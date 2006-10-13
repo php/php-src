@@ -1,3 +1,54 @@
+2006-10-12  Brian France  <list@firehawksystems.com>
+
+    * sapi/apache/mod_php5.c:
+      
+        MFB:
+        Memory assigned to the request_rec should be allocated from apache pools
+        and should not be free'ed at the end of the handler phase
+
+    * (PHP_5_2)
+      sapi/apache/mod_php5.c:
+      
+      Memory assigned to the request_rec should be allocated from apache pools
+      and should not be free'ed at the end of the handler phase
+
+2006-10-12  Michael Wallner  <mike@iworks.at>
+
+    * main/output.c
+      main/php_output.h:
+      - use new zend_fcall_info API
+      - use enums where appropriate
+
+    * ext/standard/basic_functions.c:
+      - missing part of zend_fcall_info API patch
+
+2006-10-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8_statement.c:
+      MFH: use connection charset when reading LOB data
+
+    * ext/oci8/oci8_statement.c:
+      use connection character set when reading LOB data
+
+2006-10-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_alloc.h:
+      Make zend_memory_peak_usage() to be avalable even without
+      --enable-memory-limit
+
+2006-10-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * regex/regcomp.c:
+      MFB: Fixed potential use of un-initialized var
+
+    * (PHP_5_2)
+      regex/regcomp.c:
+      Fixed potential use of un-initialized var (detected by Coverity)
+
 2006-10-11  Antony Dovgal  <antony@zend.com>
 
     * ext/dbase/tests/002.phpt
