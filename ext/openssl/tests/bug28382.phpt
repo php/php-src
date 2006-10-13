@@ -7,7 +7,7 @@ if (OPENSSL_VERSION_NUMBER<0x009070af) die("skip");
 ?>
 --FILE--
 <?php
-$cert = file_get_contents(dirname(__FILE__) . "/bug28382cert.txt", "rb");
+$cert = file_get_contents(dirname(__FILE__) . "/bug28382cert.txt");
 $ext = openssl_x509_parse($cert);
 var_dump($ext['extensions']);
 ?>
