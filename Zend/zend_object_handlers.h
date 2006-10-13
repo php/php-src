@@ -100,7 +100,7 @@ typedef int (*zend_object_compare_t)(zval *object1, zval *object2 TSRMLS_DC);
 
 /* Cast an object to some other type
  */
-typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int type TSRMLS_DC);
+typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int type, void *extra TSRMLS_DC);
 
 /* updates *count to hold the number of elements present and returns SUCCESS.
  * Returns FAILURE if the object does not have any sense of overloaded dimensions */
@@ -143,7 +143,7 @@ ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_uch
 ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC);
 
-ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC);
+ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC);
 
 
 #define IS_ZEND_STD_OBJECT(z)  (Z_TYPE(z) == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))

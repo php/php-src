@@ -320,7 +320,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 #define convert_object_to_type(op, ctype, conv_func)										\
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
 		zval dst;																			\
-		if (Z_OBJ_HT_P(op)->cast_object(op, &dst, ctype TSRMLS_CC) == FAILURE) {			\
+		if (Z_OBJ_HT_P(op)->cast_object(op, &dst, ctype, NULL TSRMLS_CC) == FAILURE) {		\
 			zend_error(E_RECOVERABLE_ERROR, 												\
 			"Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,			\
 			zend_get_type_by_const(ctype));													\
@@ -493,7 +493,7 @@ ZEND_API void convert_to_null(zval *op)
 
 			ALLOC_ZVAL(org);
 			*org = *op;
-			if (Z_OBJ_HT_P(op)->cast_object(org, op, IS_NULL TSRMLS_CC) == SUCCESS) {
+			if (Z_OBJ_HT_P(op)->cast_object(org, op, IS_NULL, NULL TSRMLS_CC) == SUCCESS) {
 				zval_dtor(org);
 				return;
 			}
@@ -875,7 +875,29 @@ ZEND_API void _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRM
 			Z_USTRLEN_P(op) = sizeof("Array")-1;
 			break;
 		case IS_OBJECT: {
-			convert_object_to_type(op, IS_UNICODE, convert_to_unicode);
+			if (Z_OBJ_HT_P(op)->cast_object) {
+				zval dst;
+				if (Z_OBJ_HT_P(op)->cast_object(op, &dst, IS_UNICODE, conv TSRMLS_CC) == FAILURE) {
+					zend_error(E_RECOVERABLE_ERROR,
+							   "Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,
+							   zend_get_type_by_const(IS_UNICODE));
+				} else {
+					zval_dtor(op);
+					Z_TYPE_P(op) = IS_UNICODE;
+					op->value = dst.value;
+				}
+			} else {
+				if(Z_OBJ_HT_P(op)->get) {
+					zval *newop = Z_OBJ_HT_P(op)->get(op TSRMLS_CC);
+					if(Z_TYPE_P(newop) != IS_OBJECT) {
+						/* for safety - avoid loop */
+						zval_dtor(op);
+						*op = *newop;
+						FREE_ZVAL(newop);
+						convert_to_string_with_converter(op, conv);
+					}
+				}
+			}
 
 			if (Z_TYPE_P(op) == IS_UNICODE) {
 				return;
@@ -958,7 +980,29 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 		case IS_OBJECT: {
 			TSRMLS_FETCH();
 
-			convert_object_to_type(op, IS_STRING, convert_to_string);
+			if (Z_OBJ_HT_P(op)->cast_object) {
+				zval dst;
+				if (Z_OBJ_HT_P(op)->cast_object(op, &dst, IS_STRING, conv TSRMLS_CC) == FAILURE) {
+					zend_error(E_RECOVERABLE_ERROR,
+							   "Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,
+							   zend_get_type_by_const(IS_STRING));
+				} else {
+					zval_dtor(op);
+					Z_TYPE_P(op) = IS_STRING;
+					op->value = dst.value;
+				}
+			} else {
+				if(Z_OBJ_HT_P(op)->get) {
+					zval *newop = Z_OBJ_HT_P(op)->get(op TSRMLS_CC);
+					if(Z_TYPE_P(newop) != IS_OBJECT) {
+						/* for safety - avoid loop */
+						zval_dtor(op);
+						*op = *newop;
+						FREE_ZVAL(newop);
+						convert_to_string_with_converter(op, conv);
+					}
+				}
+			}
 
 			if (Z_TYPE_P(op) == IS_STRING) {
 				return;
@@ -1775,7 +1819,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			op1 = op1_free = Z_OBJ_HT_P(op1)->get(op1 TSRMLS_CC);
 		} else if (!op2_obj && Z_OBJ_HT_P(op1)->cast_object) {
 			ALLOC_INIT_ZVAL(op1_free);
-			if (Z_OBJ_HT_P(op1)->cast_object(op1, op1_free, Z_TYPE_P(op2) TSRMLS_CC) == FAILURE) {
+			if (Z_OBJ_HT_P(op1)->cast_object(op1, op1_free, Z_TYPE_P(op2), NULL TSRMLS_CC) == FAILURE) {
 				op2_free = NULL;
 				ZVAL_LONG(result, 1);
 				COMPARE_RETURN_AND_FREE(SUCCESS);
@@ -1799,7 +1843,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			op2 = op2_free = Z_OBJ_HT_P(op2)->get(op2 TSRMLS_CC);
 		} else if (!op1_obj && Z_OBJ_HT_P(op2)->cast_object) {
 			ALLOC_INIT_ZVAL(op2_free);
-			if (Z_OBJ_HT_P(op2)->cast_object(op2, op2_free, Z_TYPE_P(op1) TSRMLS_CC) == FAILURE) {
+			if (Z_OBJ_HT_P(op2)->cast_object(op2, op2_free, Z_TYPE_P(op1), NULL TSRMLS_CC) == FAILURE) {
 				ZVAL_LONG(result, -1);
 				COMPARE_RETURN_AND_FREE(SUCCESS);
 			}

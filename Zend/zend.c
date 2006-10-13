@@ -315,7 +315,7 @@ ZEND_API void zend_make_string_zval(zval *expr, zval *expr_copy, int *use_copy)
 			{
 				TSRMLS_FETCH();
 
-				if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+				if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, NULL TSRMLS_CC) == SUCCESS) {
 					break;
 				}
 				if (Z_OBJ_HANDLER_P(expr, get)) {
@@ -384,7 +384,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			Z_STRVAL_P(expr_copy) = estrndup("Array", Z_STRLEN_P(expr_copy));
 			break;
 		case IS_OBJECT:
-			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
 				break;
 			}
 			if (Z_OBJ_HANDLER_P(expr, get)) {
@@ -436,7 +436,7 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 	}
 	switch (Z_TYPE_P(expr)) {
 		case IS_OBJECT:
-			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_UNICODE TSRMLS_CC) == SUCCESS) {
+			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_UNICODE, NULL TSRMLS_CC) == SUCCESS) {
 				break;
 			}
 			if (Z_OBJ_HANDLER_P(expr, get)) {

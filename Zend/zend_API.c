@@ -271,7 +271,7 @@ static int parse_arg_object_to_string(zval **arg, char **p, int *pl, int type TS
 {
 	if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
 		SEPARATE_ZVAL_IF_NOT_REF(arg);
-		if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, type TSRMLS_CC) == SUCCESS) {
+		if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, type, NULL TSRMLS_CC) == SUCCESS) {
 			*pl = Z_STRLEN_PP(arg);
 			*p = Z_STRVAL_PP(arg);
 			return SUCCESS;
@@ -280,7 +280,7 @@ static int parse_arg_object_to_string(zval **arg, char **p, int *pl, int type TS
 	/* Standard PHP objects */
 	if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HANDLER_PP(arg, cast_object)) {
 		SEPARATE_ZVAL_IF_NOT_REF(arg);
-		if (zend_std_cast_object_tostring(*arg, *arg, type TSRMLS_CC) == SUCCESS) {
+		if (zend_std_cast_object_tostring(*arg, *arg, type, NULL TSRMLS_CC) == SUCCESS) {
 			*pl = Z_STRLEN_PP(arg);
 			*p = Z_STRVAL_PP(arg);
 			return SUCCESS;

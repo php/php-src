@@ -1234,7 +1234,7 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 /* }}} */
 
 /* {{{ spl_filesystem_object_cast */
-static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(readobj TSRMLS_CC);
 
