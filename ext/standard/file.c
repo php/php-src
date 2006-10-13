@@ -1799,9 +1799,14 @@ PHP_FUNCTION(copy)
 }
 /* }}} */
 
+PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
+{
+	return php_copy_file_ex(src, dest, 0 TSRMLS_CC);
+}
+
 /* {{{ php_copy_file
  */
-PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
+PHPAPI int php_copy_file_ex(char *src, char *dest, int src_chk TSRMLS_DC)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
@@ -1856,7 +1861,7 @@ no_stat:
 	}
 safe_to_copy:
 
-	srcstream = php_stream_open_wrapper(src, "rb", REPORT_ERRORS, NULL);
+	srcstream = php_stream_open_wrapper(src, "rb", src_chk | REPORT_ERRORS, NULL);
 	
 	if (!srcstream) {
 		return ret;
