@@ -219,7 +219,6 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 						column->data = (text *) ecalloc(1, PHP_OCI_PIECE_SIZE + 1);
 					} else {
 						column->data = erealloc(column->data, column->retlen4 + PHP_OCI_PIECE_SIZE + 1);
-						memset(column->data + column->retlen4, 0, PHP_OCI_PIECE_SIZE + 1);
 					}
 					column->cb_retlen = PHP_OCI_PIECE_SIZE;
 
