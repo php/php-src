@@ -486,7 +486,7 @@ static int com_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return ret;
 }
 
-static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+static int com_object_cast(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -530,6 +530,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 	}
 
 	if (SUCCEEDED(res)) {
+		/* FIXME use 'extra' here for IS_STRING/IS_UNICODE */
 		php_com_zval_from_variant(writeobj, &v, obj->code_page TSRMLS_CC);
 	}
 
@@ -539,7 +540,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 		return SUCCESS;
 	}
 
-	return zend_std_cast_object_tostring(readobj, writeobj, type TSRMLS_CC);
+	return zend_std_cast_object_tostring(readobj, writeobj, type, extra TSRMLS_CC);
 }
 
 static int com_object_count(zval *object, long *count TSRMLS_DC)

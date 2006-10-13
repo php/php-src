@@ -1608,8 +1608,18 @@ SXE_METHOD(addAttribute)
 
 /* {{{ cast_object()
  */
-static int cast_object(zval *object, int type, char *contents TSRMLS_DC)
+static int cast_object(zval *object, int type, char *contents, void *extra TSRMLS_DC)
 {
+	UConverter *conv;
+
+	if (type == IS_STRING || type == IS_UNICODE) {
+		if (extra) {
+			conv = (UConverter *) extra;
+		} else {
+			conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+		}
+	}
+
 	if (contents) {
 		ZVAL_XML_STRING(object, contents, ZSTR_DUPLICATE);
 	} else {
@@ -1620,10 +1630,10 @@ static int cast_object(zval *object, int type, char *contents TSRMLS_DC)
 
 	switch (type) {
 		case IS_STRING:
-			convert_to_string(object);
+			convert_to_string_with_converter(object, conv);
 			break;
 		case IS_UNICODE:
-			convert_to_unicode(object);
+			convert_to_unicode_with_converter(object, conv);
 			break;
 		case IS_BOOL:
 			convert_to_boolean(object);
@@ -1643,7 +1653,7 @@ static int cast_object(zval *object, int type, char *contents TSRMLS_DC)
 
 /* {{{ sxe_object_cast()
  */
-static int sxe_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+static int sxe_object_cast(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC)
 {
 	php_sxe_object *sxe;
 	xmlChar           *contents = NULL;
@@ -1678,7 +1688,7 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 		}
 	}
 
-	rv = cast_object(writeobj, type, (char *)contents TSRMLS_CC);
+	rv = cast_object(writeobj, type, (char *)contents, extra TSRMLS_CC);
 
 	if (contents) {
 		xmlFree(contents);
@@ -1722,7 +1732,7 @@ static zval *sxe_get_value(zval *z TSRMLS_DC)
 
 	MAKE_STD_ZVAL(retval);
 
-	if (sxe_object_cast(z, retval, UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC)==FAILURE) {
+	if (sxe_object_cast(z, retval, UG(unicode)?IS_UNICODE:IS_STRING, NULL TSRMLS_CC)==FAILURE) {
 		zend_error(E_ERROR, "Unable to cast node to string");
 		/* FIXME: Should not be fatal */
 	}

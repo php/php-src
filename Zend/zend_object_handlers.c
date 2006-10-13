@@ -1091,14 +1091,20 @@ int zend_std_object_get_class_name(zval *object, zstr *class_name, zend_uint *cl
 	return SUCCESS;
 }
 
-ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC)
 {
 	zval *retval;
 	zend_class_entry *ce;
+	UConverter *conv;
 
 	switch (type) {
 		case IS_STRING:
 		case IS_UNICODE:
+			if (extra) {
+				conv = (UConverter *) extra;
+			} else {
+				conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+			}
 			ce = Z_OBJCE_P(readobj);
 			if (ce->__tostring &&
                 (zend_call_method_with_0_params(&readobj, ce, &ce->__tostring, "__tostring", &retval) || EG(exception))) {
@@ -1113,7 +1119,11 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					INIT_PZVAL(writeobj);
 					ZVAL_ZVAL(writeobj, retval, 1, 1);
 					if (Z_TYPE_P(writeobj) != type) {
-						convert_to_explicit_type(writeobj, type);
+						if (type == IS_UNICODE) {
+							convert_to_unicode_with_converter(writeobj, conv);
+						} else {
+							convert_to_string_with_converter(writeobj, conv);
+						}
 					}
 					return SUCCESS;
 				} else {

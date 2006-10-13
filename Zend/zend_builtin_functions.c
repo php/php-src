@@ -532,7 +532,7 @@ repeat:
 					goto repeat;
 				} else if (Z_OBJ_HT_PP(val)->cast_object) {
 					ALLOC_INIT_ZVAL(val_free);
-					if (Z_OBJ_HT_PP(val)->cast_object(*val, val_free, UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC) == SUCCESS) {
+					if (Z_OBJ_HT_PP(val)->cast_object(*val, val_free, UG(unicode)?IS_UNICODE:IS_STRING, NULL TSRMLS_CC) == SUCCESS) {
 						val = &val_free;
 						break;
 					}
