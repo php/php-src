@@ -686,9 +686,6 @@ default_socket_timeout = 60
 ;iconv.internal_encoding = ISO-8859-1
 ;iconv.output_encoding = ISO-8859-1
 
-[pdo]
-;pdo.global_value = 41
-
 [sqlite]
 ;sqlite.assoc_case = 0
 
