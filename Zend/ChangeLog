@@ -1,3 +1,17 @@
+2006-10-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.c
+      zend_API.c
+      zend_builtin_functions.c
+      zend_execute.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_operators.c:
+      - Add an extra parameter to the cast_object handler that can be used by
+        various types as needed.
+      - Use that parameter to pass a specific converter for
+        IS_UNICODE/IS_STRING types.
+
 2006-10-12  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_alloc.c
