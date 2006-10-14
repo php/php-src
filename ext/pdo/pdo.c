@@ -162,12 +162,6 @@ zend_module_entry pdo_module_entry = {
 ZEND_GET_MODULE(pdo)
 #endif
 
-/* {{{ PHP_INI */
-PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("pdo.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_pdo_globals, pdo_globals)
-PHP_INI_END()
-/* }}} */
-
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(pdo)
 {
@@ -326,8 +320,6 @@ PHP_MINIT_FUNCTION(pdo)
 
 	spl_ce_RuntimeException = NULL;
 
-	REGISTER_INI_ENTRIES();
-
 	if (FAILURE == pdo_sqlstate_init_error_table()) {
 		return FAILURE;
 	}
@@ -353,7 +345,6 @@ PHP_MINIT_FUNCTION(pdo)
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(pdo)
 {
-	UNREGISTER_INI_ENTRIES();
 	zend_hash_destroy(&pdo_driver_hash);
 	pdo_sqlstate_fini_error_table();
 	return SUCCESS;
@@ -388,9 +379,6 @@ PHP_MINFO_FUNCTION(pdo)
 
 	php_info_print_table_end();
 
-#if 0
-	DISPLAY_INI_ENTRIES();
-#endif
 }
 /* }}} */
 
