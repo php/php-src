@@ -1,3 +1,70 @@
+2006-10-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_operators.c
+      ext/com_dotnet/com_handlers.c
+      ext/simplexml/simplexml.c
+      ext/spl/spl_directory.c
+      ext/tidy/tidy.c:
+      - Add an extra parameter to the cast_object handler that can be used by
+        various types as needed.
+      - Use that parameter to pass a specific converter for
+        IS_UNICODE/IS_STRING types.
+
+2006-10-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_statement.c
+      ext/oci8/oci8_statement.c:
+      fix win32 build
+
+2006-10-13  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/openssl/tests/bug28382.phpt:
+      fix test
+
+    * ext/standard/file.h:
+      MFB: missing API declaration
+
+    * (PHP_5_2)
+      ext/standard/file.h:
+      Added missing API function declaration.
+
+2006-10-13  Michael Wallner  <mike@iworks.at>
+
+    * tests/output/ob_020.phpt:
+      - fix skipif
+      - generalize error message expectation
+
+    * tests/output/ob_020.phpt:
+      - add test, segfaults ATM
+
+2006-10-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c:
+      MFB: Fixed bug #38934 (move_uploaded_file() cannot read uploaded file
+      outside of open_basedir).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/file.c:
+      Fixed bug #38934 (move_uploaded_file() cannot read uploaded file outside of
+      open_basedir).
+
+    * main/php_open_temporary_file.c:
+      MFB: main/php_open_temporary_file.c
+
+    * (PHP_5_2)
+      main/php_open_temporary_file.c:
+      Improve open_basedir checks
+
 2006-10-12  Brian France  <list@firehawksystems.com>
 
     * sapi/apache/mod_php5.c:
