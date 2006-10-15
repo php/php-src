@@ -1,7 +1,0 @@
-
-README FOR ext/tidy by John Coggeshall <john@php.net>
-
-
-Tidy is an extension based on Libtidy (http://tidy.sf.net/) and allows a PHP developer
-to clean, repair, and traverse HTML, XHTML, and XML documents -- including ones with
-embedded scripting languages such as PHP or ASP within them using OO constructs.

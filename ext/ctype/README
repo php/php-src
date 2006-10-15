@@ -1,5 +1,0 @@
-this is an experimental extension that provides the
-ctype family of function available in C
-i'm not sure about whether they should go into ext/standard
-or stay as an extension of their own and about using 
-a ctype_ prefix or sticking with the C names ...
