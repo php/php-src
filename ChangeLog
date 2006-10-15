@@ -1,3 +1,16 @@
+2006-10-14  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/pdo/pdo.c:
+      MFB: Remove bogus INI entry
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended
+      ext/pdo/pdo.c:
+      Remove bogus ini entry
+
 2006-10-13  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend.c
