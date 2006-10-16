@@ -1324,19 +1324,6 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 }
 
 
-static inline int ZEND_U_CASE_EQUAL(zend_uchar type, zstr ustr, int ulen, char *str, int slen)
-{
-	zstr lcname;
-	unsigned int lcname_len;
-	int ret;
-
-	lcname = zend_u_str_case_fold(type, ustr, ulen, 0, &lcname_len);
-	ret = ZEND_U_EQUAL(type, lcname, lcname_len, str, slen);
-	efree(lcname.v);
-	return ret;
-}
-
-
 void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, znode *varname, zend_uchar pass_by_reference TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);

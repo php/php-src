@@ -707,6 +707,22 @@ END_EXTERN_C()
 	  (!memcmp((ustr).s,(str),(slen))): \
 	  (!zend_cmp_unicode_and_literal((ustr).u, ulen, str, slen)))
 
+static inline int ZEND_U_CASE_EQUAL(zend_uchar type, zstr ustr, int ulen, char *str, int slen)
+{
+	zstr lcname;
+	int ret;
+
+	if (type == IS_UNICODE) {
+		lcname.u = zend_ascii_to_unicode(str, slen+1 ZEND_FILE_LINE_CC);
+		ret = !u_memcasecmp(lcname.u, ustr.u, slen, 0);
+	} else {
+		lcname.s = zend_str_tolower_dup(ustr.s, ulen);
+		ret = !memcmp(lcname.s, str, slen);
+	}
+	efree(lcname.v);
+	return ret;
+}
+
 
 #endif /* ZEND_H */
 
