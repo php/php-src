@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 12 Oct 2006, PHP 5.2.0RC6
 - Fixed invalid read in imagecreatefrompng when an empty file is given
   (Pierre, Tony)
+- Fixed bug #39140 (Uncaught exception may cause crash). (Dmitry)
 - Fixed bug #39020 (PHP in FastCGI server mode crashes). (Dmitry)
 - Fixed bug #38458, PECL bug #8944, PECL bug #7775 (error retrieving
   columns after long/text columns with PDO_ODBC). (Wez)
