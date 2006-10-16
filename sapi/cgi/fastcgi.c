@@ -390,13 +390,14 @@ static inline int fcgi_make_header(fcgi_header *hdr, fcgi_request_type type, int
 	return pad;
 }
 
-static void fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *end)
+static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *end)
 {
 	char buf[128];
 	char *tmp = buf;
 	int buf_size = sizeof(buf);
 	int name_len, val_len;
 	char *s;
+	int ret = 1;
 
 	while (p < end) {
 		name_len = *p++;
@@ -413,6 +414,11 @@ static void fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *
 			val_len |= (*p++ << 8);
 			val_len |= *p++;
 		}
+		if (p + name_len + val_len > end) {
+			/* Malformated request */
+			ret = 0;
+			break;
+		}
 		if (name_len+1 >= buf_size) {
 			buf_size = name_len + 64;
 			tmp = (tmp == buf ? emalloc(buf_size): erealloc(tmp, buf_size));
@@ -426,6 +432,7 @@ static void fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *
 	if (tmp != buf && tmp != NULL) {
 		efree(tmp);
 	}
+	return ret;
 }
 
 static void fcgi_free_var(char **s)
@@ -503,7 +510,11 @@ static int fcgi_read_request(fcgi_request *req)
 				req->keep = 0;
 				return 0;
 			}
-			fcgi_get_params(req, buf, buf+len);
+
+			if (!fcgi_get_params(req, buf, buf+len)) {
+				req->keep = 0;
+				return 0;
+			}
 
 			if (safe_read(req, &hdr, sizeof(fcgi_header)) != sizeof(fcgi_header) ||
 			    hdr.version < FCGI_VERSION_1) {
@@ -518,9 +529,14 @@ static int fcgi_read_request(fcgi_request *req)
 		unsigned char *p = buf + sizeof(fcgi_header);
 
 		if (safe_read(req, buf, len+padding) != len+padding) {
+			req->keep = 0;
 			return 0;
 		}
-		fcgi_get_params(req, buf, buf+len);
+
+		if (!fcgi_get_params(req, buf, buf+len)) {
+			req->keep = 0;
+			return 0;
+		}
 
 		for (j = 0; j < sizeof(fcgi_mgmt_vars)/sizeof(fcgi_mgmt_vars[0]); j++) {
 			if (zend_hash_exists(&req->env, fcgi_mgmt_vars[j].name, fcgi_mgmt_vars[j].name_len+1) == 0) {
@@ -531,6 +547,7 @@ static int fcgi_read_request(fcgi_request *req)
 		len = p - buf - sizeof(fcgi_header);
 		len += fcgi_make_header((fcgi_header*)buf, FCGI_GET_VALUES_RESULT, 0, len);
 		if (safe_write(req, buf, sizeof(fcgi_header)+len) != (int)sizeof(fcgi_header)+len) {
+			req->keep = 0;
 			return 0;
 		}
 		return 0;
