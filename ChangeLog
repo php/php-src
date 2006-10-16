@@ -1,3 +1,28 @@
+2006-10-15  Antony Dovgal  <antony@zend.com>
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      fix compile warning
+
+2006-10-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS:
+      BFN
+
+    * (PHP_4_4)
+      Zend/zend_compile.c:
+      Fixed bug #39129 avoid creation of a dummy constructor.
+
+2006-10-15  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/tests/math/constants.phpt:
+      Fix test
+
+    * (PHP_5_2)
+      ext/standard/tests/math/constants.phpt:
+      Fix test (bug#39097)
+
 2006-10-14  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * php.ini-dist
