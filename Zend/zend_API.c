@@ -1709,6 +1709,18 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 	return SUCCESS;
 }
 
+ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval *value)
+{
+	zval *z_key;
+
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_UTF8_STRINGL(z_key, key, key_len-1, ZSTR_DUPLICATE);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, value TSRMLS_CC);
+	zval_ptr_dtor(&z_key);
+	return SUCCESS;
+}
+
 ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC)
 {
 	int name_len;
