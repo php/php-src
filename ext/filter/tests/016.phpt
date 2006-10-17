@@ -22,11 +22,11 @@ echo "Done\n";
 --EXPECT--	
 string(5) "a@b.c"
 string(17) "abuse@example.com"
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 string(57) "QWERTYUIOPASDFGHJKLZXCVBNM@QWERTYUIOPASDFGHJKLZXCVBNM.NET"
 Done

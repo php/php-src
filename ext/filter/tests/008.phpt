@@ -47,7 +47,13 @@ array(18) {
   [17]=>
   string(8) "callback"
 }
+<<<<<<< 008.phpt
+
+Warning: Wrong parameter count for filter_list() in /home4/php_dev/php52/ext/filter/tests/008.php on line 4
+NULL
+=======
 
 Warning: Wrong parameter count for filter_list() in %s on line %d
 NULL
+>>>>>>> 1.3
 Done

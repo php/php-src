@@ -10,7 +10,7 @@ var_dump(filter_input(INPUT_COOKIE, ""));
 echo "Done\n";
 ?>
 --EXPECT--	
-bool(false)
-bool(false)
-bool(false)
+NULL
+NULL
+NULL
 Done
