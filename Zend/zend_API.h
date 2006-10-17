@@ -897,76 +897,76 @@ ZEND_API int add_utf8_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *va
 #define add_utf8_assoc_text(__arg, __key, __str, __duplicate) add_utf8_assoc_test_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_utf8_assoc_textl(__arg, __key, __str, __length, __duplicate) add_utf8_assoc_textl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 
-ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval *value);
+ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval *value TSRMLS_DC);
 
 #define add_utf8_property_null_ex(arg, key, key_len) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_NULL(___tmp); \
-		add_utf8_property_zval_ex(arg, key, key_len, ___tmp); \
+		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_long_ex(arg, key, key_len, n) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_LONG(___tmp, n); \
-		add_utf8_property_zval_ex(arg, key, key_len, ___tmp); \
+		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_bool_ex(arg, key, key_len, b) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_BOOL(___tmp, b); \
-		add_utf8_property_zval_ex(arg, key, key_len, ___tmp); \
+		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_resource_ex(arg, key, key_len, r) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_RESOURCE(___tmp, r); \
-		add_utf8_property_zval_ex(arg, key, key_len, ___tmp); \
+		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_double_ex(arg, key, key_len, d) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_DOUBLE(___tmp, d); \
-		add_utf8_property_zval_ex(arg, key, key_len, ___tmp); \
+		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_stringl_ex(arg, key, key_len, str, length, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_STRINGL(___tmp, str, length, duplicate); \
-		add_utf8_property_zval_ex(arg, key, key_len, ___tmp); \
+		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_unicode_ex(arg, key, key_len, str, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_UNICODE(___tmp, str, duplicate); \
-		add_utf8_property_zval_ex(arg, key, key_len, ___tmp); \
+		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_unicodel_ex(arg, key, key_len, str, length, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_UNICODEL(___tmp, str, length, duplicate); \
-		add_utf8_property_zval_ex(arg, key, key_len, ___tmp); \
+		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_zstr_ex(arg, key, key_len, type, str, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_ZSTR(___tmp, str, type, duplicate); \
-		add_utf8_property_zval_ex(arg, key, key_len, ___tmp); \
+		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_zstrl_ex(arg, key, key_len, type, str, length, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_ZSTRL(___tmp, str, length, type, duplicate); \
-		add_utf8_property_zval_ex(arg, key, key_len, ___tmp); \
+		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_text_ex(arg, key, key_len, str, duplicate) do { \
