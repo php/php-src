@@ -40,7 +40,7 @@ var_dump(filter_var("http://www.example.com/index.php?a=b&c=d", FILTER_VALIDATE_
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(29) "http://example.com/index.html"
 string(32) "http://www.example.com/index.php"
 string(31) "http://www.example/img/test.png"
@@ -52,20 +52,20 @@ string(18) "file:///tmp/test.c"
 string(26) "ftp://ftp.example.com/tmp/"
 string(11) "/tmp/test.c"
 string(1) "/"
-NULL
+bool(false)
 string(6) "http:/"
 string(5) "http:"
 string(4) "http"
 string(0) ""
 string(2) "-1"
 bool(false)
-NULL
+bool(false)
 string(10) "http://qwe"
-NULL
-NULL
+bool(false)
+bool(false)
 string(22) "http://www.example.com"
-NULL
+bool(false)
 string(42) "http://www.example.com/path/at/the/server/"
-NULL
+bool(false)
 string(40) "http://www.example.com/index.php?a=b&c=d"
 Done

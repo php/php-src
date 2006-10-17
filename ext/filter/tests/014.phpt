@@ -32,9 +32,9 @@ var_dump(filter_var("111111", FILTER_VALIDATE_BOOLEAN));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 bool(false)
-NULL
+bool(false)
 bool(false)
 array(5) {
   [0]=>
@@ -48,7 +48,7 @@ array(5) {
   [4]=>
   array(2) {
     [0]=>
-    NULL
+    bool(false)
     [1]=>
     bool(false)
   }
@@ -61,7 +61,7 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
-NULL
+bool(false)
 bool(false)
 bool(false)
 bool(false)

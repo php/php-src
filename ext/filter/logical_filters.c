@@ -55,6 +55,15 @@
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
 
+#define RETURN_VALIDATION_FAILED	\
+	zval_dtor(value);	\
+	if (flags & FILTER_NULL_ON_FAILURE) {	\
+		ZVAL_NULL(value);	\
+	} else {	\
+		ZVAL_FALSE(value);	\
+	}	\
+	return;	\
+
 static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
 	long ctx_value = 0;
 	long sign = 1;
@@ -176,9 +185,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	len = Z_STRLEN_P(value);
 
 	if (len == 0) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
-		return;
+		RETURN_VALIDATION_FAILED
 	}
 
 	if (option_flags & FILTER_FLAG_ALLOW_OCTAL) {
@@ -216,8 +223,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	if (error > 0 || (min_range_set && (ctx_value < min_range)) || (max_range_set && (ctx_value > max_range))) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
+		RETURN_VALIDATION_FAILED
 	} else {
 		zval_dtor(value);
 		Z_TYPE_P(value) = IS_LONG;
@@ -236,9 +242,7 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (len>0) {
 		PHP_FILTER_TRIM_DEFAULT(str, len, end);
 	} else {
-		zval_dtor(value);
-		ZVAL_NULL(value);
-		return;
+		RETURN_VALIDATION_FAILED
 	}
 
 	/* returns true for "1", "true", "on" and "yes"
@@ -251,9 +255,15 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	{
 		zval_dtor(value);
 		ZVAL_BOOL(value, 1);
-	} else {
+	} else if ((strncasecmp(str, "false", sizeof("false")) == 0) ||
+		(strncasecmp(str, "no", sizeof("no")) == 0) ||
+		(strncasecmp(str, "off", sizeof("off")) == 0) ||
+		(strncmp(str, "0", sizeof("0")) == 0))
+	{
 		zval_dtor(value);
 		ZVAL_BOOL(value, 0);
+	} else {
+		RETURN_VALIDATION_FAILED
 	}
 }
 /* }}} */
@@ -285,9 +295,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	len = Z_STRLEN_P(value);
 
 	if (len < 1) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
-		return;
+		RETURN_VALIDATION_FAILED
 	}
 
 	str = Z_STRVAL_P(value);
@@ -424,8 +432,7 @@ stateT:
 	return;
 
 stateError:
-	zval_dtor(value);
-	ZVAL_NULL(value);
+	RETURN_VALIDATION_FAILED
 }
 /* }}} */
 
@@ -450,22 +457,18 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	if (!regexp_set) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'regexp' option missing");
-		zval_dtor(value);
-		ZVAL_NULL(value);
-		return;
+		RETURN_VALIDATION_FAILED
 	}
 
 	re = pcre_get_compiled_regex(regexp, &pcre_extra, &preg_options TSRMLS_CC);
 	if (!re) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
+		RETURN_VALIDATION_FAILED
 	}
 	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), Z_STRLEN_P(value), 0, 0, ovector, 3);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
 	if (matches < 0) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
+		RETURN_VALIDATION_FAILED
 	}
 }
 /* }}} */
@@ -478,26 +481,17 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	url = php_url_parse_ex(Z_STRVAL_P(value), Z_STRLEN_P(value));
 
 	if (url == NULL) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
-		return;
+		RETURN_VALIDATION_FAILED
 	}
 
-	if ((flags & FILTER_FLAG_SCHEME_REQUIRED) && url->scheme == NULL) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
-	}
-	if ((flags & FILTER_FLAG_HOST_REQUIRED) && url->host == NULL) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
-	}
-	if ((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
-	}
-	if ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
+	if (
+		((flags & FILTER_FLAG_SCHEME_REQUIRED) && url->scheme == NULL) ||
+		((flags & FILTER_FLAG_HOST_REQUIRED) && url->host == NULL) ||
+		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) ||
+		((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
+	) {
+		php_url_free(url);
+		RETURN_VALIDATION_FAILED
 	}
 	php_url_free(url);
 }
@@ -517,15 +511,13 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	re = pcre_get_compiled_regex((char *)regexp, &pcre_extra, &preg_options TSRMLS_CC);
 	if (!re) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
+		RETURN_VALIDATION_FAILED
 	}
 	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), Z_STRLEN_P(value), 0, 0, ovector, 3);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
 	if (matches < 0) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
+		RETURN_VALIDATION_FAILED
 	}
 
 }
@@ -766,29 +758,21 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	} else if (strchr(str, '.')) {
 		mode = FORMAT_IPV4;
 	} else {
-		zval_dtor(value);
-		ZVAL_NULL(value);
-		return;
+		RETURN_VALIDATION_FAILED
 	}
 
 	if (flags & (FILTER_FLAG_IPV4 || FILTER_FLAG_IPV6)) {
 		/* Both formats are cool */
 	} else if ((flags & FILTER_FLAG_IPV4) && mode == FORMAT_IPV6) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
-		return;
+		RETURN_VALIDATION_FAILED
 	} else if ((flags & FILTER_FLAG_IPV6) && mode == FORMAT_IPV4) {
-		zval_dtor(value);
-		ZVAL_NULL(value);
-		return;
+		RETURN_VALIDATION_FAILED
 	}
 
 	switch (mode) {
 		case FORMAT_IPV4:
 			if (!_php_filter_validate_ipv4(str, ip TSRMLS_CC)) {
-				zval_dtor(value);
-				ZVAL_NULL(value);
-				return;
+				RETURN_VALIDATION_FAILED
 			}
 
 			/* Check flags */
@@ -798,9 +782,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 					(ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31)) ||
 					(ip[0] == 192 && ip[1] == 168)
 				) {
-					zval_dtor(value);
-					ZVAL_NULL(value);
-					return;
+					RETURN_VALIDATION_FAILED
 				}
 			}
 
@@ -811,9 +793,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 					(ip[0] == 192 && ip[1] == 0 && ip[2] == 2) ||
 					(ip[0] >= 224 && ip[0] <= 255)
 				) {
-					zval_dtor(value);
-					ZVAL_NULL(value);
-					return;
+					RETURN_VALIDATION_FAILED
 				}
 			}
 			break;
@@ -823,9 +803,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 				int res = 0;
 				res = _php_filter_validate_ipv6_(str TSRMLS_CC);
 				if (res < 1) {
-					zval_dtor(value);
-					ZVAL_NULL(value);
-					return;
+					RETURN_VALIDATION_FAILED
 				}
 			}
 			break;

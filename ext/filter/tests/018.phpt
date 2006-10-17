@@ -27,24 +27,24 @@ echo "Done\n";
 ?>
 --EXPECT--	
 string(11) "192.168.0.1"
-NULL
+bool(false)
 string(3) "::1"
 string(7) "fe00::0"
-NULL
-NULL
+bool(false)
+bool(false)
 string(9) "127.0.0.1"
-NULL
+bool(false)
 string(12) "192.0.34.166"
 string(9) "127.0.0.1"
 string(9) "192.0.0.1"
 string(12) "192.0.34.166"
-NULL
+bool(false)
 string(15) "255.255.255.255"
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 string(3) "::1"
 string(9) "127.0.0.1"
 Done
