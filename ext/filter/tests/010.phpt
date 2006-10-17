@@ -21,13 +21,13 @@ array(7) {
   [1]=>
   int(1)
   [2]=>
-  NULL
+  bool(false)
   [3]=>
   int(-23234)
   [4]=>
-  NULL
+  bool(false)
   [5]=>
-  NULL
+  bool(false)
   [6]=>
   array(0) {
   }
@@ -38,20 +38,20 @@ array(7) {
   [1]=>
   float(1.7)
   [2]=>
-  NULL
+  bool(false)
   [3]=>
   float(-23234.123)
   [4]=>
-  NULL
+  bool(false)
   [5]=>
-  NULL
+  bool(false)
   [6]=>
   array(0) {
   }
 }
 
-Warning: filter_var() expects parameter 2 to be long, array given in %s on line %d
-bool(false)
+Warning: filter_var() expects parameter 2 to be long, array given in /home4/php_dev/php52/ext/filter/tests/010.php on line 5
+NULL
 string(1) "1"
 string(1) "1"
 string(1) "1"

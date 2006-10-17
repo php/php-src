@@ -16,12 +16,12 @@ $booleans = array(
 'faLsE' => false,
 'oFf' => false,
 
-'' => null
+'' => false
 );
 
 foreach($booleans as $val=>$exp) {
     $res =filter_var($val, FILTER_VALIDATE_BOOLEAN);
-    if ($res !== $exp) {
+	    if ($res !== $exp) {
         echo "$val failed,'$exp' expect, '$res' received.\n";
     }
 }

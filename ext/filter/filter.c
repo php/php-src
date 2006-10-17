@@ -182,6 +182,7 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("FILTER_REQUIRE_SCALAR", FILTER_REQUIRE_SCALAR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_REQUIRE_ARRAY", FILTER_REQUIRE_ARRAY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FORCE_ARRAY", FILTER_FORCE_ARRAY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_NULL_ON_FAILURE", FILTER_NULL_ON_FAILURE, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_INT", FILTER_VALIDATE_INT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_BOOLEAN", FILTER_VALIDATE_BOOLEAN, CONST_CS | CONST_PERSISTENT);
@@ -557,7 +558,11 @@ static void php_filter_call(zval **filtered, long filter, zval **filter_args, co
 				SEPARATE_ZVAL(filtered);
 			}
 			zval_dtor(*filtered);
-			ZVAL_FALSE(*filtered);
+			if (filter_flags & FILTER_NULL_ON_FAILURE) {
+				ZVAL_NULL(*filtered);
+			} else {
+				ZVAL_FALSE(*filtered);
+			}
 			return;
 		}
 		php_zval_filter_recursive(filtered, filter, filter_flags, options, charset, copy TSRMLS_CC);
@@ -568,7 +573,11 @@ static void php_filter_call(zval **filtered, long filter, zval **filter_args, co
 			SEPARATE_ZVAL(filtered);
 		}
 		zval_dtor(*filtered);
-		ZVAL_FALSE(*filtered);
+		if (filter_flags & FILTER_NULL_ON_FAILURE) {
+			ZVAL_NULL(*filtered);
+		} else {
+			ZVAL_FALSE(*filtered);
+		}
 		return;
 	}
 
@@ -650,13 +659,27 @@ PHP_FUNCTION(filter_input)
 	int var_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls|lZ", &fetch_from, &var, &var_len, &filter, &filter_args) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	input = php_filter_get_storage(fetch_from TSRMLS_CC);
 
 	if (!input || !HASH_OF(input) || zend_hash_find(HASH_OF(input), var, var_len + 1, (void **)&tmp) != SUCCESS) {
-		RETURN_FALSE;
+		long filter_flags = 0;
+		zval **option;
+		if (filter_args) {
+			if (Z_TYPE_PP(filter_args) == IS_LONG) {
+				filter_flags = Z_LVAL_PP(filter_args);
+			} else if (Z_TYPE_PP(filter_args) == IS_ARRAY && zend_hash_find(HASH_OF(*filter_args), "flags", sizeof("flags"), (void **)&option) == SUCCESS) {
+				convert_to_long(*option);
+				filter_flags = Z_LVAL_PP(option);
+			}
+		}
+		if (filter_flags & FILTER_NULL_ON_FAILURE) {
+			RETURN_FALSE;
+		} else {
+			RETURN_NULL();
+		}
 	}
 
 	*return_value = **tmp;
@@ -675,7 +698,7 @@ PHP_FUNCTION(filter_var)
 	zval **filter_args = NULL, *data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/|lZ", &data, &filter, &filter_args) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	*return_value = *data;
@@ -694,13 +717,27 @@ PHP_FUNCTION(filter_input_array)
 	zval   *array_input = NULL, **op = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|Z",  &fetch_from, &op) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	array_input = php_filter_get_storage(fetch_from TSRMLS_CC);
 
 	if (!array_input || !HASH_OF(array_input)) {
-		RETURN_FALSE;
+		long filter_flags = 0;
+		zval **option;
+		if (op) {
+			if (Z_TYPE_PP(op) == IS_LONG) {
+				filter_flags = Z_LVAL_PP(op);
+			} else if (Z_TYPE_PP(op) == IS_ARRAY && zend_hash_find(HASH_OF(*op), "flags", sizeof("flags"), (void **)&option) == SUCCESS) {
+				convert_to_long(*option);
+				filter_flags = Z_LVAL_PP(option);
+			}
+		}
+		if (filter_flags & FILTER_NULL_ON_FAILURE) {
+			RETURN_FALSE;
+		} else {
+			RETURN_NULL();
+		}
 	}
 
 	php_filter_array_handler(array_input, op, return_value TSRMLS_CC);
@@ -715,7 +752,7 @@ PHP_FUNCTION(filter_var_array)
 	zval *array_input = NULL, **op = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|Z",  &array_input, &op) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	php_filter_array_handler(array_input, op, return_value TSRMLS_CC);
