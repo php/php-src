@@ -16,69 +16,130 @@ A lot of internal functionality is controlled by the unicode.semantics
 switch. Its value is found in the Unicode globals variable, UG(unicode). It
 is either on or off for the entire request.
 
-The big thing is that there are two new string types: IS_UNICODE and
-IS_BINARY. The former one has its own storage in the value union part of
-zval (value.ustr) and the latter re-uses value.str.
+The big thing is that there is a new string types: IS_UNICODE.
+This has its own storage in the value union part of
+zval (value.ustr) while non-unicode (binary) strings reuse the
+IS_STRING type and the value.str element of the zval.
 
-Both types have new macros to set the zval value and to access it.
+New macros exist (parallel to Z_STRVAL/Z_STRLEN) for accessing unicode strings.
 
 Z_USTRVAL(), Z_USTRLEN()
- - accesses the value and length (in code units) of the Unicode type string
-
-Z_BINVAL(), Z_BINLEN()
- - accesses the value and length of the binary type string
+ - accesses the value (as a UChar*) and length (in code units) of the Unicode type string
+   value.ustr.val   value.ustr.len
 
 Z_UNIVAL(), Z_UNILEN()
- - accesses either Unicode or native string value, depending on the current
- setting of UG(unicode) switch. The Z_UNIVAL() type resolves to char*, so
- you may need to cast it appropriately.
+ - accesses the value (as a zstr) and length (in type-appropriate units)
+   value.uni.val    value.uni.len
 
 Z_USTRCPLEN()
- - gives the number of codepoints in the Unicode type string
+ - gives the number of codepoints (not units) in the Unicode type string
+   This macro examines the actual string taking into account Surrogate Pairs
+   and returns the number of UChar32(UTF32) codepoints which may be less than the
+   number of UChar(UTF16) codeunits found in the string buffer.
+   If this value will be used repeatedly, consider storing it in a local variable
+   to avoid having to reexamine the string every time.
 
-ZVAL_BINARY(), ZVAL_BINARYL()
- - Sets zval to hold a binary string. Takes the same parameters as
-   Z_STRING(), Z_STRINGL().
 
-ZVAL_UNICODE, ZVAL_UNICODEL()
+ZVAL_* macros
+-------------
+
+The 'dup' parameter to the ZVAL_STRING()/RETVAL_STRING()/RETURN_STRING() type
+macros has been extended slightly.  The following defines are now encouraged instead:
+
+#define ZSTR_DUPLICATE (1<<0)
+#define ZSTR_AUTOFREE  (1<<1)
+
+ZSTR_DUPLICATE (which has a resulting value of 1) serves the same purpose as a
+truth value in old-style 'dup' flags.  The value of 1 was specifically chosen
+to match the common practice of passing a 1 for this parameter.
+Warning: If you find extension code which uses a truth value other than one for
+the dup flag, its logic should be modified to explicitly pass ZSTR_DUPLICATE instead.
+
+ZSTR_AUTOFREE is used with macros such as ZVAL_RT_STRING which may populate Unicode
+zvals from non-unicode source strings.  When UG(unicode) is on, the source string
+will be implicitly copied (to make a UChar* version).  If the original string
+needed copying anyway this is fine.  However if the original string was emalloc()'d
+and would have ordinarily been given to the engine (i.e. RETURN_STRING(estrdup("foo"), 0))
+then it will need to be freed in UG(unicode) mode to avoid leaking.
+The ZSTR_AUTOFREE flag ensures that the original string is freed in UG(unicode) mode.
+
+ZVAL_UNICODE(pzv, str, dup), ZVAL_UNICODEL(pzv, str, str_len, dup)
  - Sets zval to hold a Unicode string. Takes the same parameters as
    Z_STRING(), Z_STRINGL().
 
-ZVAL_ASCII_STRING(), ZVAL_ASCII_STRINGL()
- - When UG(unicode) is off, it's equivalent to Z_STRING(), ZSTRINGL(). When
-   UG(unicode) is on, it sets zval to hold a Unicode representation of the
-   passed-in ASCII string. It will always create a new string in
-   UG(unicode)=1 case, so the value of the duplicate flag is not taken into
-   account.
+ZVAL_U_STRING(conv, pzv, str, dup), ZVAL_U_STRINGL(conv, pzv, str, str_len, dup)
+ - When UG(unicode) is off, it's equivalent to Z_STRING(), ZSTRINGL()
+   and the conv parameter is ignored.
+   When UG(unicode) is on, it sets zval to hold a Unicode representation of the
+   passed-in string using the UConverter* specified by conv.
+   Since a new string is always created in this case, passing ZSTR_DUPLICATE
+   for 'dup' does not matter, but ZSTR_AUTOFREE will be used will be used to
+   efree the original value
 
-ZVAL_RT_STRING()
- - When UG(unicode) is off, it's equivalent to Z_STRING(), Z_STRINGL(). WHen
-   UG(unicode) is on, it takes the input string, converts it to Unicode
-   using the runtime_encoding converter and sets zval to it. Since a new
-   string is always created in this case, the value of the duplicate flag
-   does not matter.
+ZVAL_RT_STRING(pzv, str, dup), ZVAL_RT_STRINGL(pzv, str, str_len, dup)
+ - When UG(unicode) is off, it's equivalent to Z_STRING(), Z_STRINGL().
+   When UG(unicode) is on, it takes the input string, converts it to Unicode
+   using the runtime_encoding converter and sets zval to it.
+   Since a new string is always created in this case, passing ZSTR_DUPLICATE
+   for 'dup' does not matter, but ZSTR_AUTOFREE will be used will be used to
+   efree the original value
 
-ZVAL_TEXT()
+ZVAL_ASCII_STRING(pzv, str, dup), ZVAL_ASCII_STRINGL(pzv, str, str_len, dup)
+ - When UG(unicode) is off, it's equivalent to Z_STRING(), Z_STRINGL().
+   When UG(unicode) is on, it takes the input string, converts it to Unicode
+   using an ASCII converter and sets zval to it.
+   Since a new string is always created in this case, passing ZSTR_DUPLICATE
+   for 'dup' does not matter, but ZSTR_AUTOFREE will be used will be used to
+   efree the original value
+
+ZVAL_UTF8_STRING(pzv, str, dup), ZVAL_UTF8_STRINGL(pzv, str, str_len, dup)
+ - When UG(unicode) is off, it's equivalent to Z_STRING(), Z_STRINGL().
+   When UG(unicode) is on, it takes the input string, converts it to Unicode
+   using a UTF8 converter and sets zval to it.
+   Since a new string is always created in this case, passing ZSTR_DUPLICATE
+   for 'dup' does not matter, but ZSTR_AUTOFREE will be used will be used to
+   efree the original value
+
+ZVAL_ZSTR(pzv, zstr, type, dup), ZVAL_ZSTRL(pzv, zstr, zstr_len, type, dup)
+ - This macro uses 'type' to switch between calling ZVAL_STRING(pzv, zstr.s, dup)
+   and ZVAL_UNICODE(pzv, zstr.u, dup).  No conversion happens so the
+   presense of absense of ZSTR_AUTOFREE is ignored.
+
+ZVAL_TEXT(pzv, zstr, dup), ZVAL_TEXTL(pzv, zstr, zstr_len, dup)
  - This macro sets the zval to hold either a Unicode or a normal string,
-   depending on the value of UG(unicode). No conversion happens, so the
-   argument has to be cast to (char*) when using this macro. One example of
-   its usage would be to initialize zval to hold the name of a user
-   function.
+   depending on the value of UG(unicode). No conversion happens, so be certain
+   that the string passed in matches the type expected by UG(unicode).
+   One example of its usage would be to initialize zval to hold the name
+   of a user function.
 
-There are, of course, related conversion macros.
+ZVAL_EMPTY_UNICODE(pzv) / ZVAL_EMPTY_TEXT(pzv)
+ - These macros work identically to ZVAL_EMPTY_STRING() with the UNICODE
+   version always generating an IS_UNICODE zval, and the TEXT version
+   generating a UG(unicode) dependent string type.
+
+ZVAL_UCHAR32(pzv, char)
+ - Converts the character provided into a UChar string (which may potentially
+   be 1 or 2 characters long in the case of surrogate pairs) and dispatches
+   to ZVAL_UNICODEL().
+
+
+As usual, for each ZVAL_* macro, there is a matching RETVAL_* and RETURN_* macro.
+
+Conversion Macros
+-----------------
 
 convert_to_string_with_converter(zval *op, UConverter *conv)
  - converts a zval to native string using the specified converter, if necessary.
 
-convert_to_binary()
- - converts a zval to binary string.
-
-convert_to_unicode()
- - converts a zval to Unicode string.
-
 convert_to_unicode_with_converter(zval *op, UConverter *conv)
  - converts a zval to Unicode string using the specified converter, if
    necessary.
+
+convert_to_unicode(zval *op)
+ - converts a zval to Unicode string.
+
+convert_to_string(zval *op)
+ - Behaves just as it currently does, converting to IS_STRING type
 
 convert_to_text(zval *op)
  - converts a zval to either Unicode or native string, depending on the
@@ -96,15 +157,94 @@ If you need to initialize a few such variables, it may be more efficient to
 use ICU macros, which avoid the conversion, depending on the platform. See
 [1] for more information.
 
-USTR_FREE() can be used to free a UChar* string safely, since it checks for
-NULL argument. USTR_LEN() takes either a UChar* or a char* argument,
-depending on the UG(unicode) value, and returns its length. Cast the
-argument to char* before passing it.
+USTR_FREE(zstr) can be used to free a UChar* string safely, since it checks for
+NULL argument. USTR_LEN() takes a zstr as its argument, and
+depending on the UG(unicode) value, and returns its strlen() or u_strlen().
 
-The list of functions that add new array values and add object properties
-has also been expanded to include the new types. Please see zend_API.h for
-full listing (add_*_ascii_string_*, add_*_rt_string_*, add_*_unicode_*,
-add_*_binary_*).
+Array Manipulation
+------------------
+
+The add_next_index_*(), add_index_*() and add_assoc_*() functions have been
+significantly expanded both to allow for the unicode type as a value and to
+permit various types of keys.
+
+Values: In the following examples, {1} represents a placeholder for the keytype and
+its arguments (covered later).
+
+add_{1}_unicode(zval *arr, {1}, UChar *ustr, int dup);
+add_{1}_unicodel(zval *arr, {1}, UChar *ustr, int ustr_len, int dup);
+ - Works like add_{1}_string() and add_{1}_stringl() but takes a UChar* value
+   and adds an IS_UNICODE type.
+
+add_{1}_rt_string(zval *arr, {1}, char *str, int dup);
+add_{1}_rt_stringl(zval *arr, {1}, char *str, int str_len, int dup);
+ - Works like add_{1}_string() and add_{1}_stringl() but converts the char*
+   value to Unicode using runtime encoding when UG(unicode) is on.
+
+add_{1}_ascii_string(zval *arr, {1}, char *str, int dup);
+add_{1}_ascii_stringl(zval *arr, {1}, char *str, int str_len, int dup);
+ - Works like add_{1}_rt_string() and add_{1}_rt_stringl() but uses
+   an ASCII converter rather than runtime encoding.
+
+add_{1}_utf8_string(zval *arr, {1}, char *str, int dup);
+add_{1}_utf8_stringl(zval *arr, {1}, char *str, int str_len, int dup);
+ - Works like add_{1}_rt_string() and add_{1}_rt_stringl() but uses
+   a UTF8 converter rather than runtime encoding.
+
+add_{1}_text(zval *arr, {1}, zstr str, int dup);
+add_{1}_textl(zval *arr, {1}, zstr str, int str_len, int dup);
+ - Wrapper which dispatches to add_{1}_string(l)() or add_{1}_unicode(l)()
+   depending on the setting of UG(unicode).
+
+add_{1}_zstr(zval *arr, {1}, zend_uchar type, zstr str, int dup);
+add_{1}_zstrl(zval *arr, {1}, zend_uchar type, zstr str, int str_len, int dup);
+ - Works like add_{1}_text() and add_{1}_textl(), but dispatches based on 'type'.
+
+
+Keys: In the following example, the zval* type is used for values, however
+each of the value types (including those listed above) are supported.
+
+The existing key types work as they always have:
+  add_next_index_zval(zval *arr, zval *val);
+  add_index_zval(zval *arr, long idx, zval *val);
+  add_assoc_zval(zval *arr, char *key, zval *val);
+  add_assoc_zval_ex(zval *arr, char *key, int key_len, zval *val);
+   . Associative keys are considered binary (IS_STRING)
+   . Remember that key_len includes the terminating NULL
+
+The following additional methods provide unicode capable keytypes:
+
+add_u_assoc_zval(zval *arr, zend_uchar type, zstr key, zval *val);
+add_u_assoc_zval_ex(zval *arr, zend_uchar type, zstr key, int key_len, zval *val);
+ . When type==IS_STRING, these behave identically to their
+   add_assoc_zval() and add_assoc_zval_ex() counterparts.
+   When type==IS_STRING, the key is considered to be Unicode (UChar*).
+
+add_rt_assoc_zval(zval *arr, char *key, zval *val);
+add_rt_assoc_zval_ex(zval *arr, char *key, int key_len, zval *val);
+ . When UG(unicode) is off, these behave identically to their
+   add_assoc_zval() and add_assoc_zval_ex() counterparts.
+   When UG(unicode) is on, key is converted to Unicode using runtime encoding.
+
+add_ascii_assoc_zval(zval *arr, char *key, zval *val);
+add_ascii_assoc_zval_ex(zval *arr, char *key, int key_len, zval *val);
+ . When UG(unicode) is off, these behave identically to their
+   add_assoc_zval() and add_assoc_zval_ex() counterparts.
+   When UG(unicode) is on, key is converted to Unicode using an ASCII converter.
+
+add_utf8_assoc_zval(zval *arr, char *key, zval *val);
+add_utf8_assoc_zval_ex(zval *arr, char *key, int key_len, zval *val);
+ . When UG(unicode) is off, these behave identically to their
+   add_assoc_zval() and add_assoc_zval_ex() counterparts.
+   When UG(unicode) is on, key is converted to Unicode using a UTF8 converter.
+
+
+Keytype and Valuetype specification may be mixed in any combination, for example:
+add_utf8_assoc_ascii_stringl_ex(zval *arr, char *key, int key_len, char *val, int val_len, int dup);
+
+
+Miscellaneous
+-------------
 
 UBYTES() macro can be used to obtain the number of bytes necessary to store
 the given number of UChar's. The typical usage is:
@@ -122,8 +262,8 @@ of code units and number of code points for the same Unicode string may be
 different. This has many implications, the most important of which is that
 you cannot simply index the UChar* string to  get the desired codepoint.
 
-The zval's value.ustr.len contains  actually the number of code units. To
-obtain the number of code points, one can use u_counChar32() ICU API
+The zval's value.ustr.len contains the number of code units (UChar -- UTF16).
+To obtain the number of code points, one can use u_counChar32() ICU API
 function or Z_USTRCPLEN() macro.
 
 ICU provides a number of macros for working with UTF-16 strings on the
@@ -195,10 +335,8 @@ string as the second argument.
 When UG(unicode) switch is on, the IS_STRING keys are upconverted to
 IS_UNICODE and then used in the hash lookup.
 
-There are two new constants that define key types:
-
-    #define HASH_KEY_IS_BINARY 4
-    #define HASH_KEY_IS_UNICODE 5
+A new HASH_KEY constant has been added for differentiating key types:
+ . HASH_KEY_IS_UNICODE
 
 Note that zend_hash_get_current_key_ex() does not have a zend_u_hash_*
 version. It returns the key as a char* pointer, you can can cast it
@@ -213,12 +351,6 @@ while various structures such as zend_class_entry, zend_function, etc store
 the identifier name as a char* pointer, it will actually point to UChar*
 string. Be careful when accessing the names of classes, functions, and such
 -- always check UG(unicode) before using them.
-
-In addition, zend_class_entry has a u_twin field that points to its Unicode
-counterpart in UG(unicode) mode. Use U_CLASS_ENTRY() macro to access the
-correct class entry, e.g.:
-
-    ce = U_CLASS_ENTRY(default_exception_ce);
 
 
 Formatted Output
@@ -237,6 +369,7 @@ Unicode strings:
 
     UChar *class_name = USTR_NAME("ReflectionClass");
     zend_printf("%r", class_name);
+    spprintf(&utf8_buffer, 0, "%*r", UG(utf8_conv), class_name);
 
   %R
     This format requires at least two arguments: the first one specifies the
