@@ -1709,7 +1709,7 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 	return SUCCESS;
 }
 
-ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval *value)
+ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval *value TSRMLS_DC)
 {
 	zval *z_key;
 
