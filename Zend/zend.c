@@ -742,13 +742,13 @@ static void function_to_unicode(zend_function *func TSRMLS_DC)
 		while (n > 0) {
 		  --n;
 		  if (args[n].name.s) {
-				UChar *uname = malloc(UBYTES(args[n].name_len));
-				u_charsToUChars(args[n].name.s, uname, args[n].name_len);
+				UChar *uname = malloc(UBYTES(args[n].name_len)+1);
+				u_charsToUChars(args[n].name.s, uname, args[n].name_len+1);
 				args[n].name.u = uname;
 		  }
 		  if (args[n].class_name.s) {
-				UChar *uname = malloc(UBYTES(args[n].class_name_len));
-				u_charsToUChars(args[n].class_name.s, uname, args[n].class_name_len);
+				UChar *uname = malloc(UBYTES(args[n].class_name_len)+1);
+				u_charsToUChars(args[n].class_name.s, uname, args[n].class_name_len+1);
 				args[n].class_name.u = uname;
 		  }
 		}
