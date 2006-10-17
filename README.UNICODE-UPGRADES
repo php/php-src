@@ -263,7 +263,7 @@ different. This has many implications, the most important of which is that
 you cannot simply index the UChar* string to  get the desired codepoint.
 
 The zval's value.ustr.len contains the number of code units (UChar -- UTF16).
-To obtain the number of code points, one can use u_counChar32() ICU API
+To obtain the number of code points, one can use u_countChar32() ICU API
 function or Z_USTRCPLEN() macro.
 
 ICU provides a number of macros for working with UTF-16 strings on the
