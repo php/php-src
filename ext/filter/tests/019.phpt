@@ -11,10 +11,10 @@ var_dump(filter_var("1.1.1.1", FILTER_VALIDATE_IP));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-NULL
-NULL
-NULL
-NULL
+--EXPECT--	
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 string(7) "1.1.1.1"
 Done

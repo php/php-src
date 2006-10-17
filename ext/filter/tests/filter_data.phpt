@@ -46,7 +46,7 @@ int(123)
 int(-123)
 int(0)
 int(123)
-NULL
+bool(false)
 
 float(-0.123)
 float(0)
@@ -54,7 +54,7 @@ float(1.23)
 float(-1.23)
 float(0)
 float(1.23)
-NULL
+bool(false)
 
 bool(true)
 bool(false)
@@ -67,5 +67,5 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-NULL
-NULL
+bool(false)
+bool(false)
