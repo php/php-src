@@ -50,7 +50,7 @@ array(7) {
   }
 }
 
-Warning: filter_var() expects parameter 2 to be long, array given in /home4/php_dev/php52/ext/filter/tests/010.php on line 5
+Warning: filter_var() expects parameter 2 to be long, array given in %s on line %d
 NULL
 string(1) "1"
 string(1) "1"
