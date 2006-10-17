@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   functions to not call __autoload(). (Dmitry)
 - Changed opendir/dir/scandir to use default context
   when no context argument is passed. (Sara)
+- Changed open_basedir to allow tightening in runtime contexts. (Sara)
 
 - Removed old legacy:
   . "register_globals" support. (Pierre)
