@@ -1,3 +1,42 @@
+2006-10-16  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_compile.c:
+      Optimize ZEND_U_CASE_EQUAL() and move it to the header file.
+
+2006-10-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/head.c:
+      initialize optional variables
+
+2006-10-16  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/json/json.c:
+      Patch to support primitive types. (Ilia)
+
+2006-10-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/zlib/zlib_filter.c:
+      MFB: Fixed compiler warnings
+
+    * (PHP_5_2)
+      ext/zlib/zlib_filter.c:
+      Fixed compiler warnings
+
+2006-10-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c:
+      Fixed bug #39140 (Uncaught exception may cause crash)
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed bug #39020 (PHP in FastCGI server mode crashes)
+
 2006-10-15  Antony Dovgal  <antony@zend.com>
 
     * ext/openssl/openssl.c
