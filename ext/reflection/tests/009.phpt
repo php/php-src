@@ -26,7 +26,7 @@ foreach ($a as $key=>$val) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(20) "Invalid method name "
 string(21) "Invalid method name 1"
 string(21) "Class  does not exist"
@@ -36,4 +36,15 @@ string(22) "Class a does not exist"
 string(21) "Class  does not exist"
 string(66) "The parameter class is expected to be either a string or an object"
 string(21) "Class  does not exist"
+Done
+--UEXPECT--	
+unicode(20) "Invalid method name "
+unicode(21) "Invalid method name 1"
+unicode(21) "Class  does not exist"
+unicode(22) "Class a does not exist"
+unicode(21) "Class  does not exist"
+unicode(22) "Class a does not exist"
+unicode(21) "Class  does not exist"
+unicode(66) "The parameter class is expected to be either a string or an object"
+unicode(21) "Class  does not exist"
 Done

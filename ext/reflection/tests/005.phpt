@@ -54,3 +54,10 @@ bool(false)
 bool(false)
 string(22) "* Comment for A::baz()"
 ===DONE===
+--UEXPECT--
+unicode(19) "Comment for class A"
+unicode(15) "Method A::bla()"
+bool(false)
+bool(false)
+unicode(22) "* Comment for A::baz()"
+===DONE===
