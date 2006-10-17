@@ -599,9 +599,6 @@ Additional converters will be optionally initialized depending on INI settings:
   UG(script_encoding_conv) - unicode.script_encoding
    . Scripts read from disk will be decoded using this converter
 
-  UG(http_input_encoding_conv) - unicode.http_input_encoding
-   . HTTP Request data ($_GET / $_POST) will be decoded using this converter
-
   UG(filesystem_encoding_conv) - unicode.filesystem_encoding
    . Filenames and paths will be encoding using this converter
 
