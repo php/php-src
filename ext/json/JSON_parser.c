@@ -278,7 +278,7 @@ static int dehexchar(char c)
 }
 
 
-static void json_create_zval(zval **z, smart_str *buf, int type)
+static void json_create_zval(zval **z, smart_str *buf, int type TSRMLS_DC)
 {
     ALLOC_INIT_ZVAL(*z);
 
@@ -477,7 +477,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
                     zval *mval;
                     smart_str_0(&buf);
 
-                    json_create_zval(&mval, &buf, type);
+                    json_create_zval(&mval, &buf, type TSRMLS_CC);
 
                     if (!assoc)
                     {
@@ -549,7 +549,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
                     zval *mval;
                     smart_str_0(&buf);
 
-                    json_create_zval(&mval, &buf, type);
+                    json_create_zval(&mval, &buf, type TSRMLS_CC);
                     add_next_index_zval(JSON(the_zstack)[JSON(the_top)], mval);
                     buf.len = 0;
                     JSON_RESET_TYPE();
@@ -594,7 +594,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
                      JSON(the_stack[JSON(the_top)]) == MODE_ARRAY))
                 {
                     smart_str_0(&buf);
-                    json_create_zval(&mval, &buf, type);
+                    json_create_zval(&mval, &buf, type TSRMLS_CC);
                 }
 
                 switch (JSON(the_stack)[JSON(the_top)]) {
