@@ -213,7 +213,7 @@ ZEND_API void zend_register_string_constant(char *name, uint name_len, char *str
 }
 
 
-ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
+ZEND_API int zend_get_constant_ex(char *name, uint name_len, zval *result, zend_class_entry *scope TSRMLS_DC)
 {
 	zend_constant *c;
 	int retval = 1;
@@ -222,17 +222,19 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 
 	if ((colon = memchr(name, ':', name_len)) && colon[1] == ':') {
 		/* class constant */
-		zend_class_entry **ce = NULL, *scope;
+		zend_class_entry **ce = NULL;
 		int class_name_len = colon-name;
 		int const_name_len = name_len - class_name_len - 2;
 		char *constant_name = colon+2;
 		zval **ret_constant;
 		char *class_name;
 
-		if (EG(in_execution)) {
-			scope = EG(scope);
-		} else {
-			scope = CG(active_class_entry);
+		if (!scope) {
+			if (EG(in_execution)) {
+				scope = EG(scope);
+			} else {
+				scope = CG(active_class_entry);
+			}
 		}
 	
 		class_name = estrndup(name, class_name_len);
@@ -300,6 +302,10 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 	return retval;
 }
 
+ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
+{
+    zend_get_constant_ex(name, name_len, result, NULL TSRMLS_CC);
+}
 
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 {
