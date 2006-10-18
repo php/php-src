@@ -396,16 +396,15 @@ ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GD_PNG
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepng, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepng, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, quality)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_JPG
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagejpeg, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagejpeg, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, quality)
