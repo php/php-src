@@ -304,7 +304,7 @@ ZEND_API int zend_get_constant_ex(char *name, uint name_len, zval *result, zend_
 
 ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
 {
-    zend_get_constant_ex(name, name_len, result, NULL TSRMLS_CC);
+    return zend_get_constant_ex(name, name_len, result, NULL TSRMLS_CC);
 }
 
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
