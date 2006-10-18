@@ -588,7 +588,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 
 ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 {
-	zval_update_constant_ex(pp, arg, NULL TSRMLS_CC);
+	return zval_update_constant_ex(pp, arg, NULL TSRMLS_CC);
 }
 
 int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC)
