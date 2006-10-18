@@ -469,7 +469,7 @@ ZEND_API int zend_is_true(zval *op)
 
 #include "../TSRM/tsrm_strtok_r.h"
 
-ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
+ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC)
 {
 	zval *p = *pp;
 	zend_bool inline_change = (zend_bool) (unsigned long) arg;
@@ -485,7 +485,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 		refcount = p->refcount;
 		is_ref = p->is_ref;
 
-		if (!zend_u_get_constant(UG(unicode)?IS_UNICODE:IS_STRING, Z_UNIVAL_P(p), Z_UNILEN_P(p), &const_value TSRMLS_CC)) {
+		if (!zend_u_get_constant(ZEND_STR_TYPE, Z_UNIVAL_P(p), Z_UNILEN_P(p), &const_value, scope TSRMLS_CC)) {
 			zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",
 				Z_UNIVAL_P(p),
 				Z_UNIVAL_P(p));
@@ -524,7 +524,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!zend_u_get_constant(UG(unicode)?IS_UNICODE:IS_STRING, str_index, str_index_len-1, &const_value TSRMLS_CC)) {
+			if (!zend_u_get_constant(ZEND_STR_TYPE, str_index, str_index_len-1, &const_value, scope TSRMLS_CC)) {
 				zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",	str_index, str_index);
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
@@ -586,6 +586,10 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 	return 0;
 }
 
+ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
+{
+	zval_update_constant_ex(pp, arg, NULL TSRMLS_CC);
+}
 
 int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC)
 {

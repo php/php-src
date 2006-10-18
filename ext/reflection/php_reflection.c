@@ -2144,7 +2144,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 
 	zv_copy = precv->op2.u.constant;
 	zv = &zv_copy;
-	zval_update_constant(&zv, (void*)0 TSRMLS_CC);
+	zval_update_constant_ex(&zv, (void*)0, param->fptr->common.scope TSRMLS_CC);
 	RETURN_ZVAL(zv, 1, 1);
 }
 /* }}} */
@@ -3961,7 +3961,7 @@ ZEND_METHOD(reflection_property, getDefaultValue)
 		*zv = **zdef;
 		zval_copy_ctor(zv);
 		INIT_PZVAL(zv);
-		zval_update_constant(&zv, (void*)1 TSRMLS_CC);
+		zval_update_constant_ex(&zv, (void*)1, ref->ce TSRMLS_CC);
 		RETURN_ZVAL(zv, 1, 1);
 	}
 }
