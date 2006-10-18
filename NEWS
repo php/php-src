@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Fixed bug #39020 (PHP in FastCGI server mode crashes). (Dmitry)
 - Fixed bug #38458, PECL bug #8944, PECL bug #7775 (error retrieving
   columns after long/text columns with PDO_ODBC). (Wez)
+- Fixed PECL bug #9061 (oci8 might reuse wrong persistent connection). (Tony)
 - Fixed PECL bug #8816 (issue in php_oci_statement_fetch with more than one 
   piecewise column) (jeff at badtz-maru dot com, Tony)
 - Fixed PECL bug #7755 (error selecting DOUBLE fields with PDO_ODBC).
