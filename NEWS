@@ -7,6 +7,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #39034 (curl_exec() with return transfer returns TRUE on empty
   files). (Ilia)
 - Fixed bug #38963 (Fixed a possible open_basedir bypass in tempnam()). (Ilia)
+- Fixed bug #38882 (ldap_connect causes segfault with newer versions of 
+  OpenLDAP). (Tony)
 - Fixed bug #38859 (parse_url() fails if passing '@' in passwd). (Tony,Ilia)
 - Fixed bug #38534 (segfault when calling setlocale() in userspace session
   handler). (Tony)
