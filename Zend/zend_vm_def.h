@@ -2617,7 +2617,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, CONST|UNUSED, CONST)
 			}
 		}
 */
-		if (!zend_u_get_constant(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
+		if (!zend_u_get_constant(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var, NULL TSRMLS_CC)) {
 			zend_error(E_NOTICE, "Use of undefined constant %R - assumed '%R'",
 				Z_TYPE(opline->op2.u.constant),
 				Z_UNIVAL(opline->op2.u.constant),

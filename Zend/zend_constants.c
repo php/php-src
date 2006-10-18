@@ -231,7 +231,7 @@ ZEND_API void zend_register_string_constant(char *name, uint name_len, char *str
 }
 
 
-ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval *result TSRMLS_DC)
+ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval *result, zend_class_entry *scope TSRMLS_DC)
 {
 	zend_constant *c;
 	int retval = 1;
@@ -241,7 +241,7 @@ ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval
 	if ((UG(unicode) && (colon.u = u_memchr(name.u, ':', name_len)) && colon.u[1] == ':') ||
 	    (!UG(unicode) && (colon.s = memchr(name.s, ':', name_len)) && colon.s[1] == ':')) {
 		/* class constant */
-		zend_class_entry **ce = NULL, *scope;
+		zend_class_entry **ce = NULL;
 		int class_name_len = UG(unicode)?colon.u-name.u:colon.s-name.s;
 		int const_name_len = name_len - class_name_len - 2;
 		zstr constant_name, class_name;
@@ -253,10 +253,12 @@ ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval
 			constant_name.s = colon.s + 2;
 		}
 
-		if (EG(in_execution)) {
-			scope = EG(scope);
-		} else {
-			scope = CG(active_class_entry);
+		if (!scope) {
+			if (EG(in_execution)) {
+				scope = EG(scope);
+			} else {
+				scope = CG(active_class_entry);
+			}
 		}
 
 		if (UG(unicode)) {
@@ -333,7 +335,7 @@ ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval
 
 ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
 {
-	return zend_u_get_constant(IS_STRING, ZSTR(name), name_len, result TSRMLS_CC);
+	return zend_u_get_constant(IS_STRING, ZSTR(name), name_len, result, NULL TSRMLS_CC);
 }
 
 ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_DC)

@@ -585,7 +585,7 @@ ZEND_FUNCTION(defined)
 	}
 
 	convert_to_text_ex(var);
-	if (zend_u_get_constant(Z_TYPE_PP(var), Z_UNIVAL_PP(var), Z_UNILEN_PP(var), &c TSRMLS_CC)) {
+	if (zend_u_get_constant(Z_TYPE_PP(var), Z_UNIVAL_PP(var), Z_UNILEN_PP(var), &c, NULL TSRMLS_CC)) {
 		zval_dtor(&c);
 		RETURN_TRUE;
 	} else {

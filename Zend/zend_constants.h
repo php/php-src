@@ -56,7 +56,7 @@ int zend_shutdown_constants(TSRMLS_D);
 void zend_register_standard_constants(TSRMLS_D);
 void clean_non_persistent_constants(TSRMLS_D);
 ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC);
-ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval *result TSRMLS_DC);
+ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval *result, zend_class_entry *scope TSRMLS_DC);
 ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, int flags, int module_number TSRMLS_DC);
 ZEND_API void zend_register_double_constant(char *name, uint name_len, double dval, int flags, int module_number TSRMLS_DC);
 ZEND_API void zend_register_string_constant(char *name, uint name_len, char *strval, int flags, int module_number TSRMLS_DC);
