@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   files). (Ilia)
 - Fixed bug #38934 (move_uploaded_file() cannot read uploaded file outside of
   open_basedir). (Ilia)
+- Fixed bug #38882 (ldap_connect causes segfault with newer versions of 
+  OpenLDAP). (Tony)
 - Fixed bug #38649 (uninit'd optional arg in stream_socket_sendto()). (Sara)
 - Fixed bug #38465 (ReflectionParameter fails if default value is an access to
   self::). (Johannes)
