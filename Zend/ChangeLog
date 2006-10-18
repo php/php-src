@@ -1,3 +1,18 @@
+2006-10-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c
+      zend_API.h:
+      Fix thread safety.
+
+    * zend_API.c
+      zend_API.h:
+      Implement add_utf8_property_* API.
+
+2006-10-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c:
+      Fixed incorrect parameter name coping
+
 2006-10-16  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend.h

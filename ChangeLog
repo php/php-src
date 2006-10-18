@@ -1,3 +1,128 @@
+2006-10-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Fix thread safety.
+
+2006-10-17  Antony Dovgal  <antony@zend.com>
+
+    * ext/filter/tests/010.phpt
+      ext/filter/tests/010.phpt:
+      fix test
+
+2006-10-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * README.UNICODE-UPGRADES:
+      Don't mention http_input_encoding converter as it won't be used anymore
+      soon.
+
+    * README.UNICODE-UPGRADES:
+      Typo.
+
+2006-10-17  Sara Golemon  <sara@golemon.com>
+
+    * NEWS
+      main/fopen_wrappers.c
+      main/fopen_wrappers.h
+      main/main.c:
+      Extend open_basedir functionality to allow runtime tightening
+
+    * README.UNICODE-UPGRADES:
+      More unicode upgrading notes
+
+    * README.UNICODE-UPGRADES:
+      Update the upgrading doc to the current wisdom.  Pass One.
+      This pass simply retruthifies the information already present.
+      The next pass will add additional information.
+
+2006-10-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/json/JSON_parser.c
+      ext/json/json.c:
+      Unicode support in JSON functions.
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Implement add_utf8_property_* API.
+
+2006-10-17  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h:
+      - MF52: Updated timezone database.
+
+    * (PHP_5_2)
+      ext/date/lib/timezonedb.h:
+      - Updated timezone database.
+
+2006-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/filter.c
+      ext/filter/filter_private.h
+      ext/filter/logical_filters.c
+      ext/filter/tests/008.phpt
+      ext/filter/tests/009.phpt
+      ext/filter/tests/010.phpt
+      ext/filter/tests/012.phpt
+      ext/filter/tests/013.phpt
+      ext/filter/tests/014.phpt
+      ext/filter/tests/015.phpt
+      ext/filter/tests/016.phpt
+      ext/filter/tests/017.phpt
+      ext/filter/tests/018.phpt
+      ext/filter/tests/019.phpt
+      ext/filter/tests/030.phpt
+      ext/filter/tests/031.phpt
+      ext/filter/tests/034.phpt
+      ext/filter/tests/bug8315.phpt
+      ext/filter/tests/filter_data.phpt:
+      MFB: Unify handling of return values on validation failure and var not
+      found
+
+    * (PHP_5_2)
+      ext/filter/filter.c
+      ext/filter/filter_private.h
+      ext/filter/logical_filters.c
+      ext/filter/tests/010.phpt
+      ext/filter/tests/012.phpt
+      ext/filter/tests/013.phpt
+      ext/filter/tests/014.phpt
+      ext/filter/tests/015.phpt
+      ext/filter/tests/016.phpt
+      ext/filter/tests/017.phpt
+      ext/filter/tests/018.phpt
+      ext/filter/tests/019.phpt
+      ext/filter/tests/030.phpt
+      ext/filter/tests/031.phpt
+      ext/filter/tests/034.phpt
+      ext/filter/tests/bug8315.phpt
+      ext/filter/tests/filter_data.phpt:
+      Unify handling of return values on validation failure and var not found
+
+2006-10-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/005.phpt
+      ext/reflection/tests/009.phpt
+      ext/reflection/tests/010.phpt
+      ext/reflection/tests/011.phpt
+      ext/reflection/tests/012.phpt
+      ext/reflection/tests/013.phpt
+      ext/reflection/tests/014.phpt
+      ext/reflection/tests/015.phpt
+      ext/reflection/tests/016.phpt
+      ext/reflection/tests/017.phpt
+      ext/reflection/tests/018.phpt
+      ext/reflection/tests/019.phpt
+      ext/reflection/tests/020.phpt
+      ext/reflection/tests/021.phpt
+      ext/reflection/tests/022.phpt
+      ext/reflection/tests/023.phpt
+      ext/reflection/tests/024.phpt:
+      Unicode support. (Two more places must be fixed. Look for FIXME comments.)
+
+    * ZendEngine2/zend.c:
+      Fixed incorrect parameter name coping
+
 2006-10-16  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend.h
