@@ -458,7 +458,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info TSR
 
 	if (zend_ascii_hash_find(Z_ARRVAL_P(info), markername, strlen(markername)+1, (void **) &tmp) == FAILURE) {
 		/* XXX we onyl catch the 1st tag of it's kind! */
-		add_ascii_assoc_stringl(info, markername, buffer, length, 1);
+		add_ascii_assoc_rt_stringl(info, markername, buffer, length, 1);
 	}
 
 	efree(buffer);
@@ -1115,25 +1115,23 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 }
 /* }}} */
 
-/* {{{ proto string image_type_to_mime_type(int imagetype)
+/* {{{ proto string image_type_to_mime_type(int imagetype) U
    Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_mime_type)
 {
-	zval **p_image_type;
-	int arg_c = ZEND_NUM_ARGS();
+	long image_type;
 	char *temp;
 
-	if ((arg_c!=1) || zend_get_parameters_ex(arg_c, &p_image_type) == FAILURE) {
-		RETVAL_FALSE;
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &image_type) == FAILURE) {
+		return;
 	}
-	convert_to_long_ex(p_image_type);
-	temp = (char*)php_image_type_to_mime_type(Z_LVAL_PP(p_image_type));
+
+	temp = (char*)php_image_type_to_mime_type(image_type);
 	ZVAL_ASCII_STRING(return_value, temp, 1);
 }
 /* }}} */
 
-/* {{{ proto string image_type_to_extension(int imagetype [, bool include_dot])
+/* {{{ proto string image_type_to_extension(int imagetype [, bool include_dot]) U
    Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_extension)
 {
@@ -1284,47 +1282,32 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto array getimagesize(string imagefile [, array info])
+/* {{{ proto array getimagesize(string imagefile [, array info]) U
    Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesize)
 {
-	zval **arg1, **info = NULL;
+	zval **pp_file, *info = NULL;
 	int itype = 0;
 	char *temp;
+	char *filename;
+	int filename_len;
 	struct gfxinfo *result = NULL;
 	php_stream * stream = NULL;
 
-	switch(ZEND_NUM_ARGS()) {
-
-	case 1:
-		if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
-			RETVAL_FALSE;
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_string_ex(arg1);
-		break;
-
-	case 2:
-		if (zend_get_parameters_ex(2, &arg1, &info) == FAILURE) {
-			RETVAL_FALSE;
-			WRONG_PARAM_COUNT;
-		}
-		zval_dtor(*info);
-
-		array_init(*info);
-
-		convert_to_string_ex(arg1);
-		break;
-
-	default:
-		RETVAL_FALSE;
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|z", &pp_file, &info) == FAILURE ||
+		php_stream_path_param_encode(pp_file, &filename, &filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
 	}
 
-	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH, NULL);
+	stream = php_stream_open_wrapper(filename, "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH, NULL);
 
 	if (!stream) {
 		RETURN_FALSE;
+	}
+
+	if (info) {
+		zval_dtor(info);
+		array_init(info);
 	}
 
 	itype = php_getimagetype(stream, NULL TSRMLS_CC);
@@ -1334,7 +1317,7 @@ PHP_FUNCTION(getimagesize)
 			break;
 		case IMAGE_FILETYPE_JPEG:
 			if (info) {
-				result = php_handle_jpeg(stream, *info TSRMLS_CC);
+				result = php_handle_jpeg(stream, info TSRMLS_CC);
 			} else {
 				result = php_handle_jpeg(stream, NULL TSRMLS_CC);
 			}
@@ -1393,10 +1376,7 @@ PHP_FUNCTION(getimagesize)
 		add_index_long(return_value, 1, result->height);
 		add_index_long(return_value, 2, itype);
 		spprintf(&temp, 0, "width=\"%d\" height=\"%d\"", result->width, result->height);
-		add_index_ascii_string(return_value, 3, temp, 0);
-		if (UG(unicode)) {
-			efree(temp);
-		}
+		add_index_ascii_string(return_value, 3, temp, ZSTR_AUTOFREE);
 
 		if (result->bits != 0) {
 			add_ascii_assoc_long(return_value, "bits", result->bits);
