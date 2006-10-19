@@ -1,3 +1,30 @@
+2006-10-18  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      zend_constants.c:
+      - Here, too
+
+    * zend_execute_API.c:
+      - added missing return...
+
+    * (PHP_5_2)
+      zend_constants.c
+      zend_constants.h
+      zend_execute.h
+      zend_execute_API.c:
+      - MFH: Fix #38465 (ReflectionParameter fails if default value is an access
+      to self::
+
+    * zend_builtin_functions.c
+      zend_constants.c
+      zend_constants.h
+      zend_execute.h
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Fix #38465 (ReflectionParameter fails if default value is an access to
+      self::
+
 2006-10-17  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c
