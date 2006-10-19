@@ -41,7 +41,7 @@ typedef char * caddr_t;
 #ifndef S_ISREG 
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
-#define chdir(path) SetCurrentDirectory(path)
+#define chdir(path) _chdir(path)
 #define mkdir(a, b)	_mkdir(a)
 #define rmdir(a)	_rmdir(a)
 #define getpid		_getpid
