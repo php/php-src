@@ -300,6 +300,8 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 
 static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
 {
+	zval **ret;
+
 	if (check_inherited) {
 		spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 		if (intern->fptr_offset_get) {
@@ -316,7 +318,30 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 			return EG(uninitialized_zval_ptr);
 		}
 	}
-	return *spl_array_get_dimension_ptr_ptr(check_inherited, object, offset, type TSRMLS_CC);
+	ret = spl_array_get_dimension_ptr_ptr(check_inherited, object, offset, type TSRMLS_CC);
+
+	/* When in a write context,
+	 * ZE has to be fooled into thinking this is in a reference set
+	 * by separating (if necessary) and returning as an is_ref=1 zval (even if refcount == 1) */
+	if ((type == BP_VAR_W || type == BP_VAR_RW) && !(*ret)->is_ref) {
+		if ((*ret)->refcount > 1) {
+			zval *newval;
+
+			/* Separate */
+			MAKE_STD_ZVAL(newval);
+			*newval = **ret;
+			zval_copy_ctor(newval);
+			newval->refcount = 1;
+
+			/* Replace */
+			(*ret)->refcount--;
+			*ret = newval;
+		}
+
+		(*ret)->is_ref = 1;
+	}
+
+	return *ret;
 } /* }}} */
 
 static zval *spl_array_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
