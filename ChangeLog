@@ -1,3 +1,81 @@
+2006-10-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/com_dotnet/com_extension.c:
+      MFB: Fixed bug #38400 (Use of com.typelib_file may cause a crash).
+
+    * (PHP_5_2)
+      NEWS
+      ext/com_dotnet/com_extension.c:
+      Fixed bug #38400 (Use of com.typelib_file may cause a crash).
+
+2006-10-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/ldap/config.m4
+      ext/ldap/config.m4:
+      MFH: fix bug #38882 (ldap_connect causes segfault with newer versions of
+      OpenLDAP)
+
+    * ext/ldap/config.m4:
+      fix bug #38882 (ldap_connect causes segfault with newer versions of
+      OpenLDAP)
+
+2006-10-18  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_constants.c:
+      - Here, too
+
+    * ZendEngine2/zend_execute_API.c:
+      - added missing return...
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug38465.phpt:
+      - MFH: Fix #38465 (ReflectionParameter fails if default value is an access
+      to self::
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug38465.phpt
+      ext/reflection/tests/bug38465.phpt
+      ext/standard/basic_functions.c:
+      - Fix #38465 (ReflectionParameter fails if default value is an access to
+      self::
+
+2006-10-18  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/gd/gd.c:
+      Fix arginfo for imagepng() and imagejpeg()
+
+2006-10-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/oci8/oci8.c:
+      MFH: fix PECL bug #9061 (oci8 might reuse wrong persistent connection)
+
+    * ext/oci8/oci8.c:
+      fix PECL bug #9061 (oci8 might reuse wrong persistent connection)
+
+2006-10-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/json/JSON_parser.c:
+      ZTS fix
+
 2006-10-17  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend_API.c
