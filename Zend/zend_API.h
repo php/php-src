@@ -1599,12 +1599,13 @@ END_EXTERN_C()
 
 #define ZVAL_ASCII_STRING(z, s, flags) \
 	if (UG(unicode)) { \
-		uint length = strlen(s); \
-		UChar *u_str = zend_ascii_to_unicode((s), length+1 ZEND_FILE_LINE_CC); \
+		char *__s = (s); \
+		int __s_len = strlen(__s); \
+		UChar *u_str = zend_ascii_to_unicode(__s, __s_len+1 ZEND_FILE_LINE_CC); \
 		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(s); \
+			efree(__s); \
 		} \
-		ZVAL_UNICODEL(z, u_str, length, 0); \
+		ZVAL_UNICODEL(z, u_str, __s_len, 0); \
 	} else { \
 		char *__s=(s);					\
 		Z_STRLEN_P(z) = strlen(__s);	\
@@ -1614,12 +1615,13 @@ END_EXTERN_C()
 
 #define ZVAL_ASCII_STRINGL(z, s, l, flags) \
 	if (UG(unicode)) { \
-		int u_len  = l; \
-		UChar *u_str = zend_ascii_to_unicode((s), (u_len)+1 ZEND_FILE_LINE_CC); \
+		char *__s = (s); \
+		int __s_len  = (l); \
+		UChar *u_str = zend_ascii_to_unicode((__s), (__s_len)+1 ZEND_FILE_LINE_CC); \
 		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(s); \
+			efree(__s); \
 		} \
-		ZVAL_UNICODEL(z, u_str, u_len, 0); \
+		ZVAL_UNICODEL(z, u_str, __s_len, 0); \
 	} else { \
 		char *__s=(s); int __l=l;	\
 		Z_STRLEN_P(z) = __l;	    \
@@ -1630,12 +1632,13 @@ END_EXTERN_C()
 #define ZVAL_U_STRING(conv, z, s, flags) \
 	if (UG(unicode)) { \
 		UErrorCode status = U_ZERO_ERROR; \
+		char *__s = (s); \
+		int __s_len = strlen(__s); \
 		UChar *u_str; \
 		int u_len; \
-		uint length = strlen(s); \
-		zend_string_to_unicode_ex(conv, &u_str, &u_len, s, length, &status); \
+		zend_string_to_unicode_ex(conv, &u_str, &u_len, __s, __s_len, &status); \
 		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(s); \
+			efree(__s); \
 		} \
 		ZVAL_UNICODEL(z, u_str, u_len, 0); \
 	} else { \
@@ -1648,11 +1651,13 @@ END_EXTERN_C()
 #define ZVAL_U_STRINGL(conv, z, s, l, flags) \
 	if (UG(unicode)) { \
 		UErrorCode status = U_ZERO_ERROR; \
+		char *__s = (s); \
+		int __s_len = (l); \
 		UChar *u_str; \
 		int u_len; \
-		zend_string_to_unicode_ex(conv, &u_str, &u_len, s, l, &status); \
+		zend_string_to_unicode_ex(conv, &u_str, &u_len, __s, __s_len, &status); \
 		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(s); \
+			efree(__s); \
 		} \
 		ZVAL_UNICODEL(z, u_str, u_len, 0); \
 	} else { \
