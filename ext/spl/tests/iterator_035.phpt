@@ -14,4 +14,4 @@ $a[] = &$tmp;
 echo "Done\n";
 ?>
 --EXPECTF--	
-Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %s on line %d
+Fatal error: Cannot assign by reference to overloaded object in %s on line %d
