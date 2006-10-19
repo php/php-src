@@ -273,3 +273,245 @@ array(1) {
     }
   }
 }
+--UEXPECT--
+Testing: [[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]
+DECODE: AS OBJECT
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [0]=>
+        array(1) {
+          [0]=>
+          array(1) {
+            [0]=>
+            array(1) {
+              [0]=>
+              array(1) {
+                [0]=>
+                array(1) {
+                  [0]=>
+                  array(1) {
+                    [0]=>
+                    array(1) {
+                      [0]=>
+                      array(1) {
+                        [0]=>
+                        array(1) {
+                          [0]=>
+                          array(1) {
+                            [0]=>
+                            array(1) {
+                              [0]=>
+                              array(1) {
+                                [0]=>
+                                array(1) {
+                                  [0]=>
+                                  array(1) {
+                                    [0]=>
+                                    array(1) {
+                                      [0]=>
+                                      unicode(12) "Not too deep"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+DECODE: AS ARRAY
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [0]=>
+        array(1) {
+          [0]=>
+          array(1) {
+            [0]=>
+            array(1) {
+              [0]=>
+              array(1) {
+                [0]=>
+                array(1) {
+                  [0]=>
+                  array(1) {
+                    [0]=>
+                    array(1) {
+                      [0]=>
+                      array(1) {
+                        [0]=>
+                        array(1) {
+                          [0]=>
+                          array(1) {
+                            [0]=>
+                            array(1) {
+                              [0]=>
+                              array(1) {
+                                [0]=>
+                                array(1) {
+                                  [0]=>
+                                  array(1) {
+                                    [0]=>
+                                    array(1) {
+                                      [0]=>
+                                      unicode(12) "Not too deep"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+ENCODE: FROM OBJECT
+[[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]
+ENCODE: FROM ARRAY
+[[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]
+DECODE AGAIN: AS OBJECT
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [0]=>
+        array(1) {
+          [0]=>
+          array(1) {
+            [0]=>
+            array(1) {
+              [0]=>
+              array(1) {
+                [0]=>
+                array(1) {
+                  [0]=>
+                  array(1) {
+                    [0]=>
+                    array(1) {
+                      [0]=>
+                      array(1) {
+                        [0]=>
+                        array(1) {
+                          [0]=>
+                          array(1) {
+                            [0]=>
+                            array(1) {
+                              [0]=>
+                              array(1) {
+                                [0]=>
+                                array(1) {
+                                  [0]=>
+                                  array(1) {
+                                    [0]=>
+                                    array(1) {
+                                      [0]=>
+                                      unicode(12) "Not too deep"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+DECODE AGAIN: AS ARRAY
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [0]=>
+        array(1) {
+          [0]=>
+          array(1) {
+            [0]=>
+            array(1) {
+              [0]=>
+              array(1) {
+                [0]=>
+                array(1) {
+                  [0]=>
+                  array(1) {
+                    [0]=>
+                    array(1) {
+                      [0]=>
+                      array(1) {
+                        [0]=>
+                        array(1) {
+                          [0]=>
+                          array(1) {
+                            [0]=>
+                            array(1) {
+                              [0]=>
+                              array(1) {
+                                [0]=>
+                                array(1) {
+                                  [0]=>
+                                  array(1) {
+                                    [0]=>
+                                    array(1) {
+                                      [0]=>
+                                      unicode(12) "Not too deep"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
