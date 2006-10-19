@@ -10,6 +10,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #38882 (ldap_connect causes segfault with newer versions of 
   OpenLDAP). (Tony)
 - Fixed bug #38859 (parse_url() fails if passing '@' in passwd). (Tony,Ilia)
+- Fixed bug #38722 (Calling undefined method prints insufficient error message)
+  (Hannes)
 - Fixed bug #38534 (segfault when calling setlocale() in userspace session
   handler). (Tony)
 - Fixed bug #38450 (constructor is not called for classes used in userspace
