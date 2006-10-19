@@ -31,43 +31,43 @@ NULL
 NULL
 NULL
 NULL
+string(1) "."
+string(1) "."
+string(3) "<?>"
+string(1) ";"
+string(12) "руссиш"
+string(4) "blah"
 NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   ["test"]=>
-  object(stdClass)#2 (1) {
+  object(stdClass)#%d (1) {
     ["foo"]=>
     string(3) "bar"
   }
 }
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   ["test"]=>
-  object(stdClass)#2 (1) {
+  object(stdClass)#%d (1) {
     ["foo"]=>
     string(0) ""
   }
 }
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   ["_empty_"]=>
-  object(stdClass)#2 (1) {
+  object(stdClass)#%d (1) {
     ["foo"]=>
     string(0) ""
   }
 }
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   ["_empty_"]=>
-  object(stdClass)#2 (1) {
+  object(stdClass)#%d (1) {
     ["_empty_"]=>
     string(0) ""
   }
 }
-NULL
-NULL
+string(16) "{ "": { "": "" }"
+string(16) "{ "": "": "" } }"
 Done
 --UEXPECTF--
 Warning: json_decode() expects at least 1 parameter, 0 given in %s on line %d
@@ -75,41 +75,41 @@ NULL
 NULL
 NULL
 NULL
+unicode(1) "."
+unicode(1) "."
+unicode(3) "<?>"
+unicode(1) ";"
+unicode(6) "руссиш"
+unicode(4) "blah"
 NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   [u"test"]=>
-  object(stdClass)#2 (1) {
+  object(stdClass)#%d (1) {
     [u"foo"]=>
-    string(3) "bar"
+    unicode(3) "bar"
   }
 }
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   [u"test"]=>
-  object(stdClass)#2 (1) {
+  object(stdClass)#%d (1) {
     [u"foo"]=>
-    string(0) ""
+    unicode(0) ""
   }
 }
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   [u"_empty_"]=>
-  object(stdClass)#2 (1) {
+  object(stdClass)#%d (1) {
     [u"foo"]=>
-    string(0) ""
+    unicode(0) ""
   }
 }
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   [u"_empty_"]=>
-  object(stdClass)#2 (1) {
+  object(stdClass)#%d (1) {
     [u"_empty_"]=>
-    string(0) ""
+    unicode(0) ""
   }
 }
-NULL
-NULL
+unicode(16) "{ "": { "": "" }"
+unicode(16) "{ "": "": "" } }"
 Done

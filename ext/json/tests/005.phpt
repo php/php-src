@@ -25,3 +25,15 @@ array(1) {
 Warning: json_encode(): recursion detected in %s on line %d
 string(8) "[[null]]"
 Done
+--UEXPECTF--
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    *RECURSION*
+  }
+}
+
+Warning: json_encode(): recursion detected in %s on line %d
+unicode(8) "[[null]]"
+Done

@@ -25,3 +25,15 @@ object(stdClass)#%d (1) {
 Warning: json_encode(): recursion detected in %s on line %d
 string(22) "{"prop":{"prop":null}}"
 Done
+--UEXPECTF--
+object(stdClass)#%d (1) {
+  [u"prop"]=>
+  object(stdClass)#%d (1) {
+    [u"prop"]=>
+    *RECURSION*
+  }
+}
+
+Warning: json_encode(): recursion detected in %s on line %d
+string(22) "{"prop":{"prop":null}}"
+Done
