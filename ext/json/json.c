@@ -439,6 +439,7 @@ PHP_FUNCTION(json_decode)
 
 	if (str_type == IS_UNICODE) {
 		utf16 = str.u;
+		utf16_len = str_len;
 	} else {
 		utf16 = (unsigned short *) emalloc((str_len+1) * sizeof(unsigned short));
 
