@@ -1072,7 +1072,18 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 		int offset = 0;
 
 		buf = estrndup(dir, dir_len);
+
+#ifdef PHP_WIN32
+		e = buf;
+		while (*e) {
+			if (*e == '/') {
+				*e = DEFAULT_SLASH;
+			}
+			e++;
+		}
+#else
 		e = buf + dir_len;
+#endif
 
 		if ((p = memchr(buf, DEFAULT_SLASH, dir_len))) {
 			offset = p - buf + 1;
@@ -1084,9 +1095,21 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 		else {
 			/* find a top level directory we need to create */
 			while ( (p = strrchr(buf + offset, DEFAULT_SLASH)) || (offset != 1 && (p = strrchr(buf, DEFAULT_SLASH))) ) {
+				int n = 0;
+
 				*p = '\0';
+				while (p > buf && *(p-1) == DEFAULT_SLASH) {
+					++n;
+					--p;
+					*p = '\0';
+				}
 				if (VCWD_STAT(buf, &sb) == 0) {
-					*p = DEFAULT_SLASH;
+					while (1) {
+						*p = DEFAULT_SLASH;
+						if (!n) break;
+						--n;
+						++p;
+					}
 					break;
 				}
 			}
@@ -1100,9 +1123,10 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 			}
 			/* create any needed directories if the creation of the 1st directory worked */
 			while (++p != e) {
-				if (*p == '\0' && *(p + 1) != '\0') {
+				if (*p == '\0') {
 					*p = DEFAULT_SLASH;
-					if ((ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
+					if ((*(p+1) != '\0') &&
+					    (ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
 						if (options & REPORT_ERRORS) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 						}
