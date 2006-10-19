@@ -1004,25 +1004,26 @@ PHP_FUNCTION(phpinfo)
 
 /* }}} */
 
-/* {{{ proto string phpversion([string extension])
+/* {{{ proto string phpversion([string extension]) U
    Return the current PHP version */
 PHP_FUNCTION(phpversion)
 {
-	zval **arg;
-	int argc = ZEND_NUM_ARGS();
+	char *ext_name = NULL;
+	int ext_name_len = 0;
 
-	if (argc == 0) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext_name, &ext_name_len) == FAILURE) {
+		return;
+	}
+
+	if (!ext_name) {
 		RETURN_ASCII_STRING(PHP_VERSION, 1);
-	} else if (argc == 1 && zend_get_parameters_ex(1, &arg) == SUCCESS) {
+	} else {
 		char *version;
-		convert_to_string_ex(arg);
-		version = zend_get_module_version(Z_STRVAL_PP(arg));
+		version = zend_get_module_version(ext_name);
 		if (version == NULL) {
 			RETURN_FALSE;
 		}
 		RETURN_ASCII_STRING(version, 1);
-	} else {
-		WRONG_PARAM_COUNT;
 	}
 }
 /* }}} */
@@ -1071,62 +1072,60 @@ PHPAPI char *php_logo_guid()
 }
 /* }}} */
 
-/* {{{ proto string php_logo_guid(void)
+/* {{{ proto string php_logo_guid(void) U
    Return the special ID used to request the PHP logo in phpinfo screens*/
 PHP_FUNCTION(php_logo_guid)
 {
-
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
 	}
 
-	RETURN_ASCII_STRING(php_logo_guid(), 0);
+	RETURN_ASCII_STRING(php_logo_guid(), ZSTR_AUTOFREE);
 }
 /* }}} */
 
-/* {{{ proto string php_real_logo_guid(void)
+/* {{{ proto string php_real_logo_guid(void) U
    Return the special ID used to request the PHP logo in phpinfo screens*/
 PHP_FUNCTION(php_real_logo_guid)
 {
-
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
 	}
 
 	RETURN_ASCII_STRINGL(PHP_LOGO_GUID, sizeof(PHP_LOGO_GUID)-1, 1);
 }
 /* }}} */
 
-/* {{{ proto string php_egg_logo_guid(void)
+/* {{{ proto string php_egg_logo_guid(void) U
    Return the special ID used to request the PHP logo in phpinfo screens*/
 PHP_FUNCTION(php_egg_logo_guid)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
 	}
 
 	RETURN_ASCII_STRINGL(PHP_EGG_LOGO_GUID, sizeof(PHP_EGG_LOGO_GUID)-1, 1);
 }
 /* }}} */
 
-/* {{{ proto string zend_logo_guid(void)
+/* {{{ proto string zend_logo_guid(void) U
    Return the special ID used to request the Zend logo in phpinfo screens*/
 PHP_FUNCTION(zend_logo_guid)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
 	}
 
 	RETURN_ASCII_STRINGL(ZEND_LOGO_GUID, sizeof(ZEND_LOGO_GUID)-1, 1);
 }
 /* }}} */
 
-/* {{{ proto string php_sapi_name(void)
+/* {{{ proto string php_sapi_name(void) U
    Return the current SAPI module name */
 PHP_FUNCTION(php_sapi_name)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
 	}
 
 	if (sapi_module.name) {
@@ -1138,7 +1137,7 @@ PHP_FUNCTION(php_sapi_name)
 
 /* }}} */
 
-/* {{{ proto string php_uname(void)
+/* {{{ proto string php_uname(void) U
    Return information about the system PHP was built on */
 PHP_FUNCTION(php_uname)
 {
@@ -1150,20 +1149,17 @@ PHP_FUNCTION(php_uname)
 		return;
 	}
 	tmp = php_get_uname(*mode);
-	RETVAL_RT_STRING(tmp, 0);
-	if (UG(unicode)) {
-		efree(tmp);
-	}
+	RETVAL_RT_STRING(tmp, ZSTR_AUTOFREE);
 }
 
 /* }}} */
 
-/* {{{ proto string php_ini_scanned_files(void)
+/* {{{ proto string php_ini_scanned_files(void) U
    Return comma-separated string of .ini files parsed from the additional ini dir */
 PHP_FUNCTION(php_ini_scanned_files)
 {
 	if (strlen(PHP_CONFIG_FILE_SCAN_DIR) && php_ini_scanned_files) {
-		RETURN_RT_STRING(php_ini_scanned_files, 1);
+		RETURN_RT_STRING(php_ini_scanned_files, ZSTR_DUPLICATE);
 	} else {
 		RETURN_FALSE;
 	}
