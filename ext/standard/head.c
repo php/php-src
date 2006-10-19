@@ -191,7 +191,7 @@ PHP_FUNCTION(setrawcookie)
 /* }}} */
 
 
-/* {{{ proto bool headers_sent([string &$file [, int &$line]])
+/* {{{ proto bool headers_sent([string &$file [, int &$line]]) U
    Returns true if headers have already been sent, false otherwise */
 PHP_FUNCTION(headers_sent)
 {
@@ -208,17 +208,28 @@ PHP_FUNCTION(headers_sent)
 	}
 
 	switch(ZEND_NUM_ARGS()) {
-	case 2:
-		zval_dtor(arg2);
-		ZVAL_LONG(arg2, line);
-	case 1:
-		zval_dtor(arg1);
-		if (file) { 
-			ZVAL_STRING(arg1, file, 1);
-		} else {
-			ZVAL_STRING(arg1, "", 1);
-		}	
-		break;
+		case 2:
+			zval_dtor(arg2);
+			ZVAL_LONG(arg2, line);
+		case 1:
+			zval_dtor(arg1);
+			if (UG(unicode)) {
+				UChar *ufile;
+				int ufile_len;
+
+				if (file && SUCCESS == php_stream_path_decode(NULL, &ufile, &ufile_len, file, strlen(file), REPORT_ERRORS, FG(default_context))) {
+					ZVAL_UNICODEL(arg1, ufile, ufile_len, 0);
+				} else {
+					ZVAL_EMPTY_UNICODE(arg1);
+				}
+			} else {
+				if (file) {
+					ZVAL_STRING(arg1, file, 1);
+				} else {
+					ZVAL_STRING(arg1, "", 1);
+				}	
+			}
+			break;
 	}
 
 	if (SG(headers_sent)) {
