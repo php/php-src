@@ -41,14 +41,7 @@ PHP_MINFO_FUNCTION(json);
 PHP_FUNCTION(json_encode);
 PHP_FUNCTION(json_decode);
 
-#ifdef ZTS
-#define JSON_G(v) TSRMG(json_globals_id, zend_json_globals *, v)
-#else
-#define JSON_G(v) (json_globals.v)
-#endif
-
 #endif  /* PHP_JSON_H */
-
 
 /*
  * Local variables:
