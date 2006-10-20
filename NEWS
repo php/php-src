@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-12 Oct 2006, PHP 5.2.0RC6
+19 Oct 2006, PHP 5.2.0RC6
 - Fixed invalid read in imagecreatefrompng when an empty file is given
   (Pierre, Tony)
 - Fixed bug #39140 (Uncaught exception may cause crash). (Dmitry)
