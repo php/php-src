@@ -1038,7 +1038,7 @@ PHP_MINIT_FUNCTION(sqlite)
 #if defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
 	REGISTER_SQLITE_CLASS(Exception,  exception, spl_ce_RuntimeException);
 #else
-	REGISTER_SQLITE_CLASS(Exception,  exception, zend_exception_get_default());
+	REGISTER_SQLITE_CLASS(Exception,  exception, zend_exception_get_default(TSRMLS_C));
 #endif
 
 	sqlite_ce_db->ce_flags &= ~ZEND_ACC_FINAL_CLASS;
