@@ -24,6 +24,10 @@
 #include "ext/standard/url.h"
 #include "ext/pcre/php_pcre.h"
 
+#if PHP_MAJOR_VERSION <= 6
+#define zend_ascii_hash_find(hash, name, sizeof_name, val) zend_hash_find(hash, name, sizeof_name, val)
+#endif
+
 /* {{{ FETCH_LONG_OPTION(var_name, option_name) */
 #define FETCH_LONG_OPTION(var_name, option_name)                                                                         \
 	var_name = 0;                                                                                                        \
