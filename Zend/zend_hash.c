@@ -246,7 +246,7 @@ ZEND_API int _zend_u_hash_add_or_update(HashTable *ht, zend_uchar type, zstr arK
 	}
 
 	UNICODE_KEY(ht, type, arKey, nKeyLength, tmp);
-	realKeyLength = REAL_KEY_SIZE(type, nKeyLength);
+	realKeyLength = USTR_BYTES(type, nKeyLength);
 
 	h = zend_u_inline_hash_func(type, arKey, nKeyLength);
 	nIndex = h & ht->nTableMask;
@@ -399,7 +399,7 @@ ZEND_API int _zend_u_hash_quick_add_or_update(HashTable *ht, zend_uchar type, zs
 		UNICODE_KEY(ht, type, arKey, nKeyLength, tmp);
 		h = zend_u_inline_hash_func(IS_UNICODE, arKey, nKeyLength);
 	}
-	realKeyLength = REAL_KEY_SIZE(type, nKeyLength);
+	realKeyLength = USTR_BYTES(type, nKeyLength);
 
 	nIndex = h & ht->nTableMask;
 
@@ -606,7 +606,7 @@ ZEND_API int zend_u_hash_del_key_or_index(HashTable *ht, zend_uchar type, zstr a
 
 	if (flag == HASH_DEL_KEY) {
 		UNICODE_KEY(ht, type, arKey, nKeyLength, tmp);
-		realKeyLength = REAL_KEY_SIZE(type, nKeyLength);
+		realKeyLength = USTR_BYTES(type, nKeyLength);
 		h = zend_u_inline_hash_func(type, arKey, nKeyLength);
 	}
 	nIndex = h & ht->nTableMask;
@@ -1081,7 +1081,7 @@ ZEND_API int zend_u_hash_find(HashTable *ht, zend_uchar type, zstr arKey, uint n
 	IS_CONSISTENT(ht);
 
 	UNICODE_KEY(ht, type, arKey, nKeyLength, tmp);
-	realKeyLength = REAL_KEY_SIZE(type, nKeyLength);
+	realKeyLength = USTR_BYTES(type, nKeyLength);
 
 	h = zend_u_inline_hash_func(type, arKey, nKeyLength);
 	nIndex = h & ht->nTableMask;
@@ -1189,7 +1189,7 @@ ZEND_API int zend_u_hash_quick_find(HashTable *ht, zend_uchar type, zstr arKey, 
 		UNICODE_KEY(ht, type, arKey, nKeyLength, tmp);
 		h = zend_u_inline_hash_func(IS_UNICODE, arKey, nKeyLength);
 	}
-	realKeyLength = REAL_KEY_SIZE(type, nKeyLength);
+	realKeyLength = USTR_BYTES(type, nKeyLength);
 
 	nIndex = h & ht->nTableMask;
 
@@ -1225,7 +1225,7 @@ ZEND_API int zend_u_hash_exists(HashTable *ht, zend_uchar type, zstr arKey, uint
 	IS_CONSISTENT(ht);
 
 	UNICODE_KEY(ht, type, arKey, nKeyLength, tmp);
-	realKeyLength = REAL_KEY_SIZE(type, nKeyLength);
+	realKeyLength = USTR_BYTES(type, nKeyLength);
 
 	h = zend_u_inline_hash_func(type, arKey, nKeyLength);
 	nIndex = h & ht->nTableMask;
@@ -1332,7 +1332,7 @@ ZEND_API int zend_u_hash_quick_exists(HashTable *ht, zend_uchar type, zstr arKey
 		UNICODE_KEY(ht, type, arKey, nKeyLength, tmp);
 		h = zend_u_inline_hash_func(type, arKey, nKeyLength);
 	}
-	realKeyLength = REAL_KEY_SIZE(type, nKeyLength);
+	realKeyLength = USTR_BYTES(type, nKeyLength);
 
 	nIndex = h & ht->nTableMask;
 
@@ -1748,7 +1748,7 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 					result = p1->nKeyLength - p2->nKeyLength;
 				}
 				if (result==0) {
-					result = memcmp(p1->key.arKey.s, p2->key.arKey.s, REAL_KEY_SIZE(p1->key.type, p1->nKeyLength));
+					result = memcmp(p1->key.arKey.s, p2->key.arKey.s, USTR_BYTES(p1->key.type, p1->nKeyLength));
 				}
 				if (result!=0) {
 					HASH_UNPROTECT_RECURSION(ht1);
