@@ -1,3 +1,16 @@
+2006-10-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.h:
+      Fix potential (and real) leaks due to bad macro writing. Grrr.
+
+    * zend_API.h:
+      Fix possible double macro expansion.
+
+2006-10-19  Antony Dovgal  <antony@zend.com>
+
+    * zend.c:
+      fix invalid write
+
 2006-10-18  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_2)

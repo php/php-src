@@ -1,3 +1,95 @@
+2006-10-19  Sara Golemon  <sara@golemon.com>
+
+    * ext/spl/tests/iterator_035.phpt:
+      Update test to reflect fix in spl_array.c r-1.114
+
+    * ext/spl/spl_array.c:
+      Fix working with ArrayObjects which contain arrays.
+
+2006-10-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/microtime.c:
+      getrusage.c was easy(). But don't ever use zend_parse_parameters() like
+      that.
+
+    * ext/standard/microtime.c:
+      Unicode support in microtime() and gettimeofday().
+
+    * ext/standard/head.c
+      ext/standard/info.c:
+      Pick some low-hanging fruit.
+
+    * ZendEngine2/zend_API.h:
+      Fix potential (and real) leaks due to bad macro writing. Grrr.
+
+    * ext/json/json.c:
+      Clarify why the result of json_encode() is a binary string.
+
+2006-10-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/json/tests/001.phpt
+      ext/json/tests/004.phpt
+      ext/json/tests/005.phpt
+      ext/json/tests/fail001.phpt
+      ext/json/tests/pass001.1.phpt
+      ext/json/tests/pass001.phpt
+      ext/json/tests/pass002.phpt
+      ext/json/tests/pass003.phpt:
+      fix tests
+
+2006-10-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.h:
+      Fix possible double macro expansion.
+
+    * ext/standard/image.c:
+      Unicode support for remaining image.c functions.
+
+    * ext/standard/head.c:
+      Unicode support for headers_sent().
+
+2006-10-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/mkdir-006.phpt:
+      add new test by Pierre
+
+    * ext/standard/tests/file/mkdir-006.phpt
+      ext/standard/tests/file/mkdir-006.phpt:
+      
+      add new test by Pierre
+
+2006-10-19  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_4_4)
+      NEWS:
+      BFN
+
+    * (PHP_4_4)
+      Zend/zend_execute.c:
+      Fixed bug#38722 (Calling undefined method prints insufficient error
+      message)
+
+2006-10-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/json/json.c
+      ext/json/php_json.h:
+      fix folding tags, nuke json globals
+
+    * ZendEngine2/zend.c:
+      fix invalid write
+
+    * ext/json/json.c:
+      fix coverity issue #262 (uninitialized variable)
+
+2006-10-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/win95nt.h
+      main/win95nt.h
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      Fixed mkdir("/tmp/foo//bar/log", 0777, true)
+
 2006-10-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/com_dotnet/com_extension.c:
