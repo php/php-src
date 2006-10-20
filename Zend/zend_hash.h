@@ -37,8 +37,6 @@
 #define HASH_DEL_KEY 0
 #define HASH_DEL_INDEX 1
 
-#define REAL_KEY_SIZE(type, nKeyLength) \
-	((type == IS_UNICODE)?UBYTES(nKeyLength):nKeyLength)
 
 
 typedef ulong (*hash_func_t)(char *arKey, uint nKeyLength);
@@ -336,7 +334,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 }
 
 #define zend_u_inline_hash_func(type, arKey, nKeyLength) \
-	zend_inline_hash_func(arKey.s, REAL_KEY_SIZE(type, nKeyLength))
+	zend_inline_hash_func(arKey.s, USTR_BYTES(type, nKeyLength))
 
 ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength);
 ZEND_API ulong zend_u_hash_func(zend_uchar type, zstr arKey, uint nKeyLength);
