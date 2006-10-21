@@ -367,40 +367,6 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void php_asn1_integer_to_string(ASN1_INTEGER *a, char **str, int *str_len TSRMLS_DC) /* {{{ */
-{
-	int i;
-	static const char *h="0123456789ABCDEF";
-	zend_bool negative = 0;
-
-	*str = NULL;
-	*str_len = 0;
-
-	if (a == NULL) { 
-		return;
-	}
-
-	if (a->type & V_ASN1_NEG) {
-		negative = 1;
-	}
-
-	if (a->length == 0) {
-		*str_len = spprintf(str, 0, "%s00", negative ? "-" : "");
-	} else {
-		*str_len = a->length*2 + negative;
-		*str = emalloc(*str_len + 1);
-		if (negative) {
-			(*str)[0] = '-';
-		}
-		for (i=0; i<a->length; i++) {
-			(*str)[i*2 + negative]=h[((unsigned char)a->data[i]>>4)&0x0f];
-			(*str)[i*2 + negative + 1]=h[((unsigned char)a->data[i])&0x0f];
-		}
-		(*str)[a->length*2 + negative] = '\0';
-	}
-}
-/* }}} */
-
 static inline int php_openssl_config_check_syntax(
 		const char * section_label,
 		const char * config_filename,
@@ -998,8 +964,6 @@ PHP_FUNCTION(openssl_x509_parse)
 	X509_EXTENSION *extension;
 	ASN1_OCTET_STRING *extdata;
 	char *extname;
-	char *serial;
-	int serial_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|b", &zcert, &useshortnames) == FAILURE) {
 		return;
@@ -1026,8 +990,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	add_assoc_name_entry(return_value, "issuer", 		X509_get_issuer_name(cert), useshortnames TSRMLS_CC);
 	add_assoc_long(return_value, "version", 			X509_get_version(cert));
 
-	php_asn1_integer_to_string(X509_get_serialNumber(cert), &serial, &serial_len TSRMLS_CC);
-	add_assoc_stringl(return_value, "serialNumber", serial, serial_len, 0);
+	add_assoc_string(return_value, "serialNumber", i2s_ASN1_INTEGER(NULL, X509_get_serialNumber(cert)), 1);
 
 	add_assoc_asn1_string(return_value, "validFrom", 	X509_get_notBefore(cert));
 	add_assoc_asn1_string(return_value, "validTo", 		X509_get_notAfter(cert));
