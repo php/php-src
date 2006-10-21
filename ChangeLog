@@ -1,3 +1,67 @@
+2006-10-20  Antony Dovgal  <antony@zend.com>
+
+    * ext/openssl/openssl.c:
+      fix #39217 (serialNumber is might be -1 when the value is too big)
+
+    * (PHP_5_2)
+      ext/sqlite/sqlite.c:
+      fix ZTS build without SPL enabled
+
+2006-10-20  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/logical_filters.c:
+      - fix windows build with php < 6
+      - fix runtime error on other OS
+
+2006-10-20  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/filter/tests/008.phpt
+      ext/filter/tests/009.phpt:
+      Fix tests
+
+    * (PHP_5_2)
+      ZendEngine2/tests/abstract-static.phpt
+      tests/classes/bug27504.phpt:
+      Fix test
+
+2006-10-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+2006-10-20  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_unicode.h:
+      rename REAL_KEY_SIZE() to USTR_BYTES() and move to zend_unicode.h
+      this macro is going to be actively used in Unicode version of OCI8 (and
+      other extensions, probably)
+
+2006-10-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c
+      tests/classes/abstract_static.phpt:
+      Make use of abstract methods be E_STRICT rather then E_ERROR
+
+2006-10-20  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      ext/spl/spl_array.c
+      ext/spl/tests/iterator_035.phpt:
+      MFH(r-1.114) Can't use real arrays held by ArrayObjects in write context
+
+2006-10-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.2.0RC6
+
 2006-10-19  Sara Golemon  <sara@golemon.com>
 
     * ext/spl/tests/iterator_035.phpt:
