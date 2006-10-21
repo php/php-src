@@ -1,3 +1,24 @@
+2006-10-20  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      tests/abstract-static.phpt:
+      Fix test
+
+2006-10-20  Antony Dovgal  <antony@zend.com>
+
+    * zend_hash.c
+      zend_hash.h
+      zend_unicode.h:
+      rename REAL_KEY_SIZE() to USTR_BYTES() and move to zend_unicode.h
+      this macro is going to be actively used in Unicode version of OCI8 (and
+      other extensions, probably)
+
+2006-10-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_compile.c:
+      Make use of abstract methods be E_STRICT rather then E_ERROR
+
 2006-10-19  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.h:
