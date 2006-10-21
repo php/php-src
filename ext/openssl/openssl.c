@@ -3146,7 +3146,7 @@ PHP_FUNCTION(openssl_sign)
 }
 /* }}} */
 
-/* {{{ proto int openssl_verify(string data, string signature, mixed key)
+/* {{{ proto int openssl_verify(string data, string signature, mixed key [, int signature_algo])
    Verifys data */
 PHP_FUNCTION(openssl_verify)
 {
