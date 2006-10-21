@@ -770,20 +770,14 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 	zend_hash_internal_pointer_reset_ex(src, &pos);
 	while (zend_hash_get_current_data_ex(src, (void **)&src_entry, &pos) == SUCCESS) {
 		key_type = zend_hash_get_current_key_ex(src, &string_key, &string_key_len, &num_key, 0, &pos);
-		/* FIXME: Unicode support??? */
 		if (Z_TYPE_PP(src_entry) != IS_ARRAY
-			|| (key_type == HASH_KEY_IS_STRING && zend_u_hash_find(dest, key_type, string_key, string_key_len, (void **) &dest_entry) != SUCCESS)
+			|| ((key_type == HASH_KEY_IS_UNICODE || key_type == HASH_KEY_IS_STRING) && zend_u_hash_find(dest, key_type, string_key, string_key_len, (void **) &dest_entry) != SUCCESS)
 			|| (key_type == HASH_KEY_IS_LONG && zend_hash_index_find(dest, num_key, (void **)&dest_entry) != SUCCESS)
 			|| Z_TYPE_PP(dest_entry) != IS_ARRAY
         ) {
 			(*src_entry)->refcount++;
-			if (key_type == HASH_KEY_IS_STRING) {
-				/* prevent overwriting of GLOBALS */
-				if (string_key_len != sizeof("GLOBALS") || memcmp(string_key.s, "GLOBALS", sizeof("GLOBALS") - 1)) {
-					zend_u_hash_update(dest, key_type, string_key, string_key_len, src_entry, sizeof(zval *), NULL);
-				} else {
-					(*src_entry)->refcount--;
-				}
+			if (key_type == HASH_KEY_IS_STRING || key_type == HASH_KEY_IS_UNICODE) {
+				zend_u_hash_update(dest, key_type, string_key, string_key_len, src_entry, sizeof(zval *), NULL);
 			} else {
 				zend_hash_index_update(dest, num_key, src_entry, sizeof(zval *), NULL);
 			}
