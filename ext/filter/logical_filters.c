@@ -175,7 +175,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	zval **option_val;
 	long   min_range, max_range, option_flags;
-	int    min_range_set, max_range_set, option_flags_set;
+	int    min_range_set, max_range_set;
 	int    allow_octal = 0, allow_hex = 0;
 	int	   len, error = 0;
 	long   ctx_value;
