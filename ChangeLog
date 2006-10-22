@@ -1,3 +1,22 @@
+2006-10-21  Johannes Schlüter  <johannes@schlueters.de>
+
+    * main/php_variables.c:
+      - Fix merging of $_REQUEST in unicode mode and remove $GLOBALS check from
+        register_globals times
+
+2006-10-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/openssl/openssl.c:
+      - add signature_algo to the function signature
+
+    * ext/openssl/openssl.c
+      ext/openssl/tests/bug39217.phpt
+      ext/openssl/tests/bug39217cert1.txt
+      ext/openssl/tests/bug39217cert2.txt:
+      - #39217, use openssl i2s_ASN1_INTEGER to get a string representation of
+        the integer (large or not). It also keeps BC by using only decimal fmt
+      - add test
+
 2006-10-20  Antony Dovgal  <antony@zend.com>
 
     * ext/openssl/openssl.c:
