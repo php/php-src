@@ -1346,7 +1346,16 @@ static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_e
 
 				prop = get_zval_property(ret, (char*)trav->name TSRMLS_CC);
 				if (!prop) {
-					set_zval_property(ret, (char*)trav->name, tmpVal TSRMLS_CC);
+					if (!trav->next || !get_node(trav->next, (char*)trav->name)) {
+						set_zval_property(ret, (char*)trav->name, tmpVal TSRMLS_CC);
+					} else {
+						zval *arr;
+
+						MAKE_STD_ZVAL(arr);
+						array_init(arr);
+						add_next_index_zval(arr, tmpVal);
+						set_zval_property(ret, (char*)trav->name, arr TSRMLS_CC);
+					}
 				} else {
 					/* Property already exist - make array */
 					if (Z_TYPE_P(prop) != IS_ARRAY) {
