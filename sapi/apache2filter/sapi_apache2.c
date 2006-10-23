@@ -220,11 +220,18 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	char *key, *val;
 	
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
-		if (!val) val = "";
-		php_register_variable(key, val, track_vars_array TSRMLS_CC);
+		if (!val) {
+			val = "";
+		}
+		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), &new_val_len TSRMLS_CC)) {
+			php_register_variable_safe(key, val, new_val_len, track_vars_array TSRMLS_CC);
+		}
 	APR_ARRAY_FOREACH_CLOSE()
 		
 	php_register_variable("PHP_SELF", ctx->r->uri, track_vars_array TSRMLS_CC);
+	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), &new_val_len TSRMLS_CC)) {
+		php_register_variable_safe("PHP_SELF", ctx->r->uri, new_val_len, track_vars_array TSRMLS_CC);
+	}
 }
 
 static void
