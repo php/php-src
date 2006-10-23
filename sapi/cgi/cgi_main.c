@@ -467,19 +467,26 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 		     zend_hash_get_current_key_ex(&request->env, &var, &var_len, &idx, 0, &pos) == HASH_KEY_IS_STRING &&
 		     zend_hash_get_current_data_ex(&request->env, (void **) &val, &pos) == SUCCESS;
 		     zend_hash_move_forward_ex(&request->env, &pos)) {
-			php_register_variable(var.s, *val, array_ptr TSRMLS_CC);
+			int new_val_len;
+			if (sapi_module.input_filter(PARSE_SERVER, var.s, val, strlen(*val), &new_val_len TSRMLS_CC)) {
+				php_register_variable_safe(var.s, *val, new_val_len, array_ptr TSRMLS_CC);
+			}
 		}
 	}
 }
 
 static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
+	int new_val_len;
+	char *val = SG(request_info).request_uri ? SG(request_info).request_uri : "";
 	/* In CGI mode, we consider the environment to be a part of the server
 	 * variables
 	 */
 	php_import_environment_variables(track_vars_array TSRMLS_CC);
 	/* Build the special-case PHP_SELF variable for the CGI version */
-	php_register_variable("PHP_SELF", (SG(request_info).request_uri ? SG(request_info).request_uri : ""), track_vars_array TSRMLS_CC);
+	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &val, strlen(val), &new_val_len TSRMLS_CC)) {
+		php_register_variable_safe("PHP_SELF", var, new_val_len, track_vars_array TSRMLS_CC);
+	}
 }
 
 static void sapi_cgi_log_message(char *message)
