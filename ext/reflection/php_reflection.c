@@ -2170,26 +2170,33 @@ ZEND_METHOD(reflection_method, __construct)
 	zend_class_entry *ce;
 	zend_function *mptr;
 	zstr name_str;
-	char *tmp;
+	zstr tmp;
 	int name_len, tmp_len;
 	zval ztmp;
 	zend_uchar type;
 
-	/* FIXME: Unicode support??? */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zt", &classname, &name_str, &name_len, &type) == FAILURE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &name_str, &name_len, &type) == FAILURE) {
 			return;
 		}
-		if ((tmp = strstr(name_str.s, "::")) == NULL) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Invalid method name %s", name_str);
+		if ((type == IS_UNICODE && (tmp.u = u_strstr(name_str.u, u_doublecolon)) == NULL) ||
+			(type == IS_STRING  && (tmp.s =   strstr(name_str.s, "::")) == NULL)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Invalid method name %R", type, name_str);
 			return;
 		}
-		type = IS_STRING;
 		classname = &ztmp;
-		tmp_len = tmp - name_str.s;
-		ZVAL_STRINGL(classname, name_str.s, tmp_len, 1);
+		if (type == IS_UNICODE) {
+			tmp_len = tmp.u - name_str.u;
+		} else {
+			tmp_len = tmp.s - name_str.s;
+		}
+		ZVAL_ZSTRL(classname, name_str, tmp_len, type, 1);
 		name_len = name_len - (tmp_len + 2);
-		name_str.s = tmp + 2;
+		if (type == IS_UNICODE) {
+			name_str.u = tmp.u + 2;
+		} else {
+			name_str.s = tmp.s + 2;
+		}
 	}
 
 	object = getThis();
@@ -3121,8 +3128,8 @@ ZEND_METHOD(reflection_class, getProperty)
 	zend_class_entry *ce, **pce;
 	zend_property_info *property_info;
 	zstr name, classname;
-	char *tmp; 
-	int name_len, classname_len;
+	zstr tmp; 
+	int name_len, classname_len, tmp_len;
 	zend_uchar name_type;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
@@ -3131,17 +3138,28 @@ ZEND_METHOD(reflection_class, getProperty)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (zend_u_hash_find(&ce->properties_info, name_type, name, name_len + 1, (void**) &property_info) == SUCCESS && (property_info->flags & ZEND_ACC_SHADOW) == 0) {
-		reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
+	if (zend_u_hash_find(&ce->properties_info, name_type, name, name_len + 1, (void**) &property_info) == SUCCESS) {
+	   	if ((property_info->flags & ZEND_ACC_SHADOW) == 0) {
+			reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
+		}
 		return;
 	}
-	/* FIXME: Unicode support??? */
-	if ((tmp = strstr(name.s, "::")) != NULL) {
-		classname_len = tmp - name.s;
-		classname.s = zend_str_tolower_dup(name.s, classname_len);
-		classname.s[classname_len] = '\0';
+	if ((name_type == IS_UNICODE && (tmp.u = u_strstr(name.u, u_doublecolon)) != NULL) ||
+		(name_type == IS_STRING  && (tmp.s =   strstr(name.s, "::")) != NULL)) {
+
+		if (name_type == IS_UNICODE) {
+			classname_len = tmp.u - name.u;
+		} else {
+			classname_len = tmp.s - name.s;
+		}
+		classname = zend_u_str_case_fold(name_type, name, classname_len, 1, &tmp_len);
+		classname_len = tmp_len;
 		name_len = name_len - (classname_len + 2);
-		name.s = tmp + 2;
+		if (name_type == IS_UNICODE) {
+			name.u = tmp.u + 2;
+		} else {
+			name.s = tmp.s + 2;
+		}
 
 		if (zend_u_lookup_class(name_type, classname, classname_len, &pce TSRMLS_CC) == FAILURE) {
 			if (!EG(exception)) {
