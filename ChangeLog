@@ -1,3 +1,13 @@
+2006-10-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/logical_filters.c:
+      Removed unused var
+
+2006-10-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - remove remaining "mode" arguments in the old api
+
 2006-10-21  Johannes Schlüter  <johannes@schlueters.de>
 
     * main/php_variables.c:
