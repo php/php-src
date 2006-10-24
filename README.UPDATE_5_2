@@ -184,6 +184,7 @@ Misc
 ====
 - $php_errormsg now prepends the function name causing the error
 - $php_errormsg doesn't get populated anymore when using custom error handler
+- PHP-CLI does no longer search in cwd for php.ini
 
 Error messages
 ==============
@@ -559,3 +560,9 @@ New optional parameters:
   - boolean XMLReader::open(string URI [, string encoding [, int options]]) (encoding, options)
   - boolean XMLReader::XML(string source [, string encoding [, int options]]) (encoding, options)
 
+New INI settings:
+=================
+pcre.backtrack_limit PHP_INI_ALL, default: 100000
+pcre.recursion_limit PHP_INI_ALL, default: 100000
+session.cookie_httponly PHP_INI_ALL, default: false
+allow_url_include PHP_INI_SYSTEM, default: false
