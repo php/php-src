@@ -484,6 +484,9 @@ New class constants:
   CachingIterator::TOSTRING_USE_INNER
   CachingIterator::FULL_CACHE
 
+  PDO::FETCH_PROPS_LATE
+  PDO::ATTR_DEFAULT_FETCH_MODE
+
 
 New functions:
 ==============
@@ -586,10 +589,6 @@ New global constants:
     - PREG_BACKTRACK_LIMIT_ERROR
     - PREG_RECURSION_LIMIT_ERROR
     - PREG_BAD_UTF8_ERROR
-
-  ext/pdo
-    - FETCH_PROPS_LATE
-    - ATTR_DEFAULT_FETCH_MODE
 
   ext/snmp
     - SNMP_OID_OUTPUT_FULL
