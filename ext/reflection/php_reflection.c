@@ -1292,7 +1292,7 @@ ZEND_METHOD(reflection, __clone)
 }
 /* }}} */
 
-/* {{{ proto public static mixed Reflection::export(Reflector r [, bool return])
+/* {{{ proto public static mixed Reflection::export(Reflector r [, bool return]) U
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection, export)
 {
@@ -1330,7 +1330,7 @@ ZEND_METHOD(reflection, export)
 }
 /* }}} */
 
-/* {{{ proto public static array Reflection::getModifierNames(int modifiers)
+/* {{{ proto public static array Reflection::getModifierNames(int modifiers) U
    Returns an array of modifier names */
 ZEND_METHOD(reflection, getModifierNames)
 {
@@ -1368,7 +1368,7 @@ ZEND_METHOD(reflection, getModifierNames)
 }
 /* }}} */
 
-/* {{{ proto public static mixed ReflectionFunction::export(string name [, bool return])
+/* {{{ proto public static mixed ReflectionFunction::export(string name [, bool return]) U
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_function, export)
 {
@@ -1376,7 +1376,7 @@ ZEND_METHOD(reflection_function, export)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionFunction::__construct(string name)
+/* {{{ proto public void ReflectionFunction::__construct(string name) U
    Constructor. Throws an Exception in case the given function does not exist */
 ZEND_METHOD(reflection_function, __construct)
 {
@@ -1416,7 +1416,7 @@ ZEND_METHOD(reflection_function, __construct)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionFunction::__toString()
+/* {{{ proto public string ReflectionFunction::__toString() U
    Returns a string representation */
 ZEND_METHOD(reflection_function, __toString)
 {
@@ -1428,11 +1428,11 @@ ZEND_METHOD(reflection_function, __toString)
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	string_init(&str);
 	_function_string(&str, fptr, intern->ce, "" TSRMLS_CC);
-	RETURN_RT_STRINGL(str.string, str.len - 1, ZSTR_AUTOFREE);
+	RETURN_U_STRINGL(ZEND_U_CONVERTER(UG(output_encoding_conv)), str.string, str.len - 1, ZSTR_AUTOFREE);
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionFunction::getName()
+/* {{{ proto public string ReflectionFunction::getName() U
    Returns this function's name */
 ZEND_METHOD(reflection, function_getName)
 {
@@ -1441,7 +1441,7 @@ ZEND_METHOD(reflection, function_getName)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionFunction::isInternal()
+/* {{{ proto public bool ReflectionFunction::isInternal() U
    Returns whether this is an internal function */
 ZEND_METHOD(reflection, function_isInternal)
 {
@@ -1454,7 +1454,7 @@ ZEND_METHOD(reflection, function_isInternal)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionFunction::isUserDefined()
+/* {{{ proto public bool ReflectionFunction::isUserDefined() U
    Returns whether this is an user-defined function */
 ZEND_METHOD(reflection_function, isUserDefined)
 {
@@ -1467,7 +1467,7 @@ ZEND_METHOD(reflection_function, isUserDefined)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionFunction::isDisabled()
+/* {{{ proto public bool ReflectionFunction::isDisabled() U
    Returns whether this function has been disabled or not */
 ZEND_METHOD(reflection_function, isDisabled)
 {
@@ -1480,7 +1480,7 @@ ZEND_METHOD(reflection_function, isDisabled)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionFunction::getFileName()
+/* {{{ proto public string ReflectionFunction::getFileName() U
    Returns the filename of the file this function was declared in */
 ZEND_METHOD(reflection_function, getFileName)
 {
@@ -1496,7 +1496,7 @@ ZEND_METHOD(reflection_function, getFileName)
 }
 /* }}} */
 
-/* {{{ proto public int ReflectionFunction::getStartLine()
+/* {{{ proto public int ReflectionFunction::getStartLine() U
    Returns the line this function's declaration starts at */
 ZEND_METHOD(reflection_function, getStartLine)
 {
@@ -1512,7 +1512,7 @@ ZEND_METHOD(reflection_function, getStartLine)
 }
 /* }}} */
 
-/* {{{ proto public int ReflectionFunction::getEndLine()
+/* {{{ proto public int ReflectionFunction::getEndLine() U
    Returns the line this function's declaration ends at */
 ZEND_METHOD(reflection_function, getEndLine)
 {
@@ -1528,7 +1528,7 @@ ZEND_METHOD(reflection_function, getEndLine)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionFunction::getDocComment()
+/* {{{ proto public string ReflectionFunction::getDocComment() U
    Returns the doc comment for this function */
 ZEND_METHOD(reflection_function, getDocComment)
 {
@@ -1538,13 +1538,17 @@ ZEND_METHOD(reflection_function, getDocComment)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
+		/* FIXME
+		 * It should use the encoding in which the doc comment was written, aka
+		 * the script encoding for the file that the class was defined in.
+		 */
 		RETURN_RT_STRINGL(fptr->op_array.doc_comment, fptr->op_array.doc_comment_len, 1);
 	}
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto public array ReflectionFunction::getStaticVariables()
+/* {{{ proto public array ReflectionFunction::getStaticVariables() U
    Returns an associative array containing this function's static variables and their values */
 ZEND_METHOD(reflection_function, getStaticVariables)
 {
@@ -1564,7 +1568,7 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 }
 /* }}} */
 
-/* {{{ proto public mixed ReflectionFunction::invoke(mixed* args)
+/* {{{ proto public mixed ReflectionFunction::invoke(mixed* args) U
    Invokes the function */
 ZEND_METHOD(reflection_function, invoke)
 {
@@ -1623,7 +1627,7 @@ static int _zval_array_to_c_array(zval **arg, zval ****params TSRMLS_DC) /* {{{ 
 	return ZEND_HASH_APPLY_KEEP;
 } /* }}} */
 
-/* {{{ proto public mixed ReflectionFunction::invokeArgs(array args)
+/* {{{ proto public mixed ReflectionFunction::invokeArgs(array args) U
    Invokes the function and pass its arguments as array. */
 ZEND_METHOD(reflection_function, invokeArgs)
 {
@@ -1681,7 +1685,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionFunction::returnsReference()
+/* {{{ proto public bool ReflectionFunction::returnsReference() U
    Gets whether this function returns a reference */
 ZEND_METHOD(reflection_function, returnsReference)
 {
@@ -1695,7 +1699,7 @@ ZEND_METHOD(reflection_function, returnsReference)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionFunction::getNumberOfParameters()
+/* {{{ proto public bool ReflectionFunction::getNumberOfParameters() U
    Gets the number of required parameters */
 ZEND_METHOD(reflection_function, getNumberOfParameters)
 {
@@ -1709,7 +1713,7 @@ ZEND_METHOD(reflection_function, getNumberOfParameters)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionFunction::getNumberOfRequiredParameters()
+/* {{{ proto public bool ReflectionFunction::getNumberOfRequiredParameters() U
    Gets the number of required parameters */
 ZEND_METHOD(reflection_function, getNumberOfRequiredParameters)
 {
@@ -1723,7 +1727,7 @@ ZEND_METHOD(reflection_function, getNumberOfRequiredParameters)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionParameter[] ReflectionFunction::getParameters()
+/* {{{ proto public ReflectionParameter[] ReflectionFunction::getParameters() U
    Returns an array of parameter objects for this function */
 ZEND_METHOD(reflection_function, getParameters)
 {
@@ -1750,7 +1754,7 @@ ZEND_METHOD(reflection_function, getParameters)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionExtension|NULL ReflectionFunction::getExtension()
+/* {{{ proto public ReflectionExtension|NULL ReflectionFunction::getExtension() U
    Returns NULL or the extension the function belongs to */
 ZEND_METHOD(reflection_function, getExtension)
 {
@@ -1774,7 +1778,7 @@ ZEND_METHOD(reflection_function, getExtension)
 }
 /* }}} */
 
-/* {{{ proto public string|false ReflectionFunction::getExtensionName()
+/* {{{ proto public string|false ReflectionFunction::getExtensionName() U
    Returns false or the name of the extension the function belongs to */
 ZEND_METHOD(reflection_function, getExtensionName)
 {
@@ -1798,7 +1802,7 @@ ZEND_METHOD(reflection_function, getExtensionName)
 }
 /* }}} */
 
-/* {{{ proto public static mixed ReflectionParameter::export(mixed function, mixed parameter [, bool return]) throws ReflectionException
+/* {{{ proto public static mixed ReflectionParameter::export(mixed function, mixed parameter [, bool return]) throws ReflectionException U
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_parameter, export)
 {
@@ -1806,7 +1810,7 @@ ZEND_METHOD(reflection_parameter, export)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionParameter::__construct(mixed function, mixed parameter)
+/* {{{ proto public void ReflectionParameter::__construct(mixed function, mixed parameter) U
    Constructor. Throws an Exception in case the given method does not exist */
 ZEND_METHOD(reflection_parameter, __construct)
 {
@@ -1938,7 +1942,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionParameter::__toString()
+/* {{{ proto public string ReflectionParameter::__toString() U
    Returns a string representation */
 ZEND_METHOD(reflection_parameter, __toString)
 {
@@ -1950,11 +1954,11 @@ ZEND_METHOD(reflection_parameter, __toString)
 	GET_REFLECTION_OBJECT_PTR(param);
 	string_init(&str);
 	_parameter_string(&str, param->fptr, param->arg_info, param->offset, param->required, "" TSRMLS_CC);
-	RETURN_RT_STRINGL(str.string, str.len - 1, ZSTR_AUTOFREE);
+	RETURN_U_STRINGL(ZEND_U_CONVERTER(UG(output_encoding_conv)), str.string, str.len - 1, ZSTR_AUTOFREE);
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionParameter::getName()
+/* {{{ proto public string ReflectionParameter::getName() U
    Returns this parameters's name */
 ZEND_METHOD(reflection_parameter, getName)
 {
@@ -1963,7 +1967,7 @@ ZEND_METHOD(reflection_parameter, getName)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionFunction ReflectionParameter::getDeclaringFunction()
+/* {{{ proto public ReflectionFunction ReflectionParameter::getDeclaringFunction() U
    Returns the ReflectionFunction for the function of this parameter */
 ZEND_METHOD(reflection_parameter, getDeclaringFunction)
 {
@@ -1981,7 +1985,7 @@ ZEND_METHOD(reflection_parameter, getDeclaringFunction)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass|NULL ReflectionParameter::getDeclaringClass()
+/* {{{ proto public ReflectionClass|NULL ReflectionParameter::getDeclaringClass() U
    Returns in which class this parameter is defined (not the typehint of the parameter) */
 ZEND_METHOD(reflection_parameter, getDeclaringClass)
 {
@@ -1997,7 +2001,7 @@ ZEND_METHOD(reflection_parameter, getDeclaringClass)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass|NULL ReflectionParameter::getClass()
+/* {{{ proto public ReflectionClass|NULL ReflectionParameter::getClass() U
    Returns this parameters's class hint or NULL if there is none */
 ZEND_METHOD(reflection_parameter, getClass)
 {
@@ -2019,7 +2023,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionParameter::isArray()
+/* {{{ proto public bool ReflectionParameter::isArray() U
    Returns whether parameter MUST be an array */
 ZEND_METHOD(reflection_parameter, isArray)
 {
@@ -2033,7 +2037,7 @@ ZEND_METHOD(reflection_parameter, isArray)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionParameter::allowsNull()
+/* {{{ proto public bool ReflectionParameter::allowsNull() U
    Returns whether NULL is allowed as this parameters's value */
 ZEND_METHOD(reflection_parameter, allowsNull)
 {
@@ -2047,7 +2051,7 @@ ZEND_METHOD(reflection_parameter, allowsNull)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionParameter::isPassedByReference()
+/* {{{ proto public bool ReflectionParameter::isPassedByReference() U
    Returns whether this parameters is passed to by reference */
 ZEND_METHOD(reflection_parameter, isPassedByReference)
 {
@@ -2061,7 +2065,7 @@ ZEND_METHOD(reflection_parameter, isPassedByReference)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionParameter::getPosition()
+/* {{{ proto public bool ReflectionParameter::getPosition() U
    Returns whether this parameter is an optional parameter */
 ZEND_METHOD(reflection_parameter, getPosition)
 {
@@ -2075,7 +2079,7 @@ ZEND_METHOD(reflection_parameter, getPosition)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionParameter::isOptional()
+/* {{{ proto public bool ReflectionParameter::isOptional() U
    Returns whether this parameter is an optional parameter */
 ZEND_METHOD(reflection_parameter, isOptional)
 {
@@ -2089,7 +2093,7 @@ ZEND_METHOD(reflection_parameter, isOptional)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionParameter::isDefaultValueAvailable()
+/* {{{ proto public bool ReflectionParameter::isDefaultValueAvailable() U
    Returns whether the default value of this parameter is available */
 ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 {
@@ -2115,7 +2119,7 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionParameter::getDefaultValue()
+/* {{{ proto public bool ReflectionParameter::getDefaultValue() U
    Returns the default value of this parameter or throws an exception */
 ZEND_METHOD(reflection_parameter, getDefaultValue)
 {
@@ -2149,7 +2153,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 }
 /* }}} */
 
-/* {{{ proto public static mixed ReflectionMethod::export(mixed class, string name [, bool return]) throws ReflectionException
+/* {{{ proto public static mixed ReflectionMethod::export(mixed class, string name [, bool return]) throws ReflectionException U
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_method, export)
 {
@@ -2157,7 +2161,7 @@ ZEND_METHOD(reflection_method, export)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionMethod::__construct(mixed class_or_method [, string name])
+/* {{{ proto public void ReflectionMethod::__construct(mixed class_or_method [, string name]) U
    Constructor. Throws an Exception in case the given method does not exist */
 ZEND_METHOD(reflection_method, __construct)
 {
@@ -2260,7 +2264,7 @@ ZEND_METHOD(reflection_method, __construct)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionMethod::__toString()
+/* {{{ proto public string ReflectionMethod::__toString() U
    Returns a string representation */
 ZEND_METHOD(reflection_method, __toString)
 {
@@ -2272,11 +2276,11 @@ ZEND_METHOD(reflection_method, __toString)
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	string_init(&str);
 	_function_string(&str, mptr, intern->ce, "" TSRMLS_CC);
-	RETURN_RT_STRINGL(str.string, str.len - 1, ZSTR_AUTOFREE);
+	RETURN_U_STRINGL(ZEND_U_CONVERTER(UG(output_encoding_conv)), str.string, str.len - 1, ZSTR_AUTOFREE);
 }
 /* }}} */
 
-/* {{{ proto public mixed ReflectionMethod::invoke(mixed object, mixed* args)
+/* {{{ proto public mixed ReflectionMethod::invoke(mixed object, mixed* args) U
    Invokes the method. */
 ZEND_METHOD(reflection_method, invoke)
 {
@@ -2379,7 +2383,7 @@ ZEND_METHOD(reflection_method, invoke)
 }
 /* }}} */
 
-/* {{{ proto public mixed ReflectionMethod::invokeArgs(mixed object, array args)
+/* {{{ proto public mixed ReflectionMethod::invokeArgs(mixed object, array args) U
    Invokes the function and pass its arguments as array. */
 ZEND_METHOD(reflection_method, invokeArgs)
 {
@@ -2483,7 +2487,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionMethod::isFinal()
+/* {{{ proto public bool ReflectionMethod::isFinal() U
    Returns whether this method is final */
 ZEND_METHOD(reflection_method, isFinal)
 {
@@ -2491,7 +2495,7 @@ ZEND_METHOD(reflection_method, isFinal)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionMethod::isAbstract()
+/* {{{ proto public bool ReflectionMethod::isAbstract() U
    Returns whether this method is abstract */
 ZEND_METHOD(reflection_method, isAbstract)
 {
@@ -2499,7 +2503,7 @@ ZEND_METHOD(reflection_method, isAbstract)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionMethod::isPublic()
+/* {{{ proto public bool ReflectionMethod::isPublic() U
    Returns whether this method is public */
 ZEND_METHOD(reflection_method, isPublic)
 {
@@ -2507,7 +2511,7 @@ ZEND_METHOD(reflection_method, isPublic)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionMethod::isPrivate()
+/* {{{ proto public bool ReflectionMethod::isPrivate() U
    Returns whether this method is private */
 ZEND_METHOD(reflection_method, isPrivate)
 {
@@ -2515,7 +2519,7 @@ ZEND_METHOD(reflection_method, isPrivate)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionMethod::isProtected()
+/* {{{ proto public bool ReflectionMethod::isProtected() U
    Returns whether this method is protected */
 ZEND_METHOD(reflection_method, isProtected)
 {
@@ -2523,7 +2527,7 @@ ZEND_METHOD(reflection_method, isProtected)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionMethod::isStatic()
+/* {{{ proto public bool ReflectionMethod::isStatic() U
    Returns whether this method is static */
 ZEND_METHOD(reflection_method, isStatic)
 {
@@ -2531,7 +2535,7 @@ ZEND_METHOD(reflection_method, isStatic)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionFunction::isDeprecated()
+/* {{{ proto public bool ReflectionFunction::isDeprecated() U
    Returns whether this function is deprecated */
 ZEND_METHOD(reflection_function, isDeprecated)
 {
@@ -2539,7 +2543,7 @@ ZEND_METHOD(reflection_function, isDeprecated)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionMethod::isConstructor()
+/* {{{ proto public bool ReflectionMethod::isConstructor() U
    Returns whether this method is the constructor */
 ZEND_METHOD(reflection_method, isConstructor)
 {
@@ -2555,7 +2559,7 @@ ZEND_METHOD(reflection_method, isConstructor)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionMethod::isDestructor()
+/* {{{ proto public bool ReflectionMethod::isDestructor() U
    Returns whether this method is static */
 ZEND_METHOD(reflection_method, isDestructor)
 {
@@ -2568,7 +2572,7 @@ ZEND_METHOD(reflection_method, isDestructor)
 }
 /* }}} */
 
-/* {{{ proto public int ReflectionMethod::getModifiers()
+/* {{{ proto public int ReflectionMethod::getModifiers() U
    Returns a bitfield of the access modifiers for this method */
 ZEND_METHOD(reflection_method, getModifiers)
 {
@@ -2582,7 +2586,7 @@ ZEND_METHOD(reflection_method, getModifiers)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass ReflectionMethod::getDeclaringClass()
+/* {{{ proto public ReflectionClass ReflectionMethod::getDeclaringClass() U
    Get the declaring class */
 ZEND_METHOD(reflection_method, getDeclaringClass)
 {
@@ -2596,7 +2600,7 @@ ZEND_METHOD(reflection_method, getDeclaringClass)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass ReflectionMethod::getPrototype()
+/* {{{ proto public ReflectionClass ReflectionMethod::getPrototype() U
    Get the prototype */
 ZEND_METHOD(reflection_method, getPrototype)
 {
@@ -2616,7 +2620,7 @@ ZEND_METHOD(reflection_method, getPrototype)
 }
 /* }}} */
 
-/* {{{ proto public static mixed ReflectionClass::export(mixed argument [, bool return]) throws ReflectionException
+/* {{{ proto public static mixed ReflectionClass::export(mixed argument [, bool return]) throws ReflectionException U
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_class, export)
 {
@@ -2682,7 +2686,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionClass::__construct(mixed argument) throws ReflectionException
+/* {{{ proto public void ReflectionClass::__construct(mixed argument) throws ReflectionException U
    Constructor. Takes a string or an instance as an argument */
 ZEND_METHOD(reflection_class, __construct)
 {
@@ -2690,7 +2694,7 @@ ZEND_METHOD(reflection_class, __construct)
 }
 /* }}} */
 
-/* {{{ proto public array ReflectionClass::getStaticProperties()
+/* {{{ proto public array ReflectionClass::getStaticProperties() U
    Returns an associative array containing all static property values of the class */
 ZEND_METHOD(reflection_class, getStaticProperties)
 {
@@ -2728,7 +2732,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 }
 /* }}} */
 
-/* {{{ proto public mixed ReflectionClass::getStaticPropertyValue(string name [, mixed default])
+/* {{{ proto public mixed ReflectionClass::getStaticPropertyValue(string name [, mixed default]) U
    Returns the value of a tsstic property */
 ZEND_METHOD(reflection_class, getStaticPropertyValue)
 {
@@ -2761,7 +2765,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionClass::setStaticPropertyValue($name, $value)
+/* {{{ proto public void ReflectionClass::setStaticPropertyValue($name, $value) U
    Sets the value of a static property */
 ZEND_METHOD(reflection_class, setStaticPropertyValue)
 {
@@ -2798,7 +2802,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 }
 /* }}} */
 
-/* {{{ proto public array ReflectionClass::getDefaultProperties()
+/* {{{ proto public array ReflectionClass::getDefaultProperties() U
    Returns an associative array containing copies of all default property values of the class */
 ZEND_METHOD(reflection_class, getDefaultProperties)
 {
@@ -2845,7 +2849,7 @@ ZEND_METHOD(reflection_class, getDefaultProperties)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionClass::__toString()
+/* {{{ proto public string ReflectionClass::__toString() U
    Returns a string representation */
 ZEND_METHOD(reflection_class, __toString)
 {
@@ -2857,11 +2861,11 @@ ZEND_METHOD(reflection_class, __toString)
 	GET_REFLECTION_OBJECT_PTR(ce);
 	string_init(&str);
 	_class_string(&str, ce, intern->obj, "" TSRMLS_CC);
-	RETURN_RT_STRINGL(str.string, str.len - 1, ZSTR_AUTOFREE);
+	RETURN_U_STRINGL(ZEND_U_CONVERTER(UG(output_encoding_conv)), str.string, str.len - 1, ZSTR_AUTOFREE);
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionClass::getName()
+/* {{{ proto public string ReflectionClass::getName() U
    Returns the class' name */
 ZEND_METHOD(reflection_class, getName)
 {
@@ -2870,7 +2874,7 @@ ZEND_METHOD(reflection_class, getName)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::isInternal()
+/* {{{ proto public bool ReflectionClass::isInternal() U
    Returns whether this class is an internal class */
 ZEND_METHOD(reflection_class, isInternal)
 {
@@ -2883,7 +2887,7 @@ ZEND_METHOD(reflection_class, isInternal)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::isUserDefined()
+/* {{{ proto public bool ReflectionClass::isUserDefined() U
    Returns whether this class is user-defined */
 ZEND_METHOD(reflection_class, isUserDefined)
 {
@@ -2896,7 +2900,7 @@ ZEND_METHOD(reflection_class, isUserDefined)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionClass::getFileName()
+/* {{{ proto public string ReflectionClass::getFileName() U
    Returns the filename of the file this class was declared in */
 ZEND_METHOD(reflection_class, getFileName)
 {
@@ -2912,7 +2916,7 @@ ZEND_METHOD(reflection_class, getFileName)
 }
 /* }}} */
 
-/* {{{ proto public int ReflectionClass::getStartLine()
+/* {{{ proto public int ReflectionClass::getStartLine() U
    Returns the line this class' declaration starts at */
 ZEND_METHOD(reflection_class, getStartLine)
 {
@@ -2928,7 +2932,7 @@ ZEND_METHOD(reflection_class, getStartLine)
 }
 /* }}} */
 
-/* {{{ proto public int ReflectionClass::getEndLine()
+/* {{{ proto public int ReflectionClass::getEndLine() U
    Returns the line this class' declaration ends at */
 ZEND_METHOD(reflection_class, getEndLine)
 {
@@ -2944,7 +2948,7 @@ ZEND_METHOD(reflection_class, getEndLine)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionClass::getDocComment()
+/* {{{ proto public string ReflectionClass::getDocComment() U
    Returns the doc comment for this class */
 ZEND_METHOD(reflection_class, getDocComment)
 {
@@ -2954,13 +2958,18 @@ ZEND_METHOD(reflection_class, getDocComment)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS && ce->doc_comment) {
+		/* FIXME
+		 * It should use the encoding in which the doc comment was written, aka
+		 * the script encoding for the file that the class was defined in. We
+		 * don't have access to that yet.
+		 */
 		RETURN_RT_STRINGL(ce->doc_comment, ce->doc_comment_len, 1);
 	}
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto public ReflectionMethod ReflectionClass::getConstructor()
+/* {{{ proto public ReflectionMethod ReflectionClass::getConstructor() U
    Returns the class' constructor if there is one, NULL otherwise */
 ZEND_METHOD(reflection_class, getConstructor)
 {
@@ -2978,7 +2987,7 @@ ZEND_METHOD(reflection_class, getConstructor)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::hasMethod(string name)
+/* {{{ proto public bool ReflectionClass::hasMethod(string name) U
    Returns whether a method exists or not */
 ZEND_METHOD(reflection_class, hasMethod)
 {
@@ -3006,7 +3015,7 @@ ZEND_METHOD(reflection_class, hasMethod)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionMethod ReflectionClass::getMethod(string name) throws ReflectionException
+/* {{{ proto public ReflectionMethod ReflectionClass::getMethod(string name) throws ReflectionException U
    Returns the class' method specified by its name */
 ZEND_METHOD(reflection_class, getMethod)
 {
@@ -3055,7 +3064,7 @@ static int _addmethod(zend_function *mptr, int num_args, va_list args, zend_hash
 }
 /* }}} */
 
-/* {{{ proto public ReflectionMethod[] ReflectionClass::getMethods([long $filter])
+/* {{{ proto public ReflectionMethod[] ReflectionClass::getMethods([long $filter]) U
    Returns an array of this class' methods */
 ZEND_METHOD(reflection_class, getMethods)
 {
@@ -3081,7 +3090,7 @@ ZEND_METHOD(reflection_class, getMethods)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::hasProperty(string name)
+/* {{{ proto public bool ReflectionClass::hasProperty(string name) U
    Returns whether a property exists or not */
 ZEND_METHOD(reflection_class, hasProperty)
 {
@@ -3120,7 +3129,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionProperty ReflectionClass::getProperty(string name) throws ReflectionException
+/* {{{ proto public ReflectionProperty ReflectionClass::getProperty(string name) throws ReflectionException U
    Returns the class' property specified by its name */
 ZEND_METHOD(reflection_class, getProperty)
 {
@@ -3236,7 +3245,7 @@ static int _adddynproperty(zval **pptr, int num_args, va_list args, zend_hash_ke
 }
 /* }}} */
 
-/* {{{ proto public ReflectionProperty[] ReflectionClass::getProperties([long $filter])
+/* {{{ proto public ReflectionProperty[] ReflectionClass::getProperties([long $filter]) U
    Returns an array of this class' properties */
 ZEND_METHOD(reflection_class, getProperties)
 {
@@ -3267,7 +3276,7 @@ ZEND_METHOD(reflection_class, getProperties)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::hasConstant(string name)
+/* {{{ proto public bool ReflectionClass::hasConstant(string name) U
    Returns whether a constant exists or not */
 ZEND_METHOD(reflection_class, hasConstant)
 {
@@ -3291,7 +3300,7 @@ ZEND_METHOD(reflection_class, hasConstant)
 }
 /* }}} */
 
-/* {{{ proto public array ReflectionClass::getConstants()
+/* {{{ proto public array ReflectionClass::getConstants() U
    Returns an associative array containing this class' constants and their values */
 ZEND_METHOD(reflection_class, getConstants)
 {
@@ -3307,7 +3316,7 @@ ZEND_METHOD(reflection_class, getConstants)
 }
 /* }}} */
 
-/* {{{ proto public mixed ReflectionClass::getConstant(string name)
+/* {{{ proto public mixed ReflectionClass::getConstant(string name) U
    Returns the class' constant specified by its name */
 ZEND_METHOD(reflection_class, getConstant)
 {
@@ -3346,7 +3355,7 @@ static void _class_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::isInstantiable()
+/* {{{ proto public bool ReflectionClass::isInstantiable() U
    Returns whether this class is instantiable */
 ZEND_METHOD(reflection_class, isInstantiable)
 {
@@ -3369,7 +3378,7 @@ ZEND_METHOD(reflection_class, isInstantiable)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::isInterface()
+/* {{{ proto public bool ReflectionClass::isInterface() U
    Returns whether this is an interface or a class */
 ZEND_METHOD(reflection_class, isInterface)
 {
@@ -3377,7 +3386,7 @@ ZEND_METHOD(reflection_class, isInterface)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::isFinal()
+/* {{{ proto public bool ReflectionClass::isFinal() U
    Returns whether this class is final */
 ZEND_METHOD(reflection_class, isFinal)
 {
@@ -3385,7 +3394,7 @@ ZEND_METHOD(reflection_class, isFinal)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::isAbstract()
+/* {{{ proto public bool ReflectionClass::isAbstract() U
    Returns whether this class is abstract */
 ZEND_METHOD(reflection_class, isAbstract)
 {
@@ -3393,7 +3402,7 @@ ZEND_METHOD(reflection_class, isAbstract)
 }
 /* }}} */
 
-/* {{{ proto public int ReflectionClass::getModifiers()
+/* {{{ proto public int ReflectionClass::getModifiers() U
    Returns a bitfield of the access modifiers for this class */
 ZEND_METHOD(reflection_class, getModifiers)
 {
@@ -3407,7 +3416,7 @@ ZEND_METHOD(reflection_class, getModifiers)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::isInstance(stdclass object)
+/* {{{ proto public bool ReflectionClass::isInstance(stdclass object) U
    Returns whether the given object is an instance of this class */
 ZEND_METHOD(reflection_class, isInstance)
 {
@@ -3424,7 +3433,7 @@ ZEND_METHOD(reflection_class, isInstance)
 }
 /* }}} */
 
-/* {{{ proto public stdclass ReflectionClass::newInstance(mixed* args, ...)
+/* {{{ proto public stdclass ReflectionClass::newInstance(mixed* args, ...) U
    Returns an instance of this class */
 ZEND_METHOD(reflection_class, newInstance)
 {
@@ -3488,7 +3497,7 @@ ZEND_METHOD(reflection_class, newInstance)
 }
 /* }}} */
 
-/* {{{ proto public stdclass ReflectionClass::newInstanceArgs([array args])
+/* {{{ proto public stdclass ReflectionClass::newInstanceArgs([array args]) U
    Returns an instance of this class */
 ZEND_METHOD(reflection_class, newInstanceArgs)
 {
@@ -3565,7 +3574,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass[] ReflectionClass::getInterfaces()
+/* {{{ proto public ReflectionClass[] ReflectionClass::getInterfaces() U
    Returns an array of interfaces this class implements */
 ZEND_METHOD(reflection_class, getInterfaces)
 {
@@ -3591,7 +3600,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 }
 /* }}} */
 
-/* {{{ proto public String[] ReflectionClass::getInterfaceNames()
+/* {{{ proto public String[] ReflectionClass::getInterfaceNames() U
    Returns an array of names of interfaces this class implements */
 ZEND_METHOD(reflection_class, getInterfaceNames)
 {
@@ -3611,7 +3620,7 @@ ZEND_METHOD(reflection_class, getInterfaceNames)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass ReflectionClass::getParentClass()
+/* {{{ proto public ReflectionClass ReflectionClass::getParentClass() U
    Returns the class' parent class, or, if none exists, FALSE */
 ZEND_METHOD(reflection_class, getParentClass)
 {
@@ -3629,7 +3638,7 @@ ZEND_METHOD(reflection_class, getParentClass)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::isSubclassOf(string|ReflectionClass class)
+/* {{{ proto public bool ReflectionClass::isSubclassOf(string|ReflectionClass class) U
    Returns whether this class is a subclass of another class */
 ZEND_METHOD(reflection_class, isSubclassOf)
 {
@@ -3675,7 +3684,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::implementsInterface(string|ReflectionClass interface_name)
+/* {{{ proto public bool ReflectionClass::implementsInterface(string|ReflectionClass interface_name) U
    Returns whether this class is a subclass of another class */
 ZEND_METHOD(reflection_class, implementsInterface)
 {
@@ -3726,7 +3735,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::isIterateable()
+/* {{{ proto public bool ReflectionClass::isIterateable() U
    Returns whether this class is iterateable (can be used inside foreach) */
 ZEND_METHOD(reflection_class, isIterateable)
 {
@@ -3740,7 +3749,7 @@ ZEND_METHOD(reflection_class, isIterateable)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionExtension|NULL ReflectionClass::getExtension()
+/* {{{ proto public ReflectionExtension|NULL ReflectionClass::getExtension() U
    Returns NULL or the extension the class belongs to */
 ZEND_METHOD(reflection_class, getExtension)
 {
@@ -3756,7 +3765,7 @@ ZEND_METHOD(reflection_class, getExtension)
 }
 /* }}} */
 
-/* {{{ proto public string|false ReflectionClass::getExtensionName()
+/* {{{ proto public string|false ReflectionClass::getExtensionName() U
    Returns false or the name of the extension the class belongs to */
 ZEND_METHOD(reflection_class, getExtensionName)
 {
@@ -3774,7 +3783,7 @@ ZEND_METHOD(reflection_class, getExtensionName)
 }
 /* }}} */
 
-/* {{{ proto public static mixed ReflectionObject::export(mixed argument [, bool return]) throws ReflectionException
+/* {{{ proto public static mixed ReflectionObject::export(mixed argument [, bool return]) throws ReflectionException U
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_object, export)
 {
@@ -3782,7 +3791,7 @@ ZEND_METHOD(reflection_object, export)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionObject::__construct(mixed argument) throws ReflectionException
+/* {{{ proto public void ReflectionObject::__construct(mixed argument) throws ReflectionException U
    Constructor. Takes an instance as an argument */
 ZEND_METHOD(reflection_object, __construct)
 {
@@ -3790,7 +3799,7 @@ ZEND_METHOD(reflection_object, __construct)
 }
 /* }}} */
 
-/* {{{ proto public static mixed ReflectionProperty::export(mixed class, string name [, bool return]) throws ReflectionException
+/* {{{ proto public static mixed ReflectionProperty::export(mixed class, string name [, bool return]) throws ReflectionException U
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_property, export)
 {
@@ -3798,7 +3807,7 @@ ZEND_METHOD(reflection_property, export)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionProperty::__construct(mixed class, string name)
+/* {{{ proto public void ReflectionProperty::__construct(mixed class, string name) U
    Constructor. Throws an Exception in case the given property does not exist */
 ZEND_METHOD(reflection_property, __construct)
 {
@@ -3880,7 +3889,7 @@ ZEND_METHOD(reflection_property, __construct)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionProperty::__toString()
+/* {{{ proto public string ReflectionProperty::__toString() U
    Returns a string representation */
 ZEND_METHOD(reflection_property, __toString)
 {
@@ -3892,11 +3901,11 @@ ZEND_METHOD(reflection_property, __toString)
 	GET_REFLECTION_OBJECT_PTR(ref);
 	string_init(&str);
 	_property_string(&str, ref->prop, NULL_ZSTR, "" TSRMLS_CC);
-	RETURN_RT_STRINGL(str.string, str.len - 1, ZSTR_AUTOFREE);
+	RETURN_U_STRINGL(ZEND_U_CONVERTER(UG(output_encoding_conv)), str.string, str.len - 1, ZSTR_AUTOFREE);
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionProperty::getName()
+/* {{{ proto public string ReflectionProperty::getName() U
    Returns the class' name */
 ZEND_METHOD(reflection_property, getName)
 {
@@ -3915,7 +3924,7 @@ static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 	RETURN_BOOL(ref->prop->flags & mask);
 }
 
-/* {{{ proto public bool ReflectionProperty::isPublic()
+/* {{{ proto public bool ReflectionProperty::isPublic() U
    Returns whether this property is public */
 ZEND_METHOD(reflection_property, isPublic)
 {
@@ -3923,7 +3932,7 @@ ZEND_METHOD(reflection_property, isPublic)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionProperty::isPrivate()
+/* {{{ proto public bool ReflectionProperty::isPrivate() U
    Returns whether this property is private */
 ZEND_METHOD(reflection_property, isPrivate)
 {
@@ -3931,7 +3940,7 @@ ZEND_METHOD(reflection_property, isPrivate)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionProperty::isProtected()
+/* {{{ proto public bool ReflectionProperty::isProtected() U
    Returns whether this property is protected */
 ZEND_METHOD(reflection_property, isProtected)
 {
@@ -3939,7 +3948,7 @@ ZEND_METHOD(reflection_property, isProtected)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionProperty::isStatic()
+/* {{{ proto public bool ReflectionProperty::isStatic() U
    Returns whether this property is static */
 ZEND_METHOD(reflection_property, isStatic)
 {
@@ -3947,7 +3956,7 @@ ZEND_METHOD(reflection_property, isStatic)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionProperty::isDefault()
+/* {{{ proto public bool ReflectionProperty::isDefault() U
    Returns whether this property is default (declared at compilation time). */
 ZEND_METHOD(reflection_property, isDefault)
 {
@@ -3955,7 +3964,7 @@ ZEND_METHOD(reflection_property, isDefault)
 }
 /* }}} */
 
-/* {{{ proto public mixed ReflectionProperty::getDefaultValue()
+/* {{{ proto public mixed ReflectionProperty::getDefaultValue() U
    Returns the default value of the property. */
 ZEND_METHOD(reflection_property, getDefaultValue)
 {
@@ -3985,7 +3994,7 @@ ZEND_METHOD(reflection_property, getDefaultValue)
 }
 /* }}} */
 
-/* {{{ proto public int ReflectionProperty::getModifiers()
+/* {{{ proto public int ReflectionProperty::getModifiers() U
    Returns a bitfield of the access modifiers for this property */
 ZEND_METHOD(reflection_property, getModifiers)
 {
@@ -3999,7 +4008,7 @@ ZEND_METHOD(reflection_property, getModifiers)
 }
 /* }}} */
 
-/* {{{ proto public mixed ReflectionProperty::getValue([stdclass object])
+/* {{{ proto public mixed ReflectionProperty::getValue([stdclass object]) U
    Returns this property's value */
 ZEND_METHOD(reflection_property, getValue)
 {
@@ -4042,7 +4051,7 @@ ZEND_METHOD(reflection_property, getValue)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionProperty::setValue([stdclass object,] mixed value)
+/* {{{ proto public void ReflectionProperty::setValue([stdclass object,] mixed value) U
    Sets this property's value */
 ZEND_METHOD(reflection_property, setValue)
 {
@@ -4111,7 +4120,7 @@ ZEND_METHOD(reflection_property, setValue)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass ReflectionProperty::getDeclaringClass()
+/* {{{ proto public ReflectionClass ReflectionProperty::getDeclaringClass() U
    Get the declaring class */
 ZEND_METHOD(reflection_property, getDeclaringClass)
 {
@@ -4144,7 +4153,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionProperty::getDocComment()
+/* {{{ proto public string ReflectionProperty::getDocComment() U
    Returns the doc comment for this property */
 ZEND_METHOD(reflection_property, getDocComment)
 {
@@ -4154,13 +4163,18 @@ ZEND_METHOD(reflection_property, getDocComment)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 	if (ref->prop->doc_comment) {
+		/* FIXME
+		 * It should use the encoding in which the doc comment was written, aka
+		 * the script encoding for the file that the class was defined in. We
+		 * don't have access to that yet.
+		 */
 		RETURN_RT_STRINGL(ref->prop->doc_comment, ref->prop->doc_comment_len, 1);
 	}
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto public static mixed ReflectionExtension::export(string name [, bool return]) throws ReflectionException
+/* {{{ proto public static mixed ReflectionExtension::export(string name [, bool return]) throws ReflectionException U
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_extension, export)
 {
@@ -4168,7 +4182,7 @@ ZEND_METHOD(reflection_extension, export)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionExtension::__construct(string name)
+/* {{{ proto public void ReflectionExtension::__construct(string name) U
    Constructor. Throws an Exception in case the given extension does not exist */
 ZEND_METHOD(reflection_extension, __construct)
 {
@@ -4207,7 +4221,7 @@ ZEND_METHOD(reflection_extension, __construct)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionExtension::__toString()
+/* {{{ proto public string ReflectionExtension::__toString() U
    Returns a string representation */
 ZEND_METHOD(reflection_extension, __toString)
 {
@@ -4219,11 +4233,11 @@ ZEND_METHOD(reflection_extension, __toString)
 	GET_REFLECTION_OBJECT_PTR(module);
 	string_init(&str);
 	_extension_string(&str, module, "" TSRMLS_CC);
-	RETURN_RT_STRINGL(str.string, str.len - 1, ZSTR_AUTOFREE);
+	RETURN_U_STRINGL(ZEND_U_CONVERTER(UG(output_encoding_conv)), str.string, str.len - 1, ZSTR_AUTOFREE);
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionExtension::getName()
+/* {{{ proto public string ReflectionExtension::getName() U
    Returns this extension's name */
 ZEND_METHOD(reflection_extension, getName)
 {
@@ -4232,7 +4246,7 @@ ZEND_METHOD(reflection_extension, getName)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionExtension::getVersion()
+/* {{{ proto public string ReflectionExtension::getVersion() U
    Returns this extension's version */
 ZEND_METHOD(reflection_extension, getVersion)
 {
@@ -4251,7 +4265,7 @@ ZEND_METHOD(reflection_extension, getVersion)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionFunction[] ReflectionExtension::getFunctions()
+/* {{{ proto public ReflectionFunction[] ReflectionExtension::getFunctions() U
    Returns an array of this extension's fuctions */
 ZEND_METHOD(reflection_extension, getFunctions)
 {
@@ -4301,7 +4315,7 @@ static int _addconstant(zend_constant *constant, int num_args, va_list args, zen
 	return 0;
 }
 
-/* {{{ proto public array ReflectionExtension::getConstants()
+/* {{{ proto public array ReflectionExtension::getConstants() U
    Returns an associative array containing this extension's constants and their values */
 ZEND_METHOD(reflection_extension, getConstants)
 {
@@ -4335,7 +4349,7 @@ static int _addinientry(zend_ini_entry *ini_entry, int num_args, va_list args, z
 }
 /* }}} */
 
-/* {{{ proto public array ReflectionExtension::getINIEntries()
+/* {{{ proto public array ReflectionExtension::getINIEntries() U
    Returns an associative array containing this extension's INI entries and their values */
 ZEND_METHOD(reflection_extension, getINIEntries)
 {
@@ -4371,7 +4385,7 @@ static int add_extension_class(zend_class_entry **pce, int num_args, va_list arg
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass[] ReflectionExtension::getClasses()
+/* {{{ proto public ReflectionClass[] ReflectionExtension::getClasses() U
    Returns an array containing ReflectionClass objects for all classes of this extension */
 ZEND_METHOD(reflection_extension, getClasses)
 {
@@ -4386,7 +4400,7 @@ ZEND_METHOD(reflection_extension, getClasses)
 }
 /* }}} */
 
-/* {{{ proto public array ReflectionExtension::getClassNames()
+/* {{{ proto public array ReflectionExtension::getClassNames() U
    Returns an array containing all names of all classes of this extension */
 ZEND_METHOD(reflection_extension, getClassNames)
 {
@@ -4401,7 +4415,7 @@ ZEND_METHOD(reflection_extension, getClassNames)
 }
 /* }}} */
 
-/* {{{ proto public array ReflectionExtension::getDependencies()
+/* {{{ proto public array ReflectionExtension::getDependencies() U
    Returns an array containing all names of all extensions this extension depends on */
 ZEND_METHOD(reflection_extension, getDependencies)
 {
