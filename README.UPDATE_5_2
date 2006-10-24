@@ -176,3 +176,379 @@ Items from the NEWS file explained
   As of PHP 5.2 this operation will emit E_WARNING as is the case in all
   other instance where division by zero is performed.
  
+==============================
+Backwards incompatible changes
+==============================
+
+<?php
+/* PHP Warning:  bzopen(): filename cannot be empty in /usr/src/php/examples/bzopen.no.filename.php on line 3 */
+bzopen("", "w");
+?>
+
+<?php
+/* PHP Warning:  bzopen(): 'a' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in /usr/src/php/examples/bzopen.wrong.stream.mode.php on line 3 */
+bzopen("foo", "a");
+
+$fp = fopen("foo", "a");
+/* PHP Warning:  bzopen(): cannot read from a stream opened in write only mode in /usr/src/php/examples/bzopen.wrong.stream.mode.php on line 7 */
+bzopen($fp, "r");
+?>
+
+<?php
+/* PHP Warning: Invalid access mode -1 in /usr/src/php/examples/dbase.invalid.access.mode.php on line 3 */
+dbase_open("foo", -1);
+?>
+
+<?php
+/* PHP Fatal error:  Class bar cannot implement previously implemented interface foo in /usr/src/php/examples/impliment.implemented.php on line 4 */
+interface foo {
+}
+class bar implements foo, foo {
+}
+?>
+
+<?php
+class foo {
+	public $bar;
+	function __get($var)
+	{
+		return $this->bar;
+	}
+}
+
+$foo = new foo;
+/* PHP Notice:  Indirect modification of overloaded property foo::$prop has no effect in /usr/src/php/examples/indirect.modification.of.overloaded.property.php on line 12 */
+$bar =& $foo->prop;
+?>
+
+<?php
+class foo implements iterator {
+    public function current() {
+
+    }
+    public function next() {
+
+    }
+    public function key() {
+
+    }
+    public function valid() {
+
+    }
+    public function rewind() {
+
+    }
+}
+
+$foo = new foo();
+/* PHP Fatal error:  An iterator cannot be used with foreach by reference in /usr/src/php/examples/iterator.foreach.by_ref.php on line 22 */
+foreach($foo as &$ref) {
+}
+?>
+
+<?php
+$key = "this is a secret key";
+
+$td = mcrypt_module_open('tripledes', '', 'ecb', '');
+$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
+mcrypt_generic_init($td, $key, $iv);
+/* PHP Warning: An empty string was passed in /usr/src/php/examples/mcrypt.generic.empty.string.php on line 8 */
+$encrypted_data = mcrypt_generic($td, "");
+?>
+
+<?php
+/* PHP Warning:  Division by zero in /usr/src/php/examples/modulus.by.zero.php on line 3 */
+print 10%0;
+
+?>
+
+<?php
+/* PHP Warning: Invalid character set name: bogus_charset in /usr/src/php/examples/oci.bogus.charset.php on line 3 */
+oci_connect("user", "pass", "db", "bogus_charset");
+?>
+
+<?php
+$oci = oci_connect("user", "pass", "db");
+/* PHP Warning: username cannot be empty in /usr/src/php/examples/oci.no.empty.username.php on line 4 */
+oci_password_change($oci, "", "old", "new");
+/* PHP Warning: old password cannot be empty in /usr/src/php/examples/oci.no.empty.username.php on line 6 */
+oci_password_change($oci, "user", "", "new");
+/* PHP Warning: new password cannot be empty in /usr/src/php/examples/oci.no.empty.username.php on line 8 */
+oci_password_change($oci, "user", "old", "");
+?>
+
+<?php
+class foo {
+    private function __construct() {
+    }
+}
+class bar extends foo {
+    public function __construct() {
+        /* PHP Fatal error:  Cannot call private foo::__construct() in /usr/src/php/examples/private.ctor.php on line 9 */
+        parent::__construct();
+    }
+}
+new bar;
+?>
+
+<?php
+echo " ";
+/*  PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /usr/src/php/examples/session.cannot.regenerate.id.php on line 4 */
+session_regenerate_id();
+
+?>
+
+<?php
+$obj = new SplFileObject(__FILE__);
+/* PHP Warning:  SplFileObject::fgetcsv(): delimiter must be a character in /usr/src/php/examples/splfileobj.csv.must.be.char.php on line 4 */
+$obj->fgetcsv("foo");
+/* PHP Warning:  SplFileObject::fgetcsv(): enclosure must be a character in /usr/src/php/examples/splfileobj.csv.must.be.char.php on line 6 */
+$obj->fgetcsv(",", "foo");
+
+?>
+
+<?php
+/* PHP Strict Standards:  Static function foo::bar() should not be abstract in /usr/src/php/examples/static.abstract.method.php on line 3 */
+abstract class foo {
+    abstract static function bar();
+}
+
+?>
+
+<?php
+/* PHP Warning:  stream_filter_register(): Filter name cannot be empty in /usr/src/php/examples/stream.filter.cannot.be.empty.php on line 3 */
+stream_filter_register("", "class");
+/* PHP Warning:  stream_filter_register(): Class name cannot be empty in /usr/src/php/examples/stream.filter.cannot.be.empty.php on line 5 */
+stream_filter_register("filter", "");
+?>
+
+<?php
+/* PHP Warning:  str_word_count(): Invalid format value 4 in /usr/src/php/examples/string.wordcount.invalid.format.value.php on line 3 */
+str_word_count("string", 4);
+?>
+
+<?php
+/* PHP Notice:  strripos(): Offset is greater than the length of haystack string in /usr/src/php/examples/strripos.offset.greater.than.heystrack.php on line 3 */
+strripos("foo", "f", 4);
+?>
+
+<?php
+/* PHP Notice:  strrpos(): Offset is greater than the length of haystack string in /usr/src/php/examples/strrpos.offset.greater.than.heystrack.php on line 3 */
+strrpos("foo", "f", 4);
+?>
+
+<?php
+class foo {
+    public function __toString() {
+        throw new Exception;
+    }
+}
+try {
+    /* PHP Fatal error:  Method foo::__toString() must not throw an exception in /usr/src/php/examples/tostring.exception.php on line 9 */
+    print new foo;
+} catch(Exception $e) {
+
+}
+?>
+
+============
+NEW FEATURES
+============
+
+New Classess:
+=============
+  RegexIterator extends FilterIterator implements Iterator, Traversable, OuterIterator
+    Constants:
+      RecursiveRegexIterator::USE_KEY
+      RecursiveRegexIterator::MATCH
+      RecursiveRegexIterator::GET_MATCH
+      RecursiveRegexIterator::ALL_MATCHES
+      RecursiveRegexIterator::SPLIT
+      RecursiveRegexIterator::REPLACE
+    Properties:
+      public $replacement
+    Methods:
+      RegexIterator::__construct(Iterator it, string regex [, int mode [, int flags [, int preg_flags]]])
+        - Create an RegexIterator from another iterator and a regular expression
+      bool RegexIterator::accept()
+        - Match (string)current() against regular expression
+      bool RegexIterator::getMode()
+        - Returns current operation mode
+      bool RegexIterator::setMode(int new_mode)
+        - Set new operation mode
+      bool RegexIterator::getFlags()
+        - Returns current operation flags
+      bool RegexIterator::setFlags(int new_flags)
+        - Set operation flags
+      bool RegexIterator::getPregFlags()
+        - Returns current PREG flags (if in use or NULL)
+      bool RegexIterator::setFlags(int new_flags)
+        - Set PREG flags
+
+  RecursiveRegexIterator extends RegexIterator implements OuterIterator, Traversable, Iterator, RecursiveIterator
+    Methods:
+      RecursiveRegexIterator::__construct(RecursiveIterator it, string regex [, int mode [, int flags [, int preg_flags]]])
+        Create an RecursiveRegexIterator from another recursive iterator and a regular expression
+      RecursiveRegexIterator RecursiveRegexIterator::getChildren()
+        Return the inner iterator's children contained in a RecursiveRegexIterator
+      bool RecursiveRegexIterator::hasChildren()
+        Check whether the inner iterator's current element has children
+
+
+New methods:
+============
+  ext/dom
+    DOMDocument:
+      DOMDocument::registerNodeClass(string baseclass, string extendedclass)
+        - Register extended class used to create base node type
+
+    DOMElement:
+      DOMElement::setIDAttribute(string name, boolean isId)
+        - Declares the attribute specified by name to be of type ID
+      DOMElement::setIDAttributeNS(string namespaceURI, string localName, boolean isId)
+        - Declares the attribute specified by local name and namespace URI to be of type ID
+      DOMElement::setIDAttributeNode(DOMAttr idAttr, boolean isId)
+        - Declares the attribute specified by node to be of type ID
+
+    DOMNode:
+      DOMNode::getNodePath()
+        - Gets an xpath for a node
+      DOMNode::C14N([bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
+        - Canonicalize nodes to a string
+      DOMNode::C14NFile(string uri [, bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
+        - Canonicalize nodes to a file
+
+  ext/soap
+    SoapServer:
+      SoapServer::setObject(object obj)
+        - Sets object which will handle SOAP requests
+
+  ext/spl
+    ArrayObject:
+      int ArrayObject::asort(void)
+        - Sort the entries by values
+      int ArrayObject::ksort(void)
+        - Sort the entries by key
+      int ArrayObject::uasort(callback cmp_function)
+        - Sort the entries by values user defined function
+      int ArrayObject::uksort(callback cmp_function)
+        - Sort the entries by key using user defined function.
+      int ArrayObject::natsort(void)
+        - Sort the entries by values using "natural order" algorithm.
+      int ArrayObject::natcasesort(void)
+        - Sort the entries by key using case insensitive "natural order" algorithm.
+
+    SplFileObject
+      void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"']])
+        - Set the delimiter and enclosure character used in fgetcsv
+      array("delimiter" =>, "enclosure" =>) SplFileObject::getCsvControl(void)
+        - Get the delimiter and enclosure character used in fgetcsv
+
+    CachingIterator
+      void CachingIterator::offsetSet(mixed index, mixed newval)
+        - Set given index in cache
+      string CachingIterator::offsetGet(mixed index)
+        - Return the internal cache if used
+      void CachingIterator::offsetUnset(mixed index)
+        - Unset given index in cache
+      bool CachingIterator::offsetExists(mixed index)
+        Return whether the requested index exists
+      bool CachingIterator::getCache()
+        Return the cache
+      int CachingIterator::getFlags()
+        Return the internal flags
+      void CachingIterator::setFlags()
+        Set the internal flags
+      int AppendIterator::getIteratorIndex()
+        Get index of iterator
+      ArrayIterator AppendIterator::getArrayIterator()
+        Get access to inner ArrayIterator
+      boolean XMLReader::setSchema(string filename)
+        Use W3C XSD schema to validate the document as it is processed. Activation is only possible before the first Read()
+
+
+New class constants:
+====================
+  SplFileObject::READ_AHEAD
+  SplFileObject::SKIP_EMPTY
+  SplFileObject::READ_CSV
+
+  CachingIterator::TOSTRING_USE_INNER
+  CachingIterator::FULL_CACHE
+
+
+New functions:
+==============
+  ext/mbstring
+    int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
+      - Finds position of first occurrence of a string within another, case insensitive
+    int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
+      - Finds position of last occurrence of a string within another, case insensitive
+    string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
+      - Finds first occurrence of a string within another
+    string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
+      - Finds the last occurrence of a character in a string within another
+    string mb_stristr(string haystack, string needle[, bool part[, string encoding]])
+      - Finds first occurrence of a string within another, case insensitive
+    string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
+      - Finds the last occurrence of a character in a string within another, case insensitive
+    array mb_list_encodings_alias_names([string encoding])
+      - Returns an array of all supported entity encodings
+    mixed mb_list_mime_names([string encoding])
+      - Returns an array or string of all supported mime names
+
+  ext/openssl
+    array openssl_csr_get_subject(mixed csr [, bool use_short_names])
+      - Returns the subject of a CERT
+    resource openssl_csr_get_public_key(mixed csr)
+      - Returns the subject of a CERT
+    array openssl_pkey_get_details(resource key)
+      - returns an array with the key details (bits, pkey, type)
+
+  ext/spl
+    string spl_object_hash(object obj)
+      - Return hash id for given object
+    int iterator_apply(Traversable it, mixed function [, mixed params])
+      - Calls a function for every element in an iterator
+
+  ext/pcre
+    int preg_last_error(void)
+      - Returns the error code of the last regexp execution.
+
+  ext/pgsql
+    mixed pg_field_table(resource result, int field_number[, bool oid_only])
+      - Returns the name of the table field belongs to, or table's oid if oid_only is true
+
+  ext/posix
+    bool posix_initgroups(string name, int base_group_id)
+      - Calculate the group access list for the user specified in name
+
+  ext/standard
+    array array_fill_keys(array keys, mixed val)
+      - Create an array using the elements of the first parameter as keys each initialized to val
+    int memory_get_peak_usage([real_usage])
+      - Returns the peak allocated by PHP memory
+    array error_get_last()
+      - Get the last occurred error as associative array. Returns NULL if there hasn't been an error yet
+
+
+New optional parameters:
+========================
+  - array curl_multi_info_read(resource mh [, long msgs_in_queue]) (msgs_in_queue)
+  - int mb_strrpos(string haystack, string needle [, int offset [, string encoding]]) (offset)
+  - int openssl_verify(string data, string signature, mixed key [, int signature_algo]) (signature_algo)
+  - string pg_escape_string([resource connection,] string data) (connection)
+  - string pg_escape_bytea([resource connection,] string data) (connection)
+  - object SimpleXMLElement::children([string ns [, bool is_prefix]]) (is_prefix)
+  - array SimpleXMLElement::attributes([string ns [, bool is_prefix]]) (is_prefix)
+  - SimpleXMLElement simplexml_load_file(string filename [, string class_name [, int options [, string ns [, bool is_prefix]]]]) (ns && is_prefix)
+  - SimpleXMLElement simplexml_load_string(string data [, string class_name [, int options [, string ns [, bool is_prefix]]]]) (ns && is_prefix)
+  - SimpleXMLElement::__construct(string data [, int options [, bool data_is_url [, string ns [, bool is_prefix]]]]) (ns && is_prefix)
+  - string base64_decode(string str[, bool strict=false]) (strict)
+  - bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly=false]]]]]] (httponly)
+  - bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly=false]]]]]] (httponly)
+  - int memory_get_usage([bool real_usage=false]) (real_usage)
+  - boolean XMLReader::open(string URI [, string encoding [, int options]]) (encoding, options)
+  - boolean XMLReader::XML(string source [, string encoding [, int options]]) (encoding, options)
+
+
