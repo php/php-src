@@ -566,3 +566,43 @@ pcre.backtrack_limit PHP_INI_ALL, default: 100000
 pcre.recursion_limit PHP_INI_ALL, default: 100000
 session.cookie_httponly PHP_INI_ALL, default: false
 allow_url_include PHP_INI_SYSTEM, default: false
+
+New global constants:
+=====================
+  ext/curl
+    - CURLOPT_FTP_SSL
+    - CURLFTPSSL_NONE
+    - CURLFTPSSL_TRY
+    - CURLFTPSSL_CONTROL
+    - CURLFTPSSL_ALL
+
+  ext/openssl
+    - OPENSSL_VERSION_TEXT
+    - OPENSSL_VERSION_NUMBER
+
+  ext/pcre
+    - PREG_NO_ERROR
+    - PREG_INTERNAL_ERROR
+    - PREG_BACKTRACK_LIMIT_ERROR
+    - PREG_RECURSION_LIMIT_ERROR
+    - PREG_BAD_UTF8_ERROR
+
+  ext/pdo
+    - FETCH_PROPS_LATE
+    - ATTR_DEFAULT_FETCH_MODE
+
+  ext/snmp
+    - SNMP_OID_OUTPUT_FULL
+    - SNMP_OID_OUTPUT_NUMERIC
+
+  ext/standard
+    - M_SQRTPI
+    - M_LNPI
+    - M_EULER
+    - M_SQRT3
+    - PATHINFO_FILENAME
+    - UPLOAD_ERR_EXTENSION
+
+  ext/sysvmsg
+    - MSG_EAGAIN
+    - MSG_ENOMSG
