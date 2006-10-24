@@ -1154,7 +1154,7 @@ ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_
 
 #define add_u_assoc_zval(__arg, __key_type, __key, __value) add_u_assoc_zval_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __value)
 #define add_u_assoc_long(__arg, __key_type, __key, __n) add_u_assoc_long_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __n)
-#define add_u_assoc_null(__arg, __key_type, __key) add_u_assoc_null_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1+1)
+#define add_u_assoc_null(__arg, __key_type, __key) add_u_assoc_null_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1)
 #define add_u_assoc_bool(__arg, __key_type, __key, __b) add_u_assoc_bool_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __b)
 #define add_u_assoc_resource(__arg, __key_type, __key, __r) add_u_assoc_resource_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __r)
 #define add_u_assoc_double(__arg, __key_type, __key, __d) add_u_assoc_double_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __d)
