@@ -1,3 +1,31 @@
+2006-10-23  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * sapi/apache2filter/sapi_apache2.c:
+      Fix build
+
+2006-10-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/reflection/php_reflection.c:
+      Fix remaining Unicode issues.
+
+2006-10-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache/mod_php5.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/cgi/cgi_main.c:
+      Added filter support for $_SERVER in cgi/apache2 sapis
+      Make sure PHP_SELF if filtered in Apache 1 sapi
+
+2006-10-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_encoding.c:
+      Fixed decoding list of arrays (related to bug #39121)
+
+    * (PHP_5_2)
+      ext/soap/php_encoding.c:
+      Fixed decoding of list of arrays in non-WSDL mode. (releated to bug #39121)
+
 2006-10-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/filter/logical_filters.c:
