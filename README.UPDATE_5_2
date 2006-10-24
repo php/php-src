@@ -554,8 +554,8 @@ New optional parameters:
   - string base64_decode(string str[, bool strict=false]) (strict)
   - bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly=false]]]]]] (httponly)
   - bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly=false]]]]]] (httponly)
+  - void session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure[, bool httponly]]]]) (httponly)
   - int memory_get_usage([bool real_usage=false]) (real_usage)
   - boolean XMLReader::open(string URI [, string encoding [, int options]]) (encoding, options)
   - boolean XMLReader::XML(string source [, string encoding [, int options]]) (encoding, options)
-
 
