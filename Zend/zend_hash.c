@@ -61,6 +61,7 @@
 		} else { \
 			type = IS_UNICODE; \
 			tmp = arKey.u = u; \
+			nKeyLength = u_len + 1; \
 		} \
 	}
 
