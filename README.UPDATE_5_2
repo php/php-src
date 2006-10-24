@@ -180,6 +180,13 @@ Items from the NEWS file explained
 Backwards incompatible changes
 ==============================
 
+Misc
+====
+- $php_errormsg now prepends the function name causing the error
+- $php_errormsg doesn't get populated anymore when using custom error handler
+
+Error messages
+==============
 <?php
 /* PHP Warning:  bzopen(): filename cannot be empty in /usr/src/php/examples/bzopen.no.filename.php on line 3 */
 bzopen("", "w");
