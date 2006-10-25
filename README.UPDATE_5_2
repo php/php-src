@@ -810,6 +810,13 @@ allow_url_include PHP_INI_SYSTEM, default: false
 New global constants:
 =====================
   ext/curl
+    - CURLE_LDAP_INVALID_URL
+    - CURLE_FILESIZE_EXCEEDED
+    - CURLE_FTP_SSL_FAILED
+    - CURLOPT_FTPSSLAUTH
+    - CURLFTPAUTH_DEFAULT
+    - CURLFTPAUTH_SSL
+    - CURLFTPAUTH_TLS
     - CURLOPT_FTP_SSL
     - CURLFTPSSL_NONE
     - CURLFTPSSL_TRY
