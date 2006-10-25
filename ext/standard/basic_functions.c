@@ -5972,23 +5972,27 @@ PHP_FUNCTION(unregister_tick_function)
 }
 /* }}} */
 
-/* {{{ proto bool is_uploaded_file(string path)
+/* {{{ proto bool is_uploaded_file(string path) U
    Check if file was created by rfc1867 upload  */
 PHP_FUNCTION(is_uploaded_file)
 {
-	zval **path;
+	zstr path;
+	int path_len;
+	zend_uchar type;
 
 	if (!SG(rfc1867_uploaded_files)) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &path) != SUCCESS) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &path, &path_len, &type) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(path);
-
-	if (zend_hash_exists(SG(rfc1867_uploaded_files), Z_STRVAL_PP(path), Z_STRLEN_PP(path)+1)) {
+	/*
+	 * The filenames are stored as IS_UNICODE or IS_STRING in the hash, not
+	 * using filesytem_encoding.
+	 */
+	if (zend_u_hash_exists(SG(rfc1867_uploaded_files), type, path, path_len+1)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -5996,43 +6000,59 @@ PHP_FUNCTION(is_uploaded_file)
 }
 /* }}} */
 
-/* {{{ proto bool move_uploaded_file(string path, string new_path)
+/* {{{ proto bool move_uploaded_file(string path, string new_path) U
    Move a file if and only if it was created by an upload */
 PHP_FUNCTION(move_uploaded_file)
 {
-	zval **path, **new_path;
+	zstr path;
+	char *old_path, *new_path;
+	int path_len, old_path_len, new_path_len;
+	zend_uchar type;
+	zval **pp_new_path;
 	zend_bool successful = 0;
 
 	if (!SG(rfc1867_uploaded_files)) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &path, &new_path) != SUCCESS) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tZ", &path, &path_len, &type, &pp_new_path) == FAILURE ||
+		php_stream_path_param_encode(pp_new_path, &new_path, &new_path_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(path);
-	convert_to_string_ex(new_path);
 
-	if (!zend_hash_exists(SG(rfc1867_uploaded_files), Z_STRVAL_PP(path), Z_STRLEN_PP(path)+1)) {
+	if (!zend_u_hash_exists(SG(rfc1867_uploaded_files), type, path, path_len+1)) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(Z_STRVAL_PP(new_path) TSRMLS_CC)) {
+	if (php_check_open_basedir(new_path TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	VCWD_UNLINK(Z_STRVAL_PP(new_path));
-	if (rename(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path)) == 0) {
+	if (type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &old_path, &old_path_len, path.u, path_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
+	} else {
+		old_path = path.s;
+		old_path_len = path_len;
+	}
+
+	VCWD_UNLINK(new_path);
+	if (rename(old_path, new_path) == 0) {
 		successful = 1;
-	} else if (php_copy_file_ex(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path), STREAM_DISABLE_OPEN_BASEDIR TSRMLS_CC) == SUCCESS) {
-		VCWD_UNLINK(Z_STRVAL_PP(path));
+	} else if (php_copy_file_ex(old_path, new_path, STREAM_DISABLE_OPEN_BASEDIR TSRMLS_CC) == SUCCESS) {
+		VCWD_UNLINK(old_path);
 		successful = 1;
 	}
 
 	if (successful) {
-		zend_hash_del(SG(rfc1867_uploaded_files), Z_STRVAL_PP(path), Z_STRLEN_PP(path)+1);
+		zend_u_hash_del(SG(rfc1867_uploaded_files), type, path, path_len+1);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to move '%s' to '%s'", Z_STRVAL_PP(path), Z_STRVAL_PP(new_path));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to move '%s' to '%s'", old_path, new_path);
+	}
+
+	if (type == IS_UNICODE) {
+		efree(old_path);
 	}
 	RETURN_BOOL(successful);
 }
