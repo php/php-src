@@ -124,7 +124,7 @@ Items from the NEWS file explained
   The Zip extension enables you to transparently read or write ZIP
   compressed archives and the files inside them.
 
-  Please refer to the PHP Manual for details.
+  Please refer to the 'NEW FEATURES' below or the PHP Manual for details.
 
 
 - Improved memory manager and increased default memory limit (Dmitry)
