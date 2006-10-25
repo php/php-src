@@ -1,3 +1,55 @@
+2006-10-24  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      Silly me. those PDO constants are class constants
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      New constants
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      New INI entrys
+      php-cli searching php.ini "bc break"
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      session_set_cookie_params new param
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      mention php_errormsg bc break..
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      Add sections: backwards incompatible error messages & new
+      functions/methods/classes/constants/optional parameters
+
+2006-10-24  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/reflection/php_reflection.c:
+      Mark reflection methods as Unicode-compliant (except for FIXME parts).
+
+    * ZendEngine2/zend_hash.c:
+      Fix key length calculation.
+
+2006-10-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/callback_filter.c:
+      Fixed a bug when callback function returns a non-modified value
+
+2006-10-24  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_API.h:
+      fix add_u_assoc_null() macro
+
+2006-10-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      ext/soap/php_encoding.c:
+      Revert patch because we are at last RC stage.
+
 2006-10-23  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * sapi/apache2filter/sapi_apache2.c:
