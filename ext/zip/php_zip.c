@@ -902,7 +902,7 @@ ZIPARCHIVE_METHOD(open)
 }
 /* }}} */
 
-/* {{{ proto resource close()
+/* {{{ proto bool close()
 close the zip archive */
 ZIPARCHIVE_METHOD(close)
 {
@@ -999,7 +999,7 @@ ZIPARCHIVE_METHOD(addFile)
 }
 /* }}} */
 
-/* {{{ proto resource addFromString(string name, string content)
+/* {{{ proto bool addFromString(string name, string content)
 Add a file using content and the entry name */
 ZIPARCHIVE_METHOD(addFromString)
 {
@@ -1064,7 +1064,7 @@ ZIPARCHIVE_METHOD(addFromString)
 }
 /* }}} */
 
-/* {{{ proto resource statName(string filename[, int flags])
+/* {{{ proto array statName(string filename[, int flags])
 Returns the information about a the zip entry filename */
 ZIPARCHIVE_METHOD(statName)
 {
@@ -1120,7 +1120,7 @@ ZIPARCHIVE_METHOD(statIndex)
 }
 /* }}} */
 
-/* {{{ proto resource locateName(string filename[, int flags])
+/* {{{ proto int locateName(string filename[, int flags])
 Returns the index of the entry named filename in the archive */
 ZIPARCHIVE_METHOD(locateName)
 {
@@ -1160,7 +1160,7 @@ ZIPARCHIVE_METHOD(locateName)
 }
 /* }}} */
 
-/* {{{ proto resource getNameIndex(int index [, int flags])
+/* {{{ proto string getNameIndex(int index [, int flags])
 Returns the name of the file at position index */
 ZIPARCHIVE_METHOD(getNameIndex)
 {
@@ -1190,7 +1190,7 @@ ZIPARCHIVE_METHOD(getNameIndex)
 }
 /* }}} */
 
-/* {{{ proto resource setArchiveComment(string name, string comment)
+/* {{{ proto bool setArchiveComment(string name, string comment)
 Set or remove (NULL/'') the comment of the archive */
 ZIPARCHIVE_METHOD(setArchiveComment)
 {
@@ -1216,7 +1216,7 @@ ZIPARCHIVE_METHOD(setArchiveComment)
 }
 /* }}} */
 
-/* {{{ proto resource getArchiveComment()
+/* {{{ proto string getArchiveComment()
 Returns the comment of an entry using its index */
 ZIPARCHIVE_METHOD(getArchiveComment)
 {
@@ -1241,7 +1241,7 @@ ZIPARCHIVE_METHOD(getArchiveComment)
 }
 /* }}} */
 
-/* {{{ proto resource setCommentName(string name, string comment)
+/* {{{ proto bool setCommentName(string name, string comment)
 Set or remove (NULL/'') the comment of an entry using its Name */
 ZIPARCHIVE_METHOD(setCommentName)
 {
@@ -1268,7 +1268,7 @@ ZIPARCHIVE_METHOD(setCommentName)
 }
 /* }}} */
 
-/* {{{ proto resource setCommentIndex(int index, string comment)
+/* {{{ proto bool setCommentIndex(int index, string comment)
 Set or remove (NULL/'') the comment of an entry using its index */
 ZIPARCHIVE_METHOD(setCommentIndex)
 {
@@ -1295,7 +1295,7 @@ ZIPARCHIVE_METHOD(setCommentIndex)
 }
 /* }}} */
 
-/* {{{ proto resource getCommentName(string name)
+/* {{{ proto string getCommentName(string name)
 Returns the comment of an entry using its name */
 ZIPARCHIVE_METHOD(getCommentName)
 {
@@ -1325,7 +1325,7 @@ ZIPARCHIVE_METHOD(getCommentName)
 }
 /* }}} */
 
-/* {{{ proto resource getCommentIndex(int index)
+/* {{{ proto string getCommentIndex(int index)
 Returns the comment of an entry using its index */
 ZIPARCHIVE_METHOD(getCommentIndex)
 {
@@ -1353,7 +1353,7 @@ ZIPARCHIVE_METHOD(getCommentIndex)
 }
 /* }}} */
 
-/* {{{ proto resource deleteIndex(int index)
+/* {{{ proto bool deleteIndex(int index)
 Delete a file using its index */
 ZIPARCHIVE_METHOD(deleteIndex)
 {
@@ -1383,7 +1383,7 @@ ZIPARCHIVE_METHOD(deleteIndex)
 }
 /* }}} */
 
-/* {{{ proto resource deleteName(string name)
+/* {{{ proto bool deleteName(string name)
 Delete a file using its index */
 ZIPARCHIVE_METHOD(deleteName)
 {
@@ -1414,7 +1414,7 @@ ZIPARCHIVE_METHOD(deleteName)
 }
 /* }}} */
 
-/* {{{ proto resource renameIndex(int index, string new_name)
+/* {{{ proto bool renameIndex(int index, string new_name)
 Rename an entry selected by its index to new_name */
 ZIPARCHIVE_METHOD(renameIndex)
 {
@@ -1450,7 +1450,7 @@ ZIPARCHIVE_METHOD(renameIndex)
 }
 /* }}} */
 
-/* {{{ proto resource renameName(string name, string new_name)
+/* {{{ proto bool renameName(string name, string new_name)
 Rename an entry selected by its name to new_name */
 ZIPARCHIVE_METHOD(renameName)
 {
@@ -1484,7 +1484,7 @@ ZIPARCHIVE_METHOD(renameName)
 }
 /* }}} */
 
-/* {{{ proto resource unchangeIndex(int index)
+/* {{{ proto bool unchangeIndex(int index)
 Changes to the file at position index are reverted */
 ZIPARCHIVE_METHOD(unchangeIndex)
 {
@@ -1514,7 +1514,7 @@ ZIPARCHIVE_METHOD(unchangeIndex)
 }
 /* }}} */
 
-/* {{{ proto resource unchangeName(string name)
+/* {{{ proto bool unchangeName(string name)
 Changes to the file named 'name' are reverted */
 ZIPARCHIVE_METHOD(unchangeName)
 {
@@ -1548,7 +1548,7 @@ ZIPARCHIVE_METHOD(unchangeName)
 }
 /* }}} */
 
-/* {{{ proto resource unchangeAll()
+/* {{{ proto bool unchangeAll()
 All changes to files and global information in archive are reverted */
 ZIPARCHIVE_METHOD(unchangeAll)
 {
@@ -1569,7 +1569,7 @@ ZIPARCHIVE_METHOD(unchangeAll)
 }
 /* }}} */
 
-/* {{{ proto resource unchangeAll()
+/* {{{ proto bool unchangeAll()
 Revert all global changes to the archive archive.  For now, this only reverts archive comment changes. */
 ZIPARCHIVE_METHOD(unchangeArchive)
 {
@@ -1590,7 +1590,7 @@ ZIPARCHIVE_METHOD(unchangeArchive)
 }
 /* }}} */
 
-/* {{{ array resource extractTo(string pathto[, mixed files])
+/* {{{ array bool extractTo(string pathto[, mixed files])
 Extract one or more file from a zip archive */
 /* TODO:
  * - allow index or array of indeces
