@@ -5306,7 +5306,7 @@ void php_free_shutdown_functions(TSRMLS_D)
 		zend_end_try();
 }
 
-/* {{{ proto void register_shutdown_function(string function_name)
+/* {{{ proto void register_shutdown_function(string function_name) U
    Register a user-level function to be called on request termination */
 PHP_FUNCTION(register_shutdown_function)
 {
@@ -5771,31 +5771,24 @@ PHP_FUNCTION(connection_status)
 }
 /* }}} */
 
-/* {{{ proto int ignore_user_abort([string value])
+/* {{{ proto int ignore_user_abort([string value]) U
    Set whether we want to ignore a user abort event or not */
 PHP_FUNCTION(ignore_user_abort)
 {
-	zval **arg;
+	char *arg = NULL;
+	int arg_len;
 	int old_setting;
 
 	old_setting = PG(ignore_user_abort);
-	switch (ZEND_NUM_ARGS()) {
-
-		case 0:
-			break;
-	
-		case 1:
-			if (zend_get_parameters_ex(1, &arg) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(arg);
-			zend_alter_ini_entry("ignore_user_abort", sizeof("ignore_user_abort"), Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-			break;
-	
-		default:	
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &arg, &arg_len,
+							  UG(ascii_conv)) == FAILURE) {
+		return;
 	}
+
+	if (arg) {
+		zend_alter_ini_entry("ignore_user_abort", sizeof("ignore_user_abort"), arg, arg_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	}
+
 	RETURN_LONG(old_setting);
 }
 /* }}} */
