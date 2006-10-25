@@ -5801,20 +5801,20 @@ PHP_FUNCTION(ignore_user_abort)
 /* }}} */
 
 #if HAVE_GETSERVBYNAME
-/* {{{ proto int getservbyname(string service, string protocol)
+/* {{{ proto int getservbyname(string service, string protocol) U
    Returns port associated with service. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyname)
 {
-	zval **name, **proto;
+	char *name, *proto;
+	int name_len, proto_len;
 	struct servent *serv;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &name, &proto) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &name, &name_len,
+							  UG(ascii_conv), &proto, &proto_len, UG(ascii_conv)) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(name);
-	convert_to_string_ex(proto);
 
-	serv = getservbyname(Z_STRVAL_PP(name), Z_STRVAL_PP(proto));
+	serv = getservbyname(name, proto);
 
 	if (serv == NULL) {
 		RETURN_FALSE;
@@ -5826,50 +5826,48 @@ PHP_FUNCTION(getservbyname)
 #endif
 
 #if HAVE_GETSERVBYPORT
-/* {{{ proto string getservbyport(int port, string protocol)
+/* {{{ proto string getservbyport(int port, string protocol) U
    Returns service name associated with port. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyport)
 {
-	zval **port, **proto;
+	char *proto;
+	int proto_len;
+	long port;
 	struct servent *serv;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &port, &proto) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls&", &port, &proto,
+							  &proto_len, UG(ascii_conv)) == FAILURE) {
+		return;
 	}
-	convert_to_long_ex(port);
-	convert_to_string_ex(proto);
 
-	serv = getservbyport(htons((unsigned short) Z_LVAL_PP(port)), Z_STRVAL_PP(proto));
+	serv = getservbyport(htons((unsigned short) port), proto);
 
 	if (serv == NULL) {
 		RETURN_FALSE;
 	}
 	
-	RETURN_STRING(serv->s_name, 1);
+	RETURN_ASCII_STRING(serv->s_name, 1);
 }
 /* }}} */
 #endif
 
 #if HAVE_GETPROTOBYNAME
-/* {{{ proto int getprotobyname(string name)
+/* {{{ proto int getprotobyname(string name) U
    Returns protocol number associated with name as per /etc/protocols */
 PHP_FUNCTION(getprotobyname)
 {
-	zval **name;
+	char *name;
+	int name_len;
 	struct protoent *ent;
 
-	if (ZEND_NUM_ARGS() != 1
-		|| zend_get_parameters_ex(1, &name) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &name, &name_len,
+							  UG(ascii_conv)) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(name);
-
-	ent = getprotobyname(Z_STRVAL_PP(name));
+	ent = getprotobyname(name);
 
 	if (ent == NULL) {
-		Z_LVAL_P(return_value) = -1;
-		Z_TYPE_P(return_value) = IS_LONG;
 		RETURN_FALSE;
 	}
 
@@ -5879,26 +5877,24 @@ PHP_FUNCTION(getprotobyname)
 #endif
 
 #if HAVE_GETPROTOBYNUMBER
-/* {{{ proto string getprotobynumber(int proto)
+/* {{{ proto string getprotobynumber(int proto) U
    Returns protocol name associated with protocol number proto */
 PHP_FUNCTION(getprotobynumber)
 {
-	zval **proto;
+	long proto;
 	struct protoent *ent;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &proto) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &proto) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(proto);
-
-	ent = getprotobynumber(Z_LVAL_PP(proto));
+	ent = getprotobynumber(proto);
 
 	if (ent == NULL) {
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(ent->p_name, 1);
+	RETURN_ASCII_STRING(ent->p_name, 1);
 }
 /* }}} */
 #endif
