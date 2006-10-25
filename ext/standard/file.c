@@ -2562,22 +2562,36 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md TSRMLS_DC)
 /* }}} */
 
 #ifdef HAVE_FNMATCH
-/* {{{ proto bool fnmatch(string pattern, string filename [, int flags])
+/* {{{ proto bool fnmatch(string pattern, string filename [, int flags]) U
    Match filename against pattern */
 PHP_FUNCTION(fnmatch)
 {
-	char *pattern, *filename;
+	zstr pattern, filename;
 	int pattern_len, filename_len;
+	char *pattern_utf8, *filename_utf8;
+	int pattern_utf8_len, filename_utf8_len;
+	zend_uchar type;
 	long flags = 0;
+	UErrorCode status = U_ZERO_ERROR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", 
-							  &pattern, &pattern_len, 
-							  &filename, &filename_len, 
-							  &flags) 
-		== FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT|l", &pattern,
+							  &pattern_len, &type, &filename, &filename_len, &type, &flags) == FAILURE) {
 		return;
+	}
+
+	if (type == IS_UNICODE) {
+		zend_unicode_to_string_ex(UG(utf8_conv), &pattern_utf8, &pattern_utf8_len, pattern.u, pattern_len, &status);
+		zend_unicode_to_string_ex(UG(utf8_conv), &filename_utf8, &filename_utf8_len, filename.u, filename_len, &status);
+		pattern.s = pattern_utf8;
+		filename.s = filename_utf8;
+	}
+
+	RETVAL_BOOL( ! fnmatch( pattern.s, filename.s, flags ));
 	
-	RETURN_BOOL( ! fnmatch( pattern, filename, flags ));
+	if (type == IS_UNICODE) {
+		efree(pattern_utf8);
+		efree(filename_utf8);
+	}
 }
 /* }}} */
 #endif
