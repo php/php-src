@@ -65,7 +65,8 @@ static int le_zip_entry;
 		} \
 	} else if (zip_set_file_comment(intern, index, comment, comment_len) < 0) { \
 		RETURN_FALSE; \
-	}
+	} \
+	RETURN_TRUE;
 
 /* }}} */
 
