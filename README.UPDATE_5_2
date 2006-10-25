@@ -359,9 +359,180 @@ try {
 }
 ?>
 
+<?php
+class foo {
+}
+$foo = new foo;
+/* PHP Catchable fatal error:  Object of class foo could not be converted to string in /usr/src/php/examples/convert.object.to.type.php on line 6 */
+print $foo;
+?>
+
+
 ============
 NEW FEATURES
 ============
+
+New extensions:
+  JSON
+    string json_encode(mixed parameter)
+      - Takes a object or an array and return JSON encoded string
+    mixed json_decode(string json[, boolean assoc=0])
+      - Decodes JSON string into PHP object/associatie array
+
+  Zip
+    Class constants:
+      ZipArchive::CREATE
+      ZipArchive::EXCL
+      ZipArchive::CHECKCONS
+      ZipArchive::OVERWRITE
+      ZipArchive::FL_NOCASE
+      ZipArchive::EXCL
+      ZipArchive::CHECKCONS
+      ZipArchive::OVERWRITE
+      ZipArchive::FL_NOCASE
+      ZipArchive::FL_NODIR
+      ZipArchive::FL_COMPRESSED
+      ZipArchive::FL_UNCHANGED
+      ZipArchive::CM_DEFAULT
+      ZipArchive::CM_STORE
+      ZipArchive::CM_SHRINK
+      ZipArchive::CM_REDUCE_1
+      ZipArchive::CM_REDUCE_2
+      ZipArchive::CM_REDUCE_3
+      ZipArchive::CM_REDUCE_4
+      ZipArchive::CM_IMPLODE
+      ZipArchive::CM_DEFLATE
+      ZipArchive::CM_DEFLATE64
+      ZipArchive::CM_PKWARE_IMPLODE
+      ZipArchive::ER_OK
+      ZipArchive::FL_NOCASE
+      ZipArchive::FL_NODIR
+      ZipArchive::FL_COMPRESSED
+      ZipArchive::FL_UNCHANGED
+      ZipArchive::CM_DEFAULT
+      ZipArchive::CM_STORE
+      ZipArchive::CM_SHRINK
+      ZipArchive::CM_REDUCE_1
+      ZipArchive::CM_REDUCE_2
+      ZipArchive::CM_REDUCE_3
+      ZipArchive::CM_REDUCE_4
+      ZipArchive::CM_IMPLODE
+      ZipArchive::CM_DEFLATE
+      ZipArchive::CM_DEFLATE64
+      ZipArchive::CM_PKWARE_IMPLODE
+      ZipArchive::ER_OK
+      ZipArchive::ER_MULTIDISK
+      ZipArchive::ER_RENAME
+      ZipArchive::ER_CLOSE
+      ZipArchive::ER_SEEK
+      ZipArchive::ER_READ
+      ZipArchive::ER_WRITE
+      ZipArchive::ER_CRC
+      ZipArchive::ER_ZIPCLOSED
+      ZipArchive::ER_NOENT
+      ZipArchive::ER_EXISTS
+      ZipArchive::ER_OPEN
+      ZipArchive::ER_TMPOPEN
+      ZipArchive::ER_ZLIB
+      ZipArchive::ER_MEMORY
+      ZipArchive::ER_CHANGED
+      ZipArchive::ER_COMPNOTSUPP
+      ZipArchive::ER_EOF
+      ZipArchive::ER_INVAL
+      ZipArchive::ER_NOZIP
+      ZipArchive::ER_INTERNAL
+      ZipArchive::ER_INCONS
+      ZipArchive::ER_REMOVE
+      ZipArchive::ER_DELETED
+    Methods:
+      resource zip_open(string filename)
+        - Create new zip using source uri for output
+      void zip_close(resource zip)
+        - Close a Zip archive
+      resource zip_read(resource zip)
+        - Returns the next file in the archive
+      bool zip_entry_open(resource zip_dp, resource zip_entry [, string mode])
+        - Open a Zip File, pointed by the resource entry
+      void zip_entry_close(resource zip_ent)
+        - Close a zip entry
+      mixed zip_entry_read(resource zip_entry [, int len])
+        - Read from an open directory entry
+      string zip_entry_name(resource zip_entry)
+        - Return the name given a ZZip entry
+      int zip_entry_compressedsize(resource zip_entry)
+        - Return the compressed size of a ZZip entry
+      int zip_entry_filesize(resource zip_entry)
+        - Return the actual filesize of a ZZip entry
+      string zip_entry_compressionmethod(resource zip_entry)
+        - Return a string containing the compression method used on a particular entry
+      mixed ZipArchive::open(string source [, int flags])
+        - Create new zip using source uri for output, return TRUE on success or the error code
+      void ZipArchive::close()
+        - close the zip archive
+      bool ZipArchive::addFile(string filepath[, string entryname[, int start [, int length]]])
+        - Add a file in a Zip archive using its path and the name to use
+      bool ZipArchive::addFromString(string name, string content)
+        - Add a file using content and the entry name
+      array ZipArchive::statName(string filename[, int flags])
+        - Returns the information about a the zip entry filename
+      array ZipArchive::statIndex(int index[, int flags])
+        - Returns the zip entry informations using its index
+      int ZipArchive::locateName(string filename[, int flags])
+        - Returns the index of the entry named filename in the archive
+      string ZipArchive::getNameIndex(int index [, int flags])
+        - Returns the name of the file at position index
+      bool ZipArchive::setArchiveComment(string name, string comment)
+        - Set or remove (NULL/'') the comment of the archive
+      string ZipArchive::getArchiveComment()
+        - Returns the comment of an entry using its index
+      bool ZipArchive::setCommentName(string name, string comment)
+        - Set or remove (NULL/'') the comment of an entry using its Name
+      bool ZipArchive::setCommentIndex(int index, string comment)
+        - Set or remove (NULL/'') the comment of an entry using its index
+      string ZipArchive::getCommentName(string name)
+        - Returns the comment of an entry using its name
+      string ZipArchive::getCommentIndex(int index)
+        - Returns the comment of an entry using its index
+      bool ZipArchive::deleteIndex(int index)
+        - Delete a file using its index
+      bool ZipArchive::deleteName(string name)
+        - Delete a file using its index
+      bool ZipArchive::renameIndex(int index, string new_name)
+        - Rename an entry selected by its index to new_name
+      bool ZipArchive::renameName(string name, string new_name)
+        - Rename an entry selected by its name to new_name
+      bool ZipArchive::unchangeIndex(int index)
+        - Changes to the file at position index are reverted
+      bool ZipArchive::unchangeName(string name)
+        - Changes to the file named 'name' are reverted
+      bool ZipArchive::unchangeAll()
+        - All changes to files and global information in archive are reverted
+      bool ZipArchive::unchangeAll()
+        - Revert all global changes to the archive archive.  For now, this only reverts archive comment changes
+      bool extractTo(string pathto[, mixed files])
+        - Extract one or more file from a zip archive 
+      string ZipArchive::getFromName(string entryname[, int len [, int flags]])
+        - get the contents of an entry using its name
+      string ZipArchive::getFromIndex(string entryname[, int len [, int flags]])
+        - get the contents of an entry using its index
+      resource ZipArchive::getStream(string entryname)
+        - get a stream for an entry using its name
+
+  Filter
+    mixed filter_has_var(constant type, string variable_name)
+      - Returns true if the variable with the name 'name' exists in source
+    mixed filter_input(constant type, string variable_name [, long filter [, mixed options]])
+      - Returns the filtered variable 'name'* from source `type`
+    mixed filter_var(mixed variable [, long filter [, mixed options]])
+      - Returns the filtered version of the vriable.
+    mixed filter_input_array(constant type, [, mixed options]])
+      - Returns an array with all arguments defined in 'definition'
+    mixed filter_var_array(array data, [, mixed options]])
+      - Returns an array with all arguments defined in 'definition'
+    array ilter_list()
+      - Returns a list of all supported filters
+    int ilter_id(string filtername)
+      - Returns the filter ID belonging to a named filter
 
 New Classess:
 =============
@@ -401,6 +572,52 @@ New Classess:
         Return the inner iterator's children contained in a RecursiveRegexIterator
       bool RecursiveRegexIterator::hasChildren()
         Check whether the inner iterator's current element has children
+
+  DateTime
+    Constants:
+      DateTime::ATOM
+      DateTime::COOKIE
+      DateTime::ISO8601
+      DateTime::RFC822
+      DateTime::RFC850
+      DateTime::RFC1036
+      DateTime::RFC1123
+      DateTime::RFC2822
+      DateTime::RFC3339
+      DateTime::RSS
+      DateTime::W3C
+    Methods:
+      DateTime::__construct([string time[, DateTimeZone object]])
+      - Returns new DateTime object
+      array DateTime::parse(string date)
+      - Returns associative array with detailed info about given date
+      string DateTime::format(DateTime object, string format)
+      - Returns date formatted according to given format
+      proto void DateTime::modify(DateTime object, string modify)
+      - Alters the timestamp
+      DateTimeZone DateTime::getTimezone(DateTime object)
+      - Return new DateTimeZone object relative to give DateTime
+      void DateTime::setTimezone(DateTime object, DateTimeZone object)
+      - Sets the timezone for the DateTime object
+      long DateTime::getOffset(DateTime object)
+      - Returns the DST offset
+      void DateTime::setTime(DateTime object, long hour, long minute[, long second])
+      - Sets the time
+      void DateTime::setDate(DateTime object, long year, long month, long day)
+      - Sets the date
+      void DateTime::setISODate(DateTime object, long year, long week[, long day])
+      - Sets the ISO date
+
+  DateTimeZone
+    Methods:
+      DateTimeZone DateTimeZone::__construct(string timezone)
+      - Returns new DateTimeZone object
+      string DateTimeZone::getName(DateTimeZone object)
+      - Returns the name of the timezone
+      long DateTimeZone::getOffset(DateTimeZone object, DateTime object)
+      - Returns the timezone offset
+      array DateTimeZone::getTransitions(DateTimeZone object)
+      - Returns numeracilly indexed array containing associative array for all transitions for the timezone
 
 
 New methods:
@@ -541,6 +758,26 @@ New functions:
       - Returns the peak allocated by PHP memory
     array error_get_last()
       - Get the last occurred error as associative array. Returns NULL if there hasn't been an error yet
+    string image_type_to_extension(int imagetype [, bool include_dot])
+      - Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype
+
+  ext/gmp
+    resource gmp_nextprime(resource a)
+      - Finds next prime of a
+
+  ext/xmlwriter
+    bool xmlwriter_full_end_element(resource xmlwriter)
+     - End current element - returns FALSE on error
+    bool xmlwriter_write_raw(resource xmlwriter, string content)
+     - Write text - returns FALSE on error
+
+  ext/date
+    array timezone_identifiers_list()
+     - Returns numerically index array with all timezone identifiers
+    array timezone_abbreviations_list()
+     - Returns associative array containing dst, offset and the timezone name
+    string timezone_name_from_abbr(string abbr[, long gmtOffset[, long isdst]])
+     - Returns the timezone name from abbrevation
 
 
 New optional parameters:
