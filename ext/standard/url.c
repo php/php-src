@@ -512,7 +512,7 @@ PHP_FUNCTION(urldecode)
 	char *in_str, *out_str;
 	int in_str_len, out_str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str,
 							  &in_str_len) == FAILURE) {
 		return;
 	}
@@ -596,7 +596,7 @@ PHP_FUNCTION(rawurlencode)
 	char *in_str, *out_str;
 	int in_str_len, out_str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str,
 							  &in_str_len) == FAILURE) {
 		return;
 	}
@@ -613,7 +613,7 @@ PHP_FUNCTION(rawurldecode)
 	char *in_str, *out_str;
 	int in_str_len, out_str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str,
 							  &in_str_len) == FAILURE) {
 		return;
 	}
