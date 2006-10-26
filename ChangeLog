@@ -1,3 +1,65 @@
+2006-10-25  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/basic_functions.c:
+      -** empty log message ***
+
+    * ext/standard/basic_functions.c:
+      Unicode support for get(server|proto)by(name|number) family of funcs.
+
+    * ext/standard/basic_functions.c:
+      Unicode support for is_uploaded_file()/move_uploaded_file().
+
+    * ext/standard/file.c:
+      Unicode support for fnmatch().
+
+2006-10-25  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/package.xml
+      ext/filter/tests/callback_non_modified_var.phpt:
+      - add test for callback with non modified var
+      - update changelog
+
+2006-10-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cgi/cgi_main.c:
+      Fixed build
+
+2006-10-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      More curl constants
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      Add a note reffering to the "new feature" section (lukas)
+
+    * ext/date/php_date.c:
+      Add oneliner descriptions
+
+    * ext/zip/php_zip.c:
+      Missing RETURN_TRUE inside the PHP_ZIP_SET_FILE_COMMENT macro
+
+    * ext/zip/php_zip.c:
+      Fix protos
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      New extensions
+      	- json
+      	- filter
+      	- zip
+      New classes
+      	- DateTime
+      	- DateTimeZone
+      New functions
+      	- image_type_to_extension
+      	- gmp_nextprime
+      	- xmlwriter_full_end_element
+      	- xmlwriter_write_raw
+      	- timezone_identifiers_list
+      Added error message (objects without casting handler) caught by rasmus
+
 2006-10-24  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_5_2)
