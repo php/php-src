@@ -197,12 +197,12 @@ static void start_syslog(TSRMLS_D)
 }
 /* }}} */
 
-/* {{{ proto void define_syslog_variables(void)
+/* {{{ proto void define_syslog_variables(void) U
    Initializes all syslog-related variables */
 PHP_FUNCTION(define_syslog_variables)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
 	}
 
 	if (!BG(syslog_started)) {
@@ -211,7 +211,7 @@ PHP_FUNCTION(define_syslog_variables)
 }
 /* }}} */
 
-/* {{{ proto bool openlog(string ident, int option, int facility)
+/* {{{ proto bool openlog(string ident, int option, int facility) U
    Open connection to system logger */
 /*
    ** OpenLog("nettopp", $LOG_PID, $LOG_LOCAL1);
@@ -237,12 +237,12 @@ PHP_FUNCTION(openlog)
 }
 /* }}} */
 
-/* {{{ proto bool closelog(void)
+/* {{{ proto bool closelog(void) U
    Close connection to system logger */
 PHP_FUNCTION(closelog)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
 	}
 
 	closelog();
@@ -254,7 +254,7 @@ PHP_FUNCTION(closelog)
 }
 /* }}} */
 
-/* {{{ proto bool syslog(int priority, string message)
+/* {{{ proto bool syslog(int priority, string message) U
    Generate a system log message */
 PHP_FUNCTION(syslog)
 {
