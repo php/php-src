@@ -48,25 +48,29 @@
 #include <ctype.h>
 
 #include "php_link.h"
+#include "ext/standard/file.h"
 
-/* {{{ proto string readlink(string filename)
+/* {{{ proto string readlink(string filename) U
    Return the target of a symbolic link */
 PHP_FUNCTION(readlink)
 {
-	zval **filename;
+	zval **pp_link;
+	char *link;
+	UChar *target;
+	int link_len, target_len;
 	char buff[MAXPATHLEN];
 	int ret;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &pp_link) == FAILURE ||
+		php_stream_path_param_encode(pp_link, &link, &link_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
 
-	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
+	if (php_check_open_basedir(link TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	ret = readlink(Z_STRVAL_PP(filename), buff, MAXPATHLEN-1);
+	ret = readlink(link, buff, MAXPATHLEN-1);
 
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
@@ -75,24 +79,34 @@ PHP_FUNCTION(readlink)
 	/* Append NULL to the end of the string */
 	buff[ret] = '\0';
 
-	RETURN_RT_STRING(buff, 1);
+	if (UG(unicode)) {
+		if (SUCCESS == php_stream_path_decode(NULL, &target, &target_len, buff, strlen(buff), REPORT_ERRORS, FG(default_context))) {
+			RETURN_UNICODEL(target, target_len, 0);
+		} else {
+			RETURN_FALSE;
+		}
+	} else {
+		RETURN_STRING(buff, 1);
+	}
 }
 /* }}} */
 
-/* {{{ proto int linkinfo(string filename)
+/* {{{ proto int linkinfo(string filename) U
    Returns the st_dev field of the UNIX C stat structure describing the link */
 PHP_FUNCTION(linkinfo)
 {
-	zval **filename;
+	zval **pp_link;
+	char *link;
+	int link_len;
 	struct stat sb;
 	int ret;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &pp_link) == FAILURE ||
+		php_stream_path_param_encode(pp_link, &link, &link_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
 
-	ret = VCWD_LSTAT(Z_STRVAL_PP(filename), &sb);
+	ret = VCWD_LSTAT(link, &sb);
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_LONG(-1L);
@@ -102,22 +116,25 @@ PHP_FUNCTION(linkinfo)
 }
 /* }}} */
 
-/* {{{ proto int symlink(string target, string link)
+/* {{{ proto int symlink(string target, string link) U
    Create a symbolic link */
 PHP_FUNCTION(symlink)
 {
-	zval **topath, **frompath;
+	zval **pp_topath, **pp_frompath;
+	char *topath, *frompath;
+	int topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &topath, &frompath) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(topath);
-	convert_to_string_ex(frompath);
 
-	if (!expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC) || !expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &pp_topath, &pp_frompath) == FAILURE ||
+		php_stream_path_param_encode(pp_topath, &topath, &topath_len, REPORT_ERRORS, FG(default_context)) == FAILURE ||
+		php_stream_path_param_encode(pp_frompath, &frompath, &frompath_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
+	}
+
+	if (!expand_filepath(frompath, source_p TSRMLS_CC) || !expand_filepath(topath, dest_p TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -137,7 +154,7 @@ PHP_FUNCTION(symlink)
 	}
 
 #ifndef ZTS
-	ret = symlink(Z_STRVAL_PP(topath), Z_STRVAL_PP(frompath));
+	ret = symlink(topath, frompath);
 #else 
 	ret = symlink(dest_p, source_p);
 #endif	
@@ -150,22 +167,24 @@ PHP_FUNCTION(symlink)
 }
 /* }}} */
 
-/* {{{ proto int link(string target, string link)
+/* {{{ proto int link(string target, string link) U
    Create a hard link */
 PHP_FUNCTION(link)
 {
-	zval **topath, **frompath;
+	zval **pp_topath, **pp_frompath;
+	char *topath, *frompath;
+	int topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &topath, &frompath) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &pp_topath, &pp_frompath) == FAILURE ||
+		php_stream_path_param_encode(pp_topath, &topath, &topath_len, REPORT_ERRORS, FG(default_context)) == FAILURE ||
+		php_stream_path_param_encode(pp_frompath, &frompath, &frompath_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(topath);
-	convert_to_string_ex(frompath);
 
-	if (!expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC) || !expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC)) {
+	if (!expand_filepath(frompath, source_p TSRMLS_CC) || !expand_filepath(topath, dest_p TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -185,7 +204,7 @@ PHP_FUNCTION(link)
 	}
 
 #ifndef ZTS
-	ret = link(Z_STRVAL_PP(topath), Z_STRVAL_PP(frompath));
+	ret = link(topath, frompath);
 #else 
 	ret = link(dest_p, source_p);	
 #endif	
