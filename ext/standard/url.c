@@ -488,14 +488,14 @@ PHPAPI char *php_url_encode(char const *s, int len, int *new_length)
 }
 /* }}} */
 
-/* {{{ proto string urlencode(string str)
+/* {{{ proto string urlencode(binary str) U
    URL-encodes string */
 PHP_FUNCTION(urlencode)
 {
 	char *in_str, *out_str;
 	int in_str_len, out_str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str,
 							  &in_str_len) == FAILURE) {
 		return;
 	}
@@ -505,7 +505,7 @@ PHP_FUNCTION(urlencode)
 }
 /* }}} */
 
-/* {{{ proto string urldecode(string str)
+/* {{{ proto binary urldecode(binary str) U
    Decodes URL-encoded string */
 PHP_FUNCTION(urldecode)
 {
@@ -589,7 +589,7 @@ PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length)
 }
 /* }}} */
 
-/* {{{ proto string rawurlencode(string str)
+/* {{{ proto binary rawurlencode(binary str) U
    URL-encodes string */
 PHP_FUNCTION(rawurlencode)
 {
@@ -606,7 +606,7 @@ PHP_FUNCTION(rawurlencode)
 }
 /* }}} */
 
-/* {{{ proto string rawurldecode(string str)
+/* {{{ proto binary rawurldecode(binary str) U
    Decodes URL-encodes string */
 PHP_FUNCTION(rawurldecode)
 {

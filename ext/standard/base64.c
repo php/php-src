@@ -203,7 +203,7 @@ PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length,
 }
 /* }}} */
 
-/* {{{ proto string base64_encode(string str) U
+/* {{{ proto binary base64_encode(binary str) U
    Encodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_encode)
 {
@@ -224,7 +224,7 @@ PHP_FUNCTION(base64_encode)
 /* }}} */
 
 
-/* {{{ proto string base64_decode(string str[, bool strict]) U
+/* {{{ proto binary base64_decode(binary str[, bool strict]) U
    Decodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_decode)
 {
