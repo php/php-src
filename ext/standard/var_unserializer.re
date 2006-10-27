@@ -353,6 +353,10 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	if (id == -1 || var_access(var_hash, id, &rval_ref) != SUCCESS) {
 		return 0;
 	}
+	
+	if ((*rval_ref)->refcount > 65500) {
+		return 0;
+	}
 
 	if (*rval != NULL) {
 	zval_ptr_dtor(rval);
@@ -376,6 +380,10 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	}
 	
 	if (*rval == *rval_ref) return 0;
+
+	if ((*rval_ref)->refcount > 65500) {
+		return 0;
+	}
 
 	if (*rval != NULL) {
 	zval_ptr_dtor(rval);
