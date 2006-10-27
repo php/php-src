@@ -32,36 +32,37 @@ shm_remove($s);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: Wrong parameter count for shm_attach() in %s on line %d
-NULL
+--EXPECTF--
 
-Warning: Wrong parameter count for shm_attach() in %s on line %d
-NULL
-
-Warning: shm_attach(): failed for key 0xffffffff: memorysize too small in %s on line %d
+Warning: shm_attach() expects at least 1 parameter, 0 given in %s002.php on line %d
 bool(false)
 
-Warning: shm_attach(): failed for key 0x0: Invalid argument in %s on line %d
+Warning: shm_attach() expects at most 3 parameters, 4 given in %s002.php on line %d
 bool(false)
 
-Warning: shm_attach(): failed for key 0x7b: Invalid argument in %s on line %d
+Warning: shm_attach(): failed for key 0xffffffff: memorysize too small in %s002.php on line %d
 bool(false)
 
-Warning: shm_attach(): failed for key %s: Invalid argument in %s on line %d
+Warning: shm_attach(): failed for key 0x0: Invalid argument in %s002.php on line %d
 bool(false)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
-
-Warning: shm_attach(): failed for key %s: memorysize too small in %s on line %d
+Warning: shm_attach(): failed for key 0x7b: Invalid argument in %s002.php on line %d
 bool(false)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
-int(%d)
+Warning: shm_attach(): failed for key 0x%x: Invalid argument in %s002.php on line %d
+bool(false)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
-int(%d)
-int(%d)
-int(%d)
-int(%d)
+Warning: shm_remove() expects parameter 1 to be resource, boolean given in %s002.php on line %d
+
+Warning: shm_attach(): failed for key 0x%x: memorysize too small in %s002.php on line %d
+bool(false)
+
+Warning: shm_remove() expects parameter 1 to be resource, boolean given in %s002.php on line %d
+resource(%d) of type (sysvshm)
+
+Warning: shm_remove() expects parameter 1 to be resource, integer given in %s002.php on line %d
+resource(%d) of type (sysvshm)
+resource(%d) of type (sysvshm)
+resource(%d) of type (sysvshm)
+resource(%d) of type (sysvshm)
 Done

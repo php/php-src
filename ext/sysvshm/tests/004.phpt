@@ -22,19 +22,20 @@ shm_remove($s);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: Wrong parameter count for shm_put_var() in %s on line %d
-NULL
+--EXPECTF--
 
-Warning: shm_put_var(): -1 is not a SysV shared memory index in %s on line %d
+Warning: shm_put_var() expects exactly 3 parameters, 0 given in %s004.php on line %d
 bool(false)
 
-Warning: shm_put_var(): -1 is not a SysV shared memory index in %s on line %d
+Warning: shm_put_var() expects parameter 1 to be resource, integer given in %s004.php on line %d
+bool(false)
+
+Warning: shm_put_var() expects parameter 1 to be resource, integer given in %s004.php on line %d
 bool(false)
 bool(true)
 bool(true)
 bool(true)
 
-Warning: shm_put_var(): not enough shared memory left in %s on line %d
+Warning: shm_put_var(): not enough shared memory left in %s004.php on line 14
 bool(false)
 Done
