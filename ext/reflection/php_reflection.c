@@ -292,8 +292,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	string_printf(&sub_indent, "%s    ", indent);
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
-	if (ce->type == ZEND_USER_CLASS && ce->doc_comment) {
-		string_printf(str, "%s%s", indent, ce->doc_comment);
+	if (ce->type == ZEND_USER_CLASS && ce->doc_comment.v) {
+		string_printf(str, "%s%v", indent, ce->doc_comment.v);
 		string_write(str, "\n", 1);
 	}
 
@@ -708,8 +708,8 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	 * What's "wrong" is that any whitespace before the doc comment start is 
 	 * swallowed, leading to an unaligned comment.
 	 */
-	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
-		string_printf(str, "%s%s\n", indent, fptr->op_array.doc_comment);
+	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment.v) {
+		string_printf(str, "%s%v\n", indent, fptr->op_array.doc_comment.v);
 	}
 
 	string_printf(str, fptr->common.scope ? "%sMethod [ " : "%sFunction [ ", indent);
@@ -1537,12 +1537,8 @@ ZEND_METHOD(reflection_function, getDocComment)
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
-	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
-		/* FIXME
-		 * It should use the encoding in which the doc comment was written, aka
-		 * the script encoding for the file that the class was defined in.
-		 */
-		RETURN_RT_STRINGL(fptr->op_array.doc_comment, fptr->op_array.doc_comment_len, 1);
+	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment.v) {
+		RETURN_ZSTRL(fptr->op_array.doc_comment, fptr->op_array.doc_comment_len, ZEND_STR_TYPE, 1);
 	}
 	RETURN_FALSE;
 }
@@ -2957,13 +2953,8 @@ ZEND_METHOD(reflection_class, getDocComment)
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->type == ZEND_USER_CLASS && ce->doc_comment) {
-		/* FIXME
-		 * It should use the encoding in which the doc comment was written, aka
-		 * the script encoding for the file that the class was defined in. We
-		 * don't have access to that yet.
-		 */
-		RETURN_RT_STRINGL(ce->doc_comment, ce->doc_comment_len, 1);
+	if (ce->type == ZEND_USER_CLASS && ce->doc_comment.v) {
+		RETURN_ZSTRL(ce->doc_comment, ce->doc_comment_len, ZEND_STR_TYPE, 1);
 	}
 	RETURN_FALSE;
 }
@@ -4162,13 +4153,8 @@ ZEND_METHOD(reflection_property, getDocComment)
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
-	if (ref->prop->doc_comment) {
-		/* FIXME
-		 * It should use the encoding in which the doc comment was written, aka
-		 * the script encoding for the file that the class was defined in. We
-		 * don't have access to that yet.
-		 */
-		RETURN_RT_STRINGL(ref->prop->doc_comment, ref->prop->doc_comment_len, 1);
+	if (ref->prop->doc_comment.v) {
+		RETURN_ZSTRL(ref->prop->doc_comment, ref->prop->doc_comment_len, ZEND_STR_TYPE, 1);
 	}
 	RETURN_FALSE;
 }

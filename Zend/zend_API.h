@@ -224,7 +224,7 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zval *callable_name TSRMLS
 ZEND_API char *zend_get_module_version(char *module_name);
 ZEND_API int zend_get_module_started(char *module_name);
 ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type TSRMLS_DC);
-ZEND_API int zend_declare_property_ex(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len TSRMLS_DC);
+ZEND_API int zend_declare_property_ex(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type, zstr doc_comment, int doc_comment_len TSRMLS_DC);
 ZEND_API int zend_declare_property_null(zend_class_entry *ce, char *name, int name_length, int access_type TSRMLS_DC);
 ZEND_API int zend_declare_property_bool(zend_class_entry *ce, char *name, int name_length, long value, int access_type TSRMLS_DC);
 ZEND_API int zend_declare_property_long(zend_class_entry *ce, char *name, int name_length, long value, int access_type TSRMLS_DC);
@@ -233,7 +233,7 @@ ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int 
 ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, char *name, int name_length, char *value, int value_len, int access_type TSRMLS_DC);
 
 ZEND_API int zend_u_declare_property(zend_class_entry *ce, zend_uchar type, zstr name, int name_length, zval *property, int access_type TSRMLS_DC);
-ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, zstr name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len TSRMLS_DC);
+ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, zstr name, int name_length, zval *property, int access_type, zstr doc_comment, int doc_comment_len TSRMLS_DC);
 
 ZEND_API int zend_declare_class_constant(zend_class_entry *ce, char *name, size_t name_length, zval *value TSRMLS_DC);
 ZEND_API int zend_declare_class_constant_null(zend_class_entry *ce, char *name, size_t name_length TSRMLS_DC);

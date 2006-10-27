@@ -2902,7 +2902,7 @@ ZEND_API char *zend_get_module_version(char *module_name)
 	return module->version;
 }
 
-ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, zstr name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len TSRMLS_DC)
+ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, zstr name, int name_length, zval *property, int access_type, zstr doc_comment, int doc_comment_len TSRMLS_DC)
 {
 	zend_property_info property_info;
 	HashTable *target_symbol_table;
@@ -2977,19 +2977,19 @@ ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, z
 	return SUCCESS;
 }
 
-ZEND_API int zend_declare_property_ex(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len TSRMLS_DC)
+ZEND_API int zend_declare_property_ex(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type, zstr doc_comment, int doc_comment_len TSRMLS_DC)
 {
-	return zend_u_declare_property_ex(ce, IS_STRING, ZSTR(name), name_length, property, access_type, NULL, 0 TSRMLS_CC);
+	return zend_u_declare_property_ex(ce, IS_STRING, ZSTR(name), name_length, property, access_type, doc_comment, doc_comment_len TSRMLS_CC);
 }
 
 ZEND_API int zend_u_declare_property(zend_class_entry *ce, zend_uchar type, zstr name, int name_length, zval *property, int access_type TSRMLS_DC)
 {
-	return zend_u_declare_property_ex(ce, type, name, name_length, property, access_type, NULL, 0 TSRMLS_CC);
+	return zend_u_declare_property_ex(ce, type, name, name_length, property, access_type, NULL_ZSTR, 0 TSRMLS_CC);
 }
 
 ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type TSRMLS_DC)
 {
-	return zend_u_declare_property_ex(ce, IS_STRING, ZSTR(name), name_length, property, access_type, NULL, 0 TSRMLS_CC);
+	return zend_u_declare_property_ex(ce, IS_STRING, ZSTR(name), name_length, property, access_type, NULL_ZSTR, 0 TSRMLS_CC);
 }
 
 ZEND_API int zend_declare_property_null(zend_class_entry *ce, char *name, int name_length, int access_type TSRMLS_DC)

@@ -399,7 +399,7 @@ struct _zend_class_entry {
 	char *filename;
 	zend_uint line_start;
 	zend_uint line_end;
-	char *doc_comment;
+	zstr doc_comment;
 	zend_uint doc_comment_len;
 
 	struct _zend_module_entry *module;

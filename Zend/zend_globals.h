@@ -126,7 +126,7 @@ struct _zend_compiler_globals {
 
 	zend_uint access_type;
 
-	char *doc_comment;
+	zstr doc_comment;
 	zend_uint doc_comment_len;
 
 	zend_uchar literal_type;

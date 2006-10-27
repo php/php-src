@@ -130,7 +130,7 @@ void startup_scanner(TSRMLS_D)
 {
 	CG(heredoc) = NULL;
 	CG(heredoc_len) = 0;
-	CG(doc_comment) = NULL;
+	CG(doc_comment) = NULL_ZSTR;
 	CG(doc_comment_len) = 0;
 	SCNG(yy_start_stack_ptr) = 0;
 	SCNG(yy_start_stack_depth) = 0;
@@ -2167,9 +2167,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_DOC_COMMENT>"*/" {
-	CG(doc_comment) = estrndup(yytext, yyleng);
-	CG(doc_comment_len) = yyleng;
+	zval temp;
+
 	HANDLE_NEWLINES(yytext, yyleng);
+	if (!zend_copy_scanner_string(&temp, yytext, yyleng, UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+		return 0;
+	}
+	CG(doc_comment) = temp.value.uni.val;
+	CG(doc_comment_len) = temp.value.uni.len;
 	BEGIN(ST_IN_SCRIPTING);
 	return T_DOC_COMMENT;
 }
