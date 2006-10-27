@@ -1,5 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+00 Oct 2006, PHP 5.2.0RC7
+- Fixed bug #39192 (Not including nsapi.h properly with SJSWS 7).
+  This will make PHP 5.2 compatible to new Sun Webserver. (Uwe)
 19 Oct 2006, PHP 5.2.0RC6
 - Fixed invalid read in imagecreatefrompng when an empty file is given
   (Pierre, Tony)
