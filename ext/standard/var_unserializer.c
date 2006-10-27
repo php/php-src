@@ -958,6 +958,10 @@ yy83:
 	
 	if (*rval == *rval_ref) return 0;
 
+	if ((*rval_ref)->refcount > 65500) {
+		return 0;
+	}
+
 	if (*rval != NULL) {
 	zval_ptr_dtor(rval);
 	}
@@ -999,6 +1003,10 @@ yy89:
 
 	id = parse_iv(start + 2) - 1;
 	if (id == -1 || var_access(var_hash, id, &rval_ref) != SUCCESS) {
+		return 0;
+	}
+
+	if ((*rval_ref)->refcount > 65500) {
 		return 0;
 	}
 
