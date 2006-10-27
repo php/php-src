@@ -1,3 +1,24 @@
+2006-10-26  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/link.c:
+      Unicode support for link functions.
+
+    * ext/standard/url.c:
+      Oops.
+
+    * ext/standard/base64.c
+      ext/standard/url.c:
+      Make url encoding/decoding functions use binary strings only.
+
+    * ext/standard/syslog.c:
+      Mark syslog functions with U. No upgrading is necessary -- we'll just
+      use runtime encoding to convert strings.
+
+2006-10-26  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_compile.h:
+      fix wrong function prototype (see bug #39260)
+
 2006-10-25  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/basic_functions.c:
