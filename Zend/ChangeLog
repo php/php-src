@@ -1,3 +1,8 @@
+2006-10-26  Antony Dovgal  <antony@zend.com>
+
+    * zend_compile.h:
+      fix wrong function prototype (see bug #39260)
+
 2006-10-24  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_hash.c:
