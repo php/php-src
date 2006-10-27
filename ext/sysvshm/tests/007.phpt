@@ -21,21 +21,41 @@ var_dump(shm_remove($s));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: Wrong parameter count for shm_remove() in %s on line %d
-NULL
+--EXPECTF--
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
+Warning: shm_remove() expects exactly 1 parameter, 0 given in %s007.php on line %d
 bool(false)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
+Warning: shm_remove() expects parameter 1 to be resource, integer given in %s007.php on line %d
 bool(false)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
+Warning: shm_remove() expects parameter 1 to be resource, integer given in %s007.php on line %d
+bool(false)
+
+Warning: shm_remove() expects parameter 1 to be resource, string given in %s007.php on line %d
 bool(false)
 bool(true)
 bool(true)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
+Warning: shm_remove(): %d is not a valid sysvshm resource in %s007.php on line %d
+bool(false)
+Done
+--UEXPECTF--
+
+Warning: shm_remove() expects exactly 1 parameter, 0 given in %s007.php on line %d
+bool(false)
+
+Warning: shm_remove() expects parameter 1 to be resource, integer given in %s007.php on line %d
+bool(false)
+
+Warning: shm_remove() expects parameter 1 to be resource, integer given in %s007.php on line %d
+bool(false)
+
+Warning: shm_remove() expects parameter 1 to be resource, Unicode string given in %s007.php on line %d
+bool(false)
+bool(true)
+bool(true)
+
+Warning: shm_remove(): %d is not a valid sysvshm resource in %s007.php on line %d
 bool(false)
 Done
