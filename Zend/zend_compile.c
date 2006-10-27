@@ -41,11 +41,14 @@ static void zend_duplicate_property_info(zend_property_info *property_info)
 
 	if (UG(unicode)) {
 		property_info->name.u = eustrndup(property_info->name.u, property_info->name_length);
+		if (property_info->doc_comment.u) {
+			property_info->doc_comment.u = eustrndup(property_info->doc_comment.u, property_info->doc_comment_len);
+		}
 	} else {
 		property_info->name.s = estrndup(property_info->name.s, property_info->name_length);
-	}
-	if (property_info->doc_comment) {
-		property_info->doc_comment = estrndup(property_info->doc_comment, property_info->doc_comment_len);
+		if (property_info->doc_comment.s) {
+			property_info->doc_comment.s = estrndup(property_info->doc_comment.s, property_info->doc_comment_len);
+		}
 	}
 }
 
@@ -65,8 +68,8 @@ static void zend_duplicate_property_info_internal(zend_property_info *property_i
 static void zend_destroy_property_info(zend_property_info *property_info)
 {
 	efree(property_info->name.v);
-	if (property_info->doc_comment) {
-		efree(property_info->doc_comment);
+	if (property_info->doc_comment.v) {
+		efree(property_info->doc_comment.v);
 	}
 }
 
@@ -1250,10 +1253,10 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		}
 	}
 
-	if (CG(doc_comment)) {
+	if (CG(doc_comment).v) {
 		CG(active_op_array)->doc_comment = CG(doc_comment);
 		CG(active_op_array)->doc_comment_len = CG(doc_comment_len);
-		CG(doc_comment) = NULL;
+		CG(doc_comment) = NULL_ZSTR;
 		CG(doc_comment_len) = 0;
 	}
 
@@ -2936,10 +2939,10 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	opline->result.op_type = IS_CONST;
 	CG(implementing_class) = opline->result;
 
-	if (CG(doc_comment)) {
+	if (CG(doc_comment).v) {
 		CG(active_class_entry)->doc_comment = CG(doc_comment);
 		CG(active_class_entry)->doc_comment_len = CG(doc_comment_len);
-		CG(doc_comment) = NULL;
+		CG(doc_comment) = NULL_ZSTR;
 		CG(doc_comment_len) = 0;
 	}
 }
@@ -3147,7 +3150,7 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 {
 	zval *property;
 	zend_property_info *existing_property_info;
-	char *comment = NULL;
+	zstr comment = NULL_ZSTR;
 	int comment_len = 0;
 
 	if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
@@ -3177,10 +3180,10 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 		Z_TYPE_P(property) = IS_NULL;
 	}
 
-	if (CG(doc_comment)) {
+	if (CG(doc_comment).v) {
 		comment = CG(doc_comment);
 		comment_len = CG(doc_comment_len);
-		CG(doc_comment) = NULL;
+		CG(doc_comment) = NULL_ZSTR;
 		CG(doc_comment_len) = 0;
 	}
 
@@ -4337,7 +4340,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	ce->constants_updated = 0;
 	ce->ce_flags = 0;
 
-	ce->doc_comment = NULL;
+	ce->doc_comment = NULL_ZSTR;
 	ce->doc_comment_len = 0;
 
 	zend_u_hash_init_ex(&ce->default_properties, 0, NULL, zval_ptr_dtor_func, persistent_hashes, UG(unicode), 0);

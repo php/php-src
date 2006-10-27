@@ -42,11 +42,11 @@
 
 #define RESET_DOC_COMMENT()        \
     {                              \
-        if (CG(doc_comment)) {     \
-          efree(CG(doc_comment));  \
-          CG(doc_comment) = NULL;  \
-        }                          \
-        CG(doc_comment_len) = 0;   \
+		if (CG(doc_comment.v)) {     \
+			efree(CG(doc_comment.v));  \
+			CG(doc_comment) = NULL_ZSTR;  \
+		}                          \
+		CG(doc_comment_len) = 0;   \
     }
 
 typedef struct _zend_op_array zend_op_array;
@@ -152,7 +152,7 @@ typedef struct _zend_property_info {
 	zstr name;
 	int name_length;
 	ulong h;
-	char *doc_comment;
+	zstr doc_comment;
 	int doc_comment_len;
 	zend_class_entry *ce;
 } zend_property_info;
@@ -220,7 +220,7 @@ struct _zend_op_array {
 	char *script_encoding;
 	zend_uint line_start;
 	zend_uint line_end;
-	char *doc_comment;
+	zstr doc_comment;
 	zend_uint doc_comment_len;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
