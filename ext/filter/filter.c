@@ -123,7 +123,7 @@ static PHP_INI_MH(UpdateDefaultFilter) /* {{{ */
 			return SUCCESS;
 		}
 	}
-	/* Fallback to "string" filter */
+	/* Fallback to the default filter */
 	IF_G(default_filter) = FILTER_DEFAULT;
 	return SUCCESS;
 }
