@@ -1,8 +1,8 @@
-Configuration of your Netscape/SunONE/iPlanet Web Server for PHP5
+Configuration of your Netscape/iPlanet/Sun Webserver for PHP5
 -----------------------------------------------------------------
 
 These instructions are targetted at Netscape Enterprise Web Server and
-SUN/Netscape Alliance iPlanet Web Server/SunONE Webserver.
+SUN/Netscape Alliance iPlanet Web Server and the new Sun Java System Webserver.
 On other web servers your milage may vary.
 
 Firstly you may need to add some paths to the LD_LIBRARY_PATH
@@ -13,7 +13,7 @@ probably skip this step. The start script is located in:
     <path-to-netscape-server>/https-servername/start
 
 
-Netscape/iPlanet/SunONE config files are located in:
+Netscape/iPlanet/Sun config files are located in:
 
     <path-to-server>/https-servername/config
 
@@ -25,7 +25,7 @@ Add the following line to mime.types (you can do that by the administration serv
 
 Place the following two lines after mime.types init in
 <path-to-server>/https-servername/config/obj.conf (for servers < 6) or
-for iPlanet/SunONE Web Server 6.0 and above however at the end of the
+for iPlanet/Sun Webserver 6.0 and above however at the end of the
 <path-to-server>/https-servername/config/magnus.conf file:
 
     Init fn="load-modules" funcs="php5_init,php5_execute,php5_auth_trans" shlib="/path/to/phplibrary"
@@ -37,7 +37,7 @@ The "shlib" will vary depending on your OS:
 	Windows: "c:/path/to/php5/php5nsapi.dll"
 
 
-In obj.conf (for virtual server classes [SunONE 6.0+] in their vserver.obj.conf):
+In obj.conf (for virtual server classes [Sun 6.0+] in their vserver.obj.conf):
 
     <Object name="default">
     .
@@ -137,7 +137,7 @@ is disabled.
 
 Under Windows limitations in the DLL handling need the use of a automatic
 detection of the most recent ns-httpdXX.dll file. This is tested for servers
-till version 6.1. If a newer version of the SunONE server is used, the detection
+till version 6.1. If a newer version of the Sun server is used, the detection
 fails and nsapi_virtual() is disabled.
 
 If this is the case, try the following:
