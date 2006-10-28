@@ -78,7 +78,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->function_name.v = NULL;
 	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
 	op_array->script_encoding = zend_get_compiled_script_encoding(TSRMLS_C);
-	op_array->doc_comment = NULL;
+	op_array->doc_comment.v = NULL;
 	op_array->doc_comment_len = 0;
 
 	op_array->arg_info = NULL;
@@ -187,8 +187,8 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
-			if (ce->doc_comment) {
-				efree(ce->doc_comment);
+			if (ce->doc_comment.v) {
+				efree(ce->doc_comment.v);
 			}
 			efree(ce);
 			break;
@@ -202,8 +202,8 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
 			}
-			if (ce->doc_comment) {
-				free(ce->doc_comment);
+			if (ce->doc_comment.v) {
+				free(ce->doc_comment.v);
 			}
 			free(ce);
 			break;
@@ -261,8 +261,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	if (op_array->function_name.v) {
 		efree(op_array->function_name.v);
 	}
-	if (op_array->doc_comment) {
-		efree(op_array->doc_comment);
+	if (op_array->doc_comment.v) {
+		efree(op_array->doc_comment.v);
 	}
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
