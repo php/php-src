@@ -149,7 +149,7 @@ PHP_MINFO_FUNCTION(sysvmsg)
 }
 /* }}} */
 
-/* {{{ proto bool msg_set_queue(resource queue, array data)
+/* {{{ proto bool msg_set_queue(resource queue, array data) U
    Set information for a message queue */
 PHP_FUNCTION(msg_set_queue)
 {
@@ -192,7 +192,7 @@ PHP_FUNCTION(msg_set_queue)
 }
 /* }}} */
 
-/* {{{ proto array msg_stat_queue(resource queue)
+/* {{{ proto array msg_stat_queue(resource queue) U
    Returns information about a message queue */
 PHP_FUNCTION(msg_stat_queue)
 {
@@ -225,7 +225,7 @@ PHP_FUNCTION(msg_stat_queue)
 }
 /* }}} */
 
-/* {{{ proto resource msg_get_queue(int key [, int perms])
+/* {{{ proto resource msg_get_queue(int key [, int perms]) U
    Attach to a message queue */
 PHP_FUNCTION(msg_get_queue)
 {
@@ -254,7 +254,7 @@ PHP_FUNCTION(msg_get_queue)
 }
 /* }}} */
 
-/* {{{ proto bool msg_remove_queue(resource queue)
+/* {{{ proto bool msg_remove_queue(resource queue) U
    Destroy the queue */
 PHP_FUNCTION(msg_remove_queue)
 {
@@ -275,7 +275,7 @@ PHP_FUNCTION(msg_remove_queue)
 }
 /* }}} */
 
-/* {{{ proto mixed msg_receive(resource queue, int desiredmsgtype, int &msgtype, int maxsize, mixed message [, bool unserialize=true [, int flags=0 [, int errorcode]]])
+/* {{{ proto mixed msg_receive(resource queue, int desiredmsgtype, int &msgtype, int maxsize, mixed message [, bool unserialize=true [, int flags=0 [, int errorcode]]]) U
    Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_receive)
 {
@@ -358,7 +358,7 @@ PHP_FUNCTION(msg_receive)
 }
 /* }}} */
 
-/* {{{ proto bool msg_send(resource queue, int msgtype, mixed message [, bool serialize=true [, bool blocking=true [, int errorcode]]])
+/* {{{ proto bool msg_send(resource queue, int msgtype, mixed message [, bool serialize=true [, bool blocking=true [, int errorcode]]]) U
    Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_send)
 {
@@ -394,8 +394,14 @@ PHP_FUNCTION(msg_send)
 		message_len = msg_var.len;
 		smart_str_free(&msg_var);
 	} else {
-		char *p;
+		char *p = NULL;
 		switch (Z_TYPE_P(message)) {
+			case IS_UNICODE:
+				if (SUCCESS != zend_unicode_to_string(UG(runtime_encoding_conv), &p, &message_len, Z_USTRVAL_P(message), Z_USTRLEN_P(message) TSRMLS_CC)) {
+					RETURN_FALSE;
+				}
+				break;
+
 			case IS_STRING:
 				p = Z_STRVAL_P(message);
 				message_len = Z_STRLEN_P(message);
