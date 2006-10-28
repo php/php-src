@@ -101,7 +101,7 @@ echo "End.\n";
 Start.
 Got semaphore Resource id #%i.
 Success aquire semaphore Resource id #%i.
-Success to attach shared memory : %i.
+Success to attach shared memory : Resource id #%i.
 Write var1 to shared memory.
 Write var2 to shared memory.
 Read var1=Variable 1.

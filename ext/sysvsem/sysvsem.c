@@ -90,6 +90,8 @@ ZEND_GET_MODULE(sysvsem)
 
 THREAD_LS sysvsem_module php_sysvsem_module;
 
+#define SEM_FETCH_RESOURCE(sem_ptr, z_ptr) ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, &z_ptr, -1, PHP_SEM_RSRC_NAME, php_sysvsem_module.le_sem)
+
 /* Semaphore functions using System V semaphores.  Each semaphore
  * actually consists of three semaphores allocated as a unit under the
  * same key.  Semaphore 0 (SYSVSEM_SEM) is the actual semaphore, it is
@@ -154,7 +156,7 @@ static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  */
 PHP_MINIT_FUNCTION(sysvsem)
 {
-	php_sysvsem_module.le_sem = zend_register_list_destructors_ex(release_sysvsem_sem, NULL, "sysvsem", module_number);
+	php_sysvsem_module.le_sem = zend_register_list_destructors_ex(release_sysvsem_sem, NULL, PHP_SEM_RSRC_NAME, module_number);
 	return SUCCESS;
 }
 /* }}} */
@@ -165,7 +167,7 @@ PHP_MINIT_FUNCTION(sysvsem)
 #undef SETVAL_WANTS_PTR
 #endif
 
-/* {{{ proto resource sem_get(int key [, int max_acquire [, int perm [, int auto_release]])
+/* {{{ proto resource sem_get(int key [, int max_acquire [, int perm [, int auto_release]]) U
    Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
@@ -279,25 +281,17 @@ PHP_FUNCTION(sem_get)
  */
 static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
-	zval **arg_id;
+	zval *arg_id;
 	sysvsem_sem *sem_ptr;
 	struct sembuf sop;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &arg_id)==FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg_id)) {
+		RETURN_FALSE;
 	}
-
-	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, arg_id, -1, "SysV semaphore", php_sysvsem_module.le_sem);
+	SEM_FETCH_RESOURCE(sem_ptr, arg_id);
 
 	if (!acquire && sem_ptr->count == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semaphore %ld (key 0x%x) is not currently acquired", Z_LVAL_PP(arg_id), sem_ptr->key);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semaphore %ld (key 0x%x) is not currently acquired", Z_LVAL_P(arg_id), sem_ptr->key);
 		RETURN_FALSE;
 	}
 
@@ -317,7 +311,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 }
 /* }}} */
 
-/* {{{ proto bool sem_acquire(resource id)
+/* {{{ proto bool sem_acquire(resource id) U
    Acquires the semaphore with the given id, blocking if necessary */
 PHP_FUNCTION(sem_acquire)
 {
@@ -325,7 +319,7 @@ PHP_FUNCTION(sem_acquire)
 }
 /* }}} */
 
-/* {{{ proto bool sem_release(resource id)
+/* {{{ proto bool sem_release(resource id) U
    Releases the semaphore with the given id */
 PHP_FUNCTION(sem_release)
 {
@@ -333,7 +327,7 @@ PHP_FUNCTION(sem_release)
 }
 /* }}} */
 
-/* {{{ proto bool sem_remove(resource id)
+/* {{{ proto bool sem_remove(resource id) U
    Removes semaphore from Unix systems */
 
 /*
@@ -343,18 +337,17 @@ PHP_FUNCTION(sem_release)
 
 PHP_FUNCTION(sem_remove)
 {
-	zval **arg_id;
+	zval *arg_id;
 	sysvsem_sem *sem_ptr;
 #if HAVE_SEMUN
 	union semun un;
 	struct semid_ds buf;
 #endif
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg_id) == FAILURE) {
-			WRONG_PARAM_COUNT;
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg_id)) {
+		RETURN_FALSE
 	}
-
-	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, arg_id, -1, "SysV semaphore", php_sysvsem_module.le_sem);
+	SEM_FETCH_RESOURCE(sem_ptr, arg_id);
 
 #if HAVE_SEMUN
 	un.buf = &buf;
@@ -362,7 +355,7 @@ PHP_FUNCTION(sem_remove)
 #else
 	if (semctl(sem_ptr->semid, 0, IPC_STAT, NULL) < 0) {
 #endif
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semaphore %ld does not (any longer) exist", Z_LVAL_PP(arg_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semaphore %ld does not (any longer) exist", Z_LVAL_P(arg_id));
 		RETURN_FALSE;
 	}
 
@@ -371,7 +364,7 @@ PHP_FUNCTION(sem_remove)
 #else
 	if (semctl(sem_ptr->semid, 0, IPC_RMID, NULL) < 0) {
 #endif
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for SysV sempphore %ld: %s", Z_LVAL_PP(arg_id), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for SysV semaphore %ld: %s", Z_LVAL_P(arg_id), strerror(errno));
 		RETURN_FALSE;
 	}
 	
