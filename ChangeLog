@@ -1,3 +1,74 @@
+2006-10-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_scanner.l
+      ext/reflection/php_reflection.c:
+      Turn doc comments into zstr strings with corresponding adjustments.
+
+2006-10-27  Michael Wallner  <mike@iworks.at>
+
+    * NEWS
+      ext/sysvshm/php_sysvshm.h
+      ext/sysvshm/sysvshm.c
+      ext/sysvshm/tests/002.phpt
+      ext/sysvshm/tests/003.phpt
+      ext/sysvshm/tests/004.phpt
+      ext/sysvshm/tests/005.phpt
+      ext/sysvshm/tests/006.phpt
+      ext/sysvshm/tests/007.phpt:
+      - upgrade ext/sysvshm to current parameter parsing API
+      - mark functions unicode safe
+      - add shm_has_var()
+
+2006-10-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/cyr_convert.c:
+      convert_cyr_string() should operate only on binary strings.
+
+2006-10-27  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/filter.c:
+      - default filter is not string (only comment fix for dave :)
+
+2006-10-27  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_5_2)
+      NEWS:
+      update news
+
+2006-10-27  Stefan Esser  <php@nopiracy.de>
+
+    * (PHP_4_4)
+      ext/standard/var_unserializer.c:
+      Manual commit without invoking re2c
+
+    * (PHP_4_4)
+      ext/standard/var_unserializer.re:
+      Do not allow more than 65500 references
+
+2006-10-27  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi-readme.txt:
+      update readme
+
+    * (PHP_5_2)
+      sapi/nsapi/config.m4:
+      Fix build in Sun Webserver 7 (should be in 5.2.0, it's not critical but
+      does not break mainstream sapis!!!)
+
+    * sapi/nsapi/config.m4:
+      Fix build in Sun Webserver 7
+
+2006-10-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sysvsem/tests/sysv.phpt:
+      no more magic quotes
+
 2006-10-26  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/link.c:
