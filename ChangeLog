@@ -1,3 +1,22 @@
+2006-10-28  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_opcode.c:
+      fix build
+
+2006-10-28  Michael Wallner  <mike@iworks.at>
+
+    * ext/sysvmsg/sysvmsg.c
+      ext/sysvmsg/tests/001.phpt:
+      - convert unicode messages to strings
+      - mark functions unicode safe
+      - fix test
+
+    * ext/sysvsem/php_sysvsem.h
+      ext/sysvsem/sysvsem.c
+      ext/sysvsem/tests/sysv.phpt:
+      - upgrade to current parameter parsing API
+      - mark functions unicode safe
+
 2006-10-27  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend.h

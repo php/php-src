@@ -1,3 +1,8 @@
+2006-10-28  Antony Dovgal  <antony@zend.com>
+
+    * zend_opcode.c:
+      fix build
+
 2006-10-27  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend.h
