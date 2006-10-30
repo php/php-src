@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2007, PHP 5.2.1
+
 02 Nov 2006, PHP 5.2.0
 - Updated bundled OpenSSL to version 0.9.8d in the Windows distro. (Edin)
 - Updated Postgresql client libraries to 8.1.4 in the Windows distro. (Edin)
