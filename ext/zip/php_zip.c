@@ -183,7 +183,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file TSRMLS_D
 #define RETURN_SB(sb) \
 	{ \
 		array_init(return_value); \
-		add_assoc_string(return_value, "name", estrdup((sb)->name), 0); \
+		add_assoc_string(return_value, "name", (char *)(sb)->name, 1); \
 		add_assoc_long(return_value, "index", (long) (sb)->index); \
 		add_assoc_long(return_value, "crc", (long) (sb)->crc); \
 		add_assoc_long(return_value, "size", (long) (sb)->size); \
@@ -1250,7 +1250,7 @@ ZIPARCHIVE_METHOD(setCommentName)
 	zval *this = getThis();
 	int comment_len, name_len;
 	char * comment, *name;
-	struct zip_stat sb;
+	int idx;
 
 	if (!this) {
 		RETURN_FALSE;
@@ -1263,9 +1263,11 @@ ZIPARCHIVE_METHOD(setCommentName)
 		return;
 	}
 
-
-	PHP_ZIP_STAT_PATH(intern, name, name_len, 0, sb);
-	PHP_ZIP_SET_FILE_COMMENT(intern, sb.index, comment, comment_len);
+	idx = zip_name_locate(intern, name, 0);
+	if (idx < 0) {
+		RETURN_FALSE;
+	}
+	PHP_ZIP_SET_FILE_COMMENT(intern, idx, comment, comment_len);
 }
 /* }}} */
 
