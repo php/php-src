@@ -639,7 +639,6 @@ PHP_FUNCTION(zip_read)
 	zval *zip_dp;
 	zip_read_rsrc *zr_rsrc;
 	int ret;
-	long flags = 0;
 	zip_rsrc *rsrc_int;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zip_dp) == FAILURE) {
@@ -654,7 +653,7 @@ PHP_FUNCTION(zip_read)
 
 		zr_rsrc = emalloc(sizeof(zip_read_rsrc));
 
-		ret = zip_stat_index(rsrc_int->za, rsrc_int->index_current, flags, &zr_rsrc->sb);
+		ret = zip_stat_index(rsrc_int->za, rsrc_int->index_current, 0, &zr_rsrc->sb);
 
 		if (ret != 0) {
 			efree(zr_rsrc);
