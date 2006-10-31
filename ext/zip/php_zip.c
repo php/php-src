@@ -990,11 +990,18 @@ ZIPARCHIVE_METHOD(addFile)
 	}
 
 	if(!expand_filepath(filename, resolved_path TSRMLS_CC)) {
+		if (Z_TYPE_PP(filename_zval) == IS_UNICODE) {
+			efree(entry_name);
+		}
+
 		RETURN_FALSE;
 	}
 
 	zs = zip_source_file(intern, resolved_path, 0, 0);
 	if (!zs) {
+		if (Z_TYPE_PP(filename_zval) == IS_UNICODE) {
+			efree(entry_name);
+		}
 		RETURN_FALSE;
 	}
 
@@ -1817,7 +1824,7 @@ ZIPARCHIVE_METHOD(getFromIndex)
 }
 /* }}} */
 
-/* {{{ proto resource getStream(string entryname)
+/* {{{ proto resource getStream(string entryname) U
 get a stream for an entry using its name */
 ZIPARCHIVE_METHOD(getStream)
 {
