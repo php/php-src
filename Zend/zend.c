@@ -241,9 +241,9 @@ str_type:
 				if (is_object) {
 					zstr prop_name, class_name;
 
-					zend_u_unmangle_property_name(ztype, string_key, str_len - 1, &class_name, &prop_name);
+					int mangled = zend_u_unmangle_property_name(ztype, string_key, str_len - 1, &class_name, &prop_name);
 
-					if (class_name.v) {
+					if (class_name.v && mangled == SUCCESS) {
 						if (class_name.s[0]=='*') {
 							zend_printf("%R:protected", ztype, prop_name);
 						} else {
