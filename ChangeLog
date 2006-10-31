@@ -1,3 +1,71 @@
+2006-10-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed year
+
+    * (PHP_5_2)
+      configure.in
+      main/php_version.h:
+      5.2.0
+
+2006-10-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - nuke flags local variable, it is constant
+
+2006-10-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Prep news file for 5.2
+
+2006-10-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/tests/oo_extract.phpt
+      ext/zip/tests/oo_getcomment.phpt
+      ext/zip/tests/oo_getnameindex.phpt
+      ext/zip/tests/oo_setcomment.phpt
+      ext/zip/tests/oo_stream.phpt
+      ext/zip/tests/utils.inc
+      ext/zip/tests/zip_entry_read.phpt:
+      - add tests for extractTo, set/getComment and stream and zip_entry_close
+
+    * ext/zip/php_zip.c:
+      - fix leak in statName and statIndex
+      - use zip_locate_name instead of zip_stat in setCommentName (faster and
+        work around for a possible bug)
+
+2006-10-30  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      README.input_filter:
+      Pierre requested an update to this.  I don't think it makes sense to
+      remove what little API docs we have here, and the simple example in this
+      doc is a lot easier to follow than ext/filter.
+
+2006-10-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug39304.phpt:
+      Fixed bug #39304 (Segmentation fault with list unpacking of string offset)
+
+    * ZendEngine2/tests/bug39304.phpt
+      ZendEngine2/tests/bug39304.phpt:
+      
+      file bug39304.phpt was initially added on branch PHP_5_2.
+
 2006-10-28  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/zend_opcode.c:

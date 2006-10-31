@@ -1,3 +1,17 @@
+2006-10-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug39304.phpt:
+      Fixed bug #39304 (Segmentation fault with list unpacking of string offset)
+
+    * tests/bug39304.phpt
+      tests/bug39304.phpt:
+      
+      file bug39304.phpt was initially added on branch PHP_5_2.
+
 2006-10-28  Antony Dovgal  <antony@zend.com>
 
     * zend_opcode.c:
