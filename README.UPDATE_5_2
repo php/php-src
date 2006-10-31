@@ -23,7 +23,8 @@ and constants available to the new classes by running
 php --rc DateTime
 php --rc DateTimeZone
 
-under PHP CLI. All methods map to existing procedural date functions.
+under PHP CLI - or see the PHP Manual under Date/Time functions, or the 'NEW
+FEATURES' section below. All methods map to existing procedural date functions.
 
 ==================================
 Items from the NEWS file explained
@@ -40,7 +41,7 @@ Items from the NEWS file explained
 - Changed E_ALL error reporting mode to include E_RECOVERABLE_ERROR. (Marcus)
 
   This change means that the value of the E_ALL error_reporting constant is now
-  6143, where its previous value was 2047. If you are setting the error_reporting
+  6143, where the previous value was 2047. If you are setting the error_reporting
   mode from either the Apache config file or the .htaccess files, you will need
   to adjust the value accordingly. The same applies if you use the numeric value
   rather than the constant in your PHP scripts.
@@ -81,7 +82,7 @@ Items from the NEWS file explained
 
   The introduction of the 'data' URL scheme has the potential to lead to a
   change of behaviour under Windows. If you are working with an NTFS
-  filesystem and making use of meta streams in your application, and if you
+  file system and making use of meta streams in your application, and if you
   just happen to be using a file with the name 'data:' that is accessed without
   any path information - it won't work any more. The fix is to use the 'file:'
   protocol when accessing it.
@@ -109,7 +110,7 @@ Items from the NEWS file explained
 
   The filepro and hwapi extensions have been moved to PECL and are no longer
   part of the PHP distribution. The PECL package version of these extensions
-  will be created on the basis of user demand.
+  will be created according to user demand.
 
 
 - Added extensions (Rasmus, Derick, Pierre)
@@ -124,7 +125,8 @@ Items from the NEWS file explained
   The Zip extension enables you to transparently read or write ZIP
   compressed archives and the files inside them.
 
-  Please refer to the 'NEW FEATURES' below or the PHP Manual for details.
+  Please refer to the NEW FEATURES section below or to the PHP Manual
+  for details.
 
 
 - Improved memory manager and increased default memory limit (Dmitry)
@@ -148,74 +150,68 @@ Items from the NEWS file explained
   in the Windows registry.
 
 
-- Added notice when accessing return value from __get() in write mode (Marcus)
-
-  The reason for this is that __get() only returns variables in read mode, and
-  it is therefore not possible to write to the returned variable. In previous
-  releases there was no effective way to detect incorrect usage. Starting from
-  PHP 5.2, an E_NOTICE will be emitted in this situation.
-
-  WARNING: foreach() and functions that modify the internal array pointer will
-  now also trigger the same E_NOTICE, since modification requires that the
-  variable be accessed in write mode. To work around this, you should either
-  cast the returned value from __get() to an array, or use SPL's ArrayObject
-  instead of an array.
-
 - CLI SAPI no longer checks cwd for php.ini or the php-cli.ini file (Edin)
 
-  In PHP 5.1.X an undocumented feature was added that made the CLI binary
-  check the current directory for PHP configuration file possibly leading to
-  unpredictable behavior due to an un-expected configuration file being
-  read. This functionality was removed in 5.2 and PHP will no longer search
-  CWD for the presence of the php.ini or the php-cli.ini files.
+  In PHP 5.1 an undocumented feature was added that made the CLI binary check
+  the current working directory for a PHP configuration file, potentially
+  leading to unpredictable behavior if an unexpected configuration file were
+  read. This functionality was removed in 5.2, and PHP will no longer search
+  CWD for the presence of php.ini or php-cli.ini files.
+
 
 - Added a notice when performing modulus 0 operation (Tony)
 
-  In earlier versions of PHP performing integer % 0 did not emit any 
-  warning messages, instead retuning an un-expected return value of false.
-  As of PHP 5.2 this operation will emit E_WARNING as is the case in all
-  other instance where division by zero is performed.
- 
-==============================
-Backwards incompatible changes
-==============================
+  In earlier versions of PHP, performing integer % 0 did not emit any
+  warning messages, instead returning an unexpected return value of FALSE.
+  As of PHP 5.2 this operation will emit an E_WARNING, as is the case in all
+  other instances where division by zero is performed.
 
-Misc
-====
-- $php_errormsg now prepends the function name causing the error
-- $php_errormsg doesn't get populated anymore when using custom error handler
-- PHP-CLI does no longer search in cwd for php.ini
 
-Error messages
-==============
+- As a side-effect of a change made to prevent duplicate error messages
+  when error_tracking is On [Ilia], it is now necessary to return FALSE
+  from your error handler in order to populate $php_errormsg. This allows
+  you to fine-grain the levels of the messages stored.
+
+
+==================
+NEW ERROR MESSAGES
+==================
+
+In the PHP core
+===============
+
 <?php
-/* PHP Warning:  bzopen(): filename cannot be empty in /usr/src/php/examples/bzopen.no.filename.php on line 3 */
-bzopen("", "w");
+
+print 10%0;
+/* Warning:  Division by zero in filename on line n */
+
+echo " ";
+session_regenerate_id();
+/*  Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in filename on line n */
+
+str_word_count("string", 4);
+/* Warning:  str_word_count(): Invalid format value 4 in filename on line n */
+
+strripos("foo", "f", 4);
+/* Notice:  strripos(): Offset is greater than the length of haystack string in filename on line n */
+
+strrpos("foo", "f", 4);
+/* Notice:  strrpos(): Offset is greater than the length of haystack string in filename on line n */
+
 ?>
 
-<?php
-/* PHP Warning:  bzopen(): 'a' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in /usr/src/php/examples/bzopen.wrong.stream.mode.php on line 3 */
-bzopen("foo", "a");
-
-$fp = fopen("foo", "a");
-/* PHP Warning:  bzopen(): cannot read from a stream opened in write only mode in /usr/src/php/examples/bzopen.wrong.stream.mode.php on line 7 */
-bzopen($fp, "r");
-?>
+OO related in the PHP core
+==========================
 
 <?php
-/* PHP Warning: Invalid access mode -1 in /usr/src/php/examples/dbase.invalid.access.mode.php on line 3 */
-dbase_open("foo", -1);
-?>
 
-<?php
-/* PHP Fatal error:  Class bar cannot implement previously implemented interface foo in /usr/src/php/examples/impliment.implemented.php on line 4 */
 interface foo {
 }
 class bar implements foo, foo {
 }
-?>
+/* Fatal error: Class bar cannot implement previously implemented interface foo in filename on line n */
 
-<?php
+
 class foo {
 	public $bar;
 	function __get($var)
@@ -225,11 +221,10 @@ class foo {
 }
 
 $foo = new foo;
-/* PHP Notice:  Indirect modification of overloaded property foo::$prop has no effect in /usr/src/php/examples/indirect.modification.of.overloaded.property.php on line 12 */
 $bar =& $foo->prop;
-?>
+/* Notice: Indirect modification of overloaded property foo::$prop has no effect in filename on line n */
 
-<?php
+
 class foo implements iterator {
     public function current() {
 
@@ -249,122 +244,128 @@ class foo implements iterator {
 }
 
 $foo = new foo();
-/* PHP Fatal error:  An iterator cannot be used with foreach by reference in /usr/src/php/examples/iterator.foreach.by_ref.php on line 22 */
-foreach($foo as &$ref) {
-}
-?>
+foreach($foo as &$ref) {}
+/* Fatal error: An iterator cannot be used with foreach by reference in filename on line n */
 
-<?php
-$key = "this is a secret key";
 
-$td = mcrypt_module_open('tripledes', '', 'ecb', '');
-$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
-mcrypt_generic_init($td, $key, $iv);
-/* PHP Warning: An empty string was passed in /usr/src/php/examples/mcrypt.generic.empty.string.php on line 8 */
-$encrypted_data = mcrypt_generic($td, "");
-?>
-
-<?php
-/* PHP Warning:  Division by zero in /usr/src/php/examples/modulus.by.zero.php on line 3 */
-print 10%0;
-
-?>
-
-<?php
-/* PHP Warning: Invalid character set name: bogus_charset in /usr/src/php/examples/oci.bogus.charset.php on line 3 */
-oci_connect("user", "pass", "db", "bogus_charset");
-?>
-
-<?php
-$oci = oci_connect("user", "pass", "db");
-/* PHP Warning: username cannot be empty in /usr/src/php/examples/oci.no.empty.username.php on line 4 */
-oci_password_change($oci, "", "old", "new");
-/* PHP Warning: old password cannot be empty in /usr/src/php/examples/oci.no.empty.username.php on line 6 */
-oci_password_change($oci, "user", "", "new");
-/* PHP Warning: new password cannot be empty in /usr/src/php/examples/oci.no.empty.username.php on line 8 */
-oci_password_change($oci, "user", "old", "");
-?>
-
-<?php
 class foo {
     private function __construct() {
     }
 }
 class bar extends foo {
     public function __construct() {
-        /* PHP Fatal error:  Cannot call private foo::__construct() in /usr/src/php/examples/private.ctor.php on line 9 */
         parent::__construct();
+        /* Fatal error:  Cannot call private foo::__construct() in filename on line n */
     }
 }
 new bar;
-?>
 
-<?php
-echo " ";
-/*  PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /usr/src/php/examples/session.cannot.regenerate.id.php on line 4 */
-session_regenerate_id();
 
-?>
-
-<?php
-$obj = new SplFileObject(__FILE__);
-/* PHP Warning:  SplFileObject::fgetcsv(): delimiter must be a character in /usr/src/php/examples/splfileobj.csv.must.be.char.php on line 4 */
-$obj->fgetcsv("foo");
-/* PHP Warning:  SplFileObject::fgetcsv(): enclosure must be a character in /usr/src/php/examples/splfileobj.csv.must.be.char.php on line 6 */
-$obj->fgetcsv(",", "foo");
-
-?>
-
-<?php
-/* PHP Strict Standards:  Static function foo::bar() should not be abstract in /usr/src/php/examples/static.abstract.method.php on line 3 */
 abstract class foo {
     abstract static function bar();
+    /* Strict Standards:  Static function foo::bar() should not be abstract in filename on line n */
 }
 
-?>
 
-<?php
-/* PHP Warning:  stream_filter_register(): Filter name cannot be empty in /usr/src/php/examples/stream.filter.cannot.be.empty.php on line 3 */
 stream_filter_register("", "class");
-/* PHP Warning:  stream_filter_register(): Class name cannot be empty in /usr/src/php/examples/stream.filter.cannot.be.empty.php on line 5 */
+/* Warning:  stream_filter_register(): Filter name cannot be empty in filename on line n */
+
 stream_filter_register("filter", "");
-?>
+/* Warning:  stream_filter_register(): Class name cannot be empty in filename on line n */
 
-<?php
-/* PHP Warning:  str_word_count(): Invalid format value 4 in /usr/src/php/examples/string.wordcount.invalid.format.value.php on line 3 */
-str_word_count("string", 4);
-?>
 
-<?php
-/* PHP Notice:  strripos(): Offset is greater than the length of haystack string in /usr/src/php/examples/strripos.offset.greater.than.heystrack.php on line 3 */
-strripos("foo", "f", 4);
-?>
-
-<?php
-/* PHP Notice:  strrpos(): Offset is greater than the length of haystack string in /usr/src/php/examples/strrpos.offset.greater.than.heystrack.php on line 3 */
-strrpos("foo", "f", 4);
-?>
-
-<?php
 class foo {
     public function __toString() {
         throw new Exception;
     }
 }
 try {
-    /* PHP Fatal error:  Method foo::__toString() must not throw an exception in /usr/src/php/examples/tostring.exception.php on line 9 */
     print new foo;
-} catch(Exception $e) {
+    /* Fatal error:  Method foo::__toString() must not throw an exception in filename on line n */
+} catch(Exception $e) {}
 
-}
+
+class foo {}
+$foo = new foo;
+print $foo;
+/* Catchable fatal error:  Object of class foo could not be converted to string in filename on line n */
+
 ?>
 
+In the bzip2 extension
+======================
+
 <?php
-class foo {
-}
-$foo = new foo;
-/* PHP Catchable fatal error:  Object of class foo could not be converted to string in /usr/src/php/examples/convert.object.to.type.php on line 6 */
-print $foo;
+
+bzopen("", "w");
+/* Warning:  bzopen(): filename cannot be empty in filename on line n */
+
+bzopen("foo", "a");
+/* Warning:  bzopen(): 'a' is not a valid mode for bzopen(). Only 'w' and 'r' are supported in filename on line n */
+
+$fp = fopen("foo", "w");
+bzopen($fp, "r");
+/* Warning:  bzopen(): cannot read from a stream opened in write only mode in filename on line n */
+
+?>
+
+In the dBase extension
+======================
+
+<?php
+
+dbase_open("foo", -1);
+/* Warning: Invalid access mode -1 in filename on line n */
+
+?>
+
+In the mcrypt extension
+=======================
+
+<?php
+
+$key = "this is a secret key";
+
+$td = mcrypt_module_open('tripledes', '', 'ecb', '');
+$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
+mcrypt_generic_init($td, $key, $iv);
+$encrypted_data = mcrypt_generic($td, "");
+/* Warning: mcrypt_generic(): An empty string was passed in filename on line n */
+
+?>
+
+In the oci8 extension
+=====================
+
+<?php
+
+oci_connect("user", "pass", "db", "bogus_charset");
+/* Warning: Invalid character set name: bogus_charset in filename on line n */
+
+$oci = oci_connect("user", "pass", "db");
+oci_password_change($oci, "", "old", "new");
+/* Warning: username cannot be empty in filename on line n */
+
+oci_password_change($oci, "user", "", "new");
+/* Warning: old password cannot be empty in filename on line n */
+
+oci_password_change($oci, "user", "old", "");
+/* Warning: new password cannot be empty in filename on line n */
+
+?>
+
+In the SPL extension
+====================
+
+<?php
+
+$obj = new SplFileObject(__FILE__);
+$obj->fgetcsv("foo");
+/* Warning:  SplFileObject::fgetcsv(): delimiter must be a character in filename on line n */
+
+$obj->fgetcsv(",", "foo");
+/* Warning:  SplFileObject::fgetcsv(): enclosure must be a character in filename on line n */
+
 ?>
 
 
@@ -372,208 +373,159 @@ print $foo;
 NEW FEATURES
 ============
 
-New extensions:
+New extensions
+==============
+
+  Filter
+    Methods:
+      mixed filter_has_var(constant type, string variable_name)
+        - Returns true if the variable with the name 'name' exists in source
+      int filter_id(string filtername)
+        - Returns the filter ID belonging to a named filter
+      mixed filter_input(constant type, string variable_name [, long filter [, mixed options]])
+        - Returns the filtered variable 'name'* from source `type`
+      mixed filter_input_array(constant type, [, mixed options]])
+        - Returns an array with all arguments defined in 'definition'
+      array filter_list()
+        - Returns a list of all supported filters
+      mixed filter_var(mixed variable [, long filter [, mixed options]])
+        - Returns the filtered version of the variable.
+      mixed filter_var_array(array data, [, mixed options]])
+        - Returns an array with all arguments defined in 'definition'
+
   JSON
-    string json_encode(mixed parameter)
-      - Takes a object or an array and return JSON encoded string
-    mixed json_decode(string json[, boolean assoc=0])
-      - Decodes JSON string into PHP object/associatie array
+    Methods:
+      mixed json_decode(string json[, boolean assoc=0])
+        - Decodes a JSON string into a PHP object/associative array
+      string json_encode(mixed parameter)
+        - Takes a object or an array and returns a JSON encoded string
 
   Zip
     Class constants:
+      ZipArchive::CHECKCONS
+      ZipArchive::CM_DEFAULT
+      ZipArchive::CM_DEFLATE
+      ZipArchive::CM_DEFLATE64
+      ZipArchive::CM_IMPLODE
+      ZipArchive::CM_PKWARE_IMPLODE
+      ZipArchive::CM_REDUCE_1
+      ZipArchive::CM_REDUCE_2
+      ZipArchive::CM_REDUCE_3
+      ZipArchive::CM_REDUCE_4
+      ZipArchive::CM_SHRINK
+      ZipArchive::CM_STORE
       ZipArchive::CREATE
-      ZipArchive::EXCL
-      ZipArchive::CHECKCONS
-      ZipArchive::OVERWRITE
-      ZipArchive::FL_NOCASE
-      ZipArchive::EXCL
-      ZipArchive::CHECKCONS
-      ZipArchive::OVERWRITE
-      ZipArchive::FL_NOCASE
-      ZipArchive::FL_NODIR
-      ZipArchive::FL_COMPRESSED
-      ZipArchive::FL_UNCHANGED
-      ZipArchive::CM_DEFAULT
-      ZipArchive::CM_STORE
-      ZipArchive::CM_SHRINK
-      ZipArchive::CM_REDUCE_1
-      ZipArchive::CM_REDUCE_2
-      ZipArchive::CM_REDUCE_3
-      ZipArchive::CM_REDUCE_4
-      ZipArchive::CM_IMPLODE
-      ZipArchive::CM_DEFLATE
-      ZipArchive::CM_DEFLATE64
-      ZipArchive::CM_PKWARE_IMPLODE
-      ZipArchive::ER_OK
-      ZipArchive::FL_NOCASE
-      ZipArchive::FL_NODIR
-      ZipArchive::FL_COMPRESSED
-      ZipArchive::FL_UNCHANGED
-      ZipArchive::CM_DEFAULT
-      ZipArchive::CM_STORE
-      ZipArchive::CM_SHRINK
-      ZipArchive::CM_REDUCE_1
-      ZipArchive::CM_REDUCE_2
-      ZipArchive::CM_REDUCE_3
-      ZipArchive::CM_REDUCE_4
-      ZipArchive::CM_IMPLODE
-      ZipArchive::CM_DEFLATE
-      ZipArchive::CM_DEFLATE64
-      ZipArchive::CM_PKWARE_IMPLODE
-      ZipArchive::ER_OK
-      ZipArchive::ER_MULTIDISK
-      ZipArchive::ER_RENAME
-      ZipArchive::ER_CLOSE
-      ZipArchive::ER_SEEK
-      ZipArchive::ER_READ
-      ZipArchive::ER_WRITE
-      ZipArchive::ER_CRC
-      ZipArchive::ER_ZIPCLOSED
-      ZipArchive::ER_NOENT
-      ZipArchive::ER_EXISTS
-      ZipArchive::ER_OPEN
-      ZipArchive::ER_TMPOPEN
-      ZipArchive::ER_ZLIB
-      ZipArchive::ER_MEMORY
       ZipArchive::ER_CHANGED
+      ZipArchive::ER_CLOSE
       ZipArchive::ER_COMPNOTSUPP
-      ZipArchive::ER_EOF
-      ZipArchive::ER_INVAL
-      ZipArchive::ER_NOZIP
-      ZipArchive::ER_INTERNAL
-      ZipArchive::ER_INCONS
-      ZipArchive::ER_REMOVE
+      ZipArchive::ER_CRC
       ZipArchive::ER_DELETED
-    Methods:
-      resource zip_open(string filename)
-        - Create new zip using source uri for output
+      ZipArchive::ER_EOF
+      ZipArchive::ER_EXISTS
+      ZipArchive::ER_INCONS
+      ZipArchive::ER_INTERNAL
+      ZipArchive::ER_INVAL
+      ZipArchive::ER_MEMORY
+      ZipArchive::ER_MULTIDISK
+      ZipArchive::ER_NOENT
+      ZipArchive::ER_NOZIP
+      ZipArchive::ER_OK
+      ZipArchive::ER_OPEN
+      ZipArchive::ER_READ
+      ZipArchive::ER_REMOVE
+      ZipArchive::ER_RENAME
+      ZipArchive::ER_SEEK
+      ZipArchive::ER_TMPOPEN
+      ZipArchive::ER_WRITE
+      ZipArchive::ER_ZIPCLOSED
+      ZipArchive::ER_ZLIB
+      ZipArchive::EXCL
+      ZipArchive::FL_COMPRESSED
+      ZipArchive::FL_NOCASE
+      ZipArchive::FL_NODIR
+      ZipArchive::FL_UNCHANGED
+      ZipArchive::OVERWRITE
+
+    Functions:
       void zip_close(resource zip)
         - Close a Zip archive
-      resource zip_read(resource zip)
-        - Returns the next file in the archive
-      bool zip_entry_open(resource zip_dp, resource zip_entry [, string mode])
-        - Open a Zip File, pointed by the resource entry
       void zip_entry_close(resource zip_ent)
         - Close a zip entry
-      mixed zip_entry_read(resource zip_entry [, int len])
-        - Read from an open directory entry
-      string zip_entry_name(resource zip_entry)
-        - Return the name given a ZZip entry
       int zip_entry_compressedsize(resource zip_entry)
-        - Return the compressed size of a ZZip entry
-      int zip_entry_filesize(resource zip_entry)
-        - Return the actual filesize of a ZZip entry
+        - Return the compressed size of a Zip entry
       string zip_entry_compressionmethod(resource zip_entry)
         - Return a string containing the compression method used on a particular entry
-      mixed ZipArchive::open(string source [, int flags])
-        - Create new zip using source uri for output, return TRUE on success or the error code
-      void ZipArchive::close()
-        - close the zip archive
+      int zip_entry_filesize(resource zip_entry)
+        - Return the actual filesize of a Zip entry
+      string zip_entry_name(resource zip_entry)
+        - Return the name given a Zip entry
+      bool zip_entry_open(resource zip_dp, resource zip_entry [, string mode])
+        - Open a Zip File, pointed by the resource entry
+      mixed zip_entry_read(resource zip_entry [, int len])
+        - Read from an open directory entry
+      resource zip_open(string filename)
+        - Create new zip using source URI for output
+      resource zip_read(resource zip)
+        - Returns the next file in the archive
+    Methods:
       bool ZipArchive::addFile(string filepath[, string entryname[, int start [, int length]]])
         - Add a file in a Zip archive using its path and the name to use
       bool ZipArchive::addFromString(string name, string content)
         - Add a file using content and the entry name
-      array ZipArchive::statName(string filename[, int flags])
-        - Returns the information about a the zip entry filename
-      array ZipArchive::statIndex(int index[, int flags])
-        - Returns the zip entry informations using its index
-      int ZipArchive::locateName(string filename[, int flags])
-        - Returns the index of the entry named filename in the archive
-      string ZipArchive::getNameIndex(int index [, int flags])
-        - Returns the name of the file at position index
-      bool ZipArchive::setArchiveComment(string name, string comment)
-        - Set or remove (NULL/'') the comment of the archive
-      string ZipArchive::getArchiveComment()
-        - Returns the comment of an entry using its index
-      bool ZipArchive::setCommentName(string name, string comment)
-        - Set or remove (NULL/'') the comment of an entry using its Name
-      bool ZipArchive::setCommentIndex(int index, string comment)
-        - Set or remove (NULL/'') the comment of an entry using its index
-      string ZipArchive::getCommentName(string name)
-        - Returns the comment of an entry using its name
-      string ZipArchive::getCommentIndex(int index)
-        - Returns the comment of an entry using its index
+      void ZipArchive::close()
+        - close the zip archive
       bool ZipArchive::deleteIndex(int index)
         - Delete a file using its index
       bool ZipArchive::deleteName(string name)
         - Delete a file using its index
-      bool ZipArchive::renameIndex(int index, string new_name)
-        - Rename an entry selected by its index to new_name
-      bool ZipArchive::renameName(string name, string new_name)
-        - Rename an entry selected by its name to new_name
-      bool ZipArchive::unchangeIndex(int index)
-        - Changes to the file at position index are reverted
-      bool ZipArchive::unchangeName(string name)
-        - Changes to the file named 'name' are reverted
-      bool ZipArchive::unchangeAll()
-        - All changes to files and global information in archive are reverted
-      bool ZipArchive::unchangeAll()
-        - Revert all global changes to the archive archive.  For now, this only reverts archive comment changes
-      bool extractTo(string pathto[, mixed files])
-        - Extract one or more file from a zip archive 
+      bool ZipArchive::extractTo(string pathto[, mixed files])
+        - Extract one or more file from a zip archive to a specified destination
+      string ZipArchive::getArchiveComment()
+        - Returns the Zip archive comment
+      string ZipArchive::getCommentIndex(int index)
+        - Returns the comment of an entry using its index
+      string ZipArchive::getCommentName(string name)
+        - Returns the comment of an entry using its name
       string ZipArchive::getFromName(string entryname[, int len [, int flags]])
         - get the contents of an entry using its name
       string ZipArchive::getFromIndex(string entryname[, int len [, int flags]])
         - get the contents of an entry using its index
+      string ZipArchive::getNameIndex(int index [, int flags])
+        - Returns the name of the file at position index
       resource ZipArchive::getStream(string entryname)
-        - get a stream for an entry using its name
+        - Get a stream for an entry using its name
+      int ZipArchive::locateName(string filename[, int flags])
+        - Returns the index of the entry named filename in the archive
+      mixed ZipArchive::open(string source [, int flags])
+        - Create new zip using source URI for output, return TRUE on success or the error code
+      bool ZipArchive::renameIndex(int index, string new_name)
+        - Rename an entry selected by its index to new_name
+      bool ZipArchive::renameName(string name, string new_name)
+        - Rename an entry selected by its name to new_name
+      bool ZipArchive::setArchiveComment(string name, string comment)
+        - Set or remove (NULL/'') the comment of the archive
+      bool ZipArchive::setCommentIndex(int index, string comment)
+        - Set or remove (NULL/'') the comment of an entry using its index
+      bool ZipArchive::setCommentName(string name, string comment)
+        - Set or remove (NULL/'') the comment of an entry using its Name
+      array ZipArchive::statIndex(int index[, int flags])
+        - Returns the zip entry information using its index
+      array ZipArchive::statName(string filename[, int flags])
+        - Returns the information about a the zip entry filename
+      bool ZipArchive::unchangeAll()
+        - All changes made to the archive are reverted
+      bool ZipArchive::unchangeArchive()
+        - Revert all global changes to the archive.  For now, this only reverts archive comment changes
+      bool ZipArchive::unchangeIndex(int index)
+        - Changes to the file at position index are reverted
+      bool ZipArchive::unchangeName(string name)
+        - Changes to the file named 'name' are reverted
 
-  Filter
-    mixed filter_has_var(constant type, string variable_name)
-      - Returns true if the variable with the name 'name' exists in source
-    mixed filter_input(constant type, string variable_name [, long filter [, mixed options]])
-      - Returns the filtered variable 'name'* from source `type`
-    mixed filter_var(mixed variable [, long filter [, mixed options]])
-      - Returns the filtered version of the vriable.
-    mixed filter_input_array(constant type, [, mixed options]])
-      - Returns an array with all arguments defined in 'definition'
-    mixed filter_var_array(array data, [, mixed options]])
-      - Returns an array with all arguments defined in 'definition'
-    array ilter_list()
-      - Returns a list of all supported filters
-    int ilter_id(string filtername)
-      - Returns the filter ID belonging to a named filter
 
-New Classess:
-=============
-  RegexIterator extends FilterIterator implements Iterator, Traversable, OuterIterator
-    Constants:
-      RecursiveRegexIterator::USE_KEY
-      RecursiveRegexIterator::MATCH
-      RecursiveRegexIterator::GET_MATCH
-      RecursiveRegexIterator::ALL_MATCHES
-      RecursiveRegexIterator::SPLIT
-      RecursiveRegexIterator::REPLACE
-    Properties:
-      public $replacement
-    Methods:
-      RegexIterator::__construct(Iterator it, string regex [, int mode [, int flags [, int preg_flags]]])
-        - Create an RegexIterator from another iterator and a regular expression
-      bool RegexIterator::accept()
-        - Match (string)current() against regular expression
-      bool RegexIterator::getMode()
-        - Returns current operation mode
-      bool RegexIterator::setMode(int new_mode)
-        - Set new operation mode
-      bool RegexIterator::getFlags()
-        - Returns current operation flags
-      bool RegexIterator::setFlags(int new_flags)
-        - Set operation flags
-      bool RegexIterator::getPregFlags()
-        - Returns current PREG flags (if in use or NULL)
-      bool RegexIterator::setFlags(int new_flags)
-        - Set PREG flags
+New classes
+===========
 
-  RecursiveRegexIterator extends RegexIterator implements OuterIterator, Traversable, Iterator, RecursiveIterator
-    Methods:
-      RecursiveRegexIterator::__construct(RecursiveIterator it, string regex [, int mode [, int flags [, int preg_flags]]])
-        Create an RecursiveRegexIterator from another recursive iterator and a regular expression
-      RecursiveRegexIterator RecursiveRegexIterator::getChildren()
-        Return the inner iterator's children contained in a RecursiveRegexIterator
-      bool RecursiveRegexIterator::hasChildren()
-        Check whether the inner iterator's current element has children
-
-  DateTime
+  DateTime:
     Constants:
       DateTime::ATOM
       DateTime::COOKIE
@@ -589,26 +541,26 @@ New Classess:
     Methods:
       DateTime::__construct([string time[, DateTimeZone object]])
       - Returns new DateTime object
-      array DateTime::parse(string date)
-      - Returns associative array with detailed info about given date
       string DateTime::format(DateTime object, string format)
       - Returns date formatted according to given format
-      proto void DateTime::modify(DateTime object, string modify)
-      - Alters the timestamp
-      DateTimeZone DateTime::getTimezone(DateTime object)
-      - Return new DateTimeZone object relative to give DateTime
-      void DateTime::setTimezone(DateTime object, DateTimeZone object)
-      - Sets the timezone for the DateTime object
       long DateTime::getOffset(DateTime object)
       - Returns the DST offset
-      void DateTime::setTime(DateTime object, long hour, long minute[, long second])
-      - Sets the time
+      DateTimeZone DateTime::getTimezone(DateTime object)
+      - Return new DateTimeZone object relative to give DateTime
+      void DateTime::modify(DateTime object, string modify)
+      - Alters the timestamp
+      array DateTime::parse(string date)
+      - Returns associative array with detailed info about given date
       void DateTime::setDate(DateTime object, long year, long month, long day)
       - Sets the date
       void DateTime::setISODate(DateTime object, long year, long week[, long day])
       - Sets the ISO date
+      void DateTime::setTime(DateTime object, long hour, long minute[, long second])
+      - Sets the time
+      void DateTime::setTimezone(DateTime object, DateTimeZone object)
+      - Sets the timezone for the DateTime object
 
-  DateTimeZone
+  DateTimeZone:
     Methods:
       DateTimeZone DateTimeZone::__construct(string timezone)
       - Returns new DateTimeZone object
@@ -617,12 +569,55 @@ New Classess:
       long DateTimeZone::getOffset(DateTimeZone object, DateTime object)
       - Returns the timezone offset
       array DateTimeZone::getTransitions(DateTimeZone object)
-      - Returns numeracilly indexed array containing associative array for all transitions for the timezone
+      - Returns numerically indexed array containing associative array for all transitions for the timezone
+
+  RecursiveRegexIterator:
+      extends RegexIterator
+      implements OuterIterator, Traversable, Iterator, RecursiveIterator
+    Methods:
+      RecursiveRegexIterator::__construct(RecursiveIterator it, string regex [, int mode [, int flags [, int preg_flags]]])
+        Create an RecursiveRegexIterator from another recursive iterator and a regular expression
+      RecursiveRegexIterator RecursiveRegexIterator::getChildren()
+        Return the inner iterator's children contained in a RecursiveRegexIterator
+      bool RecursiveRegexIterator::hasChildren()
+        Check whether the inner iterator's current element has children
+
+  RegexIterator:
+      extends FilterIterator
+      implements Iterator, Traversable, OuterIterator
+    Constants:
+      RecursiveRegexIterator::ALL_MATCHES
+      RecursiveRegexIterator::GET_MATCH
+      RecursiveRegexIterator::MATCH
+      RecursiveRegexIterator::REPLACE
+      RecursiveRegexIterator::SPLIT
+      RecursiveRegexIterator::USE_KEY
+    Properties:
+      public $replacement
+    Methods:
+      RegexIterator::__construct(Iterator it, string regex [, int mode [, int flags [, int preg_flags]]])
+        - Create an RegexIterator from another iterator and a regular expression
+      bool RegexIterator::accept()
+        - Match (string)current() against regular expression
+      bool RegexIterator::getFlags()
+        - Returns current operation flags
+      bool RegexIterator::getMode()
+        - Returns current operation mode
+      bool RegexIterator::getPregFlags()
+        - Returns current PREG flags (if in use or NULL)
+      bool RegexIterator::setFlags(int new_flags)
+        - Set operation flags
+      bool RegexIterator::setMode(int new_mode)
+        - Set new operation mode
+      bool RegexIterator::setPregFlags(int new_flags)
+        - Set PREG flags
 
 
-New methods:
-============
-  ext/dom
+New methods
+===========
+
+In ext/dom
+==========
     DOMDocument:
       DOMDocument::registerNodeClass(string baseclass, string extendedclass)
         - Register extended class used to create base node type
@@ -630,222 +625,268 @@ New methods:
     DOMElement:
       DOMElement::setIDAttribute(string name, boolean isId)
         - Declares the attribute specified by name to be of type ID
-      DOMElement::setIDAttributeNS(string namespaceURI, string localName, boolean isId)
-        - Declares the attribute specified by local name and namespace URI to be of type ID
       DOMElement::setIDAttributeNode(DOMAttr idAttr, boolean isId)
         - Declares the attribute specified by node to be of type ID
+      DOMElement::setIDAttributeNS(string namespaceURI, string localName, boolean isId)
+        - Declares the attribute specified by local name and namespace URI to be of type ID
 
     DOMNode:
-      DOMNode::getNodePath()
-        - Gets an xpath for a node
       DOMNode::C14N([bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
         - Canonicalize nodes to a string
       DOMNode::C14NFile(string uri [, bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
         - Canonicalize nodes to a file
+      DOMNode::getNodePath()
+        - Gets an xpath for a node
 
-  ext/soap
+In ext/soap
+===========
     SoapServer:
       SoapServer::setObject(object obj)
         - Sets object which will handle SOAP requests
 
-  ext/spl
+In ext/spl
+==========
     ArrayObject:
       int ArrayObject::asort(void)
         - Sort the entries by values
       int ArrayObject::ksort(void)
         - Sort the entries by key
+      int ArrayObject::natcasesort(void)
+        - Sort the entries by key using case insensitive "natural order" algorithm.
+      int ArrayObject::natsort(void)
+        - Sort the entries by values using "natural order" algorithm.
       int ArrayObject::uasort(callback cmp_function)
         - Sort the entries by values user defined function
       int ArrayObject::uksort(callback cmp_function)
         - Sort the entries by key using user defined function.
-      int ArrayObject::natsort(void)
-        - Sort the entries by values using "natural order" algorithm.
-      int ArrayObject::natcasesort(void)
-        - Sort the entries by key using case insensitive "natural order" algorithm.
 
-    SplFileObject
-      void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"']])
-        - Set the delimiter and enclosure character used in fgetcsv
-      array("delimiter" =>, "enclosure" =>) SplFileObject::getCsvControl(void)
-        - Get the delimiter and enclosure character used in fgetcsv
+    AppendIterator:
+      ArrayIterator AppendIterator::getArrayIterator()
+        Get access to inner ArrayIterator
+      int AppendIterator::getIteratorIndex()
+        Get index of iterator
 
-    CachingIterator
-      void CachingIterator::offsetSet(mixed index, mixed newval)
-        - Set given index in cache
-      string CachingIterator::offsetGet(mixed index)
-        - Return the internal cache if used
-      void CachingIterator::offsetUnset(mixed index)
-        - Unset given index in cache
-      bool CachingIterator::offsetExists(mixed index)
-        Return whether the requested index exists
+    CachingIterator:
       bool CachingIterator::getCache()
         Return the cache
       int CachingIterator::getFlags()
         Return the internal flags
+      bool CachingIterator::offsetExists(mixed index)
+        Return whether the requested index exists
+      string CachingIterator::offsetGet(mixed index)
+        - Return the internal cache if used
+      void CachingIterator::offsetSet(mixed index, mixed newval)
+        - Set given index in cache
+      void CachingIterator::offsetUnset(mixed index)
+        - Unset given index in cache
       void CachingIterator::setFlags()
         Set the internal flags
-      int AppendIterator::getIteratorIndex()
-        Get index of iterator
-      ArrayIterator AppendIterator::getArrayIterator()
-        Get access to inner ArrayIterator
+
+    SplFileObject:
+      array("delimiter" =>, "enclosure" =>) SplFileObject::getCsvControl(void)
+        - Get the delimiter and enclosure character used in fgetcsv
+      void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"']])
+        - Set the delimiter and enclosure character used in fgetcsv
+
+    XMLReader:
       boolean XMLReader::setSchema(string filename)
         Use W3C XSD schema to validate the document as it is processed. Activation is only possible before the first Read()
 
 
-New class constants:
-====================
-  SplFileObject::READ_AHEAD
-  SplFileObject::SKIP_EMPTY
-  SplFileObject::READ_CSV
+New class constants
+===================
 
-  CachingIterator::TOSTRING_USE_INNER
-  CachingIterator::FULL_CACHE
-
-  PDO::FETCH_PROPS_LATE
+In ext/pdo
+==========
   PDO::ATTR_DEFAULT_FETCH_MODE
+  PDO::FETCH_PROPS_LATE
+
+In ext/spl
+==========
+  CachingIterator::FULL_CACHE
+  CachingIterator::TOSTRING_USE_INNER
+
+  SplFileObject::READ_AHEAD
+  SplFileObject::READ_CSV
+  SplFileObject::SKIP_EMPTY
 
 
-New functions:
-==============
-  ext/mbstring
-    int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
-      - Finds position of first occurrence of a string within another, case insensitive
-    int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
-      - Finds position of last occurrence of a string within another, case insensitive
-    string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
-      - Finds first occurrence of a string within another
-    string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
-      - Finds the last occurrence of a character in a string within another
-    string mb_stristr(string haystack, string needle[, bool part[, string encoding]])
-      - Finds first occurrence of a string within another, case insensitive
-    string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
-      - Finds the last occurrence of a character in a string within another, case insensitive
+New functions
+=============
+
+In the PHP core
+===============
+    array array_fill_keys(array keys, mixed val)
+      - Create an array using the elements of the first parameter as keys, each initialized to val
+    array error_get_last()
+      - Get the last occurred error as associative array. Returns NULL if there hasn't been an error yet
+    string image_type_to_extension(int imagetype [, bool include_dot])
+      - Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype
+    int memory_get_peak_usage([real_usage])
+      - Returns the peak allocated by PHP memory
+    array timezone_abbreviations_list()
+     - Returns associative array containing DST, offset and the timezone name
+    array timezone_identifiers_list()
+     - Returns numerically indexed array with all timezone identifiers
+    string timezone_name_from_abbr(string abbr[, long gmtOffset[, long isdst]])
+     - Returns the timezone name from abbreviation
+
+In ext/mbstring
+===============
     array mb_list_encodings_alias_names([string encoding])
       - Returns an array of all supported entity encodings
     mixed mb_list_mime_names([string encoding])
       - Returns an array or string of all supported mime names
+    int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
+      - Finds position of first occurrence of a string within another, case insensitive
+    string mb_stristr(string haystack, string needle[, bool part[, string encoding]])
+      - Finds first occurrence of a string within another, case insensitive
+    string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
+      - Finds the last occurrence of a character in a string within another
+    string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
+      - Finds the last occurrence of a character in a string within another, case insensitive
+    int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
+      - Finds position of last occurrence of a string within another, case insensitive
+    string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
+      - Finds first occurrence of a string within another
 
-  ext/openssl
-    array openssl_csr_get_subject(mixed csr [, bool use_short_names])
-      - Returns the subject of a CERT
+In ext/openssl
+==============
     resource openssl_csr_get_public_key(mixed csr)
+      - Extracts public key from a CERT and prepares it for use
+    array openssl_csr_get_subject(mixed csr [, bool use_short_names])
       - Returns the subject of a CERT
     array openssl_pkey_get_details(resource key)
       - returns an array with the key details (bits, pkey, type)
 
-  ext/spl
+In ext/spl
+==========
     string spl_object_hash(object obj)
       - Return hash id for given object
     int iterator_apply(Traversable it, mixed function [, mixed params])
       - Calls a function for every element in an iterator
 
-  ext/pcre
+In ext/pcre
+===========
     int preg_last_error(void)
-      - Returns the error code of the last regexp execution.
+      - Returns the error code of the last regex execution
 
-  ext/pgsql
+In ext/pgsql
+============
     mixed pg_field_table(resource result, int field_number[, bool oid_only])
       - Returns the name of the table field belongs to, or table's oid if oid_only is true
 
-  ext/posix
+In ext/posix
+============
     bool posix_initgroups(string name, int base_group_id)
       - Calculate the group access list for the user specified in name
 
-  ext/standard
-    array array_fill_keys(array keys, mixed val)
-      - Create an array using the elements of the first parameter as keys each initialized to val
-    int memory_get_peak_usage([real_usage])
-      - Returns the peak allocated by PHP memory
-    array error_get_last()
-      - Get the last occurred error as associative array. Returns NULL if there hasn't been an error yet
-    string image_type_to_extension(int imagetype [, bool include_dot])
-      - Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype
-
-  ext/gmp
+In ext/gmp
+==========
     resource gmp_nextprime(resource a)
       - Finds next prime of a
 
-  ext/xmlwriter
+In ext/xmlwriter
+================
     bool xmlwriter_full_end_element(resource xmlwriter)
      - End current element - returns FALSE on error
     bool xmlwriter_write_raw(resource xmlwriter, string content)
      - Write text - returns FALSE on error
 
-  ext/date
-    array timezone_identifiers_list()
-     - Returns numerically index array with all timezone identifiers
-    array timezone_abbreviations_list()
-     - Returns associative array containing dst, offset and the timezone name
-    string timezone_name_from_abbr(string abbr[, long gmtOffset[, long isdst]])
-     - Returns the timezone name from abbrevation
 
+New optional parameters
+=======================
 
-New optional parameters:
-========================
-  - array curl_multi_info_read(resource mh [, long msgs_in_queue]) (msgs_in_queue)
-  - int mb_strrpos(string haystack, string needle [, int offset [, string encoding]]) (offset)
-  - int openssl_verify(string data, string signature, mixed key [, int signature_algo]) (signature_algo)
-  - string pg_escape_string([resource connection,] string data) (connection)
-  - string pg_escape_bytea([resource connection,] string data) (connection)
-  - object SimpleXMLElement::children([string ns [, bool is_prefix]]) (is_prefix)
-  - array SimpleXMLElement::attributes([string ns [, bool is_prefix]]) (is_prefix)
-  - SimpleXMLElement simplexml_load_file(string filename [, string class_name [, int options [, string ns [, bool is_prefix]]]]) (ns && is_prefix)
-  - SimpleXMLElement simplexml_load_string(string data [, string class_name [, int options [, string ns [, bool is_prefix]]]]) (ns && is_prefix)
-  - SimpleXMLElement::__construct(string data [, int options [, bool data_is_url [, string ns [, bool is_prefix]]]]) (ns && is_prefix)
+In the PHP core
+===============
   - string base64_decode(string str[, bool strict=false]) (strict)
   - bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly=false]]]]]] (httponly)
   - bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly=false]]]]]] (httponly)
   - void session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure[, bool httponly]]]]) (httponly)
   - int memory_get_usage([bool real_usage=false]) (real_usage)
+
+In ext/curl
+===========
+  - array curl_multi_info_read(resource mh [, long msgs_in_queue]) (msgs_in_queue)
+
+In ext/mbstring
+===============
+  - int mb_strrpos(string haystack, string needle [, int offset [, string encoding]]) (offset)
+
+In ext/openssl
+==============
+  - int openssl_verify(string data, string signature, mixed key [, int signature_algo]) (signature_algo)
+
+In ext/pgsql
+============
+  - string pg_escape_bytea([resource connection,] string data) (connection)
+  - string pg_escape_string([resource connection,] string data) (connection)
+
+In ext/simplexml
+================
+  - SimpleXMLElement::__construct(string data [, int options [, bool data_is_url [, string ns [, bool is_prefix]]]]) (ns, is_prefix)
+  - SimpleXMLElement SimpleXMLElement::attributes([string ns [, bool is_prefix]]) (is_prefix)
+  - SimpleXMLElement SimpleXMLElement::children([string ns [, bool is_prefix]]) (is_prefix)
+  - SimpleXMLElement simplexml_load_file(string filename [, string class_name [, int options [, string ns [, bool is_prefix]]]]) (ns, is_prefix)
+  - SimpleXMLElement simplexml_load_string(string data [, string class_name [, int options [, string ns [, bool is_prefix]]]]) (ns, is_prefix)
+
+In ext/xmlreader
+================
   - boolean XMLReader::open(string URI [, string encoding [, int options]]) (encoding, options)
   - boolean XMLReader::XML(string source [, string encoding [, int options]]) (encoding, options)
 
-New INI settings:
-=================
+
+New INI settings
+================
+allow_url_include PHP_INI_SYSTEM, default: false
 pcre.backtrack_limit PHP_INI_ALL, default: 100000
 pcre.recursion_limit PHP_INI_ALL, default: 100000
 session.cookie_httponly PHP_INI_ALL, default: false
-allow_url_include PHP_INI_SYSTEM, default: false
 
-New global constants:
-=====================
-  ext/curl
-    - CURLE_LDAP_INVALID_URL
+
+New global constants
+====================
+
+In the PHP core
+===============
+    - M_EULER
+    - M_LNPI
+    - M_SQRT3
+    - M_SQRTPI
+    - PATHINFO_FILENAME
+    - PREG_BACKTRACK_LIMIT_ERROR
+    - PREG_BAD_UTF8_ERROR
+    - PREG_INTERNAL_ERROR
+    - PREG_NO_ERROR
+    - PREG_RECURSION_LIMIT_ERROR
+    - UPLOAD_ERR_EXTENSION
+
+In ext/curl
+===========
     - CURLE_FILESIZE_EXCEEDED
     - CURLE_FTP_SSL_FAILED
-    - CURLOPT_FTPSSLAUTH
+    - CURLE_LDAP_INVALID_URL
     - CURLFTPAUTH_DEFAULT
     - CURLFTPAUTH_SSL
     - CURLFTPAUTH_TLS
-    - CURLOPT_FTP_SSL
+    - CURLFTPSSL_ALL
+    - CURLFTPSSL_CONTROL
     - CURLFTPSSL_NONE
     - CURLFTPSSL_TRY
-    - CURLFTPSSL_CONTROL
-    - CURLFTPSSL_ALL
+    - CURLOPT_FTP_SSL
+    - CURLOPT_FTPSSLAUTH
 
-  ext/openssl
-    - OPENSSL_VERSION_TEXT
+In ext/openssl
+==============
     - OPENSSL_VERSION_NUMBER
+    - OPENSSL_VERSION_TEXT
 
-  ext/pcre
-    - PREG_NO_ERROR
-    - PREG_INTERNAL_ERROR
-    - PREG_BACKTRACK_LIMIT_ERROR
-    - PREG_RECURSION_LIMIT_ERROR
-    - PREG_BAD_UTF8_ERROR
-
-  ext/snmp
+In ext/snmp
+===========
     - SNMP_OID_OUTPUT_FULL
     - SNMP_OID_OUTPUT_NUMERIC
 
-  ext/standard
-    - M_SQRTPI
-    - M_LNPI
-    - M_EULER
-    - M_SQRT3
-    - PATHINFO_FILENAME
-    - UPLOAD_ERR_EXTENSION
-
-  ext/sysvmsg
+In ext/sysvmsg
+==============
     - MSG_EAGAIN
     - MSG_ENOMSG
