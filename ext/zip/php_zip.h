@@ -42,6 +42,13 @@ extern zend_module_entry zip_module_entry;
 # endif
 #endif
 
+#if PHP_MAJOR_VERSION < 6
+#define zend_ascii_hash_find(hash, name, sizeof_name, val) zend_hash_find(hash, name, sizeof_name, val)
+#define add_ascii_assoc_long(array, name, val) add_assoc_long(array, name, val)
+#define add_ascii_assoc_string(array, name, val, dup) add_assoc_long(array, name, val, dup)
+
+#endif
+
 typedef struct _ze_zip_rsrc {
 	struct zip *za;
 	int index_current;

@@ -11,10 +11,10 @@ $dirname = dirname(__FILE__) . '/';
 $file = $dirname . 'test_with_comment.zip';
 include $dirname . 'utils.inc';
 $zip = new ZipArchive;
-if (!$zip->open($file)) {
+if ($zip->open($file) !== TRUE) {
+	echo "open failed.\n";
 	exit('failed');
 }
-
 
 $zip->extractTo($dirname . '__oo_extract_tmp');
 if (!is_dir($dirname . '__oo_extract_tmp')) {
@@ -26,7 +26,7 @@ if (!is_dir($dirname .'__oo_extract_tmp/foobar')) {
 }
 
 if (!file_exists($dirname . '__oo_extract_tmp/foobar/baz')) {
-	echo "failed. mkdir foobar\n";
+	echo "failed. extract foobar/baz\n";
 } else {
 	echo file_get_contents($dirname . '__oo_extract_tmp/foobar/baz') . "\n";
 }
@@ -69,6 +69,19 @@ rmdir_rf($dirname . '__oo_extract_tmp');
 ?>
 --EXPECTF--
 blabla laber rababer sülz
+
+bar
+
+foo
+
+
+bar
+
+bar
+
+foo
+--UEXPECTF--
+blabla laber rababer sÃ¼lz
 
 bar
 

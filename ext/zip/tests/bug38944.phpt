@@ -38,3 +38,22 @@ object(ZipArchive)#%d (5) {
   string(0) ""
 }
 Done
+--UEXPECTF--	
+int(0)
+int(0)
+int(0)
+string(0) ""
+string(0) ""
+object(ZipArchive)#1 (5) {
+  [u"status"]=>
+  int(0)
+  [u"statusSys"]=>
+  int(0)
+  [u"numFiles"]=>
+  int(0)
+  [u"filename"]=>
+  string(0) ""
+  [u"comment"]=>
+  string(0) ""
+}
+Done
