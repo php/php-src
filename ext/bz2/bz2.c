@@ -477,7 +477,7 @@ static PHP_FUNCTION(bzerror)
    Compresses a string into BZip2 encoded data */
 static PHP_FUNCTION(bzcompress)
 {
-	char	*source;		/* String to compress */
+	zstr	source;		/* String to compress */
 	int	source_len;
 	zend_uchar source_type;
 	long	block_size = 4,		/* Block size for compression algorithm */
@@ -498,14 +498,14 @@ static PHP_FUNCTION(bzcompress)
 	dest = emalloc(dest_len + 1);
 	
 	if (source_type == IS_UNICODE) {
-		source = zend_unicode_to_ascii((UChar*)source, source_len TSRMLS_CC);
-		if (!source) {
+		source.s = zend_unicode_to_ascii(source.u, source_len TSRMLS_CC);
+		if (!source.s) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
 			RETURN_FALSE;
 		}
 	}
 
-	error = BZ2_bzBuffToBuffCompress(dest, &dest_len, source, source_len, block_size, 0, work_factor);
+	error = BZ2_bzBuffToBuffCompress(dest, &dest_len, source.s, source_len, block_size, 0, work_factor);
 	if (error != BZ_OK) {
 		efree(dest);
 		RETVAL_LONG(error);
@@ -520,7 +520,7 @@ static PHP_FUNCTION(bzcompress)
 	}
 
 	if (source_type == IS_UNICODE) {
-		efree(source);
+		efree(source.s);
 	}
 }
 /* }}} */

@@ -3205,7 +3205,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zval *IM;
 	long size, x, y, col;
 	zend_uchar str_type;
-	char *str;
+	zstr str;
 	int str_len, i;
 	gdImagePtr im;
 	gdFontPtr font;
@@ -3215,8 +3215,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (str_type == IS_UNICODE) {
-		str = zend_unicode_to_ascii((UChar*)str, str_len TSRMLS_CC);
-		if (!str) {
+		str.s = zend_unicode_to_ascii(str.u, str_len TSRMLS_CC);
+		if (!str.s) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received.  Consider using the TTF functions for Unicode output");
 			RETURN_FALSE;
 		}		
@@ -3228,21 +3228,21 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	switch (mode) {
 		case 0:
-			gdImageChar(im, font, x, y, (int) ((unsigned char)str[0]), col);
+			gdImageChar(im, font, x, y, (int) ((unsigned char)str.s[0]), col);
 			break;
 		case 1:
-			php_gdimagecharup(im, font, x, y, (int) ((unsigned char)str[0]), col);
+			php_gdimagecharup(im, font, x, y, (int) ((unsigned char)str.s[0]), col);
 			break;
 		case 2:
 			for (i = 0; (i < str_len); i++) {
-				gdImageChar(im, font, x, y, (int) ((unsigned char)str[i]), col);
+				gdImageChar(im, font, x, y, (int) ((unsigned char)str.s[i]), col);
 				x += font->w;
 			}
 			break;
 		case 3: {
 			for (i = 0; (i < str_len); i++) {
 				/* php_gdimagecharup(im, font, x, y, (int) str[i], col); */
-				gdImageCharUp(im, font, x, y, (int) ((unsigned char)str[i]), col);
+				gdImageCharUp(im, font, x, y, (int) ((unsigned char)str.s[i]), col);
 				y -= font->w;
 			}
 			break;
@@ -3250,7 +3250,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (str_type == IS_UNICODE) {
-		efree(str);
+		efree(str.s);
 	}
 
 	RETURN_TRUE;
