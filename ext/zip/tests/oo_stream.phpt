@@ -18,7 +18,7 @@ $fp = $zip->getStream('foo');
 
 var_dump($fp);
 if(!$fp) exit("\n");
-$contents = '';
+$contents = b'';
 while (!feof($fp)) {
 	$contents .= fread($fp, 255);
 }
@@ -32,7 +32,7 @@ $fp = fopen('zip://' . dirname(__FILE__) . '/test_with_comment.zip#foo', 'rb');
 if (!$fp) {
   exit("cannot open\n");
 }
-$contents = '';
+$contents = b'';
 while (!feof($fp)) {
   $contents .= fread($fp, 2);
 }
