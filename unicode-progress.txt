@@ -57,7 +57,7 @@ ext/openssl
 
 ext/zip
 ------------
-  Status: In Progress
+  Status: Initial implementation done. Waiting for reviews/feedbacks. 
   (Pierre)
 
 
