@@ -48,3 +48,29 @@ object(myZip)#1 (%d) {
   ["comment"]=>
   string(0) ""
 }
+--UEXPECTF--
+array(1) {
+  [0]=>
+  int(1)
+}
+object(myZip)#1 (8) {
+  [u"test":u"myZip":private]=>
+  int(0)
+  [u"testp"]=>
+  unicode(6) "foobar"
+  [u"testarray":u"myZip":private]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+  [u"status"]=>
+  int(0)
+  [u"statusSys"]=>
+  int(0)
+  [u"numFiles"]=>
+  int(0)
+  [u"filename"]=>
+  string(0) ""
+  [u"comment"]=>
+  string(0) ""
+}
