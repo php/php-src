@@ -1658,6 +1658,7 @@ ZIPARCHIVE_METHOD(extractTo)
 	zval **pathto_zval;
 	char *pathto;
 	char *file;
+	int file_len;
 	int pathto_len;
 	int ret, i;
 
@@ -1691,9 +1692,22 @@ ZIPARCHIVE_METHOD(extractTo)
 	if (zval_files) {
 		switch (Z_TYPE_P(zval_files)) {
 			case IS_UNICODE:
+				if (FAILURE == php_stream_path_param_encode(&zval_files, &file, &file_len, REPORT_ERRORS, FG(default_context))) {
+					RETURN_FALSE;
+				}
 			case IS_STRING:
-				file = Z_STRVAL_P(zval_files);
+				if (Z_TYPE_P(zval_files) != IS_UNICODE) {
+					file_len = Z_STRLEN_P(zval_files);
+					file = Z_STRVAL_P(zval_files);
+				}
+				if (file_len < 1) {
+					efree(file);
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Empty string as filename");
+					RETURN_FALSE;
+				}
+
 				if (!php_zip_extract_file(intern, pathto, file TSRMLS_CC)) {
+					efree(file);
 					RETURN_FALSE;
 				}
 				break;
@@ -1707,9 +1721,23 @@ ZIPARCHIVE_METHOD(extractTo)
 						switch (Z_TYPE_PP(zval_file)) {
 							case IS_LONG:
 								break;
+							case IS_UNICODE:
+								if (FAILURE == php_stream_path_param_encode(zval_file, &file, &file_len, REPORT_ERRORS, FG(default_context))) {
+									RETURN_FALSE;
+								}
 							case IS_STRING:
-								file = Z_STRVAL_PP(zval_file);
+								if (Z_TYPE_P(zval_files) != IS_UNICODE) {
+									file_len = Z_STRLEN_PP(zval_file);
+									file = Z_STRVAL_PP(zval_file);
+								}
+								if (file_len < 1) {
+									efree(file);
+									php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Empty string as filename");
+									RETURN_FALSE;
+								}
+
 								if (!php_zip_extract_file(intern, pathto, file TSRMLS_CC)) {
+									efree(file);
 									RETURN_FALSE;
 								}
 								break;
