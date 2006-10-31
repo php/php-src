@@ -52,6 +52,10 @@ PHP_FUNCTION(mysqli_connect)
 		return;
 	}
 
+	if (!socket_len) {
+		socket = NULL;
+	}
+
 	if (!passwd) {
 		passwd = MyG(default_pw);
 		if (!username){
@@ -157,7 +161,7 @@ PHP_FUNCTION(mysqli_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_object (object result [, string class_name [, NULL|array ctor_params]]) 
+/* {{{ proto mixed mysqli_fetch_object (object result [, string class_name [, NULL|array ctor_params]]) U
    Fetch a result row as an object */
 PHP_FUNCTION(mysqli_fetch_object) 
 {
