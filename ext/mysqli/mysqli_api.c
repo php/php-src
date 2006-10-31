@@ -1084,7 +1084,7 @@ PHP_FUNCTION(mysqli_get_server_version)
 }
 /* }}} */
 
-/* {{{ proto string mysqli_info(object link)
+/* {{{ proto string mysqli_info(object link) U
    Get information about the most recent query */
 PHP_FUNCTION(mysqli_info)
 {
@@ -1631,7 +1631,7 @@ PHP_FUNCTION(mysqli_stmt_data_seek)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_stmt_field_count(object stmt) { U
+/* {{{ proto int mysqli_stmt_field_count(object stmt) U
    Return the number of result columns for the given statement */
 PHP_FUNCTION(mysqli_stmt_field_count)
 {
