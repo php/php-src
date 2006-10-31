@@ -55,14 +55,6 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		char *q = NULL;
 		PGresult *res;
 
-		if (S->is_prepared) {
-			spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
-			res = PQexec(H->server, q);
-			efree(q);
-			if (res) {
-				PQclear(res);
-			}
-		}
 		efree(S->stmt_name);
 		S->stmt_name = NULL;
 	}
