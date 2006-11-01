@@ -163,12 +163,15 @@ struct zip_source;
 
 
 int zip_add(struct zip *, const char *, struct zip_source *);
+int zip_add_dir(struct zip *, const char *);
 int zip_close(struct zip *);
 int zip_delete(struct zip *, int);
+void zip_error_clear(struct zip *);
 void zip_error_get(struct zip *, int *, int *);
 int zip_error_get_sys_type(int);
 int zip_error_to_str(char *, size_t, int, int);
 int zip_fclose(struct zip_file *);
+void zip_file_error_clear(struct zip_file *);
 void zip_file_error_get(struct zip_file *, int *, int *);
 const char *zip_file_strerror(struct zip_file *);
 struct zip_file *zip_fopen(struct zip *, const char *, int);
@@ -194,6 +197,7 @@ struct zip_source *zip_source_zip(struct zip *, struct zip *, int, int,
 				  off_t, off_t);
 int zip_stat(struct zip *, const char *, int, struct zip_stat *);
 int zip_stat_index(struct zip *, int, int, struct zip_stat *);
+void zip_stat_init(struct zip_stat *);
 const char *zip_strerror(struct zip *);
 int zip_unchange(struct zip *, int);
 int zip_unchange_all(struct zip *);

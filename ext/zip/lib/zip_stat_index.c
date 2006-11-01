@@ -68,7 +68,6 @@ zip_stat_index(struct zip *za, int index, int flags, struct zip_stat *st)
 	    return -1;
 	}
 	
-	st->index = index;
 	st->crc = za->cdir->entry[index].crc;
 	st->size = za->cdir->entry[index].uncomp_size;
 	st->mtime = za->cdir->entry[index].last_mod;
@@ -87,6 +86,7 @@ zip_stat_index(struct zip *za, int index, int flags, struct zip_stat *st)
 	/* st->bitflags = za->cdir->entry[index].bitflags; */
     }
 
+    st->index = index;
     st->name = name;
     
     return 0;

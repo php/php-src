@@ -935,6 +935,35 @@ ZIPARCHIVE_METHOD(close)
 }
 /* }}} */
 
+/* {{{ proto bool createEmptyDir(string dirname) U
+Returns the index of the entry named filename in the archive */
+ZIPARCHIVE_METHOD(addEmptyDir)
+{
+	struct zip *intern;
+	zval *this = getThis();
+	char *dirname;
+	int   dirname_len;
+
+	if (!this) {
+		RETURN_FALSE;
+	}
+
+	ZIP_FROM_OBJECT(intern, this);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&",
+			&dirname, &dirname_len, UG(ascii_conv)) == FAILURE) {
+		return;
+	}
+	if (dirname_len<1) {
+		RETURN_FALSE;
+	}
+
+	if (zip_add_dir(intern, (const char *)dirname) < 0) {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 /* {{{ proto bool addFile(string filepath[, string entryname[, int start [, int length]]]) U
 Add a file in a Zip archive using its path and the name to use. */
 ZIPARCHIVE_METHOD(addFile)
@@ -1904,6 +1933,7 @@ ZIPARCHIVE_METHOD(getStream)
 static zend_function_entry zip_class_functions[] = {
 	ZIPARCHIVE_ME(open,				NULL, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(close,				NULL, ZEND_ACC_PUBLIC)
+	ZIPARCHIVE_ME(addEmptyDir,			NULL, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(addFromString,		NULL, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(addFile,			NULL, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(renameIndex,		NULL, ZEND_ACC_PUBLIC)
