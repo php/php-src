@@ -2,7 +2,7 @@
   $NiH: zip_source_buffer.c,v 1.8 2006/04/23 14:50:49 wiz Exp $
 
   zip_source_buffer.c -- create zip data source from buffer
-  Copyright (C) 1999, 2003, 2004, 2005 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2006 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <nih@giga.or.at>
@@ -125,11 +125,9 @@ read_data(void *state, void *data, size_t len, enum zip_source_cmd cmd)
 
 	    st = (struct zip_stat *)data;
 
+	    zip_stat_init(st);
 	    st->mtime = z->mtime;
-	    st->crc = 0;
 	    st->size = z->end - z->data;
-	    st->comp_size = -1;
-	    st->comp_method = ZIP_CM_STORE;
 	    
 	    return sizeof(*st);
 	}

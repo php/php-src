@@ -1,7 +1,7 @@
 /*
-  $NiH: zip_error.c,v 1.7 2005/06/09 19:57:09 dillo Exp $
+  $NiH: zip_add_dir.c,v 1.1 2006/10/03 12:23:13 dillo Exp $
 
-  zip_error.c -- struct zip_error helper functions
+  zip_add_dir.c -- add directory
   Copyright (C) 1999-2006 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
@@ -36,69 +36,48 @@
 
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "zip.h"
 #include "zipint.h"
 
 
 
-void
-_zip_error_clear(struct zip_error *err)
+int
+zip_add_dir(struct zip *za, const char *name)
 {
-    err->zip_err = ZIP_ER_OK;
-    err->sys_err = 0;
-}
+    int len, ret;
+    char *s;
+    struct zip_source *source;
 
-
-
-void
-_zip_error_copy(struct zip_error *dst, struct zip_error *src)
-{
-    dst->zip_err = src->zip_err;
-    dst->sys_err = src->sys_err;
-}
-
-
-
-void
-_zip_error_fini(struct zip_error *err)
-{
-    free(err->str);
-    err->str = NULL;
-}
-
-
-
-void
-_zip_error_get(struct zip_error *err, int *zep, int *sep)
-{
-    if (zep)
-	*zep = err->zip_err;
-    if (sep) {
-	if (zip_error_get_sys_type(err->zip_err) != ZIP_ET_NONE)
-	    *sep = err->sys_err;
-	else
-	    *sep = 0;
+    if (name == NULL) {
+	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return -1;
     }
-}
 
-
+    s = NULL;
+    len = strlen(name);
 
-void
-_zip_error_init(struct zip_error *err)
-{
-    err->zip_err = ZIP_ER_OK;
-    err->sys_err = 0;
-    err->str = NULL;
-}
-
-
-
-void
-_zip_error_set(struct zip_error *err, int ze, int se)
-{
-    if (err) {
-	err->zip_err = ze;
-	err->sys_err = se;
+    if (name[len-1] != '/') {
+	if ((s=(char *)malloc(len+2)) == NULL) {
+	    _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
+	    return -1;
+	}
+	strcpy(s, name);
+	s[len] = '/';
+	s[len+1] = '\0';
     }
+
+    if ((source=zip_source_buffer(za, NULL, 0, 0)) == NULL) {
+	free(s);
+	return -1;
+    }
+	
+    ret = _zip_replace(za, -1, s ? s : name, source);
+
+    free(s);
+    if (ret < 0)
+	zip_source_free(source);
+
+    return ret;
 }

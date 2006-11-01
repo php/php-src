@@ -1,8 +1,8 @@
 /*
-  $NiH: zip_error.c,v 1.7 2005/06/09 19:57:09 dillo Exp $
+  $NiH: zip_stat_init.c,v 1.1 2006/10/31 12:03:04 dillo Exp $
 
-  zip_error.c -- struct zip_error helper functions
-  Copyright (C) 1999-2006 Dieter Baron and Thomas Klausner
+  zip_stat_init.c -- initialize struct zip_stat.
+  Copyright (C) 2006 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <nih@giga.or.at>
@@ -35,70 +35,19 @@
 
 
 
-#include <stdlib.h>
-
-#include "zip.h"
 #include "zipint.h"
 
 
 
 void
-_zip_error_clear(struct zip_error *err)
+zip_stat_init(struct zip_stat *st)
 {
-    err->zip_err = ZIP_ER_OK;
-    err->sys_err = 0;
-}
-
-
-
-void
-_zip_error_copy(struct zip_error *dst, struct zip_error *src)
-{
-    dst->zip_err = src->zip_err;
-    dst->sys_err = src->sys_err;
-}
-
-
-
-void
-_zip_error_fini(struct zip_error *err)
-{
-    free(err->str);
-    err->str = NULL;
-}
-
-
-
-void
-_zip_error_get(struct zip_error *err, int *zep, int *sep)
-{
-    if (zep)
-	*zep = err->zip_err;
-    if (sep) {
-	if (zip_error_get_sys_type(err->zip_err) != ZIP_ET_NONE)
-	    *sep = err->sys_err;
-	else
-	    *sep = 0;
-    }
-}
-
-
-
-void
-_zip_error_init(struct zip_error *err)
-{
-    err->zip_err = ZIP_ER_OK;
-    err->sys_err = 0;
-    err->str = NULL;
-}
-
-
-
-void
-_zip_error_set(struct zip_error *err, int ze, int se)
-{
-    if (err) {
-	err->zip_err = ze;
-	err->sys_err = se;
-    }
+    st->name = NULL;
+    st->index = -1;
+    st->crc = 0;
+    st->mtime = (time_t)-1;
+    st->size = -1;
+    st->comp_size = -1;
+    st->comp_method = ZIP_CM_STORE;
+    st->encryption_method = ZIP_EM_NONE;
 }
