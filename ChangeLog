@@ -1,3 +1,107 @@
+2006-10-31  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/spl/spl_iterators.c:
+      Fix segfault on invalid regex
+
+2006-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/examples/directoryfilterdots.inc:
+      - Fixed Bug #39090 DirectoryFilterDots doxygen docs and example is wrong
+
+2006-10-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - use zip_name_locate in getCommentName
+
+2006-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/internal/recursiveiteratoriterator.inc:
+      - Fixed Bug #39151 Parse error in recursiveiteratoriterator.php
+
+    * ext/spl/php_spl.c
+      ext/spl/php_spl.h
+      ext/spl/tests/spl_autoload_009.phpt:
+      - Fixed Bug #39313 spl_autoload triggers Fatal error
+
+2006-10-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/package.xml:
+      - bug first
+
+2006-10-31  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/bz2/bz2.c
+      ext/gd/gd.c:
+      cleaning some warnings (char* -> zstr)
+
+2006-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_hash.c:
+      - Consistency of apply funcs, #39320
+
+2006-10-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * unicode-progress.txt:
+      - update ext/zip
+
+    * ext/zip/php_zip.c:
+      - mark extractTo as U-ready, path and filenames are now encoded correctly
+
+2006-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c:
+      - Fix issue with name mangling
+
+    * ext/pdo_pgsql/pgsql_statement.c:
+      - Drop some uncompletley synched code, makes it work at least
+
+2006-10-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c
+      ext/zip/tests/oo_stream.phpt:
+      - fix possible leak in addFile when an unicode filename is given
+      - Mark getStream as Unicode ready, the tests was wrong
+        $unistring .= fread($fpbinary); $unistring remains as unicode.
+
+2006-10-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      Cleanup of 5.2 update file from Steph
+
+2006-10-31  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c:
+      Fixed function headers (added missing U)
+      fixed socket parameter (was removed by mistake in a previous commit)
+
+2006-10-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c
+      ext/zip/php_zip.h
+      ext/zip/tests/bug38943.phpt
+      ext/zip/tests/bug38944.phpt
+      ext/zip/tests/oo_extract.phpt:
+      - initial unicode support
+       . entry names will be converted to ascii. zip works with cp437
+         when 7zip support will be added, unicode string will be supported
+       . path and filenames are now encoded using php_stream_path_param_encode
+         if the filename/path is used as entry name, it is converted to ascii
+       . the stream (getStream and zip://) needs some tweak. I'm not sure if it
+         should return unicode or binary, neither how to change the default. For
+         now it returns unicode (seems to be the default :)
+      comments/suggestions welcome
+
+    * ext/filter/package.xml:
+      - update release date
+
+    * ext/zip/tests/test_with_comment.zip:
+      - add comment
+
+    * ext/zip/tests/test_with_comment.zip:
+      - missing test archive
+
 2006-10-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

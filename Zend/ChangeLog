@@ -1,3 +1,11 @@
+2006-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_hash.c:
+      - Consistency of apply funcs, #39320
+
+    * zend.c:
+      - Fix issue with name mangling
+
 2006-10-30  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h
