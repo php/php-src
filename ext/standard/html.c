@@ -1105,7 +1105,7 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 
 		matches_map = 0;
 
-		if (len + 9 > maxlen)
+		if (len + 16 > maxlen)
 			replaced = erealloc (replaced, maxlen += 128);
 
 		if (all) {
@@ -1130,9 +1130,15 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 			}
 
 			if (matches_map) {
+				int l = strlen(rep);
+				/* increase the buffer size */
+				if (len + 2 + l >= maxlen) {
+					replaced = erealloc(replaced, maxlen += 128);
+				}
+
 				replaced[len++] = '&';
 				strcpy(replaced + len, rep);
-				len += strlen(rep);
+				len += l;
 				replaced[len++] = ';';
 			}
 		}
