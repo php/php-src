@@ -73,7 +73,7 @@
     if(_val) { \
         if(Z_TYPE_PP(_val) == IS_ARRAY) { \
             _php_tidy_apply_config_array(_doc, HASH_OF(*_val) TSRMLS_CC); \
-        } else { \
+        } else if (Z_TYPE_PP(_val) != IS_NULL) { \
             convert_to_string_ex(_val); \
             TIDY_OPEN_BASEDIR_CHECK(Z_STRVAL_PP(_val)); \
             switch (tidyLoadConfig(_doc, Z_STRVAL_PP(_val))) { \
@@ -109,16 +109,16 @@
 #define FALSE 0
 #endif
 
-#define ADD_PROPERTY_STRING(_table, _key, _string) \
+#define ADD_PROPERTY_ASCII_STRING(_table, _key, _string) \
 	{ \
 		zval *tmp; \
 		MAKE_STD_ZVAL(tmp); \
 		if (_string) { \
-			ZVAL_STRING(tmp, (char *)_string, 1); \
+			ZVAL_ASCII_STRING(tmp, (char *)_string, 1); \
 		} else { \
 			ZVAL_EMPTY_STRING(tmp); \
 		} \
-		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
+		zend_ascii_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
 	}
 
 #define ADD_PROPERTY_STRINGL(_table, _key, _string, _len) \
@@ -130,7 +130,7 @@
        } else { \
            ZVAL_EMPTY_STRING(tmp); \
        } \
-       zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
+       zend_ascii_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
    }
 
 #define ADD_PROPERTY_LONG(_table, _key, _long) \
@@ -138,7 +138,7 @@
 		zval *tmp; \
 		MAKE_STD_ZVAL(tmp); \
 		ZVAL_LONG(tmp, _long); \
-		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
+		zend_ascii_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
 	}
 
 #define ADD_PROPERTY_NULL(_table, _key) \
@@ -146,7 +146,7 @@
 		zval *tmp; \
 		MAKE_STD_ZVAL(tmp); \
 		ZVAL_NULL(tmp); \
-		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
+		zend_ascii_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
 	}
 
 #define ADD_PROPERTY_BOOL(_table, _key, _bool) \
@@ -154,7 +154,7 @@
        zval *tmp; \
        MAKE_STD_ZVAL(tmp); \
        ZVAL_BOOL(tmp, _bool); \
-       zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
+       zend_ascii_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
    }
 
 #define TIDY_OPEN_BASEDIR_CHECK(filename) \
@@ -193,11 +193,17 @@ struct _PHPTidyDoc {
 	unsigned int ref_count;
 };
 
+typedef struct _PHPTidyConv {
+	UConverter *conv;
+	unsigned long ref_count;
+} PHPTidyConv;
+
 struct _PHPTidyObj {
 	zend_object         std;
 	TidyNode            node;
 	tidy_obj_type       type;
 	PHPTidyDoc          *ptdoc;
+	PHPTidyConv         *converter;
 };
 /* }}} */
 
@@ -240,7 +246,6 @@ static PHP_FUNCTION(tidy_diagnose);
 static PHP_FUNCTION(tidy_get_output);
 static PHP_FUNCTION(tidy_get_error_buffer);
 static PHP_FUNCTION(tidy_get_release);
-static PHP_FUNCTION(tidy_reset_config);
 static PHP_FUNCTION(tidy_get_config);
 static PHP_FUNCTION(tidy_get_status);
 static PHP_FUNCTION(tidy_get_html_ver);
@@ -571,6 +576,11 @@ static void tidy_object_free_storage(void *object TSRMLS_DC)
 		}
 	}
 
+	if (intern->converter && --intern->converter->ref_count <= 0) {
+		ucnv_close(intern->converter->conv);
+		efree(intern->converter);
+	}
+
 	efree(object);
 }
 
@@ -595,6 +605,7 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 			intern->ptdoc->doc = tidyCreate();
 			intern->ptdoc->ref_count = 1;
 			intern->ptdoc->errbuf = emalloc(sizeof(TidyBuffer));
+			intern->converter = NULL;
 			tidyBufInit(intern->ptdoc->errbuf);
 
 			if (tidySetErrorBuffer(intern->ptdoc->doc, intern->ptdoc->errbuf) != 0) {
@@ -612,9 +623,6 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 			TIDY_SET_DEFAULT_CONFIG(intern->ptdoc->doc);
 
 			tidy_add_default_properties(intern, is_doc TSRMLS_CC);
-			break;
-
-		default:
 			break;
 	}
 
@@ -684,6 +692,13 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type, void *extra TSRM
 			tidyBufFree(&output);
 			break;
 
+		case IS_UNICODE:
+			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
+			tidySaveBuffer (obj->ptdoc->doc, &output);
+			ZVAL_U_STRINGL(obj->converter->conv, out, (char *) output.bp, output.size, 1);
+			tidyBufFree(&output);
+			break;
+
 		default:
 			return FAILURE;
 	}
@@ -715,6 +730,12 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type, void *extra TSR
 			ZVAL_STRINGL(out, (char *) buf.bp, buf.size, 0);
 			break;
 
+		case IS_UNICODE:
+			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
+			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
+			ZVAL_U_STRINGL(obj->converter->conv, out, (char *) buf.bp, buf.size, 0);
+			break;
+
 		default:
 			return FAILURE;
 	}
@@ -724,16 +745,19 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type, void *extra TSR
 
 static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 {
-
 	TidyBuffer output = {0};
 	zval *temp;
 
 	tidySaveBuffer (obj->ptdoc->doc, &output);
-	
+
 	if (output.size) {
 		MAKE_STD_ZVAL(temp);
-		ZVAL_STRINGL(temp, (char *) output.bp, output.size, 1);
-		zend_hash_update(obj->std.properties, "value", sizeof("value"), (void *)&temp, sizeof(zval *), NULL);
+		if (UG(unicode)) {
+			ZVAL_U_STRINGL(obj->converter->conv, temp, (char *) output.bp, output.size, 1);
+		} else {
+			ZVAL_STRINGL(temp, (char *) output.bp, output.size, 1);
+		}
+		zend_ascii_hash_update(obj->std.properties, "value", sizeof("value"), (void *)&temp, sizeof(zval *), NULL);
 	}
 
 	tidyBufFree(&output);
@@ -741,7 +765,7 @@ static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 	if (obj->ptdoc->errbuf->size) {
 		MAKE_STD_ZVAL(temp);
 		ZVAL_STRINGL(temp, (char *) obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1, TRUE);
-		zend_hash_update(obj->std.properties, "errorBuffer", sizeof("errorBuffer"), (void *)&temp, sizeof(zval *), NULL);
+		zend_ascii_hash_update(obj->std.properties, "errorBuffer", sizeof("errorBuffer"), (void *)&temp, sizeof(zval *), NULL);
 	}
 }
 
@@ -763,7 +787,7 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 			ADD_PROPERTY_STRINGL(obj->std.properties, value, buf.bp, buf.size-1);
 			tidyBufFree(&buf);
 
-			ADD_PROPERTY_STRING(obj->std.properties, name, tidyNodeGetName(obj->node));
+			ADD_PROPERTY_ASCII_STRING(obj->std.properties, name, tidyNodeGetName(obj->node));
 			ADD_PROPERTY_LONG(obj->std.properties, type, tidyNodeGetType(obj->node));
 			ADD_PROPERTY_LONG(obj->std.properties, line, tidyNodeLine(obj->node));
 			ADD_PROPERTY_LONG(obj->std.properties, column, tidyNodeColumn(obj->node));
@@ -942,20 +966,26 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 static int php_tidy_parse_string(PHPTidyObj *obj, char *string, int len, char *enc TSRMLS_DC)
 {
 	TidyBuffer buf = {0};
-	
+	UErrorCode Uerror = U_ZERO_ERROR;
+
 	if(enc) {
 		if (tidySetCharEncoding(obj->ptdoc->doc, enc) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not set encoding '%s'", enc);
 			return FAILURE;
 		}
 	}
-	
+
+	if (UG(unicode)) {
+		obj->converter = emalloc(sizeof(PHPTidyConv));
+		obj->converter->conv = ucnv_open(tidyOptGetEncName(obj->ptdoc->doc, TidyOutCharEncoding), &Uerror);
+		obj->converter->ref_count = 1;
+	}
+
 	tidyBufInit(&buf);
 	tidyBufAttach(&buf, (byte *) string, len);
 	if (tidyParseBuffer(obj->ptdoc->doc, &buf) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", obj->ptdoc->errbuf->bp);
 		return FAILURE;
-	
 	}
 	tidy_doc_update_properties(obj TSRMLS_CC);
 
@@ -1129,27 +1159,38 @@ static int php_tidy_output_handler(void **nothing, php_output_context *output_co
    Parse a document stored in a string */
 static PHP_FUNCTION(tidy_parse_string)
 {
-	char *input, *enc = NULL;
-	int input_len, enc_len = 0;
+	zstr input, enc = NULL_ZSTR;
+	zend_uchar input_type, enc_type = IS_STRING;
+	int input_len, enc_len;
 	zval **options = NULL;
-	
 	PHPTidyObj *obj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zs", &input, &input_len, &options, &enc, &enc_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|Zt", &input, &input_len, &input_type, &options, &enc, &enc_len, &enc_type) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	if (enc_type != IS_STRING) {
+		enc.s = zend_unicode_to_ascii(enc.u, enc_len TSRMLS_CC);
+		if (!enc.s) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
+			RETURN_FALSE;
+		}
 	}
 
 	tidy_instanciate(tidy_ce_doc, return_value TSRMLS_CC);
 	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
-		
+
 	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
-	
-	if(php_tidy_parse_string(obj, input, input_len, enc TSRMLS_CC) == FAILURE) {
+
+	if (php_tidy_parse_string(obj, input.s, input_len, enc.s TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value);
 		INIT_ZVAL(*return_value);
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
-	
+
+	if (enc_type != IS_STRING) {
+		efree(enc.s);
+	}
 }
 /* }}} */
 
@@ -1747,6 +1788,8 @@ static TIDY_NODE_METHOD(getParent)
 		newobj->type = is_node;
 		newobj->ptdoc = obj->ptdoc;
 		newobj->ptdoc->ref_count++;
+		newobj->converter = obj->converter;
+		if (obj->converter) obj->converter->ref_count++;
 		tidy_add_default_properties(newobj, is_node TSRMLS_CC);
 	} else {
 		ZVAL_NULL(return_value);
