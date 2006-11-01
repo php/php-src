@@ -945,6 +945,8 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t ap
 		va_start(args, num_args);
 		hash_key.nKeyLength = p->nKeyLength;
 		hash_key.h = p->h;
+		hash_key.type = p->key.type;
+		hash_key.arKey.s = p->key.arKey.s;
 		result = apply_func(p->pData, num_args, args, &hash_key);
 
 		if (result & ZEND_HASH_APPLY_REMOVE) {
