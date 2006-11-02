@@ -1,3 +1,59 @@
+2006-11-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ZendEngine2/zend_hash.c:
+      - restoring init of the uni str which has been removed (patch by Pierre)
+
+2006-11-01  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/tests/oo_addemptydir.phpt:
+      - add simple test for addEmptyDir()
+
+2006-11-01  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/tidy.c:
+      convert a few more functions
+
+    * ext/tidy/tidy.c:
+      start converting the tidy and tidyNode objects to be Unicode aware
+      I added a converter pointer per node, so that the text can be converted to
+      unicode when requested
+      this commit also breaks a few tests in unicode mode, but it isnt scary at
+      this time :P
+
+2006-11-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/html.c:
+      MFB: Added missing boundary checks.
+
+    * (PHP_5_2)
+      ext/standard/html.c:
+      Added missing boundary checks.
+
+2006-11-01  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/config.m4
+      ext/zip/config.w32
+      ext/zip/php_zip.c
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_add_dir.c
+      ext/zip/lib/zip_error.c
+      ext/zip/lib/zip_error_clear.c
+      ext/zip/lib/zip_file_error_clear.c
+      ext/zip/lib/zip_source_buffer.c
+      ext/zip/lib/zip_source_filep.c
+      ext/zip/lib/zip_stat_index.c
+      ext/zip/lib/zip_stat_init.c:
+      - fix stat when used with freshly added entries
+      - add zip_clear_error, zip_file_clear_error and  zip_stat_init in libzip
+      - add addEmptyDir(name) method, creates an empty directory
+
+2006-11-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/libcdb/cdb.c
+      ext/dba/tests/bug38698.phpt:
+      - Fixed Bug #38698 for some keys cdbmake creates corrupted db and cdb can't
+      read valid db
+
 2006-10-31  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * ext/spl/spl_iterators.c:

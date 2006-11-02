@@ -1,3 +1,8 @@
+2006-11-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * zend_hash.c:
+      - restoring init of the uni str which has been removed (patch by Pierre)
+
 2006-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_hash.c:
