@@ -1653,6 +1653,7 @@ static void date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int
 }
 
 /* {{{ proto DateTime date_create([string time[, DateTimeZone object]])
+   Returns new DateTime object
 */
 PHP_FUNCTION(date_create)
 {
@@ -1670,6 +1671,7 @@ PHP_FUNCTION(date_create)
 /* }}} */
 
 /* {{{ proto DateTime::__construct([string time[, DateTimeZone object]])
+   Creates new DateTime object
 */
 PHP_METHOD(DateTime, __construct)
 {
@@ -1686,6 +1688,7 @@ PHP_METHOD(DateTime, __construct)
 /* }}} */
 
 /* {{{ proto array date_parse(string date)
+   Returns associative array with detailed info about given date
 */
 PHP_FUNCTION(date_parse)
 {
@@ -1784,6 +1787,7 @@ PHP_FUNCTION(date_parse)
 /* }}} */
 
 /* {{{ proto string date_format(DateTime object, string format)
+   Returns date formatted according to given format
 */
 PHP_FUNCTION(date_format)
 {
@@ -1802,6 +1806,7 @@ PHP_FUNCTION(date_format)
 /* }}} */
 
 /* {{{ proto void date_modify(DateTime object, string modify)
+   Alters the timestamp.
 */
 PHP_FUNCTION(date_modify)
 {
@@ -1836,6 +1841,7 @@ PHP_FUNCTION(date_modify)
 /* }}} */
 
 /* {{{ proto DateTimeZone date_timezone_get(DateTime object)
+   Return new DateTimeZone object relative to give DateTime
 */
 PHP_FUNCTION(date_timezone_get)
 {
@@ -1859,6 +1865,7 @@ PHP_FUNCTION(date_timezone_get)
 /* }}} */
 
 /* {{{ proto void date_timezone_set(DateTime object, DateTimeZone object)
+   Sets the timezone for the DateTime object.
 */
 PHP_FUNCTION(date_timezone_set)
 {
@@ -1882,6 +1889,7 @@ PHP_FUNCTION(date_timezone_set)
 /* }}} */
 
 /* {{{ proto long date_offset_get(DateTime object)
+   Returns the DST offset.
 */
 PHP_FUNCTION(date_offset_get)
 {
@@ -1906,6 +1914,7 @@ PHP_FUNCTION(date_offset_get)
 /* }}} */
 
 /* {{{ proto void date_time_set(DateTime object, long hour, long minute[, long second])
+   Sets the time.
 */
 PHP_FUNCTION(date_time_set)
 {
@@ -1926,6 +1935,7 @@ PHP_FUNCTION(date_time_set)
 /* }}} */
 
 /* {{{ proto void date_date_set(DateTime object, long year, long month, long day)
+   Sets the date.
 */
 PHP_FUNCTION(date_date_set)
 {
@@ -1946,6 +1956,7 @@ PHP_FUNCTION(date_date_set)
 /* }}} */
 
 /* {{{ proto void date_isodate_set(DateTime object, long year, long week[, long day])
+   Sets the ISO date.
 */
 PHP_FUNCTION(date_isodate_set)
 {
@@ -1989,6 +2000,7 @@ static int timezone_initialize(timelib_tzinfo **tzi, /*const*/ char *tz TSRMLS_D
 }
 
 /* {{{ proto DateTimeZone timezone_open(string timezone)
+   Returns new DateTimeZone object
 */
 PHP_FUNCTION(timezone_open)
 {
@@ -2007,6 +2019,7 @@ PHP_FUNCTION(timezone_open)
 /* }}} */
 
 /* {{{ proto DateTimeZone::__construct(string timezone)
+   Creates new DateTimeZone object.
 */
 PHP_METHOD(DateTimeZone, __construct)
 {
@@ -2025,6 +2038,7 @@ PHP_METHOD(DateTimeZone, __construct)
 /* }}} */
 
 /* {{{ proto string timezone_name_get(DateTimeZone object)
+   Returns the name of the timezone.
 */
 PHP_FUNCTION(timezone_name_get)
 {
@@ -2042,6 +2056,7 @@ PHP_FUNCTION(timezone_name_get)
 /* }}} */
 
 /* {{{ proto string timezone_name_from_abbr(string abbr[, long gmtOffset[, long isdst]])
+   Returns the timezone name from abbrevation
 */
 PHP_FUNCTION(timezone_name_from_abbr)
 {
@@ -2065,6 +2080,7 @@ PHP_FUNCTION(timezone_name_from_abbr)
 /* }}} */
 
 /* {{{ proto long timezone_offset_get(DateTimeZone object, DateTime object)
+   Returns the timezone offset.
 */
 PHP_FUNCTION(timezone_offset_get)
 {
@@ -2088,6 +2104,7 @@ PHP_FUNCTION(timezone_offset_get)
 /* }}} */
 
 /* {{{ proto array timezone_transitions_get(DateTimeZone object)
+   Returns numeracilly indexed array containing associative array for all transitions for the timezone.
 */
 PHP_FUNCTION(timezone_transitions_get)
 {
@@ -2117,6 +2134,7 @@ PHP_FUNCTION(timezone_transitions_get)
 /* }}} */
 
 /* {{{ proto array timezone_identifiers_list()
+   Returns numerically index array with all timezone identifiers.
 */
 PHP_FUNCTION(timezone_identifiers_list)
 {
@@ -2136,7 +2154,8 @@ PHP_FUNCTION(timezone_identifiers_list)
 }
 /* }}} */
 
-/* proto {{{ array timezone_abbreviations_list()
+/* {{{ proto array timezone_abbreviations_list()
+   Returns associative array containing dst, offset and the timezone name
 */
 PHP_FUNCTION(timezone_abbreviations_list)
 {
