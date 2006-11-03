@@ -154,6 +154,8 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 	info.num_from_encodings     = MBSTRG(http_input_list_size); 
 	info.from_language          = MBSTRG(language);
 
+	MBSTRG(illegalchars) = 0;
+
 	detected = _php_mb_encoding_handler_ex(&info, array_ptr, res TSRMLS_CC);
 	MBSTRG(http_input_identify) = detected;
 
@@ -346,6 +348,7 @@ out:
 	}
 
 	if (convd != NULL) {
+		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 		mbfl_buffer_converter_delete(convd);
 	}
 	if (val_list != NULL) {
