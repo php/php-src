@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   . Fixed a bug when callback function returns a non-modified value.
   . Added filter support for $_SERVER in cgi/apache2 sapis.
   . Make sure PHP_SELF is filtered in Apache 1 sapi.
+- Fixed bug #39361 (Removed warning on empty haystack inside mb_strstr()).
+  (Ilia)
 - Fixed bug #39354 (Allow building of curl extension against libcurl 7.16.0)
   (Ilia) 
 - Fixed bug #39320 (ZEND_HASH_APPLY_STOP causes deletion). (Marcus)
