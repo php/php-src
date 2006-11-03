@@ -367,7 +367,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_FTPAPPEND);
 	REGISTER_CURL_CONSTANT(CURLOPT_NETRC);
 	REGISTER_CURL_CONSTANT(CURLOPT_FOLLOWLOCATION);
+#if CURLOPT_FTPASCII != 0
 	REGISTER_CURL_CONSTANT(CURLOPT_FTPASCII);
+#endif
 	REGISTER_CURL_CONSTANT(CURLOPT_PUT);
 #if CURLOPT_MUTE != 0
 	REGISTER_CURL_CONSTANT(CURLOPT_MUTE);
@@ -407,7 +409,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_FILETIME);
 	REGISTER_CURL_CONSTANT(CURLOPT_WRITEFUNCTION);
 	REGISTER_CURL_CONSTANT(CURLOPT_READFUNCTION);
+#if CURLOPT_PASSWDFUNCTION != 0 
 	REGISTER_CURL_CONSTANT(CURLOPT_PASSWDFUNCTION);
+#endif
 	REGISTER_CURL_CONSTANT(CURLOPT_HEADERFUNCTION);
 	REGISTER_CURL_CONSTANT(CURLOPT_MAXREDIRS);
 	REGISTER_CURL_CONSTANT(CURLOPT_MAXCONNECTS);
@@ -1155,12 +1159,13 @@ PHP_FUNCTION(curl_copy_handle)
 	dupch->handlers->write_header->fp = ch->handlers->write_header->fp;
 	dupch->handlers->read->fp = ch->handlers->read->fp;
 	dupch->handlers->read->fd = ch->handlers->read->fd;
-
+#if CURLOPT_PASSWDDATA != 0
 	if (ch->handlers->passwd) {
 		zval_add_ref(&ch->handlers->passwd);
 		dupch->handlers->passwd = ch->handlers->passwd;
 		curl_easy_setopt(ch->cp, CURLOPT_PASSWDDATA, (void *) dupch);
 	}
+#endif
 	if (ch->handlers->write->func_name) {
 		zval_add_ref(&ch->handlers->write->func_name);
 		dupch->handlers->write->func_name = ch->handlers->write->func_name;
