@@ -1003,7 +1003,7 @@ static PHP_FUNCTION(ob_tidyhandler)
 	TidyDoc doc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &input, &input_len, &mode) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	doc = tidyCreate();

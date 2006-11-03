@@ -461,7 +461,7 @@ PHP_FUNCTION(bcpowmod)
 	long scale = BCG(bc_precision);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|l", &left, &left_len, &right, &right_len, &modulous, &modulous_len, &scale) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	bc_init_num(&first TSRMLS_CC);
