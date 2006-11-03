@@ -51,6 +51,7 @@
 #include "filters/mbfilter_euc_kr.h"
 #include "filters/mbfilter_iso2022_kr.h"
 #include "filters/mbfilter_sjis.h"
+#include "filters/mbfilter_cp51932.h"
 #include "filters/mbfilter_jis.h"
 #include "filters/mbfilter_euc_jp.h"
 #include "filters/mbfilter_euc_jp_win.h"
@@ -104,10 +105,14 @@ const struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_wchar_eucjp,
 	&vtbl_sjis_wchar,
 	&vtbl_wchar_sjis,
+	&vtbl_cp51932_wchar,
+	&vtbl_wchar_cp51932,
 	&vtbl_jis_wchar,
 	&vtbl_wchar_jis,
 	&vtbl_2022jp_wchar,
 	&vtbl_wchar_2022jp,
+	&vtbl_2022jpms_wchar,
+	&vtbl_wchar_2022jpms,
 	&vtbl_eucjpwin_wchar,
 	&vtbl_wchar_eucjpwin,
 	&vtbl_sjiswin_wchar,
