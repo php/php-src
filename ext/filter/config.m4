@@ -91,5 +91,5 @@ yes
   PHP_NEW_EXTENSION(filter, filter.c sanitizing_filters.c logical_filters.c callback_filter.c, $ext_shared)
   PHP_SUBST(FILTER_SHARED_LIBADD)
 
-  PHP_INSTALL_HEADERS([$ext_srcdir/php_filter.h])
+  PHP_INSTALL_HEADERS([ext/filter/php_filter.h])
 fi
