@@ -173,6 +173,14 @@ Items from the NEWS file explained
   you to fine-grain the levels of the messages stored.
 
 
+==============================
+Backwards incompatible changes
+==============================
+
+In the PHP core
+===============
+getrusage() will return NULL when passed incompatible arguments
+
 ==================
 NEW ERROR MESSAGES
 ==================
