@@ -36,8 +36,12 @@
 #include <stdio.h>
 #include <math.h>
 #include <ming.h>
-#include <ming/displaylist.h>
-#include <ming/movie.h>
+#ifdef HAVE_MING_DISPLAYLIST_H
+# include <ming/displaylist.h>
+#endif
+#ifdef HAVE_MING_MOVIE_H
+# include <ming/movie.h>
+#endif
 
 #define FLOAT_Z_DVAL_PP(x) ((float)Z_DVAL_PP(x))
 #define BYTE_Z_LVAL_PP(x)  ((byte)Z_LVAL_PP(x))
