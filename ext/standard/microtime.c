@@ -115,7 +115,11 @@ PHP_FUNCTION(getrusage)
 	long pwho = 0;
 	int who = RUSAGE_SELF;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &pwho) != FAILURE && pwho == 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &pwho) == FAILURE) {
+		return;
+	}
+	
+	if (pwho == 1) {
 		who = RUSAGE_CHILDREN;
 	}
 
