@@ -4,7 +4,7 @@
  * @ingroup Examples
  * @brief class DirectoryFilterDots
  * @author  Marcus Boerger
- * @date    2003 - 2005
+ * @date    2003 - 2006
  *
  * SPL - Standard PHP Library
  */
@@ -12,7 +12,7 @@
 /** @ingroup Examples
  * @brief   A filtered DirectoryIterator
  * @author  Marcus Boerger
- * @version 1.1
+ * @version 1.2
  *
  * This Iteraotr takes a pathname from which it creates a DirectoryIterator
  * and makes it recursive. Further more it filters the entries '.' and '..'.
@@ -24,7 +24,7 @@ class DirectoryFilterDots extends RecursiveFilterIterator
 	 */
 	function __construct($path)
 	{
-		parent::__construct(new DirectoryIterator($path));
+		parent::__construct(new RecursiveDirectoryIterator($path));
 	}
 
 	/** @return whether the current entry is neither '.' nor '..'

@@ -57,6 +57,7 @@ static PHP_GINIT_FUNCTION(spl)
 {
 	spl_globals->autoload_extensions = NULL;
 	spl_globals->autoload_functions  = NULL;
+	spl_globals->autoload_running    = 0;
 }
 /* }}} */
 
@@ -305,7 +306,7 @@ PHP_FUNCTION(spl_autoload)
 	EG(active_op_array) = original_active_op_array;
 	EG(function_state_ptr) = original_function_state_ptr;
 
-	if (!found) {
+	if (!found && !SPL_G(autoload_running)) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %s could not be loaded", class_name);
 	}
 } /* }}} */
@@ -361,6 +362,8 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 
 	if (SPL_G(autoload_functions)) {
+		int l_autoload_running = SPL_G(autoload_running);
+		SPL_G(autoload_running) = 1;
 		class_name_len = Z_STRLEN_P(class_name);
 		lc_name = zend_str_tolower_dup(Z_STRVAL_P(class_name), class_name_len);
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
@@ -377,6 +380,7 @@ PHP_FUNCTION(spl_autoload_call)
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);
 		}
 		efree(lc_name);
+		SPL_G(autoload_running) = l_autoload_running;
 	} else {
 		/* do not use or overwrite &EG(autoload_func) here */
 		zend_call_method_with_1_params(NULL, NULL, NULL, "spl_autoload", NULL, class_name);

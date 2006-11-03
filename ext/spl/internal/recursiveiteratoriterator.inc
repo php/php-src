@@ -217,7 +217,7 @@ class RecursiveIteratorIterator implements OuterIterator
 			if ($after_move)
 			{
 				if (($this->mode == self::SELF_FIRST && $this->callHasChildren())
-				     $this->mode == self::LEAVES_ONLY)
+				||   $this->mode == self::LEAVES_ONLY)
 				$this->nextElement();
 			}
 			else
@@ -229,7 +229,9 @@ class RecursiveIteratorIterator implements OuterIterator
 	
 	/** Called when the next element is available
 	 */
-	function nextElement();
+	function nextElement()
+	{
+	}
 }
 
 ?>
