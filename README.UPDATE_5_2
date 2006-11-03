@@ -180,6 +180,7 @@ Backwards incompatible changes
 In the PHP core
 ===============
 getrusage() will return NULL when passed incompatible arguments
+# See http://cvs.php.net/viewvc.cgi/php-src/ext/standard/microtime.c?r1=1.57&r2=1.58 && ?r1=1.53.2.2&r2=1.53.2.2.2.1
 
 ==================
 NEW ERROR MESSAGES
