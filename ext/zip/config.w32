@@ -26,7 +26,8 @@ if (PHP_ZIP != "no") {
                      zip_new.c zip_source_file.c zip_stat_index.c \
                      zip_get_archive_comment.c zip_get_file_comment.c \
                      zip_set_archive_comment.c zip_set_file_comment.c \
-                     zip_unchange_archive.c zip_memdup.c", "zip");
+                     zip_unchange_archive.c zip_memdup.c zip_stat_init.c \
+                     zip_add_dir.c zip_file_error_clear.c zip_error_clear.c", "zip");
 
 		AC_DEFINE('HAVE_ZLIB', 1);
 		AC_DEFINE('HAVE_ZIP', 1);

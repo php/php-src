@@ -1,4 +1,3 @@
-- fix _zip_replace (add two entries with the same name segfaults)
 - add pattern support to extract or add files
 - stream to add or modify entries
 - crypt support for zip (read and write)
