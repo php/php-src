@@ -647,11 +647,14 @@ ZEND_API void zend_hash_graceful_reverse_destroy(HashTable *ht)
 	SET_INCONSISTENT(HT_DESTROYED);
 }
 
-/* This is used to selectively delete certain entries from a hashtable.
- * destruct() receives the data and decides if the entry should be deleted 
- * or not
+/* This is used to recurse elements and selectively delete certain entries 
+ * from a hashtable. apply_func() receives the data and decides if the entry 
+ * should be deleted or recursion should be stopped. The following three 
+ * return codes are possible:
+ * ZEND_HASH_APPLY_KEEP   - continue
+ * ZEND_HASH_APPLY_STOP   - stop iteration
+ * ZEND_HASH_APPLY_REMOVE - delete the element, combineable with the former
  */
-
 
 ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC)
 {
@@ -662,10 +665,15 @@ ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC)
 	HASH_PROTECT_RECURSION(ht);
 	p = ht->pListHead;
 	while (p != NULL) {
-		if (apply_func(p->pData TSRMLS_CC)) {
+		int result = apply_func(p->pData TSRMLS_CC);
+		
+		if (result & ZEND_HASH_APPLY_REMOVE) {
 			p = zend_hash_apply_deleter(ht, p);
 		} else {
 			p = p->pListNext;
+		}
+		if (result & ZEND_HASH_APPLY_STOP) {
+			break;
 		}
 	}
 	HASH_UNPROTECT_RECURSION(ht);
@@ -681,17 +689,22 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t appl
 	HASH_PROTECT_RECURSION(ht);
 	p = ht->pListHead;
 	while (p != NULL) {
-		if (apply_func(p->pData, argument TSRMLS_CC)) {
+		int result = apply_func(p->pData, argument TSRMLS_CC);
+		
+		if (result & ZEND_HASH_APPLY_REMOVE) {
 			p = zend_hash_apply_deleter(ht, p);
 		} else {
 			p = p->pListNext;
+		}
+		if (result & ZEND_HASH_APPLY_STOP) {
+			break;
 		}
 	}
 	HASH_UNPROTECT_RECURSION(ht);
 }
 
 
-ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t destruct, int num_args, ...)
+ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t apply_func, int num_args, ...)
 {
 	Bucket *p;
 	va_list args;
@@ -703,14 +716,20 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t de
 
 	p = ht->pListHead;
 	while (p != NULL) {
+		int result;
 		va_start(args, num_args);
 		hash_key.arKey = p->arKey;
 		hash_key.nKeyLength = p->nKeyLength;
 		hash_key.h = p->h;
-		if (destruct(p->pData, num_args, args, &hash_key)) {
+		result = apply_func(p->pData, num_args, args, &hash_key);
+
+		if (result & ZEND_HASH_APPLY_REMOVE) {
 			p = zend_hash_apply_deleter(ht, p);
 		} else {
 			p = p->pListNext;
+		}
+		if (result & ZEND_HASH_APPLY_STOP) {
+			break;
 		}
 		va_end(args);
 	}
