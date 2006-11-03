@@ -933,7 +933,10 @@ PHP_RINIT_FUNCTION(mbstring)
 	MBSTRG(current_http_output_encoding) = MBSTRG(http_output_encoding);
 	MBSTRG(current_filter_illegal_mode) = MBSTRG(filter_illegal_mode);
 	MBSTRG(current_filter_illegal_substchar) = MBSTRG(filter_illegal_substchar);
-	MBSTRG(illegalchars) = 0;
+
+	if (!MBSTRG(encoding_translation)) {
+		MBSTRG(illegalchars) = 0;
+	}
 
 	n = 0;
 	if (MBSTRG(detect_order_list)) {
@@ -4053,8 +4056,13 @@ PHP_FUNCTION(mb_check_encoding)
 
 	if (ret != NULL) {
 		MBSTRG(illegalchars) += illegalchars;
-		efree(ret->val);
-		RETURN_BOOL(illegalchars == 0);
+		if (illegalchars == 0 && strncmp(string.val, ret->val, string.len) == 0) {
+			efree(ret->val);
+			RETURN_TRUE;
+		} else {
+			efree(ret->val);
+			RETURN_FALSE;
+		}
 	} else {
 		RETURN_FALSE;
 	}
