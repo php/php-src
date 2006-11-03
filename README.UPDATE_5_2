@@ -309,6 +309,16 @@ bzopen($fp, "r");
 
 ?>
 
+In the date extension
+=====================
+
+<?php
+
+strtotime("today", "now");'
+/* Warning:  strtotime() expects parameter 2 to be long, string given in filename on line n */
+
+?>
+
 In the dBase extension
 ======================
 
