@@ -67,7 +67,7 @@ zip_stat_index(struct zip *za, int index, int flags, struct zip_stat *st)
 	    _zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	    return -1;
 	}
-	
+
 	st->crc = za->cdir->entry[index].crc;
 	st->size = za->cdir->entry[index].uncomp_size;
 	st->mtime = za->cdir->entry[index].last_mod;

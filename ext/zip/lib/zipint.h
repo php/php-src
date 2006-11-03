@@ -199,6 +199,7 @@ void _zip_entry_free(struct zip_entry *);
 void _zip_entry_init(struct zip *, int);
 struct zip_entry *_zip_entry_new(struct zip *);
 
+void _zip_error_clear(struct zip_error *);
 void _zip_error_copy(struct zip_error *, struct zip_error *);
 void _zip_error_fini(struct zip_error *);
 void _zip_error_get(struct zip_error *, int *, int *);
