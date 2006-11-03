@@ -1877,7 +1877,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto resource getFromName(string entryname[, int len [, int flags]]) U
+/* {{{ proto string getFromName(string entryname[, int len [, int flags]]) U
 get the contents of an entry using its name */
 ZIPARCHIVE_METHOD(getFromName)
 {
@@ -1885,7 +1885,7 @@ ZIPARCHIVE_METHOD(getFromName)
 }
 /* }}} */
 
-/* {{{ proto resource getFromIndex(string entryname[, int len [, int flags]]) U
+/* {{{ proto string getFromIndex(string entryname[, int len [, int flags]]) U
 get the contents of an entry using its index */
 ZIPARCHIVE_METHOD(getFromIndex)
 {
