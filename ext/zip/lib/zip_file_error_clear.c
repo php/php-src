@@ -1,7 +1,7 @@
 /*
-  $NiH: zip_error.c,v 1.7 2005/06/09 19:57:09 dillo Exp $
+  $NiH: zip_file_error_clear.c,v 1.4 2006/10/04 18:37:54 wiz Exp $
 
-  zip_error.c -- struct zip_error helper functions
+  zip_file_error_clear.c -- clear zip file error
   Copyright (C) 1999-2006 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
@@ -35,70 +35,13 @@
 
 
 
-#include <stdlib.h>
-
 #include "zip.h"
 #include "zipint.h"
 
 
 
 void
-_zip_error_clear(struct zip_error *err)
+zip_file_error_clear(struct zip_file *zf)
 {
-    err->zip_err = ZIP_ER_OK;
-    err->sys_err = 0;
-}
-
-
-
-void
-_zip_error_copy(struct zip_error *dst, struct zip_error *src)
-{
-    dst->zip_err = src->zip_err;
-    dst->sys_err = src->sys_err;
-}
-
-
-
-void
-_zip_error_fini(struct zip_error *err)
-{
-    free(err->str);
-    err->str = NULL;
-}
-
-
-
-void
-_zip_error_get(struct zip_error *err, int *zep, int *sep)
-{
-    if (zep)
-	*zep = err->zip_err;
-    if (sep) {
-	if (zip_error_get_sys_type(err->zip_err) != ZIP_ET_NONE)
-	    *sep = err->sys_err;
-	else
-	    *sep = 0;
-    }
-}
-
-
-
-void
-_zip_error_init(struct zip_error *err)
-{
-    err->zip_err = ZIP_ER_OK;
-    err->sys_err = 0;
-    err->str = NULL;
-}
-
-
-
-void
-_zip_error_set(struct zip_error *err, int ze, int se)
-{
-    if (err) {
-	err->zip_err = ze;
-	err->sys_err = se;
-    }
+    _zip_error_clear(&zf->error);
 }
