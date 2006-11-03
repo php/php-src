@@ -541,34 +541,34 @@ New classes
     Methods:
       DateTime::__construct([string time[, DateTimeZone object]])
       - Returns new DateTime object
-      string DateTime::format(DateTime object, string format)
+      string DateTime::format(string format)
       - Returns date formatted according to given format
-      long DateTime::getOffset(DateTime object)
+      long DateTime::getOffset()
       - Returns the DST offset
-      DateTimeZone DateTime::getTimezone(DateTime object)
+      DateTimeZone DateTime::getTimezone()
       - Return new DateTimeZone object relative to give DateTime
-      void DateTime::modify(DateTime object, string modify)
+      void DateTime::modify(string modify)
       - Alters the timestamp
       array DateTime::parse(string date)
       - Returns associative array with detailed info about given date
-      void DateTime::setDate(DateTime object, long year, long month, long day)
+      void DateTime::setDate(long year, long month, long day)
       - Sets the date
-      void DateTime::setISODate(DateTime object, long year, long week[, long day])
+      void DateTime::setISODate(long year, long week[, long day])
       - Sets the ISO date
-      void DateTime::setTime(DateTime object, long hour, long minute[, long second])
+      void DateTime::setTime(long hour, long minute[, long second])
       - Sets the time
-      void DateTime::setTimezone(DateTime object, DateTimeZone object)
+      void DateTime::setTimezone(DateTimeZone object)
       - Sets the timezone for the DateTime object
 
   DateTimeZone:
     Methods:
       DateTimeZone DateTimeZone::__construct(string timezone)
       - Returns new DateTimeZone object
-      string DateTimeZone::getName(DateTimeZone object)
+      string DateTimeZone::getName()
       - Returns the name of the timezone
-      long DateTimeZone::getOffset(DateTimeZone object, DateTime object)
+      long DateTimeZone::getOffset(DateTime object)
       - Returns the timezone offset
-      array DateTimeZone::getTransitions(DateTimeZone object)
+      array DateTimeZone::getTransitions()
       - Returns numerically indexed array containing associative array for all transitions for the timezone
 
   RecursiveRegexIterator:
