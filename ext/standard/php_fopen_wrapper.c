@@ -191,11 +191,41 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	}  
 	
 	if (!strcasecmp(path, "stdin")) {
-		fd = !strcmp(sapi_module.name, "cli") ? STDIN_FILENO : dup(STDIN_FILENO);
+		if (!strcmp(sapi_module.name, "cli")) {
+			static int cli_in = 0;
+			fd = STDIN_FILENO;
+			if (cli_in) {
+				fd = dup(fd);
+			} else {
+				cli_in = 1;
+			}
+		} else {
+			fd = dup(STDIN_FILENO);
+		}
 	} else if (!strcasecmp(path, "stdout")) {
-		fd = !strcmp(sapi_module.name, "cli") ? STDOUT_FILENO : dup(STDOUT_FILENO);
+		if (!strcmp(sapi_module.name, "cli")) {
+			static int cli_out = 0;
+			fd = STDOUT_FILENO;
+			if (cli_out++) {
+				fd = dup(fd);
+			} else {
+				cli_out = 1;
+			}
+		} else {
+			fd = dup(STDOUT_FILENO);
+		}
 	} else if (!strcasecmp(path, "stderr")) {
-		fd = !strcmp(sapi_module.name, "cli") ? STDERR_FILENO : dup(STDERR_FILENO);
+		if (!strcmp(sapi_module.name, "cli")) {
+			static int cli_err = 0;
+			fd = STDERR_FILENO;
+			if (cli_err++) {
+				fd = dup(fd);
+			} else {
+				cli_err = 1;
+			}
+		} else {
+			fd = dup(STDERR_FILENO);
+		}
 	} else if (!strncasecmp(path, "filter/", 7)) {
 		/* Save time/memory when chain isn't specified */
 		if (strchr(mode, 'r') || strchr(mode, '+')) {
