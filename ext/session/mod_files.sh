@@ -20,5 +20,5 @@ fi
 for i in $hash_chars; do
 	newpath="$1/$i"
 	mkdir $newpath || exit 1
-	sh $0 $newpath `expr $2 - 1 $3`
+	sh $0 $newpath `expr $2 - 1` $3
 done
