@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.1
+- Fixed bug #39265 (Fixed path handling inside mod_files.sh). 
+  (michal dot taborsky at gmail dot com, Ilia)
 - Fixed bug #38680 (Added missing handling of basic types in json_decode).
   (Ilia) 
 
