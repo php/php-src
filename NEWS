@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.1
+- Filter Extension Improvements (Ilia)
+  . Fixed a bug when callback function returns a non-modified value.
+  . Added filter support for $_SERVER in cgi/apache2 sapis.
+  . Make sure PHP_SELF is filtered in Apache 1 sapi.
 - Fixed bug #39265 (Fixed path handling inside mod_files.sh). 
   (michal dot taborsky at gmail dot com, Ilia)
 - Fixed bug #39215 (Inappropriate close of stdin/stdout/stderr). (Wez,Ilia)
