@@ -31,12 +31,12 @@ NULL
 NULL
 NULL
 NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+string(1) "."
+string(1) "."
+string(3) "<?>"
+string(1) ";"
+string(12) "руссиш"
+string(4) "blah"
 NULL
 object(stdClass)#1 (1) {
   ["test"]=>

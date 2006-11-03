@@ -45,9 +45,9 @@ foreach ($tests as $test)
 --EXPECT--
 Testing: "A JSON payload should be an object or array, not a string."
 AS OBJECT
-NULL
+string(58) "A JSON payload should be an object or array, not a string."
 AS ARRAY
-NULL
+string(58) "A JSON payload should be an object or array, not a string."
 Testing: ["Unclosed array"
 AS OBJECT
 NULL
