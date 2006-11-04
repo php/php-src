@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   . Make sure PHP_SELF is filtered in Apache 1 sapi.
   . Fixed bug #39358 (INSTALL_HEADERS contains incorrect reference to
     php_filter.h).
+- Fixed bug #39273 (imagecopyresized may ignore alpha channel)
 - Fixed bug #39364 (Removed warning on empty haystack inside mb_strstr()).
   (Ilia)
 - Fixed bug #39354 (Allow building of curl extension against libcurl 7.16.0)
