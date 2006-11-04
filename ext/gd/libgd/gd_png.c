@@ -390,7 +390,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 void gdImagePngEx (gdImagePtr im, FILE * outFile, int level, int basefilter)
 {
 	gdIOCtx *out = gdNewFileCtx(outFile);
-	gdImagePngCtxEx(im, out, level, -1);
+	gdImagePngCtxEx(im, out, level, basefilter);
 	out->gd_free(out);
 }
 
