@@ -55,9 +55,10 @@ zend_function_entry spl_functions_none[] = {
  */
 static PHP_GINIT_FUNCTION(spl)
 {
-	spl_globals->autoload_extensions = NULL;
-	spl_globals->autoload_functions  = NULL;
-	spl_globals->autoload_running    = 0;
+	spl_globals->autoload_extensions     = NULL;
+	spl_globals->autoload_extensions_len = 0;
+	spl_globals->autoload_functions      = NULL;
+	spl_globals->autoload_running        = 0;
 }
 /* }}} */
 
@@ -269,8 +270,8 @@ int spl_autoload(const char *class_name, const char * lc_name, int class_name_le
  Default implementation for __autoload() */
 PHP_FUNCTION(spl_autoload)
 {
-	char *class_name, *lc_name, *file_exts;
-	int class_name_len, file_exts_len, found = 0;
+	char *class_name, *lc_name, *file_exts = SPL_G(autoload_extensions);
+	int class_name_len, file_exts_len = SPL_G(autoload_extensions_len), found = 0;
 	char *copy, *pos1, *pos2;
 	zval **original_return_value = EG(return_value_ptr_ptr);
 	zend_op **original_opline_ptr = EG(opline_ptr);
@@ -281,7 +282,7 @@ PHP_FUNCTION(spl_autoload)
 		RETURN_FALSE;
 	}
 
-	copy = pos1 = estrdup(ZEND_NUM_ARGS() > 1 ? file_exts : SPL_G(autoload_extensions));
+	copy = pos1 = estrndup(file_exts, file_exts_len);
 	lc_name = zend_str_tolower_dup(class_name, class_name_len);
 	while(pos1 && *pos1 && !EG(exception)) {
 		EG(return_value_ptr_ptr) = original_return_value;
@@ -326,10 +327,11 @@ PHP_FUNCTION(spl_autoload_extensions)
 		if (SPL_G(autoload_extensions)) {
 			efree(SPL_G(autoload_extensions));
 		}
-		SPL_G(autoload_extensions) = estrdup(file_exts);
+		SPL_G(autoload_extensions) = estrndup(file_exts, file_exts_len);
+		SPL_G(autoload_extensions_len) = file_exts_len;
 	}
 
-	RETURN_STRING(SPL_G(autoload_extensions), 1);
+	RETURN_STRINGL(SPL_G(autoload_extensions), SPL_G(autoload_extensions_len), 1);
 } /* }}} */
 
 typedef struct {
@@ -696,6 +698,7 @@ PHP_MINIT_FUNCTION(spl)
 PHP_RINIT_FUNCTION(spl) /* {{{ */
 {
 	SPL_G(autoload_extensions) = estrndup(".inc,.php", sizeof(".inc,.php")-1);
+	SPL_G(autoload_extensions_len) = sizeof(".inc,.php")-1;
 	SPL_G(autoload_functions) = NULL;
 	return SUCCESS;
 } /* }}} */
@@ -705,6 +708,7 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 	if (SPL_G(autoload_extensions)) {
 		efree(SPL_G(autoload_extensions));
 		SPL_G(autoload_extensions) = NULL;
+		SPL_G(autoload_extensions_len) = 0;
 	}
 	if (SPL_G(autoload_functions)) {
 		zend_hash_destroy(SPL_G(autoload_functions));

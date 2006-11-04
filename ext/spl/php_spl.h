@@ -59,6 +59,7 @@ ZEND_BEGIN_MODULE_GLOBALS(spl)
 	char *       autoload_extensions;
 	HashTable *  autoload_functions;
 	int          autoload_running;
+	int          autoload_extensions_len;
 ZEND_END_MODULE_GLOBALS(spl)
 
 #ifdef ZTS
