@@ -83,7 +83,7 @@ static zend_class_entry * spl_find_ce_by_name(zend_uchar ztype, zstr name, int l
 	return *ce;
 }
 
-/* {{{ proto array class_parents(object instance)
+/* {{{ proto array class_parents(object instance) U
  Return an array containing the names of all parent classes */
 PHP_FUNCTION(class_parents)
 {
@@ -117,7 +117,7 @@ PHP_FUNCTION(class_parents)
 }
 /* }}} */
 
-/* {{{ proto array class_implements(mixed what [, bool autoload ])
+/* {{{ proto array class_implements(mixed what [, bool autoload ]) U
  Return all classes and interfaces implemented by SPL */
 PHP_FUNCTION(class_implements)
 {
@@ -194,7 +194,7 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(UnderflowException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnexpectedValueException, z_list, sub, allow, ce_flags); \
 
-/* {{{ proto array spl_classes()
+/* {{{ proto array spl_classes() U
  Return an array containing the names of all clsses and interfaces defined in SPL */
 PHP_FUNCTION(spl_classes)
 {
@@ -388,7 +388,7 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 } /* }}} */
 
-/* {{{ proto bool spl_autoload_register([mixed autoload_function = "spl_autoload" [, throw = true]])
+/* {{{ proto bool spl_autoload_register([mixed autoload_function = "spl_autoload" [, throw = true]]) U
  Register given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_register)
 {
@@ -493,7 +493,7 @@ PHP_FUNCTION(spl_autoload_register)
 	RETURN_TRUE;
 } /* }}} */
 
-/* {{{ proto bool spl_autoload_unregister(mixed autoload_function)
+/* {{{ proto bool spl_autoload_unregister(mixed autoload_function) U
  Unregister given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_unregister)
 {
@@ -544,7 +544,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 	RETURN_BOOL(success == SUCCESS);
 } /* }}} */
 
-/* {{{ proto false|array spl_autoload_functions()
+/* {{{ proto false|array spl_autoload_functions() U
  Return all registered __autoload() functionns */
 PHP_FUNCTION(spl_autoload_functions)
 {
@@ -587,7 +587,7 @@ PHP_FUNCTION(spl_autoload_functions)
 	add_next_index_text(return_value, EG(autoload_func)->common.function_name, 1);
 } /* }}} */
 
-/* {{{ proto string spl_object_hash(object obj)
+/* {{{ proto string spl_object_hash(object obj) U
  Return hash id for given object */
 PHP_FUNCTION(spl_object_hash)
 {
