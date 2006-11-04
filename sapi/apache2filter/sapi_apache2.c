@@ -210,6 +210,7 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_struct *ctx = SG(server_context);
 	const apr_array_header_t *arr = apr_table_elts(ctx->r->subprocess_env);
 	char *key, *val;
+	int new_val_len;
 	
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) {
