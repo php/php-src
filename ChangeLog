@@ -1,3 +1,250 @@
+2006-11-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      wrong bug #
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/config.m4
+      ext/filter/config.m4:
+      Fixed bug #39358 (INSTALL_HEADERS contains incorrect reference to
+      php_filter.h)
+
+    * ext/mbstring/mbstring.c:
+      MFB: Fixed bug #39361 (Removed warning on empty haystack inside
+      mb_strstr()).
+
+    * (PHP_5_2)
+      NEWS
+      ext/mbstring/mbstring.c:
+      Fixed bug #39361 (Removed warning on empty haystack inside mb_strstr()).
+
+2006-11-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+    * (PHP_5_2)
+      main/php_version.h:
+      - Fix version
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c:
+      - MFH: Fix issue with some mangeled properties
+
+    * (PHP_5_2)
+      ext/ming/config.m4
+      ext/ming/ming.c:
+      - MFH: Include new headers only if present
+
+    * ext/ming/config.m4
+      ext/ming/ming.c:
+      - Include new headers only if present
+
+2006-11-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      Add "comment" to make tracking the commit down easier
+
+2006-11-03  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/tests/oo_get_comment.phpt
+      ext/zip/tests/oo_get_comment.phpt
+      ext/zip/tests/oo_getnameindex.phpt
+      ext/zip/tests/oo_setcomment.phpt
+      ext/zip/tests/oo_stream.phpt
+      ext/zip/tests/test_with_comment.zip
+      ext/zip/tests/utils.inc
+      ext/zip/tests/zip_entry_open.phpt
+      ext/zip/tests/zip_entry_read.phpt:
+      
+      file oo_get_comment.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/zip/TODO
+      ext/zip/config.m4
+      ext/zip/config.w32
+      ext/zip/php_zip.c
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_add_dir.c
+      ext/zip/lib/zip_error.c
+      ext/zip/lib/zip_error_clear.c
+      ext/zip/lib/zip_file_error_clear.c
+      ext/zip/lib/zip_get_archive_comment.c
+      ext/zip/lib/zip_source_buffer.c
+      ext/zip/lib/zip_source_filep.c
+      ext/zip/lib/zip_stat_index.c
+      ext/zip/lib/zip_stat_init.c
+      ext/zip/lib/zipint.h
+      ext/zip/tests/oo_addemptydir.phpt
+      ext/zip/tests/oo_extract.phpt:
+      - MFH:
+       - fix possible leak in statName and statIndex
+       - add addEmptyDir() method
+       - add zip_stat_init,zip_clear_error and zip_file_clear_error
+       - add tests
+       - Fix protos (Hannes)
+       - setComment return value on success (Hannes)
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      - fix build (var.s is for zstr)
+
+    * ext/zip/lib/zip_stat_index.c
+      ext/zip/lib/zipint.h:
+      - _zip_error_clear declaration
+      - WS
+
+    * ext/zip/php_zip.c:
+      - fix protos
+
+    * ext/zip/.cvsignore:
+      - add .libs
+
+2006-11-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2
+      ext/standard/microtime.c:
+      MFH: fix parameter parsing in getrusage()
+
+    * (PHP_5_2)
+      ext/gd/tests/test_gif_2.gif:
+      Generated file
+
+    * (PHP_5_2)
+      ext/gd/gd.c
+      ext/spl/spl_array.c:
+      MFH: Fix double "wrong param count" messages
+
+    * (PHP_5_2)
+      README.UPDATE_5_2
+      ext/date/php_date.c:
+      MFH: Add "wrong param" warning to strtotime()
+
+2006-11-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/curl/curl.c:
+      MFH: Fixed bug #39354 (Allow building of curl extension against libcurl
+      7.16.0)
+
+    * ext/curl/interface.c:
+      MFB: Fixed bug #39354 (Allow building of curl extension against libcurl
+      7.16.0)
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/interface.c:
+      Fixed bug #39354 (Allow building of curl extension against libcurl 7.16.0)
+
+2006-11-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/bcmath/bcmath.c
+      ext/dba/dba.c
+      ext/mhash/mhash.c
+      ext/session/session.c
+      ext/shmop/shmop.c
+      ext/standard/basic_functions.c
+      ext/tidy/tidy.c
+      ext/xmlwriter/php_xmlwriter.c:
+      MFH: Fix double "wron param count" messages
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      MFH: use PHP_ME_MAPPING rather than ZEND_NAMED_FE/ZEND_FN
+
+    * ext/standard/tests/file/mkdir-006.phpt:
+      Remove SKIPIF
+
+    * ext/spl/spl_iterators.c:
+      CS fix
+
+    * ext/ming/ming.c:
+      Add missing includes
+
+2006-11-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Filter extension news
+
+    * (PHP_5_2)
+      ext/filter/callback_filter.c:
+      MFH: Fixed a possible crash when callback function returns a non-modified
+      value
+
+    * (PHP_5_2)
+      sapi/apache/mod_php5.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/cgi/cgi_main.c:
+      MFH:
+      	Added filter support for $_SERVER in cgi/apache2 sapis
+      	Make sure PHP_SELF is filtered in Apache 1 sapi
+
+    * ext/standard/php_fopen_wrapper.c:
+      MFB: Fixed bug #39215 (Inappropriate close of stdin/stdout/stderr).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/php_fopen_wrapper.c:
+      Fixed bug #39215 (Inappropriate close of stdin/stdout/stderr).
+
+    * (PHP_5_2)
+      NEWS
+      ext/session/mod_files.sh:
+      MFH: Fixed bug #39265 (Fixed path handling inside mod_files.sh).
+
+    * ext/session/mod_files.sh:
+      Fixed bug #39265 (Fixed path handling inside mod_files.sh)
+      
+
+    * (PHP_5_2)
+      NEWS
+      ext/json/json.c
+      ext/json/tests/001.phpt
+      ext/json/tests/fail001.phpt:
+      Fixed bug #38680 (Added missing handling of basic types in json_decode).
+      
+
+2006-11-03  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      - Fixed API in doc.
+
+2006-11-03  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/mb_gpc.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      fixed illegal encoding detection when mbstring.encoding_translation is
+      enabled.(made by komura)
+
+    * (PHP_5_2)
+      ext/mbstring/config.m4
+      ext/mbstring/libmbfl/filters/Makefile.am
+      ext/mbstring/libmbfl/filters/mbfilter_cp51932.c
+      ext/mbstring/libmbfl/filters/mbfilter_cp51932.c
+      ext/mbstring/libmbfl/filters/mbfilter_cp51932.h
+      ext/mbstring/libmbfl/filters/mbfilter_cp51932.h
+      ext/mbstring/libmbfl/filters/mbfilter_euc_jp_win.c
+      ext/mbstring/libmbfl/filters/mbfilter_jis.c
+      ext/mbstring/libmbfl/filters/mbfilter_jis.h
+      ext/mbstring/libmbfl/filters/unicode_table_jis.h
+      ext/mbstring/libmbfl/mbfl/mbfl_convert.c
+      ext/mbstring/libmbfl/mbfl/mbfl_encoding.c
+      ext/mbstring/libmbfl/mbfl/mbfl_encoding.h
+      ext/mbstring/libmbfl/mbfl/mbfl_ident.c:
+      added japanese legacy encoding support (made by moriyama@miraclelinux.com)
+
 2006-11-01  Johannes Schlüter  <johannes@schlueters.de>
 
     * ZendEngine2/zend_hash.c:
