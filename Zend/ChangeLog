@@ -1,3 +1,9 @@
+2006-11-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend.c:
+      - MFH: Fix issue with some mangeled properties
+
 2006-11-01  Johannes Schlüter  <johannes@schlueters.de>
 
     * zend_hash.c:
