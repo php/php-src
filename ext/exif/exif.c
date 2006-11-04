@@ -3984,7 +3984,7 @@ PHP_FUNCTION(exif_read_data)
    Reads the embedded thumbnail */
 PHP_FUNCTION(exif_thumbnail)
 {
-	zval *p_width, *p_height, *p_imagetype;
+	zval *p_width = 0, *p_height = 0, *p_imagetype = 0;
 	char *p_name;
 	int p_name_len, ret, arg_c = ZEND_NUM_ARGS();
 	image_info_type ImageInfo;
