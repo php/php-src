@@ -490,7 +490,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 	if (basefilter >= 0) {
 		png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, basefilter);
 	}
-	
+
 	/* can set this to a smaller value without compromising compression if all
 	 * image data is 16K or less; will save some decoder memory [min == 8]
 	 */
