@@ -2750,6 +2750,9 @@ gdImagePtr gdImageRotate90 (gdImagePtr src, int ignoretransparent)
 	dst->transparent = src->transparent;
 
 	if (dst != NULL) {
+		int old_blendmode = dst->alphaBlendingFlag;
+		dst->alphaBlendingFlag = 0;
+
 		gdImagePaletteCopy (dst, src);
 
 		for (uY = 0; uY<src->sy; uY++) {
@@ -2769,6 +2772,7 @@ gdImagePtr gdImageRotate90 (gdImagePtr src, int ignoretransparent)
 				}
 			}
 		}
+		dst->alphaBlendingFlag = old_blendmode;
 	}
 
 	return dst;
@@ -2792,6 +2796,9 @@ gdImagePtr gdImageRotate180 (gdImagePtr src, int ignoretransparent)
 	dst->transparent = src->transparent;
 
 	if (dst != NULL) {
+		int old_blendmode = dst->alphaBlendingFlag;
+		dst->alphaBlendingFlag = 0;
+
 		gdImagePaletteCopy (dst, src);
 
 		for (uY = 0; uY<src->sy; uY++) {
@@ -2812,6 +2819,7 @@ gdImagePtr gdImageRotate180 (gdImagePtr src, int ignoretransparent)
 				}
 			}
 		}
+		dst->alphaBlendingFlag = old_blendmode;
 	}
 
 	return dst;
@@ -2835,6 +2843,9 @@ gdImagePtr gdImageRotate270 (gdImagePtr src, int ignoretransparent)
 	dst->transparent = src->transparent;
 
 	if (dst != NULL) {
+		int old_blendmode = dst->alphaBlendingFlag;
+		dst->alphaBlendingFlag = 0;
+
 		gdImagePaletteCopy (dst, src);
 
 		for (uY = 0; uY<src->sy; uY++) {
@@ -2855,6 +2866,7 @@ gdImagePtr gdImageRotate270 (gdImagePtr src, int ignoretransparent)
 				}
 			}
 		}
+		dst->alphaBlendingFlag = old_blendmode;
 	}
 
 	return dst;
