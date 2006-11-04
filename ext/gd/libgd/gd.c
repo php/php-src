@@ -1042,10 +1042,7 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 			gdImageSetPixel(im, x1,y1, color);
 		}
 		return;
-	}
-
-	/* Horizontal */
-	if (y1==y2) {
+	} else if (y1==y2) { /* Horizontal */
 		if (x2 < x1) {
 			t = x2;
 			x2 = x1;
