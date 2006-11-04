@@ -57,6 +57,7 @@ PHP_MINFO_FUNCTION(spl);
 
 ZEND_BEGIN_MODULE_GLOBALS(spl)
 	char *       autoload_extensions;
+	int          autoload_extensions_len;
 	HashTable *  autoload_functions;
 	int          autoload_running;
 ZEND_END_MODULE_GLOBALS(spl)
