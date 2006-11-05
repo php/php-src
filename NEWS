@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   . Make sure PHP_SELF is filtered in Apache 1 sapi.
   . Fixed bug #39358 (INSTALL_HEADERS contains incorrect reference to
     php_filter.h).
+- Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
 - Fixed bug #39366 (imagerotate does not use alpha with angle > 45°) (Pierre)
 - Fixed bug #39273 (imagecopyresized may ignore alpha channel) (Pierre)
