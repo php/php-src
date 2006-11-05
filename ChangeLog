@@ -1,3 +1,97 @@
+2006-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      - MFH: Make parameter parsing api check happy
+
+    * ext/exif/exif.c:
+      - Make parameter parsing api check happy
+
+2006-11-04  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * main/streams/memory.c
+      main/streams/memory.c:
+      Mark memory streams as is_url
+
+2006-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/spl/php_spl.c
+      ext/spl/php_spl.h:
+      - MFH Store length of autoload file exts
+
+    * ext/spl/php_spl.c
+      ext/spl/php_spl.h:
+      - Store length of autoload file exts
+
+    * ext/spl/php_spl.c:
+      - Mark some funcs as unicode ready
+
+2006-11-04  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mbstring/config.w32
+      ext/mbstring/config.w32:
+      Fix win32 build
+
+2006-11-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/.cvsignore:
+      - MFB: update cvsignore
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_png.c:
+      - WS
+
+    * ext/gd/libgd/gd_png.c:
+      - Fixed filter argument for imagepng in gdImagePngEx
+
+    * ext/gd/libgd/gd_gif_in.c:
+      - MFB: vim folding
+
+    * ext/gd/libgd/gd_gd2.c:
+      - MFB: silent compiler warnings
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/libgd/gd.c:
+      - MFH: optimize horizontal and vertical lines
+
+    * ext/gd/libgd/gd.c:
+      - ws
+
+2006-11-04  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      sapi/apache2filter/sapi_apache2.c:
+      Fix build
+
+2006-11-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/libgd/gd.c
+      ext/gd/tests/bug39366.phpt:
+      - MFH #39366, imagerotate does not use alpha with angles>45
+
+    * ext/gd/libgd/gd.c
+      ext/gd/tests/bug39366.phpt
+      ext/gd/tests/bug39366.phpt:
+      - #39366, imagerotate does not use alpha with angles>45
+
+    * (PHP_5_2)
+      NEWS:
+      - #39273 entry
+
+    * ext/gd/libgd/gd.c
+      ext/gd/tests/bug39273.phpt:
+      - MFB: #39273, imagecopyresized and alpha channel
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c
+      ext/gd/tests/bug39273.phpt
+      ext/gd/tests/bug39273.phpt:
+      - #39273, imagecopyresized and alpha channel
+
 2006-11-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
