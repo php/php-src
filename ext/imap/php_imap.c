@@ -736,21 +736,21 @@ PHP_MINFO_FUNCTION(imap)
  */
 static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	zval **mailbox, **user, **passwd, **options;
+	zval **mailbox, **user, **passwd, **options, **retries;
 	MAILSTREAM *imap_stream;
 	pils *imap_le_struct;
 	long flags=NIL;
 	long cl_flags=NIL;
 	int myargc = ZEND_NUM_ARGS();
 	
-	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(myargc, &mailbox, &user, &passwd, &options) == FAILURE) {
+	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(myargc, &mailbox, &user, &passwd, &options, &retries) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_string_ex(mailbox);
 	convert_to_string_ex(user);
 	convert_to_string_ex(passwd);
-	if (myargc ==4) {
+	if (myargc >= 4) {
 		convert_to_long_ex(options);
 		flags = Z_LVAL_PP(options);
 		if (flags & PHP_EXPUNGE) {
@@ -777,6 +777,13 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	IMAPG(imap_user)     = estrndup(Z_STRVAL_PP(user), Z_STRLEN_PP(user));
 	IMAPG(imap_password) = estrndup(Z_STRVAL_PP(passwd), Z_STRLEN_PP(passwd));
 
+#ifdef SET_MAXLOGINTRIALS
+	if (myargc == 5) {
+		convert_to_long_ex(retries);
+		mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) Z_LVAL_PP(retries));
+	}
+#endif
+
 	imap_stream = mail_open(NIL, Z_STRVAL_PP(mailbox), flags);
 
 	if (imap_stream == NIL) {
@@ -794,7 +801,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 /* }}} */
 
-/* {{{ proto resource imap_open(string mailbox, string user, string password [, int options])
+/* {{{ proto resource imap_open(string mailbox, string user, string password [, int options [, int n_retries]])
    Open an IMAP stream to a mailbox */
 PHP_FUNCTION(imap_open)
 {
@@ -802,18 +809,18 @@ PHP_FUNCTION(imap_open)
 }
 /* }}} */
 
-/* {{{ proto bool imap_reopen(resource stream_id, string mailbox [, int options])
+/* {{{ proto bool imap_reopen(resource stream_id, string mailbox [, int options [, int n_retries]])
    Reopen an IMAP stream to a new mailbox */
 PHP_FUNCTION(imap_reopen)
 {
-	zval **streamind, **mailbox, **options;
+	zval **streamind, **mailbox, **options, **retries;
 	pils *imap_le_struct; 
 	MAILSTREAM *imap_stream;
 	long flags=NIL;
 	long cl_flags=NIL;
 	int myargc=ZEND_NUM_ARGS();
 
-	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &mailbox, &options) == FAILURE) {
+	if (myargc < 2 || myargc > 4 || zend_get_parameters_ex(myargc, &streamind, &mailbox, &options, &retries) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
@@ -821,7 +828,7 @@ PHP_FUNCTION(imap_reopen)
 
 	convert_to_string_ex(mailbox);
 
-	if (myargc == 3) {
+	if (myargc >= 3) {
 		convert_to_long_ex(options);
 		flags = Z_LVAL_PP(options);
 		if (flags & PHP_EXPUNGE) {
@@ -830,7 +837,12 @@ PHP_FUNCTION(imap_reopen)
 		}
 		imap_le_struct->flags = cl_flags;	
 	}
-
+#ifdef SET_MAXLOGINTRIALS
+	if (myargc == 4) {
+		convert_to_long_ex(retries);
+		mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) Z_LVAL_PP(retries));
+	}
+#endif
 	/* local filename, need to perform open_basedir and safe_mode checks */
 	if (Z_STRVAL_PP(mailbox)[0] != '{' && 
 			(php_check_open_basedir(Z_STRVAL_PP(mailbox) TSRMLS_CC) || 

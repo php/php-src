@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
 - Fixed bug #39366 (imagerotate does not use alpha with angle > 45°) (Pierre)
+- Fixed bug #39362 (Added an option to imap_open/imap_reopen to control the 
+  number of connection retries). (Ilia)
 - Fixed bug #39273 (imagecopyresized may ignore alpha channel) (Pierre)
 - Fixed bug #39364 (Removed warning on empty haystack inside mb_strstr()).
   (Ilia)
