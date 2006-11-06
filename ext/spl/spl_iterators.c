@@ -757,18 +757,19 @@ static zend_object_value spl_RecursiveIteratorIterator_new(zend_class_entry *cla
 /* }}} */
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_recursive_it___construct, 0) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_it___construct, 0, 0, 1) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_getSubIterator, 0) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_it_getSubIterator, 0, 0, 0)
 	ZEND_ARG_INFO(0, level)
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_setMaxDepth, 0) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_it_setMaxDepth, 0, 0, 0)
 	ZEND_ARG_INFO(0, max_depth)
 ZEND_END_ARG_INFO();
 
@@ -1553,7 +1554,7 @@ SPL_METHOD(RegexIterator, getPregFlags)
 	}
 } /* }}} */
 
-/* {{{ proto bool RegexIterator::setFlags(int new_flags)
+/* {{{ proto bool RegexIterator::setPregFlags(int new_flags)
    Set PREG flags */
 SPL_METHOD(RegexIterator, setPregFlags)
 {
@@ -1887,7 +1888,7 @@ static zend_function_entry spl_funcs_SeekableIterator[] = {
 };
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_limit_it___construct, 0) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_limit_it___construct, 0, 0, 1) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, count)
@@ -2236,7 +2237,7 @@ SPL_METHOD(CachingIterator, getFlags)
 }
 /* }}} */
 
-/* {{{ proto void CachingIterator::setFlags()
+/* {{{ proto void CachingIterator::setFlags(int flags)
    Set the internal flags */
 SPL_METHOD(CachingIterator, setFlags)
 {
@@ -2270,7 +2271,7 @@ SPL_METHOD(CachingIterator, setFlags)
 /* }}} */
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_caching_it___construct, 0) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_it___construct, 0, 0, 1) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
@@ -2281,12 +2282,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_caching_it_setFlags, 0)
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_it_offsetGet, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_caching_it_offsetGet, 0)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_it_offsetSet, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_caching_it_offsetSet, 0)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, newval)
 ZEND_END_ARG_INFO();
@@ -2345,7 +2346,7 @@ SPL_METHOD(RecursiveCachingIterator, getChildren)
 } /* }}} */
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_rec_it___construct, 0, ZEND_RETURN_VALUE, 2) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_rec_it___construct, 0, ZEND_RETURN_VALUE, 1) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();

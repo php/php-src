@@ -1327,9 +1327,14 @@ static zend_function_entry spl_DirectoryIterator_functions[] = {
 };
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_r_dir___construct, 0) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_r_dir___construct, 0, 0, 1) 
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_r_dir_hasChildren, 0, 0, 0)
+	ZEND_ARG_INFO(0, allow_links)
 ZEND_END_ARG_INFO()
 
 static zend_function_entry spl_RecursiveDirectoryIterator_functions[] = {
@@ -1338,7 +1343,7 @@ static zend_function_entry spl_RecursiveDirectoryIterator_functions[] = {
 	SPL_ME(RecursiveDirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, current,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveDirectoryIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, hasChildren,   arginfo_r_dir_hasChildren, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, getSubPath,    NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, getSubPathname,NULL, ZEND_ACC_PUBLIC)
