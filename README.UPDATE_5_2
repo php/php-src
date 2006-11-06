@@ -207,11 +207,11 @@ strripos("foo", "f", 4);
 strrpos("foo", "f", 4);
 /* Notice:  strrpos(): Offset is greater than the length of haystack string in filename on line n */
 
-/* when allow_fopen_include is OFF (default) */
+/* when allow_url_include is OFF (default) */
 include "data:;base64,PD9waHAgcGhwaW5mbygpOz8+";
 /* Warning:  include(): URL file-access is disabled in the server configuration in filename on line n */
 
-/* when allow_fopen_include is OFF (default) */
+/* when allow_url_include is OFF (default) */
 include "php://input";
 /* Warning:  include(): URL file-access is disabled in the server configuration in filename on line n */
 #See: http://cvs.php.net/viewvc.cgi/php-src/ext/standard/php_fopen_wrapper.c?r1=1.45.2.4.2.3&r2=1.45.2.4.2.4
