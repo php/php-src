@@ -1,3 +1,35 @@
+2006-11-05  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c:
+      data: and php:stdin/input allow_url_include checks
+
+2006-11-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      MFB: Fixed bug #39362 (Added an option to imap_open/imap_reopen to control
+      the number of connection retries).
+
+    * (PHP_5_2)
+      NEWS
+      ext/imap/php_imap.c:
+      Fixed bug #39362 (Added an option to imap_open/imap_reopen to control the
+      number of connection retries).
+
+2006-11-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - gdpng entry
+
+    * ext/gd/libgd/gd_png.c:
+      - MFH: Merge from gd-cvs, initialize the signature not the infile ctx
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_png.c:
+      - Merge from gd-cvs, initialize the signature not the infile ctx
+        NB: good that we don't use getC :)
+
 2006-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
