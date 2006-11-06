@@ -207,6 +207,15 @@ strripos("foo", "f", 4);
 strrpos("foo", "f", 4);
 /* Notice:  strrpos(): Offset is greater than the length of haystack string in filename on line n */
 
+/* when allow_fopen_include is OFF (default) */
+include "data:;base64,PD9waHAgcGhwaW5mbygpOz8+";
+/* Warning:  include(): URL file-access is disabled in the server configuration in filename on line n */
+
+/* when allow_fopen_include is OFF (default) */
+include "php://input";
+/* Warning:  include(): URL file-access is disabled in the server configuration in filename on line n */
+#See: http://cvs.php.net/viewvc.cgi/php-src/ext/standard/php_fopen_wrapper.c?r1=1.45.2.4.2.3&r2=1.45.2.4.2.4
+
 ?>
 
 OO related in the PHP core
@@ -326,6 +335,9 @@ In the date extension
 strtotime("today", "now");'
 /* Warning:  strtotime() expects parameter 2 to be long, string given in filename on line n */
 
+new DateTime(new stdclass);
+/* Fatal error: Uncaught exception 'Exception' with message 'DateTime::__construct() expects parameter 1 to be string, object given' in filename:n */
+#See http://cvs.php.net/viewvc.cgi/php-src/ext/date/php_date.c?r1=1.43.2.45.2.33&r2=1.43.2.45.2.34
 ?>
 
 In the dBase extension
@@ -827,6 +839,12 @@ In the PHP core
 In ext/curl
 ===========
   - array curl_multi_info_read(resource mh [, long msgs_in_queue]) (msgs_in_queue)
+
+In ext/imap
+===========
+  - resource imap_open ( string mailbox, string username, string password [, int options[, int n_retries]]) (n_retries)
+  - bool imap_reopen(resource stream_id, string mailbox [, int options [, int n_retries]]) (n_retries)
+#See http://cvs.php.net/viewvc.cgi/php-src/ext/imap/php_imap.c?r1=1.208.2.7.2.7&r2=1.208.2.7.2.8
 
 In ext/mbstring
 ===============
