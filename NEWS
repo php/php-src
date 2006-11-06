@@ -27,6 +27,8 @@ PHP                                                                        NEWS
   (michal dot taborsky at gmail dot com, Ilia)
 - Fixed bug #39215 (Inappropriate close of stdin/stdout/stderr). (Wez,Ilia)
 - Fixed bug #39151 (Parse error in recursiveiteratoriterator.php). (Marcus)
+- Fixed bug #39121 (Incorrect return array handling in non-wsdl soap client).
+  (Dmitry)
 - Fixed bug #39090 (DirectoryFilterDots doxygen docs and example is wrong).
   (Marcus)
 - Fixed bug #38698 (for some keys cdbmake creates corrupted db and cdb can't 
