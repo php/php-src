@@ -31,6 +31,9 @@ function test($name, $lc, $lp)
 	var_dump($f->getPath());
 	$l = substr($f->getPath(), -1);
 	var_dump($l != '/' && $l != '\\' && $l == $lp);
+
+	$fo = $o->openFile();
+	var_dump($fo->getPathName(), $fo->getFileName(), $fo->getPath());
 }
 
 test(dirname(__FILE__) . '/' . 'fileobject_001a.txt', 't', substr(dirname(__FILE__),-1));
@@ -56,6 +59,9 @@ string(%d) "%sfileobject_001a.txt"
 bool(true)
 string(%d) "%stests"
 bool(true)
+string(%d) "%sfileobject_001a.txt"
+string(%d) "%sfileobject_001a.txt"
+string(%d) "%stests"
 ===1===
 object(SplFileInfo)#%d (0) {
 }
@@ -71,6 +77,9 @@ string(%d) "%stests"
 bool(true)
 string(%d) "%sspl"
 bool(true)
+string(%d) "%stests"
+string(%d) "%stests"
+string(%d) "%stests"
 ===2===
 object(SplFileInfo)#1 (0) {
 }
@@ -86,4 +95,7 @@ string(%d) "%stests"
 bool(true)
 string(%d) "%sspl"
 bool(true)
+string(%d) "%stests"
+string(%d) "%stests"
+string(%d) "%sspl"
 ===DONE===
