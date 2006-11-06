@@ -489,6 +489,7 @@ PHP_FUNCTION(lchgrp)
 /* }}} */
 #endif /* !NETWARE */
 
+#if !defined(WINDOWS)
 static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 {
 	char *filename;
@@ -545,6 +546,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 		RETURN_FALSE;
 	}
 }
+#endif
 
 #ifndef NETWARE
 /* {{{ proto bool chown (string filename, mixed user) U
