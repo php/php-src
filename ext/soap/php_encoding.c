@@ -1102,23 +1102,23 @@ static void model_to_zval_any(zval *ret, xmlNodePtr node TSRMLS_DC)
 					}
 					add_string_to_string(val, val, val2);
 					zval_ptr_dtor(&val2);
-				  node = node->next;
+					node = node->next;
 				}
 			}
 			if (any == NULL) {
 				any = val;
 			} else {
 				if (Z_TYPE_P(any) != IS_ARRAY) {
-			    /* Convert into array */
-			    zval *arr;
+					/* Convert into array */
+					zval *arr;
 
-			    MAKE_STD_ZVAL(arr);
-			    array_init(arr);
-				  add_next_index_zval(arr, any);
-				  any = arr;
-			  }
-			  /* Add array element */
-			  add_next_index_zval(any, val);
+					MAKE_STD_ZVAL(arr);
+					array_init(arr);
+					add_next_index_zval(arr, any);
+					any = arr;
+				}
+				/* Add array element */
+				add_next_index_zval(any, val);
 			}
 		}
 		node = node->next;
@@ -1378,22 +1378,31 @@ static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_e
 
 				prop = get_zval_property(ret, (char*)trav->name TSRMLS_CC);
 				if (!prop) {
-          set_zval_property(ret, (char*)trav->name, tmpVal TSRMLS_CC);
-				} else {
-				  /* Property already exist - make array */
-				  if (Z_TYPE_P(prop) != IS_ARRAY) {
-				    /* Convert into array */
-				    zval *arr;
+					if (!trav->next || !get_node(trav->next, (char*)trav->name)) {
+						set_zval_property(ret, (char*)trav->name, tmpVal TSRMLS_CC);
+					} else {
+						zval *arr;
 
-				    MAKE_STD_ZVAL(arr);
-				    array_init(arr);
-				    prop->refcount++;
-					  add_next_index_zval(arr, prop);
-	          set_zval_property(ret, (char*)trav->name, arr TSRMLS_CC);
-					  prop = arr;
-				  }
-				  /* Add array element */
-				  add_next_index_zval(prop, tmpVal);
+						MAKE_STD_ZVAL(arr);
+						array_init(arr);
+						add_next_index_zval(arr, tmpVal);
+						set_zval_property(ret, (char*)trav->name, arr TSRMLS_CC);
+					}
+				} else {
+					/* Property already exist - make array */
+					if (Z_TYPE_P(prop) != IS_ARRAY) {
+						/* Convert into array */
+						zval *arr;
+
+						MAKE_STD_ZVAL(arr);
+						array_init(arr);
+						prop->refcount++;
+						add_next_index_zval(arr, prop);
+						set_zval_property(ret, (char*)trav->name, arr TSRMLS_CC);
+						prop = arr;
+					}
+					/* Add array element */
+					add_next_index_zval(prop, tmpVal);
 				}
 			}
 			trav = trav->next;
