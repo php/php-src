@@ -350,10 +350,22 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 				if (val != NULL) {
 					if (!node_is_equal_ex(val,"result",RPC_SOAP12_NAMESPACE)) {
 						zval *tmp;
+						zval **arr;
 
 						tmp = master_to_zval(NULL, val);
 						if (val->name) {
-							add_assoc_zval(return_value, (char*)val->name, tmp);
+							if (zend_hash_find(Z_ARRVAL_P(return_value), (char*)val->name, strlen((char*)val->name)+1, (void**)&arr) == SUCCESS) {
+								add_next_index_zval(*arr, tmp);
+							} else if (val->next && get_node(val->next, (char*)val->name)) {
+								zval *arr;
+
+								MAKE_STD_ZVAL(arr);
+								array_init(arr);
+								add_next_index_zval(arr, tmp);
+								add_assoc_zval(return_value, (char*)val->name, arr);
+							} else {
+								add_assoc_zval(return_value, (char*)val->name, tmp);
+							}
 						} else {
 							add_next_index_zval(return_value, tmp);
 						}
