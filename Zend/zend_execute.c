@@ -411,11 +411,7 @@ static void zend_assign_to_variable_reference(zval **variable_ptr_ptr, zval **va
 		*variable_ptr_ptr = value_ptr;
 		value_ptr->refcount++;
 
-		variable_ptr->refcount--;
-		if (variable_ptr->refcount==0) {
-			zendi_zval_dtor(*variable_ptr);
-			FREE_ZVAL(variable_ptr);
-		}
+		zval_ptr_dtor(&variable_ptr);
 	} else if (!variable_ptr->is_ref) {
 		if (variable_ptr_ptr == value_ptr_ptr) {
 			SEPARATE_ZVAL(variable_ptr_ptr);
