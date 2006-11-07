@@ -5,7 +5,6 @@ PHP 4                                                                      NEWS
 - Fixed missing open_basedir check inside chdir() function. (Ilia)
 - Fixed bug #39354 (Allow building of curl extension against libcurl
   7.16.0). (Ilia)
-- Fixed bug #39129 (avoid creation of a dummy constructor. (Ilia)
 - Fixed bug #39034 (curl_exec() with return transfer returns TRUE on empty
   files). (Ilia)
 - Fixed bug #38963 (Fixed a possible open_basedir bypass in tempnam()). (Ilia)
