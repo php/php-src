@@ -278,6 +278,10 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 
 	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && ! ZVAL_IS_NULL(param->parameter)) {
 		convert_to_string(param->parameter);
+	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT && Z_TYPE_P(param->parameter) == IS_BOOL) {
+		convert_to_long(param->parameter);
+	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL && Z_TYPE_P(param->parameter) == IS_LONG) {
+		convert_to_boolean(param->parameter);
 	}
 
 	param->stmt = stmt;
