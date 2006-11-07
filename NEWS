@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     php_filter.h).
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
+- Fixed bug #39414 (Syntax error while compiling with Sun Workshop Complier).
+  (Johannes)
 - Fixed bug #39366 (imagerotate does not use alpha with angle > 45°) (Pierre)
 - Fixed bug #39362 (Added an option to imap_open/imap_reopen to control the 
   number of connection retries). (Ilia)
