@@ -1,3 +1,88 @@
+2006-11-06  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_iterators.c:
+      Fix arginfo
+
+2006-11-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/html.c:
+      Unicode support in entities/special chars funcs. See the NOTE at the
+      top.
+
+2006-11-06  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      It is allow_url_include not allow_fopen_include
+
+2006-11-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/bug39350.phpt
+      ext/standard/tests/strings/bug39350.phpt:
+      Fixed bug #39350 (crash with implode("\n", array(false))).
+
+2006-11-06  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      include php://input && data: have been disabled (with allow_fopen_include
+      off)
+      new DateTime(new stdclass) now throws exception
+      imap_[re]open() has new optional parameter
+
+2006-11-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      param parsing fix
+      
+
+2006-11-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug39121.phpt
+      ext/soap/tests/bugs/bug39121.phpt:
+      
+      file bug39121.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_packet_soap.c
+      ext/soap/php_packet_soap.c
+      ext/soap/tests/bugs/bug39121.phpt:
+      Fixed bug #39121 (Incorrect return array handling in non-wsdl soap client)
+
+2006-11-06  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/imap/php_imap.c:
+      Enable the new 5th parameter
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      MFH: throw exception on invalid parameters
+
+    * ext/date/php_date.c:
+      Throw exception on invalid parameters in DateTime::__construct()
+
+    * ext/spl/spl_directory.c
+      ext/spl/tests/fileobject_003.phpt:
+      Fix segfault on $splinfo->openFile()->getPath()
+      Improve test
+
+2006-11-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/filestat.c
+      ext/standard/filestat.c:
+      Windows doesn't have chown(). Remove unused function and reference to
+      undeclared macro VCWD_CHOWN().
+
+    * (PHP_5_2)
+      ext/soap/php_encoding.c:
+      MFH: Fixed decoding list of arrays (related to bug #39121)
+
 2006-11-05  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * ext/standard/php_fopen_wrapper.c
