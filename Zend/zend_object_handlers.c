@@ -469,6 +469,19 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 		/* Undo PZVAL_LOCK() */
 		retval->refcount--;
 
+		if ((type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET) && retval->refcount > 0) {
+			zval *tmp = retval;
+
+			ALLOC_ZVAL(retval);
+			*retval = *tmp;
+			zval_copy_ctor(retval);
+			retval->is_ref = 0;
+			retval->refcount = 0;
+			if (Z_TYPE_P(retval) != IS_OBJECT) {
+				zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name);
+			}
+		}
+
 		return retval;
 	} else {
 		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
