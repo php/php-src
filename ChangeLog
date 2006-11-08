@@ -1,3 +1,53 @@
+2006-11-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug33282.phpt:
+      MFB: Fixed bug #33282 (Re-assignment by reference does not clear the is_ref
+      flag)
+
+    * ext/standard/tests/array/array_diff_key.phpt
+      ext/standard/tests/array/array_intersect_key.phpt:
+      MFB: fixed tests
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_diff_key.phpt
+      ext/standard/tests/array/array_intersect_key.phpt:
+      Fixed tests
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug33282.phpt
+      ZendEngine2/tests/bug33282.phpt:
+      Fixed bug #33282 (Re-assignment by reference does not clear the is_ref
+      flag)
+      
+
+    * (PHP_4_4)
+      NEWS
+      Zend/zend_compile.c:
+      revert incorrect patch for bug #39129
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo/tests/bug_39398.phpt:
+      MFB: Fixed bug #39398 (Booleans are not automatically translated to
+      integers).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/tests/bug_39398.phpt
+      ext/pdo/tests/bug_39398.phpt:
+      Fixed bug #39398 (Booleans are not automatically translated to integers).
+
+2006-11-07  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/spl/spl_iterators.c:
+      - No C++ comments (fix #39414)
+
 2006-11-06  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * ext/spl/spl_directory.c
