@@ -1200,6 +1200,11 @@ ZEND_API int zend_u_lookup_class(zend_uchar type, zstr name, int name_length, ze
 	return zend_u_lookup_class_ex(type, name, name_length, 1, 1, ce TSRMLS_CC);
 }
 
+ZEND_API int zend_lookup_class_ex(char *name, int name_length, int use_autoload, zend_class_entry ***ce TSRMLS_DC)
+{
+	return zend_u_lookup_class_ex(IS_STRING, ZSTR(name), name_length, use_autoload, 1, ce TSRMLS_CC);
+}
+
 ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
 {
 	return zend_u_lookup_class(IS_STRING, ZSTR(name), name_length, ce TSRMLS_CC);
