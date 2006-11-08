@@ -126,7 +126,6 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D)
 		return FAILURE;
 	}
 	zend_hash_copy(EG(ini_directives), registered_zend_ini_directives, NULL, &ini_entry, sizeof(zend_ini_entry));
-	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP TSRMLS_CC);
 	return SUCCESS;
 }
 #endif
@@ -214,6 +213,7 @@ ZEND_API void zend_unregister_ini_entries(int module_number TSRMLS_DC)
 }
 
 
+#ifdef ZTS
 static int zend_ini_refresh_cache(zend_ini_entry *p, int stage TSRMLS_DC)
 {
 	if (p->on_modify) {
@@ -227,6 +227,7 @@ ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC)
 {
 	zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) zend_ini_refresh_cache, (void *)(long) stage TSRMLS_CC);
 }
+#endif
 
 
 ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage)

@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #39354 (Allow building of curl extension against libcurl 7.16.0)
   (Ilia) 
+- Fixed bug #39344 (Unnecessary calls to OnModify callback routine for
+  an extension INI directive). (wharmby at uk dot ibm dot com, Dmitry)
 - Fixed bug #39320 (ZEND_HASH_APPLY_STOP causes deletion). (Marcus)
 - Fixed bug #39313 (spl_autoload triggers Fatal error). (Marcus)
 - Fixed bug #39265 (Fixed path handling inside mod_files.sh). 
