@@ -1103,13 +1103,14 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 
 				if (node) {
 					zval *val;
+					xmlNodePtr r_node;
 
-					node = check_and_resolve_href(node);
-					if (node && node->children && node->children->content) {
-						if (model->u.element->fixed && strcmp(model->u.element->fixed, (char*)node->children->content) != 0) {
-							soap_error3(E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, node->children->content);
+					r_node = check_and_resolve_href(node);
+					if (r_node && r_node->children && r_node->children->content) {
+						if (model->u.element->fixed && strcmp(model->u.element->fixed, (char*)r_node->children->content) != 0) {
+							soap_error3(E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, r_node->children->content);
 						}
-						val = master_to_zval(model->u.element->encode, node);
+						val = master_to_zval(model->u.element->encode, r_node);
 					} else if (model->u.element->fixed) {
 						xmlNodePtr dummy = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 						xmlNodeSetContent(dummy, BAD_CAST(model->u.element->fixed));
@@ -1121,7 +1122,7 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 						val = master_to_zval(model->u.element->encode, dummy);
 						xmlFreeNode(dummy);
 					} else {
-						val = master_to_zval(model->u.element->encode, node);
+						val = master_to_zval(model->u.element->encode, r_node);
 					}
 					if ((node = get_node(node->next, model->u.element->name)) != NULL) {
 						zval *array;
