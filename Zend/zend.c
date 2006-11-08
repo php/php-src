@@ -522,8 +522,9 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals TSRMLS
 
 static void zend_new_thread_end_handler(THREAD_T thread_id TSRMLS_DC)
 {
-	zend_copy_ini_directives(TSRMLS_C);
-	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP TSRMLS_CC);
+	if (zend_copy_ini_directives(TSRMLS_C) == SUCCESS) {
+		zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP TSRMLS_CC);
+	}
 }
 #endif
 
@@ -700,7 +701,7 @@ void zend_post_startup(TSRMLS_D)
 	free(EG(zend_constants));
 	executor_globals_ctor(executor_globals, tsrm_ls);
 	global_persistent_list = &EG(persistent_list);
-	zend_new_thread_end_handler(tsrm_thread_id() TSRMLS_CC);
+	zend_copy_ini_directives(TSRMLS_C);
 }
 #endif
 
