@@ -1,3 +1,18 @@
+2006-11-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_execute.c
+      tests/bug33282.phpt:
+      MFB: Fixed bug #33282 (Re-assignment by reference does not clear the is_ref
+      flag)
+
+    * (PHP_5_2)
+      zend_execute.c
+      tests/bug33282.phpt
+      tests/bug33282.phpt:
+      Fixed bug #33282 (Re-assignment by reference does not clear the is_ref
+      flag)
+      
+
 2006-11-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
