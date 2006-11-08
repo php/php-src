@@ -773,7 +773,7 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
 	p = source->pListHead;
 	while (p) {
 		if (p->nKeyLength) {
-			zend_hash_update(target, p->arKey, p->nKeyLength, p->pData, size, &new_entry);
+			zend_hash_quick_update(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &new_entry);
 		} else {
 			zend_hash_index_update(target, p->h, p->pData, size, &new_entry);
 		}
@@ -798,7 +798,7 @@ ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_f
 	p = source->pListHead;
 	while (p) {
 		if (p->nKeyLength>0) {
-			if (_zend_hash_add_or_update(target, p->arKey, p->nKeyLength, p->pData, size, &t, mode ZEND_FILE_LINE_RELAY_CC)==SUCCESS && pCopyConstructor) {
+			if (_zend_hash_quick_add_or_update(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &t, mode ZEND_FILE_LINE_RELAY_CC)==SUCCESS && pCopyConstructor) {
 				pCopyConstructor(t);
 			}
 		} else {
