@@ -30,6 +30,8 @@ PHP                                                                        NEWS
   an extension INI directive). (wharmby at uk dot ibm dot com, Dmitry)
 - Fixed bug #39320 (ZEND_HASH_APPLY_STOP causes deletion). (Marcus)
 - Fixed bug #39313 (spl_autoload triggers Fatal error). (Marcus)
+- Fixed bug #39297 (Memory corryption because of indirect modification
+  of overloaded array). (Dmitry)
 - Fixed bug #39265 (Fixed path handling inside mod_files.sh). 
   (michal dot taborsky at gmail dot com, Ilia)
 - Fixed bug #39215 (Inappropriate close of stdin/stdout/stderr). (Wez,Ilia)
