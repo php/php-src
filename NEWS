@@ -45,6 +45,8 @@ PHP                                                                        NEWS
   read valid db). (Marcus)
 - Fixed bug #38680 (Added missing handling of basic types in json_decode).
   (Ilia) 
+- Fixed bug #38602 (header( "HTTP/1.0 ..." ) does not change proto version).
+  (Ilia)
 - Fixed bug #38536 (SOAP returns an array of values instead of an object).
   (Dmitry)
 - Fixed bug #33282 (Re-assignment by reference does not clear the is_ref flag)
