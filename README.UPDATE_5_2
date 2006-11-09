@@ -180,13 +180,13 @@ Backwards incompatible changes
 In the PHP core
 ===============
 getrusage() will return NULL when passed incompatible arguments
-# See http://cvs.php.net/viewvc.cgi/php-src/ext/standard/microtime.c?r1=1.57&r2=1.58 && ?r1=1.53.2.2&r2=1.53.2.2.2.1
+As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/standard/microtime.c?r1=1.57&r2=1.58 && ?r1=1.53.2.2&r2=1.53.2.2.2.1
 
 In ext/zip
 ==========
 ZipArchive::setCommentName() now returns TRUE on success
 ZipArchive::setCommentIndex() now return TRUE on success
-#See http://cvs.php.net/viewvc.cgi/php-src/ext/zip/php_zip.c?r1=1.1.2.15&r2=1.1.2.16
+As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/zip/php_zip.c?r1=1.1.2.15&r2=1.1.2.16
 
 ==================
 NEW ERROR MESSAGES
@@ -220,7 +220,7 @@ include "data:;base64,PD9waHAgcGhwaW5mbygpOz8+";
 /* when allow_url_include is OFF (default) */
 include "php://input";
 /* Warning:  include(): URL file-access is disabled in the server configuration in filename on line n */
-#See: http://cvs.php.net/viewvc.cgi/php-src/ext/standard/php_fopen_wrapper.c?r1=1.45.2.4.2.3&r2=1.45.2.4.2.4
+As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/standard/php_fopen_wrapper.c?r1=1.45.2.4.2.3&r2=1.45.2.4.2.4
 
 ?>
 
@@ -343,7 +343,7 @@ strtotime("today", "now");'
 
 new DateTime(new stdclass);
 /* Fatal error: Uncaught exception 'Exception' with message 'DateTime::__construct() expects parameter 1 to be string, object given' in filename:n */
-#See http://cvs.php.net/viewvc.cgi/php-src/ext/date/php_date.c?r1=1.43.2.45.2.33&r2=1.43.2.45.2.34
+As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/date/php_date.c?r1=1.43.2.45.2.33&r2=1.43.2.45.2.34
 ?>
 
 In the dBase extension
@@ -415,7 +415,7 @@ $obj->setCommentName("", "comment");'
 
 $obj->getCommentName("");
 /* Notice:  ZipArchive::getCommentName(): Empty string as entry name in filename on line n */
-#See http://cvs.php.net/viewvc.cgi/php-src/ext/zip/php_zip.c?r1=1.1.2.15&r2=1.1.2.16
+As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/zip/php_zip.c?r1=1.1.2.15&r2=1.1.2.16
 ?>
 
 
@@ -747,7 +747,7 @@ In ext/zip
     ZipArchive:
       bool createEmptyDir(string dirname)
         Creates an empty directory in the archive
-#See http://cvs.php.net/viewvc.cgi/php-src/ext/zip/php_zip.c?r1=1.1.2.15&r2=1.1.2.16
+As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/zip/php_zip.c?r1=1.1.2.15&r2=1.1.2.16
 
 New class constants
 ===================
@@ -869,15 +869,16 @@ In ext/imap
 ===========
   - resource imap_open ( string mailbox, string username, string password [, int options[, int n_retries]]) (n_retries)
   - bool imap_reopen(resource stream_id, string mailbox [, int options [, int n_retries]]) (n_retries)
-#See http://cvs.php.net/viewvc.cgi/php-src/ext/imap/php_imap.c?r1=1.208.2.7.2.7&r2=1.208.2.7.2.8
+As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/imap/php_imap.c?r1=1.208.2.7.2.7&r2=1.208.2.7.2.8
 
 In ext/mbstring
 ===============
   - int mb_strrpos(string haystack, string needle [, int offset [, string encoding]]) (offset)
 
 In ext/ming
+===========
   - int swfmovie::streamMP3(mixed file [, float skip]) (skip)
-#See http://cvs.php.net/viewvc.cgi/php-src/ext/ming/ming.c?r1=1.79.2.4.2.3&r2=1.79.2.4.2.4
+As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/ming/ming.c?r1=1.79.2.4.2.3&r2=1.79.2.4.2.4
 
 In ext/openssl
 ==============
