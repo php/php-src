@@ -139,6 +139,12 @@ static inline int zend_codepoint_to_uchar(UChar32 codepoint, UChar *buf)
 #define USTR_BYTES(__type, __length) \
 	((__type == IS_UNICODE)?UBYTES(__length):__length)
 
+#define TEXT_BYTES(__chars_len) \
+	(UG(unicode) ? UBYTES(__chars_len) : __chars_len)
+
+#define TEXT_CHARS(__bytes_len) \
+	(UG(unicode) ? (__bytes_len / sizeof(UChar)) : __bytes_len)
+
 #define USTR_MAKE(cs) zend_ascii_to_unicode(cs, sizeof(cs) ZEND_FILE_LINE_CC)
 #define USTR_MAKE_REL(cs) zend_ascii_to_unicode(cs, sizeof(cs) ZEND_FILE_LINE_RELAY_CC)
 static inline UChar* zend_ascii_to_unicode(const char *cs, size_t cs_size ZEND_FILE_LINE_DC)
