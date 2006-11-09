@@ -29,7 +29,56 @@
 #include "ext/standard/info.h"
 #include "php_xmlwriter.h"
 
-zend_class_entry *xmlwriter_class_entry;
+
+#if LIBXML_VERSION >= 20605
+static PHP_FUNCTION(xmlwriter_set_indent);
+static PHP_FUNCTION(xmlwriter_set_indent_string);
+#endif
+static PHP_FUNCTION(xmlwriter_start_attribute);
+static PHP_FUNCTION(xmlwriter_end_attribute);
+static PHP_FUNCTION(xmlwriter_write_attribute);
+#if LIBXML_VERSION > 20617
+static PHP_FUNCTION(xmlwriter_start_attribute_ns);
+static PHP_FUNCTION(xmlwriter_write_attribute_ns);
+#endif
+static PHP_FUNCTION(xmlwriter_start_element);
+static PHP_FUNCTION(xmlwriter_end_element);
+static PHP_FUNCTION(xmlwriter_full_end_element);
+static PHP_FUNCTION(xmlwriter_start_element_ns);
+static PHP_FUNCTION(xmlwriter_write_element);
+static PHP_FUNCTION(xmlwriter_write_element_ns);
+static PHP_FUNCTION(xmlwriter_start_pi);
+static PHP_FUNCTION(xmlwriter_end_pi);
+static PHP_FUNCTION(xmlwriter_write_pi);
+static PHP_FUNCTION(xmlwriter_start_cdata);
+static PHP_FUNCTION(xmlwriter_end_cdata);
+static PHP_FUNCTION(xmlwriter_write_cdata);
+static PHP_FUNCTION(xmlwriter_text);
+static PHP_FUNCTION(xmlwriter_write_raw);
+static PHP_FUNCTION(xmlwriter_start_document);
+static PHP_FUNCTION(xmlwriter_end_document);
+#if LIBXML_VERSION >= 20607
+static PHP_FUNCTION(xmlwriter_start_comment);
+static PHP_FUNCTION(xmlwriter_end_comment);
+#endif
+static PHP_FUNCTION(xmlwriter_write_comment);
+static PHP_FUNCTION(xmlwriter_start_dtd);
+static PHP_FUNCTION(xmlwriter_end_dtd);
+static PHP_FUNCTION(xmlwriter_write_dtd);
+static PHP_FUNCTION(xmlwriter_start_dtd_element);
+static PHP_FUNCTION(xmlwriter_end_dtd_element);
+static PHP_FUNCTION(xmlwriter_write_dtd_element);
+#if LIBXML_VERSION > 20608
+static PHP_FUNCTION(xmlwriter_start_dtd_attlist);
+static PHP_FUNCTION(xmlwriter_end_dtd_attlist);
+static PHP_FUNCTION(xmlwriter_write_dtd_attlist);
+#endif
+static PHP_FUNCTION(xmlwriter_open_uri);
+static PHP_FUNCTION(xmlwriter_open_memory);
+static PHP_FUNCTION(xmlwriter_output_memory);
+static PHP_FUNCTION(xmlwriter_flush);
+
+static zend_class_entry *xmlwriter_class_entry_ce;
 
 static void xmlwriter_free_resource_ptr(xmlwriter_object *intern TSRMLS_DC);
 static void xmlwriter_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
@@ -88,7 +137,7 @@ static void xmlwriter_object_free_storage(void *object TSRMLS_DC)
 
 
 /* {{{ xmlwriter_object_new */
-PHP_XMLWRITER_API zend_object_value xmlwriter_object_new(zend_class_entry *class_type TSRMLS_DC)
+static zend_object_value xmlwriter_object_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	ze_xmlwriter_object *intern;
 	zval *tmp;
@@ -229,9 +278,9 @@ static zend_function_entry xmlwriter_class_functions[] = {
 #endif
 
 /* {{{ function prototypes */
-PHP_MINIT_FUNCTION(xmlwriter);
-PHP_MSHUTDOWN_FUNCTION(xmlwriter);
-PHP_MINFO_FUNCTION(xmlwriter);
+static PHP_MINIT_FUNCTION(xmlwriter);
+static PHP_MSHUTDOWN_FUNCTION(xmlwriter);
+static PHP_MINFO_FUNCTION(xmlwriter);
 
 static int le_xmlwriter;
 /* }}} */
@@ -239,7 +288,7 @@ static int le_xmlwriter;
 /* _xmlwriter_get_valid_file_path should be made a 
 	common function in libxml extension as code is common to a few xml extensions */
 /* {{{ _xmlwriter_get_valid_file_path */
-char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, int resolved_path_len  TSRMLS_DC) {
+static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, int resolved_path_len  TSRMLS_DC) {
 	xmlURI *uri;
 	xmlChar *escsource;
 	char *file_dest;
@@ -301,7 +350,7 @@ static void *php_xmlwriter_streams_IO_open_write_wrapper(const char *filename TS
 /* }}} */
 
 /* {{{ php_xmlwriter_streams_IO_write */
-int php_xmlwriter_streams_IO_write(void *context, const char *buffer, int len)
+static int php_xmlwriter_streams_IO_write(void *context, const char *buffer, int len)
 {
 	TSRMLS_FETCH();
 	return php_stream_write((php_stream*)context, buffer, len);
@@ -309,7 +358,7 @@ int php_xmlwriter_streams_IO_write(void *context, const char *buffer, int len)
 /* }}} */
 
 /* {{{ xmlwriter_objects_clone */
-int php_xmlwriter_streams_IO_close(void *context)
+static int php_xmlwriter_streams_IO_close(void *context)
 {
 	TSRMLS_FETCH();
 	return php_stream_close((php_stream*)context);
@@ -338,7 +387,7 @@ ZEND_GET_MODULE(xmlwriter)
 #endif
 
 /* {{{ xmlwriter_objects_clone */
-void xmlwriter_objects_clone(void *object, void **object_clone TSRMLS_DC)
+static void xmlwriter_objects_clone(void *object, void **object_clone TSRMLS_DC)
 {
 	/* TODO */
 }
@@ -430,7 +479,7 @@ static void php_xmlwriter_end(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_read_int_t
 #if LIBXML_VERSION >= 20605
 /* {{{ proto bool xmlwriter_set_indent(resource xmlwriter, bool indent)
 Toggle indentation on/off - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_set_indent)
+static PHP_FUNCTION(xmlwriter_set_indent)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -470,7 +519,7 @@ PHP_FUNCTION(xmlwriter_set_indent)
 
 /* {{{ proto bool xmlwriter_set_indent_string(resource xmlwriter, string indentString)
 Set string used for indenting - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_set_indent_string)
+static PHP_FUNCTION(xmlwriter_set_indent_string)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterSetIndentString, NULL);
 }
@@ -480,7 +529,7 @@ PHP_FUNCTION(xmlwriter_set_indent_string)
 
 /* {{{ proto bool xmlwriter_start_attribute(resource xmlwriter, string name)
 Create start attribute - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_attribute)
+static PHP_FUNCTION(xmlwriter_start_attribute)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartAttribute, "Invalid Attribute Name");
 }
@@ -488,7 +537,7 @@ PHP_FUNCTION(xmlwriter_start_attribute)
 
 /* {{{ proto bool xmlwriter_end_attribute(resource xmlwriter)
 End attribute - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_end_attribute)
+static PHP_FUNCTION(xmlwriter_end_attribute)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndAttribute);
 }
@@ -497,7 +546,7 @@ PHP_FUNCTION(xmlwriter_end_attribute)
 #if LIBXML_VERSION > 20617
 /* {{{ proto bool xmlwriter_start_attribute_ns(resource xmlwriter, string prefix, string name, string uri)
 Create start namespaced attribute - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_attribute_ns)
+static PHP_FUNCTION(xmlwriter_start_attribute_ns)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -541,7 +590,7 @@ PHP_FUNCTION(xmlwriter_start_attribute_ns)
 
 /* {{{ proto bool xmlwriter_write_attribute(resource xmlwriter, string name, string content)
 Write full attribute - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_attribute)
+static PHP_FUNCTION(xmlwriter_write_attribute)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -586,7 +635,7 @@ PHP_FUNCTION(xmlwriter_write_attribute)
 #if LIBXML_VERSION > 20617
 /* {{{ proto bool xmlwriter_write_attribute_ns(resource xmlwriter, string prefix, string name, string uri, string content)
 Write full namespaced attribute - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_attribute_ns)
+static PHP_FUNCTION(xmlwriter_write_attribute_ns)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -631,7 +680,7 @@ PHP_FUNCTION(xmlwriter_write_attribute_ns)
 
 /* {{{ proto bool xmlwriter_start_element(resource xmlwriter, string name)
 Create start element tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_element)
+static PHP_FUNCTION(xmlwriter_start_element)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartElement, "Invalid Element Name");
 }
@@ -640,7 +689,7 @@ PHP_FUNCTION(xmlwriter_start_element)
 
 /* {{{ proto bool xmlwriter_start_element_ns(resource xmlwriter, string prefix, string name, string uri)
 Create start namespaced element tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_element_ns)
+static PHP_FUNCTION(xmlwriter_start_element_ns)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -684,7 +733,7 @@ PHP_FUNCTION(xmlwriter_start_element_ns)
 
 /* {{{ proto bool xmlwriter_end_element(resource xmlwriter)
 End current element - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_end_element)
+static PHP_FUNCTION(xmlwriter_end_element)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndElement);
 }
@@ -692,7 +741,7 @@ PHP_FUNCTION(xmlwriter_end_element)
 
 /* {{{ proto bool xmlwriter_full_end_element(resource xmlwriter)
 End current element - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_full_end_element)
+static PHP_FUNCTION(xmlwriter_full_end_element)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterFullEndElement);
 }
@@ -700,7 +749,7 @@ PHP_FUNCTION(xmlwriter_full_end_element)
 
 /* {{{ proto bool xmlwriter_write_element(resource xmlwriter, string name, string content)
 Write full element tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_element)
+static PHP_FUNCTION(xmlwriter_write_element)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -743,7 +792,7 @@ PHP_FUNCTION(xmlwriter_write_element)
 
 /* {{{ proto bool xmlwriter_write_element_ns(resource xmlwriter, string prefix, string name, string uri, string content)
 Write full namesapced element tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_element_ns)
+static PHP_FUNCTION(xmlwriter_write_element_ns)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -787,7 +836,7 @@ PHP_FUNCTION(xmlwriter_write_element_ns)
 
 /* {{{ proto bool xmlwriter_start_pi(resource xmlwriter, string target)
 Create start PI tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_pi)
+static PHP_FUNCTION(xmlwriter_start_pi)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartPI, "Invalid PI Target");
 }
@@ -795,7 +844,7 @@ PHP_FUNCTION(xmlwriter_start_pi)
 
 /* {{{ proto bool xmlwriter_end_pi(resource xmlwriter)
 End current PI - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_end_pi)
+static PHP_FUNCTION(xmlwriter_end_pi)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndPI);
 }
@@ -803,7 +852,7 @@ PHP_FUNCTION(xmlwriter_end_pi)
 
 /* {{{ proto bool xmlwriter_write_pi(resource xmlwriter, string target, string content)
 Write full PI tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_pi)
+static PHP_FUNCTION(xmlwriter_write_pi)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -847,7 +896,7 @@ PHP_FUNCTION(xmlwriter_write_pi)
 
 /* {{{ proto bool xmlwriter_start_cdata(resource xmlwriter)
 Create start CDATA tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_cdata)
+static PHP_FUNCTION(xmlwriter_start_cdata)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -882,7 +931,7 @@ PHP_FUNCTION(xmlwriter_start_cdata)
 
 /* {{{ proto bool xmlwriter_end_cdata(resource xmlwriter)
 End current CDATA - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_end_cdata)
+static PHP_FUNCTION(xmlwriter_end_cdata)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndCDATA);
 }
@@ -890,7 +939,7 @@ PHP_FUNCTION(xmlwriter_end_cdata)
 
 /* {{{ proto bool xmlwriter_write_cdata(resource xmlwriter, string content)
 Write full CDATA tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_cdata)
+static PHP_FUNCTION(xmlwriter_write_cdata)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteCDATA, NULL);
 }
@@ -898,7 +947,7 @@ PHP_FUNCTION(xmlwriter_write_cdata)
 
 /* {{{ proto bool xmlwriter_write_raw(resource xmlwriter, string content)
 Write text - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_raw)
+static PHP_FUNCTION(xmlwriter_write_raw)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteRaw, NULL);
 }
@@ -906,7 +955,7 @@ PHP_FUNCTION(xmlwriter_write_raw)
 
 /* {{{ proto bool xmlwriter_text(resource xmlwriter, string content)
 Write text - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_text)
+static PHP_FUNCTION(xmlwriter_text)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteString, NULL);
 }
@@ -915,7 +964,7 @@ PHP_FUNCTION(xmlwriter_text)
 #if LIBXML_VERSION >= 20607
 /* {{{ proto bool xmlwriter_start_comment(resource xmlwriter)
 Create start comment - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_comment)
+static PHP_FUNCTION(xmlwriter_start_comment)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -950,7 +999,7 @@ PHP_FUNCTION(xmlwriter_start_comment)
 
 /* {{{ proto bool xmlwriter_end_comment(resource xmlwriter)
 Create end comment - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_end_comment)
+static PHP_FUNCTION(xmlwriter_end_comment)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndComment);
 }
@@ -960,7 +1009,7 @@ PHP_FUNCTION(xmlwriter_end_comment)
 
 /* {{{ proto bool xmlwriter_write_comment(resource xmlwriter, string content)
 Write full comment tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_comment)
+static PHP_FUNCTION(xmlwriter_write_comment)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteComment, NULL);
 }
@@ -968,7 +1017,7 @@ PHP_FUNCTION(xmlwriter_write_comment)
 
 /* {{{ proto bool xmlwriter_start_document(resource xmlwriter, string version, string encoding, string standalone)
 Create document tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_document)
+static PHP_FUNCTION(xmlwriter_start_document)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -1008,7 +1057,7 @@ PHP_FUNCTION(xmlwriter_start_document)
 
 /* {{{ proto bool xmlwriter_end_document(resource xmlwriter)
 End current document - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_end_document)
+static PHP_FUNCTION(xmlwriter_end_document)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDocument);
 }
@@ -1016,7 +1065,7 @@ PHP_FUNCTION(xmlwriter_end_document)
 
 /* {{{ proto bool xmlwriter_start_dtd(resource xmlwriter, string name, string pubid, string sysid)
 Create start DTD tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_dtd)
+static PHP_FUNCTION(xmlwriter_start_dtd)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -1057,7 +1106,7 @@ PHP_FUNCTION(xmlwriter_start_dtd)
 
 /* {{{ proto bool xmlwriter_end_dtd(resource xmlwriter)
 End current DTD - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_end_dtd)
+static PHP_FUNCTION(xmlwriter_end_dtd)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTD);
 }
@@ -1065,7 +1114,7 @@ PHP_FUNCTION(xmlwriter_end_dtd)
 
 /* {{{ proto bool xmlwriter_write_dtd(resource xmlwriter, string name, string pubid, string sysid, string subset)
 Write full DTD tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_dtd)
+static PHP_FUNCTION(xmlwriter_write_dtd)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -1107,7 +1156,7 @@ PHP_FUNCTION(xmlwriter_write_dtd)
 
 /* {{{ proto bool xmlwriter_start_dtd_element(resource xmlwriter, string name)
 Create start DTD element - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_dtd_element)
+static PHP_FUNCTION(xmlwriter_start_dtd_element)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartDTDElement, "Invalid Element Name");
 }
@@ -1115,7 +1164,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_element)
 
 /* {{{ proto bool xmlwriter_end_dtd_element(resource xmlwriter)
 End current DTD element - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_end_dtd_element)
+static PHP_FUNCTION(xmlwriter_end_dtd_element)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTDElement);
 }
@@ -1123,7 +1172,7 @@ PHP_FUNCTION(xmlwriter_end_dtd_element)
 
 /* {{{ proto bool xmlwriter_write_dtd_element(resource xmlwriter, string name, string content)
 Write full DTD element tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_dtd_element)
+static PHP_FUNCTION(xmlwriter_write_dtd_element)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -1167,7 +1216,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_element)
 #if LIBXML_VERSION > 20608
 /* {{{ proto bool xmlwriter_start_dtd_attlist(resource xmlwriter, string name)
 Create start DTD AttList - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_dtd_attlist)
+static PHP_FUNCTION(xmlwriter_start_dtd_attlist)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartDTDAttlist, "Invalid Element Name");
 }
@@ -1175,7 +1224,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_attlist)
 
 /* {{{ proto bool xmlwriter_end_dtd_attlist(resource xmlwriter)
 End current DTD AttList - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_end_dtd_attlist)
+static PHP_FUNCTION(xmlwriter_end_dtd_attlist)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTDAttlist);
 }
@@ -1183,7 +1232,7 @@ PHP_FUNCTION(xmlwriter_end_dtd_attlist)
 
 /* {{{ proto bool xmlwriter_write_dtd_attlist(resource xmlwriter, string name, string content)
 Write full DTD AttList tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_dtd_attlist)
+static PHP_FUNCTION(xmlwriter_write_dtd_attlist)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -1228,7 +1277,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_attlist)
 
 /* {{{ proto bool xmlwriter_start_dtd_entity(resource xmlwriter, string name, bool isparam)
 Create start DTD Entity - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_start_dtd_entity)
+static PHP_FUNCTION(xmlwriter_start_dtd_entity)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -1272,7 +1321,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_entity)
 
 /* {{{ proto bool xmlwriter_end_dtd_entity(resource xmlwriter)
 End current DTD Entity - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_end_dtd_entity)
+static PHP_FUNCTION(xmlwriter_end_dtd_entity)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTDEntity);
 }
@@ -1280,7 +1329,7 @@ PHP_FUNCTION(xmlwriter_end_dtd_entity)
 
 /* {{{ proto bool xmlwriter_write_dtd_entity(resource xmlwriter, string name, string content)
 Write full DTD Entity tag - returns FALSE on error */
-PHP_FUNCTION(xmlwriter_write_dtd_entity)
+static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 {
 	zval *pind;
 	xmlwriter_object *intern;
@@ -1325,7 +1374,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 
 /* {{{ proto resource xmlwriter_open_uri(resource xmlwriter, string source)
 Create new xmlwriter using source uri for output */
-PHP_FUNCTION(xmlwriter_open_uri)
+static PHP_FUNCTION(xmlwriter_open_uri)
 {
 	char *valid_file = NULL;
 	xmlwriter_object *intern;
@@ -1406,7 +1455,7 @@ PHP_FUNCTION(xmlwriter_open_uri)
 
 /* {{{ proto resource xmlwriter_open_memory()
 Create new xmlwriter using memory for string output */
-PHP_FUNCTION(xmlwriter_open_memory)
+static PHP_FUNCTION(xmlwriter_open_memory)
 {
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
@@ -1507,7 +1556,7 @@ static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) 
 
 /* {{{ proto string xmlwriter_output_memory(resource xmlwriter [,bool flush])
 Output current buffer as string */
-PHP_FUNCTION(xmlwriter_output_memory)
+static PHP_FUNCTION(xmlwriter_output_memory)
 {
 	php_xmlwriter_flush(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -1515,7 +1564,7 @@ PHP_FUNCTION(xmlwriter_output_memory)
 
 /* {{{ proto mixed xmlwriter_flush(resource xmlwriter [,bool empty])
 Output current buffer */
-PHP_FUNCTION(xmlwriter_flush)
+static PHP_FUNCTION(xmlwriter_flush)
 {
 	php_xmlwriter_flush(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -1523,7 +1572,7 @@ PHP_FUNCTION(xmlwriter_flush)
 
 /* {{{ PHP_MINIT_FUNCTION
  */
-PHP_MINIT_FUNCTION(xmlwriter)
+static PHP_MINIT_FUNCTION(xmlwriter)
 {
 #ifdef ZEND_ENGINE_2
 	zend_class_entry ce;
@@ -1544,7 +1593,7 @@ PHP_MINIT_FUNCTION(xmlwriter)
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION
  */
-PHP_MSHUTDOWN_FUNCTION(xmlwriter)
+static PHP_MSHUTDOWN_FUNCTION(xmlwriter)
 {
 	return SUCCESS;
 }
@@ -1552,7 +1601,7 @@ PHP_MSHUTDOWN_FUNCTION(xmlwriter)
 
 /* {{{ PHP_MINFO_FUNCTION
  */
-PHP_MINFO_FUNCTION(xmlwriter)
+static PHP_MINFO_FUNCTION(xmlwriter)
 {
 	php_info_print_table_start();
 	{
