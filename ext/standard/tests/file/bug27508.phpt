@@ -30,6 +30,9 @@ class FileStream {
 
     function stream_eof() 
     {
+        if (!$this->fp) {
+            return true;
+        }
         return feof($this->fp);
     }
 
@@ -44,7 +47,7 @@ stream_wrapper_register("myFile", "FileStream")
 
 $tn = tempnam('/tmp', 'foo');
 
-$fp = fopen("myFile://" . urlencode($tn), "w+");
+$fp = fopen("myFile://" . urlencode((binary)$tn), "w+");
 
 fwrite($fp, b"line1\n");
 fwrite($fp, b"line2\n");
