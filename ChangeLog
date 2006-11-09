@@ -1,3 +1,55 @@
+2006-11-08  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      fix #39300 (make install fails if wget is not available)
+      add support of 'fetch'
+
+2006-11-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.c:
+      HashTable copying optimization (Matt Wilmas)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug39297.phpt
+      ZendEngine2/tests/bug39297.phpt
+      ZendEngine2/tests/bug39297.phpt:
+      Fixed bug #39297 (Memory corryption because of indirect modification of
+      overloaded array).
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.c:
+      Fixed bug #39344 (Unnecessary calls to OnModify callback routine for an
+      extension INI directive). (wharmby at uk dot ibm dot com, Dmitry)
+
+2006-11-08  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c:
+      Put zend_lookup_class_ex back into the API for BC.
+
+2006-11-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/bugs/bug38536.phpt
+      ext/soap/tests/bugs/bug38536.phpt
+      ext/soap/tests/bugs/bug38536.phpt
+      ext/soap/tests/bugs/bug38536.wsdl
+      ext/soap/tests/bugs/bug38536.wsdl
+      ext/soap/tests/bugs/bug38536.wsdl:
+      Fixed bug #38536 (SOAP returns an array of values instead of an object)
+
 2006-11-07  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ZendEngine2/zend_execute.c
