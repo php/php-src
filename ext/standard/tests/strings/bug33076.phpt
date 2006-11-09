@@ -12,3 +12,6 @@ echo "Done\n";
 --EXPECT--	
 string(6) "bzexbz"
 Done
+--UEXPECT--
+unicode(6) "bzexbz"
+Done
