@@ -1,3 +1,33 @@
+2006-11-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_hash.c
+      zend_hash.c:
+      HashTable copying optimization (Matt Wilmas)
+
+    * zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug39297.phpt:
+      Fixed bug #39297 (Memory corryption because of indirect modification of
+      overloaded array).
+
+    * tests/bug39297.phpt
+      tests/bug39297.phpt:
+      
+      file bug39297.phpt was initially added on branch PHP_5_2.
+
+    * zend.c
+      zend.c
+      zend_ini.c
+      zend_ini.c:
+      Fixed bug #39344 (Unnecessary calls to OnModify callback routine for an
+      extension INI directive). (wharmby at uk dot ibm dot com, Dmitry)
+
+2006-11-08  Sara Golemon  <sara@golemon.com>
+
+    * zend_execute.h
+      zend_execute_API.c:
+      Put zend_lookup_class_ex back into the API for BC.
+
 2006-11-07  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_execute.c
