@@ -72,6 +72,9 @@ static PHP_FUNCTION(xmlwriter_write_dtd_element);
 static PHP_FUNCTION(xmlwriter_start_dtd_attlist);
 static PHP_FUNCTION(xmlwriter_end_dtd_attlist);
 static PHP_FUNCTION(xmlwriter_write_dtd_attlist);
+static PHP_FUNCTION(xmlwriter_start_dtd_entity);
+static PHP_FUNCTION(xmlwriter_end_dtd_entity);
+static PHP_FUNCTION(xmlwriter_write_dtd_entity);
 #endif
 static PHP_FUNCTION(xmlwriter_open_uri);
 static PHP_FUNCTION(xmlwriter_open_memory);
@@ -215,6 +218,9 @@ static zend_function_entry xmlwriter_functions[] = {
 	PHP_FE(xmlwriter_start_dtd_attlist,	NULL)
 	PHP_FE(xmlwriter_end_dtd_attlist,	NULL)
 	PHP_FE(xmlwriter_write_dtd_attlist,	NULL)
+	PHP_FE(xmlwriter_start_dtd_entity,	NULL)
+	PHP_FE(xmlwriter_end_dtd_entity,	NULL)
+	PHP_FE(xmlwriter_write_dtd_entity,	NULL)
 #endif
 	PHP_FE(xmlwriter_output_memory,		NULL)
 	PHP_FE(xmlwriter_flush,				NULL)
@@ -273,6 +279,9 @@ static zend_function_entry xmlwriter_class_functions[] = {
 	PHP_ME_MAPPING(startDtdAttlist,	xmlwriter_start_dtd_attlist,	NULL, 0)
 	PHP_ME_MAPPING(endDtdAttlist,	xmlwriter_end_dtd_attlist,	NULL, 0)
 	PHP_ME_MAPPING(writeDtdAttlist,	xmlwriter_write_dtd_attlist,	NULL, 0)
+	PHP_ME_MAPPING(startDtdEntity,	xmlwriter_start_dtd_entity,	NULL, 0)
+	PHP_ME_MAPPING(endDtdEntity,	xmlwriter_end_dtd_entity,	NULL, 0)
+	PHP_ME_MAPPING(writeDtdEntity,	xmlwriter_write_dtd_entity,	NULL, 0)
 #endif
 	PHP_ME_MAPPING(outputMemory,	xmlwriter_output_memory,	NULL, 0)
 	PHP_ME_MAPPING(flush,			xmlwriter_flush,			NULL, 0)
