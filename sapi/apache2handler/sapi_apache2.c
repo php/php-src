@@ -129,9 +129,14 @@ php_apache_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 	/* httpd requires that r->status_line is set to the first digit of
 	 * the status-code: */
-	if (sline && strlen(sline) > 12 && strncmp(sline, "HTTP/1.", 7) == 0 
-		&& sline[8] == ' ') {
+	if (sline && strlen(sline) > 12 && strncmp(sline, "HTTP/1.", 7) == 0 && sline[8] == ' ') {
 		ctx->r->status_line = apr_pstrdup(ctx->r->pool, sline + 9);
+		ctx->r->proto_num = 1000 + (sline[7]-'0');
+		if ((sline[7]-'0') == 0) {
+			apr_table_set(ctx->r->subprocess_env, "force-response-1.0", "true");
+		} else {
+			apr_table_set(ctx->r->subprocess_env, "force-response-1.1", "true");
+		}
 	}
 	
 	/*	call ap_set_content_type only once, else each time we call it, 
