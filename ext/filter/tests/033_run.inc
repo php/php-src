@@ -1,7 +1,12 @@
 <?php
+if (function_exists('setlocale')) {
+	setlocale(LC_ALL, 'C');
+}
+
 function test($data) {
   return strtoupper($data);
 }
+
 $data = array(
 	"PHP",
 	"1",
