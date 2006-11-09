@@ -11,5 +11,5 @@ var_dump($s);
 string(3) %s
 string(3) "123"
 --UEXPECTF--
-string(3) "%s"
+unicode(3) "%s"
 unicode(3) "123"
