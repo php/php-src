@@ -49,6 +49,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #38536 (SOAP returns an array of values instead of an object).
   (Dmitry)
+- Fixed bug #38456 (Apache2 segfaults when virtual() is called in .php
+  ErrorDocument). (Ilia)
 - Fixed bug #33282 (Re-assignment by reference does not clear the is_ref flag)
   (Ilia,Dmitry, Matt Wilmas)
 
