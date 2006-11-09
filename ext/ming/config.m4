@@ -84,9 +84,6 @@ int main(void) { SWFMovie_output(NULL, NULL, NULL, 0); return 0; }
   ], [])
   CPPFLAGS=$old_CPPFLAGS
 
-  AC_CHECK_HEADERS([ming/displaylist.h])
-  AC_CHECK_HEADERS([ming/movie.h])
-
   PHP_NEW_EXTENSION(ming, ming.c, $ext_shared)
   PHP_SUBST(MING_SHARED_LIBADD)
 fi

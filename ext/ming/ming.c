@@ -36,12 +36,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <ming.h>
-#ifdef HAVE_MING_DISPLAYLIST_H
-# include <ming/displaylist.h>
-#endif
-#ifdef HAVE_MING_MOVIE_H
-# include <ming/movie.h>
-#endif
 
 #define FLOAT_Z_DVAL_PP(x) ((float)Z_DVAL_PP(x))
 #define BYTE_Z_LVAL_PP(x)  ((byte)Z_LVAL_PP(x))
@@ -2480,17 +2474,31 @@ PHP_METHOD(swfmovie, setFrames)
 /* }}} */
 
 #ifdef HAVE_NEW_MING
-/* {{{ proto void swfmovie::streamMP3(mixed file)
-   Sets sound stream of the SWF movie. The parameter can be stream or string. */
+/* {{{ proto int swfmovie::streamMP3(mixed file [, float skip])
+   Sets sound stream of the SWF movie. The parameter can be stream or string. Retuens the number of frames. */
 PHP_METHOD(swfmovie, streamMP3)
 {
-	zval **zfile;
+	zval **zfile, **zskip;
+	float skip;
 	SWFSoundStream sound;
 	SWFInput input;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zfile) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if(zend_get_parameters_ex(1, &zfile) == FAILURE)
+				WRONG_PARAM_COUNT;
+			skip = 0;
+			break;
+		case 2:
+			if(zend_get_parameters_ex(2, &zfile, &zskip) == FAILURE)
+				WRONG_PARAM_COUNT;
+			convert_to_double_ex(zskip);
+			skip = Z_DVAL_PP(zskip);
+			break;
+		default:		
+			WRONG_PARAM_COUNT;
+			break;
 	}
 	
 	if (Z_TYPE_PP(zfile) != IS_RESOURCE) {
@@ -2502,7 +2510,8 @@ PHP_METHOD(swfmovie, streamMP3)
 	}
 	
 	sound = newSWFSoundStream_fromInput(input);
-	SWFMovie_setSoundStream(movie, sound);
+	SWFMovie_setSoundStreamAt(movie, sound, skip);
+	RETURN_LONG(SWFSoundStream_getFrames(sound));
 }
 /* }}} */
 
