@@ -156,9 +156,9 @@ typedef struct _php_stream_wrapper_ops {
 	int (*stream_rmdir)(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
 
 	/* Unicode path manipulation -- Leave NULL to use UG(filesystem_encoding_conv) for conversion */
-	int (*path_encode)(php_stream_wrapper *wrapper, char **encpath, int *encpath_len, UChar *path, int path_len,
+	int (*path_encode)(php_stream_wrapper *wrapper, char **encpath, int *encpath_len, const UChar *path, int path_len,
 															int options, php_stream_context *context TSRMLS_DC);
-	int (*path_decode)(php_stream_wrapper *wrapper, UChar **decpath, int *decpath_len, char *path, int path_len,
+	int (*path_decode)(php_stream_wrapper *wrapper, UChar **decpath, int *decpath_len, const char *path, int path_len,
 															int options, php_stream_context *context TSRMLS_DC);
 } php_stream_wrapper_ops;
 
@@ -374,13 +374,13 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 #define php_stream_set_chunk_size(stream, size) _php_stream_set_option((stream), PHP_STREAM_OPTION_SET_CHUNK_SIZE, (size), NULL TSRMLS_CC)
 
 PHPAPI int _php_stream_path_encode(php_stream_wrapper *wrapper,
-				char **pathenc, int *pathenc_len, UChar *path, int path_len,
+				char **pathenc, int *pathenc_len, const UChar *path, int path_len,
 				int options, php_stream_context *context TSRMLS_DC);
 #define  php_stream_path_encode(wrapper, pathenc, pathenc_len, path, path_len, options, context) \
 		_php_stream_path_encode((wrapper), (pathenc), (pathenc_len), (path), (path_len), (options), (context) TSRMLS_CC)
 
 PHPAPI int _php_stream_path_decode(php_stream_wrapper *wrapper,
-				UChar **pathdec, int *pathdec_len, char *path, int path_len,
+				UChar **pathdec, int *pathdec_len, const char *path, int path_len,
 				int options, php_stream_context *context TSRMLS_DC);
 #define  php_stream_path_decode(wrapper, pathdec, pathdec_len, path, path_len, options, context) \
 		_php_stream_path_decode((wrapper), (pathdec), (pathdec_len), (path), (path_len), (options), (context) TSRMLS_CC)
