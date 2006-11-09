@@ -23,6 +23,7 @@
 #define PHP_MATH_H
 
 PHPAPI char *_php_math_number_format(double, int, char , char);
+PHPAPI char * _php_math_longtobase(zval *arg, int base);
 
 PHP_FUNCTION(sin);
 PHP_FUNCTION(cos);
