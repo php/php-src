@@ -2664,7 +2664,7 @@ Otherwise the INI defined filesystem_encoding converter will be used
 If wrapper == NULL, the path will be explored to locate the correct wrapper
 */
 PHPAPI int _php_stream_path_encode(php_stream_wrapper *wrapper,
-				char **pathenc, int *pathenc_len, UChar *path, int path_len,
+				char **pathenc, int *pathenc_len, const UChar *path, int path_len,
 				int options, php_stream_context *context TSRMLS_DC)
 {
 	UErrorCode status = U_ZERO_ERROR;
@@ -2745,7 +2745,7 @@ If the wrapper supports its own decoding rules it will be dispatched to wrapper-
 Otherwise (or if wrapper == NULL) the INI defined filesystem_encoding converter will be used.
 */
 PHPAPI int _php_stream_path_decode(php_stream_wrapper *wrapper,
-				UChar **pathdec, int *pathdec_len, char *path, int path_len,
+				UChar **pathdec, int *pathdec_len, const char *path, int path_len,
 				int options, php_stream_context *context TSRMLS_DC)
 {
 	int num_conv;
