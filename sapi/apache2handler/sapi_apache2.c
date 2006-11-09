@@ -569,7 +569,7 @@ zend_first_try {
 		}
 		
 		/* check if comming due to ErrorDocument */
-		if (parent_req && parent_req->status != HTTP_OK) {
+		if (parent_req && parent_req->status != HTTP_OK && strcmp(r->protocol, "INCLUDED")) {
 			parent_req = NULL;
 			goto normal;
 		}
