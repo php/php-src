@@ -106,3 +106,57 @@ int(1)
 string(%d) "Resource id #%d"
 int(1)
 Done
+--UEXPECTF--
+unicode(0) ""
+unicode(4) "tbst"
+unicode(0) ""
+int(0)
+unicode(1) "q"
+int(1)
+unicode(0) ""
+int(0)
+unicode(0) ""
+int(0)
+unicode(1) "a"
+int(1)
+unicode(3) "aaa"
+int(0)
+unicode(15) "multimultimulti"
+int(3)
+unicode(15) "multimultimulti"
+int(3)
+unicode(3) "qqq"
+int(3)
+array(2) {
+  [0]=>
+  unicode(3) "qqq"
+  [1]=>
+  unicode(3) "ccc"
+}
+int(6)
+
+Notice: Array to string conversion in %s on line %d
+array(2) {
+  [0]=>
+  unicode(15) "ArrayArrayArray"
+  [1]=>
+  unicode(3) "bbb"
+}
+int(3)
+array(2) {
+  [0]=>
+  unicode(3) "111"
+  [1]=>
+  unicode(3) "bbb"
+}
+int(3)
+array(2) {
+  [0]=>
+  unicode(4) "aaa3"
+  [1]=>
+  unicode(4) "2bbb"
+}
+int(1)
+unicode(%d) "Resource id #%d"
+int(1)
+Done

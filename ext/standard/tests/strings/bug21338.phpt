@@ -8,3 +8,6 @@ Bug #20934 (html_entity_decode() crash when "" is passed)
 --EXPECT--
 string(0) ""
 string(0) ""
+--UEXPECT--
+unicode(0) ""
+unicode(0) ""
