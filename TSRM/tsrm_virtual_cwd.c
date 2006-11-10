@@ -1033,25 +1033,36 @@ CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC)
 
 #endif
 
-/* On AIX & Tru64 when a file does not exist realpath() returns
- * NULL, and sets errno to ENOENT. Unlike in other libc implementations
- * the destination is not filled and remains undefined. Therefor, we
- * must populate it manually using strcpy as done on systems with no
- * realpath() function.
- */
-#if defined(__osf__) || defined(_AIX)
-char *php_realpath_hack(const char *src, char *dest)
+CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC)
 {
-	char *ret;
+	cwd_state new_state;
+	char cwd[MAXPATHLEN];
 
-	if ((ret = realpath(src, dest)) == NULL && errno == ENOENT) {
-		return strcpy(dest, src);
+	if (!IS_ABSOLUTE_PATH(path, strlen(path)) &&
+	    VCWD_GETCWD(cwd, MAXPATHLEN)) {
+		new_state.cwd = strdup(cwd);
+		new_state.cwd_length = strlen(cwd);
 	} else {
-		return ret;
+		new_state.cwd = (char*)malloc(1);
+		new_state.cwd[0] = '\0';
+		new_state.cwd_length = 0;		
+	}
+
+	if (virtual_file_ex(&new_state, path, NULL, 1)) {
+		free(new_state.cwd);
+		return NULL;
+	}
+
+	if (real_path) {
+		int copy_len = new_state.cwd_length>MAXPATHLEN-1 ? MAXPATHLEN-1 : new_state.cwd_length;
+		memcpy(real_path, new_state.cwd, copy_len);
+		real_path[copy_len] = '\0';
+		free(new_state.cwd);
+		return real_path;
+	} else {
+		return new_state.cwd;
 	}
 }
-#endif
-
 
 
 /*
