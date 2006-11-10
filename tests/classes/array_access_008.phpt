@@ -56,6 +56,6 @@ string(9) "FooBarBaz"
 ===ArrayOverloading===
 string(3) "Foo"
 
-Notice: Indirect modification of overloaded element of Peoples has no effect in /home/dmitry/php/php5.2/tests/classes/array_access_008.php on line 40
+Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 40
 
 Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_008.php on line %d
