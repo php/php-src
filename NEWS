@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . implemented registry cache that prevent registry lookup on each request.
     In case of modification of corresponding registry-tree PHP will reload
     it automatic
+  . start timiout thread only if necessary
 - Zend Memory Manager Improvements (Dmitry)
   . use HeapAlloc() instead of VirtualAlloc()
   . use "win32" storage manager (instead of "malloc") on Windows by default
