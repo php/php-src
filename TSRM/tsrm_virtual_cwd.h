@@ -189,10 +189,6 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC);
 #endif
 #endif
 
-#if defined(__osf__) || defined(_AIX)
-char *php_realpath_hack(const char *src, char *dest);
-#endif
-
 #if HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC);
 #endif
@@ -202,6 +198,8 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 #endif
 
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath);
+
+CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC);
 
 #define REALPATH_CACHE_TTL  (2*60) /* 2 minutes */
 #define REALPATH_CACHE_SIZE 0      /* disabled while php.ini isn't loaded */
@@ -295,15 +293,7 @@ extern virtual_cwd_globals cwd_globals;
 #define VCWD_ACCESS(pathname, mode) access(pathname, mode)
 #endif
 
-#ifdef HAVE_REALPATH
-#if defined(__osf__) || defined(_AIX)
-#define VCWD_REALPATH(path, real_path) php_realpath_hack(path, real_path)
-#else
-#define VCWD_REALPATH(path, real_path) realpath(path, real_path)
-#endif
-#else
-#define VCWD_REALPATH(path, real_path) strcpy(real_path, path)
-#endif
+#define VCWD_REALPATH(path, real_path) tsrm_realpath(path, real_path TSRMLS_CC)
 
 #if HAVE_UTIME
 #define VCWD_UTIME(path, time) utime(path, time)
