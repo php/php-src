@@ -17,7 +17,10 @@
    |          Pedro Melo <melo@ip.pt>                                     |
    |          Sterling Hughes <sterling@php.net>                          |
    |                                                                      |
-   | Based on code from: Shawn Cokus <Cokus@math.washington.edu>          |
+   | Based on code from: Richard J. Wagner <rjwagner@writeme.com>         |
+   |                     Makoto Matsumoto <matumoto@math.keio.ac.jp>      |
+   |                     Takuji Nishimura                                 |
+   |                     Shawn Cokus <Cokus@math.washington.edu>          |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -85,152 +88,127 @@ PHPAPI long php_rand(TSRMLS_D)
 /* MT RAND FUNCTIONS */
 
 /*
-   This is the ``Mersenne Twister'' random number generator MT19937, which
-   generates pseudorandom integers uniformly distributed in 0..(2^32 - 1)
-   starting from any odd seed in 0..(2^32 - 1).  This version is a recode
-   by Shawn Cokus (Cokus@math.washington.edu) on March 8, 1998 of a version by
-   Takuji Nishimura (who had suggestions from Topher Cooper and Marc Rieffel in
-   July-August 1997).
-  
-   Effectiveness of the recoding (on Goedel2.math.washington.edu, a DEC Alpha
-   running OSF/1) using GCC -O3 as a compiler: before recoding: 51.6 sec. to
-   generate 300 million random numbers; after recoding: 24.0 sec. for the same
-   (i.e., 46.5% of original time), so speed is now about 12.5 million random
-   number generations per second on this machine.
-  
-   According to the URL <http://www.math.keio.ac.jp/~matumoto/emt.html>
-   (and paraphrasing a bit in places), the Mersenne Twister is ``designed
-   with consideration of the flaws of various existing generators,'' has
-   a period of 2^19937 - 1, gives a sequence that is 623-dimensionally
-   equidistributed, and ``has passed many stringent tests, including the
-   die-hard test of G. Marsaglia and the load test of P. Hellekalek and
-   S. Wegenkittl.''  It is efficient in memory usage (typically using 2506
-   to 5012 bytes of static data, depending on data type sizes, and the code
-   is quite short as well).  It generates random numbers in batches of 624
-   at a time, so the caching and pipelining of modern systems is exploited.
-   It is also divide- and mod-free.
-  
-   This library is free software; you can redistribute it and/or modify it
-   under the terms of the GNU Library General Public License as published by
-   the Free Software Foundation (either version 2 of the License or, at your
-   option, any later version).  This library is distributed in the hope that
-   it will be useful, but WITHOUT ANY WARRANTY, without even the implied
-   warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
-   the GNU Library General Public License for more details.  You should have
-   received a copy of the GNU Library General Public License along with this
-   library; if not, write to the Free Software Foundation, Inc., 59 Temple
-   Place, Suite 330, Boston, MA 02111-1307, USA.
-  
-   The code as Shawn received it included the following notice:
-  
-     Copyright (C) 1997 Makoto Matsumoto and Takuji Nishimura.  When
-     you use this, send an e-mail to <matumoto@math.keio.ac.jp> with
-     an appropriate reference to your work.
-  
-   It would be nice to CC: <Cokus@math.washington.edu> when you write.
-  
+	The following php_mt_...() functions are based on a C++ class MTRand by
+	Richard J. Wagner. For more information see the web page at
+	http://www-personal.engin.umich.edu/~wagnerr/MersenneTwister.html
 
-  
-   php_uint32 must be an unsigned integer type capable of holding at least 32
-   bits; exactly 32 should be fastest, but 64 is better on an Alpha with
-   GCC at -O3 optimization so try your options and see what's best for you
+	Mersenne Twister random number generator -- a C++ class MTRand
+	Based on code by Makoto Matsumoto, Takuji Nishimura, and Shawn Cokus
+	Richard J. Wagner  v1.0  15 May 2003  rjwagner@writeme.com
 
-   Melo: we should put some ifdefs here to catch those alphas...
+	The Mersenne Twister is an algorithm for generating random numbers.  It
+	was designed with consideration of the flaws in various other generators.
+	The period, 2^19937-1, and the order of equidistribution, 623 dimensions,
+	are far greater.  The generator is also fast; it avoids multiplication and
+	division, and it benefits from caches and pipelines.  For more information
+	see the inventors' web page at http://www.math.keio.ac.jp/~matumoto/emt.html
+
+	Reference
+	M. Matsumoto and T. Nishimura, "Mersenne Twister: A 623-Dimensionally
+	Equidistributed Uniform Pseudo-Random Number Generator", ACM Transactions on
+	Modeling and Computer Simulation, Vol. 8, No. 1, January 1998, pp 3-30.
+
+	Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+	Copyright (C) 2000 - 2003, Richard J. Wagner
+	All rights reserved.                          
+
+	Redistribution and use in source and binary forms, with or without
+	modification, are permitted provided that the following conditions
+	are met:
+
+	1. Redistributions of source code must retain the above copyright
+	   notice, this list of conditions and the following disclaimer.
+
+	2. Redistributions in binary form must reproduce the above copyright
+	   notice, this list of conditions and the following disclaimer in the
+	   documentation and/or other materials provided with the distribution.
+
+	3. The names of its contributors may not be used to endorse or promote 
+	   products derived from this software without specific prior written 
+	   permission.
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+	"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+	LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+	A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+	CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+	EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+	PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+	PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+	LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+	NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+	The original code included the following notice:
+
+	When you use this, send an email to: matumoto@math.keio.ac.jp
+    with an appropriate reference to your work.
+
+	It would be nice to CC: rjwagner@writeme.com and Cokus@math.washington.edu
+	when you write.
 */
+
 #define N             MT_N                 /* length of state vector */
 #define M             (397)                /* a period parameter */
-#define K             (0x9908B0DFU)        /* a magic constant */
 #define hiBit(u)      ((u) & 0x80000000U)  /* mask all but highest   bit of u */
 #define loBit(u)      ((u) & 0x00000001U)  /* mask all but lowest    bit of u */
 #define loBits(u)     ((u) & 0x7FFFFFFFU)  /* mask     the highest   bit of u */
 #define mixBits(u, v) (hiBit(u)|loBits(v)) /* move hi bit of u to hi bit of v */
 
-/* {{{ php_mt_srand
+#define twist(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((php_uint32)(-(php_int32)(loBit(u))) & 0x9908b0dfU))
+
+/* {{{ php_mt_initialize
  */
-PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC)
+static inline void php_mt_initialize(php_uint32 seed, php_uint32 *state)
 {
-	/*
-	   We initialize state[0..(N-1)] via the generator
+	/* Initialize generator state with seed
+	   See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
+	   In previous versions, most significant bits (MSBs) of the seed affect
+	   only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
 
-	     x_new = (69069 * x_old) mod 2^32
+	register php_uint32 *s = state;
+	register php_uint32 *r = state;
+	register int i = 1;
 
-	   from Line 15 of Table 1, p. 106, Sec. 3.3.4 of Knuth's
-	   _The Art of Computer Programming_, Volume 2, 3rd ed.
-
-	   Notes (SJC): I do not know what the initial state requirements
-	   of the Mersenne Twister are, but it seems this seeding generator
-	   could be better.  It achieves the maximum period for its modulus
-	   (2^30) iff x_initial is odd (p. 20-21, Sec. 3.2.1.2, Knuth); if
-	   x_initial can be even, you have sequences like 0, 0, 0, ...;
-	   2^31, 2^31, 2^31, ...; 2^30, 2^30, 2^30, ...; 2^29, 2^29 + 2^31,
-	   2^29, 2^29 + 2^31, ..., etc. so I force seed to be odd below.
-
-	   
-	   Even if x_initial is odd, if x_initial is 1 mod 4 then
-
-	     the          lowest bit of x is always 1,
-	     the  next-to-lowest bit of x is always 0,
-	     the 2nd-from-lowest bit of x alternates      ... 0 1 0 1 0 1 0 1 ... ,
-	     the 3rd-from-lowest bit of x 4-cycles        ... 0 1 1 0 0 1 1 0 ... ,
-	     the 4th-from-lowest bit of x has the 8-cycle ... 0 0 0 1 1 1 1 0 ... ,
-	      ...
-
-	   and if x_initial is 3 mod 4 then
-
-	     the          lowest bit of x is always 1,
-	     the  next-to-lowest bit of x is always 1,
-	     the 2nd-from-lowest bit of x alternates      ... 0 1 0 1 0 1 0 1 ... ,
-	     the 3rd-from-lowest bit of x 4-cycles        ... 0 0 1 1 0 0 1 1 ... ,
-	     the 4th-from-lowest bit of x has the 8-cycle ... 0 0 1 1 1 1 0 0 ... ,
-	      ...
-
-	   The generator's potency (min. s>=0 with (69069-1)^s = 0 mod 2^32) is
-	   16, which seems to be alright by p. 25, Sec. 3.2.1.3 of Knuth.  It
-	   also does well in the dimension 2..5 spectral tests, but it could be
-	   better in dimension 6 (Line 15, Table 1, p. 106, Sec. 3.3.4, Knuth).
-
-	   Note that the random number user does not see the values generated
-	   here directly since reloadMT() will always munge them first, so maybe
-	   none of all of this matters.  In fact, the seed values made here could
-	   even be extra-special desirable if the Mersenne Twister theory says
-	   so-- that's why the only change I made is to restrict to odd seeds.
-	*/
-
-	register php_uint32 x = (seed | 1U) & 0xFFFFFFFFU, *s = BG(state);
-	register int    j;
-	
-	for (BG(left) = 0, *s++ = x, j = N; --j;
-		*s++ = (x *= 69069U) & 0xFFFFFFFFU);
-
-	/* Seed only once */
-	BG(mt_rand_is_seeded) = 1;
+	*s++ = seed & 0xffffffffU;
+	for( ; i < N; ++i ) {
+		*s++ = ( 1812433253U * ( *r ^ (*r >> 30) ) + i ) & 0xffffffffU;
+		r++;
+	}
 }
 /* }}} */
 
 /* {{{ php_mt_reload
  */
-static php_uint32 php_mt_reload(TSRMLS_D)
+static inline void php_mt_reload(TSRMLS_D)
 {
-	register php_uint32 *p0 = BG(state), *p2 = BG(state) + 2, *pM = BG(state) + M, s0, s1;
-	register int    j;
+	/* Generate N new values in state
+	   Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
 
-	if (BG(left) < -1)
-		php_mt_srand(4357U TSRMLS_CC);
+	register php_uint32 *state = BG(state);
+	register php_uint32 *p = state;
+	register int i;
 
-	BG(left) = N - 1, BG(next) = BG(state) + 1;
+	for (i = N - M; i--; ++p)
+		*p = twist(p[M], p[0], p[1]);
+	for (i = M; --i; ++p)
+		*p = twist(p[M-N], p[0], p[1]);
+	*p = twist(p[M-N], p[0], state[0]);
+	BG(left) = N;
+	BG(next) = state;
+}
+/* }}} */
 
-	for (s0 = BG(state)[0], s1 = BG(state)[1], j = N - M + 1; --j; s0 = s1, s1 = *p2++)
-		*p0++ = *pM++ ^ (mixBits(s0, s1) >> 1) ^ (loBit(s1) ? K : 0U);
+/* {{{ php_mt_srand
+ */
+PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC)
+{
+	/* Seed the generator with a simple uint32 */
+	php_mt_initialize(seed, BG(state));
+	php_mt_reload(TSRMLS_C);
 
-	for (pM = BG(state), j = M; --j; s0 = s1, s1 = *p2++)
-		*p0++ = *pM++ ^ (mixBits(s0, s1) >> 1) ^ (loBit(s1) ? K : 0U);
-
-	s1 = BG(state)[0], *p0 = *pM ^ (mixBits(s0, s1) >> 1) ^ (loBit(s1) ? K : 0U);
-	s1 ^= (s1 >> 11);
-	s1 ^= (s1 <<  7) & 0x9D2C5680U;
-	s1 ^= (s1 << 15) & 0xEFC60000U;
-
-	return s1 ^ (s1 >> 18);
+	/* Seed only once */
+	BG(mt_rand_is_seeded) = 1;
 }
 /* }}} */
 
@@ -238,17 +216,21 @@ static php_uint32 php_mt_reload(TSRMLS_D)
  */
 PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
 {
-	php_uint32 y;
+	/* Pull a 32-bit integer from the generator state
+	   Every other access function simply transforms the numbers extracted here */
+	
+	register php_uint32 s1;
 
-	if (--BG(left) < 0)
-		return php_mt_reload(TSRMLS_C);
-
-	y  = *BG(next)++;
-	y ^= (y >> 11);
-	y ^= (y <<  7) & 0x9D2C5680U;
-	y ^= (y << 15) & 0xEFC60000U;
-
-	return y ^ (y >> 18);
+	if (BG(left) == 0) {
+		php_mt_reload(TSRMLS_C);
+	}
+	--BG(left);
+		
+	s1 = *BG(next)++;
+	s1 ^= (s1 >> 11);
+	s1 ^= (s1 <<  7) & 0x9d2c5680U;
+	s1 ^= (s1 << 15) & 0xefc60000U;
+	return ( s1 ^ (s1 >> 18) );
 }
 /* }}} */
 
