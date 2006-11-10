@@ -143,6 +143,12 @@ typedef unsigned short mode_t;
 #define CWD_API
 #endif
 
+#ifdef TSRM_WIN32
+CWD_API int php_sys_stat(const char *path, struct stat *buf);
+#else
+# define php_sys_stat stat
+#endif
+
 typedef struct _cwd_state {
 	char *cwd;
 	int cwd_length;
@@ -280,7 +286,7 @@ extern virtual_cwd_globals cwd_globals;
 #define VCWD_CHDIR(path) chdir(path)
 #define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, chdir)
 #define VCWD_GETWD(buf) getwd(buf)
-#define VCWD_STAT(path, buff) stat(path, buff)
+#define VCWD_STAT(path, buff) php_sys_stat(path, buff)
 #define VCWD_LSTAT(path, buff) lstat(path, buff)
 #define VCWD_UNLINK(path) unlink(path)
 #define VCWD_MKDIR(pathname, mode) mkdir(pathname, mode)
