@@ -153,20 +153,20 @@ array(5) {
   [u"ID"]=>
   array(3) {
     [0]=>
-    string(1) "1"
+    unicode(1) "1"
     [1]=>
-    string(1) "1"
+    unicode(1) "1"
     [2]=>
-    string(1) "1"
+    unicode(1) "1"
   }
   [u"VALUE"]=>
   array(3) {
     [0]=>
-    string(1) "1"
+    unicode(1) "1"
     [1]=>
-    string(1) "1"
+    unicode(1) "1"
     [2]=>
-    string(1) "1"
+    unicode(1) "1"
   }
   [u"BLOB"]=>
   array(3) {
@@ -201,20 +201,20 @@ array(5) {
   [u"ID"]=>
   array(3) {
     [0]=>
-    string(1) "1"
+    unicode(1) "1"
     [1]=>
-    string(1) "1"
+    unicode(1) "1"
     [2]=>
-    string(1) "1"
+    unicode(1) "1"
   }
   [u"VALUE"]=>
   array(3) {
     [0]=>
-    string(1) "1"
+    unicode(1) "1"
     [1]=>
-    string(1) "1"
+    unicode(1) "1"
     [2]=>
-    string(1) "1"
+    unicode(1) "1"
   }
   [u"BLOB"]=>
   array(3) {

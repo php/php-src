@@ -28,3 +28,8 @@ resource(%d) of type (oci8 connection)
 string(%d) "%s"
 string(%d) "%s"
 Done
+--UEXPECTF--
+resource(%d) of type (oci8 connection)
+unicode(%d) "%s"
+unicode(%d) "%s"
+Done

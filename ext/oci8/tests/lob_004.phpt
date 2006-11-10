@@ -22,9 +22,9 @@ oci_execute($statement, OCI_DEFAULT);
 
 var_dump($blob);
 
-var_dump($blob->write("test"));
+var_dump($blob->write(b"test"));
 var_dump($blob->rewind());
-var_dump($blob->write("str"));
+var_dump($blob->write(b"str"));
 var_dump($blob->seek(10, OCI_SEEK_SET));
 
 oci_commit($c);

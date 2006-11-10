@@ -21,7 +21,7 @@ oci_bind_by_name($statement,":v_blob", $blob,-1,OCI_B_BLOB);
 oci_execute($statement, OCI_DEFAULT);
 
 var_dump($blob->size());
-var_dump($blob->write(str_repeat("string.", 1000)));
+var_dump($blob->write((binary)str_repeat("string.", 1000)));
 var_dump($blob->size());
 oci_commit($c);
 
@@ -59,6 +59,40 @@ array(2) {
   ["BLOB"]=>
   object(OCI-Lob)#%d (1) {
     ["descriptor"]=>
+    resource(%d) of type (oci8 descriptor)
+  }
+}
+string(2) "st"
+
+Warning: oci_lob_read() expects exactly 2 parameters, 1 given in %s on line %d
+NULL
+
+Warning: oci_lob_read() expects exactly 2 parameters, 0 given in %s on line %d
+NULL
+bool(false)
+
+Warning: oci_lob_eof() expects exactly 1 parameter, 0 given in %s on line %d
+NULL
+
+Warning: oci_lob_read(): Unable to find descriptor property in %s on line %d
+bool(false)
+
+Warning: oci_lob_eof(): Unable to find descriptor property in %s on line %d
+bool(false)
+Done
+--UEXPECTF--
+int(0)
+int(7000)
+int(7000)
+array(2) {
+  [0]=>
+  object(OCI-Lob)#%d (1) {
+    [u"descriptor"]=>
+    resource(%d) of type (oci8 descriptor)
+  }
+  [u"BLOB"]=>
+  object(OCI-Lob)#%d (1) {
+    [u"descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }

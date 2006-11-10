@@ -23,7 +23,7 @@ oci_execute($statement, OCI_DEFAULT);
 var_dump($blob);
 
 var_dump($blob->size());
-var_dump($blob->write(str_repeat("string.", 1000)));
+var_dump($blob->write((binary)str_repeat("string.", 1000)));
 var_dump($blob->size());
 oci_commit($c);
 

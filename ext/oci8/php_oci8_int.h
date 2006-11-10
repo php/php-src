@@ -97,6 +97,11 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
 
 /* }}} */
 
+typedef enum {
+	OCI_IS_CLOB=1,
+	OCI_IS_BLOB
+} php_oci_lob_type;
+
 typedef struct { /* php_oci_connection {{{ */
 	OCIEnv *env;		/* private env handle */
 	ub2 charset;		/* charset ID */
@@ -116,19 +121,21 @@ typedef struct { /* php_oci_connection {{{ */
 	time_t idle_expiry;			/* time when the connection will be considered as expired */
 	time_t next_ping;			/* time of the next ping */
 	char *hash_key;				/* hashed details of the connection */
+	int   hash_key_len;	
 } php_oci_connection; /* }}} */
 
 typedef struct { /* php_oci_descriptor {{{ */
 	int id;
 	php_oci_connection *connection;	/* parent connection handle */
 	dvoid *descriptor;				/* OCI descriptor handle */
-	ub4 type;						/* descriptor type */
+	ub4 type;						/* descriptor type (FILE/LOB) */
 	int lob_current_position;		/* LOB internal pointer */ 
 	int lob_size;					/* cached LOB size. -1 = Lob wasn't initialized yet */
 	int buffering;					/* cached buffering flag. 0 - off, 1 - on, 2 - on and buffer was used */
 	ub4 chunk_size;					/* chunk size of the LOB. 0 - unknown */
 	ub1 charset_form;				/* charset form, required for NCLOBs */
 	ub2 charset_id;					/* charset ID */
+	php_oci_lob_type lob_type;		/* CLOB/BLOB */
 } php_oci_descriptor; /* }}} */
 
 typedef struct { /* php_oci_lob_ctx {{{ */
@@ -149,7 +156,8 @@ typedef struct { /* php_oci_collection {{{ */
 
 typedef struct { /* php_oci_define {{{ */
 	zval *zval;		/* zval used in define */
-	text *name;		/* placeholder's name */
+	zstr name;		/* placeholder's name */
+	zend_uchar name_type;		/* unicode or not */
 	ub4 name_len;	/* placeholder's name length */
 	ub4 type;		/* define type */
 } php_oci_define; /* }}} */
@@ -190,12 +198,13 @@ typedef struct { /* php_oci_bind {{{ */
 	} array;
 	sb2 indicator;			/* -1 means NULL */
 	ub2 retcode;			/*  */
+	zend_bool out;			/* OUT bind or not */
 } php_oci_bind; /* }}} */
 
 typedef struct { /* php_oci_out_column {{{ */
 	php_oci_statement *statement;	/* statement handle. used when fetching REFCURSORS */
 	OCIDefine *oci_define;			/* define handle */
-	char *name;						/* column name */
+	zstr name;						/* column name */
 	ub4 name_len;					/* column name length */
 	ub2 data_type;					/* column data type */
 	ub2 data_size;					/* data size */
@@ -302,17 +311,17 @@ int php_oci_descriptor_delete_from_hash(void *data, void *id TSRMLS_DC);
 sb4 php_oci_error (OCIError *, sword TSRMLS_DC);
 sb4 php_oci_fetch_errmsg(OCIError *, text ** TSRMLS_DC);
 #ifdef HAVE_OCI8_ATTR_STATEMENT
-int php_oci_fetch_sqltext_offset(php_oci_statement *, text **, ub2 * TSRMLS_DC);
+int php_oci_fetch_sqltext_offset(php_oci_statement *, zstr *, ub2 * TSRMLS_DC);
 #endif
 	
 void php_oci_do_connect (INTERNAL_FUNCTION_PARAMETERS, int , int);
-php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, long session_mode, int persistent, int exclusive TSRMLS_DC);
+php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr password, int password_len, zstr new_password, int new_password_len, zstr dbname, int dbname_len, zstr charset, long session_mode, int persistent, int exclusive, zend_uchar type TSRMLS_DC);
 
 int php_oci_connection_rollback(php_oci_connection * TSRMLS_DC);
 int php_oci_connection_commit(php_oci_connection * TSRMLS_DC);
 
-int php_oci_password_change(php_oci_connection *, char *, int, char *, int, char *, int TSRMLS_DC);
-int php_oci_server_get_version(php_oci_connection *, char ** TSRMLS_DC); 
+int php_oci_password_change(php_oci_connection *, zstr, int, zstr, int, zstr, int, zend_uchar TSRMLS_DC);
+int php_oci_server_get_version(php_oci_connection *, zstr* TSRMLS_DC); 
 
 void php_oci_fetch_row(INTERNAL_FUNCTION_PARAMETERS, int, int);
 int php_oci_column_to_zval(php_oci_out_column *, zval *, int TSRMLS_DC);
@@ -323,15 +332,16 @@ int php_oci_column_to_zval(php_oci_out_column *, zval *, int TSRMLS_DC);
 
 php_oci_descriptor * php_oci_lob_create (php_oci_connection *, long TSRMLS_DC);
 int php_oci_lob_get_length (php_oci_descriptor *, ub4 * TSRMLS_DC);
-int php_oci_lob_read (php_oci_descriptor *, long, long, char **, ub4 * TSRMLS_DC);
-int php_oci_lob_write (php_oci_descriptor *, ub4, char *, int, ub4 * TSRMLS_DC);
+int php_oci_lob_get_type(php_oci_descriptor *descriptor, php_oci_lob_type *lob_type TSRMLS_DC);
+int php_oci_lob_read (php_oci_descriptor *, long, long, zstr *, ub4 * TSRMLS_DC);
+int php_oci_lob_write (php_oci_descriptor *, ub4, zstr, int, ub4 * TSRMLS_DC);
 int php_oci_lob_flush (php_oci_descriptor *, int TSRMLS_DC);
 int php_oci_lob_set_buffering (php_oci_descriptor *, int TSRMLS_DC);
 int php_oci_lob_get_buffering (php_oci_descriptor *);
 int php_oci_lob_copy (php_oci_descriptor *, php_oci_descriptor *, long TSRMLS_DC);
 #ifdef HAVE_OCI8_TEMP_LOB
 int php_oci_lob_close (php_oci_descriptor * TSRMLS_DC);
-int php_oci_lob_write_tmp (php_oci_descriptor *, ub1, char *, int TSRMLS_DC);
+int php_oci_lob_write_tmp (php_oci_descriptor *, ub1, zstr, int TSRMLS_DC);
 #endif
 void php_oci_lob_free(php_oci_descriptor * TSRMLS_DC);
 int php_oci_lob_import(php_oci_descriptor *descriptor, char * TSRMLS_DC);
@@ -344,51 +354,50 @@ sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, oraub8 len, ub1 piece
 #else
 sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, ub4 len, ub1 piece);
 #endif
-
 /* }}} */
 
 /* collection related prototypes {{{ */
 
-php_oci_collection * php_oci_collection_create(php_oci_connection *, char *, int, char *, int TSRMLS_DC);
+php_oci_collection * php_oci_collection_create(php_oci_connection *, zstr, int, zstr, int TSRMLS_DC);
 int php_oci_collection_size(php_oci_collection *, sb4 * TSRMLS_DC);
 int php_oci_collection_max(php_oci_collection *, long * TSRMLS_DC);
 int php_oci_collection_trim(php_oci_collection *, long TSRMLS_DC);
-int php_oci_collection_append(php_oci_collection *, char *, int TSRMLS_DC);
+int php_oci_collection_append(php_oci_collection *, zstr, int TSRMLS_DC);
 int php_oci_collection_element_get(php_oci_collection *, long, zval** TSRMLS_DC);
-int php_oci_collection_element_set(php_oci_collection *, long, char*, int TSRMLS_DC);
+int php_oci_collection_element_set(php_oci_collection *, long, zstr, int TSRMLS_DC);
 int php_oci_collection_element_set_null(php_oci_collection *, long TSRMLS_DC);
-int php_oci_collection_element_set_date(php_oci_collection *, long, char *, int TSRMLS_DC);
-int php_oci_collection_element_set_number(php_oci_collection *, long, char *, int TSRMLS_DC);
-int php_oci_collection_element_set_string(php_oci_collection *, long, char *, int TSRMLS_DC);
+int php_oci_collection_element_set_date(php_oci_collection *, long, zstr, int TSRMLS_DC);
+int php_oci_collection_element_set_number(php_oci_collection *, long, zstr, int TSRMLS_DC);
+int php_oci_collection_element_set_string(php_oci_collection *, long, zstr, int TSRMLS_DC);
 int php_oci_collection_assign(php_oci_collection *, php_oci_collection * TSRMLS_DC);
 void php_oci_collection_close(php_oci_collection * TSRMLS_DC);
 int php_oci_collection_append_null(php_oci_collection * TSRMLS_DC);
-int php_oci_collection_append_date(php_oci_collection *, char *, int TSRMLS_DC);
-int php_oci_collection_append_number(php_oci_collection *, char *, int TSRMLS_DC);
-int php_oci_collection_append_string(php_oci_collection *, char *, int TSRMLS_DC);
+int php_oci_collection_append_date(php_oci_collection *, zstr, int TSRMLS_DC);
+int php_oci_collection_append_number(php_oci_collection *, zstr, int TSRMLS_DC);
+int php_oci_collection_append_string(php_oci_collection *, zstr, int TSRMLS_DC);
 
 
 /* }}} */
 
 /* statement related prototypes {{{ */
 
-php_oci_statement * php_oci_statement_create (php_oci_connection *, char *, int TSRMLS_DC);
+php_oci_statement * php_oci_statement_create (php_oci_connection *, zstr, int, zend_uchar TSRMLS_DC);
 int php_oci_statement_set_prefetch (php_oci_statement *, ub4 TSRMLS_DC);
 int php_oci_statement_fetch (php_oci_statement *, ub4 TSRMLS_DC);
-php_oci_out_column * php_oci_statement_get_column (php_oci_statement *, long, char*, int TSRMLS_DC);
+php_oci_out_column * php_oci_statement_get_column (php_oci_statement *, long, zstr, int TSRMLS_DC);
 int php_oci_statement_execute (php_oci_statement *, ub4 TSRMLS_DC);
 int php_oci_statement_cancel (php_oci_statement * TSRMLS_DC);
 void php_oci_statement_free (php_oci_statement * TSRMLS_DC);
 int php_oci_bind_pre_exec(void *data TSRMLS_DC);
 int php_oci_bind_post_exec(void *data TSRMLS_DC);
-int php_oci_bind_by_name(php_oci_statement *, char *, int, zval*, long, long TSRMLS_DC);
+int php_oci_bind_by_name(php_oci_statement *, zstr, int, zval*, long, long, zend_uchar TSRMLS_DC);
 sb4 php_oci_bind_in_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 *, ub1 *, dvoid **);
 sb4 php_oci_bind_out_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 **, ub1 *, dvoid **, ub2 **);
 php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS, int need_data);
 
 int php_oci_statement_get_type(php_oci_statement *, ub2 * TSRMLS_DC);
 int php_oci_statement_get_numrows(php_oci_statement *, ub4 * TSRMLS_DC);
-int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int name_len, zval* var, long max_table_length, long maxlength, long type TSRMLS_DC);
+int php_oci_bind_array_by_name(php_oci_statement *statement, zstr name, int name_len, zval* var, long max_table_length, long maxlength, long type, zend_uchar uni_type TSRMLS_DC);
 php_oci_bind *php_oci_bind_array_helper_number(zval* var, long max_table_length TSRMLS_DC);
 php_oci_bind *php_oci_bind_array_helper_double(zval* var, long max_table_length TSRMLS_DC);
 php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length, long maxlength TSRMLS_DC);

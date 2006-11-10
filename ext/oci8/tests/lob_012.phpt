@@ -22,7 +22,7 @@ oci_execute($statement, OCI_DEFAULT);
 
 $blob;
 
-var_dump($blob->write("test string is here\nnew string"));
+var_dump($blob->write(b"test string is here\nnew string"));
 
 oci_commit($c);
 

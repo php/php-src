@@ -36,3 +36,8 @@ bool(true)
 bool(true)
 string(4) "blah"
 Done
+--UEXPECT--
+bool(true)
+bool(true)
+unicode(4) "blah"
+Done

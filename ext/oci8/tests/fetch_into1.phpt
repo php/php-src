@@ -194,23 +194,23 @@ Done
 int(5)
 array(2) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
 }
 int(5)
 array(2) {
   [u"ID"]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"VALUE"]=>
-  string(1) "1"
+  unicode(1) "1"
 }
 int(5)
 array(5) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
   [2]=>
   NULL
   [3]=>
@@ -221,31 +221,31 @@ array(5) {
 int(5)
 array(2) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
 }
 int(5)
 array(4) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"ID"]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"VALUE"]=>
-  string(1) "1"
+  unicode(1) "1"
 }
 int(5)
 array(10) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"ID"]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"VALUE"]=>
-  string(1) "1"
+  unicode(1) "1"
   [2]=>
   NULL
   [u"BLOB"]=>
@@ -262,13 +262,13 @@ array(10) {
 int(5)
 array(10) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"ID"]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"VALUE"]=>
-  string(1) "1"
+  unicode(1) "1"
   [2]=>
   NULL
   [u"BLOB"]=>
@@ -285,9 +285,9 @@ array(10) {
 int(5)
 array(5) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
   [2]=>
   NULL
   [3]=>
@@ -298,9 +298,9 @@ array(5) {
 int(5)
 array(5) {
   [u"ID"]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"VALUE"]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"BLOB"]=>
   NULL
   [u"CLOB"]=>
@@ -311,9 +311,9 @@ array(5) {
 int(5)
 array(5) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
   [2]=>
   NULL
   [3]=>

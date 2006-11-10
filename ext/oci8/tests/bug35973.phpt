@@ -41,3 +41,14 @@ array(1) {
 string(%d) "%s5"
 string(%d) "%sa"
 Done
+--UEXPECTF--
+array(1) {
+  [u"NC"]=>
+  object(OCI-Lob)#%d (1) {
+    [u"descriptor"]=>
+    resource(%d) of type (oci8 descriptor)
+  }
+}
+unicode(%d) "%s5"
+unicode(%d) "%sa"
+Done

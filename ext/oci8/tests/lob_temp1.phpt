@@ -30,3 +30,11 @@ bool(true)
 string(4) "test"
 bool(true)
 Done
+--UEXPECTF--
+bool(true)
+unicode(4) "test"
+bool(true)
+bool(true)
+unicode(4) "test"
+bool(true)
+Done

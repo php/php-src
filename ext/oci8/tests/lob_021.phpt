@@ -20,13 +20,11 @@ $blob = oci_new_descriptor($c,OCI_D_LOB);
 oci_bind_by_name($statement,":v_blob", $blob,-1,OCI_B_BLOB);
 oci_execute($statement, OCI_DEFAULT);
 
-$blob;
-
-var_dump($blob->write("test"));
+var_dump($blob->write(b"test"));
 var_dump($blob->close());
-var_dump($blob->write("test"));
+var_dump($blob->write(b"test"));
 var_dump(oci_free_descriptor($blob));
-var_dump($blob->write("test"));
+var_dump($blob->write(b"test"));
 
 var_dump(oci_free_descriptor($blob));
 var_dump(oci_free_descriptor(new stdclass));

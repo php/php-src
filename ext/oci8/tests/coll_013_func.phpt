@@ -36,3 +36,8 @@ bool(true)
 bool(true)
 string(9) "01-JAN-05"
 Done
+--UEXPECT--
+bool(true)
+bool(true)
+unicode(9) "01-JAN-05"
+Done

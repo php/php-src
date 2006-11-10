@@ -83,9 +83,9 @@ Done
 --UEXPECT--
 array(5) {
   [u"ID"]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"VALUE"]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"BLOB"]=>
   NULL
   [u"CLOB"]=>
@@ -95,9 +95,9 @@ array(5) {
 }
 array(5) {
   [u"ID"]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"VALUE"]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"BLOB"]=>
   NULL
   [u"CLOB"]=>
@@ -107,9 +107,9 @@ array(5) {
 }
 array(5) {
   [u"ID"]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"VALUE"]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"BLOB"]=>
   NULL
   [u"CLOB"]=>

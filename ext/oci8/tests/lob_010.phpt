@@ -20,8 +20,8 @@ $blob = oci_new_descriptor($c,OCI_D_LOB);
 oci_bind_by_name($statement,":v_blob", $blob,-1,OCI_B_BLOB);
 oci_execute($statement, OCI_DEFAULT);
 
-var_dump($blob->save("string"));
-var_dump($blob->save("string", 3));
+var_dump($blob->save(b"string"));
+var_dump($blob->save(b"string", 3));
 oci_commit($c);
 
 $select_sql = "SELECT blob FROM ".$schema.$table_name." FOR UPDATE";

@@ -22,7 +22,7 @@ oci_execute($statement, OCI_DEFAULT);
 
 var_dump($blob);
 
-var_dump($blob->write(str_repeat("string.", 1000)));
+var_dump($blob->write((binary)str_repeat("string.", 1000)));
 oci_commit($c);
 
 $select_sql = "SELECT blob FROM ".$schema.$table_name." FOR UPDATE";
