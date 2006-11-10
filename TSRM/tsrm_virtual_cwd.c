@@ -512,7 +512,10 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		char resolved_path[MAXPATHLEN];
 
 		if (!realpath(path, resolved_path)) {  /* Note: Not threadsafe on older *BSD's */
-			return 1;
+			if (use_realpath == 2) {
+				return 1;
+			}
+			goto no_realpath;
 		}
 		CWD_STATE_COPY(&old_state, state);
 
@@ -706,7 +709,7 @@ CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC)
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	
-	if (virtual_file_ex(&new_state, path, NULL, 1)==0) {
+	if (virtual_file_ex(&new_state, path, NULL, 2)==0) {
 		int len = new_state.cwd_length>MAXPATHLEN-1?MAXPATHLEN-1:new_state.cwd_length;
 
 		memcpy(real_path, new_state.cwd, len);
@@ -766,7 +769,7 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC)
 	int ret;
 	
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, pathname, NULL, 1)) {
+	if (virtual_file_ex(&new_state, pathname, NULL, 2)) {
 		return -1;
 	}
 
@@ -806,7 +809,7 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC)
 	int ret;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, filename, NULL, 1)) {
+	if (virtual_file_ex(&new_state, filename, NULL, 2)) {
 		return -1;
 	}
 
@@ -916,7 +919,7 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC)
 	int retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, path, NULL, 1)) {
+	if (virtual_file_ex(&new_state, path, NULL, 2)) {
 		return -1;
 	}
 
@@ -1005,7 +1008,7 @@ CWD_API DIR *virtual_opendir(const char *pathname TSRMLS_DC)
 	DIR *retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, pathname, NULL, 1)) {
+	if (virtual_file_ex(&new_state, pathname, NULL, 2)) {
 		return NULL;
 	}
 
@@ -1130,7 +1133,7 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC)
 		new_state.cwd_length = 0;		
 	}
 
-	if (virtual_file_ex(&new_state, path, NULL, 1)) {
+	if (virtual_file_ex(&new_state, path, NULL, 2)) {
 		free(new_state.cwd);
 		return NULL;
 	}
