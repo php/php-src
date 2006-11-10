@@ -486,7 +486,7 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 			retval->is_ref = 0;
 			retval->refcount = 0;
 			if (Z_TYPE_P(retval) != IS_OBJECT) {
-				zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name);
+				zend_error(E_NOTICE, "Indirect modification of overloaded element of %v has no effect", ce->name);
 			}
 		}
 
