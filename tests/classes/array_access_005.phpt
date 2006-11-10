@@ -69,6 +69,8 @@ array(1) {
   string(6) "JoeFoo"
 }
 
+Notice: Indirect modification of overloaded element of Peoples has no effect in /home/dmitry/php/php6/tests/classes/array_access_005.php on line 46
+
 Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_005.php on line %d
 --UEXPECTF--
 unicode(3) "Joe"
@@ -85,5 +87,7 @@ array(1) {
   [u"name"]=>
   unicode(6) "JoeFoo"
 }
+
+Notice: Indirect modification of overloaded element of Peoples has no effect in /home/dmitry/php/php6/tests/classes/array_access_005.php on line 46
 
 Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_005.php on line %d
