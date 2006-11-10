@@ -891,6 +891,8 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 				efree(persistent_id);
 			}
 
+			/* WIN32 always set ISREG flag */
+#ifndef PHP_WIN32
 			/* sanity checks for include/require.
 			 * We check these after opening the stream, so that we save
 			 * on fstat() syscalls */
@@ -899,15 +901,12 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 				int r;
 
 				r = do_fstat(self, 0);
-				if (
-#ifndef PHP_WIN32
-						(r != 0) || /* it is OK for fstat to fail under win32 */
-#endif
-						(r == 0 && !S_ISREG(self->sb.st_mode))) {
+				if ((r == 0 && !S_ISREG(self->sb.st_mode))) {
 					php_stream_close(ret);
 					return NULL;
 				}
 			}
+#endif
 
 			return ret;
 		}
