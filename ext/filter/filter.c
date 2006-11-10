@@ -104,7 +104,7 @@ zend_module_entry filter_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(filter),
 	PHP_MINFO(filter),
-	"0.9.5-dev",
+	"0.11.0",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
