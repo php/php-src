@@ -23,8 +23,6 @@
 
 /* misc globals for thread-safety under win32 */
 
-#include "pwd.h"
-
 typedef struct _php_win32_core_globals php_win32_core_globals;
 
 #ifdef ZTS
@@ -39,12 +37,6 @@ struct _php_win32_core_globals {
 	/* syslog */
 	char *log_header;
 	HANDLE log_source;
-
-	/* getpwuid */
-	struct passwd pwd;
-
-	/* getlogin */
-	char *login_name;
 
 	/* time */
 	struct timeval starttime;
