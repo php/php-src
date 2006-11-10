@@ -2,8 +2,8 @@
 #include <string.h>
 #include <errno.h>
 
-#include "readdir.h"
 #include "php.h"
+#include "readdir.h"
 
 /**********************************************************************
  * Implement dirent-style opendir/readdir/rewinddir/closedir on Win32
@@ -23,14 +23,14 @@ DIR *opendir(const char *dir)
 {
 	DIR *dp;
 	char *filespec;
-	long handle;
+	HANDLE handle;
 	int index;
 
-	filespec = malloc(strlen(dir) + 2 + 1);
+	filespec = (char *)malloc(strlen(dir) + 2 + 1);
 	strcpy(filespec, dir);
 	index = strlen(filespec) - 1;
 	if (index >= 0 && (filespec[index] == '/' || 
-	   (filespec[index] == '\\' && !IsDBCSLeadByte(filespec[index-1]))))
+	   (filespec[index] == '\\' && (index == 0 || !IsDBCSLeadByte(filespec[index-1])))))
 		filespec[index] = '\0';
 	strcat(filespec, "/*");
 
@@ -38,8 +38,9 @@ DIR *opendir(const char *dir)
 	dp->offset = 0;
 	dp->finished = 0;
 
-	if ((handle = _findfirst(filespec, &(dp->fileinfo))) < 0) {
-		if (errno == ENOENT) {
+	if ((handle = FindFirstFile(filespec, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
+		DWORD err = GetLastError();
+		if (err == ERROR_NO_MORE_FILES) {
 			dp->finished = 1;
 		} else {
 			free(dp);
@@ -60,14 +61,14 @@ struct dirent *readdir(DIR *dp)
 		return NULL;
 
 	if (dp->offset != 0) {
-		if (_findnext(dp->handle, &(dp->fileinfo)) < 0) {
+		if (FindNextFile(dp->handle, &(dp->fileinfo)) == 0) {
 			dp->finished = 1;
 			return NULL;
 		}
 	}
 	dp->offset++;
 
-	strlcpy(dp->dent.d_name, dp->fileinfo.name, _MAX_FNAME+1);
+	strlcpy(dp->dent.d_name, dp->fileinfo.cFileName, _MAX_FNAME+1);
 	dp->dent.d_ino = 1;
 	dp->dent.d_reclen = strlen(dp->dent.d_name);
 	dp->dent.d_off = dp->offset;
@@ -83,7 +84,7 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 	}
 
 	if (dp->offset != 0) {
-		if (_findnext(dp->handle, &(dp->fileinfo)) < 0) {
+		if (FindNextFile(dp->handle, &(dp->fileinfo)) == 0) {
 			dp->finished = 1;
 			*result = NULL;
 			return 0;
@@ -91,7 +92,7 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 	}
 	dp->offset++;
 
-	strlcpy(dp->dent.d_name, dp->fileinfo.name, _MAX_FNAME+1);
+	strlcpy(dp->dent.d_name, dp->fileinfo.cFileName, _MAX_FNAME+1);
 	dp->dent.d_ino = 1;
 	dp->dent.d_reclen = strlen(dp->dent.d_name);
 	dp->dent.d_off = dp->offset;
@@ -107,7 +108,7 @@ int closedir(DIR *dp)
 {
 	if (!dp)
 		return 0;
-	_findclose(dp->handle);
+	FindClose(dp->handle);
 	if (dp->dir)
 		free(dp->dir);
 	if (dp)
@@ -120,27 +121,28 @@ int rewinddir(DIR *dp)
 {
 	/* Re-set to the beginning */
 	char *filespec;
-	long handle;
+	HANDLE handle;
 	int index;
 
-	_findclose(dp->handle);
+	FindClose(dp->handle);
 
 	dp->offset = 0;
 	dp->finished = 0;
 
-	filespec = malloc(strlen(dp->dir) + 2 + 1);
+	filespec = (char *)malloc(strlen(dp->dir) + 2 + 1);
 	strcpy(filespec, dp->dir);
 	index = strlen(filespec) - 1;
-	if (index >= 0 && (filespec[index] == '/' || filespec[index] == '\\'))
+	if (index >= 0 && (filespec[index] == '/' || 
+	   (filespec[index] == '\\' && (index == 0 || !IsDBCSLeadByte(filespec[index-1])))))
 		filespec[index] = '\0';
 	strcat(filespec, "/*");
 
-	if ((handle = _findfirst(filespec, &(dp->fileinfo))) < 0) {
-		if (errno == ENOENT)
-			dp->finished = 1;
-		}
+	if ((handle = FindFirstFile(filespec, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
+		dp->finished = 1;
+	}
+	
 	dp->handle = handle;
 	free(filespec);
 
-return 0;
+	return 0;
 }

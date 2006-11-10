@@ -25,10 +25,6 @@
 #include <dirent.h>
 #endif
 
-#ifdef PHP_WIN32
-#include "win32/readdir.h"
-#endif
-
 #include "php_reentrancy.h"
 #include "ext/standard/php_rand.h"                   /* for PHP_RAND_MAX */
 

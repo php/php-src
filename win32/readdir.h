@@ -7,11 +7,15 @@
  * on Windows 95/NT.
  */
 
+#define _WIN32_WINNT 0x0400
+
+#include <windows.h>
+
 #include <io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
-
+#include <direct.h>
 
 /* struct dirent - same as Unix */
 
@@ -25,10 +29,10 @@ struct dirent {
 
 /* typedef DIR - not the same as Unix */
 typedef struct {
-	long handle;				/* _findfirst/_findnext handle */
+	HANDLE handle;				/* _findfirst/_findnext handle */
 	short offset;				/* offset into directory */
 	short finished;				/* 1 if there are not more files */
-	struct _finddata_t fileinfo;	/* from _findfirst/_findnext */
+	WIN32_FIND_DATA fileinfo;	/* from _findfirst/_findnext */
 	char *dir;					/* the dir we are reading */
 	struct dirent dent;			/* the dirent to return */
 } DIR;
