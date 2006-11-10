@@ -100,7 +100,7 @@
 #define HAVE_ASSERT_H 1
 #define HAVE_FCNTL_H 1
 #define HAVE_GRP_H 0
-#define HAVE_PWD_H 1
+#undef HAVE_PWD_H
 #define HAVE_STRING_H 1
 #undef HAVE_SYS_FILE_H
 #undef HAVE_SYS_SOCKET_H

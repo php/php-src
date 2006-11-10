@@ -199,7 +199,6 @@ char *strerror(int);
 
 #if HAVE_PWD_H
 # ifdef PHP_WIN32
-#include "win32/pwd.h"
 #include "win32/param.h"
 # else
 #include <pwd.h>
