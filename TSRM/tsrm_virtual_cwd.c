@@ -140,11 +140,93 @@ static int php_check_dots(const char *element, int n)
 #define CWD_STATE_FREE(s)			\
 	free((s)->cwd);
 	
+#ifdef TSRM_WIN32
+CWD_API int php_sys_stat(const char *path, struct stat *buf)
+{
+	WIN32_FILE_ATTRIBUTE_DATA data;
+	__int64 t;
+
+	if (!GetFileAttributesEx(path, GetFileExInfoStandard, &data)) {
+		return stat(path, buf);
+	}
+
+	if (path[1] == ':') {
+		if (path[0] >= 'A' && path[0] <= 'Z') {
+			buf->st_dev = buf->st_rdev = path[0] - 'A';
+		} else {
+			buf->st_dev = buf->st_rdev = path[0] - 'a';
+		}
+	} else {
+		char  cur_path[MAXPATHLEN+1];
+		DWORD len = sizeof(cur_path);
+		char *tmp = cur_path;
+
+		while(1) {
+			DWORD r = GetCurrentDirectory(len, tmp);
+			if (r < len) {
+				if (tmp[1] == ':') {
+					if (path[0] >= 'A' && path[0] <= 'Z') {
+						buf->st_dev = buf->st_rdev = path[0] - 'A';
+					} else {
+						buf->st_dev = buf->st_rdev = path[0] - 'a';
+					}
+				} else {
+					buf->st_dev = buf->st_rdev = -1;
+				}
+				break;
+			} else if (!r) {
+				buf->st_dev = buf->st_rdev = -1;
+				break;
+			} else {
+				len = r+1;
+				tmp = (char*)malloc(len);
+			}
+		}
+		if (tmp != cur_path) {
+			free(tmp);
+		}		    	
+	}
+	buf->st_uid = buf->st_gid = buf->st_ino = 0;
+	buf->st_mode = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? (S_IFDIR|S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6)) : S_IFREG;
+	buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
+	if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
+		int len = strlen(path);
+
+		if (path[len-4] == '.') {
+			if (_memicmp(path+len-3, "exe", 3) == 0 ||
+			    _memicmp(path+len-3, "com", 3) == 0 ||
+			    _memicmp(path+len-3, "bat", 3) == 0 ||
+			    _memicmp(path+len-3, "cmd", 3) == 0) {
+				buf->st_mode  |= (S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6));
+			}
+		}
+	}			
+    buf->st_nlink = 1;
+	t = data.nFileSizeHigh;
+	t = t << 32;
+	t |= data.nFileSizeLow;
+	buf->st_size = t;
+	t = data.ftLastAccessTime.dwHighDateTime;
+	t = t << 32;
+	t |= data.ftLastAccessTime.dwLowDateTime;
+	buf->st_atime = (unsigned long)((t / 10000000) - 11644473600);
+	t = data.ftCreationTime.dwHighDateTime;
+	t = t << 32;
+	t |= data.ftCreationTime.dwLowDateTime;
+	buf->st_ctime = (unsigned long)((t / 10000000) - 11644473600);
+	t = data.ftLastWriteTime.dwHighDateTime;
+	t = t << 32;
+	t |= data.ftLastWriteTime.dwLowDateTime;
+	buf->st_mtime = (unsigned long)((t / 10000000) - 11644473600);
+	return 0;
+}
+#endif
+
 static int php_is_dir_ok(const cwd_state *state) 
 {
 	struct stat buf;
 
-	if (stat(state->cwd, &buf) == 0 && S_ISDIR(buf.st_mode))
+	if (php_sys_stat(state->cwd, &buf) == 0 && S_ISDIR(buf.st_mode))
 		return (0);
 
 	return (1);
@@ -154,7 +236,7 @@ static int php_is_file_ok(const cwd_state *state)
 {
 	struct stat buf;
 
-	if (stat(state->cwd, &buf) == 0 && S_ISREG(buf.st_mode))
+	if (php_sys_stat(state->cwd, &buf) == 0 && S_ISREG(buf.st_mode))
 		return (0);
 
 	return (1);
@@ -838,7 +920,7 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC)
 		return -1;
 	}
 
-	retval = stat(new_state.cwd, buf);
+	retval = php_sys_stat(new_state.cwd, buf);
 
 	CWD_STATE_FREE(&new_state);
 	return retval;

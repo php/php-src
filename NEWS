@@ -9,6 +9,9 @@ PHP                                                                        NEWS
     In case of modification of corresponding registry-tree PHP will reload
     it automatic
   . start timiout thread only if necessary
+  . stat() is reimplemented using using GetFileAttributesEx().
+    The new implementation is faster then implementation in MS VC CRT, but
+    it doesn't support Windows 95.
 - Streams optimization (Dmitry)
   . removed unnecessary ftell() calls (one call for each included PHP file)
   . disabled calls to read() after EOF
