@@ -185,35 +185,41 @@ static zend_mm_segment* zend_mm_mem_mmap_zero_alloc(zend_mm_storage *storage, si
 
 #ifdef HAVE_MEM_WIN32
 
+static zend_mm_storage* zend_mm_mem_win32_init(void *params)
+{
+	HANDLE heap = HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
+	zend_mm_storage* storage;
+	
+	if (heap == NULL) {
+		return NULL;
+	}
+	storage = (zend_mm_storage*)malloc(sizeof(zend_mm_storage));
+	storage->data = (void*) heap;
+	return storage;
+}
+
+static void zend_mm_mem_win32_dtor(zend_mm_storage *storage)
+{
+	HeapDestroy((HANDLE)storage->data);
+	free(storage);
+}
+
 static zend_mm_segment* zend_mm_mem_win32_alloc(zend_mm_storage *storage, size_t size)
 {
-	return (zend_mm_segment*) VirtualAlloc(0, size, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+	return (zend_mm_segment*) HeapAlloc((HANDLE)storage->data, HEAP_NO_SERIALIZE, size);
 }
 
 static void zend_mm_mem_win32_free(zend_mm_storage *storage, zend_mm_segment* segment)
 {
-	VirtualFree(segment, segment->size, MEM_RELEASE);
+	HeapFree((HANDLE)storage->data, HEAP_NO_SERIALIZE, segment);
 }
 
 static zend_mm_segment* zend_mm_mem_win32_realloc(zend_mm_storage *storage, zend_mm_segment* segment, size_t size)
 {
-	if (size < segment->size) {
-		VirtualFree((char*)segment + size, segment->size - size, MEM_RELEASE);
-	} else if (size > segment->size) {
-		if (!VirtualAlloc((char*)segment + segment->size, size - segment->size, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE)) {
-			zend_mm_segment *ret = zend_mm_mem_win32_alloc(storage, size);
-
-			if (ret) {
-				memcpy(ret, segment, size > segment->size ? segment->size : size);
-				zend_mm_mem_win32_free(storage, segment);
-			}
-			segment = ret;
-		}
-	}
-	return segment;
+	return (zend_mm_segment*) HeapReAlloc((HANDLE)storage->data, HEAP_NO_SERIALIZE, segment, size);
 }
 
-# define ZEND_MM_MEM_WIN32_DSC {"win32", zend_mm_mem_dummy_init, zend_mm_mem_dummy_dtor, zend_mm_mem_win32_alloc, zend_mm_mem_win32_realloc, zend_mm_mem_win32_free}
+# define ZEND_MM_MEM_WIN32_DSC {"win32", zend_mm_mem_win32_init, zend_mm_mem_win32_dtor, zend_mm_mem_win32_alloc, zend_mm_mem_win32_realloc, zend_mm_mem_win32_free}
 
 #endif
 
@@ -239,6 +245,9 @@ static void zend_mm_mem_malloc_free(zend_mm_storage *storage, zend_mm_segment *p
 #endif
 
 static const zend_mm_mem_handlers mem_handlers[] = {
+#ifdef HAVE_MEM_WIN32
+	ZEND_MM_MEM_WIN32_DSC,
+#endif
 #ifdef HAVE_MEM_MALLOC
 	ZEND_MM_MEM_MALLOC_DSC,
 #endif
@@ -247,9 +256,6 @@ static const zend_mm_mem_handlers mem_handlers[] = {
 #endif
 #ifdef HAVE_MEM_MMAP_ZERO
 	ZEND_MM_MEM_MMAP_ZERO_DSC,
-#endif
-#ifdef HAVE_MEM_WIN32
-	ZEND_MM_MEM_WIN32_DSC,
 #endif
 	{NULL, NULL, NULL, NULL, NULL, NULL}
 };
