@@ -52,7 +52,7 @@
 #define PHP_LIBXML_CTX_WARNING 2
 
 /* a true global for initialization */
-int _php_libxml_initialized = 0;
+static int _php_libxml_initialized = 0;
 
 typedef struct _php_libxml_func_handler {
 	php_libxml_export_node export_func;
@@ -60,10 +60,16 @@ typedef struct _php_libxml_func_handler {
 
 static HashTable php_libxml_exports;
 
-ZEND_DECLARE_MODULE_GLOBALS(libxml)
+static ZEND_DECLARE_MODULE_GLOBALS(libxml)
 static PHP_GINIT_FUNCTION(libxml);
 
-zend_class_entry *libxmlerror_class_entry;
+static PHP_FUNCTION(libxml_set_streams_context);
+static PHP_FUNCTION(libxml_use_internal_errors);
+static PHP_FUNCTION(libxml_get_last_error);
+static PHP_FUNCTION(libxml_clear_errors);
+static PHP_FUNCTION(libxml_get_errors);
+
+static zend_class_entry *libxmlerror_class_entry;
 
 /* {{{ dynamically loadable module stuff */
 #ifdef COMPILE_DL_LIBXML
@@ -72,11 +78,11 @@ ZEND_GET_MODULE(libxml)
 /* }}} */
 
 /* {{{ function prototypes */
-PHP_MINIT_FUNCTION(libxml);
-PHP_RINIT_FUNCTION(libxml);
-PHP_MSHUTDOWN_FUNCTION(libxml);
-PHP_RSHUTDOWN_FUNCTION(libxml);
-PHP_MINFO_FUNCTION(libxml);
+static PHP_MINIT_FUNCTION(libxml);
+static PHP_RINIT_FUNCTION(libxml);
+static PHP_MSHUTDOWN_FUNCTION(libxml);
+static PHP_RSHUTDOWN_FUNCTION(libxml);
+static PHP_MINFO_FUNCTION(libxml);
 
 /* }}} */
 
@@ -106,7 +112,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ extension definition structures */
-zend_function_entry libxml_functions[] = {
+static zend_function_entry libxml_functions[] = {
 	PHP_FE(libxml_set_streams_context, arginfo_libxml_set_streams_context)
 	PHP_FE(libxml_use_internal_errors, arginfo_libxml_use_internal_errors)
 	PHP_FE(libxml_get_last_error, arginfo_libxml_get_last_error)
@@ -270,7 +276,7 @@ static PHP_GINIT_FUNCTION(libxml)
 /* Channel libxml file io layer through the PHP streams subsystem.
  * This allows use of ftps:// and https:// urls */
 
-void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode, const int read_only)
+static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode, const int read_only)
 {
 	php_stream_statbuf ssbuf;
 	php_stream_context *context = NULL;
@@ -325,35 +331,35 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode,
 	return ret_val;
 }
 
-void *php_libxml_streams_IO_open_read_wrapper(const char *filename)
+static void *php_libxml_streams_IO_open_read_wrapper(const char *filename)
 {
 	return php_libxml_streams_IO_open_wrapper(filename, "rb", 1);
 }
 
-void *php_libxml_streams_IO_open_write_wrapper(const char *filename)
+static void *php_libxml_streams_IO_open_write_wrapper(const char *filename)
 {
 	return php_libxml_streams_IO_open_wrapper(filename, "wb", 0);
 }
 
-int php_libxml_streams_IO_read(void *context, char *buffer, int len)
+static int php_libxml_streams_IO_read(void *context, char *buffer, int len)
 {
 	TSRMLS_FETCH();
 	return php_stream_read((php_stream*)context, buffer, len);
 }
 
-int php_libxml_streams_IO_write(void *context, const char *buffer, int len)
+static int php_libxml_streams_IO_write(void *context, const char *buffer, int len)
 {
 	TSRMLS_FETCH();
 	return php_stream_write((php_stream*)context, buffer, len);
 }
 
-int php_libxml_streams_IO_close(void *context)
+static int php_libxml_streams_IO_close(void *context)
 {
 	TSRMLS_FETCH();
 	return php_stream_close((php_stream*)context);
 }
 
-xmlParserInputBufferPtr
+static xmlParserInputBufferPtr
 php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 {
     xmlParserInputBufferPtr ret;
@@ -380,7 +386,7 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 	return(ret);
 }
 
-xmlOutputBufferPtr
+static xmlOutputBufferPtr
 php_libxml_output_buffer_create_filename(const char *URI,
                               xmlCharEncodingHandlerPtr encoder,
                               int compression ATTRIBUTE_UNUSED)
@@ -405,7 +411,7 @@ php_libxml_output_buffer_create_filename(const char *URI,
 		xmlFree(unescaped);
 	}
 
-    /* try with a non-escaped URI this may be a strange filename */
+	/* try with a non-escaped URI this may be a strange filename */
 	if (context == NULL) {
 		context = php_libxml_streams_IO_open_write_wrapper(URI);
 	}
@@ -590,7 +596,7 @@ PHP_LIBXML_API zval *php_libxml_switch_context(zval *context TSRMLS_DC) {
 
 }
 
-PHP_MINIT_FUNCTION(libxml)
+static PHP_MINIT_FUNCTION(libxml)
 {
 	zend_class_entry ce;
 
@@ -630,7 +636,7 @@ PHP_MINIT_FUNCTION(libxml)
 }
 
 
-PHP_RINIT_FUNCTION(libxml)
+static PHP_RINIT_FUNCTION(libxml)
 {
 	/* report errors via handler rather than stderr */
 	xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
@@ -640,7 +646,7 @@ PHP_RINIT_FUNCTION(libxml)
 }
 
 
-PHP_MSHUTDOWN_FUNCTION(libxml)
+static PHP_MSHUTDOWN_FUNCTION(libxml)
 {
 	php_libxml_shutdown();
 
@@ -648,7 +654,7 @@ PHP_MSHUTDOWN_FUNCTION(libxml)
 }
 
 
-PHP_RSHUTDOWN_FUNCTION(libxml)
+static PHP_RSHUTDOWN_FUNCTION(libxml)
 {
 	/* reset libxml generic error handling */
 	xmlSetGenericErrorFunc(NULL, NULL);
@@ -672,7 +678,7 @@ PHP_RSHUTDOWN_FUNCTION(libxml)
 }
 
 
-PHP_MINFO_FUNCTION(libxml)
+static PHP_MINFO_FUNCTION(libxml)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "libXML support", "active");
@@ -684,7 +690,7 @@ PHP_MINFO_FUNCTION(libxml)
 
 /* {{{ proto void libxml_set_streams_context(resource streams_context) 
    Set the streams context for the next libxml document load or write */
-PHP_FUNCTION(libxml_set_streams_context)
+static PHP_FUNCTION(libxml_set_streams_context)
 {
 	zval *arg;
 
@@ -702,7 +708,7 @@ PHP_FUNCTION(libxml_set_streams_context)
 
 /* {{{ proto void libxml_use_internal_errors([boolean use_errors]) 
    Disable libxml errors and allow user to fetch error information as needed */
-PHP_FUNCTION(libxml_use_internal_errors)
+static PHP_FUNCTION(libxml_use_internal_errors)
 {
 	xmlStructuredErrorFunc current_handler;
 	zend_bool use_errors=0, retval;
@@ -742,7 +748,7 @@ PHP_FUNCTION(libxml_use_internal_errors)
 
 /* {{{ proto object libxml_get_last_error() 
    Retrieve last error from libxml */
-PHP_FUNCTION(libxml_get_last_error)
+static PHP_FUNCTION(libxml_get_last_error)
 {
 	xmlErrorPtr error;
 
@@ -772,7 +778,7 @@ PHP_FUNCTION(libxml_get_last_error)
 
 /* {{{ proto object libxml_get_errors()
    Retrieve array of errors */
-PHP_FUNCTION(libxml_get_errors)
+static PHP_FUNCTION(libxml_get_errors)
 {
 	
 	xmlErrorPtr error;
@@ -814,7 +820,7 @@ PHP_FUNCTION(libxml_get_errors)
 
 /* {{{ proto void libxml_clear_errors() 
     Clear last error from libxml */
-PHP_FUNCTION(libxml_clear_errors)
+static PHP_FUNCTION(libxml_clear_errors)
 {
 	xmlResetLastError();
 	if (LIBXML(error_list)) {
