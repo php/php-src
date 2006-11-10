@@ -1458,7 +1458,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	ts_allocate_id(&core_globals_id, sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, (ts_allocate_dtor) core_globals_dtor);
 	core_globals = ts_resource(core_globals_id);
 #ifdef PHP_WIN32
-	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, NULL);
+	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, (ts_allocate_dtor) php_win32_core_globals_dtor);
 #endif
 #endif
 	EG(bailout) = NULL;
