@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     it automatic
   . start timiout thread only if necessary
 - Streams optimization (Dmitry)
+  . removed unnecessary ftell() calls (one call for each included PHP file)
   . disabled calls to read() after EOF
 - VCWD_REALPATH() is improved to use realpath cache without VIRTUAL_DIR.
   (Dmitry)
