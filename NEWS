@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2007, PHP 5.2.1
 - Windows related optimizations (Dmitry, Stas)
   . removed unnecessary checks for ISREG file and corresponding stat() calls
+  . opendir() is reimplemented using GetFistFile/GetNextFile those are faster
+    then _findfirst/_findnext
 - Zend Memory Manager Improvements (Dmitry)
   . use HeapAlloc() instead of VirtualAlloc()
   . use "win32" storage manager (instead of "malloc") on Windows by default
