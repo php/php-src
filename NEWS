@@ -8,7 +8,7 @@ PHP                                                                        NEWS
   . implemented registry cache that prevent registry lookup on each request.
     In case of modification of corresponding registry-tree PHP will reload
     it automatic
-  . start timiout thread only if necessary
+  . start timeout thread only if necessary
   . stat() is reimplemented using using GetFileAttributesEx().
     The new implementation is faster then implementation in MS VC CRT, but
     it doesn't support Windows 95.
