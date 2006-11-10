@@ -192,7 +192,7 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	}
 }
 
-static int tz_search(char *timezone, int left, int right, const timelib_tzdb *tzdb)
+static int tz_search(char *timezone, unsigned int left, unsigned int right, const timelib_tzdb *tzdb)
 {
 	int mid, cmp;
 
