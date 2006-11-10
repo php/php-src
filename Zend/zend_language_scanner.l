@@ -983,6 +983,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_STRING_CAST;
 }
 
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"binary"{TABS_AND_SPACES}")" {
+	return T_STRING_CAST;
+}
+
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
 	return T_ARRAY_CAST;
 }
