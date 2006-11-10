@@ -373,7 +373,7 @@ int php_oci_collection_append_string(php_oci_collection *, char *, int TSRMLS_DC
 /* statement related prototypes {{{ */
 
 php_oci_statement * php_oci_statement_create (php_oci_connection *, char *, int TSRMLS_DC);
-int php_oci_statement_set_prefetch (php_oci_statement *, ub4 TSRMLS_DC);
+int php_oci_statement_set_prefetch (php_oci_statement *, long TSRMLS_DC);
 int php_oci_statement_fetch (php_oci_statement *, ub4 TSRMLS_DC);
 php_oci_out_column * php_oci_statement_get_column (php_oci_statement *, long, char*, int TSRMLS_DC);
 int php_oci_statement_execute (php_oci_statement *, ub4 TSRMLS_DC);
