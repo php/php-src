@@ -31,6 +31,6 @@ $data['element'] = &$test;
 <?php exit(0); ?>
 --EXPECTF--
 
-Notice: Indirect modification of overloaded element of ArrayAccessImpl has no effect in /home/dmitry/php/php6/tests/classes/array_access_012.php on line 24
+Notice: Indirect modification of overloaded element of ArrayAccessImpl has no effect in %sarray_access_012.php on line 24
 
 Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_012.php on line %d
