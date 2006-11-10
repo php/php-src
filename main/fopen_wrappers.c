@@ -263,7 +263,9 @@ static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, c
 PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 {
 	FILE *fp;
+#ifndef PHP_WIN32
 	struct stat st;
+#endif
 	char *path_info, *filename;
 	int length;
 
@@ -329,11 +331,14 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 	}
 	fp = VCWD_FOPEN(filename, "rb");
 
+#ifndef PHP_WIN32
 	/* refuse to open anything that is not a regular file */
 	if (fp && (0 > fstat(fileno(fp), &st) || !S_ISREG(st.st_mode))) {
 		fclose(fp);
 		fp = NULL;
 	}
+#endif
+
 	if (!fp) {
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
 		SG(request_info).path_translated = NULL;
