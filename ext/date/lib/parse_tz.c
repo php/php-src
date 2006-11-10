@@ -192,39 +192,26 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	}
 }
 
-static int tz_search(char *timezone, unsigned int left, unsigned int right, const timelib_tzdb *tzdb)
-{
-	int mid, cmp;
-
-	if (left > right) {
-		return -1; /* not found */
-	}
- 
-	mid = (left + right) / 2;
- 
-	cmp = strcasecmp(timezone, tzdb->index[mid].id);
-	if (cmp < 0) {
-		return tz_search(timezone, left, mid - 1, tzdb);
-	} else if (cmp > 0) {
-		return tz_search(timezone, mid + 1, right, tzdb);
-	} else { /* (cmp == 0) */
-		return tzdb->index[mid].pos;
-	}
-}
-
-
 static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const timelib_tzdb *tzdb)
 {
-	int	pos;
-	
-	pos = tz_search(timezone, 0, tzdb->index_size - 1, tzdb);
+	int left = 0, right = tzdb->index_size - 1;
 
-	if (pos == -1) {
-		return 0;
-	}
+	do {
+		int mid = ((unsigned)left + right) >> 1;
+		int cmp = strcasecmp(timezone, tzdb->index[mid].id);
 
-	(*tzf) = &(tzdb->data[pos + 20]);
-	return 1;
+		if (cmp < 0) {
+			right = mid - 1;
+		} else if (cmp > 0) {
+			left = mid + 1;
+		} else { /* (cmp == 0) */
+			(*tzf) = &(tzdb->data[tzdb->index[mid].pos + 20]);
+			return 1;
+		}
+
+	} while (left <= right);
+
+	return 0;
 }
 
 const timelib_tzdb *timelib_builtin_db(void)
