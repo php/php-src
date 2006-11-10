@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     In case of modification of corresponding registry-tree PHP will reload
     it automatic
   . start timiout thread only if necessary
+- VCWD_REALPATH() is improved to use realpath cache without VIRTUAL_DIR.
+  (Dmitry)
 - ext/bcmath intialization code is moved from request startup to module
   startup. (Dmitry)
 - Zend Memory Manager Improvements (Dmitry)
