@@ -39,6 +39,11 @@
 
 #include "php_streams_int.h"
 
+#define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC TSRMLS_CC)
+#define php_stream_fopen_from_fd_int_rel(fd, mode, persistent_id)	 _php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_fopen_from_file_int(file, mode)	_php_stream_fopen_from_file_int((file), (mode) STREAMS_CC TSRMLS_CC)
+#define php_stream_fopen_from_file_int_rel(file, mode)	 _php_stream_fopen_from_file_int((file), (mode) STREAMS_REL_CC TSRMLS_CC)
+
 /* parse standard "fopen" modes into open() flags */
 PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 {
@@ -128,12 +133,44 @@ static int do_fstat(php_stdio_stream_data *d, int force)
 	return 0;
 }
 
+static php_stream *_php_stream_fopen_from_fd_int(int fd, const char *mode, const char *persistent_id STREAMS_DC TSRMLS_DC)
+{
+	php_stdio_stream_data *self;
+	
+	self = pemalloc_rel_orig(sizeof(*self), persistent_id);
+	memset(self, 0, sizeof(*self));
+	self->file = NULL;
+	self->is_pipe = 0;
+	self->lock_flag = LOCK_UN;
+	self->is_process_pipe = 0;
+	self->temp_file_name = NULL;
+	self->fd = fd;
+	
+	return php_stream_alloc_rel(&php_stream_stdio_ops, self, persistent_id, mode);
+}
+
+static php_stream *_php_stream_fopen_from_file_int(FILE *file, const char *mode STREAMS_DC TSRMLS_DC)
+{
+	php_stdio_stream_data *self;
+	
+	self = emalloc_rel_orig(sizeof(*self));
+	memset(self, 0, sizeof(*self));
+	self->file = file;
+	self->is_pipe = 0;
+	self->lock_flag = LOCK_UN;
+	self->is_process_pipe = 0;
+	self->temp_file_name = NULL;
+	self->fd = fileno(file);
+
+	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
+}
+
 PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path STREAMS_DC TSRMLS_DC)
 {
 	int fd = php_open_temporary_fd(dir, pfx, opened_path TSRMLS_CC);
 
 	if (fd != -1)	{
-		php_stream *stream = php_stream_fopen_from_fd_rel(fd, "r+b", NULL);
+		php_stream *stream = php_stream_fopen_from_fd_int_rel(fd, "r+b", NULL);
 		if (stream) {
 			return stream;
 		}
@@ -152,7 +189,7 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 	int fd = php_open_temporary_fd(NULL, "php", &opened_path TSRMLS_CC);
 
 	if (fd != -1)	{
-		php_stream *stream = php_stream_fopen_from_fd_rel(fd, "r+b", NULL);
+		php_stream *stream = php_stream_fopen_from_fd_int_rel(fd, "r+b", NULL);
 		if (stream) {
 			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 			stream->wrapper = &php_plain_files_wrapper;
@@ -174,36 +211,26 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 
 PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
-	php_stdio_stream_data *self;
-	php_stream *stream;
-	
-	self = pemalloc_rel_orig(sizeof(*self), persistent_id);
-	memset(self, 0, sizeof(*self));
-	self->file = NULL;
-	self->is_pipe = 0;
-	self->lock_flag = LOCK_UN;
-	self->is_process_pipe = 0;
-	self->temp_file_name = NULL;
-	self->fd = fd;
-
-#ifdef S_ISFIFO
-	/* detect if this is a pipe */
-	if (self->fd >= 0) {
-		self->is_pipe = (do_fstat(self, 0) == 0 && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
-	}
-#elif defined(PHP_WIN32)
-	{
-		long handle = _get_osfhandle(self->fd);
-
-		if (handle != 0xFFFFFFFF) {
-			self->is_pipe = GetFileType((HANDLE)handle) == FILE_TYPE_PIPE;
-		}
-	}
-#endif
-	
-	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, persistent_id, mode);
+	php_stream *stream = php_stream_fopen_from_fd_int_rel(fd, mode, persistent_id);
 
 	if (stream) {
+		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
+
+#ifdef S_ISFIFO
+		/* detect if this is a pipe */
+		if (self->fd >= 0) {
+			self->is_pipe = (do_fstat(self, 0) == 0 && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
+		}
+#elif defined(PHP_WIN32)
+		{
+			long handle = _get_osfhandle(self->fd);
+
+			if (handle != 0xFFFFFFFF) {
+				self->is_pipe = GetFileType((HANDLE)handle) == FILE_TYPE_PIPE;
+			}
+		}
+#endif
+	
 		if (self->is_pipe) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 		} else {
@@ -223,36 +250,26 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 
 PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STREAMS_DC TSRMLS_DC)
 {
-	php_stdio_stream_data *self;
-	php_stream *stream;
-	
-	self = emalloc_rel_orig(sizeof(*self));
-	memset(self, 0, sizeof(*self));
-	self->file = file;
-	self->is_pipe = 0;
-	self->lock_flag = LOCK_UN;
-	self->is_process_pipe = 0;
-	self->temp_file_name = NULL;
-	self->fd = fileno(file);
-
-#ifdef S_ISFIFO
-	/* detect if this is a pipe */
-	if (self->fd >= 0) {
-		self->is_pipe = (do_fstat(self, 0) == 0 && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
-	}
-#elif defined(PHP_WIN32)
-	{
-		long handle = _get_osfhandle(self->fd);
-
-		if (handle != 0xFFFFFFFF) {
-			self->is_pipe = GetFileType((HANDLE)handle) == FILE_TYPE_PIPE;
-		}
-	}
-#endif
-	
-	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
+	php_stream *stream = php_stream_fopen_from_file_int_rel(file, mode);
 
 	if (stream) {
+		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
+
+#ifdef S_ISFIFO
+		/* detect if this is a pipe */
+		if (self->fd >= 0) {
+			self->is_pipe = (do_fstat(self, 0) == 0 && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
+		}
+#elif defined(PHP_WIN32)
+		{
+			long handle = _get_osfhandle(self->fd);
+
+			if (handle != 0xFFFFFFFF) {
+				self->is_pipe = GetFileType((HANDLE)handle) == FILE_TYPE_PIPE;
+			}
+		}
+#endif
+	
 		if (self->is_pipe) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 		} else {
@@ -880,7 +897,11 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 
 	if (fd != -1)	{
 
-		ret = php_stream_fopen_from_fd_rel(fd, mode, persistent_id);
+		if (options & STREAM_OPEN_FOR_INCLUDE) {
+			ret = php_stream_fopen_from_fd_int_rel(fd, mode, persistent_id);
+		} else {
+			ret = php_stream_fopen_from_fd_rel(fd, mode, persistent_id);
+		}
 
 		if (ret)	{
 			if (opened_path) {
