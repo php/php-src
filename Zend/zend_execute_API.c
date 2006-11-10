@@ -1381,6 +1381,9 @@ void zend_set_timeout(long seconds)
 	TSRMLS_FETCH();
 
 	EG(timeout_seconds) = seconds;
+	if(!seconds) {
+		return;
+	}
 #ifdef ZEND_WIN32
 	if (timeout_thread_initialized==0 && InterlockedIncrement(&timeout_thread_initialized)==1) {
 		/* We start up this process-wide thread here and not in zend_startup(), because if Zend
@@ -1419,7 +1422,9 @@ void zend_set_timeout(long seconds)
 void zend_unset_timeout(TSRMLS_D)
 {
 #ifdef ZEND_WIN32
-	PostThreadMessage(timeout_thread_id, WM_UNREGISTER_ZEND_TIMEOUT, (WPARAM) GetCurrentThreadId(), (LPARAM) 0);
+	if(timeout_thread_initialized) {
+		PostThreadMessage(timeout_thread_id, WM_UNREGISTER_ZEND_TIMEOUT, (WPARAM) GetCurrentThreadId(), (LPARAM) 0);
+	}
 #else
 #	ifdef HAVE_SETITIMER
 	{
