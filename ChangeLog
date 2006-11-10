@@ -1,3 +1,146 @@
+2006-11-09  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_unicode.h:
+      add two more unicode related macros
+
+2006-11-09  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/tests/008.phpt:
+      Enable xmlwriter_start_dtd_entity(), xmlwriter_end_dtd_entity() &
+      xmlwriter_write_dtd_entity()
+
+2006-11-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/php_math.h:
+      MFB: Added missing PHPAPI declaration
+
+    * (PHP_5_2)
+      ext/standard/php_math.h:
+      Added missing PHPAPI declaration
+
+    * (PHP_4_4)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Fixed bug #38456 (Apache2 segfaults when virtual() is called in .php
+      ErrorDocument).
+
+    * sapi/apache2handler/sapi_apache2.c:
+      MFB: Fixed bug #38456 (Apache2 segfaults when virtual() is called in .php
+      ErrorDocument).
+
+    * (PHP_5_2)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #38456 (Apache2 segfaults when virtual() is called in .php
+      ErrorDocument).
+
+2006-11-09  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/filter/tests/033_run.inc:
+      MFB: fix test
+
+    * (PHP_5_2)
+      ext/filter/tests/033_run.inc:
+      fix test for non English guys
+
+    * ext/filter/callback_filter.c:
+      MFB: fix possible segfault
+
+    * (PHP_5_2)
+      ext/filter/callback_filter.c:
+      fix an invalid read + invalid free()
+
+    * ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/php_xmlwriter.h
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h:
+      MFB: static'fication
+
+    * (PHP_5_2)
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/php_xmlwriter.h
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h:
+      statification of local functions and variables.
+      also remove a few uneeded global variables
+      interesting new warnings:
+      /cvs/php5/ext/xmlwriter/php_xmlwriter.c:391: warning:
+      'xmlwriter_objects_clone' defined but not used
+      /cvs/php5/ext/xmlwriter/php_xmlwriter.c:1281: warning:
+      'zif_xmlwriter_start_dtd_entity' defined but not used
+      /cvs/php5/ext/xmlwriter/php_xmlwriter.c:1325: warning:
+      'zif_xmlwriter_end_dtd_entity' defined but not used
+      /cvs/php5/ext/xmlwriter/php_xmlwriter.c:1333: warning:
+      'zif_xmlwriter_write_dtd_entity' defined but not used
+
+2006-11-09  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      Add "As of 5.2.1" notes as requested
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      New features/errormsgs/return values in ext/zip
+      New optional parameter in ext/ming
+
+2006-11-09  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/config.m4
+      ext/ming/ming.c:
+      MFB 5_2:
+      Revert patch for warnings about missing headers. These are fixed in the
+      latest version of libming.
+      Sync code for SWFMovie::streamMP3. This function will now return the
+      number of frames in the file.
+
+    * (PHP_5_2)
+      ext/ming/config.m4
+      ext/ming/ming.c:
+      Revert patch for warnings about missing headers. These are fixed in the
+      latest version of libming.
+      Sync code for SWFMovie::streamMP3. This function will now return the
+      number of frames in the file.
+
+2006-11-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/array/array_diff_key.phpt
+      ext/standard/tests/array/array_diff_key.phpt
+      ext/standard/tests/array/array_intersect_key.phpt
+      ext/standard/tests/array/array_intersect_key.phpt:
+      Fixed tests
+
+2006-11-09  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/bug21338.phpt
+      ext/standard/tests/strings/bug25671.phpt
+      ext/standard/tests/strings/bug25707.phpt
+      ext/standard/tests/strings/bug33076.phpt
+      ext/standard/tests/strings/str_replace.phpt:
+      fix more tests
+
+    * ext/standard/tests/strings/str_shuffle.phpt:
+      fix test
+
+    * main/php_streams.h
+      main/streams/streams.c:
+      eliminate a couple of compile warnings
+
+    * ext/standard/tests/file/bug27508.phpt:
+      fix test and prevent endless loop
+
+2006-11-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      MFB: Fixed bug #38602 (header( "HTTP/1.0 ..." ) does not change proto
+      version).
+
+    * (PHP_5_2)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #38602 (header( "HTTP/1.0 ..." ) does not change proto version).
+
 2006-11-08  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
