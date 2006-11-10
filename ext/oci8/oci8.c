@@ -647,7 +647,9 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 #ifdef ZTS
 	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_descriptor TSRMLS_CC);
 	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_collection TSRMLS_CC);
-	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_statement TSRMLS_CC);
+	while (OCI_G(num_statements)) { 
+		zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_statement TSRMLS_CC);
+	}
 #endif
 
 	/* check persistent connections and do the necessary actions if needed */
@@ -1810,13 +1812,13 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 static int php_oci_list_helper(zend_rsrc_list_entry *le, void *le_type TSRMLS_DC)
 {
 	int type = (int) le_type;
-		
+
 	if (le->type == type) {
-		if (le->ptr != NULL) {
-			return 1;
+		if (le->ptr != NULL && --le->refcount<=0) {
+			return ZEND_HASH_APPLY_REMOVE;
 		}
 	}
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 } /* }}} */
 #endif
 

@@ -411,6 +411,7 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ */
 	long max_persistent;	/* maximum number of persistent connections per process */
 	long num_persistent;	/* number of existing persistent connections */
 	long num_links;			/* non-persistent + persistent connections */
+	long num_statements;	/* number of statements open */
 	long ping_interval;		/* time interval between pings */
 	long persistent_timeout;	/* time period after which idle persistent connection is considered expired */
 	long statement_cache_size;	/* statement cache size. used with 9i+ clients only*/
