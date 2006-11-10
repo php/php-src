@@ -124,7 +124,7 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, zst
 
 /* {{{ php_oci_statement_set_prefetch()
  Set prefetch buffer size for the statement (we're assuming that one row is ~1K sized) */
-int php_oci_statement_set_prefetch(php_oci_statement *statement, ub4 size TSRMLS_DC)
+int php_oci_statement_set_prefetch(php_oci_statement *statement, long size TSRMLS_DC)
 { 
 	ub4 prefetch = size * 1024;
 
