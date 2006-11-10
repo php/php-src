@@ -34,6 +34,7 @@ PHP                                                                        NEWS
     php_filter.h).
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
+- Fixed bug #39454 (Returning a SOAP array segfaults PHP). (Dmitry)
 - Fixed bug #39414 (Syntax error while compiling with Sun Workshop Complier).
   (Johannes)
 - Fixed bug #39398 (Booleans are not automatically translated to integers).

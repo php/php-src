@@ -2023,6 +2023,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 		    zend_hash_find(sdl_type->attributes, SOAP_1_1_ENC_NAMESPACE":arrayType",
 		      sizeof(SOAP_1_1_ENC_NAMESPACE":arrayType"),
 		      (void **)&arrayType) == SUCCESS &&
+		    (*arrayType)->extraAttributes &&
 		    zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&ext) == SUCCESS) {
 
 			char *value, *end;
@@ -2071,6 +2072,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 		           zend_hash_find(sdl_type->attributes, SOAP_1_2_ENC_NAMESPACE":itemType",
 		             sizeof(SOAP_1_2_ENC_NAMESPACE":itemType"),
 		             (void **)&arrayType) == SUCCESS &&
+		           (*arrayType)->extraAttributes &&
 		           zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":itemType", sizeof(WSDL_NAMESPACE":itemType"), (void **)&ext) == SUCCESS) {
 			if ((*ext)->ns != NULL) {
 				enc = get_encoder(SOAP_GLOBAL(sdl), (*ext)->ns, (*ext)->val);
@@ -2081,6 +2083,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 			if (zend_hash_find(sdl_type->attributes, SOAP_1_2_ENC_NAMESPACE":arraySize",
 			                   sizeof(SOAP_1_2_ENC_NAMESPACE":arraySize"),
 			                   (void **)&arrayType) == SUCCESS &&
+			    (*arrayType)->extraAttributes &&
 			    zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arraySize", sizeof(WSDL_NAMESPACE":arraysize"), (void **)&ext) == SUCCESS) {
 				dimension = calc_dimension_12((*ext)->val);
 				dims = get_position_12(dimension, (*ext)->val);
@@ -2101,6 +2104,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 		           zend_hash_find(sdl_type->attributes, SOAP_1_2_ENC_NAMESPACE":arraySize",
 		             sizeof(SOAP_1_2_ENC_NAMESPACE":arraySize"),
 		             (void **)&arrayType) == SUCCESS &&
+		           (*arrayType)->extraAttributes &&
 		           zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arraySize", sizeof(WSDL_NAMESPACE":arraySize"), (void **)&ext) == SUCCESS) {
 			dimension = calc_dimension_12((*ext)->val);
 			dims = get_position_12(dimension, (*ext)->val);
@@ -2258,6 +2262,7 @@ static zval *to_zval_array(encodeTypePtr type, xmlNodePtr data)
 	           zend_hash_find(type->sdl_type->attributes, SOAP_1_1_ENC_NAMESPACE":arrayType",
 	                          sizeof(SOAP_1_1_ENC_NAMESPACE":arrayType"),
 	                          (void **)&arrayType) == SUCCESS &&
+	           (*arrayType)->extraAttributes &&
 	           zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&ext) == SUCCESS) {
 		char *type, *end;
 
@@ -2279,6 +2284,7 @@ static zval *to_zval_array(encodeTypePtr type, xmlNodePtr data)
 	           zend_hash_find(type->sdl_type->attributes, SOAP_1_2_ENC_NAMESPACE":itemType",
 	                          sizeof(SOAP_1_2_ENC_NAMESPACE":itemType"),
 	                          (void **)&arrayType) == SUCCESS &&
+	           (*arrayType)->extraAttributes &&
 	           zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":itemType", sizeof(WSDL_NAMESPACE":itemType"), (void **)&ext) == SUCCESS) {
 
 		if ((*ext)->ns != NULL) {
@@ -2288,6 +2294,7 @@ static zval *to_zval_array(encodeTypePtr type, xmlNodePtr data)
 		if (zend_hash_find(type->sdl_type->attributes, SOAP_1_2_ENC_NAMESPACE":arraySize",
 		                   sizeof(SOAP_1_2_ENC_NAMESPACE":arraySize"),
 		                   (void **)&arrayType) == SUCCESS &&
+		    (*arrayType)->extraAttributes &&
 		    zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arraySize", sizeof(WSDL_NAMESPACE":arraysize"), (void **)&ext) == SUCCESS) {
 			dimension = calc_dimension_12((*ext)->val);
 			dims = get_position_12(dimension, (*ext)->val);
@@ -2300,6 +2307,7 @@ static zval *to_zval_array(encodeTypePtr type, xmlNodePtr data)
 	           zend_hash_find(type->sdl_type->attributes, SOAP_1_2_ENC_NAMESPACE":arraySize",
 	                          sizeof(SOAP_1_2_ENC_NAMESPACE":arraySize"),
 	                          (void **)&arrayType) == SUCCESS &&
+	           (*arrayType)->extraAttributes &&
 	           zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arraySize", sizeof(WSDL_NAMESPACE":arraysize"), (void **)&ext) == SUCCESS) {
 
 		dimension = calc_dimension_12((*ext)->val);
