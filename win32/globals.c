@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "php_win32_globals.h"
+#include "syslog.h"
 
 #ifdef ZTS
 PHPAPI int php_win32_core_globals_id;
@@ -33,6 +34,26 @@ void php_win32_core_globals_ctor(void *vg TSRMLS_DC)
 	memset(wg, 0, sizeof(*wg));
 }
 
+void php_win32_core_globals_dtor(void *vg TSRMLS_DC)
+{
+	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
+
+	if (wg->registry_key) {
+		RegCloseKey(wg->registry_key);
+		wg->registry_key = NULL;
+	}
+	if (wg->registry_event) {
+		CloseHandle(wg->registry_event);
+		wg->registry_event = NULL;
+	}
+	if (wg->registry_directories) {
+		zend_hash_destroy(wg->registry_directories);
+		free(wg->registry_directories);
+		wg->registry_directories = NULL;
+	}
+}
+
+
 PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
 {
 	php_win32_core_globals *wg =
@@ -43,7 +64,10 @@ PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
 #endif
 		;
 
-	memset(wg, 0, sizeof(*wg));
+	closelog();
+	wg->starttime.tv_sec = 0;
+	wg->lasttime = 0;
+
 	return SUCCESS;
 }
 
