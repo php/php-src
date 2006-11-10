@@ -312,6 +312,9 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
+		if (stream->eof && !data->is_pipe) {
+			return 0;
+		}
 		ret = read(data->fd, buf, count);
 		
 		stream->eof = (ret == 0 || (ret == (size_t)-1 && errno != EWOULDBLOCK));
