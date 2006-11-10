@@ -54,3 +54,11 @@ string(1) "1"
 string(1) "1"
 string(1) "1"
 Done
+--UEXPECT--
+unicode(1) "1"
+unicode(1) "1"
+unicode(1) "1"
+unicode(1) "1"
+unicode(1) "1"
+unicode(1) "1"
+Done

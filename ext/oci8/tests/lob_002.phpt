@@ -22,12 +22,12 @@ oci_execute($statement, OCI_DEFAULT);
 
 var_dump($blob);
 
-var_dump($blob->write("test", -1));
-var_dump($blob->write("test", "str"));
-var_dump($blob->write("test", 1000000));
-var_dump($blob->write(str_repeat("test", 10000), 1000000));
+var_dump($blob->write(b"test", -1));
+var_dump($blob->write(b"test", "str"));
+var_dump($blob->write(b"test", 1000000));
+var_dump($blob->write((binary)str_repeat("test", 10000), 1000000));
 var_dump($blob->tell());
-var_dump($blob->seek("str", -5));
+var_dump($blob->seek(b"str", -5));
 var_dump($blob->flush());
 
 oci_commit($c);
@@ -77,7 +77,7 @@ int(4)
 int(40000)
 int(40004)
 
-Warning: OCI-Lob::seek() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: OCI-Lob::seek() expects parameter 1 to be long, binary string given in %s on line %d
 NULL
 bool(false)
 int(40004)

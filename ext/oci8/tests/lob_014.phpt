@@ -22,11 +22,11 @@ oci_execute($statement, OCI_DEFAULT);
 
 $blob;
 
-var_dump($blob->write("test"));
+var_dump($blob->write(b"test"));
 var_dump($blob->close());
-var_dump($blob->write("test"));
+var_dump($blob->write(b"test"));
 var_dump($blob->free());
-var_dump($blob->write("test"));
+var_dump($blob->write(b"test"));
 
 oci_commit($c);
 

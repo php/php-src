@@ -50,3 +50,14 @@ Warning: oci_define_by_name() expects at least 3 parameters, 2 given in %s on li
 NULL
 string(4) "some"
 Done
+--UEXPECTF--
+bool(true)
+bool(false)
+
+Warning: oci_define_by_name(): Column name cannot be empty in %s on line %d
+bool(false)
+
+Warning: oci_define_by_name() expects at least 3 parameters, 2 given in %s on line %d
+NULL
+unicode(4) "some"
+Done

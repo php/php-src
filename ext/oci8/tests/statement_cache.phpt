@@ -36,14 +36,14 @@ Done
 --UEXPECTF--
 array(2) {
   [0]=>
-  string(1) "4"
+  unicode(1) "4"
   [u"1+3"]=>
-  string(1) "4"
+  unicode(1) "4"
 }
 array(2) {
   [0]=>
-  string(1) "4"
+  unicode(1) "4"
   [u"1+3"]=>
-  string(1) "4"
+  unicode(1) "4"
 }
 Done

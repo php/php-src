@@ -65,3 +65,9 @@ string(9) "long data"
 string(9) "long data"
 string(4) "data"
 Done
+--UEXPECTF--
+unicode(4) "data"
+unicode(9) "long data"
+unicode(9) "long data"
+unicode(4) "data"
+Done

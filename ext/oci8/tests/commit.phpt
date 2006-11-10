@@ -172,24 +172,24 @@ array(5) {
   [u"ID"]=>
   array(4) {
     [0]=>
-    string(1) "1"
+    unicode(1) "1"
     [1]=>
-    string(1) "1"
+    unicode(1) "1"
     [2]=>
-    string(1) "1"
+    unicode(1) "1"
     [3]=>
-    string(1) "1"
+    unicode(1) "1"
   }
   [u"VALUE"]=>
   array(4) {
     [0]=>
-    string(1) "1"
+    unicode(1) "1"
     [1]=>
-    string(1) "1"
+    unicode(1) "1"
     [2]=>
-    string(1) "1"
+    unicode(1) "1"
     [3]=>
-    string(1) "1"
+    unicode(1) "1"
   }
   [u"BLOB"]=>
   array(4) {

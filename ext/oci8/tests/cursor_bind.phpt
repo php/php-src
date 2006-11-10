@@ -97,3 +97,24 @@ array(2) {
 }
 bool(false)
 Done
+--UEXPECT--
+array(2) {
+  [0]=>
+  unicode(1) "1"
+  [1]=>
+  unicode(1) "1"
+}
+array(2) {
+  [0]=>
+  unicode(1) "1"
+  [1]=>
+  unicode(1) "1"
+}
+array(2) {
+  [0]=>
+  unicode(1) "1"
+  [1]=>
+  unicode(1) "1"
+}
+bool(false)
+Done

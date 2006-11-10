@@ -25,8 +25,8 @@ oci_execute($statement, OCI_DEFAULT);
 
 $row = oci_fetch_assoc($statement);
 
-$row['LOB_1']->write("first");
-$row['LOB_2']->write("second");
+$row['LOB_1']->write(b"first");
+$row['LOB_2']->write(b"second");
 
 unset($row);
 

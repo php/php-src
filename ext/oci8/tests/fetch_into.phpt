@@ -84,20 +84,20 @@ Done
 int(5)
 array(2) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
 }
 int(5)
 array(10) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"ID"]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
   [u"VALUE"]=>
-  string(1) "1"
+  unicode(1) "1"
   [2]=>
   NULL
   [u"BLOB"]=>

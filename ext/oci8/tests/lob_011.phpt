@@ -20,7 +20,7 @@ $blob = oci_new_descriptor($c,OCI_D_LOB);
 oci_bind_by_name($statement,":v_blob", $blob,-1,OCI_B_BLOB);
 oci_execute($statement, OCI_DEFAULT);
 
-var_dump($blob->write("some string here. string, I said"));
+var_dump($blob->write(b"some string here. string, I said"));
 oci_commit($c);
 
 $ora_sql = "INSERT INTO
