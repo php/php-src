@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.2 2006-11-10 10:30:46 dmitry Exp $
+// $Id: confutils.js,v 1.60.2.1.2.3 2006-11-10 10:38:07 dmitry Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -915,10 +915,6 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		ldflags = "$(LDFLAGS)";
 	}
 
-	if(PHP_VCI = "yes" || PHP_VCO == "yes") {
-		ldflags += " /PGD:$(BUILD_DIR)\\"+makefiletarget+".pgd";
-	}
-	
 	if (ld) {
 		MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 	} else {
