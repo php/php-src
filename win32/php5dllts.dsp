@@ -2032,10 +2032,6 @@ SOURCE=.\md5crypt.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\win32\pwd.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\win32\readdir.c
 # End Source File
 # Begin Source File
@@ -2093,10 +2089,6 @@ SOURCE=..\win32\param.h
 # Begin Source File
 
 SOURCE=..\win32\php_registry.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\win32\pwd.h
 # End Source File
 # Begin Source File
 

@@ -45,11 +45,7 @@
 #include "php_network.h"
 
 #if HAVE_PWD_H
-#ifdef PHP_WIN32
-#include "win32/pwd.h"
-#else
 #include <pwd.h>
-#endif
 #endif
 
 #include <sys/types.h>

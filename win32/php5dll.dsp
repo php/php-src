@@ -1540,10 +1540,6 @@ SOURCE=..\ext\com\conversion.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\win32\pwd.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\win32\readdir.c
 # End Source File
 # Begin Source File
@@ -1613,10 +1609,6 @@ SOURCE=..\ext\com\php_VARIANT.h
 # Begin Source File
 
 SOURCE=..\ext\com\php_versioning.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\win32\pwd.h
 # End Source File
 # Begin Source File
 
