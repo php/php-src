@@ -59,6 +59,9 @@ _zip_free(struct zip *za)
     if (za->zp)
 	fclose(za->zp);
 
+    if (za->ch_comment)
+	free(za->ch_comment);
+
     _zip_cdir_free(za->cdir);
 
     if (za->entry) {
