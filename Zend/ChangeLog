@@ -1,3 +1,28 @@
+2006-11-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_object_handlers.c:
+      Unicode support
+
+2006-11-10  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      zend_language_scanner.l:
+      - Forward port the binary cast, which will do the same as the string cast
+      in
+        PHP 5.2.
+
+2006-11-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      Start timiout thread on Windows only if necessary
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Zend Memory Manager Improvements
+      . use HeapAlloc() instead of VirtualAlloc()
+      . use "win32" storage manager (instead of "malloc") on Windows by default
+
 2006-11-09  Antony Dovgal  <antony@zend.com>
 
     * zend_unicode.h:
