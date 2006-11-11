@@ -1,3 +1,378 @@
+2006-11-10  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/date/lib/parse_tz.c
+      ext/date/lib/parse_tz.c
+      ext/libxml/libxml.c
+      ext/libxml/php_libxml.h:
+      MFB
+
+    * (PHP_5_2)
+      ext/date/lib/parse_tz.c:
+      fix the bug I introduced previously, sorry
+      anyway, convert the recursive version of the binary search to an iterative
+      one
+
+2006-11-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h:
+      fix type mess (thanks again, Chris)
+
+    * ext/oci8/oci8_lob.c:
+      fix build with old client versions
+
+    * ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      MFB
+
+    * (PHP_5_2)
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      fix possible issue with negative values in oci_set_prefetch
+      (reported by Chris Jones)
+
+2006-11-10  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - Fix typo
+
+2006-11-10  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/libxml/libxml.c
+      ext/libxml/php_libxml.h:
+      mark a few variables and functions as static
+
+2006-11-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/classes/array_access_005.phpt
+      tests/classes/array_access_005.phpt
+      tests/classes/array_access_005.phpt
+      tests/classes/array_access_008.phpt
+      tests/classes/array_access_008.phpt
+      tests/classes/array_access_008.phpt
+      tests/classes/array_access_012.phpt
+      tests/classes/array_access_012.phpt
+      tests/classes/array_access_012.phpt:
+      Fixed tests
+
+2006-11-10  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/date/lib/parse_tz.c:
+      mark the binary search delimiters as unsigned, so that the compiler can use
+      a quick shift operation
+
+2006-11-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed wrong realpath() result in case of unexistent path
+
+2006-11-10  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      tests/classes/array_access_005.phpt
+      tests/classes/array_access_008.phpt
+      tests/classes/array_access_012.phpt:
+      Fix tests
+
+2006-11-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c:
+      Revert wrong path
+
+2006-11-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/array_bind_005.phpt
+      ext/oci8/tests/array_bind_008.phpt
+      ext/oci8/tests/array_bind_010.phpt
+      ext/oci8/tests/bind_long.phpt
+      ext/oci8/tests/bind_long_raw.phpt
+      ext/oci8/tests/bind_raw.phpt
+      ext/oci8/tests/bug27303.phpt
+      ext/oci8/tests/bug27303_2.phpt
+      ext/oci8/tests/bug27303_4.phpt
+      ext/oci8/tests/bug35973.phpt
+      ext/oci8/tests/bug36096.phpt
+      ext/oci8/tests/coll_011.phpt
+      ext/oci8/tests/coll_011_func.phpt
+      ext/oci8/tests/coll_012.phpt
+      ext/oci8/tests/coll_012_func.phpt
+      ext/oci8/tests/coll_013.phpt
+      ext/oci8/tests/coll_013_func.phpt
+      ext/oci8/tests/coll_014.phpt
+      ext/oci8/tests/coll_014_func.phpt
+      ext/oci8/tests/commit.phpt
+      ext/oci8/tests/commit_old.phpt
+      ext/oci8/tests/cursor_bind.phpt
+      ext/oci8/tests/cursors.phpt
+      ext/oci8/tests/cursors_old.phpt
+      ext/oci8/tests/define.phpt
+      ext/oci8/tests/define1.phpt
+      ext/oci8/tests/define_old.phpt
+      ext/oci8/tests/error.phpt
+      ext/oci8/tests/error1.phpt
+      ext/oci8/tests/error_old.phpt
+      ext/oci8/tests/fetch.phpt
+      ext/oci8/tests/fetch_all.phpt
+      ext/oci8/tests/fetch_array.phpt
+      ext/oci8/tests/fetch_assoc.phpt
+      ext/oci8/tests/fetch_into.phpt
+      ext/oci8/tests/fetch_into1.phpt
+      ext/oci8/tests/fetch_into2.phpt
+      ext/oci8/tests/fetch_object.phpt
+      ext/oci8/tests/fetch_row.phpt
+      ext/oci8/tests/field_funcs.phpt
+      ext/oci8/tests/field_funcs1.phpt
+      ext/oci8/tests/field_funcs_old.phpt
+      ext/oci8/tests/lob_001.phpt
+      ext/oci8/tests/lob_002.phpt
+      ext/oci8/tests/lob_003.phpt
+      ext/oci8/tests/lob_004.phpt
+      ext/oci8/tests/lob_006.phpt
+      ext/oci8/tests/lob_007.phpt
+      ext/oci8/tests/lob_008.phpt
+      ext/oci8/tests/lob_010.phpt
+      ext/oci8/tests/lob_011.phpt
+      ext/oci8/tests/lob_012.phpt
+      ext/oci8/tests/lob_013.phpt
+      ext/oci8/tests/lob_014.phpt
+      ext/oci8/tests/lob_016.phpt
+      ext/oci8/tests/lob_017.phpt
+      ext/oci8/tests/lob_018.phpt
+      ext/oci8/tests/lob_019.phpt
+      ext/oci8/tests/lob_020.phpt
+      ext/oci8/tests/lob_021.phpt
+      ext/oci8/tests/lob_022.phpt
+      ext/oci8/tests/lob_023.phpt
+      ext/oci8/tests/lob_024.phpt
+      ext/oci8/tests/lob_025.phpt
+      ext/oci8/tests/lob_026.phpt
+      ext/oci8/tests/lob_temp.phpt
+      ext/oci8/tests/lob_temp1.phpt
+      ext/oci8/tests/pecl_bug8816.phpt
+      ext/oci8/tests/serverversion.phpt
+      ext/oci8/tests/statement_cache.phpt:
+      add _not yet 100% complete_ Unicode support
+      
+      collections, statements and BLOBs seem to be working ok
+      though there are still some things to be done in order to make
+      oci_bind_array_by_name() work with U-strings
+      
+      Notes:
+      - in Unicode mode OCI8 always speaks to Oracle server using UTF-16, so all
+      the conversions are done by the client lib.
+      This is why character set parameter of oci_connect() and NLS_LANG are
+      ignored in U-mode.
+      
+      - BLOBs and CLOBs behave quite differently in U-mode.
+      Reading data from a CLOB would result in Unicode string, while BLOBs would
+      return binary string.
+      Also, all LOB utilities work with _bytes_ when BLOB is used and
+      _characters_ when it's CLOB.
+      It's not that obvious, but it does make a lot of sense to me.
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/php_oci8_int.h:
+      fix segfault in ZTS mode when statements containing sub-statements are
+      destroyed in wrong order
+
+2006-11-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c:
+      Fixed bug #39454 (Returning a SOAP array segfaults PHP)
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_virtual_cwd.h:
+      stat() is reimplemented using using GetFileAttributesEx().
+      The new implementation is faster then implementation in MS VC CRT, but it
+      doesn't support Windows 95.
+
+    * ZendEngine2/zend_object_handlers.c:
+      Unicode support
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      Removed unnecessary ftell() calls (one call for each included PHP file)
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      Disabled reading from stream (calls to read()) after EOF
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_virtual_cwd.h:
+      VCWD_REALPATH() is improved to use realpath cache without VIRTUAL_DIR
+
+2006-11-10  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_language_scanner.l:
+      - Forward port the binary cast, which will do the same as the string cast
+      in
+        PHP 5.2.
+
+2006-11-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/bcmath/bcmath.c
+      ext/bcmath/bcmath.c
+      ext/bcmath/php_bcmath.h
+      ext/bcmath/php_bcmath.h:
+      Intialization code is moved from request startup to module startup
+
+2006-11-10  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      Allow mixing Unicode/binary string types.
+
+2006-11-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      Start timiout thread on Windows only if necessary
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      main/main.c
+      main/main.c
+      win32/globals.c
+      win32/globals.c
+      win32/php_win32_globals.h
+      win32/php_win32_globals.h
+      win32/registry.c
+      win32/registry.c:
+      Implemented registry cache that prevent registry lookup on each request. In
+      case of modification of corresponding registry-tree PHP will reload it
+      automatic.
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/readdir.h
+      TSRM/readdir.h
+      main/reentrancy.c
+      main/reentrancy.c
+      win32/readdir.c
+      win32/readdir.c
+      win32/readdir.h
+      win32/readdir.h:
+      opendir() is reimplemented using GetFistFile/GetNextFile those are faster
+      then _findfirst/_findnext
+
+    * main/fopen_wrappers.c
+      main/streams/plain_wrapper.c:
+      Removed unnecessary checks for ISREG file and corresponding stat() calls on
+      Wind
+      ows
+
+    * (PHP_5_2)
+      NEWS
+      main/fopen_wrappers.c
+      main/streams/plain_wrapper.c:
+      Removed unnecessary checks for ISREG file and corresponding stat() calls on
+      Windows
+
+    * (PHP_5_2)
+      NEWS:
+      typo
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Zend Memory Manager Improvements
+      . use HeapAlloc() instead of VirtualAlloc()
+      . use "win32" storage manager (instead of "malloc") on Windows by default
+
+    * win32/build/confutils.js
+      win32/build/confutils.js:
+      Fix warnings
+
+    * win32/build/Makefile
+      win32/build/Makefile
+      win32/build/confutils.js
+      win32/build/confutils.js:
+      Use $(CC) for linking instead of $(LD). This allows usage of advansed
+      optimization techniques (like Intel's inner-procedure optimization)
+
+    * ext/standard/rand.c
+      ext/standard/rand.c:
+      Faster and better licensed implementation
+
+    * ext/standard/basic_functions.c
+      main/config.w32.h
+      main/config.w32.h
+      main/fopen_wrappers.c
+      main/fopen_wrappers.c
+      main/php.h
+      main/php.h
+      main/safe_mode.c
+      win32/glob.c
+      win32/glob.c
+      win32/globals.c
+      win32/globals.c
+      win32/php5dll.dsp
+      win32/php5dll.dsp
+      win32/php5dllts.dsp
+      win32/php5dllts.dsp
+      win32/php_win32_globals.h
+      win32/php_win32_globals.h
+      win32/pwd.c
+      win32/pwd.c
+      win32/pwd.h
+      win32/pwd.h
+      win32/build/config.w32
+      win32/build/config.w32
+      win32/build/config.w32.h.in
+      win32/build/config.w32.h.in:
+      Simplify the code base as this getpwd() was used only once
+
+2006-11-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/php_math.h:
+      Added missing API declarations.
+
+    * ext/filter/filter.c:
+      MFB: Fixed pecl bug #9179 (phpversion("filter") shows wrong version).
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      Fixed pecl bug #9179 (phpversion("filter") shows wrong version).
+
 2006-11-09  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/zend_unicode.h:
