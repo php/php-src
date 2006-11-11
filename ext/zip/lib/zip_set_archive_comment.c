@@ -60,7 +60,7 @@ zip_set_archive_comment(struct zip *za, const char *comment, int len)
     else
 	tmpcom = NULL;
 
-    free(za->ch_comment);
+    if (za->ch_comment) free(za->ch_comment);
     za->ch_comment = tmpcom;
     za->ch_comment_len = len;
     
