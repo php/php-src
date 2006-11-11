@@ -247,7 +247,7 @@ zip_close(struct zip *za)
     chmod(za->zn, 0666&~mask);
 
     _zip_free(za);
-
+	free(temp);
     return 0;
 }
 
