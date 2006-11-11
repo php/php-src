@@ -551,6 +551,7 @@ static void php_zip_free_dir(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	if (zip_int) {
 		if (zip_int->za) {
 			zip_close(zip_int->za);
+			zip_int->za = NULL;
 		}
 
 		efree(rsrc->ptr);
@@ -565,8 +566,14 @@ static void php_zip_free_entry(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	zip_read_rsrc *zr_rsrc = (zip_read_rsrc *) rsrc->ptr;
 
-	efree(zr_rsrc);
-	rsrc->ptr = NULL;
+	if (zr_rsrc) {
+		if (zr_rsrc->zf) {
+			zip_fclose(zr_rsrc->zf);
+			zr_rsrc->zf = NULL;
+		}
+		efree(zr_rsrc);
+		rsrc->ptr = NULL;
+	}
 }
 /* }}} */
 
