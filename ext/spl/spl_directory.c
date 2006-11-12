@@ -88,6 +88,7 @@ static void spl_filesystem_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 	case SPL_FS_DIR:
 		if (intern->u.dir.dirp) {
 			php_stream_close(intern->u.dir.dirp);
+			intern->u.dir.dirp = NULL;
 		}
 		if (intern->u.dir.sub_path) {
 			efree(intern->u.dir.sub_path);
@@ -977,13 +978,6 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 }
 /* }}} */
 
-/* define an overloaded iterator structure */
-typedef struct {
-	zend_object_iterator  intern;
-	zval                  *current;
-	spl_filesystem_object *object;
-} spl_filesystem_dir_it;
-
 /* forward declarations to the iterator handlers */
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC);
 static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC);
@@ -1005,20 +999,19 @@ zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
 /* {{{ spl_ce_dir_get_iterator */
 zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator;
-	spl_filesystem_object *dir_object;
+	spl_filesystem_iterator *iterator;
+	spl_filesystem_object   *dir_object;
 
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
-	iterator   = emalloc(sizeof(spl_filesystem_dir_it));
 	dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
+	iterator   = spl_filesystem_object_to_iterator(dir_object);
 
-	object->refcount += 2;;
+	object->refcount += 2;
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
 	iterator->current = object;
-	iterator->object = dir_object;
 	
 	return (zend_object_iterator*)iterator;
 }
@@ -1027,20 +1020,18 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 /* {{{ spl_filesystem_dir_it_dtor */
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 
 	zval_ptr_dtor(&iterator->current);
 	zval_ptr_dtor((zval**)&iterator->intern.data);
-
-	efree(iterator);
+	iterator->intern.data = NULL; /* mark as unused */
 }
 /* }}} */
 	
 /* {{{ spl_filesystem_dir_it_valid */
 static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 
 	return object->u.dir.entry.d_name[0] != '\0' ? SUCCESS : FAILURE;
 }
@@ -1050,7 +1041,7 @@ static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC)
 /* {{{ spl_filesystem_dir_it_current_data */
 static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 	
 	*data = &iterator->current;
 }
@@ -1059,8 +1050,7 @@ static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval 
 /* {{{ spl_filesystem_dir_it_current_key */
 static int spl_filesystem_dir_it_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 	
 	*int_key = object->u.dir.index;
 	return HASH_KEY_IS_LONG;
@@ -1070,8 +1060,7 @@ static int spl_filesystem_dir_it_current_key(zend_object_iterator *iter, zstr *s
 /* {{{ spl_filesystem_dir_it_move_forward */
 static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 	
 	object->u.dir.index++;
 	if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
@@ -1087,8 +1076,7 @@ static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter TSRMLS
 /* {{{ spl_filesystem_dir_it_rewind */
 static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 	
 	object->u.dir.index = 0;
 	if (object->u.dir.dirp) {
@@ -1103,22 +1091,21 @@ static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 /* {{{ spl_filesystem_tree_it_dtor */
 static void spl_filesystem_tree_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 
 	if (iterator->current) {
 		zval_ptr_dtor(&iterator->current);
 	}
 	zval_ptr_dtor((zval**)&iterator->intern.data);
-
-	efree(iterator);
+	iterator->intern.data = NULL; /* mark as unused */
 }
 /* }}} */
 	
 /* {{{ spl_filesystem_tree_it_current_data */
 static void spl_filesystem_tree_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
 
 	if (object->flags & SPL_FILE_DIR_CURRENT_AS_PATHNAME) {
 		if (!iterator->current) {
@@ -1143,8 +1130,7 @@ static void spl_filesystem_tree_it_current_data(zend_object_iterator *iter, zval
 /* {{{ spl_filesystem_tree_it_current_key */
 static int spl_filesystem_tree_it_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 	
 	if (object->flags & SPL_FILE_DIR_KEY_AS_FILENAME) {
 		*str_key_len = strlen(object->u.dir.entry.d_name) + 1;
@@ -1161,8 +1147,8 @@ static int spl_filesystem_tree_it_current_key(zend_object_iterator *iter, zstr *
 /* {{{ spl_filesystem_tree_it_move_forward */
 static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
 	
 	object->u.dir.index++;
 	do {
@@ -1184,8 +1170,8 @@ static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter TSRML
 /* {{{ spl_filesystem_tree_it_rewind */
 static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
 	
 	object->u.dir.index = 0;
 	if (object->u.dir.dirp) {
@@ -1216,20 +1202,19 @@ zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
 /* {{{ spl_ce_dir_get_iterator */
 zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator;
+	spl_filesystem_iterator *iterator;
 	spl_filesystem_object *dir_object;
 
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
-	iterator   = emalloc(sizeof(spl_filesystem_dir_it));
 	dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
+	iterator   = spl_filesystem_object_to_iterator(dir_object);
 
 	object->refcount++;
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
 	iterator->current = NULL;
-	iterator->object = dir_object;
 	
 	return (zend_object_iterator*)iterator;
 }
