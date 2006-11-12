@@ -50,14 +50,6 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 	}
 	
 	/**
-	 * @return the filename as specified in the constructor
-	 */
-	function getFilename()
-	{
-		return $this->fname;
-	}
-
-	/**
 	 * @return whether the end of the stream is reached
 	 */
 	function eof()
