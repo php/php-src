@@ -1874,7 +1874,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		
 		/* Update output hash depending on key type */
 		if (p->nKeyLength)
-			zend_hash_update(out_hash, p->arKey, p->nKeyLength, &entry, sizeof(zval *), NULL);
+			zend_hash_quick_update(out_hash, p->arKey, p->nKeyLength, p->h, &entry, sizeof(zval *), NULL);
 		else
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 	}
@@ -1885,7 +1885,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 			entry = *((zval **)p->pData);
 			entry->refcount++;
 			if (p->nKeyLength)
-				zend_hash_update(*removed, p->arKey, p->nKeyLength, &entry, sizeof(zval *), NULL);
+				zend_hash_quick_update(*removed, p->arKey, p->nKeyLength, p->h, &entry, sizeof(zval *), NULL);
 			else
 				zend_hash_next_index_insert(*removed, &entry, sizeof(zval *), NULL);
 		}
@@ -1897,17 +1897,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		/* ..for each one, create a new zval, copy entry into it and copy it into the output hash */
 		for (i=0; i<list_count; i++) {
 			entry = *list[i];
-			if (entry->refcount>=1000) {
-				zval *tmp = (zval *) emalloc(sizeof(zval));
-
-				*tmp = *entry;
-				zval_copy_ctor(tmp);
-				tmp->refcount = 1;
-				tmp->is_ref = 0;
-				entry = tmp;
-			} else {
-				entry->refcount++;
-			}
+			entry->refcount++;
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 		}
 	}
@@ -1917,7 +1907,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		entry = *((zval **)p->pData);
 		entry->refcount++;
 		if (p->nKeyLength)
-			zend_hash_update(out_hash, p->arKey, p->nKeyLength, &entry, sizeof(zval *), NULL);
+			zend_hash_quick_update(out_hash, p->arKey, p->nKeyLength, p->h, &entry, sizeof(zval *), NULL);
 		else
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 	}
@@ -2212,7 +2202,7 @@ PHP_FUNCTION(array_slice)
 	/* Get the arguments and do error-checking */	
 	argc = ZEND_NUM_ARGS();
 	if (argc < 2 || argc > 4 || zend_get_parameters_ex(argc, &input, &offset, &length, &z_preserve_keys)) {
-		WRONG_PARAM_COUNT;
+		WRONG_PARA¬M_COUNT;
 	}
 	
 	if (Z_TYPE_PP(input) != IS_ARRAY) {

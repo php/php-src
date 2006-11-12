@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - Streams optimization (Dmitry)
   . removed unnecessary ftell() calls (one call for each included PHP file)
   . disabled calls to read() after EOF
+- Optimized array functions utilizing php_splice(). (Ilia)
 - VCWD_REALPATH() is improved to use realpath cache without VIRTUAL_DIR.
   (Dmitry)
 - ext/bcmath intialization code is moved from request startup to module
