@@ -41,9 +41,9 @@ __halt_compiler();
 --EXPECTF--
 SplFileInfo::setFileClass() expects parameter 1 to be a class name derived from SplFileObject, 'SplFileInfo' given
 MyFile::__construct(phar://%s/a.php)
-phar://%s/a.php
+a.php
 MyFile::__construct(phar://%s/b/c.php)
-phar://%s/b/c.php
+c.php
 MyFile::__construct(phar://%s/b.php)
-phar://%s/b.php
+b.php
 ===DONE===
