@@ -2202,7 +2202,7 @@ PHP_FUNCTION(array_slice)
 	/* Get the arguments and do error-checking */	
 	argc = ZEND_NUM_ARGS();
 	if (argc < 2 || argc > 4 || zend_get_parameters_ex(argc, &input, &offset, &length, &z_preserve_keys)) {
-		WRONG_PARA¬M_COUNT;
+		WRONG_PARAM_COUNT;
 	}
 	
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
