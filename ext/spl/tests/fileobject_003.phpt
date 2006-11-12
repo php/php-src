@@ -55,12 +55,12 @@ bool(true)
 string(%d) "%sfileobject_001a.txt"
 string(%d) "%sfileobject_001a.txt"
 bool(true)
-string(%d) "%sfileobject_001a.txt"
+string(19) "fileobject_001a.txt"
 bool(true)
 string(%d) "%stests"
 bool(true)
 string(%d) "%sfileobject_001a.txt"
-string(%d) "%sfileobject_001a.txt"
+string(19) "fileobject_001a.txt"
 string(%d) "%stests"
 ===1===
 object(SplFileInfo)#%d (0) {
@@ -73,7 +73,7 @@ bool(true)
 string(%d) "%stests/"
 string(%d) "%stests"
 bool(true)
-string(%d) "%stests"
+string(5) "tests"
 bool(true)
 string(%d) "%sspl"
 bool(true)
@@ -91,11 +91,11 @@ bool(true)
 string(%d) "%stests"
 string(%d) "%stests"
 bool(true)
-string(%d) "%stests"
+string(%d) "tests"
 bool(true)
 string(%d) "%sspl"
 bool(true)
 string(%d) "%stests"
-string(%d) "%stests"
+string(5) "tests"
 string(%d) "%sspl"
 ===DONE===

@@ -188,6 +188,10 @@ ZipArchive::setCommentName() now returns TRUE on success
 ZipArchive::setCommentIndex() now return TRUE on success
 As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/zip/php_zip.c?r1=1.1.2.15&r2=1.1.2.16
 
+In ext/spl
+==========
+SplFileObject::getFilename() now returns the filename, not relative/path/to/file
+As of 5.2.1 #See http://cvs.php.net/viewcvs.cgi/php-src/ext/spl/spl_directory.c?r1=1.45.2.27.2.10&r2=1.45.2.27.2.11
 ==================
 NEW ERROR MESSAGES
 ==================
