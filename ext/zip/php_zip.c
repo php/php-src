@@ -490,7 +490,9 @@ static void php_zip_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 		return;
 	}
 	if (intern->za) {
- 		zip_close(intern->za);
+		if (zip_close(intern->za) != 0) {
+			_zip_free(intern->za);
+		}
 		intern->za = NULL;
 	}
 
