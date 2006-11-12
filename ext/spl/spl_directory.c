@@ -550,7 +550,7 @@ SPL_METHOD(SplFileInfo, getFilename)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (intern->path_len) {
+	if (intern->path_len && intern->path_len < intern->file_name_len) {
 		RETURN_STRINGL(intern->file_name + intern->path_len + 1, intern->file_name_len - (intern->path_len + 1), 1);
 	} else {
 		RETURN_STRINGL(intern->file_name, intern->file_name_len, 1);
@@ -1654,15 +1654,6 @@ SPL_METHOD(SplFileObject, rewind)
 	spl_filesystem_file_rewind(getThis(), intern TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto string SplFileObject::getFilename()
-   Return the filename */
-SPL_METHOD(SplFileObject, getFilename)
-{
-	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	RETURN_STRINGL(intern->file_name, intern->file_name_len, 1);	
-} /* }}} */
-
 /* {{{ proto void SplFileObject::eof()
    Return whether end of file is reached */
 SPL_METHOD(SplFileObject, eof)
@@ -2140,7 +2131,6 @@ ZEND_END_ARG_INFO()
 
 static zend_function_entry spl_SplFileObject_functions[] = {
 	SPL_ME(SplFileObject, __construct,    arginfo_file_object___construct,   ZEND_ACC_PUBLIC)
-	SPL_ME(SplFileObject, getFilename,    NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, rewind,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, eof,            NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, valid,          NULL, ZEND_ACC_PUBLIC)
