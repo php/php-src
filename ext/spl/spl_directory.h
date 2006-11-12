@@ -48,6 +48,12 @@ typedef struct _spl_other_handler {
 	spl_foreign_clone_t    clone;
 } spl_other_handler;
 
+/* define an overloaded iterator structure */
+typedef struct {
+	zend_object_iterator  intern;
+	zval                  *current;
+} spl_filesystem_iterator;
+
 struct _spl_filesystem_object {
 	zend_object        std;
 	void               *oth;
@@ -86,7 +92,18 @@ struct _spl_filesystem_object {
 			char               enclosure;
 		} file;
 	} u;
+	spl_filesystem_iterator    it;
 };
+
+static inline spl_filesystem_iterator* spl_filesystem_object_to_iterator(spl_filesystem_object *obj)
+{
+	return &obj->it;
+}
+
+static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_filesystem_iterator *it)
+{
+	return (spl_filesystem_object*)((char*)it - offsetof(spl_filesystem_object, it));
+}
 
 #define SPL_FILE_OBJECT_DROP_NEW_LINE      0x00000001 /* drop new lines */
 #define SPL_FILE_OBJECT_READ_AHEAD         0x00000002 /* read on rewind/next */
