@@ -1,3 +1,29 @@
+2006-11-11  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/zip/php_zip.c
+      ext/zip/lib/zip_fclose.c:
+      MFB: fix leaks within zip entries in several tests
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c
+      ext/zip/lib/zip_fclose.c:
+      fix leaks within zip entries in several tests
+
+    * ext/zip/lib/zip_free.c
+      ext/zip/lib/zip_set_archive_comment.c:
+      MFB :fix leak in oo_setArchiveComment.phpt
+
+    * (PHP_5_2)
+      ext/zip/lib/zip_free.c
+      ext/zip/lib/zip_set_archive_comment.c:
+      fix leak in oo_setArchiveComment.phpt
+
+2006-11-11  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/lib/zip_close.c:
+      - fix leak in zip_close when the function's succeeded
+
 2006-11-10  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/date/lib/parse_tz.c
