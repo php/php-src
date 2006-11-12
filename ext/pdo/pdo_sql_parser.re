@@ -128,7 +128,8 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 	if (query_type == (PDO_PLACEHOLDER_NAMED|PDO_PLACEHOLDER_POSITIONAL)) {
 		/* they mixed both types; punt */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "mixed named and positional parameters" TSRMLS_CC);
-		return -1;
+		ret = -1;
+		goto clean_up;
 	}
 
 
