@@ -686,6 +686,8 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 		
 		if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz)", filename);
+			efree(arch);
+			efree(entry);
 			return NULL;
 		}
 		resource = ecalloc(1, sizeof(php_url));
@@ -1656,22 +1658,31 @@ PHP_METHOD(PharFileInfo, __construct)
 	}
 
 	if (phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
+		efree(arch);
+		efree(entry);
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot access phar file entry '%s'", fname);
 		return;
 	}
 
 	if (phar_open_filename(arch, arch_len, NULL, 0, &phar_data TSRMLS_CC) == FAILURE) {
+		efree(arch);
+		efree(entry);
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot open phar file '%s'", fname);
 		return;
 	}
 
 	if ((entry_info = phar_get_entry_info(phar_data, entry, entry_len TSRMLS_CC)) == NULL) {
+		efree(arch);
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot access phar file entry '%s' in archive '%s'", entry, arch);
+		efree(entry);
 		return;
 	}
+
+	efree(arch);
+	efree(entry);
 
 	entry_obj->ent.entry = entry_info;
 
