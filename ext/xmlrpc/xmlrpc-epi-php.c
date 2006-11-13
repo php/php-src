@@ -688,7 +688,7 @@ PHP_FUNCTION(xmlrpc_encode_request)
 	}
 	
 	if (out.xmlrpc_out.xml_elem_opts.encoding != ENCODING_DEFAULT) {
-		efree(out.xmlrpc_out.xml_elem_opts.encoding);
+		efree((char *)out.xmlrpc_out.xml_elem_opts.encoding);
 	}
 }
 /* }}} */
