@@ -25,7 +25,7 @@ print_r(ob_get_status());
 print_r(ob_get_status(true));
 
 ?>
---EXPECT--
+--EXPECTF--
 foo
 Array
 (
@@ -41,7 +41,7 @@ Array
     [type] => 1
     [flags] => 4209
     [level] => 4
-    [chunk_size] => 0
+    [chunk_size] => %d
     [buffer_size] => 16384
     [buffer_used] => 96
 )
@@ -53,7 +53,7 @@ Array
             [type] => 0
             [flags] => 112
             [level] => 0
-            [chunk_size] => 0
+            [chunk_size] => %d
             [buffer_size] => 16384
             [buffer_used] => 0
         )
@@ -64,7 +64,7 @@ Array
             [type] => 1
             [flags] => 113
             [level] => 1
-            [chunk_size] => 0
+            [chunk_size] => %d
             [buffer_size] => 16384
             [buffer_used] => 0
         )
@@ -75,7 +75,7 @@ Array
             [type] => 1
             [flags] => 113
             [level] => 2
-            [chunk_size] => 0
+            [chunk_size] => %d
             [buffer_size] => 16384
             [buffer_used] => 0
         )
@@ -86,7 +86,7 @@ Array
             [type] => 1
             [flags] => 113
             [level] => 3
-            [chunk_size] => 0
+            [chunk_size] => %d
             [buffer_size] => 16384
             [buffer_used] => 4
         )
@@ -97,9 +97,9 @@ Array
             [type] => 1
             [flags] => 4209
             [level] => 4
-            [chunk_size] => 0
+            [chunk_size] => %d
             [buffer_size] => 16384
-            [buffer_used] => 248
+            [buffer_used] => %d
         )
 
 )
