@@ -1,5 +1,5 @@
 --TEST--
-Bug #38474 (getAttribute select attribute by order, even when prefixed)
+Bug #38474 (getAttribute select attribute by order, even when prefixedi) (OK to fail with libxml2 < 2.6.2x)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
