@@ -598,6 +598,7 @@ PHP_FUNCTION(file_put_contents)
 	}
 
 	if (flags & LOCK_EX && php_stream_lock(stream, LOCK_EX)) {
+		php_stream_close(stream);
 		RETURN_FALSE;
 	}
 
