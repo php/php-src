@@ -52,7 +52,13 @@ static HashTable php_output_handler_reverse_conflicts;
 static inline int php_output_lock_error(int op TSRMLS_DC);
 static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC);
 
-static inline php_output_handler *php_output_handler_init(zval *name, size_t chunk_size, int flags);
+#if MEMORY_LIMIT
+#define php_output_handler_init(n, cs, f) php_output_handler_init_ex((n), (cs), (f) TSRMLS_CC)
+static inline php_output_handler *php_output_handler_init_ex(zval *name, size_t chunk_size, int flags TSRMLS_DC);
+#else
+#define php_output_handler_init php_output_handler_init_ex
+static inline php_output_handler *php_output_handler_init_ex(zval *name, size_t chunk_size, int flags);
+#endif
 static inline php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context);
 static inline int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf TSRMLS_DC);
 static inline zval *php_output_handler_status(php_output_handler *handler, zval *entry);
@@ -849,13 +855,28 @@ static inline void php_output_context_dtor(php_output_context *context)
 
 /* {{{ static php_output_handler *php_output_handler_init(zval *name, size_t chunk_size, int flags)
 	Allocates and initializes a php_output_handler structure */
-static inline php_output_handler *php_output_handler_init(zval *name, size_t chunk_size, int flags)
+#if MEMORY_LIMIT
+static inline php_output_handler *php_output_handler_init_ex(zval *name, size_t chunk_size, int flags TSRMLS_DC)
+#else
+static inline php_output_handler *php_output_handler_init_ex(zval *name, size_t chunk_size, int flags)
+#endif
 {
 	php_output_handler *handler;
-	 
+#if MEMORY_LIMIT
+	size_t mem_limit;
+#endif
+	
 	handler = ecalloc(1, sizeof(php_output_handler));
 	ZVAL_ADDREF(name);
 	handler->name = name;
+	
+#if MEMORY_LIMIT
+	mem_limit = (PG(memory_limit) - zend_memory_usage(1 TSRMLS_CC)) / 2;
+	if (!chunk_size || chunk_size > mem_limit) {
+		handler->size = mem_limit;
+		chunk_size = 0;
+	} else
+#endif
 	handler->size = chunk_size;
 	handler->flags = flags;
 	handler->buffer.size = PHP_OUTPUT_HANDLER_INITBUF_SIZE(chunk_size);
@@ -874,14 +895,13 @@ static inline int php_output_handler_append(php_output_handler *handler, const p
 		/* store it away */
 		if ((handler->buffer.size - handler->buffer.used) <= buf->used) {
 			size_t grow_int = PHP_OUTPUT_HANDLER_INITBUF_SIZE(handler->size);
-			size_t grow_buf = PHP_OUTPUT_HANDLER_INITBUF_SIZE(buf->used + 1 - (handler->buffer.size - handler->buffer.used));
+			size_t grow_buf = PHP_OUTPUT_HANDLER_INITBUF_SIZE(buf->used - (handler->buffer.size - handler->buffer.used));
 			size_t grow_max = MAX(grow_int, grow_buf);
-		
+			
 			handler->buffer.data = erealloc(handler->buffer.data, handler->buffer.size += grow_max);
 		}
 		memcpy(handler->buffer.data + handler->buffer.used, buf->data, buf->used);
 		handler->buffer.used += buf->used;
-		handler->buffer.data[handler->buffer.used] = '\0';
 	
 		/* chunked buffering */
 		if (handler->size && (handler->buffer.used >= handler->size)) {
@@ -898,6 +918,7 @@ static inline int php_output_handler_append(php_output_handler *handler, const p
 static inline php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context)
 {
 	php_output_handler_status_t status;
+	int original_op = context->op;
 	PHP_OUTPUT_TSRMLS(context);
 	
 #if PHP_OUTPUT_DEBUG
@@ -1017,6 +1038,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			break;
 	}
 	
+	context->op = original_op;
 	return status;
 }
 /* }}} */
@@ -1057,29 +1079,27 @@ static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC)
 		context.out.used = len;
 	}
 	
-	if (context.out.data) {
-		if (context.out.used) {
+	if (context.out.data && context.out.used) {
 #if PHP_OUTPUT_DEBUG
-			fprintf(stderr, "::: sapi_write('%s', %zu)\n", context.out.data, context.out.used);
+		fprintf(stderr, "::: sapi_write('%s', %zu)\n", context.out.data, context.out.used);
 #endif
-			if (!SG(headers_sent) && php_header(TSRMLS_C)) {
-				if (zend_is_compiling(TSRMLS_C)) {
-					OG(output_start_filename) = zend_get_compiled_filename(TSRMLS_C);
-					OG(output_start_lineno) = zend_get_compiled_lineno(TSRMLS_C);
-				} else if (zend_is_executing(TSRMLS_C)) {
-					OG(output_start_filename) = zend_get_executed_filename(TSRMLS_C);
-					OG(output_start_lineno) = zend_get_executed_lineno(TSRMLS_C);
-				}
+		if (!SG(headers_sent) && php_header(TSRMLS_C)) {
+			if (zend_is_compiling(TSRMLS_C)) {
+				OG(output_start_filename) = zend_get_compiled_filename(TSRMLS_C);
+				OG(output_start_lineno) = zend_get_compiled_lineno(TSRMLS_C);
+			} else if (zend_is_executing(TSRMLS_C)) {
+				OG(output_start_filename) = zend_get_executed_filename(TSRMLS_C);
+				OG(output_start_lineno) = zend_get_executed_lineno(TSRMLS_C);
+			}
 #if PHP_OUTPUT_DEBUG
-				fprintf(stderr, "!!! output started at: %s (%d)\n", OG(output_start_filename), OG(output_start_lineno));
+			fprintf(stderr, "!!! output started at: %s (%d)\n", OG(output_start_filename), OG(output_start_lineno));
 #endif
-			}
-			sapi_module.ub_write(context.out.data, context.out.used TSRMLS_CC);
-			if (OG(flags) & PHP_OUTPUT_IMPLICITFLUSH) {
-				sapi_flush(TSRMLS_C);
-			}
-			OG(flags) |= PHP_OUTPUT_SENT;
 		}
+		sapi_module.ub_write(context.out.data, context.out.used TSRMLS_CC);
+		if (OG(flags) & PHP_OUTPUT_IMPLICITFLUSH) {
+			sapi_flush(TSRMLS_C);
+		}
+		OG(flags) |= PHP_OUTPUT_SENT;
 	}
 	php_output_context_dtor(&context);
 }
@@ -1089,7 +1109,7 @@ static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC)
 	Operation callback for the stack apply function */
 static int php_output_stack_apply_op(void *h, void *c)
 {
-	int was_disabled, op;
+	int was_disabled;
 	php_output_handler_status_t status;
 	php_output_handler *handler = *(php_output_handler **) h;
 	php_output_context *context = (php_output_context *) c;
@@ -1097,9 +1117,7 @@ static int php_output_stack_apply_op(void *h, void *c)
 	if ((was_disabled = (handler->flags & PHP_OUTPUT_HANDLER_DISABLED))) {
 		status = PHP_OUTPUT_HANDLER_FAILURE;
 	} else {
-		op = context->op;
 		status = php_output_handler_op(handler, context);
-		context->op = op;
 	}
 	
 	/*
