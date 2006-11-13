@@ -1977,7 +1977,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		if (p->nKeyLength == 0) {
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 		} else {
-			zend_u_hash_update(out_hash, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, &entry, sizeof(zval *), NULL);
+			zend_u_hash_quick_update(out_hash, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->h, &entry, sizeof(zval *), NULL);
 		}
 	}
 	
@@ -1989,7 +1989,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 			if (p->nKeyLength == 0) {
 				zend_hash_next_index_insert(*removed, &entry, sizeof(zval *), NULL);
 			} else {			
-				zend_u_hash_update(*removed, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, &entry, sizeof(zval *), NULL);
+				zend_u_hash_quick_update(*removed, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->h, &entry, sizeof(zval *), NULL);
 			}
 		}
 	} else /* otherwise just skip those entries */
@@ -2000,17 +2000,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		/* ..for each one, create a new zval, copy entry into it and copy it into the output hash */
 		for (i=0; i<list_count; i++) {
 			entry = *list[i];
-			if (entry->refcount>=1000) {
-				zval *tmp = (zval *) emalloc(sizeof(zval));
-
-				*tmp = *entry;
-				zval_copy_ctor(tmp);
-				tmp->refcount = 1;
-				tmp->is_ref = 0;
-				entry = tmp;
-			} else {
-				entry->refcount++;
-			}
+			entry->refcount++;
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 		}
 	}
@@ -2022,7 +2012,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		if (p->nKeyLength == 0) {
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 		} else {
-			zend_u_hash_update(out_hash, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, &entry, sizeof(zval *), NULL);
+			zend_u_hash_quick_update(out_hash, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->h, &entry, sizeof(zval *), NULL);
 		}
 	}
 
