@@ -749,7 +749,7 @@ In ext/spl
 In ext/zip
 ==========
     ZipArchive:
-      bool createEmptyDir(string dirname)
+      bool addEmptyDir(string dirname)
         Creates an empty directory in the archive
 As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/zip/php_zip.c?r1=1.1.2.15&r2=1.1.2.16
 
