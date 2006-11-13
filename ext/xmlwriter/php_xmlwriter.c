@@ -370,7 +370,7 @@ static int php_xmlwriter_streams_IO_write(void *context, const char *buffer, int
 }
 /* }}} */
 
-/* {{{ xmlwriter_objects_clone */
+/* {{{ php_xmlwriter_streams_IO_close */
 static int php_xmlwriter_streams_IO_close(void *context)
 {
 	TSRMLS_FETCH();
@@ -1355,7 +1355,7 @@ static PHP_FUNCTION(xmlwriter_end_dtd_entity)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_dtd_entity(resource xmlwriter, string name, string content) U
+/* {{{ proto bool xmlwriter_write_dtd_entity(resource xmlwriter, string name, string content [, int pe [, string pubid [, string sysid [, string ndataid]]]]) U
 Write full DTD Entity tag - returns FALSE on error */
 static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 {
@@ -1364,22 +1364,29 @@ static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	xmlTextWriterPtr ptr;
 	char *name, *content;
 	int name_len, content_len, retval;
+	/* Optional parameters */
+	char *pubid = NULL, *sysid = NULL, *ndataid = NULL;
+	int pe = 0, pubid_len, sysid_len, ndataid_len;
 
 #ifdef ZEND_ENGINE_2
 	zval *this = getThis();
 
 	if (this) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&",
-			&name, &name_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv)) == FAILURE) {
+			&name, &name_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv),
+			&pe, UG(utf8_conv), &pubid, &pubid_len, UG(utf8_conv), &sysid, &sysid_len, UG(utf8_conv),
+			UG(utf8_conv), &ndataid, &ndataid_len) == FAILURE) {
 			return;
 		}
 		XMLWRITER_FROM_OBJECT(intern, this);
 	} else
 #endif
 	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&s&", &pind, 
-			&name, &name_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv)) == FAILURE) {
-			return;
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&s&|ls&s&s&", &pind, 
+			&name, &name_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv),
+			&pe, UG(utf8_conv), &pubid, &pubid_len, UG(utf8_conv), &sysid, &sysid_len, UG(utf8_conv),
+			UG(utf8_conv), &ndataid, &ndataid_len) == FAILURE) {
+ 			return;
 		}
 		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
 	}
@@ -1389,7 +1396,7 @@ static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteDTDAttlist(ptr, (xmlChar *)name, (xmlChar *)content);
+		retval = xmlTextWriterWriteDTDEntity(ptr, pe, (xmlChar *)name, (xmlChar *)pubid, (xmlChar *)sysid, (xmlChar *)ndataid, (xmlChar *)content);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
