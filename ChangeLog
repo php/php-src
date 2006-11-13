@@ -1,3 +1,121 @@
+2006-11-12  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/spl/config.m4:
+      MFB: add missing headers
+
+    * (PHP_5_2)
+      ext/spl/config.m4:
+      Add missing header installation..
+
+2006-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_sql_parser.c:
+      MFB: updated generated file
+
+2006-11-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - Optimize SPL directory stuff by making iterator part of object
+
+2006-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_sql_parser.c:
+      Fixed generated file
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      MFB: Fixed a memory leak when named & positional params are being used in
+      the same query.
+
+    * (PHP_5_2)
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      Fixed a memory leak when named & positional params are being used in the
+      same query.
+
+2006-11-12  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/spl/internal/splfileobject.inc:
+      MFH: SplFileObject no longer overwrites SplFileInfo::getFilename()
+
+    * ext/spl/internal/splfileobject.inc:
+      SplFileObject no longer overwrites getFilename()
+
+2006-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      removed bogus char
+
+2006-11-12  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2
+      ext/spl/spl_directory.c
+      ext/spl/tests/fileobject_003.phpt:
+      MFH: SplFileObject::getFilename() no longer overwrites
+      SplFileInfo::getFilename()
+      (SplFileObject::getFilename() therefor only returns the filename now)
+
+2006-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c:
+      Optimized array functions utilizing php_splice().
+
+2006-11-12  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/spl/spl_directory.c
+      ext/spl/tests/fileobject_003.phpt:
+      SplFileObject::getFilename() should not overwrite
+      SplFileInfo::getFilename()
+      (Fixes bug where SplFileObject::getFilename() returns
+      relative/path/to/file)
+
+2006-11-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_directory.h:
+      - Correct comments
+
+2006-11-12  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug36975.phpt
+      ext/standard/tests/array/bug36975.phpt:
+      MFH: Fixed bug#36975 (natcasesort() causes array_pop() to misbehave)
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug36975.phpt
+      ext/standard/tests/array/bug36975.phpt
+      ext/standard/tests/array/bug36975.phpt:
+      Fixed bug#36975 (natcasesort() causes array_pop() to misbehave)
+
+2006-11-12  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/zip/zip_stream.c:
+      MFB: fix leak in oo_stream.phpt
+
+    * (PHP_5_2)
+      ext/zip/zip_stream.c:
+      fix leak in oo_stream.phpt
+
+    * ext/zip/php_zip.c:
+      MFB: fix leak in the object destrucotr when zip_close() fails (fixes
+      oo_delete.phpt)
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      fix leak in the object destrucotr when zip_close() fails (fixes
+      oo_delete.phpt)
+
 2006-11-11  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/zip/php_zip.c
