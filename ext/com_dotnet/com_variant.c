@@ -798,6 +798,11 @@ PHP_FUNCTION(variant_date_from_timestamp)
 		return;
 	}
 
+	if (timestamp < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Timestamp value must be a positive value.");
+		RETURN_FALSE;
+	}
+
 	VariantInit(&res);
 	tzset();
 	tmv = localtime(&timestamp);
