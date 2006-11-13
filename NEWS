@@ -59,5 +59,7 @@ PHP                                                                        NEWS
   . stream_resolve_include_path(). (Sara)
 - Added shm_has_var() function. (Mike)
 
+- Fixed bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag, 
+  not enity). (Hannes Magnusson)
 - Fixed bug #36630 (umask not reset at the end of the request). (Ilia)
 - Fixed bug #34286 (__toString() behavior is inconsistent). (Marcus)
