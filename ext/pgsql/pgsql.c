@@ -1472,6 +1472,7 @@ PHP_FUNCTION(pg_execute)
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
 	}
 
+	SEPARATE_ZVAL(pv_param_arr);
 	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(pv_param_arr));
 	num_params = zend_hash_num_elements(Z_ARRVAL_PP(pv_param_arr));
 	if (num_params > 0) {
@@ -1486,7 +1487,8 @@ PHP_FUNCTION(pg_execute)
 			}
 
 			otype = (*tmp)->type;
-			convert_to_string(*tmp);
+			SEPARATE_ZVAL(tmp);
+			convert_to_string_ex(tmp);
 			if (Z_TYPE_PP(tmp) != IS_STRING) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error converting parameter");
 				_php_pgsql_free_params(params, num_params);
@@ -1495,8 +1497,7 @@ PHP_FUNCTION(pg_execute)
 
 			if (otype == IS_NULL) {
 				params[i] = NULL;
-			}
-			else {
+			} else {
 				params[i] = Z_STRVAL_PP(tmp);
 			}
 
