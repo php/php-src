@@ -28,6 +28,19 @@ var_dump(filter_var_array(array("var_name"=>""), array("var_name"=>-1)));
 var_dump(filter_var_array(array("var_name"=>""), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>"")));
 var_dump(filter_var_array(array("asdas"=>"text"), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>"")));
 
+
+$a = array(""=>""); $b = -1;
+var_dump(filter_var_array($a, $b));
+var_dump($a, $b);
+
+$a = array(""=>""); $b = 100000;
+var_dump(filter_var_array($a, $b));
+var_dump($a, $b);
+
+$a = array(""=>""); $b = "";
+var_dump(filter_var_array($a, $b));
+var_dump($a, $b);
+
 echo "Done\n";
 ?>
 --EXPECTF--	
@@ -99,4 +112,28 @@ array(4) {
   [""]=>
   NULL
 }
+array(1) {
+  [""]=>
+  string(0) ""
+}
+array(1) {
+  [""]=>
+  string(0) ""
+}
+int(-1)
+array(1) {
+  [""]=>
+  string(0) ""
+}
+array(1) {
+  [""]=>
+  string(0) ""
+}
+int(100000)
+bool(false)
+array(1) {
+  [""]=>
+  string(0) ""
+}
+string(0) ""
 Done

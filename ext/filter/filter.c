@@ -615,14 +615,16 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value 
 	zval **tmp, **arg_elm;
 
 	if (!op) {
-		SEPARATE_ZVAL(&input);
+		zval_dtor(return_value);
 		*return_value = *input;
 		zval_copy_ctor(return_value);
+		INIT_PZVAL(return_value);
 		php_filter_call(&return_value, FILTER_DEFAULT, NULL, 0, FILTER_REQUIRE_ARRAY TSRMLS_CC);
 	} else if (Z_TYPE_PP(op) == IS_LONG) {
-		SEPARATE_ZVAL(&input);
+		zval_dtor(return_value);
 		*return_value = *input;
 		zval_copy_ctor(return_value);
+		INIT_PZVAL(return_value);
 		php_filter_call(&return_value, Z_LVAL_PP(op), NULL, 0, FILTER_REQUIRE_ARRAY TSRMLS_CC);
 	} else if (Z_TYPE_PP(op) == IS_ARRAY) {
 		array_init(return_value);
