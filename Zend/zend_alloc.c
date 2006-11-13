@@ -666,6 +666,15 @@ static long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
 
 	p = ZEND_MM_NEXT_BLOCK(b);
 	while (1) {
+		if (ZEND_MM_IS_GUARD_BLOCK(p)) {
+			ZEND_MM_CHECK_MAGIC(p, MEM_BLOCK_GUARD);
+			segment = segment->next_segment;
+			if (!segment) {
+				break;
+			}
+			p = (zend_mm_block *) ((char *) segment + ZEND_MM_ALIGNED_SEGMENT_SIZE);
+			continue;
+		}
 		q = ZEND_MM_NEXT_BLOCK(p);
 		if (q <= p ||
 		    (char*)q > (char*)segment + segment->size ||
@@ -685,14 +694,6 @@ static long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
 			} else if (p->magic != MEM_BLOCK_LEAK) {
 			    zend_mm_panic("zend_mm_heap corrupted");
 			}
-		}
-		if (ZEND_MM_IS_GUARD_BLOCK(q)) {
-			ZEND_MM_CHECK_MAGIC(q, MEM_BLOCK_GUARD);
-			segment = segment->next_segment;
-			if (!segment) {
-				break;
-			}
-			q = (zend_mm_block *) ((char *) segment + ZEND_MM_ALIGNED_SEGMENT_SIZE);
 		}
 		p = q;
 	}
