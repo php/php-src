@@ -425,6 +425,7 @@ PHP_FUNCTION(get_meta_tags)
 				}
 			} else if (tok_last == TOK_EQUAL && looking_for_val) {
 				if (saw_name) {
+					STR_FREE(name);
 					/* Get the NAME attr (Single word attr, non-quoted) */
 					temp = name = estrndup(md.token_data, md.token_len);
 
@@ -437,6 +438,7 @@ PHP_FUNCTION(get_meta_tags)
 
 					have_name = 1;
 				} else if (saw_content) {
+					STR_FREE(value);
 					/* Get the CONTENT attr (Single word attr, non-quoted) */
 					value = estrndup(md.token_data, md.token_len);
 
@@ -459,6 +461,7 @@ PHP_FUNCTION(get_meta_tags)
 			}
 		} else if (tok == TOK_STRING && tok_last == TOK_EQUAL && looking_for_val) {
 			if (saw_name) {
+				STR_FREE(name);
 				/* Get the NAME attr (Quoted single/double) */
 				temp = name = estrndup(md.token_data, md.token_len);
 
@@ -471,6 +474,7 @@ PHP_FUNCTION(get_meta_tags)
 
 				have_name = 1;
 			} else if (saw_content) {
+				STR_FREE(value);
 				/* Get the CONTENT attr (Single word attr, non-quoted) */
 				value = estrndup(md.token_data, md.token_len);
 
@@ -490,12 +494,13 @@ PHP_FUNCTION(get_meta_tags)
 				/* For BC */
 				php_strtolower(name, strlen(name));
 				if (have_content) {
-					add_assoc_utf8_string(return_value, name, value, 0); 
+					add_assoc_utf8_string(return_value, name, value, 1); 
 				} else {
 					add_assoc_utf8_string(return_value, name, "", 1);
 				}
 
 				efree(name);
+				efree(value);
 			} else if (have_content) {
 				efree(value);
 			}
@@ -517,6 +522,8 @@ PHP_FUNCTION(get_meta_tags)
 		md.token_data = NULL;
 	}
 
+	STR_FREE(value);
+	STR_FREE(name);
 	php_stream_close(md.stream);
 }
 
