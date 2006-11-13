@@ -186,6 +186,10 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC);
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link TSRMLS_DC);
 #endif
 
+#define CWD_EXPAND   0
+#define CWD_FILEPATH 1
+#define CWD_REALPATH 2
+
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath);
 
 CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC);

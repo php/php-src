@@ -512,7 +512,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		char resolved_path[MAXPATHLEN];
 
 		if (!realpath(path, resolved_path)) {  /* Note: Not threadsafe on older *BSD's */
-			if (use_realpath == 2) {
+			if (use_realpath == CWD_REALPATH) {
 				return 1;
 			}
 			goto no_realpath;
@@ -667,7 +667,7 @@ no_realpath:
 
 CWD_API int virtual_chdir(const char *path TSRMLS_DC)
 {
-	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok, 1)?-1:0;
+	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok, CWD_REALPATH)?-1:0;
 }
 
 CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path TSRMLS_DC) TSRMLS_DC)
@@ -709,7 +709,7 @@ CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC)
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	
-	if (virtual_file_ex(&new_state, path, NULL, 2)==0) {
+	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)==0) {
 		int len = new_state.cwd_length>MAXPATHLEN-1?MAXPATHLEN-1:new_state.cwd_length;
 
 		memcpy(real_path, new_state.cwd, len);
@@ -730,7 +730,7 @@ CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_f
 	int retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	retval = virtual_file_ex(&new_state, path, verify_path, 1);
+	retval = virtual_file_ex(&new_state, path, verify_path, CWD_FILEPATH);
 
 	*filepath = new_state.cwd;
 
@@ -753,7 +753,7 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC)
 	}
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, path, NULL, 1)) {
+	if (virtual_file_ex(&new_state, path, NULL, CWD_FILEPATH)) {
 		return NULL;
 	}
 
@@ -769,7 +769,7 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC)
 	int ret;
 	
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, pathname, NULL, 2)) {
+	if (virtual_file_ex(&new_state, pathname, NULL, CWD_REALPATH)) {
 		return -1;
 	}
 
@@ -792,7 +792,7 @@ CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC)
 	int ret;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, filename, NULL, 0)) {
+	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH)) {
 		return -1;
 	}
 
@@ -809,7 +809,7 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC)
 	int ret;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, filename, NULL, 2)) {
+	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH)) {
 		return -1;
 	}
 
@@ -826,7 +826,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 	int ret;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, filename, NULL, 0)) {
+	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH)) {
 		return -1;
 	}
 
@@ -851,7 +851,7 @@ CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...)
 	int f;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, path, NULL, 1)) {
+	if (virtual_file_ex(&new_state, path, NULL, CWD_FILEPATH)) {
 		return -1;
 	}
 
@@ -877,7 +877,7 @@ CWD_API int virtual_creat(const char *path, mode_t mode TSRMLS_DC)
 	int f;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, path, NULL, 1)) {
+	if (virtual_file_ex(&new_state, path, NULL, CWD_FILEPATH)) {
 		return -1;
 	}
 
@@ -894,13 +894,13 @@ CWD_API int virtual_rename(char *oldname, char *newname TSRMLS_DC)
 	int retval;
 
 	CWD_STATE_COPY(&old_state, &CWDG(cwd));
-	if (virtual_file_ex(&old_state, oldname, NULL, 0)) {
+	if (virtual_file_ex(&old_state, oldname, NULL, CWD_REALPATH)) {
 		return -1;
 	}
 	oldname = old_state.cwd;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, newname, NULL, 0)) {
+	if (virtual_file_ex(&new_state, newname, NULL, CWD_FILEPATH)) {
 		return -1;
 	}
 	newname = new_state.cwd;
@@ -919,7 +919,7 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC)
 	int retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, path, NULL, 2)) {
+	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)) {
 		return -1;
 	}
 
@@ -936,7 +936,7 @@ CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC)
 	int retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, path, NULL, 0)) {
+	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)) {
 		return -1;
 	}
 
@@ -953,7 +953,7 @@ CWD_API int virtual_unlink(const char *path TSRMLS_DC)
 	int retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, path, NULL, 0)) {
+	if (virtual_file_ex(&new_state, path, NULL, CWD_EXPAND)) {
 		return -1;
 	}
 
@@ -969,7 +969,7 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC)
 	int retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, pathname, NULL, 1)) {
+	if (virtual_file_ex(&new_state, pathname, NULL, CWD_FILEPATH)) {
 		return -1;
 	}
 
@@ -988,7 +988,7 @@ CWD_API int virtual_rmdir(const char *pathname TSRMLS_DC)
 	int retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, pathname, NULL, 0)) {
+	if (virtual_file_ex(&new_state, pathname, NULL, CWD_EXPAND)) {
 		return -1;
 	}
 
@@ -1008,7 +1008,7 @@ CWD_API DIR *virtual_opendir(const char *pathname TSRMLS_DC)
 	DIR *retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, pathname, NULL, 2)) {
+	if (virtual_file_ex(&new_state, pathname, NULL, CWD_REALPATH)) {
 		return NULL;
 	}
 
@@ -1133,7 +1133,7 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC)
 		new_state.cwd_length = 0;		
 	}
 
-	if (virtual_file_ex(&new_state, path, NULL, 2)) {
+	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)) {
 		free(new_state.cwd);
 		return NULL;
 	}
