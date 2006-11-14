@@ -142,13 +142,27 @@ static const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
-/* true global.  this is retreived once only, even for fastcgi */
-static long fix_pathinfo = 1;
-static long discard_path = 0;
-static long fcgi_logging = 1;
+typedef struct _php_cgi_globals_struct {
+	zend_bool rfc2616_headers;
+	zend_bool nph;
+	zend_bool check_shebang_line;
+	zend_bool fix_pathinfo;
+	zend_bool force_redirect;
+	zend_bool discard_path;
+	char *redirect_status_env;
+	zend_bool fcgi_logging;
+#ifdef PHP_WIN32
+	zend_bool impersonate;
+#endif
+} php_cgi_globals_struct;
 
-static long rfc2616_headers = 0;
-static long cgi_nph = 0;
+#ifdef ZTS
+static int php_cgi_globals_id;
+#define CGIG(v) TSRMG(php_cgi_globals_id, php_cgi_globals_struct *, v)
+#else
+static php_cgi_globals_struct php_cgi_globals;
+#define CGIG(v) (php_cgi_globals.v)
+#endif
 
 #ifdef PHP_WIN32
 #define TRANSLATE_SLASHES(path) \
@@ -294,11 +308,11 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		return  SAPI_HEADER_SENT_SUCCESSFULLY;
 	}
 
-	if (cgi_nph || SG(sapi_headers).http_response_code != 200)
+	if (CGIG(nph) || SG(sapi_headers).http_response_code != 200)
 	{
 		int len;
 
-		if (rfc2616_headers && SG(sapi_headers).http_status_line) {
+		if (CGIG(rfc2616_headers) && SG(sapi_headers).http_status_line) {
 			len = snprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH,
 						   "%s\r\n", SG(sapi_headers).http_status_line);
 
@@ -491,9 +505,10 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 
 static void sapi_cgi_log_message(char *message)
 {
-	if (fcgi_is_fastcgi() && fcgi_logging) {
+	TSRMLS_FETCH();
+
+	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
 		fcgi_request *request;
-		TSRMLS_FETCH();
 		
 		request = (fcgi_request*) SG(server_context);
 		if (request) {			
@@ -718,7 +733,7 @@ static void init_request_info(TSRMLS_D)
 		char *env_path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
 		char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1 TSRMLS_CC);
 
-		if (fix_pathinfo) {
+		if (CGIG(fix_pathinfo)) {
 			struct stat st;
 			char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL", sizeof("REDIRECT_URL")-1 TSRMLS_CC);
 			char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT")-1 TSRMLS_CC);
@@ -877,7 +892,7 @@ static void init_request_info(TSRMLS_D)
 			} else {
 				SG(request_info).request_uri = env_script_name;
 			}
-			if (!discard_path && env_path_translated) {
+			if (!CGIG(discard_path) && env_path_translated) {
 				script_path_translated = env_path_translated;
 			}
 		}
@@ -933,6 +948,82 @@ static int is_port_number(const char *bindpath)
 }
 #endif
 
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("cgi.rfc2616_headers",     "0",  PHP_INI_ALL,    OnUpdateBool,   rfc2616_headers, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("cgi.nph",                 "0",  PHP_INI_ALL,    OnUpdateBool,   nph, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("cgi.check_shebang_line",  "1",  PHP_INI_SYSTEM, OnUpdateBool,   check_shebang_line, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("cgi.force_redirect",      "1",  PHP_INI_SYSTEM, OnUpdateBool,   force_redirect, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("cgi.redirect_status_env", NULL, PHP_INI_SYSTEM, OnUpdateString, redirect_status_env, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("cgi.fix_pathinfo",        "1",  PHP_INI_SYSTEM, OnUpdateBool,   fix_pathinfo, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("cgi.discard_path",        "0",  PHP_INI_SYSTEM, OnUpdateBool,   discard_path, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("fastcgi.logging",         "1",  PHP_INI_SYSTEM, OnUpdateBool,   fcgi_logging, php_cgi_globals_struct, php_cgi_globals)
+#ifdef PHP_WIN32
+	STD_PHP_INI_ENTRY("fastcgi.impersonate",     "0",  PHP_INI_SYSTEM, OnUpdateBool,   impersonate, php_cgi_globals_struct, php_cgi_globals)
+#endif
+PHP_INI_END()
+
+/* {{{ php_cgi_globals_ctor
+ */
+static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals TSRMLS_DC)
+{
+	php_cgi_globals->rfc2616_headers = 0;
+	php_cgi_globals->nph = 0;
+	php_cgi_globals->check_shebang_line = 1;
+	php_cgi_globals->force_redirect = 1;
+	php_cgi_globals->redirect_status_env = NULL;
+	php_cgi_globals->fix_pathinfo = 1;
+	php_cgi_globals->discard_path = 0;
+	php_cgi_globals->fcgi_logging = 1;
+#ifdef PHP_WIN32
+	php_cgi_globals->impersonate = 0;
+#endif
+}
+/* }}} */
+
+/* {{{ PHP_MINIT_FUNCTION
+ */
+static PHP_MINIT_FUNCTION(cgi)
+{
+#ifdef ZTS
+	ts_allocate_id(&php_cgi_globals_id, sizeof(php_cgi_globals_struct), (ts_allocate_ctor) php_cgi_globals_ctor, NULL);
+#else
+	php_cgi_globals_ctor(&php_cgi_globals TSRMLS_CC);
+#endif
+	REGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+static PHP_MSHUTDOWN_FUNCTION(cgi)
+{
+	UNREGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_MINFO_FUNCTION
+ */
+static PHP_MINFO_FUNCTION(cgi)
+{
+	DISPLAY_INI_ENTRIES();
+}
+/* }}} */
+
+static zend_module_entry cgi_module_entry = {
+	STANDARD_MODULE_HEADER,
+	"cgi-fcgi",
+	NULL, 
+	PHP_MINIT(cgi), 
+	PHP_MSHUTDOWN(cgi), 
+	NULL, 
+	NULL, 
+	PHP_MINFO(cgi), 
+	NO_VERSION_YET,
+	STANDARD_MODULE_PROPERTIES
+};
+
 /* {{{ main
  */
 int main(int argc, char *argv[])
@@ -968,9 +1059,7 @@ int main(int argc, char *argv[])
 #endif
 	int fcgi_fd = 0;
 	fcgi_request request;
-#ifdef PHP_WIN32
-	long impersonate = 0;
-#else
+#ifndef PHP_WIN32
 	int status = 0;
 #endif
 
@@ -1088,7 +1177,7 @@ int main(int argc, char *argv[])
 	cgi_sapi_module.additional_functions = additional_functions;
 
 	/* startup after we get the above ini override se we get things right */
-	if (php_module_startup(&cgi_sapi_module, NULL, 0) == FAILURE) {
+	if (php_module_startup(&cgi_sapi_module, &cgi_module_entry, 1) == FAILURE) {
 #ifdef ZTS
 		tsrm_shutdown();
 #endif
@@ -1096,17 +1185,8 @@ int main(int argc, char *argv[])
 	}
 
 	if (cgi) {
-		long force_redirect;
-		char *redirect_status_env;
-	
 		/* check force_cgi after startup, so we have proper output */
-		if (cfg_get_long("cgi.force_redirect", &force_redirect) == FAILURE) {
-			force_redirect = 1;
-		}
-		if (force_redirect) {
-			if (cfg_get_string("cgi.redirect_status_env", &redirect_status_env) == FAILURE) {
-				redirect_status_env = NULL;
-			}
+		if (CGIG(force_redirect)) {
 			/* Apache will generate REDIRECT_STATUS,
 			 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
 			 * redirect.so and installation instructions available from
@@ -1117,7 +1197,7 @@ int main(int argc, char *argv[])
 				&& !getenv ("HTTP_REDIRECT_STATUS")
 				/* this is to allow a different env var to be configured
 				   in case some server does something different than above */
-				&& (!redirect_status_env || !getenv(redirect_status_env))
+				&& (!CGIG(redirect_status_env) || !getenv(CGIG(redirect_status_env)))
 				) {
 				SG(sapi_headers).http_response_code = 400;
 				PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
@@ -1142,32 +1222,6 @@ consult the installation file that came with this distribution, or visit \n\
 				return FAILURE;
 			}
 		}
-	}
-
-	if (cfg_get_long("cgi.fix_pathinfo", &fix_pathinfo) == FAILURE) {
-		fix_pathinfo = 1;
-	}
-
-	if (cfg_get_long("cgi.discard_path", &discard_path) == FAILURE) {
-		discard_path = 0;
-	}
-
-	if (cfg_get_long("fastcgi.logging", &fcgi_logging) == FAILURE) {
-		fcgi_logging = 1;
-	}
-
-
-	/* Check wheater to send RFC2616 style headers compatible with
-	 * PHP versions 4.2.3 and earlier compatible with web servers
-	 * such as IIS. Default is informal CGI RFC header compatible
-	 * with Apache.
-	 */
-	if (cfg_get_long("cgi.rfc2616_headers", &rfc2616_headers) == FAILURE) {
-		rfc2616_headers = 0;
-	}
-
-	if (cfg_get_long("cgi.nph", &cgi_nph) == FAILURE) {
-		cgi_nph = 0;
 	}
 
 #ifndef PHP_WIN32
@@ -1316,11 +1370,8 @@ consult the installation file that came with this distribution, or visit \n\
 #ifdef PHP_WIN32
 		/* attempt to set security impersonation for fastcgi
 		   will only happen on NT based OS, others will ignore it. */
-		if (fastcgi) {
-			if (cfg_get_long("fastcgi.impersonate", &impersonate) == FAILURE) {
-				impersonate = 0;
-			}
-			if (impersonate) fcgi_impersonate();
+		if (fastcgi && CGIG(impersonate)) {
+			fcgi_impersonate();
 		}
 #endif
 		while (!fastcgi || fcgi_accept_request(&request) >= 0) {
@@ -1544,7 +1595,7 @@ consult the installation file that came with this distribution, or visit \n\
 				return FAILURE;
 			}
 
-			if (file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
+			if (CGIG(check_shebang_line) && file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
 				/* #!php support */
 				c = fgetc(file_handle.handle.fp);
 				if (c == '#') {
