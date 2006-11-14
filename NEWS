@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.1
+- Updated bundled libcURL to version 7.16.0 in the Windows distro. (Edin)
 - cgi.* and fastcgi.* directives are moved to INI subsystem.
   The new directive cgi.check_shebang_line can be used to ommiting checnk
   for "#! /usr/bin/php" line. (Dmitry).
