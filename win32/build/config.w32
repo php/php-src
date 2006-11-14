@@ -227,7 +227,11 @@ function add_extra_dirs()
 		for (i = 0; i < path.length; i++) {
 			f = FSO.GetAbsolutePathName(path[i]);
 			if (FSO.FolderExists(f)) {
-				ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
+				if (f.indexOf(" ") >= 0) {
+					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
+				} else {
+					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
+				}
 			}
 		}
 	}
