@@ -1,3 +1,9 @@
+2006-11-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Fixed incorrect heap corruptiuon detection code
+
 2006-11-10  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_object_handlers.c:

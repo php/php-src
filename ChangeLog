@@ -1,3 +1,125 @@
+2006-11-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      MFB: Fixed bug #36812 (pg_execute() modifies input array).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pgsql/pgsql.c:
+      Fixed bug #36812 (pg_execute() modifies input array).
+
+2006-11-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/file/fgetss.phpt
+      ext/standard/tests/file/fgetss.phpt:
+      
+      file fgetss.phpt was initially added on branch PHP_5_2.
+
+2006-11-13  Rob Richards  <rrichards@ctindustries.net>
+
+    * NEWS:
+      BFN
+
+    * ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/tests/bug39504.phpt:
+      Fixed bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag,
+       not enity). (Hannes Magnusson)
+      add test
+
+2006-11-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/file.c
+      ext/standard/file.c:
+      don't forget to close the stream when/if flock() fails
+
+    * (PHP_5_2)
+      ext/standard/file.c
+      ext/standard/tests/strings/get_meta_tags.phpt:
+      MFH: fix leaks in get_meta_tags() when used with b0rked HTML
+      add test
+
+    * ext/standard/file.c
+      ext/standard/tests/strings/get_meta_tags.phpt
+      ext/standard/tests/strings/get_meta_tags.phpt:
+      fix leaks in get_meta_tags() when used with b0rked HTML
+      add test
+
+    * ext/filter/filter.c
+      ext/filter/tests/039.phpt:
+      improve the fix and the test
+
+2006-11-13  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      It's called addEmptyDir(), not createEmptyDir()
+
+2006-11-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c:
+      MFB: php_splice() optimization
+
+    * ext/com_dotnet/com_variant.c:
+      MFB: Fixed bug #36644 (possible crash in variant_date_from_timestamp()).
+
+    * (PHP_5_2)
+      NEWS
+      ext/com_dotnet/com_variant.c:
+      Fixed bug #36644 (possible crash in variant_date_from_timestamp()).
+
+2006-11-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_virtual_cwd.h:
+      Use symbolic names
+
+2006-11-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/filter/filter.c:
+      actually copy input to return_value
+      input is a local var, you can't use it this way
+
+    * (PHP_5_2)
+      ext/filter/tests/039.phpt:
+      new test
+
+    * ext/filter/tests/039.phpt
+      ext/filter/tests/039.phpt:
+      
+      new test
+
+2006-11-13  Michael Wallner  <mike@iworks.at>
+
+    * tests/output/ob_013.phpt
+      tests/output/ob_020.phpt:
+      - fix tests
+
+    * main/output.c
+      main/php_output.h:
+      - fix buffer size alignment
+      - avoid memory overflow #if MEMORY_LIMIT
+
+2006-11-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/dom/tests/bug38474.phpt
+      ext/dom/tests/bug38474.phpt:
+      add a note that libxml2 2.6.2x is required
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      fix compile warning
+
+    * (PHP_5_2)
+      ext/mysqli/tests/bug37090.phpt:
+      fix test
+
+2006-11-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed incorrect heap corruptiuon detection code
+
 2006-11-12  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * ext/spl/config.m4:
