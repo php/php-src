@@ -5,7 +5,7 @@ symlink() & friends
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip no symlinks on Windows');
 }
-?
+?>
 --FILE--
 <?php
 
@@ -37,11 +37,6 @@ var_dump(link($filename, $link));
 var_dump(link($filename, $link));
 @unlink($link);
 
-var_dump(symlink("", ""));
-var_dump(link("", ""));
-var_dump(readlink(""));
-var_dump(linkinfo(""));
-
 var_dump(symlink(".", "."));
 var_dump(link(".", "."));
 var_dump(readlink("."));
@@ -51,7 +46,7 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 bool(true)
-%s(%d) "%ssymlink.dat"
+string(%d) "%ssymlink.dat"
 int(%d)
 
 Warning: readlink(): No such file or directory in %s on line %d
@@ -71,11 +66,20 @@ bool(true)
 Warning: link(): No such file or directory in %s on line %d
 bool(false)
 
-Warning: symlink(): No such file or directory in %s on line %d
+Warning: symlink(): File exists in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
+
+Warning: readlink(): Invalid argument in %s on line %d
+bool(false)
+int(%d)
+Done
+--UEXPECTF--
+bool(true)
+unicode(%d) "%ssymlink.dat"
+int(%d)
 
 Warning: readlink(): No such file or directory in %s on line %d
 bool(false)
@@ -85,8 +89,19 @@ int(-1)
 
 Warning: symlink(): File exists in %s on line %d
 bool(false)
+bool(true)
 
-Warning: link(): File exists in %s on line %d
+Warning: symlink(): File exists in %s on line %d
+bool(false)
+bool(true)
+
+Warning: link(): No such file or directory in %s on line %d
+bool(false)
+
+Warning: symlink(): File exists in %s on line %d
+bool(false)
+
+Warning: link(): %s in %s on line %d
 bool(false)
 
 Warning: readlink(): Invalid argument in %s on line %d
