@@ -1252,7 +1252,7 @@ ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
 
 #define add_index_ascii_stringl(arg, idx, str, length, flags) do { \
 		if (UG(unicode)) { \
-			int ___u_len; \
+			int ___u_len = length; \
 			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
 			if ((flags) & ZSTR_AUTOFREE) { \
 				efree(str); \
