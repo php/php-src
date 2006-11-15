@@ -16,6 +16,7 @@ var_dump(array_pad(array("", -1, 2.0), 2, array()));
 var_dump(array_pad(array("", -1, 2.0), -3, array()));
 var_dump(array_pad(array("", -1, 2.0), -4, array()));
 var_dump(array_pad(array("", -1, 2.0), 2000000, 0));
+var_dump(array_pad("", 2000000, 0));
 
 echo "Done\n";
 ?>
@@ -94,4 +95,7 @@ array(4) {
 
 Warning: array_pad(): You may only pad up to 1048576 elements at a time in %s on line %d
 bool(false)
+
+Warning: array_pad(): The argument should be an array in %s on line %d
+NULL
 Done
