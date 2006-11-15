@@ -62,6 +62,10 @@ zip_source_file(struct zip *za, const char *fname, off_t start, off_t len)
 	return NULL;
     }
 
+#ifdef PHP_WIN32
+	_setmode(_fileno(fp), _O_BINARY );
+#endif
+
     if ((zs=zip_source_filep(za, fp, start, len)) == NULL) {
 	fclose(fp);
 	return NULL;
