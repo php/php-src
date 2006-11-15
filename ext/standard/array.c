@@ -4335,7 +4335,7 @@ PHP_FUNCTION(array_key_exists)
 			}
 			RETURN_FALSE;
 		case IS_NULL:
-			if (zend_hash_exists(HASH_OF(array), "", 1)) {
+			if (zend_u_hash_exists(HASH_OF(array), (UG(unicode) ? IS_UNICODE : IS_STRING), EMPTY_ZSTR, 1)) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
