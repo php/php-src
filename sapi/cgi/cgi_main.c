@@ -762,33 +762,17 @@ static void init_request_info(TSRMLS_D)
 		char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT")-1 TSRMLS_CC);
 
 		if (CGIG(fix_pathinfo)) {
+			char *real_path;
+			char *orig_path_translated = env_path_translated;
+			char *orig_path_info = env_path_info;
+			char *orig_script_name = env_script_name;
+			char *orig_script_filename = env_script_filename;
 
-			/* save the originals first for anything we change later */
-			if (env_path_translated) {
-				_sapi_cgibin_putenv("ORIG_PATH_TRANSLATED", env_path_translated TSRMLS_CC);
-			}
-			if (env_path_info) {
-				_sapi_cgibin_putenv("ORIG_PATH_INFO", env_path_info TSRMLS_CC);
-			}
-			if (env_script_name) {
-				_sapi_cgibin_putenv("ORIG_SCRIPT_NAME", env_script_name TSRMLS_CC);
-			}
-			if (env_script_filename) {
-				_sapi_cgibin_putenv("ORIG_SCRIPT_FILENAME", env_script_filename TSRMLS_CC);
-			}
-			if (!env_document_root) {
-				/* ini version of document root */
-				if (!env_document_root) {
-					env_document_root = PG(doc_root);
-				}
-				/* set the document root, this makes a more
-				   consistent env for php scripts */
-				if (env_document_root) {
-					env_document_root = _sapi_cgibin_putenv("DOCUMENT_ROOT", env_document_root TSRMLS_CC);
-					/* fix docroot */
-					TRANSLATE_SLASHES(env_document_root);
-				}
-			}
+			if (!env_document_root && PG(doc_root)) {
+				env_document_root = _sapi_cgibin_putenv("DOCUMENT_ROOT", PG(doc_root) TSRMLS_CC);
+				/* fix docroot */
+				TRANSLATE_SLASHES(env_document_root);
+ 			}
 
 			if (env_path_translated != NULL && env_redirect_url != NULL) {
 				/* 
@@ -798,7 +782,7 @@ static void init_request_info(TSRMLS_D)
 				*/
 				script_path_translated = env_path_translated;
 				/* we correct SCRIPT_NAME now in case we don't have PATH_INFO */
-				env_script_name = _sapi_cgibin_putenv("SCRIPT_NAME", env_redirect_url TSRMLS_CC);
+				env_script_name = env_redirect_url;
 			}
 
 #ifdef __riscos__
@@ -812,7 +796,8 @@ static void init_request_info(TSRMLS_D)
 			 * of it by stat'ing back through the '/'
 			 * this fixes url's like /info.php/test
 			 */
-			if (script_path_translated && stat(script_path_translated, &st) == -1 ) {
+			if (script_path_translated &&
+			    (real_path = tsrm_realpath(script_path_translated, NULL TSRMLS_CC)) == NULL) {
 				char *pt = estrdup(script_path_translated);
 				int len = strlen(pt);
 				char *ptr;
@@ -839,8 +824,19 @@ static void init_request_info(TSRMLS_D)
 						int pilen = strlen(env_path_info);
 						char *path_info = env_path_info + pilen - slen;
 
-						env_path_info = _sapi_cgibin_putenv("PATH_INFO", path_info TSRMLS_CC);
-						script_path_translated = _sapi_cgibin_putenv("SCRIPT_FILENAME", pt TSRMLS_CC);
+						if (orig_path_info != path_info) {
+							if (orig_path_info) {
+								_sapi_cgibin_putenv("ORIG_PATH_INFO", orig_path_info TSRMLS_CC);
+							}
+							env_path_info = _sapi_cgibin_putenv("PATH_INFO", path_info TSRMLS_CC);
+						}
+						if (!orig_script_filename ||
+							strcmp(orig_script_filename, pt) != 0) {
+							if (orig_script_filename) {
+								_sapi_cgibin_putenv("ORIG_SCRIPT_FILENAME", orig_script_filename TSRMLS_CC);
+							}
+							script_path_translated = _sapi_cgibin_putenv("SCRIPT_FILENAME", pt TSRMLS_CC);
+						}
 						TRANSLATE_SLASHES(pt);
 
 						/* figure out docroot
@@ -863,7 +859,7 @@ static void init_request_info(TSRMLS_D)
 							 *
 							 * SCRIPT_NAME is the portion of the path beyond docroot
 							 */
-							env_script_name = _sapi_cgibin_putenv("SCRIPT_NAME", pt + l TSRMLS_CC);
+							env_script_name = pt + l;
 
 							/* PATH_TRANSATED = DOCUMENT_ROOT + PATH_INFO */
 							path_translated_len = l + strlen(env_path_info) + 2;
@@ -871,6 +867,9 @@ static void init_request_info(TSRMLS_D)
 							*path_translated = 0;
 							strncat(path_translated, env_document_root, l);
 							strcat(path_translated, env_path_info);
+							if (orig_path_translated) {
+								_sapi_cgibin_putenv("ORIG_PATH_TRANSLATED", orig_path_translated TSRMLS_CC);
+						   	}
 							env_path_translated = _sapi_cgibin_putenv("PATH_TRANSLATED", path_translated TSRMLS_CC);
 							efree(path_translated);
 						} else if (env_script_name && 
@@ -885,6 +884,9 @@ static void init_request_info(TSRMLS_D)
 							*path_translated = 0;
 							strncat(path_translated, pt, ptlen);
 							strcat(path_translated, env_path_info);
+							if (orig_path_translated) {
+								_sapi_cgibin_putenv("ORIG_PATH_TRANSLATED", orig_path_translated TSRMLS_CC);
+						   	}
 							env_path_translated = _sapi_cgibin_putenv("PATH_TRANSLATED", path_translated TSRMLS_CC);
 							efree(path_translated);
 						}
@@ -897,19 +899,52 @@ static void init_request_info(TSRMLS_D)
 					 * a valid path... we will fail, badly. of course we would
 					 * have failed anyway... we output 'no input file' now.
 					 */
+					if (orig_script_filename) {
+						_sapi_cgibin_putenv("ORIG_SCRIPT_FILENAME", orig_script_filename TSRMLS_CC);
+					}
 					script_path_translated = _sapi_cgibin_putenv("SCRIPT_FILENAME", NULL TSRMLS_CC);
 					SG(sapi_headers).http_response_code = 404;
+				}
+				if (!orig_script_name ||
+					strcmp(orig_script_name, env_script_name) != 0) {
+					if (orig_script_name) {
+						_sapi_cgibin_putenv("ORIG_SCRIPT_NAME", orig_script_name TSRMLS_CC);
+					}
+					SG(request_info).request_uri = _sapi_cgibin_putenv("SCRIPT_NAME", env_script_name TSRMLS_CC);
+				} else {
+					SG(request_info).request_uri = orig_script_name;
 				}
 				if (pt) {
 					efree(pt);
 				}
 			} else {
 				/* make sure path_info/translated are empty */
-				script_path_translated = _sapi_cgibin_putenv("SCRIPT_FILENAME", script_path_translated TSRMLS_CC);
-				_sapi_cgibin_putenv("PATH_INFO", NULL TSRMLS_CC);
-				_sapi_cgibin_putenv("PATH_TRANSLATED", NULL TSRMLS_CC);
-			}
-			SG(request_info).request_uri = sapi_cgibin_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1 TSRMLS_CC);
+				if (!orig_script_filename ||
+					(script_path_translated != orig_script_filename) ||
+					strcmp(script_path_translated, orig_script_filename) != 0) {
+					if (orig_script_filename) {
+						_sapi_cgibin_putenv("ORIG_SCRIPT_FILENAME", orig_script_filename TSRMLS_CC);
+					}
+					script_path_translated = _sapi_cgibin_putenv("SCRIPT_FILENAME", script_path_translated TSRMLS_CC);
+				}
+				if (orig_path_info) {
+					_sapi_cgibin_putenv("ORIG_PATH_INFO", orig_path_info TSRMLS_CC);
+					_sapi_cgibin_putenv("PATH_INFO", NULL TSRMLS_CC);
+				}
+				if (orig_path_translated) {
+					_sapi_cgibin_putenv("ORIG_PATH_TRANSLATED", orig_path_translated TSRMLS_CC);
+					_sapi_cgibin_putenv("PATH_TRANSLATED", NULL TSRMLS_CC);
+				}
+				if (env_script_name != orig_script_name) {
+					if (orig_script_name) {
+						_sapi_cgibin_putenv("ORIG_SCRIPT_NAME", orig_script_name TSRMLS_CC);
+					}
+					SG(request_info).request_uri = _sapi_cgibin_putenv("SCRIPT_NAME", env_script_name TSRMLS_CC);
+				} else {
+					SG(request_info).request_uri = env_script_name;
+				}
+			}			
+			free(real_path);
 		} else {
 #endif
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
