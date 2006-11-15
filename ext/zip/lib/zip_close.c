@@ -548,6 +548,9 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
 	free(temp);
 	return NULL;
     }
+#ifdef PHP_WIN32
+	_setmode(_fileno(tfp), _O_BINARY );
+#endif
 
     *outp = tfp;
     return temp;
