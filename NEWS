@@ -65,6 +65,8 @@ PHP                                                                        NEWS
   of overloaded array). (Dmitry)
 - Fixed bug #39265 (Fixed path handling inside mod_files.sh). 
   (michal dot taborsky at gmail dot com, Ilia)
+- Fixed bug #39217 (serialNumber might be -1 when the value is too large)
+  (Pierre, Tony)
 - Fixed bug #39215 (Inappropriate close of stdin/stdout/stderr). (Wez,Ilia)
 - Fixed bug #39151 (Parse error in recursiveiteratoriterator.php). (Marcus)
 - Fixed bug #39121 (Incorrect return array handling in non-wsdl soap client).
