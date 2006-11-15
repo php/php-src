@@ -1,3 +1,97 @@
+2006-11-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/symlink.phpt:
+      one more test
+
+    * ext/standard/tests/file/symlink.phpt
+      ext/standard/tests/file/symlink.phpt:
+      
+      one more test
+
+    * ext/standard/tests/file/fgetss1.phpt
+      ext/standard/tests/file/fgetss1.phpt
+      ext/standard/tests/file/fscanf.phpt
+      ext/standard/tests/file/fstat.phpt
+      ext/standard/tests/file/ftruncate.phpt
+      ext/standard/tests/file/fwrite.phpt:
+      
+      file fgetss1.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/fscanf.phpt
+      ext/standard/tests/file/fscanf.phpt
+      ext/standard/tests/file/fstat.phpt
+      ext/standard/tests/file/fstat.phpt
+      ext/standard/tests/file/ftruncate.phpt
+      ext/standard/tests/file/ftruncate.phpt
+      ext/standard/tests/file/fwrite.phpt
+      ext/standard/tests/file/fwrite.phpt:
+      
+      add new tests
+
+2006-11-14  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      NEWS:
+      Bundled lib upgrade
+
+    * ext/curl/config.w32:
+      MFB: Tell linker that we're using stati libcurl
+
+    * (PHP_5_2)
+      ext/curl/config.w32:
+      Tell linker that we're using stati libcurl
+
+2006-11-14  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      ext/standard/basic_functions.h
+      ext/standard/basic_functions.h:
+      - MFH: No idea if we actually support 16 bit systems, but this just looked
+      wrong
+
+    * ext/standard/basic_functions.h:
+      - No idea if we actually support 16 bit systems, but this just looked wrong
+
+2006-11-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * win32/build/config.w32
+      win32/build/config.w32:
+      Fixed VC2005 support
+
+    * win32/build/config.w32
+      win32/build/config.w32:
+      Fixed problem with spaces in libpath
+
+2006-11-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c:
+      - #39508, do not use the 4 neighbors implementation for small images (w<4)
+        test will follow
+
+2006-11-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      cgi.* and fastcgi.* directives are moved to INI subsystem. The new
+      directive cgi.check_shebang_line can be used to ommiting checnk for "#!
+      /usr/bin/php" line.
+
+2006-11-14  Antony Dovgal  <antony@zend.com>
+
+    * sapi/apache/.cvsignore
+      sapi/apache/.cvsignore:
+      add .libs to .cvsignore
+
+2006-11-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_virtual_cwd.h:
+      Added comments
+
 2006-11-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pgsql/pgsql.c:
