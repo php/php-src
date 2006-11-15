@@ -1661,7 +1661,7 @@ static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC)
 	while (--arg_count >= 0) {
 		arg = (zval **) p++;
 		if (*arg) {
-			if ((*arg)->type != IS_OBJECT) {
+			if (Z_TYPE_PP(arg) != IS_OBJECT) {
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
 			}
 			(*arg)->refcount++;
