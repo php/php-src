@@ -36,7 +36,13 @@ PHP                                                                        NEWS
 - Improved cURL: (Ilia)
   . Added CURLINFO_HEADER_OUT constant to facilitate request retrieval.
 - Improved ext/zlib; re-implemented non-file related functionality. (Mike)
-- Improved output layer; see README.NEW-OUTPUT_API for internals. (Mike)
+- Improved output layer; see README.NEW-OUTPUT-API for internals. (Mike)
+- Improved ext/mhash: (Mike)
+  . Added keygen constants.
+  . Added new functions: mhash_keygen_count, mhash_get_keygen_name,
+    mhash_keygen_uses_hash, mhash_keygen_uses_salt, mhash_get_keygen_salt_size,
+    mhash_keygen.
+
 
 - Added automatic module globals management. (Dmitry)
 - Added "jump label" operator (limited "goto"). (Dmitry, Sara)
