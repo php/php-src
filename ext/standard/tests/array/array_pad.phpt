@@ -16,6 +16,7 @@ var_dump(array_pad(array("", -1, 2.0), 2, array()));
 var_dump(array_pad(array("", -1, 2.0), -3, array()));
 var_dump(array_pad(array("", -1, 2.0), -4, array()));
 var_dump(array_pad(array("", -1, 2.0), 2000000, 0));
+var_dump(array_pad("", 2000000, 0));
 
 echo "Done\n";
 ?>
@@ -94,6 +95,9 @@ array(4) {
 
 Warning: array_pad(): You may only pad up to 1048576 elements at a time in %s on line %d
 bool(false)
+
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
+NULL
 Done
 --UEXPECTF--
 Warning: array_pad() expects exactly 3 parameters, 0 given in %s on line %d
@@ -170,4 +174,7 @@ array(4) {
 
 Warning: array_pad(): You may only pad up to 1048576 elements at a time in %s on line %d
 bool(false)
+
+Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 Done
