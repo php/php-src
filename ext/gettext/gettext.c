@@ -151,224 +151,175 @@ PHP_MINFO_FUNCTION(php_gettext)
 	php_info_print_table_end();
 }
 
-/* {{{ proto string textdomain(string domain)
+/* {{{ proto string textdomain(string domain) U
    Set the textdomain to "domain". Returns the current domain */
 PHP_NAMED_FUNCTION(zif_textdomain)
 {
-	zval **domain;
-	char *domain_name, *retval;
-	char *val;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &domain) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	char *domain_str;
+	int domain_len;
+	
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)))) {
+		return;
 	}
-	convert_to_string_ex(domain);
-
-	val = Z_STRVAL_PP(domain);
-	if (strcmp(val, "") && strcmp(val, "0")) {
-		domain_name = val;
-	} else {
-		domain_name = NULL;
+	
+	if (!domain_len || (domain_len == 1 && *domain_str == '0')) {
+		domain_str = NULL;
 	}
-
-	retval = textdomain(domain_name);
-
-	RETURN_STRING(retval, 1);
+	RETURN_ASCII_STRING(textdomain(domain_str), 1);
 }
 /* }}} */
 
-/* {{{ proto string gettext(string msgid)
+/* {{{ proto binary gettext(string msgid) U
    Return the translation of msgid for the current domain, or msgid unaltered if a translation does not exist */
 PHP_NAMED_FUNCTION(zif_gettext)
 {
-	zval **msgid;
-	char *msgstr;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &msgid) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	char *msgid_str;
+	int msgid_len;
+	
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &msgid_str, &msgid_len, UG(ascii_conv))) {
+		return;
 	}
-	convert_to_string_ex(msgid);
-
-	msgstr = gettext(Z_STRVAL_PP(msgid));
-
-	RETURN_STRING(msgstr, 1);
+	RETURN_STRING(gettext(msgid_str), 1);
 }
 /* }}} */
 
-/* {{{ proto string dgettext(string domain_name, string msgid)
+/* {{{ proto binary dgettext(string domain_name, string msgid) U
    Return the translation of msgid for domain_name, or msgid unaltered if a translation does not exist */
 PHP_NAMED_FUNCTION(zif_dgettext)
 {
-	zval **domain_name, **msgid;
-	char *msgstr;
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &domain_name, &msgid) == FAILURE)	{
-		WRONG_PARAM_COUNT;
+	char *domain_str, *msgid_str;
+	int domain_len, msgid_len;
+	
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str, &msgid_len, UG(ascii_conv))) {
+		return;
 	}
-	convert_to_string_ex(domain_name);
-	convert_to_string_ex(msgid);
-
-	msgstr = dgettext(Z_STRVAL_PP(domain_name), Z_STRVAL_PP(msgid));
-
-	RETURN_STRING(msgstr, 1);
+	RETURN_STRING(dgettext(domain_str, msgid_str), 1);
 }
 /* }}} */
 
-/* {{{ proto string dcgettext(string domain_name, string msgid, long category)
+/* {{{ proto binary dcgettext(string domain_name, string msgid, int category) U
    Return the translation of msgid for domain_name and category, or msgid unaltered if a translation does not exist */
 PHP_NAMED_FUNCTION(zif_dcgettext)
 {
-	zval **domain_name, **msgid, **category;
-	char *msgstr;
-
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &domain_name, &msgid, &category) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	char *domain_str, *msgid_str;
+	int domain_len, msgid_len;
+	long category;
+	
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&l", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str, &msgid_len, UG(ascii_conv), &category)) {
+		return;
 	}
-	convert_to_string_ex(domain_name);
-	convert_to_string_ex(msgid);
-	convert_to_long_ex(category);
-
-	msgstr = dcgettext(Z_STRVAL_PP(domain_name), Z_STRVAL_PP(msgid), Z_LVAL_PP(category));
-
-	RETURN_STRING(msgstr, 1);
+	RETURN_STRING(dcgettext(domain_str, msgid_str, category), 1);
 }
 /* }}} */
 
-/* {{{ proto string bindtextdomain(string domain_name, string dir)
+/* {{{ proto string bindtextdomain(string domain_name, string dir) U
    Bind to the text domain domain_name, looking for translations in dir. Returns the current domain */
 PHP_NAMED_FUNCTION(zif_bindtextdomain)
 {
-	zval **domain_name, **dir;
-	char *retval, dir_name[MAXPATHLEN];
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &domain_name, &dir) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(domain_name);
-	convert_to_string_ex(dir);
-
-	if (Z_STRVAL_PP(domain_name)[0] == '\0') {
-		php_error(E_WARNING, "The first parameter of bindtextdomain must not be empty");
-		RETURN_FALSE;
+	char *domain_str, *dir_str, dir_tmp[MAXPATHLEN] = {0};
+	int domain_len, dir_len;
+	
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &dir_str, &dir_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)))) {
+		return;
 	}
 	
-	if (Z_STRVAL_PP(dir)[0] != '\0' && strcmp(Z_STRVAL_PP(dir), "0")) {
-		VCWD_REALPATH(Z_STRVAL_PP(dir), dir_name);
-	} else {
-		VCWD_GETCWD(dir_name, MAXPATHLEN);
+	if (!domain_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "the first parameter must not be empty");
 	}
-
-	retval = bindtextdomain(Z_STRVAL_PP(domain_name), dir_name);
-
-	RETURN_STRING(retval, 1);
+	if (!dir_len || (dir_len == 1 && *dir_str == '0')) {
+		VCWD_GETCWD(dir_tmp, sizeof(dir_tmp));
+	} else {
+		VCWD_REALPATH(dir_str, dir_tmp);
+	}
+	RETURN_ASCII_STRING(bindtextdomain(domain_str, dir_tmp), 1);
 }
 /* }}} */
 
 #if HAVE_NGETTEXT
-/* {{{ proto string ngettext(string MSGID1, string MSGID2, int N)
+/* {{{ proto binary ngettext(string msgid1, string msgid2, int count) U
    Plural version of gettext() */
 PHP_NAMED_FUNCTION(zif_ngettext)
 {
-	zval **msgid1, **msgid2, **count;
-	char *msgstr;
-
-	RETVAL_FALSE;
-
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &msgid1, &msgid2, &count) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	char *msgid_str1, *msgid_str2, *msgstr;
+	int msgid_len1, msgid_len2;
+	long count;
+	
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&l", &msgid_str1, &msgid_len1, UG(ascii_conv), &msgid_str2, &msgid_len2, UG(ascii_conv), &count)) {
+		RETURN_FALSE;
+	}
+	
+	if ((msgstr = ngettext(msgid_str1, msgid_str2, count))) {
+		RETURN_STRING(msgstr, 1);
 	} else {
-		convert_to_string_ex(msgid1);
-		convert_to_string_ex(msgid2);
-		convert_to_long_ex(count);
-
-		msgstr = ngettext(Z_STRVAL_PP(msgid1), Z_STRVAL_PP(msgid2), Z_LVAL_PP(count));
-		if (msgstr) {
-			RETVAL_STRING (msgstr, 1);
-		}
+		RETURN_FALSE;
 	}
 }
 /* }}} */
 #endif
 
 #if HAVE_DNGETTEXT
-/* {{{ proto string dngettext (string domain, string msgid1, string msgid2, int count)
+/* {{{ proto binary dngettext (string domain, string msgid1, string msgid2, int count) U
    Plural version of dgettext() */
 PHP_NAMED_FUNCTION(zif_dngettext)
 {
-	zval **domain, **msgid1, **msgid2, **count;
-
-	RETVAL_FALSE;
-
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &domain, &msgid1, &msgid2, &count) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	char *domain_str, *msgid_str1, *msgid_str2, *msgstr;
+	int domain_len, msgid_len1, msgid_len2;
+	long count;
+	
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s&l", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str1, &msgid_len1, UG(ascii_conv), &msgid_str2, &msgid_len2, UG(ascii_conv), &count)) {
+		RETURN_FALSE;
+	}
+	
+	if ((msgstr = dngettext(domain_str, msgid_str1, msgid_str2, count))) {
+		RETURN_STRING(msgstr, 1);
 	} else {
-		char *msgstr;
-		
-		convert_to_string_ex(domain);
-		convert_to_string_ex(msgid1);
-		convert_to_string_ex(msgid2);
-		convert_to_long_ex(count);
-
-		msgstr = dngettext(Z_STRVAL_PP(domain), Z_STRVAL_PP(msgid1), Z_STRVAL_PP(msgid2), Z_LVAL_PP(count));
-		if (msgstr) {
-			RETVAL_STRING(msgstr, 1);
-		}
+		RETURN_FALSE;
 	}
 }
 /* }}} */
 #endif
 
 #if HAVE_DCNGETTEXT
-/* {{{ proto string dcngettext (string domain, string msgid1, string msgid2, int n, int category)
-   Plural version of dcgettext() */								
+/* {{{ proto binary dcngettext (string domain, string msgid1, string msgid2, int count, int category) U
+   Plural version of dcgettext() */
 PHP_NAMED_FUNCTION(zif_dcngettext)
 {
-	zval **domain, **msgid1, **msgid2, **count, **category;
-
-	RETVAL_FALSE;
-
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &domain, &msgid1, &msgid2, &count, &category) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	char *domain_str, *msgid_str1, *msgid_str2, *msgstr;
+	int domain_len, msgid_len1, msgid_len2;
+	long count, category;
+	
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s&ll", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str1, &msgid_len1, UG(ascii_conv), &msgid_str2, &msgid_len2, UG(ascii_conv), &count, &category)) {
+		RETURN_FALSE;
+	}
+	
+	if ((msgstr = dcngettext(domain_str, msgid_str1, msgid_str2, count, category))) {
+		RETURN_STRING(msgstr, 1);
 	} else {
-		char* msgstr = NULL;
-
-		convert_to_string_ex(domain);
-		convert_to_string_ex(msgid1);
-		convert_to_string_ex(msgid2);
-		convert_to_long_ex(count);
-		convert_to_long_ex(category);
-
-		msgstr = dcngettext(Z_STRVAL_PP(domain), Z_STRVAL_PP(msgid1), Z_STRVAL_PP(msgid2), Z_LVAL_PP(count), Z_LVAL_PP(category));
-
-		if (msgstr) {
-			RETVAL_STRING(msgstr, 1);
-		}
+		RETURN_FALSE;
 	}
 }
 /* }}} */
 #endif
 
 #if HAVE_BIND_TEXTDOMAIN_CODESET
-
-/* {{{ proto string bind_textdomain_codeset (string domain, string codeset)
+/* {{{ proto string bind_textdomain_codeset (string domain, string codeset) U
    Specify the character encoding in which the messages from the DOMAIN message catalog will be returned. */
 PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
 {
-	zval **domain, **codeset;
-	char *retval;
+	char *domain_str, *codeset_str, *codeset_ret;
+	int domain_len, codeset_len;
 	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &domain, &codeset) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &codeset_str, &codeset_len, UG(ascii_conv))) {
+		return;
+	}
+	
+	if (!codeset_len) {
+		codeset_str = NULL;
+	}
+	if ((codeset_ret = bind_textdomain_codeset(domain_str, codeset_str))) {
+		RETURN_ASCII_STRING(codeset_ret, 1);
 	} else {
-		convert_to_string_ex(domain);
-		convert_to_string_ex(codeset);
-		
-		retval = bind_textdomain_codeset(Z_STRVAL_PP(domain), Z_STRVAL_PP(codeset));
-
-		if (!retval) {
-			RETURN_FALSE;
-		}
-		RETURN_STRING(retval, 1);
+		RETURN_FALSE;
 	}
 }
 /* }}} */

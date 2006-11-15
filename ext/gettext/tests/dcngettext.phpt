@@ -19,7 +19,7 @@ var_dump(dcngettext("","","",0,0));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for dcngettext() in %s on line %d
+Warning: dcngettext() expects exactly 5 parameters, 4 given in %s on line %d
 bool(false)
 string(1) "1"
 string(4) "test"
