@@ -447,6 +447,7 @@ ZEND_API void convert_to_null(zval *op)
 				return;
 			}
 			*op = *org;
+			FREE_ZVAL(org);
 		}
 	}
 
