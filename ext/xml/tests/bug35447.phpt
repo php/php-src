@@ -7,7 +7,7 @@ if (! @xml_parser_create_ns('ISO-8859-1')) { die("skip xml_parser_create_ns is n
 ?>
 --FILE--
 <?php
-$data = <<<END_OF_XML
+$data = b<<<END_OF_XML
 \xEF\xBB\xBF<?xml version="1.0" encoding="utf-8"?\x3e
 <!DOCTYPE bundle [
     <!ELEMENT bundle (resource)+>
@@ -45,5 +45,26 @@ array(1) {
     }
     ["value"]=>
     string(13) "A bient&244;t"
+  }
+}
+--UEXPECT--
+array(1) {
+  [0]=>
+  array(5) {
+    [u"tag"]=>
+    unicode(8) "resource"
+    [u"type"]=>
+    unicode(8) "complete"
+    [u"level"]=>
+    int(1)
+    [u"attributes"]=>
+    array(2) {
+      [u"key"]=>
+      unicode(7) "rSeeYou"
+      [u"type"]=>
+      unicode(7) "literal"
+    }
+    [u"value"]=>
+    unicode(13) "A bient&244;t"
   }
 }

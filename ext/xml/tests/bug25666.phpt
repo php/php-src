@@ -33,3 +33,7 @@ xml_parser_free($parser);
 string(24) "http://example.com/foo@a"
 string(24) "http://example.com/bar@b"
 string(24) "http://example.com/baz@c"
+--UEXPECT--
+unicode(24) "http://example.com/foo@a"
+unicode(24) "http://example.com/bar@b"
+unicode(24) "http://example.com/baz@c"
