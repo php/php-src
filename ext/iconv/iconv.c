@@ -744,7 +744,9 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 				}
 			}
 
-			_php_iconv_appendl(pretval, buf, sizeof(buf), cd2);
+			if (_php_iconv_appendl(pretval, buf, sizeof(buf), cd2) != PHP_ICONV_ERR_SUCCESS) {
+				break;
+			}
 			--len;
 		}
 
@@ -761,10 +763,6 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 			break;
 
 		case E2BIG:
-			break;
-
-		default:
-			err = PHP_ICONV_ERR_UNKNOWN;
 			break;
 	}
 #endif
