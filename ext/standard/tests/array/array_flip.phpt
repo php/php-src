@@ -14,6 +14,13 @@ $trans = array("a" => 1,
                2 => "i");
 $trans = array_flip($trans);
 var_dump($trans);
+
+var_dump(array_flip());
+var_dump(array_flip(array()));
+var_dump(array_flip(array(1)));
+var_dump(array_flip(array(array())));
+
+echo "Done\n";
 ?>
 --EXPECTF--
 Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
@@ -35,3 +42,17 @@ array(6) {
   ["i"]=>
   int(2)
 }
+
+Warning: Wrong parameter count for array_flip() in %s on line %d
+NULL
+array(0) {
+}
+array(1) {
+  [1]=>
+  int(0)
+}
+
+Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+array(0) {
+}
+Done
