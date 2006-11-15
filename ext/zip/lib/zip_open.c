@@ -75,6 +75,10 @@ zip_open(const char *fn, int flags, int *zep)
 	return NULL;
     }
 
+#ifdef PHP_WIN32 
+	_fmode = _O_BINARY;
+#endif
+
     if (flags & ZIP_OVERWRITE || stat(fn, &st) != 0) {
 	if ((flags & ZIP_CREATE) || (flags & ZIP_OVERWRITE)) {
 	    if ((za=_zip_new(&error)) == NULL) {
