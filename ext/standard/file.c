@@ -653,11 +653,23 @@ PHP_FUNCTION(file_put_contents)
 			}
 			break;
 
+		case IS_OBJECT:
+			if (Z_OBJ_HT_P(data) != NULL) {
+				zval out;
+
+				if (zend_std_cast_object_tostring(data, &out, IS_STRING TSRMLS_CC) == SUCCESS) {
+					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
+					if (numbytes != Z_STRLEN(out)) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
+						numbytes = -1;
+					}
+					zval_dtor(&out);
+					break;
+				}
+			}
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The 2nd parameter should be either a string or an array");
-			numbytes = -1;
+			numbytes = -1;		
 			break;
-	
 	}
 	php_stream_close(stream);
 
