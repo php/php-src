@@ -1,5 +1,9 @@
 --TEST--
 sys_getloadavg() tests
+--SKIPIF--
+<?php
+if (!function_exists("sys_getloadavg")) die("skip");
+?>
 --FILE--
 <?php
 
