@@ -1,3 +1,257 @@
+2006-11-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/tests/oo_getcomment.phpt:
+      - mv oo_get_comment.phpt oo_getcomment.phpt
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/openssl.c:
+      - MFH: #39217, serialNumber might be -1 when the value is too big
+
+2006-11-15  Michael Wallner  <mike@iworks.at>
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h
+      ext/mcrypt/tests/basic.phpt
+      ext/mcrypt/tests/blowfish.phpt
+      ext/mcrypt/tests/bug35496.phpt
+      ext/mcrypt/tests/bug37595.phpt:
+      - unicode upgrade
+      - fix typo: ENIGNA->ENIGMA
+      - add and fix tests
+
+2006-11-15  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_API.h:
+      fix typo (patch by Mike Wallner)
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_flip.phpt
+      ext/standard/tests/array/array_key_exists.phpt
+      ext/standard/tests/array/array_pad.phpt
+      ext/standard/tests/array/array_rand.phpt
+      ext/standard/tests/array/array_unshift.phpt
+      ext/standard/tests/array/array_values.phpt
+      ext/standard/tests/array/compact.phpt
+      ext/standard/tests/file/statpage.phpt:
+      add new tests, improve existing ones
+
+    * ext/standard/array.c:
+      fix array_key_exists() with NULL key in Unicode mode
+
+    * (PHP_5_2)
+      ext/standard/tests/file/statpage.phpt:
+      file statpage.phpt was added on branch PHP_5_2 on 2006-11-15 22:44:29 +0000
+
+    * ext/standard/tests/array/array_key_exists.phpt
+      ext/standard/tests/array/array_key_exists.phpt
+      ext/standard/tests/array/array_pad.phpt
+      ext/standard/tests/array/array_rand.phpt
+      ext/standard/tests/array/array_rand.phpt
+      ext/standard/tests/array/array_unshift.phpt
+      ext/standard/tests/array/array_unshift.phpt
+      ext/standard/tests/array/array_values.phpt
+      ext/standard/tests/array/array_values.phpt
+      ext/standard/tests/file/disk.phpt
+      ext/standard/tests/file/statpage.phpt:
+      
+      add new tests
+
+    * (PHP_5_2)
+      ext/standard/array.c
+      ext/standard/tests/array/array_pad.phpt:
+      fix leak, add test
+
+    * ext/standard/array.c
+      ext/standard/tests/array/array_pad.phpt
+      ext/standard/tests/array/array_pad.phpt:
+      fix memory leak and typo in zend_parse_parameters(), which caused segfault
+      add test
+
+2006-11-15  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      ext/hash/hash.c
+      ext/hash/hash_md.c
+      ext/hash/hash_ripemd.c
+      ext/hash/php_hash.h
+      ext/hash/php_hash_md.h
+      ext/hash/php_hash_ripemd.h
+      ext/hash/tests/md2.phpt
+      ext/hash/tests/ripemd256.phpt
+      ext/hash/tests/ripemd320.phpt:
+      Backport md2, ripemd256, and ripemd320 algos from HEAD
+
+2006-11-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_source_file.c:
+      
+
+2006-11-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/iconv/iconv.c
+      ext/iconv/tests/bug37773.phpt:
+      MFB: Fixed bug #37773 (iconv_substr() gives "Unknown error" when string
+      length = 1").
+
+    * ext/iconv/tests/bug37773.phpt
+      ext/iconv/tests/bug37773.phpt:
+      
+      file bug37773.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/iconv/iconv.c:
+      Fixed bug #37773 (iconv_substr() gives "Unknown error" when string length =
+      1").
+
+2006-11-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c:
+      typo
+
+2006-11-15  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.c
+      ext/standard/tests/general_functions/type.phpt
+      ext/standard/tests/general_functions/type.phpt
+      ext/standard/tests/general_functions/type.phpt:
+      fix leak appearing when converting object to NULL
+      add test
+
+    * (PHP_5_2)
+      ext/standard/tests/file/disk.phpt
+      ext/standard/tests/file/filestat.phpt
+      ext/standard/tests/general_functions/getrusage.phpt
+      ext/standard/tests/general_functions/head.phpt
+      ext/standard/tests/strings/metaphone.phpt
+      ext/standard/tests/strings/soundex.phpt
+      ext/standard/tests/strings/uuencode.phpt:
+      add new tests
+
+    * (PHP_5_2)
+      ext/standard/tests/file/disk.phpt
+      ext/standard/tests/file/filestat.phpt
+      ext/standard/tests/file/filestat.phpt
+      ext/standard/tests/general_functions/getrusage.phpt
+      ext/standard/tests/general_functions/getrusage.phpt
+      ext/standard/tests/general_functions/head.phpt
+      ext/standard/tests/general_functions/head.phpt
+      ext/standard/tests/strings/metaphone.phpt
+      ext/standard/tests/strings/metaphone.phpt
+      ext/standard/tests/strings/soundex.phpt
+      ext/standard/tests/strings/soundex.phpt
+      ext/standard/tests/strings/uuencode.phpt
+      ext/standard/tests/strings/uuencode.phpt:
+      file disk.phpt was added on branch PHP_5_2 on 2006-11-15 17:27:03 +0000
+
+2006-11-15  Michael Wallner  <mike@iworks.at>
+
+    * NEWS:
+      - mhash news
+
+    * ext/mhash/mhash.c
+      ext/mhash/php_mhash.h:
+      - unicode upgrade
+      - use current parameter parsing API
+      - added keygen constants
+      - Added keygen functions: mhash_keygen_count, mhash_get_keygen_name,
+        mhash_keygen_uses_hash, mhash_keygen_uses_salt,
+      mhash_get_keygen_salt_size,
+        mhash_keygen
+
+    * ext/gettext/gettext.c
+      ext/gettext/tests/dcngettext.phpt
+      ext/gettext/tests/gettext_basic.phpt
+      ext/gettext/tests/gettext_basic_de.phpt
+      ext/gettext/tests/locale/de/LC_MESSAGES/messages.mo
+      ext/gettext/tests/locale/de/LC_MESSAGES/messages.po:
+      - unicode upgrade
+        see ICU message catalogue support?
+
+2006-11-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/lib/zip_open.c:
+      see: http://news.php.net/php.internals/26606 for the details
+
+2006-11-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug39445.phpt
+      ZendEngine2/tests/bug39445.phpt
+      ZendEngine2/tests/bug39445.phpt:
+      Fixed bug #39445 (Calling debug_backtrace() in the __toString() function
+      produces a crash)
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Removed unnecessary getenv/putenv calls
+
+2006-11-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xml/xml.c:
+      mark more functions unicode compatible
+
+2006-11-15  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/file/fwrite.phpt
+      ext/standard/tests/file/fwrite.phpt:
+      fix test on AIX
+
+2006-11-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xml/xml.c
+      ext/xml/tests/bug25666.phpt
+      ext/xml/tests/bug26528.phpt
+      ext/xml/tests/bug32001.phpt
+      ext/xml/tests/bug35447.phpt
+      ext/xml/tests/xml006.phpt
+      ext/xml/tests/xml009.phpt:
+      add unicode support so Andrei finally stops asking me about it
+      update tests
+
+2006-11-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+      Fixed wrong ext/filter behavior. It might not to register FastCGI
+      environment variables and make memory leaks.
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      Fixed wrong ext/filter behavior. It didn't register FastCGI environment
+      variables and made memory leaks.
+
+2006-11-15  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/file/fstat.phpt
+      ext/standard/tests/file/fstat.phpt
+      ext/standard/tests/file/symlink.phpt
+      ext/standard/tests/file/symlink.phpt:
+      fix test
+
+2006-11-15  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/file_put_contents.phpt:
+      Fix test (file_put_contents() now uses __toString)
+
+2006-11-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/file.c:
+      Added missing object support to file_put_contents().
+
 2006-11-14  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
