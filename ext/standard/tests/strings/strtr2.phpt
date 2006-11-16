@@ -28,7 +28,7 @@ strtr() function (with unicode chars and combining sequences)
 	// Test with combining chars 2
 	$from = "åb";
 	$to   = "12";
-	$string = "xyzabc";
+	$string = "xyzåbc";
 	var_dump( strtr( $string, $from, $to ) );
 
 	// Test with combining chars 3

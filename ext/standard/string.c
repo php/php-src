@@ -3805,6 +3805,43 @@ PHPAPI char *php_strtr(char *str, int len, char *str_from, char *str_to, int trl
 
 /* {{{ php_u_strtr
  */
+static void text_iter_helper_move(UChar *text, int32_t text_len, int32_t *offset, int32_t *cp_offset)
+{
+    UChar32 cp;
+    int32_t tmp, tmp2;
+
+    if (*offset == UBRK_DONE) {
+        return;
+    }
+
+	if (*offset == text_len) {
+		*offset    = UBRK_DONE;
+		*cp_offset = UBRK_DONE;
+	} else {
+		U16_NEXT(text, (*offset), text_len, cp);
+		(*cp_offset)++;
+																										
+		if (u_getCombiningClass(cp) == 0) {
+			tmp = *offset;
+			tmp2 = *cp_offset;
+			/*
+			 * At the end of the from cp will be 0 because of the NULL
+			 * terminating NULL, so combining class will be 0 as well.
+			 */
+			while (tmp < text_len) {
+				U16_NEXT(text, tmp, text_len, cp);
+				tmp2++;
+				if (u_getCombiningClass(cp) == 0) {
+					break;
+				} else {
+					*offset    = tmp;
+					*cp_offset = tmp2;
+				}
+			}
+		}
+	}
+}
+
 PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len, UChar *str_to, int str_to_len, int trlen, int *outlen TSRMLS_DC)
 {
 	int i;
@@ -3861,19 +3898,43 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 		 * array in such a way that we can reuse the code in php_u_strtr_array
 		 * to do the replacements in order to avoid duplicating code. */
 		HashTable *tmp_hash;
-		int minlen = 128*1024, maxlen;
-		zval *tmp;
-		UChar x[2] = { 0, };
+		int minlen = 128*1024, maxlen = 0;
+		int32_t prev_from_offset = 0, from_offset = 0, from_cp_offset = 0;
+		int32_t prev_to_offset = 0, to_offset = 0, to_cp_offset = 0;
+		zval *entry;
+		UChar *key_string;
 
 		tmp_hash = emalloc(sizeof(HashTable));
-		zend_hash_init(tmp_hash, 0, NULL, NULL, 0);
+		zend_hash_init(tmp_hash, 0, ZVAL_PTR_DTOR, NULL, 0);
 
 		/* Loop over the two strings and prepare the hash entries */
-		MAKE_STD_ZVAL(tmp);
-		x[0] = (UChar) 0x58 /*'X'*/;
-		ZVAL_UNICODEL(tmp, x, 1, 1);
-		minlen = maxlen = 1;
-		zend_u_hash_add(tmp_hash, IS_UNICODE, ZSTR("a"), 2, &tmp, sizeof(zval *), NULL);
+		do
+		{
+			text_iter_helper_move(str_from, str_from_len, &from_offset, &from_cp_offset);
+			text_iter_helper_move(str_to, str_to_len, &to_offset, &to_cp_offset);
+
+			if (from_offset != -1 && to_offset != -1) {
+				if (from_cp_offset - prev_from_offset > maxlen) {
+					maxlen = from_cp_offset - prev_from_offset;
+				}
+				if (from_cp_offset - prev_from_offset < minlen) {
+					minlen = from_cp_offset - prev_from_offset;
+				}
+
+				MAKE_STD_ZVAL(entry);
+				ZVAL_UNICODEL(entry, str_to + prev_to_offset, to_cp_offset - prev_to_offset, 0);
+
+				key_string = eumalloc(from_cp_offset - prev_from_offset + 1);
+				memcpy(key_string, str_from + prev_from_offset, UBYTES(from_cp_offset - prev_from_offset));
+				key_string[from_cp_offset - prev_from_offset] = 0;
+
+				zend_u_hash_add(tmp_hash, IS_UNICODE, ZSTR(key_string), from_cp_offset - prev_from_offset + 1, &entry, sizeof(zval*), NULL);
+				efree(key_string);
+			}
+
+			prev_from_offset = from_offset;
+			prev_to_offset = to_offset;
+		} while (from_offset != -1 && to_offset != -1);
 
 		/* Run the replacement */
 		str = php_u_strtr_array(str, len, tmp_hash, minlen, maxlen, outlen TSRMLS_CC);
