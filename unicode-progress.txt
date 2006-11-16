@@ -61,9 +61,83 @@ ext/zip
   (Pierre)
 
 
-  Completed
-  =========
-  
+Completed
+=========
+
+ext/gettext
+------------
+  Completed:
+    textdomain()
+    gettext()
+    _()
+    dgettext()
+    dcgettext()
+    bindtextdomain()
+    ngettext()
+    dngettext()
+    dcngettext()
+    bind_textdomain_codeset()
+
+ext/mcrypt
+------------
+  Completed:
+    mcrypt_ecb()
+    mcrypt_cbc()
+    mcrypt_cfb()
+    mcrypt_ofb()
+    mcrypt_get_key_size()
+    mcrypt_get_block_size()
+    mcrypt_get_cipher_name()
+    mcrypt_create_iv()
+    mcrypt_list_algorithms()
+    mcrypt_list_modes()
+    mcrypt_get_iv_size()
+    mcrypt_encrypt()
+    mcrypt_decrypt()
+    mcrypt_module_open()
+    mcrypt_generic_init()
+    mcrypt_generic()
+    mdecrypt_generic()
+    mcrypt_generic_end()
+    mcrypt_generic_deinit()
+    mcrypt_enc_self_test()
+    mcrypt_enc_is_block_algorithm_mode()
+    mcrypt_enc_is_block_algorithm()
+    mcrypt_enc_is_block_mode()
+    mcrypt_enc_get_block_size()
+    mcrypt_enc_get_key_size()
+    mcrypt_enc_get_supported_key_sizes()
+    mcrypt_enc_get_iv_size()
+    mcrypt_enc_get_algorithms_name()
+    mcrypt_enc_get_modes_name()
+    mcrypt_module_self_test()
+    mcrypt_module_is_block_algorithm_mode()
+    mcrypt_module_is_block_algorithm()
+    mcrypt_module_is_block_mode()
+    mcrypt_module_get_algo_block_size()
+    mcrypt_module_get_algo_key_size()
+    mcrypt_module_get_supported_key_sizes()
+    mcrypt_module_close()
+
+ext/mhash
+------------
+  Completed:
+    mhash_count()
+    mhash_get_block_size()
+    mhash_get_hash_name()
+    mhash_keygen_count()
+    mhash_get_keygen_name()
+    mhash_keygen_uses_hash()
+    mhash_keygen_uses_salt()
+    mhash_get_keygen_salt_size()
+    mhash_keygen_uses_count()
+    mhash()
+    mhash_keygen()
+    mhash_keygen_s2k()
+
+ext/standard
+------------
+
   array.c
   -------
     array_change_key_case()
@@ -176,6 +250,66 @@ ext/zip
     ucfirst()
     ucwords()
 
+ext/sysvmsg
+-----------
+  Completed:
+    msg_get_queue()
+    msg_send()
+    msg_receive()
+    msg_remove_queue()
+    msg_stat_queue()
+    msg_set_queue()
+
+ext/sysvsem
+-----------
+  Completed:
+    sem_get()
+    sem_acquire()
+    sem_release()
+    sem_remove()
+
+ext/sysvshm
+-----------
+  Completed:
+    shm_attach()
+    shm_remove()
+    shm_detach()
+    shm_put_var()
+    shm_has_var()
+    shm_get_var()
+    shm_remove_var()
+
+ext/zlib
+--------
+  TBD:
+    readgzfile()
+    gzrewind()
+    gzclose()
+    gzeof()
+    gzgetc()
+    gzgets()
+    gzgetss()
+    gzread()
+    gzopen()
+    gzpassthru()
+    gzseek()
+    gztell()
+    gzwrite()
+    gzputs()
+    gzfile()
+    gzcompress()
+    gzuncompress()
+
+  Completed:
+    gzcompress()
+    gzuncompress()
+    gzdeflate()
+    gzinflate()
+    gzencode()
+    gzdecode()
+    zlib_encode()
+    zlib_decode()
+    zlib_get_coding_type()
 
 Zend Engine
 -----------
