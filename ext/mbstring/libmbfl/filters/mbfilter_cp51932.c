@@ -111,7 +111,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp51932 = {
 int
 mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 {
-	int c1, s, w, n;
+	int c1, s, w;
 
 	switch (filter->status) {
 	case 0:

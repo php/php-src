@@ -38,8 +38,10 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, long, XSQLDA*, i
 /* map driver specific error message to PDO error */
 void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, long line TSRMLS_DC) /* {{{ */
 {
+#if 0
 	pdo_firebird_db_handle *H = stmt ? ((pdo_firebird_stmt *)stmt->driver_data)->H 
 		: (pdo_firebird_db_handle *)dbh->driver_data;
+#endif
 	pdo_error_type *const error_code = stmt ? &stmt->error_code : &dbh->error_code;
 	
 #if 0
