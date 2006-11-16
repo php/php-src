@@ -553,39 +553,39 @@ PHP_FUNCTION(name) \
 	RETURN_STRINGL(out_buf, out_len, 0); \
 }
 
-/* {{{ proto string zlib_encode(string data, int encoding[, int level = -1]) U
+/* {{{ proto binary zlib_encode(binary data, int encoding[, int level = -1]) U
 	Compress data with the specified encoding */
 PHP_ZLIB_ENCODE_FUNC(zlib_encode, 0);
 /* }}} */
 
-/* {{{ proto string zlib_decode(string data[, int max_decoded_len]) U
+/* {{{ proto binary zlib_decode(binary data[, int max_decoded_len]) U
 	Uncompress any raw/gzip/zlib encoded data */
 PHP_ZLIB_DECODE_FUNC(zlib_decode, PHP_ZLIB_ENCODING_ANY);
 /* }}} */
 
 /* NOTE: The naming of these userland functions was quite unlucky */
 
-/* {{{ proto string gzdeflate(string data[, int level = -1[, int encoding = ZLIB_ENCODING_RAW]) U
+/* {{{ proto binary gzdeflate(binary data[, int level = -1[, int encoding = ZLIB_ENCODING_RAW]) U
 	Encode data with the raw deflate encoding */
 PHP_ZLIB_ENCODE_FUNC(gzdeflate, PHP_ZLIB_ENCODING_RAW);
 /* }}} */
-/* {{{ proto string gzencode(string data[, int level = -1[, int encoding = ZLIB_ENCODING_GZIP]) U
+/* {{{ proto binary gzencode(binary data[, int level = -1[, int encoding = ZLIB_ENCODING_GZIP]) U
 	Encode data with the gzip encoding */
 PHP_ZLIB_ENCODE_FUNC(gzencode, PHP_ZLIB_ENCODING_GZIP);
 /* }}} */
-/* {{{ proto string gzcompress(string data[, int level = -1[, int encoding = ZLIB_ENCODING_DEFLATE]) U
+/* {{{ proto binary gzcompress(binary data[, int level = -1[, int encoding = ZLIB_ENCODING_DEFLATE]) U
 	Encode data with the zlib encoding */
 PHP_ZLIB_ENCODE_FUNC(gzcompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
-/* {{{ proto string gzinflate(string data[, int max_decoded_len]) U
+/* {{{ proto binary gzinflate(binary data[, int max_decoded_len]) U
 	Decode raw deflate encoded data */
 PHP_ZLIB_DECODE_FUNC(gzinflate, PHP_ZLIB_ENCODING_RAW);
 /* }}} */
-/* {{{ proto string gzdecode(string data[, int max_decoded_len]) U
+/* {{{ proto binary gzdecode(binary data[, int max_decoded_len]) U
 	Decode gzip encoded data */
 PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
 /* }}} */
-/* {{{ proto string gzuncompress(string data[, int max_decoded_len]) U
+/* {{{ proto binary gzuncompress(binary data[, int max_decoded_len]) U
 	Decode zlib encoded data */
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
