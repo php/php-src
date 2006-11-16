@@ -282,6 +282,19 @@ ext/sysvshm
 ext/zlib
 --------
   TBD:
+    zlib_filter.c
+    zlib_fopen_wrapper.c
+
+  Completed:
+    gzcompress()
+    gzuncompress()
+    gzdeflate()
+    gzinflate()
+    gzencode()
+    gzdecode()
+    zlib_encode()
+    zlib_decode()
+    zlib_get_coding_type()
     readgzfile()
     gzrewind()
     gzclose()
@@ -300,16 +313,6 @@ ext/zlib
     gzcompress()
     gzuncompress()
 
-  Completed:
-    gzcompress()
-    gzuncompress()
-    gzdeflate()
-    gzinflate()
-    gzencode()
-    gzdecode()
-    zlib_encode()
-    zlib_decode()
-    zlib_get_coding_type()
 
 Zend Engine
 -----------
