@@ -1,5 +1,10 @@
 --TEST--
 ip2long() & long2ip() tests
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
+
 --FILE--
 <?php
 
