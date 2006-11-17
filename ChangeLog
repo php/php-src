@@ -1,3 +1,119 @@
+2006-11-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/strtr2.phpt:
+      - Add the strtr implementation for unicode for the case where there are
+        characters with a code point value >= 256.
+
+2006-11-16  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/pcre/pcrelib/internal.h:
+      remove old file (which was already removed from 4.4 and HEAD trees)
+
+2006-11-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo_firebird/firebird_driver.c
+      ext/pdo_pgsql/pgsql_statement.c:
+      MFB: fixed compiler warnings
+
+    * (PHP_5_2)
+      ext/mbstring/libmbfl/filters/mbfilter_cp51932.c
+      ext/pdo_firebird/firebird_driver.c
+      ext/pdo_pgsql/pgsql_statement.c:
+      Fixed compiler warnings
+
+2006-11-16  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * main/streams/plain_wrapper.c:
+      MFB: Fix ftruncate() with negative size
+
+    * (PHP_5_2)
+      main/streams/plain_wrapper.c:
+      Fix ftruncate() with negative size on FreeBSD
+
+2006-11-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/touch.phpt
+      ext/standard/tests/general_functions/sys_getloadavg.phpt
+      ext/standard/tests/network/ip.phpt:
+      fix tests
+
+    * ext/standard/tests/file/touch.phpt
+      ext/standard/tests/general_functions/sys_getloadavg.phpt
+      ext/standard/tests/network/ip.phpt:
+      fix tests (add missing SKIPIF sections and a fix for FreeBSD)
+
+2006-11-16  Michael Wallner  <mike@iworks.at>
+
+    * ext/zlib/zlib.c:
+      - fix protos
+
+    * unicode-progress.txt:
+      - fix ext/zlib status;
+        Nuno upgraded gzio
+        stream wrapper and filter seem untouched
+
+2006-11-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/get_current_user.phpt
+      ext/standard/tests/file/magic_quotes.phpt
+      ext/standard/tests/file/magic_quotes.phpt
+      ext/standard/tests/file/touch.phpt
+      ext/standard/tests/general_functions/error_get_last.phpt
+      ext/standard/tests/general_functions/import_request.phpt
+      ext/standard/tests/general_functions/include_path.phpt
+      ext/standard/tests/general_functions/parse_ini_file.phpt
+      ext/standard/tests/general_functions/rand.phpt
+      ext/standard/tests/general_functions/sys_getloadavg.phpt
+      ext/standard/tests/network/inet.phpt
+      ext/standard/tests/network/ip.phpt
+      ext/standard/tests/strings/highlight_file.phpt
+      ext/standard/tests/strings/php_strip_whitespace.phpt
+      ext/standard/tests/strings/sha1.phpt:
+      add new tests
+
+    * ext/standard/tests/file/get_current_user.phpt
+      ext/standard/tests/file/get_current_user.phpt
+      ext/standard/tests/file/touch.phpt
+      ext/standard/tests/file/touch.phpt
+      ext/standard/tests/general_functions/error_get_last.phpt
+      ext/standard/tests/general_functions/error_get_last.phpt
+      ext/standard/tests/general_functions/import_request.phpt
+      ext/standard/tests/general_functions/import_request.phpt
+      ext/standard/tests/general_functions/include_path.phpt
+      ext/standard/tests/general_functions/include_path.phpt
+      ext/standard/tests/general_functions/parse_ini_file.phpt
+      ext/standard/tests/general_functions/parse_ini_file.phpt
+      ext/standard/tests/general_functions/rand.phpt
+      ext/standard/tests/general_functions/rand.phpt
+      ext/standard/tests/general_functions/sys_getloadavg.phpt
+      ext/standard/tests/general_functions/sys_getloadavg.phpt
+      ext/standard/tests/network/inet.phpt
+      ext/standard/tests/network/inet.phpt
+      ext/standard/tests/network/ip.phpt
+      ext/standard/tests/network/ip.phpt
+      ext/standard/tests/strings/highlight_file.phpt
+      ext/standard/tests/strings/highlight_file.phpt
+      ext/standard/tests/strings/php_strip_whitespace.phpt
+      ext/standard/tests/strings/php_strip_whitespace.phpt
+      ext/standard/tests/strings/sha1.phpt:
+      
+      more new tests, yikes!
+
+2006-11-16  Michael Wallner  <mike@iworks.at>
+
+    * unicode-progress.txt:
+      - ext/ progress
+
+2006-11-16  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/tests/oo_get_comment.phpt:
+      renamed to oo_getcomment.phpt
+
 2006-11-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_2)
