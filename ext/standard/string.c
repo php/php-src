@@ -3926,7 +3926,7 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 				Z_USTRVAL_P(entry)[to_cp_offset - prev_to_offset] = 0;
 
 				key_string = eumalloc(from_cp_offset - prev_from_offset + 1);
-				memcpy(key_string, str_from + prev_from_offset, UBYTES(from_cp_offset - prev_from_offset));
+				u_memcpy(key_string, str_from + prev_from_offset, from_cp_offset - prev_from_offset);
 				key_string[from_cp_offset - prev_from_offset] = 0;
 
 				zend_u_hash_add(tmp_hash, IS_UNICODE, ZSTR(key_string), from_cp_offset - prev_from_offset + 1, &entry, sizeof(zval*), NULL);
@@ -4020,7 +4020,7 @@ static UChar* php_u_strtr_array(UChar *str, int slen, HashTable *hash, int minle
 		}
 
 		found = 0;
-		memcpy(key, str+pos, UBYTES(maxlen));
+		u_memcpy(key, str+pos, maxlen);
 
 		for (len = maxlen; len >= minlen; len--) {
 			key[len] = 0;
