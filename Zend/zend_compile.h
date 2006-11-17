@@ -545,6 +545,7 @@ ZEND_API int zend_copy_scanner_string(zval *zendlval, char *str, zend_uint str_l
 
 ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
 ZEND_API void zend_function_dtor(zend_function *function);
+ZEND_API void zend_u_function_dtor(zend_function *function);
 ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
 
@@ -556,6 +557,7 @@ ZEND_API int zend_u_unmangle_property_name(zend_uchar type, zstr mangled_propert
 
 
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) zend_function_dtor
+#define ZEND_U_FUNCTION_DTOR (void (*)(void *)) zend_u_function_dtor
 #define ZEND_CLASS_DTOR (void (*)(void *)) destroy_zend_class
 
 zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC);

@@ -859,22 +859,13 @@ int php_libxml_xmlCheckUTF8(const unsigned char *s)
 int php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node export_function)
 {
 	php_libxml_func_handler export_hnd;
+	TSRMLS_FETCH();
 	
 	/* Initialize in case this module hasnt been loaded yet */
 	php_libxml_initialize();
 	export_hnd.export_func = export_function;
 
-	if (zend_hash_add(&php_libxml_exports, ce->name.s, ce->name_length + 1, &export_hnd, sizeof(export_hnd), NULL) == SUCCESS) {
-		int ret;
-		zstr name;
-
-		name.u = malloc(UBYTES(ce->name_length+1));
-		u_charsToUChars(ce->name.s, name.u, ce->name_length+1);
-		ret = zend_u_hash_add(&php_libxml_exports, IS_UNICODE, name, ce->name_length + 1, &export_hnd, sizeof(export_hnd), NULL);
-		free(name.u);
-		return ret;
-	}
-	return FAILURE;
+	return zend_u_hash_add(&php_libxml_exports, ZEND_STR_TYPE, ce->name, ce->name_length + 1, &export_hnd, sizeof(export_hnd), NULL);
 }
 
 PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object TSRMLS_DC)

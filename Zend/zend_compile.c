@@ -1919,13 +1919,32 @@ ZEND_API void function_add_ref(zend_function *function TSRMLS_DC)
 			zend_u_hash_init(op_array->static_variables, zend_hash_num_elements(static_variables), NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 			zend_hash_copy(op_array->static_variables, static_variables, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_zval, sizeof(zval *));
 		}
+	} else if (UG(unicode) && function->type == ZEND_INTERNAL_FUNCTION) {
+		zend_internal_function *func = &function->internal_function;
+
+		func->function_name.u = zend_ustrndup(func->function_name.u, u_strlen(func->function_name.u));
+		if (func->arg_info) {
+			zend_arg_info *args;
+			int n = func->num_args;
+
+			args = malloc((n + 1) * sizeof(zend_arg_info));
+			memcpy(args, func->arg_info, (n + 1) * sizeof(zend_arg_info));
+			while (n > 0) {
+				--n;
+				if (args[n].name.u) {
+					args[n].name.u = zend_ustrndup(args[n].name.u, u_strlen(args[n].name.u));
+				}
+				if (args[n].class_name.s) {
+					args[n].class_name.u = zend_ustrndup(args[n].class_name.u, u_strlen(args[n].class_name.u));
+				}
+			}
+			func->arg_info = args;
+		}
 	}
 }
 
 static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC)
 {
-	zend_function *function;
-
 	if (!ce->parent) {
 		return;
 	}
@@ -1978,34 +1997,17 @@ static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC)
 				);
 		}
 		return;
-	}
+	} else if (ce->parent->constructor) {
+		ce->constructor = ce->parent->constructor;
+		if (!zend_ascii_hash_exists(&ce->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME))) {
+			unsigned int lc_class_name_len;
+			zstr lc_class_name = zend_u_str_case_fold(ZEND_STR_TYPE, ce->name, ce->name_length, 0, &lc_class_name_len);
 
-	if (zend_hash_find(&ce->parent->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME), (void **)&function)==SUCCESS) {
-		/* inherit parent's constructor */
-		zend_hash_update(&ce->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME), function, sizeof(zend_function), NULL);
-		function_add_ref(function TSRMLS_CC);
-	} else {
-		/* Don't inherit the old style constructor if we already have the new style constructor */
-		unsigned int lc_class_name_len, lc_parent_class_name_len;
-		zstr lc_class_name;
-		zstr lc_parent_class_name;
-		zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
-
-			lc_class_name = zend_u_str_case_fold(utype, ce->name, ce->name_length, 0, &lc_class_name_len);
-			if (!zend_u_hash_exists(&ce->function_table, utype, lc_class_name, lc_class_name_len+1)) {
-				lc_parent_class_name = zend_u_str_case_fold(utype, ce->parent->name, ce->parent->name_length, 0, &lc_parent_class_name_len);
-				if (zend_u_hash_find(&ce->parent->function_table, utype, lc_parent_class_name, lc_parent_class_name_len+1, (void **)&function)==SUCCESS) {
-				if (function->common.fn_flags & ZEND_ACC_CTOR) {
-					/* inherit parent's constructor */
-					zend_u_hash_update(&ce->function_table, utype, lc_class_name, lc_class_name_len+1, function, sizeof(zend_function), NULL);
-					function_add_ref(function TSRMLS_CC);
-				}
-			}
-			efree(lc_parent_class_name.v);
+			zend_u_hash_update(&ce->function_table, ZEND_STR_TYPE, lc_class_name, lc_class_name_len+1, ce->constructor, sizeof(zend_function), NULL);
+			function_add_ref(ce->constructor TSRMLS_CC);
+			efree(lc_class_name.v);
 		}
-		efree(lc_class_name.v);
 	}
-	ce->constructor = ce->parent->constructor;
 }
 
 
@@ -4347,7 +4349,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	zend_u_hash_init_ex(&ce->properties_info, 0, NULL, (dtor_func_t) (persistent_hashes ? zend_destroy_property_info_internal : zend_destroy_property_info), persistent_hashes, UG(unicode), 0);
 	zend_u_hash_init_ex(&ce->default_static_members, 0, NULL, zval_ptr_dtor_func, persistent_hashes, UG(unicode), 0);
 	zend_u_hash_init_ex(&ce->constants_table, 0, NULL, zval_ptr_dtor_func, persistent_hashes, UG(unicode), 0);
-	zend_u_hash_init_ex(&ce->function_table, 0, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, UG(unicode), 0);
+	zend_u_hash_init_ex(&ce->function_table, 0, NULL, UG(unicode)?ZEND_U_FUNCTION_DTOR:ZEND_FUNCTION_DTOR, persistent_hashes, UG(unicode), 0);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 #ifdef ZTS

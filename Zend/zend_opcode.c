@@ -124,6 +124,32 @@ ZEND_API void zend_function_dtor(zend_function *function)
 	destroy_zend_function(function TSRMLS_CC);
 }
 
+ZEND_API void zend_u_function_dtor(zend_function *function)
+{
+	TSRMLS_FETCH();
+
+	destroy_zend_function(function TSRMLS_CC);
+	if (function->type == ZEND_INTERNAL_FUNCTION) {
+		if (function->common.function_name.v) {
+			free(function->common.function_name.v);
+		}
+		if (function->common.arg_info) {
+			int n = function->common.num_args;
+
+			while (n > 0) {
+				--n;
+				if (function->common.arg_info[n].name.v) {
+					free(function->common.arg_info[n].name.v);
+				}
+				if (function->common.arg_info[n].class_name.v) {
+					free(function->common.arg_info[n].class_name.v);
+				}
+			}
+			free(function->common.arg_info);
+		}
+	}
+}
+
 static void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
 	if (op_array->static_variables) {
