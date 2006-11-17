@@ -664,6 +664,7 @@ zend_object_value php_com_object_new(zend_class_entry *ce TSRMLS_DC)
 	php_com_dotnet_object *obj;
 	zend_object_value retval;
 
+	php_com_initialize(TSRMLS_C);
 	obj = emalloc(sizeof(*obj));
 	memset(obj, 0, sizeof(*obj));
 
