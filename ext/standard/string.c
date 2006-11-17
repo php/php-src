@@ -3905,7 +3905,7 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 		UChar *key_string;
 
 		tmp_hash = emalloc(sizeof(HashTable));
-		zend_hash_init(tmp_hash, 0, ZVAL_PTR_DTOR, NULL, 0);
+		zend_hash_init(tmp_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 		/* Loop over the two strings and prepare the hash entries */
 		do
@@ -3922,7 +3922,8 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 				}
 
 				MAKE_STD_ZVAL(entry);
-				ZVAL_UNICODEL(entry, str_to + prev_to_offset, to_cp_offset - prev_to_offset, 0);
+				ZVAL_UNICODEL(entry, str_to + prev_to_offset, to_cp_offset - prev_to_offset, 1);
+				Z_USTRVAL_P(entry)[to_cp_offset - prev_to_offset] = 0;
 
 				key_string = eumalloc(from_cp_offset - prev_from_offset + 1);
 				memcpy(key_string, str_from + prev_from_offset, UBYTES(from_cp_offset - prev_from_offset));
