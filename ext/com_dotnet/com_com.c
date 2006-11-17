@@ -53,6 +53,7 @@ PHP_FUNCTION(com_create_instance)
 		&authid, EOAC_NONE
 	};
 
+	php_com_initialize(TSRMLS_C);
 	obj = CDNO_FETCH(object);
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
@@ -294,6 +295,7 @@ PHP_FUNCTION(com_get_active_object)
 	HRESULT res;
 	OLECHAR *module = NULL;
 
+	php_com_initialize(TSRMLS_C);
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
 				&module_name, &module_name_len, &code_page)) {
 		php_com_throw_exception(E_INVALIDARG, "Invalid arguments!" TSRMLS_CC);
@@ -660,6 +662,7 @@ PHP_FUNCTION(com_create_guid)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
+	php_com_initialize(TSRMLS_C);
 	if (CoCreateGuid(&retval) == S_OK && StringFromCLSID(&retval, &guid_string) == S_OK) {
 		Z_TYPE_P(return_value) = IS_STRING;
 		Z_STRVAL_P(return_value) = php_com_olestring_to_string(guid_string, &Z_STRLEN_P(return_value), CP_ACP, 0);
@@ -688,6 +691,7 @@ PHP_FUNCTION(com_event_sink)
 		RETURN_FALSE;
 	}
 
+	php_com_initialize(TSRMLS_C);
 	obj = CDNO_FETCH(object);
 	
 	if (sink && Z_TYPE_P(sink) == IS_ARRAY) {
@@ -748,6 +752,7 @@ PHP_FUNCTION(com_print_typeinfo)
 		RETURN_FALSE;
 	}
 
+	php_com_initialize(TSRMLS_C);
 	if (Z_TYPE_P(arg1) == IS_OBJECT) {
 		CDNO_FETCH_VERIFY(obj, arg1);
 	} else {
@@ -778,6 +783,7 @@ PHP_FUNCTION(com_message_pump)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timeoutms) == FAILURE)
 		RETURN_FALSE;
 	
+	php_com_initialize(TSRMLS_C);
 	result = MsgWaitForMultipleObjects(0, NULL, FALSE, timeoutms, QS_ALLINPUT);
 
 	if (result == WAIT_OBJECT_0) {
@@ -811,6 +817,7 @@ PHP_FUNCTION(com_load_typelib)
 
 	RETVAL_FALSE;
 	
+	php_com_initialize(TSRMLS_C);
 	pTL = php_com_load_typelib_via_cache(name, codepage, &cached TSRMLS_CC);
 	if (pTL) {
 		if (cached) {

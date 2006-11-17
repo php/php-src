@@ -329,6 +329,8 @@ PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userda
 PHPAPI int cfg_get_long(char *varname, long *result);
 PHPAPI int cfg_get_double(char *varname, double *result);
 PHPAPI int cfg_get_string(char *varname, char **result);
+
+PHPAPI void php_com_initialize(TSRMLS_D);
 END_EXTERN_C()
 
 /* PHP-named Zend macro wrappers */

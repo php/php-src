@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   The new directive cgi.check_shebang_line can be used to ommiting checnk
   for "#! /usr/bin/php" line. (Dmitry).
 - Windows related optimizations (Dmitry, Stas)
+  . COM initialization/deinitialization are done only if necessary
   . removed unnecessary checks for ISREG file and corresponding stat() calls
   . opendir() is reimplemented using GetFistFile/GetNextFile those are faster
     then _findfirst/_findnext

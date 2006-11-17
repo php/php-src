@@ -193,6 +193,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	char *where = "";
 	IUnknown *unk = NULL;
 
+	php_com_initialize(TSRMLS_C);
 	if (COMG(dotnet_runtime_stuff) == NULL) {
 		hr = dotnet_init(&where TSRMLS_CC);
 		if (FAILED(hr)) {
