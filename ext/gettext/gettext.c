@@ -151,6 +151,15 @@ PHP_MINFO_FUNCTION(php_gettext)
 	php_info_print_table_end();
 }
 
+#define RETVAL_FS_STRING(s, f) \
+	RETVAL_STRING((s), (f)); \
+	if (UG(unicode)) { \
+		zval_string_to_unicode_ex(return_value, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)) TSRMLS_CC); \
+	}
+#define RETURN_FS_STRING(s, f) \
+	RETVAL_FS_STRING((s), (f)); \
+	return;
+
 /* {{{ proto string textdomain(string domain) U
    Set the textdomain to "domain". Returns the current domain */
 PHP_NAMED_FUNCTION(zif_textdomain)
@@ -165,7 +174,7 @@ PHP_NAMED_FUNCTION(zif_textdomain)
 	if (!domain_len || (domain_len == 1 && *domain_str == '0')) {
 		domain_str = NULL;
 	}
-	RETURN_ASCII_STRING(textdomain(domain_str), 1);
+	RETURN_FS_STRING(textdomain(domain_str), ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -179,7 +188,7 @@ PHP_NAMED_FUNCTION(zif_gettext)
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &msgid_str, &msgid_len, UG(ascii_conv))) {
 		return;
 	}
-	RETURN_STRING(gettext(msgid_str), 1);
+	RETURN_STRING(gettext(msgid_str), ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -193,7 +202,7 @@ PHP_NAMED_FUNCTION(zif_dgettext)
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str, &msgid_len, UG(ascii_conv))) {
 		return;
 	}
-	RETURN_STRING(dgettext(domain_str, msgid_str), 1);
+	RETURN_STRING(dgettext(domain_str, msgid_str), ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -208,7 +217,7 @@ PHP_NAMED_FUNCTION(zif_dcgettext)
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&l", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str, &msgid_len, UG(ascii_conv), &category)) {
 		return;
 	}
-	RETURN_STRING(dcgettext(domain_str, msgid_str, category), 1);
+	RETURN_STRING(dcgettext(domain_str, msgid_str, category), ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -231,7 +240,7 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 	} else {
 		VCWD_REALPATH(dir_str, dir_tmp);
 	}
-	RETURN_ASCII_STRING(bindtextdomain(domain_str, dir_tmp), 1);
+	RETURN_FS_STRING(bindtextdomain(domain_str, dir_tmp), ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -249,7 +258,7 @@ PHP_NAMED_FUNCTION(zif_ngettext)
 	}
 	
 	if ((msgstr = ngettext(msgid_str1, msgid_str2, count))) {
-		RETURN_STRING(msgstr, 1);
+		RETURN_STRING(msgstr, ZSTR_DUPLICATE);
 	} else {
 		RETURN_FALSE;
 	}
@@ -271,7 +280,7 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 	}
 	
 	if ((msgstr = dngettext(domain_str, msgid_str1, msgid_str2, count))) {
-		RETURN_STRING(msgstr, 1);
+		RETURN_STRING(msgstr, ZSTR_DUPLICATE);
 	} else {
 		RETURN_FALSE;
 	}
@@ -293,7 +302,7 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 	}
 	
 	if ((msgstr = dcngettext(domain_str, msgid_str1, msgid_str2, count, category))) {
-		RETURN_STRING(msgstr, 1);
+		RETURN_STRING(msgstr, ZSTR_DUPLICATE);
 	} else {
 		RETURN_FALSE;
 	}
@@ -317,7 +326,7 @@ PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
 		codeset_str = NULL;
 	}
 	if ((codeset_ret = bind_textdomain_codeset(domain_str, codeset_str))) {
-		RETURN_ASCII_STRING(codeset_ret, 1);
+		RETURN_ASCII_STRING(codeset_ret, ZSTR_DUPLICATE);
 	} else {
 		RETURN_FALSE;
 	}
