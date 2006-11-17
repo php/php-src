@@ -287,6 +287,7 @@ PHP_FUNCTION(com_variant_create_instance)
 			return;
 	}
 
+	php_com_initialize(TSRMLS_C);
 	if (ZEND_NUM_ARGS() == 3) {
 		obj->code_page = codepage;
 	}
