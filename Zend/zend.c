@@ -671,7 +671,6 @@ static void zend_set_default_compile_time_values(TSRMLS_D)
 }
 
 
-#define ZEND_U_FUNCTION_DTOR (void (*)(void *)) zend_u_function_dtor
 #define ZEND_U_CONSTANT_DTOR (void (*)(void *)) free_u_zend_constant
 
 static void zval_copy_persistent(zval *zv)
@@ -684,32 +683,6 @@ static void zval_copy_persistent(zval *zv)
 		free(Z_STRVAL_P(zv));
 		Z_USTRVAL_P(zv) = ustr;
 		if (Z_TYPE_P(zv) == IS_STRING) Z_TYPE_P(zv) = IS_UNICODE;
-	}
-}
-
-static void zend_u_function_dtor(zend_function *function)
-{
-	TSRMLS_FETCH();
-
-	destroy_zend_function(function TSRMLS_CC);
-	if (function->type == ZEND_INTERNAL_FUNCTION) {
-		if (function->common.function_name.v) {
-			free(function->common.function_name.v);
-		}
-		if (function->common.arg_info) {
-			int n = function->common.num_args;
-
-			while (n > 0) {
-				--n;
-				if (function->common.arg_info[n].name.v) {
-					free(function->common.arg_info[n].name.v);
-				}
-				if (function->common.arg_info[n].class_name.v) {
-					free(function->common.arg_info[n].class_name.v);
-				}
-			}
-			free(function->common.arg_info);
-		}
 	}
 }
 
@@ -740,17 +713,17 @@ static void function_to_unicode(zend_function *func TSRMLS_DC)
 		args = malloc((n + 1) * sizeof(zend_arg_info));
 		memcpy(args, func->common.arg_info, (n + 1) * sizeof(zend_arg_info));
 		while (n > 0) {
-		  --n;
-		  if (args[n].name.s) {
+			--n;
+			if (args[n].name.s) {
 				UChar *uname = malloc(UBYTES(args[n].name_len + 1));
 				u_charsToUChars(args[n].name.s, uname, args[n].name_len+1);
 				args[n].name.u = uname;
-		  }
-		  if (args[n].class_name.s) {
+			}
+			if (args[n].class_name.s) {
 				UChar *uname = malloc(UBYTES(args[n].class_name_len + 1));
 				u_charsToUChars(args[n].class_name.s, uname, args[n].class_name_len+1);
 				args[n].class_name.u = uname;
-		  }
+			}
 		}
 		func->common.arg_info = args;
 	}
@@ -822,11 +795,11 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 	compiler_globals->compiled_filename = NULL;
 
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_u_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, UG(unicode), 0);
+	zend_u_hash_init_ex(compiler_globals->function_table, global_function_table->nNumOfElements, NULL, ZEND_FUNCTION_DTOR, 1, UG(unicode), 0);
 	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL, &tmp_func, sizeof(zend_function));
 
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_u_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, UG(unicode), 0);
+	zend_u_hash_init_ex(compiler_globals->class_table, global_class_table->nNumOfElements, NULL, ZEND_CLASS_DTOR, 1, UG(unicode), 0);
 	zend_hash_copy(compiler_globals->class_table, global_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry *));
 
 	zend_set_default_compile_time_values(TSRMLS_C);
@@ -835,7 +808,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 	CG(literal_type) = IS_STRING;
 
 	compiler_globals->auto_globals = (HashTable *) malloc(sizeof(HashTable));
-	zend_u_hash_init_ex(compiler_globals->auto_globals, 8, NULL, NULL, 1, UG(unicode), 0);
+	zend_u_hash_init_ex(compiler_globals->auto_globals, global_auto_globals_table->nNumOfElements, NULL, NULL, 1, UG(unicode), 0);
 	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, NULL, NULL, sizeof(zend_auto_global) /* empty element */);
 
 	compiler_globals->last_static_member = zend_hash_num_elements(compiler_globals->class_table);
@@ -1135,6 +1108,26 @@ void zend_register_standard_ini_entries(TSRMLS_D)
 	int module_number = 0;
 
 	REGISTER_INI_ENTRIES();
+
+	/* Make copies of HashTables with UNICODE */
+
+	if (UG(unicode)) {
+		UConverter *old_runtime_encoding_conv;
+		UErrorCode status = U_ZERO_ERROR;
+
+		old_runtime_encoding_conv = UG(runtime_encoding_conv);
+		UG(runtime_encoding_conv) = ucnv_open("ASCII", &status);
+
+		zend_hash_to_unicode(CG(function_table), (apply_func_t)function_to_unicode TSRMLS_CC);
+		CG(function_table)->pDestructor = ZEND_U_FUNCTION_DTOR;
+		zend_hash_to_unicode(CG(class_table), (apply_func_t)class_to_unicode TSRMLS_CC);
+		zend_hash_to_unicode(CG(auto_globals), NULL TSRMLS_CC);
+		zend_hash_to_unicode(EG(zend_constants), (apply_func_t)const_to_unicode TSRMLS_CC);
+		EG(zend_constants)->pDestructor = ZEND_U_CONSTANT_DTOR;
+
+		ucnv_close(UG(runtime_encoding_conv));
+		UG(runtime_encoding_conv) = old_runtime_encoding_conv;
+	}
 }
 
 /* Unlink the global (r/o) copies of the class, function and constant tables,
@@ -1149,29 +1142,6 @@ void zend_post_startup(TSRMLS_D)
 	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
 	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
 	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
-#endif
-
-	/* Make copies of HashTables with UNICODE */
-
-	if (UG(unicode)) {
-		UConverter *old_runtime_encoding_conv;
-		UErrorCode status = U_ZERO_ERROR;
-
-		old_runtime_encoding_conv = UG(runtime_encoding_conv);
-		UG(runtime_encoding_conv) = ucnv_open("ASCII", &status);
-
-		zend_hash_to_unicode(GLOBAL_FUNCTION_TABLE, (apply_func_t)function_to_unicode TSRMLS_CC);
-		GLOBAL_FUNCTION_TABLE->pDestructor = ZEND_U_FUNCTION_DTOR;
-		zend_hash_to_unicode(GLOBAL_CLASS_TABLE, (apply_func_t)class_to_unicode TSRMLS_CC);
-		zend_hash_to_unicode(GLOBAL_AUTO_GLOBALS_TABLE, NULL TSRMLS_CC);
-		zend_hash_to_unicode(GLOBAL_CONSTANTS_TABLE, (apply_func_t)const_to_unicode TSRMLS_CC);
-		GLOBAL_CONSTANTS_TABLE->pDestructor = ZEND_U_CONSTANT_DTOR;
-
-		ucnv_close(UG(runtime_encoding_conv));
-		UG(runtime_encoding_conv) = old_runtime_encoding_conv;
-	}
-
-#ifdef ZTS
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	free(compiler_globals->function_table);
 	free(compiler_globals->class_table);

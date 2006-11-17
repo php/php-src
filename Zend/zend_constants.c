@@ -186,13 +186,19 @@ ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, 
 {
 	zend_constant c;
 
+	if (UG(unicode)) {
+		c.name.u = malloc(UBYTES(name_len));
+		u_charsToUChars(name, c.name.u, name_len);
+		c.name_len = name_len;
+	} else {
+		c.name.s = zend_strndup(name, name_len-1);
+		c.name_len = name_len;
+	}
 	Z_TYPE(c.value) = IS_LONG;
 	Z_LVAL(c.value) = lval;
 	c.flags = flags;
-	c.name.s = zend_strndup(name, name_len-1);
-	c.name_len = name_len;
 	c.module_number = module_number;
-	zend_register_constant(&c TSRMLS_CC);
+	zend_u_register_constant(ZEND_STR_TYPE, &c TSRMLS_CC);
 }
 
 
@@ -200,13 +206,19 @@ ZEND_API void zend_register_double_constant(char *name, uint name_len, double dv
 {
 	zend_constant c;
 
+	if (UG(unicode)) {
+		c.name.u = malloc(UBYTES(name_len));
+		u_charsToUChars(name, c.name.u, name_len);
+		c.name_len = name_len;
+	} else {
+		c.name.s = zend_strndup(name, name_len-1);
+		c.name_len = name_len;
+	}
 	Z_TYPE(c.value) = IS_DOUBLE;
 	Z_DVAL(c.value) = dval;
 	c.flags = flags;
-	c.name.s = zend_strndup(name, name_len-1);
-	c.name_len = name_len;
 	c.module_number = module_number;
-	zend_register_constant(&c TSRMLS_CC);
+	zend_u_register_constant(ZEND_STR_TYPE, &c TSRMLS_CC);
 }
 
 
@@ -214,14 +226,31 @@ ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *st
 {
 	zend_constant c;
 
-	Z_TYPE(c.value) = IS_STRING;
-	Z_STRVAL(c.value) = strval;
-	Z_STRLEN(c.value) = strlen;
+	if (UG(unicode)) {
+		c.name.u = malloc(UBYTES(name_len));
+		u_charsToUChars(name, c.name.u, name_len);
+		c.name_len = name_len;
+		Z_TYPE(c.value) = IS_UNICODE;
+		if (flags & CONST_PERSISTENT) {
+			Z_USTRVAL(c.value) = malloc(UBYTES(strlen+1));
+		} else {
+			Z_USTRVAL(c.value) = emalloc(UBYTES(strlen+1));
+		}
+		u_charsToUChars(strval, Z_USTRVAL(c.value), strlen+1);
+		Z_USTRLEN(c.value) = strlen;
+		if (!(flags & CONST_PERSISTENT)) {
+			efree(strval);
+		}
+	} else {
+		c.name.s = zend_strndup(name, name_len-1);
+		c.name_len = name_len;
+		Z_TYPE(c.value) = IS_STRING;
+		Z_STRVAL(c.value) = strval;
+		Z_STRLEN(c.value) = strlen;
+	}
 	c.flags = flags;
-	c.name.s = zend_strndup(name, name_len-1);
-	c.name_len = name_len;
 	c.module_number = module_number;
-	zend_register_constant(&c TSRMLS_CC);
+	zend_u_register_constant(ZEND_STR_TYPE, &c TSRMLS_CC);
 }
 
 

@@ -121,12 +121,22 @@ typedef struct _zend_function_entry {
 
 #endif
 
-#define INIT_CLASS_ENTRY(class_container, class_name, functions) INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, NULL, NULL, NULL)
+#define INIT_CLASS_ENTRY(class_container, class_name, functions) \
+	INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, NULL, NULL, NULL)
 
-#define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
+#define INIT_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions) \
+	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, NULL, NULL, NULL, NULL, NULL)
+
+#define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	{															\
-		class_container.name.s = strdup(class_name);			\
-		class_container.name_length = sizeof(class_name) - 1;	\
+		int _len = class_name_len;								\
+		if (UG(unicode)) {										\
+			class_container.name.u = malloc(UBYTES(_len+1));				\
+			u_charsToUChars(class_name, class_container.name.u, _len+1);	\
+		} else {															\
+			class_container.name.s = zend_strndup(class_name, _len);		\
+		}														\
+		class_container.name_length = _len;				        \
 		class_container.builtin_functions = functions;			\
 		class_container.constructor = NULL;						\
 		class_container.destructor = NULL;						\
@@ -154,7 +164,7 @@ typedef struct _zend_function_entry {
 	}
 
 #define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
-	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset, NULL, NULL)
+	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, sizeof(class_name)-1, functions, handle_fcall, handle_propget, handle_propset, NULL, NULL)
 
 #ifdef ZTS
 #	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members:CG(static_members)[(long)(ce)->static_members])
