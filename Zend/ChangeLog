@@ -1,3 +1,15 @@
+2006-11-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_opcode.c:
+      Unicode support.
+      Now the real UG(unicode) value is available during MINIT calls.
+
 2006-11-15  Antony Dovgal  <antony@zend.com>
 
     * zend_API.h:

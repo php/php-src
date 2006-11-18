@@ -1,3 +1,51 @@
+2006-11-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      Use u_memcpy() instead of memcpy().
+
+    * ext/standard/string.c:
+      Fix memory leaks and segfault.
+
+2006-11-17  Michael Wallner  <mike@iworks.at>
+
+    * ext/gettext/gettext.c:
+      - return domain in FS encoding
+      - use ZSTR_DUPLICATE
+
+2006-11-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_dotnet.c
+      ext/com_dotnet/com_dotnet.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/com_variant.c
+      main/main.c
+      main/main.c
+      main/php.h
+      main/php.h
+      main/php_globals.h
+      main/php_globals.h:
+      COM initialization/deinitialization are done only if necessary
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_opcode.c
+      ext/dom/php_dom.c
+      ext/libxml/libxml.c
+      ext/spl/spl_functions.c
+      main/main.c:
+      Unicode support.
+      Now the real UG(unicode) value is available during MINIT calls.
+
 2006-11-16  Derick Rethans  <php@derickrethans.nl>
 
     * ext/standard/string.c
