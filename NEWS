@@ -74,6 +74,8 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #39090 (DirectoryFilterDots doxygen docs and example is wrong).
   (Marcus)
+- Fixed bug #38770 (unpack() broken with longs on 64 bit machines). (Ilia,
+  David Soria Parra).
 - Fixed bug #38698 (for some keys cdbmake creates corrupted db and cdb can't 
   read valid db). (Marcus)
 - Fixed bug #38680 (Added missing handling of basic types in json_decode).
