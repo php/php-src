@@ -1,3 +1,23 @@
+2006-11-18  Michael Wallner  <mike@iworks.at>
+
+    * unicode-progress.txt:
+      catch up:
+      - Sara upgraded ext/bcmath
+      - Sara upgrades ext/bz2
+      - Dmitry upgraded ext/ctype
+      - Sara upgraded ext/gmp
+      - Sara upgraded ext/hash
+      - Andrei upgraded ext/json
+      - Georg upgrades ext/mysqli
+      - Dmitry and Andrei upgraded ext/reflection
+      - Rob upgrades ext/simplexml
+      - Dmitry upgraded ext/soap
+      - Nuno upgrades ext/tidy
+      - Rob upgrades ext/xml
+      - Rob upgraded ext/xmlreader
+      - Rob upgraded ext/xmlwriter
+      - Rob upgraded ext/xsl
+
 2006-11-17  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/string.c:
