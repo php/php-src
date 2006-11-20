@@ -229,9 +229,10 @@ function iterator_count(Traversable $it) {/**/};
  * @since PHP 5.1
  *
  * @param it  iterator to copy
+ * @param use_keys whether touse the keys
  * @return array with elements copied from the iterator
  */
-function iterator_to_array(Traversable $it) {/**/};
+function iterator_to_array(Traversable $it, $use_keys = true) {/**/};
 
 /** @ingroup ZendEngine
  * @brief Basic Exception class.
