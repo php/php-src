@@ -647,7 +647,7 @@ PHP_MINFO_FUNCTION(spl)
 /* }}} */
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_iterator_to_array, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_iterator_to_array, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 	ZEND_ARG_INFO(0, use_keys)
 ZEND_END_ARG_INFO();
