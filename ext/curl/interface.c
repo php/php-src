@@ -164,19 +164,19 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 															\
 		if (!(tmp_url = php_url_parse_ex(str, len))) {											\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL '%s'", str);				\
-			RETURN_FALSE; 																		\
+			RETVAL_FALSE;											\
 		} 																						\
 															\
 		if (php_memnstr(str, tmp_url->path, strlen(tmp_url->path), str + len)) {				\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL '%s' contains unencoded control characters.", str);	\
-			RETURN_FALSE;											\
+			RETVAL_FALSE;											\
 		}													\
 																								\
 		if (tmp_url->query || tmp_url->fragment || php_check_open_basedir(tmp_url->path TSRMLS_CC) || 									\
 			(PG(safe_mode) && !php_checkuid(tmp_url->path, "rb+", CHECKUID_CHECK_MODE_PARAM))	\
 		) { 																					\
 			php_url_free(tmp_url); 																\
-			RETURN_FALSE; 																		\
+			RETVAL_FALSE;											\
 		} 																						\
 		php_url_free(tmp_url); 																	\
 	}
@@ -1079,6 +1079,7 @@ PHP_FUNCTION(curl_init)
 	if (argc > 0) {
 		convert_to_string_ex(url);
 		PHP_CURL_CHECK_OPEN_BASEDIR(Z_STRVAL_PP(url), Z_STRLEN_PP(url));
+		return;
 	}
 
 	cp = curl_easy_init();
@@ -1269,7 +1270,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
 				if (Z_LVAL_PP(zvalue) != 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when in safe_mode or an open_basedir is set");
-					RETURN_FALSE;
+					RETVAL_FALSE;
+					return 1;
 				}
 			}
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
@@ -1303,6 +1305,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 
 			if (option == CURLOPT_URL) {
 				PHP_CURL_CHECK_OPEN_BASEDIR(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
+				return 1;
 			}
 
 			copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
@@ -1320,7 +1323,10 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			void * what;
 		
 			what = zend_fetch_resource(zvalue TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
-			ZEND_VERIFY_RESOURCE(what);
+			if (!what) {
+				RETVAL_FALSE;
+				return 1;
+			}
 
 			if (FAILURE == php_stream_cast((php_stream *) what, PHP_STREAM_AS_STDIO, (void *) &fp, REPORT_ERRORS)) {
 				RETVAL_FALSE;
