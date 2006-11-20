@@ -658,6 +658,12 @@ PHP_MINFO_FUNCTION(spl)
 /* }}} */
 
 static
+ZEND_BEGIN_ARG_INFO(arginfo_iterator_to_array, 0)
+	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
+	ZEND_ARG_INFO(0, use_keys)
+ZEND_END_ARG_INFO();
+
+static
 ZEND_BEGIN_ARG_INFO(arginfo_iterator, 0)
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 ZEND_END_ARG_INFO();
@@ -683,7 +689,7 @@ zend_function_entry spl_functions[] = {
 	PHP_FE(class_implements,        NULL)
 	PHP_FE(spl_object_hash,         NULL)
 #ifdef SPL_ITERATORS_H
-	PHP_FE(iterator_to_array,       arginfo_iterator)
+	PHP_FE(iterator_to_array,       arginfo_iterator_to_array)
 	PHP_FE(iterator_count,          arginfo_iterator)
 	PHP_FE(iterator_apply,          arginfo_iterator_apply)
 #endif /* SPL_ITERATORS_H */
