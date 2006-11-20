@@ -66,7 +66,7 @@ bool(true)
 Warning: link(): No such file or directory in %s on line %d
 bool(false)
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink(): %s in %s on line %d
 bool(false)
 
 Warning: link(): %s in %s on line %d
