@@ -500,7 +500,7 @@ PHP_FUNCTION(get_meta_tags)
 				}
 
 				efree(name);
-				efree(value);
+				STR_FREE(value);
 			} else if (have_content) {
 				efree(value);
 			}
