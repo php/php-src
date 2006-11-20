@@ -2,6 +2,11 @@
 stristr() function
 --FILE--
 <?php
+	var_dump(stristr());
+	var_dump(stristr(array(), ""));
+	var_dump(stristr("", array()));
+	var_dump(stristr(array(), array()));
+
 	var_dump(stristr("tEsT sTrInG", "tEsT"));
 	var_dump(stristr("tEsT sTrInG", "stRiNg"));
 	var_dump(stristr("tEsT sTrInG", "stRiN"));
@@ -15,7 +20,18 @@ stristr() function
 	var_dump(stristr("tEsT sTrInG", " ", false));
 	var_dump(stristr("tEsT sTrInG", " ", true));
 ?>
---EXPECT--
+--EXPECTF--
+Warning: stristr() expects at least 2 parameters, 0 given in %s on line %d
+NULL
+
+Notice: Array to string conversion in %s on line %d
+
+Warning: stristr(): Empty delimiter in %s on line %d
+bool(false)
+bool(false)
+
+Notice: Array to string conversion in %s on line %d
+bool(false)
 string(11) "tEsT sTrInG"
 string(6) "sTrInG"
 string(6) "sTrInG"
@@ -28,7 +44,18 @@ bool(false)
 string(32) "6ec19f52f0766c463f3bb240f4396913"
 string(7) " sTrInG"
 string(4) "tEsT"
---UEXPECT--
+--UEXPECTF--
+Warning: stristr() expects at least 2 parameters, 0 given in %s on line %d
+NULL
+
+Notice: Array to string conversion in %s on line %d
+
+Warning: stristr(): Empty delimiter in %s on line %d
+bool(false)
+bool(false)
+
+Notice: Array to string conversion in %s on line %d
+bool(false)
 unicode(11) "tEsT sTrInG"
 unicode(6) "sTrInG"
 unicode(6) "sTrInG"
