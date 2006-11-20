@@ -1,3 +1,103 @@
+2006-11-19  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/ftp/tests/001.phpt
+      ext/ftp/tests/002.phpt
+      ext/ftp/tests/003.phpt
+      ext/ftp/tests/cert.pem
+      ext/ftp/tests/server.inc
+      ext/ftp/tests/skipif.inc:
+      MFB
+
+    * ext/ftp/tests/001.phpt
+      ext/ftp/tests/001.phpt
+      ext/ftp/tests/002.phpt
+      ext/ftp/tests/002.phpt
+      ext/ftp/tests/003.phpt
+      ext/ftp/tests/003.phpt
+      ext/ftp/tests/cert.pem
+      ext/ftp/tests/cert.pem
+      ext/ftp/tests/server.inc
+      ext/ftp/tests/server.inc
+      ext/ftp/tests/skipif.inc
+      ext/ftp/tests/skipif.inc:
+      
+      file 001.phpt was initially added on branch PHP_5_2.
+
+2006-11-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/pack.phpt:
+      MFB: pack()/unpack() tests
+
+    * ext/standard/tests/strings/pack.phpt
+      ext/standard/tests/strings/pack.phpt:
+      
+      file pack.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/pack.c
+      ext/standard/tests/strings/bug38770.phpt:
+      MFB: Fixed bug #38770 (unpack() broken with longs on 64 bit machines).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/pack.c
+      ext/standard/tests/strings/bug38770.phpt
+      ext/standard/tests/strings/bug38770.phpt:
+      Fixed bug #38770 (unpack() broken with longs on 64 bit machines).
+
+2006-11-19  Georg Richter  <georg@mysql.com>
+
+    * ext/mysql/tests/mysql_affected_rows.phpt
+      ext/mysql/tests/mysql_client_encoding.phpt
+      ext/mysql/tests/mysql_close.phpt
+      ext/mysql/tests/mysql_connect.phpt
+      ext/mysql/tests/mysql_create_db.phpt
+      ext/mysql/tests/mysql_data_seek.phpt
+      ext/mysql/tests/mysql_db_name.phpt
+      ext/mysql/tests/mysql_db_query.phpt
+      ext/mysql/tests/mysql_drop_db.phpt
+      ext/mysql/tests/mysql_errno.phpt
+      ext/mysql/tests/mysql_error.phpt
+      ext/mysql/tests/mysql_escape_string.phpt
+      ext/mysql/tests/mysql_fetch_array.phpt
+      ext/mysql/tests/mysql_fetch_assoc.phpt
+      ext/mysql/tests/mysql_fetch_field.phpt
+      ext/mysql/tests/mysql_fetch_lengths.phpt
+      ext/mysql/tests/mysql_fetch_object.phpt
+      ext/mysql/tests/mysql_fetch_row.phpt
+      ext/mysql/tests/mysql_field_flags.phpt
+      ext/mysql/tests/mysql_field_len.phpt
+      ext/mysql/tests/mysql_field_name.phpt
+      ext/mysql/tests/mysql_field_seek.phpt
+      ext/mysql/tests/mysql_field_table.phpt
+      ext/mysql/tests/mysql_field_type.phpt
+      ext/mysql/tests/mysql_free_result.phpt
+      ext/mysql/tests/mysql_get_client_info.phpt
+      ext/mysql/tests/mysql_get_host_info.phpt
+      ext/mysql/tests/mysql_get_proto_info.phpt
+      ext/mysql/tests/mysql_get_server_info.phpt
+      ext/mysql/tests/mysql_info.phpt
+      ext/mysql/tests/mysql_insert_id.phpt
+      ext/mysql/tests/mysql_list_dbs.phpt
+      ext/mysql/tests/mysql_list_fields.phpt
+      ext/mysql/tests/mysql_list_processes.phpt
+      ext/mysql/tests/mysql_num_fields.phpt
+      ext/mysql/tests/mysql_num_rows.phpt
+      ext/mysql/tests/mysql_pconnect.phpt
+      ext/mysql/tests/mysql_ping.phpt
+      ext/mysql/tests/mysql_query.phpt
+      ext/mysql/tests/mysql_real_escape_string.phpt
+      ext/mysql/tests/mysql_result.phpt
+      ext/mysql/tests/mysql_select_db.phpt
+      ext/mysql/tests/mysql_stat.phpt
+      ext/mysql/tests/mysql_tablename.phpt
+      ext/mysql/tests/mysql_thread_id.phpt
+      ext/mysql/tests/mysql_unbuffered_query.phpt
+      ext/mysql/tests/table.inc:
+      added testcases for ext/mysql (written by Ulf Wendel)
+
+    * ext/mysql/php_mysql.c:
+      added unicode support for ext/mysql
+
 2006-11-18  Michael Wallner  <mike@iworks.at>
 
     * unicode-progress.txt:
