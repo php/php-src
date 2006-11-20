@@ -2734,23 +2734,38 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser T
 }
 /* }}} */
 
-/* {{{ proto array iterator_to_array(Traversable it) 
+static int spl_iterator_to_values_apply(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
+{
+	zval **data, *return_value = (zval*)puser;
+
+	iter->funcs->get_current_data(iter, &data TSRMLS_CC);
+	if (EG(exception)) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+	(*data)->refcount++;
+	add_next_index_zval(return_value, *data);
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+/* {{{ proto array iterator_to_array(Traversable it [, bool use_keys = true]) 
    Copy the iterator into an array */
 PHP_FUNCTION(iterator_to_array)
 {
 	zval  *obj;
+	zend_bool use_keys = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, zend_ce_traversable) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|b", &obj, zend_ce_traversable, &use_keys) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
-	
-	if (spl_iterator_apply(obj, spl_iterator_to_array_apply, (void*)return_value TSRMLS_CC) != SUCCESS) {
+
+	if (spl_iterator_apply(obj, use_keys ? spl_iterator_to_array_apply : spl_iterator_to_values_apply, (void*)return_value TSRMLS_CC) != SUCCESS) {
 		zval_dtor(return_value);
 		RETURN_NULL();
 	}
-}
+} /* }}} */
 
 static int spl_iterator_count_apply(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
 {
