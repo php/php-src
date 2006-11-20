@@ -7,6 +7,36 @@ ext/standard
 
   array.c
   -------
+    error_log()
+        Params API, what encoding to use for the message, handling email
+        option
+
+    set_include_path(), get_include_path(), restore_include_path()
+        Params API, depends on INI mechanism
+
+    register/unregister_tick_function()
+        Params API
+
+    import_request_variables()
+        Params API, support for Unicode keys in request arrays
+
+    ini_get(), ini_get_all(), ini_set(), ini_restore()
+        Params API, Unicode support per discussion
+
+    get_cfg_var()
+        IS_UNICODE support for varname
+
+    parse_ini_file()
+        Params API, unicode filename support, depends on INI mechaniem
+
+    highlight_string()
+        IS_UNICODE support (may be very easy, since scanner handles Unicode
+
+    getopt()
+        Use ASCII for options?
+
+  array.c
+  -------
     natsort(), natcasesort()
         Params API
         Either port strnatcmp() to support Unicode or maybe use ICU's
