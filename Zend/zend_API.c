@@ -2093,6 +2093,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 			} else {
 				reg_function = NULL;
 			}
+			efree(lc_func_name.v);
 			if (reg_function) {
 				zend_check_magic_method_implementation(scope, reg_function, error_type TSRMLS_CC);
 			}
