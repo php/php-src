@@ -5479,6 +5479,12 @@ PHP_FUNCTION(php_strip_whitespace)
 
 /* {{{ proto bool highlight_string(string string [, bool return] ) U
    Syntax highlight a string or optionally return it */
+
+/* TODO documentation:
+ * This function will return/ouput UTF-8 if the arg is a Unicode string. Users
+ * should switch their output encoding to UTF-8 when highlighting or manually
+ * convert result to their desired encoding.
+ */
 PHP_FUNCTION(highlight_string)
 {
 	zval **expr;
