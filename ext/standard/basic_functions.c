@@ -5477,7 +5477,7 @@ PHP_FUNCTION(php_strip_whitespace)
 }
 /* }}} */
 
-/* {{{ proto bool highlight_string(string string [, bool return] )
+/* {{{ proto bool highlight_string(string string [, bool return] ) U
    Syntax highlight a string or optionally return it */
 PHP_FUNCTION(highlight_string)
 {
@@ -5490,7 +5490,7 @@ PHP_FUNCTION(highlight_string)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|b", &expr, &i) == FAILURE) {
 		RETURN_FALSE;
 	}
-	convert_to_string_ex(expr);
+	convert_to_text_ex(expr);
 
 	if (i) {
 		php_output_start_default(TSRMLS_C);
