@@ -1279,8 +1279,8 @@ static int php_valid_var_name(zstr var_name, int var_name_len, int var_name_type
 	return 1;
 }
 
-static int php_extract_prefix_varname(zval *result, zval *prefix, zstr var_name,
-									  int var_name_len, int var_name_type TSRMLS_DC)
+PHPAPI int php_prefix_varname(zval *result, zval *prefix, zstr var_name,
+							  int var_name_len, int var_name_type TSRMLS_DC)
 {
 	Z_UNILEN_P(result) = Z_UNILEN_P(prefix) + 1 + var_name_len;
 	if (UG(unicode)) {
@@ -1408,7 +1408,7 @@ PHP_FUNCTION(extract)
 
 			ZVAL_LONG(&num, num_key);
 			convert_to_text(&num);
-			php_extract_prefix_varname(&final_name, prefix, Z_UNIVAL(num), Z_UNILEN(num), Z_TYPE(num) TSRMLS_CC);
+			php_prefix_varname(&final_name, prefix, Z_UNIVAL(num), Z_UNILEN(num), Z_TYPE(num) TSRMLS_CC);
 			zval_dtor(&num);
 		} else {
 			zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos);
@@ -1432,7 +1432,7 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_IF_EXISTS:
 				if (var_exists) {
-					php_extract_prefix_varname(&final_name, prefix, var_name, var_name_len, key_type TSRMLS_CC);
+					php_prefix_varname(&final_name, prefix, var_name, var_name_len, key_type TSRMLS_CC);
 				}
 				break;
 
@@ -1444,14 +1444,14 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_ALL:
 				if (Z_TYPE(final_name) == IS_NULL && var_name_len != 0) {
-					php_extract_prefix_varname(&final_name, prefix, var_name, var_name_len, key_type TSRMLS_CC);
+					php_prefix_varname(&final_name, prefix, var_name, var_name_len, key_type TSRMLS_CC);
 				}
 				break;
 
 			case EXTR_PREFIX_INVALID:
 				if (Z_TYPE(final_name) == IS_NULL) {
 					if (!php_valid_var_name(var_name, var_name_len, key_type)) {
-						php_extract_prefix_varname(&final_name, prefix, var_name, var_name_len, key_type TSRMLS_CC);
+						php_prefix_varname(&final_name, prefix, var_name, var_name_len, key_type TSRMLS_CC);
 					} else {
 						ZVAL_TEXTL(&final_name, var_name, var_name_len, 1);
 					}
