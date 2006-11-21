@@ -79,6 +79,15 @@ static zend_function_entry user_filter_class_funcs[] = {
 
 static zend_class_entry user_filter_class_entry;
 
+static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
+{
+	php_stream_bucket *bucket = (php_stream_bucket *)rsrc->ptr;
+	if (bucket) {
+		php_stream_bucket_delref(bucket TSRMLS_CC);
+		bucket = NULL;
+	}
+}
+
 PHP_MINIT_FUNCTION(user_filters)
 {
 	zend_class_entry *php_user_filter;
@@ -101,7 +110,7 @@ PHP_MINIT_FUNCTION(user_filters)
 	/* Filters will dispose of their brigades */
 	le_bucket_brigade = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_BRIGADE_RES_NAME, module_number);
 	/* Brigades will dispose of their buckets */
-	le_bucket = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_BUCKET_RES_NAME, module_number);
+	le_bucket = zend_register_list_destructors_ex(php_bucket_dtor, NULL, PHP_STREAM_BUCKET_RES_NAME, module_number);
 	
 	if (le_bucket_brigade == FAILURE) {
 		return FAILURE;
@@ -466,6 +475,13 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	} else {
 		php_stream_bucket_prepend(brigade, bucket TSRMLS_CC);
 	}
+	
+	/* This is a hack necessary to accomodate situations where bucket is appended to the stream
+	 *      * multiple times. See bug35916.phpt for reference.
+	 *           */
+	if (bucket->refcount == 1) {
+		bucket->refcount++;
+	}
 }
 /* }}} */
 
@@ -502,14 +518,19 @@ PHP_FUNCTION(stream_bucket_new)
 
 	object_init(return_value);
 	if (Z_TYPE_P(buffer) == IS_UNICODE) {
-		bucket = php_stream_bucket_new_unicode(stream, Z_USTRVAL_P(buffer), Z_USTRLEN_P(buffer), 0, php_stream_is_persistent(stream) TSRMLS_CC);
+		UChar *pbuffer = peumalloc(Z_USTRLEN_P(buffer), php_stream_is_persistent(stream));
+		memcpy(pbuffer, buffer, UBYTES(Z_USTRLEN_P(buffer)));
 
-		ZVAL_ADDREF(buffer);
+		bucket = php_stream_bucket_new_unicode(stream, pbuffer, Z_USTRLEN_P(buffer), 1, php_stream_is_persistent(stream) TSRMLS_CC);
+
 		add_property_zval(return_value, "data", buffer);
 		add_property_long(return_value, "datalen", Z_USTRLEN_P(buffer));
 	} else {
+		char *pbuffer = peumalloc(Z_STRLEN_P(buffer), php_stream_is_persistent(stream));
+		memcpy(pbuffer, buffer, Z_STRLEN_P(buffer));
+
 		convert_to_string(buffer);
-		bucket = php_stream_bucket_new(stream, Z_STRVAL_P(buffer), Z_STRLEN_P(buffer), 0, php_stream_is_persistent(stream) TSRMLS_CC);
+		bucket = php_stream_bucket_new(stream, pbuffer, Z_STRLEN_P(buffer), 1, php_stream_is_persistent(stream) TSRMLS_CC);
  
 		add_property_zval(return_value, "data", buffer);
 		add_property_long(return_value, "datalen", Z_STRLEN_P(buffer));
