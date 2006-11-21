@@ -1,3 +1,9 @@
+2006-11-20  Antony Dovgal  <antony@zend.com>
+
+    * zend_API.c:
+      fix leak in zend_register_functions()
+      this is very odd, but Zend MM said nothing about it..
+
 2006-11-17  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.c
