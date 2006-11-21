@@ -139,6 +139,7 @@ PHP_RSHUTDOWN_FUNCTION(user_filters);
 
 PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers TSRMLS_DC);
 PHPAPI char *php_get_current_user();
+PHPAPI int php_prefix_varname(zval *result, zval *prefix, zstr var_name, int var_name_len, int var_name_type TSRMLS_DC);
 
 #if SIZEOF_INT == 4
 /* Most 32-bit and 64-bit systems have 32-bit ints */

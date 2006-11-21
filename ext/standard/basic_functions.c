@@ -6215,17 +6215,17 @@ PHP_FUNCTION(parse_ini_file)
 
 static int copy_request_variable(void *pDest, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	char *prefix, *new_key;
-	uint prefix_len, new_key_len;
+	zval *prefix, new_key;
+	int prefix_len;
 	zval **var = (zval **) pDest;
 	TSRMLS_FETCH();
 
-	if (num_args != 2) {
+	if (num_args != 1) {
 		return 0;
 	}
 
-	prefix = va_arg(args, char *);
-	prefix_len = va_arg(args, uint);
+	prefix = va_arg(args, zval *);
+	prefix_len = Z_UNILEN_P(prefix);
 
 	if (!prefix_len) {
 		if (!hash_key->nKeyLength) {
@@ -6239,20 +6239,19 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 	}
 
 	if (hash_key->nKeyLength) {
-		new_key_len = prefix_len + hash_key->nKeyLength;
-		new_key = (char *) emalloc(new_key_len);
-
-		memcpy(new_key, prefix, prefix_len);
-		/* FIXME: Unicode support??? */
-		memcpy(new_key+prefix_len, hash_key->arKey.s, hash_key->nKeyLength);
+		php_prefix_varname(&new_key, prefix, hash_key->arKey, hash_key->nKeyLength, hash_key->type TSRMLS_CC);
 	} else {
-		new_key_len = spprintf(&new_key, 0, "%s%ld", prefix, hash_key->h);
+		zval num;
+		ZVAL_LONG(&num, hash_key->h);
+		convert_to_text(&num);
+		php_prefix_varname(&new_key, prefix, Z_UNIVAL(num), Z_UNILEN(num), Z_TYPE(num) TSRMLS_CC);
+		zval_dtor(&num);
 	}
 
-	zend_delete_global_variable(new_key, new_key_len-1 TSRMLS_CC);
-	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), new_key, new_key_len, *var, (*var)->refcount+1, 0);
+	zend_u_delete_global_variable(Z_TYPE(new_key), Z_UNIVAL(new_key), Z_UNILEN(new_key) TSRMLS_CC);
+	ZEND_U_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), Z_TYPE(new_key), Z_UNIVAL(new_key), Z_UNILEN(new_key), *var, (*var)->refcount+1, 0);
 
-	efree(new_key);
+	zval_dtor(&new_key);
 	return 0;
 }
 
@@ -6260,58 +6259,37 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
    Import GET/POST/Cookie variables into the global scope */
 PHP_FUNCTION(import_request_variables)
 {
-	zval **z_types, **z_prefix;
-	char *types, *prefix;
-	uint prefix_len;
+	char *types;
+	int types_len;
+	zval *prefix = NULL;
 	char *p;
 
-	switch (ZEND_NUM_ARGS()) {
-
-		case 1:
-			if (zend_get_parameters_ex(1, &z_types) == FAILURE) {
-				RETURN_FALSE;
-			}
-			prefix = "";
-			prefix_len = 0;
-			break;
-
-		case 2:
-			if (zend_get_parameters_ex(2, &z_types, &z_prefix) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(z_prefix);
-			prefix = Z_STRVAL_PP(z_prefix);
-			prefix_len = Z_STRLEN_PP(z_prefix);
-			break;
-	
-		default:
-			ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|z/", &types, &types_len, UG(ascii_conv), &prefix) == FAILURE) {
+		return;
 	}
 
-	if (prefix_len == 0) {
+	convert_to_text(prefix);
+	if (Z_UNILEN_P(prefix) == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No prefix specified - possible security hazard");
 	}
-
-	convert_to_string_ex(z_types);
-	types = Z_STRVAL_PP(z_types);
 
 	for (p = types; p && *p; p++) {
 		switch (*p) {
 	
 			case 'g':
 			case 'G':
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (apply_func_args_t) copy_request_variable, 1, prefix);
 				break;
 	
 			case 'p':
 			case 'P':
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_FILES]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (apply_func_args_t) copy_request_variable, 1, prefix);
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_FILES]), (apply_func_args_t) copy_request_variable, 1, prefix);
 				break;
 
 			case 'c':
 			case 'C':
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), (apply_func_args_t) copy_request_variable, 1, prefix);
 				break;
 		}
 	}
