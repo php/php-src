@@ -103,6 +103,7 @@ PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, s
 	bucket->buf_type = IS_STRING;
 	bucket->is_persistent = is_persistent;
 	bucket->refcount = 1;
+	bucket->brigade = NULL;
 
 	return bucket;
 }
@@ -140,6 +141,7 @@ PHPAPI php_stream_bucket *php_stream_bucket_new_unicode(php_stream *stream, UCha
 	bucket->buf_type = IS_UNICODE;
 	bucket->is_persistent = is_persistent;
 	bucket->refcount = 1;
+	bucket->brigade = NULL;
 
 	return bucket;
 }
