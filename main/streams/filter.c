@@ -102,6 +102,7 @@ PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, s
 	}
 	bucket->is_persistent = is_persistent;
 	bucket->refcount = 1;
+	bucket->brigade = NULL;
 
 	return bucket;
 }
