@@ -156,7 +156,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s), (char *) v, 1);
 #define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s), (zval *) v);
 
-#define PHP_CURL_CHECK_OPEN_BASEDIR(str, len)													\
+#define PHP_CURL_CHECK_OPEN_BASEDIR(str, len, __ret)													\
 	if (((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) &&                                                \
 	    strncasecmp(str, "file:", sizeof("file:") - 1) == 0)								\
 	{ 																							\
@@ -165,11 +165,13 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 		if (!(tmp_url = php_url_parse_ex(str, len))) {											\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL '%s'", str);				\
 			RETVAL_FALSE;											\
+			return __ret;											\
 		} 																						\
 															\
 		if (php_memnstr(str, tmp_url->path, strlen(tmp_url->path), str + len)) {				\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL '%s' contains unencoded control characters.", str);	\
 			RETVAL_FALSE;											\
+			return __ret;											\
 		}													\
 																								\
 		if (tmp_url->query || tmp_url->fragment || php_check_open_basedir(tmp_url->path TSRMLS_CC) || 									\
@@ -177,6 +179,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 		) { 																					\
 			php_url_free(tmp_url); 																\
 			RETVAL_FALSE;											\
+			return __ret;											\
 		} 																						\
 		php_url_free(tmp_url); 																	\
 	}
@@ -1078,8 +1081,7 @@ PHP_FUNCTION(curl_init)
 
 	if (argc > 0) {
 		convert_to_string_ex(url);
-		PHP_CURL_CHECK_OPEN_BASEDIR(Z_STRVAL_PP(url), Z_STRLEN_PP(url));
-		return;
+		PHP_CURL_CHECK_OPEN_BASEDIR(Z_STRVAL_PP(url), Z_STRLEN_PP(url), (void) NULL);
 	}
 
 	cp = curl_easy_init();
@@ -1304,8 +1306,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			convert_to_string_ex(zvalue);
 
 			if (option == CURLOPT_URL) {
-				PHP_CURL_CHECK_OPEN_BASEDIR(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
-				return 1;
+				PHP_CURL_CHECK_OPEN_BASEDIR(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue), 1);
 			}
 
 			copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
