@@ -1670,7 +1670,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 /* }}} */
 
 
-/* {{{ proto array get_defined_constants(void) U
+/* {{{ proto array get_defined_constants([mixed categorize]) U
    Return an array containing the names and values of all defined constants */
 ZEND_FUNCTION(get_defined_constants)
 {
