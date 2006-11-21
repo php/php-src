@@ -146,7 +146,7 @@ PHP_FUNCTION(levenshtein)
 		WRONG_PARAM_COUNT;
 	}	
 
-	if (distance < 0) {
+	if (distance < 0 && /* TODO */ ZEND_NUM_ARGS() != 3) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument string(s) too long");
 	}
 	
