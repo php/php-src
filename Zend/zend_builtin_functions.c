@@ -2271,6 +2271,9 @@ ZEND_FUNCTION(get_extension_funcs)
 			RETURN_FALSE;
 		}
 	} else {
+		if (ext_type == IS_UNICODE) {
+			efree(name);
+		}
 		func = builtin_functions;
 	}
 
