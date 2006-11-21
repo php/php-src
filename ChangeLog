@@ -1,3 +1,66 @@
+2006-11-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/filter/tests/040.phpt:
+      add new test
+
+    * ext/filter/tests/040.phpt
+      ext/filter/tests/040.phpt:
+      
+      add new test
+
+    * ZendEngine2/zend_API.c:
+      fix leak in zend_register_functions()
+      this is very odd, but Zend MM said nothing about it..
+
+2006-11-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt:
+      Update for basic_functions.c
+
+2006-11-20  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/stristr.phpt
+      ext/standard/tests/strings/stristr.phpt:
+      
+      improve test
+
+2006-11-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/php_spl.c:
+      - Fix arginfo
+
+    * ext/spl/tests/spl_006.phpt
+      ext/spl/tests/spl_006.phpt:
+      
+      - Add new test
+
+    * ext/spl/php_spl.c
+      ext/spl/spl.php
+      ext/spl/spl_iterators.c:
+      - Add optional use_keys parameter to iterator_to_array(), (idea by Kevin)
+
+2006-11-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      MFB: Fixed compiler warnings
+
+    * (PHP_5_2)
+      ext/curl/interface.c:
+      Fixed compiler warnings
+
+2006-11-20  Antony Dovgal  <antony@zend.com>
+
+    * tests/lang/bug24640.phpt:
+      fix test on those platforms where infinity is not "INF", but "Infinity"
+
+    * ext/standard/tests/file/symlink.phpt
+      ext/standard/tests/file/symlink.phpt:
+      fix test on Solaris
+
+    * ext/standard/file.c:
+      efree() if not NULL
+
 2006-11-19  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/ftp/tests/001.phpt
