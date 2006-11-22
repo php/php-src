@@ -1383,7 +1383,7 @@ PHP_FUNCTION(htmlentities)
 }
 /* }}} */
 
-/* {{{ proto array get_html_translation_table([int table [, int quote_style]])
+/* {{{ proto array get_html_translation_table([int table [, int quote_style]]) U
    Returns the internal translation table used by htmlspecialchars and htmlentities */
 PHP_FUNCTION(get_html_translation_table)
 {
@@ -1391,9 +1391,16 @@ PHP_FUNCTION(get_html_translation_table)
 	int i, j;
 	char ind[2];
 	enum entity_charset charset = determine_charset(NULL TSRMLS_CC);
+	UChar32 cp;
+	UChar key[3];
+	int key_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &which, &quote_style) == FAILURE) {
 		return;
+	}
+
+	if (UG(unicode)) {
+		charset = cs_utf_8;
 	}
 
 	array_init(return_value);
@@ -1410,11 +1417,19 @@ PHP_FUNCTION(get_html_translation_table)
 
 					if (entity_map[j].table[i] == NULL)
 						continue;
-					/* what about wide chars here ?? */
-					ind[0] = i + entity_map[j].basechar;
-					sprintf(buffer, "&%s;", entity_map[j].table[i]);
-					add_assoc_string(return_value, ind, buffer, 1);
 
+					if (UG(unicode)) {
+						cp = (UChar)(i + entity_map[j].basechar);
+						key_len = zend_codepoint_to_uchar(cp, key);
+						key[key_len] = 0;
+						sprintf(buffer, "&%s;", entity_map[j].table[i]);
+						add_u_assoc_ascii_string_ex(return_value, IS_UNICODE, ZSTR(key), key_len+1, buffer, 1);
+					} else {
+						/* no wide chars here, because charset is always cs_8859_1 */
+						ind[0] = i + entity_map[j].basechar;
+						sprintf(buffer, "&%s;", entity_map[j].table[i]);
+						add_assoc_string(return_value, ind, buffer, 1);
+					}
 				}
 			}
 			/* break thru */
@@ -1426,9 +1441,9 @@ PHP_FUNCTION(get_html_translation_table)
 					continue;
 				
 				ind[0] = (unsigned char)basic_entities[j].charcode;
-				add_assoc_stringl(return_value, ind, basic_entities[j].entity, basic_entities[j].entitylen, 1);
+				add_ascii_assoc_ascii_stringl(return_value, ind, basic_entities[j].entity, basic_entities[j].entitylen, 1);
 			}
-			add_assoc_stringl(return_value, "&", "&amp;", sizeof("&amp;") - 1, 1);
+			add_ascii_assoc_ascii_stringl(return_value, "&", "&amp;", sizeof("&amp;") - 1, 1);
 
 			break;
 	}
