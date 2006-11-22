@@ -5259,13 +5259,13 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe TSRMLS_DC)
 		} else {
 			zval **obj, **method;
 
-			if (Z_TYPE_P(function) == IS_STRING) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s() - function does not exist", Z_STRVAL_P(function));
+			if (Z_TYPE_P(function) == IS_STRING || Z_TYPE_P(function) == IS_UNICODE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R() - function does not exist", Z_TYPE_P(function), Z_UNIVAL_P(function));
 			} else if (	Z_TYPE_P(function) == IS_ARRAY 
 						&& zend_hash_index_find(Z_ARRVAL_P(function), 0, (void **) &obj) == SUCCESS
 						&& zend_hash_index_find(Z_ARRVAL_P(function), 1, (void **) &method) == SUCCESS
 						&& Z_TYPE_PP(obj) == IS_OBJECT
-						&& Z_TYPE_PP(method) == IS_STRING ) {
+						&& (Z_TYPE_PP(method) == IS_STRING || Z_TYPE_PP(method) == IS_UNICODE) ) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %v::%R() - function does not exist", Z_OBJCE_PP(obj)->name, Z_TYPE_PP(method), Z_UNIVAL_PP(method));
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call tick function");
@@ -5291,6 +5291,8 @@ static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_
 
 	if (Z_TYPE_P(func1) == IS_STRING && Z_TYPE_P(func2) == IS_STRING) {
 		return (zend_binary_zval_strcmp(func1, func2) == 0);
+	} else if (Z_TYPE_P(func1) == IS_UNICODE && Z_TYPE_P(func2) == IS_UNICODE) {
+		return (zend_u_binary_zval_strcmp(func1, func2) == 0);
 	} else if (Z_TYPE_P(func1) == IS_ARRAY && Z_TYPE_P(func2) == IS_ARRAY) {
 		zval result;
 		zend_compare_arrays(&result, func1, func2 TSRMLS_CC);
@@ -5914,7 +5916,7 @@ PHP_FUNCTION(getprotobynumber)
 /* }}} */
 #endif
 
-/* {{{ proto bool register_tick_function(string function_name [, mixed arg [, mixed ... ]])
+/* {{{ proto bool register_tick_function(string function_name [, mixed arg [, mixed ... ]]) U
    Registers a tick callback function */
 PHP_FUNCTION(register_tick_function)
 {
@@ -5935,8 +5937,9 @@ PHP_FUNCTION(register_tick_function)
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_P(tick_fe.arguments[0]) != IS_ARRAY)
-		convert_to_string_ex(&tick_fe.arguments[0]);
+	if (Z_TYPE_P(tick_fe.arguments[0]) != IS_ARRAY) {
+		convert_to_text_ex(&tick_fe.arguments[0]);
+	}
 
 	if (!BG(user_tick_functions)) {
 		BG(user_tick_functions) = (zend_llist *) emalloc(sizeof(zend_llist));
@@ -5956,27 +5959,27 @@ PHP_FUNCTION(register_tick_function)
 }
 /* }}} */
 
-/* {{{ proto void unregister_tick_function(string function_name)
+/* {{{ proto void unregister_tick_function(string function_name) U
    Unregisters a tick callback function */
 PHP_FUNCTION(unregister_tick_function)
 {
-	zval **function;
+	zval *function;
 	user_tick_function_entry tick_fe;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &function)) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/", &function) == FAILURE) {
+		return;
 	}
 
 	if (!BG(user_tick_functions)) {
 		return;
 	}
 	
-	if (Z_TYPE_PP(function) != IS_ARRAY) {
-		convert_to_string_ex(function);
+	if (Z_TYPE_P(function) != IS_ARRAY) {
+		convert_to_text(function);
 	}
 	
 	tick_fe.arguments = (zval **) emalloc(sizeof(zval *));
-	tick_fe.arguments[0] = *function;
+	tick_fe.arguments[0] = function;
 	tick_fe.arg_count = 1;
 	zend_llist_del_element(BG(user_tick_functions), &tick_fe, (int (*)(void *, void *)) user_tick_function_compare);
 	efree(tick_fe.arguments);
