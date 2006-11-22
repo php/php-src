@@ -41,6 +41,7 @@ PHP                                                                        NEWS
     php_filter.h).
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
+- Fixed bug #39576 (array_walk() doesn't separate userdata zval). (Tony)
 - Fixed bug #39454 (Returning a SOAP array segfaults PHP). (Dmitry)
 - Fixed bug #39445 (Calling debug_backtrace() in the __toString() function
   produces a crash). (Dmitry)
