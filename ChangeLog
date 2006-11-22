@@ -1,3 +1,72 @@
+2006-11-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Unicode support in import_request_variables().
+
+2006-11-21  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      main/streams/filter.c:
+      ensure that bucket->brigade is NULL in newly created bucket
+
+2006-11-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/basic_functions.c:
+      Note.
+
+    * ext/standard/basic_functions.c:
+      Unicode support in highlight_string().
+
+2006-11-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/levenshtein.c
+      ext/standard/levenshtein.c
+      ext/standard/tests/strings/levenshtein.phpt
+      ext/standard/tests/strings/levenshtein.phpt
+      ext/standard/tests/strings/levenshtein.phpt:
+      remove redundant error message
+      add test by <zoe dot slattery at googlemail dot com>
+
+2006-11-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mhash/mhash.c:
+      Fixed build
+
+    * ext/curl/interface.c:
+      MFB: Adjust previous patch to work better
+
+    * (PHP_5_2)
+      ext/curl/interface.c:
+      Adjust previous patch to work better
+
+2006-11-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/user_filters.c
+      ext/standard/tests/file/bug39551.phpt
+      ext/standard/tests/file/bug39551.phpt
+      main/streams/filter.c:
+      fix #39551 (Segfault with stream_bucket_new in user filter)
+      also fixes several segfaults and leaks
+      add test
+
+    * (PHP_5_2)
+      ZendEngine2/tests/017.phpt
+      ext/standard/tests/file/bug39551.phpt:
+      add test
+
+    * ZendEngine2/tests/017.phpt
+      ZendEngine2/tests/017.phpt:
+      
+      add test for some of builtin funcs
+
+    * ZendEngine2/zend_builtin_functions.c:
+      fix leak in get_extension_funcs()
+
+    * ZendEngine2/zend_builtin_functions.c:
+      fix proto
+
 2006-11-20  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
