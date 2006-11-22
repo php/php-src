@@ -19,6 +19,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "ext/standard/file.h"
 
 #include <sys/types.h>                                                                                                        
 
@@ -31,27 +32,27 @@
    Convert a pathname and a project identifier to a System V IPC key */
 PHP_FUNCTION(ftok)
 {
-	zval **pathname, **proj;
+	zval **pp_pathname;
+	char *proj, *pathname;
+	int proj_len, pathname_len;
 	key_t k;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &pathname, &proj) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs", &pp_pathname, &proj, &proj_len) == FAILURE ||
+		php_stream_path_param_encode(pp_pathname, &pathname, &pathname_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(pathname);
-	convert_to_string_ex(proj);
-
-	if (Z_STRLEN_PP(pathname)==0){
+	if (pathname_len == 0){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Pathname is invalid");
 		RETURN_LONG(-1);
 	}
 
-	if (Z_STRLEN_PP(proj)!=1){
+	if (proj_len != 1){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Project identifier is invalid");
 		RETURN_LONG(-1);
     }
 
-	k = ftok(Z_STRVAL_PP(pathname),Z_STRVAL_PP(proj)[0]);
+	k = ftok(pathname, proj[0]);
 	if (k == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "ftok() failed - %s", strerror(errno));
 	}
