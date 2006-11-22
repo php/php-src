@@ -2171,9 +2171,11 @@ PHPAPI void php_fgetcsv(php_stream *stream, /* {{{ */
 								size_t new_len;
 								char *new_temp;
 
-								memcpy(tptr, hunk_begin, bptr - hunk_begin);
-								tptr += (bptr - hunk_begin);
-								hunk_begin = bptr;
+								if (hunk_begin != line_end) {
+									memcpy(tptr, hunk_begin, bptr - hunk_begin);
+									tptr += (bptr - hunk_begin);
+									hunk_begin = bptr;
+								}
 
 								/* add the embedded line end to the field */
 								memcpy(tptr, line_end, line_end_len);
