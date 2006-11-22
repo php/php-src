@@ -1,3 +1,20 @@
+2006-11-21  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/017.phpt:
+      add test
+
+    * tests/017.phpt
+      tests/017.phpt:
+      
+      add test for some of builtin funcs
+
+    * zend_builtin_functions.c:
+      fix leak in get_extension_funcs()
+
+    * zend_builtin_functions.c:
+      fix proto
+
 2006-11-20  Antony Dovgal  <antony@zend.com>
 
     * zend_API.c:
