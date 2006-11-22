@@ -14,12 +14,6 @@ ext/standard
     set_include_path(), get_include_path(), restore_include_path()
         Params API, depends on INI mechanism
 
-    register/unregister_tick_function()
-        Params API
-
-    import_request_variables()
-        Params API, support for Unicode keys in request arrays
-
     ini_get(), ini_get_all(), ini_set(), ini_restore()
         Params API, Unicode support per discussion
 
