@@ -1134,11 +1134,9 @@ TEST $file
 	$env['CONTENT_TYPE']='';
 	$env['CONTENT_LENGTH']='';
 	if (!empty($section_text['ENV'])) {
-		foreach(explode("\n", $section_text['ENV']) as $e) {
-			$e = explode('=',trim($e));
-			if (count($e) == 2) {
-				$env[$e[0]] = $e[1];
-			}
+		foreach(explode("\n", trim($section_text['ENV'])) as $e) {
+			$e = explode('=',trim($e),2);
+			$env[$e[0]] = $e[1];
 		}
 	}
 
