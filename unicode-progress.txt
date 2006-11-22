@@ -29,11 +29,10 @@ ext/standard
     parse_ini_file()
         Params API, unicode filename support, depends on INI mechaniem
 
-    highlight_string()
-        IS_UNICODE support (may be very easy, since scanner handles Unicode
-
     getopt()
-        Use ASCII for options?
+        Will use ASCII for options. $_SERVER['argv'] should not be converted
+        to Unicode and should stay binary, since we can't be sure of the
+        encoding on CLI. Console_Getopt may be changed to support encodings.
 
   array.c
   -------
