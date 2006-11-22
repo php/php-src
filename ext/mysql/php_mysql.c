@@ -1815,7 +1815,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 				zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, mysql_row[i], mysql_row_lengths[i] TSRMLS_CC);
 				ZVAL_UNICODEL(data, ustr, ulen, 0);
 			} else {
-			  ZVAL_STRINGL(data, mysql_row[i], mysql_row_lengths[i], 1);
+				ZVAL_STRINGL(data, mysql_row[i], mysql_row_lengths[i], 1);
 			}
 
 			if (result_type & MYSQL_NUM) {
