@@ -57,6 +57,10 @@ if (!$s) die("Error accepting a new connection\n");
 fputs($s, "220----- PHP FTP server 0.3 -----\r\n220 Service ready\r\n");
 $buf = fread($s, 2048);
 
+
+function user_auth($buf) {
+	global $user, $s, $ssl;
+
 if (!empty($ssl)) {
 	if ($buf !== "AUTH TLS\r\n") {
 		fputs($s, "500 Syntax error, command unrecognized.\r\n");
@@ -118,12 +122,19 @@ if (anonymous()) {
 		exit;
 	}
 }
+}
+
+user_auth($buf);
 
 $cwd = '/';
+$num_bogus_cmds = 0;
 
 while($buf = fread($s, 4098)) {
 
-	if ($buf === "HELP\r\n") {
+	if (!empty($bogus)) {
+		fputs($s, "502 Command not implemented (".$num_bogus_cmds++.").\r\n");
+
+	} else if ($buf === "HELP\r\n") {
 		fputs($s, "214-There is help available for the following commands:\r\n");
 		fputs($s, " USER\r\n");
 		fputs($s, " HELP\r\n");
@@ -139,12 +150,18 @@ while($buf = fread($s, 4098)) {
 		change_dir('..');
 		fputs($s, "250 CDUP command successful.\r\n");
 
+	} elseif ($buf === "SYST\r\n") {
+		fputs($s, "215 UNIX Type: L8.\r\n");
+
 	} elseif ($buf === "QUIT\r\n") {
 		break;
 
 	} elseif (preg_match("~^CWD ([A-Za-z./]+)\r\n$~", $buf, $m)) {
 		change_dir($m[1]);
 		fputs($s, "250 CWD command successful.\r\n");
+
+	} else if(preg_match('/^USER /', $buf)) {
+		user_auth($buf);
 
 	} else {
 		fputs($s, "500 Syntax error, command unrecognized.\r\n");
