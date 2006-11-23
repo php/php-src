@@ -67,3 +67,29 @@ array(5) {
   string(1) "E"
 }
 Done
+--UEXPECTF--
+array(5) {
+  [0]=>
+  unicode(1) "A"
+  [1]=>
+  unicode(1) "B"
+  [2]=>
+  unicode(1) "C"
+  [3]=>
+  unicode(1) "D"
+  [4]=>
+  unicode(1) "E"
+}
+array(5) {
+  [0]=>
+  unicode(1) "A"
+  [1]=>
+  unicode(1) "B"
+  [2]=>
+  unicode(1) "C"
+  [3]=>
+  unicode(1) "D"
+  [4]=>
+  unicode(1) "E"
+}
+Done

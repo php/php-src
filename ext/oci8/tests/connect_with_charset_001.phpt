@@ -1,7 +1,10 @@
 --TEST--
 oci_connect() with invalid character set
 --SKIPIF--
-<?php if (!extension_loaded("oci8")) print "skip"; ?>
+<?php 
+if (!extension_loaded("oci8")) print "skip"; 
+if (unicode_semantics()) die('skip unicode.semantics=On');
+?>
 --FILE--
 <?php
 
