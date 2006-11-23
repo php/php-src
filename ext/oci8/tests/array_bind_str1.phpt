@@ -72,3 +72,17 @@ array(5) {
   string(3) "one"
 }
 Done
+--UEXPECT--
+array(5) {
+  [0]=>
+  unicode(4) "five"
+  [1]=>
+  unicode(4) "four"
+  [2]=>
+  unicode(5) "three"
+  [3]=>
+  unicode(3) "two"
+  [4]=>
+  unicode(3) "one"
+}
+Done

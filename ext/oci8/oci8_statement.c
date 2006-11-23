@@ -829,14 +829,19 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 					zstr tmp;
 					for (i = 0; i < bind->array.current_length; i++) {
 						/* int curr_element_length = strlen(((text *)bind->array.elements)+i*bind->array.max_length); */
-						int curr_element_length = bind->array.element_lengths[i];
+						ub2 curr_element_length = TEXT_CHARS(bind->array.element_lengths[i]);
 						if ((i < bind->array.old_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 							zval_dtor(*entry);
-							tmp.s = ((text *)bind->array.elements)+i*bind->array.max_length;
+							if (UG(unicode)) {
+								tmp.u = ((UChar *)bind->array.elements)+TEXT_CHARS(i*bind->array.max_length);
+							} else {
+								tmp.s = ((text *)bind->array.elements)+(i*bind->array.max_length);
+							}
+
 							ZVAL_TEXTL(*entry, tmp, curr_element_length, 1);
 							zend_hash_move_forward(hash);
 						} else {
-							tmp.s = ((text *)bind->array.elements)+i*bind->array.max_length;
+							tmp.s = ((text *)bind->array.elements)+(i*bind->array.max_length);
 							add_next_index_textl(bind->zval, tmp, curr_element_length, 1);
 						}
 					}
@@ -1328,7 +1333,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, zstr name, int name
 								(text *)name.s,
 								USTR_BYTES(uni_type, name_len),
 								(dvoid *) bindp->array.elements, 
-								(sb4) USTR_BYTES(uni_type, bind->array.max_length),
+								(sb4) bind->array.max_length,
 								type,
 								(dvoid *)0, /* bindp->array.indicators, */
 								(ub2 *)bind->array.element_lengths,
@@ -1373,10 +1378,14 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	}
 	
 	bind = emalloc(sizeof(php_oci_bind));
-	bind->array.elements		= (text *)ecalloc(1, max_table_length * sizeof(text) * (maxlength + 1));
+	if (UG(unicode)) {
+		bind->array.elements		= (UChar *)ecalloc(1, max_table_length * sizeof(UChar) * (maxlength + 1));
+	} else {
+		bind->array.elements		= (text *)ecalloc(1, max_table_length * sizeof(text) * (maxlength + 1));
+	}
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
-	bind->array.max_length		= maxlength;
+	bind->array.max_length		= TEXT_BYTES(maxlength);
 	bind->array.element_lengths	= ecalloc(1, max_table_length * sizeof(ub2));
 	
 	zend_hash_internal_pointer_reset(hash);
@@ -1384,7 +1393,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	for (i = 0; i < bind->array.current_length; i++) {
 		if (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE) {
 			convert_to_text_ex(entry);
-			bind->array.element_lengths[i] = Z_UNILEN_PP(entry); 
+			bind->array.element_lengths[i] = TEXT_BYTES(Z_UNILEN_PP(entry)); 
 			zend_hash_move_forward(hash);
 		} else {
 			break;
@@ -1399,12 +1408,16 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 			convert_to_text_ex(entry);
 			element_length = (maxlength > Z_UNILEN_PP(entry)) ? Z_UNILEN_PP(entry) : maxlength;
 			
-			memcpy((text *)bind->array.elements + i*maxlength, Z_UNIVAL_PP(entry).s, element_length);
-			((text *)bind->array.elements)[i*maxlength + element_length] = '\0';
-			
+			if (UG(unicode)) {
+				memcpy((UChar *)bind->array.elements + i*maxlength, Z_UNIVAL_PP(entry).u, TEXT_BYTES(element_length));
+				((UChar *)bind->array.elements)[i*maxlength + element_length] = '\0';
+			} else {
+				memcpy((text *)bind->array.elements + i*maxlength, Z_UNIVAL_PP(entry).s, element_length);
+				((text *)bind->array.elements)[i*maxlength + element_length] = '\0';
+			}
 			zend_hash_move_forward(hash);
 		} else {
-			((text *)bind->array.elements)[i*maxlength] = '\0';
+			break;
 		}
 	}
 	zend_hash_internal_pointer_reset(hash);
