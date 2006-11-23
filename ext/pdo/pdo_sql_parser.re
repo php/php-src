@@ -192,11 +192,14 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 							/* bork */
 							ret = -1;
 							strcpy(stmt->error_code, stmt->dbh->error_code);
-							efree(buf);
+							if (buf) {
+								efree(buf);
+							}
 							goto clean_up;
 						}
-						efree(buf);
-
+						if (buf) {
+							efree(buf);
+						}
 					} else {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
 						ret = -1;
