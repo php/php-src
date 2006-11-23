@@ -47,6 +47,8 @@ PHP                                                                        NEWS
   on Windows). (Dmitry)
 - Fixed bug #39538 (fgetcsv can't handle starting newlines and trailing odd
   number of backslashes). (David Soria Parra, Pierre)
+- Fixed bug #39534 (Error in maths to calculate of
+  ZEND_MM_ALIGNED_MIN_HEADER_SIZE). (wharmby at uk dot ibm dot com, Dmitry)
 - Fixed bug #39454 (Returning a SOAP array segfaults PHP). (Dmitry)
 - Fixed bug #39445 (Calling debug_backtrace() in the __toString() function
   produces a crash). (Dmitry)
