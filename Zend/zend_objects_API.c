@@ -64,8 +64,11 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 
 ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects TSRMLS_DC)
 {
-	zend_uint i = 1;
+	zend_uint i;
 
+	if (!objects->object_buckets) {
+		return;
+	}
 	for (i = 1; i < objects->top ; i++) {
 		if (objects->object_buckets[i].valid) {
 			objects->object_buckets[i].destructor_called = 1;
