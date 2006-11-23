@@ -1,3 +1,75 @@
+2006-11-22  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/html.c:
+      Unicode support in get_html_translation_table().
+
+    * ext/standard/ftok.c:
+      Unicode support in ftok().
+
+    * unicode-progress.txt
+      ext/standard/ftok.c:
+      -** empty log message ***
+
+    * unicode-progress.txt
+      ext/standard/basic_functions.c:
+      - Unicode support for tick functions.
+      - Update unicode-progress.txt
+
+2006-11-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dbase/dbase.c:
+      MFB: Fixed a possible crash in dbase_open() on empty filename.
+
+    * (PHP_5_2)
+      ext/dbase/dbase.c:
+      Fixed a possible crash in dbase_open() on empty filename.
+
+2006-11-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/file.c
+      ext/standard/tests/file/bug39538.phpt:
+      - MFH:  #39538, fgetcsv can't handle starting newlines and trailing odd
+        number of backslashes (David Soria Parra, Pierre)
+
+    * ext/standard/file.c
+      ext/standard/tests/file/bug39538.phpt
+      ext/standard/tests/file/bug39538.phpt:
+      - #39538, fgetcsv can't handle starting newlines and trailing odd
+        number of backslashes (David Soria Parra, Pierre)
+
+2006-11-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      main/fopen_wrappers.c
+      main/safe_mode.c:
+      fix #39575 (move_uploaded_file() no longer working (safe mode related))
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug39576.phpt:
+      fix #39576 (array_walk() doesn't separate userdata zval)
+
+2006-11-22  Michael Wallner  <mike@iworks.at>
+
+    * run-tests.php
+      run-tests.php:
+      - fix ENV section handling
+
+2006-11-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/bug39576.phpt
+      ext/standard/tests/array/bug39576.phpt:
+      MFH: fix #39576 (array_walk() doesn't separate userdata zval)
+
+2006-11-22  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/php_mysql.c:
+      space to tab
+
 2006-11-21  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/array.c
