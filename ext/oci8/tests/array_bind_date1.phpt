@@ -72,3 +72,17 @@ array(5) {
   string(9) "06-DEC-05"
 }
 Done
+--UEXPECT--
+array(5) {
+  [0]=>
+  unicode(9) "05-NOV-05"
+  [1]=>
+  unicode(9) "26-OCT-17"
+  [2]=>
+  unicode(9) "21-AUG-91"
+  [3]=>
+  unicode(9) "10-DEC-80"
+  [4]=>
+  unicode(9) "06-DEC-05"
+}
+Done
