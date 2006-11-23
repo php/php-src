@@ -1156,7 +1156,9 @@ TEST $file
 	if (!empty($section_text['ENV'])) {
 		foreach(explode("\n", trim($section_text['ENV'])) as $e) {
 			$e = explode('=',trim($e),2);
-			$env[$e[0]] = $e[1];
+			if (!empty($e[0]) && isset($e[1])) {
+				$env[$e[0]] = $e[1];
+			}
 		}
 	}
 
