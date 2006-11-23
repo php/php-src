@@ -802,7 +802,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 						} else {
 							zstr tmp;
 							tmp.s = buff;
-							ZVAL_TEXTL(*entry, tmp, buff_len, 1);
+							ZVAL_TEXTL(*entry, tmp, TEXT_CHARS(buff_len), 1);
 						}
 						zend_hash_move_forward(hash);
 					} else {
@@ -813,7 +813,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 							php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 							add_next_index_null(bind->zval);
 						} else {
-							add_next_index_textl(bind->zval, tmp, buff_len, 1);
+							add_next_index_textl(bind->zval, tmp, TEXT_CHARS(buff_len), 1);
 						}
 					}
 				}
@@ -1523,8 +1523,12 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 		}
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 			
-			convert_to_string_ex(entry);
-			PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, 0, NULL, 0, &oci_date));
+			convert_to_text_ex(entry);
+			if (UG(unicode)) {
+				PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, (text *)Z_UNIVAL_PP(entry).s, UBYTES(Z_UNILEN_PP(entry)), NULL, 0, NULL, 0, &oci_date));
+			} else {
+				PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, 0, NULL, 0, &oci_date));
+			}
 
 			if (connection->errcode != OCI_SUCCESS) {
 				/* failed to convert string to date */
@@ -1538,7 +1542,14 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 			((OCIDate *)bind->array.elements)[i] = oci_date;
 			zend_hash_move_forward(hash);
 		} else {
-			PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, "01-JAN-00", sizeof("01-JAN-00")-1, NULL, 0, NULL, 0, &oci_date));
+			
+			if (UG(unicode)) {
+				UChar *tmp = USTR_MAKE("01-JAN-00");
+				PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, (text *)tmp, UBYTES(sizeof("01-JAN-00")-1), NULL, 0, NULL, 0, &oci_date));
+				efree(tmp);
+			} else {
+				PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, "01-JAN-00", sizeof("01-JAN-00")-1, NULL, 0, NULL, 0, &oci_date));
+			}
 
 			if (connection->errcode != OCI_SUCCESS) {
 				/* failed to convert string to date */
