@@ -41,6 +41,7 @@ PHP                                                                        NEWS
     php_filter.h).
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
+- Fixed bug #39602 (Invalid session.save_handler crashes PHP). (Dmitry)
 - Fixed bug #39576 (array_walk() doesn't separate userdata zval). (Tony)
 - Fixed bug #39538 (fgetcsv can't handle starting newlines and trailing odd
   number of backslashes). (David Soria Parra, Pierre)
