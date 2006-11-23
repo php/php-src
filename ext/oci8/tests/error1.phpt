@@ -25,3 +25,17 @@ array(4) {
   string(0) ""
 }
 Done
+--UEXPECTF--
+Warning: oci_connect(): ORA-12154: TNS:could not resolve %s in %s on line %d
+bool(false)
+array(4) {
+  ["code"]=>
+  int(12154)
+  ["message"]=>
+  unicode(45) "ORA-12154: TNS:could not resolve %s"
+  ["offset"]=>
+  int(0)
+  ["sqltext"]=>
+  unicode(0) ""
+}
+Done
