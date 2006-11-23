@@ -151,7 +151,11 @@ while($buf = fread($s, 4098)) {
 		fputs($s, "250 CDUP command successful.\r\n");
 
 	} elseif ($buf === "SYST\r\n") {
-		fputs($s, "215 UNIX Type: L8.\r\n");
+		if (isset($bug27809)) {
+			fputs($s, "215   OS/400 is the remote operating system. The TCP/IP version is \"V5R2M0\"\r\n");
+		} else {
+			fputs($s, "215 UNIX Type: L8.\r\n");
+		}
 
 	} elseif ($buf === "QUIT\r\n") {
 		break;
@@ -160,7 +164,14 @@ while($buf = fread($s, 4098)) {
 		change_dir($m[1]);
 		fputs($s, "250 CWD command successful.\r\n");
 
-	} else if(preg_match('/^USER /', $buf)) {
+	} elseif (preg_match("~^MKD ([A-Za-z./]+)\r\n$~", $buf, $m)) {
+		if (isset($bug7216)) {
+			fputs($s, "257 OK.\r\n");
+		} else {
+			fputs($s, '257 "'.realpath($m[1])."\" created.\r\n");
+		}
+
+	} elseif (preg_match('/^USER /', $buf)) {
 		user_auth($buf);
 
 	} else {
