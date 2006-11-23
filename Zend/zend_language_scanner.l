@@ -286,6 +286,11 @@ int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2)
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC)
 {
 	zend_llist_del_element(&CG(open_files), file_handle, (int (*)(void *, void *)) zend_compare_file_handles);
+	/* zend_file_handle_dtor() operates on the copy, so we have to NULLify the original here */
+	file_handle->opened_path = NULL;
+	if (file_handle->free_filename) {
+		file_handle->filename = NULL;
+	}
 }
 
 
