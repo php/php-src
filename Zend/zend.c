@@ -668,6 +668,7 @@ static void zend_set_default_compile_time_values(TSRMLS_D)
 	CG(asp_tags) = 0;
 	CG(short_tags) = 1;
 	CG(extended_info) = 0;
+	CG(literal_type) = ZEND_STR_TYPE;
 }
 
 
@@ -805,7 +806,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 	zend_set_default_compile_time_values(TSRMLS_C);
 
 	CG(interactive) = 0;
-	CG(literal_type) = IS_STRING;
+	CG(literal_type) = ZEND_STR_TYPE;
 
 	compiler_globals->auto_globals = (HashTable *) malloc(sizeof(HashTable));
 	zend_u_hash_init_ex(compiler_globals->auto_globals, global_auto_globals_table->nNumOfElements, NULL, NULL, 1, UG(unicode), 0);
