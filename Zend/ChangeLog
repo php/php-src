@@ -1,3 +1,27 @@
+2006-11-23  Antony Dovgal  <antony@zend.com>
+
+    * zend_language_scanner.l
+      zend_language_scanner.l:
+      nullify opened_path and filename (when required)
+      fixes invalid reads with `php-cli -F <script>`
+
+2006-11-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Fixed bug #39534 (Error in maths to calculate of
+      ZEND_MM_ALIGNED_MIN_HEADER_SIZE). (wharmby at uk dot ibm dot com)
+
+    * zend_objects_API.c
+      zend_objects_API.c
+      tests/bug39602.phpt:
+      Fixed bug #39602 (Invalid session.save_handler crashes PHP)
+
+    * tests/bug39602.phpt
+      tests/bug39602.phpt:
+      
+      file bug39602.phpt was initially added on branch PHP_5_2.
+
 2006-11-21  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)

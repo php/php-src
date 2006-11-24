@@ -1,3 +1,112 @@
+2006-11-23  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l:
+      nullify opened_path and filename (when required)
+      fixes invalid reads with `php-cli -F <script>`
+
+2006-11-23  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/ftp/tests/bug27809.phpt
+      ext/ftp/tests/bug27809.phpt
+      ext/ftp/tests/bug7216-2.phpt
+      ext/ftp/tests/bug7216-2.phpt
+      ext/ftp/tests/bug7216.phpt
+      ext/ftp/tests/bug7216.phpt
+      ext/ftp/tests/server.inc:
+      
+      file bug27809.phpt was initially added on branch PHP_5_2.
+
+2006-11-23  Antony Dovgal  <antony@zend.com>
+
+    * run-tests.php
+      run-tests.php:
+      do not set an env variable without a name and a value
+
+2006-11-23  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/ftp/tests/.cvsignore
+      ext/ftp/tests/004.phpt
+      ext/ftp/tests/005.phpt
+      ext/ftp/tests/bug27809.phpt
+      ext/ftp/tests/bug7216-2.phpt
+      ext/ftp/tests/bug7216.phpt
+      ext/ftp/tests/server.inc
+      ext/ftp/tests/server.inc:
+      MFB
+
+    * ext/ftp/tests/.cvsignore
+      ext/ftp/tests/.cvsignore
+      ext/ftp/tests/004.phpt
+      ext/ftp/tests/004.phpt
+      ext/ftp/tests/005.phpt
+      ext/ftp/tests/005.phpt
+      ext/ftp/tests/server.inc:
+      
+      file .cvsignore was initially added on branch PHP_5_2.
+
+2006-11-23  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c
+      ext/oci8/tests/error1.phpt:
+      fix error messages in Unicode mode when global error handle is used
+
+    * ext/oci8/oci8_statement.c
+      ext/oci8/tests/array_bind_001.phpt
+      ext/oci8/tests/array_bind_003.phpt
+      ext/oci8/tests/array_bind_date.phpt
+      ext/oci8/tests/array_bind_date1.phpt:
+      fix oci_bind_array_by_name() with SQLT_ODT type
+      fix tests
+
+2006-11-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      MFB: Fixed a possible crash
+
+    * (PHP_5_2)
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      Fixed a possible crash
+
+2006-11-23  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/tests/bug37581.phpt
+      ext/oci8/tests/connect_with_charset_001.phpt:
+      fix tests
+
+    * ext/oci8/oci8_statement.c
+      ext/oci8/tests/array_bind_006.phpt
+      ext/oci8/tests/array_bind_str.phpt
+      ext/oci8/tests/array_bind_str1.phpt:
+      fix oci_bind_array_by_name() in Unicode mode
+
+2006-11-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed bug #39534 (Error in maths to calculate of
+      ZEND_MM_ALIGNED_MIN_HEADER_SIZE). (wharmby at uk dot ibm dot com)
+
+    * (PHP_5_2)
+      NEWS
+      main/main.c
+      main/main.c:
+      Fixed bug #39548 (ZMSG_LOG_SCRIPT_NAME not routed to OutputDebugString() on
+      Windows)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/tests/bug39602.phpt
+      ZendEngine2/tests/bug39602.phpt
+      ZendEngine2/tests/bug39602.phpt:
+      Fixed bug #39602 (Invalid session.save_handler crashes PHP)
+
 2006-11-22  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/html.c:
