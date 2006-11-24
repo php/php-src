@@ -39,7 +39,7 @@
 #define	FTP_BUFSIZE	4096
 
 typedef enum ftptype {
-	FTPTYPE_ASCII,
+	FTPTYPE_ASCII=1,
 	FTPTYPE_IMAGE
 } ftptype_t;
 
