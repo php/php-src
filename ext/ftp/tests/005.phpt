@@ -53,34 +53,34 @@ bool(false)
 Warning: ftp_exec(): Command not implemented (5). in %s005.php on line 15
 bool(false)
 
-Warning: ftp_fget(): Command not implemented (6). in %s005.php on line 16
+Warning: ftp_fget(): Mode must be FTP_ASCII or FTP_BINARY in %s005.php on line 16
 bool(false)
 
-Warning: ftp_fput(): Command not implemented (7). in %s005.php on line 17
+Warning: ftp_fput(): Mode must be FTP_ASCII or FTP_BINARY in %s005.php on line 17
 bool(false)
 
-Warning: ftp_get(): Command not implemented (8). in %s005.php on line 18
+Warning: ftp_get(): Mode must be FTP_ASCII or FTP_BINARY in %s005.php on line 18
 bool(false)
 int(-1)
 
-Warning: ftp_mkdir(): Command not implemented (10). in %s005.php on line 20
+Warning: ftp_mkdir(): Command not implemented (7). in %s005.php on line 20
 bool(false)
 
 Warning: ftp_nb_continue(): no nbronous transfer to continue. in %s005.php on line 21
 int(0)
 
-Warning: ftp_nb_fget(): Command not implemented (11). in %s005.php on line 22
-int(0)
-
-Warning: ftp_nb_fput(): Command not implemented (12). in %s005.php on line 23
-int(0)
-
-Warning: ftp_systype(): Command not implemented (13). in %s005.php on line 24
+Warning: ftp_nb_fget(): Mode must be FTP_ASCII or FTP_BINARY in %s005.php on line 22
 bool(false)
 
-Warning: ftp_pwd(): Command not implemented (14). in %s005.php on line 25
+Warning: ftp_nb_fput(): Mode must be FTP_ASCII or FTP_BINARY in %s005.php on line 23
+bool(false)
+
+Warning: ftp_systype(): Command not implemented (8). in %s005.php on line 24
+bool(false)
+
+Warning: ftp_pwd(): Command not implemented (9). in %s005.php on line 25
 bool(false)
 int(-1)
 
-Warning: ftp_rmdir(): Command not implemented (16). in %s005.php on line 27
+Warning: ftp_rmdir(): Command not implemented (11). in %s005.php on line 27
 bool(false)
