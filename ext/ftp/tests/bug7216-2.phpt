@@ -16,6 +16,6 @@ var_dump(ftp_login($ftp, 'anonymous', 'IEUser@'));
 var_dump(ftp_mkdir($ftp, 'CVS'));
 
 ?>
---EXPECTREGEX--
-bool\(true\)
-string\(\d+\) ".+[\/\\]CVS"
+--EXPECT--
+bool(true)
+string(20) "/path/to/ftproot/CVS"
