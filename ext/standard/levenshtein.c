@@ -104,7 +104,7 @@ PHP_FUNCTION(levenshtein)
 {
 	int	argc = ZEND_NUM_ARGS();
 	void *str1, *str2;
-	int str1_len, str2_len;
+	int str1_len, str2_len, callback_len;
 	zend_uchar str1_type, str2_type;
 	long cost_ins, cost_rep, cost_del;
 	char *callback_name;
@@ -136,7 +136,7 @@ PHP_FUNCTION(levenshtein)
 		if (zend_parse_parameters(3 TSRMLS_CC, "TTs",
 								  &str1, &str1_len, &str1_type,
 								  &str2, &str2_len, &str2_type,
-								  &callback_name) == FAILURE) {
+								  &callback_name, &callback_len) == FAILURE) {
 			return;
 		}
 		distance = custom_levdist(str1, str2, callback_name TSRMLS_CC);
