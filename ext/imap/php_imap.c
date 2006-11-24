@@ -169,10 +169,18 @@ zend_function_entry imap_functions[] = {
 };
 /* }}} */
 
+/* {{{ imap dependencies */
+static zend_module_dep imap_deps[] = {
+	ZEND_MOD_REQUIRED("standard")
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
 /* {{{ imap_module_entry
  */
 zend_module_entry imap_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	imap_deps,
 	"imap",
 	imap_functions,
 	PHP_MINIT(imap),
