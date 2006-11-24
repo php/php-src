@@ -6,6 +6,7 @@ require 'skipif.inc';
 ?>
 --FILE--
 <?php
+$bug39583=1;
 require 'server.inc';
 
 $ftp = ftp_connect('127.0.0.1', $port);

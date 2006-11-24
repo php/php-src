@@ -187,7 +187,7 @@ while($buf = fread($s, 4098)) {
 		if (isset($ascii) && !$ascii && $orig === $data) {
 			fputs($s, "226 Closing data Connection.\r\n");
 
-		} elseif (!empty($ascii) && $data === strtr($orig, array("\r\n" => "\n", "\r" => "\n", "\n" => "\r\n"))) {
+		} elseif ((!empty($ascii) || isset($bug39583)) && $data === strtr($orig, array("\r\n" => "\n", "\r" => "\n", "\n" => "\r\n"))) {
 			fputs($s, "226 Closing data Connection.\r\n");
 
 		} else {
