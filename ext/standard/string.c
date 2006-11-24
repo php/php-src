@@ -3338,16 +3338,33 @@ nothing_todo:
 		new_str = estrndup(haystack, length);
 		return new_str;
 	} else {
-		if (case_sensitivity ? strncmp(haystack, needle, length) : strncasecmp(haystack, needle, length)) {
+		if (case_sensitivity && memcmp(haystack, needle, length)) {
 			goto nothing_todo;
-		} else {
-			*_new_length = str_len;
-			new_str = estrndup(str, str_len);
-			if (replace_count) {
-				(*replace_count)++;
+		} else if (!case_sensitivity) {
+			char *l_haystack, *l_needle;
+
+			l_haystack = estrndup(haystack, length);
+			l_needle = estrndup(needle, length);
+
+			php_strtolower(l_haystack, length);
+			php_strtolower(l_needle, length);
+
+			if (memcmp(l_haystack, l_needle, length)) {
+				efree(l_haystack);
+				efree(l_needle);
+				goto nothing_todo;
 			}
-			return new_str;
+			efree(l_haystack);
+			efree(l_needle);
 		}
+
+		*_new_length = str_len;
+		new_str = estrndup(str, str_len);
+
+		if (replace_count) {
+			(*replace_count)++;
+		}
+		return new_str;
 	}
 
 }
