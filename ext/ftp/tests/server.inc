@@ -157,8 +157,45 @@ while($buf = fread($s, 4098)) {
 			fputs($s, "215 UNIX Type: L8.\r\n");
 		}
 
+	} elseif ($buf === "TYPE A\r\n") {
+		$ascii = true;
+		fputs($s, "200 OK\r\n");
+
+	} elseif ($buf === "TYPE I\r\n") {
+		$ascii = false;
+		fputs($s, "200 OK\r\n");
+
 	} elseif ($buf === "QUIT\r\n") {
 		break;
+
+	} elseif (preg_match("~^PORT (\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\r\n$~", $buf, $m)) {
+		$host = "$m[1].$m[2].$m[3].$m[4]";
+		$port = ((int)$m[5] << 8) + (int)$m[6];
+		fputs($s, "200 OK.\r\n");
+
+	} elseif (preg_match("~^STOR ([\w/.-]+)\r\n$~", $buf, $m)) {
+		fputs($s, "150 File status okay; about to open data connection\r\n");
+
+		if (!$fs = stream_socket_client("tcp://$host:$port")) {
+			fputs($s, "425 Can't open data connection\r\n");
+			continue;
+		}
+
+		$data = stream_get_contents($fs);
+		$orig = file_get_contents(dirname(__FILE__).'/'.$m[1]);
+
+		if (isset($ascii) && !$ascii && $orig === $data) {
+			fputs($s, "226 Closing data Connection.\r\n");
+
+		} elseif (!empty($ascii) && $data === strtr($orig, array("\r\n" => "\n", "\r" => "\n", "\n" => "\r\n"))) {
+			fputs($s, "226 Closing data Connection.\r\n");
+
+		} else {
+			var_dump($data);
+			var_dump($orig);
+			fputs($s, "552 Requested file action aborted.\r\n");
+		}
+		fclose($fs);
 
 	} elseif (preg_match("~^CWD ([A-Za-z./]+)\r\n$~", $buf, $m)) {
 		change_dir($m[1]);
@@ -168,7 +205,7 @@ while($buf = fread($s, 4098)) {
 		if (isset($bug7216)) {
 			fputs($s, "257 OK.\r\n");
 		} else {
-			fputs($s, '257 "'.realpath($m[1])."\" created.\r\n");
+			fputs($s, "257 \"/path/to/ftproot$cwd$m[1]\" created.\r\n");
 		}
 
 	} elseif (preg_match('/^USER /', $buf)) {
