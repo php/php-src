@@ -47,10 +47,10 @@ NULL
 Warning: ftp_chdir() expects parameter 2 to be string, array given in %s004.php on line 14
 NULL
 
-Warning: ftp_chmod() expects exactly 3 parameters, 2 given in /cvs/php5/ext/ftp/tests/004.php on line 15
+Warning: ftp_chmod() expects exactly 3 parameters, 2 given in %s on line %d
 bool(false)
 
-Warning: ftp_get() expects at least 4 parameters, 3 given in /cvs/php5/ext/ftp/tests/004.php on line 16
+Warning: ftp_get() expects at least 4 parameters, 3 given in %s on line %d
 NULL
 
 Warning: ftp_close() expects exactly 1 parameter, 0 given in %s004.php on line 17
