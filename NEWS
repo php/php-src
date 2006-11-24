@@ -44,6 +44,7 @@ PHP                                                                        NEWS
 - Fixed bug #39613 (Possible segfault in imap initialization due to missing 
   module dependency). (wharmby at uk dot ibm dot com, Tony)
 - Fixed bug #39602 (Invalid session.save_handler crashes PHP). (Dmitry)
+- Fixed bug #39583 (ftp_put() does not change transfer mode to ASCII). (Tony)
 - Fixed bug #39576 (array_walk() doesn't separate userdata zval). (Tony)
 - Fixed bug #39548 (ZMSG_LOG_SCRIPT_NAME not routed to OutputDebugString()
   on Windows). (Dmitry)
