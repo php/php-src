@@ -1,0 +1,34 @@
+--TEST--
+running PHP code before and after processing input lines with -B and -E
+--SKIPIF--
+<?php 
+include "skipif.inc"; 
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+	die ("skip not for Windows");
+}
+?>
+--FILE--
+<?php
+
+$php = $_ENV['TEST_PHP_EXECUTABLE'];
+
+$filename_txt = dirname(__FILE__)."/013.test.txt";
+file_put_contents($filename_txt, "test\nfile\ncontents\n");
+
+var_dump(`cat "$filename_txt" | "$php" -B 'var_dump("start");'`);
+var_dump(`cat "$filename_txt" | "$php" -E 'var_dump("end");'`);
+var_dump(`cat "$filename_txt" | "$php" -B 'var_dump("start");' -E 'var_dump("end");'`);
+
+@unlink($filename_txt);
+
+echo "Done\n";
+?>
+--EXPECTF--	
+string(18) "string(5) "start"
+"
+string(16) "string(3) "end"
+"
+string(34) "string(5) "start"
+string(3) "end"
+"
+Done
