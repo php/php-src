@@ -1,3 +1,163 @@
+2006-11-24  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/bug39621.phpt:
+      MFH: fix #39621 (str_replace() is not binary safe on strings with equal
+      length)
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/bug39621.phpt
+      ext/standard/tests/strings/bug39621.phpt:
+      fix #39621 (str_replace() is not binary safe on strings with equal length)
+
+    * ext/standard/levenshtein.c:
+      add missing argument to zend_parse_parameters()
+
+2006-11-24  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/ftp/tests/006.phpt
+      ext/ftp/tests/bug39583.phpt
+      ext/ftp/tests/server.inc
+      ext/standard/tests/general_functions/phpcredits.phpt
+      ext/standard/tests/general_functions/phpcredits2.phpt
+      ext/standard/tests/general_functions/phpinfo.phpt
+      ext/standard/tests/general_functions/phpinfo2.phpt:
+      more tests
+
+    * ext/ftp/tests/006.phpt
+      ext/ftp/tests/006.phpt
+      ext/ftp/tests/bug39583.phpt
+      ext/ftp/tests/server.inc
+      ext/standard/tests/general_functions/phpcredits.phpt
+      ext/standard/tests/general_functions/phpcredits.phpt
+      ext/standard/tests/general_functions/phpcredits2.phpt
+      ext/standard/tests/general_functions/phpcredits2.phpt
+      ext/standard/tests/general_functions/phpinfo.phpt
+      ext/standard/tests/general_functions/phpinfo.phpt
+      ext/standard/tests/general_functions/phpinfo2.phpt
+      ext/standard/tests/general_functions/phpinfo2.phpt:
+      
+      file 006.phpt was initially added on branch PHP_5_2.
+
+    * ext/ftp/tests/005.phpt
+      ext/ftp/tests/bug39583-2.phpt
+      ext/ftp/tests/bug39583.phpt
+      ext/ftp/tests/bug7216-2.phpt
+      ext/ftp/tests/server.inc:
+      MFB
+
+    * (PHP_5_2)
+      ext/ftp/tests/005.phpt
+      ext/ftp/tests/bug39583-2.phpt
+      ext/ftp/tests/bug39583-2.phpt
+      ext/ftp/tests/bug39583.phpt
+      ext/ftp/tests/bug39583.phpt
+      ext/ftp/tests/bug7216-2.phpt
+      ext/ftp/tests/server.inc:
+      fix tests after Tony's commit and add a test for the bug he fixed
+
+2006-11-24  Antony Dovgal  <antony@zend.com>
+
+    * ext/ftp/tests/004.phpt
+      ext/ftp/tests/004.phpt
+      sapi/cli/tests/011.phpt
+      sapi/cli/tests/011.phpt:
+      fix test
+
+    * (PHP_5_2)
+      sapi/cli/tests/.cvsignore
+      sapi/cli/tests/001.phpt
+      sapi/cli/tests/002-win32.phpt
+      sapi/cli/tests/002.phpt
+      sapi/cli/tests/003.phpt
+      sapi/cli/tests/004.phpt
+      sapi/cli/tests/005.phpt
+      sapi/cli/tests/006.phpt
+      sapi/cli/tests/007.phpt
+      sapi/cli/tests/008.phpt
+      sapi/cli/tests/009.phpt
+      sapi/cli/tests/010-2.phpt
+      sapi/cli/tests/010.phpt
+      sapi/cli/tests/011.phpt
+      sapi/cli/tests/012.phpt
+      sapi/cli/tests/013.phpt
+      sapi/cli/tests/014.phpt
+      sapi/cli/tests/skipif.inc:
+      add tests for CLI
+
+    * sapi/cli/tests/.cvsignore
+      sapi/cli/tests/.cvsignore:
+      
+      add .cvsignore
+
+    * sapi/cli/tests/001.phpt
+      sapi/cli/tests/001.phpt
+      sapi/cli/tests/002-win32.phpt
+      sapi/cli/tests/002-win32.phpt
+      sapi/cli/tests/002.phpt
+      sapi/cli/tests/002.phpt
+      sapi/cli/tests/003.phpt
+      sapi/cli/tests/003.phpt
+      sapi/cli/tests/004.phpt
+      sapi/cli/tests/004.phpt
+      sapi/cli/tests/005.phpt
+      sapi/cli/tests/005.phpt
+      sapi/cli/tests/006.phpt
+      sapi/cli/tests/006.phpt
+      sapi/cli/tests/007.phpt
+      sapi/cli/tests/007.phpt
+      sapi/cli/tests/008.phpt
+      sapi/cli/tests/008.phpt
+      sapi/cli/tests/009.phpt
+      sapi/cli/tests/009.phpt
+      sapi/cli/tests/010-2.phpt
+      sapi/cli/tests/010-2.phpt
+      sapi/cli/tests/010.phpt
+      sapi/cli/tests/010.phpt
+      sapi/cli/tests/011.phpt
+      sapi/cli/tests/011.phpt
+      sapi/cli/tests/012.phpt
+      sapi/cli/tests/012.phpt
+      sapi/cli/tests/013.phpt
+      sapi/cli/tests/013.phpt
+      sapi/cli/tests/014.phpt
+      sapi/cli/tests/014.phpt
+      sapi/cli/tests/skipif.inc
+      sapi/cli/tests/skipif.inc:
+      
+      add tests for CLI
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/ftp/ftp.h
+      ext/ftp/ftp.h:
+      MFH: fix #39583 (ftp_put() does not change transfer mode to ASCII)
+
+    * ext/ftp/ftp.h:
+      fix #39583 (ftp_put() does not change transfer mode to ASCII)
+
+    * sapi/cli/php_cli.c:
+      call sapi_deactivate() & friends on error
+      fixes leak with `php-cli -n -c ..`
+
+    * ZendEngine2/zend.c:
+      initialize CG(literal_type) using ZEND_STR_TYPE macro
+      add CG(literal_type) initialization in non-ZTS mode
+      fixes backticks operator
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      fix #39613 (Possible segfault in imap initialization due to missing module
+      dependency)
+      patch by wharmby at uk dot ibm dot com
+
 2006-11-23  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/zend_language_scanner.l
