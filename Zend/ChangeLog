@@ -1,3 +1,10 @@
+2006-11-24  Antony Dovgal  <antony@zend.com>
+
+    * zend.c:
+      initialize CG(literal_type) using ZEND_STR_TYPE macro
+      add CG(literal_type) initialization in non-ZTS mode
+      fixes backticks operator
+
 2006-11-23  Antony Dovgal  <antony@zend.com>
 
     * zend_language_scanner.l
