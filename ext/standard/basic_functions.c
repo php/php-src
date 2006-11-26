@@ -4398,7 +4398,8 @@ PHP_FUNCTION(putenv)
 			/* Check the allowed list */
 			if (BG(sm_allowed_env_vars) && *BG(sm_allowed_env_vars)) {
 				char *allowed_env_vars = estrdup(BG(sm_allowed_env_vars));
-				char *allowed_prefix = strtok(allowed_env_vars, ", ");
+				char *strtok_buf = NULL;
+				char *allowed_prefix = php_strtok_r(allowed_env_vars, ", ", &strtok_buf);
 				zend_bool allowed = 0;
 
 				while (allowed_prefix) {
@@ -4406,7 +4407,7 @@ PHP_FUNCTION(putenv)
 						allowed = 1;
 						break;
 					}
-					allowed_prefix = strtok(NULL, ", ");
+					allowed_prefix = php_strtok_r(NULL, ", ", &strtok_buf);
 				}
 				efree(allowed_env_vars);
 				if (!allowed) {
