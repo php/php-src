@@ -47,7 +47,7 @@ bool(false)
 Warning: dbase_open(): unable to open database %s in %s on line %d
 bool(false)
 
-Warning: dbase_open(): unable to open database  in %s on line %d
+Warning: dbase_open(): The filename cannot be empty. in %s on line %d
 bool(false)
 int(%d)
 int(%d)
