@@ -25,6 +25,6 @@ string(0) ""
 string(1) "1"
 
 Notice: Array to string conversion in %s on line %d
-string(5) "Array"
-string(4) "test"
+string(5) "%s"
+string(4) "%s"
 Done
