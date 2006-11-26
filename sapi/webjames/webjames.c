@@ -27,7 +27,7 @@
 
 #include <unixlib/local.h>
 
-#define WEBJAMES_SAPI_VERSION "1.0.1"
+#define WEBJAMES_SAPI_VERSION "1.0.2"
 
 typedef struct {
 	struct connection *conn; /*structure holding all the details of the current request*/
@@ -42,24 +42,44 @@ static php_webjames_globals webjames_globals;
 static int sapi_webjames_ub_write(const char *str, uint str_length TSRMLS_DC)
 /*unbuffered write - send data straight out to socket*/
 {
-	int bytes;
-	
-	bytes = webjames_writebuffer(WG(conn),str,str_length);
-	if (bytes<0) {
-		PG(connection_status) = PHP_CONNECTION_ABORTED;
-		if (!PG(ignore_user_abort)) {
-			zend_bailout();
+	int totalbytes = 0;
+
+	do {
+		int bytes;
+		bytes = webjames_writebuffer(WG(conn),str,str_length);
+		if (bytes<0) {
+			PG(connection_status) = PHP_CONNECTION_ABORTED;
+			if (!PG(ignore_user_abort)) {
+				zend_bailout();
+			}
+			return bytes;
 		}
-	}
-	return bytes;
+		str += bytes;
+		str_length -= bytes;
+		totalbytes += bytes;
+	} while (str_length);
+	return totalbytes;
 }
 
 static void sapi_webjames_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
 /*send an HTTP header*/
 {
+	char *header = sapi_header->header;
+	int len = sapi_header->header_len;
 	if (WG(conn)->flags.outputheaders) {
-		if (sapi_header)
-			webjames_writebuffer(WG(conn), sapi_header->header, sapi_header->header_len);
+		while (sapi_header && len > 0) {
+			int bytes;
+			bytes = webjames_writebuffer(WG(conn), header, len);
+			if (bytes<0) {
+				PG(connection_status) = PHP_CONNECTION_ABORTED;
+				if (!PG(ignore_user_abort)) {
+					zend_bailout();
+				}
+				return;
+			}
+			header += bytes;
+			len -= bytes;
+		}
 		webjames_writestring(WG(conn), "\r\n");
 	}
 }
