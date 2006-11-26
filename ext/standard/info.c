@@ -374,6 +374,7 @@ PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 	PUTS("<head>\n");
 	php_info_print_style();
 	PUTS("<title>phpinfo()</title>");
+	PUTS("<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW,NOARCHIVE\" />");
 /*
 	php_printf("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\" />\n", charset);
 */

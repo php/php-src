@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.5
+- Added a meta tag to phpinfo() output to prevent search engines from 
+  indexing the page. (Ilia)
 - Updated PCRE to version 6.7. (Ilia)
 - Fixed missing open_basedir check inside chdir() function. (Ilia)
 - Fixed bug #39583 (ftp_put() does not change transfer mode to ASCII). (Tony)
