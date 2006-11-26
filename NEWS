@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.1
+- Added a meta tag to phpinfo() output to prevent search engines from indexing 
+  the page. (Ilia)
 - Added missing object support to file_put_contents(). (Ilia)
 - Updated bundled libcURL to version 7.16.0 in the Windows distro. (Edin)
 - cgi.* and fastcgi.* directives are moved to INI subsystem.
