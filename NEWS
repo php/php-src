@@ -50,6 +50,8 @@ PHP                                                                        NEWS
 - Fixed bug #39602 (Invalid session.save_handler crashes PHP). (Dmitry)
 - Fixed bug #39583 (ftp_put() does not change transfer mode to ASCII). (Tony)
 - Fixed bug #39576 (array_walk() doesn't separate userdata zval). (Tony)
+- Fixed bug #39564 (PDO::errorInfo() returns inconsistent information when 
+  sqlite3_step() fails). (Tony)
 - Fixed bug #39548 (ZMSG_LOG_SCRIPT_NAME not routed to OutputDebugString()
   on Windows). (Dmitry)
 - Fixed bug #39538 (fgetcsv can't handle starting newlines and trailing odd
