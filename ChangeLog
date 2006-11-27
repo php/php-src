@@ -1,3 +1,54 @@
+2006-11-26  Alex Waugh  <alex@alexwaugh.com>
+
+    * (PHP_5_2)
+      sapi/webjames/webjames.c:
+      MFH: Improve robustness of sending routines
+
+    * sapi/webjames/webjames.c:
+      Improve robustness of sending routines
+
+2006-11-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mime_magic/mime_magic.c:
+      MFB: Fixed bug #39623 (thread safety fixes on *nix for mime_magic
+      extenion).
+
+    * (PHP_5_2)
+      ext/mime_magic/mime_magic.c
+      ext/standard/basic_functions.c:
+      Fixed bug #39623 (thread safety fixes on *nix for putenv() & mime_magic).
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/info.c:
+      MFH: Added a meta tag to phpinfo() output to prevent search engines from
+      indexing the page.
+
+    * ext/imap/tests/imap_utf8.phpt:
+      MFB: Fixed test, in some versions of c-client returned value is always
+      uppercase
+
+    * (PHP_5_2)
+      ext/imap/tests/imap_utf8.phpt:
+      Fixed test, in some versions of c-client returned value is always uppercase
+
+    * ext/dbase/tests/002.phpt:
+      MFB: fixed test
+
+    * (PHP_5_2)
+      ext/dbase/tests/002.phpt:
+      Fixed test
+
+    * ext/standard/info.c:
+      MFB: Added a meta tag to phpinfo() output to prevent search engines from
+      indexing the page.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/info.c:
+      Added a meta tag to phpinfo() output to prevent search engines from
+      indexing the page.
+
 2006-11-24  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
