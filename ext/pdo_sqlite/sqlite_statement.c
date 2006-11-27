@@ -66,6 +66,7 @@ static int pdo_sqlite_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			return 1;
 
 		case SQLITE_ERROR:
+			sqlite3_reset(S->stmt);
 		case SQLITE_MISUSE:
 		case SQLITE_BUSY:
 		default:
@@ -171,6 +172,8 @@ static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
 			sqlite3_reset(S->stmt);
 			return 0;
 
+		case SQLITE_ERROR:
+			sqlite3_reset(S->stmt);
 		default:
 			pdo_sqlite_error_stmt(stmt);
 			return 0;
