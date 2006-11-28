@@ -1762,6 +1762,7 @@ sxe_object_clone(void *object, void **clone_ptr TSRMLS_DC)
 	}
 	if (sxe->node) {
 		nodep = xmlDocCopyNode(sxe->node->node, docp, 1);
+		nodep->parent = sxe->node->node->parent;
 	}
 
 	php_libxml_increment_node_ptr((php_libxml_node_object *)clone, nodep, NULL TSRMLS_CC);
