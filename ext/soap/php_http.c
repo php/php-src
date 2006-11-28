@@ -469,9 +469,10 @@ try_again:
 					char          HA1[33], HA2[33], response[33], cnonce[33], nc[9];
 					PHP_MD5_CTX   md5ctx;
 					unsigned char hash[16];
+					unsigned int ctx;
 
 					PHP_MD5Init(&md5ctx);
-					sprintf(cnonce, "%d", rand());
+					sprintf(cnonce, "%d", php_rand_r(&ctx));
 					PHP_MD5Update(&md5ctx, (unsigned char*)cnonce, strlen(cnonce));
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(cnonce, hash);
