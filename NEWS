@@ -43,6 +43,8 @@ PHP                                                                        NEWS
     php_filter.h).
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
+- Fixed bug #39662 (Segfault when calling asXML() of a cloned SimpleXMLElement).
+  (Tony)
 - Fixed bug #39656 (crash when calling fetch() on a PDO statment object
   after closeCursor()). (Ilia, Tony)
 - Fixed bug #39653 (ext/dba doesn't check for db-4.5 and db-4.4 when db4 
