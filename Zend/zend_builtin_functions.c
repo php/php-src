@@ -2031,7 +2031,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	}
 
 	/* skip debug_backtrace() */
-	if (skip_last--) {
+	if (skip_last-- && ptr) {
 		int arg_count = *((ulong*)(cur_arg_pos - 2));
 		cur_arg_pos -= (arg_count + 2);
 		frames_on_stack--;
