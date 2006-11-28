@@ -43,8 +43,12 @@ PHP                                                                        NEWS
     php_filter.h).
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
+- Fixed bug #39656 (crash when calling fetch() on a PDO statment object
+  after closeCursor()). (Ilia, Tony)
 - Fixed bug #39653 (ext/dba doesn't check for db-4.5 and db-4.4 when db4 
   support is enabled). (Tony)
+- Fixed bug #39623 (thread safety fixes on *nix for putenv() & mime_magic).
+  (Ilia, wharmby at uk dot ibm dot com)
 - Fixed bug #39621 (str_replace() is not binary safe on strings with equal 
   length). (Tony)
 - Fixed bug #39613 (Possible segfault in imap initialization due to missing 
