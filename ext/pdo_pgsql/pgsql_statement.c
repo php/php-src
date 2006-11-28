@@ -140,7 +140,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		return 0;
 	}
 
-	if(!stmt->executed) {
+	if (!stmt->executed && !stmt->column_count) {
 		stmt->column_count = (int) PQnfields(S->result);
 		S->cols = ecalloc(stmt->column_count, sizeof(pdo_pgsql_column));
 	}
