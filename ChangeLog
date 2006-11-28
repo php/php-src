@@ -1,3 +1,19 @@
+2006-11-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_sqlite/sqlite_statement.c:
+      MFH: fix #39564 (PDO::errorInfo() returns inconsistent information when
+      sqlite3_step() fails)
+
+    * ext/pdo_sqlite/sqlite_statement.c:
+      fix #39564 (PDO::errorInfo() returns inconsistent information when
+      sqlite3_step() fails)
+
+    * ext/ftp/tests/004.phpt:
+      fix test
+      this errmsg is different on FreeBSD
+
 2006-11-26  Alex Waugh  <alex@alexwaugh.com>
 
     * (PHP_5_2)
