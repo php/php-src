@@ -223,7 +223,7 @@ AC_ARG_WITH(db4,
         break
       fi
     done
-    PHP_DBA_DB_CHECK(4, db-4.3 db-4.2 db-4.1 db-4.0 db-4 db4 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
+    PHP_DBA_DB_CHECK(4, db-4.5 db-4.4 db-4.3 db-4.2 db-4.1 db-4.0 db-4 db4 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
   fi
 ])
 AC_DBA_STD_RESULT(db4,Berkeley DB4)
