@@ -122,7 +122,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file TSRMLS_D
 		len = spprintf(&file_dirname_fullpath, 0, "%s", dest);
 	}
 
-	php_basename(file, file_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
+	php_basename(file, file_len, NULL, 0, &file_basename, (int *)&file_basename_len TSRMLS_CC);
 
 	if (SAFEMODE_CHECKFILE(file_dirname_fullpath)) {
 		efree(file_dirname_fullpath);
@@ -954,7 +954,7 @@ static ZIPARCHIVE_METHOD(close)
 
 /* {{{ proto bool createEmptyDir(string dirname) U
 Returns the index of the entry named filename in the archive */
-ZIPARCHIVE_METHOD(addEmptyDir)
+static ZIPARCHIVE_METHOD(addEmptyDir)
 {
 	struct zip *intern;
 	zval *this = getThis();
@@ -978,6 +978,7 @@ ZIPARCHIVE_METHOD(addEmptyDir)
 	if (zip_add_dir(intern, (const char *)dirname) < 0) {
 		RETURN_FALSE;
 	}
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1004,7 +1005,6 @@ static ZIPARCHIVE_METHOD(addFile)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sll",
 			&filename, &filename_len, &entry_name, &entry_name_len, &offset_start, &offset_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1375,7 +1375,7 @@ static ZIPARCHIVE_METHOD(getCommentName)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
-			&name, &name_len, &flags) == FAILURE) {;
+			&name, &name_len, &flags) == FAILURE) {
 		return;
 	}
 	if (name_len < 1) {
