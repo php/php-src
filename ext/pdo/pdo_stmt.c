@@ -466,7 +466,7 @@ static PHP_METHOD(PDOStatement, execute)
 		if (!stmt->executed) {
 			/* this is the first execute */
 
-			if (stmt->dbh->alloc_own_columns) {
+			if (stmt->dbh->alloc_own_columns && !stmt->columns) {
 				/* for "big boy" drivers, we need to allocate memory to fetch
 				 * the results into, so lets do that now */
 				ret = pdo_stmt_describe_columns(stmt TSRMLS_CC);
@@ -617,6 +617,10 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,
 	long offset, int do_bind TSRMLS_DC) /* {{{ */
 {
+	if (!stmt->executed) {
+		return 0;
+	}
+
 	if (!dispatch_param_event(stmt, PDO_PARAM_EVT_FETCH_PRE TSRMLS_CC)) {
 		return 0;
 	}
@@ -1993,6 +1997,7 @@ static PHP_METHOD(PDOStatement, closeCursor)
 			}
 				
 		} while (1);
+		stmt->executed = 0;
 		RETURN_TRUE;
 	}
 
@@ -2002,7 +2007,7 @@ static PHP_METHOD(PDOStatement, closeCursor)
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
-
+	stmt->executed = 0;
 	RETURN_TRUE;
 }
 /* }}} */
