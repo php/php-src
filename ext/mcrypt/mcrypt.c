@@ -1274,9 +1274,10 @@ PHP_FUNCTION(mcrypt_create_iv)
 			RETURN_FALSE;
 		}
 	} else {
+		unsigned int ctx;
 		n = size;
 		while (size) {
-			iv[--size] = 255.0 * rand() / RAND_MAX;
+			iv[--size] = 255.0 * php_rand_r(&ctx) / RAND_MAX;
 		}
 	}
 	RETURN_STRINGL(iv, n, 0);
