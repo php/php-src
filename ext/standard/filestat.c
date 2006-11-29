@@ -417,14 +417,29 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 	if (Z_TYPE_P(group) == IS_LONG) {
 		gid = (gid_t)Z_LVAL_P(group);
 	} else {
-		struct group *gr;
+#if HAVE_GETGRNAM_R
+		struct group gr;
+		struct group *retgrptr;
+		int grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+		char *grbuf = emalloc(grbuflen);
 
+		convert_to_string(group);
+		if (getgrnam_r(Z_STRVAL_PP(group), &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_PP(group));
+			efree(grbuf);
+			RETURN_FALSE;
+		}
+		efree(grbuf);
+		gid = gr.gr_gid;
+#else
+		struct group *gr;
 		convert_to_string(group);
 		if (!(gr = getgrnam(Z_STRVAL_P(group)))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
 			RETURN_FALSE;
 		}
 		gid = gr->gr_gid;
+#endif
 	}
 
 	if (filename_type == IS_UNICODE) {
@@ -506,6 +521,21 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 	if (Z_TYPE_P(user) == IS_LONG) {
 		uid = (uid_t)Z_LVAL_P(user);
 	} else {
+#ifdef HAVE_GETPWNAM_R
+		struct passwd pw;
+		struct passwd *retpwptr = NULL;
+		int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+		char *pwbuf = emalloc(pwbuflen);
+
+		convert_to_string(user);
+		if (getpwnam_r(Z_STRVAL_PP(user), &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_PP(user));
+			efree(pwbuf);
+			RETURN_FALSE;
+		}
+		efree(pwbuf);
+		uid = pw.pw_uid;
+#else
 		struct passwd *pw;
 
 		convert_to_string(user);
@@ -514,6 +544,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 			RETURN_FALSE;
 		}
 		uid = pw->pw_uid;
+#endif
 	}
 
 	if (filename_type == IS_UNICODE) {
