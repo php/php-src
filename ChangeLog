@@ -1,3 +1,91 @@
+2006-11-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/examples/callbackfilteriterator.inc
+      ext/spl/examples/callbackfilteriterator.inc:
+      
+      - Add new example
+
+2006-11-28  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      resolve coverity issue #224
+
+    * (PHP_5_2)
+      ext/standard/html.h:
+      add php_unescape_html_entities() proto to the header
+      (fixes #39665)
+
+    * ext/standard/html.h:
+      add php_unescape_html_entities() proto to the header
+
+    * (PHP_5_2)
+      NEWS
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug39662.phpt:
+      MFH: fix #39662 (Segfault when calling asXML() of a cloned
+      SimpleXMLElement)
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug39662.phpt
+      ext/simplexml/tests/bug39662.phpt:
+      fix #39662 (Segfault when calling asXML() of a cloned SimpleXMLElement)
+
+    * ext/pdo/tests/bug_39656.phpt:
+      add test
+
+    * ext/pdo/tests/bug_39656.phpt
+      ext/pdo/tests/bug_39656.phpt:
+      
+      file bug_39656.phpt was initially added on branch PHP_5_2.
+
+2006-11-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo_pgsql/pgsql_statement.c:
+      MFB: Fixed bug #39656 (crash when calling fetch() on a PDO statment object
+      after closeCursor()).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo_pgsql/pgsql_statement.c:
+      Fixed bug #39656 (crash when calling fetch() on a PDO statment object
+      after closeCursor()).
+
+2006-11-28  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/dba/config.m4:
+      MFH: fix #39653 (ext/dba doesn't check for db-4.5 and db-4.4 when db4
+      support is enabled)
+
+    * ext/dba/config.m4:
+      fix #39653 (ext/dba doesn't check for db-4.5 and db-4.4 when db4 support is
+      enabled)
+
+2006-11-28  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - fix warning
+      - addEmptyDir returns true on success
+      - remove useless semi column
+
+2006-11-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mcrypt/mcrypt.c
+      ext/soap/php_http.c:
+      MFB: Replace non-threadsafe rand() with php_rand_r()
+
+    * (PHP_5_2)
+      ext/mcrypt/mcrypt.c
+      ext/soap/php_http.c:
+      Replace non-threadsafe rand() with php_rand_r()
+
 2006-11-27  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
