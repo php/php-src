@@ -45,6 +45,9 @@ PHP                                                                        NEWS
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
 - Fixed bug #39673 (file_get_contents causes bus error on certain offsets). 
   (Tony)
+- Fixed bug #39663 (Memory leak in pg_get_notify() and a possible memory
+  corruption on Windows in pgsql and pdo_pgsql extensions). (Ilia, matteo at
+  beccati dot com)
 - Fixed bug #39662 (Segfault when calling asXML() of a cloned SimpleXMLElement).
   (Rob, Tony)
 - Fixed bug #39656 (crash when calling fetch() on a PDO statment object
