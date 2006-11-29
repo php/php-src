@@ -3358,7 +3358,7 @@ PHP_FUNCTION(pg_copy_to)
 							break;
 						default:
 							add_next_index_string(return_value, csv, 1);
-							free(csv);
+							PQfreemem(csv);
 							break;
 					}
 				}
@@ -3610,7 +3610,7 @@ PHP_FUNCTION(pg_escape_bytea)
 		to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
 
 	RETVAL_STRINGL(to, to_len-1, 1); /* to_len includes addtional '\0' */
-	free(to);
+	PQfreemem(to);
 }
 /* }}} */
 
@@ -3735,7 +3735,7 @@ PHP_FUNCTION(pg_unescape_bytea)
 #if HAVE_PQUNESCAPEBYTEA
 	tmp = (char *)PQunescapeBytea((unsigned char*)from, &to_len);
 	to = estrndup(tmp, to_len);
-	free(tmp);
+	PQfreemem(tmp);
 #else
 	to = (char *)php_pgsql_unescape_bytea((unsigned char*)from, &to_len);
 #endif
@@ -4348,6 +4348,7 @@ PHP_FUNCTION(pg_get_notify)
 		add_assoc_string(return_value, "message", pgsql_notify->relname, 1);
 		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
 	}
+	PQfreemem(pgsql_notify);
 }
 /* }}} */
 
@@ -5153,7 +5154,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							Z_STRLEN_P(new_val) = to_len-1; /* PQescapeBytea's to_len includes additional '\0' */
 							Z_STRVAL_P(new_val) = emalloc(to_len);
 							memcpy(Z_STRVAL_P(new_val), tmp, to_len);
-							free(tmp);
+							PQfreemem(tmp);
 							php_pgsql_add_quotes(new_val, 1 TSRMLS_CC);
 								
 						}
