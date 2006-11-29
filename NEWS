@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   the page. (Ilia)
 - Added missing object support to file_put_contents(). (Ilia)
 - Updated bundled libcURL to version 7.16.0 in the Windows distro. (Edin)
+- Updated timezone database to version 2006.16. (Derick)
 - cgi.* and fastcgi.* directives are moved to INI subsystem.
   The new directive cgi.check_shebang_line can be used to ommiting checnk
   for "#! /usr/bin/php" line. (Dmitry).
