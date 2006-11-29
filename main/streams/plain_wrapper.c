@@ -631,8 +631,15 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 
 					case PHP_STREAM_MMAP_MAP_RANGE:
 						do_fstat(data, 1);
+						if (range->length == 0 && range->offset > 0 && range->offset < data->sb.st_size) {
+							range->length = data->sb.st_size - range->offset;
+						}
 						if (range->length == 0 || range->length > data->sb.st_size) {
 							range->length = data->sb.st_size;
+						}
+						if (range->offset >= data->sb.st_size) {
+							range->offset = data->sb.st_size;
+							range->length = 0;
 						}
 						switch (range->mode) {
 							case PHP_STREAM_MAP_MODE_READONLY:
