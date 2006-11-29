@@ -1211,7 +1211,7 @@ SXE_METHOD(asXML)
 		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 
 		if (node) {
-			if (XML_DOCUMENT_NODE == node->parent->type) {
+			if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
 				int bytes;
 				bytes = xmlSaveFile(filename, (xmlDocPtr) sxe->document->ptr);
 				if (bytes == -1) {
@@ -1240,7 +1240,7 @@ SXE_METHOD(asXML)
 	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 
 	if (node) {
-		if (XML_DOCUMENT_NODE == node->parent->type) {
+		if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
 			xmlDocDumpMemory((xmlDocPtr) sxe->document->ptr, &strval, &strval_len);
 			RETVAL_STRINGL((char *)strval, strval_len, 1);
 			xmlFree(strval);
@@ -1762,7 +1762,6 @@ sxe_object_clone(void *object, void **clone_ptr TSRMLS_DC)
 	}
 	if (sxe->node) {
 		nodep = xmlDocCopyNode(sxe->node->node, docp, 1);
-		nodep->parent = sxe->node->node->parent;
 	}
 
 	php_libxml_increment_node_ptr((php_libxml_node_object *)clone, nodep, NULL TSRMLS_CC);

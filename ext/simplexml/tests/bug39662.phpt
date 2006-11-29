@@ -31,9 +31,7 @@ object(SimpleXMLElement)#%d (1) {
 
 "
 }
-string(55) "<?xml version="1.0" encoding="utf-8"?>
-<test>
+string(15) "<test>
 
-</test>
-"
+</test>"
 Done
