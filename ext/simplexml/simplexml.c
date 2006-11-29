@@ -1159,6 +1159,7 @@ SXE_METHOD(xpath)
 
 	xmlXPathFreeObject(retval);
 }
+/* }}} */
 
 /* {{{ proto bool SimpleXMLElement::registerXPathNamespace(string prefix, string ns)
    Creates a prefix/ns context for the next XPath query */
