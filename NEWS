@@ -55,6 +55,8 @@ PHP                                                                        NEWS
   after closeCursor()). (Ilia, Tony)
 - Fixed bug #39653 (ext/dba doesn't check for db-4.5 and db-4.4 when db4 
   support is enabled). (Tony)
+- Fixed bug #39648 (Implementation of PHP functions chown() and chgrp() are not
+  thread safe). (Ilia, wharmby at uk dot ibm dot com)
 - Fixed bug #39623 (thread safety fixes on *nix for putenv() & mime_magic).
   (Ilia, wharmby at uk dot ibm dot com)
 - Fixed bug #39621 (str_replace() is not binary safe on strings with equal 

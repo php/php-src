@@ -356,7 +356,6 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 {
 	zval **filename, **group;
 	gid_t gid;
-	struct group *gr=NULL;
 	int ret;
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &filename, &group)==FAILURE) {
@@ -364,13 +363,28 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 	}
 	convert_to_string_ex(filename);
 	if (Z_TYPE_PP(group) == IS_STRING) {
-		gr = getgrnam(Z_STRVAL_PP(group));
+#if HAVE_GETGRNAM_R
+		struct group gr;
+		struct group *retgrptr;
+		int grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+		char *grbuf = emalloc(grbuflen);
+
+		if (getgrnam_r(Z_STRVAL_PP(group), &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_PP(group));
+			efree(grbuf);
+			RETURN_FALSE;
+		}
+		efree(grbuf);
+		gid = gr.gr_gid;
+#else
+		struct group *gr = getgrnam(Z_STRVAL_PP(group));
+
 		if (!gr) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s",
-					   Z_STRVAL_PP(group));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_PP(group));
 			RETURN_FALSE;
 		}
 		gid = gr->gr_gid;
+#endif
 	} else {
 		convert_to_long_ex(group);
 		gid = Z_LVAL_PP(group);
@@ -434,20 +448,34 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 	zval **filename, **user;
 	int ret;
 	uid_t uid;
-	struct passwd *pw = NULL;
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &filename, &user)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
 	if (Z_TYPE_PP(user) == IS_STRING) {
-		pw = getpwnam(Z_STRVAL_PP(user));
+#ifdef HAVE_GETPWNAM_R
+		struct passwd pw;
+		struct passwd *retpwptr = NULL;
+		int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+		char *pwbuf = emalloc(pwbuflen);
+
+		if (getpwnam_r(Z_STRVAL_PP(user), &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_PP(user));
+			efree(pwbuf);
+			RETURN_FALSE;
+		}
+		efree(pwbuf);
+		uid = pw.pw_uid;
+#else
+		struct passwd *pw = getpwnam(Z_STRVAL_PP(user));
+
 		if (!pw) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s",
-					   Z_STRVAL_PP(user));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_PP(user));
 			RETURN_FALSE;
 		}
 		uid = pw->pw_uid;
+#endif
 	} else {
 		convert_to_long_ex(user);
 		uid = Z_LVAL_PP(user);
