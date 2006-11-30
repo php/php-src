@@ -1755,12 +1755,15 @@ static void mprint(union VALUETYPE *p, struct magic *m)
     case DATE:
     case BEDATE:
     case LEDATE:
-		/* XXX: not multithread safe */
-		pp = ctime((time_t *) & p->l);
-		if ((rt = strchr(pp, '\n')) != NULL)
-			*rt = '\0';
-		(void) magic_rsl_printf(m->desc, pp);
-		return;
+		{
+			char ctimebuf[52];
+			pp = php_ctime_r((time_t *) &p->l, ctimebuf);
+			if ((rt = strchr(pp, '\n')) != NULL) {
+				*rt = '\0';
+			}
+			(void) magic_rsl_printf(m->desc, pp);
+			return;
+		}
     default:
     	{
     		TSRMLS_FETCH();
