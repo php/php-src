@@ -1863,7 +1863,7 @@ static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTab
 		sdlTypePtr *tmp;
 
 	  tmp_elements = emalloc(sizeof(HashTable));
-	  zend_hash_init(tmp_elements, 0, NULL, NULL, 0);
+	  zend_hash_init(tmp_elements, zend_hash_num_elements(type->elements), NULL, NULL, 0);
 
 		zend_hash_internal_pointer_reset(type->elements);
 		while (zend_hash_get_current_data(type->elements, (void**)&tmp) == SUCCESS) {
