@@ -62,6 +62,8 @@ int php_scandir(const char *dirname, struct dirent **namelist[], int (*selector)
 	struct dirent *dp = NULL;
 	int vector_size = 0;
 	int nfiles = 0;
+	char entry[sizeof(struct dirent)+MAXPATHLEN];
+	struct dirent *result = (struct dirent *)&entry;
 
 	if (namelist == NULL) {
 		return -1;
@@ -71,7 +73,7 @@ int php_scandir(const char *dirname, struct dirent **namelist[], int (*selector)
 		return -1;
 	}
 
-	while ((dp = readdir(dirp)) != NULL) {
+	while ((dp = php_readdir_r(dirp, (struct dirent *)entry, &result)) == 0 && result) {
 		int dsize = 0;
 		struct dirent *newdp = NULL;
 
