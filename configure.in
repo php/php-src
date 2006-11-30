@@ -464,6 +464,7 @@ chroot \
 ctime_r \
 cuserid \
 crypt \
+crypt_r \
 flock \
 ftok \
 funopen \
@@ -478,6 +479,8 @@ getservbyport \
 getrusage \
 gettimeofday \
 gmtime_r \
+getpwnam_r \
+getgrnam_r \
 grantpt \
 inet_ntoa \
 inet_ntop \
