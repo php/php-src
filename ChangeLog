@@ -1,3 +1,70 @@
+2006-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/filestat.c:
+      MFB: Fixed bug #39648 (Implementation of PHP functions chown() and chgrp()
+      are not thread safe).
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      ext/standard/filestat.c:
+      Fixed bug #39648 (Implementation of PHP functions chown() and chgrp() are
+      not thread safe).
+
+2006-11-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/simplexml/simplexml.c:
+      add missing folding marker
+
+2006-11-29  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated timezone database to version 2006.16.
+
+2006-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo_pgsql/pgsql_driver.c
+      ext/pgsql/pgsql.c:
+      MFB: Fixed bug #39663 (Memory leak in pg_get_notify() and a possible memory
+      corruption on Windows in pgsql and pdo_pgsql extensions).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_pgsql/pgsql_driver.c
+      ext/pgsql/pgsql.c:
+      Fixed bug #39663 (Memory leak in pg_get_notify() and a possible memory
+      corruption on Windows in pgsql and pdo_pgsql extensions).
+
+2006-11-29  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/tests/file/bug39673.phpt
+      main/streams/plain_wrapper.c:
+      MFH: fix #39673 (file_get_contents causes bus error on certain offsets)
+
+    * ext/standard/tests/file/bug39673.phpt
+      ext/standard/tests/file/bug39673.phpt
+      main/streams/plain_wrapper.c:
+      
+      fix #39673 (file_get_contents causes bus error on certain offsets)
+
+2006-11-29  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug39662.phpt:
+      MFB: correct fix for bug #39662 to fix leak and tree corruption
+      fix test
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug39662.phpt:
+      correct fix for bug #39662 to fix leak and tree corruption
+      fix test
+
 2006-11-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/spl/examples/callbackfilteriterator.inc
