@@ -827,17 +827,33 @@ PHP_FUNCTION(posix_getgrnam)
 PHP_FUNCTION(posix_getgrgid)
 {
 	long gid;
+#ifdef HAVE_GETGRGID_R
+	int ret;
+	struct group _g;
+	struct group *retgrptr;
+	int grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+	char *grbuf = emalloc(grbuflen);
+#endif
 	struct group *g;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &gid) == FAILURE) {
 		RETURN_FALSE;
 	}
-
+#ifdef HAVE_GETGRGID_R
+	ret = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
+	if (ret) {
+		POSIX_G(last_error) = ret;
+		efree(grbuf);
+		RETURN_FALSE;
+	}
+	efree(grbuf);
+	g = &_g;
+#else
 	if (NULL == (g = getgrgid(gid))) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
 	}
-
+#endif
 	array_init(return_value);
 
 	if (!php_posix_group_to_array(g, return_value)) {
@@ -895,17 +911,33 @@ PHP_FUNCTION(posix_getpwnam)
 PHP_FUNCTION(posix_getpwuid)
 {
 	long uid;
+#ifdef HAVE_GETPWUID_R
+	struct passwd _pw;
+	struct passwd *retpwptr = NULL;
+	int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+	char *pwbuf = emalloc(pwbuflen);
+	int ret;
+#endif
 	struct passwd *pw;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uid) == FAILURE) {
 		RETURN_FALSE;
 	}
-
+#ifdef HAVE_GETPWUID_R
+	ret = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
+	if (ret) {
+		POSIX_G(last_error) = ret;
+		efree(pwbuf);
+		RETURN_FALSE;
+	}
+	efree(pwbuf);
+	pw = &_pw;
+#else
 	if (NULL == (pw = getpwuid(uid))) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
 	}
-
+#endif
 	array_init(return_value);
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
