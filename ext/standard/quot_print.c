@@ -147,26 +147,24 @@ PHPAPI unsigned char *php_quot_print_decode(const unsigned char *str, size_t len
 * Decoding  Quoted-printable string.
 *
 */
-/* {{{ proto string quoted_printable_decode(string str)
+/* {{{ proto binary quoted_printable_decode(string str) U
    Convert a quoted-printable string to an 8 bit string */
 PHP_FUNCTION(quoted_printable_decode)
 {
-	zval **arg1;
 	char *str_in, *str_out;
+	int str_in_len;
 	int i = 0, j = 0, k;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &str_in, &str_in_len, UG(ascii_conv)) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(arg1);
     
-	if (Z_STRLEN_PP(arg1) == 0) {
+	if (str_in_len == 0) {
 		/* shortcut */
 		RETURN_EMPTY_STRING();
 	}
 
-	str_in = Z_STRVAL_PP(arg1);
-	str_out = emalloc(Z_STRLEN_PP(arg1) + 1);
+	str_out = emalloc(str_in_len + 1);
 	while (str_in[i]) {
 		switch (str_in[i]) {
 		case '=':
