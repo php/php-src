@@ -53,6 +53,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
+#include "main/php_reentrancy.h"
 
 #ifndef SQLITE_OMIT_DATETIME_FUNCS
 
@@ -397,7 +398,7 @@ static void clearYMD_HMS_TZ(DateTime *p){
 static double localtimeOffset(DateTime *p){
   DateTime x, y;
   time_t t;
-  struct tm *pTm;
+  struct tm *pTm, tmbuf;
   x = *p;
   computeYMD_HMS(&x);
   if( x.Y<1971 || x.Y>=2038 ){
@@ -416,7 +417,7 @@ static double localtimeOffset(DateTime *p){
   computeJD(&x);
   t = (x.rJD-2440587.5)*86400.0 + 0.5;
   sqliteOsEnterMutex();
-  pTm = localtime(&t);
+  pTm = php_localtime_r(&t, &tmbuf);
   y.Y = pTm->tm_year + 1900;
   y.M = pTm->tm_mon + 1;
   y.D = pTm->tm_mday;
