@@ -98,7 +98,7 @@ static void php_pack(zval **val, int size, int *map, char *output)
 /* pack() idea stolen from Perl (implemented formats behave the same as there)
  * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
  */
-/* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, mixed ...]])
+/* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, mixed ...]]) U
    Takes one or more arguments and packs them into a binary string according to the format argument */
 PHP_FUNCTION(pack)
 {
@@ -113,27 +113,15 @@ PHP_FUNCTION(pack)
 	int outputpos = 0, outputsize = 0;
 	char *output;
 
-	argc = ZEND_NUM_ARGS();
-
-	if (argc < 1) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&*", &format,
+							  &formatlen, UG(ascii_conv), &argv, &argc) == FAILURE) {
+		return;
 	}
-
-	argv = safe_emalloc(argc, sizeof(zval **), 0);
-
-	if (zend_get_parameters_array_ex(argc, argv) == FAILURE) {
-		efree(argv);
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_string_ex(argv[0]);
-	format = Z_STRVAL_PP(argv[0]);
-	formatlen = Z_STRLEN_PP(argv[0]);
 
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
 	formatargs = safe_emalloc(formatlen, sizeof(*formatargs), 0);
-	currentarg = 1;
+	currentarg = 0;
 
 	/* Preprocess format into formatcodes and formatargs */
 	for (i = 0; i < formatlen; formatcount++) {
@@ -303,7 +291,7 @@ PHP_FUNCTION(pack)
 
 	output = emalloc(outputsize + 1);
 	outputpos = 0;
-	currentarg = 1;
+	currentarg = 0;
 
 	/* Do actual packing */
 	for (i = 0; i < formatcount; i++) {
@@ -506,30 +494,21 @@ static long php_unpack(char *data, int size, int issigned, int *map)
  * f and d will return doubles.
  * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
  */
-/* {{{ proto array unpack(string format, string input)
+/* {{{ proto array unpack(string format, string input) U
    Unpack binary string into named array elements according to format argument */
 PHP_FUNCTION(unpack)
 {
-	zval **formatarg;
-	zval **inputarg;
 	char *format;
 	char *input;
 	int formatlen;
 	int inputpos, inputlen;
 	int i;
 
-	if (ZEND_NUM_ARGS() != 2 || 
-        zend_get_parameters_ex(2, &formatarg, &inputarg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s", &format,
+							  &formatlen, UG(ascii_conv), &input, &inputlen) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(formatarg);
-	convert_to_string_ex(inputarg);
-
-	format = Z_STRVAL_PP(formatarg);
-	formatlen = Z_STRLEN_PP(formatarg);
-	input = Z_STRVAL_PP(inputarg);
-	inputlen = Z_STRLEN_PP(inputarg);
 	inputpos = 0;
 
 	array_init(return_value);
