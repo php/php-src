@@ -466,6 +466,7 @@ chroot \
 ctime_r \
 cuserid \
 crypt \
+crypt_r \
 flock \
 ftok \
 funopen \
