@@ -33,8 +33,6 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,6 +45,7 @@
 
 #include "zip.h"
 #include "zipint.h"
+#include "main/php_reentrancy.h"
 
 static time_t _zip_d2u_time(int, int);
 static char *_zip_readfpstr(FILE *, unsigned int, int, struct zip_error *);
@@ -391,11 +390,11 @@ _zip_dirent_write(struct zip_dirent *zde, FILE *fp, int localp,
 static time_t
 _zip_d2u_time(int dtime, int ddate)
 {
-    struct tm *tm;
+    struct tm *tm, tmbuf;
     time_t now;
 
     now = time(NULL);
-    tm = localtime(&now);
+    tm = php_localtime_r(&now, &tmbuf);
     
     tm->tm_year = ((ddate>>9)&127) + 1980 - 1900;
     tm->tm_mon = ((ddate>>5)&15) - 1;
@@ -520,9 +519,9 @@ _zip_write4(unsigned int i, FILE *fp)
 static void
 _zip_u2d_time(time_t time, unsigned short *dtime, unsigned short *ddate)
 {
-    struct tm *tm;
+    struct tm *tm, tmbuf;
 
-    tm = localtime(&time);
+    tm = php_localtime_r(&time, &tmbuf);
     *ddate = ((tm->tm_year+1900-1980)<<9) + ((tm->tm_mon+1)<<5)
 	+ tm->tm_mday;
     *dtime = ((tm->tm_hour)<<11) + ((tm->tm_min)<<5)
