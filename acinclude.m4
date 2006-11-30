@@ -591,6 +591,7 @@ EOF
   done
   echo '"[$]@"' >> $1
   chmod +x $1
+  PHP_SUBST_OLD(CONFIGURE_COMMAND)
 ])
 
 AC_DEFUN([PHP_TIME_R_TYPE],[
