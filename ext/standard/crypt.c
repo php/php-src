@@ -145,8 +145,15 @@ PHP_FUNCTION(crypt)
 		salt[2] = '\0';
 #endif
 	}
-
-	RETVAL_STRING(crypt(str, salt), 1);
+#ifdef HAVE_CRYPT_R
+	{
+		struct crypt_data buffer;
+		memset(&buffer, 0, sizeof(buffer));
+		RETURN_STRING(crypt_r(str, salt, &buffer));
+	}
+#else
+	RETURN_STRING(crypt(str, salt), 1);
+#endif
 }
 /* }}} */
 #endif
