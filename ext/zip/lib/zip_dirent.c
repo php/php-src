@@ -33,6 +33,7 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "main/php_reentrancy.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,7 +46,6 @@
 
 #include "zip.h"
 #include "zipint.h"
-#include "main/php_reentrancy.h"
 
 static time_t _zip_d2u_time(int, int);
 static char *_zip_readfpstr(FILE *, unsigned int, int, struct zip_error *);
