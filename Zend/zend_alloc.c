@@ -472,6 +472,10 @@ static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_free_blo
 		}
 	} else {
 		prev = &heap->free_buckets[0];
+		while (prev->next_free_block != &heap->free_buckets[0] &&
+			   ZEND_MM_FREE_BLOCK_SIZE(prev->next_free_block) < size) {
+			prev = prev->next_free_block;
+		}
 	}
 	next = prev->next_free_block;
 	mm_block->prev_free_block = prev;
@@ -1096,10 +1100,8 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 
 static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	size_t true_size, best_size = 0x7fffffff;
 	zend_mm_free_block *p, *end, *best_fit = NULL;
-
-	true_size = ZEND_MM_TRUE_SIZE(size);
+	size_t true_size = ZEND_MM_TRUE_SIZE(size);
 
 	if (ZEND_MM_SMALL_SIZE(true_size)) {
 		size_t index = ZEND_MM_BUCKET_INDEX(true_size);
@@ -1152,16 +1154,14 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 
 	end = &heap->free_buckets[0];
 	for (p = end->next_free_block; p != end; p = p->next_free_block) {
-		size_t s = ZEND_MM_FREE_BLOCK_SIZE(p);
-		if (s > true_size) {
-			if (s < best_size) {	/* better fit */
+		if (ZEND_MM_FREE_BLOCK_SIZE(p) >= true_size) {
+			if (ZEND_MM_IS_FIRST_BLOCK(p) ||
+			    !ZEND_MM_IS_FIRST_BLOCK(ZEND_MM_PREV_BLOCK(p)) ||
+				!ZEND_MM_IS_GUARD_BLOCK(ZEND_MM_NEXT_BLOCK(p)) ||
+				p->next_free_block == end) {
 				best_fit = p;
-				best_size = s;
+				goto zend_mm_finished_searching_for_block;
 			}
-		} else if (s == true_size) {
-			/* Found "big" free block of exactly the same size */
-			best_fit = p;
-			goto zend_mm_finished_searching_for_block;
 		}
 	}
 
