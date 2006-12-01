@@ -671,25 +671,40 @@ static inline void php_var_serialize_long(smart_str *buf, long val)
 
 static inline void php_var_serialize_string(smart_str *buf, char *str, int len)
 {
+	static const char hex[] = "0123456789abcdef";
+	unsigned char c;
+	int i;
+
 	smart_str_appendl(buf, "s:", 2);
 	smart_str_append_long(buf, len);
 	smart_str_appendl(buf, ":\"", 2);
-	smart_str_appendl(buf, str, len);
+
+	for (i = 0; i < len; i++) {
+		c = (unsigned char) str[i];
+		if (c < 128 && c != 0x5c /*'\\'*/) {
+			smart_str_appendc(buf, c & 0xff);
+		} else {
+			smart_str_appendc(buf, 0x5c /*'\\'*/);
+			smart_str_appendc(buf, hex[(c >> 4) & 0xf]);
+			smart_str_appendc(buf, hex[(c >> 0) & 0xf]);
+		}
+	}
+
 	smart_str_appendl(buf, "\";", 2);
 }
 
 static inline void php_var_serialize_ustr(smart_str *buf, UChar *ustr, int len)
 {
 	static const char hex[] = "0123456789abcdef";
-	UChar32 c;
-	int32_t i;
+	UChar c;
+	int i;
 
-	for(i=0; i<len; /* U16_NEXT post-increments */) {
-		U16_NEXT(ustr, i, len, c);
-		if (c < 128 && c != '\\') {
+	for (i = 0; i < len; i++) {
+		c = ustr[i];
+		if (c < 128 && c != 0x5c /*'\\'*/) {
 			smart_str_appendc(buf, c & 0xff);
 		} else {
-			smart_str_appendc(buf, '\\');
+			smart_str_appendc(buf, 0x5c /*'\\'*/);
 			smart_str_appendc(buf, hex[(c >> 12) & 0xf]);
 			smart_str_appendc(buf, hex[(c >> 8) & 0xf]);
 			smart_str_appendc(buf, hex[(c >> 4) & 0xf]);
@@ -1062,7 +1077,7 @@ PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash 
 	
 /* }}} */
 
-/* {{{ proto string serialize(mixed variable)
+/* {{{ proto string serialize(mixed variable) U
    Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
 {
@@ -1093,22 +1108,20 @@ PHP_FUNCTION(serialize)
 }
 
 /* }}} */
-/* {{{ proto mixed unserialize(string variable_representation)
+/* {{{ proto mixed unserialize(string variable_representation) U
    Takes a string representation of variable and recreates it */
 
 
 PHP_FUNCTION(unserialize)
 {
-	zstr buf;
-	char *str = NULL;
+	char *buf = NULL;
 	int buf_len;
-	zend_uchar buf_type;
 	const unsigned char *p;
 
 	php_unserialize_data_t var_hash;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T",
-							  &buf, &buf_len, &buf_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&",
+							  &buf, &buf_len, UG(ascii_conv)) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1116,34 +1129,15 @@ PHP_FUNCTION(unserialize)
 		RETURN_FALSE;
 	}
 
-	if (buf_type == IS_UNICODE) {
-		/* ASCII unicode string to binary string conversion */
-		int i;
-
-		str = emalloc(buf_len+1);
-		for (i = 0; i < buf_len; i++) {
-			if (buf.u[i] > 128) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %d of %d bytes", i, buf_len);
-				STR_FREE(str);
-				RETURN_FALSE;
-			}
-			str[i] = buf.u[i];
-		}
-		str[i] = '\0';
-		buf.s = str;
-	}
-	
-	p = (const unsigned char*)buf.s;
+	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	if (!php_var_unserialize(&return_value, &p, p + buf_len,  &var_hash TSRMLS_CC)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		zval_dtor(return_value);
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((char*)p - buf.s), buf_len);
-		STR_FREE(str);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
 		RETURN_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	STR_FREE(str);
 }
 
 /* }}} */

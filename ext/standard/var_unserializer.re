@@ -110,6 +110,38 @@ static UChar *unserialize_ustr(const unsigned char **p, int len)
 	return ustr;
 }
 
+static char *unserialize_str(const unsigned char **p, int len)
+{
+	int i, j;
+	char *str = emalloc(len+1);
+
+	for (i = 0; i < len; i++) {
+		if (**p != '\\') {
+			str[i] = (char)**p;
+		} else {
+			unsigned char ch = 0;
+
+			for (j = 0; j < 2; j++) {
+				(*p)++;
+				if (**p >= '0' && **p <= '9') {
+					ch = (ch << 4) + (**p -'0');
+				} else if (**p >= 'a' && **p <= 'f') {
+					ch = (ch << 4) + (**p -'a'+10);
+				} else if (**p >= 'A' && **p <= 'F') {
+					ch = (ch << 4) + (**p -'A'+10);
+				} else {
+					efree(str);
+					return NULL;
+				}
+			}
+			str[i] = (char)ch;
+		}
+		(*p)++;
+	}
+	str[i] = 0;
+	return str;
+}
+
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **nzval)
 {
 	long i;
@@ -494,11 +526,12 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 
-	str = (char*)YYCURSOR;
-
-	YYCURSOR += len;
+	if ((str = unserialize_str(&YYCURSOR, len)) == NULL) {
+		return 0;
+	}
 
 	if (*(YYCURSOR) != '"') {
+		efree(str);
 		*p = YYCURSOR;
 		return 0;
 	}
@@ -507,7 +540,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	*p = YYCURSOR;
 
 	INIT_PZVAL(*rval);
-	ZVAL_RT_STRINGL(*rval, str, len, 1);
+	ZVAL_STRINGL(*rval, str, len, 0);
 	return 1;
 }
 
@@ -523,7 +556,6 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	}
 
 	if ((ustr = unserialize_ustr(&YYCURSOR, len)) == NULL) {
-		efree(ustr);
 		return 0;
 	}
 
