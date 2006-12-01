@@ -201,6 +201,33 @@ while($buf = fread($s, 4098)) {
 		change_dir($m[1]);
 		fputs($s, "250 CWD command successful.\r\n");
 
+	} elseif (preg_match("~^NLST(?: ([A-Za-z./]+))?\r\n$~", $buf, $m)) {
+
+		if (isset($m[1]) && $m[1] === 'bogusdir') {
+			fputs($s, "250 $m[1]: No such file or directory\r\n");
+			continue;
+		}
+
+		// there are some servers that don't open the ftp-data socket if there's nothing to send
+		if (isset($bug39458) && isset($m[1]) && $m[1] === 'emptydir') {
+			fputs($s, "226 Transfer complete.\r\n");
+			continue;
+		}
+
+		fputs($s, "150 File status okay; about to open data connection\r\n");
+
+		if (!$fs = stream_socket_client("tcp://$host:$port")) {
+			fputs($s, "425 Can't open data connection\r\n");
+			continue;
+		}
+
+		if (empty($m[1]) || $m[1] !== 'emptydir') {
+			fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
+		}
+
+		fputs($s, "226 Closing data Connection.\r\n");
+		fclose($fs);
+
 	} elseif (preg_match("~^MKD ([A-Za-z./]+)\r\n$~", $buf, $m)) {
 		if (isset($bug7216)) {
 			fputs($s, "257 OK.\r\n");
