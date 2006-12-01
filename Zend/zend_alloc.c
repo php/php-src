@@ -438,7 +438,7 @@ static long _mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 
 #else
 
-# define ZEND_MM_VALID_PTR(ptr) 1
+# define ZEND_MM_VALID_PTR(ptr) (ptr != NULL)
 
 # define ZEND_MM_SET_MAGIC(block, val)
 
