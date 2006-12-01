@@ -120,6 +120,10 @@ static PHP_INI_MH(OnUpdateSerializer)
 static PHP_INI_MH(OnUpdateSaveDir) {
 	/* Only do the safemode/open_basedir check at runtime */
 	if(stage == PHP_INI_STAGE_RUNTIME) {
+		if (memchr(new_value, '\0', new_value_length) != NULL) {
+			return FAILURE;
+		}
+
 		if (PG(safe_mode) && (!php_checkuid(new_value, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
 			return FAILURE;
    		}
