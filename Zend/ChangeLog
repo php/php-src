@@ -1,3 +1,9 @@
+2006-11-30  Antony Dovgal  <antony@zend.com>
+
+    * tests/bug39602.phpt
+      tests/bug39602.phpt:
+      fix test
+
 2006-11-28  Antony Dovgal  <antony@zend.com>
 
     * zend_builtin_functions.c:
