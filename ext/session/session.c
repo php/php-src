@@ -150,6 +150,10 @@ static PHP_INI_MH(OnUpdateSaveDir)
 	if (stage == PHP_INI_STAGE_RUNTIME) {
  		char *p;
 
+		if (memchr(new_value, '\0', new_value_length) != NULL) {
+			return FAILURE;
+		}
+
 		if ((p = zend_memrchr(new_value, ';', new_value_length))) {
 			p++;
 		} else {
