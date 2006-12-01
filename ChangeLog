@@ -1,3 +1,115 @@
+2006-11-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/soap/php_sdl.c:
+      Small hash table optimization
+
+2006-11-30  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/url.c:
+      get_headers() will keep headers as binary strings.
+
+2006-11-30  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      acinclude.m4
+      configure.in:
+      MFH missing fixes required by autoconf 2.6x
+      fixes bug #39696
+
+2006-11-30  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      Mark setlocale() as Unicode-safe. It shouldn't be used in
+      unicode.semantics=on mode anyway.
+
+    * ext/standard/basic_functions.c:
+      Forgot to mark import_request_variables() as Unicode-safe.
+
+    * ext/standard/string.c:
+      Mark strtr() as Unicode-safe.
+      
+
+    * ext/standard/pack.c:
+      Mark pack()/unpack() as Unicode-safe. They will accept Unicode strings
+      but convert them to binary. We can revisit supporting something like 'U'
+      format in the future, if it's needed.
+
+    * ext/standard/quot_print.c:
+      Make quoted_printable_decode() take only ASCII strings.
+
+2006-11-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * configure.in:
+      MFB: Added check for crypt_r()
+
+    * (PHP_5_2)
+      configure.in:
+      Added check for crypt_r()
+
+    * ext/posix/config.m4:
+      MFB: Added missing function checks
+
+    * (PHP_5_2)
+      ext/posix/config.m4:
+      Added missing function checks
+
+    * ext/pdo_sqlite/sqlite/src/date.c
+      ext/sqlite/libsqlite/src/date.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/zip/lib/zip_dirent.c:
+      zts fixes
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/sqlite/src/date.c
+      ext/sqlite/libsqlite/src/date.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/zip/lib/zip_dirent.c:
+      last set of zts fixes
+
+    * ext/interbase/ibase_query.c:
+      MFB: Thread safety fixes.
+
+    * (PHP_5_2)
+      ext/interbase/ibase_query.c:
+      Thread safety fixes.
+
+    * main/php_scandir.c:
+      MFB: Thread-safety issues
+
+    * (PHP_5_2)
+      main/php_scandir.c:
+      Thread-safety issues
+
+    * ext/standard/crypt.c:
+      MFB: Use reantrant crypt_r() whenever possible.
+
+    * (PHP_5_2)
+      ext/standard/crypt.c:
+      Use reantrant crypt_r() whenever possible.
+
+    * ext/mime_magic/mime_magic.c:
+      MFB: Use thread-safe code
+
+    * (PHP_5_2)
+      ext/mime_magic/mime_magic.c:
+      Use thread-safe code
+
+2006-11-30  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug39602.phpt
+      ZendEngine2/tests/bug39602.phpt:
+      fix test
+
+2006-11-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/posix/posix.c:
+      MFB: Thread safety fixed for *nix systems
+
+    * (PHP_5_2)
+      ext/posix/posix.c:
+      Thread safety fixed for *nix systems
+
 2006-11-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/filestat.c:
