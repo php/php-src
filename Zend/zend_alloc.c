@@ -375,7 +375,7 @@ struct _zend_mm_heap {
 # define ZEND_MM_ALIGNMENT_LOG2 3
 #elif ZEND_MM_ALIGNMENT < 4
 # undef ZEND_MM_ALIGNMENT
-# undef ZEND_MM_ALIGNMENT
+# undef ZEND_MM_ALIGNMENT_LOG2
 # define ZEND_MM_ALIGNMENT 4
 # define ZEND_MM_ALIGNMENT_LOG2 2
 #endif
