@@ -17,6 +17,8 @@
 #include <sys/types.h>
 #include <direct.h>
 
+#define php_readdir_r readdir_r
+
 /* struct dirent - same as Unix */
 
 struct dirent {
