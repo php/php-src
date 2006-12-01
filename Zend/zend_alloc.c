@@ -373,6 +373,11 @@ struct _zend_mm_heap {
 #ifndef ZEND_MM_ALIGNMENT
 # define ZEND_MM_ALIGNMENT 8
 # define ZEND_MM_ALIGNMENT_LOG2 3
+#elif ZEND_MM_ALIGNMENT < 4
+# undef ZEND_MM_ALIGNMENT
+# undef ZEND_MM_ALIGNMENT
+# define ZEND_MM_ALIGNMENT 4
+# define ZEND_MM_ALIGNMENT_LOG2 2
 #endif
 
 #define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT-1)
@@ -587,6 +592,8 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 #if 0
 	int i;
 
+	printf("ZEND_MM_ALIGNMENT=%d\n", ZEND_MM_ALIGNMENT);
+	printf("ZEND_MM_ALIGNMENT_LOG2=%d\n", ZEND_MM_ALIGNMENT_LOG2);
 	printf("ZEND_MM_MIN_SIZE=%d\n", ZEND_MM_MIN_SIZE);
 	printf("ZEND_MM_MAX_SMALL_SIZE=%d\n", ZEND_MM_MAX_SMALL_SIZE);
 	printf("ZEND_MM_ALIGNED_HEADER_SIZE=%d\n", ZEND_MM_ALIGNED_HEADER_SIZE);
