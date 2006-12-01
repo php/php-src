@@ -1498,8 +1498,13 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 
 	if (!ftp_putcmd(ftp, cmd, path))
 		goto bail;
-	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125))
+	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125 && ftp->resp != 226))
 		goto bail;
+
+	/* some servers don't open a ftp-data connection if the directory is empty */
+	if (ftp->resp == 226) {
+		return ecalloc(1, sizeof(char**));
+	}
 
 	/* pull data buffer into tmpfile */
 	if ((data = data_accept(data, ftp)) == NULL)

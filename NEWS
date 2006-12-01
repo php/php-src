@@ -8,6 +8,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #39653 (ext/dba doesn't check for db-4.5 and db-4.4 when db4 
   support is enabled). (Tony)
 - Fixed bug #39583 (ftp_put() does not change transfer mode to ASCII). (Tony)
+- Fixed bug #39458 (ftp_nlist() returns false on empty dirs). (Nuno)
 - Fixed bug #39354 (Allow building of curl extension against libcurl
   7.16.0). (Ilia)
 - Fixed bug #39034 (curl_exec() with return transfer returns TRUE on empty
