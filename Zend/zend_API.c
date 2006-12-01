@@ -3016,7 +3016,7 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, char *name, int name
 		zstr uname;
 		int ret;
 
-		uname.u = do_alloca(name_length+1);
+		uname.u = do_alloca(UBYTES(name_length+1));
 		u_charsToUChars(name, uname.u, name_length+1);
 		ret = zend_u_declare_property_ex(ce, IS_UNICODE, uname, name_length, property, access_type, doc_comment, doc_comment_len TSRMLS_CC);
 		free_alloca(uname.u);
@@ -3037,7 +3037,7 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 		zstr uname;
 		int ret;
 
-		uname.u = do_alloca(name_length+1);
+		uname.u = do_alloca(UBYTES(name_length+1));
 		u_charsToUChars(name, uname.u, name_length+1);
 		ret = zend_u_declare_property_ex(ce, IS_UNICODE, uname, name_length, property, access_type, NULL_ZSTR, 0 TSRMLS_CC);
 		free_alloca(uname.u);
