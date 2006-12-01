@@ -137,7 +137,7 @@ PHP_FUNCTION(dbase_open)
 	if (Z_LVAL_PP(options) == 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open %s in write-only mode", Z_STRVAL_PP(dbf_name));
 		RETURN_FALSE;
-	} else if (Z_LVAL_PP(options) < 0) {
+	} else if (Z_LVAL_PP(options) < 0 || Z_LVAL_PP(options) > 3) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid access mode %ld", Z_LVAL_PP(options));
 		RETURN_FALSE;
 	}
