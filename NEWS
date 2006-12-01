@@ -81,6 +81,7 @@ PHP                                                                        NEWS
 - Fixed bug #39454 (Returning a SOAP array segfaults PHP). (Dmitry)
 - Fixed bug #39445 (Calling debug_backtrace() in the __toString() function
   produces a crash). (Dmitry)
+- Fixed bug #39438 (Fatal error: Out of memory). (Dmitry)
 - Fixed bug #39414 (Syntax error while compiling with Sun Workshop Complier).
   (Johannes)
 - Fixed bug #39398 (Booleans are not automatically translated to integers).
