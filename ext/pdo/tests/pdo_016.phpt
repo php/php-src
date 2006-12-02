@@ -14,6 +14,10 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE_
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
+	$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+}
+
 $db->exec('CREATE TABLE test(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
 $db->exec('INSERT INTO test VALUES(0, \'String0\')');
 $db->exec('INSERT INTO test VALUES(1, \'String1\')');
