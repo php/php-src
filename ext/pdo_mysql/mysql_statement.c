@@ -68,15 +68,17 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	}
 #endif
 #if HAVE_MYSQL_NEXT_RESULT
-	while (mysql_more_results(S->H->server)) {
-		MYSQL_RES *res;
-		if (mysql_next_result(S->H->server) != 0) {
-			break;
-		}
+	if (S->H->server) {
+		while (mysql_more_results(S->H->server)) {
+			MYSQL_RES *res;
+			if (mysql_next_result(S->H->server) != 0) {
+				break;
+			}
 			
-		res = mysql_store_result(S->H->server);
-		if (res) {
-			mysql_free_result(res);
+			res = mysql_store_result(S->H->server);
+			if (res) {
+				mysql_free_result(res);
+			}
 		}
 	}
 #endif
@@ -593,16 +595,24 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
-#if HAVE_MYSQL_STMT_PREPARE
-	if (S->stmt) {
-		int retval = mysql_stmt_free_result(S->stmt);
-		return retval ? 0 : 1;
-	}
-#endif
+
 	if (S->result) {
 		mysql_free_result(S->result);
 		S->result = NULL;
 	}
+#if HAVE_MYSQL_STMT_PREPARE
+	if (S->stmt) {
+		int retval;
+		if (!S->H->buffered) {
+			retval = mysql_stmt_close(S->stmt);
+			S->stmt = NULL;
+		} else {
+			retval = mysql_stmt_free_result(S->stmt);
+		}
+		return retval ? 0 : 1;
+	}
+#endif
+
 #if HAVE_MYSQL_NEXT_RESULT
 	while (mysql_more_results(S->H->server)) {
 		MYSQL_RES *res;
