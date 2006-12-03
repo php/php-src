@@ -461,19 +461,8 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	H->einfo.errcode = 0;
 	H->einfo.errmsg = NULL;
 
-	/* at the time of writing, the mysql documentation states:
-	 *	http://mysql.localhost.net.ar/doc/refman/5.0/en/query-cache-how.html
-	 *	"A query also is not cached under these conditions:
-	 *	...
-	 *	It was issued as a prepared statement, even if no placeholders were employed."
-	 *
-	 * We default to emulating prepared statements
-	 * in order to take advantage of the query cache
-FIXME:	H->emulate_prepare = 1;   a bit risky to do this so late in the RC, so defer it.
-	*/
-
 	/* allocate an environment */
-	
+
 	/* handle for the server */
 	if (!(H->server = mysql_init(NULL))) {
 		pdo_mysql_error(dbh);
@@ -482,6 +471,7 @@ FIXME:	H->emulate_prepare = 1;   a bit risky to do this so late in the RC, so de
 	
 	dbh->driver_data = H;
 	H->max_buffer_size = 1024*1024;
+	H->emulate_prepare = 1;
 
 	/* handle MySQL options */
 	if (driver_options) {
@@ -489,7 +479,7 @@ FIXME:	H->emulate_prepare = 1;   a bit risky to do this so late in the RC, so de
 		long local_infile = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0 TSRMLS_CC);
 		char *init_cmd = NULL, *default_file = NULL, *default_group = NULL;
 
-		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 0 TSRMLS_CC);
+		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1 TSRMLS_CC);
 
 		H->emulate_prepare = pdo_attr_lval(driver_options,
 			PDO_MYSQL_ATTR_DIRECT_QUERY, H->emulate_prepare TSRMLS_CC);
