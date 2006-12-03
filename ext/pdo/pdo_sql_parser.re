@@ -132,7 +132,6 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 		goto clean_up;
 	}
 
-
 	if (stmt->supports_placeholders == query_type && !stmt->named_rewrite_template) {
 		/* query matches native syntax */
 		ret = 0;
@@ -156,7 +155,13 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 		ret = -1;
 		goto clean_up;
 	}
-	
+
+	if (params && bindno != zend_hash_num_elements(params) && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "number of bound variables does not match number of tokens" TSRMLS_CC);
+		ret = -1;
+		goto clean_up;
+	}
+
 	/* what are we going to do ? */
 	
 	if (stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
