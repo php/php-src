@@ -19,6 +19,7 @@
 
 /* $Id$ */
 
+#include "php.h"
 #include "php_scandir.h"
 
 #ifdef HAVE_SYS_TYPES_H
