@@ -1,3 +1,41 @@
+2006-12-02  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/tests/001.phpt
+      ext/pcre/tests/002.phpt
+      ext/pcre/tests/003.phpt
+      ext/pcre/tests/004.phpt:
+      MFH (not tested. so some tests may fail in unicode mode)
+
+    * ext/pcre/tests/001.phpt
+      ext/pcre/tests/001.phpt
+      ext/pcre/tests/002.phpt
+      ext/pcre/tests/002.phpt
+      ext/pcre/tests/003.phpt
+      ext/pcre/tests/003.phpt
+      ext/pcre/tests/004.phpt
+      ext/pcre/tests/004.phpt:
+      
+      file 001.phpt was initially added on branch PHP_5_2.
+
+2006-12-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/tests/pdo_016.phpt
+      ext/pdo/tests/pdo_016a.phpt
+      ext/pdo/tests/pdo_021.phpt
+      ext/pdo_mysql/mysql_statement.c:
+      MFB: Fixed bug #39527 (Failure to retrieve results when multiple
+      unbuffered,
+      prepared statements are used in pdo_mysql).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/tests/pdo_016.phpt
+      ext/pdo/tests/pdo_016a.phpt
+      ext/pdo/tests/pdo_021.phpt
+      ext/pdo_mysql/mysql_statement.c:
+      Fixed bug #39527 (Failure to retrieve results when multiple unbuffered,
+      prepared statements are used in pdo_mysql).
+
 2006-12-01  Frank M. Kromann  <frank@kromann.info>
 
     * (PHP_5_2)
