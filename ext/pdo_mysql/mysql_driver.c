@@ -467,8 +467,8 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		long local_infile = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0 TSRMLS_CC);
 		char *init_cmd = NULL, *default_file = NULL, *default_group = NULL;
 
-		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 0 TSRMLS_CC);
-		H->emulate_prepare = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_DIRECT_QUERY, 0 TSRMLS_CC);
+		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1 TSRMLS_CC);
+		H->emulate_prepare = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_DIRECT_QUERY, 1 TSRMLS_CC);
 		H->max_buffer_size = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_MAX_BUFFER_SIZE, H->max_buffer_size TSRMLS_CC);
 
 		if (mysql_options(H->server, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout)) {
