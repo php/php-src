@@ -42,6 +42,8 @@ PHP                                                                        NEWS
   . Make sure PHP_SELF is filtered in Apache 1 sapi.
   . Fixed bug #39358 (INSTALL_HEADERS contains incorrect reference to
     php_filter.h).
+  . Added "default" option that allows a default value to be set for
+    an invalid or missing value.
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
 - Fixed bug #39718 (possible crash if assert.callback is set in ini). (Ilia)
