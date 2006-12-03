@@ -44,6 +44,7 @@ PHP                                                                        NEWS
     php_filter.h).
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
+- Fixed bug #39718 (possible crash if assert.callback is set in ini). (Ilia)
 - Fixed bug #39702 (php crashes in the allocator on linux-m68k). (Dmitry)
 - Fixed bug #39673 (file_get_contents causes bus error on certain offsets). 
   (Tony)
