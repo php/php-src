@@ -149,7 +149,7 @@ PHP_FUNCTION(crypt)
 	{
 		struct crypt_data buffer;
 		memset(&buffer, 0, sizeof(buffer));
-		RETURN_STRING(crypt_r(str, salt, &buffer));
+		RETURN_STRING(crypt_r(str, salt, &buffer), 1);
 	}
 #else
 	RETURN_STRING(crypt(str, salt), 1);
