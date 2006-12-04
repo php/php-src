@@ -346,6 +346,19 @@ END_EXTERN_C()
 #define Z_TYPE_P(zval_p)	Z_TYPE(*zval_p)
 #define Z_TYPE_PP(zval_pp)	Z_TYPE(**zval_pp)
 
+#if HAVE_SETLOCALE && defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER) && (_MSC_VER >= 1400)
+/* This is performance improvement of tolower() on Windows and VC2005
+ * GIves 10-18% on bench.php
+ */
+#define ZEND_USE_TOLOWER_L 1
+#endif
+
+#ifdef ZEND_USE_TOLOWER_L
+ZEND_API void zend_update_current_locale();
+#else
+#define zend_update_current_locale()
+#endif
+
 #endif
 
 /*
