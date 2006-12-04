@@ -82,6 +82,8 @@ PHP                                                                        NEWS
   ZEND_MM_ALIGNED_MIN_HEADER_SIZE). (wharmby at uk dot ibm dot com, Dmitry)
 - Fixed bug #39527 (Failure to retrieve results when multiple unbuffered,
   prepared statements are used in pdo_mysql). (Ilia)
+- Fixed bug #39483 (Problem with handling of \ char in prepared statements).
+  (Ilia, suhachov at gmail dot com)
 - Fixed bug #39458 (ftp_nlist() returns false on empty dirs). (Nuno)
 - Fixed bug #39454 (Returning a SOAP array segfaults PHP). (Dmitry)
 - Fixed bug #39445 (Calling debug_backtrace() in the __toString() function
