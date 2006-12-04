@@ -30,7 +30,7 @@ hello
 
 file_put_contents($filename_txt, $txt);
 
-var_dump(`cat "$filename_txt" | "$php" -F "$filename"`);
+var_dump(`cat "$filename_txt" | "$php" -n -F "$filename"`);
 
 @unlink($filename);
 @unlink($filename_txt);

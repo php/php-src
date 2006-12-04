@@ -7,9 +7,9 @@ show information about function
 
 $php = $_ENV['TEST_PHP_EXECUTABLE'];
 
-var_dump(`$php --rf unknown`);
-var_dump(`$php --rf echo`);
-var_dump(`$php --rf phpinfo`);
+var_dump(`$php -n --rf unknown`);
+var_dump(`$php -n --rf echo`);
+var_dump(`$php -n --rf phpinfo`);
 
 echo "Done\n";
 ?>
