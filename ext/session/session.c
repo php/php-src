@@ -267,7 +267,7 @@ PHP_MINFO_FUNCTION(session);
 
 static void php_rinit_session_globals(TSRMLS_D);
 static void php_rshutdown_session_globals(TSRMLS_D);
-static zend_bool php_session_destroy(TSRMLS_D);
+static int php_session_destroy(TSRMLS_D);
 
 zend_module_entry session_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -1192,9 +1192,9 @@ PHPAPI void php_session_start(TSRMLS_D)
 	}
 }
 
-static zend_bool php_session_destroy(TSRMLS_D)
+static int php_session_destroy(TSRMLS_D)
 {
-	zend_bool retval = SUCCESS;
+	int retval = SUCCESS;
 
 	if (PS(session_status) != php_session_active) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Trying to destroy uninitialized session");
