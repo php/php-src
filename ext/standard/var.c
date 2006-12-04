@@ -521,6 +521,47 @@ static int php_object_element_export(zval **zv, int num_args, va_list args, zend
 	return 0;
 }
 
+static void php_unicode_export(UChar *ustr, int ustr_len TSRMLS_DC)
+{
+	UChar32 cp;
+	int i = 0;
+	char buf[10];
+	int buf_len;
+
+	/*
+	 * We export all codepoints > 128 in escaped form to avoid encoding issues
+	 * in case the result is used in a script.
+	 */
+	while (i < ustr_len) {
+		U16_NEXT(ustr, i, ustr_len, cp);
+		switch (cp) {
+			case 0x0: /* '\0' */
+				PHPWRITE("\\0", 2);
+				break;
+
+			case 0x27: /* '\'' */
+				PHPWRITE("\\'", 2);
+				break;
+
+			case 0x5c: /* '\\' */
+				PHPWRITE("\\\\", 2);
+				break;
+
+			default:
+				if ((uint32_t)cp < 128) {
+					buf[0] = (char) (short) cp;
+					buf_len = 1;
+				} else if (U_IS_BMP(cp)) {
+					buf_len = snprintf(buf, sizeof(buf), "\\u%04X", cp);
+				} else {
+					buf_len = snprintf(buf, sizeof(buf), "\\u%06X", cp);
+				}
+				PHPWRITE(buf, buf_len);
+				break;
+		}
+	}
+}
+
 PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht;
@@ -550,7 +591,9 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 		efree (tmp_str);
 		break;
 	case IS_UNICODE:
-		php_var_dump_unicode(Z_USTRVAL_PP(struc), Z_USTRLEN_PP(struc), 0, "'", 1 TSRMLS_CC);
+		PUTS ("'");
+		php_unicode_export(Z_USTRVAL_PP(struc), Z_USTRLEN_PP(struc) TSRMLS_CC);
+		PUTS ("'");
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
@@ -589,7 +632,7 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ proto mixed var_export(mixed var [, bool return])
+/* {{{ proto mixed var_export(mixed var [, bool return]) U
    Outputs or returns a string representation of a variable */
 PHP_FUNCTION(var_export)
 {

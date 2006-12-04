@@ -4799,7 +4799,7 @@ PHPAPI UChar *php_u_addslashes_ex(UChar *str, int length, int *new_length, int s
 				*(buf+buf_len) = (UChar)0x30; buf_len++; /* 0 */
 				break;
 			case '\'':
-				case '\"':
+			case '\"':
 			case '\\':
 					*(buf+buf_len) = (UChar)0x5C; buf_len++; /* \ */
 					/* break is missing *intentionally* */
