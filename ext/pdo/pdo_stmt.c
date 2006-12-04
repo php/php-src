@@ -1867,12 +1867,11 @@ fail_out:
 			
 			stmt->fetch.cls.ce = *cep;
 			stmt->fetch.cls.ctor_args = NULL;
-
+#ifdef ilia_0 /* we'll only need this when we have persistent statements, if ever */
 			if (stmt->dbh->is_persistent) {
-				/* TODO: CRITICAL for final release */
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP might crash if you don't call $stmt->setFetchMode() to reset to defaults on this persistent statement.  This will be fixed in a later release");
 			}
-			
+#endif
 			if (argc == 3) {
 				if (Z_TYPE_PP(args[skip+2]) != IS_NULL && Z_TYPE_PP(args[skip+2]) != IS_ARRAY) {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "ctor_args must be either NULL or an array" TSRMLS_CC);
@@ -1893,11 +1892,11 @@ fail_out:
 			if (Z_TYPE_PP(args[skip+1]) != IS_OBJECT) {
 				goto fail_out;
 			}
-
+#ifdef ilia_0 /* we'll only need this when we have persistent statements, if ever */
 			if (stmt->dbh->is_persistent) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP might crash if you don't call $stmt->setFetchMode() to reset to defaults on this persistent statement.  This will be fixed in a later release");
 			}
-	
+#endif	
 			MAKE_STD_ZVAL(stmt->fetch.into);
 
 			Z_TYPE_P(stmt->fetch.into) = IS_OBJECT;
