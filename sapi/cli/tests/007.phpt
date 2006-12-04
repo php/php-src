@@ -32,9 +32,9 @@ class test { /* {{{ */
 
 file_put_contents($filename, $code);
 
-var_dump(`$php -w "$filename"`);
-var_dump(`$php -w "wrong"`);
-var_dump(`echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -w`);
+var_dump(`$php -n -w "$filename"`);
+var_dump(`$php -n -w "wrong"`);
+var_dump(`echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -n -w`);
 
 @unlink($filename);
 

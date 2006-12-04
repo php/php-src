@@ -7,9 +7,9 @@ show information about class
 
 $php = $_ENV['TEST_PHP_EXECUTABLE'];
 
-var_dump(`$php --rc unknown`);
-var_dump(`$php --rc stdclass`);
-var_dump(`$php --rc exception`);
+var_dump(`$php -n --rc unknown`);
+var_dump(`$php -n --rc stdclass`);
+var_dump(`$php -n --rc exception`);
 
 echo "Done\n";
 ?>

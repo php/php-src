@@ -7,8 +7,8 @@ show information about extension
 
 $php = $_ENV['TEST_PHP_EXECUTABLE'];
 
-var_dump(`$php --re unknown`);
-var_dump(`$php --re ""`);
+var_dump(`$php -n --re unknown`);
+var_dump(`$php -n --re ""`);
 var_dump(`$php -n --re date`);
 
 echo "Done\n";
