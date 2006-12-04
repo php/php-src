@@ -34,16 +34,17 @@
 
 
 /* Implementation of the language Header() function */
-/* {{{ proto void header(string header [, bool replace, [int http_response_code]])
+/* {{{ proto void header(string header [, bool replace, [int http_response_code]]) U
    Sends a raw HTTP header */
 PHP_FUNCTION(header)
 {
 	zend_bool rep = 1;
 	sapi_header_line ctr = {0};
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &ctr.line,
-				&ctr.line_len, &rep, &ctr.response_code) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|bl", &ctr.line,
+				&ctr.line_len, UG(ascii_conv), &rep, &ctr.response_code) == FAILURE) {
 		return;
+	}
 	
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr TSRMLS_CC);
 }
@@ -144,7 +145,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 
 
 /* php_set_cookie(name, value, expires, path, domain, secure) */
-/* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
+/* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]]) U
    Send a cookie */
 PHP_FUNCTION(setcookie)
 {
@@ -153,9 +154,11 @@ PHP_FUNCTION(setcookie)
 	zend_bool secure = 0, httponly = 0;
 	int name_len, value_len = 0, path_len = 0, domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
-							  &name_len, &value, &value_len, &expires, &path,
-							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|s&ls&s&bb", &name,
+							  &name_len, UG(ascii_conv), &value, &value_len,
+							  UG(ascii_conv), &expires, &path, &path_len,
+							  UG(ascii_conv), &domain, &domain_len,
+							  UG(ascii_conv), &secure, &httponly) == FAILURE) {
 		return;
 	}
 
@@ -167,7 +170,7 @@ PHP_FUNCTION(setcookie)
 }
 /* }}} */
 
-/* {{{ proto bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
+/* {{{ proto bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]]) U
    Send a cookie with no url encoding of the value */
 PHP_FUNCTION(setrawcookie)
 {
@@ -176,9 +179,11 @@ PHP_FUNCTION(setrawcookie)
 	zend_bool secure = 0, httponly = 0;
 	int name_len, value_len = 0, path_len = 0, domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
-							  &name_len, &value, &value_len, &expires, &path,
-							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|s&ls&s&bb", &name,
+							  &name_len, UG(ascii_conv), &value, &value_len,
+							  UG(ascii_conv), &expires, &path, &path_len,
+							  UG(ascii_conv), &domain, &domain_len,
+							  UG(ascii_conv), &secure, &httponly) == FAILURE) {
 		return;
 	}
 
