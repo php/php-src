@@ -133,6 +133,8 @@ PHP                                                                        NEWS
   ErrorDocument). (Ilia)
 - Fixed bug #38319 (Remove bogus warnings from persistent PDO connections).
   (Ilia)
+- Fixed bug #38274 (Memlimit fatal error sent to "wrong" stderr when using
+  fastcgi). (Dmitry)
 - Fixed bug #38252 (Incorrect PDO error message on invalid default fetch
   mode). (Ilia)
 - Fixed bug #37773 (iconv_substr() gives "Unknown error" when string length = 1").
