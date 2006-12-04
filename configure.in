@@ -122,6 +122,7 @@ dnl Checks for programs.
 dnl -------------------------------------------------------------------------
 
 AC_PROG_CC
+PHP_DETECT_ICC
 AC_PROG_CC_C_O
 dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
 dnl AC_PROG_CC_STDC
@@ -686,8 +687,11 @@ if test "$PHP_DEBUG" = "yes"; then
   CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9]*//g'`
   CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9]*//g'`
   changequote([,])
-  CFLAGS="$CFLAGS -O0"
-  CXXFLAGS="$CXXFLAGS -O0"
+  dnl add -O0 only if GCC or ICC is used
+  if test "$GCC" = "yes" || test "$ICC" = "yes"; then
+    CFLAGS="$CFLAGS -O0"
+    CXXFLAGS="$CXXFLAGS -O0"
+  fi
 else
   PHP_DEBUG=0
   ZEND_DEBUG=no

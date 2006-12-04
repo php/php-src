@@ -2574,3 +2574,19 @@ ifelse([$1],[],:,[$1])
 ifelse([$2],[],[AC_MSG_ERROR([Cannot find php_pdo_driver.h.])],[$2])
   fi
 ])
+
+dnl
+dnl PHP_DETECT_ICC
+dnl
+AC_DEFUN([PHP_DETECT_ICC],
+[
+  ICC="no"
+  AC_MSG_CHECKING([for icc])
+  AC_EGREP_CPP([^__INTEL_COMPILER], [__INTEL_COMPILER],
+    ICC="no"
+    AC_MSG_RESULT([no]),
+    ICC="yes"
+    AC_MSG_RESULT([yes])
+  )
+])
+
