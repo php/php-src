@@ -21,7 +21,7 @@ hello
 
 file_put_contents($filename_txt, $txt);
 
-var_dump(`cat "$filename_txt" | "$php" -R "var_dump(1);"`);
+var_dump(`cat "$filename_txt" | "$php" -n -R "var_dump(1);"`);
 
 @unlink($filename_txt);
 
