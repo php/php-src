@@ -51,6 +51,7 @@ PHP_FUNCTION(mysqli_affected_rows)
 }
 /* }}} */
 
+
 /* {{{ proto bool mysqli_autocommit(object link, bool mode) U
    Turn auto commit on or of */
 PHP_FUNCTION(mysqli_autocommit)
@@ -70,6 +71,7 @@ PHP_FUNCTION(mysqli_autocommit)
 	RETURN_TRUE;
 }
 /* }}} */
+
 
 /* {{{ proto bool mysqli_stmt_bind_param(object stmt, string types, mixed variable [,mixed,....]) U
    Bind variables to a prepared statement as parameters */
@@ -195,6 +197,7 @@ end_1:
 	efree(bind);
 }
 /* }}} */
+
 
 /* {{{ proto bool mysqli_stmt_bind_result(object stmt, mixed var, [,mixed, ...]) U
    Bind variables to a prepared statement for result storage */
@@ -400,6 +403,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 }
 /* }}} */
 
+
 /* {{{ proto bool mysqli_change_user(object link, string user, string password, string database) U
    Change logged-in user of the active connection */
 PHP_FUNCTION(mysqli_change_user)
@@ -427,6 +431,7 @@ PHP_FUNCTION(mysqli_change_user)
 	RETURN_TRUE;
 }
 /* }}} */
+
 
 /* {{{ proto string mysqli_character_set_name(object link) U
    Returns the name of the character set used for this connection */
