@@ -137,6 +137,8 @@ PHP                                                                        NEWS
   mode). (Ilia)
 - Fixed bug #37773 (iconv_substr() gives "Unknown error" when string length = 1").
   (Ilia)
+- Fixed bug #37627 (session save_path check checks the parent directory).
+  (Ilia)
 - Fixed bug #36975 (natcasesort() causes array_pop() to misbehave). (Hannes)
 - Fixed bug #36812 (pg_execute() modifies input array). (Ilia)
 - Fixed bug #36644 (possible crash in variant_date_from_timestamp()). (Ilia)
