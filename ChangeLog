@@ -1,3 +1,83 @@
+2006-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo_mysql/mysql_driver.c:
+      MFB:
+      	Default to buffered queries (much faster)
+      	Default to prepared statement emulation to avoid hitting MySQL bugs
+
+    * (PHP_5_2)
+      ext/pdo_mysql/mysql_driver.c:
+      Default to buffered queries (much faster)
+      Default to prepared statement emulation to avoid hitting MySQL bugs
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      MFB: Added missing check for mismatching number of tokens & bound params in
+      prepared statement emulation.
+
+    * (PHP_5_2)
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      Added missing check for mismatching number of tokens & bound params in
+      prepared statement emulation.
+
+    * ext/filter/filter.c:
+      MFB: Added "default" option that allows a default value to be set for an
+      invalid or missing value.
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/filter.c:
+      Added "default" option that allows a default value to be set for an invalid
+      or missing value.
+
+    * (PHP_5_2)
+      ext/dba/config.m4:
+      Config fix from Gentoo
+
+    * ext/standard/assert.c:
+      MFB: Fixed bug #39718 (possible crash if assert.callback is set in ini).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/assert.c:
+      Fixed bug #39718 (possible crash if assert.callback is set in ini).
+
+    * main/php_scandir.c:
+      MFB: Fixed php_readdir_r() usage in scandir emulation
+
+    * (PHP_5_2)
+      main/php_scandir.c:
+      Fixed php_readdir_r() usage in scandir emulation
+
+2006-12-03  Antony Dovgal  <antony@zend.com>
+
+    * main/php_scandir.c:
+      fix Solaris build
+
+    * ext/ftp/ftp.c:
+      fix leaks
+
+    * ext/standard/crypt.c:
+      fix AIX build
+
+2006-12-03  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/tests/001.phpt
+      ext/pcre/tests/002.phpt
+      ext/pcre/tests/003.phpt
+      ext/pcre/tests/004.phpt:
+      add UEXPECT sections
+
+2006-12-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/pcre/tests/002.phpt:
+      MFB: fix test on fbsd
+
+    * (PHP_5_2)
+      ext/pcre/tests/002.phpt:
+      Fix test on fbsd
+
 2006-12-02  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/pcre/tests/001.phpt
