@@ -21,11 +21,11 @@ int(518)
 int(257)
 bool(false)
 
-Warning: filter_id() expects parameter 1 to be string, array given in %s009.php on line %d
+Warning: filter_id() expects parameter 1 to be string, array given in %s on line %d
 NULL
 bool(false)
 
-Warning: filter_id() expects exactly 1 parameter, 3 given in %s009.php on line %d
+Warning: filter_id() expects exactly 1 parameter, 3 given in %s on line %d
 NULL
 Done
 --UEXPECTF--

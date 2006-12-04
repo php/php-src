@@ -48,6 +48,6 @@ array(18) {
   string(8) "callback"
 }
 
-Warning: Wrong parameter count for filter_list() in %s008.php on line 4
+Warning: Wrong parameter count for filter_list() in %s on line %d
 NULL
 Done
