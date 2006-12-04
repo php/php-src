@@ -123,7 +123,7 @@ static PHP_INI_MH(UpdateDefaultFilter) /* {{{ */
 			return SUCCESS;
 		}
 	}
-	/* Fallback to "string" filter */
+	/* Fallback to the default filter */
 	IF_G(default_filter) = FILTER_DEFAULT;
 	return SUCCESS;
 }
@@ -170,9 +170,9 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_INI_ENTRIES();
 
 	REGISTER_LONG_CONSTANT("INPUT_POST",	PARSE_POST, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_GET",	PARSE_GET,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_GET",		PARSE_GET,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INPUT_COOKIE",	PARSE_COOKIE, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_ENV",	PARSE_ENV,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_ENV",		PARSE_ENV,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INPUT_SERVER",	PARSE_SERVER, 	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INPUT_SESSION", PARSE_SESSION, 	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INPUT_REQUEST", PARSE_REQUEST, 	CONST_CS | CONST_PERSISTENT);
@@ -274,7 +274,7 @@ PHP_RSHUTDOWN_FUNCTION(filter)
 PHP_MINFO_FUNCTION(filter)
 {
 	php_info_print_table_start();
-	php_info_print_table_header( 2, "Input Validation and Filtering", "enabled" );
+	php_info_print_table_row( 2, "Input Validation and Filtering", "enabled" );
 	php_info_print_table_row( 2, "Revision", "$Revision$");
 	php_info_print_table_end();
 
@@ -638,10 +638,10 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value 
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(op));
 		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(op), &pos);
 			zend_hash_get_current_data_ex(Z_ARRVAL_PP(op), (void **) &arg_elm, &pos) == SUCCESS;
-			zend_hash_move_forward_ex(Z_ARRVAL_PP(op), &pos)) 
+			zend_hash_move_forward_ex(Z_ARRVAL_PP(op), &pos))
 		{
 			if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(op), &arg_key, &arg_key_len, &index, 0, &pos) != HASH_KEY_IS_STRING) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric keys are not allowed in the definition array.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric keys are not allowed in the definition array");
 				zval_dtor(return_value);
 				RETURN_FALSE;
 	 		}
@@ -791,7 +791,7 @@ PHP_FUNCTION(filter_list)
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
 	if (ZEND_NUM_ARGS()) {
-		WRONG_PARAM_COUNT;		
+		WRONG_PARAM_COUNT;
 	}
 
 	array_init(return_value);
