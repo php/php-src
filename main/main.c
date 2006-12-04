@@ -1502,6 +1502,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
+	zend_update_current_locale();
 #endif
 
 #if HAVE_TZSET

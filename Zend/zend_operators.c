@@ -32,6 +32,15 @@
 
 #define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
+#if ZEND_USE_TOLOWER_L
+#include <locale.h>
+static _locale_t current_locale = NULL;
+/* this is true global! may lead to strange effects on ZTS, but so is setlocale() */
+#define zend_tolower(c) _tolower_l(c, current_locale)
+#else
+#define zend_tolower(c) tolower(c)
+#endif
+
 ZEND_API int zend_atoi(const char *str, int str_len)
 {
 	int retval;
@@ -1818,6 +1827,13 @@ ZEND_API int zval_is_true(zval *op)
 	return (op->value.lval ? 1 : 0);
 }
 
+#ifdef ZEND_USE_TOLOWER_L
+ZEND_API void zend_update_current_locale()
+{
+	current_locale = _get_current_locale();
+}
+#endif
+
 ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned int length)
 {
 	register unsigned char *str = (unsigned char*)source;
@@ -1825,7 +1841,7 @@ ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned in
 	register unsigned char *end = str + length;
 
 	while (str < end) {
-		*result++ = tolower((int)*str++);
+		*result++ = zend_tolower((int)*str++);
 	}
 	*result = '\0';
 
@@ -1838,7 +1854,7 @@ ZEND_API void zend_str_tolower(char *str, unsigned int length)
 	register unsigned char *end = p + length;
 
 	while (p < end) {
-		*p = tolower((int)*p);
+		*p = zend_tolower((int)*p);
 		p++;
 	}
 }
@@ -1876,8 +1892,8 @@ ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 	len = MIN(len1, len2);
 
 	while (len--) {
-		c1 = tolower((int)*(unsigned char *)s1++);
-		c2 = tolower((int)*(unsigned char *)s2++);
+		c1 = zend_tolower((int)*(unsigned char *)s1++);
+		c2 = zend_tolower((int)*(unsigned char *)s2++);
 		if (c1 != c2) {
 			return c1 - c2;
 		}
@@ -1895,8 +1911,8 @@ ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, u
 	len = MIN(length, MIN(len1, len2));
 
 	while (len--) {
-		c1 = tolower((int)*(unsigned char *)s1++);
-		c2 = tolower((int)*(unsigned char *)s2++);
+		c1 = zend_tolower((int)*(unsigned char *)s1++);
+		c2 = zend_tolower((int)*(unsigned char *)s2++);
 		if (c1 != c2) {
 			return c1 - c2;
 		}
