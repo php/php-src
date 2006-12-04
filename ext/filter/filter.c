@@ -52,7 +52,7 @@ filter_list_entry filter_list[] = {
 	{ "stripped",        FILTER_SANITIZE_STRING,        php_filter_string          },
 	{ "encoded",         FILTER_SANITIZE_ENCODED,       php_filter_encoded         },
 	{ "special_chars",   FILTER_SANITIZE_SPECIAL_CHARS, php_filter_special_chars   },
-	{ "unsafe_raw",      FILTER_UNSAFE_RAW,    			php_filter_unsafe_raw      },
+	{ "unsafe_raw",      FILTER_UNSAFE_RAW,             php_filter_unsafe_raw      },
 	{ "email",           FILTER_SANITIZE_EMAIL,         php_filter_email           },
 	{ "url",             FILTER_SANITIZE_URL,           php_filter_url             },
 	{ "number_int",      FILTER_SANITIZE_NUMBER_INT,    php_filter_number_int      },
@@ -170,9 +170,9 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_INI_ENTRIES();
 
 	REGISTER_LONG_CONSTANT("INPUT_POST",	PARSE_POST, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_GET",		PARSE_GET, 		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_GET",		PARSE_GET,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INPUT_COOKIE",	PARSE_COOKIE, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_ENV",		PARSE_ENV, 		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_ENV",		PARSE_ENV,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INPUT_SERVER",	PARSE_SERVER, 	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INPUT_SESSION", PARSE_SESSION, 	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INPUT_REQUEST", PARSE_REQUEST, 	CONST_CS | CONST_PERSISTENT);
@@ -256,6 +256,7 @@ PHP_MSHUTDOWN_FUNCTION(filter)
 		zval_ptr_dtor(&IF_G(a)); \
 		IF_G(a) = NULL;          \
 	}
+
 PHP_RSHUTDOWN_FUNCTION(filter)
 {
 	VAR_ARRAY_COPY_DTOR(get_array)
