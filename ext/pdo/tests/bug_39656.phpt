@@ -17,8 +17,8 @@ $db = PDOTest::factory();
 
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$db->exec("CREATE TABLE testtable (id INTEGER NOT NULL PRIMARY KEY, user VARCHAR( 256 ) NOT NULL)");
-$db->exec("INSERT INTO testtable (id, user) VALUES (1, 'user')");
+$db->exec("CREATE TABLE testtable (id INTEGER NOT NULL PRIMARY KEY, usr VARCHAR( 256 ) NOT NULL)");
+$db->exec("INSERT INTO testtable (id, usr) VALUES (1, 'user')");
 
 $stmt = $db->prepare("SELECT * FROM testtable WHERE id = ?");
 $stmt->bindValue(1, 1, PDO::PARAM_INT );
