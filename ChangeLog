@@ -1,3 +1,188 @@
+2006-12-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/tests/008.phpt
+      ext/filter/tests/009.phpt:
+      - MFB: use %s
+
+    * ext/filter/filter.c
+      ext/filter/sanitizing_filters.c:
+      - WS
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      - default filter is not string anymore (in comment)
+      - WS and error msg sync with head
+
+2006-12-04  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/head.c:
+      Make headers-related functions accept Unicode strings, but only if their
+      contents can be converted to ASCII.
+
+    * ext/standard/string.c
+      ext/standard/var.c:
+      Unicode support in var_export().
+
+2006-12-04  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ext/standard/basic_functions.c
+      ext/standard/string.c
+      main/main.c:
+      Improve tolower()-related functions on Windows and VC2005 by caching locale
+      and using
+      tolower_l function.
+
+2006-12-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/calendar/tests/easter_date.phpt
+      ext/calendar/tests/unixtojd.phpt:
+      MFB: Fixed tests
+
+    * (PHP_5_2)
+      ext/calendar/tests/easter_date.phpt
+      ext/calendar/tests/unixtojd.phpt:
+      Fixed tests
+
+2006-12-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      acinclude.m4
+      configure.in:
+      MFH: fix build with Sun compiler, which doesn't support -O0
+
+    * acinclude.m4
+      configure.in:
+      fix build with Sun compiler, which doesn't support -O0
+
+    * (PHP_5_2)
+      ext/pcre/config0.m4
+      ext/spl/config.m4:
+      MFH: partly fix #39724
+      ext/spl has a soft dependcy from ext/pcre (not ext/pcre-regex)
+
+    * ext/pcre/config0.m4
+      ext/spl/config.m4:
+      partly fix #39724
+      ext/spl has a soft dependcy from ext/pcre (not ext/pcre-regex)
+
+2006-12-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/tests/bug_39656.phpt:
+      MFB: Fixed test (user is a reserved keyword in pgsql)
+
+    * (PHP_5_2)
+      ext/pdo/tests/bug_39656.phpt:
+      Fixed test (user is a reserved keyword in pgsql)
+
+2006-12-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      sapi/cli/tests/002-win32.phpt
+      sapi/cli/tests/002.phpt
+      sapi/cli/tests/004.phpt
+      sapi/cli/tests/005.phpt
+      sapi/cli/tests/006.phpt
+      sapi/cli/tests/007.phpt
+      sapi/cli/tests/008.phpt
+      sapi/cli/tests/009.phpt
+      sapi/cli/tests/010-2.phpt
+      sapi/cli/tests/010.phpt
+      sapi/cli/tests/011.phpt
+      sapi/cli/tests/012.phpt
+      sapi/cli/tests/013.phpt:
+      fix tests
+
+    * sapi/cli/tests/002-win32.phpt
+      sapi/cli/tests/002.phpt
+      sapi/cli/tests/004.phpt
+      sapi/cli/tests/005.phpt
+      sapi/cli/tests/006.phpt
+      sapi/cli/tests/007.phpt
+      sapi/cli/tests/008.phpt
+      sapi/cli/tests/009.phpt
+      sapi/cli/tests/010-2.phpt
+      sapi/cli/tests/010.phpt
+      sapi/cli/tests/011.phpt
+      sapi/cli/tests/012.phpt
+      sapi/cli/tests/013.phpt:
+      fix tests, use -n to prevent any problems with existing php.ini
+
+2006-12-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed bug #38274 (Memlimit fatal error sent to "wrong" stderr when using
+      fastcgi)
+
+2006-12-04  Antony Dovgal  <antony@zend.com>
+
+    * ext/session/session.c
+      main/main.c:
+      fix retval type
+      it should be int, not zend_bool
+
+2006-12-04  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli_api.c:
+      dummy change
+
+2006-12-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/session/session.c:
+      Fixed bug #37627 (session save_path check checks the parent directory).
+
+2006-12-04  Antony Dovgal  <antony@zend.com>
+
+    * run-tests.php:
+      look for tests in sapi/cli
+
+2006-12-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_stmt.c:
+      MFB: Fixed bug #38319 (Remove bogus warnings from persistent PDO
+      connections).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c:
+      Fixed bug #38319 (Remove bogus warnings from persistent PDO connections).
+
+    * ext/pdo/pdo_dbh.c:
+      MFB: Fixed bug #38252 (Incorrect PDO error message on invalid default fetch
+      mode).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c:
+      Fixed bug #38252 (Incorrect PDO error message on invalid default fetch
+      mode).
+
+    * ext/pdo_mysql/tests/bug_39483.phpt:
+      MFB: Added test for previous bug
+
+    * ext/pdo_mysql/tests/bug_39483.phpt
+      ext/pdo_mysql/tests/bug_39483.phpt:
+      
+      file bug_39483.phpt was initially added on branch PHP_5_2.
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      MFB: Fixed bug #39483 (Problem with handling of \ char in prepared
+      statements).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      Fixed bug #39483 (Problem with handling of \ char in prepared statements).
+
 2006-12-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pdo_mysql/mysql_driver.c:

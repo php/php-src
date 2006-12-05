@@ -1,3 +1,19 @@
+2006-12-04  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      zend_operators.c
+      zend_operators.h:
+      Improve tolower()-related functions on Windows and VC2005 by caching locale
+      and using
+      tolower_l function.
+
+2006-12-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Fixed bug #38274 (Memlimit fatal error sent to "wrong" stderr when using
+      fastcgi)
+
 2006-12-01  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_alloc.c
