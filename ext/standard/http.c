@@ -37,6 +37,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	int arg_sep_len, ekey_len, key_type, newprefix_len;
 	ulong idx;
 	zval **zdata = NULL, *copyzval;
+	zend_bool free_key;
 
 	if (!ht) {
 		return FAILURE;
@@ -57,32 +58,43 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 
 	for (zend_hash_internal_pointer_reset(ht);
 		(key_type = zend_hash_get_current_key_ex(ht, &key, &key_len, &idx, 0, NULL)) != HASH_KEY_NON_EXISTANT;
-		zend_hash_move_forward(ht)
-	) {
-		if ((key_type == HASH_KEY_IS_STRING || key_type == HASH_KEY_IS_UNICODE)
-		&& key_len && key.s[key_len-1] == '\0') {
-			/* We don't want that trailing NULL */
-			key_len -= 1;
-		}
+		zend_hash_move_forward(ht))
+	{
+		free_key = 0;
 
 		/* handling for private & protected object properties */
-		/* FIXME: Unicode support??? */
-		if (key.s && key.s[0] == '\0' && type != NULL) {
+		if (((key_type == HASH_KEY_IS_STRING  && key.s && key.s[0] == '\0') ||
+	 	     (key_type == HASH_KEY_IS_UNICODE && key.u && key.u[0] == 0))
+			&& type != NULL) {
 			zstr tmp;
 
 			zend_object *zobj = zend_objects_get_address(type TSRMLS_CC);
-			if (zend_check_property_access(zobj, IS_STRING, key, key_len TSRMLS_CC) != SUCCESS) {
+			if (zend_check_property_access(zobj, key_type, key, key_len-1 TSRMLS_CC) != SUCCESS) {
 				/* private or protected property access outside of the class */
 				continue;
 			}
-			zend_u_unmangle_property_name(key_type, key, key_len, &tmp, &key);
-			key_len = strlen(key.s);		
+			zend_u_unmangle_property_name(key_type, key, key_len-1, &tmp, &key);
+			key_len = (key_type == IS_UNICODE) ? u_strlen(key.u) : strlen(key.s);
+		} else {
+			key_len -= 1;
+		}
+
+		if (key_type == HASH_KEY_IS_UNICODE) {
+			char *temp;
+			int temp_len;
+
+			zend_unicode_to_string(UG(utf8_conv), &temp, &temp_len, key.u, key_len TSRMLS_CC);
+			key.s = temp;
+			key_len = temp_len;
+			key_type = HASH_KEY_IS_STRING;
+			free_key = 1;
 		}
 
 		if (zend_hash_get_current_data_ex(ht, (void **)&zdata, NULL) == FAILURE || !zdata || !(*zdata)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error traversing form data array");
 			return FAILURE;
 		}
+
 		if (Z_TYPE_PP(zdata) == IS_ARRAY || Z_TYPE_PP(zdata) == IS_OBJECT) {
 			if (key_type == HASH_KEY_IS_STRING) {
 				ekey = php_url_encode(key.s, key_len, &ekey_len);
@@ -141,6 +153,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			efree(newprefix);
 		} else if (Z_TYPE_PP(zdata) == IS_NULL || Z_TYPE_PP(zdata) == IS_RESOURCE) {
 			/* Skip these types */
+			if (free_key) {
+				efree(key.s);
+			}
 			continue;
 		} else {
 			if (formstr->len) {
@@ -164,6 +179,15 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			smart_str_appendl(formstr, key_suffix, key_suffix_len);
 			smart_str_appendl(formstr, "=", 1);
 			switch (Z_TYPE_PP(zdata)) {
+				case IS_UNICODE:
+				{
+					char *temp;
+					int temp_len;
+					zend_unicode_to_string(UG(utf8_conv), &temp, &temp_len, Z_USTRVAL_PP(zdata), Z_USTRLEN_PP(zdata) TSRMLS_CC);
+					ekey = php_url_encode(temp, temp_len, &ekey_len);
+					efree(temp);
+					break;
+				}
 				case IS_STRING:
 					ekey = php_url_encode(Z_STRVAL_PP(zdata), Z_STRLEN_PP(zdata), &ekey_len);
 					break;
@@ -186,23 +210,27 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			smart_str_appendl(formstr, ekey, ekey_len);
 			efree(ekey);
 		}
+
+		if (free_key) {
+			efree(key.s);
+		}
 	}
 
 	return SUCCESS;
 }
 /* }}} */
 
-/* {{{ proto string http_build_query(mixed formdata [, string prefix [, string arg_separator]])
+/* {{{ proto string http_build_query(mixed formdata [, string prefix [, string arg_separator]]) U
    Generates a form-encoded query string from an associative array or object. */
 PHP_FUNCTION(http_build_query)
 {
 	zval *formdata;
-	char *prefix = NULL, *arg_sep=NULL;
-	int arg_sep_len, prefix_len = 0;
+	char *prefix = NULL, *arg_sep = NULL;
+	int arg_sep_len = 0, prefix_len = 0;
 	smart_str formstr = {0};
 	
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ss", &formdata, &prefix, &prefix_len, &arg_sep, &arg_sep_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|s&s&", &formdata, &prefix, &prefix_len, UG(utf8_conv),
+							  &arg_sep, &arg_sep_len, UG(utf8_conv)) != SUCCESS) {
 		RETURN_FALSE;
 	}
 
@@ -224,7 +252,7 @@ PHP_FUNCTION(http_build_query)
 
 	smart_str_0(&formstr);
 	
-	RETURN_STRINGL(formstr.c, formstr.len, 0);
+	RETURN_ASCII_STRINGL(formstr.c, formstr.len, ZSTR_AUTOFREE);
 }
 /* }}} */
 
