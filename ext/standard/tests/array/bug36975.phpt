@@ -1,5 +1,5 @@
 --TEST--
-Bug#36975 (natcasesort() causes array_pop() to misbehave)
+Bug #36975 (natcasesort() causes array_pop() to misbehave)
 --FILE--
 <?php
 $a = array('aa', 'aa', 'bb', 'bb', 'cc', 'cc');                  
