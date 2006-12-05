@@ -320,6 +320,7 @@ PHP                                                                        NEWS
   being applied when RAW filter is used. (Ilia)
 - Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #39721 (Runtime inheritance causes data corruption). (Dmitry)
 - Fixed bug #39304 (Segmentation fault with list unpacking of string offset).
   (Dmitry)
 - Fixed bug #39192 (Not including nsapi.h properly with SJSWS 7). This will
