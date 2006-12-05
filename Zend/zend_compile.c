@@ -2189,13 +2189,18 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry 
 	}
 }
 
-
-static void inherit_static_prop(zval **p)
+static int inherit_static_prop(zval **p, int num_args, va_list args, zend_hash_key *key)
 {
-	(*p)->refcount++;
-	(*p)->is_ref = 1;
-}
+	HashTable *target = va_arg(args, HashTable*);
 
+	if (!zend_hash_quick_exists(target, key->arKey, key->nKeyLength, key->h)) {
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
+		if (zend_hash_quick_add(target, key->arKey, key->nKeyLength, key->h, p, sizeof(zval*), NULL) == SUCCESS) {
+			(*p)->refcount++;
+		}
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
 
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC)
 {
@@ -2216,9 +2221,9 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	if (parent_ce->type != ce->type) {
 		/* User class extends internal class */
 		zend_update_class_constants(parent_ce  TSRMLS_CC);
-		zend_hash_merge(&ce->default_static_members, CE_STATIC_MEMBERS(parent_ce), (void (*)(void *)) inherit_static_prop, NULL, sizeof(zval *), 0);
+		zend_hash_apply_with_arguments(CE_STATIC_MEMBERS(parent_ce), (apply_func_args_t)inherit_static_prop, 1, &ce->default_static_members);
 	} else {
-		zend_hash_merge(&ce->default_static_members, &parent_ce->default_static_members, (void (*)(void *)) inherit_static_prop, NULL, sizeof(zval *), 0);
+		zend_hash_apply_with_arguments(&parent_ce->default_static_members, (apply_func_args_t)inherit_static_prop, 1, &ce->default_static_members TSRMLS_CC);
 	}
 	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (copy_ctor_func_t) (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal : zend_duplicate_property_info), sizeof(zend_property_info), (merge_checker_func_t) do_inherit_property_access_check, ce);
 
