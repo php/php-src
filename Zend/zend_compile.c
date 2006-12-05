@@ -993,7 +993,6 @@ void zend_do_add_char(znode *result, znode *op1, znode *op2 TSRMLS_DC)
 	opline->op2 = *op2;
 	opline->op2.op_type = IS_CONST;
 	opline->extended_value = CG(literal_type);
-	opline->extended_value = CG(literal_type);
 	opline->result = opline->op1;
 	*result = opline->result;
 }
