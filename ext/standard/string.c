@@ -6083,6 +6083,7 @@ PHP_FUNCTION(setlocale)
 		}
 
 		retval = setlocale (cat, loc);
+		zend_update_current_locale();
 		if (retval) {
 			/* Remember if locale was changed */
 			if (loc) {

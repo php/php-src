@@ -4164,6 +4164,7 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	if (BG(locale_string) != NULL) {
 		setlocale(LC_ALL, "C");
 		setlocale(LC_CTYPE, "");
+		zend_update_current_locale();
 	}
 	STR_FREE(BG(locale_string));
 	BG(locale_string) = NULL;
