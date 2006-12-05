@@ -1,5 +1,5 @@
 --TEST--
-bug #27678 (number_format() crashes with large numbers)
+Bug #27678 (number_format() crashes with large numbers)
 --FILE--
 <?php
 

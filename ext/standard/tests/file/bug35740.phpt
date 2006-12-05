@@ -1,5 +1,5 @@
 --TEST--
-bug #35740 (memory leak when including a directory)
+Bug #35740 (memory leak when including a directory)
 --FILE--
 <?php
 
