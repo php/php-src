@@ -39,13 +39,9 @@ yes
     CPPFLAGS=$old_CPPFLAGS
   fi
 
-  if test "$PHP_PCRE_REGEX" != "yes"; then
-    AC_MSG_ERROR([Could not compile filter extension against PHP without pcre support])
-  fi
-
   PHP_NEW_EXTENSION(filter, filter.c sanitizing_filters.c logical_filters.c callback_filter.c, $ext_shared)
   PHP_SUBST(FILTER_SHARED_LIBADD)
 
   PHP_INSTALL_HEADERS([ext/filter/php_filter.h])
-  PHP_ADD_EXTENSION_DEP(filter, pcre, true)
+  PHP_ADD_EXTENSION_DEP(filter, pcre)
 fi
