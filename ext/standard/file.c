@@ -2423,11 +2423,21 @@ post_enc:
 
 				/* Simple character */
 				p++;
+
+				if (p == e) {
+					add_next_index_stringl(return_value, field_start, p - field_start, 1);
+					/* Reset scanner even though we're dying */
+					state = PHP_FGETCSV_READY;
+					field_start = field_end = NULL;
+					p += delimiter_len;
+				}
 				break;
 		}
 	}
 
-	efree(buffer);
+	if (stream) {
+		efree(buffer);
+	}
 }
 /* }}} */
 
@@ -2617,11 +2627,21 @@ post_enc:
 
 				/* Simple character */
 				p++;
+
+				if (p == e) {
+					add_next_index_unicodel(return_value, field_start, p - field_start, 1);
+					/* Reset scanner even though we're dying */
+					state = PHP_FGETCSV_READY;
+					field_start = field_end = NULL;
+					p += delimiter_len;
+				}
 				break;
 		}
 	}
 
-	efree(buffer);
+	if (stream) {
+		efree(buffer);
+	}
 }
 /* }}} */
 

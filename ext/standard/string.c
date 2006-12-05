@@ -56,6 +56,9 @@
 #include "unicode/uchar.h"
 #include "unicode/ubrk.h"
 
+/* For str_getcsv() support */
+#include "ext/standard/file.h"
+
 #define STR_PAD_LEFT			0
 #define STR_PAD_RIGHT			1
 #define STR_PAD_BOTH			2
@@ -6731,6 +6734,46 @@ reg_char:
 		*stateptr = state;
 
 	return (size_t)(rp - rbuf);
+}
+/* }}} */
+
+/* {{{ proto array str_getcsv(string input[, string delimiter[, string enclosure[, string escape]]]) U
+Parse a CSV string into an array */
+PHP_FUNCTION(str_getcsv)
+{
+	zend_uchar str_type, delim_type = IS_STRING, enc_type = IS_STRING, esc_type = IS_STRING;
+	char *str, *delim = ",", *enc = "\"", *esc = "\\";
+	int str_len, delim_len = 1, enc_len = 1, esc_len = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|TTT",
+			&str,   &str_len,   &str_type,
+			&delim, &delim_len, &delim_type,
+			&enc,   &enc_len,   &enc_type,
+			&esc,   &esc_len,   &esc_type) == FAILURE) {
+		return;
+	}
+
+	if (str_type == IS_UNICODE) {
+		UChar udelim = ',', uenc = '"', uesc = '\\';
+
+		/* Non-passed params would need to be upconverted, but we can cheat with some local declarations */
+		if (delim_type == IS_STRING) {
+			delim = (char*)&udelim;
+			delim_len = 1;
+		}
+		if (enc_type == IS_STRING) {
+			enc = (char*)&uenc;
+			enc_len = 1;
+		}
+		if (esc_type == IS_STRING) {
+			esc = (char*)&uesc;
+			esc_len = 1;
+		}
+
+		php_u_fgetcsv(NULL, (UChar*)delim, delim_len, (UChar*)enc, enc_len, (UChar*)esc, esc_len, (UChar*)str, str_len, return_value TSRMLS_CC);
+	} else {
+		php_fgetcsv_ex(NULL, delim, delim_len, enc, enc_len, esc, esc_len, str, str_len, return_value TSRMLS_CC);
+	}
 }
 /* }}} */
 
