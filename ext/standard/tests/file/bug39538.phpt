@@ -1,5 +1,5 @@
 --TEST--
-bug 39538
+Bug #39538 (fgetcsv can't handle starting newlines and trailing odd number of backslashes)
 --FILE--
 <?php
 $content = array("\"\nthis is an test\", \"next data\", \"p\narsed\"","\"\r\nthis is an test\", \"next data\", \"p\r\narsed\"","\"\n\rthis is an test\", \"next data\", \"p\n\rarsed\"");
@@ -11,6 +11,7 @@ foreach ($content as $v) {
 	print_r (fgetcsv(fopen($file, "r"), filesize($file)));
 }
 @unlink($file);
+?>
 --EXPECT--
 Array
 (

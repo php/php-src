@@ -1,5 +1,5 @@
 --TEST--
-bug #33382 ( array_reverse() fails after *sort() )
+Bug #33382 ( array_reverse() fails after *sort() )
 --FILE--
 <?php
 
