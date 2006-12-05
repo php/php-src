@@ -36,7 +36,7 @@ PHP                                                                        NEWS
   . Fixed leak in statName and stateIndex
   . Fixed return setComment (Hannes)
   . Added addEmptyDir method
-- Filter Extension Improvements (Ilia)
+- Filter Extension Improvements (Ilia, Pierre)
   . Fixed a bug when callback function returns a non-modified value.
   . Added filter support for $_SERVER in cgi/apache2 sapis.
   . Make sure PHP_SELF is filtered in Apache 1 sapi.
@@ -44,6 +44,7 @@ PHP                                                                        NEWS
     php_filter.h).
   . Added "default" option that allows a default value to be set for
     an invalid or missing value.
+  . Invalid filters fails instead of returning unsafe value
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
 - Fixed bug #39718 (possible crash if assert.callback is set in ini). (Ilia)
