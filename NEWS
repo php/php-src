@@ -147,6 +147,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #36975 (natcasesort() causes array_pop() to misbehave). (Hannes)
 - Fixed bug #36812 (pg_execute() modifies input array). (Ilia)
+- Fixed bug #36798 (Error parsing named parameters with queries containing
+  high-ascii chars). (Ilia)
 - Fixed bug #36644 (possible crash in variant_date_from_timestamp()). (Ilia)
 - Fixed bug #33282 (Re-assignment by reference does not clear the is_ref flag)
   (Ilia,Dmitry, Matt Wilmas)
