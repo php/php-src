@@ -40,56 +40,12 @@ yes
   fi
 
   if test "$PHP_PCRE_REGEX" != "yes"; then
-    dnl
-    dnl If PCRE extension is enabled we can use the already found paths,
-    dnl otherwise we have to detect them here:
-    dnl
-    if test "$PHP_PCRE_REGEX" = "no" || test "$PHP_PCRE_REGEX" = "pecl"; then
-      dnl Set the PCRE search dirs correctly
-      case "$PHP_PCRE_DIR" in
-        yes|no)
-          PCRE_SEARCH_DIR="/usr/local /usr"
-          ;;
-        *)
-          PCRE_SEARCH_DIR="$PHP_PCRE_DIR"
-          ;;
-      esac
-
-      for i in $PCRE_SEARCH_DIR; do
-        if test -f $i/include/pcre/pcre.h; then
-          PCRE_INCDIR=$i/include/pcre
-          break
-        elif test -f $i/include/pcre.h; then
-          PCRE_INCDIR=$i/include
-          break
-        elif test -f $i/pcre.h; then
-          PCRE_INCDIR=$i
-          break
-        fi
-      done
-
-      if test -z "$PCRE_INCDIR"; then
-        AC_MSG_ERROR([Could not find pcre.h anywhere under $PCRE_SEARCH_DIR])
-      fi
-
-      for j in $PCRE_SEARCH_DIR/$PHP_LIBDIR $PCRE_SEARCH_DIR; do
-        if test -f $j/libpcre.a || test -f $j/libpcre.$SHLIB_SUFFIX_NAME; then
-          PCRE_LIBDIR=$j
-          break
-        fi
-      done
-    
-      if test -z "$PCRE_LIBDIR" ; then
-        AC_MSG_ERROR([Could not find libpcre.(a|$SHLIB_SUFFIX_NAME) anywhere under $PCRE_SEARCH_DIR])
-      fi
-    fi
-
-    PHP_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR, FILTER_SHARED_LIBADD)
-    PHP_ADD_INCLUDE($PCRE_INCDIR)
+    AC_MSG_ERROR([Could not compile filter extension against PHP without pcre support])
   fi
 
   PHP_NEW_EXTENSION(filter, filter.c sanitizing_filters.c logical_filters.c callback_filter.c, $ext_shared)
   PHP_SUBST(FILTER_SHARED_LIBADD)
 
   PHP_INSTALL_HEADERS([ext/filter/php_filter.h])
+  PHP_ADD_EXTENSION_DEP(filter, pcre, true)
 fi
