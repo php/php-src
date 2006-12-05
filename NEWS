@@ -65,6 +65,7 @@ PHP                                                                        NEWS
 - Fixed bug #39648 (Implementation of PHP functions chown() and chgrp() are not
   thread safe). (Ilia, wharmby at uk dot ibm dot com)
 - Fixed bug #39640 (Segfault with "Allowed memory size exhausted"). (Dmitry)
+- Fixed bug #39625 (Apache crashes on importStylesheet call). (Rob)
 - Fixed bug #39623 (thread safety fixes on *nix for putenv() & mime_magic).
   (Ilia, wharmby at uk dot ibm dot com)
 - Fixed bug #39621 (str_replace() is not binary safe on strings with equal 
