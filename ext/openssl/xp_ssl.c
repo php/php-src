@@ -99,7 +99,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 			/* re-negotiation, or perhaps the SSL layer needs more
 			 * packets: retry in next iteration */
 			errno = EAGAIN;
-			retry = sslsock->s.is_blocked;
+			retry = 1;
 			break;
 		case SSL_ERROR_SYSCALL:
 			if (ERR_peek_error() == 0) {
@@ -386,6 +386,9 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 	int n, retry = 1;
 
 	if (cparam->inputs.activate && !sslsock->ssl_active) {
+		float timeout = sslsock->s.timeout.tv_sec + sslsock->s.timeout.tv_usec / 1000000;
+		int blocked = sslsock->s.is_blocked;
+
 		if (!sslsock->state_set) {
 			if (sslsock->is_client) {
 				SSL_set_connect_state(sslsock->ssl_handle);
@@ -395,9 +398,23 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 			sslsock->state_set = 1;
 		}
 	
+		if (sslsock->is_client && SUCCESS == php_set_sock_blocking(sslsock->s.socket, 0 TSRMLS_CC)) {
+                	sslsock->s.is_blocked = 0;
+		}
 		do {
 			if (sslsock->is_client) {
+				struct timeval tvs, tve;
+				struct timezone tz;
+
+				gettimeofday(&tvs, &tz);
 				n = SSL_connect(sslsock->ssl_handle);
+				gettimeofday(&tve, &tz);
+
+				timeout -= (tve.tv_sec + tve.tv_usec / 1000000) - (tvs.tv_sec + tvs.tv_usec / 1000000);
+				if (timeout < 0) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL: connection timeout");
+					return -1;
+				}
 			} else {
 				n = SSL_accept(sslsock->ssl_handle);
 			}
@@ -408,6 +425,10 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 				break;
 			}
 		} while (retry);
+
+		if (sslsock->is_client && sslsock->s.is_blocked != blocked && SUCCESS == php_set_sock_blocking(sslsock->s.socket, blocked TSRMLS_CC)) {
+			sslsock->s.is_blocked = blocked;
+		}
 
 		if (n == 1) {
 			X509 *peer_cert;
@@ -740,8 +761,8 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
 	memset(sslsock, 0, sizeof(*sslsock));
 
 	sslsock->s.is_blocked = 1;
-	sslsock->s.timeout.tv_sec = FG(default_socket_timeout);
-	sslsock->s.timeout.tv_usec = 0;
+	sslsock->s.timeout.tv_sec = timeout->tv_sec;
+	sslsock->s.timeout.tv_usec = timeout->tv_usec;
 
 	/* we don't know the socket until we have determined if we are binding or
 	 * connecting */
