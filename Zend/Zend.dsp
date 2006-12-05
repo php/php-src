@@ -195,10 +195,6 @@ SOURCE=.\zend_llist.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_mm.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\zend_object_handlers.c
 # End Source File
 # Begin Source File
@@ -368,10 +364,6 @@ SOURCE=.\zend_list.h
 # Begin Source File
 
 SOURCE=.\zend_llist.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\zend_mm.h
 # End Source File
 # Begin Source File
 
