@@ -28,7 +28,7 @@ various fgetcsv() functionality tests
 	$file = dirname(__FILE__) . 'fgetcsv.csv';
 	@unlink($file);
 	foreach ($list as $v) {
-		$fp = fopen($file, "w");
+		$fp = fopen($file, "wt");
 		fwrite($fp, $v . "\n");
 		fclose($fp);
 
