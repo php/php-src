@@ -1932,43 +1932,6 @@ PHPAPI PHP_FUNCTION(fread)
 }
 /* }}} */
 
-static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len, const char delimiter TSRMLS_DC)
-{
-	int inc_len;
-	unsigned char last_chars[2] = { 0, 0 };
-
-	while (len > 0) {
-		inc_len = (*ptr == '\0' ? 1: php_mblen(ptr, len));
-		switch (inc_len) {
-			case -2:
-			case -1:
-				inc_len = 1;
-				php_mblen(NULL, 0);
-				break;
-			case 0:
-				goto quit_loop;
-			case 1:
-			default:
-				last_chars[0] = last_chars[1];
-				last_chars[1] = *ptr;
-				break;
-		}
-		ptr += inc_len;
-		len -= inc_len;
-	}
-quit_loop:
-	switch (last_chars[1]) {
-		case '\n':
-			if (last_chars[0] == '\r') {
-				return ptr - 2;
-			}
-			/* break is omitted intentionally */
-		case '\r':
-			return ptr - 1;
-	}
-	return ptr;
-}
-
 #define FPUTCSV_FLD_CHK(c) memchr(Z_STRVAL_PP(field), c, Z_STRLEN_PP(field))
 
 /* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure]])
@@ -2072,87 +2035,149 @@ PHP_FUNCTION(fputcsv)
 }
 /* }}} */
 
-/* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure]]])
+/* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure[, string escape]]]]) U
    Get line from file pointer and parse for CSV fields */
-/* UTODO: Accept unicode contents */
+#define PHP_FGETCSV_TRUNCATE(field) \
+if (argc > 4) { \
+	/* Caller knows about new semantics since they're using new param, allow multichar */ \
+} else if (field##_type == IS_STRING && field##_len > 1) { \
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, #field " must be a single character"); \
+	delimiter_len = 1; \
+} else if (field##_type == IS_UNICODE && u_countChar32((UChar*)field, field##_len) > 1) { \
+	int __tmp = 0; \
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, #field " must be a single character"); \
+	U16_FWD_1(((UChar*)field), __tmp, field##_len); \
+	field##_len = __tmp; \
+}
+
 PHP_FUNCTION(fgetcsv)
 {
-	char delimiter = ',';	/* allow this to be set as parameter */
-	char enclosure = '"';	/* allow this to be set as parameter */
-	/* first section exactly as php_fgetss */
-
-	long len = 0;
-	size_t buf_len;
-	char *buf;
+	zend_uchar delimiter_type = IS_STRING, enclosure_type = IS_STRING, escape_type = IS_STRING;
+	char *delimiter = ",", *enclosure = "\"", *escape = "\\";
+	int delimiter_len = 1, enclosure_len = 1, escape_len = 1;
+	long len = -1;
+	zstr buf;
+	int buf_len, argc = ZEND_NUM_ARGS();
 	php_stream *stream;
+	zval *zstream;
+	zend_uchar delimiter_free = 0, enclosure_free = 0, escape_free = 0;
 
-	{
-		zval *fd, **len_zv = NULL;
-		char *delimiter_str = NULL;
-		int delimiter_str_len = 0;
-		char *enclosure_str = NULL;
-		int enclosure_str_len = 0;
-
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|Zss",
-					&fd, &len_zv, &delimiter_str, &delimiter_str_len,
-					&enclosure_str, &enclosure_str_len) == FAILURE) {
-			return;
-		}	
-
-		if (delimiter_str != NULL) {
-			/* Make sure that there is at least one character in string */
-			if (delimiter_str_len < 1) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
-				RETURN_FALSE;
-			} else if (delimiter_str_len > 1) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "delimiter must be a single character");
-			}
-
-			/* use first character from string */
-			delimiter = delimiter_str[0];
-		}
-	
-		if (enclosure_str != NULL) {
-			if (enclosure_str_len < 1) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
-				RETURN_FALSE;
-			} else if (enclosure_str_len > 1) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "enclosure must be a single character");
-			}
-
-			/* use first character from string */
-			enclosure = enclosure_str[0];
-		}
-
-		if (len_zv != NULL && Z_TYPE_PP(len_zv) != IS_NULL) {
-			convert_to_long_ex(len_zv);
-			len = Z_LVAL_PP(len_zv);
-			if (len < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
-				RETURN_FALSE;
-			} else if (len == 0) {
-				len = -1;
-			}
-		} else {
-			len = -1;
-		}
-
-		PHP_STREAM_TO_ZVAL(stream, &fd);
+	if (zend_parse_parameters(argc TSRMLS_CC, "r|l!ttt", &zstream, &len,
+						&delimiter, &delimiter_len, &delimiter_type,
+						&enclosure, &enclosure_len, &enclosure_type,
+						&escape,    &escape_len,    &escape_type) == FAILURE) {
+		return;
 	}
 
-	if (len < 0) {
-		if ((buf = php_stream_get_line(stream, NULL_ZSTR, 0, &buf_len)) == NULL) {
-			RETURN_FALSE;
+	PHP_STREAM_TO_ZVAL(stream, &zstream);
+
+	/* Make sure that there is at least one character in string,
+	 * For userspace BC purposes we generally limit delimiters and enclosures to 1 character,
+	 * though the code now supports multiple characters
+	 *
+	 * If this function is called with all five parameters however,
+	 * then multiple characters are allowed for all subarguments */
+	if (delimiter_len < 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
+		RETURN_FALSE;
+	} else PHP_FGETCSV_TRUNCATE(delimiter);
+
+	if (enclosure_len < 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
+		RETURN_FALSE;
+	} else PHP_FGETCSV_TRUNCATE(enclosure);
+
+	if (escape_len < 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
+		RETURN_FALSE;
+	}
+
+	if (len < -1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
+		RETURN_FALSE;
+	} else if (len == 0) {
+		len = -1;
+	}
+
+	if (stream->readbuf_type == IS_STRING) {
+		/* Binary mode stream needs binary delmiter/enclosure */
+		if (delimiter_type == IS_UNICODE) {
+			if (FAILURE == zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &delimiter, &delimiter_len, (UChar*)delimiter, delimiter_len TSRMLS_CC)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting delimiter from unicode");
+				RETVAL_FALSE;
+				goto cleanup;
+			}
+			delimiter_free = 1;
+		}
+		if (enclosure_type == IS_UNICODE) {
+			if (FAILURE == zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &enclosure, &enclosure_len, (UChar*)enclosure, enclosure_len TSRMLS_CC)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting enclosure from unicode");
+				RETVAL_FALSE;
+				goto cleanup;
+			}
+			enclosure_free = 1;
+		}
+		if (escape_type == IS_UNICODE) {
+			if (FAILURE == zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &escape, &escape_len, (UChar*)escape, escape_len TSRMLS_CC)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting escape from unicode");
+				RETVAL_FALSE;
+				goto cleanup;
+			}
+			escape_free = 1;
 		}
 	} else {
-		buf = emalloc(len + 1);
-		if (php_stream_get_line(stream, ZSTR(buf), len + 1, &buf_len) == NULL) {
-			efree(buf);
-			RETURN_FALSE;
+		/* Unicode mode stream needs unicode delimiter/enclosure */
+		if (delimiter_type == IS_STRING) {
+			if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&delimiter, &delimiter_len, delimiter, delimiter_len TSRMLS_CC)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting delimiter to unicode");
+				RETVAL_FALSE;
+				goto cleanup;
+			}
+			delimiter_free = 1;
+		}
+		if (enclosure_type == IS_STRING) {
+			if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&enclosure, &enclosure_len, enclosure, enclosure_len TSRMLS_CC)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting enclosure to unicode");
+				RETVAL_FALSE;
+				goto cleanup;
+			}
+			enclosure_free = 1;
+		}
+		if (escape_type == IS_STRING) {
+			if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&escape, &escape_len, escape, escape_len TSRMLS_CC)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting escape to unicode");
+				RETVAL_FALSE;
+				goto cleanup;
+			}
+			escape_free = 1;
 		}
 	}
 
-	php_fgetcsv(stream, delimiter, enclosure, buf_len, buf, return_value TSRMLS_CC);
+	buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, len, &buf_len);
+	if (!buf.v) {
+		/* No data */
+		RETVAL_FALSE;
+		goto cleanup;
+	}
+
+	if (stream->readbuf_type == IS_UNICODE) {
+		/* Unicode mode */
+		php_u_fgetcsv(stream, (UChar*)delimiter, delimiter_len, (UChar*)enclosure, enclosure_len, (UChar*)escape, escape_len, buf.u, buf_len, return_value TSRMLS_CC);
+	} else {
+		/* Binary mode */
+		php_fgetcsv_ex(stream, delimiter, delimiter_len, enclosure, enclosure_len, escape, escape_len, buf.s, buf_len, return_value TSRMLS_CC);
+	}
+
+cleanup:
+	if (delimiter_free) {
+		efree(delimiter);
+	}
+	if (enclosure_free) {
+		efree(enclosure);
+	}
+	if (escape_free) {
+		efree(escape);
+	}
 }
 /* }}} */
 
@@ -2161,266 +2186,442 @@ PHPAPI void php_fgetcsv(php_stream *stream, /* {{{ */
 		size_t buf_len, char *buf,
 		zval *return_value TSRMLS_DC)
 {
-	char *temp, *tptr, *bptr, *line_end, *limit;
-	const char escape_char = '\\';
+	char *delim = &delimiter, *enc = &enclosure, *buffer = buf;
+	int delim_len = 1, enc_len = 1, buffer_len = buf_len;
+	zend_uchar type = IS_STRING;
 
-	size_t temp_len, line_end_len;
-	int inc_len;
+	if (stream) {
+		type = stream->readbuf_type;
+	}
 
-	/* initialize internal state */
-	php_mblen(NULL, 0);
+	if (type == IS_UNICODE) {
+		UChar esc = '\\';
 
-	/* Now into new section that parses buf for delimiter/enclosure fields */
+		/* Unicode stream, but binary delimiter/enclosures/prefetch, promote to unicode */
+		if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&delim, &delim_len, &delimiter, 1 TSRMLS_CC)) {
+			INIT_PZVAL(return_value);
+			return;
+		}
+		if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&enc, &enc_len, &enclosure, 1 TSRMLS_CC)) {
+			efree(delim);
+			INIT_PZVAL(return_value);
+			return;
+		}
+		if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&buffer, &buffer_len, buf, buf_len TSRMLS_CC)) {
+			efree(delim);
+			efree(enc);
+			INIT_PZVAL(return_value);
+			return;
+		}
 
-	/* Strip trailing space from buf, saving end of line in case required for enclosure field */
+		php_u_fgetcsv(stream, (UChar*)delim, delim_len, (UChar*)enc, enc_len, &esc, 1,
+				(UChar*)buffer, buffer_len, return_value TSRMLS_CC);
 
-	bptr = buf;
-	tptr = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter TSRMLS_CC);
-	line_end_len = buf_len - (size_t)(tptr - buf);
-	line_end = limit = tptr;
+		/* Types converted, free storage */
+		efree(delim);
+		efree(enc);
+		efree(buffer);
+	} else {
+		/* Binary stream with binary delimiter/enclosures/prefetch */
+		php_fgetcsv_ex(stream, delim, delim_len, enc, enc_len, "\\", 1, buffer, buffer_len, return_value TSRMLS_CC);
+	}
+}
 
-	/* reserve workspace for building each individual field */
-	temp_len = buf_len;
-	temp = emalloc(temp_len + line_end_len + 1);
+typedef enum _php_fgetcsv_state {
+	PHP_FGETCSV_READY,
+	PHP_FGETCSV_FIELD_NO_ENC,
+	PHP_FGETCSV_FIELD_WITH_ENC,
+	PHP_FGETCSV_POST_ENC,
+} php_fgetcsv_state;
 
-	/* Initialize return array */
+#define PHP_FGETCSV_BIN_CHECK(p, e, m, mlen) ((p) < (e) && (((mlen) == 1 && *(p) == *(m)) || ((mlen) > 1 && (((e) - (p)) >= (mlen)) && memcmp((p), (m), (mlen)) == 0)))
+
+/* Binary mode fgetcsv */
+PHPAPI void php_fgetcsv_ex(php_stream *stream,
+		char *delimiter, int delimiter_len,
+		char *enclosure, int enclosure_len,
+		char *escape, int escape_len,
+		char *buffer, int buffer_len,
+		zval *return_value TSRMLS_DC)
+{
+	php_fgetcsv_state state = PHP_FGETCSV_READY;
+	char *p = buffer, *e = buffer + buffer_len, *field_start = NULL, *field_end = NULL;
+
 	array_init(return_value);
 
-	/* Main loop to read CSV fields */
-	/* NB this routine will return a single null entry for a blank line */
+	while(p < e) {
+		switch (state) {
+			case PHP_FGETCSV_READY:
+ready_state:
+				/* Ready to start a new field */
 
-	do {
-		char *comp_end, *hunk_begin;
-
-		tptr = temp;
-
-		/* 1. Strip any leading space */
-		for (;;) {
-			inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
-			switch (inc_len) {
-				case -2:
-				case -1:
-					inc_len = 1;
-					php_mblen(NULL, 0);
+				/* Is there nothing left to scan? */
+				if (*p == '\r' || *p == '\n') {
+					/* Terminal delimiter, treat as empty field */
+					p++;
+					add_next_index_stringl(return_value, "", 0, 1);
 					break;
-				case 0:
-					goto quit_loop_1;
-				case 1:
-					if (!isspace((int)*(unsigned char *)bptr) || *bptr == delimiter) {
-						goto quit_loop_1;
+				}
+
+				/* Is it enclosed? */
+				if (PHP_FGETCSV_BIN_CHECK(p, e, enclosure, enclosure_len)) {
+					/* Enclosure encountered, switch state */
+					state = PHP_FGETCSV_FIELD_WITH_ENC;
+					p += enclosure_len;
+					field_start = p;
+					break;
+				}
+
+				/* Is it an immediate delimiter? */
+				if (PHP_FGETCSV_BIN_CHECK(p, e, delimiter, delimiter_len)) {
+					/* Immediate delimiter, treate as empty field */
+					p += delimiter_len;
+					add_next_index_stringl(return_value, "", 0, 1);
+					break;
+				}
+
+				/* Whitespace? */
+				if (*p == ' ' || *p == '\t') {
+					p++;
+					if (p >= e) break;
+					goto ready_state;
+				}
+
+				/* Is it an escape character? */
+				if (PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len)) {
+					/* Skip escape sequence and let next char be treated as literal */
+					p += escape_len;
+					/* FALL THROUGH */
+				}
+
+				/* Otherwise, starting a new field without enclosures */
+				state = PHP_FGETCSV_FIELD_NO_ENC;
+				field_start = p;
+				field_end = NULL;
+				p++;
+				break;
+
+			case PHP_FGETCSV_FIELD_WITH_ENC:
+with_enc:
+				/* Check for ending enclosure */
+				if (PHP_FGETCSV_BIN_CHECK(p, e, enclosure, enclosure_len)) {
+					/* Enclosure encountered, is it paired? */
+					if (PHP_FGETCSV_BIN_CHECK(p + enclosure_len, e, enclosure, enclosure_len)) {
+						/* Double enclosure gets translated to single enclosure */
+						memmove(p, p + enclosure_len, (e - p) - enclosure_len);
+						e -= enclosure_len;
+						p += enclosure_len;
+						goto with_enc;
+					} else {
+						/* Genuine end enclosure, switch state */
+						field_end = p;
+						p += enclosure_len;
+						state = PHP_FGETCSV_POST_ENC;
+						goto post_enc;
 					}
+				}
+
+				/* Check for field escapes */
+				if (PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len)) {
+					p += escape_len + 1;
+
+					/* Reprocess for ending enclosures */
+					goto with_enc;
+				}
+
+				/* Simple character */
+				if (e - p) {
+					p++;
+				}
+
+				/* Hungry? */
+				if (((e - p) < enclosure_len) && stream) {
+					/* Feed me! */
+					int new_len;
+					char *new_buf = php_stream_get_line(stream, NULL_ZSTR, 0, &new_len);
+
+					if (new_buf) {
+						int tmp_len = new_len + e - field_start;
+						char *tmp = emalloc(tmp_len);
+
+						/* Realign scan buffer */
+						memcpy(tmp, field_start, e - field_start);
+						memcpy(tmp + (e - field_start), new_buf, new_len);
+						field_start = tmp;
+						if (field_end) {
+							field_end = tmp + (field_end - field_start);
+						}
+						efree(buffer);
+						efree(new_buf);
+						buffer = tmp;
+						buffer_len = tmp_len;
+						p = buffer;
+						e = buffer + buffer_len;
+					}
+				}
+
+				if ((e - p) == 0) {
+					/* Nothing left to consume the buffer, use it */
+					add_next_index_stringl(return_value, field_start, p - field_start, 1);
+
+					/* Loop is dying anyway, but be pedantic */
+					state = PHP_FGETCSV_READY;
+					field_start = field_end = NULL;
 					break;
-				default:
-					goto quit_loop_1;
-			}
-			bptr += inc_len;
+				}
+				break;
+
+			case PHP_FGETCSV_POST_ENC:
+post_enc:
+				/* Check for delimiters or EOL */
+				if (p >= e || *p == '\r' || *p == '\n' || PHP_FGETCSV_BIN_CHECK(p, e, delimiter, delimiter_len)) {
+					int field_len = field_end - field_start;
+					char *field;
+
+					if ((p - enclosure_len) > field_end) {
+						/* There's cruft, append it to the proper field */
+						int cruft_len = p - (field_end + enclosure_len);
+
+						field = emalloc(field_len + cruft_len + 1);
+						memcpy(field, field_start, field_len);
+						memcpy(field + field_len, field_end + enclosure_len, cruft_len);
+
+						field_len += cruft_len;
+						field[field_len] = 0;
+					} else {
+						field = estrndup(field_start, field_end - field_start);
+					}
+					add_next_index_stringl(return_value, field, field_len, 0);
+
+					/* Reset scanner */
+					state = PHP_FGETCSV_READY;
+					field_start = field_end = NULL;
+					p += delimiter_len;
+					goto ready_state;
+				}
+
+				/* Queue anything else as cruft */
+				p++;
+				break;
+
+			case PHP_FGETCSV_FIELD_NO_ENC:
+				/* Check for escapes */
+				if (PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len)) {
+					p += escape_len + 1;
+				}
+
+				/* Check for delimiter */
+				if (p >= e || *p == '\r' || *p == '\n' || PHP_FGETCSV_BIN_CHECK(p, e, delimiter, delimiter_len)) {
+					add_next_index_stringl(return_value, field_start, p - field_start, 1);
+
+					/* Reset scanner */
+					state = PHP_FGETCSV_READY;
+					field_start = field_end = NULL;
+					p += delimiter_len;
+					goto ready_state;
+				}
+
+				/* Simple character */
+				p++;
+				break;
 		}
+	}
 
-	quit_loop_1:
-		/* 2. Read field, leaving bptr pointing at start of next field */
-		if (inc_len != 0 && *bptr == enclosure) {
-			int state = 0;
+	efree(buffer);
+}
+/* }}} */
 
-			bptr++;	/* move on to first character in field */
-			hunk_begin = bptr;
+#define PHP_FGETCSV_UNI_CHECK(p, e, m, mlen) ((p) < (e) && (((mlen) == 1 && *(p) == *(m)) || ((mlen) > 1 && (((e) - (p)) >= (mlen)) && memcmp((p), (m), UBYTES(mlen)) == 0)))
 
-			/* 2A. handle enclosure delimited field */
-			for (;;) {
-				switch (inc_len) {
-					case 0:
-						switch (state) {
-							case 2:
-								memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
-								tptr += (bptr - hunk_begin - 1);
-								hunk_begin = bptr;
-								goto quit_loop_2;
+/* Unicode mode fgetcsv */
+PHPAPI void php_u_fgetcsv(php_stream *stream,
+		UChar *delimiter, int delimiter_len,
+		UChar *enclosure, int enclosure_len,
+		UChar *escape, int escape_len,
+		UChar *buffer, int buffer_len,
+		zval *return_value TSRMLS_DC)
+{
+	php_fgetcsv_state state = PHP_FGETCSV_READY;
+	UChar *p = buffer, *e = buffer + buffer_len, *field_start = NULL, *field_end = NULL;
 
-							case 1:
-								memcpy(tptr, hunk_begin, bptr - hunk_begin);
-								tptr += (bptr - hunk_begin);
-								hunk_begin = bptr;
-								/* break is omitted intentionally */
+	array_init(return_value);
 
-							case 0: {
-								char *new_buf;
-								size_t new_len;
-								char *new_temp;
+	while(p < e) {
+		switch (state) {
+			case PHP_FGETCSV_READY:
+ready_state:
+				/* Ready to start a new field */
 
-								memcpy(tptr, hunk_begin, bptr - hunk_begin);
-								tptr += (bptr - hunk_begin);
-								hunk_begin = bptr;
-								if (hunk_begin != line_end) {
-									memcpy(tptr, hunk_begin, bptr - hunk_begin);
-									tptr += (bptr - hunk_begin);
-									hunk_begin = bptr;
-								}
-
-								/* add the embedded line end to the field */
-								memcpy(tptr, line_end, line_end_len);
-								tptr += line_end_len;
-
-								if ((new_buf = php_stream_get_line(stream, NULL_ZSTR, 0, &new_len)) == NULL) {
-									/* we've got an unterminated enclosure,
-									 * assign all the data from the start of
-									 * the enclosure to end of data to the
-									 * last element */
-									if ((size_t)temp_len > (size_t)(limit - buf)) { 
-										goto quit_loop_2;
-									}
-									zval_dtor(return_value);
-									RETVAL_FALSE;
-									goto out;
-								}
-								temp_len += new_len;
-								new_temp = erealloc(temp, temp_len);
-								tptr = new_temp + (size_t)(tptr - temp);
-								temp = new_temp;
-
-								efree(buf);
-								buf_len = new_len;
-								bptr = buf = new_buf;
-								hunk_begin = buf;
-
-								line_end = limit = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter TSRMLS_CC);
-								line_end_len = buf_len - (size_t)(limit - buf); 
-
-								state = 0;
-							} break;
-						}
-						break;
-
-					case -2:
-					case -1:
-						php_mblen(NULL, 0);
-						/* break is omitted intentionally */
-					case 1:
-						/* we need to determine if the enclosure is
-						 * 'real' or is it escaped */
-						switch (state) {
-							case 1: /* escaped */
-								bptr++;
-								state = 0;
-								break;
-							case 2: /* embedded enclosure ? let's check it */
-								if (*bptr != enclosure) {
-									/* real enclosure */
-									memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
-									tptr += (bptr - hunk_begin - 1);
-									hunk_begin = bptr;
-									goto quit_loop_2;
-								}
-								memcpy(tptr, hunk_begin, bptr - hunk_begin);
-								tptr += (bptr - hunk_begin);
-								bptr++;
-								hunk_begin = bptr;
-								state = 0;
-								break;
-							default:
-								if (*bptr == escape_char) {
-									state = 1;
-								} else if (*bptr == enclosure) {
-									state = 2;
-								}
-								bptr++;
-								break;
-						}
-						break;
-
-					default:
-						switch (state) {
-							case 2:
-								/* real enclosure */
-								memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
-								tptr += (bptr - hunk_begin - 1);
-								hunk_begin = bptr;
-								goto quit_loop_2;
-							case 1:
-								bptr += inc_len;
-								memcpy(tptr, hunk_begin, bptr - hunk_begin);
-								tptr += (bptr - hunk_begin);
-								hunk_begin = bptr;
-								break;
-							default:
-								bptr += inc_len;
-								break;
-						}
-						break;
+				/* Is there nothing left to scan? */
+				if (*p == '\r' || *p == '\n') {
+					/* Terminal delimiter, treat as empty field */
+					p++;
+					add_next_index_stringl(return_value, "", 0, 1);
+					break;
 				}
-				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
-			}
 
-		quit_loop_2:
-			/* look up for a delimiter */
-			for (;;) {
-				switch (inc_len) {
-					case 0:
-						goto quit_loop_3;
-
-					case -2:
-					case -1:
-						inc_len = 1;
-						php_mblen(NULL, 0);
-						/* break is omitted intentionally */
-					case 1:
-						if (*bptr == delimiter) {
-							goto quit_loop_3;
-						}
-						break;
-					default:
-						break;
+				/* Is it enclosed? */
+				if (PHP_FGETCSV_UNI_CHECK(p, e, enclosure, enclosure_len)) {
+					/* Enclosure encountered, switch state */
+					state = PHP_FGETCSV_FIELD_WITH_ENC;
+					p += enclosure_len;
+					field_start = p;
+					break;
 				}
-				bptr += inc_len;
-				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
-			}
 
-		quit_loop_3:
-			memcpy(tptr, hunk_begin, bptr - hunk_begin);
-			tptr += (bptr - hunk_begin);
-			bptr += inc_len;
-			comp_end = tptr;
-		} else {
-			/* 2B. Handle non-enclosure field */
-
-			hunk_begin = bptr;
-
-			for (;;) {
-				switch (inc_len) {
-					case 0:
-						goto quit_loop_4;
-					case -2:
-					case -1:
-						inc_len = 1;
-						php_mblen(NULL, 0);
-						/* break is omitted intentionally */
-					case 1:
-						if (*bptr == delimiter) {
-							goto quit_loop_4;
-						}
-						break;
-					default:
-						break;
+				/* Is it an immediate delimiter? */
+				if (PHP_FGETCSV_UNI_CHECK(p, e, delimiter, delimiter_len)) {
+					/* Immediate delimiter, treate as empty field */
+					p += delimiter_len;
+					add_next_index_unicodel(return_value, (UChar*)"", 0, 1);
+					break;
 				}
-				bptr += inc_len;
-				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
-			}
-		quit_loop_4:
-			memcpy(tptr, hunk_begin, bptr - hunk_begin);
-			tptr += (bptr - hunk_begin);
 
-			comp_end = (char *)php_fgetcsv_lookup_trailing_spaces(temp, tptr - temp, delimiter TSRMLS_CC);
-			if (*bptr == delimiter) {
-				bptr++;
-			}
+				/* Whitespace? */
+				if (*p == ' ' || *p == '\t') {
+					p++;
+					if (p >= e) break;
+					goto ready_state;
+				}
+
+				/* Is it an escape character? */
+				if (PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len)) {
+					/* Skip escape sequence and let next char be treated as literal */
+					p += escape_len;
+					/* FALL THROUGH */
+				}
+
+				/* Otherwise, starting a new field without enclosures */
+				state = PHP_FGETCSV_FIELD_NO_ENC;
+				field_start = p;
+				field_end = NULL;
+				p++;
+				break;
+
+			case PHP_FGETCSV_FIELD_WITH_ENC:
+with_enc:
+				/* Check for ending enclosure */
+				if (PHP_FGETCSV_UNI_CHECK(p, e, enclosure, enclosure_len)) {
+					/* Enclosure encountered, is it paired? */
+					if (PHP_FGETCSV_UNI_CHECK(p + enclosure_len, e, enclosure, enclosure_len)) {
+						/* Double enclosure gets translated to single enclosure */
+						memmove(p, p + enclosure_len, (e - p) - enclosure_len);
+						e -= enclosure_len;
+						p += enclosure_len;
+						goto with_enc;
+					} else {
+						/* Genuine end enclosure, switch state */
+						field_end = p;
+						p += enclosure_len;
+						state = PHP_FGETCSV_POST_ENC;
+						goto post_enc;
+					}
+				}
+
+				/* Check for field escapes */
+				if (PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len)) {
+					p += escape_len + 1;
+
+					/* Reprocess for ending enclosures */
+					goto with_enc;
+				}
+
+				/* Simple character */
+				if (e - p) {
+					p++;
+				}
+
+				/* Hungry? */
+				if (((e - p) < enclosure_len) && stream) {
+					/* Feed me! */
+					int new_len;
+					UChar *new_buf = (UChar*)php_stream_get_line_ex(stream, IS_UNICODE, NULL_ZSTR, 0, 0, &new_len);
+
+					if (new_buf) {
+						int tmp_len = new_len + e - field_start;
+						UChar *tmp = eumalloc(tmp_len);
+
+						/* Realign scan buffer, ick -- expensive */
+						memcpy(tmp, field_start, UBYTES(e - field_start));
+						memcpy(tmp + (e - field_start), new_buf, UBYTES(new_len));
+						field_start = tmp;
+						if (field_end) {
+							field_end = tmp + (field_end - field_start);
+						}
+						efree(buffer);
+						efree(new_buf);
+						buffer = tmp;
+						buffer_len = tmp_len;
+						p = buffer;
+						e = buffer + buffer_len;
+					}
+				}
+
+				if ((e - p) == 0) {
+					/* Nothing left to consume the buffer */
+					add_next_index_unicodel(return_value, field_start, p - field_start, 1);
+
+					/* Loop is dying, but cleanup anyway */
+					state = PHP_FGETCSV_READY;
+					field_start = field_end = NULL;
+					break;
+				}
+				break;
+
+			case PHP_FGETCSV_POST_ENC:
+post_enc:
+				/* Check for delimiters or EOL */
+				if (p >= e || *p == '\r' || *p == '\n' || PHP_FGETCSV_UNI_CHECK(p, e, delimiter, delimiter_len)) {
+					int field_len = field_end - field_start;
+					UChar *field;
+
+					if ((p - enclosure_len) > field_end) {
+						/* There's cruft, append it to the regular field */
+						int cruft_len = p - (field_end + enclosure_len);
+
+						field = eumalloc(field_len + cruft_len + 1);
+						memcpy(field, field_start, field_len);
+						memcpy(field + field_len, field_end + enclosure_len, UBYTES(cruft_len));
+						field_len += cruft_len;
+						field[field_len] = 0;
+					} else {
+						field = eustrndup(field_start, field_len);
+					}
+					add_next_index_unicodel(return_value, field, field_len, 0);
+
+					/* Reset scanner state */
+					state = PHP_FGETCSV_READY;
+					field_start = field_end = NULL;
+					p += delimiter_len;
+					goto ready_state;
+				}
+
+				/* Queue anything else as cruft */
+				p++;
+				break;
+
+			case PHP_FGETCSV_FIELD_NO_ENC:
+				/* Check for escapes */
+				if (PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len)) {
+					p += escape_len + 1;
+				}
+
+				/* Check for delimiter */
+				if (p >= e || *p == '\r' || *p == '\n' || PHP_FGETCSV_UNI_CHECK(p, e, delimiter, delimiter_len)) {
+					add_next_index_unicodel(return_value, field_start, p - field_start, 1);
+					state = PHP_FGETCSV_READY;
+					field_start = field_end = NULL;
+					p += delimiter_len;
+					goto ready_state;
+				}
+
+				/* Simple character */
+				p++;
+				break;
 		}
+	}
 
-		/* 3. Now pass our field back to php */
-		*comp_end = '\0';
-		add_next_index_stringl(return_value, temp, comp_end - temp, 1);
-	} while (inc_len > 0);
-
-out:
-	efree(temp);
-	efree(buf);
+	efree(buffer);
 }
 /* }}} */
 

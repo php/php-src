@@ -46,3 +46,41 @@ array(4) {
 2,4,5,line3
 "
 }
+--UEXPECT--
+array(4) {
+  [0]=>
+  unicode(1) "6"
+  [1]=>
+  unicode(1) "7"
+  [2]=>
+  unicode(1) "8"
+  [3]=>
+  unicode(5) "line1"
+}
+array(4) {
+  [0]=>
+  unicode(1) "1"
+  [1]=>
+  unicode(1) "2"
+  [2]=>
+  unicode(1) "3"
+  [3]=>
+  unicode(186) "line2
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+2,4,5,line3
+"
+}
+
