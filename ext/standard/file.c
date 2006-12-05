@@ -2153,7 +2153,7 @@ PHP_FUNCTION(fgetcsv)
 		}
 	}
 
-	buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, len, &buf_len);
+	buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, (len < 0) ? 0 : len, &buf_len);
 	if (!buf.v) {
 		/* No data */
 		RETVAL_FALSE;
