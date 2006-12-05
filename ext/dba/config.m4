@@ -463,7 +463,7 @@ AC_DEFUN([PHP_DBA_BUILTIN_CDB],[
 
 AC_ARG_WITH(cdb,
 [  --with-cdb[=DIR]          DBA: Include CDB support],[
-  if test "$withval" = "yes" && test "$HAVE_DBA" = "1"; then
+  if test "$withval" = "yes" || test "$HAVE_DBA" = "1"; then
     PHP_DBA_BUILTIN_CDB
   elif test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
