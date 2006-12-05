@@ -645,6 +645,11 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value 
 				zval_dtor(return_value);
 				RETURN_FALSE;
 	 		}
+			if (arg_key_len < 2) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty keys are not allowed in the definition array");
+				zval_dtor(return_value);
+				RETURN_FALSE;
+			}
 			if (zend_hash_find(Z_ARRVAL_P(input), arg_key, arg_key_len, (void **)&tmp) != SUCCESS) {
 				add_assoc_null_ex(return_value, arg_key, arg_key_len);
 			} else {
@@ -678,6 +683,10 @@ PHP_FUNCTION(filter_input)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls|lZ", &fetch_from, &var, &var_len, &filter, &filter_args) == FAILURE) {
 		return;
+	}
+
+	if (!PHP_FILTER_ID_EXISTS(filter)) {
+		RETURN_FALSE;
 	}
 
 	input = php_filter_get_storage(fetch_from TSRMLS_CC);
@@ -726,6 +735,10 @@ PHP_FUNCTION(filter_var)
 		return;
 	}
 
+	if (!PHP_FILTER_ID_EXISTS(filter)) {
+		RETURN_FALSE;
+	}
+
 	*return_value = *data;
 	zval_copy_ctor(data);
 
@@ -743,6 +756,11 @@ PHP_FUNCTION(filter_input_array)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|Z",  &fetch_from, &op) == FAILURE) {
 		return;
+	}
+
+	if (op && ( (Z_TYPE_PP(op) == IS_LONG && !PHP_FILTER_ID_EXISTS(Z_LVAL_PP(op)))
+		|| Z_TYPE_PP(op) != IS_ARRAY)) {
+		RETURN_FALSE;
 	}
 
 	array_input = php_filter_get_storage(fetch_from TSRMLS_CC);
@@ -778,6 +796,11 @@ PHP_FUNCTION(filter_var_array)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|Z",  &array_input, &op) == FAILURE) {
 		return;
+	}
+
+	if (op && ( (Z_TYPE_PP(op) == IS_LONG && !PHP_FILTER_ID_EXISTS(Z_LVAL_PP(op)))
+		|| Z_TYPE_PP(op) != IS_ARRAY)) {
+		RETURN_FALSE;
 	}
 
 	php_filter_array_handler(array_input, op, return_value TSRMLS_CC);
