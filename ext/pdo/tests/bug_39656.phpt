@@ -41,7 +41,7 @@ array(4) {
   string(1) "1"
   [0]=>
   string(1) "1"
-  ["user"]=>
+  ["usr"]=>
   string(4) "user"
   [1]=>
   string(4) "user"
