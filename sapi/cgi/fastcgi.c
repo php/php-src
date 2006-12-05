@@ -616,6 +616,13 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 	if (destroy) {
 		zend_hash_destroy(&req->env);
 	}
+
+#ifdef _WIN32
+	if (is_impersonate) {
+		RevertToSelf();
+	}
+#endif
+
 	if ((force || !req->keep) && req->fd >= 0) {
 #ifdef _WIN32
 		HANDLE pipe = (HANDLE)_get_osfhandle(req->fd);
@@ -624,9 +631,6 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 			FlushFileBuffers(pipe);
 		}
 		DisconnectNamedPipe(pipe);
-		if (is_impersonate) {
-			RevertToSelf();
-		}
 #else
 		if (!force) {
 			char buf[8];
@@ -673,12 +677,7 @@ int fcgi_accept_request(fcgi_request *req)
 					}
 				}
 				CloseHandle(ov.hEvent);
-				if (is_impersonate && !ImpersonateNamedPipeClient(pipe)) {
-					DisconnectNamedPipe(pipe);
-					req->fd = -1;
-				} else {
-					req->fd = req->listen_socket;
-				}
+				req->fd = req->listen_socket;
 				FCGI_UNLOCK(req->listen_socket);
 #else
 				{
@@ -718,6 +717,15 @@ try_again:
 			return -1;
 		}
 		if (fcgi_read_request(req)) {
+#ifdef _WIN32
+			if (is_impersonate) {
+				pipe = (HANDLE)_get_osfhandle(req->fd);
+				if (!ImpersonateNamedPipeClient(pipe)) {
+					fcgi_close(req, 1, 1);
+					continue;
+				}
+			}
+#endif
 			return req->fd;
 		} else {
 			fcgi_close(req, 1, 1);
