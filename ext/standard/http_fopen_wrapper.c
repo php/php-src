@@ -289,7 +289,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		SEPARATE_ZVAL(tmpzval);
 		convert_to_double_ex(tmpzval);
 		protocol_version_len = spprintf(&protocol_version, 0, "%.1f", Z_DVAL_PP(tmpzval));
-		zval_ptr_dtor(tmpzval);
 	}
 
 	if (!scratch) {
