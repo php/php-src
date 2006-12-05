@@ -14,6 +14,7 @@
   +----------------------------------------------------------------------+
   | Authors: Dave Hayden <dave@opaque.net>                               |
   |          Frank M. Kromann <fmk@php.net>                              |
+  |          Stuart R. Anderson <anderson@netsweng.com>                  |
   +----------------------------------------------------------------------+
 */
 
@@ -51,6 +52,7 @@ static zend_function_entry ming_functions[] = {
 	PHP_FALIAS(ming_keypress,           ming_keypress,           NULL)
 #ifdef HAVE_NEW_MING
 	PHP_FALIAS(ming_useconstants,		ming_useConstants,       NULL)
+	PHP_FALIAS(ming_setswfcompression,	ming_setSWFCompression,  NULL)
 #endif
 	{ NULL, NULL, NULL }
 };
@@ -140,6 +142,19 @@ PHP_FUNCTION(ming_useConstants)
 	Ming_useConstants(Z_LVAL_PP(num));
 }
 /* }}} */
+
+/* {{{ set output compression */
+PHP_FUNCTION(ming_setSWFCompression)
+{  
+    zval **num;
+    if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE)
+        WRONG_PARAM_COUNT;
+				   
+    convert_to_long_ex(num);
+    Ming_setSWFCompression(Z_LVAL_PP(num));
+}
+/* }}} */
+
 #endif
 
 static int le_swfmoviep;
@@ -351,6 +366,7 @@ PHP_METHOD(swfbitmap, __construct)
 {
 	zval **zfile, **zmask = NULL;
 	SWFBitmap bitmap;
+	SWFJpegWithAlpha bitmap_alpha;
 	SWFInput input, maskinput;
 	int ret;
 
@@ -383,15 +399,22 @@ PHP_METHOD(swfbitmap, __construct)
 		} else {
 			maskinput = getInput(zmask TSRMLS_CC);
 		}
-		bitmap = newSWFJpegWithAlpha_fromInput(input, maskinput);
+		bitmap_alpha = newSWFJpegWithAlpha_fromInput(input, maskinput);
+		if(bitmap_alpha) {
+			ret = zend_list_insert(bitmap_alpha, le_swfbitmapp);
+			object_init_ex(getThis(), bitmap_class_entry_ptr);
+			add_property_resource(getThis(), "bitmap", ret);
+			zend_list_addref(ret);
+		}
 	} else {
 		bitmap = newSWFBitmap_fromInput(input);
+		if(bitmap) {
+			ret = zend_list_insert(bitmap, le_swfbitmapp);
+			object_init_ex(getThis(), bitmap_class_entry_ptr);
+			add_property_resource(getThis(), "bitmap", ret);
+			zend_list_addref(ret);
+		}
 	}
-
-	ret = zend_list_insert(bitmap, le_swfbitmapp);
-	object_init_ex(getThis(), bitmap_class_entry_ptr);
-	add_property_resource(getThis(), "bitmap", ret);
-	zend_list_addref(ret);
 }
 
 static void destroy_SWFBitmap_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
@@ -417,6 +440,9 @@ static SWFBitmap getBitmap(zval *id TSRMLS_DC)
    Returns the width of this bitmap */
 PHP_METHOD(swfbitmap, getWidth)
 {
+	if(ZEND_NUM_ARGS() != 0) {
+	    WRONG_PARAM_COUNT;
+	}
 	RETURN_DOUBLE(SWFBitmap_getWidth(getBitmap(getThis() TSRMLS_CC)));
 }
 /* }}} */
@@ -425,6 +451,9 @@ PHP_METHOD(swfbitmap, getWidth)
    Returns the height of this bitmap */
 PHP_METHOD(swfbitmap, getHeight)
 {
+	if(ZEND_NUM_ARGS() != 0) {
+	    WRONG_PARAM_COUNT;
+	}
 	RETURN_DOUBLE(SWFBitmap_getHeight(getBitmap(getThis() TSRMLS_CC)));
 }
 /* }}} */
@@ -1515,6 +1544,9 @@ PHP_METHOD(swffont, getWideWidth)
    Returns the ascent of the font, or 0 if not available */
 PHP_METHOD(swffont, getAscent)
 {
+    if(ZEND_NUM_ARGS() != 0) {
+	    WRONG_PARAM_COUNT;
+	}
 	RETURN_DOUBLE(SWFFont_getAscent(getFont(getThis() TSRMLS_CC)));
 }
 /* }}} */
@@ -1523,6 +1555,9 @@ PHP_METHOD(swffont, getAscent)
    Returns the descent of the font, or 0 if not available */
 PHP_METHOD(swffont, getDescent)
 {
+    if(ZEND_NUM_ARGS() != 0) {
+	    WRONG_PARAM_COUNT;
+	}
 	RETURN_DOUBLE(SWFFont_getDescent(getFont(getThis() TSRMLS_CC)));
 }
 /* }}} */
@@ -1531,6 +1566,9 @@ PHP_METHOD(swffont, getDescent)
    Returns the leading of the font, or 0 if not available */
 PHP_METHOD(swffont, getLeading)
 {
+    if(ZEND_NUM_ARGS() != 0) {
+	    WRONG_PARAM_COUNT;
+	}
 	RETURN_DOUBLE(SWFFont_getLeading(getFont(getThis() TSRMLS_CC)));
 }
 /* }}} */
@@ -2099,9 +2137,9 @@ PHP_METHOD(swfmovie, __construct)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(version);
-		movie = newSWFMovie(Z_LVAL_PP(version));
+		movie = newSWFMovieWithVersion(Z_LVAL_PP(version));
 	} else {
-		movie = newSWFMovie(4); /* default version 4 */
+		movie = newSWFMovie(); /* default version 4 */
 	}
 	
 	ret = zend_list_insert(movie, le_swfmoviep);
@@ -2152,6 +2190,48 @@ PHP_METHOD(swfmovie, labelFrame)
 }
 /* }}} */
 
+/* {{{ proto void swfmovie::namedanchor(string name)
+*/
+PHP_METHOD(swfmovie, namedAnchor)
+{
+	zval **name;
+	
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &name) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_string_ex(name);
+	
+	SWFMovie_namedAnchor(getMovie(getThis() TSRMLS_CC), Z_STRVAL_PP(name));
+}
+/* }}} */
+
+/* {{{ proto void swfmovie::protect([ string pasword])
+*/
+PHP_METHOD(swfmovie, protect)
+{
+	zval **zchar;
+	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
+	
+	switch(ZEND_NUM_ARGS() ) {
+		case 0:
+			SWFMovie_protect(movie, NULL);
+			break;
+		case 1:
+			if( zend_get_parameters_ex(1, &zchar) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_string_ex(zchar);
+			SWFMovie_protect(movie,Z_STRVAL_PP(zchar));
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+}
+/* }}} */
+
+
 /* {{{ proto object swfmovie::add(object SWFBlock) 
 */
 PHP_METHOD(swfmovie, add)
@@ -2187,7 +2267,7 @@ PHP_METHOD(swfmovie, add)
 }
 /* }}} */
 
-/* {{{ proto void swfmovie::labelframe(object SWFBlock)
+/* {{{ proto void swfmovie::remove(object SWFBlock)
 */
 PHP_METHOD(swfmovie, remove)
 {
@@ -2277,6 +2357,10 @@ static void phpStreamOutputMethod(byte b, void * data)
 	php_stream_write((php_stream*)data, &b, 1);
 }
 
+/* I'm not sure about the logic here as Ming_setSWFCompression() should be
+ * used with current Ming. I'll have to add some tests to the test suite to
+ * verify this functionallity before I can say for sure
+ */
 PHP_METHOD(swfmovie, saveToFile)
 {
 	zval **x;
@@ -2700,6 +2784,8 @@ static zend_function_entry swfmovie_functions[] = {
 	PHP_ME(swfmovie, importChar,        NULL, 0)
 	PHP_ME(swfmovie, importFont,        NULL, 0)
 	PHP_ME(swfmovie, addFont,           NULL, 0)
+	PHP_ME(swfmovie, namedAnchor,       NULL, 0)
+	PHP_ME(swfmovie, protect,           NULL, 0)
 #endif
 	{ NULL, NULL, NULL }
 };
@@ -3653,6 +3739,9 @@ PHP_METHOD(swftext, getWideWidth)
    Returns the ascent of the current font at its current size, or 0 if not available */
 PHP_METHOD(swftext, getAscent)
 {
+	if(ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 	RETURN_DOUBLE(SWFText_getAscent(getText(getThis() TSRMLS_CC)));
 }
 /* }}} */
@@ -3661,6 +3750,9 @@ PHP_METHOD(swftext, getAscent)
    Returns the descent of the current font at its current size, or 0 if not available */
 PHP_METHOD(swftext, getDescent)
 {
+	if(ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
   RETURN_DOUBLE(SWFText_getDescent(getText(getThis() TSRMLS_CC)));
 }
 /* }}} */
@@ -3669,6 +3761,9 @@ PHP_METHOD(swftext, getDescent)
    Returns the leading of the current font at its current size, or 0 if not available */
 PHP_METHOD(swftext, getLeading)
 {
+	if(ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
   RETURN_DOUBLE(SWFText_getLeading(getText(getThis() TSRMLS_CC)));
 }
 /* }}} */
@@ -3742,6 +3837,19 @@ static SWFTextField getTextField(zval *id TSRMLS_DC)
 
 /* {{{ proto void swftextfield::setFont(object font)
    Sets the font for this textfield */
+static
+SWFBlock getFontOrFontChar(zval *id TSRMLS_DC)
+{
+	if(Z_OBJCE_P(id) == font_class_entry_ptr) {
+		return (SWFBlock)getFont(id TSRMLS_CC);
+	} else if(Z_OBJCE_P(id) == fontchar_class_entry_ptr) {
+		return (SWFBlock)getFontCharacter(id TSRMLS_CC);
+	} else {
+		php_error(E_ERROR, "called object is not an SWFFont or SWFFontCharacter");
+	}
+	return NULL;
+}
+
 PHP_METHOD(swftextfield, setFont)
 {
 	zval **font;
@@ -3751,7 +3859,7 @@ PHP_METHOD(swftextfield, setFont)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_object_ex(font);
-	SWFTextField_setFont(field, getFont(*font TSRMLS_CC));
+	SWFTextField_setFont(field, getFontOrFontChar(*font TSRMLS_CC));
 }
 /* }}} */
 
@@ -4025,6 +4133,25 @@ PHP_MINFO_FUNCTION(ming)
 /* {{{ todo PHP_MINIT_FUNCTION(ming)
 */
 
+#if PHP_API_VERSION == 20020918
+static php4_fix_funcnames(char *class_name, zend_function_entry *funcs)
+{
+	zend_function_entry *pf = funcs;
+	char *pname;
+
+	while(funcs->fname) {
+		if( strcmp(funcs->fname,"__construct") == 0 ) {
+			pname=strdup(class_name);
+		} else {
+			pname=strdup(funcs->fname);
+		}
+		funcs->fname=pname;
+		while(*pname) { *pname=tolower(*pname);pname++;}
+		funcs++;
+	}
+}
+#endif
+
 /* custom error handler propagates ming errors up to php */
 static void php_ming_error(const char *msg, ...)
 {
@@ -4121,6 +4248,8 @@ PHP_MINIT_FUNCTION(ming)
 	CONSTANT("SWFTEXTFIELD_DRAWBOX",        SWFTEXTFIELD_DRAWBOX);
 	CONSTANT("SWFTEXTFIELD_NOSELECT",       SWFTEXTFIELD_NOSELECT);
 	CONSTANT("SWFTEXTFIELD_HTML",           SWFTEXTFIELD_HTML);
+	CONSTANT("SWFTEXTFIELD_USEFONT",        SWFTEXTFIELD_USEFONT);
+	CONSTANT("SWFTEXTFIELD_AUTOSIZE",       SWFTEXTFIELD_AUTOSIZE);
 
 	/* flags for SWFTextField_align */
 	CONSTANT("SWFTEXTFIELD_ALIGN_LEFT",     SWFTEXTFIELD_ALIGN_LEFT);
@@ -4138,6 +4267,21 @@ PHP_MINIT_FUNCTION(ming)
 	CONSTANT("SWFACTION_KEYDOWN",           SWFACTION_KEYDOWN);
 	CONSTANT("SWFACTION_KEYUP",             SWFACTION_KEYUP);
 	CONSTANT("SWFACTION_DATA",              SWFACTION_DATA);
+
+  /* flags for SWFSound */
+	CONSTANT("SWF_SOUND_NOT_COMPRESSED",    SWF_SOUND_NOT_COMPRESSED);
+	CONSTANT("SWF_SOUND_ADPCM_COMPRESSED",  SWF_SOUND_ADPCM_COMPRESSED);
+	CONSTANT("SWF_SOUND_MP3_COMPRESSED",    SWF_SOUND_MP3_COMPRESSED);
+	CONSTANT("SWF_SOUND_NOT_COMPRESSED_LE", SWF_SOUND_NOT_COMPRESSED_LE);
+	CONSTANT("SWF_SOUND_NELLY_COMPRESSED",  SWF_SOUND_NELLY_COMPRESSED);
+	CONSTANT("SWF_SOUND_5KHZ",              SWF_SOUND_5KHZ);
+	CONSTANT("SWF_SOUND_11KHZ",             SWF_SOUND_11KHZ);
+	CONSTANT("SWF_SOUND_22KHZ",             SWF_SOUND_22KHZ);
+	CONSTANT("SWF_SOUND_44KHZ",             SWF_SOUND_44KHZ);
+	CONSTANT("SWF_SOUND_8BITS",             SWF_SOUND_8BITS);
+	CONSTANT("SWF_SOUND_16BITS",            SWF_SOUND_16BITS);
+	CONSTANT("SWF_SOUND_MONO",              SWF_SOUND_MONO);
+	CONSTANT("SWF_SOUND_STEREO",            SWF_SOUND_STEREO);
 
 	le_swfshapep = zend_register_list_destructors_ex(destroy_SWFShape_resource, NULL, "SWFShape", module_number);
 	le_swffillp = zend_register_list_destructors_ex(destroy_SWFFill_resource, NULL, "SWFFill", module_number);
