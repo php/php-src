@@ -1,3 +1,43 @@
+2006-12-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug39721.phpt:
+      Fixed bug #39721 (Runtime inheritance causes data corruption)
+
+    * tests/bug39721.phpt
+      tests/bug39721.phpt:
+      
+      file bug39721.phpt was initially added on branch PHP_5_2.
+
+2006-12-05  Antony Dovgal  <antony@zend.com>
+
+    * zend_compile.c:
+      remove duplicating line
+
+2006-12-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * Makefile.am
+      Makefile.am
+      Zend.dsp
+      Zend.dsp
+      ZendTS.dsp
+      ZendTS.dsp
+      zend_mm.c
+      zend_mm.c
+      zend_mm.h
+      zend_mm.h:
+      Removed unused zend_mm.*
+
+2006-12-05  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_operators.c
+      zend_operators.h:
+      Merge from 5.2:
+      Improve tolower()-related functions on Windows and VC2005 by caching
+      locale and using
+      tolower_l function.
+
 2006-12-04  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)

@@ -1,3 +1,213 @@
+2006-12-05  Antony Dovgal  <antony@zend.com>
+
+    * ext/filter/config.m4:
+      let PHP_ADD_EXTENSION_DEP() to take care of this
+
+2006-12-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/config.m4:
+      MFB: Fixed bug #39724 (Broken build due to spl/filter usage of pcre
+      extension).
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/config.m4:
+      Fixed bug #39724 (Broken build due to spl/filter usage of pcre extension).
+
+2006-12-05  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/array.c:
+      extract() should convert keys using runtime encoding.
+
+2006-12-05  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/array/bug33382.phpt
+      ext/standard/tests/array/bug33382.phpt
+      ext/standard/tests/array/bug36975.phpt
+      ext/standard/tests/array/bug36975.phpt
+      ext/standard/tests/file/bug35740.phpt
+      ext/standard/tests/file/bug35740.phpt
+      ext/standard/tests/file/bug39538.phpt
+      ext/standard/tests/file/bug39538.phpt
+      ext/standard/tests/general_functions/bug27678.phpt
+      ext/standard/tests/general_functions/bug27678.phpt
+      ext/xmlwriter/tests/bug39504.phpt
+      ext/zlib/tests/bug_34821.phpt
+      ext/zlib/tests/bug_34821.phpt:
+      cosmetic improvements
+
+2006-12-05  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/ming.c
+      ext/ming/ming.c:
+      Remove PHP4.x stuff
+
+    * ext/ming/ming.c
+      ext/ming/ming.c
+      ext/ming/php_ming.h
+      ext/ming/php_ming.h:
+      
+
+2006-12-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug39721.phpt
+      ZendEngine2/tests/bug39721.phpt:
+      
+      file bug39721.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug39721.phpt:
+      Fixed bug #39721 (Runtime inheritance causes data corruption)
+
+2006-12-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/http_fopen_wrapper.c:
+      MFH: nuke redundant zval_ptr_dtor() call
+
+    * ext/standard/http_fopen_wrapper.c:
+      nuke redundant zval_ptr_dtor() call and fix memory corruption/segfault
+
+2006-12-05  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/http.c:
+      Unicode support in http_build_query().
+
+2006-12-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo/tests/bug_36798.phpt:
+      MFB: Fixed bug #36798 (Error parsing named parameters with queries
+      containing high-ascii chars).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo/tests/bug_36798.phpt
+      ext/pdo/tests/bug_36798.phpt:
+      Fixed bug #36798 (Error parsing named parameters with queries containing
+      high-ascii chars).
+
+    * (PHP_5_2)
+      ext/dba/config.m4:
+      Revert previous patch and it breaks builds with built-in cdb lib
+
+2006-12-05  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/pdo/tests/bug_39656.phpt:
+      MFB: fix test
+
+    * (PHP_5_2)
+      ext/pdo/tests/bug_39656.phpt:
+      Fix test
+
+2006-12-05  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/file.c:
+      don't pass negative maxchars to php_stream_get_line_ex()
+
+    * ZendEngine2/zend_compile.c:
+      remove duplicating line
+
+2006-12-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/xsl/xsltprocessor.c:
+      MFB: fix bug #39625 (Apache crashes on importStylesheet call)
+
+    * (PHP_5_2)
+      ext/xsl/xsltprocessor.c:
+      fix bug #39625 (Apache crashes on importStylesheet call)
+
+2006-12-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed FastCGI impersonation for persistent connections on Windows
+
+    * configure.in
+      configure.in
+      ZendEngine2/Makefile.am
+      ZendEngine2/Makefile.am
+      ZendEngine2/Zend.dsp
+      ZendEngine2/Zend.dsp
+      ZendEngine2/ZendTS.dsp
+      ZendEngine2/ZendTS.dsp
+      ZendEngine2/zend_mm.c
+      ZendEngine2/zend_mm.c
+      ZendEngine2/zend_mm.h
+      ZendEngine2/zend_mm.h
+      win32/build/config.w32
+      win32/build/config.w32:
+      Removed unused zend_mm.*
+
+2006-12-05  Sara Golemon  <sara@golemon.com>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+      Add str_getcsv() and fix a couple cases in recent fgetcsv()
+      reimplementation
+
+    * ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/tests/file/bug12556.phpt
+      ext/standard/tests/file/fgetcsv.phpt:
+      Unicode upgrade for fgetcsv()
+
+2006-12-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ext/standard/basic_functions.c
+      ext/standard/string.c
+      main/main.c:
+      Merge from 5.2:
+      Improve tolower()-related functions on Windows and VC2005 by caching
+      locale and using
+      tolower_l function.
+
+2006-12-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/xp_ssl.c:
+      MFB: Fixed bug #39571 (timeout ssl:// connections).
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/xp_ssl.c:
+      Fixed bug #39571 (timeout ssl:// connections).
+
+2006-12-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - invalid filter
+
+    * (PHP_5_2)
+      ext/filter/filter.c
+      ext/filter/filter_private.h
+      ext/filter/tests/010.phpt
+      ext/filter/tests/039.phpt:
+      - MFH: invalid filter id should not return unsafe values
+
+    * ext/filter/filter.c
+      ext/filter/filter_private.h
+      ext/filter/tests/010.phpt
+      ext/filter/tests/039.phpt:
+      - invalid filter id should not return unsafe values
+
 2006-12-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/filter/tests/008.phpt
