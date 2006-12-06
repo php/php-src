@@ -6,13 +6,13 @@ function test($str) {
 	$res = md5(base64_decode(base64_encode($str)))."\n";
 	return $res;
 } 
-echo test("");
-echo test("a");
-echo test("abc");
-echo test("message digest");
-echo test("abcdefghijklmnopqrstuvwxyz");
-echo test("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-echo test("12345678901234567890123456789012345678901234567890123456789012345678901234567890");
+echo test(b"");
+echo test(b"a");
+echo test(b"abc");
+echo test(b"message digest");
+echo test(b"abcdefghijklmnopqrstuvwxyz");
+echo test(b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+echo test(b"12345678901234567890123456789012345678901234567890123456789012345678901234567890");
 ?>
 --EXPECT--
 d41d8cd98f00b204e9800998ecf8427e

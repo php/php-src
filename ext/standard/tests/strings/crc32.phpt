@@ -2,7 +2,7 @@
 crc32() function
 --FILE--
 <?php
-$input = array("foo", "bar", "baz", "grldsajkopallkjasd");
+$input = array(b"foo", b"bar", b"baz", b"grldsajkopallkjasd");
 foreach($input AS $i) {
 	printf("%u\n", crc32($i));
 }

@@ -29,7 +29,8 @@ foreach( $strings as $string )
 Året
 Året ßen
 Året ßen
---UEXPECT--
+--UEXPECTF--
+Strict Standards: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 SSen
 Ssen
 Året

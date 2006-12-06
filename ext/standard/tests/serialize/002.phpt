@@ -46,11 +46,11 @@ object(stdClass)#%d (0) {
 bool(false)
 bool(true)
 int(823)
-unicode(0) ""
-unicode(3) "foo"
+string(0) ""
+string(3) "foo"
 array(1) {
   [0]=>
-  unicode(2) "12"
+  string(2) "12"
 }
 array(2) {
   [0]=>
@@ -62,11 +62,11 @@ array(2) {
 }
 array(3) {
   [0]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [1]=>
-  unicode(3) "bar"
+  string(3) "bar"
   [2]=>
-  unicode(3) "baz"
+  string(3) "baz"
 }
 object(stdClass)#%d (0) {
 }

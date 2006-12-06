@@ -9,7 +9,7 @@ strrev() function
 		$str .= chr($i++);
 	}
 	
-	var_dump(md5(strrev($str)));
+	var_dump(md5((binary)strrev($str)));
 	var_dump(strrev(NULL));
 	var_dump(strrev(""));
 ?>
