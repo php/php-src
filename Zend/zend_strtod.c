@@ -442,6 +442,7 @@ ZEND_API int zend_startup_strtod(void) /* {{{ */
 /* }}} */
 ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 {
+	destroy_freelist();
 #ifdef ZTS
 	tsrm_mutex_free(dtoa_mutex);
 	dtoa_mutex = NULL;
@@ -449,7 +450,6 @@ ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 	tsrm_mutex_free(pow5mult_mutex);
 	pow5mult_mutex = NULL;
 #endif
-	destroy_freelist();
 	return 1;
 }
 /* }}} */
