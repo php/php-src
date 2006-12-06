@@ -18,6 +18,210 @@
 
 /* $Id$ */
 
+
+#include "php.h"
+
+#include <zend_strtod.h>
+
+#include <stddef.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <sys/types.h>
+#include <stdarg.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
+#ifdef HAVE_LOCALE_H
+#include <locale.h>
+#endif
+
+/*
+ * Copyright (c) 2002, 2006 Todd C. Miller <Todd.Miller@courtesan.com>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * Sponsored in part by the Defense Advanced Research Projects
+ * Agency (DARPA) and Air Force Research Laboratory, Air Force
+ * Materiel Command, USAF, under agreement number F39502-99-1-0512.
+ */
+
+static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, int pad)
+{
+	register char *s = NULL;
+	char *p, *rve, c;
+	size_t siz;
+
+	if (ndigit < 0) {
+		siz = -ndigit + 1;
+	} else {
+		siz = ndigit + 1;
+	}
+
+	/* __dtoa() doesn't allocate space for 0 so we do it by hand */
+	if (value == 0.0) {
+		*decpt = 1 - fmode; /* 1 for 'e', 0 for 'f' */
+		*sign = 0;
+		if ((rve = s = (char *)malloc(ndigit?siz:2)) == NULL)
+			return(NULL);
+		*rve++ = '0';
+		*rve = '\0';
+		if (!ndigit) {
+			return(s);
+		}
+	} else {
+		p = zend_dtoa(value, fmode + 2, ndigit, decpt, sign, &rve);
+		if (*decpt == 9999) {
+			/* Infinity or Nan, convert to inf or nan like printf */
+			*decpt = 0;
+			c = *p;
+			zend_freedtoa(p);
+			return(c == 'I' ? "inf" : "nan");
+		}
+		/* Make a local copy and adjust rve to be in terms of s */
+		if (pad && fmode)
+			siz += *decpt;
+		if ((s = (char *)malloc(siz+1)) == NULL) {
+			zend_freedtoa(p);
+			return(NULL);
+		}
+		(void) strlcpy(s, p, siz);
+		rve = s + (rve - p);
+		zend_freedtoa(p);
+	}
+
+	/* Add trailing zeros */
+	if (pad) {
+		siz -= rve - s;
+		while (--siz)
+			*rve++ = '0';
+		*rve = '\0';
+	}
+
+	return(s);
+}
+
+char *bsd_ecvt(double value, int ndigit, int *decpt, int *sign)
+{
+	return(__cvt(value, ndigit, decpt, sign, 0, 1));
+}
+
+char *bsd_fcvt(double value, int ndigit, int *decpt, int *sign)
+{
+    return(__cvt(value, ndigit, decpt, sign, 1, 1));
+}
+
+char *bsd_gcvt(double value, int ndigit, char *buf)
+{
+	char *digits, *dst, *src;
+	int i, decpt, sign;
+	struct lconv *lconv;
+
+	lconv = localeconv();
+
+	digits = zend_dtoa(value, 2, ndigit, &decpt, &sign, NULL);
+	if (decpt == 9999) {
+		/*
+		 * Infinity or NaN, convert to inf or nan with sign.
+		 * We assume the buffer is at least ndigit long.
+		 */
+		snprintf(buf, ndigit + 1, "%s%s", sign ? "-" : "",
+				*digits == 'I' ? "inf" : "nan");
+		zend_freedtoa(digits);
+		return (buf);
+	}
+
+	dst = buf;
+	if (sign)
+		*dst++ = '-';
+
+	for (i = 0; i < ndigit && digits[i] != '\0'; i++);
+	
+	if ((decpt >= 0 && decpt - i > 4)
+			|| (decpt < 0 && decpt < -3)) {     /* use E-style */
+		/* exponential format (e.g. 1.2345e+13) */
+		if (--decpt < 0) {
+			sign = 1;
+			decpt = -decpt;
+		} else
+			sign = 0;
+		src = digits;
+		*dst++ = *src++;
+		*dst++ = *lconv->decimal_point;
+		if (*src == '\0') {
+			*dst++ = '0';
+		} else {
+			do {
+				*dst++ = *src++;
+			} while (*src != '\0');
+		}
+		*dst++ = 'e';
+		if (sign)
+			*dst++ = '-';
+		else
+			*dst++ = '+';
+		if (decpt < 10) {
+			*dst++ = '0' + decpt;
+			*dst = '\0';
+		} else {
+			/* XXX - optimize */
+			for (sign = decpt, i = 0; (sign /= 10) != 0; i++)
+				continue;
+			dst[i + 1] = '\0';
+			while (decpt != 0) {
+				dst[i--] = '0' + decpt % 10;
+				decpt /= 10;
+			}
+		}
+	} else if (decpt < 0) {
+		/* standard format 0. */
+		*dst++ = '0';   /* zero before decimal point */
+		*dst++ = *lconv->decimal_point;
+		do {
+			*dst++ = '0';
+		} while (++decpt < 0);
+		src = digits;
+		while (*src != '\0') {
+			*dst++ = *src++;
+		}
+		*dst = '\0';
+	} else {
+		/* standard format */
+		for (i = 0, src = digits; i < decpt; i++) {
+			if (*src != '\0')
+				*dst++ = *src++;
+			else
+				*dst++ = '0';
+		}
+		if (*src != '\0') {
+			if (src == digits)
+				*dst++ = '0';   /* zero before decimal point */
+			*dst++ = *lconv->decimal_point;
+			for (i = decpt; digits[i] != '\0'; i++) {
+                *dst++ = digits[i];
+            }
+        }
+        *dst = '\0';
+    }
+    zend_freedtoa(digits);
+    return (buf);
+}
+
+
 /* ====================================================================
  * Copyright (c) 1995-1998 The Apache Group.  All rights reserved.
  *
@@ -72,20 +276,6 @@
  * SIO stdio-replacement strx_* functions by Panos Tsirigotis
  * <panos@alumni.cs.colorado.edu> for xinetd.
  */
-
-#include "php.h"
-
-#include <stddef.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/types.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
 
 #define FALSE			0
 #define TRUE			1
@@ -171,14 +361,17 @@ char * ap_php_conv_fp(register char format, register double num,
 		 boolean_e add_dp, int precision, bool_int * is_negative, char *buf, int *len)
 {
 	register char *s = buf;
-	register char *p;
+	register char *p, *p_orig;
 	int decimal_point;
-	char buf1[NDIG];
+
+	if (precision >= NDIG - 1) {
+		precision = NDIG - 2;
+	}
 
 	if (format == 'f')
-		p = ap_php_fcvt(num, precision, &decimal_point, is_negative, buf1);
+		p_orig = p = bsd_fcvt(num, precision, &decimal_point, is_negative);
 	else						/* either e or E format */
-		p = ap_php_ecvt(num, precision + 1, &decimal_point, is_negative, buf1);
+		p_orig = p = bsd_ecvt(num, precision + 1, &decimal_point, is_negative);
 
 	/*
 	 * Check for Infinity and NaN
@@ -187,17 +380,20 @@ char * ap_php_conv_fp(register char format, register double num,
 		*len = strlen(p);
 		memcpy(buf, p, *len + 1);
 		*is_negative = FALSE;
+		free(p_orig);
 		return (buf);
 	}
 	if (format == 'f') {
 		if (decimal_point <= 0) {
-			*s++ = '0';
-			if (precision > 0) {
-				*s++ = '.';
-				while (decimal_point++ < 0)
-					*s++ = '0';
-			} else if (add_dp) {
-				*s++ = '.';
+			if (num != 0 || precision > 0) {
+				*s++ = '0';
+				if (precision > 0) {
+					*s++ = '.';
+					while (decimal_point++ < 0)
+						*s++ = '0';
+				} else if (add_dp) {
+					*s++ = '.';
+				}
 			}
 		} else {
 			int addz = decimal_point >= NDIG ? decimal_point - NDIG + 1 : 0;
@@ -239,20 +435,17 @@ char * ap_php_conv_fp(register char format, register double num,
 			/*
 			 * Make sure the exponent has at least 2 digits
 			 */
-			if (t_len == 1)
-				*s++ = '0';
 			while (t_len--)
 				*s++ = *p++;
 		} else {
 			*s++ = '+';
 			*s++ = '0';
-			*s++ = '0';
 		}
 	}
 	*len = s - buf;
+	free(p_orig);
 	return (buf);
 }
-
 
 /*
  * Convert num to a base X number where X is a power of 2. nbits determines X.
@@ -283,189 +476,6 @@ char * ap_php_conv_p2(register u_wide_int num, register int nbits,
 	return (p);
 }
 
-/*
- * cvt.c - IEEE floating point formatting routines for FreeBSD
- * from GNU libc-4.6.27
- */
-
-/*
- *    ap_php_ecvt converts to decimal
- *      the number of digits is specified by ndigit
- *      decpt is set to the position of the decimal point
- *      sign is set to 0 for positive, 1 for negative
- */
-
-
-char * ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
-{
-	register int r2;
-	int mvl;
-	double fi, fj;
-	register char *p, *p1;
-
-	if (ndigits >= NDIG - 1)
-		ndigits = NDIG - 2;
-	r2 = 0;
-	*sign = 0;
-	p = &buf[0];
-	if (arg < 0) {
-		*sign = 1;
-		arg = -arg;
-	}
-	arg = modf(arg, &fi);
-	p1 = &buf[NDIG];
-	/*
-	 * Do integer part
-	 */
-	if (fi != 0) {
-		while (fi != 0) {
-			fj = modf(fi / 10, &fi);
-			if (p1 <= &buf[0]) {
-				mvl = NDIG - ndigits;
-				if (ndigits > 0) {
-					memmove(&buf[mvl], &buf[0], NDIG-mvl-1);
-				}
-				p1 += mvl;
-			}
-			*--p1 = (int) ((fj + .03) * 10) + '0';
-			r2++;
-		}
-		while (p1 < &buf[NDIG]) {
-			*p++ = *p1++;
-		}
-	} else if (arg > 0) {
-		while ((fj = arg * 10) < 1) {
-			if (!eflag && (r2 * -1) < ndigits) {
-				break;
-			}
-			arg = fj;
-			r2--;
-		}
-	}
-	p1 = &buf[ndigits];
-	if (eflag == 0)
-		p1 += r2;
-	*decpt = r2;
-	if (p1 < &buf[0]) {
-		buf[0] = '\0';
-		return (buf);
-	}
-	if (p <= p1 && p < &buf[NDIG]) {
-		arg = modf(arg * 10, &fj);
-		if ((int)fj==10) {
-			*p++ = '1';
-			fj = 0;
-			*decpt = ++r2;
-		}
-		while (p <= p1 && p < &buf[NDIG]) {
-			*p++ = (int) fj + '0';
-			arg = modf(arg * 10, &fj);
-		}
-	}
-	if (p1 >= &buf[NDIG]) {
-		buf[NDIG - 1] = '\0';
-		return (buf);
-	}
-	p = p1;
-	*p1 += 5;
-	while (*p1 > '9') {
-		*p1 = '0';
-		if (p1 > buf)
-			++ * --p1;
-		else {
-			*p1 = '1';
-			(*decpt)++;
-			if (eflag == 0) {
-				if (p > buf)
-					*p = '0';
-				p++;
-			}
-		}
-	}
-	*p = '\0';
-	return (buf);
-}
-
-char * ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
-{
-	return (ap_php_cvt(arg, ndigits, decpt, sign, 1, buf));
-}
-
-char * ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
-{
-	return (ap_php_cvt(arg, ndigits, decpt, sign, 0, buf));
-}
-
-/*
- * ap_php_gcvt  - Floating output conversion to
- * minimal length string
- */
-
-char * ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform)
-{
-	int sign, decpt;
-	register char *p1, *p2;
-	register int i;
-	char buf1[NDIG];
-
-	if (ndigit >= NDIG - 1) {
-		ndigit = NDIG - 2;	
-	}
-
-	p1 = ap_php_ecvt(number, ndigit, &decpt, &sign, buf1);
-	p2 = buf;
-	if (sign)
-		*p2++ = '-';
-	for (i = ndigit - 1; i > 0 && p1[i] == '0'; i--)
-		ndigit--;
-	if ((decpt >= 0 && decpt - ndigit > 4)
-		|| (decpt < 0 && decpt < -3)) {		/* use E-style */
-		decpt--;
-		*p2++ = *p1++;
-		*p2++ = '.';
-		for (i = 1; i < ndigit; i++)
-			*p2++ = *p1++;
-		if (*(p2 - 1) == '.') {
-			*p2++ = '0';
-		}	
-		*p2++ = 'e';
-		if (decpt < 0) {
-			decpt = -decpt;
-			*p2++ = '-';
-		} else
-			*p2++ = '+';
-		if (decpt / 100 > 0)
-			*p2++ = decpt / 100 + '0';
-		if (decpt / 10 > 0)
-			*p2++ = (decpt % 100) / 10 + '0';
-		*p2++ = decpt % 10 + '0';
-	} else {
-		if (decpt <= 0) {
-			if (*p1 != '0') {
-				*p2++ = '0';
-				*p2++ = '.';
-			}
-			while (decpt < 0) {
-				decpt++;
-				*p2++ = '0';
-			}
-		}
-		for (i = 1; i <= ndigit; i++) {
-			*p2++ = *p1++;
-			if (i == decpt)
-				*p2++ = '.';
-		}
-		if (ndigit < decpt) {
-			while (ndigit++ < decpt)
-				*p2++ = '0';
-			*p2++ = '.';
-		}
-	}
-	if (p2[-1] == '.' && !altform)
-		p2--;
-	*p2 = '\0';
-	return (buf);
-}
 
 /*
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
@@ -910,7 +920,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 					pad_char = ' ';
 					break;
 
-
+				
 				case 'f':
 				case 'e':
 				case 'E':
@@ -980,8 +990,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-					s = ap_php_gcvt(fp_num, precision, &num_buf[1],
-							alternate_form);
+					s = bsd_gcvt(fp_num, precision, &num_buf[1]);
 					if (*s == '-')
 						prefix_char = *s++;
 					else if (print_sign)

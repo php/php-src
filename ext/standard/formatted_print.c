@@ -51,110 +51,6 @@ static char hexchars[] = "0123456789abcdef";
 static char HEXCHARS[] = "0123456789ABCDEF";
 
 
-/*
- * cvt.c - IEEE floating point formatting routines for FreeBSD
- * from GNU libc-4.6.27
- */
-
-/*
- *    php_convert_to_decimal converts to decimal
- *      the number of digits is specified by ndigit
- *      decpt is set to the position of the decimal point
- *      sign is set to 0 for positive, 1 for negative
- */
-static char *php_convert_to_decimal(double arg, int ndigits, int *decpt, int *sign, int eflag)
-{
-	register int r2;
-	int mvl;
-	double fi, fj;
-	register char *p, *p1;
-	/*THREADX*/
-#ifndef THREAD_SAFE
-	static char cvt_buf[NDIG];
-#endif
-
-	if (ndigits >= NDIG - 1)
-		ndigits = NDIG - 2;
-	r2 = 0;
-	*sign = 0;
-	p = &cvt_buf[0];
-	if (arg < 0) {
-		*sign = 1;
-		arg = -arg;
-	}
-	arg = modf(arg, &fi);
-	p1 = &cvt_buf[NDIG];
-	/*
-	 * Do integer part
-	 */
-	if (fi != 0) {
-		p1 = &cvt_buf[NDIG];
-		while (fi != 0) {
-			fj = modf(fi / 10, &fi);
-			if (p1 <= &cvt_buf[0]) {
-				mvl = NDIG - ndigits;
-				memmove(&cvt_buf[mvl], &cvt_buf[0], NDIG-mvl-1);
-				p1 += mvl;
-			}
-			*--p1 = (int) ((fj + .03) * 10) + '0';
-			r2++;
-		}
-		while (p1 < &cvt_buf[NDIG])
-			*p++ = *p1++;
-	} else if (arg > 0) {
-		while ((fj = arg * 10) < 1) {
-			if (!eflag && (r2 * -1) < ndigits) {
-				break;
-			}
-			arg = fj;
-			r2--;
-		}
-	}
-	p1 = &cvt_buf[ndigits];
-	if (eflag == 0)
-		p1 += r2;
-	*decpt = r2;
-	if (p1 < &cvt_buf[0]) {
-		cvt_buf[0] = '\0';
-		return (cvt_buf);
-	}
-	if (p <= p1 && p < &cvt_buf[NDIG]) {
-		arg = modf(arg * 10, &fj);
-		if ((int)fj==10) {
-			*p++ = '1';
-			fj = 0;
-			*decpt = ++r2;
-		}
-		while (p <= p1 && p < &cvt_buf[NDIG]) {
-		*p++ = (int) fj + '0';
-			arg = modf(arg * 10, &fj);
-		}
-	}
-	if (p1 >= &cvt_buf[NDIG]) {
-		cvt_buf[NDIG - 1] = '\0';
-		return (cvt_buf);
-	}
-	p = p1;
-	*p1 += 5;
-	while (*p1 > '9') {
-		*p1 = '0';
-		if (p1 > cvt_buf)
-			++ * --p1;
-		else {
-			*p1 = '1';
-			(*decpt)++;
-			if (eflag == 0) {
-				if (p > cvt_buf)
-					*p = '0';
-				p++;
-			}
-		}
-	}
-	*p = '\0';
-	return (cvt_buf);
-}
-
-
 inline static void
 php_sprintf_appendchar(char **buffer, int *pos, int *size, char add TSRMLS_DC)
 {
@@ -299,19 +195,10 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 						 int always_sign
 						 TSRMLS_DC)
 {
-	char numbuf[NUM_BUF_SIZE];
-	char *cvt;
-	register int i = 0, j = 0;
-	int sign, decpt, cvt_len;
-	char decimal_point = '.';
-#ifdef HAVE_LOCALE_H
-	struct lconv lc;
-	char locale_decimal_point;
-	localeconv_r(&lc);
-	locale_decimal_point = (lc.decimal_point)[0];
-#else
-	char locale_decimal_point = '.';
-#endif
+	char num_buf[NUM_BUF_SIZE];
+	char *s, *q;
+	int s_len;
+	int is_negative;
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
 				  *buffer, pos, size, number, width, padding, alignment, fmt));
@@ -322,92 +209,66 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	}
 	
 	if (zend_isnan(number)) {
-		sign = (number<0);
+		is_negative = (number<0);
 		php_sprintf_appendstring(buffer, pos, size, "NaN", 3, 0, padding,
-								 alignment, precision, sign, 0, always_sign);
+								 alignment, precision, is_negative, 0, always_sign);
 		return;
 	}
 
 	if (zend_isinf(number)) {
-		sign = (number<0);
+		is_negative = (number<0);
 		php_sprintf_appendstring(buffer, pos, size, "INF", 3, 0, padding,
-								 alignment, precision, sign, 0, always_sign);
+								 alignment, precision, is_negative, 0, always_sign);
 		return;
 	}
 
-	cvt = php_convert_to_decimal(number, precision, &decpt, &sign, (fmt == 'e'));
-	cvt_len = strlen(cvt);
+	switch (fmt) {			
+		case 'e':
+			if (precision) {
+				precision--;
+			}
+		case 'E':
+		case 'f':
+			s = ap_php_conv_fp(fmt, number, 0, precision,
+						&is_negative, &num_buf[1], &s_len);
+			if (is_negative) {
+				num_buf[0] = '-';
+				s = num_buf;
+				s_len++;
+			} else if (always_sign) {
+				num_buf[0] = '+';
+				s = num_buf;
+				s_len++;
+			}
+			break;
 
-	if (sign) {
-		numbuf[i++] = '-';
-	} else if (always_sign) {
-		numbuf[i++] = '+';
+		case 'g':
+		case 'G':
+			if (precision == 0)
+				precision = 1;
+			/*
+			 * * We use &num_buf[ 1 ], so that we have room for the sign
+			 */
+			s = bsd_gcvt(number, precision, &num_buf[1]);
+			is_negative = 0;
+			if (*s == '-') {
+				is_negative = 1;
+				s = &num_buf[1];
+			} else if (always_sign) {
+				num_buf[0] = '+';
+				s = num_buf;
+			}
+
+			s_len = strlen(s);
+
+			if (fmt == 'G' && (q = strchr(s, 'e')) != NULL) {
+				*q = 'E';
+			}
+			break;
 	}
 
-	if (fmt == 'f' || fmt == 'F') {
-		if (decpt <= 0) {
-			numbuf[i++] = '0';
-			if (precision > 0) {
-				int k = precision;
-				numbuf[i++] = fmt == 'F' ? decimal_point : locale_decimal_point;
-				while ((decpt++ < 0) && k--) {
-					numbuf[i++] = '0';
-				}
-			}
-		} else {
-			while (decpt-- > 0) {
-				numbuf[i++] = j < cvt_len ? cvt[j++] : '0';
-			}
-			if (precision > 0) {
-				numbuf[i++] = fmt == 'F' ? decimal_point : locale_decimal_point;
-				while (precision-- > 0) {
-					numbuf[i++] = j < cvt_len ? cvt[j++] : '0';
-				}
-			}
-		}
-	} else if (fmt == 'e' || fmt == 'E') {
-		char *exp_p;
-		int dec2;
-		
-		decpt--;
-		
-		numbuf[i++] = cvt[j++];
-		numbuf[i++] = decimal_point;	
-
-		if (precision > 0) {
-			int k = precision;
-				
-			while (k-- && cvt[j]) {
-				numbuf[i++] = cvt[j++];
-			}
-		} else {
-			numbuf[i++] = '0';
-		}
-		
-		numbuf[i++] = fmt;
-		exp_p = php_convert_to_decimal(decpt, 0, &dec2, &sign, 0);
-		numbuf[i++] = sign ? '-' : '+';
-		if (*exp_p) { 
-			while (*exp_p) {
-				numbuf[i++] = *(exp_p++);
-			}
-		} else {
-			numbuf[i++] = '0';
-		}
-	} else {
-		numbuf[i++] = cvt[j++];
-		if (precision > 0)
-			numbuf[i++] = decimal_point;
-	}
-
-	while (cvt[j]) {
-		numbuf[i++] = cvt[j++];
-	}
-
-	numbuf[i] = '\0';
-
-	php_sprintf_appendstring(buffer, pos, size, numbuf, width, 0, padding,
-							 alignment, i, sign, 0, always_sign);
+	php_sprintf_appendstring(buffer, pos, size, s, width, 0, padding,
+							 alignment, s_len, is_negative, 0, always_sign);
 }
 
 
@@ -690,7 +551,10 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 										  width, padding, alignment);
 					break;
 
+				case 'g':
+				case 'G':
 				case 'e':
+				case 'E':
 				case 'f':
 				case 'F':
 					/* XXX not done */
