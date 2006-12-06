@@ -76,7 +76,6 @@
  * SIO stdio-replacement strx_* functions by Panos Tsirigotis
  * <panos@alumni.cs.colorado.edu> for xinetd.
  */
-
 #include "php.h"
 
 #include <stddef.h>
@@ -549,7 +548,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 						s_len = 3;
 					} else {
 						s = ap_php_conv_fp(*fmt, fp_num, alternate_form,
-									(adjust_precision == NO) ? FLOAT_DIGITS : precision,
+						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
 									&is_negative, &num_buf[1], &s_len);
 						if (is_negative)
 							prefix_char = '-';
@@ -596,8 +595,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-					s = ap_php_gcvt(fp_num, precision, &num_buf[1],
-							alternate_form);
+					s = bsd_gcvt(fp_num, precision, &num_buf[1]);
 					if (*s == '-')
 						prefix_char = *s++;
 					else if (print_sign)
@@ -747,7 +745,6 @@ PHPAPI int spprintf(char **pbuf, size_t max_len, const char *format, ...)
 	va_end(ap);
 	return (cc);
 }
-
 /*
  * Local variables:
  * tab-width: 4

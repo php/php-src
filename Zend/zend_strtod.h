@@ -25,7 +25,11 @@
 #include <zend.h>
 
 BEGIN_EXTERN_C()
+ZEND_API void zend_freedtoa(char *s);
+ZEND_API char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign, char **rve);
 ZEND_API double zend_strtod(const char *s00, char **se);
+ZEND_API int zend_startup_strtod(void);
+ZEND_API int zend_shutdown_strtod(void);
 END_EXTERN_C()
 
 #endif

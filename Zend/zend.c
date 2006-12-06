@@ -571,6 +571,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	fpsetmask(0);
 #endif
 
+	zend_startup_strtod();
 	zend_startup_extensions_mechanism();
 
 	/* Set up utility functions and values */
@@ -729,6 +730,7 @@ void zend_shutdown(TSRMLS_D)
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
 	free(GLOBAL_CONSTANTS_TABLE);
 
+	zend_shutdown_strtod();
 #ifdef ZTS
 	GLOBAL_FUNCTION_TABLE = NULL;
 	GLOBAL_CLASS_TABLE = NULL;
