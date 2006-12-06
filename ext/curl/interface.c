@@ -957,14 +957,17 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	error = call_user_function(EG(function_table), NULL, func, retval, 2, argv TSRMLS_CC);
 	if (error == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_PASSWDFUNCTION");
-	} else if (Z_TYPE_P(retval) == IS_STRING) {
+	} else if (Z_TYPE_P(retval) == IS_STRING || Z_TYPE_(retval) == IS_UNICODE) {
+		if (Z_TYPE_(retval) == IS_UNICODE) {
+			convert_to_string_ex(retval);
+		}
 		if (Z_STRLEN_P(retval) > buflen) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Returned password is too long for libcurl to handle");
 		} else {
 			strlcpy(buf, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "User handler '%s' did not return a string", Z_STRVAL_P(func));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "User handler '%v' did not return a string", func);
 	}
 	
 	zval_ptr_dtor(&argv[0]);
@@ -1426,12 +1429,13 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				struct HttpPost  *first = NULL;
 				struct HttpPost  *last  = NULL;
 				char             *postval;
-				char             *string_key = NULL;
-				ulong             num_key;
-				uint              string_key_len;
+				zstr             string_key;
+				char		 *key;
+				ulong		 num_key;
+				uint             string_key_len;
 
 				postfields = HASH_OF(*zvalue);
-				if (! postfields) {
+				if (!postfields) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't get HashTable in CURLOPT_POSTFIELDS"); 
 					RETVAL_FALSE;
 					return 1;
@@ -1449,6 +1453,23 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				
 					postval = Z_STRVAL_PP(current);
 
+					switch (zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL)) {
+						case HASH_KEY_IS_UNICODE:
+							key = zend_unicode_to_ascii(string_key.u, string_key_len TSRMLS_CC);
+							if (!key) {
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received"); 
+								continue;
+							}
+							break;
+						case HASH_KEY_IS_STRING:
+							key = string_key.s;
+							break;
+						case HASH_KEY_IS_LONG:
+							key = NULL;
+							string_key_len = 0;
+							break;
+					}
+
 					/* The arguments after _NAMELENGTH and _CONTENTSLENGTH
 					 * must be explicitly cast to long in curl_formadd
 					 * use since curl needs a long not an int. */
@@ -1460,13 +1481,13 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 							return 1;
 						}
 						error = curl_formadd(&first, &last, 
-											 CURLFORM_COPYNAME, string_key,
+											 CURLFORM_COPYNAME, key,
 											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
 											 CURLFORM_FILE, postval, 
 											 CURLFORM_END);
 					} else {
 						error = curl_formadd(&first, &last, 
-											 CURLFORM_COPYNAME, string_key,
+											 CURLFORM_COPYNAME, key,
 											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
 											 CURLFORM_COPYCONTENTS, postval, 
 											 CURLFORM_CONTENTSLENGTH, (long)Z_STRLEN_PP(current),
@@ -1579,7 +1600,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 	}
 }
 
-/* {{{ proto bool curl_setopt(resource ch, int option, mixed value)
+/* {{{ proto bool curl_setopt(resource ch, int option, mixed value) U
    Set an option for a cURL transfer */
 PHP_FUNCTION(curl_setopt)
 {
@@ -1601,7 +1622,7 @@ PHP_FUNCTION(curl_setopt)
 }
 /* }}} */
 
-/* {{{ proto bool curl_setopt_array(resource ch, array options)
+/* {{{ proto bool curl_setopt_array(resource ch, array options) U
    Set an array of option for a cURL transfer */
 PHP_FUNCTION(curl_setopt_array)
 {
