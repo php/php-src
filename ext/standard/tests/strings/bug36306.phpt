@@ -9,7 +9,7 @@ Bug #36306 crc32() 64bit
    Have to find some small strings to truely reproduce
    the problem, this example being not a problem
 */
-echo dechex(crc32("platform independant")) . "\n";
+echo dechex(crc32(b"platform independant")) . "\n";
 ?>
 --EXPECT--
 ccd9fe66

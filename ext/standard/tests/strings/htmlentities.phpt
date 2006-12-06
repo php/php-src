@@ -19,3 +19,9 @@ echo html_entity_decode($ent_encoded);
 &lt;&gt;&quot;&amp;&aring;&Auml;
 <>"&åÄ
 <>"&åÄ
+--UEXPECTF--
+Strict Standards: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+&lt;&gt;&quot;&amp;åÄ
+&lt;&gt;&quot;&amp;&aring;&Auml;
+<>"&åÄ
+<>"&åÄ
