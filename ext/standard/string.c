@@ -6742,7 +6742,7 @@ Parse a CSV string into an array */
 PHP_FUNCTION(str_getcsv)
 {
 	zend_uchar str_type, delim_type = IS_STRING, enc_type = IS_STRING, esc_type = IS_STRING;
-	char *str, *delim = ",", *enc = "\"", *esc = "\\";
+	zstr str, delim = ZSTR(","), enc = ZSTR("\""), esc = ZSTR("\\");
 	int str_len, delim_len = 1, enc_len = 1, esc_len = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|TTT",
@@ -6756,23 +6756,35 @@ PHP_FUNCTION(str_getcsv)
 	if (str_type == IS_UNICODE) {
 		UChar udelim = ',', uenc = '"', uesc = '\\';
 
-		/* Non-passed params would need to be upconverted, but we can cheat with some local declarations */
+		/* When a unicode string is passed for the main argument,
+		 * the 'T' specifiers will atuomatically align any remaining
+		 * arguments that are actually passed to be Unicode as well.
+		 *
+		 * However, since they are optional, they may have reached
+		 * this point still in IS_STRING form (because they wern't passed).
+		 *
+		 * The "clean" way to handle this would be to use zend_string_to_unicode()
+		 * to convert the binary defaults to their unicode counterparts.
+		 *
+		 * However, since these are simple fixed constants, it's cheaper
+		 * to declare them as UChars locally and point at these versions.
+		 */
 		if (delim_type == IS_STRING) {
-			delim = (char*)&udelim;
+			delim.u = &udelim;
 			delim_len = 1;
 		}
 		if (enc_type == IS_STRING) {
-			enc = (char*)&uenc;
+			enc.u = &uenc;
 			enc_len = 1;
 		}
 		if (esc_type == IS_STRING) {
-			esc = (char*)&uesc;
+			esc.u = &uesc;
 			esc_len = 1;
 		}
 
-		php_u_fgetcsv(NULL, (UChar*)delim, delim_len, (UChar*)enc, enc_len, (UChar*)esc, esc_len, (UChar*)str, str_len, return_value TSRMLS_CC);
+		php_u_fgetcsv(NULL, delim.u, delim_len, enc.u, enc_len, esc.u, esc_len, str.u, str_len, return_value TSRMLS_CC);
 	} else {
-		php_fgetcsv_ex(NULL, delim, delim_len, enc, enc_len, esc, esc_len, str, str_len, return_value TSRMLS_CC);
+		php_fgetcsv_ex(NULL, delim.s, delim_len, enc.s, enc_len, esc.s, esc_len, str.s, str_len, return_value TSRMLS_CC);
 	}
 }
 /* }}} */
