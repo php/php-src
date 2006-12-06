@@ -1837,7 +1837,7 @@ PHP_FUNCTION(oci_server_version)
 }
 /* }}} */
 
-/* {{{ proto string oci_statement_type(resource stmt)
+/* {{{ proto string oci_statement_type(resource stmt) U
    Return the query type of an OCI statement */
 PHP_FUNCTION(oci_statement_type)
 {
@@ -1857,34 +1857,34 @@ PHP_FUNCTION(oci_statement_type)
 
 	switch (type) {
 		case OCI_STMT_SELECT:
-			RETVAL_STRING("SELECT",1);
+			RETVAL_ASCII_STRING("SELECT", ZSTR_DUPLICATE);
 			break;
 		case OCI_STMT_UPDATE:
-			RETVAL_STRING("UPDATE",1);
+			RETVAL_ASCII_STRING("UPDATE", ZSTR_DUPLICATE);
 			break;
 		case OCI_STMT_DELETE:
-			RETVAL_STRING("DELETE",1);
+			RETVAL_ASCII_STRING("DELETE", ZSTR_DUPLICATE);
 			break;
 		case OCI_STMT_INSERT:
-			RETVAL_STRING("INSERT",1);
+			RETVAL_ASCII_STRING("INSERT", ZSTR_DUPLICATE);
 			break;
 		case OCI_STMT_CREATE:
-			RETVAL_STRING("CREATE",1);
+			RETVAL_ASCII_STRING("CREATE", ZSTR_DUPLICATE);
 			break;
 		case OCI_STMT_DROP:
-			RETVAL_STRING("DROP",1);
+			RETVAL_ASCII_STRING("DROP", ZSTR_DUPLICATE);
 			break;
 		case OCI_STMT_ALTER:
-			RETVAL_STRING("ALTER",1);
+			RETVAL_ASCII_STRING("ALTER", ZSTR_DUPLICATE);
 			break;
 		case OCI_STMT_BEGIN:
-			RETVAL_STRING("BEGIN",1);
+			RETVAL_ASCII_STRING("BEGIN", ZSTR_DUPLICATE);
 			break;
 		case OCI_STMT_DECLARE:
-			RETVAL_STRING("DECLARE",1);
+			RETVAL_ASCII_STRING("DECLARE", ZSTR_DUPLICATE);
 			break;
 		default:
-			RETVAL_STRING("UNKNOWN",1);
+			RETVAL_ASCII_STRING("UNKNOWN", ZSTR_DUPLICATE);
 	}
 }
 /* }}} */
