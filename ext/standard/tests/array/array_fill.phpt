@@ -366,73 +366,73 @@ array(2) {
 == Done =================Done====================
 --UEXPECTF--
 ===========================
-start: 0.00000000000000E+000 num: 0.00000000000000E+000 value: 1
+start: 0 num: 0 value: 1
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 0.00000000000000E+000 num: 0.00000000000000E+000 value: 
+start: 0 num: 0 value: 
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 0.00000000000000E+000 num: 0.00000000000000E+000 value: 
+start: 0 num: 0 value: 
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 0.00000000000000E+000 num: 0.00000000000000E+000 value: d
+start: 0 num: 0 value: d
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 0.00000000000000E+000 num: 0.00000000000000E+000 value: e
+start: 0 num: 0 value: e
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 0.00000000000000E+000 num: 0.00000000000000E+000 value: f
+start: 0 num: 0 value: f
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 0.00000000000000E+000 num: 1 value: 1
+start: 0 num: 1 value: 1
 array(1) {
   [0]=>
   bool(true)
 }
 ===========================
-start: 0.00000000000000E+000 num: 1 value: 
+start: 0 num: 1 value: 
 array(1) {
   [0]=>
   bool(false)
 }
 ===========================
-start: 0.00000000000000E+000 num: 1 value: 
+start: 0 num: 1 value: 
 array(1) {
   [0]=>
   NULL
 }
 ===========================
-start: 0.00000000000000E+000 num: 1 value: d
+start: 0 num: 1 value: d
 array(1) {
   [0]=>
   unicode(1) "d"
 }
 ===========================
-start: 0.00000000000000E+000 num: 1 value: e
+start: 0 num: 1 value: e
 array(1) {
   [0]=>
   unicode(1) "e"
 }
 ===========================
-start: 0.00000000000000E+000 num: 1 value: f
+start: 0 num: 1 value: f
 array(1) {
   [0]=>
   unicode(1) "f"
 }
 ===========================
-start: 0.00000000000000E+000 num: 2.5 value: 1
+start: 0 num: 2.5 value: 1
 array(2) {
   [0]=>
   bool(true)
@@ -440,7 +440,7 @@ array(2) {
   bool(true)
 }
 ===========================
-start: 0.00000000000000E+000 num: 2.5 value: 
+start: 0 num: 2.5 value: 
 array(2) {
   [0]=>
   bool(false)
@@ -448,7 +448,7 @@ array(2) {
   bool(false)
 }
 ===========================
-start: 0.00000000000000E+000 num: 2.5 value: 
+start: 0 num: 2.5 value: 
 array(2) {
   [0]=>
   NULL
@@ -456,7 +456,7 @@ array(2) {
   NULL
 }
 ===========================
-start: 0.00000000000000E+000 num: 2.5 value: d
+start: 0 num: 2.5 value: d
 array(2) {
   [0]=>
   unicode(1) "d"
@@ -464,7 +464,7 @@ array(2) {
   unicode(1) "d"
 }
 ===========================
-start: 0.00000000000000E+000 num: 2.5 value: e
+start: 0 num: 2.5 value: e
 array(2) {
   [0]=>
   unicode(1) "e"
@@ -472,7 +472,7 @@ array(2) {
   unicode(1) "e"
 }
 ===========================
-start: 0.00000000000000E+000 num: 2.5 value: f
+start: 0 num: 2.5 value: f
 array(2) {
   [0]=>
   unicode(1) "f"
@@ -480,32 +480,32 @@ array(2) {
   unicode(1) "f"
 }
 ===========================
-start: 1 num: 0.00000000000000E+000 value: 1
+start: 1 num: 0 value: 1
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 1 num: 0.00000000000000E+000 value: 
+start: 1 num: 0 value: 
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 1 num: 0.00000000000000E+000 value: 
+start: 1 num: 0 value: 
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 1 num: 0.00000000000000E+000 value: d
+start: 1 num: 0 value: d
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 1 num: 0.00000000000000E+000 value: e
+start: 1 num: 0 value: e
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 1 num: 0.00000000000000E+000 value: f
+start: 1 num: 0 value: f
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
@@ -594,32 +594,32 @@ array(2) {
   unicode(1) "f"
 }
 ===========================
-start: 2.5 num: 0.00000000000000E+000 value: 1
+start: 2.5 num: 0 value: 1
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 2.5 num: 0.00000000000000E+000 value: 
+start: 2.5 num: 0 value: 
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 2.5 num: 0.00000000000000E+000 value: 
+start: 2.5 num: 0 value: 
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 2.5 num: 0.00000000000000E+000 value: d
+start: 2.5 num: 0 value: d
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 2.5 num: 0.00000000000000E+000 value: e
+start: 2.5 num: 0 value: e
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 ===========================
-start: 2.5 num: 0.00000000000000E+000 value: f
+start: 2.5 num: 0 value: f
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
