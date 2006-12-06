@@ -53,7 +53,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
+#ifndef PHP_WIN32
 #include "main/php_reentrancy.h"
+#endif
 
 #ifndef SQLITE_OMIT_DATETIME_FUNCS
 

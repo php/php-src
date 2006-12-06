@@ -27,6 +27,10 @@
 #include <openssl/x509.h>
 #include <openssl/err.h>
 
+#ifdef PHP_WIN32
+#include "win32/time.h"
+#endif
+
 #ifdef NETWARE
 #include <sys/select.h>
 #endif
