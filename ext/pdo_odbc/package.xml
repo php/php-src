@@ -12,8 +12,8 @@
   </maintainer>
  </maintainers>
  <configureoptions>
-	 <configureoption name="with-pdo-odbc" prompt="flavour,dir? (just leave blank for help)"/>
-</configureoptions>
+  <configureoption name="with-pdo-odbc" prompt="flavour,dir? (just leave blank for help)"/>
+ </configureoptions>
  <description>
 	 This extension provides an ODBC v3 driver for PDO.  It supports unixODBC
 	 and IBM DB2 libraries, and will support more in future releases.
