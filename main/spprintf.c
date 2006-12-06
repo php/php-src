@@ -685,8 +685,7 @@ fmt_string:
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-					s = ap_php_gcvt(fp_num, precision, &num_buf[1],
-							alternate_form);
+					s = bsd_gcvt(fp_num, precision, &num_buf[1]);
 					if (*s == '-')
 						prefix_char = *s++;
 					else if (print_sign)
