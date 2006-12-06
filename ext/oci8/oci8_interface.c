@@ -40,7 +40,7 @@
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 
-/* {{{ proto bool oci_define_by_name(resource stmt, string name, mixed &var [, int type])
+/* {{{ proto bool oci_define_by_name(resource stmt, string name, mixed &var [, int type]) U
    Define a PHP variable to an Oracle column by name */
 /* if you want to define a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE defining!!! */
 PHP_FUNCTION(oci_define_by_name)
@@ -95,7 +95,7 @@ PHP_FUNCTION(oci_define_by_name)
 }
 /* }}} */
 
-/* {{{ proto bool oci_bind_by_name(resource stmt, string name, mixed &var, [, int maxlength [, int type]])
+/* {{{ proto bool oci_bind_by_name(resource stmt, string name, mixed &var, [, int maxlength [, int type]]) U
    Bind a PHP variable to an Oracle placeholder by name */
 /* if you want to bind a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE binding!!! */
 PHP_FUNCTION(oci_bind_by_name)
@@ -126,7 +126,7 @@ PHP_FUNCTION(oci_bind_by_name)
 }
 /* }}} */
 
-/* {{{ proto bool oci_bind_array_by_name(resource stmt, string name, array &var, int max_table_length [, int max_item_length [, int type ]])
+/* {{{ proto bool oci_bind_array_by_name(resource stmt, string name, array &var, int max_table_length [, int max_item_length [, int type ]]) U
    Bind a PHP array to an Oracle PL/SQL type by name */
 PHP_FUNCTION(oci_bind_array_by_name)
 {
@@ -162,7 +162,7 @@ PHP_FUNCTION(oci_bind_array_by_name)
 }
 /* }}} */
 
-/* {{{ proto bool oci_free_descriptor()
+/* {{{ proto bool oci_free_descriptor() U
    Deletes large object description */
 PHP_FUNCTION(oci_free_descriptor)
 {
@@ -742,7 +742,7 @@ PHP_FUNCTION(oci_lob_flush)
 }
 /* }}} */
 
-/* {{{ proto bool ocisetbufferinglob( boolean flag )
+/* {{{ proto bool ocisetbufferinglob( boolean flag ) U
    Enables/disables buffering for a LOB */
 PHP_FUNCTION(ocisetbufferinglob)
 {
@@ -775,7 +775,7 @@ PHP_FUNCTION(ocisetbufferinglob)
 }
 /* }}} */
 
-/* {{{ proto bool ocigetbufferinglob()
+/* {{{ proto bool ocigetbufferinglob() U
    Returns current state of buffering for a LOB */
 PHP_FUNCTION(ocigetbufferinglob)
 {
@@ -844,7 +844,7 @@ PHP_FUNCTION(oci_lob_copy)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_is_equal( object lob1, object lob2 )
+/* {{{ proto bool oci_lob_is_equal( object lob1, object lob2 ) U
    Tests to see if two LOB/FILE locators are equal */
 PHP_FUNCTION(oci_lob_is_equal)
 {
@@ -1028,7 +1028,7 @@ PHP_FUNCTION(oci_lob_write_temporary)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_close()
+/* {{{ proto bool oci_lob_close() U
    Closes lob descriptor */
 PHP_FUNCTION(oci_lob_close)
 {
@@ -1056,7 +1056,7 @@ PHP_FUNCTION(oci_lob_close)
 /* }}} */
 #endif 
 
-/* {{{ proto object oci_new_descriptor(resource connection [, int type])
+/* {{{ proto object oci_new_descriptor(resource connection [, int type]) U
    Initialize a new empty descriptor LOB/FILE (LOB is default) */
 PHP_FUNCTION(oci_new_descriptor)
 {
@@ -1083,7 +1083,7 @@ PHP_FUNCTION(oci_new_descriptor)
 }
 /* }}} */
 
-/* {{{ proto bool oci_rollback(resource connection)
+/* {{{ proto bool oci_rollback(resource connection) U
    Rollback the current context */
 PHP_FUNCTION(oci_rollback)
 {
@@ -1109,7 +1109,7 @@ PHP_FUNCTION(oci_rollback)
 }
 /* }}} */
 
-/* {{{ proto bool oci_commit(resource connection)
+/* {{{ proto bool oci_commit(resource connection) U
    Commit the current context */
 PHP_FUNCTION(oci_commit)
 {
@@ -1135,7 +1135,7 @@ PHP_FUNCTION(oci_commit)
 }
 /* }}} */
 
-/* {{{ proto string oci_field_name(resource stmt, int col)
+/* {{{ proto string oci_field_name(resource stmt, int col) U
    Tell the name of a column */
 PHP_FUNCTION(oci_field_name)
 {
@@ -1148,7 +1148,7 @@ PHP_FUNCTION(oci_field_name)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_size(resource stmt, int col)
+/* {{{ proto int oci_field_size(resource stmt, int col) U
    Tell the maximum data size of a column */
 PHP_FUNCTION(oci_field_size)
 {
@@ -1165,7 +1165,7 @@ PHP_FUNCTION(oci_field_size)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_scale(resource stmt, int col)
+/* {{{ proto int oci_field_scale(resource stmt, int col) U
    Tell the scale of a column */
 PHP_FUNCTION(oci_field_scale)
 {
@@ -1178,7 +1178,7 @@ PHP_FUNCTION(oci_field_scale)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_precision(resource stmt, int col)
+/* {{{ proto int oci_field_precision(resource stmt, int col) U
    Tell the precision of a column */
 PHP_FUNCTION(oci_field_precision)
 {
@@ -1191,7 +1191,7 @@ PHP_FUNCTION(oci_field_precision)
 }
 /* }}} */
 
-/* {{{ proto mixed oci_field_type(resource stmt, int col)
+/* {{{ proto mixed oci_field_type(resource stmt, int col) U
    Tell the data type of a column */
 PHP_FUNCTION(oci_field_type)
 {
@@ -1256,7 +1256,7 @@ PHP_FUNCTION(oci_field_type)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_type_raw(resource stmt, int col)
+/* {{{ proto int oci_field_type_raw(resource stmt, int col) U
    Tell the raw oracle data type of a column */
 PHP_FUNCTION(oci_field_type_raw)
 {
@@ -1270,7 +1270,7 @@ PHP_FUNCTION(oci_field_type_raw)
 }
 /* }}} */
 
-/* {{{ proto bool oci_field_is_null(resource stmt, int col)
+/* {{{ proto bool oci_field_is_null(resource stmt, int col) U
    Tell whether a column is NULL */
 PHP_FUNCTION(oci_field_is_null)
 {
@@ -1285,7 +1285,7 @@ PHP_FUNCTION(oci_field_is_null)
 }
 /* }}} */
 
-/* {{{ proto void oci_internal_debug(int onoff)
+/* {{{ proto void oci_internal_debug(int onoff) U
    Toggle internal debugging output for the OCI extension */
 PHP_FUNCTION(oci_internal_debug)
 {
@@ -1298,7 +1298,7 @@ PHP_FUNCTION(oci_internal_debug)
 }
 /* }}} */
 
-/* {{{ proto bool oci_execute(resource stmt [, int mode])
+/* {{{ proto bool oci_execute(resource stmt [, int mode]) U
    Execute a parsed statement */
 PHP_FUNCTION(oci_execute)
 {
@@ -1319,7 +1319,7 @@ PHP_FUNCTION(oci_execute)
 }
 /* }}} */
 
-/* {{{ proto bool oci_cancel(resource stmt)
+/* {{{ proto bool oci_cancel(resource stmt) U
    Cancel reading from a cursor */
 PHP_FUNCTION(oci_cancel)
 {
@@ -1339,7 +1339,7 @@ PHP_FUNCTION(oci_cancel)
 }
 /* }}} */
 
-/* {{{ proto bool oci_fetch(resource stmt)
+/* {{{ proto bool oci_fetch(resource stmt) U
    Prepare a new row of data for reading */
 PHP_FUNCTION(oci_fetch)
 {
@@ -1360,7 +1360,7 @@ PHP_FUNCTION(oci_fetch)
 }
 /* }}} */
 
-/* {{{ proto int ocifetchinto(resource stmt, array &output [, int mode])
+/* {{{ proto int ocifetchinto(resource stmt, array &output [, int mode]) U
    Fetch a row of result data into an array */
 PHP_FUNCTION(ocifetchinto)
 {
@@ -1368,7 +1368,7 @@ PHP_FUNCTION(ocifetchinto)
 }
 /* }}} */
 
-/* {{{ proto int oci_fetch_all(resource stmt, array &output[, int skip[, int maxrows[, int flags]]])
+/* {{{ proto int oci_fetch_all(resource stmt, array &output[, int skip[, int maxrows[, int flags]]]) U
    Fetch all rows of result data into an array */
 PHP_FUNCTION(oci_fetch_all)
 {
@@ -1474,7 +1474,7 @@ PHP_FUNCTION(oci_fetch_all)
 }
 /* }}} */
 
-/* {{{ proto object oci_fetch_object( resource stmt )
+/* {{{ proto object oci_fetch_object( resource stmt ) U
    Fetch a result row as an object */
 PHP_FUNCTION(oci_fetch_object)
 {
@@ -1486,7 +1486,7 @@ PHP_FUNCTION(oci_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto array oci_fetch_row( resource stmt )
+/* {{{ proto array oci_fetch_row( resource stmt ) U
    Fetch a result row as an enumerated array */
 PHP_FUNCTION(oci_fetch_row)
 {
@@ -1494,7 +1494,7 @@ PHP_FUNCTION(oci_fetch_row)
 }
 /* }}} */
 
-/* {{{ proto array oci_fetch_assoc( resource stmt )
+/* {{{ proto array oci_fetch_assoc( resource stmt ) U
    Fetch a result row as an associative array */
 PHP_FUNCTION(oci_fetch_assoc)
 {
@@ -1502,7 +1502,7 @@ PHP_FUNCTION(oci_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto array oci_fetch_array( resource stmt [, int mode ])
+/* {{{ proto array oci_fetch_array( resource stmt [, int mode ]) U
    Fetch a result row as an array */
 PHP_FUNCTION(oci_fetch_array)
 {
@@ -1510,7 +1510,7 @@ PHP_FUNCTION(oci_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto bool oci_free_statement(resource stmt)
+/* {{{ proto bool oci_free_statement(resource stmt) U
    Free all resources associated with a statement */
 PHP_FUNCTION(oci_free_statement)
 {
@@ -1531,7 +1531,7 @@ PHP_FUNCTION(oci_free_statement)
 }
 /* }}} */
 
-/* {{{ proto bool oci_close(resource connection)
+/* {{{ proto bool oci_close(resource connection) U
    Disconnect from database */
 PHP_FUNCTION(oci_close)
 {
@@ -1555,7 +1555,7 @@ PHP_FUNCTION(oci_close)
 }
 /* }}} */
 
-/* {{{ proto resource oci_new_connect(string user, string pass [, string db])
+/* {{{ proto resource oci_new_connect(string user, string pass [, string db]) U
    Connect to an Oracle database and log on. Returns a new session. */
 PHP_FUNCTION(oci_new_connect)
 {
@@ -1563,7 +1563,7 @@ PHP_FUNCTION(oci_new_connect)
 }
 /* }}} */
 
-/* {{{ proto resource oci_connect(string user, string pass [, string db [, string charset [, int session_mode ]])
+/* {{{ proto resource oci_connect(string user, string pass [, string db [, string charset [, int session_mode ]]) U
    Connect to an Oracle database and log on. Returns a new session. */
 PHP_FUNCTION(oci_connect)
 {
@@ -1571,7 +1571,7 @@ PHP_FUNCTION(oci_connect)
 }
 /* }}} */
 
-/* {{{ proto resource oci_pconnect(string user, string pass [, string db [, string charset ]])
+/* {{{ proto resource oci_pconnect(string user, string pass [, string db [, string charset ]]) U
    Connect to an Oracle database using a persistent connection and log on. Returns a new session. */
 PHP_FUNCTION(oci_pconnect)
 {
@@ -1579,7 +1579,7 @@ PHP_FUNCTION(oci_pconnect)
 }
 /* }}} */
 
-/* {{{ proto array oci_error([resource stmt|connection|global])
+/* {{{ proto array oci_error([resource stmt|connection|global]) U
    Return the last error of stmt|connection|global. If no error happened returns false. */
 PHP_FUNCTION(oci_error)
 {
@@ -1657,7 +1657,7 @@ PHP_FUNCTION(oci_error)
 }
 /* }}} */
 
-/* {{{ proto int oci_num_fields(resource stmt)
+/* {{{ proto int oci_num_fields(resource stmt) U
    Return the number of result columns in a statement */
 PHP_FUNCTION(oci_num_fields)
 {
@@ -1674,7 +1674,7 @@ PHP_FUNCTION(oci_num_fields)
 }
 /* }}} */
 
-/* {{{ proto resource oci_parse(resource connection, string query)
+/* {{{ proto resource oci_parse(resource connection, string query) U
    Parse a query and return a statement */
 PHP_FUNCTION(oci_parse)
 {
@@ -1700,7 +1700,7 @@ PHP_FUNCTION(oci_parse)
 }
 /* }}} */
 
-/* {{{ proto bool oci_set_prefetch(resource stmt, int prefetch_rows)
+/* {{{ proto bool oci_set_prefetch(resource stmt, int prefetch_rows) U
   Sets the number of rows to be prefetched on execute to prefetch_rows for stmt */
 PHP_FUNCTION(oci_set_prefetch)
 {
@@ -1721,7 +1721,7 @@ PHP_FUNCTION(oci_set_prefetch)
 }
 /* }}} */
 
-/* {{{ proto bool oci_password_change(resource connection, string username, string old_password, string new_password)
+/* {{{ proto bool oci_password_change(resource connection, string username, string old_password, string new_password) U
   Changes the password of an account */
 PHP_FUNCTION(oci_password_change)
 {
@@ -1776,7 +1776,7 @@ PHP_FUNCTION(oci_password_change)
 }
 /* }}} */
 
-/* {{{ proto resource oci_new_cursor(resource connection)
+/* {{{ proto resource oci_new_cursor(resource connection) U
    Return a new cursor (Statement-Handle) - use this to bind ref-cursors! */
 PHP_FUNCTION(oci_new_cursor)
 {
@@ -1799,7 +1799,7 @@ PHP_FUNCTION(oci_new_cursor)
 }
 /* }}} */
 
-/* {{{ proto string oci_result(resource stmt, mixed column)
+/* {{{ proto string oci_result(resource stmt, mixed column) U
    Return a single column of result data */
 PHP_FUNCTION(oci_result)
 {
@@ -1815,7 +1815,7 @@ PHP_FUNCTION(oci_result)
 }
 /* }}} */
 
-/* {{{ proto string oci_server_version(resource connection)
+/* {{{ proto string oci_server_version(resource connection) U
    Return a string containing server version information */
 PHP_FUNCTION(oci_server_version)
 {
@@ -1889,7 +1889,7 @@ PHP_FUNCTION(oci_statement_type)
 }
 /* }}} */
 
-/* {{{ proto int oci_num_rows(resource stmt)
+/* {{{ proto int oci_num_rows(resource stmt) U
    Return the row count of an OCI statement */
 PHP_FUNCTION(oci_num_rows)
 {
@@ -1936,7 +1936,7 @@ PHP_FUNCTION(oci_free_collection)
 }
 /* }}} */
 
-/* {{{ proto bool oci_collection_append(string value)
+/* {{{ proto bool oci_collection_append(string value) U
    Append an object to the collection */
 PHP_FUNCTION(oci_collection_append)
 {
@@ -1970,7 +1970,7 @@ PHP_FUNCTION(oci_collection_append)
 }
 /* }}} */
 
-/* {{{ proto string oci_collection_element_get(int ndx)
+/* {{{ proto string oci_collection_element_get(int ndx) U
    Retrieve the value at collection index ndx */
 PHP_FUNCTION(oci_collection_element_get)
 {
@@ -2007,7 +2007,7 @@ PHP_FUNCTION(oci_collection_element_get)
 }
 /* }}} */
 
-/* {{{ proto bool oci_collection_assign(object from)
+/* {{{ proto bool oci_collection_assign(object from) U
    Assign a collection from another existing collection */
 PHP_FUNCTION(oci_collection_assign)
 {
@@ -2045,7 +2045,7 @@ PHP_FUNCTION(oci_collection_assign)
 }
 /* }}} */
 
-/* {{{ proto bool oci_collection_element_assign(int index, string val)
+/* {{{ proto bool oci_collection_element_assign(int index, string val) U
    Assign element val to collection at index ndx */
 PHP_FUNCTION(oci_collection_element_assign)
 {
@@ -2080,7 +2080,7 @@ PHP_FUNCTION(oci_collection_element_assign)
 }
 /* }}} */
 
-/* {{{ proto int oci_collection_size()
+/* {{{ proto int oci_collection_size() U
    Return the size of a collection */
 PHP_FUNCTION(oci_collection_size)
 {
@@ -2108,7 +2108,7 @@ PHP_FUNCTION(oci_collection_size)
 }
 /* }}} */
 
-/* {{{ proto int oci_collection_max()
+/* {{{ proto int oci_collection_max() U
    Return the max value of a collection. For a varray this is the maximum length of the array */
 PHP_FUNCTION(oci_collection_max)
 {
@@ -2136,7 +2136,7 @@ PHP_FUNCTION(oci_collection_max)
 }
 /* }}} */
 
-/* {{{ proto bool oci_collection_trim(int num)
+/* {{{ proto bool oci_collection_trim(int num) U
    Trim num elements from the end of a collection */
 PHP_FUNCTION(oci_collection_trim)
 {
@@ -2169,7 +2169,7 @@ PHP_FUNCTION(oci_collection_trim)
 }
 /* }}} */
 
-/* {{{ proto object oci_new_collection(resource connection, string tdo [, string schema])
+/* {{{ proto object oci_new_collection(resource connection, string tdo [, string schema]) U
    Initialize a new collection */
 PHP_FUNCTION(oci_new_collection)
 {
