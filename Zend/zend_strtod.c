@@ -2560,24 +2560,89 @@ ret:
 	return result;
 }
 
-/* UTODO: someone can reimplement this using the code above, if they really want to. */
 ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr)
 {
-	double value = 0.0;
-	int32_t num_conv = 0, num_read = 0;
+	const UChar *u = nptr, *nstart;
+	UChar c = *u;
+	int any = 0;
 
-	num_conv = u_sscanf(nptr, "%f%n", &value, &num_read);
-	if (num_conv != EOF) {
-		if (endptr != 0) {
-			*endptr = (UChar *)nptr + num_read;
-		}
-		return value;
-	} else {
-		if (endptr != 0) {
-			*endptr = (UChar *)nptr;
-		}
-		return 0;
+	while (u_isspace(c)) {
+		c = *++u;
 	}
+	nstart = u;
+
+	if (c == 0x2D /*'-'*/ || c == 0x2B /*'+'*/) {
+		c = *++u;
+	}
+
+	while (c >= 0x30 /*'0'*/ && c <= 0x39 /*'9'*/) {
+		any = 1;
+		c = *++u;
+	}
+
+	if (c == 0x2E /*'.'*/) {
+		c = *++u;
+		while (c >= 0x30 /*'0'*/ && c <= 0x39 /*'9'*/) {
+			any = 1;
+			c = *++u;
+		}
+	}
+
+	if ((c == 0x65 /*'e'*/ || c == 0x45 /*'E'*/) && any) {
+		const UChar *e = u;
+		int any_exp = 0;
+
+		c = *++u;
+		if (c == 0x2D /*'-'*/ || c == 0x2B /*'+'*/) {
+			c = *++u;
+		}
+
+		while (c >= 0x30 /*'0'*/ && c <= 0x39 /*'9'*/) {
+			any_exp = 1;
+			c = *++u;
+		}
+
+		if (!any_exp) {
+			u = e;
+		}
+	}
+
+	if (any) {
+		char buf[64], *numbuf, *bufpos;
+		int length = u - nstart;
+		double value;
+
+		if (length < sizeof(buf)) {
+			numbuf = buf;
+		} else {
+			numbuf = (char *) do_alloca(length + 1);
+		}
+
+		bufpos = numbuf;
+
+		while (nstart < u) {
+			*bufpos++ = (char) *nstart++;
+		}
+
+		*bufpos = '\0';
+		value = zend_strtod(numbuf, NULL);
+
+		if (numbuf != buf) {
+			free_alloca(numbuf);
+		}
+
+		if (endptr != NULL) {
+			*endptr = (UChar *)u;
+		}
+
+		return value;
+	}
+
+	if (endptr != NULL) {
+		*endptr = (UChar *)nptr;
+	}
+
+	return 0;
 }
 
 /*
