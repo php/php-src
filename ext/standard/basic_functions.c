@@ -6252,17 +6252,17 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 	}
 
 	if (hash_key->nKeyLength) {
-		php_prefix_varname(&new_key, prefix, hash_key->arKey, hash_key->nKeyLength, hash_key->type TSRMLS_CC);
+		php_prefix_varname(&new_key, prefix, hash_key->arKey, hash_key->nKeyLength-1, hash_key->type, 0 TSRMLS_CC);
 	} else {
 		zval num;
 		ZVAL_LONG(&num, hash_key->h);
 		convert_to_text(&num);
-		php_prefix_varname(&new_key, prefix, Z_UNIVAL(num), Z_UNILEN(num), Z_TYPE(num) TSRMLS_CC);
+		php_prefix_varname(&new_key, prefix, Z_UNIVAL(num), Z_UNILEN(num), Z_TYPE(num), 0 TSRMLS_CC);
 		zval_dtor(&num);
 	}
 
 	zend_u_delete_global_variable(Z_TYPE(new_key), Z_UNIVAL(new_key), Z_UNILEN(new_key) TSRMLS_CC);
-	ZEND_U_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), Z_TYPE(new_key), Z_UNIVAL(new_key), Z_UNILEN(new_key), *var, (*var)->refcount+1, 0);
+	ZEND_U_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), Z_TYPE(new_key), Z_UNIVAL(new_key), Z_UNILEN(new_key) + 1, *var, (*var)->refcount+1, 0);
 
 	zval_dtor(&new_key);
 	return 0;
