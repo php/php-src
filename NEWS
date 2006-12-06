@@ -1,10 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.1
-- Fixed FastCGI impersonation for persistent connections on Windows. (Dmitry)
 - Added a meta tag to phpinfo() output to prevent search engines from indexing 
   the page. (Ilia)
 - Added missing object support to file_put_contents(). (Ilia)
+- Changed double-to-string utilities to use BSD implementation. (Dmitry, Tony)
 - Updated bundled libcURL to version 7.16.0 in the Windows distro. (Edin)
 - Updated timezone database to version 2006.16. (Derick)
 - cgi.* and fastcgi.* directives are moved to INI subsystem.
@@ -46,6 +46,7 @@ PHP                                                                        NEWS
   . Added "default" option that allows a default value to be set for
     an invalid or missing value.
   . Invalid filters fails instead of returning unsafe value
+- Fixed FastCGI impersonation for persistent connections on Windows. (Dmitry)
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
 - Fixed bug #39724 (Broken build due to spl/filter usage of pcre extension).
