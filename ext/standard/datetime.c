@@ -85,25 +85,39 @@ PHPAPI char *php_std_date(time_t t TSRMLS_DC)
 char *strptime(const char *s, const char *format, struct tm *tm);
 #endif
 
-/* {{{ proto string strptime(string timestamp, string format)
+/* {{{ proto string strptime(string timestamp, string format) U
    Parse a time/date generated with strftime() */
 PHP_FUNCTION(strptime)
 {
-	char      *ts;
+	zstr       ts;
 	int        ts_length;
-	char      *format;
+	zstr       format;
 	int        format_length;
 	struct tm  parsed_time;
 	char      *unparsed_part;
+	zend_uchar type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", 
-		&ts, &ts_length, &format, &format_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", 
+		&ts, &ts_length, &type, &format, &format_length, &type) == FAILURE) {
 		return;
+	}
+
+	if (type == IS_UNICODE) {
+		char *temp;
+		int temp_len;
+
+		zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp, &temp_len, ts.u, ts_length TSRMLS_CC);
+		ts.s = temp;
+		ts_length = temp_len;
+
+		zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp, &temp_len, format.u, format_length TSRMLS_CC);
+		format.s = temp;
+		format_length = temp_len;
 	}
 
 	memset(&parsed_time, 0, sizeof(parsed_time));
 
-	unparsed_part = strptime(ts, format, &parsed_time);
+	unparsed_part = strptime(ts.s, format.s, &parsed_time);
 	if (unparsed_part == NULL) {
 		RETURN_FALSE;
 	}
@@ -117,7 +131,18 @@ PHP_FUNCTION(strptime)
 	add_ascii_assoc_long(return_value, "tm_year",  parsed_time.tm_year);
 	add_ascii_assoc_long(return_value, "tm_wday",  parsed_time.tm_wday);
 	add_ascii_assoc_long(return_value, "tm_yday",  parsed_time.tm_yday);
-	add_ascii_assoc_string(return_value, "unparsed", unparsed_part, 1);
+	if (type == IS_UNICODE) {
+		UChar *temp;
+		int temp_len;
+
+		zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp, &temp_len, unparsed_part, strlen(unparsed_part) TSRMLS_CC);
+		add_ascii_assoc_unicodel(return_value, "unparsed", temp, temp_len, 0);
+
+		efree(ts.s);
+		efree(format.s);
+	} else {
+		add_ascii_assoc_string(return_value, "unparsed", unparsed_part, 1);
+	}
 }
 /* }}} */
 #endif
