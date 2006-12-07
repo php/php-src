@@ -1294,7 +1294,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_COOKIE:
 		case CURLOPT_REFERER:
 		case CURLOPT_INTERFACE:
-		case CURLOPT_KRB4LEVEL: 
+		case CURLOPT_KRB4LEVEL:
 		case CURLOPT_EGDSOCKET:
 		case CURLOPT_CAINFO: 
 		case CURLOPT_CAPATH:
@@ -1433,6 +1433,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				char		 *key;
 				ulong		 num_key;
 				uint             string_key_len;
+				int		 type = -1;
 
 				postfields = HASH_OF(*zvalue);
 				if (!postfields) {
@@ -1445,6 +1446,9 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					 zend_hash_get_current_data(postfields, (void **) &current) == SUCCESS;
 					 zend_hash_move_forward(postfields)
 				) {
+					int ntype;
+					int l;
+					UErrorCode status = U_ZERO_ERROR;
 
 					SEPARATE_ZVAL(current);
 					convert_to_string_ex(current);
@@ -1453,20 +1457,25 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				
 					postval = Z_STRVAL_PP(current);
 
-					switch (zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL)) {
+					ntype = zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
+					if (type == -1) {
+						type = ntype;
+					} else if (type != ntype) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Form parameters must either be all unicode or all binary"); 
+						continue;
+					}
+
+					switch (ntype) {
 						case HASH_KEY_IS_UNICODE:
-							key = zend_unicode_to_ascii(string_key.u, string_key_len TSRMLS_CC);
-							if (!key) {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received"); 
-								continue;
-							}
+							zend_unicode_to_string_ex(UG(utf8_conv), &key, &l, string_key.u, string_key_len, &status);
 							break;
 						case HASH_KEY_IS_STRING:
 							key = string_key.s;
+							l = string_key_len - 1;
 							break;
 						case HASH_KEY_IS_LONG:
 							key = NULL;
-							string_key_len = 0;
+							l = 0;
 							break;
 					}
 
@@ -1482,16 +1491,19 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 						}
 						error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, key,
-											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
+											 CURLFORM_NAMELENGTH, l,
 											 CURLFORM_FILE, postval, 
 											 CURLFORM_END);
 					} else {
 						error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, key,
-											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
+											 CURLFORM_NAMELENGTH, l,
 											 CURLFORM_COPYCONTENTS, postval, 
 											 CURLFORM_CONTENTSLENGTH, (long)Z_STRLEN_PP(current),
 											 CURLFORM_END);
+					}
+					if (ntype == HASH_KEY_IS_UNICODE) {
+						efree(key);
 					}
 				}
 
