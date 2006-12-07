@@ -1452,9 +1452,9 @@ ZEND_API char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sig
         to hold the suppressed trailing zeros.
     */
 
-	int bbits, b2, b5, be, dig, i, ieps, ilim, ilim0, ilim1,
+	int bbits, b2, b5, be, dig, i, ieps, ilim = 0, ilim0, ilim1,
 		j, j1, k, k0, k_check, leftright, m2, m5, s2, s5,
-		spec_case, try_quick;
+		spec_case = 0, try_quick;
 	Long L;
 #ifndef Sudden_Underflow
 	int denorm;
@@ -1831,9 +1831,9 @@ bump_up:
 			b2 += Log2P;
 			s2 += Log2P;
 			spec_case = 1;
-		}
-		else
+		} else {
 			spec_case = 0;
+		}
 	}
 
 	/* Arrange for convenient computation of quotients:
