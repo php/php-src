@@ -1880,35 +1880,33 @@ ZEND_API ulong zend_hash_next_free_element(HashTable *ht)
 	} while (0);																		\
 }
 
-#define HANDLE_U_NUMERIC(key, length, func) {												\
-	register UChar *tmp=key;																\
-	register int val; \
+#define HANDLE_U_NUMERIC(key, length, func) {											\
+	register UChar *tmp=key;															\
 																						\
-	if (*tmp=='-') {																	\
+	if (*tmp==0x2D /*'-'*/) {															\
 		tmp++;																			\
 	}																					\
-	if ((val = u_digit(*tmp, 10)) >= 0) do { /* possibly a numeric index */					\
-		UChar *end=key+length-1;															\
+	if ((*tmp>=0x30 /*'0'*/ && *tmp<=0x39 /*'9'*/)) do { /* possibly a numeric index */	\
+		UChar *end=key+length-1;														\
 		long idx;																		\
 																						\
-		if (val==0 && length>2) { /* don't accept numbers with leading zeros */	\
+		if (*tmp++==0x30 && length>2) { /* don't accept numbers with leading zeros */	\
 			break;																		\
-		} \
-		tmp++;																	\
+		}																				\
 		while (tmp<end) {																\
-			if (u_digit(*tmp, 10) < 0) {											\
+			if (!(*tmp>=0x30 /*'0'*/ && *tmp<=0x39 /*'9'*/)) {							\
 				break;																	\
 			}																			\
 			tmp++;																		\
 		}																				\
 		if (tmp==end && *tmp==0) { /* a numeric index */								\
-			if (*key=='-') {															\
-				idx = zend_u_strtol(key, NULL, 10);											\
+			if (*key==0x2D /*'-'*/) {													\
+				idx = zend_u_strtol(key, NULL, 10);										\
 				if (idx!=LONG_MIN) {													\
 					return func;														\
 				}																		\
 			} else {																	\
-				idx = zend_u_strtol(key, NULL, 10);											\
+				idx = zend_u_strtol(key, NULL, 10);										\
 				if (idx!=LONG_MAX) {													\
 					return func;														\
 				}																		\

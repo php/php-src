@@ -55,7 +55,6 @@ zend_u_strtol(nptr, endptr, base)
 	register UChar c;
 	register unsigned long cutoff;
 	register int neg = 0, any, cutlim;
-	register int val;
 
 	/*
 	 * Skip white space and pick up leading +/- sign if any.
@@ -65,20 +64,20 @@ zend_u_strtol(nptr, endptr, base)
 	do {
 		c = *s++;
 	} while (u_isspace(c));
-	if (c == '-') {
+	if (c == 0x2D /*'-'*/) {
 		neg = 1;
 		c = *s++;
-	} else if (c == '+')
+	} else if (c == 0x2B /*'+'*/)
 		c = *s++;
 	if ((base == 0 || base == 16) &&
-	    (c == '0')
-		 && (*s == 'x' || *s == 'X')) {
+	    (c == 0x30 /*'0'*/)
+		 && (*s == 0x78 /*'x'*/ || *s == 0x58 /*'X'*/)) {
 		c = s[1];
 		s += 2;
 		base = 16;
 	}
 	if (base == 0)
-		base = (c == '0') ? 8 : 10;
+		base = (c == 0x30 /*'0'*/) ? 8 : 10;
 
 	/*
 	 * Compute the cutoff value between legal numbers and illegal
@@ -101,14 +100,23 @@ zend_u_strtol(nptr, endptr, base)
 	cutlim = cutoff % (unsigned long)base;
 	cutoff /= (unsigned long)base;
 	for (acc = 0, any = 0;; c = *s++) {
-		if ((val = u_digit(c, base)) < 0)
+		if (c >= 0x30 /*'0'*/ && c <= 0x39 /*'9'*/)
+			c -= 0x30 /*'0'*/;
+		else if (c >= 0x41 /*'A'*/ && c <= 0x5A /*'Z'*/)
+			c -= 0x41 /*'A'*/ - 10;
+		else if (c >= 0x61 /*'a'*/ && c <= 0x7A /*'z'*/)
+			c -= 0x61 /*'a'*/ - 10;
+		else
 			break;
-		if (any < 0 || acc > cutoff || (acc == cutoff && val > cutlim))
+		if (c >= base)
+			break;
+
+		if (any < 0 || acc > cutoff || (acc == cutoff && c > cutlim))
 			any = -1;
 		else {
 			any = 1;
 			acc *= base;
-			acc += val;
+			acc += c;
 		}
 	}
 	if (any < 0) {
@@ -116,7 +124,7 @@ zend_u_strtol(nptr, endptr, base)
 		errno = ERANGE;
 	} else if (neg)
 		acc = -acc;
-	if (endptr != 0)
+	if (endptr != NULL)
 		*endptr = (UChar *)(any ? s - 1 : nptr);
 	return (acc);
 }
