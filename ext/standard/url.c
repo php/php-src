@@ -37,6 +37,60 @@
 #endif /*APACHE*/
 #endif /*_OSD_POSIX*/
 
+
+/*
+ * These macros are similar to ZVAL_U_STRING*() but they select between
+ * Unicode/binary based on explicitly specified type, rather than the
+ * UG(unicode) global. They may be useful for other functions, but implementing
+ * them would probably require updating all of the corresponding add_*_assoc_*()
+ * macros, so let's keep them here for now and revisit the issue if someone else
+ * needs them in the future.
+ */
+#define ZVAL_UT_STRING(conv, type, z, s, flags) { \
+		if (type == IS_UNICODE) { \
+			UErrorCode status = U_ZERO_ERROR; \
+			char *__s = (s); \
+			int __s_len = strlen(__s); \
+			UChar *u_str; \
+			int u_len; \
+			zend_string_to_unicode_ex(conv, &u_str, &u_len, __s, __s_len, &status); \
+			if ((flags) & ZSTR_AUTOFREE) { \
+				efree(__s); \
+			} \
+			ZVAL_UNICODEL(z, u_str, u_len, 0); \
+		} else { \
+			char *__s=(s);					\
+			Z_STRLEN_P(z) = strlen(__s);	\
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : __s);	\
+			Z_TYPE_P(z) = IS_STRING;        \
+		} \
+	}
+
+#define ZVAL_UT_STRINGL(conv, type, z, s, l, flags) { \
+		if (type == IS_UNICODE) { \
+			UErrorCode status = U_ZERO_ERROR; \
+			char *__s = (s); \
+			int __s_len = (l); \
+			UChar *u_str; \
+			int u_len; \
+			zend_string_to_unicode_ex(conv, &u_str, &u_len, __s, __s_len, &status); \
+			if ((flags) & ZSTR_AUTOFREE) { \
+				efree(__s); \
+			} \
+			ZVAL_UNICODEL(z, u_str, u_len, 0); \
+		} else { \
+			char *__s=(s); int __l=l;	\
+			Z_STRLEN_P(z) = __l;	    \
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s);	\
+			Z_TYPE_P(z) = IS_STRING;    \
+		}\
+	}
+
+#define RETVAL_UT_STRING(conv, type, s, flags) 		ZVAL_UT_STRING(conv, type, return_value, s, flags)
+#define RETVAL_UT_STRINGL(conv, type, s, l, flags) 	ZVAL_UT_STRINGL(conv, type, return_value, s, l, flags)
+#define RETURN_UT_STRING(conv, type, t, flags)		{ RETVAL_UT_STRING(conv, type, t, flags); return; }
+#define RETURN_UT_STRINGL(conv, type, t, l, flags)	{ RETVAL_UT_STRINGL(conv, type, t, l, flags); return; }
+
 /* {{{ free_url
  */
 PHPAPI void php_url_free(php_url *theurl)
@@ -329,50 +383,69 @@ end:
 }
 /* }}} */
 
-/* {{{ proto mixed parse_url(string url, [int url_component])
+#define add_ascii_assoc_u_ascii_string(arg, key, str, type, duplicate) do { \
+		zval *___tmp; \
+		MAKE_STD_ZVAL(___tmp); \
+		ZVAL_UT_STRING(UG(ascii_conv), type, ___tmp, str, duplicate); \
+		add_ascii_assoc_zval(arg, key, ___tmp); \
+    } while (0)
+
+
+/* {{{ proto mixed parse_url(string url, [int url_component]) U
    Parse a URL and return its components */
 PHP_FUNCTION(parse_url)
 {
-	char *str;
+	zstr str;
 	int str_len;
+	zend_uchar type;
 	php_url *resource;
 	long key = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &key) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &str, &str_len, &type, &key) == FAILURE) {
 		return;
 	}
 
-	resource = php_url_parse_ex(str, str_len);
+	if (type == IS_UNICODE) {
+		char *temp;
+
+		if ((temp = zend_unicode_to_ascii(str.u, str_len TSRMLS_CC)) == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not convert URL parameter to ASCII");
+			return;
+		}
+		str.s = temp;
+	}
+
+	resource = php_url_parse_ex(str.s, str_len);
 	if (resource == NULL) {
-		php_error_docref1(NULL TSRMLS_CC, str, E_WARNING, "Unable to parse URL");
+		php_error_docref1(NULL TSRMLS_CC, str.s, E_WARNING, "Unable to parse URL");
 		RETURN_FALSE;
 	}
 
 	if (key > -1) {
 		switch (key) {
 			case PHP_URL_SCHEME:
-				if (resource->scheme != NULL) RETVAL_STRING(resource->scheme, 1);
+				if (resource->scheme != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->scheme, 1);
 				break;
 			case PHP_URL_HOST:
-				if (resource->host != NULL) RETVAL_STRING(resource->host, 1);
+				if (resource->host != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->host, 1);
 				break;
 			case PHP_URL_PORT:
 				if (resource->port != 0) RETVAL_LONG(resource->port);
 				break;
 			case PHP_URL_USER:
-				if (resource->user != NULL) RETVAL_STRING(resource->user, 1);
+				if (resource->user != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->user, 1);
 				break;
 			case PHP_URL_PASS:
-				if (resource->pass != NULL) RETVAL_STRING(resource->pass, 1);
+				if (resource->pass != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->pass, 1);
 				break;
 			case PHP_URL_PATH:
-				if (resource->path != NULL) RETVAL_STRING(resource->path, 1);
+				if (resource->path != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->path, 1);
 				break;
 			case PHP_URL_QUERY:
-				if (resource->query != NULL) RETVAL_STRING(resource->query, 1);
+				if (resource->query != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->query, 1);
 				break;
 			case PHP_URL_FRAGMENT:
-				if (resource->fragment != NULL) RETVAL_STRING(resource->fragment, 1);
+				if (resource->fragment != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->fragment, 1);
 				break;
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL component identifier %ld", key);
@@ -386,23 +459,26 @@ PHP_FUNCTION(parse_url)
 
     /* add the various elements to the array */
 	if (resource->scheme != NULL)
-		add_ascii_assoc_string(return_value, "scheme", resource->scheme, 1);
+		add_ascii_assoc_u_ascii_string(return_value, "scheme", resource->scheme, type, 1);
 	if (resource->host != NULL)
-		add_ascii_assoc_string(return_value, "host", resource->host, 1);
+		add_ascii_assoc_u_ascii_string(return_value, "host", resource->host, type, 1);
 	if (resource->port != 0)
 		add_ascii_assoc_long(return_value, "port", resource->port);
 	if (resource->user != NULL)
-		add_ascii_assoc_string(return_value, "user", resource->user, 1);
+		add_ascii_assoc_u_ascii_string(return_value, "user", resource->user, type, 1);
 	if (resource->pass != NULL)
-		add_ascii_assoc_string(return_value, "pass", resource->pass, 1);
+		add_ascii_assoc_u_ascii_string(return_value, "pass", resource->pass, type, 1);
 	if (resource->path != NULL)
-		add_ascii_assoc_string(return_value, "path", resource->path, 1);
+		add_ascii_assoc_u_ascii_string(return_value, "path", resource->path, type, 1);
 	if (resource->query != NULL)
-		add_ascii_assoc_string(return_value, "query", resource->query, 1);
+		add_ascii_assoc_u_ascii_string(return_value, "query", resource->query, type, 1);
 	if (resource->fragment != NULL)
-		add_ascii_assoc_string(return_value, "fragment", resource->fragment, 1);
+		add_ascii_assoc_u_ascii_string(return_value, "fragment", resource->fragment, type, 1);
 done:	
 	php_url_free(resource);
+	if (type == IS_UNICODE) {
+		efree(str.s);
+	}
 }
 /* }}} */
 
