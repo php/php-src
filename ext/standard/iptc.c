@@ -35,6 +35,7 @@
 #include "php.h"
 #include "php_iptc.h"
 #include "ext/standard/head.h"
+#include "ext/standard/file.h"
 
 #include <sys/stat.h>
 
@@ -173,56 +174,37 @@ static int php_iptc_next_marker(FILE *fp, int spool, unsigned char **spoolbuf TS
 
 static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 
-/* {{{ proto array iptcembed(string iptcdata, string jpeg_file_name [, int spool])
+/* {{{ proto array iptcembed(string iptcdata, string jpeg_file_name [, int spool]) U
    Embed binary IPTC data into a JPEG image. */
 PHP_FUNCTION(iptcembed)
 {
-    zval **iptcdata, **jpeg_file, **spool_flag; 
+    zval **pp_jpeg_file;
+	char *iptcdata, *jpeg_file;
+	int jpeg_file_len, iptcdata_len;
     FILE *fp;
 	unsigned int marker;
-	unsigned int spool = 0, done = 0, inx, len;	
+	unsigned int spool = 0, done = 0, inx;	
 	unsigned char *spoolbuf=0, *poi=0;
 	struct stat sb;
 
-    switch(ZEND_NUM_ARGS()){
-    case 3:
-        if (zend_get_parameters_ex(3, &iptcdata, &jpeg_file, &spool_flag) == FAILURE) {
-            WRONG_PARAM_COUNT;
-        }
-        convert_to_string_ex(iptcdata);
-        convert_to_string_ex(jpeg_file);
-        convert_to_long_ex(spool_flag);
-		spool = Z_LVAL_PP(spool_flag);
-        break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SZ|l", &iptcdata, iptcdata_len, &pp_jpeg_file, &spool) == FAILURE ||
+		php_stream_path_param_encode(pp_jpeg_file, &jpeg_file, &jpeg_file_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
+	}
 
-    case 2:
-        if (zend_get_parameters_ex(2, &iptcdata, &jpeg_file) == FAILURE) {
-            WRONG_PARAM_COUNT;
-        }
-        convert_to_string_ex(iptcdata);
-        convert_to_string_ex(jpeg_file);
-        break;
-
-    default:
-        WRONG_PARAM_COUNT;
-        break;
-    }
-
-    if (php_check_open_basedir(Z_STRVAL_PP(jpeg_file) TSRMLS_CC)) {
+    if (php_check_open_basedir(jpeg_file TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-    if ((fp = VCWD_FOPEN(Z_STRVAL_PP(jpeg_file), "rb")) == 0) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open %s", Z_STRVAL_PP(jpeg_file));
+    if ((fp = VCWD_FOPEN(jpeg_file, "rb")) == 0) {
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open %s", jpeg_file);
         RETURN_FALSE;
     }
-
-	len = Z_STRLEN_PP(iptcdata);
 
 	if (spool < 2) {
 		fstat(fileno(fp), &sb);
 
-		poi = spoolbuf = emalloc(len + sizeof(psheader) + sb.st_size + 1024);
+		poi = spoolbuf = emalloc(iptcdata_len + sizeof(psheader) + sb.st_size + 1024);
 	} 
 
 	if (php_iptc_get1(fp, spool, poi?&poi:0 TSRMLS_CC) != 0xFF) {
@@ -262,19 +244,19 @@ PHP_FUNCTION(iptcembed)
 				/* APP0 is in each and every JPEG, so when we hit APP0 we insert our new APP13! */
 				php_iptc_skip_variable(fp, spool, poi?&poi:0 TSRMLS_CC);
 
-				if (len & 1) len++; /* make the length even */
+				if (iptcdata_len & 1) iptcdata_len++; /* make the length even */
 
-				psheader[ 2 ] = (len+28)>>8;
-				psheader[ 3 ] = (len+28)&0xff;
+				psheader[ 2 ] = (iptcdata_len+28)>>8;
+				psheader[ 3 ] = (iptcdata_len+28)&0xff;
 
 				for (inx = 0; inx < 28; inx++)
 					php_iptc_put1(fp, spool, psheader[inx], poi?&poi:0 TSRMLS_CC);
 
-				php_iptc_put1(fp, spool, (unsigned char)(len>>8), poi?&poi:0 TSRMLS_CC);
-				php_iptc_put1(fp, spool, (unsigned char)(len&0xff), poi?&poi:0 TSRMLS_CC);
+				php_iptc_put1(fp, spool, (unsigned char)(iptcdata_len>>8), poi?&poi:0 TSRMLS_CC);
+				php_iptc_put1(fp, spool, (unsigned char)(iptcdata_len&0xff), poi?&poi:0 TSRMLS_CC);
 					
-				for (inx = 0; inx < len; inx++)
-					php_iptc_put1(fp, spool, Z_STRVAL_PP(iptcdata)[inx], poi?&poi:0 TSRMLS_CC);
+				for (inx = 0; inx < iptcdata_len; inx++)
+					php_iptc_put1(fp, spool, iptcdata[inx], poi?&poi:0 TSRMLS_CC);
 				break;
 
 			case M_SOS:								
@@ -299,7 +281,7 @@ PHP_FUNCTION(iptcembed)
 }
 /* }}} */
 
-/* {{{ proto array iptcparse(string iptcdata)
+/* {{{ proto array iptcparse(string iptcdata) U
    Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {
@@ -307,17 +289,13 @@ PHP_FUNCTION(iptcparse)
 	unsigned char *buffer;
 	unsigned char recnum, dataset;
 	char key[16];
-	zval *values, **str, **element;
+	zval *values, **element;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &buffer, &length) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(str);
 
 	inx = 0;
-	length = Z_STRLEN_PP(str);
-	buffer = (unsigned char*)Z_STRVAL_PP(str);
-
 	tagsfound = 0; /* number of tags already found */
 
 	while (inx < length) { /* find 1st tag */
