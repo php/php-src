@@ -1,3 +1,131 @@
+2006-12-06  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/string.c:
+      Use proper zstr for str_getcsv() and add documentation for Andrei's peace
+      of mind
+
+2006-12-06  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Typo
+
+2006-12-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/pdo_odbc/package.xml:
+      test. please ignore
+
+2006-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      Final set of unicode changes
+
+    * ext/curl/interface.c:
+      First part of unicode upgrade
+
+2006-12-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      fix import_request_variables()
+
+    * ext/oci8/oci8_interface.c
+      ext/oci8/tests/statement_type.phpt:
+      add Unicode support to oci_statement_type()
+
+    * ext/oci8/oci8_interface.c:
+      mark most of the OCI8 functions as unicode aware
+
+    * ext/standard/formatted_print.c:
+      move handling of 'F' to the top
+
+2006-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/multi.c:
+      Make functions as being unicode safe
+
+2006-12-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/formatted_print.c:
+      MFH: add missing 'F' modified (noticed by Matt)
+
+    * ext/standard/formatted_print.c:
+      add missing 'F' modified (noticed by Matt)
+
+2006-12-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/openssl/xp_ssl.c
+      ext/pdo_sqlite/sqlite/src/date.c:
+      MFB: Fix win32 build
+
+    * (PHP_5_2)
+      ext/openssl/xp_ssl.c
+      ext/pdo_sqlite/sqlite/src/date.c:
+      Fix win32 build
+
+2006-12-06  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/unset_cv05.phpt
+      ext/standard/tests/array/array_fill.phpt
+      ext/standard/tests/array/bug14580.phpt
+      ext/standard/tests/general_functions/007.phpt
+      ext/standard/tests/serialize/002.phpt
+      ext/standard/tests/strings/bug24312.phpt
+      ext/standard/tests/strings/bug36306.phpt
+      ext/standard/tests/strings/crc32.phpt
+      ext/standard/tests/strings/crypt.phpt
+      ext/standard/tests/strings/htmlentities.phpt
+      ext/standard/tests/strings/strrev.phpt
+      ext/standard/tests/strings/strtotitle.phpt
+      ext/standard/tests/strings/strtoupper.phpt
+      tests/classes/bug26737.phpt
+      tests/lang/034.phpt
+      tests/lang/bug24783.phpt
+      tests/lang/bug30638.phpt
+      tests/lang/each_binary_safety.phpt:
+      fix tests
+
+    * ZendEngine2/zend_strtod.c:
+      add zend_u_strtod() implementation by Matt Wilmas
+      major speedup when using floats in Unicode mode
+      also fixes several problems with the current code
+
+    * ZendEngine2/zend_strtod.c:
+      destroy freelist before destroying the mutexes
+
+    * (PHP_5_2)
+      NEWS:
+      news
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.h
+      ext/standard/formatted_print.c
+      ext/standard/tests/serialize/003.phpt
+      ext/standard/tests/strings/sprintf_f.phpt
+      main/snprintf.c
+      main/snprintf.h
+      main/spprintf.c:
+      MFH: use BSD licensed implementation of double-to-string utilities instead
+      of LGPL one
+      this patch also fixes thread safety issues in zend_strtod()
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.h
+      ext/standard/formatted_print.c
+      ext/standard/tests/serialize/003.phpt
+      ext/standard/tests/strings/sprintf_f.phpt
+      main/snprintf.c
+      main/snprintf.h
+      main/spprintf.c:
+      use BSD licensed implementation of double-to-string utilities instead of
+      LGPL one
+      this patch also fixes thread safety issues in zend_strtod()
+
 2006-12-05  Antony Dovgal  <antony@zend.com>
 
     * ext/filter/config.m4:
