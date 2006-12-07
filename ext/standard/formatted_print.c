@@ -196,9 +196,8 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 						 TSRMLS_DC)
 {
 	char num_buf[NUM_BUF_SIZE];
-	char *s, *q;
-	int s_len;
-	int is_negative;
+	char *s = NULL, *q;
+	int s_len = 0, is_negative = 0;
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
 				  *buffer, pos, size, number, width, padding, alignment, fmt));
