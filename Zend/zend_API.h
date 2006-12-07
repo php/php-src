@@ -1607,74 +1607,78 @@ END_EXTERN_C()
 		Z_TYPE_P(z) = IS_STRING;		    \
 	}
 
-#define ZVAL_ASCII_STRING(z, s, flags) \
-	if (UG(unicode)) { \
-		char *__s = (s); \
-		int __s_len = strlen(__s); \
-		UChar *u_str = zend_ascii_to_unicode(__s, __s_len+1 ZEND_FILE_LINE_CC); \
-		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(__s); \
+#define ZVAL_ASCII_STRING(z, s, flags) { \
+		if (UG(unicode)) { \
+			char *__s = (s); \
+			int __s_len = strlen(__s); \
+			UChar *u_str = zend_ascii_to_unicode(__s, __s_len+1 ZEND_FILE_LINE_CC); \
+			if ((flags) & ZSTR_AUTOFREE) { \
+				efree(__s); \
+			} \
+			ZVAL_UNICODEL(z, u_str, __s_len, 0); \
+		} else { \
+			char *__s=(s);					\
+			Z_STRLEN_P(z) = strlen(__s);	\
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : __s);	\
+			Z_TYPE_P(z) = IS_STRING;        \
 		} \
-		ZVAL_UNICODEL(z, u_str, __s_len, 0); \
-	} else { \
-		char *__s=(s);					\
-		Z_STRLEN_P(z) = strlen(__s);	\
-		Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : __s);	\
-		Z_TYPE_P(z) = IS_STRING;        \
 	}
 
-#define ZVAL_ASCII_STRINGL(z, s, l, flags) \
-	if (UG(unicode)) { \
-		char *__s = (s); \
-		int __s_len  = (l); \
-		UChar *u_str = zend_ascii_to_unicode((__s), (__s_len)+1 ZEND_FILE_LINE_CC); \
-		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(__s); \
+#define ZVAL_ASCII_STRINGL(z, s, l, flags) { \
+		if (UG(unicode)) { \
+			char *__s = (s); \
+			int __s_len  = (l); \
+			UChar *u_str = zend_ascii_to_unicode((__s), (__s_len)+1 ZEND_FILE_LINE_CC); \
+			if ((flags) & ZSTR_AUTOFREE) { \
+				efree(__s); \
+			} \
+			ZVAL_UNICODEL(z, u_str, __s_len, 0); \
+		} else { \
+			char *__s=(s); int __l=l;	\
+			Z_STRLEN_P(z) = __l;	    \
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s);	\
+			Z_TYPE_P(z) = IS_STRING;    \
 		} \
-		ZVAL_UNICODEL(z, u_str, __s_len, 0); \
-	} else { \
-		char *__s=(s); int __l=l;	\
-		Z_STRLEN_P(z) = __l;	    \
-		Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s);	\
-		Z_TYPE_P(z) = IS_STRING;    \
 	}
 
-#define ZVAL_U_STRING(conv, z, s, flags) \
-	if (UG(unicode)) { \
-		UErrorCode status = U_ZERO_ERROR; \
-		char *__s = (s); \
-		int __s_len = strlen(__s); \
-		UChar *u_str; \
-		int u_len; \
-		zend_string_to_unicode_ex(conv, &u_str, &u_len, __s, __s_len, &status); \
-		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(__s); \
+#define ZVAL_U_STRING(conv, z, s, flags) { \
+		if (UG(unicode)) { \
+			UErrorCode status = U_ZERO_ERROR; \
+			char *__s = (s); \
+			int __s_len = strlen(__s); \
+			UChar *u_str; \
+			int u_len; \
+			zend_string_to_unicode_ex(conv, &u_str, &u_len, __s, __s_len, &status); \
+			if ((flags) & ZSTR_AUTOFREE) { \
+				efree(__s); \
+			} \
+			ZVAL_UNICODEL(z, u_str, u_len, 0); \
+		} else { \
+			char *__s=(s);					\
+			Z_STRLEN_P(z) = strlen(__s);	\
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : __s);	\
+			Z_TYPE_P(z) = IS_STRING;        \
 		} \
-		ZVAL_UNICODEL(z, u_str, u_len, 0); \
-	} else { \
-		char *__s=(s);					\
-		Z_STRLEN_P(z) = strlen(__s);	\
-		Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : __s);	\
-		Z_TYPE_P(z) = IS_STRING;        \
 	}
 
-#define ZVAL_U_STRINGL(conv, z, s, l, flags) \
-	if (UG(unicode)) { \
-		UErrorCode status = U_ZERO_ERROR; \
-		char *__s = (s); \
-		int __s_len = (l); \
-		UChar *u_str; \
-		int u_len; \
-		zend_string_to_unicode_ex(conv, &u_str, &u_len, __s, __s_len, &status); \
-		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(__s); \
+#define ZVAL_U_STRINGL(conv, z, s, l, flags) { \
+		if (UG(unicode)) { \
+			UErrorCode status = U_ZERO_ERROR; \
+			char *__s = (s); \
+			int __s_len = (l); \
+			UChar *u_str; \
+			int u_len; \
+			zend_string_to_unicode_ex(conv, &u_str, &u_len, __s, __s_len, &status); \
+			if ((flags) & ZSTR_AUTOFREE) { \
+				efree(__s); \
+			} \
+			ZVAL_UNICODEL(z, u_str, u_len, 0); \
+		} else { \
+			char *__s=(s); int __l=l;	\
+			Z_STRLEN_P(z) = __l;	    \
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s);	\
+			Z_TYPE_P(z) = IS_STRING;    \
 		} \
-		ZVAL_UNICODEL(z, u_str, u_len, 0); \
-	} else { \
-		char *__s=(s); int __l=l;	\
-		Z_STRLEN_P(z) = __l;	    \
-		Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s);	\
-		Z_TYPE_P(z) = IS_STRING;    \
 	}
 
 #define ZVAL_RT_STRING(z, s, flags) \
@@ -1694,14 +1698,14 @@ END_EXTERN_C()
 		Z_USTRLEN_P(z) = u_strlen(__u); \
 		Z_USTRVAL_P(z) = (duplicate?eustrndup(__u, Z_USTRLEN_P(z)):__u);	\
 		Z_TYPE_P(z) = IS_UNICODE;		\
-}
+	}
 
 #define ZVAL_UNICODEL(z, u, l, duplicate) {	\
 		UChar *__u=(u); int __l=l;			\
 		Z_USTRLEN_P(z) = __l;				\
 		Z_USTRVAL_P(z) = (duplicate?eustrndup(__u, __l):__u);	\
 		Z_TYPE_P(z) = IS_UNICODE;		    \
-}
+	}
 
 #define ZVAL_ZSTR(z, zs, type, duplicate) { \
 		zstr __s=(zs); 					    \
@@ -1712,7 +1716,7 @@ END_EXTERN_C()
 							:(void*)estrndup(__s.s, Z_UNILEN_P(z))) \
 					   :__s.v);			   \
 		Z_TYPE_P(z) = type; 			   \
-}
+	}
 
 #define ZVAL_ZSTRL(z, zs, l, type, duplicate) { \
 		zstr __s=(zs); int __l=l;				\
@@ -1723,13 +1727,13 @@ END_EXTERN_C()
 							:(void*)estrndup(__s.s, __l)) \
 					   :__s.v);				   \
 		Z_TYPE_P(z) = type; 				   \
-}
+	}
 
 #define ZVAL_UCHAR32(z, ch) { 							\
 		UChar buf[3];									\
 		int buf_len = zend_codepoint_to_uchar(ch, buf); \
 		ZVAL_UNICODEL(z, buf, buf_len, 1); 				\
-}
+	}
 
 #define ZVAL_EMPTY_STRING(z) {				\
 		Z_STRLEN_P(z) = 0;					\
