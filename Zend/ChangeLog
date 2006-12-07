@@ -1,3 +1,31 @@
+2006-12-06  Antony Dovgal  <antony@zend.com>
+
+    * tests/unset_cv05.phpt:
+      fix tests
+
+    * zend_strtod.c:
+      add zend_u_strtod() implementation by Matt Wilmas
+      major speedup when using floats in Unicode mode
+      also fixes several problems with the current code
+
+    * zend_strtod.c:
+      destroy freelist before destroying the mutexes
+
+    * (PHP_5_2)
+      zend.c
+      zend_strtod.c
+      zend_strtod.h:
+      MFH: use BSD licensed implementation of double-to-string utilities instead
+      of LGPL one
+      this patch also fixes thread safety issues in zend_strtod()
+
+    * zend.c
+      zend_strtod.c
+      zend_strtod.h:
+      use BSD licensed implementation of double-to-string utilities instead of
+      LGPL one
+      this patch also fixes thread safety issues in zend_strtod()
+
 2006-12-05  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
