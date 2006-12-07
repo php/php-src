@@ -49,6 +49,7 @@ PHP                                                                        NEWS
 - Fixed FastCGI impersonation for persistent connections on Windows. (Dmitry)
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
+- Fixed bug #39763 (magic quotes are applied twice by ext/filter). (Tony)
 - Fixed bug #39754 (Some POSIX extension functions not thread safe).
   (Ilia, wharmby at uk dot ibm dot com)
 - Fixed bug #39724 (Broken build due to spl/filter usage of pcre extension).
