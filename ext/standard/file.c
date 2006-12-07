@@ -1114,7 +1114,7 @@ PHPAPI PHP_FUNCTION(feof)
 }
 /* }}} */
 
-/* {{{ proto string fgets(resource fp[, int length]) U
+/* {{{ proto string fgets(resource fp[, int lengthish]) U
    Get a line from file pointer */
 PHPAPI PHP_FUNCTION(fgets)
 {
@@ -1130,6 +1130,11 @@ PHPAPI PHP_FUNCTION(fgets)
 	}
 
 	php_stream_from_zval(stream, &zstream);
+
+	if (length > 0) {
+		/* For BC reasons, fgets() should only return length-1 bytes. */
+		length--;
+	}
 
 	buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, length, &retlen);
 	if (!buf.v) {
