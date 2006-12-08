@@ -57,5 +57,11 @@ string(9) "FooBarBaz"
 string(3) "Foo"
 
 Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 40
+string(3) "Foo"
 
-Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_008.php on line %d
+Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 42
+string(3) "Foo"
+
+Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 44
+string(3) "Foo"
+===DONE===

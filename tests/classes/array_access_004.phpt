@@ -51,4 +51,7 @@ object::offsetGet(2)
 int(1)
 object::offsetGet(2)
 
-Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_004.php on line %d
+Notice: Indirect modification of overloaded element of object has no effect in %sarray_access_004.php on line 39
+object::offsetGet(2)
+int(1)
+===DONE===
