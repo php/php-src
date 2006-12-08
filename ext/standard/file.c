@@ -1129,12 +1129,14 @@ PHPAPI PHP_FUNCTION(fgets)
 		RETURN_NULL();
 	}
 
-	php_stream_from_zval(stream, &zstream);
-
-	if (length > 0) {
+	if (length == 1) {
 		/* For BC reasons, fgets() should only return length-1 bytes. */
+		RETURN_FALSE;
+	} else if (length > 1) {
 		length--;
 	}
+
+	php_stream_from_zval(stream, &zstream);
 
 	buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, length, &retlen);
 	if (!buf.v) {
@@ -1180,7 +1182,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 }
 /* }}} */
 
-/* {{{ proto string fgetss(resource fp [, int length, string allowable_tags]) U
+/* {{{ proto string fgetss(resource fp [, int lengthish, string allowable_tags]) U
    Get a line from file pointer and strip HTML tags */
 PHPAPI PHP_FUNCTION(fgetss)
 {
@@ -1192,6 +1194,13 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lZ", &zstream, &length, &allow) == FAILURE) {
 		return;
+	}
+
+	if (length == 1) {
+		/* For BC reasons, fgetss() should only return length-1 bytes. */
+		RETURN_FALSE;
+	} else if (length > 1) {
+		length--;
 	}
 
 	php_stream_from_zval(stream, &zstream);
