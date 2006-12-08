@@ -42,7 +42,7 @@ zend_function_entry php_dom_domimplementation_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto boolean dom_domimplementation_has_feature(string feature, string version);
+/* {{{ proto boolean dom_domimplementation_has_feature(string feature, string version)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-5CED94D7
 Since: 
 */
@@ -64,7 +64,7 @@ PHP_METHOD(domimplementation, hasFeature)
 /* }}} end dom_domimplementation_has_feature */
 
 
-/* {{{ proto DOMDocumentType dom_domimplementation_create_document_type(string qualifiedName, string publicId, string systemId);
+/* {{{ proto DOMDocumentType dom_domimplementation_create_document_type(string qualifiedName, string publicId, string systemId) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocType
 Since: DOM Level 2
 */
@@ -120,7 +120,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 /* }}} end dom_domimplementation_create_document_type */
 
 
-/* {{{ proto DOMDocument dom_domimplementation_create_document(string namespaceURI, string qualifiedName, DOMDocumentType doctype);
+/* {{{ proto DOMDocument dom_domimplementation_create_document(string namespaceURI, string qualifiedName, DOMDocumentType doctype) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocument
 Since: DOM Level 2
 */
@@ -223,7 +223,7 @@ PHP_METHOD(domimplementation, createDocument)
 /* }}} end dom_domimplementation_create_document */
 
 
-/* {{{ proto DOMNode dom_domimplementation_get_feature(string feature, string version);
+/* {{{ proto DOMNode dom_domimplementation_get_feature(string feature, string version) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementation3-getFeature
 Since: DOM Level 3
 */

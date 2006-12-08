@@ -43,7 +43,7 @@ zend_function_entry php_dom_domerrorhandler_class_functions[] = {
 /* {{{ attribute protos, not implemented yet */
 
 
-/* {{{ proto dom_boolean dom_domerrorhandler_handle_error(domerror error);
+/* {{{ proto dom_boolean dom_domerrorhandler_handle_error(domerror error) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-ERRORS-DOMErrorHandler-handleError
 Since: 
 */
