@@ -2277,7 +2277,7 @@ PHP_FUNCTION(dom_document_save_html)
 
 #endif  /* defined(LIBXML_HTML_ENABLED) */
 
-/* {{{ proto boolean DOMDocument::registerNodeClass(string baseclass, string extendedclass)
+/* {{{ proto boolean DOMDocument::registerNodeClass(string baseclass, string extendedclass) U
    Register extended class used to create base node type */
 PHP_METHOD(domdocument, registerNodeClass)
 {
