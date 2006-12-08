@@ -958,7 +958,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	if (error == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_PASSWDFUNCTION");
 	} else if (Z_TYPE_P(retval) == IS_STRING || Z_TYPE_P(retval) == IS_UNICODE) {
-		if (Z_TYPE_(retval) == IS_UNICODE) {
+		if (Z_TYPE_P(retval) == IS_UNICODE) {
 			convert_to_string_ex(retval);
 		}
 		if (Z_STRLEN_P(retval) > buflen) {
