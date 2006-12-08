@@ -40,7 +40,7 @@ zend_function_entry php_dom_entityreference_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DOMEntityReference::__construct(string name); */
+/* {{{ proto void DOMEntityReference::__construct(string name) U */
 PHP_METHOD(domentityreference, __construct)
 {
 	zval *id;

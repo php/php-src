@@ -40,7 +40,7 @@ zend_function_entry php_dom_processinginstruction_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DOMProcessingInstruction::__construct(string name, [string value]); */
+/* {{{ proto void DOMProcessingInstruction::__construct(string name, [string value]) U */
 PHP_METHOD(domprocessinginstruction, __construct)
 {
 

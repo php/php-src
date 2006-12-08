@@ -59,7 +59,7 @@ int dom_domstringlist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto domstring dom_domstringlist_item(int index);
+/* {{{ proto domstring dom_domstringlist_item(int index) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMStringList-item
 Since: 
 */

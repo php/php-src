@@ -44,7 +44,7 @@ zend_function_entry php_dom_xpath_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DOMXPath::__construct(DOMDocument doc); */
+/* {{{ proto void DOMXPath::__construct(DOMDocument doc) U */
 PHP_METHOD(domxpath, __construct)
 {
 	zval *id, *doc;
@@ -280,14 +280,14 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) {
 	xmlXPathFreeObject(xpathobjp);
 }
 
-/* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context]); */
+/* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context]) U */
 PHP_FUNCTION(dom_xpath_query)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY);
 }
 /* }}} end dom_xpath_query */
 
-/* {{{ proto mixed dom_xpath_evaluate(string expr [,DOMNode context]); */
+/* {{{ proto mixed dom_xpath_evaluate(string expr [,DOMNode context]) U */
 PHP_FUNCTION(dom_xpath_evaluate)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE);

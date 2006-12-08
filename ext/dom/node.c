@@ -905,7 +905,7 @@ static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
 	return newchild;
 }
 
-/* {{{ proto domnode dom_node_insert_before(DomNode newChild, DomNode refChild);
+/* {{{ proto domnode dom_node_insert_before(DomNode newChild, DomNode refChild) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
 Since:
 */
@@ -1067,7 +1067,7 @@ PHP_FUNCTION(dom_node_insert_before)
 /* }}} end dom_node_insert_before */
 
 
-/* {{{ proto DomNode dom_node_replace_child(DomNode newChild, DomNode oldChild);
+/* {{{ proto DomNode dom_node_replace_child(DomNode newChild, DomNode oldChild) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-785887307
 Since: 
 */
@@ -1159,7 +1159,7 @@ PHP_FUNCTION(dom_node_replace_child)
 /* }}} end dom_node_replace_child */
 
 
-/* {{{ proto DomNode dom_node_remove_child(DomNode oldChild);
+/* {{{ proto DomNode dom_node_remove_child(DomNode oldChild) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1734834066
 Since: 
 */
@@ -1212,7 +1212,7 @@ PHP_FUNCTION(dom_node_remove_child)
 /* }}} end dom_node_remove_child */
 
 
-/* {{{ proto DomNode dom_node_append_child(DomNode newChild);
+/* {{{ proto DomNode dom_node_append_child(DomNode newChild) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-184E7107
 Since: 
 */
@@ -1314,7 +1314,7 @@ PHP_FUNCTION(dom_node_append_child)
 /* }}} end dom_node_append_child */
 
 
-/* {{{ proto boolean dom_node_has_child_nodes();
+/* {{{ proto boolean dom_node_has_child_nodes() U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-810594187
 Since: 
 */
@@ -1343,7 +1343,7 @@ PHP_FUNCTION(dom_node_has_child_nodes)
 /* }}} end dom_node_has_child_nodes */
 
 
-/* {{{ proto DomNode dom_node_clone_node(boolean deep);
+/* {{{ proto DomNode dom_node_clone_node(boolean deep) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3A0ED0A4
 Since: 
 */
@@ -1407,7 +1407,7 @@ PHP_FUNCTION(dom_node_clone_node)
 
 
 
-/* {{{ proto void dom_node_normalize();
+/* {{{ proto void dom_node_normalize() U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-normalize
 Since: 
 */
@@ -1452,7 +1452,7 @@ PHP_FUNCTION(dom_node_is_supported)
 /* }}} end dom_node_is_supported */
 
 
-/* {{{ proto boolean dom_node_has_attributes();
+/* {{{ proto boolean dom_node_has_attributes() U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeHasAttrs
 Since: DOM Level 2
 */
@@ -1479,7 +1479,7 @@ PHP_FUNCTION(dom_node_has_attributes)
 }
 /* }}} end dom_node_has_attributes */
 
-/* {{{ proto short dom_node_compare_document_position(DomNode other);
+/* {{{ proto short dom_node_compare_document_position(DomNode other) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-compareDocumentPosition
 Since: DOM Level 3
 */
@@ -1490,7 +1490,7 @@ PHP_FUNCTION(dom_node_compare_document_position)
 /* }}} end dom_node_compare_document_position */
 
 
-/* {{{ proto boolean dom_node_is_same_node(DomNode other);
+/* {{{ proto boolean dom_node_is_same_node(DomNode other) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isSameNode
 Since: DOM Level 3
 */
@@ -1517,7 +1517,7 @@ PHP_FUNCTION(dom_node_is_same_node)
 /* }}} end dom_node_is_same_node */
 
 
-/* {{{ proto string dom_node_lookup_prefix(string namespaceURI);
+/* {{{ proto string dom_node_lookup_prefix(string namespaceURI) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
 Since: DOM Level 3
 */
@@ -1569,7 +1569,7 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 /* }}} end dom_node_lookup_prefix */
 
 
-/* {{{ proto boolean dom_node_is_default_namespace(string namespaceURI);
+/* {{{ proto boolean dom_node_is_default_namespace(string namespaceURI) U
 URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
 Since: DOM Level 3
 */
@@ -1600,7 +1600,7 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 /* }}} end dom_node_is_default_namespace */
 
 
-/* {{{ proto string dom_node_lookup_namespace_uri(string prefix);
+/* {{{ proto string dom_node_lookup_namespace_uri(string prefix) U
 URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-lookupNamespaceURI
 Since: DOM Level 3
 */
@@ -1630,7 +1630,7 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 /* }}} end dom_node_lookup_namespace_uri */
 
 
-/* {{{ proto boolean dom_node_is_equal_node(DomNode arg);
+/* {{{ proto boolean dom_node_is_equal_node(DomNode arg) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isEqualNode
 Since: DOM Level 3
 */
@@ -1641,7 +1641,7 @@ PHP_FUNCTION(dom_node_is_equal_node)
 /* }}} end dom_node_is_equal_node */
 
 
-/* {{{ proto DomNode dom_node_get_feature(string feature, string version);
+/* {{{ proto DomNode dom_node_get_feature(string feature, string version) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getFeature
 Since: DOM Level 3
 */
@@ -1652,7 +1652,7 @@ PHP_FUNCTION(dom_node_get_feature)
 /* }}} end dom_node_get_feature */
 
 
-/* {{{ proto DomUserData dom_node_set_user_data(string key, DomUserData data, userdatahandler handler);
+/* {{{ proto DomUserData dom_node_set_user_data(string key, DomUserData data, userdatahandler handler) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-setUserData
 Since: DOM Level 3
 */
@@ -1663,7 +1663,7 @@ PHP_FUNCTION(dom_node_set_user_data)
 /* }}} end dom_node_set_user_data */
 
 
-/* {{{ proto DomUserData dom_node_get_user_data(string key);
+/* {{{ proto DomUserData dom_node_get_user_data(string key) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getUserData
 Since: DOM Level 3
 */
@@ -1919,14 +1919,14 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 }
 
-/* {{{ proto string DOMNode::C14N([bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
+/* {{{ proto string DOMNode::C14N([bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]]) U
    Canonicalize nodes to a string */
 PHP_METHOD(domnode, C14N)
 {
 	dom_canonicalization(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 
-/* {{{ proto int DOMNode::C14NFile(string uri [, bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
+/* {{{ proto int DOMNode::C14NFile(string uri [, bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]]) U
    Canonicalize nodes to a file */
 PHP_METHOD(domnode, C14NFile)
 {
@@ -1935,7 +1935,7 @@ PHP_METHOD(domnode, C14NFile)
 
 #endif
 
-/* {{{ proto int DOMNode::getNodePath()
+/* {{{ proto int DOMNode::getNodePath() U
    Gets an xpath for a node */
 
 PHP_METHOD(domnode, getNodePath)

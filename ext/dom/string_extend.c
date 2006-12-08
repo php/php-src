@@ -44,7 +44,7 @@ zend_function_entry php_dom_string_extend_class_functions[] = {
 /* {{{ attribute protos, not implemented yet */
 
 
-/* {{{ proto int dom_string_extend_find_offset16(int offset32);
+/* {{{ proto int dom_string_extend_find_offset16(int offset32) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#i18n-methods-StringExtend-findOffset16
 Since: 
 */
@@ -55,7 +55,7 @@ PHP_FUNCTION(dom_string_extend_find_offset16)
 /* }}} end dom_string_extend_find_offset16 */
 
 
-/* {{{ proto int dom_string_extend_find_offset32(int offset16);
+/* {{{ proto int dom_string_extend_find_offset32(int offset16) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#i18n-methods-StringExtend-findOffset32
 Since: 
 */
