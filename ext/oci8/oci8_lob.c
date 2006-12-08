@@ -500,7 +500,7 @@ int php_oci_lob_get_buffering (php_oci_descriptor *descriptor)
 int php_oci_lob_copy (php_oci_descriptor *descriptor_dest, php_oci_descriptor *descriptor_from, long length TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor_dest->connection;
-	int length_dest, length_from, copy_len;
+	ub4 length_dest, length_from, copy_len;
 	
 	if (php_oci_lob_get_length(descriptor_dest, &length_dest TSRMLS_CC)) {
 		return 1;
@@ -767,7 +767,7 @@ int php_oci_lob_truncate (php_oci_descriptor *descriptor, long new_lob_length TS
 
 /* {{{ php_oci_lob_erase()
  Erase (or fill with whitespaces, depending on LOB type) the LOB (or its part) */
-int php_oci_lob_erase (php_oci_descriptor *descriptor, long offset, long length, ub4 *bytes_erased TSRMLS_DC)
+int php_oci_lob_erase (php_oci_descriptor *descriptor, long offset, ub4 length, ub4 *bytes_erased TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
 	OCILobLocator *lob = descriptor->descriptor;
