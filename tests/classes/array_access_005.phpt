@@ -70,5 +70,8 @@ array(1) {
 }
 
 Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_005.php on line 46
+string(6) "JoeFoo"
 
-Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_005.php on line %d
+Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_005.php on line 48
+string(6) "JoeFoo"
+===DONE===

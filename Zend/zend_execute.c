@@ -1162,16 +1162,21 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
 
 				if (overloaded_result) {
-					switch (type) {
-						case BP_VAR_RW:
-						case BP_VAR_W:
-							if (Z_TYPE_P(overloaded_result) != IS_OBJECT
-								&& !overloaded_result->is_ref) {
-								zend_error_noreturn(E_ERROR, "Objects used as arrays in post/pre increment/decrement must return values by reference");
-							}
-							break;
-					}
+					if (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET) {
+						if (overloaded_result->refcount > 0) {
+							zval *tmp = overloaded_result;
 
+							ALLOC_ZVAL(overloaded_result);
+							*overloaded_result = *tmp;
+							zval_copy_ctor(overloaded_result);
+							overloaded_result->is_ref = 0;
+							overloaded_result->refcount = 0;
+						}
+						if (Z_TYPE_P(overloaded_result) != IS_OBJECT) {
+							zend_class_entry *ce = Z_OBJCE_P(container);
+							zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name);
+						}
+					}
 					retval = &overloaded_result;
 				} else {
 					retval = &EG(error_zval_ptr);
