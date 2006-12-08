@@ -397,7 +397,13 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 			Z_STRVAL(new_var) = estrndup(*val, val_len);
 			INIT_PZVAL(tmp_new_var);
  			php_zval_filter(&tmp_new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL/*charset*/, 0 TSRMLS_CC);
-		} else {
+		}
+#if PHP_VERSION_ID<60000
+		else if (PG(magic_quotes_gpc)) {
+			Z_STRVAL(new_var) = php_addslashes(*val, Z_STRLEN(new_var), &Z_STRLEN(new_var), 0 TSRMLS_CC);
+		}
+#endif
+		else {
 			Z_STRVAL(new_var) = estrndup(*val, val_len);
 		}
 	} else { /* empty string */
