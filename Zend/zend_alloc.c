@@ -557,15 +557,14 @@ static void zend_mm_free_cache(zend_mm_heap *heap)
 			while (mm_block) {
 				size_t size = ZEND_MM_BLOCK_SIZE(mm_block);
 				zend_mm_free_block *q = mm_block->prev_free_block;
-				zend_mm_block *prev_block = ZEND_MM_PREV_BLOCK(mm_block);
 				zend_mm_block *next_block = ZEND_MM_NEXT_BLOCK(mm_block);
 
 				heap->cached -= size;
 
-				if (ZEND_MM_IS_FREE_BLOCK(prev_block)) {
-					size += ZEND_MM_FREE_BLOCK_SIZE(prev_block);
-					mm_block = (zend_mm_free_block*)prev_block;
-					zend_mm_remove_from_free_list(heap, (zend_mm_free_block *) prev_block);
+				if (ZEND_MM_PREV_BLOCK_IS_FREE(mm_block)) {
+					mm_block = (zend_mm_free_block*)ZEND_MM_PREV_BLOCK(mm_block);
+					size += ZEND_MM_FREE_BLOCK_SIZE(mm_block);
+					zend_mm_remove_from_free_list(heap, (zend_mm_free_block *) mm_block);
 				}
 				if (ZEND_MM_IS_FREE_BLOCK(next_block)) {
 					size += ZEND_MM_FREE_BLOCK_SIZE(next_block);
