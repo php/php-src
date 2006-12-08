@@ -102,7 +102,7 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 	return SUCCESS;
 }
 
-/* {{{ proto boolean dom_xpath_register_ns(string prefix, string uri); */
+/* {{{ proto boolean dom_xpath_register_ns(string prefix, string uri) U */
 PHP_FUNCTION(dom_xpath_register_ns)
 {
 	zval *id;
