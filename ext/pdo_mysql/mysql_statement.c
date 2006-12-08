@@ -273,15 +273,15 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 		/* No more results */
 		return 0;
 	} else {
-		if ((my_ulonglong)-1 == (row_count = mysql_affected_rows(H->server))) {
-			pdo_mysql_error_stmt(stmt);
-			return 0;
-		}
-		
 		if (!H->buffered) {
 			S->result = mysql_use_result(H->server);
+			row_count = 0;
 		} else {
 			S->result = mysql_store_result(H->server);
+			if ((my_ulonglong)-1 == (row_count = mysql_affected_rows(H->server))) {
+				pdo_mysql_error_stmt(stmt);
+				return 0;
+			}
 		}
 
 		if (NULL == S->result) {

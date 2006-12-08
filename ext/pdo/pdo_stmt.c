@@ -1932,10 +1932,6 @@ static PHP_METHOD(PDOStatement, setFetchMode)
 
 static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	if (!stmt->methods->next_rowset(stmt TSRMLS_CC)) {
-		return 0;
-	}
-
 	/* un-describe */
 	if (stmt->columns) {
 		int i;
@@ -1947,6 +1943,10 @@ static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 		efree(stmt->columns);
 		stmt->columns = NULL;
 		stmt->column_count = 0;
+	}
+
+	if (!stmt->methods->next_rowset(stmt TSRMLS_CC)) {
+		return 0;
 	}
 
 	pdo_stmt_describe_columns(stmt TSRMLS_CC);
@@ -1969,8 +1969,6 @@ static PHP_METHOD(PDOStatement, nextRowset)
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
-	
-	pdo_stmt_describe_columns(stmt TSRMLS_CC);
 
 	RETURN_TRUE;
 }
