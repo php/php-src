@@ -33,10 +33,8 @@ array(2) {
   [1]=>
   string(7) "testing"
 }
-bool(false)
-array(2) {
+bool(true)
+array(1) {
   [0]=>
-  string(5) "HY000"
-  [1]=>
-  int(2014)
+  string(5) "00000"
 }
