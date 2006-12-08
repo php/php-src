@@ -25,4 +25,9 @@ echo $xml->asXML();
 ===FAIL===
 int(0)
 
-Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sbug35785.php on line %d
+Notice: Indirect modification of overloaded element of SimpleXMLElement has no effect in %sbug35785.php on line %d
+
+Strict Standards: Creating default object from empty value in %sbug35785.php on line %d
+<?xml version="1.0"?>
+<root><bla><posts/></bla></root>
+===DONE===

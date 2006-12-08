@@ -71,4 +71,5 @@ Warning: main(): Cannot add element person number 3 when only 2 such elements ex
   </person>
 </people>
 
-Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %s027.php on line %d
+Notice: Indirect modification of overloaded element of SimpleXMLElement has no effect in %s027.php on line %d
+===DONE===
