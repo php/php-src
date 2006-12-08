@@ -957,7 +957,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	error = call_user_function(EG(function_table), NULL, func, retval, 2, argv TSRMLS_CC);
 	if (error == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_PASSWDFUNCTION");
-	} else if (Z_TYPE_P(retval) == IS_STRING || Z_TYPE_(retval) == IS_UNICODE) {
+	} else if (Z_TYPE_P(retval) == IS_STRING || Z_TYPE_P(retval) == IS_UNICODE) {
 		if (Z_TYPE_(retval) == IS_UNICODE) {
 			convert_to_string_ex(retval);
 		}
@@ -1449,13 +1449,19 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					int ntype;
 					int l;
 					UErrorCode status = U_ZERO_ERROR;
+					uint data_len;
 
 					SEPARATE_ZVAL(current);
-					convert_to_string_ex(current);
+
+					if (Z_TYPE_PP(current) == IS_UNICODE) {
+						zend_unicode_to_string_ex(UG(utf8_conv), &postval, &data_len, Z_USTRVAL_PP(current), Z_USTRLEN_PP(current), &status);
+					} else {
+						convert_to_string_ex(current);
+						postval = Z_STRVAL_PP(current);
+						data_len = Z_STRLEN_PP(current);
+					}
 
 					zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
-				
-					postval = Z_STRVAL_PP(current);
 
 					ntype = zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
 					if (type == -1) {
@@ -1499,7 +1505,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 											 CURLFORM_COPYNAME, key,
 											 CURLFORM_NAMELENGTH, l,
 											 CURLFORM_COPYCONTENTS, postval, 
-											 CURLFORM_CONTENTSLENGTH, (long)Z_STRLEN_PP(current),
+											 CURLFORM_CONTENTSLENGTH, (long)data_len,
 											 CURLFORM_END);
 					}
 					if (ntype == HASH_KEY_IS_UNICODE) {
