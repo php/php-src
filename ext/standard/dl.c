@@ -25,6 +25,7 @@
 #include "php_globals.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/file.h"
 
 #include "SAPI.h"
 
@@ -52,20 +53,17 @@
 #endif /* defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H */
 
 
-/* {{{ proto int dl(string extension_filename)
+/* {{{ proto int dl(string extension_filename) U
    Load a PHP extension at runtime */
 PHP_FUNCTION(dl)
 {
-	zval **file;
+	zval *filename;
 
-	/* obtain arguments */
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &filename) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(file);
-
-	php_dl(*file, MODULE_TEMPORARY, return_value, 0 TSRMLS_CC);
+	php_dl(filename, MODULE_TEMPORARY, return_value, 0 TSRMLS_CC);
 	EG(full_tables_cleanup) = 1;
 }
 
@@ -90,6 +88,8 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 	zend_module_entry *(*get_module)(void);
 	int error_type;
 	char *extension_dir;
+	char *filename;
+	int filename_len;
 
 	if (type == MODULE_PERSISTENT) {
 		extension_dir = INI_STR("extension_dir");
@@ -103,18 +103,31 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 		error_type = E_CORE_WARNING;
 	}
 
+	if (Z_TYPE_P(file) == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, Z_USTRVAL_P(file), Z_USTRLEN_P(file), REPORT_ERRORS, FG(default_context))) {
+			return;
+		}
+	} else {
+		filename = Z_STRVAL_P(file);
+		filename_len = Z_STRLEN_P(file);
+	}
+
 	if (extension_dir && extension_dir[0]){
 		int extension_dir_len = strlen(extension_dir);
 
-		libpath = emalloc(extension_dir_len+Z_STRLEN_P(file)+2);
+		libpath = emalloc(extension_dir_len+filename_len+2);
 
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
-			sprintf(libpath, "%s%s", extension_dir, Z_STRVAL_P(file)); /* SAFE */
+			sprintf(libpath, "%s%s", extension_dir, filename); /* SAFE */
 		} else {
-			sprintf(libpath, "%s%c%s", extension_dir, DEFAULT_SLASH, Z_STRVAL_P(file)); /* SAFE */
+			sprintf(libpath, "%s%c%s", extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 		}
 	} else {
-		libpath = estrndup(Z_STRVAL_P(file), Z_STRLEN_P(file));
+		libpath = estrndup(filename, filename_len);
+	}
+
+	if (Z_TYPE_P(file) == IS_UNICODE) {
+		efree(filename);
 	}
 
 	/* load dynamic symbol */
@@ -141,7 +154,7 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 
 	if (!get_module) {
 		DL_UNLOAD(handle);
-		php_error_docref(NULL TSRMLS_CC, error_type, "Invalid library (maybe not a PHP library) '%s'", Z_STRVAL_P(file));
+		php_error_docref(NULL TSRMLS_CC, error_type, "Invalid library (maybe not a PHP library) '%R'", Z_TYPE_P(file), Z_UNIVAL_P(file));
 		RETURN_FALSE;
 	}
 	module_entry = get_module();
@@ -229,7 +242,7 @@ PHP_MINFO_FUNCTION(dl)
 
 void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", Z_STRVAL_P(file));
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot dynamically load %R - dynamic modules are not supported", Z_TYPE_P(file), Z_UNIVAL_P(file));
 	RETURN_FALSE;
 }
 
