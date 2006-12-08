@@ -1,3 +1,82 @@
+2006-12-07  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/bug39350.phpt:
+      MFB test
+
+    * ext/standard/file.c
+      ext/standard/tests/file/fgetss.phpt
+      ext/standard/tests/file/fgetss1.phpt:
+      MFB tests (they still fail though)
+      fix BC in fgetss()
+
+2006-12-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/datetime.c:
+      Unicode support in strptime(). Uses runtime encoding for conversion.
+      
+
+    * ext/standard/versioning.c:
+      version_compare() will use runtime encoding.
+
+    * ext/standard/iptc.c:
+      Unicode support/safety in iptc* functions. Untested, cause I know crap
+      about IPTC.
+
+2006-12-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_strtod.c
+      ext/standard/formatted_print.c:
+      initialize variables
+
+    * ZendEngine2/zend_strtod.c
+      ext/standard/formatted_print.c:
+      initialize variables and make Coverity happy
+
+2006-12-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_hash.c
+      ZendEngine2/zend_strtol.c:
+      Apply Matt W's patch  to only allow ASCII digits and not use u_digit().
+
+    * ZendEngine2/zend_API.h:
+      Guard against ambiguous 'else' clauses.
+
+    * ext/standard/url.c:
+      Unicode support in parse_url().
+
+2006-12-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/filter.c:
+      MFH: fix #39763 (magic quotes are applied twice by ext/filter)
+
+    * ext/filter/filter.c:
+      fix #39763 (magic quotes are applied twice by ext/filter)
+      no need to add slashes manually, they are added by
+      php_register_variable_ex()
+
+2006-12-07  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c:
+      Change fgets() behavior back to BC version
+
+2006-12-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/posix/config.m4
+      ext/posix/posix.c:
+      MFB: Fixed bug #39754 (Some POSIX extension functions not thread safe).
+
+    * (PHP_5_2)
+      NEWS
+      ext/posix/config.m4
+      ext/posix/posix.c:
+      Fixed bug #39754 (Some POSIX extension functions not thread safe).
+
+    * ext/curl/interface.c:
+      Allow submission of unicode data in utf8 form
+
 2006-12-06  Sara Golemon  <sara@golemon.com>
 
     * ext/standard/string.c:
