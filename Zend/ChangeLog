@@ -1,3 +1,21 @@
+2006-12-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_strtod.c:
+      initialize variables
+
+    * zend_strtod.c:
+      initialize variables and make Coverity happy
+
+2006-12-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_hash.c
+      zend_strtol.c:
+      Apply Matt W's patch  to only allow ASCII digits and not use u_digit().
+
+    * zend_API.h:
+      Guard against ambiguous 'else' clauses.
+
 2006-12-06  Antony Dovgal  <antony@zend.com>
 
     * tests/unset_cv05.phpt:
