@@ -14,6 +14,7 @@ foreach($f->bar as $key => $value) {
     print "$key => $value\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Notice: Indirect modification of overloaded property foo::$bar has no effect in %sbug38146.php on line 10
 foo => bar
 bar => foo
