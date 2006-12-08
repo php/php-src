@@ -342,14 +342,16 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 
 			if (rv) {
 				retval = &rv;
-				if ((type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET) && rv->refcount > 0) {
-					zval *tmp = rv;
+				if (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET) {
+					if (rv->refcount > 0) {
+						zval *tmp = rv;
 
-					ALLOC_ZVAL(rv);
-					*rv = *tmp;
-					zval_copy_ctor(rv);
-					rv->is_ref = 0;
-					rv->refcount = 0;
+						ALLOC_ZVAL(rv);
+						*rv = *tmp;
+						zval_copy_ctor(rv);
+						rv->is_ref = 0;
+						rv->refcount = 0;
+					}
 					if (Z_TYPE_P(rv) != IS_OBJECT) {
 						zend_error(E_NOTICE, "Indirect modification of overloaded property %v::$%R has no effect", zobj->ce->name, Z_TYPE_P(member), Z_UNIVAL_P(member));
 					}
@@ -476,19 +478,6 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 
 		/* Undo PZVAL_LOCK() */
 		retval->refcount--;
-
-		if ((type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET) && retval->refcount > 0) {
-			zval *tmp = retval;
-
-			ALLOC_ZVAL(retval);
-			*retval = *tmp;
-			zval_copy_ctor(retval);
-			retval->is_ref = 0;
-			retval->refcount = 0;
-			if (Z_TYPE_P(retval) != IS_OBJECT) {
-				zend_error(E_NOTICE, "Indirect modification of overloaded element of %v has no effect", ce->name);
-			}
-		}
 
 		return retval;
 	} else {
