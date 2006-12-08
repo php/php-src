@@ -56,6 +56,8 @@ PHP                                                                        NEWS
   sets in pdo_mysql). (Ilia)
 - Fixed bug #39754 (Some POSIX extension functions not thread safe).
   (Ilia, wharmby at uk dot ibm dot com)
+- Fixed bug #39732 (oci_bind_array_by_name doesn't work on Solaris 64bit). 
+  (Tony)
 - Fixed bug #39724 (Broken build due to spl/filter usage of pcre extension).
   (Tony, Ilia)
 - Fixed bug #39718 (possible crash if assert.callback is set in ini). (Ilia)
