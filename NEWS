@@ -165,6 +165,8 @@ PHP                                                                        NEWS
 - Fixed bug #36644 (possible crash in variant_date_from_timestamp()). (Ilia)
 - Fixed bug #33282 (Re-assignment by reference does not clear the is_ref flag)
   (Ilia,Dmitry, Matt Wilmas)
+- Fixed bug #29840 (is_executable() does not honor safe_mode_exec_dir
+  setting). (Ilia)
 
 02 Nov 2006, PHP 5.2.0
 - Updated bundled OpenSSL to version 0.9.8d in the Windows distro. (Edin)
