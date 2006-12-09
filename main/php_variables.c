@@ -511,7 +511,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 				var++;
 			}
 			if (var == val || *var == '\0') {
-				goto next_cookie;
+				goto next_var;
 			}
 		}
 
