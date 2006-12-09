@@ -1451,22 +1451,36 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					UErrorCode status = U_ZERO_ERROR;
 					uint data_len;
 
-					SEPARATE_ZVAL(current);
-
-					if (Z_TYPE_PP(current) == IS_UNICODE) {
-						zend_unicode_to_string_ex(UG(utf8_conv), &postval, &data_len, Z_USTRVAL_PP(current), Z_USTRLEN_PP(current), &status);
-					} else {
-						convert_to_string_ex(current);
-						postval = Z_STRVAL_PP(current);
-						data_len = Z_STRLEN_PP(current);
+					switch (Z_TYPE_PP(current)) {
+						case IS_UNICODE:
+							ntype = HASH_KEY_IS_UNICODE;
+							break;
+						case IS_STRING:
+							ntype = HASH_KEY_IS_STRING;
+							break;
+						default:
+							if (type != -1) {
+								ntype = type;
+							} else {
+								ntype = HASH_KEY_IS_STRING;
+							}
+							break;
 					}
 
-					zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
-
-					ntype = zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
 					if (type == -1) {
 						type = ntype;
 					} else if (type != ntype) {
+						goto type_conflict;
+					}
+
+					SEPARATE_ZVAL(current);
+					convert_to_string_with_converter_ex(current, UG(utf8_conv));
+					postval = Z_STRVAL_PP(current);
+					data_len = Z_STRLEN_PP(current);
+
+					ntype = zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
+					if (type != ntype && ntype != HASH_KEY_IS_LONG) {
+type_conflict:
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Form parameters must either be all unicode or all binary"); 
 						continue;
 					}
