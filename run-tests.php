@@ -968,13 +968,14 @@ TEST $file
 		'TEST'   => '',
 		'SKIPIF' => '',
 		'GET'    => '',
+		'COOKIE' => '',
 		'POST_RAW' => '',
 		'POST'   => '',
 		'UPLOAD' => '',
 		'ARGS'   => '',
 	);
 
-	$fp = @fopen($file, "rt") or error("Cannot open test file: $file");
+	$fp = fopen($file, "rt") or error("Cannot open test file: $file");
 
 	$borked = false;
 	$bork_info = '';
@@ -1062,7 +1063,7 @@ TEST $file
 	$tested = trim($section_text['TEST']);
 
 	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
-	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
+	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['COOKIE'])) {
 		if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) ."/php-cgi.exe")) {
 			$old_php = $php;
 			$php = realpath(dirname($php) ."/php-cgi.exe") .' -C ';
@@ -1341,6 +1342,12 @@ TEST $file
 	$env['PATH_TRANSLATED'] = $test_file;
 	$env['SCRIPT_FILENAME'] = $test_file;
 
+	if (array_key_exists('COOKIE', $section_text)) {
+		$env['HTTP_COOKIE'] = trim($section_text['COOKIE']);
+	} else {
+		$env['HTTP_COOKIE'] = '';
+	}
+
 	$args = $section_text['ARGS'] ? ' -- '.$section_text['ARGS'] : '';
 
 	if (array_key_exists('POST_RAW', $section_text) && !empty($section_text['POST_RAW'])) {
@@ -1400,6 +1407,7 @@ QUERY_STRING    = " . $env['QUERY_STRING'] . "
 REDIRECT_STATUS = " . $env['REDIRECT_STATUS'] . "
 REQUEST_METHOD  = " . $env['REQUEST_METHOD'] . "
 SCRIPT_FILENAME = " . $env['SCRIPT_FILENAME'] . "
+HTTP_COOKIE     = " . $env['HTTP_COOKIE'] . "
 COMMAND $cmd
 ";
 
