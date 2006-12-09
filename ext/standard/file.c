@@ -2503,6 +2503,14 @@ PHP_FUNCTION(fnmatch)
 /* }}} */
 #endif
 
+/* {{{ proto string sys_get_temp_dir()
+   Returns directory path used for temporary files */
+PHP_FUNCTION(sys_get_temp_dir)
+{
+	RETURN_STRING((char *)php_get_temporary_directory(), 1);
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

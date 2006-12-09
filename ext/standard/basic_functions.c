@@ -1399,6 +1399,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fnmatch, 0, 0, 2)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 #endif
+static
+ZEND_BEGIN_ARG_INFO(arginfo_sys_get_temp_dir, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ filestat.c */
 static
@@ -3762,6 +3765,7 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(output_add_rewrite_var,											arginfo_output_add_rewrite_var)
 	PHP_FE(output_reset_rewrite_vars,										arginfo_output_reset_rewrite_vars)
 
+	PHP_FE(sys_get_temp_dir,												arginfo_sys_get_temp_dir)
 	{NULL, NULL, NULL}
 };
 
