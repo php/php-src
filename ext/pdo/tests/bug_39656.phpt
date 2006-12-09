@@ -15,6 +15,7 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE_
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
+@$db->exec("DROP TABLE testtable");
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $db->exec("CREATE TABLE testtable (id INTEGER NOT NULL PRIMARY KEY, usr VARCHAR( 256 ) NOT NULL)");
@@ -31,11 +32,9 @@ $stmt->closeCursor();
 $row = $stmt->fetch(); // this line will crash CLI
 var_dump( $row );
 
-$db->exec("DROP TABLE testtable");
-
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 array(4) {
   ["id"]=>
   string(1) "1"
