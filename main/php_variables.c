@@ -504,6 +504,17 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 		int var_len;
 
 		val = strchr(var, '=');
+
+		if (arg == PARSE_COOKIE) {
+			/* Remove leading spaces from cookie names, needed for multi-cookie header where ; can be followed by a space */
+			while (isspace(*var)) {
+				var++;
+			}
+			if (var == val || *var == '\0') {
+				goto next_cookie;
+			}
+		}
+
 		if (val) {
 			*val++ = '\0';
 		}
