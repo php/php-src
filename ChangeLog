@@ -1,3 +1,198 @@
+2006-12-08  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/php_var.h
+      ext/standard/var.c:
+      don't change public API
+
+    * (PHP_5_2)
+      ext/standard/php_var.h
+      ext/standard/var.c:
+      MFH: fix possible issue in the serializer, which might currupt struc when
+      reallocating arguments stack
+
+    * ext/standard/php_var.h
+      ext/standard/var.c:
+      fix possible issue in the serializer, which might currupt struc when
+      reallocating arguments stack
+      (no reproduce case, sorry)
+
+    * (PHP_5_2)
+      NEWS
+      ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h:
+      MFH: fix #39732 (oci_bind_array_by_name doesn't work on Solaris 64bit)
+
+    * ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h:
+      fix #39732 (oci_bind_array_by_name doesn't work on Solaris 64bit)
+
+    * ext/standard/iptc.c:
+      fix typo
+
+2006-12-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo_mysql/mysql_statement.c:
+      MFB: Fixed bug #39759 (Can't use stored procedures fetching multiple result
+      sets in pdo_mysql).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo_mysql/mysql_driver.c
+      ext/pdo_mysql/mysql_statement.c
+      ext/pdo_mysql/tests/pecl_bug_5780.phpt:
+      Fixed bug #39759 (Can't use stored procedures fetching multiple result
+      sets in pdo_mysql).
+
+2006-12-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/dl.c:
+      Unicode filename support in dl().
+
+    * main/main.c:
+      Don't use zend_ascii_hash_find() here -- module names are binary strings.
+
+2006-12-08  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/simplexml/tests/027.phpt
+      ext/simplexml/tests/bug35785.phpt:
+      fix tests
+
+2006-12-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/filter.c
+      ext/filter/tests/bug39763.phpt
+      ext/filter/tests/bug39763.phpt:
+      Fixed bug #39763 (magic quotes are applied twice by ext/filter in
+      parse_str())
+
+2006-12-08  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      -BFN
+
+    * ext/filter/filter.c
+      ext/filter/filter.c:
+      revert the fix for #39763
+
+2006-12-08  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/xpath.c
+      ext/dom/tests/domxpath.phpt:
+      mark more functions unicode safe
+      add test
+
+    * ext/dom/documentfragment.c
+      ext/dom/domconfiguration.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domstringlist.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/node.c
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/text.c
+      ext/dom/userdatahandler.c
+      ext/dom/xpath.c
+      ext/dom/tests/domattributes.phpt
+      ext/dom/tests/domelement.phpt
+      ext/dom/tests/domfragment.phpt
+      ext/dom/tests/domimplementation.phpt
+      ext/dom/tests/dompi.phpt:
+      mark more functions unicode safe
+      add tests
+
+2006-12-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug38146.phpt
+      ZendEngine2/tests/bug39775.phpt
+      ext/spl/tests/iterator_035.phpt
+      tests/classes/array_access_003.phpt
+      tests/classes/array_access_004.phpt
+      tests/classes/array_access_005.phpt
+      tests/classes/array_access_008.phpt
+      tests/classes/array_access_012.phpt:
+      Fixed bug #39775 ("Indirect modification ..." message is not shown)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug38146.phpt
+      ZendEngine2/tests/bug39775.phpt
+      ZendEngine2/tests/bug39775.phpt
+      ext/spl/tests/iterator_035.phpt
+      tests/classes/array_access_003.phpt
+      tests/classes/array_access_004.phpt
+      tests/classes/array_access_005.phpt
+      tests/classes/array_access_008.phpt
+      tests/classes/array_access_012.phpt:
+      Fixed bug #39775 ("Indirect modification ..." message is not shown)
+      The fix breaks two SimpleXML tests those must be fixed
+
+2006-12-08  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/assert/assert03.phpt
+      ext/standard/tests/assert/assert04.phpt:
+      add new tests by <zoe dot slattery at googlemail dot co dot uk>
+
+    * ext/standard/tests/assert/assert03.phpt
+      ext/standard/tests/assert/assert03.phpt
+      ext/standard/tests/assert/assert04.phpt
+      ext/standard/tests/assert/assert04.phpt:
+      
+      add new tests by <zoe dot slattery at googlemail dot co dot uk>
+
+2006-12-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed possible failure
+
+2006-12-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/tests/bug21758.phpt
+      ext/pcre/tests/bug27011.phpt
+      ext/pcre/tests/bug38600.phpt:
+      MFB: new tests
+
+    * ext/pcre/tests/bug21758.phpt
+      ext/pcre/tests/bug21758.phpt
+      ext/pcre/tests/bug27011.phpt
+      ext/pcre/tests/bug27011.phpt
+      ext/pcre/tests/bug38600.phpt
+      ext/pcre/tests/bug38600.phpt:
+      
+      file bug21758.phpt was initially added on branch PHP_5_2.
+
+2006-12-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      Fixed typo
+
+2006-12-08  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c:
+      More BC bodges for fgets/fgetss
+
+2006-12-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      Allow POST of unicode data as utf8
+
 2006-12-07  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/tests/strings/bug39350.phpt:
