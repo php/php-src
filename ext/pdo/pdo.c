@@ -54,7 +54,12 @@ int php_pdo_list_entry(void)
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
 
-PDO_API zend_class_entry *php_pdo_get_exception(TSRMLS_D)
+PDO_API zend_class_entry *php_pdo_get_dbh_ce(void)
+{
+	return pdo_dbh_ce;
+}
+
+PDO_API zend_class_entry *php_pdo_get_exception(void)
 {
 	return pdo_exception_ce;
 }
@@ -68,7 +73,7 @@ PDO_API char *php_pdo_str_tolower_dup(const char *src, int len)
 
 PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
 {
-#if can_handle_soft_dependency_on_SPL && defined(HAVE_SPL)
+#if can_handle_soft_dependency_on_SPL && defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
 	if (!root) {
 		if (!spl_ce_RuntimeException) {
 			zend_class_entry **pce;
@@ -82,7 +87,7 @@ PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
 		}
 	}
 #endif
-#if (PHP_MAJOR_VERSION < 6)
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 2)
 	return zend_exception_get_default();
 #else
 	return zend_exception_get_default(TSRMLS_C);
@@ -151,7 +156,7 @@ zend_module_entry pdo_module_entry = {
 /* }}} */
 
 /* TODO: visit persistent handles: for each persistent statement handle,
- * remove bound parameter associations in RSHUTDOWN */
+ * remove bound parameter associations */
 
 #ifdef COMPILE_DL_PDO
 ZEND_GET_MODULE(pdo)
@@ -368,6 +373,8 @@ PHP_MINFO_FUNCTION(pdo)
 
 	if (drivers) {
 		efree(drivers);
+	} else {
+		efree(ldrivers);
 	}
 
 	php_info_print_table_end();

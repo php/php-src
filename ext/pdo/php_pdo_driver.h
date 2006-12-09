@@ -22,6 +22,7 @@
 #define PHP_PDO_DRIVER_H
 
 #include "php_pdo.h"
+#include "php_pdo_phpvers_compat.h"
 
 /* forward declarations */
 typedef struct _pdo_dbh_t 	pdo_dbh_t;
@@ -44,7 +45,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20060318
+#define PDO_DRIVER_API	20061209
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -131,6 +132,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_STRINGIFY_FETCHES,	/* converts integer/float types to strings during fetch */
 	PDO_ATTR_MAX_COLUMN_LEN,	/* make database calculate maximum length of data found in a column */
 	PDO_ATTR_DEFAULT_FETCH_MODE, /* Set the default fetch mode */
+	PDO_ATTR_EMULATE_PREPARES,  /* use query emulation rather than native */
 
 	/* this defines the start of the range for driver specific options.
 	 * Drivers should define their own attribute constants beginning with this
@@ -251,7 +253,7 @@ typedef int (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS
 
 /* return last insert id.  NULL indicates error condition, otherwise, the return value
  * MUST be an emalloc'd NULL terminated string. */
-typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC);
+typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, int *len TSRMLS_DC);
 
 /* fetch error information.  if stmt is not null, fetch information pertaining
  * to the statement, otherwise fetch global error information.  The driver
@@ -340,7 +342,8 @@ enum pdo_param_event {
 	PDO_PARAM_EVT_EXEC_PRE,
 	PDO_PARAM_EVT_EXEC_POST,
 	PDO_PARAM_EVT_FETCH_PRE,
-	PDO_PARAM_EVT_FETCH_POST
+	PDO_PARAM_EVT_FETCH_POST,
+	PDO_PARAM_EVT_NORMALIZE,
 };
 
 typedef int (*pdo_stmt_param_hook_func)(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type TSRMLS_DC);
@@ -489,7 +492,7 @@ struct _pdo_dbh_t {
 	pdo_driver_t *driver;
 	
 	zend_class_entry *def_stmt_ce;
-	
+
 	zval *def_stmt_ctor_args;
 
 	/* when calling PDO::query(), we need to keep the error
@@ -643,7 +646,8 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 		unsigned long data_source_len, struct pdo_data_src_parser *parsed,
 		int nparams);
 
-PDO_API zend_class_entry *php_pdo_get_exception(TSRMLS_D);
+PDO_API zend_class_entry *php_pdo_get_dbh_ce(void);
+PDO_API zend_class_entry *php_pdo_get_exception(void);
 
 PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
 	char **outquery, int *outquery_len TSRMLS_DC);
@@ -653,6 +657,10 @@ PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
 
 PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh TSRMLS_DC);
 PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh TSRMLS_DC);
+
+PDO_API void php_pdo_stmt_addref(pdo_stmt_t *stmt TSRMLS_DC);
+PDO_API void php_pdo_stmt_delref(pdo_stmt_t *stmt TSRMLS_DC);
+
 
 #endif /* PHP_PDO_DRIVER_H */
 /*

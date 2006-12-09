@@ -61,7 +61,7 @@ ZEND_END_MODULE_GLOBALS(pdo)
 #endif
 
 #define REGISTER_PDO_CLASS_CONST_LONG(const_name, value) \
-	zend_declare_class_constant_long(pdo_dbh_ce, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+	zend_declare_class_constant_long(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
 
 #define REGISTER_PDO_CONST_LONG(const_name, value) { \
 	zend_class_entry **pce;	\
@@ -70,7 +70,7 @@ ZEND_END_MODULE_GLOBALS(pdo)
 }	\
 
 #define REGISTER_PDO_CLASS_CONST_STRING(const_name, value) \
-	zend_declare_class_constant_stringl(pdo_dbh_ce, const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
+	zend_declare_class_constant_stringl(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
 
 #define PDO_CONSTRUCT_CHECK	\
 	if (!dbh->driver) {	\

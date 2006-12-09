@@ -20,8 +20,6 @@
 
 /* $Id$ */
 
-#include "php_pdo_phpvers_compat.h"
-
 /* Stuff private to the PDO extension and not for consumption by PDO drivers
  * */
 
@@ -59,7 +57,13 @@ extern pdo_driver_t *pdo_find_driver(const char *name, int namelen);
 
 extern void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC);
 
-#define PDO_DBH_CLEAR_ERR()		strcpy(dbh->error_code, PDO_ERR_NONE)
+#define PDO_DBH_CLEAR_ERR()		do { \
+	strcpy(dbh->error_code, PDO_ERR_NONE); \
+	if (dbh->query_stmt) { \
+		dbh->query_stmt = NULL; \
+		zend_objects_store_del_ref(&dbh->query_stmt_zval TSRMLS_CC); \
+	} \
+} while (0)
 #define PDO_STMT_CLEAR_ERR()	strcpy(stmt->error_code, PDO_ERR_NONE)
 #define PDO_HANDLE_DBH_ERR()	if (strcmp(dbh->error_code, PDO_ERR_NONE)) { pdo_handle_error(dbh, NULL TSRMLS_CC); }
 #define PDO_HANDLE_STMT_ERR()	if (strcmp(stmt->error_code, PDO_ERR_NONE)) { pdo_handle_error(stmt->dbh, stmt TSRMLS_CC); }
