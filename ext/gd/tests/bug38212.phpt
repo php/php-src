@@ -1,5 +1,5 @@
 --TEST--
-imagecopy doen't copy alpha, palette to truecolor
+Bzg #38212 (Seg Fault on invalid imagecreatefromgd2part() parameters)
 --SKIPIF--
 <?php
         if (!function_exists('imagecopy')) die("skip gd extension not available\n");
@@ -14,4 +14,5 @@ $im = imagecreatefromgd2part($file, 0,0, -25,10);
 unlink($file);
 ?>
 --EXPECTF--
-Warning: imagecreatefromgd2part(): '%sbug38212.gd2' is not a valid GD2 file in %sbug38212.php on line %d
+
+Warning: imagecreatefromgd2part(): Zero width or height not allowed in %s on line %d
