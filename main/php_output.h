@@ -148,6 +148,9 @@ ZEND_BEGIN_MODULE_GLOBALS(output)
 	int output_start_lineno;
 	zval *default_output_handler_name;
 	zval *devnull_output_handler_name;
+	struct {
+		UConverter *western;
+	} conv;
 ZEND_END_MODULE_GLOBALS(output);
 
 /* there should not be a need to use OG() from outside of output.c */
@@ -205,7 +208,10 @@ PHPAPI char *php_output_get_start_filename(TSRMLS_D);
 PHPAPI int php_output_get_start_lineno(TSRMLS_D);
 
 PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC);
+PHPAPI int php_output_write_encoded(const void *str, size_t len, UConverter *src_encoding_conv, UConverter *dst_encoding_conv TSRMLS_DC);
 PHPAPI int php_output_write_unicode(const UChar *str, size_t len TSRMLS_DC);
+PHPAPI int php_output_write_western(const char *str, size_t len TSRMLS_DC);
+PHPAPI int php_output_write_utf8(const char *str, size_t len TSRMLS_DC);
 PHPAPI int php_output_write_ascii(const char *str, size_t len TSRMLS_DC);
 PHPAPI int php_output_write(const char *str, size_t len TSRMLS_DC);
 
