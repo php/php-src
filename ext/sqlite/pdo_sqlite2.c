@@ -288,8 +288,13 @@ int _pdo_sqlite2_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *errmsg, const cha
 	}
 
 	if (!dbh->methods) {
+#if PHP_VERSION_ID > 50200
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
+				*pdo_err, einfo->errcode, einfo->errmsg);
+#else
 		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
 				*pdo_err, einfo->errcode, einfo->errmsg);
+#endif
 	}
 
 	return einfo->errcode;
@@ -579,9 +584,15 @@ static int pdo_sqlite2_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRML
 	filename = make_filename_safe(dbh->data_source TSRMLS_CC);
 
 	if (!filename) {
+#if PHP_VERSION_ID > 50200
 		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC,
 				"open_basedir prohibits opening %s",
 				dbh->data_source);
+#else
+		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC,
+				"open_basedir prohibits opening %s",
+				dbh->data_source);
+#endif
 		goto cleanup;
 	}
 
