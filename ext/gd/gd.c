@@ -2125,6 +2125,10 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zllll", &ppfilename, &srcx, &srcy, &width, &height) == FAILURE) {
 			return;
 		}
+		if (width < 1 || height < 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Zero width or height not allowed");
+			RETURN_FALSE;
+		}
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &ppfilename) == FAILURE) {
 			return;
