@@ -12,7 +12,7 @@
 /** @ingroup Examples
  * @brief   Synchronous iteration over two iterators
  * @author  Marcus Boerger
- * @version 1.2
+ * @version 1.3
  */
 class DualIterator implements Iterator
 {
@@ -174,7 +174,7 @@ class DualIterator implements Iterator
 			{
 				$it = new RecursiveDualIterator($lhs, $rhs, 
 								self::CURRENT_0 | self::KEY_0);
-				$it = new RecursiveIteratorIterator($it);
+				$it = new RecursiveCompareDualIterator($it);
 			}
 			else
 			{

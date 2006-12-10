@@ -33,6 +33,7 @@ test(array(1,array(21,22),3), array(1,array(21,"22"),3), true);
 
 ?>
 ===DONE===
+<?php exit(0); ?>
 --EXPECT--
 bool(true)
 bool(false)

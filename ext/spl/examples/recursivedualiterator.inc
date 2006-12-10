@@ -18,7 +18,7 @@ class RecursiveDualIterator extends DualIterator implements RecursiveIterator
 {
 	private $ref;
 
-	/** construct iterator from two iterators
+	/** construct iterator from two RecursiveIterator instances
 	 *
 	 * @param lhs   Left  Hand Side Iterator
 	 * @param rhs   Right Hand Side Iterator
