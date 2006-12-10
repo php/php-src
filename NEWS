@@ -50,6 +50,7 @@ PHP                                                                        NEWS
 - Fixed FastCGI impersonation for persistent connections on Windows. (Dmitry)
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
+- Fixed bug #39780 (PNG image with CRC/data error raises fatal error) (Pierre)
 - Fixed bug #39775 ("Indirect modification ..." message is not shown). (Dmitry)
 - Fixed bug #39763 (magic quotes are applied twice by ext/filter in
   parse_str()). (Ilia) 
