@@ -1931,6 +1931,29 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 		return;
 	}
 
+	/* Do not use the 4 neighbors implementation with
+   * small images
+   */
+	if (im->sx < 4) {
+		int ix = x, iy = y, c;
+		do {
+			c = gdImageGetPixel(im, ix, iy);
+			if (c != oc) {
+				return;
+			}
+			gdImageSetPixel(im, ix, iy, nc);
+		} while(ix++ < (im->sx -1));
+		ix = x; iy = y + 1;
+		do {
+			c = gdImageGetPixel(im, ix, iy);
+			if (c != oc) {
+				return;
+			}
+			gdImageSetPixel(im, ix, iy, nc);
+		} while(ix++ < (im->sx -1));
+		return;
+	}
+
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
 	sp = stack;
 
