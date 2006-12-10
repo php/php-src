@@ -1,3 +1,112 @@
+2006-12-09  Wez Furlong  <wez.php.net@netevil.org>
+
+    * ext/pdo/config.m4
+      ext/pdo/pdo.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sqlstate.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo/php_pdo.h
+      ext/pdo/php_pdo_driver.h
+      ext/pdo/php_pdo_int.h
+      ext/pdo/php_pdo_phpvers_compat.h:
+      merge PHP 5 pdo into HEAD.  This source compiles on both PHP 5 and PHP 6.
+      If you're poking around in here, please make sure that any changes you
+      make
+      compile on both PHP 5 and 6.  Thanks!
+
+2006-12-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/filestat.c:
+      Fixed bug #29840 (is_executable() does not honor safe_mode_exec_dir
+      setting).
+
+2006-12-09  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * tests/basic/022.phpt
+      tests/basic/022.phpt
+      tests/basic/023.phpt
+      tests/basic/023.phpt:
+      
+      Cookie tests
+
+2006-12-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      Improve handling of POST data with Andrei's help.
+
+    * run-tests.php
+      ext/filter/filter.c
+      ext/filter/tests/041.phpt
+      main/php_variables.c:
+      MFB:
+      	Fixed handling of multiple cookies with the same name.
+      	Added support for cookies into run-tests.php
+
+    * (PHP_5_2)
+      run-tests.php
+      ext/filter/filter.c
+      ext/filter/tests/041.phpt
+      ext/filter/tests/041.phpt:
+      Fixed handling of multiple cookies with the same name.
+      Added support for cookies into run-tests.php
+
+2006-12-09  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/curl/interface.c:
+      Fix build
+
+2006-12-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_variables.c:
+      MFB: Strip leading spaces from cookie names, that can come from
+      multi-cookie
+      headers where ; can be followed by any number of spaces.
+
+    * (PHP_5_2)
+      main/php_variables.c:
+      Strip leading spaces from cookie names, that can come from multi-cookie
+      headers where ; can be followed by any number of spaces.
+
+2006-12-09  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/com_dotnet/com_typeinfo.c
+      ext/com_dotnet/tests/bug39606.phpt:
+      MFB: fix heap corruption when adding/caching typelib (also fixes bug 39606)
+      add test
+
+    * (PHP_5_2)
+      ext/com_dotnet/com_typeinfo.c
+      ext/com_dotnet/tests/bug39606.phpt
+      ext/com_dotnet/tests/bug39606.phpt:
+      fix heap corruption when adding/caching typelib (also fixes bug 39606)
+      add test
+
+2006-12-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/tests/007.phpt
+      ext/filter/tests/011.phpt:
+      MFB: Fixed tests
+
+    * (PHP_5_2)
+      ext/filter/tests/007.phpt
+      ext/filter/tests/011.phpt:
+      Fixed tests
+
+    * ext/filter/tests/004.phpt:
+      MFB: fixed test
+
+    * (PHP_5_2)
+      ext/filter/tests/004.phpt
+      ext/pdo/tests/bug_39656.phpt:
+      Fixed test
+
 2006-12-08  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/php_var.h
