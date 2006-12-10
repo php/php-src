@@ -961,6 +961,7 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 	if (zip_add_dir(intern, (const char *)dirname) < 0) {
 		RETURN_FALSE;
 	}
+	RETURN_TRUE;
 }
 /* }}} */
 
