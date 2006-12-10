@@ -1270,14 +1270,12 @@ PHP_FUNCTION(array_search)
 /* }}} */
 
 
-static int php_valid_var_name(char *var_name)
+static int php_valid_var_name(char *var_name, int len)
 {
-	int len, i;
+	int i;
 	
 	if (!var_name)
 		return 0;
-	
-	len = strlen(var_name);
 	
 	if (!isalpha((int)((unsigned char *)var_name)[0]) && var_name[0] != '_')
 		return 0;
@@ -1409,7 +1407,7 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_INVALID:
 				if (final_name.len == 0) {
-					if (!php_valid_var_name(var_name)) {
+					if (!php_valid_var_name(var_name, var_name_len)) {
 						smart_str_appendl(&final_name, Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
 						smart_str_appendc(&final_name, '_');
 						smart_str_appendl(&final_name, var_name, var_name_len);
@@ -1426,7 +1424,7 @@ PHP_FUNCTION(extract)
 
 		if (final_name.len) {
 			smart_str_0(&final_name);
-			if (php_valid_var_name(final_name.c)) {
+			if (php_valid_var_name(final_name.c, final_name.len)) {
 				if (extract_refs) {
 					zval **orig_var;
 
