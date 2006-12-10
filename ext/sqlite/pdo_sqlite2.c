@@ -585,7 +585,7 @@ static int pdo_sqlite2_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRML
 
 	if (!filename) {
 #if PHP_VERSION_ID > 50200
-		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC,
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
 				"open_basedir prohibits opening %s",
 				dbh->data_source);
 #else
