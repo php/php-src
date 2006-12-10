@@ -131,6 +131,8 @@ PHP                                                                        NEWS
 - Fixed bug #39300 (make install fails if wget is not available). (Tony)
 - Fixed bug #39297 (Memory corruption because of indirect modification
   of overloaded array). (Dmitry)
+- Fixed bug #39286 (misleading error message when invalid dimensions are
+  given) (Pierre)
 - Fixed bug #39265 (Fixed path handling inside mod_files.sh). 
   (michal dot taborsky at gmail dot com, Ilia)
 - Fixed bug #39217 (serialNumber might be -1 when the value is too large)
