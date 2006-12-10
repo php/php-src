@@ -153,6 +153,11 @@ PHPAPI void php_output_deactivate(TSRMLS_D)
 		OG(handlers) = NULL;
 	}
 	
+	if (OG(conv).western) {
+		ucnv_close(OG(conv).western);
+		OG(conv).western = NULL;
+	}
+	
 	if (OG(default_output_handler_name)) {
 		zval_ptr_dtor(&OG(default_output_handler_name));
 		OG(default_output_handler_name) = NULL;
@@ -231,23 +236,31 @@ PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
 	Buffered ASCII write */
 PHPAPI int php_output_write_ascii(const char *str, size_t len TSRMLS_DC)
 {
-	UErrorCode status = U_ZERO_ERROR;
-	char *buf_str = NULL;
-	int buf_len = 0;
-	
-	if (OG(flags) & PHP_OUTPUT_DISABLED) {
-		return 0;
+	return php_output_write_encoded(str, len, UG(ascii_conv), NULL TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ int php_output_write_utf8(const char *str, size_t len TSRMLS_DC)
+	Buffered UTF8 write */
+PHPAPI int php_output_write_utf8(const char *str, size_t len TSRMLS_DC)
+{
+	return php_output_write_encoded(str, len, UG(utf8_conv), NULL TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ int php_output_write_western(const char *str, size_t len TSRMLS_DC)
+	Buffered western cs write */
+PHPAPI int php_output_write_western(const char *str, size_t len TSRMLS_DC)
+{
+	if (!OG(conv).western) {
+		UErrorCode status = U_ZERO_ERROR;
+		
+		OG(conv).western = ucnv_open("latin1", &status);
+		if (U_FAILURE(status)) {
+			return 0;
+		}
 	}
-	
-	zend_convert_encodings(UG(output_encoding_conv), UG(ascii_conv),
-			&buf_str, &buf_len, str, len, &status);
-	if (U_ZERO_ERROR == status) {
-		php_output_op(PHP_OUTPUT_HANDLER_WRITE, buf_str, buf_len TSRMLS_CC);
-	}
-	if (buf_str) {
-		efree(buf_str);
-	}
-	return (int) len;
+	return php_output_write_encoded(str, len, OG(conv).western, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -255,22 +268,43 @@ PHPAPI int php_output_write_ascii(const char *str, size_t len TSRMLS_DC)
 	Buffered Unicode write */
 PHPAPI int php_output_write_unicode(const UChar *str, size_t len TSRMLS_DC)
 {
+	return php_output_write_encoded(str, len, NULL, NULL TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ int php_output_write_encoded(const void *str, size_t len TSRMLS_DC)
+	Buffered write with specified encodings */
+PHPAPI int php_output_write_encoded(const void *str, size_t len, UConverter *src_encoding_conv, UConverter *dst_encoding_conv TSRMLS_DC)
+{
 	UErrorCode status = U_ZERO_ERROR;
-	char *buf_str = NULL;
-	int buf_len = 0;
+	char *new_str = NULL;
+	int new_len;
 	
 	if (OG(flags) & PHP_OUTPUT_DISABLED) {
 		return 0;
 	}
 	
-	zend_unicode_to_string_ex(UG(output_encoding_conv), &buf_str, &buf_len, str, len, &status);
-	if (U_ZERO_ERROR == status) {
-		php_output_op(PHP_OUTPUT_HANDLER_WRITE, buf_str, buf_len TSRMLS_CC);
+	if (!dst_encoding_conv) {
+		dst_encoding_conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
 	}
-	if (buf_str) {
-		efree(buf_str);
+	
+	if (src_encoding_conv) {
+		zend_convert_encodings(dst_encoding_conv, src_encoding_conv, &new_str, &new_len, str, len, &status);
+	} else {
+		zend_unicode_to_string_ex(dst_encoding_conv, &new_str, &new_len, str, len, &status);
 	}
-	return (int) len;
+	
+	if (U_SUCCESS(status)) {
+		php_output_op(PHP_OUTPUT_HANDLER_WRITE, new_str, new_len TSRMLS_CC);
+	} else {
+		len = 0;
+	}
+	
+	if (new_str) {
+		efree(new_str);
+	}
+	
+	return len;
 }
 /* }}} */
 
