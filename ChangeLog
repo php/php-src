@@ -1,3 +1,119 @@
+2006-12-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/spl/examples/dualiterator.inc
+      ext/spl/examples/recursivecomparedualiterator.inc
+      ext/spl/examples/recursivedualiterator.inc
+      ext/spl/examples/tests/dualiterator_001.phpt:
+      - MFH Fix comparison of RecursiveDualIterators
+
+    * ext/spl/examples/dualiterator.inc
+      ext/spl/examples/recursivecomparedualiterator.inc
+      ext/spl/examples/recursivecomparedualiterator.inc
+      ext/spl/examples/recursivedualiterator.inc
+      ext/spl/examples/tests/dualiterator_001.phpt:
+      - Fix comparison of RecursiveDualIterators
+
+2006-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      Optimize extract()
+      
+
+2006-12-10  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/sqlite/pdo_sqlite2.c:
+      Fix build
+
+2006-12-10  Michael Wallner  <mike@iworks.at>
+
+    * ext/standard/credits.c
+      ext/standard/info.c
+      main/output.c
+      main/php_output.h:
+      - upgrade phpinfo() and phpcredits()
+
+2006-12-10  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/pdo_mysql/mysql_driver.c
+      ext/pdo_oci/oci_driver.c
+      ext/pdo_odbc/odbc_driver.c
+      ext/sqlite/pdo_sqlite2.c:
+      - build fix the other driver as well (a macro would be nicer)
+
+    * ext/zip/php_zip.c:
+      -  MFB: addDir returns true
+
+    * ext/gd/gd.c
+      ext/gd/tests/bug38212.phpt
+      ext/gd/tests/bug39286.phpt:
+      - MFB: #39286, misleading error message when invalid dimensions are given
+
+    * (PHP_5_2)
+      NEWS:
+      - #39286 entry
+
+    * ext/gd/tests/bug39286.phpt
+      ext/gd/tests/bug39286.phpt:
+      
+      file bug39286.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/gd/gd.c
+      ext/gd/tests/bug38212.phpt:
+      - #39286, misleading error message when nvalid dimensions are given
+
+    * ext/pdo_sqlite/sqlite_driver.c:
+      - fix build on HEAD
+        (not sure if it should compile on 6 and 5 or if it is required only for
+         pdo, other drivers require this fix)
+
+    * ext/gd/libgd/gd.c
+      ext/gd/tests/bug39508.phpt:
+      - MFB: #39508, imagefill crashes with small image
+
+    * ext/gd/tests/bug39508.phpt
+      ext/gd/tests/bug39508.phpt:
+      
+      file bug39508.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS:
+      - #39508, add test (imagefill crashes with small image)
+
+    * (PHP_5_2)
+      NEWS:
+      - #39780 entry
+
+    * (PHP_5_2)
+      ext/gd/gd.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/tests/bug39780.phpt
+      ext/gd/tests/bug39780.png:
+      - MFH:#39780, PNG image with CRC/data error raises fatal error
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/tests/bug39780.phpt
+      ext/gd/tests/bug39780.phpt
+      ext/gd/tests/bug39780.png
+      ext/gd/tests/bug39780.png:
+      - #39780, PNG image with CRC/data error raises fatal error
+
+2006-12-10  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/standard/basic_functions.c:
+      MFB: Fixed by #39751 by KevinJohnHoffman at gmail dot com
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      Fixed by #39751 by KevinJohnHoffman at gmail dot com
+
 2006-12-09  Wez Furlong  <wez.php.net@netevil.org>
 
     * ext/pdo/config.m4
