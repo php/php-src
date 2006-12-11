@@ -200,7 +200,7 @@ ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 ZEND_API int add_char_to_string(zval *result, zval *op1, zval *op2);
 ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2);
-#define convert_to_string(op)			_convert_to_string((op) ZEND_FILE_LINE_CC)
+#define convert_to_string(op) if ((op)->type != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
 
 ZEND_API double zend_string_to_double(const char *number, zend_uint length);
 
