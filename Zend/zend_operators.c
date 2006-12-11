@@ -306,7 +306,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 
 ZEND_API void convert_to_long(zval *op)
 {
-	if ((op)->type != IS_BOOL && (op)->type != IS_LONG) {
+	if ((op)->type == IS_LONG) {
 		convert_to_long_base(op, 10);
 	}
 }
