@@ -182,6 +182,10 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_ENTRY("unicode.script_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   script_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.http_input_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   http_input_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.filesystem_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   filesystem_encoding_conv, zend_unicode_globals, unicode_globals)
+	/*
+	 * This is used as a default for the stream contexts. It's not an actual
+	 * UConverter because each stream needs its own.
+	 */
 	STD_ZEND_INI_ENTRY("unicode.stream_encoding",  "UTF-8", ZEND_INI_ALL, OnUpdateStringUnempty,   stream_encoding, zend_unicode_globals, unicode_globals)
 ZEND_INI_END()
 
