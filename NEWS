@@ -54,6 +54,8 @@ PHP                                                                        NEWS
   multipliers). (Ilia)
 - Fixed bug #39787 (PHP doesn't work with Apache 2.3). (mv at binarysec dot
   com).
+- Fixed bug #39782 (setTime() on a DateTime constructed with a Weekday
+  yields incorrect results). (Ilia)
 - Fixed bug #39780 (PNG image with CRC/data error raises fatal error) (Pierre)
 - Fixed bug #39775 ("Indirect modification ..." message is not shown). (Dmitry)
 - Fixed bug #39763 (magic quotes are applied twice by ext/filter in

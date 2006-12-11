@@ -1643,6 +1643,8 @@ static void date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int
 	timelib_fill_holes(dateobj->time, now, 0);
 	timelib_update_ts(dateobj->time, tzi);
 
+	dateobj->time->have_weekday_relative = dateobj->time->have_relative = 0;
+
 	if (now->tz_info != tzi) {
 		timelib_tzinfo_dtor(now->tz_info);
 	}
