@@ -590,7 +590,10 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, int behavior, S
 {
 	const timelib_relunit* relunit;
 
-	relunit = timelib_lookup_relunit(ptr);
+	if (!(relunit = timelib_lookup_relunit(ptr))) {
+		return;
+	}
+
 	switch (relunit->unit) {
 		case TIMELIB_SECOND: s->time->relative.s += amount * relunit->multiplier; break;
 		case TIMELIB_MINUTE: s->time->relative.i += amount * relunit->multiplier; break;
