@@ -587,7 +587,8 @@ PHP_FUNCTION(oci_lob_truncate)
 {
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
-	ub4 trim_length = 0;
+	long trim_length = 0;
+	ub4 ub_trim_length;
 	
 	if (getThis()) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &trim_length) == FAILURE) {
@@ -604,10 +605,16 @@ PHP_FUNCTION(oci_lob_truncate)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
-	
+
+	if (trim_length < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length must be greater than or equal to zero");
+		RETURN_FALSE;
+	}
+
+	ub_trim_length = (ub4) trim_length;
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(*tmp, descriptor);
 	
-	if (php_oci_lob_truncate(descriptor, trim_length TSRMLS_CC)) {
+	if (php_oci_lob_truncate(descriptor, ub_trim_length TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
