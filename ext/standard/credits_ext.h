@@ -62,7 +62,7 @@ CREDIT_LINE("PostgreSQL driver for PDO", "Edin Kadribasic, Ilia Alshanetsky");
 CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski, Yasuo Ohgaki, Chris Kings-Lynne");
 CREDIT_LINE("Pspell", "Vlad Krupin");
 CREDIT_LINE("Readline", "Thies C. Arntzen");
-CREDIT_LINE("Recode", "Kristian Köhntopp");
+CREDIT_LINE("Recode", "Kristian KÃ¶hntopp");
 CREDIT_LINE("Reflection", "Marcus Boerger, Timm Friebe, George Schlossnagle, Andrei Zmievski, Johannes Schlueter");
 CREDIT_LINE("Sessions", "Sascha Schumann, Andrei Zmievski");
 CREDIT_LINE("Shared Memory Operations", "Slava Poliakov, Ilia Alshanetsky");
