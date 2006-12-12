@@ -654,7 +654,8 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 		int i;
 		for (i = 0; i < SG(request_info).argc; i++) {
 			ALLOC_ZVAL(tmp);
-			ZVAL_RT_STRING(tmp, SG(request_info).argv[i], 1);
+			/* leave args as binary, since the encoding is not known */
+			ZVAL_STRING(tmp, SG(request_info).argv[i], 1);
 			INIT_PZVAL(tmp);
 			if (zend_hash_next_index_insert(Z_ARRVAL_P(arr), &tmp, sizeof(zval *), NULL) == FAILURE) {
 				if (Z_TYPE_P(tmp) == IS_STRING) {
