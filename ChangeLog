@@ -1,3 +1,74 @@
+2006-12-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c:
+      Clarify stream_encoding.
+
+2006-12-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/date/php_date.c
+      ext/date/tests/bug39782.phpt:
+      MFB: Fixed bug #39782 (setTime() on a DateTime constructed with a Weekday
+      yields incorrect results).
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/php_date.c
+      ext/date/tests/bug39782.phpt
+      ext/date/tests/bug39782.phpt:
+      Fixed bug #39782 (setTime() on a DateTime constructed with a Weekday
+      yields incorrect results).
+
+    * (PHP_5_2)
+      ZendEngine2/zend_operators.c:
+      Fixed typo
+
+    * (PHP_5_2)
+      ZendEngine2/zend_operators.c:
+      Removed bool<>long optimization as it causes issues with strict type checks
+
+    * (PHP_5_2)
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h:
+      Minor optimization (2-3%) from Brian Shire
+
+    * sapi/apache2filter/php_functions.c
+      sapi/apache2handler/php_functions.c:
+      MFB: Fixed bug #39787 (PHP doesn't work with Apache 2.3).
+
+    * (PHP_5_2)
+      NEWS
+      sapi/apache2filter/php_functions.c
+      sapi/apache2handler/php_functions.c:
+      Fixed bug #39787 (PHP doesn't work with Apache 2.3).
+
+2006-12-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_interface.c:
+      prevent any possible problems with negative values
+
+    * (PHP_5_2)
+      ext/oci8/tests/lob_027.phpt:
+      add new test
+
+    * ext/oci8/tests/lob_027.phpt
+      ext/oci8/tests/lob_027.phpt:
+      
+      add new test
+
+2006-12-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      MFB: Fixed bug #39791 (Crash in strtotime() on overly long relative date
+      multipliers).
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      Fixed bug #39791 (Crash in strtotime() on overly long relative date
+      multipliers).
+
 2006-12-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)

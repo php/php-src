@@ -1,3 +1,23 @@
+2006-12-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.c:
+      Clarify stream_encoding.
+
+2006-12-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_operators.c:
+      Fixed typo
+
+    * (PHP_5_2)
+      zend_operators.c:
+      Removed bool<>long optimization as it causes issues with strict type checks
+
+    * (PHP_5_2)
+      zend_operators.c
+      zend_operators.h:
+      Minor optimization (2-3%) from Brian Shire
+
 2006-12-08  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c
