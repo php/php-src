@@ -23,11 +23,6 @@ ext/standard
     parse_ini_file()
         Params API, unicode filename support, depends on INI mechaniem
 
-    getopt()
-        Will use ASCII for options. $_SERVER['argv'] should not be converted
-        to Unicode and should stay binary, since we can't be sure of the
-        encoding on CLI. Console_Getopt may be changed to support encodings.
-
   array.c
   -------
     natsort(), natcasesort()
@@ -39,10 +34,6 @@ ext/standard
 
   string.c
   --------
-    hebrev(), hebrevc()
-        Figure out if this is something we can use ICU for, internally.
-        Check with Zeev.
-
     parse_str()
         Params API. How do we deal with encoding of the data?
 
@@ -51,9 +42,6 @@ ext/standard
 
     strnatcmp(), strnatcasecmp()
         Params API. The rest depends on porting of strnatcmp.c
-
-    strtr()
-        Check on Derick's progress.
 
     wordwrap()
         Upgrade, do wordwrapping on codepoint (or glyph ?) level, maybe use
@@ -556,6 +544,7 @@ ext/standard
     compact()
     count()
     extract()
+    getopt()
     in_array()
     min()
     max()
@@ -591,6 +580,7 @@ ext/standard
     count_chars()
     dirname()
     explode()
+    hebrev(), hebrevc()
     implode()
     levenshtein()
     localeconv()
@@ -628,6 +618,7 @@ ext/standard
     strtok()
     strtolower()
     strtoupper()
+    strtr()
     substr()
     substr_compare()
     substr_count()
