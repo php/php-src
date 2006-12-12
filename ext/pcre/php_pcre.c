@@ -559,8 +559,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		}
 		if (name_cnt > 0) {
 			int rc1, rc2;
-			long dummy_l;
-			double dummy_d;
+
 			rc1 = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMETABLE, &name_table);
 			rc2 = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMEENTRYSIZE, &name_size);
 			rc = rc2 ? rc2 : rc1;
@@ -574,7 +573,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			while (ni++ < name_cnt) {
 				name_idx = 0xff * name_table[0] + name_table[1];
 				subpat_names[name_idx] = name_table + 2;
-				if (is_numeric_string(subpat_names[name_idx], strlen(subpat_names[name_idx]), &dummy_l, &dummy_d, 0) > 0) {
+				if (is_numeric_string(subpat_names[name_idx], strlen(subpat_names[name_idx]), NULL, NULL, 0) > 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric named subpatterns are not allowed");
 					efree(offsets);
 					efree(subpat_names);
