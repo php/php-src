@@ -2590,3 +2590,55 @@ AC_DEFUN([PHP_DETECT_ICC],
   )
 ])
 
+dnl
+dnl PHP_CRYPT_R_STYLE
+dnl detect the style of crypt_r() is any is available
+dnl see APR_CHECK_CRYPT_R_STYLE() for original version
+dnl
+AC_DEFUN([PHP_CRYPT_R_STYLE],
+[
+  AC_CACHE_CHECK([which data struct is used by crypt_r], php_cv_crypt_r_style,[
+    php_cv_crypt_r_style=none
+    AC_TRY_COMPILE([
+#include <crypt.h>
+],[
+CRYPTD buffer;
+crypt_r("passwd", "hash", &buffer);
+], 
+php_cv_crypt_r_style=cryptd)
+
+    if test "$php_cv_crypt_r_style" = "none"; then
+      AC_TRY_COMPILE([
+#include <crypt.h>
+],[
+struct crypt_data buffer;
+crypt_r("passwd", "hash", &buffer);
+], 
+php_cv_crypt_r_style=struct_crypt_data)
+    fi
+
+    if test "$php_cv_crypt_r_style" = "none"; then
+      AC_TRY_COMPILE([
+#define _GNU_SOURCE
+#include <crypt.h>
+],[
+struct crypt_data buffer;
+crypt_r("passwd", "hash", &buffer);
+], 
+php_cv_crypt_r_style=struct_crypt_data_gnu_source)
+    fi
+    ])
+
+  if test "$php_cv_crypt_r_style" = "cryptd"; then
+    AC_DEFINE(CRYPT_R_CRYPTD, 1, [Define if crypt_r has uses CRYPTD])
+  fi
+  if test "$php_cv_crypt_r_style" = "struct_crypt_data" -o "$php_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
+    AC_DEFINE(CRYPT_R_STRUCT_CRYPT_DATA, 1, [Define if crypt_r uses struct crypt_data])
+  fi
+  if test "$php_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
+    AC_DEFINE(CRYPT_R_GNU_SOURCE, 1, [Define if struct crypt_data requires _GNU_SOURCE])
+  fi
+  if test "$php_cv_crypt_r_style" = "none"; then
+    AC_MSG_ERROR([Unable to detect data struct is used by crypt_r])
+  fi
+])
