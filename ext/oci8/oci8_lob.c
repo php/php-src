@@ -194,7 +194,11 @@ static inline int php_oci_lob_calculate_buffer(php_oci_descriptor *descriptor, l
 {
 	php_oci_connection *connection = descriptor->connection;
 	ub4 chunk_size;
-		
+
+	if (descriptor->type == OCI_DTYPE_FILE) {
+		return read_length;
+	}
+
 	if (!descriptor->chunk_size) {
 		PHP_OCI_CALL_RETURN(connection->errcode, OCILobGetChunkSize, (connection->svc, connection->err, descriptor->descriptor, &chunk_size));
 
