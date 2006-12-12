@@ -345,11 +345,7 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	);
 	
 	efree(bufp);
-	if (lob_type == OCI_IS_BLOB) {
-		offset = descriptor->lob_current_position + TEXT_BYTES(bytes_read);
-	} else {
-		offset = descriptor->lob_current_position + bytes_read;
-	}
+	offset = descriptor->lob_current_position + bytes_read;
 
 #endif
 	
