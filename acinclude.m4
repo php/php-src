@@ -2639,6 +2639,6 @@ php_cv_crypt_r_style=struct_crypt_data_gnu_source)
     AC_DEFINE(CRYPT_R_GNU_SOURCE, 1, [Define if struct crypt_data requires _GNU_SOURCE])
   fi
   if test "$php_cv_crypt_r_style" = "none"; then
-    AC_MSG_ERROR([Unable to detect data struct is used by crypt_r])
+    AC_MSG_ERROR([Unable to detect data struct used by crypt_r])
   fi
 ])
