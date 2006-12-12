@@ -44,3 +44,14 @@ string(6) "CREATE"
 string(7) "UNKNOWN"
 string(7) "UNKNOWN"
 Done
+--UEXPECTF--
+resource(%d) of type (oci8 connection)
+unicode(6) "SELECT"
+unicode(6) "DELETE"
+unicode(6) "INSERT"
+unicode(6) "UPDATE"
+unicode(4) "DROP"
+unicode(6) "CREATE"
+unicode(7) "UNKNOWN"
+unicode(7) "UNKNOWN"
+Done
