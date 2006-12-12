@@ -3850,6 +3850,10 @@ void zend_do_instanceof(znode *result, znode *expr, znode *class_znode, int type
 		}
 	}
 
+	if (expr->op_type == IS_CONST) {
+		zend_error(E_COMPILE_ERROR, "instanceof expects an object instance, constant given");
+	}
+
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_INSTANCEOF;
 	opline->result.op_type = IS_TMP_VAR;
