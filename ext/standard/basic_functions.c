@@ -4497,7 +4497,7 @@ static void free_longopts(struct option *longopts)
 /* }}} */
 #endif
 
-/* {{{ proto array getopt(string options [, array longopts])
+/* {{{ proto array getopt(string options [, array longopts]) U
    Get options from the command line argument list */
 PHP_FUNCTION(getopt)
 {
@@ -4634,7 +4634,8 @@ PHP_FUNCTION(getopt)
 
 		MAKE_STD_ZVAL(val);
 		if (optarg != NULL) {
-			ZVAL_RT_STRING(val, optarg, 1);
+			/* keep the arg as binary, since the encoding is not known */
+			ZVAL_STRING(val, optarg, 1);
 		} else {
 			ZVAL_FALSE(val);
 		}
