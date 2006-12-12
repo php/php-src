@@ -1,7 +1,10 @@
 --TEST--
 reading/writing BFILE LOBs
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
+include "details.inc";
+if (empty($oracle_on_localhost)) die("skip this test won't work with remote Oracle");
+?>
 --FILE--
 <?php
 
