@@ -148,7 +148,7 @@ PHP_FUNCTION(crypt)
 		salt[2] = '\0';
 #endif
 	}
-#ifdef HAVE_CRYPT_R
+#if defined(HAVE_CRYPT_R) && defined(_REENTRANT)
 	{
 #if defined(CRYPT_R_STRUCT_CRYPT_DATA)
 		struct crypt_data buffer;
