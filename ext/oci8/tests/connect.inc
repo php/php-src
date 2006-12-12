@@ -1,13 +1,6 @@
 <?php
 
-/* 
- * Please, change user, password and dbase to match your configuration.
- * 
- * */
- 
-$user       = "system";
-$password   = "system";
-$dbase      = "oracle";
+include "details.inc";
 
 /* 
  * You should have privileges to create tables in this schema 
