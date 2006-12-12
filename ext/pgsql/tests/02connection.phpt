@@ -29,7 +29,7 @@ if (function_exists('pg_transaction_status')) {
 		echo "pg_transaction_status() error\n";
 	}
 }
-if (!pg_host($db)) 
+if (false === pg_host($db)) 
 {
 	echo "pg_host() error\n";
 }
