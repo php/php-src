@@ -1205,11 +1205,6 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	php_stream_from_zval(stream, &zstream);
 
-	if (length > 0) {
-		/* For BC reasons, fgetss() should only return length-1 bytes. */
-		length--;
-	}
-
 	if (stream->readbuf_type == IS_UNICODE) {
 		UChar *buf = php_stream_get_line_ex(stream, IS_UNICODE, NULL_ZSTR, 0, length, &retlen);
 		UChar *allowed = NULL;
