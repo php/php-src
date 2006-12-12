@@ -50,6 +50,7 @@ PHP                                                                        NEWS
 - Fixed FastCGI impersonation for persistent connections on Windows. (Dmitry)
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
+- Fixed bug #39797 (virtual() does not reset changed INI settings). (Ilia)
 - Fixed bug #39795 (build fails on AIX because crypt_r() uses different data 
   struct). (Tony)
 - Fixed bug #39791 (Crash in strtotime() on overly long relative date
