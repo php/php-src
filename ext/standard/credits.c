@@ -23,8 +23,10 @@
 #include "info.h"
 #include "SAPI.h"
 
+/* NOTE: keep utf8 */
+
 #define CREDIT_LINE(module, authors) php_info_print_table_row(2, module, authors)
-#define CREDIT_PUTS(s) php_output_write_western((s), strlen(s) TSRMLS_CC)
+#define CREDIT_PUTS(s) php_output_write_utf8((s), strlen(s) TSRMLS_CC)
 
 /* {{{ php_print_credits
  */

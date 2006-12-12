@@ -568,6 +568,18 @@ ext/standard
     array_intersect_uassoc(), array_uintersect_uassoc()
     array_intersect_key(), array_intersect_ukey()
 
+  info.c
+  ------
+    phpinfo()
+    phpversion()
+    phpcredits()
+    php_logo_guid()
+    php_real_logo_guid()
+    php_egg_logo_guid()
+    zend_logo_guid()
+    php_sapi_name()
+    php_uname()
+    php_ini_scanned_files()
 
   string.c
   --------

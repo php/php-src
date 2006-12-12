@@ -67,8 +67,8 @@ static int php_info_print_html_esc(const char *str, int len)
 	char *new_str;
 	TSRMLS_FETCH();
 	
-	new_str = php_escape_html_entities((char *) str, len, &new_len, 0, ENT_QUOTES, "iso-8859-1" TSRMLS_CC);
-	written = php_output_write_western(new_str, new_len TSRMLS_CC);
+	new_str = php_escape_html_entities((char *) str, len, &new_len, 0, ENT_QUOTES, "utf8" TSRMLS_CC);
+	written = php_output_write_utf8(new_str, new_len TSRMLS_CC);
 	efree(new_str);
 	return written;
 }
@@ -76,17 +76,15 @@ static int php_info_print_html_esc(const char *str, int len)
 static int php_info_uprint_html_esc(const UChar *str, int len)
 {
 	UErrorCode status = U_ZERO_ERROR;
-	char *new_str = NULL, *esc_str;
-	int new_len, esc_len, written;
+	char *new_str = NULL;
+	int new_len, written;
 	TSRMLS_FETCH();
 	
 	zend_unicode_to_string_ex(UG(utf8_conv), &new_str, &new_len, str, len, &status);
 	if (U_FAILURE(status)) {
 		return 0;
 	}
-	
-	esc_str = php_escape_html_entities(new_str, new_len, &esc_len, 0, ENT_QUOTES, "utf8" TSRMLS_CC);
-	written = php_output_write_utf8(esc_str, esc_len TSRMLS_CC);
+	written = php_info_print_html_esc(new_str, new_len);
 	efree(new_str);
 	return written;
 }
@@ -102,7 +100,7 @@ static int php_info_printf(const char *fmt, ...)
 	len = vspprintf(&buf, 0, fmt, argv);
 	va_end(argv);
 	
-	written = php_output_write_western(buf, len TSRMLS_CC);
+	written = php_output_write_utf8(buf, len TSRMLS_CC);
 	efree(buf);
 	return written;
 }
@@ -118,7 +116,7 @@ static void php_info_print_request_uri(TSRMLS_D)
 static int php_info_print(const char *str)
 {
 	TSRMLS_FETCH();
-	return php_output_write_western(str, strlen(str) TSRMLS_CC);
+	return php_output_write_utf8(str, strlen(str) TSRMLS_CC);
 }
 
 static int php_info_uprint(const UChar *str, int len)
