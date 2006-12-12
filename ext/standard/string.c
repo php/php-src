@@ -5659,42 +5659,27 @@ PHP_FUNCTION(str_ireplace)
  */
 static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 {
-	zval **str, **max_chars_per_line;
+	char *str;
+	int str_len;
 	char *heb_str, *tmp, *target, *broken_str;
 	int block_start, block_end, block_type, block_length, i;
 	long max_chars=0;
 	int begin, end, char_count, orig_begin;
 
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &str) == FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &str, &max_chars_per_line) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(max_chars_per_line);
-			max_chars = Z_LVAL_PP(max_chars_per_line);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|l", &str, &str_len, &max_chars) == FAILURE) {
+		return;
 	}
-
-	convert_to_string_ex(str);
-
-	if (Z_STRLEN_PP(str) == 0) {
+	
+	if (str_len == 0) {
 		RETURN_FALSE;
 	}
 
-	tmp = Z_STRVAL_PP(str);
+	tmp = str;
 	block_start=block_end=0;
 
-	heb_str = (char *) emalloc(Z_STRLEN_PP(str)+1);
-	target = heb_str+Z_STRLEN_PP(str);
+	heb_str = (char *) emalloc(str_len+1);
+	target = heb_str+str_len;
 	*target = 0;
 	target--;
 
@@ -5708,13 +5693,13 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 
 	do {
 		if (block_type == _HEB_BLOCK_TYPE_HEB) {
-			while ((isheb((int)*(tmp+1)) || _isblank((int)*(tmp+1)) || ispunct((int)*(tmp+1)) || (int)*(tmp+1)=='\n' ) && block_end<Z_STRLEN_PP(str)-1) {
+			while ((isheb((int)*(tmp+1)) || _isblank((int)*(tmp+1)) || ispunct((int)*(tmp+1)) || (int)*(tmp+1)=='\n' ) && block_end<str_len-1) {
 				tmp++;
 				block_end++;
 				block_length++;
 			}
 			for (i = block_start; i<= block_end; i++) {
-				*target = Z_STRVAL_PP(str)[i];
+				*target = str[i];
 				switch (*target) {
 					case '(':
 						*target = ')';
@@ -5753,7 +5738,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 			}
 			block_type = _HEB_BLOCK_TYPE_ENG;
 		} else {
-			while (!isheb(*(tmp+1)) && (int)*(tmp+1)!='\n' && block_end < Z_STRLEN_PP(str)-1) {
+			while (!isheb(*(tmp+1)) && (int)*(tmp+1)!='\n' && block_end < str_len-1) {
 				tmp++;
 				block_end++;
 				block_length++;
@@ -5763,17 +5748,17 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				block_end--;
 			}
 			for (i = block_end; i >= block_start; i--) {
-				*target = Z_STRVAL_PP(str)[i];
+				*target = str[i];
 				target--;
 			}
 			block_type = _HEB_BLOCK_TYPE_HEB;
 		}
 		block_start=block_end+1;
-	} while (block_end < Z_STRLEN_PP(str)-1);
+	} while (block_end < str_len-1);
 
 
-	broken_str = (char *) emalloc(Z_STRLEN_PP(str)+1);
-	begin=end=Z_STRLEN_PP(str)-1;
+	broken_str = (char *) emalloc(str_len+1);
+	begin=end=str_len-1;
 	target = broken_str;
 
 	while (1) {
@@ -5832,17 +5817,17 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	efree(heb_str);
 
 	if (convert_newlines) {
-		php_char_to_str(broken_str, Z_STRLEN_PP(str),'\n', "<br />\n", 7, return_value);
+		php_char_to_str(broken_str, str_len,'\n', "<br />\n", 7, return_value);
 		efree(broken_str);
 	} else {
 		Z_STRVAL_P(return_value) = broken_str;
-		Z_STRLEN_P(return_value) = Z_STRLEN_PP(str);
+		Z_STRLEN_P(return_value) = str_len;
 		Z_TYPE_P(return_value) = IS_STRING;
 	}
 }
 /* }}} */
 
-/* {{{ proto string hebrev(string str [, int max_chars_per_line])
+/* {{{ proto string hebrev(string str [, int max_chars_per_line]) U
    Converts logical Hebrew text to visual text */
 PHP_FUNCTION(hebrev)
 {
@@ -5850,7 +5835,7 @@ PHP_FUNCTION(hebrev)
 }
 /* }}} */
 
-/* {{{ proto string hebrevc(string str [, int max_chars_per_line])
+/* {{{ proto string hebrevc(string str [, int max_chars_per_line]) U
    Converts logical Hebrew text to visual text with newline conversion */
 PHP_FUNCTION(hebrevc)
 {
