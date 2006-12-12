@@ -6,6 +6,9 @@ require_once('skipif.inc');
 if (!function_exists('mysqli_set_charset')) {
 	die('skip mysqli_set_charset() not available');
 }
+if (!mysqli_set_charset($con, "gbh") && mysqli_errno($con) == 2019) {
+    die('skip mysql compiled without gbh charset support');
+}
 ?>
 --FILE--
 <?php

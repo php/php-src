@@ -12,8 +12,10 @@ local infile handler
 		return(strlen($buffer));
 	}
 	
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd, "test");
+	/*** test mysqli_real_connect 127.0.0.1 ***/
+	$link = mysqli_init();
+	mysqli_options($link, MYSQLI_OPT_LOCAL_INFILE, 1);
+	mysqli_real_connect($link, $host, $user, $passwd, "test");
 
 	/* create temporary file */
 	$filename = dirname(__FILE__) . "061.csv";

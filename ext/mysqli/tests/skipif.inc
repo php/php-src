@@ -4,7 +4,7 @@ if (!extension_loaded('mysqli')){
 }
 include "connect.inc";
 $driver = new mysqli_driver();
-if (!$driver->embedded && !@mysqli_connect($host, $user, $passwd, "", 3306)) {
+if (!$driver->embedded && !($con = @mysqli_connect($host, $user, $passwd, "", 3306))) {
 	die('skip could not connect to MySQL');
 }
 ?>
