@@ -28,6 +28,9 @@
 #include <unistd.h>
 #endif
 #if HAVE_CRYPT_H
+#if defined(CRYPT_R_GNU_SOURCE) && !defined(_GNU_SOURCE)
+#define _GNU_SOURCE
+#endif
 #include <crypt.h>
 #endif
 #if TM_IN_SYS_TIME
@@ -147,8 +150,15 @@ PHP_FUNCTION(crypt)
 	}
 #ifdef HAVE_CRYPT_R
 	{
+#if defined(CRYPT_R_STRUCT_CRYPT_DATA)
 		struct crypt_data buffer;
 		memset(&buffer, 0, sizeof(buffer));
+#elif defined(CRYPT_R_CRYPTD)
+		CRYPTD buffer;
+#else 
+#error Data struct used by crypt_r() is unknown. Please report.
+#endif
+
 		RETURN_STRING(crypt_r(str, salt, &buffer), 1);
 	}
 #else
