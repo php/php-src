@@ -17,9 +17,9 @@ oci_connect("", "", "", false, "qwe");
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: oci_connect(): ORA-01031: insufficient privileges in %s on line %d
+Warning: oci_connect(): ORA-%d: %s in %s on line %d
 
-Warning: oci_connect(): ORA-01031: insufficient privileges in %s on line %d
+Warning: oci_connect(): ORA-%d: %s in %s on line %d
 
 Warning: oci_connect(): Invalid session mode specified (-1) in %s on line %d
 
