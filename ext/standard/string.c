@@ -2995,10 +2995,6 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 		wlength = strlen(what);
 	}
 
-	if (!length) {
-		length = strlen(str);
-	}
-
 	php_charmask(what, wlength, flags TSRMLS_CC);
 
 	for (source = str, end = source + length, target = new_str; (c = *source) || (source < end); source++) {
