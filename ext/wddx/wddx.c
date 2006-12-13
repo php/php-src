@@ -974,10 +974,11 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						add_property_zval(ent2->data, ent1->varname, ent1->data);
 						EG(scope) = old_scope;
 					} else {
-						long l;  
+						long l;
 						double d;
+						int varname_len = strlen(ent1->varname);
 				
-						switch (is_numeric_string(ent1->varname, strlen(ent1->varname), &l, &d, 0)) {
+						switch (is_numeric_string(ent1->varname, varname_len, &l, &d, 0)) {
 							case IS_DOUBLE:
 								if (d > INT_MAX) {
 									goto bigint;
@@ -988,7 +989,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 								break;
 							default:
 bigint:
-								zend_hash_update(target_hash,ent1->varname, strlen(ent1->varname)+1, &ent1->data, sizeof(zval *), NULL);
+								zend_hash_update(target_hash,ent1->varname, varname_len + 1, &ent1->data, sizeof(zval *), NULL);
 						}
 					}
 					efree(ent1->varname);
