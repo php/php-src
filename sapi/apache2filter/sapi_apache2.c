@@ -511,6 +511,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 		return ap_pass_brigade(f->next, bb);
 	}
 
+	apply_config(conf);
 	php_apache_request_ctor(f, ctx TSRMLS_CC);
 	
 	// It'd be nice if we could highlight based of a zend_file_handle here....
