@@ -582,8 +582,13 @@ zend_first_try {
 			}
 		}
 		
-		/* check if comming due to ErrorDocument */
-		if (parent_req && parent_req->status != HTTP_OK && strcmp(r->protocol, "INCLUDED")) {
+		/* 
+		 * check if comming due to ErrorDocument 
+		 * We make a special exception of 413 (Invalid POST request) as the invalidity of the request occurs
+		 * during processing of the request by PHP during POST processing. Therefor we need to re-use the exiting
+		 * PHP instance to handle the request rather then creating a new one.
+		*/
+		if (parent_req && parent_req->status != HTTP_OK && parent_req->status != 413 && strcmp(r->protocol, "INCLUDED")) {
 			parent_req = NULL;
 			goto normal;
 		}
