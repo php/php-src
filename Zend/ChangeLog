@@ -1,3 +1,12 @@
+2006-12-12  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      zend_compile.c:
+      MFH: Bugfix# 39435: 'foo' instanceof bar gives invalid opcode error
+
+    * zend_compile.c:
+      Bugfix# 39435: 'foo' instanceof bar gives invalid opcode error
+
 2006-12-11  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend.c:
