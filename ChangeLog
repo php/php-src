@@ -1,3 +1,164 @@
+2006-12-12  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c:
+      MFH: Bugfix# 39435: 'foo' instanceof bar gives invalid opcode error
+
+    * ZendEngine2/zend_compile.c:
+      Bugfix# 39435: 'foo' instanceof bar gives invalid opcode error
+
+2006-12-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/file.c:
+      erm.. somehow this part got here twice
+
+2006-12-12  Michael Wallner  <mike@iworks.at>
+
+    * ext/recode/CREDITS
+      ext/standard/credits_ext.h:
+      - utf8
+
+    * unicode-progress.txt
+      ext/posix/CREDITS
+      ext/standard/credits.c
+      ext/standard/credits_ext.h
+      ext/standard/info.c
+      ext/standard/info.h:
+      - utf8 CREDITS and php_info API
+      - unicode progress in info.c
+
+2006-12-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt:
+      -** empty log message ***
+
+    * ext/standard/basic_functions.c:
+      Do not convert args to Unicode in getopt(), they should stay binary.
+
+    * ext/standard/string.c:
+      Make hebrev(c) support only binary strings.
+
+2006-12-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      MFB: Fixed bug #39797 (virtual() does not reset changed INI settings).
+
+    * (PHP_5_2)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #39797 (virtual() does not reset changed INI settings).
+
+2006-12-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * main/php_variables.c:
+      Keep CLI args as binary strings.
+
+2006-12-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pcre/php_pcre.c:
+      Removed dummy vars.
+      
+
+2006-12-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/tests/connect_without_oracle_home.phpt
+      ext/oci8/tests/connect_without_oracle_home_old.phpt:
+      disable tests
+
+    * ext/oci8/tests/connect_without_oracle_home.phpt
+      ext/oci8/tests/connect_without_oracle_home_old.phpt:
+      disable tests
+      I don't think it makes sense to test a segfault which we cannot fix..
+
+    * ext/oci8/tests/privileged_connect1.phpt
+      ext/oci8/tests/privileged_connect1.phpt
+      ext/oci8/tests/statement_type_old.phpt
+      tests/basic/023.phpt:
+      fix test
+
+    * (PHP_5_2)
+      ext/oci8/tests/connect.inc
+      ext/oci8/tests/details.inc
+      ext/oci8/tests/lob_029.phpt:
+      MFH: skip BFILE tests if Oracle is not on localhost
+
+    * ext/oci8/tests/connect.inc
+      ext/oci8/tests/details.inc
+      ext/oci8/tests/details.inc
+      ext/oci8/tests/lob_029.phpt:
+      BFILE tests are only valid when Oracle is installed on the same host
+      skip them if it's not
+
+    * ext/standard/crypt.c:
+      _THREAD_SAFE might be used instead of _REENTRANT
+
+    * acinclude.m4
+      ext/standard/crypt.c:
+      missing part of the fix for #39795
+      crypt.h defines struct crypt_data only if _REENTRANT is defined
+
+    * ext/oci8/oci8_lob.c:
+      fix LOBs internal position in Unicode mode
+
+    * acinclude.m4:
+      fix typo
+
+    * (PHP_5_2)
+      ext/oci8/tests/lob_028.phpt
+      ext/oci8/tests/lob_029.phpt:
+      add new tests
+
+    * ext/oci8/tests/lob_028.phpt
+      ext/oci8/tests/lob_028.phpt
+      ext/oci8/tests/lob_029.phpt
+      ext/oci8/tests/lob_029.phpt:
+      
+      add new tests
+
+    * ext/oci8/oci8_lob.c:
+      OCILobGetChunkSize() does not like BFILEs, return read_length right away
+
+2006-12-12  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/pgsql/tests/02connection.phpt:
+      Fix test
+
+    * (PHP_5_2)
+      ext/pdo_mysql/tests/bug_33689.phpt
+      ext/pdo_mysql/tests/bug_37445.phpt
+      ext/pdo_mysql/tests/bug_39483.phpt
+      ext/pdo_mysql/tests/last_insert_id.phpt
+      ext/pdo_mysql/tests/pecl_bug_5200.phpt
+      ext/pdo_mysql/tests/pecl_bug_5780.phpt
+      ext/pdo_mysql/tests/pecl_bug_5802.phpt
+      ext/pdo_mysql/tests/show_tables.phpt:
+      Fix skipif
+
+    * (PHP_5_2)
+      ext/mysqli/tests/061.phpt
+      ext/mysqli/tests/065.phpt
+      ext/mysqli/tests/skipif.inc:
+      Fix tests
+
+2006-12-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      acinclude.m4
+      configure.in
+      ext/standard/crypt.c:
+      MFH: fix #39795 (build fails on AIX because crypt_r() uses different data
+      struct)
+
+    * acinclude.m4
+      configure.in
+      ext/standard/crypt.c:
+      fix #39795 (build fails on AIX because crypt_r() uses different data
+      struct)
+
 2006-12-11  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend.c:
