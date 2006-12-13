@@ -4665,13 +4665,13 @@ PHP_FUNCTION(getopt)
 			}
 		} else {
 			/* other strings */
-			if(zend_hash_find(HASH_OF(return_value), optname, strlen(optname)+1, (void **)&args) != FAILURE) {
+			if(zend_hash_find(HASH_OF(return_value), optname, optname_len + 1, (void **)&args) != FAILURE) {
 				if(Z_TYPE_PP(args) != IS_ARRAY) {
 					convert_to_array_ex(args);
 				} 
 				zend_hash_next_index_insert(HASH_OF(*args),  (void *)&val, sizeof(zval *), NULL);
 			} else {
-				zend_hash_add(HASH_OF(return_value), optname, strlen(optname)+1, (void *)&val, sizeof(zval *), NULL);
+				zend_hash_add(HASH_OF(return_value), optname, optname_len + 1, (void *)&val, sizeof(zval *), NULL);
 			}
 		}
 	}
