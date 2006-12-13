@@ -125,14 +125,13 @@ PHP                                                                        NEWS
 - Fixed bug #39398 (Booleans are not automatically translated to integers).
   (Ilia)
 - Fixed bug #39366 (imagerotate does not use alpha with angle > 45°) (Pierre)
-- Fixed bug #39362 (Added an option to imap_open/imap_reopen to control the 
-  number of connection retries). (Ilia)
-- Fixed bug #39350 (crash with implode("\n", array(false))). (Ilia)
-- Fixed bug #39273 (imagecopyresized may ignore alpha channel) (Pierre)
 - Fixed bug #39364 (Removed warning on empty haystack inside mb_strstr()).
   (Ilia)
+- Fixed bug #39362 (Added an option to imap_open/imap_reopen to control the 
+  number of connection retries). (Ilia)
 - Fixed bug #39354 (Allow building of curl extension against libcurl 7.16.0)
   (Ilia) 
+- Fixed bug #39350 (crash with implode("\n", array(false))). (Ilia)
 - Fixed bug #39344 (Unnecessary calls to OnModify callback routine for
   an extension INI directive). (wharmby at uk dot ibm dot com, Dmitry)
 - Fixed bug #39320 (ZEND_HASH_APPLY_STOP causes deletion). (Marcus)
@@ -144,9 +143,12 @@ PHP                                                                        NEWS
   given) (Pierre)
 - Fixed bug #39265 (Fixed path handling inside mod_files.sh). 
   (michal dot taborsky at gmail dot com, Ilia)
+- Fixed bug #39273 (imagecopyresized may ignore alpha channel) (Pierre)
 - Fixed bug #39217 (serialNumber might be -1 when the value is too large)
   (Pierre, Tony)
 - Fixed bug #39215 (Inappropriate close of stdin/stdout/stderr). (Wez,Ilia)
+- Fixed bug #39201 (Possible crash in Apache 2 with 413 ErrorHandler).
+  (Ilia)
 - Fixed bug #39151 (Parse error in recursiveiteratoriterator.php). (Marcus)
 - Fixed bug #39121 (Incorrect return array handling in non-wsdl soap client).
   (Dmitry)
