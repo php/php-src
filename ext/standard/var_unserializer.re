@@ -526,6 +526,34 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 
+	str = (char*)YYCURSOR;
+
+	YYCURSOR += len;
+
+	if (*(YYCURSOR) != '"') {
+		*p = YYCURSOR;
+		return 0;
+	}
+
+	YYCURSOR += 2;
+	*p = YYCURSOR;
+
+	INIT_PZVAL(*rval);
+	ZVAL_STRINGL(*rval, str, len, 1);
+	return 1;
+}
+
+"S:" uiv ":" ["] 	{
+	size_t len, maxlen;
+	char *str;
+
+	len = parse_uiv(start + 2);
+	maxlen = max - YYCURSOR;
+	if (maxlen < len) {
+		*p = start + 2;
+		return 0;
+	}
+
 	if ((str = unserialize_str(&YYCURSOR, len)) == NULL) {
 		return 0;
 	}
