@@ -718,7 +718,7 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, int len)
 	unsigned char c;
 	int i;
 
-	smart_str_appendl(buf, "s:", 2);
+	smart_str_appendl(buf, "S:", 2);
 	smart_str_append_long(buf, len);
 	smart_str_appendl(buf, ":\"", 2);
 
