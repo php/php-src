@@ -1,3 +1,29 @@
+2006-12-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/apache2filter/sapi_apache2.c:
+      Fixed bug #39816 (apxs2filter ignores httpd.conf & .htaccess php config
+      settings).
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Removed deadcode found by Ron Korving
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c
+      ext/wddx/wddx.c:
+      optimize out strlen() calls
+      
+
+    * sapi/apache2handler/sapi_apache2.c:
+      MFB: Fixed bug #39201 (Possible crash in Apache 2 with 413 ErrorHandler).
+
+    * (PHP_5_2)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #39201 (Possible crash in Apache 2 with 413 ErrorHandler).
+
 2006-12-12  Sara Golemon  <sara@golemon.com>
 
     * (PHP_5_2)
