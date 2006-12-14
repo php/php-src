@@ -921,7 +921,7 @@ void node_list_unlink(xmlNodePtr node TSRMLS_DC)
 /* {{{ dom_xpath_objects_free_storage */
 void dom_xpath_objects_free_storage(void *object TSRMLS_DC)
 {
-	dom_object *intern = (dom_object *)object;
+	dom_xpath_object *intern = (dom_xpath_object *)object;
 
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
 
@@ -929,6 +929,14 @@ void dom_xpath_objects_free_storage(void *object TSRMLS_DC)
 		xmlXPathFreeContext((xmlXPathContextPtr) intern->ptr);
 		php_libxml_decrement_doc_ref((php_libxml_node_object *) intern TSRMLS_CC);
 		intern->ptr = NULL;
+	}
+
+	zend_hash_destroy(intern->registered_phpfunctions);
+	FREE_HASHTABLE(intern->registered_phpfunctions);
+	
+	if (intern->node_list) {
+		zend_hash_destroy(intern->node_list);
+		FREE_HASHTABLE(intern->node_list);
 	}
 
 	efree(object);
@@ -987,7 +995,12 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 	zval *tmp;
 	dom_object *intern;
 
-	intern = emalloc(sizeof(dom_object));
+	if (instanceof_function(class_type, dom_xpath_class_entry TSRMLS_CC)) {
+		intern = emalloc(sizeof(dom_xpath_object));
+		memset(intern, 0, sizeof(dom_xpath_object));
+	} else {
+		intern = emalloc(sizeof(dom_object));
+	}
 	intern->ptr = NULL;
 	intern->prop_handler = NULL;
 	intern->document = NULL;
@@ -1058,9 +1071,15 @@ zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	zend_object_value retval;
-	dom_object *intern;
+	dom_xpath_object *intern;
 	
-	intern = dom_objects_set_class(class_type, 1 TSRMLS_CC);
+	intern = (dom_xpath_object *)dom_objects_set_class(class_type, 1 TSRMLS_CC);
+	intern->registerPhpFunctions = 0;
+	intern->registered_phpfunctions = NULL;
+	intern->node_list = NULL;
+
+	ALLOC_HASHTABLE(intern->registered_phpfunctions);
+	zend_u_hash_init(intern->registered_phpfunctions, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)dom_xpath_objects_free_storage, dom_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
