@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2007, PHP 5.2.1
+14 Dec 2006, PHP 5.2.1RC1
 - Added a meta tag to phpinfo() output to prevent search engines from indexing 
   the page. (Ilia)
 - Added new function, sys_get_temp_dir(). (Hartmut)
