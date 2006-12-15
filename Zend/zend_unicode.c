@@ -419,7 +419,7 @@ static void zend_default_conversion_error_handler(char *message, UConverter *con
 		zend_error(E_WARNING, message_fmt, message, conv_name?conv_name:"", codepoint, error_char_offset-1);
 	} else {
 		char err_char[8]; /* UTF-8 uses up to 8 bytes */
-		char buf[32];     /* 4x number of error bytes */
+		char buf[40];     /* 4x number of error bytes + 7 separators + 1 for safety */
 		int8_t err_char_len = sizeof(err_char);
 		char *message_fmt = "%s (converter %s failed on bytes (%s) at offset %d)";
 		char *p;
@@ -429,8 +429,9 @@ static void zend_default_conversion_error_handler(char *message, UConverter *con
 		p = buf;
 		for (i = 0; i < err_char_len; i++) {
 			sprintf(p, "0x%02X%s", (unsigned char)err_char[i], (i+1<err_char_len)?",":"");
-			p += 5;
+			p += 4 + (i+1<err_char_len?1:0);
 		}
+		*p = 0;
 
 		zend_error(E_WARNING, message_fmt, message, conv_name?conv_name:"", buf, error_char_offset-err_char_len);
 	}
