@@ -300,11 +300,11 @@ typedef enum _mem_magic {
 
 /* mm block type */
 typedef struct _zend_mm_block_info {
-	size_t _size;
-	size_t _prev;
 #if ZEND_MM_COOKIES
 	unsigned long _cookie;
 #endif
+	size_t _size;
+	size_t _prev;
 } zend_mm_block_info;
 
 #if ZEND_DEBUG
