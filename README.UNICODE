@@ -211,6 +211,15 @@ to the included files.
    unicode.script_encoding = utf-8
 
 
+INI Files
+=========
+
+INI files will be presumed to contain UTF-8 encoded keys and values when the
+Unicode semantics mode is On. When the mode is off, the data is taken as-is,
+similar to PHP 5. No validation occurs during parsing. Instead invalid UTF-8
+sequences are caught during access by ini_*() functions.
+
+
 Conversion Semantics
 ====================
 
