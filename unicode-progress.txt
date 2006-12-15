@@ -14,9 +14,6 @@ ext/standard
     set_include_path(), get_include_path(), restore_include_path()
         Params API, depends on INI mechanism
 
-    ini_get(), ini_get_all(), ini_set(), ini_restore()
-        Params API, Unicode support per discussion
-
     get_cfg_var()
         IS_UNICODE support for varname
 

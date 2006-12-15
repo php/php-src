@@ -5546,26 +5546,24 @@ PHP_FUNCTION(highlight_string)
 }
 /* }}} */
 
-/* {{{ proto string ini_get(string varname)
+/* {{{ proto string ini_get(string varname) U
    Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
-	zval **varname;
-	char *str;
+	char *varname, *str;
+	int varname_len;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &varname) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &varname, &varname_len, UG(utf8_conv)) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(varname);
-
-	str = zend_ini_string(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, 0);
+	str = zend_ini_string(varname, varname_len+1, 0);
 
 	if (!str) {
 		RETURN_FALSE;
 	}
 
-	RETURN_RT_STRING(str, 1);
+	RETURN_UTF8_STRING(str, ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -5588,15 +5586,15 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 		array_init(option);
 
 		if (ini_entry->orig_value) {
-			add_ascii_assoc_stringl(option, "global_value", ini_entry->orig_value, ini_entry->orig_value_length, 1);
+			add_ascii_assoc_utf8_stringl(option, "global_value", ini_entry->orig_value, ini_entry->orig_value_length, 1);
 		} else if (ini_entry->value) {
-			add_ascii_assoc_stringl(option, "global_value", ini_entry->value, ini_entry->value_length, 1);
+			add_ascii_assoc_utf8_stringl(option, "global_value", ini_entry->value, ini_entry->value_length, 1);
 		} else {
 			add_ascii_assoc_null(option, "global_value");
 		}
 
 		if (ini_entry->value) {
-			add_ascii_assoc_stringl(option, "local_value", ini_entry->value, ini_entry->value_length, 1);
+			add_ascii_assoc_utf8_stringl(option, "local_value", ini_entry->value, ini_entry->value_length, 1);
 		} else {
 			add_ascii_assoc_null(option, "local_value");
 		}
@@ -5608,7 +5606,7 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 	return 0;
 }
 
-/* {{{ proto array ini_get_all([string extension])
+/* {{{ proto array ini_get_all([string extension]) U
    Get all configuration options */
 PHP_FUNCTION(ini_get_all)
 {
@@ -5616,8 +5614,8 @@ PHP_FUNCTION(ini_get_all)
 	int extname_len = 0, extnumber = 0;
 	zend_module_entry *module;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &extname, &extname_len) == FAILURE) {
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &extname, &extname_len, UG(ascii_conv)) == FAILURE) {
+		return;
 	}
 
 	zend_ini_sort_entries(TSRMLS_C);
@@ -5644,67 +5642,99 @@ static int php_ini_check_path(char *option_name, int option_len, char *new_optio
 	return !strncmp(option_name, new_option_name, option_len);
 }
 
-/* {{{ proto string ini_set(string varname, string newvalue)
+/* {{{ proto string ini_set(string varname, string newvalue) U
    Set a configuration option, returns false on error and the old value of the configuration option on success */
 PHP_FUNCTION(ini_set)
 {
-	zval **varname, **new_value;
+	char *varname;
+	zstr new_value;
+	int varname_len, new_value_len;
+	zend_uchar type;
 	char *old_value;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &varname, &new_value) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&t",
+							  &varname, &varname_len, UG(utf8_conv),
+							  &new_value, &new_value_len, &type) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(varname);
-	convert_to_string_ex(new_value);
-
-	old_value = zend_ini_string(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, 0);
+	old_value = zend_ini_string(varname, varname_len+1, 0);
 
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
-		RETVAL_STRING(old_value, 1);
+		RETVAL_UTF8_STRING(old_value, ZSTR_DUPLICATE);
 	} else {
 		RETVAL_FALSE;
 	}
 
-#define _CHECK_PATH(var, ini) php_ini_check_path(Z_STRVAL_PP(var), Z_STRLEN_PP(var), ini, sizeof(ini))
+#define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, var_len, ini, sizeof(ini))
 	
 	/* basedir check */
 	if (PG(open_basedir)) {
-		if (_CHECK_PATH(varname, "error_log") ||
-			_CHECK_PATH(varname, "java.class.path") ||
-			_CHECK_PATH(varname, "java.home") ||
-			_CHECK_PATH(varname, "java.library.path") ||
-			_CHECK_PATH(varname, "vpopmail.directory")) {
+		char *path = NULL;
+		int path_len;
+
+		if (_CHECK_PATH(varname, varname_len, "error_log") ||
+			_CHECK_PATH(varname, varname_len, "java.class.path") ||
+			_CHECK_PATH(varname, varname_len, "java.home") ||
+			_CHECK_PATH(varname, varname_len, "java.library.path") ||
+			_CHECK_PATH(varname, varname_len, "vpopmail.directory")) {
 			
-			if (php_check_open_basedir(Z_STRVAL_PP(new_value) TSRMLS_CC)) {
+			/* convert to filesystem encoding to check against open_basedir */
+			if (type == IS_UNICODE) {
+				if (FAILURE == php_stream_path_encode(NULL, &path, &path_len, new_value.u, new_value_len, REPORT_ERRORS, FG(default_context))) {
+					RETURN_FALSE;
+				}
+			} else {
+				path = new_value.s;
+				path_len = new_value_len;
+			}
+			if (php_check_open_basedir(path TSRMLS_CC)) {
+				if (type == IS_UNICODE) {
+					efree(path);
+				}
 				zval_dtor(return_value);
 				RETURN_FALSE;
 			}
+			if (type == IS_UNICODE) {
+				efree(path);
+			}
 		}
 	}	
-		
-	if (zend_alter_ini_entry(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, Z_STRVAL_PP(new_value), Z_STRLEN_PP(new_value),
+
+	/* now convert to UTF-8 for the INI system */
+	if (type == IS_UNICODE) {
+		char *temp;
+		int temp_len;
+
+		zend_unicode_to_string(UG(utf8_conv), &temp, &temp_len, new_value.u, new_value_len);
+		new_value.s = temp;
+		new_value_len = temp_len;
+	}
+
+	if (zend_alter_ini_entry(varname, varname_len+1, new_value.s, new_value_len,
 								PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
 		zval_dtor(return_value);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+	}
+	if (type == IS_UNICODE) {
+		efree(new_value.s);
 	}
 }
 /* }}} */
 
-/* {{{ proto void ini_restore(string varname)
+/* {{{ proto void ini_restore(string varname) U
    Restore the value of a configuration option specified by varname */
 PHP_FUNCTION(ini_restore)
 {
-	zval **varname;
+	char *varname;
+	int varname_len;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &varname) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &varname, &varname_len, UG(utf8_conv)) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(varname);
-
-	zend_restore_ini_entry(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, PHP_INI_STAGE_RUNTIME);
+	zend_restore_ini_entry(varname, varname_len+1, PHP_INI_STAGE_RUNTIME);
 }
 /* }}} */
 
