@@ -1,3 +1,20 @@
+2006-12-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Use 'S' for escaped binary strings and 's' for non-escaped.
+
+2006-12-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/dom_fe.h
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/xpath.c
+      ext/dom/tests/domxpath.phpt:
+      add ability to call PHP functions from XPath
+      update test
+
 2006-12-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
