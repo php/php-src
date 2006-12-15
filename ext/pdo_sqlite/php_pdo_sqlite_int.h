@@ -62,8 +62,13 @@ typedef struct {
 extern pdo_driver_t pdo_sqlite_driver;
 
 extern int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC);
-#define pdo_sqlite_error(s) _pdo_sqlite_error(s, NULL, __FILE__, __LINE__ TSRMLS_CC)
-#define pdo_sqlite_error_stmt(s) _pdo_sqlite_error(stmt->dbh, stmt, __FILE__, __LINE__ TSRMLS_CC)
+extern int _pdo_sqlite_error_msg(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *msg, 
+					const char *file, int line TSRMLS_DC);
+#define pdo_sqlite_error(dbh) _pdo_sqlite_error(dbh, NULL, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_sqlite_errmsg(dbh, st, msg) _pdo_sqlite_error_msg(dbh, NULL, st, msg, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_sqlite_error_stmt(stmt) _pdo_sqlite_error(stmt->dbh, stmt, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_sqlite_errmsg_stmt(stmt, st, msg) _pdo_sqlite_error_msg(stmt->dbh, stmt, st, msg, __FILE__, __LINE__ TSRMLS_CC)
+
 
 extern struct pdo_stmt_methods sqlite_stmt_methods;
 #endif
