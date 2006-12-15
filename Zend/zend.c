@@ -917,6 +917,7 @@ static void unicode_globals_ctor(zend_unicode_globals *unicode_globals TSRMLS_DC
 	unicode_globals->http_input_encoding_conv = NULL;
 	unicode_globals->filesystem_encoding_conv = NULL;
 	zend_set_converter_encoding(&unicode_globals->utf8_conv, "UTF-8");
+	zend_set_converter_error_mode(unicode_globals->utf8_conv, ZEND_TO_UNICODE, ZEND_CONV_ERROR_STOP);
 	zend_set_converter_encoding(&unicode_globals->ascii_conv, "US-ASCII");
 	zend_set_converter_error_mode(unicode_globals->ascii_conv, ZEND_FROM_UNICODE, ZEND_CONV_ERROR_STOP);
 	unicode_globals->from_error_mode = ZEND_CONV_ERROR_SUBST;
