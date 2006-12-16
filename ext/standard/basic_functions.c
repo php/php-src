@@ -5573,6 +5573,7 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 	zval *ini_array = va_arg(args, zval *);
 	int module_number = va_arg(args, int);
 	zval *option;
+	TSRMLS_FETCH();
 
 	if (module_number != 0 && ini_entry->module_number != module_number) {
 		return 0;
@@ -5707,7 +5708,7 @@ PHP_FUNCTION(ini_set)
 		char *temp;
 		int temp_len;
 
-		zend_unicode_to_string(UG(utf8_conv), &temp, &temp_len, new_value.u, new_value_len);
+		zend_unicode_to_string(UG(utf8_conv), &temp, &temp_len, new_value.u, new_value_len TSRMLS_CC);
 		new_value.s = temp;
 		new_value_len = temp_len;
 	}
