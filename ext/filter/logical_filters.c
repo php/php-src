@@ -28,6 +28,10 @@
 #define zend_ascii_hash_find(hash, name, sizeof_name, val) zend_hash_find(hash, name, sizeof_name, val)
 #endif
 
+#if HAVE_ARPA_INET_H
+# include <arpa/inet.h>
+#endif
+
 /* {{{ FETCH_LONG_OPTION(var_name, option_name) */
 #define FETCH_LONG_OPTION(var_name, option_name)                                                                         \
 	var_name = 0;                                                                                                        \
@@ -527,70 +531,31 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 }
 /* }}} */
 
-static int _php_filter_validate_ipv4_count_dots(char *str) /* {{{ */
+static int _php_filter_validate_ipv4(char *str, int str_len, int *ip) /* {{{ */
 {
-	char *s1, *s2, *s3, *s4;
+	unsigned long int i = inet_addr(str);
+	char ip_chk[16];
+	int l;
 
-	s1 = strchr(str, '.');
-	if (!s1)
-		return 0;
-	s2 = strchr(s1 + 1, '.');
-	if (!s2)
-		return 1;
-	s3 = strchr(s2 + 1, '.');
-	if (!s3)
-		return 2;
-	s4 = strchr(s3 + 1, '.');
-	if (!s4)
-		return 3;
-	return 4; /* too many */
-}
-/* }}} */
-
-static int _php_filter_validate_ipv4_get_nr(char **str) /* {{{ */
-{
-	char *begin, *end, *ptr, *tmp_str;
-	int   tmp_nr = -1;
-
-	begin = ptr = *str;
-	while ((*ptr >= '0') && (*ptr <= '9')) {
-		++ptr;
-	}
-	end = ptr;
-	*str = end + 1;
-
-	if (end == begin) {
-		return -1;
-	}
-
-	tmp_str = calloc(1, end - begin + 1);
-	memcpy(tmp_str, begin, end - begin);
-	tmp_nr = strtol(tmp_str, NULL, 10);
-	free(tmp_str);
-
-	if (tmp_nr < 0 || tmp_nr > 255) {
-		tmp_nr = -1;
-	}
-	return tmp_nr;
-}
-/* }}} */
-
-static int _php_filter_validate_ipv4(char *str, int *ip TSRMLS_DC) /* {{{ */
-{
-	char *p;
-	int x;
-
-	if (_php_filter_validate_ipv4_count_dots(str) != 3) {
-		return 0;
-	}
-
-	p = str;
-	for (x = 0; x < 4; ++x) {
-		ip[x] = _php_filter_validate_ipv4_get_nr(&p);
-		if (ip[x] == -1) {
+	if (i == INADDR_NONE) {
+		if (!strcmp(str, "255.255.255.255")) {
+			ip[0] = ip[1] = ip[2] = ip[3] = 255;
+			return 1;
+		} else {
 			return 0;
 		}
 	}
+	ip[0] = i & 0xFF;
+	ip[1] = (i & 0xFF00) / 256;
+	ip[2] = (i & 0xFF0000) / 256 / 256;
+	ip[3] = (i & 0xFF000000) / 256 / 256 / 256;
+
+	/* make sure that the input does not have any trailing values */
+	l = sprintf(ip_chk, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+	if (l != str_len || strcmp(ip_chk, str)) {
+		return 0;
+	}
+
 	return 1;
 }
 /* }}} */
@@ -611,7 +576,7 @@ static int _php_filter_validate_ipv4(char *str, int *ip TSRMLS_DC) /* {{{ */
 				hexcode_found++; 			\
 			}
 
-static int _php_filter_validate_ipv6_(char *str TSRMLS_DC) /* {{{ */
+static int _php_filter_validate_ipv6_(char *str, int str_len TSRMLS_DC) /* {{{ */
 {
 	int hexcode_found = 0;
 	int compressed_2end = 0;
@@ -621,21 +586,21 @@ static int _php_filter_validate_ipv6_(char *str TSRMLS_DC) /* {{{ */
 	char *s2 = NULL, *ipv4=NULL;
 	int ip4elm[4];
 
-	if (!strchr(str, ':')) {
+	if (!memchr(str, ':', str_len)) {
 		return 0;
 	}
 
 	/* Check for compressed expression. only one is allowed */
-	compressed = strstr(str, "::");
+	compressed = php_memnstr(str, "::", sizeof("::")-1, str+str_len);
 	if (compressed) {
-		s2 = strstr(compressed+1, "::");
+		s2 = php_memnstr(compressed+1, "::", sizeof("::")-1, str + str_len);
 		if (s2) {
 			return 0;
 		}
 	}
 
 	/* check for bundled IPv4 */
-	ipv4 = strchr(str, '.');
+	ipv4 = memchr(str, '.', str_len);
 
 	if (ipv4) {
 		while (*ipv4 != ':' && ipv4 >= start) {
@@ -648,7 +613,7 @@ static int _php_filter_validate_ipv6_(char *str TSRMLS_DC) /* {{{ */
 		}
 		ipv4++;
 
-		if (!_php_filter_validate_ipv4(ipv4, ip4elm TSRMLS_CC)) {
+		if (!_php_filter_validate_ipv4(ipv4, (str + str_len - ipv4), ip4elm TSRMLS_CC)) {
 			return 0;
 		}
 
@@ -662,7 +627,7 @@ static int _php_filter_validate_ipv6_(char *str TSRMLS_DC) /* {{{ */
 		if (ipv4) {
 			end = ipv4 - 1;
 		} else {
-			end = str + strlen(start);
+			end = str + str_len;
 		}
 
 		while (*str && str <= end) {
@@ -775,7 +740,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	switch (mode) {
 		case FORMAT_IPV4:
-			if (!_php_filter_validate_ipv4(str, ip TSRMLS_CC)) {
+			if (!_php_filter_validate_ipv4(str, Z_STRLEN_P(value), ip)) {
 				RETURN_VALIDATION_FAILED
 			}
 
@@ -805,7 +770,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		case FORMAT_IPV6:
 			{
 				int res = 0;
-				res = _php_filter_validate_ipv6_(str TSRMLS_CC);
+				res = _php_filter_validate_ipv6_(str, Z_STRLEN_P(value) TSRMLS_CC);
 				if (res < 1) {
 					RETURN_VALIDATION_FAILED
 				}
