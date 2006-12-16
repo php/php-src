@@ -118,7 +118,7 @@ ZEND_API double zend_string_to_double(const char *number, zend_uint length)
 }
 
 
-ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
+ZEND_API int convert_scalar_to_number(zval *op TSRMLS_DC)
 {
 	switch (Z_TYPE_P(op)) {
 		case IS_STRING:
@@ -171,6 +171,8 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 			Z_LVAL_P(op) = 0;
 			break;
 	}
+
+	return SUCCESS;
 }
 
 #define zendi_convert_scalar_to_number(op, holder, result)			\
@@ -352,13 +354,13 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 	}
 
 
-ZEND_API void convert_to_long(zval *op)
+ZEND_API int convert_to_long(zval *op)
 {
-	convert_to_long_base(op, 10);
+	return convert_to_long_base(op, 10);
 }
 
 
-ZEND_API void convert_to_long_base(zval *op, int base)
+ZEND_API int convert_to_long_base(zval *op, int base)
 {
 	long tmp;
 
@@ -405,27 +407,28 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 				convert_object_to_type(op, IS_LONG, convert_to_long);
 
 				if (Z_TYPE_P(op) == IS_LONG) {
-					return;
+					return SUCCESS;
 				}
 
 				zend_error(E_NOTICE, "Object of class %v could not be converted to int", Z_OBJCE_P(op)->name);
 
 				zval_dtor(op);
 				ZVAL_LONG(op, retval);
-				return;
+				return FAILURE;
 			}
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
 			zval_dtor(op);
 			Z_LVAL_P(op) = 0;
-			break;
+			return FAILURE;
 	}
 
 	Z_TYPE_P(op) = IS_LONG;
+	return SUCCESS;
 }
 
 
-ZEND_API void convert_to_double(zval *op)
+ZEND_API int convert_to_double(zval *op)
 {
 	double tmp;
 
@@ -474,26 +477,28 @@ ZEND_API void convert_to_double(zval *op)
 				convert_object_to_type(op, IS_DOUBLE, convert_to_double);
 
 				if (Z_TYPE_P(op) == IS_DOUBLE) {
-					return;
+					return SUCCESS;
 				}
 
 				zend_error(E_NOTICE, "Object of class %v could not be converted to double", Z_OBJCE_P(op)->name);
 
 				zval_dtor(op);
 				ZVAL_DOUBLE(op, retval);
-				break;
+				return FAILURE;
 			}
 		default:
 			zend_error(E_WARNING, "Cannot convert to real value (type=%d)", Z_TYPE_P(op));
 			zval_dtor(op);
 			Z_DVAL_P(op) = 0;
-			break;
+			return FAILURE;
 	}
+
 	Z_TYPE_P(op) = IS_DOUBLE;
+	return SUCCESS;
 }
 
 
-ZEND_API void convert_to_null(zval *op)
+ZEND_API int convert_to_null(zval *op)
 {
 	if (Z_TYPE_P(op) == IS_OBJECT) {
 		if (Z_OBJ_HT_P(op)->cast_object) {
@@ -504,19 +509,21 @@ ZEND_API void convert_to_null(zval *op)
 			*org = *op;
 			if (Z_OBJ_HT_P(op)->cast_object(org, op, IS_NULL, NULL TSRMLS_CC) == SUCCESS) {
 				zval_dtor(org);
-				return;
+				return SUCCESS;
 			}
 			*op = *org;
 			FREE_ZVAL(org);
+			return FAILURE;
 		}
 	}
 
 	zval_dtor(op);
 	Z_TYPE_P(op) = IS_NULL;
+	return SUCCESS;
 }
 
 
-ZEND_API void convert_to_boolean(zval *op)
+ZEND_API int convert_to_boolean(zval *op)
 {
 	int tmp;
 
@@ -578,19 +585,21 @@ ZEND_API void convert_to_boolean(zval *op)
 				convert_object_to_type(op, IS_BOOL, convert_to_boolean);
 
 				if (Z_TYPE_P(op) == IS_BOOL) {
-					return;
+					return SUCCESS;
 				}
 
 				zval_dtor(op);
 				ZVAL_BOOL(op, retval);
-				break;
+				return FAILURE;
 			}
 		default:
 			zval_dtor(op);
 			Z_LVAL_P(op) = 0;
 			break;
 	}
+
 	Z_TYPE_P(op) = IS_BOOL;
+	return SUCCESS;
 }
 
 #define NUM_BUF_SIZE 512
@@ -813,12 +822,12 @@ static UChar* zend_u_format_gdouble(double dnum, int ndigit, UChar *result)
 	return (result);
 }
 
-ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
+ZEND_API int _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 {
-    _convert_to_unicode_with_converter(op, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC ZEND_FILE_LINE_CC);
+    return _convert_to_unicode_with_converter(op, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC ZEND_FILE_LINE_CC);
 }
 
-ZEND_API void _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRMLS_DC ZEND_FILE_LINE_DC)
+ZEND_API int _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
@@ -828,8 +837,7 @@ ZEND_API void _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRM
 		case IS_UNICODE:
 			break;
 		case IS_STRING:
-			zval_string_to_unicode_ex(op, conv TSRMLS_CC);
-			return;
+			return zval_string_to_unicode_ex(op, conv TSRMLS_CC);
 		case IS_BOOL:
 			if (Z_LVAL_P(op)) {
 				Z_USTRVAL_P(op) = USTR_MAKE_REL("1");
@@ -883,18 +891,22 @@ ZEND_API void _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRM
 			zval_dtor(op);
 			Z_USTRVAL_P(op) = USTR_MAKE_REL("Array");
 			Z_USTRLEN_P(op) = sizeof("Array")-1;
-			break;
+			return FAILURE;
 		case IS_OBJECT: {
+			int retval = FAILURE;
+
 			if (Z_OBJ_HT_P(op)->cast_object) {
 				zval dst;
 				if (Z_OBJ_HT_P(op)->cast_object(op, &dst, IS_UNICODE, conv TSRMLS_CC) == FAILURE) {
 					zend_error(E_RECOVERABLE_ERROR,
 							   "Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,
 							   zend_get_type_by_const(IS_UNICODE));
+					return FAILURE;
 				} else {
 					zval_dtor(op);
 					Z_TYPE_P(op) = IS_UNICODE;
 					op->value = dst.value;
+					retval = SUCCESS;
 				}
 			} else {
 				if(Z_OBJ_HT_P(op)->get) {
@@ -904,37 +916,39 @@ ZEND_API void _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRM
 						zval_dtor(op);
 						*op = *newop;
 						FREE_ZVAL(newop);
-						convert_to_string_with_converter(op, conv);
+						retval = convert_to_string_with_converter(op, conv);
 					}
 				}
 			}
 
-			if (Z_TYPE_P(op) == IS_UNICODE) {
-				return;
+			if (retval == SUCCESS && Z_TYPE_P(op) == IS_UNICODE) {
+				return SUCCESS;
 			}
 
 			zend_error(E_NOTICE, "Object of class %v to string conversion", Z_OBJCE_P(op)->name);
 			zval_dtor(op);
 			Z_USTRVAL_P(op) = USTR_MAKE_REL("Object");
 			Z_USTRLEN_P(op) = sizeof("Object")-1;
-			break;
+			return FAILURE;
 		}
 		default:
 			zval_dtor(op);
 			ZVAL_BOOL(op, 0);
-			break;
+			return FAILURE;
 	}
+
 	Z_TYPE_P(op) = IS_UNICODE;
+	return SUCCESS;
 }
 
 
-ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
+ZEND_API int _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 {
     TSRMLS_FETCH();
-    _convert_to_string_with_converter(op, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC ZEND_FILE_LINE_CC);
+    return _convert_to_string_with_converter(op, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC ZEND_FILE_LINE_CC);
 }
 
-ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS_DC ZEND_FILE_LINE_DC)
+ZEND_API int _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	long lval;
 	double dval;
@@ -945,10 +959,9 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 			Z_STRLEN_P(op) = 0;
 			break;
 		case IS_STRING:
-			return;
-		case IS_UNICODE:
-			zval_unicode_to_string_ex(op, conv TSRMLS_CC);
 			break;
+		case IS_UNICODE:
+			return zval_unicode_to_string_ex(op, conv TSRMLS_CC);
 		case IS_BOOL:
 			if (Z_LVAL_P(op)) {
 				Z_STRVAL_P(op) = estrndup_rel("1", 1);
@@ -986,8 +999,9 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 			zval_dtor(op);
 			Z_STRVAL_P(op) = estrndup_rel("Array", sizeof("Array")-1);
 			Z_STRLEN_P(op) = sizeof("Array")-1;
-			break;
+			return FAILURE;
 		case IS_OBJECT: {
+			int retval = FAILURE;
 			TSRMLS_FETCH();
 
 			if (Z_OBJ_HT_P(op)->cast_object) {
@@ -996,10 +1010,12 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 					zend_error(E_RECOVERABLE_ERROR,
 							   "Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,
 							   zend_get_type_by_const(IS_STRING));
+					return FAILURE;
 				} else {
 					zval_dtor(op);
 					Z_TYPE_P(op) = IS_STRING;
 					op->value = dst.value;
+					retval = SUCCESS;
 				}
 			} else {
 				if(Z_OBJ_HT_P(op)->get) {
@@ -1009,31 +1025,33 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 						zval_dtor(op);
 						*op = *newop;
 						FREE_ZVAL(newop);
-						convert_to_string_with_converter(op, conv);
+						retval = convert_to_string_with_converter(op, conv);
 					}
 				}
 			}
 
-			if (Z_TYPE_P(op) == IS_STRING) {
-				return;
+			if (retval == SUCCESS && Z_TYPE_P(op) == IS_STRING) {
+				return SUCCESS;
 			}
 
 			zend_error(E_NOTICE, "Object of class %v to string conversion", Z_OBJCE_P(op)->name);
 			zval_dtor(op);
 			Z_STRVAL_P(op) = estrndup_rel("Object", sizeof("Object")-1);
 			Z_STRLEN_P(op) = sizeof("Object")-1;
-			break;
+			return FAILURE;
 		}
 		default:
 			zval_dtor(op);
 			ZVAL_BOOL(op, 0);
-			break;
+			return FAILURE;
 	}
+
 	Z_TYPE_P(op) = IS_STRING;
+	return SUCCESS;
 }
 
 
-static void convert_scalar_to_array(zval *op, int type TSRMLS_DC)
+static int convert_scalar_to_array(zval *op, int type TSRMLS_DC)
 {
 	zval *entry;
 
@@ -1058,66 +1076,70 @@ static void convert_scalar_to_array(zval *op, int type TSRMLS_DC)
 			}
 			break;
 	}
+
+	return SUCCESS;
 }
 
 
-ZEND_API void convert_to_array(zval *op)
+ZEND_API int convert_to_array(zval *op)
 {
 	TSRMLS_FETCH();
 
 	switch (Z_TYPE_P(op)) {
 		case IS_ARRAY:
-			return;
 			break;
 /* OBJECTS_OPTIMIZE */
 		case IS_OBJECT:
 			{
 				zval *tmp;
 				HashTable *ht;
+				int retval = FAILURE;
 
 				ALLOC_HASHTABLE(ht);
 				zend_u_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0, 0);
 				if (Z_OBJ_HT_P(op)->get_properties) {
 					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op TSRMLS_CC);
-					if(obj_ht) {
+					if (obj_ht) {
 						zend_hash_copy(ht, obj_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+						retval = SUCCESS;
 					}
 				} else {
 					convert_object_to_type(op, IS_ARRAY, convert_to_array);
 
 					if (Z_TYPE_P(op) == IS_ARRAY) {
-						return;
+						return SUCCESS;
 					}
 				}
 				zval_dtor(op);
 				Z_TYPE_P(op) = IS_ARRAY;
 				Z_ARRVAL_P(op) = ht;
+				return retval;
 			}
-			return;
+			break;
 		case IS_NULL:
 			ALLOC_HASHTABLE(Z_ARRVAL_P(op));
 			zend_u_hash_init(Z_ARRVAL_P(op), 0, NULL, ZVAL_PTR_DTOR, 0, 0);
 			Z_TYPE_P(op) = IS_ARRAY;
 			break;
 		default:
-			convert_scalar_to_array(op, IS_ARRAY TSRMLS_CC);
-			break;
+			return convert_scalar_to_array(op, IS_ARRAY TSRMLS_CC);
 	}
+
+	return SUCCESS;
 }
 
 
-ZEND_API void convert_to_object(zval *op)
+ZEND_API int convert_to_object(zval *op)
 {
 	TSRMLS_FETCH();
 	switch (Z_TYPE_P(op)) {
 		case IS_ARRAY:
 			{
 				object_and_properties_init(op, zend_standard_class_def, Z_ARRVAL_P(op));
-				return;
 				break;
 			}
 		case IS_OBJECT:
-			return;
+			break;
 		case IS_NULL:
 			{
 				/* OBJECTS_OPTIMIZE */
@@ -1127,9 +1149,10 @@ ZEND_API void convert_to_object(zval *op)
 				break;
 			}
 		default:
-			convert_scalar_to_array(op, IS_OBJECT TSRMLS_CC);
-			break;
+			return convert_scalar_to_array(op, IS_OBJECT TSRMLS_CC);
 	}
+
+	return SUCCESS;
 }
 
 ZEND_API void multi_convert_to_long_ex(int argc, ...)
