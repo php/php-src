@@ -1,3 +1,77 @@
+2006-12-15  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * README.UNICODE:
+      Update with INI file info.
+
+    * unicode-progress.txt
+      ext/standard/basic_functions.c:
+      Unicode support in ini_*() functions.
+
+    * ZendEngine2/zend_alloc.c:
+      __builtin_expect() exists only in GCC 3.0 and higher.
+
+    * ZendEngine2/zend_API.h:
+      Make all macros (RETURN_*, RETVAL_*, ZVAL_*, add_*) that convert binary
+      strings to Unicode actually issues errors on failure. I'm surprised we
+      haven't done this already.
+
+    * ZendEngine2/zend_unicode.c:
+      Fix potential buffer overflow in default conversion error handler.
+
+    * ZendEngine2/zend.c:
+      Make utf8_conv stop on conversion errors when converting to UTF-16.
+
+2006-12-15  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_alloc.c:
+      - MF 5.2 (put cookie in first place)
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.c:
+      - I prefer cookie to be the first element.
+
+2006-12-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Added internal heap protection
+        . safe unlinking
+        . cookies
+        . canary protection (debug build only)
+
+2006-12-15  Wez Furlong  <wez.php.net@netevil.org>
+
+    * ext/pdo_sqlite/pdo_sqlite.c
+      ext/pdo_sqlite/php_pdo_sqlite.h
+      ext/pdo_sqlite/php_pdo_sqlite_int.h
+      ext/pdo_sqlite/sqlite_driver.c
+      ext/pdo_sqlite/sqlite_statement.c:
+      merge php5 pdo_sqlite into head; this source compiles on both php5 and
+      php6.
+
+2006-12-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      configure.in
+      main/php_version.h:
+      back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.2.1RC1
+
+2006-12-15  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Support for 'S' format in unserialize() (forward compatibility with PHP
+      6)
+
 2006-12-14  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/var.c
