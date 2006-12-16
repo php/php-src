@@ -5,7 +5,6 @@ PHP                                                                        NEWS
 
 - Changed dl() to be disabled by default. Enabled only when explicitly 
   registered by the SAPI layer. Enabled only with CLI, CGI and EMBED. (Dmitry)
-- Changed return "new" by reference to throw an E_STRICT error. (Dmitry)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
   functions to not call __autoload(). (Dmitry)
 - Changed opendir/dir/scandir to use default context
@@ -26,15 +25,12 @@ PHP                                                                        NEWS
 - Removed support for "continue" and "break" operators with non-constant
   operands. (Dmitry)
 - Removed Freetype 1.x and GD 1.x from GD extension. (Pierre)
-- Removed global reflection constants. (Johannes)
 
 - Moved extensions to PECL:
   . ext/ncurses (Hartmut)
 
 - Improved and cleaned CGI code. FastCGI is now always enabled and can not be
   disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
-- Improved cURL: (Ilia)
-  . Added CURLINFO_HEADER_OUT constant to facilitate request retrieval.
 - Improved ext/zlib; re-implemented non-file related functionality. (Mike)
 - Improved output layer; see README.NEW-OUTPUT-API for internals. (Mike)
 - Improved ext/mhash: (Mike)
@@ -44,23 +40,16 @@ PHP                                                                        NEWS
     mhash_keygen.
 
 
-- Added automatic module globals management. (Dmitry)
 - Added "jump label" operator (limited "goto"). (Dmitry, Sara)
 - Added E_STRICT to E_ALL. (Dmitry)
-- Added --rclass and --rextension CLI parameters to reflect internal classes
-  and loaded extensions. (Johannes)
 - Added an optional parameter to strstr() and stristr() for retrieval of either
   the part of haystack before or after first occurence of needle. (Johannes)
 - Added possibility to check in which extension an internal function was
   defined using reflection API. (Johannes)
 - Added streams features:
   . Context parameter for copy() function. (Sara)
-  . "allow_url_include" ini option to be able to turn off remote url
-    code execution separately from the "allow_url_fopen" setting. (Rasmus)
   . Second optional parameter to stream_context_create() to
     set params during context creation. (Sara)
-  . sys_get_temp_dir() function that returns the default directory
-    for temporary files (as requested in bug #35380). (Hartmut)
   . "context" and "binary_pipes" params in "other_options" arg. (Sara)
   . stream_resolve_include_path(). (Sara)
 - Added shm_has_var() function. (Mike)
@@ -68,5 +57,3 @@ PHP                                                                        NEWS
 
 - Fixed bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag, 
   not enity). (Hannes Magnusson)
-- Fixed bug #36630 (umask not reset at the end of the request). (Ilia)
-- Fixed bug #34286 (__toString() behavior is inconsistent). (Marcus)
