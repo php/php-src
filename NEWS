@@ -67,6 +67,8 @@ PHP                                                                        NEWS
 - Fixed bug #39782 (setTime() on a DateTime constructed with a Weekday
   yields incorrect results). (Ilia)
 - Fixed bug #39780 (PNG image with CRC/data error raises fatal error) (Pierre)
+- Fixed bug #39779 (Enable AUTH PLAIN mechanism in underlaying libc-client).
+  (michael dot heimpold at s2000 dot tu-chemnitz dot de, Ilia)
 - Fixed bug #39775 ("Indirect modification ..." message is not shown). (Dmitry)
 - Fixed bug #39763 (magic quotes are applied twice by ext/filter in
   parse_str()). (Ilia) 
