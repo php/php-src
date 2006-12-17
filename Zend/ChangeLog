@@ -1,3 +1,14 @@
+2006-12-16  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * zend_API.h:
+      Fix ZTS build
+
+2006-12-16  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_operators.c
+      zend_operators.h:
+      Make convert_to_*() APIs return SUCCESS/FAILURE.
+
 2006-12-15  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_alloc.c:
