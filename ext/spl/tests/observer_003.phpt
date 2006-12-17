@@ -56,3 +56,16 @@ string(1) "2"
 string(3) "foo"
 bool(true)
 ===DONE===
+--UEXPECT--
+int(4)
+int(1)
+unicode(1) "2"
+unicode(3) "foo"
+bool(true)
+===UNSERIALIZE===
+int(4)
+int(1)
+unicode(1) "2"
+unicode(3) "foo"
+bool(true)
+===DONE===

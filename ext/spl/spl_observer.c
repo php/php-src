@@ -304,7 +304,7 @@ SPL_METHOD(SplObjectStorage, serialize)
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	if (buf.c) {
-		RETURN_STRINGL(buf.c, buf.len, 0);
+		RETURN_ASCII_STRINGL(buf.c, buf.len, 0);
 	} else {
 		RETURN_NULL();
 	}
