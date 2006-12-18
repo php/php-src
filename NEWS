@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . cookies
   . canary protection (debug build only)
   . random generation of cookies and canaries
+- Fixed bug #39832 (SOAP Server: parameter not matching the WSDL specified type
+  are set to 0). (Dmitry)
 
 14 Dec 2006, PHP 5.2.1RC1
 - Added a meta tag to phpinfo() output to prevent search engines from indexing 
