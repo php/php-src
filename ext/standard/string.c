@@ -3890,7 +3890,7 @@ PHP_FUNCTION(strip_tags)
 	}
 	convert_to_string_ex(str);
 	buf = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
-	retval_len = php_strip_tags(buf, Z_STRLEN_PP(str), NULL, allowed_tags, allowed_tags_len);
+	retval_len = php_strip_tags_ex(buf, Z_STRLEN_PP(str), NULL, allowed_tags, allowed_tags_len, 0);
 	RETURN_STRINGL(buf, retval_len, 0);
 }
 /* }}} */
@@ -4095,6 +4095,11 @@ int php_tag_find(char *tag, int len, char *set) {
 }
 /* }}} */
 
+PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len)
+{
+	return php_strip_tags_ex(rbuf, len, stateptr, allow, allow_len, 0);
+}
+
 /* {{{ php_strip_tags
  
 	A simple little state-machine to strip out html and php tags 
@@ -4115,7 +4120,7 @@ int php_tag_find(char *tag, int len, char *set) {
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
-PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len)
+PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow, int allow_len, zend_bool allow_tag_spaces)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0, depth=0;
@@ -4143,7 +4148,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 			case '\0':
 				break;
 			case '<':
-				if (isspace(*(p + 1)) && allow_len >=- 0) {
+				if (isspace(*(p + 1)) && !allow_tag_spaces) {
 					goto reg_char;
 				}
 				if (state == 0) {
