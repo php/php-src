@@ -540,26 +540,26 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	}
 
 	switch (op) {
-	case SAPI_HEADER_SET_STATUS:
-		sapi_update_response_code((long) arg TSRMLS_CC);
-		return SUCCESS;
+		case SAPI_HEADER_SET_STATUS:
+			sapi_update_response_code((long) arg TSRMLS_CC);
+			return SUCCESS;
 
-	case SAPI_HEADER_REPLACE:
-	case SAPI_HEADER_ADD: {
-		sapi_header_line *p = arg;
-		
-		if (!p->line || !p->line_len) {
+		case SAPI_HEADER_REPLACE:
+		case SAPI_HEADER_ADD: {
+				sapi_header_line *p = arg;
+
+				if (!p->line || !p->line_len) {
+					return FAILURE;
+				}
+				header_line = p->line;
+				header_line_len = p->line_len;
+				http_response_code = p->response_code;
+				replace = (op == SAPI_HEADER_REPLACE);
+				break;
+			}
+
+		default:
 			return FAILURE;
-		}
-		header_line = p->line;
-		header_line_len = p->line_len;
-		http_response_code = p->response_code;
-		replace = (op == SAPI_HEADER_REPLACE);
-		break;
-		}
-	
-	default:
-		return FAILURE;
 	}
 
 	header_line = estrndup(header_line, header_line_len);
