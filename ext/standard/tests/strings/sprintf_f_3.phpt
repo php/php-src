@@ -1,5 +1,5 @@
 --TEST--
-sprintf #2
+sprintf %f #3
 --SKIPIF--
 <?php if(false == setlocale(LC_NUMERIC, "is_IS", "is_IS.UTF-8")) print "skip icelandic locale not supported"; ?>
 --FILE--
