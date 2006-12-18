@@ -390,3 +390,10 @@ AC_DEFUN([LIBZEND_CPLUSPLUS_CHECKS],[
 
 ])
 
+AC_MSG_CHECKING(whether /dev/urandom exists) 
+if test -r "/dev/urandom" && test -c "/dev/urandom"; then 
+  AC_DEFINE([HAVE_DEV_URANDOM], 1, [Define if the target system has /dev/urandom device])
+  AC_MSG_RESULT(yes) 
+else 
+  AC_MSG_RESULT(no) 
+fi 
