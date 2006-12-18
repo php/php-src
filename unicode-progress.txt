@@ -14,12 +14,6 @@ ext/standard
     set_include_path(), get_include_path(), restore_include_path()
         Params API, depends on INI mechanism
 
-    get_cfg_var()
-        IS_UNICODE support for varname
-
-    parse_ini_file()
-        Params API, unicode filename support, depends on INI mechaniem
-
   array.c
   -------
     natsort(), natcasesort()
