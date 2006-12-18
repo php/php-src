@@ -1,3 +1,44 @@
+2006-12-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_observer.c
+      ext/spl/tests/observer_003.phpt:
+      - Make this work in unicode mode
+
+2006-12-17  Brian Shire  <shire@facebook.com>
+
+    * (PHP_5_2)
+      ext/standard/array.c
+      ext/standard/tests/array/bug30074.phpt
+      ext/standard/tests/array/bug30074.phpt:
+      Fixed bug #30074
+        extract with EXTR_REFS was setting EG(unitialized_zval_ptr)->is_ref=1,
+      affecting subsequent usage
+        Added test
+
+2006-12-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c
+      main/main.c:
+      Fixed compiler warning
+
+    * ext/imap/php_imap.c:
+      MFB: Fixed bug #39779 (Enable AUTH PLAIN mechanism in underlaying
+      libc-client).
+
+    * (PHP_5_2)
+      NEWS
+      ext/imap/php_imap.c:
+      Fixed bug #39779 (Enable AUTH PLAIN mechanism in underlaying libc-client).
+
+2006-12-17  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/filter/logical_filters.c:
+      MFB: fix build
+
+    * (PHP_5_2)
+      ext/filter/logical_filters.c:
+      Fix build
+
 2006-12-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/filter/logical_filters.c
