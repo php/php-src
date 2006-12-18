@@ -1,5 +1,5 @@
 --TEST--
-sprintf #2
+sprintf %f #3
 --INI--
 error_reporting=6143
 --SKIPIF--
