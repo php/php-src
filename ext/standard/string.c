@@ -5988,7 +5988,7 @@ PHP_FUNCTION(strip_tags)
 		RETURN_UNICODEL((UChar *)buf, retval_len, 0);
 	} else {
 		buf = estrndup(str, str_len);
-		retval_len = php_strip_tags((char *)buf, str_len, NULL, (char *)allow, allow_len);
+		retval_len = php_strip_tags_ex((char *)buf, str_len, NULL, (char *)allow, allow_len, 0);
 		RETURN_STRINGL((char *)buf, retval_len, 0);
 	}
 }
@@ -6502,9 +6502,14 @@ reg_u_char:
 }
 /* }}} */
 
+PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len)
+{
+	return php_strip_tags_ex(rbuf, len, stateptr, allow, allow_len, 0);
+}
+
 /* {{{ php_strip_tags
  */
-PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len)
+PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow, int allow_len, zend_bool allow_tag_spaces)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0, depth=0;
@@ -6532,7 +6537,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 			case '\0':
 				break;
 			case '<':
-				if (isspace(*(p + 1)) && allow_len >=- 0) {
+				if (isspace(*(p + 1)) && !allow_tag_spaces) {
 					goto reg_char;
 				}
 				if (state == 0) {
