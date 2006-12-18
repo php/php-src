@@ -64,15 +64,6 @@
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
 
-#define RETURN_VALIDATION_FAILED	\
-	zval_dtor(value);	\
-	if (flags & FILTER_NULL_ON_FAILURE) {	\
-		ZVAL_NULL(value);	\
-	} else {	\
-		ZVAL_FALSE(value);	\
-	}	\
-	return;	\
-
 static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
 	long ctx_value = 0;
 	long sign = 1;
@@ -308,6 +299,9 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	str = Z_STRVAL_P(value);
+
+	PHP_FILTER_TRIM_DEFAULT(str, len, end);
+
 	start = str;
 
 	if (len == 1) {
@@ -334,8 +328,6 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	} else {
 		dec_sep = *default_decimal;
 	}
-
-	PHP_FILTER_TRIM_DEFAULT(str, len, end);
 
 	if (*str == '-') {
 		sign = -1;
