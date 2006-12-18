@@ -4807,7 +4807,7 @@ PHP_FUNCTION(get_current_user)
 }
 /* }}} */
 
-/* {{{ proto string get_cfg_var(string option_name)
+/* {{{ proto string get_cfg_var(string option_name) U
    Get the value of a PHP configuration option */
 PHP_FUNCTION(get_cfg_var)
 {
@@ -4815,14 +4815,14 @@ PHP_FUNCTION(get_cfg_var)
 	int varname_len;
 	char *value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &varname, &varname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &varname, &varname_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
 	if (cfg_get_string(varname, &value) == FAILURE) {
 		RETURN_FALSE;
 	}
-	RETURN_STRING(value, 1);
+	RETURN_UTF8_STRING(value, ZSTR_DUPLICATE);
 }
 /* }}} */
 
