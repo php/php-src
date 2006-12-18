@@ -276,6 +276,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		return stream;
  	} else {
 		/* invalid php://thingy */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid php:// URL specified");
 		return NULL;
 	}
 	
