@@ -1,5 +1,5 @@
 --TEST--
-SPL: SplObjectStorage overloaded & serialization
+SPL: SplObjectStorage serialization & overloading
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
