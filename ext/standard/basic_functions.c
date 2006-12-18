@@ -6215,7 +6215,9 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 			*element = *arg2;
 			zval_copy_ctor(element);
 			INIT_PZVAL(element);
-			convert_to_text_with_converter(element, UG(utf8_conv));
+			if (UG(unicode)) {
+				convert_to_unicode_with_converter(element, UG(utf8_conv));
+			}
 			add_next_index_zval(hash, element);
 		}
 		break;
