@@ -363,12 +363,20 @@ char * ap_php_conv_fp(register char format, register double num,
 	register char *s = buf;
 	register char *p, *p_orig;
 	int decimal_point;
+	char dec_point = '.';
+
+	if (format == 'f') {
+		struct lconv *lconv;
+		lconv = localeconv();
+		dec_point = *lconv->decimal_point;
+		format = 'F';
+	}
 
 	if (precision >= NDIG - 1) {
 		precision = NDIG - 2;
 	}
 
-	if (format == 'f')
+	if (format == 'F')
 		p_orig = p = bsd_fcvt(num, precision, &decimal_point, is_negative);
 	else						/* either e or E format */
 		p_orig = p = bsd_ecvt(num, precision + 1, &decimal_point, is_negative);
@@ -383,16 +391,16 @@ char * ap_php_conv_fp(register char format, register double num,
 		free(p_orig);
 		return (buf);
 	}
-	if (format == 'f') {
+	if (format == 'F') {
 		if (decimal_point <= 0) {
 			if (num != 0 || precision > 0) {
 				*s++ = '0';
 				if (precision > 0) {
-					*s++ = '.';
+					*s++ = dec_point;
 					while (decimal_point++ < 0)
 						*s++ = '0';
 				} else if (add_dp) {
-					*s++ = '.';
+					*s++ = dec_point;
 				}
 			}
 		} else {
@@ -405,7 +413,7 @@ char * ap_php_conv_fp(register char format, register double num,
 				*s++ = '0';
 			}
 			if (precision > 0 || add_dp) {
-				*s++ = '.';
+				*s++ = dec_point;
 			}
 		}
 	} else {
@@ -420,7 +428,7 @@ char * ap_php_conv_fp(register char format, register double num,
 	while (*p)
 		*s++ = *p++;
 
-	if (format != 'f') {
+	if (format != 'F') {
 		char temp[EXPONENT_LENGTH];		/* for exponent conversion */
 		int t_len;
 		bool_int exponent_is_negative;
