@@ -222,15 +222,13 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	}
 
 	switch (fmt) {			
-		case 'F':
-			fmt = 'f';
-			/* break is missing */
 		case 'e':
 			if (precision) {
 				precision--;
 			}
 		case 'E':
 		case 'f':
+		case 'F':
 			s = ap_php_conv_fp(fmt, number, 0, precision,
 						&is_negative, &num_buf[1], &s_len);
 			if (is_negative) {
