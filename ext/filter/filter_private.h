@@ -88,25 +88,30 @@
 || (id >= FILTER_VALIDATE_ALL && id <= FILTER_VALIDATE_LAST) \
 || id == FILTER_CALLBACK)
 
+#define RETURN_VALIDATION_FAILED	\
+	zval_dtor(value);	\
+	if (flags & FILTER_NULL_ON_FAILURE) {	\
+		ZVAL_NULL(value);	\
+	} else {	\
+		ZVAL_FALSE(value);	\
+	}	\
+	return;	\
+
 #define PHP_FILTER_TRIM_DEFAULT(p, len, end) { \
-	while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\v') { \
+	while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\v' || *p == '\n') { \
 		p++; \
 		len--; \
 	} \
-	start = p; \
+        if (len < 1) { \
+          RETURN_VALIDATION_FAILED \
+        } \
+        start = p; \
 	end = p + len - 1; \
-	if (*end == ' ' || *end == '\t' || *end == '\r' || *end == '\v') { \
-		unsigned int i; \
-		for (i = len - 1; i >= 0; i--) { \
-			if (!(p[i] == ' ' || p[i] == '\t' || p[i] == '\r' || p[i] == '\v')) { \
-				break; \
-			} \
-		} \
-		i++; \
-		p[i] = '\0'; \
-		end = p + i - 1; \
-		len = (int) (end - p) + 1; \
+	while (*end == ' ' || *end == '\t' || *end == '\r' || *end == '\v' || *end == '\n') { \
+	    end--; \
 	} \
+	*(end + 1) = '\0'; \
+	len = (end - p + 1); \
 }
 
 
