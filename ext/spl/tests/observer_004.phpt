@@ -1,5 +1,5 @@
 --TEST--
-SPL: SplObjectStorage serialization
+SPL: SplObjectStorage overloaded & serialization
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
@@ -15,9 +15,19 @@ class TestClass
 	}
 }
 
-$storage = new SplObjectStorage();
+class MyStorage extends SplObjectStorage
+{
+	public $bla = 25;
+	
+	public function __construct($bla = 26)
+	{
+		$this->bla = $bla;
+	}
+}
 
-foreach(array(1,"2","foo",true) as $value)
+$storage = new MyStorage();
+
+foreach(array(1,2) as $value)
 {
      $storage->attach(new TestClass($value));
 }
@@ -28,6 +38,8 @@ foreach($storage as $object)
 {
 	var_dump($object->test);
 }
+
+var_dump($storage);
 
 var_dump(serialize($storage));
 echo "===UNSERIALIZE===\n";
@@ -41,34 +53,44 @@ foreach($storage2 as $object)
 	var_dump($object->test);
 }
 
+var_dump($storage2);
+
 ?>
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-int(4)
+int(2)
 int(1)
-string(1) "2"
-string(3) "foo"
-bool(true)
+int(2)
+object(MyStorage)#%d (1) {
+  ["bla"]=>
+  int(26)
+}
 string(%d) "%s"
 ===UNSERIALIZE===
-int(4)
+int(2)
 int(1)
-string(1) "2"
-string(3) "foo"
-bool(true)
+int(2)
+object(MyStorage)#%d (1) {
+  ["bla"]=>
+  int(26)
+}
 ===DONE===
 --UEXPECTF--
-int(4)
+int(2)
 int(1)
-unicode(1) "2"
-unicode(3) "foo"
-bool(true)
+int(2)
+object(MyStorage)#%d (1) {
+  [u"bla"]=>
+  int(26)
+}
 unicode(%d) "%s"
 ===UNSERIALIZE===
-int(4)
+int(2)
 int(1)
-unicode(1) "2"
-unicode(3) "foo"
-bool(true)
+int(2)
+object(MyStorage)#%d (1) {
+  [u"bla"]=>
+  int(26)
+}
 ===DONE===

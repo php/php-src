@@ -272,46 +272,51 @@ SPL_METHOD(SplObjectStorage, serialize)
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	zval **entry;
+	zval **entry, members, *pmembers;
 	HashPosition      pos;
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
-	long index = 0;
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
-	smart_str_appendl(&buf, "a:", 2);
+	/* storage */
+	smart_str_appendl(&buf, "x:i:", 4);
 	smart_str_append_long(&buf, zend_hash_num_elements(&intern->storage));
-	smart_str_appendl(&buf, ":{", 2);
+	smart_str_appendc(&buf, ';');
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
 
 	while(zend_hash_has_more_elements_ex(&intern->storage, &pos) == SUCCESS) {
-		smart_str_appendl(&buf, "i:", 2);
-		smart_str_append_long(&buf, index++);
-		smart_str_appendc(&buf, ';');
 		if (zend_hash_get_current_data_ex(&intern->storage, (void**)&entry, &pos) == FAILURE) {
 			smart_str_free(&buf);
 			PHP_VAR_SERIALIZE_DESTROY(var_hash);
-			RETURN_FALSE;
+			RETURN_NULL();
 		}
 		php_var_serialize(&buf, entry, &var_hash TSRMLS_CC);
+		smart_str_appendc(&buf, ';');
 		zend_hash_move_forward_ex(&intern->storage, &pos);
 	}
 
-	smart_str_appendc(&buf, '}');
-	smart_str_0(&buf);
+	/* members */
+	smart_str_appendl(&buf, "m:", 2);
+	INIT_PZVAL(&members);
+	Z_ARRVAL(members) = intern->std.properties;
+	Z_TYPE(members) = IS_ARRAY;
+	pmembers = &members;
+	php_var_serialize(&buf, &pmembers, &var_hash TSRMLS_CC); /* finishes the string */
+
+	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	if (buf.c) {
-		RETURN_ASCII_STRINGL(buf.c, buf.len, 0);
+		RETURN_ASCII_STRINGL(buf.c, buf.len, ZSTR_AUTOFREE);
 	} else {
 		RETURN_NULL();
 	}
 	
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::unserialize(string unserialized)
+/* {{{ proto void SplObjectStorage::unserialize(string serialized)
  */
 SPL_METHOD(SplObjectStorage, unserialize)
 {
@@ -319,12 +324,10 @@ SPL_METHOD(SplObjectStorage, unserialize)
 
 	char *buf;
 	int buf_len;
-	const unsigned char *p;
+	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
-	zval *zentries, **entry;
-	HashPosition pos;
-	
-	ALLOC_INIT_ZVAL(zentries);
+	zval *pentry, *pmembers, *pcount = NULL;
+	long count;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
 		return;
@@ -335,36 +338,70 @@ SPL_METHOD(SplObjectStorage, unserialize)
 		return;
 	}
 
-	p = (const unsigned char*)buf;
+	/* storage */
+	s = p = (const unsigned char*)buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if (!php_var_unserialize(&zentries, &p, p + buf_len,  &var_hash TSRMLS_CC)) {
-		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-		zval_ptr_dtor(&zentries);
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
-		return;
-	}
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
-	/* move from temp array to storage */
-	
-	if (Z_TYPE_P(zentries) != IS_ARRAY) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Serialize string must contain a single array");
-		return;
+	if (*p!= 'x' || *++p != ':') {
+		goto outexcept;
+	}
+	++p;
+
+	ALLOC_INIT_ZVAL(pcount);
+	if (!php_var_unserialize(&pcount, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(pcount) != IS_LONG) {
+		zval_ptr_dtor(&pcount);
+		goto outexcept;
 	}
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(zentries), &pos);
-
-	while(zend_hash_has_more_elements_ex(Z_ARRVAL_P(zentries), &pos) == SUCCESS) {
-		if (zend_hash_get_current_data_ex(Z_ARRVAL_P(zentries), (void**)&entry, &pos) == FAILURE || Z_TYPE_PP(entry) != IS_OBJECT) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Serialize string must only contain objects");		
-			zval_ptr_dtor(&zentries);
-			return;
+	--p; /* for ';' */
+	count = Z_LVAL_P(pcount);
+	zval_ptr_dtor(&pcount);
+		
+	while(count-- > 0) {
+		if (*p != ';') {
+			goto outexcept;
 		}
-		spl_object_storage_attach(intern, *entry TSRMLS_CC);
-		zend_hash_move_forward_ex(Z_ARRVAL_P(zentries), &pos);
+		++p;
+		ALLOC_INIT_ZVAL(pentry);
+		if (!php_var_unserialize(&pentry, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+			zval_ptr_dtor(&pentry);
+			goto outexcept;
+		}
+		spl_object_storage_attach(intern, pentry TSRMLS_CC);
+		zval_ptr_dtor(&pentry);
 	}
-	
-	zval_ptr_dtor(&zentries);
+
+	if (*p != ';') {
+		goto outexcept;
+	}
+	++p;
+
+	/* members */
+	if (*p!= 'm' || *++p != ':') {
+		goto outexcept;
+	}
+	++p;
+
+	ALLOC_INIT_ZVAL(pmembers);
+	if (!php_var_unserialize(&pmembers, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+		zval_ptr_dtor(&pmembers);
+		goto outexcept;
+	}
+
+	/* copy members */
+	zend_hash_copy(intern->std.properties, Z_ARRVAL_P(pmembers), (copy_ctor_func_t) zval_add_ref, (void *) NULL, sizeof(zval *));
+	zval_ptr_dtor(&pmembers);
+
+	/* done reading $serialized */
+
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	return;
+
+outexcept:
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+	return;
+
 } /* }}} */
 
 static
