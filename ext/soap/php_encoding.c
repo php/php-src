@@ -666,9 +666,15 @@ static zval *to_zval_base64(encodeTypePtr type, xmlNodePtr data)
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
 			whiteSpace_collapse(data->children->content);
 			str = (char*)php_base64_decode(data->children->content, strlen((char*)data->children->content), &str_len);
+			if (!str) {
+				soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+			}
 			ZVAL_STRINGL(ret, str, str_len, 0);
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
 			str = (char*)php_base64_decode(data->children->content, strlen((char*)data->children->content), &str_len);
+			if (!str) {
+				soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+			}
 			ZVAL_STRINGL(ret, str, str_len, 0);
 		} else {
 			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
@@ -705,6 +711,8 @@ static zval *to_zval_hexbin(encodeTypePtr type, xmlNodePtr data)
 				str[i] = (c - 'a' + 10) << 4;
 			} else if (c >= 'A' && c <= 'F') {
 				str[i] = (c - 'A' + 10) << 4;
+			} else {
+				soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
 			}
 			c = data->children->content[j++];
 			if (c >= '0' && c <= '9') {
@@ -713,6 +721,8 @@ static zval *to_zval_hexbin(encodeTypePtr type, xmlNodePtr data)
 				str[i] |= c - 'a' + 10;
 			} else if (c >= 'A' && c <= 'F') {
 				str[i] |= c - 'A' + 10;
+			} else {
+				soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
 			}
 		}
 		str[str_len] = '\0';
@@ -825,8 +835,22 @@ static zval *to_zval_double(encodeTypePtr type, xmlNodePtr data)
 
 	if (data && data->children) {
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			long lval;
+			double dval;
+
 			whiteSpace_collapse(data->children->content);
-			ZVAL_DOUBLE(ret, atof((char*)data->children->content));
+			switch (is_numeric_string((char*)data->children->content, strlen((char*)data->children->content), &lval, &dval, 0)) {
+				case IS_LONG:
+					Z_TYPE_P(ret) = IS_DOUBLE;
+					Z_DVAL_P(ret) = lval;
+					break;
+				case IS_DOUBLE:
+					Z_TYPE_P(ret) = IS_DOUBLE;
+					Z_DVAL_P(ret) = dval;
+					break;
+				default:
+					soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+			}
 		} else {
 			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
 		}
@@ -844,14 +868,21 @@ static zval *to_zval_long(encodeTypePtr type, xmlNodePtr data)
 
 	if (data && data->children) {
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			long lval;
+			double dval;
+
 			whiteSpace_collapse(data->children->content);
 			errno = 0;
-			ret->value.lval = strtol((char*)data->children->content, NULL, 0);
-			if (errno == ERANGE) { /* overflow */
-				ret->value.dval = zend_strtod((char*)data->children->content, NULL);
-				ret->type = IS_DOUBLE;
-			} else {
-				ret->type = IS_LONG;
+
+			switch ((Z_TYPE_P(ret) = is_numeric_string((char*)data->children->content, strlen((char*)data->children->content), &lval, &dval, 0))) {
+				case IS_LONG:
+					Z_LVAL_P(ret) = lval;
+					break;
+				case IS_DOUBLE:
+					Z_DVAL_P(ret) = dval;
+					break;
+				default:
+					soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
 			}
 		} else {
 			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
