@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . cookies
   . canary protection (debug build only)
   . random generation of cookies and canaries
+- Fixed bug #39850 (SplFileObject throws contradictory/wrong error messages 
+  when trying to open "php://wrong"). (Tony)
 - Fixed bug #39832 (SOAP Server: parameter not matching the WSDL specified type
   are set to 0). (Dmitry)
 
