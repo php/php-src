@@ -1,10 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-14 Dec 2006, PHP 5.2.1RC1
+?? Dec 2006, PHP 5.2.1RC2
 - Added internal heap protection (Dmitry)
   . safe unlinking
   . cookies
   . canary protection (debug build only)
+  . random generation of cookies and canaries
+
+14 Dec 2006, PHP 5.2.1RC1
 - Added a meta tag to phpinfo() output to prevent search engines from indexing 
   the page. (Ilia)
 - Added new function, sys_get_temp_dir(). (Hartmut)
