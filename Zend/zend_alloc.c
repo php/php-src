@@ -32,6 +32,13 @@
 # include <unistd.h>
 #endif
 
+#ifdef ZEND_WIN32
+# define _WIN32_WINNT 0x0400
+# include <wincrypt.h>
+# include <process.h>
+#endif
+
+
 #ifndef ZEND_USE_MALLOC_MM
 # define ZEND_USE_MALLOC_MM ZEND_DEBUG
 #endif
@@ -712,6 +719,53 @@ static void zend_mm_free_cache(zend_mm_heap *heap)
 }
 #endif
 
+static void zend_mm_random(unsigned char *buf, size_t size)
+{
+	size_t i = 0;
+	unsigned char t;
+
+#ifdef ZEND_WIN32
+	HCRYPTPROV   hCryptProv;
+
+	if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, 0)) {
+		do {
+			BOOL ret = CryptGenRandom(hCryptProv, size, buf);
+			CryptReleaseContext(hCryptProv, 0);
+			if (ret) {
+				while (i < size && buf[i] != 0) {
+					i++;
+				}
+				if (i == size) {
+				    return;
+				}
+		   }
+		} while (0);
+	}
+#elif defined(HAVE_DEV_URANDOM)
+	int fd = open("/dev/urandom", 0);
+
+	if (fd >= 0) {
+		if (read(fd, buf, size) == size) {
+			while (i < size && buf[i] != 0) {
+				i++;
+			}
+			if (i == size) {
+				close(fd);
+			    return;
+			}
+		}
+		close(fd);
+	}
+#endif
+	t = (unsigned char)getpid();
+	while (i < size) {
+		do {
+			buf[i] = ((unsigned char)rand()) ^ t;
+		} while (buf[i] == 0);
+		t = buf[i++] << 1;
+    }
+}
+
 /* Notes:
  * - This function may alter the block_sizes values to match platform alignment
  * - This function does *not* perform sanity checks on the arguments
@@ -741,36 +795,15 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 
 #if ZEND_MM_HEAP_PROTECTION
 	if (_mem_block_start_magic == 0) {
-		int r;
-		do {
-			r = rand();
-		} while (!(r&0xff000000) ||
-		         !(r&0x00ff0000) ||
-		         !(r&0x0000ff00) ||
-		         !(r&0x000000ff));
-		_mem_block_start_magic = r;
+		zend_mm_random((unsigned char*)&_mem_block_start_magic, sizeof(_mem_block_start_magic));
 	}
 	if (_mem_block_end_magic == 0) {
-		int r;
-		do {
-			r = rand();
-		} while (!(r&0xff000000) ||
-		         !(r&0x00ff0000) ||
-		         !(r&0x0000ff00) ||
-		         !(r&0x000000ff));
-		_mem_block_end_magic = r;
+		zend_mm_random((unsigned char*)&_mem_block_end_magic, sizeof(_mem_block_end_magic));
 	}
 #endif
 #if ZEND_MM_COOKIES
 	if (_zend_mm_cookie == 0) {
-		int r;
-		do {
-			r = rand();
-		} while (!(r&0xff000000) ||
-		         !(r&0x00ff0000) ||
-		         !(r&0x0000ff00) ||
-		         !(r&0x000000ff));
-		_zend_mm_cookie = r;
+		zend_mm_random((unsigned char*)&_zend_mm_cookie, sizeof(_zend_mm_cookie));
 	}
 #endif
 
