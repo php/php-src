@@ -6126,6 +6126,7 @@ PHP_FUNCTION(move_uploaded_file)
 static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, zval *arr)
 {
 	zval *element;
+	TSRMLS_FETCH();
 
 	switch (callback_type) {
 	
@@ -6146,7 +6147,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 				int key_len;
 
 				if (UG(unicode)) {
-					if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == FAILURE) {
+					if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) TSRMLS_CC) == FAILURE) {
 						return;
 					}
 				} else {
@@ -6177,7 +6178,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 				int key_len;
 
 				if (UG(unicode)) {
-					if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == FAILURE) {
+					if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) TSRMLS_CC) == FAILURE) {
 						return;
 					}
 				} else {
@@ -6239,7 +6240,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback
 			int key_len;
 
 			if (UG(unicode)) {
-				if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == FAILURE) {
+				if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) TSRMLS_CC) == FAILURE) {
 					return;
 				}
 			} else {
