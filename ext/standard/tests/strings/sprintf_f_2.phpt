@@ -1,5 +1,5 @@
 --TEST--
-sprintf #2
+sprintf %f #2
 --FILE--
 <?php
 var_dump(sprintf("%.3F", 100.426));
