@@ -66,7 +66,7 @@ void zend_debug_alloc_output(char *format, ...)
 }
 #endif
 
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
+#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
 # define EXPECTED(condition)   __builtin_expect(condition, 1)
 # define UNEXPECTED(condition) __builtin_expect(condition, 0)
 static void zend_mm_panic(const char *message) __attribute__ ((noreturn));
