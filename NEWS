@@ -65,6 +65,8 @@ PHP                                                                        NEWS
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
 - Fixed bug #39846 (Invalid IPv4 treated as valid). (Ilia)
+- Fixed bug #39845 (Persistent connections generate a warning in pdo_pgsql).
+  (Ilia)
 - Fixed bug #39816 (apxs2filter ignores httpd.conf & .htaccess php config
   settings). (Ilia)
 - Fixed bug #39797 (virtual() does not reset changed INI settings). (Ilia)
