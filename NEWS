@@ -51,6 +51,8 @@ PHP                                                                        NEWS
   . Added "default" option that allows a default value to be set for
     an invalid or missing value.
   . Invalid filters fails instead of returning unsafe value
+  . Fixed possible double encoding problem with sanitizing filters
+  . Make use of space-strict strip_tags() function
 - Fixed FastCGI impersonation for persistent connections on Windows. (Dmitry)
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)

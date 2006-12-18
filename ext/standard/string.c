@@ -4143,7 +4143,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 			case '\0':
 				break;
 			case '<':
-				if (isspace(*(p + 1))) {
+				if (isspace(*(p + 1)) && allow_len >=- 0) {
 					goto reg_char;
 				}
 				if (state == 0) {
