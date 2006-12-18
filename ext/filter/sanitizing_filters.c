@@ -64,27 +64,47 @@ static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 #define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
 
-static void php_filter_encode_url(zval *value, const char* chars, int high, int low, int encode_nul)
+static void php_filter_encode_url(zval *value, const unsigned char* chars, const int char_len, int high, int low, int encode_nul)
 {
-	register int x, y;
-	unsigned char *str;
-	int len = Z_STRLEN_P(value);
-	char *s = Z_STRVAL_P(value);
+	unsigned char *str, *p;
+	unsigned char tmp[256];
+	unsigned char *s = (unsigned char *)chars;
+	unsigned char *e = s + char_len;
 
-	str = (unsigned char *) safe_emalloc(3, len, 1);
-	for (x = 0, y = 0; len--; x++, y++) {
-		str[y] = (unsigned char) s[x];
+	memset(tmp, 1, sizeof(tmp)-1);
 
-		if ((strlen(chars) && !strchr(chars, str[y])) || (high && str[y] > 127) || (low && str[y] < 32) || (encode_nul && str[y] == 0)) {
-			str[y++] = '%';
-			str[y++] = hexchars[(unsigned char) s[x] >> 4];
-			str[y] = hexchars[(unsigned char) s[x] & 15];
-		}
+	while (s < e) {
+		tmp[*s++] = 0;
 	}
-	str[y] = '\0';
+/* XXX: This is not needed since these chars in the allowed list never include the high/low/null value
+	if (encode_nul) {
+		tmp[0] = 1;
+	}
+	if (high) {
+		memset(tmp + 127, 1, sizeof(tmp) - 127);
+	}
+	if (low) {
+		memset(tmp, 1, 32);
+	}
+*/
+	p = str = (unsigned char *) safe_emalloc(3, Z_STRLEN_P(value), 1);
+	s = (unsigned char *)Z_STRVAL_P(value);
+	e = s + Z_STRLEN_P(value);
+
+	while (s < e) {
+		if (tmp[*s]) {
+			*p++ = '%';
+			*p++ = hexchars[(unsigned char) *s >> 4];
+			*p++ = hexchars[(unsigned char) *s & 15];
+		} else {
+			*p++ = *s;	
+		}
+		s++;	
+	}
+	*p = '\0';
 	efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = (char *)str;
-	Z_STRLEN_P(value) = y;
+	Z_STRLEN_P(value) = p - str;
 }
 
 static void php_filter_strip(zval *value, long flags)
@@ -196,7 +216,7 @@ void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL)
 	/* apply strip_high and strip_low filters */
 	php_filter_strip(value, flags);
 	/* urlencode */
-	php_filter_encode_url(value, DEFAULT_URL_ENCODE, flags & FILTER_FLAG_ENCODE_HIGH, flags & FILTER_FLAG_ENCODE_LOW, 1);
+	php_filter_encode_url(value, (unsigned char *)DEFAULT_URL_ENCODE, sizeof(DEFAULT_URL_ENCODE)-1, flags & FILTER_FLAG_ENCODE_HIGH, flags & FILTER_FLAG_ENCODE_LOW, 1);
 }
 /* }}} */
 
