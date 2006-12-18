@@ -6138,8 +6138,25 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 			*element = *arg2;
 			zval_copy_ctor(element);
 			INIT_PZVAL(element);
+			if (UG(unicode)) {
+				convert_to_unicode_with_converter(element, UG(utf8_conv));
+			}
 			if (is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) != IS_LONG) { 
-				zend_hash_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &element, sizeof(zval *), NULL);
+				zstr key;
+				int key_len;
+
+				if (UG(unicode)) {
+					if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == FAILURE) {
+						return;
+					}
+				} else {
+					key.s = Z_STRVAL_P(arg1);
+					key_len = Z_STRLEN_P(arg1);
+				}
+				zend_u_hash_update(Z_ARRVAL_P(arr), ZEND_STR_TYPE, key, key_len+1, &element, sizeof(zval *), NULL);
+				if (UG(unicode)) {
+					efree(key.u);
+				}
 			} else {
 				ulong key = (ulong) zend_atoi(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				zend_hash_index_update(Z_ARRVAL_P(arr), key, &element, sizeof(zval *), NULL);
@@ -6156,23 +6173,39 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 			}
 
 			if (is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) != IS_LONG) {
-				if (zend_hash_find(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, (void **) &find_hash) == FAILURE) {
+				zstr key;
+				int key_len;
+
+				if (UG(unicode)) {
+					if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == FAILURE) {
+						return;
+					}
+				} else {
+					key.s = Z_STRVAL_P(arg1);
+					key_len = Z_STRLEN_P(arg1);
+				}
+
+				if (zend_u_hash_find(Z_ARRVAL_P(arr), ZEND_STR_TYPE, key, key_len+1, (void **) &find_hash) == FAILURE) {
 					ALLOC_ZVAL(hash);
 					INIT_PZVAL(hash);
 					array_init(hash);
 
-					zend_hash_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &hash, sizeof(zval *), NULL);
+					zend_u_hash_update(Z_ARRVAL_P(arr), ZEND_STR_TYPE, key, key_len+1, &hash, sizeof(zval *), NULL);
 				} else {
 					hash = *find_hash;
+				}
+
+				if (UG(unicode)) {
+					efree(key.u);
 				}
 			} else {
 				ulong key = (ulong) zend_atoi(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				if (zend_hash_index_find(Z_ARRVAL_P(arr), key, (void **) &find_hash) == FAILURE) {
 						ALLOC_ZVAL(hash);
 						INIT_PZVAL(hash);
-					        array_init(hash);
+						array_init(hash);
 
-					        zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash, sizeof(zval *), NULL);
+						zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash, sizeof(zval *), NULL);
 				} else {
 					hash = *find_hash;
 				}
@@ -6182,7 +6215,8 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 			*element = *arg2;
 			zval_copy_ctor(element);
 			INIT_PZVAL(element);
-			add_next_index_zval(hash, element);			
+			convert_to_text_with_converter(element, UG(utf8_conv));
+			add_next_index_zval(hash, element);
 		}
 		break;
 
@@ -6199,7 +6233,21 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback
 		MAKE_STD_ZVAL(BG(active_ini_file_section));
 		array_init(BG(active_ini_file_section));
 		if (is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) != IS_LONG) {
-			zend_hash_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &BG(active_ini_file_section), sizeof(zval *), NULL);
+			zstr key;
+			int key_len;
+
+			if (UG(unicode)) {
+				if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == FAILURE) {
+					return;
+				}
+			} else {
+				key.s = Z_STRVAL_P(arg1);
+				key_len = Z_STRLEN_P(arg1);
+			}
+			zend_u_hash_update(Z_ARRVAL_P(arr), ZEND_STR_TYPE, key, key_len+1, &BG(active_ini_file_section), sizeof(zval *), NULL);
+			if (UG(unicode)) {
+				efree(key.u);
+			}
 		} else {
 			ulong key = (ulong) zend_atoi(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 			zend_hash_index_update(Z_ARRVAL_P(arr), key, &BG(active_ini_file_section), sizeof(zval *), NULL);
@@ -6218,47 +6266,39 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback
 }
 
 
-/* {{{ proto array parse_ini_file(string filename [, bool process_sections])
+/* {{{ proto array parse_ini_file(string filename [, bool process_sections]) U
    Parse configuration file */
 PHP_FUNCTION(parse_ini_file)
 {
-	zval **filename, **process_sections;
+	zval **pp_filename;
+	zend_bool process_sections;
+	char *filename;
+	int filename_len;
 	zend_file_handle fh;
 	zend_ini_parser_cb_t ini_parser_cb;
 
-	switch (ZEND_NUM_ARGS()) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|b", &pp_filename, &process_sections) == FAILURE ||
+		php_stream_path_param_encode(pp_filename, &filename, &filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
+	}
 
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			if (zend_get_parameters_ex(1, &filename) == FAILURE) {
-				RETURN_FALSE;
-			}
 			ini_parser_cb = (zend_ini_parser_cb_t) php_simple_ini_parser_cb;
 			break;
 
 		case 2:
-			if (zend_get_parameters_ex(2, &filename, &process_sections) == FAILURE) {
-				RETURN_FALSE;
-			}
-	
-			convert_to_boolean_ex(process_sections);
-		
-			if (Z_BVAL_PP(process_sections)) {
+			if (process_sections) {
 				BG(active_ini_file_section) = NULL;
 				ini_parser_cb = (zend_ini_parser_cb_t) php_ini_parser_cb_with_sections;
 			} else {
 				ini_parser_cb = (zend_ini_parser_cb_t) php_simple_ini_parser_cb;
 			}
 			break;
-	
-		default:
-			ZEND_WRONG_PARAM_COUNT();
-			break;
 	}
 
-	convert_to_string_ex(filename);
-
 	memset(&fh, 0, sizeof(fh));
-	fh.filename = Z_STRVAL_PP(filename);
+	fh.filename = filename;
 	fh.type = ZEND_HANDLE_FILENAME;
 	
 	array_init(return_value);
