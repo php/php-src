@@ -31,7 +31,7 @@ ZEND_API zend_class_entry *zend_ce_serializable;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
-ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
+ZEND_API zval* zend_u_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, int function_name_type, zstr function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
 {
 	int result;
 	zend_fcall_info fci;
@@ -57,7 +57,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 	if (!fn_proxy && !obj_ce) {
 		/* no interest in caching and no information already present that is
 		 * needed later inside zend_call_function. */
-		ZVAL_ASCII_STRINGL(&z_fname, function_name, function_name_len, 1);
+		ZVAL_ZSTRL(&z_fname, function_name, function_name_len, function_name_type, 1);
 		fci.function_table = !object_pp ? EG(function_table) : NULL;
 		result = zend_call_function(&fci, NULL TSRMLS_CC);
 		zval_dtor(&z_fname);
@@ -74,7 +74,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 			function_table = EG(function_table);
 		}
 		if (!fn_proxy || !*fn_proxy) {
-			if (zend_hash_find(function_table, function_name, function_name_len+1, (void **) &fcic.function_handler) == FAILURE) {
+			if (zend_u_hash_find(function_table, function_name_type, function_name, function_name_len+1, (void **) &fcic.function_handler) == FAILURE) {
 				/* error at c-level */
 				zend_error(E_CORE_ERROR, "Couldn't find implementation for method %v%s%s", obj_ce ? obj_ce->name : EMPTY_ZSTR, obj_ce ? "::" : "", function_name);
 			}

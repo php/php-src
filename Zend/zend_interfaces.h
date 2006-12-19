@@ -38,7 +38,7 @@ typedef struct _zend_user_iterator {
 	zval                     *value;
 } zend_user_iterator;
 
-ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC);
+ZEND_API zval* zend_u_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, int function_name_type, zstr function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC);
 
 #define zend_call_method_with_0_params(obj, obj_ce, fn_proxy, function_name, retval) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 0, NULL, NULL TSRMLS_CC)
@@ -48,6 +48,11 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 
 #define zend_call_method_with_2_params(obj, obj_ce, fn_proxy, function_name, retval, arg1, arg2) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 2, arg1, arg2 TSRMLS_CC)
+
+static inline zval* zend_call_method(zval **obj, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
+{
+	return zend_u_call_method(obj, obj_ce, fn_proxy, IS_STRING, ZSTR(function_name), function_name_len, retval_ptr_ptr, param_count, arg1, arg2 TSRMLS_CC);
+}
 
 ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC);
 ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC);
