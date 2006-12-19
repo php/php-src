@@ -59,9 +59,11 @@ ext/openssl
 
 ext/zip
 ------------
-  Status: Initial implementation done. Waiting for reviews/feedbacks. 
-  (Pierre)
-
+  Status: done.
+  Both the new OO and the old procedural API are unicode ready.
+  Custom encoding for the entry names (ISO-*, ANSI, etc.) will
+  be supported in later version. Binary strings are used now.
+  The use is responsible of the encoding of the entry names.
 
 Completed
 =========
