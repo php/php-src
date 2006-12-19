@@ -52,7 +52,7 @@ string(%d) "No syntax errors detected in %s011.test.php
 Could not open input file: some.unknown
 NULL
 string(%d) "
-Parse error: %s error, unexpected T_PRIVATE, expecting '{' in %s on line %d
+Parse error: %s expecting %s{%s in %s on line %d
 Errors parsing %s011.test.php
 "
 Done
