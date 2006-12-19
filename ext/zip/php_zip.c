@@ -587,17 +587,32 @@ zend_module_entry zip_module_entry = {
 ZEND_GET_MODULE(zip)
 #endif
 
-/* {{{ proto resource zip_open(string filename)
+/* {{{ proto resource zip_open(string filename) U
 Create new zip using source uri for output */
 static PHP_FUNCTION(zip_open)
 {
+	zval **filename_zval;
 	char     *filename;
 	int       filename_len;
+	char resolved_path[MAXPATHLEN + 1];
 	zip_rsrc *rsrc_int;
 	int err = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &filename_zval) == FAILURE) {
 		return;
+	}
+
+	if (FAILURE == php_stream_path_param_encode(filename_zval, &filename, &filename_len, REPORT_ERRORS, FG(default_context))) {
+		RETURN_FALSE;
+	}
+
+	if (filename_len == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty string as source");
+		RETURN_FALSE;
+	}
+
+	if(!expand_filepath(filename, resolved_path TSRMLS_CC)) {
+		RETURN_FALSE;
 	}
 
 	rsrc_int = (zip_rsrc *)emalloc(sizeof(zip_rsrc));
@@ -615,7 +630,7 @@ static PHP_FUNCTION(zip_open)
 }
 /* }}} */
 
-/* {{{ proto void zip_close(resource zip)
+/* {{{ proto void zip_close(resource zip) U 
    Close a Zip archive */
 static PHP_FUNCTION(zip_close)
 {
@@ -632,7 +647,7 @@ static PHP_FUNCTION(zip_close)
 }
 /* }}} */
 
-/* {{{ proto resource zip_read(resource zip)
+/* {{{ proto resource zip_read(resource zip) U
    Returns the next file in the archive */
 static PHP_FUNCTION(zip_read)
 {
@@ -657,7 +672,7 @@ static PHP_FUNCTION(zip_read)
 
 		if (ret != 0) {
 			efree(zr_rsrc);
-			RETURN_LONG((long)ret);
+			RETURN_FALSE;
 		}
 
 		zr_rsrc->zf = zip_fopen_index(rsrc_int->za, rsrc_int->index_current, 0);
@@ -674,7 +689,7 @@ static PHP_FUNCTION(zip_read)
 }
 /* }}} */
 
-/* {{{ proto bool zip_entry_open(resource zip_dp, resource zip_entry [, string mode])
+/* {{{ proto bool zip_entry_open(resource zip_dp, resource zip_entry [, string mode]) U
    Open a Zip File, pointed by the resource entry */
 /* Dummy function to follow the old API */
 static PHP_FUNCTION(zip_entry_open)
@@ -686,7 +701,8 @@ static PHP_FUNCTION(zip_entry_open)
 	zip_read_rsrc * zr_rsrc;
 	zip_rsrc *z_rsrc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|s", &zip, &zip_entry, &mode, &mode_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|s&",
+		&zip, &zip_entry, &mode, &mode_len, UG(ascii_conv)) == FAILURE) {
 		return;
 	}
 
@@ -701,7 +717,7 @@ static PHP_FUNCTION(zip_entry_open)
 }
 /* }}} */
 
-/* {{{ proto void zip_entry_close(resource zip_ent)
+/* {{{ proto void zip_entry_close(resource zip_ent) U
    Close a zip entry */
 /* another dummy function to fit in the old api*/
 static PHP_FUNCTION(zip_entry_close)
@@ -719,7 +735,7 @@ static PHP_FUNCTION(zip_entry_close)
 }
 /* }}} */
 
-/* {{{ proto mixed zip_entry_read(resource zip_entry [, int len])
+/* {{{ proto mixed zip_entry_read(resource zip_entry [, int len]) U
    Read from an open directory entry */
 static PHP_FUNCTION(zip_entry_read)
 {
@@ -782,31 +798,31 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 		case 3:
 			switch (zr_rsrc->sb.comp_method) {
 				case 0:
-					RETURN_STRING("stored", 1);
+					RETURN_ASCII_STRING("stored", ZSTR_DUPLICATE);
 					break;
 				case 1:
-					RETURN_STRING("shrunk", 1);
+					RETURN_ASCII_STRING("shrunk", ZSTR_DUPLICATE);
 					break;
 				case 2:
 				case 3:
 				case 4:
 				case 5:
-					RETURN_STRING("reduced", 1);
+					RETURN_ASCII_STRING("reduced", ZSTR_DUPLICATE);
 					break;
 				case 6:
-					RETURN_STRING("imploded", 1);
+					RETURN_ASCII_STRING("imploded", ZSTR_DUPLICATE);
 					break;
 				case 7:
-					RETURN_STRING("tokenized", 1);
+					RETURN_ASCII_STRING("tokenized", ZSTR_DUPLICATE);
 					break;
 				case 8:
-					RETURN_STRING("deflated", 1);
+					RETURN_ASCII_STRING("deflated", ZSTR_DUPLICATE);
 					break;
 				case 9:
-					RETURN_STRING("deflatedX", 1);
+					RETURN_ASCII_STRING("deflatedX", ZSTR_DUPLICATE);
 					break;
 				case 10:
-					RETURN_STRING("implodedX", 1);
+					RETURN_ASCII_STRING("implodedX", ZSTR_DUPLICATE);
 					break;
 				default:
 					RETURN_FALSE;
@@ -818,7 +834,7 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 }
 /* }}} */
 
-/* {{{ proto string zip_entry_name(resource zip_entry)
+/* {{{ proto string zip_entry_name(resource zip_entry) U
    Return the name given a ZZip entry */
 static PHP_FUNCTION(zip_entry_name)
 {
@@ -826,7 +842,7 @@ static PHP_FUNCTION(zip_entry_name)
 }
 /* }}} */
 
-/* {{{ proto int zip_entry_compressedsize(resource zip_entry)
+/* {{{ proto int zip_entry_compressedsize(resource zip_entry) U
    Return the compressed size of a ZZip entry */
 static PHP_FUNCTION(zip_entry_compressedsize)
 {
@@ -834,7 +850,7 @@ static PHP_FUNCTION(zip_entry_compressedsize)
 }
 /* }}} */
 
-/* {{{ proto int zip_entry_filesize(resource zip_entry)
+/* {{{ proto int zip_entry_filesize(resource zip_entry) U
    Return the actual filesize of a ZZip entry */
 static PHP_FUNCTION(zip_entry_filesize)
 {
@@ -842,7 +858,7 @@ static PHP_FUNCTION(zip_entry_filesize)
 }
 /* }}} */
 
-/* {{{ proto string zip_entry_compressionmethod(resource zip_entry)
+/* {{{ proto string zip_entry_compressionmethod(resource zip_entry) U
    Return a string containing the compression method used on a particular entry */
 PHP_FUNCTION(zip_entry_compressionmethod)
 {
@@ -1090,11 +1106,6 @@ static ZIPARCHIVE_METHOD(addFromString)
 		&buffer, &buffer_len, UG(ascii_conv)) == FAILURE) {
         return;
     }
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
-			&name, &name_len, &buffer, &buffer_len) == FAILURE) {
-		return;
-	}
 
 	ze_obj = (ze_zip_object*) zend_object_store_get_object(this TSRMLS_CC);
 	if (ze_obj->buffers_cnt) {
