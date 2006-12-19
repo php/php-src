@@ -2,13 +2,13 @@
 Sort with SORT_LOCALE_STRING
 --SKIPIF--
 <?php
-if ("fr_FR" != setlocale(LC_CTYPE, "fr_FR")) {
+if (false == setlocale(LC_CTYPE, "fr_FR", "fr_FR.ISO8859-1")) {
   die("skip setlocale() failed\n");
 }
 ?>
 --FILE--
 <?php
-setlocale(LC_ALL, 'fr_FR');
+setlocale(LC_ALL, 'fr_FR', 'fr_FR.ISO8859-1');
 $table = array("AB" => "Alberta",
 "BC" => "Colombie-Britannique",
 "MB" => "Manitoba",
