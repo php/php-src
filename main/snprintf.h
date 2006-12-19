@@ -65,10 +65,19 @@ Example:
 #ifndef SNPRINTF_H
 #define SNPRINTF_H
 
+typedef int bool_int;
+
+typedef enum {
+	NO = 0, YES = 1
+} boolean_e;
+
 BEGIN_EXTERN_C()
 PHPAPI int ap_php_snprintf(char *, size_t, const char *, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 PHPAPI int ap_php_vsnprintf(char *, size_t, const char *, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 PHPAPI int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPAPI char * php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
+PHPAPI char * php_conv_fp(register char format, register double num,
+		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, int *len);
 END_EXTERN_C()
 
 #ifdef snprintf
@@ -85,10 +94,6 @@ END_EXTERN_C()
 #undef sprintf
 #endif
 #define sprintf php_sprintf
-
-typedef enum {
-	NO = 0, YES = 1
-} boolean_e;
 
 typedef enum {
 	LM_STD = 0,
@@ -118,20 +123,11 @@ typedef enum {
 typedef WIDE_INT wide_int;
 typedef unsigned WIDE_INT u_wide_int;
 
-typedef int bool_int;
-
 extern char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 	   register bool_int * is_negative, char *buf_end, register int *len);
 
-extern char * ap_php_conv_fp(register char format, register double num,
-		 boolean_e add_dp, int precision, bool_int * is_negative, char *buf, int *len);
-
 extern char * ap_php_conv_p2(register u_wide_int num, register int nbits,
 		 char format, char *buf_end, register int *len);
-
-extern char * bsd_ecvt(double value, int ndigit, int *decpt, int *sign);
-extern char * bsd_fcvt(double value, int ndigit, int *decpt, int *sign);
-extern char * bsd_gcvt(double value, int ndigit, char *buf);
 
 #endif /* SNPRINTF_H */
 
