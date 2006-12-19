@@ -540,40 +540,51 @@ default_socket_timeout = 60
 ; extension folders as well as the separate PECL DLL download (PHP 5).
 ; Be sure to appropriately set the extension_dir directive.
 
-;extension=php_mbstring.dll
 ;extension=php_bz2.dll
 ;extension=php_curl.dll
 ;extension=php_dba.dll
 ;extension=php_dbase.dll
 ;extension=php_exif.dll
 ;extension=php_fdf.dll
-;extension=php_filepro.dll
 ;extension=php_gd2.dll
 ;extension=php_gettext.dll
+;extension=php_gmp.dll
 ;extension=php_ifx.dll
 ;extension=php_imap.dll
 ;extension=php_interbase.dll
 ;extension=php_ldap.dll
+;extension=php_mbstring.dll
 ;extension=php_mcrypt.dll
 ;extension=php_mhash.dll
 ;extension=php_mime_magic.dll
 ;extension=php_ming.dll
-;extension=php_mssql.dll
 ;extension=php_msql.dll
+;extension=php_mssql.dll
 ;extension=php_mysql.dll
+;extension=php_mysqli.dll
 ;extension=php_oci8.dll
 ;extension=php_openssl.dll
-;extension=php_oracle.dll
+;extension=php_pdo.dll
+;extension=php_pdo_firebird.dll
+;extension=php_pdo_mssql.dll
+;extension=php_pdo_mysql.dll
+;extension=php_pdo_oci.dll
+;extension=php_pdo_oci8.dll
+;extension=php_pdo_odbc.dll
+;extension=php_pdo_pgsql.dll
+;extension=php_pdo_sqlite.dll
 ;extension=php_pgsql.dll
+;extension=php_pspell.dll
 ;extension=php_shmop.dll
 ;extension=php_snmp.dll
+;extension=php_soap.dll
 ;extension=php_sockets.dll
 ;extension=php_sqlite.dll
 ;extension=php_sybase_ct.dll
 ;extension=php_tidy.dll
 ;extension=php_xmlrpc.dll
 ;extension=php_xsl.dll
-
+;extension=php_zip.dll
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
@@ -740,6 +751,37 @@ msql.max_persistent = -1
 
 ; Maximum number of links (persistent+non persistent).  -1 means no limit.
 msql.max_links = -1
+
+[OCI8]
+; enables privileged connections using external credentials (OCI_SYSOPER, OCI_SYSDBA)
+;oci8.privileged_connect = Off
+
+; Connection: The maximum number of persistent OCI8 connections per
+; process. Using -1 means no limit.
+;oci8.max_persistent = -1
+
+; Connection: The maximum number of seconds a process is allowed to
+; maintain an idle persistent connection. Using -1 means idle
+; persistent connections will be maintained forever.
+;oci8.persistent_timeout = -1
+
+; Connection: The number of seconds that must pass before issuing a
+; ping during oci_pconnect() to check the connection validity. When
+; set to 0, each oci_pconnect() will cause a ping. Using -1 disables
+; pings completely.
+;oci8.ping_interval = 60
+
+; Tuning: This option enables statement caching, and specifies how
+; many statements to cache. Using 0 disables statement caching.
+;oci8.statement_cache_size = 20
+
+; Tuning: Enables statement prefetching and sets the default number of
+; rows that will be fetched automatically after statement execution.
+;oci8.default_prefetch = 10
+
+; Compatibility. Using On means oci_close() will not close
+; oci_connect() and oci_new_connect() connections.
+;oci8.old_oci_close_semantics = Off
 
 [PostgresSQL]
 ; Allow or prevent persistent links.
