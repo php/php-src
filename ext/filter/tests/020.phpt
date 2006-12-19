@@ -1,5 +1,7 @@
 --TEST--
 filter_var() and FILTER_SANITIZE_MAGIC_QUOTES
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 

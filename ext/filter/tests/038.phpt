@@ -1,5 +1,7 @@
 --TEST--
 Test scalar, array
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 

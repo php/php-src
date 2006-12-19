@@ -1,5 +1,7 @@
 --TEST--
 bug 7715, floats value with integer or incomplete input
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 $data = array(
