@@ -357,7 +357,7 @@ PHP_FUNCTION(spl_autoload_call)
 	HashPosition function_pos;
 	autoload_func_info *alfi;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, UG(unicode) ? "u" : "s", &class_name, &class_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "x", &class_name, &class_name_len) == FAILURE) {
 		return;
 	}
 
