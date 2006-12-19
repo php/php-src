@@ -333,6 +333,10 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 		spec_walk++;
 	}
 
+	if (c == 'x') {
+		c = UG(unicode) ? 'u' : 's';
+	}
+
 	switch (c) {
 		case 'l':
 			{
@@ -867,7 +871,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			case 't': case 'u':
 		   	case 'C': case 'h':
 			case 'U': case 'S':
-			case 'f':
+			case 'f': case 'x':
 				max_num_args++;
 				break;
 
