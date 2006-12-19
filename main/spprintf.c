@@ -92,6 +92,9 @@
 
 #ifdef HAVE_LOCALE_H
 #include <locale.h>
+#define LCONV_DECIMAL_POINT (*lconv->decimal_point)
+#else
+#define LCONV_DECIMAL_POINT '.'
 #endif
 
 #include "snprintf.h"
@@ -199,7 +202,9 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
 
+#ifdef HAVE_LOCALE_H
 	struct lconv *lconv = NULL;
+#endif
 
 	/*
 	 * Flag variables
@@ -554,9 +559,11 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 						s = "inf";
 						s_len = 3;
 					} else {
+#ifdef HAVE_LOCALE_H
 						if (!lconv) {
 							lconv = localeconv();
 						}
+#endif
 						s = php_conv_fp((*fmt == 'f')?'F':*fmt, fp_num, alternate_form,
 						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
 						 (*fmt == 'f')?(*lconv->decimal_point):'.',
@@ -606,9 +613,11 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
+#ifdef HAVE_LOCALE_H
 					if (!lconv) {
 						lconv = localeconv();
 					}
+#endif
 					s = php_gcvt(fp_num, precision, *lconv->decimal_point, (*fmt == 'G')?'E':'e', &num_buf[1]);
 					if (*s == '-')
 						prefix_char = *s++;
