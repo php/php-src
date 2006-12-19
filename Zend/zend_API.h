@@ -389,13 +389,13 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 #define add_assoc_zstr_ex(arg, key, key_len, type, str, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTR(___tmp, str, type, duplicate); \
+		ZVAL_ZSTR(___tmp, type, str, duplicate); \
 		add_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_assoc_zstrl_ex(arg, key, key_len, type, str, length, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTRL(___tmp, str, type, length, duplicate); \
+		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
@@ -532,13 +532,13 @@ ZEND_API int add_ascii_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *v
 #define add_ascii_assoc_zstr_ex(arg, key, key_len, type, str, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTR(___tmp, str, type, duplicate); \
+		ZVAL_ZSTR(___tmp, type, str, duplicate); \
 		add_ascii_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_ascii_assoc_zstrl_ex(arg, key, key_len, type, str, length, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTRL(___tmp, str, type, length, duplicate); \
+		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_ascii_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_ascii_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
@@ -676,13 +676,13 @@ ZEND_API int add_rt_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 #define add_rt_assoc_zstr_ex(arg, key, key_len, type, str, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTR(___tmp, str, type, duplicate); \
+		ZVAL_ZSTR(___tmp, type, str, duplicate); \
 		add_rt_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_rt_assoc_zstrl_ex(arg, key, key_len, type, str, length, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTRL(___tmp, str, type, length, duplicate); \
+		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_rt_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_rt_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
@@ -820,13 +820,13 @@ ZEND_API int add_utf8_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *va
 #define add_utf8_assoc_zstr_ex(arg, key, key_len, type, str, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTR(___tmp, str, type, duplicate); \
+		ZVAL_ZSTR(___tmp, type, str, duplicate); \
 		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_utf8_assoc_zstrl_ex(arg, key, key_len, type, str, length, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTRL(___tmp, str, type, length, duplicate); \
+		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_utf8_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
@@ -972,14 +972,14 @@ ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval 
 #define add_utf8_property_zstr_ex(arg, key, key_len, type, str, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTR(___tmp, str, type, duplicate); \
+		ZVAL_ZSTR(___tmp, type, str, duplicate); \
 		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_zstrl_ex(arg, key, key_len, type, str, length, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTRL(___tmp, str, type, length, duplicate); \
+		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
@@ -1092,13 +1092,13 @@ ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_
 #define add_u_assoc_zstr_ex(arg, key_type, key, key_len, type, str, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTR(___tmp, str, type, duplicate); \
+		ZVAL_ZSTR(___tmp, type, str, duplicate); \
 		add_u_assoc_zval_ex(arg, key_type, key, key_len, ___tmp); \
 	} while (0)
 #define add_u_assoc_zstrl_ex(arg, key_type, key, key_len, type, str, length, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTRL(___tmp, str, type, length, duplicate); \
+		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_u_assoc_zval_ex(arg, key_type, key, key_len, ___tmp); \
 	} while (0)
 #define add_u_assoc_text_ex(arg, type, key, key_len, str, duplicate) do { \
@@ -1236,13 +1236,13 @@ ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
 #define add_index_zstr(arg, idx, type, str, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTR(___tmp, str, type, duplicate); \
+		ZVAL_ZSTR(___tmp, type, str, duplicate); \
 		add_index_zval(arg, idx, ___tmp); \
 	} while (0)
 #define add_index_zstrl(arg, idx, type, str, length, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTRL(___tmp, str, type, length, duplicate); \
+		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_index_zval(arg, idx, ___tmp); \
 	} while (0)
 #define add_index_text(arg, idx, str, duplicate) do { \
@@ -1359,13 +1359,13 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 #define add_next_index_zstr(arg, type, str, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTR(___tmp, str, type, duplicate); \
+		ZVAL_ZSTR(___tmp, type, str, duplicate); \
 		add_next_index_zval(arg, ___tmp); \
 	} while (0)
 #define add_next_index_zstrl(arg, type, str, length, duplicate) do { \
 		zval *___tmp; \
 		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_ZSTRL(___tmp, str, type, length, duplicate); \
+		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_next_index_zval(arg, ___tmp); \
 	} while (0)
 #define add_next_index_text(arg, str, duplicate) do { \
@@ -1707,7 +1707,7 @@ END_EXTERN_C()
 		Z_TYPE_P(z) = IS_UNICODE;		    \
 	}
 
-#define ZVAL_ZSTR(z, zs, type, duplicate) { \
+#define ZVAL_ZSTR(z, type, zs, duplicate) { \
 		zstr __s=(zs); 					    \
 		Z_UNILEN_P(z) = (type==IS_UNICODE)?u_strlen(__s.u):strlen(__s.s); \
 		Z_UNIVAL_P(z) = ZSTR(duplicate?     \
@@ -1718,7 +1718,7 @@ END_EXTERN_C()
 		Z_TYPE_P(z) = type; 			   \
 	}
 
-#define ZVAL_ZSTRL(z, zs, type, l, duplicate) { \
+#define ZVAL_ZSTRL(z, type, zs, l, duplicate) { \
 		zstr __s=(zs); int __l=l;				\
 		Z_UNILEN_P(z) = __l;					\
 		Z_UNIVAL_P(z) = ZSTR(duplicate? 		\
@@ -1819,8 +1819,8 @@ END_EXTERN_C()
 #define RETVAL_TEXT(t, duplicate) ZVAL_TEXT(return_value, t, duplicate)
 #define RETVAL_TEXTL(t, l, duplicate) ZVAL_TEXTL(return_value, t, l, duplicate)
 #define RETVAL_EMPTY_TEXT() 			ZVAL_EMPTY_TEXT(return_value)
-#define RETVAL_ZSTR(s, type, duplicate) ZVAL_ZSTR(return_value, s, type, duplicate)
-#define RETVAL_ZSTRL(s, l, type, duplicate) ZVAL_ZSTRL(return_value, s, type, l, duplicate)
+#define RETVAL_ZSTR(type, s, duplicate) ZVAL_ZSTR(return_value, type, s, duplicate)
+#define RETVAL_ZSTRL(type, s, l, duplicate) ZVAL_ZSTRL(return_value, type, s, l, duplicate)
 
 #define RETURN_RESOURCE(l) 				{ RETVAL_RESOURCE(l); return; }
 #define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
@@ -1848,8 +1848,8 @@ END_EXTERN_C()
 #define RETURN_RT_STRINGL(t, l, flags)	{ RETVAL_RT_STRINGL(t, l, flags); return; }
 #define RETURN_UTF8_STRING(t, flags)		{ RETVAL_UTF8_STRING(t, flags); return; }
 #define RETURN_UTF8_STRINGL(t, l, flags)	{ RETVAL_UTF8_STRINGL(t, l, flags); return; }
-#define RETURN_ZSTR(s, type, duplicate) 	{ RETVAL_ZSTR(s, type, duplicate); return; }
-#define RETURN_ZSTRL(s, l, type, duplicate) { RETVAL_ZSTRL(s, l, type, duplicate); return; }
+#define RETURN_ZSTR(type, s, duplicate) 	{ RETVAL_ZSTR(type, s, duplicate); return; }
+#define RETURN_ZSTRL(type, s, l, duplicate) { RETVAL_ZSTRL(type, s, l, duplicate); return; }
 
 #define SET_VAR_STRING(n, v) {																				\
 								{																			\
