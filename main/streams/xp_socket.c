@@ -369,6 +369,24 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 					return PHP_STREAM_OPTION_RETURN_OK;
 
 
+#ifdef HAVE_SHUTDOWN
+# ifndef SHUT_RD
+#  define SHUT_RD 0
+# endif
+# ifndef SHUT_WR
+#  define SHUT_WR 1
+# endif
+# ifndef SHUT_RDWR
+#  define SHUT_RDWR 2
+# endif
+				case STREAM_XPORT_OP_SHUTDOWN: {
+					static const int shutdown_how[] = {SHUT_RD, SHUT_WR, SHUT_RDWR};
+
+					xparam->outputs.returncode = shutdown(sock->socket, shutdown_how[xparam->how]);
+					return PHP_STREAM_OPTION_RETURN_OK;
+				}
+#endif
+				
 				default:
 					return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 			}

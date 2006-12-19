@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Dec 2006, PHP 5.2.1RC2
+- Added function stream_socket_shutdown(). It is a wraper for system shutdown()
+  function, that shut downs part of a full-duplex connection. (Dmitry)
 - Added internal heap protection (Dmitry)
   . safe unlinking
   . cookies

@@ -486,6 +486,25 @@ PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t b
 	return -1;
 }
 
+/* Similar to shutdown() system call; shut down part of a full-duplex
+ * connection */
+PHPAPI int php_stream_xport_shutdown(php_stream *stream, stream_shutdown_t how TSRMLS_DC)
+{
+	php_stream_xport_param param;
+	int ret = 0;
+
+	memset(&param, 0, sizeof(param));
+
+	param.op = STREAM_XPORT_OP_SHUTDOWN;
+	param.how = how;
+	
+	ret = php_stream_set_option(stream, PHP_STREAM_OPTION_XPORT_API, 0, &param);
+
+	if (ret == PHP_STREAM_OPTION_RETURN_OK) {
+		return param.outputs.returncode;
+	}
+	return -1;
+}
 
 /*
  * Local variables:
