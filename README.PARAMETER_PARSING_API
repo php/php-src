@@ -57,6 +57,8 @@ Type specifiers
       coalesces all T parameters to common type (Unicode or binary)
  u  - unicode (UChar*, int)
  U  - Unicode string, does not allow conversion from binary strings
+ x  - Unicode or binary string depending on UG(unicode). In unicode this 
+      behaves like 'u' and in nonunicode mode it behaves like 's'.
  z  - the actual zval (zval*)
  Z  - the actual zval (zval**)
  *  - variable arguments list
