@@ -40,7 +40,7 @@ array(2) {
     int(2)
   }
 }
-a:2:{s:3:"one";s:3:"ABC";s:3:"two";N;}
+a:2:{S:3:"one";S:3:"ABC";S:3:"two";N;}
 array(2) {
   ["one"]=>
   string(3) "ABC"
