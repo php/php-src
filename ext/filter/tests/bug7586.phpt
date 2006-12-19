@@ -1,5 +1,7 @@
 --TEST--
 input_get_args() filter not reseted between elements
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 $data = array(

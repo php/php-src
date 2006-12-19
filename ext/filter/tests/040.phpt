@@ -1,5 +1,7 @@
 --TEST--
 filter_has_var() tests
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --GET--
 a=1&b=2&c=0
 --POST--
