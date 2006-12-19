@@ -5750,30 +5750,66 @@ PHP_FUNCTION(ini_restore)
 }
 /* }}} */
 
-/* {{{ proto string set_include_path(string new_include_path)
+/* {{{ proto string set_include_path(string new_include_path) U
    Sets the include_path configuration option */
 
 PHP_FUNCTION(set_include_path)
 {
-	zval **new_value;
+	zstr new_value;
+	int new_value_len;
+	zend_uchar type;
 	char *old_value;
+	zend_bool free_new_value = 0;
+	char *temp;
+	int temp_len;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &new_value) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &new_value, &new_value_len, &type) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(new_value);
+
 	old_value = zend_ini_string("include_path", sizeof("include_path"), 0);
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
-		RETVAL_STRING(old_value, 1);
+		RETVAL_UTF8_STRING(old_value, ZSTR_DUPLICATE);
 	} else {
 		RETVAL_FALSE;
 	}
+
+	/*
+	 * We always want to convert IS_UNICODE to UTF-8 and pass to INI subsystem.
+	 * For binary strings, however, we want to convert only if UG(unicode) is
+	 * on, in which case we check whether filesystem encoding is already UTF-8,
+	 * and if it's not, we convert from that to UTF-8.
+	 */
+	if (type == IS_UNICODE) {
+		zend_unicode_to_string(UG(utf8_conv), &temp, &temp_len, new_value.u, new_value_len TSRMLS_CC);
+		new_value.s = temp;
+		new_value_len = temp_len;
+		free_new_value = 1;
+	} else if (UG(unicode)) {
+		const char *conv_name;
+		UErrorCode status = U_ZERO_ERROR;
+
+		conv_name = ucnv_getName(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &status);
+		conv_name = ucnv_getStandardName(conv_name, "MIME", &status);
+		if (strcmp(conv_name, "UTF-8") != 0) {
+			status = U_ZERO_ERROR;
+			zend_convert_encodings(UG(utf8_conv), ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
+								   &temp, &temp_len, new_value.s, new_value_len, &status);
+			new_value.s = temp;
+			new_value_len = temp_len;
+			free_new_value = 1;
+		}
+	}
+
 	if (zend_alter_ini_entry("include_path", sizeof("include_path"),
-                             Z_STRVAL_PP(new_value), Z_STRLEN_PP(new_value),
-                             PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
+							 new_value.s, new_value_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
+	}
+
+	if (free_new_value) {
+		efree(new_value.s);
 	}
 }
 
