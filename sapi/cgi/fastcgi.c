@@ -347,6 +347,7 @@ static inline ssize_t safe_write(fcgi_request *req, const void *buf, size_t coun
 	size_t n = 0;
 
 	do {
+		errno = 0;
 		ret = write(req->fd, ((char*)buf)+n, count-n);
 		if (ret > 0) {
 			n += ret;
@@ -363,6 +364,7 @@ static inline ssize_t safe_read(fcgi_request *req, const void *buf, size_t count
 	size_t n = 0;
 
 	do {
+		errno = 0;
 		ret = read(req->fd, ((char*)buf)+n, count-n);
 		if (ret > 0) {
 			n += ret;
