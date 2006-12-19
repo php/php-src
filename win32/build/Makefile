@@ -20,6 +20,7 @@
 CC="$(CL)"
 LD="$(LINK)"
 MC="$(MC)"
+MT="$(MT)"
 
 MCFILE=$(BUILD_DIR)\wsyslog.rc
 
@@ -54,6 +55,9 @@ $(MCFILE): win32\build\wsyslog.mc
 
 #	$(RC) /fo $(MCFILE) $(BUILD_DIR)\wsyslog.rc
 
+_VC_MANIFEST_EMBED_EXE= $(MT) -manifest $@.manifest -outputresource:$@;1
+_VC_MANIFEST_EMBED_DLL= $(MT) -manifest $@.manifest -outputresource:$@;2
+
 $(PHPDLL_RES): win32\build\template.rc
 	$(RC) /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
 		/d FILE_NAME="\"$(PHPDLL)\"" /d PRODUCT_NAME="\"PHP Script Interpreter\"" \
@@ -62,6 +66,7 @@ $(PHPDLL_RES): win32\build\template.rc
 
 $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
 	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
+	-@$(_VC_MANIFEST_EMBED_DLL)
 	
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
 	

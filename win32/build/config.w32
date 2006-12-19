@@ -48,6 +48,9 @@ PATH_PROG('lemon');
 // avoid picking up midnight commander from cygwin
 PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
 
+// Try locating manifest tool
+PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"));
+
 // stick objects somewhere outside of the source tree
 ARG_ENABLE('object-out-dir', 'Alternate location for binary objects during build', '');
 if (PHP_OBJECT_OUT_DIR.length) {

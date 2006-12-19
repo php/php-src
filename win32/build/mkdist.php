@@ -401,6 +401,17 @@ if (file_exists($snapshot_template)) {
 			}
 		}
 	}
+	
+	/* copy c++ runtime */
+	$items = glob("$snapshot_template/dlls/*.CRT");
+
+	foreach ($items as $item) {
+		$bi = basename($item);
+		if (is_dir($item)) {
+			copy_dir($item, "$dist_dir/$bi");
+			copy_dir($item, "$dist_dir/ext/$bi");
+		}
+	}
 } else {
 	echo "WARNING: you don't have a snapshot template\n";
 	echo "         your dist will not be complete\n";
