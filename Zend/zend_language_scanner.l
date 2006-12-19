@@ -1707,13 +1707,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_IN_SCRIPTING>["] {
+<ST_IN_SCRIPTING>b?["] {
 	BEGIN(ST_DOUBLE_QUOTES);
 	return '\"';
 }
 
 
-<ST_IN_SCRIPTING>"<<<"{TABS_AND_SPACES}{LABEL}{NEWLINE} {
+<ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}{LABEL}{NEWLINE} {
 	char *s;
 	CG(zend_lineno)++;
 	CG(heredoc_len) = yyleng-3-1-(yytext[yyleng-2]=='\r'?1:0);
@@ -1734,7 +1734,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_IN_SCRIPTING>['] {
+<ST_IN_SCRIPTING>b?['] {
 	BEGIN(ST_SINGLE_QUOTE);
 	return '\'';
 }
