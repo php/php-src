@@ -27,6 +27,9 @@
 
 #ifdef HAVE_LOCALE_H
 #include <locale.h>
+#define LCONV_DECIMAL_POINT (*lconv->decimal_point)
+#else
+#define LCONV_DECIMAL_POINT '.'
 #endif
 
 #define ALIGN_LEFT 0
@@ -198,7 +201,9 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	char num_buf[NUM_BUF_SIZE];
 	char *s = NULL;
 	int s_len = 0, is_negative = 0;
+#ifdef HAVE_LOCALE_H
 	struct lconv *lconv;
+#endif
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
 				  *buffer, pos, size, number, width, padding, alignment, fmt));
@@ -230,9 +235,11 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 		case 'E':
 		case 'f':
 		case 'F':
+#ifdef HAVE_LOCALE_H
 			lconv = localeconv();
+#endif
 			s = php_conv_fp((fmt == 'f')?'F':fmt, number, 0, precision,
-						(fmt == 'f')?(*lconv->decimal_point):'.',
+						(fmt == 'f')?LCONV_DECIMAL_POINT:'.',
 						&is_negative, &num_buf[1], &s_len);
 			if (is_negative) {
 				num_buf[0] = '-';
@@ -252,8 +259,10 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 			/*
 			 * * We use &num_buf[ 1 ], so that we have room for the sign
 			 */
+#ifdef HAVE_LOCALE_H
 			lconv = localeconv();
-			s = php_gcvt(number, precision, *lconv->decimal_point, (fmt == 'G')?'E':'e', &num_buf[1]);
+#endif
+			s = php_gcvt(number, precision, LCONV_DECIMAL_POINT, (fmt == 'G')?'E':'e', &num_buf[1]);
 			is_negative = 0;
 			if (*s == '-') {
 				is_negative = 1;
