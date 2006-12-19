@@ -1645,6 +1645,36 @@ PHP_FUNCTION(stream_resolve_include_path)
 }
 /* }}} */
 
+#ifdef HAVE_SHUTDOWN
+/* {{{ proto int stream_socket_shutdown(resource stream, int how)
+	causes all or part of a full-duplex connection on the socket associated
+	with stream to be shut down.  If how is SHUT_RD,  further receptions will
+	be disallowed. If how is SHUT_WR, further transmissions will be disallowed.
+	If how is SHUT_RDWR,  further  receptions and transmissions will be
+	disallowed. */
+PHP_FUNCTION(stream_socket_shutdown)
+{
+	long how;
+	zval *zstream;
+	php_stream *stream;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zstream, &how) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	if (how != STREAM_SHUT_RD &&
+	    how != STREAM_SHUT_WR &&
+	    how != STREAM_SHUT_RDWR) {
+		RETURN_FALSE;
+	}
+
+	php_stream_from_zval(stream, &zstream);
+
+	RETURN_BOOL(php_stream_xport_shutdown(stream, (stream_shutdown_t)how TSRMLS_CC) == 0);
+}
+#endif
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

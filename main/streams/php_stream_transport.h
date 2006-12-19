@@ -104,7 +104,18 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
  * sending it as OOB data */
 PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t buflen,
 		long flags, void *addr, socklen_t addrlen TSRMLS_DC);
+
+typedef enum {
+	STREAM_SHUT_RD,
+	STREAM_SHUT_WR,
+	STREAM_SHUT_RDWR
+} stream_shutdown_t;
+
+/* Similar to shutdown() system call; shut down part of a full-duplex
+ * connection */
+PHPAPI int php_stream_xport_shutdown(php_stream *stream, stream_shutdown_t how TSRMLS_DC);
 END_EXTERN_C()
+
 
 /* Structure definition for the set_option interface that the above functions wrap */
 
@@ -116,11 +127,13 @@ typedef struct _php_stream_xport_param {
 		STREAM_XPORT_OP_GET_NAME,
 		STREAM_XPORT_OP_GET_PEER_NAME,
 		STREAM_XPORT_OP_RECV,
-		STREAM_XPORT_OP_SEND
+		STREAM_XPORT_OP_SEND,
+		STREAM_XPORT_OP_SHUTDOWN
 	} op;
 	unsigned int want_addr:1;
 	unsigned int want_textaddr:1;
 	unsigned int want_errortext:1;
+	stream_shutdown_t how:3;
 
 	struct {
 		char *name;

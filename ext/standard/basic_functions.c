@@ -2449,6 +2449,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_resolve_include_path, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
+
+#ifdef HAVE_SHUTDOWN
+static
+ZEND_BEGIN_ARG_INFO(arginfo_stream_socket_shutdown, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_INFO(0, how)
+ZEND_END_ARG_INFO()
+#endif
 /* }}} */
 /* {{{ string.c */
 static
@@ -3563,6 +3571,9 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(stream_socket_recvfrom,											arginfo_stream_socket_recvfrom)
 	PHP_FE(stream_socket_sendto,											arginfo_stream_socket_sendto)
 	PHP_FE(stream_socket_enable_crypto,										arginfo_stream_socket_enable_crypto)
+#ifdef HAVE_SHUTDOWN
+	PHP_FE(stream_socket_shutdown,											arginfo_stream_socket_shutdown)
+#endif
 #if HAVE_SOCKETPAIR
 	PHP_FE(stream_socket_pair,												arginfo_stream_socket_pair)
 #endif
