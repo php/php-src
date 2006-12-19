@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . cookies
   . canary protection (debug build only)
   . random generation of cookies and canaries
+- Fixed bug #39869 (safe_read does not initialize errno).
+  (michiel at boland dot org, Dmitry)
 - Fixed bug #39850 (SplFileObject throws contradictory/wrong error messages 
   when trying to open "php://wrong"). (Tony)
 - Fixed bug #39832 (SOAP Server: parameter not matching the WSDL specified type
