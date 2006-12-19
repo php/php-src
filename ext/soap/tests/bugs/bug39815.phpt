@@ -1,7 +1,11 @@
 --TEST--
 Bug #39815 (to_zval_double() in ext/soap/php_encoding.c is not locale-independent)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+if (!function_exists('setlocale')) die('skip setlocale() not available'); 
+if (!@setlocale(LC_ALL, 'sv_SE')) die('skip sv_SE locale not available');
+?>
 --FILE--
 <?php
 function test(){
