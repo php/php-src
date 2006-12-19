@@ -1,5 +1,7 @@
 --TEST--
 GET/POST/REQUEST Test with filtered data
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --INI--
 filter.default=special_chars
 --POST--

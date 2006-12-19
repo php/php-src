@@ -1,5 +1,7 @@
 --TEST--
 input_get_args()
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 $data = array(

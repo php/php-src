@@ -1,5 +1,7 @@
 --TEST--
 Simple filter_var() tests
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 

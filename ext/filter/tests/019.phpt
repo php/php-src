@@ -1,5 +1,7 @@
 --TEST--
 filter_var() & FILTER_VALIDATE_IP and weird data
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 

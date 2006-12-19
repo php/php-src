@@ -1,5 +1,7 @@
 --TEST--
 filter_var() and flags
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 var_dump(filter_var("  234", FILTER_VALIDATE_INT));
