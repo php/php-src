@@ -2190,7 +2190,7 @@ ZEND_METHOD(reflection_method, __construct)
 		} else {
 			tmp_len = tmp.s - name_str.s;
 		}
-		ZVAL_ZSTRL(classname, name_str, tmp_len, type, 1);
+		ZVAL_ZSTRL(classname, name_str, type, tmp_len, 1);
 		name_len = name_len - (tmp_len + 2);
 		if (type == IS_UNICODE) {
 			name_str.u = tmp.u + 2;

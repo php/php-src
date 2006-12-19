@@ -100,7 +100,7 @@ ZVAL_UTF8_STRING(pzv, str, dup), ZVAL_UTF8_STRINGL(pzv, str, str_len, dup)
    for 'dup' does not matter, but ZSTR_AUTOFREE will be used will be used to
    efree the original value
 
-ZVAL_ZSTR(pzv, zstr, type, dup), ZVAL_ZSTRL(pzv, zstr, zstr_len, type, dup)
+ZVAL_ZSTR(pzv, zstr, type, dup), ZVAL_ZSTRL(pzv, zstr, type, zstr_len, dup)
  - This macro uses 'type' to switch between calling ZVAL_STRING(pzv, zstr.s, dup)
    and ZVAL_UNICODE(pzv, zstr.u, dup).  No conversion happens so the
    presense of absense of ZSTR_AUTOFREE is ignored.
