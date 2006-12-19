@@ -345,39 +345,37 @@ static void autoload_func_info_dtor(autoload_func_info *alfi)
 	}
 }
 
-/* {{{ proto void spl_autoload_call(string class_name)
+/* {{{ proto void spl_autoload_call(string class_name) U
  Try all registerd autoload function to load the requested class */
 PHP_FUNCTION(spl_autoload_call)
 {
-	zval *class_name, *retval = NULL;
-	int class_name_len, class_name_type;
-	zstr func_name, lc_name;
+	zval *zclass_name, *retval = NULL;
+	int class_name_len, func_name_type;
+	zstr class_name, func_name, lc_name;
 	uint func_name_len;
 	ulong dummy;
 	HashPosition function_pos;
 	autoload_func_info *alfi;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &class_name) == FAILURE ||
-	    Z_TYPE_P(class_name) != (UG(unicode)?IS_UNICODE:IS_STRING)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, UG(unicode) ? "u" : "s", &class_name, &class_name_len) == FAILURE) {
 		return;
 	}
 
+	MAKE_STD_ZVAL(zclass_name);
+	ZVAL_ZSTRL(zclass_name, ZEND_STR_TYPE, class_name, class_name_len, 1);
 	if (SPL_G(autoload_functions)) {
 		int l_autoload_running = SPL_G(autoload_running);
 		SPL_G(autoload_running) = 1;
-		class_name_type = Z_TYPE_P(class_name);
-		class_name_len = Z_UNILEN_P(class_name);
-		lc_name = zend_u_str_tolower_dup(class_name_type, Z_UNIVAL_P(class_name), class_name_len);
+		lc_name = zend_u_str_tolower_dup(ZEND_STR_TYPE, class_name, class_name_len);
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
 		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS && !EG(exception)) {
-			zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &func_name_len, &dummy, 0, &function_pos);
+			func_name_type = zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &func_name_len, &dummy, 0, &function_pos);
 			zend_hash_get_current_data_ex(SPL_G(autoload_functions), (void **) &alfi, &function_pos);
-			/* TODO: Unicode support??? */
-			zend_call_method(alfi->obj ? &alfi->obj : NULL, alfi->ce, &alfi->func_ptr, func_name.s, func_name_len, &retval, 1, class_name, NULL TSRMLS_CC);
+			zend_u_call_method(alfi->obj ? &alfi->obj : NULL, alfi->ce, &alfi->func_ptr, func_name_type, func_name, func_name_len, &retval, 1, zclass_name, NULL TSRMLS_CC);
 			if (retval) {
 				zval_ptr_dtor(&retval);					
 			}
-			if (zend_u_hash_exists(EG(class_table), class_name_type, lc_name, class_name_len+1)) {
+			if (zend_u_hash_exists(EG(class_table), ZEND_STR_TYPE, lc_name, class_name_len+1)) {
 				break;
 			}
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);
@@ -386,8 +384,9 @@ PHP_FUNCTION(spl_autoload_call)
 		SPL_G(autoload_running) = l_autoload_running;
 	} else {
 		/* do not use or overwrite &EG(autoload_func) here */
-		zend_call_method_with_1_params(NULL, NULL, NULL, "spl_autoload", NULL, class_name);
+		zend_call_method_with_1_params(NULL, NULL, NULL, "spl_autoload", NULL, zclass_name);
 	}
+	zval_ptr_dtor(&zclass_name);
 } /* }}} */
 
 /* {{{ proto bool spl_autoload_register([mixed autoload_function = "spl_autoload" [, throw = true]]) U
