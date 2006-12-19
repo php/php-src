@@ -612,7 +612,7 @@ PHP_MINIT_FUNCTION(curl)
 #endif
 
 #ifdef PHP_CURL_NEED_OPENSSL_TSL
-	{
+	if (!CRYPTO_get_id_callback()) {
 		int i, c = CRYPTO_num_locks();
 		
 		php_curl_openssl_tsl = malloc(c * sizeof(MUTEX_T));
@@ -665,16 +665,11 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 	php_unregister_url_stream_wrapper("ftp" TSRMLS_CC);
 	php_unregister_url_stream_wrapper("ldap" TSRMLS_CC);
 #endif
-#ifdef PHP_CURL_NEED_OPENSSL_TSL
-	/* ensure there are valid callbacks set */
-	CRYPTO_set_id_callback(php_curl_ssl_id);
-	CRYPTO_set_locking_callback(php_curl_ssl_lock);
-#endif
 	curl_global_cleanup();
 #ifdef PHP_CURL_NEED_OPENSSL_TSL
 	if (php_curl_openssl_tsl) {
 		int i, c = CRYPTO_num_locks();
-			
+		
 		CRYPTO_set_id_callback(NULL);
 		CRYPTO_set_locking_callback(NULL);
 			
