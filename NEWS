@@ -204,6 +204,8 @@ PHP                                                                        NEWS
 - Fixed bug #36644 (possible crash in variant_date_from_timestamp()). (Ilia)
 - Fixed bug #33282 (Re-assignment by reference does not clear the is_ref flag)
   (Ilia,Dmitry, Matt Wilmas)
+- Fixed bug #30074 (apparent symbol table error with extract($blah, EXTR_REFS)) 
+  (shire)
 - Fixed bug #29840 (is_executable() does not honor safe_mode_exec_dir
   setting). (Ilia)
 
