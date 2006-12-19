@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.64 2006-11-10 10:38:23 dmitry Exp $
+// $Id: confutils.js,v 1.65 2006-12-19 10:26:44 edink Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -877,6 +877,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 	var ldflags;
 	var resname;
 	var ld;
+	var manifest;
 
 	if (typeof(obj_dir) == "undefined") {
 		sapiname_for_printing = configure_module_dirname;
@@ -908,11 +909,13 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
 		ldflags = "/dll $(LDFLAGS)";
+		manifest = "-@$(_VC_MANIFEST_EMBED_DLL)";
 	} else if (makefiletarget.match(new RegExp("\\.lib$"))) {
 		ldflags = "$(LDFLAGS)";
 		ld = "$(MAKE_LIB)";
 	} else {
 		ldflags = "$(LDFLAGS)";
+		manifest = "-@$(_VC_MANIFEST_EMBED_EXE)";
 	}
 
 	if (ld) {
@@ -922,6 +925,10 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /link /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
 	}
 
+	if (manifest) {
+		MFO.WriteLine("\t" + manifest);
+	}
+		
 	DEFINE('CFLAGS_' + SAPI + '_OBJ', '$(CFLAGS_' + SAPI + ')');
 
 	if (configure_module_dirname.match("pecl")) {
@@ -998,7 +1005,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	var objs = null;
 	var EXT = extname.toUpperCase();
 	var extname_for_printing;
-
+	
 	if (shared == null) {
 		eval("shared = PHP_" + EXT + "_SHARED;");
 	}
@@ -1040,6 +1047,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 
 		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + " $(BUILD_DIR)\\" + libname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
 		MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /link /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
+		MFO.WriteLine("\t-@$(_VC_MANIFEST_EMBED_DLL)");
 		MFO.WriteBlankLines(1);
 
 		if (configure_module_dirname.match("pecl")) {
