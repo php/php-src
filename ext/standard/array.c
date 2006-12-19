@@ -1492,7 +1492,7 @@ PHP_FUNCTION(extract)
 
 					*orig_var = *entry;
 				} else {
-					if (var_array->refcount > 1) {
+					if (var_array->refcount > 1 || *entry == EG(uninitialized_zval_ptr)) {
 						SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
 					} else {
 						(*entry)->is_ref = 1;
