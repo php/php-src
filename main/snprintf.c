@@ -115,23 +115,20 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, 
 	return(s);
 }
 
-char *bsd_ecvt(double value, int ndigit, int *decpt, int *sign)
+static inline char *php_ecvt(double value, int ndigit, int *decpt, int *sign)
 {
 	return(__cvt(value, ndigit, decpt, sign, 0, 1));
 }
 
-char *bsd_fcvt(double value, int ndigit, int *decpt, int *sign)
+static inline char *php_fcvt(double value, int ndigit, int *decpt, int *sign)
 {
     return(__cvt(value, ndigit, decpt, sign, 1, 1));
 }
 
-char *bsd_gcvt(double value, int ndigit, char *buf)
+PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf)
 {
 	char *digits, *dst, *src;
 	int i, decpt, sign;
-	struct lconv *lconv;
-
-	lconv = localeconv();
 
 	digits = zend_dtoa(value, 2, ndigit, &decpt, &sign, NULL);
 	if (decpt == 9999) {
@@ -161,7 +158,7 @@ char *bsd_gcvt(double value, int ndigit, char *buf)
 			sign = 0;
 		src = digits;
 		*dst++ = *src++;
-		*dst++ = *lconv->decimal_point;
+		*dst++ = dec_point;
 		if (*src == '\0') {
 			*dst++ = '0';
 		} else {
@@ -169,7 +166,7 @@ char *bsd_gcvt(double value, int ndigit, char *buf)
 				*dst++ = *src++;
 			} while (*src != '\0');
 		}
-		*dst++ = 'e';
+		*dst++ = exponent;
 		if (sign)
 			*dst++ = '-';
 		else
@@ -190,7 +187,7 @@ char *bsd_gcvt(double value, int ndigit, char *buf)
 	} else if (decpt < 0) {
 		/* standard format 0. */
 		*dst++ = '0';   /* zero before decimal point */
-		*dst++ = *lconv->decimal_point;
+		*dst++ = dec_point;
 		do {
 			*dst++ = '0';
 		} while (++decpt < 0);
@@ -210,7 +207,7 @@ char *bsd_gcvt(double value, int ndigit, char *buf)
 		if (*src != '\0') {
 			if (src == digits)
 				*dst++ = '0';   /* zero before decimal point */
-			*dst++ = *lconv->decimal_point;
+			*dst++ = dec_point;
 			for (i = decpt; digits[i] != '\0'; i++) {
                 *dst++ = digits[i];
             }
@@ -357,29 +354,21 @@ char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
  * The sign is returned in the is_negative argument (and is not placed
  * in buf).
  */
-char * ap_php_conv_fp(register char format, register double num,
-		 boolean_e add_dp, int precision, bool_int * is_negative, char *buf, int *len)
+PHPAPI char * php_conv_fp(register char format, register double num,
+		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, int *len)
 {
 	register char *s = buf;
 	register char *p, *p_orig;
 	int decimal_point;
-	char dec_point = '.';
-
-	if (format == 'f') {
-		struct lconv *lconv;
-		lconv = localeconv();
-		dec_point = *lconv->decimal_point;
-		format = 'F';
-	}
 
 	if (precision >= NDIG - 1) {
 		precision = NDIG - 2;
 	}
 
 	if (format == 'F')
-		p_orig = p = bsd_fcvt(num, precision, &decimal_point, is_negative);
+		p_orig = p = php_fcvt(num, precision, &decimal_point, is_negative);
 	else						/* either e or E format */
-		p_orig = p = bsd_ecvt(num, precision + 1, &decimal_point, is_negative);
+		p_orig = p = php_ecvt(num, precision + 1, &decimal_point, is_negative);
 
 	/*
 	 * Check for Infinity and NaN
@@ -594,6 +583,8 @@ static int format_converter(register buffy * odp, const char *fmt,
 
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
+
+	struct lconv *lconv = NULL;
 
 	/*
 	 * Flag variables
@@ -930,6 +921,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 
 				
 				case 'f':
+				case 'F':
 				case 'e':
 				case 'E':
 					switch(modifier) {
@@ -950,8 +942,12 @@ static int format_converter(register buffy * odp, const char *fmt,
 						s = "inf";
 						s_len = 3;
 					} else {
-						s = ap_php_conv_fp(*fmt, fp_num, alternate_form,
+						if (!lconv) {
+							lconv = localeconv();
+						}
+						s = php_conv_fp((*fmt == 'f')?'F':*fmt, fp_num, alternate_form,
 						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
+						 (*fmt == 'f')?(*lconv->decimal_point):'.',
 									&is_negative, &num_buf[1], &s_len);
 						if (is_negative)
 							prefix_char = '-';
@@ -998,7 +994,10 @@ static int format_converter(register buffy * odp, const char *fmt,
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-					s = bsd_gcvt(fp_num, precision, &num_buf[1]);
+					if (!lconv) {
+						lconv = localeconv();
+					}
+					s = php_gcvt(fp_num, precision, *lconv->decimal_point, (*fmt == 'G')?'E':'e', &num_buf[1]);
 					if (*s == '-')
 						prefix_char = *s++;
 					else if (print_sign)
@@ -1010,8 +1009,6 @@ static int format_converter(register buffy * odp, const char *fmt,
 
 					if (alternate_form && (q = strchr(s, '.')) == NULL)
 						s[s_len++] = '.';
-					if (*fmt == 'G' && (q = strchr(s, 'e')) != NULL)
-						*q = 'E';
 					break;
 
 

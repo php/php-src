@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   when trying to open "php://wrong"). (Tony)
 - Fixed bug #39832 (SOAP Server: parameter not matching the WSDL specified type
   are set to 0). (Dmitry)
+- Fixed bug #39815 (SOAP double encoding is not locale-independent). (Dmitry)
 
 14 Dec 2006, PHP 5.2.1RC1
 - Added a meta tag to phpinfo() output to prevent search engines from indexing 
