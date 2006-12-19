@@ -1,3 +1,15 @@
+2006-12-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * Zend.m4
+      Zend.m4
+      zend_alloc.c
+      zend_alloc.c:
+      Fixed random generation of cookies and canaries
+
+    * (PHP_5_2)
+      zend_alloc.c:
+      MFH: __builtin_expect() exists only in GCC 3.0 and higher
+
 2006-12-16  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * zend_API.h:
