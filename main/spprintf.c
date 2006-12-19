@@ -91,6 +91,10 @@
 #include <inttypes.h>
 #endif
 
+#ifdef HAVE_LOCALE_H
+#include <locale.h>
+#endif
+
 #include "snprintf.h"
 
 #define FALSE           0
@@ -225,6 +229,8 @@ static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt,
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
 	zend_bool free_s; /* free string if allocated here */
+
+	struct lconv *lconv = NULL;
 
 	/*
 	 * Flag variables
@@ -617,6 +623,7 @@ fmt_string:
 					break;
 
 				case 'f':
+				case 'F':
 				case 'e':
 				case 'E':
 					switch(modifier) {
@@ -637,8 +644,12 @@ fmt_string:
 						s = "inf";
 						s_len = 3;
 					} else {
-						s = ap_php_conv_fp(*fmt, fp_num, alternate_form,
-									(adjust_precision == NO) ? FLOAT_DIGITS : precision,
+						if (!lconv) {
+							lconv = localeconv();
+						}
+						s = php_conv_fp((*fmt == 'f')?'F':*fmt, fp_num, alternate_form,
+						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
+						 (*fmt == 'f')?(*lconv->decimal_point):'.',
 									&is_negative, &num_buf[1], &s_len);
 						if (is_negative)
 							prefix_char = '-';
@@ -685,7 +696,10 @@ fmt_string:
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-					s = bsd_gcvt(fp_num, precision, &num_buf[1]);
+					if (!lconv) {
+						lconv = localeconv();
+					}
+					s = php_gcvt(fp_num, precision, *lconv->decimal_point, (*fmt == 'G')?'E':'e', &num_buf[1]);
 					if (*s == '-')
 						prefix_char = *s++;
 					else if (print_sign)
@@ -697,8 +711,6 @@ fmt_string:
 
 					if (alternate_form && (q = strchr(s, '.')) == NULL)
 						s[s_len++] = '.';
-					if (*fmt == 'G' && (q = strchr(s, 'e')) != NULL)
-						*q = 'E';
 					break;
 
 
