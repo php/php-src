@@ -196,8 +196,9 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 						 TSRMLS_DC)
 {
 	char num_buf[NUM_BUF_SIZE];
-	char *s = NULL, *q;
+	char *s = NULL;
 	int s_len = 0, is_negative = 0;
+	struct lconv *lconv;
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
 				  *buffer, pos, size, number, width, padding, alignment, fmt));
@@ -229,7 +230,9 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 		case 'E':
 		case 'f':
 		case 'F':
-			s = ap_php_conv_fp(fmt, number, 0, precision,
+			lconv = localeconv();
+			s = php_conv_fp((fmt == 'f')?'F':fmt, number, 0, precision,
+						(fmt == 'f')?(*lconv->decimal_point):'.',
 						&is_negative, &num_buf[1], &s_len);
 			if (is_negative) {
 				num_buf[0] = '-';
@@ -249,7 +252,8 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 			/*
 			 * * We use &num_buf[ 1 ], so that we have room for the sign
 			 */
-			s = bsd_gcvt(number, precision, &num_buf[1]);
+			lconv = localeconv();
+			s = php_gcvt(number, precision, *lconv->decimal_point, (fmt == 'G')?'E':'e', &num_buf[1]);
 			is_negative = 0;
 			if (*s == '-') {
 				is_negative = 1;
@@ -260,10 +264,6 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 			}
 
 			s_len = strlen(s);
-
-			if (fmt == 'G' && (q = strchr(s, 'e')) != NULL) {
-				*q = 'E';
-			}
 			break;
 	}
 
