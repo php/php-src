@@ -57,7 +57,7 @@ unicode(12) "a${1b${1c${1"
 Warning: preg_replace(): Compilation failed: missing terminating ] for character class at offset 8 in %s002.php on line 11
 NULL
 
-Parse error: %s, unexpected T_FOR in %s002.php(12) : regexp code on line 1
+Parse error: %s in %s002.php(12) : regexp code on line 1
 
 Fatal error: preg_replace(): Failed evaluating code: 
 for ($ in %s002.php on line 12
