@@ -5779,33 +5779,33 @@ PHP_FUNCTION(set_include_path)
 
 /* }}} */
 
-/* {{{ proto string get_include_path()
+/* {{{ proto string get_include_path() U
    Get the current include_path configuration option */
 
 PHP_FUNCTION(get_include_path)
 {
     char *str;
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
 	}
 	str = zend_ini_string("include_path", sizeof("include_path"), 0);
 	if (str == NULL) {
 		RETURN_FALSE;
 	}
-	RETURN_STRING(str, 1);
+	RETURN_UTF8_STRING(str, ZSTR_DUPLICATE);
 }
 
 /* }}} */
 
-/* {{{ proto void restore_include_path()
+/* {{{ proto void restore_include_path() U
    Restore the value of the include_path configuration option */
 
 PHP_FUNCTION(restore_include_path)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
 	}
-
 	zend_restore_ini_entry("include_path", sizeof("include_path"),
                            PHP_INI_STAGE_RUNTIME);
 }

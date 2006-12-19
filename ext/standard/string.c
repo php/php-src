@@ -2033,7 +2033,7 @@ PHP_FUNCTION(dirname)
 		ret_len = php_dirname(ret.s, str_len);
 	}
 
-	RETURN_ZSTRL(ret, ret_len, str_type, 0);
+	RETURN_ZSTRL(str_type, ret, ret_len, 0);
 }
 /* }}} */
 
@@ -3162,7 +3162,7 @@ PHP_FUNCTION(chunk_split)
 			memcpy(result.s + str_len, ending.s, ending_len);
 			result.s[result_len] = '\0';
 		}
-		RETURN_ZSTRL(result, result_len, str_type, 0);
+		RETURN_ZSTRL(str_type, result, result_len, 0);
 	}
 
 	if (!str_len) {
@@ -3172,7 +3172,7 @@ PHP_FUNCTION(chunk_split)
 	result.v = php_chunk_split(str.v, str_len, ending.v, ending_len, chunklen, &result_len, str_type);
 
 	if (result.v) {
-		RETURN_ZSTRL(result, result_len, str_type, 0);
+		RETURN_ZSTRL(str_type, result, result_len, 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -5900,7 +5900,7 @@ PHP_FUNCTION(nl2br)
 	}
 
 	if (repl_cnt == 0) {
-		RETURN_ZSTRL(str, str_len, str_type, 1);
+		RETURN_ZSTRL(str_type, str, str_len, 1);
 	}
 
 	new_length = str_len + repl_cnt * (sizeof("<br />") - 1);
@@ -5963,7 +5963,7 @@ PHP_FUNCTION(nl2br)
 	}
 
 
-	RETURN_ZSTRL(tmp, new_length, str_type, 0);
+	RETURN_ZSTRL(str_type, tmp, new_length, 0);
 }
 /* }}} */
 
@@ -7441,7 +7441,7 @@ PHP_FUNCTION(str_shuffle)
 		return;
 	}
 
-	RETVAL_ZSTRL(str, str_len, str_type, 1);
+	RETVAL_ZSTRL(str_type, str, str_len, 1);
 	if (Z_UNILEN_P(return_value) > 1) {
 		php_string_shuffle(Z_UNIVAL_P(return_value), Z_UNILEN_P(return_value), Z_TYPE_P(return_value) TSRMLS_CC);
 	}

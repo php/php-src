@@ -1538,7 +1538,7 @@ ZEND_METHOD(reflection_function, getDocComment)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment.v) {
-		RETURN_ZSTRL(fptr->op_array.doc_comment, fptr->op_array.doc_comment_len, ZEND_STR_TYPE, 1);
+		RETURN_ZSTRL(ZEND_STR_TYPE, fptr->op_array.doc_comment, fptr->op_array.doc_comment_len, 1);
 	}
 	RETURN_FALSE;
 }
@@ -2190,7 +2190,7 @@ ZEND_METHOD(reflection_method, __construct)
 		} else {
 			tmp_len = tmp.s - name_str.s;
 		}
-		ZVAL_ZSTRL(classname, name_str, type, tmp_len, 1);
+		ZVAL_ZSTRL(classname, type, name_str, tmp_len, 1);
 		name_len = name_len - (tmp_len + 2);
 		if (type == IS_UNICODE) {
 			name_str.u = tmp.u + 2;
@@ -2954,7 +2954,7 @@ ZEND_METHOD(reflection_class, getDocComment)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS && ce->doc_comment.v) {
-		RETURN_ZSTRL(ce->doc_comment, ce->doc_comment_len, ZEND_STR_TYPE, 1);
+		RETURN_ZSTRL(ZEND_STR_TYPE, ce->doc_comment, ce->doc_comment_len, 1);
 	}
 	RETURN_FALSE;
 }
@@ -4154,7 +4154,7 @@ ZEND_METHOD(reflection_property, getDocComment)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 	if (ref->prop->doc_comment.v) {
-		RETURN_ZSTRL(ref->prop->doc_comment, ref->prop->doc_comment_len, ZEND_STR_TYPE, 1);
+		RETURN_ZSTRL(ZEND_STR_TYPE, ref->prop->doc_comment, ref->prop->doc_comment_len, 1);
 	}
 	RETURN_FALSE;
 }
