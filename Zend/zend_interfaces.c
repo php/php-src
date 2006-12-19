@@ -57,7 +57,7 @@ ZEND_API zval* zend_u_call_method(zval **object_pp, zend_class_entry *obj_ce, ze
 	if (!fn_proxy && !obj_ce) {
 		/* no interest in caching and no information already present that is
 		 * needed later inside zend_call_function. */
-		ZVAL_ZSTRL(&z_fname, function_name, function_name_len, function_name_type, 1);
+		ZVAL_ZSTRL(&z_fname, function_name, function_name_type, function_name_len, 1);
 		fci.function_table = !object_pp ? EG(function_table) : NULL;
 		result = zend_call_function(&fci, NULL TSRMLS_CC);
 		zval_dtor(&z_fname);
