@@ -1436,7 +1436,7 @@ PHP_FUNCTION(extract)
 					break;
 				}
 			
-				ZVAL_ZSTRL(&final_name, var_name, var_name_len, key_type, 1);
+				ZVAL_ZSTRL(&final_name, var_name, key_type, var_name_len, 1);
 				break;
 
 			case EXTR_PREFIX_IF_EXISTS:
@@ -1447,7 +1447,7 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_SAME:
 				if (!var_exists && var_name_len != 0) {
-					ZVAL_ZSTRL(&final_name, var_name, var_name_len, key_type, 1);
+					ZVAL_ZSTRL(&final_name, var_name, key_type, var_name_len, 1);
 				}
 				/* break omitted intentionally */
 
@@ -1462,14 +1462,14 @@ PHP_FUNCTION(extract)
 					if (!php_valid_var_name(var_name, var_name_len, key_type)) {
 						php_prefix_varname(&final_name, prefix, var_name, var_name_len, key_type, 1 TSRMLS_CC);
 					} else {
-						ZVAL_ZSTRL(&final_name, var_name, var_name_len, key_type, 1);
+						ZVAL_ZSTRL(&final_name, var_name, key_type, var_name_len, 1);
 					}
 				}
 				break;
 
 			default:
 				if (!var_exists) {
-					ZVAL_ZSTRL(&final_name, var_name, var_name_len, key_type, 1);
+					ZVAL_ZSTRL(&final_name, var_name, key_type, var_name_len, 1);
 				}
 				break;
 		}
