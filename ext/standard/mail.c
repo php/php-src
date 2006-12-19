@@ -54,7 +54,7 @@
 		continue;											\
 	}													\
 
-/* {{{ proto int ezmlm_hash(string addr)
+/* {{{ proto int ezmlm_hash(string addr) U
    Calculate EZMLM list hash value. */
 PHP_FUNCTION(ezmlm_hash)
 {
@@ -62,8 +62,7 @@ PHP_FUNCTION(ezmlm_hash)
 	unsigned long h = 5381L;
 	int j, str_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-							  &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &str, &str_len, UG(ascii_conv)) == FAILURE) {
 		return;
 	}
 
