@@ -1,5 +1,7 @@
 --TEST--
 Integer validation with spaces
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php 
 $vals = array(

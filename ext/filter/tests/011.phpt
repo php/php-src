@@ -1,5 +1,7 @@
 --TEST--
 input_get()
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --GET--
 a=<b>test</b>&b=http://example.com
 --POST--

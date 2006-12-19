@@ -1,5 +1,7 @@
 --TEST--
 Test all filters returned by filter_list()
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 include dirname(__FILE__) . '/033_run.inc';

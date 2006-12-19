@@ -1,5 +1,7 @@
 --TEST--
 filter_has_var()
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --GET--
 a=qwe&abc=<a>href</a>
 --POST--
