@@ -91,14 +91,7 @@ static void json_escape_string(smart_str *buf, char *s, int len);
 
 static int json_determine_array_type(zval **val TSRMLS_DC) {
     int i;
-    HashTable *myht;
-
-    if (Z_TYPE_PP(val) == IS_ARRAY) {
-        myht = HASH_OF(*val);
-    } else {
-        myht = Z_OBJPROP_PP(val);
-        return 1;
-    }
+    HashTable *myht = HASH_OF(*val);
 
     i = myht ? zend_hash_num_elements(myht) : 0;
     if (i > 0) {
