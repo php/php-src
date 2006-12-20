@@ -1,3 +1,361 @@
+2006-12-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/mail.c:
+      Unicode support in ezmlm_hash().
+      
+
+2006-12-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/php_spl.c:
+      - Use new 'x' parameter parsing
+
+    * ext/spl/php_spl.c:
+      - Make spl_autoload_call() unicode safe
+
+    * ZendEngine2/zend_interfaces.c:
+      - Changed macro once again
+
+    * README.PARAMETER_PARSING_API:
+      - x was added toparameter parsing api
+
+    * ZendEngine2/zend_API.c:
+      - Implement parameter parsing 'x'
+
+    * ZendEngine2/zend_interfaces.c:
+      - Fix macro param order
+
+    * ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h:
+      - Implement zend_u_call_method to deal with situations where the function
+        name type is already known
+
+2006-12-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/basic_functions.c:
+      Unicode support in set_include_path().
+
+2006-12-19  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/tests/005.phpt:
+      new test
+
+    * ext/pcre/tests/005.phpt
+      ext/pcre/tests/005.phpt:
+      
+      file 005.phpt was initially added on branch PHP_5_2.
+
+2006-12-19  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      ext/curl/interface.c:
+      MFH: check CRYPTO_get_id_callback() if anyone else already set thread lock
+      callbacks
+
+    * ext/curl/interface.c:
+      - check CRYPTO_get_id_callback() if anyone else already set thread lock
+      callbacks
+
+2006-12-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/soap/tests/bugs/bug39815.phpt:
+      MFB
+
+2006-12-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * README.UNICODE-UPGRADES:
+      Update.
+
+2006-12-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/soap/tests/bugs/bug39815.phpt:
+      on FreeBSD these locales have different names
+
+2006-12-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute_API.c
+      ext/reflection/php_reflection.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/string.c:
+      - Marcus was too quick. Let's put type before zstr in the macros.
+      - Also mark get_include_path() and restore_include_path() with U.
+
+2006-12-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.UNICODE-UPGRADES
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute_API.c
+      ext/reflection/php_reflection.c
+      ext/standard/array.c:
+      - Fix ZVAL_ZSTRL
+
+2006-12-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/soap/tests/bugs/bug39815.phpt:
+      add check for setlocale() and sv_SE to SKIPIF section
+
+2006-12-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/formatted_print.c:
+      Unicode support in *printf() functions. (Antony, Andrei)
+
+    * (PHP_5_2)
+      ZendEngine2/zend_language_scanner.l:
+      Support 'b' prefix in front of string literals for forward compatibility
+      with PHP 6.
+
+2006-12-19  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/json/json.c:
+      MFB: little cleanup in json_determine_array_type()
+
+    * (PHP_5_2)
+      ext/json/json.c:
+      remove NOP code in json_determine_array_type(), as we already know the zval
+      passed is an array (based on patch by Ron Korving)
+
+2006-12-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/filter/tests/004.phpt
+      ext/filter/tests/004.phpt
+      ext/filter/tests/006.phpt
+      ext/filter/tests/006.phpt
+      ext/filter/tests/007.phpt
+      ext/filter/tests/007.phpt
+      ext/filter/tests/008.phpt
+      ext/filter/tests/008.phpt
+      ext/filter/tests/009.phpt
+      ext/filter/tests/009.phpt
+      ext/filter/tests/010.phpt
+      ext/filter/tests/010.phpt
+      ext/filter/tests/011.phpt
+      ext/filter/tests/011.phpt
+      ext/filter/tests/012.phpt
+      ext/filter/tests/012.phpt
+      ext/filter/tests/013.phpt
+      ext/filter/tests/013.phpt
+      ext/filter/tests/014.phpt
+      ext/filter/tests/014.phpt
+      ext/filter/tests/015.phpt
+      ext/filter/tests/015.phpt
+      ext/filter/tests/016.phpt
+      ext/filter/tests/016.phpt
+      ext/filter/tests/017.phpt
+      ext/filter/tests/017.phpt
+      ext/filter/tests/018.phpt
+      ext/filter/tests/018.phpt
+      ext/filter/tests/019.phpt
+      ext/filter/tests/019.phpt
+      ext/filter/tests/020.phpt
+      ext/filter/tests/020.phpt
+      ext/filter/tests/021.phpt
+      ext/filter/tests/021.phpt
+      ext/filter/tests/022.phpt
+      ext/filter/tests/022.phpt
+      ext/filter/tests/023.phpt
+      ext/filter/tests/023.phpt
+      ext/filter/tests/024.phpt
+      ext/filter/tests/024.phpt
+      ext/filter/tests/025.phpt
+      ext/filter/tests/025.phpt
+      ext/filter/tests/026.phpt
+      ext/filter/tests/026.phpt
+      ext/filter/tests/027.phpt
+      ext/filter/tests/027.phpt
+      ext/filter/tests/028.phpt
+      ext/filter/tests/028.phpt
+      ext/filter/tests/029.phpt
+      ext/filter/tests/029.phpt
+      ext/filter/tests/030.phpt
+      ext/filter/tests/030.phpt
+      ext/filter/tests/031.phpt
+      ext/filter/tests/031.phpt
+      ext/filter/tests/032.phpt
+      ext/filter/tests/032.phpt
+      ext/filter/tests/033.phpt
+      ext/filter/tests/033.phpt
+      ext/filter/tests/034.phpt
+      ext/filter/tests/034.phpt
+      ext/filter/tests/035.phpt
+      ext/filter/tests/035.phpt
+      ext/filter/tests/037.phpt
+      ext/filter/tests/037.phpt
+      ext/filter/tests/038.phpt
+      ext/filter/tests/038.phpt
+      ext/filter/tests/040.phpt
+      ext/filter/tests/040.phpt
+      ext/filter/tests/041.phpt
+      ext/filter/tests/041.phpt
+      ext/filter/tests/042.phpt
+      ext/filter/tests/042.phpt
+      ext/filter/tests/043.phpt
+      ext/filter/tests/043.phpt
+      ext/filter/tests/044.phpt
+      ext/filter/tests/044.phpt
+      ext/filter/tests/bug39846.phpt
+      ext/filter/tests/bug39846.phpt
+      ext/filter/tests/bug7586.phpt
+      ext/filter/tests/bug7586.phpt
+      ext/filter/tests/bug7715.phpt
+      ext/filter/tests/bug7715.phpt
+      ext/filter/tests/bug7733.phpt
+      ext/filter/tests/bug7733.phpt
+      ext/filter/tests/bug8315.phpt
+      ext/filter/tests/bug8315.phpt
+      ext/filter/tests/callback_non_modified_var.phpt
+      ext/filter/tests/callback_non_modified_var.phpt
+      ext/filter/tests/filter_data.phpt
+      ext/filter/tests/filter_data.phpt:
+      add missing SKIPIF sections
+
+    * main/snprintf.c:
+      -NAN should not be possible
+
+    * main/snprintf.c:
+      inf->INF
+      nan->NAN
+
+2006-12-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/formatted_print.c
+      ext/standard/formatted_print.c
+      main/snprintf.c
+      main/snprintf.c
+      main/spprintf.c
+      main/spprintf.c:
+      Support for systems without locale.h
+
+2006-12-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/pcre/tests/002.phpt
+      sapi/cli/tests/011.phpt
+      sapi/cli/tests/011.phpt:
+      fix test on MacOS
+
+    * ext/standard/tests/serialize/001.phpt
+      ext/standard/tests/serialize/006.phpt
+      ext/standard/tests/serialize/bug14293.phpt
+      ext/standard/tests/serialize/bug21957.phpt:
+      fix serialize tests after s: -> S: change
+
+    * ext/standard/var.c:
+      MFB: serialize() should use '.' as decimal point irrespectively to locale
+
+    * (PHP_5_2)
+      ext/standard/var.c:
+      serialize() should use '.' as decimal point irrespectively to locale
+
+2006-12-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug39815.phpt
+      ext/soap/tests/bugs/bug39815.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_compound2_001w.phpt
+      ext/standard/formatted_print.c
+      main/snprintf.c
+      main/snprintf.h
+      main/spprintf.c:
+      
+      file bug39815.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/bugs/bug39815.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_compound2_001w.phpt
+      ext/standard/formatted_print.c
+      main/snprintf.c
+      main/snprintf.h
+      main/spprintf.c:
+      Fixed bug #39815 (SOAP double encoding is not locale-independent)
+
+2006-12-19  Edin Kadribasic  <edink@emini.dk>
+
+    * php.ini-dist
+      php.ini-recommended:
+      MFB
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended:
+      Updated list of available extensions in dlls.
+      Updated oci extension ini settings.
+      -- christopher.jones at oracle dot com
+
+    * win32/build/Makefile
+      win32/build/config.w32
+      win32/build/confutils.js
+      win32/build/mkdist.php:
+      MFB: Enable full build with newer Microsoft compilers
+
+    * (PHP_5_2)
+      win32/build/Makefile
+      win32/build/config.w32
+      win32/build/confutils.js
+      win32/build/mkdist.php:
+      Enable full build with newer Microsoft compilers
+
+2006-12-19  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug34617.phpt
+      ext/ftp/tests/004.phpt
+      ext/standard/tests/array/locale_sort.phpt
+      tests/lang/bug30638.phpt:
+      Fix tests
+
+2006-12-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed bug #39869 (safe_read does not initialize errno). (michiel at boland
+      dot org)
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h
+      ext/standard/streamsfuncs.h
+      ext/standard/tests/network/shutdown.phpt
+      ext/standard/tests/network/shutdown.phpt
+      ext/standard/tests/network/shutdown.phpt
+      main/streams/php_stream_transport.h
+      main/streams/php_stream_transport.h
+      main/streams/transports.c
+      main/streams/transports.c
+      main/streams/xp_socket.c
+      main/streams/xp_socket.c:
+      Added function stream_socket_shutdown(). It is a wraper for system
+      shutdown() function, that shut downs part of a full-duplex connection
+
+2006-12-19  Brian Shire  <shire@tekrat.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug30074.phpt:
+      -Fixed bug #30074 (apparent symbol table error with extract($blah,
+      EXTR_REFS))
+
+2006-12-19  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * unicode-progress.txt:
+      - zip is done
+
+    * ext/zip/php_zip.c:
+      - unicode support for the procedural API
+
 2006-12-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/spl/tests/observer_004.phpt
