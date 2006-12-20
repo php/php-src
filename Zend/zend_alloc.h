@@ -41,7 +41,7 @@ BEGIN_EXTERN_C()
 
 ZEND_API char *zend_strndup(const char *s, unsigned int length) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API UChar *zend_ustrndup(const UChar *s, uint length) ZEND_ATTRIBUTE_MALLOC;
-ZEND_API void *zend_zstrndup(int type, const zstr s, uint length) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API zstr zend_zstrndup(int type, const zstr s, uint length);
 
 ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
