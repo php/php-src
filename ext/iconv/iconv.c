@@ -142,7 +142,7 @@ ZEND_END_ARG_INFO()
 /* {{{ iconv_functions[]
  */
 zend_function_entry iconv_functions[] = {
-	PHP_NAMED_FE(iconv,php_if_iconv,				arginfo_iconv)
+	PHP_RAW_NAMED_FE(iconv,php_if_iconv,				arginfo_iconv)
 	PHP_FE(ob_iconv_handler,						arginfo_ob_iconv_handler)
 	PHP_FE(iconv_get_encoding,						arginfo_iconv_get_encoding)
 	PHP_FE(iconv_set_encoding,						arginfo_iconv_set_encoding)
