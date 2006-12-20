@@ -465,6 +465,8 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 	int namelen;
 	int has_value;
 	php_unserialize_data_t var_hash;
+	int globals_on = PG(register_globals);
+	int longarrays_on = PG(register_long_arrays);
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
@@ -475,15 +477,22 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 		name = estrndup(p + 1, namelen);
 		
 		p += namelen + 1;
-		
-		if (has_value) {
-			ALLOC_INIT_ZVAL(current);
-			if (php_var_unserialize(&current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
-				php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
+		if (globals_on && namelen == sizeof("_SESSION")-1 && !memcmp(name, "_SESSION", sizeof("_SESSION") - 1)) {
+			/* _SESSION hijack attempt */
+		} else if (globals_on && namelen == sizeof("GLOBALS")-1 && !memcmp(name, "GLOBALS", sizeof("GLOBALS") - 1)) {
+			/* _GLOBALS hijack attempt */
+		} else if (globals_on && longarrays_on && namelen == sizeof("HTTP_SESSION_VARS")-1 && !memcmp(name, "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS")-1)) {
+			/* HTTP_SESSION_VARS hijack attempt */
+		} else {	
+			if (has_value) {
+				ALLOC_INIT_ZVAL(current);
+				if (php_var_unserialize(&current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
+					php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
+				}
+				zval_ptr_dtor(&current);
 			}
-			zval_ptr_dtor(&current);
+			PS_ADD_VARL(name, namelen);
 		}
-		PS_ADD_VARL(name, namelen);
 		efree(name);
 	}
 
@@ -535,6 +544,8 @@ PS_SERIALIZER_DECODE_FUNC(php)
 	int namelen;
 	int has_value;
 	php_unserialize_data_t var_hash;
+	int globals_on = PG(register_globals);
+	int longarrays_on = PG(register_long_arrays);
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
@@ -556,14 +567,22 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		name = estrndup(p, namelen);
 		q++;
 		
-		if (has_value) {
-			ALLOC_INIT_ZVAL(current);
-			if (php_var_unserialize(&current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
-				php_set_session_var(name, namelen, current, &var_hash TSRMLS_CC);
+		if (globals_on && namelen == sizeof("_SESSION")-1 && !memcmp(name, "_SESSION", sizeof("_SESSION") - 1)) {
+			/* _SESSION hijack attempt */
+		} else if (globals_on && namelen == sizeof("GLOBALS")-1 && !memcmp(name, "GLOBALS", sizeof("GLOBALS") - 1)) {
+			/* GLOBALS hijack attempt */
+		} else if (globals_on && longarrays_on && namelen == sizeof("HTTP_SESSION_VARS")-1 && !memcmp(name, "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS")-1)) {
+			/* HTTP_SESSION_VARS hijack attempt */
+		} else {
+			if (has_value) {
+				ALLOC_INIT_ZVAL(current);
+				if (php_var_unserialize(&current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
+					php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
+				}
+				zval_ptr_dtor(&current);
 			}
-			zval_ptr_dtor(&current);
+			PS_ADD_VARL(name, namelen);
 		}
-		PS_ADD_VARL(name, namelen);
 		efree(name);
 		
 		p = q;
@@ -583,16 +602,20 @@ static void php_session_track_init(TSRMLS_D)
 	zend_delete_global_variable("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS")-1 TSRMLS_CC);
 	zend_delete_global_variable("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
 
+	if (PS(http_session_vars)) {
+		zval_ptr_dtor(&PS(http_session_vars));
+	}
+
 	MAKE_STD_ZVAL(session_vars);
 	array_init(session_vars);
 	PS(http_session_vars) = session_vars;
 	
 	if (PG(register_long_arrays)) {
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), PS(http_session_vars), 2, 1);
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 2, 1);
+		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), PS(http_session_vars), 3, 1);
+		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 3, 1);
 	}
 	else {
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 1, 0);
+		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 2, 1);
 	}
 }
 
@@ -1828,6 +1851,10 @@ static void php_rinit_session_globals(TSRMLS_D)
 
 static void php_rshutdown_session_globals(TSRMLS_D)
 {
+	if (PS(http_session_vars)) {
+		zval_ptr_dtor(&PS(http_session_vars));
+		PS(http_session_vars) = NULL;
+	}
 	if (PS(mod_data)) {
 		zend_try {
 			PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
