@@ -87,6 +87,11 @@ static size_t on_header_available(char *data, size_t size, size_t nmemb, void *c
 	php_curl_stream *curlstream = (php_curl_stream *) stream->abstract;
 	TSRMLS_FETCH();
 
+	if (length < 2) {
+		/* invalid header ? */
+		return length;
+	}
+
 	if (!(length == 2 && data[0] == '\r' && data[1] == '\n')) {
 		MAKE_STD_ZVAL(header);
 		Z_STRLEN_P(header) = length;
