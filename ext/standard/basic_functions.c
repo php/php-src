@@ -3109,7 +3109,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_unserialize, 0)
 	ZEND_ARG_INFO(0, variable_representation)
 ZEND_END_ARG_INFO()
 
-#if MEMORY_LIMIT
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_memory_get_usage, 0, 0, 0)
 	ZEND_ARG_INFO(0, real_usage)
@@ -3119,7 +3118,6 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_memory_get_peak_usage, 0, 0, 0)
 	ZEND_ARG_INFO(0, real_usage)
 ZEND_END_ARG_INFO()
-#endif
 /* }}} */
 /* {{{ versioning.c */
 static
@@ -3435,10 +3433,8 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(var_export,														arginfo_var_export)
 	PHP_FE(debug_zval_dump,													arginfo_debug_zval_dump)
 	PHP_FE(print_r,															arginfo_print_r)
-#if MEMORY_LIMIT 
 	PHP_FE(memory_get_usage,												arginfo_memory_get_usage)
 	PHP_FE(memory_get_peak_usage,											arginfo_memory_get_peak_usage)
-#endif
 
 	PHP_FE(register_shutdown_function,										arginfo_register_shutdown_function)
 	PHP_FE(register_tick_function,											arginfo_register_tick_function)

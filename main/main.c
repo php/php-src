@@ -105,7 +105,6 @@ static PHP_INI_MH(OnSetPrecision)
 }
 /* }}} */
 
-#if MEMORY_LIMIT
 /* {{{ PHP_INI_MH
  */
 static PHP_INI_MH(OnChangeMemoryLimit)
@@ -118,7 +117,6 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	return zend_set_memory_limit(PG(memory_limit));
 }
 /* }}} */
-#endif
 
 
 /* {{{ php_disable_functions
@@ -409,9 +407,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("SMTP",						"localhost",PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("smtp_port",					"25",		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		NULL)
-#if MEMORY_LIMIT
 	PHP_INI_ENTRY("memory_limit",				"16M",		PHP_INI_ALL,		OnChangeMemoryLimit)
-#endif
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
@@ -929,10 +925,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		case E_USER_ERROR:
 			EG(exit_status) = 255;
 			if (module_initialized) {
-#if MEMORY_LIMIT
 				/* restore memory limit */
 				zend_set_memory_limit(PG(memory_limit));
-#endif
 				efree(buffer);
 				zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
 				zend_bailout();

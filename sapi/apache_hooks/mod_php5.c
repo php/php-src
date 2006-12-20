@@ -721,16 +721,10 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 static int send_parsed_php(request_rec * r)
 {
 	int result = send_php(r, 0, NULL);
-
-#if MEMORY_LIMIT
-	{
-		char *mem_usage;
-		TSRMLS_FETCH();
+	TSRMLS_FETCH();
  
-		mem_usage = ap_psprintf(r->pool, "%u", zend_memory_peak_usage(1 TSRMLS_CC));
-		ap_table_setn(r->notes, "mod_php_memory_usage", mem_usage);
-	}
-#endif
+	ap_table_setn(r->notes, "mod_php_memory_usage",
+		ap_psprintf(r->pool, "%u", zend_memory_peak_usage(1 TSRMLS_CC)));
 
 	return result;
 }

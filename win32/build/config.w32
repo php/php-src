@@ -314,14 +314,6 @@ AC_DEFINE('HAVE_IPV6', main_network_has_ipv6);
 ARG_ENABLE('fd-setsize', "Set maximum number of sockets for select(2)", "256");
 ADD_FLAG("CFLAGS", "/D FD_SETSIZE=" + parseInt(PHP_FD_SETSIZE));
 
-ARG_ENABLE("memory-limit", "Enable memory limit checking code", "no");
-AC_DEFINE('MEMORY_LIMIT', PHP_MEMORY_LIMIT == "yes" ? 1 : 0);
-
-ARG_ENABLE("malloc-mm", "Use environment variable for run-time malloc/emalloc selection", "");
-if (PHP_MALLOC_MM.length) {
-	AC_DEFINE('ZEND_USE_MALLOC_MM', PHP_MALLOC_MM == "yes" ? 1 : 0);
-}
-
 AC_DEFINE('HAVE_USLEEP', 1);
 AC_DEFINE('HAVE_STRCOLL', 1);
 
