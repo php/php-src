@@ -2033,7 +2033,7 @@ ZEND_API UChar *zend_ustrndup(const UChar *s, uint length)
 	return p;
 }
 
-ZEND_API zstr zend_zstrndup(int type, const zstr s, uint length)
+ZEND_API void *zend_zstrndup(int type, const zstr s, uint length)
 {
 	zstr result;
 	if (type == IS_STRING) {
