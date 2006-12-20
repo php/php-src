@@ -11,9 +11,6 @@ ext/standard
         Params API, what encoding to use for the message, handling email
         option
 
-    set_include_path(), get_include_path(), restore_include_path()
-        Params API, depends on INI mechanism
-
   array.c
   -------
     natsort(), natcasesort()
