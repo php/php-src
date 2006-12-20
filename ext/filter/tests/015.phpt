@@ -24,6 +24,10 @@ $values = Array(
 '',	
 -1,	
 array(),	
+'mailto:foo@bar.com',
+'news:news.php.net',
+'file://foo/bar',
+"http://\r\n/bar",
 );
 foreach ($values as $value) {
 	var_dump(filter_var($value, FILTER_VALIDATE_URL));
@@ -48,18 +52,22 @@ string(32) "http://www.example.com/index.php"
 string(31) "http://www.example/img/test.png"
 string(27) "http://www.example/img/dir/"
 string(26) "http://www.example/img/dir"
-string(28) "http//www.example/wrong/url/"
-string(17) "http:/www.example"
+bool(false)
+bool(false)
 string(18) "file:///tmp/test.c"
 string(26) "ftp://ftp.example.com/tmp/"
-string(11) "/tmp/test.c"
-string(1) "/"
 bool(false)
-string(6) "http:/"
-string(5) "http:"
-string(4) "http"
-string(0) ""
-string(2) "-1"
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+string(18) "mailto:foo@bar.com"
+string(17) "news:news.php.net"
+string(14) "file://foo/bar"
 bool(false)
 bool(false)
 string(10) "http://qwe"
