@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Added function stream_socket_shutdown(). It is a wraper for system shutdown()
   function, that shut downs part of a full-duplex connection. (Dmitry)
 - Added internal heap protection (Dmitry)
+  . memory-limit is always enabled (--enable-memory-limit removed)
   . safe unlinking
   . cookies
   . canary protection (debug build only)
