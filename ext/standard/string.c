@@ -1679,7 +1679,7 @@ PHP_FUNCTION(strtotitle)
  */
 PHPAPI void php_u_basename(UChar *s, int len, UChar *suffix, int sufflen, UChar **p_ret, int *p_len TSRMLS_DC)
 {
-	UChar *ret = NULL, *end, *c, *comp, *cend;
+	UChar *end, *c, *comp, *cend;
 	int state;
 
 	c = comp = cend = s;
@@ -1713,10 +1713,9 @@ PHPAPI void php_u_basename(UChar *s, int len, UChar *suffix, int sufflen, UChar 
 	}
 
 	len = cend - comp;
-	ret = eustrndup(comp, len);
 
 	if (p_ret) {
-		*p_ret = ret;
+		*p_ret = eustrndup(comp, len);
 	}
 	if (p_len) {
 		*p_len = len;
@@ -1784,11 +1783,10 @@ quit_loop:
 	}
 
 	len = cend - comp;
-	ret = emalloc(len + 1);
-	memcpy(ret, comp, len);
-	ret[len] = '\0';
-
 	if (p_ret) {
+		ret = emalloc(len + 1);
+		memcpy(ret, comp, len);
+		ret[len] = '\0';
 		*p_ret = ret;
 	}
 	if (p_len) {
