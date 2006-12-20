@@ -1,3 +1,45 @@
+2006-12-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_interfaces.c:
+      - Changed macro once again
+
+    * zend_API.c:
+      - Implement parameter parsing 'x'
+
+    * zend_interfaces.c:
+      - Fix macro param order
+
+    * zend_interfaces.c
+      zend_interfaces.h:
+      - Implement zend_u_call_method to deal with situations where the function
+        name type is already known
+
+2006-12-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.h
+      zend_execute_API.c:
+      - Marcus was too quick. Let's put type before zstr in the macros.
+      - Also mark get_include_path() and restore_include_path() with U.
+
+2006-12-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.h
+      zend_execute_API.c:
+      - Fix ZVAL_ZSTRL
+
+2006-12-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      zend_language_scanner.l:
+      Support 'b' prefix in front of string literals for forward compatibility
+      with PHP 6.
+
+2006-12-19  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      tests/bug34617.phpt:
+      Fix tests
+
 2006-12-18  Dmitry Stogov  <dmitry@zend.com>
 
     * Zend.m4
