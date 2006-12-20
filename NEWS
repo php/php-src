@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . cookies
   . canary protection (debug build only)
   . random generation of cookies and canaries
+- Fixed incorrect function names on FreeBSD where inet_pton() was named
+  __inet_pton() and inet_ntop() was named __inet_ntop() (Hannes)
+
 - Fixed bug #39869 (safe_read does not initialize errno).
   (michiel at boland dot org, Dmitry)
 - Fixed bug #39850 (SplFileObject throws contradictory/wrong error messages 
@@ -15,6 +18,8 @@ PHP                                                                        NEWS
 - Fixed bug #39832 (SOAP Server: parameter not matching the WSDL specified type
   are set to 0). (Dmitry)
 - Fixed bug #39815 (SOAP double encoding is not locale-independent). (Dmitry)
+- Fixed bug #39685 (iconv() - undefined function). (Hannes)
+- Fixed bug #38852 (XML-RPC Breaks iconv). (Hannes)
 
 14 Dec 2006, PHP 5.2.1RC1
 - Added a meta tag to phpinfo() output to prevent search engines from indexing 
