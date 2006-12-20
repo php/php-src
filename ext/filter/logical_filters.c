@@ -479,7 +479,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	php_url *url;
 	int old_len = Z_STRLEN_P(value);
 	
-	php_filter_url(value, flags, option_array, charset TSRMLS_DC);
+	php_filter_url(value, flags, option_array, charset TSRMLS_CC);
 
 	if (Z_TYPE_P(value) != IS_STRING || old_len != Z_STRLEN_P(value)) {
 		RETURN_VALIDATION_FAILED
