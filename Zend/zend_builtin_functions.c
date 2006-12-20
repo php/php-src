@@ -201,7 +201,7 @@ ZEND_FUNCTION(func_get_arg)
 		RETURN_FALSE;
 	}
 	convert_to_long_ex(z_requested_offset);
-	requested_offset = (*z_requested_offset)->value.lval;
+	requested_offset = Z_LVAL_PP(z_requested_offset);
 
 	if (requested_offset < 0) {
 		zend_error(E_WARNING, "func_get_arg():  The argument number should be >= 0");
@@ -281,7 +281,7 @@ ZEND_NAMED_FUNCTION(zend_if_strlen)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	convert_to_string_ex(str);
-	RETVAL_LONG((*str)->value.str.len);
+	RETVAL_LONG(Z_STRLEN_PP(str));
 }
 /* }}} */
 
@@ -517,8 +517,8 @@ repeat:
 		zval_ptr_dtor(&val_free);
 	}
 	c.flags = case_sensitive; /* non persistent */
-	c.name = zend_strndup((*var)->value.str.val, (*var)->value.str.len);
-	c.name_len = (*var)->value.str.len+1;
+	c.name = zend_strndup(Z_STRVAL_PP(var), Z_STRLEN_PP(var));
+	c.name_len = Z_STRLEN_PP(var)+1;
 	c.module_number = PHP_USER_CONSTANT;
 	if (zend_register_constant(&c TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
@@ -541,7 +541,7 @@ ZEND_FUNCTION(defined)
 	}
 	
 	convert_to_string_ex(var);
-	if (zend_get_constant((*var)->value.str.val, (*var)->value.str.len, &c TSRMLS_CC)) {
+	if (zend_get_constant(Z_STRVAL_PP(var), Z_STRLEN_PP(var), &c TSRMLS_CC)) {
 		zval_dtor(&c);
 		RETURN_TRUE;
 	} else {
@@ -1085,9 +1085,9 @@ ZEND_FUNCTION(function_exists)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	convert_to_string_ex(function_name);
-	lcname = zend_str_tolower_dup((*function_name)->value.str.val, (*function_name)->value.str.len);
+	lcname = zend_str_tolower_dup(Z_STRVAL_PP(function_name), Z_STRLEN_PP(function_name));
 
-	retval = (zend_hash_find(EG(function_table), lcname, (*function_name)->value.str.len+1, (void **)&func) == SUCCESS);
+	retval = (zend_hash_find(EG(function_table), lcname, Z_STRLEN_PP(function_name)+1, (void **)&func) == SUCCESS);
 	
 	efree(lcname);
 
@@ -1115,7 +1115,7 @@ ZEND_FUNCTION(leak)
 	if (ZEND_NUM_ARGS()>=1) {
 		if (zend_get_parameters_ex(1, &leak)==SUCCESS) {
 			convert_to_long_ex(leak);
-			leakbytes = (*leak)->value.lval;
+			leakbytes = Z_LVAL_PP(leak);
 		}
 	}
 
@@ -1172,7 +1172,7 @@ ZEND_FUNCTION(trigger_error)
 				ZEND_WRONG_PARAM_COUNT();
 			}
 			convert_to_long_ex(z_error_type);
-			error_type = (*z_error_type)->value.lval;
+			error_type = Z_LVAL_PP(z_error_type);
 			switch (error_type) {
 				case E_USER_ERROR:
 				case E_USER_WARNING:
@@ -1188,7 +1188,7 @@ ZEND_FUNCTION(trigger_error)
 			ZEND_WRONG_PARAM_COUNT();	
 	}
 	convert_to_string_ex(z_error_message);
-	zend_error(error_type, "%s", (*z_error_message)->value.str.val);
+	zend_error(error_type, "%s", Z_STRVAL_PP(z_error_message));
 	RETURN_TRUE;
 }
 /* }}} */
