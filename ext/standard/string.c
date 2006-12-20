@@ -1235,11 +1235,11 @@ quit_loop:
 	}
 
 	len = cend - comp;
-	ret = emalloc(len + 1);
-	memcpy(ret, comp, len);
-	ret[len] = '\0';
 
 	if (p_ret) {
+		ret = emalloc(len + 1);
+		memcpy(ret, comp, len);
+		ret[len] = '\0';
 		*p_ret = ret;
 	}
 	if (p_len) {
