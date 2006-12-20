@@ -323,6 +323,8 @@ allocating UChar's.
 
 The size parameter refers to the number of UChar's, not bytes.
 
+	zend_zstrndup(type, zstr, length)
+
 
 Hashes
 ------
