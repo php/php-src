@@ -576,11 +576,11 @@ ZEND_API int zval_unicode_to_string_ex(zval *string, UConverter *conv TSRMLS_DC)
 	if (zend_unicode_to_string(conv, &s, &s_len, u, u_len TSRMLS_CC) == SUCCESS) {
 		ZVAL_STRINGL(string, s, s_len, 0);
 		efree((UChar*)u);
-		return FAILURE;
+		return SUCCESS;
 	} else {
 		ZVAL_EMPTY_STRING(string);
 		efree((UChar*)u);
-		return SUCCESS;
+		return FAILURE;
 	}
 }
 /* }}} */
