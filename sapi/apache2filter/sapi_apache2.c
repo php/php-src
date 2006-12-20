@@ -442,10 +442,10 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	php_struct *ctx;
 	void *conf = ap_get_module_config(f->r->per_dir_config, &php5_module);
 	char *p = get_php_config(conf, "engine", sizeof("engine"));
-	TSRMLS_FETCH();
 	zend_file_handle zfd;
 	php_apr_bucket_brigade *pbb;
 	apr_bucket *b;
+	TSRMLS_FETCH();
 	
 	if (f->r->proxyreq) {
 		zend_try {
@@ -531,14 +531,8 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	
 	php_execute_script(&zfd TSRMLS_CC);
 
-#if MEMORY_LIMIT
-	{
-		char *mem_usage;
-
-		mem_usage = apr_psprintf(ctx->r->pool, "%u", zend_memory_peak_usage(1 TSRMLS_CC));
-		apr_table_set(ctx->r->notes, "mod_php_memory_usage", mem_usage);
-	}
-#endif
+	apr_table_set(ctx->r->notes, "mod_php_memory_usage",
+		apr_psprintf(ctx->r->pool, "%u", zend_memory_peak_usage(1 TSRMLS_CC)));
 		
 	php_apache_request_dtor(f TSRMLS_CC);
 		
