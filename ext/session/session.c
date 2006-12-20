@@ -493,14 +493,17 @@ static void php_session_track_init(TSRMLS_D)
 	zval *session_vars = NULL;
 	
 	/* Unconditionally destroy existing arrays -- possible dirty data */
-	zend_delete_global_variable("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS")-1 TSRMLS_CC);
 	zend_delete_global_variable("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
+
+	if (PS(http_session_vars)) {
+		zval_ptr_dtor(&PS(http_session_vars));
+	}
 
 	MAKE_STD_ZVAL(session_vars);
 	array_init(session_vars);
 	PS(http_session_vars) = session_vars;
 	
-	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 1, 0);
+	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 2, 1);
 }
 
 static char *php_session_encode(int *newlen TSRMLS_DC)
@@ -727,39 +730,6 @@ new_session:
 		efree(PS(id));
 		goto new_session;
 	}
-}
-
-static int migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
-{
-	zstr str;
-	uint str_len;
-	ulong num_key;
-	int n;
-	zval **val;
-	int ret = 0;
-	
-	n = zend_hash_get_current_key_ex(ht, &str, &str_len, &num_key, 0, pos);
-
-	switch (n) {
-		case HASH_KEY_IS_STRING:
-		case HASH_KEY_IS_UNICODE:
-			if (zend_u_hash_find(&EG(symbol_table), n, str, str_len, 
-						(void **) &val) == SUCCESS 
-					&& val && Z_TYPE_PP(val) != IS_NULL) {
-				/* FIXME: Unicode support??? */
-				ZEND_SET_SYMBOL_WITH_LENGTH(ht, str.s, str_len, *val, 
-						(*val)->refcount + 1 , 1);
-				ret = 1;
-			}
-			break;
-		case HASH_KEY_IS_LONG:
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The session bug compatibility code will not "
-					"try to locate the global variable $%lu due to its "
-					"numeric nature", num_key);
-			break;
-	}
-	
-	return ret;
 }
 
 static void php_session_save_current_state(TSRMLS_D)
@@ -1507,8 +1477,7 @@ static void php_register_var(zval** entry TSRMLS_DC)
 	} else {
 		convert_to_string_ex(entry);
 
-		if ((strcmp(Z_STRVAL_PP(entry), "HTTP_SESSION_VARS") != 0) &&
-		   (strcmp(Z_STRVAL_PP(entry), "_SESSION") != 0)) {
+		if (strcmp(Z_STRVAL_PP(entry), "_SESSION") != 0) {
 			PS_ADD_VARL(Z_STRVAL_PP(entry), Z_STRLEN_PP(entry));
 		}
 	}
@@ -1617,6 +1586,10 @@ static void php_rinit_session_globals(TSRMLS_D)
 
 static void php_rshutdown_session_globals(TSRMLS_D)
 {
+	if (PS(http_session_vars)) {
+		zval_ptr_dtor(&PS(http_session_vars));
+		PS(http_session_vars) = NULL;
+	}
 	if (PS(mod_data)) {
 		zend_try {
 			PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
