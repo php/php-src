@@ -221,12 +221,18 @@ char *alloca ();
 #define ZTS_V 0
 #endif
 
+#include <unicode/utypes.h>
+
+typedef union _zstr {
+	char  *s;
+	UChar *u;
+	void  *v;
+} zstr;
+
 #include "zend_errors.h"
 #include "zend_alloc.h"
 
 #include "zend_types.h"
-
-#include <unicode/utypes.h>
 
 #ifdef HAVE_LIMITS_H
 # include <limits.h>
@@ -239,12 +245,6 @@ char *alloca ();
 #ifndef LONG_MIN
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
-
-typedef union _zstr {
-	char  *s;
-	UChar *u;
-	void  *v;
-} zstr;
 
 #ifdef __GNUC__
 #	define ZSTR(x)    ((zstr)(x))

@@ -2033,6 +2033,14 @@ ZEND_API UChar *zend_ustrndup(const UChar *s, uint length)
 	return p;
 }
 
+ZEND_API zstr zend_zstrndup(int type, const zstr s, uint length)
+{
+	if (type == IS_STRING) {
+		return zend_strndup(s.s, length);
+	} else {
+		return zend_ustrndup(s.u, length);
+	}
+}
 
 ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
 {
