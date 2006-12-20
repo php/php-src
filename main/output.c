@@ -52,13 +52,8 @@ static HashTable php_output_handler_reverse_conflicts;
 static inline int php_output_lock_error(int op TSRMLS_DC);
 static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC);
 
-#if MEMORY_LIMIT
 #define php_output_handler_init(n, cs, f) php_output_handler_init_ex((n), (cs), (f) TSRMLS_CC)
 static inline php_output_handler *php_output_handler_init_ex(zval *name, size_t chunk_size, int flags TSRMLS_DC);
-#else
-#define php_output_handler_init php_output_handler_init_ex
-static inline php_output_handler *php_output_handler_init_ex(zval *name, size_t chunk_size, int flags);
-#endif
 static inline php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context);
 static inline int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf TSRMLS_DC);
 static inline zval *php_output_handler_status(php_output_handler *handler, zval *entry);
@@ -889,29 +884,23 @@ static inline void php_output_context_dtor(php_output_context *context)
 
 /* {{{ static php_output_handler *php_output_handler_init(zval *name, size_t chunk_size, int flags)
 	Allocates and initializes a php_output_handler structure */
-#if MEMORY_LIMIT
 static inline php_output_handler *php_output_handler_init_ex(zval *name, size_t chunk_size, int flags TSRMLS_DC)
-#else
-static inline php_output_handler *php_output_handler_init_ex(zval *name, size_t chunk_size, int flags)
-#endif
 {
 	php_output_handler *handler;
-#if MEMORY_LIMIT
 	size_t mem_limit;
-#endif
 	
 	handler = ecalloc(1, sizeof(php_output_handler));
 	ZVAL_ADDREF(name);
 	handler->name = name;
 	
-#if MEMORY_LIMIT
 	mem_limit = (PG(memory_limit) - zend_memory_usage(1 TSRMLS_CC)) / 2;
 	if (!chunk_size || chunk_size > mem_limit) {
 		handler->size = mem_limit;
 		chunk_size = 0;
-	} else
-#endif
-	handler->size = chunk_size;
+	} else {
+		handler->size = chunk_size;
+	}
+
 	handler->flags = flags;
 	handler->buffer.size = PHP_OUTPUT_HANDLER_INITBUF_SIZE(chunk_size);
 	handler->buffer.data = emalloc(handler->buffer.size);

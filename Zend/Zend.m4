@@ -129,13 +129,6 @@ AC_ARG_WITH(zend-vm,
   PHP_ZEND_VM=CALL
 ])
 
-AC_ARG_ENABLE(malloc-mm,
-[  --enable-malloc-mm      Use environment variable for run-time malloc/emalloc
-                          selection - FOR DEVELOPERS ONLY!!],
-[
-  ZEND_USE_MALLOC_MM=$enableval
-])
-
 AC_ARG_ENABLE(maintainer-zts,
 [  --enable-maintainer-zts Enable thread safety - for code maintainers only!!],[
   ZEND_MAINTAINER_ZTS=$enableval
@@ -151,13 +144,6 @@ AC_ARG_ENABLE(inline-optimization,
   ZEND_INLINE_OPTIMIZATION=yes
 ])
 
-AC_ARG_ENABLE(memory-limit,
-[  --enable-memory-limit   Compile with memory limit support], [
-  ZEND_MEMORY_LIMIT=$enableval
-],[
-  ZEND_MEMORY_LIMIT=no
-])
-
 AC_MSG_CHECKING([virtual machine dispatch method])
 AC_MSG_RESULT($PHP_ZEND_VM)
 
@@ -166,9 +152,6 @@ AC_MSG_RESULT($ZEND_MAINTAINER_ZTS)
 
 AC_MSG_CHECKING(whether to enable inline optimization for GCC)
 AC_MSG_RESULT($ZEND_INLINE_OPTIMIZATION)
-
-AC_MSG_CHECKING(whether to enable a memory limit)
-AC_MSG_RESULT($ZEND_MEMORY_LIMIT)
 
 AC_MSG_CHECKING(whether to enable Zend debugging)
 AC_MSG_RESULT($ZEND_DEBUG)
@@ -206,12 +189,6 @@ if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
   CFLAGS="$CFLAGS -DZTS"
   LIBZEND_CPLUSPLUS_CHECKS
 fi  
-
-if test "$ZEND_MEMORY_LIMIT" = "yes"; then
-  AC_DEFINE(MEMORY_LIMIT, 1, [Memory limit])
-else
-  AC_DEFINE(MEMORY_LIMIT, 0, [Memory limit])
-fi
 
 changequote({,})
 if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then

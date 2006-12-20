@@ -1187,7 +1187,6 @@ PHP_FUNCTION(unserialize)
 
 /* }}} */
 
-#if MEMORY_LIMIT
 /* {{{ proto int memory_get_usage([real_usage]) U
     Returns the allocated by PHP memory */
 PHP_FUNCTION(memory_get_usage) {
@@ -1200,6 +1199,7 @@ PHP_FUNCTION(memory_get_usage) {
 	RETURN_LONG(zend_memory_usage(real_usage TSRMLS_CC));
 }
 /* }}} */
+
 /* {{{ proto int memory_get_peak_usage([real_usage]) U
     Returns the peak allocated by PHP memory */
 PHP_FUNCTION(memory_get_peak_usage) {
@@ -1212,7 +1212,6 @@ PHP_FUNCTION(memory_get_peak_usage) {
 	RETURN_LONG(zend_memory_peak_usage(real_usage TSRMLS_CC));
 }
 /* }}} */
-#endif
 
 /*
  * Local variables:
