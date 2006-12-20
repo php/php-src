@@ -1416,11 +1416,16 @@ ZEND_FUNCTION(get_defined_functions)
 	zend_hash_apply_with_arguments(EG(function_table), (apply_func_args_t) copy_function_name, 2, internal, user);
 
 	if (zend_hash_add(Z_ARRVAL_P(return_value), "internal", sizeof("internal"), (void **)&internal, sizeof(zval *), NULL) == FAILURE) {
+		zval_ptr_dtor(&internal);
+		zval_ptr_dtor(&user);
+		zval_dtor(return_value);
 		zend_error(E_WARNING, "Cannot add internal functions to return value from get_defined_functions()");
 		RETURN_FALSE;
 	}
 
 	if (zend_hash_add(Z_ARRVAL_P(return_value), "user", sizeof("user"), (void **)&user, sizeof(zval *), NULL) == FAILURE) {
+		zval_ptr_dtor(&user);
+		zval_dtor(return_value);
 		zend_error(E_WARNING, "Cannot add user functions to return value from get_defined_functions()");
 		RETURN_FALSE;
 	}
