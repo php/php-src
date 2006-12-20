@@ -431,7 +431,7 @@ php_u_sprintf_appenddouble(UChar **buffer, int *pos,
 						 TSRMLS_DC)
 {
 	char num_buf[NUM_BUF_SIZE];
-	char *s = NULL, *q, s_fmt;
+	char *s = NULL, s_fmt;
 	UChar *uni_s;
 	int s_len = 0, is_negative = 0;
 #ifdef HAVE_LOCALE_H
@@ -506,7 +506,6 @@ php_u_sprintf_appenddouble(UChar **buffer, int *pos,
 				s = num_buf;
 				s_len++;
 			}
-			s[s_len] = '\0';
 			break;
 
 		case 0x67 /* 'g' */:
@@ -530,10 +529,6 @@ php_u_sprintf_appenddouble(UChar **buffer, int *pos,
 			}
 
 			s_len = strlen(s);
-
-			if (fmt == 0x47 /* 'G' */ && (q = strchr(s, 'e')) != NULL) {
-				*q = 'E';
-			}
 			break;
 	}
 
