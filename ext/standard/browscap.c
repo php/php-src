@@ -277,16 +277,18 @@ static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_
 }
 /* }}} */
 
-/* {{{ proto mixed get_browser([string browser_name [, bool return_array]])
+/* {{{ proto mixed get_browser([string browser_name [, bool return_array]]) U
    Get information about the capabilities of a browser. If browser_name is omitted
    or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array
    is true, returns an array. */
 PHP_FUNCTION(get_browser)
 {
-	zval **agent_name = NULL, **agent, **retarr;
+	char *agent_name = NULL;
+	int agent_name_len;
+	zend_bool return_array = 0;
+	zval **agent;
 	zval *found_browser_entry, *tmp_copy;
 	char *lookup_browser_name;
-	zend_bool return_array = 0;
 	char *browscap = INI_STR("browscap");
 
 	if (!browscap || !browscap[0]) {
@@ -294,11 +296,12 @@ PHP_FUNCTION(get_browser)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() > 2 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &agent_name, &retarr) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&!b", &agent_name,
+							  &agent_name_len, UG(ascii_conv), &return_array) == FAILURE) {
+		return;
 	}
 
-	if (agent_name == NULL || Z_TYPE_PP(agent_name) == IS_NULL) {
+	if (agent_name == NULL) {
 		zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
 		if (!PG(http_globals)[TRACK_VARS_SERVER]
 			|| zend_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name)==FAILURE) {
@@ -307,16 +310,10 @@ PHP_FUNCTION(get_browser)
 		}
 	}
 
-	convert_to_string_ex(agent_name);
-	lookup_browser_name = estrndup(Z_STRVAL_PP(agent_name), Z_STRLEN_PP(agent_name));
-	php_strtolower(lookup_browser_name, strlen(lookup_browser_name));
+	lookup_browser_name = estrndup(agent_name, agent_name_len);
+	php_strtolower(lookup_browser_name, agent_name_len);
 
-	if (ZEND_NUM_ARGS() == 2) {
-		convert_to_boolean_ex(retarr);
-		return_array = Z_BVAL_PP(retarr);
-	}
-
-	if (zend_hash_find(&browser_hash, lookup_browser_name, strlen(lookup_browser_name)+1, (void **) &agent)==FAILURE) {
+	if (zend_hash_find(&browser_hash, lookup_browser_name, agent_name_len+1, (void **) &agent)==FAILURE) {
 		found_browser_entry = NULL;
 		zend_hash_apply_with_arguments(&browser_hash, (apply_func_args_t) browser_reg_compare, 2, lookup_browser_name, &found_browser_entry);
 
@@ -338,7 +335,7 @@ PHP_FUNCTION(get_browser)
 	}
 
 	while (zend_hash_find(Z_ARRVAL_PP(agent), "parent", sizeof("parent"), (void **) &agent_name)==SUCCESS) {
-		if (zend_hash_find(&browser_hash, Z_STRVAL_PP(agent_name), Z_STRLEN_PP(agent_name)+1, (void **)&agent)==FAILURE) {
+		if (zend_hash_find(&browser_hash, agent_name, agent_name_len+1, (void **)&agent)==FAILURE) {
 			break;
 		}
 
