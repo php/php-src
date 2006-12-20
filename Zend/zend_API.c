@@ -456,7 +456,9 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						/* handle conversion of Unicode to binary with a specific converter */
 						if (conv != NULL) {
 							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							convert_to_string_with_converter(*arg, conv);
+							if (convert_to_string_with_converter(*arg, conv) == FAILURE) {
+								return "";
+							}
 							*p = Z_STRVAL_PP(arg);
 							*pl = Z_STRLEN_PP(arg);
 							break;
