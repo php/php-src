@@ -705,8 +705,7 @@ PHP_FUNCTION(pspell_config_ignore)
 	zval **conf, **pignore;
 	int argc;
 
-	int loc = PSPELL_LARGEST_WORD;
-	char ignore_str[PSPELL_LARGEST_WORD + 1];	
+	char ignore_str[MAX_LENGTH_OF_LONG + 1];	
 	long ignore = 0L;
 
 	PspellConfig *config;
@@ -721,23 +720,9 @@ PHP_FUNCTION(pspell_config_ignore)
 	convert_to_long_ex(pignore);
 	ignore = Z_LVAL_PP(pignore);
 
-	/* The following is a very hackish way to convert a long to a string
-	(actually only the numbers 0-999 will get converted properly, but that should
-	be sufficient). If anyone knows of a better way to convert an integer to a string,
-	please, fix it.*/
-	ignore_str[loc] = '\0';
-	while(ignore > 0){
-		if(loc == 0){
-			break;
-		}
-		ignore_str[--loc] = '0' + (ignore % 10);
-		ignore /= 10;
-	}
-	if(ignore_str[loc] == '\0'){
-		ignore_str[--loc] = '0';
-	}
+	sprintf(ignore_str, "%ld", ignore);
 
-	pspell_config_replace(config, "ignore", &ignore_str[loc]);
+	pspell_config_replace(config, "ignore", ignore_str);
 	RETURN_TRUE;
 }
 /* }}} */
