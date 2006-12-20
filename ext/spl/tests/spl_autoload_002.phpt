@@ -1,5 +1,5 @@
 --TEST--
-SPL: spl_autoloadfunctions()
+SPL: spl_autoload_functions()
 --SKIPIF--
 <?php 
 	if (!extension_loaded("spl")) die("skip");
