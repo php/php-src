@@ -171,9 +171,13 @@ zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
 
 static inline void *zend_memrchr(const void *s, int c, size_t n)
 {
-	register unsigned char *e = (unsigned char *)s + n;
+	register unsigned char *e;
 
-	for (e--; e >= (unsigned char *)s; e--) {
+	if (n <= 0) {
+		return NULL;
+	}
+
+	for (e = (unsigned char *)s + n - 1; e >= (unsigned char *)s; e--) {
 		if (*e == (unsigned char)c) {
 			return (void *)e;
 		}
