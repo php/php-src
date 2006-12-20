@@ -2035,11 +2035,13 @@ ZEND_API UChar *zend_ustrndup(const UChar *s, uint length)
 
 ZEND_API zstr zend_zstrndup(int type, const zstr s, uint length)
 {
+	zstr result;
 	if (type == IS_STRING) {
-		return zend_strndup(s.s, length);
+		result.s = zend_strndup(s.s, length);
 	} else {
-		return zend_ustrndup(s.u, length);
+		result.u = zend_ustrndup(s.u, length);
 	}
+	return result;
 }
 
 ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
