@@ -3378,10 +3378,10 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(number_format,													arginfo_number_format)
 	PHP_FE(fmod,															arginfo_fmod)
 #ifdef HAVE_INET_NTOP
-	PHP_NAMED_FE(inet_ntop,		php_inet_ntop,								arginfo_inet_ntop)
+	PHP_RAW_NAMED_FE(inet_ntop,		php_inet_ntop,								arginfo_inet_ntop)
 #endif
 #ifdef HAVE_INET_PTON
-	PHP_NAMED_FE(inet_pton,		php_inet_pton,								arginfo_inet_pton)
+	PHP_RAW_NAMED_FE(inet_pton,		php_inet_pton,								arginfo_inet_pton)
 #endif
 	PHP_FE(ip2long,															arginfo_ip2long)
 	PHP_FE(long2ip,															arginfo_long2ip)
