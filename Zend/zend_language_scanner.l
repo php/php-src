@@ -1569,9 +1569,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_IN_SCRIPTING>(["]([^$"\\]|("\\".))*["]) {
+<ST_IN_SCRIPTING>("b"?["]([^$"\\]|("\\".))*["]) {
 	register char *s, *t;
 	char *end;
+
+	if (*yytext == 'b') {
+		yytext++;
+		yyleng--;
+	}
 
 	zendlval->value.str.val = estrndup(yytext+1, yyleng-2);
 	zendlval->value.str.len = yyleng-2;
@@ -1659,9 +1664,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_IN_SCRIPTING>([']([^'\\]|("\\".))*[']) {
+<ST_IN_SCRIPTING>("b"?[']([^'\\]|("\\".))*[']) {
 	register char *s, *t;
 	char *end;
+
+	if (*yytext == 'b') {
+		yytext++;
+		yyleng--;
+	}
 
 	zendlval->value.str.val = estrndup(yytext+1, yyleng-2);
 	zendlval->value.str.len = yyleng-2;
@@ -1713,8 +1723,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}{LABEL}{NEWLINE} {
+<ST_IN_SCRIPTING>"b"?"<<<"{TABS_AND_SPACES}{LABEL}{NEWLINE} {
 	char *s;
+
+	if (*yytext == 'b') {
+		yytext++;
+		yyleng--;
+	}
+
 	CG(zend_lineno)++;
 	CG(heredoc_len) = yyleng-3-1-(yytext[yyleng-2]=='\r'?1:0);
 	s = yytext+3;
