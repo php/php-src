@@ -115,6 +115,11 @@ PHP_METHOD(domimplementation, createDocumentType)
 	doctype = xmlCreateIntSubset(NULL, localname, pch1, pch2);
 	xmlFree(localname);
 
+	if (doctype == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create DocumentType");
+		RETURN_FALSE;
+	}
+
 	DOM_RET_OBJ(rv, (xmlNodePtr) doctype, &ret, NULL);
 }
 /* }}} end dom_domimplementation_create_document_type */
