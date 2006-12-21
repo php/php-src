@@ -347,9 +347,7 @@ PHP_FUNCTION(get_browser)
 		}
 	}
 
-	if (lookup_browser_name) {
-		efree(lookup_browser_name);
-	}
+	efree(lookup_browser_name);
 }
 /* }}} */
 
