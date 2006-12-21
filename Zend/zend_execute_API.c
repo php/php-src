@@ -870,6 +870,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 						zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (long) i, NULL);
 						zend_ptr_stack_clear_multiple(TSRMLS_C);
 					}
+
+					if (call_via_handler) {
+						zval_ptr_dtor(&method_name);
+						zval_ptr_dtor(&params_array);
+					}
 					return FAILURE;
 				}
 				ALLOC_ZVAL(new_zval);
