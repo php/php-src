@@ -141,7 +141,7 @@ void spl_object_storage_attach(spl_SplObjectStorage *intern, zval *obj TSRMLS_DC
 	obj->refcount++;
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::attach($obj)
+/* {{{ proto void SplObjectStorage::attach($obj) U
  Attaches an object to the storage if not yet contained */
 SPL_METHOD(SplObjectStorage, attach)
 {
@@ -155,7 +155,7 @@ SPL_METHOD(SplObjectStorage, attach)
 	spl_object_storage_attach(intern, obj TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::detach($obj)
+/* {{{ proto void SplObjectStorage::detach($obj) U
  Detaches an object from the storage */
 SPL_METHOD(SplObjectStorage, detach)
 {
@@ -182,7 +182,7 @@ SPL_METHOD(SplObjectStorage, detach)
 	intern->index = 0;
 } /* }}} */
 
-/* {{{ proto bool SplObjectStorage::contains($obj)
+/* {{{ proto bool SplObjectStorage::contains($obj) U
  Determine whethe an object is contained in the storage */
 SPL_METHOD(SplObjectStorage, contains)
 {
@@ -206,7 +206,7 @@ SPL_METHOD(SplObjectStorage, contains)
 #endif
 } /* }}} */
 
-/* {{{ proto int SplObjectStorage::count()
+/* {{{ proto int SplObjectStorage::count() U
  Determine number of objects in storage */
 SPL_METHOD(SplObjectStorage, count)
 {
@@ -215,7 +215,7 @@ SPL_METHOD(SplObjectStorage, count)
 	RETURN_LONG(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::rewind()
+/* {{{ proto void SplObjectStorage::rewind() U
  */
 SPL_METHOD(SplObjectStorage, rewind)
 {
@@ -225,7 +225,7 @@ SPL_METHOD(SplObjectStorage, rewind)
 	intern->index = 0;
 } /* }}} */
 
-/* {{{ proto bool SplObjectStorage::valid()
+/* {{{ proto bool SplObjectStorage::valid() U
  */
 SPL_METHOD(SplObjectStorage, valid)
 {
@@ -234,7 +234,7 @@ SPL_METHOD(SplObjectStorage, valid)
 	RETURN_BOOL(zend_hash_has_more_elements_ex(&intern->storage, &intern->pos) == SUCCESS);
 } /* }}} */
 
-/* {{{ proto mixed SplObjectStorage::key()
+/* {{{ proto mixed SplObjectStorage::key() U
  */
 SPL_METHOD(SplObjectStorage, key)
 {
@@ -243,7 +243,7 @@ SPL_METHOD(SplObjectStorage, key)
 	RETURN_LONG(intern->index);
 } /* }}} */
 
-/* {{{ proto mixed SplObjectStorage::current()
+/* {{{ proto mixed SplObjectStorage::current() U
  */
 SPL_METHOD(SplObjectStorage, current)
 {
@@ -256,7 +256,7 @@ SPL_METHOD(SplObjectStorage, current)
 	RETVAL_ZVAL(*entry, 1, 0);
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::next()
+/* {{{ proto void SplObjectStorage::next() U
  */
 SPL_METHOD(SplObjectStorage, next)
 {
@@ -266,7 +266,7 @@ SPL_METHOD(SplObjectStorage, next)
 	intern->index++;
 } /* }}} */
 
-/* {{{ proto string SplObjectStorage::serialize()
+/* {{{ proto string SplObjectStorage::serialize() U
  */
 SPL_METHOD(SplObjectStorage, serialize)
 {
@@ -309,14 +309,14 @@ SPL_METHOD(SplObjectStorage, serialize)
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	if (buf.c) {
-		RETURN_ASCII_STRINGL(buf.c, buf.len, ZSTR_AUTOFREE);
+		RETURN_STRINGL(buf.c, buf.len, 0);
 	} else {
 		RETURN_NULL();
 	}
 	
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::unserialize(string serialized)
+/* {{{ proto void SplObjectStorage::unserialize(string serialized) U
  */
 SPL_METHOD(SplObjectStorage, unserialize)
 {
