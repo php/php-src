@@ -113,7 +113,6 @@ PHP_FUNCTION(strptime)
 		ts_length = temp_len;
 
 		if (zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp, &temp_len, format.u, format_length TSRMLS_CC) == FAILURE) {
-			efree(ts.s);
 			RETURN_FALSE;
 		}
 		format.s = temp;
