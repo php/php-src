@@ -470,7 +470,6 @@ enum mbfl_no_encoding mbfl_encoding_detector_judge(mbfl_encoding_detector *ident
 			n--;
 		}
 
-		/* fallback judge */
 		if (encoding ==	mbfl_no_encoding_invalid) {
 			n = identd->filter_list_size - 1;
 			while (n >= 0) {
@@ -630,7 +629,6 @@ mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int el
 			}
 		}
 	}
-
 
 	/* cleanup */
 	/* dtors should be called in reverse order */

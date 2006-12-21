@@ -60,6 +60,7 @@
 #include "ext/standard/url.h"
 #include "main/php_output.h"
 #include "ext/standard/info.h"
+
 #include "libmbfl/mbfl/mbfl_allocators.h"
 
 #include "php_variables.h"
@@ -936,7 +937,10 @@ PHP_RINIT_FUNCTION(mbstring)
 	MBSTRG(current_http_output_encoding) = MBSTRG(http_output_encoding);
 	MBSTRG(current_filter_illegal_mode) = MBSTRG(filter_illegal_mode);
 	MBSTRG(current_filter_illegal_substchar) = MBSTRG(filter_illegal_substchar);
-	MBSTRG(illegalchars) = 0;
+
+	if (!MBSTRG(encoding_translation)) {
+		MBSTRG(illegalchars) = 0;
+	}
 
 	n = 0;
 	if (MBSTRG(detect_order_list)) {
@@ -967,14 +971,14 @@ PHP_RINIT_FUNCTION(mbstring)
 				zend_hash_find(EG(function_table), p->ovld_func, strlen(p->ovld_func)+1 , (void **)&func);
 				
 				if (zend_hash_find(EG(function_table), p->orig_func, strlen(p->orig_func)+1, (void **)&orig) != SUCCESS) {
-					php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring couldn't find function %s", p->orig_func);
+					php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring couldn't find function %s.", p->orig_func);
 					return FAILURE;
 				} else {
 					zend_hash_add(EG(function_table), p->save_func, strlen(p->save_func)+1, orig, sizeof(zend_function), NULL);
 
 					if (zend_hash_update(EG(function_table), p->orig_func, strlen(p->orig_func)+1, func, sizeof(zend_function), 
 						NULL) == FAILURE) {
-						php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring couldn't replace function %s", p->orig_func);
+						php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring couldn't replace function %s.", p->orig_func);
 						return FAILURE;
 					}
 				}
@@ -1341,7 +1345,7 @@ PHP_FUNCTION(mb_substitute_character)
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
 					RETVAL_FALSE;					
 				}
 			}
@@ -1352,7 +1356,7 @@ PHP_FUNCTION(mb_substitute_character)
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 				MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
 				RETVAL_FALSE;
 			}
 			break;
@@ -1599,11 +1603,11 @@ PHP_FUNCTION(mb_strpos)
 	}
 
 	if (offset < 0 || (unsigned long)offset > haystack.len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is out of range");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
 		RETURN_FALSE;
 	}
 	if (needle.len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty needle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter.");
 		RETURN_FALSE;
 	}
 
@@ -1615,16 +1619,16 @@ PHP_FUNCTION(mb_strpos)
 		case 1:
 			break;
 		case 2:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Needle has non-positive length");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Needle has not positive length.");
 			break;
 		case 4:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding or conversion error");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding or conversion error.");
 			break;
 		case 8:
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Argument is empty");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Argument is empty.");
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error in mb_strpos");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error in mb_strpos.");
 			break;			
 		}
 		RETVAL_FALSE;
@@ -1637,10 +1641,13 @@ PHP_FUNCTION(mb_strpos)
 PHP_FUNCTION(mb_strrpos)
 {
 	int n;
-	long offset = 0;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
 	int enc_name_len;
+	zval **zoffset;
+	long offset = 0, str_flg;
+	char *enc_name2 = NULL;
+	int enc_name_len2;
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
@@ -1649,8 +1656,49 @@ PHP_FUNCTION(mb_strrpos)
 	needle.no_language = MBSTRG(current_language);
 	needle.no_encoding = MBSTRG(current_internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|Zs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &zoffset, &enc_name, &enc_name_len) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	if(ZEND_NUM_ARGS() >= 3) {
+		if (Z_TYPE_PP(zoffset) == IS_STRING) {
+			enc_name2     = Z_STRVAL_PP(zoffset);
+			enc_name_len2 = Z_STRLEN_PP(zoffset);
+			str_flg       = 1;
+
+			if (enc_name2 != NULL) {
+				switch (*enc_name2) {
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+				case ' ':
+				case '-':
+				case '.':
+					break;
+				default :
+					str_flg = 0;
+					break;
+				}
+			}
+
+			if(str_flg) {
+					convert_to_long_ex(zoffset);
+					offset   = Z_LVAL_PP(zoffset);
+			} else {
+				enc_name     = enc_name2;
+				enc_name_len = enc_name_len2;
+			}
+		} else {
+			convert_to_long_ex(zoffset);
+			offset = Z_LVAL_PP(zoffset);
+		}
 	}
 
 	if (enc_name != NULL) {
@@ -1662,11 +1710,9 @@ PHP_FUNCTION(mb_strrpos)
 	}
 
 	if (haystack.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty haystack");
 		RETURN_FALSE;
 	}
 	if (needle.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
 		RETURN_FALSE;
 	}
 	n = mbfl_strpos(&haystack, &needle, offset, 1);
@@ -1720,6 +1766,10 @@ PHP_FUNCTION(mb_strripos)
 		RETURN_FALSE;
 	}
 
+	if(offset > old_haystack_len){
+		RETURN_FALSE;
+	}
+
  n = php_mb_stripos(1, old_haystack, old_haystack_len, old_needle, old_needle_len, offset, from_encoding TSRMLS_CC);
 
 	if (n >= 0) {
@@ -1759,12 +1809,8 @@ PHP_FUNCTION(mb_strstr)
 		}
 	}
 
-	if (haystack.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty haystack");
-		RETURN_FALSE;
-	}
 	if (needle.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty delimiter.");
 		RETURN_FALSE;
 	}
 	n = mbfl_strpos(&haystack, &needle, 0, 0);
@@ -1821,8 +1867,10 @@ PHP_FUNCTION(mb_strrchr)
 		}
 	}
 
+	if (haystack.len <= 0) {
+		RETURN_FALSE;
+	}
 	if (needle.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
 		RETURN_FALSE;
 	}
 	n = mbfl_strpos(&haystack, &needle, 0, 1);
@@ -1867,6 +1915,11 @@ PHP_FUNCTION(mb_stristr)
 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if(!needle.len){
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty delimiter.");
 		RETURN_FALSE;
 	}
 
@@ -1983,7 +2036,7 @@ PHP_FUNCTION(mb_substr_count)
 	}
 
 	if (needle.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty substring.");
 		RETURN_FALSE;
 	}
 
@@ -2166,7 +2219,7 @@ PHP_FUNCTION(mb_strcut)
 	if (((unsigned) from + (unsigned) len) > Z_STRLEN_PP(arg1)) {
 		len = Z_STRLEN_PP(arg1) - from;
 	}
-	
+
 	ret = mbfl_strcut(&string, &result, from, len);
 	if (ret != NULL) {
 		RETVAL_STRINGL(ret->val, ret->len, 0);		/* the string is already strdup()'ed */
@@ -2526,7 +2579,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	mbfl_string string;
 	const char *ret;
 	enum mbfl_no_encoding *elist;
-	int size, *list, strict;
+	int size, *list, strict = 0;
 
 	if (ZEND_NUM_ARGS() == 1) {
 		if (zend_get_parameters_ex(1, &arg_str) == FAILURE) {
@@ -3904,8 +3957,8 @@ PHP_FUNCTION(mb_get_info)
 		if (lang != NULL && (name = (char *)mbfl_no_encoding2name(lang->mail_body_encoding)) != NULL) {
 			RETVAL_STRING(name, 1);
 		}
- 	} else if (!strcasecmp("illegal_chars", typ)) {
- 		RETVAL_LONG(MBSTRG(illegalchars));
+	} else if (!strcasecmp("illegal_chars", typ)) {
+		RETVAL_LONG(MBSTRG(illegalchars));
 	} else if (!strcasecmp("encoding_translation", typ)) {
 		if (MBSTRG(encoding_translation)) {
 			RETVAL_STRING("On", 1);
@@ -4019,8 +4072,13 @@ PHP_FUNCTION(mb_check_encoding)
 
 	if (ret != NULL) {
 		MBSTRG(illegalchars) += illegalchars;
-		efree(ret->val);
-		RETURN_BOOL(illegalchars == 0);
+		if (illegalchars == 0 && strncmp(string.val, ret->val, string.len) == 0) {
+			efree(ret->val);
+			RETURN_TRUE;
+		} else {
+			efree(ret->val);
+			RETURN_FALSE;
+		}
 	} else {
 		RETURN_FALSE;
 	}
@@ -4297,7 +4355,6 @@ MBSTRING_API int php_mb_stripos(int mode, char *old_haystack, int old_haystack_l
 		}
 
 		if (haystack.len <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty haystack");
 			break;
 		}
 
@@ -4308,7 +4365,6 @@ MBSTRING_API int php_mb_stripos(int mode, char *old_haystack, int old_haystack_l
 		}
 
 		if (needle.len <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty needle");
 			break;
 		}
 
@@ -4319,7 +4375,7 @@ MBSTRING_API int php_mb_stripos(int mode, char *old_haystack, int old_haystack_l
 		}
 
 		if (offset < 0 || (unsigned long)offset > haystack.len) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is out of range");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
 			break;
 		}
 

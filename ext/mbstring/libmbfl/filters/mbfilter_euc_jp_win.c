@@ -60,7 +60,8 @@ static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
 };
 
 
-static const char *mbfl_encoding_eucjp_win_aliases[] = {"eucJP-open", NULL};
+static const char *mbfl_encoding_eucjp_win_aliases[] = {"eucJP-open", 
+							"eucJP-ms", NULL};
 
 const struct mbfl_identify_vtbl vtbl_identify_eucjpwin = {
 	mbfl_no_encoding_eucjp_win,
