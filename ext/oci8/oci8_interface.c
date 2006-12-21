@@ -1648,18 +1648,18 @@ PHP_FUNCTION(oci_error)
 
 	if (errcode) {
 		array_init(return_value);
-		add_assoc_long(return_value, "code", errcode);
+		add_ascii_assoc_long(return_value, "code", errcode);
 		if (UG(unicode)) {
-			add_assoc_unicode(return_value, "message", (UChar *)errbuf, 0);
+			add_ascii_assoc_unicode(return_value, "message", (UChar *)errbuf, 0);
 		} else {
 			add_assoc_string(return_value, "message", errbuf, 0);
 		}
 #ifdef HAVE_OCI8_ATTR_STATEMENT
-		add_assoc_long(return_value, "offset", error_offset);
+		add_ascii_assoc_long(return_value, "offset", error_offset);
 		if (sqltext.v) {
-			add_assoc_text(return_value, "sqltext", sqltext, 1);
+			add_ascii_assoc_zstr(return_value, "sqltext", ZEND_STR_TYPE, sqltext, 1); /* XXX */
 		} else {
-			add_assoc_ascii_string(return_value, "sqltext", "", 1);
+			add_ascii_assoc_ascii_string(return_value, "sqltext", "", 1);
 		}
 #endif
 	} else {
