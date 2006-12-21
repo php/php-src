@@ -35,11 +35,6 @@
 #ifdef TSRM_WIN32
 #include <io.h>
 #include "tsrm_win32.h"
-# if HAVE_NEWAPIS_H
-#  define WANT_GETLONGPATHNAME_WRAPPER
-#  define COMPILE_NEWAPIS_STUBS
-#  include <NewAPIs.h>
-# endif
 #endif
 
 #ifdef NETWARE
