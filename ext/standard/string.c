@@ -6970,22 +6970,24 @@ PHP_FUNCTION(count_chars)
  */
 static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 {
-	zval **s1, **s2;
+	zstr s1, s2;
+	int s1_len, s2_len;
+	zend_uchar type;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &s1, &s2) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &s1, &s1_len,
+							  &type, &s2, &s2_len, &type) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(s1);
-	convert_to_string_ex(s2);
-
-	RETURN_LONG(strnatcmp_ex(Z_STRVAL_PP(s1), Z_STRLEN_PP(s1),
-							 Z_STRVAL_PP(s2), Z_STRLEN_PP(s2),
-							 fold_case));
+	if (type == IS_UNICODE) {
+		RETURN_LONG(u_strnatcmp_ex(s1.u, s1_len, s2.u, s2_len, fold_case));
+	} else {
+		RETURN_LONG(strnatcmp_ex(s1.s, s1_len, s2.s, s2_len, fold_case));
+	}
 }
 /* }}} */
 
-/* {{{ proto int strnatcmp(string s1, string s2)
+/* {{{ proto int strnatcmp(string s1, string s2) U
    Returns the result of string comparison using 'natural' algorithm */
 PHP_FUNCTION(strnatcmp)
 {
@@ -7083,7 +7085,7 @@ PHP_FUNCTION(localeconv)
 }
 /* }}} */
 
-/* {{{ proto int strnatcasecmp(string s1, string s2)
+/* {{{ proto int strnatcasecmp(string s1, string s2) U
    Returns the result of case-insensitive string comparison using 'natural' algorithm */
 PHP_FUNCTION(strnatcasecmp)
 {
