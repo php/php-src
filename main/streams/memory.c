@@ -673,7 +673,6 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 	if ((stream = php_stream_temp_create_rel(0, ~0u)) != NULL) {
 		/* store data */
 		php_stream_temp_write(stream, comma, ilen TSRMLS_CC);
-		efree(comma);
 		php_stream_temp_seek(stream, 0, SEEK_SET, &newoffs TSRMLS_CC);
 		/* set special stream stuff (enforce exact mode) */
 		vlen = strlen(mode);
