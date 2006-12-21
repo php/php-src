@@ -40,6 +40,10 @@
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 
+#ifndef OCI_STMT_CALL
+#define OCI_STMT_CALL 10
+#endif
+
 /* {{{ proto bool oci_define_by_name(resource stmt, string name, mixed &var [, int type]) U
    Define a PHP variable to an Oracle column by name */
 /* if you want to define a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE defining!!! */
@@ -1889,6 +1893,9 @@ PHP_FUNCTION(oci_statement_type)
 			break;
 		case OCI_STMT_DECLARE:
 			RETVAL_ASCII_STRING("DECLARE", ZSTR_DUPLICATE);
+			break;
+		case OCI_STMT_CALL:
+			RETVAL_ASCII_STRING("CALL", ZSTR_DUPLICATE);
 			break;
 		default:
 			RETVAL_ASCII_STRING("UNKNOWN", ZSTR_DUPLICATE);
