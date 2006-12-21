@@ -941,6 +941,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 						Z_TYPE_P(fci->function_name) = IS_STRING;
 						Z_STRVAL_P(fci->function_name) = old_func_name;
 					}
+
+					if (call_via_handler) {
+						zval_ptr_dtor(&method_name);
+						zval_ptr_dtor(&params_array);
+					}
 					return FAILURE;
 				}
 				ALLOC_ZVAL(new_zval);
