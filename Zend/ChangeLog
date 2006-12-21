@@ -1,3 +1,99 @@
+2006-12-20  Antony Dovgal  <antony@zend.com>
+
+    * zend_builtin_functions.c:
+      fix possible leak on failure in get_defined_functions()
+
+    * zend_API.c:
+      fix leak in zend_disable_class()
+
+2006-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_alloc.c
+      zend_alloc.h:
+      - Make shorter and do not use problematic attribute
+
+    * zend_alloc.c
+      zend_alloc.h:
+      - Compilers mightnot like the zstr return,thus return void*
+
+2006-12-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Check for conversion failure in "s&" and return appropriately.
+
+    * zend_unicode.c:
+      Fix return value in zval_unicode_to_string_ex().
+
+    * zend_alloc.c:
+      Fix warning.
+
+2006-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.h
+      zend_alloc.c
+      zend_alloc.h:
+      - Implement zend_zstrndup()
+
+2006-12-20  Antony Dovgal  <antony@zend.com>
+
+    * zend_operators.h:
+      return NULL right away if invalid length was passed
+
+2006-12-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      zend_language_scanner.l:
+      More correct patch for b-prefixes.
+
+2006-12-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_language_parser.y:
+      MFH: fix #39903 (Notice message when executing __halt_compiler() more than
+      once)
+
+    * zend_language_parser.y:
+      fix #39903 (Notice message when executing __halt_compiler() more than once)
+
+    * (PHP_5_2)
+      zend_builtin_functions.c:
+      use Z_* macros
+
+2006-12-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * Zend.m4
+      zend_alloc.c:
+      Make MEMORY_LIMIT and ZEND_USE_MALLOC_MM to be always enabled. They don't
+      make a
+      ny significant slowdown, but incrise maintainability a lot. Note that the
+      setting of memory_limit wasn't changes (neither in main/main.c nor in
+      php.ini) and it
+      still set to 16M.
+
+    * (PHP_5_2)
+      Zend.m4
+      zend_alloc.c:
+      Make MEMORY_LIMIT and ZEND_USE_MALLOC_MM to be always enabled. They don't
+      make any significant slowdown, but incrise maintainability a lot. Note
+      that the setting of memory_limit wasn't changes (neither in main/main.c
+      nor in php.ini) and it still set to 16M.
+
+2006-12-20  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * zend_API.h:
+      MFB:
+      - Fixed incorrect function names on FreeBSD where inet_pton() was named
+              __inet_pton() and inet_ntop() was named __inet_ntop()
+      - Fixed bug #39685 (iconv() - undefined function)
+      - Fixed bug #38852 (XML-RPC Breaks iconv)
+
+    * (PHP_5_2)
+      zend_API.h:
+      - Fixed incorrect function names on FreeBSD where inet_pton() was named
+      	__inet_pton() and inet_ntop() was named __inet_ntop()
+      - Fixed bug #39685 (iconv() - undefined function)
+      - Fixed bug #38852 (XML-RPC Breaks iconv)
+
 2006-12-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_interfaces.c:

@@ -1,3 +1,228 @@
+2006-12-20  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c:
+      fix potential leak, improve length checks
+
+2006-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_directory.c:
+      - Quick hackto make tests pass
+
+2006-12-20  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c:
+      do not allocate the return value if it wasn't requested
+
+    * ZendEngine2/zend_builtin_functions.c:
+      fix possible leak on failure in get_defined_functions()
+
+    * ZendEngine2/zend_API.c:
+      fix leak in zend_disable_class()
+
+    * ext/standard/file.c:
+      fix double free on error
+
+2006-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/php_spl.c
+      ext/spl/php_spl.h:
+      - More unicode
+
+    * ext/spl/tests/spl_autoload_001.phpt:
+      - Add unicode expectations
+
+    * ext/spl/tests/spl_autoload_002.phpt:
+      - Fix test name
+
+2006-12-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt:
+      Update.
+
+2006-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      - Make shorter and do not use problematic attribute
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      - Compilers mightnot like the zstr return,thus return void*
+
+2006-12-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/browscap.c:
+      Unicode support in get_browser(). To avoid additional copying/conversion
+      during parsing, the browscap values in the returned array will be of
+      IS_STRING type.
+
+    * ZendEngine2/zend_API.c:
+      Check for conversion failure in "s&" and return appropriately.
+
+    * ZendEngine2/zend_unicode.c:
+      Fix return value in zval_unicode_to_string_ex().
+
+    * ZendEngine2/zend_alloc.c:
+      Fix warning.
+
+2006-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.UNICODE-UPGRADES:
+      - Mention zend_zstrndup()
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      - Implement zend_zstrndup()
+
+2006-12-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/logical_filters.c:
+      Fixed zts build
+
+    * (PHP_5_2)
+      ext/filter/logical_filters.c:
+      fixed ZTS build
+
+2006-12-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/session/session.c
+      ext/session/session.c:
+      protect _SESSION, HTTP_SESSION_VARS and GLOBALS
+      maintain an internal reference of _SESSION, so that it won't be possible
+      to destroy it from userspace
+
+    * ext/session/session.c:
+      remove register_globals remains
+      maintain an internal reference of _SESSION, so that it won't be possible
+      to destroy it from userspace
+
+2006-12-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/logical_filters.c
+      ext/filter/tests/015.phpt
+      ext/filter/tests/033.phpt:
+      MFB: Fixed bug #39898 (FILTER_VALIDATE_URL validates \r\n\t etc).
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/logical_filters.c
+      ext/filter/tests/015.phpt
+      ext/filter/tests/033.phpt:
+      Fixed bug #39898 (FILTER_VALIDATE_URL validates \r\n\t etc).
+
+2006-12-20  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_operators.h:
+      return NULL right away if invalid length was passed
+
+2006-12-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/formatted_print.c:
+      Align Unicode and binary versions of formatted printing.
+
+    * (PHP_5_2)
+      ZendEngine2/zend_language_scanner.l:
+      More correct patch for b-prefixes.
+
+2006-12-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_language_parser.y:
+      MFH: fix #39903 (Notice message when executing __halt_compiler() more than
+      once)
+
+    * ZendEngine2/zend_language_parser.y:
+      fix #39903 (Notice message when executing __halt_compiler() more than once)
+
+    * (PHP_5_2)
+      ZendEngine2/zend_builtin_functions.c:
+      use Z_* macros
+
+    * ext/pspell/pspell.c:
+      don't reinvent the wheel, use sprintf()
+
+2006-12-20  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/logical_filters.c:
+      - Fixed the validate email filter so that the letter "v" can also be used
+      in
+        the user part of the email address. (Derick)
+
+    * ext/filter/logical_filters.c:
+      - Fixed the regexp so that the letter "v" also works.
+
+2006-12-20  Antony Dovgal  <antony@zend.com>
+
+    * ext/curl/streams.c:
+      gracefully bail out on invalid header
+
+2006-12-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/Zend.m4
+      ZendEngine2/zend_alloc.c
+      ext/standard/basic_functions.c
+      ext/standard/php_var.h
+      ext/standard/var.c
+      main/main.c
+      main/output.c
+      sapi/apache/mod_php5.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache_hooks/mod_php5.c
+      win32/build/config.w32:
+      Make MEMORY_LIMIT and ZEND_USE_MALLOC_MM to be always enabled. They don't
+      make a
+      ny significant slowdown, but incrise maintainability a lot. Note that the
+      setting of memory_limit wasn't changes (neither in main/main.c nor in
+      php.ini) and it
+      still set to 16M.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/Zend.m4
+      ZendEngine2/zend_alloc.c
+      ext/standard/basic_functions.c
+      ext/standard/php_var.h
+      ext/standard/var.c
+      main/main.c
+      sapi/apache/mod_php5.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache_hooks/mod_php5.c
+      win32/build/config.w32:
+      Make MEMORY_LIMIT and ZEND_USE_MALLOC_MM to be always enabled. They don't
+      make any significant slowdown, but incrise maintainability a lot. Note
+      that the setting of memory_limit wasn't changes (neither in main/main.c
+      nor in php.ini) and it still set to 16M.
+
+2006-12-20  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ZendEngine2/zend_API.h
+      ext/iconv/iconv.c
+      ext/standard/basic_functions.c
+      main/php.h:
+      MFB:
+      - Fixed incorrect function names on FreeBSD where inet_pton() was named
+              __inet_pton() and inet_ntop() was named __inet_ntop()
+      - Fixed bug #39685 (iconv() - undefined function)
+      - Fixed bug #38852 (XML-RPC Breaks iconv)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_API.h
+      ext/iconv/iconv.c
+      ext/standard/basic_functions.c
+      main/php.h:
+      - Fixed incorrect function names on FreeBSD where inet_pton() was named
+      	__inet_pton() and inet_ntop() was named __inet_ntop()
+      - Fixed bug #39685 (iconv() - undefined function)
+      - Fixed bug #38852 (XML-RPC Breaks iconv)
+
 2006-12-19  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/mail.c:
