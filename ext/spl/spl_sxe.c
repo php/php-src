@@ -41,7 +41,7 @@ zend_class_entry *spl_ce_SimpleXMLElement;
 
 #include "ext/simplexml/php_simplexml_exports.h"
 
-/* {{{ proto void SimpleXMLIterator::rewind()
+/* {{{ proto void SimpleXMLIterator::rewind() U
  Rewind to first element */
 SPL_METHOD(SimpleXMLIterator, rewind)
 {
@@ -52,7 +52,7 @@ SPL_METHOD(SimpleXMLIterator, rewind)
 }
 /* }}} */
 
-/* {{{ proto bool SimpleXMLIterator::valid()
+/* {{{ proto bool SimpleXMLIterator::valid() U
  Check whether iteration is valid */
 SPL_METHOD(SimpleXMLIterator, valid)
 {
@@ -62,7 +62,7 @@ SPL_METHOD(SimpleXMLIterator, valid)
 }
 /* }}} */
 
-/* {{{ proto SimpleXMLIterator SimpleXMLIterator::current()
+/* {{{ proto SimpleXMLIterator SimpleXMLIterator::current() U
  Get current element */
 SPL_METHOD(SimpleXMLIterator, current)
 {
@@ -76,7 +76,7 @@ SPL_METHOD(SimpleXMLIterator, current)
 }
 /* }}} */
 
-/* {{{ proto string SimpleXMLIterator::key()
+/* {{{ proto string SimpleXMLIterator::key() U
  Get name of current child element */
 SPL_METHOD(SimpleXMLIterator, key)
 {
@@ -98,7 +98,7 @@ SPL_METHOD(SimpleXMLIterator, key)
 }
 /* }}} */
 
-/* {{{ proto void SimpleXMLIterator::next()
+/* {{{ proto void SimpleXMLIterator::next() U
  Move to next element */
 SPL_METHOD(SimpleXMLIterator, next)
 {
@@ -109,7 +109,7 @@ SPL_METHOD(SimpleXMLIterator, next)
 }
 /* }}} */
 
-/* {{{ proto bool SimpleXMLIterator::hasChildren()
+/* {{{ proto bool SimpleXMLIterator::hasChildren() U
  Check whether element has children (elements) */ 
 SPL_METHOD(SimpleXMLIterator, hasChildren)
 {
@@ -133,7 +133,7 @@ SPL_METHOD(SimpleXMLIterator, hasChildren)
 }
 /* }}} */
 
-/* {{{ proto SimpleXMLIterator SimpleXMLIterator::getChildren()
+/* {{{ proto SimpleXMLIterator SimpleXMLIterator::getChildren() U
  Get child element iterator */ 
 SPL_METHOD(SimpleXMLIterator, getChildren)
 {
@@ -146,7 +146,7 @@ SPL_METHOD(SimpleXMLIterator, getChildren)
 	return_value->value.obj = zend_objects_store_clone_obj(sxe->iter.data TSRMLS_CC);
 }
 
-/* {{{ proto int SimpleXMLIterator::count()
+/* {{{ proto int SimpleXMLIterator::count() U
  Get number of child elements */
 SPL_METHOD(SimpleXMLIterator, count)
 {
