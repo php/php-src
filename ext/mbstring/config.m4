@@ -171,6 +171,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/filters/mbfilter_euc_cn.c
      libmbfl/filters/mbfilter_euc_jp.c
      libmbfl/filters/mbfilter_euc_jp_win.c
+     libmbfl/filters/mbfilter_cp51932.c
      libmbfl/filters/mbfilter_euc_kr.c
      libmbfl/filters/mbfilter_euc_tw.c
      libmbfl/filters/mbfilter_htmlent.c
@@ -282,7 +283,7 @@ if test "$PHP_MBSTRING" != "no"; then
   dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
   PHP_MBSTRING_EXTENSION
-  PHP_INSTALL_HEADERS([ext/mbstring], [mbstring.h php_mbregex.h libmbfl/ libmbfl/mbfl/ oniguruma/])
+  PHP_INSTALL_HEADERS([ext/mbstring], [mbstring.h php_mbregex.h libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h oniguruma/oniguruma.h oniguruma/php_onig_compat.h])
 fi
 
 # vim600: sts=2 sw=2 et
