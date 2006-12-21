@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   function, that shut downs part of a full-duplex connection. (Dmitry)
 - Added internal heap protection (Dmitry)
   . memory-limit is always enabled (--enable-memory-limit removed)
+  . default value if memory-limit is set to 128M
   . safe unlinking
   . cookies
   . canary protection (debug build only)
