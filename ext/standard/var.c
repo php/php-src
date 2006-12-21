@@ -990,7 +990,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 					
 						smart_str_append_long(buf, serialized_length);
 						smart_str_appendl(buf, ":{", 2);
-						/* we need non binary or ascii at least not unicode */
+						/* we need binary or ascii at least not unicode */
 						smart_str_appendl(buf, serialized_data, serialized_length);
 						smart_str_appendc(buf, '}'); 
 					} else {
