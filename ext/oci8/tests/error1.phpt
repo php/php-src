@@ -32,7 +32,7 @@ array(4) {
   ["code"]=>
   int(12154)
   ["message"]=>
-  unicode(45) "ORA-12154: TNS:could not resolve %s"
+  unicode(%d) "ORA-12154: TNS:could not resolve %s"
   ["offset"]=>
   int(0)
   ["sqltext"]=>
