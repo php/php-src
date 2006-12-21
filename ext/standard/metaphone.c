@@ -27,7 +27,7 @@
 
 static int metaphone(unsigned char *word, int word_len, long max_phonemes, char **phoned_word, int traditional);
 
-/* {{{ proto string metaphone(string text[, int phones])
+/* {{{ proto string metaphone(string text[, int phones]) U
    Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
 {
@@ -42,7 +42,7 @@ PHP_FUNCTION(metaphone)
 	}
 
 	if (metaphone((unsigned char *)str, str_len, phones, &result, 1) == 0) {
-		RETVAL_STRING(result, 0);
+		RETVAL_ASCII_STRING(result, ZSTR_AUTOFREE);
 	} else {
 		if (result) {
 			efree(result);
