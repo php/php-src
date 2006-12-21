@@ -642,6 +642,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 			if (xparam->want_errortext) {
 				spprintf(&xparam->outputs.error_text, 0, "local_addr context option is not a string.");
 			}
+			efree(host);
 			return -1;
 		}
 		bindto = parse_ip_address_ex(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval), &bindport, xparam->want_errortext, &xparam->outputs.error_text TSRMLS_CC);
