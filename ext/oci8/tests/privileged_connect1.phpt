@@ -25,3 +25,12 @@ Warning: oci_connect(): Invalid session mode specified (-1) in %s on line %d
 
 Warning: oci_connect() expects parameter 5 to be long, string given in %s on line %d
 Done
+--UEXPECTF--
+Warning: oci_connect(): ORA-01017: invalid username/password; logon denied in %s on line %d
+
+Warning: oci_connect(): ORA-01017: invalid username/password; logon denied in %s on line %d
+
+Warning: oci_connect(): Invalid session mode specified (-1) in %s on line %d
+
+Warning: oci_connect() expects parameter 5 to be long, Unicode string given in %s on line %d
+Done
