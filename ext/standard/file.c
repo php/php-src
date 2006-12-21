@@ -2237,7 +2237,6 @@ PHPAPI void php_fgetcsv(php_stream *stream, /* {{{ */
 		/* Types converted, free storage */
 		efree(delim);
 		efree(enc);
-		efree(buffer);
 	} else {
 		/* Binary stream with binary delimiter/enclosures/prefetch */
 		php_fgetcsv_ex(stream, delim, delim_len, enc, enc_len, "\\", 1, buffer, buffer_len, return_value TSRMLS_CC);
