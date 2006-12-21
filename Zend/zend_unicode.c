@@ -413,6 +413,7 @@ static void zend_default_conversion_error_handler(char *message, UConverter *con
 		UChar32 codepoint;
 		char *message_fmt = "%s (converter %s failed on character {U+%04X} at offset %d)";
 
+		memset(&err_char, '\0', U16_MAX_LENGTH);
 		ucnv_getInvalidUChars(conv, err_char, &err_char_len, &status);
 		codepoint = (err_char_len < 2) ? err_char[0] : U16_GET_SUPPLEMENTARY(err_char[0], err_char[1]);
 
@@ -425,6 +426,7 @@ static void zend_default_conversion_error_handler(char *message, UConverter *con
 		char *p;
 		int i;
 
+		memset(&err_char, '\0', 8);
 		ucnv_getInvalidChars(conv, err_char, &err_char_len, &status);
 		p = buf;
 		for (i = 0; i < err_char_len; i++) {
@@ -476,6 +478,7 @@ static void zend_call_conversion_error_handler(char *message, UConverter *conv, 
 		UChar err_char[U16_MAX_LENGTH];
 		int8_t err_char_len = sizeof(err_char);
 
+		memset(&err_char, '\0', U16_MAX_LENGTH);
 		ucnv_getInvalidUChars(conv, err_char, &err_char_len, &status);
 		ZVAL_UNICODEL(z_char, err_char, err_char_len, 1);
 		ZVAL_LONG(z_offset, error_char_offset-1);
@@ -483,6 +486,7 @@ static void zend_call_conversion_error_handler(char *message, UConverter *conv, 
 		char err_char[8]; /* UTF-8 uses up to 8 bytes */
 		int8_t err_char_len = sizeof(err_char);
 
+		memset(&err_char, '\0', 8);
 		ucnv_getInvalidChars(conv, err_char, &err_char_len, &status);
 		ZVAL_STRINGL(z_char, err_char, err_char_len, 1);
 		ZVAL_LONG(z_offset, error_char_offset-err_char_len);
