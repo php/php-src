@@ -86,11 +86,19 @@ TSRM_API void tsrm_win32_shutdown(void)
 
 TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 {
-	SHFILEINFO sfi;
-
 	if (mode == 1 /*X_OK*/) {
+#if 1
+		/* This code is not supported by Windows 98, 
+		 * but we don't support it anymore */
+		DWORD type;
+
+		return GetBinaryType(pathname, &type)?0:-1;
+#else
+		SHFILEINFO sfi;
+
 		return access(pathname, 0) == 0 && 
 			SHGetFileInfo(pathname, 0, &sfi, sizeof(SHFILEINFO), SHGFI_EXETYPE) != 0 ? 0 : -1;
+#endif
 	} else {
 		return access(pathname, mode);
 	}
