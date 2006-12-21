@@ -688,6 +688,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 		ts->mode = mode && mode[0] == 'r' ? TEMP_STREAM_READONLY : 0;
 		ts->meta = meta;
 	}
+	efree(comma);
 
 	return stream;
 }
