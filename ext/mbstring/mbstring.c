@@ -1346,7 +1346,7 @@ PHP_FUNCTION(mb_substitute_character)
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");					  
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
 					RETVAL_FALSE;					
 				}
 			}
@@ -1605,11 +1605,11 @@ PHP_FUNCTION(mb_strpos)
 	}
 
 	if (offset < 0 || (unsigned long)offset > haystack.len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is out of range");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
 		RETURN_FALSE;
 	}
 	if (needle.len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty needle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter.");
 		RETURN_FALSE;
 	}
 
@@ -1639,7 +1639,7 @@ PHP_FUNCTION(mb_strpos)
 /* }}} */
 
 /* {{{ proto int mb_strrpos(string haystack, string needle [, int offset [, string encoding]])
-   Find the last occurrence of a character in a string within another */
+   Find position of last occurrence of a string within another */
 PHP_FUNCTION(mb_strrpos)
 {
 	int n;
@@ -1712,11 +1712,9 @@ PHP_FUNCTION(mb_strrpos)
 	}
 
 	if (haystack.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty haystack");
 		RETURN_FALSE;
 	}
 	if (needle.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
 		RETURN_FALSE;
 	}
 	n = mbfl_strpos(&haystack, &needle, offset, 1);
@@ -1770,6 +1768,10 @@ PHP_FUNCTION(mb_strripos)
 		RETURN_FALSE;
 	}
 
+	if(offset > old_haystack_len){
+		RETURN_FALSE;
+	}
+
  n = php_mb_stripos(1, old_haystack, old_haystack_len, old_needle, old_needle_len, offset, from_encoding TSRMLS_CC);
 
 	if (n >= 0) {
@@ -1810,7 +1812,7 @@ PHP_FUNCTION(mb_strstr)
 	}
 
 	if (needle.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty delimiter.");
 		RETURN_FALSE;
 	}
 	n = mbfl_strpos(&haystack, &needle, 0, 0);
@@ -1868,11 +1870,9 @@ PHP_FUNCTION(mb_strrchr)
 	}
 
 	if (haystack.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty haystack");
 		RETURN_FALSE;
 	}
 	if (needle.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
 		RETURN_FALSE;
 	}
 	n = mbfl_strpos(&haystack, &needle, 0, 1);
@@ -1917,6 +1917,11 @@ PHP_FUNCTION(mb_stristr)
 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if(!needle.len){
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty delimiter.");
 		RETURN_FALSE;
 	}
 
@@ -2033,7 +2038,7 @@ PHP_FUNCTION(mb_substr_count)
 	}
 
 	if (needle.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty substring.");
 		RETURN_FALSE;
 	}
 
@@ -4225,6 +4230,7 @@ MBSTRING_API int php_mb_gpc_encoding_converter(char **str, int *len, int num, co
 			str[i] = ret->val;
 			len[i] = ret->len;
 		}
+		
 		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 		mbfl_buffer_converter_delete(convd);
 	}
@@ -4334,7 +4340,6 @@ MBSTRING_API int php_mb_stripos(int mode, char *old_haystack, int old_haystack_l
 		}
 
 		if (haystack.len <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty haystack");
 			break;
 		}
 
@@ -4345,7 +4350,6 @@ MBSTRING_API int php_mb_stripos(int mode, char *old_haystack, int old_haystack_l
 		}
 
 		if (needle.len <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty needle");
 			break;
 		}
 
@@ -4356,7 +4360,7 @@ MBSTRING_API int php_mb_stripos(int mode, char *old_haystack, int old_haystack_l
 		}
 
 		if (offset < 0 || (unsigned long)offset > haystack.len) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is out of range");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
 			break;
 		}
 
@@ -4507,6 +4511,7 @@ int php_mb_encoding_converter(char **to, int *to_length, const char *from,
 		*to = ret->val;
 		*to_length = ret->len;
 	}
+
 	MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 	mbfl_buffer_converter_delete(convd);
 
