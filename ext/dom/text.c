@@ -156,6 +156,10 @@ PHP_FUNCTION(dom_text_split_text)
 	xmlFree(first);
 	xmlFree(second);
 
+	if (nnode == NULL) {
+		RETURN_FALSE;
+	}
+
 	if (node->parent != NULL) {
 		nnode->type = XML_ELEMENT_NODE;
 		xmlAddNextSibling(node, nnode);
