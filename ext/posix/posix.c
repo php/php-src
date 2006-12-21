@@ -851,6 +851,7 @@ PHP_FUNCTION(posix_getgrnam)
 	array_init(return_value);
 
 	if (!php_posix_group_to_array(g, return_value)) {
+		zval_dtor(return_value);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to convert posix group to array");
 		RETVAL_FALSE;
 	}
@@ -869,8 +870,8 @@ PHP_FUNCTION(posix_getgrgid)
 	int ret;
 	struct group _g;
 	struct group *retgrptr;
-	int grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
-	char *grbuf = emalloc(grbuflen);
+	int grbuflen;
+	char *grbuf;
 #endif
 	struct group *g;
 	
@@ -878,6 +879,10 @@ PHP_FUNCTION(posix_getgrgid)
 		RETURN_FALSE;
 	}
 #ifdef HAVE_GETGRGID_R
+	
+	grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+	grbuf = emalloc(grbuflen);
+
 	ret = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
 	if (ret) {
 		POSIX_G(last_error) = ret;
@@ -894,6 +899,7 @@ PHP_FUNCTION(posix_getgrgid)
 	array_init(return_value);
 
 	if (!php_posix_group_to_array(g, return_value)) {
+		zval_dtor(return_value);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to convert posix group struct to array");
 		RETVAL_FALSE;
 	}
@@ -955,6 +961,7 @@ PHP_FUNCTION(posix_getpwnam)
 	array_init(return_value);
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
+		zval_dtor(return_value);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
@@ -972,8 +979,8 @@ PHP_FUNCTION(posix_getpwuid)
 #ifdef HAVE_GETPWUID_R
 	struct passwd _pw;
 	struct passwd *retpwptr = NULL;
-	int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-	char *pwbuf = emalloc(pwbuflen);
+	int pwbuflen;
+	char *pwbuf;
 	int ret;
 #endif
 	struct passwd *pw;
@@ -982,6 +989,9 @@ PHP_FUNCTION(posix_getpwuid)
 		RETURN_FALSE;
 	}
 #ifdef HAVE_GETPWUID_R
+	pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+	pwbuf = emalloc(pwbuflen);
+
 	ret = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
 	if (ret) {
 		POSIX_G(last_error) = ret;
@@ -998,6 +1008,7 @@ PHP_FUNCTION(posix_getpwuid)
 	array_init(return_value);
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
+		zval_dtor(return_value);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
@@ -1115,8 +1126,10 @@ PHP_FUNCTION(posix_getrlimit)
 	array_init(return_value);
 
 	for (l=limits; l->name; l++) {
-		if (posix_addlimit(l->limit, l->name, return_value TSRMLS_CC) == FAILURE)
+		if (posix_addlimit(l->limit, l->name, return_value TSRMLS_CC) == FAILURE) {
+			zval_dtor(return_value);
 			RETURN_FALSE;
+		}
 	}
 }
 /* }}} */
