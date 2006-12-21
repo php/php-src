@@ -822,6 +822,7 @@ PHP_FUNCTION(posix_getgrnam)
 	}
 
 	if (!php_posix_group_to_array(g, return_value)) {
+		zval_dtor(return_value);
 		php_error(E_WARNING, "%s() unable to convert posix group to array",
 				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -853,6 +854,7 @@ PHP_FUNCTION(posix_getgrgid)
 	}
 
 	if (!php_posix_group_to_array(g, return_value)) {
+		zval_dtor(return_value);
 		php_error(E_WARNING, "%s() unable to convert posix group struct to array",
 				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -898,6 +900,7 @@ PHP_FUNCTION(posix_getpwnam)
 	}
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
+		zval_dtor(return_value);
 		php_error(E_WARNING, "%s() unable to convert posix passwd struct to array",
 				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -927,6 +930,7 @@ PHP_FUNCTION(posix_getpwuid)
 	}
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
+		zval_dtor(return_value);
 		php_error(E_WARNING, "%s() unable to convert posix passwd struct to array",
 				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -1046,8 +1050,10 @@ PHP_FUNCTION(posix_getrlimit)
 	}
 
 	for (l=limits; l->name; l++) {
-		if (posix_addlimit(l->limit, l->name, return_value TSRMLS_CC) == FAILURE)
+		if (posix_addlimit(l->limit, l->name, return_value TSRMLS_CC) == FAILURE) {
+			zval_dtor(return_value);
 			RETURN_FALSE;
+		}
 	}
 }
 /* }}} */
