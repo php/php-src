@@ -948,7 +948,8 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 
 					default:
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot yet handle MBCS!");
-						return 0;
+						efree(ret);
+						return NULL;
 				}
 
 				if (php_memnstr(ret, entity, entity_length, ret+retlen)) {
@@ -1308,7 +1309,10 @@ PHP_FUNCTION(html_entity_decode)
 	}
 
 	replaced = php_unescape_html_entities(str, str_len, &len, 1, quote_style, hint_charset TSRMLS_CC);
-	RETVAL_STRINGL(replaced, len, 0);
+	if (replaced) {
+		RETURN_STRINGL(replaced, len, 0);
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 
