@@ -419,7 +419,6 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 
 	zend_call_method_with_0_params(&object, ce, &ce->serialize_func, "serialize", &retval);
 
-
 	if (!retval || EG(exception)) {
 		result = FAILURE;
 	} else {
@@ -428,14 +427,12 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 			/* we could also make this '*buf_len = 0' but this allows to skip variables */
 			zval_ptr_dtor(&retval);
 			return FAILURE;
+		case IS_UNICODE:
+			convert_to_string(retval);
+			/* no break */
 		case IS_STRING:
 			*buffer = (unsigned char*)estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 			*buf_len = Z_STRLEN_P(retval);
-			result = SUCCESS;
-			break;
-		case IS_UNICODE:
-			*buffer = (unsigned char*)eustrndup(Z_USTRVAL_P(retval), Z_USTRLEN_P(retval));
-			*buf_len = Z_USTRLEN_P(retval);
 			result = SUCCESS;
 			break;
 		default: /* failure */
