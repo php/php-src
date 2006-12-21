@@ -111,7 +111,12 @@ PHP_MINIT_FUNCTION(nl_langinfo);
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 0)
 #define strnatcasecmp(a, b) \
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 1)
+#define u_strnatcmp(a, b) \
+	u_strnatcmp_ex(a, u_strlen(a), b, strlen(b), 0)
+#define u_strnatcasecmp(a, b) \
+	u_strnatcmp_ex(a, u_strlen(a), b, strlen(b), 1)
 PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case);
+PHPAPI int u_strnatcmp_ex(UChar const *a, size_t a_len, UChar const *b, size_t b_len, int fold_case);
 
 #ifdef HAVE_LOCALECONV
 PHPAPI struct lconv *localeconv_r(struct lconv *out);

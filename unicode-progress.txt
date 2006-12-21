@@ -11,15 +11,6 @@ ext/standard
         Params API, what encoding to use for the message, handling email
         option
 
-  array.c
-  -------
-    natsort(), natcasesort()
-        Params API
-        Either port strnatcmp() to support Unicode or maybe use ICU's
-        numeric collation. Update: can't seem to get the right collation
-        parameters to duplicate strnatcmp() functionality. Conclusion: port
-        to support Unicode.
-
   string.c
   --------
     parse_str()
@@ -27,9 +18,6 @@ ext/standard
 
     sscanf()
         Params API. Rest - no idea yet.
-
-    strnatcmp(), strnatcasecmp()
-        Params API. The rest depends on porting of strnatcmp.c
 
     wordwrap()
         Upgrade, do wordwrapping on codepoint (or glyph ?) level, maybe use
@@ -538,6 +526,7 @@ ext/standard
     in_array()
     min()
     max()
+    natsort(), natcasesort()
     range()
     shuffle()
 
@@ -609,6 +598,7 @@ ext/standard
     stripslashes()
     stripos()
     stristr()
+    strnatcmp(), strnatcasecmp()
     strpbrk()
     strpos()
     strrchr()

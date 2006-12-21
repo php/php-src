@@ -394,6 +394,7 @@ static int array_natural_general_compare(const void *a, const void *b, int fold_
 	zval *fval, *sval;
 	zval first, second;
 	int result;
+	zend_uchar type;
  
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -402,20 +403,26 @@ static int array_natural_general_compare(const void *a, const void *b, int fold_
 	sval = *((zval **) s->pData);
 	first = *fval;
 	second = *sval;
-	if (Z_TYPE_P(fval) != IS_STRING) {
+
+	type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_P(fval), Z_TYPE_P(sval));
+	if (Z_TYPE_P(fval) != type) {
 		zval_copy_ctor(&first);
-		convert_to_string(&first);
+		convert_to_explicit_type(&first, type);
 	}
-	if (Z_TYPE_P(sval) != IS_STRING) {
+	if (Z_TYPE_P(sval) != type) {
 		zval_copy_ctor(&second);
-		convert_to_string(&second);
+		convert_to_explicit_type(&second, type);
 	}
 
-	result = strnatcmp_ex(Z_STRVAL(first), Z_STRLEN(first), Z_STRVAL(second), Z_STRLEN(second), fold_case);
+	if (type == IS_UNICODE) {
+		result = u_strnatcmp_ex(Z_USTRVAL(first), Z_USTRLEN(first), Z_USTRVAL(second), Z_USTRLEN(second), fold_case);
+	} else {
+		result = strnatcmp_ex(Z_STRVAL(first), Z_STRLEN(first), Z_STRVAL(second), Z_STRLEN(second), fold_case);
+	}
 
-	if (Z_TYPE_P(fval) != IS_STRING)
+	if (Z_TYPE_P(fval) != type)
 		zval_dtor(&first);
-	if (Z_TYPE_P(sval) != IS_STRING)
+	if (Z_TYPE_P(sval) != type)
 		zval_dtor(&second);
 	
 	return result;
@@ -433,14 +440,14 @@ static int array_natural_case_compare(const void *a, const void *b TSRMLS_DC)
 
 static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 {
-	zval **array;
+	zval *array;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &array) == FAILURE) {
+		return;
 	}
 
-	target_hash = HASH_OF(*array);
+	target_hash = HASH_OF(array);
 	if (!target_hash) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
 		return;
@@ -460,7 +467,7 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 }
 
 
-/* {{{ proto void natsort(array &array_arg)
+/* {{{ proto void natsort(array &array_arg) U
    Sort an array using natural sort */
 PHP_FUNCTION(natsort)
 {
@@ -469,7 +476,7 @@ PHP_FUNCTION(natsort)
 /* }}} */
 
 
-/* {{{ proto void natcasesort(array &array_arg)
+/* {{{ proto void natcasesort(array &array_arg) U
    Sort an array using case-insensitive natural sort */
 PHP_FUNCTION(natcasesort)
 {
