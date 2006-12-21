@@ -2877,14 +2877,16 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 {
 	zend_op *opline;
 	int doing_inheritance = 0;
-	zend_class_entry *new_class_entry = emalloc(sizeof(zend_class_entry));
+	zend_class_entry *new_class_entry;
 	unsigned int lcname_len;
-	zstr lcname = zend_u_str_case_fold(Z_TYPE(class_name->u.constant), Z_UNIVAL(class_name->u.constant), Z_UNILEN(class_name->u.constant), 0, &lcname_len);
+	zstr lcname;
 
 	if (CG(active_class_entry)) {
 		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
 		return;
 	}
+
+	lcname = zend_u_str_case_fold(Z_TYPE(class_name->u.constant), Z_UNIVAL(class_name->u.constant), Z_UNILEN(class_name->u.constant), 0, &lcname_len);
 
 	if ((lcname_len == sizeof("self")-1 &&
 	     ZEND_U_EQUAL(Z_TYPE(class_name->u.constant), lcname, lcname_len, "self", sizeof("self")-1)) ||
@@ -2894,6 +2896,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 		zend_error(E_COMPILE_ERROR, "Cannot use '%R' as class name as it is reserved", Z_TYPE(class_name->u.constant), Z_UNIVAL(class_name->u.constant));
 	}
 
+	new_class_entry = emalloc(sizeof(zend_class_entry));
 	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->name = Z_UNIVAL(class_name->u.constant);
 	new_class_entry->name_length = Z_UNILEN(class_name->u.constant);
