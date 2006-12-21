@@ -661,6 +661,8 @@ ZEND_API void convert_to_array(zval *op)
 					convert_object_to_type(op, IS_ARRAY, convert_to_array);
 
 					if (op->type == IS_ARRAY) {
+						zend_hash_destroy(ht);
+						FREE_HASHTABLE(ht);
 						return;
 					}
 				}
