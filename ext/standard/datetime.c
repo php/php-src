@@ -106,11 +106,16 @@ PHP_FUNCTION(strptime)
 		char *temp;
 		int temp_len;
 
-		zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp, &temp_len, ts.u, ts_length TSRMLS_CC);
+		if (zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp, &temp_len, ts.u, ts_length TSRMLS_CC) == FAILURE) {
+			RETURN_FALSE;
+		}
 		ts.s = temp;
 		ts_length = temp_len;
 
-		zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp, &temp_len, format.u, format_length TSRMLS_CC);
+		if (zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp, &temp_len, format.u, format_length TSRMLS_CC) == FAILURE) {
+			efree(ts.s);
+			RETURN_FALSE;
+		}
 		format.s = temp;
 		format_length = temp_len;
 	}
