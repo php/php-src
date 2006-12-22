@@ -2,7 +2,7 @@
 Sort with SORT_LOCALE_STRING
 --SKIPIF--
 <?php
-if ("fr_FR" != setlocale(LC_CTYPE, "fr_FR")) {
+if (false == @setlocale(LC_CTYPE, "fr_FR", "fr_FR.UTF-8")) {
   die("skip setlocale() failed\n");
 }
 if (!function_exists("locale_set_default")) {
@@ -14,7 +14,7 @@ unicode.script_encoding=UTF-8
 unicode.output_encoding=UTF-8
 --FILE--
 <?php
-setlocale(LC_ALL, 'fr_FR');
+@setlocale(LC_ALL, 'fr_FR', 'fr_FR.UTF-8');
 locale_set_default('fr_FR');
 $table = array("AB" => "Alberta",
 "BC" => "Colombie-Britannique",
