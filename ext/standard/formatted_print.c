@@ -229,9 +229,6 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 
 	switch (fmt) {			
 		case 'e':
-			if (precision) {
-				precision--;
-			}
 		case 'E':
 		case 'f':
 		case 'F':
