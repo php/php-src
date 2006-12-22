@@ -983,7 +983,11 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 	}
 
 	/* find decimal point, if expected */
-	dp = dec ? strchr(tmpbuf, '.') : NULL;
+	if (dec) {
+		dp = strpbrk(tmpbuf, ".,");
+	} else {
+		dp = NULL;
+	}
 
 	/* calculate the length of the return buffer */
 	if (dp) {
