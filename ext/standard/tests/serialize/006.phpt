@@ -20,12 +20,12 @@ unicode.output_encoding=ISO-8859-1
 	var_dump(unserialize(serialize($åäöÅÄÖ)));
 ?>
 --EXPECT--
-string(55) "O:11:"ÜberKööliäå":1:{S:11:"åäöÅÄÖüÜber";S:6:"åäöÅÄÖ";}"
+string(83) "O:11:"ÜberKööliäå":1:{S:11:"\e5\e4\f6\c5\c4\d6\fc\dcber";S:6:"\e5\e4\f6\c5\c4\d6";}"
 object(ÜberKööliäå)#2 (1) {
   ["åäöÅÄÖüÜber"]=>
   string(6) "åäöÅÄÖ"
 }
-string(32) "a:1:{S:6:"åäöÅÄÖ";S:6:"åäöÅÄÖ";}"
+string(56) "a:1:{S:6:"\e5\e4\f6\c5\c4\d6";S:6:"\e5\e4\f6\c5\c4\d6";}"
 array(1) {
   ["åäöÅÄÖ"]=>
   string(6) "åäöÅÄÖ"
