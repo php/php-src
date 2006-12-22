@@ -2003,6 +2003,16 @@ ZEND_API UChar *_eustrndup(const UChar *s, int length ZEND_FILE_LINE_DC ZEND_FIL
 }
 
 
+ZEND_API zstr _ezstrndup(int type, const zstr s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+	if (type == IS_STRING) {
+		return ZSTR(_estrndup(s.s, length ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
+	} else {
+		return ZSTR(_eustrndup(s.u, length ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
+	}
+}
+
+
 ZEND_API char *zend_strndup(const char *s, uint length)
 {
 	char *p;

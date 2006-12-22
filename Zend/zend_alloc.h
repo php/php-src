@@ -53,6 +53,7 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) 
 ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API UChar *_eustrdup(const UChar *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API UChar *_eustrndup(const UChar *s, int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API zstr _ezstrndup(int type, const zstr s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 
 /* Standard wrapper macros */
@@ -68,6 +69,7 @@ ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_
 #define eurealloc(ptr, size)			(UChar*)_erealloc((ptr), UBYTES(size), 0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define eustrndup(s, length)			_eustrndup((s), (length) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define eustrdup(s)						_eustrdup((s) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define ezstrndup(type, s, length)      _ezstrndup((type), (s), (length) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 
 /* Relay wrapper macros */
 #define emalloc_rel(size)					_emalloc((size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
