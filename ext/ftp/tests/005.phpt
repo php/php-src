@@ -66,7 +66,7 @@ int(-1)
 Warning: ftp_mkdir(): Command not implemented (7). in %s005.php on line 20
 bool(false)
 
-Warning: ftp_nb_continue(): no nbronous transfer to continue. in %s005.php on line 21
+Warning: ftp_nb_continue(): no nbronous transfer to continue in %s005.php on line 21
 int(0)
 
 Warning: ftp_nb_fget(): Mode must be FTP_ASCII or FTP_BINARY in %s005.php on line 22
