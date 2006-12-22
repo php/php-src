@@ -1014,71 +1014,40 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 }
 /* }}} */
 
-/* {{{ proto string number_format(float number [, int num_decimal_places [, string dec_seperator, string thousands_seperator]])
+/* {{{ proto string number_format(float number [, int num_decimal_places [, string dec_seperator, string thousands_seperator]]) U
    Formats a number with grouped thousands */
 PHP_FUNCTION(number_format)
 {
-	zval **num, **dec, **t_s, **d_p;
+	char *sep1 = NULL, *sep2 = NULL;
+	int sep1_len, sep2_len;
+	double num;
+	int dec = 0;
 	char thousand_sep=',', dec_point='.';
 	char *tmp;
 	
-	switch(ZEND_NUM_ARGS()) {
-	case 1:
-		if (zend_get_parameters_ex(1, &num)==FAILURE) {
-			RETURN_FALSE;
-		}
-		convert_to_double_ex(num);
-		tmp = _php_math_number_format(Z_DVAL_PP(num), 0, dec_point, thousand_sep);
-		RETVAL_RT_STRING(tmp, 0);
-		if (UG(unicode)) {
-			efree(tmp);
-		}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|ls&s&", &num, &dec,
+							  &sep1, &sep1_len, UG(ascii_conv),
+							  &sep2, &sep2_len, UG(ascii_conv)) == FAILURE) {
 		return;
-	case 2:
-		if (zend_get_parameters_ex(2, &num, &dec)==FAILURE) {
-			RETURN_FALSE;
-		}
-		convert_to_double_ex(num);
-		convert_to_long_ex(dec);
-		tmp = _php_math_number_format(Z_DVAL_PP(num), Z_LVAL_PP(dec), dec_point, thousand_sep);
-		RETVAL_RT_STRING(tmp, 0);
-		if (UG(unicode)) {
-			efree(tmp);
-		}
-		return;
-	case 4:
-		if (zend_get_parameters_ex(4, &num, &dec, &d_p, &t_s)==FAILURE) {
-			RETURN_FALSE;
-		}
-		convert_to_double_ex(num);
-		convert_to_long_ex(dec);
-
-		if (Z_TYPE_PP(d_p) != IS_NULL) { 
-			convert_to_string_ex(d_p);
-			if (Z_STRLEN_PP(d_p)>=1) {
-				dec_point=Z_STRVAL_PP(d_p)[0];
-			} else if (Z_STRLEN_PP(d_p)==0) {
-				dec_point=0;
-			}
-		}
-		if (Z_TYPE_PP(t_s) != IS_NULL) {
-			convert_to_string_ex(t_s);
-			if (Z_STRLEN_PP(t_s)>=1) {
-				thousand_sep=Z_STRVAL_PP(t_s)[0];
-			} else if(Z_STRLEN_PP(t_s)==0) {
-				thousand_sep=0;	
-			}
-		}
-		tmp = _php_math_number_format(Z_DVAL_PP(num), Z_LVAL_PP(dec), dec_point, thousand_sep);
-		RETVAL_RT_STRING(tmp, 0);
-		if (UG(unicode)) {
-			efree(tmp);
-		}
-		return;
-	default:
-		WRONG_PARAM_COUNT;
-		break;
 	}
+
+	if (sep1) {
+		if (sep1_len >= 1) {
+			dec_point = sep1[0];
+		} else if (sep1_len == 0) {
+			dec_point = 0;
+		}
+	}
+	if (sep2) {
+		if (sep2_len >= 1) {
+			thousand_sep = sep2[0];
+		} else if (sep2_len == 0) {
+			thousand_sep = 0;
+		}
+	}
+
+	tmp = _php_math_number_format(num, dec, dec_point, thousand_sep);
+	RETVAL_ASCII_STRING(tmp, ZSTR_AUTOFREE);
 }
 /* }}} */
 
