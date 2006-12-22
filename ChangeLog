@@ -1,3 +1,235 @@
+2006-12-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/levenshtein.c:
+      levenshtein() already supported Unicode.
+
+    * ext/standard/metaphone.c:
+      Metaphone will work only with binary runtime-encoded strings.
+
+2006-12-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/var.c:
+      - No misleading comments
+
+    * ext/spl/spl_observer.c
+      ext/spl/spl_sxe.c:
+      - Mark a fewthings as unicode ready
+
+    * ext/standard/var.c:
+      - Serialization doesn't work with unicode data
+
+    * ZendEngine2/zend_interfaces.c:
+      -Serialization doesn't work with unicode data
+
+2006-12-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_interface.c:
+      temporary fix for oci_error(), just to make it work
+      it should be using add_ascii_assoc_text() instead
+
+    * ext/oci8/oci8_interface.c:
+      added support for CALL statement type (patch by Chris Jones)
+
+    * main/SAPI.c:
+      fix ws, cs and overall code readability
+
+2006-12-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/array.c
+      ext/standard/php_string.h
+      ext/standard/string.c
+      ext/standard/strnatcmp.c:
+      Bite the bullet and port the natural comparison algorithm to support
+      UChar strings. Also, simplify the original code.
+      
+
+2006-12-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/datetime.c:
+      temp is freed in zend_unicode_to_string() on failure
+
+    * ext/standard/browscap.c:
+      lookup_browser_name cannot be NULL
+
+    * (PHP_5_2)
+      ext/oci8/tests/array_bind_014.phpt
+      ext/oci8/tests/array_bind_int1.phpt
+      ext/oci8/tests/fetch_all2.phpt
+      ext/oci8/tests/lob_020.phpt
+      ext/oci8/tests/lob_027.phpt
+      ext/oci8/tests/lob_033.phpt
+      ext/oci8/tests/lob_034.phpt
+      ext/oci8/tests/lob_035.phpt:
+      improve tests
+
+    * ext/oci8/tests/array_bind_014.phpt
+      ext/oci8/tests/array_bind_014.phpt
+      ext/oci8/tests/array_bind_int1.phpt
+      ext/oci8/tests/error1.phpt
+      ext/oci8/tests/fetch_all2.phpt
+      ext/oci8/tests/fetch_all2.phpt
+      ext/oci8/tests/lob_020.phpt
+      ext/oci8/tests/lob_027.phpt
+      ext/oci8/tests/lob_033.phpt
+      ext/oci8/tests/lob_033.phpt
+      ext/oci8/tests/lob_034.phpt
+      ext/oci8/tests/lob_034.phpt
+      ext/oci8/tests/lob_035.phpt
+      ext/oci8/tests/lob_035.phpt
+      ext/oci8/tests/privileged_connect1.phpt:
+      
+      improve tests, add new ones
+
+2006-12-21  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/libmbfl/filters/mbfilter_cp51932.c
+      ext/mbstring/libmbfl/filters/mbfilter_cp51932.h:
+      Initial commit(Synced PHP_5_2 Branch.).
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mb_gpc.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/libmbfl/libmbfl.dsw
+      ext/mbstring/libmbfl/libmbfl.sln
+      ext/mbstring/libmbfl/libmbfl.vcproj
+      ext/mbstring/libmbfl/filters/Makefile.am
+      ext/mbstring/libmbfl/filters/mbfilter_euc_jp_win.c
+      ext/mbstring/libmbfl/filters/mbfilter_jis.c
+      ext/mbstring/libmbfl/filters/mbfilter_jis.h
+      ext/mbstring/libmbfl/filters/unicode_table_jis.h
+      ext/mbstring/libmbfl/mbfl/mbfilter.c
+      ext/mbstring/libmbfl/mbfl/mbfl_convert.c
+      ext/mbstring/libmbfl/mbfl/mbfl_encoding.c
+      ext/mbstring/libmbfl/mbfl/mbfl_encoding.h
+      ext/mbstring/libmbfl/mbfl/mbfl_ident.c
+      ext/mbstring/libmbfl/nls/nls_ru.c
+      ext/mbstring/libmbfl/nls/nls_ru.h:
+      Synced PHP_5_2 Branch.
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      Fixed bug #39361, #39400 (mbstring function overloading problem).
+
+2006-12-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * php.ini-dist
+      php.ini-dist
+      php.ini-recommended
+      php.ini-recommended:
+      Fixed comments
+
+2006-12-21  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/domimplementation.c
+      ext/dom/text.c:
+      MFB: fix issues identitified by coverity
+
+    * (PHP_5_2)
+      ext/dom/domimplementation.c
+      ext/dom/text.c:
+      fix issues identitified by coverity
+
+2006-12-21  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/tests/lob_030.phpt
+      ext/oci8/tests/lob_031.phpt
+      ext/oci8/tests/lob_032.phpt:
+      new tests
+
+    * ext/oci8/tests/lob_030.phpt
+      ext/oci8/tests/lob_030.phpt
+      ext/oci8/tests/lob_031.phpt
+      ext/oci8/tests/lob_031.phpt
+      ext/oci8/tests/lob_032.phpt
+      ext/oci8/tests/lob_032.phpt:
+      
+      new tests by Christopher Jones
+
+    * ZendEngine2/zend_execute_API.c:
+      fix possible leak
+
+2006-12-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      php.ini-dist
+      php.ini-dist
+      php.ini-recommended
+      php.ini-recommended
+      main/main.c
+      main/main.c:
+      Default memory_limit value is set to 128M
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_win32.c:
+      emoved dependency from SHELL32.DLL
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_win32.c:
+      Removed dependency from SHELL32.DLL
+
+2006-12-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_compile.c:
+      MFB: Fix a possible memory leak
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c:
+      Fix a possible memory leak
+
+    * ZendEngine2/zend_operators.c:
+      MFB: Fixed possible memory leak
+
+    * (PHP_5_2)
+      ZendEngine2/zend_operators.c:
+      Fixed possible memory leak
+
+2006-12-21  Antony Dovgal  <antony@zend.com>
+
+    * main/streams/memory.c:
+      apply correct fix (aka "oops!")
+
+2006-12-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/soap/php_sdl.c:
+      MFB: Optimize out zend_hash_num_elements() call
+
+    * (PHP_5_2)
+      ext/soap/php_sdl.c:
+      Optimize out zend_hash_num_elements() call
+
+2006-12-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/html.c:
+      fix leak on error
+
+    * main/streams/xp_socket.c:
+      don't leak on error
+
+    * ext/posix/posix.c
+      ext/posix/posix.c:
+      fix possible leaks
+
+    * main/streams/memory.c:
+      fix potential leak
+
+    * sapi/cli/php_cli.c:
+      prevent potential leak on error
+
+    * ext/standard/datetime.c:
+      bail out if zend_unicode_to_string() fails
+
+    * ZendEngine2/zend_unicode.c:
+      make sure err_char is initialized properly
+
+    * ext/standard/file.c:
+      fix double free
+
 2006-12-20  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/string.c:
