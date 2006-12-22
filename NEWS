@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Fixed bug #39903 (Notice message when executing __halt_compiler() more than 
   once). (Tony)
 - Fixed bug #39898 (FILTER_VALIDATE_URL validates \r\n\t etc). (Ilia)
+- Fixed bug #39873 (number_format() breaks with locale & decimal points).
+  (Ilia)
 - Fixed bug #39869 (safe_read does not initialize errno).
   (michiel at boland dot org, Dmitry)
 - Fixed bug #39850 (SplFileObject throws contradictory/wrong error messages 
