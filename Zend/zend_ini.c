@@ -589,6 +589,46 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty)
 	return SUCCESS;
 }
 
+ZEND_API ZEND_INI_MH(OnUpdateUTF8String)
+{
+	UChar **p;
+	UChar *ustr = NULL;
+	int32_t ustr_len, capacity;
+	UErrorCode status = U_ZERO_ERROR;
+#ifndef ZTS
+	char *base = (char *) mh_arg2;
+#else
+	char *base;
+
+	base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+
+	/* estimate capacity */
+	capacity = (new_value_length > 2) ? ((new_value_length >> 1) + (new_value_length >> 3) + 2) : new_value_length;
+
+	while (1) {
+		ustr = eurealloc(ustr, capacity+1);
+		u_strFromUTF8(ustr, capacity, &ustr_len, new_value, new_value_length, &status);
+		if (status == U_BUFFER_OVERFLOW_ERROR) {
+			capacity = ustr_len;
+			status = U_ZERO_ERROR;
+		} else {
+			break;
+		}
+	}
+
+	if (U_FAILURE(status)) {
+		zend_error(E_WARNING, "Could not convert UTF-8 INI value to Unicode");
+		efree(ustr);
+		return FAILURE;
+	}
+
+	p = (UChar **) (base+(size_t) mh_arg1);
+
+	*p = ustr;
+	return SUCCESS;
+}
+
 /*
  * Local variables:
  * tab-width: 4
