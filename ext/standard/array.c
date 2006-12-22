@@ -388,7 +388,7 @@ static int array_reverse_data_compare(const void *a, const void *b TSRMLS_DC)
 	return php_array_data_compare(a, b TSRMLS_CC)*-1;
 }
 
-static int array_natural_general_compare(const void *a, const void *b, int fold_case)
+static int array_natural_general_compare(const void *a, const void *b, int fold_case TSRMLS_DC)
 {
 	Bucket *f, *s;
 	zval *fval, *sval;
@@ -430,12 +430,12 @@ static int array_natural_general_compare(const void *a, const void *b, int fold_
 
 static int array_natural_compare(const void *a, const void *b TSRMLS_DC)
 {
-	return array_natural_general_compare(a, b, 0);
+	return array_natural_general_compare(a, b, 0 TSRMLS_CC);
 }
 
 static int array_natural_case_compare(const void *a, const void *b TSRMLS_DC)
 {
-	return array_natural_general_compare(a, b, 1);
+	return array_natural_general_compare(a, b, 1 TSRMLS_CC);
 }
 
 static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
