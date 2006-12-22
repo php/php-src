@@ -2036,9 +2036,9 @@ ZEND_API UChar *zend_ustrndup(const UChar *s, uint length)
 ZEND_API zstr zend_zstrndup(int type, const zstr s, uint length)
 {
 	if (type == IS_STRING) {
-		return (zstr)zend_strndup(s.s, length);
+		return ZSTR(zend_strndup(s.s, length));
 	} else {
-		return (zstr)zend_ustrndup(s.u, length);
+		return ZSTR(zend_ustrndup(s.u, length));
 	}
 }
 
