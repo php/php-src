@@ -1995,7 +1995,40 @@ ZEND_METHOD(reflection_parameter, getClass)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->arg_info->class_name) {
-		if (zend_lookup_class(param->arg_info->class_name, param->arg_info->class_name_len, &pce TSRMLS_CC) == FAILURE) {
+		/* Class name is stored as a string, we might also get "self" or "parent"
+		 * - For "self", simply use the function scope. If scope is NULL then
+		 *   the function is global and thus self does not make any sense
+		 *
+		 * - For "parent", use the function scope's parent. If scope is NULL then
+		 *   the function is global and thus parent does not make any sense.
+		 *   If the parent is NULL then the class does not extend anything and
+		 *   thus parent does not make any sense, either.
+		 *
+		 * TODO: Think about moving these checks to the compiler or some sort of
+		 * lint-mode.
+		 */
+		if (0 == strncmp(param->arg_info->class_name, "self", sizeof("self")- 1)) {
+			zend_class_entry *ce= param->fptr->common.scope;
+			if (!ce) {
+			   zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				   "Parameter uses 'self' as type hint but function is not a class member!");
+			   return;
+			}
+			pce= &ce;
+		} else if (0 == strncmp(param->arg_info->class_name, "parent", sizeof("parent")- 1)) {
+			zend_class_entry *ce= param->fptr->common.scope;
+			if (!ce) {
+			   zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				   "Parameter uses 'parent' as type hint but function is not a class member!");
+			   return;
+			}
+			if (!ce->parent) {
+			   zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				   "Parameter uses 'parent' as type hint although class does not have a parent!");
+			   return;
+			}
+			pce= &ce->parent;
+		} else if (zend_lookup_class(param->arg_info->class_name, param->arg_info->class_name_len, &pce TSRMLS_CC) == FAILURE) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 				"Class %s does not exist", param->arg_info->class_name);
 			return;
