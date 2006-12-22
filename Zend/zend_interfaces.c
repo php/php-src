@@ -411,7 +411,7 @@ static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_en
 /* }}}*/
 
 /* {{{ zend_user_serialize */
-int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC)
+int zend_user_serialize(zval *object, int *type, zstr *buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC)
 {
 	zend_class_entry * ce = Z_OBJCE_P(object);
 	zval *retval;
@@ -428,11 +428,10 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 			zval_ptr_dtor(&retval);
 			return FAILURE;
 		case IS_UNICODE:
-			convert_to_string(retval);
-			/* no break */
 		case IS_STRING:
-			*buffer = (unsigned char*)estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-			*buf_len = Z_STRLEN_P(retval);
+			*buffer = zend_zstrndup(Z_TYPE_P(retval), Z_UNIVAL_P(retval), Z_UNILEN_P(retval));
+			*buf_len = Z_UNILEN_P(retval);
+			*type = Z_TYPE_P(retval);
 			result = SUCCESS;
 			break;
 		default: /* failure */
@@ -450,14 +449,14 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 /* }}} */
 
 /* {{{ zend_user_unserialize */
-int zend_user_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC)
+int zend_user_unserialize(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC)
 {
 	zval * zdata;
 
 	object_init_ex(*object, ce);
 
 	MAKE_STD_ZVAL(zdata);
-	ZVAL_STRINGL(zdata, (char*)buf, buf_len, 1);
+	ZVAL_ZSTRL(zdata, type, buf, buf_len, 1);
 
 	zend_call_method_with_1_params(object, ce, &ce->unserialize_func, "unserialize", NULL, zdata);
 
