@@ -972,10 +972,12 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 
 				if(ce && ce->serialize != NULL) {
 					/* has custom handler */
-					unsigned char *serialized_data = NULL;
+					int serialized_type;
+					zstr serialized_data;
 					zend_uint serialized_length;
 
-					if(ce->serialize(struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
+					serialized_data.v = NULL;
+					if(ce->serialize(struc, &serialized_type, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
 						smart_str_appendl(buf, "C:", 2);
 						smart_str_append_long(buf, Z_OBJCE_P(struc)->name_length);
 						smart_str_appendl(buf, ":\"", 2);
@@ -989,15 +991,21 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 						smart_str_appendl(buf, "\":", 2);
 					
 						smart_str_append_long(buf, serialized_length);
-						smart_str_appendl(buf, ":{", 2);
-						/* we need binary or ascii at least not unicode */
-						smart_str_appendl(buf, serialized_data, serialized_length);
+						if (serialized_type == IS_UNICODE) {
+							smart_str_appendl(buf, ":U:{", 4);
+							php_var_serialize_ustr(buf, serialized_data.u, serialized_length);
+						} else if (serialized_type == IS_STRING) {
+							smart_str_appendl(buf, ":{", 2);
+							smart_str_appendl(buf, serialized_data.s, serialized_length);
+						} else {
+							smart_str_appendc(buf, 'N');
+						}
 						smart_str_appendc(buf, '}'); 
 					} else {
 						smart_str_appendl(buf, "N;", 2);
 					}
-					if(serialized_data) {
-						efree(serialized_data);
+					if(serialized_data.v) {
+						efree(serialized_data.v);
 					}
 					return;
 				}

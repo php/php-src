@@ -197,7 +197,7 @@ unicode(2) "N;"
 NULL
 ===N2===
 TestNew::serialize()
-unicode(19) "C:7:"TestNew":1:{2}"
+unicode(21) "C:7:"TestNew":1:U:{2}"
 TestNew::unserialize()
 object(TestNew)#%d (0) {
 }

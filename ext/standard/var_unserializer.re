@@ -351,6 +351,7 @@ static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
 static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 {
 	long datalen;
+	int type;
 
 	if(ce->unserialize == NULL) {
 		zend_error(E_WARNING, "Class %v has no unserializer", ce->name);
@@ -359,14 +360,29 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	datalen = parse_iv2((*p) + 2, p);
 
-	(*p) += 2;
-
+	switch((*p)[1]) {
+	case 'U':
+		type = IS_UNICODE;
+		(*p) += 4;
+		break;
+	case 'N':
+		(*p) += 2;
+		return finish_nested_data(UNSERIALIZE_PASSTHRU);
+	case '{':
+		type = IS_STRING;
+		(*p) += 2;
+		break;
+	default:
+		zend_error(E_WARNING, "Illegal data for unserializing");
+		return 0;
+	}
+          
 	if(datalen < 0 || (*p) + datalen >= max) {
 		zend_error(E_WARNING, "Insufficient data for unserializing - %ld required, %d present", datalen, max - (*p));
 		return 0;
 	}
 
-	if(ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
+	if(ce->unserialize(rval, ce, type, ZSTR((char*)*p), datalen, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
 		return 0;
 	}
 
