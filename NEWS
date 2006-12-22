@@ -16,7 +16,6 @@ PHP                                                                        NEWS
   __inet_pton() and inet_ntop() was named __inet_ntop(). (Hannes)
 - Fixed the validate email filter so that the letter "v" can also be used in
   the user part of the email address. (Derick)
-
 - Fixed bug #39903 (Notice message when executing __halt_compiler() more than 
   once). (Tony)
 - Fixed bug #39898 (FILTER_VALIDATE_URL validates \r\n\t etc). (Ilia)
@@ -31,6 +30,8 @@ PHP                                                                        NEWS
 - Fixed bug #39815 (SOAP double encoding is not locale-independent). (Dmitry)
 - Fixed bug #39685 (iconv() - undefined function). (Hannes)
 - Fixed bug #38852 (XML-RPC Breaks iconv). (Hannes)
+- Fixed bug #36392 (wrong number of decimal digits with %e specifier in
+  sprintf). (Matt,Ilia)
 
 14 Dec 2006, PHP 5.2.1RC1
 - Added a meta tag to phpinfo() output to prevent search engines from indexing 
