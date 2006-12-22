@@ -429,7 +429,7 @@ int zend_user_serialize(zval *object, int *type, zstr *buffer, zend_uint *buf_le
 			return FAILURE;
 		case IS_UNICODE:
 		case IS_STRING:
-			*buffer = zend_zstrndup(Z_TYPE_P(retval), Z_UNIVAL_P(retval), Z_UNILEN_P(retval));
+			*buffer = ezstrndup(Z_TYPE_P(retval), Z_UNIVAL_P(retval), Z_UNILEN_P(retval));
 			*buf_len = Z_UNILEN_P(retval);
 			*type = Z_TYPE_P(retval);
 			result = SUCCESS;
