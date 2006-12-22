@@ -575,6 +575,7 @@ ext/standard
     implode()
     levenshtein()
     localeconv()
+    metaphone()
     money_format()
     nl_langinfo()
     nl2br()
