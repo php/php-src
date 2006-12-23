@@ -272,6 +272,11 @@ PHP_FUNCTION(msg_receive)
 				&out_message, &do_unserialize, &flags, &zerrcode) == FAILURE)
 		return;
 
+	if (maxsize <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "maximum size of the message has to be greater then zero");
+		return;
+	}
+
 	if (flags != 0) {
 		if (flags & PHP_MSG_EXCEPT) {
 #ifndef MSG_EXCEPT
@@ -289,7 +294,7 @@ PHP_FUNCTION(msg_receive)
 	
 	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
-	messagebuffer = (struct php_msgbuf*)emalloc(sizeof(struct php_msgbuf) + maxsize);
+	messagebuffer = (struct php_msgbuf*)safe_emalloc(maxsize, 1, sizeof(struct php_msgbuf));
 	
 	result = msgrcv(mq->id, messagebuffer, maxsize, desiredmsgtype, realflags);
 		
@@ -363,7 +368,7 @@ PHP_FUNCTION(msg_send)
 		
 		/* NB: php_msgbuf is 1 char bigger than a long, so there is no need to
 		 * allocate the extra byte. */
-		messagebuffer = emalloc(sizeof(struct php_msgbuf) + msg_var.len);
+		messagebuffer = safe_emalloc(msg_var.len, 1, sizeof(struct php_msgbuf));
 		memcpy(messagebuffer->mtext, msg_var.c, msg_var.len + 1);
 		message_len = msg_var.len;
 		smart_str_free(&msg_var);
@@ -389,7 +394,7 @@ PHP_FUNCTION(msg_send)
 				RETURN_FALSE;
 		}
 
-		messagebuffer = emalloc(sizeof(struct php_msgbuf) + message_len);
+		messagebuffer = safe_emalloc(message_len, 1, sizeof(struct php_msgbuf));
 		memcpy(messagebuffer->mtext, p, message_len + 1);
 
 		if (Z_TYPE_P(message) != IS_STRING) {
