@@ -29,13 +29,13 @@ Done
 Warning: oci_connect(): ORA-12154: TNS:could not resolve %s in %s on line %d
 bool(false)
 array(4) {
-  ["code"]=>
+  [u"code"]=>
   int(12154)
-  ["message"]=>
-  unicode(%d) "ORA-12154: TNS:could not resolve %s"
-  ["offset"]=>
+  [u"message"]=>
+  unicode(65) "ORA-12154: TNS:could not resolve %s"
+  [u"offset"]=>
   int(0)
-  ["sqltext"]=>
+  [u"sqltext"]=>
   unicode(0) ""
 }
 Done
