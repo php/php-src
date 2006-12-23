@@ -1,3 +1,24 @@
+2006-12-22  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_ini.c
+      zend_ini.h:
+      Implement OnUpdateUTF8String() handler. It always assumes UTF-8 input,
+      since we cannot check for UG(unicodE) inside it.
+
+2006-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_alloc.c
+      zend_alloc.h
+      zend_interfaces.c:
+      - Implement ezstrndup()
+
+    * zend.h
+      zend_interfaces.c:
+      - Make custom serializing work with zstr (as discussed with andrei)
+
+    * zend_alloc.c:
+      - Use conversion macro
+
 2006-12-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_interfaces.c:
