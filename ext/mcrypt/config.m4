@@ -45,13 +45,13 @@ if test "$PHP_MCRYPT" != "no"; then
     ],[
       AC_MSG_ERROR([Sorry, I was not able to diagnose which libmcrypt version you have installed.])
     ],[
-      -L$MCRYPT_DIR/lib
+      -L$MCRYPT_DIR/$PHP_LIBDIR
     ])
   ],[
-    -L$MCRYPT_DIR/lib -lltdl
+    -L$MCRYPT_DIR/$PHP_LIBDIR -lltdl
   ])
 
-  PHP_ADD_LIBRARY_WITH_PATH(mcrypt, $MCRYPT_DIR/lib, MCRYPT_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH(mcrypt, $MCRYPT_DIR/$PHP_LIBDIR, MCRYPT_SHARED_LIBADD)
   PHP_ADD_INCLUDE($MCRYPT_DIR/include)
 
   PHP_SUBST(MCRYPT_SHARED_LIBADD)
