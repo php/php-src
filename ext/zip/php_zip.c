@@ -83,30 +83,29 @@ static int le_zip_entry;
 
 /* {{{ php_zip_extract_file */
 /* TODO: Simplify it */
-static int php_zip_extract_file(struct zip * za, char *dest, char *file TSRMLS_DC)
+static int php_zip_extract_file(struct zip * za, char *dest, char *file, int file_len TSRMLS_DC)
 {
 	php_stream_statbuf ssb;
 	struct zip_file *zf;
 	struct zip_stat sb;
 	char b[8192];
 
-	int n, len, ret, file_len;
+	int n, len, ret;
 
 	php_stream *stream;
 
 	char *fullpath;
 	char *file_dirname_fullpath;
-	char file_dirname[MAXPATHLEN + 1];
+	char file_dirname[MAXPATHLEN];
 	size_t dir_len;
 
 	char *file_basename;
 	size_t file_basename_len;
 
-	if (zip_stat(za, file, 0, &sb)) {
+	if (file_len >= MAXPATHLEN || zip_stat(za, file, 0, &sb)) {
 		return 0;
 	}
 
-	file_len = strlen(file);
 	memcpy(file_dirname, file, file_len);
 
 	dir_len = php_dirname(file_dirname, file_len);
@@ -117,7 +116,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file TSRMLS_D
 		len = spprintf(&file_dirname_fullpath, 0, "%s", dest);
 	}
 
-	php_basename(file, file_len, NULL, 0, &file_basename, (int *)&file_basename_len TSRMLS_CC);
+	php_basename(file, file_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
 
 	/* let see if the path already exists */
 	if (php_stream_stat_path(file_dirname_fullpath, &ssb) < 0) {
@@ -876,7 +875,7 @@ static ZIPARCHIVE_METHOD(open)
 	int filename_len;
 	int err = 0;
 	long flags = 0;
-	char resolved_path[MAXPATHLEN + 1];
+	char resolved_path[MAXPATHLEN];
 
 	zval *this = getThis();
 	ze_zip_object *ze_obj = NULL;
@@ -995,7 +994,7 @@ static ZIPARCHIVE_METHOD(addFile)
 	struct zip_source *zs;
 	long offset_start = 0, offset_len = 0;
 	int cur_idx, res;
-	char resolved_path[MAXPATHLEN + 1];
+	char resolved_path[MAXPATHLEN];
 
 	if (!this) {
 		RETURN_FALSE;
@@ -1759,7 +1758,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 					RETURN_FALSE;
 				}
 
-				if (!php_zip_extract_file(intern, pathto, file TSRMLS_CC)) {
+				if (!php_zip_extract_file(intern, pathto, file, file_len TSRMLS_CC)) {
 					efree(file);
 					RETURN_FALSE;
 				}
@@ -1789,7 +1788,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 									RETURN_FALSE;
 								}
 
-								if (!php_zip_extract_file(intern, pathto, file TSRMLS_CC)) {
+								if (!php_zip_extract_file(intern, pathto, file, file_len TSRMLS_CC)) {
 									efree(file);
 									RETURN_FALSE;
 								}
@@ -1814,7 +1813,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 
         for (i = 0; i < filecount; i++) {
             file = (char*)zip_get_name(intern, i, ZIP_FL_UNCHANGED);
-            if (!php_zip_extract_file(intern, pathto, file TSRMLS_CC)) {
+            if (!php_zip_extract_file(intern, pathto, file, strlen(file) TSRMLS_CC)) {
                 RETURN_FALSE;
             }
         }
@@ -1877,7 +1876,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	buffer = safe_emalloc(len + 1, 1, 1);
+	buffer = safe_emalloc(len, 1, 2);
 	n = zip_fread(zf, buffer, len);
 	if (n < 1) {
 		RETURN_EMPTY_STRING();
