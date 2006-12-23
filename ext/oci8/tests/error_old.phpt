@@ -45,13 +45,13 @@ resource(%d) of type (oci8 statement)
 Warning: ociexecute(): ORA-00900: invalid SQL statement in %s on line %d
 bool(false)
 array(4) {
-  ["code"]=>
+  [u"code"]=>
   int(900)
-  ["message"]=>
+  [u"message"]=>
   unicode(32) "ORA-00900: invalid SQL statement"
-  ["offset"]=>
+  [u"offset"]=>
   int(0)
-  ["sqltext"]=>
+  [u"sqltext"]=>
   unicode(12) "WRONG SYNTAX"
 }
 Done
