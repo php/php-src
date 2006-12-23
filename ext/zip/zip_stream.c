@@ -153,7 +153,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 
 	char *file_basename;
 	size_t file_basename_len;
-	char file_dirname[MAXPATHLEN+1];
+	char file_dirname[MAXPATHLEN];
 
 	struct zip *za;
 	struct zip_file *zf = NULL;
@@ -179,15 +179,15 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 	path_len = strlen(path);
+	if (path_len >= MAXPATHLEN || mode[0] != 'r') {
+		return NULL;
+	}
 
 	memcpy(file_dirname, path, path_len - fragment_len);
 	file_dirname[path_len - fragment_len] = '\0';
 
 	php_basename(path, path_len - fragment_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
 	fragment++;
-	if (mode[0] != 'r') {
-		return NULL;
-	}
 
 	za = zip_open(file_dirname, ZIP_CREATE, &err);
 	if (za) {
