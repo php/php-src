@@ -1,3 +1,156 @@
+2006-12-22  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h:
+      Implement OnUpdateUTF8String() handler. It always assumes UTF-8 input,
+      since we cannot check for UG(unicodE) inside it.
+
+    * ext/standard/math.c:
+      Unicode support in number_format().
+
+2006-12-22  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pdo/pdo_sql_parser.c:
+      fix lcov/genhtml build (yes it is very picky)
+
+2006-12-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug39884.phpt:
+      MFB: Fixed bug #39884 (ReflectionParameter::getClass() throws exception for
+      type hint self).
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug39884.phpt
+      ext/reflection/tests/bug39884.phpt:
+      Fixed bug #39884 (ReflectionParameter::getClass() throws exception for type
+      hint self).
+
+    * ext/standard/formatted_print.c
+      ext/standard/tests/strings/bug36392.phpt:
+      MFB: Fixed bug #36392 (wrong number of decimal digits with %e specifier in
+      sprintf).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/formatted_print.c:
+      Fixed bug #36392 (wrong number of decimal digits with %e specifier in
+      sprintf).
+
+    * ext/standard/tests/strings/bug36392.phpt
+      ext/standard/tests/strings/bug36392.phpt:
+      
+      file bug36392.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/php_date.c:
+      Small optimization of the date() function
+
+2006-12-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/tests/coll_018.phpt
+      ext/oci8/tests/error2.phpt
+      ext/oci8/tests/lob_036.phpt
+      ext/oci8/tests/statement_type.phpt:
+      new tests
+
+    * ext/oci8/tests/coll_018.phpt
+      ext/oci8/tests/coll_018.phpt
+      ext/oci8/tests/error2.phpt
+      ext/oci8/tests/error2.phpt
+      ext/oci8/tests/lob_036.phpt
+      ext/oci8/tests/lob_036.phpt
+      ext/oci8/tests/statement_type.phpt:
+      
+      more OCI8 tests by Chris Jones
+
+    * (PHP_5_2)
+      ext/date/tests/010.phpt
+      ext/date/tests/011.phpt
+      ext/date/tests/012.phpt
+      ext/date/tests/013.phpt
+      ext/date/tests/014.phpt
+      ext/date/tests/date_parse_001.phpt
+      ext/date/tests/date_sun_info_001.phpt:
+      more tests
+
+    * ext/date/tests/010.phpt
+      ext/date/tests/010.phpt
+      ext/date/tests/011.phpt
+      ext/date/tests/011.phpt
+      ext/date/tests/012.phpt
+      ext/date/tests/012.phpt
+      ext/date/tests/013.phpt
+      ext/date/tests/013.phpt
+      ext/date/tests/014.phpt
+      ext/date/tests/014.phpt
+      ext/date/tests/date_parse_001.phpt
+      ext/date/tests/date_parse_001.phpt
+      ext/date/tests/date_sun_info_001.phpt
+      ext/date/tests/date_sun_info_001.phpt:
+      
+      more ext/date tests by Chris Jones
+
+2006-12-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/math.c
+      ext/standard/tests/strings/bug39873.phpt:
+      MFB: Fixed bug #39873 (number_format() breaks with locale & decimal
+      points).
+
+    * ext/standard/tests/strings/bug39873.phpt
+      ext/standard/tests/strings/bug39873.phpt:
+      
+      file bug39873.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/math.c:
+      Fixed bug #39873 (number_format() breaks with locale & decimal points).
+
+2006-12-22  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/ftp/tests/005.phpt
+      ext/standard/tests/array/locale_sort.phpt
+      ext/standard/tests/strings/substr_compare.phpt:
+      Fix tests
+
+    * ext/standard/array.c:
+      Fix ZTS build...
+
+2006-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/php_spl.c:
+      - Fix memory allocation/deallocation to match
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_interfaces.c:
+      - Implement ezstrndup()
+
+2006-12-22  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/tests/serialize/006.phpt:
+      Fix serialization test.
+
+2006-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_interfaces.c
+      ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/tests/serialize/005.phpt:
+      - Make custom serializing work with zstr (as discussed with andrei)
+
+    * ZendEngine2/zend_alloc.c:
+      - Use conversion macro
+
 2006-12-21  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/levenshtein.c:
