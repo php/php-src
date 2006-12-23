@@ -623,7 +623,7 @@ ZEND_API int add_ascii_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *v
 #define add_ascii_assoc_rt_stringl(arg, key, str, length, flags) add_ascii_assoc_rt_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
 #define add_ascii_assoc_utf8_string(arg, key, str, flags) add_ascii_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, strlen(str), flags)
 #define add_ascii_assoc_utf8_stringl(arg, key, str, length, flags) add_ascii_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
-#define add_ascii_assoc_text(__arg, __key, __str, __duplicate) add_ascii_assoc_test_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
+#define add_ascii_assoc_text(__arg, __key, __str, __duplicate) add_ascii_assoc_text_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_ascii_assoc_textl(__arg, __key, __str, __length, __duplicate) add_ascii_assoc_textl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 
 ZEND_API int add_rt_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
@@ -767,7 +767,7 @@ ZEND_API int add_rt_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 #define add_rt_assoc_rt_stringl(arg, key, str, length, flags) add_rt_assoc_rt_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
 #define add_rt_assoc_utf8_string(arg, key, str, flags) add_rt_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, strlen(str), flags)
 #define add_rt_assoc_utf8_stringl(arg, key, str, length, flags) add_rt_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
-#define add_rt_assoc_text(__arg, __key, __str, __duplicate) add_rt_assoc_test_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
+#define add_rt_assoc_text(__arg, __key, __str, __duplicate) add_rt_assoc_text_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_rt_assoc_textl(__arg, __key, __str, __length, __duplicate) add_rt_assoc_textl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 
 ZEND_API int add_utf8_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
@@ -911,7 +911,7 @@ ZEND_API int add_utf8_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *va
 #define add_utf8_assoc_rt_stringl(arg, key, str, length, flags) add_utf8_assoc_rt_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
 #define add_utf8_assoc_utf8_string(arg, key, str, flags) add_utf8_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, strlen(str), flags)
 #define add_utf8_assoc_utf8_stringl(arg, key, str, length, flags) add_utf8_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
-#define add_utf8_assoc_text(__arg, __key, __str, __duplicate) add_utf8_assoc_test_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
+#define add_utf8_assoc_text(__arg, __key, __str, __duplicate) add_utf8_assoc_text_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_utf8_assoc_textl(__arg, __key, __str, __length, __duplicate) add_utf8_assoc_textl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 
 ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval *value TSRMLS_DC);
@@ -1183,7 +1183,7 @@ ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_
 #define add_u_assoc_rt_stringl(arg, key_type, key, str, length, flags) add_u_assoc_rt_stringl_ex(arg, key_type, key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, str, length, flags)
 #define add_u_assoc_utf8_string(arg, key_type, key, str, flags) add_u_assoc_utf8_stringl_ex(arg, key_type, key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, str, strlen(str), flags)
 #define add_u_assoc_utf8_stringl(arg, key_type, key, str, length, flags) add_u_assoc_utf8_stringl_ex(arg, key_type, key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, str, length, flags)
-#define add_u_assoc_text(__arg, __key_type, __key, __str, __duplicate) add_u_assoc_test_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __str, __duplicate)
+#define add_u_assoc_text(__arg, __key_type, __key, __str, __duplicate) add_u_assoc_text_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __str, __duplicate)
 #define add_u_assoc_textl(__arg, __key_type, __key, __str, __length, __duplicate) add_u_assoc_textl_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __str, __length, __duplicate)
 
 ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
