@@ -76,7 +76,7 @@ static void com_property_write(zval *object, zval *member, zval *value TSRMLS_DC
 
 		convert_to_string_ex(&member);
 		if (SUCCESS == php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
-				DISPATCH_PROPERTYPUT, &v, 1, &value TSRMLS_CC)) {
+				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, &value TSRMLS_CC)) {
 			VariantClear(&v);
 		}
 	} else {
