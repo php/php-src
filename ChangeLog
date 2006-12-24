@@ -1,3 +1,65 @@
+2006-12-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/zip/php_zip.c
+      ext/zip/zip_stream.c:
+      MFB: safety checks
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c
+      ext/zip/zip_stream.c:
+      Safety checks
+
+    * (PHP_4_4)
+      ext/sysvmsg/sysvmsg.c:
+      MFB: Added checks for negative max length and overflow checks for
+      overly long strings.
+
+    * ext/sysvmsg/sysvmsg.c:
+      MFB: Added checks for negative max length and overflow checks for overly
+      long strings.
+
+    * (PHP_5_2)
+      ext/sysvmsg/sysvmsg.c:
+      Added checks for negative max length and overflow checks for overly long
+      strings.
+
+2006-12-23  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/mcrypt/config.m4
+      ext/mhash/config.m4
+      ext/pdo_sqlite/config.m4
+      ext/tidy/config.m4:
+      - MFB: Fixed bug #39935 (Extensions tidy,mcrypt,mhash,pdo_sqlite ignores
+        --with-libdir).
+
+    * (PHP_5_2)
+      NEWS
+      ext/mcrypt/config.m4
+      ext/mhash/config.m4
+      ext/pdo_sqlite/config.m4
+      ext/tidy/config.m4:
+      - Fixed bug #39935 (Extensions tidy,mcrypt,mhash,pdo_sqlite ignores
+        --with-libdir).
+
+2006-12-23  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/tests/error1.phpt:
+      fix test
+
+    * ZendEngine2/zend_API.h:
+      fix typo
+
+    * ext/oci8/tests/error.phpt
+      ext/oci8/tests/error1.phpt
+      ext/oci8/tests/error_old.phpt:
+      fix tests
+
+    * ext/oci8/oci8_interface.c:
+      use add_ascii_assoc_text()
+
+    * ext/oci8/oci8_collection.c:
+      use OCI_SUCCESS constant, do not rely on its value
+
 2006-12-22  Andrei Zmievski  <andrei@gravitonic.com>
 
     * unicode-progress.txt

@@ -1,3 +1,8 @@
+2006-12-23  Antony Dovgal  <antony@zend.com>
+
+    * zend_API.h:
+      fix typo
+
 2006-12-22  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_ini.c
