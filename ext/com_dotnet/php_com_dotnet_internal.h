@@ -102,13 +102,13 @@ PHP_FUNCTION(com_load_typelib);
 PHP_FUNCTION(com_get_active_object);
 
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
-		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent TSRMLS_DC);
+		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent, int allow_noarg TSRMLS_DC);
 HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 		int namelen, DISPID *dispid TSRMLS_DC);
 int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
-		WORD flags,	VARIANT *v, int nargs, zval **args, int silent TSRMLS_DC);
+		WORD flags,	VARIANT *v, int nargs, zval **args, int silent, int allow_noarg TSRMLS_DC);
 int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
-		WORD flags,	VARIANT *v, int nargs, zval **args TSRMLS_DC);
+		WORD flags,	VARIANT *v, int nargs, zval **args, int allow_noarg TSRMLS_DC);
 int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 		WORD flags,	VARIANT *v, int nargs, zval ***args TSRMLS_DC);
 
