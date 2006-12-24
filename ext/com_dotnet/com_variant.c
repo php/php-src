@@ -289,19 +289,36 @@ PHP_FUNCTION(com_variant_create_instance)
 		php_com_variant_from_zval(&obj->v, zvalue, obj->code_page TSRMLS_CC);
 	}
 
-	if (ZEND_NUM_ARGS() >= 2) {
+	/* Only perform conversion if variant not already of type passed */
+	if ((ZEND_NUM_ARGS() >= 2) && (vt != V_VT(&obj->v))) {
 
-		res = VariantChangeType(&obj->v, &obj->v, 0, (VARTYPE)vt);
+		/* If already an array and VT_ARRAY is passed then:
+			- if only VT_ARRAY passed then do not perform a conversion
+			- if VT_ARRAY plus other type passed then perform conversion 
+			  but will probably fail (origional behavior)
+		*/
+		if ((vt & VT_ARRAY) && (V_VT(&obj->v) & VT_ARRAY)) {
+			long orig_vt = vt;
 
-		if (FAILED(res)) {
-			char *werr, *msg;
+			vt &= ~VT_ARRAY;
+			if (vt) {
+				vt = orig_vt;
+			}
+		}
 
-			werr = php_win_err(res);
-			spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
-			LocalFree(werr);
+		if (vt) {
+			res = VariantChangeType(&obj->v, &obj->v, 0, (VARTYPE)vt);
 
-			php_com_throw_exception(res, msg TSRMLS_CC);
-			efree(msg);
+			if (FAILED(res)) {
+				char *werr, *msg;
+
+				werr = php_win_err(res);
+				spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
+				LocalFree(werr);
+
+				php_com_throw_exception(res, msg TSRMLS_CC);
+				efree(msg);
+			}
 		}
 	}
 
