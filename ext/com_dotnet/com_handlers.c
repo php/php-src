@@ -49,7 +49,7 @@ static zval *com_property_read(zval *object, zval *member, int type TSRMLS_DC)
 		convert_to_string_ex(&member);
 
 		res = php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
-				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL TSRMLS_CC);
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1 TSRMLS_CC);
 
 		if (res == SUCCESS) {
 			php_com_zval_from_variant(return_value, &v, obj->code_page TSRMLS_CC);
@@ -76,7 +76,7 @@ static void com_property_write(zval *object, zval *member, zval *value TSRMLS_DC
 
 		convert_to_string_ex(&member);
 		if (SUCCESS == php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
-				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, &value TSRMLS_CC)) {
+				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, &value, 0 TSRMLS_CC)) {
 			VariantClear(&v);
 		}
 	} else {
@@ -101,7 +101,7 @@ static zval *com_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 		VariantInit(&v);
 
 		if (SUCCESS == php_com_do_invoke_by_id(obj, DISPID_VALUE,
-				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 1, &offset, 0 TSRMLS_CC)) {
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 1, &offset, 0, 0 TSRMLS_CC)) {
 			php_com_zval_from_variant(return_value, &v, obj->code_page TSRMLS_CC);
 			VariantClear(&v);
 		}
@@ -140,7 +140,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 		VariantInit(&v);
 
 		if (SUCCESS == php_com_do_invoke_by_id(obj, DISPID_VALUE,
-				DISPATCH_METHOD|DISPATCH_PROPERTYPUT, &v, 2, args, 0 TSRMLS_CC)) {
+				DISPATCH_METHOD|DISPATCH_PROPERTYPUT, &v, 2, args, 0, 0 TSRMLS_CC)) {
 			VariantClear(&v);
 		}
 	} else if (V_ISARRAY(&obj->v)) {
@@ -500,7 +500,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, void *extra 
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		if (SUCCESS != php_com_do_invoke_by_id(obj, DISPID_VALUE,
-				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1 TSRMLS_CC)) {
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1, 0 TSRMLS_CC)) {
 			VariantCopy(&v, &obj->v);
 		}
 	} else {
