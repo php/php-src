@@ -357,7 +357,7 @@ static int saproxy_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return -1;
 }
 
-static int saproxy_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+static int saproxy_object_cast(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC)
 {
 	return FAILURE;
 }
