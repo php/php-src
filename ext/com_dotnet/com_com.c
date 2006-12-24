@@ -338,7 +338,7 @@ PHP_FUNCTION(com_get_active_object)
 /* Performs an Invoke on the given com object.
  * returns a failure code and creates an exception if there was an error */
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
-		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent TSRMLS_DC)
+		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent, int allow_noarg TSRMLS_DC)
 {
 	HRESULT hr;
 	unsigned int arg_err;
@@ -389,7 +389,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 				break;
 
 			case DISP_E_BADPARAMCOUNT:
-				if ((disp_params->cArgs + disp_params->cNamedArgs == 0) && (flags == DISPATCH_PROPERTYGET)) {
+				if ((disp_params->cArgs + disp_params->cNamedArgs == 0) && (allow_noarg == 1)) {
 					/* if getting a property and they are missing all parameters,
 					 * we want to create a proxy object for them; so lets not create an
 					 * exception here */
@@ -545,7 +545,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 	}
 
 	/* this will create an exception if needed */
-	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, 0 TSRMLS_CC);	
+	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, 0, 0 TSRMLS_CC);	
 
 	/* release variants */
 	if (vargs) {
@@ -583,7 +583,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 
 
 int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
-		WORD flags,	VARIANT *v, int nargs, zval **args, int silent TSRMLS_DC)
+		WORD flags,	VARIANT *v, int nargs, zval **args, int silent, int allow_noarg TSRMLS_DC)
 {
 	DISPID altdispid;
 	DISPPARAMS disp_params;
@@ -612,7 +612,7 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 	}
 
 	/* this will create an exception if needed */
-	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, silent TSRMLS_CC);	
+	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, silent, allow_noarg TSRMLS_CC);	
 
 	/* release variants */
 	if (vargs) {
@@ -630,7 +630,7 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 }
 
 int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
-		WORD flags,	VARIANT *v, int nargs, zval **args TSRMLS_DC)
+		WORD flags,	VARIANT *v, int nargs, zval **args, int allow_noarg TSRMLS_DC)
 {
 	DISPID dispid;
 	HRESULT hr;
@@ -648,7 +648,7 @@ int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
 		return FAILURE;
 	}
 
-	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args, 0 TSRMLS_CC);
+	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args, 0, allow_noarg TSRMLS_CC);
 }
 
 /* {{{ proto string com_create_guid()

@@ -120,7 +120,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 
 		res = php_com_do_invoke(proxy->obj, Z_STRVAL_P(proxy->indices[0]),
 			   	Z_STRLEN_P(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
-			   	proxy->dimensions, args TSRMLS_CC);
+			   	proxy->dimensions, args, 0 TSRMLS_CC);
 
 		if (res == SUCCESS) {
 			php_com_zval_from_variant(return_value, &v, proxy->obj->code_page TSRMLS_CC);
@@ -233,7 +233,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		VariantInit(&v);
 		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STRVAL_P(proxy->indices[0]),
 					Z_STRLEN_P(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
-					args TSRMLS_CC)) {
+					args, 0 TSRMLS_CC)) {
 			VariantClear(&v);
 		}
 
