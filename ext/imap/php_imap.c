@@ -2801,7 +2801,7 @@ PHP_FUNCTION(imap_mail_compose)
 	BODY *bod=NULL, *topbod=NULL;
 	PART *mypart=NULL, *part;
 	PARAMETER *param, *disp_param = NULL, *custom_headers_param = NULL, *tmp_param = NULL;
-	char tmp[8 * MAILTMPLEN], *mystring=NULL, *t=NULL, *tempstring=NULL;
+	char tmp[SENDBUFLEN + 1], *mystring=NULL, *t=NULL, *tempstring=NULL;
 	int toppart = 0;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &envelope, &body) == FAILURE) {
@@ -3102,8 +3102,8 @@ PHP_FUNCTION(imap_mail_compose)
 		goto done;
 	}
 
-	rfc822_encode_body_7bit(env, topbod); 
-	rfc822_header (tmp, env, topbod);
+	rfc822_encode_body_7bit(env, topbod);
+	rfc822_header(tmp, env, topbod);
 
 	/* add custom envelope headers */
 	if (custom_headers_param) {
@@ -3152,43 +3152,42 @@ PHP_FUNCTION(imap_mail_compose)
 		/* yucky default */
 			if (!cookie) {
 				cookie = "-";  
+			} else if (strlen(cookie) > (sizeof(tmp) - 2 - 2)) {  /* validate cookie length -- + CRLF */
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "The boudary should be no longer then 4kb");
+				RETVAL_FALSE;
+				goto done;	
 			}
 
 		/* for each part */
 			do {
 				t=tmp;
 			/* build cookie */
-				sprintf (t, "--%s%s", cookie, CRLF);
+				sprintf(t, "--%s%s", cookie, CRLF);
 
 			/* append mini-header */
 				rfc822_write_body_header(&t, &part->body);
 
 			/* write terminating blank line */
-				strcat (t, CRLF);
+				strcat(t, CRLF);
 
 			/* output cookie, mini-header, and contents */
-				tempstring=emalloc(strlen(mystring)+strlen(tmp)+1);
-				sprintf(tempstring, "%s%s", mystring, tmp);
+				spprintf(&tempstring, 0, "%s%s", mystring, tmp);
 				efree(mystring);
 				mystring=tempstring;
 
 				bod=&part->body;
 
-				tempstring=emalloc(strlen(bod->contents.text.data)+strlen(CRLF)+strlen(mystring)+1);
-				sprintf(tempstring, "%s%s%s", mystring, bod->contents.text.data, CRLF);
+				spprintf(&tempstring, 0, "%s%s%s", mystring, bod->contents.text.data, CRLF);
 				efree(mystring);
 				mystring=tempstring;
 			} while ((part = part->next)); /* until done */
 
 			/* output trailing cookie */
-			sprintf(tmp, "--%s--", cookie);
-			tempstring=emalloc(strlen(tmp)+strlen(CRLF)+strlen(mystring)+1);
-			sprintf(tempstring, "%s%s%s", mystring, tmp, CRLF);
+			spprintf(&tempstring, 0, "%s--%s--%s", mystring, tmp, CRLF);
 			efree(mystring);
 			mystring=tempstring;
 	} else if (bod) {
-			tempstring = emalloc(strlen(bod->contents.text.data)+strlen(CRLF)+strlen(mystring)+1);
-			sprintf(tempstring, "%s%s%s", mystring, bod->contents.text.data, CRLF);
+			spprintf(&tempstring, 0, "%s%s%s", mystring, bod->contents.text.data, CRLF);
 			efree(mystring);
 			mystring=tempstring;
 	} else {
