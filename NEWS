@@ -33,9 +33,13 @@ PHP                                                                        NEWS
   are set to 0). (Dmitry)
 - Fixed bug #39815 (SOAP double encoding is not locale-independent). (Dmitry)
 - Fixed bug #39685 (iconv() - undefined function). (Hannes)
+- Fixed bug #39596 (Creating Variant of type VT_ARRAY). (Rob)
 - Fixed bug #38852 (XML-RPC Breaks iconv). (Hannes)
+- Fixed bug #37588 (COM Property propputref converts to PHP function 
+  and can't be accesed). (Rob)
 - Fixed bug #36392 (wrong number of decimal digits with %e specifier in
   sprintf). (Matt,Ilia)
+- Fixed bug #39596 (Creating Variant of type VT_ARRAY). (Rob)
 
 14 Dec 2006, PHP 5.2.1RC1
 - Added a meta tag to phpinfo() output to prevent search engines from indexing 
