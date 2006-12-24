@@ -39,7 +39,8 @@ PHP                                                                        NEWS
   and can't be accesed). (Rob)
 - Fixed bug #36392 (wrong number of decimal digits with %e specifier in
   sprintf). (Matt,Ilia)
-- Fixed bug #39596 (Creating Variant of type VT_ARRAY). (Rob)
+- Fixed bug #33734 (Something strange with COM Object). (Rob)
+- Fixed bug #33386 (ScriptControl only sees last function of class). (Rob)
 
 14 Dec 2006, PHP 5.2.1RC1
 - Added a meta tag to phpinfo() output to prevent search engines from indexing 
