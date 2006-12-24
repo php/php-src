@@ -1720,7 +1720,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 								break;
 							case IS_STRING:
 								file = Z_STRVAL_PP(zval_file);
-								if (!php_zip_extract_file(intern, pathto, file, Z_STRLEN_P(zval_files) TSRMLS_CC)) {
+								if (!php_zip_extract_file(intern, pathto, file, Z_STRLEN_PP(zval_file) TSRMLS_CC)) {
 									RETURN_FALSE;
 								}
 								break;
