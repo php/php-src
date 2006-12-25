@@ -358,6 +358,9 @@ In the dBase extension
 dbase_open("foo", -1);
 /* Warning: Invalid access mode -1 in filename on line n */
 
+dbase_open("foo", null);
+/* Warning: The filename cannot be empty in filename on line n */
+As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/dbase/dbase.c?r1=1.74.2.2.2.5&r2=1.74.2.2.2.6&diff_format=u
 ?>
 
 In the mcrypt extension
@@ -406,6 +409,14 @@ $obj->fgetcsv("foo");
 
 $obj->fgetcsv(",", "foo");
 /* Warning:  SplFileObject::fgetcsv(): enclosure must be a character in filename on line n */
+
+?>
+
+In the sysvmsg extension
+========================
+<?php
+
+/* Warning:  maximum size of the message has to be greater then zero in filename on line n */
 
 ?>
 
@@ -790,6 +801,9 @@ In the PHP core
      - Returns numerically indexed array with all timezone identifiers
     string timezone_name_from_abbr(string abbr[, long gmtOffset[, long isdst]])
      - Returns the timezone name from abbreviation
+As of 5.2.1: #See http://cvs.php.net/viewvc.cgi/php-src/ext/standard/streamsfuncs.c?r1=1.58.2.6.2.9&r2=1.58.2.6.2.10&diff_format=u
+    int stream_socket_shutdown(resource stream, int how)
+     - Causes all or part of a full-duplex connection on the socket associated with stream to be shut down
 
 In ext/mbstring
 ===============
@@ -809,6 +823,16 @@ In ext/mbstring
       - Finds position of last occurrence of a string within another, case insensitive
     string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
       - Finds first occurrence of a string within another
+
+In ext/ming
+===========
+As of 5.2.1: See http://cvs.php.net/viewvc.cgi/php-src/ext/ming/ming.c?r1=1.79.2.4.2.4&r2=1.79.2.4.2.5&diff_format=u
+    void ming_setSWFCompression(int num)
+     - Sets output compression
+    void swfmovie::namedanchor(string name)
+     - Creates anchor
+    void swfmovie::protect([string pasword])
+     - Protects
 
 In ext/openssl
 ==============
@@ -901,6 +925,11 @@ In ext/simplexml
   - SimpleXMLElement simplexml_load_file(string filename [, string class_name [, int options [, string ns [, bool is_prefix]]]]) (ns, is_prefix)
   - SimpleXMLElement simplexml_load_string(string data [, string class_name [, int options [, string ns [, bool is_prefix]]]]) (ns, is_prefix)
 
+In ext/spl
+==========
+  - array iterator_to_array(Traversable it [, bool use_keys = true]) (use_keys)
+As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/spl/spl_iterators.c?r1=1.73.2.30.2.20&r2=1.73.2.30.2.21
+
 In ext/xmlreader
 ================
   - boolean XMLReader::open(string URI [, string encoding [, int options]]) (encoding, options)
@@ -931,6 +960,10 @@ In the PHP core
     - PREG_NO_ERROR
     - PREG_RECURSION_LIMIT_ERROR
     - UPLOAD_ERR_EXTENSION
+As of 5.2.1: (See http://cvs.php.net/viewvc.cgi/php-src/ext/standard/file.c?r1=1.409.2.6.2.13&r2=1.409.2.6.2.14&diff_format=u)
+    - STREAM_SHUT_RD
+    - STREAM_SHUT_WR
+    - STREAM_SHUT_RDWR
 
 In ext/curl
 ===========
@@ -946,6 +979,25 @@ In ext/curl
     - CURLFTPSSL_TRY
     - CURLOPT_FTP_SSL
     - CURLOPT_FTPSSLAUTH
+
+In ext/ming
+===========
+As of 5.2.1: See http://cvs.php.net/viewvc.cgi/php-src/ext/ming/ming.c?r1=1.79.2.4.2.4&r2=1.79.2.4.2.5&diff_format=u
+    - SWFTEXTFIELD_USEFONT
+    - SWFTEXTFIELD_AUTOSIZE
+    - SWF_SOUND_NOT_COMPRESSED
+    - SWF_SOUND_ADPCM_COMPRESSED
+    - SWF_SOUND_MP3_COMPRESSED
+    - SWF_SOUND_NOT_COMPRESSED_LE
+    - SWF_SOUND_NELLY_COMPRESSED
+    - SWF_SOUND_5KHZ
+    - SWF_SOUND_11KHZ
+    - SWF_SOUND_22KHZ
+    - SWF_SOUND_44KHZ
+    - SWF_SOUND_8BITS
+    - SWF_SOUND_16BITS
+    - SWF_SOUND_MONO
+    - SWF_SOUND_STEREO
 
 In ext/openssl
 ==============
