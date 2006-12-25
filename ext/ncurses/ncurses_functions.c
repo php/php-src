@@ -1473,7 +1473,7 @@ PHP_FUNCTION(ncurses_instr)
 	str = (char *)emalloc(COLS + 1);
 	retval = instr(str);
 
-	ZVAL_STRING(param, str, strlen(str));
+	ZVAL_STRING(param, str, 1);
 	efree(str);
 
 	RETURN_LONG(retval);
