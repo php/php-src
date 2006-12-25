@@ -61,7 +61,7 @@ sprintf octal binary test:      passed
 sprintf float test:             passed
 99.00
 99.00
-1.23400e-18
-1.23400e+18
-9.84324e+6
--9.84324e+6
+1.234000e-18
+1.234000e+18
+9.843243e+6
+-9.843243e+6
