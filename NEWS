@@ -35,6 +35,7 @@ PHP                                                                        NEWS
   when trying to open "php://wrong"). (Tony)
 - Fixed bug #39832 (SOAP Server: parameter not matching the WSDL specified type
   are set to 0). (Dmitry)
+- Fixed bug #39825 (foreach produces memory error). (Dmitry)
 - Fixed bug #39815 (SOAP double encoding is not locale-independent). (Dmitry)
 - Fixed bug #39685 (iconv() - undefined function). (Hannes)
 - Fixed bug #39596 (Creating Variant of type VT_ARRAY). (Rob)
