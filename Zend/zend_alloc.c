@@ -454,11 +454,11 @@ static unsigned int _zend_mm_cookie = 0;
 #define ZEND_MM_ALIGNED_MIN_HEADER_SIZE		(ZEND_MM_MIN_ALLOC_BLOCK_SIZE>ZEND_MM_ALIGNED_FREE_HEADER_SIZE?ZEND_MM_MIN_ALLOC_BLOCK_SIZE:ZEND_MM_ALIGNED_FREE_HEADER_SIZE)
 #define ZEND_MM_ALIGNED_SEGMENT_SIZE		ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_segment))
 
-#define ZEND_MM_MIN_SIZE					(ZEND_MM_ALIGNED_MIN_HEADER_SIZE-(ZEND_MM_ALIGNED_HEADER_SIZE+END_MAGIC_SIZE))
+#define ZEND_MM_MIN_SIZE					((ZEND_MM_ALIGNED_MIN_HEADER_SIZE>(ZEND_MM_ALIGNED_HEADER_SIZE+END_MAGIC_SIZE))?(ZEND_MM_ALIGNED_MIN_HEADER_SIZE-(ZEND_MM_ALIGNED_HEADER_SIZE+END_MAGIC_SIZE)):0)
 
 #define ZEND_MM_MAX_SMALL_SIZE				(((ZEND_MM_NUM_BUCKETS-1)<<ZEND_MM_ALIGNMENT_LOG2)+ZEND_MM_ALIGNED_MIN_HEADER_SIZE)
 
-#define ZEND_MM_TRUE_SIZE(size)				(((long)size<(long)ZEND_MM_MIN_SIZE)?(ZEND_MM_ALIGNED_MIN_HEADER_SIZE):(ZEND_MM_ALIGNED_SIZE(size+ZEND_MM_ALIGNED_HEADER_SIZE+END_MAGIC_SIZE)))
+#define ZEND_MM_TRUE_SIZE(size)				((size<ZEND_MM_MIN_SIZE)?(ZEND_MM_ALIGNED_MIN_HEADER_SIZE):(ZEND_MM_ALIGNED_SIZE(size+ZEND_MM_ALIGNED_HEADER_SIZE+END_MAGIC_SIZE)))
 
 #define ZEND_MM_BUCKET_INDEX(true_size)		((true_size>>ZEND_MM_ALIGNMENT_LOG2)-(ZEND_MM_ALIGNED_MIN_HEADER_SIZE>>ZEND_MM_ALIGNMENT_LOG2)+1)
 
@@ -1332,6 +1332,9 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	zend_mm_free_block *p, *end, *best_fit = NULL;
 	size_t true_size = ZEND_MM_TRUE_SIZE(size);
 
+	if (true_size < size) {
+		goto out_of_memory;
+	}
 	if (ZEND_MM_SMALL_SIZE(true_size)) {
 		size_t index = ZEND_MM_BUCKET_INDEX(true_size);
 		unsigned int bitmap;
@@ -1422,7 +1425,7 @@ zend_mm_finished_searching_for_block:
 		size_t remaining_size;
 		zend_mm_segment *segment;
 
-		if (true_size + ZEND_MM_ALIGNED_SEGMENT_SIZE + ZEND_MM_ALIGNED_HEADER_SIZE > heap->block_size) {
+		if (true_size > heap->block_size - (ZEND_MM_ALIGNED_SEGMENT_SIZE + ZEND_MM_ALIGNED_HEADER_SIZE)) {
 			/* Make sure we add a memory block which is big enough,
 			   segment must have header "size" and trailer "guard" block */
 			segment_size = true_size + ZEND_MM_ALIGNED_SEGMENT_SIZE + ZEND_MM_ALIGNED_HEADER_SIZE;
@@ -1433,7 +1436,8 @@ zend_mm_finished_searching_for_block:
 
 		HANDLE_BLOCK_INTERRUPTIONS();
 
-		if (heap->real_size + segment_size > heap->limit) {
+		if (segment_size < true_size || 
+		    heap->real_size + segment_size > heap->limit) {
 			/* Memory limit overflow */
 #if ZEND_MM_CACHE
 			zend_mm_free_cache(heap);
@@ -1454,6 +1458,7 @@ zend_mm_finished_searching_for_block:
 			zend_mm_free_cache(heap);
 #endif
 			HANDLE_UNBLOCK_INTERRUPTIONS();
+out_of_memory:
 #if ZEND_DEBUG
 			zend_mm_safe_error(heap, "Out of memory (allocated %d) at %s:%d (tried to allocate %d bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
 #else
@@ -1617,6 +1622,10 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 	orig_size = ZEND_MM_BLOCK_SIZE(mm_block);
 	ZEND_MM_CHECK_PROTECTION(mm_block);
 
+	if (true_size < size) {
+		goto out_of_memory;
+	}
+
 	if (true_size <= orig_size) {
 		size_t remaining_size = orig_size - true_size;
 
@@ -1694,7 +1703,7 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 		HANDLE_BLOCK_INTERRUPTIONS();
 realloc_segment:
 		/* segment size, size of block and size of guard block */
-		if (true_size+ZEND_MM_ALIGNED_SEGMENT_SIZE+ZEND_MM_ALIGNED_HEADER_SIZE > heap->block_size) {
+		if (true_size > heap->block_size - (ZEND_MM_ALIGNED_SEGMENT_SIZE + ZEND_MM_ALIGNED_HEADER_SIZE)) {
 			segment_size = true_size+ZEND_MM_ALIGNED_SEGMENT_SIZE+ZEND_MM_ALIGNED_HEADER_SIZE;
 			segment_size = ((segment_size + (heap->block_size-1)) / heap->block_size) * heap->block_size;
 		} else {
@@ -1702,7 +1711,8 @@ realloc_segment:
 		}
 
 		segment_copy = (zend_mm_segment *) ((char *)mm_block - ZEND_MM_ALIGNED_SEGMENT_SIZE);
-		if (heap->real_size + segment_size - segment_copy->size > heap->limit) {
+		if (segment_size < true_size ||
+		    heap->real_size + segment_size - segment_copy->size > heap->limit) {
 #if ZEND_MM_CACHE
 			zend_mm_free_cache(heap);
 #endif
@@ -1721,6 +1731,7 @@ realloc_segment:
 			zend_mm_free_cache(heap);
 #endif
 			HANDLE_UNBLOCK_INTERRUPTIONS();
+out_of_memory:
 #if ZEND_DEBUG
 			zend_mm_safe_error(heap, "Out of memory (allocated %d) at %s:%d (tried to allocate %d bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
 #else
