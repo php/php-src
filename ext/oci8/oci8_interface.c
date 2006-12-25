@@ -191,7 +191,7 @@ PHP_FUNCTION(oci_free_descriptor)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_save( string data [, int offset ])
+/* {{{ proto bool oci_lob_save( string data [, int offset ]) U
    Saves a large object */
 PHP_FUNCTION(oci_lob_save)
 {
@@ -232,7 +232,7 @@ PHP_FUNCTION(oci_lob_save)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_import( string filename )
+/* {{{ proto bool oci_lob_import( string filename ) U
    Loads file into a LOB */
 PHP_FUNCTION(oci_lob_import)
 {
@@ -266,7 +266,7 @@ PHP_FUNCTION(oci_lob_import)
 }
 /* }}} */
 
-/* {{{ proto string oci_lob_load()
+/* {{{ proto string oci_lob_load() U
    Loads a large object */
 PHP_FUNCTION(oci_lob_load)
 {
@@ -314,7 +314,7 @@ PHP_FUNCTION(oci_lob_load)
 }
 /* }}} */
 
-/* {{{ proto string oci_lob_read( int length )
+/* {{{ proto string oci_lob_read( int length ) U
    Reads particular part of a large object */
 PHP_FUNCTION(oci_lob_read)
 {
@@ -373,7 +373,7 @@ PHP_FUNCTION(oci_lob_read)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_eof()
+/* {{{ proto bool oci_lob_eof() U
    Checks if EOF is reached */
 PHP_FUNCTION(oci_lob_eof)
 {
@@ -403,7 +403,7 @@ PHP_FUNCTION(oci_lob_eof)
 }
 /* }}} */
 
-/* {{{ proto int oci_lob_tell()
+/* {{{ proto int oci_lob_tell() U
    Tells LOB pointer position */
 PHP_FUNCTION(oci_lob_tell)
 {
@@ -427,7 +427,7 @@ PHP_FUNCTION(oci_lob_tell)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_rewind()
+/* {{{ proto bool oci_lob_rewind() U
    Rewind pointer of a LOB */
 PHP_FUNCTION(oci_lob_rewind)
 {
@@ -453,7 +453,7 @@ PHP_FUNCTION(oci_lob_rewind)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_seek( int offset [, int whence ])
+/* {{{ proto bool oci_lob_seek( int offset [, int whence ]) U
    Moves the pointer of a LOB */
 PHP_FUNCTION(oci_lob_seek)
 {
@@ -505,7 +505,7 @@ PHP_FUNCTION(oci_lob_seek)
 }
 /* }}} */
 
-/* {{{ proto int oci_lob_size()
+/* {{{ proto int oci_lob_size() U
    Returns size of a large object */
 PHP_FUNCTION(oci_lob_size)
 {
@@ -533,7 +533,7 @@ PHP_FUNCTION(oci_lob_size)
 }
 /* }}} */
 
-/* {{{ proto int oci_lob_write( string string [, int length ])
+/* {{{ proto int oci_lob_write( string string [, int length ]) U
    Writes data to current position of a LOB */
 PHP_FUNCTION(oci_lob_write)
 {
@@ -582,7 +582,7 @@ PHP_FUNCTION(oci_lob_write)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_append( object lob )
+/* {{{ proto bool oci_lob_append( object lob ) U
    Appends data from a LOB to another LOB */
 PHP_FUNCTION(oci_lob_append)
 {
@@ -621,7 +621,7 @@ PHP_FUNCTION(oci_lob_append)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_truncate( [ int length ])
+/* {{{ proto bool oci_lob_truncate( [ int length ]) U
    Truncates a LOB */
 PHP_FUNCTION(oci_lob_truncate)
 {
@@ -661,7 +661,7 @@ PHP_FUNCTION(oci_lob_truncate)
 }
 /* }}} */
 
-/* {{{ proto int oci_lob_erase( [ int offset [, int length ] ] )
+/* {{{ proto int oci_lob_erase( [ int offset [, int length ] ] ) U
    Erases a specified portion of the internal LOB, starting at a specified offset */
 PHP_FUNCTION(oci_lob_erase)
 {
@@ -715,7 +715,7 @@ PHP_FUNCTION(oci_lob_erase)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_flush( [ int flag ] )
+/* {{{ proto bool oci_lob_flush( [ int flag ] ) U
    Flushes the LOB buffer */
 PHP_FUNCTION(oci_lob_flush)
 {
@@ -813,7 +813,7 @@ PHP_FUNCTION(ocigetbufferinglob)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_copy( object lob_to, object lob_from [, int length ] )
+/* {{{ proto bool oci_lob_copy( object lob_to, object lob_from [, int length ] ) U
    Copies data from a LOB to another LOB */
 PHP_FUNCTION(oci_lob_copy)
 {
@@ -891,7 +891,7 @@ PHP_FUNCTION(oci_lob_is_equal)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_export([string filename [, int start [, int length]]])
+/* {{{ proto bool oci_lob_export([string filename [, int start [, int length]]]) U
    Writes a large object into a file */
 PHP_FUNCTION(oci_lob_export)
 {	
@@ -1003,7 +1003,7 @@ PHP_FUNCTION(oci_lob_export)
 /* }}} */
 
 #ifdef HAVE_OCI8_TEMP_LOB
-/* {{{ proto bool oci_lob_write_temporary(string var [, int lob_type])
+/* {{{ proto bool oci_lob_write_temporary(string var [, int lob_type]) U
    Writes temporary blob */
 PHP_FUNCTION(oci_lob_write_temporary)
 {
@@ -1921,7 +1921,7 @@ PHP_FUNCTION(oci_num_rows)
 /* }}} */
 
 #ifdef PHP_OCI8_HAVE_COLLECTIONS
-/* {{{ proto bool oci_free_collection()
+/* {{{ proto bool oci_free_collection() U
    Deletes collection object*/
 PHP_FUNCTION(oci_free_collection)
 {
