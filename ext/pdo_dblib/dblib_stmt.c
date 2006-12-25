@@ -131,7 +131,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	arows = 100;
 	size = S->ncols * sizeof(pdo_dblib_colval);
-	S->rows = emalloc(arows * size);
+	S->rows = safe_emalloc(arows, size, 0);
 
 	/* let's fetch all the data */
 	do {

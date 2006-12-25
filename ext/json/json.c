@@ -242,7 +242,7 @@ static void json_escape_string(smart_str *buf, char *s, int len)
         return;
     }
 
-    utf16 = (unsigned short *) emalloc(len * sizeof(unsigned short));
+    utf16 = (unsigned short *) safe_emalloc(len, sizeof(unsigned short), 0);
 
     len = utf8_to_utf16(utf16, s, len);
     if (len <= 0)
@@ -421,7 +421,7 @@ static PHP_FUNCTION(json_decode)
         RETURN_NULL();
     }
 
-    utf16 = (unsigned short *) emalloc((parameter_len+1) * sizeof(unsigned short));
+    utf16 = (unsigned short *) safe_emalloc((parameter_len+1), sizeof(unsigned short), 1);
 
     utf16_len = utf8_to_utf16(utf16, parameter, parameter_len);
     if (utf16_len <= 0)

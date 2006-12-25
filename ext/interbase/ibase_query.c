@@ -1146,7 +1146,7 @@ PHP_FUNCTION(ibase_query)
 				break;
 			}
 		} else if (bind_n > 0) {
-			bind_args = (zval ***) emalloc(sizeof(zval **) * ZEND_NUM_ARGS());
+			bind_args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
 
 			if (FAILURE == zend_get_parameters_array_ex(ZEND_NUM_ARGS(), bind_args)) {
 				break;
