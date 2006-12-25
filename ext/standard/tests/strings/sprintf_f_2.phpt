@@ -79,7 +79,6 @@ $number = 362525200;
 var_dump(sprintf("%.3e", $number)); // outputs 3.63e+8
 ?>
 --EXPECT--
-
 string(7) "100.426"
 string(6) "100.43"
 string(3) "100"
@@ -94,7 +93,7 @@ string(76) "The world contains 100 monkeys.
 string(33) "%b = '10100111101010011010101101'"
 string(8) "%c = 'A'"
 string(15) "%d = '43951789'"
-string(17) "%e = '4.39518e+7'"
+string(18) "%e = '4.395179e+7'"
 string(15) "%u = '43951789'"
 string(17) "%u = '4251015507'"
 string(22) "%f = '43951789.000000'"
@@ -112,4 +111,4 @@ string(12) "[####monkey]"
 string(12) "[many monke]"
 string(10) "2006-12-18"
 string(6) "123.10"
-string(7) "3.63e+8"
+string(8) "3.625e+8"
