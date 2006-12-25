@@ -144,7 +144,7 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	char *q;
 	int l = 1;
 
-	*quoted = q = emalloc(2 * unquotedlen + 3);
+	*quoted = q = safe_emalloc(2, unquotedlen, 3);
 	*q++ = '\'';
 
 	while (unquotedlen--) {
