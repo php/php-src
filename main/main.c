@@ -100,8 +100,13 @@ PHPAPI int core_globals_id;
  */
 static PHP_INI_MH(OnSetPrecision)
 {
-	EG(precision) = atoi(new_value);
-	return SUCCESS;
+	int i = atoi(new_value);
+	if (i >= 0) {
+		EG(precision) = i;
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
 }
 /* }}} */
 

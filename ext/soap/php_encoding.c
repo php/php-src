@@ -974,7 +974,7 @@ static xmlNodePtr to_xml_double(encodeTypePtr type, zval *data, int style, xmlNo
 		convert_to_double(&tmp);
 	}
 	
-	str = (char *) emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
+	str = (char *) safe_emalloc(EG(precision), 1, MAX_LENGTH_OF_DOUBLE + 1);
 	php_gcvt(Z_DVAL(tmp), EG(precision), '.', 'E', str);
 	xmlNodeSetContentLen(ret, BAD_CAST(str), strlen(str));
 	efree(str);
