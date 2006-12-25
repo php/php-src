@@ -976,7 +976,7 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 	dec = MAX(0, dec);
 	PHP_ROUND_WITH_FUZZ(d, dec);
 
-	tmplen = spprintf(&tmpbuf, 0, "%.*f", dec, d);
+	tmplen = spprintf(&tmpbuf, 0, "%.*F", dec, d);
 
 	if (tmpbuf == NULL || !isdigit((int)tmpbuf[0])) {
 		return tmpbuf;
