@@ -1052,6 +1052,15 @@ if test -z "$EXTENSION_DIR"; then
   fi
 fi
 
+case $PHP_LAYOUT in
+  GNU)
+    datarootdir=$prefix/share
+    ;;
+  *)
+    datarootdir=$prefix/php
+    ;;
+esac
+
 dnl Expand all directory names for use in macros/constants
 EXPANDED_EXTENSION_DIR=`eval echo $EXTENSION_DIR`
 EXPANDED_LOCALSTATEDIR=`eval echo $localstatedir`
@@ -1141,6 +1150,7 @@ PHP_SUBST(phptempdir)
 PHP_SUBST(prefix)
 PHP_SUBST(localstatedir)
 PHP_SUBST(datadir)
+PHP_SUBST(datarootdir)
 PHP_SUBST(sysconfdir)
 
 PHP_SUBST(EXEEXT)
