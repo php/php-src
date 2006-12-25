@@ -269,7 +269,7 @@ PHP_FUNCTION(bzread)
 	
 	php_stream_from_zval(stream, &bz);
 
-	if (len < 0) {
+	if ((len + 1) < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length may not be negative");
 		RETURN_FALSE;
 	}
