@@ -65,7 +65,7 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 
 #define TEMP_VAR_STACK_LIMIT 2000
 
-static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free)
+static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, int unref)
 {
 	if (!--z->refcount) {
 		z->refcount = 1;
@@ -74,7 +74,7 @@ static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free)
 /*		should_free->is_var = 1; */
 	} else {
 		should_free->var = 0;
-		if (z->is_ref && z->refcount == 1) {
+		if (unref && z->is_ref && z->refcount == 1) {
 			z->is_ref = 0;
 		}
 	}
@@ -88,7 +88,8 @@ static inline void zend_pzval_unlock_free_func(zval *z)
 	}
 }
 
-#define PZVAL_UNLOCK(z, f) zend_pzval_unlock_func(z, f)
+#define PZVAL_UNLOCK(z, f) zend_pzval_unlock_func(z, f, 1)
+#define PZVAL_UNLOCK_EX(z, f, u) zend_pzval_unlock_func(z, f, u)
 #define PZVAL_UNLOCK_FREE(z) zend_pzval_unlock_free_func(z)
 #define PZVAL_LOCK(z) (z)->refcount++
 #define RETURN_VALUE_UNUSED(pzn)	(((pzn)->u.EA.type & EXT_TYPE_UNUSED))

@@ -2266,7 +2266,15 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 		ZEND_VM_DISPATCH_TO_HELPER(zend_send_by_var_helper);
 	}
 
-	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	if (OP1_TYPE == IS_VAR &&
+		(opline->extended_value & ZEND_ARG_SEND_FUNCTION) &&
+		EX_T(opline->op1.u.var).var.fcall_returned_reference &&
+		EX_T(opline->op1.u.var).var.ptr) {
+		varptr = EX_T(opline->op1.u.var).var.ptr;
+		PZVAL_UNLOCK_EX(varptr, &free_op1, 0);
+	} else {
+		varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	}
 	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
 	     EX_T(opline->op1.u.var).var.fcall_returned_reference) &&
 	    varptr != &EG(uninitialized_zval) &&
