@@ -96,7 +96,7 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, zst
 	}
 	
 	if (query.s && query_len) {
-		statement->last_query = emalloc(USTR_BYTES(type, query_len + 1));
+		statement->last_query = safe_emalloc(1, USTR_BYTES(type, query_len + 1), 0);
 		memcpy(statement->last_query, query.s, USTR_BYTES(type, query_len));
 		statement->last_query[USTR_BYTES(type, query_len)] = '\0';
 		statement->last_query_len = query_len;
@@ -604,7 +604,8 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 					outcol->storage_size4 *= 3;
 					
 					dynamic = OCI_DEFAULT;
-					buf = outcol->data = (text *) ecalloc(1, outcol->storage_size4);
+					buf = outcol->data = (text *) safe_emalloc(1, outcol->storage_size4, 0);
+					memset(buf, 0, outcol->storage_size4);
 					break;
 			}
 
@@ -1379,14 +1380,17 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	
 	bind = emalloc(sizeof(php_oci_bind));
 	if (UG(unicode)) {
-		bind->array.elements		= (UChar *)ecalloc(1, max_table_length * sizeof(UChar) * (maxlength + 1));
+		bind->array.elements		= (UChar *)safe_emalloc(max_table_length * (maxlength + 1), sizeof(UChar), 0);
+		memset(bind->array.elements, 0, max_table_length * sizeof(UChar) * (maxlength + 1));
 	} else {
-		bind->array.elements		= (text *)ecalloc(1, max_table_length * sizeof(text) * (maxlength + 1));
+		bind->array.elements		= (text *)safe_emalloc(max_table_length * (maxlength + 1), sizeof(text), 0);
+		memset(bind->array.elements, 0, max_table_length * sizeof(text) * (maxlength + 1));
 	}
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
 	bind->array.max_length		= TEXT_BYTES(maxlength);
-	bind->array.element_lengths	= ecalloc(1, max_table_length * sizeof(ub2));
+	bind->array.element_lengths	= safe_emalloc(max_table_length, sizeof(ub2), 0);
+	memset(bind->array.element_lengths, 0, max_table_length * sizeof(ub2));
 	
 	zend_hash_internal_pointer_reset(hash);
 	
@@ -1437,11 +1441,12 @@ php_oci_bind *php_oci_bind_array_helper_number(zval* var, long max_table_length 
 	hash = HASH_OF(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
-	bind->array.elements		= (ub4 *)emalloc(max_table_length * sizeof(ub4));
+	bind->array.elements		= (ub4 *)safe_emalloc(max_table_length, sizeof(ub4), 0);
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
 	bind->array.max_length		= sizeof(ub4);
-	bind->array.element_lengths	= ecalloc(1, max_table_length * sizeof(ub2));
+	bind->array.element_lengths	= safe_emalloc(max_table_length, sizeof(ub2), 0);
+	memset(bind->array.element_lengths, 0, max_table_length * sizeof(ub2));
 	
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
@@ -1473,11 +1478,12 @@ php_oci_bind *php_oci_bind_array_helper_double(zval* var, long max_table_length 
 	hash = HASH_OF(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
-	bind->array.elements		= (double *)emalloc(max_table_length * sizeof(double));
+	bind->array.elements		= (double *)safe_emalloc(max_table_length, sizeof(double), 0);
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
 	bind->array.max_length		= sizeof(double);
-	bind->array.element_lengths	= ecalloc(1, max_table_length * sizeof(ub2));
+	bind->array.element_lengths	= safe_emalloc(max_table_length, sizeof(ub2), 0);
+	memset(bind->array.element_lengths, 0, max_table_length * sizeof(ub2));
 	
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
@@ -1509,11 +1515,12 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 	hash = HASH_OF(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
-	bind->array.elements		= (OCIDate *)emalloc(max_table_length * sizeof(OCIDate));
+	bind->array.elements		= (OCIDate *)safe_emalloc(max_table_length, sizeof(OCIDate), 0);
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
 	bind->array.max_length		= sizeof(OCIDate);
-	bind->array.element_lengths	= ecalloc(1, max_table_length * sizeof(ub2));
+	bind->array.element_lengths	= safe_emalloc(max_table_length, sizeof(ub2), 0);
+	memset(bind->array.element_lengths, 0, max_table_length * sizeof(ub2));
 
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
