@@ -246,7 +246,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		php_stream_context_get_option(context, "http", "protocol_version", &tmpzval) == SUCCESS) {
 		SEPARATE_ZVAL(tmpzval);
 		convert_to_double_ex(tmpzval);
-		protocol_version_len = spprintf(&protocol_version, 0, "%.1f", Z_DVAL_PP(tmpzval));
+		protocol_version_len = spprintf(&protocol_version, 0, "%.1F", Z_DVAL_PP(tmpzval));
 	}
 
 	if (!scratch) {
