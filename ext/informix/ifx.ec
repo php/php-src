@@ -449,7 +449,7 @@ PHP_MINFO_FUNCTION(ifx)
 	php_info_print_table_row(2, "Active Persistent links", buf);
 	sprintf(buf, "%ld", IFXG(num_links)); 
 	php_info_print_table_row(2, "Active links", buf);
-	sprintf(buf, "%02.2f", (double)(IFX_VERSION/100.0));
+	sprintf(buf, "%02.2F", (double)(IFX_VERSION/100.0));
 	php_info_print_table_row(2, "ESQL/C Version", buf);
 	php_info_print_table_end();
 
