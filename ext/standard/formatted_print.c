@@ -482,9 +482,6 @@ php_u_sprintf_appenddouble(UChar **buffer, int *pos,
 
 	switch (fmt) {		
 		case 0x65 /* 'e' */:
-			if (precision) {
-				precision--;
-			}
 		case 0x45 /* 'E' */:
 		case 0x46 /* 'F' */:
 		case 0x66 /* 'f' */:
