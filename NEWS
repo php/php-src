@@ -5,6 +5,8 @@ PHP 4                                                                      NEWS
   indexing the page. (Ilia)
 - Updated PCRE to version 6.7. (Ilia)
 - Fixed missing open_basedir check inside chdir() function. (Ilia)
+- Fixed bug #39890 (using autoconf 2.6x and --with-layout=GNU breaks PEAR 
+  install path). (Tony)
 - Fixed bug #39653 (ext/dba doesn't check for db-4.5 and db-4.4 when db4 
   support is enabled). (Tony)
 - Fixed bug #39583 (ftp_put() does not change transfer mode to ASCII). (Tony)
