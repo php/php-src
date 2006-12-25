@@ -1,3 +1,81 @@
+2006-12-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      MFB: Fixed buffer boundary protection
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      Fixed buffer boundary protection
+
+    * ext/sqlite/libsqlite/src/encode.c:
+      MFB: Added empty string checks
+
+    * (PHP_5_2)
+      ext/sqlite/libsqlite/src/encode.c:
+      Added empty string checks
+
+2006-12-24  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/com_dotnet/com_saproxy.c:
+      update function signature
+
+    * (PHP_5_2)
+      NEWS
+      NEWS:
+      BFN
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      MFB: fix bug #33734 and related (Something strange with COM Object)
+       - caused by fix in com_handlers.c rev 1.22.2.5
+
+    * (PHP_5_2)
+      ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      fix bug #33734 and related (Something strange with COM Object)
+       - caused by fix in com_handlers.c rev 1.22.2.5
+
+    * ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/com_wrapper.c
+      ext/com_dotnet/tests/bug33386.phpt
+      ext/com_dotnet/tests/bug39596.phpt:
+      MFB:
+      - fix bug #33386 (ScriptControl only sees last function of class):
+      com_wrapper.c
+      - fix bug #37588 (COM Property propputref converts to PHP function
+        and can't be accesed): com_handlers.c
+      - fix bug #39596 (Creating Variant of type VT_ARRAY): com_variant.c
+      - add tests
+
+    * ext/com_dotnet/tests/bug33386.phpt
+      ext/com_dotnet/tests/bug33386.phpt
+      ext/com_dotnet/tests/bug39596.phpt
+      ext/com_dotnet/tests/bug39596.phpt:
+      
+      file bug33386.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/com_wrapper.c:
+      - fix bug #33386 (ScriptControl only sees last function of class):
+      com_wrapper.c
+      - fix bug #37588 (COM Property propputref converts to PHP function
+        and can't be accesed): com_handlers.c
+      - fix bug #39596 (Creating Variant of type VT_ARRAY): com_variant.c
+      - add tests
+
+2006-12-24  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      Fix typo
+
 2006-12-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/zip/php_zip.c
