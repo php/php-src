@@ -3284,7 +3284,8 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
 				if (key_type != HASH_KEY_NON_EXISTANT &&
-				    zend_check_property_access(zobj, key_type == HASH_KEY_IS_UNICODE?IS_UNICODE:IS_STRING, str_key, str_key_len-1 TSRMLS_CC) == SUCCESS) {
+					(key_type == HASH_KEY_IS_LONG ||
+				     zend_check_property_access(zobj, key_type == HASH_KEY_IS_UNICODE?IS_UNICODE:IS_STRING, str_key, str_key_len-1 TSRMLS_CC) == SUCCESS)) {
 					break;
 				}
 				zend_hash_move_forward(fe_ht);
@@ -3343,8 +3344,10 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
 
 				zend_hash_move_forward(fe_ht);
-			} while (key_type == HASH_KEY_NON_EXISTANT || zend_check_property_access(zobj, key_type == HASH_KEY_IS_UNICODE?IS_UNICODE:IS_STRING, str_key, str_key_len-1 TSRMLS_CC) != SUCCESS);
-			if (use_key) {
+			} while (key_type == HASH_KEY_NON_EXISTANT ||
+			         (key_type != HASH_KEY_IS_LONG &&
+		              zend_check_property_access(zobj, key_type == HASH_KEY_IS_UNICODE?IS_UNICODE:IS_STRING, str_key, str_key_len-1 TSRMLS_CC) != SUCCESS));
+			if (use_key && key_type != HASH_KEY_IS_LONG) {
 				zend_u_unmangle_property_name(key_type == HASH_KEY_IS_UNICODE?IS_UNICODE:IS_STRING, str_key, str_key_len-1, &class_name, &prop_name);
 				if (key_type == HASH_KEY_IS_UNICODE) {
 					str_key_len = u_strlen(prop_name.u);
