@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . cookies
   . canary protection (debug build only)
   . random generation of cookies and canaries
+- Added forward support for 'b' prefix in front of string literals. (Andrei)
 - Fixed incorrect function names on FreeBSD where inet_pton() was named
   __inet_pton() and inet_ntop() was named __inet_ntop(). (Hannes)
 - Fixed the validate email filter so that the letter "v" can also be used in
@@ -37,8 +38,10 @@ PHP                                                                        NEWS
 - Fixed bug #39815 (SOAP double encoding is not locale-independent). (Dmitry)
 - Fixed bug #39685 (iconv() - undefined function). (Hannes)
 - Fixed bug #39596 (Creating Variant of type VT_ARRAY). (Rob)
+- Fixed bug #39435 ('foo' instanceof bar gives invalid opcode error). (Sara)
+- Fixed bugs #39361 & #39400 (mbstring function overloading problem). (Seiji)
 - Fixed bug #38852 (XML-RPC Breaks iconv). (Hannes)
-- Fixed bug #37588 (COM Property propputref converts to PHP function 
+- Fixed bug #37588 (COM Property propputref converts to PHP function
   and can't be accesed). (Rob)
 - Fixed bug #36392 (wrong number of decimal digits with %e specifier in
   sprintf). (Matt,Ilia)
@@ -50,6 +53,8 @@ PHP                                                                        NEWS
   the page. (Ilia)
 - Added new function, sys_get_temp_dir(). (Hartmut)
 - Added missing object support to file_put_contents(). (Ilia)
+- Added support for md2, ripemd256 and ripemd320 algos to hash(). (Sara)
+- Added forward support for (binary) cast. (Derick)
 - Changed double-to-string utilities to use BSD implementation. (Dmitry, Tony)
 - Updated bundled libcURL to version 7.16.0 in the Windows distro. (Edin)
 - Updated timezone database to version 2006.16. (Derick)
@@ -95,8 +100,19 @@ PHP                                                                        NEWS
   . Fixed possible double encoding problem with sanitizing filters
   . Make use of space-strict strip_tags() function
   . Fixed whitespace trimming
+  . Added support for FastCGI environment variables. (Dmitry)
+- PDO_MySQL Extension Improvements (Ilia)
+  . Enabled buffered queries by default.
+  . Enabled prepared statement emulation by default.
 - Fixed FastCGI impersonation for persistent connections on Windows. (Dmitry)
 - Fixed wrong signature initialization in imagepng (Takeshi Abe)
+- Fixed ftruncate() with negative size on FreeBSD. (Hannes)
+- Fixed segfault in RegexIterator when given invalid regex. (Hannes)
+- Fixed segfault in SplFileObject->openFile()->getPathname(). (Hannes)
+- Fixed segfault in ZTS mode when OCI8 statements containing
+  sub-statements are destroyed in wrong order. (Tony)
+- Removed double "wrong parameter count" warnings in various functions.
+  (Hannes)
 - Added optimization for imageline with horizontal and vertial lines (Pierre)
 - Fixed bug #39846 (Invalid IPv4 treated as valid). (Ilia)
 - Fixed bug #39845 (Persistent connections generate a warning in pdo_pgsql).
@@ -155,6 +171,8 @@ PHP                                                                        NEWS
 - Fixed bug #39602 (Invalid session.save_handler crashes PHP). (Dmitry)
 - Fixed bug #39583 (ftp_put() does not change transfer mode to ASCII). (Tony)
 - Fixed bug #39576 (array_walk() doesn't separate userdata zval). (Tony)
+- Fixed bug #39575 (move_uploaded_file() no longer working (safe mode related)).
+  (Tony)
 - Fixed bug #39571 (timeout ssl:// connections). (Ilia)
 - Fixed bug #39564 (PDO::errorInfo() returns inconsistent information when 
   sqlite3_step() fails). (Tony)
@@ -168,6 +186,7 @@ PHP                                                                        NEWS
   prepared statements are used in pdo_mysql). (Ilia)
 - Fixed bug #39508 (imagefill crashes with small images 3 pixels or less)
   (Pierre)
+- Fixed bug #39506 (Archive corrupt with ZipArchive::addFile method). (Pierre)
 - Fixed bug #39483 (Problem with handling of \ char in prepared statements).
   (Ilia, suhachov at gmail dot com)
 - Fixed bug #39458 (ftp_nlist() returns false on empty dirs). (Nuno)
@@ -239,7 +258,7 @@ PHP                                                                        NEWS
 - Fixed bug #33282 (Re-assignment by reference does not clear the is_ref flag)
   (Ilia,Dmitry, Matt Wilmas)
 - Fixed bug #30074 (apparent symbol table error with extract($blah, EXTR_REFS)) 
-  (shire)
+  (Brian)
 - Fixed bug #29840 (is_executable() does not honor safe_mode_exec_dir
   setting). (Ilia)
 
