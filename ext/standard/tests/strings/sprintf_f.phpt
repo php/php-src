@@ -38,3 +38,20 @@ string(7) "-005.60"
 string(7) "-5.6000"
 
 string(105) "1234567%d.0000"
+--UEXPECTF--
+unicode(4) "1.20"
+unicode(4) "1.20"
+unicode(4) "1.20"
+unicode(4) "1.20"
+
+unicode(5) " 3.40"
+unicode(5) "3.40 "
+unicode(5) "03.40"
+unicode(5) "3.400"
+
+unicode(7) "  -5.60"
+unicode(7) "-5.60  "
+unicode(7) "-005.60"
+unicode(7) "-5.6000"
+
+unicode(105) "1234567%d.0000"
