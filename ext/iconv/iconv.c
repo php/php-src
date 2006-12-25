@@ -1105,7 +1105,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 		goto out;
 	}
 
-	buf = emalloc(max_line_len + 5);
+	buf = safe_emalloc(1, max_line_len, 5);
 
 	char_cnt = max_line_len;
 
