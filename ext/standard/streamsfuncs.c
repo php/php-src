@@ -1646,7 +1646,7 @@ PHP_FUNCTION(stream_resolve_include_path)
 /* }}} */
 
 #ifdef HAVE_SHUTDOWN
-/* {{{ proto int stream_socket_shutdown(resource stream, int how)
+/* {{{ proto int stream_socket_shutdown(resource stream, int how) U
 	causes all or part of a full-duplex connection on the socket associated
 	with stream to be shut down.  If how is SHUT_RD,  further receptions will
 	be disallowed. If how is SHUT_WR, further transmissions will be disallowed.
@@ -1672,8 +1672,8 @@ PHP_FUNCTION(stream_socket_shutdown)
 
 	RETURN_BOOL(php_stream_xport_shutdown(stream, (stream_shutdown_t)how TSRMLS_CC) == 0);
 }
-#endif
 /* }}} */
+#endif
 
 /*
  * Local variables:
