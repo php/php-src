@@ -6,6 +6,6 @@ Bug #22207 (missing 0 when using the e notation in *printf functions)
 	var_dump(sprintf("%10.5e\n", 1.1));
 ?>
 --EXPECT--
-1.1000e+0
-string(11) " 1.1000e+0
+1.10000e+0
+string(11) "1.10000e+0
 "
