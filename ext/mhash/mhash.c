@@ -249,7 +249,7 @@ PHP_FUNCTION(mhash_get_hash_name)
 }
 /* }}} */
 
-/* {{{ int mhash_keygen_count() U
+/* {{{ proto int mhash_keygen_count() U
 	Get the number of available keygen algorithms */
 PHP_FUNCTION(mhash_keygen_count)
 {
@@ -261,7 +261,7 @@ PHP_FUNCTION(mhash_keygen_count)
 }
 /* }}} */
 
-/* {{{ string mhash_get_keygen_name(int keygen)
+/* {{{ proto string mhash_get_keygen_name(int keygen) U
 	Get the name of the keygen algorithm */
 PHP_FUNCTION(mhash_get_keygen_name)
 {
@@ -294,7 +294,7 @@ PHP_FUNCTION(mhash_keygen_uses_hash)
 }
 /* }}} */
 
-/* {{{ proto bool mhash_keygen_uses_count
+/* {{{ proto bool mhash_keygen_uses_count(int keygen) U
 	Whether the keygen algorithm uses the bytes_count parameter */
 PHP_FUNCTION(mhash_keygen_uses_count)
 {
@@ -308,7 +308,7 @@ PHP_FUNCTION(mhash_keygen_uses_count)
 }
 /* }}} */
 
-/* {{{ proto bool mhash_keygen uses_salt(int keygen) U
+/* {{{ proto bool mhash_keygen_uses_salt(int keygen) U
 	Whether the keygen algorithm requires a salt */
 PHP_FUNCTION(mhash_keygen_uses_salt)
 {
