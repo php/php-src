@@ -88,7 +88,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 	zstr string_key = NULL_ZSTR;
 
 	parsize = (2 * zend_hash_num_elements(parht) + 1) * sizeof(char *);
-	params = (char **)emalloc(parsize);
+	params = (char **)safe_emalloc((2 * zend_hash_num_elements(parht) + 1), sizeof(char *), 0);
 	memset((char *)params, 0, parsize);
 
 	for (zend_hash_internal_pointer_reset(parht);
