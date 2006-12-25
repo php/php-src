@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - Fixed bug #39903 (Notice message when executing __halt_compiler() more than 
   once). (Tony)
 - Fixed bug #39898 (FILTER_VALIDATE_URL validates \r\n\t etc). (Ilia)
+- Fixed bug #39890 (using autoconf 2.6x and --with-layout=GNU breaks PEAR 
+  install path). (Tony)
 - Fixed bug #39884 (ReflectionParameter::getClass() throws exception for type
   hint self). (thekid at php dot net)
 - Fixed bug #39873 (number_format() breaks with locale & decimal points).
