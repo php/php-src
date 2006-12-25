@@ -98,7 +98,6 @@ PHPAPI void php_print_credits(int flag)
 		php_info_print_table_start();
 		php_info_print_table_colspan_header(2, "PHP Documentation");
 		CREDIT_LINE("Authors", "Mehdi Achour, Friedhelm Betz, Antony Dovgal, Nuno Lopes, Philip Olson, Georg Richter, Damien Seguy, Jakub Vrana");
-		CREDIT_LINE("Editor", "Gabor Hojtsy");
 		CREDIT_LINE("User Note Maintainers", "Mehdi Achour, Friedhelm Betz, Vincent Gevers, Aidan Lister, Nuno Lopes, Tom Sommer");
 		CREDIT_LINE("Other Contributors", "Previously active authors, editors and other contributors are listed in the manual.");
 		php_info_print_table_end();
@@ -115,7 +114,7 @@ PHPAPI void php_print_credits(int flag)
 		/* Website Team */
 		php_info_print_table_start();
 		php_info_print_table_header(1, "PHP Website Team");
-		php_info_print_table_row(1, "Gabor Hojtsy, Colin Viebrock, Jim Winstead");
+		php_info_print_table_row(1, "Hannes Magnusson, Colin Viebrock, Jim Winstead");
 		php_info_print_table_end();
 	}
 
