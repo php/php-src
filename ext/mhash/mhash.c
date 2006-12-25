@@ -228,7 +228,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 	keystruct.salt = salt;
 	keystruct.salt_size = salt_len;
 
-	ret = emalloc(bytes + 1);
+	ret = safe_emalloc(1, bytes, 1);
 
 	if (mhash_keygen_ext(KEYGEN_S2K_SALTED, keystruct, ret, bytes, password, password_len) >= 0) {
 		ret[bytes] = '\0';
