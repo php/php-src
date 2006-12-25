@@ -2470,7 +2470,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	}
 }
 
-/* {{{ proto use_soap_error_handler ( [bool on] ) U
+/* {{{ proto bool use_soap_error_handler ( [bool on] ) U
    Enable or disable SOAP's error handler, that translates PHP errors into 
    SOAP faults */
 PHP_FUNCTION(use_soap_error_handler)
