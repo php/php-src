@@ -369,7 +369,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		RETURN_FALSE;
 	}
 	
-	read_buf = emalloc(to_read + 1);
+	read_buf = safe_emalloc(1, to_read, 1);
 	
 	recvd = php_stream_xport_recvfrom(stream, read_buf, to_read, flags, NULL, NULL,
 			zremote ? &remote_addr : NULL,
