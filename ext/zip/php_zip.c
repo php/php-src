@@ -1115,8 +1115,8 @@ static ZIPARCHIVE_METHOD(addFromString)
 		ze_obj->buffers_cnt++;
 		pos = 0;
 	}
-	ze_obj->buffers[pos] = (char *)emalloc(buffer_len);
-	memcpy(ze_obj->buffers[pos], buffer, buffer_len);
+	ze_obj->buffers[pos] = (char *)emalloc(buffer_len + 1);
+	memcpy(ze_obj->buffers[pos], buffer, buffer_len + 1);
 
 	zs = zip_source_buffer(intern, ze_obj->buffers[pos], buffer_len, 0);
 
