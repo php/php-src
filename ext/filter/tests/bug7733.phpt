@@ -17,13 +17,13 @@ var_dump($out);
 --EXPECTF--	
 array(5) {
   [0]=>
-  float(0)
+  bool(false)
   [1]=>
-  float(10)
+  bool(false)
   [2]=>
-  float(2)
+  bool(false)
   [3]=>
-  float(0)
+  bool(false)
   [4]=>
-  float(0)
+  bool(false)
 }
