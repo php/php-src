@@ -119,6 +119,17 @@ typedef struct CharSet {
 	} *ranges;
 } CharSet;
 
+typedef struct u_CharSet {
+	int exclude;		/* 1 if this is an exclusion set. */
+	int nchars;
+	UChar *chars;
+	int nranges;
+	struct u_Range {
+		UChar start;
+		UChar end;
+	} *ranges;
+} u_CharSet;
+
 /*
  * Declarations for functions used only in this file.
  */
@@ -126,6 +137,9 @@ typedef struct CharSet {
 static char *BuildCharSet(CharSet *cset, char *format);
 static int	CharInSet(CharSet *cset, int ch);
 static void	ReleaseCharSet(CharSet *cset);
+static UChar *u_BuildCharSet(u_CharSet *cset, UChar *format);
+static int	u_CharInSet(u_CharSet *cset, UChar ch);
+static void	u_ReleaseCharSet(u_CharSet *cset);
 static inline void scan_set_error_return(int numVars, zval **return_value);
 
 
@@ -237,6 +251,114 @@ static char * BuildCharSet(CharSet *cset, char *format)
 }
 /* }}} */
 
+/* {{{ u_BuildCharSet
+ *----------------------------------------------------------------------
+ *
+ * BuildCharSet --
+ *
+ *	This function examines a character set format specification
+ *	and builds a CharSet containing the individual characters and
+ *	character ranges specified.
+ *
+ * Results:
+ *	Returns the next format position.
+ *
+ * Side effects:
+ *	Initializes the charset.
+ *
+ *----------------------------------------------------------------------
+ */
+static UChar * u_BuildCharSet(u_CharSet *cset, UChar *format)
+{
+	UChar *ch, start;
+	int  nranges;
+	UChar *end;
+
+	memset(cset, 0, sizeof(u_CharSet));
+	
+	ch = format;
+	if (*ch == 0x5E /* '^' */) {
+		cset->exclude = 1;
+		ch = ++format;
+	}
+	end = format + 1;        /* verify this - cc */
+
+	/*
+	 * Find the close bracket so we can overallocate the set.
+	 */
+
+	if (*ch == 0x5D /* ']' */) {
+		ch = end++;
+	}
+	nranges = 0;
+	while (*ch != 0x5D /* ']' */) {
+		if (*ch == 0x2D /* '-' */) {
+			nranges++;
+		}
+		ch = end++;
+	}
+
+	cset->chars = safe_emalloc(sizeof(UChar), (end - format - 1), 0);
+	if (nranges > 0) {
+		cset->ranges = (struct u_Range *) safe_emalloc(sizeof(struct u_Range), nranges, 0);
+	} else {
+		cset->ranges = NULL;
+	}
+
+	/*
+	 * Now build the character set.
+	 */
+
+	cset->nchars = cset->nranges = 0;
+	ch    = format++;
+	start = *ch;
+	if (*ch == 0x5D /* ']' */ || *ch == 0x2D /* '-' */) {
+		cset->chars[cset->nchars++] = *ch;
+		ch = format++;
+	}
+	while (*ch != 0x5D /* ']' */) {
+		if (*format == 0x2D /* '-' */) {
+			/*
+			 * This may be the first character of a range, so don't add
+			 * it yet.
+			 */
+
+			start = *ch;
+		} else if (*ch == 0x2D /* '-' */) {
+			/*
+			 * Check to see if this is the last character in the set, in which
+			 * case it is not a range and we should add the previous character
+			 * as well as the dash.
+			 */
+
+			if (*format == 0x5D /* ']' */) {
+				cset->chars[cset->nchars++] = start;
+				cset->chars[cset->nchars++] = *ch;
+			} else {
+				ch = format++;
+
+				/*
+				 * Check to see if the range is in reverse order.
+				 */
+
+				if (start < *ch) {
+					cset->ranges[cset->nranges].start = start;
+					cset->ranges[cset->nranges].end = *ch;
+				} else {
+					cset->ranges[cset->nranges].start = *ch;
+					cset->ranges[cset->nranges].end = start;
+				}
+				cset->nranges++;
+		   }
+		} else {
+			cset->chars[cset->nchars++] = *ch;
+		}
+		ch = format++;
+	}
+	return format;
+}
+/* }}} */
+
 /* {{{ CharInSet
  *----------------------------------------------------------------------
  *
@@ -255,6 +377,45 @@ static char * BuildCharSet(CharSet *cset, char *format)
 static int CharInSet(CharSet *cset, int c)
 {
 	char ch = (char) c;
+	int i, match = 0;
+
+	for (i = 0; i < cset->nchars; i++) {
+		if (cset->chars[i] == ch) {
+			match = 1;
+			break;
+		}
+	}
+	if (!match) {
+		for (i = 0; i < cset->nranges; i++) {
+			if ((cset->ranges[i].start <= ch)
+				&& (ch <= cset->ranges[i].end)) {
+				match = 1;
+				break;
+			}
+		}
+	}
+	return (cset->exclude ? !match : match);    
+}
+/* }}} */
+
+/* {{{ u_CharInSet
+ *----------------------------------------------------------------------
+ *
+ * CharInSet --
+ *
+ *	Check to see if a character matches the given set.
+ *
+ * Results:
+ *	Returns non-zero if the character matches the given set.
+ *
+ * Side effects:
+ *	None.
+ *
+ *----------------------------------------------------------------------
+ */
+static int u_CharInSet(u_CharSet *cset, UChar c)
+{
+	UChar ch = c;
 	int i, match = 0;
 
 	for (i = 0; i < cset->nchars; i++) {
@@ -296,6 +457,30 @@ static void ReleaseCharSet(CharSet *cset)
 	efree((char *)cset->chars);
 	if (cset->ranges) {
 		efree((char *)cset->ranges);
+	}
+}
+/* }}} */
+
+/* {{{ u_ReleaseCharSet
+ *----------------------------------------------------------------------
+ *
+ * ReleaseCharSet --
+ *
+ *	Free the storage associated with a character set.
+ *
+ * Results:
+ *	None.
+ *
+ * Side effects:
+ *	None.
+ *
+ *----------------------------------------------------------------------
+ */
+static void u_ReleaseCharSet(u_CharSet *cset)
+{
+	efree(cset->chars);
+	if (cset->ranges) {
+		efree(cset->ranges);
 	}
 }
 /* }}} */
@@ -420,6 +605,285 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 
 		if (isdigit(UCHAR(*ch))) { 
 			value = strtoul(format-1, &format, 10);
+			flags |= SCAN_WIDTH;
+			ch = format++;
+		}
+
+		/*
+		 * Ignore size specifier.
+		 */
+
+		if ((*ch == 'l') || (*ch == 'L') || (*ch == 'h')) {
+			ch = format++;
+		}
+
+		if (!(flags & SCAN_SUPPRESS) && numVars && (objIndex >= numVars)) {
+			goto badIndex;
+		}
+
+		/*
+		 * Handle the various field types.
+		 */
+
+		switch (*ch) {
+			case 'n':
+			case 'd':
+			case 'D':		
+			case 'i':
+			case 'o':
+			case 'x':
+			case 'X':		
+			case 'u':
+			case 'f':
+			case 'e':
+			case 'E':		
+			case 'g':
+			case 's':
+				  break;
+			case 'c':
+				/* we differ here with the TCL implementation in allowing for */
+				/* a character width specification, to be more consistent with */
+				/* ANSI. since Zend auto allocates space for vars, this is no */
+				/* problem - cc                                               */
+				/*
+				if (flags & SCAN_WIDTH) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field width may not be specified in %c conversion");
+					goto error;
+				}
+				*/
+				break;
+			case '[':
+				if (*format == '\0') {
+					goto badSet;
+				}
+				ch = format++;
+				if (*ch == '^') {
+					if (*format == '\0') {
+						goto badSet;
+					}
+					ch = format++;
+				}
+				if (*ch == ']') {
+					if (*format == '\0') {
+						goto badSet;
+					}
+					ch = format++;
+				}
+				while (*ch != ']') {
+					if (*format == '\0') {
+						goto badSet;
+					}
+					ch = format++;
+				}
+				break;
+			badSet:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unmatched [ in format string");
+				goto error;
+			default:
+				{
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad scan conversion character \"%c\"", *ch);
+				goto error;
+				}
+		}
+		if (!(flags & SCAN_SUPPRESS)) {
+			if (objIndex >= nspace) {
+				/*
+				 * Expand the nassign buffer.  If we are using XPG specifiers,
+				 * make sure that we grow to a large enough size.  xpgSize is
+				 * guaranteed to be at least one larger than objIndex.
+				 */
+				value = nspace;
+				if (xpgSize) {
+					nspace = xpgSize;
+				} else {
+					nspace += STATIC_LIST_SIZE;
+				}
+				if (nassign == staticAssign) {
+					nassign = (void *)safe_emalloc(nspace, sizeof(int), 0);
+					for (i = 0; i < STATIC_LIST_SIZE; ++i) {
+						nassign[i] = staticAssign[i];
+					}
+				} else {
+					nassign = (void *)erealloc((void *)nassign, nspace * sizeof(int));
+				}
+				for (i = value; i < nspace; i++) {
+					nassign[i] = 0;
+				}
+			}
+			nassign[objIndex]++;
+			objIndex++;
+		}
+	}  /* while (*format != '\0') */
+
+	/*
+	 * Verify that all of the variable were assigned exactly once.
+	 */
+
+	if (numVars == 0) {
+		if (xpgSize) {
+			numVars = xpgSize;
+		} else {
+			numVars = objIndex;
+		}
+	}
+	if (totalSubs) {
+		*totalSubs = numVars;
+	}
+	for (i = 0; i < numVars; i++) {
+		if (nassign[i] > 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "Variable is assigned by multiple \"%n$\" conversion specifiers");
+			goto error;
+		} else if (!xpgSize && (nassign[i] == 0)) {
+			/*
+			 * If the space is empty, and xpgSize is 0 (means XPG wasn't
+			 * used, and/or numVars != 0), then too many vars were given
+			 */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variable is not assigned by any conversion specifiers");
+			goto error;
+		}
+	}
+
+	if (nassign != staticAssign) {
+		efree((char *)nassign);
+	}
+	return SCAN_SUCCESS;
+
+badIndex:
+	if (gotXpg) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "\"%n$\" argument index out of range");
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Different numbers of variable names and field specifiers");
+	}
+
+error:
+	if (nassign != staticAssign) {
+		efree((char *)nassign);
+	}
+	return SCAN_ERROR_INVALID_FORMAT;
+#undef STATIC_LIST_SIZE
+}
+/* }}} */
+
+/* {{{ u_ValidateFormat
+ *----------------------------------------------------------------------
+ *
+ * ValidateFormat --
+ *
+ *	Parse the format string and verify that it is properly formed
+ *	and that there are exactly enough variables on the command line.
+ *
+ * Results:
+ *    FAILURE or SUCCESS.
+ *
+ * Side effects:
+ *     May set php_error based on abnormal conditions.
+ *
+ * Parameters :
+ *     format     The format string.
+ *     numVars    The number of variables passed to the scan command.
+ *     totalSubs  The number of variables that will be required.
+ *
+ *----------------------------------------------------------------------
+*/
+PHPAPI int u_ValidateFormat(UChar *format, int numVars, int *totalSubs)
+{
+#define STATIC_LIST_SIZE 16
+	int gotXpg, gotSequential, value, i, flags;
+	UChar *end, *ch = NULL;
+	int staticAssign[STATIC_LIST_SIZE];
+	int *nassign = staticAssign;
+	int objIndex, xpgSize, nspace = STATIC_LIST_SIZE;
+	TSRMLS_FETCH();
+
+	/*
+	 * Initialize an array that records the number of times a variable
+	 * is assigned to by the format string.  We use this to detect if
+	 * a variable is multiply assigned or left unassigned.
+	 */
+
+	if (numVars > nspace) {
+		nassign = (int*)safe_emalloc(sizeof(int), numVars, 0);
+		nspace = numVars;
+	}
+	for (i = 0; i < nspace; i++) {
+		nassign[i] = 0;
+	}
+
+	xpgSize = objIndex = gotXpg = gotSequential = 0;
+
+	while (*format != 0x00) {
+		ch = format++;
+		flags = 0;
+
+		if (*ch != 0x25 /* '%' */) {
+			continue;
+		}
+		ch = format++;
+		if (*ch == 0x25 /* '%' */) {
+			continue;
+		}
+		if (*ch == 0x2A /* '*' */) {
+			flags |= SCAN_SUPPRESS;
+			ch = format++;
+			goto xpgCheckDone;
+		}
+
+		if ( u_isdigit( *ch ) ) { 
+			/*
+			 * Check for an XPG3-style %n$ specification.  Note: there
+			 * must not be a mixture of XPG3 specs and non-XPG3 specs
+			 * in the same format string.
+			 */
+
+			value = zend_u_strtoul(format-1, &end, 10); 
+			if (*end != '$') {
+				goto notXpg;
+			}
+			format = end+1;
+			ch     = format++;
+			gotXpg = 1;
+			if (gotSequential) {
+				goto mixedXPG;
+			}
+			objIndex = value - 1;
+			if ((objIndex < 0) || (numVars && (objIndex >= numVars))) {
+				goto badIndex;
+			} else if (numVars == 0) {
+				/*
+				 * In the case where no vars are specified, the user can
+				 * specify %9999$ legally, so we have to consider special
+				 * rules for growing the assign array.  'value' is
+				 * guaranteed to be > 0.
+				 */
+
+				/* set a lower artificial limit on this
+				 * in the interest of security and resource friendliness
+				 * 255 arguments should be more than enough. - cc
+				 */
+				if (value > SCAN_MAX_ARGS) {
+					goto badIndex;
+				}
+
+				xpgSize = (xpgSize > value) ? xpgSize : value;
+			}
+			goto xpgCheckDone;
+		}
+
+	notXpg:
+		gotSequential = 1;
+		if (gotXpg) {
+			mixedXPG:
+			  php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
+			goto error;
+		}
+
+	xpgCheckDone:
+		/*
+		 * Parse any width specifier.
+		 */
+
+		if (u_isdigit(*ch)) { 
+			value = zend_u_strtoul(format-1, &format, 10);
 			flags |= SCAN_WIDTH;
 			ch = format++;
 		}
@@ -1253,8 +1717,682 @@ done:
 }
 /* }}} */
 
+/* {{{ php_u_sscanf_internal
+ * This is the internal function which does processing on behalf of
+ * both sscanf() and fscanf()
+ * 
+ * parameters :
+ * 		string		literal string to be processed
+ * 		format		format string
+ *		argCount	total number of elements in the args array
+ *		args		arguments passed in from user function (f|s)scanf
+ * 		varStart	offset (in args) of 1st variable passed in to (f|s)scanf
+ *		return_value set with the results of the scan
+ */
+
+PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
+				int argCount, zval ***args,
+				int varStart, zval **return_value TSRMLS_DC)
+{
+	int  numVars, nconversions, totalVars = -1;
+	int  i, value, result;
+	int  objIndex;
+	UChar *end, *baseString;
+	zval **current;
+	char op   = 0;
+	int  base = 0;
+	int  underflow = 0;
+	size_t width;
+	long (*fn)() = NULL;
+	UChar *ch, sch;
+	int  flags;
+	UChar buf[64];   	/* Temporary buffer to hold scanned
+			 * number strings before they are
+			 * passed to strtoul. */
+
+	
+	/* do some sanity checking */
+	if ((varStart > argCount) || (varStart < 0)){
+		varStart = SCAN_MAX_ARGS + 1;
+	}
+   	numVars = argCount - varStart;
+	if (numVars < 0) {
+		numVars = 0;
+	}
+	
+#if 0 
+	zend_printf("<br>in sscanf_internal : <br> string is \"%s\", format = \"%s\"<br> NumVars = %d. VarStart = %d<br>-------------------------<br>",
+					string, format, numVars, varStart);	
+#endif	
+	/*
+	 * Check for errors in the format string.
+	 */
+	if (u_ValidateFormat(format, numVars, &totalVars) != SCAN_SUCCESS) {
+		scan_set_error_return( numVars, return_value );	
+		return SCAN_ERROR_INVALID_FORMAT;
+	}
+
+	objIndex = numVars ? varStart : 0; 
+
+	/*
+	 * If any variables are passed, make sure they are all passed by reference
+	 */ 
+	if (numVars) {
+		for (i = varStart;i < argCount;i++){
+			if ( ! PZVAL_IS_REF( *args[ i ] ) ) {	
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter %d must be passed by reference", i);
+				scan_set_error_return(numVars, return_value);
+				return SCAN_ERROR_VAR_PASSED_BYVAL;
+			}
+		}
+	}
+	
+	
+	/*
+	 * Allocate space for the result objects. Only happens when no variables
+	 * are specified
+	 */
+
+	if (!numVars) {
+		zval *tmp;
+
+		/* allocate an array for return */
+		array_init(*return_value);
+
+		for (i = 0; i < totalVars; i++) {
+			MAKE_STD_ZVAL(tmp);
+			ZVAL_NULL(tmp);
+		   	if (add_next_index_zval(*return_value, tmp) == FAILURE) {
+				scan_set_error_return(0, return_value);
+				return FAILURE;
+			}
+		}
+	}
+
+	baseString = string;
+
+	/*
+	 * Iterate over the format string filling in the result objects until
+	 * we reach the end of input, the end of the format string, or there
+	 * is a mismatch.
+	 */
+
+	nconversions = 0;
+	/* note ! - we need to limit the loop for objIndex to keep it in bounds */
+
+	while (*format != 0x00) {
+
+		ch    = format++;
+
+		flags = 0;
+
+		/*
+		 * If we see whitespace in the format, skip whitespace in the string.
+		 */
+
+		if ( u_isspace(*ch) ) {
+			sch = *string;
+			while ( u_isspace(sch) ) {
+				if (*string == 0x00) {
+					goto done;
+				}
+				string++;
+				sch = *string;
+			}
+			continue;
+		}
+		
+		if (*ch != 0x25 /* '%' */) {
+		literal:
+			if (*string == 0x00) {
+				underflow = 1;
+				goto done;
+			}
+			sch = *string;
+			string++;
+			if (*ch != sch) {
+				goto done;
+			}
+			continue;
+		}
+
+		ch = format++;
+		if (*ch == 0x25 /* '%' */) {
+			goto literal;
+		}
+
+		/*
+		 * Check for assignment suppression ('*') or an XPG3-style
+		 * assignment ('%n$').
+		 */
+
+		if (*ch == 0x2A /* '*' */) {
+			flags |= SCAN_SUPPRESS;
+			ch = format++;
+		} else if ( u_isdigit(*ch)) { 
+			value = zend_u_strtoul(format-1, &end, 10); 
+			if (*end == 0x24 /* '$' */) {
+				format = end+1;
+				ch = format++;
+				objIndex = varStart + value - 1;
+			}
+		}
+
+		/*
+		 * Parse any width specifier.
+		 */
+
+		if ( u_isdigit(*ch)) { 
+			width = zend_u_strtoul(format-1, &format, 10); 
+			ch = format++;
+		} else {
+			width = 0;
+		}
+
+		/*
+		 * Ignore size specifier.
+		 */
+
+		if ((*ch == 0x6C /* 'l' */) || (*ch == 0x4C /* 'L' */) || (*ch == 0x68 /* 'h' */)) {
+			ch = format++;
+		}
+
+		/*
+		 * Handle the various field types.
+		 */
+
+		switch (*ch) {
+			case 0x6E /* 'n' */:
+				if (!(flags & SCAN_SUPPRESS)) {
+					if (numVars && objIndex >= argCount) {
+						break;
+					} else if (numVars) {
+						zend_uint refcount;
+
+						current = args[objIndex++];
+						refcount = (*current)->refcount;
+						zval_dtor( *current );
+						ZVAL_LONG( *current, (long)(string - baseString) );
+						(*current)->refcount = refcount;
+						(*current)->is_ref = 1;
+					} else {
+						add_index_long(*return_value, objIndex++, string - baseString);
+					}
+				}
+				nconversions++;
+				continue;
+
+			case 0x64 /* 'd' */:
+			case 0x44 /* 'D' */:	
+				op = 'i';
+				base = 10;
+				fn = (long (*)())zend_u_strtol;
+				break;
+			case 0x69 /* 'i' */:
+				op = 'i';
+				base = 0;
+				fn = (long (*)())zend_u_strtol;
+				break;
+			case 0x6F /* 'o' */:
+				op = 'i';
+				base = 8;
+				fn = (long (*)())zend_u_strtol;
+				break;
+			case 0x78 /* 'x' */:
+			case 0x58 /* 'X' */:
+				op = 'i';
+				base = 16;
+				fn = (long (*)())zend_u_strtol;
+				break;
+			case 0x75 /* 'u' */:
+				op = 'i';
+				base = 10;
+				flags |= SCAN_UNSIGNED;
+				fn = (long (*)())zend_u_strtoul;
+				break;
+
+			case 0x66 /* 'f' */:
+			case 0x65 /* 'e' */:
+			case 0x45 /* 'E' */:	
+			case 0x67 /* 'g' */:
+				op = 'f';
+				break;
+
+			case 0x73 /* 's' */:
+				op = 's';
+				break;
+
+			case 0x63 /* 'c' */:
+				op = 's';
+				flags |= SCAN_NOSKIP;
+				/*-cc-*/
+				if (0 == width) {
+					width = 1;
+				}
+				/*-cc-*/
+				break;
+			case 0x5B /* '[' */:
+				op = '[';
+				flags |= SCAN_NOSKIP;
+				break;
+		}   /* switch */
+
+		/*
+		 * At this point, we will need additional characters from the
+		 * string to proceed.
+		 */
+
+		if (*string == 0x00) {
+			underflow = 1;
+			goto done;
+		}
+	
+		/*
+		 * Skip any leading whitespace at the beginning of a field unless
+		 * the format suppresses this behavior.
+		 */
+
+		if (!(flags & SCAN_NOSKIP)) {
+			while (*string != 0x00) {
+				sch = *string;
+				if (! u_isspace(sch) ) {
+					break;
+				}
+				string++;
+			}
+			if (*string == 0x00) {
+				underflow = 1;
+				goto done;
+			}
+		}
+
+		/*
+		 * Perform the requested scanning operation.
+		 */
+	
+		switch (op) {
+			case 'c':	
+			case 's':
+			/*
+			 * Scan a string up to width characters or whitespace.
+			 */
+
+				if (width == 0) {
+					width = (size_t) ~0;
+				}
+				end = string;
+				while (*end != 0x00) {
+					sch = *end;
+					if ( u_isspace( sch ) ) {
+						break;
+					}
+					end++;
+					if (--width == 0) {
+					   break;
+					}
+				}
+				if (!(flags & SCAN_SUPPRESS)) {
+					if (numVars && objIndex >= argCount) {
+						break;
+					} else if (numVars) {
+						zend_uint refcount;
+
+						current = args[objIndex++];
+						refcount = (*current)->refcount;
+						zval_dtor( *current );
+						ZVAL_UNICODEL( *current, string, end-string, 1);
+						(*current)->refcount = refcount;
+						(*current)->is_ref = 1;
+					} else {
+						add_index_unicodel( *return_value, objIndex++, string, end-string, 1);
+					}
+				}
+				string = end;
+				break;
+
+			case '[': {
+				u_CharSet cset;
+
+				if (width == 0) {
+					width = (size_t) ~0;
+				}
+				end = string;
+
+				format = u_BuildCharSet(&cset, format);
+				while (*end != 0x00) {
+					sch = *end;
+					if (!u_CharInSet(&cset, sch)) {
+						break;
+					}
+					end++;
+					if (--width == 0) {
+						break;
+					}
+				}
+				u_ReleaseCharSet(&cset);
+
+				if (string == end) {
+					 /*
+					* Nothing matched the range, stop processing
+					*/
+					goto done;
+				}
+				if (!(flags & SCAN_SUPPRESS)) {
+					if (numVars && objIndex >= argCount) {
+						break;
+					} else if (numVars) {
+						current = args[objIndex++];
+						zval_dtor( *current );
+						ZVAL_UNICODEL( *current, string, end-string, 1);
+					} else {
+						add_index_unicodel(*return_value, objIndex++, string, end-string, 1);
+					}
+				}
+				string = end;
+			
+				break;
+			}
+			  /*
+			case 'c':
+			   / Scan a single character./
+
+				sch = *string;
+				string++;
+				if (!(flags & SCAN_SUPPRESS)) {
+					if (numVars) {
+						char __buf[2];
+						__buf[0] = sch;
+						__buf[1] = '\0';;
+						current = args[objIndex++];
+						convert_to_string_ex( current );
+						ZVAL_STRINGL( *current, __buf, 1, 1);
+					} else {
+						add_index_stringl(*return_value, objIndex++, &sch, 1, 1);
+					}
+				}
+				break;
+			*/
+			case 'i':
+			/*
+			 * Scan an unsigned or signed integer.
+			 */
+
+			/*-cc-*/
+				buf[0] = 0x00;
+			/*-cc-*/
+				if ((width == 0) || (width > sizeof(buf) - 1)) {
+					width = sizeof(buf) - 1;
+				}
+		
+				flags |= SCAN_SIGNOK | SCAN_NODIGITS | SCAN_NOZERO;
+				for (end = buf; width > 0; width--) {
+					switch (*string) {
+					/*
+					 * The 0 digit has special meaning at the beginning of
+					 * a number.  If we are unsure of the base, it
+					 * indicates that we are in base 8 or base 16 (if it is
+					 * followed by an 'x').
+					 */
+						case 0x30 /* '0' */:
+							/*-cc-*/
+							if (base == 16) {
+								flags |= SCAN_XOK;	
+							}
+							/*-cc-*/
+							if (base == 0) {
+								base = 8;
+								flags |= SCAN_XOK;
+							}
+							if (flags & SCAN_NOZERO) {
+								flags &= ~(SCAN_SIGNOK | SCAN_NODIGITS | SCAN_NOZERO);
+							} else {
+								flags &= ~(SCAN_SIGNOK | SCAN_XOK | SCAN_NODIGITS);
+							}
+							goto addToInt;
+
+						case 0x31 /* '1' */: case 0x32 /* '2' */: case 0x33 /* '3' */: case 0x34 /* '4' */:
+						case 0x35 /* '5' */: case 0x36 /* '6' */: case 0x37 /* '7' */:
+							if (base == 0) {
+								base = 10;
+							}
+							flags &= ~(SCAN_SIGNOK | SCAN_XOK | SCAN_NODIGITS);
+							goto addToInt;
+
+						case 0x38 /* '8' */: case 0x39 /* '9' */:
+							if (base == 0) {
+								base = 10;
+							}
+							if (base <= 8) {
+							   break;
+							}
+							flags &= ~(SCAN_SIGNOK | SCAN_XOK | SCAN_NODIGITS);
+							goto addToInt;
+
+						case 0x41 /* 'A' */: case 0x42 /* 'B' */: case 0x43 /* 'C' */:
+						case 0x44 /* 'D' */: case 0x45 /* 'E' */: case 0x46 /* 'F' */:
+						case 0x61 /* 'a' */: case 0x62 /* 'b' */: case 0x63 /* 'c' */:
+						case 0x64 /* 'd' */: case 0x65 /* 'e' */: case 0x66 /* 'f' */:
+							if (base <= 10) {
+								break;
+							}
+							flags &= ~(SCAN_SIGNOK | SCAN_XOK | SCAN_NODIGITS);
+							goto addToInt;
+
+						case 0x2B /* '+' */: case 0x2D /* '-' */:
+							if (flags & SCAN_SIGNOK) {
+								flags &= ~SCAN_SIGNOK;
+								goto addToInt;
+							}
+							break;
+
+						case 0x78 /* 'x' */: case 0x58 /* 'X' */:
+							if ((flags & SCAN_XOK) && (end == buf+1)) {
+								base = 16;
+								flags &= ~SCAN_XOK;
+								goto addToInt;
+							}
+							break;
+					}
+
+				/*
+				 * We got an illegal character so we are done accumulating.
+				 */
+
+					break;
+
+				addToInt:
+				/*
+				 * Add the character to the temporary buffer.
+				 */
+					*end++ = *string++;
+					if (*string == 0x00) {
+						break;
+					}
+				}
+
+				/*
+				 * Check to see if we need to back up because we only got a
+				 * sign or a trailing x after a 0.
+				 */
+
+				if (flags & SCAN_NODIGITS) {
+					if (*string == 0x00) {
+						underflow = 1;
+					}
+					goto done;
+				} else if (end[-1] == 0x78 /* 'x' */ || end[-1] == 0x58 /* 'X' */) {
+					end--;
+					string--;
+				}
+
+
+				/*
+				 * Scan the value from the temporary buffer.  If we are
+				 * returning a large unsigned value, we have to convert it back
+				 * to a string since PHP only supports signed values.
+				 */
+
+				if (!(flags & SCAN_SUPPRESS)) {
+					*end = 0x00;
+					value = (int) (*fn)(buf, NULL, base);
+					if ((flags & SCAN_UNSIGNED) && (value < 0)) {
+						u_sprintf(buf, "%u", value); /* INTL: ISO digit */
+						if (numVars && objIndex >= argCount) {
+							break;
+						} else if (numVars) {
+						  /* change passed value type to string */
+						   current = args[objIndex++];
+						   convert_to_unicode( *current );
+						   ZVAL_UNICODE( *current, buf, 1 );
+						} else {
+							add_index_unicode(*return_value, objIndex++, buf, 1);
+						}
+					} else {
+						if (numVars && objIndex >= argCount) {
+							break;
+						} else if (numVars) {
+							current = args[objIndex++];
+							convert_to_long( *current );
+							Z_LVAL(**current) = value;
+						} else {
+							add_index_long(*return_value, objIndex++, value);
+						}
+					}
+				}
+
+				break;
+
+			case 'f':
+			/*
+			 * Scan a floating point number
+			 */
+				buf[0] = 0x00;     /* call me pedantic */
+				if ((width == 0) || (width > sizeof(buf) - 1)) {
+					width = sizeof(buf) - 1;
+				}
+				flags |= SCAN_SIGNOK | SCAN_NODIGITS | SCAN_PTOK | SCAN_EXPOK;
+				for (end = buf; width > 0; width--) {
+					switch (*string) {
+						case 0x30 /* '0' */: case 0x31 /* '1' */: case 0x32 /* '2' */: case 0x33 /* '3' */:
+						case 0x34 /* '4' */: case 0x35 /* '5' */: case 0x36 /* '6' */: case 0x37 /* '7' */:
+						case 0x38 /* '8' */: case 0x39 /* '9' */:
+							flags &= ~(SCAN_SIGNOK | SCAN_NODIGITS);
+							goto addToFloat;
+						case 0x2B /* '+' */: case 0x2D /* '-' */:
+							if (flags & SCAN_SIGNOK) {
+								flags &= ~SCAN_SIGNOK;
+								goto addToFloat;
+							}
+							break;
+						case 0x2E /* '.' */:
+							if (flags & SCAN_PTOK) {
+								flags &= ~(SCAN_SIGNOK | SCAN_PTOK);
+								goto addToFloat;
+							}
+							break;
+						case 0x65 /* 'e' */: case 0x45 /* 'E' */:
+						/*
+						 * An exponent is not allowed until there has
+						 * been at least one digit.
+						 */
+
+							if ((flags & (SCAN_NODIGITS | SCAN_EXPOK)) == SCAN_EXPOK) {
+								flags = (flags & ~(SCAN_EXPOK|SCAN_PTOK))
+									| SCAN_SIGNOK | SCAN_NODIGITS;
+								goto addToFloat;
+							}
+							break;
+					}
+
+					/*
+					 * We got an illegal character so we are done accumulating.
+					 */
+
+					break;
+
+				addToFloat:
+				/*
+				 * Add the character to the temporary buffer.
+				 */
+
+					*end++ = *string++;
+					if (*string == 0x00) {
+						break;
+					}
+				}
+
+				/*
+				 * Check to see if we need to back up because we saw a
+				 * trailing 'e' or sign.
+				 */
+
+				if (flags & SCAN_NODIGITS) {
+					if (flags & SCAN_EXPOK) {
+						/*
+						 * There were no digits at all so scanning has
+						 * failed and we are done.
+						 */
+						if (*string == 0x00) {
+							underflow = 1;
+						}
+						goto done;
+					}
+
+					/*
+					 * We got a bad exponent ('e' and maybe a sign).
+					 */
+
+					end--;
+					string--;
+					if (*end != 0x65 /* 'e' */ && *end != 0x45 /* 'E' */) {
+						end--;
+						string--;
+					}
+				}
+
+				/*
+				 * Scan the value from the temporary buffer.
+				 */
+
+				if (!(flags & SCAN_SUPPRESS)) {
+					double dvalue;
+					*end = 0x00;
+					dvalue = zend_u_strtod(buf, NULL);
+					if (numVars && objIndex >= argCount) {
+						break;
+					} else if (numVars) {
+						current = args[objIndex++];
+						convert_to_double( *current );
+						Z_DVAL_PP( current ) = dvalue;
+					} else {
+						add_index_double( *return_value, objIndex++, dvalue );
+					}
+				}
+				break;
+		}  /* switch (op)              */
+		nconversions++;
+	}      /*  while (*format != '\0') */
+
+done:
+	result = SCAN_SUCCESS;
+
+	if (underflow && (0==nconversions)) {
+		scan_set_error_return( numVars, return_value );
+		result = SCAN_ERROR_EOF;
+	} else if (numVars) {
+		convert_to_long( *return_value );
+		Z_LVAL_PP(return_value) = nconversions;
+	} else if (nconversions < totalVars) {
+		/* to do : not all elements converted. we need to prune the list - cc
+		 */		
+	}
+
+	return result;
+}
+/* }}} */
+
 /* the compiler choked when i tried to make this a macro    */
-static inline void scan_set_error_return(int numVars, zval **return_value)
+static inline void scan_set_error_return(int numVars, zval **return_value) /* {{{ */
 {
 	if (numVars) {
 		Z_TYPE_PP(return_value) = IS_LONG;
@@ -1265,7 +2403,7 @@ static inline void scan_set_error_return(int numVars, zval **return_value)
    		convert_to_null( *return_value );
 	}	
 }
-
+/* }}} */
 
 /*
  * Local variables:
