@@ -29,6 +29,7 @@ PHP                                                                        NEWS
   install path). (Tony)
 - Fixed bug #39884 (ReflectionParameter::getClass() throws exception for type
   hint self). (thekid at php dot net)
+- Fixed bug #39878 (CURL doesn't compile on Sun Studio Pro). (Ilia)
 - Fixed bug #39873 (number_format() breaks with locale & decimal points).
   (Ilia)
 - Fixed bug #39869 (safe_read does not initialize errno).
