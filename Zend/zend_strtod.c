@@ -2568,7 +2568,7 @@ ZEND_API double zend_hex_strtod(const char *str, char **endptr)
 		s += 2;
 	}
 
-	while (c = *s++) {
+	while ((c = *s++)) {
 		if (c >= '0' && c <= '9') {
 			c -= '0';
 		} else if (c >= 'A' && c <= 'F') {
