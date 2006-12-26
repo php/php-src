@@ -1246,16 +1246,15 @@ PHPAPI PHP_FUNCTION(fgetss)
 }
 /* }}} */
 
-/* {{{ proto mixed fscanf(resource stream, string format [, string ...])
+/* {{{ proto mixed fscanf(resource stream, string format [, string ...]) U
    Implements a mostly ANSI compatible fscanf() */
-/* UTODO: Accept unicode contents */
 PHP_FUNCTION(fscanf)
 {
 	int  result;
 	zval **file_handle, **format_string;
-	size_t len;
 	int type;
 	char *buf;
+	UChar *u_buf;
 	void *what;
 
 	zval ***args;
@@ -1271,8 +1270,9 @@ PHP_FUNCTION(fscanf)
 		WRONG_PARAM_COUNT;
 	}
 
-	file_handle    = args[0];
-	format_string  = args[1];
+	file_handle   = args[0];
+	format_string = args[1];
+
 
 	what = zend_fetch_resource(file_handle TSRMLS_CC, -1, "File-Handle", &type, 2,
 			php_file_le_stream(), php_file_le_pstream());
@@ -1287,19 +1287,31 @@ PHP_FUNCTION(fscanf)
 		RETURN_FALSE;
 	}
 
+	if (((php_stream *)what)->readbuf_type == IS_UNICODE) {
+		u_buf = php_stream_u_get_line((php_stream *) what, NULL_ZSTR, 0, 0, NULL TSRMLS_CC);
+		if (u_buf == NULL) {
+			efree(args);
+			RETURN_FALSE;
+		}
 
-	buf = php_stream_get_line((php_stream *) what, NULL_ZSTR, 0, &len);
-	if (buf == NULL) {
-		efree(args);
-		RETURN_FALSE;
+		convert_to_unicode_ex(format_string);
+		result = php_u_sscanf_internal(u_buf, Z_USTRVAL_PP(format_string),
+				argCount, args, 2, &return_value TSRMLS_CC);
+		efree(u_buf);
+	} else {
+		buf = php_stream_get_line((php_stream *) what, NULL_ZSTR, 0, NULL);
+		if (buf == NULL) {
+			efree(args);
+			RETURN_FALSE;
+		}
+
+		convert_to_string_ex(format_string);
+		result = php_sscanf_internal(buf, Z_STRVAL_PP(format_string),
+				argCount, args, 2, &return_value TSRMLS_CC);
+		efree(buf);
 	}
 
-	convert_to_string_ex(format_string);
-	result = php_sscanf_internal(buf, Z_STRVAL_PP(format_string),
-			argCount, args, 2, &return_value TSRMLS_CC);
-
 	efree(args);
-	efree(buf);
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
 		WRONG_PARAM_COUNT;
