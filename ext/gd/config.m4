@@ -44,6 +44,30 @@ dnl
 dnl Checks for the configure options 
 dnl 
 
+AC_DEFUN([PHP_GD_ZLIB],[
+	if test "$PHP_ZLIB_DIR" != "no" && test "$PHP_ZLIB_DIR" != "yes"; then
+		if test -f "$PHP_ZLIB_DIR/include/zlib/zlib.h"; then
+			PHP_ZLIB_DIR="$PHP_ZLIB_DIR"
+			PHP_ZLIB_INCDIR="$PHP_ZLIB_DIR/include/zlib"
+		elif test -f "$PHP_ZLIB_DIR/include/zlib.h"; then
+			PHP_ZLIB_DIR="$PHP_ZLIB_DIR"
+			PHP_ZLIB_INCDIR="$PHP_ZLIB_DIR/include"
+		else
+			AC_MSG_ERROR([Can't find zlib headers under "$PHP_ZLIB_DIR"])
+		fi
+	else
+		for i in /usr/local /usr; do
+			if test -f "$i/include/zlib/zlib.h"; then
+				PHP_ZLIB_DIR="$i"
+				PHP_ZLIB_INCDIR="$i/include/zlib"
+			elif test -f "$i/include/zlib.h"; then
+				PHP_ZLIB_DIR="$i"
+				PHP_ZLIB_INCDIR="$i/include"
+			fi
+		done
+	fi
+])
+
 AC_DEFUN([PHP_GD_JPEG],
 [
   if test "$PHP_JPEG_DIR" != "no"; then
@@ -248,7 +272,7 @@ dnl check for fabsf and floorf which are available since C99
 
 dnl Depending which libraries were included to PHP configure,
 dnl enable the support in bundled GD library
-
+  PHP_GD_ZLIB
   PHP_GD_TTSTR
   PHP_GD_JISX0208
   PHP_GD_JPEG
