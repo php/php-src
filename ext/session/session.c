@@ -382,13 +382,21 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	for (p = val; p < endptr; ) {
+		zval **tmp;
 		namelen = *p & (~PS_BIN_UNDEF);
 		has_value = *p & PS_BIN_UNDEF ? 0 : 1;
 
 		name = estrndup(p + 1, namelen);
 		
 		p += namelen + 1;
-		
+
+		if (zend_hash_find(&EG(symbol_table), name, namelen + 1, (void **) &tmp) == SUCCESS) {
+			if ((Z_TYPE_PP(tmp) == IS_ARRAY && Z_ARRVAL_PP(tmp) == &EG(symbol_table)) || *tmp == PS(http_session_vars)) {
+				efree(name);
+				continue;
+  			}
+  		}
+
 		if (has_value) {
 			ALLOC_INIT_ZVAL(current);
 			if (php_var_unserialize(&current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
@@ -454,6 +462,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 	p = val;
 
 	while (p < endptr) {
+		zval **tmp;
 		q = p;
 		while (*q != PS_DELIMITER)
 			if (++q >= endptr) goto break_outer_loop;
@@ -468,7 +477,13 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		namelen = q - p;
 		name = estrndup(p, namelen);
 		q++;
-		
+
+		if (zend_hash_find(&EG(symbol_table), name, namelen + 1, (void **) &tmp) == SUCCESS) {
+			if ((Z_TYPE_PP(tmp) == IS_ARRAY && Z_ARRVAL_PP(tmp) == &EG(symbol_table)) || *tmp == PS(http_session_vars)) {
+				goto skip;
+  			}
+  		}
+
 		if (has_value) {
 			ALLOC_INIT_ZVAL(current);
 			if (php_var_unserialize(&current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
@@ -477,6 +492,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 			zval_ptr_dtor(&current);
 		}
 		PS_ADD_VARL(name, namelen);
+skip:
 		efree(name);
 		
 		p = q;
@@ -614,7 +630,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 	buf = emalloc(100);
 
 	/* maximum 15+19+19+10 bytes */	
-	sprintf(buf, "%.15s%ld%ld%0.8f", remote_addr ? remote_addr : "", 
+	sprintf(buf, "%.15s%ld%ld%0.8F", remote_addr ? remote_addr : "", 
 			tv.tv_sec, (long int)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
 
 	switch (PS(hash_func)) {
@@ -1349,6 +1365,11 @@ PHP_FUNCTION(session_save_path)
 
 	if (ac == 1) {
 		convert_to_string_ex(p_name);
+		if (memchr(Z_STRVAL_PP(p_name), '\0', Z_STRLEN_PP(p_name)) != NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The save_path cannot contain NULL characters.");
+			efree(old);
+			RETURN_FALSE;
+		}
 		zend_alter_ini_entry("session.save_path", sizeof("session.save_path"), Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
 	
