@@ -156,6 +156,12 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s), (char *) v, 1);
 #define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s), (zval *) v);
 
+#if defined(PHP_WIN32) || defined(__GNUC__)
+ #define php_curl_ret(__ret) RETVAL_FALSE; return __ret;
+#else
+ #define php_curl_ret(__ret) RETVAL_FALSE; return;
+#endif
+
 #define PHP_CURL_CHECK_OPEN_BASEDIR(str, len, __ret)													\
 	if (((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) &&                                                \
 	    strncasecmp(str, "file:", sizeof("file:") - 1) == 0)								\
@@ -164,22 +170,19 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 															\
 		if (!(tmp_url = php_url_parse_ex(str, len))) {											\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL '%s'", str);				\
-			RETVAL_FALSE;											\
-			return __ret;											\
-		} 																						\
+			php_curl_ret(__ret);											\
+		} 													\
 															\
 		if (php_memnstr(str, tmp_url->path, strlen(tmp_url->path), str + len)) {				\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL '%s' contains unencoded control characters.", str);	\
-			RETVAL_FALSE;											\
-			return __ret;											\
+			php_curl_ret(__ret);											\
 		}													\
 																								\
 		if (tmp_url->query || tmp_url->fragment || php_check_open_basedir(tmp_url->path TSRMLS_CC) || 									\
 			(PG(safe_mode) && !php_checkuid(tmp_url->path, "rb+", CHECKUID_CHECK_MODE_PARAM))	\
 		) { 																					\
 			php_url_free(tmp_url); 																\
-			RETVAL_FALSE;											\
-			return __ret;											\
+			php_curl_ret(__ret);											\
 		} 																						\
 		php_url_free(tmp_url); 																	\
 	}
