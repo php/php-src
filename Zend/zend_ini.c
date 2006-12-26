@@ -530,6 +530,28 @@ ZEND_API ZEND_INI_MH(OnUpdateLong)
 	*p = zend_atoi(new_value, new_value_length);
 	return SUCCESS;
 }
+ZEND_API ZEND_INI_MH(OnUpdateLongGEZero)
+{
+	long *p, tmp;
+#ifndef ZTS
+	char *base = (char *) mh_arg2;
+#else
+	char *base;
+
+	base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+
+	tmp = zend_atoi(new_value, new_value_length);
+	if (tmp < 0) {
+		return FAILURE;
+	}
+
+	p = (long *) (base+(size_t) mh_arg1);
+	*p = tmp;
+
+	return SUCCESS;
+}
+
 
 
 ZEND_API ZEND_INI_MH(OnUpdateReal)
