@@ -465,34 +465,33 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 	int namelen;
 	int has_value;
 	php_unserialize_data_t var_hash;
-	int globals_on = PG(register_globals);
-	int longarrays_on = PG(register_long_arrays);
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	for (p = val; p < endptr; ) {
+		zval **tmp;
 		namelen = *p & (~PS_BIN_UNDEF);
 		has_value = *p & PS_BIN_UNDEF ? 0 : 1;
 
 		name = estrndup(p + 1, namelen);
-		
+
 		p += namelen + 1;
-		if (globals_on && namelen == sizeof("_SESSION")-1 && !memcmp(name, "_SESSION", sizeof("_SESSION") - 1)) {
-			/* _SESSION hijack attempt */
-		} else if (globals_on && namelen == sizeof("GLOBALS")-1 && !memcmp(name, "GLOBALS", sizeof("GLOBALS") - 1)) {
-			/* _GLOBALS hijack attempt */
-		} else if (globals_on && longarrays_on && namelen == sizeof("HTTP_SESSION_VARS")-1 && !memcmp(name, "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS")-1)) {
-			/* HTTP_SESSION_VARS hijack attempt */
-		} else {	
-			if (has_value) {
-				ALLOC_INIT_ZVAL(current);
-				if (php_var_unserialize(&current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
-					php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
-				}
-				zval_ptr_dtor(&current);
+
+		if (zend_hash_find(&EG(symbol_table), name, namelen + 1, (void **) &tmp) == SUCCESS) {
+			if ((Z_TYPE_PP(tmp) == IS_ARRAY && Z_ARRVAL_PP(tmp) == &EG(symbol_table)) || *tmp == PS(http_session_vars)) {
+				efree(name);
+				continue;
 			}
-			PS_ADD_VARL(name, namelen);
 		}
+
+		if (has_value) {
+			ALLOC_INIT_ZVAL(current);
+			if (php_var_unserialize(&current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
+				php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
+			}
+			zval_ptr_dtor(&current);
+		}
+		PS_ADD_VARL(name, namelen);
 		efree(name);
 	}
 
@@ -544,14 +543,13 @@ PS_SERIALIZER_DECODE_FUNC(php)
 	int namelen;
 	int has_value;
 	php_unserialize_data_t var_hash;
-	int globals_on = PG(register_globals);
-	int longarrays_on = PG(register_long_arrays);
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	p = val;
 
 	while (p < endptr) {
+		zval **tmp;
 		q = p;
 		while (*q != PS_DELIMITER)
 			if (++q >= endptr) goto break_outer_loop;
@@ -566,25 +564,23 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		namelen = q - p;
 		name = estrndup(p, namelen);
 		q++;
-		
-		if (globals_on && namelen == sizeof("_SESSION")-1 && !memcmp(name, "_SESSION", sizeof("_SESSION") - 1)) {
-			/* _SESSION hijack attempt */
-		} else if (globals_on && namelen == sizeof("GLOBALS")-1 && !memcmp(name, "GLOBALS", sizeof("GLOBALS") - 1)) {
-			/* GLOBALS hijack attempt */
-		} else if (globals_on && longarrays_on && namelen == sizeof("HTTP_SESSION_VARS")-1 && !memcmp(name, "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS")-1)) {
-			/* HTTP_SESSION_VARS hijack attempt */
-		} else {
-			if (has_value) {
-				ALLOC_INIT_ZVAL(current);
-				if (php_var_unserialize(&current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
-					php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
-				}
-				zval_ptr_dtor(&current);
+
+		if (zend_hash_find(&EG(symbol_table), name, namelen + 1, (void **) &tmp) == SUCCESS) {
+			if ((Z_TYPE_PP(tmp) == IS_ARRAY && Z_ARRVAL_PP(tmp) == &EG(symbol_table)) || *tmp == PS(http_session_vars)) {
+				goto skip;
 			}
-			PS_ADD_VARL(name, namelen);
 		}
+
+		if (has_value) {
+			ALLOC_INIT_ZVAL(current);
+			if (php_var_unserialize(&current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
+				php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
+			}
+			zval_ptr_dtor(&current);
+		}
+		PS_ADD_VARL(name, namelen);
+skip:
 		efree(name);
-		
 		p = q;
 	}
 break_outer_loop:
@@ -727,7 +723,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 	buf = emalloc(100);
 
 	/* maximum 15+19+19+10 bytes */	
-	sprintf(buf, "%.15s%ld%ld%0.8f", remote_addr ? remote_addr : "", 
+	sprintf(buf, "%.15s%ld%ld%0.8F", remote_addr ? remote_addr : "", 
 			tv.tv_sec, (long int)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
 
 	switch (PS(hash_func)) {
