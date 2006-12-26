@@ -97,23 +97,29 @@
 	}	\
 	return;	\
 
-#define PHP_FILTER_TRIM_DEFAULT(p, len, end) { \
-	while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\v' || *p == '\n') { \
+#define PHP_FILTER_TRIM_DEFAULT(p, len) { \
+	while ((len > 0)  && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\v' || *p == '\n')) { \
 		p++; \
 		len--; \
 	} \
-        if (len < 1) { \
-          RETURN_VALIDATION_FAILED \
-        } \
-        start = p; \
-	end = p + len - 1; \
-	while (*end == ' ' || *end == '\t' || *end == '\r' || *end == '\v' || *end == '\n') { \
-	    end--; \
+	if (len < 1) { \
+		RETURN_VALIDATION_FAILED \
 	} \
-	*(end + 1) = '\0'; \
-	len = (end - p + 1); \
+	while (p[len-1] == ' ' || p[len-1] == '\t' || p[len-1] == '\r' || p[len-1] == '\v' || p[len-1] == '\n') { \
+		len--; \
+	} \
 }
 
+#define PHP_FILTER_GET_LONG_OPT(zv, opt) { \
+	if (Z_TYPE_PP(zv) != IS_LONG) {                                                                      \
+		zval tmp = **zv;                                                                                 \
+		zval_copy_ctor(&tmp);                                                                                    \
+		convert_to_long(&tmp);                                                                                   \
+		opt = Z_LVAL(tmp);                                                                                  \
+	} else {                                                                                                     \
+		opt = Z_LVAL_PP(zv);                                                                        \
+	}                                                                                                            \
+}
 
 #endif /* FILTER_PRIVATE_H */
 
