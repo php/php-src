@@ -1162,7 +1162,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 		ns_param = ":";
 	}
 
-	parser = ecalloc(sizeof(xml_parser), 1);
+	parser = ecalloc(1, sizeof(xml_parser));
 	parser->parser = XML_ParserCreate_MM((auto_detect ? NULL : encoding),
                                          &php_xml_mem_hdlrs, ns_param);
 
