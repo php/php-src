@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   __inet_pton() and inet_ntop() was named __inet_ntop(). (Hannes)
 - Fixed the validate email filter so that the letter "v" can also be used in
   the user part of the email address. (Derick)
+- Fixed bug #39952 (zip ignoring --with-libdir on zlib checks) (judas dot
+  iscariote at gmail dot com)
 - Fixed bug #39944 (References broken). (Dmitry)
 - Fixed bug #39935 (Extensions tidy,mcrypt,mhash,pdo_sqlite ignores
   --with-libdir). (judas dot iscariote at gmail dot com, Derick)

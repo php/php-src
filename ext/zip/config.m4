@@ -40,7 +40,7 @@ if test "$PHP_ZIP" != "no"; then
 		AC_MSG_ERROR([zip support requires ZLIB. Use --with-zlib-dir=<DIR> to specify prefix where ZLIB include and library are located])
 	else
 		AC_MSG_RESULT([$PHP_ZLIB_DIR])
-		PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, ZIP_SHARED_LIBADD)
+		PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/$PHP_LIBDIR, ZIP_SHARED_LIBADD)
 		PHP_ADD_INCLUDE($PHP_ZLIB_INCDIR)
 	fi
 
