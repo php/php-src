@@ -123,14 +123,9 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 				char *strval;
 
 				strval = op->value.str.val;
-				switch ((op->type=is_numeric_string(strval, op->value.str.len, &op->value.lval, &op->value.dval, 1))) {
-					case IS_DOUBLE:
-					case IS_LONG:
-						break;
-					default:
-						op->value.lval = strtol(op->value.str.val, NULL, 10);
-						op->type = IS_LONG;
-						break;
+				if ((op->type=is_numeric_string(strval, op->value.str.len, &op->value.lval, &op->value.dval, 1)) == 0) {
+					op->value.lval = 0;
+					op->type = IS_LONG;
 				}
 				STR_FREE(strval);
 				break;
@@ -161,14 +156,9 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 		switch ((op)->type) {										\
 			case IS_STRING:											\
 				{													\
-					switch (((holder).type=is_numeric_string((op)->value.str.val, (op)->value.str.len, &(holder).value.lval, &(holder).value.dval, 1))) {	\
-						case IS_DOUBLE:															\
-						case IS_LONG:															\
-							break;																\
-						default:																\
-							(holder).value.lval = strtol((op)->value.str.val, NULL, 10);		\
-							(holder).type = IS_LONG;						\
-							break;											\
+					if (((holder).type=is_numeric_string((op)->value.str.val, (op)->value.str.len, &(holder).value.lval, &(holder).value.dval, 1)) == 0) {	\
+						(holder).value.lval = 0;						\
+						(holder).type = IS_LONG;						\
 					}														\
 					(op) = &(holder);										\
 					break;													\
@@ -560,7 +550,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			TSRMLS_FETCH();
 
 			zend_list_delete(op->value.lval);
-			op->value.str.val = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
+			op->value.str.val = (char *) emalloc(sizeof("Resource id #") + MAX_LENGTH_OF_LONG);
 			op->value.str.len = sprintf(op->value.str.val, "Resource id #%ld", tmp);
 			break;
 		}
@@ -1227,10 +1217,14 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
-	int use_copy1, use_copy2;
+	int use_copy1 = 0, use_copy2 = 0;
 
-	zend_make_printable_zval(op1, &op1_copy, &use_copy1);
-	zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+	if (op1->type != IS_STRING) {
+		zend_make_printable_zval(op1, &op1_copy, &use_copy1);
+	}
+	if (op2->type != IS_STRING) {
+		zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+	}
 
 	if (use_copy1) {
 		op1 = &op1_copy;
@@ -1255,10 +1249,14 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_D
 ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
-	int use_copy1, use_copy2;
+	int use_copy1 = 0, use_copy2 = 0;
 
-	zend_make_printable_zval(op1, &op1_copy, &use_copy1);
-	zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+	if (op1->type != IS_STRING) {
+		zend_make_printable_zval(op1, &op1_copy, &use_copy1);
+	}
+	if (op2->type != IS_STRING) {
+		zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+	}
 
 	if (use_copy1) {
 		op1 = &op1_copy;

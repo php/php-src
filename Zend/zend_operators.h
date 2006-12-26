@@ -36,7 +36,16 @@
 #include "ext/bcmath/libbcmath/src/bcmath.h"
 #endif
 
+#if SIZEOF_LONG == 4
+#define MAX_LENGTH_OF_LONG 11
+static const char long_min_digits[] = "2147483648";
+#elif SIZEOF_LONG == 8
 #define MAX_LENGTH_OF_LONG 20
+static const char long_min_digits[] = "9223372036854775808";
+#else
+#error "Unknown SIZEOF_LONG"
+#endif
+
 #define MAX_LENGTH_OF_DOUBLE 32
 
 BEGIN_EXTERN_C()
@@ -66,82 +75,143 @@ ZEND_API zend_bool instanceof_function_ex(zend_class_entry *instance_ce, zend_cl
 ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class_entry *ce TSRMLS_DC);
 END_EXTERN_C()
 
+#define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
+#define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a'  && (c) <= 'f'))
+
 /**
- * Checks whether the string "str" with the length "length" is a numeric string.
+ * Checks whether the string "str" with length "length" is numeric. The value
+ * of allow_errors determines whether it's required to be entirely numeric, or
+ * just its prefix. Leading whitespace is allowed.
  *
- * The function returns 0 if the string did not contain a string; IS_LONG if
- * the string contained a number that fits in the integer range and IS_DOUBLE
- * in case it did not. The long value is returned into the pointer *lval if
- * that pointer was not NULL or into the pointer *dval if that pointer was not
- * NULL.
+ * The function returns 0 if the string did not contain a valid number; IS_LONG
+ * if it contained a number that fits within the range of a long; or IS_DOUBLE
+ * if the number was out of long range or contained a decimal point/exponent.
+ * The number's value is returned into the respective pointer, *lval or *dval,
+ * if that pointer is not NULL.
  */
-static inline zend_bool is_numeric_string(char *str, int length, long *lval, double *dval, int allow_errors)
+
+static inline zend_uchar is_numeric_string(const char *str, int length, long *lval, double *dval, int allow_errors)
 {
-	long local_lval;
+	const char *ptr;
+	int base = 10, digits = 0, dp_or_e = 0;
 	double local_dval;
-	char *end_ptr_long, *end_ptr_double;
-	int conv_base=10;
+	zend_uchar type;
 
 	if (!length) {
 		return 0;
 	}
 
-	/* handle hex numbers */
-	if (length>=2 && str[0]=='0' && (str[1]=='x' || str[1]=='X')) {
-		conv_base=16;
+	/* Skip any whitespace
+	 * This is much faster than the isspace() function */
+	while (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r' || *str == '\v' || *str == '\f') {
+		str++;
+		length--;
 	}
-	errno=0;
-	local_lval = strtol(str, &end_ptr_long, conv_base);
-	if (errno!=ERANGE) {
-		if (end_ptr_long == str+length) { /* integer string */
-			if (lval) {
-				*lval = local_lval;
+	ptr = str;
+
+	if (*ptr == '-' || *ptr == '+') {
+		ptr++;
+	}
+
+	if (ZEND_IS_DIGIT(*ptr)) {
+		/* Handle hex numbers
+		 * str is used instead of ptr to disallow signs and keep old behavior */
+		if (length > 2 && *str == '0' && (str[1] == 'x' || str[1] == 'X')) {
+			base = 16;
+			ptr += 2;
+		}
+
+		/* Skip any leading 0s */
+		while (*ptr == '0') {
+			ptr++;
+		}
+
+		/* Count the number of digits. If a decimal point/exponent is found,
+		 * it's a double. Otherwise, if there's a dval or no need to check for
+		 * a full match, stop when there are too many digits for a long */
+		for (type = IS_LONG; !(digits >= MAX_LENGTH_OF_LONG && (dval || allow_errors == 1)); digits++, ptr++) {
+check_digits:
+			if (ZEND_IS_DIGIT(*ptr) || (base == 16 && ZEND_IS_XDIGIT(*ptr))) {
+				continue;
+			} else if (base == 10) {
+				if (*ptr == '.' && dp_or_e < 1) {
+					goto process_double;
+				} else if ((*ptr == 'e' || *ptr == 'E') && dp_or_e < 2) {
+					const char *e = ptr + 1;
+
+					if (*e == '-' || *e == '+') {
+						ptr = e++;
+					}
+					if (ZEND_IS_DIGIT(*e)) {
+						goto process_double;
+					}
+				}
 			}
-			return IS_LONG;
-		} else if (end_ptr_long == str && *end_ptr_long != '\0' && *str != '.' && *str != '-') { /* ignore partial string matches */
+
+			break;
+		}
+
+		if (base == 10) {
+			if (digits >= MAX_LENGTH_OF_LONG) {
+				dp_or_e = -1;
+				goto process_double;
+			}
+		} else if (!(digits < SIZEOF_LONG * 2 || (digits == SIZEOF_LONG * 2 && ptr[-digits] <= '7'))) {
+			if (dval) {
+				local_dval = zend_hex_strtod(str, (char **)&ptr);
+			}
+			type = IS_DOUBLE;
+		}
+	} else if (*ptr == '.' && ZEND_IS_DIGIT(ptr[1])) {
+process_double:
+		type = IS_DOUBLE;
+
+		/* If there's a dval, do the conversion; else continue checking
+		 * the digits if we need to check for a full match */
+		if (dval) {
+			local_dval = zend_strtod(str, (char **)&ptr);
+		} else if (allow_errors != 1 && dp_or_e != -1) {
+			dp_or_e = (*ptr++ == '.') ? 1 : 2;
+			goto check_digits;
+		}
+	} else {
+		return 0;
+	}
+
+	if (ptr != str + length) {
+		if (!allow_errors) {
 			return 0;
 		}
-	} else {
-		end_ptr_long=NULL;
-	}
-
-	if (conv_base==16) { /* hex string, under UNIX strtod() messes it up */
-		return 0;
-	}
-
-	errno=0;
-	local_dval = zend_strtod(str, &end_ptr_double);
-	if (errno != ERANGE) {
-		if (end_ptr_double == str+length) { /* floating point string */
-			if (!zend_finite(local_dval)) {
-				/* "inf","nan" and maybe other weird ones */
-				return 0;
-			}
-
-			if (dval) {
-				*dval = local_dval;
-			}
-			return IS_DOUBLE;
+		if (allow_errors == -1) {
+			zend_error(E_NOTICE, "A non well formed numeric value encountered");
 		}
-	} else {
-		end_ptr_double=NULL;
 	}
 
-	if (!allow_errors) {
-		return 0;
-	}
-	if (allow_errors == -1) {
-		zend_error(E_NOTICE, "A non well formed numeric value encountered");
-	}
+	if (type == IS_LONG) {
+		if (digits == MAX_LENGTH_OF_LONG - 1) {
+			int cmp = strcmp(&ptr[-digits], long_min_digits);
 
-	if (end_ptr_double>end_ptr_long && dval) {
-		*dval = local_dval;
-		return IS_DOUBLE;
-	} else if (end_ptr_long && lval) {
-		*lval = local_lval;
+			if (!(cmp < 0 || (cmp == 0 && *str == '-'))) {
+				if (dval) {
+					*dval = zend_strtod(str, NULL);
+				}
+
+				return IS_DOUBLE;
+			}
+		}
+
+		if (lval) {
+			*lval = strtol(str, NULL, base);
+		}
+
 		return IS_LONG;
+	} else {
+		if (dval) {
+			*dval = local_dval;
+		}
+
+		return IS_DOUBLE;
 	}
-	return 0;
 }
 
 static inline char *

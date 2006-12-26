@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set("UTC");
 
 function simple() {
   $a = 0;
