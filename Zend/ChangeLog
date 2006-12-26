@@ -1,3 +1,44 @@
+2006-12-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_ini.c
+      zend_ini.h:
+      
+      Ensure that OnUpdateLongGEZero is greater or equal to 0.
+      Added a update wrapper for ensuring >0 values
+
+2006-12-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug39825.phpt:
+      Fixed bug #39825 (foreach produces memory error)
+
+    * tests/bug39825.phpt
+      tests/bug39825.phpt:
+      
+      file bug39825.phpt was initially added on branch PHP_5_2.
+
+    * zend_execute.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug39944.phpt:
+      Fixed bug #39944 (References broken)
+
+    * tests/bug39944.phpt
+      tests/bug39944.phpt:
+      
+      file bug39944.phpt was initially added on branch PHP_5_2.
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Fixed possible size_t overflow
+
 2006-12-23  Antony Dovgal  <antony@zend.com>
 
     * zend_API.h:
