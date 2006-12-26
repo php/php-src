@@ -1,3 +1,207 @@
+2006-12-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      main/main.c:
+      
+      Ensure that OnUpdateLongGEZero is greater or equal to 0.
+      Added a update wrapper for ensuring >0 values
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      
+      Allocation safety checks
+
+2006-12-25  Antony Dovgal  <antony@zend.com>
+
+    * ext/zip/php_zip.c:
+      add missing space for \0
+
+2006-12-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pgsql/pgsql.c
+      ext/soap/php_encoding.c
+      ext/spl/spl_directory.c
+      ext/standard/math.c
+      main/main.c:
+      Allocation safety checks
+
+2006-12-25  Antony Dovgal  <antony@zend.com>
+
+    * ext/xsl/xsltprocessor.c:
+      more safe_emalloc()
+
+2006-12-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/interbase/ibase_query.c
+      ext/json/json.c
+      ext/oci8/oci8_statement.c
+      ext/pdo_dblib/dblib_driver.c
+      ext/pdo_dblib/dblib_stmt.c
+      ext/standard/uuencode.c
+      ext/standard/var.c:
+      Use safe_emalloc()
+
+    * ext/standard/tests/array/array_sum.phpt:
+      MFB: Fixed test for 64bit systems
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_sum.phpt:
+      Fixed test for 64bit systems
+
+2006-12-25  Antony Dovgal  <antony@zend.com>
+
+    * ext/iconv/iconv.c
+      ext/interbase/ibase_blobs.c
+      ext/mhash/mhash.c
+      ext/oci8/oci8_statement.c
+      ext/standard/streamsfuncs.c:
+      use safe_emalloc()
+
+    * ext/bz2/bz2.c:
+      improve check for overflow
+
+    * ext/sockets/sockets.c:
+      fix CS, add missing folding markers
+      mark Unicode safe functions as they are
+
+2006-12-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug39825.phpt
+      ZendEngine2/tests/bug39825.phpt:
+      
+      file bug39825.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug39825.phpt:
+      Fixed bug #39825 (foreach produces memory error)
+
+2006-12-25  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/streamsfuncs.c:
+      stream_socket_shutdown() is Unicode safe by definition
+
+    * ext/soap/soap.c:
+      fix proto
+
+    * ext/mhash/mhash.c:
+      fix protos
+
+    * ext/posix/posix.c:
+      mark most of the ext/posix functions as Unicode safe, for they do not use
+      strings in any way
+
+    * ext/oci8/oci8_interface.c:
+      mark all LOB functions as Unicode safe
+
+2006-12-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/exif/exif.c
+      ext/informix/ifx.ec
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/microtime.c:
+      MFB: Use %F (ignores locale) for internal representation of floats
+
+    * (PHP_5_2)
+      ext/exif/exif.c
+      ext/informix/ifx.ec
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/microtime.c:
+      Use %F (ignores locale) for internal representation of floats
+
+2006-12-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      README.UPDATE_5_2:
+      Add missing NEWS entrys and update the README.UPDATE file
+
+2006-12-25  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      configure.in
+      configure.in:
+      MFH: fix bug #39890 (using autoconf 2.6x and --with-layout=GNU breaks PEAR
+      install path)
+
+    * configure.in:
+      fix bug #39890 (using autoconf 2.6x and --with-layout=GNU breaks PEAR
+      install path)
+
+    * ext/imap/php_imap.c:
+      fix build
+
+    * ext/standard/tests/general_functions/001.phpt
+      ext/standard/tests/general_functions/001.phpt
+      ext/standard/tests/strings/bug22207.phpt
+      ext/standard/tests/strings/bug22207.phpt:
+      fix test
+
+2006-12-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      MFB: Define SENDBUFLEN for older c-client libs
+
+    * (PHP_4_4)
+      ext/imap/php_imap.c:
+      MFH: Define SENDBUFLEN for older c-client libs
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      Define SENDBUFLEN for older c-client libs
+
+2006-12-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug39944.phpt
+      ZendEngine2/tests/bug39944.phpt:
+      
+      file bug39944.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug39944.phpt:
+      Fixed bug #39944 (References broken)
+
+    * main/streams/filter.c
+      main/streams/filter.c:
+      Fixed heap overflow
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed possible size_t overflow
+
+2006-12-25  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/credits.c:
+      update credits at request of Gabor
+
+    * ext/standard/tests/strings/bug23894.phpt
+      ext/standard/tests/strings/sprintf_f.phpt
+      ext/standard/tests/strings/sprintf_f_2.phpt
+      ext/standard/tests/strings/sprintf_f_2.phpt
+      ext/standard/tests/strings/sprintf_f_3.phpt
+      ext/standard/tests/strings/sprintf_f_3.phpt:
+      fix tests
+
+    * ext/standard/formatted_print.c:
+      fix #36392 in Unicode mode
+
 2006-12-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/imap/php_imap.c:
