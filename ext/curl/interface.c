@@ -175,6 +175,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 															\
 		if (php_memnstr(str, tmp_url->path, strlen(tmp_url->path), str + len)) {				\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL '%s' contains unencoded control characters.", str);	\
+			php_url_free(tmp_url); 																\
 			php_curl_ret(__ret);											\
 		}													\
 																								\
