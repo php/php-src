@@ -335,7 +335,7 @@ PHPAPI UChar *php_stream_get_record_unicode(php_stream *stream, size_t maxlen, s
 
 
 PHPAPI UChar *_php_stream_u_get_line(php_stream *stream, UChar *buf, int32_t *pmax_bytes, int32_t *pmax_chars, int *pis_unicode TSRMLS_DC);
-#define php_stream_u_get_line(stream, buf, maxlen_buf, maxlen_chars, buf_type)	_php_stream_u_get_line((stream), (buf), (maxlen_buf), (maxlen_chars), (buf_type) TSRMLS_CC)
+#define php_stream_u_get_line(stream, buf, maxlen_buf, maxlen_chars, retlen)	_php_stream_get_line((stream), IS_UNICODE, (buf), (maxlen_buf), (maxlen_chars), (retlen) TSRMLS_CC)
 
 /* CAREFUL! this is equivalent to puts NOT fputs! */
 PHPAPI int _php_stream_puts(php_stream *stream, char *buf TSRMLS_DC);
