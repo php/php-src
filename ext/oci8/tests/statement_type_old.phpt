@@ -15,14 +15,19 @@ else {
 }
 
 $sqls = Array(
-	"SELECT * FROM table",
-	"DELETE FROM table WHERE id = 1",
-	"INSERT INTO table VALUES(1)",
-	"UPDATE table SET id = 1",
+    "SELECT * FROM table",
+    "DELETE FROM table WHERE id = 1",
+    "INSERT INTO table VALUES(1)",
+    "UPDATE table SET id = 1",
 	"DROP TABLE table",
-	"CREATE TABLE table (id NUMBER)",
-	"WRONG SYNTAX",
-	""
+	"CREATE OR REPLACE PROCEDURE myproc(v1 NUMBER) as BEGIN DBMS_OUTPUT.PUT_LINE(v1); END;",
+    "CREATE TABLE table (id NUMBER)",
+    "ALTER TABLE table ADD (col1 NUMBER)",
+    "BEGIN NULL; END;",
+    "DECLARE myn NUMBER BEGIN myn := 1; END;",
+    "CALL myproc(1)",
+    "WRONG SYNTAX",
+    ""
 );
 
 foreach ($sqls as $sql) {
@@ -41,6 +46,11 @@ string(6) "INSERT"
 string(6) "UPDATE"
 string(4) "DROP"
 string(6) "CREATE"
+string(6) "CREATE"
+string(5) "ALTER"
+string(5) "BEGIN"
+string(7) "DECLARE"
+string(4) "CALL"
 string(7) "UNKNOWN"
 string(7) "UNKNOWN"
 Done
