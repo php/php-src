@@ -25,7 +25,8 @@ $arr[3]->method();
 session_start();
 $_SESSION["baz"] = $baz;
 $_SESSION["arr"] = $arr;
-print session_encode();
+var_dump(session_encode());
 session_destroy();
+?>
 --EXPECT--
-baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}}
+string(126) "baz|O:3:"foo":2:{S:3:"bar";S:2:"ok";S:3:"yes";S:4:"done";}arr|a:1:{i:3;O:3:"foo":2:{S:3:"bar";S:2:"ok";S:3:"yes";S:4:"done";}}"
