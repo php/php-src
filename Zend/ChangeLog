@@ -1,3 +1,27 @@
+2006-12-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini.c
+      zend_ini.h:
+      
+      MFB: safety checks
+
+    * (PHP_5_2)
+      zend_strtod.c:
+      
+      Fixed compiler warning
+
+    * (PHP_5_2)
+      bench.php
+      zend.c
+      zend_exceptions.c
+      zend_language_scanner.l
+      zend_operators.c
+      zend_operators.h
+      zend_strtod.c
+      zend_strtod.h:
+      is_numeric_string() optimization
+      
+
 2006-12-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
