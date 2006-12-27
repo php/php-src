@@ -16,10 +16,10 @@ Bug #25671 (subarrays not copied correctly)
   echo serialize(str_replace(" ", "", $arr)) . "\n";
 ?>
 --EXPECT--
-a:4:{i:0;s:19:"This is strung one.";i:1;s:19:"This is strung two.";i:2;a:2:{i:0;s:23:"This is another string.";i:1;s:22:"This is a last string.";}i:3;s:22:"This is a last strung.";}
-a:4:{i:0;s:19:"This is strung one.";i:1;s:19:"This is strung two.";i:2;a:2:{i:0;s:23:"This is another string.";i:1;s:22:"This is a last string.";}i:3;s:22:"This is a last strung.";}
-a:4:{i:0;s:16:"Thisisstringone.";i:1;s:16:"Thisisstringtwo.";i:2;a:2:{i:0;s:23:"This is another string.";i:1;s:22:"This is a last string.";}i:3;s:18:"Thisisalaststring.";}
-a:4:{i:0;s:16:"Thisisstringone.";i:1;s:16:"Thisisstringtwo.";i:2;a:2:{i:0;s:23:"This is another string.";i:1;s:22:"This is a last string.";}i:3;s:18:"Thisisalaststring.";}
+a:4:{i:0;S:19:"This is strung one.";i:1;S:19:"This is strung two.";i:2;a:2:{i:0;S:23:"This is another string.";i:1;S:22:"This is a last string.";}i:3;S:22:"This is a last strung.";}
+a:4:{i:0;S:19:"This is strung one.";i:1;S:19:"This is strung two.";i:2;a:2:{i:0;S:23:"This is another string.";i:1;S:22:"This is a last string.";}i:3;S:22:"This is a last strung.";}
+a:4:{i:0;S:16:"Thisisstringone.";i:1;S:16:"Thisisstringtwo.";i:2;a:2:{i:0;S:23:"This is another string.";i:1;S:22:"This is a last string.";}i:3;S:18:"Thisisalaststring.";}
+a:4:{i:0;S:16:"Thisisstringone.";i:1;S:16:"Thisisstringtwo.";i:2;a:2:{i:0;S:23:"This is another string.";i:1;S:22:"This is a last string.";}i:3;S:18:"Thisisalaststring.";}
 --UEXPECT--
 a:4:{i:0;U:19:"This is strung one.";i:1;U:19:"This is strung two.";i:2;a:2:{i:0;U:23:"This is another string.";i:1;U:22:"This is a last string.";}i:3;U:22:"This is a last strung.";}
 a:4:{i:0;U:19:"This is strung one.";i:1;U:19:"This is strung two.";i:2;a:2:{i:0;U:23:"This is another string.";i:1;U:22:"This is a last string.";}i:3;U:22:"This is a last strung.";}

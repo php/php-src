@@ -46,6 +46,6 @@ array(9) {
   [u"tm_yday"]=>
   int(231)
   [u"unparsed"]=>
-  string(0) ""
+  unicode(0) ""
 }
 ===DONE===

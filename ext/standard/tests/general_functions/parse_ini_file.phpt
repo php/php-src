@@ -95,10 +95,10 @@ var_dump(parse_ini_file($filename, true));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for parse_ini_file() in %s on line %d
+Warning: parse_ini_file() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for parse_ini_file() in %s on line %d
+Warning: parse_ini_file() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
 Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %s on line %d
@@ -173,3 +173,83 @@ array(1) {
   string(5) "test4"
 }
 Done
+--UEXPECTF--
+Warning: parse_ini_file() expects at least 1 parameter, 0 given in %s on line %d
+NULL
+
+Warning: parse_ini_file() expects at most 2 parameters, 3 given in %s on line %d
+NULL
+
+Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %s on line %d
+array(0) {
+}
+
+Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %s on line %d
+array(0) {
+}
+array(1) {
+  [u"test"]=>
+  unicode(0) ""
+}
+
+Warning: Error parsing %sparse_ini_file.dat on line 2
+ in %s on line %d
+array(1) {
+  [u"test"]=>
+  unicode(0) ""
+}
+
+Warning: Error parsing %sparse_ini_file.dat on line 2
+ in %s on line %d
+array(1) {
+  [u"test"]=>
+  unicode(4) "test"
+}
+array(1) {
+  [u"test"]=>
+  unicode(8) "new
+line"
+}
+array(1) {
+  [u"test"]=>
+  unicode(16) "test const value"
+}
+array(1) {
+  [u"section"]=>
+  array(1) {
+    [u"test"]=>
+    unicode(5) "hello"
+  }
+}
+array(1) {
+  [u"test"]=>
+  unicode(5) "hello"
+}
+array(1) {
+  [u"section.test"]=>
+  unicode(5) "hello"
+}
+array(1) {
+  [u"section"]=>
+  array(1) {
+    [u"section.test"]=>
+    unicode(5) "hello"
+  }
+}
+array(1) {
+  [u"section"]=>
+  array(1) {
+    [1]=>
+    unicode(1) "2"
+  }
+}
+array(1) {
+  [1]=>
+  unicode(1) "2"
+}
+array(1) {
+  [u"test"]=>
+  unicode(5) "test4"
+}
+Done
+
