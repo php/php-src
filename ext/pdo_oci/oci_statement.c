@@ -204,7 +204,7 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 	zval_dtor(param->parameter);
 
 	Z_STRLEN_P(param->parameter) = param->max_value_len;
-	Z_STRVAL_P(param->parameter) = emalloc(Z_STRLEN_P(param->parameter)+1);
+	Z_STRVAL_P(param->parameter) = ecalloc(1, Z_STRLEN_P(param->parameter)+1);
 	P->used_for_output = 1;
 
 	P->actual_len = Z_STRLEN_P(param->parameter);	
