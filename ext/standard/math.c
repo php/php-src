@@ -1018,30 +1018,30 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
    Formats a number with grouped thousands */
 PHP_FUNCTION(number_format)
 {
-	char *sep1 = NULL, *sep2 = NULL;
-	int sep1_len, sep2_len;
+	zval *sep1 = NULL, *sep2 = NULL;
 	double num;
 	int dec = 0;
 	char thousand_sep=',', dec_point='.';
 	char *tmp;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|ls&s&", &num, &dec,
-							  &sep1, &sep1_len, UG(ascii_conv),
-							  &sep2, &sep2_len, UG(ascii_conv)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|lzz", &num, &dec, &sep1, &sep2) == FAILURE) {
 		return;
 	}
 
-	if (sep1) {
-		if (sep1_len >= 1) {
-			dec_point = sep1[0];
-		} else if (sep1_len == 0) {
+	if (sep1 && Z_TYPE_P(sep1) != IS_NULL) {
+		convert_to_string_with_converter(sep1, UG(ascii_conv));
+		if (Z_STRLEN_P(sep1)) {
+			dec_point  = Z_STRVAL_P(sep1)[0];
+		} else {
 			dec_point = 0;
 		}
 	}
-	if (sep2) {
-		if (sep2_len >= 1) {
-			thousand_sep = sep2[0];
-		} else if (sep2_len == 0) {
+
+	if (sep2 && Z_TYPE_P(sep2) != IS_NULL) {
+		convert_to_string_with_converter(sep2, UG(ascii_conv));
+		if (Z_STRLEN_P(sep2)) {
+			thousand_sep = Z_STRVAL_P(sep2)[0];
+		} else {
 			thousand_sep = 0;
 		}
 	}
