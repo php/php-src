@@ -7,7 +7,7 @@
 
 $user       = "system";
 $password   = "system";
-$dbase      = "oracle";
+$dbase      = "HP";
 
 /* Set this variable to TRUE if Oracle is installed @ localhost */
 

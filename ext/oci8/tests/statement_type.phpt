@@ -12,7 +12,8 @@ $sqls = Array(
     "DELETE FROM table WHERE id = 1",
     "INSERT INTO table VALUES(1)",
     "UPDATE table SET id = 1",
-    "DROP TABLE table",
+	"DROP TABLE table",
+	"CREATE OR REPLACE PROCEDURE myproc(v1 NUMBER) as BEGIN DBMS_OUTPUT.PUT_LINE(v1); END;",
     "CREATE TABLE table (id NUMBER)",
     "ALTER TABLE table ADD (col1 NUMBER)",
     "BEGIN NULL; END;",
@@ -37,6 +38,7 @@ string(6) "INSERT"
 string(6) "UPDATE"
 string(4) "DROP"
 string(6) "CREATE"
+string(6) "CREATE"
 string(5) "ALTER"
 string(5) "BEGIN"
 string(7) "DECLARE"
@@ -50,6 +52,7 @@ unicode(6) "DELETE"
 unicode(6) "INSERT"
 unicode(6) "UPDATE"
 unicode(4) "DROP"
+unicode(6) "CREATE"
 unicode(6) "CREATE"
 unicode(5) "ALTER"
 unicode(5) "BEGIN"
