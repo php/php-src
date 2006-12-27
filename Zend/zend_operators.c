@@ -891,6 +891,7 @@ ZEND_API int _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRML
 			zval_dtor(op);
 			Z_USTRVAL_P(op) = USTR_MAKE_REL("Array");
 			Z_USTRLEN_P(op) = sizeof("Array")-1;
+			Z_TYPE_P(op) = IS_UNICODE;
 			return FAILURE;
 		case IS_OBJECT: {
 			int retval = FAILURE;
@@ -929,6 +930,7 @@ ZEND_API int _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRML
 			zval_dtor(op);
 			Z_USTRVAL_P(op) = USTR_MAKE_REL("Object");
 			Z_USTRLEN_P(op) = sizeof("Object")-1;
+			Z_TYPE_P(op) = IS_UNICODE;
 			return FAILURE;
 		}
 		default:
@@ -999,6 +1001,7 @@ ZEND_API int _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS
 			zval_dtor(op);
 			Z_STRVAL_P(op) = estrndup_rel("Array", sizeof("Array")-1);
 			Z_STRLEN_P(op) = sizeof("Array")-1;
+			Z_TYPE_P(op) = IS_STRING;
 			return FAILURE;
 		case IS_OBJECT: {
 			int retval = FAILURE;
@@ -1038,6 +1041,7 @@ ZEND_API int _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS
 			zval_dtor(op);
 			Z_STRVAL_P(op) = estrndup_rel("Object", sizeof("Object")-1);
 			Z_STRLEN_P(op) = sizeof("Object")-1;
+			Z_TYPE_P(op) = IS_STRING;
 			return FAILURE;
 		}
 		default:
