@@ -9,3 +9,6 @@ Bug #20108 (Segfault on printf statement)
 --EXPECT--
 string(581) "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 boo
 "
+--UEXPECT--
+unicode(581) "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 boo
+"

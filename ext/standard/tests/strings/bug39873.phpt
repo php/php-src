@@ -15,3 +15,6 @@ if (!setlocale(LC_ALL, "ita","it","Italian","it_IT","it_IT.ISO8859-1","it_IT.ISO
 ?>
 --EXPECT--
 1,234.56
+--UEXPECTF--
+Strict Standards: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+1,234.56
