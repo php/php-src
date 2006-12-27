@@ -513,7 +513,6 @@ ZEND_API int convert_to_null(zval *op)
 			}
 			*op = *org;
 			FREE_ZVAL(org);
-			return FAILURE;
 		}
 	}
 
@@ -902,7 +901,6 @@ ZEND_API int _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRML
 					zend_error(E_RECOVERABLE_ERROR,
 							   "Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,
 							   zend_get_type_by_const(IS_UNICODE));
-					return FAILURE;
 				} else {
 					zval_dtor(op);
 					Z_TYPE_P(op) = IS_UNICODE;
@@ -1013,7 +1011,6 @@ ZEND_API int _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS
 					zend_error(E_RECOVERABLE_ERROR,
 							   "Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,
 							   zend_get_type_by_const(IS_STRING));
-					return FAILURE;
 				} else {
 					zval_dtor(op);
 					Z_TYPE_P(op) = IS_STRING;
