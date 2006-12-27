@@ -31,6 +31,7 @@
  * SUCH DAMAGE.
  */
 
+#include <zend.h>
 #include <limits.h>
 #include <ctype.h>
 #include <errno.h>
@@ -39,13 +40,12 @@
 #include <unicode/utypes.h>
 #include <unicode/uchar.h>
 
-/*
+/* long zend_u_strtol (const UChar *nptr, UChar **endptr, int base) {{{ 
  * Convert a Unicode string to a long integer.
  *
  * Ignores `locale' stuff.
  */
-long
-zend_u_strtol(nptr, endptr, base)
+ZEND_API long zend_u_strtol(nptr, endptr, base)
 	const UChar *nptr;
 	UChar **endptr;
 	register int base;
@@ -55,6 +55,14 @@ zend_u_strtol(nptr, endptr, base)
 	register UChar c;
 	register unsigned long cutoff;
 	register int neg = 0, any, cutlim;
+
+	if (s == NULL) {
+		errno = ERANGE;
+		if (endptr != NULL) {
+			*endptr = NULL;
+		}
+		return 0;
+	}
 
 	/*
 	 * Skip white space and pick up leading +/- sign if any.
@@ -128,3 +136,109 @@ zend_u_strtol(nptr, endptr, base)
 		*endptr = (UChar *)(any ? s - 1 : nptr);
 	return (acc);
 }
+/* }}} */
+
+/* unsigned long zend_u_strtoul (const UChar *nptr, UChar **endptr, int base) {{{ 
+ * Convert a Unicode string to a unsigned long integer.
+ *
+ * Ignores `locale' stuff.
+ */
+ZEND_API unsigned long zend_u_strtoul(nptr, endptr, base)
+	const UChar *nptr;
+	UChar **endptr;
+	register int base;
+{
+	register const UChar *s = nptr;
+	register unsigned long acc;
+	register UChar c;
+	register unsigned long cutoff;
+	register int neg = 0, any, cutlim;
+
+	if (s == NULL) {
+		errno = ERANGE;
+		if (endptr != NULL) {
+			*endptr = NULL;
+		}
+		return 0;
+	}
+
+	/*
+	 * Skip white space and pick up leading +/- sign if any.
+	 * If base is 0, allow 0x for hex and 0 for octal, else
+	 * assume decimal; if base is already 16, allow 0x.
+	 */
+	do {
+		c = *s++;
+	} while (u_isspace(c));
+	if (c == 0x2D /*'-'*/) {
+		neg = 1;
+		c = *s++;
+	} else if (c == 0x2B /*'+'*/)
+		c = *s++;
+	if ((base == 0 || base == 16) &&
+	    (c == 0x30 /*'0'*/)
+		 && (*s == 0x78 /*'x'*/ || *s == 0x58 /*'X'*/)) {
+		c = s[1];
+		s += 2;
+		base = 16;
+	}
+	if (base == 0)
+		base = (c == 0x30 /*'0'*/) ? 8 : 10;
+
+	/*
+	 * Compute the cutoff value between legal numbers and illegal
+	 * numbers.  That is the largest legal value, divided by the
+	 * base.  An input number that is greater than this value, if
+	 * followed by a legal input character, is too big.  One that
+	 * is equal to this value may be valid or not; the limit
+	 * between valid and invalid numbers is then based on the last
+	 * digit.  For instance, if the range for longs is
+	 * [-2147483648..2147483647] and the input base is 10,
+	 * cutoff will be set to 214748364 and cutlim to either
+	 * 7 (neg==0) or 8 (neg==1), meaning that if we have accumulated
+	 * a value > 214748364, or equal but the next digit is > 7 (or 8),
+	 * the number is too big, and we will return a range error.
+	 *
+	 * Set any if any `digits' consumed; make it negative to indicate
+	 * overflow.
+	 */
+	cutoff = (unsigned long)ULONG_MAX / (unsigned long)base;
+	cutlim = (unsigned long)ULONG_MAX % (unsigned long)base;
+	for (acc = 0, any = 0;; c = *s++) {
+		if (c >= 0x30 /*'0'*/ && c <= 0x39 /*'9'*/)
+			c -= 0x30 /*'0'*/;
+		else if (c >= 0x41 /*'A'*/ && c <= 0x5A /*'Z'*/)
+			c -= 0x41 /*'A'*/ - 10;
+		else if (c >= 0x61 /*'a'*/ && c <= 0x7A /*'z'*/)
+			c -= 0x61 /*'a'*/ - 10;
+		else
+			break;
+		if (c >= base)
+			break;
+
+		if (any < 0 || acc > cutoff || (acc == cutoff && c > cutlim))
+			any = -1;
+		else {
+			any = 1;
+			acc *= base;
+			acc += c;
+		}
+	}
+	if (any < 0) {
+		acc = ULONG_MAX;
+		errno = ERANGE;
+	} else if (neg)
+		acc = -acc;
+	if (endptr != NULL)
+		*endptr = (UChar *)(any ? s - 1 : nptr);
+	return (acc);
+}
+/* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

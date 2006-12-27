@@ -65,6 +65,7 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSR
 ZEND_API zend_bool instanceof_function_ex(zend_class_entry *instance_ce, zend_class_entry *ce, zend_bool interfaces_only TSRMLS_DC);
 ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class_entry *ce TSRMLS_DC);
 ZEND_API long zend_u_strtol(const UChar *nptr, UChar **endptr, int base);
+ZEND_API unsigned long zend_u_strtoul(const UChar *nptr, UChar **endptr, int base);
 ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr);
 END_EXTERN_C()
 
