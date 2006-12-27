@@ -1,3 +1,140 @@
+2006-12-26  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/file.c
+      ext/standard/scanf.c
+      ext/standard/scanf.h
+      ext/standard/string.c:
+      Unicode support in sscanf() and fscanf(). (Tony, Andrei)
+
+2006-12-26  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/snmp/php_snmp.h:
+      fix build
+
+2006-12-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      ext/exif/exif.c
+      ext/interbase/ibase_query.c
+      ext/json/json.c
+      ext/pdo_dblib/dblib_driver.c
+      ext/pdo_dblib/dblib_stmt.c
+      ext/pgsql/pgsql.c
+      ext/soap/php_encoding.c
+      ext/spl/spl_directory.c
+      ext/standard/uuencode.c
+      ext/standard/var.c
+      main/main.c:
+      
+      MFB: safety checks
+
+    * (PHP_4_4)
+      Zend/zend_ini.c
+      Zend/zend_ini.h
+      ext/exif/exif.c
+      main/main.c:
+      MFB: safety checks
+
+    * ext/session/session.c:
+      MFB:   Session deserializer protection.
+
+    * (PHP_5_2)
+      ZendEngine2/zend_strtod.c:
+      
+      Fixed compiler warning
+
+    * (PHP_5_2)
+      ext/curl/interface.c:
+      Don't forget to free url structure
+
+    * ext/curl/interface.c:
+      MFB: Fixed bug #39878 (CURL doesn't compile on Sun Studio Pro).
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/interface.c:
+      Fixed bug #39878 (CURL doesn't compile on Sun Studio Pro).
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      Session deserializer protection.
+
+    * (PHP_5_2)
+      ext/standard/type.c:
+      is_numeric_string() optimization
+
+    * (PHP_5_2)
+      ZendEngine2/bench.php
+      ZendEngine2/zend.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.h:
+      is_numeric_string() optimization
+      
+
+2006-12-26  Antony Dovgal  <antony@zend.com>
+
+    * ext/xml/xml.c:
+      fix arguments order (just in the sake of purity)
+
+2006-12-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/config.m4:
+      - Add better zlib detection
+
+    * (PHP_5_2)
+      NEWS
+      ext/zip/config.m4
+      ext/zip/config.m4:
+      - #39952 zip ignoring --with-libdir on zlib checks (judas dot
+        iscariote at gmail dot com)
+
+2006-12-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/filter/filter.c
+      ext/filter/filter.c
+      ext/filter/filter_private.h
+      ext/filter/filter_private.h
+      ext/filter/logical_filters.c
+      ext/filter/logical_filters.c
+      ext/filter/tests/030.phpt
+      ext/filter/tests/030.phpt
+      ext/filter/tests/045.phpt
+      ext/filter/tests/046.phpt
+      ext/filter/tests/047.phpt
+      ext/filter/tests/048.phpt
+      ext/filter/tests/049.phpt
+      ext/filter/tests/050.phpt
+      ext/filter/tests/051.phpt
+      ext/filter/tests/bug7733.phpt:
+      Code review:
+        . fixed integer overflow
+        . fixed buffer overflow/underflow
+        . added more strict IP validation
+        . reimplemented float number validation
+
+    * ext/filter/tests/045.phpt
+      ext/filter/tests/045.phpt
+      ext/filter/tests/046.phpt
+      ext/filter/tests/046.phpt
+      ext/filter/tests/047.phpt
+      ext/filter/tests/047.phpt
+      ext/filter/tests/048.phpt
+      ext/filter/tests/048.phpt
+      ext/filter/tests/049.phpt
+      ext/filter/tests/049.phpt
+      ext/filter/tests/050.phpt
+      ext/filter/tests/050.phpt
+      ext/filter/tests/051.phpt
+      ext/filter/tests/051.phpt
+      ext/filter/tests/bug7733.phpt:
+      
+      file 045.phpt was initially added on branch PHP_5_2.
+
 2006-12-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
