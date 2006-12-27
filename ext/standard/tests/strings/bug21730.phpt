@@ -33,3 +33,20 @@ array(3) {
   [2]=>
   int(9)
 }
+--UEXPECT--
+array(3) {
+  [0]=>
+  unicode(3) "ABC"
+  [1]=>
+  unicode(3) "DEF"
+  [2]=>
+  int(9)
+}
+array(3) {
+  [0]=>
+  unicode(3) "ABC"
+  [1]=>
+  unicode(3) "DEF"
+  [2]=>
+  int(9)
+}
