@@ -33,6 +33,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
+#include "ext/standard/basic_functions.h"
 #include "zend_exceptions.h"
 
 #if HAVE_MYSQL
