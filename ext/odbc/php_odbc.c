@@ -2083,23 +2083,23 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 			 if (strstr(db, "pwd") || strstr(db, "PWD")) {
 				 pwd = NULL;
 			 }
-			 strncpy( lpszConnStr, db, CONNSTRSIZE);
+			 strlcpy( lpszConnStr, db, CONNSTRSIZE);
 		 }
 		 else {
 			 strcpy(lpszConnStr, "DSN=");
-			 strcat(lpszConnStr, db);
+			 strlcat(lpszConnStr, db, CONNSTRSIZE);
 		 }
 		 if (uid) {
 			 if (uid[0]) {
-				 strcat(lpszConnStr, ";UID=");
-				 strcat(lpszConnStr, uid);
-				 strcat(lpszConnStr, ";");
+				 strlcat(lpszConnStr, ";UID=", CONNSTRSIZE);
+				 strlcat(lpszConnStr, uid, CONNSTRSIZE);
+				 strlcat(lpszConnStr, ";", CONNSTRSIZE);
 			 }
 			 if (pwd) {
 				 if (pwd[0]) {
-					 strcat(lpszConnStr, "PWD=");
-					 strcat(lpszConnStr, pwd);
-					 strcat(lpszConnStr, ";");
+					 strlcat(lpszConnStr, "PWD=", CONNSTRSIZE);
+					 strlcat(lpszConnStr, pwd, CONNSTRSIZE);
+					 strlcat(lpszConnStr, ";", CONNSTRSIZE);
 				 }
 			 }
 		 }
