@@ -18,6 +18,7 @@
 /* $Id$ */
 
 #include "php_embed.h"
+#include <ext/standard/dl.h>
 
 #ifdef PHP_WIN32
 #include <io.h>
