@@ -1600,11 +1600,12 @@ PHP_FUNCTION(socket_set_option)
 {
 	zval			*arg1, **arg4;
 	struct linger	lv;
-	struct timeval tv;
 	php_socket		*php_sock;
 	int				ov, optlen, retval; 
 #ifdef PHP_WIN32
 	int				timeout;
+#else 
+	struct timeval tv;
 #endif
 	long				level, optname;
 	void 			*opt_ptr;

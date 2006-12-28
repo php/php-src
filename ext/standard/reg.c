@@ -425,7 +425,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 				buf = nbuf;
 			}
 			/* stick that last bit of string on our output */
-			strcat(buf, &string[pos]);
+			strlcat(buf, &string[pos], buf_len);
 		}
 	}
 
