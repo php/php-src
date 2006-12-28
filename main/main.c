@@ -824,7 +824,7 @@ static void php_message_handler_for_zend(long message, void *data)
 
 				if ((EG(error_reporting)&E_WARNING) && PG(report_memleaks)) {
 #if ZEND_DEBUG
-					char memory_leak_buf[512];
+					char memory_leak_buf[1024];
 
 					if (message==ZMSG_MEMORY_LEAK_DETECTED) {
 						zend_mem_header *t = (zend_mem_header *) data;
@@ -835,7 +835,7 @@ static void php_message_handler_for_zend(long message, void *data)
 							char relay_buf[512];
 
 							snprintf(relay_buf, 512, "%s(%d) : Actual location (location was relayed)\n", t->orig_filename, t->orig_lineno);
-							strcat(memory_leak_buf, relay_buf);
+							strlcat(memory_leak_buf, relay_buf, sizeof(memory_leak_buf));
 						}
 					} else {
 						unsigned long leak_count = (unsigned long) data;
