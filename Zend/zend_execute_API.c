@@ -1118,11 +1118,14 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 	int retval;
 
 	if (retval_ptr) {
-		pv.value.str.len = strlen(str)+sizeof("return  ;")-1;
-		pv.value.str.val = emalloc(pv.value.str.len+1);
-		strcpy(pv.value.str.val, "return ");
-		strcat(pv.value.str.val, str);
-		strcat(pv.value.str.val, " ;");
+		int l = strlen(str);
+		Z_STRLEN(pv) = l+sizeof("return  ;")-1;
+		Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
+		memcpy(Z_STRVAL(pv), "return ", sizeof("return ")-1);
+		memcpy(Z_STRVAL(pv) + sizeof("return ")-1, str, l);
+		Z_STRVAL(pv)[Z_STRLEN(pv)-2] = ' ';
+		Z_STRVAL(pv)[Z_STRLEN(pv)-1] = ';';
+		Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
 	} else {
 		pv.value.str.len = strlen(str);
 		pv.value.str.val = estrndup(str, pv.value.str.len);
