@@ -248,7 +248,7 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ php_make_safe_mode_command */
 static int php_make_safe_mode_command(char *cmd, char **safecmd, int is_persistent TSRMLS_DC)
 {
-	int lcmd, larg0, ldir, len, overflow_limit;
+	int lcmd, larg0;
 	char *space, *sep, *arg0;
 
 	if (!PG(safe_mode)) {
@@ -257,42 +257,27 @@ static int php_make_safe_mode_command(char *cmd, char **safecmd, int is_persiste
 	}
 
 	lcmd = strlen(cmd);
-	ldir = strlen(PG(safe_mode_exec_dir));
-	len = lcmd + ldir + 2;
-	overflow_limit = len;
 
-	arg0 = emalloc(len);
-	
-	strcpy(arg0, cmd);
-	
-	space = strchr(arg0, ' ');
+	arg0 = estrndup(cmd, lcmd);
+
+	space = memchr(arg0, ' ', lcmd);
 	if (space) {
 		*space = '\0';
+		larg0 = space - arg0;
+	} else {
+		larg0 = lcmd;
 	}
-	larg0 = strlen(arg0);
 
-	if (strstr(arg0, "..")) {
+	if (php_memnstr(arg0, "..", sizeof("..")-1, arg0 + larg0)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No '..' components allowed in path");
 		efree(arg0);
 		return FAILURE;
 	}
 
-	*safecmd = emalloc(len);
-	strcpy(*safecmd, PG(safe_mode_exec_dir));
-	overflow_limit -= ldir;
-	
-	sep = strrchr(arg0, PHP_DIR_SEPARATOR);
-	if (sep) {
-		strcat(*safecmd, sep);
-		overflow_limit -= strlen(sep);
-	} else {
-		strcat(*safecmd, "/");
-		strcat(*safecmd, arg0);
-		overflow_limit -= larg0 + 1;
-	}
-	if (space) {
-		strncat(*safecmd, cmd + larg0, overflow_limit);
-	}
+	sep = zend_memrchr(arg0, PHP_DIR_SEPARATOR, larg0);
+
+	spprintf(safecmd, 0, "%s%c%s%s", PG(safe_mode_exec_dir), (sep ? *sep : '/'), (sep ? "" : arg0), (space ? cmd + larg0 : ""));
+
 	efree(arg0);
 	arg0 = php_escape_shell_cmd(*safecmd);
 	efree(*safecmd);
