@@ -10,20 +10,20 @@ $b = array(
 	50, 
 	500, 
 	5000, 
-	500000,
+	250000,
 //	1000000, // works, but test would take too long
 );
 
-srand(time());
+$s = '';
+$i = 0;
 
 foreach ($b as $size) {
-	$s = '';
-	for ($i = 0; $i <= $size; ++$i) {
+	do {
 		$s .= chr(rand(0,255));
-	}
-	var_dump($s == gzinflate(gzdeflate($s)));
-	var_dump($s == gzuncompress(gzcompress($s)));
-	var_dump($s == gzinflate(substr(gzencode($s), 10, -8)));
+	} while (++$i < $size);
+	var_dump($s === gzinflate(gzdeflate($s)));
+	var_dump($s === gzuncompress(gzcompress($s)));
+	var_dump($s === gzinflate(substr(gzencode($s), 10, -8)));
 }
 ?>
 --EXPECT--
