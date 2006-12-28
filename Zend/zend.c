@@ -1594,16 +1594,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 			EG(return_value_ptr_ptr) = retval ? retval : &local_retval;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			if (EG(exception)) {
-				char ex_class_name[128];
-
 				EG(opline_ptr) = NULL;
-				if (Z_TYPE_P(EG(exception)) == IS_OBJECT) {
-					/* CHECK ME: why strings only */
-					strncpy(ex_class_name, Z_OBJ_CLASS_NAME_P(EG(exception)).s, 127);
-					ex_class_name[127] = '\0';
-				} else {
-					strcpy(ex_class_name, "Unknown Exception");
-				}
 				if (EG(user_exception_handler)) {
 					zval *orig_user_exception_handler;
 					zval ***params, *retval2, *old_exception;
