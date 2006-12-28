@@ -1818,10 +1818,10 @@ PHP_FUNCTION(fdf_enum_values) {
 	if (!zend_is_callable(callback, 0, &name)) {
 		convert_to_string(&name);
 		php_error_docref1(NULL TSRMLS_CC, Z_STRVAL(name), E_WARNING, "Second argument is expected to be a valid callback");
-		zval_ptr_dtor(&name);
+		zval_dtor(&name);
 		RETURN_FALSE;
 	}
-	zval_ptr_dtor(&name);
+	zval_dtor(&name);
 	FDF_G(enum_callback) = callback;
 	FDF_G(enum_fdf) = fdf;
 
