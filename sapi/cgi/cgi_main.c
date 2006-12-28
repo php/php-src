@@ -849,7 +849,7 @@ static void init_request_info(TSRMLS_D)
 							int path_translated_len = 0;
 							char *path_translated = NULL;
 							
-							if (env_document_root[l - 1] == '/') {
+							if (l && env_document_root[l - 1] == '/') {
 								--l;
 							}
 
