@@ -289,6 +289,7 @@ int php_init_config(TSRMLS_D)
 		php_ini_search_path = sapi_module.php_ini_path_override;
 		free_ini_search_path = 0;
 	} else if (!sapi_module.php_ini_ignore) {
+		int search_path_size;
 		char *default_location;
 		char *env_location;
 		char *binary_location;
@@ -306,16 +307,17 @@ int php_init_config(TSRMLS_D)
 		 * Prepare search path
 		 */
 
-		php_ini_search_path = (char *) emalloc(MAXPATHLEN * 4 + strlen(env_location) + 3 + 1);
+		search_path_size = MAXPATHLEN * 4 + strlen(env_location) + 3 + 1;
+		php_ini_search_path = (char *) emalloc(search_path_size);
 		free_ini_search_path = 1;
 		php_ini_search_path[0] = 0;
 
 		/* Add environment location */
 		if (env_location[0]) {
 			if (*php_ini_search_path) {
-				strcat(php_ini_search_path, paths_separator);
+				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strcat(php_ini_search_path, env_location);
+			strlcat(php_ini_search_path, env_location, search_path_size);
 			php_ini_file_name = env_location;
 		}
 
@@ -324,9 +326,9 @@ int php_init_config(TSRMLS_D)
 		reg_location = GetIniPathFromRegistry();
 		if (reg_location != NULL) {
 			if (*php_ini_search_path) {
-				strcat(php_ini_search_path, paths_separator);
+				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strcat(php_ini_search_path, reg_location);
+			strlcat(php_ini_search_path, reg_location, search_path_size);
 			efree(reg_location);
 		}
 #endif
@@ -334,9 +336,9 @@ int php_init_config(TSRMLS_D)
 		/* Add cwd (not with CLI) */
 		if (strcmp(sapi_module.name, "cli") != 0) {
 			if (*php_ini_search_path) {
-				strcat(php_ini_search_path, paths_separator);
+				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strcat(php_ini_search_path, ".");
+			strlcat(php_ini_search_path, ".", search_path_size);
 		}
 
 		/* Add binary directory */
@@ -364,9 +366,9 @@ int php_init_config(TSRMLS_D)
 				*(separator_location) = 0;
 			}
 			if (*php_ini_search_path) {
-				strcat(php_ini_search_path, paths_separator);
+				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strcat(php_ini_search_path, binary_location);
+			strlcat(php_ini_search_path, binary_location, search_path_size);
 			efree(binary_location);
 		}
 
@@ -376,9 +378,9 @@ int php_init_config(TSRMLS_D)
 	
 		if (0 < GetWindowsDirectory(default_location, MAXPATHLEN)) {
 			if (*php_ini_search_path) {
-				strcat(php_ini_search_path, paths_separator);
+				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strcat(php_ini_search_path, default_location);
+			strlcat(php_ini_search_path, default_location, search_path_size);
 		}
 		efree(default_location);
 
@@ -400,9 +402,9 @@ int php_init_config(TSRMLS_D)
 				default_location = (char *) emalloc(MAXPATHLEN + 1);
 				if (0 < get_system_windows_directory(default_location, MAXPATHLEN)) {
 					if (*php_ini_search_path) {
-						strcat(php_ini_search_path, paths_separator);
+						strlcat(php_ini_search_path, paths_separator, search_path_size);
 					}
-					strcat(php_ini_search_path, default_location);
+					strlcat(php_ini_search_path, default_location, search_path_size);
 				}
 				efree(default_location);
 			}
@@ -410,9 +412,9 @@ int php_init_config(TSRMLS_D)
 #else
 		default_location = PHP_CONFIG_FILE_PATH;
 		if (*php_ini_search_path) {
-			strcat(php_ini_search_path, paths_separator);
+			strlcat(php_ini_search_path, paths_separator, search_path_size);
 		}
-		strcat(php_ini_search_path, default_location);
+		strlcat(php_ini_search_path, default_location, search_path_size);
 #endif
 	}
 
@@ -518,8 +520,8 @@ int php_init_config(TSRMLS_D)
 				php_ini_scanned_files = (char *) malloc(total_l);
 				*php_ini_scanned_files = '\0';
 				for (element = scanned_ini_list.head; element; element = element->next) {
-					strcat(php_ini_scanned_files, *(char **)element->data);		
-					strcat(php_ini_scanned_files, element->next ? ",\n" : "\n");
+					strlcat(php_ini_scanned_files, *(char **)element->data, total_l);
+					strlcat(php_ini_scanned_files, element->next ? ",\n" : "\n", total_l);
 				}	
 			}
 			zend_llist_destroy(&scanned_ini_list);
