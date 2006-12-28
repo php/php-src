@@ -1288,7 +1288,7 @@ PHP_FUNCTION(fscanf)
 	}
 
 	if (((php_stream *)what)->readbuf_type == IS_UNICODE) {
-		u_buf = php_stream_u_get_line((php_stream *) what, NULL_ZSTR, 0, 0, NULL TSRMLS_CC);
+		u_buf = php_stream_u_get_line((php_stream *) what, NULL_ZSTR, 0, 0, NULL);
 		if (u_buf == NULL) {
 			efree(args);
 			RETURN_FALSE;
