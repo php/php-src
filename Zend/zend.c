@@ -429,8 +429,8 @@ static void register_standard_class(TSRMLS_D)
 static void zend_set_default_compile_time_values(TSRMLS_D)
 {
 	/* default compile-time values */
-	CG(asp_tags) = 0;
-	CG(short_tags) = 1;
+/*	CG(asp_tags) = 0;
+	CG(short_tags) = 1; */
 	CG(allow_call_time_pass_reference) = 1;
 	CG(extended_info) = 0;
 }
@@ -1099,15 +1099,6 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 			EG(return_value_ptr_ptr) = retval ? retval : &local_retval;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			if (EG(exception)) {
-				char ex_class_name[128];
-
-				EG(opline_ptr) = NULL;
-				if (Z_TYPE_P(EG(exception)) == IS_OBJECT) {
-					strncpy(ex_class_name, Z_OBJ_CLASS_NAME_P(EG(exception)), 127);
-					ex_class_name[127] = '\0';
-				} else {
-					strcpy(ex_class_name, "Unknown Exception");
-				}
 				if (EG(user_exception_handler)) {
 					zval *orig_user_exception_handler;
 					zval ***params, *retval2, *old_exception;
