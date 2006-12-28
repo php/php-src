@@ -1,3 +1,16 @@
+2006-12-27  Antony Dovgal  <antony@zend.com>
+
+    * zend_operators.c:
+      restore old behaviour when casting objects to strings and NULL
+
+    * zend_operators.c:
+      fix convert_to_unicode() and convert_to_string() which didn't set the type
+      of the op properly
+
+    * zend_operators.h
+      zend_strtol.c:
+      add zend_u_strtoul() and fix build
+
 2006-12-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_ini.c
