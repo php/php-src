@@ -37,7 +37,7 @@
 
 #include "flatfile.h"
 
-#define _php_stream_gets(stream, buf, len) php_stream_gets(stream, (zstr)((char*)buf), len)
+#define _php_stream_gets(stream, buf, len) php_stream_gets(stream, ZSTR(((char*)buf)), len)
 
 #define FLATFILE_BLOCK_SIZE 1024
 
