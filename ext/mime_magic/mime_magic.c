@@ -730,9 +730,7 @@ static int parse(char *l, int lineno)
 		return -1;
 	}
 	
-	strncpy(m->desc, l, sizeof(m->desc) - 1);
-	m->desc[sizeof(m->desc) - 1] = '\0';
-
+	strlcpy(m->desc, l, sizeof(m->desc));
     return 0;
 }
 
