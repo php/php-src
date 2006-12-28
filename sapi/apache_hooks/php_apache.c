@@ -554,7 +554,7 @@ PHP_FUNCTION(apache_request_headers_in)
 	
 	APREQ_GET_REQUEST(id, r);
 
-	apache_table_to_zval(r->headers_in, 0, return_value);
+	apache_table_to_zval(r->headers_in, return_value);
 }
 /* }}} */
 
@@ -650,7 +650,7 @@ PHP_FUNCTION(apache_request_headers_out)
 	if (ZEND_NUM_ARGS() > 0)
 		add_header_to_table(r->headers_out, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
-	apache_table_to_zval(r->headers_out, 0, return_value);
+	apache_table_to_zval(r->headers_out, return_value);
 }
 /* }}} */
 
@@ -668,7 +668,7 @@ PHP_FUNCTION(apache_request_err_headers_out)
 	if (ZEND_NUM_ARGS() > 0)
 		add_header_to_table(r->err_headers_out, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
-	apache_table_to_zval(r->err_headers_out, 0, return_value);
+	apache_table_to_zval(r->err_headers_out, return_value);
 }
 /* }}} */
 
@@ -1731,7 +1731,7 @@ PHP_FUNCTION(virtual)
 		RETURN_FALSE;
 	}
 
-	php_output_end_all();
+	php_output_end_all(TSRMLS_C);
 	php_header(TSRMLS_C);
 
 	if (run_sub_req(rr)) {
@@ -1761,9 +1761,7 @@ static void apache_table_to_zval(table *t, zval *return_value)
 		if (tenv[i].key) {
 			continue;
 		}
-		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
-			RETURN_FALSE;
-		}
+		add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1);
     }
 
 }
@@ -1787,7 +1785,7 @@ PHP_FUNCTION(apache_request_headers)
    Fetch all HTTP response headers */
 PHP_FUNCTION(apache_response_headers)
 {
-	apache_table_to_zval(((request_rec *) SG(server_context))->headers_out, 0, return_value);
+	apache_table_to_zval(((request_rec *) SG(server_context))->headers_out, return_value);
 }
 /* }}} */
 
