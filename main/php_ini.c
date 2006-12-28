@@ -280,10 +280,12 @@ int php_init_config()
 		php_ini_search_path = sapi_module.php_ini_path_override;
 		free_ini_search_path = 0;
 	} else {
+		int search_path_size;
 		char *default_location;
 		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
 
-		php_ini_search_path = (char *) emalloc(MAXPATHLEN * NUM_INI_SEARCH_LOCATIONS + strlen(env_location) + NUM_INI_SEARCH_LOCATIONS + 1);
+		search_path_size = MAXPATHLEN * NUM_INI_SEARCH_LOCATIONS + strlen(env_location) + NUM_INI_SEARCH_LOCATIONS + 1;
+		php_ini_search_path = (char *) emalloc(search_path_size);
 		free_ini_search_path = 1;
 		php_ini_search_path[0] = 0;
 
@@ -294,18 +296,18 @@ int php_init_config()
 		/* Add environment location */
 		if (env_location[0]) {
 			if (*php_ini_search_path) {
-				strcat(php_ini_search_path, paths_separator);
+				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strcat(php_ini_search_path, env_location);
+			strlcat(php_ini_search_path, env_location, search_path_size);
 		}
 
 #ifdef PHP_WIN32
 		registry_location = GetIniPathFromRegistry();
 		if (registry_location) {
 			if (*php_ini_search_path) {
-				strcat(php_ini_search_path, paths_separator);
+				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strcat(php_ini_search_path, registry_location);
+			strlcat(php_ini_search_path, registry_location, search_path_size);
 			efree(registry_location);
 		}
 #endif
@@ -314,9 +316,9 @@ int php_init_config()
 #ifdef INI_CHECK_CWD
 		if (strcmp(sapi_module.name, "cli") != 0) {
 			if (*php_ini_search_path) {
-				strcat(php_ini_search_path, paths_separator);
+				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strcat(php_ini_search_path, ".");
+			strlcat(php_ini_search_path, ".", search_path_size);
 		}
 #endif
 
@@ -341,9 +343,9 @@ int php_init_config()
 				*(separator_location+1) = 0;
 			}
 			if (*php_ini_search_path) {
-				strcat(php_ini_search_path, paths_separator);
+				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strcat(php_ini_search_path, binary_location);
+			strlcat(php_ini_search_path, binary_location, search_path_size);
 			efree(binary_location);
 		}
 
@@ -353,17 +355,17 @@ int php_init_config()
 	
 		if (0 < GetWindowsDirectory(default_location, MAXPATHLEN)) {
 			if (*php_ini_search_path) {
-				strcat(php_ini_search_path, paths_separator);
+				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strcat(php_ini_search_path, default_location);
+			strlcat(php_ini_search_path, default_location, search_path_size);
 		}
 		efree(default_location);
 #else
 		default_location = PHP_CONFIG_FILE_PATH;
 		if (*php_ini_search_path) {
-			strcat(php_ini_search_path, paths_separator);
+			strlcat(php_ini_search_path, paths_separator, search_path_size);
 		}
-		strcat(php_ini_search_path, default_location);
+		strlcat(php_ini_search_path, default_location, search_path_size);
 #endif
 	}
 
@@ -468,8 +470,8 @@ int php_init_config()
 				php_ini_scanned_files = (char *) malloc(total_l);
 				*php_ini_scanned_files = '\0';
 				for (element = scanned_ini_list.head; element; element = element->next) {
-					strcat(php_ini_scanned_files, *(char **)element->data);		
-					strcat(php_ini_scanned_files, element->next ? ",\n" : "\n");
+					strlcat(php_ini_scanned_files, *(char **)element->data, total_l);
+					strlcat(php_ini_scanned_files, element->next ? ",\n" : "\n", total_l);
 				}	
 			}
 			zend_llist_destroy(&scanned_ini_list);
