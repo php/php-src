@@ -1492,8 +1492,7 @@ PHP_FUNCTION(fdf_get_attachment) {
 		RETURN_FALSE;
 	}
 
-	strncpy(pathbuf	, savepath, MAXPATHLEN-1);
-	pathbuf[MAXPATHLEN-1] = '\0';
+	strlcpy(pathbuf, savepath, sizeof(pathbuf));
 
 	if(0 == stat(pathbuf, &statBuf)) {
 		is_dir = S_ISDIR(statBuf.st_mode);
