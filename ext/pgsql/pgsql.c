@@ -3772,14 +3772,14 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 				switch(Z_TYPE_PP(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_PP(val) == 0) {
-							ZVAL_STRING(new_val, "NULL", 1);
-						}
-						else {
+							ZVAL_STRINGL(new_val, "NULL", sizeof("NULL")-1, 1);
+						} else if (!strcasecmp(Z_STRVAL_PP(val), "now()")) {
+							ZVAL_STRINGL(new_val, "NOW()", sizeof("NOW()")-1, 1);
+						} else {
 							/* FIXME: better regex must be used */
 							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2})([ \\t]+(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1}(\\.[0-9]+){0,1}([ \\t]*([+-][0-9]{1,2}(:[0-9]{1,2}){0,1}|[a-zA-Z]{1,5})){0,1})){0,1}$", 1 TSRMLS_CC) == FAILURE) {
 								err = 1;
-							}
-							else {
+							} else {
 								ZVAL_STRING(new_val, Z_STRVAL_PP(val), 1);
 								php_pgsql_add_quotes(new_val, 1 TSRMLS_CC);
 							}
@@ -3787,7 +3787,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						break;
 				
 					case IS_NULL:
-						ZVAL_STRING(new_val, "NULL", 1);
+						ZVAL_STRINGL(new_val, "NULL", sizeof("NULL")-1, 1);
 						break;
 
 					default:
