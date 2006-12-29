@@ -1,3 +1,19 @@
+2006-12-28  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend.c:
+      that was not intentional
+      thanks Nuno
+
+    * zend.c:
+      nuke dead code
+
+2006-12-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_execute_API.c:
+      Avoid strcpy() & strcat()
+
 2006-12-27  Antony Dovgal  <antony@zend.com>
 
     * zend_operators.c:
