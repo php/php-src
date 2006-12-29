@@ -1,3 +1,100 @@
+2006-12-28  Antony Dovgal  <antony@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+      make sure l != 0
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c:
+      that was not intentional
+      thanks Nuno
+
+    * ZendEngine2/zend.c:
+      nuke dead code
+
+    * ext/fdf/fdf.c
+      ext/mime_magic/mime_magic.c:
+      use strlcpy()
+
+2006-12-28  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/zlib/tests/bug_34821.phpt:
+      MFB
+
+    * (PHP_5_2)
+      ext/zlib/tests/bug_34821.phpt:
+      make this test run a little faster (is currently timeout with valgrind)
+
+2006-12-28  Antony Dovgal  <antony@zend.com>
+
+    * ext/mysql/php_mysql.c:
+      include basic_functions.h for php_get_current_user() declaration
+
+    * ext/fdf/fdf.c:
+      it's ptr, not ptrptr
+
+    * ext/dba/libflatfile/flatfile.c:
+      use the macro, casting works only with GCC
+
+    * sapi/embed/php_embed.c:
+      fix sapi/embed build
+
+2006-12-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      
+      MFB: Added buffer length checks
+
+    * (PHP_5_2)
+      ext/pgsql/pgsql.c:
+      
+      Added buffer length checks
+
+2006-12-28  Antony Dovgal  <antony@zend.com>
+
+    * sapi/apache_hooks/php_apache.c:
+      fix build
+
+2006-12-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_logos.c:
+      
+      MFB: strcat() stuff
+
+    * (PHP_5_2)
+      ext/standard/proc_open.c
+      main/php_logos.c:
+      
+      Simplify code and eliminate strcat() usage
+
+2006-12-28  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * run-tests.php:
+      force tidy.clean_output=0
+
+2006-12-28  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/file.c:
+      fix ZTS build
+
+    * ext/odbc/php_odbc.c
+      main/php_ini.c
+      sapi/apache/php_apache.c
+      sapi/apache_hooks/php_apache.c:
+      use strlcat()
+
+    * ext/sockets/sockets.c
+      ext/standard/reg.c:
+      minor improvements
+
+    * main/main.c:
+      use strlcat() and a bigger buffer
+
+2006-12-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute_API.c:
+      Avoid strcpy() & strcat()
+
 2006-12-27  Antony Dovgal  <antony@zend.com>
 
     * (PHP_4_4)
