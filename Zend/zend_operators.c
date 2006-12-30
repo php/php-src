@@ -1958,19 +1958,23 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 		(ret2=is_numeric_string(s2->value.str.val, s2->value.str.len, &lval2, &dval2, 0))) {
 		if ((ret1==IS_DOUBLE) || (ret2==IS_DOUBLE)) {
 			if (ret1!=IS_DOUBLE) {
-				dval1 = zend_strtod(s1->value.str.val, NULL);
+				dval1 = (double) lval1;
 			} else if (ret2!=IS_DOUBLE) {
-				dval2 = zend_strtod(s2->value.str.val, NULL);
+				dval2 = (double) lval2;
+			} else if (dval1 == dval2 && !zend_finite(dval1)) {
+				/* Both values overflowed and have the same sign,
+				 * so a numeric comparison would be inaccurate */
+				goto string_cmp;
 			}
 			result->value.dval = dval1 - dval2;
 			result->value.lval = ZEND_NORMALIZE_BOOL(result->value.dval);
 			result->type = IS_LONG;
 		} else { /* they both have to be long's */
-			result->value.lval = lval1 - lval2;
-			result->value.lval = ZEND_NORMALIZE_BOOL(result->value.lval);
+			result->value.lval = lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0);
 			result->type = IS_LONG;
 		}
 	} else {
+string_cmp:
 		result->value.lval = zend_binary_zval_strcmp(s1, s2);
 		result->value.lval = ZEND_NORMALIZE_BOOL(result->value.lval);
 		result->type = IS_LONG;
