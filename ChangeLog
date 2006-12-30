@@ -1,3 +1,30 @@
+2006-12-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/pgsql/pgsql.c:
+      
+      MFH: Fixed bug #39971 (pg_insert/pg_update do not allow now() to be used
+      for
+      timestamp fields).
+
+    * ext/pgsql/pgsql.c:
+      MFB: Fixed bug #39971 (pg_insert/pg_update do not allow now() to be used
+      for
+      timestamp fields).
+
+    * ext/pgsql/tests/80_bug39971.phpt
+      ext/pgsql/tests/80_bug39971.phpt:
+      
+      file 80_bug39971.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/pgsql/pgsql.c:
+      
+      Fixed bug #39971 (pg_insert/pg_update do not allow now() to be used for
+      timestamp fields).
+
 2006-12-28  Antony Dovgal  <antony@zend.com>
 
     * sapi/cgi/cgi_main.c:
