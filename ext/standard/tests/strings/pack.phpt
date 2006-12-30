@@ -1,5 +1,11 @@
 --TEST--
 Generic pack()/unpack() tests
+--SKIPIF--
+<?php
+if (PHP_INT_MAX > 2147483647) {
+	die("skip 32bit test only");
+}
+?>
 --FILE--
 <?php
 print_r(unpack("A", pack("A", "hello world")));
