@@ -386,6 +386,9 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			Z_DVAL_P(value) = lval;
 			break;
 		case IS_DOUBLE:
+			if ((!dval && p - num > 1 && strpbrk(num, "123456789")) || !zend_finite(dval)) {
+				goto error;
+			}
 			zval_dtor(value);
 			Z_TYPE_P(value) = IS_DOUBLE;
 			Z_DVAL_P(value) = dval;
