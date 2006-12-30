@@ -1783,6 +1783,16 @@ sxe_object_clone(void *object, void **clone_ptr TSRMLS_DC)
 		clone->document->refcount++;
 		docp = clone->document->ptr;
 	}
+
+	clone->iter.isprefix = sxe->iter.isprefix;
+	if (sxe->iter.name != NULL) {
+		clone->iter.name = xmlStrdup((xmlChar *)sxe->iter.name);
+	}
+	if (sxe->iter.nsprefix != NULL) {
+		clone->iter.nsprefix = xmlStrdup((xmlChar *)sxe->iter.nsprefix);
+	}
+	clone->iter.type = sxe->iter.type;
+
 	if (sxe->node) {
 		nodep = xmlDocCopyNode(sxe->node->node, docp, 1);
 	}
