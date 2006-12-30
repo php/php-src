@@ -42,6 +42,7 @@ PHP                                                                        NEWS
   are set to 0). (Dmitry)
 - Fixed bug #39825 (foreach produces memory error). (Dmitry)
 - Fixed bug #39815 (SOAP double encoding is not locale-independent). (Dmitry)
+- Fixed bug #39760 (cloning fails on nested SimpleXML-Object). (Rob)
 - Fixed bug #39685 (iconv() - undefined function). (Hannes)
 - Fixed bug #39596 (Creating Variant of type VT_ARRAY). (Rob)
 - Fixed bug #39435 ('foo' instanceof bar gives invalid opcode error). (Sara)
