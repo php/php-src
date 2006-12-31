@@ -424,6 +424,11 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 	for (p = val; p < endptr; ) {
 		zval **tmp;
 		namelen = *p & (~PS_BIN_UNDEF);
+
+		if (namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
+			return FAILURE;
+		}
+
 		has_value = *p & PS_BIN_UNDEF ? 0 : 1;
 
 		name = estrndup(p + 1, namelen);
