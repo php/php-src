@@ -660,7 +660,8 @@ PHP_FUNCTION(proc_open)
 				}
 
 #ifdef PHP_WIN32
-				descriptors[ndesc].childend = (HANDLE)_get_osfhandle(fd);
+				descriptors[ndesc].childend = dup_fd_as_handle(fd);
+				_close(fd);
 #else
 				descriptors[ndesc].childend = fd;
 #endif
