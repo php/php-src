@@ -51,6 +51,8 @@ PHP                                                                        NEWS
 - Fixed bug #38542 (proc_get_status() returns wrong PID on windows). (Nuno)
 - Fixed bug #37588 (COM Property propputref converts to PHP function
   and can't be accesed). (Rob)
+- Fixed bug #36427 (proc_open() / proc_close() leak handles on windows).
+  (jdolecek at NetBSD dot org, Nuno)
 - Fixed bug #36392 (wrong number of decimal digits with %e specifier in
   sprintf). (Matt,Ilia)
 - Fixed bug #33734 (Something strange with COM Object). (Rob)
