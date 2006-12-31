@@ -19,7 +19,7 @@
 
 #ifdef PHP_WIN32
 typedef HANDLE php_file_descriptor_t;
-typedef HANDLE php_process_id_t;
+typedef DWORD php_process_id_t;
 #else
 typedef int php_file_descriptor_t;
 typedef pid_t php_process_id_t;
@@ -40,6 +40,9 @@ typedef struct _php_process_env {
 
 struct php_process_handle {
 	php_process_id_t	child;
+#ifdef PHP_WIN32
+	HANDLE childHandle;
+#endif
 	int npipes;
 	long pipes[PHP_PROC_OPEN_MAX_DESCRIPTORS];
 	char *command;
