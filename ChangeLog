@@ -1,3 +1,68 @@
+2006-12-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/sysvshm/sysvshm.c:
+      MFH: Added missing resource validation checks
+
+    * (PHP_5_2)
+      ext/sysvshm/sysvshm.c:
+      Added missing resource validation checks
+
+    * ext/shmop/shmop.c:
+      MFB: Added missing resource type checks
+
+    * (PHP_5_2)
+      ext/shmop/shmop.c:
+      Added missing resource type checks
+
+2006-12-30  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug39760.phpt:
+      MFB: fix bug #39760 (cloning fails on nested SimpleXML-Object)
+      add test
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug39760.phpt
+      ext/simplexml/tests/bug39760.phpt:
+      fix bug #39760 (cloning fails on nested SimpleXML-Object)
+      add test
+
+2006-12-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/xsl/xsltprocessor.c:
+      
+      C++ comment
+
+    * ext/standard/tests/strings/pack.phpt:
+      MFB: Mark test as being 32bit only
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/pack.phpt:
+      
+      Mark test as being 32bit only
+
+    * (PHP_5_2)
+      ZendEngine2/zend_operators.c:
+      
+      Simplify & optimize code
+      
+
+    * ext/filter/logical_filters.c:
+      
+      MFB: Fixes test #50
+
+    * (PHP_5_2)
+      ext/filter/logical_filters.c:
+      
+      Fixes test #50
+
 2006-12-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)

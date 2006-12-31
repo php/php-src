@@ -1,3 +1,11 @@
+2006-12-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_operators.c:
+      
+      Simplify & optimize code
+      
+
 2006-12-28  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
