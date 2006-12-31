@@ -900,7 +900,7 @@ class SplFileInfo
 	 */
 	function getCTime() {/**/}
 
-	/** @return The current entry's size in bytes .
+	/** @return The current entry's file type.
 	 */
 	function getType() {/**/}
 
