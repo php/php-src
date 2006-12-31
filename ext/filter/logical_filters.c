@@ -593,15 +593,12 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	 * allow_ipv4 and allow_ipv6 flags flag are used, then the first dot or
 	 * colon determine the format */
 
-	char          *str = NULL;
 	int            ip[4];
 	int            mode;
 
-	str = Z_STRVAL_P(value);
-
-	if (strchr(str, ':')) {
+	if (memchr(Z_STRVAL_P(value), ':', Z_STRLEN_P(value))) {
 		mode = FORMAT_IPV6;
-	} else if (strchr(str, '.')) {
+	} else if (memchr(Z_STRVAL_P(value), '.', Z_STRLEN_P(value))) {
 		mode = FORMAT_IPV4;
 	} else {
 		RETURN_VALIDATION_FAILED
@@ -617,7 +614,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	switch (mode) {
 		case FORMAT_IPV4:
-			if (!_php_filter_validate_ipv4(str, Z_STRLEN_P(value), ip)) {
+			if (!_php_filter_validate_ipv4(Z_STRVAL_P(value), Z_STRLEN_P(value), ip)) {
 				RETURN_VALIDATION_FAILED
 			}
 
@@ -647,7 +644,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		case FORMAT_IPV6:
 			{
 				int res = 0;
-				res = _php_filter_validate_ipv6(str, Z_STRLEN_P(value) TSRMLS_CC);
+				res = _php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value) TSRMLS_CC);
 				if (res < 1) {
 					RETURN_VALIDATION_FAILED
 				}
