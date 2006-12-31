@@ -216,10 +216,10 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	
 #ifdef PHP_WIN32
 	
-	WaitForSingleObject(proc->child, INFINITE);
-	GetExitCodeProcess(proc->child, &wstatus);
+	WaitForSingleObject(proc->childHandle, INFINITE);
+	GetExitCodeProcess(proc->childHandle, &wstatus);
 	FG(pclose_ret) = wstatus;
-	CloseHandle(proc->child);
+	CloseHandle(proc->childHandle);
 	
 #elif HAVE_SYS_WAIT_H
 	
@@ -268,7 +268,7 @@ PHP_FUNCTION(proc_terminate)
 	ZEND_FETCH_RESOURCE(proc, struct php_process_handle *, &zproc, -1, "process", le_proc_open);
 	
 #ifdef PHP_WIN32
-	TerminateProcess(proc->child, 255);
+	TerminateProcess(proc->childHandle, 255);
 #else
 	kill(proc->child, sig_no);
 #endif
@@ -336,7 +336,7 @@ PHP_FUNCTION(proc_get_status)
 	
 #ifdef PHP_WIN32
 	
-	GetExitCodeProcess(proc->child, &wstatus);
+	GetExitCodeProcess(proc->childHandle, &wstatus);
 
 	running = wstatus == STILL_ACTIVE;
 	exitcode == STILL_ACTIVE ? -1 : wstatus;
@@ -436,6 +436,7 @@ PHP_FUNCTION(proc_open)
 	struct php_proc_open_descriptor_item descriptors[PHP_PROC_OPEN_MAX_DESCRIPTORS];
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
+	HANDLE childHandle;
 	STARTUPINFO si;
 	BOOL newprocok;
 	SECURITY_ATTRIBUTES security;
@@ -740,7 +741,8 @@ PHP_FUNCTION(proc_open)
 		goto exit_fail;
 	}
 
-	child = pi.hProcess;
+	childHandle = pi.hProcess;
+	child       = pi.dwProcessId;
 	CloseHandle(pi.hThread);
 
 #elif defined(NETWARE)
@@ -865,6 +867,9 @@ PHP_FUNCTION(proc_open)
 	proc->command = pestrdup(command, is_persistent);
 	proc->npipes = ndesc;
 	proc->child = child;
+#ifdef PHP_WIN32
+	proc->childHandle = childHandle;
+#endif
 	proc->env = env;
 
 	if (pipes != NULL) {
