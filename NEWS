@@ -48,6 +48,7 @@ PHP                                                                        NEWS
 - Fixed bug #39435 ('foo' instanceof bar gives invalid opcode error). (Sara)
 - Fixed bugs #39361 & #39400 (mbstring function overloading problem). (Seiji)
 - Fixed bug #38852 (XML-RPC Breaks iconv). (Hannes)
+- Fixed bug #38542 (proc_get_status() returns wrong PID on windows). (Nuno)
 - Fixed bug #37588 (COM Property propputref converts to PHP function
   and can't be accesed). (Rob)
 - Fixed bug #36392 (wrong number of decimal digits with %e specifier in
