@@ -1,8 +1,8 @@
 /*
-  $NiH: zip_get_file_comment.c,v 1.2 2006/04/23 13:06:28 wiz Exp $
+  $NiH: zip_get_file_comment.c,v 1.2 2007/04/23 13:06:28 wiz Exp $
 
   zip_get_file_comment.c -- get file comment
-  Copyright (C) 2006 Dieter Baron and Thomas Klausner
+  Copyright (C) 2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <nih@giga.or.at>

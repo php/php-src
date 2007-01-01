@@ -1,8 +1,8 @@
 /*
-  $NiH: zip_unchange_archive.c,v 1.1 2006/04/23 13:14:46 wiz Exp $
+  $NiH: zip_unchange_archive.c,v 1.1 2007/04/23 13:14:46 wiz Exp $
 
   zip_unchange_archive.c -- undo global changes to ZIP archive
-  Copyright (C) 2006 Dieter Baron and Thomas Klausner
+  Copyright (C) 2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <nih@giga.or.at>

@@ -1,5 +1,5 @@
 /*
-  $NiH: zip_dirent.c,v 1.9 2006/04/23 14:51:45 wiz Exp $
+  $NiH: zip_dirent.c,v 1.9 2007/04/23 14:51:45 wiz Exp $
 
   zip_dirent.c -- read directory entry (local or central), clean dirent
   Copyright (C) 1999, 2003, 2004, 2005 Dieter Baron and Thomas Klausner

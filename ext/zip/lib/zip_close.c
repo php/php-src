@@ -1,5 +1,5 @@
 /*
-  $NiH: zip_close.c,v 1.60 2006/05/09 17:21:47 wiz Exp $
+  $NiH: zip_close.c,v 1.60 2007/05/09 17:21:47 wiz Exp $
 
   zip_close.c -- close zip archive and update changes
   Copyright (C) 1999, 2004, 2005 Dieter Baron and Thomas Klausner

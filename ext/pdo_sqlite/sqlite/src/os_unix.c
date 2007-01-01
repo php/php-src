@@ -162,7 +162,7 @@ struct unixFile {
 ** to another.  This logic makes sure a user does not try to do that
 ** by mistake.
 **
-** Version 3.3.1 (2006-01-15):  OsFiles can be moved from one thread to
+** Version 3.3.1 (2007-01-15):  OsFiles can be moved from one thread to
 ** another as long as we are running on a system that supports threads
 ** overriding each others locks (which now the most common behavior)
 ** or if no locks are held.  But the OsFile.pLock field needs to be

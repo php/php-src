@@ -1,5 +1,5 @@
 /*
-  $NiH: zip_new.c,v 1.12 2006/04/23 00:40:47 wiz Exp $
+  $NiH: zip_new.c,v 1.12 2007/04/23 00:40:47 wiz Exp $
 
   zip_new.c -- create and init struct zip
   Copyright (C) 1999, 2004, 2005 Dieter Baron and Thomas Klausner

@@ -1,5 +1,5 @@
 /*
-  $NiH: zip_fread.c,v 1.21 2006/04/23 14:49:50 wiz Exp $
+  $NiH: zip_fread.c,v 1.21 2007/04/23 14:49:50 wiz Exp $
 
   zip_fread.c -- read from file
   Copyright (C) 1999, 2004, 2005 Dieter Baron and Thomas Klausner

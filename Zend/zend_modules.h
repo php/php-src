@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2007 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,7 +39,7 @@ extern struct _zend_arg_info fourth_arg_force_ref[5];
 extern struct _zend_arg_info fifth_arg_force_ref[6];
 extern struct _zend_arg_info all_args_by_ref[1];
 
-#define ZEND_MODULE_API_NO 20060613
+#define ZEND_MODULE_API_NO 20070613
 #ifdef ZTS
 #define USING_ZTS 1
 #else

@@ -761,7 +761,7 @@ void sqlite3VdbeMemSanity(Mem *pMem){
 ** parameter, which must be one of SQLITE_UTF16BE, SQLITE_UTF16LE or
 ** SQLITE_UTF8.
 **
-** (2006-02-16:)  The enc value can be or-ed with SQLITE_UTF16_ALIGNED.
+** (2007-02-16:)  The enc value can be or-ed with SQLITE_UTF16_ALIGNED.
 ** If that is the case, then the result must be aligned on an even byte
 ** boundary.
 */
