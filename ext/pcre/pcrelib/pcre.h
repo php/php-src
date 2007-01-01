@@ -57,7 +57,7 @@ circumstance. */
 #define PCRE_MAJOR          6
 #define PCRE_MINOR          6
 #define PCRE_PRERELEASE
-#define PCRE_DATE           06-Feb-2006
+#define PCRE_DATE           06-Feb-2007
 
 /* Win32 uses DLL by default; it needs special stuff for exported functions
 when building PCRE. */
