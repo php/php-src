@@ -6,7 +6,7 @@
 its pattern matching. On a Unix or Win32 system it can recurse into
 directories.
 
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2007 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 typedef int BOOL;
 
-#define VERSION "4.3 01-Jun-2006"
+#define VERSION "4.3 01-Jun-2007"
 #define MAX_PATTERN_COUNT 100
 
 #if BUFSIZ > 8192
