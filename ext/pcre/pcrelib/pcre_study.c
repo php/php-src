@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2007 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ register int c;
 
 #if 0
 /* ========================================================================= */
-/* The following comment and code was inserted in January 1999. In May 2006,
+/* The following comment and code was inserted in January 1999. In May 2007,
 when it was observed to cause compiler warnings about unused values, I took it
 out again. If anybody is still using OS/2, they will have to put it back
 manually. */

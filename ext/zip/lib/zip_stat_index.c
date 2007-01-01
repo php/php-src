@@ -1,5 +1,5 @@
 /*
-  $NiH: zip_stat_index.c,v 1.10 2006/04/24 14:04:19 dillo Exp $
+  $NiH: zip_stat_index.c,v 1.10 2007/04/24 14:04:19 dillo Exp $
 
   zip_stat_index.c -- get information about file by index
   Copyright (C) 1999, 2003, 2004 Dieter Baron and Thomas Klausner

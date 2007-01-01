@@ -1,5 +1,5 @@
 /*
-  $NiH: zip_file_get_offset.c,v 1.4 2006/04/23 14:51:45 wiz Exp $
+  $NiH: zip_file_get_offset.c,v 1.4 2007/04/23 14:51:45 wiz Exp $
 
   zip_file_get_offset.c -- get offset of file data in archive.
   Copyright (C) 1999, 2003, 2004 Dieter Baron and Thomas Klausner

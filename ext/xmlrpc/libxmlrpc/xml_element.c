@@ -44,6 +44,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.10  2007/07/30 11:33:49  tony2001
+ *   fix compile warnings (#38257)
+ *
  *   Revision 1.9  2005/04/22 11:06:53  jorton
  *   Fixed bug #32797 (invalid C code in xmlrpc extension).
  *

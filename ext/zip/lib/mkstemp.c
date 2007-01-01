@@ -1,4 +1,4 @@
-/* $NiH: mkstemp.c,v 1.3 2006/04/23 14:51:45 wiz Exp $ */
+/* $NiH: mkstemp.c,v 1.3 2007/04/23 14:51:45 wiz Exp $ */
 
 /* Adapted from NetBSB libc by Dieter Baron */
 

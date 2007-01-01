@@ -1,8 +1,8 @@
 /*
-  $NiH: zip_set_archive_comment.c,v 1.3 2006/04/24 10:34:39 dillo Exp $
+  $NiH: zip_set_archive_comment.c,v 1.3 2007/04/24 10:34:39 dillo Exp $
 
   zip_set_archive_comment.c -- set archive comment
-  Copyright (C) 2006 Dieter Baron and Thomas Klausner
+  Copyright (C) 2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <nih@giga.or.at>

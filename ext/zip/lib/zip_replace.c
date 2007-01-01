@@ -1,8 +1,8 @@
 /*
-  $NiH: zip_replace.c,v 1.20 2006/04/09 14:52:02 wiz Exp $
+  $NiH: zip_replace.c,v 1.20 2007/04/09 14:52:02 wiz Exp $
 
   zip_replace.c -- replace file via callback function
-  Copyright (C) 1999, 2003, 2004, 2006 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999, 2003, 2004, 2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <nih@giga.or.at>

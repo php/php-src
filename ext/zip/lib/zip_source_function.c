@@ -1,5 +1,5 @@
 /*
-  $NiH: zip_source_function.c,v 1.4 2006/02/21 09:41:00 dillo Exp $
+  $NiH: zip_source_function.c,v 1.4 2007/02/21 09:41:00 dillo Exp $
 
   zip_source_function.c -- create zip data source from callback function
   Copyright (C) 1999, 2003, 2004 Dieter Baron and Thomas Klausner

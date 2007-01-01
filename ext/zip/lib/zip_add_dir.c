@@ -1,8 +1,8 @@
 /*
-  $NiH: zip_add_dir.c,v 1.1 2006/10/03 12:23:13 dillo Exp $
+  $NiH: zip_add_dir.c,v 1.1 2007/10/03 12:23:13 dillo Exp $
 
   zip_add_dir.c -- add directory
-  Copyright (C) 1999-2006 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <nih@giga.or.at>

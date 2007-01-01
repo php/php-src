@@ -1,5 +1,5 @@
 /*
-  $NiH: zip_error_strerror.c,v 1.4 2006/02/21 09:41:00 dillo Exp $
+  $NiH: zip_error_strerror.c,v 1.4 2007/02/21 09:41:00 dillo Exp $
 
   zip_error_sterror.c -- get string representation of struct zip_error
   Copyright (C) 1999, 2003 Dieter Baron and Thomas Klausner
