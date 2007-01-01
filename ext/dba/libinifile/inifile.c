@@ -403,7 +403,7 @@ static int inifile_copy_to(inifile *dba, size_t pos_start, size_t pos_end, inifi
 	}
 	php_stream_seek(dba->fp, pos_start, SEEK_SET);
 	if (!php_stream_copy_to_stream(dba->fp, fp, pos_end - pos_start)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy group [%d - %d] to temporary stream", pos_start, pos_end);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy group [%zu - %zu] to temporary stream", pos_start, pos_end);
 		return FAILURE;
 	} 
 	return SUCCESS;
@@ -428,7 +428,7 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key TSRML
 			if (pos_start != pos_next) {
 				php_stream_seek(from->fp, pos_start, SEEK_SET);
 				if (!php_stream_copy_to_stream(from->fp, dba->fp, pos_next - pos_start)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy [%d - %d] from temporary stream", pos_next, pos_start);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy [%zu - %zu] from temporary stream", pos_next, pos_start);
 					ret = FAILURE;
 				}
 				php_stream_seek(from->fp, pos_curr, SEEK_SET);
@@ -447,7 +447,7 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key TSRML
 	if (pos_start != pos_next) {
 		php_stream_seek(from->fp, pos_start, SEEK_SET);
 		if (!php_stream_copy_to_stream(from->fp, dba->fp, pos_next - pos_start)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy [%d - %d] from temporary stream", pos_next, pos_start);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy [%zu - %zu] from temporary stream", pos_next, pos_start);
 			ret = FAILURE;
 		}
 	}
