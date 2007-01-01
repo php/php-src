@@ -395,12 +395,12 @@ zend_module_entry xmlwriter_module_entry = {
 ZEND_GET_MODULE(xmlwriter)
 #endif
 
-/* {{{ xmlwriter_objects_clone */
+/* {{{ xmlwriter_objects_clone 
 static void xmlwriter_objects_clone(void *object, void **object_clone TSRMLS_DC)
 {
-	/* TODO */
+	TODO
 }
-/* }}} */
+}}} */
 
 /* {{{ xmlwriter_dtor */
 static void xmlwriter_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) {
