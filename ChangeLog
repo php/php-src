@@ -1,3 +1,68 @@
+2006-12-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/logical_filters.c:
+      
+      MFB: Simplify code and change strchr() to memchr()
+
+    * (PHP_5_2)
+      ext/filter/logical_filters.c:
+      
+      Simplify code and change strchr() to memchr()
+
+    * (PHP_4_4)
+      ext/session/session.c:
+      
+      MFH: Added boundary checks to php_binary deserializer
+
+    * ext/session/session.c:
+      MFB: Added boundary checks to php_binary deserializer
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      
+      Added boundary checks to php_binary deserializer
+
+    * main/SAPI.c:
+      
+      MFB: Fixed bug #39984 (redirect response code in header() could be ignored
+      in CGI sapi).
+
+    * (PHP_5_2)
+      NEWS
+      main/SAPI.c:
+      
+      Fixed bug #39984 (redirect response code in header() could be ignored in
+      CGI sapi).
+
+2006-12-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/spl/spl.php:
+      - MFH Bugfix: #39996 Wrong PHPDoc comment for SplFileInfo::getType()
+
+    * ext/spl/spl.php:
+      - Bugfix: #39996 Wrong PHPDoc comment for SplFileInfo::getType()
+
+2006-12-31  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/proc_open.c:
+      MFB: fix #36427. patch by jdolecek at NetBSD dot org
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/proc_open.c:
+      - Fixed bug #36427 (proc_open() / proc_close() leak handles on windows).
+
+    * ext/standard/proc_open.c
+      ext/standard/proc_open.h:
+      MFB: fix PID info on windows
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/proc_open.c
+      ext/standard/proc_open.h:
+      Fixed bug #38542 (proc_get_status() returns wrong PID on windows)
+
 2006-12-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)
