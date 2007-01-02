@@ -156,6 +156,8 @@ union _phar_entry_object {
 };
 
 /* {{{ forward declarations */
+static int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar TSRMLS_DC);
+
 static php_stream *php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 static int phar_close(php_stream *stream, int close_handle TSRMLS_DC);
 static int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC);
@@ -353,24 +355,25 @@ static phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len
 	if ((phar = phar_get_archive(fname, fname_len, NULL, 0 TSRMLS_CC)) == NULL) {
 		return NULL;
 	}
-	if (NULL == (ret = phar_get_entry_data(fname, fname_len, path, path_len TSRMLS_CC))) {
-		/* create an entry, this is a new file */
-		if ((entry = phar_get_entry_info(phar, path, path_len TSRMLS_CC)) != NULL) {
-			ret = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
-			entry = (phar_entry_info *) emalloc(sizeof(phar_entry_info));
-			etemp.filename_len = path_len;
-			etemp.filename = estrndup(path, path_len);
-			etemp.uncompressed_filesize = 0;
-			etemp.compressed_filesize = 0;
-			etemp.timestamp = time(0);
-			etemp.offset_within_phar = -1;
-			etemp.crc32 = 0;
-			etemp.crc_checked = TRUE;
-			etemp.fp = NULL;
-			etemp.temp_file = 0;
-			memcpy((void *) entry, (void *) &etemp, sizeof(phar_entry_info));
-			zend_hash_add(&phar->manifest, etemp.filename, path_len, (void*)entry, sizeof(phar_entry_info), NULL);
-		}
+	if (NULL != (ret = phar_get_entry_data(fname, fname_len, path, path_len TSRMLS_CC))) {
+		return ret;
+	}
+	/* create an entry, this is a new file */
+	if ((entry = phar_get_entry_info(phar, path, path_len TSRMLS_CC)) != NULL) {
+		ret = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
+		entry = (phar_entry_info *) emalloc(sizeof(phar_entry_info));
+		etemp.filename_len = path_len;
+		etemp.filename = estrndup(path, path_len);
+		etemp.uncompressed_filesize = 0;
+		etemp.compressed_filesize = 0;
+		etemp.timestamp = time(0);
+		etemp.offset_within_phar = -1;
+		etemp.crc32 = 0;
+		etemp.crc_checked = TRUE;
+		etemp.fp = NULL;
+		etemp.temp_file = 0;
+		memcpy((void *) entry, (void *) &etemp, sizeof(phar_entry_info));
+		zend_hash_add(&phar->manifest, etemp.filename, path_len, (void*)entry, sizeof(phar_entry_info), NULL);
 	}
 	ret->phar = phar;
 	ret->internal_file = entry;
@@ -588,6 +591,7 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	}
 
 	/* set up our manifest */
+	entry.temp_file = 0;
 	mydata = emalloc(sizeof(phar_archive_data));
 	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest, 0);
@@ -696,6 +700,24 @@ static int phar_create_or_open_filename(char *fname, int fname_len, char *alias,
 			}
 			return SUCCESS;
 		}
+	}
+
+#if PHP_MAJOR_VERSION < 6
+	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+		return FAILURE;
+	}
+#endif
+
+	if (php_check_open_basedir(fname TSRMLS_CC)) {
+		return FAILURE;
+	}
+
+	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
+
+	if (fp) {
+		/* open an existing phar */
+		php_stream_close(fp);
+		return phar_open_filename(fname, fname_len, alias, alias_len, pphar TSRMLS_CC);
 	}
 	/* set up our manifest */
 	mydata = emalloc(sizeof(phar_archive_data));
@@ -1100,6 +1122,10 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 			php_url_free(resource);
 			return NULL;
 		}
+		fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
+		idata->phar->refcount++;
+		efree(internal_file);
+		return fpf;
 	} else {
 		if (NULL == (idata = phar_get_entry_data(resource->host, strlen(resource->host), internal_file, strlen(internal_file) TSRMLS_CC))) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\"", internal_file, resource->host);
@@ -1174,7 +1200,7 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 			efree(internal_file);
 			return NULL;			
 		}
-		/* Unfortunatley we cannot check the read position of fp after getting */
+		/* Unfortunately we cannot check the read position of fp after getting */
 		/* uncompressed data because the new stream posiition is being changed */
 		/* by the number of bytes read throughthe filter not by the raw number */
 		/* bytes being consumed on the stream. Therefor use a consumed filter. */ 
@@ -1425,19 +1451,24 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 	php_stream *file, *newfile, *compressedfile;
 	php_stream_filter *filter;
 
-	if (stream->mode != "w" && stream->mode != "wb") {
+	if (strcmp(stream->mode, "wb") != 0 && strcmp(stream->mode, "w") != 0) {
 		return EOF;
 	}
 	newfile = php_stream_fopen_tmpfile();
+	if (!data->fp) {
+		data->fp = php_stream_open_wrapper(data->phar->fname, "rb", 0, NULL);
+	} else {
+		php_stream_rewind(data->fp);
+	}
 	filter = 0;
 
 	if (data->phar->halt_offset) {
-		if (data->phar->halt_offset != php_stream_copy_to_stream(newfile, data->fp, data->phar->halt_offset))
+		if (data->phar->halt_offset != php_stream_copy_to_stream(data->fp, newfile, data->phar->halt_offset))
 		{
 			
 		}
 	}
-	manifest_ftell = php_stream_tell(data->fp);
+	manifest_ftell = php_stream_tell(newfile);
 	buffer = (char *) emalloc(300);
 	bufsize = 300;
 	/*  4: manifest length, 4: manifest entry count, 2: phar version,
@@ -1555,7 +1586,7 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 			file = compressedfile;
 			entry->crc32 = newcrc32;
 		} else if (entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
-			filter = php_stream_filter_create("zlib.deflate", NULL, 0 TSRMLS_CC);
+			filter = php_stream_filter_create("bzip2.compress", NULL, 0 TSRMLS_CC);
 			if (!filter) {
 				
 			}
@@ -1575,7 +1606,7 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 			file = compressedfile;
 			entry->crc32 = newcrc32;
 		}
-		if (copy != php_stream_copy_to_stream(newfile, file, copy)) {
+		if (copy != php_stream_copy_to_stream(file, newfile, copy)) {
 			
 		}
 		/* close the temporary file, no longer needed */
