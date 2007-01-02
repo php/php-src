@@ -169,6 +169,10 @@ static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, cha
 static zend_class_entry *phar_ce_archive;
 static zend_class_entry *phar_ce_entry;
 
+/**
+ * When all uses of a phar have been concluded, this frees the manifest
+ * and the phar slot
+ */
 static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 {
 	if (data->alias && data->alias != data->fname) {
@@ -185,6 +189,9 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 }
 /* }}}*/
 
+/**
+ * Filename map destructor
+ */
 static void destroy_phar_data(void *pDest) /* {{{ */
 {
 	phar_archive_data *phar_data = *(phar_archive_data **) pDest;
@@ -196,6 +203,9 @@ static void destroy_phar_data(void *pDest) /* {{{ */
 }
 /* }}}*/
 
+/**
+ * from spl_directory
+ */
 static void phar_spl_foreign_dtor(spl_filesystem_object *object TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar_data = (phar_archive_data *) object->oth;
@@ -206,6 +216,9 @@ static void phar_spl_foreign_dtor(spl_filesystem_object *object TSRMLS_DC) /* {{
 }
 /* }}} */
 
+/**
+ * from spl_directory
+ */
 static void phar_spl_foreign_clone(spl_filesystem_object *src, spl_filesystem_object *dst TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar_data = (phar_archive_data *) dst->oth;
@@ -214,11 +227,17 @@ static void phar_spl_foreign_clone(spl_filesystem_object *src, spl_filesystem_ob
 }
 /* }}} */
 
+/**
+ * from spl_directory
+ */
 static spl_other_handler phar_spl_foreign_handler = {
 	phar_spl_foreign_dtor,
 	phar_spl_foreign_clone
 };
 
+/**
+ * destructor for the manifest hash, frees each file's entry
+ */
 static void destroy_phar_manifest(void *pDest) /* {{{ */
 {
 	phar_entry_info *entry = (phar_entry_info *)pDest;
@@ -233,6 +252,10 @@ static void destroy_phar_manifest(void *pDest) /* {{{ */
 }
 /* }}} */
 
+/**
+ * Looks up a phar archive in the filename map, connecting it to the alias
+ * (if any) or returns null
+ */
 static phar_archive_data * phar_get_archive(char *fname, int fname_len, char *alias, int alias_len TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *fd, **fd_ptr;
@@ -262,6 +285,9 @@ static phar_archive_data * phar_get_archive(char *fname, int fname_len, char *al
 }
 /* }}} */
 
+/**
+ * retrieve information on a file contained within a phar, or null if it ain't there
+ */
 static phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *entry;
@@ -277,6 +303,10 @@ static phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path,
 }
 /* }}} */
 
+/**
+ * Retrieve a copy of the file information on a single file within a phar, or null.
+ * This also transfers the open file pointer, if any, to the entry.
+ */
 static phar_entry_data *phar_get_entry_data(char *fname, int fname_len, char *path, int path_len TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
@@ -338,13 +368,21 @@ PHP_METHOD(Phar, canCompress)
 		+ ((unsigned char)buffer[2]) << 16 \
 		+ ((unsigned char)buffer[1]) <<  8 \
 		+ ((unsigned char)buffer[0]); \
-	buffer += 4
+	buffer += 4get_entry_data
 #else
 # define PHAR_GET_32(buffer, var) \
 	var = *(php_uint32*)(buffer); \
 	buffer += 4
 #endif
 
+/**
+ * retrieve a previously opened phar manifest from the cache, or parse a new
+ * one and add it to the cache, returning either SUCCESS or FAILURE, and setting
+ * pphar to the pointer to the manifest entry
+ * 
+ * This is used by phar_open_filename to process the manifest, but can be called
+ * directly.
+ */
 static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, long halt_offset, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
 {
 	char b32[4], *buffer, *endbuffer, *savebuf;
@@ -568,6 +606,11 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 }
 /* }}} */
 
+/**
+ * Scan a phar file for the required __HALT_COMPILER(); ?> token and verify
+ * that the manifest is proper, then pass it to phar_open_file().  SUCCESS
+ * or FAILURE is returned and pphar is set to a pointer to the phar's manifest
+ */
 static int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
 {
 	const char token[] = "__HALT_COMPILER();";
@@ -636,9 +679,19 @@ static int phar_open_filename(char *fname, int fname_len, char *alias, int alias
 }
 /* }}} */
 
+/**
+ * Process a phar stream name, ensuring we can handle any of:
+ * 
+ * - phar://whatever.phar
+ * - whatever.phar
+ * - whatever.phar.gz
+ * - whatever.phar.bz2
+ *
+ * This is used by phar_open_url()
+ */
 static int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len TSRMLS_DC) /* {{{ */
 {
-	char *pos_p, *pos_z, *ext_str;
+	char *pos_p, *pos_z, *pos_b, *ext_str;
 	int ext_len;
 
 	if (!strncasecmp(filename, "phar://", 7)) {
@@ -648,6 +701,7 @@ static int phar_split_fname(char *filename, int filename_len, char **arch, int *
 
 	pos_p = strstr(filename, ".phar.php");
 	pos_z = strstr(filename, ".phar.gz");
+	pos_b = strstr(filename, ".phar.bz2");
 	if (pos_p) {
 		if (pos_z) {
 			return FAILURE;
@@ -657,6 +711,9 @@ static int phar_split_fname(char *filename, int filename_len, char **arch, int *
 	} else if (pos_z) {
 		ext_str = pos_z;
 		ext_len = 8;
+	} else if (pos_b) {
+		ext_str = pos_b;
+		ext_len = 9;
 	} else if ((pos_p = strstr(filename, ".phar")) != NULL) {
 		ext_str = pos_p;
 		ext_len = 5;
@@ -676,6 +733,9 @@ static int phar_split_fname(char *filename, int filename_len, char **arch, int *
 }
 /* }}} */
 	
+/**
+ * Open a phar file for streams API
+ */
 static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC) /* {{{ */
 {
 	php_url *resource;
@@ -685,7 +745,7 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 	if (!strncasecmp(filename, "phar://", 7)) {
 		
 		if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz)", filename);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz/.phar.bz2)", filename);
 			efree(arch);
 			efree(entry);
 			return NULL;
@@ -720,6 +780,10 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 }
 /* }}} */
 
+/**
+ * Invoked when a user calls Phar::mapPhar() from within an executing .phar
+ * to set up its manifest directly
+ */
 static int phar_open_compiled_file(char *alias, int alias_len TSRMLS_DC) /* {{{ */
 {
 	char *fname;
@@ -768,7 +832,7 @@ PHP_METHOD(Phar, mapPhar)
 } /* }}} */
 
 /* {{{ proto mixed Phar::loadPhar(string url [, string alias])
- * Loads a phar archive with an alias */
+ * Loads any phar archive with an alias */
 PHP_METHOD(Phar, loadPhar)
 {
 	char *fname, *alias = NULL;
@@ -823,6 +887,9 @@ php_stream_wrapper php_stream_phar_wrapper =  {
     0 /* is_url */
 };
 
+/**
+ * Validate the CRC32 of a file opened from within the phar
+ */
 static int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_entry_data *idata, php_uint32 crc32 TSRMLS_DC) /* {{{ */
 {
 	unsigned int crc = ~0;
@@ -845,7 +912,10 @@ static int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_
 }
 /* }}} */
 
-static char * phar_decompress_filter(phar_entry_info * entry, int return_unknow) /* {{{ */
+/**
+ * Determine which stream decompression filter (if any) we need to read this file
+ */
+static char * phar_decompress_filter(phar_entry_info * entry, int return_unknown) /* {{{ */
 {
 	switch (entry->flags & PHAR_ENT_COMPRESSION_MASK) {
 	case PHAR_ENT_COMPRESSED_GZ:
@@ -853,11 +923,14 @@ static char * phar_decompress_filter(phar_entry_info * entry, int return_unknow)
 	case PHAR_ENT_COMPRESSED_BZ2:
 		return "bzip2.decompress";
 	default:
-		return return_unknow ? "unknown" : NULL;
+		return return_unknown ? "unknown" : NULL;
 	}
 }
 /* }}} */
 
+/**
+ * used for fopen('phar://...') and company
+ */
 static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *idata;
@@ -1020,6 +1093,9 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 }
 /* }}} */
 
+/**
+ * Used for fclose($fp) where $fp is a phar archive
+ */
 static int phar_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
@@ -1042,6 +1118,9 @@ static int phar_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+/**
+ * Used for closedir($fp) where $fp is an opendir('phar://...') directory handle
+ */
 static int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC)  /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
@@ -1056,6 +1135,9 @@ static int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC)  /* {{{
 }
 /* }}} */
 
+/**
+ * Used for seeking on a phar directory handle
+ */
 static int phar_seekdir(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
@@ -1085,6 +1167,9 @@ static int phar_seekdir(php_stream *stream, off_t offset, int whence, off_t *new
 }
 /* }}} */
 
+/**
+ * used for fread($fp) and company on a fopen()ed phar file handle
+ */
 static size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
@@ -1099,6 +1184,9 @@ static size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /
 }
 /* }}} */
 
+/**
+ * Used for readdir() on an opendir()ed phar directory handle
+ */
 static size_t phar_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	size_t to_read;
@@ -1126,6 +1214,9 @@ static size_t phar_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC
 }
 /* }}} */
 
+/**
+ * Used for fseek($fp) on a phar file handle
+ */
 static int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
@@ -1136,12 +1227,18 @@ static int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoff
 }
 /* }}} */
 
+/**
+ * Used for writing to a phar file
+ */
 static size_t phar_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	return 0;
 }
 /* }}} */
 
+/**
+ * Used to save work done on a writeable phar
+ */
 static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	return EOF;
@@ -1149,6 +1246,9 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 /* }}} */
 
  /* {{{ phar_dostat */
+/**
+ * stat an opened phar file handle stream, used by phar_stat()
+ */
 static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, 
 			zend_bool is_dir, char *alias, int alias_len TSRMLS_DC)
 {
@@ -1211,6 +1311,9 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
 }
 /* }}}*/
 
+/**
+ * Stat an opened phar file handle
+ */
 static int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data;
@@ -1223,6 +1326,9 @@ static int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {
 }
 /* }}} */
 
+/**
+ * Stream wrapper stat implementation of stat()
+ */
 static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
 				  php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
@@ -1291,7 +1397,12 @@ static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
 }
 /* }}} */
 
-/* add an empty element with a char * key to a hash table, avoiding duplicates */
+/**
+ * add an empty element with a char * key to a hash table, avoiding duplicates
+ *
+ * This is used to get a unique listing of virtual directories within a phar,
+ * for iterating over opendir()ed phar directories.
+ */
 static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)  /* {{{ */
 {
 	void *dummy = (void *) 1;
@@ -1300,6 +1411,9 @@ static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)  /* {{{ *
 }
 /* }}} */
 
+/**
+ * Used for sorting directories alphabetically
+ */
 static int compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{ */
 {
 	Bucket *f;
@@ -1325,6 +1439,11 @@ static int compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{ */
 }
 /* }}} */
 
+/**
+ * Create a opendir() directory stream handle by iterating over each of the
+ * files in a phar and retrieving its relative path.  From this, construct
+ * a list of files/directories that are "in" the directory represented by dir
+ */
 static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC) /* {{{ */
 {
 	HashTable *data;
@@ -1410,6 +1529,9 @@ PHAR_ADD_ENTRY:
 }
 /* }}}*/
 
+/**
+ * Open a directory handle within a phar archive
+ */
 static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
