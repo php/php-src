@@ -258,7 +258,13 @@ static void destroy_phar_manifest(void *pDest) /* {{{ */
 
 		php_stream_close(entry->fp);
 	}
+	if (entry->temp_file) {
+		TSRMLS_FETCH();
+
+		php_stream_close(entry->temp_file);
+	}
 	entry->fp = 0;
+	entry->temp_file = 0;
 	efree(entry->filename);
 }
 /* }}} */
@@ -356,6 +362,10 @@ static phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len
 		return NULL;
 	}
 	if (NULL != (ret = phar_get_entry_data(fname, fname_len, path, path_len TSRMLS_CC))) {
+		/* reset file size */
+		ret->internal_file->uncompressed_filesize = 0;
+		ret->internal_file->compressed_filesize = 0;
+		ret->internal_file->crc32 = 0;
 		return ret;
 	}
 	/* create an entry, this is a new file */
@@ -1407,6 +1417,8 @@ static size_t phar_write(php_stream *stream, const char *buf, size_t count TSRML
 		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar error: Could not write %d characters to \"%s\" in phar \"%s\"", (int) count, data->internal_file->filename, data->phar->fname);
 		return -1;
 	}
+	data->internal_file->uncompressed_filesize += count;
+	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize; 
 	data->internal_file->flags |= PHAR_ENT_MODIFIED;
 	return 0;
 }
@@ -1566,6 +1578,7 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 			}
 			php_stream_rewind(entry->temp_file);
 			file = entry->temp_file;
+			copy = entry->uncompressed_filesize;
 		} else {
 			if (-1 == php_stream_seek(data->fp, entry->offset_within_phar + data->phar->internal_file_start, SEEK_SET)) {
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, data->phar->fname);
