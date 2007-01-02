@@ -1436,19 +1436,23 @@ static size_t phar_dirwrite(php_stream *stream, const char *buf, size_t count TS
 static inline void phar_set_32(char *buffer, int var) /* {{{ */
 {
 #ifdef WORDS_BIGENDIAN
-	*((buffer) + 3) = (unsigned char) (((var) << 24) & 0xFF);
-	*((buffer) + 2) = (unsigned char) (((var) << 16) & 0xFF);
-	*((buffer) + 1) = (unsigned char) (((var) << 8) & 0xFF);
+	*((buffer) + 3) = (unsigned char) (((var) >> 24) & 0xFF);
+	*((buffer) + 2) = (unsigned char) (((var) >> 16) & 0xFF);
+	*((buffer) + 1) = (unsigned char) (((var) >> 8) & 0xFF);
 	*((buffer) + 0) = (unsigned char) ((var) & 0xFF);
 #else
 	*(php_uint32 *)(buffer) = (php_uint32)(var);
 #endif
 } /* }}} */
 
+/**
+ * The only purpose of this is to store the API version, which was stored bigendian for some reason
+ * in the original PHP_Archive, so we will do the same
+ */
 static inline void phar_set_16(char *buffer, int var) /* {{{ */
 {
 #ifdef WORDS_BIGENDIAN
-	*((buffer) + 1) = (unsigned char) (((var) << 8) & 0xFF); \
+	*((buffer) + 1) = (unsigned char) (((var) >> 8) & 0xFF); \
 	*(buffer) = (unsigned char) ((var) & 0xFF);
 #else
 	*(php_uint16 *)(buffer) = (php_uint16)(var);
@@ -1496,7 +1500,8 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 	/* use dummy value until we know the actual length */
 	phar_set_32(manifest, 0); /* manifest length */
 	phar_set_32(manifest+4, data->phar->manifest.nNumOfElements);
-	phar_set_16(manifest+8, PHAR_API_VERSION);
+	*(manifest + 8) = (unsigned char) (((PHAR_API_VERSION) >> 8) & 0xFF);
+	*(manifest + 9) = (unsigned char) ((PHAR_API_VERSION) & 0xFF);
 	phar_set_32(manifest+10, data->phar->alias_len);
 	memcpy(manifest + 14, data->phar->alias, data->phar->alias_len);
 
@@ -1679,7 +1684,6 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 	   move the temp to the old phar, unlink the old phar, and reload it into memory
 	*/
 	php_stream_rewind(newfile);
-	VCWD_UNLINK(data->phar->fname);
 	file = php_stream_open_wrapper(data->phar->fname, "wb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 	if (!file) {
 		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to open new phar \"%s\" for writing", data->phar->fname);
