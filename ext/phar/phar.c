@@ -1421,21 +1421,27 @@ static size_t phar_dirwrite(php_stream *stream, const char *buf, size_t count TS
 }
 /* }}} */
 
+static inline void phar_set_32(char *buffer, int var) /* {{{ */
+{
 #ifdef WORDS_BIGENDIAN
-# define PHAR_SET_32(buffer, var) \
-	*((buffer) + 3) = (unsigned char) (((var) << 24) & 0xFF); \
-	*((buffer) + 2) = (unsigned char) (((var) << 16) & 0xFF); \
-	*((buffer) + 1) = (unsigned char) (((var) << 8) & 0xFF); \
-	*(buffer) = (unsigned char) ((var) & 0xFF);
-# define PHAR_SET_16(buffer, var) \
+	*((buffer) + 3) = (unsigned char) (((var) << 24) & 0xFF);
+	*((buffer) + 2) = (unsigned char) (((var) << 16) & 0xFF);
+	*((buffer) + 1) = (unsigned char) (((var) << 8) & 0xFF);
+	*((buffer) + 0) = (unsigned char) ((var) & 0xFF);
+#else
+	*(php_uint32 *)buffer = *(php_uint32*)(var);
+#endif
+} /* }}} */
+
+static inline void phar_set_16(char *buffer, int var) /* {{{ */
+{
+#ifdef WORDS_BIGENDIAN
 	*((buffer) + 1) = (unsigned char) (((var) << 8) & 0xFF); \
 	*(buffer) = (unsigned char) ((var) & 0xFF);
 #else
-# define PHAR_SET_32(buffer, var) \
-	*(php_uint32 *)buffer = *(php_uint32*)(var);
-# define PHAR_SET_16(buffer, var) \
 	*(php_uint16 *)buffer = *(php_uint16*)(var);
 #endif
+} /* }}} */
 
 /**
  * Used to save work done on a writeable phar
@@ -1476,16 +1482,10 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 	*/
 	manifest = (char *) emalloc(14 + data->phar->alias_len);
 	/* use dummy value until we know the actual length */
-	copy = 0;
-	PHAR_SET_32(manifest, copy); /* manifest length */
-	manifest += 4;
-	PHAR_SET_32(manifest, data->phar->manifest.nNumOfElements);
-	manifest += 4;
-	copy = PHAR_API_VERSION;
-	PHAR_SET_16(manifest, copy);
-	manifest += 2;
-	PHAR_SET_32(manifest, data->phar->alias_len);
-	manifest -= 10;
+	phar_set_32(manifest, 0); /* manifest length */
+	phar_set_32(manifest+4, data->phar->manifest.nNumOfElements);
+	phar_set_16(manifest+8, PHAR_API_VERSION);
+	phar_set_32(manifest+10, data->phar->alias_len);
 	memcpy(manifest + 14, data->phar->alias, data->phar->alias_len);
 
 	/* write the manifest header */
@@ -1501,7 +1501,7 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 			/* remove this from the new phar */
 			continue;
 		}
-		PHAR_SET_32(buffer, entry->filename_len);
+		phar_set_32(buffer, entry->filename_len);
 		memcpy(buffer + 4, entry->filename, entry->filename_len);
 		if (4 + entry->filename_len != php_stream_write(newfile, buffer, 4 + entry->filename_len)) {
 			
@@ -1520,22 +1520,18 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 			   1: flags (compression or not)
 			*/
 			copy = time(NULL);
-			PHAR_SET_32(buffer, entry->uncompressed_filesize);
-			buffer += 4;
-			PHAR_SET_32(buffer, copy);
-			buffer += 4;
-			PHAR_SET_32(buffer, entry->compressed_filesize);
-			buffer += 4;
-			PHAR_SET_32(buffer, entry->crc32);
-			buffer[4] = (char) entry->flags;
-			buffer -= 11;
+			phar_set_32(buffer, entry->uncompressed_filesize);
+			phar_set_32(buffer+4, copy);
+			phar_set_32(buffer+8, entry->compressed_filesize);
+			phar_set_32(buffer+12, entry->crc32);
+			buffer[16] = (char) entry->flags;
 			php_stream_write(newfile, buffer, 17);
 		}
 	}
 	/* write the actual manifest size */
 	file_ftell = php_stream_tell(newfile);
 	copy = file_ftell - manifest_ftell;
-	PHAR_SET_32(manifest, copy);
+	phar_set_32(manifest, copy);
 	php_stream_seek(newfile, manifest_ftell, SEEK_SET);
 	/* write the manifest header */
 	php_stream_write(newfile, manifest, 2);
@@ -1641,15 +1637,11 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 			1: flags (compression or not)
 		*/
 		copy = time(NULL);
-		PHAR_SET_32(buffer, entry->uncompressed_filesize);
-		buffer += 4;
-		PHAR_SET_32(buffer, copy);
-		buffer += 4;
-		PHAR_SET_32(buffer, entry->compressed_filesize);
-		buffer += 4;
-		PHAR_SET_32(buffer, entry->crc32);
-		buffer[4] = (char) entry->flags;
-		buffer -= 11;
+		phar_set_32(buffer, entry->uncompressed_filesize);
+		phar_set_32(buffer+4, copy);
+		phar_set_32(buffer+8, entry->compressed_filesize);
+		phar_set_32(buffer+12, entry->crc32);
+		buffer[16] = (char) entry->flags;
 		php_stream_write(newfile, buffer, 17);
 	}
 	/* finally, close the temp file, rename the original phar,
