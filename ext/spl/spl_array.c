@@ -503,8 +503,8 @@ static int spl_array_has_dimension(zval *object, zval *offset, int check_empty T
 	return spl_array_has_dimension_ex(1, object, offset, check_empty TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto bool ArrayObject::offsetExists(mixed $index)
-       proto bool ArrayIterator::offsetExists(mixed $index)
+/* {{{ proto bool ArrayObject::offsetExists(mixed $index) U
+       proto bool ArrayIterator::offsetExists(mixed $index) U
  Returns whether the requested $index exists. */
 SPL_METHOD(Array, offsetExists)
 {
@@ -515,8 +515,8 @@ SPL_METHOD(Array, offsetExists)
 	RETURN_BOOL(spl_array_has_dimension_ex(0, getThis(), index, 1 TSRMLS_CC));
 } /* }}} */
 
-/* {{{ proto mixed ArrayObject::offsetGet(mixed $index)
-       proto mixed ArrayIterator::offsetGet(mixed $index)
+/* {{{ proto mixed ArrayObject::offsetGet(mixed $index) U
+       proto mixed ArrayIterator::offsetGet(mixed $index) U
  Returns the value at the specified $index. */
 SPL_METHOD(Array, offsetGet)
 {
@@ -528,8 +528,8 @@ SPL_METHOD(Array, offsetGet)
 	RETURN_ZVAL(value, 1, 0);
 } /* }}} */
 
-/* {{{ proto void ArrayObject::offsetSet(mixed $index, mixed $newval)
-       proto void ArrayIterator::offsetSet(mixed $index, mixed $newval)
+/* {{{ proto void ArrayObject::offsetSet(mixed $index, mixed $newval) U
+       proto void ArrayIterator::offsetSet(mixed $index, mixed $newval) U
  Sets the value at the specified $index to $newval. */
 SPL_METHOD(Array, offsetSet)
 {
@@ -562,8 +562,8 @@ void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC) /* {{
 	}
 } /* }}} */
 
-/* {{{ proto void ArrayObject::append(mixed $newval)
-       proto void ArrayIterator::append(mixed $newval)
+/* {{{ proto void ArrayObject::append(mixed $newval) U
+       proto void ArrayIterator::append(mixed $newval) U
  Appends the value (cannot be called for objects). */
 SPL_METHOD(Array, append)
 {
@@ -575,8 +575,8 @@ SPL_METHOD(Array, append)
 	spl_array_iterator_append(getThis(), value TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto void ArrayObject::offsetUnset(mixed $index)
-       proto void ArrayIterator::offsetUnset(mixed $index)
+/* {{{ proto void ArrayObject::offsetUnset(mixed $index) U
+       proto void ArrayIterator::offsetUnset(mixed $index) U
  Unsets the value at the specified $index. */
 SPL_METHOD(Array, offsetUnset)
 {
@@ -587,8 +587,8 @@ SPL_METHOD(Array, offsetUnset)
 	spl_array_unset_dimension_ex(0, getThis(), index TSRMLS_CC);
 } /* }}} */
 
-/* {{ proto array ArrayObject::getArrayCopy()
-      proto array ArrayIterator::getArrayCopy()
+/* {{ proto array ArrayObject::getArrayCopy() U
+      proto array ArrayIterator::getArrayCopy() U
  Return a copy of the contained array */
 SPL_METHOD(Array, getArrayCopy)
 {
@@ -878,8 +878,8 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 }
 /* }}} */
 
-/* {{{ proto void ArrayObject::__construct(array|object ar = array() [, int flags = 0 [, string iterator_class = "ArrayIterator"]])
-       proto void ArrayIterator::__construct(array|object ar = array() [, int flags = 0])
+/* {{{ proto void ArrayObject::__construct(array|object ar = array() [, int flags = 0 [, string iterator_class = "ArrayIterator"]]) U
+       proto void ArrayIterator::__construct(array|object ar = array() [, int flags = 0]) U
  Cronstructs a new array iterator from a path. */
 SPL_METHOD(Array, __construct)
 {
@@ -887,9 +887,7 @@ SPL_METHOD(Array, __construct)
 	spl_array_object *intern;
 	zval *array;
 	long ar_flags = 0;
-	char *class_name;
-	int class_name_len;
-	zend_class_entry ** pce_get_iterator;
+	zend_class_entry *ce_get_iterator = zend_ce_iterator;
 
 	if (ZEND_NUM_ARGS() == 0) {
 		return; /* nothing to do */
@@ -898,18 +896,13 @@ SPL_METHOD(Array, __construct)
 
 	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ls", &array, &ar_flags, &class_name, &class_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
 
 	if (ZEND_NUM_ARGS() > 2) {
-		if (zend_lookup_class(class_name, class_name_len, &pce_get_iterator TSRMLS_CC) == FAILURE) {
-			zend_throw_exception(spl_ce_InvalidArgumentException, "A class that implements Iterator must be specified", 0 TSRMLS_CC);
-			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-			return;
-		}
-		intern->ce_get_iterator = *pce_get_iterator;
+		intern->ce_get_iterator = ce_get_iterator;
 	}
 
 	ar_flags &= ~SPL_ARRAY_INT_MASK;
@@ -945,7 +938,7 @@ SPL_METHOD(Array, __construct)
 		if ((handler != std_object_handlers.get_properties && handler != spl_array_get_properties)
 		|| !spl_array_get_hash_table(intern, 0 TSRMLS_CC)) {
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Overloaded object of type %s is not compatible with %s", intern->std.ce->name, intern->std.ce->name);
+			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Overloaded object of type %v is not compatible with %v", Z_OBJCE_P(array)->name, intern->std.ce->name);
 			return;
 		}
 	}
@@ -956,31 +949,24 @@ SPL_METHOD(Array, __construct)
 }
 /* }}} */
 
-/* {{{ proto void ArrayObject::setIteratorClass(string iterator_class)
+/* {{{ proto void ArrayObject::setIteratorClass(string iterator_class) U
    Set the class used in getIterator. */
 SPL_METHOD(Array, setIteratorClass)
 {
 	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
-	char *class_name;
-	int class_name_len;
-	zend_class_entry ** pce_get_iterator;
+	zend_class_entry *ce_get_iterator = zend_ce_iterator;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &class_name, &class_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "C", &ce_get_iterator) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
 
-	if (zend_lookup_class(class_name, class_name_len, &pce_get_iterator TSRMLS_CC) == FAILURE) {
-		zend_throw_exception(spl_ce_InvalidArgumentException, "A class that implements Iterator must be specified", 0 TSRMLS_CC);
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-		return;
-	}
-	intern->ce_get_iterator = *pce_get_iterator;
+	intern->ce_get_iterator = ce_get_iterator;
 }
 /* }}} */
 
-/* {{{ proto string ArrayObject::getIteratorClass()
+/* {{{ proto string ArrayObject::getIteratorClass() U
    Get the class used in getIterator. */
 SPL_METHOD(Array, getIteratorClass)
 {
@@ -991,7 +977,7 @@ SPL_METHOD(Array, getIteratorClass)
 }
 /* }}} */
 
-/* {{{ proto int ArrayObject::getFlags()
+/* {{{ proto int ArrayObject::getFlags() U
    Get flags */
 SPL_METHOD(Array, getFlags)
 {
@@ -1002,7 +988,7 @@ SPL_METHOD(Array, getFlags)
 }
 /* }}} */
 
-/* {{{ proto void ArrayObject::setFlags(int flags)
+/* {{{ proto void ArrayObject::setFlags(int flags) U
    Set flags */
 SPL_METHOD(Array, setFlags)
 {
@@ -1018,7 +1004,7 @@ SPL_METHOD(Array, setFlags)
 }
 /* }}} */
 
-/* {{{ proto Array|Object ArrayObject::exchangeArray(Array|Object ar = array())
+/* {{{ proto Array|Object ArrayObject::exchangeArray(Array|Object ar = array()) U
    Replace the referenced array or object with a new one and return the old one (right now copy - to be changed) */
 SPL_METHOD(Array, exchangeArray)
 {
@@ -1058,7 +1044,7 @@ SPL_METHOD(Array, exchangeArray)
 }
 /* }}} */
 
-/* {{{ proto ArrayIterator ArrayObject::getIterator()
+/* {{{ proto ArrayIterator ArrayObject::getIterator() U
    Create a new iterator from a ArrayObject instance */
 SPL_METHOD(Array, getIterator)
 {
@@ -1079,7 +1065,7 @@ SPL_METHOD(Array, getIterator)
 }
 /* }}} */
 
-/* {{{ proto void ArrayIterator::rewind()
+/* {{{ proto void ArrayIterator::rewind() U
    Rewind array back to the start */
 SPL_METHOD(Array, rewind)
 {
@@ -1090,7 +1076,7 @@ SPL_METHOD(Array, rewind)
 }
 /* }}} */
 
-/* {{{ proto void ArrayIterator::seek(int $position)
+/* {{{ proto void ArrayIterator::seek(int $position) U
  Seek to position. */
 SPL_METHOD(Array, seek)
 {
@@ -1153,8 +1139,8 @@ int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ 
 	}
 } /* }}} */
 
-/* {{{ proto int ArrayObject::count()
-       proto int ArrayIterator::count()
+/* {{{ proto int ArrayObject::count() U
+       proto int ArrayIterator::count() U
  Return the number of elements in the Iterator. */
 SPL_METHOD(Array, count)
 {
@@ -1191,37 +1177,37 @@ SPL_METHOD(cname, fname) \
 	spl_array_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, #fname, sizeof(#fname)-1, use_arg); \
 }
 
-/* {{{ proto int ArrayObject::asort()
-       proto int ArrayIterator::asort()
+/* {{{ proto int ArrayObject::asort() U
+       proto int ArrayIterator::asort() U
  Sort the entries by values. */
 SPL_ARRAY_METHOD(Array, asort, 0)
 
-/* {{{ proto int ArrayObject::ksort()
-       proto int ArrayIterator::ksort()
+/* {{{ proto int ArrayObject::ksort() U
+       proto int ArrayIterator::ksort() U
  Sort the entries by key. */
 SPL_ARRAY_METHOD(Array, ksort, 0)
 
-/* {{{ proto int ArrayObject::uasort(callback cmp_function)
-       proto int ArrayIterator::uasort(callback cmp_function)
+/* {{{ proto int ArrayObject::uasort(callback cmp_function) U
+       proto int ArrayIterator::uasort(callback cmp_function) U
  Sort the entries by values user defined function. */
 SPL_ARRAY_METHOD(Array, uasort, 1)
 
-/* {{{ proto int ArrayObject::uksort(callback cmp_function)
-       proto int ArrayIterator::uksort(callback cmp_function)
+/* {{{ proto int ArrayObject::uksort(callback cmp_function) U
+       proto int ArrayIterator::uksort(callback cmp_function) U
  Sort the entries by key using user defined function. */
 SPL_ARRAY_METHOD(Array, uksort, 1)
 
-/* {{{ proto int ArrayObject::natsort()
-       proto int ArrayIterator::natsort()
+/* {{{ proto int ArrayObject::natsort() U
+       proto int ArrayIterator::natsort() U
  Sort the entries by values using "natural order" algorithm. */
 SPL_ARRAY_METHOD(Array, natsort, 0)
 
-/* {{{ proto int ArrayObject::natcasesort()
-       proto int ArrayIterator::natcasesort()
+/* {{{ proto int ArrayObject::natcasesort() U
+       proto int ArrayIterator::natcasesort() U
  Sort the entries by key using case insensitive "natural order" algorithm. */
 SPL_ARRAY_METHOD(Array, natcasesort, 0)
 
-/* {{{ proto mixed|NULL ArrayIterator::current()
+/* {{{ proto mixed|NULL ArrayIterator::current() U
    Return current array entry */
 SPL_METHOD(Array, current)
 {
@@ -1246,13 +1232,6 @@ SPL_METHOD(Array, current)
 	RETVAL_ZVAL(*entry, 1, 0);
 }
 /* }}} */
-
-/* {{{ proto mixed|NULL ArrayIterator::key()
-   Return current array key */
-SPL_METHOD(Array, key)
-{
-	spl_array_iterator_key(getThis(), return_value TSRMLS_CC);
-}
 
 void spl_array_iterator_key(zval *object, zval *return_value TSRMLS_DC) /* {{{ */
 {
@@ -1288,7 +1267,14 @@ void spl_array_iterator_key(zval *object, zval *return_value TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
-/* {{{ proto void ArrayIterator::next()
+/* {{{ proto mixed|NULL ArrayIterator::key() U
+   Return current array key */
+SPL_METHOD(Array, key)
+{
+	spl_array_iterator_key(getThis(), return_value TSRMLS_CC);
+}
+
+/* {{{ proto void ArrayIterator::next() U
    Move to next entry */
 SPL_METHOD(Array, next)
 {
@@ -1305,7 +1291,7 @@ SPL_METHOD(Array, next)
 }
 /* }}} */
 
-/* {{{ proto bool ArrayIterator::valid()
+/* {{{ proto bool ArrayIterator::valid() U
    Check whether array contains more entries */
 SPL_METHOD(Array, valid)
 {
@@ -1327,7 +1313,7 @@ SPL_METHOD(Array, valid)
 }
 /* }}} */
 
-/* {{{ proto bool RecursiveArrayIterator::hasChildren()
+/* {{{ proto bool RecursiveArrayIterator::hasChildren() U
    Check whether current element has children (e.g. is an array) */
 SPL_METHOD(Array, hasChildren)
 {
@@ -1353,7 +1339,7 @@ SPL_METHOD(Array, hasChildren)
 }
 /* }}} */
 
-/* {{{ proto object RecursiveArrayIterator::getChildren()
+/* {{{ proto object RecursiveArrayIterator::getChildren() U
    Create a sub iterator for the current element (same class as $this) */
 SPL_METHOD(Array, getChildren)
 {
