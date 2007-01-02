@@ -283,7 +283,7 @@ PHP_FUNCTION(zip_entry_open)
 }
 /* }}} */
 
-/* {{{ proto string zip_entry_read(resource zip_ent)
+/* {{{ proto string zip_entry_read(resource zip_ent [, int nbytes])
    Read X bytes from an opened zip entry */
 PHP_FUNCTION(zip_entry_read)
 {
@@ -295,6 +295,10 @@ PHP_FUNCTION(zip_entry_read)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zzip_ent, &len) == FAILURE) {
 		return;
+	}
+	if (len <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The bytes parameter must greater then zero");
+		RETURN_FALSE;
 	}
 	ZEND_FETCH_RESOURCE(entry, php_zzip_dirent *, &zzip_ent, -1, le_zip_entry_name, le_zip_entry);
 
