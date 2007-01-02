@@ -625,8 +625,6 @@ PHP_FUNCTION(proc_open)
 					descriptors[ndesc].mode_flags |= O_BINARY;
 #endif
 
-				
-
 			} else if (strcmp(Z_STRVAL_PP(ztype), "file") == 0) {
 				zval **zfile, **zmode;
 				int fd;
@@ -788,7 +786,8 @@ PHP_FUNCTION(proc_open)
 		/* clean up all the descriptors */
 		for (i = 0; i < ndesc; i++) {
 			close(descriptors[i].childend);
-			close(descriptors[i].parentend);
+			if (descriptors[i].parentend)
+				close(descriptors[i].parentend);
 		}
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "procve failed - %s", strerror(errno));
 		goto exit_fail;
@@ -855,7 +854,8 @@ PHP_FUNCTION(proc_open)
 		/* clean up all the descriptors */
 		for (i = 0; i < ndesc; i++) {
 			close(descriptors[i].childend);
-			close(descriptors[i].parentend);
+			if (descriptors[i].parentend)
+				close(descriptors[i].parentend);
 		}
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "fork failed - %s", strerror(errno));
