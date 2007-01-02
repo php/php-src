@@ -675,7 +675,7 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 /**
  * Create or open a phar for writing
  */
-static int phar_create_or_open_filename(char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar TSRMLS_CC) /* {{{ */
+static int phar_create_or_open_filename(char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *mydata;
 	int register_alias;
@@ -1549,7 +1549,7 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 			for (loc = 0;loc < copy; loc++) {
 				CRC32(newcrc32, *(buffer + loc));
 			}
-			php_stream_filter_remove(filter, 1);
+			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			php_stream_rewind(compressedfile);
 			php_stream_write(compressedfile, buffer, copy); 
 			file = compressedfile;
@@ -1569,7 +1569,7 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 			for (loc = 0;loc < copy; loc++) {
 				CRC32(newcrc32, *(buffer + loc));
 			}
-			php_stream_filter_remove(filter, 1);
+			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			php_stream_rewind(compressedfile);
 			php_stream_write(compressedfile, buffer, copy); 
 			file = compressedfile;
