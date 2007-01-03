@@ -347,7 +347,7 @@ zend_module_entry sqlite_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	PHP_SQLITE_MODULE_VERSION,
 #endif
-#if ZEND_MODULE_API_NO >= 20070613
+#if ZEND_MODULE_API_NO >= 20060613
 	PHP_MODULE_GLOBALS(sqlite),
 	PHP_GINIT(sqlite),
 	NULL,

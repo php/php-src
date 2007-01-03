@@ -240,7 +240,7 @@ zend_module_entry mime_magic_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	"0.1", 
 #endif
-#if ZEND_MODULE_API_NO >= 20070613
+#if ZEND_MODULE_API_NO >= 20060613
 	PHP_MODULE_GLOBALS(mime_magic),
 	PHP_GINIT(mime_magic),
 	NULL,
