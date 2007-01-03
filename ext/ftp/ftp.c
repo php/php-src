@@ -1503,6 +1503,8 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 
 	/* some servers don't open a ftp-data connection if the directory is empty */
 	if (ftp->resp == 226) {
+		ftp->data = data_close(ftp, data);
+		php_stream_close(tmpstream);
 		return ecalloc(1, sizeof(char**));
 	}
 
