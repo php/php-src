@@ -45,7 +45,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20071209
+#define PDO_DRIVER_API	20061209
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
