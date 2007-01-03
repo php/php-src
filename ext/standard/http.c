@@ -247,7 +247,7 @@ PHP_FUNCTION(http_build_query)
 	}
 
 	if (!formstr.c) {
-		RETURN_NULL();
+		RETURN_EMPTY_STRING();
 	}
 
 	smart_str_0(&formstr);
