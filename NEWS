@@ -19,6 +19,7 @@ PHP                                                                        NEWS
   the user part of the email address. (Derick)
 - Fixed bug #40012 (php_date.c doesnt compile on Netware). (gk at gknw dot de,
   Derick)
+- Fixed bug #40009 (http_build_query(array()) returns NULL). (Ilia)
 - Fixed bug #39984 (redirect response code in header() could be ignored in
   CGI sapi). (Ilia)
 - Fixed bug #39971 (pg_insert/pg_update do not allow now() to be used for
