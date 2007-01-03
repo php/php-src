@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   __inet_pton() and inet_ntop() was named __inet_ntop(). (Hannes)
 - Fixed the validate email filter so that the letter "v" can also be used in
   the user part of the email address. (Derick)
+- Fixed bug #40012 (php_date.c doesnt compile on Netware). (gk at gknw dot de,
+  Derick)
 - Fixed bug #39984 (redirect response code in header() could be ignored in
   CGI sapi). (Ilia)
 - Fixed bug #39971 (pg_insert/pg_update do not allow now() to be used for
