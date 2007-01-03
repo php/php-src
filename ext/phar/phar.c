@@ -169,6 +169,7 @@ static int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoff
 static size_t phar_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
 static size_t phar_dirwrite(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
 static int phar_flush(php_stream *stream TSRMLS_DC);
+static int phar_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
 static int phar_dirflush(php_stream *stream TSRMLS_DC);
 static int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 
@@ -1044,7 +1045,7 @@ static php_stream_wrapper_ops phar_stream_wops = {
     phar_stream_stat, /* stat_url */
     phar_opendir, /* opendir */
     "phar",
-    NULL, /* unlink */
+    phar_unlink, /* unlink */
     NULL, /* rename */
     NULL, /* create directory */
     NULL /* remove directory */
@@ -2093,6 +2094,55 @@ PHAR_ADD_ENTRY:
 	}
 }
 /* }}}*/
+
+/**
+ * Unlink a file within a phar archive
+ */
+static int phar_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
+{
+	php_url *resource;
+	char *internal_file;
+	phar_entry_data *idata;
+	
+	resource = php_url_parse(url);
+
+	if (!resource && (resource = phar_open_url(wrapper, url, "rb", options TSRMLS_CC)) == NULL) {
+		return FAILURE;
+	}
+
+	/* we must have at the very least phar://alias.phar/internalfile.php */
+	if (!resource->scheme || !resource->host || !resource->path) {
+		php_url_free(resource);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", url);
+		return FAILURE;
+	}
+
+	if (strcasecmp("phar", resource->scheme)) {
+		php_url_free(resource);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar stream url \"%s\"", url);
+		return FAILURE;
+	}
+
+	/* strip leading "/" */
+	internal_file = estrdup(resource->path + 1);
+	if (NULL == (idata = phar_get_entry_data(resource->host, strlen(resource->host), internal_file, strlen(internal_file) TSRMLS_CC))) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\", cannot unlink", internal_file, resource->host);
+		efree(internal_file);
+		php_url_free(resource);
+		return FAILURE;
+	}
+	if (idata->internal_file->flags & PHAR_ENT_MODIFIED) {
+		idata->internal_file->flags &= ~PHAR_ENT_MODIFIED;
+		if (idata->internal_file->temp_file) {
+			php_stream_close(idata->internal_file->temp_file);
+			idata->internal_file->temp_file = 0;
+		}
+	}
+	idata->internal_file->flags |= PHAR_ENT_DELETED;
+	php_url_free(resource);
+	return SUCCESS;
+}
+/* }}} */
 
 /**
  * Open a directory handle within a phar archive
