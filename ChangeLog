@@ -1,3 +1,30 @@
+2007-01-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_array.c:
+      - Make Andrei happy - spread some U's
+
+2007-01-02  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/proc_open.c:
+      MFB
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/proc_open.c:
+      +- Fixed bug #37619 (proc_open() closes stdin on fork() failure).
+
+2007-01-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/zip/zip.c:
+      
+      Added length parameter validator to zip_entry_read()
+
+2007-01-02  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_api.c:
+      fixed parameters for unicode in mysqli_change_user
+
 2007-01-01  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * acinclude.m4
