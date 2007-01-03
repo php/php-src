@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2006 The PHP Group                                |
+  | Copyright (c) 1997-2007 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -29,14 +29,14 @@
 
 #define RET(i) {s->cur = cursor; return i; }
 
-#define YYCTYPE         char
+#define YYCTYPE         unsigned char
 #define YYCURSOR        cursor
-#define YYLIMIT         s->lim
+#define YYLIMIT         cursor
 #define YYMARKER        s->ptr
 #define YYFILL(n)
 
 typedef struct Scanner {
-	char 	*lim, *ptr, *cur, *tok;
+	char 	*ptr, *cur, *tok;
 } Scanner;
 
 static int scan(Scanner *s) 
@@ -90,7 +90,6 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 
 	ptr = *outquery;
 	s.cur = inquery;
-	s.lim = inquery + inquery_len;
 
 	/* phase 1: look for args */
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
@@ -405,7 +404,6 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 
 	ptr = *outquery;
 	s.cur = inquery;
-	s.lim = inquery + inquery_len;
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
 		if(t == PDO_PARSER_TEXT) {
 			memcpy(ptr, s.tok, s.cur - s.tok);
