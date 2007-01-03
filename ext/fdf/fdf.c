@@ -1448,7 +1448,7 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 					if(lastfieldname) efree(lastfieldname);
 					lastfieldname = estrdup(name);
 
-					if (sapi_module.input_filter(PARSE_POST, name, &value, value_len - 1, &new_val_len TSRMLS_CC)) {
+					if (sapi_module.input_filter(PARSE_POST, name, &value, nBytes, &new_val_len TSRMLS_CC)) {
 						php_register_variable_safe(name, value, new_val_len, array_ptr TSRMLS_CC);
 					}
 				} 
