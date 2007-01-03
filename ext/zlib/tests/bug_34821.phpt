@@ -5,12 +5,12 @@ Bug #34821 (zlib encoders fail on widely varying binary data)
 --FILE--
 <?php
 
-// test 50 bytes to 500k
+// test 50 bytes to 50k
 $b = array(
 	50, 
 	500, 
 	5000, 
-	250000,
+	50000,
 //	1000000, // works, but test would take too long
 );
 
