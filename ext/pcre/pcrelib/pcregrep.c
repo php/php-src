@@ -56,7 +56,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 typedef int BOOL;
 
-#define VERSION "4.3 01-Jun-2007"
+#define VERSION "4.3 01-Jun-2006"
 #define MAX_PATTERN_COUNT 100
 
 #if BUFSIZ > 8192
