@@ -85,7 +85,7 @@ static int scan(Scanner *s)
 		162, 162, 162, 162, 162, 162, 162, 162, 
 	};
 
-#line 89 "pdo_sql_parser.c"
+#line 89 "ext/pdo/pdo_sql_parser.c"
 	{
 		YYCTYPE yych;
 
@@ -109,7 +109,7 @@ yy2:
 yy3:
 #line 61 "ext/pdo/pdo_sql_parser.re"
 		{ RET(PDO_PARSER_TEXT); }
-#line 113 "pdo_sql_parser.c"
+#line 113 "ext/pdo/pdo_sql_parser.c"
 yy4:
 		yych = *++YYCURSOR;
 		if(yybm[0+yych] & 16) {
@@ -144,7 +144,7 @@ yy6:
 		}
 #line 60 "ext/pdo/pdo_sql_parser.re"
 		{ RET(PDO_PARSER_BIND_POS); }
-#line 148 "pdo_sql_parser.c"
+#line 148 "ext/pdo/pdo_sql_parser.c"
 yy8:
 		++YYCURSOR;
 		if(YYLIMIT == YYCURSOR) YYFILL(1);
@@ -154,12 +154,12 @@ yy8:
 		}
 #line 62 "ext/pdo/pdo_sql_parser.re"
 		{ RET(PDO_PARSER_TEXT); }
-#line 158 "pdo_sql_parser.c"
+#line 158 "ext/pdo/pdo_sql_parser.c"
 yy11:
 		++YYCURSOR;
 #line 63 "ext/pdo/pdo_sql_parser.re"
 		{ RET(PDO_PARSER_EOI); }
-#line 163 "pdo_sql_parser.c"
+#line 163 "ext/pdo/pdo_sql_parser.c"
 yy13:
 		++YYCURSOR;
 		if(YYLIMIT == YYCURSOR) YYFILL(1);
@@ -169,7 +169,7 @@ yy13:
 		}
 #line 58 "ext/pdo/pdo_sql_parser.re"
 		{ RET(PDO_PARSER_TEXT); }
-#line 173 "pdo_sql_parser.c"
+#line 173 "ext/pdo/pdo_sql_parser.c"
 yy16:
 		++YYCURSOR;
 		if(YYLIMIT == YYCURSOR) YYFILL(1);
@@ -179,7 +179,7 @@ yy16:
 		}
 #line 59 "ext/pdo/pdo_sql_parser.re"
 		{ RET(PDO_PARSER_BIND); }
-#line 183 "pdo_sql_parser.c"
+#line 183 "ext/pdo/pdo_sql_parser.c"
 yy19:
 		if((YYLIMIT - YYCURSOR) < 2) YYFILL(2);
 		yych = *YYCURSOR;
@@ -195,7 +195,7 @@ yy21:
 yy22:
 #line 57 "ext/pdo/pdo_sql_parser.re"
 		{ RET(PDO_PARSER_TEXT); }
-#line 199 "pdo_sql_parser.c"
+#line 199 "ext/pdo/pdo_sql_parser.c"
 yy23:
 		++YYCURSOR;
 		if(YYLIMIT == YYCURSOR) YYFILL(1);
@@ -213,7 +213,7 @@ yy26:
 yy27:
 #line 56 "ext/pdo/pdo_sql_parser.re"
 		{ RET(PDO_PARSER_TEXT); }
-#line 217 "pdo_sql_parser.c"
+#line 217 "ext/pdo/pdo_sql_parser.c"
 yy28:
 		if((YYLIMIT - YYCURSOR) < 2) YYFILL(2);
 		yych = *YYCURSOR;
