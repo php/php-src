@@ -1,3 +1,9 @@
+2007-01-03  Antony Dovgal  <antony@zend.com>
+
+    * zend_extensions.h
+      zend_modules.h:
+      more magic number fixes
+
 2007-01-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * acconfig.h

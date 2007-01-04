@@ -1,3 +1,111 @@
+2007-01-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/http.c:
+      
+      MFB: Fixed bug #40009 (http_build_query(array()) returns NULL).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/http.c:
+      
+      Fixed bug #40009 (http_build_query(array()) returns NULL).
+
+2007-01-03  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/zlib/tests/bug_34821.phpt:
+      MFB
+
+    * (PHP_5_2)
+      ext/zlib/tests/bug_34821.phpt:
+      reduce the test data size even further or when running with valgrind it
+      times out
+
+    * (PHP_5_2)
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      MFH: fix infinite cycle
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      fix a bug where PHP would enter in an infinite cycle with chars with ascii
+      value > 127
+      while at it, remove the lim structure parameter (it wasn't being used)
+
+2007-01-03  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_modules.h
+      ext/exif/exif.c
+      ext/mime_magic/mime_magic.c
+      ext/sqlite/sqlite.c:
+      more magic number fixes
+
+    * ext/oci8/oci8_interface.c:
+      use constant
+
+2007-01-03  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pdo/php_pdo_driver.h:
+      fix PDO_DRIVER_API
+
+    * ext/pdo/pdo_sql_parser.c:
+      fix lcov build
+
+2007-01-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/pcre/pcrelib/pcregrep.c:
+      Revert pcrelib version string to 2006
+
+2007-01-03  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_4_4)
+      ext/ftp/ftp.c:
+      merge Tony's patch to fix memleak
+
+2007-01-03  Antony Dovgal  <antony@zend.com>
+
+    * sapi/apache2filter/php_functions.c
+      sapi/apache2handler/php_functions.c:
+      fix magic numbers
+
+    * ext/pcre/pcrelib/pcre.h:
+      revert this date to its previous state
+
+2007-01-03  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c:
+      - MFB: Fixed bug #40012 (php_date.c doesnt compile on Netware).
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/php_date.c:
+      - Fixed bug #40012 (php_date.c doesnt compile on Netware).
+
+2007-01-03  Antony Dovgal  <antony@zend.com>
+
+    * ext/date/tests/bug37514.phpt:
+      and one more..
+
+    * ext/date/tests/oo_002.phpt
+      ext/date/tests/oo_002.phpt:
+      fix test
+
+2007-01-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/fdf/fdf.c
+      ext/fdf/fdf.c:
+      Use proper length
+
+    * ext/fdf/fdf.c:
+      MFB:
+      	Added filter callback
+      	Unlink temporary file on error
+
+    * (PHP_5_2)
+      ext/fdf/fdf.c:
+      Added filter callback
+      Unlink temporary file on error
+
 2007-01-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/spl/spl_array.c:
