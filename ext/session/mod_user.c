@@ -29,25 +29,20 @@ ps_module ps_mod_user = {
 #define SESS_ZVAL_LONG(val, a) 					\
 {											\
 	MAKE_STD_ZVAL(a); 						\
-	Z_TYPE_P(a) = IS_LONG; 						\
-	Z_LVAL_P(a) = val; 					\
+	ZVAL_LONG(a, val);						\
 }
 
 #define SESS_ZVAL_STRING(vl, a) 					\
 {											\
 	int len = strlen(vl); 					\
 	MAKE_STD_ZVAL(a); 						\
-	Z_TYPE_P(a) = IS_STRING; 					\
-	Z_STRLEN_P(a) = len; 				\
-	Z_STRVAL_P(a) = estrndup(vl, len); 	\
+	ZVAL_STRINGL(a, vl, len, 1);			\
 }
 
 #define SESS_ZVAL_STRINGN(vl, ln, a) 			\
 {											\
 	MAKE_STD_ZVAL(a); 						\
-	Z_TYPE_P(a) = IS_STRING; 					\
-	Z_STRLEN_P(a) = ln; 					\
-	Z_STRVAL_P(a) = estrndup(vl, ln); 	\
+	ZVAL_STRINGL(a, vl, ln, 1);			\
 }
 
 
@@ -74,8 +69,7 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 	zval *retval; 							\
 	int ret = FAILURE; 						\
 	ps_user *mdata = PS_GET_MOD_DATA();		\
-	if (!mdata) 							\
-		return FAILURE
+	if (!mdata) { return FAILURE; }
 
 #define PSF(a) mdata->name.ps_##a
 
@@ -92,8 +86,8 @@ PS_OPEN_FUNC(user)
 	zval *args[2];
 	STDVARS;
 	
-	SESS_ZVAL_STRING(save_path, args[0]);
-	SESS_ZVAL_STRING(session_name, args[1]);
+	SESS_ZVAL_STRING((char*)save_path, args[0]);
+	SESS_ZVAL_STRING((char*)session_name, args[1]);
 	
 	retval = ps_call_handler(PSF(open), 2, args TSRMLS_CC);
 	
@@ -107,8 +101,10 @@ PS_CLOSE_FUNC(user)
 
 	retval = ps_call_handler(PSF(close), 0, NULL TSRMLS_CC);
 
-	for (i = 0; i < 6; i++)
+	for (i = 0; i < 6; i++) {
 		zval_ptr_dtor(&mdata->names[i]);
+	}
+
 	efree(mdata);
 
 	PS_SET_MOD_DATA(NULL);
@@ -121,7 +117,7 @@ PS_READ_FUNC(user)
 	zval *args[1];
 	STDVARS;
 
-	SESS_ZVAL_STRING(key, args[0]);
+	SESS_ZVAL_STRING((char*)key, args[0]);
 
 	retval = ps_call_handler(PSF(read), 1, args TSRMLS_CC);
 	
@@ -142,8 +138,8 @@ PS_WRITE_FUNC(user)
 	zval *args[2];
 	STDVARS;
 	
-	SESS_ZVAL_STRING(key, args[0]);
-	SESS_ZVAL_STRINGN(val, vallen, args[1]);
+	SESS_ZVAL_STRING((char*)key, args[0]);
+	SESS_ZVAL_STRINGN((char*)val, vallen, args[1]);
 
 	retval = ps_call_handler(PSF(write), 2, args TSRMLS_CC);
 
@@ -155,7 +151,7 @@ PS_DESTROY_FUNC(user)
 	zval *args[1];
 	STDVARS;
 
-	SESS_ZVAL_STRING(key, args[0]);
+	SESS_ZVAL_STRING((char*)key, args[0]);
 
 	retval = ps_call_handler(PSF(destroy), 1, args TSRMLS_CC);
 
