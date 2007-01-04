@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Jan 2007, PHP 5.2.1RC3
+
 04 Jan 2007, PHP 5.2.1RC2
 - Small optimization of the date() function (Matt,Ilia)
 - Removed dependency from SHELL32.DLL. (Dmitry)
