@@ -87,9 +87,10 @@ static int ps_files_valid_key(const char *key)
 
 	len = p - key;
 	
-	if (len == 0)
+	if (len == 0) {
 		ret = 0;
-	
+	}
+
 	return ret;
 }
 
@@ -101,9 +102,11 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 	int n;
 	
 	key_len = strlen(key);
-	if (key_len <= data->dirdepth || buflen < 
-			(strlen(data->basedir) + 2 * data->dirdepth + key_len + 5 + sizeof(FILE_PREFIX))) 
+	if (key_len <= data->dirdepth ||
+		buflen < (strlen(data->basedir) + 2 * data->dirdepth + key_len + 5 + sizeof(FILE_PREFIX))) {
 		return NULL;
+	}
+
 	p = key;
 	memcpy(buf, data->basedir, data->basedir_len);
 	n = data->basedir_len;
@@ -149,27 +152,27 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		}
 
 		ps_files_close(data);
-		
+
 		if (!ps_files_valid_key(key)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The session id contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
 			PS(invalid_session_id) = 1;
 			return;
 		}
-		if (!ps_files_path_create(buf, sizeof(buf), data, key))
+		if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
 			return;
-		
+		}
+
 		data->lastkey = estrdup(key);
-		
-		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, 
-				data->filemode);
-		
+
+		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, data->filemode);
+
 		if (data->fd != -1) {
 			flock(data->fd, LOCK_EX);
 
 #ifdef F_SETFD
-#ifndef FD_CLOEXEC
-#define FD_CLOEXEC 1
-#endif
+# ifndef FD_CLOEXEC
+#  define FD_CLOEXEC 1
+# endif
 			if (fcntl(data->fd, F_SETFD, FD_CLOEXEC)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "fcntl(%d, F_SETFD, FD_CLOEXEC) failed: %s (%d)", data->fd, strerror(errno), errno);
 			}
@@ -209,15 +212,16 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 	while (php_readdir_r(dir, (struct dirent *) dentry, &entry) == 0 && entry) {
 		/* does the file start with our prefix? */
 		if (!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1)) {
-			size_t entry_len;
+			size_t entry_len = strlen(entry->d_name);
 
-			entry_len = strlen(entry->d_name);
 			/* does it fit into our buffer? */
 			if (entry_len + dirname_len + 2 < MAXPATHLEN) {
 				/* create the full path.. */
 				memcpy(buf + dirname_len + 1, entry->d_name, entry_len);
+
 				/* NUL terminate it and */
 				buf[dirname_len + entry_len + 1] = '\0';
+
 				/* check whether its last access was more than maxlifet ago */
 				if (VCWD_STAT(buf, &sbuf) == 0 && 
 #ifdef NETWARE
@@ -268,8 +272,7 @@ PS_OPEN_FUNC(files)
 		errno = 0;
 		dirdepth = (size_t) strtol(argv[0], NULL, 10);
 		if (errno == ERANGE) {
-			php_error(E_WARNING, 
-					"The first parameter in session.save_path is invalid");
+			php_error(E_WARNING, "The first parameter in session.save_path is invalid");
 			return FAILURE;
 		}
 	}
@@ -278,15 +281,13 @@ PS_OPEN_FUNC(files)
 		errno = 0;
 		filemode = strtol(argv[1], NULL, 8);
 		if (errno == ERANGE || filemode < 0 || filemode > 07777) {
-			php_error(E_WARNING, 
-					"The second parameter in session.save_path is invalid");
+			php_error(E_WARNING, "The second parameter in session.save_path is invalid");
 			return FAILURE;
 		}
 	}
 	save_path = argv[argc - 1];
 
-	data = emalloc(sizeof(*data));
-	memset(data, 0, sizeof(*data));
+	data = ecalloc(1, sizeof(*data));
 	
 	data->fd = -1;
 	data->dirdepth = dirdepth;
@@ -305,8 +306,10 @@ PS_CLOSE_FUNC(files)
 
 	ps_files_close(data);
 
-	if (data->lastkey) 
+	if (data->lastkey) {
 		efree(data->lastkey);
+	}
+
 	efree(data->basedir);
 	efree(data);
 	*mod_data = NULL;
@@ -321,19 +324,21 @@ PS_READ_FUNC(files)
 	PS_FILES_DATA;
 
 	ps_files_open(data, key TSRMLS_CC);
-	if (data->fd < 0)
+	if (data->fd < 0) {
 		return FAILURE;
-	
-	if (fstat(data->fd, &sbuf))
+	}
+
+	if (fstat(data->fd, &sbuf)) {
 		return FAILURE;
-	
+	}
+
 	data->st_size = *vallen = sbuf.st_size;
-	
+
 	if (sbuf.st_size == 0) {
 		*val = STR_EMPTY_ALLOC();
 		return SUCCESS;
 	}
-	
+
 	*val = emalloc(sbuf.st_size);
 
 #if defined(HAVE_PREAD)
@@ -344,10 +349,11 @@ PS_READ_FUNC(files)
 #endif
 
 	if (n != sbuf.st_size) {
-		if (n == -1)
+		if (n == -1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "read failed: %s (%d)", strerror(errno), errno);
-		else
+		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "read returned less bytes than requested");
+		}
 		efree(*val);
 		return FAILURE;
 	}
@@ -361,16 +367,18 @@ PS_WRITE_FUNC(files)
 	PS_FILES_DATA;
 
 	ps_files_open(data, key TSRMLS_CC);
-	if (data->fd < 0)
+	if (data->fd < 0) {
 		return FAILURE;
+	}
 
 	/* 
 	 * truncate file, if the amount of new data is smaller than
 	 * the existing data set.
 	 */
 	
-	if (vallen < (int)data->st_size)
+	if (vallen < (int)data->st_size) {
 		ftruncate(data->fd, 0);
+	}
 
 #if defined(HAVE_PWRITE)
 	n = pwrite(data->fd, val, vallen, 0);
@@ -380,10 +388,11 @@ PS_WRITE_FUNC(files)
 #endif
 
 	if (n != vallen) {
-		if (n == -1)
+		if (n == -1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
-		else
+		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "write wrote less bytes than requested");
+		}
 		return FAILURE;
 	}
 
@@ -395,9 +404,10 @@ PS_DESTROY_FUNC(files)
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
 
-	if (!ps_files_path_create(buf, sizeof(buf), data, key))
+	if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
 		return FAILURE;
-	
+	}
+
 	if (data->fd != -1) {
 		ps_files_close(data);
 	
@@ -422,9 +432,10 @@ PS_GC_FUNC(files)
 	   we return SUCCESS, since all cleanup should be handled by
 	   an external entity (i.e. find -ctime x | xargs rm) */
 	   
-	if (data->dirdepth == 0)
+	if (data->dirdepth == 0) {
 		*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime TSRMLS_CC);
-	
+	}
+
 	return SUCCESS;
 }
 

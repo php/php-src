@@ -161,9 +161,9 @@ static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 
 	slot = ps_sd_hash(sd->key, strlen(sd->key)) & data->hash_max;
 
-	if (data->hash[slot] == sd)
+	if (data->hash[slot] == sd) {
 		data->hash[slot] = sd->next;
-	else {
+	} else {
 		ps_sd *prev;
 
 		/* There must be some entry before the one we want to delete */
@@ -172,8 +172,11 @@ static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 	}
 		
 	data->hash_cnt--;
-	if (sd->data) 
+
+	if (sd->data) {
 		mm_free(data->mm, sd->data);
+	}
+
 	mm_free(data->mm, sd);
 }
 
@@ -185,15 +188,19 @@ static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, int rw)
 	hv = ps_sd_hash(key, strlen(key));
 	slot = hv & data->hash_max;
 	
-	for (prev = NULL, ret = data->hash[slot]; ret; prev = ret, ret = ret->next)
-		if (ret->hv == hv && !strcmp(ret->key, key)) 
+	for (prev = NULL, ret = data->hash[slot]; ret; prev = ret, ret = ret->next) {
+		if (ret->hv == hv && !strcmp(ret->key, key)) {
 			break;
-	
+		}
+	}
+
 	if (ret && rw && ret != data->hash[slot]) {
 		/* Move the entry to the top of the linked list */
 		
-		if (prev)
+		if (prev) {
 			prev->next = ret->next;
+		}
+
 		ret->next = data->hash[slot];
 		data->hash[slot] = ret;
 	}
@@ -238,11 +245,12 @@ static void ps_mm_destroy(ps_mm *data)
 	   an Apache child dies! */
 	if (data->owner != getpid()) return;
 
-	for (h = 0; h < data->hash_max + 1; h++)
+	for (h = 0; h < data->hash_max + 1; h++) {
 		for (sd = data->hash[h]; sd; sd = next) {
 			next = sd->next;
 			ps_sd_destroy(data, sd);
 		}
+	}
 	
 	mm_free(data->mm, data->hash);
 	mm_destroy(data->mm);
@@ -257,13 +265,15 @@ PHP_MINIT_FUNCTION(ps_mm)
 	int ret;
 
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
-   	if (!ps_mm_instance)
+   	if (!ps_mm_instance) {
 		return FAILURE;
+	}
 
-	if (!sprintf(euid,"%d", geteuid())) 
+	if (!sprintf(euid,"%d", geteuid())) {
 		return FAILURE;
+	}
 		
-    /* Directory + '/' + File + Module Name + Effective UID + \0 */	
+	/* Directory + '/' + File + Module Name + Effective UID + \0 */	
 	ps_mm_path = emalloc(save_path_len+1+sizeof(PS_MM_FILE)+mod_name_len+strlen(euid)+1);
 	
 	memcpy(ps_mm_path, PS(save_path), save_path_len + 1);
@@ -271,6 +281,7 @@ PHP_MINIT_FUNCTION(ps_mm)
 		ps_mm_path[save_path_len] = DEFAULT_SLASH;
 		ps_mm_path[save_path_len+1] = '\0';
 	}
+
 	strcat(ps_mm_path, PS_MM_FILE);
 	strcat(ps_mm_path, sapi_module.name);
 	strcat(ps_mm_path, euid);
@@ -302,8 +313,9 @@ PS_OPEN_FUNC(mm)
 {
 	ps_mm_debug(("open: ps_mm_instance=%p\n", ps_mm_instance));
 	
-	if (!ps_mm_instance)
+	if (!ps_mm_instance) {
 		return FAILURE;
+	}
 	
 	PS_SET_MOD_DATA(ps_mm_instance);
 	
@@ -354,8 +366,9 @@ PS_WRITE_FUNC(mm)
 
 	if (sd) {
 		if (vallen >= sd->alloclen) {
-			if (data->mm) 
+			if (data->mm) {
 				mm_free(data->mm, sd->data);
+			}
 			sd->alloclen = vallen + 1;
 			sd->data = mm_malloc(data->mm, sd->alloclen);
 
@@ -385,9 +398,10 @@ PS_DESTROY_FUNC(mm)
 	mm_lock(data->mm, MM_LOCK_RW);
 	
 	sd = ps_sd_lookup(data, key, 0);
-	if (sd)
+	if (sd) {
 		ps_sd_destroy(data, sd);
-	
+	}
+
 	mm_unlock(data->mm);
 	
 	return SUCCESS;
@@ -410,7 +424,7 @@ PS_GC_FUNC(mm)
 	mm_lock(data->mm, MM_LOCK_RW);
 
 	ehash = data->hash + data->hash_max + 1;
-	for (ohash = data->hash; ohash < ehash; ohash++)
+	for (ohash = data->hash; ohash < ehash; ohash++) {
 		for (sd = *ohash; sd; sd = next) {
 			next = sd->next;
 			if (sd->ctime < limit) {
@@ -419,6 +433,7 @@ PS_GC_FUNC(mm)
 				(*nrdels)++;
 			}
 		}
+	}
 
 	mm_unlock(data->mm);
 	
