@@ -117,6 +117,7 @@ typedef struct _phar_archive_data {
 	int                      fname_len;
 	char                     *alias;
 	int                      alias_len;
+	zend_bool                explicit_alias;
 	char                     version[12];
 	size_t                   internal_file_start;
 	size_t                   halt_offset;
@@ -679,7 +680,10 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	mydata->alias_len = alias ? alias_len : fname_len;
 	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data),  NULL);
 	if (register_alias) {
+		mydata->explicit_alias = TRUE;
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
+	} else {
+		mydata->explicit_alias = FALSE;
 	}
 	efree(savebuf);
 	
@@ -1627,13 +1631,24 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 	/*  4: manifest length, 4: manifest entry count, 2: phar version,
 	    4: alias length, the rest is the alias itself
 	*/
-	manifest = (char *) emalloc(14 + data->phar->alias_len);
-	phar_set_32(manifest, offset + data->phar->alias_len + 10); /* manifest length */
-	phar_set_32(manifest+4, new_manifest_count);
+	if (data->phar->explicit_alias) {
+		manifest = (char *) emalloc(14 + data->phar->alias_len);
+		phar_set_32(manifest, offset + data->phar->alias_len + 10); /* manifest length */
+		phar_set_32(manifest+4, new_manifest_count);
+		phar_set_32(manifest+10, data->phar->alias_len);
+		memcpy(manifest + 14, data->phar->alias, data->phar->alias_len);
+	} else {
+		/* alias was assigned at runtime, do not add to new phar */
+		manifest = (char *) emalloc(14);
+		phar_set_32(manifest, offset + 10); /* manifest length */
+		phar_set_32(manifest+4, new_manifest_count);
+		phar_set_32(manifest+10, 0);
+		data->phar->alias_len = 0;
+		efree(data->phar->alias);
+		data->phar->alias = 0;
+	}
 	*(manifest + 8) = (unsigned char) (((PHAR_API_VERSION) >> 8) & 0xFF);
 	*(manifest + 9) = (unsigned char) ((PHAR_API_VERSION) & 0xFF);
-	phar_set_32(manifest+10, data->phar->alias_len);
-	memcpy(manifest + 14, data->phar->alias, data->phar->alias_len);
 
 	/* write the manifest header */
 	if (14 + data->phar->alias_len != php_stream_write(newfile, manifest, 14 + data->phar->alias_len)) {
@@ -1792,7 +1807,11 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 
 	fname = estrndup(data->phar->fname, data->phar->fname_len);
 	fname_len = data->phar->fname_len;
-	alias = estrndup(data->phar->alias, data->phar->alias_len);
+	if (data->phar->alias) {
+		alias = estrndup(data->phar->alias, data->phar->alias_len);
+	} else {
+		alias = 0;
+	}
 	alias_len = data->phar->alias_len;
 	halt_offset = data->phar->halt_offset;
 	zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len);
@@ -2320,6 +2339,7 @@ PHP_METHOD(Phar, offsetExists)
 {
 	char *fname;
 	int fname_len;
+	phar_entry_info *entry;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
@@ -2327,6 +2347,12 @@ PHP_METHOD(Phar, offsetExists)
 	}
 
 	if (zend_hash_exists(&phar_obj->arc.archive->manifest, fname, (uint) fname_len)) {
+		if (SUCCESS == zend_hash_find(&phar_obj->arc.archive->manifest, fname, (uint) fname_len, (void**)&entry)) {
+			if (entry->flags & PHAR_ENT_DELETED) {
+				/* entry is deleted, but has not been flushed to disk yet */
+				RETURN_FALSE;
+			}
+		}
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -2397,7 +2423,27 @@ PHP_METHOD(Phar, offsetSet)
  */
 PHP_METHOD(Phar, offsetUnset)
 {
-	zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Operation currently not supported");
+	char *fname;
+	int fname_len;
+	phar_entry_info *entry;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
+		return;
+	}
+
+	if (zend_hash_exists(&phar_obj->arc.archive->manifest, fname, (uint) fname_len)) {
+		if (SUCCESS == zend_hash_find(&phar_obj->arc.archive->manifest, fname, (uint) fname_len, (void**)&entry)) {
+			if (entry->flags & PHAR_ENT_DELETED) {
+				/* entry is deleted, but has not been flushed to disk yet */
+				return;
+			}
+			entry->flags &= ~PHAR_ENT_MODIFIED;
+			entry->flags |= PHAR_ENT_DELETED;
+		}
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
