@@ -1530,34 +1530,71 @@ ZEND_FUNCTION(get_defined_vars)
 }
 /* }}} */
 
-
+#define LAMBDA_DECLARE_ENCODING	"declare(encoding=\"utf8\"); "
 #define LAMBDA_TEMP_FUNCNAME	"__lambda_func"
-/* {{{ proto string create_function(string args, string code)
+/* {{{ proto string create_function(string args, string code) U
    Creates an anonymous function, and returns its name (funny, eh?) */
 ZEND_FUNCTION(create_function)
 {
 	char *eval_code, *function_name;
 	int eval_code_length, function_name_length;
-	zval **z_function_args, **z_function_code;
+	zstr args, code;
+	int args_len, code_len;
+	zend_uchar type;
 	int retval;
 	char *eval_name;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &z_function_args, &z_function_code)==FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &args, &args_len, &type, &code, &code_len, &type) == FAILURE) {
+		return;
 	}
 
-	/* UTODO: Check whether the following always succeeds */
-	convert_to_string_ex(z_function_args);
-	convert_to_string_ex(z_function_code);
+	if (type == IS_UNICODE) {
+		char *str;
+		int len;
+		UErrorCode status = U_ZERO_ERROR;
 
-	eval_code_length = sizeof("function " LAMBDA_TEMP_FUNCNAME)
-			+Z_STRLEN_PP(z_function_args)
+		/* Convert args */
+		zend_unicode_to_string_ex(UG(utf8_conv), &str, &len, args.u, args_len, &status);
+		if (U_FAILURE(status)) {
+			if (str) {
+				efree(str);
+			}
+			zend_error(E_ERROR, "Unexpected error converting arguments to utf8 for compiling [%d]", (int)status);
+			RETURN_FALSE;
+		}
+		args.s = str;
+		args_len = len;
+
+		/* Convert code */
+		status = U_ZERO_ERROR;
+		zend_unicode_to_string_ex(UG(utf8_conv), &str, &len, code.u, code_len, &status);
+		if (U_FAILURE(status)) {
+			if (str) {
+				efree(str);
+			}
+			efree(args.s);
+			zend_error(E_ERROR, "Unexpected error converting code to utf8 for compiling [%d]", (int)status);
+			RETURN_FALSE;
+		}
+		code.s = str;
+		code_len = len;
+	}
+
+	eval_code_length = sizeof(LAMBDA_DECLARE_ENCODING "function " LAMBDA_TEMP_FUNCNAME)
+			+args_len
 			+2	/* for the args parentheses */
 			+2	/* for the curly braces */
-			+Z_STRLEN_PP(z_function_code);
+			+code_len;
 
 	eval_code = (char *) emalloc(eval_code_length);
-	sprintf(eval_code, "function " LAMBDA_TEMP_FUNCNAME "(%s){%s}", Z_STRVAL_PP(z_function_args), Z_STRVAL_PP(z_function_code));
+	sprintf(eval_code, "%sfunction " LAMBDA_TEMP_FUNCNAME "(%s){%s}",
+		(type == IS_UNICODE) ? LAMBDA_DECLARE_ENCODING : "",
+		args.s, code.s);
+
+	if (type == IS_UNICODE) {
+		efree(args.s);
+		efree(code.s);
+	}
 
 	eval_name = zend_make_compiled_string_description("runtime-created function" TSRMLS_CC);
 	retval = zend_eval_string(eval_code, NULL, eval_name TSRMLS_CC);
