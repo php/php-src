@@ -2366,7 +2366,29 @@ PHP_METHOD(Phar, offsetGet)
  */
 PHP_METHOD(Phar, offsetSet)
 {
-	zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Operation currently not supported");
+	char *fname;
+	int fname_len;
+	char *contents;
+	int contents_len;
+	PHAR_ARCHIVE_OBJECT();
+	phar_entry_data *data;
+	php_stream *fp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &fname, &fname_len, &contents, &contents_len) == FAILURE) {
+		return;
+	}
+
+	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, fname, fname_len TSRMLS_CC))) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created", fname);
+	} else {
+		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
+		fp = php_stream_open_wrapper(fname, "wb", STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
+		if (contents_len != php_stream_write(fp, contents, contents_len)) {
+			php_stream_close(fp);
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
+		}
+		php_stream_close(fp);
+	}
 }
 /* }}} */
 
