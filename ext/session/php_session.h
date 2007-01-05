@@ -23,6 +23,10 @@
 
 #include "ext/standard/php_var.h"
 
+#ifdef HAVE_HASH_EXT
+# include "ext/hash/php_hash.h"
+#endif
+
 #define PHP_SESSION_API 20020330
 
 #define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name TSRMLS_DC
@@ -121,6 +125,9 @@ typedef struct _php_ps_globals {
 	zend_bool apply_trans_sid;	/* whether or not to enable trans-sid for the current request */
 
 	long hash_func;
+#ifdef HAVE_HASH_EXT
+	php_hash_ops *hash_ops;
+#endif
 	long hash_bits_per_character;
 	int send_cookie;
 	int define_sid;

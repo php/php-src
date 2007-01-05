@@ -218,7 +218,8 @@ static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP
 
 enum {
 	PS_HASH_FUNC_MD5,
-	PS_HASH_FUNC_SHA1
+	PS_HASH_FUNC_SHA1,
+	PS_HASH_FUNC_OTHER
 };
 
 /* returns a pointer to the byte after the last valid character in out */
@@ -259,11 +260,15 @@ static char *bin_to_readable(char *in, size_t inlen, char *out, char nbits)
 	return out;
 }
 
+#define PS_ID_INITIAL_SIZE	100
 PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 {
 	PHP_MD5_CTX md5_context;
 	PHP_SHA1_CTX sha1_context;
-	unsigned char digest[21];
+#ifdef HAVE_HASH_EXT
+	void *hash_context;
+#endif
+	unsigned char *digest;
 	int digest_len;
 	int j;
 	char *buf;
@@ -282,7 +287,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 		remote_addr = Z_STRVAL_PP(token);
 	}
 
-	buf = emalloc(100);
+	buf = emalloc(PS_ID_INITIAL_SIZE);
 
 	/* maximum 15+19+19+10 bytes */	
 	sprintf(buf, "%.15s%ld%ld%0.8F", remote_addr ? remote_addr : "", 
@@ -299,6 +304,20 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 			PHP_SHA1Update(&sha1_context, (unsigned char *) buf, strlen(buf));
 			digest_len = 20;
 			break;
+#ifdef HAVE_HASH_EXT
+		case PS_HASH_FUNC_OTHER:
+			if (!PS(hash_ops)) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid session hash function");
+				efree(buf);
+				return NULL;
+			}
+
+			hash_context = emalloc(PS(hash_ops)->context_size);
+			PS(hash_ops)->hash_init(hash_context);
+			PS(hash_ops)->hash_update(hash_context, (unsigned char *) buf, strlen(buf));
+			digest_len = PS(hash_ops)->digest_size;
+			break;
+#endif /* HAVE_HASH_EXT */
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid session hash function");
 			efree(buf);
@@ -325,6 +344,11 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 					case PS_HASH_FUNC_SHA1:
 						PHP_SHA1Update(&sha1_context, rbuf, n);
 						break;
+#ifdef HAVE_HASH_EXT
+					case PS_HASH_FUNC_OTHER:
+						PS(hash_ops)->hash_update(hash_context, rbuf, n);
+						break;
+#endif /* HAVE_HASH_EXT */
 				}
 				to_read -= n;
 			}
@@ -332,6 +356,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 		}
 	}
 
+	digest = emalloc(digest_len + 1);
 	switch (PS(hash_func)) {
 		case PS_HASH_FUNC_MD5:
 			PHP_MD5Final(digest, &md5_context);
@@ -339,6 +364,12 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 		case PS_HASH_FUNC_SHA1:
 			PHP_SHA1Final(digest, &sha1_context);
 			break;
+#ifdef HAVE_HASH_EXT
+		case PS_HASH_FUNC_OTHER:
+			PS(hash_ops)->hash_final(digest, hash_context);
+			efree(hash_context);
+			break;
+#endif /* HAVE_HASH_EXT */
 	}
 
 	if (PS(hash_bits_per_character) < 4
@@ -347,7 +378,14 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
 	}
+
+	if (PS_ID_INITIAL_SIZE < ((digest_len + 2) * (8 / PS(hash_bits_per_character))) ) {
+		/* 100 bytes is enough for most, but not all hash algos */
+		buf = erealloc(buf, (digest_len + 2) * (8 / PS(hash_bits_per_character)) );
+	}
+
 	j = (int) (bin_to_readable((char *)digest, digest_len, buf, PS(hash_bits_per_character)) - buf);
+	efree(digest);
 	
 	if (newlen) {
 		*newlen = j;
@@ -526,6 +564,53 @@ static PHP_INI_MH(OnUpdateSaveDir)
 	return SUCCESS;
 }
 
+static PHP_INI_MH(OnUpdateHashFunc)
+{
+        long val;
+	char *endptr = NULL;
+
+#ifdef HAVE_HASH_EXT
+	PS(hash_ops) = NULL;
+#endif
+
+	val = strtol(new_value, &endptr, 10);
+	if (endptr && (*endptr == '\0')) {
+		/* Numeric value */
+		PS(hash_func) = val ? 1 : 0;
+
+		return SUCCESS;
+	}
+
+	if (new_value_length == (sizeof("md5") - 1) &&
+		strncasecmp(new_value, "md5", sizeof("md5") - 1) == 0) {
+		PS(hash_func) = PS_HASH_FUNC_MD5;
+
+		return SUCCESS;
+	}
+
+	if (new_value_length == (sizeof("sha1") - 1) &&
+		strncasecmp(new_value, "sha1", sizeof("sha1") - 1) == 0) {
+		PS(hash_func) = PS_HASH_FUNC_SHA1;
+
+		return SUCCESS;
+	}
+
+#ifdef HAVE_HASH_EXT
+{
+	php_hash_ops *ops = php_hash_fetch_ops(new_value, new_value_length);
+
+	if (ops) {
+		PS(hash_func) = PS_HASH_FUNC_OTHER;
+		PS(hash_ops) = ops;
+
+		return SUCCESS;
+	}
+}
+#endif /* HAVE_HASH_EXT */
+
+        return FAILURE;
+}
+
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
@@ -550,7 +635,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.cache_limiter",      "nocache",   PHP_INI_ALL, OnUpdateString, cache_limiter,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateLong,    cache_expire,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.use_trans_sid",    	"0",         PHP_INI_ALL, OnUpdateTransSid)
-	STD_PHP_INI_ENTRY("session.hash_function",      "0",         PHP_INI_ALL, OnUpdateLong,    hash_func,          php_ps_globals,    ps_globals)
+	PHP_INI_ENTRY("session.hash_function",		"0",         PHP_INI_ALL, OnUpdateHashFunc)
 	STD_PHP_INI_ENTRY("session.hash_bits_per_character",      "4",         PHP_INI_ALL, OnUpdateLong,    hash_bits_per_character,          php_ps_globals,    ps_globals)
 
 	/* Commented out until future discussion */
