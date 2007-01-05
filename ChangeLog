@@ -1,3 +1,47 @@
+2007-01-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.1RC2
+
+    * ext/session/mod_files.c:
+      
+      MFB: Added missing open_basedir checks
+
+    * (PHP_5_2)
+      ext/session/mod_files.c:
+      
+      Added missing open_basedir checks
+
+2007-01-04  Sara Golemon  <sara@golemon.com>
+
+    * ext/session/mod_files.c
+      ext/session/mod_mm.c
+      ext/session/mod_user.c
+      ext/session/php_session.h
+      ext/session/session.c:
+      Cleanup ext/session so that I can do a unicode update without going insane.
+
+2007-01-04  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * Makefile.gcov:
+      MFB
+
+    * (PHP_5_2)
+      Makefile.gcov:
+      remove --show-details from lcov's genhtml, as currently we don't separate
+      the coverage data per test, making this option useless
+
 2007-01-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/http.c:
