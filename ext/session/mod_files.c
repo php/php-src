@@ -94,7 +94,7 @@ static int ps_files_valid_key(const char *key)
 	return ret;
 }
 
-static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const char *key)
+static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const char *key TSRMLS_DC)
 {
 	size_t key_len;
 	const char *p;
@@ -180,7 +180,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 			PS(invalid_session_id) = 1;
 			return;
 		}
-		if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
+		if (!ps_files_path_create(buf, sizeof(buf), data, key TSRMLS_CC)) {
 			return;
 		}
 
@@ -430,7 +430,7 @@ PS_DESTROY_FUNC(files)
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
 
-	if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
+	if (!ps_files_path_create(buf, sizeof(buf), data, key TSRMLS_CC)) {
 		return FAILURE;
 	}
 
