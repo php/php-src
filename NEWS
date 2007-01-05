@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2006, Version 4.4.5
+04 Jan 2007, Version 4.4.5RC1
 - Added a meta tag to phpinfo() output to prevent search engines from 
   indexing the page. (Ilia)
 - Updated PCRE to version 6.7. (Ilia)
