@@ -5783,15 +5783,16 @@ PHP_FUNCTION(set_include_path)
 		new_value_len = temp_len;
 		free_new_value = 1;
 	} else if (UG(unicode)) {
-		const char *conv_name;
 		UErrorCode status = U_ZERO_ERROR;
 
-		conv_name = ucnv_getName(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &status);
-		conv_name = ucnv_getStandardName(conv_name, "MIME", &status);
-		if (strcmp(conv_name, "UTF-8") != 0) {
-			status = U_ZERO_ERROR;
+		if (ucnv_getType(ZEND_U_CONVERTER(UG(filesystem_encoding_conv))) != UCNV_UTF8) {
 			zend_convert_encodings(UG(utf8_conv), ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
 								   &temp, &temp_len, new_value.s, new_value_len, &status);
+			if (U_FAILURE(status)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not convert path parameter from filesystem encoding to UTF-8");
+				zval_dtor(return_value);
+				RETURN_FALSE;
+			}
 			new_value.s = temp;
 			new_value_len = temp_len;
 			free_new_value = 1;
