@@ -13,7 +13,8 @@ session.serialize_handler=php
 error_reporting(E_ALL);
 
 class handler {
-	public $data = 'baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}';
+    public $data = 'baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}';
+
     function open($save_path, $session_name)
     {
         print "OPEN: $session_name\n";
@@ -33,7 +34,7 @@ class handler {
     function write($key, $val)
     {
         print "WRITE: $key, $val\n";
-		$GLOBALS["hnd"]->data = $val;
+        $GLOBALS["hnd"]->data = $val;
         return true;
     }
 
@@ -44,6 +45,13 @@ class handler {
     }
 
     function gc() { return true; }
+
+    function __construct()
+    {
+        if (ini_get("unicode.semantics")) {
+            $this->data = str_replace('s:', 'U:', $this->data);
+        }
+    }
 }
 
 $hnd = new handler;
@@ -149,3 +157,64 @@ array(1) {
 int(123)
 DESTROY: abtest
 CLOSE
+--UEXPECTF--
+OPEN: PHPSESSID
+READ: abtest
+object(foo)#%d (2) {
+  [u"bar"]=>
+  unicode(2) "ok"
+  [u"yes"]=>
+  int(2)
+}
+array(1) {
+  [3]=>
+  object(foo)#%d (2) {
+    [u"bar"]=>
+    unicode(2) "ok"
+    [u"yes"]=>
+    int(2)
+  }
+}
+WRITE: abtest, baz|O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:2;}}
+CLOSE
+OPEN: PHPSESSID
+READ: abtest
+object(foo)#%d (2) {
+  [u"bar"]=>
+  unicode(2) "ok"
+  [u"yes"]=>
+  int(3)
+}
+array(1) {
+  [3]=>
+  object(foo)#%d (2) {
+    [u"bar"]=>
+    unicode(2) "ok"
+    [u"yes"]=>
+    int(3)
+  }
+}
+int(123)
+WRITE: abtest, baz|O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:3;}arr|a:1:{i:3;O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:3;}}c|i:123;
+CLOSE
+OPEN: PHPSESSID
+READ: abtest
+object(foo)#%d (2) {
+  [u"bar"]=>
+  unicode(2) "ok"
+  [u"yes"]=>
+  int(3)
+}
+array(1) {
+  [3]=>
+  object(foo)#%d (2) {
+    [u"bar"]=>
+    unicode(2) "ok"
+    [u"yes"]=>
+    int(3)
+  }
+}
+int(123)
+DESTROY: abtest
+CLOSE
+

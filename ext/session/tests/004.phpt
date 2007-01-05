@@ -12,7 +12,8 @@ session.serialize_handler=php
 error_reporting(E_ALL);
 
 class handler {
-	public $data = 'baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}';
+    public $data = 'baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}';
+
     function open($save_path, $session_name)
     {
         print "OPEN: $session_name\n";
@@ -42,6 +43,14 @@ class handler {
     }
 
     function gc() { return true; }
+
+    function __construct()
+    {
+	if (ini_get("unicode.semantics")) {
+		/* Setup proper deserialization data for unicode.semantics mode */
+	        $this->data = str_replace('s:', 'U:', $this->data);
+	}
+    }
 }
 
 $hnd = new handler;
@@ -55,6 +64,7 @@ session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, 
 
 session_id("abtest");
 session_start();
+
 $baz = $_SESSION['baz'];
 $arr = $_SESSION['arr'];
 $baz->method();
@@ -106,6 +116,43 @@ array(1) {
     ["bar"]=>
     string(2) "ok"
     ["yes"]=>
+    int(2)
+  }
+}
+DESTROY: abtest
+--UEXPECTF--
+OPEN: PHPSESSID
+READ: abtest
+object(foo)#%d (2) {
+  [u"bar"]=>
+  unicode(2) "ok"
+  [u"yes"]=>
+  int(2)
+}
+array(1) {
+  [3]=>
+  object(foo)#%d (2) {
+    [u"bar"]=>
+    unicode(2) "ok"
+    [u"yes"]=>
+    int(2)
+  }
+}
+WRITE: abtest, baz|O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:2;}}
+OPEN: PHPSESSID
+READ: abtest
+object(foo)#%d (2) {
+  [u"bar"]=>
+  unicode(2) "ok"
+  [u"yes"]=>
+  int(2)
+}
+array(1) {
+  [3]=>
+  object(foo)#%d (2) {
+    [u"bar"]=>
+    unicode(2) "ok"
+    [u"yes"]=>
     int(2)
   }
 }

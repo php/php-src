@@ -32,17 +32,17 @@ ps_module ps_mod_user = {
 	ZVAL_LONG(a, val);						\
 }
 
-#define SESS_ZVAL_STRING(vl, a) 					\
-{											\
-	int len = strlen(vl); 					\
-	MAKE_STD_ZVAL(a); 						\
-	ZVAL_STRINGL(a, vl, len, 1);			\
-}
 
 #define SESS_ZVAL_STRINGN(vl, ln, a) 			\
 {											\
 	MAKE_STD_ZVAL(a); 						\
-	ZVAL_STRINGL(a, vl, ln, 1);			\
+	ZVAL_UTF8_STRINGL(a, vl, ln, ZSTR_DUPLICATE);	\
+}
+
+#define SESS_ZVAL_STRING(vl, a) 					\
+{											\
+	char *__vl = vl;							\
+	SESS_ZVAL_STRINGN(__vl, strlen(__vl), a);	\
 }
 
 
@@ -126,7 +126,23 @@ PS_READ_FUNC(user)
 			*val = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 			*vallen = Z_STRLEN_P(retval);
 			ret = SUCCESS;
+		} else if (Z_TYPE_P(retval) == IS_UNICODE) {
+			char *sval = NULL;
+			int slen;
+			UErrorCode status = U_ZERO_ERROR;
+
+			zend_unicode_to_string_ex(UG(utf8_conv), &sval, &slen, Z_USTRVAL_P(retval), Z_USTRLEN_P(retval), &status);
+			if (U_FAILURE(status)) {
+				if (sval) {
+					efree(sval);
+				}
+			} else {
+				*val = sval;
+				*vallen = slen;
+				ret = SUCCESS;
+			}
 		}
+
 		zval_ptr_dtor(&retval);
 	}
 
