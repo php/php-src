@@ -1470,7 +1470,8 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 	char *manifest;
 	off_t manifest_ftell, bufsize;
 	long offset;
-	php_uint32 copy, loc, new_manifest_count, newcrc32;
+	php_uint32 copy, loc, new_manifest_count;
+	unsigned int newcrc32;
 	php_stream *file, *newfile, *compressedfile;
 	php_stream_filter *filter;
 
@@ -1531,11 +1532,11 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 				}
 				php_stream_read(entry->temp_file, buffer, copy);
 				php_stream_rewind(entry->temp_file);
-				newcrc32 = 0;
+				newcrc32 = ~0;
 				for (loc = 0;loc < copy; loc++) {
 					CRC32(newcrc32, *(buffer + loc));
 				}
-				entry->crc32 = newcrc32;
+				entry->crc32 = ~newcrc32;
 			}
 		} else {
 			if (-1 == php_stream_seek(data->fp, entry->offset_within_phar + data->phar->internal_file_start, SEEK_SET)) {
@@ -1574,14 +1575,14 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 			}
 			copy = php_stream_read(data->fp, buffer, entry->uncompressed_filesize);
 			entry->compressed_filesize = copy;
-			newcrc32 = 0;
+			newcrc32 = ~0;
 			for (loc = 0;loc < copy; loc++) {
 				CRC32(newcrc32, *(buffer + loc));
 			}
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			php_stream_rewind(compressedfile);
 			php_stream_write(compressedfile, buffer, copy); 
-			entry->crc32 = newcrc32;
+			entry->crc32 = ~newcrc32;
 			/* use temp_file to store the newly compressed data */
 			if (entry->temp_file) {
 				/* no longer need the uncompressed contents */
