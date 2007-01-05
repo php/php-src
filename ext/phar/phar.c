@@ -320,6 +320,10 @@ static phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path,
 		return NULL;
 	}
 	if (SUCCESS == zend_hash_find(&phar->manifest, path, path_len, (void**)&entry)) {
+		if (entry->flags & PHAR_ENT_DELETED) {
+			/* entry is deleted, but has not been flushed to disk yet */
+			return NULL;
+		}
 		return entry;
 	}
 	return NULL;
