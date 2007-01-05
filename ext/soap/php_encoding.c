@@ -937,7 +937,7 @@ static xmlNodePtr to_xml_long(encodeTypePtr type, zval *data, int style, xmlNode
 	if (Z_TYPE_P(data) == IS_DOUBLE) {
 		char s[256];
 
-		sprintf(s, "%0.0f",floor(Z_DVAL_P(data)));
+		sprintf(s, "%0.0F",floor(Z_DVAL_P(data)));
 		xmlNodeSetContent(ret, BAD_CAST(s));
 	} else {
 		zval tmp = *data;

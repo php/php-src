@@ -366,11 +366,11 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					break;
 				case SQL_FLOAT:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
-					*len = sprintf(*ptr, "%f", *(float*)var->sqldata);
+					*len = sprintf(*ptr, "%F", *(float*)var->sqldata);
 					break;
 				case SQL_DOUBLE:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
-					*len = sprintf(*ptr, "%f" , *(double*)var->sqldata);
+					*len = sprintf(*ptr, "%F" , *(double*)var->sqldata);
 					break;
 /* --- cut here --- */
 #if abies_0
