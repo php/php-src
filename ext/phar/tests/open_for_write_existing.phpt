@@ -28,7 +28,7 @@ file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.
 $fp = fopen('phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b/c.php', 'wb');
 fwrite($fp, 'extra');
 fclose($fp);
-include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b/c.php';
+include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b/c.php';exit;
 ?>
 ===DONE===
 --CLEAN--
