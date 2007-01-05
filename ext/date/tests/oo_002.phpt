@@ -19,10 +19,10 @@ var_dump($t->getName());
 $c = clone $t;
 var_dump($c->getName());
 ?>
---EXPECTF--
-string(29) "Tue, 01 Aug %d 13:00:00 +0000"
-string(29) "Tue, 01 Aug %d 13:00:00 +0000"
-string(29) "Tue, 01 Aug %d 14:00:00 +0000"
-string(29) "Tue, 01 Aug %d 12:59:59 +0000"
+--EXPECT--
+string(29) "Wed, 01 Aug 07 13:00:00 +0000"
+string(29) "Wed, 01 Aug 07 13:00:00 +0000"
+string(29) "Wed, 01 Aug 07 14:00:00 +0000"
+string(29) "Wed, 01 Aug 07 12:59:59 +0000"
 string(10) "Asia/Tokyo"
 string(10) "Asia/Tokyo"
