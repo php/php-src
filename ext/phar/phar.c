@@ -1425,7 +1425,7 @@ static size_t phar_write(php_stream *stream, const char *buf, size_t count TSRML
 	data->internal_file->uncompressed_filesize += count;
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize; 
 	data->internal_file->flags |= PHAR_ENT_MODIFIED;
-	return 0;
+	return count;
 }
 /* }}} */
 
@@ -1498,6 +1498,14 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 			php_stream_close(data->fp);
 			php_stream_close(newfile);
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to copy prologue of old phar to new phar \"%s\"", data->phar->fname);
+		}
+	} else {
+		/* this is a brand new phar */
+		data->phar->halt_offset = sizeof("<?php __HALT_COMPILER(); ?>");
+		if (sizeof("<?php __HALT_COMPILER(); ?>") != php_stream_write(newfile, "<?php __HALT_COMPILER(); ?>" ,sizeof("<?php __HALT_COMPILER(); ?>"))) {
+			php_stream_close(data->fp);
+			php_stream_close(newfile);
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to create prologue in new phar \"%s\"", data->phar->fname);
 		}
 	}
 	manifest_ftell = php_stream_tell(newfile);
@@ -1771,15 +1779,17 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 		php_stream_close(data->fp);
 		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to seek to __HALT_COMPILER(); in new phar \"%s\"", data->phar->fname);
 	}
-	
-	php_stream_close(data->fp);
+
+	if (data->fp) {
+		php_stream_close(data->fp);
+	}
 	data->fp = 0;
 	if (data->phar->fp) {
 		/* we will re-open this later */
 		php_stream_close(data->phar->fp);
 		data->phar->fp = 0;
 	}
-	
+
 	fname = estrndup(data->phar->fname, data->phar->fname_len);
 	fname_len = data->phar->fname_len;
 	alias = estrndup(data->phar->alias, data->phar->alias_len);
