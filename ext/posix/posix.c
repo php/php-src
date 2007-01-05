@@ -575,7 +575,12 @@ PHP_FUNCTION(posix_ttyname)
 			fd = Z_LVAL_PP(z_fd);
 	}
 #if HAVE_TTYNAME_R
+#ifdef _SC_TTY_NAME_MAX
 	buflen = sysconf(_SC_TTY_NAME_MAX);
+#else
+	/* Arbitrary buffer size for systems which don't extrospect their tty name lengths, way overkill */
+	buflen = 64;
+#endif
 	p = emalloc(buflen);
 
 	if (ttyname_r(fd, p, buflen)) {
