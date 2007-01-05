@@ -11,10 +11,10 @@ echo date('r', strtotime('May 18th 5:05am')), "\n";
 echo date('r', strtotime('May 18th 5:05 am')), "\n";
 echo date('r', strtotime('May 18th 2006 5:05pm')), "\n";
 ?>
---EXPECTF--
-Thu, 18 May %d 05:05:00 +0000
-Thu, 18 May %d 17:05:00 +0000
-Thu, 18 May %d 17:05:00 +0000
-Thu, 18 May %d 05:05:00 +0000
-Thu, 18 May %d 05:05:00 +0000
-Thu, 18 May %d 17:05:00 +0000
+--EXPECT--
+Fri, 18 May 2007 05:05:00 +0000
+Fri, 18 May 2007 17:05:00 +0000
+Fri, 18 May 2007 17:05:00 +0000
+Fri, 18 May 2007 05:05:00 +0000
+Fri, 18 May 2007 05:05:00 +0000
+Thu, 18 May 2006 17:05:00 +0000
