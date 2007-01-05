@@ -342,13 +342,13 @@ PHP_MINFO_FUNCTION(ldap)
 
 #if HAVE_NSLDAP
 	SDKVersion = ldap_version(&ver);
-	snprintf(tmp, 31, "%f", SDKVersion/100.0);
+	snprintf(tmp, 31, "%F", SDKVersion/100.0);
 	php_info_print_table_row(2, "SDK Version", tmp);
 
-	snprintf(tmp, 31, "%f", ver.protocol_version/100.0);
+	snprintf(tmp, 31, "%F", ver.protocol_version/100.0);
 	php_info_print_table_row(2, "Highest LDAP Protocol Supported", tmp);
 
-	snprintf(tmp, 31, "%f", ver.SSL_version/100.0);
+	snprintf(tmp, 31, "%F", ver.SSL_version/100.0);
 	php_info_print_table_row(2, "SSL Level Supported", tmp);
 
 	if (ver.security_level != LDAP_SECURITY_NONE) {
