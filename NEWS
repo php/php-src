@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? Jan 2007, PHP 5.2.1RC3
 - Improved proc_open(). Now on Windows it can run external commands not through
   CMD.EXE. (Dmitry)  
+- Fixed bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag,
+  not entity). (Hannes)
 
 04 Jan 2007, PHP 5.2.1RC2
 - Small optimization of the date() function (Matt,Ilia)
@@ -17,6 +19,10 @@ PHP                                                                        NEWS
   . canary protection (debug build only)
   . random generation of cookies and canaries
 - Added forward support for 'b' prefix in front of string literals. (Andrei)
+- Add three new functions to ext/xmlwriter (Rob, Ilia)
+  . xmlwriter_start_dtd_entity()
+  . xmlwriter_end_dtd_entity()
+  . xmlwriter_write_dtd_entity()
 - Fixed incorrect function names on FreeBSD where inet_pton() was named
   __inet_pton() and inet_ntop() was named __inet_ntop(). (Hannes)
 - Fixed the validate email filter so that the letter "v" can also be used in
