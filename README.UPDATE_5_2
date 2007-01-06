@@ -876,6 +876,13 @@ In ext/xmlwriter
      - End current element - returns FALSE on error
     bool xmlwriter_write_raw(resource xmlwriter, string content)
      - Write text - returns FALSE on error
+As of 5.2.1 #See http://cvs.php.net/viewvc.cgi/php-src/ext/xmlwriter/php_xmlwriter.c?r1=1.20.2.12.2.8&r2=1.20.2.12.2.9
+    bool xmlwriter_start_dtd_entity(resource xmlwriter, string name, bool isparam)
+     - Create start DTD Entity - returns FALSE on error
+    bool xmlwriter_end_dtd_entity(resource xmlwriter)
+     - End current DTD Entity - returns FALSE on error
+    bool xmlwriter_write_dtd_entity(resource xmlwriter, string name, string content [, int pe [, string pubid [, string sysid [, string ndataid]]]])
+     - Write full DTD Entity tag - returns FALSE on error
 
 
 New optional parameters
