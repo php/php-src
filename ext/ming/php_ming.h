@@ -78,7 +78,9 @@ PHP_METHOD(swfmovie, add);
 PHP_METHOD(swfmovie, remove);
 PHP_METHOD(swfmovie, nextFrame);
 PHP_METHOD(swfmovie, labelFrame);
+#ifdef HAVE_SWFMOVIE_NAMEDANCHOR
 PHP_METHOD(swfmovie, namedAnchor);
+#endif
 PHP_METHOD(swfmovie, setBackground);
 PHP_METHOD(swfmovie, setRate);
 PHP_METHOD(swfmovie, setDimension);
@@ -265,6 +267,8 @@ PHP_FUNCTION(ming_useSWFVersion);
 
 #ifdef HAVE_NEW_MING
 PHP_FUNCTION(ming_useConstants);
+#endif
+#ifdef HAVE_MING_SETSWFCOMPRESSION
 PHP_FUNCTION(ming_setSWFCompression);
 #endif
 
