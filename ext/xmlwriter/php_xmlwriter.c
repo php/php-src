@@ -1372,10 +1372,10 @@ static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	zval *this = getThis();
 
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&",
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&|ls&s&s&",
 			&name, &name_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv),
-			&pe, UG(utf8_conv), &pubid, &pubid_len, UG(utf8_conv), &sysid, &sysid_len, UG(utf8_conv),
-			UG(utf8_conv), &ndataid, &ndataid_len) == FAILURE) {
+			&pe, &pubid, &pubid_len, UG(utf8_conv), &sysid, &sysid_len, UG(utf8_conv),
+			&ndataid, &ndataid_len, UG(utf8_conv)) == FAILURE) {
 			return;
 		}
 		XMLWRITER_FROM_OBJECT(intern, this);
@@ -1384,8 +1384,8 @@ static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	{
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&s&|ls&s&s&", &pind, 
 			&name, &name_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv),
-			&pe, UG(utf8_conv), &pubid, &pubid_len, UG(utf8_conv), &sysid, &sysid_len, UG(utf8_conv),
-			UG(utf8_conv), &ndataid, &ndataid_len) == FAILURE) {
+			&pe, &pubid, &pubid_len, UG(utf8_conv), &sysid, &sysid_len, UG(utf8_conv),
+			&ndataid, &ndataid_len, UG(utf8_conv)) == FAILURE) {
  			return;
 		}
 		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
