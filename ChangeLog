@@ -1,3 +1,104 @@
+2007-01-05  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      ext/posix/config.m4:
+      MFH: (r-1.16) ttyname_r() is broken on BSD
+
+    * ext/posix/config.m4
+      ext/posix/posix.c:
+      Refix posix_ttyname(), test for a working implementation of ttyname_r() --
+      which BSD doesn't have
+
+    * ext/posix/posix.c:
+      BSD4.1 (possibly others) doesn't support _SC_TTY_NAME_MAX
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Update create_function()
+
+2007-01-05  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/basic_functions.c:
+      Clean up set_include_path().
+
+2007-01-05  Sara Golemon  <sara@golemon.com>
+
+    * ext/session/mod_files.c:
+      Don't bother with conversion when the converter is already UTF8
+
+2007-01-05  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/date/tests/bug37514.phpt
+      ext/date/tests/oo_002.phpt
+      ext/standard/tests/strings/bug26819.phpt:
+      MFB: Fix tests
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/bug26819.phpt:
+      Fix test according to bug#40009
+
+    * (PHP_5_2)
+      ext/date/tests/bug37514.phpt
+      ext/date/tests/oo_002.phpt:
+      Fix tests
+
+2007-01-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/fbsql/php_fbsql.c
+      ext/gd/gd.c
+      ext/ldap/ldap.c
+      ext/pdo_firebird/firebird_statement.c
+      ext/pgsql/pgsql.c
+      ext/soap/php_encoding.c
+      ext/standard/uniqid.c
+      ext/sysvmsg/sysvmsg.c:
+      
+      %f -> %F
+
+2007-01-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/session/mod_files.c
+      ext/session/session.c:
+      Fix ZTS issues.
+
+2007-01-05  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_4)
+      ext/curl/curl.dsp:
+      New curl lib needs CURL_STATICLIB define when linked statically
+
+2007-01-05  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to -dev
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - 4.4.5rc1
+
+2007-01-05  Sara Golemon  <sara@golemon.com>
+
+    * NEWS
+      ext/session/CREDITS
+      ext/session/php_session.h
+      ext/session/session.c:
+      Allow ext/session to use ext/hash's algorithms for generating IDs
+
+    * ext/session/mod_files.c
+      ext/session/mod_user.c
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/session/tests/001.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt:
+      Unicode Updates
+
 2007-01-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
