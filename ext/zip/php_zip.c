@@ -531,7 +531,9 @@ static void php_zip_free_dir(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	if (zip_int) {
 		if (zip_int->za) {
-			zip_close(zip_int->za);
+			if (zip_close(zip_int->za) != 0) {
+				_zip_free(zip_int->za);
+			}
 			zip_int->za = NULL;
 		}
 
@@ -904,17 +906,21 @@ static ZIPARCHIVE_METHOD(open)
 
 	if (ze_obj->za) {
 		/* we already have an opened zip, free it */
-		zip_close(ze_obj->za);
+		if (zip_close(ze_obj->za) != 0) {
+			_zip_free(ze_obj->za);
+		}
+		ze_obj->za = NULL;
 	}
 	if (ze_obj->filename) {
 		efree(ze_obj->filename);
+		ze_obj->filename = NULL;
 	}
 
 	intern = zip_open(resolved_path, flags, &err);
 	if (!intern || err) {
 		RETURN_LONG((long)err);
 	}
-	ze_obj->filename = estrndup(resolved_path, strlen(resolved_path));
+	ze_obj->filename = estrdup(resolved_path);
 	ze_obj->filename_len = filename_len;
 	ze_obj->za = intern;
 	RETURN_TRUE;
