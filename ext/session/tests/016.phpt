@@ -2,10 +2,6 @@
 invalid session.save_path should not cause a segfault
 --SKIPIF--
 <?php
-if (!extension_loaded("session") && ini_get("enable_dl")) {
-    $dlext = (substr(PHP_OS, 0, 3) == "WIN") ? ".dll" : ".so";
-    @dl("session$dlext");
-}
 if (!extension_loaded("session")) {
     die("skip Session module not loaded");
 }
