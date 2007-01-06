@@ -52,6 +52,8 @@ static zend_function_entry ming_functions[] = {
 	PHP_FALIAS(ming_keypress,           ming_keypress,           NULL)
 #ifdef HAVE_NEW_MING
 	PHP_FALIAS(ming_useconstants,		ming_useConstants,       NULL)
+#endif
+#ifdef HAVE_MING_SETSWFCOMPRESSION
 	PHP_FALIAS(ming_setswfcompression,	ming_setSWFCompression,  NULL)
 #endif
 	{ NULL, NULL, NULL }
@@ -142,7 +144,9 @@ PHP_FUNCTION(ming_useConstants)
 	Ming_useConstants(Z_LVAL_PP(num));
 }
 /* }}} */
+#endif
 
+#ifdef HAVE_MING_SETSWFCOMPRESSION
 /* {{{ set output compression */
 PHP_FUNCTION(ming_setSWFCompression)
 {  
@@ -154,7 +158,6 @@ PHP_FUNCTION(ming_setSWFCompression)
     Ming_setSWFCompression(Z_LVAL_PP(num));
 }
 /* }}} */
-
 #endif
 
 static int le_swfmoviep;
@@ -2192,6 +2195,7 @@ PHP_METHOD(swfmovie, labelFrame)
 }
 /* }}} */
 
+#ifdef HAVE_SWFMOVIE_NAMEDANCHOR
 /* {{{ proto void swfmovie::namedanchor(string name)
 */
 PHP_METHOD(swfmovie, namedAnchor)
@@ -2207,6 +2211,7 @@ PHP_METHOD(swfmovie, namedAnchor)
 	SWFMovie_namedAnchor(getMovie(getThis() TSRMLS_CC), Z_STRVAL_PP(name));
 }
 /* }}} */
+#endif
 
 /* {{{ proto void swfmovie::protect([ string pasword])
 */
@@ -2786,8 +2791,10 @@ static zend_function_entry swfmovie_functions[] = {
 	PHP_ME(swfmovie, importChar,        NULL, 0)
 	PHP_ME(swfmovie, importFont,        NULL, 0)
 	PHP_ME(swfmovie, addFont,           NULL, 0)
-	PHP_ME(swfmovie, namedAnchor,       NULL, 0)
 	PHP_ME(swfmovie, protect,           NULL, 0)
+#endif
+#ifdef HAVE_SWFMOVIE_NAMEDANCHOR
+	PHP_ME(swfmovie, namedAnchor,       NULL, 0)
 #endif
 	{ NULL, NULL, NULL }
 };
