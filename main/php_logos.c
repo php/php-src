@@ -31,7 +31,7 @@ typedef struct _php_info_logo {
 	int size; 
 } php_info_logo;
 
-HashTable phpinfo_logo_hash;
+static HashTable phpinfo_logo_hash;
 
 PHPAPI int php_register_info_logo(char *logo_string, const char *mimetype, const unsigned char *data, int size)
 {
