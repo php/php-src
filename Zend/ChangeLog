@@ -1,3 +1,8 @@
+2007-01-05  Sara Golemon  <sara@golemon.com>
+
+    * zend_builtin_functions.c:
+      Update create_function()
+
 2007-01-03  Antony Dovgal  <antony@zend.com>
 
     * zend_extensions.h
