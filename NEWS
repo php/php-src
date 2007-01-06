@@ -56,5 +56,3 @@ PHP                                                                        NEWS
 - Added str_getcsv() function. (Sara)
 - Added ext/hash support to ext/session's ID generator. (Sara)
 
-- Fixed bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag, 
-  not enity). (Hannes Magnusson)
