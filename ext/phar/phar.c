@@ -2396,9 +2396,9 @@ PHP_METHOD(Phar, offsetSet)
 	int fname_len;
 	char *contents;
 	int contents_len;
-	PHAR_ARCHIVE_OBJECT();
 	phar_entry_data *data;
 	php_stream *fp;
+	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &fname, &fname_len, &contents, &contents_len) == FAILURE) {
 		return;
