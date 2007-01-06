@@ -455,6 +455,7 @@ PHP_FUNCTION(proc_open)
 	int is_persistent = 0; /* TODO: ensure that persistent procs will work */
 #ifdef PHP_WIN32
 	int suppress_errors = 0;
+	int bypass_shell = 0;
 #endif
 #if PHP_CAN_DO_PTS
 	php_file_descriptor_t dev_ptmx = -1;	/* master */
@@ -476,8 +477,15 @@ PHP_FUNCTION(proc_open)
 		zval **item;
 #ifdef PHP_WIN32
 		if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors"), (void**)&item)) {
-			if (Z_TYPE_PP(item) == IS_BOOL && Z_BVAL_PP(item)) {
+			if ((Z_TYPE_PP(item) == IS_BOOL || Z_TYPE_PP(item) == IS_LONG) &&
+			    Z_LVAL_PP(item)) {
 				suppress_errors = 1;
+			}
+		}	
+		if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell"), (void**)&item)) {
+			if ((Z_TYPE_PP(item) == IS_BOOL || Z_TYPE_PP(item) == IS_LONG) &&
+			    Z_LVAL_PP(item)) {
+				bypass_shell = 1;
 			}
 		}	
 #endif
@@ -720,21 +728,25 @@ PHP_FUNCTION(proc_open)
 	
 	memset(&pi, 0, sizeof(pi));
 	
-	command_with_cmd = emalloc(command_len + sizeof(COMSPEC_9X) + 1 + sizeof(" /c "));
-	sprintf(command_with_cmd, "%s /c %s", GetVersion() < 0x80000000 ? COMSPEC_NT : COMSPEC_9X, command);
-
 	if (suppress_errors) {
 		old_error_mode = SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
 	}
 	
-	newprocok = CreateProcess(NULL, command_with_cmd, &security, &security, TRUE, NORMAL_PRIORITY_CLASS, env.envp, cwd, &si, &pi);
+	if (bypass_shell) {
+		newprocok = CreateProcess(NULL, command, &security, &security, TRUE, NORMAL_PRIORITY_CLASS, env.envp, cwd, &si, &pi);
+	} else {
+		command_with_cmd = emalloc(command_len + sizeof(COMSPEC_9X) + 1 + sizeof(" /c "));
+		sprintf(command_with_cmd, "%s /c %s", GetVersion() < 0x80000000 ? COMSPEC_NT : COMSPEC_9X, command);
+
+		newprocok = CreateProcess(NULL, command_with_cmd, &security, &security, TRUE, NORMAL_PRIORITY_CLASS, env.envp, cwd, &si, &pi);
+
+		efree(command_with_cmd);
+	}
 
 	if (suppress_errors) {
 		SetErrorMode(old_error_mode);
 	}
 	
-	efree(command_with_cmd);
-
 	if (FALSE == newprocok) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "CreateProcess failed");
 		goto exit_fail;
