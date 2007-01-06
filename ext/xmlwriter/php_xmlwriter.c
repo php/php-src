@@ -1336,7 +1336,7 @@ static PHP_FUNCTION(xmlwriter_end_dtd_entity)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_dtd_entity(resource xmlwriter, string name, string content)
+/* {{{ proto bool xmlwriter_write_dtd_entity(resource xmlwriter, string name, string content [, int pe [, string pubid [, string sysid [, string ndataid]]]])
 Write full DTD Entity tag - returns FALSE on error */
 static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 {
@@ -1345,21 +1345,26 @@ static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	xmlTextWriterPtr ptr;
 	char *name, *content;
 	int name_len, content_len, retval;
+	/* Optional parameters */
+	char *pubid = NULL, *sysid = NULL, *ndataid = NULL;
+	int pe = 0, pubid_len, sysid_len, ndataid_len;
 
 #ifdef ZEND_ENGINE_2
 	zval *this = getThis();
 
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
-			&name, &name_len, &content, &content_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|lsss",
+			&name, &name_len, &content, &content_len, &pe, &pubid, &pubid_len,
+			&sysid, &sysid_len, &ndataid, &ndataid_len) == FAILURE) {
 			return;
 		}
 		XMLWRITER_FROM_OBJECT(intern, this);
 	} else
 #endif
 	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss", &pind, 
-			&name, &name_len, &content, &content_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|lsss", &pind, 
+			&name, &name_len, &content, &content_len, &pe, &pubid, &pubid_len,
+			&sysid, &sysid_len, &ndataid, &ndataid_len) == FAILURE) {
 			return;
 		}
 		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
@@ -1370,7 +1375,7 @@ static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteDTDAttlist(ptr, (xmlChar *)name, (xmlChar *)content);
+		retval = xmlTextWriterWriteDTDEntity(ptr, pe, (xmlChar *)name, (xmlChar *)pubid, (xmlChar *)sysid, (xmlChar *)ndataid, (xmlChar *)content);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}

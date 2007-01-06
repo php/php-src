@@ -11,6 +11,10 @@ if (!extension_loaded("xmlwriter")) die("skip");
 $xw = xmlwriter_open_memory();
 xmlwriter_set_indent($xw, TRUE);
 xmlwriter_start_document($xw, NULL, "UTF-8");
+xmlwriter_start_dtd_entity($xw, "ent", false);
+xmlwriter_text($xw, "val");
+xmlwriter_end_dtd_entity($xw);
+xmlwriter_write_dtd_entity($xw, "ent2", "val2");
 xmlwriter_write_dtd_element($xw, 'sxe', '(elem1+, elem11, elem22*)');
 xmlwriter_write_dtd_attlist($xw, 'sxe', 'id     CDATA  #implied');
 xmlwriter_start_dtd_element($xw, 'elem1');
@@ -27,6 +31,8 @@ print $output;
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
+<!ENTITY ent "val">
+<!ENTITY ent2 "val2">
 <!ELEMENT sxe (elem1+, elem11, elem22*)>
 <!ATTLIST sxe id     CDATA  #implied>
 <!ELEMENT elem1 elem2*>
