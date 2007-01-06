@@ -1099,7 +1099,7 @@ PHP_FUNCTION(mysqli_info)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-	RETURN_UTF8_STRING(mysql->mysql->info, ZSTR_DUPLICATE);
+	RETURN_UTF8_STRING((mysql->mysql->info) ? mysql->mysql->info : "", ZSTR_DUPLICATE);
 }
 /* }}} */
 
