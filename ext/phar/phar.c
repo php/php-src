@@ -113,7 +113,7 @@ typedef struct _phar_manifest_entry {
 	char                     flags;
 	zend_bool                crc_checked;
 	php_stream               *fp;
-	php_stream		 *temp_file;
+	php_stream               *temp_file;
 } phar_entry_info;
 
 /* information about a phar file (the archive itself) */
@@ -422,7 +422,7 @@ static phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len
 		ret->fp = 0;
 	}
 	if (ret->internal_file->temp_file == 0) {
-		/* create atemporary stream for our new file */
+		/* create a temporary stream for our new file */
 		ret->internal_file->temp_file = php_stream_fopen_tmpfile();
 		ret->internal_file->flags |= PHAR_ENT_MODIFIED;
 	}
@@ -1176,6 +1176,7 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 		}
 		fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 		idata->phar->refcount++;
+		php_url_free(resource);
 		efree(internal_file);
 		return fpf;
 	} else {
@@ -1240,7 +1241,6 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 	}
 
 	if ((idata->internal_file->flags & PHAR_ENT_COMPRESSION_MASK) != 0) {
-		;
 		if ((filter_name = phar_decompress_filter(idata->internal_file, 0)) != NULL) {
 			filter = php_stream_filter_create(phar_decompress_filter(idata->internal_file, 0), NULL, php_stream_is_persistent(fp) TSRMLS_CC);
 		} else {
@@ -1295,6 +1295,7 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 
 	/* check length, crc32 */
 	if (phar_postprocess_file(wrapper, options, idata, idata->internal_file->crc32 TSRMLS_CC) != SUCCESS) {
+		/* already issued the error */
 		php_stream_close(idata->fp);
 		efree(idata);
 		efree(internal_file);
@@ -1884,6 +1885,10 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 	zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len);
 	zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len);
 	phar_open_file(file, fname, fname_len, alias, alias_len, halt_offset, NULL TSRMLS_CC);
+	efree(fname);
+	if (alias) {
+		efree(alias);
+	}
 	return EOF;
 }
 /* }}} */
@@ -2214,11 +2219,12 @@ static int phar_unlink(php_stream_wrapper *wrapper, char *url, int options, php_
 	}
 
 	if (PHAR_G(readonly)) {
+		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
 		return FAILURE;
 	}
 	
-	/* strip leading "/" */
+	/* need to copy to strip leading "/", will get touched again */
 	internal_file = estrdup(resource->path + 1);
 	if (NULL == (idata = phar_get_entry_data(resource->host, strlen(resource->host), internal_file, strlen(internal_file) TSRMLS_CC))) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\", cannot unlink", internal_file, resource->host);
@@ -2234,6 +2240,8 @@ static int phar_unlink(php_stream_wrapper *wrapper, char *url, int options, php_
 		}
 	}
 	idata->internal_file->flags |= PHAR_ENT_DELETED;
+	efree(idata);
+	efree(internal_file);
 	php_url_free(resource);
 	return SUCCESS;
 }
@@ -2490,6 +2498,8 @@ PHP_METHOD(Phar, offsetSet)
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
 		}
 		php_stream_close(fp);
+		efree(fname);
+		efree(data);
 	}
 }
 /* }}} */
