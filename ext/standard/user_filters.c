@@ -31,8 +31,10 @@
 
 struct php_user_filter_data {
 	zend_class_entry *ce;
-	/* variable length; this *must* be last in the structure */
-	char classname[1];
+
+	zend_uchar classname_type;
+	zstr classname;
+	int classname_len;
 };
 
 /* to provide context for calling into the next filter from user-space */
@@ -50,10 +52,13 @@ static int le_bucket;
 }
 
 /* define the base filter class */
-
-PHP_FUNCTION(user_filter_nop)
+/* {{{ proto void user_filter_nop(void) U
+Non-function */
+static PHP_FUNCTION(user_filter_nop)
 {
 }
+/* }}} */
+
 static
 ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_filter, 0)
 	ZEND_ARG_INFO(0, in)
@@ -269,10 +274,10 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		char *period;
 
 		/* Userspace Filters using ambiguous wildcards could cause problems.
-           i.e.: myfilter.foo.bar will always call into myfilter.foo.*
-                 never seeing myfilter.* 
-           TODO: Allow failed userfilter creations to continue
-                 scanning through the list */
+		   i.e.: myfilter.foo.bar will always call into myfilter.foo.*
+		   never seeing myfilter.* 
+		   TODO: Allow failed userfilter creations to continue
+		   scanning through the list */
 		if ((period = strrchr(filtername, '.'))) {
 			char *wildcard;
 
@@ -300,7 +305,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 	/* bind the classname to the actual class */
 	if (fdat->ce == NULL) {
-		if (FAILURE == zend_lookup_class(fdat->classname, strlen(fdat->classname),
+		if (FAILURE == zend_u_lookup_class(fdat->classname_type, fdat->classname, fdat->classname_len,
 					(zend_class_entry ***)&fdat->ce TSRMLS_CC)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"user-filter \"%s\" requires class \"%s\", but that class is not defined",
@@ -323,7 +328,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	PZVAL_IS_REF(obj) = 1;
 
 	/* filtername */
-	add_property_string(obj, "filtername", (char*)filtername, 1);
+	add_property_rt_string(obj, "filtername", (char*)filtername, 1);
 	
 	/* and the parameters, if any */
 	if (filterparams) {
@@ -378,9 +383,10 @@ static php_stream_filter_factory user_filter_factory = {
 
 static void filter_item_dtor(struct php_user_filter_data *fdat)
 {
+	efree(fdat->classname.v);
 }
 
-/* {{{ proto object stream_bucket_make_writeable(resource brigade)
+/* {{{ proto object stream_bucket_make_writeable(resource brigade) U
    Return a bucket object from the brigade for operating on */
 PHP_FUNCTION(stream_bucket_make_writeable)
 {
@@ -405,7 +411,7 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		zval_ptr_dtor(&zbucket);
 		if (bucket->buf_type == IS_UNICODE) {
 			add_property_unicodel(return_value, "data", bucket->buf.u, bucket->buflen, 1);
-			add_property_long(return_value, "datalen", bucket->buflen);
+			add_property_long(return_value, "datalen", u_countChar32(bucket->buf.u, bucket->buflen));
 		} else {
 			add_property_stringl(return_value, "data", bucket->buf.s, bucket->buflen, 1);
 			add_property_long(return_value, "datalen", bucket->buflen);
@@ -485,7 +491,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto void stream_bucket_prepend(resource brigade, resource bucket)
+/* {{{ proto void stream_bucket_prepend(resource brigade, resource bucket) U
    Prepend bucket to brigade */
 PHP_FUNCTION(stream_bucket_prepend)
 {
@@ -493,7 +499,7 @@ PHP_FUNCTION(stream_bucket_prepend)
 }
 /* }}} */
 
-/* {{{ proto void stream_bucket_append(resource brigade, resource bucket)
+/* {{{ proto void stream_bucket_append(resource brigade, resource bucket) U
    Append bucket to brigade */
 PHP_FUNCTION(stream_bucket_append)
 {
@@ -501,40 +507,40 @@ PHP_FUNCTION(stream_bucket_append)
 }
 /* }}} */
 
-/* {{{ proto resource stream_bucket_new(resource stream, string buffer)
+/* {{{ proto object stream_bucket_new(resource stream, string buffer) U
    Create a new bucket for use on the current stream */
 PHP_FUNCTION(stream_bucket_new)
 {
 	zval *zstream, *zbucket;
 	php_stream *stream;
-	zval *buffer;
+	zstr buffer;
+	int buffer_len;
+	zend_uchar buffer_type;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zstream, &buffer) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zt", &zstream, &buffer, &buffer_len, &buffer_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	php_stream_from_zval(stream, &zstream);
 
 	object_init(return_value);
-	if (Z_TYPE_P(buffer) == IS_UNICODE) {
-		UChar *pbuffer = peumalloc(Z_USTRLEN_P(buffer), php_stream_is_persistent(stream));
-		memcpy(pbuffer, buffer, UBYTES(Z_USTRLEN_P(buffer)));
+	if (buffer_type == IS_UNICODE) {
+		UChar *pbuffer = peustrndup(buffer.u, buffer_len, php_stream_is_persistent(stream));
 
-		bucket = php_stream_bucket_new_unicode(stream, pbuffer, Z_USTRLEN_P(buffer), 1, php_stream_is_persistent(stream) TSRMLS_CC);
+		bucket = php_stream_bucket_new_unicode(stream, pbuffer, buffer_len, 1, php_stream_is_persistent(stream) TSRMLS_CC);
 
-		add_property_zval(return_value, "data", buffer);
-		add_property_long(return_value, "datalen", Z_USTRLEN_P(buffer));
+		add_property_zstrl(return_value, "data", buffer_type, buffer, buffer_len, ZSTR_DUPLICATE);
+		add_property_long(return_value, "datalen", u_countChar32(buffer.u, buffer_len));
 	} else {
-		char *pbuffer = peumalloc(Z_STRLEN_P(buffer), php_stream_is_persistent(stream));
-		memcpy(pbuffer, buffer, Z_STRLEN_P(buffer));
+		char *pbuffer = pestrndup(buffer.s, buffer_len, php_stream_is_persistent(stream));
 
-		convert_to_string(buffer);
-		bucket = php_stream_bucket_new(stream, pbuffer, Z_STRLEN_P(buffer), 1, php_stream_is_persistent(stream) TSRMLS_CC);
+		bucket = php_stream_bucket_new(stream, pbuffer, buffer_len, 1, php_stream_is_persistent(stream) TSRMLS_CC);
  
-		add_property_zval(return_value, "data", buffer);
-		add_property_long(return_value, "datalen", Z_STRLEN_P(buffer));
+		add_property_zstrl(return_value, "data", buffer_type, buffer, buffer_len, ZSTR_DUPLICATE);
+		add_property_long(return_value, "datalen", buffer_len);
 	}
+
 	ALLOC_INIT_ZVAL(zbucket);
 	ZEND_REGISTER_RESOURCE(zbucket, bucket, le_bucket);
 	add_property_zval(return_value, "bucket", zbucket);
@@ -543,13 +549,14 @@ PHP_FUNCTION(stream_bucket_new)
 }
 /* }}} */
 
-/* {{{ proto array stream_get_filters(void)
+/* {{{ proto array stream_get_filters(void) U
    Returns a list of registered filters */
 PHP_FUNCTION(stream_get_filters)
 {
 	zstr filter_name;
 	uint key_flags, filter_name_len = 0;
 	HashTable *filters_hash;
+	HashPosition pos;
 	ulong num_key;
 
 	if (ZEND_NUM_ARGS() != 0) {
@@ -561,26 +568,30 @@ PHP_FUNCTION(stream_get_filters)
 	filters_hash = php_get_stream_filters_hash();
 
 	if (filters_hash) {
-		for(zend_hash_internal_pointer_reset(filters_hash);
-			(key_flags = zend_hash_get_current_key_ex(filters_hash, &filter_name, &filter_name_len, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT;
-			zend_hash_move_forward(filters_hash))
-				if (key_flags == HASH_KEY_IS_STRING)
-					add_next_index_stringl(return_value, filter_name.s, filter_name_len, 1);
+		for(zend_hash_internal_pointer_reset_ex(filters_hash, &pos);
+			(key_flags = zend_hash_get_current_key_ex(filters_hash, &filter_name, &filter_name_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTANT;
+			zend_hash_move_forward_ex(filters_hash, &pos)) {
+			if (key_flags == HASH_KEY_IS_STRING) {
+				add_next_index_rt_stringl(return_value, filter_name.s, filter_name_len, 1);
+			}
+		}
 	}
 	/* It's okay to return an empty array if no filters are registered */
 }
 /* }}} */	
 
-/* {{{ proto bool stream_filter_register(string filtername, string classname)
+/* {{{ proto bool stream_filter_register(string filtername, string classname) U
    Registers a custom filter handler class */
 PHP_FUNCTION(stream_filter_register)
 {
-	char *filtername, *classname;
+	char *filtername;
+	zstr classname;
 	int filtername_len, classname_len;
+	zend_uchar classname_type;
 	struct php_user_filter_data *fdat;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &filtername, &filtername_len,
-				&classname, &classname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "st", &filtername, &filtername_len,
+				&classname, &classname_len, &classname_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -601,8 +612,10 @@ PHP_FUNCTION(stream_filter_register)
 		zend_hash_init(BG(user_filter_map), 5, NULL, (dtor_func_t) filter_item_dtor, 0);
 	}
 
-	fdat = ecalloc(1, sizeof(*fdat) + classname_len);
-	memcpy(fdat->classname, classname, classname_len);
+	fdat = ecalloc(1, sizeof(struct php_user_filter_data));
+	fdat->classname_type = classname_type;
+	fdat->classname = ezstrndup(classname_type, classname, classname_len);
+	fdat->classname_len = classname_len;
 
 	if (zend_hash_add(BG(user_filter_map), filtername, filtername_len, (void*)fdat,
 				sizeof(*fdat) + classname_len, NULL) == SUCCESS &&
