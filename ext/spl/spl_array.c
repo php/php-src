@@ -476,7 +476,16 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 	
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
-		return zend_symtable_exists(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+		if (check_empty) {
+			zval **tmp;
+			HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+			if (zend_hash_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &tmp) != FAILURE && zend_is_true(*tmp)) {
+				return 1;
+			}
+			return 0;
+		} else {
+			return zend_symtable_exists(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+		}
 	case IS_DOUBLE:
 	case IS_RESOURCE:
 	case IS_BOOL: 
@@ -486,7 +495,16 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		} else {
 			index = Z_LVAL_P(offset);
 		}
-		return zend_hash_index_exists(spl_array_get_hash_table(intern, 0 TSRMLS_CC), index);
+		if (check_empty) {
+			zval **tmp;
+			HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+			if (zend_hash_index_find(ht, index, (void **)&tmp) != FAILURE && zend_is_true(*tmp)) {
+				return 1;
+			}
+			return 0;
+		} else {
+			return zend_hash_index_exists(spl_array_get_hash_table(intern, 0 TSRMLS_CC), index);
+		}
 	default:
 		zend_error(E_WARNING, "Illegal offset type");
 	}
