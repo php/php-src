@@ -1507,9 +1507,19 @@ static inline void phar_set_16(char *buffer, int var) /* {{{ */
 /**
  * Used to save work done on a writeable phar
  */
+static int do_phar_flush(phar_entry_data *data TSRMLS_DC);
 static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
+	if (strcmp(stream->mode, "wb") != 0 && strcmp(stream->mode, "w") != 0) {
+		return EOF;
+	}
+	return do_phar_flush(data TSRMLS_CC);
+}
+/* }}} */
+
+static int do_phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
+{
 	phar_entry_info *entry;
 	int alias_len, fname_len, halt_offset, restore_alias_len;
 	char *buffer, *fname, *alias;
@@ -1522,9 +1532,6 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 	php_stream_filter *filter;
 
 	if (PHAR_G(readonly)) {
-		return EOF;
-	}
-	if (strcmp(stream->mode, "wb") != 0 && strcmp(stream->mode, "w") != 0) {
 		return EOF;
 	}
 	newfile = php_stream_fopen_tmpfile();
@@ -2198,7 +2205,6 @@ static int phar_unlink(php_stream_wrapper *wrapper, char *url, int options, php_
 	php_url *resource;
 	char *internal_file;
 	phar_entry_data *idata;
-	php_stream *fpf;
 	
 	resource = php_url_parse(url);
 
@@ -2241,13 +2247,12 @@ static int phar_unlink(php_stream_wrapper *wrapper, char *url, int options, php_
 		}
 	}
 	idata->internal_file->flags |= PHAR_ENT_DELETED;
-	/* we need to "flush" the stream to save the newly deleted file on disk */
-	fpf = php_stream_alloc(&phar_ops, idata, NULL, "wb");
-	phar_flush(fpf TSRMLS_CC);
-	php_stream_close(fpf);
-	efree(idata);
 	efree(internal_file);
 	php_url_free(resource);
+	idata->internal_file = 0;
+	/* we need to "flush" the stream to save the newly deleted file on disk */
+	do_phar_flush(idata TSRMLS_CC);
+	efree(idata);
 	return SUCCESS;
 }
 /* }}} */
@@ -2517,6 +2522,7 @@ PHP_METHOD(Phar, offsetUnset)
 	char *fname;
 	int fname_len;
 	phar_entry_info *entry;
+	phar_entry_data *data;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly)) {
@@ -2536,6 +2542,14 @@ PHP_METHOD(Phar, offsetUnset)
 			}
 			entry->flags &= ~PHAR_ENT_MODIFIED;
 			entry->flags |= PHAR_ENT_DELETED;
+			/* we need to "flush" the stream to save the newly deleted file on disk */
+			data = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
+			data->phar = phar_obj->arc.archive;
+			data->fp = 0;
+			/* internal_file is unused in do_phar_flush, so we won't set it */
+			do_phar_flush(data TSRMLS_CC);
+			efree(data);
+			RETURN_TRUE;
 		}
 	} else {
 		RETURN_FALSE;
