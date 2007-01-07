@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   CMD.EXE. (Dmitry)  
 - Fixed bug #40036 (empty() does not work correctly with ArrayObject when using
   ARRAY_AS_PROPS). (Ilia)
+- Fixed bug #39979 (PGSQL_CONNECT_FORCE_NEW will causes next connect to
+  establish a new connection). (Ilia)
 - Fixed bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag,
   not entity). (Hannes)
 
