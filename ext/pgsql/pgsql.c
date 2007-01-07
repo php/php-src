@@ -629,6 +629,16 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	smart_str_appends(&str, "pgsql");
 	
 	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
+		/* make sure that the PGSQL_CONNECT_FORCE_NEW bit is not part of the hash so that subsequent connections
+		 * can re-use this connection. Bug #39979
+		 */ 
+		if (i == 1 && ZEND_NUM_ARGS() == 2 && Z_TYPE_PP(args[i]) == IS_LONG) {
+			if (Z_LVAL_PP(args[1]) == PGSQL_CONNECT_FORCE_NEW) {
+				continue;
+			} else if (Z_LVAL_PP(args[1]) & PGSQL_CONNECT_FORCE_NEW) {
+				smart_str_append_long(&str, Z_LVAL_PP(args[1]) ^ PGSQL_CONNECT_FORCE_NEW);
+			}
+		}
 		convert_to_string_ex(args[i]);
 		smart_str_appendc(&str, '_');
 		smart_str_appendl(&str, Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]));
