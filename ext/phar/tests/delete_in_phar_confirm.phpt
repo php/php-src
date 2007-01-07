@@ -1,5 +1,5 @@
 --TEST--
-Phar: delete a file within a .phar
+Phar: delete a file within a .phar (confirm disk file is changed)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --INI--
