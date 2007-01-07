@@ -28,7 +28,7 @@ class strtoupper_filter extends php_user_filter
 }
 
 stream_filter_register("strtoupper", "strtoupper_filter");
-$fp=fopen($file, "w");
+$fp=fopen($file, "wt");
 stream_filter_append($fp,  "strtoupper");
 fread($fp, 1024);
 fwrite($fp, "Thank you\n");
