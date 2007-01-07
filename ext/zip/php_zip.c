@@ -689,6 +689,7 @@ static PHP_FUNCTION(zip_read)
 			rsrc_int->index_current++;
 			ZEND_REGISTER_RESOURCE(return_value, zr_rsrc, le_zip_entry);
 		} else {
+			efree(zr_rsrc);
 			RETURN_FALSE;
 		}
 
@@ -770,6 +771,7 @@ static PHP_FUNCTION(zip_entry_read)
 			buffer[n] = 0;
 			RETURN_STRINGL(buffer, n, 0);
 		} else {
+			efree(buffer);
 			RETURN_EMPTY_STRING()
 		}
 	} else {
@@ -1815,6 +1817,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	buffer = safe_emalloc(len, 1, 2);
 	n = zip_fread(zf, buffer, len);
 	if (n < 1) {
+		efree(buffer);
 		RETURN_EMPTY_STRING();
 	}
 
