@@ -40,6 +40,7 @@ typedef struct _zend_leak_info {
 BEGIN_EXTERN_C()
 
 ZEND_API char *zend_strndup(const char *s, unsigned int length) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API UChar *zend_ustrdup(const UChar *s) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API UChar *zend_ustrndup(const UChar *s, uint length) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API zstr zend_zstrndup(int type, const zstr s, uint length);
 
@@ -55,8 +56,6 @@ ZEND_API UChar *_eustrdup(const UChar *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_D
 ZEND_API UChar *_eustrndup(const UChar *s, int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API zstr _ezstrndup(int type, const zstr s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API UChar *_peustrdup(const UChar *s) ZEND_ATTRIBUTE_MALLOC;
-ZEND_API UChar *_peustrndup(const UChar *s, int length) ZEND_ATTRIBUTE_MALLOC;
 
 /* Standard wrapper macros */
 #define emalloc(size)					_emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
@@ -96,8 +95,9 @@ ZEND_API UChar *_peustrndup(const UChar *s, int length) ZEND_ATTRIBUTE_MALLOC;
 #define pestrdup(s, persistent) ((persistent)?strdup(s):estrdup(s))
 #define peumalloc(size, persistent) ((persistent)?malloc(UBYTES(size)):eumalloc(size))
 #define peurealloc(ptr, size, persistent) ((persistent)?realloc((ptr),UBYTES(size)):eurealloc((ptr),size))
-#define peustrdup(s, persistent) ((persistent)?_peustrdup((s)):eustrdup((s)))
-#define peustrndup(s, length, persistent) ((persistent)?_peustrndup((s),(length)):eustrndup((s),(length)))
+#define peustrdup(s, persistent) ((persistent)?zend_ustrdup((s)):eustrdup((s)))
+#define peustrndup(s, length, persistent) ((persistent)?zend_ustrndup((s),(length)):eustrndup((s),(length)))
+#define pezstrndup(type, s, length, persistent) ((persistent)?zend_zstrndup((type),(s),(length)):ezstrndup((type),(s),(length)))
 
 #define pemalloc_rel(size, persistent) ((persistent)?malloc(size):emalloc_rel(size))
 #define pefree_rel(ptr, persistent)	((persistent)?free(ptr):efree_rel(ptr))

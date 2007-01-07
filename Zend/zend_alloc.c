@@ -2013,33 +2013,6 @@ ZEND_API UChar *_eustrndup(const UChar *s, int length ZEND_FILE_LINE_DC ZEND_FIL
 	return p;
 }
 
-ZEND_API UChar *_peustrdup(const UChar *s)
-{
-	int length;
-	UChar *p;
-
-	length = u_strlen(s)+1;
-	p = (UChar *) malloc(sizeof(UChar) * length);
-	if (!p) {
-		return (UChar *)NULL;
-	}
-	u_memcpy(p, s, length);
-	return p;
-}
-
-ZEND_API UChar *_peustrndup(const UChar *s, int length)
-{
-        UChar *p;
-
-        p = (UChar *) malloc(sizeof(UChar) * (length+1));
-        if (!p) {
-                return (UChar *)NULL;
-        }
-        memcpy(p, s, length * sizeof(UChar));
-        p[length] = 0;
-        return p;
-}
-
 ZEND_API zstr _ezstrndup(int type, const zstr s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	if (type == IS_STRING) {
@@ -2060,6 +2033,23 @@ ZEND_API char *zend_strndup(const char *s, uint length)
 	}
 	if (length) {
 		memcpy(p, s, length);
+	}
+	p[length] = 0;
+	return p;
+}
+
+ZEND_API UChar *zend_ustrdup(const UChar *s)
+{
+	UChar *p;
+	uint length;
+
+	length = u_strlen(s)+1;
+	p = (UChar *) malloc(UBYTES(length+1));
+	if (!p) {
+		return (UChar *)NULL;
+	}
+	if (length) {
+		memcpy(p, s, UBYTES(length));
 	}
 	p[length] = 0;
 	return p;
