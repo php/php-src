@@ -1467,6 +1467,8 @@ ZEND_API int add_property_unicode_ex(zval *arg, char *key, uint key_len, UChar *
 ZEND_API int add_property_unicodel_ex(zval *arg, char *key, uint key_len,  UChar *str, uint length, int duplicate TSRMLS_DC);
 ZEND_API int add_property_utf8_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
 ZEND_API int add_property_utf8_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC);
+ZEND_API int add_property_zstr_ex(zval *arg, char *key, uint key_len, zend_uchar type, zstr str, int duplicate TSRMLS_DC);
+ZEND_API int add_property_zstrl_ex(zval *arg, char *key, uint key_len, zend_uchar type, zstr str, uint length, int duplicate TSRMLS_DC);
 
 #define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key)+1, __n TSRMLS_CC)
 #define add_property_null(__arg, __key) add_property_null_ex(__arg, __key, strlen(__key) + 1 TSRMLS_CC)
@@ -1484,7 +1486,8 @@ ZEND_API int add_property_utf8_stringl_ex(zval *arg, char *key, uint key_len, ch
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value TSRMLS_CC)
 #define add_property_unicode(__arg, __key, __str, __duplicate) add_property_unicode_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
 #define add_property_unicodel(__arg, __key, __str, __length, __duplicate) add_property_unicodel_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
-
+#define add_property_zstr(__arg, __key, __type, __str, __duplicate) add_property_zstr_ex(__arg, __key, strlen(__key)+1, __type, __str, __duplicate TSRMLS_CC)
+#define add_property_zstrl(__arg, __key, __type, __str, __length, __duplicate) add_property_zstrl_ex(__arg, __key, strlen(__key)+1, __type, __str, __length, __duplicate TSRMLS_CC)
 
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC);
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);

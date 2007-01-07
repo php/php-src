@@ -1727,6 +1727,50 @@ ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval 
 	return SUCCESS;
 }
 
+ZEND_API int add_property_zstr_ex(zval *arg, char *key, uint key_len, zend_uchar type, zstr str, int duplicate TSRMLS_DC)
+{
+	zval *tmp;
+	zval *z_key;
+
+	if (type == IS_UNICODE) {
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_UNICODE(tmp, str.u, duplicate);
+	} else {
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_STRING(tmp, str.s, duplicate);
+	}
+
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
+	return SUCCESS;
+}
+
+ZEND_API int add_property_zstrl_ex(zval *arg, char *key, uint key_len, zend_uchar type, zstr str, uint length, int duplicate TSRMLS_DC)
+{
+	zval *tmp;
+	zval *z_key;
+
+	if (type == IS_UNICODE) {
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_UNICODEL(tmp, str.u, length, duplicate);
+	} else {
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_STRINGL(tmp, str.s, length, duplicate);
+	}
+
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
+	return SUCCESS;
+}
+
 ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC)
 {
 	int name_len;
