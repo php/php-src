@@ -1,9 +1,9 @@
 --TEST--
-Phar: fopen a .phar for writing (new file)
+Phar: delete a file within a .phar
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --INI--
-phar.readonly=0
+phar.readonly=1
 --FILE--
 <?php
 $file = "<?php __HALT_COMPILER(); ?>";
@@ -27,17 +27,30 @@ foreach($files as $cont)
 
 file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
 
-$fp = fopen('phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b/new.php', 'wb');
-fwrite($fp, 'extra');
-fclose($fp);
+include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/a.php';
+include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b.php';
 include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b/c.php';
-include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b/new.php';
+unlink('phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b/c.php');
+?>
+===AFTER===
+<?php
+include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/a.php';
+include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b.php';
+include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b/c.php';
 ?>
 
 ===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
---EXPECT--
+--EXPECTF--
+This is a
+This is b
 This is b/c
-extra
+
+Warning: unlink(): phar error: write operations disabled by INI setting in %sdelete_in_phar_b.php on line %d
+===AFTER===
+This is a
+This is b
+This is b/c
+
 ===DONE===

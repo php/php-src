@@ -2,6 +2,8 @@
 Phar: create a completely new phar
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
+--INI--
+phar.readonly=0
 --FILE--
 <?php
 

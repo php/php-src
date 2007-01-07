@@ -2,6 +2,8 @@
 Phar object: add file
 --SKIPIF--
 <?php if (!extension_loaded('phar')) die('skip'); ?>
+--INI--
+phar.readonly=0
 --FILE--
 <?php
 
