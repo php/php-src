@@ -2,6 +2,8 @@
 Phar: delete a file within a .phar
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
+--INI--
+phar.readonly=0
 --FILE--
 <?php
 $file = "<?php __HALT_COMPILER(); ?>";
@@ -47,5 +49,10 @@ This is b/c
 ===AFTER===
 This is a
 This is b
-Warning: include(%selete_in_phar.phpt.phar.php/b/c.php): failed to open stream: phar error: "b/c.php" is not a file in phar "%selete_in_phar.phpt.phar.php" in %selete_in_phar.phpt on line %d
+
+Warning: include(%sdelete_in_phar.phar.php/b/c.php): failed to open stream: phar error: "b/c.php" is not a file in phar "%sdelete_in_phar.phar.php" in %sdelete_in_phar.php on line %d
+
+Warning: include(): Failed opening 'phar://%sdelete_in_phar.phar.php/b/c.php' for inclusion (include_path='.') in %sdelete_in_phar.php on line %d
+
 ===DONE===
+		

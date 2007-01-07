@@ -2,6 +2,8 @@
 Phar: fopen a .phar for writing (existing file)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
+--INI--
+phar.readonly=0
 --FILE--
 <?php
 $file = "<?php __HALT_COMPILER(); ?>";
