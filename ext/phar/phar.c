@@ -2248,10 +2248,14 @@ static int phar_unlink(php_stream_wrapper *wrapper, char *url, int options, php_
 	}
 	idata->internal_file->flags |= PHAR_ENT_DELETED;
 	efree(internal_file);
-	php_url_free(resource);
 	idata->internal_file = 0;
+	efree(idata);
 	/* we need to "flush" the stream to save the newly deleted file on disk */
+	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
+	idata->fp = 0;
+	idata->phar = phar_get_archive(resource->host, strlen(resource->host), 0, 0 TSRMLS_CC);
 	do_phar_flush(idata TSRMLS_CC);
+	php_url_free(resource);
 	efree(idata);
 	return SUCCESS;
 }
