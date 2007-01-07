@@ -1,3 +1,93 @@
+2007-01-06  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * main/php_logos.c:
+      make a var static
+
+    * ext/zip/php_zip.c:
+      MFB
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      fix a few memleaks and double-free()s on error conditions
+
+    * ext/ming/config.m4
+      ext/ming/ming.c
+      ext/ming/php_ming.h:
+      MFB: fix build with libming 0.3
+
+    * (PHP_5_2)
+      ext/ming/config.m4
+      ext/ming/ming.c
+      ext/ming/php_ming.h:
+      fix build with libming 0.3 and older
+
+2007-01-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      update xmlwriter_write_dtd_entity parameters
+
+    * (PHP_5_2)
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/tests/bug39504.phpt:
+      MFH: parameter entity argument (pe) should be bool
+      update test
+
+    * ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/tests/bug39504.phpt:
+      parameter entity argument (pe) should be bool
+      update test
+
+2007-01-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/session/tests/016.phpt:
+      
+      
+      removed dl() block
+
+2007-01-06  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/session/tests/016.phpt:
+      MFB: fix skipif
+
+    * (PHP_5_2)
+      ext/session/tests/016.phpt:
+      Fix skipif
+
+    * (PHP_5_2)
+      NEWS
+      README.UPDATE_5_2:
+      ext/XMLWriter updates
+
+    * NEWS:
+      Remove bugfix entry (will be in 5.2.1)
+
+    * ext/xmlwriter/php_xmlwriter.c:
+      Fix parameter parsing
+
+    * (PHP_5_2)
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/tests/008.phpt
+      ext/xmlwriter/tests/bug39504.phpt:
+      MFH: bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag, not
+      entity)
+      Add & improve test
+
+2007-01-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/proc_open.c
+      ext/standard/proc_open.c:
+      Improved proc_open(). Now on Windows it can run external commands not
+      through CMD.EXE
+
+2007-01-06  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_api.c:
+      merged from 5_2 (mysqli_info crash)
+
 2007-01-05  Sara Golemon  <sara@golemon.com>
 
     * (PHP_5_2)
