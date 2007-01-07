@@ -54,9 +54,8 @@ This is b/c
 This is a
 This is b
 
-Warning: include(%sdelete_in_phar.phar.php/b/c.php): failed to open stream: phar error: "b/c.php" is not a file in phar "%sdelete_in_phar.phar.php" in %sdelete_in_phar.php on line %d
+Warning: include(%sdelete_in_phar_confirm.phar.php/b/c.php): failed to open stream: phar error: "b/c.php" is not a file in phar "%sdelete_in_phar_confirm.phar.php" in %sdelete_in_phar_confirm.php on line %d
 
-Warning: include(): Failed opening 'phar://%sdelete_in_phar.phar.php/b/c.php' for inclusion (include_path='.') in %sdelete_in_phar.php on line %d
+Warning: include(): Failed opening 'phar://%sdelete_in_phar_confirm.phar.php/b/c.php' for inclusion (include_path='.') in %sdelete_in_phar_confirm.php on line %d
 
 ===DONE===
-		
