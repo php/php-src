@@ -24,6 +24,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "php_main.h"
 #include "ext/standard/info.h"
 #include "php_spl.h"
 #include "spl_functions.h"
@@ -207,7 +208,7 @@ PHP_FUNCTION(spl_classes)
 }
 /* }}} */
 
-int spl_autoload(const char *class_name, const char * lc_name, int class_name_len, const char * file_extension TSRMLS_DC) /* {{{ */
+static int spl_autoload(const char *class_name, const char * lc_name, int class_name_len, const char * file_extension TSRMLS_DC) /* {{{ */
 {
 	char *class_file;
 	int class_file_len;
@@ -215,23 +216,11 @@ int spl_autoload(const char *class_name, const char * lc_name, int class_name_le
 	zend_file_handle file_handle;
 	zend_op_array *new_op_array;
 	zval *result = NULL;
-	zval err_mode;
 	int ret;
 
 	class_file_len = spprintf(&class_file, 0, "%s%s", lc_name, file_extension);
 
-	ZVAL_LONG(&err_mode, EG(error_reporting));
-	if (Z_LVAL(err_mode)) {
-		php_alter_ini_entry("error_reporting", sizeof("error_reporting"), "0", 1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
-	}
-
-	ret = zend_stream_open(class_file, &file_handle TSRMLS_CC);
-
-	if (!EG(error_reporting) && Z_LVAL(err_mode) != EG(error_reporting)) {
-		convert_to_string(&err_mode);
-		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(err_mode), Z_STRLEN(err_mode), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
-		zendi_zval_dtor(err_mode);
-	}
+	ret = php_stream_open_for_zend_ex(class_file, &file_handle, ENFORCE_SAFE_MODE|USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
 
 	if (ret == SUCCESS) {
 		if (!file_handle.opened_path) {
