@@ -4,6 +4,7 @@ Phar: delete a file within a .phar (confirm disk file is changed)
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --INI--
 phar.readonly=0
+phar.require_hash=0
 --FILE--
 <?php
 $file = "<?php __HALT_COMPILER(); ?>";

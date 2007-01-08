@@ -2,6 +2,8 @@
 Phar: phar:// include (repeated names)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
+--INI--
+phar.require_hash=0
 --FILE--
 <?php
 $file = "<?php __HALT_COMPILER(); ?>";

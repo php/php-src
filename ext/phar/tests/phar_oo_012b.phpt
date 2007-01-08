@@ -4,6 +4,7 @@ Phar object: unset file
 <?php if (!extension_loaded('phar')) die('skip'); ?>
 --INI--
 phar.readonly=1
+phar.require_hash=0
 --FILE--
 <?php
 

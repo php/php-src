@@ -3,6 +3,8 @@ Phar::mapPhar invalid file (gzipped file length is too short)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";
 if (!extension_loaded("zlib")) print "skip zlib not present"; ?>
+--INI--
+phar.require_hash=0
 --FILE--
 <?php
 $file = "<?php
