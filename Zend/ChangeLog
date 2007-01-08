@@ -1,3 +1,24 @@
+2007-01-07  Sara Golemon  <sara@golemon.com>
+
+    * zend_alloc.h:
+      Typo
+
+    * zend_API.c
+      zend_API.h:
+      Add add_property_zstr(l)(_ex)()
+
+    * zend_alloc.h:
+      Add pestrndup()
+
+    * zend_alloc.c
+      zend_alloc.h:
+      Fix prior commit noticing this time that persistent allocators start with
+      zend_*() and that one already exists
+
+    * zend_alloc.c
+      zend_alloc.h:
+      Flesh out some missing API calls
+
 2007-01-05  Sara Golemon  <sara@golemon.com>
 
     * zend_builtin_functions.c:

@@ -1,3 +1,72 @@
+2007-01-07  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend_alloc.h:
+      Typo
+
+2007-01-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/config.w32
+      ext/openssl/config0.m4
+      ext/openssl/openssl.c:
+      
+      Fixed bug #39394 (Missing check for older variants of openssl).
+
+2007-01-07  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/date/tests/bug37514.phpt:
+      Use relative timestamp
+
+    * (PHP_5_2)
+      ext/date/tests/bug37514.phpt:
+      Use relative timestamp
+
+2007-01-07  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/user_filters.c
+      ext/standard/tests/filters/001.phpt
+      ext/standard/tests/filters/bug35916.phpt:
+      Remaining unicode updates for user filters
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Add add_property_zstr(l)(_ex)()
+
+    * ZendEngine2/zend_alloc.h:
+      Add pestrndup()
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      Fix prior commit noticing this time that persistent allocators start with
+      zend_*() and that one already exists
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      Flesh out some missing API calls
+
+2007-01-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pgsql/pgsql.c:
+      
+      Fixed bug #39979 (PGSQL_CONNECT_FORCE_NEW will causes next connect to
+      establish a new connection).
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_array.c
+      ext/spl/tests/bug40036.phpt
+      ext/spl/tests/bug40036.phpt:
+      
+      Fixed bug #40036 (empty() does not work correctly with ArrayObject when
+      using ARRAY_AS_PROPS).
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      Fixed memory leaks on error
+
 2007-01-06  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * main/php_logos.c:
