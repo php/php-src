@@ -164,24 +164,28 @@ union _phar_entry_object {
 /* {{{ forward declarations */
 static int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar TSRMLS_DC);
 
-static php_stream *php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-static int phar_close(php_stream *stream, int close_handle TSRMLS_DC);
-static int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC);
-static int phar_seekdir(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
-static size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC);
-static size_t phar_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC);
-static int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
+static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC);
 
-static size_t phar_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
-static size_t phar_dirwrite(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
-static int phar_flush(php_stream *stream TSRMLS_DC);
-static int phar_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
-static int phar_dirflush(php_stream *stream TSRMLS_DC);
-static int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
+static php_stream* phar_wrapper_open_url(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+static php_stream* phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
+static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
 
-static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
-static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
-			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+/* file/stream handlers */
+static size_t phar_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
+static size_t phar_stream_read( php_stream *stream, char *buf, size_t count TSRMLS_DC);
+static int    phar_stream_close(php_stream *stream, int close_handle TSRMLS_DC);
+static int    phar_stream_flush(php_stream *stream TSRMLS_DC);
+static int    phar_stream_seek( php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
+static int    phar_stream_stat( php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
+
+/* directory handlers */
+static size_t phar_dir_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
+static size_t phar_dir_read( php_stream *stream, char *buf, size_t count TSRMLS_DC);
+static int    phar_dir_close(php_stream *stream, int close_handle TSRMLS_DC);
+static int    phar_dir_flush(php_stream *stream TSRMLS_DC);
+static int    phar_dir_seek( php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
+static int    phar_dir_stat( php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 /* }}} */
 
 static zend_class_entry *phar_ce_archive;
@@ -215,9 +219,9 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 static void destroy_phar_data(void *pDest) /* {{{ */
 {
 	phar_archive_data *phar_data = *(phar_archive_data **) pDest;
-	TSRMLS_FETCH();
-
 	if (--phar_data->refcount < 0) {
+		TSRMLS_FETCH();
+
 		phar_destroy_phar_data(phar_data TSRMLS_CC);
 	}
 }
@@ -1048,37 +1052,37 @@ PHP_METHOD(Phar, loadPhar)
 } /* }}} */
 
 static php_stream_ops phar_ops = {
-	phar_write, /* write */
-	phar_read, /* read */
-	phar_close, /* close */
-	phar_flush, /* flush */
+	phar_stream_write, /* write */
+	phar_stream_read,  /* read */
+	phar_stream_close, /* close */
+	phar_stream_flush, /* flush */
 	"phar stream",
-	phar_seek, /* seek */
+	phar_stream_seek, /* seek */
 	NULL, /* cast */
-	phar_stat, /* stat */
+	phar_stream_stat, /* stat */
 	NULL, /* set option */
 };
 
 static php_stream_ops phar_dir_ops = {
-	phar_dirwrite, /* write (does nothing) */
-	phar_readdir, /* read */
-	phar_closedir, /* close */
-	phar_dirflush, /* flush (does nothing) */
+	phar_dir_write, /* write (does nothing) */
+	phar_dir_read,  /* read */
+	phar_dir_close, /* close */
+	phar_dir_flush, /* flush (does nothing) */
 	"phar stream",
-	phar_seekdir, /* seek */
+	phar_dir_seek, /* seek */
 	NULL, /* cast */
-	phar_stat, /* stat */
+	phar_dir_stat, /* stat */
 	NULL, /* set option */
 };
 
 static php_stream_wrapper_ops phar_stream_wops = {
-    php_stream_phar_url_wrapper,
-    NULL, /* stream_close */
-    NULL, /* php_stream_phar_stat, */
-    phar_stream_stat, /* stat_url */
-    phar_opendir, /* opendir */
+    phar_wrapper_open_url,
+    NULL, /* phar_wrapper_close */
+    NULL, /* phar_wrapper_stat, */
+    phar_wrapper_stat, /* stat_url */
+    phar_wrapper_open_dir, /* opendir */
     "phar",
-    phar_unlink, /* unlink */
+    phar_wrapper_unlink, /* unlink */
     NULL, /* rename */
     NULL, /* create directory */
     NULL /* remove directory */
@@ -1134,7 +1138,7 @@ static char * phar_decompress_filter(phar_entry_info * entry, int return_unknown
 /**
  * used for fopen('phar://...') and company
  */
-static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
+static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *idata;
 	char *internal_file;
@@ -1313,7 +1317,7 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 /**
  * Used for fclose($fp) where $fp is a phar archive
  */
-static int phar_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
+static int phar_stream_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 
@@ -1339,7 +1343,7 @@ static int phar_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 /**
  * Used for closedir($fp) where $fp is an opendir('phar://...') directory handle
  */
-static int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC)  /* {{{ */
+static int phar_dir_close(php_stream *stream, int close_handle TSRMLS_DC)  /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
@@ -1357,7 +1361,7 @@ static int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC)  /* {{{
 /**
  * Used for seeking on a phar directory handle
  */
-static int phar_seekdir(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
+static int phar_dir_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
@@ -1389,7 +1393,7 @@ static int phar_seekdir(php_stream *stream, off_t offset, int whence, off_t *new
 /**
  * used for fread($fp) and company on a fopen()ed phar file handle
  */
-static size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
+static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 
@@ -1406,7 +1410,7 @@ static size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /
 /**
  * Used for readdir() on an opendir()ed phar directory handle
  */
-static size_t phar_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
+static size_t phar_dir_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	size_t to_read;
 	HashTable *data = (HashTable *)stream->abstract;
@@ -1436,7 +1440,7 @@ static size_t phar_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC
 /**
  * Used for fseek($fp) on a phar file handle
  */
-static int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
+static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 
@@ -1449,7 +1453,7 @@ static int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoff
 /**
  * Used for writing to a phar file
  */
-static size_t phar_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
+static size_t phar_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *) stream->abstract;
 
@@ -1472,7 +1476,7 @@ static size_t phar_write(php_stream *stream, const char *buf, size_t count TSRML
 /**
  * Dummy: Used for writing to a phar directory (i.e. not used)
  */
-static size_t phar_dirwrite(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
+static size_t phar_dir_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	return 0;
 }
@@ -1504,21 +1508,7 @@ static inline void phar_set_16(char *buffer, int var) /* {{{ */
 #endif
 } /* }}} */
 
-/**
- * Used to save work done on a writeable phar
- */
-static int do_phar_flush(phar_entry_data *data TSRMLS_DC);
-static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
-{
-	phar_entry_data *data = (phar_entry_data *)stream->abstract;
-	if (strcmp(stream->mode, "wb") != 0 && strcmp(stream->mode, "w") != 0) {
-		return EOF;
-	}
-	return do_phar_flush(data TSRMLS_CC);
-}
-/* }}} */
-
-static int do_phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
+static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *entry;
 	int alias_len, fname_len, halt_offset, restore_alias_len;
@@ -1901,9 +1891,22 @@ static int do_phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /**
+ * Used to save work done on a writeable phar
+ */
+static int phar_stream_flush(php_stream *stream TSRMLS_DC) /* {{{ */
+{
+	phar_entry_data *data = (phar_entry_data *)stream->abstract;
+	if (strcmp(stream->mode, "wb") != 0 && strcmp(stream->mode, "w") != 0) {
+		return EOF;
+	}
+	return phar_flush(data TSRMLS_CC);
+}
+/* }}} */
+
+/**
  * Dummy: Used for flushing writes to a phar directory (i.e. not used)
  */
-static int phar_dirflush(php_stream *stream TSRMLS_DC) /* {{{ */
+static int phar_dir_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	return EOF;
 }
@@ -1978,7 +1981,22 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
 /**
  * Stat an opened phar file handle
  */
-static int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
+static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
+{
+	phar_entry_data *data;
+	/* If ssb is NULL then someone is misbehaving */
+	if (!ssb) return -1;
+
+	data = (phar_entry_data *)stream->abstract;
+	phar_dostat(data->phar, data->internal_file, ssb, 0, data->phar->alias, data->phar->alias_len TSRMLS_CC);
+	return 0;
+}
+/* }}} */
+
+/**
+ * Stat a dir in a phar
+ */
+static int phar_dir_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data;
 	/* If ssb is NULL then someone is misbehaving */
@@ -1993,7 +2011,7 @@ static int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {
 /**
  * Stream wrapper stat implementation of stat()
  */
-static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
+static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 				  php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
@@ -2082,7 +2100,7 @@ static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)  /* {{{ *
 /**
  * Used for sorting directories alphabetically
  */
-static int compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{ */
+static int phar_compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{ */
 {
 	Bucket *f;
 	Bucket *s;
@@ -2184,7 +2202,7 @@ PHAR_ADD_ENTRY:
 	}
 	if (FAILURE != zend_hash_has_more_elements(data)) {
 		efree(dir);
-		if (zend_hash_sort(data, zend_qsort, compare_dir_name, 0 TSRMLS_CC) == FAILURE) {
+		if (zend_hash_sort(data, zend_qsort, phar_compare_dir_name, 0 TSRMLS_CC) == FAILURE) {
 			FREE_HASHTABLE(data);
 			return NULL;
 		}
@@ -2200,7 +2218,7 @@ PHAR_ADD_ENTRY:
 /**
  * Unlink a file within a phar archive
  */
-static int phar_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
+static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource;
 	char *internal_file;
@@ -2254,7 +2272,7 @@ static int phar_unlink(php_stream_wrapper *wrapper, char *url, int options, php_
 	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
 	idata->fp = 0;
 	idata->phar = phar_get_archive(resource->host, strlen(resource->host), 0, 0 TSRMLS_CC);
-	do_phar_flush(idata TSRMLS_CC);
+	phar_flush(idata TSRMLS_CC);
 	php_url_free(resource);
 	efree(idata);
 	return SUCCESS;
@@ -2264,7 +2282,7 @@ static int phar_unlink(php_stream_wrapper *wrapper, char *url, int options, php_
 /**
  * Open a directory handle within a phar archive
  */
-static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
+static php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char *mode,
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
@@ -2275,27 +2293,27 @@ static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, cha
 	phar_archive_data *phar;
 	phar_entry_info *entry;
 
-	resource = php_url_parse(filename);
+	resource = php_url_parse(path);
 
-	if (!resource && (resource = phar_open_url(wrapper, filename, mode, options TSRMLS_CC)) == NULL) {
+	if (!resource && (resource = phar_open_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
 		return NULL;
 	}
 
 	/* we must have at the very least phar://alias.phar/ */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		if (resource->host && !resource->path) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory", filename, resource->host);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory", path, resource->host);
 			php_url_free(resource);
 			return NULL;
 		}
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\", must have at least phar://%s/", filename, filename);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\", must have at least phar://%s/", path, path);
 		return NULL;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar url \"%s\"", filename);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar url \"%s\"", path);
 		return NULL;
 	}
 
@@ -2550,8 +2568,8 @@ PHP_METHOD(Phar, offsetUnset)
 			data = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
 			data->phar = phar_obj->arc.archive;
 			data->fp = 0;
-			/* internal_file is unused in do_phar_flush, so we won't set it */
-			do_phar_flush(data TSRMLS_CC);
+			/* internal_file is unused in phar_flush, so we won't set it */
+			phar_flush(data TSRMLS_CC);
 			efree(data);
 			RETURN_TRUE;
 		}
