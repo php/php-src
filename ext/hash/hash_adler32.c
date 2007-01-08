@@ -49,7 +49,7 @@ PHP_HASH_API void PHP_ADLER32Final(unsigned char digest[4], PHP_ADLER32_CTX *con
 	context->state = 0;
 }
 
-php_hash_ops php_hash_adler32_ops = {
+const php_hash_ops php_hash_adler32_ops = {
 	(php_hash_init_func_t) PHP_ADLER32Init,
 	(php_hash_update_func_t) PHP_ADLER32Update,
 	(php_hash_final_func_t) PHP_ADLER32Final,
