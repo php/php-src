@@ -2,6 +2,8 @@
 Phar::loadPhar overloading alias names
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
+--INI--
+phar.require_hash=0
 --FILE--
 <?php
 $fname1 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.phar.php';

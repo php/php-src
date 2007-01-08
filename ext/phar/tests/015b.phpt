@@ -3,6 +3,8 @@ Phar::mapPhar valid file (bzip2)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";
 if (!extension_loaded("bz2")) print "skip bz2 not present"; ?>
+--INI--
+phar.require_hash=0
 --FILE--
 <?php
 $file = "<?php

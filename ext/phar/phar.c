@@ -29,6 +29,8 @@
 #include "ext/standard/info.h"
 #include "ext/standard/url.h"
 #include "ext/standard/crc32.h"
+#include "ext/standard/md5.h"
+#include "ext/standard/sha1.h"
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
 #include "ext/spl/spl_engine.h"
@@ -65,6 +67,12 @@
 #define PHAR_HDR_ANY_COMPRESSED   0x0001
 #define PHAR_HDR_SIGNATURE        0x0008
 
+#define PHAR_SIG_MD5              0x0001
+#define PHAR_SIG_SHA1             0x0002
+#define PHAR_SIG_PGP              0x0010
+
+#define PHAR_SIG_USE  PHAR_SIG_SHA1
+
 /* flags byte for each file adheres to these bitmasks.
    All unused values are reserved */
 #define PHAR_ENT_COMPRESSION_MASK 0x0F
@@ -82,12 +90,14 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_fname_map;
 	HashTable   phar_alias_map;
 	int         readonly;
+	int         require_hash;
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("phar.readonly", "1", PHP_INI_SYSTEM, OnUpdateBool, readonly, zend_phar_globals, phar_globals)
+	STD_PHP_INI_BOOLEAN("phar.readonly",     "1", PHP_INI_SYSTEM, OnUpdateBool, readonly,     zend_phar_globals, phar_globals)
+	STD_PHP_INI_BOOLEAN("phar.require_hash", "1", PHP_INI_SYSTEM, OnUpdateBool, require_hash, zend_phar_globals, phar_globals)
 PHP_INI_END()
 
 #ifndef php_uint16
@@ -591,9 +601,103 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		efree(savebuf);
 		return FAILURE;
 	}
+
 	/* The lowest nibble contains the phar wide flags. The any compressed can */
 	/* be ignored on reading because it is being generated anyways. */
+	if (manifest_tag & PHAR_HDR_SIGNATURE) {
+		unsigned char buf[1024];
+		int read_size, len;
+		php_uint32 sig_flags;
+		char sig_buf[8], *sig_ptr = sig_buf;
+		off_t read_len;
 
+		if (-1 == php_stream_seek(fp, -8, SEEK_END)
+		|| (read_len = php_stream_tell(fp)) < 20
+		|| 8 != php_stream_read(fp, sig_buf, 8) 
+		|| memcmp(sig_buf+4, "GBMB", 4)) {
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
+			efree(savebuf);
+			return FAILURE;
+		}
+		PHAR_GET_32(sig_ptr, sig_flags);
+		switch(sig_flags) {
+		case PHAR_SIG_SHA1: {
+			unsigned char digest[20], saved[20];
+			PHP_SHA1_CTX  context;
+
+			php_stream_rewind(fp);
+			PHP_SHA1Init(&context);
+			read_len -= sizeof(digest);
+			if (read_len > sizeof(buf)) {
+				read_size = sizeof(buf);
+			} else {
+				read_size = (int)read_len;
+			}
+			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
+				PHP_SHA1Update(&context, buf, len);
+				read_len -= (off_t)len;
+				if (read_len < read_size) {
+					read_size = (int)read_len;
+				}
+			}
+			PHP_SHA1Final(digest, &context);
+
+			if (read_len > 0
+			|| php_stream_read(fp, (char*)saved, sizeof(saved)) != sizeof(saved)
+			|| memcmp(digest, saved, sizeof(digest))) {
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
+				efree(savebuf);
+				return FAILURE;
+			}
+
+			break;
+		}
+		case PHAR_SIG_MD5: {
+			unsigned char digest[16], saved[16];
+			PHP_MD5_CTX   context;
+
+			php_stream_rewind(fp);
+			PHP_MD5Init(&context);
+			read_len -= sizeof(digest);
+			if (read_len > sizeof(buf)) {
+				read_size = sizeof(buf);
+			} else {
+				read_size = (int)read_len;
+			}
+			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
+				PHP_MD5Update(&context, buf, len);
+				read_len -= (off_t)len;
+				if (read_len < read_size) {
+					read_size = (int)read_len;
+				}
+			}
+			PHP_MD5Final(digest, &context);
+
+			if (read_len > 0
+			|| php_stream_read(fp, (char*)saved, sizeof(saved)) != sizeof(saved)
+			|| memcmp(digest, saved, sizeof(digest))) {
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
+				efree(savebuf);
+				return FAILURE;
+			}
+
+			break;
+		}
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
+			efree(savebuf);
+			return FAILURE;
+		}
+	} else if (PHAR_G(require_hash)) {
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" does not have a signature", fname);
+		efree(savebuf);
+		return FAILURE;
+	}
+
+/*xxx*/
+#define PHAR_SIG_MD5              0x0001
+#define PHAR_SIG_SHA1             0x0002
+#define PHAR_SIG_PGP              0x0010
 	/* extract alias */
 	PHAR_GET_32(buffer, tmp_len);
 	if (buffer + tmp_len > endbuffer) {
@@ -1511,7 +1615,7 @@ static inline void phar_set_16(char *buffer, int var) /* {{{ */
 static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *entry;
-	int alias_len, fname_len, halt_offset, restore_alias_len;
+	int alias_len, fname_len, halt_offset, restore_alias_len, global_flags = 0;
 	char *buffer, *fname, *alias;
 	char *manifest;
 	off_t manifest_ftell, bufsize;
@@ -1670,6 +1774,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			file = entry->temp_file;
 			entry->compressed_filesize = copy;
 			entry->flags |= PHAR_ENT_MODIFIED;
+			global_flags |= PHAR_HDR_ANY_COMPRESSED;
 		}
 	}
 	php_stream_close(compressedfile);
@@ -1693,8 +1798,11 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 		phar_set_32(manifest+10, 0);
 		data->phar->alias_len = 0;
 	}
+
+	global_flags |= PHAR_HDR_SIGNATURE;
+
 	*(manifest + 8) = (unsigned char) (((PHAR_API_VERSION) >> 8) & 0xFF);
-	*(manifest + 9) = (unsigned char) ((PHAR_API_VERSION) & 0xFF);
+	*(manifest + 9) = (unsigned char) (((PHAR_API_VERSION) & 0xF0) | (global_flags & 0x0F));
 
 	/* write the manifest header */
 	if (14 + data->phar->alias_len != php_stream_write(newfile, manifest, 14 + data->phar->alias_len)) {
@@ -1821,6 +1929,50 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 				entry->flags &= ~PHAR_ENT_MODIFIED;
 			}
 		}
+	}
+
+	/* append signature */
+	if (global_flags & PHAR_HDR_SIGNATURE) {
+		unsigned char buf[1024];
+		int  sig_flags = 0, len;
+		char sig_buf[4];
+
+		php_stream_rewind(newfile);
+		
+		switch(PHAR_SIG_USE) {
+		case PHAR_SIG_PGP:
+			/* TODO: currently fall back to sha1,later do both */
+		default:
+		case PHAR_SIG_SHA1: {
+			unsigned char digest[20];
+			PHP_SHA1_CTX  context;
+
+			PHP_SHA1Init(&context);
+			while ((len = php_stream_read(newfile, (char*)buf, sizeof(buf))) > 0) {
+				PHP_SHA1Update(&context, buf, len);
+			}
+			PHP_SHA1Final(digest, &context);
+			php_stream_write(newfile, digest, sizeof(digest));
+			sig_flags |= PHAR_SIG_SHA1;
+			break;
+		}
+		case PHAR_SIG_MD5: {
+			unsigned char digest[16];
+			PHP_MD5_CTX   context;
+
+			PHP_MD5Init(&context);
+			while ((len = php_stream_read(newfile, (char*)buf, sizeof(buf))) > 0) {
+				PHP_MD5Update(&context, buf, len);
+			}
+			PHP_MD5Final(digest, &context);
+			php_stream_write(newfile, digest, sizeof(digest));
+			sig_flags |= PHAR_SIG_MD5;
+			break;
+		}
+		}
+		phar_set_32(sig_buf, sig_flags);
+		php_stream_write(newfile, sig_buf, 4);
+		php_stream_write(newfile, "GBMB", 4);
 	}
 
 	/* finally, close the temp file, rename the original phar,

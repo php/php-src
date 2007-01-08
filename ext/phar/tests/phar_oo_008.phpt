@@ -2,6 +2,8 @@
 Phar object: iterating via SplFileObject
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
+--INI--
+phar.require_hash=0
 --FILE--
 <?php
 

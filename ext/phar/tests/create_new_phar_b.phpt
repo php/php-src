@@ -4,6 +4,7 @@ Phar: create a completely new phar
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --INI--
 phar.readonly=1
+phar.require_hash=1
 --FILE--
 <?php
 

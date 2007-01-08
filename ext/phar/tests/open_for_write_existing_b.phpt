@@ -4,6 +4,7 @@ Phar: fopen a .phar for writing (existing file)
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --INI--
 phar.readonly=1
+phar.require_hash=0
 --FILE--
 <?php
 $file = "<?php __HALT_COMPILER(); ?>";
