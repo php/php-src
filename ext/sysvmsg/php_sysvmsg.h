@@ -40,9 +40,6 @@ extern zend_module_entry sysvmsg_module_entry;
 #endif
 
 PHP_MINIT_FUNCTION(sysvmsg);
-PHP_MSHUTDOWN_FUNCTION(sysvmsg);
-PHP_RINIT_FUNCTION(sysvmsg);
-PHP_RSHUTDOWN_FUNCTION(sysvmsg);
 PHP_MINFO_FUNCTION(sysvmsg);
 
 PHP_FUNCTION(msg_get_queue);
