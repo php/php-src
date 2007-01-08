@@ -84,7 +84,7 @@ zend_module_entry sysvmsg_module_entry = {
 	"sysvmsg",
 	sysvmsg_functions,
 	PHP_MINIT(sysvmsg),
-	PHP_MSHUTDOWN(sysvmsg),
+	NULL,
 	NULL,
 	NULL,
 	PHP_MINFO(sysvmsg),
@@ -126,14 +126,6 @@ PHP_MINIT_FUNCTION(sysvmsg)
 	REGISTER_LONG_CONSTANT("MSG_ENOMSG",	 ENOMSG, 	     CONST_PERSISTENT|CONST_CS);
 	REGISTER_LONG_CONSTANT("MSG_NOERROR",    PHP_MSG_NOERROR,    CONST_PERSISTENT|CONST_CS);
 	REGISTER_LONG_CONSTANT("MSG_EXCEPT",     PHP_MSG_EXCEPT,     CONST_PERSISTENT|CONST_CS);
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
-PHP_MSHUTDOWN_FUNCTION(sysvmsg)
-{
 	return SUCCESS;
 }
 /* }}} */
