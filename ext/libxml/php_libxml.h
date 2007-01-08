@@ -58,6 +58,8 @@ typedef struct _php_libxml_ref_obj {
 	void *ptr;
 	int   refcount;
 	libxml_doc_props *doc_props;
+	zend_bool persistent;
+	zend_bool external_owner;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {
