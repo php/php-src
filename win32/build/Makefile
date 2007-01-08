@@ -55,8 +55,8 @@ $(MCFILE): win32\build\wsyslog.mc
 
 #	$(RC) /fo $(MCFILE) $(BUILD_DIR)\wsyslog.rc
 
-_VC_MANIFEST_EMBED_EXE= $(MT) -manifest $@.manifest -outputresource:$@;1
-_VC_MANIFEST_EMBED_DLL= $(MT) -manifest $@.manifest -outputresource:$@;2
+_VC_MANIFEST_EMBED_EXE= $(MT) -nologo -manifest $@.manifest -outputresource:$@;1
+_VC_MANIFEST_EMBED_DLL= $(MT) -nologo -manifest $@.manifest -outputresource:$@;2
 
 $(PHPDLL_RES): win32\build\template.rc
 	$(RC) /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
