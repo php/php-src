@@ -1,5 +1,5 @@
 --TEST--
-Phar include and parser error
+Phar: include and parser error
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
