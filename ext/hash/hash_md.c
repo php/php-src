@@ -21,7 +21,7 @@
 #include "php_hash.h"
 #include "php_hash_md.h"
 
-php_hash_ops php_hash_md5_ops = {
+const php_hash_ops php_hash_md5_ops = {
 	(php_hash_init_func_t) PHP_MD5Init,
 	(php_hash_update_func_t) PHP_MD5Update,
 	(php_hash_final_func_t) PHP_MD5Final,
@@ -30,7 +30,7 @@ php_hash_ops php_hash_md5_ops = {
 	sizeof(PHP_MD5_CTX)
 };
 
-php_hash_ops php_hash_md4_ops = {
+const php_hash_ops php_hash_md4_ops = {
 	(php_hash_init_func_t) PHP_MD4Init,
 	(php_hash_update_func_t) PHP_MD4Update,
 	(php_hash_final_func_t) PHP_MD4Final,
@@ -39,7 +39,7 @@ php_hash_ops php_hash_md4_ops = {
 	sizeof(PHP_MD4_CTX)
 };
 
-php_hash_ops php_hash_md2_ops = {
+const php_hash_ops php_hash_md2_ops = {
 	(php_hash_init_func_t) PHP_MD2Init,
 	(php_hash_update_func_t) PHP_MD2Update,
 	(php_hash_final_func_t) PHP_MD2Final,
@@ -50,7 +50,7 @@ php_hash_ops php_hash_md2_ops = {
 
 /* MD common stuff */
 
-static unsigned char PADDING[64] =
+static const unsigned char PADDING[64] =
 {
 	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -238,7 +238,7 @@ PHP_HASH_API void PHP_MD4Final(unsigned char digest[16], PHP_MD4_CTX * context)
 
 /* MD2 */
 
-static unsigned char MD2_S[256] = {
+static const unsigned char MD2_S[256] = {
 	 41,  46,  67, 201, 162, 216, 124,   1,  61,  54,  84, 161, 236, 240,   6,  19,
 	 98, 167,   5, 243, 192, 199, 115, 140, 152, 147,  43, 217, 188,  76, 130, 202,
 	 30, 155,  87,  60, 253, 212, 224,  22, 103,  66, 111,  24, 138,  23, 229,  18,

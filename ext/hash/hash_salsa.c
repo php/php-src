@@ -194,7 +194,7 @@ PHP_HASH_API void PHP_SALSAFinal(unsigned char digest[64], PHP_SALSA_CTX *contex
 	memset(context, 0, sizeof(*context));
 }
 
-php_hash_ops php_hash_salsa10_ops = {
+const php_hash_ops php_hash_salsa10_ops = {
 	(php_hash_init_func_t) PHP_SALSA10Init,
 	(php_hash_update_func_t) PHP_SALSAUpdate,
 	(php_hash_final_func_t) PHP_SALSAFinal,
@@ -203,7 +203,7 @@ php_hash_ops php_hash_salsa10_ops = {
 	sizeof(PHP_SALSA_CTX)
 };
 
-php_hash_ops php_hash_salsa20_ops = {
+const php_hash_ops php_hash_salsa20_ops = {
 	(php_hash_init_func_t) PHP_SALSA20Init,
 	(php_hash_update_func_t) PHP_SALSAUpdate,
 	(php_hash_final_func_t) PHP_SALSAFinal,
