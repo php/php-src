@@ -22,7 +22,7 @@
 #include "php_hash.h"
 #include "php_hash_sha.h"
 
-static unsigned char PADDING[128] =
+static const unsigned char PADDING[128] =
 {
 	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -66,7 +66,7 @@ static void SHADecode32(php_hash_uint32 *output, const unsigned char *input, uns
 }
 /* }}} */
 
-php_hash_ops php_hash_sha1_ops = {
+const php_hash_ops php_hash_sha1_ops = {
 	(php_hash_init_func_t) PHP_SHA1Init,
 	(php_hash_update_func_t) PHP_SHA1Update,
 	(php_hash_final_func_t) PHP_SHA1Final,
@@ -77,7 +77,7 @@ php_hash_ops php_hash_sha1_ops = {
 
 /* sha256 */
 
-php_hash_ops php_hash_sha256_ops = {
+const php_hash_ops php_hash_sha256_ops = {
 	(php_hash_init_func_t) PHP_SHA256Init,
 	(php_hash_update_func_t) PHP_SHA256Update,
 	(php_hash_final_func_t) PHP_SHA256Final,
@@ -103,7 +103,7 @@ php_hash_ops php_hash_sha256_ops = {
 /* OM1 */
 #define SHA256_F5(x)		(ROTR32(17,(x)) ^ ROTR32(19,(x)) ^ SHR(10,(x)))
 
-static php_hash_uint32 SHA256_K[64] = {
+static const php_hash_uint32 SHA256_K[64] = {
 	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 	0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
 	0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -265,7 +265,7 @@ PHP_HASH_API void PHP_SHA256Final(unsigned char digest[32], PHP_SHA256_CTX * con
 /* OM1 */
 #define SHA512_F5(x)			(ROTR64(19, x) ^ ROTR64(61, x) ^ SHR(6, x))
 
-static php_hash_uint64 SHA512_K[128] = {
+static const php_hash_uint64 SHA512_K[128] = {
 	L64(0x428a2f98d728ae22), L64(0x7137449123ef65cd), L64(0xb5c0fbcfec4d3b2f), L64(0xe9b5dba58189dbbc),
 	L64(0x3956c25bf348b538), L64(0x59f111f1b605d019), L64(0x923f82a4af194f9b), L64(0xab1c5ed5da6d8118),
 	L64(0xd807aa98a3030242), L64(0x12835b0145706fbe), L64(0x243185be4ee4b28c), L64(0x550c7dc3d5ffb4e2),
@@ -472,7 +472,7 @@ PHP_HASH_API void PHP_SHA384Final(unsigned char digest[48], PHP_SHA384_CTX * con
 }
 /* }}} */
 
-php_hash_ops php_hash_sha384_ops = {
+const php_hash_ops php_hash_sha384_ops = {
 	(php_hash_init_func_t) PHP_SHA384Init,
 	(php_hash_update_func_t) PHP_SHA384Update,
 	(php_hash_final_func_t) PHP_SHA384Final,
@@ -585,7 +585,7 @@ PHP_HASH_API void PHP_SHA512Final(unsigned char digest[48], PHP_SHA512_CTX * con
 }
 /* }}} */
 
-php_hash_ops php_hash_sha512_ops = {
+const php_hash_ops php_hash_sha512_ops = {
 	(php_hash_init_func_t) PHP_SHA512Init,
 	(php_hash_update_func_t) PHP_SHA512Update,
 	(php_hash_final_func_t) PHP_SHA512Final,

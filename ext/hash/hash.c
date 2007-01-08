@@ -37,7 +37,7 @@ HashTable php_hash_hashtable;
 
 /* Hash Registry Access */
 
-PHP_HASH_API php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len)
+PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len)
 {
 	php_hash_ops *ops;
 	char *lower = estrndup(algo, algo_len);
@@ -51,13 +51,13 @@ PHP_HASH_API php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len)
 	return ops;
 }
 
-PHP_HASH_API void php_hash_register_algo(const char *algo, php_hash_ops *ops)
+PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops)
 {
 	int algo_len = strlen(algo);
 	char *lower = estrndup(algo, algo_len);
 	
 	zend_str_tolower(lower, algo_len);
-	zend_hash_add(&php_hash_hashtable, lower, algo_len + 1, ops, sizeof(php_hash_ops), NULL);
+	zend_hash_add(&php_hash_hashtable, lower, algo_len + 1, (void*)ops, sizeof(php_hash_ops), NULL);
 	efree(lower);
 }
 
@@ -69,7 +69,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 	int algo_len, data_len;
 	zend_uchar data_type = IS_STRING;
 	zend_bool raw_output = 0;
-	php_hash_ops *ops;
+	const php_hash_ops *ops;
 	void *context;
 	php_stream *stream = NULL;
 
@@ -180,7 +180,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 	int algo_len, data_len, key_len, i;
 	zend_uchar data_type = IS_STRING, key_type = IS_STRING;
 	zend_bool raw_output = 0;
-	php_hash_ops *ops;
+	const php_hash_ops *ops;
 	void *context;
 	php_stream *stream = NULL;
 
@@ -344,7 +344,7 @@ PHP_FUNCTION(hash_init)
 	zend_uchar key_type;
 	long options = 0;
 	void *context;
-	php_hash_ops *ops;
+	const php_hash_ops *ops;
 	php_hash_data *hash;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "s|lt", &algo, &algo_len, &options, &key, &key_len, &key_type) == FAILURE) {
