@@ -365,11 +365,6 @@ ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source
 	memset(buffer + converted, 0, null_size); /* NULL-terminate the output string */
 	*target = buffer;
 	*target_len = converted;
-
-	/* Report the conversion error */
-	if (U_FAILURE(*status)) {
-		zend_error(E_NOTICE, "Error converting from codepage string to Unicode: %s", u_errorName(*status));
-	}
 }
 /* }}} */
 
