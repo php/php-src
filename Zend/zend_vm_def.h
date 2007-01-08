@@ -887,7 +887,8 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
 	zval *z = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	UErrorCode status = U_ZERO_ERROR;
 
-	/* Convert inline HTML blocks to the output encoding, but only if necessary. */
+	/* UTODO: review this
+	 * Convert inline HTML blocks to the output encoding, but only if necessary. */
 	if (opline->extended_value &&
 		strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status),
 			   EX(op_array)->script_encoding)) {
