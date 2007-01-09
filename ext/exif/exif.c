@@ -1550,6 +1550,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 	image_info->info_list[section_index].list = list;
 
 	info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+	memset(info_data, 0, sizeof(image_info_data));
 	info_data->tag    = tag;
 	info_data->format = format;
 	info_data->length = length;
