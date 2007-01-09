@@ -331,6 +331,10 @@ PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC)
 		zend_hash_find(&EG(symbol_table), name, namelen + 1, 
 				(void *) &sym_global);
 				
+		if ((Z_TYPE_PP(sym_global) == IS_ARRAY && Z_ARRVAL_PP(sym_global) == &EG(symbol_table)) || *sym_global == PS(http_session_vars)) {
+			return;
+		}
+
 		if (sym_global == NULL && sym_track == NULL) {
 			zval *empty_var;
 
@@ -360,7 +364,10 @@ PHPAPI void php_set_session_var(char *name, size_t namelen, zval *state_val, php
 	if (PG(register_globals)) {
 		zval **old_symbol;
 		if (zend_hash_find(&EG(symbol_table),name,namelen+1,(void *)&old_symbol) == SUCCESS) { 
-			
+			if ((Z_TYPE_PP(old_symbol) == IS_ARRAY && Z_ARRVAL_PP(old_symbol) == &EG(symbol_table)) || *old_symbol == PS(http_session_vars)) {
+				return;
+			}
+
 			/* 
 			 * A global symbol with the same name exists already. That
 			 * symbol might have been created by other means (e.g. $_GET).
