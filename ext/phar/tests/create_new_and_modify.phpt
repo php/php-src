@@ -13,15 +13,15 @@ $pname = 'phar://' . $fname;
 
 @unlink($fname);
 
-file_put_contents($pname . '/a.php', 'brand new!\n');
+file_put_contents($pname . '/a.php', "brand new!\n");
 
 $phar = new Phar($fname);
 $sig1 = $phar->getSignature();
 
 include $pname . '/a.php';
 
-file_put_contents($pname .'/a.php', 'modified!\n');
-file_put_contents($pname .'/b.php', 'another!\n');
+file_put_contents($pname .'/a.php', "modified!\n");
+file_put_contents($pname .'/b.php', "another!\n");
 
 $phar = new Phar($fname);
 $sig2 = $phar->getSignature();
@@ -38,8 +38,8 @@ include $pname . '/b.php';
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-string(40) "%s"
 brand new!
+string(40) "%s"
 string(40) "%s"
 bool(true)
 modified!
