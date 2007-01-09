@@ -1271,13 +1271,13 @@ int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 	return T_CONSTANT_ENCAPSED_STRING;
 }
 
-int zend_scan_binary_double_string(zval *zendlval TSRMLS_DC)
+int zend_scan_binary_double_string(zval *zendlval, int bprefix TSRMLS_DC)
 {
 	register char *s, *t;
 	char *end;
 
-	Z_STRVAL_P(zendlval) = estrndup(yytext+1, yyleng-2);
-	Z_STRLEN_P(zendlval) = yyleng-2;
+	Z_STRVAL_P(zendlval) = estrndup(yytext+bprefix+1, yyleng-bprefix-2);
+	Z_STRLEN_P(zendlval) = yyleng-bprefix-2;
 	Z_TYPE_P(zendlval) = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 
@@ -1353,13 +1353,13 @@ int zend_scan_binary_double_string(zval *zendlval TSRMLS_DC)
 	return T_CONSTANT_ENCAPSED_STRING;
 }
 
-int zend_scan_binary_single_string(zval *zendlval TSRMLS_DC)
+int zend_scan_binary_single_string(zval *zendlval, int bprefix TSRMLS_DC)
 {
 	register char *s, *t;
 	char *end;
 
-	Z_STRVAL_P(zendlval) = estrndup(yytext+1, yyleng-2);
-	Z_STRLEN_P(zendlval) = yyleng-2;
+	Z_STRVAL_P(zendlval) = estrndup(yytext+bprefix+1, yyleng-bprefix-2);
+	Z_STRLEN_P(zendlval) = yyleng-bprefix-2;
 	Z_TYPE_P(zendlval) = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 
@@ -2221,15 +2221,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (UG(unicode)) {
 		return zend_scan_unicode_double_string(zendlval TSRMLS_CC);
 	} else {
-		return zend_scan_binary_double_string(zendlval TSRMLS_CC);
+		return zend_scan_binary_double_string(zendlval, 0 TSRMLS_CC);
 	}
 }
 
 
 <ST_IN_SCRIPTING>(b["]([^$"\\]|("\\".))*["]) {
-	yytext++; /* adjust for 'b' */
-	yyleng--;
-	return zend_scan_binary_double_string(zendlval TSRMLS_CC);
+	return zend_scan_binary_double_string(zendlval, 1 TSRMLS_CC);
 }
 
 
@@ -2237,15 +2235,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (UG(unicode)) {
 		return zend_scan_unicode_single_string(zendlval TSRMLS_CC);
 	} else {
-		return zend_scan_binary_single_string(zendlval TSRMLS_CC);
+		return zend_scan_binary_single_string(zendlval, 0 TSRMLS_CC);
 	}
 }
 
 
 <ST_IN_SCRIPTING>("b'"([^'\\]|("\\".))*[']) {
-	yytext++; /* adjust for 'b' */
-	yyleng--;
-	return zend_scan_binary_single_string(zendlval TSRMLS_CC);
+	return zend_scan_binary_single_string(zendlval, 1 TSRMLS_CC);
 }
 
 
