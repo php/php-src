@@ -10,6 +10,9 @@ phar.require_hash=1
 
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
+
+@unlink($fname);
+
 file_put_contents($pname . '/a.php', 'brand new!\n');
 
 $phar = new Phar($fname);
