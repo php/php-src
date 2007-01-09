@@ -230,15 +230,22 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 }
 /* }}}*/
 
+static int phar_unalias_apply(void *pDest, void *argument TSRMLS_DC) /* {{{ */
+{
+	return *(void**)pDest == argument ? ZEND_HASH_APPLY_REMOVE : ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
 /**
  * Filename map destructor
  */
 static void destroy_phar_data(void *pDest) /* {{{ */
 {
 	phar_archive_data *phar_data = *(phar_archive_data **) pDest;
-	if (--phar_data->refcount < 0) {
-		TSRMLS_FETCH();
+	TSRMLS_FETCH();
 
+	zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_alias_map), phar_unalias_apply, phar_data TSRMLS_CC);
+	if (--phar_data->refcount < 0) {
 		phar_destroy_phar_data(phar_data TSRMLS_CC);
 	}
 }
@@ -935,7 +942,7 @@ static int phar_create_or_open_filename(char *fname, int fname_len, char *alias,
 	} else {
 		register_alias = 1;
 	}
-	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data),  NULL);
+	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
 	if (register_alias) {
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 	}
@@ -2059,15 +2066,15 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 
 	fname = estrndup(data->phar->fname, data->phar->fname_len);
 	fname_len = data->phar->fname_len;
-	if (data->phar->alias) {
+	if (data->phar->explicit_alias == TRUE) {
 		alias = estrndup(data->phar->alias, data->phar->alias_len);
 	} else {
 		alias = 0;
 	}
 	alias_len = data->phar->alias_len;
 	halt_offset = data->phar->halt_offset;
+	zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_alias_map), phar_unalias_apply, data->phar TSRMLS_CC);
 	zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len);
-	zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len);
 	phar_open_file(file, fname, fname_len, alias, alias_len, halt_offset, NULL TSRMLS_CC);
 	efree(fname);
 	if (alias) {
@@ -3030,7 +3037,7 @@ PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 
 PHP_RINIT_FUNCTION(phar) /* {{{ */
 {
-	zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data),  zend_get_hash_value, destroy_phar_data, 0);
+	zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data, 0);
 	zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
 	return SUCCESS;
 }
