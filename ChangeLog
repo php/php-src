@@ -1,3 +1,114 @@
+2007-01-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+      MFB
+
+    * (PHP_5_2)
+      ext/gd/gd.c
+      ext/gd/php_gd.h:
+      avoid calling MSHUTDOWN when built without libt1
+
+    * ext/sysvmsg/php_sysvmsg.h
+      ext/sysvmsg/sysvmsg.c:
+      MFB: remove mshutdown func
+
+    * (PHP_5_2)
+      ext/sysvmsg/php_sysvmsg.h
+      ext/sysvmsg/sysvmsg.c:
+      remove useless MSHUTDOWN function
+
+    * ext/hash/hash.c
+      ext/hash/hash_adler32.c
+      ext/hash/hash_crc32.c
+      ext/hash/hash_gost.c
+      ext/hash/hash_haval.c
+      ext/hash/hash_md.c
+      ext/hash/hash_ripemd.c
+      ext/hash/hash_salsa.c
+      ext/hash/hash_sha.c
+      ext/hash/hash_snefru.c
+      ext/hash/hash_tiger.c
+      ext/hash/hash_whirlpool.c
+      ext/hash/php_hash.h:
+      MFB: constify
+
+    * (PHP_5_2)
+      ext/hash/hash.c
+      ext/hash/hash_adler32.c
+      ext/hash/hash_crc32.c
+      ext/hash/hash_gost.c
+      ext/hash/hash_haval.c
+      ext/hash/hash_md.c
+      ext/hash/hash_ripemd.c
+      ext/hash/hash_salsa.c
+      ext/hash/hash_sha.c
+      ext/hash/hash_snefru.c
+      ext/hash/hash_tiger.c
+      ext/hash/hash_whirlpool.c
+      ext/hash/php_hash.h:
+      make the hash_ops structures const and save some memory
+
+2007-01-08  Sara Golemon  <sara@golemon.com>
+
+    * ext/curl/interface.c:
+      Add CURLOPT_TCP_NODELAY
+
+    * ext/libxml/libxml.c
+      ext/libxml/php_libxml.h:
+      Allow libxml DomNodes to remain persistent when requested by other
+      extensions
+
+2007-01-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/imap/config.m4:
+      Fix IMAP check.
+
+    * ZendEngine2/zend_unicode.c:
+      Let caller issue error.
+
+    * ZendEngine2/zend_vm_def.h:
+      Note.
+
+2007-01-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      
+      MFB: Use safe_emalloc() rather then emalloc()
+
+    * (PHP_4_4)
+      ext/standard/string.c:
+      
+      MFH: Use safe_emalloc() rather then emalloc()
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      
+      Use safe_emalloc() rather then emalloc()
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/php_spl.c
+      ext/spl/tests/bug38325.phpt
+      ext/spl/tests/bug38325.phpt:
+      
+      Fixed bug #38325 (spl_autoload_register() gaves wrong line for "class
+      not found").
+
+    * (PHP_5_2)
+      ext/spl/php_spl.c
+      main/main.c
+      main/php_main.h:
+      
+      Provide means for opening file for zend with error supression. Allows us
+      to
+      avoid INI hackery such as the one used in SPL.
+
+2007-01-08  Edin Kadribasic  <edink@emini.dk>
+
+    * win32/build/Makefile:
+      Make mt more silent
+
 2007-01-07  Sara Golemon  <sara@golemon.com>
 
     * ZendEngine2/zend_alloc.h:
