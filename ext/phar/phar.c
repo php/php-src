@@ -225,7 +225,7 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 	if (data->fp) {
 		php_stream_close(data->fp);
 	}
-	data->fp = 0;
+
 	efree(data);
 }
 /* }}}*/
@@ -1923,11 +1923,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			/* remove this from the new phar */
 			continue;
 		}
-		if (entry->flags & PHAR_ENT_MODIFIED) {
-			if (!entry->temp_file) {
-				/* nothing to do here */
-				continue;
-			}
+		if ((entry->flags & PHAR_ENT_MODIFIED) && entry->temp_file) {
 			php_stream_rewind(entry->temp_file);
 			file = entry->temp_file;
 		} else {
