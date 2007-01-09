@@ -483,6 +483,7 @@ gettimeofday \
 gmtime_r \
 getpwnam_r \
 getgrnam_r \
+getpwuid_r \
 grantpt \
 inet_ntoa \
 inet_ntop \

@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Added CURLOPT_TCP_NODELAY constant to Curl extension. (Sara)
 - Improved proc_open(). Now on Windows it can run external commands not through
   CMD.EXE. (Dmitry)
+- Fixed bug #40079 (php_get_current_user() not thread safe). (Ilia, wharmby
+  at uk dot ibm dot com)
 - Fixed bug #40076 (zend_alloc.c: Value of enumeration constant must be in
   range of signed integer). (Dmitry)
 - Fixed bug #40073 (exif_read_data dies on certain images). (Tony, Marcus)
