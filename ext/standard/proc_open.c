@@ -755,6 +755,13 @@ PHP_FUNCTION(proc_open)
 	}
 	
 	if (FALSE == newprocok) {
+		/* clean up all the descriptors */
+		for (i = 0; i < ndesc; i++) {
+			CloseHandle(descriptors[i].childend);
+			if (descriptors[i].parentend) {
+				CloseHandle(descriptors[i].parentend);
+			}
+		}
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "CreateProcess failed");
 		goto exit_fail;
 	}
