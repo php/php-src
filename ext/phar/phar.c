@@ -57,7 +57,7 @@
 #define E_RECOVERABLE_ERROR E_ERROR
 #endif
 
-#define PHAR_VERSION_STR          "0.8.0"
+#define PHAR_VERSION_STR          "0.9.0"
 /* x.y.z maps to 0xyz0 */
 #define PHAR_API_VERSION          0x0800
 #define PHAR_API_MAJORVERSION     0x0000
@@ -142,6 +142,10 @@ typedef struct _phar_archive_data {
 	php_uint32               max_timestamp;
 	php_stream               *fp;
 	int                      refcount;
+	int                      modified;
+	php_uint32               sig_flags;
+	int                      sig_len;
+	char                     *signature;
 } phar_archive_data;
 
 /* stream access data for one file entry in a phar file */
@@ -212,6 +216,9 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 		data->alias = NULL;
 	}
 	efree(data->fname);
+	if (data->signature) {
+		efree(data->signature);
+	}
 	if (data->manifest.arBuckets) {
 		zend_hash_destroy(&data->manifest);
 	}
@@ -439,6 +446,7 @@ static phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len
 		/* create a temporary stream for our new file */
 		ret->internal_file->temp_file = php_stream_fopen_tmpfile();
 		ret->internal_file->flags |= PHAR_ENT_MODIFIED;
+		ret->phar->modified = 1;
 	}
 	return ret;
 }
@@ -479,6 +487,12 @@ PHP_METHOD(Phar, canWrite)
 
 #define MAPPHAR_FAIL(msg) \
 	efree(savebuf);\
+	if (mydata) {\
+		efree(mydata);\
+	}\
+	if (signature) {\
+		efree(signature);\
+	}\
 	MAPPHAR_ALLOC_FAIL(msg)
 
 #ifdef WORDS_BIGENDIAN
@@ -505,13 +519,14 @@ PHP_METHOD(Phar, canWrite)
 static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, long halt_offset, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
 {
 	char b32[4], *buffer, *endbuffer, *savebuf;
-	phar_archive_data *mydata;
+	phar_archive_data *mydata = NULL;
 	phar_entry_info entry;
-	php_uint32 manifest_len, manifest_count, manifest_index, tmp_len;
+	php_uint32 manifest_len, manifest_count, manifest_index, tmp_len, sig_flags;
 	php_uint16 manifest_tag;
 	long offset;
 	int compressed = 0;
-	int register_alias;
+	int register_alias, sig_len;
+	char *signature = NULL;
 
 	if (pphar) {
 		*pphar = NULL;
@@ -607,7 +622,6 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	if (manifest_tag & PHAR_HDR_SIGNATURE) {
 		unsigned char buf[1024];
 		int read_size, len;
-		php_uint32 sig_flags;
 		char sig_buf[8], *sig_ptr = sig_buf;
 		off_t read_len;
 
@@ -650,6 +664,13 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 				return FAILURE;
 			}
 
+			sig_len = sizeof(digest) * 2;
+			signature = (char*)safe_emalloc(sizeof(digest), 2, 1);
+			for(len = 0; len < sizeof(digest); ++len)
+			{
+				sprintf(signature+len+len, "%02X", digest[len]);
+			}
+			signature[sizeof(digest) * 2] = '\0';
 			break;
 		}
 		case PHAR_SIG_MD5: {
@@ -681,6 +702,13 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 				return FAILURE;
 			}
 
+			sig_len = sizeof(digest) * 2;
+			signature = (char*)safe_emalloc(sizeof(digest), 2, 1);
+			for(len = 0; len < sizeof(digest); ++len)
+			{
+				sprintf(signature+len+len, "%02X", digest[len]);
+			}
+			signature[sizeof(digest) * 2] = '\0';
 			break;
 		}
 		default:
@@ -692,12 +720,11 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" does not have a signature", fname);
 		efree(savebuf);
 		return FAILURE;
+	} else {
+		sig_flags = 0;
+		sig_len = 0;
 	}
 
-/*xxx*/
-#define PHAR_SIG_MD5              0x0001
-#define PHAR_SIG_SHA1             0x0002
-#define PHAR_SIG_PGP              0x0010
 	/* extract alias */
 	PHAR_GET_32(buffer, tmp_len);
 	if (buffer + tmp_len > endbuffer) {
@@ -714,6 +741,9 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 			buffer[tmp_len] = '\0';
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "cannot load phar \"%s\" with implicit alias \"%s\" under different alias \"%s\"", fname, buffer, alias);
 			efree(savebuf);
+			if (signature) {
+				efree(signature);
+			}
 			return FAILURE;
 		}
 		alias_len = tmp_len;
@@ -807,7 +837,11 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	mydata->fname_len = fname_len;
 	mydata->alias = alias ? estrndup(alias, alias_len) : mydata->fname;
 	mydata->alias_len = alias ? alias_len : fname_len;
-	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data),  NULL);
+	mydata->modified = 0;
+	mydata->sig_flags = sig_flags;
+	mydata->sig_len = sig_len;
+	mydata->signature = signature;
+	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
 	if (register_alias) {
 		mydata->explicit_alias = TRUE;
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
@@ -1573,6 +1607,7 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 	data->internal_file->uncompressed_filesize += count;
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize; 
 	data->internal_file->flags |= PHAR_ENT_MODIFIED;
+	data->phar->modified = 1;
 	return count;
 }
 /* }}} */
@@ -2596,6 +2631,41 @@ PHP_METHOD(Phar, getVersion)
 }
 /* }}} */
 
+/* {{{ proto array|false Phar::getSignature()
+ * Return signature or false
+ */
+PHP_METHOD(Phar, getSignature)
+{
+	PHAR_ARCHIVE_OBJECT();
+
+	if (phar_obj->arc.archive->signature) {
+		array_init(return_value);
+		add_assoc_stringl(return_value, "hash", phar_obj->arc.archive->signature, phar_obj->arc.archive->sig_len, 1);
+		switch(phar_obj->arc.archive->sig_flags) {
+		case PHAR_SIG_MD5:
+			add_assoc_stringl(return_value, "hash_type", "md5", 3, 1);
+			break;
+		case PHAR_SIG_SHA1:
+			add_assoc_stringl(return_value, "hash_type", "sha1", 4, 1);
+			break;
+		}
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool Phar::getModified()
+ * Return whether phar was modified
+ */
+PHP_METHOD(Phar, getModified)
+{
+	PHAR_ARCHIVE_OBJECT();
+
+	RETURN_BOOL(phar_obj->arc.archive->modified);
+}
+/* }}} */
+
 /* {{{ proto int Phar::offsetExists(string offset)
  * determines whether a file exists in the phar
  */
@@ -2893,6 +2963,8 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, __construct,   arginfo_phar___construct,  0)
 	PHP_ME(Phar, count,         NULL,                      0)
 	PHP_ME(Phar, getVersion,    NULL,                      0)
+	PHP_ME(Phar, getSignature,  NULL,                      0)
+	PHP_ME(Phar, getModified,   NULL,                      0)
 	PHP_ME(Phar, offsetGet,     arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,     arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetUnset,   arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
