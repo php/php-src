@@ -47,6 +47,7 @@ PHPAPI void php_handle_aborted_connection(void);
 PHPAPI int php_handle_auth_data(const char *auth TSRMLS_DC);
 
 PHPAPI void php_html_puts(const char *str, uint siz TSRMLS_DC);
+PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode TSRMLS_DC);
 
 extern void php_call_shutdown_functions(TSRMLS_D);
 extern void php_free_shutdown_functions(TSRMLS_D);

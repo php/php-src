@@ -106,7 +106,7 @@ static PHP_INI_MH(OnSetPrecision)
 		return SUCCESS;
 	} else {
 		return FAILURE;
-}
+	}
 }
 /* }}} */
 
@@ -1013,9 +1013,14 @@ static long stream_fteller_for_zend(void *handle TSRMLS_DC)
 
 static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle TSRMLS_DC)
 {
+	return php_stream_open_for_zend_ex(filename, handle, ENFORCE_SAFE_MODE|USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
+}
+
+PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode TSRMLS_DC)
+{
 	php_stream *stream;
 
-	stream = php_stream_open_wrapper((char *)filename, "rb", USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, &handle->opened_path);
+	stream = php_stream_open_wrapper((char *)filename, "rb", mode, &handle->opened_path);
 
 	if (stream) {
 		handle->type = ZEND_HANDLE_STREAM;
@@ -1033,7 +1038,6 @@ static int php_stream_open_for_zend(const char *filename, zend_file_handle *hand
 	}
 	return FAILURE;
 }
-
 
 /* {{{ php_get_configuration_directive_for_zend
  */
