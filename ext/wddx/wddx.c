@@ -289,7 +289,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 
 			switch (hash_type) {
 				case HASH_KEY_IS_LONG:
-					sprintf(tmp, "%ld", idx);
+					key_length = sprintf(tmp, "%ld", idx) + 1;
 					key = tmp;
 					/* fallthru */
 				case HASH_KEY_IS_STRING:
