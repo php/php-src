@@ -292,13 +292,11 @@ static const zend_mm_mem_handlers mem_handlers[] = {
 /* Heap Manager */
 /****************/
 
-typedef enum _mem_magic {
-	MEM_BLOCK_VALID  = 0x7312F8DC,
-	MEM_BLOCK_FREED  = 0x99954317,
-	MEM_BLOCK_CACHED = 0xFB8277DC,
-	MEM_BLOCK_GUARD  = 0x2A8FCC84,
-	MEM_BLOCK_LEAK   = 0x6C5E8F2D
-} mem_magic;
+#define MEM_BLOCK_VALID  0x7312F8DC
+#define	MEM_BLOCK_FREED  0x99954317
+#define	MEM_BLOCK_CACHED 0xFB8277DC
+#define	MEM_BLOCK_GUARD  0x2A8FCC84
+#define	MEM_BLOCK_LEAK   0x6C5E8F2D
 
 /* mm block type */
 typedef struct _zend_mm_block_info {
@@ -334,7 +332,7 @@ typedef struct _zend_mm_debug_info {
 typedef struct _zend_mm_block {
 	zend_mm_block_info info;
 #if ZEND_DEBUG
-	mem_magic magic;
+	unsigned int magic;
 # ifdef ZTS
 	THREAD_T thread_id;
 # endif
@@ -347,7 +345,7 @@ typedef struct _zend_mm_block {
 typedef struct _zend_mm_free_block {
 	zend_mm_block_info info;
 #if ZEND_DEBUG
-	mem_magic magic;
+	unsigned int magic;
 # ifdef ZTS
 	THREAD_T thread_id;
 # endif
