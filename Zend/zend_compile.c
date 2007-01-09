@@ -1726,16 +1726,35 @@ void zend_do_first_catch(znode *open_parentheses TSRMLS_DC)
 
 void zend_initialize_try_catch_element(znode *try_token TSRMLS_DC)
 {
+	int jmp_op_number = get_next_op_number(CG(active_op_array));
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_llist jmp_list;
+	zend_llist *jmp_list_ptr;
+
+	opline->opcode = ZEND_JMP;
+	SET_UNUSED(opline->op1);
+	SET_UNUSED(opline->op2);
+	/* save for backpatching */
+
+	zend_llist_init(&jmp_list, sizeof(int), NULL, 0);
+	zend_stack_push(&CG(bp_stack), (void *) &jmp_list, sizeof(zend_llist));
+	zend_stack_top(&CG(bp_stack), (void **) &jmp_list_ptr);
+	zend_llist_add_element(jmp_list_ptr, &jmp_op_number);
+
 	zend_add_catch_element(try_token->u.opline_num, get_next_op_number(CG(active_op_array)) TSRMLS_CC);
 }
 
 
 void zend_do_mark_last_catch(znode *first_catch, znode *last_additional_catch TSRMLS_DC)
 {
+	CG(active_op_array)->last--;
+	zend_do_if_end(TSRMLS_C);
 	if (last_additional_catch->u.opline_num == -1) {
 		CG(active_op_array)->opcodes[first_catch->u.opline_num].op1.u.EA.type = 1;
+		CG(active_op_array)->opcodes[first_catch->u.opline_num].extended_value = get_next_op_number(CG(active_op_array));
 	} else {
 		CG(active_op_array)->opcodes[last_additional_catch->u.opline_num].op1.u.EA.type = 1;
+		CG(active_op_array)->opcodes[last_additional_catch->u.opline_num].extended_value = get_next_op_number(CG(active_op_array));
 	}
 	DEC_BPC(CG(active_op_array));
 }
@@ -1772,6 +1791,18 @@ void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var,
 
 void zend_do_end_catch(znode *try_token TSRMLS_DC)
 {
+	int jmp_op_number = get_next_op_number(CG(active_op_array));
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_llist *jmp_list_ptr;
+
+	opline->opcode = ZEND_JMP;
+	SET_UNUSED(opline->op1);
+	SET_UNUSED(opline->op2);
+	/* save for backpatching */
+
+	zend_stack_top(&CG(bp_stack), (void **) &jmp_list_ptr);
+	zend_llist_add_element(jmp_list_ptr, &jmp_op_number);
+
 	CG(active_op_array)->opcodes[try_token->u.opline_num].extended_value = get_next_op_number(CG(active_op_array));
 }
 
