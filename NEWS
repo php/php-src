@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   CMD.EXE. (Dmitry)
 - Fixed bug #40076 (zend_alloc.c: Value of enumeration constant must be in
   range of signed integer). (Dmitry)
+- Fixed bug #40073 (exif_read_data dies on certain images). (Tony, Marcus)
 - Fixed bug #40036 (empty() does not work correctly with ArrayObject when using
   ARRAY_AS_PROPS). (Ilia)
 - Fixed bug #40002 (Try/Catch performs poorly). (Dmitry)
@@ -37,7 +38,6 @@ PHP                                                                        NEWS
   __inet_pton() and inet_ntop() was named __inet_ntop(). (Hannes)
 - Fixed the validate email filter so that the letter "v" can also be used in
   the user part of the email address. (Derick)
-- Fixed bug #40073 (exif_read_data dies on certain images). (Tony, Marcus)
 - Fixed bug #40012 (php_date.c doesnt compile on Netware). (gk at gknw dot de,
   Derick)
 - Fixed bug #40009 (http_build_query(array()) returns NULL). (Ilia)
