@@ -444,10 +444,19 @@ PHP_FUNCTION(spl_autoload_register)
 			}
 		}
 	
-		lc_name = do_alloca(func_name_len + 1);
+		lc_name = safe_emalloc(func_name_len, 1, sizeof(long) + 1);
 		zend_str_tolower_copy(lc_name, func_name, func_name_len);
 		efree(func_name);
+
+		if (SPL_G(autoload_functions) && zend_hash_exists(SPL_G(autoload_functions), (char*)lc_name, func_name_len+1)) {
+			goto skip;			
+		}
+
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
+			memcpy(lc_name + func_name_len, obj_ptr, sizeof(long));
+			func_name_len += sizeof(long);
+			lc_name[func_name_len] = '\0';
 			alfi.obj = *obj_ptr;
 			alfi.obj->refcount++;
 		} else {
@@ -471,8 +480,8 @@ PHP_FUNCTION(spl_autoload_register)
 		}
 
 		zend_hash_add(SPL_G(autoload_functions), lc_name, func_name_len+1, &alfi.func_ptr, sizeof(autoload_func_info), NULL);
-
-		free_alloca(lc_name);
+skip:
+		efree(lc_name);
 	}
 
 	if (SPL_G(autoload_functions)) {
@@ -492,12 +501,13 @@ PHP_FUNCTION(spl_autoload_unregister)
 	zval *zcallable;
 	int success = FAILURE;
 	zend_function *spl_func_ptr;
+	zval **obj_ptr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcallable) == FAILURE) {
 		return;
 	}
 
-	if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_SYNTAX_ONLY, &func_name, &func_name_len, NULL, NULL, NULL TSRMLS_CC)) {
+	if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_SYNTAX_ONLY, &func_name, &func_name_len, NULL, NULL, &obj_ptr TSRMLS_CC)) {
 		if (func_name) {
 			efree(func_name);
 		}
@@ -517,6 +527,13 @@ PHP_FUNCTION(spl_autoload_unregister)
 		} else {
 			/* remove specific */
 			success = zend_hash_del(SPL_G(autoload_functions), func_name, func_name_len+1);
+			if (success != SUCCESS && obj_ptr) {
+				func_name = erealloc(func_name, func_name_len + 1 + sizeof(long));
+				memcpy(func_name + func_name_len, obj_ptr, sizeof(long));
+				func_name_len += sizeof(long);
+				func_name[func_name_len] = '\0';
+				success = zend_hash_del(SPL_G(autoload_functions), func_name, func_name_len+1);
+			}
 		}
 	} else if (func_name_len == sizeof("spl_autoload")-1 && !strcmp(func_name, "spl_autoload")) {
 		/* register single spl_autoload() */
