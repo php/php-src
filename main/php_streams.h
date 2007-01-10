@@ -618,11 +618,17 @@ PHPAPI int php_register_url_stream_wrapper_volatile(char *protocol, php_stream_w
 PHPAPI int php_unregister_url_stream_wrapper_volatile(char *protocol TSRMLS_DC);
 PHPAPI void php_stream_fix_encoding(php_stream *stream, const char *mode, php_stream_context *context TSRMLS_DC);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+PHPAPI php_stream *_php_stream_u_open_wrapper(zend_uchar type,  zstr path, int path_len, char *mode, int options, zstr *opened_path, int *opened_path_len, php_stream_context *context STREAMS_DC TSRMLS_DC);
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char **path_for_open, int options TSRMLS_DC);
 PHPAPI void *php_stream_locate_eol(php_stream *stream, zstr zbuf, int buf_len TSRMLS_DC);
 
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC TSRMLS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC TSRMLS_CC)
+
+#define php_stream_u_open_wrapper(type, path, path_len, mode, options, opened, context)	\
+	_php_stream_u_open_wrapper((type), (path), (path_len), (mode), (options), (opened), NULL, (context) STREAMS_CC TSRMLS_CC)
+#define php_stream_u_open_wrapper_ex(type, path, path_len, mode, options, opened, opened_len, context)	\
+	_php_stream_u_open_wrapper((type), (path), (path_len), (mode), (options), (opened), (opened_len), (context) STREAMS_CC TSRMLS_CC)
 
 #define php_stream_get_from_zval(stream, zstream, mode, options, opened, context) \
 		if (Z_TYPE_PP((zstream)) == IS_RESOURCE) { \
