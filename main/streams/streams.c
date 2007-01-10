@@ -2434,6 +2434,61 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 }
 /* }}} */
 
+/* {{{ _php_stream_u_open_wrapper */
+PHPAPI php_stream *_php_stream_u_open_wrapper(zend_uchar type, zstr path, int path_len,
+			char *mode, int options, zstr *opened_path, int *opened_path_len,
+			php_stream_context *context STREAMS_DC TSRMLS_DC)
+{
+	php_stream *stream;
+	char *filename = NULL;
+	int filename_len;
+
+	if (opened_path) {
+		opened_path->v = NULL;
+	}
+	if (opened_path_len) {
+		*opened_path_len = 0;
+	}
+
+	if (type == IS_STRING) {
+		stream = php_stream_open_wrapper_ex(path.s, mode, options, (char**)opened_path, context);
+
+		if (opened_path_len && opened_path && opened_path->s) {
+			*opened_path_len = strlen(opened_path->s);
+		}
+
+		return stream;
+	}
+
+	/* type == IS_UNICODE */
+	if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, path.u, path_len, options, context)) {
+		return NULL;
+	}
+
+	stream = php_stream_open_wrapper_ex(filename, mode, options, (char**)opened_path, context);
+	efree(filename);
+
+	if (opened_path && opened_path->s) {
+		UChar *upath;
+		int upath_len;
+
+		if (SUCCESS == php_stream_path_decode(NULL, &upath, &upath_len, opened_path->s, strlen(opened_path->s), options, context)) {
+			efree(opened_path->s);
+			opened_path->u = upath;
+			if (opened_path_len) {
+				*opened_path_len = upath_len;
+			}
+		} else {
+			/* Shouldn't happen */
+			efree(opened_path->s);
+			opened_path->s = NULL;
+		}
+	}
+
+	return stream;
+}
+/* }}} */
+
 /* {{{ context API */
 PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context)
 {
