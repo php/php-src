@@ -66,7 +66,9 @@ PHP_FUNCTION(socket_recvfrom);
 PHP_FUNCTION(socket_sendto);
 PHP_FUNCTION(socket_get_option);
 PHP_FUNCTION(socket_set_option);
+#ifdef HAVE_SHUTDOWN
 PHP_FUNCTION(socket_shutdown);
+#endif
 PHP_FUNCTION(socket_last_error);
 PHP_FUNCTION(socket_clear_error);
 
