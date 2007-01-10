@@ -74,7 +74,7 @@ AC_ARG_WITH(apxs,
   *darwin*)
     MH_BUNDLE_FLAGS="-dynamic -twolevel_namespace -bundle -bundle_loader $APXS_HTTPD"
     PHP_SUBST(MH_BUNDLE_FLAGS)
-    SAPI_SHARED=libs/libphp5.so
+    SAPI_SHARED=libs/libphp6.so
     build_type=bundle
     ;;
   *)
@@ -82,26 +82,26 @@ AC_ARG_WITH(apxs,
     ;;
   esac
 
-  PHP_SELECT_SAPI(apache, $build_type, sapi_apache.c mod_php5.c php_apache.c, $APACHE_CPPFLAGS -I$APXS_INCLUDEDIR)
+  PHP_SELECT_SAPI(apache, $build_type, sapi_apache.c mod_php.c php_apache.c, $APACHE_CPPFLAGS -I$APXS_INCLUDEDIR)
 
   # Test whether apxs support -S option
   $APXS -q -S CFLAGS="$APXS_CFLAGS" CFLAGS >/dev/null 2>&1
 
   if test "$?" != "0"; then
-    APACHE_INSTALL="$APXS -i -a -n php5 $SAPI_SHARED" # Old apxs does not have -S option
+    APACHE_INSTALL="$APXS -i -a -n php6 $SAPI_SHARED" # Old apxs does not have -S option
   else 
     APXS_LIBEXECDIR='$(INSTALL_ROOT)'`$APXS -q LIBEXECDIR`
     if test -z `$APXS -q SYSCONFDIR`; then
       APACHE_INSTALL="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                        $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
-                             -i -n php5 $SAPI_SHARED"
+                             -i -n php6 $SAPI_SHARED"
     else
       APXS_SYSCONFDIR='$(INSTALL_ROOT)'`$APXS -q SYSCONFDIR`
       APACHE_INSTALL="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                       \$(mkinstalldirs) '$APXS_SYSCONFDIR' && \
                        $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
                              -S SYSCONFDIR='$APXS_SYSCONFDIR' \
-                             -i -a -n php5 $SAPI_SHARED"
+                             -i -a -n php6 $SAPI_SHARED"
     fi
   fi
 
@@ -123,7 +123,7 @@ AC_ARG_WITH(apache,
 [  --with-apache[=DIR]     Build Apache 1.x module. DIR is the top-level Apache
                           build directory [/usr/local/apache]],[
 
-  APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php5.* sapi/apache/libphp5.module"
+  APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php.* sapi/apache/libphp6.module"
 
   if test "$withval" = "yes"; then
     # Apache's default directory
@@ -142,13 +142,13 @@ AC_ARG_WITH(apache,
     elif test -f $withval/src/main/httpd.h; then
       APACHE_HAS_REGEX=1
       APACHE_INCLUDE="-I$withval/src/main -I$withval/src/os/unix -I$withval/src/ap"
-      APACHE_TARGET=$withval/src/modules/php5
+      APACHE_TARGET=$withval/src/modules/php6
       if test ! -d $APACHE_TARGET; then
         mkdir $APACHE_TARGET
       fi
-      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
-      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp5.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-      PHP_LIBS="-Lmodules/php5 -L../modules/php5 -L../../modules/php5 -lmodphp5"
+      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php.c php_apache.c, $APACHE_INCLUDE)
+      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp6.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
+      PHP_LIBS="-Lmodules/php6 -L../modules/php6 -L../../modules/php6 -lmodphp6"
       AC_MSG_RESULT(yes - Apache 1.3.x)
       STRONGHOLD=
       if test -f $withval/src/include/ap_config.h; then
@@ -168,13 +168,13 @@ AC_ARG_WITH(apache,
     elif test -f $withval/src/include/httpd.h; then
       APACHE_HAS_REGEX=1
       APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
-      APACHE_TARGET=$withval/src/modules/php5
+      APACHE_TARGET=$withval/src/modules/php6
       if test ! -d $APACHE_TARGET; then
         mkdir $APACHE_TARGET
       fi
-      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
-      PHP_LIBS="-Lmodules/php5 -L../modules/php5 -L../../modules/php5 -lmodphp5"
-      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp5.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
+      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php.c php_apache.c, $APACHE_INCLUDE)
+      PHP_LIBS="-Lmodules/php6 -L../modules/php6 -L../../modules/php6 -lmodphp6"
+      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp6.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
       AC_MSG_RESULT(yes - Apache 1.3.x)
       STRONGHOLD=
       if test -f $withval/src/include/ap_config.h; then
@@ -194,9 +194,9 @@ AC_ARG_WITH(apache,
     elif test -f $withval/apache/httpd.h; then
       APACHE_INCLUDE="-I$withval/apache -I$withval/ssl/include"
       APACHE_TARGET=$withval/apache
-      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
-      PHP_LIBS="-Lmodules/php5 -L../modules/php5 -L../../modules/php5 -lmodphp5"
-      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp5.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET"
+      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php.c php_apache.c, $APACHE_INCLUDE)
+      PHP_LIBS="-Lmodules/php6 -L../modules/php6 -L../../modules/php6 -lmodphp6"
+      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp6.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET"
       STRONGHOLD=-DSTRONGHOLD=1
       AC_MSG_RESULT(yes - StrongHold)
       if test -f $withval/apache/ap_config.h; then
@@ -239,13 +239,13 @@ dnl Build as static module
 if test -n "$APACHE_MODULE"; then
   PHP_TARGET_RDYNAMIC
   $php_shtool mkdir -p sapi/apache
-  PHP_OUTPUT(sapi/apache/libphp5.module)
+  PHP_OUTPUT(sapi/apache/libphp6.module)
 fi
 
 dnl General
 if test -n "$APACHE_INSTALL"; then
   if test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
-    APXS_EXP=-bE:sapi/apache/mod_php5.exp
+    APXS_EXP=-bE:sapi/apache/mod_php.exp
   fi
 
   PHP_APACHE_FD_CHECK

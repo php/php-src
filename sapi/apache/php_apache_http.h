@@ -67,4 +67,4 @@
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
 
-#include "mod_php5.h"
+#include "mod_php.h"
