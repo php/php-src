@@ -24,5 +24,5 @@ SimpleXMLElement Object
 (
 )
 
-Warning: iterate(): Node no longer exists in %s on line %d
+Warning: Invalid argument supplied for foreach() in %sbug38347.php on line 6
 Done
