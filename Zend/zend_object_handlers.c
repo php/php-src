@@ -334,7 +334,8 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 
 			if (rv) {
 				retval = &rv;
-				if (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET) {
+				if (!rv->is_ref &&
+				    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
 					if (rv->refcount > 0) {
 						zval *tmp = rv;
 

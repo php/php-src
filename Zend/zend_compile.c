@@ -3677,11 +3677,12 @@ void zend_do_instanceof(znode *result, znode *expr, znode *class_znode, int type
 }
 
 
-void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, znode *array, int variable TSRMLS_DC)
+void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, znode *array, znode *as_token, int variable TSRMLS_DC)
 {
 	zend_op *opline;
 	zend_bool is_variable;
 	zend_bool push_container = 0;
+	zend_op dummy_opline;
 
 	if (variable) {
 		if (zend_is_function_or_method_call(array)) {
@@ -3689,6 +3690,8 @@ void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, zno
 		} else {
 			is_variable = 1;
 		}
+		/* save the location of FETCH_W instruction(s) */
+		open_brackets_token->u.opline_num = get_next_op_number(CG(active_op_array));
 		zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
 		if (CG(active_op_array)->last > 0 &&
 		    CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode == ZEND_FETCH_OBJ_W) {
@@ -3700,6 +3703,7 @@ void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, zno
 		}
 	} else {
 		is_variable = 0;
+		open_brackets_token->u.opline_num = get_next_op_number(CG(active_op_array));
 	}
 
 	/* save the location of FE_RESET */
@@ -3714,28 +3718,17 @@ void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, zno
 	opline->op1 = *array;
 	SET_UNUSED(opline->op2);
 	opline->extended_value = is_variable ? ZEND_FE_RESET_VARIABLE : 0;
-	*open_brackets_token = opline->result;
 
-	{
-		zend_op dummy_opline;
+	dummy_opline.result = opline->result;
+	if (push_container) {
+		dummy_opline.op1 = CG(active_op_array)->opcodes[CG(active_op_array)->last-2].op1;
+	} else {
+		znode tmp;
 
-		dummy_opline.result = opline->result;
-		if (push_container) {
-			dummy_opline.op1 = CG(active_op_array)->opcodes[CG(active_op_array)->last-2].op1;
-		} else {
-			znode tmp;
-
-			tmp.op_type = IS_UNUSED;
-			dummy_opline.op1 = tmp;
-		}
-		zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline, sizeof(zend_op));
+		tmp.op_type = IS_UNUSED;
+		dummy_opline.op1 = tmp;
 	}
-}
-
-
-void zend_do_foreach_fetch(znode *foreach_token, znode *open_brackets_token, znode *as_token TSRMLS_DC)
-{
-	zend_op *opline;
+	zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline, sizeof(zend_op));
 
 	/* save the location of FE_FETCH */
 	as_token->u.opline_num = get_next_op_number(CG(active_op_array));
@@ -3744,7 +3737,7 @@ void zend_do_foreach_fetch(znode *foreach_token, znode *open_brackets_token, zno
 	opline->opcode = ZEND_FE_FETCH;
 	opline->result.op_type = IS_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->op1 = *open_brackets_token;
+	opline->op1 = dummy_opline.result;
 	opline->extended_value = 0;
 	SET_UNUSED(opline->op2);
 
@@ -3756,7 +3749,7 @@ void zend_do_foreach_fetch(znode *foreach_token, znode *open_brackets_token, zno
 }
 
 
-void zend_do_foreach_cont(znode *foreach_token, znode *as_token, znode *value, znode *key TSRMLS_DC)
+void zend_do_foreach_cont(znode *foreach_token, znode *open_brackets_token, znode *as_token, znode *value, znode *key TSRMLS_DC)
 {
 	zend_op *opline;
 	znode dummy, value_node;
@@ -3787,6 +3780,19 @@ void zend_do_foreach_cont(znode *foreach_token, znode *as_token, znode *value, z
 		/* Mark extended_value for assign-by-reference */
 		opline->extended_value |= ZEND_FE_FETCH_BYREF;
 		CG(active_op_array)->opcodes[foreach_token->u.opline_num].extended_value |= ZEND_FE_RESET_REFERENCE;
+	} else {
+		zend_op *foreach_copy;
+		zend_op *fetch = &CG(active_op_array)->opcodes[foreach_token->u.opline_num];
+		zend_op	*end = &CG(active_op_array)->opcodes[open_brackets_token->u.opline_num];
+
+		/* Change "write context" into "read context" */
+		fetch->extended_value = 0;  /* reset ZEND_FE_RESET_VARIABLE */
+		while (fetch != end) {
+			(--fetch)->opcode -= 3; /* FETCH_W -> FETCH_R */
+		}
+		/* prevent double SWITCH_FREE */
+		zend_stack_top(&CG(foreach_copy_stack), (void **) &foreach_copy);
+		foreach_copy->op1.op_type = IS_UNUSED;
 	}
 
 	value_node = opline->result;

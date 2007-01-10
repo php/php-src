@@ -1006,6 +1006,37 @@ ZEND_API int zend_hash_num_elements(HashTable *ht)
 }
 
 
+ZEND_API int zend_hash_get_pointer(HashTable *ht, HashPointer *ptr)
+{
+	ptr->pos = ht->pInternalPointer;
+	if (ht->pInternalPointer) {
+		ptr->h = ht->pInternalPointer->h;
+		return 1;
+	} else {
+		ptr->h = 0;
+		return 0;
+	}
+}
+
+ZEND_API int zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr)
+{
+	if (ht->pInternalPointer != ptr->pos) {
+		Bucket *p;
+
+		IS_CONSISTENT(ht);
+		p = ht->arBuckets[ptr->h & ht->nTableMask];
+		while (p != NULL) {
+			if (p == ptr->pos) {
+				ht->pInternalPointer = p;
+				return 1;
+			}
+			p = p->pNext;
+		}
+		return 0;
+	}
+	return 1;
+}
+
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos)
 {
 	IS_CONSISTENT(ht);

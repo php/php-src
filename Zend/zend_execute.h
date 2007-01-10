@@ -41,6 +41,12 @@ typedef union _temp_variable {
 		zval *str;
 		zend_uint offset;
 	} str_offset;
+	struct {
+		zval **ptr_ptr;
+		zval *ptr;
+		zend_bool fcall_returned_reference;
+		HashPointer fe_pos;
+	} fe;
 	zend_class_entry *class_entry;
 } temp_variable;
 
