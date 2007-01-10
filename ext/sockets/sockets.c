@@ -136,7 +136,9 @@ zend_function_entry sockets_functions[] = {
 	PHP_FE(socket_sendto,			NULL)
 	PHP_FE(socket_get_option,		NULL)
 	PHP_FE(socket_set_option,		NULL)
+#ifdef HAVE_SHUTDOWN
 	PHP_FE(socket_shutdown,			NULL)
+#endif
 	PHP_FE(socket_last_error,		NULL)
 	PHP_FE(socket_clear_error,		NULL)
 	
@@ -1786,6 +1788,7 @@ PHP_FUNCTION(socket_create_pair)
 }
 /* }}} */
 
+#ifdef HAVE_SHUTDOWN
 /* {{{ proto bool socket_shutdown(resource socket[, int how]) U
    Shuts down a socket for receiving, sending, or both. */
 PHP_FUNCTION(socket_shutdown)
@@ -1808,6 +1811,7 @@ PHP_FUNCTION(socket_shutdown)
 	RETURN_TRUE;
 }
 /* }}} */
+#endif
 
 /* {{{ proto int socket_last_error([resource socket]) U
    Returns the last socket error (either the last used or the provided socket resource) */
