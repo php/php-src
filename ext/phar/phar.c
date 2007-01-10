@@ -289,19 +289,14 @@ static spl_other_handler phar_spl_foreign_handler = {
 static void destroy_phar_manifest(void *pDest) /* {{{ */
 {
 	phar_entry_info *entry = (phar_entry_info *)pDest;
+	TSRMLS_FETCH();
 
 	if (entry->fp) {
-		TSRMLS_FETCH();
-
 		php_stream_close(entry->fp);
 	}
 	if (entry->temp_file) {
-		TSRMLS_FETCH();
-
 		php_stream_close(entry->temp_file);
 	}
-	entry->fp = 0;
-	entry->temp_file = 0;
 	efree(entry->filename);
 }
 /* }}} */
@@ -1479,6 +1474,7 @@ static int phar_stream_close(php_stream *stream, int close_handle TSRMLS_DC) /* 
 			php_stream_close(data->fp);
 			data->fp = 0;
 		} else {
+			/* else transfer ownership back */
 			data->internal_file->fp = data->fp;
 		}
 	}
