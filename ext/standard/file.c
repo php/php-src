@@ -2425,6 +2425,7 @@ post_enc:
 					state = PHP_FGETCSV_READY;
 					field_start = field_end = NULL;
 					p += delimiter_len;
+					if (p >= e) break;
 					goto ready_state;
 				}
 
@@ -2446,6 +2447,7 @@ post_enc:
 					state = PHP_FGETCSV_READY;
 					field_start = field_end = NULL;
 					p += delimiter_len;
+					if (p >= e) break;
 					goto ready_state;
 				}
 
@@ -2546,6 +2548,7 @@ with_enc:
 						memmove(p, p + enclosure_len, (e - p) - enclosure_len);
 						e -= enclosure_len;
 						p += enclosure_len;
+						if (p >= e) break;
 						goto with_enc;
 					} else {
 						/* Genuine end enclosure, switch state */
@@ -2561,6 +2564,7 @@ with_enc:
 					p += escape_len + 1;
 
 					/* Reprocess for ending enclosures */
+					if (p >= e) break;
 					goto with_enc;
 				}
 
