@@ -13,13 +13,20 @@ PHP                                                                        NEWS
 - Fixed bug #40036 (empty() does not work correctly with ArrayObject when using
   ARRAY_AS_PROPS). (Ilia)
 - Fixed bug #40002 (Try/Catch performs poorly). (Dmitry)
+- Fixed bug #39990 (Cannot "foreach" over overloaded properties). (Dmitry)
 - Fixed bug #39979 (PGSQL_CONNECT_FORCE_NEW will causes next connect to
   establish a new connection). (Ilia)
 - Fixed bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag,
   not entity). (Hannes)
+- Fixed bug #39449 (Overloaded array properties do not work correctly).
+  (Dmitry)
 - Fixed bug #39394 (Missing check for older variants of openssl). (Ilia)
 - Fixed bug #38325 (spl_autoload_register() gaves wrong line for "class
   not found"). (Ilia)
+- Fixed bug #36214 (__get method works properly only when conditional operator
+  is used). (Dmitry)
+- Fixed bug #35106 (nested foreach fails when array variable has a reference).
+  (Dmitry)
 
 04 Jan 2007, PHP 5.2.1RC2
 - Small optimization of the date() function (Matt,Ilia)

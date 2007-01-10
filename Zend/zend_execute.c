@@ -1163,7 +1163,8 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
 
 				if (overloaded_result) {
-					if (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET) {
+					if (!overloaded_result->is_ref &&
+					    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
 						if (overloaded_result->refcount > 0) {
 							zval *tmp = overloaded_result;
 
