@@ -214,8 +214,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 				return pce;
 #if HAVE_SETLOCALE
 			}
-		}
 #endif
+		}
 	}
 	
 	p = regex;
