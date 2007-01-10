@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - Fixed bug #39449 (Overloaded array properties do not work correctly).
   (Dmitry)
 - Fixed bug #39394 (Missing check for older variants of openssl). (Ilia)
+- Fixed bug #38604 (Fixed request time leak inside foreach() when itterating 
+  through virtual properties). (Dmitry)
 - Fixed bug #38325 (spl_autoload_register() gaves wrong line for "class
   not found"). (Ilia)
 - Fixed bug #36214 (__get method works properly only when conditional operator
