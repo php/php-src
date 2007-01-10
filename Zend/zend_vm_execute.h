@@ -1386,7 +1386,8 @@ static int ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *z = &opline->op1.u.constant;
 	UErrorCode status = U_ZERO_ERROR;
 
-	/* Convert inline HTML blocks to the output encoding, but only if necessary. */
+	/* UTODO: review this
+	 * Convert inline HTML blocks to the output encoding, but only if necessary. */
 	if (opline->extended_value &&
 		strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status),
 			   EX(op_array)->script_encoding)) {
@@ -2235,6 +2236,7 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 		}
 		is_empty = zend_hash_has_more_elements(fe_ht) != SUCCESS;
+		zend_hash_get_pointer(fe_ht, &EX_T(opline->result.u.var).fe.fe_pos);
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 		is_empty = 1;
@@ -3992,7 +3994,8 @@ static int ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *z = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	UErrorCode status = U_ZERO_ERROR;
 
-	/* Convert inline HTML blocks to the output encoding, but only if necessary. */
+	/* UTODO: review this
+	 * Convert inline HTML blocks to the output encoding, but only if necessary. */
 	if (opline->extended_value &&
 		strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status),
 			   EX(op_array)->script_encoding)) {
@@ -4843,6 +4846,7 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 		}
 		is_empty = zend_hash_has_more_elements(fe_ht) != SUCCESS;
+		zend_hash_get_pointer(fe_ht, &EX_T(opline->result.u.var).fe.fe_pos);
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 		is_empty = 1;
@@ -7106,7 +7110,8 @@ static int ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *z = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	UErrorCode status = U_ZERO_ERROR;
 
-	/* Convert inline HTML blocks to the output encoding, but only if necessary. */
+	/* UTODO: review this
+	 * Convert inline HTML blocks to the output encoding, but only if necessary. */
 	if (opline->extended_value &&
 		strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status),
 			   EX(op_array)->script_encoding)) {
@@ -8056,6 +8061,7 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 		}
 		is_empty = zend_hash_has_more_elements(fe_ht) != SUCCESS;
+		zend_hash_get_pointer(fe_ht, &EX_T(opline->result.u.var).fe.fe_pos);
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 		is_empty = 1;
@@ -8100,6 +8106,7 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_object *zobj = zend_objects_get_address(array TSRMLS_CC);
 
 			fe_ht = HASH_OF(array);
+			zend_hash_set_pointer(fe_ht, &EX_T(opline->op1.u.var).fe.fe_pos);
 			do {
 				if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
 					/* reached end of iteration */
@@ -8111,6 +8118,7 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			} while (key_type == HASH_KEY_NON_EXISTANT ||
 			         (key_type != HASH_KEY_IS_LONG &&
 		              zend_check_property_access(zobj, key_type == HASH_KEY_IS_UNICODE?IS_UNICODE:IS_STRING, str_key, str_key_len-1 TSRMLS_CC) != SUCCESS));
+			zend_hash_get_pointer(fe_ht, &EX_T(opline->op1.u.var).fe.fe_pos);
 			if (use_key && key_type != HASH_KEY_IS_LONG) {
 				zend_u_unmangle_property_name(key_type == HASH_KEY_IS_UNICODE?IS_UNICODE:IS_STRING, str_key, str_key_len-1, &class_name, &prop_name);
 				if (key_type == HASH_KEY_IS_UNICODE) {
@@ -8127,6 +8135,7 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		case ZEND_ITER_PLAIN_ARRAY:
 			fe_ht = HASH_OF(array);
+			zend_hash_set_pointer(fe_ht, &EX_T(opline->op1.u.var).fe.fe_pos);
 			if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
 				/* reached end of iteration */
 				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
@@ -8135,6 +8144,7 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL);
 			}
 			zend_hash_move_forward(fe_ht);
+			zend_hash_get_pointer(fe_ht, &EX_T(opline->op1.u.var).fe.fe_pos);
 			break;
 
 		case ZEND_ITER_OBJECT:
@@ -19678,7 +19688,8 @@ static int ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *z = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 	UErrorCode status = U_ZERO_ERROR;
 
-	/* Convert inline HTML blocks to the output encoding, but only if necessary. */
+	/* UTODO: review this
+	 * Convert inline HTML blocks to the output encoding, but only if necessary. */
 	if (opline->extended_value &&
 		strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status),
 			   EX(op_array)->script_encoding)) {
@@ -20614,6 +20625,7 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 		}
 		is_empty = zend_hash_has_more_elements(fe_ht) != SUCCESS;
+		zend_hash_get_pointer(fe_ht, &EX_T(opline->result.u.var).fe.fe_pos);
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 		is_empty = 1;

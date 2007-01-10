@@ -237,6 +237,14 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zstr str_index, uint str_length, ulong num_index, HashPosition *pos);
 
+typedef struct _HashPointer {
+	HashPosition pos;
+	ulong h;
+} HashPointer;
+
+ZEND_API int zend_hash_get_pointer(HashTable *ht, HashPointer *ptr);
+ZEND_API int zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr);
+
 #define zend_hash_has_more_elements(ht) \
 	zend_hash_has_more_elements_ex(ht, NULL)
 #define zend_hash_move_forward(ht) \
