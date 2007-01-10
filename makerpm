@@ -101,7 +101,7 @@ mv php.keepme sapi/cgi/php
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/apache
-install -m 0755 .libs/libphp5.so $RPM_BUILD_ROOT%{_libdir}/apache
+install -m 0755 .libs/libphp6.so $RPM_BUILD_ROOT%{_libdir}/apache
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
 install -m 0755 sapi/cli/php $RPM_BUILD_ROOT%{_bindir}
 install -m 0755 sapi/cgi/php $RPM_BUILD_ROOT%{_bindir}/php_cgi
@@ -166,7 +166,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%{_libdir}/apache/libphp5.so
+%{_libdir}/apache/libphp6.so
 %{_bindir}/php
 %{_bindir}/php_cgi
 %{_mandir}/man1/php.1*

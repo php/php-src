@@ -17,8 +17,8 @@
  */
 /* $Id$ */
 
-#ifndef MOD_PHP5_H
-#define MOD_PHP5_H
+#ifndef MOD_PHP_H
+#define MOD_PHP_H
 
 #if !defined(WIN32) && !defined(WINNT)
 #ifndef MODULE_VAR_EXPORT
@@ -44,7 +44,7 @@ extern php_apache_info_struct php_apache_info;
 #define AP(v) (php_apache_info.v)
 #endif
 
-#endif							/* MOD_PHP5_H */
+#endif							/* MOD_PHP_H */
 
 /*
  * Local variables:

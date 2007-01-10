@@ -60,12 +60,12 @@ static CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *con
 static CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode);
 static CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
 
-/* ### these should be defined in mod_php5.h or somewhere else */
+/* ### these should be defined in mod_php.h or somewhere else */
 #define USE_PATH 1
 #define IGNORE_URL 2
 #define MAX_STATUS_LENGTH sizeof("xxxx LONGEST POSSIBLE STATUS DESCRIPTION")
 
-module MODULE_VAR_EXPORT php5_module;
+module MODULE_VAR_EXPORT php6_module;
 
 int saved_umask;
 static unsigned char apache_php_initialized;
@@ -588,7 +588,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 			return DECLINED;
 		}
 
-		per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php5_module);
+		per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php6_module);
 		if (per_dir_conf) {
 			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 		}
@@ -862,7 +862,7 @@ static int php_xbithack_handler(request_rec * r)
 	if (!(r->finfo.st_mode & S_IXUSR)) {
 		return DECLINED;
 	}
-	per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php5_module);
+	per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php6_module);
 	if (per_dir_conf) {
 		zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 	}
@@ -959,9 +959,9 @@ command_rec php_commands[] =
 };
 /* }}} */
 
-/* {{{ odule MODULE_VAR_EXPORT php5_module
+/* {{{ odule MODULE_VAR_EXPORT php6_module
  */
-module MODULE_VAR_EXPORT php5_module =
+module MODULE_VAR_EXPORT php6_module =
 {
 	STANDARD_MODULE_STUFF,
 	php_init_handler,			/* initializer */

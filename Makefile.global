@@ -13,22 +13,22 @@ all: $(all_targets)
 	
 build-modules: $(PHP_MODULES)
 
-libphp5.la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
+libphp6.la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
 	$(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@
-	-@$(LIBTOOL) --silent --mode=install cp libphp5.la $(phptempdir)/libphp5.la >/dev/null 2>&1
+	-@$(LIBTOOL) --silent --mode=install cp libphp6.la $(phptempdir)/libphp6.la >/dev/null 2>&1
 
-libs/libphp5.bundle: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
-	$(CC) $(MH_BUNDLE_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(PHP_GLOBAL_OBJS:.lo=.o) $(PHP_SAPI_OBJS:.lo=.o) $(PHP_FRAMEWORKS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@ && cp $@ libs/libphp5.so
+libs/libphp6.bundle: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
+	$(CC) $(MH_BUNDLE_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(PHP_GLOBAL_OBJS:.lo=.o) $(PHP_SAPI_OBJS:.lo=.o) $(PHP_FRAMEWORKS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@ && cp $@ libs/libphp6.so
 
 install: $(all_targets) $(install_targets)
 
 install-sapi: $(OVERALL_TARGET)
 	@echo "Installing PHP SAPI module:       $(PHP_SAPI)"
 	-@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
-	-@if test ! -r $(phptempdir)/libphp5.$(SHLIB_DL_SUFFIX_NAME); then \
+	-@if test ! -r $(phptempdir)/libphp6.$(SHLIB_DL_SUFFIX_NAME); then \
 		for i in 0.0.0 0.0 0; do \
-			if test -r $(phptempdir)/libphp5.$(SHLIB_DL_SUFFIX_NAME).$$i; then \
-				$(LN_S) $(phptempdir)/libphp5.$(SHLIB_DL_SUFFIX_NAME).$$i $(phptempdir)/libphp5.$(SHLIB_DL_SUFFIX_NAME); \
+			if test -r $(phptempdir)/libphp6.$(SHLIB_DL_SUFFIX_NAME).$$i; then \
+				$(LN_S) $(phptempdir)/libphp6.$(SHLIB_DL_SUFFIX_NAME).$$i $(phptempdir)/libphp6.$(SHLIB_DL_SUFFIX_NAME); \
 				break; \
 			fi; \
 		done; \
@@ -108,10 +108,10 @@ clean:
 	find . -name \*.la -o -name \*.a | xargs rm -f 
 	find . -name \*.so | xargs rm -f
 	find . -name .libs -a -type d|xargs rm -rf
-	rm -f libphp5.la $(SAPI_CLI_PATH) $(OVERALL_TARGET) modules/* libs/*
+	rm -f libphp6.la $(SAPI_CLI_PATH) $(OVERALL_TARGET) modules/* libs/*
 
 distclean: clean
-	rm -f config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h stamp-h php5.spec sapi/apache/libphp5.module buildmk.stamp
+	rm -f config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h stamp-h php5.spec sapi/apache/libphp6.module buildmk.stamp
 	$(EGREP) define'.*include/php' $(top_srcdir)/configure | $(SED) 's/.*>//'|xargs rm -f
 	find . -name Makefile | xargs rm -f
 

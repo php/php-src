@@ -218,6 +218,10 @@ Apache 1.3.x on Unix systems
 
       LoadModule php5_module libexec/libphp5.so
 
+    For PHP 6:
+
+      LoadModule php6_module libexec/libphp6.so
+
 15. And in the AddModule section of httpd.conf, somewhere under the
     ClearModuleList, add this:
 
@@ -466,6 +470,10 @@ Apache 2.0 on Unix systems
     For PHP 5:
 
       LoadModule php5_module libexec/libphp5.so
+
+    For PHP 6:
+
+      LoadModule php6_module libexec/libphp6.so
 
 15. Tell Apache to parse certain extensions as PHP.  For example,
     let's have Apache parse the .php extension as PHP.  You could
