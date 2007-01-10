@@ -1,3 +1,102 @@
+2007-01-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/safe_mode.c:
+      
+      Fixed bug #40079 (php_get_current_user() not thread safe).
+      
+
+2007-01-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - Ups wrong place
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+    * ext/exif/exif.c:
+      - Improve debugging and fix #40073
+
+2007-01-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l:
+      Fix 'b' prefix in highlighting and tokenizer. (Matt W)
+
+2007-01-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      Zend/zend_execute.c:
+      Fixed bug #39819 (Using $this not in object context can cause segfaults)
+
+    * ext/standard/proc_open.c
+      ext/standard/proc_open.c:
+      Close open files in case of failure (Amit)
+
+2007-01-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/session/session.c:
+      
+      MFH: Prevent SESSION/GLOBALS overload via session decoding
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      
+      Prevent SESSION/GLOBALS overload via session decoding
+
+2007-01-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed bug #40076 (zend_alloc.c: Value of enumeration constant must be in
+      range of signed integer)
+
+2007-01-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/wddx/wddx.c:
+      
+      MFB: Added key_length intialization for intergers
+
+    * (PHP_4_4)
+      ext/wddx/wddx.c:
+      
+      MFH: Added key_length intialization for intergers
+
+    * (PHP_5_2)
+      ext/wddx/wddx.c:
+      Added key_length intialization for intergers
+
+2007-01-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Fixed bug #40002 (Try/Catch performs poorly)
+
+    * ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_gen.php:
+      Bump year.
+
+2007-01-09  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      MFH: zerofill info_data and fix possible segfault
+      partly fixes #40073
+
+    * ext/exif/exif.c:
+      zerofill info_data and fix possible segfault
+      partly fixes #40073
+
 2007-01-08  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/gd/gd.c
