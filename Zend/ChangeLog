@@ -1,3 +1,24 @@
+2007-01-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_language_scanner.l
+      zend_language_scanner.l:
+      Fix 'b' prefix in highlighting and tokenizer. (Matt W)
+
+2007-01-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Fixed bug #40076 (zend_alloc.c: Value of enumeration constant must be in
+      range of signed integer)
+
+    * zend_compile.c
+      zend_compile.c:
+      Fixed bug #40002 (Try/Catch performs poorly)
+
+    * zend_vm_gen.php
+      zend_vm_gen.php:
+      Bump year.
+
 2007-01-08  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_unicode.c:
