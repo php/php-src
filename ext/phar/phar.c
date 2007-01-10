@@ -230,6 +230,23 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 }
 /* }}}*/
 
+/**
+ * Destroy phar's in shutdown, here we don't care about aliases
+ */
+static void destroy_phar_data_only(void *pDest) /* {{{ */
+{
+	phar_archive_data *phar_data = *(phar_archive_data **) pDest;
+	TSRMLS_FETCH();
+
+	if (--phar_data->refcount < 0) {
+		phar_destroy_phar_data(phar_data TSRMLS_CC);
+	}
+}
+/* }}}*/
+
+/**
+ * Delete aliases to phar's that got kicked out of the global table
+ */
 static int phar_unalias_apply(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 {
 	return *(void**)pDest == argument ? ZEND_HASH_APPLY_REMOVE : ZEND_HASH_APPLY_KEEP;
@@ -3003,6 +3020,7 @@ PHP_RINIT_FUNCTION(phar) /* {{{ */
 PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
+	PHAR_GLOBALS->phar_fname_map. pDestructor = destroy_phar_data_only;
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
 	return SUCCESS;
 }
