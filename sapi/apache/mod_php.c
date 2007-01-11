@@ -963,7 +963,13 @@ command_rec php_commands[] =
  */
 module MODULE_VAR_EXPORT php6_module =
 {
-	STANDARD_MODULE_STUFF,
+	MODULE_MAGIC_NUMBER_MAJOR,
+	MODULE_MAGIC_NUMBER_MINOR,
+	-1,
+	"mod_php6.c",
+	NULL,
+	NULL,
+	MODULE_MAGIC_COOKIE,
 	php_init_handler,			/* initializer */
 	php_create_dir,				/* per-directory config creator */
 	php_merge_dir,				/* dir merger */
