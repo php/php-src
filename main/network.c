@@ -441,7 +441,7 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 			err = php_socket_errno();
 		}
 
-		close(sock);
+		closesocket(sock);
 	}
 	sock = -1;
 
@@ -870,7 +870,7 @@ skip_bind:
 #endif
 		}
 
-		close(sock);
+		closesocket(sock);
 	}
 	sock = -1;
 
