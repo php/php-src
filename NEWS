@@ -33,6 +33,8 @@ PHP                                                                        NEWS
   not found"). (Ilia)
 - Fixed bug #36214 (__get method works properly only when conditional operator
   is used). (Dmitry)
+- Fixed bug #35634 (Erroneous "Class declarations may not be nested" error
+  raised). (Carl P. Corliss, Dmitry)
 - Fixed bug #35106 (nested foreach fails when array variable has a reference).
   (Dmitry)
 
