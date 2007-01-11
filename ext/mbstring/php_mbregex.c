@@ -607,7 +607,7 @@ PHP_FUNCTION(mb_eregi)
 /* {{{ _php_mb_regex_ereg_replace_exec */
 static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOptionType options)
 {
-	zval *arg_pattern_zval;
+	zval **arg_pattern_zval;
 
 	char *arg_pattern;
 	int arg_pattern_len;
@@ -647,7 +647,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		char *option_str = NULL;
 		int option_str_len = 0;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zss|s",
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zss|s",
 									&arg_pattern_zval,
 									&replace, &replace_len,
 									&string, &string_len,
@@ -662,13 +662,13 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 			syntax = MBSTRG(regex_default_syntax);
 		}
 	}
-	if (Z_TYPE_P(arg_pattern_zval) == IS_STRING) {
-		arg_pattern = Z_STRVAL_P(arg_pattern_zval);
-		arg_pattern_len = Z_STRLEN_P(arg_pattern_zval);
+	if (Z_TYPE_PP(arg_pattern_zval) == IS_STRING) {
+		arg_pattern = Z_STRVAL_PP(arg_pattern_zval);
+		arg_pattern_len = Z_STRLEN_PP(arg_pattern_zval);
 	} else {
 		/* FIXME: this code is not multibyte aware! */
-		convert_to_long_ex(&arg_pattern_zval);
-		pat_buf[0] = (char)Z_LVAL_P(arg_pattern_zval);	
+		convert_to_long_ex(arg_pattern_zval);
+		pat_buf[0] = (char)Z_LVAL_PP(arg_pattern_zval);	
 		pat_buf[1] = '\0';
 
 		arg_pattern = pat_buf;
