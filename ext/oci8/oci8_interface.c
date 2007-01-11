@@ -53,7 +53,7 @@ PHP_FUNCTION(oci_define_by_name)
 	zstr name;
 	int name_len;
 	zend_uchar name_type;
-	long type = SQLT_CHR;
+	long type = 0;
 	php_oci_statement *statement;
 	php_oci_define *define, *tmp_define;
 
