@@ -454,7 +454,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 	}
 	convert_to_string_ex(filename);
 	if (Z_TYPE_PP(user) == IS_STRING) {
-#ifdef HAVE_GETPWNAM_R
+#if defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 		struct passwd pw;
 		struct passwd *retpwptr = NULL;
 		int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
