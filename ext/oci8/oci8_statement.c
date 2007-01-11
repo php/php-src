@@ -1336,7 +1336,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, zstr name, int name
 								(dvoid *) bindp->array.elements, 
 								(sb4) bind->array.max_length,
 								type,
-								(dvoid *)0, /* bindp->array.indicators, */
+								(dvoid *)bindp->array.indicators,
 								(ub2 *)bind->array.element_lengths,
 								(ub2 *)0, /* bindp->array.retcodes, */
 								(ub4) max_table_length,
@@ -1391,13 +1391,18 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	bind->array.max_length		= TEXT_BYTES(maxlength);
 	bind->array.element_lengths	= safe_emalloc(max_table_length, sizeof(ub2), 0);
 	memset(bind->array.element_lengths, 0, max_table_length * sizeof(ub2));
-	
+	bind->array.indicators      = safe_emalloc(max_table_length, sizeof(sb2), 0);
+	memset(bind->array.indicators, 0, max_table_length*sizeof(sb2));
+
 	zend_hash_internal_pointer_reset(hash);
 	
 	for (i = 0; i < bind->array.current_length; i++) {
 		if (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE) {
 			convert_to_text_ex(entry);
 			bind->array.element_lengths[i] = TEXT_BYTES(Z_UNILEN_PP(entry)); 
+			if (Z_UNILEN_PP(entry) == 0) {
+				bind->array.indicators[i] = -1;
+			}
 			zend_hash_move_forward(hash);
 		} else {
 			break;
@@ -1447,6 +1452,7 @@ php_oci_bind *php_oci_bind_array_helper_number(zval* var, long max_table_length 
 	bind->array.max_length		= sizeof(ub4);
 	bind->array.element_lengths	= safe_emalloc(max_table_length, sizeof(ub2), 0);
 	memset(bind->array.element_lengths, 0, max_table_length * sizeof(ub2));
+	bind->array.indicators		= NULL;
 	
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
@@ -1484,6 +1490,7 @@ php_oci_bind *php_oci_bind_array_helper_double(zval* var, long max_table_length 
 	bind->array.max_length		= sizeof(double);
 	bind->array.element_lengths	= safe_emalloc(max_table_length, sizeof(ub2), 0);
 	memset(bind->array.element_lengths, 0, max_table_length * sizeof(ub2));
+	bind->array.indicators		= NULL;
 	
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
@@ -1521,6 +1528,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 	bind->array.max_length		= sizeof(OCIDate);
 	bind->array.element_lengths	= safe_emalloc(max_table_length, sizeof(ub2), 0);
 	memset(bind->array.element_lengths, 0, max_table_length * sizeof(ub2));
+	bind->array.indicators		= NULL;
 
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
