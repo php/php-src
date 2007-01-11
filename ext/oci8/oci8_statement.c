@@ -519,7 +519,11 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 
 			/* find a user-setted define */
 			if (statement->defines) {
-				zend_hash_find(statement->defines, outcol->name.s, TEXT_BYTES(outcol->name_len+1), (void **) &outcol->define);
+				if (zend_hash_find(statement->defines, outcol->name.s, TEXT_BYTES(outcol->name_len + 1),(void **) &outcol->define) == SUCCESS) {
+					if (outcol->define->type) {
+						outcol->data_type = outcol->define->type;
+					}
+				}
 			}
 
 			buf = 0;
