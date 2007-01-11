@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed bug #40083 (milter SAPI functions always return false/null). (Tony)
 - Fixed bug #40079 (php_get_current_user() not thread safe). (Ilia, wharmby
   at uk dot ibm dot com)
+- Fixed bug #40078 (ORA-01405 when fetching NULL values using 
+  oci_bind_array_by_name()). (Tony)
 - Fixed bug #40076 (zend_alloc.c: Value of enumeration constant must be in
   range of signed integer). (Dmitry)
 - Fixed bug #40073 (exif_read_data dies on certain images). (Tony, Marcus)
