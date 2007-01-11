@@ -176,6 +176,7 @@ union _phar_entry_object {
 };
 
 /* {{{ forward declarations */
+static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar TSRMLS_DC);
 static int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar TSRMLS_DC);
 
 static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC);
@@ -414,6 +415,7 @@ static phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
 	phar_entry_data *ret;
+
 	if ((phar = phar_get_archive(fname, fname_len, NULL, 0 TSRMLS_CC)) == NULL) {
 		return NULL;
 	}
@@ -528,9 +530,36 @@ PHP_METHOD(Phar, canWrite)
 #endif
 
 /**
- * retrieve a previously opened phar manifest from the cache, or parse a new
- * one and add it to the cache, returning either SUCCESS or FAILURE, and setting
- * pphar to the pointer to the manifest entry
+ * Open an already loaded phar
+ */
+static int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
+{
+	phar_archive_data *phar;
+
+	if ((phar = phar_get_archive(fname, fname_len, alias, alias_len TSRMLS_CC)) != NULL
+	&& fname_len == phar->fname_len
+	&& !strncmp(fname, phar->fname, fname_len)) {
+		if (pphar) {
+			*pphar = phar;
+		}
+		return SUCCESS;
+	} else {
+		if (pphar) {
+			*pphar = NULL;
+		}
+		if (phar && alias && (options & REPORT_ERRORS)) {
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, phar->fname, fname);
+		}
+		return FAILURE;
+	}
+}
+/* }}}*/
+
+/**
+ * Does not check for a previously opened phar in the cache.
+ *
+ * Parse a new one and add it to the cache, returning either SUCCESS or 
+ * FAILURE, and setting pphar to the pointer to the manifest entry
  * 
  * This is used by phar_open_filename to process the manifest, but can be called
  * directly.
@@ -549,23 +578,6 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 
 	if (pphar) {
 		*pphar = NULL;
-	}
-
-	if ((mydata = phar_get_archive(fname, fname_len, alias, alias_len TSRMLS_CC)) != NULL) {
-		/* Overloading or reloading an archive would only be possible if we  */
-		/* refcount everything to be sure no stream for any file in the */
-		/* archive is open. */
-		if (fname_len != mydata->fname_len || strncmp(fname, mydata->fname, fname_len)) {
-			php_stream_close(fp);
-			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, mydata->fname, fname);
-			return FAILURE;
-		} else {
-			if (pphar) {
-				*pphar = mydata;
-			}		
-			php_stream_close(fp);
-			return SUCCESS;
-		}
 	}
 
 	/* check for ?>\n and increment accordingly */
@@ -631,8 +643,9 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	if ((manifest_tag & PHAR_API_VER_MASK) < PHAR_API_VERSION ||
 		    (manifest_tag & PHAR_API_MAJORVER_MASK) != PHAR_API_MAJORVERSION)
 	{
-		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" is API version %1.u.%1.u.%1.u, and cannot be processed", fname, manifest_tag >> 12, (manifest_tag >> 8) & 0xF, (manifest_tag >> 4) & 0x0F);
 		efree(savebuf);
+		php_stream_close(fp);
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" is API version %1.u.%1.u.%1.u, and cannot be processed", fname, manifest_tag >> 12, (manifest_tag >> 8) & 0xF, (manifest_tag >> 4) & 0x0F);
 		return FAILURE;
 	}
 
@@ -648,8 +661,9 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		|| (read_len = php_stream_tell(fp)) < 20
 		|| 8 != php_stream_read(fp, sig_buf, 8) 
 		|| memcmp(sig_buf+4, "GBMB", 4)) {
-			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
 			efree(savebuf);
+			php_stream_close(fp);
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
 			return FAILURE;
 		}
 		PHAR_GET_32(sig_ptr, sig_flags);
@@ -678,8 +692,9 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 			if (read_len > 0
 			|| php_stream_read(fp, (char*)saved, sizeof(saved)) != sizeof(saved)
 			|| memcmp(digest, saved, sizeof(digest))) {
-				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
 				efree(savebuf);
+				php_stream_close(fp);
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
 				return FAILURE;
 			}
 
@@ -716,8 +731,9 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 			if (read_len > 0
 			|| php_stream_read(fp, (char*)saved, sizeof(saved)) != sizeof(saved)
 			|| memcmp(digest, saved, sizeof(digest))) {
-				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
 				efree(savebuf);
+				php_stream_close(fp);
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
 				return FAILURE;
 			}
 
@@ -731,13 +747,15 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 			break;
 		}
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
 			efree(savebuf);
+			php_stream_close(fp);
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" has a broken signature", fname);
 			return FAILURE;
 		}
 	} else if (PHAR_G(require_hash)) {
-		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" does not have a signature", fname);
 		efree(savebuf);
+		php_stream_close(fp);
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" does not have a signature", fname);
 		return FAILURE;
 	} else {
 		sig_flags = 0;
@@ -758,11 +776,12 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		if (alias && alias_len && (alias_len != tmp_len || strncmp(alias, buffer, tmp_len)))
 		{
 			buffer[tmp_len] = '\0';
-			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "cannot load phar \"%s\" with implicit alias \"%s\" under different alias \"%s\"", fname, buffer, alias);
 			efree(savebuf);
+			php_stream_close(fp);
 			if (signature) {
 				efree(signature);
 			}
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "cannot load phar \"%s\" with implicit alias \"%s\" under different alias \"%s\"", fname, buffer, alias);
 			return FAILURE;
 		}
 		alias_len = tmp_len;
@@ -876,29 +895,14 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 /**
  * Create or open a phar for writing
  */
-static int phar_create_or_open_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
+static int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *mydata;
 	int register_alias;
 	php_stream *fp;
-	phar_archive_data *phar;
 
-	if (pphar) {
-		*pphar = NULL;
-	}
-	
-	if ((phar = phar_get_archive(fname, fname_len, alias, alias_len TSRMLS_CC)) != NULL) {
-		if (fname_len != phar->fname_len || strncmp(fname, phar->fname, fname_len)) {
-			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, phar->fname, fname);
-			}
-			return FAILURE;
-		} else {
-			if (pphar) {
-				*pphar = phar;
-			}
-			return SUCCESS;
-		}
+	if (phar_open_loaded(fname, fname_len, alias, alias_len, options, pphar TSRMLS_CC) == SUCCESS) {
+		return SUCCESS;
 	}
 
 #if PHP_MAJOR_VERSION < 6
@@ -913,10 +917,8 @@ static int phar_create_or_open_filename(char *fname, int fname_len, char *alias,
 
 	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, NULL);
 
-	if (fp) {
-		/* open an existing phar */
-		php_stream_close(fp);
-		return phar_open_filename(fname, fname_len, alias, alias_len, options, pphar TSRMLS_CC);
+	if (fp && phar_open_fp(fp, fname, fname_len, alias, alias_len, options, pphar TSRMLS_CC) == SUCCESS) {
+		return SUCCESS;
 	}
 
 	if (PHAR_G(readonly)) {
@@ -954,32 +956,18 @@ static int phar_create_or_open_filename(char *fname, int fname_len, char *alias,
 }
 
 /**
- * Scan a phar file for the required __HALT_COMPILER(); ?> token and verify
+ * Return an already opened filename.
+ *
+ * Or scan a phar file for the required __HALT_COMPILER(); ?> token and verify
  * that the manifest is proper, then pass it to phar_open_file().  SUCCESS
  * or FAILURE is returned and pphar is set to a pointer to the phar's manifest
  */
 static int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
 {
-	const char token[] = "__HALT_COMPILER();";
-	char *pos, buffer[1024 + sizeof(token)];
-	const long readsize = sizeof(buffer) - sizeof(token);
-	const long tokenlen = sizeof(token) - 1;
-	long halt_offset;
 	php_stream *fp;
-	phar_archive_data *phar;
 	
-	if ((phar = phar_get_archive(fname, fname_len, alias, alias_len TSRMLS_CC)) != NULL) {
-		if (fname_len != phar->fname_len || strncmp(fname, phar->fname, fname_len)) {
-			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, phar->fname, fname);
-			}
-			return FAILURE;
-		} else {
-			if (pphar) {
-				*pphar = phar;
-			}
-			return SUCCESS;
-		}
+	if (phar_open_loaded(fname, fname_len, alias, alias_len, options, pphar TSRMLS_CC) == SUCCESS) {
+		return SUCCESS;
 	}
 
 #if PHP_MAJOR_VERSION < 6
@@ -993,7 +981,7 @@ static int phar_open_filename(char *fname, int fname_len, char *alias, int alias
 	}
 
 	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
-
+	
 	if (!fp) {
 		if (options & REPORT_ERRORS) {
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to open phar for reading \"%s\"", fname);
@@ -1001,10 +989,27 @@ static int phar_open_filename(char *fname, int fname_len, char *alias, int alias
 		return FAILURE;
 	}
 
+	return phar_open_fp(fp, fname, fname_len, alias, alias_len, options, pphar TSRMLS_CC);
+}
+/* }}}*/
+
+/**
+ * Scan an open fp for the required __HALT_COMPILER(); ?> token and verify
+ * that the manifest is proper, then pass it to phar_open_file().  SUCCESS
+ * or FAILURE is returned and pphar is set to a pointer to the phar's manifest
+ */
+static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
+{
+	const char token[] = "__HALT_COMPILER();";
+	char *pos, buffer[1024 + sizeof(token)];
+	const long readsize = sizeof(buffer) - sizeof(token);
+	const long tokenlen = sizeof(token) - 1;
+	long halt_offset;
+
 	/* Maybe it's better to compile the file instead of just searching,  */
 	/* but we only want the offset. So we want a .re scanner to find it. */
 
-	if (-1 == php_stream_seek(fp, 0, SEEK_SET)) {
+	if (-1 == php_stream_rewind(fp)) {
 		MAPPHAR_ALLOC_FAIL("cannot rewind phar \"%s\"")
 	}
 
@@ -1117,7 +1122,7 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 		}
 #endif
 		if (strcmp(mode, "wb") == 0 || strcmp(mode, "w") == 0) {
-			if (phar_create_or_open_filename(resource->host, arch_len, NULL, 0, options, NULL TSRMLS_CC) == FAILURE)
+			if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, options, NULL TSRMLS_CC) == FAILURE)
 			{
 				php_url_free(resource);
 				return NULL;
@@ -1146,8 +1151,15 @@ static int phar_open_compiled_file(char *alias, int alias_len TSRMLS_DC) /* {{{ 
 	long halt_offset;
 	zval *halt_constant;
 	php_stream *fp;
+	int fname_len;
 
 	fname = zend_get_executed_filename(TSRMLS_C);
+	
+	fname_len = strlen(fname);
+
+	if (alias && phar_open_loaded(fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL TSRMLS_CC) == SUCCESS) {
+		return SUCCESS;
+	}
 
 	if (!strcmp(fname, "[no active file]")) {
 		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "cannot initialize a phar outside of PHP execution");
@@ -1161,7 +1173,7 @@ static int phar_open_compiled_file(char *alias, int alias_len TSRMLS_DC) /* {{{ 
 		return FAILURE;
 	}
 	halt_offset = Z_LVAL(*halt_constant);
-	zval_ptr_dtor(&halt_constant);
+	FREE_ZVAL(halt_constant);
 	
 	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 
@@ -1170,7 +1182,7 @@ static int phar_open_compiled_file(char *alias, int alias_len TSRMLS_DC) /* {{{ 
 		return FAILURE;
 	}
 
-	return phar_open_file(fp, fname, strlen(fname), alias, alias_len, halt_offset, NULL TSRMLS_CC);
+	return phar_open_file(fp, fname, fname_len, alias, alias_len, halt_offset, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -1627,6 +1639,7 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 	}
 	if (count != php_stream_write(data->internal_file->temp_file, buf, count)) {
 		php_stream_close(data->internal_file->temp_file);
+		data->internal_file->temp_file = 0;
 		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar error: Could not write %d characters to \"%s\" in phar \"%s\"", (int) count, data->internal_file->filename, data->phar->fname);
 		return -1;
 	}
@@ -1839,8 +1852,8 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			php_stream_close(oldfile);
 		}
 		php_stream_close(newfile);
-		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to write manifest meta-data of new phar \"%s\"", data->phar->fname);
 		data->phar->alias_len = restore_alias_len;
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to write manifest meta-data of new phar \"%s\"", data->phar->fname);
 		return EOF;
 	}
 	data->phar->alias_len = restore_alias_len;
@@ -2030,7 +2043,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 	}
 	if (data->fp) {
 		php_stream_close(data->fp);
-		data->fp = NULL;
+		data->fp = 0;
 	}
 	if (data->phar->fp) {
 		/* we will re-open this later */
@@ -2434,7 +2447,9 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	}
 	idata->internal_file->flags |= PHAR_ENT_DELETED;
 	efree(internal_file);
-	idata->internal_file = 0;
+	if (idata->fp) {
+		php_stream_close(idata->fp);
+	}
 	efree(idata);
 	/* we need to "flush" the stream to save the newly deleted file on disk */
 	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
