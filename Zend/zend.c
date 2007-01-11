@@ -1391,6 +1391,8 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	char *error_filename;
 	uint error_lineno;
 	zval *orig_user_error_handler;
+	zend_bool in_compilation;
+	zend_class_entry *saved_class_entry;
 	TSRMLS_FETCH();
 
 	/* Obtain relevant filename and lineno */
@@ -1504,6 +1506,17 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			orig_user_error_handler = EG(user_error_handler);
 			EG(user_error_handler) = NULL;
 
+			/* User error handler may include() additinal PHP files.
+			 * If an error was generated during comilation PHP will compile
+			 * such scripts recursivly, but some CG() variables may be 
+			 * inconsistent. */ 
+
+			in_compilation = zend_is_compiling(TSRMLS_C);
+			if (in_compilation) {
+				saved_class_entry = CG(active_class_entry);
+				CG(active_class_entry) = NULL;
+			}
+
 			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC)==SUCCESS) {
 				if (retval) {
 					if (Z_TYPE_P(retval) == IS_BOOL && Z_LVAL_P(retval) == 0) {
@@ -1514,6 +1527,10 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			} else if (!EG(exception)) {
 				/* The user error handler failed, use built-in error handler */
 				zend_error_cb(type, error_filename, error_lineno, format, args);
+			}
+
+			if (in_compilation) {
+				CG(active_class_entry) = saved_class_entry;
 			}
 
 			if (!EG(user_error_handler)) {
