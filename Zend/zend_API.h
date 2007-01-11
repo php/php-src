@@ -1165,26 +1165,26 @@ ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_
 #define add_u_assoc_rt_string_ex(arg, key_type, key, key_len, str, flags) add_u_assoc_rt_stringl_ex(arg, key_type, key, key_len, str, strlen(str), flags)
 #define add_u_assoc_utf8_string_ex(arg, key_type, key, key_len, str, flags) add_u_assoc_utf8_stringl_ex(arg, key_type, key, key_len, str, strlen(str), flags)
 
-#define add_u_assoc_zval(__arg, __key_type, __key, __value) add_u_assoc_zval_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __value)
-#define add_u_assoc_long(__arg, __key_type, __key, __n) add_u_assoc_long_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __n)
-#define add_u_assoc_null(__arg, __key_type, __key) add_u_assoc_null_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1)
-#define add_u_assoc_bool(__arg, __key_type, __key, __b) add_u_assoc_bool_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __b)
-#define add_u_assoc_resource(__arg, __key_type, __key, __r) add_u_assoc_resource_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __r)
-#define add_u_assoc_double(__arg, __key_type, __key, __d) add_u_assoc_double_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __d)
-#define add_u_assoc_string(__arg, __key_type, __key, __str, __duplicate) add_u_assoc_string_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __str, __duplicate)
-#define add_u_assoc_stringl(__arg, __key_type, __key, __str, __length, __duplicate) add_u_assoc_stringl_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __str, __length, __duplicate)
-#define add_u_assoc_unicode(__arg, __key_type, __key, __str, __duplicate) add_u_assoc_unicode_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __str, __duplicate)
-#define add_u_assoc_unicodel(__arg, __key_type, __key, __str, __length, __duplicate) add_u_assoc_unicodel_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __str, __length, __duplicate)
-#define add_u_assoc_zstr(arg, key_type, key, type, str, duplicate) add_u_assoc_zstr_ex(arg, key_type, key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, type, str, duplicate)
-#define add_u_assoc_zstrl(arg, key_type, key, type, str, length, duplicate) add_u_assoc_zstrl_ex(arg, key_type, key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, type, str, length, duplicate)
-#define add_u_assoc_ascii_string(arg, key_type, key, str, flags) add_u_assoc_ascii_string_ex(arg, key_type, key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, str, flags)
-#define add_u_assoc_ascii_stringl(arg, key_type, key, str, length, flags) add_u_assoc_ascii_stringl_ex(arg, key_type, key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, str, length, flags)
-#define add_u_assoc_rt_string(arg, key_type, key, str, flags) add_rt_assoc_u_stringl_ex(arg, key_type, key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, str, strlen(str), flags)
-#define add_u_assoc_rt_stringl(arg, key_type, key, str, length, flags) add_u_assoc_rt_stringl_ex(arg, key_type, key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, str, length, flags)
-#define add_u_assoc_utf8_string(arg, key_type, key, str, flags) add_u_assoc_utf8_stringl_ex(arg, key_type, key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, str, strlen(str), flags)
-#define add_u_assoc_utf8_stringl(arg, key_type, key, str, length, flags) add_u_assoc_utf8_stringl_ex(arg, key_type, key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, str, length, flags)
-#define add_u_assoc_text(__arg, __key_type, __key, __str, __duplicate) add_u_assoc_text_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __str, __duplicate)
-#define add_u_assoc_textl(__arg, __key_type, __key, __str, __length, __duplicate) add_u_assoc_textl_ex(__arg, __key_type, __key, ((__key_type==IS_UNICODE)?u_strlen(__key.u):strlen(__key.s))+1, __str, __length, __duplicate)
+#define add_u_assoc_zval(__arg, __key_type, __key, __value) add_u_assoc_zval_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1, __value)
+#define add_u_assoc_long(__arg, __key_type, __key, __n) add_u_assoc_long_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1, __n)
+#define add_u_assoc_null(__arg, __key_type, __key) add_u_assoc_null_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1)
+#define add_u_assoc_bool(__arg, __key_type, __key, __b) add_u_assoc_bool_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1, __b)
+#define add_u_assoc_resource(__arg, __key_type, __key, __r) add_u_assoc_resource_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1, __r)
+#define add_u_assoc_double(__arg, __key_type, __key, __d) add_u_assoc_double_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1, __d)
+#define add_u_assoc_string(__arg, __key_type, __key, __str, __duplicate) add_u_assoc_string_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1, __str, __duplicate)
+#define add_u_assoc_stringl(__arg, __key_type, __key, __str, __length, __duplicate) add_u_assoc_stringl_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1, __str, __length, __duplicate)
+#define add_u_assoc_unicode(__arg, __key_type, __key, __str, __duplicate) add_u_assoc_unicode_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1, __str, __duplicate)
+#define add_u_assoc_unicodel(__arg, __key_type, __key, __str, __length, __duplicate) add_u_assoc_unicodel_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1, __str, __length, __duplicate)
+#define add_u_assoc_zstr(arg, key_type, key, type, str, duplicate) add_u_assoc_zstr_ex(arg, key_type, key, zstrlen(__key_type, __key)+1, type, str, duplicate)
+#define add_u_assoc_zstrl(arg, key_type, key, type, str, length, duplicate) add_u_assoc_zstrl_ex(arg, key_type, key, zstrlen(__key_type, __key)+1, type, str, length, duplicate)
+#define add_u_assoc_ascii_string(arg, key_type, key, str, flags) add_u_assoc_ascii_string_ex(arg, key_type, key, zstrlen(__key_type, __key)+1, str, flags)
+#define add_u_assoc_ascii_stringl(arg, key_type, key, str, length, flags) add_u_assoc_ascii_stringl_ex(arg, key_type, key, zstrlen(__key_type, __key)+1, str, length, flags)
+#define add_u_assoc_rt_string(arg, key_type, key, str, flags) add_rt_assoc_u_stringl_ex(arg, key_type, key, zstrlen(__key_type, __key)+1, str, strlen(str), flags)
+#define add_u_assoc_rt_stringl(arg, key_type, key, str, length, flags) add_u_assoc_rt_stringl_ex(arg, key_type, key, zstrlen(__key_type, __key)+1, str, length, flags)
+#define add_u_assoc_utf8_string(arg, key_type, key, str, flags) add_u_assoc_utf8_stringl_ex(arg, key_type, key, zstrlen(__key_type, __key)+1, str, strlen(str), flags)
+#define add_u_assoc_utf8_stringl(arg, key_type, key, str, length, flags) add_u_assoc_utf8_stringl_ex(arg, key_type, key, zstrlen(__key_type, __key)+1, str, length, flags)
+#define add_u_assoc_text(__arg, __key_type, __key, __str, __duplicate) add_u_assoc_text_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1, __str, __duplicate)
+#define add_u_assoc_textl(__arg, __key_type, __key, __str, __length, __duplicate) add_u_assoc_textl_ex(__arg, __key_type, __key, zstrlen(__key_type, __key)+1, __str, __length, __duplicate)
 
 ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
 
@@ -1715,7 +1715,7 @@ END_EXTERN_C()
 
 #define ZVAL_ZSTR(z, type, zs, duplicate) { \
 		zstr __s=(zs); 					    \
-		Z_UNILEN_P(z) = (type==IS_UNICODE)?u_strlen(__s.u):strlen(__s.s); \
+		Z_UNILEN_P(z) = zstrlen(type, __s); \
 		Z_UNIVAL_P(z) = ZSTR(duplicate?     \
 					   ((type==IS_UNICODE)? \
 							(void*)eustrndup(__s.u, Z_UNILEN_P(z))  \
