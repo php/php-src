@@ -216,7 +216,7 @@ ZEND_GET_MODULE(pgsql)
 
 static int le_link, le_plink, le_result, le_lofp, le_string;
 
-ZEND_DECLARE_MODULE_GLOBALS(pgsql);
+ZEND_DECLARE_MODULE_GLOBALS(pgsql)
 
 /* {{{ _php_pgsql_trim_message */
 static char * _php_pgsql_trim_message(const char *message, int *len)
@@ -2658,10 +2658,11 @@ PHP_FUNCTION(pg_copy_from)
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(pg_rows), &pos);
 				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(pg_rows), (void **) &tmp, &pos) == SUCCESS) {
 					convert_to_string_ex(tmp);
-					query = (char *)emalloc(Z_STRLEN_PP(tmp) +2);
-					strcpy(query, Z_STRVAL_PP(tmp));
-					if(*(query+Z_STRLEN_PP(tmp)-1) != '\n')
-						strcat(query, "\n");
+					query = (char *)emalloc(Z_STRLEN_PP(tmp) + 2);
+					strlcpy(query, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp) + 2);
+					if(Z_STRLEN_PP(tmp) > 0 && *(query + Z_STRLEN_PP(tmp) - 1) != '\n') {
+						strlcat(query, "\n", Z_STRLEN_PP(tmp) + 2);
+					}
 					if (PQputline(pgsql, query)) {
 						efree(query);
 						PHP_PQ_ERROR("copy failed: %s", pgsql);
