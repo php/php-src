@@ -129,7 +129,7 @@ static inline int zend_codepoint_to_uchar(UChar32 codepoint, UChar *buf)
 	}
 }
 
-#define zstrlen(__type, __str) ((__type==IS_UNICODE)?u_strlen(__str.u):strlen(__str.s))
+#define ZSTR_LEN(__type, __str) ((__type==IS_UNICODE)?u_strlen(__str.u):strlen(__str.s))
 
 #define ZEND_U_CONVERTER(c) ((c)?(c):UG(fallback_encoding_conv))
 
