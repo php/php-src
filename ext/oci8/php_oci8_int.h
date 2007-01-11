@@ -180,7 +180,7 @@ typedef struct { /* php_oci_bind {{{ */
 	php_oci_statement *parent_statement;     /* pointer to the parent statement */
 	struct {
 		void *elements;
-/*		ub2 *indicators; */
+		sb2 *indicators;
 		ub2 *element_lengths;
 /*		ub2 *retcodes;		*/
 		ub4 current_length;
