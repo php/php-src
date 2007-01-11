@@ -942,7 +942,7 @@ PHP_FUNCTION(posix_getpwnam)
 		RETURN_FALSE;
 	}
 
-#ifdef HAVE_GETPWNAM_R
+#if defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 	buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 	buf = emalloc(buflen);
 	pw = &pwbuf;
@@ -988,7 +988,7 @@ PHP_FUNCTION(posix_getpwuid)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uid) == FAILURE) {
 		RETURN_FALSE;
 	}
-#ifdef HAVE_GETPWUID_R
+#if defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
 	pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 	pwbuf = emalloc(pwbuflen);
 
