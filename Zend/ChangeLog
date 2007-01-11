@@ -1,3 +1,54 @@
+2007-01-10  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.h:
+      Remove const warnings. (Andrey)
+
+2007-01-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_execute.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute.h
+      zend_hash.c
+      zend_hash.c
+      zend_hash.h
+      zend_hash.h
+      zend_language_parser.y
+      zend_language_parser.y
+      zend_object_handlers.c
+      zend_object_handlers.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug35106.phpt
+      tests/bug36214.phpt
+      tests/bug38146.phpt
+      tests/bug39449.phpt
+      tests/bug39990.phpt:
+      - Fixed bug #35106 (nested foreach fails when array variable has a
+      reference).
+      - Fixed bug #36214 (__get method works properly only when conditional
+      operator is used).
+      - Fixed bug #39449 (Overloaded array properties do not work correctly).
+      - Fixed bug #39990 (Cannot "foreach" over overloaded properties).
+
+    * tests/bug35106.phpt
+      tests/bug35106.phpt
+      tests/bug36214.phpt
+      tests/bug36214.phpt
+      tests/bug38146.phpt
+      tests/bug39449.phpt
+      tests/bug39449.phpt
+      tests/bug39990.phpt
+      tests/bug39990.phpt:
+      
+      file bug35106.phpt was initially added on branch PHP_5_2.
+
 2007-01-09  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_language_scanner.l

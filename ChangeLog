@@ -1,3 +1,174 @@
+2007-01-10  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * INSTALL
+      Makefile.global
+      acinclude.m4
+      configure.in
+      makerpm
+      sapi/apache/.cvsignore
+      sapi/apache/apMakefile.tmpl
+      sapi/apache/config.m4
+      sapi/apache/libphp5.module.in
+      sapi/apache/libphp6.module.in
+      sapi/apache/mod_php.c
+      sapi/apache/mod_php.exp
+      sapi/apache/mod_php.h
+      sapi/apache/mod_php5.c
+      sapi/apache/mod_php5.exp
+      sapi/apache/mod_php5.h
+      sapi/apache/php.sym
+      sapi/apache/php_apache_http.h
+      sapi/cli/config.m4:
+      Rename php5 module to php6. Remove version number from
+      sapi/apache/mod_php.* filenames (for future's sake). No other SAPI
+      moduels modified (up to invididual maintainers).
+
+    * README.UNICODE:
+      Update with rewrites by me and Evan G.
+
+    * README.UNICODE-UPGRADES:
+      Update with info from README.UNICODE.
+
+2007-01-10  Sara Golemon  <sara@golemon.com>
+
+    * main/php_streams.h
+      main/streams/streams.c:
+      Add convenience function for openeing files with unicode names
+
+2007-01-10  Johannes Schlüter  <johannes@schlueters.de>
+
+    * sapi/cli/php.1.in:
+      - Bump year
+
+2007-01-10  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c:
+      MFB: Add missing ifdefs
+
+2007-01-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/file.c:
+      - Fix mem access
+
+2007-01-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/php_spl.c
+      ext/spl/tests/bug40091.phpt
+      ext/spl/tests/bug40091.phpt:
+      
+      Fixed bug #40091 (spl_autoload_register with 2 instances of the same
+      class).
+
+2007-01-10  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.h:
+      Remove const warnings. (Andrey)
+
+2007-01-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Another bug fixed by Dmitry
+
+2007-01-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/simplexml/tests/bug38347.phpt
+      ext/simplexml/tests/bug38347.phpt
+      ext/spl/tests/iterator_035.phpt
+      ext/spl/tests/iterator_035.phpt
+      tests/classes/bug27468.phpt
+      tests/classes/bug27468.phpt
+      tests/lang/bug27439.phpt
+      tests/lang/bug27439.phpt:
+      Fixed tests
+
+    * ZendEngine2/tests/bug35106.phpt
+      ZendEngine2/tests/bug35106.phpt
+      ZendEngine2/tests/bug36214.phpt
+      ZendEngine2/tests/bug36214.phpt
+      ZendEngine2/tests/bug38146.phpt
+      ZendEngine2/tests/bug39449.phpt
+      ZendEngine2/tests/bug39449.phpt
+      ZendEngine2/tests/bug39990.phpt
+      ZendEngine2/tests/bug39990.phpt:
+      
+      file bug35106.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug35106.phpt
+      ZendEngine2/tests/bug36214.phpt
+      ZendEngine2/tests/bug38146.phpt
+      ZendEngine2/tests/bug39449.phpt
+      ZendEngine2/tests/bug39990.phpt:
+      - Fixed bug #35106 (nested foreach fails when array variable has a
+      reference).
+      - Fixed bug #36214 (__get method works properly only when conditional
+      operator is used).
+      - Fixed bug #39449 (Overloaded array properties do not work correctly).
+      - Fixed bug #39990 (Cannot "foreach" over overloaded properties).
+
+2007-01-10  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/sockets/php_sockets.h
+      ext/sockets/sockets.c:
+      Add missing ifdefs for shutdown()
+
+    * ext/standard/file.h:
+      MFB: fix ifdefs
+
+    * (PHP_5_2)
+      ext/standard/file.h:
+      Fix ifdefs
+
+    * (PHP_5_2)
+      ext/pcre/php_pcre.c:
+      Fix build on system where HAVE_SETLOCALE is not defined
+
+2007-01-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * sapi/milter/php_milter.c:
+      fix #40083
+
+    * (PHP_5_2)
+      sapi/milter/php_milter.c:
+      use RETURN_* instead of RETVAL_* and fix #40083
+
+2007-01-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      Fixed SIGSEGV
+
 2007-01-09  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
