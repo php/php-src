@@ -885,6 +885,7 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	zval *z = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	zval z_copy;
 	UErrorCode status = U_ZERO_ERROR;
 
 	/* UTODO: review this
@@ -906,6 +907,10 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
 		}
 		zval_dtor(&z_conv);
 		ucnv_close(script_enc_conv);
+	} else if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
+		zend_std_cast_object_tostring(z, &z_copy, ZEND_STR_TYPE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
+		zend_print_variable(&z_copy);
+		zval_dtor(&z_copy);
 	} else {
 		zend_print_variable(z);
 	}

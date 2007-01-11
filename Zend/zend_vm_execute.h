@@ -1384,6 +1384,7 @@ static int ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 
 	zval *z = &opline->op1.u.constant;
+	zval z_copy;
 	UErrorCode status = U_ZERO_ERROR;
 
 	/* UTODO: review this
@@ -1405,6 +1406,10 @@ static int ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zval_dtor(&z_conv);
 		ucnv_close(script_enc_conv);
+	} else if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
+		zend_std_cast_object_tostring(z, &z_copy, ZEND_STR_TYPE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
+		zend_print_variable(&z_copy);
+		zval_dtor(&z_copy);
 	} else {
 		zend_print_variable(z);
 	}
@@ -3992,6 +3997,7 @@ static int ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	zval *z = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
+	zval z_copy;
 	UErrorCode status = U_ZERO_ERROR;
 
 	/* UTODO: review this
@@ -4013,6 +4019,10 @@ static int ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zval_dtor(&z_conv);
 		ucnv_close(script_enc_conv);
+	} else if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
+		zend_std_cast_object_tostring(z, &z_copy, ZEND_STR_TYPE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
+		zend_print_variable(&z_copy);
+		zval_dtor(&z_copy);
 	} else {
 		zend_print_variable(z);
 	}
@@ -7108,6 +7118,7 @@ static int ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	zval *z = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
+	zval z_copy;
 	UErrorCode status = U_ZERO_ERROR;
 
 	/* UTODO: review this
@@ -7129,6 +7140,10 @@ static int ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zval_dtor(&z_conv);
 		ucnv_close(script_enc_conv);
+	} else if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
+		zend_std_cast_object_tostring(z, &z_copy, ZEND_STR_TYPE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
+		zend_print_variable(&z_copy);
+		zval_dtor(&z_copy);
 	} else {
 		zend_print_variable(z);
 	}
@@ -19686,6 +19701,7 @@ static int ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 
 	zval *z = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
+	zval z_copy;
 	UErrorCode status = U_ZERO_ERROR;
 
 	/* UTODO: review this
@@ -19707,6 +19723,10 @@ static int ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zval_dtor(&z_conv);
 		ucnv_close(script_enc_conv);
+	} else if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
+		zend_std_cast_object_tostring(z, &z_copy, ZEND_STR_TYPE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
+		zend_print_variable(&z_copy);
+		zval_dtor(&z_copy);
 	} else {
 		zend_print_variable(z);
 	}
