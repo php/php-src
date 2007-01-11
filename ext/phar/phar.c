@@ -26,6 +26,14 @@
 #include <time.h>
 #include "php.h"
 #include "php_ini.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_exceptions.h"
+#include "zend_hash.h"
+#include "zend_interfaces.h"
+#include "zend_operators.h"
+#include "zend_qsort.h"
+#include "main/php_streams.h"
 #include "ext/standard/info.h"
 #include "ext/standard/url.h"
 #include "ext/standard/crc32.h"
@@ -35,15 +43,7 @@
 #include "ext/spl/spl_directory.h"
 #include "ext/spl/spl_engine.h"
 #include "ext/spl/spl_exceptions.h"
-#include "zend_constants.h"
-#include "zend_execute.h"
-#include "zend_exceptions.h"
-#include "zend_hash.h"
-#include "zend_interfaces.h"
-#include "zend_operators.h"
-#include "zend_qsort.h"
 #include "php_phar.h"
-#include "main/php_streams.h"
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
