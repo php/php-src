@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   ARRAY_AS_PROPS). (Ilia)
 - Fixed bug #40002 (Try/Catch performs poorly). (Dmitry)
 - Fixed bug #39990 (Cannot "foreach" over overloaded properties). (Dmitry)
+- Fixed bug #39988 (type argument of oci_define_by_name() is ignored).
+  (Chris Jones, Tony)
 - Fixed bug #39979 (PGSQL_CONNECT_FORCE_NEW will causes next connect to
   establish a new connection). (Ilia)
 - Fixed bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag,

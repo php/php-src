@@ -52,7 +52,7 @@ PHP_FUNCTION(oci_define_by_name)
 	zval *stmt, *var;
 	char *name;
 	int name_len;
-	long type = SQLT_CHR;
+	long type = 0;
 	php_oci_statement *statement;
 	php_oci_define *define, *tmp_define;
 
