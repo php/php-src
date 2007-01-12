@@ -68,6 +68,8 @@ AC_PREFIX_DEFAULT()
 
 PHP_PROG_RE2C
 PHP_PROG_AWK
+
+PHP_SETUP_ICU
     
 sinclude(config.m4)
 
