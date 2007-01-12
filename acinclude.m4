@@ -2088,7 +2088,7 @@ dnl -------------------------------------------------------------------------
 dnl
 dnl PHP_SETUP_ICU([shared-add])
 dnl
-dnl Common setup macro for kerberos
+dnl Common setup macro for ICU
 dnl
 AC_DEFUN([PHP_SETUP_ICU],[
   unset PHP_ICU_DIR
