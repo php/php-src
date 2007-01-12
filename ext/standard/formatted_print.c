@@ -651,9 +651,10 @@ static char * php_formatted_print(int ht, int *len, int use_array, int format_of
 {
 	zval ***args, **z_format;
 	int argc, size = 240, inpos = 0, outpos = 0, temppos;
-	int alignment, width, precision, currarg, adjusting, argnum;
+	int alignment, currarg, adjusting;
 	char *format, *result, padding;
 	int always_sign;
+	long argnum, width, precision;
 
 	argc = ZEND_NUM_ARGS();
 
