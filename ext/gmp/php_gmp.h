@@ -33,7 +33,6 @@ extern zend_module_entry gmp_module_entry;
 #endif
 
 ZEND_MODULE_STARTUP_D(gmp);
-ZEND_MODULE_SHUTDOWN_D(gmp);
 ZEND_MODULE_DEACTIVATE_D(gmp);
 ZEND_MODULE_INFO_D(gmp);
 
