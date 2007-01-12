@@ -426,13 +426,25 @@ static void register_standard_class(TSRMLS_D)
 	zend_hash_add(CG(class_table), "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
 }
 
+#ifdef ZTS
+static zend_bool asp_tags_default      = 0;
+static zend_bool short_tags_default    = 1;
+static zend_bool ct_pass_ref_default   = 1;
+static zend_bool extended_info_default = 0;
+#else
+# define asp_tags_default      0
+# define short_tags_default    1
+# define ct_pass_ref_default   1
+# define extended_info_default 0
+#endif
+
 static void zend_set_default_compile_time_values(TSRMLS_D)
 {
 	/* default compile-time values */
-	CG(asp_tags) = 0;
-	CG(short_tags) = 1;
-	CG(allow_call_time_pass_reference) = 1;
-	CG(extended_info) = 0;
+	CG(asp_tags) = asp_tags_default;
+	CG(short_tags) = short_tags_default;
+	CG(allow_call_time_pass_reference) = ct_pass_ref_default;
+	CG(extended_info) = extended_info_default;
 }
 
 
@@ -695,6 +707,12 @@ void zend_post_startup(TSRMLS_D)
 	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
 	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
 	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
+
+	asp_tags_default = CG(asp_tags);
+	short_tags_default = CG(short_tags);
+	ct_pass_ref_default = CG(allow_call_time_pass_reference);
+	extended_info_default = CG(extended_info);
+	
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	free(compiler_globals->function_table);
 	free(compiler_globals->class_table);

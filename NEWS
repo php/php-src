@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   (Chris Jones, Tony)
 - Fixed bug #39979 (PGSQL_CONNECT_FORCE_NEW will causes next connect to
   establish a new connection). (Ilia)
+- Fixed bug #39969 (ini setting short_open_tag has no effect when using
+  --enable-maintainer-zts). (Dmitry)
 - Fixed bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag,
   not entity). (Hannes)
 - Fixed bug #39449 (Overloaded array properties do not work correctly).
