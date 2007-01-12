@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? Jan 2007, Version 4.4.5
 - Fixed bug #39819 (Using $this not in object context can cause segfaults).
   (Dmitry)
+- Fixed bug #36248 (CURLOPT_HEADERFUNCTION, couldn't set the function in the
+  class). (Ilia)
 
 04 Jan 2007, Version 4.4.5RC1
 - Added a meta tag to phpinfo() output to prevent search engines from 
