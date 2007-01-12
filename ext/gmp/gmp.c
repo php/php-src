@@ -324,7 +324,7 @@ zend_module_entry gmp_module_entry = {
 	"gmp",
 	gmp_functions,
 	ZEND_MODULE_STARTUP_N(gmp),
-	ZEND_MODULE_SHUTDOWN_N(gmp),
+	NULL,
 	NULL,
 	ZEND_MODULE_DEACTIVATE_N(gmp),
 	ZEND_MODULE_INFO_N(gmp),
@@ -405,14 +405,6 @@ ZEND_MODULE_DEACTIVATE_D(gmp)
 		GMPG(rand_initialized) = 0;
 	}
 
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ ZEND_MSHUTDOWN_FUNCTION
- */
-ZEND_MODULE_SHUTDOWN_D(gmp)
-{
 	return SUCCESS;
 }
 /* }}} */
