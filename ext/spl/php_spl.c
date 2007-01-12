@@ -215,7 +215,7 @@ int spl_autoload(const zstr class_name, const zstr lc_name, int class_name_len, 
 	zval *result = NULL;
 	int ret;
 
-	/* UTODO: Wewant the stream toacept a zstrfor opening */
+	/* UTODO: We want the stream to acept a zstr for opening */
 	class_file_len = spprintf(&class_file, 0, "%v%v", lc_name, file_extension);
 
 	ret = php_stream_open_for_zend_ex(class_file, &file_handle, ENFORCE_SAFE_MODE|USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
