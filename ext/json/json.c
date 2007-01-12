@@ -35,9 +35,6 @@ static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);
 static PHP_FUNCTION(json_decode);
 
-/* If you declare any globals in php_json.h uncomment this:
-ZEND_DECLARE_MODULE_GLOBALS(json)
-*/
 static const char digits[] = "0123456789abcdef";
 
 /* {{{ json_functions[]

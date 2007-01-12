@@ -277,10 +277,6 @@ PHP_MINFO_FUNCTION(ncurses)
 		php_info_print_table_row(2, "color support", "no");
 #endif
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
 }
 /* }}} */
 
