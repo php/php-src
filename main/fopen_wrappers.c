@@ -272,6 +272,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 			char user[32];			/* to try open the directory */
 			struct passwd *pw;
 #if defined(ZTS) && defined(HAVE_GETPWNAM_R) && defined(_SC_GETPW_R_SIZE_MAX)
+			struct passwd pwstruc;
 			long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 			char *pwbuf;
 
