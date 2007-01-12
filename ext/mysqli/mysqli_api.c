@@ -686,6 +686,11 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 	if (!ret) {
 #endif
 		for (i = 0; i < stmt->result.var_cnt; i++) {
+			/*
+			  QQ: Isn't it quite better to call zval_dtor(). What if the user has
+			  assigned a resource, or an array to the bound variable? We are going
+			  to leak probably. zval_dtor() will handle also Unicode/Non-unicode mode.
+			*/
 			/* Even if the string is of length zero there is one byte alloced so efree() in all cases */
 			if (Z_TYPE_P(stmt->result.vars[i]) == IS_STRING) {
 				efree(stmt->result.vars[i]->value.str.val);
