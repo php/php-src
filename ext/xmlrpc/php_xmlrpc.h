@@ -56,9 +56,6 @@
 #ifndef _PHP_XMLRPC_H
 #define _PHP_XMLRPC_H
 
-/* You should tweak config.m4 so this symbol (or some else suitable)
-   gets defined.
-*/
 #if 1 /* HAVE_XMLRPC */
 
 extern zend_module_entry xmlrpc_module_entry;
@@ -71,9 +68,6 @@ extern zend_module_entry xmlrpc_module_entry;
 #endif
 
 PHP_MINIT_FUNCTION(xmlrpc);
-PHP_MSHUTDOWN_FUNCTION(xmlrpc);
-PHP_RINIT_FUNCTION(xmlrpc);
-PHP_RSHUTDOWN_FUNCTION(xmlrpc);
 PHP_MINFO_FUNCTION(xmlrpc);
 
 PHP_FUNCTION(xmlrpc_encode);
@@ -90,20 +84,6 @@ PHP_FUNCTION(xmlrpc_server_call_method);
 PHP_FUNCTION(xmlrpc_parse_method_descriptions);
 PHP_FUNCTION(xmlrpc_server_add_introspection_data);
 PHP_FUNCTION(xmlrpc_server_register_introspection_callback);
-
-/* Fill in this structure and use entries in it
-   for thread safety instead of using true globals.
-*/
-typedef struct {
-	int x; /* fix error in msvc, cannot have empty structs */
-} zend_xmlrpc_globals;
-
-/* In every function that needs to use variables in zend_xmlrpc_globals,
-   do call XMLRPCLS_FETCH(); after declaring other variables used by
-   that function, and always refer to them as XMLRPCG(variable).
-   You are encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
-*/
 
 #else
 
