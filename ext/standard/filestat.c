@@ -363,12 +363,17 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 	}
 	convert_to_string_ex(filename);
 	if (Z_TYPE_PP(group) == IS_STRING) {
-#if HAVE_GETGRNAM_R
+#if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 		struct group gr;
 		struct group *retgrptr;
-		int grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
-		char *grbuf = emalloc(grbuflen);
+		long grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+		char *grbuf;
 
+		if (grbuflen < 1) {
+			RETURN_FALSE;
+		}
+
+		grbuf = emalloc(grbuflen);
 		if (getgrnam_r(Z_STRVAL_PP(group), &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_PP(group));
 			efree(grbuf);
@@ -454,12 +459,17 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 	}
 	convert_to_string_ex(filename);
 	if (Z_TYPE_PP(user) == IS_STRING) {
-#if defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
+#if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 		struct passwd pw;
 		struct passwd *retpwptr = NULL;
-		int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-		char *pwbuf = emalloc(pwbuflen);
+		long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+		char *pwbuf;
 
+		if (pwbuflen < 1) {
+			RETURN_FALSE;
+		}
+
+		pwbuf = emalloc(pwbuflen);
 		if (getpwnam_r(Z_STRVAL_PP(user), &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_PP(user));
 			efree(pwbuf);

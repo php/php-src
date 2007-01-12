@@ -264,23 +264,37 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 	filename = SG(request_info).path_translated;
 	path_info = SG(request_info).request_uri;
 #if HAVE_PWD_H
-	if (PG(user_dir) && *PG(user_dir)
-		&& path_info && '/' == path_info[0] && '~' == path_info[1]) {
-
-		char user[32];
-		struct passwd *pw;
+	if (PG(user_dir) && *PG(user_dir) && path_info && '/' == path_info[0] && '~' == path_info[1]) {
 		char *s = strchr(path_info + 2, '/');
 
 		filename = NULL;	/* discard the original filename, it must not be used */
 		if (s) {			/* if there is no path name after the file, do not bother */
-							/* to try open the directory */
+			char user[32];			/* to try open the directory */
+			struct passwd *pw;
+#if defined(ZTS) && defined(HAVE_GETPWNAM_R) && defined(_SC_GETPW_R_SIZE_MAX)
+			long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+			char *pwbuf;
+
+			if (pwbuflen < 1) {
+				return FAILURE;
+			}
+			
+			pwbuf = emalloc(pwbuflen);
+#endif
 			length = s - (path_info + 2);
-			if (length > (int)sizeof(user) - 1)
+			if (length > (int)sizeof(user) - 1) {
 				length = sizeof(user) - 1;
+			}
 			memcpy(user, path_info + 2, length);
 			user[length] = '\0';
-
+#if defined(ZTS) && defined(HAVE_GETPWNAM_R) && defined(_SC_GETPW_R_SIZE_MAX)
+			if (getpwnam_r(user, &pwstruc, pwbuf, pwbuflen, &pw)) {
+				efree(pwbuf);
+				return FAILURE;
+			}
+#else
 			pw = getpwnam(user);
+#endif
 			if (pw && pw->pw_dir) {
 				filename = emalloc(strlen(PG(user_dir)) + strlen(path_info) + strlen(pw->pw_dir) + 4);
 				if (filename) {

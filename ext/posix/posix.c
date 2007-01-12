@@ -555,8 +555,8 @@ PHP_FUNCTION(posix_ttyname)
 	zval **z_fd;
 	char *p;
 	int fd;
-#if HAVE_TTYNAME_R
-	size_t buflen;
+#if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
+	long buflen;
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &z_fd) == FAILURE) {
@@ -573,8 +573,11 @@ PHP_FUNCTION(posix_ttyname)
 			convert_to_long_ex(z_fd);
 			fd = Z_LVAL_PP(z_fd);
 	}
-#if HAVE_TTYNAME_R
+#if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	buflen = sysconf(_SC_TTY_NAME_MAX);
+	if (buflen < 1) {
+		RETURN_FALSE;
+	}
 	p = emalloc(buflen);
 
 	if (ttyname_r(fd, p, buflen)) {
@@ -822,9 +825,9 @@ PHP_FUNCTION(posix_getgrnam)
 	char *name;
 	struct group *g;
 	int name_len;
-#if HAVE_GETGRNAM_R
+#if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	struct group gbuf;
-	int buflen;
+	long buflen;
 	char *buf;
 #endif
 	
@@ -832,8 +835,11 @@ PHP_FUNCTION(posix_getgrnam)
 		RETURN_FALSE;
 	}
 
-#if HAVE_GETGRNAM_R
+#if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+	if (buflen < 1) {
+		RETURN_FALSE;
+	}
 	buf = emalloc(buflen);
 	g = &gbuf;
 
@@ -855,7 +861,7 @@ PHP_FUNCTION(posix_getgrnam)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to convert posix group to array");
 		RETVAL_FALSE;
 	}
-#if HAVE_GETGRNAM_R
+#if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	efree(buf);
 #endif
 }
@@ -870,7 +876,7 @@ PHP_FUNCTION(posix_getgrgid)
 	int ret;
 	struct group _g;
 	struct group *retgrptr;
-	int grbuflen;
+	long grbuflen;
 	char *grbuf;
 #endif
 	struct group *g;
@@ -932,9 +938,9 @@ PHP_FUNCTION(posix_getpwnam)
 	struct passwd *pw;
 	char *name;
 	int name_len;
-#if defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
+#if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 	struct passwd pwbuf;
-	int buflen;
+	long buflen;
 	char *buf;
 #endif
 
@@ -942,8 +948,11 @@ PHP_FUNCTION(posix_getpwnam)
 		RETURN_FALSE;
 	}
 
-#if defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
+#if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 	buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+	if (buflen < 1) {
+		RETURN_FALSE;
+	}
 	buf = emalloc(buflen);
 	pw = &pwbuf;
 
@@ -965,7 +974,7 @@ PHP_FUNCTION(posix_getpwnam)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
-#if defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
+#if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 	efree(buf);
 #endif
 }
@@ -976,10 +985,10 @@ PHP_FUNCTION(posix_getpwnam)
 PHP_FUNCTION(posix_getpwuid)
 {
 	long uid;
-#if defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
+#if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
 	struct passwd _pw;
 	struct passwd *retpwptr = NULL;
-	int pwbuflen;
+	long pwbuflen;
 	char *pwbuf;
 	int ret;
 #endif
@@ -988,8 +997,11 @@ PHP_FUNCTION(posix_getpwuid)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uid) == FAILURE) {
 		RETURN_FALSE;
 	}
-#if defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
+#if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
 	pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+	if (pwbuflen < 1) {
+		RETURN_FALSE;
+	}
 	pwbuf = emalloc(pwbuflen);
 
 	ret = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
@@ -1012,7 +1024,7 @@ PHP_FUNCTION(posix_getpwuid)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
-#if defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
+#if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
 	efree(pwbuf);
 #endif
 }

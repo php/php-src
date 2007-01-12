@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Added CURLOPT_TCP_NODELAY constant to Curl extension. (Sara)
 - Improved proc_open(). Now on Windows it can run external commands not through
   CMD.EXE. (Dmitry)
+- Fixed bug #40098 (php_fopen_primary_script() not thread safe). (Ilia)
 - Fixed bug #40091 (spl_autoload_register with 2 instances of the same
   class). (Ilia)
 - Fixed bug #40083 (milter SAPI functions always return false/null). (Tony)
