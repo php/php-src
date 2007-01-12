@@ -28,17 +28,7 @@
 
 #include <ctype.h>
 
-/* You should tweak config.m4 so this symbol (or some else suitable)
-   gets defined.
-*/
 #if HAVE_CTYPE
-
-/* If you declare any globals in php_ctype.h uncomment this:
-ZEND_DECLARE_MODULE_GLOBALS(ctype)
-*/
-
-/* True global resources - no need for thread safety here */
-/* static int le_ctype; */
 
 static PHP_MINFO_FUNCTION(ctype);
 
