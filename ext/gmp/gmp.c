@@ -424,10 +424,6 @@ ZEND_MODULE_INFO_D(gmp)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "gmp support", "enabled");
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
 }
 /* }}} */
 
