@@ -304,6 +304,9 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 					SG(request_info).path_translated = filename;
 				}
 			}
+#if defined(ZTS) && defined(HAVE_GETPWNAM_R) && defined(_SC_GETPW_R_SIZE_MAX)
+			efree(pwbuf);
+#endif
 		}
 	} else
 #endif
