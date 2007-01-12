@@ -1742,7 +1742,7 @@ PHP_FUNCTION(mb_stripos)
 		RETURN_FALSE;
 	}
 
- n = php_mb_stripos(0, old_haystack, old_haystack_len, old_needle, old_needle_len, offset, from_encoding TSRMLS_CC);
+	n = php_mb_stripos(0, old_haystack, old_haystack_len, old_needle, old_needle_len, offset, from_encoding TSRMLS_CC);
 
 	if (n >= 0) {
 		RETVAL_LONG(n);
@@ -1772,7 +1772,7 @@ PHP_FUNCTION(mb_strripos)
 		RETURN_FALSE;
 	}
 
- n = php_mb_stripos(1, old_haystack, old_haystack_len, old_needle, old_needle_len, offset, from_encoding TSRMLS_CC);
+	n = php_mb_stripos(1, old_haystack, old_haystack_len, old_needle, old_needle_len, offset, from_encoding TSRMLS_CC);
 
 	if (n >= 0) {
 		RETVAL_LONG(n);
@@ -1956,6 +1956,7 @@ PHP_FUNCTION(mb_stristr)
 		}
 	}
 }
+/* }}} */
 
 /* {{{ proto string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
    Finds the last occurrence of a character in a string within another, case insensitive */
@@ -1983,7 +1984,7 @@ PHP_FUNCTION(mb_strrichr)
 		RETURN_FALSE;
 	}
 
- n = php_mb_stripos(1, haystack.val, haystack.len, needle.val, needle.len, 0, from_encoding TSRMLS_CC);
+	n = php_mb_stripos(1, haystack.val, haystack.len, needle.val, needle.len, 0, from_encoding TSRMLS_CC);
 
 	if (n <0) {
 		RETURN_FALSE;
@@ -2008,6 +2009,7 @@ PHP_FUNCTION(mb_strrichr)
 		}
 	}
 }
+/* }}} */
 
 /* {{{ proto int mb_substr_count(string haystack, string needle [, string encoding])
    Count the number of substring occurrences */
@@ -4237,6 +4239,7 @@ MBSTRING_API int php_mb_gpc_encoding_converter(char **str, int *len, int num, co
 
 	return ret ? 0 : -1;
 }
+/* }}} */
 
 /* {{{ MBSTRING_API int php_mb_gpc_encoding_detector()
  */
