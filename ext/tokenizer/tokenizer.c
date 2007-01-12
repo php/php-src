@@ -92,12 +92,6 @@ struct yy_buffer_state
 
 #define zendtext LANG_SCNG(yy_text)
 #define zendleng LANG_SCNG(yy_leng)
-/* If you declare any globals in php_tokenizer.h uncomment this:
-ZEND_DECLARE_MODULE_GLOBALS(tokenizer)
-*/
-
-/* True global resources - no need for thread safety here */
-/* static int le_tokenizer; */
 
 /* {{{ tokenizer_functions[]
  *
@@ -134,35 +128,10 @@ zend_module_entry tokenizer_module_entry = {
 ZEND_GET_MODULE(tokenizer)
 #endif
 
-/* {{{ PHP_INI
- */
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("tokenizer.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_tokenizer_globals, tokenizer_globals)
-	STD_PHP_INI_ENTRY("tokenizer.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_tokenizer_globals, tokenizer_globals)
-PHP_INI_END()
-*/
-/* }}} */
-
-/* {{{ PHP_GINIT_FUNCTION
- */
-/* Uncomment this function if you have INI entries
-static PHP_GINIT_FUNCTION(tokenizer)
-{
-	tokenizer_globals->global_value = 0;
-	tokenizer_globals->global_string = NULL;
-}
-*/
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(tokenizer)
 {
-	/* If you have INI entries, uncomment these lines 
-	REGISTER_INI_ENTRIES();
-	*/
-
 	REGISTER_LONG_CONSTANT("T_INCLUDE", T_INCLUDE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_INCLUDE_ONCE", T_INCLUDE_ONCE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_EVAL", T_EVAL, CONST_CS | CONST_PERSISTENT);
@@ -294,10 +263,6 @@ PHP_MINFO_FUNCTION(tokenizer)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Tokenizer Support", "enabled");
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
 }
 /* }}} */
 
