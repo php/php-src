@@ -235,7 +235,7 @@ PHPAPI char *php_get_current_user()
 		char *pwbuf;
 
 		if (pwbuflen < 1) {
-			return ""
+			return "";
 		}
 		pwbuf = emalloc(pwbuflen);
 		if (getpwuid_r(pstat->st_uid, &_pw, pwbuf, pwbuflen, &retpwptr) != 0) {
