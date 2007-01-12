@@ -1,3 +1,30 @@
+2007-01-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.h
+      zend_unicode.h:
+      - Consistency: macros shall be uppercased (as requested by Andrei)
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      - MFB Missing part of __toString() support
+
+    * zend_API.h
+      zend_unicode.h:
+      - Add zstrlen() helper
+
+2007-01-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.c
+      tests/bug35634.phpt:
+      Fixed bug #35634 (Erroneous "Class declarations may not be nested" error
+      raised). (Carl P. Corliss)
+
+    * tests/bug35634.phpt
+      tests/bug35634.phpt:
+      
+      file bug35634.phpt was initially added on branch PHP_5_2.
+
 2007-01-10  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.h:

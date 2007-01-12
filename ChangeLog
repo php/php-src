@@ -1,3 +1,111 @@
+2007-01-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * sapi/apache/mod_php.c:
+      Fake out the module name, since the filename is different now.
+
+2007-01-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_unicode.h:
+      - Consistency: macros shall be uppercased (as requested by Andrei)
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - MFB Missing part of __toString() support
+
+2007-01-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/mbstring/php_mbregex.c:
+      avoid changing original zval
+
+2007-01-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_engine.h:
+      - Unicode support
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_unicode.h:
+      - Add zstrlen() helper
+
+2007-01-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/tests/bug35634.phpt
+      ZendEngine2/tests/bug35634.phpt
+      ZendEngine2/tests/bug35634.phpt:
+      Fixed bug #35634 (Erroneous "Class declarations may not be nested" error
+      raised). (Carl P. Corliss)
+
+2007-01-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/pgsql/pgsql.c:
+      make sure the string is non-empty and use strlcpy() & strlcat()
+
+    * main/network.c:
+      use closesocket() on Win32 and close() on *nix
+
+    * (PHP_5_2)
+      NEWS
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/tests/array_bind_005.phpt
+      ext/oci8/tests/coll_019.phpt
+      ext/oci8/tests/define2.phpt
+      ext/oci8/tests/define3.phpt
+      ext/oci8/tests/define4.phpt
+      ext/oci8/tests/define5.phpt:
+      MFH: fix #39988 (type argument of oci_define_by_name() is ignored)
+      patch and tests by Chris Jones
+
+    * ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/tests/coll_019.phpt
+      ext/oci8/tests/coll_019.phpt
+      ext/oci8/tests/define2.phpt
+      ext/oci8/tests/define2.phpt
+      ext/oci8/tests/define3.phpt
+      ext/oci8/tests/define3.phpt
+      ext/oci8/tests/define4.phpt
+      ext/oci8/tests/define4.phpt
+      ext/oci8/tests/define5.phpt
+      ext/oci8/tests/define5.phpt:
+      fix #39988 (type argument of oci_define_by_name() is ignored)
+      patch and tests by Chris Jones
+
+    * (PHP_5_2)
+      NEWS
+      ext/oci8/oci8.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug40078.phpt:
+      MFH: fix #40078 (ORA-01405 when fetching NULL values using
+      oci_bind_array_by_name())
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug40078.phpt
+      ext/oci8/tests/bug40078.phpt:
+      fix #40078 (ORA-01405 when fetching NULL values using
+      oci_bind_array_by_name())
+
+    * main/.cvsignore
+      main/streams/.cvsignore
+      regex/.cvsignore:
+      add misssing temp directories to .cvsignore
+
+2007-01-11  Sara Golemon  <sara@golemon.com>
+
+    * ext/posix/posix.c:
+      
+
+    * ext/posix/posix.c
+      ext/standard/filestat.c:
+      Some platforms have getpwnam_r() but are missing _SC_GETPW_R_SIZE_MAX
+
 2007-01-10  Andrei Zmievski  <andrei@gravitonic.com>
 
     * INSTALL
