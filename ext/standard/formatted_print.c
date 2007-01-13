@@ -441,7 +441,7 @@ php_sprintf_append2n(char **buffer, int *pos, int *size, long number,
 }
 
 
-inline static long
+inline static int
 php_sprintf_getnumber(char *buffer, int *pos)
 {
 	char *endptr;
@@ -453,7 +453,12 @@ php_sprintf_getnumber(char *buffer, int *pos)
 	}
 	PRINTF_DEBUG(("sprintf_getnumber: number was %d bytes long\n", i));
 	*pos += i;
-	return num;
+
+	if (num >= INT_MAX || num < 0) {
+		return -1;
+	} else {
+		return (int) num;
+	}
 }
 
 /* {{{ php_formatted_print
@@ -486,10 +491,9 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 {
 	zval ***args, **z_format, **array;
 	int argc, size = 240, inpos = 0, outpos = 0, temppos;
-	int alignment, currarg, adjusting;
+	int alignment, currarg, adjusting, argnum, width, precision;
 	char *format, *result, padding;
 	int always_sign;
-	long argnum, width, precision;
 
 	argc = ZEND_NUM_ARGS();
 
@@ -553,10 +557,10 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				if (format[temppos] == '$') {
 					argnum = php_sprintf_getnumber(format, &inpos);
 
-					if (argnum == 0) {
+					if (argnum <= 0) {
 						efree(result);
 						efree(args);
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zero is not a valid argument number");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument number must be greater then zero.");
 						return NULL;
 					}
 
@@ -593,7 +597,12 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				/* after modifiers comes width */
 				if (isdigit((int)format[inpos])) {
 					PRINTF_DEBUG(("sprintf: getting width\n"));
-					width = php_sprintf_getnumber(format, &inpos);
+					if ((width = php_sprintf_getnumber(format, &inpos)) < 0) {
+						efree(result);
+						efree(args);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Width must be greater then zero and less then %d.", INT_MAX);
+						return NULL;
+					}
 					adjusting |= ADJ_WIDTH;
 				} else {
 					width = 0;
@@ -605,7 +614,12 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 					inpos++;
 					PRINTF_DEBUG(("sprintf: getting precision\n"));
 					if (isdigit((int)format[inpos])) {
-						precision = php_sprintf_getnumber(format, &inpos);
+						if ((precision = php_sprintf_getnumber(format, &inpos)) < 0) {
+							efree(result);
+							efree(args);
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Precision must be greater then zero and less then %d.", INT_MAX);
+							return NULL;
+						}
 						adjusting |= ADJ_PRECISION;
 						expprec = 1;
 					} else {
