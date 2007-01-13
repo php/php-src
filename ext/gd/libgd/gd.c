@@ -2014,7 +2014,7 @@ void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 	tiled = nc==gdTiled;
 
 	nc =  gdImageTileGet(im,x,y);
-	pts = (char **) ecalloc(sizeof(char *) * im->sy, sizeof(char));
+	pts = (char **) ecalloc(im->sy, sizeof(char*));
 
 	for (i=0; i<im->sy;i++) {
 		pts[i] = (char *) ecalloc(im->sx, sizeof(char));
