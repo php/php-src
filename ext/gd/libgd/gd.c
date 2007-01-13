@@ -2004,9 +2004,9 @@ void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 	/* stack of filled segments */
 	struct seg *stack;
 	struct seg *sp;
+	char **pts;
 
-	int **pts;
-	if(!im->tile){
+	if (!im->tile) {
 		return;
 	}
 
@@ -2014,10 +2014,10 @@ void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 	tiled = nc==gdTiled;
 
 	nc =  gdImageTileGet(im,x,y);
-	pts = (int **) ecalloc(sizeof(int *) * im->sy, sizeof(int));
+	pts = (char **) ecalloc(sizeof(char *) * im->sy, sizeof(char));
 
 	for (i=0; i<im->sy;i++) {
-		pts[i] = (int *) ecalloc(im->sx, sizeof(int));
+		pts[i] = (char *) ecalloc(im->sx, sizeof(char));
 	}
 
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
@@ -2032,10 +2032,6 @@ void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 	while (sp>stack) {
 		FILL_POP(y, x1, x2, dy);
 		for (x=x1; x>=0 && (!pts[y][x] && gdImageGetPixel(im,x,y)==oc); x--) {
-			if (pts[y][x]){
-				/* we should never be here */
-				break;
-			}
 			nc = gdImageTileGet(im,x,y);
 			pts[y][x]=1;
 			gdImageSetPixel(im,x, y, nc);
@@ -2051,11 +2047,7 @@ void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 		}
 		x = x1+1;
 		do {
-			for (; x<=wx2 && (!pts[y][x] && gdImageGetPixel(im,x, y)==oc) ; x++) {
-				if (pts[y][x]){
-					/* we should never be here */
-					break;
-				}
+			for (; x<wx2 && (!pts[y][x] && gdImageGetPixel(im,x, y)==oc) ; x++) {
 				nc = gdImageTileGet(im,x,y);
 				pts[y][x]=1;
 				gdImageSetPixel(im, x, y, nc);
