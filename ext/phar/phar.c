@@ -48,11 +48,6 @@
 #include <stdint.h>
 #endif
 
-#ifndef TRUE
- #       define TRUE 1
- #       define FALSE 0
-#endif
-
 #ifndef E_RECOVERABLE_ERROR
 #define E_RECOVERABLE_ERROR E_ERROR
 #endif
@@ -84,11 +79,14 @@
 #define PHAR_ENT_COMPRESSED_GZ    0x0001
 #define PHAR_ENT_COMPRESSED_BZ2   0x0002
 
-/* an entry has been marked as deleted from a writeable phar */
-#define PHAR_ENT_DELETED	  0x10
-/* an entry has been modified, and should be saved */
-#define PHAR_ENT_MODIFIED	  0x20
-
+#ifdef ZTS
+#	include "TSRM.h"
+#	define PHAR_G(v) TSRMG(phar_globals_id, zend_phar_globals *, v)
+#	define PHAR_GLOBALS ((zend_phar_globals *) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(phar_globals_id)])
+#else
+#	define PHAR_G(v) (phar_globals.v)
+#	define PHAR_GLOBALS (&phar_globals)
+#endif
 
 ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_fname_map;
@@ -127,9 +125,11 @@ typedef struct _phar_entry_info {
 	php_uint32               filename_len;
 	char                     *filename;
 	long                     offset_within_phar;
-	zend_bool                crc_checked;
 	php_stream               *fp;
 	php_stream               *temp_file;
+	int                      is_crc_checked:1;
+	int                      is_modified:1;
+	int                      is_deleted:1;
 } phar_entry_info;
 
 /* information about a phar file (the archive itself) */
@@ -138,7 +138,6 @@ typedef struct _phar_archive_data {
 	int                      fname_len;
 	char                     *alias;
 	int                      alias_len;
-	zend_bool                explicit_alias;
 	char                     version[12];
 	size_t                   internal_file_start;
 	size_t                   halt_offset;
@@ -152,6 +151,7 @@ typedef struct _phar_archive_data {
 	php_uint32               sig_flags;
 	int                      sig_len;
 	char                     *signature;
+	int                      is_explicit_alias:1;
 } phar_archive_data;
 
 /* stream access data for one file entry in a phar file */
@@ -373,7 +373,7 @@ static phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path,
 		return NULL;
 	}
 	if (SUCCESS == zend_hash_find(&phar->manifest, path, path_len, (void**)&entry)) {
-		if (entry->flags & PHAR_ENT_DELETED) {
+		if (entry->is_deleted) {
 			/* entry is deleted, but has not been flushed to disk yet */
 			return NULL;
 		}
@@ -444,17 +444,12 @@ static phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len
 	ret = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
 	if ((entry = phar_get_entry_info(phar, path, path_len TSRMLS_CC)) == NULL) {
 		/* create an entry, this is a new file */
-		etemp.flags = 0;
+		memset(&etemp, 0, sizeof(phar_entry_info));
 		etemp.filename_len = path_len;
 		etemp.filename = estrndup(path, path_len);
-		etemp.uncompressed_filesize = 0;
-		etemp.compressed_filesize = 0;
 		etemp.timestamp = time(0);
 		etemp.offset_within_phar = -1;
-		etemp.crc32 = 0;
-		etemp.crc_checked = TRUE;
-		etemp.fp = NULL;
-		etemp.temp_file = 0;
+		etemp.is_crc_checked = 1;
 		zend_hash_add(&phar->manifest, etemp.filename, path_len, (void*)&etemp, sizeof(phar_entry_info), NULL);
 		/* retrieve the phar manifest copy */
 		entry = phar_get_entry_info(phar, path, path_len TSRMLS_CC);
@@ -472,7 +467,7 @@ static phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len
 	if (ret->internal_file->temp_file == 0) {
 		/* create a temporary stream for our new file */
 		ret->internal_file->temp_file = php_stream_fopen_tmpfile();
-		ret->internal_file->flags |= PHAR_ENT_MODIFIED;
+		ret->internal_file->is_modified = 1;
 		ret->phar->modified = 1;
 	}
 	return ret;
@@ -820,6 +815,7 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		if (buffer + 4 > endbuffer) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)")
 		}
+		memset(&entry, 0, sizeof(phar_entry_info));
 		PHAR_GET_32(buffer, entry.filename_len);
 		if (entry.filename_len == 0) {
 			MAPPHAR_FAIL("zero-length filename encountered in phar \"%s\"");
@@ -864,7 +860,7 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 			break;
 		}
 		manifest_flags |= (entry.flags & PHAR_ENT_COMPRESSION_MASK);
-		entry.crc_checked = 0;
+		entry.is_crc_checked = 0;
 		entry.fp = NULL;
 		zend_hash_add(&mydata->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
 	}
@@ -883,10 +879,10 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	mydata->signature = signature;
 	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
 	if (register_alias) {
-		mydata->explicit_alias = TRUE;
+		mydata->is_explicit_alias = 1;
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 	} else {
-		mydata->explicit_alias = FALSE;
+		mydata->is_explicit_alias = 0;
 	}
 	efree(savebuf);
 	
@@ -943,7 +939,7 @@ static int phar_open_or_create_filename(char *fname, int fname_len, char *alias,
 	mydata->alias = alias ? estrndup(alias, alias_len) : mydata->fname;
 	mydata->alias_len = alias ? alias_len : fname_len;
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHAR_VERSION_STR);
-	mydata->explicit_alias = alias ? TRUE : FALSE;
+	mydata->is_explicit_alias = alias ? 1 : 0;
 	mydata->internal_file_start = -1;
 	mydata->fp = fp;
 	if (!alias_len || !alias) {
@@ -1486,7 +1482,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		efree(internal_file);
 		return NULL;
 	}
-	idata->internal_file->crc_checked = 1;
+	idata->internal_file->is_crc_checked = 1;
 
 	fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 	idata->phar->refcount++;
@@ -1651,7 +1647,7 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 	}
 	data->internal_file->uncompressed_filesize += count;
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize; 
-	data->internal_file->flags |= PHAR_ENT_MODIFIED;
+	data->internal_file->is_modified = 1;
 	data->phar->modified = 1;
 	return count;
 }
@@ -1746,7 +1742,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 		if (zend_hash_get_current_data(&data->phar->manifest, (void **)&entry) == FAILURE) {
 			continue;
 		}
-		if (entry->flags & PHAR_ENT_DELETED) {
+		if (entry->is_deleted) {
 			/* remove this from the new phar */
 			continue;
 		}
@@ -1755,7 +1751,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 		offset += 4 + entry->filename_len + sizeof(entry_buffer);
 
 		/* compress as necessary */
-		if (entry->flags & PHAR_ENT_MODIFIED) {
+		if (entry->is_modified) {
 			if (!entry->temp_file) {
 				/* nothing to do here */
 				continue;
@@ -1770,7 +1766,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 					CRC32(newcrc32, php_stream_getc(file));
 				}
 				entry->crc32 = ~newcrc32;
-				entry->crc_checked = 1;
+				entry->is_crc_checked = 1;
 			}
 		} else {
 			if (-1 == php_stream_seek(oldfile, entry->offset_within_phar + data->phar->internal_file_start, SEEK_SET)) {
@@ -1811,7 +1807,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 				CRC32(newcrc32, php_stream_getc(compfile));
 			}
 			entry->crc32 = ~newcrc32;
-			entry->crc_checked = 1;
+			entry->is_crc_checked = 1;
 			if (entry->temp_file) {
 				/* no longer need the uncompressed contents */
 				php_stream_close(entry->temp_file);
@@ -1819,7 +1815,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			/* use temp_file to store the newly compressed data */
 			entry->temp_file = compfile;
 			entry->compressed_filesize = copy;
-			entry->flags |= PHAR_ENT_MODIFIED;
+			entry->is_modified = 1;
 			global_flags |= (entry->flags & PHAR_ENT_COMPRESSION_MASK);
 		}
 	}
@@ -1834,7 +1830,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 	 *  4: alias length, the rest is the alias itself
 	 */
 	restore_alias_len = data->phar->alias_len;
-	if (!data->phar->explicit_alias) {
+	if (!data->phar->is_explicit_alias) {
 		data->phar->alias_len = 0;
 	}
 
@@ -1868,7 +1864,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 		if (zend_hash_get_current_data(&data->phar->manifest, (void **)&entry) == FAILURE) {
 			continue;
 		}
-		if (entry->flags & PHAR_ENT_DELETED) {
+		if (entry->is_deleted) {
 			/* remove this from the new phar */
 			continue;
 		}
@@ -1913,11 +1909,11 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 		if (zend_hash_get_current_data(&data->phar->manifest, (void **)&entry) == FAILURE) {
 			continue;
 		}
-		if (entry->flags & PHAR_ENT_DELETED) {
+		if (entry->is_deleted) {
 			/* remove this from the new phar */
 			continue;
 		}
-		if ((entry->flags & PHAR_ENT_MODIFIED) && entry->temp_file) {
+		if (entry->is_modified && entry->temp_file) {
 			php_stream_rewind(entry->temp_file);
 			file = entry->temp_file;
 		} else {
@@ -1944,11 +1940,11 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			return EOF;
 		}
 		/* close the temporary file, no longer needed */
-		if (entry->flags & PHAR_ENT_MODIFIED) {
+		if (entry->is_modified) {
 			if (entry->temp_file) {
 				php_stream_close(entry->temp_file);
 				entry->temp_file = 0;
-				entry->flags &= ~PHAR_ENT_MODIFIED;
+				entry->is_modified = 0;
 			}
 		}
 	}
@@ -2047,7 +2043,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 
 	fname = estrndup(data->phar->fname, data->phar->fname_len);
 	fname_len = data->phar->fname_len;
-	if (data->phar->explicit_alias == TRUE) {
+	if (data->phar->is_explicit_alias) {
 		alias = estrndup(data->phar->alias, data->phar->alias_len);
 	} else {
 		alias = 0;
@@ -2436,14 +2432,14 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 		php_url_free(resource);
 		return FAILURE;
 	}
-	if (idata->internal_file->flags & PHAR_ENT_MODIFIED) {
-		idata->internal_file->flags &= ~PHAR_ENT_MODIFIED;
+	if (idata->internal_file->is_modified) {
+		idata->internal_file->is_modified = 0;
 		if (idata->internal_file->temp_file) {
 			php_stream_close(idata->internal_file->temp_file);
 			idata->internal_file->temp_file = 0;
 		}
 	}
-	idata->internal_file->flags |= PHAR_ENT_DELETED;
+	idata->internal_file->is_deleted = 1;
 	efree(internal_file);
 	if (idata->fp) {
 		php_stream_close(idata->fp);
@@ -2676,7 +2672,7 @@ PHP_METHOD(Phar, offsetExists)
 
 	if (zend_hash_exists(&phar_obj->arc.archive->manifest, fname, (uint) fname_len)) {
 		if (SUCCESS == zend_hash_find(&phar_obj->arc.archive->manifest, fname, (uint) fname_len, (void**)&entry)) {
-			if (entry->flags & PHAR_ENT_DELETED) {
+			if (entry->is_deleted) {
 				/* entry is deleted, but has not been flushed to disk yet */
 				RETURN_FALSE;
 			}
@@ -2774,12 +2770,12 @@ PHP_METHOD(Phar, offsetUnset)
 
 	if (zend_hash_exists(&phar_obj->arc.archive->manifest, fname, (uint) fname_len)) {
 		if (SUCCESS == zend_hash_find(&phar_obj->arc.archive->manifest, fname, (uint) fname_len, (void**)&entry)) {
-			if (entry->flags & PHAR_ENT_DELETED) {
+			if (entry->is_deleted) {
 				/* entry is deleted, but has not been flushed to disk yet */
 				return;
 			}
-			entry->flags &= ~PHAR_ENT_MODIFIED;
-			entry->flags |= PHAR_ENT_DELETED;
+			entry->is_modified = 0;
+			entry->is_deleted = 1;
 			/* we need to "flush" the stream to save the newly deleted file on disk */
 			data = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
 			data->phar = phar_obj->arc.archive;
@@ -2881,7 +2877,7 @@ PHP_METHOD(PharFileInfo, getCRC32)
 {
 	PHAR_ENTRY_OBJECT();
 
-	if (entry_obj->ent.entry->crc_checked) {
+	if (entry_obj->ent.entry->is_crc_checked) {
 		RETURN_LONG(entry_obj->ent.entry->crc32);
 	} else {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
@@ -2908,7 +2904,7 @@ PHP_METHOD(PharFileInfo, isCRCChecked)
 {
 	PHAR_ENTRY_OBJECT();
 	
-	RETURN_BOOL(entry_obj->ent.entry->crc_checked);
+	RETURN_BOOL(entry_obj->ent.entry->is_crc_checked);
 }
 /* }}} */
 
