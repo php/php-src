@@ -59,7 +59,8 @@
 
 #define PHAR_VERSION_STR          "0.9.0"
 /* x.y.z maps to 0xyz0 */
-#define PHAR_API_VERSION          0x0800
+#define PHAR_API_VERSION          0x0900
+#define PHAR_API_MIN_READ         0x0900
 #define PHAR_API_MAJORVERSION     0x0000
 #define PHAR_API_MAJORVER_MASK    0xF000
 #define PHAR_API_VER_MASK         0xFFF0
@@ -644,9 +645,7 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	manifest_ver = (((unsigned char)buffer[0]) <<  8)
 	             + ((unsigned char)buffer[1]);
 	buffer += 2;
-	if ((manifest_ver & PHAR_API_VER_MASK) < PHAR_API_VERSION ||
-		    (manifest_ver & PHAR_API_MAJORVER_MASK) != PHAR_API_MAJORVERSION)
-	{
+	if ((manifest_ver & PHAR_API_VER_MASK) < PHAR_API_MIN_READ) {
 		efree(savebuf);
 		php_stream_close(fp);
 		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" is API version %1.u.%1.u.%1.u, and cannot be processed", fname, manifest_ver >> 12, (manifest_ver >> 8) & 0xF, (manifest_ver >> 4) & 0x0F);
