@@ -43,19 +43,7 @@ EOF;
 		break;
 }
 
-$manifest = '';
-foreach($files as $name => $cont) {
-	$len = strlen($cont);
-	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, mktime (12, 0, 0, 3, 1, 2006), $len, crc32($cont), 0x00);
-}
-$alias = 'alias';
-$manifest = pack('VnV', count($files), 0x0800, strlen($alias)) . $alias . $manifest;
-$file .= pack('V', strlen($manifest)) . $manifest;
-foreach($files as $cont)
-{
-	$file .= $cont;
-}
-
-file_put_contents($fname, $file);
+$ftime = mktime(12, 0, 0, 3, 1, 2006);
+include 'phar_test.inc';
 
 ?>

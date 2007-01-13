@@ -6,27 +6,19 @@ Phar: stream stat
 phar.require_hash=0
 --FILE--
 <?php
+$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$pname = 'phar://' . $fname;
 $file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a'] = 'abcdefg';
-$manifest = '';
-foreach($files as $name => $cont) {
-	$len = strlen($cont);
-	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, time(), $len, crc32($cont), 0x00);
-}
-$alias = 'hio';
-$manifest = pack('VnV', count($files), 0x0800, strlen($alias)) . $alias . $manifest;
-$file .= pack('V', strlen($manifest)) . $manifest;
-foreach($files as $cont)
-{
-	$file .= $cont;
-}
 
-file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
-include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+include 'phar_test.inc';
+
+include $fname;
+
 $fp = fopen('phar://hio/a', 'r');
 var_dump(ftell($fp));
 echo 'fseek($fp, 1)';var_dump(fseek($fp, 1));
