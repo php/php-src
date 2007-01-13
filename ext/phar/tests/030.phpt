@@ -17,20 +17,7 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; include "'.$pname.'/b/d.php"; ?
 $files['b/d.php'] = '<?php echo "This is b/d\n"; include "'.$pname.'/e.php"; ?>';    
 $files['e.php']   = '<?php echo "This is e\n"; ?>';                                  
 
-$manifest = '';
-foreach($files as $name => $cont) {
-	$len = strlen($cont);
-	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, time(), $len, crc32($cont), 0x00);
-}
-$alias = 'alias';
-$manifest = pack('VnV', count($files), 0x0800, strlen($alias)) . $alias . $manifest;
-$file .= pack('V', strlen($manifest)) . $manifest;
-foreach($files as $cont)
-{
-	$file .= $cont;
-}
-
-file_put_contents($fname, $file);
+include 'phar_test.inc';
 
 Phar::loadPhar($fname);
 

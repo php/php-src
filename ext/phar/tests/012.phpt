@@ -6,27 +6,17 @@ Phar::mapPhar valid file
 phar.require_hash=0
 --FILE--
 <?php
+$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$pname = 'phar://' . $fname;
 $file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a'] = 'a';
-$manifest = '';
-foreach($files as $name => $cont) {
-	$len = strlen($cont);
-	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, time(), $len, crc32($cont), 0);
-}
-$alias = 'hio';
-$manifest = pack('VnV', count($files), 0x0800, strlen($alias)) . $alias . $manifest;
-$file .= pack('V', strlen($manifest)) . $manifest;
-foreach($files as $cont)
-{
-	$file .= $cont;
-}
 
-file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
-include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+include 'phar_test.inc';
+include $fname;
 echo file_get_contents('phar://hio/a');
 ?>
 --CLEAN--

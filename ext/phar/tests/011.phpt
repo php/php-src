@@ -17,10 +17,10 @@ $files['a'] = 'a';
 $manifest = '';
 foreach($files as $name => $cont) {
 	$len = strlen($cont);
-	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, time(), $len+1, crc32($cont), 0);
+	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVV', $len, time(), $len+1, crc32($cont), 0x00000000);
 }
 $alias = 'hio';
-$manifest = pack('VnV', count($files), 0x0800, strlen($alias)) . $alias . $manifest;
+$manifest = pack('VnVV', count($files), 0x0900, 0x00000000, strlen($alias)) . $alias . $manifest;
 $file .= pack('V', strlen($manifest)) . $manifest;
 foreach($files as $cont)
 {

@@ -64,8 +64,11 @@
 #define PHAR_API_MAJORVER_MASK    0xF000
 #define PHAR_API_VER_MASK         0xFFF0
 
-#define PHAR_HDR_ANY_COMPRESSED   0x0001
-#define PHAR_HDR_SIGNATURE        0x0008
+#define PHAR_HDR_COMPRESSION_MASK 0x000F
+#define PHAR_HDR_COMPRESSED_NONE  0x000F
+#define PHAR_HDR_COMPRESSED_GZ    0x0001
+#define PHAR_HDR_COMPRESSED_BZ2   0x0002
+#define PHAR_HDR_SIGNATURE        0x0010
 
 #define PHAR_SIG_MD5              0x0001
 #define PHAR_SIG_SHA1             0x0002
@@ -75,10 +78,10 @@
 
 /* flags byte for each file adheres to these bitmasks.
    All unused values are reserved */
-#define PHAR_ENT_COMPRESSION_MASK 0x0F
-#define PHAR_ENT_COMPRESSED_NONE  0x00
-#define PHAR_ENT_COMPRESSED_GZ    0x01
-#define PHAR_ENT_COMPRESSED_BZ2   0x02
+#define PHAR_ENT_COMPRESSION_MASK 0x000F
+#define PHAR_ENT_COMPRESSED_NONE  0x0000
+#define PHAR_ENT_COMPRESSED_GZ    0x0001
+#define PHAR_ENT_COMPRESSED_BZ2   0x0002
 
 /* an entry has been marked as deleted from a writeable phar */
 #define PHAR_ENT_DELETED	  0x10
@@ -112,15 +115,17 @@ typedef union _phar_archive_object  phar_archive_object;
 typedef union _phar_entry_object    phar_entry_object;
 
 /* entry for one file in a phar file */
-typedef struct _phar_manifest_entry {
-	php_uint32               filename_len;
-	char                     *filename;
+typedef struct _phar_entry_info {
+	/* first bytes are exactly as in file */
 	php_uint32               uncompressed_filesize;
 	php_uint32               timestamp;
-	long                     offset_within_phar;
 	php_uint32               compressed_filesize;
 	php_uint32               crc32;
-	char                     flags;
+	php_uint32               flags;
+	/* remainder */
+	php_uint32               filename_len;
+	char                     *filename;
+	long                     offset_within_phar;
 	zend_bool                crc_checked;
 	php_stream               *fp;
 	php_stream               *temp_file;
@@ -136,8 +141,8 @@ typedef struct _phar_archive_data {
 	char                     version[12];
 	size_t                   internal_file_start;
 	size_t                   halt_offset;
-	zend_bool                has_compressed_files;
 	HashTable                manifest;
+	php_uint32               flags;
 	php_uint32               min_timestamp;
 	php_uint32               max_timestamp;
 	php_stream               *fp;
@@ -569,10 +574,9 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	char b32[4], *buffer, *endbuffer, *savebuf;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry;
-	php_uint32 manifest_len, manifest_count, manifest_index, tmp_len, sig_flags;
-	php_uint16 manifest_tag;
+	php_uint32 manifest_len, manifest_count, manifest_flags, manifest_index, tmp_len, sig_flags;
+	php_uint16 manifest_ver;
 	long offset;
-	int compressed = 0;
 	int register_alias, sig_len;
 	char *signature = NULL;
 
@@ -636,22 +640,26 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		MAPPHAR_FAIL("in phar \"%s\", manifest claims to have zero entries.  Phars must have at least 1 entry");
 	}
 
-	/* extract API version and global compressed flag */
-	manifest_tag = (((unsigned char)buffer[0]) <<  8)
-		+ ((unsigned char)buffer[1]);
+	/* extract API version, lowest nibble currently unused */
+	manifest_ver = (((unsigned char)buffer[0]) <<  8)
+	             + ((unsigned char)buffer[1]);
 	buffer += 2;
-	if ((manifest_tag & PHAR_API_VER_MASK) < PHAR_API_VERSION ||
-		    (manifest_tag & PHAR_API_MAJORVER_MASK) != PHAR_API_MAJORVERSION)
+	if ((manifest_ver & PHAR_API_VER_MASK) < PHAR_API_VERSION ||
+		    (manifest_ver & PHAR_API_MAJORVER_MASK) != PHAR_API_MAJORVERSION)
 	{
 		efree(savebuf);
 		php_stream_close(fp);
-		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" is API version %1.u.%1.u.%1.u, and cannot be processed", fname, manifest_tag >> 12, (manifest_tag >> 8) & 0xF, (manifest_tag >> 4) & 0x0F);
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" is API version %1.u.%1.u.%1.u, and cannot be processed", fname, manifest_ver >> 12, (manifest_ver >> 8) & 0xF, (manifest_ver >> 4) & 0x0F);
 		return FAILURE;
 	}
 
+	PHAR_GET_32(buffer, manifest_flags);
+
+	manifest_flags &= ~PHAR_ENT_COMPRESSION_MASK; 
+
 	/* The lowest nibble contains the phar wide flags. The any compressed can */
 	/* be ignored on reading because it is being generated anyways. */
-	if (manifest_tag & PHAR_HDR_SIGNATURE) {
+	if (manifest_flags & PHAR_HDR_SIGNATURE) {
 		unsigned char buf[1024];
 		int read_size, len;
 		char sig_buf[8], *sig_ptr = sig_buf;
@@ -817,7 +825,7 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		if (entry.filename_len == 0) {
 			MAPPHAR_FAIL("zero-length filename encountered in phar \"%s\"");
 		}
-		if (buffer + entry.filename_len + 16 + 1 > endbuffer) {
+		if (buffer + entry.filename_len + 20 > endbuffer) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
 		}
 		entry.filename = estrndup(buffer, entry.filename_len);
@@ -836,21 +844,19 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		}
 		PHAR_GET_32(buffer, entry.compressed_filesize);
 		PHAR_GET_32(buffer, entry.crc32);
+		PHAR_GET_32(buffer, entry.flags);
 		entry.offset_within_phar = offset;
 		offset += entry.compressed_filesize;
-		entry.flags = *buffer++;
 		switch (entry.flags & PHAR_ENT_COMPRESSION_MASK) {
 		case PHAR_ENT_COMPRESSED_GZ:
 #if !HAVE_ZLIB
 			MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
 #endif
-			compressed = 1;
 			break;
 		case PHAR_ENT_COMPRESSED_BZ2:
 #if !HAVE_BZ2
 			MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
 #endif
-			compressed = 1;
 			break;
 		default:
 			if (entry.uncompressed_filesize != entry.compressed_filesize) {
@@ -858,15 +864,16 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 			}
 			break;
 		}
+		manifest_flags |= (entry.flags & PHAR_ENT_COMPRESSION_MASK);
 		entry.crc_checked = 0;
 		entry.fp = NULL;
 		zend_hash_add(&mydata->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
 	}
 
-	snprintf(mydata->version, sizeof(mydata->version), "%u.%u.%u", manifest_tag >> 12, (manifest_tag >> 8) & 0xF, (manifest_tag >> 4) & 0xF);
+	snprintf(mydata->version, sizeof(mydata->version), "%u.%u.%u", manifest_ver >> 12, (manifest_ver >> 8) & 0xF, (manifest_ver >> 4) & 0xF);
 	mydata->internal_file_start = halt_offset + manifest_len + 4;
 	mydata->halt_offset = halt_offset;
-	mydata->has_compressed_files = compressed;
+	mydata->flags = manifest_flags;
 	mydata->fp = fp;
 	mydata->fname = estrndup(fname, fname_len);
 	mydata->fname_len = fname_len;
@@ -1218,35 +1225,35 @@ static php_stream_ops phar_ops = {
 	phar_stream_close, /* close */
 	phar_stream_flush, /* flush */
 	"phar stream",
-	phar_stream_seek, /* seek */
-	NULL, /* cast */
-	phar_stream_stat, /* stat */
+	phar_stream_seek,  /* seek */
+	NULL,              /* cast */
+	phar_stream_stat,  /* stat */
 	NULL, /* set option */
 };
 
 static php_stream_ops phar_dir_ops = {
-	phar_dir_write, /* write (does nothing) */
-	phar_dir_read,  /* read */
+	phar_dir_write, /* write */
+	phar_dir_read,  /* read  */
 	phar_dir_close, /* close */
-	phar_dir_flush, /* flush (does nothing) */
-	"phar stream",
-	phar_dir_seek, /* seek */
-	NULL, /* cast */
-	phar_dir_stat, /* stat */
+	phar_dir_flush, /* flush */
+	"phar dir",
+	phar_dir_seek,  /* seek */
+	NULL,           /* cast */
+	phar_dir_stat,  /* stat */
 	NULL, /* set option */
 };
 
 static php_stream_wrapper_ops phar_stream_wops = {
     phar_wrapper_open_url,
-    NULL, /* phar_wrapper_close */
-    NULL, /* phar_wrapper_stat, */
-    phar_wrapper_stat, /* stat_url */
+    NULL,                  /* phar_wrapper_close */
+    NULL,                  /* phar_wrapper_stat, */
+    phar_wrapper_stat,     /* stat_url */
     phar_wrapper_open_dir, /* opendir */
     "phar",
-    phar_wrapper_unlink, /* unlink */
-    NULL, /* rename */
-    NULL, /* create directory */
-    NULL /* remove directory */
+    phar_wrapper_unlink,   /* unlink */
+    NULL,                  /* rename */
+    NULL,                  /* create directory */
+    NULL,                  /* remove directory */
 };
 
 php_stream_wrapper php_stream_phar_wrapper =  {
@@ -1692,7 +1699,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 	phar_entry_info *entry;
 	int alias_len, fname_len, halt_offset, restore_alias_len, global_flags = 0;
 	char *fname, *alias;
-	char *manifest, entry_buffer[20];
+	char manifest[18], entry_buffer[20];
 	off_t manifest_ftell;
 	long offset;
 	php_uint32 copy, loc, new_manifest_count;
@@ -1746,7 +1753,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 		}
 		/* after excluding deleted files, calculate manifest size in bytes and number of entries */
 		++new_manifest_count;
-		offset += 21 + entry->filename_len;
+		offset += 4 + entry->filename_len + sizeof(entry_buffer);
 
 		/* compress as necessary */
 		if (entry->flags & PHAR_ENT_MODIFIED) {
@@ -1768,7 +1775,6 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			}
 		} else {
 			if (-1 == php_stream_seek(oldfile, entry->offset_within_phar + data->phar->internal_file_start, SEEK_SET)) {
-				efree(manifest);
 				if (oldfile) {
 					php_stream_close(oldfile);
 				}
@@ -1782,7 +1788,6 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 		if (entry->flags & PHAR_ENT_COMPRESSION_MASK) {
 			filter = php_stream_filter_create(phar_compress_filter(entry, 0), NULL, 0 TSRMLS_CC);
 			if (!filter) {
-				efree(manifest);
 				if (oldfile) {
 					php_stream_close(oldfile);
 				}
@@ -1816,38 +1821,34 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			entry->temp_file = compfile;
 			entry->compressed_filesize = copy;
 			entry->flags |= PHAR_ENT_MODIFIED;
-			global_flags |= PHAR_HDR_ANY_COMPRESSED;
+			global_flags |= (entry->flags & PHAR_ENT_COMPRESSION_MASK);
 		}
 	}
 	
+	global_flags |= PHAR_HDR_SIGNATURE;
+
 	/* write out manifest pre-header */
-	/*  4: manifest length, 4: manifest entry count, 2: phar version,
-	    4: alias length, the rest is the alias itself
-	*/
+	/*  4: manifest length
+	 *  4: manifest entry count
+	 *  2: phar version
+	 *  4: phar global flags
+	 *  4: alias length, the rest is the alias itself
+	 */
 	restore_alias_len = data->phar->alias_len;
-	if (data->phar->explicit_alias) {
-		manifest = (char *) emalloc(14 + data->phar->alias_len);
-		phar_set_32(manifest, offset + data->phar->alias_len + 10); /* manifest length */
-		phar_set_32(manifest+4, new_manifest_count);
-		phar_set_32(manifest+10, data->phar->alias_len);
-		memcpy(manifest + 14, data->phar->alias, data->phar->alias_len);
-	} else {
-		/* alias was assigned at runtime, do not add to new phar */
-		manifest = (char *) emalloc(14);
-		phar_set_32(manifest, offset + 10); /* manifest length */
-		phar_set_32(manifest+4, new_manifest_count);
-		phar_set_32(manifest+10, 0);
+	if (!data->phar->explicit_alias) {
 		data->phar->alias_len = 0;
 	}
 
-	global_flags |= PHAR_HDR_SIGNATURE;
-
+	phar_set_32(manifest, offset + data->phar->alias_len + sizeof(manifest) - 4); /* manifest length */
+	phar_set_32(manifest+4, new_manifest_count);
 	*(manifest + 8) = (unsigned char) (((PHAR_API_VERSION) >> 8) & 0xFF);
-	*(manifest + 9) = (unsigned char) (((PHAR_API_VERSION) & 0xF0) | (global_flags & 0x0F));
+	*(manifest + 9) = (unsigned char) (((PHAR_API_VERSION) & 0xF0));
+	phar_set_32(manifest+10, global_flags);
+	phar_set_32(manifest+14, data->phar->alias_len);
 
 	/* write the manifest header */
-	if (14 + data->phar->alias_len != php_stream_write(newfile, manifest, 14 + data->phar->alias_len)) {
-		efree(manifest);
+	if (sizeof(manifest) != php_stream_write(newfile, manifest, sizeof(manifest))
+	|| data->phar->alias_len != php_stream_write(newfile, data->phar->alias, data->phar->alias_len)) {
 		if (oldfile) {
 			php_stream_close(oldfile);
 		}
@@ -1875,7 +1876,6 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 		phar_set_32(entry_buffer, entry->filename_len);
 		if (4 != php_stream_write(newfile, entry_buffer, 4)
 		|| entry->filename_len != php_stream_write(newfile, entry->filename, entry->filename_len)) {
-			efree(manifest);
 			if (oldfile) {
 				php_stream_close(oldfile);
 			}
@@ -1888,16 +1888,15 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			4: creation timestamp
 			4: compressed filesize
 			4: crc32
-			1: flags (compression or not)
+			4: flags
 		*/
 		copy = time(NULL);
 		phar_set_32(entry_buffer, entry->uncompressed_filesize);
 		phar_set_32(entry_buffer+4, copy);
 		phar_set_32(entry_buffer+8, entry->compressed_filesize);
 		phar_set_32(entry_buffer+12, entry->crc32);
-		entry_buffer[16] = (char) entry->flags;
-		if (17 != php_stream_write(newfile, entry_buffer, 17)) {
-			efree(manifest);
+		phar_set_32(entry_buffer+16, entry->flags);
+		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))) {
 			if (oldfile) {
 				php_stream_close(oldfile);
 			}
@@ -1924,7 +1923,6 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			file = entry->temp_file;
 		} else {
 			if (-1 == php_stream_seek(oldfile, entry->offset_within_phar + data->phar->internal_file_start, SEEK_SET)) {
-				efree(manifest);
 				if (oldfile) {
 					php_stream_close(oldfile);
 				}
@@ -1939,7 +1937,6 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 		entry->offset_within_phar = offset;
 		offset += entry->compressed_filesize;
 		if (entry->compressed_filesize != php_stream_copy_to_stream(file, newfile, entry->compressed_filesize)) {
-			efree(manifest);
 			if (oldfile) {
 				php_stream_close(oldfile);
 			}
@@ -2007,7 +2004,6 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 	php_stream_rewind(newfile);
 	file = php_stream_open_wrapper(data->phar->fname, "wb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 	if (!file) {
-		efree(manifest);
 		if (oldfile) {
 			php_stream_close(oldfile);
 		}
@@ -2018,7 +2014,6 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 	php_stream_copy_to_stream(newfile, file, PHP_STREAM_COPY_ALL);
 	php_stream_close(newfile);
 	php_stream_close(file);
-	efree(manifest);
 
 	file = php_stream_open_wrapper(data->phar->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 
@@ -2164,11 +2159,13 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
  */
 static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
 {
-	phar_entry_data *data;
-	/* If ssb is NULL then someone is misbehaving */
-	if (!ssb) return -1;
+	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 
-	data = (phar_entry_data *)stream->abstract;
+	/* If ssb is NULL then someone is misbehaving */
+	if (!ssb) {
+		return -1;
+	}
+
 	phar_dostat(data->phar, data->internal_file, ssb, 0, data->phar->alias, data->phar->alias_len TSRMLS_CC);
 	return 0;
 }
@@ -2179,11 +2176,13 @@ static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
  */
 static int phar_dir_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
 {
-	phar_entry_data *data;
-	/* If ssb is NULL then someone is misbehaving */
-	if (!ssb) return -1;
+	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 
-	data = (phar_entry_data *)stream->abstract;
+	/* If ssb is NULL then someone is misbehaving */
+	if (!ssb) {
+		return -1;
+	}
+
 	phar_dostat(data->phar, data->internal_file, ssb, 0, data->phar->alias, data->phar->alias_len TSRMLS_CC);
 	return 0;
 }

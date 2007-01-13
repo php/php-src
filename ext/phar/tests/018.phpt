@@ -6,6 +6,8 @@ Phar: opendir test, root directory
 phar.require_hash=0
 --FILE--
 <?php
+$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$pname = 'phar://' . $fname;
 $file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
@@ -13,20 +15,7 @@ __HALT_COMPILER(); ?>";
 $files = array();
 $files['a'] = 'a';
 $files['b/a'] = 'b';
-$manifest = '';
-foreach($files as $name => $cont) {
-	$len = strlen($cont);
-	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, time(), $len, crc32($cont), 0x00);
-}
-$alias = 'hio';
-$manifest = pack('VnV', count($files), 0x0800, strlen($alias)) . $alias . $manifest;
-$file .= pack('V', strlen($manifest)) . $manifest;
-foreach($files as $cont)
-{
-	$file .= chr(0) . chr(4) . chr(0); // 'a' gzdeflated
-}
-
-file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
+include 'phar_test.inc';
 include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $dir = opendir('phar://hio/');
 while (false !== ($a = readdir($dir))) {

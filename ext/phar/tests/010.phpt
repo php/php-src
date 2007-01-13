@@ -12,8 +12,8 @@ __HALT_COMPILER(); ?>";
 
 // this fails because the manifest length does not include the other 10 byte manifest data
 
-$manifest = pack('V', 1) . 'a' . pack('VVVVC', 0, time(), 0, crc32(''), 0);
-$file .= pack('VVnV', strlen($manifest), 1, 0x0800, 3) . 'hio' . $manifest;
+$manifest = pack('V', 1) . 'a' . pack('VVVVV', 0, time(), 0, crc32(''), 0x00000000);
+$file .= pack('VVnVV', strlen($manifest), 1, 0x0900, 0x00000000, 3) . 'hio' . $manifest;
 
 file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
 include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
