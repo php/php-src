@@ -1,3 +1,47 @@
+2007-01-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/formatted_print.c:
+      
+      MFB: Improve validation of argnum, width and precision.
+
+    * (PHP_4_4)
+      ext/standard/formatted_print.c:
+      
+      MFH: Improve validation of argnum, width and precision.
+
+    * (PHP_5_2)
+      ext/standard/formatted_print.c:
+      
+      Improve validation of argnum, width and precision.
+
+2007-01-13  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.c:
+      MFB
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c:
+      OMG, this line was really bogus (and allocating huge amounts of memory
+      unecessarly)
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c:
+      fix valgrind error in test bug24594.phpt
+      while at it, remove some dead code and change the pts vector to char to
+      save (much) memory
+
+2007-01-13  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_2)
+      win32/build/Makefile:
+      MFH: Kill warnings when mt is not installed or is found as the tape command
+      under cygwin
+
+    * win32/build/Makefile:
+      Kill warnings when mt is not installed or is found as the tape command
+      under cygwin
+
 2007-01-11  Andrei Zmievski  <andrei@gravitonic.com>
 
     * sapi/apache/mod_php.c:
