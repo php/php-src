@@ -29,5 +29,5 @@ include $pname . '/b/c.php';
 
 Warning: include(phar://%sopen_for_write_existing_b.phar.php/b/c.php): failed to open stream: phar error: internal corruption of phar "%sopen_for_write_existing_b.phar.php" (crc32 mismatch on file "b/c.php") in %sopen_for_write_existing_b.php on line %d
 
-Warning: include(): Failed opening 'phar://%sopen_for_write_existing_b.phar.php/b/c.php' for inclusion (include_path='.') in %sopen_for_write_existing_b.php on line %d
+Warning: include(): Failed opening 'phar://%sopen_for_write_existing_b.phar.php/b/c.php' for inclusion (include_path='%s') in %sopen_for_write_existing_b.php on line %d
 ===DONE===

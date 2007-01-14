@@ -38,6 +38,6 @@ This is b/c
 
 Warning: include(phar://%sopen_for_write_newfile_b.phar.php/b/new.php): failed to open stream: phar error: "b/new.php" is not a file in phar "%sopen_for_write_newfile_b.phar.php" in %sopen_for_write_newfile_b.php on line %d
 
-Warning: include(): Failed opening 'phar://%sopen_for_write_newfile_b.phar.php/b/new.php' for inclusion (include_path='.') in %sopen_for_write_newfile_b.php on line %d
+Warning: include(): Failed opening 'phar://%sopen_for_write_newfile_b.phar.php/b/new.php' for inclusion (include_path='%s') in %sopen_for_write_newfile_b.php on line %d
 
 ===DONE===
