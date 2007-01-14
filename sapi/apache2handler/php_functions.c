@@ -42,7 +42,7 @@
 #include "util_script.h"
 #include "http_core.h"
 #include "ap_mpm.h"
-#if !defined(WIN32) && !defined(WINNT)
+#if !defined(WIN32) && !defined(WINNT) && !defined(NETWARE)
 #include "unixd.h"
 #endif
 
@@ -382,7 +382,7 @@ PHP_MINFO_FUNCTION(apache)
 	int n, max_requests;
 	char *p;
 	server_rec *serv = ((php_struct *) SG(server_context))->r->server;
-#if !defined(WIN32) && !defined(WINNT)
+#if !defined(WIN32) && !defined(WINNT) && !defined(NETWARE)
 	AP_DECLARE_DATA extern unixd_config_rec unixd_config;
 #endif
 	
@@ -413,7 +413,7 @@ PHP_MINFO_FUNCTION(apache)
 	sprintf(tmp, "%s:%u", serv->server_hostname, serv->port);
 	php_info_print_table_row(2, "Hostname:Port", tmp);
 	
-#if !defined(WIN32) && !defined(WINNT)
+#if !defined(WIN32) && !defined(WINNT) && !defined(NETWARE)
 	sprintf(tmp, "%s(%d)/%d", unixd_config.user_name, unixd_config.user_id, unixd_config.group_id);
 	php_info_print_table_row(2, "User/Group", tmp);
 #endif
