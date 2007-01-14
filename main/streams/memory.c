@@ -266,7 +266,7 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC)
 	self->mode = mode;
 	self->owner_ptr = NULL;
 	
-	stream = php_stream_alloc(&php_stream_memory_ops, self, 0, mode & TEMP_STREAM_READONLY ? "r+b" : "w+b");
+	stream = php_stream_alloc(&php_stream_memory_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	return stream;
 }
@@ -520,9 +520,9 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	self->smax = max_memory_usage;
 	self->mode = mode;
 	self->meta = NULL;
-	stream = php_stream_alloc(&php_stream_temp_ops, self, 0, mode & TEMP_STREAM_READONLY ? "r+b" : "w+b");
+	stream = php_stream_alloc(&php_stream_temp_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
-	self->innerstream = php_stream_memory_create(mode);
+	self->innerstream = php_stream_memory_create_rel(mode);
 	((php_stream_memory_data*)self->innerstream->abstract)->owner_ptr = &self->innerstream;
 
 	return stream;
@@ -684,7 +684,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 		stream->ops = &php_stream_rfc2397_ops;
 		ts = (php_stream_temp_data*)stream->abstract;
 		assert(ts != NULL);
-		ts->mode = mode && mode[0] == 'r' ? TEMP_STREAM_READONLY : 0;
+		ts->mode = mode && mode[0] == 'r' && mode[1] != '+' ? TEMP_STREAM_READONLY : 0;
 		ts->meta = meta;
 	}
 	efree(comma);
