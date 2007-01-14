@@ -24,6 +24,6 @@ Warning: include(%screate_new_phar_b.phar.php): failed to open stream: No such f
 
 Warning: include(phar://%screate_new_phar_b.phar.php/a.php): failed to open stream: No such file or directory in %screate_new_phar_b.php on line %d
 
-Warning: include(): Failed opening 'phar://%screate_new_phar_b.phar.php/a.php' for inclusion (include_path='.') in %screate_new_phar_b.php on line %d
+Warning: include(): Failed opening 'phar://%screate_new_phar_b.phar.php/a.php' for inclusion (include_path='%s') in %screate_new_phar_b.php on line %d
 
 ===DONE===
