@@ -250,6 +250,17 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 	return 1;
 }
 
+static int dblib_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
+{
+	pdo_dblib_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+
+	if (S->rows) {
+		free_rows(S TSRMLS_CC);
+		S->rows = NULL;
+	}
+
+	return 1;
+}
 
 struct pdo_stmt_methods dblib_stmt_methods = {
 	pdo_dblib_stmt_dtor,
@@ -261,5 +272,7 @@ struct pdo_stmt_methods dblib_stmt_methods = {
 	NULL, /* set attr */
 	NULL, /* get attr */
 	NULL, /* meta */
+	NULL, /* nextrow */
+	dblib_mysql_stmt_cursor_closer
 };
 
