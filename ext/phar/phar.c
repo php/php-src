@@ -74,10 +74,20 @@
 
 /* flags byte for each file adheres to these bitmasks.
    All unused values are reserved */
-#define PHAR_ENT_COMPRESSION_MASK 0x000F
-#define PHAR_ENT_COMPRESSED_NONE  0x0000
-#define PHAR_ENT_COMPRESSED_GZ    0x0001
-#define PHAR_ENT_COMPRESSED_BZ2   0x0002
+#define PHAR_ENT_COMPRESSION_MASK 0x0000000F
+#define PHAR_ENT_COMPRESSED_NONE  0x00000000
+#define PHAR_ENT_COMPRESSED_GZ    0x00000001
+#define PHAR_ENT_COMPRESSED_BZ2   0x00000002
+
+#define PHAR_ENT_PERM_MASK        0x0001FF00
+#define PHAR_ENT_PERM_MASK_USR    0x0001C000
+#define PHAR_ENT_PERM_SHIFT_USR   14
+#define PHAR_ENT_PERM_MASK_GRP    0x00003800
+#define PHAR_ENT_PERM_SHIFT_GRP   11
+#define PHAR_ENT_PERM_MASK_OTH    0x00000700
+#define PHAR_ENT_PERM_SHIFT_OTH   8
+#define PHAR_ENT_PERM_DEF_FILE    0x0001B600
+#define PHAR_ENT_PERM_DEF_DIR     0x0001FF00
 
 #ifdef ZTS
 #	include "TSRM.h"
@@ -147,11 +157,12 @@ typedef struct _phar_archive_data {
 	php_uint32               max_timestamp;
 	php_stream               *fp;
 	int                      refcount;
-	int                      modified;
 	php_uint32               sig_flags;
 	int                      sig_len;
 	char                     *signature;
 	int                      is_explicit_alias:1;
+	int                      is_modified:1;
+	int                      is_writeable:1;
 } phar_archive_data;
 
 /* stream access data for one file entry in a phar file */
@@ -431,6 +442,7 @@ static phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len
 		ret->internal_file->uncompressed_filesize = 0;
 		ret->internal_file->compressed_filesize = 0;
 		ret->internal_file->crc32 = 0;
+		ret->internal_file->flags = PHAR_ENT_PERM_DEF_FILE;
 		return ret;
 	}
 
@@ -450,6 +462,7 @@ static phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len
 		etemp.timestamp = time(0);
 		etemp.offset_within_phar = -1;
 		etemp.is_crc_checked = 1;
+		etemp.flags = PHAR_ENT_PERM_DEF_FILE;
 		zend_hash_add(&phar->manifest, etemp.filename, path_len, (void*)&etemp, sizeof(phar_entry_info), NULL);
 		/* retrieve the phar manifest copy */
 		entry = phar_get_entry_info(phar, path, path_len TSRMLS_CC);
@@ -468,7 +481,7 @@ static phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len
 		/* create a temporary stream for our new file */
 		ret->internal_file->temp_file = php_stream_fopen_tmpfile();
 		ret->internal_file->is_modified = 1;
-		ret->phar->modified = 1;
+		ret->phar->is_modified = 1;
 	}
 	return ret;
 }
@@ -649,7 +662,7 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 
 	PHAR_GET_32(buffer, manifest_flags);
 
-	manifest_flags &= ~PHAR_ENT_COMPRESSION_MASK; 
+	manifest_flags &= ~PHAR_HDR_COMPRESSION_MASK; 
 
 	/* The lowest nibble contains the phar wide flags. The any compressed can */
 	/* be ignored on reading because it is being generated anyways. */
@@ -903,7 +916,12 @@ static int phar_open_or_create_filename(char *fname, int fname_len, char *alias,
 	int register_alias;
 	php_stream *fp;
 
+	if (!pphar) {
+		pphar = &mydata;
+	}
+
 	if (phar_open_loaded(fname, fname_len, alias, alias_len, options, pphar TSRMLS_CC) == SUCCESS) {
+		(*pphar)->is_writeable = 1;
 		return SUCCESS;
 	}
 
@@ -917,9 +935,10 @@ static int phar_open_or_create_filename(char *fname, int fname_len, char *alias,
 		return FAILURE;
 	}
 
-	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, NULL);
+	fp = php_stream_open_wrapper(fname, "r+b", IGNORE_URL|STREAM_MUST_SEEK|0, NULL);
 
 	if (fp && phar_open_fp(fp, fname, fname_len, alias, alias_len, options, pphar TSRMLS_CC) == SUCCESS) {
+		(*pphar)->is_writeable = 1;
 		return SUCCESS;
 	}
 
@@ -942,6 +961,7 @@ static int phar_open_or_create_filename(char *fname, int fname_len, char *alias,
 	mydata->is_explicit_alias = alias ? 1 : 0;
 	mydata->internal_file_start = -1;
 	mydata->fp = fp;
+	mydata->is_writeable = 1;
 	if (!alias_len || !alias) {
 		/* if we neither have an explicit nor an implicit alias, we use the filename */
 		alias = NULL;
@@ -1099,7 +1119,10 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 	int arch_len, entry_len;
 
 	if (!strncasecmp(filename, "phar://", 7)) {
-		
+		if (mode[0] == 'a') {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: open mode append not supported");
+			return NULL;			
+		}		
 		if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz/.phar.bz2)", filename);
 			efree(arch);
@@ -1123,7 +1146,7 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 /*			fprintf(stderr, "Fragment:  %s\n", resource->fragment);*/
 		}
 #endif
-		if (strcmp(mode, "wb") == 0 || strcmp(mode, "w") == 0) {
+		if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 			if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, options, NULL TSRMLS_CC) == FAILURE)
 			{
 				php_url_free(resource);
@@ -1348,7 +1371,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 
 	/* strip leading "/" */
 	internal_file = estrdup(resource->path + 1);
-	if (strcmp(mode, "wb") == 0 || strcmp(mode, "w") == 0) {
+	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 		if (NULL == (idata = phar_get_or_create_entry_data(resource->host, strlen(resource->host), internal_file, strlen(internal_file) TSRMLS_CC))) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" could not be created in phar \"%s\"", internal_file, resource->host);
 			efree(internal_file);
@@ -1648,7 +1671,7 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 	data->internal_file->uncompressed_filesize += count;
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize; 
 	data->internal_file->is_modified = 1;
-	data->phar->modified = 1;
+	data->phar->is_modified = 1;
 	return count;
 }
 /* }}} */
@@ -2066,11 +2089,11 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
  */
 static int phar_stream_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 {
-	phar_entry_data *data = (phar_entry_data *)stream->abstract;
-	if (strcmp(stream->mode, "wb") != 0 && strcmp(stream->mode, "w") != 0) {
+	if (stream->mode[0] == 'w' || (stream->mode[0] == 'r' && stream->mode[1] == '+')) {
+		return phar_flush((phar_entry_data *)stream->abstract TSRMLS_CC);
+	} else {
 		return EOF;
 	}
-	return phar_flush(data TSRMLS_CC);
 }
 /* }}} */
 
@@ -2093,11 +2116,10 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
 	char *tmp;
 	int tmp_len;
 	memset(ssb, 0, sizeof(php_stream_statbuf));
-	/* read-only across the board */
-	ssb->sb.st_mode = 0444;
 
 	if (!is_dir) {
 		ssb->sb.st_size = data->uncompressed_filesize;
+		ssb->sb.st_mode = (data->flags & PHAR_ENT_PERM_MASK) >> PHAR_ENT_PERM_SHIFT_OTH;
 		ssb->sb.st_mode |= S_IFREG; /* regular file */
 		/* timestamp is just the timestamp when this was added to the phar */
 #ifdef NETWARE
@@ -2111,6 +2133,7 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
 #endif
 	} else {
 		ssb->sb.st_size = 0;
+		ssb->sb.st_mode = 0777;
 		ssb->sb.st_mode |= S_IFDIR; /* regular directory */
 #ifdef NETWARE
 		ssb->sb.st_mtime.tv_sec = phar->max_timestamp;
@@ -2121,6 +2144,9 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
 		ssb->sb.st_atime = phar->max_timestamp;
 		ssb->sb.st_ctime = phar->max_timestamp;
 #endif
+	}
+	if (!phar->is_writeable) {
+		ssb->sb.st_mode = (ssb->sb.st_mode & 0555) | (ssb->sb.st_mode & ~0777);
 	}
 
 	ssb->sb.st_nlink = 1;
@@ -2652,7 +2678,7 @@ PHP_METHOD(Phar, getModified)
 {
 	PHAR_ARCHIVE_OBJECT();
 
-	RETURN_BOOL(phar_obj->arc.archive->modified);
+	RETURN_BOOL(phar_obj->arc.archive->is_modified);
 }
 /* }}} */
 
@@ -2737,7 +2763,7 @@ PHP_METHOD(Phar, offsetSet)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created", fname);
 	} else {
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
-		fp = php_stream_open_wrapper(fname, "wb", STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
+		fp = php_stream_open_wrapper(fname, "w+b", STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 		if (contents_len != php_stream_write(fp, contents, contents_len)) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
 		}
@@ -2870,6 +2896,39 @@ PHP_METHOD(PharFileInfo, getCompressedSize)
 }
 /* }}} */
 
+/* {{{ proto bool PharFileInfo::isCompressed()
+ * Returns whether the entry is compressed
+ */
+PHP_METHOD(PharFileInfo, isCompressed)
+{
+	PHAR_ENTRY_OBJECT();
+	
+	RETURN_BOOL(entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSION_MASK);
+}
+/* }}} */
+
+/* {{{ proto bool PharFileInfo::isCompressedGZ()
+ * Returns whether the entry is compressed using gz
+ */
+PHP_METHOD(PharFileInfo, isCompressedGZ)
+{
+	PHAR_ENTRY_OBJECT();
+	
+	RETURN_BOOL(entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_GZ);
+}
+/* }}} */
+
+/* {{{ proto bool PharFileInfo::isCompressedBZIP2()
+ * Returns whether the entry is compressed using bzip2
+ */
+PHP_METHOD(PharFileInfo, isCompressedBZIP2)
+{
+	PHAR_ENTRY_OBJECT();
+	
+	RETURN_BOOL(entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_BZ2);
+}
+/* }}} */
+
 /* {{{ proto int PharFileInfo::getCRC32()
  * Returns CRC32 code or throws an exception if not CRC checked
  */
@@ -2886,17 +2945,6 @@ PHP_METHOD(PharFileInfo, getCRC32)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::getPharFlags()
- * Returns the Phar file entry flags
- */
-PHP_METHOD(PharFileInfo, getPharFlags)
-{
-	PHAR_ENTRY_OBJECT();
-	
-	RETURN_LONG(entry_obj->ent.entry->flags);
-}
-/* }}} */
-
 /* {{{ proto int PharFileInfo::isCRCChecked()
  * Returns whether file entry is CRC checked
  */
@@ -2905,6 +2953,17 @@ PHP_METHOD(PharFileInfo, isCRCChecked)
 	PHAR_ENTRY_OBJECT();
 	
 	RETURN_BOOL(entry_obj->ent.entry->is_crc_checked);
+}
+/* }}} */
+
+/* {{{ proto int PharFileInfo::getPharFlags()
+ * Returns the Phar file entry flags
+ */
+PHP_METHOD(PharFileInfo, getPharFlags)
+{
+	PHAR_ENTRY_OBJECT();
+	
+	RETURN_LONG(entry_obj->ent.entry->flags & ~(PHAR_ENT_PERM_MASK|PHAR_ENT_COMPRESSION_MASK));
 }
 /* }}} */
 
@@ -2977,9 +3036,12 @@ ZEND_END_ARG_INFO();
 zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, __construct,        arginfo_entry___construct,  0)
 	PHP_ME(PharFileInfo, getCompressedSize,  NULL,                       0)
+	PHP_ME(PharFileInfo, isCompressed,       NULL,                       0)
+	PHP_ME(PharFileInfo, isCompressedGZ,     NULL,                       0)
+	PHP_ME(PharFileInfo, isCompressedBZIP2,  NULL,                       0)
 	PHP_ME(PharFileInfo, getCRC32,           NULL,                       0)
-	PHP_ME(PharFileInfo, getPharFlags,       NULL,                       0)
 	PHP_ME(PharFileInfo, isCRCChecked,       NULL,                       0)
+	PHP_ME(PharFileInfo, getPharFlags,       NULL,                       0)
 	{NULL, NULL, NULL}
 };
 /* }}} */
