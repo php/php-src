@@ -1,3 +1,34 @@
+2007-01-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams/memory.c:
+      - Use relay to aid debugging
+
+    * main/streams/memory.c:
+      - Fix readonly mode to 'rb'
+
+2007-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/apache2handler/php_functions.c:
+      
+      Fixed bug #40127 (apache2handler doesnt compile on Netware).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_dblib/dblib_stmt.c:
+      
+      Fixed bug #40121 (PDO_DBLIB driver wont free statements).
+
+2007-01-14  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/http_fopen_wrapper.c:
+      MFB: Fix typo in error message
+
+    * (PHP_5_2)
+      ext/standard/http_fopen_wrapper.c:
+      Fix typo in error message
+
 2007-01-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/formatted_print.c:
