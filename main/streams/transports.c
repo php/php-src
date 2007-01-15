@@ -31,12 +31,12 @@ PHPAPI HashTable *php_stream_xport_get_hash(void)
 
 PHPAPI int php_stream_xport_register(char *protocol, php_stream_transport_factory factory TSRMLS_DC)
 {
-	return zend_hash_update(&xport_hash, protocol, strlen(protocol), &factory, sizeof(factory), NULL);
+	return zend_hash_update(&xport_hash, protocol, strlen(protocol) + 1, &factory, sizeof(factory), NULL);
 }
 
 PHPAPI int php_stream_xport_unregister(char *protocol TSRMLS_DC)
 {
-	return zend_hash_del(&xport_hash, protocol, strlen(protocol));
+	return zend_hash_del(&xport_hash, protocol, strlen(protocol) + 1);
 }
 
 #define ERR_REPORT(out_err, fmt, arg) \
@@ -106,7 +106,8 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 	}
 
 	if (protocol) {
-		if (FAILURE == zend_hash_find(&xport_hash, (char*)protocol, n, (void**)&factory)) {
+		char *tmp = estrndup(protocol, n);
+		if (FAILURE == zend_hash_find(&xport_hash, tmp, n + 1, (void**)&factory)) {
 			char wrapper_name[32];
 
 			if (n >= sizeof(wrapper_name))
@@ -116,8 +117,10 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 			ERR_REPORT(error_string, "Unable to find the socket transport \"%s\" - did you forget to enable it when you configured PHP?",
 					wrapper_name);
 
+			efree(tmp);
 			return NULL;
 		}
+		efree(tmp);
 	}
 
 	if (factory == NULL) {
