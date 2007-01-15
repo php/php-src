@@ -1,5 +1,7 @@
 --TEST--
 Bug #36214 (__get method works properly only when conditional operator is used)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) die("skip SPL is no available"); ?>
 --FILE--
 <?php
 class context {
