@@ -266,7 +266,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 	/* determine the classname/class entry */
 	if (FAILURE == zend_hash_find(BG(user_filter_map), (char*)filtername,
-				strlen(filtername), (void**)&fdat)) {
+				strlen(filtername) + 1, (void**)&fdat)) {
 		char *period;
 
 		/* Userspace Filters using ambiguous wildcards could cause problems.
@@ -283,7 +283,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			while (period) {
 				*period = '\0';
 				strcat(wildcard, ".*");
-				if (SUCCESS == zend_hash_find(BG(user_filter_map), wildcard, strlen(wildcard), (void**)&fdat)) {
+				if (SUCCESS == zend_hash_find(BG(user_filter_map), wildcard, strlen(wildcard) + 1, (void**)&fdat)) {
 					period = NULL;
 				} else {
 					*period = '\0';
@@ -567,7 +567,7 @@ PHP_FUNCTION(stream_filter_register)
 	fdat = ecalloc(1, sizeof(*fdat) + classname_len);
 	memcpy(fdat->classname, classname, classname_len);
 
-	if (zend_hash_add(BG(user_filter_map), filtername, filtername_len, (void*)fdat,
+	if (zend_hash_add(BG(user_filter_map), filtername, filtername_len + 1, (void*)fdat,
 				sizeof(*fdat) + classname_len, NULL) == SUCCESS &&
 			php_stream_filter_register_factory_volatile(filtername, &user_filter_factory TSRMLS_CC) == SUCCESS) {
 		RETVAL_TRUE;
