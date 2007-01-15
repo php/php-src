@@ -46,12 +46,12 @@ PHPAPI HashTable *_php_get_stream_filters_hash(TSRMLS_D)
 /* API for registering GLOBAL filters */
 PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC)
 {
-	return zend_hash_add(&stream_filters_hash, (char*)filterpattern, strlen(filterpattern) + 1, factory, sizeof(*factory), NULL);
+	return zend_hash_add(&stream_filters_hash, (char*)filterpattern, strlen(filterpattern), factory, sizeof(*factory), NULL);
 }
 
 PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern TSRMLS_DC)
 {
-	return zend_hash_del(&stream_filters_hash, (char*)filterpattern, strlen(filterpattern) + 1);
+	return zend_hash_del(&stream_filters_hash, (char*)filterpattern, strlen(filterpattern));
 }
 
 /* API for registering VOLATILE wrappers */
@@ -65,7 +65,7 @@ PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern
 		zend_hash_copy(FG(stream_filters), &stream_filters_hash, NULL, &tmpfactory, sizeof(php_stream_filter_factory));
 	}
 
-	return zend_hash_add(FG(stream_filters), (char*)filterpattern, strlen(filterpattern) + 1, factory, sizeof(*factory), NULL);
+	return zend_hash_add(FG(stream_filters), (char*)filterpattern, strlen(filterpattern), factory, sizeof(*factory), NULL);
 }
 
 /* Buckets */
@@ -259,7 +259,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 
 	n = strlen(filtername);
 	
-	if (SUCCESS == zend_hash_find(filter_hash, (char*)filtername, n + 1, (void**)&factory)) {
+	if (SUCCESS == zend_hash_find(filter_hash, (char*)filtername, n, (void**)&factory)) {
 		filter = factory->create_filter(filtername, filterparams, persistent TSRMLS_CC);
 	} else if ((period = strrchr(filtername, '.'))) {
 		/* try a wildcard */
@@ -271,7 +271,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		while (period && !filter) {
 			*period = '\0';
 			strcat(wildname, ".*");
-			if (SUCCESS == zend_hash_find(filter_hash, wildname, strlen(wildname) + 1, (void**)&factory)) {
+			if (SUCCESS == zend_hash_find(filter_hash, wildname, strlen(wildname), (void**)&factory)) {
 				filter = factory->create_filter(filtername, filterparams, persistent TSRMLS_CC);
 			}
 
