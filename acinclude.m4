@@ -2098,25 +2098,25 @@ AC_DEFUN([PHP_SETUP_ICU],[
   AC_ARG_WITH(icu-dir,
   [  --with-icu-dir=DIR      Specify where ICU libraries and headers can be found], 
   [
-	if test "x$withval" != "xyes"; then
-	  PHP_ICU_DIR=$withval
-	else
-	  PHP_ICU_DIR=DEFAULT
-	fi
+    if test "x$withval" != "xyes"; then
+      PHP_ICU_DIR=$withval
+    else
+      PHP_ICU_DIR=DEFAULT
+    fi
   ], [
-	PHP_ICU_DIR=DEFAULT
+    PHP_ICU_DIR=DEFAULT
   ])
 
   if test "$PHP_ICU_DIR" = "DEFAULT"; then
-	ICU_CONFIG=icu-config
-	for i in /usr/local/bin /usr/bin; do
-	  if test -x "$i/icu-config"; then
-		ICU_CONFIG=$i/icu-config
-		break;
-	  fi
-	done
+    ICU_CONFIG=icu-config
+    for i in /usr/local/bin /usr/bin; do
+      if test -x "$i/icu-config"; then
+        ICU_CONFIG=$i/icu-config
+        break;
+      fi
+    done
   else
-	ICU_CONFIG="$PHP_ICU_DIR/bin/icu-config"
+    ICU_CONFIG="$PHP_ICU_DIR/bin/icu-config"
   fi
 
   dnl Trust icu-config to know better what the install prefix is..
@@ -2127,23 +2127,24 @@ AC_DEFUN([PHP_SETUP_ICU],[
   else
     AC_MSG_RESULT([found in $icu_install_prefix])
 
-	dnl Check ICU version
-	AC_MSG_CHECKING([for ICU 3.4 or greater])
-	icu_version_full=`$ICU_CONFIG --version`
-	ac_IFS=$IFS
-	IFS="."
-	set $icu_version_full
-	IFS=$ac_IFS
-	icu_version=`expr [$]1 \* 1000 + [$]2`
-	AC_MSG_RESULT([found $icu_version_full])
-	if test "$icu_version" -lt "3004"; then
-	  AC_MSG_ERROR([ICU version 3.4 or later is required])
-	fi
+    dnl Check ICU version
+    AC_MSG_CHECKING([for ICU 3.4 or greater])
+    icu_version_full=`$ICU_CONFIG --version`
+    ac_IFS=$IFS
+    IFS="."
+    set $icu_version_full
+    IFS=$ac_IFS
+    icu_version=`expr [$]1 \* 1000 + [$]2`
+    AC_MSG_RESULT([found $icu_version_full])
+	
+    if test "$icu_version" -lt "3004"; then
+      AC_MSG_ERROR([ICU version 3.4 or later is required])
+    fi
 
-	ICU_INCS=`$ICU_CONFIG --cppflags-searchpath`
-	ICU_LIBS=`$ICU_CONFIG --ldflags --ldflags-icuio`
-	PHP_EVAL_INCLINE($ICU_INCS)
-	PHP_EVAL_LIBLINE($ICU_LIBS, $1)
+    ICU_INCS=`$ICU_CONFIG --cppflags-searchpath`
+    ICU_LIBS=`$ICU_CONFIG --ldflags --ldflags-icuio`
+    PHP_EVAL_INCLINE($ICU_INCS)
+    PHP_EVAL_LIBLINE($ICU_LIBS, $1)
   fi
 ])
 
