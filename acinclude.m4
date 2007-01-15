@@ -2121,9 +2121,9 @@ AC_DEFUN([PHP_SETUP_ICU],[
 
   dnl Trust icu-config to know better what the install prefix is..
   icu_install_prefix=`$ICU_CONFIG --prefix 2> /dev/null`
-  if test -z "$icu_install_prefix"; then
+  if test "$?" != "0" || test -z "$icu_install_prefix"; then
     AC_MSG_RESULT([not found])
-    AC_MSG_ERROR([Please specify the correct ICU install prefix.])
+    AC_MSG_ERROR([Unable to detect ICU prefix or $ICU_CONFIG failed. Please verify ICU install prefix and make sure icu-config works.])
   else
     AC_MSG_RESULT([found in $icu_install_prefix])
 
