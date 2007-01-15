@@ -327,6 +327,11 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 	if (*newstream == NULL)
 		return PHP_STREAM_FAILED;
 
+#if ZEND_DEBUG
+	(*newstream)->open_filename = origstream->open_filename;
+	(*newstream)->open_lineno = origstream->open_lineno;
+#endif
+
 	if (php_stream_copy_to_stream(origstream, *newstream, PHP_STREAM_COPY_ALL) == 0) {
 		php_stream_close(*newstream);
 		*newstream = NULL;

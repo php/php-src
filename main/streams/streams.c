@@ -241,6 +241,11 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 	ret->chunk_size = FG(def_chunk_size);
 	ret->readbuf_type = IS_STRING;
 
+#if ZEND_DEBUG
+	ret->open_filename = __zend_orig_filename ? __zend_orig_filename : __zend_filename;
+	ret->open_lineno = __zend_orig_lineno ? __zend_orig_lineno : __zend_lineno;
+#endif
+
 	if (FG(auto_detect_line_endings)) {
 		ret->flags |= PHP_STREAM_FLAG_DETECT_EOL;
 	}
@@ -384,7 +389,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			 * as leaked; it will log a warning, but lets help it out and display what kind
 			 * of stream it was. */
 			char *leakinfo;
-			spprintf(&leakinfo, 0, __FILE__ "(%d) : Stream of type '%s' %p (path:%s) was not closed\n", __LINE__, stream->ops->label, stream, stream->orig_path);
+			spprintf(&leakinfo, 0, __FILE__ "(%d) : Stream of type '%s' %p (path:%s) was not closed (opened in %s on line %d)\n", __LINE__, stream->ops->label, stream, stream->orig_path, stream->open_filename, stream->open_lineno);
 
 			if (stream->orig_path) {
 				pefree(stream->orig_path, stream->is_persistent);
@@ -2376,6 +2381,10 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		}
 		copy_of_path = pestrdup(path, persistent);
 		stream->orig_path = copy_of_path;
+#if ZEND_DEBUG
+		stream->open_filename = __zend_orig_filename ? __zend_orig_filename : __zend_filename;
+		stream->open_lineno = __zend_orig_lineno ? __zend_orig_lineno : __zend_lineno;
+#endif
 	}
 
 	if (stream != NULL && (options & STREAM_MUST_SEEK)) {

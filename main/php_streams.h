@@ -225,7 +225,12 @@ struct _php_stream  {
 
 	int eof;
 
+#if ZEND_DEBUG
+	char *open_filename;
+	uint open_lineno;
+#endif
 }; /* php_stream */
+
 /* state definitions when closing down; these are private to streams.c */
 #define PHP_STREAM_FCLOSE_NONE 0
 #define PHP_STREAM_FCLOSE_FDOPEN	1
