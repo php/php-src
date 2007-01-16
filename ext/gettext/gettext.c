@@ -253,9 +253,11 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 	}
 	
 	if (Z_STRVAL_PP(dir)[0] != '\0' && strcmp(Z_STRVAL_PP(dir), "0")) {
-		VCWD_REALPATH(Z_STRVAL_PP(dir), dir_name);
-	} else {
-		VCWD_GETCWD(dir_name, MAXPATHLEN);
+		if (!VCWD_REALPATH(Z_STRVAL_PP(dir), dir_name)) {
+			RETURN_FALSE;
+		}
+	} else if (!VCWD_GETCWD(dir_name, MAXPATHLEN)) {
+		RETURN_FALSE;
 	}
 
 	retval = bindtextdomain(Z_STRVAL_PP(domain_name), dir_name);
