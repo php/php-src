@@ -186,6 +186,7 @@ static PHP_FUNCTION(pspell_new)
 	 * pointing to the location of the dictionaries
 	 */
 	if(0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
+		dwLen = sizeof(aspell_dir) - 1;
 		RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
 		RegCloseKey(hkey);
 		strcpy(data_dir, aspell_dir);
@@ -247,6 +248,7 @@ static PHP_FUNCTION(pspell_new)
 
 	if(pspell_error_number(ret) != 0){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
+		delete_pspell_manager(ret);
 		RETURN_FALSE;
 	}
 	
@@ -289,6 +291,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	 * pointing to the location of the dictionaries
 	 */
 	if(0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
+		dwLen = sizeof(aspell_dir) - 1;
 		RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
 		RegCloseKey(hkey);
 		strcpy(data_dir, aspell_dir);
@@ -304,6 +307,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	convert_to_string_ex(personal);
 
 	if (php_check_open_basedir(Z_STRVAL_PP(personal) TSRMLS_CC)) {
+		delete_pspell_config(config);
 		RETURN_FALSE;
 	}
 
@@ -359,6 +363,7 @@ static PHP_FUNCTION(pspell_new_personal)
 
 	if(pspell_error_number(ret) != 0){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
+		delete_pspell_manager(ret);
 		RETURN_FALSE;
 	}
 	
@@ -392,6 +397,7 @@ static PHP_FUNCTION(pspell_new_config)
 
 	if(pspell_error_number(ret) != 0){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
+		delete_pspell_manager(ret);
 		RETURN_FALSE;
 	}
 	
@@ -637,17 +643,18 @@ static PHP_FUNCTION(pspell_config_create)
     /* If aspell was installed using installer, we should have a key
      * pointing to the location of the dictionaries
      */
-    if(0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
-	RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
-	RegCloseKey(hkey);
-	strcpy(data_dir, aspell_dir);
-	strcat(data_dir, "\\data");
-	strcpy(dict_dir, aspell_dir);
-	strcat(dict_dir, "\\dict");
+	if(0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
+		dwLen = sizeof(aspell_dir) - 1;
+		RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
+		RegCloseKey(hkey);
+		strcpy(data_dir, aspell_dir);
+		strcat(data_dir, "\\data");
+		strcpy(dict_dir, aspell_dir);
+		strcat(dict_dir, "\\dict");
 
-	pspell_config_replace(config, "data-dir", data_dir);
-	pspell_config_replace(config, "dict-dir", dict_dir);
-      }
+		pspell_config_replace(config, "data-dir", data_dir);
+		pspell_config_replace(config, "dict-dir", dict_dir);
+	}
 #endif
 
 	convert_to_string_ex(language);
