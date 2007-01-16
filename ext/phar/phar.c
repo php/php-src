@@ -1597,8 +1597,13 @@ static int phar_dir_seek(php_stream *stream, off_t offset, int whence, off_t *ne
 static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
-
-	size_t got = php_stream_read(data->fp, buf, count);
+	size_t got;
+	
+	if (data->internal_file->is_deleted) {
+		stream->eof = 1;
+		return 0;
+	}
+	got = php_stream_read(data->fp, buf, count);
 	
 	if (data->fp->eof) {
 		stream->eof = 1;
