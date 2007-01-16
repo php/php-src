@@ -39,7 +39,7 @@ include $pname . '/b/c.php';
 extra
 extra
 
-Warning: include(phar:///home/cellog/workspace/pecl/phar/tests/refcount1.phpt.phar.php/b/c.php): failed to open stream: phar error: "b/c.php" is not a file in phar "/home/cellog/workspace/pecl/phar/tests/refcount1.phpt.phar.php" in /home/cellog/workspace/pecl/phar/tests/refcount1.phpt on line %d
+Warning: include(phar://%s/b/c.php): failed to open stream: phar error: "b/c.php" is not a file in phar "%s" in %s on line %d
 
-Warning: include(): Failed opening 'phar:///home/cellog/workspace/pecl/phar/tests/refcount1.phpt.phar.php/b/c.php' for inclusion (include_path='.:/usr/local/lib/php') in /home/cellog/workspace/pecl/phar/tests/refcount1.phpt on line %d
+Warning: include(): Failed opening 'phar://%s/b/c.php' for inclusion (include_path='%s') in %s on line %d
 ===DONE===
