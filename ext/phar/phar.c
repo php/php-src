@@ -496,7 +496,7 @@ PHP_METHOD(Phar, apiVersion)
 /* }}}*/
 
 /* {{{ proto bool canCompress()
- * Returns whether phar extension supports compression using zlib */
+ * Returns whether phar extension supports compression using zlib/bzip2 */
 PHP_METHOD(Phar, canCompress)
 {
 #if HAVE_ZLIB || HAVE_BZ2
