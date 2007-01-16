@@ -360,7 +360,9 @@ PHPAPI int _php_stream_rmdir(char *path, int options, php_stream_context *contex
 #define php_stream_rmdir(path, options, context)	_php_stream_rmdir(path, options, context TSRMLS_CC)
 
 PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_context *context STREAMS_DC TSRMLS_DC);
+PHPAPI php_stream *_php_stream_u_opendir(zend_uchar type, zstr path, int path_len, int options, php_stream_context *context STREAMS_DC TSRMLS_DC);
 #define php_stream_opendir(path, options, context)	_php_stream_opendir((path), (options), (context) STREAMS_CC TSRMLS_CC)
+#define php_stream_u_opendir(path_type, path, path_len, options, context)	_php_stream_u_opendir((path_type), (path), (path_len), (options), (context) STREAMS_CC TSRMLS_CC)
 PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent TSRMLS_DC);
 #define php_stream_readdir(dirstream, dirent)	_php_stream_readdir((dirstream), (dirent) TSRMLS_CC)
 #define php_stream_closedir(dirstream)	php_stream_close((dirstream))

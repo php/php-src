@@ -2278,6 +2278,27 @@ PHPAPI php_stream *_php_stream_opendir(char *path, int options,
 }
 /* }}} */
 
+PHPAPI php_stream *_php_stream_u_opendir(zend_uchar type, zstr path, int path_len, int options, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
+{
+	char *filename;
+	int filename_len;
+	php_stream *stream;
+
+	if (type == IS_STRING) {
+		return php_stream_opendir(path.s, options, context);
+	}
+
+	/* type == IS_UNICODE */
+	if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, path.u, path_len, options, context)) {
+		return NULL;
+	}
+
+	stream = php_stream_opendir(filename, options, context);
+	efree(filename);
+	return stream;
+}
+/* }}} */
+
 /* {{{ _php_stream_readdir */
 PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent TSRMLS_DC)
 {
