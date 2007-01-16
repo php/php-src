@@ -1,3 +1,50 @@
+2007-01-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/php_streams.h
+      main/streams/cast.c
+      main/streams/streams.c:
+      - Help streams debugging
+
+2007-01-15  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/user_filters.c
+      main/streams/streams.c
+      main/streams/transports.c
+      main/streams/userspace.c:
+      add trailing '\0' to stream hashes
+
+    * (PHP_5_2)
+      main/streams/filter.c:
+      revert the patch temporarily, I need to test a bigger patch in HEAD..
+
+    * main/streams/filter.c:
+      include \0 to the hash
+      it does matter because we use these strings in phpinfo()
+
+    * acinclude.m4:
+      tabs -> ws
+
+    * acinclude.m4:
+      improve icu-config check
+
+    * ZendEngine2/tests/bug36214.phpt
+      ZendEngine2/tests/bug36214.phpt:
+      fix test
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c:
+      missing comma
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c:
+      fix error message and #40111
+
+2007-01-15  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_2)
+      ext/pdo_dblib/dblib_stmt.c:
+      Fix mysql -> dblib
+
 2007-01-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * main/streams/memory.c:
