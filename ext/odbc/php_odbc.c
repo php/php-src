@@ -1980,12 +1980,12 @@ PHP_FUNCTION(odbc_result_all)
 						RETURN_FALSE;
 					}
 					if (rc == SQL_SUCCESS_WITH_INFO)
-						php_printf(buf,result->longreadlen);
+						PHPWRITE(buf, result->longreadlen);
 					else if (result->values[i].vallen == SQL_NULL_DATA) {
 						php_printf("<td>NULL</td>");
 						break;
 					} else {
-						php_printf(buf, result->values[i].vallen);
+						PHPWRITE(buf, result->values[i].vallen);
 					}
 					php_printf("</td>");
 					break;
