@@ -99,3 +99,59 @@ string(%d) "%stests"
 string(5) "tests"
 string(%d) "%sspl"
 ===DONE===
+--UEXPECTF--
+===0===
+object(SplFileInfo)#%d (0) {
+}
+object(SplFileInfo)#%d (0) {
+}
+bool(false)
+bool(true)
+bool(true)
+%s(%d) "%sfileobject_001a.txt"
+unicode(%d) "%sfileobject_001a.txt"
+bool(true)
+unicode(19) "fileobject_001a.txt"
+bool(true)
+unicode(%d) "%stests"
+bool(true)
+unicode(%d) "%sfileobject_001a.txt"
+unicode(19) "fileobject_001a.txt"
+unicode(%d) "%stests"
+===1===
+object(SplFileInfo)#%d (0) {
+}
+object(SplFileInfo)#%d (0) {
+}
+bool(false)
+bool(true)
+bool(true)
+%s(%d) "%stests/"
+unicode(%d) "%stests"
+bool(true)
+unicode(5) "tests"
+bool(true)
+unicode(%d) "%sspl"
+bool(true)
+unicode(%d) "%stests"
+unicode(%d) "%stests"
+unicode(%d) "%stests"
+===2===
+object(SplFileInfo)#1 (0) {
+}
+object(SplFileInfo)#2 (0) {
+}
+bool(false)
+bool(true)
+bool(true)
+%s(%d) "%stests"
+unicode(%d) "%stests"
+bool(true)
+unicode(%d) "tests"
+bool(true)
+unicode(%d) "%sspl"
+bool(true)
+unicode(%d) "%stests"
+unicode(5) "tests"
+unicode(%d) "%sspl"
+===DONE===

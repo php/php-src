@@ -122,3 +122,97 @@ bool(true)
 int(5)
 bool(true)
 ===DONE===
+--UEXPECT--
+===fileobject_001a.txt===
+int(0)
+int(0)
+unicode(1) "0"
+bool(false)
+int(1)
+unicode(1) "
+"
+bool(false)
+int(1)
+unicode(1) "1"
+bool(false)
+int(2)
+unicode(1) "
+"
+bool(false)
+int(2)
+unicode(1) "2"
+bool(false)
+int(3)
+unicode(1) "
+"
+bool(false)
+int(3)
+unicode(1) "3"
+bool(false)
+int(4)
+unicode(1) "
+"
+bool(false)
+int(4)
+unicode(1) "4"
+bool(false)
+int(5)
+unicode(1) "
+"
+bool(false)
+int(5)
+unicode(1) "5"
+bool(false)
+int(6)
+unicode(1) "
+"
+bool(false)
+===EOF?===
+bool(true)
+int(6)
+bool(true)
+===fileobject_001b.txt===
+int(0)
+int(0)
+unicode(1) "0"
+bool(false)
+int(1)
+unicode(1) "
+"
+bool(false)
+int(1)
+unicode(1) "1"
+bool(false)
+int(2)
+unicode(1) "
+"
+bool(false)
+int(2)
+unicode(1) "2"
+bool(false)
+int(3)
+unicode(1) "
+"
+bool(false)
+int(3)
+unicode(1) "3"
+bool(false)
+int(4)
+unicode(1) "
+"
+bool(false)
+int(4)
+unicode(1) "4"
+bool(false)
+int(5)
+unicode(1) "
+"
+bool(false)
+int(5)
+unicode(1) "5"
+bool(false)
+===EOF?===
+bool(true)
+int(5)
+bool(true)
+===DONE===
