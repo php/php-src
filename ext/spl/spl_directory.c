@@ -165,9 +165,9 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 			break;
 		case SPL_FS_DIR:
 			if (intern->path_type == IS_UNICODE) {
-				intern->file_name_len = spprintf(&intern->file_name.s, 0, "%s%c%s", intern->path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
-			} else {
 				intern->file_name_len = uspprintf(&intern->file_name.s, 0, "%r%c%s", intern->path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
+			} else {
+				intern->file_name_len = spprintf(&intern->file_name.s, 0, "%s%c%s", intern->path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 			}
 			intern->file_name_type = intern->path_type;
 			break;
@@ -266,8 +266,10 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 
 	switch (source->type) {
 	case SPL_FS_INFO:
+		intern->path_type = source->path_type;
 		intern->path_len = source->path_len;
 		intern->path = ezstrndup(source->path_type, source->path, source->path_len);
+		intern->file_name_type = source->file_name_type;
 		intern->file_name_len = source->file_name_len;
 		intern->file_name = ezstrndup(source->file_name_type, source->file_name, intern->file_name_len);
 		break;
@@ -299,6 +301,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, zend_uchar 
 {
 	zstr p1, p2;
 
+	intern->file_name_type = type;
 	intern->file_name = use_copy ? ezstrndup(type, path, len) : path;
 	intern->file_name_len = len;
 
@@ -325,6 +328,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, zend_uchar 
 	} else {
 		intern->path_len = 0;
 	}
+	intern->path_type = type;
 	intern->path = ezstrndup(type, path, intern->path_len);
 } /* }}} */
 
@@ -395,10 +399,12 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 			zend_call_method_with_1_params(&return_value, ce, &ce->constructor, "__construct", NULL, arg1);
 			zval_ptr_dtor(&arg1);
 		} else {
-			intern->file_name = ezstrndup(source->file_name_type, source->file_name, source->file_name_len);
-			intern->file_name_len = source->file_name_len;
-			intern->path = ezstrndup(source->path_type, source->path, source->path_len);
+			intern->path_type = source->path_type;
 			intern->path_len = source->path_len;
+			intern->path = ezstrndup(source->path_type, source->path, source->path_len);
+			intern->file_name_type = source->file_name_type;
+			intern->file_name_len = source->file_name_len;
+			intern->file_name = ezstrndup(source->file_name_type, source->file_name, source->file_name_len);
 		}
 		break;
 	case SPL_FS_FILE:
@@ -417,10 +423,12 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 			zval_ptr_dtor(&arg1);
 			zval_ptr_dtor(&arg2);
 		} else {
-			intern->file_name = source->file_name;
-			intern->file_name_len = source->file_name_len;
-			intern->path = ezstrndup(source->path_type, source->path, source->path_len);
+			intern->path_type = source->path_type;
 			intern->path_len = source->path_len;
+			intern->path = ezstrndup(source->path_type, source->path, source->path_len);
+			intern->file_name_type = source->file_name_type;
+			intern->file_name_len = source->file_name_len;
+			intern->file_name = source->file_name;
 		
 			intern->u.file.open_mode = "r";
 			intern->u.file.open_mode_len = 1;
@@ -573,7 +581,7 @@ SPL_METHOD(SplFileInfo, getFilename)
 		} else {
 			ret.s = intern->file_name.s + intern->path_len + 1;
 		}
-		RETURN_ZSTRL(intern->file_name_type, ret, intern->file_name_len - (intern->path_len + 1), 1);
+		RETURN_ZSTRL(intern->file_name_type, ret, intern->file_name_len - (intern->path_len + 1), ZSTR_DUPLICATE);
 	} else {
 		RETURN_ZSTRL(intern->file_name_type, intern->file_name, intern->file_name_len, ZSTR_DUPLICATE);
 	}
@@ -1647,6 +1655,7 @@ SPL_METHOD(SplFileObject, __construct)
 		} else {
 			intern->path_len = 0;
 		}
+		intern->path_type = intern->file_name_type;
 		intern->path = ezstrndup(intern->file_name_type, intern->file_name, intern->path_len);
 	}
 
