@@ -255,12 +255,16 @@ PHP_MINIT_FUNCTION(miconv)
 	}
 #elif HAVE_GLIBC_ICONV
 	version = (char *)gnu_get_libc_version();
+#elif defined(NETWARE)
+	version = "OS built-in";
 #endif
 
 #ifdef PHP_ICONV_IMPL
 	REGISTER_STRING_CONSTANT("ICONV_IMPL", PHP_ICONV_IMPL, CONST_CS | CONST_PERSISTENT);
 #elif HAVE_LIBICONV
 	REGISTER_STRING_CONSTANT("ICONV_IMPL", "libiconv", CONST_CS | CONST_PERSISTENT);
+#elif defined(NETWARE)
+	REGISTER_STRING_CONSTANT("ICONV_IMPL", "Novell", CONST_CS | CONST_PERSISTENT);
 #else
 	REGISTER_STRING_CONSTANT("ICONV_IMPL", "unknown", CONST_CS | CONST_PERSISTENT);
 #endif
@@ -499,7 +503,11 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	out_buffer = (char *) emalloc(out_size + 1);
 	out_p = out_buffer;
 	
+#ifdef NETWARE
+	result = iconv(cd, (char **) &in_p, &in_size, (char **)
+#else
 	result = iconv(cd, (const char **) &in_p, &in_size, (char **)
+#endif
 				&out_p, &out_left);
 	
 	if (result == (size_t)(-1)) {
@@ -775,7 +783,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 #endif
 	}
 
-	cd2 = NULL;
+	cd2 = (iconv_t)NULL;
 
 	for (in_p = str, in_left = nbytes, cnt = 0; in_left > 0 && len > 0; ++cnt) {
 		size_t prev_in_left;
@@ -791,11 +799,11 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 		}
 
 		if (cnt >= (unsigned int)offset) {
-			if (cd2 == NULL) {
+			if (cd2 == (iconv_t)NULL) {
 				cd2 = iconv_open(enc, GENERIC_SUPERSET_NAME);
 
 				if (cd2 == (iconv_t)(-1)) {
-					cd2 = NULL;
+					cd2 = (iconv_t)NULL;
 #if ICONV_SUPPORTS_ERRNO
 					if (errno == EINVAL) {
 						err = PHP_ICONV_ERR_WRONG_CHARSET;
@@ -832,17 +840,17 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 	}
 #endif
 	if (err == PHP_ICONV_ERR_SUCCESS) {
-		if (cd2 != NULL) {
+		if (cd2 != (iconv_t)NULL) {
 			_php_iconv_appendl(pretval, NULL, 0, cd2);
 		}
 		smart_str_0(pretval);
 	}
 
-	if (cd1 != NULL) {
+	if (cd1 != (iconv_t)NULL) {
 		iconv_close(cd1);
 	}
 
-	if (cd2 != NULL) {
+	if (cd2 != (iconv_t)NULL) {
 		iconv_close(cd2);
 	}	
 	return err;
