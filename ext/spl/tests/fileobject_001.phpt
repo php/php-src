@@ -88,3 +88,49 @@ string(1) "4"
 int(5)
 string(1) "5"
 ===DONE===
+--UEXPECT--
+int(0)
+unicode(2) "0
+"
+int(0)
+unicode(2) "0
+"
+int(0)
+int(1)
+unicode(1) "1"
+int(1)
+int(0)
+unicode(1) "0"
+int(0)
+int(4)
+unicode(1) "4"
+int(4)
+===A===
+int(0)
+unicode(1) "0"
+int(1)
+unicode(1) "1"
+int(2)
+unicode(1) "2"
+int(3)
+unicode(1) "3"
+int(4)
+unicode(1) "4"
+int(5)
+unicode(1) "5"
+int(6)
+unicode(0) ""
+===B===
+int(0)
+unicode(1) "0"
+int(1)
+unicode(1) "1"
+int(2)
+unicode(1) "2"
+int(3)
+unicode(1) "3"
+int(4)
+unicode(1) "4"
+int(5)
+unicode(1) "5"
+===DONE===
