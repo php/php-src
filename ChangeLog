@@ -1,3 +1,68 @@
+2007-01-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - Steps towards unicode
+
+2007-01-16  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * main/php.h:
+      Update PHP API version.
+      
+
+2007-01-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/filestat.c
+      ext/standard/php_filestat.h:
+      - Add php_u_stat()
+
+    * main/php_streams.h
+      main/streams/streams.c:
+      - Add more unicode stuff
+
+2007-01-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/odbc/php_odbc.c:
+      
+      MFB: Fixed output code inside odbc_result_all()
+
+    * (PHP_4_4)
+      ext/odbc/php_odbc.c:
+      
+      MFH: Fixed output code inside odbc_result_all()
+
+    * (PHP_5_2)
+      ext/odbc/php_odbc.c:
+      Fixed output code inside odbc_result_all()
+
+2007-01-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/gettext/gettext.c:
+      MFH: return false if realpath()/getcwd() fail
+
+    * ext/gettext/gettext.c:
+      return false if realpath()/getcwd() fail
+
+    * (PHP_5_2)
+      TSRM/tsrm_virtual_cwd.c:
+      MFH: free temp cwd_state struct on error
+
+    * TSRM/tsrm_virtual_cwd.c:
+      free temporary cwd_state struct on error
+
+    * ext/pspell/pspell.c:
+      plug leaks
+      initialize the last argument of RegQueryValueEx()
+      fix ws
+
+2007-01-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      win32/sendmail.c:
+      
+      Added buffer length checks
+
 2007-01-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * main/php_streams.h
