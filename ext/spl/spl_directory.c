@@ -556,7 +556,7 @@ SPL_METHOD(SplFileInfo, getPath)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	RETURN_ZSTRL(intern->path_type, intern->path, intern->path_len, 1);
+	RETURN_ZSTRL(intern->path_type, intern->path, intern->path_len, ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -575,7 +575,7 @@ SPL_METHOD(SplFileInfo, getFilename)
 		}
 		RETURN_ZSTRL(intern->file_name_type, ret, intern->file_name_len - (intern->path_len + 1), 1);
 	} else {
-		RETURN_ZSTRL(intern->file_name_type, intern->file_name, intern->file_name_len, 1);
+		RETURN_ZSTRL(intern->file_name_type, intern->file_name, intern->file_name_len, ZSTR_DUPLICATE);
 	}
 }
 /* }}} */
@@ -599,11 +599,11 @@ SPL_METHOD(SplFileInfo, getPathname)
 	switch (intern->type) {
 	case SPL_FS_INFO:
 	case SPL_FS_FILE:
-		RETURN_ZSTRL(intern->file_name_type, intern->file_name, intern->file_name_len, 1);
+		RETURN_ZSTRL(intern->file_name_type, intern->file_name, intern->file_name_len, ZSTR_DUPLICATE);
 	case SPL_FS_DIR:
 		if (intern->u.dir.entry.d_name[0]) {
 			spl_filesystem_object_get_file_name(intern TSRMLS_CC);
-			RETURN_ZSTRL(intern->file_name_type, intern->file_name, intern->file_name_len, 1);
+			RETURN_ZSTRL(intern->file_name_type, intern->file_name, intern->file_name_len, ZSTR_DUPLICATE);
 		}
 	}
 	RETURN_BOOL(0);
@@ -617,7 +617,7 @@ SPL_METHOD(RecursiveDirectoryIterator, key)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (intern->flags & SPL_FILE_DIR_KEY_AS_FILENAME) {
-		RETURN_STRING(intern->u.dir.entry.d_name, 1);
+		RETURN_RT_STRING(intern->u.dir.entry.d_name, ZSTR_DUPLICATE);
 	} else {
 		spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 		RETURN_ZSTRL(intern->file_name_type, intern->file_name, intern->file_name_len, 1);
@@ -633,7 +633,7 @@ SPL_METHOD(RecursiveDirectoryIterator, current)
 
 	if (intern->flags & SPL_FILE_DIR_CURRENT_AS_PATHNAME) {
 		spl_filesystem_object_get_file_name(intern TSRMLS_CC);
-		RETURN_ZSTRL(intern->file_name_type, intern->file_name, intern->file_name_len, 1);
+		RETURN_ZSTRL(intern->file_name_type, intern->file_name, intern->file_name_len, ZSTR_DUPLICATE);
 	} else if (intern->flags & SPL_FILE_DIR_CURRENT_AS_FILEINFO) {
 		spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 		spl_filesystem_object_create_type(0, intern, SPL_FS_INFO, NULL, return_value TSRMLS_CC);
@@ -667,19 +667,19 @@ SPL_METHOD(SplFileInfo, __construct)
 {
 	spl_filesystem_object *intern;
 	zstr path;
-	int len;
-	zend_uchar type;
+	int path_len;
+	zend_uchar path_type;
 
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &path, &len, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &path, &path_len, &path_type) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
-	spl_filesystem_info_set_filename(intern, type, path, len, 1 TSRMLS_CC);
+	spl_filesystem_info_set_filename(intern, path_type, path, path_len, 1 TSRMLS_CC);
 	
 	/* intern->type = SPL_FS_INFO; already set */
 
@@ -980,7 +980,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (intern->u.dir.sub_path.v) {
-		RETURN_ZSTRL(intern->u.dir.sub_path_type, intern->u.dir.sub_path, intern->u.dir.sub_path_len, 1);
+		RETURN_ZSTRL(intern->u.dir.sub_path_type, intern->u.dir.sub_path, intern->u.dir.sub_path_len, ZSTR_DUPLICATE);
 	} else {
 		RETURN_EMPTY_TEXT();
 	}
@@ -1003,7 +1003,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 		}
 		RETURN_ZSTRL(intern->u.dir.sub_path_type, sub_name, len, 0);
 	} else {
-		RETURN_STRING(intern->u.dir.entry.d_name, 1);
+		RETURN_RT_STRING(intern->u.dir.entry.d_name, ZSTR_DUPLICATE);
 	}
 }
 /* }}} */
@@ -1141,7 +1141,7 @@ static void spl_filesystem_tree_it_current_data(zend_object_iterator *iter, zval
 		if (!iterator->current) {
 			ALLOC_INIT_ZVAL(iterator->current);
 			spl_filesystem_object_get_file_name(object TSRMLS_CC);
-			ZVAL_ZSTRL(iterator->current, object->file_name_type, object->file_name, object->file_name_len, 1);
+			ZVAL_ZSTRL(iterator->current, object->file_name_type, object->file_name, object->file_name_len, ZSTR_DUPLICATE);
 		}
 		*data = &iterator->current;
 	} else if (object->flags & SPL_FILE_DIR_CURRENT_AS_FILEINFO) {
@@ -1264,7 +1264,7 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type, v
 			return SUCCESS;
 		}
 		if (type == IS_STRING) {
-			ZVAL_ZSTRL(writeobj, intern->file_name_type, intern->file_name, intern->file_name_len, 1);
+			ZVAL_ZSTRL(writeobj, intern->file_name_type, intern->file_name, intern->file_name_len, ZSTR_DUPLICATE);
 			zval_unicode_to_string_ex(writeobj, ZEND_U_CONVERTER(((UConverter *)extra)) TSRMLS_CC);
 			return SUCCESS;
 		}
@@ -1747,7 +1747,7 @@ SPL_METHOD(SplFileObject, current)
 		spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC);
 	}
 	if (intern->u.file.current_line && (!(intern->flags & SPL_FILE_OBJECT_READ_CSV) || !intern->u.file.current_zval)) {
-		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len, 1);
+		RETURN_RT_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len, ZSTR_DUPLICATE);
 	} else if (intern->u.file.current_zval) {
 		RETURN_ZVAL(intern->u.file.current_zval, 1, 0);
 	}
@@ -2003,7 +2003,7 @@ SPL_METHOD(SplFileObject, fgetc)
 		buf[0] = result;
 		buf[1] = '\0';
 
-		RETURN_STRINGL(buf, 1, 1);
+		RETURN_RT_STRINGL(buf, 1, ZSTR_DUPLICATE);
 	}
 } /* }}} */
 
