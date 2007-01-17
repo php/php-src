@@ -77,10 +77,10 @@ static void spl_filesystem_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
 	
 	if (intern->path.v) {
-		efree(intern->path.s);
+		efree(intern->path.v);
 	}
 	if (intern->file_name.v) {
-		efree(intern->file_name.s);
+		efree(intern->file_name.v);
 	}
 	switch(intern->type) {
 	case SPL_FS_INFO:
@@ -90,8 +90,8 @@ static void spl_filesystem_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 			php_stream_close(intern->u.dir.dirp);
 			intern->u.dir.dirp = NULL;
 		}
-		if (intern->u.dir.sub_path.s) {
-			efree(intern->u.dir.sub_path.s);
+		if (intern->u.dir.sub_path.v) {
+			efree(intern->u.dir.sub_path.v);
 		}		
 		break;
 	case SPL_FS_FILE:
@@ -175,13 +175,7 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 	}
 } /* }}} */
 
-#if defined(PHP_WIN32) || defined(NETWARE)
-# define is_slash(c) (c == '/' || c == '\\')
-#else
-# define is_slash(c) (c == '/')
-#endif
-
-#define is_slash_at(type, zs, pos) (type == IS_UNICODE ? is_slash(zs.u[pos]) : is_slash(zs.s[pos]))
+#define IS_SLASH_AT(type, zs, pos) (type == IS_UNICODE ? IS_U_SLASH(zs.u[pos]) : IS_SLASH(zs.s[pos]))
 
 /* {{{ spl_filesystem_dir_open */
 /* open a directory resource */
@@ -192,7 +186,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_uchar ty
 	intern->path_len = path_len;
 	intern->u.dir.dirp = php_stream_u_opendir(type, path, path_len, REPORT_ERRORS, NULL);
 
-	if (intern->path_len && is_slash_at(type, path, intern->path_len-1)) {
+	if (intern->path_len && IS_SLASH_AT(type, path, intern->path_len-1)) {
 		intern->path = ezstrndup(type, path, --intern->path_len);
 	} else {
 		intern->path = ezstrndup(type, path, intern->path_len);
@@ -229,7 +223,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 		zend_list_addref(Z_RESVAL_P(intern->u.file.zcontext));
 	}
 
-	if (intern->file_name_len && is_slash_at(intern->file_name_type, intern->file_name, intern->file_name_len-1)) {
+	if (intern->file_name_len && IS_SLASH_AT(intern->file_name_type, intern->file_name, intern->file_name_len-1)) {
 		intern->file_name_len--;
 	}
 
