@@ -24,7 +24,6 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_sysvmsg.h"
 #include "ext/standard/php_var.h"
@@ -99,16 +98,6 @@ ZEND_GET_MODULE(sysvmsg)
 # include "zend_arg_defs.c"
 # endif
 #endif
-
-/* {{{ PHP_INI
- */
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("sysvmsg.value",  "42",     PHP_INI_ALL, OnUpdateLong,    global_value,  zend_sysvmsg_globals, sysvmsg_globals)
-	STD_PHP_INI_ENTRY("sysvmsg.string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_sysvmsg_globals, sysvmsg_globals)
-PHP_INI_END()
-*/
-/* }}} */
 
 static void sysvmsg_release(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -288,7 +277,7 @@ PHP_FUNCTION(msg_receive)
 	}
 
 	if (maxsize <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "maximum size of the message has to be greater then zero");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "maximum size of the message has to be greater than zero");
 		return;
 	}
 
