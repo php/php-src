@@ -318,12 +318,12 @@ try_again:
 	}
 
 	old_allow_url_fopen = PG(allow_url_fopen);
-	PG(allow_url_fopen) = 1;
+	zend_alter_ini_entry("allow_url_fopen", sizeof("allow_url_fopen"), "1", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
 	if (use_ssl && php_stream_locate_url_wrapper("https://", NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) == NULL) {
 		php_url_free(phpurl);
 		if (request != buf) {efree(request);}
 		add_soap_fault(this_ptr, "HTTP", "SSL support is not available in this build", NULL, NULL TSRMLS_CC);
-		PG(allow_url_fopen) = old_allow_url_fopen;
+		zend_alter_ini_entry("allow_url_fopen", sizeof("allow_url_fopen"), old_allow_url_fopen ? "1" : "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
 		return FALSE;
 	}
 
@@ -376,11 +376,11 @@ try_again:
 			php_url_free(phpurl);
 			if (request != buf) {efree(request);}
 			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL TSRMLS_CC);
-			PG(allow_url_fopen) = old_allow_url_fopen;
+			zend_alter_ini_entry("allow_url_fopen", sizeof("allow_url_fopen"), old_allow_url_fopen ? "1" : "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
 			return FALSE;
 		}
 	}
-	PG(allow_url_fopen) = old_allow_url_fopen;
+	zend_alter_ini_entry("allow_url_fopen", sizeof("allow_url_fopen"), old_allow_url_fopen ? "1" : "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
 
 	if (stream) {
 		if (client->url) {
