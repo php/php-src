@@ -3048,60 +3048,51 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation)
 */
 
 	/* Build buffer for isc_service_attach() */
-	*spb++ = isc_spb_version;
-	*spb++ = isc_spb_current_version;
-	*spb++ = isc_spb_user_name;
-	*spb++ = strlen(dba_user_name);
-	strcpy(spb, dba_user_name);
-	spb += strlen(dba_user_name);
-	*spb++ = isc_spb_password;
-	*spb++ = strlen(dba_password);
-	strcpy(spb, dba_password);
-	spb += strlen(dba_password);
-	spb_length = spb - spb_buffer;
+	snprintf(buf, sizeof(buf), "%c%c%c%d%s%c%d%s", isc_spb_version, isc_spb_current_version, isc_spb_user_name, 
+						strlen(dba_user_name), dba_user_name, isc_spb_password, strlen(dba_password), dba_password);
+	spb_length = strlen(buf);
 
 	/* Attach to the Service Manager */
-	sprintf(service_name, "%s:service_mgr", ib_server);
+	snprintf(service_name, sizeof(service_name), "%s:service_mgr", ib_server);
 	if (isc_service_attach(IB_STATUS, 0, service_name, &service_handle, spb_length, spb_buffer)) {
 		_php_ibase_error(TSRMLS_C);
 		RETURN_FALSE;
 	} else {
-		char request[128], *x, *p = request;
+		char request[128], *p = request;
+		int l = 1, lt;
 
-		/* Identify cluster (here, isc_action_svc_*_user) */
-		*p++ = operation;
-
-		/* Argument for username */
-		*p++ = isc_spb_sec_username;
-		ADD_SPB_LENGTH(p, strlen(user_name));
-		for (x = user_name ; *x;) *p++ = *x++;
+		request[0] = operation;
+		
+		lt = strlen(user_name);
+		snprintf(request + l, sizeof(request) - l, "%c%c%c%s", isc_spb_sec_username, (char)lt, (char)(lt >> 8), user_name);
+		l += lt + 3;
 
 		/* Argument for password */
 		if (user_password) {
-			*p++ = isc_spb_sec_password;
-			ADD_SPB_LENGTH(p, strlen(user_password));
-			for (x = user_password ; *x;) *p++ = *x++;
+			lt = strlen(user_password);
+			snprintf(request + l, sizeof(request) - l, "%c%c%c%s", isc_spb_sec_username, (char)lt, (char)(lt >> 8), user_password);
+			l += lt + 3;
 		}
 
 		/* Argument for first name */
 		if (first_name) {
-			*p++ = isc_spb_sec_firstname;
-			ADD_SPB_LENGTH(p, strlen(first_name));
-			for (x = first_name ; *x;) *p++ = *x++;
+			lt = strlen(first_name);
+			snprintf(request + l, sizeof(request) - l, "%c%c%c%s", isc_spb_sec_username, (char)lt, (char)(lt >> 8), first_name);
+			l += lt + 3;
 		}
 
 		/* Argument for middle name */
 		if (middle_name) {
-			*p++ = isc_spb_sec_middlename;
-			ADD_SPB_LENGTH(p, strlen(middle_name));
-			for (x = middle_name ; *x;) *p++ = *x++;
+			lt = strlen(middle_name);
+			snprintf(request + l, sizeof(request) - l, "%c%c%c%s", isc_spb_sec_username, (char)lt, (char)(lt >> 8), middle_name);
+			l += lt + 3;
 		}
 
 		/* Argument for last name */
 		if (last_name) {
-			*p++ = isc_spb_sec_lastname;
-			ADD_SPB_LENGTH(p, strlen(last_name));
-			for (x = last_name ; *x;) *p++ = *x++;
+			lt = strlen(last_name);
+			snprintf(request + l, sizeof(request) - l, "%c%c%c%s", isc_spb_sec_username, (char)lt, (char)(lt >> 8), last_name);
+			l += lt + 3;
 		}
 
 		/* Let's go update: start Service Manager */
