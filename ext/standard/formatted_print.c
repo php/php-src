@@ -436,7 +436,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 					if (argnum <= 0) {
 						efree(result);
 						efree(args);
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument number must be greater then zero.");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument number must be greater than zero.");
 						return NULL;
 					}
 
@@ -478,7 +478,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 					if ((width = php_sprintf_getnumber(format, &inpos)) < 0) {
 						efree(result);
 						efree(args);
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Width must be greater then zero and less then %d.", INT_MAX);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Width must be greater than zero and less than %d.", INT_MAX);
 						return NULL;
 					}
 					adjusting |= ADJ_WIDTH;
@@ -495,7 +495,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 						if ((precision = php_sprintf_getnumber(format, &inpos)) < 0) {
 							efree(result);
 							efree(args);
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Precision must be greater then zero and less then %d.", INT_MAX);
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Precision must be greater than zero and less than %d.", INT_MAX);
 							return NULL;
 						}
 						adjusting |= ADJ_PRECISION;
