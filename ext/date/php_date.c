@@ -794,7 +794,7 @@ static inline int date_spprintf(char **str, size_t size TSRMLS_DC, const char *f
 	va_start(ap, format);
 
 	if (UG(unicode)) {
-		c = vuspprintf(str, size, format, ap);
+		c = vuspprintf(str, size, format, ap) * 2;
 	} else {
 		c = vspprintf(str, size, format, ap);
 	}
