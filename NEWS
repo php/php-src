@@ -50,7 +50,9 @@ PHP                                                                        NEWS
   (Dmitry)
 
 04 Jan 2007, PHP 5.2.1RC2
-- Small optimization of the date() function (Matt,Ilia)
+- Small optimization of the date() function. (Matt,Ilia)
+- Optimized the internal is_numeric_string() function. (Matt,Ilia)
+- Added support for hex numbers of any size. (Matt)
 - Removed dependency from SHELL32.DLL. (Dmitry)
 - Added function stream_socket_shutdown(). It is a wraper for system shutdown()
   function, that shut downs part of a full-duplex connection. (Dmitry)
