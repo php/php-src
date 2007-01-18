@@ -872,7 +872,7 @@ PHPAPI int vuspprintf(UChar **pbuf, size_t max_len, const char *format, va_list 
 		
 	*pbuf = (UChar*)xbuf.c;
 	
-	return xbuf.len;
+	return xbuf.len >> 1;
 }
 
 PHPAPI int uspprintf(UChar **pbuf, size_t max_len, const char *format, ...)
