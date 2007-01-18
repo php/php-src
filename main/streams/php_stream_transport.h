@@ -133,7 +133,7 @@ typedef struct _php_stream_xport_param {
 	unsigned int want_addr:1;
 	unsigned int want_textaddr:1;
 	unsigned int want_errortext:1;
-	stream_shutdown_t how:3;
+	stream_shutdown_t how:2;
 
 	struct {
 		char *name;
