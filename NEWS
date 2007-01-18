@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 - Fixed bug #40036 (empty() does not work correctly with ArrayObject when using
   ARRAY_AS_PROPS). (Ilia)
 - Fixed bug #40002 (Try/Catch performs poorly). (Dmitry)
+- Fixed bug #39993 (tr_TR.UTF-8 locale has problems with PHP). (Ilia)
 - Fixed bug #39990 (Cannot "foreach" over overloaded properties). (Dmitry)
 - Fixed bug #39988 (type argument of oci_define_by_name() is ignored).
   (Chris Jones, Tony)
