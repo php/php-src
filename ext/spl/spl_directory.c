@@ -164,11 +164,7 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
 			break;
 		case SPL_FS_DIR:
-			if (intern->path_type == IS_UNICODE) {
-				intern->file_name_len = uspprintf(&intern->file_name.s, 0, "%r%c%s", intern->path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
-			} else {
-				intern->file_name_len = spprintf(&intern->file_name.s, 0, "%s%c%s", intern->path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
-			}
+			intern->file_name_len = zspprintf(intern->path_type, &intern->file_name, 0, "%R%c%s", intern->path_type, intern->path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 			intern->file_name_type = intern->path_type;
 			break;
 		}
@@ -964,10 +960,8 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	
 	subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
 	if (subdir) {
-		if (intern->u.dir.sub_path_type == IS_UNICODE && intern->u.dir.sub_path.u && intern->u.dir.sub_path.u[0]) {
-			subdir->u.dir.sub_path_len = uspprintf(&subdir->u.dir.sub_path.s, 0, "%r%c%s", intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
-		} else if (intern->u.dir.sub_path_type == IS_STRING && intern->u.dir.sub_path.s && intern->u.dir.sub_path.s[0]) {
-			subdir->u.dir.sub_path_len = spprintf(&subdir->u.dir.sub_path.s, 0, "%s%c%s", intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
+		if (intern->u.dir.sub_path.v && intern->u.dir.sub_path_len > 1) {
+			subdir->u.dir.sub_path_len = zspprintf(intern->u.dir.sub_path_type, &subdir->u.dir.sub_path, 0, "%R%c%s", intern->u.dir.sub_path_type, intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 		} else {
 			subdir->u.dir.sub_path_len = strlen(intern->u.dir.entry.d_name);
 			subdir->u.dir.sub_path_type = IS_STRING;
@@ -1001,15 +995,11 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zstr sub_name;
-	int len;
+	int sub_len;
 
-	if (intern->u.dir.sub_path.u) {
-		if (intern->u.dir.sub_path_type == IS_UNICODE) {
-			len = uspprintf(&sub_name.s, 0, "%r%c%s", intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
-		} else {
-			len = spprintf(&sub_name.s, 0, "%s%c%s", intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
-		}
-		RETURN_ZSTRL(intern->u.dir.sub_path_type, sub_name, len, 0);
+	if (intern->u.dir.sub_path.v) {
+		sub_len = zspprintf(intern->u.dir.sub_path_type, &sub_name, 0, "%R%c%s", intern->u.dir.sub_path_type, intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
+		RETURN_ZSTRL(intern->u.dir.sub_path_type, sub_name, sub_len, 0);
 	} else {
 		RETURN_RT_STRING(intern->u.dir.entry.d_name, ZSTR_DUPLICATE);
 	}
