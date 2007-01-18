@@ -859,7 +859,7 @@ PHPAPI int spprintf(char **pbuf, size_t max_len, const char *format, ...)
 	return (cc);
 }
 
-PHPAPI int vuspprintf(char **pbuf, size_t max_len, const char *format, va_list ap)
+PHPAPI int vuspprintf(UChar **pbuf, size_t max_len, const char *format, va_list ap)
 {
 	smart_str xbuf = {0};
 
@@ -870,19 +870,38 @@ PHPAPI int vuspprintf(char **pbuf, size_t max_len, const char *format, va_list a
 	}
 	smart_str_0(&xbuf);
 		
-	*pbuf = xbuf.c;
+	*pbuf = (UChar*)xbuf.c;
 	
 	return xbuf.len;
 }
 
-
-PHPAPI int uspprintf(char **pbuf, size_t max_len, const char *format, ...)
+PHPAPI int uspprintf(UChar **pbuf, size_t max_len, const char *format, ...)
 {
 	int cc;
 	va_list ap;
 
 	va_start(ap, format);
 	cc = vuspprintf(pbuf, max_len, format, ap);
+	va_end(ap);
+	return (cc);
+}
+
+PHPAPI int vzspprintf(zend_uchar type, zstr *pbuf, size_t max_len, const char *format, va_list ap)
+{
+	if (type == IS_UNICODE) {
+		return vuspprintf(&pbuf->u, max_len, format, ap);
+	} else {
+		return vspprintf(&pbuf->s, max_len, format, ap);
+	}
+}
+
+PHPAPI int zspprintf( zend_uchar type, zstr *pbuf, size_t max_len, const char *format, ...)
+{
+	int cc;
+	va_list ap;
+
+	va_start(ap, format);
+	cc = vzspprintf(type, pbuf, max_len, format, ap);
 	va_end(ap);
 	return (cc);
 }
