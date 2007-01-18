@@ -1182,13 +1182,13 @@ PHP_FUNCTION(imap_headers)
 		if ((i = cache->user_flags)) {
 			strcat(tmp, "{");
 			while (i) {
-				strcat(tmp, imap_le_struct->imap_stream->user_flags[find_rightmost_bit (&i)]);
-				if (i) strcat(tmp, " ");
+				strlcat(tmp, imap_le_struct->imap_stream->user_flags[find_rightmost_bit (&i)], sizeof(tmp));
+				if (i) strlcat(tmp, " ", sizeof(tmp));
 			}
-			strcat(tmp, "} ");
+			strlcat(tmp, "} ", sizeof(tmp));
 		}
 		mail_fetchsubject(t = tmp + strlen(tmp), imap_le_struct->imap_stream, msgno, (long)25);
-		sprintf(t += strlen(t), " (%ld chars)", cache->rfc822_size);
+		snprintf(t += strlen(t), sizeof(tmp) - strlen(tmp),  " (%ld chars)", cache->rfc822_size);
 		add_next_index_string(return_value, tmp, 1);
 	}
 }
@@ -3387,14 +3387,14 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 #define PHP_IMAP_CLEAN	if (bufferTo) efree(bufferTo); if (bufferCc) efree(bufferCc); if (bufferBcc) efree(bufferBcc); if (bufferHeader) efree(bufferHeader);
 #define PHP_IMAP_BAD_DEST PHP_IMAP_CLEAN; efree(tempMailTo); return (BAD_MSG_DESTINATION);
 
-	bufferHeader = (char *)emalloc(bufferLen);
+	bufferHeader = (char *)emalloc(bufferLen + 1);
 	memset(bufferHeader, 0, bufferLen);
 	if (to && *to) {
-		strcat(bufferHeader, "To: ");
-		strcat(bufferHeader, to);
-		strcat(bufferHeader, "\r\n");
+		strlcat(bufferHeader, "To: ", bufferLen + 1);
+		strlcat(bufferHeader, to, bufferLen + 1);
+		strlcat(bufferHeader, "\r\n", bufferLen + 1);
 		tempMailTo = estrdup(to);
-		bufferTo = (char *)emalloc(strlen(to));
+		bufferTo = (char *)emalloc(strlen(to) + 1);
 		offset = 0;
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
@@ -3413,11 +3413,11 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 
 	if (cc && *cc) {
-		strcat(bufferHeader, "Cc: ");
-		strcat(bufferHeader, cc);
-		strcat(bufferHeader, "\r\n");
+		strlcat(bufferHeader, "Cc: ", bufferLen + 1);
+		strlcat(bufferHeader, cc, bufferLen + 1);
+		strlcat(bufferHeader, "\r\n", bufferLen + 1);
 		tempMailTo = estrdup(cc);
-		bufferCc = (char *)emalloc(strlen(cc));
+		bufferCc = (char *)emalloc(strlen(cc) + 1);
 		offset = 0;
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
@@ -3437,7 +3437,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 
 	if (bcc && *bcc) {
 		tempMailTo = estrdup(bcc);
-		bufferBcc = (char *)emalloc(strlen(bcc));
+		bufferBcc = (char *)emalloc(strlen(bcc) + 1);
 		offset = 0;
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
@@ -3456,7 +3456,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 
 	if (headers && *headers) {
-		strcat(bufferHeader, headers);
+		strlcat(bufferHeader, headers, bufferLen + 1);
 	}
 
 	if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, bufferHeader, subject, bufferTo, message, bufferCc, bufferBcc, rpath TSRMLS_CC) != SUCCESS) {
