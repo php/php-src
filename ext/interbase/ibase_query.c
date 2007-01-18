@@ -1933,7 +1933,7 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var) /* {{{ */
 	add_index_stringl(return_value, 2, var->relname, var->relname_length, 1);
 	add_assoc_stringl(return_value, "relation", var->relname, var->relname_length, 1);
 
-	len = sprintf(buf, "%d", var->sqllen);
+	len = snprintf(buf, 16, "%d", var->sqllen);
 	add_index_stringl(return_value, 3, buf, len, 1);
 	add_assoc_stringl(return_value, "length", buf, len, 1);
 
@@ -1952,7 +1952,7 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var) /* {{{ */
 				precision = 18;
 				break;
 		}
-		len = sprintf(buf, "NUMERIC(%d,%d)", precision, -var->sqlscale);
+		len = snprintf(buf, 16, "NUMERIC(%d,%d)", precision, -var->sqlscale);
 		add_index_stringl(return_value, 4, s, len, 1);
 		add_assoc_stringl(return_value, "type", s, len, 1);
 	} else {
