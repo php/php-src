@@ -1354,7 +1354,7 @@ PHP_FUNCTION(get_html_translation_table)
 						continue;
 					/* what about wide chars here ?? */
 					ind[0] = i + entity_map[j].basechar;
-					sprintf(buffer, "&%s;", entity_map[j].table[i]);
+					snprintf(buffer, sizeof(buffer), "&%s;", entity_map[j].table[i]);
 					add_assoc_string(return_value, ind, buffer, 1);
 
 				}
