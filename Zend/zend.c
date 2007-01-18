@@ -578,9 +578,10 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 			break;
 		case IS_OBJECT:
 			{
-				HashTable *properties = NULL;
+				HashTable *properties;
 				zstr class_name = NULL_ZSTR;
 				zend_uint clen;
+				int is_temp;
 
 				if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
 					Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
@@ -593,17 +594,24 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				if (class_name.v) {
 					efree(class_name.v);
 				}
-				if (Z_OBJ_HANDLER_P(expr, get_properties)) {
+				if (Z_OBJ_HANDLER_P(expr, get_debug_info)) {
+					properties = Z_OBJ_HANDLER_P(expr, get_debug_info)(expr, &is_temp TSRMLS_CC);
+				} else if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 					properties = Z_OBJPROP_P(expr);
+					is_temp = 0;
+				} else {
+					break;
 				}
-				if (properties) {
-					if (++properties->nApplyCount>1) {
-						ZEND_PUTS(" *RECURSION*");
-						properties->nApplyCount--;
-						return;
-					}
-					print_hash(properties, indent, 1 TSRMLS_CC);
+				if (++properties->nApplyCount>1) {
+					ZEND_PUTS(" *RECURSION*");
 					properties->nApplyCount--;
+					return;
+				}
+				print_hash(properties, indent, 1 TSRMLS_CC);
+				properties->nApplyCount--;
+				if (is_temp) {
+					zend_hash_destroy(properties);
+					efree(properties);
 				}
 				break;
 			}

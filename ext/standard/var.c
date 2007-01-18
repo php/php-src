@@ -177,10 +177,11 @@ static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_
 
 PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC)
 {
-	HashTable *myht = NULL;
+	HashTable *myht;
 	zstr class_name;
 	zend_uint class_name_len;
 	int (*php_element_dump_func)(zval**, int, va_list, zend_hash_key*);
+	int is_temp;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -217,9 +218,18 @@ PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC)
 		}
 		php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
 		php_element_dump_func = php_array_element_dump;
+		is_temp = 0;
 		goto head_done;
 	case IS_OBJECT:
-		myht = Z_OBJPROP_PP(struc);
+		if (Z_OBJ_HANDLER_PP(struc, get_debug_info)) {
+			myht = Z_OBJ_HANDLER_PP(struc, get_debug_info)(*struc, &is_temp TSRMLS_CC);
+		} else if (Z_OBJ_HANDLER_PP(struc, get_properties)) {
+			myht = Z_OBJPROP_PP(struc);
+			is_temp = 0;
+		} else {
+			myht = NULL;
+			is_temp = 0;
+		}
 		if (myht && myht->nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
 			return;
@@ -232,6 +242,10 @@ PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC)
 head_done:
 		if (myht) {
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_element_dump_func, 3, level, verbose, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
+			if (is_temp) {
+				zend_hash_destroy(myht);
+				efree(myht);
+			}
 		}
 		if (level > 1) {
 			php_printf("%*c", level-1, ' ');
@@ -377,6 +391,7 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC)
 	zend_uint class_name_len;
 	zend_class_entry *ce;
 	int (*zval_element_dump_func)(zval**, int, va_list, zend_hash_key*);
+	int is_temp;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -415,19 +430,31 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC)
 		zval_element_dump_func = zval_array_element_dump;
 		goto head_done;
 	case IS_OBJECT:
-		myht = Z_OBJPROP_PP(struc);
+		if (Z_OBJ_HANDLER_PP(struc, get_debug_info)) {
+			myht = Z_OBJ_HANDLER_PP(struc, get_debug_info)(*struc, &is_temp TSRMLS_CC);
+		} else if (Z_OBJ_HANDLER_PP(struc, get_properties)) {
+			myht = Z_OBJPROP_PP(struc);
+			is_temp = 0;
+		} else {
+			myht = NULL;
+			is_temp = 0;
+		}
 		if (myht && myht->nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
 			return;
 		}
-		ce = Z_OBJCE(**struc);
-		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
+		ce = Z_OBJCE_PP(struc);
+		Z_OBJ_HANDLER_PP(struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 		php_printf("%sobject(%v)#%d (%d) refcount(%u){\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_PP(struc));
 		efree(class_name.v);
 		zval_element_dump_func = zval_object_property_dump;
 head_done:
 		if (myht) {
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) zval_element_dump_func, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
+			if (is_temp) {
+				zend_hash_destroy(myht);
+				efree(myht);
+			}
 		}
 		if (level > 1) {
 			php_printf("%*c", level-1, ' ');

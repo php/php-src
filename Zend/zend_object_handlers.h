@@ -80,6 +80,8 @@ typedef void (*zend_object_unset_dimension_t)(zval *object, zval *offset TSRMLS_
 /* Used to get hash of the properties of the object, as hash of zval's */
 typedef HashTable *(*zend_object_get_properties_t)(zval *object TSRMLS_DC);
 
+typedef HashTable *(*zend_object_get_debug_info_t)(zval *object, int *is_temp TSRMLS_DC);
+
 /* Used to call methods */
 /* args on stack! */
 /* Andi - EX(fbc) (function being called) needs to be initialized already in the INIT fcall opcode so that the parameters can be parsed the right way. We need to add another callback for this.
@@ -132,6 +134,7 @@ struct _zend_object_handlers {
 	zend_object_compare_t					compare_objects;
 	zend_object_cast_t						cast_object;
 	zend_object_count_elements_t			count_elements;
+	zend_object_get_debug_info_t			get_debug_info;
 };
 
 extern ZEND_API zend_object_handlers std_object_handlers;
@@ -142,7 +145,8 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_uchar type, zstr property_name, int property_name_len TSRMLS_DC);
 ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC);
-
+ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC);
+ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC);
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC);
 
 

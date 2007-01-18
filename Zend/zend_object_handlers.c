@@ -49,11 +49,17 @@
   called, we cal __call handler.
 */
 
-static HashTable *zend_std_get_properties(zval *object TSRMLS_DC)
+ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC)
 {
 	zend_object *zobj;
 	zobj = Z_OBJ_P(object);
 	return zobj->properties;
+}
+
+ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
+{
+	*is_temp = 0;
+	return zend_std_get_properties(object TSRMLS_CC);
 }
 
 static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC)
@@ -1186,6 +1192,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_compare_objects,				/* compare_objects */
 	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */
+	NULL,                                   /* get_debug_info */
 };
 
 /*
