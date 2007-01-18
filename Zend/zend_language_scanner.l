@@ -1253,22 +1253,21 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>{HNUM} {
-	/* Skip "0x" */
-	yytext += 2;
-	yyleng -= 2;
+	char *hex = yytext + 2; /* Skip "0x" */
+	int len = yyleng - 2;
 
 	/* Skip any leading 0s */
-	while (*yytext == '0') {
-		yytext++;
-		yyleng--;
+	while (*hex == '0') {
+		hex++;
+		len--;
 	}
 
-	if (yyleng < SIZEOF_LONG * 2 || (yyleng == SIZEOF_LONG * 2 && *yytext <= '7')) {
-		zendlval->value.lval = strtol(yytext, NULL, 16);
+	if (len < SIZEOF_LONG * 2 || (len == SIZEOF_LONG * 2 && *hex <= '7')) {
+		zendlval->value.lval = strtol(hex, NULL, 16);
 		zendlval->type = IS_LONG;
 		return T_LNUMBER;
 	} else {
-		zendlval->value.dval = zend_hex_strtod(yytext, NULL);
+		zendlval->value.dval = zend_hex_strtod(hex, NULL);
 		zendlval->type = IS_DOUBLE;
 		return T_DNUMBER;
 	}
