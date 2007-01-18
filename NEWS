@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Added CURLOPT_TCP_NODELAY constant to Curl extension. (Sara)
 - Improved proc_open(). Now on Windows it can run external commands not through
   CMD.EXE. (Dmitry)
+- Moved extensions to PECL:
+  . ext/informix (Derick, Tony)
 - Fixed bug #40129 (iconv extension doesn't compile with CodeWarrior on 
   Netware). (gk at gknw dot de, Tony)
 - Fixed bug #40127 (apache2handler doesnt compile on Netware). (gk at gknw
