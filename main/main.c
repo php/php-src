@@ -123,7 +123,6 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 }
 /* }}} */
 
-
 /* {{{ php_disable_functions
  */
 static void php_disable_functions(TSRMLS_D)
@@ -956,7 +955,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 }
 /* }}} */
 
-/* {{{ proto bool set_time_limit(int seconds)
+/* {{{ proto bool set_time_limit(int seconds) U
    Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
 {
@@ -1001,22 +1000,25 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 }
 /* }}} */
 
-static void stream_closer_for_zend(void *handle TSRMLS_DC)
+static void stream_closer_for_zend(void *handle TSRMLS_DC) /* {{{ */
 {
 	php_stream_close((php_stream*)handle);
 }
+/* }}} */
 
-static long stream_fteller_for_zend(void *handle TSRMLS_DC)
+static long stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
 {
 	return (long)php_stream_tell((php_stream*)handle);
 }
+/* }}} */
 
-static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle TSRMLS_DC)
+static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle TSRMLS_DC) /* {{{ */
 {
 	return php_stream_open_for_zend_ex(filename, handle, ENFORCE_SAFE_MODE|USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
 }
+/* }}} */
 
-PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode TSRMLS_DC)
+PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream;
 
@@ -1038,6 +1040,7 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 	}
 	return FAILURE;
 }
+/* }}} */
 
 /* {{{ php_get_configuration_directive_for_zend
  */
@@ -1135,12 +1138,12 @@ static void php_message_handler_for_zend(long message, void *data)
 }
 /* }}} */
 
-
-void php_on_timeout(int seconds TSRMLS_DC)
+void php_on_timeout(int seconds TSRMLS_DC) /* {{{ */
 {
 	PG(connection_status) |= PHP_CONNECTION_TIMEOUT;
 	zend_set_timeout(EG(timeout_seconds));
 }
+/* }}} */
 
 #if PHP_SIGCHILD
 /* {{{ sigchld_handler
@@ -1458,7 +1461,6 @@ void php_request_shutdown(void *dummy)
 }
 /* }}} */
 
-
 /* {{{ php_com_initialize
  */
 PHPAPI void php_com_initialize(TSRMLS_D)
@@ -1527,7 +1529,6 @@ int php_register_extensions(zend_module_entry **ptr, int count TSRMLS_DC)
 	return SUCCESS;
 }
 /* }}} */
-
 
 /* {{{ php_module_startup
  */
@@ -1855,7 +1856,6 @@ void php_module_shutdown(TSRMLS_D)
 #endif
 }
 /* }}} */
-
 
 /* {{{ php_execute_script
  */
