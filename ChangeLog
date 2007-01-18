@@ -1,3 +1,50 @@
+2007-01-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/interbase/interbase.c:
+      
+      Buffer length checks
+
+2007-01-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/tests/fileobject_001.phpt
+      ext/spl/tests/fileobject_002.phpt
+      ext/spl/tests/fileobject_003.phpt:
+      - Different results in unicode now
+
+    * ext/spl/spl_directory.c:
+      - Ensure string-type is always set correctly
+
+    * ext/spl/spl_directory.c:
+      - More help from David
+
+    * ext/spl/spl_directory.c:
+      - A little help from Andrei
+
+2007-01-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/iconv/iconv.c:
+      MFH: fix #40129 (iconv extension doesn't compile with CodeWarrior on
+      Netware)
+      patch by gk at gknw dot de
+
+    * ext/iconv/iconv.c:
+      fix #40129 (iconv extension doesn't compile with CodeWarrior on Netware)
+      patch by gk at gknw dot de
+
+    * ext/standard/formatted_print.c
+      ext/sysvmsg/sysvmsg.c:
+      fix grammar
+
+2007-01-17  Sara Golemon  <sara@golemon.com>
+
+    * ext/soap/php_http.c
+      ext/soap/php_xml.c:
+      INI options should not be modified directly.
+      Bad extension.  No cookie for you.
+
 2007-01-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/spl/spl_directory.c
