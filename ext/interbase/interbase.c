@@ -588,22 +588,28 @@ static char const dpb_args[] = {
 	
 int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db TSRMLS_DC)
 {
-	short i;
+	short i, dpb_len, buf_len = 256;
 	char dpb_buffer[256] = { isc_dpb_version1 }, *dpb;
 
 	dpb = dpb_buffer + 1;
 
 	for (i = 0; i < sizeof(dpb_args); ++i) {
-		if (dpb_args[i] && args[i] && len[i]) {
-			dpb += sprintf(dpb, "%c%c%s", dpb_args[i],(unsigned char)len[i],args[i]);
+		if (dpb_args[i] && args[i] && len[i] && buf_len > 0) {
+			dpb_len += snprintf(dpb, buf_len, "%c%c%s", dpb_args[i],(unsigned char)len[i],args[i]);
+			dpb += dpb_len;
+			buf_len -= dpb_len;
 		}
 	}
-	if (largs[BUF]) {
-		dpb += sprintf(dpb, "%c\2%c%c", isc_dpb_num_buffers, 
+	if (largs[BUF] && buf_len > 0) {
+		dpb_len += snprintf(dpb, buf_len, "%c\2%c%c", isc_dpb_num_buffers, 
 			(char)(largs[BUF] >> 8), (char)(largs[BUF] & 0xff));
+		dpb += dpb_len;
+		buf_len -= dpb_len;
 	}
-	if (largs[SYNC]) {
-		dpb += sprintf(dpb, "%c\1%c", isc_dpb_force_write, largs[SYNC] == isc_spb_prp_wm_sync ? 1 : 0);
+	if (largs[SYNC] && buf_len > 0) {
+		dpb_len += sprintf(dpb, buf_len, "%c\1%c", isc_dpb_force_write, largs[SYNC] == isc_spb_prp_wm_sync ? 1 : 0);
+		dpb += dpb_len;
+		buf_len -= dpb_len;
 	}
 	if (isc_attach_database(IB_STATUS, (short)len[DB], args[DB], db, (short)(dpb-dpb_buffer), dpb_buffer)) {
 		_php_ibase_error(TSRMLS_C);
