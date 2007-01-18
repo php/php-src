@@ -2134,7 +2134,7 @@ PHP_METHOD(SoapServer, handle)
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Dump memory failed");
 		}
 
-		sprintf(cont_len, "Content-Length: %d", size);
+		snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", size);
 		sapi_add_header(cont_len, strlen(cont_len), 1);
 		if (soap_version == SOAP_1_2) {
 			sapi_add_header("Content-Type: application/soap+xml; charset=utf-8", sizeof("Content-Type: application/soap+xml; charset=utf-8")-1, 1);
@@ -2303,7 +2303,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 	   our fault code with their own handling... Figure this out later
 	*/
 	sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error")-1, 1);
-	sprintf(cont_len,"Content-Length: %d", size);
+	snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", size);
 	sapi_add_header(cont_len, strlen(cont_len), 1);
 	if (soap_version == SOAP_1_2) {
 		sapi_add_header("Content-Type: application/soap+xml; charset=utf-8", sizeof("Content-Type: application/soap+xml; charset=utf-8")-1, 1);
@@ -4706,7 +4706,7 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, zval *param_val, int in
 	} else {
 		if (name == NULL) {
 			paramName = paramNameBuf;
-			sprintf(paramName,"param%d",index);
+			snprintf(paramName, sizeof(paramNameBuf), "param%d",index);
 		} else {
 			paramName = name;
 		}
