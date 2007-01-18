@@ -35,7 +35,8 @@
   performance difference when doing quickCheck + normalize versus simple
   normalize.
 
-* UG(unicode) is turned off during MINIT() currently. We need to figure out
-  a way to avoid turning it off.
+* USTR_MAKE("") should be estrndup(EMPTY_STR)
 
-* USTR_MAKE("") should be EMPTY_STR
+* See if ext/pcre can ba adjusted to allow operations on pure binary
+  strings. Ideal mode would be: convert all IS_UNICODE to UTF-8, assume that
+  binary strings with /u modifier are UTF-8, otherwise it's pure binary.
