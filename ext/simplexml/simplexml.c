@@ -615,6 +615,7 @@ static void sxe_dimension_write(zval *object, zval *offset, zval *value TSRMLS_D
 }
 /* }}} */
 
+#if HELLY_0
 static zval** sxe_property_get_adr(zval *object, zval *member TSRMLS_DC) /* {{{ */
 {
 	php_sxe_object *sxe;
@@ -639,12 +640,16 @@ static zval** sxe_property_get_adr(zval *object, zval *member TSRMLS_DC) /* {{{ 
 	_node_as_zval(sxe, node, return_value, type, name, sxe->iter.nsprefix, sxe->iter.isprefix TSRMLS_CC);
 
 	sxe = php_sxe_fetch_object(return_value TSRMLS_CC);
+	if (sxe->tmp) {
+		zval_ptr_dtor(&sxe->tmp);
+	}
 	sxe->tmp = return_value;
 	return_value->is_ref  = 1;
 
 	return &sxe->tmp;
 }
 /* }}} */
+#endif
 
 /* {{{ sxe_prop_dim_exists()
  */
@@ -946,9 +951,7 @@ static void sxe_properties_add(HashTable *rv, char *name, int namelen, zval *val
 	}
 }
 
-/* {{{ sxe_properties_get()
- */
-static HashTable * sxe_properties_get(zval *object TSRMLS_DC)
+static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{{ */
 {
 	zval            *value;
 	zval            *zattr;
@@ -962,7 +965,10 @@ static HashTable * sxe_properties_get(zval *object TSRMLS_DC)
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
-	if (sxe->properties) {
+	if (is_debug) {
+		ALLOC_HASHTABLE(rv);
+		zend_u_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+	} else if (sxe->properties) {
 		zend_hash_clean(sxe->properties);
 		rv = sxe->properties;
 	} else {
@@ -975,7 +981,7 @@ static HashTable * sxe_properties_get(zval *object TSRMLS_DC)
 	if (!node) {
 		return rv;
 	}
-	if (1||sxe->iter.type != SXE_ITER_CHILD) {
+	if (is_debug) {
 		if (sxe->iter.type == SXE_ITER_ELEMENT) {
 			node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 		}
@@ -1063,6 +1069,19 @@ next_iter:
 	}
 
 	return rv;
+}
+/* }}} */
+
+static HashTable * sxe_get_properties(zval *object TSRMLS_DC) /* {{{ */
+{
+	return sxe_get_prop_hash(object, 0 TSRMLS_CC);
+}
+/* }}} */
+
+static HashTable * sxe_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
+{
+	*is_temp = 1;
+	return sxe_get_prop_hash(object, 1 TSRMLS_CC);
 }
 /* }}} */
 
@@ -1657,16 +1676,20 @@ static int cast_object(zval *object, int type, char *contents, void *extra TSRML
 static int sxe_object_cast(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC)
 {
 	php_sxe_object *sxe;
-	xmlChar           *contents = NULL;
+	xmlChar        *contents = NULL;
 	xmlNodePtr	    node;
-	int rv;
+	int             rv;
+	HashTable      *prop_hash;
 
 	sxe = php_sxe_fetch_object(readobj TSRMLS_CC);
 	
 	if (type == IS_BOOL) {
 		node = php_sxe_get_first_node(sxe, NULL TSRMLS_CC);
+		prop_hash = sxe_get_prop_hash(readobj, 1 TSRMLS_CC);
 		INIT_PZVAL(writeobj);
-		ZVAL_BOOL(writeobj, node != NULL || zend_hash_num_elements(sxe_properties_get(readobj TSRMLS_CC)) > 0);
+		ZVAL_BOOL(writeobj, node != NULL || zend_hash_num_elements(prop_hash) > 0);
+		zend_hash_destroy(prop_hash);
+		efree(prop_hash);
 		return SUCCESS;
 	}
 
@@ -1749,14 +1772,14 @@ static zend_object_handlers sxe_object_handlers = {
 	sxe_property_write,
 	sxe_dimension_read,
 	sxe_dimension_write,
-	sxe_property_get_adr,
+	NULL,
 	sxe_get_value,			/* get */
 	NULL,
 	sxe_property_exists,
 	sxe_property_delete,
 	sxe_dimension_exists,
 	sxe_dimension_delete,
-	sxe_properties_get,
+	sxe_get_properties,
 	NULL, /* zend_get_std_object_handlers()->get_method,*/
 	NULL, /* zend_get_std_object_handlers()->call_method,*/
 	NULL, /* zend_get_std_object_handlers()->get_constructor, */
@@ -1764,7 +1787,8 @@ static zend_object_handlers sxe_object_handlers = {
 	NULL, /* zend_get_std_object_handlers()->get_class_name,*/
 	sxe_objects_compare,
 	sxe_object_cast,
-	sxe_count_elements
+	sxe_count_elements,
+	sxe_get_debug_info
 };
 
 /* {{{ sxe_object_clone()
