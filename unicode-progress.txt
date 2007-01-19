@@ -42,6 +42,18 @@ ext/openssl
   Status: In Progress
   (Pierre)
 
+ext/spl
+------------
+  Status: In progress
+  zend_filehandle needs to operate on zstr. Once we have that we can finalize
+  the internal c-function spl_autoload().
+
+  RegExIterator might need to deal with regex provided in unicode.
+
+  SplFileObject needs toeithe deal withunicode files or a derived class must
+  be created for that. Either way streams cannot deal with unicode line
+  endings.
+
 ext/zip
 ------------
   Status: done.
@@ -619,6 +631,77 @@ ext/standard
     trim()
     ucfirst()
     ucwords()
+
+ext/spl
+-----------
+  Completed:
+    php_spl.c
+      class_implements()
+      class_parents()
+      spl_autoload()
+      spl_autoload_call()
+      spl_autoload_extensions()
+      spl_autoload_functions()
+      spl_autoload_register()
+      spl_autoload_unregister()
+      spl_classes()
+      spl_object_hash()
+    
+    spl_array.c
+      class ArrayObject
+      class ArrayIterator
+      class RecursiveArrayIterator
+
+    spl_directory.c
+      class SplFileInfo
+      class DirectoryIterator
+      class RecursiveDirectoryIterator
+      class SplFileObject
+      class SplTempFileObject
+
+    spl_exceptions.c
+      class BadFunctionCallException
+      class BadMethodCallException
+      class DomainException
+      class InvalidArgumentException
+      class LengthException
+      class LogicException
+      class OutOfBoundsException
+      class OutOfRangeException
+      class OverflowException
+      class RangeException
+      class RuntimeException
+      class UnderflowException
+      class UnexpectedValueException
+
+    spl_iterators.c
+      iterator_to_array()
+      iterator_count()
+      iterator_apply()
+      class RecursiveIteratorIterator
+      class AppendIterator
+      class ArrayIterator
+      class ArrayObject
+      class CachingIterator
+      class DirectoryIterator
+      class EmptyIterator
+      class FilterIterator
+      class InfiniteIterator
+      class IteratorIterator
+      class LimitIterator
+      class NoRewindIterator
+      class ParentIterator
+      class RecursiveCachingIterator
+      class RecursiveFilterIterator
+      class RecursiveIteratorIterator
+      class RecursiveRegexIterator
+      class RegexIterator
+
+    spl_observer.c
+      class SplObjectStorage
+
+    spl_sxe.c
+      class SimpleXMLIteraotr
 
 ext/sysvmsg
 -----------
