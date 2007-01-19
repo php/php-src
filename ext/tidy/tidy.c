@@ -511,8 +511,8 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	}
 	
 	if (data) {
-		TidyBuffer buf = {0};
-		
+		TidyBuffer buf;
+
 		tidyBufInit(&buf);
 		tidyBufAttach(&buf, (byte *) data, data_len);
 		
@@ -521,7 +521,8 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 			RETVAL_FALSE;
 		} else {
 			if (tidyCleanAndRepair(doc) >= 0) {
-				TidyBuffer output = {0};
+				TidyBuffer output;
+				tidyBufInit(&output);
 
 				tidySaveBuffer (doc, &output);
 				FIX_BUFFER(&output);
@@ -669,7 +670,7 @@ static zval * tidy_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
 
 static int tidy_doc_cast_handler(zval *in, zval *out, int type, void *extra TSRMLS_DC)
 {
-	TidyBuffer output = {0};
+	TidyBuffer output;
 	PHPTidyObj *obj;
 
 	switch(type) {
@@ -687,6 +688,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type, void *extra TSRM
 
 		case IS_STRING:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
+			tidyBufInit(&output);
 			tidySaveBuffer (obj->ptdoc->doc, &output);
 			ZVAL_STRINGL(out, (char *) output.bp, output.size, 1);
 			tidyBufFree(&output);
@@ -708,7 +710,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type, void *extra TSRM
 
 static int tidy_node_cast_handler(zval *in, zval *out, int type, void *extra TSRMLS_DC)
 {
-	TidyBuffer buf = {0};
+	TidyBuffer buf;
 	PHPTidyObj *obj;
 
 	switch(type) {
@@ -726,6 +728,7 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type, void *extra TSR
 
 		case IS_STRING:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
+			tidyBufInit(&buf);
 			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
 			ZVAL_STRINGL(out, (char *) buf.bp, buf.size, 0);
 			break;
@@ -745,9 +748,10 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type, void *extra TSR
 
 static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 {
-	TidyBuffer output = {0};
+	TidyBuffer output;
 	zval *temp;
 
+	tidyBufInit(&output);
 	tidySaveBuffer (obj->ptdoc->doc, &output);
 
 	if (output.size) {
@@ -781,8 +785,7 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 	switch(type) {
 
 		case is_node:
-
-			memset(&buf, 0, sizeof(buf));
+			tidyBufInit(&buf);
 			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
 			ADD_PROPERTY_STRINGL(obj->converter->conv, obj->std.properties, value, buf.bp, buf.size-1);
 			tidyBufFree(&buf);
@@ -853,9 +856,6 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 		case is_doc:
 			ADD_PROPERTY_NULL(obj->std.properties, errorBuffer);
 			ADD_PROPERTY_NULL(obj->std.properties, value);
-			break;
-
-		default:
 			break;
 	}
 }
@@ -965,7 +965,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 
 static int php_tidy_parse_string(PHPTidyObj *obj, char *string, int len, char *enc TSRMLS_DC)
 {
-	TidyBuffer buf = {0};
+	TidyBuffer buf;
 	UErrorCode Uerror = U_ZERO_ERROR;
 
 	if(enc) {
@@ -1119,7 +1119,7 @@ static int php_tidy_output_handler(void **nothing, php_output_context *output_co
 {
 	int status = FAILURE;
 	TidyDoc doc;
-	TidyBuffer inbuf = {0}, outbuf = {0}, errbuf = {0};
+	TidyBuffer inbuf, outbuf, errbuf;
 	PHP_OUTPUT_TSRMLS(output_context);
 	
 	if (TG(clean_output) && (output_context->op & PHP_OUTPUT_HANDLER_START) && (output_context->op & PHP_OUTPUT_HANDLER_FINAL)) {
@@ -1210,9 +1210,10 @@ static PHP_FUNCTION(tidy_get_error_buffer)
    Return a string representing the parsed tidy markup */
 static PHP_FUNCTION(tidy_get_output)
 {
-	TidyBuffer output = {0};
+	TidyBuffer output;
 	TIDY_FETCH_OBJECT;
 
+	tidyBufInit(&output);
 	tidySaveBuffer(obj->ptdoc->doc, &output);
 	FIX_BUFFER(&output);
 	RETVAL_U_STRINGL(obj->converter->conv, (char *) output.bp, output.size-1, 1);
