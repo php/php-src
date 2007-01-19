@@ -16,7 +16,7 @@ var_dump(oci_bind_array_by_name($statement, ":c1", $array, 5, -10));
 var_dump(oci_bind_array_by_name($statement, ":c1", $array, 5, -1));
 var_dump(oci_bind_array_by_name($statement, ":c1", $array, 5, 0));
 
-oci_execute($statement);
+@oci_execute($statement);
 
 var_dump($array);
 
