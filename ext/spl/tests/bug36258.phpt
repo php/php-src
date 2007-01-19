@@ -13,9 +13,13 @@ foreach ($diriter as $key => $file) {
 	break;
 }
 
-echo "Done\n";
 ?>
+===DONE===
 --EXPECTF--	
 string(%d) "%s"
 string(%d) "%s"
-Done
+===DONE===
+--UEXPECTF--	
+unicode(%d) "%s"
+unicode(%d) "%s"
+===DONE===

@@ -157,7 +157,7 @@ static zend_object_value spl_filesystem_object_new(zend_class_entry *class_type 
 
 static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *intern TSRMLS_DC) /* {{{ */
 {
-	if (!intern->file_name.s) {
+	if (!intern->file_name.v) {
 		switch (intern->type) {
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
@@ -862,18 +862,18 @@ SPL_METHOD(RecursiveDirectoryIterator, __construct)
 	spl_filesystem_object *intern;
 	zstr path;
 	zend_uchar path_type;
-	int len;
+	int path_len;
 	long flags = SPL_FILE_DIR_CURRENT_AS_FILEINFO;
 
 	php_set_error_handling(EH_THROW, spl_ce_UnexpectedValueException TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &path, &len, &path_type, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &path, &path_len, &path_type, &flags) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	spl_filesystem_dir_open(intern, path_type, path, len TSRMLS_CC);
+	spl_filesystem_dir_open(intern, path_type, path, path_len TSRMLS_CC);
 	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
 	intern->flags = flags;
 
@@ -926,16 +926,16 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
 	if (!strcmp(intern->u.dir.entry.d_name, ".") || !strcmp(intern->u.dir.entry.d_name, "..")) {
-		RETURN_BOOL(0);
+		RETURN_FALSE;
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &allow_links) == FAILURE) {
 			return;
 		}
 		spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 		if (!allow_links) {
-			php_u_stat(intern->file_name_len, intern->file_name, intern->file_name_len, FS_IS_LINK, FG(default_context), return_value TSRMLS_CC);
+			php_u_stat(intern->file_name_type, intern->file_name, intern->file_name_len, FS_IS_LINK, FG(default_context), return_value TSRMLS_CC);
 			if (zend_is_true(return_value)) {
-				RETURN_BOOL(0);
+				RETURN_FALSE;
 			}
 		}
 		php_u_stat(intern->file_name_type, intern->file_name, intern->file_name_len, FS_IS_DIR, FG(default_context), return_value TSRMLS_CC);
@@ -961,6 +961,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
 	if (subdir) {
 		if (intern->u.dir.sub_path.v && intern->u.dir.sub_path_len > 1) {
+			subdir->u.dir.sub_path_type = intern->u.dir.sub_path_type;
 			subdir->u.dir.sub_path_len = zspprintf(intern->u.dir.sub_path_type, &subdir->u.dir.sub_path, 0, "%R%c%s", intern->u.dir.sub_path_type, intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 		} else {
 			subdir->u.dir.sub_path_len = strlen(intern->u.dir.entry.d_name);
