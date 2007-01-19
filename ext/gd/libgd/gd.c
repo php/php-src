@@ -1802,10 +1802,8 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 		return;
 	}
 
-	if (im->alphaBlendingFlag) {
-		restoreAlphaBleding = 1;
-		im->alphaBlendingFlag = 0;
-	}
+	restoreAlphaBleding = im->alphaBlendingFlag;
+	im->alphaBlendingFlag = 0;
 
 	if (x >= im->sx) {
 		x = im->sx - 1;
@@ -1822,9 +1820,7 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 		leftLimit = i;
 	}
 	if (leftLimit == -1) {
-		if (restoreAlphaBleding) {
-			im->alphaBlendingFlag = 1;
-		}
+		im->alphaBlendingFlag = restoreAlphaBleding;
 		return;
 	}
 	/* Seek right */
@@ -1869,9 +1865,7 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 			}
 		}
 	}
-	if (restoreAlphaBleding) {
-		im->alphaBlendingFlag = 1;
-	}
+	im->alphaBlendingFlag = restoreAlphaBleding;
 }
 
 /*
@@ -1939,7 +1933,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 		do {
 			c = gdImageGetPixel(im, ix, iy);
 			if (c != oc) {
-				return;
+				goto done;	
 			}
 			gdImageSetPixel(im, ix, iy, nc);
 		} while(ix++ < (im->sx -1));
@@ -1947,11 +1941,11 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 		do {
 			c = gdImageGetPixel(im, ix, iy);
 			if (c != oc) {
-				return;
+				goto done;
 			}
 			gdImageSetPixel(im, ix, iy, nc);
 		} while(ix++ < (im->sx -1));
-		return;
+		goto done;	
 	}
 
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
@@ -1992,6 +1986,8 @@ skip:			for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
 		} while (x<=x2);
 	}
 	efree(stack);
+
+done:
 	im->alphaBlendingFlag = alphablending_bak;	
 }
 
