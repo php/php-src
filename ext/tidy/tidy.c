@@ -501,17 +501,18 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	}
 	
 	if (data) {
-		TidyBuffer buf = {0};
-		
+		TidyBuffer buf;
+
 		tidyBufInit(&buf);
 		tidyBufAppend(&buf, data, data_len);
-		
+
 		if (tidyParseBuffer(doc, &buf) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errbuf->bp);
 			RETVAL_FALSE;
 		} else {
 			if (tidyCleanAndRepair(doc) >= 0) {
-				TidyBuffer output = {0};
+				TidyBuffer output;
+				tidyBufInit(&output);
 
 				tidySaveBuffer (doc, &output);
 				RETVAL_STRINGL(output.bp, output.size-1, 1);
@@ -662,7 +663,7 @@ static zval * tidy_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
 
 static int tidy_doc_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 {
-	TidyBuffer output = {0};
+	TidyBuffer output;
 	PHPTidyObj *obj;
 
 	switch(type) {
@@ -680,6 +681,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 
 		case IS_STRING:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
+			tidyBufInit(&output);
 			tidySaveBuffer (obj->ptdoc->doc, &output);
 			ZVAL_STRINGL(out, output.bp, output.size-1, TRUE);
 			tidyBufFree(&output);
@@ -694,7 +696,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 
 static int tidy_node_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 {
-	TidyBuffer buf = {0};
+	TidyBuffer buf;
 	PHPTidyObj *obj;
 
 	switch(type) {
@@ -712,6 +714,7 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 
 		case IS_STRING:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
+			tidyBufInit(&buf);
 			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
 			ZVAL_STRINGL(out, buf.bp, buf.size-1, TRUE);
 			tidyBufFree(&buf);
@@ -727,9 +730,10 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 {
 
-	TidyBuffer output = {0};
+	TidyBuffer output;
 	zval *temp;
 
+	tidyBufInit(&output);
 	tidySaveBuffer (obj->ptdoc->doc, &output);
 	
 	if (output.size) {
@@ -759,8 +763,7 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 	switch(type) {
 
 		case is_node:
-
-			memset(&buf, 0, sizeof(buf));
+			tidyBufInit(&buf);
 			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
 			ADD_PROPERTY_STRINGL(obj->std.properties, value, buf.bp, buf.size-1);
 			tidyBufFree(&buf);
@@ -831,9 +834,6 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 		case is_doc:
 			ADD_PROPERTY_NULL(obj->std.properties, errorBuffer);
 			ADD_PROPERTY_NULL(obj->std.properties, value);
-			break;
-
-		default:
 			break;
 	}
 }
@@ -925,7 +925,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 
 static int php_tidy_parse_string(PHPTidyObj *obj, char *string, int len, char *enc TSRMLS_DC)
 {
-	TidyBuffer buf = {0};
+	TidyBuffer buf;
 	
 	if(enc) {
 		if (tidySetCharEncoding(obj->ptdoc->doc, enc) < 0) {
@@ -999,7 +999,7 @@ static PHP_FUNCTION(ob_tidyhandler)
 	char *input;
 	int input_len;
 	long mode;
-	TidyBuffer errbuf = {0};
+	TidyBuffer errbuf;
 	TidyDoc doc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &input, &input_len, &mode) == FAILURE) {
@@ -1022,7 +1022,7 @@ static PHP_FUNCTION(ob_tidyhandler)
 	TIDY_SET_DEFAULT_CONFIG(doc);
 
 	if (input_len > 1) {
-		TidyBuffer buf = {0};
+		TidyBuffer buf;
 		
 		tidyBufInit(&buf);
 		tidyBufAppend(&buf, input, input_len);
@@ -1031,7 +1031,7 @@ static PHP_FUNCTION(ob_tidyhandler)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errbuf.bp);
 			RETVAL_NULL();
 		} else {
-			TidyBuffer output = {0};
+			TidyBuffer output;
 			tidyBufInit(&output);
 
 			tidySaveBuffer(doc, &output);
@@ -1095,9 +1095,10 @@ static PHP_FUNCTION(tidy_get_error_buffer)
    Return a string representing the parsed tidy markup */
 static PHP_FUNCTION(tidy_get_output)
 {
-	TidyBuffer output = {0};
+	TidyBuffer output;
 	TIDY_FETCH_OBJECT;
 
+	tidyBufInit(&output);
 	tidySaveBuffer(obj->ptdoc->doc, &output);
 
 	RETVAL_STRINGL(output.bp, output.size-1, 1);
