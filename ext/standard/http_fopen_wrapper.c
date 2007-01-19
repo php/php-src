@@ -164,7 +164,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		SEPARATE_ZVAL(tmpzval);
 		convert_to_double_ex(tmpzval);
 		timeout.tv_sec = (time_t) Z_DVAL_PP(tmpzval);
-		timeout.tv_usec = (suseconds_t) ((Z_DVAL_PP(tmpzval) - timeout.tv_sec) * 1000000);
+		timeout.tv_usec = (size_t) ((Z_DVAL_PP(tmpzval) - timeout.tv_sec) * 1000000);
 	} else {
 		timeout.tv_sec = FG(default_socket_timeout);
 		timeout.tv_usec = 0;
