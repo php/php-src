@@ -482,7 +482,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		path_length = orig_path_len; 
 	}
 
-	if (use_realpath && CWDG(realpath_cache_size_limit)) {
+	if (use_realpath != CWD_EXPAND && CWDG(realpath_cache_size_limit)) {
 		t = CWDG(realpath_cache_ttl)?time(NULL):0;
 		if ((bucket = realpath_cache_find(path, path_length, t TSRMLS_CC)) != NULL) {		
 			int len = bucket->realpath_len;
@@ -502,7 +502,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		}
 	}
 
-	if (use_realpath) {
+	if (use_realpath != CWD_EXPAND) {
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
 		char resolved_path[MAXPATHLEN];
 
@@ -609,7 +609,7 @@ no_realpath:
 				memcpy(&state->cwd[state->cwd_length], ptr, ptr_length+1);
 
 #ifdef TSRM_WIN32
-				if (use_realpath) {
+				if (use_realpath != CWD_EXPAND) {
 					WIN32_FIND_DATA data;
 					HANDLE hFind;
 
@@ -641,7 +641,7 @@ no_realpath:
 		}
 	}
 
-	if (use_realpath && CWDG(realpath_cache_size_limit)) {
+	if (use_realpath != CWD_EXPAND && CWDG(realpath_cache_size_limit)) {
 		realpath_cache_add(path, path_length, state->cwd, state->cwd_length, t TSRMLS_CC);
 	}
 
