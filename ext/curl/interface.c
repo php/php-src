@@ -1268,10 +1268,10 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_COOKIESESSION:
 #if LIBCURL_VERSION_NUM > 0x070b01 /* CURLOPT_TCP_NODELAY is available since curl 7.11.2 */
 		case CURLOPT_TCP_NODELAY:
+#endif
 			convert_to_long_ex(zvalue);
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
-#endif
 		case CURLOPT_FOLLOWLOCATION:
 			convert_to_long_ex(zvalue);
 			if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
