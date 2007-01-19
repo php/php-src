@@ -104,11 +104,12 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	int transport_len, have_header = 0, request_fulluri = 0;
 	char *protocol_version = NULL;
 	int protocol_version_len = 3; /* Default: "1.0" */
+	struct timeval timeout;
 
 	tmp_line[0] = '\0';
 
 	if (redirect_max < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Redirection limit reached, aborting.");
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Redirection limit reached, aborting");
 		return NULL;
 	}
 
@@ -159,9 +160,23 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		}
 	}
 
+	if (context && php_stream_context_get_option(context, wrapper->wops->label, "timeout", &tmpzval) == SUCCESS) {
+		SEPARATE_ZVAL(tmpzval);
+		convert_to_double_ex(tmpzval);
+		timeout.tv_sec = (time_t) Z_DVAL_PP(tmpzval);
+		timeout.tv_usec = (suseconds_t) ((Z_DVAL_PP(tmpzval) - timeout.tv_sec) * 1000000);
+	} else {
+		timeout.tv_sec = FG(default_socket_timeout);
+		timeout.tv_usec = 0;
+	}
+
 	stream = php_stream_xport_create(transport_string, transport_len, options,
 			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
-			NULL, NULL, context, &errstr, NULL);
+			NULL, &timeout, context, &errstr, NULL);
+    
+	if (stream) {
+		php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &timeout);
+	}
 			
 	if (errstr) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", errstr);
@@ -232,8 +247,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		redirect_max = Z_LVAL_PP(tmpzval);
 	}
 
-	if (header_init && context &&
-		php_stream_context_get_option(context, "http", "method", &tmpzval) == SUCCESS) {
+	if (context && php_stream_context_get_option(context, "http", "method", &tmpzval) == SUCCESS) {
 		if (Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval) > 0) {
 			scratch_len = strlen(path) + 29 + Z_STRLEN_PP(tmpzval);
 			scratch = emalloc(scratch_len);
@@ -241,9 +255,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			strcat(scratch, " ");
 		}
 	}
-
-	if (context &&
-		php_stream_context_get_option(context, "http", "protocol_version", &tmpzval) == SUCCESS) {
+ 
+	if (context && php_stream_context_get_option(context, "http", "protocol_version", &tmpzval) == SUCCESS) {
 		SEPARATE_ZVAL(tmpzval);
 		convert_to_double_ex(tmpzval);
 		protocol_version_len = spprintf(&protocol_version, 0, "%.1F", Z_DVAL_PP(tmpzval));
@@ -564,7 +577,11 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		}
 	}
 	
-	if (!reqok || location[0] != '\0')	{		
+	if (!reqok || location[0] != '\0') {
+		if (options & STREAM_ONLY_GET_HEADERS && redirect_max <= 1) {
+			goto out;
+		}
+
 		if (location[0] != '\0')
 			php_stream_notify_info(context, PHP_STREAM_NOTIFY_REDIRECTED, location, 0);
 
