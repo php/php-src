@@ -32,3 +32,13 @@ string(%d) "%s"
 Second
 string(%d) "%s"
 ===DONE===
+--UEXPECTF--
+First
+unicode(%d) "%s"
+Second
+unicode(%d) "%s"
+First
+unicode(%d) "%s"
+Second
+unicode(%d) "%s"
+===DONE===
