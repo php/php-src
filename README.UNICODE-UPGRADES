@@ -540,6 +540,27 @@ Unicode strings:
     zend_error(E_WARNING, "%v::__toString() did not return anything",
             Z_OBJCE_P(object)->name);
 
+Since [v]spprintf() can only output native strings there are also the new
+function [v]uspprintf() and [v]zspprintf() that create unicode strings and
+return the number of characters printed. That is they return the length rather 
+than the byte size. The second pair offunction also takes an additional type
+parameter that allows to create a string of arbitrary type. The following
+example illustrates the use. Assume it fetches a unicode/native string into
+path, path_len, path_type and then creates sub_name, sub_len and sub_type.
+
+	zstr path, sub_name;
+	int path_len, sub_len;
+	zend_uchar path_type, sub_type;
+
+	/* fetch */
+
+	if (path.v) {
+		sub_type = path_type;
+		sub_len = zspprintf(path_type, &sub_name, 0, "%R%c%s", 
+			path_type, path, 
+			DEFAULT_SLASH, 
+			entry.d_name);
+	}
 
 
 Upgrading Functions
