@@ -123,6 +123,7 @@ if test "$PHP_IMAP" != "no"; then
     CFLAGS="-I$IMAP_INC_DIR"
     AC_CACHE_CHECK(for utf8_mime2text signature, ac_cv_utf8_mime2text,
       AC_TRY_COMPILE([
+#include <stdio.h>
 #include <c-client.h>
       ],[
         SIZEDTEXT *src, *dst;
