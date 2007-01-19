@@ -1,3 +1,133 @@
+2007-01-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Old bug fixing news
+
+    * (PHP_5_2)
+      ZendEngine2/zend_language_scanner.l:
+      
+      Syntax highlighting fix for hex numbers.
+      
+
+2007-01-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      - Implement debug helper
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ext/standard/var.c:
+      - Add debug_info helper to overloadedobjects
+
+2007-01-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/parse_tz.c:
+      
+      Fixed bug #39993 (tr_TR.UTF-8 locale has problems with PHP).
+
+2007-01-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/date/php_date.c:
+      - We want the size here not the length
+
+    * main/spprintf.c
+      main/spprintf.h:
+      - We need to return the length not the byte size
+
+    * ext/standard/filestat.c:
+      - Use correct string inunicode mode
+
+2007-01-18  Antony Dovgal  <antony@zend.com>
+
+    * ext/spl/spl_directory.c:
+      fix win32 build
+
+2007-01-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_directory.c:
+      - Simplify by using zspprintf
+
+    * main/spprintf.c
+      main/spprintf.h:
+      - Fix [v]uspprintf()
+      - Add [v]zspprintf
+
+2007-01-18  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-todo.txt:
+      -** empty log message ***
+
+2007-01-18  Antony Dovgal  <antony@zend.com>
+
+    * ext/soap/soap.c
+      ext/standard/html.c
+      ext/wddx/wddx.c:
+      more snprintf()
+
+2007-01-18  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * main/streams/php_stream_transport.h:
+      MFB: use only 2 bits
+
+    * (PHP_5_2)
+      main/streams/php_stream_transport.h:
+      only 2 bits are needed for shutdown(2) method (only 3 possible values).
+      this is new code in 5.2.1, so don't worry..
+
+2007-01-18  Antony Dovgal  <antony@zend.com>
+
+    * ext/interbase/interbase.c:
+      fix the previous patch
+
+    * ext/interbase/ibase_query.c
+      ext/interbase/interbase.c
+      ext/pdo_firebird/firebird_driver.c:
+      use snprintf()
+
+    * (PHP_5_2)
+      ext/imap/config.m4:
+      MFH: improve check configure for new version of utf8_mime2text()
+
+    * ext/imap/config.m4:
+      improve check configure for new version of utf8_mime2text()
+
+    * ext/imap/php_imap.c:
+      use strlcat()
+
+    * main/main.c:
+      fix fodling, mark set_time_limit() unicode safe
+
+    * (PHP_5_2)
+      NEWS
+      ext/informix/.cvsignore
+      ext/informix/.cvsignore
+      ext/informix/CREDITS
+      ext/informix/CREDITS
+      ext/informix/Makefile.frag
+      ext/informix/Makefile.frag
+      ext/informix/config.m4
+      ext/informix/config.w32
+      ext/informix/ifx.dsp
+      ext/informix/ifx.dsp
+      ext/informix/ifx.ec
+      ext/informix/ifx.ec
+      ext/informix/php_informix.h
+      ext/informix/php_informix.h
+      ext/informix/php_informix_includes.h
+      ext/informix/php_informix_includes.h:
+      moved ext/informix to PECL
+
+    * (PHP_5_2)
+      ZendEngine2/zend_exceptions.c:
+      fix folding
+
+    * ZendEngine2/zend_exceptions.c:
+      fix folding, mark functions as unicode safe
+
 2007-01-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)
