@@ -456,7 +456,7 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 	return NULL;
 } /* }}} */
 
-/* {{{ proto void DirectoryIterator::__construct(string path)
+/* {{{ proto void DirectoryIterator::__construct(string path) U
  Cronstructs a new dir iterator from a path. */
 SPL_METHOD(DirectoryIterator, __construct)
 {
@@ -489,7 +489,7 @@ SPL_METHOD(DirectoryIterator, __construct)
 }
 /* }}} */
 
-/* {{{ proto void DirectoryIterator::rewind()
+/* {{{ proto void DirectoryIterator::rewind() U
    Rewind dir back to the start */
 SPL_METHOD(DirectoryIterator, rewind)
 {
@@ -505,7 +505,7 @@ SPL_METHOD(DirectoryIterator, rewind)
 }
 /* }}} */
 
-/* {{{ proto string DirectoryIterator::key()
+/* {{{ proto string DirectoryIterator::key() U
    Return current dir entry */
 SPL_METHOD(DirectoryIterator, key)
 {
@@ -519,7 +519,7 @@ SPL_METHOD(DirectoryIterator, key)
 }
 /* }}} */
 
-/* {{{ proto DirectoryIterator DirectoryIterator::current()
+/* {{{ proto DirectoryIterator DirectoryIterator::current() U
    Return this (needed for Iterator interface) */
 SPL_METHOD(DirectoryIterator, current)
 {
@@ -527,7 +527,7 @@ SPL_METHOD(DirectoryIterator, current)
 }
 /* }}} */
 
-/* {{{ proto void DirectoryIterator::next()
+/* {{{ proto void DirectoryIterator::next() U
    Move to next entry */
 SPL_METHOD(DirectoryIterator, next)
 {
@@ -544,7 +544,7 @@ SPL_METHOD(DirectoryIterator, next)
 }
 /* }}} */
 
-/* {{{ proto string DirectoryIterator::valid()
+/* {{{ proto string DirectoryIterator::valid() U
    Check whether dir contains more entries */
 SPL_METHOD(DirectoryIterator, valid)
 {
@@ -554,7 +554,7 @@ SPL_METHOD(DirectoryIterator, valid)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getPath()
+/* {{{ proto string SplFileInfo::getPath() U
    Return the path */
 SPL_METHOD(SplFileInfo, getPath)
 {
@@ -564,7 +564,7 @@ SPL_METHOD(SplFileInfo, getPath)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getFilename()
+/* {{{ proto string SplFileInfo::getFilename() U
    Return filename only */
 SPL_METHOD(SplFileInfo, getFilename)
 {
@@ -584,7 +584,7 @@ SPL_METHOD(SplFileInfo, getFilename)
 }
 /* }}} */
 
-/* {{{ proto string DirectoryIterator::getFilename()
+/* {{{ proto string DirectoryIterator::getFilename() U
    Return filename of current dir entry */
 SPL_METHOD(DirectoryIterator, getFilename)
 {
@@ -594,7 +594,7 @@ SPL_METHOD(DirectoryIterator, getFilename)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getPathname()
+/* {{{ proto string SplFileInfo::getPathname() U
    Return path and filename */
 SPL_METHOD(SplFileInfo, getPathname)
 {
@@ -614,7 +614,7 @@ SPL_METHOD(SplFileInfo, getPathname)
 }
 /* }}} */
 
-/* {{{ proto string RecursiveDirectoryIterator::key()
+/* {{{ proto string RecursiveDirectoryIterator::key() U
    Return getPathname() or getFilename() depending on flags */
 SPL_METHOD(RecursiveDirectoryIterator, key)
 {
@@ -629,7 +629,7 @@ SPL_METHOD(RecursiveDirectoryIterator, key)
 }
 /* }}} */
 
-/* {{{ proto string RecursiveDirectoryIterator::current()
+/* {{{ proto string RecursiveDirectoryIterator::current() U
    Return getFilename(), getFileInfo() or $this depending on flags */
 SPL_METHOD(RecursiveDirectoryIterator, current)
 {
@@ -648,7 +648,7 @@ SPL_METHOD(RecursiveDirectoryIterator, current)
 }
 /* }}} */
 
-/* {{{ proto bool DirectoryIterator::isDot()
+/* {{{ proto bool DirectoryIterator::isDot() U
    Returns true if current entry is '.' or  '..' */
 SPL_METHOD(DirectoryIterator, isDot)
 {
@@ -658,7 +658,7 @@ SPL_METHOD(DirectoryIterator, isDot)
 }
 /* }}} */
 
-/* {{{ proto void SplFileInfo::__construct(string file_name)
+/* {{{ proto void SplFileInfo::__construct(string file_name) U
  Cronstructs a new SplFileInfo from a path. */
 /* php_set_error_handling() is used to throw exceptions in case
    the constructor fails. Here we use this to ensure the object
@@ -702,82 +702,82 @@ SPL_METHOD(SplFileInfo, func_name) \
 }
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getPerms()
+/* {{{ proto int SplFileInfo::getPerms() U
    Get file permissions */
 FileInfoFunction(getPerms, FS_PERMS)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getInode()
+/* {{{ proto int SplFileInfo::getInode() U
    Get file inode */
 FileInfoFunction(getInode, FS_INODE)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getSize()
+/* {{{ proto int SplFileInfo::getSize() U
    Get file size */
 FileInfoFunction(getSize, FS_SIZE)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getOwner()
+/* {{{ proto int SplFileInfo::getOwner() U
    Get file owner */
 FileInfoFunction(getOwner, FS_OWNER)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getGroup()
+/* {{{ proto int SplFileInfo::getGroup() U
    Get file group */
 FileInfoFunction(getGroup, FS_GROUP)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getATime()
+/* {{{ proto int SplFileInfo::getATime() U
    Get last access time of file */
 FileInfoFunction(getATime, FS_ATIME)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getMTime()
+/* {{{ proto int SplFileInfo::getMTime() U
    Get last modification time of file */
 FileInfoFunction(getMTime, FS_MTIME)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getCTime()
+/* {{{ proto int SplFileInfo::getCTime() U
    Get inode modification time of file */
 FileInfoFunction(getCTime, FS_CTIME)
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getType()
+/* {{{ proto string SplFileInfo::getType() U
    Get file type */
 FileInfoFunction(getType, FS_TYPE)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isWritable()
+/* {{{ proto bool SplFileInfo::isWritable() U
    Returns true if file can be written */
 FileInfoFunction(isWritable, FS_IS_W)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isReadable()
+/* {{{ proto bool SplFileInfo::isReadable() U
    Returns true if file can be read */
 FileInfoFunction(isReadable, FS_IS_R)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isExecutable()
+/* {{{ proto bool SplFileInfo::isExecutable() U
    Returns true if file is executable */
 FileInfoFunction(isExecutable, FS_IS_X)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isFile()
+/* {{{ proto bool SplFileInfo::isFile() U
    Returns true if file is a regular file */
 FileInfoFunction(isFile, FS_IS_FILE)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isDir()
+/* {{{ proto bool SplFileInfo::isDir() U
    Returns true if file is directory */
 FileInfoFunction(isDir, FS_IS_DIR)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isLink()
+/* {{{ proto bool SplFileInfo::isLink() U
    Returns true if file is symbolic link */
 FileInfoFunction(isLink, FS_IS_LINK)
 /* }}} */
 
-/* {{{ proto SplFileObject SplFileInfo::openFile([string mode = 'r' [, bool use_include_path  [, resource context]]])
+/* {{{ proto SplFileObject SplFileInfo::openFile([string mode = 'r' [, bool use_include_path  [, resource context]]]) U
    Open the current file */
 SPL_METHOD(SplFileInfo, openFile)
 {
@@ -787,7 +787,7 @@ SPL_METHOD(SplFileInfo, openFile)
 }
 /* }}} */
 
-/* {{{ proto void SplFileInfo::setFileClass([string class_name])
+/* {{{ proto void SplFileInfo::setFileClass([string class_name]) U
    Class to use in openFile() */
 SPL_METHOD(SplFileInfo, setFileClass)
 {
@@ -804,7 +804,7 @@ SPL_METHOD(SplFileInfo, setFileClass)
 }
 /* }}} */
 
-/* {{{ proto void SplFileInfo::setInfoClass([string class_name])
+/* {{{ proto void SplFileInfo::setInfoClass([string class_name]) U
    Class to use in getFileInfo(), getPathInfo() */
 SPL_METHOD(SplFileInfo, setInfoClass)
 {
@@ -821,7 +821,7 @@ SPL_METHOD(SplFileInfo, setInfoClass)
 }
 /* }}} */
 
-/* {{{ proto SplFileInfo SplFileInfo::getFileInfo([string $class_name])
+/* {{{ proto SplFileInfo SplFileInfo::getFileInfo([string $class_name]) U
    Get/copy file info */
 SPL_METHOD(SplFileInfo, getFileInfo)
 {
@@ -838,7 +838,7 @@ SPL_METHOD(SplFileInfo, getFileInfo)
 }
 /* }}} */
 
-/* {{{ proto SplFileInfo SplFileInfo::getPathInfo([string $class_name])
+/* {{{ proto SplFileInfo SplFileInfo::getPathInfo([string $class_name]) U
    Get/copy file info */
 SPL_METHOD(SplFileInfo, getPathInfo)
 {
@@ -855,7 +855,7 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 }
 /* }}} */
 
-/* {{{ proto void RecursiveDirectoryIterator::__construct(string path [, int flags])
+/* {{{ proto void RecursiveDirectoryIterator::__construct(string path [, int flags]) U
  Cronstructs a new dir iterator from a path. */
 SPL_METHOD(RecursiveDirectoryIterator, __construct)
 {
@@ -881,7 +881,7 @@ SPL_METHOD(RecursiveDirectoryIterator, __construct)
 }
 /* }}} */
 
-/* {{{ proto void RecursiveDirectoryIterator::rewind()
+/* {{{ proto void RecursiveDirectoryIterator::rewind() U
    Rewind dir back to the start */
 SPL_METHOD(RecursiveDirectoryIterator, rewind)
 {
@@ -899,7 +899,7 @@ SPL_METHOD(RecursiveDirectoryIterator, rewind)
 }
 /* }}} */
 
-/* {{{ proto void RecursiveDirectoryIterator::next()
+/* {{{ proto void RecursiveDirectoryIterator::next() U
    Move to next entry */
 SPL_METHOD(RecursiveDirectoryIterator, next)
 {
@@ -918,7 +918,7 @@ SPL_METHOD(RecursiveDirectoryIterator, next)
 }
 /* }}} */
 
-/* {{{ proto bool RecursiveDirectoryIterator::hasChildren([bool $allow_links = false])
+/* {{{ proto bool RecursiveDirectoryIterator::hasChildren([bool $allow_links = false]) U
    Returns whether current entry is a directory and not '.' or '..' */
 SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 {
@@ -943,7 +943,7 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 }
 /* }}} */
 
-/* {{{ proto RecursiveDirectoryIterator DirectoryIterator::getChildren()
+/* {{{ proto RecursiveDirectoryIterator DirectoryIterator::getChildren() U
    Returns an iterator for the current entry if it is a directory */
 SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 {
@@ -976,7 +976,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 }
 /* }}} */
 
-/* {{{ proto void RecursiveDirectoryIterator::getSubPath()
+/* {{{ proto void RecursiveDirectoryIterator::getSubPath() U
    Get sub path */
 SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
 {
@@ -990,7 +990,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
 }
 /* }}} */
 
-/* {{{ proto void RecursiveDirectoryIterator::getSubPathname()
+/* {{{ proto void RecursiveDirectoryIterator::getSubPathname() U
    Get sub path and file name */
 SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 {
@@ -1601,7 +1601,7 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 	}
 } /* }}} */
 
-/* {{{ proto void SplFileObject::__construct(string filename [, string mode = 'r' [, bool use_include_path  [, resource context]]]])
+/* {{{ proto void SplFileObject::__construct(string filename [, string mode = 'r' [, bool use_include_path  [, resource context]]]]) U
    Construct a new file object */
 SPL_METHOD(SplFileObject, __construct)
 {
@@ -1653,7 +1653,7 @@ SPL_METHOD(SplFileObject, __construct)
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto void SplTempFileObject::__construct([int max_memory])
+/* {{{ proto void SplTempFileObject::__construct([int max_memory]) U
    Construct a new temp file object */
 SPL_METHOD(SplTempFileObject, __construct)
 {
@@ -1694,7 +1694,7 @@ SPL_METHOD(SplTempFileObject, __construct)
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto void SplFileObject::rewind()
+/* {{{ proto void SplFileObject::rewind() U
    Rewind the file and read the first line */
 SPL_METHOD(SplFileObject, rewind)
 {
@@ -1703,7 +1703,7 @@ SPL_METHOD(SplFileObject, rewind)
 	spl_filesystem_file_rewind(getThis(), intern TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto void SplFileObject::eof()
+/* {{{ proto void SplFileObject::eof() U
    Return whether end of file is reached */
 SPL_METHOD(SplFileObject, eof)
 {
@@ -1712,7 +1712,7 @@ SPL_METHOD(SplFileObject, eof)
 	RETURN_BOOL(php_stream_eof(intern->u.file.stream));
 } /* }}} */
 
-/* {{{ proto void SplFileObject::valid()
+/* {{{ proto void SplFileObject::valid() U
    Return !eof() */
 SPL_METHOD(SplFileObject, valid)
 {
@@ -1725,7 +1725,7 @@ SPL_METHOD(SplFileObject, valid)
 	}
 } /* }}} */
 
-/* {{{ proto string SplFileObject::fgets()
+/* {{{ proto string SplFileObject::fgets() U
    Rturn next line from file */
 SPL_METHOD(SplFileObject, fgets)
 {
@@ -1737,7 +1737,7 @@ SPL_METHOD(SplFileObject, fgets)
 	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len, 1);
 } /* }}} */
 
-/* {{{ proto string SplFileObject::current()
+/* {{{ proto string SplFileObject::current() U
    Return current line from file */
 SPL_METHOD(SplFileObject, current)
 {
@@ -1754,7 +1754,7 @@ SPL_METHOD(SplFileObject, current)
 	RETURN_FALSE;
 } /* }}} */
 
-/* {{{ proto int SplFileObject::key()
+/* {{{ proto int SplFileObject::key() U
    Return line number */
 SPL_METHOD(SplFileObject, key)
 {
@@ -1767,7 +1767,7 @@ SPL_METHOD(SplFileObject, key)
 	RETURN_LONG(intern->u.file.current_line_num);
 } /* }}} */
 
-/* {{{ proto void SplFileObject::next()
+/* {{{ proto void SplFileObject::next() U
    Read next line */
 SPL_METHOD(SplFileObject, next)
 {
@@ -1780,7 +1780,7 @@ SPL_METHOD(SplFileObject, next)
 	intern->u.file.current_line_num++;
 } /* }}} */
 
-/* {{{ proto void SplFileObject::setFlags(int flags)
+/* {{{ proto void SplFileObject::setFlags(int flags) U
    Set file handling flags */
 SPL_METHOD(SplFileObject, setFlags)
 {
@@ -1789,7 +1789,7 @@ SPL_METHOD(SplFileObject, setFlags)
 	zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &intern->flags);
 } /* }}} */
 
-/* {{{ proto int SplFileObject::getFlags()
+/* {{{ proto int SplFileObject::getFlags() U
    Get file handling flags */
 SPL_METHOD(SplFileObject, getFlags)
 {
@@ -1798,7 +1798,7 @@ SPL_METHOD(SplFileObject, getFlags)
 	RETURN_LONG(intern->flags);
 } /* }}} */
 
-/* {{{ proto void SplFileObject::setMaxLineLen(int max_len)
+/* {{{ proto void SplFileObject::setMaxLineLen(int max_len) U
    Set maximum line length */
 SPL_METHOD(SplFileObject, setMaxLineLen)
 {
@@ -1818,7 +1818,7 @@ SPL_METHOD(SplFileObject, setMaxLineLen)
 	intern->u.file.max_line_len = max_len;
 } /* }}} */
 
-/* {{{ proto int SplFileObject::getMaxLineLen()
+/* {{{ proto int SplFileObject::getMaxLineLen() U
    Get maximum line length */
 SPL_METHOD(SplFileObject, getMaxLineLen)
 {
@@ -1827,14 +1827,14 @@ SPL_METHOD(SplFileObject, getMaxLineLen)
 	RETURN_LONG((long)intern->u.file.max_line_len);
 } /* }}} */
 
-/* {{{ proto bool SplFileObject::hasChildren()
+/* {{{ proto bool SplFileObject::hasChildren() U
    Return false */
 SPL_METHOD(SplFileObject, hasChildren)
 {
 	RETURN_FALSE;
 } /* }}} */
 
-/* {{{ proto bool SplFileObject::getChildren()
+/* {{{ proto bool SplFileObject::getChildren() U
    Read NULL */
 SPL_METHOD(SplFileObject, getChildren)
 {
@@ -1850,7 +1850,7 @@ SPL_METHOD(SplFileObject, func_name) \
 }
 /* }}} */
 
-/* {{{ proto array SplFileObject::fgetcsv([string delimiter [, string enclosure]])
+/* {{{ proto array SplFileObject::fgetcsv([string delimiter [, string enclosure]]) U
    Return current line as csv */
 SPL_METHOD(SplFileObject, fgetcsv)
 {
@@ -1919,7 +1919,7 @@ SPL_METHOD(SplFileObject, setCsvControl)
 }
 /* }}} */
 
-/* {{{ proto array SplFileObject::getCsvControl()
+/* {{{ proto array SplFileObject::getCsvControl() U
    Get the delimiter and enclosure character used in fgetcsv */
 SPL_METHOD(SplFileObject, getCsvControl)
 {
@@ -1943,7 +1943,7 @@ SPL_METHOD(SplFileObject, getCsvControl)
 FileFunction(flock)
 /* }}} */
 
-/* {{{ proto bool SplFileObject::fflush()
+/* {{{ proto bool SplFileObject::fflush() U
    Flush the file */
 SPL_METHOD(SplFileObject, fflush)
 {
@@ -1953,7 +1953,7 @@ SPL_METHOD(SplFileObject, fflush)
 } /* }}} */
 
 
-/* {{{ proto int SplFileObject::ftell()
+/* {{{ proto int SplFileObject::ftell() U
    Return current file position */
 SPL_METHOD(SplFileObject, ftell)
 {
@@ -1967,7 +1967,7 @@ SPL_METHOD(SplFileObject, ftell)
 	}
 } /* }}} */
 
-/* {{{ proto int SplFileObject::fseek(int pos [, int whence = SEEK_SET])
+/* {{{ proto int SplFileObject::fseek(int pos [, int whence = SEEK_SET]) U
    Return current file position */
 SPL_METHOD(SplFileObject, fseek)
 {
@@ -1982,7 +1982,7 @@ SPL_METHOD(SplFileObject, fseek)
 	RETURN_LONG(php_stream_seek(intern->u.file.stream, pos, whence));
 } /* }}} */
 
-/* {{{ proto int SplFileObject::fgetc()
+/* {{{ proto int SplFileObject::fgetc() U
    Get a character form the file */
 SPL_METHOD(SplFileObject, fgetc)
 {
@@ -2007,7 +2007,7 @@ SPL_METHOD(SplFileObject, fgetc)
 	}
 } /* }}} */
 
-/* {{{ proto string SplFileObject::fgetss([string allowable_tags])
+/* {{{ proto string SplFileObject::fgetss([string allowable_tags]) U
    Get a line from file pointer and strip HTML tags */
 SPL_METHOD(SplFileObject, fgetss)
 {
@@ -2024,7 +2024,7 @@ SPL_METHOD(SplFileObject, fgetss)
 	zval_ptr_dtor(&arg2);
 } /* }}} */
 
-/* {{{ proto int SplFileObject::fpassthru()
+/* {{{ proto int SplFileObject::fpassthru() U
    Output all remaining data from a file pointer */
 SPL_METHOD(SplFileObject, fpassthru)
 {
@@ -2033,7 +2033,7 @@ SPL_METHOD(SplFileObject, fpassthru)
 	RETURN_LONG(php_stream_passthru(intern->u.file.stream));
 } /* }}} */
 
-/* {{{ proto bool SplFileObject::fscanf(string format [, string ...])
+/* {{{ proto bool SplFileObject::fscanf(string format [, string ...]) U
    Implements a mostly ANSI compatible fscanf() */
 SPL_METHOD(SplFileObject, fscanf)
 {
@@ -2046,7 +2046,7 @@ SPL_METHOD(SplFileObject, fscanf)
 }
 /* }}} */
 
-/* {{{ proto mixed SplFileObject::fwrite(string str [, int length])
+/* {{{ proto mixed SplFileObject::fwrite(string str [, int length]) U
    Binary-safe file write */
 SPL_METHOD(SplFileObject, fwrite)
 {
@@ -2074,7 +2074,7 @@ SPL_METHOD(SplFileObject, fwrite)
 FileFunction(fstat)
 /* }}} */
 
-/* {{{ proto bool SplFileObject::ftruncate(int size)
+/* {{{ proto bool SplFileObject::ftruncate(int size) U
    Truncate file to 'size' length */
 SPL_METHOD(SplFileObject, ftruncate)
 {
