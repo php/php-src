@@ -62,35 +62,87 @@ var_dump($storage2);
 int(2)
 int(1)
 int(2)
-object(MyStorage)#%d (1) {
+object(MyStorage)#%d (2) {
   ["bla"]=>
   int(26)
+  ["storage":"SplObjectStorage":private]=>
+  array(2) {
+    ["%s"]=>
+    object(TestClass)#%d (1) {
+      ["test"]=>
+      int(1)
+    }
+    ["%s"]=>
+    object(TestClass)#%d (1) {
+      ["test"]=>
+      int(2)
+    }
+  }
 }
 string(%d) "%s"
 ===UNSERIALIZE===
 int(2)
 int(1)
 int(2)
-object(MyStorage)#%d (1) {
+object(MyStorage)#%d (2) {
   ["bla"]=>
   int(26)
+  ["storage":"SplObjectStorage":private]=>
+  array(2) {
+    ["%s"]=>
+    object(TestClass)#%d (1) {
+      ["test"]=>
+      int(1)
+    }
+    ["%s"]=>
+    object(TestClass)#%d (1) {
+      ["test"]=>
+      int(2)
+    }
+  }
 }
 ===DONE===
 --UEXPECTF--
 int(2)
 int(1)
 int(2)
-object(MyStorage)#%d (1) {
+object(MyStorage)#%d (2) {
   [u"bla"]=>
   int(26)
+  [u"storage":u"SplObjectStorage":private]=>
+  array(2) {
+    ["%s"]=>
+    object(TestClass)#%d (1) {
+      [u"test"]=>
+      int(1)
+    }
+    ["%s"]=>
+    object(TestClass)#%d (1) {
+      [u"test"]=>
+      int(2)
+    }
+  }
 }
 unicode(%d) "%s"
 ===UNSERIALIZE===
 int(2)
 int(1)
 int(2)
-object(MyStorage)#%d (1) {
+object(MyStorage)#%d (2) {
   [u"bla"]=>
   int(26)
+  [u"storage":u"SplObjectStorage":private]=>
+  array(2) {
+    ["%s"]=>
+    object(TestClass)#%d (1) {
+      [u"test"]=>
+      int(1)
+    }
+    ["%s"]=>
+    object(TestClass)#%d (1) {
+      [u"test"]=>
+      int(2)
+    }
+  }
 }
 ===DONE===
