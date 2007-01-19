@@ -450,7 +450,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_PROXYPORT);
 	REGISTER_CURL_CONSTANT(CURLOPT_UNRESTRICTED_AUTH);
 	REGISTER_CURL_CONSTANT(CURLOPT_FTP_USE_EPRT);
+#if LIBCURL_VERSION_NUM > 0x070b01 /* CURLOPT_TCP_NODELAY is available since curl 7.11.2 */
 	REGISTER_CURL_CONSTANT(CURLOPT_TCP_NODELAY);
+#endif
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTP200ALIASES);
 	REGISTER_CURL_CONSTANT(CURL_TIMECOND_IFMODSINCE);
 	REGISTER_CURL_CONSTANT(CURL_TIMECOND_IFUNMODSINCE);
@@ -1269,10 +1271,12 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_PORT:
 		case CURLOPT_AUTOREFERER:
 		case CURLOPT_COOKIESESSION:
+#if LIBCURL_VERSION_NUM > 0x070b01 /* CURLOPT_TCP_NODELAY is available since curl 7.11.2 */
 		case CURLOPT_TCP_NODELAY:
 			convert_to_long_ex(zvalue);
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
+#endif
 		case CURLOPT_FOLLOWLOCATION:
 			convert_to_long_ex(zvalue);
 			if (PG(open_basedir) && *PG(open_basedir)) {
