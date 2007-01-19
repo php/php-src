@@ -221,15 +221,7 @@ PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC)
 		is_temp = 0;
 		goto head_done;
 	case IS_OBJECT:
-		if (Z_OBJ_HANDLER_PP(struc, get_debug_info)) {
-			myht = Z_OBJ_HANDLER_PP(struc, get_debug_info)(*struc, &is_temp TSRMLS_CC);
-		} else if (Z_OBJ_HANDLER_PP(struc, get_properties)) {
-			myht = Z_OBJPROP_PP(struc);
-			is_temp = 0;
-		} else {
-			myht = NULL;
-			is_temp = 0;
-		}
+		myht = Z_OBJDEBUG_PP(struc, is_temp);
 		if (myht && myht->nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
 			return;
@@ -430,15 +422,7 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC)
 		zval_element_dump_func = zval_array_element_dump;
 		goto head_done;
 	case IS_OBJECT:
-		if (Z_OBJ_HANDLER_PP(struc, get_debug_info)) {
-			myht = Z_OBJ_HANDLER_PP(struc, get_debug_info)(*struc, &is_temp TSRMLS_CC);
-		} else if (Z_OBJ_HANDLER_PP(struc, get_properties)) {
-			myht = Z_OBJPROP_PP(struc);
-			is_temp = 0;
-		} else {
-			myht = NULL;
-			is_temp = 0;
-		}
+		myht = Z_OBJDEBUG_PP(struc, is_temp);
 		if (myht && myht->nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
 			return;
