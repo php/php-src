@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jan 2007, PHP 5.2.1RC3
+18 Jan 2007, PHP 5.2.1RC3
 - Added read-timeout context option "timeout" for HTTP streams. (Hannes,
   Ilia). 
 - Added CURLOPT_TCP_NODELAY constant to Curl extension. (Sara)
