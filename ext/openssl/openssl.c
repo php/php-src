@@ -1945,11 +1945,10 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 				/* got the key - return it */
 				return (EVP_PKEY*)what;
 			}
+		} else {
+			/* other types could be used here - eg: file pointers and read in the data from them */
+			TMP_CLEAN;
 		}
-
-		/* other types could be used here - eg: file pointers and read in the data from them */
-
-		TMP_CLEAN;
 	} else {
 		/* force it to be a string and check if it refers to a file */
 		/* passing non string values leaks, object uses toString, it returns NULL 

@@ -27,8 +27,8 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: openssl_x509_parse() expects at least 1 parameter, 0 given in %s/bug38261.php on line %d
+Warning: openssl_x509_parse() expects at least 1 parameter, 0 given in %sbug38261.php on line %d
 NULL
 bool(false)
 
-Catchable fatal error: Object of class stdClass could not be converted to string in %s/bug38261.php on line %d 
+Catchable fatal error: Object of class stdClass could not be converted to string in %sbug38261.php on line %d 
