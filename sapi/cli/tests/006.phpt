@@ -5,7 +5,7 @@ show information about extension
 --FILE--
 <?php
 
-$php = $_ENV['TEST_PHP_EXECUTABLE'];
+$php = getenv('TEST_PHP_EXECUTABLE');
 
 var_dump(`"$php" -n --re unknown`);
 var_dump(`"$php" -n --re ""`);

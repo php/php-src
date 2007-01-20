@@ -5,7 +5,7 @@ syntax check
 --FILE--
 <?php
 
-$php = $_ENV['TEST_PHP_EXECUTABLE'];
+$php = getenv('TEST_PHP_EXECUTABLE');
 
 $filename = dirname(__FILE__)."/011.test.php";
 

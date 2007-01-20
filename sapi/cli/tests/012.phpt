@@ -5,7 +5,7 @@ invalid arguments and error messages
 --FILE--
 <?php
 
-$php = $_ENV['TEST_PHP_EXECUTABLE'];
+$php = getenv('TEST_PHP_EXECUTABLE');
 
 var_dump(`"$php" -n -F some.php -F some.php`);
 var_dump(`"$php" -n -F some.php -R some.php`);
