@@ -1,12 +1,18 @@
 Version 1.0.0
 
- * implement metadata in manifest as [metadatacount8][type32][len16][metadata...]
+ X make permissions in the lowest bits of flags to simplify using them [Greg]
+ * implement ini handler for phar.readonly and phar.require_hash that allows enabling it on
+   PHP_INI_ALL if it is disabled in the system, but does not allow disabling it
+   if it is enabled in the system
+ * implement metadata in manifest as [type32][len16][metadata...] where 0 type is
+   used to finish metadata for this file
  * if SPL is disabled, disable the Phar class
  * implement in-phar locking, so that a file that is opened for reading can't have
    a handle opened for writing
  * docs on file format/manifest description
  * docs on uses
- * support stream context for specifying compression of a file, as well as meta-data
+ * support stream context for specifying compression of a file, as well as meta-data, and
+   copying of new prologue to the phar
  * add setUncompressed(), setCompressedGZ() and setCompressedBZ2() to PharFileInfo class
  * add uncompressAllFiles(), compressAllFilesGZ() and compressAllFilesBZ2() to Phar class
  * add setMetaData($key, $contents) to PharFileInfo

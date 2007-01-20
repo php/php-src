@@ -72,22 +72,29 @@
 
 #define PHAR_SIG_USE  PHAR_SIG_SHA1
 
+/* metadata type constants */
+
+#define PHAR_METADATA_FINISHED 0x00000000
+
+/* #define PHAR_METADATA_WHATEVER 0x000000001
+   We don't need anything yet, so put this here
+   in order to remember how it works */
+
 /* flags byte for each file adheres to these bitmasks.
    All unused values are reserved */
-#define PHAR_ENT_COMPRESSION_MASK 0x0000000F
+#define PHAR_ENT_COMPRESSION_MASK 0x00001C00
 #define PHAR_ENT_COMPRESSED_NONE  0x00000000
-#define PHAR_ENT_COMPRESSED_GZ    0x00000001
-#define PHAR_ENT_COMPRESSED_BZ2   0x00000002
+#define PHAR_ENT_COMPRESSED_GZ    0x00000200
+#define PHAR_ENT_COMPRESSED_BZ2   0x00000400
 
-#define PHAR_ENT_PERM_MASK        0x0001FF00
-#define PHAR_ENT_PERM_MASK_USR    0x0001C000
-#define PHAR_ENT_PERM_SHIFT_USR   14
-#define PHAR_ENT_PERM_MASK_GRP    0x00003800
-#define PHAR_ENT_PERM_SHIFT_GRP   11
-#define PHAR_ENT_PERM_MASK_OTH    0x00000700
-#define PHAR_ENT_PERM_SHIFT_OTH   8
-#define PHAR_ENT_PERM_DEF_FILE    0x0001B600
-#define PHAR_ENT_PERM_DEF_DIR     0x0001FF00
+#define PHAR_ENT_PERM_MASK        0x000001FF
+#define PHAR_ENT_PERM_MASK_USR    0x000001C0
+#define PHAR_ENT_PERM_SHIFT_USR   6
+#define PHAR_ENT_PERM_MASK_GRP    0x00000038
+#define PHAR_ENT_PERM_SHIFT_GRP   3
+#define PHAR_ENT_PERM_MASK_OTH    0x00000007
+#define PHAR_ENT_PERM_DEF_FILE    0x000001B6
+#define PHAR_ENT_PERM_DEF_DIR     0x000001FF
 
 #ifdef ZTS
 #	include "TSRM.h"
@@ -664,7 +671,7 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 
 	manifest_flags &= ~PHAR_HDR_COMPRESSION_MASK; 
 
-	/* The lowest nibble contains the phar wide flags. The any compressed can */
+	/* The lowest nibble contains the phar wide flags. The compression flags can */
 	/* be ignored on reading because it is being generated anyways. */
 	if (manifest_flags & PHAR_HDR_SIGNATURE) {
 		unsigned char buf[1024];
@@ -1998,7 +2005,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 				PHP_SHA1Update(&context, buf, len);
 			}
 			PHP_SHA1Final(digest, &context);
-			php_stream_write(newfile, digest, sizeof(digest));
+			php_stream_write(newfile, (char *) digest, sizeof(digest));
 			sig_flags |= PHAR_SIG_SHA1;
 			break;
 		}
@@ -2011,7 +2018,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 				PHP_MD5Update(&context, buf, len);
 			}
 			PHP_MD5Final(digest, &context);
-			php_stream_write(newfile, digest, sizeof(digest));
+			php_stream_write(newfile, (char *) digest, sizeof(digest));
 			sig_flags |= PHAR_SIG_MD5;
 			break;
 		}
@@ -2124,7 +2131,7 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
 
 	if (!is_dir) {
 		ssb->sb.st_size = data->uncompressed_filesize;
-		ssb->sb.st_mode = (data->flags & PHAR_ENT_PERM_MASK) >> PHAR_ENT_PERM_SHIFT_OTH;
+		ssb->sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
 		ssb->sb.st_mode |= S_IFREG; /* regular file */
 		/* timestamp is just the timestamp when this was added to the phar */
 #ifdef NETWARE
