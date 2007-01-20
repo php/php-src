@@ -1565,7 +1565,7 @@ static TIDY_NODE_METHOD(hasSiblings)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
-	if (tidyGetNext(obj->node)) {
+	if (obj->node && tidyGetNext(obj->node)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
