@@ -6,7 +6,7 @@ foreach($files as $name => $cont)
 {
 	$ulen = strlen($cont);
 	$clen = $ulen;
-	$time = isset($ftime) ? $ftime : mktime(12, 0, 0, 3, 1, 2006);
+	$time = isset($ftime) ? $ftime : @mktime(12, 0, 0, 3, 1, 2006);
 	$manifest .= pack('V', strlen($name)) . $name;
 	$manifest .= pack('VVVVV', $ulen, $time, $clen, crc32($cont), 0x000001B6);
 }
