@@ -13,10 +13,10 @@ __HALT_COMPILER(); ?>";
 // file length is too short
 
 $files = array();
-$files['a'] = array('a', chr(75)/*. chr(4) . chr(0): 'a' gzdeflated */, 0x00000001);
-$files['b'] = array('a', chr(75)/*. chr(4) . chr(0): 'a' gzdeflated */, 0x00000001);
+$files['a'] = array('a', chr(75)/*. chr(4) . chr(0): 'a' gzdeflated */, 0x00001000);
+$files['b'] = array('a', chr(75)/*. chr(4) . chr(0): 'a' gzdeflated */, 0x00001000);
 $files['c'] = array('*', '*',                                           0x00000000);
-$files['d'] = array('a', chr(75)/*. chr(4) . chr(0): 'a' gzdeflated */, 0x00000001);
+$files['d'] = array('a', chr(75)/*. chr(4) . chr(0): 'a' gzdeflated */, 0x00001000);
 $manifest = '';
 foreach($files as $name => $cont) {
 	$ulen = strlen($cont[0]);
@@ -25,7 +25,7 @@ foreach($files as $name => $cont) {
 	          . pack('VVVVV', $ulen, time(), $clen, crc32($cont[0]), $cont[2]);
 }
 $alias = 'hio';
-$manifest = pack('VnVV', count($files), 0x0900, 0x00000001, strlen($alias)) . $alias . $manifest;
+$manifest = pack('VnVV', count($files), 0x0900, 0x00001000, strlen($alias)) . $alias . $manifest;
 $file .= pack('V', strlen($manifest)) . $manifest;
 foreach($files as $cont)
 {
