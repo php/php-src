@@ -383,14 +383,15 @@ CWD_API char *virtual_getcwd(char *buf, size_t size TSRMLS_DC)
 
 static inline unsigned long realpath_cache_key(const char *path, int path_len)
 {
-  register unsigned long h;
+	register unsigned long h;
+	const char *e = path + path_len;
 
-  const char *e = path + path_len;
-  for (h = 2166136261U; path < e; ) {
-    h *= 16777619;
-    h ^= *path++;
-  }
-  return h;
+	for (h = 2166136261U; path < e;) {
+		h *= 16777619;
+		h ^= *path++;
+	}
+
+	return h;
 }
 
 static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, int realpath_len, time_t t TSRMLS_DC)
@@ -411,7 +412,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 		n = bucket->key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 		bucket->next = CWDG(realpath_cache)[n];
 		CWDG(realpath_cache)[n] = bucket;
-	  CWDG(realpath_cache_size) += size;
+		CWDG(realpath_cache_size) += size;
 	}
 }
 
