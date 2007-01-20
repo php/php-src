@@ -110,13 +110,65 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_alias_map;
 	int         readonly;
 	int         require_hash;
+	zend_bool   readonly_orig;
+	zend_bool   require_hash_orig;
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
 
+/* if the original value is 0 (disabled), then allow setting/unsetting at will
+   otherwise, only allow 1 (enabled), and error on disabling */
+ZEND_INI_MH(phar_ini_modify_handler)
+{
+	zend_bool *p, test;
+#ifndef ZTS
+	char *base = (char *) mh_arg2;
+#else
+	char *base;
+
+	base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+
+	p = (zend_bool *) (base+(size_t) mh_arg1);
+
+	if (new_value_length==2 && strcasecmp("on", new_value)==0) {
+		*p = (zend_bool) 1;
+	}
+	else if (new_value_length==3 && strcasecmp("yes", new_value)==0) {
+		*p = (zend_bool) 1;
+	}
+	else if (new_value_length==4 && strcasecmp("true", new_value)==0) {
+		*p = (zend_bool) 1;
+	}
+	else {
+		*p = (zend_bool) atoi(new_value);
+	}
+	if (stage == ZEND_INI_STAGE_STARTUP && !entry->modified) {
+		/* this is more efficient than processing orig_value every time */
+		if (entry->name_length == 14) { /* phar.readonly */
+			PHAR_G(readonly_orig) = *p; 
+		} else { /* phar.require_hash */
+			PHAR_G(require_hash_orig) = *p;
+		} 
+	}
+	if (stage != ZEND_INI_STAGE_STARTUP) {
+		if (entry->name_length == 14) { /* phar.readonly */
+			test = PHAR_G(readonly_orig); 
+		} else { /* phar.require_hash */
+			test = PHAR_G(require_hash_orig);
+		} 
+		if (test && !*p) {
+			/* do not allow unsetting in runtime */
+			*p = (zend_bool) 1;
+			return FAILURE;
+		}
+	}
+	return SUCCESS;
+}
+
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("phar.readonly",     "1", PHP_INI_SYSTEM, OnUpdateBool, readonly,     zend_phar_globals, phar_globals)
-	STD_PHP_INI_BOOLEAN("phar.require_hash", "1", PHP_INI_SYSTEM, OnUpdateBool, require_hash, zend_phar_globals, phar_globals)
+	STD_PHP_INI_BOOLEAN("phar.readonly",     "1", PHP_INI_ALL, phar_ini_modify_handler, readonly,     zend_phar_globals, phar_globals)
+	STD_PHP_INI_BOOLEAN("phar.require_hash", "1", PHP_INI_ALL, phar_ini_modify_handler, require_hash, zend_phar_globals, phar_globals)
 PHP_INI_END()
 
 #ifndef php_uint16
