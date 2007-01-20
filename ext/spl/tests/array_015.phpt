@@ -43,38 +43,47 @@ var_dump($ar);
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-object(ArrayObject)#%d (5) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(4)
-  [4]=>
-  int(5)
+object(ArrayObject)#%d (1) {
+  %s"storage"%s"ArrayObject":private]=>
+  array(5) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+    [3]=>
+    int(4)
+    [4]=>
+    int(5)
+  }
 }
 
 Notice: ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sarray_015.php on line %d
 int(2)
-object(ArrayObject)#%d (4) {
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(4)
-  [4]=>
-  int(5)
+object(ArrayObject)#%d (1) {
+  %s"storage"%s"ArrayObject":private]=>
+  array(4) {
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+    [3]=>
+    int(4)
+    [4]=>
+    int(5)
+  }
 }
 1=>2
 3=>4
-object(ArrayObject)#%d (2) {
-  [1]=>
-  int(2)
-  [3]=>
-  int(4)
+object(ArrayObject)#%d (1) {
+  %s"storage"%s"ArrayObject":private]=>
+  array(2) {
+    [1]=>
+    int(2)
+    [3]=>
+    int(4)
+  }
 }
 1=>2
 
@@ -82,6 +91,9 @@ Notice: main(): ArrayIterator::next(): Array was modified outside object and int
 3=>4
 
 Notice: main(): ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sarray_015.php on line %d
-object(ArrayObject)#%d (0) {
+object(ArrayObject)#%d (1) {
+  %s"storage"%s"ArrayObject":private]=>
+  array(0) {
+  }
 }
 ===DONE===

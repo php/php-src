@@ -53,11 +53,19 @@ test Object
 )
 ArrayIterator Object
 (
-    [pub] => public
-    [pro:protected] => protected
-    [pri:test:private] => private
-    [imp] => implicit
-    [dyn] => dynamic
+    [storage:ArrayIterator:private] => ArrayObject Object
+        (
+            [storage:ArrayObject:private] => test Object
+                (
+                    [pub] => public
+                    [pro:protected] => protected
+                    [pri:test:private] => private
+                    [imp] => implicit
+                    [dyn] => dynamic
+                )
+
+        )
+
 )
 pub => public
 imp => implicit

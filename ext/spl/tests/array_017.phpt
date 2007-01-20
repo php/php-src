@@ -148,13 +148,26 @@ array(3) {
     int(42)
   }
   ["$this"]=>
-  object(ArrayObjectEx)#1 (3) {
-    [0]=>
-    int(1)
-    ["a"]=>
-    int(25)
+  object(ArrayObjectEx)#%d (6) {
     ["pub1"]=>
-    int(42)
+    int(1)
+    ["pro1":protected]=>
+    int(2)
+    ["pri1":"ArrayObjectEx":private]=>
+    int(3)
+    ["imp1"]=>
+    int(4)
+    ["dyn1"]=>
+    int(5)
+    ["storage":"ArrayObject":private]=>
+    array(3) {
+      [0]=>
+      int(1)
+      ["a"]=>
+      int(25)
+      ["pub1"]=>
+      int(42)
+    }
   }
 }
 ArrayObjectEx::show()
@@ -172,13 +185,39 @@ array(3) {
     int(42)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#2 (3) {
-    [0]=>
+  object(ArrayIteratorEx)#%d (6) {
+    ["pub2"]=>
     int(1)
-    ["a"]=>
-    int(25)
-    ["pub1"]=>
-    int(42)
+    ["pro2":protected]=>
+    int(2)
+    ["pri2":"ArrayIteratorEx":private]=>
+    int(3)
+    ["imp2"]=>
+    int(4)
+    ["dyn2"]=>
+    int(5)
+    ["storage":"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (6) {
+      ["pub1"]=>
+      int(1)
+      ["pro1":protected]=>
+      int(2)
+      ["pri1":"ArrayObjectEx":private]=>
+      int(3)
+      ["imp1"]=>
+      int(4)
+      ["dyn1"]=>
+      int(5)
+      ["storage":"ArrayObject":private]=>
+      array(3) {
+        [0]=>
+        int(1)
+        ["a"]=>
+        int(25)
+        ["pub1"]=>
+        int(42)
+      }
+    }
   }
 }
 array(1) {
@@ -208,13 +247,39 @@ array(3) {
     int(42)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#3 (3) {
-    [0]=>
+  object(ArrayIteratorEx)#%d (6) {
+    ["pub2"]=>
     int(1)
-    ["a"]=>
-    int(25)
-    ["pub1"]=>
-    int(42)
+    ["pro2":protected]=>
+    int(2)
+    ["pri2":"ArrayIteratorEx":private]=>
+    int(3)
+    ["imp2"]=>
+    int(4)
+    ["dyn2"]=>
+    int(5)
+    ["storage":"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (6) {
+      ["pub1"]=>
+      int(1)
+      ["pro1":protected]=>
+      int(2)
+      ["pri1":"ArrayObjectEx":private]=>
+      int(3)
+      ["imp1"]=>
+      int(4)
+      ["dyn1"]=>
+      int(5)
+      ["storage":"ArrayObject":private]=>
+      array(3) {
+        [0]=>
+        int(1)
+        ["a"]=>
+        int(25)
+        ["pub1"]=>
+        int(42)
+      }
+    }
   }
 }
 array(1) {
@@ -260,7 +325,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayObjectEx)#1 (5) {
+  object(ArrayObjectEx)#%d (6) {
     ["pub1"]=>
     int(1)
     ["pro1":protected]=>
@@ -271,6 +336,15 @@ array(3) {
     int(4)
     ["dyn1"]=>
     int(5)
+    ["storage":"ArrayObject":private]=>
+    array(3) {
+      [0]=>
+      int(1)
+      ["a"]=>
+      int(25)
+      ["pub1"]=>
+      int(42)
+    }
   }
 }
 ArrayObjectEx::show()
@@ -294,7 +368,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#3 (5) {
+  object(ArrayIteratorEx)#%d (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -305,6 +379,28 @@ array(3) {
     int(4)
     ["dyn2"]=>
     int(5)
+    ["storage":"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (6) {
+      ["pub1"]=>
+      int(1)
+      ["pro1":protected]=>
+      int(2)
+      ["pri1":"ArrayObjectEx":private]=>
+      int(3)
+      ["imp1"]=>
+      int(4)
+      ["dyn1"]=>
+      int(5)
+      ["storage":"ArrayObject":private]=>
+      array(3) {
+        [0]=>
+        int(1)
+        ["a"]=>
+        int(25)
+        ["pub1"]=>
+        int(42)
+      }
+    }
   }
 }
 array(1) {
@@ -340,7 +436,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#2 (5) {
+  object(ArrayIteratorEx)#%d (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -351,6 +447,28 @@ array(3) {
     int(4)
     ["dyn2"]=>
     int(5)
+    ["storage":"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (6) {
+      ["pub1"]=>
+      int(1)
+      ["pro1":protected]=>
+      int(2)
+      ["pri1":"ArrayObjectEx":private]=>
+      int(3)
+      ["imp1"]=>
+      int(4)
+      ["dyn1"]=>
+      int(5)
+      ["storage":"ArrayObject":private]=>
+      array(3) {
+        [0]=>
+        int(1)
+        ["a"]=>
+        int(25)
+        ["pub1"]=>
+        int(42)
+      }
+    }
   }
 }
 array(1) {
@@ -398,7 +516,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayObjectEx)#1 (5) {
+  object(ArrayObjectEx)#%d (5) {
     ["pub1"]=>
     int(1)
     ["pro1":protected]=>
@@ -430,17 +548,30 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#2 (5) {
-    ["pub1"]=>
+  object(ArrayIteratorEx)#%d (6) {
+    ["pub2"]=>
     int(1)
-    ["pro1":protected]=>
+    ["pro2":protected]=>
     int(2)
-    ["pri1":"ArrayObjectEx":private]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
-    ["imp1"]=>
+    ["imp2"]=>
     int(4)
-    ["dyn1"]=>
+    ["dyn2"]=>
     int(5)
+    ["storage":"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (5) {
+      ["pub1"]=>
+      int(1)
+      ["pro1":protected]=>
+      int(2)
+      ["pri1":"ArrayObjectEx":private]=>
+      int(3)
+      ["imp1"]=>
+      int(4)
+      ["dyn1"]=>
+      int(5)
+    }
   }
 }
 array(1) {
@@ -474,17 +605,30 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#3 (5) {
-    ["pub1"]=>
+  object(ArrayIteratorEx)#%d (6) {
+    ["pub2"]=>
     int(1)
-    ["pro1":protected]=>
+    ["pro2":protected]=>
     int(2)
-    ["pri1":"ArrayObjectEx":private]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
-    ["imp1"]=>
+    ["imp2"]=>
     int(4)
-    ["dyn1"]=>
+    ["dyn2"]=>
     int(5)
+    ["storage":"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (5) {
+      ["pub1"]=>
+      int(1)
+      ["pro1":protected]=>
+      int(2)
+      ["pri1":"ArrayObjectEx":private]=>
+      int(3)
+      ["imp1"]=>
+      int(4)
+      ["dyn1"]=>
+      int(5)
+    }
   }
 }
 array(1) {
@@ -530,7 +674,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayObjectEx)#1 (5) {
+  object(ArrayObjectEx)#%d (5) {
     ["pub1"]=>
     int(1)
     ["pro1":protected]=>
@@ -564,7 +708,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#3 (5) {
+  object(ArrayIteratorEx)#%d (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -575,6 +719,19 @@ array(3) {
     int(4)
     ["dyn2"]=>
     int(5)
+    ["storage":"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (5) {
+      ["pub1"]=>
+      int(1)
+      ["pro1":protected]=>
+      int(2)
+      ["pri1":"ArrayObjectEx":private]=>
+      int(3)
+      ["imp1"]=>
+      int(4)
+      ["dyn1"]=>
+      int(5)
+    }
   }
 }
 array(1) {
@@ -610,7 +767,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#2 (5) {
+  object(ArrayIteratorEx)#%d (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -621,6 +778,19 @@ array(3) {
     int(4)
     ["dyn2"]=>
     int(5)
+    ["storage":"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (5) {
+      ["pub1"]=>
+      int(1)
+      ["pro1":protected]=>
+      int(2)
+      ["pri1":"ArrayObjectEx":private]=>
+      int(3)
+      ["imp1"]=>
+      int(4)
+      ["dyn1"]=>
+      int(5)
+    }
   }
 }
 array(1) {
@@ -663,13 +833,26 @@ array(3) {
     int(42)
   }
   [u"$this"]=>
-  object(ArrayObjectEx)#1 (3) {
-    [0]=>
-    int(1)
-    [u"a"]=>
-    int(25)
+  object(ArrayObjectEx)#%d (6) {
     [u"pub1"]=>
-    int(42)
+    int(1)
+    [u"pro1":protected]=>
+    int(2)
+    [u"pri1":u"ArrayObjectEx":private]=>
+    int(3)
+    [u"imp1"]=>
+    int(4)
+    [u"dyn1"]=>
+    int(5)
+    [u"storage":u"ArrayObject":private]=>
+    array(3) {
+      [0]=>
+      int(1)
+      [u"a"]=>
+      int(25)
+      [u"pub1"]=>
+      int(42)
+    }
   }
 }
 ArrayObjectEx::show()
@@ -687,13 +870,39 @@ array(3) {
     int(42)
   }
   [u"$this"]=>
-  object(ArrayIteratorEx)#2 (3) {
-    [0]=>
+  object(ArrayIteratorEx)#%d (6) {
+    [u"pub2"]=>
     int(1)
-    [u"a"]=>
-    int(25)
-    [u"pub1"]=>
-    int(42)
+    [u"pro2":protected]=>
+    int(2)
+    [u"pri2":u"ArrayIteratorEx":private]=>
+    int(3)
+    [u"imp2"]=>
+    int(4)
+    [u"dyn2"]=>
+    int(5)
+    [u"storage":u"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (6) {
+      [u"pub1"]=>
+      int(1)
+      [u"pro1":protected]=>
+      int(2)
+      [u"pri1":u"ArrayObjectEx":private]=>
+      int(3)
+      [u"imp1"]=>
+      int(4)
+      [u"dyn1"]=>
+      int(5)
+      [u"storage":u"ArrayObject":private]=>
+      array(3) {
+        [0]=>
+        int(1)
+        [u"a"]=>
+        int(25)
+        [u"pub1"]=>
+        int(42)
+      }
+    }
   }
 }
 array(1) {
@@ -723,13 +932,39 @@ array(3) {
     int(42)
   }
   [u"$this"]=>
-  object(ArrayIteratorEx)#3 (3) {
-    [0]=>
+  object(ArrayIteratorEx)#%d (6) {
+    [u"pub2"]=>
     int(1)
-    [u"a"]=>
-    int(25)
-    [u"pub1"]=>
-    int(42)
+    [u"pro2":protected]=>
+    int(2)
+    [u"pri2":u"ArrayIteratorEx":private]=>
+    int(3)
+    [u"imp2"]=>
+    int(4)
+    [u"dyn2"]=>
+    int(5)
+    [u"storage":u"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (6) {
+      [u"pub1"]=>
+      int(1)
+      [u"pro1":protected]=>
+      int(2)
+      [u"pri1":u"ArrayObjectEx":private]=>
+      int(3)
+      [u"imp1"]=>
+      int(4)
+      [u"dyn1"]=>
+      int(5)
+      [u"storage":u"ArrayObject":private]=>
+      array(3) {
+        [0]=>
+        int(1)
+        [u"a"]=>
+        int(25)
+        [u"pub1"]=>
+        int(42)
+      }
+    }
   }
 }
 array(1) {
@@ -775,7 +1010,7 @@ array(3) {
     int(5)
   }
   [u"$this"]=>
-  object(ArrayObjectEx)#1 (5) {
+  object(ArrayObjectEx)#%d (6) {
     [u"pub1"]=>
     int(1)
     [u"pro1":protected]=>
@@ -786,6 +1021,15 @@ array(3) {
     int(4)
     [u"dyn1"]=>
     int(5)
+    [u"storage":u"ArrayObject":private]=>
+    array(3) {
+      [0]=>
+      int(1)
+      [u"a"]=>
+      int(25)
+      [u"pub1"]=>
+      int(42)
+    }
   }
 }
 ArrayObjectEx::show()
@@ -809,7 +1053,7 @@ array(3) {
     int(5)
   }
   [u"$this"]=>
-  object(ArrayIteratorEx)#3 (5) {
+  object(ArrayIteratorEx)#%d (6) {
     [u"pub2"]=>
     int(1)
     [u"pro2":protected]=>
@@ -820,6 +1064,28 @@ array(3) {
     int(4)
     [u"dyn2"]=>
     int(5)
+    [u"storage":u"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (6) {
+      [u"pub1"]=>
+      int(1)
+      [u"pro1":protected]=>
+      int(2)
+      [u"pri1":u"ArrayObjectEx":private]=>
+      int(3)
+      [u"imp1"]=>
+      int(4)
+      [u"dyn1"]=>
+      int(5)
+      [u"storage":u"ArrayObject":private]=>
+      array(3) {
+        [0]=>
+        int(1)
+        [u"a"]=>
+        int(25)
+        [u"pub1"]=>
+        int(42)
+      }
+    }
   }
 }
 array(1) {
@@ -855,7 +1121,7 @@ array(3) {
     int(5)
   }
   [u"$this"]=>
-  object(ArrayIteratorEx)#2 (5) {
+  object(ArrayIteratorEx)#%d (6) {
     [u"pub2"]=>
     int(1)
     [u"pro2":protected]=>
@@ -866,6 +1132,28 @@ array(3) {
     int(4)
     [u"dyn2"]=>
     int(5)
+    [u"storage":u"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (6) {
+      [u"pub1"]=>
+      int(1)
+      [u"pro1":protected]=>
+      int(2)
+      [u"pri1":u"ArrayObjectEx":private]=>
+      int(3)
+      [u"imp1"]=>
+      int(4)
+      [u"dyn1"]=>
+      int(5)
+      [u"storage":u"ArrayObject":private]=>
+      array(3) {
+        [0]=>
+        int(1)
+        [u"a"]=>
+        int(25)
+        [u"pub1"]=>
+        int(42)
+      }
+    }
   }
 }
 array(1) {
@@ -913,7 +1201,7 @@ array(3) {
     int(5)
   }
   [u"$this"]=>
-  object(ArrayObjectEx)#1 (5) {
+  object(ArrayObjectEx)#%d (5) {
     [u"pub1"]=>
     int(1)
     [u"pro1":protected]=>
@@ -945,17 +1233,30 @@ array(3) {
     int(5)
   }
   [u"$this"]=>
-  object(ArrayIteratorEx)#2 (5) {
-    [u"pub1"]=>
+  object(ArrayIteratorEx)#%d (6) {
+    [u"pub2"]=>
     int(1)
-    [u"pro1":protected]=>
+    [u"pro2":protected]=>
     int(2)
-    [u"pri1":u"ArrayObjectEx":private]=>
+    [u"pri2":u"ArrayIteratorEx":private]=>
     int(3)
-    [u"imp1"]=>
+    [u"imp2"]=>
     int(4)
-    [u"dyn1"]=>
+    [u"dyn2"]=>
     int(5)
+    [u"storage":u"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (5) {
+      [u"pub1"]=>
+      int(1)
+      [u"pro1":protected]=>
+      int(2)
+      [u"pri1":u"ArrayObjectEx":private]=>
+      int(3)
+      [u"imp1"]=>
+      int(4)
+      [u"dyn1"]=>
+      int(5)
+    }
   }
 }
 array(1) {
@@ -989,17 +1290,30 @@ array(3) {
     int(5)
   }
   [u"$this"]=>
-  object(ArrayIteratorEx)#3 (5) {
-    [u"pub1"]=>
+  object(ArrayIteratorEx)#%d (6) {
+    [u"pub2"]=>
     int(1)
-    [u"pro1":protected]=>
+    [u"pro2":protected]=>
     int(2)
-    [u"pri1":u"ArrayObjectEx":private]=>
+    [u"pri2":u"ArrayIteratorEx":private]=>
     int(3)
-    [u"imp1"]=>
+    [u"imp2"]=>
     int(4)
-    [u"dyn1"]=>
+    [u"dyn2"]=>
     int(5)
+    [u"storage":u"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (5) {
+      [u"pub1"]=>
+      int(1)
+      [u"pro1":protected]=>
+      int(2)
+      [u"pri1":u"ArrayObjectEx":private]=>
+      int(3)
+      [u"imp1"]=>
+      int(4)
+      [u"dyn1"]=>
+      int(5)
+    }
   }
 }
 array(1) {
@@ -1045,7 +1359,7 @@ array(3) {
     int(5)
   }
   [u"$this"]=>
-  object(ArrayObjectEx)#1 (5) {
+  object(ArrayObjectEx)#%d (5) {
     [u"pub1"]=>
     int(1)
     [u"pro1":protected]=>
@@ -1079,7 +1393,7 @@ array(3) {
     int(5)
   }
   [u"$this"]=>
-  object(ArrayIteratorEx)#3 (5) {
+  object(ArrayIteratorEx)#%d (6) {
     [u"pub2"]=>
     int(1)
     [u"pro2":protected]=>
@@ -1090,6 +1404,19 @@ array(3) {
     int(4)
     [u"dyn2"]=>
     int(5)
+    [u"storage":u"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (5) {
+      [u"pub1"]=>
+      int(1)
+      [u"pro1":protected]=>
+      int(2)
+      [u"pri1":u"ArrayObjectEx":private]=>
+      int(3)
+      [u"imp1"]=>
+      int(4)
+      [u"dyn1"]=>
+      int(5)
+    }
   }
 }
 array(1) {
@@ -1125,7 +1452,7 @@ array(3) {
     int(5)
   }
   [u"$this"]=>
-  object(ArrayIteratorEx)#2 (5) {
+  object(ArrayIteratorEx)#%d (6) {
     [u"pub2"]=>
     int(1)
     [u"pro2":protected]=>
@@ -1136,6 +1463,19 @@ array(3) {
     int(4)
     [u"dyn2"]=>
     int(5)
+    [u"storage":u"ArrayIterator":private]=>
+    object(ArrayObjectEx)#%d (5) {
+      [u"pub1"]=>
+      int(1)
+      [u"pro1":protected]=>
+      int(2)
+      [u"pri1":u"ArrayObjectEx":private]=>
+      int(3)
+      [u"imp1"]=>
+      int(4)
+      [u"dyn1"]=>
+      int(5)
+    }
   }
 }
 array(1) {

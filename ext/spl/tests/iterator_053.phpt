@@ -290,26 +290,29 @@ array(2) {
     string(1) "8"
   }
 }
-object(ArrayIterator)#%d (9) {
-  [0]=>
-  %s(1) "1"
-  [1]=>
-  %s(3) "1,2"
-  [2]=>
-  %s(5) "1,2,3"
-  [3]=>
-  %s(0) ""
-  [4]=>
-  NULL
-  [5]=>
-  array(0) {
+object(ArrayIterator)#%d (1) {
+  ["storage":"ArrayIterator":private]=>
+  array(9) {
+    [0]=>
+    %s(1) "1"
+    [1]=>
+    %s(3) "1,2"
+    [2]=>
+    %s(5) "1,2,3"
+    [3]=>
+    %s(0) ""
+    [4]=>
+    NULL
+    [5]=>
+    array(0) {
+    }
+    [6]=>
+    %s(6) "FooBar"
+    [7]=>
+    %s(1) ","
+    [8]=>
+    %s(2) ",,"
   }
-  [6]=>
-  %s(6) "FooBar"
-  [7]=>
-  %s(1) ","
-  [8]=>
-  %s(2) ",,"
 }
 ===DONE===
 --UEXPECTF--
@@ -556,25 +559,28 @@ array(2) {
     unicode(1) "8"
   }
 }
-object(ArrayIterator)#%d (9) {
-  [0]=>
-  unicode(1) "1"
-  [1]=>
-  unicode(3) "1,2"
-  [2]=>
-  unicode(5) "1,2,3"
-  [3]=>
-  unicode(0) ""
-  [4]=>
-  NULL
-  [5]=>
-  array(0) {
+object(ArrayIterator)#%d (1) {
+  [u"storage":u"ArrayIterator":private]=>
+  array(9) {
+    [0]=>
+    unicode(1) "1"
+    [1]=>
+    unicode(3) "1,2"
+    [2]=>
+    unicode(5) "1,2,3"
+    [3]=>
+    unicode(0) ""
+    [4]=>
+    NULL
+    [5]=>
+    array(0) {
+    }
+    [6]=>
+    unicode(6) "FooBar"
+    [7]=>
+    unicode(1) ","
+    [8]=>
+    unicode(2) ",,"
   }
-  [6]=>
-  unicode(6) "FooBar"
-  [7]=>
-  unicode(1) ","
-  [8]=>
-  unicode(2) ",,"
 }
 ===DONE===

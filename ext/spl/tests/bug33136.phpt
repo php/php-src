@@ -66,9 +66,20 @@ Collection::offsetGet(foo)
 string(3) "baz"
 Collection Object
 (
-    [0] => foo
-    [1] => bar
-    [foo] => baz
+    [data:Collection:private] => Array
+        (
+            [0] => foo
+            [1] => bar
+            [foo] => baz
+        )
+
+    [storage:ArrayObject:private] => Array
+        (
+            [0] => foo
+            [1] => bar
+            [foo] => baz
+        )
+
 )
 int(3)
 ===DONE===
@@ -88,9 +99,20 @@ Collection::offsetGet(foo)
 unicode(3) "baz"
 Collection Object
 (
-    [0] => foo
-    [1] => bar
-    [foo] => baz
+    [data:Collection:private] => Array
+        (
+            [0] => foo
+            [1] => bar
+            [foo] => baz
+        )
+
+    [storage:ArrayObject:private] => Array
+        (
+            [0] => foo
+            [1] => bar
+            [foo] => baz
+        )
+
 )
 int(3)
 ===DONE===
