@@ -122,9 +122,9 @@ static HashTable* spl_object_storage_debug_infos(zval *obj, int *is_temp TSRMLS_
 	HashTable *rv, *props;
 	HashPosition pos;
 	zval *tmp, *storage, **entry;
-	char md5str[33], *name;
+	char md5str[33];
 	int name_len;
-	zstr zname, zclass, zprop;
+	zstr zname;
 
 	*is_temp = 1;
 
@@ -145,19 +145,9 @@ static HashTable* spl_object_storage_debug_infos(zval *obj, int *is_temp TSRMLS_
 		zend_hash_move_forward_ex(&intern->storage, &pos);
 	}
 
-	if (UG(unicode)) {
-		zclass.u = USTR_MAKE("SplObjectStorage");
-		zprop.u = USTR_MAKE("storage");
-		zend_u_mangle_property_name(&zname, &name_len, IS_UNICODE, zclass, sizeof("SplObjectStorage")-1, zprop, sizeof("storage")-1, 0);
-		zend_u_symtable_update(rv, IS_UNICODE, zname, name_len+1, &storage, sizeof(zval *), NULL);
-		efree(zname.v);
-		efree(zclass.v);
-		efree(zprop.v);
-	} else {
-		zend_mangle_property_name(&name, &name_len, "SplObjectStorage", sizeof("SplObjectStorage")-1, "storage", sizeof("storage")-1, 0);
-		zend_symtable_update(rv, name, name_len+1, &storage, sizeof(zval *), NULL);
-		efree(name);
-	}
+	zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1, &name_len TSRMLS_CC);
+	zend_u_symtable_update(rv, ZEND_STR_TYPE, zname, name_len+1, &storage, sizeof(zval *), NULL);
+	efree(zname.v);
 
 	return rv;
 }
