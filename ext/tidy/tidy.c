@@ -729,14 +729,22 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type, void *extra TSR
 		case IS_STRING:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
 			tidyBufInit(&buf);
-			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
-			ZVAL_STRINGL(out, (char *) buf.bp, buf.size, 0);
+			if (obj->ptdoc) {
+				tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
+				ZVAL_STRINGL(out, (char *) buf.bp, buf.size-1, 0);
+			} else {
+				ZVAL_EMPTY_STRING(out);
+			}
 			break;
 
 		case IS_UNICODE:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
-			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
-			ZVAL_U_STRINGL(obj->converter->conv, out, (char *) buf.bp, buf.size, 0);
+			if (obj->ptdoc) {
+				tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
+				ZVAL_U_STRINGL(obj->converter->conv, out, (char *) buf.bp, buf.size-1, 0);
+			} else {
+				ZVAL_EMPTY_UNICODE(out);
+			}
 			break;
 
 		default:
