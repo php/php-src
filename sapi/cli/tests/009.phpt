@@ -5,7 +5,7 @@ using invalid combinations of cmdline options
 --FILE--
 <?php
 
-$php = $_ENV['TEST_PHP_EXECUTABLE'];
+$php = getenv('TEST_PHP_EXECUTABLE');
 
 var_dump(`"$php" -n -c -r 'echo hello;'`);
 var_dump(`"$php" -n -a -r 'echo hello;'`);

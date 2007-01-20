@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$php = $_ENV['TEST_PHP_EXECUTABLE'];
+$php = getenv('TEST_PHP_EXECUTABLE');
 
 $filename_txt = dirname(__FILE__)."/013.test.txt";
 file_put_contents($filename_txt, "test\nfile\ncontents\n");
