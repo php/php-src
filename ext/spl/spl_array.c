@@ -624,6 +624,60 @@ static HashTable *spl_array_get_properties(zval *object TSRMLS_DC) /* {{{ */
 	return spl_array_get_hash_table(intern, 1 TSRMLS_CC);
 } /* }}} */
 
+static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{ */
+{
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(obj TSRMLS_CC);
+	HashTable *rv;
+	zval *tmp, *storage;
+	int name_len, class_len, prop_len;
+	zstr zname, zclass, zprop;
+
+	if (HASH_OF(intern->array) == intern->std.properties) {
+		*is_temp = 0;
+		return intern->std.properties;
+	} else {
+		*is_temp = 1;
+	
+		ALLOC_HASHTABLE(rv);
+		ZEND_INIT_SYMTABLE_EX(rv, zend_hash_num_elements(intern->std.properties) + 1, 0);
+	
+		zend_hash_copy(rv, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	
+		//MAKE_STD_ZVAL(storage);
+		//array_init(storage);
+		//spl_instantiate(zend_standard_class_def, &storage, 1 TSRMLS_CC);
+		//zend_hash_copy(HASH_OF(storage), HASH_OF(intern->array), (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+		storage = intern->array;
+		zval_add_ref(&storage);
+	
+		if (Z_OBJ_HT_P(obj) == &spl_handler_ArrayIterator) {
+			zclass.s = "ArrayIterator";
+			class_len = sizeof("ArrayIterator") - 1;
+		} else {
+			zclass.s = "ArrayObject";
+			class_len = sizeof("ArrayObject") - 1;
+		}
+		zprop.s = "storage";
+		prop_len = sizeof("storage") - 1;
+		if (UG(unicode)) {
+			zclass.u = zend_ascii_to_unicode(zclass.s, class_len + 1 ZEND_FILE_LINE_CC);
+			zprop.u = zend_ascii_to_unicode(zprop.s, prop_len + 1 ZEND_FILE_LINE_CC);
+			zend_u_mangle_property_name(&zname, &name_len, IS_UNICODE, zclass, class_len, zprop, prop_len, 0);
+			zend_u_symtable_update(rv, IS_UNICODE, zname, name_len+1, &storage, sizeof(zval *), NULL);
+			efree(zname.v);
+			efree(zclass.v);
+			efree(zprop.v);
+		} else {
+			zend_mangle_property_name(&zname.s, &name_len, zclass.s, class_len, zprop.s, prop_len, 0);
+			zend_symtable_update(rv, zname.s, name_len+1, &storage, sizeof(zval *), NULL);
+			efree(zname.v);
+		}
+	
+		return rv;
+	}
+}
+/* }}} */
+
 static zval *spl_array_read_property(zval *object, zval *member, int type TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -1512,6 +1566,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.count_elements = spl_array_object_count_elements;
 
 	spl_handler_ArrayObject.get_properties = spl_array_get_properties;
+	spl_handler_ArrayObject.get_debug_info = spl_array_get_debug_info;
 	spl_handler_ArrayObject.read_property = spl_array_read_property;
 	spl_handler_ArrayObject.write_property = spl_array_write_property;
 	spl_handler_ArrayObject.get_property_ptr_ptr = spl_array_get_property_ptr_ptr;

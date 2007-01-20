@@ -49,11 +49,15 @@ test Object
 )
 ArrayObject Object
 (
-    [pub] => public
-    [pro:protected] => protected
-    [pri:test:private] => private
-    [imp] => implicit
-    [dyn] => dynamic
+    [storage:ArrayObject:private] => test Object
+        (
+            [pub] => public
+            [pro:protected] => protected
+            [pri:test:private] => private
+            [imp] => implicit
+            [dyn] => dynamic
+        )
+
 )
 pub => public
 imp => implicit

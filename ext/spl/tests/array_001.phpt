@@ -38,11 +38,14 @@ var_dump($ar);
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-object(ArrayObject)#1 (2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
+object(ArrayObject)#1 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(1)
+  }
 }
 int(2)
 int(3)
@@ -61,17 +64,20 @@ array(6) {
   int(5)
 }
 string(1) "a"
-object(ArrayObject)#1 (5) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-  ["a"]=>
-  string(1) "a"
+object(ArrayObject)#1 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(5) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(1)
+    [2]=>
+    int(2)
+    [3]=>
+    int(3)
+    ["a"]=>
+    string(1) "a"
+  }
 }
 int(0)
 
@@ -84,29 +90,38 @@ NULL
 Notice: Undefined offset:  7 in %sarray_001.php on line %d
 
 Notice: Undefined index:  c in %sarray_001.php on line %d
-object(ArrayObject)#1 (2) {
-  [0]=>
-  int(0)
-  [2]=>
-  int(2)
+object(ArrayObject)#1 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [2]=>
+    int(2)
+  }
 }
-object(ArrayObject)#1 (4) {
-  [0]=>
-  int(0)
-  [2]=>
-  int(2)
-  [4]=>
-  string(1) "3"
-  [5]=>
-  int(4)
+object(ArrayObject)#1 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(4) {
+    [0]=>
+    int(0)
+    [2]=>
+    int(2)
+    [4]=>
+    string(1) "3"
+    [5]=>
+    int(4)
+  }
 }
 ===DONE===
 --UEXPECTF--
-object(ArrayObject)#1 (2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
+object(ArrayObject)#1 (1) {
+  [u"storage":u"ArrayObject":private]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(1)
+  }
 }
 int(2)
 int(3)
@@ -125,17 +140,20 @@ array(6) {
   int(5)
 }
 unicode(1) "a"
-object(ArrayObject)#1 (5) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-  [u"a"]=>
-  unicode(1) "a"
+object(ArrayObject)#1 (1) {
+  [u"storage":u"ArrayObject":private]=>
+  array(5) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(1)
+    [2]=>
+    int(2)
+    [3]=>
+    int(3)
+    [u"a"]=>
+    unicode(1) "a"
+  }
 }
 int(0)
 
@@ -148,20 +166,26 @@ NULL
 Notice: Undefined offset:  7 in %sarray_001.php on line %d
 
 Notice: Undefined index:  c in %sarray_001.php on line %d
-object(ArrayObject)#1 (2) {
-  [0]=>
-  int(0)
-  [2]=>
-  int(2)
+object(ArrayObject)#1 (1) {
+  [u"storage":u"ArrayObject":private]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [2]=>
+    int(2)
+  }
 }
-object(ArrayObject)#1 (4) {
-  [0]=>
-  int(0)
-  [2]=>
-  int(2)
-  [4]=>
-  unicode(1) "3"
-  [5]=>
-  int(4)
+object(ArrayObject)#1 (1) {
+  [u"storage":u"ArrayObject":private]=>
+  array(4) {
+    [0]=>
+    int(0)
+    [2]=>
+    int(2)
+    [4]=>
+    unicode(1) "3"
+    [5]=>
+    int(4)
+  }
 }
 ===DONE===

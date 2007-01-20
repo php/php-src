@@ -76,21 +76,24 @@ array(2) {
   [1]=>
   string(1) "0"
 }
-object(ArrayIterator)#%d (7) {
-  [1]=>
-  int(0)
-  ["1,2"]=>
-  int(1)
-  ["1,2,3"]=>
-  int(2)
-  [0]=>
-  int(3)
-  ["FooBar"]=>
-  int(4)
-  [","]=>
-  int(5)
-  [",,"]=>
-  int(6)
+object(ArrayIterator)#%d (1) {
+  ["storage":"ArrayIterator":private]=>
+  array(7) {
+    [1]=>
+    int(0)
+    ["1,2"]=>
+    int(1)
+    ["1,2,3"]=>
+    int(2)
+    [0]=>
+    int(3)
+    ["FooBar"]=>
+    int(4)
+    [","]=>
+    int(5)
+    [",,"]=>
+    int(6)
+  }
 }
 ===DONE===
 --UEXPECTF--
@@ -140,20 +143,23 @@ array(2) {
   [1]=>
   unicode(1) "0"
 }
-object(ArrayIterator)#1 (7) {
-  [1]=>
-  int(0)
-  [u"1,2"]=>
-  int(1)
-  [u"1,2,3"]=>
-  int(2)
-  [0]=>
-  int(3)
-  [u"FooBar"]=>
-  int(4)
-  [u","]=>
-  int(5)
-  [u",,"]=>
-  int(6)
+object(ArrayIterator)#1 (1) {
+  [u"storage":u"ArrayIterator":private]=>
+  array(7) {
+    [1]=>
+    int(0)
+    [u"1,2"]=>
+    int(1)
+    [u"1,2,3"]=>
+    int(2)
+    [0]=>
+    int(3)
+    [u"FooBar"]=>
+    int(4)
+    [u","]=>
+    int(5)
+    [u",,"]=>
+    int(6)
+  }
 }
 ===DONE===
