@@ -1,9 +1,9 @@
 Version 1.0.0
 
  X make permissions in the lowest bits of flags to simplify using them [Greg]
- * implement ini handler for phar.readonly and phar.require_hash that allows enabling it on
+ X implement ini handler for phar.readonly and phar.require_hash that allows enabling it on
    PHP_INI_ALL if it is disabled in the system, but does not allow disabling it
-   if it is enabled in the system
+   if it is enabled in the system [Greg]
  * implement metadata in manifest as [type32][len16][metadata...] where 0 type is
    used to finish metadata for this file
  * if SPL is disabled, disable the Phar class
