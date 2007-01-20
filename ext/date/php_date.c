@@ -744,7 +744,7 @@ static const UChar sLongPat [] = { 0x004D, 0x004D, 0x004D, 0x004D, 0x0020,
 		status = U_ZERO_ERROR;                                                 \
 		j = udat_getSymbols(fmt, (type), i, array[i], 15, &status);            \
 		                                                                       \
-		tmp->var[i + (cor)] = array[i];                                        \
+		tmp->var[i + (cor)] = (char*)array[i];                                 \
 	}
 
 static php_locale_data* date_get_locale_data(char *locale)
@@ -754,7 +754,7 @@ static php_locale_data* date_get_locale_data(char *locale)
 	UErrorCode status = 0;
 	int32_t count, i, j;
 	UChar *array[15];
-	UChar *pat = sLongPat;
+	UChar *pat = (UChar*)sLongPat;
 	int32_t len = 9;
 
 	fmt = udat_open(UDAT_IGNORE,UDAT_IGNORE, locale, NULL, 0, pat, len, &status);
@@ -794,7 +794,7 @@ static inline int date_spprintf(char **str, size_t size TSRMLS_DC, const char *f
 	va_start(ap, format);
 
 	if (UG(unicode)) {
-		c = vuspprintf(str, size, format, ap) * 2;
+		c = vuspprintf((UChar**)str, size, format, ap) * sizeof(UChar);
 	} else {
 		c = vspprintf(str, size, format, ap);
 	}
@@ -821,7 +821,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 
 	if (!format_len) {
 		if (UG(unicode)) {
-			return eustrdup(EMPTY_STR);
+			return (char*)eustrdup(EMPTY_STR);
 		} else {		
 			return estrdup("");
 		}
@@ -977,7 +977,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	string = php_format_date(format, format_len, ts, localtime TSRMLS_CC);
 
 	if (UG(unicode)) {
-		RETVAL_UNICODE(string, 0);
+		RETVAL_UNICODE((UChar*)string, 0);
 	} else {
 		RETVAL_STRING(string, 0);
 	}
