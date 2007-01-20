@@ -88,6 +88,9 @@ int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int c
 	PHP_MALIAS(spl_ ## alias_class, function_name, alias_function, arg_info, flags)
 #endif /* PHP_FUNCTIONS_H */
 
+/* caller must efree(return.v) */
+zstr spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len, int *name_len TSRMLS_DC);
+
 /*
  * Local Variables:
  * c-basic-offset: 4

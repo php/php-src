@@ -456,6 +456,57 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 	return NULL;
 } /* }}} */
 
+static HashTable* spl_filesystem_object_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{{ */
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(obj TSRMLS_CC);
+	HashTable *rv;
+	zval *tmp, zrv;
+	zstr pnstr;
+	int  pnlen;
+	char stmp[2];
+
+	*is_temp = 1;
+
+	ALLOC_HASHTABLE(rv);
+	ZEND_INIT_SYMTABLE_EX(rv, zend_hash_num_elements(intern->std.properties) + 3, 0);
+
+	INIT_PZVAL(&zrv);
+	Z_ARRVAL(zrv) = rv;
+	
+	zend_hash_copy(rv, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "pathName", sizeof("pathName")-1, &pnlen TSRMLS_CC);
+	add_u_assoc_zstrl_ex(&zrv, ZEND_STR_TYPE, pnstr, pnlen+1, intern->path_type, intern->path, intern->path_len, 1);
+	efree(pnstr.v);
+	if (intern->file_name.v) {
+		pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "fileName", sizeof("fileName")-1, &pnlen TSRMLS_CC);
+		add_u_assoc_zstrl_ex(&zrv, ZEND_STR_TYPE, pnstr, pnlen+1, intern->file_name_type, intern->file_name, intern->file_name_len, 1);
+		efree(pnstr.v);
+	}
+	if (intern->type == SPL_FS_DIR && intern->u.dir.sub_path.v) {
+		pnstr = spl_gen_private_prop_name(spl_ce_RecursiveDirectoryIterator, "subPathName", sizeof("subPathName")-1, &pnlen TSRMLS_CC);
+		add_u_assoc_zstrl_ex(&zrv, ZEND_STR_TYPE, pnstr, pnlen+1, intern->u.dir.sub_path_type, intern->u.dir.sub_path, intern->u.dir.sub_path_len, 1);
+		efree(pnstr.v);
+	}
+	if (intern->type == SPL_FS_FILE) {
+		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "openMode", sizeof("openMode")-1, &pnlen TSRMLS_CC);
+		add_u_assoc_stringl_ex(&zrv, ZEND_STR_TYPE, pnstr, pnlen+1, intern->u.file.open_mode, intern->u.file.open_mode_len, 1);
+		efree(pnstr.v);
+		stmp[1] = '\0';
+		stmp[0] = intern->u.file.delimiter;
+		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "delimiter", sizeof("delimiter")-1, &pnlen TSRMLS_CC);
+		add_u_assoc_stringl_ex(&zrv, ZEND_STR_TYPE, pnstr, pnlen+1, stmp, 1, 1);
+		efree(pnstr.v);
+		stmp[0] = intern->u.file.enclosure;
+		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "enclosure", sizeof("enclosure")-1, &pnlen TSRMLS_CC);
+		add_u_assoc_stringl_ex(&zrv, ZEND_STR_TYPE, pnstr, pnlen+1, stmp, 1, 1);
+		efree(pnstr.v);
+	}
+
+	return rv;
+}
+/* }}}} */
+
 /* {{{ proto void DirectoryIterator::__construct(string path) U
  Cronstructs a new dir iterator from a path. */
 SPL_METHOD(DirectoryIterator, __construct)
@@ -2233,6 +2284,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	memcpy(&spl_filesystem_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	spl_filesystem_object_handlers.clone_obj = spl_filesystem_object_clone;
 	spl_filesystem_object_handlers.cast_object = spl_filesystem_object_cast;
+	spl_filesystem_object_handlers.get_debug_info = spl_filesystem_object_get_debug_info;
 
 	REGISTER_SPL_SUB_CLASS_EX(DirectoryIterator, SplFileInfo, spl_filesystem_object_new, spl_DirectoryIterator_functions);
 	zend_class_implements(spl_ce_DirectoryIterator TSRMLS_CC, 1, zend_ce_iterator);

@@ -629,8 +629,9 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(obj TSRMLS_CC);
 	HashTable *rv;
 	zval *tmp, *storage;
-	int name_len, class_len, prop_len;
-	zstr zname, zclass, zprop;
+	int name_len;
+	zstr zname;
+	zend_class_entry *base;
 
 	if (HASH_OF(intern->array) == intern->std.properties) {
 		*is_temp = 0;
@@ -646,28 +647,10 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 		storage = intern->array;
 		zval_add_ref(&storage);
 	
-		if (Z_OBJ_HT_P(obj) == &spl_handler_ArrayIterator) {
-			zclass.s = "ArrayIterator";
-			class_len = sizeof("ArrayIterator") - 1;
-		} else {
-			zclass.s = "ArrayObject";
-			class_len = sizeof("ArrayObject") - 1;
-		}
-		zprop.s = "storage";
-		prop_len = sizeof("storage") - 1;
-		if (UG(unicode)) {
-			zclass.u = zend_ascii_to_unicode(zclass.s, class_len + 1 ZEND_FILE_LINE_CC);
-			zprop.u = zend_ascii_to_unicode(zprop.s, prop_len + 1 ZEND_FILE_LINE_CC);
-			zend_u_mangle_property_name(&zname, &name_len, IS_UNICODE, zclass, class_len, zprop, prop_len, 0);
-			zend_u_symtable_update(rv, IS_UNICODE, zname, name_len+1, &storage, sizeof(zval *), NULL);
-			efree(zname.v);
-			efree(zclass.v);
-			efree(zprop.v);
-		} else {
-			zend_mangle_property_name(&zname.s, &name_len, zclass.s, class_len, zprop.s, prop_len, 0);
-			zend_symtable_update(rv, zname.s, name_len+1, &storage, sizeof(zval *), NULL);
-			efree(zname.v);
-		}
+		base = (Z_OBJ_HT_P(obj) == &spl_handler_ArrayIterator) ? spl_ce_ArrayIterator : spl_ce_ArrayObject;
+		zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1, &name_len TSRMLS_CC);
+		zend_u_symtable_update(rv, ZEND_STR_TYPE, zname, name_len+1, &storage, sizeof(zval *), NULL);
+		efree(zname.v);
 	
 		return rv;
 	}
