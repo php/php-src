@@ -715,8 +715,10 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 		case IS_STRING:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
 			tidyBufInit(&buf);
-			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
-			ZVAL_STRINGL(out, buf.bp, buf.size-1, TRUE);
+			if (obj->ptdoc) {
+				tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
+			}
+			ZVAL_STRINGL(out, buf.bp, buf.size ? buf.size-1 : 0, TRUE);
 			tidyBufFree(&buf);
 			break;
 
