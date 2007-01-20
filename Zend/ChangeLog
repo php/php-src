@@ -1,3 +1,9 @@
+2007-01-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c
+      zend_operators.h:
+      - Add Z_OBJDEBUG[_P[P]] helper macros
+
 2007-01-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

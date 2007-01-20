@@ -1,3 +1,149 @@
+2007-01-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/php_spl.c
+      ext/spl/php_spl.h
+      ext/spl/spl_observer.c
+      ext/spl/tests/observer_004.phpt
+      ext/spl/tests/observer_005.phpt:
+      - Make use of get_debug_info handler in SplObjectStorage
+
+2007-01-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/imap/config.m4:
+      fix configure check with imap-2001
+
+2007-01-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/var.c:
+      - Use Z_OBJDEBUG_PP()
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_operators.h:
+      - Add Z_OBJDEBUG[_P[P]] helper macros
+
+2007-01-19  Antony Dovgal  <antony@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c:
+      improve readability and use constant instead of its value
+
+    * (PHP_5_2)
+      ext/imap/config.m4:
+      MFH: improve utf8_mime2text() signature detection
+
+    * ext/imap/config.m4:
+      improve utf8_mime2text() signature detection
+      look also for U8T_CANONICAL, which must exist if new signature was
+      detected
+
+    * ext/oci8/tests/array_bind_013.phpt:
+      fix test
+
+2007-01-19  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      INSTALL
+      win32/install.txt:
+      update install instructions from phpdoc XMl sources
+
+2007-01-19  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/openssl/openssl.c
+      ext/openssl/tests/005.phpt
+      ext/openssl/tests/bug38261.phpt:
+      fix accessing public key from x509 resource
+      add test
+      fix test under win32
+
+2007-01-19  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/tidy.c:
+      MFB: fix segfaults with new libtidy
+
+    * (PHP_5_2)
+      ext/tidy/tidy.c:
+      fix segfaults with new libtidy. the patch is backwards compatible
+
+2007-01-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/curl/interface.c:
+      improve the fix
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/interface.c:
+      MFH: fix #40169 (CURLOPT_TCP_NODELAY only available in curl >= 7.11.2)
+
+    * ext/curl/interface.c:
+      fix #40169 (CURLOPT_TCP_NODELAY only available in curl >= 7.11.2)
+
+2007-01-19  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd.c:
+      - MFB: save/restore the alpha blending mode correctly in imagefill and
+          imagefilltoborder
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c:
+      - save/restore the alpha blending mode correctly in imagefill and
+        imagefilltoborder
+
+2007-01-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/streamsfuncs.c
+      ext/standard/user_filters.c:
+      fix #40168
+
+2007-01-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * unicode-progress.txt
+      ext/spl/spl_directory.c
+      ext/spl/spl_iterators.c:
+      - Update unicode progress on SPL, looks like nearly done, actually all is
+        unicode safe by now but a few things need to be added and a few problems
+        be clarified.
+
+    * README.UNICODE-UPGRADES:
+      - Nicer version
+
+    * README.UNICODE-UPGRADES:
+      - Update
+
+    * main/spprintf.c:
+      - Change hardcoded size to lentgh translation to use sizeof(UChar) as
+      suggested by Andrei
+
+    * ext/spl/spl_directory.c
+      ext/spl/tests/bug36258.phpt
+      ext/spl/tests/bug36287.phpt:
+      - A few unicode fixes and tidying
+
+2007-01-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/http_fopen_wrapper.c:
+      Fix win32 build
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.1RC3
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/http_fopen_wrapper.c:
+      
+      Added read-timeout context option "timeout" for HTTP streams.
+      
+
 2007-01-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
