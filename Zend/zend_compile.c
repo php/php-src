@@ -267,7 +267,7 @@ static zend_uint get_temporary_variable(zend_op_array *op_array)
 	return (op_array->T)++ * sizeof(temp_variable);
 }
 
-static int lookup_cv(zend_op_array *op_array, zend_uchar type, zstr name, int name_len)
+static int lookup_cv(zend_op_array *op_array, zend_uchar type, zstr name, int name_len TSRMLS_DC)
 {
 	int i = 0;
 	ulong hash_value = zend_u_inline_hash_func(type, name, name_len+1);
@@ -290,6 +290,7 @@ static int lookup_cv(zend_op_array *op_array, zend_uchar type, zstr name, int na
 	op_array->vars[i].name = name; /* estrndup(name, name_len); */
 	op_array->vars[i].name_len = name_len;
 	op_array->vars[i].hash_value = hash_value;
+	op_array->vars[i].fetch_type = zend_u_is_auto_global(type, name, name_len TSRMLS_CC) ? ZEND_FETCH_GLOBAL : ZEND_FETCH_LOCAL;
 	return i;
 }
 
@@ -380,13 +381,12 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	if (varname->op_type == IS_CONST &&
 	    (Z_TYPE(varname->u.constant) == IS_STRING ||
 	     Z_TYPE(varname->u.constant) == IS_UNICODE) &&
-	    !zend_u_is_auto_global(Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant) TSRMLS_CC) &&
 	    !(Z_UNILEN(varname->u.constant) == (sizeof("this")-1) &&
 	      ZEND_U_EQUAL(Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant), "this", sizeof("this")-1)) &&
 	    (CG(active_op_array)->last == 0 ||
 	     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
 		result->op_type = IS_CV;
-		result->u.var = lookup_cv(CG(active_op_array), Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant));
+		result->u.var = lookup_cv(CG(active_op_array), Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant) TSRMLS_CC);
 		result->u.EA.type = 0;
 		return;
 	}

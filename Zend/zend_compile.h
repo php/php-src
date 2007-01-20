@@ -174,6 +174,7 @@ typedef struct _zend_compiled_variable {
 	zstr name;
 	int name_len;
 	ulong hash_value;
+	zend_uint fetch_type;
 } zend_compiled_variable;
 
 struct _zend_op_array {
