@@ -643,10 +643,6 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 	
 		zend_hash_copy(rv, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	
-		//MAKE_STD_ZVAL(storage);
-		//array_init(storage);
-		//spl_instantiate(zend_standard_class_def, &storage, 1 TSRMLS_CC);
-		//zend_hash_copy(HASH_OF(storage), HASH_OF(intern->array), (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 		storage = intern->array;
 		zval_add_ref(&storage);
 	
