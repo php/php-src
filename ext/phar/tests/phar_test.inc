@@ -14,7 +14,7 @@ foreach($files as $name => $cont)
 	$time = isset($ftime) ? $ftime : @mktime(12, 0, 0, 3, 1, 2006);
 	$flags= 0;
 	$perm = 0x000001B6;
-	$meta = array();
+	$meta = NULL;
 
 	// overwrite if array
 	if (is_array($cont))
@@ -33,15 +33,11 @@ foreach($files as $name => $cont)
 	if (empty($ulen)) $ulen = strlen($cont);
 	if (empty($clen)) $clen = strlen($comp);
 	if (empty($crc32))$crc32= crc32($cont);
+	if (isset($meta)) $meta = serialize($meta);
 
 	// write manifest entry
 	$manifest .= pack('V', strlen($name)) . $name;
-	$manifest .= pack('VVVVV', $ulen, $time, $clen, $crc32, $flags|$perm);
-	foreach($meta as $type => $data)
-	{
-		$manifest .= pack('Vv', $type, strlen($data)) . $data;
-	}
-	$manifest .= pack('V', 0);
+	$manifest .= pack('VVVVVV', $ulen, $time, $clen, $crc32, $flags|$perm, strlen($meta)) . $meta;
 
 	// globals
 	$gflags |= $flags;

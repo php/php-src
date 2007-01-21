@@ -39,6 +39,8 @@
 #include "ext/standard/crc32.h"
 #include "ext/standard/md5.h"
 #include "ext/standard/sha1.h"
+#include "ext/standard/php_var.h"
+#include "ext/standard/php_smart_str.h"
 #if HAVE_SPL
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
