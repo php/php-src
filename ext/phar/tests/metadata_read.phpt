@@ -13,7 +13,6 @@ $file = "<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['c'] = array('cont' => '*', 'meta' => array(1, 'hi there'));
-
 include 'phar_test.inc';
 
 var_dump(file_get_contents($pname.'/c'));
