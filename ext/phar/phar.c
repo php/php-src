@@ -391,6 +391,7 @@ static int phar_parse_metadata(php_stream *fp, char **buffer, char *endbuffer, z
 	php_uint32 datatype;
 	php_uint16 len;
 	char *data;
+
 	do {
 		/* for each meta-data, add an array index to the metadata array
 		   if the index already exists, convert to a sub-array */
@@ -404,18 +405,18 @@ static int phar_parse_metadata(php_stream *fp, char **buffer, char *endbuffer, z
 			memcpy(data, *buffer, len);
 			data[len] = '\0';
 		}
-		if (SUCCESS == zend_hash_index_find(metadata->value.ht, datatype, (void**)&found)) {
+		if (SUCCESS == zend_hash_index_find(HASH_OF(metadata), datatype, (void**)&found)) {
 			if (Z_TYPE_P(found) == IS_ARRAY) {
-				add_next_index_stringl(dataarray, data, len, 0);
+				dataarray = found;
 			} else {
 				MAKE_STD_ZVAL(dataarray);
 				array_init(dataarray);
 				add_next_index_zval(dataarray, found);
-				add_next_index_stringl(dataarray, data, len, 0); 
 			}
 		} else {
-			add_index_stringl(metadata, datatype, data, len, 0);
+			dataarray = metadata;
 		}
+		add_index_stringl(dataarray, datatype, data, len, 0);
 	} while (*(php_uint32 *) *buffer && *buffer < endbuffer);
 	*buffer += 4;
 	return SUCCESS;
