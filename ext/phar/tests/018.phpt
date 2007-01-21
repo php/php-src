@@ -16,7 +16,8 @@ $files = array();
 $files['a'] = 'a';
 $files['b/a'] = 'b';
 include 'phar_test.inc';
-include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+
+include $fname;
 $dir = opendir('phar://hio/');
 while (false !== ($a = readdir($dir))) {
 	var_dump($a);

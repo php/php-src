@@ -6,6 +6,8 @@ Phar::mapPhar filesize too small in manifest
 phar.require_hash=0
 --FILE--
 <?php
+$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$pname = 'phar://' . $fname;
 $file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
@@ -13,22 +15,10 @@ __HALT_COMPILER(); ?>";
 // compressed file length does not match incompressed lentgh for an uncompressed file
 
 $files = array();
-$files['a'] = 'a';
-$manifest = '';
-foreach($files as $name => $cont) {
-	$len = strlen($cont);
-	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVVV', $len, time(), $len+1, crc32($cont), 0x00000000, 0);
-}
-$alias = 'hio';
-$manifest = pack('VnVV', count($files), 0x0900, 0x00000000, strlen($alias)) . $alias . $manifest;
-$file .= pack('V', strlen($manifest)) . $manifest;
-foreach($files as $cont)
-{
-	$file .= $cont;
-}
+$files['a'] = array('cont'=>'a','ulen'=>1,'clen'=>2);;
+include 'phar_test.inc';
 
-file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
-include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+include $fname;
 echo file_get_contents('phar://hio/a');
 ?>
 --CLEAN--
