@@ -663,8 +663,11 @@ static int phar_parse_metadata(php_stream *fp, char **buffer, char *endbuffer, z
 		PHAR_GET_32(*buffer, datatype);
 		PHAR_GET_16(*buffer, len);
 		data = (char *) emalloc(len);
-		if (len != php_stream_read(fp, data, (size_t) len) TSRMLS_CC) {
+		if (endbuffer - *buffer < len) {
+			efree(data);
 			return FAILURE;
+		} else {
+			memcpy(data, *buffer, len);
 		}
 		if (SUCCESS == zend_hash_index_find(metadata->value.ht, datatype, (void**)&found)) {
 			if (Z_TYPE_P(found) == IS_ARRAY) {
@@ -676,10 +679,8 @@ static int phar_parse_metadata(php_stream *fp, char **buffer, char *endbuffer, z
 				add_next_index_stringl(dataarray, data, len, 0); 
 			}
 		} else {
-			MAKE_STD_ZVAL(dataarray);
 			add_index_stringl(metadata, datatype, data, len, 0);
 		}
-		
 	} while (*(php_uint32 *) *buffer && *buffer < endbuffer);
 	*buffer += 4;
 	return SUCCESS;
