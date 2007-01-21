@@ -22,7 +22,7 @@ foreach($files as $name => $cont) {
 	$ulen = strlen($cont[0]);
 	$clen = strlen($cont[1]);
 	$manifest .= pack('V', strlen($name)) . $name 
-	          . pack('VVVVV', $ulen, time(), $clen, crc32($cont[0]), $cont[2]);
+	          . pack('VVVVVV', $ulen, time(), $clen, crc32($cont[0]), $cont[2], 0);
 }
 $alias = 'hio';
 $manifest = pack('VnVV', count($files), 0x0900, 0x00001000, strlen($alias)) . $alias . $manifest;

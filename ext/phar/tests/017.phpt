@@ -16,7 +16,7 @@ $files['a'] = 'abc';
 $manifest = '';
 foreach($files as $name => $cont) {
 	$len = strlen($cont);
-	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVV', $len, time(), $len, crc32($cont), 0x00000001);
+	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVVV', $len, time(), $len, crc32($cont), 0x00000001, 0);
 }
 $alias = 'hio';
 $manifest = pack('VnVV', count($files), 0x0900, 0x00000001, strlen($alias)) . $alias . $manifest;
