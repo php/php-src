@@ -8,7 +8,7 @@ Version 1.0.0
    where 0 type is used to finish metadata for this file [Greg]
  * implement writing out of metadata to new manifest
  X if SPL is disabled, enable only static methods of class Phar and disable 
-   class PharFileInfo completley [Marcus]
+   class PharFileInfo completely [Marcus]
  * implement in-phar locking, so that a file that is opened for reading can't 
    have a handle opened for writing
  * docs on file format/manifest description
