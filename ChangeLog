@@ -1,3 +1,147 @@
+2007-01-20  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_hash.c:
+      catch overflow right away
+
+2007-01-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      main/php_variables.c:
+      Fixed bug #39450 (getenv() fills other super-globals).
+
+2007-01-20  Antony Dovgal  <antony@zend.com>
+
+    * sapi/cli/tests/001.phpt
+      sapi/cli/tests/001.phpt
+      sapi/cli/tests/002.phpt
+      sapi/cli/tests/002.phpt
+      sapi/cli/tests/003.phpt
+      sapi/cli/tests/003.phpt
+      sapi/cli/tests/004.phpt
+      sapi/cli/tests/004.phpt
+      sapi/cli/tests/005.phpt
+      sapi/cli/tests/005.phpt
+      sapi/cli/tests/006.phpt
+      sapi/cli/tests/006.phpt
+      sapi/cli/tests/007.phpt
+      sapi/cli/tests/007.phpt
+      sapi/cli/tests/008.phpt
+      sapi/cli/tests/008.phpt
+      sapi/cli/tests/009.phpt
+      sapi/cli/tests/009.phpt
+      sapi/cli/tests/010-2.phpt
+      sapi/cli/tests/010-2.phpt
+      sapi/cli/tests/010.phpt
+      sapi/cli/tests/010.phpt
+      sapi/cli/tests/011.phpt
+      sapi/cli/tests/011.phpt
+      sapi/cli/tests/012.phpt
+      sapi/cli/tests/012.phpt
+      sapi/cli/tests/013.phpt
+      sapi/cli/tests/013.phpt
+      sapi/cli/tests/014.phpt
+      sapi/cli/tests/014.phpt:
+      use getenv()
+
+2007-01-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c
+      ext/openssl/tests/005.phpt
+      ext/openssl/tests/bug38261.phpt:
+      MFH: fix accessing public key from x509 resource
+      add test
+      fix test under win32
+
+2007-01-20  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c:
+      Resolve autoglobals as global-fetch CVs when possible
+
+2007-01-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/dom/tests/bug38474.phpt:
+      typo in the test name
+
+2007-01-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      TSRM/tsrm_virtual_cwd.c:
+      
+      CS
+
+2007-01-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_functions.c
+      ext/spl/spl_functions.h
+      ext/spl/spl_observer.c
+      ext/spl/tests/dit_001.phpt
+      ext/spl/tests/fileobject_003.phpt:
+      - Mode debug info
+
+    * ext/spl/spl_array.c:
+      - Drop left-over
+
+    * ext/spl/spl_array.c
+      ext/spl/tests/array_001.phpt
+      ext/spl/tests/array_002.phpt
+      ext/spl/tests/array_003.phpt
+      ext/spl/tests/array_007.phpt
+      ext/spl/tests/array_015.phpt
+      ext/spl/tests/array_017.phpt
+      ext/spl/tests/array_018.phpt
+      ext/spl/tests/array_022.phpt
+      ext/spl/tests/bug33136.phpt
+      ext/spl/tests/iterator_042.phpt
+      ext/spl/tests/iterator_049.phpt
+      ext/spl/tests/iterator_049b.phpt
+      ext/spl/tests/iterator_050.phpt
+      ext/spl/tests/iterator_051.phpt
+      ext/spl/tests/iterator_052.phpt
+      ext/spl/tests/iterator_053.phpt
+      ext/spl/tests/iterator_054.phpt
+      ext/spl/tests/iterator_055.phpt:
+      - Make use of get_debug_info() handler in ArrayObject/Iterator
+
+2007-01-20  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/tidy.c
+      ext/tidy/tests/024.phpt
+      ext/tidy/tests/025.phpt
+      ext/tidy/tests/026.phpt:
+      MFB: fix crash & add tests
+
+    * ext/tidy/tests/024.phpt
+      ext/tidy/tests/024.phpt
+      ext/tidy/tests/025.phpt
+      ext/tidy/tests/025.phpt
+      ext/tidy/tests/026.phpt
+      ext/tidy/tests/026.phpt:
+      
+      file 024.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/tidy/tidy.c:
+      fix another crash
+
+    * ext/tidy/tidy.c:
+      MFB: fix crash
+
+    * (PHP_5_2)
+      ext/tidy/tidy.c:
+      fix crash. tests will follow
+
+2007-01-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/date/php_date.c:
+      - Fix warnings
+
 2007-01-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/spl/php_spl.c

@@ -1,3 +1,15 @@
+2007-01-20  Antony Dovgal  <antony@zend.com>
+
+    * zend_hash.c:
+      catch overflow right away
+
+2007-01-20  Sara Golemon  <sara@golemon.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+      Resolve autoglobals as global-fetch CVs when possible
+
 2007-01-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.c
