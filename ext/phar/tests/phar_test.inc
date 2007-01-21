@@ -8,7 +8,7 @@ foreach($files as $name => $cont)
 	$clen = $ulen;
 	$time = isset($ftime) ? $ftime : @mktime(12, 0, 0, 3, 1, 2006);
 	$manifest .= pack('V', strlen($name)) . $name;
-	$manifest .= pack('VVVVV', $ulen, $time, $clen, crc32($cont), 0x000001B6);
+	$manifest .= pack('VVVVVV', $ulen, $time, $clen, crc32($cont), 0x000001B6, 0);
 }
 $alias = 'hio';
 $manifest = pack('VnVV', count($files), 0x0900, 0x00000000, strlen($alias)) . $alias . $manifest;

@@ -15,7 +15,7 @@ $files = array();
 $files['a'] = array('Hello World', pack('H*', '425a6839314159265359d872012f00000157800010400000400080060490002000220686d420c988c769e8281f8bb9229c28486c39009780'));
 $manifest = '';
 foreach($files as $name => $cont) {
-	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVV', strlen($cont[0]), time(), strlen($cont[1]), crc32($cont[0]), 0x00002000);
+	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVVV', strlen($cont[0]), time(), strlen($cont[1]), crc32($cont[0]), 0x00002000, 0);
 }
 $alias = 'hio';
 $manifest = pack('VnVV', count($files), 0x0900, 0x00002000, strlen($alias)) . $alias . $manifest;

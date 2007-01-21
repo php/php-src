@@ -76,9 +76,10 @@
 
 #define PHAR_METADATA_FINISHED 0x00000000
 
-/* #define PHAR_METADATA_WHATEVER 0x000000001
-   We don't need anything yet, so put this here
-   in order to remember how it works */
+/* basic meta-data types */
+#define PHAR_METADATA_STRING   0x00000001
+#define PHAR_METADATA_INT      0x00000002
+#define PHAR_METADATA_BOOL     0x00000003
 
 /* flags byte for each file adheres to these bitmasks.
    All unused values are reserved */
@@ -191,6 +192,7 @@ typedef struct _phar_entry_info {
 	php_uint32               crc32;
 	php_uint32               flags;
 	/* remainder */
+	zval                     *metadata;
 	php_uint32               filename_len;
 	char                     *filename;
 	long                     offset_within_phar;
@@ -390,6 +392,10 @@ static void destroy_phar_manifest(void *pDest) /* {{{ */
 	}
 	if (entry->temp_file) {
 		php_stream_close(entry->temp_file);
+	}
+	if (entry->metadata) {
+		zval_dtor(entry->metadata);
+		entry->metadata = 0;
 	}
 	efree(entry->filename);
 }
@@ -591,15 +597,22 @@ PHP_METHOD(Phar, canWrite)
 
 #ifdef WORDS_BIGENDIAN
 # define PHAR_GET_32(buffer, var) \
-	var = ((unsigned char)buffer[3]) << 24 \
-		+ ((unsigned char)buffer[2]) << 16 \
-		+ ((unsigned char)buffer[1]) <<  8 \
-		+ ((unsigned char)buffer[0]); \
-	buffer += 4
+	var = ((unsigned char)(buffer)[3]) << 24 \
+		+ ((unsigned char)(buffer)[2]) << 16 \
+		+ ((unsigned char)(buffer)[1]) <<  8 \
+		+ ((unsigned char)(buffer)[0]); \
+	(buffer) += 4
+# define PHAR_GET_16(buffer, var) \
+	var = ((unsigned char)(buffer)[1]) <<  8 \
+		+ ((unsigned char)(buffer)[0]); \
+	(buffer) += 2
 #else
 # define PHAR_GET_32(buffer, var) \
 	var = *(php_uint32*)(buffer); \
 	buffer += 4
+# define PHAR_GET_16(buffer, var) \
+	var = *(php_uint16*)(buffer); \
+	buffer += 2
 #endif
 
 /**
@@ -625,6 +638,50 @@ static int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_l
 		}
 		return FAILURE;
 	}
+}
+/* }}}*/
+
+/**
+ * Parse out metadata from the manifest for a single file
+ *
+ * Meta-data is in this format:
+ * [type32][len16][data...]
+ * 
+ * where type32 is a 32-bit type indicator, len16 is a 16-bit length indicator,
+ * and data is the actual meta-data.
+ */
+static int phar_parse_metadata(php_stream *fp, char **buffer, char *endbuffer, zval *metadata TSRMLS_DC) /* {{{ */
+{
+	zval *dataarray, *found;
+	php_uint32 datatype;
+	php_uint16 len;
+	char *data;
+	do {
+		/* for each meta-data, add an array index to the metadata array
+		   if the index already exists, convert to a sub-array */
+		PHAR_GET_32(*buffer, datatype);
+		PHAR_GET_16(*buffer, len);
+		data = (char *) emalloc(len);
+		if (len != php_stream_read(fp, data, (size_t) len) TSRMLS_CC) {
+			return FAILURE;
+		}
+		if (SUCCESS == zend_hash_index_find(metadata->value.ht, datatype, (void**)&found)) {
+			if (Z_TYPE_P(found) == IS_ARRAY) {
+				add_next_index_stringl(dataarray, data, len, 0);
+			} else {
+				MAKE_STD_ZVAL(dataarray);
+				array_init(dataarray);
+				add_next_index_zval(dataarray, found);
+				add_next_index_stringl(dataarray, data, len, 0); 
+			}
+		} else {
+			MAKE_STD_ZVAL(dataarray);
+			add_index_stringl(metadata, datatype, data, len, 0);
+		}
+		
+	} while (*(php_uint32 *) *buffer && *buffer < endbuffer);
+	*buffer += 4;
+	return SUCCESS;
 }
 /* }}}*/
 
@@ -912,6 +969,13 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		PHAR_GET_32(buffer, entry.compressed_filesize);
 		PHAR_GET_32(buffer, entry.crc32);
 		PHAR_GET_32(buffer, entry.flags);
+		if (*(php_uint32 *) buffer) {
+			MAKE_STD_ZVAL(entry.metadata);
+			array_init(entry.metadata);
+			phar_parse_metadata(fp, &buffer, endbuffer, entry.metadata TSRMLS_CC);
+		} else {
+			buffer += 4;
+		}
 		entry.offset_within_phar = offset;
 		offset += entry.compressed_filesize;
 		switch (entry.flags & PHAR_ENT_COMPRESSION_MASK) {
@@ -1518,7 +1582,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		/* Unfortunately we cannot check the read position of fp after getting */
 		/* uncompressed data because the new stream posiition is being changed */
 		/* by the number of bytes read throughthe filter not by the raw number */
-		/* bytes being consumed on the stream. Therefor use a consumed filter. */ 
+		/* bytes being consumed on the stream. Therefore use a consumed filter. */ 
 		consumed = php_stream_filter_create("consumed", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
 		php_stream_filter_append(&fp->readfilters, consumed);
 		php_stream_filter_append(&fp->readfilters, filter);
@@ -1781,7 +1845,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 	phar_entry_info *entry;
 	int alias_len, fname_len, halt_offset, restore_alias_len, global_flags = 0;
 	char *fname, *alias;
-	char manifest[18], entry_buffer[20];
+	char manifest[18], entry_buffer[24];
 	off_t manifest_ftell;
 	long offset;
 	php_uint32 copy, loc, new_manifest_count;
@@ -1971,6 +2035,7 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			4: compressed filesize
 			4: crc32
 			4: flags
+			4+: metadata TODO: copy the actual metadata, 0 for now
 		*/
 		copy = time(NULL);
 		phar_set_32(entry_buffer, entry->uncompressed_filesize);
@@ -1978,6 +2043,8 @@ static int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 		phar_set_32(entry_buffer+8, entry->compressed_filesize);
 		phar_set_32(entry_buffer+12, entry->crc32);
 		phar_set_32(entry_buffer+16, entry->flags);
+		copy = 0;
+		phar_set_32(entry_buffer+20, 0);
 		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))) {
 			if (oldfile) {
 				php_stream_close(oldfile);

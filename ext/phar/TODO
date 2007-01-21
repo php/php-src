@@ -4,8 +4,9 @@ Version 1.0.0
  X implement ini handler for phar.readonly and phar.require_hash that allows enabling it on
    PHP_INI_ALL if it is disabled in the system, but does not allow disabling it
    if it is enabled in the system [Greg]
- * implement metadata in manifest as [type32][len16][metadata...] where 0 type is
-   used to finish metadata for this file
+ X implement reading in metadata in manifest as [type32][len16][metadata...] where 0 type is
+   used to finish metadata for this file [Greg]
+ * implement writing out of metadata to new manifest
  * if SPL is disabled, disable the Phar class
  * implement in-phar locking, so that a file that is opened for reading can't have
    a handle opened for writing
