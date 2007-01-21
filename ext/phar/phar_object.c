@@ -522,6 +522,41 @@ PHP_METHOD(PharFileInfo, getPharFlags)
 }
 /* }}} */
 
+/* {{{ proto int PharFileInfo::getMetaData()
+ * Returns the metadata of the entry
+ */
+PHP_METHOD(PharFileInfo, getMetadata)
+{
+	PHAR_ENTRY_OBJECT();
+
+	if (entry_obj->ent.entry->metadata) {
+		RETURN_ZVAL(entry_obj->ent.entry->metadata, 1, 0);
+	}
+}
+/* }}} */
+
+/* {{{ proto int PharFileInfo::setMetaData(mixed $metadata)
+ * Returns the metadata of the entry
+ */
+PHP_METHOD(PharFileInfo, setMetadata)
+{
+	zval *metadata;
+	PHAR_ENTRY_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &metadata) == FAILURE) {
+		return;
+	}
+
+	if (entry_obj->ent.entry->metadata) {
+		zval_ptr_dtor(&entry_obj->ent.entry->metadata);
+		entry_obj->ent.entry->metadata = NULL;
+	}
+
+	MAKE_STD_ZVAL(entry_obj->ent.entry->metadata);
+	ZVAL_ZVAL(entry_obj->ent.entry->metadata, metadata, 1, 0);
+}
+/* }}} */
+
 #endif /* HAVE_SPL */
 
 /* {{{ phar methods */
@@ -587,6 +622,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_entry___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_entry_setMetadata, 0, 0, 1)
+	ZEND_ARG_INFO(0, metadata)
+ZEND_END_ARG_INFO();
+
 zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, __construct,        arginfo_entry___construct,  0)
 	PHP_ME(PharFileInfo, getCompressedSize,  NULL,                       0)
@@ -596,6 +636,8 @@ zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, getCRC32,           NULL,                       0)
 	PHP_ME(PharFileInfo, isCRCChecked,       NULL,                       0)
 	PHP_ME(PharFileInfo, getPharFlags,       NULL,                       0)
+	PHP_ME(PharFileInfo, getMetadata,        NULL,                       0)
+	PHP_ME(PharFileInfo, setMetadata,        arginfo_entry_setMetadata,  0)
 	{NULL, NULL, NULL}
 };
 #endif

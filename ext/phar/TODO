@@ -4,9 +4,8 @@ Version 1.0.0
  X implement ini handler for phar.readonly and phar.require_hash that allows 
    enabling it on PHP_INI_ALL if it is disabled in the system, but does not 
    allow disabling it if it is enabled in the system [Greg]
- X implement reading in metadata in manifest as [type32][len16][metadata...] 
-   where 0 type is used to finish metadata for this file [Greg]
- * implement writing out of metadata to new manifest
+ X implement reading in metadata in manifest as <len32><metadata...> [Marcus]
+ X implement writing out of metadata to new manifest [Marcus]
  X if SPL is disabled, enable only static methods of class Phar and disable 
    class PharFileInfo completely [Marcus]
  * implement in-phar locking, so that a file that is opened for reading can't 
@@ -20,8 +19,8 @@ Version 1.0.0
    PharFileInfo class
  * add uncompressAllFiles(), compressAllFilesGZ() and compressAllFilesBZ2() 
    to Phar class
- * add setMetaData($key, $contents) to PharFileInfo
- * add getMetaData($key = null) to PharFileInfo
+ X add PharFileInfo::setMetaData($metadata) [Marcus]
+ X add PharFileInfo::getMetaData() [Marcus]
  * always throw exceptions from the Phar object, and E_RECOVERABLE_ERROR from 
    streams interface
  * ability to have Phar object return file class as offsetGet() result

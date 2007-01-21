@@ -1,5 +1,5 @@
 --TEST--
-Phar with meta-data (read)
+Phar with meta-data (write)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";?>
 --INI--
@@ -22,6 +22,11 @@ foreach($files as $name => $cont) {
 }
 
 $phar = new Phar($fname);
+$phar['a']->setMetadata(42);
+$phar['b']->setMetadata(NULL);
+$phar['c']->setMetadata(array(25, 'foo'=>'bar'));
+$phar['d']->setMetadata(true);
+
 foreach($files as $name => $cont) {
 	var_dump($phar[$name]->getMetadata());
 }
@@ -40,20 +45,15 @@ string(1) "a"
 string(1) "b"
 string(1) "c"
 string(1) "d"
+int(42)
 NULL
-string(8) "hi there"
 array(2) {
   [0]=>
-  string(2) "hi"
-  [1]=>
-  string(5) "there"
-}
-array(2) {
-  ["hi"]=>
-  string(5) "there"
+  int(25)
   ["foo"]=>
   string(3) "bar"
 }
+bool(true)
 string(1) "a"
 string(1) "b"
 string(1) "c"

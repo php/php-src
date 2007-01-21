@@ -380,45 +380,31 @@ static int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_l
  * Parse out metadata from the manifest for a single file
  *
  * Meta-data is in this format:
- * [type32][len16][data...]
+ * [len32][data...]
  * 
- * where type32 is a 32-bit type indicator, len16 is a 16-bit length indicator,
- * and data is the actual meta-data.
+ * data is the serialized zval
  */
-static int phar_parse_metadata(php_stream *fp, char **buffer, char *endbuffer, zval *metadata TSRMLS_DC) /* {{{ */
+static int phar_parse_metadata(php_stream *fp, char **buffer, char *endbuffer, zval **metadata TSRMLS_DC) /* {{{ */
 {
-	zval *dataarray, *found;
-	php_uint32 datatype;
-	php_uint16 len;
-	char *data;
+	const unsigned char *p;
+	php_uint32 buf_len;
+	php_unserialize_data_t var_hash;
 
-	do {
-		/* for each meta-data, add an array index to the metadata array
-		   if the index already exists, convert to a sub-array */
-		PHAR_GET_32(*buffer, datatype);
-		PHAR_GET_16(*buffer, len);
-		data = (char *) emalloc(len+1);
-		if (endbuffer - *buffer < len) {
-			efree(data);
+	PHAR_GET_32(*buffer, buf_len);
+	
+	if (buf_len) {
+		ALLOC_INIT_ZVAL(*metadata);
+		p = (const unsigned char*) *buffer;
+		PHP_VAR_UNSERIALIZE_INIT(var_hash);
+		if (!php_var_unserialize(metadata, &p, p + buf_len,  &var_hash TSRMLS_CC)) {
+			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+			zval_ptr_dtor(metadata);
+			*metadata = NULL;
 			return FAILURE;
-		} else {
-			memcpy(data, *buffer, len);
-			data[len] = '\0';
 		}
-		if (SUCCESS == zend_hash_index_find(HASH_OF(metadata), datatype, (void**)&found)) {
-			if (Z_TYPE_P(found) == IS_ARRAY) {
-				dataarray = found;
-			} else {
-				MAKE_STD_ZVAL(dataarray);
-				array_init(dataarray);
-				add_next_index_zval(dataarray, found);
-			}
-		} else {
-			dataarray = metadata;
-		}
-		add_index_stringl(dataarray, datatype, data, len, 0);
-	} while (*(php_uint32 *) *buffer && *buffer < endbuffer);
-	*buffer += 4;
+		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	}
+	*buffer += buf_len;
 	return SUCCESS;
 }
 /* }}}*/
@@ -708,9 +694,9 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		PHAR_GET_32(buffer, entry.crc32);
 		PHAR_GET_32(buffer, entry.flags);
 		if (*(php_uint32 *) buffer) {
-			MAKE_STD_ZVAL(entry.metadata);
-			array_init(entry.metadata);
-			phar_parse_metadata(fp, &buffer, endbuffer, entry.metadata TSRMLS_CC);
+			if (phar_parse_metadata(fp, &buffer, endbuffer, &entry.metadata TSRMLS_CC) == FAILURE) {
+				MAPPHAR_FAIL("unable to read metadata in .phar file \"%s\"");
+			}
 		} else {
 			buffer += 4;
 		}
@@ -1564,6 +1550,8 @@ int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 	php_uint32 newcrc32;
 	php_stream *file, *oldfile, *newfile, *compfile;
 	php_stream_filter *filter;
+	php_serialize_data_t metadata_hash;
+	smart_str metadata_str = {0};
 
 	if (PHAR_G(readonly)) {
 		return EOF;
@@ -1747,17 +1735,25 @@ int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			4: compressed filesize
 			4: crc32
 			4: flags
-			4+: metadata TODO: copy the actual metadata, 0 for now
+			4: metadata-len
+			+: metadata
 		*/
+		metadata_str.c = 0;
+		if (entry->metadata) {
+			PHP_VAR_SERIALIZE_INIT(metadata_hash);
+			php_var_serialize(&metadata_str, &entry->metadata, &metadata_hash TSRMLS_CC);
+			PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
+		}
 		copy = time(NULL);
 		phar_set_32(entry_buffer, entry->uncompressed_filesize);
 		phar_set_32(entry_buffer+4, copy);
 		phar_set_32(entry_buffer+8, entry->compressed_filesize);
 		phar_set_32(entry_buffer+12, entry->crc32);
 		phar_set_32(entry_buffer+16, entry->flags);
-		copy = 0;
-		phar_set_32(entry_buffer+20, 0);
-		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))) {
+		phar_set_32(entry_buffer+20, metadata_str.len);
+		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))
+		|| metadata_str.len != php_stream_write(newfile, metadata_str.c, sizeof(metadata_str.len))) {
+			smart_str_free(&metadata_str);
 			if (oldfile) {
 				php_stream_close(oldfile);
 			}
@@ -1765,6 +1761,7 @@ int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to write temporary manifest of file \"%s\" to manifest of new phar \"%s\"", entry->filename, data->phar->fname);
 			return EOF;
 		}
+		smart_str_free(&metadata_str);
 	}
 	
 	/* now copy the actual file data to the new phar */
