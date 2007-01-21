@@ -285,7 +285,7 @@ PHP_METHOD(Phar, offsetGet)
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
 		MAKE_STD_ZVAL(zfname);
 		ZVAL_STRINGL(zfname, fname, fname_len, 0);
-		spl_instantiate_arg_ex1(phar_obj->spl.file_class, &return_value, 0, zfname TSRMLS_CC);
+		spl_instantiate_arg_ex1(phar_obj->spl.info_class, &return_value, 0, zfname TSRMLS_CC);
 		zval_ptr_dtor(&zfname);
 	}
 

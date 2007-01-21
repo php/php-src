@@ -16,6 +16,7 @@ try
 	require_once 'phar_oo_test.inc';
 	
 	$phar = new Phar($fname);
+	$phar->setInfoClass('SplFileObject');
 	
 	$phar['f.php'] = 'hi';
 	var_dump(isset($phar['f.php']));

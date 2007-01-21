@@ -5,8 +5,7 @@ Version 1.0.0
    enabling it on PHP_INI_ALL if it is disabled in the system, but does not 
    allow disabling it if it is enabled in the system [Greg]
  X implement reading in metadata in manifest as [type32][len16][metadata...] 
-   where 0 type is
-   used to finish metadata for this file [Greg]
+   where 0 type is used to finish metadata for this file [Greg]
  * implement writing out of metadata to new manifest
  X if SPL is disabled, enable only static methods of class Phar and disable 
    class PharFileInfo completley [Marcus]
@@ -14,8 +13,9 @@ Version 1.0.0
    have a handle opened for writing
  * docs on file format/manifest description
  * docs on uses
- * support stream context for specifying compression of a file, as well as 
-   meta-data, and copying of new prologue to the phar
+ * stream context for specifying compression of a file
+ * stream context for specifying meta-data
+ * stream context for specifying a new prologue to the phar
  * add setUncompressed(), setCompressedGZ() and setCompressedBZ2() to 
    PharFileInfo class
  * add uncompressAllFiles(), compressAllFilesGZ() and compressAllFilesBZ2() 
@@ -24,6 +24,7 @@ Version 1.0.0
  * add getMetaData($key = null) to PharFileInfo
  * always throw exceptions from the Phar object, and E_RECOVERABLE_ERROR from 
    streams interface
+ * ability to have Phar object return file class as offsetGet() result
  
 Version 1.1.0
 

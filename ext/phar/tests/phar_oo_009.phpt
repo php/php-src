@@ -13,7 +13,7 @@ $pharconfig = 2;
 require_once 'phar_oo_test.inc';
 
 $phar = new Phar($fname);
-$phar->setFileClass('SplFileObject');
+$phar->setInfoClass('SplFileObject');
 
 $f = $phar['a.csv'];
 $f->setFlags(SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE);

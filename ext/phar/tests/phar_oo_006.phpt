@@ -28,7 +28,7 @@ catch (UnexpectedValueException $e)
 {
 	echo $e->getMessage() . "\n";
 }
-$phar->setFileClass('MyFile');
+$phar->setInfoClass('MyFile');
 
 echo $phar['a.php']->getFilename() . "\n";
 echo $phar['b/c.php']->getFilename() . "\n";
