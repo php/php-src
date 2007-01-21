@@ -1170,6 +1170,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	php_stream *fp, *fpf;
 	php_stream_filter *filter, *consumed;
 	php_uint32 offset;
+	zval **pzoption;
 
 	resource = php_url_parse(path);
 
@@ -1203,6 +1204,17 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		idata->phar->refcount++;
 		php_url_free(resource);
 		efree(internal_file);
+		if (idata->internal_file->uncompressed_filesize == 0
+			&&  idata->internal_file->compressed_filesize == 0
+			&& context && context->options
+			&& zend_hash_find(HASH_OF(context->options), "phar", sizeof("phar"), (void**)&pzoption) == SUCCESS
+			&& zend_hash_find(HASH_OF(*pzoption), "compress", sizeof("compress"), (void**)&pzoption) == SUCCESS
+			&& Z_TYPE_PP(pzoption) == IS_LONG
+			&& (Z_LVAL_PP(pzoption) & ~PHAR_ENT_COMPRESSION_MASK) == 0
+		) {
+			idata->internal_file->flags &= ~PHAR_ENT_COMPRESSION_MASK;
+			idata->internal_file->flags |= Z_LVAL_PP(pzoption);
+		}
 		return fpf;
 	} else {
 		if (NULL == (idata = phar_get_entry_data(resource->host, strlen(resource->host), internal_file, strlen(internal_file) TSRMLS_CC))) {
@@ -1287,7 +1299,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 
 		idata->fp = php_stream_temp_new();
 		if (php_stream_copy_to_stream(fp, idata->fp, idata->internal_file->uncompressed_filesize) != idata->internal_file->uncompressed_filesize) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch 1 on file \"%s\")", idata->phar->fname, internal_file);
 			php_stream_close(idata->fp);
 			efree(idata);
 			efree(internal_file);
@@ -1298,7 +1310,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		php_stream_filter_flush(consumed, 1);
 		php_stream_filter_remove(consumed, 1 TSRMLS_CC);
 		if (offset + idata->internal_file->compressed_filesize != php_stream_tell(fp)) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch 2 on file \"%s\")", idata->phar->fname, internal_file);
 			php_stream_close(idata->fp);
 			efree(idata);
 			efree(internal_file);
@@ -1310,7 +1322,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		/* bypass to temp stream */
 		idata->fp = php_stream_temp_new();
 		if (php_stream_copy_to_stream(fp, idata->fp, idata->internal_file->uncompressed_filesize) != idata->internal_file->uncompressed_filesize) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch 3 on file \"%s\")", idata->phar->fname, internal_file);
 			php_stream_close(idata->fp);
 			efree(idata);
 			efree(internal_file);
@@ -1537,9 +1549,15 @@ static inline void phar_set_16(char *buffer, int var) /* {{{ */
 #endif
 } /* }}} */
 
-int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
+/**
+ * Save phar contents to disk
+ *
+ * user_stub contains either a string, or a resource pointer, if len is a negative length.
+ * user_stub and len should be both 0 if the default or existing stub should be used
+ */
+int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{{ */
 {
-	static const char newprologue[] = "<?php __HALT_COMPILER();";
+	static const char newstub[] = "<?php __HALT_COMPILER();";
 	phar_entry_info *entry;
 	int alias_len, fname_len, halt_offset, restore_alias_len, global_flags = 0;
 	char *fname, *alias;
@@ -1548,7 +1566,7 @@ int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 	long offset;
 	php_uint32 copy, loc, new_manifest_count;
 	php_uint32 newcrc32;
-	php_stream *file, *oldfile, *newfile, *compfile;
+	php_stream *file, *oldfile, *newfile, *compfile, *stubfile;
 	php_stream_filter *filter;
 	php_serialize_data_t metadata_hash;
 	smart_str metadata_str = {0};
@@ -1561,28 +1579,65 @@ int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 	newfile = php_stream_fopen_tmpfile();
 	filter  = 0;
 
-	if (data->phar->halt_offset && oldfile) {
-		if (data->phar->halt_offset != php_stream_copy_to_stream(oldfile, newfile, data->phar->halt_offset)) {
-			if (oldfile) {
-				php_stream_close(oldfile);
+	if (len != 0) {
+		if (len < 0) {
+			/* resource passed in */
+			if (!(php_stream_from_zval_no_verify(stubfile, (zval **)user_stub))) {
+				if (oldfile) {
+					php_stream_close(oldfile);
+				}
+				php_stream_close(newfile);
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to read resource to copy stub to new phar \"%s\"", data->phar->fname);
+				return EOF;
 			}
-			php_stream_close(newfile);
-			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to copy prologue of old phar to new phar \"%s\"", data->phar->fname);
-			return EOF;
+			if (len == -1) {
+				len = PHP_STREAM_COPY_ALL;
+			} else {
+				len = -len;
+			}
+			if (len != php_stream_copy_to_stream(stubfile, newfile, len) && len != PHP_STREAM_COPY_ALL) {
+				if (oldfile) {
+					php_stream_close(oldfile);
+				}
+				php_stream_close(newfile);
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to copy stub from resource to new phar \"%s\"", data->phar->fname);
+				return EOF;
+			}
+		} else {
+			if (len != php_stream_write(newfile, user_stub, len)) {
+				if (oldfile) {
+					php_stream_close(oldfile);
+				}
+				php_stream_close(newfile);
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to create stub from string in new phar \"%s\"", data->phar->fname);
+				return EOF;
+			}
 		}
 	} else {
-		/* this is a brand new phar */
-		data->phar->halt_offset = sizeof(newprologue)-1;
-		if (sizeof(newprologue)-1 != php_stream_write(newfile, newprologue, sizeof(newprologue)-1)) {
-			if (oldfile) {
-				php_stream_close(oldfile);
+		if (data->phar->halt_offset && oldfile) {
+			if (data->phar->halt_offset != php_stream_copy_to_stream(oldfile, newfile, data->phar->halt_offset)) {
+				if (oldfile) {
+					php_stream_close(oldfile);
+				}
+				php_stream_close(newfile);
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to copy stub of old phar to new phar \"%s\"", data->phar->fname);
+				return EOF;
 			}
-			php_stream_close(newfile);
-			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to create prologue in new phar \"%s\"", data->phar->fname);
-			return EOF;
+		} else {
+			/* this is a brand new phar */
+			data->phar->halt_offset = sizeof(newstub)-1;
+			if (sizeof(newstub)-1 != php_stream_write(newfile, newstub, sizeof(newstub)-1)) {
+				if (oldfile) {
+					php_stream_close(oldfile);
+				}
+				php_stream_close(newfile);
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to create stub in new phar \"%s\"", data->phar->fname);
+				return EOF;
+			}
 		}
 	}
 	manifest_ftell = php_stream_tell(newfile);
+	halt_offset = manifest_ftell;
 	
 	/* compress as necessary, calculate crcs, manifest size, and file sizes */
 	new_manifest_count = 0;
@@ -1912,7 +1967,6 @@ int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 		alias = 0;
 	}
 	alias_len = data->phar->alias_len;
-	halt_offset = data->phar->halt_offset;
 	zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_alias_map), phar_unalias_apply, data->phar TSRMLS_CC);
 	zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len);
 	phar_open_file(file, fname, fname_len, alias, alias_len, halt_offset, NULL TSRMLS_CC);
@@ -1930,7 +1984,7 @@ int phar_flush(phar_entry_data *data TSRMLS_DC) /* {{{ */
 static int phar_stream_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	if (stream->mode[0] == 'w' || (stream->mode[0] == 'r' && stream->mode[1] == '+')) {
-		return phar_flush((phar_entry_data *)stream->abstract TSRMLS_CC);
+		return phar_flush((phar_entry_data *)stream->abstract, 0, 0 TSRMLS_CC);
 	} else {
 		return EOF;
 	}
@@ -2315,7 +2369,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
 	idata->fp = 0;
 	idata->phar = phar_get_archive(resource->host, strlen(resource->host), 0, 0 TSRMLS_CC);
-	phar_flush(idata TSRMLS_CC);
+	phar_flush(idata, 0, 0 TSRMLS_CC);
 	php_url_free(resource);
 	efree(idata);
 	return SUCCESS;
