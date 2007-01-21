@@ -157,8 +157,7 @@ static void destroy_phar_manifest(void *pDest) /* {{{ */
 		php_stream_close(entry->temp_file);
 	}
 	if (entry->metadata) {
-		zval_dtor(entry->metadata);
-		efree(entry->metadata);
+		zval_ptr_dtor(&entry->metadata);
 		entry->metadata = 0;
 	}
 	efree(entry->filename);
@@ -397,12 +396,13 @@ static int phar_parse_metadata(php_stream *fp, char **buffer, char *endbuffer, z
 		   if the index already exists, convert to a sub-array */
 		PHAR_GET_32(*buffer, datatype);
 		PHAR_GET_16(*buffer, len);
-		data = (char *) emalloc(len);
+		data = (char *) emalloc(len+1);
 		if (endbuffer - *buffer < len) {
 			efree(data);
 			return FAILURE;
 		} else {
 			memcpy(data, *buffer, len);
+			data[len] = '\0';
 		}
 		if (SUCCESS == zend_hash_index_find(metadata->value.ht, datatype, (void**)&found)) {
 			if (Z_TYPE_P(found) == IS_ARRAY) {
