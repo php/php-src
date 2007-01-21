@@ -362,12 +362,53 @@ PHP_METHOD(Phar, offsetUnset)
 			data->phar = phar_obj->arc.archive;
 			data->fp = 0;
 			/* internal_file is unused in phar_flush, so we won't set it */
-			phar_flush(data TSRMLS_CC);
+			phar_flush(data, 0, 0 TSRMLS_CC);
 			efree(data);
 			RETURN_TRUE;
 		}
 	} else {
 		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int Phar::setStub(string|stream stub [, int len])
+ * set the pre-phar stub for the current writeable phar
+ */
+PHP_METHOD(Phar, setStub)
+{
+	zval *stub;
+	phar_entry_data *idata;
+	long len = -1;
+	php_stream *stream;
+	PHAR_ARCHIVE_OBJECT();
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot set stub, phar is read-only");
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &stub, &len) == FAILURE) {
+		return;
+	}
+
+	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
+	idata->phar = phar_obj->arc.archive;
+	idata->fp = 0;
+	idata->internal_file = 0;
+
+	if (Z_TYPE_P(stub) == IS_STRING) {
+		phar_flush(idata, Z_STRVAL_P(stub), Z_STRLEN_P(stub) TSRMLS_CC);
+		efree(idata);
+	} else if (Z_TYPE_P(stub) == IS_RESOURCE && (php_stream_from_zval_no_verify(stream, &stub))) {
+		if (len > 0) {
+			len = -len;
+		}
+		phar_flush(idata, (char *) &stub, len TSRMLS_CC);
+		efree(idata);
+	} else {
+		efree(idata);
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot only set stub to a string or read from a stream resource");
 	}
 }
 /* }}} */
@@ -574,6 +615,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mapPhar, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setStub, 0, 0, 0)
+	ZEND_ARG_INFO(0, newstub)
+ZEND_END_ARG_INFO();
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_loadPhar, 0, 0, 1)
 	ZEND_ARG_INFO(0, fname)
 	ZEND_ARG_INFO(0, alias)
@@ -601,6 +647,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, getVersion,    NULL,                      0)
 	PHP_ME(Phar, getSignature,  NULL,                      0)
 	PHP_ME(Phar, getModified,   NULL,                      0)
+	PHP_ME(Phar, setStub,       arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetGet,     arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,     arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetUnset,   arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
