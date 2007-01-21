@@ -395,6 +395,7 @@ static void destroy_phar_manifest(void *pDest) /* {{{ */
 	}
 	if (entry->metadata) {
 		zval_dtor(entry->metadata);
+		efree(entry->metadata);
 		entry->metadata = 0;
 	}
 	efree(entry->filename);
