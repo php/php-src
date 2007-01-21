@@ -15,7 +15,7 @@ PHP                                                                        NEWS
   . ext/informix (Derick, Tony)
 - Fixed bug #40129 (iconv extension doesn't compile with CodeWarrior on 
   Netware). (gk at gknw dot de, Tony)
-- Fixed bug #40127 (apache2handler doesnt compile on Netware). (gk at gknw
+- Fixed bug #40127 (apache2handler doesn't compile on Netware). (gk at gknw
   dot de)
 - Fixed bug #40121 (PDO_DBLIB driver wont free statements). (Ilia)
 - Fixed bug #40098 (php_fopen_primary_script() not thread safe). (Ilia)
@@ -45,9 +45,9 @@ PHP                                                                        NEWS
 - Fixed bug #39449 (Overloaded array properties do not work correctly).
   (Dmitry)
 - Fixed bug #39394 (Missing check for older variants of openssl). (Ilia)
-- Fixed bug #38604 (Fixed request time leak inside foreach() when itterating 
+- Fixed bug #38604 (Fixed request time leak inside foreach() when iterating 
   through virtual properties). (Dmitry)
-- Fixed bug #38325 (spl_autoload_register() gaves wrong line for "class
+- Fixed bug #38325 (spl_autoload_register() gives wrong line for "class
   not found"). (Ilia)
 - Fixed bug #36214 (__get method works properly only when conditional operator
   is used). (Dmitry)
@@ -61,7 +61,7 @@ PHP                                                                        NEWS
 - Optimized the internal is_numeric_string() function. (Matt,Ilia)
 - Added support for hex numbers of any size. (Matt)
 - Removed dependency from SHELL32.DLL. (Dmitry)
-- Added function stream_socket_shutdown(). It is a wraper for system shutdown()
+- Added function stream_socket_shutdown(). It is a wrapper for system shutdown()
   function, that shut downs part of a full-duplex connection. (Dmitry)
 - Added internal heap protection (Dmitry)
   . memory-limit is always enabled (--enable-memory-limit removed)
