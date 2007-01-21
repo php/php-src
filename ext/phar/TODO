@@ -1,24 +1,29 @@
 Version 1.0.0
 
  X make permissions in the lowest bits of flags to simplify using them [Greg]
- X implement ini handler for phar.readonly and phar.require_hash that allows enabling it on
-   PHP_INI_ALL if it is disabled in the system, but does not allow disabling it
-   if it is enabled in the system [Greg]
- X implement reading in metadata in manifest as [type32][len16][metadata...] where 0 type is
+ X implement ini handler for phar.readonly and phar.require_hash that allows 
+   enabling it on PHP_INI_ALL if it is disabled in the system, but does not 
+   allow disabling it if it is enabled in the system [Greg]
+ X implement reading in metadata in manifest as [type32][len16][metadata...] 
+   where 0 type is
    used to finish metadata for this file [Greg]
  * implement writing out of metadata to new manifest
- * if SPL is disabled, disable the Phar class
- * implement in-phar locking, so that a file that is opened for reading can't have
-   a handle opened for writing
+ X if SPL is disabled, enable only static methods of class Phar and disable 
+   class PharFileInfo completley [Marcus]
+ * implement in-phar locking, so that a file that is opened for reading can't 
+   have a handle opened for writing
  * docs on file format/manifest description
  * docs on uses
- * support stream context for specifying compression of a file, as well as meta-data, and
-   copying of new prologue to the phar
- * add setUncompressed(), setCompressedGZ() and setCompressedBZ2() to PharFileInfo class
- * add uncompressAllFiles(), compressAllFilesGZ() and compressAllFilesBZ2() to Phar class
+ * support stream context for specifying compression of a file, as well as 
+   meta-data, and copying of new prologue to the phar
+ * add setUncompressed(), setCompressedGZ() and setCompressedBZ2() to 
+   PharFileInfo class
+ * add uncompressAllFiles(), compressAllFilesGZ() and compressAllFilesBZ2() 
+   to Phar class
  * add setMetaData($key, $contents) to PharFileInfo
  * add getMetaData($key = null) to PharFileInfo
- * always throw exceptions from the Phar object, and E_RECOVERABLE_ERROR from streams interface
+ * always throw exceptions from the Phar object, and E_RECOVERABLE_ERROR from 
+   streams interface
  
 Version 1.1.0
 
