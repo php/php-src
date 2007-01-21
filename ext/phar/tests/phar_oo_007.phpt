@@ -20,7 +20,7 @@ class MyFile extends SplFileObject
 }
 
 $phar = new Phar($fname);
-$phar->setFileClass('MyFile');
+$phar->setInfoClass('MyFile');
 
 $f = $phar['a.php'];
 

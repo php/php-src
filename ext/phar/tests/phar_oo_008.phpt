@@ -13,7 +13,7 @@ $pharconfig = 1;
 require_once 'phar_oo_test.inc';
 
 $phar = new Phar($fname);
-$phar->setFileClass('SplFileObject');
+$phar->setInfoClass('SplFileObject');
 
 $f = $phar['a.csv'];
 echo "===1===\n";
@@ -38,7 +38,7 @@ class MyCSVFile extends SplFileObject
 	}
 }
 
-$phar->setFileClass('MyCSVFile');
+$phar->setInfoClass('MyCSVFile');
 $v = $phar['a.csv'];
 
 echo "===3===\n";
@@ -70,7 +70,7 @@ class MyCSVFile2 extends SplFileObject
 	}
 }
 
-$phar->setFileClass('MyCSVFile2');
+$phar->setInfoClass('MyCSVFile2');
 $v = $phar['a.csv'];
 
 echo "===6===\n";
