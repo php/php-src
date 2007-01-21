@@ -2,6 +2,7 @@
 Phar object: ArrayAccess and isset
 --SKIPIF--
 <?php if (!extension_loaded('phar')) die('skip'); ?>
+<?php if (!extension_loaded("spl")) print "skip SPL not available"; ?>
 --INI--
 phar.require_hash=0
 --FILE--

@@ -2,6 +2,7 @@
 Phar object: entry & openFile()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
+<?php if (!extension_loaded("spl")) print "skip SPL not available"; ?>
 --INI--
 phar.require_hash=0
 --FILE--
