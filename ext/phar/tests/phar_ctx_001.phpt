@@ -57,12 +57,12 @@ string(1) "b"
 bool(false)
 string(1) "c"
 bool(false)
-string(4) "new a"
+string(5) "new a"
 bool(false)
-string(4) "new b"
+string(5) "new b"
 bool(true)
 string(1) "c"
 bool(false)
-string(4) "new d"
-bool(true)
+string(5) "new d"
+bool(false)
 ===DONE===
