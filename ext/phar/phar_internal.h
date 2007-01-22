@@ -134,6 +134,7 @@ typedef union _phar_archive_object  phar_archive_object;
 typedef union _phar_entry_object    phar_entry_object;
 #endif
 
+typedef struct _phar_archive_data phar_archive_data;
 /* entry for one file in a phar file */
 typedef struct _phar_entry_info {
 	/* first bytes are exactly as in file */
@@ -152,10 +153,11 @@ typedef struct _phar_entry_info {
 	int                      is_crc_checked:1;
 	int                      is_modified:1;
 	int                      is_deleted:1;
+	phar_archive_data        *phar;
 } phar_entry_info;
 
 /* information about a phar file (the archive itself) */
-typedef struct _phar_archive_data {
+struct _phar_archive_data {
 	char                     *fname;
 	int                      fname_len;
 	char                     *alias;
@@ -175,7 +177,7 @@ typedef struct _phar_archive_data {
 	int                      is_explicit_alias:1;
 	int                      is_modified:1;
 	int                      is_writeable:1;
-} phar_archive_data;
+};
 
 /* stream access data for one file entry in a phar file */
 typedef struct _phar_entry_data {

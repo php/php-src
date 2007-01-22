@@ -291,6 +291,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 		etemp.offset_within_phar = -1;
 		etemp.is_crc_checked = 1;
 		etemp.flags = PHAR_ENT_PERM_DEF_FILE;
+		etemp.phar = phar;
 		zend_hash_add(&phar->manifest, etemp.filename, path_len, (void*)&etemp, sizeof(phar_entry_info), NULL);
 		/* retrieve the phar manifest copy */
 		entry = phar_get_entry_info(phar, path, path_len TSRMLS_CC);
@@ -722,6 +723,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		manifest_flags |= (entry.flags & PHAR_ENT_COMPRESSION_MASK);
 		entry.is_crc_checked = 0;
 		entry.fp = NULL;
+		entry.phar = mydata;
 		zend_hash_add(&mydata->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
 	}
 
