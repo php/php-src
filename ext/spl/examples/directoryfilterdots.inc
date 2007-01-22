@@ -14,7 +14,7 @@
  * @author  Marcus Boerger
  * @version 1.2
  *
- * This Iteraotr takes a pathname from which it creates a DirectoryIterator
+ * This Iterator takes a pathname from which it creates a RecursiveDirectoryIterator
  * and makes it recursive. Further more it filters the entries '.' and '..'.
  */
 class DirectoryFilterDots extends RecursiveFilterIterator
