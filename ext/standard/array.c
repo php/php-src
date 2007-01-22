@@ -2846,7 +2846,7 @@ PHP_FUNCTION(array_change_key_case)
    Removes duplicate values from array */
 PHP_FUNCTION(array_unique)
 {
-	zval *array;
+	zval **array, *tmp;
 	HashTable *target_hash;
 	Bucket *p;
 	struct bucketindex {
@@ -2856,14 +2856,18 @@ PHP_FUNCTION(array_unique)
 	struct bucketindex *arTmp, *cmpdata, *lastkept;
 	unsigned int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &array) == FAILURE) {
 		return;
 	}
 
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
+	if (!target_hash) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+		RETURN_FALSE;
+	}
 
-	/* copy the argument array */
-	RETVAL_ZVAL(array, 1, 0);
+	array_init(return_value);
+	zend_hash_copy(Z_ARRVAL_P(return_value), target_hash, (copy_ctor_func_t) zval_add_ref, (void *)&tmp, sizeof(zval*));
 
 	if (target_hash->nNumOfElements <= 1) {	/* nothing to do */
 		return;
