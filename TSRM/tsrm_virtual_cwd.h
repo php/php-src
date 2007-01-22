@@ -226,6 +226,9 @@ extern virtual_cwd_globals cwd_globals;
 # define CWDG(v) (cwd_globals.v)
 #endif
 
+CWD_API void realpath_cache_clean(TSRMLS_D);
+CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC);
+
 /* The actual macros to be used in programs using TSRM
  * If the program defines VIRTUAL_DIR it will use the
  * virtual_* functions 

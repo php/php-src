@@ -257,12 +257,13 @@ PHP_FUNCTION(chroot)
 	}
 	
 	ret = chroot(str);
-	
 	if (ret != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
 	}
 
+	realpath_cache_clean(TSRMLS_C);
+	
 	ret = chdir("/");
 	
 	if (ret != 0) {
