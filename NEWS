@@ -6,6 +6,9 @@ PHP 4                                                                      NEWS
 - Fixed bug #36248 (CURLOPT_HEADERFUNCTION, couldn't set the function in the
   class). (Ilia)
 
+- Moved extensions to PECL:
+  . ext/ovrimos (Derick)
+
 04 Jan 2007, Version 4.4.5RC1
 - Added a meta tag to phpinfo() output to prevent search engines from 
   indexing the page. (Ilia)
