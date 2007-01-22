@@ -373,7 +373,7 @@ PHP_METHOD(Phar, offsetUnset)
 /* }}} */
 
 /* {{{ proto int Phar::setStub(string|stream stub [, int len])
- * set the pre-phar stub for the current writeable phar
+ * Set the pre-phar stub for the current writeable phar
  */
 PHP_METHOD(Phar, setStub)
 {
@@ -382,6 +382,7 @@ PHP_METHOD(Phar, setStub)
 	long len = -1;
 	php_stream *stream;
 	PHAR_ARCHIVE_OBJECT();
+
 	if (PHAR_G(readonly)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot set stub, phar is read-only");
@@ -412,6 +413,37 @@ PHP_METHOD(Phar, setStub)
 	}
 }
 /* }}} */
+
+/* {{{ proto string Phar::getStub()
+ * Get the pre-phar stub
+ */
+PHP_METHOD(Phar, getStub)
+{
+	char *buf;
+	int len;
+	PHAR_ARCHIVE_OBJECT();
+
+	len = phar_obj->arc.archive->halt_offset;
+
+	if (!phar_obj->arc.archive->fp)  {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
+			"Unable to read stub");
+		return;
+	}
+
+	buf = emalloc(len+1);
+	php_stream_rewind(phar_obj->arc.archive->fp);
+	if (len != php_stream_read(phar_obj->arc.archive->fp, buf, len)) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
+			"Unable to read stub");
+		efree(buf);
+		return;
+	}
+	buf[len] = '\0';
+	
+	RETURN_STRINGL(buf, len, 0);
+}
+/* }}}*/
 
 /* {{{ proto void PharFileInfo::__construct(string entry)
  * Construct a Phar entry object
@@ -817,23 +849,24 @@ zend_function_entry php_archive_methods[] = {
 #if !HAVE_SPL
 	PHP_ME(Phar, __construct,   arginfo_phar___construct,  ZEND_ACC_PRIVATE)
 #else
-	PHP_ME(Phar, __construct,   arginfo_phar___construct,  0)
-	PHP_ME(Phar, count,         NULL,                      0)
-	PHP_ME(Phar, getVersion,    NULL,                      0)
-	PHP_ME(Phar, getSignature,  NULL,                      0)
-	PHP_ME(Phar, getModified,   NULL,                      0)
-	PHP_ME(Phar, setStub,       arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, __construct,   arginfo_phar___construct,  ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, count,         NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getModified,   NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getSignature,  NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getStub,       NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getVersion,    NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, offsetExists,  arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetGet,     arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,     arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetUnset,   arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, offsetExists,  arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setStub,       arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 #endif
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,    NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, canCompress,   NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, canWrite,      NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, mapPhar,       arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, loadPhar,      arginfo_phar_loadPhar,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, mapPhar,       arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
