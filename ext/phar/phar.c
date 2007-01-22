@@ -1678,10 +1678,22 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 			entry->is_crc_checked = 1;
 			entry->compressed_filesize = entry->uncompressed_filesize;
 		} else {
-			if (-1 == php_stream_seek(oldfile, entry->offset_within_phar + data->phar->internal_file_start, SEEK_SET)) {
-				if (oldfile) {
+			if (!entry->is_crc_checked) {
+				if (-1 == php_stream_seek(oldfile, entry->offset_within_phar + data->phar->internal_file_start, SEEK_SET)) {
 					php_stream_close(oldfile);
+					php_stream_close(newfile);
+					php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, data->phar->fname);
+					return EOF;
 				}
+				newcrc32 = ~0;
+				for (loc = entry->uncompressed_filesize; loc > 0; --loc) {
+					CRC32(newcrc32, php_stream_getc(oldfile));
+				}
+				entry->crc32 = ~newcrc32;
+				entry->is_crc_checked = 1;
+			}
+			if (-1 == php_stream_seek(oldfile, entry->offset_within_phar + data->phar->internal_file_start, SEEK_SET)) {
+				php_stream_close(oldfile);
 				php_stream_close(newfile);
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, data->phar->fname);
 				return EOF;
