@@ -25,6 +25,7 @@ var_dump($phar->getStub() == $stub);
 
 $stub = '<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
 $phar->setStub($stub);
+var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
 $phar = new Phar($fname);
@@ -35,13 +36,13 @@ var_dump($phar->getStub() == $stub);
 --CLEAN--
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
 __HALT_COMPILER();
 ?>
 --EXPECT--
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
+string(49) "<?php echo "second stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
 bool(true)
 ===DONE===
