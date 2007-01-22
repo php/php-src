@@ -1621,9 +1621,7 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 	} else {
 		if (data->phar->halt_offset && oldfile) {
 			if (data->phar->halt_offset != php_stream_copy_to_stream(oldfile, newfile, data->phar->halt_offset)) {
-				if (oldfile) {
-					php_stream_close(oldfile);
-				}
+				php_stream_close(oldfile);
 				php_stream_close(newfile);
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to copy stub of old phar to new phar \"%s\"", data->phar->fname);
 				return EOF;
