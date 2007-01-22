@@ -11,6 +11,5 @@ echo "ok\n";
 ?>
 --EXPECTF--
 ok
-
-Notice: Undefined variable: b in %sunset_cv08.php on line %d
+ok
 ok
