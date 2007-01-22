@@ -1669,16 +1669,14 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 			}
 			php_stream_rewind(entry->temp_file);
 			file = entry->temp_file;
-			copy = entry->uncompressed_filesize;
-			if (!(entry->flags & PHAR_ENT_COMPRESSION_MASK)) {
-				php_stream_rewind(file);
-				newcrc32 = ~0;
-				for (loc = 0;loc < copy; loc++) {
-					CRC32(newcrc32, php_stream_getc(file));
-				}
-				entry->crc32 = ~newcrc32;
-				entry->is_crc_checked = 1;
+			php_stream_rewind(file);
+			newcrc32 = ~0;
+			for (loc = entry->uncompressed_filesize; loc > 0; --loc) {
+				CRC32(newcrc32, php_stream_getc(file));
 			}
+			entry->crc32 = ~newcrc32;
+			entry->is_crc_checked = 1;
+			entry->compressed_filesize = entry->uncompressed_filesize;
 		} else {
 			if (-1 == php_stream_seek(oldfile, entry->offset_within_phar + data->phar->internal_file_start, SEEK_SET)) {
 				if (oldfile) {
@@ -1689,7 +1687,6 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 				return EOF;
 			}
 			file = oldfile;
-			copy = entry->uncompressed_filesize;
 		}
 		if (entry->flags & PHAR_ENT_COMPRESSION_MASK) {
 			filter = php_stream_filter_create(phar_compress_filter(entry, 0), NULL, 0 TSRMLS_CC);
@@ -1711,21 +1708,12 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 			compfile = php_stream_fopen_tmpfile();
 			entry->compressed_filesize = php_stream_copy_to_stream(file, compfile, entry->uncompressed_filesize);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
-			/* generate crc on compressed file */
-			php_stream_rewind(compfile);
-			newcrc32 = ~0;
-			for (loc = entry->compressed_filesize; loc > 0; --loc) {
-				CRC32(newcrc32, php_stream_getc(compfile));
-			}
-			entry->crc32 = ~newcrc32;
-			entry->is_crc_checked = 1;
 			if (entry->temp_file) {
 				/* no longer need the uncompressed contents */
 				php_stream_close(entry->temp_file);
 			}
 			/* use temp_file to store the newly compressed data */
 			entry->temp_file = compfile;
-			entry->compressed_filesize = copy;
 			entry->is_modified = 1;
 			global_flags |= (entry->flags & PHAR_ENT_COMPRESSION_MASK);
 		}
@@ -1867,8 +1855,8 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 			if (entry->temp_file) {
 				php_stream_close(entry->temp_file);
 				entry->temp_file = 0;
-				entry->is_modified = 0;
 			}
+			entry->is_modified = 0;
 		}
 	}
 
