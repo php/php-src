@@ -15,6 +15,7 @@ Version 1.0.0
  X stream context for specifying compression of a file [Marcus]
  * stream context for specifying meta-data
  X Phar->setStub() for specifying a new stub to the phar [Greg]
+ X Phar->getStub() for retrieving the stub of the phar [Marcus]
  X add setUncompressed(), setCompressedGZ() and setCompressedBZ2() to 
    PharFileInfo class [Greg]
  * add uncompressAllFiles(), compressAllFilesGZ() and compressAllFilesBZ2() 
