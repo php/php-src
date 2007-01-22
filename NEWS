@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2007, PHP 5.2.1RC4
+- Fixed bug #40191 (use of array_unique() with objects triggers segfault).
+  (Tony)
 - Fixed bug #40169 (CURLOPT_TCP_NODELAY only available in curl >= 7.11.2). 
   (Tony)
 - Fixed bug #39450 (getenv() fills other super-globals). (Ilia, Tony)
