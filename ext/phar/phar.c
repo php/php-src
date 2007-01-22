@@ -1597,7 +1597,8 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 			} else {
 				len = -len;
 			}
-			if (len != php_stream_copy_to_stream(stubfile, newfile, len) && len != PHP_STREAM_COPY_ALL) {
+			offset = php_stream_copy_to_stream(stubfile, newfile, len);
+			if (len != offset && len != PHP_STREAM_COPY_ALL) {
 				if (oldfile) {
 					php_stream_close(oldfile);
 				}
@@ -1605,6 +1606,7 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to copy stub from resource to new phar \"%s\"", data->phar->fname);
 				return EOF;
 			}
+			data->phar->halt_offset = offset;
 		} else {
 			if (len != php_stream_write(newfile, user_stub, len)) {
 				if (oldfile) {
@@ -1614,6 +1616,7 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to create stub from string in new phar \"%s\"", data->phar->fname);
 				return EOF;
 			}
+			data->phar->halt_offset = len;
 		}
 	} else {
 		if (data->phar->halt_offset && oldfile) {

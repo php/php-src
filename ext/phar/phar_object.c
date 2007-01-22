@@ -421,23 +421,35 @@ PHP_METHOD(Phar, getStub)
 {
 	char *buf;
 	int len;
+	php_stream *fp;
 	PHAR_ARCHIVE_OBJECT();
 
 	len = phar_obj->arc.archive->halt_offset;
+	fp = phar_obj->arc.archive->fp;
 
-	if (!phar_obj->arc.archive->fp)  {
+	if (!fp) {
+		 fp = php_stream_open_wrapper(phar_obj->arc.archive->fname, "rb", 0, NULL);
+	}
+
+	if (!fp)  {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
 			"Unable to read stub");
 		return;
 	}
 
 	buf = emalloc(len+1);
-	php_stream_rewind(phar_obj->arc.archive->fp);
-	if (len != php_stream_read(phar_obj->arc.archive->fp, buf, len)) {
+	php_stream_rewind(fp);
+	if (len != php_stream_read(fp, buf, len)) {
+		if (fp != phar_obj->arc.archive->fp) {
+			php_stream_close(fp);
+		}
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
 			"Unable to read stub");
 		efree(buf);
 		return;
+	}
+	if (fp != phar_obj->arc.archive->fp) {
+		php_stream_close(fp);
 	}
 	buf[len] = '\0';
 	

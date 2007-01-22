@@ -72,9 +72,9 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phartmp.ph
 __HALT_COMPILER();
 ?>
 --EXPECT--
-===DONE===
 <?php echo "first stub\n"; __HALT_COMPILER(); ?>
 <?php echo "second stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>booya
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
+===DONE===
