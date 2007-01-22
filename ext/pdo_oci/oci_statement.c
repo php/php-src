@@ -272,7 +272,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 					case PDO_PARAM_STR:
 					default:
 						P->oci_type = SQLT_CHR;
-						value_sz = param->max_value_len + 1;
+						value_sz = param->max_value_len;
 						if (param->max_value_len == 0) {
 							value_sz = 4000; /* maximum size before value is interpreted as a LONG value */
 						}
@@ -460,6 +460,7 @@ static sb4 oci_define_callback(dvoid *octxp, OCIDefine *define, ub4 iter, dvoid 
 			*piecep = OCI_ONE_PIECE;
 			*bufpp = col->data;
 			*alenpp = &col->datalen;
+			*indpp = (dvoid *)&col->indicator;
 			break;
 
 		default:
