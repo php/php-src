@@ -1,5 +1,5 @@
 --TEST--
-Phar stub
+Phar::setStub()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --INI--
