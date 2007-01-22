@@ -1171,7 +1171,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	php_url *resource = NULL;
 	php_stream *fp, *fpf;
 	php_stream_filter *filter, *consumed;
-	php_uint32 offset;
+	php_uint32 offset, read, total, toread;
 	zval **pzoption;
 
 	resource = php_url_parse(path);
@@ -1291,26 +1291,37 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 			efree(internal_file);
 			return NULL;			
 		}
-		/* Unfortunately we cannot check the read position of fp after getting */
-		/* uncompressed data because the new stream posiition is being changed */
-		/* by the number of bytes read throughthe filter not by the raw number */
-		/* bytes being consumed on the stream. Therefore use a consumed filter. */ 
-		consumed = php_stream_filter_create("consumed", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
-		php_stream_filter_append(&fp->readfilters, consumed);
-		php_stream_filter_append(&fp->readfilters, filter);
+		buffer = (char *) emalloc(8192);
+		read = 0;
+		total = 0;
 
 		idata->fp = php_stream_temp_new();
-		if (php_stream_copy_to_stream(fp, idata->fp, idata->internal_file->uncompressed_filesize) != idata->internal_file->uncompressed_filesize) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
-			php_stream_close(idata->fp);
-			efree(idata);
-			efree(internal_file);
-			return NULL;
-		}
+		php_stream_filter_append(&idata->fp->writefilters, filter);
+		do {
+			if ((total + 8192) > idata->internal_file->compressed_filesize) {
+				toread = idata->internal_file->compressed_filesize - total;
+			} else {
+				toread = 8192;
+			}
+			read = php_stream_read(fp, buffer, toread);
+			if (read) {
+				total += read;
+				if (read != php_stream_write(idata->fp, buffer, read)) {
+					efree(buffer);
+					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
+					php_stream_close(idata->fp);
+					efree(idata);
+					efree(internal_file);
+					return NULL;
+				}
+				if (total == idata->internal_file->compressed_filesize) {
+					read = 0;
+				} 
+			}
+		} while (read);
+		efree(buffer);
 		php_stream_filter_flush(filter, 1);
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
-		php_stream_filter_flush(consumed, 1);
-		php_stream_filter_remove(consumed, 1 TSRMLS_CC);
 		if (offset + idata->internal_file->compressed_filesize != php_stream_tell(fp)) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
 			php_stream_close(idata->fp);
@@ -1561,12 +1572,12 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 {
 	static const char newstub[] = "<?php __HALT_COMPILER();";
 	phar_entry_info *entry;
-	int alias_len, fname_len, halt_offset, restore_alias_len, global_flags = 0;
-	char *fname, *alias;
+	int alias_len, fname_len, halt_offset, restore_alias_len, global_flags = 0, read;
+	char *fname, *alias, *buf;
 	char manifest[18], entry_buffer[24];
 	off_t manifest_ftell;
 	long offset;
-	php_uint32 copy, loc, new_manifest_count;
+	php_uint32 mytime, loc, new_manifest_count;
 	php_uint32 newcrc32;
 	php_stream *file, *oldfile, *newfile, *compfile, *stubfile;
 	php_stream_filter *filter;
@@ -1645,6 +1656,7 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 	/* compress as necessary, calculate crcs, manifest size, and file sizes */
 	new_manifest_count = 0;
 	offset = 0;
+	buf = (char *) emalloc(8192);
 	for (zend_hash_internal_pointer_reset(&data->phar->manifest);
 	    zend_hash_has_more_elements(&data->phar->manifest) == SUCCESS;
 	    zend_hash_move_forward(&data->phar->manifest)) {
@@ -1660,75 +1672,74 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 		offset += 4 + entry->filename_len + sizeof(entry_buffer);
 
 		/* compress as necessary */
-		if (entry->is_modified) {
-			if (!entry->temp_file) {
-				/* nothing to do here */
-				continue;
+		if (!entry->is_modified) {
+			continue;
+		}
+		if (!entry->temp_file) {
+			/* nothing to do here */
+			continue;
+		}
+		php_stream_rewind(entry->temp_file);
+		file = entry->temp_file;
+		php_stream_rewind(file);
+		newcrc32 = ~0;
+		mytime = entry->uncompressed_filesize;
+		for (loc = 0;loc < mytime; loc++) {
+			CRC32(newcrc32, php_stream_getc(file));
+		}
+		entry->crc32 = ~newcrc32;
+		entry->is_crc_checked = 1;
+		if (!(entry->flags & PHAR_ENT_COMPRESSION_MASK)) {
+			continue;
+		}
+		php_stream_rewind(file);
+		filter = php_stream_filter_create(phar_compress_filter(entry, 0), NULL, 0 TSRMLS_CC);
+		if (!filter) {
+			if (oldfile) {
+				php_stream_close(oldfile);
 			}
-			php_stream_rewind(entry->temp_file);
-			file = entry->temp_file;
-			php_stream_rewind(file);
-			newcrc32 = ~0;
-			for (loc = entry->uncompressed_filesize; loc > 0; --loc) {
-				CRC32(newcrc32, php_stream_getc(file));
+			php_stream_close(newfile);
+			if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to gzip compress file \"%s\" to new phar \"%s\"", entry->filename, data->phar->fname);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to bzip2 compress file \"%s\" to new phar \"%s\"", entry->filename, data->phar->fname);
 			}
-			entry->crc32 = ~newcrc32;
-			entry->is_crc_checked = 1;
-			entry->compressed_filesize = entry->uncompressed_filesize;
-		} else {
-			if (!entry->is_crc_checked) {
-				if (-1 == php_stream_seek(oldfile, entry->offset_within_phar + data->phar->internal_file_start, SEEK_SET)) {
-					php_stream_close(oldfile);
-					php_stream_close(newfile);
-					php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, data->phar->fname);
+			efree(buf);
+			return EOF;
+		}
+		php_stream_filter_append(&file->readfilters, filter);
+
+		/* create new file that holds the compressed version */
+		/* work around inability to specify freedom in write and strictness
+		in read count */
+		entry->compressed_filesize = 0;
+		compfile = php_stream_fopen_tmpfile();
+		do {
+			read = php_stream_read(file, buf, 8192);
+			if (read) {
+				if (read != php_stream_write(compfile, buf, read)) {
+					php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to write to file \"%s\" while creating new phar \"%s\"", entry->filename, data->phar->fname);
+					efree(buf);
+					php_stream_filter_remove(filter, 1 TSRMLS_CC);
+					php_stream_close(compfile);
 					return EOF;
 				}
-				newcrc32 = ~0;
-				for (loc = entry->uncompressed_filesize; loc > 0; --loc) {
-					CRC32(newcrc32, php_stream_getc(oldfile));
-				}
-				entry->crc32 = ~newcrc32;
-				entry->is_crc_checked = 1;
+				entry->compressed_filesize += read;
 			}
-			if (-1 == php_stream_seek(oldfile, entry->offset_within_phar + data->phar->internal_file_start, SEEK_SET)) {
-				php_stream_close(oldfile);
-				php_stream_close(newfile);
-				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, data->phar->fname);
-				return EOF;
-			}
-			file = oldfile;
+		} while (read);
+		php_stream_filter_remove(filter, 1 TSRMLS_CC);
+		/* generate crc on compressed file */
+		php_stream_rewind(compfile);
+		if (entry->temp_file) {
+			/* no longer need the uncompressed contents */
+			php_stream_close(entry->temp_file);
 		}
-		if (entry->flags & PHAR_ENT_COMPRESSION_MASK) {
-			filter = php_stream_filter_create(phar_compress_filter(entry, 0), NULL, 0 TSRMLS_CC);
-			if (!filter) {
-				if (oldfile) {
-					php_stream_close(oldfile);
-				}
-				php_stream_close(newfile);
-				if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
-					php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to gzip compress file \"%s\" to new phar \"%s\"", entry->filename, data->phar->fname);
-				} else {
-					php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to bzip2 compress file \"%s\" to new phar \"%s\"", entry->filename, data->phar->fname);
-				}
-				return EOF;
-			}
-			php_stream_filter_append(&file->readfilters, filter);
-
-			/* create new file that holds the compressed version */
-			compfile = php_stream_fopen_tmpfile();
-			entry->compressed_filesize = php_stream_copy_to_stream(file, compfile, entry->uncompressed_filesize);
-			php_stream_filter_remove(filter, 1 TSRMLS_CC);
-			if (entry->temp_file) {
-				/* no longer need the uncompressed contents */
-				php_stream_close(entry->temp_file);
-			}
-			/* use temp_file to store the newly compressed data */
-			entry->temp_file = compfile;
-			entry->is_modified = 1;
-			global_flags |= (entry->flags & PHAR_ENT_COMPRESSION_MASK);
-		}
+		/* use temp_file to store the newly compressed data */
+		entry->temp_file = compfile;
+		entry->is_modified = 1;
+		global_flags |= (entry->flags & PHAR_ENT_COMPRESSION_MASK);
 	}
-	
+	efree(buf);
 	global_flags |= PHAR_HDR_SIGNATURE;
 
 	/* write out manifest pre-header */
@@ -1802,9 +1813,9 @@ int phar_flush(phar_entry_data *data, char *user_stub, long len TSRMLS_DC) /* {{
 			php_var_serialize(&metadata_str, &entry->metadata, &metadata_hash TSRMLS_CC);
 			PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
 		}
-		copy = time(NULL);
+		mytime = time(NULL);
 		phar_set_32(entry_buffer, entry->uncompressed_filesize);
-		phar_set_32(entry_buffer+4, copy);
+		phar_set_32(entry_buffer+4, mytime);
 		phar_set_32(entry_buffer+8, entry->compressed_filesize);
 		phar_set_32(entry_buffer+12, entry->crc32);
 		phar_set_32(entry_buffer+16, entry->flags);

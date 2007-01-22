@@ -13,7 +13,7 @@ $file = "<?php __HALT_COMPILER(); ?>";
 // file length is too short
 
 $files = array();
-$files['a'] = array('cont'=>'a','flags'=>0x00001000);
+$files['a'] = array('cont'=>'a','flags'=>0x00001000, 'clen' => 1);
 include 'phar_test.inc';
 
 echo file_get_contents($pname . '/a');
