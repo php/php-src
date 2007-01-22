@@ -1,3 +1,8 @@
+2007-01-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/.cvsignore:
+      - Add *.mem
+
 2007-01-20  Antony Dovgal  <antony@zend.com>
 
     * zend_hash.c:

@@ -1,3 +1,123 @@
+2007-01-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed typos
+
+2007-01-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/.cvsignore
+      ext/bcmath/tests/.cvsignore
+      ext/bz2/tests/.cvsignore
+      ext/calendar/tests/.cvsignore
+      ext/ctype/tests/.cvsignore
+      ext/date/tests/.cvsignore
+      ext/dba/tests/.cvsignore
+      ext/dbase/tests/.cvsignore
+      ext/dom/tests/.cvsignore
+      ext/exif/tests/.cvsignore
+      ext/fdf/tests/.cvsignore
+      ext/filter/tests/.cvsignore
+      ext/gd/tests/.cvsignore
+      ext/gettext/tests/.cvsignore
+      ext/gmp/tests/.cvsignore
+      ext/hash/tests/.cvsignore
+      ext/iconv/tests/.cvsignore
+      ext/imap/tests/.cvsignore
+      ext/interbase/tests/.cvsignore
+      ext/json/tests/.cvsignore
+      ext/libxml/tests/.cvsignore
+      ext/mbstring/tests/.cvsignore
+      ext/mcrypt/tests/.cvsignore
+      ext/mhash/tests/.cvsignore
+      ext/ming/tests/.cvsignore
+      ext/mysql/tests/.cvsignore
+      ext/mysqli/tests/.cvsignore
+      ext/oci8/tests/.cvsignore
+      ext/openssl/tests/.cvsignore
+      ext/pcntl/tests/.cvsignore
+      ext/pcre/pcrelib/testdata/.cvsignore
+      ext/pcre/tests/.cvsignore
+      ext/pdo/tests/.cvsignore
+      ext/pdo_firebird/tests/.cvsignore
+      ext/pdo_mysql/tests/.cvsignore
+      ext/pdo_oci/tests/.cvsignore
+      ext/pdo_odbc/tests/.cvsignore
+      ext/pdo_pgsql/tests/.cvsignore
+      ext/pdo_sqlite/tests/.cvsignore
+      ext/pgsql/tests/.cvsignore
+      ext/posix/tests/.cvsignore
+      ext/pspell/tests/.cvsignore
+      ext/reflection/tests/.cvsignore
+      ext/session/tests/.cvsignore
+      ext/shmop/tests/.cvsignore
+      ext/simplexml/tests/.cvsignore
+      ext/skeleton/tests/.cvsignore
+      ext/soap/tests/.cvsignore
+      ext/soap/tests/bugs/.cvsignore
+      ext/soap/tests/interop/Round2/Base/.cvsignore
+      ext/soap/tests/interop/Round2/GroupB/.cvsignore
+      ext/soap/tests/interop/Round3/GroupD/.cvsignore
+      ext/soap/tests/interop/Round3/GroupE/.cvsignore
+      ext/soap/tests/interop/Round3/GroupF/.cvsignore
+      ext/soap/tests/interop/Round4/GroupG/.cvsignore
+      ext/soap/tests/interop/Round4/GroupH/.cvsignore
+      ext/soap/tests/interop/Round4/GroupI/.cvsignore
+      ext/soap/tests/schema/.cvsignore
+      ext/soap/tests/soap12/.cvsignore
+      ext/sockets/tests/.cvsignore
+      ext/spl/examples/tests/.cvsignore
+      ext/spl/tests/.cvsignore
+      ext/sqlite/tests/.cvsignore
+      ext/sqlite/tests/pdo/.cvsignore
+      ext/standard/tests/.cvsignore
+      ext/standard/tests/array/.cvsignore
+      ext/standard/tests/assert/.cvsignore
+      ext/standard/tests/file/.cvsignore
+      ext/standard/tests/filters/.cvsignore
+      ext/standard/tests/general_functions/.cvsignore
+      ext/standard/tests/image/.cvsignore
+      ext/standard/tests/math/.cvsignore
+      ext/standard/tests/network/.cvsignore
+      ext/standard/tests/reg/.cvsignore
+      ext/standard/tests/serialize/.cvsignore
+      ext/standard/tests/strings/.cvsignore
+      ext/standard/tests/time/.cvsignore
+      ext/standard/tests/versioning/.cvsignore
+      ext/sysvmsg/tests/.cvsignore
+      ext/sysvsem/tests/.cvsignore
+      ext/sysvshm/tests/.cvsignore
+      ext/tidy/tests/.cvsignore
+      ext/tokenizer/tests/.cvsignore
+      ext/unicode/tests/.cvsignore
+      ext/wddx/tests/.cvsignore
+      ext/xml/tests/.cvsignore
+      ext/xmlreader/tests/.cvsignore
+      ext/xmlrpc/tests/.cvsignore
+      ext/xmlwriter/tests/.cvsignore
+      ext/xsl/tests/.cvsignore
+      ext/zip/tests/.cvsignore
+      ext/zlib/tests/.cvsignore
+      sapi/cli/tests/.cvsignore
+      sapi/tests/.cvsignore
+      tests/.cvsignore
+      tests/basic/.cvsignore
+      tests/classes/.cvsignore
+      tests/func/.cvsignore
+      tests/lang/.cvsignore
+      tests/output/.cvsignore
+      tests/run-test/.cvsignore
+      tests/strings/.cvsignore
+      tests/unicode/.cvsignore
+      tests/unicode/func/.cvsignore:
+      - Add *.mem
+
+    * (PHP_5_2)
+      ext/spl/tests/observer_003.phpt
+      ext/spl/tests/observer_004.phpt
+      ext/spl/tests/observer_005.phpt:
+      - Add tests
+
 2007-01-20  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/zend_hash.c:
