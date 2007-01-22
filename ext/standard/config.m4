@@ -250,8 +250,12 @@ dnl
 AC_MSG_CHECKING([whether rounding works as expected])
 AC_TRY_RUN([
 #include <math.h>
+  /* keep this out-of-line to prevent use of gcc inline floor() */
+  double somefn(double n) {
+    return floor(n*pow(10,2) + 0.5);
+  }
   int main() {
-    return floor(0.045*pow(10,2) + 0.5)/10.0 != 0.5;
+    return somefn(0.045)/10.0 != 0.5;
   }
 ],[
   PHP_ROUND_FUZZ=0.5

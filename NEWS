@@ -5,6 +5,8 @@ PHP 4                                                                      NEWS
   (Dmitry)
 - Fixed bug #36248 (CURLOPT_HEADERFUNCTION, couldn't set the function in the
   class). (Ilia)
+- Backported a fix in the configure tests to detect the "rounding fuzz".
+  (Derick, Joe Orton)
 
 - Moved extensions to PECL:
   . ext/ovrimos (Derick)
