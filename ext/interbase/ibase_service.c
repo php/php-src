@@ -425,7 +425,8 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 	 */
 	zval *res;
 	char *db, *bk, buf[200];
-	long dblen, bklen, spb_len, opts = 0;
+	int dblen, bklen, spb_len;
+	long opts = 0;
 	zend_bool verbose = 0;
 	ibase_service *svm;
 
@@ -489,7 +490,8 @@ static void _php_ibase_service_action(INTERNAL_FUNCTION_PARAMETERS, char svc_act
 {
 	zval *res;
 	char buf[128], *db;
-	long action, spb_len, dblen, argument = 0;
+	int dblen, spb_len;
+	long action, argument = 0;
 	ibase_service *svm;
 
 	RESET_ERRMSG;
