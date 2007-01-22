@@ -744,6 +744,7 @@ PHP_FUNCTION(clearstatcache)
 		efree(BG(CurrentLStatFile));
 		BG(CurrentLStatFile) = NULL;
 	}
+	realpath_cache_clean(TSRMLS_C);
 }
 /* }}} */
 
