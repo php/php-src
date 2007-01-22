@@ -249,18 +249,7 @@ static void cwd_globals_ctor(virtual_cwd_globals *cwd_globals TSRMLS_DC)
 static void cwd_globals_dtor(virtual_cwd_globals *cwd_globals TSRMLS_DC)
 {
 	CWD_STATE_FREE(&cwd_globals->cwd);
-	{
-		int i;
-
-		for (i = 0; i < sizeof(cwd_globals->realpath_cache)/sizeof(cwd_globals->realpath_cache[0]); i++) {
-			realpath_cache_bucket *p = cwd_globals->realpath_cache[i];
-			while (p != NULL) {
-				realpath_cache_bucket *r = p;
-				p = p->next;
-				free(r);
-			}
-		}
-	}
+	realpath_cache_clean(TSRMLS_C);
 }
 
 static char *tsrm_strndup(const char *s, size_t length)
@@ -391,6 +380,42 @@ static inline unsigned long realpath_cache_key(const char *path, int path_len)
     h ^= *path++;
   }
   return h;
+}
+
+CWD_API void realpath_cache_clean(TSRMLS_D)
+{
+	int i;
+
+	for (i = 0; i < sizeof(CWDG(realpath_cache))/sizeof(CWDG(realpath_cache)[0]); i++) {
+		realpath_cache_bucket *p = CWDG(realpath_cache)[i];
+		while (p != NULL) {
+			realpath_cache_bucket *r = p;
+			p = p->next;
+			free(r);
+		}
+		CWDG(realpath_cache)[i] = NULL;
+	}
+	CWDG(realpath_cache_size) = 0;
+}
+
+CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC)
+{
+	unsigned long key = realpath_cache_key(path, path_len);
+	unsigned long n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
+	realpath_cache_bucket **bucket = &CWDG(realpath_cache)[n];
+
+	while (*bucket != NULL) {
+		if (key == (*bucket)->key && path_len == (*bucket)->path_len &&
+		           memcmp(path, (*bucket)->path, path_len) == 0) {
+			realpath_cache_bucket *r = *bucket;
+			*bucket = (*bucket)->next;
+			CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
+			free(r);
+			return;
+		} else {
+			bucket = &(*bucket)->next;
+		}
+	}
 }
 
 static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, int realpath_len, time_t t TSRMLS_DC)
