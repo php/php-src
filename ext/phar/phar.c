@@ -1301,7 +1301,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 
 		idata->fp = php_stream_temp_new();
 		if (php_stream_copy_to_stream(fp, idata->fp, idata->internal_file->uncompressed_filesize) != idata->internal_file->uncompressed_filesize) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch 1 on file \"%s\")", idata->phar->fname, internal_file);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
 			php_stream_close(idata->fp);
 			efree(idata);
 			efree(internal_file);
@@ -1312,7 +1312,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		php_stream_filter_flush(consumed, 1);
 		php_stream_filter_remove(consumed, 1 TSRMLS_CC);
 		if (offset + idata->internal_file->compressed_filesize != php_stream_tell(fp)) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch 2 on file \"%s\")", idata->phar->fname, internal_file);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
 			php_stream_close(idata->fp);
 			efree(idata);
 			efree(internal_file);
@@ -1324,7 +1324,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		/* bypass to temp stream */
 		idata->fp = php_stream_temp_new();
 		if (php_stream_copy_to_stream(fp, idata->fp, idata->internal_file->uncompressed_filesize) != idata->internal_file->uncompressed_filesize) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch 3 on file \"%s\")", idata->phar->fname, internal_file);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
 			php_stream_close(idata->fp);
 			efree(idata);
 			efree(internal_file);
