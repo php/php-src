@@ -598,6 +598,181 @@ PHP_METHOD(PharFileInfo, setMetadata)
 }
 /* }}} */
 
+/* {{{ proto int PharFileInfo::setCompressedGZ()
+ * Instructs the Phar class to compress the current file using zlib
+ */
+PHP_METHOD(PharFileInfo, setCompressedGZ)
+{
+#if HAVE_ZLIB
+	php_stream *stream, *parent;
+	phar_entry_data *idata;
+	char *fname;
+	int fname_len;
+	PHAR_ENTRY_OBJECT();
+
+	if (entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_GZ) {
+		RETURN_TRUE;
+		return;
+	}
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Phar is readonly, cannot change compression");
+	}
+	if (entry_obj->ent.entry->is_deleted) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot compress deleted file");
+	}
+	stream = php_stream_fopen_tmpfile();
+	if (!entry_obj->ent.entry->temp_file) {
+		fname_len = spprintf(&fname, 0, "phar://%s/%s", entry_obj->ent.entry->phar->fname, entry_obj->ent.entry->filename);
+		parent = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
+		efree(fname);
+		php_stream_copy_to_stream(parent, stream, PHP_STREAM_COPY_ALL);
+		entry_obj->ent.entry->temp_file = stream;
+		php_stream_close(parent);
+	}
+	if (entry_obj->ent.entry->fp) {
+		php_stream_close(entry_obj->ent.entry->fp);
+		entry_obj->ent.entry->fp = 0;
+	}
+	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
+	entry_obj->ent.entry->flags |= PHAR_ENT_COMPRESSED_GZ;
+	entry_obj->ent.entry->phar->is_modified = 1;
+	entry_obj->ent.entry->is_modified = 1;
+
+	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
+	idata->fp = 0;
+	idata->internal_file = 0;
+	idata->phar = entry_obj->ent.entry->phar;
+	phar_flush(idata, 0, 0 TSRMLS_CC);
+	efree(idata);
+	RETURN_TRUE;
+#else
+	zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+		"Cannot compress with Gzip compression, zlib extension is not enabled");
+#endif
+}
+/* }}} */
+
+/* {{{ proto int PharFileInfo::setCompressedBZIP2()
+ * Instructs the Phar class to compress the current file using bzip2
+ */
+PHP_METHOD(PharFileInfo, setCompressedBZIP2)
+{
+#if HAVE_BZ2
+	php_stream *stream, *parent;
+	phar_entry_data *idata;
+	char *fname;
+	int fname_len;
+	PHAR_ENTRY_OBJECT();
+
+	if (entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
+		RETURN_TRUE;
+		return;
+	}
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Phar is readonly, cannot change compression");
+	}
+	if (entry_obj->ent.entry->is_deleted) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot compress deleted file");
+	}
+	stream = php_stream_fopen_tmpfile();
+	if (!entry_obj->ent.entry->temp_file) {
+		fname_len = spprintf(&fname, 0, "phar://%s/%s", entry_obj->ent.entry->phar->fname, entry_obj->ent.entry->filename);
+		parent = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
+		efree(fname);
+		php_stream_copy_to_stream(parent, stream, PHP_STREAM_COPY_ALL);
+		entry_obj->ent.entry->temp_file = stream;
+		php_stream_close(parent);
+	}
+	if (entry_obj->ent.entry->fp) {
+		php_stream_close(entry_obj->ent.entry->fp);
+		entry_obj->ent.entry->fp = 0;
+	}
+	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
+	entry_obj->ent.entry->flags |= PHAR_ENT_COMPRESSED_BZ2;
+	entry_obj->ent.entry->phar->is_modified = 1;
+	entry_obj->ent.entry->is_modified = 1;
+
+	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
+	idata->fp = 0;
+	idata->internal_file = 0;
+	idata->phar = entry_obj->ent.entry->phar;
+	phar_flush(idata, 0, 0 TSRMLS_CC);
+	efree(idata);
+	RETURN_TRUE;
+#else
+	zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+		"Cannot compress with Bzip2 compression, bzip2 extension is not enabled");
+#endif
+}
+/* }}} */
+
+/* {{{ proto int PharFileInfo::setUncompressed()
+ * Instructs the Phar class to uncompress the current file
+ */
+PHP_METHOD(PharFileInfo, setUncompressed)
+{
+	php_stream *stream, *parent;
+	phar_entry_data *idata;
+	char *fname;
+	int fname_len;
+	PHAR_ENTRY_OBJECT();
+
+	if ((entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSION_MASK) == 0) {
+		RETURN_TRUE;
+		return;
+	}
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Phar is readonly, cannot change compression");
+	}
+	if (entry_obj->ent.entry->is_deleted) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot compress deleted file");
+	}
+#if !HAVE_ZLIB
+	if (entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_GZ) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot uncompress Gzip-compressed file, zlib extension is not enabled");
+	}
+#endif
+#if !HAVE_BZ2
+	if (entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot uncompress Bzip2-compressed file, bzip2 extension is not enabled");
+	}
+#endif
+	stream = php_stream_fopen_tmpfile();
+	if (!entry_obj->ent.entry->temp_file) {
+		fname_len = spprintf(&fname, 0, "phar://%s/%s", entry_obj->ent.entry->phar->fname, entry_obj->ent.entry->filename);
+		parent = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
+		efree(fname);
+		php_stream_copy_to_stream(parent, stream, PHP_STREAM_COPY_ALL);
+		entry_obj->ent.entry->compressed_filesize = entry_obj->ent.entry->uncompressed_filesize;
+		entry_obj->ent.entry->temp_file = stream;
+		php_stream_close(parent);
+	}
+	if (entry_obj->ent.entry->fp) {
+		php_stream_close(entry_obj->ent.entry->fp);
+		entry_obj->ent.entry->fp = 0;
+	}
+	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
+	entry_obj->ent.entry->phar->is_modified = 1;
+	entry_obj->ent.entry->is_modified = 1;
+
+	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
+	idata->fp = 0;
+	idata->internal_file = 0;
+	idata->phar = entry_obj->ent.entry->phar;
+	phar_flush(idata, 0, 0 TSRMLS_CC);
+	efree(idata);
+	RETURN_TRUE;
+}
+/* }}} */
+
 #endif /* HAVE_SPL */
 
 /* {{{ phar methods */
@@ -680,6 +855,9 @@ zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, isCompressed,       NULL,                       0)
 	PHP_ME(PharFileInfo, isCompressedGZ,     NULL,                       0)
 	PHP_ME(PharFileInfo, isCompressedBZIP2,  NULL,                       0)
+	PHP_ME(PharFileInfo, setUncompressed,    NULL,                       0)
+	PHP_ME(PharFileInfo, setCompressedGZ,    NULL,                       0)
+	PHP_ME(PharFileInfo, setCompressedBZIP2, NULL,                       0)
 	PHP_ME(PharFileInfo, getCRC32,           NULL,                       0)
 	PHP_ME(PharFileInfo, isCRCChecked,       NULL,                       0)
 	PHP_ME(PharFileInfo, getPharFlags,       NULL,                       0)
