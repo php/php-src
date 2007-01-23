@@ -26,7 +26,7 @@ ZEND_DECLARE_MODULE_GLOBALS(phar)
 
 /* if the original value is 0 (disabled), then allow setting/unsetting at will
    otherwise, only allow 1 (enabled), and error on disabling */
-ZEND_INI_MH(phar_ini_modify_handler)
+ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 {
 	zend_bool *p, test;
 #ifndef ZTS
@@ -73,6 +73,7 @@ ZEND_INI_MH(phar_ini_modify_handler)
 	}
 	return SUCCESS;
 }
+/* }}}*/
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("phar.readonly",     "1", PHP_INI_ALL, phar_ini_modify_handler, readonly,     zend_phar_globals, phar_globals)
@@ -825,6 +826,7 @@ static int phar_open_or_create_filename(char *fname, int fname_len, char *alias,
 	}
 	return SUCCESS;
 }
+/* }}}*/
 
 /**
  * Return an already opened filename.
@@ -2482,6 +2484,7 @@ ZEND_GET_MODULE(phar)
 function_entry phar_functions[] = {
        {NULL, NULL, NULL}      /* Must be the last line in phar_functions[] */
 };
+/* }}}*/
 
 /* {{{ php_phar_init_globals
  */

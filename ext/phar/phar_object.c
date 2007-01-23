@@ -176,7 +176,7 @@ PHP_METHOD(Phar, __construct)
 	phar_archive_object *phar_obj = (phar_archive_object*)zend_object_store_get_object(getThis() TSRMLS_CC); \
 	if (!phar_obj->arc.archive) { \
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
-			"Cannot call method on an uninitialzed Phar object"); \
+			"Cannot call method on an uninitialized Phar object"); \
 		return; \
 	}
 
@@ -521,7 +521,7 @@ PHP_METHOD(PharFileInfo, __construct)
 	phar_entry_object *entry_obj = (phar_entry_object*)zend_object_store_get_object(getThis() TSRMLS_CC); \
 	if (!entry_obj->ent.entry) { \
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
-			"Cannot call method on an uninitialzed PharFileInfo object"); \
+			"Cannot call method on an uninitialized PharFileInfo object"); \
 		return; \
 	}
 

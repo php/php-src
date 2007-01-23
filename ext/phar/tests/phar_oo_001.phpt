@@ -41,5 +41,5 @@ __halt_compiler();
 --EXPECT--
 string(5) "0.9.0"
 int(5)
-string(49) "Cannot call method on an uninitialzed Phar object"
+string(50) "Cannot call method on an uninitialized Phar object"
 ===DONE===
