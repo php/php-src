@@ -648,6 +648,11 @@ no_realpath:
 						memcpy(&state->cwd[state->cwd_length], data.cFileName, length+1);
 						ptr_length = length;
 						FindClose(hFind);
+					} else if (use_realpath == CWD_REALPATH) {
+						free(free_path);
+						CWD_STATE_FREE(state);
+						*state = old_state;					
+						return 1;
 					}
 				}
 #endif
