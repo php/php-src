@@ -105,6 +105,7 @@
 #define PHP_MODE_REFLECTION_FUNCTION    8
 #define PHP_MODE_REFLECTION_CLASS       9
 #define PHP_MODE_REFLECTION_EXTENSION   10
+#define PHP_MODE_REFLECTION_EXT_INFO    11
 
 #define HARDCODED_INI			\
 	"html_errors=0\n"			\
@@ -152,6 +153,8 @@ static const opt_struct OPTIONS[] = {
 	{11,  1, "rclass"},
 	{12,  1, "re"},
 	{12,  1, "rextension"},
+	{13,  1, "ri"},
+	{13,  1, "rextinfo"},
 #endif
 	{'-', 0, NULL} /* end of args */
 };
@@ -460,6 +463,7 @@ static void php_cli_usage(char *argv0)
 				"  --rf <name>      Show information about function <name>.\n"
 				"  --rc <name>      Show information about class <name>.\n"
 				"  --re <name>      Show information about extension <name>.\n"
+				"  --ri <name>      Show configuration for extension <name>.\n"
 				"\n"
 #endif
 				, prog, prog, prog, prog, prog, prog);
@@ -958,6 +962,10 @@ int main(int argc, char *argv[])
 				behavior=PHP_MODE_REFLECTION_EXTENSION;
 				reflection_what = php_optarg;
 				break;
+			case 13:
+				behavior=PHP_MODE_REFLECTION_EXT_INFO;
+				reflection_what = php_optarg;
+				break;
 #endif
 			default:
 				break;
@@ -1263,6 +1271,22 @@ int main(int argc, char *argv[])
 					zval_ptr_dtor(&ref);
 					zval_ptr_dtor(&arg);
 
+					break;
+				}
+			case PHP_MODE_REFLECTION_EXT_INFO:
+				{
+					int len = strlen(reflection_what);
+					char *lcname = zend_str_tolower_dup(reflection_what, len);
+					zend_module_entry *module;
+
+					if (zend_hash_find(&module_registry, lcname, len+1, (void**)&module) == FAILURE) {
+						zend_printf("Extension '%s' not present.\n", reflection_what);
+						exit_status = 1;
+					} else {
+						php_info_print_module(module TSRMLS_CC);
+					}
+					
+					efree(lcname);
 					break;
 				}
 #endif /* reflection */
