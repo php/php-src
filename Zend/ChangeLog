@@ -1,3 +1,13 @@
+2007-01-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/unset_cv08.phpt:
+      fix test
+
+    * tests/unset_cv08.phpt:
+      fix test
+      array_unique() is not expected to modify its argument
+
 2007-01-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/.cvsignore:
