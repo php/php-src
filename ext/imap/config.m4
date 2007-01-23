@@ -65,7 +65,7 @@ AC_DEFUN([PHP_IMAP_KRB_CHK], [
 
 AC_DEFUN([PHP_IMAP_SSL_CHK], [
   if test "$PHP_IMAP_SSL" != "no"; then
-    if test "$PHP_OPENSSL" == ""; then
+    if test "$PHP_OPENSSL" = ""; then
       PHP_OPENSSL='no'
     fi
     PHP_SETUP_OPENSSL(IMAP_SHARED_LIBADD,
