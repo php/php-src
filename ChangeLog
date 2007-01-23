@@ -1,3 +1,77 @@
+2007-01-22  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/config.m4:
+      - Backported a fix in the configure tests to detect the "rounding fuzz".
+
+    * (PHP_4_4)
+      NEWS:
+      - Move ext/ovrimos to PECL.
+
+2007-01-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_oci/oci_statement.c:
+      fix PECL bug #7295 (ORA-01405: fetched column value is NULL on LOB fields)
+
+2007-01-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_virtual_cwd.h
+      ext/standard/dir.c
+      ext/standard/dir.c
+      ext/standard/filestat.c
+      ext/standard/filestat.c
+      ext/standard/tests/file/bug39367.phpt
+      ext/standard/tests/file/bug39367.phpt
+      ext/standard/tests/file/bug39367.phpt:
+      Fixed bug #39367 (clearstatcache() doesn't clear realpath cache)
+      Fixed bug #40092 (chroot() doesn't clear realpath cache)
+
+2007-01-22  Antony Dovgal  <antony@zend.com>
+
+    * ext/interbase/ibase_query.c:
+      fix wrong param definition
+
+    * ext/interbase/ibase_service.c:
+      fix long/int mess
+
+    * (PHP_5_2)
+      ZendEngine2/tests/unset_cv08.phpt:
+      fix test
+
+    * ZendEngine2/tests/unset_cv08.phpt:
+      fix test
+      array_unique() is not expected to modify its argument
+
+    * ext/spl/examples/directoryfilterdots.inc
+      ext/spl/examples/directoryfilterdots.inc:
+      fix classname
+
+    * (PHP_4_4)
+      ext/standard/array.c:
+      fix array_unique() to return array with any type of argument
+
+    * ext/standard/tests/array/bug40191.phpt:
+      add skipif
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/bug40191.phpt:
+      MFH: fix #40191 (use of array_unique() with objects triggers segfault)
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug40191.phpt
+      ext/standard/tests/array/bug40191.phpt:
+      fix #40191 (use of array_unique() with objects triggers segfault)
+
 2007-01-21  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
