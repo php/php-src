@@ -42,7 +42,7 @@
 
 /* {{{ ext/tidy macros
 */
-#define FIX_BUFFER(bptr) (bptr)->bp[(bptr)->size-1] = '\0'
+#define FIX_BUFFER(bptr) do { if ((bptr)->size) { (bptr)->bp[(bptr)->size-1] = '\0'; } } while(0)
 
 #define TIDY_SET_CONTEXT \
     zval *object = getThis();
@@ -526,7 +526,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 
 				tidySaveBuffer (doc, &output);
 				FIX_BUFFER(&output);
-				RETVAL_STRINGL((char *) output.bp, output.size-1, 1);
+				RETVAL_STRINGL((char *) output.bp, output.size ? output.size-1 : 0, 1);
 				tidyBufFree(&output);
 			} else {
 				RETVAL_FALSE;
@@ -690,14 +690,14 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type, void *extra TSRM
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
 			tidyBufInit(&output);
 			tidySaveBuffer (obj->ptdoc->doc, &output);
-			ZVAL_STRINGL(out, (char *) output.bp, output.size, 1);
+			ZVAL_STRINGL(out, (char *) output.bp, output.size ? output.size-1 : 0, 1);
 			tidyBufFree(&output);
 			break;
 
 		case IS_UNICODE:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
 			tidySaveBuffer (obj->ptdoc->doc, &output);
-			ZVAL_U_STRINGL(obj->converter->conv, out, (char *) output.bp, output.size, 1);
+			ZVAL_U_STRINGL(obj->converter->conv, out, (char *) output.bp, output.size ? output.size-1 : 0, 1);
 			tidyBufFree(&output);
 			break;
 
@@ -765,9 +765,9 @@ static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 	if (output.size) {
 		MAKE_STD_ZVAL(temp);
 		if (UG(unicode)) {
-			ZVAL_U_STRINGL(obj->converter->conv, temp, (char *) output.bp, output.size, 1);
+			ZVAL_U_STRINGL(obj->converter->conv, temp, (char *) output.bp, output.size-1, 1);
 		} else {
-			ZVAL_STRINGL(temp, (char *) output.bp, output.size, 1);
+			ZVAL_STRINGL(temp, (char *) output.bp, output.size-1, 1);
 		}
 		zend_ascii_hash_update(obj->std.properties, "value", sizeof("value"), (void *)&temp, sizeof(zval *), NULL);
 	}
@@ -1148,7 +1148,7 @@ static int php_tidy_output_handler(void **nothing, php_output_context *output_co
 				tidySaveBuffer(doc, &outbuf);
 				FIX_BUFFER(&outbuf);
 				output_context->out.data = (char *) outbuf.bp;
-				output_context->out.used = outbuf.size - 1;
+				output_context->out.used = outbuf.size ? outbuf.size-1 : 0;
 				output_context->out.free = 1;
 				status = SUCCESS;
 			}
@@ -1224,7 +1224,7 @@ static PHP_FUNCTION(tidy_get_output)
 	tidyBufInit(&output);
 	tidySaveBuffer(obj->ptdoc->doc, &output);
 	FIX_BUFFER(&output);
-	RETVAL_U_STRINGL(obj->converter->conv, (char *) output.bp, output.size-1, 1);
+	RETVAL_U_STRINGL(obj->converter->conv, (char *) output.bp, output.size ? output.size-1 : 0, 1);
 	tidyBufFree(&output);
 }
 /* }}} */
