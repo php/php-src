@@ -784,6 +784,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 	}
 
 	cd2 = (iconv_t)NULL;
+	errno = 0;
 
 	for (in_p = str, in_left = nbytes, cnt = 0; in_left > 0 && len > 0; ++cnt) {
 		size_t prev_in_left;
