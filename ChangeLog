@@ -1,3 +1,61 @@
+2007-01-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php.1.in
+      sapi/cli/php_cli.c:
+      - Add --ri/--rextinfo
+
+    * ext/standard/info.c
+      ext/standard/info.h:
+      - Simplify
+      - Add PHPAPI php_info_print_module()
+
+2007-01-23  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/tidy.c
+      ext/tidy/tests/027.phpt:
+      MFB: fix a few crashes
+
+    * ext/tidy/tests/027.phpt
+      ext/tidy/tests/027.phpt:
+      
+      file 027.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/tidy/tidy.c:
+      fix a few crashes
+
+2007-01-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed bug #40200 (The FastCgi version has different realpath results than
+      thread safe version)
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed wrong realpath() result for unexistent files on win32
+
+2007-01-23  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/standard/info.c:
+      - Use utf-8 instead of utf8 as encoding to fix phpinfo()
+
+2007-01-23  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/imap/config.m4:
+      MFB: Fix typo
+
+    * (PHP_5_2)
+      ext/imap/config.m4:
+      Fix typo
+
+2007-01-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      
+      emalloc() -> safe_emalloc()
+
 2007-01-22  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_4_4)
