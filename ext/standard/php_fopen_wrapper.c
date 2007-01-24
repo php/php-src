@@ -187,7 +187,8 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	}
 
 	if (!strcasecmp(path, "input")) {
-		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
+		/* Override default behavior for php://input when used as an include and allow_url_include is being used in BC (off) mode */
+		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include_list) ) {
 			if (options & REPORT_ERRORS) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL file-access is disabled in the server configuration");
 			}
@@ -197,7 +198,8 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	}  
 	
 	if (!strcasecmp(path, "stdin")) {
-		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
+		/* Override default behavior for php://stdin when used as an include and allow_url_include is being used in BC (off) mode */
+		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include_list) ) {
 			if (options & REPORT_ERRORS) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL file-access is disabled in the server configuration");
 			}

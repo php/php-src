@@ -53,7 +53,7 @@ static php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_mkdir,
 	user_wrapper_rmdir
 };
-
+php_stream_wrapper_ops *php_stream_user_wrapper_ops = &user_stream_wops;
 
 static void stream_wrapper_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {

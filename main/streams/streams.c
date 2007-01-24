@@ -2096,6 +2096,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 	}
 	/* TODO: curl based streams probably support file:// properly */
 	if (!protocol || !strncasecmp(protocol, "file", n))	{
+		/* fall back on regular file access */
+		php_stream_wrapper *plain_files_wrapper = &php_plain_files_wrapper;
+
 		if (protocol) {
 			int localhost = 0;
 
@@ -2132,32 +2135,37 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 			return NULL;
 		}
 		
+		/* The file:// wrapper may have been disabled/overridden */
 		if (FG(stream_wrappers)) {
-			/* The file:// wrapper may have been disabled/overridden */
-
-			if (wrapperpp) {
-				/* It was found so go ahead and provide it */
-				return *wrapperpp;
-			}
-			
-			/* Check again, the original check might have not known the protocol name */
-			if (zend_hash_find(wrapper_hash, "file", sizeof("file"), (void**)&wrapperpp) == SUCCESS) {
-				return *wrapperpp;
+			if (!wrapperpp || zend_hash_find(wrapper_hash, "file", sizeof("file"), (void**)&wrapperpp) == FAILURE) {
+				if (options & REPORT_ERRORS) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Plainfiles wrapper disabled");
+				}
+				return NULL;
 			}
 
+			/* Handles overridden plain files wrapper */
+			plain_files_wrapper = *wrapperpp;
+		}
+
+		if (!php_stream_allow_url_fopen("file", sizeof("file") - 1) ||
+			((options & STREAM_OPEN_FOR_INCLUDE) && !php_stream_allow_url_include("file", sizeof("file") - 1)) ) {
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Plainfiles wrapper disabled");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "file:// wrapper is disabled in the server configuration");
 			}
 			return NULL;
 		}
-
-		/* fall back on regular file access */		
-		return &php_plain_files_wrapper;
+		
+		return plain_files_wrapper;
 	}
 
-	if ((wrapperpp && (*wrapperpp)->is_url) && (!PG(allow_url_fopen) || ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include))) ) {
+	if (!php_stream_allow_url_fopen(protocol, n) ||
+		((options & STREAM_OPEN_FOR_INCLUDE) && !php_stream_allow_url_include(protocol, n)) ) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL file-access is disabled in the server configuration");
+			/* protocol[n] probably isn't '\0' */
+			char *protocol_dup = estrndup(protocol, n);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s:// wrapper is disabled in the server configuration", protocol_dup);
+			efree(protocol_dup);
 		}
 		return NULL;
 	}
@@ -2864,6 +2872,241 @@ PHPAPI int _php_stream_path_decode(php_stream_wrapper *wrapper,
 	return SUCCESS;
 
 }
+/* }}} */
+
+/* {{{ allow_url_fopen / allow_url_include Handlers */
+
+PHPAPI int php_stream_wrapper_is_allowed(const char *wrapper, int wrapper_len, const char *setting TSRMLS_DC)
+{
+	HashTable *wrapper_hash = (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
+	php_stream_wrapper **wrapperpp;
+	int setting_len = setting ? strlen(setting) : 0;
+	const char *s = setting, *e = s + setting_len;
+	char *wrapper_dup;
+
+	/* BC: allow_url_* == on */
+	if (setting_len == 1 && *setting == '*') {
+		/* "*" means everything is allowed */
+		return 1;
+	}
+
+	if (wrapper_len == (sizeof("zlib") - 1) && strncasecmp("zlib", wrapper, sizeof("zlib") - 1) == 0) {
+		wrapper = "compress.zlib";
+		wrapper_len = sizeof("compress.zlib") - 1;
+	}
+
+	wrapper_dup = estrndup(wrapper, wrapper_len);
+	php_strtolower(wrapper_dup, wrapper_len);
+	if (FAILURE == zend_hash_find(wrapper_hash, wrapper_dup, wrapper_len + 1, (void**)&wrapperpp)) {
+		/* Wrapper does not exist, assume disallow */
+		efree(wrapper_dup);
+		return 0;
+	}
+	efree(wrapper_dup);
+
+	/* BC: allow_url_* == off */
+	if (!setting || !setting_len) {
+		/* NULL or empty indicates that only is_url == 0 wrappers are allowed */
+
+		if (wrapper_len == (sizeof("file") - 1) && strncasecmp("file", wrapper, sizeof("file") - 1) == 0) {
+			/* file:// is non-url */
+			return 1;
+		}
+
+		if ((*wrapperpp)->is_url) {
+			/* is_url types are disabled, but this is an is_url wrapper, disallow */
+			return 0;
+		}
+
+		/* Wrapper is not is_url, allow it */
+		return 1;
+	}
+
+	/* Otherwise, scan list */
+	while (s < e) {
+		const char *p = php_memnstr((char*)s, ":", 1, (char*)e);
+
+		if (!p) {
+			p = e;
+		}
+
+		if (wrapper_len == (p - s) &&
+			strncasecmp(s, wrapper, p - s) == 0) {
+			/* wrapper found in list */
+			return 1;
+		}
+
+		if ((*wrapperpp)->wops == php_stream_user_wrapper_ops &&
+			(sizeof("user") - 1) == (p - s) &&
+			strncasecmp(s, "user", sizeof("user") - 1) == 0) {
+			/* Wrapper is userspace wrapper and meta-wrapper "user" is enabled */
+			return 1;
+		}
+
+		s = p + 1;
+	}
+
+	return 0;
+}
+
+/* allow_url_*_list accepts:
+ *
+ * 1/on to enable all URL prefixes
+ * 0/off to disable all is_url=1 wrappers
+ * A colon delimited list of wrappers to allow (wildcards allowed)
+ * e.g.    file:gzip:compress.*:php
+ */
+PHP_INI_MH(OnUpdateAllowUrl)
+{
+#ifndef ZTS
+	char *base = (char *) mh_arg2;
+#else
+	char *base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+        char **allow = (char **) (base+(size_t) mh_arg1);
+
+	/* BC Enable */
+	if ((new_value_length == 1 && *new_value == '1') ||
+		(new_value_length == (sizeof("on") - 1) && strncasecmp(new_value, "on", sizeof("on") - 1) == 0) ) {
+
+		if (*allow && strcmp(*allow, "*") == 0) {
+			/* Turning on, but that's no change from current, so leave it alone */
+			return SUCCESS;
+		}
+			
+		if (stage != PHP_INI_STAGE_STARTUP) {
+			/* Not already on, and not in SYSTEM context, fail */
+			return FAILURE;
+		}
+
+		/* Otherwise, turn on setting */
+		if (*allow) {
+			free(*allow);
+		}
+
+		*allow = zend_strndup("*", 1);
+
+		return SUCCESS;
+	}
+
+	/* BC disable */
+	if ((new_value_length == 1 && *new_value == '0') ||
+		(new_value_length == (sizeof("off") - 1) && strncasecmp(new_value, "off", sizeof("off") - 1) == 0) ) {
+
+		/* Always permit shutting off allowurl settings */
+		if (*allow) {
+			free(*allow);
+		}
+		*allow = NULL;
+
+		return SUCCESS;
+	}
+
+	/* Specify as list */
+	if (stage == PHP_INI_STAGE_STARTUP) {
+		/* Always allow new settings in startup stage */
+		if (*allow) {
+			free(*allow);
+		}
+		*allow = zend_strndup(new_value, new_value_length);
+
+		return SUCCESS;
+	}
+
+	/* In PERDIR/RUNTIME context, do more work to ensure we're only tightening the restriction */
+
+	if (*allow && strcmp(*allow, "*") == 0) {
+		/* Currently allowing everying, so whatever we set it to will be more restrictive */
+		free(*allow);
+		*allow = zend_strndup(new_value, new_value_length);
+
+		return SUCCESS;
+	}
+
+	if (!*allow) {
+		/* Currently allowing anything with is_url == 0
+		 * So long as this list doesn't contain any is_url == 1, allow it
+		 */
+		HashTable *wrapper_hash = (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
+		char *s = new_value, *e = new_value + new_value_length;
+
+		while (s < e) {
+			php_stream_wrapper **wrapper;
+			char *p = php_memnstr(s, ":", 1, e);
+			char *scan;
+			int scan_len;
+
+			if (!p) {
+				p = e;
+			}
+
+			/* file:// is never a URL */
+			if ( (p - s) == (sizeof("file") - 1) && strncasecmp(s, "file", sizeof("file") - 1) == 0 ) {
+				/* file is not a URL */
+				s = p + 1;
+				continue;
+			}
+
+			if ( (p - s) == (sizeof("zlib") - 1) && strncasecmp(s, "zlib", sizeof("zlib") - 1) == 0 ) {
+				/* Wastful since we know that compress.zlib is already lower cased, but forgivable */
+				scan = estrndup("compress.zlib", sizeof("compress.zlib") - 1);
+				scan_len = sizeof("compress.zlib") - 1;
+			} else {
+				scan = estrndup(s, p - s);;
+				scan_len = p - s;
+				php_strtolower(scan, scan_len);
+			}
+
+			if (FAILURE == zend_hash_find(wrapper_hash, scan, scan_len + 1, (void**) &wrapper)) {
+				/* Unknown wrapper, not allowed in this context */
+				efree(scan);
+				return FAILURE;
+			}
+			efree(scan);
+
+			if ((*wrapper)->is_url) {
+				/* Disallowed is_url wrapper specified when trying to escape is_url == 0 context */
+				return FAILURE;
+			}
+
+			/* Seems alright so far... */
+			s = p+1;
+		}
+
+		/* All tests passed, allow it */
+		*allow = zend_strndup(new_value, new_value_length);
+
+		return SUCCESS;
+	}
+
+	/* The current allows are restricted to a specific list,
+	 * Make certain that our new list is a subset of that list
+	 */
+	{
+		char *s = new_value, *e = new_value + new_value_length;
+
+		while (s < e) {
+			char *p = php_memnstr(s, ":", 1, e);
+
+			if (!p) {
+				p = e;
+			}
+
+			if (!php_stream_wrapper_is_allowed(s, p - s, *allow TSRMLS_CC)) {
+				/* Current settings don't allow this wrapper, deny */
+				return FAILURE;
+			}
+
+			s = p + 1;
+		}
+
+		free(*allow);
+		*allow = zend_strndup(new_value, new_value_length);
+
+		return SUCCESS;
+	}
+}
+
 /* }}} */
 
 /*
