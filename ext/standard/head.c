@@ -111,7 +111,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		if (expires > 0) {
 			strcat(cookie, "; expires=");
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
-			strcat(cookie, dt);
+			strlcat(cookie, dt, len + 100);
 			efree(dt);
 		}
 	}
@@ -121,18 +121,18 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	}
 
 	if (path && path_len > 0) {
-		strcat(cookie, "; path=");
-		strcat(cookie, path);
+		strlcat(cookie, "; path=", len + 100);
+		strlcat(cookie, path, len + 100);
 	}
 	if (domain && domain_len > 0) {
-		strcat(cookie, "; domain=");
-		strcat(cookie, domain);
+		strlcat(cookie, "; domain=", len + 100);
+		strlcat(cookie, domain, len + 100);
 	}
 	if (secure) {
-		strcat(cookie, "; secure");
+		strlcat(cookie, "; secure", len + 100);
 	}
 	if (httponly) {
-		strcat(cookie, "; httponly");
+		strlcat(cookie, "; httponly", len + 100);
 	}
 
 	ctr.line = cookie;
