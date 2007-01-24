@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Changed opendir/dir/scandir to use default context
   when no context argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
+- Changed allow_url_fopen/allow_url_include to allow
+  per-wrapper enable/disable and runtime tightening. (Sara)
 
 - Removed old legacy:
   . "register_globals" support. (Pierre)

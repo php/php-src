@@ -21,6 +21,8 @@
 #ifndef PHP_STREAMS_H
 #define PHP_STREAMS_H
 
+#include "php_ini.h"
+
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -165,7 +167,7 @@ typedef struct _php_stream_wrapper_ops {
 struct _php_stream_wrapper	{
 	php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
 	void *abstract;					/* context for the wrapper */
-	int is_url;						/* so that PG(allow_url_fopen) can be respected */
+	int is_url;						/* so that PG(allow_url_fopen_list)/PG(allow_url_include_list) can be respected */
 
 	/* support for wrappers to return (multiple) error messages to the stream opener */
 	int err_count;
@@ -658,6 +660,11 @@ PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int option
 PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC TSRMLS_DC);
 #define php_stream_make_seekable(origstream, newstream, flags)	_php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_CC TSRMLS_CC)
 
+PHP_INI_MH(OnUpdateAllowUrl);
+PHPAPI int php_stream_wrapper_is_allowed(const char *wrapper, int wrapper_len, const char *setting TSRMLS_DC);
+#define php_stream_allow_url_fopen(wrapper, wrapper_len)	php_stream_wrapper_is_allowed((wrapper), (wrapper_len), PG(allow_url_fopen_list) TSRMLS_CC)
+#define php_stream_allow_url_include(wrapper, wrapper_len)	php_stream_wrapper_is_allowed((wrapper), (wrapper_len), PG(allow_url_include_list) TSRMLS_CC)
+
 /* Give other modules access to the url_stream_wrappers_hash and stream_filters_hash */
 PHPAPI HashTable *_php_stream_get_url_stream_wrappers_hash(TSRMLS_D);
 #define php_stream_get_url_stream_wrappers_hash()	_php_stream_get_url_stream_wrappers_hash(TSRMLS_C)
@@ -665,6 +672,7 @@ PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void);
 PHPAPI HashTable *_php_get_stream_filters_hash(TSRMLS_D);
 #define php_get_stream_filters_hash()	_php_get_stream_filters_hash(TSRMLS_C)
 PHPAPI HashTable *php_get_stream_filters_hash_global();
+extern php_stream_wrapper_ops *php_stream_user_wrapper_ops;
 END_EXTERN_C()
 #endif
 
