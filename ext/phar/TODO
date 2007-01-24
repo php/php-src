@@ -10,7 +10,7 @@ Version 1.0.0
    class PharFileInfo completely [Marcus]
  * implement in-phar locking, so that a file that is opened for reading can't 
    have a handle opened for writing
- * docs on file format/manifest description
+ X docs on file format/manifest description
  * docs on uses
  X stream context for specifying compression of a file [Marcus]
  * stream context for specifying meta-data
