@@ -30,23 +30,19 @@
  <license>PHP</license>
  <release>
   <state>stable</state>
-  <version>1.2.2</version>
-  <date>2006-08-24</date>
+  <version>1.2.3</version>
+  <date>2007-01-25</date>
   <notes>
-   Reimplemented oci_lob_read() utilities using patch from Massimo Squillace (msquillace at sogei dot it), which should fix Unicode LOB problems.
-   Fixed bug #38161 (oci_bind_by_name() returns garbage when Oracle didn't set the variable)
-   Fixed bug #38173 (Freeing nested cursors causes OCI8 to segfault)
-   Fixed bug #37886 (oci_connect may crash when charset parameter is given)
-   Fixed bug #37931 (possible crash after database restart when using persistent connections)
-   Fixed bug #37531 (oci8 persistent connection corruption)
-   Fixed bug #37487 (oci_fetch_array() array-type should always default to OCI_BOTH)
-   Fixed bug #37392 (Unnecessary call to OCITransRollback() at the end of request)
-   Fixed bug #35973 (Error ORA-24806 occurs when trying to fetch a NCLOB field)
-   Fixed bug #34005 (oci_password_change() fails). Patch by pholdaway at technocom-wireless dot com.
-   Fixed PECL bug #8112 (Persistent connections misbehave when Apache process times out)
+   Fixed possible segfault in ZTS mode when statements containing sub-statements are destroyed in wrong order.
+   Fixed bug #40078 (ORA-01405 when fetching NULL values using oci_bind_array_by_name()).
+   Fixed bug #39988 (type argument of oci_define_by_name() is ignored).
+   Fixed bug #39732 (oci_bind_array_by_name doesn't work on Solaris 64bit).
+   Fixed PECL bug #8816 (issue in php_oci_statement_fetch with more than one piecewise column).
+   Various minor improvements.
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.3.10"/>
+   <dep type="php" rel="lt" version="6.0.0"/>
   </deps>
  </release>
  <filelist>
@@ -62,10 +58,39 @@
   <file role="src" name="oci8_collection.c"/>
   <file role="src" name="php_oci8.h"/>
   <file role="src" name="php_oci8_int.h"/>
+  <file role="test" name="tests/connect.inc"/>
+  <file role="test" name="tests/create_table.inc"/>
+  <file role="test" name="tests/create_type.inc"/>
+  <file role="test" name="tests/details.inc"/>
+  <file role="test" name="tests/drop_table.inc"/>
+  <file role="test" name="tests/drop_type.inc"/>
+  <file role="test" name="tests/skipif.inc"/>
+  <file role="test" name="tests/array_bind_001.phpt"/>
+  <file role="test" name="tests/array_bind_002.phpt"/>
+  <file role="test" name="tests/array_bind_003.phpt"/>
+  <file role="test" name="tests/array_bind_004.phpt"/>
+  <file role="test" name="tests/array_bind_005.phpt"/>
+  <file role="test" name="tests/array_bind_006.phpt"/>
+  <file role="test" name="tests/array_bind_007.phpt"/>
+  <file role="test" name="tests/array_bind_008.phpt"/>
+  <file role="test" name="tests/array_bind_009.phpt"/>
+  <file role="test" name="tests/array_bind_010.phpt"/>
+  <file role="test" name="tests/array_bind_011.phpt"/>
+  <file role="test" name="tests/array_bind_012.phpt"/>
+  <file role="test" name="tests/array_bind_013.phpt"/>
+  <file role="test" name="tests/array_bind_014.phpt"/>
+  <file role="test" name="tests/array_bind_date1.phpt"/>
+  <file role="test" name="tests/array_bind_date.phpt"/>
+  <file role="test" name="tests/array_bind_float1.phpt"/>
+  <file role="test" name="tests/array_bind_float.phpt"/>
+  <file role="test" name="tests/array_bind_int1.phpt"/>
+  <file role="test" name="tests/array_bind_int.phpt"/>
+  <file role="test" name="tests/array_bind_str1.phpt"/>
+  <file role="test" name="tests/array_bind_str.phpt"/>
   <file role="test" name="tests/bind_empty.phpt"/>
   <file role="test" name="tests/bind_long.phpt"/>
-  <file role="test" name="tests/bind_raw.phpt"/>
   <file role="test" name="tests/bind_long_raw.phpt"/>
+  <file role="test" name="tests/bind_raw.phpt"/>
   <file role="test" name="tests/bug26133.phpt"/>
   <file role="test" name="tests/bug27303_2.phpt"/>
   <file role="test" name="tests/bug27303_3.phpt"/>
@@ -73,10 +98,12 @@
   <file role="test" name="tests/bug27303.phpt"/>
   <file role="test" name="tests/bug32325.phpt"/>
   <file role="test" name="tests/bug35973.phpt"/>
+  <file role="test" name="tests/bug36010.phpt"/>
   <file role="test" name="tests/bug36096.phpt"/>
   <file role="test" name="tests/bug37581.phpt"/>
   <file role="test" name="tests/bug38161.phpt"/>
   <file role="test" name="tests/bug38173.phpt"/>
+  <file role="test" name="tests/bug40078.phpt"/>
   <file role="test" name="tests/close.phpt"/>
   <file role="test" name="tests/coll_001.phpt"/>
   <file role="test" name="tests/coll_002_func.phpt"/>
@@ -108,32 +135,40 @@
   <file role="test" name="tests/coll_016.phpt"/>
   <file role="test" name="tests/coll_017_func.phpt"/>
   <file role="test" name="tests/coll_017.phpt"/>
+  <file role="test" name="tests/coll_018.phpt"/>
+  <file role="test" name="tests/coll_019.phpt"/>
   <file role="test" name="tests/commit_old.phpt"/>
   <file role="test" name="tests/commit.phpt"/>
   <file role="test" name="tests/connect_1_old.phpt"/>
   <file role="test" name="tests/connect_1.phpt"/>
-  <file role="test" name="tests/connect.inc"/>
   <file role="test" name="tests/connect_old.phpt"/>
   <file role="test" name="tests/connect.phpt"/>
   <file role="test" name="tests/connect_with_charset_001.phpt"/>
   <file role="test" name="tests/connect_without_oracle_home_old.phpt"/>
   <file role="test" name="tests/connect_without_oracle_home.phpt"/>
-  <file role="test" name="tests/create_table.inc"/>
-  <file role="test" name="tests/create_type.inc"/>
   <file role="test" name="tests/cursor_bind_err.phpt"/>
+  <file role="test" name="tests/cursor_bind.phpt"/>
   <file role="test" name="tests/cursors_old.phpt"/>
   <file role="test" name="tests/cursors.phpt"/>
   <file role="test" name="tests/debug.phpt"/>
   <file role="test" name="tests/default_prefetch1.phpt"/>
   <file role="test" name="tests/default_prefetch2.phpt"/>
   <file role="test" name="tests/default_prefetch.phpt"/>
+  <file role="test" name="tests/define1.phpt"/>
+  <file role="test" name="tests/define2.phpt"/>
+  <file role="test" name="tests/define3.phpt"/>
+  <file role="test" name="tests/define4.phpt"/>
+  <file role="test" name="tests/define5.phpt"/>
   <file role="test" name="tests/define_old.phpt"/>
   <file role="test" name="tests/define.phpt"/>
-  <file role="test" name="tests/drop_table.inc"/>
-  <file role="test" name="tests/drop_type.inc"/>
+  <file role="test" name="tests/descriptors.phpt"/>
+  <file role="test" name="tests/error1.phpt"/>
+  <file role="test" name="tests/error2.phpt"/>
   <file role="test" name="tests/error_old.phpt"/>
   <file role="test" name="tests/error.phpt"/>
   <file role="test" name="tests/exec_fetch.phpt"/>
+  <file role="test" name="tests/execute_mode.phpt"/>
+  <file role="test" name="tests/fetch_all2.phpt"/>
   <file role="test" name="tests/fetch_all.phpt"/>
   <file role="test" name="tests/fetch_array.phpt"/>
   <file role="test" name="tests/fetch_assoc.phpt"/>
@@ -143,8 +178,10 @@
   <file role="test" name="tests/fetch_object.phpt"/>
   <file role="test" name="tests/fetch.phpt"/>
   <file role="test" name="tests/fetch_row.phpt"/>
+  <file role="test" name="tests/field_funcs1.phpt"/>
   <file role="test" name="tests/field_funcs_old.phpt"/>
   <file role="test" name="tests/field_funcs.phpt"/>
+  <file role="test" name="tests/function_aliases.phpt"/>
   <file role="test" name="tests/lob_001.phpt"/>
   <file role="test" name="tests/lob_002.phpt"/>
   <file role="test" name="tests/lob_003.phpt"/>
@@ -154,7 +191,6 @@
   <file role="test" name="tests/lob_007.phpt"/>
   <file role="test" name="tests/lob_008.phpt"/>
   <file role="test" name="tests/lob_009.phpt"/>
-  <file role="test" name="tests/lob_009.txt"/>
   <file role="test" name="tests/lob_010.phpt"/>
   <file role="test" name="tests/lob_011.phpt"/>
   <file role="test" name="tests/lob_012.phpt"/>
@@ -166,7 +202,23 @@
   <file role="test" name="tests/lob_018.phpt"/>
   <file role="test" name="tests/lob_019.phpt"/>
   <file role="test" name="tests/lob_020.phpt"/>
-  <file role="test" name="tests/test.gif"/>
+  <file role="test" name="tests/lob_021.phpt"/>
+  <file role="test" name="tests/lob_022.phpt"/>
+  <file role="test" name="tests/lob_023.phpt"/>
+  <file role="test" name="tests/lob_024.phpt"/>
+  <file role="test" name="tests/lob_025.phpt"/>
+  <file role="test" name="tests/lob_026.phpt"/>
+  <file role="test" name="tests/lob_027.phpt"/>
+  <file role="test" name="tests/lob_028.phpt"/>
+  <file role="test" name="tests/lob_029.phpt"/>
+  <file role="test" name="tests/lob_030.phpt"/>
+  <file role="test" name="tests/lob_031.phpt"/>
+  <file role="test" name="tests/lob_032.phpt"/>
+  <file role="test" name="tests/lob_033.phpt"/>
+  <file role="test" name="tests/lob_034.phpt"/>
+  <file role="test" name="tests/lob_035.phpt"/>
+  <file role="test" name="tests/lob_036.phpt"/>
+  <file role="test" name="tests/lob_aliases.phpt"/>
   <file role="test" name="tests/lob_temp1.phpt"/>
   <file role="test" name="tests/lob_temp.phpt"/>
   <file role="test" name="tests/num.phpt"/>
@@ -176,13 +228,14 @@
   <file role="test" name="tests/password_new.phpt"/>
   <file role="test" name="tests/password_old.phpt"/>
   <file role="test" name="tests/password.phpt"/>
+  <file role="test" name="tests/pecl_bug8816.phpt"/>
   <file role="test" name="tests/persistent.phpt"/>
   <file role="test" name="tests/prefetch_old.phpt"/>
   <file role="test" name="tests/prefetch.phpt"/>
   <file role="test" name="tests/privileged_connect1.phpt"/>
   <file role="test" name="tests/privileged_connect.phpt"/>
+  <file role="test" name="tests/select_null.phpt"/>
   <file role="test" name="tests/serverversion.phpt"/>
-  <file role="test" name="tests/skipif.inc"/>
   <file role="test" name="tests/statement_cache.phpt"/>
   <file role="test" name="tests/statement_type_old.phpt"/>
   <file role="test" name="tests/statement_type.phpt"/>
@@ -192,6 +245,27 @@
   <configureoption name="with-oci8" default="autodetect" prompt="Please provide the path to ORACLE_HOME dir. Use 'instantclient,/path/to/instant/client/lib' if you're compiling against Oracle Instant Client"/>
  </configureoptions>
  <changelog>
+  <release>
+   <state>stable</state>
+   <version>1.2.2</version>
+   <date>2006-08-24</date>
+   <notes>
+    Reimplemented oci_lob_read() utilities using patch from Massimo Squillace (msquillace at sogei dot it), which should fix Unicode LOB problems.
+    Fixed bug #38161 (oci_bind_by_name() returns garbage when Oracle didn't set the variable)
+    Fixed bug #38173 (Freeing nested cursors causes OCI8 to segfault)
+    Fixed bug #37886 (oci_connect may crash when charset parameter is given)
+    Fixed bug #37931 (possible crash after database restart when using persistent connections)
+    Fixed bug #37531 (oci8 persistent connection corruption)
+    Fixed bug #37487 (oci_fetch_array() array-type should always default to OCI_BOTH)
+    Fixed bug #37392 (Unnecessary call to OCITransRollback() at the end of request)
+    Fixed bug #35973 (Error ORA-24806 occurs when trying to fetch a NCLOB field)
+    Fixed bug #34005 (oci_password_change() fails). Patch by pholdaway at technocom-wireless dot com.
+    Fixed PECL bug #8112 (Persistent connections misbehave when Apache process times out)
+   </notes>
+   <deps>
+    <dep type="php" rel="ge" version="4.3.10"/>
+   </deps>
+  </release>
   <release>
    <state>stable</state>
    <version>1.2.1</version>
