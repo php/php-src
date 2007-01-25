@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   thread safe version). (Dmitry)
 - Fixed bug #40191 (use of array_unique() with objects triggers segfault).
   (Tony)
+- Fixed bug #40189 (possible endless loop in zlib.inflate stream filter).
+  (Greg, Tony)
 - Fixed bug #40169 (CURLOPT_TCP_NODELAY only available in curl >= 7.11.2). 
   (Tony)
 - Fixed bug #40092 (chroot() doesn't clear realpath cache). (Dmitry)
