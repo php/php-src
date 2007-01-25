@@ -280,7 +280,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			char *wildcard = emalloc(len + 3);
 
 			/* Search for wildcard matches instead */
-			memcpy(wildname, filtername, len + 1); /* copy \0 */
+			memcpy(wildcard, filtername, len + 1); /* copy \0 */
 			period = wildcard + (period - filtername);
 			while (period) {
 				*period = '\0';
