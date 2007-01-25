@@ -1,3 +1,35 @@
+2007-01-24  Sara Golemon  <sara@golemon.com>
+
+    * NEWS
+      ext/soap/php_http.c
+      ext/soap/php_xml.c
+      ext/standard/php_fopen_wrapper.c
+      main/main.c
+      main/php_globals.h
+      main/php_streams.h
+      main/streams/streams.c
+      main/streams/userspace.c:
+      Expand allow_url_fopen/allow_url_include functionality
+
+2007-01-24  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c
+      ext/oci8/package.xml:
+      prepare to release 1.2.3
+
+2007-01-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/head.c:
+      
+      strcat() -> strlcat()
+
+2007-01-24  Antony Dovgal  <antony@zend.com>
+
+    * ext/iconv/iconv.c:
+      initialize errno
+
 2007-01-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * sapi/cli/php.1.in
