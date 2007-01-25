@@ -109,7 +109,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	} else {
 		sprintf(cookie, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (expires > 0) {
-			strcat(cookie, "; expires=");
+			strlcat(cookie, "; expires=", len + 100);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
 			strlcat(cookie, dt, len + 100);
 			efree(dt);
