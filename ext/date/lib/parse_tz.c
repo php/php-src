@@ -196,7 +196,13 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const timelib_tzdb *tzdb)
 {
 	int left = 0, right = tzdb->index_size - 1;
-	char *cur_locale = setlocale(LC_CTYPE, "C");
+	char *cur_locale = NULL, *tmp;
+	
+	tmp = setlocale(LC_CTYPE, NULL);
+	if (tmp) {
+		cur_locale = strdup(tmp);
+	}
+	setlocale(LC_CTYPE, "C");
 
 	do {
 		int mid = ((unsigned)left + right) >> 1;
@@ -209,12 +215,14 @@ static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const 
 		} else { /* (cmp == 0) */
 			(*tzf) = &(tzdb->data[tzdb->index[mid].pos + 20]);
 			setlocale(LC_CTYPE, cur_locale);
+			if (cur_locale) free(cur_locale);
 			return 1;
 		}
 
 	} while (left <= right);
 
 	setlocale(LC_CTYPE, cur_locale);
+	if (cur_locale) free(cur_locale);
 	return 0;
 }
 
