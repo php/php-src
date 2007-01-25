@@ -106,6 +106,11 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			data->strm.avail_in = 0;
 			bin += desired;
 
+			if (!desired) {
+				flags |= PSFS_FLAG_FLUSH_CLOSE;
+				break;
+			}
+
 			if (data->strm.avail_out < data->outbuf_len) {
 				php_stream_bucket *out_bucket;
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
