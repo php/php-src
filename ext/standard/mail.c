@@ -200,10 +200,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 #endif
 	}
 	if (extra_cmd != NULL) {
-		sendmail_cmd = emalloc (strlen (sendmail_path) + strlen (extra_cmd) + 2);
-		strcpy (sendmail_cmd, sendmail_path);
-		strcat (sendmail_cmd, " ");
-		strcat (sendmail_cmd, extra_cmd);
+		spprintf(&sendmail_cmd, 0, "%s %s", sendmail_path, extra_cmd);
 	} else {
 		sendmail_cmd = sendmail_path;
 	}
