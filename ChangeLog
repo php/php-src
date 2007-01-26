@@ -1,3 +1,51 @@
+2007-01-25  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/package2.xml
+      ext/oci8/package2.xml:
+      
+      file package2.xml was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/date/lib/parse_tz.c:
+      add missing ifdefs
+
+    * (PHP_5_2)
+      ext/date/lib/parse_tz.c:
+      setlocale() returns static buffer, which must be copied
+
+    * (PHP_5_2)
+      NEWS
+      ext/bz2/bz2_filter.c
+      ext/zlib/zlib_filter.c:
+      MFH: fix #40189 (possible endless loop in zlib.inflate stream filter)
+
+    * ext/bz2/bz2_filter.c
+      ext/zlib/zlib_filter.c:
+      fix #40189 (possible endless loop in zlib.inflate stream filter)
+
+    * (PHP_5_2)
+      ext/oci8/oci8_statement.c:
+      PHP4 compatibility
+
+2007-01-25  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      ext/standard/user_filters.c:
+      Fix typo
+
+2007-01-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/user_filters.c:
+      
+      Added safety checks to the code
+
+    * (PHP_5_2)
+      ext/standard/head.c
+      ext/standard/mail.c:
+      
+      Eliminate strcat() and strcpy()
+
 2007-01-24  Sara Golemon  <sara@golemon.com>
 
     * NEWS
