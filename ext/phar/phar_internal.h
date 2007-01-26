@@ -242,6 +242,7 @@ static int    phar_dir_stat( php_stream *stream, php_stream_statbuf *ssb TSRMLS_
 
 #endif
 
+int phar_archive_delref(phar_archive_data *phar TSRMLS_DC);
 void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC);
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len TSRMLS_DC);
 void phar_free_entry_data(phar_entry_data *idata TSRMLS_DC);

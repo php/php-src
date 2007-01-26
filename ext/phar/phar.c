@@ -107,6 +107,21 @@ void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 /* }}}*/
 
 /**
+ * Delete refcount and destruct if needed. On destruct return 1 else 0.
+ */
+int phar_archive_delref(phar_archive_data *phar TSRMLS_DC) /* {{{ */
+{
+	if (--phar->refcount < 0) {
+		if (zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), phar->fname, phar->fname_len) != SUCCESS) {
+			phar_destroy_phar_data(phar TSRMLS_CC);
+		}
+		return 1;
+	}
+	return 0;
+}
+/* }}}*/
+
+/**
  * Destroy phar's in shutdown, here we don't care about aliases
  */
 static void destroy_phar_data_only(void *pDest) /* {{{ */
@@ -1433,11 +1448,7 @@ static int phar_stream_close(php_stream *stream, int close_handle TSRMLS_DC) /* 
 
 	/* data->fp is the temporary memory stream containing this file's data */
 	phar_free_entry_data(data TSRMLS_CC);
-	if (--phar->refcount < 0) {
-		if (zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), phar->fname, phar->fname_len) != SUCCESS) {
-			phar_destroy_phar_data(phar TSRMLS_CC);
-		}
-	}
+	phar_archive_delref(phar TSRMLS_CC);
 
 	return 0;
 }
