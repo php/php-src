@@ -509,10 +509,10 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 						zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, (uint *)&stream_protocol_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
 						zend_hash_move_forward(url_stream_wrappers_hash)) {
 					stream_protocols_buf = erealloc(stream_protocols_buf, stream_protocols_buf_len + stream_protocol_len + 2 + 1);
-					memcpy(stream_protocols_buf + stream_protocols_buf_len, stream_protocol, stream_protocol_len);
-					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len] = ',';
-					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len + 1] = ' ';
-					stream_protocols_buf_len += stream_protocol_len + 2;
+					memcpy(stream_protocols_buf + stream_protocols_buf_len, stream_protocol, stream_protocol_len - 1);
+					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len - 1] = ',';
+					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len] = ' ';
+					stream_protocols_buf_len += stream_protocol_len + 1;
 				}
 				if (stream_protocols_buf) {
 					stream_protocols_buf[stream_protocols_buf_len - 2] = ' ';
@@ -539,8 +539,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 				for(zend_hash_internal_pointer_reset(stream_xport_hash);
 					zend_hash_get_current_key_ex(stream_xport_hash, &xport_name, (uint *)&xport_name_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
 					zend_hash_move_forward(stream_xport_hash)) {
-					if (xport_buf_len + xport_name_len + 3 > xport_buf_size) {
-						while (xport_buf_len + xport_name_len + 3 > xport_buf_size) {
+					if (xport_buf_len + xport_name_len + 2 > xport_buf_size) {
+						while (xport_buf_len + xport_name_len + 2 > xport_buf_size) {
 							xport_buf_size += 256;
 						}
 						if (xport_buf) {
@@ -553,8 +553,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 						xport_buf[xport_buf_len++] = ',';
 						xport_buf[xport_buf_len++] = ' ';
 					}
-					memcpy(xport_buf + xport_buf_len, xport_name, xport_name_len);
-					xport_buf_len += xport_name_len;
+					memcpy(xport_buf + xport_buf_len, xport_name, xport_name_len - 1);
+					xport_buf_len += xport_name_len - 1;
 					xport_buf[xport_buf_len] = '\0';
 				}
 				if (xport_buf) {
@@ -580,8 +580,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 				for(zend_hash_internal_pointer_reset(stream_filter_hash);
 					zend_hash_get_current_key_ex(stream_filter_hash, &filter_name, (uint *)&filter_name_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
 					zend_hash_move_forward(stream_filter_hash)) {
-					if (filter_buf_len + filter_name_len + 3 > filter_buf_size) {
-						while (filter_buf_len + filter_name_len + 3 > filter_buf_size) {
+					if (filter_buf_len + filter_name_len + 2 > filter_buf_size) {
+						while (filter_buf_len + filter_name_len + 2 > filter_buf_size) {
 							filter_buf_size += 256;
 						}
 						if (filter_buf) {
@@ -594,8 +594,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 						filter_buf[filter_buf_len++] = ',';
 						filter_buf[filter_buf_len++] = ' ';
 					}
-					memcpy(filter_buf + filter_buf_len, filter_name, filter_name_len);
-					filter_buf_len += filter_name_len;
+					memcpy(filter_buf + filter_buf_len, filter_name, filter_name_len - 1);
+					filter_buf_len += filter_name_len - 1;
 					filter_buf[filter_buf_len] = '\0';
 				}
 				if (filter_buf) {
