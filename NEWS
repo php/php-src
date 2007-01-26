@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jan 2007, PHP 5.2.1RC4
+25 Jan 2007, PHP 5.2.1RC4
 - Fixed PECL bug #7295 (ORA-01405: fetched column value is NULL on LOB fields).
   (Tony)
 - Fixed bug #40200 (The FastCgi version has different realpath results than
