@@ -150,6 +150,23 @@ static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 				(S->stmt, OCI_HTYPE_STMT, &colcount, 0, OCI_ATTR_PARAM_COUNT, S->err));
 
 		stmt->column_count = (int)colcount;
+	
+		if (S->cols) {
+			int i;
+			for (i = 0; i < stmt->column_count; i++) {
+				if (S->cols[i].data) {
+					switch (S->cols[i].dtype) {
+						case SQLT_BLOB:
+						case SQLT_CLOB:
+							/* do nothing */
+							break;
+						default:
+							efree(S->cols[i].data);
+					}
+				}
+			}
+			efree(S->cols);
+		}
 
 		S->cols = ecalloc(colcount, sizeof(pdo_oci_column));
 	}
@@ -274,7 +291,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 						P->oci_type = SQLT_CHR;
 						value_sz = param->max_value_len;
 						if (param->max_value_len == 0) {
-							value_sz = 4000; /* maximum size before value is interpreted as a LONG value */
+							value_sz = 1332; /* maximum size before value is interpreted as a LONG value */
 						}
 						
 				}
