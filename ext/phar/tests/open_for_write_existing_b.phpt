@@ -26,8 +26,10 @@ include $pname . '/b/c.php';
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
+Warning: fopen(phar://%sopen_for_write_existing_b.phar.php/b/c.php): failed to open stream: phar error: file "b/c.php" could not be created in phar "%spen_for_write_existing_b.phar.php" in %spen_for_write_existing_b.php on line %d
 
-Warning: include(phar://%sopen_for_write_existing_b.phar.php/b/c.php): failed to open stream: phar error: internal corruption of phar "%sopen_for_write_existing_b.phar.php" (crc32 mismatch on file "b/c.php") in %sopen_for_write_existing_b.php on line %d
+Warning: fwrite(): supplied argument is not a valid stream resource in %spen_for_write_existing_b.php on line %d
 
-Warning: include(): Failed opening 'phar://%sopen_for_write_existing_b.phar.php/b/c.php' for inclusion (include_path='%s') in %sopen_for_write_existing_b.php on line %d
+Warning: fclose(): supplied argument is not a valid stream resource in %spen_for_write_existing_b.php on line %d
+This is b/c
 ===DONE===
