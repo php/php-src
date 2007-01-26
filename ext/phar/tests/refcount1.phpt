@@ -40,7 +40,6 @@ include $pname . '/b/c.php';
 extra
 extra
 
-Warning: include(phar://%s/b/c.php): failed to open stream: phar error: "b/c.php" is not a file in phar "%s" in %s on line %d
-
-Warning: include(): Failed opening 'phar://%s/b/c.php' for inclusion (include_path='%s') in %s on line %d
+Warning: unlink(): phar error: "b/c.php" in phar "%sefcount1.phar.php", has open file pointers, cannot unlink in %sefcount1.php on line %d
+extra
 ===DONE===
