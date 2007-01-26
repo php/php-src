@@ -550,6 +550,9 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		char *ptr, *path_copy, *free_path;
 		char *tok = NULL;
 		int ptr_length;
+#ifdef TSRM_WIN32
+		int is_unc = 0;
+#endif
 
 no_realpath:
 
@@ -570,6 +573,7 @@ no_realpath:
 			state->cwd[1] = '\0';
 			state->cwd_length = 1;
 			path_copy += 2;
+			is_unc = 2;
 		} else {
 #endif
 			state->cwd = (char *) realloc(state->cwd, 1);
@@ -649,10 +653,14 @@ no_realpath:
 						ptr_length = length;
 						FindClose(hFind);
 					} else if (use_realpath == CWD_REALPATH) {
-						free(free_path);
-						CWD_STATE_FREE(state);
-						*state = old_state;					
-						return 1;
+						if (is_unc) {
+							is_unc--;
+						} else {
+							free(free_path);
+							CWD_STATE_FREE(state);
+							*state = old_state;					
+							return 1;
+						}
 					}
 				}
 #endif
