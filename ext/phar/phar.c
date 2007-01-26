@@ -1434,7 +1434,9 @@ static int phar_stream_close(php_stream *stream, int close_handle TSRMLS_DC) /* 
 	/* data->fp is the temporary memory stream containing this file's data */
 	phar_free_entry_data(data TSRMLS_CC);
 	if (--phar->refcount < 0) {
-		phar_destroy_phar_data(phar TSRMLS_CC);
+		if (zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), phar->fname, phar->fname_len) != SUCCESS) {
+			phar_destroy_phar_data(phar TSRMLS_CC);
+		}
 	}
 
 	return 0;
