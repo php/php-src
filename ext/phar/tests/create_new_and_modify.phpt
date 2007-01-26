@@ -1,5 +1,5 @@
 --TEST--
-Phar: create and mofiy phar
+Phar: create and modify phar
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 <?php if (!extension_loaded("spl")) print "skip SPL not available"; ?>

@@ -202,6 +202,69 @@ PHP_METHOD(Phar, getVersion)
 }
 /* }}} */
 
+/* {{{ proto void Phar::beginWrite()
+ * Do not flush a writeable phar (save its contents) until explicitly requested
+ */
+PHP_METHOD(Phar, beginWrite)
+{
+	PHAR_ARCHIVE_OBJECT();
+	
+	phar_obj->arc.archive->donotflush = 1;
+}
+/* }}} */
+
+/* {{{ proto bool Phar::commitWrite([string|stream stub [, int len]])
+ * Save the contents of a modified phar, with an optional change to the stub
+ */
+PHP_METHOD(Phar, commitWrite)
+{
+	zval *stub;
+	phar_entry_data *idata;
+	long len = -1;
+	php_stream *stream;
+	phar_archive_data *temp;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot write out phar archive, phar is read-only");
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zl", &stub, &len) == FAILURE) {
+		return;
+	}
+
+	if (!phar_obj->arc.archive->is_modified) {
+		RETURN_TRUE;
+	}
+	phar_obj->arc.archive->donotflush = 0;
+	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
+	idata->fp = 0;
+	idata->internal_file = 0;
+	idata->phar = phar_obj->arc.archive;
+
+	if (Z_TYPE_P(stub) == IS_STRING) {
+		phar_flush(0, idata, Z_STRVAL_P(stub), Z_STRLEN_P(stub) TSRMLS_CC);
+	} else if (Z_TYPE_P(stub) == IS_RESOURCE && (php_stream_from_zval_no_verify(stream, &stub))) {
+		if (len > 0) {
+			len = -len;
+		}
+		phar_flush(0, idata, (char *) &stub, len TSRMLS_CC);
+	} else {
+		phar_flush(0, idata, 0, 0 TSRMLS_CC);
+	}
+	
+	/* reset the internal object so that the manifest is correct */
+	if (phar_open_filename(idata->phar->fname, idata->phar->fname_len, idata->phar->alias, idata->phar->alias_len, REPORT_ERRORS, &temp TSRMLS_CC) == FAILURE) {
+		RETURN_FALSE;
+	}
+	efree(idata);
+
+	phar_obj->arc.archive = temp;
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto array|false Phar::getSignature()
  * Return signature or false
  */
@@ -299,10 +362,11 @@ PHP_METHOD(Phar, offsetSet)
 {
 	char *fname;
 	int fname_len;
-	char *contents;
-	int contents_len;
+	zval *contents;
+	long contents_len = PHP_STREAM_COPY_ALL;
 	phar_entry_data *data;
-	php_stream *fp;
+	php_stream *fp, *contents_file;
+	long offset;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly)) {
@@ -310,21 +374,37 @@ PHP_METHOD(Phar, offsetSet)
 		return;
 	}
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &fname, &fname_len, &contents, &contents_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &fname, &fname_len, &contents, &contents_len) == FAILURE) {
 		return;
 	}
 
+	if (Z_TYPE_P(contents) != IS_STRING && Z_TYPE_P(contents) != IS_RESOURCE) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
+	}
 	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, fname, fname_len TSRMLS_CC))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created", fname);
 	} else {
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
 		fp = php_stream_open_wrapper(fname, "w+b", STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
-		if (contents_len != php_stream_write(fp, contents, contents_len)) {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
+		if (Z_TYPE_P(contents) == IS_STRING) {
+			if (contents_len != php_stream_write(fp, Z_STRVAL_P(contents), Z_STRLEN_P(contents))) {
+				php_stream_close(fp);
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
+			}
+		} else if (Z_TYPE_P(contents) == IS_RESOURCE) {
+			if (!(php_stream_from_zval_no_verify(contents_file, &contents))) {
+				php_stream_close(fp);
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
+			}
+			offset = php_stream_copy_to_stream(contents_file, fp, contents_len);
+			if (contents_len != offset && contents_len != PHP_STREAM_COPY_ALL) {
+				php_stream_close(fp);
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
+			}
 		}
 		php_stream_close(fp);
 		efree(fname);
-		efree(data);
+		phar_free_entry_data(data TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -362,54 +442,12 @@ PHP_METHOD(Phar, offsetUnset)
 			data->phar = phar_obj->arc.archive;
 			data->fp = 0;
 			/* internal_file is unused in phar_flush, so we won't set it */
-			phar_flush(data, 0, 0 TSRMLS_CC);
+			phar_flush(0, data, 0, 0 TSRMLS_CC);
 			efree(data);
 			RETURN_TRUE;
 		}
 	} else {
 		RETURN_FALSE;
-	}
-}
-/* }}} */
-
-/* {{{ proto int Phar::setStub(string|stream stub [, int len])
- * Set the pre-phar stub for the current writeable phar
- */
-PHP_METHOD(Phar, setStub)
-{
-	zval *stub;
-	phar_entry_data *idata;
-	long len = -1;
-	php_stream *stream;
-	PHAR_ARCHIVE_OBJECT();
-
-	if (PHAR_G(readonly)) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot set stub, phar is read-only");
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &stub, &len) == FAILURE) {
-		return;
-	}
-
-	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
-	idata->phar = phar_obj->arc.archive;
-	idata->fp = 0;
-	idata->internal_file = 0;
-
-	if (Z_TYPE_P(stub) == IS_STRING) {
-		phar_flush(idata, Z_STRVAL_P(stub), Z_STRLEN_P(stub) TSRMLS_CC);
-		efree(idata);
-	} else if (Z_TYPE_P(stub) == IS_RESOURCE && (php_stream_from_zval_no_verify(stream, &stub))) {
-		if (len > 0) {
-			len = -len;
-		}
-		phar_flush(idata, (char *) &stub, len TSRMLS_CC);
-		efree(idata);
-	} else {
-		efree(idata);
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot only set stub to a string or read from a stream resource");
 	}
 }
 /* }}} */
@@ -648,7 +686,6 @@ PHP_METHOD(PharFileInfo, setMetadata)
 PHP_METHOD(PharFileInfo, setCompressedGZ)
 {
 #if HAVE_ZLIB
-	php_stream *stream, *parent;
 	phar_entry_data *idata;
 	char *fname;
 	int fname_len;
@@ -666,18 +703,10 @@ PHP_METHOD(PharFileInfo, setCompressedGZ)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress deleted file");
 	}
-	stream = php_stream_fopen_tmpfile();
-	if (!entry_obj->ent.entry->temp_file) {
+	if (!entry_obj->ent.entry->fp) {
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", entry_obj->ent.entry->phar->fname, entry_obj->ent.entry->filename);
-		parent = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
+		entry_obj->ent.entry->fp = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
 		efree(fname);
-		php_stream_copy_to_stream(parent, stream, PHP_STREAM_COPY_ALL);
-		entry_obj->ent.entry->temp_file = stream;
-		php_stream_close(parent);
-	}
-	if (entry_obj->ent.entry->fp) {
-		php_stream_close(entry_obj->ent.entry->fp);
-		entry_obj->ent.entry->fp = 0;
 	}
 	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry_obj->ent.entry->flags |= PHAR_ENT_COMPRESSED_GZ;
@@ -688,7 +717,7 @@ PHP_METHOD(PharFileInfo, setCompressedGZ)
 	idata->fp = 0;
 	idata->internal_file = 0;
 	idata->phar = entry_obj->ent.entry->phar;
-	phar_flush(idata, 0, 0 TSRMLS_CC);
+	phar_flush(0, idata, 0, 0 TSRMLS_CC);
 	efree(idata);
 	RETURN_TRUE;
 #else
@@ -704,7 +733,6 @@ PHP_METHOD(PharFileInfo, setCompressedGZ)
 PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 {
 #if HAVE_BZ2
-	php_stream *stream, *parent;
 	phar_entry_data *idata;
 	char *fname;
 	int fname_len;
@@ -722,18 +750,10 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress deleted file");
 	}
-	stream = php_stream_fopen_tmpfile();
-	if (!entry_obj->ent.entry->temp_file) {
+	if (!entry_obj->ent.entry->fp) {
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", entry_obj->ent.entry->phar->fname, entry_obj->ent.entry->filename);
-		parent = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
+		entry_obj->ent.entry->fp = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
 		efree(fname);
-		php_stream_copy_to_stream(parent, stream, PHP_STREAM_COPY_ALL);
-		entry_obj->ent.entry->temp_file = stream;
-		php_stream_close(parent);
-	}
-	if (entry_obj->ent.entry->fp) {
-		php_stream_close(entry_obj->ent.entry->fp);
-		entry_obj->ent.entry->fp = 0;
 	}
 	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry_obj->ent.entry->flags |= PHAR_ENT_COMPRESSED_BZ2;
@@ -744,7 +764,7 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 	idata->fp = 0;
 	idata->internal_file = 0;
 	idata->phar = entry_obj->ent.entry->phar;
-	phar_flush(idata, 0, 0 TSRMLS_CC);
+	phar_flush(0, idata, 0, 0 TSRMLS_CC);
 	efree(idata);
 	RETURN_TRUE;
 #else
@@ -759,7 +779,6 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
  */
 PHP_METHOD(PharFileInfo, setUncompressed)
 {
-	php_stream *stream, *parent;
 	phar_entry_data *idata;
 	char *fname;
 	int fname_len;
@@ -789,19 +808,10 @@ PHP_METHOD(PharFileInfo, setUncompressed)
 			"Cannot uncompress Bzip2-compressed file, bzip2 extension is not enabled");
 	}
 #endif
-	stream = php_stream_fopen_tmpfile();
-	if (!entry_obj->ent.entry->temp_file) {
+	if (!entry_obj->ent.entry->fp) {
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", entry_obj->ent.entry->phar->fname, entry_obj->ent.entry->filename);
-		parent = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
+		entry_obj->ent.entry->fp = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
 		efree(fname);
-		php_stream_copy_to_stream(parent, stream, PHP_STREAM_COPY_ALL);
-		entry_obj->ent.entry->compressed_filesize = entry_obj->ent.entry->uncompressed_filesize;
-		entry_obj->ent.entry->temp_file = stream;
-		php_stream_close(parent);
-	}
-	if (entry_obj->ent.entry->fp) {
-		php_stream_close(entry_obj->ent.entry->fp);
-		entry_obj->ent.entry->fp = 0;
 	}
 	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry_obj->ent.entry->phar->is_modified = 1;
@@ -811,7 +821,7 @@ PHP_METHOD(PharFileInfo, setUncompressed)
 	idata->fp = 0;
 	idata->internal_file = 0;
 	idata->phar = entry_obj->ent.entry->phar;
-	phar_flush(idata, 0, 0 TSRMLS_CC);
+	phar_flush(0, idata, 0, 0 TSRMLS_CC);
 	efree(idata);
 	RETURN_TRUE;
 }
@@ -834,7 +844,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mapPhar, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setStub, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setStub, 0, 0, 1)
 	ZEND_ARG_INFO(0, newstub)
 ZEND_END_ARG_INFO();
 
@@ -867,11 +877,12 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, getSignature,  NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getStub,       NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getVersion,    NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, beginWrite,    NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, commitWrite,   arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetExists,  arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetGet,     arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,     arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetUnset,   arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setStub,       arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 #endif
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,    NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)

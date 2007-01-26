@@ -13,7 +13,8 @@ $file = "<?php __HALT_COMPILER(); ?>";
 // file length is too short
 
 $files = array();
-$files['a'] = array('cont'=>'a','comp'=>chr(75)/*. chr(4) . chr(0): 'a' gzdeflated */,'flags'=>0x00001000, 'clen' => 3);
+// "hi" gzdeflated
+$files['a'] = array('cont'=>'a','comp'=> pack('H*', 'cbc80400'),'flags'=>0x00001000, 'ulen' => 1, 'clen' => 4);
 $files['b'] = $files['a'];
 $files['c'] = array('cont'=>'*');
 $files['d'] = $files['a'];
