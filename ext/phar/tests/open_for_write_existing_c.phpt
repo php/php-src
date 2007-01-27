@@ -26,5 +26,11 @@ include $pname . '/b/c.php';
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
+Warning: fopen(phar://%sopen_for_write_existing_c.phar.php/b/c.php): failed to open stream: phar error: file "%sopen_for_write_existing_c.phar.php" cannot opened for writing, disabled by ini setting
+phar error: file "b/c.php" could not be created in phar "%sopen_for_write_existing_c.phar.php" in %sopen_for_write_existing_c.php on line %d
 
-Catchable fatal error: fopen(): phar error: file "%sopen_for_write_existing_c.phar.php" cannot opened for writing, disabled by ini setting in %sopen_for_write_existing_c.php on line %d
+Warning: fwrite(): supplied argument is not a valid stream resource in %sopen_for_write_existing_c.php on line %d
+
+Warning: fclose(): supplied argument is not a valid stream resource in %sopen_for_write_existing_c.php on line %d
+This is b/c
+===DONE===
