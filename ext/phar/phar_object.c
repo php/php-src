@@ -343,6 +343,7 @@ PHP_METHOD(Phar, offsetGet)
 PHP_METHOD(Phar, offsetSet)
 {
 	char *fname;
+	char *error;
 	int fname_len;
 	zval *contents;
 	long contents_len = PHP_STREAM_COPY_ALL;
@@ -363,9 +364,11 @@ PHP_METHOD(Phar, offsetSet)
 	if (Z_TYPE_P(contents) != IS_STRING && Z_TYPE_P(contents) != IS_RESOURCE) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
 	}
-	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, fname, fname_len, "w+b" TSRMLS_CC))) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created", fname);
+	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, fname, fname_len, "w+b", &error TSRMLS_CC))) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created: %s", fname, error);
+		efree(error);
 	} else {
+		efree(error);
 		if (Z_TYPE_P(contents) == IS_STRING) {
 			contents_len = php_stream_write(data->fp, Z_STRVAL_P(contents), Z_STRLEN_P(contents));
 			if (contents_len != Z_STRLEN_P(contents)) {
