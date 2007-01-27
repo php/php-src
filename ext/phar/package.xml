@@ -23,21 +23,21 @@ This is the extension version of PEAR's PHP_Archive package. Support for zlib an
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2006-01-01</date>
+ <date>2007-01-27</date>
  <version>
-  <release>0.1.0</release>
-  <api>0.7.1</api>
+  <release>0.9.0</release>
+  <api>0.9.0</api>
  </version>
  <stability>
-  <release>alpha</release>
-  <api>alpha</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
   Initial release.  This release is fully regression-tested
 
   This extension is only compatible with phar archives compliant with PHP_Archive
-  0.8.0 (api Version 0.7.1)
+  0.9.0 (api Version 0.9.0)
  </notes>
  <contents>
   <dir name="/">
@@ -57,26 +57,83 @@ This is the extension version of PEAR's PHP_Archive package. Support for zlib an
     <file name="013.phpt" role="test"/>
     <file name="014.phpt" role="test"/>
     <file name="015.phpt" role="test"/>
+    <file name="015b.phpt" role="test"/>
     <file name="016.phpt" role="test"/>
+    <file name="016b.phpt" role="test"/>
     <file name="017.phpt" role="test"/>
     <file name="018.phpt" role="test"/>
     <file name="019.phpt" role="test"/>
+    <file name="019b.phpt" role="test"/>
+    <file name="019c.phpt" role="test"/>
     <file name="020.phpt" role="test"/>
     <file name="021.phpt" role="test"/>
     <file name="022.phpt" role="test"/>
+    <file name="023.phpt" role="test"/>
+    <file name="024.phpt" role="test"/>
+    <file name="025.phpt" role="test"/>
+    <file name="026.phpt" role="test"/>
+    <file name="027.phpt" role="test"/>
+    <file name="028.phpt" role="test"/>
+    <file name="029.phpt" role="test"/>
+    <file name="030.phpt" role="test"/>
+    <file name="031.phpt" role="test"/>
+    <file name="032.phpt" role="test"/>
+    <file name="create_new_and_modify.phpt" role="test"/>
+    <file name="create_new_phar.phpt" role="test"/>
+    <file name="create_new_phar_b.phpt" role="test"/>
+    <file name="create_new_phar_c.phpt" role="test"/>
+    <file name="delete_in_phar.phpt" role="test"/>
+    <file name="delete_in_phar_b.phpt" role="test"/>
+    <file name="delete_in_phar_confirm.phpt" role="test"/>
+    <file name="ini_set.phpt" role="test"/>
+    <file name="ini_set_off.phpt" role="test"/>
+    <file name="metadata_read.phpt" role="test"/>
+    <file name="metadata_write.phpt" role="test"/>
+    <file name="open_for_write_existing.phpt" role="test"/>
+    <file name="open_for_write_existing_b.phpt" role="test"/>
+    <file name="open_for_write_existing_c.phpt" role="test"/>
+    <file name="open_for_write_newfile.phpt" role="test"/>
+    <file name="open_for_write_newfile_b.phpt" role="test"/>
+    <file name="open_for_write_newfile_c.phpt" role="test"/>
+    <file name="phar_ctx_001.phpt" role="test"/>
+    <file name="phar_oo_001.phpt" role="test"/>
+    <file name="phar_oo_002.phpt" role="test"/>
+    <file name="phar_oo_003.phpt" role="test"/>
+    <file name="phar_oo_004.phpt" role="test"/>
+    <file name="phar_oo_005.phpt" role="test"/>
+    <file name="phar_oo_006.phpt" role="test"/>
+    <file name="phar_oo_007.phpt" role="test"/>
+    <file name="phar_oo_008.phpt" role="test"/>
+    <file name="phar_oo_009.phpt" role="test"/>
+    <file name="phar_oo_010.phpt" role="test"/>
+    <file name="phar_oo_011.phpt" role="test"/>
+    <file name="phar_oo_011b.phpt" role="test"/>
+    <file name="phar_oo_012.phpt" role="test"/>
+    <file name="phar_oo_012b.phpt" role="test"/>
+    <file name="phar_oo_012_confirm.phpt" role="test"/>
+    <file name="phar_oo_compressed_001.phpt" role="test"/>
+    <file name="phar_oo_compressed_001b.phpt" role="test"/>
+    <file name="phar_oo_compressed_002.phpt" role="test"/>
+    <file name="phar_oo_compressed_002b.phpt" role="test"/>
+    <file name="phar_stub.phpt" role="test"/>
+    <file name="phar_stub_write.phpt" role="test"/>
+    <file name="refcount1.phpt" role="test"/>
    </dir> <!-- /tests -->
    <file name="config.m4" role="src"/>
    <file name="config.w32" role="src"/>
    <file name="CREDITS" role="doc"/>
+   <file name="TODO" role="doc"/>
    <file name="EXPERIMENTAL" role="src"/>
    <file name="phar.c" role="src"/>
+   <file name="phar_object.c" role="src"/>
    <file name="php_phar.h" role="src"/>
+   <file name="phar_internal.h" role="src"/>
   </dir> <!-- / -->
  </contents>
  <dependencies>
   <required>
    <php>
-    <min>5.1.2</min>
+    <min>5.2.1</min>
    </php>
    <pearinstaller>
     <min>1.4.3</min>
