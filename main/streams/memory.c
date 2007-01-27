@@ -241,6 +241,37 @@ static int php_stream_memory_stat(php_stream *stream, php_stream_statbuf *ssb TS
 }
 /* }}} */
 
+static int php_stream_memory_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC) /* {{{ */
+{
+	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
+	size_t newsize;
+	
+	switch(option) {
+		case PHP_STREAM_OPTION_TRUNCATE_API:
+			switch (value) {
+				case PHP_STREAM_TRUNCATE_SUPPORTED:
+					return PHP_STREAM_OPTION_RETURN_OK;
+
+				case PHP_STREAM_TRUNCATE_SET_SIZE:
+					newsize = *(size_t*)ptrparam;
+					if (newsize <= ms->fsize) {
+						if (newsize < ms->fpos) {
+							ms->fpos = newsize;
+						} else {
+							ms->data = erealloc(ms->data, newsize);
+							memset(ms->data+ms->fsize, 0, newsize - ms->fsize);
+							ms->fsize = newsize;
+						}
+						ms->fsize = newsize;
+						return PHP_STREAM_OPTION_RETURN_OK;
+					}
+			}
+		default:
+			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
+	}
+}
+/* }}} */
+	
 php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_write, php_stream_memory_read,
 	php_stream_memory_close, php_stream_memory_flush,
@@ -248,7 +279,7 @@ php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_seek,
 	php_stream_memory_cast,
 	php_stream_memory_stat,
-	NULL  /* set_option */
+	php_stream_memory_set_option
 };
 
 
@@ -266,7 +297,7 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC)
 	self->mode = mode;
 	self->owner_ptr = NULL;
 	
-	stream = php_stream_alloc(&php_stream_memory_ops, self, 0, mode & TEMP_STREAM_READONLY ? "r+b" : "w+b");
+	stream = php_stream_alloc_rel(&php_stream_memory_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	return stream;
 }
@@ -493,6 +524,9 @@ static int php_stream_temp_set_option(php_stream *stream, int option, int value,
 			}
 			return PHP_STREAM_OPTION_RETURN_OK;
 		default:
+			if (ts->innerstream) {
+				return php_stream_set_option(ts->innerstream, option, value, ptrparam);
+			}
 			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	}
 }
@@ -520,9 +554,9 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	self->smax = max_memory_usage;
 	self->mode = mode;
 	self->meta = NULL;
-	stream = php_stream_alloc(&php_stream_temp_ops, self, 0, mode & TEMP_STREAM_READONLY ? "r+b" : "w+b");
+	stream = php_stream_alloc_rel(&php_stream_temp_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
-	self->innerstream = php_stream_memory_create(mode);
+	self->innerstream = php_stream_memory_create_rel(mode);
 	((php_stream_memory_data*)self->innerstream->abstract)->owner_ptr = &self->innerstream;
 
 	return stream;
@@ -684,7 +718,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 		stream->ops = &php_stream_rfc2397_ops;
 		ts = (php_stream_temp_data*)stream->abstract;
 		assert(ts != NULL);
-		ts->mode = mode && mode[0] == 'r' ? TEMP_STREAM_READONLY : 0;
+		ts->mode = mode && mode[0] == 'r' && mode[1] != '+' ? TEMP_STREAM_READONLY : 0;
 		ts->meta = meta;
 	}
 	efree(comma);
