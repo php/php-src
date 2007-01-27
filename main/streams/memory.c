@@ -279,7 +279,7 @@ php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_seek,
 	php_stream_memory_cast,
 	php_stream_memory_stat,
-	php_stream_memory_set_option
+	NULL /* php_stream_memory_set_option */
 };
 
 
