@@ -1,3 +1,42 @@
+2007-01-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/info.c:
+      use length - 1 when we fetch it from hashes
+
+2007-01-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed bug #40231 (file_exists incorrectly reports false)
+
+2007-01-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/pdo_oci/oci_statement.c:
+      fix leak
+      readuce size of the buffer to prevent ORA-01461
+
+    * configure.in:
+      check if -no-cpp-precomp is supported by GCC before using it (mac os only)
+
+2007-01-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.1RC4
+
 2007-01-25  Antony Dovgal  <antony@zend.com>
 
     * ext/oci8/package2.xml
