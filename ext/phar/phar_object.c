@@ -310,7 +310,7 @@ static int phar_test_compression(void *pDest, void *argument TSRMLS_DC) /* {{{ *
 		*result = 0;
 	}
 #endif
-#if !HAVE_GZ
+#if !HAVE_ZLIB
 	if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
 		*result = 0;
 	}
@@ -377,7 +377,7 @@ PHP_METHOD(Phar, compressAllFilesBZIP2)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress all files as Bzip2, some are compressed as gzip and cannot be uncompressed");
 	}
-	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_GZ TSRMLS_CC);
+	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_BZ2 TSRMLS_CC);
 	phar_obj->arc.archive->is_modified = 1;
 	
 	phar_flush(phar_obj->arc.archive, 0, 0 TSRMLS_CC);
@@ -403,7 +403,7 @@ PHP_METHOD(Phar, uncompressAllFiles)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot uncompress all files, some are compressed as bzip2 or gzip and cannot be uncompressed");
 	}
-	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_GZ TSRMLS_CC);
+	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_NONE TSRMLS_CC);
 	phar_obj->arc.archive->is_modified = 1;
 	
 	phar_flush(phar_obj->arc.archive, 0, 0 TSRMLS_CC);
