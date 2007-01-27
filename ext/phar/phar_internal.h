@@ -99,6 +99,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         require_hash;
 	zend_bool   readonly_orig;
 	zend_bool   require_hash_orig;
+	int         request_done;
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)
@@ -140,6 +141,7 @@ typedef struct _phar_entry_info {
 	char                     *filename;
 	long                     offset_within_phar;
 	php_stream               *fp;
+	php_stream               *cfp;
 	int                      fp_refcount;
 	int                      is_crc_checked:1;
 	int                      is_modified:1;
@@ -243,11 +245,12 @@ static int    phar_dir_stat( php_stream *stream, php_stream_statbuf *ssb TSRMLS_
 #endif
 
 int phar_archive_delref(phar_archive_data *phar TSRMLS_DC);
+int phar_entry_delref(phar_entry_data *idata TSRMLS_DC);
+
 void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC);
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len TSRMLS_DC);
-void phar_free_entry_data(phar_entry_data *idata TSRMLS_DC);
-phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len TSRMLS_DC);
-int phar_flush(php_stream *stream, phar_entry_data *data, char *user_stub, long len TSRMLS_DC);
+phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode TSRMLS_DC);
+int phar_flush(phar_archive_data *archive, char *user_stub, long len TSRMLS_DC);
 int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len TSRMLS_DC);
 
 END_EXTERN_C()

@@ -216,10 +216,9 @@ PHP_METHOD(Phar, beginWrite)
 PHP_METHOD(Phar, commitWrite)
 {
 	zval *stub;
-	phar_entry_data *idata;
 	long len = -1;
 	php_stream *stream;
-	phar_archive_data *temp;
+/*	phar_archive_data *temp;*/
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly)) {
@@ -231,33 +230,19 @@ PHP_METHOD(Phar, commitWrite)
 		return;
 	}
 
-	if (!phar_obj->arc.archive->is_modified) {
-		RETURN_TRUE;
-	}
-	phar_obj->arc.archive->donotflush = 0;
-	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
-	idata->fp = 0;
-	idata->internal_file = 0;
-	idata->phar = phar_obj->arc.archive;
-
 	if (Z_TYPE_P(stub) == IS_STRING) {
-		phar_flush(0, idata, Z_STRVAL_P(stub), Z_STRLEN_P(stub) TSRMLS_CC);
+		phar_flush(phar_obj->arc.archive, Z_STRVAL_P(stub), Z_STRLEN_P(stub) TSRMLS_CC);
 	} else if (Z_TYPE_P(stub) == IS_RESOURCE && (php_stream_from_zval_no_verify(stream, &stub))) {
 		if (len > 0) {
 			len = -len;
+		} else {
+			len = -1;
 		}
-		phar_flush(0, idata, (char *) &stub, len TSRMLS_CC);
+		phar_flush(phar_obj->arc.archive, (char *) &stub, len TSRMLS_CC);
 	} else {
-		phar_flush(0, idata, 0, 0 TSRMLS_CC);
+		phar_flush(phar_obj->arc.archive, 0, 0 TSRMLS_CC);
 	}
 	
-	/* reset the internal object so that the manifest is correct */
-	if (phar_open_filename(idata->phar->fname, idata->phar->fname_len, idata->phar->alias, idata->phar->alias_len, REPORT_ERRORS, &temp TSRMLS_CC) == FAILURE) {
-		RETURN_FALSE;
-	}
-	efree(idata);
-
-	phar_obj->arc.archive = temp;
 	RETURN_TRUE;
 }
 /* }}} */
@@ -362,7 +347,7 @@ PHP_METHOD(Phar, offsetSet)
 	zval *contents;
 	long contents_len = PHP_STREAM_COPY_ALL;
 	phar_entry_data *data;
-	php_stream *fp, *contents_file;
+	php_stream *contents_file;
 	long offset;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -378,30 +363,25 @@ PHP_METHOD(Phar, offsetSet)
 	if (Z_TYPE_P(contents) != IS_STRING && Z_TYPE_P(contents) != IS_RESOURCE) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
 	}
-	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, fname, fname_len TSRMLS_CC))) {
+	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, fname, fname_len, "w+b" TSRMLS_CC))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created", fname);
 	} else {
-		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
-		fp = php_stream_open_wrapper(fname, "w+b", STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 		if (Z_TYPE_P(contents) == IS_STRING) {
-			if (contents_len != php_stream_write(fp, Z_STRVAL_P(contents), Z_STRLEN_P(contents))) {
-				php_stream_close(fp);
+			contents_len = php_stream_write(data->fp, Z_STRVAL_P(contents), Z_STRLEN_P(contents));
+			if (contents_len != Z_STRLEN_P(contents)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
 			}
 		} else if (Z_TYPE_P(contents) == IS_RESOURCE) {
 			if (!(php_stream_from_zval_no_verify(contents_file, &contents))) {
-				php_stream_close(fp);
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
 			}
-			offset = php_stream_copy_to_stream(contents_file, fp, contents_len);
+			offset = php_stream_copy_to_stream(contents_file, data->fp, contents_len);
 			if (contents_len != offset && contents_len != PHP_STREAM_COPY_ALL) {
-				php_stream_close(fp);
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
 			}
 		}
-		php_stream_close(fp);
-		efree(fname);
-		phar_free_entry_data(data TSRMLS_CC);
+		phar_flush(phar_obj->arc.archive, 0, 0 TSRMLS_CC);
+		phar_entry_delref(data TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -414,7 +394,6 @@ PHP_METHOD(Phar, offsetUnset)
 	char *fname;
 	int fname_len;
 	phar_entry_info *entry;
-	phar_entry_data *data;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly)) {
@@ -435,12 +414,7 @@ PHP_METHOD(Phar, offsetUnset)
 			entry->is_modified = 0;
 			entry->is_deleted = 1;
 			/* we need to "flush" the stream to save the newly deleted file on disk */
-			data = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
-			data->phar = phar_obj->arc.archive;
-			data->fp = 0;
-			/* internal_file is unused in phar_flush, so we won't set it */
-			phar_flush(0, data, 0, 0 TSRMLS_CC);
-			efree(data);
+			phar_flush(phar_obj->arc.archive, 0, 0 TSRMLS_CC);
 			RETURN_TRUE;
 		}
 	} else {
@@ -683,9 +657,6 @@ PHP_METHOD(PharFileInfo, setMetadata)
 PHP_METHOD(PharFileInfo, setCompressedGZ)
 {
 #if HAVE_ZLIB
-	phar_entry_data *idata;
-	char *fname;
-	int fname_len;
 	PHAR_ENTRY_OBJECT();
 
 	if (entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_GZ) {
@@ -700,22 +671,12 @@ PHP_METHOD(PharFileInfo, setCompressedGZ)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress deleted file");
 	}
-	if (!entry_obj->ent.entry->fp) {
-		fname_len = spprintf(&fname, 0, "phar://%s/%s", entry_obj->ent.entry->phar->fname, entry_obj->ent.entry->filename);
-		entry_obj->ent.entry->fp = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
-		efree(fname);
-	}
 	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry_obj->ent.entry->flags |= PHAR_ENT_COMPRESSED_GZ;
 	entry_obj->ent.entry->phar->is_modified = 1;
 	entry_obj->ent.entry->is_modified = 1;
 
-	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
-	idata->fp = 0;
-	idata->internal_file = 0;
-	idata->phar = entry_obj->ent.entry->phar;
-	phar_flush(0, idata, 0, 0 TSRMLS_CC);
-	efree(idata);
+	phar_flush(entry_obj->ent.entry->phar, 0, 0 TSRMLS_CC);
 	RETURN_TRUE;
 #else
 	zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
@@ -730,9 +691,6 @@ PHP_METHOD(PharFileInfo, setCompressedGZ)
 PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 {
 #if HAVE_BZ2
-	phar_entry_data *idata;
-	char *fname;
-	int fname_len;
 	PHAR_ENTRY_OBJECT();
 
 	if (entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
@@ -747,22 +705,12 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress deleted file");
 	}
-	if (!entry_obj->ent.entry->fp) {
-		fname_len = spprintf(&fname, 0, "phar://%s/%s", entry_obj->ent.entry->phar->fname, entry_obj->ent.entry->filename);
-		entry_obj->ent.entry->fp = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
-		efree(fname);
-	}
 	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry_obj->ent.entry->flags |= PHAR_ENT_COMPRESSED_BZ2;
 	entry_obj->ent.entry->phar->is_modified = 1;
 	entry_obj->ent.entry->is_modified = 1;
 
-	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
-	idata->fp = 0;
-	idata->internal_file = 0;
-	idata->phar = entry_obj->ent.entry->phar;
-	phar_flush(0, idata, 0, 0 TSRMLS_CC);
-	efree(idata);
+	phar_flush(entry_obj->ent.entry->phar, 0, 0 TSRMLS_CC);
 	RETURN_TRUE;
 #else
 	zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
@@ -776,7 +724,6 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
  */
 PHP_METHOD(PharFileInfo, setUncompressed)
 {
-	phar_entry_data *idata;
 	char *fname;
 	int fname_len;
 	PHAR_ENTRY_OBJECT();
@@ -814,12 +761,7 @@ PHP_METHOD(PharFileInfo, setUncompressed)
 	entry_obj->ent.entry->phar->is_modified = 1;
 	entry_obj->ent.entry->is_modified = 1;
 
-	idata = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
-	idata->fp = 0;
-	idata->internal_file = 0;
-	idata->phar = entry_obj->ent.entry->phar;
-	phar_flush(0, idata, 0, 0 TSRMLS_CC);
-	efree(idata);
+	phar_flush(entry_obj->ent.entry->phar, 0, 0 TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */
