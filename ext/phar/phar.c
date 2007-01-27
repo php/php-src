@@ -849,7 +849,6 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	efree(savebuf);
 	
 	if (pphar) {
-		mydata->refcount++;
 		*pphar = mydata;
 	}
 

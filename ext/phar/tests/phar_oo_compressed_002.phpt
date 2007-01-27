@@ -4,6 +4,7 @@ Phar: context/compress=GZ
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 <?php if (!extension_loaded("zlib")) print "skip zlib not present"; ?>
 --INI--
+phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
