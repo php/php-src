@@ -1,5 +1,5 @@
 --TEST--
-Phar context
+Phar::setCompressedGZ()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 <?php if (!extension_loaded("zlib")) print "skip zlib not present"; ?>
@@ -27,8 +27,6 @@ var_dump(file_get_contents($pname . '/b'));
 var_dump($phar['b']->isCompressed());
 var_dump(file_get_contents($pname . '/c'));
 var_dump($phar['c']->isCompressed());
-
-$context = stream_context_create(array('phar'=>array('compress'=>Phar::GZ)));
 
 $phar['a'] = 'new a';
 $phar['a']->setUncompressed();
