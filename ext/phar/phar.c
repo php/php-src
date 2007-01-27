@@ -401,6 +401,7 @@ void phar_entry_remove(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 			php_stream_close(idata->fp);
 		}
 		zend_hash_del(&idata->phar->manifest, idata->internal_file->filename, idata->internal_file->filename_len);
+		idata->phar->refcount--;
 		efree(idata);
 	} else {
 		idata->internal_file->is_deleted = 1;
@@ -2521,8 +2522,6 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 		php_url_free(resource);
 		return FAILURE;
 	}
-	/* faulty increment of phar refcount - nothing persists beyond this function */
-	idata->phar->refcount--;
 	if (idata->internal_file->fp_refcount > 1) {
 		/* more than just our fp resource is open for this file */ 
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" in phar \"%s\", has open file pointers, cannot unlink", internal_file, resource->host);
