@@ -300,19 +300,18 @@ static int phar_set_compression(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 static int phar_test_compression(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *entry = (phar_entry_info *)pDest;
-	int *result = (int *) argument;
 
 	if (entry->is_deleted) {
 		return ZEND_HASH_APPLY_KEEP;
 	}
 #if !HAVE_BZ2
 	if (entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
-		*result = 0;
+		*(int *) argument = 0;
 	}
 #endif
 #if !HAVE_ZLIB
 	if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
-		*result = 0;
+		*(int *) argument = 0;
 	}
 #endif
 	return ZEND_HASH_APPLY_KEEP;
