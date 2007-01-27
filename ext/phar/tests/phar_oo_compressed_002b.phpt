@@ -4,6 +4,7 @@ Phar: context/compress=BZip2
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 <?php if (!extension_loaded("bz2")) print "skip bz2 not present"; ?>
 --INI--
+phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
