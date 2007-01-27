@@ -348,10 +348,10 @@ void phar_entry_remove(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 		phar_flush(idata->internal_file->phar, 0, 0 TSRMLS_CC);
 	}
 	if (idata->internal_file->fp_refcount < 2) {
-		zend_hash_del(&idata->phar->manifest, idata->internal_file->filename, idata->internal_file->filename_len);
 		if (idata->fp && idata->fp != idata->internal_file->fp) {
 			php_stream_close(idata->fp);
 		}
+		zend_hash_del(&idata->phar->manifest, idata->internal_file->filename, idata->internal_file->filename_len);
 		efree(idata);
 	} else {
 		idata->internal_file->is_deleted = 1;
