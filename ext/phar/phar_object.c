@@ -282,6 +282,134 @@ PHP_METHOD(Phar, getModified)
 }
 /* }}} */
 
+static int phar_set_compression(void *pDest, void *argument TSRMLS_DC) /* {{{ */
+{
+	phar_entry_info *entry = (phar_entry_info *)pDest;
+	php_uint32 compress = *(php_uint32 *)argument;
+
+	if (entry->is_deleted) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+	entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
+	entry->flags |= compress;
+	entry->is_modified = 1;
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+static int phar_test_compression(void *pDest, void *argument TSRMLS_DC) /* {{{ */
+{
+	phar_entry_info *entry = (phar_entry_info *)pDest;
+	int *result = (int *) argument;
+
+	if (entry->is_deleted) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+#if !HAVE_BZ2
+	if (entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
+		*result = 0;
+	}
+#endif
+#if !HAVE_GZ
+	if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
+		*result = 0;
+	}
+#endif
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+static void pharobj_set_compression(HashTable *manifest, php_uint32 compress TSRMLS_DC) /* {{{ */
+{
+	zend_hash_apply_with_argument(manifest, phar_set_compression, &compress TSRMLS_CC);
+}
+/* }}} */
+
+static int pharobj_cancompress(HashTable *manifest TSRMLS_DC) /* {{{ */
+{
+	int test;
+	test = 1;
+	zend_hash_apply_with_argument(manifest, phar_test_compression, &test TSRMLS_CC);
+	return test;
+}
+/* }}} */
+
+/* {{{ proto bool Phar::compressAllFilesGZ()
+ * compress every file with GZip compression
+ */
+PHP_METHOD(Phar, compressAllFilesGZ)
+{
+	PHAR_ARCHIVE_OBJECT();
+
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Phar is readonly, cannot change compression");
+	}
+#if HAVE_ZLIB
+	if (!pharobj_cancompress(&phar_obj->arc.archive->manifest TSRMLS_CC)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot compress all files as Gzip, some are compressed as bzip2 and cannot be uncompressed");
+	}
+	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_GZ TSRMLS_CC);
+	phar_obj->arc.archive->is_modified = 1;
+	
+	phar_flush(phar_obj->arc.archive, 0, 0 TSRMLS_CC);
+#else
+	zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+		"Cannot compress with Gzip compression, zlib extension is not enabled");
+#endif
+}
+/* }}} */
+
+/* {{{ proto bool Phar::compressAllFilesBZIP2()
+ * compress every file with BZip2 compression
+ */
+PHP_METHOD(Phar, compressAllFilesBZIP2)
+{
+	PHAR_ARCHIVE_OBJECT();
+
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Phar is readonly, cannot change compression");
+	}
+#if HAVE_BZ2
+	if (!pharobj_cancompress(&phar_obj->arc.archive->manifest TSRMLS_CC)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot compress all files as Bzip2, some are compressed as gzip and cannot be uncompressed");
+	}
+	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_GZ TSRMLS_CC);
+	phar_obj->arc.archive->is_modified = 1;
+	
+	phar_flush(phar_obj->arc.archive, 0, 0 TSRMLS_CC);
+#else
+	zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+		"Cannot compress with Bzip2 compression, bz2 extension is not enabled");
+#endif
+}
+/* }}} */
+
+/* {{{ proto bool Phar::uncompressAllFiles()
+ * uncompress every file
+ */
+PHP_METHOD(Phar, uncompressAllFiles)
+{
+	PHAR_ARCHIVE_OBJECT();
+
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Phar is readonly, cannot change compression");
+	}
+	if (!pharobj_cancompress(&phar_obj->arc.archive->manifest TSRMLS_CC)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot uncompress all files, some are compressed as bzip2 or gzip and cannot be uncompressed");
+	}
+	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_GZ TSRMLS_CC);
+	phar_obj->arc.archive->is_modified = 1;
+	
+	phar_flush(phar_obj->arc.archive, 0, 0 TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ proto int Phar::offsetExists(string offset)
  * determines whether a file exists in the phar
  */
@@ -811,27 +939,30 @@ ZEND_END_ARG_INFO();
 
 zend_function_entry php_archive_methods[] = {
 #if !HAVE_SPL
-	PHP_ME(Phar, __construct,   arginfo_phar___construct,  ZEND_ACC_PRIVATE)
+	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PRIVATE)
 #else
-	PHP_ME(Phar, __construct,   arginfo_phar___construct,  ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, count,         NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getModified,   NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getSignature,  NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getStub,       NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getVersion,    NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, beginWrite,    NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, commitWrite,   arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, offsetExists,  arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, offsetGet,     arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, offsetSet,     arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, offsetUnset,   arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, count,                 NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getModified,           NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getSignature,          NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getStub,               NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getVersion,            NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, beginWrite,            NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, compressAllFilesBZIP2, NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, uncompressAllFiles,    NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, commitWrite,           arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, offsetExists,          arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, offsetGet,             arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, offsetUnset,           arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 #endif
 	/* static member functions */
-	PHP_ME(Phar, apiVersion,    NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, canCompress,   NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, canWrite,      NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, loadPhar,      arginfo_phar_loadPhar,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, mapPhar,       arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, apiVersion,            NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, canCompress,           NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, canWrite,              NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, loadPhar,              arginfo_phar_loadPhar,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, mapPhar,               arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
