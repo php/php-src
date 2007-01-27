@@ -259,11 +259,12 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 		return FAILURE;
 	}
 	*ret = NULL;
-	*error = (char *) emalloc(200 + fname_len);
-	**error = '\0';
+	if (error) {
+		*error = NULL;
+	}
 	if (for_write && PHAR_G(readonly)) {
 		if (error) {
-			sprintf(*error, "phar error: file \"%s\" cannot opened for writing, disabled by ini setting", fname);
+			spprintf(error, 0, "phar error: file \"%s\" cannot opened for writing, disabled by ini setting", fname);
 		}
 		return FAILURE;
 	}
@@ -271,13 +272,13 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 		if ((entry = phar_get_entry_info(phar, path, path_len TSRMLS_CC)) != NULL) {
 			if (entry->is_modified && !for_write) {
 				if (error) {
-					sprintf(*error, "phar error: file \"%s\" cannot opened for reading, writable file pointers are open", fname);
+					spprintf(error, 0, "phar error: file \"%s\" cannot opened for reading, writable file pointers are open", fname);
 				}
 				return FAILURE;
 			}
 			if (entry->fp_refcount && for_write) {
 				if (error) {
-					sprintf(*error, "phar error: file \"%s\" cannot opened for writing, readable file pointers are open", fname);
+					spprintf(error, 0, "phar error: file \"%s\" cannot opened for writing, readable file pointers are open", fname);
 				}
 				return FAILURE;
 			}
@@ -294,7 +295,6 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 			if (entry->fp) {
 				/* make a copy */
 				if (for_trunc) {
-					php_stream_truncate_set_size(entry->fp, 0);
 					entry->is_modified = 1;
 					phar->is_modified = 1;
 					/* reset file size */
@@ -1299,10 +1299,10 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	internal_file = estrdup(resource->path + 1);
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 		if (NULL == (idata = phar_get_or_create_entry_data(resource->host, strlen(resource->host), internal_file, strlen(internal_file), mode, &error TSRMLS_CC))) {
-			if (error[0]) {
+			if (error) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+				efree(error);
 			}
-			efree(error);
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" could not be created in phar \"%s\"", internal_file, resource->host);
 			efree(internal_file);
 			php_url_free(resource);
@@ -1326,17 +1326,15 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		return fpf;
 	} else {
 		if ((FAILURE == phar_get_entry_data(&idata, resource->host, strlen(resource->host), internal_file, strlen(internal_file), "r", &error TSRMLS_CC)) || !idata) {
-			if (error[0]) {
+			if (error) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+				efree(error);
 			}
-			efree(error);
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\"", internal_file, resource->host);
 			efree(internal_file);
 			php_url_free(resource);
 			return NULL;
 		}
-		/* alloced in get_entry_data */
-		efree(error);
 	}
 	php_url_free(resource);
 	
@@ -2467,10 +2465,10 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	internal_file = estrdup(resource->path + 1);
 	if (FAILURE == phar_get_entry_data(&idata, resource->host, strlen(resource->host), internal_file, strlen(internal_file), "r", &error TSRMLS_CC)) {
 		/* constraints of fp refcount were not met */
-		if (error[0]) {
+		if (error) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+			efree(error);
 		}
-		efree(error);
 		efree(internal_file);
 		php_url_free(resource);
 		return FAILURE;

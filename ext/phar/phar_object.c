@@ -493,8 +493,12 @@ PHP_METHOD(Phar, offsetSet)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
 	}
 	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, fname, fname_len, "w+b", &error TSRMLS_CC))) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created: %s", fname, error);
-		efree(error);
+		if (error) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created: %s", fname, error);
+			efree(error);
+		} else {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created", fname);
+		}
 	} else {
 		efree(error);
 		if (Z_TYPE_P(contents) == IS_STRING) {
