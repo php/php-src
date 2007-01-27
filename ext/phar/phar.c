@@ -314,7 +314,7 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 							memfp->fpos = 0;
 							memfp->fsize = 0;
 						} else if (php_stream_is(*(php_stream**)entry->fp->abstract, PHP_STREAM_IS_STDIO)) {
-							php_stream_truncate_set_size(entry->fp, 0);
+							php_stream_truncate_set_size(*(php_stream**)entry->fp->abstract, 0);
 						} else {
 							efree(*ret);
 							*ret = NULL;
@@ -323,6 +323,8 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 							}
 							return FAILURE;
 						}
+					} else if (php_stream_is(entry->fp, PHP_STREAM_IS_STDIO)) {
+						php_stream_truncate_set_size(entry->fp, 0);
 					} else {
 						efree(*ret);
 						*ret = NULL;
