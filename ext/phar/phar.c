@@ -246,7 +246,7 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int pa
  * Retrieve a copy of the file information on a single file within a phar, or null.
  * This also transfers the open file pointer, if any, to the entry.
  */
-static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode TSRMLS_DC) /* {{{ */
+static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -259,18 +259,26 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 		return FAILURE;
 	}
 	*ret = NULL;
+	*error = (char *) emalloc(200 + fname_len);
+	**error = '\0';
 	if (for_write && PHAR_G(readonly)) {
-		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar error: file \"%s\" cannot opened for writing, disabled by ini setting", fname);
+		if (error) {
+			sprintf(*error, "phar error: file \"%s\" cannot opened for writing, disabled by ini setting", fname);
+		}
 		return FAILURE;
 	}
 	if ((phar = phar_get_archive(fname, fname_len, NULL, 0 TSRMLS_CC)) != NULL) {
 		if ((entry = phar_get_entry_info(phar, path, path_len TSRMLS_CC)) != NULL) {
 			if (entry->is_modified && !for_write) {
-				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar error: file \"%s\" cannot opened for reading, writable file pointers are open", fname);
+				if (error) {
+					sprintf(*error, "phar error: file \"%s\" cannot opened for reading, writable file pointers are open", fname);
+				}
 				return FAILURE;
 			}
 			if (entry->fp_refcount && for_write) {
-				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar error: file \"%s\" cannot opened for writing, readable file pointers are open", fname);
+				if (error) {
+					sprintf(*error, "phar error: file \"%s\" cannot opened for writing, readable file pointers are open", fname);
+				}
 				return FAILURE;
 			}
 			if (entry->is_deleted) {
@@ -363,7 +371,7 @@ void phar_entry_remove(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode TSRMLS_DC) /* {{{ */
+phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
@@ -373,7 +381,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 		return NULL;
 	}
 
-	if (FAILURE == phar_get_entry_data(&ret, fname, fname_len, path, path_len, mode TSRMLS_CC)) {
+	if (FAILURE == phar_get_entry_data(&ret, fname, fname_len, path, path_len, mode, error TSRMLS_CC)) {
 		return NULL;
 	}
 	if (ret) {
@@ -1260,6 +1268,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	phar_entry_data *idata;
 	char *internal_file;
 	char *buffer;
+	char *error;
 	char *filter_name;
 	char tmpbuf[8];
 	php_url *resource = NULL;
@@ -1290,12 +1299,17 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	/* strip leading "/" */
 	internal_file = estrdup(resource->path + 1);
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
-		if (NULL == (idata = phar_get_or_create_entry_data(resource->host, strlen(resource->host), internal_file, strlen(internal_file), mode TSRMLS_CC))) {
+		if (NULL == (idata = phar_get_or_create_entry_data(resource->host, strlen(resource->host), internal_file, strlen(internal_file), mode, &error TSRMLS_CC))) {
+			if (error[0]) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+			}
+			efree(error);
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" could not be created in phar \"%s\"", internal_file, resource->host);
 			efree(internal_file);
 			php_url_free(resource);
 			return NULL;
 		}
+		efree(error);
 		fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 		php_url_free(resource);
 		efree(internal_file);
@@ -1312,12 +1326,18 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		}
 		return fpf;
 	} else {
-		if ((FAILURE == phar_get_entry_data(&idata, resource->host, strlen(resource->host), internal_file, strlen(internal_file), "r" TSRMLS_CC)) || !idata) {
+		if ((FAILURE == phar_get_entry_data(&idata, resource->host, strlen(resource->host), internal_file, strlen(internal_file), "r", &error TSRMLS_CC)) || !idata) {
+			if (error[0]) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+			}
+			efree(error);
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\"", internal_file, resource->host);
 			efree(internal_file);
 			php_url_free(resource);
 			return NULL;
 		}
+		/* alloced in get_entry_data */
+		efree(error);
 	}
 	php_url_free(resource);
 	
@@ -2416,6 +2436,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 {
 	php_url *resource;
 	char *internal_file;
+	char *error;
 	phar_entry_data *idata;
 	
 	resource = php_url_parse(url);
@@ -2445,12 +2466,17 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	
 	/* need to copy to strip leading "/", will get touched again */
 	internal_file = estrdup(resource->path + 1);
-	if (FAILURE == phar_get_entry_data(&idata, resource->host, strlen(resource->host), internal_file, strlen(internal_file), "r" TSRMLS_CC)) {
+	if (FAILURE == phar_get_entry_data(&idata, resource->host, strlen(resource->host), internal_file, strlen(internal_file), "r", &error TSRMLS_CC)) {
 		/* constraints of fp refcount were not met */
+		if (error[0]) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+		}
+		efree(error);
 		efree(internal_file);
 		php_url_free(resource);
 		return FAILURE;
 	}
+	efree(error);
 	if (!idata) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\", cannot unlink", internal_file, resource->host);
 		efree(internal_file);
@@ -2467,6 +2493,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 		phar_entry_delref(idata TSRMLS_CC);
 		return FAILURE;
 	}
+	php_url_free(resource);
 	efree(internal_file);
 	phar_entry_remove(idata TSRMLS_CC);
 	return SUCCESS;

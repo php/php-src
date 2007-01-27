@@ -249,7 +249,7 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC);
 
 void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC);
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len TSRMLS_DC);
-phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode TSRMLS_DC);
+phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC);
 int phar_flush(phar_archive_data *archive, char *user_stub, long len TSRMLS_DC);
 int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len TSRMLS_DC);
 
