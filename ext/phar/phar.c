@@ -293,9 +293,9 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 			(*ret)->internal_file = entry;
 			if (entry->fp) {
 				/* make a copy */
-				(*ret)->fp = entry->fp;
 				if (for_trunc) {
-					php_stream_truncate_set_size(entry->fp, 0);
+					php_stream_close(entry->fp);
+					entry->fp = php_stream_fopen_tmpfile();
 					entry->is_modified = 1;
 					phar->is_modified = 1;
 					/* reset file size */
@@ -305,6 +305,7 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 				} else if (for_append) {
 					php_stream_seek(entry->fp, 0, SEEK_END);
 				}
+				(*ret)->fp = entry->fp;
 			} else {
 				(*ret)->fp = 0;
 				if (for_write) {
