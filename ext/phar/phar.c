@@ -294,8 +294,7 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 			if (entry->fp) {
 				/* make a copy */
 				if (for_trunc) {
-					php_stream_close(entry->fp);
-					entry->fp = php_stream_fopen_tmpfile();
+					php_stream_truncate_set_size(entry->fp, 0);
 					entry->is_modified = 1;
 					phar->is_modified = 1;
 					/* reset file size */
