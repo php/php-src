@@ -12,7 +12,7 @@ $pname = 'phar://' . $fname;
 $file = "<?php __HALT_COMPILER(); ?>";
 
 $files = array();
-$files['a'] = array('cont'=>'Hello World', 'comp'=>pack('H*', '425a6839314159265359d872012f00000157800010400000400080060490002000220686d420c988c769e8281f8bb9229c28486c39009780'),'flags'=>0x00002000);
+$files['a'] = array('cont'=>'Hello World', 'comp'=>pack('H*', '425a6834314159265359065c89da0000009780400000400080060490002000310c082031a916c41d41e2ee48a70a1200cb913b40'),'flags'=>0x00002000);
 include 'phar_test.inc';
 
 var_dump(file_get_contents($pname . '/a'));
