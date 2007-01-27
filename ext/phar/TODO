@@ -19,8 +19,8 @@ Version 1.0.0
  X Phar->getStub() for retrieving the stub of the phar [Marcus]
  X add setUncompressed(), setCompressedGZ() and setCompressedBZ2() to 
    PharFileInfo class [Greg]
- * add uncompressAllFiles(), compressAllFilesGZ() and compressAllFilesBZ2() 
-   to Phar class
+ X add uncompressAllFiles(), compressAllFilesGZ() and compressAllFilesBZ2() 
+   to Phar class [Greg]
  X add PharFileInfo::setMetaData($metadata) [Marcus]
  X add PharFileInfo::getMetaData() [Marcus]
  * always throw exceptions from the Phar object, and E_RECOVERABLE_ERROR from 
