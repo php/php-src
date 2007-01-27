@@ -17,6 +17,12 @@ $files['b.php'] = '<?php echo "This is b\n"; ?>';
 $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 include 'phar_test.inc';
 
+function err_handler($errno, $errstr, $errfile, $errline) {
+  echo "Catchable fatal error: $errstr in $errfile on line $errline\n";
+}
+
+set_error_handler("err_handler", E_RECOVERABLE_ERROR);
+
 $fp = fopen($pname . '/b/new.php', 'wb');
 fwrite($fp, 'extra');
 fclose($fp);
@@ -28,6 +34,8 @@ include $pname . '/b/new.php';
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
+
+Catchable fatal error: fopen(): phar error: file "%sopen_for_write_newfile_b.phar.php" cannot opened for writing, disabled by ini setting in %sopen_for_write_newfile_b.php on line %d
 
 Warning: fopen(phar://%sopen_for_write_newfile_b.phar.php/b/new.php): failed to open stream: phar error: file "b/new.php" could not be created in phar "%sopen_for_write_newfile_b.phar.php" in %sopen_for_write_newfile_b.php on line %d
 
