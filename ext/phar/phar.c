@@ -242,6 +242,17 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int pa
 }
 /* }}} */
 
+#if PHP_VERSION_ID < 50202
+typedef struct {
+	char        *data;
+	size_t      fpos;
+	size_t      fsize;
+	size_t      smax;
+	int			mode;
+	php_stream  **owner_ptr;
+} php_stream_memory_data;
+#endif
+
 /**
  * Retrieve a copy of the file information on a single file within a phar, or null.
  * This also transfers the open file pointer, if any, to the entry.
@@ -295,7 +306,34 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 			if (entry->fp) {
 				/* make a copy */
 				if (for_trunc) {
+#if PHP_VERSION_ID < 50202
+					if (php_stream_is(entry->fp, PHP_STREAM_IS_TEMP)) {
+						if (php_stream_is(*(php_stream**)entry->fp->abstract, PHP_STREAM_IS_MEMORY)) {
+							php_stream *inner = *(php_stream**)entry->fp->abstract;
+							php_stream_memory_data *memfp = (php_stream_memory_data*)inner->abstract;
+							memfp->fpos = 0;
+							memfp->fsize = 0;
+						} else if (php_stream_is(*(php_stream**)entry->fp->abstract, PHP_STREAM_IS_STDIO)) {
+							php_stream_truncate_set_size(entry->fp, 0);
+						} else {
+							efree(*ret);
+							*ret = NULL;
+							if (error) {
+								spprintf(error, 0, "phar error: file \"%s\" cannot opened for writing, no truncate support", fname);
+							}
+							return FAILURE;
+						}
+					} else {
+						efree(*ret);
+						*ret = NULL;
+						if (error) {
+							spprintf(error, 0, "phar error: file \"%s\" cannot opened for writing, no truncate support", fname);
+						}
+						return FAILURE;
+					}
+#else
 					php_stream_truncate_set_size(entry->fp, 0);
+#endif
 					entry->is_modified = 1;
 					phar->is_modified = 1;
 					/* reset file size */
