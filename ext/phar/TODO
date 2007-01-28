@@ -25,6 +25,7 @@ Version 1.0.0
  X add PharFileInfo::getMetaData() [Marcus]
  * always throw exceptions from the Phar object, and E_RECOVERABLE_ERROR from 
    streams interface
+ * Phar archive metadata
  
 Version 1.1.0
 
