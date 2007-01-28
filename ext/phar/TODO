@@ -10,8 +10,8 @@ Version 1.0.0
    class PharFileInfo completely [Marcus]
  X implement in-phar locking, so that a file that is opened for reading can't 
    have a handle opened for writing [Greg]
- X docs on file format/manifest description
- * docs on uses
+ X docs on file format/manifest description [Greg]
+ X docs on uses [Greg]
  X stream context for specifying compression of a file [Marcus]
  X stream context for specifying meta-data [Greg]
  X Phar->begin()/Phar->commit() for specifying a new stub to the phar,
