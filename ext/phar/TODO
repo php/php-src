@@ -25,7 +25,7 @@ Version 1.0.0
  X add PharFileInfo::getMetaData() [Marcus]
  * always throw exceptions from the Phar object, and E_RECOVERABLE_ERROR from 
    streams interface
- * Phar archive metadata
+ * Phar archive metadata Phar::setMetaData($metadata) Phar::getMetaData()
  X support rename() in stream wrapper [Greg]
  
 Version 1.1.0
