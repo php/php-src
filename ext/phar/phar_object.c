@@ -230,6 +230,8 @@ PHP_METHOD(Phar, commit)
 		return;
 	}
 
+	phar_obj->arc.archive->donotflush = 0;
+
 	if (stub && Z_TYPE_P(stub) == IS_STRING) {
 		phar_flush(phar_obj->arc.archive, Z_STRVAL_P(stub), Z_STRLEN_P(stub) TSRMLS_CC);
 	} else if (stub && Z_TYPE_P(stub) == IS_RESOURCE && (php_stream_from_zval_no_verify(stream, &stub))) {
