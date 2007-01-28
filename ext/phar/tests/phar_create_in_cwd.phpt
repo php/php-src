@@ -7,6 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+chdir(dirname(__FILE__));
 $p = new Phar('brandnewphar.phar');
 $p['file1.txt'] = 'hi';
 $p->commit();
