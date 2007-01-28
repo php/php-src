@@ -215,7 +215,7 @@ PHP_METHOD(Phar, beginWrite)
  */
 PHP_METHOD(Phar, commitWrite)
 {
-	zval *stub;
+	zval *stub = NULL;
 	long len = -1;
 	php_stream *stream;
 /*	phar_archive_data *temp;*/
@@ -230,9 +230,9 @@ PHP_METHOD(Phar, commitWrite)
 		return;
 	}
 
-	if (Z_TYPE_P(stub) == IS_STRING) {
+	if (stub && Z_TYPE_P(stub) == IS_STRING) {
 		phar_flush(phar_obj->arc.archive, Z_STRVAL_P(stub), Z_STRLEN_P(stub) TSRMLS_CC);
-	} else if (Z_TYPE_P(stub) == IS_RESOURCE && (php_stream_from_zval_no_verify(stream, &stub))) {
+	} else if (stub && Z_TYPE_P(stub) == IS_RESOURCE && (php_stream_from_zval_no_verify(stream, &stub))) {
 		if (len > 0) {
 			len = -len;
 		} else {
