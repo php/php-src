@@ -25,7 +25,10 @@ var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
 $stub = '<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
-$phar->commit($stub);
+$phar->setStub($stub);
+var_dump($phar->getStub());
+var_dump($phar->getStub() == $stub);
+$phar->commit();
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
@@ -42,6 +45,8 @@ __HALT_COMPILER();
 --EXPECT--
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
+bool(true)
+string(49) "<?php echo "second stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
 string(49) "<?php echo "second stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
