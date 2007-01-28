@@ -84,7 +84,7 @@ PHP_INI_END()
  * When all uses of a phar have been concluded, this frees the manifest
  * and the phar slot
  */
-void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
+static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 {
 	if (data->alias && data->alias != data->fname) {
 		efree(data->alias);
