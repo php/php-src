@@ -210,15 +210,11 @@ PHP_METHOD(Phar, begin)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::commit([string|stream stub [, int len]])
- * Save the contents of a modified phar, with an optional change to the stub
+/* {{{ proto bool Phar::commit()
+ * Save the contents of a modified phar
  */
 PHP_METHOD(Phar, commit)
 {
-	zval *stub = NULL;
-	long len = -1;
-	php_stream *stream;
-/*	phar_archive_data *temp;*/
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly)) {
@@ -226,26 +222,48 @@ PHP_METHOD(Phar, commit)
 			"Cannot write out phar archive, phar is read-only");
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zl", &stub, &len) == FAILURE) {
-		return;
-	}
-
 	phar_obj->arc.archive->donotflush = 0;
 
-	if (stub && Z_TYPE_P(stub) == IS_STRING) {
-		phar_flush(phar_obj->arc.archive, Z_STRVAL_P(stub), Z_STRLEN_P(stub) TSRMLS_CC);
-	} else if (stub && Z_TYPE_P(stub) == IS_RESOURCE && (php_stream_from_zval_no_verify(stream, &stub))) {
-		if (len > 0) {
-			len = -len;
-		} else {
-			len = -1;
-		}
-		phar_flush(phar_obj->arc.archive, (char *) &stub, len TSRMLS_CC);
-	} else {
-		phar_flush(phar_obj->arc.archive, 0, 0 TSRMLS_CC);
+	phar_flush(phar_obj->arc.archive, 0, 0 TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto bool Phar::setStub(string|stream stub [, int len])
+ * Change the stub of the archive
+ */
+PHP_METHOD(Phar, setStub)
+{
+	zval *zstub;
+	char *stub;
+	int stub_len;
+	long len = -1;
+	php_stream *stream;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot change stub, phar is read-only");
 	}
-	
-	RETURN_TRUE;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zstub, &len) == SUCCESS) {
+		if ((php_stream_from_zval_no_verify(stream, &zstub)) != NULL) {
+			if (len > 0) {
+				len = -len;
+			} else {
+				len = -1;
+			}
+			phar_flush(phar_obj->arc.archive, (char *) &zstub, len TSRMLS_CC);
+			RETURN_TRUE;
+		} else {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"Cannot change stub, unable to read from input stream");
+		}
+	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &stub, &stub_len) == SUCCESS) {
+		phar_flush(phar_obj->arc.archive, stub, stub_len TSRMLS_CC);
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -924,6 +942,7 @@ ZEND_END_ARG_INFO();
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setStub, 0, 0, 1)
 	ZEND_ARG_INFO(0, newstub)
+	ZEND_ARG_INFO(0, maxlen)
 ZEND_END_ARG_INFO();
 
 static
@@ -954,12 +973,13 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, getModified,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getSignature,          NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getStub,               NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getVersion,            NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, begin,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressAllFilesBZIP2, NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, uncompressAllFiles,    NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, commit,                arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, commit,                NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetExists,          arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetGet,             arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)

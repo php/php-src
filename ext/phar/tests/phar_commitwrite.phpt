@@ -1,5 +1,5 @@
 --TEST--
-Phar::commit()
+Phar::setStub()/commit()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --INI--
@@ -11,7 +11,7 @@ $p = new Phar(dirname(__FILE__) . '/brandnewphar.phar', 0, 'brandnewphar.phar');
 $p['file1.txt'] = 'hi';
 $p->commit();
 var_dump($p->getStub());
-$p->commit("<?php
+$p->setStub("<?php
 function __autoload(\$class)
 {
     include 'phar://' . str_replace('_', '/', \$class);
