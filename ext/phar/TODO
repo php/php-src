@@ -26,7 +26,7 @@ Version 1.0.0
  * always throw exceptions from the Phar object, and E_RECOVERABLE_ERROR from 
    streams interface
  * Phar archive metadata
- * support rename() in stream wrapper
+ X support rename() in stream wrapper [Greg]
  
 Version 1.1.0
 
