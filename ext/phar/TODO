@@ -25,8 +25,8 @@ Version 1.0.0
  X add PharFileInfo::getMetaData() [Marcus]
  * always throw exceptions from the Phar object, and E_RECOVERABLE_ERROR from 
    streams interface
- * ability to have Phar object return file class as offsetGet() result
  
 Version 1.1.0
 
+ * ability to have Phar object return file class as offsetGet() result
  * implement GPG signing
