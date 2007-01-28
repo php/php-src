@@ -7,9 +7,19 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <channel>pecl.php.net</channel>
  <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
  <description>
-This is the extension version of PEAR's PHP_Archive package. Support for zlib and crc32 is achieved without any dependency other than the external libz. The zlib extension need not be enabled to take advantage of compressed .phar files.
+This is the extension version of PEAR's PHP_Archive package. Support for
+zlib, bz2 and crc32 is achieved without any dependency other than the external
+zlib or bz2 extension.
 
-.phar files should be created using pear.php.net/PHP_Archive
+.phar files can be read using the phar stream, or with the Phar class.  If the SPL extension
+is available, a Phar object can be used as an array to iterate over a phar's contents
+or to read files directly from the phar.
+
+Phar archives can be created using the streams API or with the Phar class, if
+the phar.readonly ini variable is set to false.
+
+Full support for MD5 and SHA1 signatures is possible if the hash extension is present, and
+signatures can be required if the ini variable phar.require_hash is set to true.
  </description>
  <lead>
   <name>Greg Beaver</name>
@@ -26,7 +36,7 @@ This is the extension version of PEAR's PHP_Archive package. Support for zlib an
  <date>2007-01-27</date>
  <version>
   <release>0.9.0</release>
-  <api>0.9.0</api>
+  <api>1.0.0</api>
  </version>
  <stability>
   <release>beta</release>
@@ -37,7 +47,7 @@ This is the extension version of PEAR's PHP_Archive package. Support for zlib an
   Initial release.  This release is fully regression-tested
 
   This extension is only compatible with phar archives compliant with PHP_Archive
-  0.9.0 (api Version 0.9.0)
+  0.9.0 (api Version 1.0.0)
  </notes>
  <contents>
   <dir name="/">
@@ -139,6 +149,24 @@ This is the extension version of PEAR's PHP_Archive package. Support for zlib an
     <min>1.4.3</min>
    </pearinstaller>
   </required>
+  <optional>
+  <package>
+   <name>hash</name>
+   <channel>pecl.php.net</channel>
+   <providesextension>hash</providesextension>
+  </package>
+  <package>
+   <name>bz2</name>
+   <channel>pecl.php.net</channel>
+   <providesextension>bz2</providesextension>
+  </package>
+  <extension>
+   <name>zlib</name>
+  </extension>
+  <extension>
+   <name>spl</name>
+  </extension>
+  </optional>
  </dependencies>
  <providesextension>phar</providesextension>
  <extsrcrelease/>
