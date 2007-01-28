@@ -572,10 +572,11 @@ PHP_METHOD(Phar, getStub)
 	PHAR_ARCHIVE_OBJECT();
 
 	len = phar_obj->arc.archive->halt_offset;
-	fp = phar_obj->arc.archive->fp;
 
-	if (!fp) {
-		 fp = php_stream_open_wrapper(phar_obj->arc.archive->fname, "rb", 0, NULL);
+	if (phar_obj->arc.archive->fp && !phar_obj->arc.archive->is_brandnew) {
+		fp = phar_obj->arc.archive->fp;
+	} else {
+		fp = php_stream_open_wrapper(phar_obj->arc.archive->fname, "rb", 0, NULL);
 	}
 
 	if (!fp)  {

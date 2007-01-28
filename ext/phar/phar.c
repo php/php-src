@@ -586,7 +586,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	if (3 != php_stream_read(fp, buffer, 3)) {
 		MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
 	}
-	if (*buffer == ' ' && *(buffer + 1) == '?' && *(buffer + 2) == '>') {
+	if ((*buffer == ' ' || *buffer == '\n') && *(buffer + 1) == '?' && *(buffer + 2) == '>') {
 		int nextchar;
 		halt_offset += 3;
 		if (EOF == (nextchar = php_stream_getc(fp))) {
@@ -960,6 +960,7 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 	mydata->internal_file_start = -1;
 	mydata->fp = fp;
 	mydata->is_writeable = 1;
+	mydata->is_brandnew = 1;
 	if (!alias_len || !alias) {
 		/* if we neither have an explicit nor an implicit alias, we use the filename */
 		alias = NULL;
@@ -1759,7 +1760,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len TSRMLS_DC) 
 {
 	static const char newstub[] = "<?php __HALT_COMPILER();";
 	phar_entry_info *entry;
-	int halt_offset, restore_alias_len, global_flags = 0, read;
+	int halt_offset, restore_alias_len, global_flags = 0, read, closeoldfile;
 	char *buf;
 	char manifest[18], entry_buffer[24];
 	off_t manifest_ftell;
@@ -1776,13 +1777,13 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len TSRMLS_DC) 
 		return EOF;
 	}
 
-	if (archive->fp && archive->internal_file_start) {
+	if (archive->fp && !archive->is_brandnew) {
 		oldfile = archive->fp;
-		php_stream_rewind(oldfile); 
-fprintf(stderr, "### CACHED\n");
+		closeoldfile = 0;
+		php_stream_rewind(oldfile);
 	} else {
-fprintf(stderr, "### RELOADED\n");
 		oldfile = php_stream_open_wrapper(archive->fname, "rb", 0, NULL);
+		closeoldfile = oldfile != NULL;
 	}
 	newfile = php_stream_fopen_tmpfile();
 
@@ -1790,7 +1791,7 @@ fprintf(stderr, "### RELOADED\n");
 		if (len < 0) {
 			/* resource passed in */
 			if (!(php_stream_from_zval_no_verify(stubfile, (zval **)user_stub))) {
-				if (oldfile != archive->fp) {
+				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
 				php_stream_close(newfile);
@@ -1804,7 +1805,7 @@ fprintf(stderr, "### RELOADED\n");
 			}
 			offset = php_stream_copy_to_stream(stubfile, newfile, len);
 			if (len != offset && len != PHP_STREAM_COPY_ALL) {
-				if (oldfile != archive->fp) {
+				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
 				php_stream_close(newfile);
@@ -1814,7 +1815,7 @@ fprintf(stderr, "### RELOADED\n");
 			archive->halt_offset = offset;
 		} else {
 			if (len != php_stream_write(newfile, user_stub, len)) {
-				if (oldfile != archive->fp) {
+				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
 				php_stream_close(newfile);
@@ -1824,9 +1825,11 @@ fprintf(stderr, "### RELOADED\n");
 			archive->halt_offset = len;
 		}
 	} else {
-		if (archive->halt_offset && oldfile != archive->fp) {
+		if (archive->halt_offset && oldfile && !archive->is_brandnew) {
 			if (archive->halt_offset != php_stream_copy_to_stream(oldfile, newfile, archive->halt_offset)) {	
-				php_stream_close(oldfile);
+				if (closeoldfile) {
+					php_stream_close(oldfile);
+				}
 				php_stream_close(newfile);
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to copy stub of old phar to new phar \"%s\"", archive->fname);
 				return EOF;
@@ -1835,7 +1838,7 @@ fprintf(stderr, "### RELOADED\n");
 			/* this is a brand new phar */
 			archive->halt_offset = sizeof(newstub)-1;
 			if (sizeof(newstub)-1 != php_stream_write(newfile, newstub, sizeof(newstub)-1)) {
-				if (oldfile != archive->fp) {
+				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
 				php_stream_close(newfile);
@@ -1876,7 +1879,7 @@ fprintf(stderr, "### RELOADED\n");
 		offset += 4 + entry->filename_len + sizeof(entry_buffer);
 
 		/* compress and rehash as necessary */
-		if (archive->fp && !entry->is_modified) {
+		if (oldfile && !entry->is_modified) {
 			continue;
 		}
 		if (!entry->fp) {
@@ -1899,7 +1902,7 @@ fprintf(stderr, "### RELOADED\n");
 		php_stream_rewind(file);
 		filter = php_stream_filter_create(phar_compress_filter(entry, 0), NULL, 0 TSRMLS_CC);
 		if (!filter) {
-			if (oldfile != archive->fp) {
+			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -1927,7 +1930,7 @@ fprintf(stderr, "### RELOADED\n");
 					php_stream_filter_remove(filter, 1 TSRMLS_CC);
 					php_stream_close(entry->cfp);
 					entry->cfp = 0;
-					if (oldfile != archive->fp) {
+					if (closeoldfile) {
 						php_stream_close(oldfile);
 					}
 					php_stream_close(newfile);
@@ -1968,7 +1971,7 @@ fprintf(stderr, "### RELOADED\n");
 	/* write the manifest header */
 	if (sizeof(manifest) != php_stream_write(newfile, manifest, sizeof(manifest))
 	|| archive->alias_len != php_stream_write(newfile, archive->alias, archive->alias_len)) {
-		if (oldfile != archive->fp) {
+		if (closeoldfile) {
 			php_stream_close(oldfile);
 		}
 		php_stream_close(newfile);
@@ -1995,7 +1998,7 @@ fprintf(stderr, "### RELOADED\n");
 		phar_set_32(entry_buffer, entry->filename_len);
 		if (4 != php_stream_write(newfile, entry_buffer, 4)
 		|| entry->filename_len != php_stream_write(newfile, entry->filename, entry->filename_len)) {
-			if (oldfile != archive->fp) {
+			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2027,7 +2030,7 @@ fprintf(stderr, "### RELOADED\n");
 		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))
 		|| metadata_str.len != php_stream_write(newfile, metadata_str.c, metadata_str.len)) {
 			smart_str_free(&metadata_str);
-			if (oldfile != archive->fp) {
+			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2056,7 +2059,7 @@ fprintf(stderr, "### RELOADED\n");
 			php_stream_rewind(file);
 		} else {
 			if (-1 == php_stream_seek(oldfile, entry->offset_within_phar + archive->internal_file_start, SEEK_SET)) {
-				if (oldfile != archive->fp) {
+				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
 				php_stream_close(newfile);
@@ -2071,7 +2074,7 @@ fprintf(stderr, "### RELOADED\n");
 		offset += entry->compressed_filesize;
 		wrote = php_stream_copy_to_stream(file, newfile, entry->compressed_filesize);
 		if (entry->compressed_filesize != wrote) {
-			if (oldfile != archive->fp) {
+			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2151,21 +2154,23 @@ fprintf(stderr, "### RELOADED\n");
 	/* finally, close the temp file, rename the original phar,
 	   move the temp to the old phar, unlink the old phar, and reload it into memory
 	*/
-	if (archive->fp != oldfile) {
+	if (archive->fp) {
 		php_stream_close(archive->fp);
 	}
-	if (oldfile) {
+	if (closeoldfile) {
 		php_stream_close(oldfile);
 	}
 
 	archive->internal_file_start = halt_offset + manifest_len + 4;
+	archive->is_brandnew = 0;
+
+	php_stream_rewind(newfile);
 
 	if (archive->donotflush) {
 		/* deferred flush */
 		archive->fp = newfile;
 	} else {
-		php_stream_rewind(newfile);
-		archive->fp = php_stream_open_wrapper(archive->fname, "wb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
+		archive->fp = php_stream_open_wrapper(archive->fname, "w+b", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 		if (!archive->fp) {
 			archive->fp = newfile;
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to open new phar \"%s\" for writing", archive->fname);

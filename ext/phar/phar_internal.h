@@ -170,6 +170,7 @@ struct _phar_archive_data {
 	int                      is_explicit_alias:1;
 	int                      is_modified:1;
 	int                      is_writeable:1;
+	int                      is_brandnew:1;
 	/* defer phar creation */
 	int                      donotflush:1;
 };
