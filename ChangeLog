@@ -1,3 +1,22 @@
+2007-01-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c:
+      nullify param.parameter and avoid destroying it twice
+
+2007-01-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      main/streams/memory.c:
+      - Disable memory streams set option until 5.2.2
+
+    * (PHP_5_2)
+      main/streams/memory.c:
+      - MFH truncate support for mem/temp streams
+
+    * main/streams/memory.c:
+      - Add option support for temp/memory stream (adds ftruncate support)
+
 2007-01-26  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
