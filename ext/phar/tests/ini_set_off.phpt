@@ -1,5 +1,5 @@
 --TEST--
-Phar - test ini_set with readonly and require_hash disabled
+Phar: test ini_set with readonly and require_hash disabled
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";?>
 --INI--
