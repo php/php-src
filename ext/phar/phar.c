@@ -1312,11 +1312,12 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	char *error;
 	char *filter_name;
 	char tmpbuf[8];
+	HashTable *pharcontext;
 	php_url *resource = NULL;
 	php_stream *fp, *fpf;
 	php_stream_filter *filter/*,  *consumed */;
 	php_uint32 offset, read, total, toread;
-	zval **pzoption;
+	zval **pzoption, *metadata;
 
 	resource = php_url_parse(path);
 
@@ -1350,20 +1351,34 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 			php_url_free(resource);
 			return NULL;
 		}
-		efree(error);
+		if (error) {
+			efree(error);
+		}
 		fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 		php_url_free(resource);
 		efree(internal_file);
-		if (idata->internal_file->uncompressed_filesize == 0
-			&&  idata->internal_file->compressed_filesize == 0
-			&& context && context->options
-			&& zend_hash_find(HASH_OF(context->options), "phar", sizeof("phar"), (void**)&pzoption) == SUCCESS
-			&& zend_hash_find(HASH_OF(*pzoption), "compress", sizeof("compress"), (void**)&pzoption) == SUCCESS
-			&& Z_TYPE_PP(pzoption) == IS_LONG
-			&& (Z_LVAL_PP(pzoption) & ~PHAR_ENT_COMPRESSION_MASK) == 0
-		) {
-			idata->internal_file->flags &= ~PHAR_ENT_COMPRESSION_MASK;
-			idata->internal_file->flags |= Z_LVAL_PP(pzoption);
+		if (context && context->options && zend_hash_find(HASH_OF(context->options), "phar", sizeof("phar"), (void**)&pzoption) == SUCCESS) {
+			pharcontext = HASH_OF(*pzoption);
+			if (idata->internal_file->uncompressed_filesize == 0
+				&& idata->internal_file->compressed_filesize == 0
+				&& zend_hash_find(pharcontext, "compress", sizeof("compress"), (void**)&pzoption) == SUCCESS
+				&& Z_TYPE_PP(pzoption) == IS_LONG
+				&& (Z_LVAL_PP(pzoption) & ~PHAR_ENT_COMPRESSION_MASK) == 0
+			) {
+				idata->internal_file->flags &= ~PHAR_ENT_COMPRESSION_MASK;
+				idata->internal_file->flags |= Z_LVAL_PP(pzoption);
+			}
+			if (zend_hash_find(pharcontext, "metadata", sizeof("metadata"), (void**)&pzoption) == SUCCESS) {
+				if (idata->internal_file->metadata) {
+					zval_ptr_dtor(&idata->internal_file->metadata);
+					idata->internal_file->metadata = NULL;
+				}
+
+				MAKE_STD_ZVAL(idata->internal_file->metadata);
+				metadata = *pzoption;
+				ZVAL_ZVAL(idata->internal_file->metadata, metadata, 1, 0);
+				idata->phar->is_modified = 1;
+			}
 		}
 		return fpf;
 	} else {
@@ -1992,7 +2007,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len TSRMLS_DC) 
 		phar_set_32(entry_buffer+16, entry->flags);
 		phar_set_32(entry_buffer+20, metadata_str.len);
 		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))
-		|| metadata_str.len != php_stream_write(newfile, metadata_str.c, sizeof(metadata_str.len))) {
+		|| metadata_str.len != php_stream_write(newfile, metadata_str.c, metadata_str.len)) {
 			smart_str_free(&metadata_str);
 			if (oldfile) {
 				php_stream_close(oldfile);
@@ -2532,7 +2547,9 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 		php_url_free(resource);
 		return FAILURE;
 	}
-	efree(error);
+	if (error) {
+		efree(error);
+	}
 	if (!idata) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\", cannot unlink", internal_file, resource->host);
 		efree(internal_file);
