@@ -27,7 +27,7 @@ $phar = new Phar($fname);
 $file = '<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
 
 //// 2
-$phar->commitWrite($file);
+$phar->commit($file);
 $fp = fopen($fname, 'rb');
 echo fread($fp, strlen($file)) . "\n";
 fclose($fp);
@@ -40,7 +40,7 @@ fclose($fp);
 $fp = fopen($fname2, 'rb');
 
 //// 3
-$phar->commitWrite($fp);
+$phar->commit($fp);
 fclose($fp);
 
 $fp = fopen($fname, 'rb');
@@ -55,7 +55,7 @@ echo file_get_contents($fname2) . "\n";
 $fp = fopen($fname2, 'rb');
 
 //// 4
-$phar->commitWrite($fp, strlen($file));
+$phar->commit($fp, strlen($file));
 fclose($fp);
 
 $fp = fopen($fname, 'rb');
