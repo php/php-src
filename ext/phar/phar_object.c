@@ -199,10 +199,10 @@ PHP_METHOD(Phar, getVersion)
 }
 /* }}} */
 
-/* {{{ proto void Phar::beginWrite()
+/* {{{ proto void Phar::begin()
  * Do not flush a writeable phar (save its contents) until explicitly requested
  */
-PHP_METHOD(Phar, beginWrite)
+PHP_METHOD(Phar, begin)
 {
 	PHAR_ARCHIVE_OBJECT();
 	
@@ -210,10 +210,10 @@ PHP_METHOD(Phar, beginWrite)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::commitWrite([string|stream stub [, int len]])
+/* {{{ proto bool Phar::commit([string|stream stub [, int len]])
  * Save the contents of a modified phar, with an optional change to the stub
  */
-PHP_METHOD(Phar, commitWrite)
+PHP_METHOD(Phar, commit)
 {
 	zval *stub = NULL;
 	long len = -1;
@@ -952,11 +952,11 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, getSignature,          NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getStub,               NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getVersion,            NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, beginWrite,            NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, begin,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressAllFilesBZIP2, NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, uncompressAllFiles,    NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, commitWrite,           arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, commit,                arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetExists,          arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetGet,             arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)

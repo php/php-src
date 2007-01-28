@@ -14,7 +14,7 @@ Version 1.0.0
  * docs on uses
  X stream context for specifying compression of a file [Marcus]
  X stream context for specifying meta-data [Greg]
- X Phar->begin()/Phar->commitWrite() for specifying a new stub to the phar,
+ X Phar->begin()/Phar->commit() for specifying a new stub to the phar,
    and deferring flush until all modifications are complete [Greg]
  X Phar->getStub() for retrieving the stub of the phar [Marcus]
  X add setUncompressed(), setCompressedGZ() and setCompressedBZ2() to 
@@ -29,4 +29,5 @@ Version 1.0.0
 Version 1.1.0
 
  * ability to have Phar object return file class as offsetGet() result
+ * [optional] Phar->rollback() to abort a write transaction
  * implement GPG signing
