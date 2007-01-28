@@ -12,12 +12,12 @@ $p['file1.txt'] = 'hi';
 $p->commitWrite();
 var_dump($p->getStub());
 $p->commitWrite("<?php
-function __autoload($class)
+function __autoload(\$class)
 {
-    include 'phar://' . str_replace('_', '/', $class);
+    include 'phar://' . str_replace('_', '/', \$class);
 }
-Phar::mapPhar('myphar.phar');
-include 'phar://myphar.phar/startup.php';
+Phar::mapPhar('brandnewphar.phar');
+include 'phar://brandnewphar.phar/startup.php';
 __HALT_COMPILER();
 ?>");
 var_dump($p->getStub());
@@ -28,3 +28,14 @@ var_dump($p->getStub());
 unlink(dirname(__FILE__) . '/brandnewphar.phar');
 ?>
 --EXPECT--
+string(24) "<?php __HALT_COMPILER();"
+string(198) "<?php
+function __autoload($class)
+{
+    include 'phar://' . str_replace('_', '/', $class);
+}
+Phar::mapPhar('brandnewphar.phar');
+include 'phar://brandnewphar.phar/startup.php';
+__HALT_COMPILER();
+?>"
+===DONE===

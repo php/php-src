@@ -901,7 +901,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 /**
  * Create or open a phar for writing
  */
-static int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
+int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *mydata;
 	int register_alias;
@@ -942,6 +942,9 @@ static int phar_open_or_create_filename(char *fname, int fname_len, char *alias,
 
 	/* set up our manifest */
 	mydata = ecalloc(sizeof(phar_archive_data), 1);
+	if (pphar) {
+		*pphar = mydata;
+	}
 	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest, 0);
 	mydata->fname = estrndup(fname, fname_len);
@@ -2229,7 +2232,7 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
 		ssb->sb.st_ctime = phar->max_timestamp;
 #endif
 	}
-	if (!phar->is_writeable) {
+	if (PHAR_G(readonly)) {
 		ssb->sb.st_mode = (ssb->sb.st_mode & 0555) | (ssb->sb.st_mode & ~0777);
 	}
 
@@ -2426,6 +2429,11 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 	ALLOC_HASHTABLE(data);
 	zend_hash_init(data, 64, zend_get_hash_value, NULL, 0);
 
+	if (*dir == '/' && dirlen == 1 && (manifest->nNumOfElements == 0)) {
+		// make empty root directory for empty phar
+		efree(dir);
+		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
+	}
 	zend_hash_internal_pointer_reset(manifest);
 	while (FAILURE != zend_hash_has_more_elements(manifest)) {
 		if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
