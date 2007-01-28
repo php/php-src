@@ -18,7 +18,7 @@ include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.pha
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 
-Warning: file_put_contents(phar://%screate_new_phar_b.phar.php/a.php): failed to open stream: No such file or directory in %screate_new_phar_b.php on line %d
+Warning: file_put_contents(phar://%screate_new_phar_b.phar.php/a.php): failed to open stream: phar error: write operations disabled by INI setting in %screate_new_phar_b.php on line %d
 
 Warning: include(%screate_new_phar_b.phar.php): failed to open stream: No such file or directory in %screate_new_phar_b.php on line %d
 

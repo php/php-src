@@ -35,8 +35,7 @@ include $pname . '/b/new.php';
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 
-Warning: fopen(phar://%sopen_for_write_newfile_b.phar.php/b/new.php): failed to open stream: phar error: file "%sopen_for_write_newfile_b.phar.php" cannot opened for writing, disabled by ini setting
-phar error: file "b/new.php" could not be created in phar "%sopen_for_write_newfile_b.phar.php" in %sopen_for_write_newfile_b.php on line %d
+Warning: fopen(phar://%sopen_for_write_newfile_b.phar.php/b/new.php): failed to open stream: phar error: write operations disabled by INI setting in %sopen_for_write_newfile_b.php on line %d
 
 Warning: fwrite(): supplied argument is not a valid stream resource in %sopen_for_write_newfile_b.php on line %d
 

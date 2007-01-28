@@ -912,7 +912,9 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 	}
 
 	if (phar_open_loaded(fname, fname_len, alias, alias_len, options, pphar TSRMLS_CC) == SUCCESS) {
-		(*pphar)->is_writeable = 1;
+		if (!PHAR_G(readonly)) {
+			(*pphar)->is_writeable = 1;
+		}
 		return SUCCESS;
 	}
 
@@ -926,10 +928,12 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 		return FAILURE;
 	}
 
-	fp = php_stream_open_wrapper(fname, "r+b", IGNORE_URL|STREAM_MUST_SEEK|0, NULL);
+	fp = php_stream_open_wrapper(fname, PHAR_G(readonly)?"rb":"r+b", IGNORE_URL|STREAM_MUST_SEEK|0, NULL);
 
 	if (fp && phar_open_fp(fp, fname, fname_len, alias, alias_len, options, pphar TSRMLS_CC) == SUCCESS) {
-		(*pphar)->is_writeable = 1;
+		if (!PHAR_G(readonly)) {
+			(*pphar)->is_writeable = 1;
+		}
 		return SUCCESS;
 	}
 
@@ -1142,6 +1146,11 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 		}
 #endif
 		if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
+			if (PHAR_G(readonly)) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
+				php_url_free(resource);
+				return NULL;
+			}
 			if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, options, NULL TSRMLS_CC) == FAILURE)
 			{
 				php_url_free(resource);
@@ -2232,7 +2241,7 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
 		ssb->sb.st_ctime = phar->max_timestamp;
 #endif
 	}
-	if (PHAR_G(readonly)) {
+	if (!phar->is_writeable) {
 		ssb->sb.st_mode = (ssb->sb.st_mode & 0555) | (ssb->sb.st_mode & ~0777);
 	}
 

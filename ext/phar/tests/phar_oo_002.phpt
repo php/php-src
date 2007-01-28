@@ -4,6 +4,7 @@ Phar object: iterator & entries
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 <?php if (!extension_loaded("spl")) print "skip SPL not available"; ?>
 --INI--
+phar.readonly=1
 phar.require_hash=0
 --FILE--
 <?php
