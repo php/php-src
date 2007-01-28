@@ -32,3 +32,5 @@ Version 1.1.0
  * ability to have Phar object return file class as offsetGet() result
  * [optional] Phar->rollback() to abort a write transaction
  * implement GPG signing
+ * ability to match files containing a metadata key opendir('phar://a.phar/?mime-type=image/jpeg')
+   or foreach ($p->match('mime-type', 'image/jpeg') as $file)
