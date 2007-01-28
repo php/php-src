@@ -18,8 +18,8 @@ or to read files directly from the phar.
 Phar archives can be created using the streams API or with the Phar class, if
 the phar.readonly ini variable is set to false.
 
-Full support for MD5 and SHA1 signatures is possible if the hash extension is present, and
-signatures can be required if the ini variable phar.require_hash is set to true.
+Full support for MD5 and SHA1 signatures is possible. Signatures can be required 
+if the ini variable phar.require_hash is set to true.
  </description>
  <lead>
   <name>Greg Beaver</name>
@@ -150,11 +150,6 @@ signatures can be required if the ini variable phar.require_hash is set to true.
    </pearinstaller>
   </required>
   <optional>
-  <package>
-   <name>hash</name>
-   <channel>pecl.php.net</channel>
-   <providesextension>hash</providesextension>
-  </package>
   <package>
    <name>bz2</name>
    <channel>pecl.php.net</channel>
