@@ -106,6 +106,7 @@ if the ini variable phar.require_hash is set to true.
     <file name="open_for_write_newfile_b.phpt" role="test"/>
     <file name="open_for_write_newfile_c.phpt" role="test"/>
     <file name="phar_ctx_001.phpt" role="test"/>
+    <file name="phar_commitwrite.phpt" role="test"/>
     <file name="phar_oo_001.phpt" role="test"/>
     <file name="phar_oo_002.phpt" role="test"/>
     <file name="phar_oo_003.phpt" role="test"/>
@@ -121,14 +122,20 @@ if the ini variable phar.require_hash is set to true.
     <file name="phar_oo_012.phpt" role="test"/>
     <file name="phar_oo_012b.phpt" role="test"/>
     <file name="phar_oo_012_confirm.phpt" role="test"/>
+    <file name="phar_oo_compressallbz2.phpt" role="test"/>
+    <file name="phar_oo_compressallgz.phpt" role="test"/>
     <file name="phar_oo_compressed_001.phpt" role="test"/>
     <file name="phar_oo_compressed_001b.phpt" role="test"/>
     <file name="phar_oo_compressed_002.phpt" role="test"/>
     <file name="phar_oo_compressed_002b.phpt" role="test"/>
+    <file name="phar_oo_test.inc" role="test"/>
+    <file name="phar_oo_uncompressall.phpt" role="test"/>
     <file name="phar_stub.phpt" role="test"/>
     <file name="phar_stub_write.phpt" role="test"/>
     <file name="refcount1.phpt" role="test"/>
+    <file name="phar_test.inc" role="test"/>
    </dir> <!-- /tests -->
+   <file name="LICENSE" role="doc"/>
    <file name="config.m4" role="src"/>
    <file name="config.w32" role="src"/>
    <file name="CREDITS" role="doc"/>
