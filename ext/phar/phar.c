@@ -97,6 +97,10 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 	if (data->manifest.arBuckets) {
 		zend_hash_destroy(&data->manifest);
 	}
+	if (data->metadata) {
+		zval_ptr_dtor(&data->metadata);
+		data->metadata = 0;
+	}
 	if (data->fp) {
 		php_stream_close(data->fp);
 		data->fp = 0;
@@ -802,8 +806,17 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (too many manifest entries for size of manifest)")
 	}
 
-	/* set up our manifest */
 	mydata = ecalloc(sizeof(phar_archive_data), 1);
+	if (*(php_uint32 *) buffer) {
+		if (phar_parse_metadata(fp, &buffer, endbuffer, &mydata->metadata TSRMLS_CC) == FAILURE) {
+			MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
+		}
+	} else {
+		mydata->metadata = 0;
+		buffer += 4;
+	}
+	
+	/* set up our manifest */
 	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest, 0);
 	offset = 0;
@@ -838,7 +851,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		PHAR_GET_32(buffer, entry.flags);
 		if (*(php_uint32 *) buffer) {
 			if (phar_parse_metadata(fp, &buffer, endbuffer, &entry.metadata TSRMLS_CC) == FAILURE) {
-				MAPPHAR_FAIL("unable to read metadata in .phar file \"%s\"");
+				MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
 			}
 		} else {
 			buffer += 4;
@@ -1855,7 +1868,15 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len TSRMLS_DC) 
 	 * we need to skip entries marked is_deleted. */
 	zend_hash_apply(&archive->manifest, phar_flush_clean_deleted_apply TSRMLS_CC);
 
-	/* compress as necessary, calculate crcs, manifest size, and file sizes */
+	/* compress as necessary, calculate crcs, serialize meta-data, manifest size, and file sizes */
+	metadata_str.c = 0;
+	if (archive->metadata) {
+		PHP_VAR_SERIALIZE_INIT(metadata_hash);
+		php_var_serialize(&metadata_str, &archive->metadata, &metadata_hash TSRMLS_CC);
+		PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
+	} else {
+		metadata_str.len = 0;
+	}
 	new_manifest_count = 0;
 	offset = 0;
 	buf = (char *) emalloc(8192);
@@ -1953,14 +1974,17 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len TSRMLS_DC) 
 	 *  4: manifest entry count
 	 *  2: phar version
 	 *  4: phar global flags
-	 *  4: alias length, the rest is the alias itself
+	 *  4: alias length
+	 *  ?: the alias itself
+	 *  4: phar metadata length
+	 *  ?: phar metadata
 	 */
 	restore_alias_len = archive->alias_len;
 	if (!archive->is_explicit_alias) {
 		archive->alias_len = 0;
 	}
 
-	manifest_len = offset + archive->alias_len + sizeof(manifest) - 4;
+	manifest_len = offset + archive->alias_len + sizeof(manifest) + metadata_str.len;
 	phar_set_32(manifest, manifest_len);
 	phar_set_32(manifest+4, new_manifest_count);
 	*(manifest + 8) = (unsigned char) (((PHAR_API_VERSION) >> 8) & 0xFF);
@@ -1976,10 +2000,39 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len TSRMLS_DC) 
 		}
 		php_stream_close(newfile);
 		archive->alias_len = restore_alias_len;
-		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to write manifest meta-data of new phar \"%s\"", archive->fname);
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to write manifest header of new phar \"%s\"", archive->fname);
 		return EOF;
 	}
+	
 	archive->alias_len = restore_alias_len;
+	
+	metadata_str.c = 0;
+	phar_set_32(manifest, metadata_str.len);
+	if (metadata_str.len) {
+		if (4 != php_stream_write(newfile, manifest, 4) ||
+		metadata_str.len != php_stream_write(newfile, metadata_str.c, metadata_str.len)) {
+			smart_str_free(&metadata_str);
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			php_stream_close(newfile);
+			archive->alias_len = restore_alias_len;
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to write manifest meta-data of new phar \"%s\"", archive->fname);
+			return EOF;
+		} 
+	} else {
+		if (4 != php_stream_write(newfile, manifest, 4)) {
+			smart_str_free(&metadata_str);
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			php_stream_close(newfile);
+			archive->alias_len = restore_alias_len;
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "unable to write manifest header of new phar \"%s\"", archive->fname);
+			return EOF;
+		}
+	}
+	smart_str_free(&metadata_str);
 	
 	/* re-calculate the manifest location to simplify later code */
 	manifest_ftell = php_stream_tell(newfile);

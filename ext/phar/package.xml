@@ -107,6 +107,8 @@ if the ini variable phar.require_hash is set to true.
     <file name="open_for_write_newfile_c.phpt" role="test"/>
     <file name="phar_ctx_001.phpt" role="test"/>
     <file name="phar_commitwrite.phpt" role="test"/>
+    <file name="phar_metadata_read.phpt" role="test"/>
+    <file name="phar_metadata_write.phpt" role="test"/>
     <file name="phar_oo_001.phpt" role="test"/>
     <file name="phar_oo_002.phpt" role="test"/>
     <file name="phar_oo_003.phpt" role="test"/>
