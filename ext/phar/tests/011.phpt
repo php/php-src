@@ -17,11 +17,14 @@ __HALT_COMPILER(); ?>";
 $files = array();
 $files['a'] = array('cont'=>'a','ulen'=>1,'clen'=>2);;
 include 'phar_test.inc';
-
+try {
 include $fname;
 echo file_get_contents('phar://hio/a');
+} catch (Exception $e) {
+echo $e->getMessage();
+}
 ?>
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-%satal error: Phar::mapPhar(): internal corruption of phar "%s" (compressed and uncompressed size does not match for uncompressed entry) in %s on line %d
+internal corruption of phar "%s" (compressed and uncompressed size does not match for uncompressed entry)
