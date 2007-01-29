@@ -1519,6 +1519,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 				case 'i': /* php info & quit */
 						if (php_request_startup(TSRMLS_C) == FAILURE) {
+							SG(server_context) = NULL;
 							php_module_shutdown(TSRMLS_C);
 							return FAILURE;
 						}
@@ -1566,6 +1567,7 @@ consult the installation file that came with this distribution, or visit \n\
 				case 'v': /* show php version & quit */
 						no_headers = 1;
 						if (php_request_startup(TSRMLS_C) == FAILURE) {
+							SG(server_context) = NULL;
 							php_module_shutdown(TSRMLS_C);
 							return FAILURE;
 						}
@@ -1673,6 +1675,7 @@ consult the installation file that came with this distribution, or visit \n\
 				fcgi_finish_request(&request);
 			}
 #endif
+			SG(server_context) = NULL;
 			php_module_shutdown(TSRMLS_C);
 			return FAILURE;
 		}
@@ -1705,6 +1708,7 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 #endif
 			php_request_shutdown((void *) 0);
+			SG(server_context) = NULL;
 			php_module_shutdown(TSRMLS_C);
 			return FAILURE;
 		}
