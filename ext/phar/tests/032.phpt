@@ -11,7 +11,11 @@ $pharconfig = 0;
 
 require_once 'phar_oo_test.inc';
 
+try {
 Phar::loadPhar($fname);
+} catch (Exception $e) {
+echo $e->getMessage();
+}
 
 ?>
 ===DONE===
@@ -22,4 +26,4 @@ __halt_compiler();
 ?>
 --EXPECTF--
 
-Catchable fatal error: Phar::loadPhar(): phar "%sphar_oo_test.phar.php" does not have a signature in %s032.php on line %d
+phar "%sphar_oo_test.phar.php" does not have a signature===DONE===

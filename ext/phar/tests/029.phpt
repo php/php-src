@@ -25,7 +25,11 @@ file_put_contents($fname2, $file);
 
 var_dump(Phar::loadPhar($fname1, 'hio'));
 var_dump(Phar::loadPhar($fname1, 'copy'));
+try {
 var_dump(Phar::loadPhar($fname2, 'copy'));
+} catch (Exception $e) {
+echo $e->getMessage();
+}
 
 ?>
 ===DONE===
@@ -38,4 +42,4 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php
 bool(true)
 bool(true)
 
-%satal error: Phar::loadPhar(): alias "copy" is already used for archive "%s029.1.phar.php" cannot be overloaded with "%s029.2.phar.php" in %s029.php on line %d
+alias "copy" is already used for archive "%s029.1.phar.php" cannot be overloaded with "%s029.2.phar.php"===DONE===

@@ -4,7 +4,11 @@ Phar::mapPhar truncated manifest (none)
 <?php if (!extension_loaded("phar")) print "skip";?>
 --FILE--
 <?php
+try {
 Phar::mapPhar('hio');
+} catch (Exception $e) {
+echo $e->getMessage();
+}
 __HALT_COMPILER(); ?>()
 --EXPECTF--
-%satal error: Phar::mapPhar(): internal corruption of phar "%s" (truncated manifest) in %s on line %d
+internal corruption of phar "%s" (truncated manifest)

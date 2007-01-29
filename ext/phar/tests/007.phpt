@@ -4,7 +4,11 @@ Phar::mapPhar manifest too big
 <?php if (!extension_loaded("phar")) print "skip";?>
 --FILE--
 <?php
+try {
 Phar::mapPhar('hio');
+} catch (Exception $e) {
+echo $e->getMessage();
+}
 __HALT_COMPILER(); ?>~~~~
 --EXPECTF--
-%satal error: Phar::mapPhar(): manifest cannot be larger than 1 MB in phar "%s" in %s on line %d
+manifest cannot be larger than 1 MB in phar "%s"

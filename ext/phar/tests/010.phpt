@@ -16,10 +16,14 @@ $manifest = pack('V', 1) . 'a' . pack('VVVVVV', 0, time(), 0, crc32(''), 0x00000
 $file .= pack('VVnVV', strlen($manifest), 1, 0x1000, 0x00000000, 3) . 'hio' . pack('V', 0) . $manifest;
 
 file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
+try {
 include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 echo file_get_contents('phar://hio/a');
+} catch (Exception $e) {
+echo $e->getMessage();
+}
 ?>
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-%satal error: Phar::mapPhar(): internal corruption of phar "%s" (too many manifest entries for size of manifest) in %s on line %d
+internal corruption of phar "%s" (too many manifest entries for size of manifest)
