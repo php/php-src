@@ -210,6 +210,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/filters/mbfilter_iso8859_8.c
      libmbfl/filters/mbfilter_iso8859_9.c
      libmbfl/filters/mbfilter_jis.c
+     libmbfl/filters/mbfilter_iso2022_jp_ms.c
      libmbfl/filters/mbfilter_koi8r.c
      libmbfl/filters/mbfilter_armscii8.c
      libmbfl/filters/mbfilter_qprint.c
