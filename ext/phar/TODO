@@ -9,7 +9,7 @@ Version 1.0.0
  X if SPL is disabled, enable only static methods of class Phar and disable 
    class PharFileInfo completely [Marcus]
  X implement in-phar locking, so that a file that is opened for reading can't 
-   have a handle opened for writing [Greg]
+   have a handle opened for writing [Marcus/Greg]
  X docs on file format/manifest description [Greg]
  X docs on uses [Greg]
  X stream context for specifying compression of a file [Marcus]
@@ -27,6 +27,10 @@ Version 1.0.0
    streams interface [Greg]
  X Phar archive metadata Phar::setMetaData($metadata) Phar::getMetaData() [Greg]
  X support rename() in stream wrapper [Greg]
+ * update docs to reflect changes in error handling
+ * update docs to add setStub(), make note about not using it within begin()/commit()
+ ? have setStub() throw an exception if used between begin()/commit() [erase if no]
+ * fix 011.phpt, 029.phpt for uncaught exceptions causing bad cleanup
  
 Version 1.1.0
 
