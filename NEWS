@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.1
+- Fixed bug #40259 (ob_start call many times - memory error). (Dmitry)
 - Fixed bug #40231 (file_exists incorrectly reports false). (Dmitry)
 
 25 Jan 2007, PHP 5.2.1RC4
