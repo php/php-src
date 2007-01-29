@@ -25,10 +25,13 @@ file_put_contents($fname2, $file);
 
 var_dump(Phar::loadPhar($fname1, 'hio'));
 var_dump(Phar::loadPhar($fname1, 'copy'));
-try {
-var_dump(Phar::loadPhar($fname2, 'copy'));
-} catch (Exception $e) {
-echo $e->getMessage();
+try
+{
+	var_dump(Phar::loadPhar($fname2, 'copy'));
+}
+catch (Exception $e)
+{
+	echo $e->getMessage() . "\n";
 }
 
 ?>
@@ -41,5 +44,5 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php
 --EXPECTF--
 bool(true)
 bool(true)
-
-alias "copy" is already used for archive "%s029.1.phar.php" cannot be overloaded with "%s029.2.phar.php"===DONE===
+alias "copy" is already used for archive "%s029.1.phar.php" cannot be overloaded with "%s029.2.phar.php"
+===DONE===
