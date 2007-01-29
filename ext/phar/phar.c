@@ -199,6 +199,7 @@ static int phar_get_archive(phar_archive_data **archive, char *fname, int fname_
 	if (error) {
 		*error = NULL;
 	}
+	*archive = NULL;
 	if (alias && alias_len) {
 		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void**)&fd_ptr)) {
 			if (fname && (fname_len != (*fd_ptr)->fname_len || strncmp(fname, (*fd_ptr)->fname, fname_len))) {
@@ -515,6 +516,9 @@ static int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_l
 {
 	phar_archive_data *phar;
 
+	if (error) {
+		*error = NULL;
+	}
 	if (SUCCESS == phar_get_archive(&phar, fname, fname_len, alias, alias_len, error TSRMLS_CC)
 		&& fname_len == phar->fname_len
 		&& !strncmp(fname, phar->fname, fname_len)
@@ -529,9 +533,7 @@ static int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_l
 		}
 		if (phar && alias && (options & REPORT_ERRORS)) {
 			if (error) {
-				if (*error) {
-					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, phar->fname, fname);
-				}
+				spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, phar->fname, fname);
 			}
 		}
 		return FAILURE;
@@ -987,7 +989,7 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 
 	if (PHAR_G(readonly)) {
 		if (options & REPORT_ERRORS) {
-			if (*error) {
+			if (error) {
 				spprintf(error, 0, "creating archive \"%s\" disabled by INI setting", fname);
 			}
 		}
