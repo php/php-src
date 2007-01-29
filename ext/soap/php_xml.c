@@ -87,12 +87,17 @@ xmlDocPtr soap_xmlParseFile(const char *filename TSRMLS_DC)
 */
 
 	old_allow_url_fopen_list = PG(allow_url_fopen_list);
-	if (!old_allow_url_fopen_list) {
-		old_allow_url_fopen_list = "";
+	if (old_allow_url_fopen_list) {
+		old_allow_url_fopen_list = estrdup(old_allow_url_fopen_list);
+	} else {
+		old_allow_url_fopen_list = STR_EMPTY_ALLOC();
 	}
+
 	zend_alter_ini_entry("allow_url_fopen", sizeof("allow_url_fopen"), "*", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
 	ctxt = xmlCreateFileParserCtxt(filename);
 	zend_alter_ini_entry("allow_url_fopen", sizeof("allow_url_fopen"), old_allow_url_fopen_list, strlen(old_allow_url_fopen_list), PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
+	efree(old_allow_url_fopen_list);
+
 	if (ctxt) {
 		ctxt->keepBlanks = 0;
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
