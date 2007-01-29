@@ -39,7 +39,7 @@ unlink(dirname(__FILE__) . '/phar_oo_test.phar.php');
 __halt_compiler();
 ?>
 --EXPECT--
-string(5) "0.9.0"
+string(5) "1.0.0"
 int(5)
 string(50) "Cannot call method on an uninitialized Phar object"
 ===DONE===

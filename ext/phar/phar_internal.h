@@ -59,7 +59,7 @@
 #define PHAR_VERSION_STR          "1.0.0"
 /* x.y.z maps to 0xyz0 */
 #define PHAR_API_VERSION          0x1000
-#define PHAR_API_MIN_READ         0x0900
+#define PHAR_API_MIN_READ         0x1000
 #define PHAR_API_MAJORVERSION     0x1000
 #define PHAR_API_MAJORVER_MASK    0xF000
 #define PHAR_API_VER_MASK         0xFFF0
@@ -167,6 +167,7 @@ struct _phar_archive_data {
 	php_uint32               sig_flags;
 	int                      sig_len;
 	char                     *signature;
+	zval                     *metadata;
 	int                      is_explicit_alias:1;
 	int                      is_modified:1;
 	int                      is_writeable:1;

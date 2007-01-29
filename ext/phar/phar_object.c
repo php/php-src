@@ -623,6 +623,41 @@ PHP_METHOD(Phar, getStub)
 }
 /* }}}*/
 
+/* {{{ proto int Phar::getMetaData()
+ * Returns the metadata of the phar
+ */
+PHP_METHOD(Phar, getMetadata)
+{
+	PHAR_ARCHIVE_OBJECT();
+
+	if (phar_obj->arc.archive->metadata) {
+		RETURN_ZVAL(phar_obj->arc.archive->metadata, 1, 0);
+	}
+}
+/* }}} */
+
+/* {{{ proto int Phar::setMetaData(mixed $metadata)
+ * Returns the metadata of the phar
+ */
+PHP_METHOD(Phar, setMetadata)
+{
+	zval *metadata;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &metadata) == FAILURE) {
+		return;
+	}
+
+	if (phar_obj->arc.archive->metadata) {
+		zval_ptr_dtor(&phar_obj->arc.archive->metadata);
+		phar_obj->arc.archive->metadata = NULL;
+	}
+
+	MAKE_STD_ZVAL(phar_obj->arc.archive->metadata);
+	ZVAL_ZVAL(phar_obj->arc.archive->metadata, metadata, 1, 0);
+}
+/* }}} */
+
 /* {{{ proto void PharFileInfo::__construct(string entry)
  * Construct a Phar entry object
  */
@@ -964,6 +999,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_offsetSet, 0, 0, 2)
 ZEND_END_ARG_INFO();
 #endif
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_entry_setMetadata, 0, 0, 1)
+	ZEND_ARG_INFO(0, metadata)
+ZEND_END_ARG_INFO();
+
 zend_function_entry php_archive_methods[] = {
 #if !HAVE_SPL
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PRIVATE)
@@ -984,6 +1024,8 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, offsetGet,             arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetUnset,           arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getMetadata,           NULL,                       0)
+	PHP_ME(Phar, setMetadata,           arginfo_entry_setMetadata,  0)
 #endif
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,            NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
@@ -999,11 +1041,6 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_entry___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, fname)
 	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO();
-
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_entry_setMetadata, 0, 0, 1)
-	ZEND_ARG_INFO(0, metadata)
 ZEND_END_ARG_INFO();
 
 zend_function_entry php_entry_methods[] = {

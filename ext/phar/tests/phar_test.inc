@@ -49,7 +49,9 @@ foreach($files as $name => $cont)
 }
 
 $alias = 'hio';
-$manifest = pack('VnVV', count($files), 0x0900, $glags, strlen($alias)) . $alias . $manifest;
+
+if (isset($pmeta)) $pmeta = serialize($pmeta); else $pmeta = '';
+$manifest = pack('VnVV', count($files), 0x1000, $glags, strlen($alias)) . $alias . pack('V', strlen($pmeta)) . $pmeta . $manifest;
 $file .= pack('V', strlen($manifest)) . $manifest;
 
 foreach($files as $cont)
