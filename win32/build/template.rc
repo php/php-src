@@ -47,7 +47,7 @@ BEGIN
             VALUE "FileDescription", FILE_DESCRIPTION "\0"
             VALUE "FileVersion", STRVER4(PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION, PHP_RELEASE_VERSION)
             VALUE "InternalName", FILE_NAME "\0"
-            VALUE "LegalCopyright", "Copyright © 1997-2006 The PHP Group\0"
+            VALUE "LegalCopyright", "Copyright © 1997-2007 The PHP Group\0"
             VALUE "LegalTrademarks", "PHP\0"
             VALUE "OriginalFilename", FILE_NAME "\0"
             VALUE "PrivateBuild", "\0"

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2006 The PHP Group                                |
+  | Copyright (c) 1997-2007 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.15 2006-01-01 13:09:59 sniper Exp $ */
+/* $Id: buildconf.js,v 1.16 2007-01-29 04:40:46 iliaa Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
