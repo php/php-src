@@ -59,7 +59,6 @@ var_dump($array);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: oci_execute(): ORA-01405: fetched column value is NULL in %s on line %d
 array(5) {
   [0]=>
   string(0) ""
@@ -74,7 +73,6 @@ array(5) {
 }
 Done
 --UEXPECTF--
-Warning: oci_execute(): ORA-01405: fetched column value is NULL in %s on line %d
 array(5) {
   [0]=>
   unicode(0) ""
