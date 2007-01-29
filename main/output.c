@@ -887,20 +887,11 @@ static inline void php_output_context_dtor(php_output_context *context)
 static inline php_output_handler *php_output_handler_init_ex(zval *name, size_t chunk_size, int flags TSRMLS_DC)
 {
 	php_output_handler *handler;
-	size_t mem_limit;
 	
 	handler = ecalloc(1, sizeof(php_output_handler));
 	ZVAL_ADDREF(name);
 	handler->name = name;
-	
-	mem_limit = (PG(memory_limit) - zend_memory_usage(1 TSRMLS_CC)) / 2;
-	if (!chunk_size || chunk_size > mem_limit) {
-		handler->size = mem_limit;
-		chunk_size = 0;
-	} else {
-		handler->size = chunk_size;
-	}
-
+	handler->size = chunk_size;
 	handler->flags = flags;
 	handler->buffer.size = PHP_OUTPUT_HANDLER_INITBUF_SIZE(chunk_size);
 	handler->buffer.data = emalloc(handler->buffer.size);
