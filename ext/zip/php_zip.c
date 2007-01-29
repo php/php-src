@@ -106,27 +106,32 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 	char *file_basename;
 	size_t file_basename_len;
+	int is_dir_only = 0;
 
 	if (file_len >= MAXPATHLEN || zip_stat(za, file, 0, &sb)) {
 		return 0;
 	}
 
-	memcpy(file_dirname, file, file_len);
-
-	dir_len = php_dirname(file_dirname, file_len);
-
-	if (dir_len > 0) {
-		len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file_dirname);
+	if (file_len > 1 && file[file_len - 1] == '/') {
+		len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file);
+		is_dir_only = 1;
 	} else {
-		len = spprintf(&file_dirname_fullpath, 0, "%s", dest);
-	}
+		memcpy(file_dirname, file, file_len);
+		dir_len = php_dirname(file_dirname, file_len);
 
-	php_basename(file, file_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
+		if (dir_len > 0) {
+			len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file_dirname);
+		} else {
+			len = spprintf(&file_dirname_fullpath, 0, "%s", dest);
+		}
 
-	if (SAFEMODE_CHECKFILE(file_dirname_fullpath)) {
-		efree(file_dirname_fullpath);
-		efree(file_basename);
-		return 0;
+		php_basename(file, file_len, NULL, 0, &file_basename, (unsigned int *)&file_basename_len TSRMLS_CC);
+
+		if (SAFEMODE_CHECKFILE(file_dirname_fullpath)) {
+			efree(file_dirname_fullpath);
+			efree(file_basename);
+			return 0;
+		}
 	}
 
 	/* let see if the path already exists */
@@ -142,7 +147,9 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	/* it is a standalone directory, job done */
 	if (file[file_len - 1] == '/') {
 		efree(file_dirname_fullpath);
-		efree(file_basename);
+		if (!is_dir_only) {
+			efree(file_basename);
+		}
 		return 1;
 	}
 
