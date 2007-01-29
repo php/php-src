@@ -1568,11 +1568,13 @@ COMMAND $cmd
 	}
 
 	if ($leaked) {
-		$restype = 'LEAK';
-	} else if ($warn) {
-		$restype = 'WARN';
-	} else {
-		$restype = 'FAIL';
+		$restype[] = 'LEAK';
+	}
+	if ($warn) {
+		$restype[] = 'WARN';
+	}
+	if (!$passed) {
+		$restype[] = 'FAIL';
 	}
 
 	if (!$passed) {
@@ -1604,9 +1606,10 @@ $output
 		}
 	}
 
-	show_result($restype, $tested, $tested_file, $unicode_semantics, $info, $temp_filenames);
+	show_result(implode('&', $restype), $tested, $tested_file, $unicode_semantics, $info, $temp_filenames);
 
-	$PHP_FAILED_TESTS[$restype.'ED'][] = array (
+	foreach ($restype as $type) {
+		$PHP_FAILED_TESTS[$type.'ED'][] = array (
 						'name' => $file,
 						'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
 						'output' => $output_filename,
@@ -1614,12 +1617,13 @@ $output
 						'info'   => $info,
 						'unicode'=> $unicode_semantics,
 						);
+	}
 
 	if (isset($old_php)) {
 		$php = $old_php;
 	}
 
-	return $restype.'ED';
+	return $restype[0].'ED';
 }
 
 function comp_line($l1,$l2,$is_reg)
