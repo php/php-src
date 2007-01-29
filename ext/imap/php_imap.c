@@ -74,7 +74,11 @@ static int _php_imap_address_size(ADDRESS *addresslist);
 void rfc822_date(char *date);
 char *cpystr(const char *str);
 char *cpytxt(SIZEDTEXT *dst, char *text, unsigned long size);
+#ifndef HAVE_NEW_MIME2TEXT
 long utf8_mime2text(SIZEDTEXT *src, SIZEDTEXT *dst);
+#else
+long utf8_mime2text (SIZEDTEXT *src, SIZEDTEXT *dst, long flags);
+#endif
 unsigned long find_rightmost_bit(unsigned long *valptr);
 void fs_give(void **block);
 void *fs_get(size_t size);
@@ -2064,7 +2068,11 @@ PHP_FUNCTION(imap_utf8)
 	dest.size = 0;
 
 	cpytxt(&src, Z_STRVAL_PP(str), Z_STRLEN_PP(str));
+#ifndef HAVE_NEW_MIME2TEXT
 	utf8_mime2text(&src, &dest);
+#else
+	utf8_mime2text(&src, &dest, U8T_CANONICAL);
+#endif
 	RETURN_STRINGL(dest.data, strlen(dest.data), 1);
 }
 /* }}} */

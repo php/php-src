@@ -7,6 +7,8 @@ PHP 4                                                                      NEWS
   class). (Ilia)
 - Backported a fix in the configure tests to detect the "rounding fuzz".
   (Derick, Joe Orton)
+- Backported fix for ext/imap compilation failure with recent c-client 
+  versions. (Tony)
 
 - Moved extensions to PECL:
   . ext/ovrimos (Derick)
