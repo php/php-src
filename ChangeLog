@@ -1,3 +1,109 @@
+2007-01-29  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * run-tests.php:
+      display all errors/leaks/warnings on each test, instead of showing just the
+      top most error
+
+2007-01-29  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/config.m4
+      ext/mbstring/libmbfl/filters/Makefile.am
+      ext/mbstring/libmbfl/filters/mbfilter_euc_jp_win.c
+      ext/mbstring/libmbfl/filters/mbfilter_iso2022_jp_ms.c
+      ext/mbstring/libmbfl/filters/mbfilter_iso2022_jp_ms.c
+      ext/mbstring/libmbfl/filters/mbfilter_iso2022_jp_ms.h
+      ext/mbstring/libmbfl/filters/mbfilter_iso2022_jp_ms.h
+      ext/mbstring/libmbfl/filters/mbfilter_jis.c
+      ext/mbstring/libmbfl/filters/mbfilter_jis.h
+      ext/mbstring/libmbfl/filters/unicode_table_jis.h
+      ext/mbstring/libmbfl/mbfl/mbfl_convert.c
+      ext/mbstring/libmbfl/mbfl/mbfl_encoding.c
+      ext/mbstring/libmbfl/mbfl/mbfl_ident.c:
+      fixed incompatibility with PHP 5.2.0 for encoding conversion between
+      ShiftJIS(CP932), eucJP, ISO-2022-JP.
+
+2007-01-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+      Prevent flush() of closed handle on php_module_shutdown()
+
+2007-01-29  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/soap/php_xml.c:
+      fix access to already free'ed memory
+
+2007-01-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      Prevent flush of closed handle on php_module_shutdown()
+
+2007-01-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/tests/privileged_connect1.phpt:
+      fix test
+      different Oracle client versions report different error messages
+
+    * ext/oci8/tests/array_bind_005.phpt:
+      fix test
+
+2007-01-29  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c
+      ext/zip/tests/bug40228.phpt
+      ext/zip/tests/bug40228.zip:
+      - MFB: #40228, ZipArchive::extractTo does create empty directories
+       recursively
+
+    * (PHP_5_2)
+      NEWS:
+      - #40228
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c
+      ext/zip/tests/bug40228.phpt
+      ext/zip/tests/bug40228.phpt
+      ext/zip/tests/bug40228.zip
+      ext/zip/tests/bug40228.zip:
+      - #40228, ZipArchive::extractTo does create empty directories
+        recursively
+
+2007-01-29  Michael Wallner  <mike@iworks.at>
+
+    * main/output.c:
+      - don't do memory limit checks for chunk_size
+
+2007-01-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/output.c:
+      Fixed bug #40259 (ob_start call many times - memory error). (Dmitry)
+
+2007-01-29  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/imap/config.m4
+      ext/imap/php_imap.c:
+      backported fix for ext/imap compilation failure with recent c-client
+      versions
+      (fixes #39401)
+
+2007-01-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      win32/build/Makefile
+      win32/build/buildconf.js
+      win32/build/confutils.js
+      win32/build/cvsclean.js
+      win32/build/template.rc:
+      
+      Copyright update
+
 2007-01-27  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
