@@ -704,8 +704,8 @@ if ($just_save_results || !getenv('NO_INTERACTION')) {
 
 		if (substr(PHP_OS, 0, 3) != "WIN") {
 			/* If PHP_AUTOCONF is set, use it; otherwise, use 'autoconf'. */
-			if (!empty($_ENV['PHP_AUTOCONF'])) {
-				$autoconf = shell_exec($_ENV['PHP_AUTOCONF'] . ' --version');
+			if (getenv('PHP_AUTOCONF')) {
+				$autoconf = shell_exec(getenv('PHP_AUTOCONF') . ' --version');
 			} else {
 				$autoconf = shell_exec('autoconf --version');
 			}
