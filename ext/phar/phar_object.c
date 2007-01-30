@@ -225,6 +225,17 @@ PHP_METHOD(Phar, begin)
 }
 /* }}} */
 
+/* {{{ proto bool Phar::isFlushing()
+ * Returns whether write operations are flushing to disk immediately
+ */
+PHP_METHOD(Phar, isFlushing)
+{
+	PHAR_ARCHIVE_OBJECT();
+	
+	RETURN_BOOL(!phar_obj->arc.archive->donotflush);
+}
+/* }}} */
+
 /* {{{ proto bool Phar::commit()
  * Save the contents of a modified phar
  */
@@ -1084,23 +1095,24 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PRIVATE)
 #else
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, begin,                 NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, commit,                NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, compressAllFilesBZIP2, NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, count,                 NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getMetadata,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getModified,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getSignature,          NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getStub,               NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getVersion,            NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, begin,                 NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, compressAllFilesBZIP2, NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, uncompressAllFiles,    NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, commit,                NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isFlushing,            NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setMetadata,           arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetExists,          arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetGet,             arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetUnset,           arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getMetadata,           NULL,                       0)
-	PHP_ME(Phar, setMetadata,           arginfo_entry_setMetadata,  0)
+	PHP_ME(Phar, uncompressAllFiles,    NULL,                      ZEND_ACC_PUBLIC)
 #endif
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,            NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)

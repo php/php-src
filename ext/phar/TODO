@@ -28,8 +28,6 @@ Version 1.0.0
  X Phar archive metadata Phar::setMetaData($metadata) Phar::getMetaData() [Greg]
  X support rename() in stream wrapper [Greg]
  * update docs to reflect changes in error handling
- * update docs to add setStub(), make note about not using it within begin()/commit()
- ? have setStub() throw an exception if used between begin()/commit() [erase if no]
  * fix 011.phpt, 029.phpt for uncaught exceptions causing bad cleanup
  
 Version 1.1.0
@@ -39,3 +37,9 @@ Version 1.1.0
  * implement GPG signing
  * ability to match files containing a metadata key opendir('phar://a.phar/?mime-type=image/jpeg')
    or foreach ($p->match('mime-type', 'image/jpeg') as $file)
+ * Phar::copy($from, $to);
+ * Phar::delete($what)
+ * Phar::buildFromIterator($filename, Iterator $it, array $addinfo = null);
+   $addinfo = array('alias','flags','metadata','stub'...)
+ * Layout: Option to compress all content rather than single files.
+   That excludes stub and anifest haeder.
