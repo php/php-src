@@ -1,3 +1,11 @@
+2007-01-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini_parser.y
+      zend_language_parser.y
+      zend_language_scanner.l:
+      
+      Copyright update
+
 2007-01-22  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
