@@ -244,11 +244,7 @@ PHP_FUNCTION(shmop_read)
 	startaddr = shmop->addr + start;
 	bytes = count ? count : shmop->size - start;
 
-	return_string = emalloc(bytes+1);
-	memcpy(return_string, startaddr, bytes);
-	return_string[bytes] = 0;
-
-	RETURN_STRINGL(return_string, bytes, 0);
+	RETURN_STRINGL(startaddr, bytes, 1);
 }
 /* }}} */
 
