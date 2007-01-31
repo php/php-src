@@ -1,3 +1,21 @@
+2007-01-30  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * run-tests.php:
+      use getenv() instead of the _ENV var
+
+2007-01-30  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/tests/bind_empty.phpt:
+      improve test
+      patch by Chris Jones
+
+2007-01-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Prepare news file for release
+
 2007-01-29  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * run-tests.php:
