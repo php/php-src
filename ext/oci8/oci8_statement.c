@@ -1147,7 +1147,17 @@ sb4 php_oci_bind_out_callback(
 	
 	phpbind->out = 1; /* mark as OUT bind */
 
-	if ((Z_TYPE_P(val) == IS_OBJECT) || (Z_TYPE_P(val) == IS_RESOURCE)) {
+	if (Z_TYPE_P(val) == IS_RESOURCE) {
+		retval = OCI_CONTINUE;
+	} else if (Z_TYPE_P(val) == IS_OBJECT) {
+		if (!phpbind->descriptor) {
+			return OCI_ERROR;
+		}
+		*alenpp = &phpbind->dummy_len;
+		*bufpp = phpbind->descriptor;
+		*piecep = OCI_ONE_PIECE;
+		*rcodepp = &phpbind->retcode;
+		*indpp = &phpbind->indicator;
 		retval = OCI_CONTINUE;
 	} else { 
 		if (UG(unicode)) {
