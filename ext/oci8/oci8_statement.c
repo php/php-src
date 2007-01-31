@@ -828,7 +828,9 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
  Bind zval to the given placeholder */
 int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len, zval* var, long maxlength, long type TSRMLS_DC)
 {
+#ifdef PHP_OCI8_HAVE_COLLECTIONS 
 	php_oci_collection *bind_collection = NULL;
+#endif
 	php_oci_descriptor *bind_descriptor = NULL;
 	php_oci_statement  *bind_statement  = NULL;
 	dvoid *oci_desc                 = NULL;
@@ -1095,7 +1097,17 @@ sb4 php_oci_bind_out_callback(
 		return retval;
 	}
 
-	if ((Z_TYPE_P(val) == IS_OBJECT) || (Z_TYPE_P(val) == IS_RESOURCE)) {
+	if (Z_TYPE_P(val) == IS_RESOURCE) {
+		retval = OCI_CONTINUE;
+	} else if (Z_TYPE_P(val) == IS_OBJECT) {
+		if (!phpbind->descriptor) {
+			return OCI_ERROR;
+		}
+		*alenpp = &phpbind->dummy_len;
+		*bufpp = phpbind->descriptor;
+		*piecep = OCI_ONE_PIECE;
+		*rcodepp = &phpbind->retcode;
+		*indpp = &phpbind->indicator;
 		retval = OCI_CONTINUE;
 	} else {
 		convert_to_string(val);
