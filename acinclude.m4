@@ -2015,11 +2015,14 @@ dnl
 dnl Search for (f)lex and check it's version
 dnl
 AC_DEFUN([PHP_PROG_LEX], [
-  # we only support certain flex versions
+dnl we only support certain flex versions
   flex_version_list="2.5.4"
    
   AC_PROG_LEX
   if test -n "$LEX"; then
+dnl AC_DECL_YYTEXT is obsolete since autoconf 2.50 and merged into AC_PROG_LEX
+dnl this is what causes that annoying "PHP_PROG_LEX is expanded from" warning with autoconf 2.50+
+dnl it should be removed once we drop support of autoconf 2.13 (if ever)
     AC_DECL_YYTEXT
     :
   fi
