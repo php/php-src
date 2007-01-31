@@ -89,7 +89,9 @@ static void php_oci_connection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
 static void php_oci_pconnection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
 static void php_oci_statement_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
 static void php_oci_descriptor_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
+#ifdef PHP_OCI8_HAVE_COLLECTIONS 
 static void php_oci_collection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
+#endif
 
 static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC);
 #ifdef ZTS
@@ -646,7 +648,9 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 {
 #ifdef ZTS
 	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_descriptor TSRMLS_CC);
+#ifdef PHP_OCI8_HAVE_COLLECTIONS 
 	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_collection TSRMLS_CC);
+#endif
 	while (OCI_G(num_statements)) { 
 		zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_statement TSRMLS_CC);
 	}
@@ -742,6 +746,7 @@ static void php_oci_descriptor_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
 	php_oci_lob_free(descriptor TSRMLS_CC);
 } /* }}} */
 
+#ifdef PHP_OCI8_HAVE_COLLECTIONS 
 /* {{{ php_oci_collection_list_dtor()
  Collection destructor */
 static void php_oci_collection_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
@@ -749,6 +754,7 @@ static void php_oci_collection_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
 	php_oci_collection *collection = (php_oci_collection *)entry->ptr;
 	php_oci_collection_close(collection TSRMLS_CC);
 } /* }}} */
+#endif
 
 /* }}} */
 

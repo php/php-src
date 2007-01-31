@@ -190,6 +190,7 @@ typedef struct { /* php_oci_bind {{{ */
 	} array;
 	sb2 indicator;			/* -1 means NULL */
 	ub2 retcode;			/*  */
+	ub4 dummy_len;          /* a dummy var to store alenpp value in bind OUT callback */
 } php_oci_bind; /* }}} */
 
 typedef struct { /* php_oci_out_column {{{ */
