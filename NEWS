@@ -99,6 +99,8 @@ PHP                                                                        NEWS
   are destroyed in wrong order. (Tony)
 - Fixed the validate email filter so that the letter "v" can also be used in
   the user part of the email address. (Derick)
+- Fixed bug #40297 (compile failure in ZTS mode when collections support is 
+  missing). (Tony)
 - Fixed bug #40259 (ob_start call many times - memory error). (Dmitry)
 - Fixed bug #40231 (file_exists incorrectly reports false). (Dmitry)
 - Fixed bug #40228 (ZipArchive::extractTo does create empty directories 
