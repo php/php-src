@@ -1,5 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Feb 2007, Version 4.4.5
+
 01 Feb 2007, Version 4.4.5RC2
 - Fixed bug #39819 (Using $this not in object context can cause segfaults).
   (Dmitry)
