@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jan 2007, Version 4.4.5
+01 Feb 2007, Version 4.4.5RC2
 - Fixed bug #39819 (Using $this not in object context can cause segfaults).
   (Dmitry)
 - Fixed bug #36248 (CURLOPT_HEADERFUNCTION, couldn't set the function in the
@@ -9,7 +9,7 @@ PHP 4                                                                      NEWS
   (Derick, Joe Orton)
 - Backported fix for ext/imap compilation failure with recent c-client 
   versions. (Tony)
-
+- Upgraded PEAR to 1.5.0. (Greg)
 - Moved extensions to PECL:
   . ext/ovrimos (Derick)
 
