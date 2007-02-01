@@ -496,6 +496,10 @@ PHP_FUNCTION(stream_bucket_new)
 	memcpy(pbuffer, buffer, buffer_len);
 
 	bucket = php_stream_bucket_new(stream, pbuffer, buffer_len, 1, php_stream_is_persistent(stream) TSRMLS_CC);
+	
+	if (bucket == NULL) {
+		RETURN_FALSE;
+	}
 
 	ALLOC_INIT_ZVAL(zbucket);
 	ZEND_REGISTER_RESOURCE(zbucket, bucket, le_bucket);
