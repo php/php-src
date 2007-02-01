@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: Bug #39656 (Crash when calling fetch() on a PDO statment object after closeCursor())
+PDO Common: Bug #40285 (The prepare parser goes into an infinite loop on ': or ":)
 --SKIPIF--
 <?php  
 if (!extension_loaded('pdo')) die('skip');
@@ -15,36 +15,13 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE_
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-@$db->exec("DROP TABLE testtable");
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$db->exec('CREATE TABLE test (field1 VARCHAR(32), field2 VARCHAR(32), field3 VARCHAR(32), field4 INT)');
 
-$db->exec("CREATE TABLE testtable (id INTEGER NOT NULL PRIMARY KEY, usr VARCHAR( 256 ) NOT NULL)");
-$db->exec("INSERT INTO testtable (id, usr) VALUES (1, 'user')");
-
-$stmt = $db->prepare("SELECT * FROM testtable WHERE id = ?");
-$stmt->bindValue(1, 1, PDO::PARAM_INT );
-$stmt->execute();
-$row = $stmt->fetch();
-var_dump( $row );
-
-$stmt->execute();
-$stmt->closeCursor();
-$row = $stmt->fetch(); // this line will crash CLI
-var_dump( $row );
+$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+$s = $db->prepare("INSERT INTO test VALUES( ':id', 'name', 'section', 22)" );
+$s->execute();
 
 echo "Done\n";
 ?>
 --EXPECT--	
-array(4) {
-  ["id"]=>
-  string(1) "1"
-  [0]=>
-  string(1) "1"
-  ["usr"]=>
-  string(4) "user"
-  [1]=>
-  string(4) "user"
-}
-bool(false)
 Done
-

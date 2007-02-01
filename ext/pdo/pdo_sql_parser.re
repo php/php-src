@@ -48,6 +48,7 @@ static int scan(Scanner *s)
 	BINDCHR		= [:][a-zA-Z0-9_]+;
 	QUESTION	= [?];
 	SPECIALS	= [:?"'];
+	MULTICHAR	= [:?];
 	EOF		= [\000];
 	ANYNOEOF	= [\001-\377];
 	*/
@@ -55,7 +56,7 @@ static int scan(Scanner *s)
 	/*!re2c
 		(["] ([^"])* ["])		{ RET(PDO_PARSER_TEXT); }
 		(['] ([^'])* ['])		{ RET(PDO_PARSER_TEXT); }
-		SPECIALS{2,}							{ RET(PDO_PARSER_TEXT); }
+		MULTICHAR{2,}							{ RET(PDO_PARSER_TEXT); }
 		BINDCHR									{ RET(PDO_PARSER_BIND); }
 		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
 		SPECIALS								{ RET(PDO_PARSER_TEXT); }
