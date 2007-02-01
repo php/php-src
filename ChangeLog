@@ -1,3 +1,37 @@
+2007-01-31  Antony Dovgal  <antony@zend.com>
+
+    * acinclude.m4:
+      use correct comment marker (dnl, not #)
+      add comment regarding AC_DECL_YYTEXT and the annoying warning
+      (just in case I'm not the only one who's annoyed by it)
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      MFH: fix segfault on rebindinging and rexecuting a statement with LOBs
+      fix compile failure in ZTS mode when collections support is missing
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_statement.c:
+      fix compile failure in ZTS mode when collections support is missing
+
+    * ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/oci_execute_segfault.phpt:
+      fix segfault on re-binding and re-executing a statement
+      improve the test
+      patch by Chris Jones
+
+2007-01-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/shmop/shmop.c:
+      Minor code optimization
+
 2007-01-30  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * run-tests.php:
