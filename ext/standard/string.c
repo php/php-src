@@ -1881,6 +1881,8 @@ PHP_FUNCTION(strripos)
 
 	if (offset >= 0) {
 		if (offset > haystack_len) {
+			efree(needle_dup);
+			efree(haystack_dup);
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
@@ -1888,6 +1890,8 @@ PHP_FUNCTION(strripos)
 		e = haystack_dup + haystack_len - needle_len;
 	} else {
 		if (-offset > haystack_len) {
+			efree(needle_dup);
+			efree(haystack_dup);
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
