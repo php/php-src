@@ -3137,7 +3137,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		}
 	}
 
-	if (ce && ce->get_iterator) {
+	if (OP1_TYPE != IS_TMP_VAR && ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_RESET_REFERENCE TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
