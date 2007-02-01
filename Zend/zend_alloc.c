@@ -47,7 +47,7 @@
 #endif
 
 #ifndef ZEND_MM_COOKIES
-# define ZEND_MM_COOKIES 1
+# define ZEND_MM_COOKIES ZEND_DEBUG
 #endif
 
 #if ZEND_DEBUG
