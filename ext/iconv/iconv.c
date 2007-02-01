@@ -2312,6 +2312,9 @@ PHP_FUNCTION(ob_iconv_handler)
 			if (content_type && sapi_add_header(content_type, strlen(content_type), 0) != FAILURE) {
 				SG(sapi_headers).send_default_content_type = 0;
 			}
+			if (mimetype_alloced) {
+				efree(mimetype);
+			}
 			RETURN_STRINGL(out_buffer, out_len, 0);
 		}
 		if (mimetype_alloced) {
