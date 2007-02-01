@@ -541,6 +541,10 @@ PHP_FUNCTION(stream_bucket_new)
 		add_property_long(return_value, "datalen", buffer_len);
 	}
 
+	if (bucket == NULL) {
+		RETURN_FALSE;
+	}
+ 
 	ALLOC_INIT_ZVAL(zbucket);
 	ZEND_REGISTER_RESOURCE(zbucket, bucket, le_bucket);
 	add_property_zval(return_value, "bucket", zbucket);
