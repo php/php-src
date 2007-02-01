@@ -1685,17 +1685,13 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC)
 
 	if (expr) {
 		opline->op1 = *expr;
+
+		if (do_end_vparse && zend_is_function_or_method_call(expr)) {
+			opline->extended_value = ZEND_RETURNS_FUNCTION;
+		}
 	} else {
 		opline->op1.op_type = IS_CONST;
 		INIT_ZVAL(opline->op1.u.constant);
-	}
-
-	if (do_end_vparse) {
-		if (zend_is_function_or_method_call(expr)) {
-			opline->extended_value = ZEND_RETURNS_FUNCTION;
-		} else {
-			opline->extended_value = 0;
-		}
 	}
 
 	SET_UNUSED(opline->op2);
