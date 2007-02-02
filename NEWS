@@ -325,6 +325,8 @@ PHP                                                                        NEWS
   fastcgi). (Dmitry)
 - Fixed bug #38252 (Incorrect PDO error message on invalid default fetch
   mode). (Ilia)
+- Fixed bug #37927 (Prevent trap when COM extension processes argument of
+  type VT_DISPATCH|VT_REF) (Andy)
 - Fixed bug #37773 (iconv_substr() gives "Unknown error" when string
   length = 1"). (Ilia)
 - Fixed bug #37627 (session save_path check checks the parent directory).
