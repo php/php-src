@@ -1,3 +1,66 @@
+2007-02-01  andy wharmby  <wharmby@uk.ibm.com>
+
+    * ext/com_dotnet/com_misc.c:
+      ADW: Fixed COM extension  bug #37927.  Correct the processing of in/out
+      arguments of type VT_DISPATCH|VT_REF
+
+2007-02-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Removed dead code
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Fixed possible crash because of dereference of NULL
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Enable canary protection in DEBUG mode only.
+
+2007-02-01  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/user_filters.c:
+      bailout if bucket is NULL
+
+    * ext/standard/incomplete_class.c:
+      free class_name when necessary
+
+    * (PHP_5_2)
+      ext/iconv/iconv.c:
+      plug leak
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      fix leaks on error
+
+2007-02-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to -dev.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with RC2.
+
+2007-02-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo/tests/bug_39656.phpt:
+      
+      Fixed bug #40285 (The PDO prepare parser goes into an infinite loop in
+      some instances).
+
 2007-01-31  Antony Dovgal  <antony@zend.com>
 
     * acinclude.m4:
