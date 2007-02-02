@@ -316,6 +316,8 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 	char c = *spec_walk++;
 	int return_null = 0;
 	int alternate_form = 0;
+	int return_orig_type = 0;
+	zend_uchar orig_type;
 
 	/* scan through modifiers */
 	while (1) {
@@ -327,6 +329,9 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 			if (Z_TYPE_PP(arg) == IS_NULL) {
 				return_null = 1;
 			}
+		} else if (*spec_walk == '^') {
+			return_orig_type = 1;
+			orig_type = Z_TYPE_PP(arg);
 		} else {
 			break;
 		}
@@ -443,6 +448,11 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					conv = va_arg(*va, UConverter *);
 				}
 
+				if (return_orig_type) {
+					zend_uchar *type = va_arg(*va, zend_uchar *);
+					*type = orig_type;
+				}
+
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
 						if (return_null) {
@@ -497,6 +507,12 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 			{
 				UChar **p = va_arg(*va, UChar **);
 				int *pl = va_arg(*va, int *);
+
+				if (return_orig_type) {
+					zend_uchar *type = va_arg(*va, zend_uchar *);
+					*type = orig_type;
+				}
+
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
 						if (return_null) {
@@ -882,7 +898,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 				break;
 
 			case '/': case '!':
-			case '&':
+			case '&': case '^':
 				/* Pass */
 				break;
 
