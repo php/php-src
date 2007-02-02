@@ -1796,7 +1796,7 @@ END_EXTERN_C()
 			ZVAL_EMPTY_STRING(z); \
 		}
 
-#define ZVAL_ENC_STRINGL(z, t, conv, s, l, flags) \
+#define ZVAL_ENC_STRINGL(z, t, conv, s, l, flags) { \
 		if (t == IS_UNICODE) { \
 			char *__s = (char *)(s); \
 			int __s_len = (l); \
@@ -1816,7 +1816,7 @@ END_EXTERN_C()
 		} \
 	}
 
-#define ZVAL_ENC_STRING(z, t, conv, s, flags) \
+#define ZVAL_ENC_STRING(z, t, conv, s, flags) { \
 		if (t == IS_UNICODE) { \
 			char *__s = (char *)(s); \
 			int __s_len = strlen(__s); \
@@ -1867,8 +1867,8 @@ END_EXTERN_C()
 #define RETVAL_EMPTY_TEXT() 			ZVAL_EMPTY_TEXT(return_value)
 #define RETVAL_ZSTR(type, s, duplicate) ZVAL_ZSTR(return_value, type, s, duplicate)
 #define RETVAL_ZSTRL(type, s, l, duplicate) ZVAL_ZSTRL(return_value, type, s, l, duplicate)
-#define RETVAL_ENC_STRINGL(type, conv, s, l, flags) ZVAL_ENC_STRINGL(return_value, t, conv, s, l, flags)
-#define RETVAL_ENC_STRING(type, conv, s, flags) ZVAL_ENC_STRING(return_value, t, conv, s, flags)
+#define RETVAL_ENC_STRINGL(type, conv, s, l, flags) ZVAL_ENC_STRINGL(return_value, type, conv, s, l, flags)
+#define RETVAL_ENC_STRING(type, conv, s, flags) ZVAL_ENC_STRING(return_value, type, conv, s, flags)
 
 #define RETURN_RESOURCE(l) 				{ RETVAL_RESOURCE(l); return; }
 #define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
