@@ -3802,14 +3802,18 @@ void zend_do_unset(znode *variable TSRMLS_DC)
 	zend_check_writable_variable(variable);
 
 	if (variable->op_type == IS_CV) {
+		zstr name;
+		int name_len;
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+		name = CG(active_op_array)->vars[variable->u.var].name;
+		name_len = CG(active_op_array)->vars[variable->u.var].name_len;
+
 		opline->opcode = ZEND_UNSET_VAR;
 		opline->op1.op_type = IS_CONST;
-		ZVAL_TEXTL(&opline->op1.u.constant,
-			CG(active_op_array)->vars[variable->u.var].name,
-			CG(active_op_array)->vars[variable->u.var].name_len, 1);
+		ZVAL_TEXTL(&opline->op1.u.constant, name, name_len, 1);
 		SET_UNUSED(opline->op2);
-		opline->op2.u.EA.type = ZEND_FETCH_LOCAL;
+		opline->op2.u.EA.type = zend_u_is_auto_global(ZEND_STR_TYPE, name, name_len TSRMLS_CC) ? ZEND_FETCH_GLOBAL : ZEND_FETCH_LOCAL;;
 		SET_UNUSED(opline->result);
 	} else {
 		last_op = &CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1];
@@ -3839,14 +3843,19 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 	zend_check_writable_variable(variable);
 
 	if (variable->op_type == IS_CV) {
+		zstr name;
+		int name_len;
+
 		last_op = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+		name = CG(active_op_array)->vars[variable->u.var].name;
+		name_len = CG(active_op_array)->vars[variable->u.var].name_len;
+
 		last_op->opcode = ZEND_ISSET_ISEMPTY_VAR;
 		last_op->op1.op_type = IS_CONST;
-		ZVAL_TEXTL(&last_op->op1.u.constant,
-			CG(active_op_array)->vars[variable->u.var].name,
-			CG(active_op_array)->vars[variable->u.var].name_len, 1);
+		ZVAL_TEXTL(&last_op->op1.u.constant, name, name_len, 1);
 		SET_UNUSED(last_op->op2);
-		last_op->op2.u.EA.type = ZEND_FETCH_LOCAL;
+		last_op->op2.u.EA.type = zend_u_is_auto_global(ZEND_STR_TYPE, name, name_len TSRMLS_CC) ? ZEND_FETCH_GLOBAL : ZEND_FETCH_LOCAL;;
 		last_op->result.u.var = get_temporary_variable(CG(active_op_array));
 	} else {
 		last_op = &CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1];
