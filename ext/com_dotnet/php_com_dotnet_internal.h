@@ -36,6 +36,7 @@ typedef struct _php_com_dotnet_object {
 	zend_object zo;
 
 	VARIANT v;
+	int modified;
 
 	ITypeInfo *typeinfo;
 	long code_page;
@@ -152,6 +153,7 @@ PHP_FUNCTION(variant_cast);
 PHPAPI void php_com_variant_from_zval_with_type(VARIANT *v, zval *z, VARTYPE type, int codepage TSRMLS_DC);
 PHPAPI void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC);
 PHPAPI int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC);
+PHPAPI int php_com_copy_variant(VARIANT *dst, VARIANT *src TSRMLS_DC);
 
 /* com_dotnet.c */
 PHP_FUNCTION(com_dotnet_create_instance);
