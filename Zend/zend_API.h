@@ -1796,6 +1796,46 @@ END_EXTERN_C()
 			ZVAL_EMPTY_STRING(z); \
 		}
 
+#define ZVAL_ENC_STRINGL(z, t, conv, s, l, flags) \
+		if (t == IS_UNICODE) { \
+			char *__s = (char *)(s); \
+			int __s_len = (l); \
+			UChar *u_str; \
+			int u_len; \
+			if (zend_string_to_unicode(conv, &u_str, &u_len, __s, __s_len TSRMLS_CC) == SUCCESS) { \
+				ZVAL_UNICODEL(z, u_str, u_len, 0); \
+			} \
+			if ((flags) & ZSTR_AUTOFREE) { \
+				efree(__s); \
+			} \
+		} else { \
+			char *__s=(char *)(s); int __l=l; \
+			Z_STRLEN_P(z) = __l;	    \
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s); \
+			Z_TYPE_P(z) = IS_STRING; \
+		} \
+	}
+
+#define ZVAL_ENC_STRING(z, t, conv, s, flags) \
+		if (t == IS_UNICODE) { \
+			char *__s = (char *)(s); \
+			int __s_len = strlen(__s); \
+			UChar *u_str; \
+			int u_len; \
+			if (zend_string_to_unicode(conv, &u_str, &u_len, __s, __s_len TSRMLS_CC) == SUCCESS) { \
+				ZVAL_UNICODEL(z, u_str, u_len, 0); \
+			} \
+			if ((flags) & ZSTR_AUTOFREE) { \
+				efree(__s); \
+			} \
+		} else { \
+			char *__s=(char *)(s); \
+			Z_STRLEN_P(z) = strlen(__s); \
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : __s); \
+			Z_TYPE_P(z) = IS_STRING; \
+		} \
+	}
+
 #define ZVAL_FALSE(z)  					ZVAL_BOOL(z, 0)
 #define ZVAL_TRUE(z)  					ZVAL_BOOL(z, 1)
 
@@ -1827,6 +1867,8 @@ END_EXTERN_C()
 #define RETVAL_EMPTY_TEXT() 			ZVAL_EMPTY_TEXT(return_value)
 #define RETVAL_ZSTR(type, s, duplicate) ZVAL_ZSTR(return_value, type, s, duplicate)
 #define RETVAL_ZSTRL(type, s, l, duplicate) ZVAL_ZSTRL(return_value, type, s, l, duplicate)
+#define RETVAL_ENC_STRINGL(type, conv, s, l, flags) ZVAL_ENC_STRINGL(return_value, t, conv, s, l, flags)
+#define RETVAL_ENC_STRING(type, conv, s, flags) ZVAL_ENC_STRING(return_value, t, conv, s, flags)
 
 #define RETURN_RESOURCE(l) 				{ RETVAL_RESOURCE(l); return; }
 #define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
@@ -1856,6 +1898,8 @@ END_EXTERN_C()
 #define RETURN_UTF8_STRINGL(t, l, flags)	{ RETVAL_UTF8_STRINGL(t, l, flags); return; }
 #define RETURN_ZSTR(type, s, duplicate) 	{ RETVAL_ZSTR(type, s, duplicate); return; }
 #define RETURN_ZSTRL(type, s, l, duplicate) { RETVAL_ZSTRL(type, s, l, duplicate); return; }
+#define RETURN_ENC_STRINGL(type, conv, s, l, flags) { RETVAL_ENC_STRINGL(type, conv, s, l, flags); return; }
+#define RETURN_ENC_STRING(type, conv, s, flags) { RETVAL_ENC_STRING(type, conv, s, flags); return; }
 
 #define SET_VAR_STRING(n, v) {																				\
 								{																			\

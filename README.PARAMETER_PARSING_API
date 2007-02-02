@@ -74,6 +74,8 @@ Type specifiers
         pointer is set to NULL as well.
     & - alternate format (currently used for 's' only to specify a converter to
         use when converting from Unicode strings)
+	^ - returns original string type before conversion (only for 's' and 'u'
+	    specifiers)
 
 Examples
 --------
