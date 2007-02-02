@@ -1964,10 +1964,10 @@ ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_
 		zend_error(error_type, "Method %v::%s() must take exactly 2 arguments", ce->name, ZEND_SET_FUNC_NAME);
 	} else if (lcname_len == sizeof(ZEND_UNSET_FUNC_NAME) - 1 &&
 	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_UNSET_FUNC_NAME, sizeof(ZEND_UNSET_FUNC_NAME)-1) && fptr->common.num_args != 1) {
-		zend_error(error_type, "Method %v::%s() must take exactly 1 arguments", ce->name, ZEND_UNSET_FUNC_NAME);
+		zend_error(error_type, "Method %v::%s() must take exactly 1 argument", ce->name, ZEND_UNSET_FUNC_NAME);
 	} else if (lcname_len == sizeof(ZEND_ISSET_FUNC_NAME) - 1 &&
 	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_ISSET_FUNC_NAME, sizeof(ZEND_ISSET_FUNC_NAME)-1) && fptr->common.num_args != 1) {
-		zend_error(error_type, "Method %v::%s() must take exactly 1 arguments", ce->name, ZEND_ISSET_FUNC_NAME);
+		zend_error(error_type, "Method %v::%s() must take exactly 1 argument", ce->name, ZEND_ISSET_FUNC_NAME);
 	} else if (lcname_len == sizeof(ZEND_CALL_FUNC_NAME) - 1 &&
 	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1) && fptr->common.num_args != 2) {
 		zend_error(error_type, "Method %v::%s() must take exactly 2 arguments", ce->name, ZEND_CALL_FUNC_NAME);
