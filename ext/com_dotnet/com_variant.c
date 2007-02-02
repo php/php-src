@@ -264,6 +264,140 @@ PHPAPI int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC
 	return ret;
 }
 
+
+PHPAPI int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar TSRMLS_DC)
+{
+	int ret = SUCCESS;
+	
+	switch (V_VT(dstvar) & ~VT_BYREF) {
+	case VT_EMPTY:
+	case VT_NULL:
+	case VT_VOID:
+		/* should not be possible */
+		break;
+
+	case VT_UI1:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_UI1REF(dstvar) = V_UI1(srcvar);
+		} else {
+			 V_UI1(dstvar) = V_UI1(srcvar);
+		}
+		break;
+
+	case VT_I1:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_I1REF(dstvar) = V_I1(srcvar);
+		} else {
+			V_I1(dstvar) = V_I1(srcvar);
+		}
+		break;
+
+	case VT_UI2:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_UI2REF(dstvar) = V_UI2(srcvar);
+		} else {
+			V_UI2(dstvar) = V_UI2(srcvar); 
+		}
+		break;
+
+	case VT_I2:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_I2REF(dstvar) = V_I2(srcvar);
+		} else {
+			V_I2(dstvar) = V_I2(srcvar);
+		}
+		break;
+
+	case VT_UI4: 
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_UI4REF(dstvar) = V_UI4(srcvar);
+		} else {
+			V_UI4(dstvar) = V_UI4(srcvar);
+		}
+		break;
+
+	case VT_I4:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_I4REF(dstvar) = V_I4(srcvar);
+		} else {
+			V_I4(dstvar) = V_I4(srcvar);
+		}
+		break;
+
+	case VT_INT:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_INTREF(dstvar) = V_INT(srcvar);
+		} else {
+			V_INT(dstvar) = V_INT(srcvar);
+		}
+		break;
+
+	case VT_UINT:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_UINTREF(dstvar) = V_UINT(srcvar);
+		} else {
+			V_UINT(dstvar) = V_UINT(srcvar);       
+		}
+		break;
+
+	case VT_R4:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_R4REF(dstvar) = V_R4(srcvar);
+		} else {
+			V_R4(dstvar) = V_R4(srcvar);
+		}
+		break;
+
+	case VT_R8:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_R8REF(dstvar) = V_R8(srcvar);
+		} else {
+			V_R8(dstvar) = V_R8(srcvar);
+		}
+		break;
+
+	case VT_BOOL:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_BOOLREF(dstvar) = V_BOOL(srcvar);
+		} else {
+			V_BOOL(dstvar) = V_BOOL(srcvar);
+		}
+        break;
+
+	case VT_BSTR:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_BSTRREF(dstvar) = V_BSTR(srcvar);
+		} else {
+			V_BSTR(dstvar) = V_BSTR(srcvar);
+        }
+		break;
+
+	case VT_UNKNOWN:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_UNKNOWNREF(dstvar) = V_UNKNOWN(srcvar);
+		} else {
+			V_UNKNOWN(dstvar) = V_UNKNOWN(srcvar);
+		}
+		break;
+
+	case VT_DISPATCH:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_DISPATCHREF(dstvar) = V_DISPATCH(srcvar);
+		} else {
+			V_DISPATCH(dstvar) = V_DISPATCH(srcvar);
+		}
+		break;
+
+	case VT_VARIANT:
+		return php_com_copy_variant(V_VARIANTREF(dstvar), srcvar TSRMLS_CC);
+		
+	default:
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variant->variant: failed to copy from 0x%x to 0x%x", V_VT(dstvar), V_VT(srcvar));
+		ret = FAILURE;
+	}
+	return ret;
+}
+
 /* {{{ com_variant_create_instance - ctor for new VARIANT() */
 PHP_FUNCTION(com_variant_create_instance)
 {
@@ -364,6 +498,8 @@ PHP_FUNCTION(variant_set)
 	VariantClear(&obj->v);
 
 	php_com_variant_from_zval(&obj->v, zvalue, obj->code_page TSRMLS_CC);
+	/* remember we modified this variant */
+	obj->modified = 1;
 }
 /* }}} */
 

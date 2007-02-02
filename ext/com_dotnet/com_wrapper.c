@@ -298,6 +298,17 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 							&retval, pdp->cArgs, params, 1, NULL TSRMLS_CC)) {
 					ret = S_OK;
 					trace("function called ok\n");
+
+					/* Copy any modified values to callers copy of variant*/
+					for (i = 0; i < pdp->cArgs; i++) {
+						php_com_dotnet_object *obj = CDNO_FETCH(*params[i]);
+						VARIANT *srcvar = &obj->v;
+						VARIANT *dstvar = &pdp->rgvarg[ pdp->cArgs - 1 - i];
+						if ((V_VT(dstvar) & VT_BYREF) && obj->modified ) {
+							trace("percolate modified value for arg %d VT=%08x\n", i, V_VT(dstvar));
+							php_com_copy_variant(dstvar, srcvar TSRMLS_CC);   
+						}
+					}
 				} else {
 					trace("failed to call func\n");
 					ret = DISP_E_EXCEPTION;
