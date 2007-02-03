@@ -62,7 +62,7 @@ PHP_METHOD(Phar, loadPhar)
 	}
 } /* }}} */
 
-/* {{{ proto string apiVersion()
+/* {{{ proto string Phar::apiVersion()
  * Returns the api version */
 PHP_METHOD(Phar, apiVersion)
 {
@@ -70,7 +70,7 @@ PHP_METHOD(Phar, apiVersion)
 }
 /* }}}*/
 
-/* {{{ proto bool canCompress()
+/* {{{ proto bool Phar::canCompress()
  * Returns whether phar extension supports compression using zlib/bzip2 */
 PHP_METHOD(Phar, canCompress)
 {
@@ -82,7 +82,7 @@ PHP_METHOD(Phar, canCompress)
 }
 /* }}} */
 
-/* {{{ proto bool canWrite()
+/* {{{ proto bool Phar::canWrite()
  * Returns whether phar extension supports writing and creating phars */
 PHP_METHOD(Phar, canWrite)
 {
