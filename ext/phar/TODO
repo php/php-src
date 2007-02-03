@@ -27,8 +27,8 @@ Version 1.0.0
    streams interface [Greg]
  X Phar archive metadata Phar::setMetaData($metadata) Phar::getMetaData() [Greg]
  X support rename() in stream wrapper [Greg]
- * update docs to reflect changes in error handling
- * fix 011.phpt, 029.phpt for uncaught exceptions causing bad cleanup
+ X update docs to reflect changes in error handling [Greg]
+ X fix 011.phpt, 029.phpt for uncaught exceptions causing bad cleanup [Marcus/Greg]
  
 Version 1.1.0
 

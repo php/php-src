@@ -90,7 +90,9 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 		efree(data->alias);
 		data->alias = NULL;
 	}
-	efree(data->fname);
+	if (data->fname) {
+		efree(data->fname);
+	}
 	if (data->signature) {
 		efree(data->signature);
 	}
@@ -134,7 +136,7 @@ static void destroy_phar_data_only(void *pDest) /* {{{ */
 	phar_archive_data *phar_data = *(phar_archive_data **) pDest;
 	TSRMLS_FETCH();
 
-	if (--phar_data->refcount < 0) {
+	if (EG(exception) || --phar_data->refcount < 0) {
 		phar_destroy_phar_data(phar_data TSRMLS_CC);
 	}
 }
@@ -482,7 +484,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 #define MAPPHAR_FAIL(msg) \
 	efree(savebuf);\
 	if (mydata) {\
-		efree(mydata);\
+		phar_destroy_phar_data(mydata TSRMLS_CC);\
 	}\
 	if (signature) {\
 		efree(signature);\
@@ -885,6 +887,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		PHAR_GET_32(buffer, entry.flags);
 		if (*(php_uint32 *) buffer) {
 			if (phar_parse_metadata(fp, &buffer, endbuffer, &entry.metadata TSRMLS_CC) == FAILURE) {
+				efree(entry.filename);
 				MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
 			}
 		} else {
@@ -895,16 +898,28 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		switch (entry.flags & PHAR_ENT_COMPRESSION_MASK) {
 		case PHAR_ENT_COMPRESSED_GZ:
 #if !HAVE_ZLIB
+			if (entry.metadata) {
+				zval_ptr_dtor(&entry.metadata);
+			}
+			efree(entry.filename);
 			MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
 #endif
 			break;
 		case PHAR_ENT_COMPRESSED_BZ2:
 #if !HAVE_BZ2
+			if (entry.metadata) {
+				zval_ptr_dtor(&entry.metadata);
+			}
+			efree(entry.filename);
 			MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
 #endif
 			break;
 		default:
 			if (entry.uncompressed_filesize != entry.compressed_filesize) {
+				if (entry.metadata) {
+					zval_ptr_dtor(&entry.metadata);
+				}
+				efree(entry.filename);
 				MAPPHAR_FAIL("internal corruption of phar \"%s\" (compressed and uncompressed size does not match for uncompressed entry)");
 			}
 			break;
@@ -2944,7 +2959,7 @@ static php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path
 	/* we must have at the very least phar://alias.phar/ */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		if (resource->host && !resource->path) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory", path, resource->host);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", path, resource->host);
 			php_url_free(resource);
 			return NULL;
 		}
