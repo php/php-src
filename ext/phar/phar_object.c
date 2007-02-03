@@ -225,14 +225,14 @@ PHP_METHOD(Phar, begin)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::isFlushing()
+/* {{{ proto bool Phar::isFlushingToPhar()
  * Returns whether write operations are flushing to disk immediately
  */
-PHP_METHOD(Phar, isFlushing)
+PHP_METHOD(Phar, isFlushingToPhar)
 {
 	PHAR_ARCHIVE_OBJECT();
 	
-	RETURN_BOOL(!phar_obj->arc.archive->donotflush);
+	RETURN_BOOL(phar_obj->arc.archive->donotflush);
 }
 /* }}} */
 
@@ -1105,7 +1105,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, getSignature,          NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getStub,               NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getVersion,            NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isFlushing,            NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isFlushingToPhar,            NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setMetadata,           arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetExists,          arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
