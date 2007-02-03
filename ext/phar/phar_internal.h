@@ -56,7 +56,8 @@
 #define E_RECOVERABLE_ERROR E_ERROR
 #endif
 
-#define PHAR_VERSION_STR          "1.0.0"
+#define PHAR_EXT_VERSION_STR      "1.0.0"
+#define PHAR_API_VERSION_STR      "1.0.0"
 /* x.y.z maps to 0xyz0 */
 #define PHAR_API_VERSION          0x1000
 #define PHAR_API_MIN_READ         0x1000

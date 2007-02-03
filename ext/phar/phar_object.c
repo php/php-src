@@ -66,7 +66,7 @@ PHP_METHOD(Phar, loadPhar)
  * Returns the api version */
 PHP_METHOD(Phar, apiVersion)
 {
-	RETURN_STRINGL(PHAR_VERSION_STR, sizeof(PHAR_VERSION_STR)-1, 1);
+	RETURN_STRINGL(PHAR_API_VERSION_STR, sizeof(PHAR_API_VERSION_STR)-1, 1);
 }
 /* }}}*/
 
