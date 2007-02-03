@@ -1,3 +1,134 @@
+2007-02-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.h:
+      Typos.
+
+    * README.PARAMETER_PARSING_API
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      - Add ^ specifier that returns original string type before conversion.
+      - Add ZVAL_ENC_STRING[L] macro that allows returning either a binary
+        string or an encoded strings as Unicode based on type, instead of
+        UG(unicode)
+
+2007-02-02  Michael Wallner  <mike@iworks.at>
+
+    * ext/zlib/zlib.c:
+      - add note about the past for the future, see
+      http://bugs.php.net/?id=40310&edit=1
+
+2007-02-02  andy wharmby  <wharmby@uk.ibm.com>
+
+    * NEWS:
+      Remove bug fix entries #34564 and #37927 as now in 5.2.1
+
+    * (PHP_5_2)
+      NEWS
+      ext/com_dotnet/com_misc.c:
+       Fixed bug #37927 (Prevent trap when COM extension processes argument of
+      type VT_DISPATCH|VT_REF)
+
+    * (PHP_5_2)
+      NEWS
+      ext/com_dotnet/com_misc.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/com_wrapper.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      Fixed bug #34564 (COM extension not returning modified "out" argument)
+
+2007-02-02  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/errmsg_001.phpt
+      ZendEngine2/tests/errmsg_002.phpt
+      ZendEngine2/tests/errmsg_003.phpt
+      ZendEngine2/tests/errmsg_004.phpt
+      ZendEngine2/tests/errmsg_005.phpt
+      ZendEngine2/tests/errmsg_006.phpt
+      ZendEngine2/tests/errmsg_007.phpt
+      ZendEngine2/tests/errmsg_008.phpt
+      ZendEngine2/tests/errmsg_009.phpt
+      ZendEngine2/tests/errmsg_010.phpt
+      ZendEngine2/tests/errmsg_011.phpt
+      ZendEngine2/tests/errmsg_012.phpt
+      ZendEngine2/tests/errmsg_013.phpt
+      ZendEngine2/tests/errmsg_014.phpt
+      ZendEngine2/tests/errmsg_015.phpt
+      ZendEngine2/tests/errmsg_016.phpt
+      ZendEngine2/tests/errmsg_017.phpt
+      ZendEngine2/tests/errmsg_018.phpt
+      ZendEngine2/tests/errmsg_019.phpt
+      ZendEngine2/tests/errmsg_020.phpt
+      ZendEngine2/tests/errmsg_021.phpt
+      ZendEngine2/tests/errmsg_022.phpt
+      ZendEngine2/tests/errmsg_023.phpt
+      ZendEngine2/tests/errmsg_024.phpt
+      ZendEngine2/tests/errmsg_025.phpt
+      ZendEngine2/tests/errmsg_026.phpt
+      ZendEngine2/tests/errmsg_027.phpt
+      ZendEngine2/tests/errmsg_028.phpt
+      ZendEngine2/tests/errmsg_029.phpt
+      ZendEngine2/tests/errmsg_030.phpt
+      ZendEngine2/tests/errmsg_031.phpt
+      ZendEngine2/tests/errmsg_032.phpt
+      ZendEngine2/tests/errmsg_033.phpt
+      ZendEngine2/tests/errmsg_034.phpt
+      ZendEngine2/tests/errmsg_035.phpt
+      ZendEngine2/tests/errmsg_036.phpt
+      ZendEngine2/tests/errmsg_037.phpt
+      ZendEngine2/tests/errmsg_038.phpt
+      ZendEngine2/tests/errmsg_039.phpt
+      ZendEngine2/tests/errmsg_040.phpt
+      ZendEngine2/tests/errmsg_041.phpt
+      ZendEngine2/tests/errmsg_042.phpt
+      ZendEngine2/tests/errmsg_043.phpt
+      ZendEngine2/tests/globals.inc
+      ZendEngine2/tests/globals_001.phpt
+      ZendEngine2/tests/globals_002.phpt
+      ZendEngine2/tests/globals_003.phpt
+      ZendEngine2/tests/globals_004.phpt:
+      add new tests
+
+    * ZendEngine2/zend_API.c:
+      -exactly 1 arguments
+      +exactly 1 argument
+
+2007-02-02  andy wharmby  <wharmby@uk.ibm.com>
+
+    * NEWS:
+      Update NEWS for ealier bug fixes
+
+2007-02-02  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug38779.phpt
+      ZendEngine2/tests/bug38779_1.phpt:
+      fix tests
+
+    * ZendEngine2/zend_compile.c:
+      fix isset() & unset() with CV-superglobals
+      see #40311
+
+2007-02-02  andy wharmby  <wharmby@uk.ibm.com>
+
+    * ext/com_dotnet/com_misc.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/com_wrapper.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      ADW: Fix COM extension bug #35463. Fix in/out argument processing
+
+2007-02-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_sql_parser.c:
+      
+      Better generated parser
+
+    * (PHP_5_2)
+      ext/pdo/tests/bug_39656.phpt
+      ext/pdo/tests/bug_40285.phpt
+      ext/pdo/tests/bug_40285.phpt:
+      
+      Fixed test mixup
+
 2007-02-01  andy wharmby  <wharmby@uk.ibm.com>
 
     * ext/com_dotnet/com_misc.c:

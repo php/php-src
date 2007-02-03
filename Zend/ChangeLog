@@ -1,3 +1,79 @@
+2007-02-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.h:
+      Typos.
+
+    * zend_API.c
+      zend_API.h:
+      - Add ^ specifier that returns original string type before conversion.
+      - Add ZVAL_ENC_STRING[L] macro that allows returning either a binary
+        string or an encoded strings as Unicode based on type, instead of
+        UG(unicode)
+
+2007-02-02  Antony Dovgal  <antony@zend.com>
+
+    * tests/errmsg_001.phpt
+      tests/errmsg_002.phpt
+      tests/errmsg_003.phpt
+      tests/errmsg_004.phpt
+      tests/errmsg_005.phpt
+      tests/errmsg_006.phpt
+      tests/errmsg_007.phpt
+      tests/errmsg_008.phpt
+      tests/errmsg_009.phpt
+      tests/errmsg_010.phpt
+      tests/errmsg_011.phpt
+      tests/errmsg_012.phpt
+      tests/errmsg_013.phpt
+      tests/errmsg_014.phpt
+      tests/errmsg_015.phpt
+      tests/errmsg_016.phpt
+      tests/errmsg_017.phpt
+      tests/errmsg_018.phpt
+      tests/errmsg_019.phpt
+      tests/errmsg_020.phpt
+      tests/errmsg_021.phpt
+      tests/errmsg_022.phpt
+      tests/errmsg_023.phpt
+      tests/errmsg_024.phpt
+      tests/errmsg_025.phpt
+      tests/errmsg_026.phpt
+      tests/errmsg_027.phpt
+      tests/errmsg_028.phpt
+      tests/errmsg_029.phpt
+      tests/errmsg_030.phpt
+      tests/errmsg_031.phpt
+      tests/errmsg_032.phpt
+      tests/errmsg_033.phpt
+      tests/errmsg_034.phpt
+      tests/errmsg_035.phpt
+      tests/errmsg_036.phpt
+      tests/errmsg_037.phpt
+      tests/errmsg_038.phpt
+      tests/errmsg_039.phpt
+      tests/errmsg_040.phpt
+      tests/errmsg_041.phpt
+      tests/errmsg_042.phpt
+      tests/errmsg_043.phpt
+      tests/globals.inc
+      tests/globals_001.phpt
+      tests/globals_002.phpt
+      tests/globals_003.phpt
+      tests/globals_004.phpt:
+      add new tests
+
+    * zend_API.c:
+      -exactly 1 arguments
+      +exactly 1 argument
+
+    * tests/bug38779.phpt
+      tests/bug38779_1.phpt:
+      fix tests
+
+    * zend_compile.c:
+      fix isset() & unset() with CV-superglobals
+      see #40311
+
 2007-02-01  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h
