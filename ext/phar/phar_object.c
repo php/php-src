@@ -1156,12 +1156,18 @@ zend_function_entry phar_exception_methods[] = {
 #define REGISTER_PHAR_CLASS_CONST_LONG(class_name, const_name, value) \
 	zend_declare_class_constant_long(class_name, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
 
+#if PHP_VERSION_ID < 50200
+# define phar_exception_get_default() zend_exception_get_default()
+#else
+# define phar_exception_get_default() zend_exception_get_default(TSRMLS_C)
+#endif
+
 void phar_object_init(TSRMLS_D) /* {{{ */
 {
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "PharException", phar_exception_methods);
-	phar_ce_PharException = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL  TSRMLS_CC);
+	phar_ce_PharException = zend_register_internal_class_ex(&ce, phar_exception_get_default(), NULL  TSRMLS_CC);
 
 #if HAVE_SPL
 	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
