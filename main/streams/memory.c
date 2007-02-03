@@ -253,6 +253,9 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 					return PHP_STREAM_OPTION_RETURN_OK;
 
 				case PHP_STREAM_TRUNCATE_SET_SIZE:
+					if (ms->mode & TEMP_STREAM_READONLY) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
+					}
 					newsize = *(size_t*)ptrparam;
 					if (newsize <= ms->fsize) {
 						if (newsize < ms->fpos) {
@@ -272,7 +275,7 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 }
 /* }}} */
 	
-php_stream_ops	php_stream_memory_ops = {
+PHPAPI php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_write, php_stream_memory_read,
 	php_stream_memory_close, php_stream_memory_flush,
 	"MEMORY",
@@ -532,7 +535,7 @@ static int php_stream_temp_set_option(php_stream *stream, int option, int value,
 }
 /* }}} */
 
-php_stream_ops	php_stream_temp_ops = {
+PHPAPI php_stream_ops	php_stream_temp_ops = {
 	php_stream_temp_write, php_stream_temp_read,
 	php_stream_temp_close, php_stream_temp_flush,
 	"TEMP",
@@ -585,7 +588,7 @@ PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char
 }
 /* }}} */
 
-php_stream_ops php_stream_rfc2397_ops = {
+PHPAPI php_stream_ops php_stream_rfc2397_ops = {
 	php_stream_temp_write, php_stream_temp_read,
 	php_stream_temp_close, php_stream_temp_flush,
 	"RFC2397",
