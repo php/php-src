@@ -33,14 +33,14 @@ if the ini variable phar.require_hash is set to true.
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-01-27</date>
+ <date>2007-02-04</date>
  <version>
-  <release>0.9.0</release>
+  <release>0.1.0</release>
   <api>1.0.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
@@ -105,8 +105,10 @@ if the ini variable phar.require_hash is set to true.
     <file name="open_for_write_newfile.phpt" role="test"/>
     <file name="open_for_write_newfile_b.phpt" role="test"/>
     <file name="open_for_write_newfile_c.phpt" role="test"/>
-    <file name="phar_ctx_001.phpt" role="test"/>
+    <file name="phar_begin_setstub_commit.phpt" role="test"/>
     <file name="phar_commitwrite.phpt" role="test"/>
+    <file name="phar_create_in_cwd.phpt" role="test"/>
+    <file name="phar_ctx_001.phpt" role="test"/>
     <file name="phar_metadata_read.phpt" role="test"/>
     <file name="phar_metadata_write.phpt" role="test"/>
     <file name="phar_oo_001.phpt" role="test"/>
@@ -134,8 +136,9 @@ if the ini variable phar.require_hash is set to true.
     <file name="phar_oo_uncompressall.phpt" role="test"/>
     <file name="phar_stub.phpt" role="test"/>
     <file name="phar_stub_write.phpt" role="test"/>
-    <file name="refcount1.phpt" role="test"/>
     <file name="phar_test.inc" role="test"/>
+    <file name="refcount1.phpt" role="test"/>
+    <file name="rename.phpt" role="test"/>
    </dir> <!-- /tests -->
    <file name="LICENSE" role="doc"/>
    <file name="config.m4" role="src"/>
@@ -152,7 +155,7 @@ if the ini variable phar.require_hash is set to true.
  <dependencies>
   <required>
    <php>
-    <min>5.2.1</min>
+    <min>5.2.0</min>
    </php>
    <pearinstaller>
     <min>1.4.3</min>
