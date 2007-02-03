@@ -48,10 +48,10 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC TSRMLS_DC);
 END_EXTERN_C()
 
-extern php_stream_ops php_stream_memory_ops;
-extern php_stream_ops php_stream_temp_ops;
-extern php_stream_ops php_stream_rfc2397_ops;
-extern php_stream_wrapper php_stream_rfc2397_wrapper;
+extern PHPAPI php_stream_ops php_stream_memory_ops;
+extern PHPAPI php_stream_ops php_stream_temp_ops;
+extern PHPAPI php_stream_ops php_stream_rfc2397_ops;
+extern PHPAPI php_stream_wrapper php_stream_rfc2397_wrapper;
 
 #define PHP_STREAM_IS_MEMORY &php_stream_memory_ops
 #define PHP_STREAM_IS_TEMP   &php_stream_temp_ops
