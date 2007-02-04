@@ -184,8 +184,13 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					char *temp;
 					int temp_len;
 					zend_unicode_to_string(UG(utf8_conv), &temp, &temp_len, Z_USTRVAL_PP(zdata), Z_USTRLEN_PP(zdata) TSRMLS_CC);
-					ekey = php_url_encode(temp, temp_len, &ekey_len);
-					efree(temp);
+					if (temp) {
+						ekey = php_url_encode(temp, temp_len, &ekey_len);
+						efree(temp);
+					} else {
+						smart_str_free(formstr);
+						return FAILURE;
+					}
 					break;
 				}
 				case IS_STRING:
