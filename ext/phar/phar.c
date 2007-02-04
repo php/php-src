@@ -481,7 +481,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	entry = phar_get_entry_info(phar, path, path_len, error TSRMLS_CC);
 	
 	if (!entry) {
-		//return NULL;
+		return NULL;
 	}
 
 	phar->refcount++;
@@ -2657,7 +2657,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 	zend_hash_init(data, 64, zend_get_hash_value, NULL, 0);
 
 	if (*dir == '/' && dirlen == 1 && (manifest->nNumOfElements == 0)) {
-		// make empty root directory for empty phar
+		/* make empty root directory for empty phar */
 		efree(dir);
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	}
