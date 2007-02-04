@@ -29,6 +29,7 @@ if (PHP_MBSTRING == "yes") {
 		mbfilter_iso8859_2.c mbfilter_iso8859_3.c mbfilter_iso8859_4.c \
 		mbfilter_iso8859_5.c mbfilter_iso8859_6.c mbfilter_iso8859_7.c \
 		mbfilter_iso8859_8.c mbfilter_iso8859_9.c mbfilter_jis.c \
+		mbfilter_iso2022_jp_ms.c \
 		mbfilter_koi8r.c mbfilter_qprint.c mbfilter_sjis.c mbfilter_ucs2.c \
 		mbfilter_ucs4.c mbfilter_uhc.c mbfilter_utf16.c mbfilter_utf32.c \
 		mbfilter_utf7.c mbfilter_utf7imap.c mbfilter_utf8.c \
