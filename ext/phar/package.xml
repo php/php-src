@@ -92,6 +92,7 @@ if the ini variable phar.require_hash is set to true.
     <file name="create_new_phar.phpt" role="test"/>
     <file name="create_new_phar_b.phpt" role="test"/>
     <file name="create_new_phar_c.phpt" role="test"/>
+    <file name="create_path_error.phpt" role="test"/>
     <file name="delete_in_phar.phpt" role="test"/>
     <file name="delete_in_phar_b.phpt" role="test"/>
     <file name="delete_in_phar_confirm.phpt" role="test"/>
@@ -150,6 +151,8 @@ if the ini variable phar.require_hash is set to true.
    <file name="phar_object.c" role="src"/>
    <file name="php_phar.h" role="src"/>
    <file name="phar_internal.h" role="src"/>
+   <file name="phar_path_check.c" role="src"/>
+   <file name="phar_path_check.re" role="src"/>
   </dir> <!-- / -->
  </contents>
  <dependencies>

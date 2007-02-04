@@ -1,0 +1,77 @@
+/*
+  +----------------------------------------------------------------------+
+  | phar php single-file executable PHP extension                        |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2005-2006 The PHP Group                                |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 3.01 of the PHP license,      |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available through the world-wide-web at the following url:           |
+  | http://www.php.net/license/3_01.txt.                                 |
+  | If you did not receive a copy of the PHP license and are unable to   |
+  | obtain it through the world-wide-web, please send a note to          |
+  | license@php.net so we can mail you a copy immediately.               |
+  +----------------------------------------------------------------------+
+  | Authors: Marcus Boerger <helly@php.net>                              |
+  +----------------------------------------------------------------------+
+*/
+
+/* $Id$ */
+
+#include "phar_internal.h"
+
+phar_path_check_result phar_path_check(const char *s, int *len, const char **error)
+{
+	const unsigned char *p = (const unsigned char*)s;
+	const unsigned char *m;
+#define YYCTYPE         unsigned char
+#define YYCURSOR        p
+#define YYLIMIT         p+*len
+#define YYMARKER        m
+#define YYFILL(n)
+
+loop:
+/*!re2c
+END = "\x00";
+EOS = "/" | END;
+ANY = .;
+"//" 	{
+			*error = "double slash";
+			return pcr_err_double_slash;
+		}
+"/.." EOS {
+			*error = "upper directory reference";
+			return pcr_err_up_dir;
+		}
+"/." EOS {
+			*error = "current directory reference";
+			return pcr_err_curr_dir;
+		}
+"\\" {
+			*error = "back-slash";
+			return pcr_err_back_slash;
+		}
+"/" END {
+			*error = "empty entry";
+			return pcr_err_empty_entry;
+		}
+"?"	{
+			if (*s == '/') {
+				s++;
+			}
+			*len = (p - (const unsigned char*)s) -1;
+			*error = NULL;
+			return pcr_use_query;
+		}
+END {
+			if (*s == '/') {
+				s++;
+			}
+			*error = NULL;
+			return pcr_is_ok;
+		}
+ANY {
+			goto loop;
+		}
+*/
+}
