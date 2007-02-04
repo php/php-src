@@ -4,7 +4,7 @@
 ARG_ENABLE("phar", "enable phar support", "no");
 
 if (PHP_PHAR != "no") {
-	EXTENSION("phar", "phar.c phar_object.c");
+	EXTENSION("phar", "phar.c phar_object.c phar_path_check.c");
 	ADD_EXTENSION_DEP('phar', 'zlib', true);
 	ADD_EXTENSION_DEP('phar', 'bz2', true);
 	ADD_EXTENSION_DEP('phar', 'spl', false);

@@ -257,6 +257,18 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
 int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len TSRMLS_DC);
 
+typedef enum {
+	pcr_use_query,
+	pcr_is_ok,
+	pcr_err_double_slash,
+	pcr_err_up_dir,
+	pcr_err_curr_dir,
+	pcr_err_back_slash,
+	pcr_err_empty_entry
+} phar_path_check_result;
+
+phar_path_check_result phar_path_check(const char *p, int *len, const char **error);
+
 END_EXTERN_C()
 
 /*

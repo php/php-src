@@ -434,6 +434,15 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
 	phar_entry_data *ret;
+	phar_path_check_result res;
+	const char *pcr_error;
+
+	if ((res = phar_path_check(path, &path_len, &pcr_error)) > pcr_is_ok) {
+		if (error) {
+			spprintf(error, 0, "phar error: invalid path \"%s\" contains %s", path, pcr_error);
+		}
+		return NULL;
+	}
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error TSRMLS_CC)) {
 		return NULL;
@@ -441,8 +450,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 
 	if (FAILURE == phar_get_entry_data(&ret, fname, fname_len, path, path_len, mode, error TSRMLS_CC)) {
 		return NULL;
-	}
-	if (ret) {
+	} else if (ret) {
 		return ret;
 	}
 
@@ -1453,8 +1461,9 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 			if (error) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
 				efree(error);
+			} else {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" could not be created in phar \"%s\"", internal_file, resource->host);
 			}
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" could not be created in phar \"%s\"", internal_file, resource->host);
 			efree(internal_file);
 			php_url_free(resource);
 			return NULL;
