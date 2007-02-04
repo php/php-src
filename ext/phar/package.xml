@@ -144,6 +144,7 @@ if the ini variable phar.require_hash is set to true.
    <file name="LICENSE" role="doc"/>
    <file name="config.m4" role="src"/>
    <file name="config.w32" role="src"/>
+   <file name="Makefile.frag" role="src"/>
    <file name="CREDITS" role="doc"/>
    <file name="TODO" role="doc"/>
    <file name="EXPERIMENTAL" role="src"/>
