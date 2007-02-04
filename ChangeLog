@@ -1,3 +1,21 @@
+2007-02-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      main/php_memory_streams.h
+      main/streams/memory.c:
+      - MFH Add PHPAPI to stuff needed by streams API for shared exts
+      - MFH Readonly issue fix to memory streams option handling (still not
+        activated in 5.2.1 though)
+
+    * main/main.c
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.h:
+      - Fix memleak
+
+    * main/php_memory_streams.h
+      main/streams/memory.c:
+      - Fix mem/temp stream exports and readonlyissue
+
 2007-02-02  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend_API.h:
