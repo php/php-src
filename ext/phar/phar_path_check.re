@@ -55,6 +55,10 @@ ANY = .;
 			*error = "empty entry";
 			return pcr_err_empty_entry;
 		}
+"*" {
+			*error = "star";
+			return pcr_err_star;
+		}
 "?"	{
 			if (*s == '/') {
 				s++;

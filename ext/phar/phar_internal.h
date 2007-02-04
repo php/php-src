@@ -264,6 +264,7 @@ typedef enum {
 	pcr_err_up_dir,
 	pcr_err_curr_dir,
 	pcr_err_back_slash,
+	pcr_err_star,
 	pcr_err_empty_entry
 } phar_path_check_result;
 
