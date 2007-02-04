@@ -20,9 +20,9 @@
 
 #include "phar_internal.h"
 
-phar_path_check_result phar_path_check(const char *s, int *len, const char **error)
+phar_path_check_result phar_path_check(char **s, int *len, const char **error)
 {
-	const unsigned char *p = (const unsigned char*)s;
+	const unsigned char *p = (const unsigned char*)*s;
 	const unsigned char *m;
 #define YYCTYPE         unsigned char
 #define YYCURSOR        p
@@ -60,16 +60,17 @@ ANY = .;
 			return pcr_err_star;
 		}
 "?"	{
-			if (*s == '/') {
-				s++;
+			if (**s == '/') {
+				(*s)++;
 			}
-			*len = (p - (const unsigned char*)s) -1;
+			*len = (p - (const unsigned char*)*s) -1;
 			*error = NULL;
 			return pcr_use_query;
 		}
 END {
-			if (*s == '/') {
-				s++;
+			if (**s == '/') {
+				(*s)++;
+				(*len)--;
 			}
 			*error = NULL;
 			return pcr_is_ok;

@@ -520,7 +520,7 @@ PHP_METHOD(Phar, offsetExists)
  */
 PHP_METHOD(Phar, offsetGet)
 {
-	char *fname;
+	char *fname, *error;
 	int fname_len;
 	zval *zfname;
 	PHAR_ARCHIVE_OBJECT();
@@ -529,8 +529,8 @@ PHP_METHOD(Phar, offsetGet)
 		return;
 	}
 	
-	if (!phar_get_entry_info(phar_obj->arc.archive, fname, fname_len TSRMLS_CC)) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist", fname);
+	if (!phar_get_entry_info(phar_obj->arc.archive, fname, fname_len, &error TSRMLS_CC)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist%s%s", fname, error?", ":"", error?error:"");
 	} else {
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
 		MAKE_STD_ZVAL(zfname);
@@ -769,10 +769,10 @@ PHP_METHOD(PharFileInfo, __construct)
 		return;
 	}
 
-	if ((entry_info = phar_get_entry_info(phar_data, entry, entry_len TSRMLS_CC)) == NULL) {
+	if ((entry_info = phar_get_entry_info(phar_data, entry, entry_len, &error TSRMLS_CC)) == NULL) {
 		efree(arch);
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot access phar file entry '%s' in archive '%s'", entry, arch);
+			"Cannot access phar file entry '%s' in archive '%s'%s%s", entry, arch, error?", ":"", error?error:"");
 		efree(entry);
 		return;
 	}
