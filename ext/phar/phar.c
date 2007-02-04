@@ -235,14 +235,22 @@ static int phar_get_archive(phar_archive_data **archive, char *fname, int fname_
 /**
  * retrieve information on a file contained within a phar, or null if it ain't there
  */
-phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len TSRMLS_DC) /* {{{ */
+phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len, char **error TSRMLS_DC) /* {{{ */
 {
+	const char *pcr_error;
 	phar_entry_info *entry;
 
-	if (path && *path == '/') {
-		path++;
-		path_len--;
+	if (error) {
+		*error = NULL;
 	}
+
+	if (phar_path_check(&path, &path_len, &pcr_error) > pcr_is_ok) {
+		if (error) {
+			spprintf(error, 0, "phar error: invalid path \"%s\" contains %s", path, pcr_error);
+		}
+		return NULL;
+	}
+
 	if (!&phar->manifest.arBuckets) {
 		return NULL;
 	}
@@ -257,7 +265,7 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int pa
 }
 /* }}} */
 
-#if PHP_VERSION_ID < 50202
+#if defined(PHP_VERSION_ID) && PHP_VERSION_ID < 50202
 typedef struct {
 	char        *data;
 	size_t      fpos;
@@ -297,7 +305,7 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error TSRMLS_CC)) {
 		return FAILURE;
 	}
-	if ((entry = phar_get_entry_info(phar, path, path_len TSRMLS_CC)) == NULL) {
+	if ((entry = phar_get_entry_info(phar, path, path_len, for_create && !PHAR_G(readonly) ? NULL : error TSRMLS_CC)) == NULL) {
 		if (for_create && !PHAR_G(readonly)) {
 			return SUCCESS;
 		}
@@ -328,7 +336,9 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 	if (entry->fp) {
 		/* make a copy */
 		if (for_trunc) {
-#if PHP_VERSION_ID < 50202
+#if PHP_VERSION_ID >= 50202
+			php_stream_truncate_set_size(entry->fp, 0);
+#else
 			if (php_stream_is(entry->fp, PHP_STREAM_IS_TEMP)) {
 				if (php_stream_is(*(php_stream**)entry->fp->abstract, PHP_STREAM_IS_MEMORY)) {
 					php_stream *inner = *(php_stream**)entry->fp->abstract;
@@ -355,8 +365,6 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 				}
 				return FAILURE;
 			}
-#else
-			php_stream_truncate_set_size(entry->fp, 0);
 #endif
 			entry->is_modified = 1;
 			phar->is_modified = 1;
@@ -434,15 +442,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
 	phar_entry_data *ret;
-	phar_path_check_result res;
 	const char *pcr_error;
-
-	if ((res = phar_path_check(path, &path_len, &pcr_error)) > pcr_is_ok) {
-		if (error) {
-			spprintf(error, 0, "phar error: invalid path \"%s\" contains %s", path, pcr_error);
-		}
-		return NULL;
-	}
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error TSRMLS_CC)) {
 		return NULL;
@@ -452,6 +452,13 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 		return NULL;
 	} else if (ret) {
 		return ret;
+	}
+
+	if (phar_path_check(&path, &path_len, &pcr_error) > pcr_is_ok) {
+		if (error) {
+			spprintf(error, 0, "phar error: invalid path \"%s\" contains %s", path, pcr_error);
+		}
+		return NULL;
 	}
 
 	/* create a new phar data holder */
@@ -471,7 +478,11 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	etemp.phar = phar;
 	zend_hash_add(&phar->manifest, etemp.filename, path_len, (void*)&etemp, sizeof(phar_entry_info), NULL);
 	/* retrieve the phar manifest copy */
-	entry = phar_get_entry_info(phar, path, path_len TSRMLS_CC);
+	entry = phar_get_entry_info(phar, path, path_len, error TSRMLS_CC);
+	
+	if (!entry) {
+		//return NULL;
+	}
 
 	phar->refcount++;
 	ret->phar = phar;

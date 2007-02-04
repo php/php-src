@@ -252,7 +252,7 @@ static int    phar_dir_stat( php_stream *stream, php_stream_statbuf *ssb TSRMLS_
 int phar_archive_delref(phar_archive_data *phar TSRMLS_DC);
 int phar_entry_delref(phar_entry_data *idata TSRMLS_DC);
 
-phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len TSRMLS_DC);
+phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len, char **error TSRMLS_DC);
 phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC);
 int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
 int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len TSRMLS_DC);
@@ -268,7 +268,7 @@ typedef enum {
 	pcr_err_empty_entry
 } phar_path_check_result;
 
-phar_path_check_result phar_path_check(const char *p, int *len, const char **error);
+phar_path_check_result phar_path_check(char **p, int *len, const char **error);
 
 END_EXTERN_C()
 
