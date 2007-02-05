@@ -32,6 +32,6 @@ include($pname . $iname);
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
-Entry /error/ does not exist and cannot be created: phar error: invalid path "/error/" contains empty entry
+Entry /error/ does not exist and cannot be created: phar error: invalid path "/error/" contains empty directory
 foobar
 ===DONE===

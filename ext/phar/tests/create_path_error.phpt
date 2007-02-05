@@ -27,10 +27,10 @@ function error_handler($errno, $errmsg)
 
 set_error_handler('error_handler');
 
-$checks = array('//', '/.', '/../', '/a/..');
+$checks = array('/', '.', '../', 'a/..', 'a/', 'b//a.php');
 foreach($checks as $check)
 {
-	file_put_contents($pname . $check, "error");
+	file_put_contents($pname . '/' . $check, "error");
 }
 
 ?>
@@ -40,7 +40,10 @@ foreach($checks as $check)
 --EXPECTF--
 string(5) "query"
 string(5) "query"
-Error: file_put_contents(phar://%s//): failed to open stream: phar error: invalid path "/" contains empty entry
-Error: file_put_contents(phar://%s/../): failed to open stream: phar error: invalid path "../" contains empty entry
+Error: file_put_contents(phar://%s//): failed to open stream: phar error: invalid path "/" contains empty directory
+Error: file_put_contents(phar://%s/.): failed to open stream: phar error: invalid path "." contains current directory reference
+Error: file_put_contents(phar://%s/../): failed to open stream: phar error: invalid path "../" contains empty directory
 Error: file_put_contents(phar://%s/a/..): failed to open stream: phar error: invalid path "a/.." contains upper directory reference
+Error: file_put_contents(phar://%s/a/): failed to open stream: phar error: invalid path "a/" contains empty directory
+Error: file_put_contents(phar://%s/b//a.php): failed to open stream: phar error: invalid path "b//a.php" contains double slash
 ===DONE===

@@ -24,6 +24,13 @@ phar_path_check_result phar_path_check(char **s, int *len, const char **error)
 {
 	const unsigned char *p = (const unsigned char*)*s;
 	const unsigned char *m;
+	if (*len == 1 && *p == '.') {
+		*error = "current directory reference";
+		return pcr_err_curr_dir;
+	} else if (*len == 2 && p[0] == '.' && p[1] == '.') {
+		*error = "upper directory reference";
+		return pcr_err_up_dir;
+	}
 #define YYCTYPE         unsigned char
 #define YYCURSOR        p
 #define YYLIMIT         p+*len
@@ -52,7 +59,7 @@ ANY = .;
 			return pcr_err_back_slash;
 		}
 "/" END {
-			*error = "empty entry";
+			*error = "empty directory";
 			return pcr_err_empty_entry;
 		}
 "*" {
