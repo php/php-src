@@ -829,7 +829,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	/* tmp_len = 0 says alias length is 0, which means the alias is not stored in the phar */
 	if (tmp_len) {
 		/* if the alias is stored we enforce it (implicit overrides explicit) */
-		if (alias && alias_len && (alias_len != tmp_len || strncmp(alias, buffer, tmp_len)))
+		if (alias && alias_len && (alias_len != (int)tmp_len || strncmp(alias, buffer, tmp_len)))
 		{
 			buffer[tmp_len] = '\0';
 			efree(savebuf);
@@ -1616,13 +1616,13 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		efree(buffer);
 		php_stream_filter_flush(filter, 1);
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
-		if (offset + idata->internal_file->compressed_filesize != php_stream_tell(fp)) {
+		if (php_stream_tell(fp) != (off_t)(offset + idata->internal_file->compressed_filesize)) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
 			phar_entry_delref(idata TSRMLS_CC);
 			efree(internal_file);
 			return NULL;
 		}
-		if (php_stream_tell(idata->fp) != idata->internal_file->uncompressed_filesize) {
+		if (php_stream_tell(idata->fp) != (off_t)idata->internal_file->uncompressed_filesize) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
 			phar_entry_delref(idata TSRMLS_CC);
 			efree(internal_file);
@@ -1809,7 +1809,7 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 		return -1;
 	}
 	data->position = php_stream_tell(data->fp);
-	if (data->position > data->internal_file->uncompressed_filesize) {
+	if (data->position > (off_t)data->internal_file->uncompressed_filesize) {
 		data->internal_file->uncompressed_filesize = data->position;
 	}
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize; 
@@ -1875,12 +1875,12 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 {
 	static const char newstub[] = "<?php __HALT_COMPILER();";
 	phar_entry_info *entry;
-	int halt_offset, restore_alias_len, global_flags = 0, read, closeoldfile;
+	int halt_offset, restore_alias_len, global_flags = 0, closeoldfile;
 	char *buf;
 	char manifest[18], entry_buffer[24];
 	off_t manifest_ftell;
 	long offset;
-	size_t wrote;
+	size_t wrote, read;
 	php_uint32 manifest_len, mytime, loc, new_manifest_count;
 	php_uint32 newcrc32;
 	php_stream *file, *oldfile, *newfile, *stubfile;
@@ -1936,7 +1936,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			}
 			archive->halt_offset = offset;
 		} else {
-			if (len != php_stream_write(newfile, user_stub, len)) {
+			if ((size_t)len != php_stream_write(newfile, user_stub, len)) {
 				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
@@ -2115,7 +2115,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 
 	/* write the manifest header */
 	if (sizeof(manifest) != php_stream_write(newfile, manifest, sizeof(manifest))
-	|| archive->alias_len != php_stream_write(newfile, archive->alias, archive->alias_len)) {
+	|| (size_t)archive->alias_len != php_stream_write(newfile, archive->alias, archive->alias_len)) {
 		if (closeoldfile) {
 			php_stream_close(oldfile);
 		}
@@ -2471,7 +2471,7 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
 	/* this is only for APC, so use /dev/null device - no chance of conflict there! */
 	ssb->sb.st_dev = 0xc;
 	/* generate unique inode number for alias/filename, so no phars will conflict */
-	ssb->sb.st_ino = zend_get_hash_value(tmp, tmp_len);
+	ssb->sb.st_ino = (unsigned short)zend_get_hash_value(tmp, tmp_len);
 	efree(tmp);
 #ifndef PHP_WIN32
 	ssb->sb.st_blksize = -1;
@@ -2670,12 +2670,12 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 			/* root directory */
 			if (NULL != (found = (char *) memchr(key, '/', keylen))) {
 				/* the entry has a path separator and is a subdirectory */
-				entry = (char *) emalloc (found - key + 1);
+				entry = (char *) safe_emalloc(found - key, 1, 1);
 				memcpy(entry, key, found - key);
 				keylen = found - key;
 				entry[keylen] = '\0';
 			} else {
-				entry = (char *) emalloc (keylen + 1);
+				entry = (char *) safe_emalloc(keylen, 1, 1);
 				memcpy(entry, key, keylen);
 				entry[keylen] = '\0';
 			}
@@ -2701,14 +2701,14 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 		if (NULL != (found = (char *) memchr(save, '/', keylen - dirlen - 1))) {
 			/* is subdirectory */
 			save -= dirlen + 1;
-			entry = (char *) emalloc (found - save + dirlen + 1);
+			entry = (char *) safe_emalloc(found - save + dirlen, 1, 1);
 			memcpy(entry, save + dirlen + 1, found - save - dirlen - 1);
 			keylen = found - save - dirlen - 1;
 			entry[keylen] = '\0';
 		} else {
 			/* is file */
 			save -= dirlen + 1;
-			entry = (char *) emalloc (keylen - dirlen + 1);
+			entry = (char *) safe_emalloc(keylen - dirlen, 1, 1);
 			memcpy(entry, save + dirlen + 1, keylen - dirlen - 1);
 			entry[keylen - dirlen - 1] = '\0';
 			keylen = keylen - dirlen - 1;
