@@ -33,6 +33,20 @@ foreach($checks as $check)
 	file_put_contents($pname . '/' . $check, "error");
 }
 
+$phar = new Phar($fname);
+$checks = array("a\0");
+foreach($checks as $check)
+{
+	try
+	{
+		$phar[$check] = 'error';
+	}
+	catch(Exception $e)
+	{
+		echo 'Exception: ' . $e->getMessage() . "\n";
+	}
+}
+
 ?>
 ===DONE===
 --CLEAN--
@@ -46,4 +60,5 @@ Error: file_put_contents(phar://%s/../): failed to open stream: phar error: inva
 Error: file_put_contents(phar://%s/a/..): failed to open stream: phar error: invalid path "a/.." contains upper directory reference
 Error: file_put_contents(phar://%s/a/): failed to open stream: phar error: invalid path "a/" contains empty directory
 Error: file_put_contents(phar://%s/b//a.php): failed to open stream: phar error: invalid path "b//a.php" contains double slash
+Exception: Entry a does not exist and cannot be created: phar error: invalid path "a" contains illegal character
 ===DONE===
