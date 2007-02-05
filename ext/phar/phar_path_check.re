@@ -86,6 +86,11 @@ END {
 				(*s)++;
 				(*len)--;
 			}
+			if ((p - (const unsigned char*)*s) - 1 != *len)
+			{
+				*error ="illegal character";
+				return pcr_err_illegal_char;
+			}
 			*error = NULL;
 			return pcr_is_ok;
 		}
