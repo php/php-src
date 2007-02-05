@@ -1876,7 +1876,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	static const char newstub[] = "<?php __HALT_COMPILER();";
 	phar_entry_info *entry;
 	int halt_offset, restore_alias_len, global_flags = 0, closeoldfile;
-	char *buf;
+	char *buf, *pos;
 	char manifest[18], entry_buffer[24];
 	off_t manifest_ftell;
 	long offset;
@@ -1936,6 +1936,13 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			}
 			archive->halt_offset = offset;
 		} else {
+			if ((pos = strstr(user_stub, "__HALT_COMPILER();")) == NULL)
+			{
+				if (error) {
+					spprintf(error, 0, "illegal stub for phar \"%s\"", archive->fname);
+				}
+				return EOF;
+			}
 			if ((size_t)len != php_stream_write(newfile, user_stub, len)) {
 				if (closeoldfile) {
 					php_stream_close(oldfile);
