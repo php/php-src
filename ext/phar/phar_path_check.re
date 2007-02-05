@@ -24,6 +24,7 @@ phar_path_check_result phar_path_check(char **s, int *len, const char **error)
 {
 	const unsigned char *p = (const unsigned char*)*s;
 	const unsigned char *m;
+
 	if (*len == 1 && *p == '.') {
 		*error = "current directory reference";
 		return pcr_err_curr_dir;
@@ -31,6 +32,7 @@ phar_path_check_result phar_path_check(char **s, int *len, const char **error)
 		*error = "upper directory reference";
 		return pcr_err_up_dir;
 	}
+
 #define YYCTYPE         unsigned char
 #define YYCURSOR        p
 #define YYLIMIT         p+*len
@@ -40,6 +42,7 @@ phar_path_check_result phar_path_check(char **s, int *len, const char **error)
 loop:
 /*!re2c
 END = "\x00";
+ILL = [\x01-\x19\x80-\xFF];
 EOS = "/" | END;
 ANY = .;
 "//" 	{
@@ -73,6 +76,10 @@ ANY = .;
 			*len = (p - (const unsigned char*)*s) -1;
 			*error = NULL;
 			return pcr_use_query;
+		}
+ILL {
+			*error ="illegal character";
+			return pcr_err_illegal_char;
 		}
 END {
 			if (**s == '/') {
