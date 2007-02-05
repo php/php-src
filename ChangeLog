@@ -1,3 +1,32 @@
+2007-02-04  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c:
+      MFB: #39213
+      Fix for '' returned as ' '.
+      This only works with FreeTDS as microsofts library returns a length of 1
+      for an empty string!
+
+    * (PHP_5_2)
+      ext/mssql/php_mssql.c:
+      Fix for '' returned as ' '.
+      This only works with FreeTDS as microsofts library returns a length of 1
+      for an empty string!
+
+2007-02-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/http.c:
+      
+      Added a double free check.
+
+2007-02-04  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mbstring/config.w32:
+      MFB: Fix win32 build
+
+    * (PHP_5_2)
+      ext/mbstring/config.w32:
+      Fix win32 build
+
 2007-02-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
