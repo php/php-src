@@ -35,11 +35,11 @@ if the ini variable phar.require_hash is set to true.
  </lead>
  <date>2007-02-06</date>
  <version>
-  <release>0.1.0</release>
+  <release>1.0.0RC1</release>
   <api>1.0.0</api>
  </version>
  <stability>
-  <release>stable</release>
+  <release>beta</release>
   <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
