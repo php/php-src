@@ -28,4 +28,4 @@ __halt_compiler();
 --EXPECTF--
 string(25) "<?php echo new new class;"
 
-Parse error: syntax error, unexpected T_NEW, expecting T_STRING or T_VARIABLE or '$' in phar://%sphar_oo_test.phar.php/a.php on line %d
+Parse error: %s error%sexpecting%s in phar://%sphar_oo_test.phar.php/a.php on line %d
