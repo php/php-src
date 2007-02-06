@@ -417,6 +417,7 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 	efree(idata);
 	return ret;
 }
+/* }}} */
 
 /**
  * Removes an entry, either by actually removingit or by marking it.
