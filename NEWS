@@ -103,6 +103,7 @@ PHP                                                                        NEWS
   missing). (Tony)
 - Fixed bug #40285 (The PDO prepare parser goes into an infinite loop in
   some instances). (Ilia)
+- Fixed Bug #40274 (Sessions fail with numeric root keys). (Ilia)
 - Fixed bug #40259 (ob_start call many times - memory error). (Dmitry)
 - Fixed bug #40231 (file_exists incorrectly reports false). (Dmitry)
 - Fixed bug #40228 (ZipArchive::extractTo does create empty directories 
