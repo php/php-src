@@ -194,12 +194,12 @@ PHPAPI const char* php_get_temporary_directory(void)
 #ifdef P_tmpdir
 	/* Use the standard default temporary directory. */
 	if (P_tmpdir) {
-		temporary_directory = P_tmpdir;
+		temporary_directory = strdup(P_tmpdir);
 		return temporary_directory;
 	}
 #endif
 	/* Shouldn't ever(!) end up here ... last ditch default. */
-	temporary_directory = "/tmp";
+	temporary_directory = strdup("/tmp");
 	return temporary_directory;
 #endif
 }
