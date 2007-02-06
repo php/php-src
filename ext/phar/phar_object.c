@@ -70,15 +70,38 @@ PHP_METHOD(Phar, apiVersion)
 }
 /* }}}*/
 
-/* {{{ proto bool Phar::canCompress()
+/* {{{ proto bool Phar::canCompress([int method])
  * Returns whether phar extension supports compression using zlib/bzip2 */
 PHP_METHOD(Phar, canCompress)
 {
-#if HAVE_ZLIB || HAVE_BZ2
-	RETURN_TRUE;
+	long method = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &method) == FAILURE) {
+		return;
+	}
+
+	switch (method) {
+	case PHAR_ENT_COMPRESSED_GZ:
+#if HAVE_ZLIB
+		RETURN_TRUE;
 #else
-	RETURN_FALSE;
+		RETURN_FALSE;
 #endif
+
+	case PHAR_ENT_COMPRESSED_BZ2:
+#if HAVE_BZ2
+		RETURN_TRUE;
+#else
+		RETURN_FALSE;
+#endif
+
+	default:
+#if HAVE_ZLIB || HAVE_BZ2
+		RETURN_TRUE;
+#else
+		RETURN_FALSE;
+#endif
+	}
 }
 /* }}} */
 
