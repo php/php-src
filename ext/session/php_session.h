@@ -223,11 +223,16 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 
 #define PS_ENCODE_LOOP(code) do {									\
 		HashTable *_ht = Z_ARRVAL_P(PS(http_session_vars)); \
+		int key_type;						\
 																	\
 		for (zend_hash_internal_pointer_reset(_ht);			\
-				zend_hash_get_current_key_ex(_ht, &key, &key_length, &num_key, 0, NULL) == HASH_KEY_IS_STRING; \
+				(key_type = zend_hash_get_current_key_ex(_ht, &key, &key_length, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT; \
 				zend_hash_move_forward(_ht)) {				\
-				key_length--;										\
+			if (key_type == HASH_KEY_IS_LONG) {                                             \
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Skipping numeric key %ld.", num_key); \
+				continue;                                                               \
+			}										\
+			key_length--;										\
 			if (php_get_session_var(key, key_length, &struc TSRMLS_CC) == SUCCESS) { \
 				code;		 										\
 			} 														\
