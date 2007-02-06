@@ -1134,6 +1134,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 	const long readsize = sizeof(buffer) - sizeof(token);
 	const long tokenlen = sizeof(token) - 1;
 	long halt_offset;
+	size_t got;
 
 	/* Maybe it's better to compile the file instead of just searching,  */
 	/* but we only want the offset. So we want a .re scanner to find it. */
@@ -1149,7 +1150,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 	memset(buffer, 32, sizeof(token));
 	halt_offset = 0;
 	while(!php_stream_eof(fp)) {
-		if (php_stream_read(fp, buffer+tokenlen, readsize) < 0) {
+		if ((got = php_stream_read(fp, buffer+tokenlen, readsize)) < tokenlen) {
 			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
 		}
 		if ((pos = strstr(buffer, token)) != NULL) {
@@ -1157,8 +1158,8 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 			return phar_open_file(fp, fname, fname_len, alias, alias_len, halt_offset, pphar, error TSRMLS_CC);
 		}
 
-		halt_offset += readsize;
-		memmove(buffer, buffer + tokenlen, readsize + 1);
+		halt_offset += got;
+		memmove(buffer, buffer + tokenlen, got + 1);
 	}
 	
 	MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (__HALT_COMPILER(); not found)")
