@@ -880,13 +880,31 @@ PHP_METHOD(PharFileInfo, getPharFlags)
 }
 /* }}} */
 
+/* {{{ proto int PharFileInfo::chmod()
+ * set the file permissions for the Phar.  This only allows setting execution bit, read/write
+ */
+PHP_METHOD(PharFileInfo, chmod)
+{
+	long perms;
+	PHAR_ENTRY_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &perms) == FAILURE) {
+		return;
+	}	
+	/* clear permissions */ 
+	entry_obj->ent.entry->flags &= ~PHAR_ENT_PERM_MASK;
+	perms &= 0777;
+	entry_obj->ent.entry->flags |= perms;
+}
+/* }}} */
+
 /* {{{ proto int PharFileInfo::getMetaData()
  * Returns the metadata of the entry
  */
 PHP_METHOD(PharFileInfo, getMetadata)
 {
 	PHAR_ENTRY_OBJECT();
-
+	
 	if (entry_obj->ent.entry->metadata) {
 		RETURN_ZVAL(entry_obj->ent.entry->metadata, 1, 0);
 	}
@@ -1144,6 +1162,7 @@ zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, getPharFlags,       NULL,                       0)
 	PHP_ME(PharFileInfo, getMetadata,        NULL,                       0)
 	PHP_ME(PharFileInfo, setMetadata,        arginfo_entry_setMetadata,  0)
+	PHP_ME(PharFileInfo, chmod,              arginfo_entry_setMetadata,  0)
 	{NULL, NULL, NULL}
 };
 #endif
