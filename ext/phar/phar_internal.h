@@ -35,6 +35,7 @@
 #include "zend_qsort.h"
 #include "main/php_streams.h"
 #include "ext/standard/info.h"
+#include "ext/standard/basic_functions.h"
 #include "ext/standard/url.h"
 #include "ext/standard/crc32.h"
 #include "ext/standard/md5.h"

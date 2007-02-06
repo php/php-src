@@ -885,9 +885,13 @@ PHP_METHOD(PharFileInfo, getPharFlags)
  */
 PHP_METHOD(PharFileInfo, chmod)
 {
+	char *error;
 	long perms;
 	PHAR_ENTRY_OBJECT();
 
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Cannot modify permissions for file \"%s\" write operations are prohibited", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
+	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &perms) == FAILURE) {
 		return;
 	}	
@@ -895,6 +899,24 @@ PHP_METHOD(PharFileInfo, chmod)
 	entry_obj->ent.entry->flags &= ~PHAR_ENT_PERM_MASK;
 	perms &= 0777;
 	entry_obj->ent.entry->flags |= perms;
+	entry_obj->ent.entry->phar->is_modified = 1;
+	entry_obj->ent.entry->is_modified = 1;
+	/* hackish cache in php_stat needs to be cleared */
+	/* if this code fails to work, check main/streams/streams.c, _php_stream_stat_path */
+	if (BG(CurrentLStatFile)) {
+		efree(BG(CurrentLStatFile));
+	}
+	if (BG(CurrentStatFile)) {
+		efree(BG(CurrentStatFile));
+	}
+	BG(CurrentLStatFile) = NULL;
+	BG(CurrentStatFile) = NULL;
+
+	phar_flush(entry_obj->ent.entry->phar, 0, 0, &error TSRMLS_CC);
+	if (error) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		efree(error);
+	}
 }
 /* }}} */
 

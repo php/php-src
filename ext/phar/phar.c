@@ -1900,13 +1900,14 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	php_serialize_data_t metadata_hash;
 	smart_str metadata_str = {0};
 
+	if (error) {
+		*error = NULL;
+	}
+
 	if (PHAR_G(readonly)) {
 		return EOF;
 	}
 
-	if (error) {
-		*error = NULL;
-	}
 	if (archive->fp && !archive->is_brandnew) {
 		oldfile = archive->fp;
 		closeoldfile = 0;
@@ -1959,6 +1960,10 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		} else {
 			if ((pos = strstr(user_stub, "__HALT_COMPILER();")) == NULL)
 			{
+				if (closeoldfile) {
+					php_stream_close(oldfile);
+				}
+				php_stream_close(newfile);
 				if (error) {
 					spprintf(error, 0, "illegal stub for phar \"%s\"", archive->fname);
 				}
@@ -2277,10 +2282,20 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		if (entry->cfp) {
 			file = entry->cfp;
 			php_stream_rewind(file);
-		} else if (entry->is_modified || !oldfile) {
+		} else if (entry->fp && (entry->is_modified || !oldfile)) {
 			file = entry->fp;
 			php_stream_rewind(file);
 		} else {
+			if (!oldfile) {
+				if (closeoldfile) {
+					php_stream_close(oldfile);
+				}
+				php_stream_close(newfile);
+				if (error) {
+					spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, archive->fname);
+				}
+				return EOF;
+			}
 			if (-1 == php_stream_seek(oldfile, entry->offset_within_phar + archive->internal_file_start, SEEK_SET)) {
 				if (closeoldfile) {
 					php_stream_close(oldfile);
@@ -2399,6 +2414,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	} else {
 		archive->fp = php_stream_open_wrapper(archive->fname, "w+b", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 		if (!archive->fp) {
+			php_stream_close(newfile);
 			archive->fp = newfile;
 			if (error) {
 				spprintf(error, 0, "unable to open new phar \"%s\" for writing", archive->fname);
@@ -2414,6 +2430,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		if (error) {
 			spprintf(error, 0, "unable to seek to __HALT_COMPILER(); in new phar \"%s\"", archive->fname);
 		}
+		php_stream_close(newfile);
 		return EOF;
 	}
 
