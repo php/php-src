@@ -2429,7 +2429,6 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		if (error) {
 			spprintf(error, 0, "unable to seek to __HALT_COMPILER(); in new phar \"%s\"", archive->fname);
 		}
-		php_stream_close(newfile);
 		return EOF;
 	}
 
