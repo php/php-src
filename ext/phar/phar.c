@@ -525,14 +525,14 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 
 #ifdef WORDS_BIGENDIAN
 # define PHAR_GET_32(buffer, var) \
-	var = ((unsigned char)(buffer)[3]) << 24 \
-		+ ((unsigned char)(buffer)[2]) << 16 \
-		+ ((unsigned char)(buffer)[1]) <<  8 \
-		+ ((unsigned char)(buffer)[0]); \
+	var = ((((unsigned char*)(buffer))[3]) << 24) \
+		| ((((unsigned char*)(buffer))[2]) << 16) \
+		| ((((unsigned char*)(buffer))[1]) <<  8) \
+		| (((unsigned char*)(buffer))[0]); \
 	(buffer) += 4
 # define PHAR_GET_16(buffer, var) \
-	var = ((unsigned char)(buffer)[1]) <<  8 \
-		+ ((unsigned char)(buffer)[0]); \
+	var = ((((unsigned char*)(buffer))[1]) <<  8) \
+		| (((unsigned char*)(buffer))[0]); \
 	(buffer) += 2
 #else
 # define PHAR_GET_32(buffer, var) \
