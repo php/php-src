@@ -596,6 +596,8 @@ static int phar_parse_metadata(php_stream *fp, char **buffer, char *endbuffer, z
 			return FAILURE;
 		}
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	} else {
+		*metadata = NULL;
 	}
 	*buffer += buf_len;
 	return SUCCESS;
@@ -869,13 +871,10 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	}
 
 	mydata = ecalloc(sizeof(phar_archive_data), 1);
-	if (*(php_uint32 *) buffer) {
-		if (phar_parse_metadata(fp, &buffer, endbuffer, &mydata->metadata TSRMLS_CC) == FAILURE) {
-			MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
-		}
-	} else {
-		mydata->metadata = 0;
-		buffer += 4;
+
+	/* check whetehr we have meta data, zero check works regardless of byte order */
+	if (phar_parse_metadata(fp, &buffer, endbuffer, &mydata->metadata TSRMLS_CC) == FAILURE) {
+		MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
 	}
 	
 	/* set up our manifest */
@@ -911,13 +910,9 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		PHAR_GET_32(buffer, entry.compressed_filesize);
 		PHAR_GET_32(buffer, entry.crc32);
 		PHAR_GET_32(buffer, entry.flags);
-		if (*(php_uint32 *) buffer) {
-			if (phar_parse_metadata(fp, &buffer, endbuffer, &entry.metadata TSRMLS_CC) == FAILURE) {
-				efree(entry.filename);
-				MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
-			}
-		} else {
-			buffer += 4;
+		if (phar_parse_metadata(fp, &buffer, endbuffer, &entry.metadata TSRMLS_CC) == FAILURE) {
+			efree(entry.filename);
+			MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
 		}
 		entry.offset_within_phar = offset;
 		offset += entry.compressed_filesize;
