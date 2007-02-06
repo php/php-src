@@ -35,7 +35,7 @@ if the ini variable phar.require_hash is set to true.
  </lead>
  <date>2007-02-06</date>
  <version>
-  <release>1.0.0RC1</release>
+  <release>1.0.0RC2</release>
   <api>1.0.0</api>
  </version>
  <stability>
