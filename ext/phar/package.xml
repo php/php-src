@@ -47,7 +47,7 @@ if the ini variable phar.require_hash is set to true.
   Initial release.  This release is fully regression-tested
 
   This extension is only compatible with phar archives compliant with PHP_Archive
-  0.9.0 (api Version 1.0.0)
+  0.10.0 (api Version 1.0.0)
  </notes>
  <contents>
   <dir name="/">
