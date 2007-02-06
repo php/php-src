@@ -2414,7 +2414,6 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	} else {
 		archive->fp = php_stream_open_wrapper(archive->fname, "w+b", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 		if (!archive->fp) {
-			php_stream_close(newfile);
 			archive->fp = newfile;
 			if (error) {
 				spprintf(error, 0, "unable to open new phar \"%s\" for writing", archive->fname);
