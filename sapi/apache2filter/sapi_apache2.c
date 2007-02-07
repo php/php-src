@@ -440,7 +440,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 {
 	php_struct *ctx;
 	apr_bucket *b;
-	void *conf = ap_get_module_config(f->r->per_dir_config, &php5_module);
+	void *conf = ap_get_module_config(f->r->per_dir_config, &php6_module);
 	char *p = get_php_config(conf, "engine", sizeof("engine"));
 	TSRMLS_FETCH();
 
@@ -701,7 +701,7 @@ static void php_register_hook(apr_pool_t *p)
 	ap_register_input_filter("PHP", php_input_filter, php_apache_disable_caching, AP_FTYPE_RESOURCE);
 }
 
-AP_MODULE_DECLARE_DATA module php5_module = {
+AP_MODULE_DECLARE_DATA module php6_module = {
 	STANDARD20_MODULE_STUFF,
 	create_php_config,		/* create per-directory config structure */
 	merge_php_config,		/* merge per-directory config structures */
