@@ -26,7 +26,14 @@
 #include "php_apache.h"
 
 AP_MODULE_DECLARE_DATA module php6_module = {
-	STANDARD20_MODULE_STUFF,
+	MODULE_MAGIC_NUMBER_MAJOR, 
+	MODULE_MAGIC_NUMBER_MINOR, 
+	-1, 
+	"mod_php6.c", 
+	NULL, 
+	NULL, 
+	MODULE_MAGIC_COOKIE, 
+	NULL,
 	create_php_config,		/* create per-directory config structure */
 	merge_php_config,		/* merge per-directory config structures */
 	NULL,					/* create per-server config structure */
