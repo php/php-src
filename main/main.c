@@ -83,6 +83,7 @@
 #include "php_ticks.h"
 #include "php_logos.h"
 #include "php_streams.h"
+#include "php_open_temporary_file.h"
 
 #include "SAPI.h"
 #include "rfc1867.h"
@@ -1691,6 +1692,8 @@ void php_module_shutdown(TSRMLS_D)
 	zend_ini_global_shutdown(TSRMLS_C);
 	ts_free_id(core_globals_id);	
 #endif
+
+	php_shutdown_temporary_directory();
 
 	module_initialized = 0;
 }
