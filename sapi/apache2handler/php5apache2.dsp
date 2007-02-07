@@ -1,25 +1,25 @@
-# Microsoft Developer Studio Project File - Name="php5apache2" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="php6apache2" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
-CFG=php5apache2 - Win32 Debug_TS
+CFG=php6apache2 - Win32 Debug_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "php5apache2.mak".
+!MESSAGE NMAKE /f "php6apache2.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "php5apache2.mak" CFG="php5apache2 - Win32 Debug_TS"
+!MESSAGE NMAKE /f "php6apache2.mak" CFG="php6apache2 - Win32 Debug_TS"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "php5apache2 - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php5apache2 - Win32 Release_TS_inline" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php5apache2 - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php6apache2 - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php6apache2 - Win32 Release_TS_inline" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php6apache2 - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -30,7 +30,7 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "php5apache2 - Win32 Release_TS"
+!IF  "$(CFG)" == "php6apache2 - Win32 Release_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -54,9 +54,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 php5ts.lib libhttpd.lib libapr.lib libaprutil.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /libpath:"..\..\Release_TS" /libpath:"..\..\TSRM\Release_TS" /libpath:"..\..\Zend\Release_TS"
+# ADD LINK32 php6ts.lib libhttpd.lib libapr.lib libaprutil.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /libpath:"..\..\Release_TS" /libpath:"..\..\TSRM\Release_TS" /libpath:"..\..\Zend\Release_TS"
 
-!ELSEIF  "$(CFG)" == "php5apache2 - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php6apache2 - Win32 Release_TS_inline"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -80,9 +80,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 php5ts.lib libhttpd.lib libapr.lib libaprutil.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS_inline/php5apache2.dll" /libpath:"..\..\Release_TS_inline" /libpath:"..\..\TSRM\Release_TS_inline" /libpath:"..\..\Zend\Release_TS_inline"
+# ADD LINK32 php6ts.lib libhttpd.lib libapr.lib libaprutil.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS_inline/php6apache2.dll" /libpath:"..\..\Release_TS_inline" /libpath:"..\..\TSRM\Release_TS_inline" /libpath:"..\..\Zend\Release_TS_inline"
 
-!ELSEIF  "$(CFG)" == "php5apache2 - Win32 Debug_TS"
+!ELSEIF  "$(CFG)" == "php6apache2 - Win32 Debug_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -105,15 +105,15 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 php5ts_debug.lib libhttpd.lib libapr.lib libaprutil.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"..\..\Debug_TS" /libpath:"..\..\TSRM\Debug_TS" /libpath:"..\..\Zend\Debug_TS"
+# ADD LINK32 php6ts_debug.lib libhttpd.lib libapr.lib libaprutil.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"..\..\Debug_TS" /libpath:"..\..\TSRM\Debug_TS" /libpath:"..\..\Zend\Debug_TS"
 
 !ENDIF 
 
 # Begin Target
 
-# Name "php5apache2 - Win32 Release_TS"
-# Name "php5apache2 - Win32 Release_TS_inline"
-# Name "php5apache2 - Win32 Debug_TS"
+# Name "php6apache2 - Win32 Release_TS"
+# Name "php6apache2 - Win32 Release_TS_inline"
+# Name "php6apache2 - Win32 Debug_TS"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
@@ -123,7 +123,7 @@ SOURCE=.\apache_config.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mod_php5.c
+SOURCE=.\mod_php.c
 # End Source File
 # Begin Source File
 
