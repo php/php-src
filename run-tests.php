@@ -700,8 +700,8 @@ if ($just_save_results || !getenv('NO_INTERACTION')) {
 
 		if (substr(PHP_OS, 0, 3) != "WIN") {
 			/* If PHP_AUTOCONF is set, use it; otherwise, use 'autoconf'. */
-			if (!empty($_ENV['PHP_AUTOCONF'])) {
-				$autoconf = shell_exec($_ENV['PHP_AUTOCONF'] . ' --version');
+			if (getenv('PHP_AUTOCONF')) {
+				$autoconf = shell_exec(getenv('PHP_AUTOCONF') . ' --version');
 			} else {
 				$autoconf = shell_exec('autoconf --version');
 			}
@@ -1511,11 +1511,13 @@ COMMAND $cmd
 	}
 
 	if ($leaked) {
-		$restype = 'LEAK';
-	} else if ($warn) {
-		$restype = 'WARN';
-	} else {
-		$restype = 'FAIL';
+		$restype[] = 'LEAK';
+	}
+	if ($warn) {
+		$restype[] = 'WARN';
+	}
+	if (!$passed) {
+		$restype[] = 'FAIL';
 	}
 
 	if (!$passed) {
@@ -1547,21 +1549,23 @@ $output
 		}
 	}
 
-	show_result($restype, $tested, $tested_file, $info, $temp_filenames);
+	show_result(implode('&', $restype), $tested, $tested_file, $info, $temp_filenames);
 
-	$PHP_FAILED_TESTS[$restype.'ED'][] = array (
+	foreach ($restype as $type) {
+		$PHP_FAILED_TESTS[$type.'ED'][] = array (
 						'name' => $file,
 						'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
 						'output' => $output_filename,
 						'diff'   => $diff_filename,
 						'info'   => $info,
 						);
+	}
 
 	if (isset($old_php)) {
 		$php = $old_php;
 	}
 
-	return $restype.'ED';
+	return $restype[0].'ED';
 }
 
 function comp_line($l1,$l2,$is_reg)
