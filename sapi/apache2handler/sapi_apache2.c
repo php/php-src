@@ -61,7 +61,7 @@
 
 #define PHP_MAGIC_TYPE "application/x-httpd-php"
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
-#define PHP_SCRIPT "php5-script"
+#define PHP_SCRIPT "php6-script"
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
@@ -468,7 +468,7 @@ typedef struct {
 } php_conf_rec;
 		char *str;
 		uint str_len;
-		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php5_module);
+		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php6_module);
 
 		for (zend_hash_internal_pointer_reset(&c->config); 
 				zend_hash_get_current_key_ex(&c->config, &str, &str_len, NULL, 0,  NULL) == HASH_KEY_IS_STRING;
@@ -496,7 +496,7 @@ static int php_handler(request_rec *r)
 
 #define PHPAP_INI_OFF php_apache_ini_dtor(r, parent_req TSRMLS_CC);
 
-	conf = ap_get_module_config(r->per_dir_config, &php5_module);
+	conf = ap_get_module_config(r->per_dir_config, &php6_module);
 
 	/* apply_config() needs r in some cases, so allocate server_context early */
 	ctx = SG(server_context);

@@ -25,7 +25,7 @@
 #include "php.h"
 #include "php_apache.h"
 
-AP_MODULE_DECLARE_DATA module php5_module = {
+AP_MODULE_DECLARE_DATA module php6_module = {
 	STANDARD20_MODULE_STUFF,
 	create_php_config,		/* create per-directory config structure */
 	merge_php_config,		/* merge per-directory config structures */
