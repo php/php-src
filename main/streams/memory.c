@@ -282,7 +282,7 @@ PHPAPI php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_seek,
 	php_stream_memory_cast,
 	php_stream_memory_stat,
-	NULL /* php_stream_memory_set_option */
+	php_stream_memory_set_option
 };
 
 
@@ -729,7 +729,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 	return stream;
 }
 
-static php_stream_wrapper_ops php_stream_rfc2397_wops = {
+PHPAPI php_stream_wrapper_ops php_stream_rfc2397_wops = {
 	php_stream_url_wrap_rfc2397,
 	NULL, /* close */
 	NULL, /* fstat */
@@ -742,7 +742,7 @@ static php_stream_wrapper_ops php_stream_rfc2397_wops = {
 	NULL  /* rmdir */
 };
 
-php_stream_wrapper php_stream_rfc2397_wrapper =	{
+PHPAPI php_stream_wrapper php_stream_rfc2397_wrapper =	{
 	&php_stream_rfc2397_wops,
 	NULL,
 	1, /* is_url */
