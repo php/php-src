@@ -33,7 +33,7 @@ if the ini variable phar.require_hash is set to true.
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-02-06</date>
+ <date>2007-02-07</date>
  <version>
   <release>1.0.0RC2</release>
   <api>1.0.0</api>
@@ -55,6 +55,7 @@ if the ini variable phar.require_hash is set to true.
     <file name="001.phpt" role="test"/>
     <file name="002.phpt" role="test"/>
     <file name="003.phpt" role="test"/>
+    <file name="003a.phpt" role="test"/>
     <file name="004.phpt" role="test"/>
     <file name="005.phpt" role="test"/>
     <file name="006.phpt" role="test"/>
