@@ -2882,7 +2882,7 @@ ZEND_API int zend_fcall_info_init(zval *callable, zend_fcall_info *fci, zend_fca
 	return SUCCESS;
 }
 
-static inline void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem)
+ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem)
 {
 	if (fci->params) {
 		while (fci->param_count) {
@@ -2896,7 +2896,7 @@ static inline void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem
 	fci->param_count = 0;
 }
 
-static inline void zend_fcall_info_args_save(zend_fcall_info *fci, int *param_count, zval ****params)
+ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, int *param_count, zval ****params)
 {
 	*param_count = fci->param_count;
 	*params = fci->params;
@@ -2904,7 +2904,7 @@ static inline void zend_fcall_info_args_save(zend_fcall_info *fci, int *param_co
 	fci->params = NULL;
 }
 
-static inline void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count, zval ***params)
+ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count, zval ***params)
 {
 	zend_fcall_info_args_clear(fci, 1);
 	fci->param_count = param_count;
