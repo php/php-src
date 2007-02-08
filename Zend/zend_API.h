@@ -1527,14 +1527,36 @@ ZEND_API extern zend_fcall_info_cache empty_fcall_info_cache;
  */
 ZEND_API int zend_fcall_info_init(zval *callable, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *callable_name TSRMLS_DC);
 
+/** Clear argumens connected with zend_fcall_info *fci
+ * If free_mem is not zero then the params array gets free'd as well
+ */
 ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem);
+
+/** Save current arguments from zend_fcall_info *fci
+ * params array will be set to NULL
+ */
 ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, int *param_count, zval ****params);
+
+/** Free arguments connected with zend_fcall_info *fci andset back saved ones.
+ */
 ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count, zval ***params);
 
 /** Set or clear the arguments in the zend_call_info struct taking care of
  * refcount. If args is NULL and arguments are set then those are cleared.
  */
 ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC);
+
+/** Set arguments in the zend_fcall_info struct taking care of refcount.
+ * If argc is 0 the arguments which are set will be cleared, else pass
+ * a variable amount of zval** arguments.
+ */
+ZEND_API int zend_fcall_info_argp(zend_fcall_info *fci TSRMLS_DC, int argc, zval ***argv);
+
+/** Set arguments in the zend_fcall_info struct taking care of refcount.
+ * If argc is 0 the arguments which are set will be cleared, else pass
+ * a variable amount of zval** arguments.
+ */
+ZEND_API int zend_fcall_info_argv(zend_fcall_info *fci TSRMLS_DC, int argc, va_list *argv);
 
 /** Set arguments in the zend_fcall_info struct taking care of refcount.
  * If argc is 0 the arguments which are set will be cleared, else pass
