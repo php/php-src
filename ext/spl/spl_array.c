@@ -42,8 +42,6 @@ zend_object_handlers spl_handler_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 
-PHPAPI zend_class_entry  *spl_ce_Countable;
-
 #define SPL_ARRAY_STD_PROP_LIST      0x00000001
 #define SPL_ARRAY_ARRAY_AS_PROPS     0x00000002
 #define SPL_ARRAY_OVERLOADED_REWIND  0x00010000
@@ -1495,11 +1493,6 @@ static zend_function_entry spl_funcs_RecursiveArrayIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry spl_funcs_Countable[] = {
-	SPL_ABSTRACT_ME(Countable, count,   NULL)
-	{NULL, NULL, NULL}
-};
-
 /* {{{ PHP_MINIT_FUNCTION(spl_array) */
 PHP_MINIT_FUNCTION(spl_array)
 {
@@ -1533,8 +1526,6 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(RecursiveArrayIterator, RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
 
-	REGISTER_SPL_INTERFACE(Countable);
-	
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Countable);
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Countable);
 
