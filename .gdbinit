@@ -95,7 +95,11 @@ define ____printzv_contents
 	set $zvalue = $arg0
 	set $type = $zvalue->type
 
-	printf "(refcount=%d) ", $zvalue->refcount
+	printf "(refcount=%d", $zvalue->refcount
+	if $zvalue->is_ref
+		printf ",is_ref"
+	end
+	printf ") "
 	if $type == 0
 		printf "NULL"
 	end
