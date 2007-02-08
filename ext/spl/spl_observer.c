@@ -25,6 +25,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_var.h"
+#include "ext/standard/php_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
@@ -34,6 +36,7 @@
 #include "spl_observer.h"
 #include "spl_iterators.h"
 #include "spl_array.h"
+#include "spl_exceptions.h"
 
 SPL_METHOD(SplObserver, update);
 SPL_METHOD(SplSubject, attach);
@@ -121,18 +124,8 @@ static zend_object_value spl_SplObjectStorage_new(zend_class_entry *class_type T
 }
 /* }}} */
 
-/* {{{ proto void SplObjectStorage::attach($obj)
- Attaches an object to the storage if not yet contained */
-SPL_METHOD(SplObjectStorage, attach)
+void spl_object_storage_attach(spl_SplObjectStorage *intern, zval *obj TSRMLS_DC) /* {{{ */
 {
-	zval *obj;
-
-	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
-		return;
-	}
-
 #if HAVE_PACKED_OBJECT_VALUE
 	zend_hash_update(&intern->storage, (char*)&Z_OBJVAL_P(obj), sizeof(zend_object_value), &obj, sizeof(zval*), NULL);	
 #else
@@ -146,6 +139,20 @@ SPL_METHOD(SplObjectStorage, attach)
 #endif
 
 	obj->refcount++;
+} /* }}} */
+
+/* {{{ proto void SplObjectStorage::attach($obj)
+ Attaches an object to the storage if not yet contained */
+SPL_METHOD(SplObjectStorage, attach)
+{
+	zval *obj;
+
+	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
+		return;
+	}
+	spl_object_storage_attach(intern, obj TSRMLS_CC);
 } /* }}} */
 
 /* {{{ proto void SplObjectStorage::detach($obj)
@@ -259,9 +266,152 @@ SPL_METHOD(SplObjectStorage, next)
 	intern->index++;
 } /* }}} */
 
+/* {{{ proto string SplObjectStorage::serialize()
+ */
+SPL_METHOD(SplObjectStorage, serialize)
+{
+	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	zval **entry, members, *pmembers;
+	HashPosition      pos;
+	php_serialize_data_t var_hash;
+	smart_str buf = {0};
+
+	PHP_VAR_SERIALIZE_INIT(var_hash);
+
+	/* storage */
+	smart_str_appendl(&buf, "x:i:", 4);
+	smart_str_append_long(&buf, zend_hash_num_elements(&intern->storage));
+	smart_str_appendc(&buf, ';');
+
+	zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
+
+	while(zend_hash_has_more_elements_ex(&intern->storage, &pos) == SUCCESS) {
+		if (zend_hash_get_current_data_ex(&intern->storage, (void**)&entry, &pos) == FAILURE) {
+			smart_str_free(&buf);
+			PHP_VAR_SERIALIZE_DESTROY(var_hash);
+			RETURN_NULL();
+		}
+		php_var_serialize(&buf, entry, &var_hash TSRMLS_CC);
+		smart_str_appendc(&buf, ';');
+		zend_hash_move_forward_ex(&intern->storage, &pos);
+	}
+
+	/* members */
+	smart_str_appendl(&buf, "m:", 2);
+	INIT_PZVAL(&members);
+	Z_ARRVAL(members) = intern->std.properties;
+	Z_TYPE(members) = IS_ARRAY;
+	pmembers = &members;
+	php_var_serialize(&buf, &pmembers, &var_hash TSRMLS_CC); /* finishes the string */
+
+	/* done */
+	PHP_VAR_SERIALIZE_DESTROY(var_hash);
+
+	if (buf.c) {
+		RETURN_STRINGL(buf.c, buf.len, 0);
+	} else {
+		RETURN_NULL();
+	}
+	
+} /* }}} */
+
+/* {{{ proto void SplObjectStorage::unserialize(string serialized)
+ */
+SPL_METHOD(SplObjectStorage, unserialize)
+{
+	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	char *buf;
+	int buf_len;
+	const unsigned char *p, *s;
+	php_unserialize_data_t var_hash;
+	zval *pentry, *pmembers, *pcount = NULL;
+	long count;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
+		return;
+	}
+
+	if (buf_len == 0) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Empty serialized string cannot be empty");
+		return;
+	}
+
+	/* storage */
+	s = p = (const unsigned char*)buf;
+	PHP_VAR_UNSERIALIZE_INIT(var_hash);
+
+	if (*p!= 'x' || *++p != ':') {
+		goto outexcept;
+	}
+	++p;
+
+	ALLOC_INIT_ZVAL(pcount);
+	if (!php_var_unserialize(&pcount, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(pcount) != IS_LONG) {
+		zval_ptr_dtor(&pcount);
+		goto outexcept;
+	}
+
+	--p; /* for ';' */
+	count = Z_LVAL_P(pcount);
+	zval_ptr_dtor(&pcount);
+		
+	while(count-- > 0) {
+		if (*p != ';') {
+			goto outexcept;
+		}
+		++p;
+		ALLOC_INIT_ZVAL(pentry);
+		if (!php_var_unserialize(&pentry, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+			zval_ptr_dtor(&pentry);
+			goto outexcept;
+		}
+		spl_object_storage_attach(intern, pentry TSRMLS_CC);
+		zval_ptr_dtor(&pentry);
+	}
+
+	if (*p != ';') {
+		goto outexcept;
+	}
+	++p;
+
+	/* members */
+	if (*p!= 'm' || *++p != ':') {
+		goto outexcept;
+	}
+	++p;
+
+	ALLOC_INIT_ZVAL(pmembers);
+	if (!php_var_unserialize(&pmembers, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+		zval_ptr_dtor(&pmembers);
+		goto outexcept;
+	}
+
+	/* copy members */
+	zend_hash_copy(intern->std.properties, Z_ARRVAL_P(pmembers), (copy_ctor_func_t) zval_add_ref, (void *) NULL, sizeof(zval *));
+	zval_ptr_dtor(&pmembers);
+
+	/* done reading $serialized */
+
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	return;
+
+outexcept:
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+	return;
+
+} /* }}} */
+
 static
 ZEND_BEGIN_ARG_INFO(arginfo_Object, 0)
 	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_Serialized, 0)
+	ZEND_ARG_INFO(0, serialized)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_SplObjectStorage[] = {
@@ -274,6 +424,8 @@ static zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_ME(SplObjectStorage,  key,         NULL,                  0)
 	SPL_ME(SplObjectStorage,  current,     NULL,                  0)
 	SPL_ME(SplObjectStorage,  next,        NULL,                  0)
+	SPL_ME(SplObjectStorage,  unserialize, arginfo_Serialized,    0)
+	SPL_ME(SplObjectStorage,  serialize,   NULL,                  0)
 	{NULL, NULL, NULL}
 };
 
@@ -288,7 +440,8 @@ PHP_MINIT_FUNCTION(spl_observer)
 
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Countable);
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Iterator);
-	
+	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Serializable);
+
 	return SUCCESS;
 }
 /* }}} */
