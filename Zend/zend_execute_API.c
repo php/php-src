@@ -1053,7 +1053,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			EG(scope) = EX(function_state).function->common.scope;
 		}
 		((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, EX(function_state).function->common.return_reference?fci->retval_ptr_ptr:NULL, (fci->object_pp?*fci->object_pp:NULL), 1 TSRMLS_CC);
-		INIT_PZVAL(*fci->retval_ptr_ptr);
+		if (!EX(function_state).function->common.return_reference)
+		{
+			INIT_PZVAL(*fci->retval_ptr_ptr);
+		}
 	}
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
 	if (call_via_handler) {
