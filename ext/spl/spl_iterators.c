@@ -57,6 +57,7 @@ PHPAPI zend_class_entry *spl_ce_EmptyIterator;
 PHPAPI zend_class_entry *spl_ce_AppendIterator;
 PHPAPI zend_class_entry *spl_ce_RegexIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
+PHPAPI zend_class_entry *spl_ce_Countable;
 
 zend_function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  NULL)
@@ -2272,6 +2273,23 @@ SPL_METHOD(CachingIterator, setFlags)
 }
 /* }}} */
 
+/* {{{ proto void CachingIterator::count()
+   Number of cached elements */
+SPL_METHOD(CachingIterator, count)
+{
+	spl_dual_it_object   *intern;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "%v does not use a full cache (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name);
+		return;
+	}
+
+	RETURN_LONG(zend_hash_num_elements(HASH_OF(intern->u.caching.zcache)));
+}
+/* }}} */
+
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_it___construct, 0, 0, 1) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
@@ -2311,6 +2329,7 @@ static zend_function_entry spl_funcs_CachingIterator[] = {
 	SPL_ME(CachingIterator, offsetUnset,      arginfo_caching_it_offsetGet,   ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, offsetExists,     arginfo_caching_it_offsetGet,   ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, getCache,         NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, count,            NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2897,6 +2916,11 @@ static zend_function_entry spl_funcs_OuterIterator[] = {
 	{NULL, NULL, NULL}
 };
 
+static zend_function_entry spl_funcs_Countable[] = {
+	SPL_ABSTRACT_ME(Countable, count,   NULL)
+	{NULL, NULL, NULL}
+};
+
 /* {{{ PHP_MINIT_FUNCTION(spl_iterators)
  */
 PHP_MINIT_FUNCTION(spl_iterators)
@@ -2939,6 +2963,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 
 	REGISTER_SPL_SUB_CLASS_EX(ParentIterator, RecursiveFilterIterator, spl_dual_it_new, spl_funcs_ParentIterator);
 
+	REGISTER_SPL_INTERFACE(Countable);
 	REGISTER_SPL_INTERFACE(SeekableIterator);
 	REGISTER_SPL_ITERATOR(SeekableIterator);
 
@@ -2946,6 +2971,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 
 	REGISTER_SPL_SUB_CLASS_EX(CachingIterator, IteratorIterator, spl_dual_it_new, spl_funcs_CachingIterator);
 	REGISTER_SPL_IMPLEMENTS(CachingIterator, ArrayAccess);
+	REGISTER_SPL_IMPLEMENTS(CachingIterator, Countable);
 
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CALL_TOSTRING",        CIT_CALL_TOSTRING); 
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CATCH_GET_CHILD",      CIT_CATCH_GET_CHILD); 
