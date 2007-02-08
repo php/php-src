@@ -866,7 +866,6 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	int max_num_args = 0;
 	int post_varargs = 0;
 	zval **arg;
-	void **p;
 	int arg_count;
 	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
 	zend_bool have_varargs = 0;
@@ -887,7 +886,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			case 'o': case 'O':
 			case 'z': case 'Z':
 			case 't': case 'u':
-		   	case 'C': case 'h':
+			case 'C': case 'h':
 			case 'U': case 'S':
 			case 'f': case 'x':
 				max_num_args++;
@@ -958,8 +957,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 		return FAILURE;
 	}
 
-	p = EG(argument_stack).top_element-2;
-	arg_count = (ulong) *p;
+	arg_count = (ulong) *(EG(argument_stack).top_element-2);
 
 	if (num_args > arg_count) {
 		zend_error(E_WARNING, "%v(): could not obtain parameters for parsing",
@@ -972,7 +970,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 		for (spec_walk = type_spec, i = 0; *spec_walk && i < num_args; spec_walk++) {
 			switch (*spec_walk) {
 				case 'T':
-					arg = (zval **) p - (arg_count-i);
+					arg = (zval **) (EG(argument_stack).top_element - 2 - (arg_count-i));
 					if (Z_TYPE_PP(arg) == IS_UNICODE && (T_arg_type == -1 || T_arg_type == IS_STRING)) {
 						/* we can upgrade from strings to Unicode */
 						T_arg_type = IS_UNICODE;
@@ -1019,13 +1017,14 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 			if (num_varargs > 0) {
 				int iv = 0;
+				zval **p = (zval **) (EG(argument_stack).top_element - 2 - (arg_count - i));
+
 				*n_varargs = num_varargs;
 
 				/* allocate space for array and store args */
 				*varargs = safe_emalloc(num_varargs, sizeof(zval **), 0);
 				while (num_varargs-- > 0) {
-					(*varargs)[iv++] = (zval **) p - (arg_count-i);
-					i++;
+					(*varargs)[iv++] = p++;
 				}
 
 				/* adjust how many args we have left and restart loop */
@@ -1037,7 +1036,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			}
 		}
 
-		arg = (zval **) p - (arg_count-i);
+		arg = (zval **) (EG(argument_stack).top_element - 2 - (arg_count-i));
 
 		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet, T_arg_type TSRMLS_CC) == FAILURE) {
 			/* clean up varargs array if it was used */
@@ -2939,11 +2938,33 @@ ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC)
 	return SUCCESS;
 }
 
-ZEND_API int zend_fcall_info_argn(zend_fcall_info *fci TSRMLS_DC, int argc, ...)
+ZEND_API int zend_fcall_info_argp(zend_fcall_info *fci TSRMLS_DC, int argc, zval ***argv)
+{
+	int i;
+	
+	if (argc < 0) {
+		return FAILURE;
+	}
+	
+	zend_fcall_info_args_clear(fci, !argc);
+	
+	if (argc) {
+		fci->param_count = argc;
+		fci->params = (zval ***) erealloc(fci->params, fci->param_count * sizeof(zval **));
+
+		for (i = 0; i < argc; ++i) {
+			ZVAL_ADDREF(*(argv[i]));
+			fci->params[i] = argv[i];
+		}
+	}
+	
+	return SUCCESS;
+}
+
+ZEND_API int zend_fcall_info_argv(zend_fcall_info *fci TSRMLS_DC, int argc, va_list *argv)
 {
 	int i;
 	zval **arg;
-	va_list argv;
 	
 	if (argc < 0) {
 		return FAILURE;
@@ -2955,16 +2976,26 @@ ZEND_API int zend_fcall_info_argn(zend_fcall_info *fci TSRMLS_DC, int argc, ...)
 		fci->param_count = argc;
 		fci->params = (zval ***) erealloc(fci->params, fci->param_count * sizeof(zval **));
 		
-		va_start(argv, argc);
 		for (i = 0; i < argc; ++i) {
-			arg = va_arg(argv, zval **);
+			arg = va_arg(*argv, zval **);
 			ZVAL_ADDREF(*arg);
 			fci->params[i] = arg;
 		}
-		va_end(argv);
 	}
 	
 	return SUCCESS;
+}
+
+ZEND_API int zend_fcall_info_argn(zend_fcall_info *fci TSRMLS_DC, int argc, ...)
+{
+	int ret;
+	va_list argv;
+	
+	va_start(argv, argc);
+	ret = zend_fcall_info_argv(fci TSRMLS_CC, argc, &argv);
+	va_end(argv);
+	
+	return ret;
 }
 
 ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval **retval_ptr_ptr, zval *args TSRMLS_DC)
