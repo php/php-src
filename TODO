@@ -129,7 +129,6 @@ ext/standard
 ext/wddx
 --------
     * See if we can support the remaining data types:
-        dateTime
         binary
 
         http://www.wddx.org/WDDX_SDK_10a/7__References/WDDX_DTD.htm
