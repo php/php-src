@@ -1368,7 +1368,7 @@ ZEND_API opcode_handler_t *zend_opcode_handlers;
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC)
 {
 	zval **return_value_ptr = &(*(temp_variable *)((char *) execute_data_ptr->Ts + execute_data_ptr->opline->result.u.var)).var.ptr;
-	((zend_internal_function *) execute_data_ptr->function_state.function)->handler(execute_data_ptr->opline->extended_value, *return_value_ptr, execute_data_ptr->function_state.function->common.return_reference?return_value_ptr:NULL, execute_data_ptr->object, return_value_used TSRMLS_CC);
+	((zend_internal_function *) execute_data_ptr->function_state.function)->handler(execute_data_ptr->opline->extended_value, *return_value_ptr, return_value_ptr, execute_data_ptr->object, return_value_used TSRMLS_CC);
 }
 
 #define ZEND_VM_NEXT_OPCODE() \
