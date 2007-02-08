@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.2
+- Add --ri switch to CLI which allows to check extension information. (Marcus)
 
 08 Feb 2007, PHP 5.2.1
 - Added read-timeout context option "timeout" for HTTP streams. (Hannes, Ilia). 

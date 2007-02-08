@@ -76,13 +76,9 @@ static int php_info_write_wrapper(const char *str, uint str_length)
 }
 
 
-/* {{{ _display_module_info
- */
-static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
+PHPAPI void php_info_print_module(zend_module_entry *module TSRMLS_DC) /* {{{ */
 {
-	int show_info_func = *((int *) arg);
-
-	if (show_info_func && module->info_func) {
+	if (module->info_func) {
 		if (!sapi_module.phpinfo_as_text) {
 			php_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", module->name, module->name);
 		} else {
@@ -91,7 +87,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 			php_info_print_table_end();
 		}
 		module->info_func(module TSRMLS_CC);
-	} else if (!show_info_func && !module->info_func) {
+	} else {
 		if (!sapi_module.phpinfo_as_text) {
 			php_printf("<tr>");
 			php_printf("<td>");
@@ -102,7 +98,24 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 			php_printf("\n");
 		}	
 	}
-	return 0;
+}
+/* }}} */
+
+static int _display_module_info_func(zend_module_entry *module TSRMLS_DC) /* {{{ */
+{
+	if (module->info_func) {
+		php_info_print_module(module TSRMLS_CC);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+static int _display_module_info_def(zend_module_entry *module TSRMLS_DC) /* {{{ */
+{
+	if (!module->info_func) {
+		php_info_print_module(module TSRMLS_CC);
+	}
+	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
@@ -662,22 +675,19 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	}
 
 	if (flag & PHP_INFO_MODULES) {
-		int show_info_func;
 		HashTable sorted_registry;
 		zend_module_entry tmp;
 
-		zend_hash_init(&sorted_registry, 50, NULL, NULL, 1);
+		zend_hash_init(&sorted_registry, zend_hash_num_elements(&module_registry), NULL, NULL, 1);
 		zend_hash_copy(&sorted_registry, &module_registry, NULL, &tmp, sizeof(zend_module_entry));
 		zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
 
-		show_info_func = 1;
-		zend_hash_apply_with_argument(&sorted_registry, (apply_func_arg_t) _display_module_info, &show_info_func TSRMLS_CC);
+		zend_hash_apply(&sorted_registry, (apply_func_t) _display_module_info_func TSRMLS_CC);
 
 		SECTION("Additional Modules");
 		php_info_print_table_start();
 		php_info_print_table_header(1, "Module Name");
-		show_info_func = 0;
-		zend_hash_apply_with_argument(&sorted_registry, (apply_func_arg_t) _display_module_info, &show_info_func TSRMLS_CC);
+		zend_hash_apply(&sorted_registry, (apply_func_t) _display_module_info_def TSRMLS_CC);
 		php_info_print_table_end();
 
 		zend_hash_destroy(&sorted_registry);
