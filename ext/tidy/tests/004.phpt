@@ -9,7 +9,6 @@ tidy_diagnose()
 	echo tidy_get_error_buffer($a);
 ?>
 --EXPECT--
-
 line 1 column 1 - Warning: missing <!DOCTYPE> declaration
 line 1 column 7 - Warning: discarding unexpected </html>
 line 1 column 14 - Warning: inserting missing 'title' element

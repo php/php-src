@@ -475,12 +475,12 @@ object(tidyNode)#11 (8) {
 bool(true)
 object(tidyNode)#3 (9) {
   [u"value"]=>
-  string(31) "<head>
+  unicode(31) "<head>
 <title></title>
 </head>
 "
   [u"name"]=>
-  string(4) "head"
+  unicode(4) "head"
   [u"type"]=>
   int(5)
   [u"line"]=>
@@ -498,10 +498,10 @@ object(tidyNode)#3 (9) {
     [0]=>
     &object(tidyNode)#4 (9) {
       [u"value"]=>
-      string(16) "<title></title>
+      unicode(16) "<title></title>
 "
       [u"name"]=>
-      string(5) "title"
+      unicode(5) "title"
       [u"type"]=>
       int(5)
       [u"line"]=>
@@ -522,10 +522,10 @@ object(tidyNode)#3 (9) {
 bool(true)
 object(tidyNode)#4 (9) {
   [u"value"]=>
-  string(16) "<title></title>
+  unicode(16) "<title></title>
 "
   [u"name"]=>
-  string(5) "title"
+  unicode(5) "title"
   [u"type"]=>
   int(5)
   [u"line"]=>
@@ -543,12 +543,12 @@ object(tidyNode)#4 (9) {
 }
 object(tidyNode)#5 (9) {
   [u"value"]=>
-  string(80) "<body bgcolor="#FFFFFF" alink="#000000">
+  unicode(80) "<body bgcolor="#FFFFFF" alink="#000000">
 <b>Hi</b><i>Bye<u>Test</u></i>
 </body>
 "
   [u"name"]=>
-  string(4) "body"
+  unicode(4) "body"
   [u"type"]=>
   int(5)
   [u"line"]=>
@@ -562,18 +562,18 @@ object(tidyNode)#5 (9) {
   [u"attribute"]=>
   array(2) {
     [u"bgcolor"]=>
-    string(7) "#FFFFFF"
+    unicode(7) "#FFFFFF"
     [u"alink"]=>
-    string(7) "#000000"
+    unicode(7) "#000000"
   }
   [u"child"]=>
   array(2) {
     [0]=>
     &object(tidyNode)#6 (9) {
       [u"value"]=>
-      string(9) "<b>Hi</b>"
+      unicode(9) "<b>Hi</b>"
       [u"name"]=>
-      string(1) "b"
+      unicode(1) "b"
       [u"type"]=>
       int(5)
       [u"line"]=>
@@ -591,9 +591,9 @@ object(tidyNode)#5 (9) {
         [0]=>
         &object(tidyNode)#7 (8) {
           [u"value"]=>
-          string(2) "Hi"
+          unicode(2) "Hi"
           [u"name"]=>
-          string(0) ""
+          unicode(0) ""
           [u"type"]=>
           int(4)
           [u"line"]=>
@@ -612,9 +612,9 @@ object(tidyNode)#5 (9) {
     [1]=>
     &object(tidyNode)#8 (9) {
       [u"value"]=>
-      string(21) "<i>Bye<u>Test</u></i>"
+      unicode(21) "<i>Bye<u>Test</u></i>"
       [u"name"]=>
-      string(1) "i"
+      unicode(1) "i"
       [u"type"]=>
       int(5)
       [u"line"]=>
@@ -632,9 +632,9 @@ object(tidyNode)#5 (9) {
         [0]=>
         &object(tidyNode)#9 (8) {
           [u"value"]=>
-          string(3) "Bye"
+          unicode(3) "Bye"
           [u"name"]=>
-          string(0) ""
+          unicode(0) ""
           [u"type"]=>
           int(4)
           [u"line"]=>
@@ -651,9 +651,9 @@ object(tidyNode)#5 (9) {
         [1]=>
         &object(tidyNode)#10 (9) {
           [u"value"]=>
-          string(11) "<u>Test</u>"
+          unicode(11) "<u>Test</u>"
           [u"name"]=>
-          string(1) "u"
+          unicode(1) "u"
           [u"type"]=>
           int(5)
           [u"line"]=>
@@ -671,9 +671,9 @@ object(tidyNode)#5 (9) {
             [0]=>
             &object(tidyNode)#11 (8) {
               [u"value"]=>
-              string(4) "Test"
+              unicode(4) "Test"
               [u"name"]=>
-              string(0) ""
+              unicode(0) ""
               [u"type"]=>
               int(4)
               [u"line"]=>
@@ -696,9 +696,9 @@ object(tidyNode)#5 (9) {
 bool(true)
 object(tidyNode)#6 (9) {
   [u"value"]=>
-  string(9) "<b>Hi</b>"
+  unicode(9) "<b>Hi</b>"
   [u"name"]=>
-  string(1) "b"
+  unicode(1) "b"
   [u"type"]=>
   int(5)
   [u"line"]=>
@@ -716,9 +716,9 @@ object(tidyNode)#6 (9) {
     [0]=>
     &object(tidyNode)#7 (8) {
       [u"value"]=>
-      string(2) "Hi"
+      unicode(2) "Hi"
       [u"name"]=>
-      string(0) ""
+      unicode(0) ""
       [u"type"]=>
       int(4)
       [u"line"]=>
@@ -737,9 +737,9 @@ object(tidyNode)#6 (9) {
 bool(true)
 object(tidyNode)#7 (8) {
   [u"value"]=>
-  string(2) "Hi"
+  unicode(2) "Hi"
   [u"name"]=>
-  string(0) ""
+  unicode(0) ""
   [u"type"]=>
   int(4)
   [u"line"]=>
@@ -755,9 +755,9 @@ object(tidyNode)#7 (8) {
 }
 object(tidyNode)#8 (9) {
   [u"value"]=>
-  string(21) "<i>Bye<u>Test</u></i>"
+  unicode(21) "<i>Bye<u>Test</u></i>"
   [u"name"]=>
-  string(1) "i"
+  unicode(1) "i"
   [u"type"]=>
   int(5)
   [u"line"]=>
@@ -775,9 +775,9 @@ object(tidyNode)#8 (9) {
     [0]=>
     &object(tidyNode)#9 (8) {
       [u"value"]=>
-      string(3) "Bye"
+      unicode(3) "Bye"
       [u"name"]=>
-      string(0) ""
+      unicode(0) ""
       [u"type"]=>
       int(4)
       [u"line"]=>
@@ -794,9 +794,9 @@ object(tidyNode)#8 (9) {
     [1]=>
     &object(tidyNode)#10 (9) {
       [u"value"]=>
-      string(11) "<u>Test</u>"
+      unicode(11) "<u>Test</u>"
       [u"name"]=>
-      string(1) "u"
+      unicode(1) "u"
       [u"type"]=>
       int(5)
       [u"line"]=>
@@ -814,9 +814,9 @@ object(tidyNode)#8 (9) {
         [0]=>
         &object(tidyNode)#11 (8) {
           [u"value"]=>
-          string(4) "Test"
+          unicode(4) "Test"
           [u"name"]=>
-          string(0) ""
+          unicode(0) ""
           [u"type"]=>
           int(4)
           [u"line"]=>
@@ -837,9 +837,9 @@ object(tidyNode)#8 (9) {
 bool(true)
 object(tidyNode)#9 (8) {
   [u"value"]=>
-  string(3) "Bye"
+  unicode(3) "Bye"
   [u"name"]=>
-  string(0) ""
+  unicode(0) ""
   [u"type"]=>
   int(4)
   [u"line"]=>
@@ -855,9 +855,9 @@ object(tidyNode)#9 (8) {
 }
 object(tidyNode)#10 (9) {
   [u"value"]=>
-  string(11) "<u>Test</u>"
+  unicode(11) "<u>Test</u>"
   [u"name"]=>
-  string(1) "u"
+  unicode(1) "u"
   [u"type"]=>
   int(5)
   [u"line"]=>
@@ -875,9 +875,9 @@ object(tidyNode)#10 (9) {
     [0]=>
     &object(tidyNode)#11 (8) {
       [u"value"]=>
-      string(4) "Test"
+      unicode(4) "Test"
       [u"name"]=>
-      string(0) ""
+      unicode(0) ""
       [u"type"]=>
       int(4)
       [u"line"]=>
@@ -896,9 +896,9 @@ object(tidyNode)#10 (9) {
 bool(true)
 object(tidyNode)#11 (8) {
   [u"value"]=>
-  string(4) "Test"
+  unicode(4) "Test"
   [u"name"]=>
-  string(0) ""
+  unicode(0) ""
   [u"type"]=>
   int(4)
   [u"line"]=>
