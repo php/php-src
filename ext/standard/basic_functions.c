@@ -787,7 +787,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_call_user_func_array, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func_array, 0, 0, 2)
 	ZEND_ARG_INFO(0, function_name)
 	ZEND_ARG_INFO(0, parameters) /* ARRAY_INFO(0, parameters, 1) */
 ZEND_END_ARG_INFO()
@@ -5044,43 +5044,29 @@ PHP_FUNCTION(error_get_last)
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_func(string function_name [, mixed parmeter] [, mixed ...]) U
+/* {{{ proto mixed call_user_func(mixed function_name [, mixed parmeter] [, mixed ...]) U
    Call a user function which is the first parameter */
 PHP_FUNCTION(call_user_func)
 {
-	zval ***params = NULL;
-	int n_params = 0;
-	zval *retval_ptr;
-	zval *callback, name;
+	zval *retval_ptr = return_value;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z*", &callback, &params, &n_params) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f*", &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
 		return;
 	}
 
-	if (zend_fcall_info_init(callback, &fci, &fci_cache, NULL TSRMLS_CC) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "first parameter is expected to be a valid callback");
-		return;
-	}
-
-	fci.retval_ptr_ptr = &retval_ptr;
-	fci.params = params;
-	fci.param_count = n_params;
-	fci.no_separation = 0;
+	fci.retval_ptr_ptr = return_value_ptr;
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS) {
-		if (retval_ptr) {
-			COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
-		}
-	} else {
-		zend_is_callable(callback, IS_CALLABLE_CHECK_SYNTAX_ONLY, &name);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R()", Z_TYPE(name), Z_UNIVAL(name));
-		zval_dtor(&name);
+		zval_ptr_dtor(&retval_ptr);
+	}
+	if (!*return_value_ptr) {
+		ALLOC_INIT_ZVAL(*return_value_ptr);
 	}
 
-	if (params) {
-		efree(params);
+	if (fci.params) {
+		efree(fci.params);
 	}
 }
 /* }}} */
@@ -5089,58 +5075,26 @@ PHP_FUNCTION(call_user_func)
    Call a user function which is the first parameter with the arguments contained in array */
 PHP_FUNCTION(call_user_func_array)
 {
-	zval ***func_params, *callback, *params;
-	zval *retval_ptr;
-	HashTable *func_params_ht;
-	zval name;
+	zval *params, *retval_ptr = return_value;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	int count;
-	int current = 0;
+	zend_fcall_info_cache fci_cache;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za/", &callback, &params) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "fa/", &fci, &fci_cache, &params) == FAILURE) {
 		return;
 	}
 
-	if (zend_fcall_info_init(callback, &fci, &fci_cache, NULL TSRMLS_CC) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "first parameter is expected to be a valid callback");
-		return;
-	}
+	fci.retval_ptr_ptr = return_value_ptr;
 
-	func_params_ht = Z_ARRVAL_P(params);
-
-	count = zend_hash_num_elements(func_params_ht);
-	if (count) {
-		func_params = safe_emalloc(sizeof(zval **), count, 0);
-
-		for (zend_hash_internal_pointer_reset(func_params_ht);
-			 zend_hash_get_current_data(func_params_ht, (void **) &func_params[current]) == SUCCESS;
-			 zend_hash_move_forward(func_params_ht))
-		{
-			current++;
-		}
-	} else {
-		func_params = NULL;
-	}
-
-	fci.retval_ptr_ptr = &retval_ptr;
-	fci.params = func_params;
-	fci.param_count = count;
-	fci.no_separation = 0;
+	zend_fcall_info_args(&fci, params TSRMLS_CC);
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS) {
-		if (retval_ptr) {
-			COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
-		}
-	} else {
-		zend_is_callable(callback, IS_CALLABLE_CHECK_SYNTAX_ONLY, &name);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R()", Z_TYPE(name), Z_UNIVAL(name));
-		zval_dtor(&name);
+		zval_ptr_dtor(&retval_ptr);
+	}
+	if (!*return_value_ptr) {
+		ALLOC_INIT_ZVAL(*return_value_ptr);
 	}
 
-	if (func_params) {
-		efree(func_params);
-	}
+	zend_fcall_info_args_clear(&fci, 1);
 }
 /* }}} */
 

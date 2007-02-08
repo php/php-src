@@ -1,5 +1,5 @@
 --TEST--
-Bug: #40398 (parent and self callback functions erroneously called statically)
+Bug #40398 (parent and self callback functions erroneously called statically)
 --FILE--
 <?php
 
@@ -78,11 +78,11 @@ new Derived_6('6');
 Base::__construct(1)
 Base::__construct(2)
 
-Warning: call_user_func_array(): first parameter is expected to be a valid callback in %sbug40398.php on line %d
+Warning: call_user_func_array() expects parameter 1 to be valid callback, string given in %sbug40398.php on line %d
 
-Warning: call_user_func_array(): first parameter is expected to be a valid callback in %sbug40398.php on line %d
+Warning: call_user_func_array() expects parameter 1 to be valid callback, string given in %sbug40398.php on line %d
 
-Warning: call_user_func_array(): first parameter is expected to be a valid callback in %sbug40398.php on line %d
+Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %sbug40398.php on line %d
 
-Warning: call_user_func_array(): first parameter is expected to be a valid callback in %sbug40398.php on line %d
+Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %sbug40398.php on line %d
 ===DONE===
