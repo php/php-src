@@ -294,6 +294,16 @@ Shows information about class
 .IR name
 Shows information about extension
 .B name
+.TP
+.PD 0
+.B \-\-rextinfo
+.IR name
+.TP
+.PD 1
+.B \-\-ri
+.IR name
+Shows configuration for extension
+.B name
 .SH FILES
 .TP 15
 .B php\-cli.ini
