@@ -47,6 +47,7 @@
 #include "ext/spl/spl_directory.h"
 #include "ext/spl/spl_engine.h"
 #include "ext/spl/spl_exceptions.h"
+#include "ext/spl/spl_iterators.h"
 #endif
 #include "php_phar.h"
 #ifdef HAVE_STDINT_H
