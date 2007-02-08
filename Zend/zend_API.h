@@ -1527,6 +1527,10 @@ ZEND_API extern zend_fcall_info_cache empty_fcall_info_cache;
  */
 ZEND_API int zend_fcall_info_init(zval *callable, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *callable_name TSRMLS_DC);
 
+ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem);
+ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, int *param_count, zval ****params);
+ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count, zval ***params);
+
 /** Set or clear the arguments in the zend_call_info struct taking care of
  * refcount. If args is NULL and arguments are set then those are cleared.
  */
