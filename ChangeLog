@@ -1,3 +1,64 @@
+2007-02-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/bug40374.phpt:
+      add test
+
+    * ext/standard/tests/file/bug40374.phpt
+      ext/standard/tests/file/bug40374.phpt:
+      
+      add test
+
+    * sapi/apache2handler/mod_php.c:
+      explicitly set module name
+
+2007-02-07  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      run-tests.php:
+      MFH: use getenv() instead of _ENV
+      enable multiple error reporting on the same test
+
+2007-02-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      configure.in:
+      MFH: check if GCC on MacOS supports -no-cpp-precomp before using it
+
+    * sapi/apache2filter/config.m4
+      sapi/apache2filter/php.sym
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+      upgrade apache2filter to php6
+
+    * sapi/apache2handler/.cvsignore
+      sapi/apache2handler/config.m4
+      sapi/apache2handler/config.w32
+      sapi/apache2handler/mod_php.c
+      sapi/apache2handler/mod_php5.c
+      sapi/apache2handler/php.sym
+      sapi/apache2handler/php5apache2.dsp
+      sapi/apache2handler/php_apache.h
+      sapi/apache2handler/sapi_apache2.c:
+      change "php5" to "php6" everywhere
+      rename mod_php5.c to mod_php.c
+
+2007-02-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.1
+
 2007-02-06  Antony Dovgal  <antony@zend.com>
 
     * main/php_open_temporary_file.c:
