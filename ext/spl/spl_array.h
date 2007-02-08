@@ -23,6 +23,7 @@
 
 #include "php.h"
 #include "php_spl.h"
+#include "spl_iterators.h"
 
 extern PHPAPI zend_class_entry *spl_ce_ArrayObject;
 extern PHPAPI zend_class_entry *spl_ce_ArrayIterator;
