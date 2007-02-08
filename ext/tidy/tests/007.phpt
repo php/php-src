@@ -36,5 +36,5 @@ Current Value of 'tab-size': int(8)
 Warning: tidy::getOpt(): Unknown Tidy Configuration Option 'bogus-opt' in %s007.php on line 10
 bool(false)
 
-Warning: tidy_getopt(): Unknown Tidy Configuration Option 'non-ASCII string рсч' in %s007.php on line 11
+Warning: tidy_getopt(): Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received in %s007.php on line 11
 bool(false)

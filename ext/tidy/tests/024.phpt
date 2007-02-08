@@ -39,3 +39,15 @@ string(117) "<html>
 </wps:block>
 </body>
 </html>"
+--UEXPECT--
+unicode(117) "<html>
+<head>
+<title></title>
+</head>
+<body>
+<wps:block>
+<wps:var>
+<wps:value></wps:var>
+</wps:block>
+</body>
+</html>"

@@ -420,7 +420,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 		case TidyString:
 			if (Z_TYPE(conv) != IS_STRING) {
 				zval_copy_ctor(&conv);
-				convert_to_string(&conv);
+				convert_to_string_with_converter(&conv, UG(ascii_conv));
 			}
 			if (tidyOptSetValue(doc, tidyOptGetId(opt), Z_STRVAL(conv))) {
 				if (Z_TYPE(conv) != Z_TYPE_P(value)) {
@@ -696,6 +696,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type, void *extra TSRM
 
 		case IS_UNICODE:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
+			tidyBufInit(&output);
 			tidySaveBuffer (obj->ptdoc->doc, &output);
 			ZVAL_U_STRINGL(obj->converter->conv, out, (char *) output.bp, output.size ? output.size-1 : 0, 1);
 			tidyBufFree(&output);
@@ -731,20 +732,23 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type, void *extra TSR
 			tidyBufInit(&buf);
 			if (obj->ptdoc) {
 				tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
-				ZVAL_STRINGL(out, (char *) buf.bp, buf.size-1, 0);
+				ZVAL_STRINGL(out, (char *) buf.bp, buf.size-1, 1);
 			} else {
 				ZVAL_EMPTY_STRING(out);
 			}
+			tidyBufFree(&buf);
 			break;
 
 		case IS_UNICODE:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
+			tidyBufInit(&buf);
 			if (obj->ptdoc) {
 				tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
-				ZVAL_U_STRINGL(obj->converter->conv, out, (char *) buf.bp, buf.size-1, 0);
+				ZVAL_U_STRINGL(obj->converter->conv, out, (char *) buf.bp, buf.size ? buf.size-1 : 0, 1);
 			} else {
 				ZVAL_EMPTY_UNICODE(out);
 			}
+			tidyBufFree(&buf);
 			break;
 
 		default:
@@ -795,7 +799,7 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 		case is_node:
 			tidyBufInit(&buf);
 			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
-			ADD_PROPERTY_STRINGL(obj->converter->conv, obj->std.properties, value, buf.bp, buf.size-1);
+			ADD_PROPERTY_STRINGL(obj->converter->conv, obj->std.properties, value, buf.bp, buf.size ? buf.size-1 : 0);
 			tidyBufFree(&buf);
 
 			ADD_PROPERTY_ASCII_STRING(obj->std.properties, name, tidyNodeGetName(obj->node));
@@ -847,6 +851,8 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 					newobj->type = is_node;
 					newobj->ptdoc = obj->ptdoc;
 					newobj->ptdoc->ref_count++;
+					newobj->converter = obj->converter;
+					if (obj->converter) obj->converter->ref_count++;
 
 					tidy_add_default_properties(newobj, is_node TSRMLS_CC);
 					add_next_index_zval(children, temp);
@@ -906,6 +912,8 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 	newobj->type = is_node;
 	newobj->ptdoc = obj->ptdoc;
 	newobj->ptdoc->ref_count++;
+	newobj->converter = obj->converter;
+	if (obj->converter) obj->converter->ref_count++;
 
 	switch(node) {
 		case is_root_node:

@@ -23,9 +23,9 @@ Attrib 'alink': #000000
 --UEXPECT--
 array(2) {
   [u"bgcolor"]=>
-  string(7) "#FFFFFF"
+  unicode(7) "#FFFFFF"
   [u"alink"]=>
-  string(7) "#000000"
+  unicode(7) "#000000"
 }
 Attrib 'bgcolor': #FFFFFF
 Attrib 'alink': #000000

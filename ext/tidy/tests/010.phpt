@@ -318,7 +318,7 @@ object(tidyNode)#2 (9) {
 --UEXPECT--
 object(tidyNode)#2 (8) {
   [u"value"]=>
-  string(94) "<html>
+  unicode(94) "<html>
 <head>
 <title></title>
 </head>
@@ -326,7 +326,7 @@ object(tidyNode)#2 (8) {
 </body>
 </html>"
   [u"name"]=>
-  string(0) ""
+  unicode(0) ""
   [u"type"]=>
   int(0)
   [u"line"]=>
@@ -342,7 +342,7 @@ object(tidyNode)#2 (8) {
     [0]=>
     &object(tidyNode)#3 (9) {
       [u"value"]=>
-      string(94) "<html>
+      unicode(94) "<html>
 <head>
 <title></title>
 </head>
@@ -350,7 +350,7 @@ object(tidyNode)#2 (8) {
 </body>
 </html>"
       [u"name"]=>
-      string(4) "html"
+      unicode(4) "html"
       [u"type"]=>
       int(5)
       [u"line"]=>
@@ -368,12 +368,12 @@ object(tidyNode)#2 (8) {
         [0]=>
         &object(tidyNode)#4 (9) {
           [u"value"]=>
-          string(31) "<head>
+          unicode(31) "<head>
 <title></title>
 </head>
 "
           [u"name"]=>
-          string(4) "head"
+          unicode(4) "head"
           [u"type"]=>
           int(5)
           [u"line"]=>
@@ -391,10 +391,10 @@ object(tidyNode)#2 (8) {
             [0]=>
             &object(tidyNode)#5 (9) {
               [u"value"]=>
-              string(16) "<title></title>
+              unicode(16) "<title></title>
 "
               [u"name"]=>
-              string(5) "title"
+              unicode(5) "title"
               [u"type"]=>
               int(5)
               [u"line"]=>
@@ -415,11 +415,11 @@ object(tidyNode)#2 (8) {
         [1]=>
         &object(tidyNode)#6 (9) {
           [u"value"]=>
-          string(49) "<body bgcolor="#FFFFFF" alink="#000000">
+          unicode(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
 "
           [u"name"]=>
-          string(4) "body"
+          unicode(4) "body"
           [u"type"]=>
           int(5)
           [u"line"]=>
@@ -433,9 +433,9 @@ object(tidyNode)#2 (8) {
           [u"attribute"]=>
           array(2) {
             [u"bgcolor"]=>
-            string(7) "#FFFFFF"
+            unicode(7) "#FFFFFF"
             [u"alink"]=>
-            string(7) "#000000"
+            unicode(7) "#000000"
           }
           [u"child"]=>
           NULL
@@ -446,11 +446,11 @@ object(tidyNode)#2 (8) {
 }
 object(tidyNode)#2 (9) {
   [u"value"]=>
-  string(49) "<body bgcolor="#FFFFFF" alink="#000000">
+  unicode(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
 "
   [u"name"]=>
-  string(4) "body"
+  unicode(4) "body"
   [u"type"]=>
   int(5)
   [u"line"]=>
@@ -464,16 +464,16 @@ object(tidyNode)#2 (9) {
   [u"attribute"]=>
   array(2) {
     [u"bgcolor"]=>
-    string(7) "#FFFFFF"
+    unicode(7) "#FFFFFF"
     [u"alink"]=>
-    string(7) "#000000"
+    unicode(7) "#000000"
   }
   [u"child"]=>
   NULL
 }
 object(tidyNode)#2 (9) {
   [u"value"]=>
-  string(94) "<html>
+  unicode(94) "<html>
 <head>
 <title></title>
 </head>
@@ -481,7 +481,7 @@ object(tidyNode)#2 (9) {
 </body>
 </html>"
   [u"name"]=>
-  string(4) "html"
+  unicode(4) "html"
   [u"type"]=>
   int(5)
   [u"line"]=>
@@ -499,12 +499,12 @@ object(tidyNode)#2 (9) {
     [0]=>
     &object(tidyNode)#3 (9) {
       [u"value"]=>
-      string(31) "<head>
+      unicode(31) "<head>
 <title></title>
 </head>
 "
       [u"name"]=>
-      string(4) "head"
+      unicode(4) "head"
       [u"type"]=>
       int(5)
       [u"line"]=>
@@ -522,10 +522,10 @@ object(tidyNode)#2 (9) {
         [0]=>
         &object(tidyNode)#6 (9) {
           [u"value"]=>
-          string(16) "<title></title>
+          unicode(16) "<title></title>
 "
           [u"name"]=>
-          string(5) "title"
+          unicode(5) "title"
           [u"type"]=>
           int(5)
           [u"line"]=>
@@ -546,11 +546,11 @@ object(tidyNode)#2 (9) {
     [1]=>
     &object(tidyNode)#4 (9) {
       [u"value"]=>
-      string(49) "<body bgcolor="#FFFFFF" alink="#000000">
+      unicode(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
 "
       [u"name"]=>
-      string(4) "body"
+      unicode(4) "body"
       [u"type"]=>
       int(5)
       [u"line"]=>
@@ -564,9 +564,9 @@ object(tidyNode)#2 (9) {
       [u"attribute"]=>
       array(2) {
         [u"bgcolor"]=>
-        string(7) "#FFFFFF"
+        unicode(7) "#FFFFFF"
         [u"alink"]=>
-        string(7) "#000000"
+        unicode(7) "#000000"
       }
       [u"child"]=>
       NULL
@@ -575,12 +575,12 @@ object(tidyNode)#2 (9) {
 }
 object(tidyNode)#2 (9) {
   [u"value"]=>
-  string(31) "<head>
+  unicode(31) "<head>
 <title></title>
 </head>
 "
   [u"name"]=>
-  string(4) "head"
+  unicode(4) "head"
   [u"type"]=>
   int(5)
   [u"line"]=>
@@ -598,10 +598,10 @@ object(tidyNode)#2 (9) {
     [0]=>
     &object(tidyNode)#4 (9) {
       [u"value"]=>
-      string(16) "<title></title>
+      unicode(16) "<title></title>
 "
       [u"name"]=>
-      string(5) "title"
+      unicode(5) "title"
       [u"type"]=>
       int(5)
       [u"line"]=>
