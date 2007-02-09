@@ -1,3 +1,24 @@
+2007-02-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - No reason not to pass return_value_ptr for non return-by-reference
+      functions
+
+    * zend_API.c
+      zend_API.h:
+      - Fix potential issue with 'f'-parameter parsing
+      - Complete zend_fcall_info_*() API
+
+    * zend_execute_API.c:
+      - Do not set is_ref/refcount for functions that return by reference
+
+    * zend_API.c
+      zend_API.h:
+      - More ZEND_API's
+
 2007-02-02  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.h:
