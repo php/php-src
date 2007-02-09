@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2007 University of Cambridge
+           Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -131,11 +131,11 @@ letter, return the other case. Otherwise, return -1.
 Arguments:
   c           the character value
 
-Returns:      the other case or -1 if none
+Returns:      the other case or NOTACHAR if none
 */
 
-int
-_pcre_ucp_othercase(const int c)
+unsigned int
+_pcre_ucp_othercase(const unsigned int c)
 {
 int bot = 0;
 int top = sizeof(ucp_table)/sizeof(cnode);
@@ -161,14 +161,14 @@ for (;;)
     }
   }
 
-/* Found an entry in the table. Return -1 for a range entry. Otherwise return
-the other case if there is one, else -1. */
+/* Found an entry in the table. Return NOTACHAR for a range entry. Otherwise
+return the other case if there is one, else NOTACHAR. */
 
-if ((ucp_table[mid].f0 & f0_rangeflag) != 0) return -1;
+if ((ucp_table[mid].f0 & f0_rangeflag) != 0) return NOTACHAR;
 
 offset = ucp_table[mid].f1 & f1_casemask;
 if ((offset & f1_caseneg) != 0) offset |= f1_caseneg;
-return (offset == 0)? -1 : c + offset;
+return (offset == 0)? NOTACHAR : c + offset;
 }
 
 

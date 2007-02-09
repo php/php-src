@@ -4,7 +4,7 @@ PCRE LICENCE
 PCRE is a library of functions to support regular expressions whose syntax
 and semantics are as close as possible to those of the Perl 5 language.
 
-Release 6 of PCRE is distributed under the terms of the "BSD" licence, as
+Release 7 of PCRE is distributed under the terms of the "BSD" licence, as
 specified below. The documentation for PCRE, supplied in the "doc"
 directory, is distributed under the same terms as the software itself.
 

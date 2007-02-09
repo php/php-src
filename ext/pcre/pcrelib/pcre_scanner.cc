@@ -43,6 +43,7 @@ Scanner::Scanner()
     input_(data_),
     skip_(NULL),
     should_skip_(false),
+    skip_repeat_(false),
     save_comments_(false),
     comments_(NULL),
     comments_offset_(0) {
@@ -53,6 +54,7 @@ Scanner::Scanner(const string& in)
     input_(data_),
     skip_(NULL),
     should_skip_(false),
+    skip_repeat_(false),
     save_comments_(false),
     comments_(NULL),
     comments_offset_(0) {
@@ -63,15 +65,31 @@ Scanner::~Scanner() {
   delete comments_;
 }
 
+void Scanner::SetSkipExpression(const char* re) {
+  delete skip_;
+  if (re != NULL) {
+    skip_ = new RE(re);
+    should_skip_ = true;
+    skip_repeat_ = true;
+    ConsumeSkip();
+  } else {
+    skip_ = NULL;
+    should_skip_ = false;
+    skip_repeat_ = false;
+  }
+}
+
 void Scanner::Skip(const char* re) {
   delete skip_;
   if (re != NULL) {
     skip_ = new RE(re);
     should_skip_ = true;
+    skip_repeat_ = false;
     ConsumeSkip();
   } else {
     skip_ = NULL;
     should_skip_ = false;
+    skip_repeat_ = false;
   }
 }
 
@@ -118,19 +136,22 @@ bool Scanner::Consume(const RE& re,
 
 // helper function to consume *skip_ and honour save_comments_
 void Scanner::ConsumeSkip() {
+  const char* start_data = input_.data();
+  while (skip_->Consume(&input_)) {
+    if (!skip_repeat_) {
+      // Only one skip allowed.
+      break;
+    }
+  }
   if (save_comments_) {
-    if (NULL == comments_) {
+    if (comments_ == NULL) {
       comments_ = new vector<StringPiece>;
     }
-    const char *start_data = input_.data();
-    skip_->Consume(&input_);
     // already pointing one past end, so no need to +1
     int length = input_.data() - start_data;
     if (length > 0) {
       comments_->push_back(StringPiece(start_data, length));
     }
-  } else {
-    skip_->Consume(&input_);
   }
 }
 
