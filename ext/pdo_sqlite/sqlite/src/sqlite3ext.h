@@ -19,7 +19,7 @@
 */
 #ifndef _SQLITE3EXT_H_
 #define _SQLITE3EXT_H_
-#include <sqlite3.h>
+#include "sqlite3.h"
 
 typedef struct sqlite3_api_routines sqlite3_api_routines;
 
@@ -92,7 +92,7 @@ struct sqlite3_api_routines {
   void * (*get_auxdata)(sqlite3_context*,int);
   int  (*get_table)(sqlite3*,const char*,char***,int*,int*,char**);
   int  (*global_recover)(void);
-  void  (*interrupt)(sqlite3*);
+  void  (*interruptx)(sqlite3*);
   sqlite_int64  (*last_insert_rowid)(sqlite3*);
   const char * (*libversion)(void);
   int  (*libversion_number)(void);
@@ -143,6 +143,7 @@ struct sqlite3_api_routines {
   const void * (*value_text16le)(sqlite3_value*);
   int  (*value_type)(sqlite3_value*);
   char * (*vmprintf)(const char*,va_list);
+  int (*overload_function)(sqlite3*, const char *zFuncName, int nArg);
 };
 
 /*
@@ -221,7 +222,7 @@ struct sqlite3_api_routines {
 #define sqlite3_get_auxdata            sqlite3_api->get_auxdata
 #define sqlite3_get_table              sqlite3_api->get_table
 #define sqlite3_global_recover         sqlite3_api->global_recover
-#define sqlite3_interrupt              sqlite3_api->interrupt
+#define sqlite3_interrupt              sqlite3_api->interruptx
 #define sqlite3_last_insert_rowid      sqlite3_api->last_insert_rowid
 #define sqlite3_libversion             sqlite3_api->libversion
 #define sqlite3_libversion_number      sqlite3_api->libversion_number
@@ -272,6 +273,7 @@ struct sqlite3_api_routines {
 #define sqlite3_value_text16le         sqlite3_api->value_text16le
 #define sqlite3_value_type             sqlite3_api->value_type
 #define sqlite3_vmprintf               sqlite3_api->vmprintf
+#define sqlite3_overload_function      sqlite3_api->overload_function
 #endif /* SQLITE_CORE */
 
 #define SQLITE_EXTENSION_INIT1     const sqlite3_api_routines *sqlite3_api;

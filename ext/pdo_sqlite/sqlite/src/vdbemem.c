@@ -50,14 +50,6 @@ int sqlite3VdbeChangeEncoding(Mem *pMem, int desiredEnc){
   assert(rc==SQLITE_OK    || rc==SQLITE_NOMEM);
   assert(rc==SQLITE_OK    || pMem->enc!=desiredEnc);
   assert(rc==SQLITE_NOMEM || pMem->enc==desiredEnc);
-
-  if( rc==SQLITE_NOMEM ){
-/*
-    sqlite3VdbeMemRelease(pMem);
-    pMem->flags = MEM_Null;
-    pMem->z = 0;
-*/
-  }
   return rc;
 #endif
 }
@@ -127,22 +119,9 @@ int sqlite3VdbeMemMakeWriteable(Mem *pMem){
 ** Make sure the given Mem is \u0000 terminated.
 */
 int sqlite3VdbeMemNulTerminate(Mem *pMem){
-  /* In SQLite, a string without a nul terminator occurs when a string
-  ** is loaded from disk (in this case the memory management is ephemeral),
-  ** or when it is supplied by the user as a bound variable or function
-  ** return value. Therefore, the memory management of the string must be
-  ** either ephemeral, static or controlled by a user-supplied destructor.
-  */
-  assert(                         
-    !(pMem->flags&MEM_Str) ||                /* it's not a string, or      */
-    (pMem->flags&MEM_Term) ||                /* it's nul term. already, or */
-    (pMem->flags&(MEM_Ephem|MEM_Static)) ||  /* it's static or ephem, or   */
-    (pMem->flags&MEM_Dyn && pMem->xDel)      /* external management        */
-  );
   if( (pMem->flags & MEM_Term)!=0 || (pMem->flags & MEM_Str)==0 ){
     return SQLITE_OK;   /* Nothing to do */
   }
-
   if( pMem->flags & (MEM_Static|MEM_Ephem) ){
     return sqlite3VdbeMemMakeWriteable(pMem);
   }else{
@@ -151,7 +130,11 @@ int sqlite3VdbeMemNulTerminate(Mem *pMem){
     memcpy(z, pMem->z, pMem->n);
     z[pMem->n] = 0;
     z[pMem->n+1] = 0;
-    pMem->xDel(pMem->z);
+    if( pMem->xDel ){
+      pMem->xDel(pMem->z);
+    }else{
+      sqliteFree(pMem->z);
+    }
     pMem->xDel = 0;
     pMem->z = z;
   }
@@ -782,7 +765,9 @@ const void *sqlite3ValueText(sqlite3_value* pVal, u8 enc){
         return 0;
       }
     }
-  }else if( !(pVal->flags&MEM_Blob) ){
+    sqlite3VdbeMemNulTerminate(pVal);
+  }else{
+    assert( (pVal->flags&MEM_Blob)==0 );
     sqlite3VdbeMemStringify(pVal, enc);
     assert( 0==(1&(int)pVal->z) );
   }

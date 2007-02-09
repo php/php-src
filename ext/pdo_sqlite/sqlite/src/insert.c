@@ -387,11 +387,9 @@ void sqlite3Insert(
     NameContext sNC;
     memset(&sNC, 0, sizeof(sNC));
     sNC.pParse = pParse;
-    assert( pList!=0 );
     srcTab = -1;
     useTempTable = 0;
-    assert( pList );
-    nColumn = pList->nExpr;
+    nColumn = pList ? pList->nExpr : 0;
     for(i=0; i<nColumn; i++){
       if( sqlite3ExprResolveNames(&sNC, pList->a[i].pExpr) ){
         goto insert_cleanup;
@@ -402,7 +400,7 @@ void sqlite3Insert(
   /* Make sure the number of columns in the source data matches the number
   ** of columns to be inserted into the table.
   */
-  if( pColumn==0 && nColumn!=pTab->nCol ){
+  if( pColumn==0 && nColumn && nColumn!=pTab->nCol ){
     sqlite3ErrorMsg(pParse, 
        "table %S has %d columns but %d values were supplied",
        pTabList, 0, pTab->nCol, nColumn);
@@ -455,7 +453,7 @@ void sqlite3Insert(
   ** key, the set the keyColumn variable to the primary key column index
   ** in the original table definition.
   */
-  if( pColumn==0 ){
+  if( pColumn==0 && nColumn>0 ){
     keyColumn = pTab->iPKey;
   }
 
@@ -618,12 +616,12 @@ void sqlite3Insert(
           if( pColumn->a[j].idx==i ) break;
         }
       }
-      if( pColumn && j>=pColumn->nId ){
+      if( nColumn==0 || (pColumn && j>=pColumn->nId) ){
         sqlite3ExprCode(pParse, pTab->aCol[i].pDflt);
       }else if( useTempTable ){
         sqlite3VdbeAddOp(v, OP_Column, srcTab, j); 
       }else if( pSelect ){
-        sqlite3VdbeAddOp(v, OP_Dup, i+nColumn-j, 1);
+        sqlite3VdbeAddOp(v, OP_Dup, i+nColumn-j+IsVirtual(pTab), 1);
       }else{
         sqlite3ExprCode(pParse, pList->a[j].pExpr);
       }

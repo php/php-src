@@ -37,7 +37,7 @@
 ** (Later):  Actually, OP_NewRowid does not depend on a good source of
 ** randomness any more.  But we will leave this code in all the same.
 */
-static int randomByte(){
+static int randomByte(void){
   unsigned char t;
 
   /* All threads share a single random number generator.

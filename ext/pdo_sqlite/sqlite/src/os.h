@@ -81,9 +81,21 @@
 ** prefix to reflect your program's name, so that if your program exits
 ** prematurely, old temporary files can be easily identified. This can be done
 ** using -DTEMP_FILE_PREFIX=myprefix_ on the compiler command line.
+**
+** 2006-10-31:  The default prefix used to be "sqlite_".  But then
+** Mcafee started using SQLite in their anti-virus product and it
+** started putting files with the "sqlite" name in the c:/temp folder.
+** This annoyed many windows users.  Those users would then do a 
+** Google search for "sqlite", find the telephone numbers of the
+** developers and call to wake them up at night and complain.
+** For this reason, the default name prefix is changed to be "sqlite" 
+** spelled backwards.  So the temp files are still identified, but
+** anybody smart enough to figure out the code is also likely smart
+** enough to know that calling the developer will not help get rid
+** of the file.
 */
 #ifndef TEMP_FILE_PREFIX
-# define TEMP_FILE_PREFIX "sqlite_"
+# define TEMP_FILE_PREFIX "etilqs_"
 #endif
 
 /*
@@ -110,6 +122,9 @@
 #define sqlite3OsRealloc            sqlite3GenericRealloc
 #define sqlite3OsFree               sqlite3GenericFree
 #define sqlite3OsAllocationSize     sqlite3GenericAllocationSize
+#define sqlite3OsDlopen             sqlite3UnixDlopen
+#define sqlite3OsDlsym              sqlite3UnixDlsym
+#define sqlite3OsDlclose            sqlite3UnixDlclose
 #endif
 #if OS_WIN
 #define sqlite3OsOpenReadWrite      sqlite3WinOpenReadWrite
@@ -132,6 +147,9 @@
 #define sqlite3OsRealloc            sqlite3GenericRealloc
 #define sqlite3OsFree               sqlite3GenericFree
 #define sqlite3OsAllocationSize     sqlite3GenericAllocationSize
+#define sqlite3OsDlopen             sqlite3WinDlopen
+#define sqlite3OsDlsym              sqlite3WinDlsym
+#define sqlite3OsDlclose            sqlite3WinDlclose
 #endif
 #if OS_OS2
 #define sqlite3OsOpenReadWrite      sqlite3Os2OpenReadWrite
@@ -154,6 +172,9 @@
 #define sqlite3OsRealloc            sqlite3GenericRealloc
 #define sqlite3OsFree               sqlite3GenericFree
 #define sqlite3OsAllocationSize     sqlite3GenericAllocationSize
+#define sqlite3OsDlopen             sqlite3Os2Dlopen
+#define sqlite3OsDlsym              sqlite3Os2Dlsym
+#define sqlite3OsDlclose            sqlite3Os2Dlclose
 #endif
 
 
@@ -337,6 +358,9 @@ void *sqlite3OsMalloc(int);
 void *sqlite3OsRealloc(void *, int);
 void sqlite3OsFree(void *);
 int sqlite3OsAllocationSize(void *);
+void *sqlite3OsDlopen(const char*);
+void *sqlite3OsDlsym(void*, const char*);
+int sqlite3OsDlclose(void*);
 
 /*
 ** If the SQLITE_ENABLE_REDEF_IO macro is defined, then the OS-layer
@@ -381,16 +405,26 @@ struct sqlite3OsVtbl {
   void *(*xRealloc)(void *, int);
   void (*xFree)(void *);
   int (*xAllocationSize)(void *);
+
+  void *(*xDlopen)(const char*);
+  void *(*xDlsym)(void*, const char*);
+  int (*xDlclose)(void*);
 };
 
 /* Macro used to comment out routines that do not exists when there is
-** no disk I/O 
+** no disk I/O or extension loading
 */
 #ifdef SQLITE_OMIT_DISKIO
 # define IF_DISKIO(X)  0
 #else
 # define IF_DISKIO(X)  X
 #endif
+#ifdef SQLITE_OMIT_LOAD_EXTENSION
+# define IF_DLOPEN(X)  0
+#else
+# define IF_DLOPEN(X)  X
+#endif
+
 
 #ifdef _SQLITE_OS_C_
   /*
@@ -416,7 +450,10 @@ struct sqlite3OsVtbl {
     sqlite3OsMalloc,
     sqlite3OsRealloc,
     sqlite3OsFree,
-    sqlite3OsAllocationSize
+    sqlite3OsAllocationSize,
+    IF_DLOPEN( sqlite3OsDlopen ),
+    IF_DLOPEN( sqlite3OsDlsym ),
+    IF_DLOPEN( sqlite3OsDlclose ),
   };
 #else
   /*

@@ -15,6 +15,8 @@
 ** 6000 lines long) it was split up into several smaller files and
 ** this header information was factored out.
 */
+#ifndef _VDBEINT_H_
+#define _VDBEINT_H_
 
 /*
 ** intToKey() and keyToInt() used to transform the rowid.  But with
@@ -328,6 +330,8 @@ struct Vdbe {
   u8 inVtabMethod;        /* See comments above */
   int nChange;            /* Number of db changes made since last reset */
   i64 startTime;          /* Time when query started - used for profiling */
+  int nSql;             /* Number of bytes in zSql */
+  char *zSql;           /* Text of the SQL statement that generated this */
 #ifdef SQLITE_SSE
   int fetchId;          /* Statement number used by sqlite3_fetch_statement */
   int lru;              /* Counter used for LRU cache replacement */
@@ -401,3 +405,5 @@ void sqlite3VdbeFifoInit(Fifo*);
 int sqlite3VdbeFifoPush(Fifo*, i64);
 int sqlite3VdbeFifoPop(Fifo*, i64*);
 void sqlite3VdbeFifoClear(Fifo*);
+
+#endif /* !defined(_VDBEINT_H_) */

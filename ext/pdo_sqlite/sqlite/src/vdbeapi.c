@@ -153,9 +153,13 @@ void sqlite3_result_value(sqlite3_context *pCtx, sqlite3_value *pValue){
 /*
 ** Execute the statement pStmt, either until a row of data is ready, the
 ** statement is completely executed or an error occurs.
+**
+** This routine implements the bulk of the logic behind the sqlite_step()
+** API.  The only thing omitted is the automatic recompile if a 
+** schema change has occurred.  That detail is handled by the
+** outer sqlite3_step() wrapper procedure.
 */
-int sqlite3_step(sqlite3_stmt *pStmt){
-  Vdbe *p = (Vdbe*)pStmt;
+static int sqlite3Step(Vdbe *p){
   sqlite3 *db;
   int rc;
 
@@ -172,7 +176,8 @@ int sqlite3_step(sqlite3_stmt *pStmt){
     if( p->rc==SQLITE_OK ){
       p->rc = SQLITE_SCHEMA;
     }
-    return SQLITE_ERROR;
+    rc = SQLITE_ERROR;
+    goto end_of_step;
   }
   db = p->db;
   if( sqlite3SafetyOn(db) ){
@@ -254,8 +259,42 @@ int sqlite3_step(sqlite3_stmt *pStmt){
 
   sqlite3Error(p->db, rc, 0);
   p->rc = sqlite3ApiExit(p->db, p->rc);
+end_of_step:
+  assert( (rc&0xff)==rc );
+  if( p->zSql && (rc&0xff)<SQLITE_ROW ){
+    /* This behavior occurs if sqlite3_prepare_v2() was used to build
+    ** the prepared statement.  Return error codes directly */
+    return p->rc;
+  }else{
+    /* This is for legacy sqlite3_prepare() builds and when the code
+    ** is SQLITE_ROW or SQLITE_DONE */
+    return rc;
+  }
+}
+
+/*
+** This is the top-level implementation of sqlite3_step().  Call
+** sqlite3Step() to do most of the work.  If a schema error occurs,
+** call sqlite3Reprepare() and try again.
+*/
+#ifdef SQLITE_OMIT_PARSER
+int sqlite3_step(sqlite3_stmt *pStmt){
+  return sqlite3Step((Vdbe*)pStmt);
+}
+#else
+int sqlite3_step(sqlite3_stmt *pStmt){
+  int cnt = 0;
+  int rc;
+  Vdbe *v = (Vdbe*)pStmt;
+  while( (rc = sqlite3Step(v))==SQLITE_SCHEMA
+         && cnt++ < 5
+         && sqlite3Reprepare(v) ){
+    sqlite3_reset(pStmt);
+    v->expired = 0;
+  }
   return rc;
 }
+#endif
 
 /*
 ** Extract the user data from a sqlite3_context structure and return a
@@ -264,6 +303,27 @@ int sqlite3_step(sqlite3_stmt *pStmt){
 void *sqlite3_user_data(sqlite3_context *p){
   assert( p && p->pFunc );
   return p->pFunc->pUserData;
+}
+
+/*
+** The following is the implementation of an SQL function that always
+** fails with an error message stating that the function is used in the
+** wrong context.  The sqlite3_overload_function() API might construct
+** SQL function that use this routine so that the functions will exist
+** for name resolution but are actually overloaded by the xFindFunction
+** method of virtual tables.
+*/
+void sqlite3InvalidFunction(
+  sqlite3_context *context,  /* The function calling context */
+  int argc,                  /* Number of arguments to the function */
+  sqlite3_value **argv       /* Value of each argument */
+){
+  const char *zName = context->pFunc->zName;
+  char *zErr;
+  zErr = sqlite3MPrintf(
+      "unable to use function %s in the requested context", zName);
+  sqlite3_result_error(context, zErr, -1);
+  sqliteFree(zErr);
 }
 
 /*
@@ -815,6 +875,7 @@ int sqlite3_transfer_bindings(sqlite3_stmt *pFromStmt, sqlite3_stmt *pToStmt){
     rc = sqlite3VdbeMemMove(&pTo->aVar[i], &pFrom->aVar[i]);
     sqlite3MallocAllow();
   }
+  assert( rc==SQLITE_OK || rc==SQLITE_NOMEM );
   return rc;
 }
 
