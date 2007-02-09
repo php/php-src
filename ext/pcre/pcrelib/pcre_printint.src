@@ -49,7 +49,17 @@ local functions. This source file is used in two places:
 compiled regex for debugging purposes. */
 
 
+/* Macro that decides whether a character should be output as a literal or in
+hexadecimal. We don't use isprint() because that can vary from system to system
+(even without the use of locales) and we want the output always to be the same,
+for testing purposes. This macro is used in pcretest as well as in this file. */
+
+#define PRINTABLE(c) ((c) >= 32 && (c) < 127)
+
+/* The table of operator names. */
+
 static const char *OP_names[] = { OP_NAME_LIST };
+
 
 
 /*************************************************
@@ -63,7 +73,7 @@ int c = *ptr;
 
 if (!utf8 || (c & 0xc0) != 0xc0)
   {
-  if (isprint(c)) fprintf(f, "%c", c); else fprintf(f, "\\x%02x", c);
+  if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x%02x", c);
   return 0;
   }
 else
@@ -160,16 +170,6 @@ for(;;)
 
   fprintf(f, "%3d ", (int)(code - codestart));
 
-  if (*code >= OP_BRA)
-    {
-    if (*code - OP_BRA > EXTRACT_BASIC_MAX)
-      fprintf(f, "%3d Bra extra\n", GET(code, 1));
-    else
-      fprintf(f, "%3d Bra %d\n", GET(code, 1), *code - OP_BRA);
-    code += _pcre_OP_lengths[OP_BRA];
-    continue;
-    }
-
   switch(*code)
     {
     case OP_END:
@@ -203,6 +203,14 @@ for(;;)
     fprintf(f, "\n");
     continue;
 
+    case OP_CBRA:
+    case OP_SCBRA:
+    fprintf(f, "%3d %s %d", GET(code, 1), OP_names[*code],
+      GET2(code, 1+LINK_SIZE));
+    break;
+
+    case OP_BRA:
+    case OP_SBRA:
     case OP_KETRMAX:
     case OP_KETRMIN:
     case OP_ALT:
@@ -213,33 +221,45 @@ for(;;)
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
     case OP_COND:
+    case OP_SCOND:
     case OP_REVERSE:
     fprintf(f, "%3d %s", GET(code, 1), OP_names[*code]);
     break;
 
-    case OP_BRANUMBER:
-    printf("%3d %s", GET2(code, 1), OP_names[*code]);
+    case OP_CREF:
+    fprintf(f, "%3d %s", GET2(code,1), OP_names[*code]);
     break;
 
-    case OP_CREF:
-    if (GET2(code, 1) == CREF_RECURSE)
-      fprintf(f, "    Cond recurse");
+    case OP_RREF:
+    c = GET2(code, 1);
+    if (c == RREF_ANY)
+      fprintf(f, "    Cond recurse any");
     else
-      fprintf(f, "%3d %s", GET2(code,1), OP_names[*code]);
+      fprintf(f, "    Cond recurse %d", c);
+    break;
+
+    case OP_DEF:
+    fprintf(f, "    Cond def");
     break;
 
     case OP_STAR:
     case OP_MINSTAR:
+    case OP_POSSTAR:
     case OP_PLUS:
     case OP_MINPLUS:
+    case OP_POSPLUS:
     case OP_QUERY:
     case OP_MINQUERY:
+    case OP_POSQUERY:
     case OP_TYPESTAR:
     case OP_TYPEMINSTAR:
+    case OP_TYPEPOSSTAR:
     case OP_TYPEPLUS:
     case OP_TYPEMINPLUS:
+    case OP_TYPEPOSPLUS:
     case OP_TYPEQUERY:
     case OP_TYPEMINQUERY:
+    case OP_TYPEPOSQUERY:
     fprintf(f, "    ");
     if (*code >= OP_TYPESTAR)
       {
@@ -257,17 +277,20 @@ for(;;)
     case OP_EXACT:
     case OP_UPTO:
     case OP_MINUPTO:
+    case OP_POSUPTO:
     fprintf(f, "    ");
     extra = print_char(f, code+3, utf8);
     fprintf(f, "{");
-    if (*code != OP_EXACT) fprintf(f, ",");
+    if (*code != OP_EXACT) fprintf(f, "0,");
     fprintf(f, "%d}", GET2(code,1));
     if (*code == OP_MINUPTO) fprintf(f, "?");
+      else if (*code == OP_POSUPTO) fprintf(f, "+");
     break;
 
     case OP_TYPEEXACT:
     case OP_TYPEUPTO:
     case OP_TYPEMINUPTO:
+    case OP_TYPEPOSUPTO:
     fprintf(f, "    %s", OP_names[code[3]]);
     if (code[3] == OP_PROP || code[3] == OP_NOTPROP)
       {
@@ -278,20 +301,26 @@ for(;;)
     if (*code != OP_TYPEEXACT) fprintf(f, "0,");
     fprintf(f, "%d}", GET2(code,1));
     if (*code == OP_TYPEMINUPTO) fprintf(f, "?");
+      else if (*code == OP_TYPEPOSUPTO) fprintf(f, "+");
     break;
 
     case OP_NOT:
-    if (isprint(c = code[1])) fprintf(f, "    [^%c]", c);
+    c = code[1];
+    if (PRINTABLE(c)) fprintf(f, "    [^%c]", c);
       else fprintf(f, "    [^\\x%02x]", c);
     break;
 
     case OP_NOTSTAR:
     case OP_NOTMINSTAR:
+    case OP_NOTPOSSTAR:
     case OP_NOTPLUS:
     case OP_NOTMINPLUS:
+    case OP_NOTPOSPLUS:
     case OP_NOTQUERY:
     case OP_NOTMINQUERY:
-    if (isprint(c = code[1])) fprintf(f, "    [^%c]", c);
+    case OP_NOTPOSQUERY:
+    c = code[1];
+    if (PRINTABLE(c)) fprintf(f, "    [^%c]", c);
       else fprintf(f, "    [^\\x%02x]", c);
     fprintf(f, "%s", OP_names[*code]);
     break;
@@ -299,11 +328,14 @@ for(;;)
     case OP_NOTEXACT:
     case OP_NOTUPTO:
     case OP_NOTMINUPTO:
-    if (isprint(c = code[3])) fprintf(f, "    [^%c]{", c);
+    case OP_NOTPOSUPTO:
+    c = code[3];
+    if (PRINTABLE(c)) fprintf(f, "    [^%c]{", c);
       else fprintf(f, "    [^\\x%02x]{", c);
     if (*code != OP_NOTEXACT) fprintf(f, "0,");
     fprintf(f, "%d}", GET2(code,1));
     if (*code == OP_NOTMINUPTO) fprintf(f, "?");
+      else if (*code == OP_NOTPOSUPTO) fprintf(f, "+");
     break;
 
     case OP_RECURSE:
@@ -363,12 +395,14 @@ for(;;)
             for (j = i+1; j < 256; j++)
               if ((ccode[j/8] & (1 << (j&7))) == 0) break;
             if (i == '-' || i == ']') fprintf(f, "\\");
-            if (isprint(i)) fprintf(f, "%c", i); else fprintf(f, "\\x%02x", i);
+            if (PRINTABLE(i)) fprintf(f, "%c", i);
+              else fprintf(f, "\\x%02x", i);
             if (--j > i)
               {
               if (j != i + 1) fprintf(f, "-");
               if (j == '-' || j == ']') fprintf(f, "\\");
-              if (isprint(j)) fprintf(f, "%c", j); else fprintf(f, "\\x%02x", j);
+              if (PRINTABLE(j)) fprintf(f, "%c", j);
+                else fprintf(f, "\\x%02x", j);
               }
             i = j;
             }

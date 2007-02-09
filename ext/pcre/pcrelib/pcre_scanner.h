@@ -36,7 +36,7 @@
 //      Scanner scanner(input);
 //      string var;
 //      int number;
-//      scanner.Skip("\\s+");           // Skip any white space we encounter
+//      scanner.SetSkipExpression("\\s+"); // Skip any white space we encounter
 //      while (scanner.Consume("(\\w+) = (\\d+)", &var, &number)) {
 //        ...;
 //      }
@@ -90,10 +90,16 @@ class Scanner {
   // skipped.  For example, a programming language scanner would use
   // a skip RE that matches white space and comments.
   //
-  //    scanner.Skip("(\\s|//.*|/[*](.|\n)*?[*]/)*");
+  //    scanner.SetSkipExpression("\\s+|//.*|/[*](.|\n)*?[*]/");
+  //
+  // Skipping repeats as long as it succeeds.  We used to let people do
+  // this by writing "(...)*" in the regular expression, but that added
+  // up to lots of recursive calls within the pcre library, so now we
+  // control repetition explicitly via the function call API.
   //
   // You can pass NULL for "re" if you do not want any data to be skipped.
-  void Skip(const char* re);
+  void Skip(const char* re);   // DEPRECATED; does *not* repeat
+  void SetSkipExpression(const char* re);
 
   // Temporarily pause "skip"ing. This
   //   Skip("Foo"); code ; DisableSkip(); code; EnableSkip()
@@ -109,12 +115,13 @@ class Scanner {
   /***** Special wrappers around SetSkip() for some common idioms *****/
 
   // Arranges to skip whitespace, C comments, C++ comments.
-  // The overall RE is a repeated disjunction of the following REs:
+  // The overall RE is a disjunction of the following REs:
   //    \\s                     whitespace
   //    //.*\n                  C++ comment
   //    /[*](.|\n)*?[*]/        C comment (x*? means minimal repetitions of x)
+  // We get repetition via the semantics of SetSkipExpression, not by using *
   void SkipCXXComments() {
-    Skip("((\\s|//.*\n|/[*](.|\n)*?[*]/)*)");
+    SetSkipExpression("\\s|//.*\n|/[*](?:\n|.)*?[*]/");
   }
 
   void set_save_comments(bool comments) {
@@ -143,6 +150,7 @@ class Scanner {
   StringPiece   input_;         // Unprocessed input
   RE*           skip_;          // If non-NULL, RE for skipping input
   bool          should_skip_;   // If true, use skip_
+  bool          skip_repeat_;   // If true, repeat skip_ as long as it works
   bool          save_comments_; // If true, aggregate the skip expression
 
   // the skipped comments

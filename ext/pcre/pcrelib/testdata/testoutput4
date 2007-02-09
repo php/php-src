@@ -914,4 +914,8 @@ No match
  0: ab
  1: ab
 
+/a*\x{100}*\w/8
+    a 
+ 0: a
+
 / End of testinput4 /
