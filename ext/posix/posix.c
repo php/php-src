@@ -884,7 +884,7 @@ PHP_FUNCTION(posix_getgrgid)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &gid) == FAILURE) {
 		RETURN_FALSE;
 	}
-#ifdef HAVE_GETGRGID_R
+#if defined(ZTS) && defined(HAVE_GETGRGID_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	
 	grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
 	grbuf = emalloc(grbuflen);
@@ -909,7 +909,7 @@ PHP_FUNCTION(posix_getgrgid)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to convert posix group struct to array");
 		RETVAL_FALSE;
 	}
-#ifdef HAVE_GETGRGID_R
+#if defined(ZTS) && defined(HAVE_GETGRGID_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	efree(grbuf);
 #endif
 }
