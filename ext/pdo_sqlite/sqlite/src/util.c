@@ -1446,7 +1446,7 @@ int sqlite3ApiExit(sqlite3* db, int rc){
     sqlite3Error(db, SQLITE_NOMEM, 0);
     rc = SQLITE_NOMEM;
   }
-  return rc;
+  return rc & (db ? db->errMask : 0xff);
 }
 
 /* 

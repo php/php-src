@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.2
+- Upgraded SQLite 3 to version 3.3.12 (Ilia)
 - Add --ri switch to CLI which allows to check extension information. (Marcus)
 - Fixed bug #39836 (SplObjectStorage empty after unserialize). (Marcus)
 

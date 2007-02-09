@@ -41,6 +41,29 @@ int sqlite3_create_module(
 }
 
 /*
+** Lock the virtual table so that it cannot be disconnected.
+** Locks nest.  Every lock should have a corresponding unlock.
+** If an unlock is omitted, resources leaks will occur.  
+**
+** If a disconnect is attempted while a virtual table is locked,
+** the disconnect is deferred until all locks have been removed.
+*/
+void sqlite3VtabLock(sqlite3_vtab *pVtab){
+  pVtab->nRef++;
+}
+
+/*
+** Unlock a virtual table.  When the last lock is removed,
+** disconnect the virtual table.
+*/
+void sqlite3VtabUnlock(sqlite3_vtab *pVtab){
+  pVtab->nRef--;
+  if( pVtab->nRef==0 ){
+    pVtab->pModule->xDisconnect(pVtab);
+  }
+}
+
+/*
 ** Clear any and all virtual-table information from the Table record.
 ** This routine is called, for example, just before deleting the Table
 ** record.
@@ -49,10 +72,7 @@ void sqlite3VtabClear(Table *p){
   sqlite3_vtab *pVtab = p->pVtab;
   if( pVtab ){
     assert( p->pMod && p->pMod->pModule );
-    pVtab->nRef--;
-    if( pVtab->nRef==0 ){
-      pVtab->pModule->xDisconnect(pVtab);
-    }
+    sqlite3VtabUnlock(pVtab);
     p->pVtab = 0;
   }
   if( p->azModuleArg ){
@@ -139,7 +159,7 @@ void sqlite3VtabBeginParse(
 */
 static void addArgumentToVtab(Parse *pParse){
   if( pParse->sArg.z && pParse->pNewTable ){
-    const char *z = pParse->sArg.z;
+    const char *z = (const char*)pParse->sArg.z;
     int n = pParse->sArg.n;
     addModuleArgument(pParse->pNewTable, sqliteStrNDup(z, n));
   }
@@ -210,7 +230,7 @@ void sqlite3VtabFinishParse(Parse *pParse, Token *pEnd){
 
     sqlite3VdbeAddOp(v, OP_Expire, 0, 0);
     zWhere = sqlite3MPrintf("name='%q'", pTab->zName);
-    sqlite3VdbeOp3(v, OP_ParseSchema, iDb, 0, zWhere, P3_DYNAMIC);
+    sqlite3VdbeOp3(v, OP_ParseSchema, iDb, 1, zWhere, P3_DYNAMIC);
     sqlite3VdbeOp3(v, OP_VCreate, iDb, 0, pTab->zName, strlen(pTab->zName) + 1);
   }
 
@@ -266,14 +286,16 @@ static int vtabCallConstructor(
   sqlite3 *db, 
   Table *pTab,
   Module *pMod,
-  int (*xConstruct)(sqlite3*, void *, int, char **, sqlite3_vtab **),
+  int (*xConstruct)(sqlite3*,void*,int,const char*const*,sqlite3_vtab**,char**),
   char **pzErr
 ){
   int rc;
   int rc2;
-  char **azArg = pTab->azModuleArg;
+  sqlite3_vtab *pVtab;
+  const char *const*azArg = (const char *const*)pTab->azModuleArg;
   int nArg = pTab->nModuleArg;
-  char *zErr = sqlite3MPrintf("vtable constructor failed: %s", pTab->zName);
+  char *zErr = 0;
+  char *zModuleName = sqlite3MPrintf("%s", pTab->zName);
 
   assert( !db->pVTab );
   assert( xConstruct );
@@ -281,17 +303,22 @@ static int vtabCallConstructor(
   db->pVTab = pTab;
   rc = sqlite3SafetyOff(db);
   assert( rc==SQLITE_OK );
-  rc = xConstruct(db, pMod->pAux, nArg, azArg, &pTab->pVtab);
+  rc = xConstruct(db, pMod->pAux, nArg, azArg, &pTab->pVtab, &zErr);
   rc2 = sqlite3SafetyOn(db);
-  if( rc==SQLITE_OK && pTab->pVtab ){
-    pTab->pVtab->pModule = pMod->pModule;
-    pTab->pVtab->nRef = 1;
+  pVtab = pTab->pVtab;
+  if( rc==SQLITE_OK && pVtab ){
+    pVtab->pModule = pMod->pModule;
+    pVtab->nRef = 1;
   }
 
   if( SQLITE_OK!=rc ){
-    *pzErr = zErr;
-    zErr = 0;
-  } else if( db->pVTab ){
+    if( zErr==0 ){
+      *pzErr = sqlite3MPrintf("vtable constructor failed: %s", zModuleName);
+    }else {
+      *pzErr = sqlite3MPrintf("%s", zErr);
+      sqlite3_free(zErr);
+    }
+  }else if( db->pVTab ){
     const char *zFormat = "vtable constructor did not declare schema: %s";
     *pzErr = sqlite3MPrintf(zFormat, pTab->zName);
     rc = SQLITE_ERROR;
@@ -300,7 +327,7 @@ static int vtabCallConstructor(
     rc = rc2;
   }
   db->pVTab = 0;
-  sqliteFree(zErr);
+  sqliteFree(zModuleName);
   return rc;
 }
 
@@ -313,7 +340,6 @@ static int vtabCallConstructor(
 */
 int sqlite3VtabCallConnect(Parse *pParse, Table *pTab){
   Module *pMod;
-  const char *zModule;
   int rc = SQLITE_OK;
 
   if( !pTab || !pTab->isVirtual || pTab->pVtab ){
@@ -321,7 +347,6 @@ int sqlite3VtabCallConnect(Parse *pParse, Table *pTab){
   }
 
   pMod = pTab->pMod;
-  zModule = pTab->azModuleArg[0];
   if( !pMod ){
     const char *zModule = pTab->azModuleArg[0];
     sqlite3ErrorMsg(pParse, "no such module: %s", zModule);
@@ -359,7 +384,7 @@ static int addToVTrans(sqlite3 *db, sqlite3_vtab *pVtab){
 
   /* Add pVtab to the end of sqlite3.aVTrans */
   db->aVTrans[db->nVTrans++] = pVtab;
-  pVtab->nRef++;
+  sqlite3VtabLock(pVtab);
   return SQLITE_OK;
 }
 
@@ -444,6 +469,7 @@ int sqlite3_declare_vtab(sqlite3 *db, const char *zCreateTable){
   sParse.pNewTable = 0;
   db->pVTab = 0;
 
+  assert( (rc&0xff)==rc );
   return rc;
 }
 
@@ -492,10 +518,7 @@ static void callFinaliser(sqlite3 *db, int offset){
     int (*x)(sqlite3_vtab *);
     x = *(int (**)(sqlite3_vtab *))((char *)pVtab->pModule + offset);
     if( x ) x(pVtab);
-    pVtab->nRef--;
-    if( pVtab->nRef==0 ){
-      pVtab->pModule->xDisconnect(pVtab);
-    }
+    sqlite3VtabUnlock(pVtab);
   }
   sqliteFree(db->aVTrans);
   db->nVTrans = 0;
@@ -623,6 +646,10 @@ FuncDef *sqlite3VtabOverloadFunction(
   void (*xFunc)(sqlite3_context*,int,sqlite3_value**);
   void *pArg;
   FuncDef *pNew;
+  int rc;
+  char *zLowerName;
+  unsigned char *z;
+
 
   /* Check to see the left operand is a column in a virtual table */
   if( pExpr==0 ) return pDef;
@@ -637,8 +664,15 @@ FuncDef *sqlite3VtabOverloadFunction(
   if( pMod->xFindFunction==0 ) return pDef;
  
   /* Call the xFuncFunction method on the virtual table implementation
-  ** to see if the implementation wants to overload this function */
-  if( pMod->xFindFunction(pVtab, nArg, pDef->zName, &xFunc, &pArg)==0 ){
+  ** to see if the implementation wants to overload this function 
+  */
+  zLowerName = sqlite3StrDup(pDef->zName);
+  for(z=(unsigned char*)zLowerName; *z; z++){
+    *z = sqlite3UpperToLower[*z];
+  }
+  rc = pMod->xFindFunction(pVtab, nArg, zLowerName, &xFunc, &pArg);
+  sqliteFree(zLowerName);
+  if( rc==0 ){
     return pDef;
   }
 

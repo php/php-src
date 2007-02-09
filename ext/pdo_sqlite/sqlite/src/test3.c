@@ -567,6 +567,7 @@ static int btree_integrity_check(
   int nRoot;
   int *aRoot;
   int i;
+  int nErr;
   char *zResult;
 
   if( argc<3 ){
@@ -581,7 +582,7 @@ static int btree_integrity_check(
     if( Tcl_GetInt(interp, argv[i+2], &aRoot[i]) ) return TCL_ERROR;
   }
 #ifndef SQLITE_OMIT_INTEGRITY_CHECK
-  zResult = sqlite3BtreeIntegrityCheck(pBt, aRoot, nRoot);
+  zResult = sqlite3BtreeIntegrityCheck(pBt, aRoot, nRoot, 10000, &nErr);
 #else
   zResult = 0;
 #endif
@@ -598,7 +599,6 @@ static int btree_integrity_check(
 **
 ** Print information about all cursors to standard output for debugging.
 */
-#ifdef SQLITE_DEBUG
 static int btree_cursor_list(
   void *NotUsed,
   Tcl_Interp *interp,    /* The TCL interpreter that invoked this command */
@@ -616,7 +616,6 @@ static int btree_cursor_list(
   sqlite3BtreeCursorList(pBt);
   return SQLITE_OK;
 }
-#endif
 
 /*
 ** Usage:   btree_cursor ID TABLENUM WRITEABLE
@@ -1053,6 +1052,7 @@ static int btree_data(
   rc = sqlite3BtreeData(pCur, 0, n, zBuf);
   if( rc ){
     Tcl_AppendResult(interp, errorName(rc), 0);
+    free(zBuf);
     return TCL_ERROR;
   }
   zBuf[n] = 0;
@@ -1187,7 +1187,6 @@ static int btree_payload_size(
 **   aResult[8] =  Local payload size
 **   aResult[9] =  Parent page number
 */
-#ifdef SQLITE_DEBUG
 static int btree_cursor_info(
   void *NotUsed,
   Tcl_Interp *interp,    /* The TCL interpreter that invoked this command */
@@ -1225,7 +1224,6 @@ static int btree_cursor_info(
   Tcl_AppendResult(interp, &zBuf[1], 0);
   return SQLITE_OK;
 }
-#endif
 
 /*
 ** The command is provided for the purpose of setting breakpoints.
@@ -1441,10 +1439,8 @@ int Sqlitetest3_Init(Tcl_Interp *interp){
      { "btree_rollback_statement", (Tcl_CmdProc*)btree_rollback_statement },
      { "btree_from_db",            (Tcl_CmdProc*)btree_from_db            },
      { "btree_set_cache_size",     (Tcl_CmdProc*)btree_set_cache_size     },
-#ifdef SQLITE_DEBUG
      { "btree_cursor_info",        (Tcl_CmdProc*)btree_cursor_info        },
      { "btree_cursor_list",        (Tcl_CmdProc*)btree_cursor_list        },
-#endif
   };
   int i;
 

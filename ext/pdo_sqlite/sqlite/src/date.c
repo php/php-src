@@ -237,11 +237,11 @@ static void computeJD(DateTime *p){
   X2 = 30.6001*(M+1);
   p->rJD = X1 + X2 + D + B - 1524.5;
   p->validJD = 1;
-  p->validYMD = 0;
   if( p->validHMS ){
     p->rJD += (p->h*3600.0 + p->m*60.0 + p->s)/86400.0;
     if( p->validTZ ){
       p->rJD -= p->tz*60/86400.0;
+      p->validYMD = 0;
       p->validHMS = 0;
       p->validTZ = 0;
     }
@@ -360,6 +360,7 @@ static void computeYMD(DateTime *p){
 static void computeHMS(DateTime *p){
   int Z, s;
   if( p->validHMS ) return;
+  computeJD(p);
   Z = p->rJD + 0.5;
   s = (p->rJD + 0.5 - Z)*86400000.0 + 0.5;
   p->s = 0.001*s;
@@ -415,8 +416,7 @@ static double localtimeOffset(DateTime *p){
   computeJD(&x);
   t = (x.rJD-2440587.5)*86400.0 + 0.5;
   sqlite3OsEnterMutex();
-  pTm = php_localtime_r
-(&t, &tmbuf);
+  pTm = php_localtime_r(&t, &tmbuf);
   y.Y = pTm->tm_year + 1900;
   y.M = pTm->tm_mon + 1;
   y.D = pTm->tm_mday;
@@ -585,7 +585,7 @@ static int parseModifier(const char *zMod, DateTime *p){
         if( z[0]=='-' ) tx.rJD = -tx.rJD;
         computeJD(p);
         clearYMD_HMS_TZ(p);
-       p->rJD += tx.rJD;
+        p->rJD += tx.rJD;
         rc = 0;
         break;
       }
@@ -813,9 +813,9 @@ static void strftimeFunc(
       switch( zFmt[i] ){
         case 'd':  sprintf(&z[j],"%02d",x.D); j+=2; break;
         case 'f': {
-          int s = x.s;
-          int ms = (x.s - s)*1000.0;
-          sprintf(&z[j],"%02d.%03d",s,ms);
+          double s = x.s;
+          if( s>59.999 ) s = 59.999;
+          sqlite3_snprintf(7, &z[j],"%02.3f", s);
           j += strlen(&z[j]);
           break;
         }
@@ -828,7 +828,7 @@ static void strftimeFunc(
           y.M = 1;
           y.D = 1;
           computeJD(&y);
-          nDay = x.rJD - y.rJD;
+          nDay = x.rJD - y.rJD + 0.5;
           if( zFmt[i]=='W' ){
             int wd;   /* 0=Monday, 1=Tuesday, ... 6=Sunday */
             wd = ((int)(x.rJD+0.5)) % 7;
@@ -848,7 +848,7 @@ static void strftimeFunc(
           j += strlen(&z[j]);
           break;
         }
-        case 'S':  sprintf(&z[j],"%02d",(int)(x.s+0.5)); j+=2; break;
+        case 'S':  sprintf(&z[j],"%02d",(int)x.s); j+=2; break;
         case 'w':  z[j++] = (((int)(x.rJD+1.5)) % 7) + '0'; break;
         case 'Y':  sprintf(&z[j],"%04d",x.Y); j+=strlen(&z[j]); break;
         case '%':  z[j++] = '%'; break;
@@ -948,9 +948,21 @@ static void currentTimeFunc(
   }
 #endif
 
-  sqlite3OsEnterMutex();
-  strftime(zBuf, 20, zFormat, gmtime(&t));
-  sqlite3OsLeaveMutex();
+#ifdef HAVE_GMTIME_R
+  {
+    struct tm sNow;
+    gmtime_r(&t, &sNow);
+    strftime(zBuf, 20, zFormat, &sNow);
+  }
+#else
+  {
+    struct tm *pTm;
+    sqlite3OsEnterMutex();
+    pTm = gmtime(&t);
+    strftime(zBuf, 20, zFormat, pTm);
+    sqlite3OsLeaveMutex();
+  }
+#endif
 
   sqlite3_result_text(context, zBuf, -1, SQLITE_TRANSIENT);
 }
