@@ -1,3 +1,95 @@
+2007-02-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_array.h:
+      - Add include
+
+    * (PHP_5_2)
+      ext/spl/spl_array.c
+      ext/spl/spl_array.h
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.h:
+      - MFH Rearrange code: mode Countable from spl_array.c to spl_iterator.c
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_observer.c:
+      - MFH: Fix Bug #39836 SplObjectStorage empty after unserialize
+
+    * ext/spl/spl_array.c
+      ext/spl/spl_array.h
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.h:
+      - Moving Countable from spl_array.c to spl_iterator.c
+        allows CachingIterator to implement Countable
+
+2007-02-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/tidy.c
+      ext/tidy/tests/004.phpt
+      ext/tidy/tests/007.phpt
+      ext/tidy/tests/010.phpt
+      ext/tidy/tests/011.phpt
+      ext/tidy/tests/012.phpt
+      ext/tidy/tests/019.phpt
+      ext/tidy/tests/024.phpt
+      ext/tidy/tests/025.phpt
+      ext/tidy/tests/027.phpt:
+      fix a few tests (segfaults + wrong output)
+
+2007-02-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug40398.phpt
+      ext/standard/tests/general_functions/call_user_func_return.phpt:
+      - Simplify call_user_func/call_user_func_array implementation
+      - Allow call_user_func/call_user_func_array to return reference
+
+    * .gdbinit:
+      - Show whether a zval is a reference in printzv user command
+
+2007-02-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * run-tests.php:
+      MFB: remove ereg() calls
+
+    * (PHP_5_2)
+      run-tests.php:
+      convert all ereg*() calls to preg_match(), so that we become future-proof
+      (ereg is scheduled for removal in PHP 6)
+
+2007-02-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - No reason not to pass return_value_ptr for non return-by-reference
+      functions
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      - Fix potential issue with 'f'-parameter parsing
+      - Complete zend_fcall_info_*() API
+
+    * ZendEngine2/zend_execute_API.c:
+      - Do not set is_ref/refcount for functions that return by reference
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      - More ZEND_API's
+
+    * ext/standard/tests/general_functions/bug40398.phpt
+      ext/standard/tests/general_functions/bug40398.phpt:
+      
+      - Add new test
+
+2007-02-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      TODO:
+      
+      Remove already done item from the todo
+
 2007-02-07  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
