@@ -1,4 +1,6 @@
-// Copyright (c) 2005, Google Inc.
+// -*- coding: utf-8 -*-
+//
+// Copyright (c) 2005 - 2006, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -445,6 +447,80 @@ static void TestRecursion() {
   CHECK(re4.FullMatch(text_bad) == false);
 }
 
+// A meta-quoted string, interpreted as a pattern, should always match
+// the original unquoted string.
+static void TestQuoteMeta(string unquoted, RE_Options options = RE_Options()) {
+  string quoted = RE::QuoteMeta(unquoted);
+  RE re(quoted, options);
+  CHECK(re.FullMatch(unquoted));
+}
+
+// A string containing meaningful regexp characters, which is then meta-
+// quoted, should not generally match a string the unquoted string does.
+static void NegativeTestQuoteMeta(string unquoted, string should_not_match,
+                                  RE_Options options = RE_Options()) {
+  string quoted = RE::QuoteMeta(unquoted);
+  RE re(quoted, options);
+  CHECK(!re.FullMatch(should_not_match));
+}
+
+// Tests that quoted meta characters match their original strings,
+// and that a few things that shouldn't match indeed do not.
+static void TestQuotaMetaSimple() {
+  TestQuoteMeta("foo");
+  TestQuoteMeta("foo.bar");
+  TestQuoteMeta("foo\\.bar");
+  TestQuoteMeta("[1-9]");
+  TestQuoteMeta("1.5-2.0?");
+  TestQuoteMeta("\\d");
+  TestQuoteMeta("Who doesn't like ice cream?");
+  TestQuoteMeta("((a|b)c?d*e+[f-h]i)");
+  TestQuoteMeta("((?!)xxx).*yyy");
+  TestQuoteMeta("([");
+}
+
+static void TestQuoteMetaSimpleNegative() {
+  NegativeTestQuoteMeta("foo", "bar");
+  NegativeTestQuoteMeta("...", "bar");
+  NegativeTestQuoteMeta("\\.", ".");
+  NegativeTestQuoteMeta("\\.", "..");
+  NegativeTestQuoteMeta("(a)", "a");
+  NegativeTestQuoteMeta("(a|b)", "a");
+  NegativeTestQuoteMeta("(a|b)", "(a)");
+  NegativeTestQuoteMeta("(a|b)", "a|b");
+  NegativeTestQuoteMeta("[0-9]", "0");
+  NegativeTestQuoteMeta("[0-9]", "0-9");
+  NegativeTestQuoteMeta("[0-9]", "[9]");
+  NegativeTestQuoteMeta("((?!)xxx)", "xxx");
+}
+
+static void TestQuoteMetaLatin1() {
+  TestQuoteMeta("3\xb2 = 9");
+}
+
+static void TestQuoteMetaUtf8() {
+#ifdef SUPPORT_UTF8
+  TestQuoteMeta("Pl\xc3\xa1\x63ido Domingo", pcrecpp::UTF8());
+  TestQuoteMeta("xyz", pcrecpp::UTF8());            // No fancy utf8
+  TestQuoteMeta("\xc2\xb0", pcrecpp::UTF8());       // 2-byte utf8 (degree symbol)
+  TestQuoteMeta("27\xc2\xb0 degrees", pcrecpp::UTF8());  // As a middle character
+  TestQuoteMeta("\xe2\x80\xb3", pcrecpp::UTF8());   // 3-byte utf8 (double prime)
+  TestQuoteMeta("\xf0\x9d\x85\x9f", pcrecpp::UTF8()); // 4-byte utf8 (music note)
+  TestQuoteMeta("27\xc2\xb0"); // Interpreted as Latin-1, but should still work
+  NegativeTestQuoteMeta("27\xc2\xb0",               // 2-byte utf (degree symbol)
+                        "27\\\xc2\\\xb0",
+                        pcrecpp::UTF8());
+#endif
+}
+
+static void TestQuoteMetaAll() {
+  printf("Testing QuoteMeta\n");
+  TestQuotaMetaSimple();
+  TestQuoteMetaSimpleNegative();
+  TestQuoteMetaLatin1();
+  TestQuoteMetaUtf8();
+}
+
 //
 // Options tests contributed by
 // Giuseppe Maxia, CTO, Stardata s.r.l.
@@ -665,6 +741,35 @@ static void TestOptions() {
   Test_UNGREEDY();
   Test_EXTRA();
   Test_all_options();
+}
+
+static void TestConstructors() {
+  printf("Testing constructors\n");
+
+  RE_Options options;
+  options.set_dotall(true);
+  const char *str = "HELLO\n" "cruel\n" "world";
+
+  RE orig("HELLO.*world", options);
+  CHECK(orig.FullMatch(str));
+
+  RE copy1(orig);
+  CHECK(copy1.FullMatch(str));
+
+  RE copy2("not a match");
+  CHECK(!copy2.FullMatch(str));
+  copy2 = copy1;
+  CHECK(copy2.FullMatch(str));
+  copy2 = orig;
+  CHECK(copy2.FullMatch(str));
+
+  // Make sure when we assign to ourselves, nothing bad happens
+  orig = orig;
+  copy1 = copy1;
+  copy2 = copy2;
+  CHECK(orig.FullMatch(str));
+  CHECK(copy1.FullMatch(str));
+  CHECK(copy2.FullMatch(str));
 }
 
 int main(int argc, char** argv) {
@@ -985,11 +1090,14 @@ int main(int argc, char** argv) {
   CHECK(RE("h.*o").PartialMatch("hello!"));
   CHECK(RE("((((((((((((((((((((x))))))))))))))))))))").PartialMatch("x"));
 
+  /***** other tests *****/
+
   RadixTests();
   TestReplace();
   TestExtract();
   TestConsume();
   TestFindAndConsume();
+  TestQuoteMetaAll();
   TestMatchNumberPeculiarity();
 
   // Check the pattern() accessor
@@ -1108,6 +1216,9 @@ int main(int argc, char** argv) {
   if (getenv("VERBOSE_TEST") != NULL)
     VERBOSE_TEST  = true;
   TestOptions();
+
+  // Test the constructors
+  TestConstructors();
 
   // Done
   printf("OK\n");

@@ -1297,8 +1297,7 @@
     abc
 
 /^a	b
-  
-    c/x
+      c/x
     abc
 
 /^(a|)\1*b/
@@ -1454,11 +1453,6 @@
 /{4,5a}bc/
     {4,5a}bc
 
-/^a.b/
-    a\rb
-    *** Failers
-    a\nb
-
 /abc$/
     abc
     abc\n
@@ -1500,8 +1494,8 @@
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)\12\123/
     abcdefghijk\12S
 
-/ab\gdef/
-    abgdef
+/ab\hdef/
+    abhdef
 
 /a{0}bc/
     bc
@@ -3382,9 +3376,14 @@
     cdaccb
 
 /^(?:a?b?)*$/
+    \
+    a
+    ab
+    aaa   
     *** Failers
     dbcb
     a--
+    aa-- 
 
 /((?s)^a(.))((?m)^b$)/
     a\nb\nc\n
@@ -3883,5 +3882,140 @@
     abc]
     a,b]
     [a,b,c]  
+
+/(?-x: )/x
+    A\x20B
+    
+"(?x)(?-x: \s*#\s*)"
+    A # B
+    ** Failers
+    #  
+
+"(?x-is)(?:(?-ixs) \s*#\s*) include"
+    A #include
+    ** Failers
+    A#include  
+    A #Include
+
+/a*b*\w/
+    aaabbbb
+    aaaa
+    a
+
+/a*b?\w/
+    aaabbbb
+    aaaa
+    a
+
+/a*b{0,4}\w/
+    aaabbbb
+    aaaa
+    a
+
+/a*b{0,}\w/
+    aaabbbb
+    aaaa
+    a
+    
+/a*\d*\w/
+    0a
+    a 
+    
+/a*b *\w/x
+    a 
+
+/a*b#comment
+  *\w/x
+    a 
+
+/a* b *\w/x
+    a 
+
+/^\w+=.*(\\\n.*)*/
+    abc=xyz\\\npqr
+
+/(?=(\w+))\1:/
+    abcd:
+
+/^(?=(\w+))\1:/
+    abcd:
+
+/^\Eabc/
+    abc
+    
+/^[\Eabc]/
+    a
+    ** Failers 
+    E 
+    
+/^[a-\Ec]/
+    b
+    ** Failers
+    -
+    E    
+
+/^[a\E\E-\Ec]/
+    b
+    ** Failers
+    -
+    E    
+
+/^[\E\Qa\E-\Qz\E]+/
+    b
+    ** Failers
+    -  
+    
+/^[a\Q]bc\E]/
+    a
+    ]
+    c
+    
+/^[a-\Q\E]/
+    a
+    -     
+
+/^(a()*)*/
+    aaaa
+
+/^(?:a(?:(?:))*)*/
+    aaaa
+
+/^(a()+)+/
+    aaaa
+
+/^(?:a(?:(?:))+)+/
+    aaaa
+
+/(a){0,3}(?(1)b|(c|))*D/
+    abbD
+    ccccD
+    D  
+
+/(a|)*\d/
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
+
+/(?>a|)*\d/
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
+
+/(?:a|)*\d/
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
+
+/\Z/g
+  abc\n
+  
+/^(?s)(?>.*)(?<!\n)/
+  abc
+  abc\n  
+
+/^(?![^\n]*\n\z)/
+  abc
+  abc\n 
+  
+/\z(?<!\n)/
+  abc
+  abc\n  
 
 / End of testinput1 /
