@@ -112,6 +112,12 @@
 //    T             (where "bool T::ParseFrom(const char*, int)" exists)
 //    NULL          (the corresponding matched sub-pattern is not copied)
 //
+// CAVEAT: An optional sub-pattern that does not exist in the matched
+// string is assigned the empty string.  Therefore, the following will
+// return false (because the empty string is not a valid number):
+//    int number;
+//    pcrecpp::RE::FullMatch("abc", "[a-z]+(\\d+)?", &number);
+//
 // -----------------------------------------------------------------------
 // DO_MATCH
 //
@@ -488,8 +494,25 @@ class RE {
   // pass in a string or a "const char*" wherever an "RE" is expected.
   RE(const char* pat) { Init(pat, NULL); }
   RE(const char *pat, const RE_Options& option) { Init(pat, &option); }
-  RE(const string& pat) { Init(pat.c_str(), NULL); }
-  RE(const string& pat, const RE_Options& option) { Init(pat.c_str(), &option); }
+  RE(const string& pat) { Init(pat, NULL); }
+  RE(const string& pat, const RE_Options& option) { Init(pat, &option); }
+
+  // Copy constructor & assignment - note that these are expensive
+  // because they recompile the expression.
+  RE(const RE& re) { Init(re.pattern_, &re.options_); }
+  const RE& operator=(const RE& re) {
+    if (this != &re) {
+      Cleanup();
+
+      // This is the code that originally came from Google
+      // Init(re.pattern_.c_str(), &re.options_);
+
+      // This is the replacement from Ari Pollak
+      Init(re.pattern_, &re.options_);
+    }
+    return *this;
+  }
+
 
   ~RE();
 
@@ -589,6 +612,15 @@ class RE {
                const StringPiece &text,
                string *out) const;
 
+  // Escapes all potentially meaningful regexp characters in
+  // 'unquoted'.  The returned string, used as a regular expression,
+  // will exactly match the original string.  For example,
+  //           1.5-2.0?
+  // may become:
+  //           1\.5\-2\.0\?
+  static string QuoteMeta(const StringPiece& unquoted);
+
+
   /***** Generic matching interface *****/
 
   // Type of match (TODO: Should be restructured as part of RE_Options)
@@ -611,7 +643,8 @@ class RE {
 
  private:
 
-  void Init(const char* pattern, const RE_Options* options);
+  void Init(const string& pattern, const RE_Options* options);
+  void Cleanup();
 
   // Match against "text", filling in "vec" (up to "vecsize" * 2/3) with
   // pairs of integers for the beginning and end positions of matched
@@ -655,11 +688,6 @@ class RE {
   pcre*         re_full_;       // For full matches
   pcre*         re_partial_;    // For partial matches
   const string* error_;         // Error indicator (or points to empty string)
-
-  // Don't allow the default copy or assignment constructors --
-  // they're expensive and too easy to do by accident.
-  RE(const RE&);
-  void operator=(const RE&);
 };
 
 }   // namespace pcrecpp

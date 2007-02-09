@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2007 University of Cambridge
+           Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ static const int eint[] = {
   REG_BADPAT,  /* unrecognized character after (?< */
   REG_BADPAT,  /* lookbehind assertion is not fixed length */
   REG_BADPAT,  /* malformed number or name after (?( */
-  REG_BADPAT,  /* conditional group containe more than two branches */
+  REG_BADPAT,  /* conditional group contains more than two branches */
   REG_BADPAT,  /* assertion expected after (?( */
   REG_BADPAT,  /* (?R or (?digits must be followed by ) */
   REG_ECTYPE,  /* unknown POSIX class name */
@@ -93,7 +93,7 @@ static const int eint[] = {
   REG_BADPAT,  /* closing ) for (?C expected */
   REG_BADPAT,  /* recursive call could loop indefinitely */
   REG_BADPAT,  /* unrecognized character after (?P */
-  REG_BADPAT,  /* syntax error after (?P */
+  REG_BADPAT,  /* syntax error in subpattern name (missing terminator) */
   REG_BADPAT,  /* two named subpatterns have the same name */
   REG_BADPAT,  /* invalid UTF-8 string */
   REG_BADPAT,  /* support for \P, \p, and \X has not been compiled */
@@ -102,7 +102,13 @@ static const int eint[] = {
   REG_BADPAT,  /* subpattern name is too long (maximum 32 characters) */
   REG_BADPAT,  /* too many named subpatterns (maximum 10,000) */
   REG_BADPAT,  /* repeated subpattern is too long */
-  REG_BADPAT   /* octal value is greater than \377 (not in UTF-8 mode) */
+  REG_BADPAT,  /* octal value is greater than \377 (not in UTF-8 mode) */
+  REG_BADPAT,  /* internal error: overran compiling workspace */
+  REG_BADPAT,  /* internal error: previously-checked referenced subpattern not found */
+  REG_BADPAT,  /* DEFINE group contains more than one branch */
+  REG_BADPAT,  /* repeating a DEFINE group is not allowed */
+  REG_INVARG,  /* inconsistent NEWLINE options */
+  REG_BADPAT   /* \g is not followed followed by an (optionally braced) non-zero number */
 };
 
 /* Table of texts corresponding to POSIX error codes */

@@ -1,6 +1,36 @@
 News about PCRE releases
 ------------------------
 
+Release 7.0 23-Nov-06
+---------------------
+
+This release has a new major number because there have been some internal
+upheavals to facilitate the addition of new optimizations and other facilities,
+and to make subsequent maintenance and extension easier. Compilation is likely
+to be a bit slower, but there should be no major effect on runtime performance.
+Previously compiled patterns are NOT upwards compatible with this release. If
+you have saved compiled patterns from a previous release, you will have to
+re-compile them. Important changes that are visible to users are:
+
+1. The Unicode property tables have been updated to Unicode 5.0.0, which adds
+   some more scripts.
+
+2. The option PCRE_NEWLINE_ANY causes PCRE to recognize any Unicode newline
+   sequence as a newline.
+
+3. The \R escape matches a single Unicode newline sequence as a single unit.
+
+4. New features that will appear in Perl 5.10 are now in PCRE. These include
+   alternative Perl syntax for named parentheses, and Perl syntax for
+   recursion.
+
+5. The C++ wrapper interface has been extended by the addition of a
+   QuoteMeta function and the ability to allow copy construction and
+   assignment.
+
+For a complete list of changes, see the ChangeLog file.
+
+
 Release 6.7 04-Jul-06
 ---------------------
 

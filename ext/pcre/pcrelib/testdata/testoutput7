@@ -2735,8 +2735,7 @@ No match
 No match
 
 /^a	b
-  
-    c/x
+      c/x
     abc
  0: abc
 
@@ -2974,7 +2973,7 @@ No match
     {4,5a}bc
  0: {4,5a}bc
 
-/^a.b/
+/^a.b/<lf>
     a\rb
  0: a\x0db
     *** Failers
@@ -3040,9 +3039,9 @@ No match
     abcdefghijk\12S
  0: abcdefghijk\x0aS
 
-/ab\gdef/
-    abgdef
- 0: abgdef
+/ab\hdef/
+    abhdef
+ 0: abhdef
 
 /a{0}bc/
     bc
@@ -6601,7 +6600,7 @@ No match
     xyz\rabc\<lf>
 No match
     
-/abc$/m
+/abc$/m<lf>
     xyzabc
  0: abc
     xyzabc\n 
@@ -6657,7 +6656,7 @@ No match
     xyz\rabcdef
 No match
     
-/.*/
+/.*/<lf>
     abc\ndef
  0: abc
  1: ab
@@ -6728,5 +6727,229 @@ No match
  0: abc\x0ddef
     abc\r\ndef
  0: abc\x0d\x0adef
+
+/^\w+=.*(\\\n.*)*/
+    abc=xyz\\\npqr
+ 0: abc=xyz\\x0apqr
+ 1: abc=xyz\\x0apq
+ 2: abc=xyz\\x0ap
+ 3: abc=xyz\\x0a
+ 4: abc=xyz\
+ 5: abc=xyz
+ 6: abc=xy
+ 7: abc=x
+ 8: abc=
+
+/^(a()*)*/
+    aaaa
+ 0: aaaa
+ 1: aaa
+ 2: aa
+ 3: a
+ 4: 
+
+/^(?:a(?:(?:))*)*/
+    aaaa
+ 0: aaaa
+ 1: aaa
+ 2: aa
+ 3: a
+ 4: 
+
+/^(a()+)+/
+    aaaa
+ 0: aaaa
+ 1: aaa
+ 2: aa
+ 3: a
+
+/^(?:a(?:(?:))+)+/
+    aaaa
+ 0: aaaa
+ 1: aaa
+ 2: aa
+ 3: a
+
+/(a|)*\d/
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+No match
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
+
+/(?>a|)*\d/
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+No match
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
+
+/(?:a|)*\d/
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+No match
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
+
+/^a.b/<lf>
+    a\rb
+ 0: a\x0db
+    a\nb\<cr> 
+ 0: a\x0ab
+    ** Failers
+No match
+    a\nb
+No match
+    a\nb\<any>
+No match
+    a\rb\<cr>   
+No match
+    a\rb\<any>   
+No match
+
+/^abc./mgx<any>
+    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 \x{2028}abc8 \x{2029}abc9 JUNK
+ 0: abc1
+ 0: abc2
+ 0: abc3
+ 0: abc4
+ 0: abc5
+ 0: abc6
+ 0: abc7
+
+/abc.$/mgx<any>
+    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7\x{2028} abc8\x{2029} abc9
+ 0: abc1
+ 0: abc2
+ 0: abc3
+ 0: abc4
+ 0: abc5
+ 0: abc6
+ 0: abc9
+
+/^a\Rb/
+    a\nb
+ 0: a\x0ab
+    a\rb
+ 0: a\x0db
+    a\r\nb
+ 0: a\x0d\x0ab
+    a\x0bb
+ 0: a\x0bb
+    a\x0cb
+ 0: a\x0cb
+    a\x85b   
+ 0: a\x85b
+    ** Failers
+No match
+    a\n\rb    
+No match
+
+/^a\R*b/
+    ab
+ 0: ab
+    a\nb
+ 0: a\x0ab
+    a\rb
+ 0: a\x0db
+    a\r\nb
+ 0: a\x0d\x0ab
+    a\x0bb
+ 0: a\x0bb
+    a\x0cb
+ 0: a\x0cb
+    a\x85b   
+ 0: a\x85b
+    a\n\rb    
+ 0: a\x0a\x0db
+    a\n\r\x85\x0cb 
+ 0: a\x0a\x0d\x85\x0cb
+
+/^a\R+b/
+    a\nb
+ 0: a\x0ab
+    a\rb
+ 0: a\x0db
+    a\r\nb
+ 0: a\x0d\x0ab
+    a\x0bb
+ 0: a\x0bb
+    a\x0cb
+ 0: a\x0cb
+    a\x85b   
+ 0: a\x85b
+    a\n\rb    
+ 0: a\x0a\x0db
+    a\n\r\x85\x0cb 
+ 0: a\x0a\x0d\x85\x0cb
+    ** Failers
+No match
+    ab  
+No match
+    
+/^a\R{1,3}b/
+    a\nb
+ 0: a\x0ab
+    a\n\rb
+ 0: a\x0a\x0db
+    a\n\r\x85b
+ 0: a\x0a\x0d\x85b
+    a\r\n\r\nb 
+ 0: a\x0d\x0a\x0d\x0ab
+    a\r\n\r\n\r\nb 
+ 0: a\x0d\x0a\x0d\x0a\x0d\x0ab
+    a\n\r\n\rb
+ 0: a\x0a\x0d\x0a\x0db
+    a\n\n\r\nb 
+ 0: a\x0a\x0a\x0d\x0ab
+    ** Failers
+No match
+    a\n\n\n\rb
+No match
+    a\r
+No match
+
+/^a[\R]b/
+    aRb
+ 0: aRb
+    ** Failers
+No match
+    a\nb  
+No match
+
+/.+foo/
+    afoo
+ 0: afoo
+    ** Failers 
+No match
+    \r\nfoo 
+No match
+    \nfoo 
+No match
+
+/.+foo/<crlf>
+    afoo
+ 0: afoo
+    \nfoo 
+ 0: \x0afoo
+    ** Failers 
+No match
+    \r\nfoo 
+No match
+
+/.+foo/<any>
+    afoo
+ 0: afoo
+    ** Failers 
+No match
+    \nfoo 
+No match
+    \r\nfoo 
+No match
+
+/.+foo/s
+    afoo
+ 0: afoo
+    \r\nfoo 
+ 0: \x0d\x0afoo
+    \nfoo 
+ 0: \x0afoo
 
 / End of testinput7 /

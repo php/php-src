@@ -520,4 +520,7 @@
     abcdefg
     ab
 
+/a*\x{100}*\w/8
+    a 
+
 / End of testinput4 /

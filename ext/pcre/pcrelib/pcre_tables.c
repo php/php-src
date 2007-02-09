@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2007 University of Cambridge
+           Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -72,9 +72,8 @@ first byte of a character, indexed by the number of additional bytes. */
 const int _pcre_utf8_table2[] = { 0,    0xc0, 0xe0, 0xf0, 0xf8, 0xfc};
 const int _pcre_utf8_table3[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
 
-/* Table of the number of extra characters, indexed by the first character
-masked with 0x3f. The highest number for a valid UTF-8 character is in fact
-0x3d. */
+/* Table of the number of extra bytes, indexed by the first byte masked with
+0x3f. The highest number for a valid UTF-8 first byte is in fact 0x3d. */
 
 const uschar _pcre_utf8_table4[] = {
   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -89,6 +88,7 @@ const ucp_type_table _pcre_utt[] = {
   { "Any",                 PT_ANY,  0 },
   { "Arabic",              PT_SC,   ucp_Arabic },
   { "Armenian",            PT_SC,   ucp_Armenian },
+  { "Balinese",            PT_SC,   ucp_Balinese },
   { "Bengali",             PT_SC,   ucp_Bengali },
   { "Bopomofo",            PT_SC,   ucp_Bopomofo },
   { "Braille",             PT_SC,   ucp_Braille },
@@ -104,6 +104,7 @@ const ucp_type_table _pcre_utt[] = {
   { "Common",              PT_SC,   ucp_Common },
   { "Coptic",              PT_SC,   ucp_Coptic },
   { "Cs",                  PT_PC,   ucp_Cs },
+  { "Cuneiform",           PT_SC,   ucp_Cuneiform },
   { "Cypriot",             PT_SC,   ucp_Cypriot },
   { "Cyrillic",            PT_SC,   ucp_Cyrillic },
   { "Deseret",             PT_SC,   ucp_Deseret },
@@ -146,6 +147,7 @@ const ucp_type_table _pcre_utt[] = {
   { "N",                   PT_GC,   ucp_N },
   { "Nd",                  PT_PC,   ucp_Nd },
   { "New_Tai_Lue",         PT_SC,   ucp_New_Tai_Lue },
+  { "Nko",                 PT_SC,   ucp_Nko },
   { "Nl",                  PT_PC,   ucp_Nl },
   { "No",                  PT_PC,   ucp_No },
   { "Ogham",               PT_SC,   ucp_Ogham },
@@ -158,6 +160,8 @@ const ucp_type_table _pcre_utt[] = {
   { "Pd",                  PT_PC,   ucp_Pd },
   { "Pe",                  PT_PC,   ucp_Pe },
   { "Pf",                  PT_PC,   ucp_Pf },
+  { "Phags_Pa",            PT_SC,   ucp_Phags_Pa },
+  { "Phoenician",          PT_SC,   ucp_Phoenician },
   { "Pi",                  PT_PC,   ucp_Pi },
   { "Po",                  PT_PC,   ucp_Po },
   { "Ps",                  PT_PC,   ucp_Ps },

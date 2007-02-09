@@ -1,6 +1,279 @@
 ChangeLog for PCRE
 ------------------
 
+Version 7.0 19-Dec-06
+---------------------
+
+ 1. Fixed a signed/unsigned compiler warning in pcre_compile.c, shown up by
+    moving to gcc 4.1.1.
+
+ 2. The -S option for pcretest uses setrlimit(); I had omitted to #include
+    sys/time.h, which is documented as needed for this function. It doesn't
+    seem to matter on Linux, but it showed up on some releases of OS X.
+
+ 3. It seems that there are systems where bytes whose values are greater than
+    127 match isprint() in the "C" locale. The "C" locale should be the
+    default when a C program starts up. In most systems, only ASCII printing
+    characters match isprint(). This difference caused the output from pcretest
+    to vary, making some of the tests fail. I have changed pcretest so that:
+
+    (a) When it is outputting text in the compiled version of a pattern, bytes
+        other than 32-126 are always shown as hex escapes.
+
+    (b) When it is outputting text that is a matched part of a subject string,
+        it does the same, unless a different locale has been set for the match
+        (using the /L modifier). In this case, it uses isprint() to decide.
+
+ 4. Fixed a major bug that caused incorrect computation of the amount of memory
+    required for a compiled pattern when options that changed within the
+    pattern affected the logic of the preliminary scan that determines the
+    length. The relevant options are -x, and -i in UTF-8 mode. The result was
+    that the computed length was too small. The symptoms of this bug were
+    either the PCRE error "internal error: code overflow" from pcre_compile(),
+    or a glibc crash with a message such as "pcretest: free(): invalid next
+    size (fast)". Examples of patterns that provoked this bug (shown in
+    pcretest format) are:
+
+      /(?-x: )/x
+      /(?x)(?-x: \s*#\s*)/
+      /((?i)[\x{c0}])/8
+      /(?i:[\x{c0}])/8
+
+    HOWEVER: Change 17 below makes this fix obsolete as the memory computation
+    is now done differently.
+
+ 5. Applied patches from Google to: (a) add a QuoteMeta function to the C++
+    wrapper classes; (b) implement a new function in the C++ scanner that is
+    more efficient than the old way of doing things because it avoids levels of
+    recursion in the regex matching; (c) add a paragraph to the documentation
+    for the FullMatch() function.
+
+ 6. The escape sequence \n was being treated as whatever was defined as
+    "newline". Not only was this contrary to the documentation, which states
+    that \n is character 10 (hex 0A), but it also went horribly wrong when
+    "newline" was defined as CRLF. This has been fixed.
+
+ 7. In pcre_dfa_exec.c the value of an unsigned integer (the variable called c)
+    was being set to -1 for the "end of line" case (supposedly a value that no
+    character can have). Though this value is never used (the check for end of
+    line is "zero bytes in current character"), it caused compiler complaints.
+    I've changed it to 0xffffffff.
+
+ 8. In pcre_version.c, the version string was being built by a sequence of
+    C macros that, in the event of PCRE_PRERELEASE being defined as an empty
+    string (as it is for production releases) called a macro with an empty
+    argument. The C standard says the result of this is undefined. The gcc
+    compiler treats it as an empty string (which was what was wanted) but it is
+    reported that Visual C gives an error. The source has been hacked around to
+    avoid this problem.
+
+ 9. On the advice of a Windows user, included <io.h> and <fcntl.h> in Windows
+    builds of pcretest, and changed the call to _setmode() to use _O_BINARY
+    instead of 0x8000. Made all the #ifdefs test both _WIN32 and WIN32 (not all
+    of them did).
+
+10. Originally, pcretest opened its input and output without "b"; then I was
+    told that "b" was needed in some environments, so it was added for release
+    5.0 to both the input and output. (It makes no difference on Unix-like
+    systems.) Later I was told that it is wrong for the input on Windows. I've
+    now abstracted the modes into two macros, to make it easier to fiddle with
+    them, and removed "b" from the input mode under Windows.
+
+11. Added pkgconfig support for the C++ wrapper library, libpcrecpp.
+
+12. Added -help and --help to pcretest as an official way of being reminded
+    of the options.
+
+13. Removed some redundant semicolons after macro calls in pcrecpparg.h.in
+    and pcrecpp.cc because they annoy compilers at high warning levels.
+
+14. A bit of tidying/refactoring in pcre_exec.c in the main bumpalong loop.
+
+15. Fixed an occurrence of == in configure.ac that should have been = (shell
+    scripts are not C programs :-) and which was not noticed because it works
+    on Linux.
+
+16. pcretest is supposed to handle any length of pattern and data line (as one
+    line or as a continued sequence of lines) by extending its input buffer if
+    necessary. This feature was broken for very long pattern lines, leading to
+    a string of junk being passed to pcre_compile() if the pattern was longer
+    than about 50K.
+
+17. I have done a major re-factoring of the way pcre_compile() computes the
+    amount of memory needed for a compiled pattern. Previously, there was code
+    that made a preliminary scan of the pattern in order to do this. That was
+    OK when PCRE was new, but as the facilities have expanded, it has become
+    harder and harder to keep it in step with the real compile phase, and there
+    have been a number of bugs (see for example, 4 above). I have now found a
+    cunning way of running the real compile function in a "fake" mode that
+    enables it to compute how much memory it would need, while actually only
+    ever using a few hundred bytes of working memory and without too many
+    tests of the mode. This should make future maintenance and development
+    easier. A side effect of this work is that the limit of 200 on the nesting
+    depth of parentheses has been removed (though this was never a serious
+    limitation, I suspect). However, there is a downside: pcre_compile() now
+    runs more slowly than before (30% or more, depending on the pattern). I
+    hope this isn't a big issue. There is no effect on runtime performance.
+
+18. Fixed a minor bug in pcretest: if a pattern line was not terminated by a
+    newline (only possible for the last line of a file) and it was a
+    pattern that set a locale (followed by /Lsomething), pcretest crashed.
+
+19. Added additional timing features to pcretest. (1) The -tm option now times
+    matching only, not compiling. (2) Both -t and -tm can be followed, as a
+    separate command line item, by a number that specifies the number of
+    repeats to use when timing. The default is 50000; this gives better
+    precision, but takes uncomfortably long for very large patterns.
+
+20. Extended pcre_study() to be more clever in cases where a branch of a
+    subpattern has no definite first character. For example, (a*|b*)[cd] would
+    previously give no result from pcre_study(). Now it recognizes that the
+    first character must be a, b, c, or d.
+
+21. There was an incorrect error "recursive call could loop indefinitely" if
+    a subpattern (or the entire pattern) that was being tested for matching an
+    empty string contained only one non-empty item after a nested subpattern.
+    For example, the pattern (?>\x{100}*)\d(?R) provoked this error
+    incorrectly, because the \d was being skipped in the check.
+
+22. The pcretest program now has a new pattern option /B and a command line
+    option -b, which is equivalent to adding /B to every pattern. This causes
+    it to show the compiled bytecode, without the additional information that
+    -d shows. The effect of -d is now the same as -b with -i (and similarly, /D
+    is the same as /B/I).
+
+23. A new optimization is now able automatically to treat some sequences such
+    as a*b as a*+b. More specifically, if something simple (such as a character
+    or a simple class like \d) has an unlimited quantifier, and is followed by
+    something that cannot possibly match the quantified thing, the quantifier
+    is automatically "possessified".
+
+24. A recursive reference to a subpattern whose number was greater than 39
+    went wrong under certain circumstances in UTF-8 mode. This bug could also
+    have affected the operation of pcre_study().
+
+25. Realized that a little bit of performance could be had by replacing
+    (c & 0xc0) == 0xc0 with c >= 0xc0 when processing UTF-8 characters.
+
+26. Timing data from pcretest is now shown to 4 decimal places instead of 3.
+
+27. Possessive quantifiers such as a++ were previously implemented by turning
+    them into atomic groups such as ($>a+). Now they have their own opcodes,
+    which improves performance. This includes the automatically created ones
+    from 23 above.
+
+28. A pattern such as (?=(\w+))\1: which simulates an atomic group using a
+    lookahead was broken if it was not anchored. PCRE was mistakenly expecting
+    the first matched character to be a colon. This applied both to named and
+    numbered groups.
+
+29. The ucpinternal.h header file was missing its idempotency #ifdef.
+
+30. I was sent a "project" file called libpcre.a.dev which I understand makes
+    building PCRE on Windows easier, so I have included it in the distribution.
+
+31. There is now a check in pcretest against a ridiculously large number being
+    returned by pcre_exec() or pcre_dfa_exec(). If this happens in a /g or /G
+    loop, the loop is abandoned.
+
+32. Forward references to subpatterns in conditions such as (?(2)...) where
+    subpattern 2 is defined later cause pcre_compile() to search forwards in
+    the pattern for the relevant set of parentheses. This search went wrong
+    when there were unescaped parentheses in a character class, parentheses
+    escaped with \Q...\E, or parentheses in a #-comment in /x mode.
+
+33. "Subroutine" calls and backreferences were previously restricted to
+    referencing subpatterns earlier in the regex. This restriction has now
+    been removed.
+
+34. Added a number of extra features that are going to be in Perl 5.10. On the
+    whole, these are just syntactic alternatives for features that PCRE had
+    previously implemented using the Python syntax or my own invention. The
+    other formats are all retained for compatibility.
+
+    (a) Named groups can now be defined as (?<name>...) or (?'name'...) as well
+        as (?P<name>...). The new forms, as well as being in Perl 5.10, are
+        also .NET compatible.
+
+    (b) A recursion or subroutine call to a named group can now be defined as
+        (?&name) as well as (?P>name).
+
+    (c) A backreference to a named group can now be defined as \k<name> or
+        \k'name' as well as (?P=name). The new forms, as well as being in Perl
+        5.10, are also .NET compatible.
+
+    (d) A conditional reference to a named group can now use the syntax
+        (?(<name>) or (?('name') as well as (?(name).
+
+    (e) A "conditional group" of the form (?(DEFINE)...) can be used to define
+        groups (named and numbered) that are never evaluated inline, but can be
+        called as "subroutines" from elsewhere. In effect, the DEFINE condition
+        is always false. There may be only one alternative in such a group.
+
+    (f) A test for recursion can be given as (?(R1).. or (?(R&name)... as well
+        as the simple (?(R). The condition is true only if the most recent
+        recursion is that of the given number or name. It does not search out
+        through the entire recursion stack.
+
+    (g) The escape \gN or \g{N} has been added, where N is a positive or
+        negative number, specifying an absolute or relative reference.
+
+35. Tidied to get rid of some further signed/unsigned compiler warnings and
+    some "unreachable code" warnings.
+
+36. Updated the Unicode property tables to Unicode version 5.0.0. Amongst other
+    things, this adds five new scripts.
+
+37. Perl ignores orphaned \E escapes completely. PCRE now does the same.
+    There were also incompatibilities regarding the handling of \Q..\E inside
+    character classes, for example with patterns like [\Qa\E-\Qz\E] where the
+    hyphen was adjacent to \Q or \E. I hope I've cleared all this up now.
+
+38. Like Perl, PCRE detects when an indefinitely repeated parenthesized group
+    matches an empty string, and forcibly breaks the loop. There were bugs in
+    this code in non-simple cases. For a pattern such as  ^(a()*)*  matched
+    against  aaaa  the result was just "a" rather than "aaaa", for example. Two
+    separate and independent bugs (that affected different cases) have been
+    fixed.
+
+39. Refactored the code to abolish the use of different opcodes for small
+    capturing bracket numbers. This is a tidy that I avoided doing when I
+    removed the limit on the number of capturing brackets for 3.5 back in 2001.
+    The new approach is not only tidier, it makes it possible to reduce the
+    memory needed to fix the previous bug (38).
+
+40. Implemented PCRE_NEWLINE_ANY to recognize any of the Unicode newline
+    sequences (http://unicode.org/unicode/reports/tr18/) as "newline" when
+    processing dot, circumflex, or dollar metacharacters, or #-comments in /x
+    mode.
+
+41. Add \R to match any Unicode newline sequence, as suggested in the Unicode
+    report.
+
+42. Applied patch, originally from Ari Pollak, modified by Google, to allow
+    copy construction and assignment in the C++ wrapper.
+
+43. Updated pcregrep to support "--newline=any". In the process, I fixed a
+    couple of bugs that could have given wrong results in the "--newline=crlf"
+    case.
+
+44. Added a number of casts and did some reorganization of signed/unsigned int
+    variables following suggestions from Dair Grant. Also renamed the variable
+    "this" as "item" because it is a C++ keyword.
+
+45. Arranged for dftables to add
+
+      #include "pcre_internal.h"
+
+    to pcre_chartables.c because without it, gcc 4.x may remove the array
+    definition from the final binary if PCRE is built into a static library and
+    dead code stripping is activated.
+
+46. For an unanchored pattern, if a match attempt fails at the start of a
+    newline sequence, and the newline setting is CRLF or ANY, and the next two
+    characters are CRLF, advance by two characters instead of one.
+
+
 Version 6.7 04-Jul-06
 ---------------------
 
