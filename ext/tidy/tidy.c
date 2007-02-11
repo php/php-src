@@ -267,6 +267,7 @@ static TIDY_NODE_METHOD(isText);
 static TIDY_NODE_METHOD(isJste);
 static TIDY_NODE_METHOD(isAsp);
 static TIDY_NODE_METHOD(isPhp);
+static TIDY_NODE_METHOD(getParent);
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(tidy)
@@ -341,6 +342,7 @@ static zend_function_entry tidy_funcs_node[] = {
 	TIDY_NODE_ME(isJste, NULL)
 	TIDY_NODE_ME(isAsp, NULL)
 	TIDY_NODE_ME(isPhp, NULL)
+	TIDY_NODE_ME(getParent, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -1655,6 +1657,29 @@ static TIDY_NODE_METHOD(isPhp)
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto tidyNode tidyNode::getParent()
+   Returns the parent node if available or NULL */
+static TIDY_NODE_METHOD(getParent)
+{
+	TidyNode	parent_node;
+	PHPTidyObj *newobj;
+	TIDY_FETCH_ONLY_OBJECT;
+
+	parent_node = tidyGetParent(obj->node);
+	if(parent_node) {
+		tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
+		newobj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+		newobj->node = parent_node;
+		newobj->type = is_node;
+		newobj->ptdoc = obj->ptdoc;
+		newobj->ptdoc->ref_count++;
+		tidy_add_default_properties(newobj, is_node TSRMLS_CC);
+	} else {
+		ZVAL_NULL(return_value);
 	}
 }
 /* }}} */
