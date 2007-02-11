@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Upgraded SQLite 3 to version 3.3.12 (Ilia)
 - Upgraded PCRE to version 7.0 (Nuno)
 - Add --ri switch to CLI which allows to check extension information. (Marcus)
+- Added tidyNode::getParent() method (John, Nuno)
 - Fixed bug #40431 (dynamic properties may cause crash in ReflectionProperty 
   methods). (Tony)
 - Fixed bug #40428, imagepstext() doesn't accept optional parameter (Pierre)
