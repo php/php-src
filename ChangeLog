@@ -1,3 +1,31 @@
+2007-02-10  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_4_4)
+      ext/imap/config.m4:
+      fix typos
+
+2007-02-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug40431.phpt
+      ext/reflection/tests/bug40431.phpt:
+      fix #40431 (dynamic properties may cause crash in ReflectionProperty
+      methods)
+
+2007-02-10  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/sqlite/src/parse.c:
+      fix gcov build (#line directives)
+
+2007-02-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/posix/posix.c:
+      use the same ifdef anf get rid of "unused var" warnings
+
+    * ext/standard/string.c:
+      fix off-by-one accidentally introduced by safe_emalloc() patch
+
 2007-02-09  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/pcre/config.w32
