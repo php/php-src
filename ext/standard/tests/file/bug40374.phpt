@@ -13,8 +13,8 @@ unlink($file);
 echo "Done\n";
 ?>
 --EXPECTF--	
-string(%d) "/tmp/test_%s"
+string(%d) "%s"
 Done
 --UEXPECTF--
-unicode(%d) "/tmp/test_%s"
+unicode(%d) "%s"
 Done
