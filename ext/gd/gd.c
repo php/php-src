@@ -4338,11 +4338,6 @@ PHP_FUNCTION(imagepstext)
 	T1_TMATRIX *transform = NULL;
 	char *str;
 	int str_len;
-	int argc = ZEND_NUM_ARGS();
-
-	if (argc != 8 && argc != 12) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrlllll|lldl", &img, &str, &str_len, &fnt, &size, &_fg, &_bg, &x, &y, &space, &width, &angle, &aa_steps) == FAILURE) {
 		return;
