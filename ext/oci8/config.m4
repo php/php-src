@@ -99,7 +99,7 @@ PHP_ARG_WITH(oci8, for Oracle (OCI8) support,
 [  --with-oci8[=DIR]       Include Oracle (OCI8) support. 
                           The default DIR is ORACLE_HOME.
                           Use --with-oci8=instantclient,/path/to/oic/lib
-                          to use Oracle Instant Client installation])
+                          to use an Oracle Instant Client installation])
 
   AC_MSG_CHECKING([checking PHP version])
 

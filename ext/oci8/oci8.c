@@ -1088,7 +1088,7 @@ php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr 
 			size_t rsize = 0;
 			sword result;
 
-			PHP_OCI_CALL_RETURN(result, OCINlsEnvironmentVariableGet, (&charsetid_nls_lang, 0, OCI_NLS_CHARSET_ID, 0, &rsize))
+			PHP_OCI_CALL_RETURN(result, OCINlsEnvironmentVariableGet, (&charsetid_nls_lang, 0, OCI_NLS_CHARSET_ID, 0, &rsize));
 			if (result != OCI_SUCCESS) {
 				charsetid_nls_lang = 0;
 			}
