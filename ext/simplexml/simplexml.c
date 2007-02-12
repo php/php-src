@@ -1526,7 +1526,7 @@ SXE_METHOD(addAttribute)
 
 	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 
-	if (node->type != XML_ELEMENT_NODE) {
+	if (node && node->type != XML_ELEMENT_NODE) {
 		node = node->parent;
 	}
 
