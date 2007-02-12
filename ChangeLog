@@ -1,3 +1,51 @@
+2007-02-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/str_ireplace.phpt:
+      add test
+
+    * ext/standard/tests/strings/str_ireplace.phpt
+      ext/standard/tests/strings/str_ireplace.phpt:
+      
+      new test
+
+    * tests/lang/bug30638.phpt:
+      add a note
+
+    * ext/standard/tests/file/bug40374.phpt
+      ext/standard/tests/file/bug40374.phpt:
+      fix test
+
+2007-02-11  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/tests/019.phpt
+      ext/tidy/tests/028.phpt:
+      sync tests with php 5.2
+
+    * (PHP_5_2)
+      NEWS
+      ext/tidy/tidy.c
+      ext/tidy/tests/028.phpt
+      ext/tidy/tests/028.phpt:
+      merge the tidyNode::getParent() patch from HEAD
+
+2007-02-11  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c:
+      - MFB: Fixed bug #40428, imagepstext() doesn't accept optional parameter
+      	(Pierre)
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/gd.c:
+      - Fixed bug #40428, imagepstext() doesn't accept optional parameter
+        (Pierre)
+
+2007-02-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/imap/config.m4:
+      fix typos
+
 2007-02-10  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * (PHP_4_4)
