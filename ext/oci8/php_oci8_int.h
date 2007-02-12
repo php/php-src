@@ -222,41 +222,47 @@ typedef struct { /* php_oci_out_column {{{ */
 /* {{{ macros */
 
 #define PHP_OCI_CALL(func, params) \
-	OCI_G(in_call) = 1; \
-	func params; \
-	OCI_G(in_call) = 0; \
-	if (OCI_G(debug_mode)) { \
-		php_printf ("OCI8 DEBUG: " #func " at (%s:%d) \n", __FILE__, __LINE__); \
-	}
+	do { \
+		OCI_G(in_call) = 1; \
+		func params; \
+		OCI_G(in_call) = 0; \
+		if (OCI_G(debug_mode)) { \
+			php_printf ("OCI8 DEBUG: " #func " at (%s:%d) \n", __FILE__, __LINE__); \
+		} \
+	} while (0)
 
 #define PHP_OCI_CALL_RETURN(__retval, func, params) \
-	OCI_G(in_call) = 1; \
-	__retval = func params; \
-	OCI_G(in_call) = 0; \
-	if (OCI_G(debug_mode)) { \
-		php_printf ("OCI8 DEBUG: " #func " at (%s:%d) \n", __FILE__, __LINE__); \
-	}
+	do { \
+		OCI_G(in_call) = 1; \
+		__retval = func params; \
+		OCI_G(in_call) = 0; \
+		if (OCI_G(debug_mode)) { \
+			php_printf ("OCI8 DEBUG: " #func " at (%s:%d) \n", __FILE__, __LINE__); \
+		} \
+	} while (0)
 
 #define PHP_OCI_HANDLE_ERROR(connection, errcode) \
-{ \
-	switch (errcode) { \
-		case 1013: \
-			zend_bailout(); \
+	do { \
+		switch (errcode) { \
+			case 1013: \
+					   zend_bailout(); \
 			break; \
-		case 22: \
-		case 1012: \
-		case 3113: \
-		case 604: \
-		case 1041: \
-		case 3114: \
-			connection->is_open = 0; \
+			case 22: \
+			case 1012: \
+			case 3113: \
+			case 604: \
+			case 1041: \
+			case 3114: \
+					   connection->is_open = 0; \
 			break; \
-	} \
-} \
+		} \
+	} while (0)
 
 #define PHP_OCI_REGISTER_RESOURCE(resource, le_resource) \
-	resource->id = ZEND_REGISTER_RESOURCE(NULL, resource, le_resource); \
-	zend_list_addref(resource->connection->rsrc_id);
+	do { \
+		resource->id = ZEND_REGISTER_RESOURCE(NULL, resource, le_resource); \
+		zend_list_addref(resource->connection->rsrc_id); \
+	} while (0)
 
 #define PHP_OCI_ZVAL_TO_CONNECTION(zval, connection) \
 	ZEND_FETCH_RESOURCE2(connection, php_oci_connection *, &zval, -1, "oci8 connection", le_connection, le_pconnection);
@@ -271,10 +277,12 @@ typedef struct { /* php_oci_out_column {{{ */
 	ZEND_FETCH_RESOURCE(collection, php_oci_collection *, &zval, -1, "oci8 collection", le_collection)
 
 #define PHP_OCI_FETCH_RESOURCE_EX(zval, var, type, name, resource_type)                      \
-	var = (type) zend_fetch_resource(&zval TSRMLS_CC, -1, name, NULL, 1, resource_type); \
-	if (!var) {                                                                          \
-		return 1;                                                                        \
-	}
+	do { \
+		var = (type) zend_fetch_resource(&zval TSRMLS_CC, -1, name, NULL, 1, resource_type); \
+		if (!var) {                                                                          \
+			return 1;                                                                        \
+		} \
+	} while (0)
 	
 #define PHP_OCI_ZVAL_TO_CONNECTION_EX(zval, connection) \
 	PHP_OCI_FETCH_RESOURCE_EX(zval, connection, php_oci_connection *, "oci8 connection", le_connection)
