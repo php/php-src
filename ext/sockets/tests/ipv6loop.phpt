@@ -5,7 +5,7 @@ IPv6 Loopback test
 	if (!extension_loaded('sockets')) {
 		die('skip sockets extenion not available.');
 	}
-	if (!defined(AF_INET6)) {
+	if (!defined("AF_INET6")) {
 		die('skip no IPv6 support');
 	}
 ?>
