@@ -49,7 +49,7 @@ php_output_globals output_globals;
 #endif
 
 /* {{{ php_default_output_func */
-static inline int php_default_output_func(const char *str, uint str_len TSRMLS_DC)
+PHPAPI int php_default_output_func(const char *str, uint str_len TSRMLS_DC)
 {
 	fwrite(str, 1, str_len, stderr);
 	return str_len;

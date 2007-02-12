@@ -27,6 +27,7 @@ PHPAPI void php_output_startup(void);
 PHPAPI void php_output_activate(TSRMLS_D);
 PHPAPI void php_output_set_status(zend_bool status TSRMLS_DC);
 PHPAPI void php_output_register_constants(TSRMLS_D);
+PHPAPI int  php_default_output_func(const char *str, uint str_len TSRMLS_DC);
 PHPAPI int  php_body_write(const char *str, uint str_length TSRMLS_DC);
 PHPAPI int  php_header_write(const char *str, uint str_length TSRMLS_DC);
 PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC);
