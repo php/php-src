@@ -14,9 +14,6 @@ var_dump(inet_ntop($packed));
 $packed = chr(255) . chr(255) . chr(255) . chr(0);
 var_dump(inet_ntop($packed));
 
-$packed = str_repeat(chr(0), 15) . chr(38);
-var_dump(inet_ntop($packed));
-
 var_dump(inet_ntop());
 var_dump(inet_ntop(-1));
 var_dump(inet_ntop(""));
@@ -43,7 +40,6 @@ echo "Done\n";
 --EXPECTF--	
 string(9) "127.0.0.1"
 string(13) "255.255.255.0"
-string(4) "::26"
 
 Warning: inet_ntop() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
