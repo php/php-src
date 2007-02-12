@@ -186,6 +186,7 @@ PHP_FUNCTION(iptcembed)
 	unsigned int spool = 0, done = 0, inx;	
 	unsigned char *spoolbuf=0, *poi=0;
 	struct stat sb;
+	zend_bool written = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SZ|l", &iptcdata, &iptcdata_len, &pp_jpeg_file, &spool) == FAILURE ||
 		php_stream_path_param_encode(pp_jpeg_file, &jpeg_file, &jpeg_file_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
@@ -204,7 +205,8 @@ PHP_FUNCTION(iptcembed)
 	if (spool < 2) {
 		fstat(fileno(fp), &sb);
 
-		poi = spoolbuf = emalloc(iptcdata_len + sizeof(psheader) + sb.st_size + 1024);
+		poi = spoolbuf = safe_emalloc(1, iptcdata_len + sizeof(psheader) + sb.st_size + 1024, 1);
+		memset(poi, 0, iptcdata_len + sizeof(psheader) + sb.st_size + 1024 + 1);
 	} 
 
 	if (php_iptc_get1(fp, spool, poi?&poi:0 TSRMLS_CC) != 0xFF) {
@@ -242,6 +244,14 @@ PHP_FUNCTION(iptcembed)
 
 			case M_APP0:
 				/* APP0 is in each and every JPEG, so when we hit APP0 we insert our new APP13! */
+			case M_APP1:
+				/* APP1 is present in JFIF */
+				if (written) {
+					/* don't try to write the data twice */
+					break;
+				}
+				written = 1;
+
 				php_iptc_skip_variable(fp, spool, poi?&poi:0 TSRMLS_CC);
 
 				if (iptcdata_len & 1) iptcdata_len++; /* make the length even */
