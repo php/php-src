@@ -31,10 +31,10 @@ bool(false)
 int(0)
 string(27) "Failed to parse address "[""
 
-Warning: stream_socket_client(): unable to connect to [  (Failed to parse IPv6 address "[ ") in %s on line %d
+Warning: stream_socket_client(): unable to connect to [  (Failed to parse%saddress "[ ") in %s on line %d
 bool(false)
 int(0)
-string(33) "Failed to parse IPv6 address "[ ""
+string(%d) "Failed to parse%saddress "[ ""
 
 Warning: stream_socket_client(): unable to connect to . (Failed to parse address ".") in %s on line %d
 bool(false)
@@ -62,10 +62,10 @@ bool(false)
 int(0)
 unicode(27) "Failed to parse address "[""
 
-Warning: stream_socket_client(): unable to connect to [  (Failed to parse IPv6 address "[ ") in %s on line %d
+Warning: stream_socket_client(): unable to connect to [  (Failed to parse%saddress "[ ") in %s on line %d
 bool(false)
 int(0)
-unicode(33) "Failed to parse IPv6 address "[ ""
+unicode(%d) "Failed to parse%saddress "[ ""
 
 Warning: stream_socket_client(): unable to connect to . (Failed to parse address ".") in %s on line %d
 bool(false)
