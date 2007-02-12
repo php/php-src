@@ -453,6 +453,7 @@ PHP_FUNCTION(readline_completion_function)
 
 	if (!zend_is_callable(arg, 0, &name)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name);
+		efree(name);
 		RETURN_FALSE;
 	}
 
