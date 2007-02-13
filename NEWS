@@ -5,9 +5,13 @@ PHP                                                                        NEWS
 - Upgraded PCRE to version 7.0 (Nuno)
 - Add --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)
+- Fixed bug #40455 (proc_open() uses wrong commandline when safe_mode_exec_dir 
+  is set). (Tony)
 - Fixed bug #40432 (strip_tags() fails with greater than in attribute). (Ilia)
 - Fixed bug #40431 (dynamic properties may cause crash in ReflectionProperty 
   methods). (Tony)
+- Fixed bug #40451 (addAttribute() may crash when used with non-existent child 
+  node). (Tony)
 - Fixed bug #40428 (imagepstext() doesn't accept optional parameter). (Pierre)
 - Fixed bug #40410 (ext/posix does not compile on MacOS 10.3.9). (Tony)
 - Fixed bug #40109 (iptcembed fails on non-jfif jpegs). (Tony)
