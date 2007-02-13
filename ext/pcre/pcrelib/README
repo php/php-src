@@ -118,13 +118,13 @@ library. You can read more about them in the pcrebuild man page.
   property table); only the basic two-letter properties such as Lu are
   supported.
 
-. You can build PCRE to recognize either CR or LF or the sequence CRLF as
-  indicating the end of a line. Whatever you specify at build time is the
-  default; the caller of PCRE can change the selection at run time. The default
-  newline indicator is a single LF character (the Unix standard). You can
-  specify the default newline indicator by adding --newline-is-cr or
-  --newline-is-lf or --newline-is-crlf to the "configure" command,
-  respectively.
+. You can build PCRE to recognize either CR or LF or the sequence CRLF or any
+  of the Unicode newline sequences as indicating the end of a line. Whatever
+  you specify at build time is the default; the caller of PCRE can change the
+  selection at run time. The default newline indicator is a single LF character
+  (the Unix standard). You can specify the default newline indicator by adding
+  --newline-is-cr or --newline-is-lf or --newline-is-crlf or --newline-is-any
+  to the "configure" command, respectively.
 
 . When called via the POSIX interface, PCRE uses malloc() to get additional
   storage for processing capturing parentheses if there are more than 10 of
@@ -283,7 +283,7 @@ to the values of CC and CFLAGS.
 Using HP's ANSI C++ compiler (aCC)
 ----------------------------------
 
-Unless C++ support is disabled by specifiying the "--disable-cpp" option of the
+Unless C++ support is disabled by specifying the "--disable-cpp" option of the
 "configure" script, you *must* include the "-AA" option in the CXXFLAGS
 environment variable in order for the C++ components to compile correctly.
 
@@ -305,8 +305,8 @@ PCRE in the same way as for Unix systems.
 
 PCRE has been compiled on Windows systems and on Macintoshes, but I don't know
 the details because I don't use those systems. It should be straightforward to
-build PCRE on any system that has a Standard C compiler, because it uses only
-Standard C functions.
+build PCRE on any system that has a Standard C compiler and library, because it
+uses only Standard C functions.
 
 
 Testing PCRE
@@ -325,15 +325,15 @@ NON-UNIX-USE.
 The RunTest script runs the pcretest test program (which is documented in its
 own man page) on each of the testinput files (in the testdata directory) in
 turn, and compares the output with the contents of the corresponding testoutput
-file. A file called testtry is used to hold the main output from pcretest
+files. A file called testtry is used to hold the main output from pcretest
 (testsavedregex is also used as a working file). To run pcretest on just one of
 the test files, give its number as an argument to RunTest, for example:
 
   RunTest 2
 
-The first file can also be fed directly into the perltest script to check that
-Perl gives the same results. The only difference you should see is in the first
-few lines, where the Perl version is given instead of the PCRE version.
+The first test file can also be fed directly into the perltest script to check
+that Perl gives the same results. The only difference you should see is in the
+first few lines, where the Perl version is given instead of the PCRE version.
 
 The second set of tests check pcre_fullinfo(), pcre_info(), pcre_study(),
 pcre_copy_substring(), pcre_get_substring(), pcre_get_substring_list(), error
@@ -442,6 +442,7 @@ The distribution should contain the following files:
   pcre_globals.c        )   and some internal functions that they use
   pcre_info.c           )
   pcre_maketables.c     )
+  pcre_newline.c        )
   pcre_ord2utf8.c       )
   pcre_refcount.c       )
   pcre_study.c          )
@@ -525,4 +526,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-June 2006
+November 2006

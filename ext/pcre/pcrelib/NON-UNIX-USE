@@ -22,7 +22,7 @@ The following are generic comments about building PCRE. The interspersed
 indented commands are suggestions from Mark Tetrode as to which commands you
 might use on a Windows system to build a static library.
 
-(1) Copy or rename the file config.in as config.h, and change the macros that
+(1) Copy or rename the file config.h.in as config.h, and change the macros that
 define HAVE_STRERROR and HAVE_MEMMOVE to define them as 1 rather than 0.
 Unfortunately, because of the way Unix autoconf works, the default setting has
 to be 0. You may also want to make changes to other macros in config.h. In
@@ -31,7 +31,7 @@ the NEWLINE macro. The default is to use '\n', thereby using whatever value
 your compiler gives to '\n'.
 
   rem Mark Tetrode's commands
-  copy config.in config.h
+  copy config.h.in config.h
   rem Use write, because notepad cannot handle UNIX files. Change values.
   write config.h
 
@@ -56,6 +56,7 @@ character tables and writes them to that file.
   pcre_globals.c
   pcre_info.c
   pcre_maketables.c
+  pcre_newline.c
   pcre_ord2utf8.c
   pcre_refcount.c
   pcre_study.c
@@ -93,10 +94,10 @@ pcre and pcreposix libraries when linking.
   cl /F0x400000 pcretest.c pcre.lib pcreposix.lib
 
 (6) Run pcretest on the testinput files in the testdata directory, and check
-that the output matches the corresponding testoutput files. You must use the
--i option when checking testinput2. Note that the supplied files are in Unix
-format, with just LF characters as line terminators. You may need to edit them
-to change this if your system uses a different convention.
+that the output matches the corresponding testoutput files. Note that the
+supplied files are in Unix format, with just LF characters as line terminators.
+You may need to edit them to change this if your system uses a different
+convention.
 
   rem Mark Tetrode's commands
   pcretest testdata\testinput1 testdata\myoutput1
@@ -134,6 +135,17 @@ FURTHER REMARKS
 If you have a system without "configure" but where you can use a Makefile, edit
 Makefile.in to create Makefile, substituting suitable values for the variables
 at the head of the file.
+
+Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
+
+  Some of the core BCC libraries have a version of PCRE from 1998 built in,
+  which can lead to pcre_exec() giving an erroneous PCRE_ERROR_NULL from a
+  version mismatch. I'm including an easy workaround below, if you'd like to
+  include it in the non-unix instructions:
+
+  When linking a project with BCC5.5, pcre.lib must be included before any of
+  the libraries cw32.lib, cw32i.lib, cw32mt.lib, and cw32mti.lib on the command
+  line.
 
 Some help in building a Win32 DLL of PCRE in GnuWin32 environments was
 contributed by Paul Sokolovsky. These environments are Mingw32

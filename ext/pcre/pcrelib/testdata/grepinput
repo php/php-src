@@ -593,7 +593,8 @@ aaaaa2
 ffffffffff
 
 This is a line before the binary zero.
-This line contains a binary zero here >This is a line after the binary zero.
+This line contains a binary zero here > < for testing.
+This is a line after the binary zero.
 
 ABOVE the elephant 
 ABOVE

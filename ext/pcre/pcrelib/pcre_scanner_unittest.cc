@@ -33,9 +33,12 @@
 // functionality.
 
 #include <stdio.h>
+#include <string>
 #include <vector>
 #include <pcre_stringpiece.h>
 #include <pcre_scanner.h>
+
+#define FLAGS_unittest_stack_size   49152
 
 // Dies with a fatal error if the two values are not equal.
 #define CHECK_EQ(a, b)  do {                                    \
@@ -116,8 +119,31 @@ static void TestScanner() {
   comments.resize(0);
 }
 
+static void TestBigComment() {
+  string input;
+  for (int i = 0; i < 1024; ++i) {
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "    # Comment %d\n", i);
+    input += buf;
+  }
+  input += "name = value;\n";
+
+  Scanner s(input.c_str());
+  s.SetSkipExpression("\\s+|#.*\n");
+
+  string name;
+  string value;
+  s.Consume("(\\w+) = (\\w+);", &name, &value);
+  CHECK_EQ(name, "name");
+  CHECK_EQ(value, "value");
+}
+
+// TODO: also test scanner and big-comment in a thread with a
+//       small stack size
+
 int main(int argc, char** argv) {
   TestScanner();
+  TestBigComment();
 
   // Done
   printf("OK\n");

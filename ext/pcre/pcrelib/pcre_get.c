@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2007 University of Cambridge
+           Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -436,7 +436,6 @@ pcre_get_named_substring(const pcre *code, const char *subject, int *ovector,
 int n = get_first_set(code, stringname, ovector);
 if (n <= 0) return n;
 return pcre_get_substring(subject, ovector, stringcount, n, stringptr);
-
 }
 
 

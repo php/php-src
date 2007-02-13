@@ -2,6 +2,9 @@
 *           Unicode Property Table handler       *
 *************************************************/
 
+#ifndef _UCPINTERNAL_H
+#define _UCPINTERNAL_H
+
 /* Internal header file defining the layout of the bits in each pair of 32-bit
 words that form a data item in the table. */
 
@@ -83,5 +86,7 @@ When searching the data, proceed as follows:
 (7) Otherwise, set the bottom to one element past the current point and goto
     (2).
 */
+
+#endif /* _UCPINTERNAL_H */
 
 /* End of ucpinternal.h */

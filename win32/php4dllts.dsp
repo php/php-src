@@ -468,7 +468,7 @@ SOURCE=..\ext\pcre\pcrelib\pcre_config.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\pcre_dfa_exec.c
+SOURCE=..\ext\pcre\pcrelib\pcre_newline.c
 
 !IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
 

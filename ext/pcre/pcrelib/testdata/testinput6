@@ -747,4 +747,19 @@
 /([\pL]=(abc))*X/
     L=abcX
 
+/The next two should be Perl-compatible, but it fails to match \x{e0}. PCRE
+will match it only with UCP support, because without that it has no notion
+of case for anything other than the ASCII letters. / 
+
+/((?i)[\x{c0}])/8
+    \x{c0}
+    \x{e0} 
+
+/(?i:[\x{c0}])/8
+    \x{c0}
+    \x{e0} 
+    
+/^\p{Balinese}\p{Cuneiform}\p{Nko}\p{Phags_Pa}\p{Phoenician}/8
+    \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
+
 / End of testinput6 /

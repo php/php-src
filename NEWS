@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, Version 4.4.6
+- Updated PCRE to version 7.0. (Nuno)
 	
 14 Feb 2007, Version 4.4.5
 - Upgraded PEAR to 1.5.0. (Greg)
