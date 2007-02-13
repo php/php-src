@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Fixed bug #40410 (ext/posix does not compile on MacOS 10.3.9). (Tony)
 - Fixed bug #40109 (iptcembed fails on non-jfif jpegs). (Tony)
 - Fixed bug #39836 (SplObjectStorage empty after unserialize). (Marcus)
+- Fixed bug #37799 (ftp_ssl_connect() falls back to non-ssl connection). (Nuno)
 
 08 Feb 2007, PHP 5.2.1
 - Added read-timeout context option "timeout" for HTTP streams. (Hannes, Ilia). 
