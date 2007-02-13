@@ -1,3 +1,71 @@
+2007-02-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug40451.phpt:
+      MFB: #40451 (addAttribute() may crash when used with non-existent child
+      node)
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug40451.phpt
+      ext/simplexml/tests/bug40451.phpt:
+      fix #40451 (addAttribute() may crash when used with non-existent child
+      node)
+
+    * (PHP_5_2)
+      ext/standard/iptc.c:
+      upgrade to new parameter parsing API
+      + mostly ws/cs fixes, sort of MFH
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/iptc.c:
+      MFH: fix #40109 (iptcembed fails on non-jfif jpegs)
+
+    * ext/standard/iptc.c:
+      fix bug #40109 (iptcembed fails on non-jfif jpegs)
+      + use safe_emalloc
+
+    * (PHP_4_4)
+      NEWS
+      main/output.c
+      main/php_output.h:
+      fix #40335 (Compile fails when using GCC 4.1.1/binutils 2.17)
+
+    * ext/sockets/tests/ipv6loop.phpt
+      ext/standard/tests/file/stream_002.phpt:
+      fix tests
+
+    * ext/standard/tests/network/inet.phpt
+      ext/standard/tests/network/inet_ipv6.phpt
+      ext/standard/tests/network/inet_ipv6.phpt:
+      add separate IPv6 test
+
+    * ext/pcre/tests/backtrack_limit.phpt
+      ext/pcre/tests/bug27103.phpt
+      ext/pcre/tests/invalid_utf8.phpt
+      ext/pcre/tests/pcre_anchored.phpt
+      ext/pcre/tests/preg_replace2.phpt
+      ext/pcre/tests/recursion_limit.phpt:
+      add SKIPIF sections to check if PCRE has the functionality tested/used
+
+    * ext/oci8/config.m4
+      ext/oci8/oci8.c
+      ext/oci8/php_oci8_int.h:
+      typofixes and other improvements by Chris Jones
+
+    * (PHP_5_2)
+      NEWS:
+      fix news entry
+
+2007-02-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/readline/readline.c:
+      
+      Fixed a memory leak inside readline_completion_function() on non-callable
+      callback.
+
 2007-02-11  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
