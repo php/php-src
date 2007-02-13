@@ -59,7 +59,7 @@ $buf = fread($s, 2048);
 
 
 function user_auth($buf) {
-	global $user, $s, $ssl;
+	global $user, $s, $ssl, $bug37799;
 
 if (!empty($ssl)) {
 	if ($buf !== "AUTH TLS\r\n") {
@@ -67,7 +67,13 @@ if (!empty($ssl)) {
 		dump_and_exit($buf);
 	}
 
-	fputs($s, "234 auth type accepted\r\n");
+	if (empty($bug37799)) {
+		fputs($s, "234 auth type accepted\r\n");
+	} else {
+		fputs($s, "666 dummy\r\n");
+		fputs($s, "666 bogus msg\r\n");
+		exit;
+	}
 
 	if (!stream_socket_enable_crypto($s, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER)) {
 		die("SSLv23 handshake failed.\n");
