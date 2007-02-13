@@ -1,30 +1,25 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Feb 2007, Version 4.4.5
-- Fixed bug #40335 (Compile fails when using GCC 4.1.1/binutils 2.17). (Tony)
+14 Feb 2007, Version 4.4.5
+- Upgraded PEAR to 1.5.0. (Greg)
+- Updated PCRE to version 6.7. (Ilia)
+- Moved extensions to PECL:
+  . ext/ovrimos (Derick)
 
-01 Feb 2007, Version 4.4.5RC2
-- Fixed bug #39819 (Using $this not in object context can cause segfaults).
-  (Dmitry)
-- Fixed bug #36248 (CURLOPT_HEADERFUNCTION, couldn't set the function in the
-  class). (Ilia)
+- Added a meta tag to phpinfo() output to prevent search engines from 
+  indexing the page. (Ilia)
 - Backported a fix in the configure tests to detect the "rounding fuzz".
   (Derick, Joe Orton)
 - Backported fix for ext/imap compilation failure with recent c-client 
   versions. (Tony)
-- Upgraded PEAR to 1.5.0. (Greg)
-- Moved extensions to PECL:
-  . ext/ovrimos (Derick)
-
-04 Jan 2007, Version 4.4.5RC1
-- Added a meta tag to phpinfo() output to prevent search engines from 
-  indexing the page. (Ilia)
-- Updated PCRE to version 6.7. (Ilia)
 - Fixed missing open_basedir check inside chdir() function. (Ilia)
+- Fixed bug #40335 (Compile fails when using GCC 4.1.1/binutils 2.17). (Tony)
 - Fixed bug #39971 (pg_insert/pg_update do not allow now() to be used for   
   timestamp fields). (Ilia)
 - Fixed bug #39890 (using autoconf 2.6x and --with-layout=GNU breaks PEAR 
   install path). (Tony)
+- Fixed bug #39819 (Using $this not in object context can cause segfaults).
+  (Dmitry)
 - Fixed bug #39653 (ext/dba doesn't check for db-4.5 and db-4.4 when db4 
   support is enabled). (Tony)
 - Fixed bug #39583 (ftp_put() does not change transfer mode to ASCII). (Tony)
@@ -48,6 +43,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #37812 (aggregate_methods_by_list fails to take certain methods).
   (Hannes)
 - Fixed bug #36975 (natcasesort() causes array_pop() to misbehave). (Hannes)
+- Fixed bug #36248 (CURLOPT_HEADERFUNCTION, couldn't set the function in the
+  class). (Ilia)
 - Fixed bug #34066 (recursive array_walk causes segfault). (Tony)
 	
 17 Aug 2006, Version 4.4.4
