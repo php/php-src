@@ -945,6 +945,10 @@ PHP_FUNCTION(proc_open)
 							descriptors[i].mode_flags), mode_string, NULL);
 #else
 				stream = php_stream_fopen_from_fd(descriptors[i].parentend, mode_string, NULL);
+# if defined(F_SETFD) && defined(FD_CLOEXEC)
+				/* mark the descriptor close-on-exec, so that it won't be inherited by potential other children */
+				fcntl(descriptors[i].parentend, F_SETFD, FD_CLOEXEC);
+# endif
 #endif
 				if (stream) {
 					zval *retfp;
