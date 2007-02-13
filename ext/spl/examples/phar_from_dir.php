@@ -37,9 +37,6 @@ if ($argc > 3)
 	$dir = new RegexIterator($dir, '/'.$argv[3].'/');
 }
 
-
-$cwd .= DIRECTORY_SEPARATOR;
-
 $phar->begin();
 
 foreach($dir as $file)
