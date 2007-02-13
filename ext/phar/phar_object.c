@@ -570,14 +570,12 @@ PHP_METHOD(Phar, offsetGet)
  */
 PHP_METHOD(Phar, offsetSet)
 {
-	char *fname;
-	char *error;
-	int fname_len;
-	zval *contents;
-	long contents_len = PHP_STREAM_COPY_ALL;
+	char *fname, *cont_str = NULL, *error;
+	int fname_len, cont_len;
+	zval *zresource;
+	long contents_len;
 	phar_entry_data *data;
 	php_stream *contents_file;
-	long offset;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly)) {
@@ -585,13 +583,11 @@ PHP_METHOD(Phar, offsetSet)
 		return;
 	}
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &fname, &fname_len, &contents) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sr", &fname, &fname_len, &zresource) == FAILURE
+	&& zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &fname, &fname_len, &cont_str, &cont_len) == FAILURE) {
 		return;
 	}
 
-	if (Z_TYPE_P(contents) != IS_STRING && Z_TYPE_P(contents) != IS_RESOURCE) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
-	}
 	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, fname, fname_len, "w+b", &error TSRMLS_CC))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created: %s", fname, error);
@@ -603,19 +599,16 @@ PHP_METHOD(Phar, offsetSet)
 		if (error) {
 			efree(error);
 		}
-		if (Z_TYPE_P(contents) == IS_STRING) {
-			contents_len = php_stream_write(data->fp, Z_STRVAL_P(contents), Z_STRLEN_P(contents));
-			if (contents_len != Z_STRLEN_P(contents)) {
+		if (cont_str) {
+			contents_len = php_stream_write(data->fp, cont_str, cont_len);
+			if (contents_len != cont_len) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
 			}
-		} else if (Z_TYPE_P(contents) == IS_RESOURCE) {
-			if (!(php_stream_from_zval_no_verify(contents_file, &contents))) {
+		} else {
+			if (!(php_stream_from_zval_no_verify(contents_file, &zresource))) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
 			}
-			offset = php_stream_copy_to_stream(contents_file, data->fp, contents_len);
-			if (contents_len != offset && contents_len != PHP_STREAM_COPY_ALL) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
-			}
+			contents_len = php_stream_copy_to_stream(contents_file, data->fp, PHP_STREAM_COPY_ALL);
 		}
 		data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 		phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
