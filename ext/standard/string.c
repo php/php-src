@@ -4130,7 +4130,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow, int allow_len, zend_bool allow_tag_spaces)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
-	int br, i=0, depth=0;
+	int br, i=0, depth=0, in_q = 0;
 	int state = 0;
 
 	if (stateptr)
@@ -4164,7 +4164,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 					if (allow) {
 						tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 						*(tp++) = '<';
-					}
+				 	}
 				} else if (state == 1) {
 					depth++;
 				}
@@ -4203,7 +4203,11 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 					depth--;
 					break;
 				}
-			
+
+				if (in_q) {
+					break;
+				}
+
 				switch (state) {
 					case 1: /* HTML/XML */
 						lc = '>';
@@ -4258,6 +4262,9 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 				} else if (allow && state == 1) {
 					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 					*(tp++) = c;
+				}
+				if (*(p-1) != '\\') {
+					in_q = !in_q;
 				}
 				break;
 			
