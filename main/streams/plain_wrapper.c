@@ -889,12 +889,12 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 					*opened_path = realpath;
 					realpath = NULL;
 				}
-				if (realpath) {
-					efree(realpath);
-				}
 				/* fall through */
 
 			case PHP_STREAM_PERSISTENT_FAILURE:
+				if (realpath) {
+					efree(realpath);
+				}
 				efree(persistent_id);;
 				return ret;
 		}
@@ -933,6 +933,10 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 
 				r = do_fstat(self, 0);
 				if ((r == 0 && !S_ISREG(self->sb.st_mode))) {
+					if (opened_path) {
+						efree(*opened_path);
+						*opened_path = NULL;
+					}
 					php_stream_close(ret);
 					return NULL;
 				}
