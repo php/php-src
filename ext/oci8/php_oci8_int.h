@@ -232,22 +232,22 @@ typedef struct { /* php_oci_out_column {{{ */
 
 #define PHP_OCI_CALL(func, params) \
 	do { \
-		OCI_G(in_call) = 1; \
-		func params; \
-		OCI_G(in_call) = 0; \
 		if (OCI_G(debug_mode)) { \
 			php_printf ("OCI8 DEBUG: " #func " at (%s:%d) \n", __FILE__, __LINE__); \
 		} \
+		OCI_G(in_call) = 1; \
+		func params; \
+		OCI_G(in_call) = 0; \
 	} while (0)
 
 #define PHP_OCI_CALL_RETURN(__retval, func, params) \
 	do { \
-		OCI_G(in_call) = 1; \
-		__retval = func params; \
-		OCI_G(in_call) = 0; \
 		if (OCI_G(debug_mode)) { \
 			php_printf ("OCI8 DEBUG: " #func " at (%s:%d) \n", __FILE__, __LINE__); \
 		} \
+		OCI_G(in_call) = 1; \
+		__retval = func params; \
+		OCI_G(in_call) = 0; \
 	} while (0)
 
 #define PHP_OCI_HANDLE_ERROR(connection, errcode) \
