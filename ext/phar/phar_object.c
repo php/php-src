@@ -585,7 +585,7 @@ PHP_METHOD(Phar, offsetSet)
 		return;
 	}
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &fname, &fname_len, &contents, &contents_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &fname, &fname_len, &contents) == FAILURE) {
 		return;
 	}
 
