@@ -1,3 +1,13 @@
+2007-02-13  Antony Dovgal  <antony@zend.com>
+
+    * tests/018.phpt:
+      new/improved tests
+
+    * tests/018.phpt
+      tests/018.phpt:
+      
+      file 018.phpt was initially added on branch PHP_5_2.
+
 2007-02-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c
