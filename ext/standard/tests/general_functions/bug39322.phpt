@@ -42,3 +42,23 @@ array(8) {
   int(0)
 }
 Done!
+--UEXPECTF--
+array(8) {
+  [u"command"]=>
+  unicode(14) "/bin/sleep 120"
+  [u"pid"]=>
+  int(%d)
+  [u"running"]=>
+  bool(false)
+  [u"signaled"]=>
+  bool(true)
+  [u"stopped"]=>
+  bool(false)
+  [u"exitcode"]=>
+  int(-1)
+  [u"termsig"]=>
+  int(15)
+  [u"stopsig"]=>
+  int(0)
+}
+Done!
