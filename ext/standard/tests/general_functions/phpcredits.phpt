@@ -22,7 +22,7 @@ PHP Group
 Language Design & Concept
 %s
 
-%wPHP %d Authors%w
+%wPHP Authors%w
 %s
 
 %wSAPI Modules%w
