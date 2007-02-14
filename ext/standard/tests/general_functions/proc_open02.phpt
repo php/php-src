@@ -68,3 +68,43 @@ array(8) {
   int(0)
 }
 Done!
+--UEXPECTF--
+bool(true)
+array(8) {
+  [u"command"]=>
+  unicode(24) "/bin/nohup /bin/sleep 50"
+  [u"pid"]=>
+  int(%d)
+  [u"running"]=>
+  bool(true)
+  [u"signaled"]=>
+  bool(false)
+  [u"stopped"]=>
+  bool(false)
+  [u"exitcode"]=>
+  int(-1)
+  [u"termsig"]=>
+  int(0)
+  [u"stopsig"]=>
+  int(0)
+}
+bool(true)
+array(8) {
+  [u"command"]=>
+  unicode(24) "/bin/nohup /bin/sleep 50"
+  [u"pid"]=>
+  int(%d)
+  [u"running"]=>
+  bool(false)
+  [u"signaled"]=>
+  bool(true)
+  [u"stopped"]=>
+  bool(false)
+  [u"exitcode"]=>
+  int(-1)
+  [u"termsig"]=>
+  int(15)
+  [u"stopsig"]=>
+  int(0)
+}
+Done!
