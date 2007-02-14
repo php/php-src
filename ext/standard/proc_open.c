@@ -300,7 +300,7 @@ PHP_MINIT_FUNCTION(proc_open)
 }
 /* }}} */
 
-/* {{{ proto int proc_terminate(resource process [, long signal])
+/* {{{ proto bool proc_terminate(resource process [, long signal])
    kill a process opened by proc_open */
 PHP_FUNCTION(proc_terminate)
 {
@@ -315,13 +315,18 @@ PHP_FUNCTION(proc_terminate)
 	ZEND_FETCH_RESOURCE(proc, struct php_process_handle *, &zproc, -1, "process", le_proc_open);
 	
 #ifdef PHP_WIN32
-	TerminateProcess(proc->childHandle, 255);
+	if (TerminateProcess(proc->childHandle, 255)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 #else
-	kill(proc->child, sig_no);
+	if (kill(proc->child, sig_no) == 0) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 #endif
-	
-	zend_list_delete(Z_LVAL_P(zproc));
-	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */
 
