@@ -36,9 +36,9 @@
 
 #define SET_UNUSED(op)  (op).op_type = IS_UNUSED
 
-#define INC_BPC(op_array)	if (CG(interactive)) { ((op_array)->backpatch_count++); }
-#define DEC_BPC(op_array)	if (CG(interactive)) { ((op_array)->backpatch_count--); }
-#define HANDLE_INTERACTIVE()  if (CG(interactive)) { execute_new_code(TSRMLS_C); }
+#define INC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { ((op_array)->backpatch_count++); }
+#define DEC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { ((op_array)->backpatch_count--); }
+#define HANDLE_INTERACTIVE()  if (CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) { execute_new_code(TSRMLS_C); }
 
 #define RESET_DOC_COMMENT()        \
     {                              \
@@ -115,6 +115,9 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
 #define ZEND_ACC_FINAL_CLASS	            0x40
 #define ZEND_ACC_INTERFACE		            0x80
+
+/* op_array flags */
+#define ZEND_ACC_INTERACTIVE				0x10
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */

@@ -545,7 +545,11 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		efree(op_array);
 		retval = NULL;
 	} else {
+		zend_bool orig_interactive = CG(interactive);
+	
+		CG(interactive) = 0;
 		init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
+		CG(interactive) = orig_interactive;
 		CG(active_op_array) = op_array;
 		BEGIN(ST_IN_SCRIPTING);
 		compiler_result = zendparse(TSRMLS_C);
