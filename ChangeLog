@@ -1,3 +1,41 @@
+2007-02-14  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      - MFH: Clarify the source of the timezone data.
+
+    * ext/date/php_date.c:
+      - Clarify the source of the timezone data.
+
+2007-02-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/tests/general_functions/bug39322.phpt
+      ext/standard/tests/general_functions/bug40398.phpt
+      ext/standard/tests/general_functions/error_get_last.phpt
+      ext/standard/tests/general_functions/proc_open02.phpt:
+      fix a few tests in unicode mode
+
+    * ext/standard/proc_open.c
+      ext/standard/tests/general_functions/bug39322.phpt
+      ext/standard/tests/general_functions/phpcredits.phpt
+      ext/standard/tests/general_functions/proc_open02.phpt:
+      MFB
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/proc_open.c
+      ext/standard/tests/general_functions/bug39322.phpt
+      ext/standard/tests/general_functions/bug39322.phpt
+      ext/standard/tests/general_functions/proc_open02.phpt
+      ext/standard/tests/general_functions/proc_open02.phpt:
+      Fixed bug #39322 (proc_terminate() destroys process resource)
+
+2007-02-14  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_2)
+      sapi/cgi/CREDITS:
+      - Give Dmitry credit for all the FastCGI work
+
 2007-02-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
