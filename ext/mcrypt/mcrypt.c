@@ -1242,7 +1242,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 		return;
 	}
 
-	if (size <= 0 || size >= 2147483647) {
+	if (size <= 0 || size >= INT_MAX) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not create an IV with a size of less then 1 or greater then %d", INT_MAX);
 		RETURN_FALSE;
 	}
