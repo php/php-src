@@ -1574,8 +1574,10 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 
 			zend_hash_internal_pointer_reset_ex(model->u.content, &pos);
 			while (zend_hash_get_current_data_ex(model->u.content, (void**)&tmp, &pos) == SUCCESS) {
-				if (!model_to_xml_object(node, *tmp, object, style, model->min_occurs > 0 TSRMLS_CC)) {
-					return 0;
+				if (!model_to_xml_object(node, *tmp, object, style, (*tmp)->min_occurs > 0 TSRMLS_CC)) {
+					if ((*tmp)->min_occurs > 0) {
+						return 0;
+					}
 				}
 				zend_hash_move_forward_ex(model->u.content, &pos);
 			}
