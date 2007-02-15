@@ -13,14 +13,11 @@
 #ifndef TSRM_H
 #define TSRM_H
 
-/* #ifndef WIN32 */
-#ifndef WIN32
-# include <tsrm_config.h>
-#endif
-
-#ifdef WIN32
+#if !defined(__CYGWIN__) && defined(WIN32)
 # define TSRM_WIN32
 # include "tsrm_config.w32.h"
+#else
+# include <tsrm_config.h>
 #endif
 
 #ifdef TSRM_WIN32
