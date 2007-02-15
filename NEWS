@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   node). (Tony)
 - Fixed bug #40428 (imagepstext() doesn't accept optional parameter). (Pierre)
 - Fixed bug #40410 (ext/posix does not compile on MacOS 10.3.9). (Tony)
+- Fixed bug #40236 (php -a function allocation eats memory). (Dmitry)
 - Fixed bug #40109 (iptcembed fails on non-jfif jpegs). (Tony)
 - Fixed bug #39836 (SplObjectStorage empty after unserialize). (Marcus)
 - Fixed bug #39322 (proc_terminate() destroys process resource). (Nuno)

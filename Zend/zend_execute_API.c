@@ -1197,7 +1197,7 @@ void execute_new_code(TSRMLS_D)
 	zend_op *ret_opline;
 	zval *local_retval=NULL;
 
-	if (!CG(interactive)
+	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE)
 		|| CG(active_op_array)->backpatch_count>0
 		|| CG(active_op_array)->function_name
 		|| CG(active_op_array)->type!=ZEND_USER_FUNCTION) {
