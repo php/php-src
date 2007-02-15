@@ -89,7 +89,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
       PHP_ADD_BUILD_DIR($ext_builddir/sqlite/src, 1)
       AC_CHECK_SIZEOF(char *,4)
       AC_DEFINE(SQLITE_PTR_SZ, SIZEOF_CHAR_P, [Size of a pointer])
-      PDO_SQLITE_VERSION=`cat $ext_srcdir/sqlite/VERSION`
+      PDO_SQLITE_VERSION=`cat $ext_srcdir/sqlite/VERSION | sed 's/[^0-9.]//g'`
       PDO_SQLITE_VERSION_NUMBER=`echo $PDO_SQLITE_VERSION | $AWK -F. '{printf("%d%03d%03d", $1, $2, $3)}'`
       sed -e s/--VERS--/$PDO_SQLITE_VERSION/ -e s/--VERSION-NUMBER--/$PDO_SQLITE_VERSION_NUMBER/ $ext_srcdir/sqlite/src/sqlite.h.in > $ext_builddir/sqlite/src/sqlite3.h
 
