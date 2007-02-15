@@ -1338,6 +1338,10 @@ consult the installation file that came with this distribution, or visit \n\
 			exit(1);
 		}
 
+		if (fcgi_in_shutdown()) {
+			exit(0);
+		}
+
 		while (parent) {
 			do {
 #ifdef DEBUG_FASTCGI
