@@ -164,6 +164,11 @@ static void fcgi_signal_handler(int signo)
 
 #endif
 
+int fcgi_in_shutdown(void)
+{
+	return in_shutdown;
+}
+
 int fcgi_init(void)
 {
 	if (!is_initialized) {
