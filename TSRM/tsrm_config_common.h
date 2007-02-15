@@ -1,8 +1,10 @@
 #ifndef TSRM_CONFIG_COMMON_H
 #define TSRM_CONFIG_COMMON_H
 
-#if WINNT|WIN32
-# define TSRM_WIN32
+#ifndef __CYGWIN__
+# if WINNT|WIN32
+#  define TSRM_WIN32
+# endif
 #endif
 
 #ifdef TSRM_WIN32
