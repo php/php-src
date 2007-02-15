@@ -2531,7 +2531,7 @@ PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len,
 	}
 	
 	Z_STRLEN_P(result) = len + (char_count * (to_len - 1));
-	Z_STRVAL_P(result) = target = safe_emalloc(char_count, to_len, len);
+	Z_STRVAL_P(result) = target = safe_emalloc(char_count, to_len, len + 1);
 	Z_TYPE_P(result) = IS_STRING;
 	
 	for (source = str; source < source_end; source++) {
