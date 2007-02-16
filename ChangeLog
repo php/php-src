@@ -1,3 +1,103 @@
+2007-02-15  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pdo_sqlite/config.m4:
+      MFB: fix build on cygwin with windows-style EOLs
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/config.m4:
+      fix build on cygwin with windows-style EOLs
+
+    * build/build.mk:
+      MFB: fix cvsclean on cygwin with windows-style EOLs
+
+    * (PHP_5_2)
+      build/build.mk:
+      fix cvsclean on cygwin with windows-style EOLs
+
+2007-02-15  Antony Dovgal  <antony@zend.com>
+
+    * TSRM/TSRM.h
+      TSRM/tsrm_config_common.h:
+      fix Cygwin build
+      (costs us nothing, but makes some people happy)
+
+2007-02-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_schema.c
+      ext/soap/php_schema.c:
+      Fixed memory leak
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c:
+      Fixed bug #40467 (Partial SOAP request sent when XSD sequence or choice
+      include minOccurs=0)
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h
+      sapi/cgi/fastcgi.h:
+      Fixed bug #40414 (possivle endless fork() loop when running fastcgi)
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed Bug #40352 (FCGI_WEB_SERVER_ADDRS function get lost)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/tests/bug40236.inc
+      ZendEngine2/tests/bug40236.inc
+      ZendEngine2/tests/bug40236.inc
+      ZendEngine2/tests/bug40236.phpt
+      ZendEngine2/tests/bug40236.phpt
+      ZendEngine2/tests/bug40236.phpt:
+      Fixed bug #40236 (php -a function allocation eats memory)
+
+2007-02-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/session/session.c
+      ext/session/tests/002.phpt:
+      fix segfault in php_add_session_var()
+
+    * (PHP_4_4)
+      ext/standard/string.c:
+      fix possible off-by-one in str_(i)replace()
+
+2007-02-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/mcrypt/mcrypt.c:
+      use constant
+
+    * (PHP_5_2)
+      ext/mcrypt/mcrypt.c:
+      
+      Improved validation route for size parameter of the mcrypt_create_iv()
+      function.
+
+    * (PHP_5_2)
+      ext/mime_magic/mime_magic.c:
+      Fixed a possible memory corruption inside mime_content_type() on a
+      non-existent file.
+
 2007-02-14  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_2)
