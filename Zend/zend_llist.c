@@ -134,13 +134,15 @@ ZEND_API void *zend_llist_remove_tail(zend_llist *l)
 	void *data;
 
 	if ((old_tail = l->tail)) {
-		if (l->tail->prev) {
-			l->tail->prev->next = NULL;
+		if (old_tail->prev) {
+			old_tail->prev->next = NULL;
+		} else {
+			l->head = NULL;
 		}
 
 		data = old_tail->data;
 
-		l->tail = l->tail->prev;
+		l->tail = old_tail->prev;
 		if (l->dtor) {
 			l->dtor(data);
 		}
