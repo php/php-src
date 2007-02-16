@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Upgraded PCRE to version 7.0 (Nuno)
 - Add --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)
+- Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed bug #40467 (Partial SOAP request sent when XSD sequence or choice
   include minOccurs=0). (Dmitry) 
 - Fixed bug #40465 (Ensure that all PHP elements are printed by var_dump).
