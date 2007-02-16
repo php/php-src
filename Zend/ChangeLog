@@ -1,3 +1,26 @@
+2007-02-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_language_scanner.l
+      zend_language_scanner.l
+      zend_opcode.c
+      zend_opcode.c
+      tests/bug40236.inc
+      tests/bug40236.phpt:
+      Fixed bug #40236 (php -a function allocation eats memory)
+
+    * tests/bug40236.inc
+      tests/bug40236.inc
+      tests/bug40236.phpt
+      tests/bug40236.phpt:
+      
+      file bug40236.inc was initially added on branch PHP_5_2.
+
 2007-02-13  Antony Dovgal  <antony@zend.com>
 
     * tests/018.phpt:
