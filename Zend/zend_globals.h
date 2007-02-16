@@ -96,6 +96,7 @@ struct _zend_compiler_globals {
 	HashTable filenames_table;
 
 	HashTable *auto_globals;
+	zval ***auto_globals_cache;
 
 	zend_bool in_compilation;
 	zend_bool short_tags;

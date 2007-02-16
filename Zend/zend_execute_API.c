@@ -1711,6 +1711,7 @@ ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC)
 	zend_execute_data *ex;
 	int i;
 
+	memset(CG(auto_globals_cache), 0, sizeof(zval**) * zend_hash_num_elements(CG(auto_globals)));
 	for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
 		if (ex->op_array && ex->symbol_table == symbol_table) {
 			for (i = 0; i < ex->op_array->last_var; i++) {
@@ -1724,7 +1725,11 @@ ZEND_API int zend_u_delete_global_variable(zend_uchar type, zstr name, int name_
 {
 	zend_execute_data *ex;
 	ulong hash_value = zend_u_inline_hash_func(type, name, name_len+1);
+	zend_auto_global *auto_global;
 
+	if (zend_u_hash_quick_find(CG(auto_globals), type, name, name_len+1, hash_value, (void**)&auto_global) == SUCCESS) {
+		CG(auto_globals_cache)[auto_global->index] = NULL;
+	}
 	if (zend_u_hash_quick_exists(&EG(symbol_table), type, name, name_len+1, hash_value)) {
 		for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
 			if (ex->op_array && ex->symbol_table == &EG(symbol_table)) {

@@ -177,7 +177,6 @@ typedef struct _zend_compiled_variable {
 	zstr name;
 	int name_len;
 	ulong hash_value;
-	zend_uint fetch_type;
 } zend_compiled_variable;
 
 struct _zend_op_array {
@@ -584,12 +583,16 @@ typedef struct _zend_auto_global {
 	uint name_len;
 	zend_auto_global_callback auto_global_callback;
 	zend_bool armed;
+	zend_bool runtime;
+	zend_uchar index;
 } zend_auto_global;
 
 void zend_auto_global_dtor(zend_auto_global *auto_global);
 ZEND_API int zend_register_auto_global(char *name, uint name_len, zend_auto_global_callback auto_global_callback TSRMLS_DC);
+ZEND_API int zend_register_auto_global_ex(char *name, uint name_len, zend_auto_global_callback auto_global_callback, zend_bool runtime TSRMLS_DC);
 ZEND_API zend_bool zend_is_auto_global(char *name, uint name_len TSRMLS_DC);
 ZEND_API zend_bool zend_u_is_auto_global(zend_uchar type, zstr name, uint name_len TSRMLS_DC);
+ZEND_API zend_bool zend_u_is_auto_global_ex(zend_uchar type, zstr name, uint name_len, zend_bool runtime, zend_auto_global **ret TSRMLS_DC);
 ZEND_API int zend_auto_global_disable_jit(char *varname, zend_uint varname_length TSRMLS_DC);
 
 int zendlex(znode *zendlval TSRMLS_DC);
@@ -610,7 +613,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_LOCAL			1
 #define ZEND_FETCH_STATIC			2
 #define ZEND_FETCH_STATIC_MEMBER	3
-#define ZEND_FETCH_GLOBAL_LOCK	4
+#define ZEND_FETCH_GLOBAL_LOCK		4
+#define ZEND_FETCH_AUTO_GLOBAL		5
 
 
 /* class fetches */

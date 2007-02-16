@@ -160,6 +160,7 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	CG(in_compilation) = 0;
 	CG(start_lineno) = 0;
 	init_compiler_declarables(TSRMLS_C);
+	memset(CG(auto_globals_cache), 0, sizeof(zval**) * zend_hash_num_elements(CG(auto_globals)));
 	zend_hash_apply(CG(auto_globals), (apply_func_t) zend_auto_global_arm TSRMLS_CC);
 	zend_stack_init(&CG(labels_stack));
 	CG(labels) = NULL;
@@ -168,6 +169,7 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 
 void init_compiler(TSRMLS_D)
 {
+	CG(auto_globals_cache) = emalloc(sizeof(zval**) * zend_hash_num_elements(CG(auto_globals)));
 	CG(active_op_array) = NULL;
 	zend_init_compiler_data_structures(TSRMLS_C);
 	zend_init_rsrc_list(TSRMLS_C);
@@ -180,6 +182,8 @@ void init_compiler(TSRMLS_D)
 
 void shutdown_compiler(TSRMLS_D)
 {
+	efree(CG(auto_globals_cache));
+	CG(auto_globals_cache) = NULL;
 	zend_stack_destroy(&CG(bp_stack));
 	zend_stack_destroy(&CG(function_call_stack));
 	zend_stack_destroy(&CG(switch_cond_stack));
@@ -267,7 +271,7 @@ static zend_uint get_temporary_variable(zend_op_array *op_array)
 	return (op_array->T)++ * sizeof(temp_variable);
 }
 
-static int lookup_cv(zend_op_array *op_array, zend_uchar type, zstr name, int name_len TSRMLS_DC)
+static int lookup_cv(zend_op_array *op_array, zend_uchar type, zstr name, int name_len)
 {
 	int i = 0;
 	ulong hash_value = zend_u_inline_hash_func(type, name, name_len+1);
@@ -290,7 +294,6 @@ static int lookup_cv(zend_op_array *op_array, zend_uchar type, zstr name, int na
 	op_array->vars[i].name = name; /* estrndup(name, name_len); */
 	op_array->vars[i].name_len = name_len;
 	op_array->vars[i].hash_value = hash_value;
-	op_array->vars[i].fetch_type = zend_u_is_auto_global(type, name, name_len TSRMLS_CC) ? ZEND_FETCH_GLOBAL : ZEND_FETCH_LOCAL;
 	return i;
 }
 
@@ -377,18 +380,23 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	zend_op opline;
 	zend_op *opline_ptr;
 	zend_llist *fetch_list_ptr;
+	zend_bool is_auto_global = 0;
+	zend_auto_global *auto_global;
 
 	if (varname->op_type == IS_CONST &&
 	    (Z_TYPE(varname->u.constant) == IS_STRING ||
-	     Z_TYPE(varname->u.constant) == IS_UNICODE) &&
-	    !(Z_UNILEN(varname->u.constant) == (sizeof("this")-1) &&
-	      ZEND_U_EQUAL(Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant), "this", sizeof("this")-1)) &&
-	    (CG(active_op_array)->last == 0 ||
-	     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
-		result->op_type = IS_CV;
-		result->u.var = lookup_cv(CG(active_op_array), Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant) TSRMLS_CC);
-		result->u.EA.type = 0;
-		return;
+	     Z_TYPE(varname->u.constant) == IS_UNICODE)) {
+	    is_auto_global = zend_u_is_auto_global_ex(Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant), 0, &auto_global TSRMLS_CC);
+	    if (!is_auto_global &&
+		    !(Z_UNILEN(varname->u.constant) == (sizeof("this")-1) &&
+		      ZEND_U_EQUAL(Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant), "this", sizeof("this")-1)) &&
+		    (CG(active_op_array)->last == 0 ||
+		     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
+			result->op_type = IS_CV;
+			result->u.var = lookup_cv(CG(active_op_array), Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant));
+			result->u.EA.type = 0;
+			return;
+		}
 	}
 
 	if (bp) {
@@ -407,12 +415,9 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	SET_UNUSED(opline_ptr->op2);
 
 	opline_ptr->op2.u.EA.type = ZEND_FETCH_LOCAL;
-	if (varname->op_type == IS_CONST &&
-	    (Z_TYPE(varname->u.constant) == IS_STRING ||
-	     Z_TYPE(varname->u.constant) == IS_UNICODE)) {
-		if (zend_u_is_auto_global(Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant) TSRMLS_CC)) {
-			opline_ptr->op2.u.EA.type = ZEND_FETCH_GLOBAL;
-		}
+	if (is_auto_global) {
+		opline_ptr->op2.u.var = auto_global->index;
+		opline_ptr->op2.u.EA.type = ZEND_FETCH_AUTO_GLOBAL;
 	}
 
 	if (bp) {
@@ -4323,36 +4328,50 @@ void zend_auto_global_dtor(zend_auto_global *auto_global)
 }
 
 
-zend_bool zend_u_is_auto_global(zend_uchar type, zstr name, uint name_len TSRMLS_DC)
+zend_bool zend_u_is_auto_global_ex(zend_uchar type, zstr name, uint name_len, zend_bool runtime, zend_auto_global **ret TSRMLS_DC)
 {
 	zend_auto_global *auto_global;
 
 	if (zend_u_hash_find(CG(auto_globals), type, name, name_len+1, (void **) &auto_global)==SUCCESS) {
-		if (auto_global->armed) {
+		if (auto_global->runtime == runtime && auto_global->armed) {
 			auto_global->armed = auto_global->auto_global_callback(auto_global->name, auto_global->name_len TSRMLS_CC);
+		}
+		if (ret) {
+			*ret = auto_global;
 		}
 		return 1;
 	}
 	return 0;
 }
 
+zend_bool zend_u_is_auto_global(zend_uchar type, zstr name, uint name_len TSRMLS_DC)
+{
+	return zend_u_is_auto_global_ex(type, name, name_len, 0, NULL TSRMLS_CC);
+}
+
 zend_bool zend_is_auto_global(char *name, uint name_len TSRMLS_DC)
 {
-	return zend_u_is_auto_global(IS_STRING, ZSTR(name), name_len TSRMLS_CC);
+	return zend_u_is_auto_global_ex(IS_STRING, ZSTR(name), name_len, 0, NULL TSRMLS_CC);
 }
 
 
-int zend_register_auto_global(char *name, uint name_len, zend_auto_global_callback auto_global_callback TSRMLS_DC)
+int zend_register_auto_global_ex(char *name, uint name_len, zend_auto_global_callback auto_global_callback, zend_bool runtime TSRMLS_DC)
 {
 	zend_auto_global auto_global;
 
 	auto_global.name = zend_strndup(name, name_len);
 	auto_global.name_len = name_len;
 	auto_global.auto_global_callback = auto_global_callback;
+	auto_global.runtime = runtime;
+	auto_global.index = zend_hash_num_elements(CG(auto_globals));
 
 	return zend_hash_add(CG(auto_globals), name, name_len+1, &auto_global, sizeof(zend_auto_global), NULL);
 }
 
+int zend_register_auto_global(char *name, uint name_len, zend_auto_global_callback auto_global_callback TSRMLS_DC)
+{
+	return zend_register_auto_global_ex(name, name_len, auto_global_callback, 0 TSRMLS_CC);
+}
 
 int zendlex(znode *zendlval TSRMLS_DC)
 {
