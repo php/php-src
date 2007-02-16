@@ -2956,7 +2956,7 @@ PHP_FUNCTION(imap_mail_compose)
 	BODY *bod=NULL, *topbod=NULL;
 	PART *mypart=NULL, *part;
 	PARAMETER *param, *disp_param = NULL, *custom_headers_param = NULL, *tmp_param = NULL;
-	char tmp[SENDBUFLEN + 1], *mystring=NULL, *t=NULL, *tempstring=NULL;
+	char *tmp=NULL, *mystring=NULL, *t=NULL, *tempstring=NULL;
 	int toppart = 0;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &envelope, &body) == FAILURE) {
@@ -3258,6 +3258,9 @@ PHP_FUNCTION(imap_mail_compose)
 	}
 
 	rfc822_encode_body_7bit(env, topbod);
+
+	tmp = emalloc(SENDBUFLEN + 1);
+
 	rfc822_header(tmp, env, topbod);
 
 	/* add custom envelope headers */
@@ -3307,7 +3310,7 @@ PHP_FUNCTION(imap_mail_compose)
 		/* yucky default */
 			if (!cookie) {
 				cookie = "-";  
-			} else if (strlen(cookie) > (sizeof(tmp) - 2 - 2)) {  /* validate cookie length -- + CRLF */
+			} else if (strlen(cookie) > (SENDBUFLEN - 2 - 2 - 2)) {  /* validate cookie length -- + CRLF * 2 */
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "The boudary should be no longer then 4kb");
 				RETVAL_FALSE;
 				goto done;	
@@ -3315,18 +3318,14 @@ PHP_FUNCTION(imap_mail_compose)
 
 		/* for each part */
 			do {
-				t=tmp;
-			/* build cookie */
-				sprintf(t, "--%s%s", cookie, CRLF);
-
+				t = tmp;
+			
 			/* append mini-header */
+				*t = '\0';
 				rfc822_write_body_header(&t, &part->body);
 
-			/* write terminating blank line */
-				strcat(t, CRLF);
-
 			/* output cookie, mini-header, and contents */
-				spprintf(&tempstring, 0, "%s%s", mystring, tmp);
+				spprintf(&tempstring, 0, "%s--%s%s%s%s", mystring, cookie, CRLF, tmp, CRLF);
 				efree(mystring);
 				mystring=tempstring;
 
@@ -3342,9 +3341,9 @@ PHP_FUNCTION(imap_mail_compose)
 			efree(mystring);
 			mystring=tempstring;
 	} else if (bod) {
-			spprintf(&tempstring, 0, "%s%s%s", mystring, bod->contents.text.data, CRLF);
-			efree(mystring);
-			mystring=tempstring;
+		spprintf(&tempstring, 0, "%s%s%s", mystring, bod->contents.text.data, CRLF);
+		efree(mystring);
+		mystring=tempstring;
 	} else {
 		efree(mystring);
 		RETVAL_FALSE;
@@ -3353,6 +3352,9 @@ PHP_FUNCTION(imap_mail_compose)
 
 	RETVAL_STRING(tempstring, 0);
 done:
+	if (tmp) {
+		efree(tmp);
+	}
 	mail_free_body(&topbod);
 	mail_free_envelope(&env);
 }
