@@ -51,12 +51,6 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 	if (hash_key->nKeyLength==0) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		if (va_arg(args, int) && hash_key->arKey[0] == '\0') { 
-			/* XXX: perhaps when we are inside the class we should permit access to 
-			 * private & protected values
-			 */
-			return 0;
-		}
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(hash_key->arKey, hash_key->nKeyLength - 1);
 		php_printf("\"]=>\n");
@@ -149,7 +143,7 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 		php_element_dump_func = php_object_property_dump;
 head_done:
 		if (myht) {
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_element_dump_func, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
+			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_element_dump_func, 1, level);
 		}
 		if (level > 1) {
 			php_printf("%*c", level-1, ' ');
