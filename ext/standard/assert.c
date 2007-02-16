@@ -114,6 +114,16 @@ PHP_MSHUTDOWN_FUNCTION(assert)
 	return SUCCESS;
 }
 
+PHP_RINIT_FUNCTION(assert)
+{
+	if (ASSERTG(cb)) {
+		MAKE_STD_ZVAL(ASSERTG(callback));
+		ZVAL_STRING(ASSERTG(callback), ASSERTG(cb), 1);
+	}
+
+	return SUCCESS;
+}
+
 PHP_RSHUTDOWN_FUNCTION(assert)
 {
 	if (ASSERTG(callback)) { 
@@ -200,11 +210,6 @@ PHP_FUNCTION(assert)
 			zval_dtor(&tmp);
 		}
 		RETURN_TRUE;
-	}
-
-	if (!ASSERTG(callback) && ASSERTG(cb)) {
-		MAKE_STD_ZVAL(ASSERTG(callback));
-		ZVAL_STRING(ASSERTG(callback), ASSERTG(cb), 1);
 	}
 
 	if (ASSERTG(callback)) {
@@ -309,6 +314,11 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	case ASSERT_CALLBACK:
+		if (ASSERTG(callback) != NULL) {
+			RETVAL_ZVAL(ASSERTG(callback), 1, 0);
+		} else {
+			RETVAL_NULL();
+		}
 		if (ac == 2) {
 			if (ASSERTG(callback)) {
 				zval_ptr_dtor(&ASSERTG(callback));
@@ -316,7 +326,7 @@ PHP_FUNCTION(assert_options)
 			ASSERTG(callback) = *value;
 			zval_add_ref(value);
 		}
-		RETURN_TRUE;
+		return;
 		break;
 
 	default:
