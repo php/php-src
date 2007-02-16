@@ -26,12 +26,12 @@ typedef struct _zend_compiler_globals zend_compiler_globals;
 typedef struct _zend_executor_globals zend_executor_globals;
 typedef struct _zend_scanner_globals zend_scanner_globals;
 
+BEGIN_EXTERN_C()
+
 /* Compiler */
 #ifdef ZTS
 # define CG(v) TSRMG(compiler_globals_id, zend_compiler_globals *, v)
-BEGIN_EXTERN_C()
 int zendparse(void *compiler_globals);
-END_EXTERN_C()
 #else
 # define CG(v) (compiler_globals.v)
 extern ZEND_API struct _zend_compiler_globals compiler_globals;
@@ -66,6 +66,7 @@ extern ZEND_API ts_rsrc_id ini_scanner_globals_id;
 extern ZEND_API zend_scanner_globals ini_scanner_globals;
 #endif
 
+END_EXTERN_C()
 
 /* For limited downwards source compatibility */
 #define CLS_FETCH()
