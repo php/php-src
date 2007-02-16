@@ -4,6 +4,8 @@ PHP 4                                                                      NEWS
 - Updated PCRE to version 7.0. (Nuno)
 - Fixed segfault in ext/session when register_globals=On. (Tony)
 - Fixed bug #40502 (ext/interbase compile failure). (Tony)
+- Fixed bug #40286 (PHP fastcgi with PHP_FCGI_CHILDREN don't kill children when
+  parent is killed). (Dmitry)
 	
 14 Feb 2007, Version 4.4.5
 - Upgraded PEAR to 1.5.0. (Greg)
