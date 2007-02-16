@@ -1130,10 +1130,10 @@ int php_local_infile_error(void *ptr, char *error_msg, uint error_msg_len)
 	mysqli_local_infile *data = (mysqli_local_infile *) ptr;
 
 	if (data) {
-		strcpy(error_msg, data->error_msg);
+		strlcpy(error_msg, data->error_msg, error_msg_len);
 		return 2000;
 	} 
-	strcpy(error_msg, ER(CR_OUT_OF_MEMORY));
+	strlcpy(error_msg, ER(CR_OUT_OF_MEMORY), error_msg_len);
 	return CR_OUT_OF_MEMORY;
 }
 /* }}} */
