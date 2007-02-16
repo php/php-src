@@ -1443,9 +1443,17 @@ static int zend_fetch_var_address_helper_SPEC_CONST(int type, ZEND_OPCODE_HANDLE
 		varname = &tmp_varname;
 	}
 
-	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
+	if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL &&
+	    CG(auto_globals_cache)[opline->op2.u.var]) {
+		retval = CG(auto_globals_cache)[opline->op2.u.var];
+	} else if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 0 TSRMLS_CC);
 	} else {
+		zend_auto_global *auto_global = NULL;
+
+		if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL) {
+			zend_u_is_auto_global_ex(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1, &auto_global TSRMLS_CC);
+		}
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), type, varname TSRMLS_CC);
 /*
 		if (!target_symbol_table) {
@@ -1475,6 +1483,11 @@ static int zend_fetch_var_address_helper_SPEC_CONST(int type, ZEND_OPCODE_HANDLE
 			}
 		}
 		switch (opline->op2.u.EA.type) {
+			case ZEND_FETCH_AUTO_GLOBAL:
+				if (auto_global && (!auto_global->armed || !auto_global->runtime)) {
+					CG(auto_globals_cache)[opline->op2.u.var] = retval;
+				}
+				/* break missing intentionally */
 			case ZEND_FETCH_GLOBAL:
 				if (IS_CONST != IS_TMP_VAR) {
 
@@ -2079,7 +2092,11 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (zend_u_hash_del(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1) == SUCCESS) {
 			zend_execute_data *ex = execute_data;
 			ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1);
+			zend_auto_global *auto_global;
 
+			if (zend_u_hash_quick_find(CG(auto_globals), Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, hash_value, (void**)&auto_global) == SUCCESS) {
+				CG(auto_globals_cache)[auto_global->index] = NULL;
+			}
 			do {
 				int i;
 
@@ -4057,9 +4074,17 @@ static int zend_fetch_var_address_helper_SPEC_TMP(int type, ZEND_OPCODE_HANDLER_
 		varname = &tmp_varname;
 	}
 
-	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
+	if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL &&
+	    CG(auto_globals_cache)[opline->op2.u.var]) {
+		retval = CG(auto_globals_cache)[opline->op2.u.var];
+	} else if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 0 TSRMLS_CC);
 	} else {
+		zend_auto_global *auto_global = NULL;
+
+		if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL) {
+			zend_u_is_auto_global_ex(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1, &auto_global TSRMLS_CC);
+		}
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), type, varname TSRMLS_CC);
 /*
 		if (!target_symbol_table) {
@@ -4089,6 +4114,11 @@ static int zend_fetch_var_address_helper_SPEC_TMP(int type, ZEND_OPCODE_HANDLER_
 			}
 		}
 		switch (opline->op2.u.EA.type) {
+			case ZEND_FETCH_AUTO_GLOBAL:
+				if (auto_global && (!auto_global->armed || !auto_global->runtime)) {
+					CG(auto_globals_cache)[opline->op2.u.var] = retval;
+				}
+				/* break missing intentionally */
 			case ZEND_FETCH_GLOBAL:
 				if (IS_TMP_VAR != IS_TMP_VAR) {
 					zval_dtor(free_op1.var);
@@ -4694,7 +4724,11 @@ static int ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (zend_u_hash_del(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1) == SUCCESS) {
 			zend_execute_data *ex = execute_data;
 			ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1);
+			zend_auto_global *auto_global;
 
+			if (zend_u_hash_quick_find(CG(auto_globals), Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, hash_value, (void**)&auto_global) == SUCCESS) {
+				CG(auto_globals_cache)[auto_global->index] = NULL;
+			}
 			do {
 				int i;
 
@@ -7178,9 +7212,17 @@ static int zend_fetch_var_address_helper_SPEC_VAR(int type, ZEND_OPCODE_HANDLER_
 		varname = &tmp_varname;
 	}
 
-	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
+	if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL &&
+	    CG(auto_globals_cache)[opline->op2.u.var]) {
+		retval = CG(auto_globals_cache)[opline->op2.u.var];
+	} else if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 0 TSRMLS_CC);
 	} else {
+		zend_auto_global *auto_global = NULL;
+
+		if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL) {
+			zend_u_is_auto_global_ex(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1, &auto_global TSRMLS_CC);
+		}
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), type, varname TSRMLS_CC);
 /*
 		if (!target_symbol_table) {
@@ -7210,6 +7252,11 @@ static int zend_fetch_var_address_helper_SPEC_VAR(int type, ZEND_OPCODE_HANDLER_
 			}
 		}
 		switch (opline->op2.u.EA.type) {
+			case ZEND_FETCH_AUTO_GLOBAL:
+				if (auto_global && (!auto_global->armed || !auto_global->runtime)) {
+					CG(auto_globals_cache)[opline->op2.u.var] = retval;
+				}
+				/* break missing intentionally */
 			case ZEND_FETCH_GLOBAL:
 				if (IS_VAR != IS_TMP_VAR) {
 					if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -7914,7 +7961,11 @@ static int ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (zend_u_hash_del(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1) == SUCCESS) {
 			zend_execute_data *ex = execute_data;
 			ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1);
+			zend_auto_global *auto_global;
 
+			if (zend_u_hash_quick_find(CG(auto_globals), Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, hash_value, (void**)&auto_global) == SUCCESS) {
+				CG(auto_globals_cache)[auto_global->index] = NULL;
+			}
 			do {
 				int i;
 
@@ -19760,9 +19811,17 @@ static int zend_fetch_var_address_helper_SPEC_CV(int type, ZEND_OPCODE_HANDLER_A
 		varname = &tmp_varname;
 	}
 
-	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
+	if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL &&
+	    CG(auto_globals_cache)[opline->op2.u.var]) {
+		retval = CG(auto_globals_cache)[opline->op2.u.var];
+	} else if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 0 TSRMLS_CC);
 	} else {
+		zend_auto_global *auto_global = NULL;
+
+		if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL) {
+			zend_u_is_auto_global_ex(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1, &auto_global TSRMLS_CC);
+		}
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), type, varname TSRMLS_CC);
 /*
 		if (!target_symbol_table) {
@@ -19792,6 +19851,11 @@ static int zend_fetch_var_address_helper_SPEC_CV(int type, ZEND_OPCODE_HANDLER_A
 			}
 		}
 		switch (opline->op2.u.EA.type) {
+			case ZEND_FETCH_AUTO_GLOBAL:
+				if (auto_global && (!auto_global->armed || !auto_global->runtime)) {
+					CG(auto_globals_cache)[opline->op2.u.var] = retval;
+				}
+				/* break missing intentionally */
 			case ZEND_FETCH_GLOBAL:
 				if (IS_CV != IS_TMP_VAR) {
 
@@ -20483,7 +20547,11 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (zend_u_hash_del(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1) == SUCCESS) {
 			zend_execute_data *ex = execute_data;
 			ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1);
+			zend_auto_global *auto_global;
 
+			if (zend_u_hash_quick_find(CG(auto_globals), Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, hash_value, (void**)&auto_global) == SUCCESS) {
+				CG(auto_globals_cache)[auto_global->index] = NULL;
+			}
 			do {
 				int i;
 

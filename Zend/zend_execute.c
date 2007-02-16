@@ -226,9 +226,8 @@ static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, int type TS
 	if (!*ptr) {
 		zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
 		zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
-		HashTable *symbol_table = (cv->fetch_type == ZEND_FETCH_GLOBAL) ? &EG(symbol_table) : EG(active_symbol_table);
 
-		if (zend_u_hash_quick_find(symbol_table, utype, cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
+		if (zend_u_hash_quick_find(EG(active_symbol_table), utype, cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
@@ -297,9 +296,8 @@ static inline zval **_get_zval_ptr_ptr_cv(znode *node, temp_variable *Ts, int ty
 	if (!*ptr) {
 		zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
 		zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
-		HashTable *symbol_table = (cv->fetch_type == ZEND_FETCH_GLOBAL) ? &EG(symbol_table) : EG(active_symbol_table);
 
-		if (zend_u_hash_quick_find(symbol_table, utype, cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
+		if (zend_u_hash_quick_find(EG(active_symbol_table), utype, cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
@@ -903,6 +901,7 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 			break;
 		case ZEND_FETCH_GLOBAL:
 		case ZEND_FETCH_GLOBAL_LOCK:
+		case ZEND_FETCH_AUTO_GLOBAL:
 			return &EG(symbol_table);
 			break;
 		case ZEND_FETCH_STATIC:
