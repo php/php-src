@@ -1520,6 +1520,7 @@ static void _zend_mm_free_int(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND
 	if (!ZEND_MM_VALID_PTR(p)) {
 		return;
 	}
+
 	mm_block = ZEND_MM_HEADER_OF(p);
 	size = ZEND_MM_BLOCK_SIZE(mm_block);
 	ZEND_MM_CHECK_PROTECTION(mm_block);
@@ -1946,6 +1947,57 @@ ZEND_API void *_safe_malloc(size_t nmemb, size_t size, size_t offset)
 	zend_error(E_ERROR, "Possible integer overflow in memory allocation (%zd * %zd + %zd)", nmemb, size, offset);
 	return 0;
 }
+
+ZEND_API void *_safe_erealloc(void *ptr, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+
+	if (nmemb < LONG_MAX
+			&& size < LONG_MAX
+			&& offset < LONG_MAX
+			&& nmemb >= 0
+			&& size >= 0
+			&& offset >= 0) {
+		long lval;
+		double dval;
+		int use_dval;
+
+		ZEND_SIGNED_MULTIPLY_LONG(nmemb, size, lval, dval, use_dval);
+
+		if (!use_dval
+				&& lval < (long) (LONG_MAX - offset)) {
+			return erealloc_rel(ptr, lval + offset);
+		}
+	}
+
+	zend_error(E_ERROR, "Possible integer overflow in memory allocation (%zd * %zd + %zd)", nmemb, size, offset);
+	return 0;
+}
+
+ZEND_API void *_safe_realloc(void *ptr, size_t nmemb, size_t size, size_t offset)
+{
+
+	if (nmemb < LONG_MAX
+			&& size < LONG_MAX
+			&& offset < LONG_MAX
+			&& nmemb >= 0
+			&& size >= 0
+			&& offset >= 0) {
+		long lval;
+		double dval;
+		int use_dval;
+
+		ZEND_SIGNED_MULTIPLY_LONG(nmemb, size, lval, dval, use_dval);
+
+		if (!use_dval
+				&& lval < (long) (LONG_MAX - offset)) {
+			return perealloc(ptr, lval + offset, 1);
+		}
+	}
+
+	zend_error(E_ERROR, "Possible integer overflow in memory allocation (%zd * %zd + %zd)", nmemb, size, offset);
+	return 0;
+}
+
 
 ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
