@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 - Added tidyNode::getParent() method (John, Nuno)
 - Fixed bug #40467 (Partial SOAP request sent when XSD sequence or choice
   include minOccurs=0). (Dmitry) 
+- Fixed bug #40465 (Ensure that all PHP elements are printed by var_dump).
+  (wharmby at uk dot ibm dot com, Ilia)
 - Fixed bug #40455 (proc_open() uses wrong commandline when safe_mode_exec_dir 
   is set). (Tony)
 - Fixed bug #40432 (strip_tags() fails with greater than in attribute). (Ilia)
