@@ -416,7 +416,7 @@ PHP_FUNCTION(cal_from_jd)
 
 	calendar->from_jd(jd, &year, &month, &day);
 
-	snprintf(date, sizeof(date)-1, "%i/%i/%i", month, day, year);
+	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
 	add_assoc_string(return_value, "date", date, 1);
 
 	add_assoc_long(return_value, "month", month);
@@ -447,7 +447,7 @@ PHP_FUNCTION(jdtogregorian)
 	}
 
 	SdnToGregorian(julday, &year, &month, &day);
-	snprintf(date, sizeof(date)-1, "%i/%i/%i", month, day, year);
+	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
 
 	RETURN_STRING(date, 1);
 }
@@ -480,7 +480,7 @@ PHP_FUNCTION(jdtojulian)
 	}
 
 	SdnToJulian(julday, &year, &month, &day);
-	snprintf(date, sizeof(date)-1, "%i/%i/%i", month, day, year);
+	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
 
 	RETURN_STRING(date, 1);
 }
@@ -611,7 +611,7 @@ PHP_FUNCTION(jdtojewish)
 
 	SdnToJewish(julday, &year, &month, &day);
 	if (!heb) {
-		snprintf(date, sizeof(date)-1, "%i/%i/%i", month, day, year);
+		snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
 		RETURN_STRING(date, 1);
 	} else {
 		if (year <= 0 || year > 9999) {
@@ -619,7 +619,7 @@ PHP_FUNCTION(jdtojewish)
 			RETURN_FALSE;
 		}
 
-		snprintf(hebdate, sizeof(hebdate)-1, "%s %s %s", heb_number_to_chars(day, fl, &dayp), JewishMonthHebName[month], heb_number_to_chars(year, fl, &yearp));
+		snprintf(hebdate, sizeof(hebdate), "%s %s %s", heb_number_to_chars(day, fl, &dayp), JewishMonthHebName[month], heb_number_to_chars(year, fl, &yearp));
 
 		if (dayp) {
 			efree(dayp);
@@ -661,7 +661,7 @@ PHP_FUNCTION(jdtofrench)
 	}
 
 	SdnToFrench(julday, &year, &month, &day);
-	snprintf(date, sizeof(date)-1, "%i/%i/%i", month, day, year);
+	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
 
 	RETURN_STRING(date, 1);
 }
