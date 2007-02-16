@@ -2215,7 +2215,7 @@ PHP_FUNCTION(imap_utf8)
 	if (dest.data) {
 		free(dest.data);
 	}
-	if (src.data) {
+	if (src.data && src.data != dest.data) {
 		free(src.data);
 	}
 }
