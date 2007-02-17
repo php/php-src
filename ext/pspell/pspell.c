@@ -186,16 +186,19 @@ static PHP_FUNCTION(pspell_new)
 	 * pointing to the location of the dictionaries
 	 */
 	if(0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
+		LONG result;
 		dwLen = sizeof(aspell_dir) - 1;
-		RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
+		result = RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
 		RegCloseKey(hkey);
-		strcpy(data_dir, aspell_dir);
-		strcat(data_dir, "\\data");
-		strcpy(dict_dir, aspell_dir);
-		strcat(dict_dir, "\\dict");
+		if(result == ERROR_SUCCESS) {
+			strlcpy(data_dir, aspell_dir, sizeof(data_dir));
+			strlcat(data_dir, "\\data", sizeof(data_dir));
+			strlcpy(dict_dir, aspell_dir, sizeof(dict_dir));
+			strlcat(dict_dir, "\\dict", sizeof(dict_dir));
 
-		pspell_config_replace(config, "data-dir", data_dir);
-		pspell_config_replace(config, "dict-dir", dict_dir);
+			pspell_config_replace(config, "data-dir", data_dir);
+			pspell_config_replace(config, "dict-dir", dict_dir);
+		}
 	}
 #endif
 
@@ -291,16 +294,19 @@ static PHP_FUNCTION(pspell_new_personal)
 	 * pointing to the location of the dictionaries
 	 */
 	if(0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
+		LONG result;
 		dwLen = sizeof(aspell_dir) - 1;
-		RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
+		result = RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
 		RegCloseKey(hkey);
-		strcpy(data_dir, aspell_dir);
-		strcat(data_dir, "\\data");
-		strcpy(dict_dir, aspell_dir);
-		strcat(dict_dir, "\\dict");
+		if(result == ERROR_SUCCESS) {
+			strlcpy(data_dir, aspell_dir, sizeof(data_dir));
+			strlcat(data_dir, "\\data", sizeof(data_dir));
+			strlcpy(dict_dir, aspell_dir, sizeof(dict_dir));
+			strlcat(dict_dir, "\\dict", sizeof(dict_dir));
 
-		pspell_config_replace(config, "data-dir", data_dir);
-		pspell_config_replace(config, "dict-dir", dict_dir);
+			pspell_config_replace(config, "data-dir", data_dir);
+			pspell_config_replace(config, "dict-dir", dict_dir);
+		}
 	}
 #endif
 
@@ -644,16 +650,19 @@ static PHP_FUNCTION(pspell_config_create)
      * pointing to the location of the dictionaries
      */
 	if(0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
+		LONG result;
 		dwLen = sizeof(aspell_dir) - 1;
-		RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
+		result = RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
 		RegCloseKey(hkey);
-		strcpy(data_dir, aspell_dir);
-		strcat(data_dir, "\\data");
-		strcpy(dict_dir, aspell_dir);
-		strcat(dict_dir, "\\dict");
+		if(result == ERROR_SUCCESS) {
+			strlcpy(data_dir, aspell_dir, sizeof(data_dir));
+			strlcat(data_dir, "\\data", sizeof(data_dir));
+			strlcpy(dict_dir, aspell_dir, sizeof(dict_dir));
+			strlcat(dict_dir, "\\dict", sizeof(dict_dir));
 
-		pspell_config_replace(config, "data-dir", data_dir);
-		pspell_config_replace(config, "dict-dir", dict_dir);
+			pspell_config_replace(config, "data-dir", data_dir);
+			pspell_config_replace(config, "dict-dir", dict_dir);
+		}
 	}
 #endif
 
