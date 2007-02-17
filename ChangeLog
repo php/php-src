@@ -1,3 +1,132 @@
+2007-02-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.c:
+      fix typo
+
+    * ZendEngine2/zend_alloc.c:
+      typo in Dmitry's last name =)
+
+2007-02-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Added runtime JIT auto-globals fetching and caching
+
+2007-02-16  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c:
+      use error message size
+
+    * (PHP_5_2)
+      ext/calendar/calendar.c:
+      fix snprintf size
+
+    * ext/calendar/calendar.c:
+      use snprintf, increase hebdate buffer
+
+    * (PHP_5_2)
+      ext/calendar/calendar.c:
+      increase hebdate buffer, use snprintf
+
+2007-02-16  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_alloc.h:
+      fix build
+
+2007-02-16  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_alloc.h:
+      add safe_realloc
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.h:
+      fix typo
+
+2007-02-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/assert.c
+      ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      Optimize out RINIT()
+
+2007-02-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/imap/php_imap.c:
+      MFB: fix leak
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      fix possible double free
+
+2007-02-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/assert.c
+      ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      Fixed return value of assert_options(ASSERT_CALLBACK) and possible crash
+      (Andy Wharmby)
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed bug #40286 (PHP fastcgi with PHP_FCGI_CHILDREN don't kill children
+      when parent is killed)
+
+2007-02-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/gd/tests/bug38179.phpt:
+      fix test name
+
+2007-02-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_globals_macros.h
+      ZendEngine2/zend_globals_macros.h:
+      Allow C++ extensions to use CG(), EG() ... (Caroline)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_llist.c
+      ZendEngine2/zend_llist.c:
+      Fixed zend_llist_remove_tail (Michael Wallner)
+
+2007-02-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS:
+      BFN
+
+    * (PHP_4_4)
+      ext/interbase/interbase.c:
+      fix ext/interbase build
+
+2007-02-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/var.c:
+      
+      Fixed bug #40465 (Ensure that all PHP elements are printed by var_dump).
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      Reduce stack usage & improve boundary checks
+
 2007-02-15  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/pdo_sqlite/config.m4:

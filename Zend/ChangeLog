@@ -1,3 +1,50 @@
+2007-02-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_alloc.c:
+      fix typo
+
+    * zend_alloc.c:
+      typo in Dmitry's last name =)
+
+2007-02-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c
+      zend_globals.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Added runtime JIT auto-globals fetching and caching
+
+2007-02-16  Antony Dovgal  <antony@zend.com>
+
+    * zend_alloc.h:
+      fix build
+
+2007-02-16  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_alloc.h
+      zend_alloc.h:
+      add safe_realloc
+
+    * (PHP_5_2)
+      zend_alloc.h:
+      fix typo
+
+2007-02-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_globals_macros.h
+      zend_globals_macros.h:
+      Allow C++ extensions to use CG(), EG() ... (Caroline)
+
+    * zend_llist.c
+      zend_llist.c:
+      Fixed zend_llist_remove_tail (Michael Wallner)
+
 2007-02-15  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
