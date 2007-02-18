@@ -858,11 +858,11 @@ static void init_request_info(TSRMLS_D)
 							env_script_name = pt + l;
 
 							/* PATH_TRANSATED = DOCUMENT_ROOT + PATH_INFO */
-							path_translated_len = l + strlen(env_path_info) + 2;
-							path_translated = (char *) emalloc(path_translated_len);
-							*path_translated = 0;
-							strncat(path_translated, env_document_root, l);
-							strcat(path_translated, env_path_info);
+							path_translated_len = l + strlen(env_path_info);
+							path_translated = (char *) emalloc(path_translated_len + 1);
+							memcpy(path_translated, env_document_root, l);
+							memcpy(path_translated + l, env_path_info, (path_translated_len - l));
+							path_translated[path_translated_len] = '\0';
 							if (orig_path_translated) {
 								_sapi_cgibin_putenv("ORIG_PATH_TRANSLATED", orig_path_translated TSRMLS_CC);
 						   	}
@@ -873,13 +873,13 @@ static void init_request_info(TSRMLS_D)
 						) {
 							/* PATH_TRANSATED = PATH_TRANSATED - SCRIPT_NAME + PATH_INFO */
 							int ptlen = strlen(pt) - strlen(env_script_name);
-							int path_translated_len = ptlen + strlen(env_path_info) + 2;
+							int path_translated_len = ptlen + strlen(env_path_info);
 							char *path_translated = NULL;
 
-							path_translated = (char *) emalloc(path_translated_len);
-							*path_translated = 0;
-							strncat(path_translated, pt, ptlen);
-							strcat(path_translated, env_path_info);
+							path_translated = (char *) emalloc(path_translated_len + 1);
+							memcpy(path_translated, pt, ptlen);
+							memcpy(path_translated + ptlen, env_path_info, path_translated_len - ptlen);
+							path_translated[path_translated_len] = '\0';
 							if (orig_path_translated) {
 								_sapi_cgibin_putenv("ORIG_PATH_TRANSLATED", orig_path_translated TSRMLS_CC);
 						   	}
@@ -1626,17 +1626,22 @@ consult the installation file that came with this distribution, or visit \n\
 			   test.php v1=test "v2=hello world!"
 			*/
 			if (!SG(request_info).query_string && argc > php_optind) {
+				int slen = strlen(PG(arg_separator).input);
 				len = 0;
 				for (i = php_optind; i < argc; i++) {
-					len += strlen(argv[i]) + 1;
+					if (i < (argc - 1)) {
+						len += strlen(argv[i]) + slen;
+					} else {
+						len += strlen(argv[i]);
+					}
 				}
 
-				s = malloc(len + 1);
+				s = malloc(++len + 1);
 				*s = '\0';			/* we are pretending it came from the environment  */
-				for (i = php_optind, len = 0; i < argc; i++) {
-					strcat(s, argv[i]);
+				for (i = php_optind; i < argc; i++) {
+					strlcat(s, argv[i], len);
 					if (i < (argc - 1)) {
-						strcat(s, PG(arg_separator).input);
+						strlcat(s, PG(arg_separator).input, len);
 					}
 				}
 				SG(request_info).query_string = s;
