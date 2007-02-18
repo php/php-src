@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Add --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
+- Fixed bug #40503 (json_encode() value corruption on 32bit systems with 
+  overflown values). (Ilia)
 - Fixed bug #40467 (Partial SOAP request sent when XSD sequence or choice
   include minOccurs=0). (Dmitry) 
 - Fixed bug #40465 (Ensure that all PHP elements are printed by var_dump).
