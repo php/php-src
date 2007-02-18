@@ -345,7 +345,7 @@ static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) {
             }
             break;
         case IS_LONG:
-            smart_str_append_long(buf, Z_LVAL_P(val));
+	    smart_str_append_long(buf, Z_LVAL_P(val));
             break;
         case IS_DOUBLE:
             {
@@ -353,14 +353,16 @@ static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) {
                 int len;
                 double dbl = Z_DVAL_P(val);
 
-                if (!zend_isinf(dbl) && !zend_isnan(dbl))
-                {
-                    len = spprintf(&d, 0, "%.9g", dbl);
-                    if (d)
-                    {
-                        smart_str_appendl(buf, d, len);
-                        efree(d);
-                    }
+                if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
+			len = spprintf(&d, 0, "%.9g", dbl);
+			if (d) {
+				if (dbl > LONG_MAX && !memchr(d, '.', len)) {
+					smart_str_append_unsigned(buf, (unsigned long)Z_DVAL_P(val));
+				} else {
+					smart_str_appendl(buf, d, len);
+				}
+				efree(d);
+			}
                 }
                 else
                 {
