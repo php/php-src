@@ -15,6 +15,6 @@ echo (float)"3.14", "\n";
 ?>
 --EXPECT--
 3,14
---UEXPECT--
+--UEXPECTF--
 Strict Standards: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 3,14

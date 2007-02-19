@@ -18,8 +18,8 @@ Bug #27504 (call_user_func_array allows calling of private/protected methods)
 	$foo->bar('3');
 ?>
 --EXPECTF--
-Called function foo:bar(%d)
+Called function foo:bar(1)
 
-Warning: call_user_func_array(): first parameter is expected to be a valid callback in %sbug27504.php on line %d
+Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %s on line %d
 
 Fatal error: Call to private method foo::bar() from context '' in %s on line %d
