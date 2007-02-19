@@ -111,14 +111,6 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 	if (hash_key->nKeyLength==0) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		if (va_arg(args, int) && 
-		    ((hash_key->type == IS_STRING && hash_key->arKey.s[0] == 0) ||
-		     (hash_key->type == IS_UNICODE && hash_key->arKey.u[0] == 0))) { 
-			/* XXX: perhaps when we are inside the class we should permit access to 
-			 * private & protected values
-			 */
-			return 0;
-		}
 		php_printf("%*c[", level + 1, ' ');
 		if (hash_key->type == IS_STRING) {
 			php_printf("\"");
@@ -233,7 +225,7 @@ PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC)
 		php_element_dump_func = php_object_property_dump;
 head_done:
 		if (myht) {
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_element_dump_func, 3, level, verbose, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
+			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_element_dump_func, 2, level, verbose);
 			if (is_temp) {
 				zend_hash_destroy(myht);
 				efree(myht);
