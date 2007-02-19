@@ -4,6 +4,7 @@ Bug #39602 (Invalid session.save_handler crashes PHP)
 <?php if (!extension_loaded("session")) die("skip"); ?>
 --INI--
 session.save_handler=qwerty
+error_reporting=0
 --FILE--
 <?php
 ini_set("session.save_handler","files");
@@ -12,4 +13,3 @@ echo "ok";
 ?>
 --EXPECT--
 ok
-Fatal error: Unknown: Cannot find save handler qwerty in Unknown on line 0
