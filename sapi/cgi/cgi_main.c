@@ -1694,6 +1694,7 @@ consult the installation file that came with this distribution, or visit \n\
 			1. we are running from shell and got filename was there
 			2. we are running as cgi or fastcgi
 		*/
+		retval = FAILURE;
 		if (cgi || SG(request_info).path_translated) {
 			retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
 		}
