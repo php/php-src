@@ -587,6 +587,10 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 		do {
 	 */
 	rc = SQLError(henv, conn, stmt, state, &error, errormsg, sizeof(errormsg)-1, &errormsgsize);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		sprintf(state, "HY000");
+		sprintf(errormsg, "Failed to fetch error message");
+	}
 	if (conn_resource) {
 		memcpy(conn_resource->laststate, state, sizeof(state));
 		memcpy(conn_resource->lasterrormsg, errormsg, sizeof(errormsg));
@@ -1224,7 +1228,7 @@ PHP_FUNCTION(odbc_data_source)
 
 	if (rc != SQL_SUCCESS) {
 		/* ummm.... he did it */
-		odbc_sql_error(conn, NULL, "SQLDataSources");
+		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLDataSources");
 		RETURN_FALSE;
 	}
 
