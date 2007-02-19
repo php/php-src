@@ -530,12 +530,12 @@ static unsigned int _zend_mm_cookie = 0;
 	} while (0)
 
 # define ZEND_MM_END_MAGIC_PTR(block) \
-	(unsigned int*)(((char*)(ZEND_MM_DATA_OF(block))) + ((zend_mm_block*)(block))->debug.size)
+	(((char*)(ZEND_MM_DATA_OF(block))) + ((zend_mm_block*)(block))->debug.size)
 
 # define END_MAGIC_SIZE sizeof(unsigned int)
 
 # define ZEND_MM_SET_BLOCK_SIZE(block, __size) do { \
-		unsigned int *p; \
+		char *p; \
 		((zend_mm_block*)(block))->debug.size = (__size); \
 		p = ZEND_MM_END_MAGIC_PTR(block); \
 		((zend_mm_block*)(block))->debug.start_magic = _mem_block_start_magic; \
@@ -1110,7 +1110,7 @@ static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE
 			zend_debug_alloc_output("Unknown\n");
 		}
 	} else {
-		unsigned int *end_magic = ZEND_MM_END_MAGIC_PTR(p);
+		char *end_magic = ZEND_MM_END_MAGIC_PTR(p);
 
 		if (p->debug.start_magic == _mem_block_start_magic) {
 			if (!silent) {
