@@ -475,10 +475,10 @@ PHP_MINIT_FUNCTION(imap)
 	auth_link(&auth_gss);		/* link in the gss authenticator */
 #endif
 	auth_link(&auth_pla);		/* link in the plain authenticator */
+#endif
 
 #ifdef HAVE_IMAP_SSL
 	ssl_onceonlyinit ();
-#endif
 #endif
 
 	/* lets allow NIL */
