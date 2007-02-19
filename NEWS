@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.2
+- Upgraded libraries bundled in the Windows distribution. (Edin)
+  . c-client (imap) to version 2006e
+  . libpq (PostgreSQL) to version 8.2.3
 - Upgraded SQLite 3 to version 3.3.12 (Ilia)
 - Upgraded PCRE to version 7.0 (Nuno)
 - Add --ri switch to CLI which allows to check extension information. (Marcus)
@@ -23,6 +26,7 @@ PHP                                                                        NEWS
 - Fixed bug #40414 (possible endless fork() loop when running fastcgi).
   (Dmitry)
 - Fixed bug #40410 (ext/posix does not compile on MacOS 10.3.9). (Tony)
+- Fixed bug #40371 (pg_client_encoding() not working on Windows). (Edin)
 - Fixed Bug #40352 (FCGI_WEB_SERVER_ADDRS function get lost). (Dmitry)
 - Fixed bug #40286 (PHP fastcgi with PHP_FCGI_CHILDREN don't kill children when
   parent is killed). (Dmitry)
