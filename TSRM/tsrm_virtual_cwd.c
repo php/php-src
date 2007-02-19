@@ -548,11 +548,8 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 #endif
 	} else {
 		char *ptr, *path_copy, *free_path;
-		char *tok = NULL;
+		char *tok;
 		int ptr_length;
-#ifdef TSRM_WIN32
-		int is_unc = 0;
-#endif
 
 no_realpath:
 
@@ -573,7 +570,6 @@ no_realpath:
 			state->cwd[1] = '\0';
 			state->cwd_length = 1;
 			path_copy += 2;
-			is_unc = 2;
 		} else {
 #endif
 			state->cwd = (char *) realloc(state->cwd, 1);
@@ -583,6 +579,7 @@ no_realpath:
 		}
 #endif
 		
+		tok = NULL;
 		ptr = tsrm_strtok_r(path_copy, TOKENIZER_STRING, &tok);
 		while (ptr) {
 			ptr_length = strlen(ptr);
@@ -652,15 +649,9 @@ no_realpath:
 						memcpy(&state->cwd[state->cwd_length], data.cFileName, length+1);
 						ptr_length = length;
 						FindClose(hFind);
+						ret = 0;
 					} else if (use_realpath == CWD_REALPATH) {
-						if (is_unc) {
-							is_unc--;
-						} else {
-							free(free_path);
-							CWD_STATE_FREE(state);
-							*state = old_state;					
-							return 1;
-						}
+						ret = 1;
 					}
 				}
 #endif
@@ -671,6 +662,12 @@ no_realpath:
 		}
 
 		free(free_path);
+
+		if ((use_realpath == CWD_REALPATH) && ret) {
+			CWD_STATE_FREE(state);
+			*state = old_state;					
+			return 1;
+		}
 
 		if (state->cwd_length == COPY_WHEN_ABSOLUTE(state->cwd)) {
 			state->cwd = (char *) realloc(state->cwd, state->cwd_length+1+1);
