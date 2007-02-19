@@ -975,14 +975,15 @@ char* fcgi_getenv(fcgi_request *req, const char* var, int var_len)
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 {
 	if (var && req) {
-		char **ret;
-
 		if (val == NULL) {
-			val = "";
-		}
-		val = strdup(val);
-		if (zend_hash_update(&req->env, var, var_len+1, &val, sizeof(char*), (void**)&ret) == SUCCESS) {
-			return *ret;
+			zend_hash_del(&req->env, var, var_len+1);
+		} else {
+			char **ret;
+
+			val = strdup(val);
+			if (zend_hash_update(&req->env, var, var_len+1, &val, sizeof(char*), (void**)&ret) == SUCCESS) {
+				return *ret;
+			}
 		}
 	}
 	return NULL;
