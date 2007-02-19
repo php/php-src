@@ -1,3 +1,24 @@
+2007-02-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      
+      Eliminate strcat() usage
+      Fixed handling of argv[] for GET
+
+    * (PHP_5_2)
+      ext/pgsql/config.m4
+      ext/pgsql/config.w32:
+      PQfreemem checks
+
+    * (PHP_5_2)
+      NEWS
+      ext/json/json.c
+      ext/json/tests/bug40503.phpt
+      ext/json/tests/bug40503.phpt:
+      Fixed bug #40503 (json_encode() value corruption on 32bit systems with
+      overflown values).
+
 2007-02-17  Stanislav Malyshev  <stas@zend.com>
 
     * ext/pspell/pspell.c
