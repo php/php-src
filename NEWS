@@ -6,9 +6,11 @@ PHP                                                                        NEWS
   . libpq (PostgreSQL) to version 8.2.3
 - Upgraded SQLite 3 to version 3.3.12 (Ilia)
 - Upgraded PCRE to version 7.0 (Nuno)
-- Add --ri switch to CLI which allows to check extension information. (Marcus)
+- Added --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
+- Fixed bug #40546 (SplFileInfo::getPathInfo() throws an execption if directory
+  is in root dir). (Marcus)
 - Fixed bug #40503 (json_encode() value corruption on 32bit systems with 
   overflown values). (Ilia)
 - Fixed bug #40467 (Partial SOAP request sent when XSD sequence or choice
