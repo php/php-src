@@ -44,7 +44,7 @@ PHPAPI OLECHAR *php_com_string_to_olestring(char *string, uint string_len, int c
 		string_len++;
 	}
 
-	if (strlen > 0) {
+	if (string_len > 0) {
 		olestring = (OLECHAR*)safe_emalloc(sizeof(OLECHAR), string_len, 0);
 		ok = MultiByteToWideChar(codepage, flags, string, string_len, olestring, string_len);
 	} else {
