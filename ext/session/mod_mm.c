@@ -253,28 +253,34 @@ PHP_MINIT_FUNCTION(ps_mm)
 {
 	int save_path_len = strlen(PS(save_path));
 	int mod_name_len = strlen(sapi_module.name);
+	int euid_len;
 	char *ps_mm_path, euid[30];
 	int ret;
 
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
-   	if (!ps_mm_instance)
+   	if (!ps_mm_instance) {
 		return FAILURE;
-
-	if (!sprintf(euid,"%d", geteuid())) 
-		return FAILURE;
-		
-    /* Directory + '/' + File + Module Name + Effective UID + \0 */	
-	ps_mm_path = emalloc(save_path_len+1+sizeof(PS_MM_FILE)+mod_name_len+strlen(euid)+1);
-	
-	memcpy(ps_mm_path, PS(save_path), save_path_len + 1);
-	if (save_path_len > 0 && ps_mm_path[save_path_len - 1] != DEFAULT_SLASH) {
-		ps_mm_path[save_path_len] = DEFAULT_SLASH;
-		ps_mm_path[save_path_len+1] = '\0';
 	}
-	strcat(ps_mm_path, PS_MM_FILE);
-	strcat(ps_mm_path, sapi_module.name);
-	strcat(ps_mm_path, euid);
+
+	if (!(euid_len = sprintf(euid,"%d", geteuid()))) {
+		return FAILURE;
+	}
+		
+	/* Directory + '/' + File + Module Name + Effective UID + \0 */	
+	ps_mm_path = emalloc(save_path_len + 1 + (sizeof(PS_MM_FILE) - 1) + mod_name_len + euid_len + 1);
 	
+	memcpy(ps_mm_path, PS(save_path), save_path_len);
+	if (PS(save_path)[save_path_len - 1] != DEFAULT_SLASH) {
+		ps_mm_path[save_path_len] = DEFAULT_SLASH;
+		save_path_len++;
+	}
+	mempcy(ps_mm_path + save_path_len, PS_MM_FILE, sizeof(PS_MM_FILE) - 1);
+	save_path_len += sizeof(PS_MM_FILE) - 1;
+	memcpy(ps_mm_path + save_path_len, sapi_module.name, mod_name_len);
+	save_path_len += mod_name_len;
+	memcpy(ps_mm_path + save_path_len, euid, euid_len);
+	ps_mm_path[save_path_len + euid_len] = '\0';
+
 	ret = ps_mm_initialize(ps_mm_instance, ps_mm_path);
 		
 	efree(ps_mm_path);
