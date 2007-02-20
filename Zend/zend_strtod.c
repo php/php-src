@@ -413,7 +413,10 @@ struct Bigint {
 
 typedef struct Bigint Bigint;
 
+/* static variables, multithreading fun! */
 static Bigint *freelist[Kmax+1];
+static Bigint *p5s;
+
 static void destroy_freelist(void);
 
 #ifdef ZTS
@@ -757,28 +760,25 @@ static Bigint * s2b (CONST char *s, int nd0, int nd, ULong y9)
 	return b;
 }
 
-
-static Bigint *p5s;
-
 static Bigint * pow5mult(Bigint *b, int k)
 {
 	Bigint *b1, *p5, *p51;
 	int i;
 	static int p05[3] = { 5, 25, 125 };
 
+	_THREAD_PRIVATE_MUTEX_LOCK(pow5mult_mutex);
 	if ((i = k & 3)) {
 		b = multadd(b, p05[i-1], 0);
 	}
 
 	if (!(k >>= 2)) {
+		_THREAD_PRIVATE_MUTEX_UNLOCK(pow5mult_mutex);
 		return b;
 	}
 	if (!(p5 = p5s)) {
 		/* first time */
-		_THREAD_PRIVATE_MUTEX_LOCK(pow5mult_mutex);
 		p5 = p5s = i2b(625);
 		p5->next = 0;
-		_THREAD_PRIVATE_MUTEX_UNLOCK(pow5mult_mutex);
 	}
 	for(;;) {
 		if (k & 1) {
@@ -790,15 +790,14 @@ static Bigint * pow5mult(Bigint *b, int k)
 			break;
 		}
 		if (!(p51 = p5->next)) {
-			_THREAD_PRIVATE_MUTEX_LOCK(pow5mult_mutex);
 			if (!(p51 = p5->next)) {
 				p51 = p5->next = mult(p5,p5);
 				p51->next = 0;
 			}
-			_THREAD_PRIVATE_MUTEX_UNLOCK(pow5mult_mutex);
 		}
 		p5 = p51;
 	}
+	_THREAD_PRIVATE_MUTEX_UNLOCK(pow5mult_mutex);
 	return b;
 }
 
