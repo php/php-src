@@ -513,11 +513,17 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 					value = sxe_get_value(value TSRMLS_CC);
 					INIT_PZVAL(value);
 					new_value = 1;
+					if (UG(unicode)) {
+						convert_to_string_with_converter(value, UG(utf8_conv));
+					}
 					break;
 				}
 				/* break is missing intentionally */
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "It is not yet possible to assign complex types to %s", attribs ? "attributes" : "properties");
+				if (member == &tmp_zv) {
+					zval_dtor(&tmp_zv);
+				}
+				zend_error(E_WARNING, "It is not yet possible to assign complex types to %s", attribs ? "attributes" : "properties");
 				return;
 		}
 	}
