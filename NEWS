@@ -39,6 +39,7 @@ PHP                                                                        NEWS
 - Fixed bug #40109 (iptcembed fails on non-jfif jpegs). (Tony)
 - Fixed bug #39836 (SplObjectStorage empty after unserialize). (Marcus)
 - Fixed bug #39322 (proc_terminate() destroys process resource). (Nuno)
+- Fixed bug #38406 (crash when assigning objects to SimpleXML attributes). (Tony)
 - Fixed bug #37799 (ftp_ssl_connect() falls back to non-ssl connection). (Nuno)
 - Fixed bug #36496 (SSL support in imap_open() not working on Windows). (Edin)
 - Fixed bug #34794 (proc_close() hangs when used with two processes).
