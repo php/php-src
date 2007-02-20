@@ -1,3 +1,129 @@
+2007-02-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/session/mod_mm.c:
+      
+      Eliminate strcat() usage.
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      
+      Fixed strlcat() usage.
+      
+
+2007-02-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.c:
+      - Bugfix #40546: SplFileInfo::getPathInfo() throws an execption if
+      directory is in root dir.
+
+2007-02-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/odbc/php_odbc.c:
+      MFH: check SQLError() return value and output a meaningful errmsg when it
+      fails
+
+    * ext/odbc/php_odbc.c:
+      check SQLError() return value and output a meaningful errmsg when it fails
+
+    * tests/basic/022.phpt
+      tests/basic/023.phpt
+      tests/classes/bug26737.phpt
+      tests/classes/bug27504.phpt
+      tests/lang/034.phpt:
+      fix tests
+
+    * sapi/cgi/README.FastCGI
+      sapi/cgi/cgi_main.c:
+      MFB: Eliminate strcat() usage
+           Fixed handling of argv[] for GET
+
+    * ext/pgsql/config.m4
+      ext/pgsql/config.w32:
+      MFB: PQfreemem() checks
+
+    * ext/json/json.c
+      ext/json/tests/bug40503.phpt:
+      MFB: #40503 (json_encode() value corruption on 32bit systems with overflown
+      values)
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.c:
+      MFH: fix heap protection on SPARC, required by GCC4
+      patch by Dmitry
+
+    * ZendEngine2/zend_alloc.c:
+      fix heap protection on SPARC, required by GCC4
+      patch by Dmitry
+
+2007-02-19  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      NEWS:
+      Info on new lib versions and BFN
+
+2007-02-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/com_dotnet/com_olechar.c
+      ext/com_dotnet/com_olechar.c:
+      typo
+
+2007-02-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/var.c:
+      - MFH Fixed bug #40465 (Ensure that all PHP elements are printed by
+      var_dump)
+
+2007-02-19  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      ext/pgsql/config.w32:
+      Fixed bug #40371
+
+2007-02-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/info.c:
+      - WS/CS
+
+    * (PHP_5_2)
+      ext/spl/spl_iterators.c:
+      - MFH CachingIterator implements Countable
+
+2007-02-19  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/imap/php_imap.c
+      ext/pgsql/config.w32:
+      MFB
+
+    * (PHP_5_2)
+      NEWS
+      ext/imap/php_imap.c:
+      Fixed bug #36496
+
+2007-02-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      On win32 directories in the middle of the patch may be unreadable
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Initialize "retval" on each request
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed fcgi_putenv() semantic with NULL value
+
+2007-02-19  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug39602.phpt:
+      fix test
+      stdout is closed in non-debug mode
+
 2007-02-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
