@@ -288,6 +288,9 @@ PHP_EBCDIC
 dnl Check whether the system byte ordering is bigendian
 PHP_C_BIGENDIAN
 
+dnl Check whether writing to stdout works
+PHP_TEST_WRITE_STDOUT
+
 dnl Check for /usr/pkg/{lib,include} which is where NetBSD puts binary
 dnl and source packages.  This should be harmless on other OSs.
 if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
