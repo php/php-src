@@ -10,36 +10,6 @@ AC_ARG_ENABLE(cgi,
   PHP_SAPI_CGI=yes
 ])
 
-AC_DEFUN([PHP_TEST_WRITE_STDOUT],[
-  AC_CACHE_CHECK(whether writing to stdout works,ac_cv_write_stdout,[
-    AC_TRY_RUN([
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#define TEXT "This is the test message -- "
-        
-main()
-{
-  int n;
-
-  n = write(1, TEXT, sizeof(TEXT)-1);
-  return (!(n == sizeof(TEXT)-1));
-}
-    ],[
-      ac_cv_write_stdout=yes
-    ],[
-      ac_cv_write_stdout=no
-    ],[
-      ac_cv_write_stdout=no
-    ])
-  ])
-  if test "$ac_cv_write_stdout" = "yes"; then
-    AC_DEFINE(PHP_WRITE_STDOUT, 1, [whether write(2) works])
-  fi
-])
-
-
 if test "$PHP_SAPI" = "default"; then
   AC_MSG_CHECKING(for CGI build)
   if test "$PHP_SAPI_CGI" != "no"; then
@@ -81,8 +51,6 @@ if test "$PHP_SAPI" = "default"; then
         ;;
     esac
     PHP_SUBST(SAPI_CGI_PATH)
-
-    PHP_TEST_WRITE_STDOUT
 
     INSTALL_IT="@echo \"Installing PHP CGI into: \$(INSTALL_ROOT)\$(bindir)/\"; \$(INSTALL) -m 0755 \$(SAPI_CGI_PATH) \$(INSTALL_ROOT)\$(bindir)/\$(program_prefix)php\$(program_suffix)\$(EXEEXT)"
     PHP_SELECT_SAPI(cgi, program, fastcgi.c cgi_main.c getopt.c, , '$(SAPI_CGI_PATH)')
