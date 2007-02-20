@@ -33,9 +33,9 @@ if the ini variable phar.require_hash is set to true.
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-02-07</date>
+ <date>2007-02-20</date>
  <version>
-  <release>1.0.0RC2</release>
+  <release>1.0.0RC3</release>
   <api>1.0.0</api>
  </version>
  <stability>
@@ -44,10 +44,8 @@ if the ini variable phar.require_hash is set to true.
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
-  Initial release.  This release is fully regression-tested
-
-  This extension is only compatible with phar archives compliant with PHP_Archive
-  0.10.0 (api Version 1.0.0)
+  Disable begin()/commit() with non-CLI sapi so they will function as
+  a true transaction
  </notes>
  <contents>
   <dir name="/">
