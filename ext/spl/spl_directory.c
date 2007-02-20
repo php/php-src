@@ -679,8 +679,10 @@ SPL_METHOD(SplFileInfo, func_name) \
 { \
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC); \
  \
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);\
 	spl_filesystem_object_get_file_name(intern TSRMLS_CC); \
 	php_stat(intern->file_name, intern->file_name_len, func_num, return_value TSRMLS_CC); \
+	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);\
 }
 /* }}} */
 
