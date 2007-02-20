@@ -1569,7 +1569,8 @@ consult the installation file that came with this distribution, or visit \n\
 						}
 					}
 
-					s = malloc(++len + 1);
+					len += 2;
+					s = malloc(len);
 					*s = '\0';			/* we are pretending it came from the environment  */
 					for (i = php_optind; i < argc; i++) {
 						strlcat(s, argv[i], len);
