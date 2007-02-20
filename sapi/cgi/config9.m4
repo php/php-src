@@ -50,36 +50,6 @@ AC_ARG_ENABLE(path-info-check,
   PHP_ENABLE_PATHINFO_CHECK=yes
 ])
 
-AC_DEFUN([PHP_TEST_WRITE_STDOUT],[
-  AC_CACHE_CHECK(whether writing to stdout works,ac_cv_write_stdout,[
-    AC_TRY_RUN([
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#define TEXT "This is the test message -- "
-        
-main()
-{
-  int n;
-
-  n = write(1, TEXT, sizeof(TEXT)-1);
-  return (!(n == sizeof(TEXT)-1));
-}
-    ],[
-      ac_cv_write_stdout=yes
-    ],[
-      ac_cv_write_stdout=no
-    ],[
-      ac_cv_write_stdout=no
-    ])
-  ])
-  if test "$ac_cv_write_stdout" = "yes"; then
-    AC_DEFINE(PHP_WRITE_STDOUT, 1, [whether write(2) works])
-  fi
-])
-
-
 if test "$PHP_SAPI" = "default"; then
   AC_MSG_CHECKING(for CGI build)
   if test "$PHP_SAPI_CGI" != "no"; then
@@ -95,8 +65,6 @@ if test "$PHP_SAPI" = "default"; then
         ;;
     esac
     PHP_SUBST(SAPI_CGI_PATH)
-
-    PHP_TEST_WRITE_STDOUT
 
     AC_MSG_CHECKING(whether to force Apache CGI redirect)
     if test "$PHP_FORCE_CGI_REDIRECT" = "yes"; then

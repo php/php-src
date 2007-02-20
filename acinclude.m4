@@ -2645,3 +2645,33 @@ php_cv_crypt_r_style=struct_crypt_data_gnu_source)
     AC_MSG_ERROR([Unable to detect data struct used by crypt_r])
   fi
 ])
+
+AC_DEFUN([PHP_TEST_WRITE_STDOUT],[
+  AC_CACHE_CHECK(whether writing to stdout works,ac_cv_write_stdout,[
+    AC_TRY_RUN([
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#define TEXT "This is the test message -- "
+
+main()
+{
+  int n;
+
+  n = write(1, TEXT, sizeof(TEXT)-1);
+  return (!(n == sizeof(TEXT)-1));
+}
+    ],[
+      ac_cv_write_stdout=yes
+    ],[
+      ac_cv_write_stdout=no
+    ],[
+      ac_cv_write_stdout=no
+    ])
+  ])
+  if test "$ac_cv_write_stdout" = "yes"; then
+    AC_DEFINE(PHP_WRITE_STDOUT, 1, [whether write(2) works])
+  fi
+])
+
