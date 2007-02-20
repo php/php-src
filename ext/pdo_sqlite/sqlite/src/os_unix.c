@@ -565,7 +565,7 @@ static sqlite3LockingStyle sqlite3TestLockingStyle(const char *filePath,
   lockInfo.l_whence = SEEK_SET;
   lockInfo.l_type = F_RDLCK;
   
-  if (fcntl(fd, F_GETLK, (int) &lockInfo) != -1) {
+  if (fcntl(fd, F_GETLK, &lockInfo) != -1) {
     return posixLockingStyle;
   } 
   
@@ -1000,10 +1000,14 @@ int sqlite3UnixIsDirWritable(char *zBuf){
 */
 static int seekAndRead(unixFile *id, void *pBuf, int cnt){
   int got;
+  i64 newOffset;
 #ifdef USE_PREAD
   got = pread(id->h, pBuf, cnt, id->offset);
 #else
-  lseek(id->h, id->offset, SEEK_SET);
+  newOffset = lseek(id->h, id->offset, SEEK_SET);
+  if( newOffset!=id->offset ){
+    return -1;
+  }
   got = read(id->h, pBuf, cnt);
 #endif
   if( got>0 ){
@@ -1043,10 +1047,14 @@ static int unixRead(OsFile *id, void *pBuf, int amt){
 */
 static int seekAndWrite(unixFile *id, const void *pBuf, int cnt){
   int got;
+  i64 newOffset;
 #ifdef USE_PREAD
   got = pwrite(id->h, pBuf, cnt, id->offset);
 #else
-  lseek(id->h, id->offset, SEEK_SET);
+  newOffset = lseek(id->h, id->offset, SEEK_SET);
+  if( newOffset!=id->offset ){
+    return -1;
+  }
   got = write(id->h, pBuf, cnt);
 #endif
   if( got>0 ){
@@ -1160,13 +1168,26 @@ static int full_fsync(int fd, int fullSync, int dataOnly){
 #if HAVE_FULLFSYNC
   if( fullSync ){
     rc = fcntl(fd, F_FULLFSYNC, 0);
-  }else
-#endif /* HAVE_FULLFSYNC */
+  }else{
+    rc = 1;
+  }
+  /* If the FULLFSYNC failed, fall back to attempting an fsync().
+   * It shouldn't be possible for fullfsync to fail on the local 
+   * file system (on OSX), so failure indicates that FULLFSYNC
+   * isn't supported for this file system. So, attempt an fsync 
+   * and (for now) ignore the overhead of a superfluous fcntl call.  
+   * It'd be better to detect fullfsync support once and avoid 
+   * the fcntl call every time sync is called.
+   */
+  if( rc ) rc = fsync(fd);
+
+#else 
   if( dataOnly ){
     rc = fdatasync(fd);
   }else{
     rc = fsync(fd);
   }
+#endif /* HAVE_FULLFSYNC */
 #endif /* defined(SQLITE_NO_SYNC) */
 
   return rc;

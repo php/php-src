@@ -43,6 +43,7 @@ int sqlite3_where_trace = 0;
 /* Forward reference
 */
 typedef struct WhereClause WhereClause;
+typedef struct ExprMaskSet ExprMaskSet;
 
 /*
 ** The query generator uses an array of instances of this structure to
@@ -106,6 +107,7 @@ struct WhereTerm {
 */
 struct WhereClause {
   Parse *pParse;           /* The parser context */
+  ExprMaskSet *pMaskSet;   /* Mapping of table indices to bitmasks */
   int nTerm;               /* Number of terms */
   int nSlot;               /* Number of entries in a[] */
   WhereTerm *a;            /* Each a[] describes a term of the WHERE cluase */
@@ -138,7 +140,6 @@ struct WhereClause {
 ** numbers all get mapped into bit numbers that begin with 0 and contain
 ** no gaps.
 */
-typedef struct ExprMaskSet ExprMaskSet;
 struct ExprMaskSet {
   int n;                        /* Number of assigned cursor values */
   int ix[sizeof(Bitmask)*8];    /* Cursor assigned to each bit */
@@ -186,8 +187,13 @@ struct ExprMaskSet {
 /*
 ** Initialize a preallocated WhereClause structure.
 */
-static void whereClauseInit(WhereClause *pWC, Parse *pParse){
+static void whereClauseInit(
+  WhereClause *pWC,        /* The WhereClause to be initialized */
+  Parse *pParse,           /* The parsing context */
+  ExprMaskSet *pMaskSet    /* Mapping from table indices to bitmasks */
+){
   pWC->pParse = pParse;
+  pWC->pMaskSet = pMaskSet;
   pWC->nTerm = 0;
   pWC->nSlot = ARRAYSIZE(pWC->aStatic);
   pWC->a = pWC->aStatic;
@@ -463,7 +469,7 @@ static WhereTerm *findTerm(
 }
 
 /* Forward reference */
-static void exprAnalyze(SrcList*, ExprMaskSet*, WhereClause*, int);
+static void exprAnalyze(SrcList*, WhereClause*, int);
 
 /*
 ** Call exprAnalyze on all terms in a WHERE clause.  
@@ -472,12 +478,11 @@ static void exprAnalyze(SrcList*, ExprMaskSet*, WhereClause*, int);
 */
 static void exprAnalyzeAll(
   SrcList *pTabList,       /* the FROM clause */
-  ExprMaskSet *pMaskSet,   /* table masks */
   WhereClause *pWC         /* the WHERE clause to be analyzed */
 ){
   int i;
   for(i=pWC->nTerm-1; i>=0; i--){
-    exprAnalyze(pTabList, pMaskSet, pWC, i);
+    exprAnalyze(pTabList, pWC, i);
   }
 }
 
@@ -592,11 +597,11 @@ static void transferJoinMarkings(Expr *pDerived, Expr *pBase){
 */
 static void exprAnalyze(
   SrcList *pSrc,            /* the FROM clause */
-  ExprMaskSet *pMaskSet,    /* table masks */
   WhereClause *pWC,         /* the WHERE clause */
   int idxTerm               /* Index of the term to be analyzed */
 ){
   WhereTerm *pTerm = &pWC->a[idxTerm];
+  ExprMaskSet *pMaskSet = pWC->pMaskSet;
   Expr *pExpr = pTerm->pExpr;
   Bitmask prereqLeft;
   Bitmask prereqAll;
@@ -679,7 +684,7 @@ static void exprAnalyze(
       pNewExpr = sqlite3Expr(ops[i], sqlite3ExprDup(pExpr->pLeft),
                              sqlite3ExprDup(pList->a[i].pExpr), 0);
       idxNew = whereClauseInsert(pWC, pNewExpr, TERM_VIRTUAL|TERM_DYNAMIC);
-      exprAnalyze(pSrc, pMaskSet, pWC, idxNew);
+      exprAnalyze(pSrc, pWC, idxNew);
       pTerm = &pWC->a[idxTerm];
       pWC->a[idxNew].iParent = idxTerm;
     }
@@ -708,9 +713,9 @@ static void exprAnalyze(
     WhereTerm *pOrTerm;
 
     assert( (pTerm->flags & TERM_DYNAMIC)==0 );
-    whereClauseInit(&sOr, pWC->pParse);
+    whereClauseInit(&sOr, pWC->pParse, pMaskSet);
     whereSplit(&sOr, pExpr, TK_OR);
-    exprAnalyzeAll(pSrc, pMaskSet, &sOr);
+    exprAnalyzeAll(pSrc, &sOr);
     assert( sOr.nTerm>0 );
     j = 0;
     do{
@@ -750,7 +755,7 @@ static void exprAnalyze(
         transferJoinMarkings(pNew, pExpr);
         pNew->pList = pList;
         idxNew = whereClauseInsert(pWC, pNew, TERM_VIRTUAL|TERM_DYNAMIC);
-        exprAnalyze(pSrc, pMaskSet, pWC, idxNew);
+        exprAnalyze(pSrc, pWC, idxNew);
         pTerm = &pWC->a[idxTerm];
         pWC->a[idxNew].iParent = idxTerm;
         pTerm->nChild = 1;
@@ -787,10 +792,10 @@ or_not_possible:
     }
     pNewExpr1 = sqlite3Expr(TK_GE, sqlite3ExprDup(pLeft), pStr1, 0);
     idxNew1 = whereClauseInsert(pWC, pNewExpr1, TERM_VIRTUAL|TERM_DYNAMIC);
-    exprAnalyze(pSrc, pMaskSet, pWC, idxNew1);
+    exprAnalyze(pSrc, pWC, idxNew1);
     pNewExpr2 = sqlite3Expr(TK_LT, sqlite3ExprDup(pLeft), pStr2, 0);
     idxNew2 = whereClauseInsert(pWC, pNewExpr2, TERM_VIRTUAL|TERM_DYNAMIC);
-    exprAnalyze(pSrc, pMaskSet, pWC, idxNew2);
+    exprAnalyze(pSrc, pWC, idxNew2);
     pTerm = &pWC->a[idxTerm];
     if( isComplete ){
       pWC->a[idxNew1].iParent = idxTerm;
@@ -836,6 +841,25 @@ or_not_possible:
 #endif /* SQLITE_OMIT_VIRTUALTABLE */
 }
 
+/*
+** Return TRUE if any of the expressions in pList->a[iFirst...] contain
+** a reference to any table other than the iBase table.
+*/
+static int referencesOtherTables(
+  ExprList *pList,          /* Search expressions in ths list */
+  ExprMaskSet *pMaskSet,    /* Mapping from tables to bitmaps */
+  int iFirst,               /* Be searching with the iFirst-th expression */
+  int iBase                 /* Ignore references to this table */
+){
+  Bitmask allowed = ~getMask(pMaskSet, iBase);
+  while( iFirst<pList->nExpr ){
+    if( (exprTableUsage(pMaskSet, pList->a[iFirst++].pExpr)&allowed)!=0 ){
+      return 1;
+    }
+  }
+  return 0;
+}
+
 
 /*
 ** This routine decides if pIdx can be used to satisfy the ORDER BY
@@ -858,6 +882,7 @@ or_not_possible:
 */
 static int isSortingIndex(
   Parse *pParse,          /* Parsing context */
+  ExprMaskSet *pMaskSet,  /* Mapping from table indices to bitmaps */
   Index *pIdx,            /* The index we are testing */
   int base,               /* Cursor number for the table to be sorted */
   ExprList *pOrderBy,     /* The ORDER BY clause */
@@ -894,7 +919,7 @@ static int isSortingIndex(
     if( pExpr->op!=TK_COLUMN || pExpr->iTable!=base ){
       /* Can not use an index sort on anything that is not a column in the
       ** left-most table of the FROM clause */
-      return 0;
+      break;
     }
     pColl = sqlite3ExprCollSeq(pParse, pExpr);
     if( !pColl ){
@@ -941,11 +966,12 @@ static int isSortingIndex(
     }
     j++;
     pTerm++;
-    if( iColumn<0 ){
+    if( iColumn<0 && !referencesOtherTables(pOrderBy, pMaskSet, j, base) ){
       /* If the indexed column is the primary key and everything matches
-      ** so far, then we are assured that the index can be used to sort
-      ** because the primary key is unique and so none of the other columns
-      ** will make any difference
+      ** so far and none of the ORDER BY terms to the right reference other
+      ** tables in the join, then we are assured that the index can be used 
+      ** to sort because the primary key is unique and so none of the other
+      ** columns will make any difference
       */
       j = nTerm;
     }
@@ -957,9 +983,12 @@ static int isSortingIndex(
     ** this index can be used for sorting. */
     return 1;
   }
-  if( j==pIdx->nColumn && pIdx->onError!=OE_None ){
+  if( pIdx->onError!=OE_None && i==pIdx->nColumn
+      && !referencesOtherTables(pOrderBy, pMaskSet, j, base) ){
     /* All terms of this index match some prefix of the ORDER BY clause
-    ** and this index is UNIQUE, so this index can be used for sorting. */
+    ** and the index is UNIQUE and no terms on the tail of the ORDER BY
+    ** clause reference other tables in a join.  If this is all true then
+    ** the order by clause is superfluous. */
     return 1;
   }
   return 0;
@@ -973,6 +1002,7 @@ static int isSortingIndex(
 static int sortableByRowid(
   int base,               /* Cursor number for table to be sorted */
   ExprList *pOrderBy,     /* The ORDER BY clause */
+  ExprMaskSet *pMaskSet,  /* Mapping from tables to bitmaps */
   int *pbRev              /* Set to 1 if ORDER BY is DESC */
 ){
   Expr *p;
@@ -980,7 +1010,8 @@ static int sortableByRowid(
   assert( pOrderBy!=0 );
   assert( pOrderBy->nExpr>0 );
   p = pOrderBy->a[0].pExpr;
-  if( p->op==TK_COLUMN && p->iTable==base && p->iColumn==-1 ){
+  if( p->op==TK_COLUMN && p->iTable==base && p->iColumn==-1
+    && !referencesOtherTables(pOrderBy, pMaskSet, 1, base) ){
     *pbRev = pOrderBy->a[0].sortOrder;
     return 1;
   }
@@ -1298,7 +1329,7 @@ static double bestIndex(
   */
   if( pProbe==0 &&
      findTerm(pWC, iCur, -1, 0, WO_EQ|WO_IN|WO_LT|WO_LE|WO_GT|WO_GE,0)==0 &&
-     (pOrderBy==0 || !sortableByRowid(iCur, pOrderBy, &rev)) ){
+     (pOrderBy==0 || !sortableByRowid(iCur, pOrderBy, pWC->pMaskSet, &rev)) ){
     *pFlags = 0;
     *ppIndex = 0;
     *pnEq = 0;
@@ -1360,7 +1391,7 @@ static double bestIndex(
   /* If the table scan does not satisfy the ORDER BY clause, increase
   ** the cost by NlogN to cover the expense of sorting. */
   if( pOrderBy ){
-    if( sortableByRowid(iCur, pOrderBy, &rev) ){
+    if( sortableByRowid(iCur, pOrderBy, pWC->pMaskSet, &rev) ){
       flags |= WHERE_ORDERBY|WHERE_ROWID_RANGE;
       if( rev ){
         flags |= WHERE_REVERSE;
@@ -1444,7 +1475,7 @@ static double bestIndex(
     */
     if( pOrderBy ){
       if( (flags & WHERE_COLUMN_IN)==0 &&
-           isSortingIndex(pParse,pProbe,iCur,pOrderBy,nEq,&rev) ){
+           isSortingIndex(pParse,pWC->pMaskSet,pProbe,iCur,pOrderBy,nEq,&rev) ){
         if( flags==0 ){
           flags = WHERE_COLUMN_RANGE;
         }
@@ -1832,7 +1863,7 @@ WhereInfo *sqlite3WhereBegin(
   ** subexpression is separated by an AND operator.
   */
   initMaskSet(&maskSet);
-  whereClauseInit(&wc, pParse);
+  whereClauseInit(&wc, pParse, &maskSet);
   whereSplit(&wc, pWhere, TK_AND);
     
   /* Allocate and initialize the WhereInfo structure that will become the
@@ -1863,7 +1894,7 @@ WhereInfo *sqlite3WhereBegin(
   for(i=0; i<pTabList->nSrc; i++){
     createMask(&maskSet, pTabList->a[i].iCursor);
   }
-  exprAnalyzeAll(pTabList, &maskSet, &wc);
+  exprAnalyzeAll(pTabList, &wc);
   if( sqlite3MallocFailed() ){
     goto whereBeginNoMem;
   }

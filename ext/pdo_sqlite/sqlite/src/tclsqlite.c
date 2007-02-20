@@ -1055,7 +1055,7 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
       return TCL_ERROR;
     }
     nByte = strlen(zSql);
-    rc = sqlite3_prepare(pDb->db, zSql, 0, &pStmt, 0);
+    rc = sqlite3_prepare(pDb->db, zSql, -1, &pStmt, 0);
     sqlite3_free(zSql);
     if( rc ){
       Tcl_AppendResult(interp, "Error: ", sqlite3_errmsg(pDb->db), 0);
@@ -1081,7 +1081,7 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
     zSql[j++] = ')';
     zSql[j] = 0;
-    rc = sqlite3_prepare(pDb->db, zSql, 0, &pStmt, 0);
+    rc = sqlite3_prepare(pDb->db, zSql, -1, &pStmt, 0);
     free(zSql);
     if( rc ){
       Tcl_AppendResult(interp, "Error: ", sqlite3_errmsg(pDb->db), 0);

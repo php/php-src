@@ -103,6 +103,7 @@ void sqlite3Update(
   AuthContext sContext;  /* The authorization context */
   NameContext sNC;       /* The name-context to resolve expressions in */
   int iDb;               /* Database containing the table being updated */
+  int memCnt = 0;        /* Memory cell used for counting rows changed */
 
 #ifndef SQLITE_OMIT_TRIGGER
   int isView;                  /* Trying to update a view */
@@ -311,7 +312,8 @@ void sqlite3Update(
   /* Initialize the count of updated rows
   */
   if( db->flags & SQLITE_CountRows && !pParse->trigStack ){
-    sqlite3VdbeAddOp(v, OP_Integer, 0, 0);
+    memCnt = pParse->nMem++;
+    sqlite3VdbeAddOp(v, OP_MemInt, 0, memCnt);
   }
 
   if( triggers_exist ){
@@ -469,7 +471,7 @@ void sqlite3Update(
   /* Increment the row counter 
   */
   if( db->flags & SQLITE_CountRows && !pParse->trigStack){
-    sqlite3VdbeAddOp(v, OP_AddImm, 1, 0);
+    sqlite3VdbeAddOp(v, OP_MemIncr, 1, memCnt);
   }
 
   /* If there are triggers, close all the cursors after each iteration
@@ -514,6 +516,7 @@ void sqlite3Update(
   ** invoke the callback function.
   */
   if( db->flags & SQLITE_CountRows && !pParse->trigStack && pParse->nested==0 ){
+    sqlite3VdbeAddOp(v, OP_MemLoad, memCnt, 0);
     sqlite3VdbeAddOp(v, OP_Callback, 1, 0);
     sqlite3VdbeSetNumCols(v, 1);
     sqlite3VdbeSetColName(v, 0, COLNAME_NAME, "rows updated", P3_STATIC);

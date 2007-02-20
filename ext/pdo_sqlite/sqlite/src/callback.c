@@ -195,6 +195,11 @@ static CollSeq *findCollSeqEntry(
 **
 ** If the entry specified is not found and 'create' is true, then create a
 ** new entry.  Otherwise return NULL.
+**
+** A separate function sqlite3LocateCollSeq() is a wrapper around
+** this routine.  sqlite3LocateCollSeq() invokes the collation factory
+** if necessary and generates an error message if the collating sequence
+** cannot be found.
 */
 CollSeq *sqlite3FindCollSeq(
   sqlite3 *db,

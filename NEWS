@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 - Upgraded libraries bundled in the Windows distribution. (Edin)
   . c-client (imap) to version 2006e
   . libpq (PostgreSQL) to version 8.2.3
-- Upgraded SQLite 3 to version 3.3.12 (Ilia)
+- Upgraded SQLite 3 to version 3.3.13 (Ilia)
 - Upgraded PCRE to version 7.0 (Nuno)
 - Added --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)

@@ -106,7 +106,8 @@ void sqlite3DeleteFrom(
   AuthContext sContext;  /* Authorization context */
   int oldIdx = -1;       /* Cursor for the OLD table of AFTER triggers */
   NameContext sNC;       /* Name context to resolve expressions in */
-  int iDb;
+  int iDb;               /* Database number */
+  int memCnt = 0;        /* Memory cell used for change counting */
 
 #ifndef SQLITE_OMIT_TRIGGER
   int isView;                  /* True if attempting to delete from a view */
@@ -204,7 +205,8 @@ void sqlite3DeleteFrom(
   ** we are counting rows.
   */
   if( db->flags & SQLITE_CountRows ){
-    sqlite3VdbeAddOp(v, OP_Integer, 0, 0);
+    memCnt = pParse->nMem++;
+    sqlite3VdbeAddOp(v, OP_MemInt, 0, memCnt);
   }
 
   /* Special case: A DELETE without a WHERE clause deletes everything.
@@ -221,7 +223,7 @@ void sqlite3DeleteFrom(
         sqlite3OpenTable(pParse, iCur, iDb, pTab, OP_OpenRead);
       }
       sqlite3VdbeAddOp(v, OP_Rewind, iCur, sqlite3VdbeCurrentAddr(v)+2);
-      addr2 = sqlite3VdbeAddOp(v, OP_AddImm, 1, 0);
+      addr2 = sqlite3VdbeAddOp(v, OP_MemIncr, 1, memCnt);
       sqlite3VdbeAddOp(v, OP_Next, iCur, addr2);
       sqlite3VdbeResolveLabel(v, endOfLoop);
       sqlite3VdbeAddOp(v, OP_Close, iCur, 0);
@@ -251,7 +253,7 @@ void sqlite3DeleteFrom(
     sqlite3VdbeAddOp(v, IsVirtual(pTab) ? OP_VRowid : OP_Rowid, iCur, 0);
     sqlite3VdbeAddOp(v, OP_FifoWrite, 0, 0);
     if( db->flags & SQLITE_CountRows ){
-      sqlite3VdbeAddOp(v, OP_AddImm, 1, 0);
+      sqlite3VdbeAddOp(v, OP_MemIncr, 1, memCnt);
     }
 
     /* End the database scan loop.
@@ -354,6 +356,7 @@ void sqlite3DeleteFrom(
   ** invoke the callback function.
   */
   if( db->flags & SQLITE_CountRows && pParse->nested==0 && !pParse->trigStack ){
+    sqlite3VdbeAddOp(v, OP_MemLoad, memCnt, 0);
     sqlite3VdbeAddOp(v, OP_Callback, 1, 0);
     sqlite3VdbeSetNumCols(v, 1);
     sqlite3VdbeSetColName(v, 0, COLNAME_NAME, "rows deleted", P3_STATIC);
