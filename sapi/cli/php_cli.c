@@ -698,7 +698,7 @@ int main(int argc, char *argv[])
 #endif
 
 	/* startup after we get the above ini override se we get things right */
-	if (php_module_startup(&cli_sapi_module, NULL, 0)==FAILURE) {
+	if (cli_sapi_module.startup(&cli_sapi_module)==FAILURE) {
 		/* there is no way to see if we must call zend_ini_deactivate()
 		 * since we cannot check if EG(ini_directives) has been initialised
 		 * because the executor's constructor does not set initialize it.
