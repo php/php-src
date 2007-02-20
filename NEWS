@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Added --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
+- Fixed bug #40548 (SplFileInfo::getOwner/getGroup give a warning on broken
+  symlink). (Marcus)
 - Fixed bug #40546 (SplFileInfo::getPathInfo() throws an execption if directory
   is in root dir). (Marcus)
 - Fixed bug #40545 (multithreading issue in zend_strtod()). (Tony)
