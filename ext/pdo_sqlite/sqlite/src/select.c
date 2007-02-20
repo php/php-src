@@ -1950,10 +1950,9 @@ static int multiSelect(
       apColl = pKeyInfo->aColl;
       for(i=0; i<nOrderByExpr; i++, pOTerm++, apColl++, pSortOrder++){
         Expr *pExpr = pOTerm->pExpr;
-        char *zName = pOTerm->zName;
-        assert( pExpr->op==TK_COLUMN && pExpr->iColumn<nCol );
-        if( zName ){
-          *apColl = sqlite3LocateCollSeq(pParse, zName, -1);
+        if( (pExpr->flags & EP_ExpCollate) ){
+          assert( pExpr->pColl!=0 );
+          *apColl = pExpr->pColl;
         }else{
           *apColl = aCopy[pExpr->iColumn];
         }
@@ -2476,8 +2475,14 @@ static int processOrderGroupBy(
     Expr *pE = pOrderBy->a[i].pExpr;
     if( sqlite3ExprIsInteger(pE, &iCol) ){
       if( iCol>0 && iCol<=pEList->nExpr ){
+        CollSeq *pColl = pE->pColl;
+        int flags = pE->flags & EP_ExpCollate;
         sqlite3ExprDelete(pE);
         pE = pOrderBy->a[i].pExpr = sqlite3ExprDup(pEList->a[iCol-1].pExpr);
+        if( pColl && flags ){
+          pE->pColl = pColl;
+          pE->flags |= flags;
+        }
       }else{
         sqlite3ErrorMsg(pParse, 
            "%s BY column number %d out of range - should be "
@@ -2912,23 +2917,15 @@ int sqlite3Select(
   }
 #endif
 
-  /* If there is an ORDER BY clause, resolve any collation sequences
-  ** names that have been explicitly specified and create a sorting index.
-  **
-  ** This sorting index might end up being unused if the data can be 
+  /* If there is an ORDER BY clause, then this sorting
+  ** index might end up being unused if the data can be 
   ** extracted in pre-sorted order.  If that is the case, then the
   ** OP_OpenEphemeral instruction will be changed to an OP_Noop once
   ** we figure out that the sorting index is not needed.  The addrSortIndex
   ** variable is used to facilitate that change.
   */
   if( pOrderBy ){
-    struct ExprList_item *pTerm;
     KeyInfo *pKeyInfo;
-    for(i=0, pTerm=pOrderBy->a; i<pOrderBy->nExpr; i++, pTerm++){
-      if( pTerm->zName ){
-        pTerm->pExpr->pColl = sqlite3LocateCollSeq(pParse, pTerm->zName, -1);
-      }
-    }
     if( pParse->nErr ){
       goto select_end;
     }

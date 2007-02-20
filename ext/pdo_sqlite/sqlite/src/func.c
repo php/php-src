@@ -272,6 +272,25 @@ static void randomFunc(
 }
 
 /*
+** Implementation of randomblob(N).  Return a random blob
+** that is N bytes long.
+*/
+static void randomBlob(
+  sqlite3_context *context,
+  int argc,
+  sqlite3_value **argv
+){
+  int n;
+  unsigned char *p;
+  assert( argc==1 );
+  n = sqlite3_value_int(argv[0]);
+  if( n<1 ) n = 1;
+  p = sqlite3_malloc(n);
+  sqlite3Randomness(n, p);
+  sqlite3_result_blob(context, (char*)p, n, sqlite3_free);
+}
+
+/*
 ** Implementation of the last_insert_rowid() SQL function.  The return
 ** value is the same as the sqlite3_last_insert_rowid() API function.
 */
@@ -547,6 +566,12 @@ static void versionFunc(
   sqlite3_result_text(context, sqlite3_version, -1, SQLITE_STATIC);
 }
 
+/* Array for converting from half-bytes (nybbles) into ASCII hex
+** digits. */
+static const char hexdigits[] = {
+  '0', '1', '2', '3', '4', '5', '6', '7',
+  '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' 
+};
 
 /*
 ** EXPERIMENTAL - This is not an official function.  The interface may
@@ -572,10 +597,6 @@ static void quoteFunc(sqlite3_context *context, int argc, sqlite3_value **argv){
       break;
     }
     case SQLITE_BLOB: {
-      static const char hexdigits[] = { 
-        '0', '1', '2', '3', '4', '5', '6', '7',
-        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' 
-      };
       char *zText = 0;
       int nBlob = sqlite3_value_bytes(argv[0]);
       char const *zBlob = sqlite3_value_blob(argv[0]);
@@ -621,11 +642,41 @@ static void quoteFunc(sqlite3_context *context, int argc, sqlite3_value **argv){
   }
 }
 
+/*
+** The hex() function.  Interpret the argument as a blob.  Return
+** a hexadecimal rendering as text.
+*/
+static void hexFunc(
+  sqlite3_context *context,
+  int argc,
+  sqlite3_value **argv
+){
+  int i, n;
+  const unsigned char *pBlob;
+  char *zHex, *z;
+  assert( argc==1 );
+  pBlob = sqlite3_value_blob(argv[0]);
+  n = sqlite3_value_bytes(argv[0]);
+  z = zHex = sqlite3_malloc(n*2 + 1);
+  if( zHex==0 ) return;
+  for(i=0; i<n; i++, pBlob++){
+    unsigned char c = *pBlob;
+    *(z++) = hexdigits[(c>>4)&0xf];
+    *(z++) = hexdigits[c&0xf];
+  }
+  *z = 0;
+  sqlite3_result_text(context, zHex, n*2, sqlite3_free);
+}
+
 #ifdef SQLITE_SOUNDEX
 /*
 ** Compute the soundex encoding of a word.
 */
-static void soundexFunc(sqlite3_context *context, int argc, sqlite3_value **argv){
+static void soundexFunc(
+  sqlite3_context *context,
+  int argc,
+  sqlite3_value **argv
+){
   char zResult[8];
   const u8 *zIn;
   int i, j;
@@ -1021,8 +1072,10 @@ void sqlite3RegisterBuiltinFunctions(sqlite3 *db){
     { "coalesce",          -1, 0, SQLITE_UTF8,    0, ifnullFunc },
     { "coalesce",           0, 0, SQLITE_UTF8,    0, 0          },
     { "coalesce",           1, 0, SQLITE_UTF8,    0, 0          },
+    { "hex",                1, 0, SQLITE_UTF8,    0, hexFunc    },
     { "ifnull",             2, 0, SQLITE_UTF8,    1, ifnullFunc },
     { "random",            -1, 0, SQLITE_UTF8,    0, randomFunc },
+    { "randomblob",         1, 0, SQLITE_UTF8,    0, randomBlob },
     { "nullif",             2, 0, SQLITE_UTF8,    1, nullifFunc },
     { "sqlite_version",     0, 0, SQLITE_UTF8,    0, versionFunc},
     { "quote",              1, 0, SQLITE_UTF8,    0, quoteFunc  },

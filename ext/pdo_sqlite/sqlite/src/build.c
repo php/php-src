@@ -1222,6 +1222,10 @@ void sqlite3AddCollateType(Parse *pParse, const char *zType, int nType){
 ** If no versions of the requested collations sequence are available, or
 ** another error occurs, NULL is returned and an error message written into
 ** pParse.
+**
+** This routine is a wrapper around sqlite3FindCollSeq().  This routine
+** invokes the collation factory if the named collation cannot be found
+** and generates an error message.
 */
 CollSeq *sqlite3LocateCollSeq(Parse *pParse, const char *zName, int nName){
   sqlite3 *db = pParse->db;
@@ -2457,7 +2461,7 @@ void sqlite3CreateIndex(
     const char *zColName = pListItem->zName;
     Column *pTabCol;
     int requestedSortOrder;
-    char *zColl;                   /* Collation sequence */
+    char *zColl;                   /* Collation sequence name */
 
     for(j=0, pTabCol=pTab->aCol; j<pTab->nCol; j++, pTabCol++){
       if( sqlite3StrICmp(zColName, pTabCol->zName)==0 ) break;
@@ -2467,6 +2471,12 @@ void sqlite3CreateIndex(
         pTab->zName, zColName);
       goto exit_create_index;
     }
+    /* TODO:  Add a test to make sure that the same column is not named
+    ** more than once within the same index.  Only the first instance of
+    ** the column will ever be used by the optimizer.  Note that using the
+    ** same column more than once cannot be an error because that would 
+    ** break backwards compatibility - it needs to be a warning.
+    */
     pIndex->aiColumn[i] = j;
     if( pListItem->pExpr ){
       assert( pListItem->pExpr->pColl );

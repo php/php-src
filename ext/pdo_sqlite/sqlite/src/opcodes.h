@@ -28,9 +28,9 @@
 #define OP_NotNull                             67   /* same as TK_NOTNULL  */
 #define OP_Rowid                               23
 #define OP_Real                               126   /* same as TK_FLOAT    */
-#define OP_String8                             88   /* same as TK_STRING   */
+#define OP_String8                             89   /* same as TK_STRING   */
 #define OP_And                                 62   /* same as TK_AND      */
-#define OP_BitNot                              87   /* same as TK_BITNOT   */
+#define OP_BitNot                              88   /* same as TK_BITNOT   */
 #define OP_VFilter                             24
 #define OP_NullRow                             25
 #define OP_Noop                                26
@@ -84,8 +84,8 @@
 #define OP_Halt                                65
 #define OP_Expire                              74
 #define OP_Or                                  61   /* same as TK_OR       */
-#define OP_DropIndex                           86
-#define OP_IdxInsert                           89
+#define OP_DropIndex                           85
+#define OP_IdxInsert                           87
 #define OP_ShiftLeft                           77   /* same as TK_LSHIFT   */
 #define OP_FifoRead                            90
 #define OP_Column                              91
@@ -117,7 +117,7 @@
 #define OP_VOpen                              114
 #define OP_AggFinal                           115
 #define OP_OpenWrite                          116
-#define OP_Negative                            85   /* same as TK_UMINUS   */
+#define OP_Negative                            86   /* same as TK_UMINUS   */
 #define OP_Le                                  71   /* same as TK_LE       */
 #define OP_VNext                              117
 #define OP_AbsValue                           118
@@ -154,7 +154,7 @@
 #define NOPUSH_MASK_2 0xedaf
 #define NOPUSH_MASK_3 0xf1eb
 #define NOPUSH_MASK_4 0xfffe
-#define NOPUSH_MASK_5 0x62ef
+#define NOPUSH_MASK_5 0x61ef
 #define NOPUSH_MASK_6 0xbfcf
 #define NOPUSH_MASK_7 0x23bf
 #define NOPUSH_MASK_8 0xf87b

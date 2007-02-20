@@ -611,6 +611,46 @@ static void sqlite3ExecFunc(
 }
 
 /*
+** Implementation of tkt2213func(), a scalar function that takes exactly
+** one argument. It has two interesting features:
+**
+** * It calls sqlite3_value_text() 3 times on the argument sqlite3_value*.
+**   If the three pointers returned are not the same an SQL error is raised.
+**
+** * Otherwise it returns a copy of the text representation of it's 
+**   argument in such a way as the VDBE representation is a Mem* cell 
+**   with the MEM_Term flag clear. 
+**
+** Ticket #2213 can therefore be tested by evaluating the following
+** SQL expression:
+**
+**   tkt2213func(tkt2213func('a string'));
+*/
+static void tkt2213Function(
+  sqlite3_context *context, 
+  int argc,  
+  sqlite3_value **argv
+){
+  int nText;
+  unsigned char const *zText1;
+  unsigned char const *zText2;
+  unsigned char const *zText3;
+
+  nText = sqlite3_value_bytes(argv[0]);
+  zText1 = sqlite3_value_text(argv[0]);
+  zText2 = sqlite3_value_text(argv[0]);
+  zText3 = sqlite3_value_text(argv[0]);
+
+  if( zText1!=zText2 || zText2!=zText3 ){
+    sqlite3_result_error(context, "tkt2213 is not fixed", -1);
+  }else{
+    char *zCopy = (char *)sqlite3_malloc(nText);
+    memcpy(zCopy, zText1, nText);
+    sqlite3_result_text(context, zCopy, nText, sqlite3_free);
+  }
+}
+
+/*
 ** Usage:  sqlite_test_create_function DB
 **
 ** Call the sqlite3_create_function API on the given database in order
@@ -650,6 +690,10 @@ static int test_create_function(
   if( rc==SQLITE_OK ){
     rc = sqlite3_create_function(db, "hex16", 1, SQLITE_ANY, 0, 
           hex16Func, 0, 0);
+  }
+  if( rc==SQLITE_OK ){
+    rc = sqlite3_create_function(db, "tkt2213func", 1, SQLITE_ANY, 0, 
+          tkt2213Function, 0, 0);
   }
 
 #ifndef SQLITE_OMIT_UTF16

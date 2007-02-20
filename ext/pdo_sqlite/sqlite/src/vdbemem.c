@@ -137,6 +137,7 @@ int sqlite3VdbeMemNulTerminate(Mem *pMem){
     }
     pMem->xDel = 0;
     pMem->z = z;
+    pMem->flags |= MEM_Term;
   }
   return SQLITE_OK;
 }
