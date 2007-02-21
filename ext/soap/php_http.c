@@ -480,7 +480,7 @@ try_again:
 					if (zend_hash_find(Z_ARRVAL_PP(digest), "nc", sizeof("nc"), (void **)&tmp) == SUCCESS &&
 					    Z_TYPE_PP(tmp) == IS_LONG) {
 						Z_LVAL_PP(tmp)++;
-						sprintf(nc, "%08ld", Z_LVAL_PP(tmp));
+						snprintf(nc, sizeof(nc), "%08ld", Z_LVAL_PP(tmp));
 					} else {
 						add_assoc_long(*digest, "nc", 1);
 						strcpy(nc, "00000001");
