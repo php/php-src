@@ -549,13 +549,16 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		char *ptr, *path_copy, *free_path;
 		char *tok;
 		int ptr_length;
-
+#ifdef TSRM_WIN32
+		int is_unc;
+#endif
 no_realpath:
 
 		free_path = path_copy = tsrm_strndup(path, path_length);
 		CWD_STATE_COPY(&old_state, state);
 
-#ifdef TSRM_WIN32		
+#ifdef TSRM_WIN32
+		is_unc = 0;
 		if (path_length >= 2 && path[1] == ':') {			
 			state->cwd = (char *) realloc(state->cwd, 2 + 1);
 			state->cwd[0] = toupper(path[0]);
@@ -569,6 +572,7 @@ no_realpath:
 			state->cwd[1] = '\0';
 			state->cwd_length = 1;
 			path_copy += 2;
+			is_unc = 2;
 		} else {
 #endif
 			state->cwd = (char *) realloc(state->cwd, 1);
@@ -650,7 +654,13 @@ no_realpath:
 						FindClose(hFind);
 						ret = 0;
 					} else if (use_realpath == CWD_REALPATH) {
-						ret = 1;
+						if (is_unc) {
+							/* skip share name */
+							is_unc--;
+							ret = 0;
+						} else {
+							ret = 1;
+						}
 					}
 				}
 #endif
