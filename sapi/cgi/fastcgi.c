@@ -757,18 +757,23 @@ int fcgi_accept_request(fcgi_request *req)
 				break;
 #else
 				if (req->fd >= 0) {
-					struct timeval tv = {5,0};
-					fd_set set;
+					if (req->fd < FD_SETSIZE) {
+						struct timeval tv = {5,0};
+						fd_set set;
 
-					FD_ZERO(&set);
-					FD_SET(req->fd, &set);
+						FD_ZERO(&set);
+						FD_SET(req->fd, &set);
 try_again:
-					errno = 0;
-					if (select(req->fd + 1, &set, NULL, NULL, &tv) >= 0 && FD_ISSET(req->fd, &set)) {
-						break;
+						errno = 0;
+						if (select(req->fd + 1, &set, NULL, NULL, &tv) >= 0 && FD_ISSET(req->fd, &set)) {
+							break;
+						}
+						if (errno == EINTR) goto try_again;
+						fcgi_close(req, 1, 0);
+					} else {
+						fprintf(stderr, "Too many open file descriptors. FD_SETSIZE limit exceeded.");
+						fcgi_close(req, 1, 0);
 					}
-					if (errno == EINTR) goto try_again;
-					fcgi_close(req, 1, 0);
 				}
 #endif
 			}
