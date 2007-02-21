@@ -54,12 +54,13 @@ debug_zval_dump(feof($fp));
 rewind($fp);
 echo ftell($fp) . "\n";
 debug_zval_dump(feof($fp));
-while (!feof($fp)) {
+while ($fp && !feof($fp)) {
     echo fgets($fp);
 }
 fclose($fp);
 
 unlink($tn);
+?>
 --EXPECT--
 bool(false) refcount(1)
 0
