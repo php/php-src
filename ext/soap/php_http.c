@@ -474,7 +474,7 @@ try_again:
 					make_digest(cnonce, hash);
 
 					client->digest_nc++;
-					sprintf(nc, "%08ld", client->digest_nc);
+					snprintf(nc, sizeof(nc), "%08ld", client->digest_nc);
 
 					PHP_MD5Init(&md5ctx);
 					PHP_MD5Update(&md5ctx, (unsigned char*)client->login, strlen(client->login));
