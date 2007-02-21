@@ -1138,7 +1138,7 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 				}
 
 				replaced[len++] = '&';
-				strcpy(replaced + len, rep);
+				strlcpy(replaced + len, rep, maxlen);
 				len += l;
 				replaced[len++] = ';';
 			}
