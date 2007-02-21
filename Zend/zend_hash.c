@@ -1025,7 +1025,9 @@ ZEND_API int zend_hash_get_pointer(HashTable *ht, HashPointer *ptr)
 
 ZEND_API int zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr)
 {
-	if (ht->pInternalPointer != ptr->pos) {
+	if (ptr->pos == NULL) {
+		ht->pInternalPointer = NULL;
+	} else if (ht->pInternalPointer != ptr->pos) {
 		Bucket *p;
 
 		IS_CONSISTENT(ht);
