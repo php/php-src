@@ -3,14 +3,14 @@ proc_open
 --SKIPIF--
 <?php
 if (!is_executable('/bin/sleep')) echo 'skip no sleep';
-if (!is_executable('/bin/nohup')) echo 'skip no nohup';
+if (!is_executable('/usr/bin/nohup')) echo 'skip no nohup';
 ?>
 --FILE--
 <?php
 $ds = array(array('pipe', 'r'));
 
 $cat = proc_open(
-	'/bin/nohup /bin/sleep 50',
+	'/usr/bin/nohup /bin/sleep 50',
 	$ds,
 	$pipes
 );
@@ -32,7 +32,7 @@ echo "Done!\n";
 bool(true)
 array(8) {
   ["command"]=>
-  string(24) "/bin/nohup /bin/sleep 50"
+  string(28) "/usr/bin/nohup /bin/sleep 50"
   ["pid"]=>
   int(%d)
   ["running"]=>
@@ -51,7 +51,7 @@ array(8) {
 bool(true)
 array(8) {
   ["command"]=>
-  string(24) "/bin/nohup /bin/sleep 50"
+  string(28) "/usr/bin/nohup /bin/sleep 50"
   ["pid"]=>
   int(%d)
   ["running"]=>
