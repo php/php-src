@@ -910,19 +910,20 @@ try_again:
 				efree(http_body);
 				efree(loc);
 				if (new_url->scheme == NULL && new_url->path != NULL) {
-					new_url->scheme = estrdup(phpurl->scheme);
-					new_url->host = estrdup(phpurl->host);
+					new_url->scheme = NULL;
+					new_url->host = phpurl->host ? estrdup(phpurl->host) : NULL;
 					new_url->port = phpurl->port;
 					if (new_url->path && new_url->path[0] != '/') {
-						char *t = phpurl->path?phpurl->path:"/";
+						char *t = phpurl->path;
 						char *p = strrchr(t, '/');
-						char *s = emalloc((p - t) + strlen(new_url->path) + 2);
-
-						strncpy(s, t, (p - t) + 1);
-						s[(p - t) + 1] = 0;
-						strcat(s, new_url->path);
-						efree(new_url->path);
-						new_url->path = s;
+						if (p) {
+							char *s = emalloc((p - t) + strlen(new_url->path) + 2);
+							strncpy(s, t, (p - t) + 1);
+							s[(p - t) + 1] = 0;
+							strcat(s, new_url->path);
+							efree(new_url->path);
+							new_url->path = s;
+						}
 					}
 				}
 				phpurl = new_url;
