@@ -45,7 +45,7 @@ PHPAPI OLECHAR *php_com_string_to_olestring(char *string, uint string_len, int c
 	}
 
 	if (string_len > 0) {
-		olestring = (OLECHAR*)safe_emalloc(sizeof(OLECHAR), string_len, 0);
+		olestring = (OLECHAR*)safe_emalloc(string_len, sizeof(OLECHAR), 0);
 		ok = MultiByteToWideChar(codepage, flags, string, string_len, olestring, string_len);
 	} else {
 		ok = FALSE;
@@ -75,7 +75,7 @@ PHPAPI char *php_com_olestring_to_string(OLECHAR *olestring, uint *string_len, i
 	length = WideCharToMultiByte(codepage, 0, olestring, -1, NULL, 0, NULL, NULL);
 
 	if (length) {
-		string = (char*)safe_emalloc(sizeof(char), length, 0);
+		string = (char*)safe_emalloc(length, sizeof(char), 0);
 		length = WideCharToMultiByte(codepage, 0, olestring, -1, string, length, NULL, NULL);
 		ok = length > 0;
 	} else {
