@@ -188,6 +188,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	int assembly_name_len, datatype_name_len;
 	struct dotnet_runtime_stuff *stuff;
 	OLECHAR *oleassembly, *oletype;
+	BSTR oleassembly_sys, oletype_sys;
 	HRESULT hr;
 	int ret = FAILURE;
 	char *where = "";
@@ -223,10 +224,14 @@ PHP_FUNCTION(com_dotnet_create_instance)
 
 	oletype = php_com_string_to_olestring(datatype_name, datatype_name_len, obj->code_page TSRMLS_CC);
 	oleassembly = php_com_string_to_olestring(assembly_name, assembly_name_len, obj->code_page TSRMLS_CC);
+	oletype_sys = SysAllocString(oletype);
+	oleassembly_sys = SysAllocString(oleassembly);
 	where = "CreateInstance";
-	hr = stuff->dotnet_domain->lpVtbl->CreateInstance(stuff->dotnet_domain, oleassembly, oletype, &unk);
+	hr = stuff->dotnet_domain->lpVtbl->CreateInstance(stuff->dotnet_domain, oleassembly_sys, oletype_sys, &unk);
 	efree(oletype);
 	efree(oleassembly);
+	SysFreeString(oletype_sys);
+	SysFreeString(oleassembly_sys);
 
 	if (SUCCEEDED(hr)) {
 		VARIANT unwrapped;
