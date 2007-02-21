@@ -29,7 +29,7 @@ string(125) "<?xml version="1.0" encoding="utf-8"?>
 </param>
 </params>
 "
-string(128) "<?xml version="1.0" encoding="utf-8"?>
+string(119) "<?xml version="1.0" encoding="utf-8"?>
 <params>
 <param>
  <value>
