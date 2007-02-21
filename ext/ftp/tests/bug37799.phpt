@@ -2,6 +2,7 @@
 Bug #37799: ftp_ssl_connect() falls back to non-ssl connection
 --SKIPIF--
 <?php
+$ssl = 1;
 require 'skipif.inc';
 ?>
 --FILE--
