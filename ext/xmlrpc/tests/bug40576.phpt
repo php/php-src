@@ -1,5 +1,10 @@
 --TEST--
 Bug #40576 (double values are truncated to 6 decimal digits when encoding)
+--SKIPIF--
+<?php
+if (!extension_loaded("xmlrpc")) print "skip";
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
 --INI--
 precision=12
 --FILE--
