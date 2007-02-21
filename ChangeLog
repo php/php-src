@@ -1,3 +1,98 @@
+2007-02-20  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/com_dotnet/com_dotnet.c:
+      fix unallocated free
+
+2007-02-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      acinclude.m4
+      configure.in
+      sapi/cgi/config9.m4:
+      MFH: move PHP_TEST_WRITE_STDOUT to acinclude.m4 and use it in configure.in
+
+    * acinclude.m4
+      configure.in
+      sapi/cgi/config9.m4:
+      move PHP_TEST_WRITE_STDOUT to acinclude.m4 and use it in configure.in
+      its result is used in sapi/cli & sapi/embed, not just sapi/cgi
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      don't call php_module_startup() directly, use startup functions
+      patch by Andrei Nigmatulin
+
+    * ext/simplexml/tests/bug38406.phpt
+      ext/simplexml/tests/bug38406.phpt:
+      
+      new test
+
+    * ext/simplexml/simplexml.c:
+      fix leak, convert unicode values to string before assigning
+      change error message to use zend_error() since there is no active function
+
+    * (PHP_5_2)
+      NEWS
+      ext/simplexml/simplexml.c:
+      MFH: fix #38406 (crash when assigning objects to SimpleXML attributes)
+
+    * ext/simplexml/simplexml.c:
+      fix #38406 (crash when assigning objects to SimpleXML attributes)
+
+2007-02-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.c:
+      - Make stat based functions throw an exception
+
+2007-02-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_strtod.c:
+      MFH: fix #40545 (multithreading issue in zend_strtod())
+
+    * ZendEngine2/zend_strtod.c:
+      fix #40545 (multithreading issue in zend_strtod())
+
+    * sapi/cgi/cgi_main.c:
+      MFB
+
+2007-02-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_sqlite/sqlite/VERSION
+      ext/pdo_sqlite/sqlite/src/btree.c
+      ext/pdo_sqlite/sqlite/src/build.c
+      ext/pdo_sqlite/sqlite/src/callback.c
+      ext/pdo_sqlite/sqlite/src/delete.c
+      ext/pdo_sqlite/sqlite/src/expr.c
+      ext/pdo_sqlite/sqlite/src/func.c
+      ext/pdo_sqlite/sqlite/src/opcodes.h
+      ext/pdo_sqlite/sqlite/src/os_unix.c
+      ext/pdo_sqlite/sqlite/src/parse.c
+      ext/pdo_sqlite/sqlite/src/parse.h
+      ext/pdo_sqlite/sqlite/src/parse.y
+      ext/pdo_sqlite/sqlite/src/select.c
+      ext/pdo_sqlite/sqlite/src/sqliteInt.h
+      ext/pdo_sqlite/sqlite/src/tclsqlite.c
+      ext/pdo_sqlite/sqlite/src/test1.c
+      ext/pdo_sqlite/sqlite/src/test3.c
+      ext/pdo_sqlite/sqlite/src/update.c
+      ext/pdo_sqlite/sqlite/src/vdbemem.c
+      ext/pdo_sqlite/sqlite/src/where.c:
+      
+      Upgraded SQLite 3 library to version 3.3.13
+
 2007-02-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

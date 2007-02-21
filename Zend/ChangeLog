@@ -1,3 +1,12 @@
+2007-02-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_strtod.c:
+      MFH: fix #40545 (multithreading issue in zend_strtod())
+
+    * zend_strtod.c:
+      fix #40545 (multithreading issue in zend_strtod())
+
 2007-02-19  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
