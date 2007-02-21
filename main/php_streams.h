@@ -186,6 +186,8 @@ struct _php_stream_wrapper	{
  * might otherwise cause the read to block for much longer than
  * is strictly required. */
 #define PHP_STREAM_FLAG_AVOID_BLOCKING				16
+
+#define PHP_STREAM_FLAG_NO_CLOSE					32
 	
 struct _php_stream  {
 	php_stream_ops *ops;
