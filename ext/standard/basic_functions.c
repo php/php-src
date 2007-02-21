@@ -3851,6 +3851,10 @@ static void php_putenv_destructor(putenv_entry *pe)
 # if HAVE_UNSETENV
 		unsetenv(pe->key);
 # elif defined(PHP_WIN32)
+		char *del_string = emalloc(pe->key_len+2);
+		snprintf(del_string, pe->key_len+2, "%s=", pe->key);
+		putenv(del_string);
+		efree(del_string);
 		SetEnvironmentVariable(pe->key, NULL);
 # else
 		char **env;
