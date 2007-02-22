@@ -4446,7 +4446,7 @@ PHP_FUNCTION(putenv)
 			if (!strncmp(*env, pe.key, pe.key_len) && (*env)[pe.key_len] == '=') {	/* found it */
 #if defined(PHP_WIN32)
 				/* must copy previous value because MSVCRT's putenv can free the string without notice */
-				pe.previous_value = estrndup(*env, 1024);
+				pe.previous_value = estrdup(*env);
 #else
 				pe.previous_value = *env;
 #endif
