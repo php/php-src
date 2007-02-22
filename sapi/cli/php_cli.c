@@ -476,12 +476,6 @@ static void cli_register_file_handles(TSRMLS_D)
 	s_out = php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, sc_out);
 	s_err = php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, sc_err);
 
-#if PHP_DEBUG
-	/* do not close stdout and stderr */
-	s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-	s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-#endif
-
 	if (s_in==NULL || s_out==NULL || s_err==NULL) {
 		FREE_ZVAL(zin);
 		FREE_ZVAL(zout);
@@ -491,7 +485,13 @@ static void cli_register_file_handles(TSRMLS_D)
 		if (s_err) php_stream_close(s_err);
 		return;
 	}
-	
+
+#if PHP_DEBUG
+	/* do not close stdout and stderr */
+	s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+	s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+#endif
+
 	s_in_process = s_in;
 
 	php_stream_to_zval(s_in,  zin);
