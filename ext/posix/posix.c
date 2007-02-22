@@ -885,6 +885,10 @@ PHP_FUNCTION(posix_getgrgid)
 #if defined(ZTS) && defined(HAVE_GETGRGID_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	
 	grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+	if (grbuflen < 1) {
+		RETURN_FALSE;
+	}
+	
 	grbuf = emalloc(grbuflen);
 
 	ret = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
