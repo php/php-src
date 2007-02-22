@@ -1,3 +1,149 @@
+2007-02-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/file/bug27508.phpt:
+      minor improvements
+
+    * (PHP_5_2)
+      main/php_streams.h
+      main/streams/plain_wrapper.c
+      main/streams/streams.c
+      sapi/cli/php_cli.c:
+      MFH: implement PHP_STREAM_FLAG_NO_CLOSE and avoid hacks
+
+    * main/php_streams.h
+      main/streams/plain_wrapper.c
+      main/streams/streams.c
+      sapi/cli/php_cli.c:
+      implement PHP_STREAM_FLAG_NO_CLOSE and avoid hacks in plain wrapper
+
+2007-02-21  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/soap/php_http.c
+      ext/soap/php_http.c:
+      use snprintf
+
+2007-02-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/file/get_current_user.phpt:
+      fix test on FreeBSD
+
+    * ext/iconv/tests/bug37176.phpt
+      ext/iconv/tests/bug37773.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      ext/iconv/tests/bug37176.phpt
+      ext/iconv/tests/bug37773.phpt:
+      fix tests on AIX
+
+    * ext/xmlrpc/tests/bug40576_64bit.phpt:
+      add test
+
+    * (PHP_5_2)
+      ext/xmlrpc/tests/bug40576_64bit.phpt:
+      wrong string len
+
+    * ext/xmlrpc/tests/bug40576_64bit.phpt
+      ext/xmlrpc/tests/bug40576_64bit.phpt:
+      
+      file bug40576_64bit.phpt was initially added on branch PHP_5_2.
+
+    * ext/ftp/tests/bug37799.phpt
+      ext/ftp/tests/bug37799.phpt
+      ext/standard/tests/file/get_current_user.phpt
+      ext/xmlrpc/tests/bug40576.phpt
+      ext/xmlrpc/tests/bug40576.phpt:
+      fix test
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdft.c:
+      MFH: fix #40578 (imagettftext() multithreading issue)
+
+2007-02-21  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/tests/general_functions/proc_open02.phpt:
+      MFB
+
+    * (PHP_5_2)
+      ext/standard/tests/general_functions/proc_open02.phpt:
+      use /usr/bin/nohup instead
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/sqlite/src/parse.c:
+      fix gcov build (#line stuff)
+
+2007-02-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Check for FD_SETSIZE limit
+
+2007-02-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/gd/libgd/gdft.c:
+      fix #40578 (imagettftext() multithreading issue)
+
+    * (PHP_5_2)
+      NEWS
+      ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.c
+      ext/xmlrpc/tests/bug40576.phpt:
+      MFH: fix #40576 (double values are truncated to 6 decimal digits when
+      encoding)
+
+    * ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.c
+      ext/xmlrpc/tests/bug40576.phpt
+      ext/xmlrpc/tests/bug40576.phpt:
+      fix bug #40576 (double values are truncated to 6 decimal digits when
+      encoding)
+
+2007-02-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.c:
+      Special case for last iteration
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed bug #40560 (DIR functions do not work on root UNC path)
+
+2007-02-21  Antony Dovgal  <antony@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+      fix typo
+
+2007-02-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/soap/php_http.c:
+      
+      Improve redirect validation
+
+    * (PHP_5_2)
+      ext/standard/html.c:
+      Use strlcpy() rather then strcpy()
+
+2007-02-21  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      fix putenv - if there was no previous, remove variable from environ
+
+    * ext/com_dotnet/com_olechar.c
+      ext/com_dotnet/com_olechar.c:
+      Cosmetic fix - safe_emalloc(nmemb, size, offset)
+
+    * ext/com_dotnet/com_dotnet.c:
+      MF5.2: CreateInstance requires BSTR (should fix #33188)
+
+    * (PHP_5_2)
+      ext/com_dotnet/com_dotnet.c:
+      CreateInstance requires BSTR (should fix #33188)
+
 2007-02-20  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)
