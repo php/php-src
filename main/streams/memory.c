@@ -260,14 +260,14 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 					if (newsize <= ms->fsize) {
 						if (newsize < ms->fpos) {
 							ms->fpos = newsize;
-						} else {
-							ms->data = erealloc(ms->data, newsize);
-							memset(ms->data+ms->fsize, 0, newsize - ms->fsize);
-							ms->fsize = newsize;
 						}
+					} else {
+						ms->data = erealloc(ms->data, newsize);
+						memset(ms->data+ms->fsize, 0, newsize - ms->fsize);
 						ms->fsize = newsize;
-						return PHP_STREAM_OPTION_RETURN_OK;
 					}
+					ms->fsize = newsize;
+					return PHP_STREAM_OPTION_RETURN_OK;
 			}
 		default:
 			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
