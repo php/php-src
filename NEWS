@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Feb 2007, Version 4.4.6
+
 22 Feb 2007, Version 4.4.6RC1
+
 - Updated PCRE to version 7.0. (Nuno)
 - Fixed segfault in ext/session when register_globals=On. (Tony)
 - Fixed bug #40578 (imagettftext() multithreading issue). (Tony)
