@@ -203,7 +203,7 @@ char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen
 							maxl+=l;
 							out=realloc(out,maxl);
 							outp=out+*newlen;
-							strcpy(outp,p);
+							strlcpy(outp,p,maxl);
 							outp+=l;
 							*newlen+=l;
 							efree(p);
