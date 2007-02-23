@@ -246,6 +246,7 @@ static void php_libxml_node_free_list(xmlNodePtr node TSRMLS_DC)
 				case XML_ENTITY_DECL:
 				case XML_ATTRIBUTE_NODE:
 				case XML_NAMESPACE_DECL:
+				case XML_TEXT_NODE:
 					php_libxml_node_free_list(node->children TSRMLS_CC);
 					break;
 				default:
@@ -1000,6 +1001,7 @@ void php_libxml_node_free_resource(xmlNodePtr node TSRMLS_DC)
 					case XML_ENTITY_DECL:
 					case XML_ATTRIBUTE_NODE:
 					case XML_NAMESPACE_DECL:
+					case XML_TEXT_NODE:
 						break;
 					default:
 						php_libxml_node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
