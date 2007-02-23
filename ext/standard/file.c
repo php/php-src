@@ -1488,7 +1488,7 @@ PHP_FUNCTION(umask)
 
 	oldumask = umask(077);
 
-	if (BG(umask) != -1) {
+	if (BG(umask) == -1) {
 		BG(umask) = oldumask;
 	}
 
