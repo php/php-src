@@ -333,8 +333,15 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 			return 0;
 		}
 		ret = read(data->fd, buf, count);
-		
-		stream->eof = (ret == 0 || (ret == (size_t)-1 && errno != EWOULDBLOCK));
+
+		if (ret == (size_t)-1 && errno == EINTR) {
+			/* Read was interrupted, retry once,
+			   If read still fails, giveup with feof==0
+			   so script can retry if desired */
+			ret = read(data->fd, buf, count);
+		}
+
+		stream->eof = (ret == 0 || (ret == (size_t)-1 && errno != EWOULDBLOCK && errno != EINTR));
 				
 	} else {
 #if HAVE_FLUSHIO
