@@ -75,7 +75,7 @@ static xml_element_attr* new_attr(const char* key, const char* val) {
 }
 
 struct array_info {
-	char          kids_type[30];
+	char          kids_type[128];
 	unsigned long size;
 	/* ... ? */
 };
