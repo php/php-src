@@ -246,6 +246,7 @@ static void php_libxml_node_free_list(xmlNodePtr node TSRMLS_DC)
 				case XML_ENTITY_DECL:
 				case XML_ATTRIBUTE_NODE:
 				case XML_NAMESPACE_DECL:
+				case XML_TEXT_NODE:
 					php_libxml_node_free_list(node->children TSRMLS_CC);
 					break;
 				default:
@@ -688,7 +689,7 @@ static PHP_MINFO_FUNCTION(libxml)
 }
 /* }}} */
 
-/* {{{ proto void libxml_set_streams_context(resource streams_context) 
+/* {{{ proto void libxml_set_streams_context(resource streams_context) U
    Set the streams context for the next libxml document load or write */
 static PHP_FUNCTION(libxml_set_streams_context)
 {
@@ -706,7 +707,7 @@ static PHP_FUNCTION(libxml_set_streams_context)
 }
 /* }}} */
 
-/* {{{ proto void libxml_use_internal_errors([boolean use_errors]) 
+/* {{{ proto void libxml_use_internal_errors([boolean use_errors]) U
    Disable libxml errors and allow user to fetch error information as needed */
 static PHP_FUNCTION(libxml_use_internal_errors)
 {
@@ -746,7 +747,7 @@ static PHP_FUNCTION(libxml_use_internal_errors)
 }
 /* }}} */
 
-/* {{{ proto object libxml_get_last_error() 
+/* {{{ proto object libxml_get_last_error()
    Retrieve last error from libxml */
 static PHP_FUNCTION(libxml_get_last_error)
 {
@@ -818,7 +819,7 @@ static PHP_FUNCTION(libxml_get_errors)
 }
 /* }}} */
 
-/* {{{ proto void libxml_clear_errors() 
+/* {{{ proto void libxml_clear_errors() U
     Clear last error from libxml */
 static PHP_FUNCTION(libxml_clear_errors)
 {
@@ -1017,6 +1018,7 @@ void php_libxml_node_free_resource(xmlNodePtr node TSRMLS_DC)
 					case XML_ENTITY_DECL:
 					case XML_ATTRIBUTE_NODE:
 					case XML_NAMESPACE_DECL:
+					case XML_TEXT_NODE:
 						break;
 					default:
 						php_libxml_node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
