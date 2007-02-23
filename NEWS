@@ -2,6 +2,8 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2007, Version 4.4.6
 
+- Fixed bug #40611 (possible cURL memory error). (Tony)
+
 22 Feb 2007, Version 4.4.6RC1
 
 - Updated PCRE to version 7.0. (Nuno)
