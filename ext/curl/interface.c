@@ -715,7 +715,9 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 		case PHP_CURL_FILE:
 			return fwrite(data, size, nmemb, t->fp);
 		case PHP_CURL_RETURN:
-			smart_str_appendl(&t->buf, data, (int) length);
+			if (length > 0) {
+				smart_str_appendl(&t->buf, data, (int) length);
+			}
 			break;
 		case PHP_CURL_USER: {
 			zval **argv[2];
@@ -854,7 +856,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 		case PHP_CURL_STDOUT:
 			/* Handle special case write when we're returning the entire transfer
 			 */
-			if (ch->handlers->write->method == PHP_CURL_RETURN) {
+			if (ch->handlers->write->method == PHP_CURL_RETURN && length > 0) {
 				smart_str_appendl(&ch->handlers->write->buf, data, (int) length);
 			} else {
 				PHPWRITE(data, length);
