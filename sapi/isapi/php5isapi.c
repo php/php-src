@@ -391,7 +391,7 @@ static void sapi_isapi_register_zeus_ssl_variables(LPEXTENSION_CONTROL_BLOCK lpE
 	if( lpECB->GetServerVariable( lpECB->ConnID, "SSL_CLIENT_C", static_variable_buf, &variable_len ) && static_variable_buf[0] ) {
 		strlcat( static_cons_buf, static_variable_buf,  ISAPI_SERVER_VAR_BUF_SIZE);
 	}
-	strcat( static_cons_buf, "/ST=" );
+	strlcat( static_cons_buf, "/ST=",  ISAPI_SERVER_VAR_BUF_SIZE);
 	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 	if( lpECB->GetServerVariable( lpECB->ConnID, "SSL_CLIENT_ST", static_variable_buf, &variable_len ) && static_variable_buf[0] ) {
 		strlcat( static_cons_buf, static_variable_buf, ISAPI_SERVER_VAR_BUF_SIZE );
@@ -403,7 +403,7 @@ static void sapi_isapi_register_zeus_ssl_variables(LPEXTENSION_CONTROL_BLOCK lpE
 	if( lpECB->GetServerVariable( lpECB->ConnID, "SSL_CLIENT_I_C", static_variable_buf, &variable_len ) && static_variable_buf[0] ) {
 		strlcat( static_cons_buf, static_variable_buf, ISAPI_SERVER_VAR_BUF_SIZE );
 	}
-	strcat( static_cons_buf, "/ST=" );
+	strlcat( static_cons_buf, "/ST=", ISAPI_SERVER_VAR_BUF_SIZE);
 	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 	if( lpECB->GetServerVariable( lpECB->ConnID, "SSL_CLIENT_I_ST", static_variable_buf, &variable_len ) && static_variable_buf[0] ) {
 		strlcat( static_cons_buf, static_variable_buf, ISAPI_SERVER_VAR_BUF_SIZE );
