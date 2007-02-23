@@ -1,3 +1,70 @@
+2007-02-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/posix/posix.c:
+      MFH: check for buflen (on FreeBSD _SC_GETGR_R_SIZE_MAX is not implemented)
+      patch by stas at FreeBSD dot org
+
+    * ext/posix/posix.c:
+      check for buflen (on FreeBSD _SC_GETGR_R_SIZE_MAX is not implemented)
+      patch by stas at FreeBSD dot org
+
+2007-02-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams/memory.c:
+      - Fix logic
+
+2007-02-22  Edin Kadribasic  <edin@krug.dk>
+
+    * (PHP_4_4)
+      ext/imap/imap.dsp:
+      fix build
+
+2007-02-22  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to -dev.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with RC1.
+
+2007-02-22  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/tests/general_functions/proc_open02.phpt:
+      MFB
+
+    * (PHP_5_2)
+      ext/standard/tests/general_functions/proc_open02.phpt:
+      fix test on ultra-fast-machines and/or SOs with long time slices
+
+2007-02-22  Antony Dovgal  <antony@zend.com>
+
+    * sapi/cli/php_cli.c:
+      check for NULL, then add flag
+
+2007-02-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      Fixed possible crash in putenv() on win32
+
+2007-02-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/url_scanner.c:
+      One more strcpy. (Thanks Stas)
+
+    * (PHP_5_2)
+      ext/standard/url_scanner.c:
+      
+      strcpy() elimination
+
 2007-02-21  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/tests/file/bug27508.phpt:
