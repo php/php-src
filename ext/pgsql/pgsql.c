@@ -3303,7 +3303,6 @@ PHP_FUNCTION(pg_copy_to)
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL;
 	int table_name_len, pg_delim_len, pg_null_as_len;
 	char *query;
-	char *query_template = "COPY \"\" TO STDOUT DELIMITERS ':' WITH NULL AS ''";
 	int id = -1;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
@@ -3331,9 +3330,7 @@ PHP_FUNCTION(pg_copy_to)
 		pg_null_as = safe_estrdup("\\\\N");
 	}
 
-	query = (char *)emalloc(strlen(query_template) + strlen(table_name) + strlen(pg_null_as) + 1);
-	sprintf(query, "COPY \"%s\" TO STDOUT DELIMITERS '%c' WITH NULL AS '%s'",
-			table_name, *pg_delim, pg_null_as);
+	spprintf(&query, 0, "COPY \"%s\" TO STDOUT DELIMITERS '%c' WITH NULL AS '%s'", table_name, *pg_delim, pg_null_as);
 
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
@@ -3441,7 +3438,6 @@ PHP_FUNCTION(pg_copy_from)
 	int  table_name_len, pg_delim_len, pg_null_as_len;
 	int  pg_null_as_free = 0;
 	char *query;
-	char *query_template = "COPY \"\" FROM STDIN DELIMITERS ':' WITH NULL AS ''";
 	HashPosition pos;
 	int id = -1;
 	PGconn *pgsql;
@@ -3464,9 +3460,7 @@ PHP_FUNCTION(pg_copy_from)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	query = (char *)emalloc(strlen(query_template) + strlen(table_name) + strlen(pg_null_as) + 1);
-	sprintf(query, "COPY \"%s\" FROM STDIN DELIMITERS '%c' WITH NULL AS '%s'",
-			table_name, *pg_delim, pg_null_as);
+	spprintf(&query, 0, "COPY \"%s\" FROM STDIN DELIMITERS '%c' WITH NULL AS '%s'", table_name, *pg_delim, pg_null_as);
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 	}
