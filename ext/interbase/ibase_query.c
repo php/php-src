@@ -603,9 +603,8 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 					break;
 				default:
 					convert_to_string(val);
-					strncpy(buf, Z_STRVAL_P(val), array->el_size);
-					buf[array->el_size-1] = '\0';
-			}	
+					strlcpy(buf, Z_STRVAL_P(val), buf_size);
+			}
 		}
 	}
 	return SUCCESS;
