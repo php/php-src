@@ -207,20 +207,20 @@ PHP_MINFO_FUNCTION(apache)
 	} 
 
 #ifdef APACHE_RELEASE
-	sprintf(output_buf, "%d", APACHE_RELEASE);
+	snprintf(output_buf, sizeof(output_buf), "%d", APACHE_RELEASE);
 	php_info_print_table_row(2, "Apache Release", output_buf);
 #endif
-	sprintf(output_buf, "%d", MODULE_MAGIC_NUMBER);
+	snprintf(output_buf, sizeof(output_buf), "%d", MODULE_MAGIC_NUMBER);
 	php_info_print_table_row(2, "Apache API Version", output_buf);
 	snprintf(output_buf, sizeof(output_buf), "%s:%u", serv->server_hostname, serv->port);
 	php_info_print_table_row(2, "Hostname:Port", output_buf);
 #if !defined(WIN32) && !defined(WINNT)
 	snprintf(output_buf, sizeof(output_buf), "%s(%d)/%d", user_name, (int)user_id, (int)group_id);
 	php_info_print_table_row(2, "User/Group", output_buf);
-	sprintf(output_buf, "Per Child: %d - Keep Alive: %s - Max Per Connection: %d", max_requests_per_child, serv->keep_alive ? "on":"off", serv->keep_alive_max);
+	snprintf(output_buf, sizeof(output_buf), "Per Child: %d - Keep Alive: %s - Max Per Connection: %d", max_requests_per_child, serv->keep_alive ? "on":"off", serv->keep_alive_max);
 	php_info_print_table_row(2, "Max Requests", output_buf);
 #endif
-	sprintf(output_buf, "Connection: %d - Keep-Alive: %d", serv->timeout, serv->keep_alive_timeout);
+	snprintf(output_buf, sizeof(output_buf), "Connection: %d - Keep-Alive: %d", serv->timeout, serv->keep_alive_timeout);
 	php_info_print_table_row(2, "Timeouts", output_buf);
 #if !defined(WIN32) && !defined(WINNT)
 /*

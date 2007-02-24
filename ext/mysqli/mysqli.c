@@ -1037,7 +1037,7 @@ int php_local_infile_init(void **ptr, const char *filename, void *userdata)
 	mysql->li_stream = php_stream_open_wrapper_ex((char *)filename, "r", 0, NULL, context);
 
 	if (mysql->li_stream == NULL) {
-		sprintf((char *)data->error_msg, "Can't find file '%-.64s'.", filename);	
+		snprintf((char *)data->error_msg, sizeof(data->error_msg), "Can't find file '%-.64s'.", filename);	
 		return 1;
 	}
 

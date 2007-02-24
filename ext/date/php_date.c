@@ -2244,7 +2244,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	int             rs;
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
-	char            retstr[6];
+	char           *retstr;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ldddd", &time, &retformat, &latitude, &longitude, &zenith, &gmt_offset) == FAILURE) {
 		RETURN_FALSE;
@@ -2310,8 +2310,8 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	}
 	switch (retformat) {
 		case SUNFUNCS_RET_STRING:
-			sprintf(retstr, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
-			RETURN_STRINGL(retstr, 5, 1);
+			spprintf(&retstr, 0, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
+			RETURN_STRINGL(retstr, 5, 0);
 			break;
 		case SUNFUNCS_RET_DOUBLE:
 			RETURN_DOUBLE(N);

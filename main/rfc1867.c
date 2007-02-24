@@ -365,12 +365,9 @@ static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
 	self->buffer = (char *) ecalloc(1, minsize + 1);
 	self->bufsize = minsize;
 
-	self->boundary = (char *) ecalloc(1, boundary_len + 3); 
-	sprintf(self->boundary, "--%s", boundary);
+	spprintf(&self->boundary, 0, "--%s", boundary);
 	
-	self->boundary_next = (char *) ecalloc(1, boundary_len + 4);
-	sprintf(self->boundary_next, "\n--%s", boundary);
-	self->boundary_next_len = boundary_len + 3;
+	self->boundary_next_len = spprintf(&self->boundary_next, 0, "\n--%s", boundary);
 
 	self->buf_begin = self->buffer;
 	self->bytes_in_buffer = 0;
@@ -797,6 +794,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	int fd=-1;
 	zend_llist header;
 	void *event_extra_data = NULL;
+	int llen = 0;
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
@@ -1159,17 +1157,18 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			}
 			
 			/* Add $foo_name */
-			if (lbuf) {
-				efree(lbuf);
+			if (llen < strlen(param) + MAX_SIZE_OF_INDEX + 1) {
+				llen = strlen(param);
+				lbuf = (char *) safe_erealloc(lbuf, llen, 1, MAX_SIZE_OF_INDEX + 1);
+				llen += MAX_SIZE_OF_INDEX + 1;
 			}
-			lbuf = (char *) emalloc(strlen(param) + MAX_SIZE_OF_INDEX + 1);
 			
 			if (is_arr_upload) {
 				if (abuf) efree(abuf);
 				abuf = estrndup(param, strlen(param)-array_len);
-				sprintf(lbuf, "%s_name[%s]", abuf, array_index);
+				snprintf(lbuf, llen, "%s_name[%s]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s_name", param);
+				snprintf(lbuf, llen, "%s_name", param);
 			}
 
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
@@ -1227,9 +1226,9 @@ filedone:
 
 			/* Add $foo[name] */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s[name][%s]", abuf, array_index);
+				snprintf(lbuf, llen, "%s[name][%s]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s[name]", param);
+				snprintf(lbuf, llen, "%s[name]", param);
 			}
 			if (s && s > filename) {
 				register_http_post_files_variable(lbuf, s+1, http_post_files, 0 TSRMLS_CC);
@@ -1252,9 +1251,9 @@ filedone:
 
 			/* Add $foo_type */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s_type[%s]", abuf, array_index);
+				snprintf(lbuf, llen, "%s_type[%s]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s_type", param);
+				snprintf(lbuf, llen, "%s_type", param);
 			}
 			if (!is_anonymous) {
 				safe_php_register_variable(lbuf, cd, strlen(cd), NULL, 0 TSRMLS_CC);
@@ -1262,9 +1261,9 @@ filedone:
 
 			/* Add $foo[type] */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s[type][%s]", abuf, array_index);
+				snprintf(lbuf, llen, "%s[type][%s]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s[type]", param);
+				snprintf(lbuf, llen, "%s[type]", param);
 			}
 			register_http_post_files_variable(lbuf, cd, http_post_files, 0 TSRMLS_CC);
 
@@ -1286,9 +1285,9 @@ filedone:
 	
 			/* Add $foo[tmp_name] */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s[tmp_name][%s]", abuf, array_index);
+				snprintf(lbuf, llen, "%s[tmp_name][%s]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s[tmp_name]", param);
+				snprintf(lbuf, llen, "%s[tmp_name]", param);
 			}
 			add_protected_variable(lbuf TSRMLS_CC);
 			register_http_post_files_variable(lbuf, temp_filename, http_post_files, 1 TSRMLS_CC);
@@ -1311,17 +1310,17 @@ filedone:
 				}	
 	
 				if (is_arr_upload) {
-					sprintf(lbuf, "%s[error][%s]", abuf, array_index);
+					snprintf(lbuf, llen, "%s[error][%s]", abuf, array_index);
 				} else {
-					sprintf(lbuf, "%s[error]", param);
+					snprintf(lbuf, llen, "%s[error]", param);
 				}
 				register_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
 
 				/* Add $foo_size */
 				if (is_arr_upload) {
-					sprintf(lbuf, "%s_size[%s]", abuf, array_index);
+					snprintf(lbuf, llen, "%s_size[%s]", abuf, array_index);
 				} else {
-					sprintf(lbuf, "%s_size", param);
+					snprintf(lbuf, llen, "%s_size", param);
 				}
 				if (!is_anonymous) {
 					safe_php_register_variable_ex(lbuf, &file_size, NULL, 0 TSRMLS_CC);
@@ -1329,9 +1328,9 @@ filedone:
 
 				/* Add $foo[size] */
 				if (is_arr_upload) {
-					sprintf(lbuf, "%s[size][%s]", abuf, array_index);
+					snprintf(lbuf, llen, "%s[size][%s]", abuf, array_index);
 				} else {
-					sprintf(lbuf, "%s[size]", param);
+					snprintf(lbuf, llen, "%s[size]", param);
 				}
 				register_http_post_files_variable_ex(lbuf, &file_size, http_post_files, 0 TSRMLS_CC);
 			}
@@ -1339,6 +1338,9 @@ filedone:
 		}
 	}
 fileupload_done:
+	if (lbuf) {
+		efree(lbuf);
+	}
 	if (php_rfc1867_callback != NULL) {
 		multipart_event_end event_end;
 		

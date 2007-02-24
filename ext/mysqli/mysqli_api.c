@@ -710,7 +710,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 								 * may be negative. Therefor we cannot use MYSQLI_LLU_SPEC and must
 								 * use MYSQLI_LL_SPEC.
 								 */
-								sprintf((char *)&tmp, (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
+								snprintf(tmp, sizeof(tmp), (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
 								ZVAL_STRING(stmt->result.vars[i], tmp, 1);
 							} else {
 								ZVAL_LONG(stmt->result.vars[i], llval);

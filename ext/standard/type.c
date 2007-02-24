@@ -64,8 +64,7 @@ PHP_FUNCTION(gettype)
 		   int res_len;
 
 		   res_len = sizeof("object of type ")-1 + Z_OBJCE_P(arg)->name_length;
-		   result = (char *) emalloc(res_len+1);
-		   sprintf(result, "object of type %s", Z_OBJCE_P(arg)->name);
+		   spprintf(&result, 0, "object of type %s", Z_OBJCE_P(arg)->name);
 		   RETVAL_STRINGL(result, res_len, 0);
 		   }
 		 */

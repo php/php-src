@@ -586,11 +586,7 @@ ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filenam
 		return 0;
 	}
 
-	if (!(buffer = emalloc(32 + filename_len + 1))) {
-		return 0;
-	}
-
-	sprintf(buffer, "CHMOD %o %s", mode, filename);
+	spprintf(&buffer, 0, "CHMOD %o %s", mode, filename);
 
 	if (!ftp_putcmd(ftp, "SITE", buffer)) {
 		efree(buffer);
@@ -810,7 +806,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files greater than 2147483647 bytes.");
 			goto bail;
 		}
-		sprintf(arg, "%u", resumepos);
+		snprintf(arg, sizeof(arg), "%u", resumepos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -907,7 +903,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, i
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files with a size greater than 2147483647 bytes.");
 			goto bail;
 		}
-		sprintf(arg, "%u", startpos);
+		snprintf(arg, sizeof(arg), "%u", startpos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -1106,13 +1102,13 @@ ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const char *args)
 		if (strlen(cmd) + strlen(args) + 4 > FTP_BUFSIZE) {
 			return 0;
 		}
-		size = sprintf(ftp->outbuf, "%s %s\r\n", cmd, args);
+		size = snprintf(ftp->outbuf, sizeof(ftp->outbuf), "%s %s\r\n", cmd, args);
 	} else {
 		/* "cmd\r\n\0" */
 		if (strlen(cmd) + 3 > FTP_BUFSIZE) {
 			return 0;
 		}
-		size = sprintf(ftp->outbuf, "%s\r\n", cmd);
+		size = snprintf(ftp->outbuf, sizeof(ftp->outbuf), "%s\r\n", cmd);
 	}
 
 	data = ftp->outbuf;
@@ -1438,7 +1434,7 @@ ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 		char eprtarg[INET6_ADDRSTRLEN + sizeof("|x||xxxxx|")];
 		char out[INET6_ADDRSTRLEN];
 		inet_ntop(AF_INET6, &((struct sockaddr_in6*) sa)->sin6_addr, out, sizeof(out));
-		sprintf(eprtarg, "|2|%s|%hu|", out, ntohs(((struct sockaddr_in6 *) &addr)->sin6_port));
+		snprintf(eprtarg, sizeof(eprtag), "|2|%s|%hu|", out, ntohs(((struct sockaddr_in6 *) &addr)->sin6_port));
 
 		if (!ftp_putcmd(ftp, "EPRT", eprtarg)) {
 			goto bail;
@@ -1456,7 +1452,7 @@ ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 	/* send the PORT */
 	ipbox.ia[0] = ((struct sockaddr_in*) sa)->sin_addr;
 	ipbox.s[2] = ((struct sockaddr_in*) &addr)->sin_port;
-	sprintf(arg, "%u,%u,%u,%u,%u,%u", ipbox.c[0], ipbox.c[1], ipbox.c[2], ipbox.c[3], ipbox.c[4], ipbox.c[5]);
+	snprintf(arg, sizeof(arg), "%u,%u,%u,%u,%u,%u", ipbox.c[0], ipbox.c[1], ipbox.c[2], ipbox.c[3], ipbox.c[4], ipbox.c[5]);
 
 	if (!ftp_putcmd(ftp, "PORT", arg)) {
 		goto bail;
@@ -1713,7 +1709,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files greater than 2147483648 bytes.");
 			goto bail;
 		}
-		sprintf(arg, "%u", resumepos);
+		snprintf(arg, sizeof(arg), "%u", resumepos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -1831,7 +1827,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files with a size greater than 2147483647 bytes.");
 			goto bail;
 		}
-		sprintf(arg, "%u", startpos);
+		snprintf(arg, sizeof(arg), "%u", startpos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}

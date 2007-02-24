@@ -25,6 +25,7 @@
 #include "zend_constants.h"
 #include "zend_llist.h"
 #include "zend_API.h"
+#include "zend_exceptions.h"
 
 #ifdef ZEND_MULTIBYTE
 #include "zend_multibyte.h"
@@ -83,14 +84,13 @@ static void build_runtime_defined_function_key(zval *result, char *name, int nam
 
 	/* NULL, name length, filename length, last accepting char position length */
 	result->value.str.len = 1+name_length+strlen(filename)+char_pos_len;
-	result->value.str.val = (char *) emalloc(result->value.str.len+1);
 #ifdef ZEND_MULTIBYTE
 	/* must be binary safe */
+	result->value.str.val = (char *) safe_emalloc(result->value.str.len, 1, 1);
 	result->value.str.val[0] = '\0';
-	memcpy(result->value.str.val+1, name, name_length);
-	sprintf(result->value.str.val+1+name_length, "%s%s", filename, char_pos_buf);
+	sprintf(result->value.str.val+1, "%s%s%s", name, filename, char_pos_buf);
 #else
-	sprintf(result->value.str.val, "%c%s%s%s", '\0', name, filename, char_pos_buf);
+	zend_spprintf(&result->value.str.val, 0, "%c%s%s%s", '\0', name, filename, char_pos_buf);
 #endif /* ZEND_MULTIBYTE */
 	result->type = IS_STRING;
 	result->refcount = 1;

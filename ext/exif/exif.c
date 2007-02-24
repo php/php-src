@@ -1035,22 +1035,22 @@ static unsigned char* exif_char_dump(unsigned char * addr, int len, int offset)
 	static unsigned char tmp[20];
 	int c, i, p=0, n = 5+31;
 
-	p += sprintf(buf+p, "\nDump Len: %08X (%d)", len, len);
+	p += snprintf(buf+p, sizeof(buf)-p, "\nDump Len: %08X (%d)", len, len);
 	if (len) {
 		for(i=0; i<len+15 && p+n<=sizeof(buf); i++) {
 			if (i%16==0) {
-				p += sprintf(buf+p, "\n%08X: ", i+offset);
+				p += snprintf(buf+p, sizeof(buf)-p, "\n%08X: ", i+offset);
 			}
 			if (i<len) {
 				c = *addr++;
-				p += sprintf(buf+p, "%02X ", c);
+				p += snprintf(buf+p, sizeof(buf)-p, "%02X ", c);
 				tmp[i%16] = c>=32 ? c : '.';
 				tmp[(i%16)+1] = '\0';
 			} else {
-				p += sprintf(buf+p, "   ");
+				p += snprintf(buf+p, sizeof(buf)-p, "   ");
 			}
 			if (i%16==15) {
-				p += sprintf(buf+p, "    %s", tmp);
+				p += snprintf(buf+p, sizeof(buf)-p, "    %s", tmp);
 				if (i>=len) {
 					break;
 				}
@@ -1181,44 +1181,44 @@ char * exif_dump_data(int *dump_free, int format, int components, int length, in
 			case TAG_FMT_UNDEFINED:
 			case TAG_FMT_STRING:
 			case TAG_FMT_SBYTE:
-				dump = erealloc(dump, len + 4);
-				sprintf(dump + len, "0x%02X", *value_ptr);
+				dump = erealloc(dump, len + 4 + 1);
+				snprintf(dump + len, 4, "0x%02X", *value_ptr);
 				len += 4;
 				value_ptr++;
 				break;
 			case TAG_FMT_USHORT:
 			case TAG_FMT_SSHORT:
-				dump = erealloc(dump, len + 6);
-				sprintf(dump + len, "0x%04X", php_ifd_get16s(value_ptr, motorola_intel));
+				dump = erealloc(dump, len + 6 + 1);
+				snprintf(dump + len, 6, "0x%04X", php_ifd_get16s(value_ptr, motorola_intel));
 				len += 6;
 				value_ptr += 2;
 				break;
 			case TAG_FMT_ULONG:
 			case TAG_FMT_SLONG:
-				dump = erealloc(dump, len + 6);
-				sprintf(dump + len, "0x%04X", php_ifd_get32s(value_ptr, motorola_intel));
+				dump = erealloc(dump, len + 6 + 1);
+				snprintf(dump + len, 6, "0x%04X", php_ifd_get32s(value_ptr, motorola_intel));
 				len += 6;
 				value_ptr += 4;
 				break;
 			case TAG_FMT_URATIONAL:
 			case TAG_FMT_SRATIONAL:
-				dump = erealloc(dump, len + 13);
-				sprintf(dump + len, "0x%04X/0x%04X", php_ifd_get32s(value_ptr, motorola_intel), php_ifd_get32s(value_ptr+4, motorola_intel));
+				dump = erealloc(dump, len + 13 + 1);
+				snprintf(dump + len, 13, "0x%04X/0x%04X", php_ifd_get32s(value_ptr, motorola_intel), php_ifd_get32s(value_ptr+4, motorola_intel));
 				len += 13;
 				value_ptr += 8;
 				break;
 		}
 		if (components > 0) {
-			dump = erealloc(dump, len + 2);
-			sprintf(dump + len, ", ");
+			dump = erealloc(dump, len + 4 + 1);
+			snprintf(dump + len, 4, ", ");
 			len += 2;			
 			components--;
 		} else{
 			break;
 		}
 	}
-	dump = erealloc(dump, len + 2);
-	sprintf(dump + len, "}");
+	dump = erealloc(dump, len + 2 + 1);
+	snprintf(dump + len, 2, "}");
 	return dump;
 }
 /* }}} */
@@ -1448,18 +1448,18 @@ static tag_table_type exif_get_tag_table(int section)
 */
 static char *exif_get_sectionlist(int sectionlist TSRMLS_DC)
 {
-	int i, len=0;
+	int i, len, ml = 0;
 	char *sections;
 
 	for(i=0; i<SECTION_COUNT; i++) {
-		len += strlen(exif_get_sectionname(i))+2;
+		ml += strlen(exif_get_sectionname(i))+2;
 	}
-	sections = safe_emalloc(len, 1, 1);
+	sections = safe_emalloc(ml, 1, 1);
 	sections[0] = '\0';
 	len = 0;
 	for(i=0; i<SECTION_COUNT; i++) {
 		if (sectionlist&(1<<i)) {
-			sprintf(sections+len, "%s, ", exif_get_sectionname(i));
+			snprintf(sections+len, ml-len, "%s, ", exif_get_sectionname(i));
 			len = strlen(sections);
 		}
 	}
@@ -3912,8 +3912,7 @@ PHP_FUNCTION(exif_read_data)
 
 	if(ac >= 2) {
 		convert_to_string_ex(p_sections_needed);
-		sections_str = safe_emalloc(strlen(Z_STRVAL_PP(p_sections_needed)), 1, 3);
-		sprintf(sections_str, ",%s,", Z_STRVAL_PP(p_sections_needed));
+		spprintf(&sections_str, 0, ",%s,", Z_STRVAL_PP(p_sections_needed));
 		/* sections_str DOES start with , and SPACES are NOT allowed in names */
 		s = sections_str;
 		while(*++s) {

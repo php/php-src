@@ -217,8 +217,7 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 			while (*cwd == '\\' || *cwd == '/') {
 				cwd++;
 			}
-			path = (char *) emalloc(2+strlen(cwd)+1+strlen(orig_path)+1);
-			sprintf(path, "%c\\%s\\%s", drive_letter, cwd, orig_path);
+			spprintf(&path, 0, "%c\\%s\\%s", drive_letter, cwd, orig_path);
 			efree(orig_path);
 			orig_path = path;
 		}

@@ -83,7 +83,7 @@ PHP_MINFO_FUNCTION(mhash)
 {
 	char version[32];
 	
-	sprintf(version,"%d", MHASH_API_VERSION);
+	snprintf(version, sizeof(version), "%d", MHASH_API_VERSION);
 	
 	php_info_print_table_start();
 	php_info_print_table_row(2, "MHASH support", "Enabled");

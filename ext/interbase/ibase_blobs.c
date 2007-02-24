@@ -74,16 +74,15 @@ int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd) /* {{{ */
 
 char *_php_ibase_quad_to_string(ISC_QUAD const qd) /* {{{ */
 {
-	char *result = (char *) emalloc(BLOB_ID_LEN+1);
+	char *result;
 
 	/* shortcut for most common case */
 	if (sizeof(ISC_QUAD) == sizeof(ISC_UINT64)) {
-		sprintf(result, "0x%0*" LL_MASK "x", 16, *(ISC_UINT64*)(void *) &qd);
+		spprintf(&result, BLOB_ID_LEN+1, "0x%0*" LL_MASK "x", 16, *(ISC_UINT64*)(void *) &qd);
 	} else {
 		ISC_UINT64 res = ((ISC_UINT64) qd.gds_quad_high << 0x20) | qd.gds_quad_low;
-		sprintf(result, "0x%0*" LL_MASK "x", 16, res);
+		spprintf(&result, BLOB_ID_LEN+1, "0x%0*" LL_MASK "x", 16, res);
 	}
-	result[BLOB_ID_LEN] = '\0';
 	return result;
 }
 /* }}} */

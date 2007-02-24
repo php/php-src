@@ -158,7 +158,7 @@ addlength = (preg != NULL && (int)preg->re_erroffset != -1)?
 if (errbuf_size > 0)
   {
   if (addlength > 0 && errbuf_size >= length + addlength)
-    sprintf(errbuf, "%s%s%-6d", message, addmessage, (int)preg->re_erroffset);
+    snprintf(errbuf, errbuf_size, "%s%s%-6d", message, addmessage, (int)preg->re_erroffset);
   else
     {
     strncpy(errbuf, message, errbuf_size - 1);

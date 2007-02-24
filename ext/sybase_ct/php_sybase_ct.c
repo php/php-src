@@ -996,8 +996,7 @@ PHP_FUNCTION(sybase_select_db)
 	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, sybase_link_index, id, "Sybase-Link", le_link, le_plink);
 
 	convert_to_string_ex(db);
-	cmdbuf = (char *) emalloc(sizeof("use ")+Z_STRLEN_PP(db)+1);
-	sprintf(cmdbuf, "use %s", Z_STRVAL_PP(db)); /* SAFE */
+	spprintf(&cmdbuf, 0, "use %s", Z_STRVAL_PP(db)); /* SAFE */
 
 	if (exec_cmd(sybase_ptr, cmdbuf)==FAILURE) {
 		efree(cmdbuf);
@@ -2115,16 +2114,16 @@ PHP_MINFO_FUNCTION(sybase)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Sybase_CT Support", "enabled" );
-	sprintf(buf, "%ld", SybCtG(num_persistent));
+	snprintf(buf, sizeof(buf), "%ld", SybCtG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
-	sprintf(buf, "%ld", SybCtG(num_links));
+	snprintf(buf, sizeof(buf), "%ld", SybCtG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
-	sprintf(buf, "%ld", SybCtG(min_server_severity));
+	snprintf(buf, sizeof(buf), "%ld", SybCtG(min_server_severity));
 	php_info_print_table_row(2, "Min server severity", buf);
-	sprintf(buf, "%ld", SybCtG(min_client_severity));
+	snprintf(buf, sizeof(buf), "%ld", SybCtG(min_client_severity));
 	php_info_print_table_row(2, "Min client severity", buf);	
 	php_info_print_table_row(2, "Application Name", SybCtG(appname));
-	sprintf(buf, "%ld", SybCtG(deadlock_retry_count));
+	snprintf(buf, sizeof(buf), "%ld", SybCtG(deadlock_retry_count));
 	php_info_print_table_row(2, "Deadlock retry count", buf);
 	php_info_print_table_end();
 

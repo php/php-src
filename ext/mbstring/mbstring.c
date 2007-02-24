@@ -1048,7 +1048,7 @@ PHP_MINFO_FUNCTION(mbstring)
 	{
 		char buf[32];
 		php_info_print_table_row(2, "Multibyte (japanese) regex support", "enabled");
-		sprintf(buf, "%d.%d.%d",
+		snprintf(buf, sizeof(buf), "%d.%d.%d",
 			ONIGURUMA_VERSION_MAJOR,ONIGURUMA_VERSION_MINOR,ONIGURUMA_VERSION_TEENY);
 		php_info_print_table_row(2, "Multibyte regex (oniguruma) version", buf);
 #ifdef USE_COMBINATION_EXPLOSION_CHECK
