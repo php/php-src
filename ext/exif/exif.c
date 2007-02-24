@@ -1185,43 +1185,43 @@ char * exif_dump_data(int *dump_free, int format, int components, int length, in
 			case TAG_FMT_STRING:
 			case TAG_FMT_SBYTE:
 				dump = erealloc(dump, len + 4 + 1);
-				snprintf(dump + len, 4, "0x%02X", *value_ptr);
+				snprintf(dump + len, 4 + 1, "0x%02X", *value_ptr);
 				len += 4;
 				value_ptr++;
 				break;
 			case TAG_FMT_USHORT:
 			case TAG_FMT_SSHORT:
 				dump = erealloc(dump, len + 6 + 1);
-				snprintf(dump + len, 6, "0x%04X", php_ifd_get16s(value_ptr, motorola_intel));
+				snprintf(dump + len, 6 + 1, "0x%04X", php_ifd_get16s(value_ptr, motorola_intel));
 				len += 6;
 				value_ptr += 2;
 				break;
 			case TAG_FMT_ULONG:
 			case TAG_FMT_SLONG:
 				dump = erealloc(dump, len + 6 + 1);
-				snprintf(dump + len, 6, "0x%04X", php_ifd_get32s(value_ptr, motorola_intel));
+				snprintf(dump + len, 6 + 1, "0x%04X", php_ifd_get32s(value_ptr, motorola_intel));
 				len += 6;
 				value_ptr += 4;
 				break;
 			case TAG_FMT_URATIONAL:
 			case TAG_FMT_SRATIONAL:
 				dump = erealloc(dump, len + 13 + 1);
-				snprintf(dump + len, 13, "0x%04X/0x%04X", php_ifd_get32s(value_ptr, motorola_intel), php_ifd_get32s(value_ptr+4, motorola_intel));
+				snprintf(dump + len, 13 + 1, "0x%04X/0x%04X", php_ifd_get32s(value_ptr, motorola_intel), php_ifd_get32s(value_ptr+4, motorola_intel));
 				len += 13;
 				value_ptr += 8;
 				break;
 		}
 		if (components > 0) {
-			dump = erealloc(dump, len + 4 + 1);
-			snprintf(dump + len, 4, ", ");
+			dump = erealloc(dump, len + 2 + 1);
+			snprintf(dump + len, 2 + 1, ", ");
 			len += 2;			
 			components--;
 		} else{
 			break;
 		}
 	}
-	dump = erealloc(dump, len + 2 + 1);
-	snprintf(dump + len, 2, "}");
+	dump = erealloc(dump, len + 1 + 1);
+	snprintf(dump + len, 1 + 1, "}");
 	return dump;
 }
 /* }}} */
