@@ -84,6 +84,9 @@ typedef unsigned char uchar;
 #ifndef safe_emalloc
 # define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
 #endif
+#ifndef safe_erealloc
+# define safe_erealloc(p,a,b,c) erealloc(p, (a)*(b)+(c))
+#endif
 
 #ifndef TRUE
 #	define TRUE 1
@@ -999,27 +1002,24 @@ static char * exif_get_tagname(int tag_num, char *ret, int len, tag_table_type t
 				break;
 			}
 			if (ret && len)  {
-				strncpy(ret, tag_table[i].Desc, abs(len));
-				if (len<0) {
-					len = -len;
-					ret[len-1]='\0';
-					for(i=strlen(ret);i<len;i++)ret[i]=' ';
+				strlcpy(ret, tag_table[i].Desc, abs(len));
+				if (len < 0) {
+					memset(ret + strlen(ret), ' ', -len - strlen(ret) - 1);
+					ret[-len - 1] = '\0';
 				}
-				ret[len-1]='\0';
 				return ret;
 			}
 			return tag_table[i].Desc;
 		}
 	}
+
 	if (ret && len) {
 		snprintf(tmp, sizeof(tmp), "UndefinedTag:0x%04X", tag_num);
-		strncpy(ret, tmp, abs(len));
-		if (len<0) {
-			len = -len;
-			ret[len-1]='\0';
-			for(i=strlen(ret);i<len;i++)ret[i]=' ';
+		strlcpy(ret, tmp, abs(len));
+		if (len < 0) {
+			memset(ret + strlen(ret), ' ', -len - strlen(ret) - 1);
+			ret[-len - 1] = '\0';
 		}
-		ret[len-1]='\0';
 		return ret;
 	}
 	return "";
@@ -1597,7 +1597,7 @@ static int exif_file_sections_add(image_info_type *ImageInfo, int type, size_t s
 	file_section    *tmp;
 	int             count = ImageInfo->file.count;
 
-	tmp = erealloc(ImageInfo->file.list, (count+1)*sizeof(file_section));
+	tmp = safe_erealloc(ImageInfo->file.list, (count+1), sizeof(file_section), 0);
 	ImageInfo->file.list = tmp;
 	ImageInfo->file.list[count].type = 0xFFFF;
 	ImageInfo->file.list[count].data = NULL;
@@ -1606,7 +1606,7 @@ static int exif_file_sections_add(image_info_type *ImageInfo, int type, size_t s
 	if (!size) {
 		data = NULL;
 	} else if (data == NULL) {
-		data = emalloc(size);
+		data = safe_emalloc(size, 1, 0);
 	}
 	ImageInfo->file.list[count].type = type;
 	ImageInfo->file.list[count].data = data;
@@ -1629,7 +1629,7 @@ static int exif_file_sections_realloc(image_info_type *ImageInfo, int section_in
 		EXIF_ERRLOG_FSREALLOC(ImageInfo)
 		return -1;
 	}
-	tmp = erealloc(ImageInfo->file.list[section_index].data, size);
+	tmp = safe_erealloc(ImageInfo->file.list[section_index].data, 1, size, 0);
 	ImageInfo->file.list[section_index].data = tmp;
 	ImageInfo->file.list[section_index].size = size;
 	return 0;
@@ -1669,7 +1669,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 		return;
 	}
 
-	list = erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1)*sizeof(image_info_data));
+	list = safe_erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1), sizeof(image_info_data), 0);
 	image_info->info_list[section_index].list = list;
 
 	info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
@@ -1798,7 +1798,7 @@ static void exif_iif_add_int(image_info_type *image_info, int section_index, cha
 	image_info_data  *info_data;
 	image_info_data  *list;
 
-	list = erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1)*sizeof(image_info_data));
+	list = safe_erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1), sizeof(image_info_data), 0);
 	image_info->info_list[section_index].list = list;
 
 	info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
@@ -1821,7 +1821,7 @@ static void exif_iif_add_str(image_info_type *image_info, int section_index, cha
 	image_info_data  *list;
 
 	if (value) {
-		list = erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1)*sizeof(image_info_data));
+		list = safe_erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1), sizeof(image_info_data), 0);
 		image_info->info_list[section_index].list = list;
 		info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
 		info_data->tag    = TAG_NONE;
@@ -1862,7 +1862,7 @@ static void exif_iif_add_buffer(image_info_type *image_info, int section_index, 
 	image_info_data  *list;
 
 	if (value) {
-		list = erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1)*sizeof(image_info_data));
+		list = safe_erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1), sizeof(image_info_data), 0);
 		image_info->info_list[section_index].list = list;
 		info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
 		info_data->tag    = TAG_NONE;
@@ -2362,7 +2362,7 @@ static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel 
 	image_info_value  *info_value;
 
 	byte_count = php_tiff_bytes_per_format[info_data->format] * info_data->length;
-	value_ptr = emalloc(max(byte_count, 4));
+	value_ptr = safe_emalloc(max(byte_count, 4), 1, 0);
 	memset(value_ptr, 0, 4);
 	if (!info_data->length) {
 		return value_ptr;
@@ -2468,7 +2468,7 @@ static void exif_thumbnail_build(image_info_type *ImageInfo TSRMLS_DC) {
 				}
 			}
 			new_move = new_size;
-			new_data = erealloc(ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size+new_size);
+			new_data = safe_erealloc(ImageInfo->Thumbnail.data, 1, ImageInfo->Thumbnail.size, new_size);
 			ImageInfo->Thumbnail.data = new_data;
 			memmove(ImageInfo->Thumbnail.data + new_move, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
 			ImageInfo->Thumbnail.size += new_size;
@@ -2854,7 +2854,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 			}
 			if (byte_count>sizeof(cbuf)) {
 				/* mark as outside range and get buffer */
-				value_ptr = emalloc(byte_count);
+				value_ptr = safe_emalloc(byte_count, 1, 0);
 				outside = value_ptr;
 			} else {
 				/*
@@ -2964,7 +2964,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 			case TAG_XP_AUTHOR:
 			case TAG_XP_KEYWORDS:
 			case TAG_XP_SUBJECT:
-				tmp_xp = (xp_field_type*)erealloc(ImageInfo->xp_fields.list, sizeof(xp_field_type)*(ImageInfo->xp_fields.count+1));
+				tmp_xp = (xp_field_type*)safe_erealloc(ImageInfo->xp_fields.list, (ImageInfo->xp_fields.count+1), sizeof(xp_field_type), 0);
 				ImageInfo->sections_found |= FOUND_WINXP;
 				ImageInfo->xp_fields.list = tmp_xp;
 				ImageInfo->xp_fields.count++;
