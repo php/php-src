@@ -604,6 +604,23 @@ static int phar_parse_metadata(php_stream *fp, char **buffer, char *endbuffer, z
 }
 /* }}}*/
 
+static const char hexChars[] = "0123456789ABCDEF";
+
+static int phar_hex_str(const char *digest, size_t digest_len, char ** signature)
+{
+	int pos = -1;
+	size_t len;
+
+	*signature = (char*)safe_emalloc(digest_len, 2, 1);
+
+	for(len = 0; len < digest_len; ++len) {
+		(*signature)[++pos] = hexChars[((const unsigned char *)digest)[len] >> 4];
+		(*signature)[++pos] = hexChars[((const unsigned char *)digest)[len] & 0x0F];
+	}
+	(*signature)[++pos] = '\0';
+	return pos;
+}
+
 /**
  * Does not check for a previously opened phar in the cache.
  *
@@ -757,13 +774,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 				return FAILURE;
 			}
 
-			sig_len = sizeof(digest) * 2;
-			signature = (char*)safe_emalloc(sizeof(digest), 2, 1);
-			for(len = 0; len < sizeof(digest); ++len)
-			{
-				sprintf(signature+len+len, "%02X", digest[len]);
-			}
-			signature[sizeof(digest) * 2] = '\0';
+			sig_len = phar_hex_str(digest, sizeof(digest), &signature);
 			break;
 		}
 		case PHAR_SIG_MD5: {
@@ -798,13 +809,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 				return FAILURE;
 			}
 
-			sig_len = sizeof(digest) * 2;
-			signature = (char*)safe_emalloc(sizeof(digest), 2, 1);
-			for(len = 0; len < sizeof(digest); ++len)
-			{
-				sprintf(signature+len+len, "%02X", digest[len]);
-			}
-			signature[sizeof(digest) * 2] = '\0';
+			sig_len = phar_hex_str(digest, sizeof(digest), &signature);
 			break;
 		}
 		default:
@@ -2324,7 +2329,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	/* append signature */
 	if (global_flags & PHAR_HDR_SIGNATURE) {
 		unsigned char buf[1024];
-		int  sig_flags = 0, sig_len, len;
+		int  sig_flags = 0, sig_len;
 		char sig_buf[4];
 
 		php_stream_rewind(newfile);
@@ -2348,13 +2353,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			PHP_SHA1Final(digest, &context);
 			php_stream_write(newfile, (char *) digest, sizeof(digest));
 			sig_flags |= PHAR_SIG_SHA1;
-			archive->signature = (char*)safe_emalloc(sizeof(digest), 2, 1);
-			for(len = 0; len < sizeof(digest); ++len)
-			{
-				sprintf(archive->signature+len+len, "%02X", digest[len]);
-			}
-			archive->signature[sizeof(digest) * 2] = '\0';
-			archive->sig_len = sizeof(digest) * 2;
+			archive->sig_len = phar_hex_str(digest, sizeof(digest), &archive->signature);
 			break;
 		}
 		case PHAR_SIG_MD5: {
@@ -2368,13 +2367,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			PHP_MD5Final(digest, &context);
 			php_stream_write(newfile, (char *) digest, sizeof(digest));
 			sig_flags |= PHAR_SIG_MD5;
-			archive->signature = (char*)safe_emalloc(sizeof(digest), 2, 1);
-			for(len = 0; len < sizeof(digest); ++len)
-			{
-				sprintf(archive->signature+len+len, "%02X", digest[len]);
-			}
-			archive->signature[sizeof(digest) * 2] = '\0';
-			archive->sig_len = sizeof(digest) * 2;
+			archive->sig_len = phar_hex_str(digest, sizeof(digest), &archive->signature);
 			break;
 		}
 		}
