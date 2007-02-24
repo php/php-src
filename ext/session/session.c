@@ -478,7 +478,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 		zval **tmp;
 		namelen = *p & (~PS_BIN_UNDEF);
 
-		if (namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
+		if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
 			return FAILURE;
 		}
 
