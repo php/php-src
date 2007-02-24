@@ -252,7 +252,7 @@ usage:
 	  /* Open a temporary file. */
 
 	  /* "temp.tmp" is not good temporary filename. */
-	  sprintf (outFn, "webpng.tmp%d", getpid ());
+	  snprintf (outFn, sizeof(outFn), "webpng.tmp%d", getpid ());
 	  out = fopen (outFn, "wb");
 
 	  if (!out)

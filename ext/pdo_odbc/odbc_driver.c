@@ -387,8 +387,8 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 		/* Force UID and PWD to be set in the DSN */
 		if (dbh->username && *dbh->username && !strstr(dbh->data_source, "uid")
 				&& !strstr(dbh->data_source, "UID")) {
-			char *dsn = pemalloc(strlen(dbh->data_source) + strlen(dbh->username) + strlen(dbh->password) + sizeof(";UID=;PWD="), dbh->is_persistent);
-			sprintf(dsn, "%s;UID=%s;PWD=%s", dbh->data_source, dbh->username, dbh->password);
+			char *dsn;
+			spprintf(&dsn, 0, "%s;UID=%s;PWD=%s", dbh->data_source, dbh->username, dbh->password);
 			pefree((char*)dbh->data_source, dbh->is_persistent);
 			dbh->data_source = dsn;
 		}

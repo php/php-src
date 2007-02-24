@@ -302,7 +302,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 /*
 	This is how the time string is formatted:
 
-   sprintf(p,"%02d%02d%02d%02d%02d%02dZ",ts->tm_year%100,
+   snprintf(p, sizeof(p), "%02d%02d%02d%02d%02d%02dZ",ts->tm_year%100,
       ts->tm_mon+1,ts->tm_mday,ts->tm_hour,ts->tm_min,ts->tm_sec);
 */
 

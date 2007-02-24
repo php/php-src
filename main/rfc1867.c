@@ -475,12 +475,9 @@ static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
 	self->buffer = (char *) ecalloc(1, minsize + 1);
 	self->bufsize = minsize;
 
-	self->boundary = (char *) ecalloc(1, boundary_len + 3); 
-	sprintf(self->boundary, "--%s", boundary);
+	spprintf(&self->boundary, 0, "--%s", boundary);
 	
-	self->boundary_next = (char *) ecalloc(1, boundary_len + 4);
-	sprintf(self->boundary_next, "\n--%s", boundary);
-	self->boundary_next_len = boundary_len + 3;
+	self->boundary_next_len = spprintf(&self->boundary_next, 0, "\n--%s", boundary);
 
 	self->buf_begin = self->buffer;
 	self->bytes_in_buffer = 0;
@@ -1015,6 +1012,7 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_unicode)
 	U_STRING_DECL(filename_key, "filename", 8);
 	U_STRING_DECL(maxfilesize_key, "MAX_FILE_SIZE", 13);
 	static zend_bool did_string_init = FALSE;
+	int llen = 0;
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
@@ -1322,14 +1320,15 @@ var_done:
 			if (lbuf) {
 				efree(lbuf);
 			}
-			lbuf = eumalloc(u_strlen(param) + MAX_SIZE_OF_INDEX + 1);
+			llen = u_strlen(param) + MAX_SIZE_OF_INDEX + 1;
+			lbuf = eumalloc(llen);
 
 			if (is_arr_upload) {
 				if (abuf) efree(abuf);
 				abuf = eustrndup(param, u_strlen(param)-array_len);
-				u_sprintf(lbuf, "%S_name[%S]", abuf, array_index);
+				u_snprintf(lbuf, llen, "%S_name[%S]", abuf, array_index);
 			} else {
-				u_sprintf(lbuf, "%S_name", param);
+				u_snprintf(lbuf, llen, "%S_name", param);
 			}
 
 			/* The \ check should technically be needed for win32 systems only where
@@ -1353,9 +1352,9 @@ var_done:
 
 			/* Add $foo[name] */
 			if (is_arr_upload) {
-				u_sprintf(lbuf, "%S[name][%S]", abuf, array_index);
+				u_snprintf(lbuf, llen, "%S[name][%S]", abuf, array_index);
 			} else {
-				u_sprintf(lbuf, "%S[name]", param);
+				u_snprintf(lbuf, llen, "%S[name]", param);
 			}
 			if (s && s > filename) {
 				register_u_http_post_files_variable(lbuf, s+1, u_strlen(s+1), http_post_files, 0 TSRMLS_CC);
@@ -1383,9 +1382,9 @@ var_done:
 
 			/* Add $foo_type */
 			if (is_arr_upload) {
-				u_sprintf(lbuf, "%S_type[%S]", abuf, array_index);
+				u_snprintf(lbuf, llen, "%S_type[%S]", abuf, array_index);
 			} else {
-				u_sprintf(lbuf, "%S_type", param);
+				u_snprintf(lbuf, llen, "%S_type", param);
 			}
 			if (!is_anonymous) {
 				safe_u_php_register_variable(lbuf, ucd, ucd_len, NULL, 0 TSRMLS_CC);
@@ -1393,9 +1392,9 @@ var_done:
 
 			/* Add $foo[type] */
 			if (is_arr_upload) {
-				u_sprintf(lbuf, "%S[type][%S]", abuf, array_index);
+				u_snprintf(lbuf, llen, "%S[type][%S]", abuf, array_index);
 			} else {
-				u_sprintf(lbuf, "%S[type]", param);
+				u_snprintf(lbuf, llen, "%S[type]", param);
 			}
 			register_u_http_post_files_variable(lbuf, ucd, ucd_len, http_post_files, 0 TSRMLS_CC);
 
@@ -1417,9 +1416,9 @@ var_done:
 
 			/* Add $foo[tmp_name] */
 			if (is_arr_upload) {
-				u_sprintf(lbuf, "%S[tmp_name][%S]", abuf, array_index);
+				u_snprintf(lbuf, llen, "%S[tmp_name][%S]", abuf, array_index);
 			} else {
-				u_sprintf(lbuf, "%S[tmp_name]", param);
+				u_snprintf(lbuf, llen, "%S[tmp_name]", param);
 			}
 			add_u_protected_variable(lbuf TSRMLS_CC);
 			register_u_http_post_files_variable(lbuf, temp_filename, u_strlen(temp_filename), http_post_files, 1 TSRMLS_CC);
@@ -1440,17 +1439,17 @@ var_done:
 				}	
 
 				if (is_arr_upload) {
-					u_sprintf(lbuf, "%S[error][%S]", abuf, array_index);
+					u_snprintf(lbuf, llen, "%S[error][%S]", abuf, array_index);
 				} else {
-					u_sprintf(lbuf, "%S[error]", param);
+					u_snprintf(lbuf, llen, "%S[error]", param);
 				}
 				register_u_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
 
 				/* Add $foo_size */
 				if (is_arr_upload) {
-					u_sprintf(lbuf, "%S_size[%S]", abuf, array_index);
+					u_snprintf(lbuf, llen, "%S_size[%S]", abuf, array_index);
 				} else {
-					u_sprintf(lbuf, "%S_size", param);
+					u_snprintf(lbuf, llen, "%S_size", param);
 				}
 				if (!is_anonymous) {
 					safe_u_php_register_variable_ex(lbuf, &file_size, NULL, 0 TSRMLS_CC);
@@ -1458,9 +1457,9 @@ var_done:
 
 				/* Add $foo[size] */
 				if (is_arr_upload) {
-					u_sprintf(lbuf, "%S[size][%S]", abuf, array_index);
+					u_snprintf(lbuf, llen, "%S[size][%S]", abuf, array_index);
 				} else {
-					u_sprintf(lbuf, "%S[size]", param);
+					u_snprintf(lbuf, llen, "%S[size]", param);
 				}
 				register_u_http_post_files_variable_ex(lbuf, &file_size, http_post_files, 0 TSRMLS_CC);
 			}
@@ -1487,6 +1486,7 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_legacy)
 	zval *array_ptr = (zval *) arg;
 	int fd=-1;
 	zend_llist header;
+	int llen = 0;
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
@@ -1768,14 +1768,15 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_legacy)
 			if (lbuf) {
 				efree(lbuf);
 			}
-			lbuf = (char *) emalloc(strlen(param) + MAX_SIZE_OF_INDEX + 1);
+			llen = strlen(param) + MAX_SIZE_OF_INDEX + 1;
+			lbuf = (char *) emalloc(llen);
 
 			if (is_arr_upload) {
 				if (abuf) efree(abuf);
 				abuf = estrndup(param, strlen(param)-array_len);
-				sprintf(lbuf, "%s_name[%s]", abuf, array_index);
+				snprintf(lbuf, llen, "%s_name[%s]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s_name", param);
+				snprintf(lbuf, llen, "%s_name", param);
 			}
 
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
@@ -1824,9 +1825,9 @@ filedone:
 
 			/* Add $foo[name] */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s[name][%s]", abuf, array_index);
+				snprintf(lbuf, llen, "%s[name][%s]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s[name]", param);
+				snprintf(lbuf, llen, "%s[name]", param);
 			}
 			if (s && s > filename) {
 				register_http_post_files_variable(lbuf, s+1, http_post_files, 0 TSRMLS_CC);
@@ -1849,9 +1850,9 @@ filedone:
 
 			/* Add $foo_type */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s_type[%s]", abuf, array_index);
+				snprintf(lbuf, llen, "%s_type[%s]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s_type", param);
+				snprintf(lbuf, llen, "%s_type", param);
 			}
 			if (!is_anonymous) {
 				safe_php_register_variable(lbuf, cd, strlen(cd), NULL, 0 TSRMLS_CC);
@@ -1859,9 +1860,9 @@ filedone:
 
 			/* Add $foo[type] */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s[type][%s]", abuf, array_index);
+				snprintf(lbuf, llen, "%s[type][%s]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s[type]", param);
+				snprintf(lbuf, llen, "%s[type]", param);
 			}
 			register_http_post_files_variable(lbuf, cd, http_post_files, 0 TSRMLS_CC);
 
@@ -1881,9 +1882,9 @@ filedone:
 
 			/* Add $foo[tmp_name] */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s[tmp_name][%s]", abuf, array_index);
+				snprintf(lbuf, llen, "%s[tmp_name][%s]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s[tmp_name]", param);
+				snprintf(lbuf, llen, "%s[tmp_name]", param);
 			}
 			add_protected_variable(lbuf TSRMLS_CC);
 			register_http_post_files_variable(lbuf, temp_filename, http_post_files, 1 TSRMLS_CC);
@@ -1904,17 +1905,17 @@ filedone:
 				}	
 
 				if (is_arr_upload) {
-					sprintf(lbuf, "%s[error][%s]", abuf, array_index);
+					snprintf(lbuf, llen, "%s[error][%s]", abuf, array_index);
 				} else {
-					sprintf(lbuf, "%s[error]", param);
+					snprintf(lbuf, llen, "%s[error]", param);
 				}
 				register_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
 
 				/* Add $foo_size */
 				if (is_arr_upload) {
-					sprintf(lbuf, "%s_size[%s]", abuf, array_index);
+					snprintf(lbuf, llen, "%s_size[%s]", abuf, array_index);
 				} else {
-					sprintf(lbuf, "%s_size", param);
+					snprintf(lbuf, llen, "%s_size", param);
 				}
 				if (!is_anonymous) {
 					safe_php_register_variable_ex(lbuf, &file_size, NULL, 0 TSRMLS_CC);
@@ -1922,9 +1923,9 @@ filedone:
 
 				/* Add $foo[size] */
 				if (is_arr_upload) {
-					sprintf(lbuf, "%s[size][%s]", abuf, array_index);
+					snprintf(lbuf, llen, "%s[size][%s]", abuf, array_index);
 				} else {
-					sprintf(lbuf, "%s[size]", param);
+					snprintf(lbuf, llen, "%s[size]", param);
 				}
 				register_http_post_files_variable_ex(lbuf, &file_size, http_post_files, 0 TSRMLS_CC);
 			}

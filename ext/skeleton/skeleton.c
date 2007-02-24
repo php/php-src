@@ -138,14 +138,14 @@ PHP_FUNCTION(confirm_extname_compiled)
 {
 	char *arg = NULL;
 	int arg_len, len;
-	char string[256];
+	char *strg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
-	len = sprintf(string, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "extname", arg);
-	RETURN_STRINGL(string, len, 1);
+	len = spprintf(&strg, 0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "extname", arg);
+	RETURN_STRINGL(strg, len, 0);
 }
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and 

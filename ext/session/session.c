@@ -287,10 +287,8 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 		remote_addr = Z_STRVAL_PP(token);
 	}
 
-	buf = emalloc(PS_ID_INITIAL_SIZE);
-
 	/* maximum 15+19+19+10 bytes */	
-	sprintf(buf, "%.15s%ld%ld%0.8F", remote_addr ? remote_addr : "", 
+	spprintf(&buf, 0, "%.15s%ld%ld%0.8F", remote_addr ? remote_addr : "", 
 			tv.tv_sec, (long int)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
 
 	switch (PS(hash_func)) {
@@ -936,7 +934,7 @@ static inline void strcpy_gmt(char *ubuf, time_t *when)
 	
 	php_gmtime_r(when, &tm);
 	
-	n = sprintf(buf, "%s, %02d %s %d %02d:%02d:%02d GMT", /* SAFE */
+	n = snprintf(buf, sizeof(buf), "%s, %02d %s %d %02d:%02d:%02d GMT", /* SAFE */
 				week_days[tm.tm_wday], tm.tm_mday, 
 				month_names[tm.tm_mon], tm.tm_year + 1900, 
 				tm.tm_hour, tm.tm_min, 
@@ -977,7 +975,7 @@ CACHE_LIMITER_FUNC(public)
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
 	ADD_HEADER(buf);
 	
-	sprintf(buf, "Cache-Control: public, max-age=%ld", PS(cache_expire) * 60); /* SAFE */
+	snprintf(buf, sizeof(buf) , "Cache-Control: public, max-age=%ld", PS(cache_expire) * 60); /* SAFE */
 	ADD_HEADER(buf);
 	
 	last_modified(TSRMLS_C);
@@ -987,7 +985,7 @@ CACHE_LIMITER_FUNC(private_no_expire)
 {
 	char buf[MAX_STR + 1];
 	
-	sprintf(buf, "Cache-Control: private, max-age=%ld, pre-check=%ld", PS(cache_expire) * 60, PS(cache_expire) * 60); /* SAFE */
+	snprintf(buf, sizeof(buf), "Cache-Control: private, max-age=%ld, pre-check=%ld", PS(cache_expire) * 60, PS(cache_expire) * 60); /* SAFE */
 	ADD_HEADER(buf);
 
 	last_modified(TSRMLS_C);

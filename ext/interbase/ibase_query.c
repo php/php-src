@@ -1312,17 +1312,17 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 			goto _sql_long;
 #else
 			if (scale == 0) {
-				l = sprintf(string_data, "%" LL_MASK "d", *(ISC_INT64 *) data);
+				l = snprintf(string_data, sizeof(string_data), "%" LL_MASK "d", *(ISC_INT64 *) data);
 				ZVAL_STRINGL(val,string_data,l,1);
 			} else {
 				ISC_INT64 n = *(ISC_INT64 *) data, f = scales[-scale];
 
 				if (n >= 0) {
-					l = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, n % f);
+					l = snprintf(string_data, sizeof(string_data), "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, n % f);
 				} else if (n <= -f) {
-					l = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, -n % f);				
+					l = snprintf(string_data, sizeof(string_data), "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, -n % f);				
 				 } else {
-					l = sprintf(string_data, "-0.%0*" LL_MASK "d", -scale, -n % f);
+					l = snprintf(string_data, sizeof(string_data), "-0.%0*" LL_MASK "d", -scale, -n % f);
 				}
 				ZVAL_STRINGL(val,string_data,l,1);
 			}
@@ -1337,11 +1337,11 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 				long f = (long) scales[-scale];
 
 				if (n >= 0) {
-					l = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  n % f);
+					l = snprintf(string_data, sizeof(string_data), "%ld.%0*ld", n / f, -scale,  n % f);
 				} else if (n <= -f) {
-					l = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  -n % f);
+					l = snprintf(string_data, sizeof(string_data), "%ld.%0*ld", n / f, -scale,  -n % f);
 				} else {
-					l = sprintf(string_data, "-0.%0*ld", -scale, -n % f);
+					l = snprintf(string_data, sizeof(string_data), "-0.%0*ld", -scale, -n % f);
 				}
 				ZVAL_STRINGL(val,string_data,l,1);
 			}
@@ -1381,14 +1381,14 @@ format_date_time:
 #else
 				switch (type & ~1) {
 					default:
-						l = sprintf(string_data, "%02d/%02d/%4d %02d:%02d:%02d", t.tm_mon+1, t.tm_mday, 
+						l = snprintf(string_data, sizeof(string_data), "%02d/%02d/%4d %02d:%02d:%02d", t.tm_mon+1, t.tm_mday, 
 							t.tm_year + 1900, t.tm_hour, t.tm_min, t.tm_sec);
 						break;
 					case SQL_TYPE_DATE:
-						l = sprintf(string_data, "%02d/%02d/%4d", t.tm_mon + 1, t.tm_mday, t.tm_year+1900);
+						l = snprintf(string_data, sizeof(string_data), "%02d/%02d/%4d", t.tm_mon + 1, t.tm_mday, t.tm_year+1900);
 						break;
 					case SQL_TYPE_TIME:
-						l = sprintf(string_data, "%02d:%02d:%02d", t.tm_hour, t.tm_min, t.tm_sec);
+						l = snprintf(string_data, sizeof(string_data), "%02d:%02d:%02d", t.tm_hour, t.tm_min, t.tm_sec);
 						break;
 				}
 #endif
@@ -1520,7 +1520,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 							Z_ARRVAL_P(return_value),alias,strlen(alias)+1,&p)) {
 				
 				case '\0':
-						sprintf(alias = buf, "%s_%02d", base, i++);
+						snprintf(alias = buf, sizeof(buf), "%s_%02d", base, i++);
 					}
 			}
 		}

@@ -740,8 +740,7 @@ PHP_FUNCTION(proc_open)
 	if (bypass_shell) {
 		newprocok = CreateProcess(NULL, command, &security, &security, TRUE, NORMAL_PRIORITY_CLASS, env.envp, cwd, &si, &pi);
 	} else {
-		command_with_cmd = emalloc(command_len + sizeof(COMSPEC_9X) + 1 + sizeof(" /c "));
-		sprintf(command_with_cmd, "%s /c %s", GetVersion() < 0x80000000 ? COMSPEC_NT : COMSPEC_9X, command);
+		spprintf(&command_with_cmd, 0, "%s /c %s", GetVersion() < 0x80000000 ? COMSPEC_NT : COMSPEC_9X, command);
 
 		newprocok = CreateProcess(NULL, command_with_cmd, &security, &security, TRUE, NORMAL_PRIORITY_CLASS, env.envp, cwd, &si, &pi);
 

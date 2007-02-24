@@ -409,7 +409,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 	switch (type) {
 		case DNS_T_A:
 			add_ascii_assoc_string(*subarray, "type", "A", 1);
-			sprintf(name, "%d.%d.%d.%d", cp[0], cp[1], cp[2], cp[3]);
+			snprintf(name, sizeof(name), "%d.%d.%d.%d", cp[0], cp[1], cp[2], cp[3]);
 			add_ascii_assoc_rt_string(*subarray, "ip", name, ZSTR_DUPLICATE);
 			cp += dlen;
 			break;

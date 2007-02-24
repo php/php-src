@@ -405,7 +405,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		return (BAD_MSG_DESTINATION);
 	*/
 
-	sprintf(Buffer, "HELO %s\r\n", LocalHost);
+	snprintf(Buffer, sizeof(Buffer), "HELO %s\r\n", LocalHost);
 
 	/* in the beggining of the dialog */
 	/* attempt reconnect if the first Post fail */
@@ -699,16 +699,13 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders T
 		}
 	}
 
-	if (NULL == (header_buffer = ecalloc(1, MAIL_BUFFER_SIZE))) {
-		efree(headers_lc);
-		return OUT_OF_MEMORY;
-	}
+	header_buffer = ecalloc(1, MAIL_BUFFER_SIZE);
 
 	if (!xheaders || !strstr(headers_lc, "date:")) {
 		time_t tNow = time(NULL);
 		char *dt = php_format_date("r", 1, tNow, 1 TSRMLS_CC);
 
-		sprintf(header_buffer, "Date: %s\r\n", dt);
+		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", dt);
 		efree(dt);
 	}
 

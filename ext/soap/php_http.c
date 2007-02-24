@@ -468,7 +468,7 @@ try_again:
 					unsigned int ctx;
 
 					PHP_MD5Init(&md5ctx);
-					sprintf(cnonce, "%d", php_rand_r(&ctx));
+					snprintf(cnonce, sizeof(cnonce), "%d", php_rand_r(&ctx));
 					PHP_MD5Update(&md5ctx, (unsigned char*)cnonce, strlen(cnonce));
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(cnonce, hash);

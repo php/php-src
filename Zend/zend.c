@@ -1697,8 +1697,7 @@ ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC)
 		cur_lineno = 0;
 	}
 
-	compiled_string_description = emalloc(sizeof(COMPILED_STRING_DESCRIPTION_FORMAT)+strlen(name)+strlen(cur_filename)+MAX_LENGTH_OF_LONG);
-	sprintf(compiled_string_description, COMPILED_STRING_DESCRIPTION_FORMAT, cur_filename, cur_lineno, name);
+	zend_spprintf(&compiled_string_description, 0, COMPILED_STRING_DESCRIPTION_FORMAT, cur_filename, cur_lineno, name);
 	return compiled_string_description;
 }
 

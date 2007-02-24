@@ -4641,7 +4641,7 @@ char *php_strerror(int errnum)
 		return(sys_errlist[errnum]);
 	}
 
-	(void) sprintf(BG(str_ebuf), "Unknown error: %d", errnum);
+	(void) snprintf(BG(str_ebuf), sizeof(php_basic_globals.str_ebuf), "Unknown error: %d", errnum);
 	return(BG(str_ebuf));
 }
 /* }}} */

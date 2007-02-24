@@ -676,9 +676,9 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "Version", "1.2.2");
 	php_info_print_table_row(2, "Revision", "$Revision$");
 
-	sprintf(buf, "%ld", OCI_G(num_persistent));
+	snprintf(buf, sizeof(buf), "%ld", OCI_G(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Connections", buf);
-	sprintf(buf, "%ld", OCI_G(num_links));
+	snprintf(buf, sizeof(buf), "%ld", OCI_G(num_links));
 	php_info_print_table_row(2, "Active Connections", buf);
 
 #if !defined(PHP_WIN32) && !defined(HAVE_OCI_INSTANT_CLIENT)
@@ -687,7 +687,7 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "Libraries Used", PHP_OCI8_SHARED_LIBADD );
 #else 
 #	if defined(HAVE_OCI_INSTANT_CLIENT) && defined(OCI_MAJOR_VERSION) && defined(OCI_MINOR_VERSION) 
-	sprintf(buf, "%d.%d", OCI_MAJOR_VERSION, OCI_MINOR_VERSION);
+	snprintf(buf, sizeof(buf), "%d.%d", OCI_MAJOR_VERSION, OCI_MINOR_VERSION);
 	php_info_print_table_row(2, "Oracle Instant Client Version", buf);
 #	endif
 #endif

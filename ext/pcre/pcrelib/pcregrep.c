@@ -1188,8 +1188,7 @@ if ((sep = isdirectory(pathname)) != 0)
     while ((nextfile = readdirectory(dir)) != NULL)
       {
       int frc, blen;
-      sprintf(buffer, "%.512s%c%.128s", pathname, sep, nextfile);
-      blen = strlen(buffer);
+      blen = snprintf(buffer, sizeof(buffer), "%.512s%c%.128s", pathname, sep, nextfile);
 
       if (exclude_compiled != NULL &&
           pcre_exec(exclude_compiled, NULL, buffer, blen, 0, 0, NULL, 0) >= 0)
@@ -1281,7 +1280,7 @@ for (op = optionlist; op->one_char != 0; op++)
   {
   int n;
   char s[4];
-  if (op->one_char > 0) sprintf(s, "-%c,", op->one_char); else strcpy(s, "   ");
+  if (op->one_char > 0) snprintf(s, sizeof(s), "-%c,", op->one_char); else strcpy(s, "   ");
   printf("  %s --%s%n", s, op->long_name, &n);
   n = 30 - n;
   if (n < 1) n = 1;
@@ -1355,7 +1354,7 @@ ordin(int n)
 {
 static char buffer[8];
 char *p = buffer;
-sprintf(p, "%d", n);
+snprintf(p, sizeof(buffer), "%d", n);
 while (*p != 0) p++;
 switch (n%10)
   {
@@ -1401,7 +1400,7 @@ if (pattern_count >= MAX_PATTERN_COUNT)
   return FALSE;
   }
 
-sprintf(buffer, "%s%.*s%s", prefix[process_options], MBUFTHIRD, pattern,
+snprintf(buffer, sizeof(buffer), "%s%.*s%s", prefix[process_options], MBUFTHIRD, pattern,
   suffix[process_options]);
 pattern_list[pattern_count] =
   pcre_compile(buffer, options, &error, &errptr, pcretables);
@@ -1463,7 +1462,7 @@ if ((process_options & PO_FIXED_STRINGS) != 0)
     char *p = end_of_line(pattern, eop, &ellength);
     if (ellength == 0)
       return compile_single_pattern(pattern, options, filename, count);
-    sprintf(buffer, "%.*s", p - pattern - ellength, pattern);
+    snprintf(buffer, sizeof(buffer), "%.*s", p - pattern - ellength, pattern);
     pattern = p;
     if (!compile_single_pattern(buffer, options, filename, count))
       return FALSE;
@@ -1579,8 +1578,8 @@ for (i = 1; i < argc; i++)
         char buff1[24];
         char buff2[24];
         int baselen = opbra - op->long_name;
-        sprintf(buff1, "%.*s", baselen, op->long_name);
-        sprintf(buff2, "%s%.*s", buff1, strlen(op->long_name) - baselen - 2,
+        snprintf(buff1, sizeof(buff1), "%.*s", baselen, op->long_name);
+        snprintf(buff2, sizeof(buff2), "%s%.*s", buff1, strlen(op->long_name) - baselen - 2,
           opbra + 1);
         if (strcmp(arg, buff1) == 0 || strcmp(arg, buff2) == 0)
           break;
@@ -1935,7 +1934,7 @@ for (j = 0; j < pattern_count; j++)
   if (error != NULL)
     {
     char s[16];
-    if (pattern_count == 1) s[0] = 0; else sprintf(s, " number %d", j);
+    if (pattern_count == 1) s[0] = 0; else snprintf(s, sizeof(s), " number %d", j);
     fprintf(stderr, "pcregrep: Error while studying regex%s: %s\n", s, error);
     return 2;
     }
