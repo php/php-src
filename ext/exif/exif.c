@@ -1002,13 +1002,10 @@ static char * exif_get_tagname(int tag_num, char *ret, int len, tag_table_type t
 				break;
 			}
 			if (ret && len)  {
-				strncpy(ret, tag_table[i].Desc, abs(len));
-				if (len<0) {
-					len = -len;
-					ret[len-1]='\0';
-					for(i=strlen(ret);i<len;i++)ret[i]=' ';
+				strlcpy(ret, tag_table[i].Desc, abs(len));
+				if (len < 0) {
+					memset(ret, ' ', -len - 1);
 				}
-				ret[len-1]='\0';
 				return ret;
 			}
 			return tag_table[i].Desc;
@@ -1016,13 +1013,10 @@ static char * exif_get_tagname(int tag_num, char *ret, int len, tag_table_type t
 	}
 	if (ret && len) {
 		snprintf(tmp, sizeof(tmp), "UndefinedTag:0x%04X", tag_num);
-		strncpy(ret, tmp, abs(len));
-		if (len<0) {
-			len = -len;
-			ret[len-1]='\0';
-			for(i=strlen(ret);i<len;i++)ret[i]=' ';
+		strlcpy(ret, tmp, abs(len));
+		if (len < 0) {
+			memset(ret, ' ', -len - 1);
 		}
-		ret[len-1]='\0';
 		return ret;
 	}
 	return "";
