@@ -569,8 +569,9 @@ static int format_converter(register buffy * odp, const char *fmt,
 	register int i;
 
 	register char *s = NULL;
+	register UChar *u = NULL;
 	char *q;
-	int s_len;
+	int s_len, s_unicode, u_len;
 
 	register int min_width = 0;
 	int precision = 0;
@@ -586,6 +587,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
+	zend_bool free_s; /* free string if allocated here */
 
 #ifdef HAVE_LOCALE_H
 	struct lconv *lconv = NULL;
@@ -616,6 +618,8 @@ static int format_converter(register buffy * odp, const char *fmt,
 			alternate_form = print_sign = print_blank = NO;
 			pad_char = ' ';
 			prefix_char = NUL;
+			free_s = 0;
+			s_unicode = 0;
 
 			fmt++;
 
@@ -909,8 +913,59 @@ static int format_converter(register buffy * odp, const char *fmt,
 					}
 					break;
 
+				case 'v':
+					if (UG(unicode)) {
+						goto fmt_unicode;
+					} else {
+						goto fmt_string;
+					}
+					break;
+
+				case 'R':
+				{
+					int type = va_arg(ap, int);
+					if (type != IS_UNICODE) {
+						if (alternate_form) {
+							va_arg(ap, UConverter *);
+						}
+						goto fmt_string;
+					}
+				}
+				/* break omitted */
+
+				case 'r':
+fmt_unicode:
+				{
+					UConverter *conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
+					UErrorCode status = U_ZERO_ERROR;
+					char *res = NULL;
+
+					if (alternate_form) {
+						conv = va_arg(ap, UConverter *);
+					}
+
+					u = va_arg(ap, UChar *);
+					if (u == NULL) {
+						s = S_NULL;
+						s_len = S_NULL_LEN;
+						break;
+					}
+
+					u_len = u_strlen(u);
+					zend_unicode_to_string_ex(conv, &res, &s_len, u, u_len, &status);
+					if (U_FAILURE(status)) {
+						php_error(E_WARNING, "Could not convert Unicode to printable form in s[np]printf call");
+						return (cc);
+					}
+					s = res;
+					free_s = 1;
+						
+					pad_char = ' ';
+					break;
+				}
 
 				case 's':
+fmt_string:
 					s = va_arg(ap, char *);
 					if (s != NULL) {
 						s_len = strlen(s);
@@ -923,7 +978,6 @@ static int format_converter(register buffy * odp, const char *fmt,
 					pad_char = ' ';
 					break;
 
-				
 				case 'f':
 				case 'F':
 				case 'e':
@@ -1102,7 +1156,7 @@ fmt_error:
 			if (adjust_width && adjust == RIGHT && min_width > s_len) {
 				if (pad_char == '0' && prefix_char != NUL) {
 					INS_CHAR(*s, sp, bep, cc)
-						s++;
+					s++;
 					s_len--;
 					min_width--;
 				}
@@ -1115,6 +1169,8 @@ fmt_error:
 				INS_CHAR(*s, sp, bep, cc);
 				s++;
 			}
+
+			if (free_s) efree(s);
 
 			if (adjust_width && adjust == LEFT && min_width > s_len)
 				PAD(min_width, s_len, pad_char);
