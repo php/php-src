@@ -663,8 +663,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					ptr_len = strlen(ptr);
 					MAKE_STD_ZVAL(repl_temp);
 					Z_TYPE_P(repl_temp) = IS_STRING;
-					Z_STRVAL_P(repl_temp) = emalloc(32);
-					Z_STRLEN_P(repl_temp) = sprintf(Z_STRVAL_P(repl_temp), "realm=\"\\1-%ld\"", myuid);
+					Z_STRLEN_P(repl_temp) = spprintf(&Z_STRVAL_P(repl_temp), 0, "realm=\"\\1-%ld\"", myuid);
 					/* Modify quoted realm value */
 					result = php_pcre_replace("/realm=\"(.*?)\"/i", 16,
 											 ptr, ptr_len,
@@ -672,7 +671,8 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 											 0, &result_len, -1, NULL TSRMLS_CC);
 					if(result_len==ptr_len) {
 						efree(result);
-						sprintf(Z_STRVAL_P(repl_temp), "realm=\\1-%ld\\2", myuid);
+						efree(Z_STRVAL_P(repl_temp));
+						Z_STRLEN_P(repl_temp) = spprintf(&Z_STRVAL_P(repl_temp), 0, "realm=\\1-%ld\\2", myuid);
 						/* modify unquoted realm value */
 						result = php_pcre_replace("/realm=([^\\s]+)(.*)/i", 21, 
 											 	ptr, ptr_len,
@@ -687,7 +687,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 							/* If there is no realm string at all, append one */
 							if(!strstr(lower_temp,"realm")) {
 								efree(result);
-								conv_len = sprintf(conv_temp, " realm=\"%ld\"",myuid);
+								conv_len = snprintf(conv_temp, sizeof(conv_temp), " realm=\"%ld\"",myuid);
 								result = emalloc(ptr_len+conv_len+1);
 								result_len = ptr_len+conv_len;
 								memcpy(result, ptr, ptr_len);	
@@ -697,9 +697,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 							efree(lower_temp);
 						}
 					}
-					newlen = sizeof("WWW-Authenticate: ") - 1  + result_len;
-					newheader = emalloc(newlen+1);
-					sprintf(newheader,"WWW-Authenticate: %s", result);
+					newlen = spprintf(&newheader, 0, "WWW-Authenticate: %s", result);
 					efree(header_line);
 					sapi_header.header = newheader;
 					sapi_header.header_len = newlen;
@@ -820,7 +818,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 					http_status_line.header_len = strlen(SG(sapi_headers).http_status_line);
 				} else {
 					http_status_line.header = buf;
-					http_status_line.header_len = sprintf(buf, "HTTP/1.0 %d X", SG(sapi_headers).http_response_code);
+					http_status_line.header_len = snprintf(buf, sizeof(buf), "HTTP/1.0 %d X", SG(sapi_headers).http_response_code);
 				}
 				sapi_module.send_header(&http_status_line, SG(server_context) TSRMLS_CC);
 			}

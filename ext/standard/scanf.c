@@ -1094,7 +1094,7 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 					*end = '\0';
 					value = (int) (*fn)(buf, NULL, base);
 					if ((flags & SCAN_UNSIGNED) && (value < 0)) {
-						sprintf(buf, "%u", value); /* INTL: ISO digit */
+						snprintf(buf, sizeof(buf), "%u", value); /* INTL: ISO digit */
 						if (numVars && objIndex >= argCount) {
 							break;
 						} else if (numVars) {

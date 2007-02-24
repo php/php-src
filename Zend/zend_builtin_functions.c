@@ -24,6 +24,7 @@
 #include "zend_builtin_functions.h"
 #include "zend_constants.h"
 #include "zend_ini.h"
+#include "zend_exceptions.h"
 
 #undef ZEND_TEST_EXCEPTIONS
 
@@ -1471,8 +1472,7 @@ ZEND_FUNCTION(create_function)
 			+2	/* for the curly braces */
 			+Z_STRLEN_PP(z_function_code);
 
-	eval_code = (char *) emalloc(eval_code_length);
-	sprintf(eval_code, "function " LAMBDA_TEMP_FUNCNAME "(%s){%s}", Z_STRVAL_PP(z_function_args), Z_STRVAL_PP(z_function_code));
+	zend_spprintf(&eval_code, 0, "function " LAMBDA_TEMP_FUNCNAME "(%s){%s}", Z_STRVAL_PP(z_function_args), Z_STRVAL_PP(z_function_code));
 
 	eval_name = zend_make_compiled_string_description("runtime-created function" TSRMLS_CC);
 	retval = zend_eval_string(eval_code, NULL, eval_name TSRMLS_CC);

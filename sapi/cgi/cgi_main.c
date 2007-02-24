@@ -333,7 +333,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 			}
 
 		} else {
-			len = sprintf(buf, "Status: %d\r\n", SG(sapi_headers).http_response_code);
+			len = snprintf(buf, sizeof(buf), "Status: %d\r\n", SG(sapi_headers).http_response_code);
 		}
 
 		PHPWRITE_H(buf, len);

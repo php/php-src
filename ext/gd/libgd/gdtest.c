@@ -56,7 +56,7 @@ main (int argc, char **argv)
   /* */
   /* Send to PNG File then Ptr */
   /* */
-  sprintf (of, "%s.png", argv[1]);
+  snprintf (of, sizeof(of), "%s.png", argv[1]);
   out = fopen (of, "wb");
   gdImagePng (im, out);
   fclose (out);
@@ -88,7 +88,7 @@ main (int argc, char **argv)
   /* */
   /* Send to GD2 File then Ptr */
   /* */
-  sprintf (of, "%s.gd2", argv[1]);
+  snprintf (of, sizeof(of), "%s.gd2", argv[1]);
   out = fopen (of, "wb");
   gdImageGd2 (im, out, 128, 2);
   fclose (out);
@@ -123,7 +123,7 @@ main (int argc, char **argv)
   /* */
   /* Send to GD File then Ptr */
   /* */
-  sprintf (of, "%s.gd", argv[1]);
+  snprintf (of, sizeof(of), "%s.gd", argv[1]);
   out = fopen (of, "wb");
   gdImageGd (im, out);
   fclose (out);
@@ -180,7 +180,7 @@ main (int argc, char **argv)
      ** Test gdImagePngToSink'
      * */
 
-  sprintf (of, "%s.snk", argv[1]);
+  snprintf (of, sizeof(of), "%s.snk", argv[1]);
   out = fopen (of, "wb");
   imgsnk.sink = fwriteWrapper;
   imgsnk.context = out;

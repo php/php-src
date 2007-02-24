@@ -74,7 +74,7 @@ static inline void trace(char *fmt, ...)
 	va_list ap;
 	char buf[4096];
 
-	sprintf(buf, "T=%08x ", GetCurrentThreadId());
+	snprintf(buf, sizeof(buf), "T=%08x ", GetCurrentThreadId());
 	OutputDebugString(buf);
 	
 	va_start(ap, fmt);
@@ -474,7 +474,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 			   	&namelen, &pid, 0, &pos))) {
 			char namebuf[32];
 			if (keytype == HASH_KEY_IS_LONG) {
-				sprintf(namebuf, "%d", pid);
+				snprintf(namebuf, sizeof(namebuf), "%d", pid);
 				name = namebuf;
 				namelen = strlen(namebuf)+1;
 			}
@@ -506,7 +506,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 
 			char namebuf[32];
 			if (keytype == HASH_KEY_IS_LONG) {
-				sprintf(namebuf, "%d", pid);
+				snprintf(namebuf, sizeof(namebuf), "%d", pid);
 				name = namebuf;
 				namelen = strlen(namebuf) + 1;
 			}

@@ -250,9 +250,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				}
 				convert_to_string(yyhost);
 				host = Z_STRVAL_P(yyhost);
-				hashed_details_length = Z_STRLEN_P(yyhost)+4+1;
-				hashed_details = emalloc(hashed_details_length+1);
-				sprintf(hashed_details,"msql_%s",Z_STRVAL_P(yyhost)); /* SAFE */
+				hashed_details_length = spprintf(&hashed_details, 0, "msql_%s",Z_STRVAL_P(yyhost));
 			}
 			break;
 		default:

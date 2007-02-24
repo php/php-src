@@ -599,9 +599,9 @@ PHP_MINFO_FUNCTION(pgsql)
 	php_info_print_table_row(2, "SSL support", "disabled");
 #endif
 #endif /* HAVE_PG_CONFIG_H */	
-	sprintf(buf, "%ld", PGG(num_persistent));
+	snprintf(buf, sizeof(buf), "%ld", PGG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
-	sprintf(buf, "%ld", PGG(num_links));
+	snprintf(buf, sizeof(buf), "%ld", PGG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_end();
 

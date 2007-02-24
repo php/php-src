@@ -418,9 +418,10 @@ TODO:
 			efree(class_name);
 		}
 		if (pce && retval) {
-			char *tmp = malloc(class_name_len + 2 + strlen(retval) + 1);
+			int len = class_name_len + 2 + strlen(retval) + 1;
+			char *tmp = malloc(len);
 			
-			sprintf(tmp, "%s::%s", (*pce)->name, retval);
+			snprintf(tmp, len, "%s::%s", (*pce)->name, retval);
 			free(retval);
 			retval = tmp;
 		}

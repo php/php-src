@@ -444,8 +444,7 @@ static void php_soap_prepare_globals()
 		if (defaultEncoding[i].details.type_str) {
 			if (defaultEncoding[i].details.ns != NULL) {
 				char *ns_type;
-				ns_type = emalloc(strlen(defaultEncoding[i].details.ns) + strlen(defaultEncoding[i].details.type_str) + 2);
-				sprintf(ns_type, "%s:%s", defaultEncoding[i].details.ns, defaultEncoding[i].details.type_str);
+				spprintf(&ns_type, 0, "%s:%s", defaultEncoding[i].details.ns, defaultEncoding[i].details.type_str);
 				zend_hash_add(&defEnc, ns_type, strlen(ns_type) + 1, &enc, sizeof(encodePtr), NULL);
 				efree(ns_type);
 			} else {

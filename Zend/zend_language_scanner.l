@@ -59,6 +59,7 @@
 #include "zend_operators.h"
 #include "zend_API.h"
 #include "zend_strtod.h"
+#include "zend_exceptions.h"
 
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
@@ -1334,13 +1335,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		len += strlen(func_name);
 	}
 
-	zendlval->value.str.val = emalloc(len+1);
-	zendlval->value.str.len = sprintf(zendlval->value.str.val, "%s%s%s", 
+	zendlval->value.str.len = zend_spprintf(&zendlval->value.str.val, 0, "%s%s%s", 
 		class_name ? class_name : "",
 		class_name && func_name ? "::" : "",
 		func_name ? func_name : ""
 		);
-	zendlval->value.str.len = strlen(zendlval->value.str.val);
 	zendlval->type = IS_STRING;
 	return T_METHOD_C;
 }

@@ -147,7 +147,7 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 			case HASH_KEY_IS_LONG:
 				{
 					char key[25];
-					sprintf(key, "%ld", num_key);
+					snprintf(key, sizeof(key), "%ld", num_key);
 					ZEND_PUTS_EX(key);
 				}
 				break;
@@ -214,8 +214,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			}
 			break;
 		case IS_RESOURCE:
-			expr_copy->value.str.val = (char *) emalloc(sizeof("Resource id #") + MAX_LENGTH_OF_LONG);
-			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Resource id #%ld", expr->value.lval);
+			expr_copy->value.str.len = zend_spprintf(&expr_copy->value.str.val, 0, "Resource id #%ld", expr->value.lval);
 			break;
 		case IS_ARRAY:
 			expr_copy->value.str.len = sizeof("Array")-1;
@@ -1201,8 +1200,7 @@ ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC)
 		cur_lineno = 0;
 	}
 
-	compiled_string_description = emalloc(sizeof(COMPILED_STRING_DESCRIPTION_FORMAT)+strlen(name)+strlen(cur_filename)+MAX_LENGTH_OF_LONG);
-	sprintf(compiled_string_description, COMPILED_STRING_DESCRIPTION_FORMAT, cur_filename, cur_lineno, name);
+	zend_spprintf(&compiled_string_description, 0, COMPILED_STRING_DESCRIPTION_FORMAT, cur_filename, cur_lineno, name);
 	return compiled_string_description;
 }
 

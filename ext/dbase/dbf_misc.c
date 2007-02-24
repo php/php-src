@@ -114,12 +114,7 @@ void db_set_date(char *cp, int year, int month, int day)
 		month = 0;
 	if (day > 31)
 		day = 0;
-	sprintf(cp, "%d", year);
-	cp[4] = month / 10 + '0';
-	cp[5] = month % 10 + '0';
-	cp[6] = day / 10 + '0';
-	cp[7] = day % 10 + '0';
-	cp[8] = 0;
+	snprintf(cp, 9, "%04d%02d%02d", year, month, day);
 }
 
 int db_date_year(char *cp)

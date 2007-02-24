@@ -262,7 +262,7 @@ PHP_MINIT_FUNCTION(ps_mm)
 		return FAILURE;
 	}
 
-	if (!(euid_len = sprintf(euid,"%d", geteuid()))) {
+	if (!(euid_len = snprintf(euid, sizeof(euid), "%d", geteuid()))) {
 		return FAILURE;
 	}
 		
