@@ -56,8 +56,6 @@ static int _zip_cdir_set_comment(struct zip_cdir *, struct zip *);
 static int _zip_changed(struct zip *, int *);
 static char *_zip_create_temp_output(struct zip *, FILE **);
 
-
-
 int
 zip_close(struct zip *za)
 {
@@ -550,6 +548,9 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
 	free(temp);
 	return NULL;
     }
+#ifdef PHP_WIN32
+	_setmode(_fileno(tfp), _O_BINARY );
+#endif
 
     *outp = tfp;
     return temp;

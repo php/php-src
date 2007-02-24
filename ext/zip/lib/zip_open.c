@@ -100,13 +100,16 @@ zip_open(const char *fn, int flags, int *zep)
 	return NULL;
     }
 
-
     /* ZIP_CREATE gets ignored if file exists and not ZIP_EXCL,
        just like open() */
 	if ((fp=fopen(fn, "rb")) == NULL) {
 		set_error(zep, NULL, ZIP_ER_OPEN);
 		return NULL;
 	}
+
+#ifdef PHP_WIN32
+	_setmode(_fileno(fp), _O_BINARY );
+#endif
 
     clearerr(fp);
     fseek(fp, 0, SEEK_END);
