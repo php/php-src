@@ -21,7 +21,7 @@
 
 /*
 
-Comparing: sprintf, snprintf, spprintf 
+Comparing: sprintf, snprintf, slprintf, spprintf 
 
 sprintf  offers the ability to make a lot of failures since it does not know
          the size of the buffer it uses. Therefore usage of sprintf often
@@ -36,6 +36,11 @@ snprintf knows the buffers size and will not write behind it. But you will
          A bad thing is having a big maximum while in most cases you would
          only need a small buffer. If the size of the resulting string is 
          longer or equal to the buffer size than the buffer is not terminated.
+         The function also returns the number of chars not including the 
+         terminating \0 that were needed to fully comply to the print request.
+
+slprintf same as snprintf with the difference that it actually returns the 
+         length printed not including the terminating \0.
 
 spprintf is the dynamical version of snprintf. It allocates the buffer in size
          as needed and allows a maximum setting as snprintf (turn this feature
@@ -71,14 +76,28 @@ typedef enum {
 	NO = 0, YES = 1
 } boolean_e;
 
+
 BEGIN_EXTERN_C()
+PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 PHPAPI int ap_php_snprintf(char *, size_t, const char *, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 PHPAPI int ap_php_vsnprintf(char *, size_t, const char *, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 PHPAPI int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPAPI char * php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_conv_fp(register char format, register double num,
 		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, int *len);
+
 END_EXTERN_C()
+
+#ifdef slprintf
+#undef slprintf
+#endif
+#define slprintf ap_php_slprintf
+
+#ifdef vslprintf
+#undef vslprintf
+#endif
+#define vslprintf ap_php_vslprintf
 
 #ifdef snprintf
 #undef snprintf
