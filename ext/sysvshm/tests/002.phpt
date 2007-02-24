@@ -33,33 +33,33 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for shm_attach() in %s on line %d
+Warning: Wrong parameter count for shm_attach() in %s/sysvshm/tests/002.php on line %d
 NULL
 
-Warning: Wrong parameter count for shm_attach() in %s on line %d
+Warning: Wrong parameter count for shm_attach() in %s/sysvshm/tests/002.php on line %d
 NULL
 
-Warning: shm_attach(): failed for key 0xffffffff: memorysize too small in %s on line %d
+Warning: shm_attach(): Segment size must be greater then zero. in %s/sysvshm/tests/002.php on line %d
 bool(false)
 
-Warning: shm_attach(): failed for key 0x0: Invalid argument in %s on line %d
+Warning: shm_attach(): Segment size must be greater then zero. in %s/sysvshm/tests/002.php on line %d
 bool(false)
 
-Warning: shm_attach(): failed for key 0x7b: Invalid argument in %s on line %d
+Warning: shm_attach(): Segment size must be greater then zero. in %s/sysvshm/tests/002.php on line %d
 bool(false)
 
-Warning: shm_attach(): failed for key %s: Invalid argument in %s on line %d
+Warning: shm_attach(): Segment size must be greater then zero. in %s/sysvshm/tests/002.php on line %d
 bool(false)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
+Warning: shm_remove(): The parameter is not a valid shm_identifier in %s/sysvshm/tests/002.php on line %d
 
-Warning: shm_attach(): failed for key %s: memorysize too small in %s on line %d
+Warning: shm_attach(): Segment size must be greater then zero. in %s/sysvshm/tests/002.php on line %d
 bool(false)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
+Warning: shm_remove(): The parameter is not a valid shm_identifier in %s/sysvshm/tests/002.php on line %d
 int(%d)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
+Warning: shm_remove(): The parameter is not a valid shm_identifier in %s/sysvshm/tests/002.php on line %d
 int(%d)
 int(%d)
 int(%d)
