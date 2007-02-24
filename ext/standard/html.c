@@ -912,12 +912,10 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 				if (entity_map[j].table[k - entity_map[j].basechar] == NULL)
 					continue;
 
-				entity[0] = '&';
-				entity_length = strlen(entity_map[j].table[k - entity_map[j].basechar]);
-				strncpy(&entity[1], entity_map[j].table[k - entity_map[j].basechar], sizeof(entity) - 2);
-				entity[entity_length+1] = ';';
-				entity[entity_length+2] = '\0';
-				entity_length += 2;
+				entity_length = snprintf(entity, sizeof(entity), "&%s;", entity_map[j].table[k - entity_map[j].basechar]);
+				if (entity_length >= sizeof(entity)) {
+					continue;
+				}
 
 				/* When we have MBCS entities in the tables above, this will need to handle it */
 				replacement_len = 0;
