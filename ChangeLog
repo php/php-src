@@ -1,3 +1,92 @@
+2007-02-23  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      main/streams/plain_wrapper.c:
+      MFH (r-1.82): Add retry for interrupted reads and graceful handling for
+      failed retries
+
+    * main/streams/plain_wrapper.c:
+      Add retry for interrupted reads and graceful handling for failed retries
+
+2007-02-23  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      sapi/isapi/php5isapi.c
+      sapi/isapi/php5isapi.c:
+      use strlcat
+
+    * (PHP_5_2)
+      sapi/apache/php_apache.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/php_apache.c:
+      use snprintf
+
+    * (PHP_5_2)
+      ext/xmlrpc/libxmlrpc/xml_to_soap.c:
+      increase array size to fit buffer size
+
+2007-02-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/curl/curl.c:
+      fix #40611 (possible cURL memory error)
+
+    * ext/curl/interface.c:
+      fix leak
+      no need to allocate the buffer if there was no data
+
+2007-02-23  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/soap/php_sdl.c:
+      use safe_emalloc
+
+2007-02-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/file.c:
+      MFH: fix #40606 (umask is not being restored when request is finished)
+
+    * ext/standard/file.c:
+      fix #40606 (umask is not being restored when request is finished)
+
+2007-02-23  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/libxml/libxml.c:
+      fix bug #40598 (libxml segfault)
+      mark more functions unicode safe
+
+    * (PHP_5_2)
+      ext/libxml/libxml.c:
+      fix bug #40598 (libxml segfault)
+
+2007-02-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gdft.c:
+      - MFB: #40578, fix the 2nd race condition on shutdown when the cache is
+        freed
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/libgd/gdft.c:
+      - #40578, fix the 2nd race condition on shutdown when the cache is freed
+
+2007-02-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pgsql/pgsql.c
+      ext/standard/dl.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c:
+      
+      Simplify code by converting emalloc() + sprintf() to spprintf()
+
 2007-02-22  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
