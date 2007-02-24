@@ -704,7 +704,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		if(!ce->constructor) {
 			zend_error_noreturn(E_ERROR, "Can not call constructor");
 		}
-		if (Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
 		}
 		EX(fbc) = ce->constructor;
@@ -925,7 +925,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		if(!ce->constructor) {
 			zend_error_noreturn(E_ERROR, "Can not call constructor");
 		}
-		if (Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
 		}
 		EX(fbc) = ce->constructor;
@@ -1061,7 +1061,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		if(!ce->constructor) {
 			zend_error_noreturn(E_ERROR, "Can not call constructor");
 		}
-		if (Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
 		}
 		EX(fbc) = ce->constructor;
@@ -1196,7 +1196,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 		if(!ce->constructor) {
 			zend_error_noreturn(E_ERROR, "Can not call constructor");
 		}
-		if (Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
 		}
 		EX(fbc) = ce->constructor;
@@ -1289,7 +1289,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		if(!ce->constructor) {
 			zend_error_noreturn(E_ERROR, "Can not call constructor");
 		}
-		if (Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
 		}
 		EX(fbc) = ce->constructor;
