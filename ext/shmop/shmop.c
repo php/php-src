@@ -169,7 +169,7 @@ PHP_FUNCTION(shmop_open)
 			goto err;
 	}
 
-	if (shmop->size < 1) {
+	if (shmop->shmflg & IPC_CREAT && shmop->size < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Shared memory segment size must be greater then zero.");
 		goto err;
 	}
