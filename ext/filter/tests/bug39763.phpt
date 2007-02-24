@@ -2,6 +2,7 @@
 Bug #39763 filter applies magic_quotes twice in parse_str()
 --INI--
 magic_quotes_gpc=1
+filter.default=
 --FILE--
 <?php
 $arr = array();
