@@ -45,7 +45,7 @@ void bc_rt_warn (char *mesg ,...)
   char error_mesg [255];
 
   va_start (args, mesg);
-  vsnprintf (error_mesg, sizeof(error_msg), mesg, args);
+  vsnprintf (error_mesg, sizeof(error_mesg), mesg, args);
   va_end (args);
 
   fprintf (stderr, "bc math warning: %s\n", error_mesg);
@@ -58,7 +58,7 @@ void bc_rt_error (char *mesg ,...)
   char error_mesg [255];
 
   va_start (args, mesg);
-  vsnprintf (error_mesg, sizeof(error_msg), mesg, args);
+  vsnprintf (error_mesg, sizeof(error_mesg), mesg, args);
   va_end (args);
 
   fprintf (stderr, "bc math error: %s\n", error_mesg);
