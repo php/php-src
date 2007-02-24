@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Added --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
+- Fixed bug #40621 (Crash when constructor called inappropriately). (Tony)
 - Fixed bug #40606 (umask is not being restored when request is finished). 
   (Tony)
 - Fixed bug #40598 (libxml segfault). (Rob)
