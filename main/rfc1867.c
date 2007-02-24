@@ -1338,9 +1338,6 @@ filedone:
 		}
 	}
 fileupload_done:
-	if (lbuf) {
-		efree(lbuf);
-	}
 	if (php_rfc1867_callback != NULL) {
 		multipart_event_end event_end;
 		
