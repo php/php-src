@@ -133,8 +133,7 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 	if (strncmp((char *)buf,"GIF",3) != 0) {
 		return 0;
 	}
-	strncpy(version, (char *)buf + 3, 3);
-	version[3] = '\0';
+	strlcpy(version, (char *)buf + 3, sizeof(version));
 
 	if ((strcmp(version, "87a") != 0) && (strcmp(version, "89a") != 0)) {
 		return 0;

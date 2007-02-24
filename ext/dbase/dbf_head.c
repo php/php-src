@@ -184,7 +184,7 @@ int put_dbf_field(dbhead_t *dbh, dbfield_t *dbf)
 	/* build the on disk field info */
 	scp = dbf->db_fname; dcp = dbfield.dbf_name;
 
-	strncpy(dbfield.dbf_name, dbf->db_fname, DBF_NAMELEN);
+	strlcpy(dbfield.dbf_name, dbf->db_fname, DBF_NAMELEN);
 
 	dbfield.dbf_type = dbf->db_type;
 	switch (dbf->db_type) {
