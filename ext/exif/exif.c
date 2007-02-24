@@ -1005,7 +1005,7 @@ static char * exif_get_tagname(int tag_num, char *ret, int len, tag_table_type t
 				strlcpy(ret, tag_table[i].Desc, abs(len));
 				if (len < 0) {
 					memset(ret + strlen(ret), ' ', -len - strlen(ret) - 1);
-					ret[-len] = '\0';
+					ret[-len - 1] = '\0';
 				}
 				return ret;
 			}
@@ -1018,7 +1018,7 @@ static char * exif_get_tagname(int tag_num, char *ret, int len, tag_table_type t
 		strlcpy(ret, tmp, abs(len));
 		if (len < 0) {
 			memset(ret + strlen(ret), ' ', -len - strlen(ret) - 1);
-			ret[-len] = '\0';
+			ret[-len - 1] = '\0';
 		}
 		return ret;
 	}
