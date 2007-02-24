@@ -244,7 +244,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 		RETURN_LONG((__val));		\
 	} else {				\
 		char *ret;			\
-		int l = spprintf(ret, "%llu", (__val));	\
+		int l = spprintf(&ret, 0, "%llu", (__val));	\
 		RETURN_STRINGL(ret, l, 0);		\
 	}					\
 }
