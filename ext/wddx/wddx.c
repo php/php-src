@@ -285,7 +285,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 
 			switch (hash_type) {
 				case HASH_KEY_IS_LONG:
-					key_length = sprintf(tmp, "%ld", idx) + 1;
+					key_length = snprintf(tmp, sizeof(tmp), "%ld", idx) + 1;
 					key = tmp;
 					/* fallthru */
 				case HASH_KEY_IS_STRING:
@@ -410,7 +410,7 @@ static void php_wddx_serialize_boolean(wddx_packet *packet, zval *var)
 {
 	char tmp_buf[WDDX_BUF_LEN];
 
-	sprintf(tmp_buf, WDDX_BOOLEAN, Z_LVAL_P(var) ? "true" : "false");
+	snprintf(tmp_buf, sizeof(tmp_buf), WDDX_BOOLEAN, Z_LVAL_P(var) ? "true" : "false");
 	php_wddx_add_chunk(packet, tmp_buf);
 }
 /* }}} */
@@ -502,7 +502,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 				zend_unmangle_property_name(key, key_len-1, &class_name, &prop_name);
 				php_wddx_serialize_var(packet, *ent, prop_name, strlen(prop_name)+1 TSRMLS_CC);
 			} else {
-				key_len = sprintf(tmp_buf, "%ld", idx);
+				key_len = snprintf(tmp_buf, sizeof(tmp_buf), "%ld", idx);
 				php_wddx_serialize_var(packet, *ent, tmp_buf, key_len TSRMLS_CC);
 			}
 		}
@@ -557,7 +557,7 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 	if (is_struct) {
 		php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 	} else {
-		sprintf(tmp_buf, WDDX_ARRAY_S, zend_hash_num_elements(target_hash));
+		snprintf(tmp_buf, sizeof(tmp_buf), WDDX_ARRAY_S, zend_hash_num_elements(target_hash));
 		php_wddx_add_chunk(packet, tmp_buf);
 	}
 
@@ -573,7 +573,7 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 			if (ent_type == HASH_KEY_IS_STRING) {
 				php_wddx_serialize_var(packet, *ent, key, key_len TSRMLS_CC);
 			} else {
-				key_len = sprintf(tmp_buf, "%ld", idx);
+				key_len = snprintf(tmp_buf, sizeof(tmp_buf), "%ld", idx);
 				php_wddx_serialize_var(packet, *ent, tmp_buf, key_len TSRMLS_CC);
 			}
 		} else
@@ -725,7 +725,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 			if (!strcmp(atts[i], EL_CHAR_CODE) && atts[++i] && atts[i][0]) {
 				char tmp_buf[2];
 
-				sprintf(tmp_buf, "%c", (char)strtol(atts[i], NULL, 16));
+				snprintf(tmp_buf, sizeof(tmp_buf), "%c", (char)strtol(atts[i], NULL, 16));
 				php_wddx_process_data(user_data, tmp_buf, strlen(tmp_buf));
 				break;
 			}

@@ -71,7 +71,7 @@ bc_out_long (val, size, space, out_char)
   int len, ix;
 
   if (space) (*out_char) (' ');
-  sprintf (digits, "%ld", val);
+  snprintf(digits, sizeof(digits), "%ld", val);
   len = strlen (digits);
   while (size > len)
     {

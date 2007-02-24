@@ -257,9 +257,9 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	if ((__val) < LONG_MAX) {		\
 		RETURN_LONG((__val));		\
 	} else {				\
-		char ret[40];			\
-		sprintf(ret, "%llu", (__val));	\
-		RETURN_STRING(ret,1);		\
+		char *ret;			\
+		int l = spprintf(&ret, 0, "%llu", (__val));	\
+		RETURN_STRINGL(ret, l, 0);		\
 	}					\
 }
 

@@ -211,6 +211,8 @@ static void set_param_type(enum pdo_param_type *param_type, XSQLVAR const *var) 
 #define FETCH_BUF(buf,type,len,lenvar) ((buf) = (buf) ? (buf) : \
 	emalloc((len) ? (len * sizeof(type)) : ((*(unsigned long*)lenvar) = sizeof(type))))
 
+#define CHAR_BUF_LEN 24
+
 /* fetch a blob into a fetch buffer */
 static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ */
 	unsigned long *len, ISC_QUAD *blob_id TSRMLS_DC)
@@ -322,16 +324,16 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					n = *(ISC_INT64*)var->sqldata;
 			}
 				
-			*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
+			*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 			
 			if (n >= 0) {
-				*len = sprintf(*ptr, "%" LL_MASK "d.%0*" LL_MASK "d", 
+				*len = snprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d", 
 					n / f, -var->sqlscale, n % f);
 			} else if (n < -f) {
-				*len = sprintf(*ptr, "%" LL_MASK "d.%0*" LL_MASK "d",
+				*len = snprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d",
 					n / f, -var->sqlscale, -n % f);				
 			 } else {
-				*len = sprintf(*ptr, "-0.%0*" LL_MASK "d", -var->sqlscale, -n % f);
+				*len = snprintf(*ptr, CHAR_BUF_LEN, "-0.%0*" LL_MASK "d", -var->sqlscale, -n % f);
 			}
 		} else {
 			switch (var->sqltype & ~1) {
@@ -353,24 +355,24 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					break;
 /* --- cut here --- */
 				case SQL_SHORT:
-				    *ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
-					*len = sprintf(*ptr, "%d", *(short*)var->sqldata);
+				    *ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
+					*len = snprintf(*ptr, CHAR_BUF_LEN"%d", *(short*)var->sqldata);
 					break;
 				case SQL_LONG:
-					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
-					*len = sprintf(*ptr, "%ld", *(ISC_LONG*)var->sqldata);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
+					*len = snprintf(*ptr, CHAR_BUF_LEN"%ld", *(ISC_LONG*)var->sqldata);
 					break;
 				case SQL_INT64:
-					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
-					*len = sprintf(*ptr, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
+					*len = snprintf(*ptr, CHAR_BUF_LEN"%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
 					break;
 				case SQL_FLOAT:
-					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
-					*len = sprintf(*ptr, "%f", *(float*)var->sqldata);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
+					*len = snprintf(*ptr, CHAR_BUF_LEN"%f", *(float*)var->sqldata);
 					break;
 				case SQL_DOUBLE:
-					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
-					*len = sprintf(*ptr, "%f" , *(double*)var->sqldata);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
+					*len = snprintf(*ptr, CHAR_BUF_LEN"%f" , *(double*)var->sqldata);
 					break;
 /* --- cut here --- */
 #if abies_0
@@ -391,8 +393,8 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 #if SIZEOF_LONG == 8
 					*ptr = var->sqldata;
 #else
-					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 20, NULL);
-					*len = sprintf(*ptr, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
+					*len = snprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
 #endif
 					break;
 				case SQL_FLOAT:

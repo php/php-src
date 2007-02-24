@@ -535,7 +535,7 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
 	return NULL;
     }
 
-    sprintf(temp, "%s.XXXXXX", za->zn);
+    snprintf(temp, sizeof(temp), "%s.XXXXXX", za->zn);
 
     if ((tfd=mkstemp(temp)) == -1) {
 	_zip_error_set(&za->error, ZIP_ER_TMPOPEN, errno);
