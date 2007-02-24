@@ -169,6 +169,11 @@ PHP_FUNCTION(shmop_open)
 			goto err;
 	}
 
+	if (shmop->size < 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Shared memory segment size must be greater then zero.");
+		goto err;
+	}
+
 	shmop->shmid = shmget(shmop->key, shmop->size, shmop->shmflg);
 	if (shmop->shmid == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to attach or create shared memory segment");
