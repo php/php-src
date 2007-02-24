@@ -784,6 +784,9 @@ PHP_FUNCTION(proc_open)
 	channel.errfd = -1;
 	/* Duplicate the command as processing downwards will modify it*/
 	command_dup = strdup(command);
+	if (!command_dup) {
+		goto exit_fail;
+	}
 	/* get a number of args */
 	construct_argc_argv(command_dup, NULL, &command_num_args, NULL);
 	child_argv = (char**) malloc((command_num_args + 1) * sizeof(char*));
