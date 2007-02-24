@@ -1161,6 +1161,34 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format,
 }
 
 
+PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...)
+{
+	int cc;
+	va_list ap;
+
+	va_start(ap, format);
+	strx_printv(&cc, buf, len, format, ap);
+	va_end(ap);
+	if (cc >= len) {
+		cc = len -1;
+		buf[cc] = '\0';
+	}
+	return cc;
+}
+
+
+PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap)
+{
+	int cc;
+
+	strx_printv(&cc, buf, len, format, ap);
+	if (cc >= len) {
+		cc = len -1;
+		buf[cc] = '\0';
+	}
+	return cc;
+}
+
 PHPAPI int ap_php_snprintf(char *buf, size_t len, const char *format,...)
 {
 	int cc;
