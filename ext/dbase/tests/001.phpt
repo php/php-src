@@ -51,7 +51,9 @@ int(%d)
 
 Warning: dbase_create(): expected field name as first element of list in field 0 in %s on line %d
 bool(false)
-int(%d)
+
+Warning: dbase_create(): Unable to create database without fields in %s on line %d
+bool(false)
 
 Warning: dbase_create(): Expected array as second parameter in %s on line %d
 bool(false)

@@ -621,6 +621,11 @@ PHP_FUNCTION(dbase_create)
 
 	num_fields = zend_hash_num_elements(Z_ARRVAL_PP(fields));
 
+	if (num_fields <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create database without fields");
+		RETURN_FALSE;
+	}
+
 	/* have to use regular malloc() because this gets free()d by
 	   code in the dbase library */
 	dbh = (dbhead_t *)malloc(sizeof(dbhead_t));
