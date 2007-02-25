@@ -2646,6 +2646,29 @@ static int ZEND_BOOL_XOR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FETCH_DIM_TMP_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+
+	zval *container = &opline->op1.u.constant;
+
+	if (Z_TYPE_P(container) != IS_ARRAY) {
+		if (!RETURN_VALUE_UNUSED(&opline->result)) {
+			EX_T(opline->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
+			PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr);
+		}
+	} else {
+
+		zval *dim = &opline->op2.u.constant;
+
+		EX_T(opline->result.u.var).var.ptr_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, BP_VAR_R TSRMLS_CC);
+		SELECTIVE_PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr, &opline->result);
+
+	}
+	AI_USE_PTR(EX_T(opline->result.u.var).var);
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_CASE_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -29966,7 +29989,7 @@ void zend_init_opcodes_handlers()
   	ZEND_FETCH_OBJ_UNSET_SPEC_CV_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_FETCH_DIM_TMP_VAR_SPEC_CONST_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
