@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - Fixed bug #40606 (umask is not being restored when request is finished). 
   (Tony)
 - Fixed bug #40598 (libxml segfault). (Rob)
+- Fixed bug #40591 (list()="string"; gives invalid opcode). (Dmitry)
 - Fixed bug #40578 (imagettftext() multithreading issue). (Tony, Pierre)
 - Fixed bug #40576 (double values are truncated to 6 decimal digits when 
   encoding). (Tony)
