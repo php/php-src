@@ -1,3 +1,327 @@
+2007-02-24  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      ext/filter/tests/bug39763.phpt:
+      Fix test
+
+2007-02-24  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug40621.phpt:
+      MFH: fix #40621 (Crash when constructor called inappropriately
+      (statically))
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug40621.phpt
+      ZendEngine2/tests/bug40621.phpt:
+      fix #40621 (Crash when constructor called inappropriately (statically))
+
+2007-02-24  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/lib/zip_close.c:
+      - MFB: Fixed snprintf() usage
+
+    * ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_source_file.c:
+      - merge from pecl: Force binary mode on windows
+
+    * ext/zip/lib/zip_close.c:
+      - MFB: free temp buffer
+
+2007-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      - MFB Synch
+
+    * main/snprintf.c:
+      - Make [v]s[nl]printf compatible with 5.2 versions and [v]spprintf of head
+
+    * main/snprintf.c
+      main/snprintf.h:
+      - Add [v]slprintf
+
+    * (PHP_5_2)
+      main/snprintf.c
+      main/snprintf.h:
+      - Add [v]slprintf to overcome the returnvalues issue of snprintf
+
+2007-02-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      
+      missing -1
+
+    * (PHP_5_2)
+      ext/dbase/dbf_head.c
+      ext/dbase/dbf_rec.c
+      ext/gd/libgd/gd_gif_in.c
+      ext/interbase/ibase_query.c
+      ext/pdo_firebird/firebird_statement.c
+      ext/wddx/wddx.c:
+      
+      strncpy() -> strlcpy()
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      
+      Pad to given length, not replace data with spaces
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      
+      Eliminate strncpy and simplify code
+
+    * (PHP_5_2)
+      ext/standard/html.c:
+      
+      Eliminate strncpy() and simplify code
+
+    * (PHP_5_2)
+      ext/standard/dir.c:
+      strncpy > strlcpy
+
+    * (PHP_5_2)
+      ext/shmop/shmop.c:
+      
+      Only do size check on create operations
+
+2007-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c
+      ext/bcmath/libbcmath/src/output.c
+      ext/bcmath/libbcmath/src/rt.c
+      ext/com_dotnet/com_wrapper.c
+      ext/dbase/dbf_head.c
+      ext/dbase/dbf_misc.c
+      ext/exif/exif.c
+      ext/fbsql/php_fbsql.c
+      ext/ftp/ftp.c
+      ext/gd/libgd/gdtest.c
+      ext/gd/libgd/webpng.c
+      ext/imap/php_imap.c
+      ext/interbase/ibase_blobs.c
+      ext/interbase/ibase_query.c
+      ext/interbase/ibase_service.c
+      ext/interbase/interbase.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/oniguruma/regposerr.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/php_mysqli.h
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pdo_firebird/firebird_statement.c
+      ext/pdo_odbc/odbc_driver.c
+      ext/pgsql/pgsql.c
+      ext/pspell/pspell.c
+      ext/session/mod_mm.c
+      ext/session/session.c
+      ext/skeleton/skeleton.c
+      ext/soap/php_encoding.c
+      ext/soap/php_http.c
+      ext/soap/soap.c
+      ext/standard/dns.c
+      ext/standard/head.c
+      ext/standard/image.c
+      ext/standard/pack.c
+      ext/standard/proc_open.c
+      ext/standard/scanf.c
+      ext/standard/string.c
+      ext/standard/type.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/wddx/wddx.c
+      ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_error_strerror.c
+      main/fopen_wrappers.c
+      main/php_ini.c
+      main/rfc1867.c
+      sapi/nsapi/nsapi.c
+      sapi/tux/php_tux.c
+      win32/registry.c
+      win32/sendmail.c:
+      - avoid sprintf
+
+2007-02-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/zip/lib/zip_close.c:
+      
+      Fixed snprintf() usage
+
+    * (PHP_5_2)
+      ext/shmop/shmop.c:
+      Segment size validation
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/transports.c:
+      Fixed Bug #39396 (stream_set_blocking crashes on Win32).
+
+    * (PHP_5_2)
+      ext/sysvshm/sysvshm.c
+      ext/sysvshm/tests/002.phpt:
+      Unify validation of shm segment size inside shm_attach()
+
+    * (PHP_5_2)
+      ext/tidy/tests/024.phpt:
+      Fixed test to work with new version of libtidy that strips spaces
+
+2007-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      main/rfc1867.c:
+      - Drop superflous efree
+
+    * (PHP_5_2)
+      ext/mysqli/php_mysqli.h:
+      - Fix spprintf usage
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      - Make debug code really safe
+
+2007-02-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Use poll() instead of select() if available
+
+2007-02-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/proc_open.c:
+      strdup() can fail
+
+2007-02-24  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      use safe allocations
+
+2007-02-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/sybase/php_sybase_db.c:
+      
+      Fixed a typo
+
+2007-02-24  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      TSRM/tsrm_win32.c:
+      Unfortunately, VC does not have snprintf, and sprintf_s supported only in
+      vc2005
+      Fortunately, we don't need it here too badly.
+
+    * (PHP_5_2)
+      ext/ftp/ftp.c:
+      fix typo
+
+    * (PHP_5_2)
+      ext/bcmath/libbcmath/src/rt.c:
+      fix typos
+
+2007-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      TSRM/tsrm_win32.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_operators.c
+      ext/bcmath/libbcmath/src/output.c
+      ext/bcmath/libbcmath/src/rt.c
+      ext/com_dotnet/com_wrapper.c
+      ext/date/php_date.c
+      ext/dbase/dbf_head.c
+      ext/dbase/dbf_misc.c
+      ext/exif/exif.c
+      ext/fbsql/php_fbsql.c
+      ext/ftp/ftp.c
+      ext/gd/libgd/gdtest.c
+      ext/gd/libgd/webpng.c
+      ext/imap/php_imap.c
+      ext/interbase/ibase_blobs.c
+      ext/interbase/ibase_query.c
+      ext/interbase/ibase_service.c
+      ext/interbase/interbase.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/oniguruma/regerror.c
+      ext/mbstring/oniguruma/regposerr.c
+      ext/mbstring/oniguruma/regversion.c
+      ext/mhash/mhash.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/php_mysqli.h
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pdo_firebird/firebird_statement.c
+      ext/pdo_odbc/odbc_driver.c
+      ext/pgsql/pgsql.c
+      ext/pspell/pspell.c
+      ext/session/mod_mm.c
+      ext/session/session.c
+      ext/skeleton/skeleton.c
+      ext/soap/php_encoding.c
+      ext/soap/php_http.c
+      ext/soap/soap.c
+      ext/standard/dns.c
+      ext/standard/head.c
+      ext/standard/image.c
+      ext/standard/pack.c
+      ext/standard/proc_open.c
+      ext/standard/scanf.c
+      ext/standard/string.c
+      ext/standard/type.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/wddx/wddx.c
+      ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_error_strerror.c
+      main/SAPI.c
+      main/fopen_wrappers.c
+      main/php_ini.c
+      main/rfc1867.c
+      sapi/apache/php_apache.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/php_apache.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli_readline.c
+      sapi/nsapi/nsapi.c
+      sapi/tux/php_tux.c
+      win32/registry.c
+      win32/sendmail.c:
+      - Avoid sprintf, even when checked copy'n'paste or changes lead to errors
+
+2007-02-24  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      disallow negative length
+
 2007-02-23  Sara Golemon  <sara@golemon.com>
 
     * (PHP_5_2)
