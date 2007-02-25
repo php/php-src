@@ -1,3 +1,31 @@
+2007-02-24  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug40621.phpt:
+      MFH: fix #40621 (Crash when constructor called inappropriately
+      (statically))
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug40621.phpt
+      tests/bug40621.phpt:
+      fix #40621 (Crash when constructor called inappropriately (statically))
+
+2007-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c:
+      - avoid sprintf
+
+    * (PHP_5_2)
+      zend.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_language_scanner.l
+      zend_operators.c:
+      - Avoid sprintf, even when checked copy'n'paste or changes lead to errors
+
 2007-02-21  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_hash.c
