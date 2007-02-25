@@ -2876,8 +2876,18 @@ static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodeP
 		ret = xmlNewTextLen(BAD_CAST(Z_STRVAL(tmp)), Z_STRLEN(tmp));
 		zval_dtor(&tmp);
 	}
+
 	ret->name = xmlStringTextNoenc;
-	xmlAddChild(parent, ret);
+	ret->parent = parent;
+	ret->doc = parent->doc;
+	ret->prev = parent->last;
+	ret->next = NULL;
+	if (parent->last) {
+		parent->last->next = ret;
+	} else {
+		parent->children = ret;
+	}
+	parent->last = ret;
 
 	return ret;
 }
