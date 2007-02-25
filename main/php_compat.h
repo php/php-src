@@ -12,7 +12,7 @@
 #define pcre_compile2 			php_pcre_compile2
 #define pcre_copy_substring		php_pcre_copy_substring
 #define pcre_exec				php_pcre_exec
-#define pcre_get_substring		php_pcre_substring
+#define pcre_get_substring		php_pcre_get_substring
 #define pcre_get_substring_list	php_pcre_get_substring_list
 #define pcre_info				php_pcre_info
 #define pcre_maketables			php_pcre_maketables
@@ -23,7 +23,6 @@
 #define pcre_malloc				php_pcre_malloc
 #define pcre_config				php_pcre_config
 #define pcre_copy_named_substring php_pcre_copy_named_substring
-#define pcre_dfa_exec			php_pcre_dfa_exec
 #define pcre_free_substring 	php_pcre_free_substring
 #define pcre_free_substring_list php_pcre_free_substring_list
 #define pcre_get_named_substring php_pcre_get_named_substring
@@ -35,6 +34,22 @@
 #define _pcre_ucp_othercase 	php__pcre_ucp_othercase
 #define _pcre_valid_utf8 		php__pcre_valid_utf8
 #define _pcre_xclass	 		php__pcre_xclass
+#define pcre_callout			php_pcre_callout
+#define _pcre_OP_lengths		php__pcre_OP_lengths
+/* this one doesn't work because pcre.h isn't included from the pcre_chartables.c file
+#define _pcre_default_tables		php__pcre_default_tables */
+#define pcre_get_stringtable_entries	php_pcre_get_stringtable_entries
+#define _pcre_is_newline		php__pcre_is_newline
+#define pcre_stack_free			php_pcre_stack_free
+#define pcre_stack_malloc		php_pcre_stack_malloc
+#define _pcre_utf8_table1		php__pcre_utf8_table1
+#define _pcre_utf8_table1_size		php__pcre_utf8_table1_size
+#define _pcre_utf8_table2		php__pcre_utf8_table2
+#define _pcre_utf8_table3		php__pcre_utf8_table3
+#define _pcre_utf8_table4		php__pcre_utf8_table4
+#define _pcre_utt			php__pcre_utt
+#define _pcre_utt_size			php__pcre_utt_size
+#define _pcre_was_newline		php__pcre_was_newline
 #endif
 
 #define lookup				php_lookup
