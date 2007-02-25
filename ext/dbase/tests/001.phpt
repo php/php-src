@@ -54,7 +54,8 @@ bool(false)
 int(%d)
 string(71) "dbase_create(): expected field name as first element of list in field 0"
 bool(false)
-int(%d)
+string(56) "dbase_create(): Unable to create database without fields"
+bool(false)
 string(67) "Argument 2 passed to dbase_create() must be an array, integer given"
 string(50) "dbase_create(): Expected array as second parameter"
 bool(false)
