@@ -569,7 +569,7 @@ typedef tag_info_type  *tag_table_type;
 #define TAG_TABLE_END \
   {TAG_NONE,           "No tag value"},\
   {TAG_COMPUTED_VALUE, "Computed value"},\
-  {TAG_END_OF_LIST,    ""}  /* Important for exif_get_tagname() IF value != "" functionresult is != false */
+  {TAG_END_OF_LIST,    ""}  /* Important for exif_get_tagname() IF value != "" function result is != false */
 
 static tag_info_array tag_table_IFD = {
   { 0x000B, "ACDComment"},
@@ -996,11 +996,8 @@ static char * exif_get_tagname(int tag_num, char *ret, int len, tag_table_type t
 	int i, t;
 	char tmp[32];
 
-	for (i=0;;i++) {
-		if ((t=tag_table[i].Tag) == tag_num || t==TAG_END_OF_LIST) {
-			if (t==TAG_END_OF_LIST) {
-				break;
-			}
+	for (i = 0; (t = tag_table[i].Tag) != TAG_END_OF_LIST; i++) {
+		if (t == tag_num) {
 			if (ret && len)  {
 				strlcpy(ret, tag_table[i].Desc, abs(len));
 				if (len < 0) {
