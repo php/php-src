@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Added tidyNode::getParent() method (John, Nuno)
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed bug #40621 (Crash when constructor called inappropriately). (Tony)
+- Fixed bug #40609 (Segfaults when using more than one SoapVar in a request).
+  (Rob, Dmitry)
 - Fixed bug #40606 (umask is not being restored when request is finished). 
   (Tony)
 - Fixed bug #40598 (libxml segfault). (Rob)
