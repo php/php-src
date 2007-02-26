@@ -2,7 +2,7 @@ EXPORTS
 php_pcre_compile
 php_pcre_copy_substring
 php_pcre_exec
-php_pcre_substring
+php_pcre_get_substring
 php_pcre_get_substring_list
 php_pcre_info
 php_pcre_maketables
