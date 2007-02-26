@@ -274,7 +274,7 @@ PHP_MINIT_FUNCTION(ps_mm)
 		ps_mm_path[save_path_len] = DEFAULT_SLASH;
 		save_path_len++;
 	}
-	mempcy(ps_mm_path + save_path_len, PS_MM_FILE, sizeof(PS_MM_FILE) - 1);
+	memcpy(ps_mm_path + save_path_len, PS_MM_FILE, sizeof(PS_MM_FILE) - 1);
 	save_path_len += sizeof(PS_MM_FILE) - 1;
 	memcpy(ps_mm_path + save_path_len, sapi_module.name, mod_name_len);
 	save_path_len += mod_name_len;
