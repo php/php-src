@@ -2757,41 +2757,11 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC)
 	}
 }
 
-ZEND_API void zend_locale_usprintf_double(zval *op ZEND_FILE_LINE_DC)
-{
-	double dval = Z_DVAL_P(op);
-	UFILE *strf;
-	int capacity;
-
-	TSRMLS_FETCH();
-
-	capacity = MAX_LENGTH_OF_DOUBLE + EG(precision) + 1;
-	Z_USTRVAL_P(op) = eumalloc_rel(capacity);
-	/* UTODO uses default locale for now */
-	strf = u_fstropen(Z_USTRVAL_P(op), capacity, NULL);
-	Z_USTRLEN_P(op) = u_fprintf(strf, "%.*G", (int) EG(precision), dval);
-	u_fclose(strf);
-}
-
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC)
 {
 	TSRMLS_FETCH();
 
 	op->value.str.len = zend_spprintf(&op->value.str.val, 0, "%.*G", (int) EG(precision), (double)op->value.dval);
-}
-
-ZEND_API void zend_locale_usprintf_long(zval *op ZEND_FILE_LINE_DC)
-{
-	long lval = Z_LVAL_P(op);
-	UFILE *strf;
-	int capacity;
-
-	capacity = MAX_LENGTH_OF_LONG + 1;
-	Z_USTRVAL_P(op) = eumalloc_rel(capacity);
-	/* UTODO uses default locale for now */
-	strf = u_fstropen(Z_USTRVAL_P(op), capacity, NULL);
-	Z_USTRLEN_P(op) = u_fprintf(strf, "%ld", lval);
-	u_fclose(strf);
 }
 
 /*
