@@ -120,16 +120,10 @@ PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto float disk_total_space(string path) U
-   Get total disk space for filesystem that path is on */
-PHP_FUNCTION(disk_total_space)
+static int php_disk_total_space(char *path, double *space TSRMLS_DC) /* {{{ */
+#if defined(WINDOWS) /* {{{ */
 {
-	char *path;
-	int path_len;
-	zend_uchar path_type;
-#ifdef WINDOWS
-	double bytestotal;
-
+	double bytestotal = 0;
 	HINSTANCE kernel32;
 	FARPROC gdfse;
 	typedef BOOL (WINAPI *gdfse_func)(LPCTSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
@@ -146,14 +140,102 @@ PHP_FUNCTION(disk_total_space)
 	DWORD NumberOfFreeClusters;
 	DWORD TotalNumberOfClusters;
 
-#else /* not - WINDOWS */
+	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
+	   so we have to jump through some hoops to see if the function
+	   exists. */
+	kernel32 = LoadLibrary("kernel32.dll");
+	if (kernel32) {
+		gdfse = GetProcAddress(kernel32, "GetDiskFreeSpaceExA");
+		/* It's available, so we can call it. */
+		if (gdfse) {
+			func = (gdfse_func)gdfse;
+			if (func(path,
+						&FreeBytesAvailableToCaller,
+						&TotalNumberOfBytes,
+						&TotalNumberOfFreeBytes) == 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
+				return FAILURE;
+			}
+
+			/* i know - this is ugly, but i works <thies@thieso.net> */
+			bytestotal  = TotalNumberOfBytes.HighPart *
+				(double) (((unsigned long)1) << 31) * 2.0 +
+				TotalNumberOfBytes.LowPart;
+		} else { /* If it's not available, we just use GetDiskFreeSpace */
+			if (GetDiskFreeSpace(path,
+						&SectorsPerCluster, &BytesPerSector,
+						&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
+				return FAILURE;
+			}
+			bytestotal = (double)TotalNumberOfClusters * (double)SectorsPerCluster * (double)BytesPerSector;
+		}
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load kernel32.dll");
+		return FAILURE;
+	}
+
+	*space = bytestotal;
+	return SUCCESS;
+}
+/* }}} */
+#elif defined(OS2) /* {{{ */
+{
+	double bytestotal = 0;
+	FSALLOCATE fsinfo;
+	char drive = path[0] & 95;
+
+	if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0) {
+		bytestotal = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnit;
+		*space = bytestotal;
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+/* }}} */
+#else /* {{{ if !defined(OS2) && !defined(WINDOWS) */
+{
+	double bytestotal = 0;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
 	struct statvfs buf;
 #elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
 	struct statfs buf;
 #endif
-	double bytestotal = 0;
-#endif /* WINDOWS */
+
+#if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
+	if (statvfs(path, &buf)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		return FAILURE;
+	}
+	if (buf.f_frsize) {
+		bytestotal = (((double)buf.f_blocks) * ((double)buf.f_frsize));
+	} else {
+		bytestotal = (((double)buf.f_blocks) * ((double)buf.f_bsize));
+	}
+
+#elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
+	if (statfs(path, &buf)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		return FAILURE;
+	}
+	bytestotal = (((double)buf.f_bsize) * ((double)buf.f_blocks));
+#endif
+
+	*space = bytestotal;
+	return SUCCESS;
+}
+#endif
+/* }}} */
+/* }}} */
+	
+/* {{{ proto float disk_total_space(string path) U
+   Get total disk space for filesystem that path is on */
+PHP_FUNCTION(disk_total_space)
+{
+	char *path;
+	int path_len;
+	zend_uchar path_type;
+	double bytestotal;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &path, &path_len, &path_type) == FAILURE) {
 		return;
@@ -169,87 +251,12 @@ PHP_FUNCTION(disk_total_space)
 		goto totalspace_failure;
 	}
 
-/* OS Selection */
-#ifdef WINDOWS
-	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
-	   so we have to jump through some hoops to see if the function
-	   exists. */
-	kernel32 = LoadLibrary("kernel32.dll");
-	if (kernel32) {
-		gdfse = GetProcAddress(kernel32, "GetDiskFreeSpaceExA");
-		/* It's available, so we can call it. */
-		if (gdfse) {
-			func = (gdfse_func)gdfse;
-			if (func(path,
-				&FreeBytesAvailableToCaller,
-				&TotalNumberOfBytes,
-				&TotalNumberOfFreeBytes) == 0) { 
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
-				goto totalspace_failure;
-			}
-
-			/* i know - this is ugly, but i works <thies@thieso.net> */
-			bytestotal  = TotalNumberOfBytes.HighPart *
-				(double) (((unsigned long)1) << 31) * 2.0 +
-				TotalNumberOfBytes.LowPart;
+	if (php_disk_total_space(path, &bytestotal TSRMLS_CC) == SUCCESS) {
+		if (path_type == IS_UNICODE) {
+			efree(path);
 		}
-		/* If it's not available, we just use GetDiskFreeSpace */
-		else {
-			if (GetDiskFreeSpace(path,
-				&SectorsPerCluster, &BytesPerSector,
-				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) { 
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
-				goto totalspace_failure;
-			}
-			bytestotal = (double)TotalNumberOfClusters * (double)SectorsPerCluster * (double)BytesPerSector;
-		}
+		RETURN_DOUBLE(bytestotal);
 	}
-	else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load kernel32.dll");
-		goto totalspace_failure;
-	}
-
-#elif defined(OS2)
-	{
-		FSALLOCATE fsinfo;
-		char drive = path[0] & 0x5F; /* ascii ucase */
-
-		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
-			bytestotal = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnit;
-	}
-#else /* ! WINDOWS, ! OS/2 */
-
-
-/* *nix Implmentations */
-# if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
-	if (statvfs(path, &buf)) { 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-		goto totalspace_failure;
-	}
-	if (buf.f_frsize) {
-		bytestotal = (((double)buf.f_blocks) * ((double)buf.f_frsize));
-	} else {
-		bytestotal = (((double)buf.f_blocks) * ((double)buf.f_bsize));
-	}
-
-# elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
-	if (statfs(path, &buf)) { 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-		goto totalspace_failure;
-	}
-	bytestotal = (((double)buf.f_bsize) * ((double)buf.f_blocks));
-# else /* No implementation avail */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "System does not support disk_total_space()");
-	goto totalspace_failure;
-# endif /* *nix Implementations */
-
-
-#endif /* OS selection */
-
-	if (path_type == IS_UNICODE) {
-		efree(path);
-	}
-	RETURN_DOUBLE(bytestotal);
 
 totalspace_failure:
 	if (path_type == IS_UNICODE) {
@@ -259,15 +266,10 @@ totalspace_failure:
 }
 /* }}} */
 
-/* {{{ proto float disk_free_space(string path) U
-   Get free disk space for filesystem that path is on */
-PHP_FUNCTION(disk_free_space)
+static int php_disk_free_space(char *path, double *space TSRMLS_DC) /* {{{ */
+#if defined(WINDOWS) /* {{{ */
 {
-	char *path;
-	int path_len;
-	zend_uchar path_type;
-#ifdef WINDOWS
-	double bytesfree;
+	double bytesfree = 0;
 
 	HINSTANCE kernel32;
 	FARPROC gdfse;
@@ -285,14 +287,106 @@ PHP_FUNCTION(disk_free_space)
 	DWORD NumberOfFreeClusters;
 	DWORD TotalNumberOfClusters;
 
-#else /* not - WINDOWS */
+	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
+	   so we have to jump through some hoops to see if the function
+	   exists. */
+	kernel32 = LoadLibrary("kernel32.dll");
+	if (kernel32) {
+		gdfse = GetProcAddress(kernel32, "GetDiskFreeSpaceExA");
+		/* It's available, so we can call it. */
+		if (gdfse) {
+			func = (gdfse_func)gdfse;
+			if (func(path,
+						&FreeBytesAvailableToCaller,
+						&TotalNumberOfBytes,
+						&TotalNumberOfFreeBytes) == 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
+				return FAILURE;
+			}
+
+			/* i know - this is ugly, but i works <thies@thieso.net> */
+			bytesfree  = FreeBytesAvailableToCaller.HighPart *
+				(double) (((unsigned long)1) << 31) * 2.0 +
+				FreeBytesAvailableToCaller.LowPart;
+		} else { /* If it's not available, we just use GetDiskFreeSpace */
+			if (GetDiskFreeSpace(path,
+						&SectorsPerCluster, &BytesPerSector,
+						&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
+				return FAILURE;
+			}
+			bytesfree = (double)NumberOfFreeClusters * (double)SectorsPerCluster * (double)BytesPerSector;
+		}
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load kernel32.dll");
+		return FAILURE;
+	}
+
+	*space = bytesfree;
+	return SUCCESS;
+}
+/* }}} */
+#elif defined(OS2) /* {{{ */
+{
+	double bytesfree = 0;
+	FSALLOCATE fsinfo;
+	char drive = path[0] & 95;
+
+	if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0) {
+		bytesfree = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnitAvail;
+		*space = bytesfree;
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+/* }}} */
+#else /* {{{ if !defined(OS2) && !defined(WINDOWS) */
+{
+	double bytesfree = 0;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
 	struct statvfs buf;
 #elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
 	struct statfs buf;
 #endif
-	double bytesfree = 0;
-#endif /* WINDOWS */
+
+#if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
+	if (statvfs(path, &buf)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		return FAILURE;
+	}
+	if (buf.f_frsize) {
+		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_frsize));
+	} else {
+		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_bsize));
+	}
+#elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
+	if (statfs(path, &buf)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		return FAILURE;
+	}
+#ifdef NETWARE
+	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bfree));
+#else
+	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
+#endif
+#endif
+
+	*space = bytesfree;
+	return SUCCESS;
+}
+#endif
+/* }}} */
+/* }}} */
+
+
+/* {{{ proto float disk_free_space(string path) U
+   Get free disk space for filesystem that path is on */
+PHP_FUNCTION(disk_free_space)
+{
+	char *path;
+	int path_len;
+	zend_uchar path_type;
+	double bytesfree;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &path, &path_len, &path_type) == FAILURE) {
 		return;
@@ -308,91 +402,12 @@ PHP_FUNCTION(disk_free_space)
 		goto freespace_failure;
 	}
 
-/* OS Selection */
-#ifdef WINDOWS
-	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
-	   so we have to jump through some hoops to see if the function
-	   exists. */
-	kernel32 = LoadLibrary("kernel32.dll");
-	if (kernel32) {
-		gdfse = GetProcAddress(kernel32, "GetDiskFreeSpaceExA");
-		/* It's available, so we can call it. */
-		if (gdfse) {
-			func = (gdfse_func)gdfse;
-			if (func(path,
-				&FreeBytesAvailableToCaller,
-				&TotalNumberOfBytes,
-				&TotalNumberOfFreeBytes) == 0) { 
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
-				goto freespace_failure;
-			}
-
-			/* i know - this is ugly, but i works <thies@thieso.net> */
-			bytesfree  = FreeBytesAvailableToCaller.HighPart *
-				(double) (((unsigned long)1) << 31) * 2.0 +
-				FreeBytesAvailableToCaller.LowPart;
+	if (php_disk_free_space(path, &bytesfree TSRMLS_CC) == SUCCESS) {
+		if (path_type == IS_UNICODE) {
+			efree(path);
 		}
-		/* If it's not available, we just use GetDiskFreeSpace */
-		else {
-			if (GetDiskFreeSpace(path,
-				&SectorsPerCluster, &BytesPerSector,
-				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) { 
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
-				goto freespace_failure;
-			}
-			bytesfree = (double)NumberOfFreeClusters * (double)SectorsPerCluster * (double)BytesPerSector;
-		}
+		RETURN_DOUBLE(bytesfree);
 	}
-	else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load kernel32.dll");
-		goto freespace_failure;
-	}
-
-#elif defined(OS2)
-	{
-		FSALLOCATE fsinfo;
-		char drive = path[0] & 0x5F; /* ascii ucase */
-
-		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
-			bytesfree = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnitAvail;
-	}
-#else /* !WINDOWS, !OS/2 */
-
-/* *nix Implementation */
-# if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
-	if (statvfs(path, &buf)) { 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-		goto freespace_failure;
-	}
-	if (buf.f_frsize) {
-		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_frsize));
-	} else {
-		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_bsize));
-	}
-# elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
-	if (statfs(path, &buf)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-		goto freespace_failure;
-	}
-#  ifdef NETWARE
-	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bfree));
-#  else
-	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
-#  endif
-
-# else /* No *nix Implemetation */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "System does not support disk_free_space()");
-	goto freespace_failure;
-
-# endif /* *nix Implementation */
-
-
-#endif /* OS Selection */
-
-	if (path_type == IS_UNICODE) {
-		efree(path);
-	}
-	RETURN_DOUBLE(bytesfree);
 
 freespace_failure:
 	if (path_type == IS_UNICODE) {
