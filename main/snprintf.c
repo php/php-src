@@ -63,7 +63,7 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, int pad)
+static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, int pad) /* {{{ */
 {
 	register char *s = NULL;
 	char *p, *rve, c;
@@ -79,8 +79,9 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, 
 	if (value == 0.0) {
 		*decpt = 1 - fmode; /* 1 for 'e', 0 for 'f' */
 		*sign = 0;
-		if ((rve = s = (char *)malloc(ndigit?siz:2)) == NULL)
+		if ((rve = s = (char *)malloc(ndigit?siz:2)) == NULL) {
 			return(NULL);
+		}
 		*rve++ = '0';
 		*rve = '\0';
 		if (!ndigit) {
@@ -96,8 +97,9 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, 
 			return(c == 'I' ? "INF" : "NAN");
 		}
 		/* Make a local copy and adjust rve to be in terms of s */
-		if (pad && fmode)
+		if (pad && fmode) {
 			siz += *decpt;
+		}
 		if ((s = (char *)malloc(siz+1)) == NULL) {
 			zend_freedtoa(p);
 			return(NULL);
@@ -110,25 +112,29 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, 
 	/* Add trailing zeros */
 	if (pad) {
 		siz -= rve - s;
-		while (--siz)
+		while (--siz) {
 			*rve++ = '0';
+		}
 		*rve = '\0';
 	}
 
 	return(s);
 }
+/* }}} */
 
-static inline char *php_ecvt(double value, int ndigit, int *decpt, int *sign)
+static inline char *php_ecvt(double value, int ndigit, int *decpt, int *sign) /* {{{ */
 {
 	return(__cvt(value, ndigit, decpt, sign, 0, 1));
 }
+/* }}} */
 
-static inline char *php_fcvt(double value, int ndigit, int *decpt, int *sign)
+static inline char *php_fcvt(double value, int ndigit, int *decpt, int *sign) /* {{{ */
 {
     return(__cvt(value, ndigit, decpt, sign, 1, 1));
 }
+/* }}} */
 
-PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf)
+PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf) /* {{{ */
 {
 	char *digits, *dst, *src;
 	int i, decpt, sign;
@@ -139,15 +145,15 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 		 * Infinity or NaN, convert to inf or nan with sign.
 		 * We assume the buffer is at least ndigit long.
 		 */
-		snprintf(buf, ndigit + 1, "%s%s", (sign && *digits == 'I') ? "-" : "",
-				*digits == 'I' ? "INF" : "NAN");
+		snprintf(buf, ndigit + 1, "%s%s", (sign && *digits == 'I') ? "-" : "", *digits == 'I' ? "INF" : "NAN");
 		zend_freedtoa(digits);
 		return (buf);
 	}
 
 	dst = buf;
-	if (sign)
+	if (sign) {
 		*dst++ = '-';
+	}
 
 	for (i = 0; i < ndigit && digits[i] != '\0'; i++);
 	
@@ -157,8 +163,9 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 		if (--decpt < 0) {
 			sign = 1;
 			decpt = -decpt;
-		} else
+		} else {
 			sign = 0;
+		}
 		src = digits;
 		*dst++ = *src++;
 		*dst++ = dec_point;
@@ -170,10 +177,11 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 			} while (*src != '\0');
 		}
 		*dst++ = exponent;
-		if (sign)
+		if (sign) {
 			*dst++ = '-';
-		else
+		} else {
 			*dst++ = '+';
+		}
 		if (decpt < 10) {
 			*dst++ = '0' + decpt;
 			*dst = '\0';
@@ -202,14 +210,16 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 	} else {
 		/* standard format */
 		for (i = 0, src = digits; i < decpt; i++) {
-			if (*src != '\0')
+			if (*src != '\0') {
 				*dst++ = *src++;
-			else
+			} else {
 				*dst++ = '0';
+			}
 		}
 		if (*src != '\0') {
-			if (src == digits)
+			if (src == digits) {
 				*dst++ = '0';   /* zero before decimal point */
+			}
 			*dst++ = dec_point;
 			for (i = decpt; digits[i] != '\0'; i++) {
                 *dst++ = digits[i];
@@ -220,8 +230,9 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
     zend_freedtoa(digits);
     return (buf);
 }
+/* }}} */
 
-
+/* {{{ Apache license */
 /* ====================================================================
  * Copyright (c) 1995-1998 The Apache Group.  All rights reserved.
  *
@@ -276,6 +287,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * SIO stdio-replacement strx_* functions by Panos Tsirigotis
  * <panos@alumni.cs.colorado.edu> for xinetd.
  */
+/* }}} */
 
 #define FALSE			0
 #define TRUE			1
@@ -301,6 +313,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
+/* char * ap_php_conv_10() {{{ */
 char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 	   register bool_int * is_negative, char *buf_end, register int *len)
 {
@@ -324,10 +337,10 @@ char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 		 */
 		if (*is_negative) {
 			wide_int t = num + 1;
-
 			magnitude = ((u_wide_int) - t) + 1;
-		} else
+		} else {
 			magnitude = (u_wide_int) num;
+		}
 	}
 
 	/*
@@ -344,6 +357,7 @@ char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 	*len = buf_end - p;
 	return (p);
 }
+/* }}} */
 
 /* If you change this value then also change bug24640.phpt.
  * Also NDIG must be reasonable smaller than NUM_BUF_SIZE.
@@ -357,6 +371,7 @@ char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
  * The sign is returned in the is_negative argument (and is not placed
  * in buf).
  */
+/* PHPAPI char * php_conv_fp() {{{ */
 PHPAPI char * php_conv_fp(register char format, register double num,
 		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, int *len)
 {
@@ -368,10 +383,11 @@ PHPAPI char * php_conv_fp(register char format, register double num,
 		precision = NDIG - 2;
 	}
 
-	if (format == 'F')
+	if (format == 'F') {
 		p_orig = p = php_fcvt(num, precision, &decimal_point, is_negative);
-	else						/* either e or E format */
+	} else {						/* either e or E format */
 		p_orig = p = php_ecvt(num, precision + 1, &decimal_point, is_negative);
+	}
 
 	/*
 	 * Check for Infinity and NaN
@@ -389,8 +405,9 @@ PHPAPI char * php_conv_fp(register char format, register double num,
 				*s++ = '0';
 				if (precision > 0) {
 					*s++ = dec_point;
-					while (decimal_point++ < 0)
+					while (decimal_point++ < 0) {
 						*s++ = '0';
+					}
 				} else if (add_dp) {
 					*s++ = dec_point;
 				}
@@ -410,15 +427,17 @@ PHPAPI char * php_conv_fp(register char format, register double num,
 		}
 	} else {
 		*s++ = *p++;
-		if (precision > 0 || add_dp)
+		if (precision > 0 || add_dp) {
 			*s++ = '.';
+		}
 	}
 
 	/*
 	 * copy the rest of p, the NUL is NOT copied
 	 */
-	while (*p)
+	while (*p) {
 		*s++ = *p++;
+	}
 
 	if (format != 'F') {
 		char temp[EXPONENT_LENGTH];		/* for exponent conversion */
@@ -428,15 +447,15 @@ PHPAPI char * php_conv_fp(register char format, register double num,
 		*s++ = format;			/* either e or E */
 		decimal_point--;
 		if (decimal_point != 0) {
-			p = ap_php_conv_10((wide_int) decimal_point, FALSE, &exponent_is_negative,
-						&temp[EXPONENT_LENGTH], &t_len);
+			p = ap_php_conv_10((wide_int) decimal_point, FALSE, &exponent_is_negative, &temp[EXPONENT_LENGTH], &t_len);
 			*s++ = exponent_is_negative ? '-' : '+';
 
 			/*
 			 * Make sure the exponent has at least 2 digits
 			 */
-			while (t_len--)
+			while (t_len--) {
 				*s++ = *p++;
+			}
 		} else {
 			*s++ = '+';
 			*s++ = '0';
@@ -446,6 +465,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
 	free(p_orig);
 	return (buf);
 }
+/* }}} */
 
 /*
  * Convert num to a base X number where X is a power of 2. nbits determines X.
@@ -457,8 +477,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-char * ap_php_conv_p2(register u_wide_int num, register int nbits,
-		 char format, char *buf_end, register int *len)
+char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register int *len) /* {{{ */
 {
 	register int mask = (1 << nbits) - 1;
 	register char *p = buf_end;
@@ -475,7 +494,7 @@ char * ap_php_conv_p2(register u_wide_int num, register int nbits,
 	*len = buf_end - p;
 	return (p);
 }
-
+/* }}} */
 
 /*
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
@@ -560,8 +579,7 @@ typedef struct buf_area buffy;
 /*
  * Do format conversion placing the output in buffer
  */
-static int format_converter(register buffy * odp, const char *fmt,
-							va_list ap)
+static int format_converter(register buffy * odp, const char *fmt, va_list ap) /* {{{ */
 {
 	register char *sp;
 	register char *bep;
@@ -820,12 +838,13 @@ static int format_converter(register buffy * odp, const char *fmt,
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
 
 					if (*fmt != 'u') {
-						if (is_negative)
+						if (is_negative) {
 							prefix_char = '-';
-						else if (print_sign)
+						} else if (print_sign) {
 							prefix_char = '+';
-						else if (print_blank)
+						} else if (print_blank) {
 							prefix_char = ' ';
+						}
 					}
 					break;
 
@@ -859,8 +878,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 							break;
 #endif
 					}
-					s = ap_php_conv_p2(ui_num, 3, *fmt,
-								&num_buf[NUM_BUF_SIZE], &s_len);
+					s = ap_php_conv_p2(ui_num, 3, *fmt, &num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
 					if (alternate_form && *s != '0') {
 						*--s = '0';
@@ -899,8 +917,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 							break;
 #endif
 					}
-					s = ap_php_conv_p2(ui_num, 4, *fmt,
-								&num_buf[NUM_BUF_SIZE], &s_len);
+					s = ap_php_conv_p2(ui_num, 4, *fmt, &num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
 					if (alternate_form && i_num != 0) {
 						*--s = *fmt;	/* 'x' or 'X' */
@@ -915,8 +932,9 @@ static int format_converter(register buffy * odp, const char *fmt,
 					s = va_arg(ap, char *);
 					if (s != NULL) {
 						s_len = strlen(s);
-						if (adjust_precision && precision < s_len)
+						if (adjust_precision && precision < s_len) {
 							s_len = precision;
+						}
 					} else {
 						s = S_NULL;
 						s_len = S_NULL_LEN;
@@ -994,10 +1012,11 @@ static int format_converter(register buffy * odp, const char *fmt,
  						break;
  					}
 
-					if (adjust_precision == NO)
+					if (adjust_precision == NO) {
 						precision = FLOAT_DIGITS;
-					else if (precision == 0)
+					} else if (precision == 0) {
 						precision = 1;
+					}
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
@@ -1007,17 +1026,19 @@ static int format_converter(register buffy * odp, const char *fmt,
 					}
 #endif
 					s = php_gcvt(fp_num, precision, LCONV_DECIMAL_POINT, (*fmt == 'G')?'E':'e', &num_buf[1]);
-					if (*s == '-')
+					if (*s == '-') {
 						prefix_char = *s++;
-					else if (print_sign)
+					} else if (print_sign) {
 						prefix_char = '+';
-					else if (print_blank)
+					} else if (print_blank) {
 						prefix_char = ' ';
+					}
 
 					s_len = strlen(s);
 
-					if (alternate_form && (q = strchr(s, '.')) == NULL)
+					if (alternate_form && (q = strchr(s, '.')) == NULL) {
 						s[s_len++] = '.';
+					}
 					break;
 
 
@@ -1126,13 +1147,12 @@ skip_output:
 	odp->nextb = sp;
 	return (cc);
 }
-
+/* }}} */
 
 /*
  * This is the general purpose conversion function.
  */
-static void strx_printv(int *ccp, char *buf, size_t len, const char *format,
-						va_list ap)
+static void strx_printv(int *ccp, char *buf, size_t len, const char *format, va_list ap) /* {{{ */
 {
 	buffy od;
 	int cc;
@@ -1154,14 +1174,16 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format,
 	 * Do the conversion
 	 */
 	cc = format_converter(&od, format, ap);
-	if (len != 0 && od.nextb <= od.buf_end)
+	if (len != 0 && od.nextb <= od.buf_end) {
 		*(od.nextb) = '\0';
-	if (ccp)
+	}
+	if (ccp) {
 		*ccp = cc;
+	}
 }
+/* }}} */
 
-
-PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...)
+PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{ */
 {
 	int cc;
 	va_list ap;
@@ -1175,9 +1197,9 @@ PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...)
 	}
 	return cc;
 }
+/* }}} */
 
-
-PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap)
+PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
 {
 	int cc;
 
@@ -1188,8 +1210,9 @@ PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list a
 	}
 	return cc;
 }
+/* }}} */
 
-PHPAPI int ap_php_snprintf(char *buf, size_t len, const char *format,...)
+PHPAPI int ap_php_snprintf(char *buf, size_t len, const char *format,...) /* {{{ */
 {
 	int cc;
 	va_list ap;
@@ -1199,15 +1222,16 @@ PHPAPI int ap_php_snprintf(char *buf, size_t len, const char *format,...)
 	va_end(ap);
 	return (cc);
 }
+/* }}} */
 
-
-PHPAPI int ap_php_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
+PHPAPI int ap_php_vsnprintf(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
 {
 	int cc;
 
 	strx_printv(&cc, buf, len, format, ap);
 	return (cc);
 }
+/* }}} */
 
 /*
  * Local variables:
