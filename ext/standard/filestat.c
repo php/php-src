@@ -98,14 +98,15 @@
 
 #define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
 
-PHP_RINIT_FUNCTION(filestat)
+PHP_RINIT_FUNCTION(filestat) /* {{{ */
 {
 	BG(CurrentStatFile)=NULL;
 	BG(CurrentLStatFile)=NULL;
 	return SUCCESS;
 }
+/* }}} */
 
-PHP_RSHUTDOWN_FUNCTION(filestat) 
+PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */ 
 {
 	if (BG(CurrentStatFile)) {
 		efree (BG(CurrentStatFile));
@@ -117,6 +118,7 @@ PHP_RSHUTDOWN_FUNCTION(filestat)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ proto float disk_total_space(string path)
    Get total disk space for filesystem that path is on */
@@ -352,7 +354,7 @@ PHP_FUNCTION(disk_free_space)
 /* }}} */
 
 #if !defined(WINDOWS)
-static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
+static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 {
 	zval **filename, **group;
 	gid_t gid;
@@ -417,6 +419,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 #endif
 
 #ifndef NETWARE
@@ -448,7 +451,7 @@ PHP_FUNCTION(lchgrp)
 #endif
 
 #if !defined(WINDOWS)
-static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
+static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 {
 	zval **filename, **user;
 	int ret;
@@ -512,6 +515,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 #endif
 
 #ifndef NETWARE
