@@ -43,6 +43,7 @@
 
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/php_filestat.h"
+#include "ext/standard/php_link.h"
 
 /* declare the class handlers */
 static zend_object_handlers spl_filesystem_object_handlers;
@@ -840,6 +841,82 @@ FileInfoFunction(isDir, FS_IS_DIR)
 FileInfoFunction(isLink, FS_IS_LINK)
 /* }}} */
 
+/* {{{ proto string SplFileInfo::getLinkTarget() U
+   Return the target of a symbolic link */
+SPL_METHOD(SplFileInfo, getLinkTarget)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	UChar *target;
+	int ret, link_len, target_len;
+	char *link, buff[MAXPATHLEN];
+
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
+
+	if (intern->file_name_type == IS_UNICODE) {
+		php_stream_path_encode(NULL, &link, &link_len, intern->file_name.u, intern->file_name_len, REPORT_ERRORS, FG(default_context));
+	} else {
+		link = intern->file_name.s;
+	}
+
+	ret = readlink(link, buff, MAXPATHLEN-1);
+
+	if (ret == -1) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Unable to read link %R, error: %s", intern->file_name_type, intern->file_name, strerror(errno));
+		RETVAL_FALSE;
+	} else {
+		/* Append NULL to the end of the string */
+		buff[ret] = '\0';
+
+		if (UG(unicode)) {
+			if (SUCCESS == php_stream_path_decode(NULL, &target, &target_len, buff, ret, REPORT_ERRORS, FG(default_context))) {
+				RETVAL_UNICODEL(target, target_len, 0);
+			} else {
+				RETVAL_STRING(buff, 1);
+			}
+		} else {
+			RETVAL_STRING(buff, 1);
+		}
+	}
+	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+}
+/* }}} */
+
+#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+/* {{{ proto string SplFileInfo::getRealPath() U
+   Return the resolved path */
+SPL_METHOD(SplFileInfo, getRealPath)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	UChar *path;
+	int filename_len, path_len;
+	char *filename, buff[MAXPATHLEN];
+
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
+
+	if (intern->file_name_type == IS_UNICODE) {
+		php_stream_path_encode(NULL, &filename, &filename_len, intern->file_name.u, intern->file_name_len, REPORT_ERRORS, FG(default_context));
+	} else {
+		filename = intern->file_name.s;
+	}
+
+	if (VCWD_REALPATH(filename, buff)) {
+		if (UG(unicode)) {
+			if (php_stream_path_decode(NULL, &path, &path_len, buff, strlen(buff), REPORT_ERRORS, FG(default_context)) == SUCCESS) {
+				RETVAL_UNICODEL(path, path_len, 0);
+			} else {
+				RETVAL_STRING(buff, 1);
+			}
+		} else {
+			RETVAL_STRING(buff, 1);
+		}
+	} else {
+		RETVAL_FALSE;
+	}
+	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+}
+/* }}} */
+#endif
+
 /* {{{ proto SplFileObject SplFileInfo::openFile([string mode = 'r' [, bool use_include_path  [, resource context]]]) U
    Open the current file */
 SPL_METHOD(SplFileInfo, openFile)
@@ -1392,6 +1469,8 @@ static zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       isFile,        NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       isDir,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       isLink,        NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileInfo,       getLinkTarget, NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileInfo,       getRealPath,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getFileInfo,   arginfo_info_optinalFileClass, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPathInfo,   arginfo_info_optinalFileClass, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       openFile,      arginfo_info_openFile,         ZEND_ACC_PUBLIC)
