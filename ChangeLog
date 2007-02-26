@@ -1,3 +1,63 @@
+2007-02-25  Antony Dovgal  <antony@zend.com>
+
+    * ext/dbase/dbase.c
+      ext/dbase/tests/001.phpt
+      ext/dbase/tests/002.phpt:
+      do not allow db without fields
+      fix test
+
+    * ext/sockets/sockets.c:
+      zerofill socket structs
+
+2007-02-25  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * main/php_compat.h:
+      MFB: update pcre symbol list
+
+    * (PHP_5_2)
+      main/php_compat.h:
+      update pcre symbols list
+
+2007-02-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed bug #40591 (list()="string"; gives invalid opcode)
+
+    * ext/soap/tests/bugs/bug40609.phpt
+      ext/soap/tests/bugs/bug40609.phpt
+      ext/soap/tests/bugs/bug40609.wsdl
+      ext/soap/tests/bugs/bug40609.wsdl:
+      
+      file bug40609.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/bugs/bug40609.phpt
+      ext/soap/tests/bugs/bug40609.wsdl:
+      Fixed bug #40609 (Segfaults when using more than one SoapVar in a request).
+      (Rob, Dmitry)
+
+2007-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      - Readability
+
+2007-02-25  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gdft.c:
+      - MFB: sync with libgd.org, patch from Kees Cook
+
+    * (PHP_5_2)
+      ext/gd/libgd/gdft.c:
+      - sync with libgd.org, patch from Kees Cook
+
 2007-02-24  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * (PHP_5_2)
