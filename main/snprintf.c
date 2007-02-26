@@ -593,6 +593,8 @@ static int format_converter(register buffy * odp, const char *fmt,
 	struct lconv *lconv = NULL;
 #endif
 
+	TSRMLS_FETCH();
+
 	/*
 	 * Flag variables
 	 */
