@@ -29,6 +29,7 @@
 #include "zend_API.h"
 #include "zend_multiply.h"
 #include "zend_strtod.h"
+#include "zend_exceptions.h"
 
 #include "unicode/uchar.h"
 #include "unicode/ucol.h"
@@ -976,21 +977,18 @@ ZEND_API int _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS
 			TSRMLS_FETCH();
 
 			zend_list_delete(Z_LVAL_P(op));
-			Z_STRVAL_P(op) = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
-			Z_STRLEN_P(op) = sprintf(Z_STRVAL_P(op), "Resource id #%ld", tmp);
+			op->value.str.len = zend_spprintf(&op->value.str.val, 0, "Resource id #%ld", tmp);
 			break;
 		}
 		case IS_LONG:
 			lval = Z_LVAL_P(op);
 
-			Z_STRVAL_P(op) = (char *) emalloc_rel(MAX_LENGTH_OF_LONG + 1);
-			Z_STRLEN_P(op) = zend_sprintf(Z_STRVAL_P(op), "%ld", lval);  /* SAFE */
+			op->value.str.len = zend_spprintf(&op->value.str.val, 0, "%ld", lval);
 			break;
 		case IS_DOUBLE: {
 			TSRMLS_FETCH();
 			dval = Z_DVAL_P(op);
-			Z_STRVAL_P(op) = (char *) emalloc_rel(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
-			Z_STRLEN_P(op) = zend_sprintf(Z_STRVAL_P(op), "%.*G", (int) EG(precision), dval);  /* SAFE */
+			op->value.str.len = zend_spprintf(&op->value.str.val, 0, "%.*G", (int) EG(precision), dval);
 			/* %G already handles removing trailing zeros from the fractional part, yay */
 			break;
 		}
@@ -2777,13 +2775,9 @@ ZEND_API void zend_locale_usprintf_double(zval *op ZEND_FILE_LINE_DC)
 
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC)
 {
-	double dval = Z_DVAL_P(op);
-
 	TSRMLS_FETCH();
 
-	Z_STRVAL_P(op) = (char *) emalloc_rel(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
-	sprintf(Z_STRVAL_P(op), "%.*G", (int) EG(precision), dval);
-	Z_STRLEN_P(op) = strlen(Z_STRVAL_P(op));
+	op->value.str.len = zend_spprintf(&op->value.str.val, 0, "%.*G", (int) EG(precision), (double)op->value.dval);
 }
 
 ZEND_API void zend_locale_usprintf_long(zval *op ZEND_FILE_LINE_DC)
