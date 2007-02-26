@@ -900,6 +900,11 @@ SPL_METHOD(SplFileInfo, getRealPath)
 	}
 
 	if (VCWD_REALPATH(filename, buff)) {
+#ifdef ZTS
+		if (VCWD_ACCESS(buff, F_OK)) {
+			RETVAL_FALSE;
+		} else
+#endif
 		if (UG(unicode)) {
 			if (php_stream_path_decode(NULL, &path, &path_len, buff, strlen(buff), REPORT_ERRORS, FG(default_context)) == SUCCESS) {
 				RETVAL_UNICODEL(path, path_len, 0);
