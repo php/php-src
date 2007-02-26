@@ -928,6 +928,14 @@ class SplFileInfo
 	 */
 	function isLink() {/**/}
 
+	/** @return target of link.
+	 */
+	function getLinkTarget() {/**/}
+
+	/** @return The resolved path
+	 */
+	function getRealPath() {/**/}
+	
 	/** @return getPathname()
 	 */
 	function __toString() {/**/}
