@@ -306,18 +306,6 @@ int OS_SetImpersonate(void)
 	return 0;
 }
 
-int OS_StartImpersonation(void)
-{
-	return (!bImpersonate ||
-	        ((hListen != INVALID_HANDLE_VALUE) && 
-	         !ImpersonateNamedPipeClient(hListen)));
-}
-
-void OS_StopImpersonation(void)
-{
-	if (bImpersonate) RevertToSelf();
-}
-
 /*
  *--------------------------------------------------------------
  *
@@ -608,7 +596,7 @@ void OS_LibShutdown()
     if (stdioHandles[0] != INVALID_HANDLE_VALUE) {
 		DisconnectNamedPipe(hListen);
 		CancelIo(hListen);
-		OS_StopImpersonation();
+		if (bImpersonate) RevertToSelf();
 	}
 
     WSACleanup();
@@ -1775,14 +1763,14 @@ static int acceptNamedPipe()
     //
     // impersonate the client
     //
-    if(bImpersonate && OS_StartImpersonation()) {
+    if(bImpersonate && !ImpersonateNamedPipeClient(hListen)) {
         DisconnectNamedPipe(hListen);
     } else {
 		ipcFd = Win32NewDescriptor(FD_PIPE_SYNC, (int) hListen, -1);
 		if (ipcFd == -1) 
 		{
 			DisconnectNamedPipe(hListen);
-			OS_StopImpersonation();
+			if (bImpersonate) RevertToSelf();
 		}
 	}
 
@@ -1987,7 +1975,7 @@ int OS_IpcClose(int ipcFd, int shutdown)
 
         if (! DisconnectNamedPipe(fdTable[ipcFd].fid.fileHandle)) return -1;
 
-		OS_StopImpersonation();
+        if (bImpersonate) RevertToSelf();
 
         /* fall through */
     case FD_SOCKET_SYNC:
@@ -2061,3 +2049,4 @@ void OS_SetFlags(int fd, int flags)
     }
     return;
 }
+

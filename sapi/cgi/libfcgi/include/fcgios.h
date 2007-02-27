@@ -129,8 +129,6 @@ DLLAPI void OS_ShutdownPending(void);
 
 #ifdef _WIN32
 DLLAPI int OS_SetImpersonate(void);
-int OS_StartImpersonation(void);
-void OS_StopImpersonation(void);
 #endif
 
 #if defined (__cplusplus) || defined (c_plusplus)

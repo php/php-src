@@ -2061,10 +2061,6 @@ void FCGX_Free(FCGX_Request * request, int close)
         OS_IpcClose(request->ipcFd, ! request->detached);
         request->ipcFd = -1;
         request->detached = 0;
-#ifdef _WIN32
-    } else {
-        OS_StopImpersonation();
-#endif
     }
 }
 
@@ -2229,10 +2225,6 @@ int FCGX_Accept_r(FCGX_Request *reqDataPtr)
             if (reqDataPtr->ipcFd < 0) {
                 return (errno > 0) ? (0 - errno) : -9999;
             }
-#ifdef _WIN32
-		} else if (!OS_StartImpersonation()) {
-			FCGX_Free(reqDataPtr, 1);
-#endif
         }
         /*
          * A connection is open.  Read from the connection in order to
