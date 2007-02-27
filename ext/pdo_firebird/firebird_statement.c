@@ -327,13 +327,13 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 			*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 			
 			if (n >= 0) {
-				*len = snprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d", 
+				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d", 
 					n / f, -var->sqlscale, n % f);
 			} else if (n < -f) {
-				*len = snprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d",
+				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d",
 					n / f, -var->sqlscale, -n % f);				
 			 } else {
-				*len = snprintf(*ptr, CHAR_BUF_LEN, "-0.%0*" LL_MASK "d", -var->sqlscale, -n % f);
+				*len = slprintf(*ptr, CHAR_BUF_LEN, "-0.%0*" LL_MASK "d", -var->sqlscale, -n % f);
 			}
 		} else {
 			switch (var->sqltype & ~1) {
@@ -356,23 +356,23 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 /* --- cut here --- */
 				case SQL_SHORT:
 				    *ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN, "%d", *(short*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%d", *(short*)var->sqldata);
 					break;
 				case SQL_LONG:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN, "%ld", *(ISC_LONG*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%ld", *(ISC_LONG*)var->sqldata);
 					break;
 				case SQL_INT64:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
 					break;
 				case SQL_FLOAT:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN, "%F", *(float*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%F", *(float*)var->sqldata);
 					break;
 				case SQL_DOUBLE:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN, "%F" , *(double*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%F" , *(double*)var->sqldata);
 					break;
 /* --- cut here --- */
 #if abies_0
@@ -394,7 +394,7 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*ptr = var->sqldata;
 #else
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
 #endif
 					break;
 				case SQL_FLOAT:

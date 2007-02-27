@@ -2049,10 +2049,10 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			INIT_ZVAL(outbuflen);
 #ifdef va_copy
 			va_copy(argcopy, args);
-			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, argcopy);
+			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, argcopy);
 			va_end(argcopy);
 #else
-			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
+			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, args);
 #endif
 			buffer[sizeof(buffer)-1]=0;
 			if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
@@ -2109,10 +2109,10 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 
 #ifdef va_copy
 			va_copy(argcopy, args);
-			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, argcopy);
+			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, argcopy);
 			va_end(argcopy);
 #else
-			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
+			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, args);
 #endif
 			buffer[sizeof(buffer)-1]=0;
 			if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
