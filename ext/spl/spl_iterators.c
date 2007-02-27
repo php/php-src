@@ -1390,7 +1390,7 @@ SPL_METHOD(RegexIterator, accept)
 
 	if (intern->u.regex.flags & REGIT_USE_KEY) {
 		if (intern->current.key_type == HASH_KEY_IS_LONG) {
-			subject_len = snprintf(tmp, sizeof(tmp), "%ld", intern->current.int_key);
+			subject_len = slprintf(tmp, sizeof(tmp), "%ld", intern->current.int_key);
 			subject = &tmp[0];
 			use_copy = 0;
 		} else {

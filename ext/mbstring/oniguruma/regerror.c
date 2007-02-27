@@ -278,6 +278,9 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
 
   va_init_list(args, fmt);
   n = vsnprintf((char* )buf, bufsize, (const char* )fmt, args);
+  if (n >= bufsize) {
+	return;
+  }
   va_end(args);
 
   need = (pat_end - pat) * 4 + 4;

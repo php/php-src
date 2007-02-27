@@ -687,7 +687,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 							/* If there is no realm string at all, append one */
 							if(!strstr(lower_temp,"realm")) {
 								efree(result);
-								conv_len = snprintf(conv_temp, sizeof(conv_temp), " realm=\"%ld\"",myuid);
+								conv_len = slprintf(conv_temp, sizeof(conv_temp), " realm=\"%ld\"",myuid);
 								result = emalloc(ptr_len+conv_len+1);
 								result_len = ptr_len+conv_len;
 								memcpy(result, ptr, ptr_len);	
@@ -774,7 +774,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 
 			assert(Z_STRVAL_P(uf_result) != NULL);
 
-			len = snprintf(buf, sizeof(buf), "Content-Encoding: %s", Z_STRVAL_P(uf_result));
+			len = slprintf(buf, sizeof(buf), "Content-Encoding: %s", Z_STRVAL_P(uf_result));
 			if (len <= 0 || sapi_add_header(buf, len, 1) == FAILURE) {
 				return FAILURE;
 			}
@@ -818,7 +818,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 					http_status_line.header_len = strlen(SG(sapi_headers).http_status_line);
 				} else {
 					http_status_line.header = buf;
-					http_status_line.header_len = snprintf(buf, sizeof(buf), "HTTP/1.0 %d X", SG(sapi_headers).http_response_code);
+					http_status_line.header_len = slprintf(buf, sizeof(buf), "HTTP/1.0 %d X", SG(sapi_headers).http_response_code);
 				}
 				sapi_module.send_header(&http_status_line, SG(server_context) TSRMLS_CC);
 			}

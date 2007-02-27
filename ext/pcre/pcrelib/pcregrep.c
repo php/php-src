@@ -1188,7 +1188,7 @@ if ((sep = isdirectory(pathname)) != 0)
     while ((nextfile = readdirectory(dir)) != NULL)
       {
       int frc, blen;
-      blen = snprintf(buffer, sizeof(buffer), "%.512s%c%.128s", pathname, sep, nextfile);
+      blen = slprintf(buffer, sizeof(buffer), "%.512s%c%.128s", pathname, sep, nextfile);
 
       if (exclude_compiled != NULL &&
           pcre_exec(exclude_compiled, NULL, buffer, blen, 0, 0, NULL, 0) >= 0)

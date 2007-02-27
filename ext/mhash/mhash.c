@@ -70,7 +70,7 @@ PHP_MINIT_FUNCTION(mhash)
 
 	for (i=0; i<n; i++) {
 		if ((name = mhash_get_hash_name(i))) {
-			l = snprintf(buf, 127, "MHASH_%s", name);
+			l = slprintf(buf, 127, "MHASH_%s", name);
 			zend_register_long_constant(buf, l + 1, i, CONST_PERSISTENT, module_number TSRMLS_CC);
 			free(name);
 		}
