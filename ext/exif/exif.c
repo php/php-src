@@ -1032,22 +1032,22 @@ static unsigned char* exif_char_dump(unsigned char * addr, int len, int offset)
 	static unsigned char tmp[20];
 	int c, i, p=0, n = 5+31;
 
-	p += snprintf(buf+p, sizeof(buf)-p, "\nDump Len: %08X (%d)", len, len);
+	p += slprintf(buf+p, sizeof(buf)-p, "\nDump Len: %08X (%d)", len, len);
 	if (len) {
 		for(i=0; i<len+15 && p+n<=sizeof(buf); i++) {
 			if (i%16==0) {
-				p += snprintf(buf+p, sizeof(buf)-p, "\n%08X: ", i+offset);
+				p += slprintf(buf+p, sizeof(buf)-p, "\n%08X: ", i+offset);
 			}
 			if (i<len) {
 				c = *addr++;
-				p += snprintf(buf+p, sizeof(buf)-p, "%02X ", c);
+				p += slprintf(buf+p, sizeof(buf)-p, "%02X ", c);
 				tmp[i%16] = c>=32 ? c : '.';
 				tmp[(i%16)+1] = '\0';
 			} else {
-				p += snprintf(buf+p, sizeof(buf)-p, "   ");
+				p += slprintf(buf+p, sizeof(buf)-p, "   ");
 			}
 			if (i%16==15) {
-				p += snprintf(buf+p, sizeof(buf)-p, "    %s", tmp);
+				p += slprintf(buf+p, sizeof(buf)-p, "    %s", tmp);
 				if (i>=len) {
 					break;
 				}

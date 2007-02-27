@@ -595,19 +595,19 @@ int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db T
 
 	for (i = 0; i < sizeof(dpb_args); ++i) {
 		if (dpb_args[i] && args[i] && len[i] && buf_len > 0) {
-			dpb_len = snprintf(dpb, buf_len, "%c%c%s", dpb_args[i],(unsigned char)len[i],args[i]);
+			dpb_len = slprintf(dpb, buf_len, "%c%c%s", dpb_args[i],(unsigned char)len[i],args[i]);
 			dpb += dpb_len;
 			buf_len -= dpb_len;
 		}
 	}
 	if (largs[BUF] && buf_len > 0) {
-		dpb_len = snprintf(dpb, buf_len, "%c\2%c%c", isc_dpb_num_buffers, 
+		dpb_len = slprintf(dpb, buf_len, "%c\2%c%c", isc_dpb_num_buffers, 
 			(char)(largs[BUF] >> 8), (char)(largs[BUF] & 0xff));
 		dpb += dpb_len;
 		buf_len -= dpb_len;
 	}
 	if (largs[SYNC] && buf_len > 0) {
-		dpb_len = snprintf(dpb, buf_len, "%c\1%c", isc_dpb_force_write, largs[SYNC] == isc_spb_prp_wm_sync ? 1 : 0);
+		dpb_len = slprintf(dpb, buf_len, "%c\1%c", isc_dpb_force_write, largs[SYNC] == isc_spb_prp_wm_sync ? 1 : 0);
 		dpb += dpb_len;
 		buf_len -= dpb_len;
 	}

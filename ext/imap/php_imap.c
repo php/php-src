@@ -3414,7 +3414,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 				bt_len += strlen(addr->mailbox);
 				bufferTo = safe_erealloc(bufferTo, bt_len, 1, strlen(addr->host));
 				bt_len += strlen(addr->host);
-				offset += snprintf(bufferTo + offset, bt_len - offset, "%s@%s,", addr->mailbox, addr->host);
+				offset += slprintf(bufferTo + offset, bt_len - offset, "%s@%s,", addr->mailbox, addr->host);
 			}
 			addr = addr->next;
 		}
@@ -3443,7 +3443,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 				bt_len += strlen(addr->mailbox);
 				bufferCc = safe_erealloc(bufferCc, bt_len, 1, strlen(addr->host));
 				bt_len += strlen(addr->host);
-				offset += snprintf(bufferCc + offset, bt_len - offset, "%s@%s,", addr->mailbox, addr->host);
+				offset += slprintf(bufferCc + offset, bt_len - offset, "%s@%s,", addr->mailbox, addr->host);
 			}
 			addr = addr->next;
 		}
@@ -3469,7 +3469,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 				bt_len += strlen(addr->mailbox);
 				bufferBcc = safe_erealloc(bufferBcc, bt_len, 1, strlen(addr->host));
 				bt_len += strlen(addr->host);
-				offset += snprintf(bufferBcc + offset, bt_len - offset, "%s@%s,", addr->mailbox, addr->host);
+				offset += slprintf(bufferBcc + offset, bt_len - offset, "%s@%s,", addr->mailbox, addr->host);
 			}
 			addr = addr->next;
 		}
