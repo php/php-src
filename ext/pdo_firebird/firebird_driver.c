@@ -619,7 +619,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 		/* loop through all the provided arguments and set dpb fields accordingly */
 		for (i = 0; i < sizeof(dpb_flags); ++i) {
 			if (dpb_values[i] && buf_len > 0) {
-				dpb_len = snprintf(dpb, buf_len, "%c%c%s", dpb_flags[i], (unsigned char)strlen(dpb_values[i]),
+				dpb_len = slprintf(dpb, buf_len, "%c%c%s", dpb_flags[i], (unsigned char)strlen(dpb_values[i]),
 					dpb_values[i]);
 				dpb += dpb_len;
 				buf_len -= dpb_len;

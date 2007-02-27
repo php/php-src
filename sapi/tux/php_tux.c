@@ -116,7 +116,7 @@ static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers)
 	status_line = malloc(30);
 	
 	/* safe sprintf use */
-	len = snprintf(status_line, 30, "HTTP/1.1 %d NA\r\n", SG(sapi_headers).http_response_code);
+	len = slprintf(status_line, 30, "HTTP/1.1 %d NA\r\n", SG(sapi_headers).http_response_code);
 	
 	vec[0].iov_base = status_line;
 	vec[0].iov_len = len;
@@ -195,7 +195,7 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 	sapi_header_line ctr = {0};
 	
 	ctr.line = buf;
-	ctr.line_len = snprintf(buf, sizeof(buf), "Server: %s", TUXAPI_version);
+	ctr.line_len = slprintf(buf, sizeof(buf), "Server: %s", TUXAPI_version);
 	sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 	
 	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC);

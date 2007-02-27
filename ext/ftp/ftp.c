@@ -1102,13 +1102,13 @@ ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const char *args)
 		if (strlen(cmd) + strlen(args) + 4 > FTP_BUFSIZE) {
 			return 0;
 		}
-		size = snprintf(ftp->outbuf, sizeof(ftp->outbuf), "%s %s\r\n", cmd, args);
+		size = slprintf(ftp->outbuf, sizeof(ftp->outbuf), "%s %s\r\n", cmd, args);
 	} else {
 		/* "cmd\r\n\0" */
 		if (strlen(cmd) + 3 > FTP_BUFSIZE) {
 			return 0;
 		}
-		size = snprintf(ftp->outbuf, sizeof(ftp->outbuf), "%s\r\n", cmd);
+		size = slprintf(ftp->outbuf, sizeof(ftp->outbuf), "%s\r\n", cmd);
 	}
 
 	data = ftp->outbuf;

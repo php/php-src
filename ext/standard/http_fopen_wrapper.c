@@ -438,7 +438,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		/* ensure the header is only sent if user_agent is not blank */
 		if (ua_len > sizeof(_UA_HEADER)) {
 			ua = emalloc(ua_len + 1);
-			if ((ua_len = snprintf(ua, ua_len, _UA_HEADER, ua_str)) > 0) {
+			if ((ua_len = slprintf(ua, ua_len, _UA_HEADER, ua_str)) > 0) {
 				ua[ua_len] = 0;
 				php_stream_write(stream, ua, ua_len);
 			} else {
@@ -456,7 +456,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		php_stream_context_get_option(context, "http", "content", &tmpzval) == SUCCESS &&
 		Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval) > 0) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
-			scratch_len = snprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_PP(tmpzval));
+			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_PP(tmpzval));
 			php_stream_write(stream, scratch, scratch_len);
 		}
 		if (!(have_header & HTTP_HEADER_TYPE)) {

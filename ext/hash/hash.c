@@ -588,7 +588,7 @@ PHP_MINFO_FUNCTION(hash)
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
 		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, NULL, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
-		s += snprintf(s, e - s, "%s ", str);
+		s += slprintf(s, e - s, "%s ", str);
 	}
 	*s = 0;
 
