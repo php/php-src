@@ -4263,8 +4263,12 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 					*(tp++) = c;
 				}
-				if (p != buf && *(p-1) != '\\') {
-					in_q = !in_q;
+				if (p != buf && *(p-1) != '\\' && (!in_q || *p == in_q)) {
+					if (in_q) {
+						in_q = 0;
+					} else {
+						in_q = *p;
+					}
 				}
 				break;
 			
