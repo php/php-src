@@ -1,3 +1,12 @@
+2007-02-26  Antony Dovgal  <antony@zend.com>
+
+    * zend_operators.c
+      zend_operators.h:
+      nuke dead code
+
+    * zend_operators.c:
+      MFB: use zend_spprintf()
+
 2007-02-25  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h

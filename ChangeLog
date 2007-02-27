@@ -1,3 +1,102 @@
+2007-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_directory.c:
+      - Add missing access check
+
+    * ext/spl/spl.php
+      ext/spl/spl_directory.c:
+      - Add SplFileInfo::getLinkTarget
+      - Add SplFileInfo::getRealPath
+
+2007-02-26  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h:
+      nuke dead code
+
+    * ext/standard/filestat.c:
+      simplify disk_*_space() functions sources by moving ifdef'ed
+      implementations into separate functions
+
+    * (PHP_5_2)
+      ext/session/mod_mm.c:
+      fix typo
+
+2007-02-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug40609.phpt
+      ext/soap/tests/bugs/bug40609.phpt
+      ext/soap/tests/bugs/bug40609.wsdl
+      ext/soap/tests/bugs/bug40609.wsdl:
+      Fixed tests
+
+2007-02-26  Antony Dovgal  <antony@zend.com>
+
+    * Makefile.global:
+      remind about 'make test'
+
+    * ext/standard/filestat.c
+      ext/standard/filestat.c:
+      fix folding
+
+2007-02-26  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/pcre/php_pcre.def:
+      fix win build
+
+2007-02-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/serialize/bug24063.phpt:
+      fix
+      the sprintf() -> zend_spprintf() change affected this
+
+    * (PHP_5_2)
+      main/snprintf.c:
+      fix ws/cs and make the ugly code less ugly..
+
+    * main/snprintf.c:
+      fix CS/WS
+
+    * ZendEngine2/zend_operators.c:
+      MFB: use zend_spprintf()
+
+2007-02-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/snprintf.c:
+      ZTS fix
+
+2007-02-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/bug40637.phpt:
+      add new test
+
+    * ext/standard/tests/strings/bug40637.phpt
+      ext/standard/tests/strings/bug40637.phpt:
+      
+      new test
+
+2007-02-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      poll() is not affected by FD_SETSIZE (Tony)
+
+2007-02-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/curl/curl.c:
+      fix #40635 (segfault in cURL extension)
+
+2007-02-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/head.c:
+      
+      Revert previous commit that caused a buffer overflow (Bug #40634)
+
 2007-02-25  Antony Dovgal  <antony@zend.com>
 
     * ext/dbase/dbase.c
