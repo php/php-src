@@ -1193,7 +1193,7 @@ PHP_FUNCTION(ibase_gen_id)
 #if SIZEOF_LONG < 8
 	if (result < LONG_MIN || result > LONG_MAX) {
 		char *res;
-		int l
+		int l;
 
 		l = spprintf(&res, 0, "%" LL_MASK "d", result);
 		RETURN_STRINGL(res, l, 0);
