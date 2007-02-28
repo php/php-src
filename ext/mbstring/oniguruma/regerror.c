@@ -1,4 +1,4 @@
-/**********************************************************************
+
   regerror.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
@@ -279,7 +279,7 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
   va_init_list(args, fmt);
   n = vsnprintf((char* )buf, bufsize, (const char* )fmt, args);
   if (n >= bufsize) {
-	return;
+	n = bufsize - 1;
   }
   va_end(args);
 
