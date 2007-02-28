@@ -1,3 +1,46 @@
+2007-02-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/ftp/ftp.c
+      ext/hash/hash.c
+      ext/mbstring/oniguruma/regerror.c
+      ext/mhash/mhash.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pdo_firebird/firebird_driver.c
+      ext/session/mod_mm.c
+      ext/session/session.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_iterators.c
+      ext/standard/html.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/string.c
+      ext/wddx/wddx.c
+      main/SAPI.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/tux/php_tux.c:
+      
+      snprintf() -> slprintf()
+
+    * (PHP_5_2)
+      ext/date/php_date.c
+      ext/exif/exif.c
+      ext/imap/php_imap.c
+      ext/interbase/ibase_query.c
+      ext/interbase/ibase_service.c
+      ext/interbase/interbase.c
+      ext/pdo_firebird/firebird_statement.c
+      ext/soap/soap.c:
+      
+      snprintf() -> slprintf()
+      
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      
+      Fixed bug #40637 (Regression in strip_tags() in relation so quote
+      handling)
+
 2007-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/spl/spl_directory.c:
