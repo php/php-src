@@ -1036,7 +1036,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 					} else {
 						ch = c & 0xFF;	/* don't extend sign */
 					}
-					next++;
+					if (next) next++;
 				}
 				break;
 			case gdFTEX_Big5: {
