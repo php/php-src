@@ -1,14 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Feb 2007, Version 4.4.6
-
-- Fixed bug #40635 (segfault in cURL extension). (Tony)
-- Fixed bug #40611 (possible cURL memory error). (Tony)
-
-22 Feb 2007, Version 4.4.6RC1
+28 Feb 2007, Version 4.4.6
 
 - Updated PCRE to version 7.0. (Nuno)
 - Fixed segfault in ext/session when register_globals=On. (Tony)
+- Fixed bug #40635 (segfault in cURL extension). (Tony)
+- Fixed bug #40611 (possible cURL memory error). (Tony)
 - Fixed bug #40578 (imagettftext() multithreading issue). (Tony)
 - Fixed bug #40502 (ext/interbase compile failure). (Tony)
 - Fixed bug #40286 (PHP fastcgi with PHP_FCGI_CHILDREN don't kill children when
