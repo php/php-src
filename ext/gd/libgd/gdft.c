@@ -772,10 +772,12 @@ gdroundupdown (FT_F26Dot6 v1, int updown)
 void gdFontCacheShutdown()
 {
 	if (fontCache) {
- 		gdMutexShutdown(gdFontCacheMutex);
- 		gdCacheDelete(fontCache);
+		gdMutexLock(gdFontCacheMutex);
+		gdCacheDelete(fontCache);
 		fontCache = NULL;
- 		FT_Done_FreeType(library);
+		gdMutexUnlock(gdFontCacheMutex);
+		gdMutexShutdown(gdFontCacheMutex);
+		FT_Done_FreeType(library);
 	}
 }
 
