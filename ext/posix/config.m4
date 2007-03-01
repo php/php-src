@@ -28,5 +28,7 @@ int main(int argc, char *argv[])
     AC_DEFINE(HAVE_TTYNAME_R, 1, [Whether you have a working ttyname_r])
   ],[
     AC_MSG_RESULT([no, posix_ttyname() will be thread-unsafe])
+  ], [
+    AC_MSG_RESULT([no, cannot detect working ttyname_r() when cross compiling. posix_ttyname() will be thread-unsafe])
   ])
 fi
