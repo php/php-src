@@ -1,3 +1,34 @@
+2007-02-28  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to dev.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with 4.4.6.
+
+2007-02-28  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/interbase/interbase.c
+      ext/interbase/interbase.c:
+      Typo
+
+2007-02-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/mbstring/oniguruma/regerror.c:
+      
+      Fixed typo
+
+    * (PHP_5_2)
+      ext/mbstring/oniguruma/regerror.c:
+      Adjust vsnprintf() usage
+
 2007-02-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
