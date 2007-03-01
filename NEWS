@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Added --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
+- Fixed bug #40678 (Cross compilation fails). (Tony)
 - Fixed bug #40621 (Crash when constructor called inappropriately). (Tony)
 - Fixed bug #40609 (Segfaults when using more than one SoapVar in a request).
   (Rob, Dmitry)
