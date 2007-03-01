@@ -721,6 +721,7 @@ void gdFontCacheShutdown()
 		gdMutexLock(gdFontCacheMutex);
 		gdCacheDelete(fontCache);
 		fontCache = NULL;
+		gdMutexUnlock(gdFontCacheMutex);
 		gdMutexShutdown(gdFontCacheMutex);
 		FT_Done_FreeType(library);
 	}
