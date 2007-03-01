@@ -203,7 +203,8 @@ typedef struct { /* php_oci_bind {{{ */
 } php_oci_bind; /* }}} */
 
 typedef struct { /* php_oci_out_column {{{ */
-	php_oci_statement *statement;	/* statement handle. used when fetching REFCURSORS */
+	php_oci_statement *statement;			/* statement handle. used when fetching REFCURSORS */
+	php_oci_statement *nested_statement;	/* statement handle. used when fetching REFCURSORS */
 	OCIDefine *oci_define;			/* define handle */
 	zstr name;						/* column name */
 	ub4 name_len;					/* column name length */
