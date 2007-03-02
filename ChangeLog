@@ -1,3 +1,69 @@
+2007-03-01  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/tests/bug40415.phpt
+      ext/oci8/tests/fetch_all3.phpt
+      ext/oci8/tests/fetch_all3.phpt
+      ext/oci8/tests/lob_037.phpt
+      ext/oci8/tests/lob_038.phpt
+      ext/oci8/tests/lob_039.phpt:
+      new tests
+
+    * ext/oci8/tests/bug40415.phpt
+      ext/oci8/tests/bug40415.phpt
+      ext/oci8/tests/lob_029.phpt
+      ext/oci8/tests/lob_037.phpt
+      ext/oci8/tests/lob_037.phpt
+      ext/oci8/tests/lob_038.phpt
+      ext/oci8/tests/lob_038.phpt
+      ext/oci8/tests/lob_039.phpt
+      ext/oci8/tests/lob_039.phpt:
+      
+      new tests by Chris and me
+
+    * ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      MFB: allocate and define descriptors dynamically
+
+    * (PHP_5_2)
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      allocate descriptors dynamically
+
+2007-03-01  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_4_4)
+      ext/gd/libgd/gdft.c:
+      MFH
+
+    * ext/gd/libgd/gdft.c:
+      MFB
+
+    * (PHP_5_2)
+      ext/gd/libgd/gdft.c:
+      merge from gd sources: unlock mutex before shuting it down
+
+2007-03-01  Antony Dovgal  <antony@zend.com>
+
+    * ext/iconv/config.m4:
+      fix iconv cross-compilation
+
+    * (PHP_5_2)
+      NEWS
+      ext/posix/config.m4:
+      MFH: fix #40678 (Cross compilation fails)
+
+    * ext/posix/config.m4:
+      fix #40678 (Cross compilation fails)
+
+2007-03-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Fixed bug #40464 (session.save_path wont use default-value when safe_mode
+      or open_basedir is enabled).
+
 2007-02-28  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_4_4)
