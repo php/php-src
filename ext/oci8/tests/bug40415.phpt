@@ -258,11 +258,11 @@ array(2) {
   [u"CURSOR"]=>
   array(3) {
     [0]=>
-    resource(22) of type (oci8 statement)
+    resource(%d) of type (oci8 statement)
     [1]=>
-    resource(23) of type (oci8 statement)
+    resource(%d) of type (oci8 statement)
     [2]=>
-    resource(24) of type (oci8 statement)
+    resource(%d) of type (oci8 statement)
   }
 }
 Getting nested cursor
