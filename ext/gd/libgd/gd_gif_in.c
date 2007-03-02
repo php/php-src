@@ -121,7 +121,6 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 	int             bitPixel;
 	int	       i;
 	/*1.4//int             imageCount = 0; */
-	char            version[4];
 
 	gdImagePtr im = 0;
 	ZeroDataBlock = FALSE;
@@ -133,9 +132,8 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 	if (strncmp((char *)buf,"GIF",3) != 0) {
 		return 0;
 	}
-	strlcpy(version, (char *)buf + 3, sizeof(version));
 
-	if ((strcmp(version, "87a") != 0) && (strcmp(version, "89a") != 0)) {
+	if ((strncmp((char*)buf+3, "87a", 3) != 0) && (strncmp((char*)buf+3, "89a", 3) != 0)) {
 		return 0;
 	}
 	if (! ReadOK(fd,buf,7)) {
