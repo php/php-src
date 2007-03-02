@@ -60,6 +60,8 @@ PHP                                                                        NEWS
 - Fixed bug #36496 (SSL support in imap_open() not working on Windows). (Edin)
 - Fixed bug #34794 (proc_close() hangs when used with two processes).
   (jdolecek at netbsd dot org, Nuno)
+- Limit nesting level of input variables with max_input_nesting_level 
+  as fix for MOPB-03-2007 (Stas)
 
 08 Feb 2007, PHP 5.2.1
 - Added read-timeout context option "timeout" for HTTP streams. (Hannes, Ilia). 
