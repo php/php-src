@@ -163,7 +163,7 @@ static PHP_INI_MH(OnUpdateSaveDir)
 			p = new_value;
 		}
 
-		if (PG(safe_mode) && (!php_checkuid(p, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		if (PG(safe_mode) && (!php_checkuid(p, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
 			return FAILURE;
 		}
 
