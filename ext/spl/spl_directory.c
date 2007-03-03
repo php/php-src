@@ -189,7 +189,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_uchar ty
 	intern->path_len = path_len;
 	intern->u.dir.dirp = php_stream_u_opendir(type, path, path_len, options, NULL);
 
-	if (php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops)) {
+	if (intern->u.dir.dirp && php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops)) {
 		intern->path.s = php_glob_stream_get_path(intern->u.dir.dirp, 1, &intern->path_len);
 		intern->path_type = IS_STRING;
 		intern->flags |= SPL_FILE_DIR_USE_GLOB;
@@ -626,6 +626,19 @@ SPL_METHOD(DirectoryIterator, valid)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETURN_BOOL(intern->u.dir.entry.d_name[0] != '\0');
+}
+/* }}} */
+
+/* {{{ proto string DirectoryIterator::count() U
+   Return number of entries in directory, works only when USE_GLOB is in effect */
+SPL_METHOD(DirectoryIterator, count)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (intern->flags & SPL_FILE_DIR_USE_GLOB) {
+		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp));
+	}
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Unable to determine count unless USE_GLOG flag is in effect");
 }
 /* }}} */
 
@@ -1597,6 +1610,7 @@ static zend_function_entry spl_DirectoryIterator_functions[] = {
 	SPL_ME(DirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, count,         NULL, ZEND_ACC_PUBLIC)
 	SPL_MA(DirectoryIterator, __toString, DirectoryIterator, getFilename, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
