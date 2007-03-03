@@ -90,6 +90,14 @@ PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, int *ple
 }
 /* }}} */
 
+PHPAPI int _php_glob_stream_get_count(php_stream *stream STREAMS_DC TSRMLS_DC) /* {{{ */
+{
+	glob_s_t *pglob = (glob_s_t *)stream->abstract;
+	
+	return pglob ? pglob->glob.gl_pathc : 0;
+}
+/* }}} */
+
 static void php_glob_stream_path_split(glob_s_t *pglob, char *path, int get_path, char **p_file TSRMLS_DC) /* {{{ */
 {
 	char *pos, *gpath = path;
