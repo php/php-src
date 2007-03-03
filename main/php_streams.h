@@ -545,6 +545,7 @@ END_EXTERN_C()
 
 #include "streams/php_stream_transport.h"
 #include "streams/php_stream_plain_wrapper.h"
+#include "streams/php_stream_glob_wrapper.h"
 #include "streams/php_stream_userspace.h"
 #include "streams/php_stream_mmap.h"
 
@@ -613,6 +614,9 @@ END_EXTERN_C()
 
 /* get (or create) a persistent version of the stream */
 #define STREAM_OPEN_PERSISTENT	2048
+
+/* use glob stream for directory open in plain files stream */
+#define STREAM_USE_GLOB_DIR_OPEN 4096
 
 /* Antique - no longer has meaning */
 #define IGNORE_URL_WIN 0
