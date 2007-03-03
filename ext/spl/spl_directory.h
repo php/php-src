@@ -120,6 +120,8 @@ static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_files
 #define SPL_FILE_DIR_KEY_AS_FILENAME       0x00000100 /* make RecursiveDirectoryTree::key() return getFilename() */
 #define SPL_FILE_DIR_KEY_MODE_MASK         0x00000F00 /* mask RecursiveDirectoryTree::key() */
 
+#define SPL_FILE_DIR_USE_GLOB              0x00001000 /* use glob for open dir*/
+
 #endif /* SPL_DIRECTORY_H */
 
 /*
