@@ -90,11 +90,21 @@ PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, int *ple
 }
 /* }}} */
 
-PHPAPI int _php_glob_stream_get_count(php_stream *stream STREAMS_DC TSRMLS_DC) /* {{{ */
+PHPAPI int _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
-	
-	return pglob ? pglob->glob.gl_pathc : 0;
+
+	if (pglob) {
+		if (pflags) {
+			*pflags = pglob->flags;
+		}
+		return pglob->glob.gl_pathc;
+	} else {
+		if (pflags) {
+			*pflags = 0;
+		}
+		return 0;
+	}
 }
 /* }}} */
 
@@ -199,7 +209,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	glob_s_t *pglob;
-	int ret;
+	int ret, path_len;
 	char *tmp, *pos;
 
 	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path TSRMLS_CC)) {
@@ -208,9 +218,12 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 
 	if (!strncmp(path, "glob://", sizeof("glob://")-1)) {
 		path += sizeof("glob://")-1;
+		path_len = strlen(path);
 		if (opened_path) {
-			*opened_path = estrdup(path);
+			*opened_path = estrndup(path, path_len);
 		}
+	} else {
+		path_len = strlen(path);
 	}
 
 	pglob = ecalloc(sizeof(*pglob), 1);
@@ -222,17 +235,6 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 		{
 			efree(pglob);
 			return NULL;
-		}
-	}
-
-#ifdef GLOB_APPEND
-	if ((pglob->flags & GLOB_APPEND) == 0)
-#endif
-	{
-		if (pglob->glob.gl_pathc) {
-			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[0], 1, &tmp TSRMLS_CC);
-		} else {
-			php_glob_stream_path_split(pglob, path, 1, &tmp TSRMLS_CC);
 		}
 	}
 
@@ -248,6 +250,16 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 
 	pglob->pattern_len = strlen(pos);
 	pglob->pattern = estrndup(pos, pglob->pattern_len);
+
+	if (strcspn(path, "*?") < (path_len - pglob->pattern_len)) {
+		pglob->flags |= GLOB_APPEND;
+	}
+
+	if (pglob->glob.gl_pathc) {
+		php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[0], 1, &tmp TSRMLS_CC);
+	} else {
+		php_glob_stream_path_split(pglob, path, 1, &tmp TSRMLS_CC);
+	}
 
 	return php_stream_alloc(&php_glob_stream_ops, pglob, 0, mode);
 }
