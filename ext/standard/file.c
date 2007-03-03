@@ -2697,7 +2697,7 @@ PHP_FUNCTION(realpath)
 #ifdef ZTS
 		if (VCWD_ACCESS(resolved_path_buff, F_OK)) {
 			RETVAL_FALSE;
-		}
+		} else
 #endif
 
 		if (UG(unicode)) {
