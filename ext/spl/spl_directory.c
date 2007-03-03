@@ -675,6 +675,18 @@ SPL_METHOD(SplFileInfo, getBasename)
 		}
 	}
 
+	if (intern->path_len && intern->path_len < intern->file_name_len) {
+		if (intern->file_name_type == IS_UNICODE) {
+			fname.u = intern->file_name.u + intern->path_len + 1;
+		} else {
+			fname.s = intern->file_name.s + intern->path_len + 1;
+		}
+		flen = intern->file_name_len - (intern->path_len + 1);
+	} else {
+		fname = intern->file_name;
+		flen = intern->file_name_len;
+	}
+
 	if (intern->file_name_type == IS_UNICODE) {	
 		php_u_basename(fname.u, flen, suffix.u, slen, &fname.u, &flen TSRMLS_CC);
 	} else {
