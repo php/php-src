@@ -45,6 +45,14 @@
 #include "ext/standard/php_filestat.h"
 #include "ext/standard/php_link.h"
 
+#ifdef HAVE_GLOB
+# ifndef PHP_WIN32
+#  include <glob.h>
+# else
+#  include "win32/glob.h"
+# endif
+#endif
+
 /* declare the class handlers */
 static zend_object_handlers spl_filesystem_object_handlers;
 
@@ -174,11 +182,28 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 
 #define IS_SLASH_AT(type, zs, pos) (type == IS_UNICODE ? IS_U_SLASH(zs.u[pos]) : IS_SLASH(zs.s[pos]))
 
+static int spl_filesystem_dir_read(spl_filesystem_object *intern TSRMLS_DC) /* {{{ */
+{
+	if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
+		intern->u.dir.entry.d_name[0] = '\0';
+		return 0;
+	} else {
+		if (intern->flags & SPL_FILE_DIR_GLOB_REFETCH_PATH) {
+			if (intern->path.v) {
+				efree(intern->path.v);
+			}
+			intern->path.s = php_glob_stream_get_path(intern->u.dir.dirp, 1, &intern->path_len);
+		}
+		return 1;
+	}
+}
+/* }}} */
+
 /* {{{ spl_filesystem_dir_open */
 /* open a directory resource */
 static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_uchar type, zstr path, int path_len TSRMLS_DC)
 {
-	int options = REPORT_ERRORS;
+	int options = REPORT_ERRORS, flags;
 	
 	if (intern->flags & SPL_FILE_DIR_USE_GLOB) {
 		options |= STREAM_USE_GLOB_DIR_OPEN;
@@ -193,12 +218,18 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_uchar ty
 		intern->path.s = php_glob_stream_get_path(intern->u.dir.dirp, 1, &intern->path_len);
 		intern->path_type = IS_STRING;
 		intern->flags |= SPL_FILE_DIR_USE_GLOB;
+		php_glob_stream_get_count(intern->u.dir.dirp, &flags);
+		if (flags & GLOB_APPEND) {
+			intern->flags |= SPL_FILE_DIR_GLOB_REFETCH_PATH;
+		} else {
+			intern->flags &= ~SPL_FILE_DIR_GLOB_REFETCH_PATH;
+		}
 	} else if (intern->path_len && IS_SLASH_AT(type, path, intern->path_len-1)) {
 		intern->path = ezstrndup(type, path, --intern->path_len);
-		intern->flags &= ~SPL_FILE_DIR_USE_GLOB;
+		intern->flags &= ~(SPL_FILE_DIR_USE_GLOB|SPL_FILE_DIR_GLOB_REFETCH_PATH);
 	} else {
 		intern->path = ezstrndup(type, path, intern->path_len);
-		intern->flags &= ~SPL_FILE_DIR_USE_GLOB;
+		intern->flags &= ~(SPL_FILE_DIR_USE_GLOB|SPL_FILE_DIR_GLOB_REFETCH_PATH);
 	}
 	intern->u.dir.index = 0;
 
@@ -206,9 +237,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_uchar ty
 		/* throw exception: should've been already happened */
 		intern->u.dir.entry.d_name[0] = '\0';
 	} else {
-		if (!php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
-			intern->u.dir.entry.d_name[0] = '\0';
-		}
+		spl_filesystem_dir_read(intern TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -574,9 +603,8 @@ SPL_METHOD(DirectoryIterator, rewind)
 	if (intern->u.dir.dirp) {
 		php_stream_rewinddir(intern->u.dir.dirp);
 	}
-	if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
-		intern->u.dir.entry.d_name[0] = '\0';
-	}
+
+	spl_filesystem_dir_read(intern TSRMLS_CC);
 }
 /* }}} */
 
@@ -609,9 +637,7 @@ SPL_METHOD(DirectoryIterator, next)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	intern->u.dir.index++;
-	if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
-		intern->u.dir.entry.d_name[0] = '\0';
-	}
+	spl_filesystem_dir_read(intern TSRMLS_CC);
 	if (intern->file_name.v) {
 		efree(intern->file_name.v);
 		intern->file_name = NULL_ZSTR;
@@ -636,7 +662,7 @@ SPL_METHOD(DirectoryIterator, count)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (intern->flags & SPL_FILE_DIR_USE_GLOB) {
-		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp));
+		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
 	}
 	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Unable to determine count unless USE_GLOG flag is in effect");
 }
@@ -1122,9 +1148,7 @@ SPL_METHOD(RecursiveDirectoryIterator, rewind)
 		php_stream_rewinddir(intern->u.dir.dirp);
 	}
 	do {
-		if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
-			intern->u.dir.entry.d_name[0] = '\0';
-		}
+		spl_filesystem_dir_read(intern TSRMLS_CC);
 	} while (!strcmp(intern->u.dir.entry.d_name, ".") || !strcmp(intern->u.dir.entry.d_name, ".."));
 }
 /* }}} */
@@ -1137,9 +1161,7 @@ SPL_METHOD(RecursiveDirectoryIterator, next)
 
 	intern->u.dir.index++;
 	do {
-		if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
-			intern->u.dir.entry.d_name[0] = '\0';
-		}
+		spl_filesystem_dir_read(intern TSRMLS_CC);
 	} while (!strcmp(intern->u.dir.entry.d_name, ".") || !strcmp(intern->u.dir.entry.d_name, ".."));
 	if (intern->file_name.v) {
 		efree(intern->file_name.v);
@@ -1336,9 +1358,7 @@ static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter TSRMLS
 	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 	
 	object->u.dir.index++;
-	if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
-		object->u.dir.entry.d_name[0] = '\0';
-	}
+	spl_filesystem_dir_read(object TSRMLS_CC);
 	if (object->file_name.v) {
 		efree(object->file_name.v);
 		object->file_name = NULL_ZSTR;
@@ -1355,9 +1375,7 @@ static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 	if (object->u.dir.dirp) {
 		php_stream_rewinddir(object->u.dir.dirp);
 	}
-	if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
-		object->u.dir.entry.d_name[0] = '\0';
-	}
+	spl_filesystem_dir_read(object TSRMLS_CC);
 }
 /* }}} */
 
@@ -1426,9 +1444,7 @@ static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter TSRML
 	
 	object->u.dir.index++;
 	do {
-		if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
-			object->u.dir.entry.d_name[0] = '\0';
-		}
+		spl_filesystem_dir_read(object TSRMLS_CC);
 	} while (!strcmp(object->u.dir.entry.d_name, ".") || !strcmp(object->u.dir.entry.d_name, ".."));
 	if (object->file_name.v) {
 		efree(object->file_name.v);
@@ -1452,9 +1468,7 @@ static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 		php_stream_rewinddir(object->u.dir.dirp);
 	}
 	do {
-		if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
-			object->u.dir.entry.d_name[0] = '\0';
-		}
+		spl_filesystem_dir_read(object TSRMLS_CC);
 	} while (!strcmp(object->u.dir.entry.d_name, ".") || !strcmp(object->u.dir.entry.d_name, ".."));
 	if (iterator->current) {
 		zval_ptr_dtor(&iterator->current);
