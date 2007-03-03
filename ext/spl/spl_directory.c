@@ -178,15 +178,27 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 /* open a directory resource */
 static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_uchar type, zstr path, int path_len TSRMLS_DC)
 {
+	int options = REPORT_ERRORS;
+	
+	if (intern->flags & SPL_FILE_DIR_USE_GLOB) {
+		options |= STREAM_USE_GLOB_DIR_OPEN;
+	}
+
 	intern->type = SPL_FS_DIR;
 	intern->path_type= type;
 	intern->path_len = path_len;
-	intern->u.dir.dirp = php_stream_u_opendir(type, path, path_len, REPORT_ERRORS, NULL);
+	intern->u.dir.dirp = php_stream_u_opendir(type, path, path_len, options, NULL);
 
-	if (intern->path_len && IS_SLASH_AT(type, path, intern->path_len-1)) {
+	if (php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops)) {
+		intern->path.s = php_glob_stream_get_path(intern->u.dir.dirp, 1, &intern->path_len);
+		intern->path_type = IS_STRING;
+		intern->flags |= SPL_FILE_DIR_USE_GLOB;
+	} else if (intern->path_len && IS_SLASH_AT(type, path, intern->path_len-1)) {
 		intern->path = ezstrndup(type, path, --intern->path_len);
+		intern->flags &= ~SPL_FILE_DIR_USE_GLOB;
 	} else {
 		intern->path = ezstrndup(type, path, intern->path_len);
+		intern->flags &= ~SPL_FILE_DIR_USE_GLOB;
 	}
 	intern->u.dir.index = 0;
 
@@ -518,7 +530,7 @@ static HashTable* spl_filesystem_object_get_debug_info(zval *obj, int *is_temp T
 }
 /* }}}} */
 
-/* {{{ proto void DirectoryIterator::__construct(string path) U
+/* {{{ proto void DirectoryIterator::__construct(string $path, [int $flags = 0]) U
  Cronstructs a new dir iterator from a path. */
 SPL_METHOD(DirectoryIterator, __construct)
 {
@@ -526,10 +538,11 @@ SPL_METHOD(DirectoryIterator, __construct)
 	zstr path;
 	int len;
 	zend_uchar path_type;
+	long flags = 0;
 	
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &path, &len, &path_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &path, &len, &path_type, &flags) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
@@ -542,10 +555,10 @@ SPL_METHOD(DirectoryIterator, __construct)
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
+	intern->flags = flags;
 	spl_filesystem_dir_open(intern, path_type, path, len TSRMLS_CC);
 
 	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
-	intern->flags = 0;
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
@@ -1077,9 +1090,9 @@ SPL_METHOD(RecursiveDirectoryIterator, __construct)
 	}
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	spl_filesystem_dir_open(intern, path_type, path, path_len TSRMLS_CC);
 	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
 	intern->flags = flags;
+	spl_filesystem_dir_open(intern, path_type, path, path_len TSRMLS_CC);
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
@@ -1151,17 +1164,32 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
    Returns an iterator for the current entry if it is a directory */
 SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 {
-	zval zpath;
+	zval zpath, zflags;
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_filesystem_object *subdir;
 	
 	spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 
-	INIT_PZVAL(&zpath);
-	ZVAL_ZSTRL(&zpath, intern->file_name_type, intern->file_name, intern->file_name_len, 0);
+	INIT_PZVAL(&zflags);
+	ZVAL_LONG(&zflags, intern->flags);
 
-	spl_instantiate_arg_ex1(spl_ce_RecursiveDirectoryIterator, &return_value, 0, &zpath TSRMLS_CC);
-	
+	INIT_PZVAL(&zpath);
+	if (intern->flags & SPL_FILE_DIR_USE_GLOB) {
+		Z_TYPE(zpath) = IS_STRING;
+		spprintf(&Z_STRVAL(zpath), 0, "%R%c%s",
+			intern->file_name_type, intern->file_name,
+			DEFAULT_SLASH,
+			php_glob_stream_get_pattern(intern->u.dir.dirp, 0, NULL));
+	} else {
+		ZVAL_ZSTRL(&zpath, intern->file_name_type, intern->file_name, intern->file_name_len, 0);
+	}
+
+	spl_instantiate_arg_ex2(spl_ce_RecursiveDirectoryIterator, &return_value, 0, &zpath, &zflags TSRMLS_CC);
+
+	if (intern->flags & SPL_FILE_DIR_USE_GLOB) {
+		efree(Z_STRVAL(zpath));
+	}
+
 	subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
 	if (subdir) {
 		if (intern->u.dir.sub_path.v && intern->u.dir.sub_path_len > 1) {
@@ -1174,7 +1202,6 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 		}
 		subdir->info_class = intern->info_class;
 		subdir->file_class = intern->file_class;
-		subdir->flags = intern->flags;
 		subdir->oth = intern->oth;
 	}
 }
@@ -1553,8 +1580,9 @@ static zend_function_entry spl_SplFileInfo_functions[] = {
 };
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_dir___construct, 0) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dir___construct, 0, 0, 1) 
 	ZEND_ARG_INFO(0, path)
+	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
 /* the method table */
@@ -2452,6 +2480,8 @@ PHP_MINIT_FUNCTION(spl_directory)
 
 	REGISTER_SPL_SUB_CLASS_EX(DirectoryIterator, SplFileInfo, spl_filesystem_object_new, spl_DirectoryIterator_functions);
 	zend_class_implements(spl_ce_DirectoryIterator TSRMLS_CC, 1, zend_ce_iterator);
+
+	REGISTER_SPL_CLASS_CONST_LONG(DirectoryIterator, "USE_GLOB", SPL_FILE_DIR_USE_GLOB);
 
 	spl_ce_DirectoryIterator->get_iterator = spl_filesystem_dir_get_iterator;
 
