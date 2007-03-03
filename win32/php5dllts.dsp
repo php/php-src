@@ -2176,6 +2176,10 @@ SOURCE=..\main\streams\php_stream_filter_api.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\streams\php_stream_glob_wrapper.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\streams\php_stream_mmap.h
 # End Source File
 # Begin Source File
@@ -2202,6 +2206,10 @@ SOURCE=..\main\streams\cast.c
 # Begin Source File
 
 SOURCE=..\main\streams\filter.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\streams\glob_wrapper.c
 # End Source File
 # Begin Source File
 
