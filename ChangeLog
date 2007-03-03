@@ -1,3 +1,55 @@
+2007-03-02  Stanislav Malyshev  <stas@zend.com>
+
+    * main/main.c
+      main/main.c
+      main/php_globals.h
+      main/php_globals.h
+      main/php_variables.c
+      main/php_variables.c:
+      limit nesting level of input variables
+
+    * (PHP_5_2)
+      main/php_variables.c:
+      fix variable name
+
+    * (PHP_5_2)
+      NEWS:
+      limit input variable nesting
+
+2007-03-02  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/tests/file/proc_open01.phpt:
+      MFB
+
+    * (PHP_5_2)
+      ext/standard/tests/file/proc_open01.phpt:
+      increase the stream_select() timeout, to make the test pass in a slow
+      machine with valgrind
+
+    * ext/gd/libgd/gd_gif_in.c:
+      MFB
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gif_in.c:
+      fix access to non initialized memory (check valgrind reports on
+      http://gcov.php.net)
+
+2007-03-02  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/tests/bug40415.phpt:
+      mask resource numbers
+
+    * (PHP_5_2)
+      ext/oci8/tests/lob_029.phpt:
+      improved test
+
+2007-03-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      
+      Improve safe_mode check
+
 2007-03-01  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
