@@ -1540,7 +1540,9 @@ static zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       isDir,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       isLink,        NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getLinkTarget, NULL, ZEND_ACC_PUBLIC)
+#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
 	SPL_ME(SplFileInfo,       getRealPath,   NULL, ZEND_ACC_PUBLIC)
+#endif
 	SPL_ME(SplFileInfo,       getFileInfo,   arginfo_info_optinalFileClass, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPathInfo,   arginfo_info_optinalFileClass, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       openFile,      arginfo_info_openFile,         ZEND_ACC_PUBLIC)
