@@ -252,11 +252,13 @@ PS_OPEN_FUNC(files)
 		/* if save path is an empty string, determine the temporary dir */
 		save_path = php_get_temporary_directory();
 
-		if (PG(safe_mode) && (!php_checkuid(save_path, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
-			return FAILURE;
-		}
-		if (php_check_open_basedir(save_path TSRMLS_CC)) {
-			return FAILURE;
+		if (strcmp(save_path, "/tmp")) {
+			if (PG(safe_mode) && (!php_checkuid(save_path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+				return FAILURE;
+			}
+			if (php_check_open_basedir(save_path TSRMLS_CC)) {
+				return FAILURE;
+			}
 		}
 	}
 	
