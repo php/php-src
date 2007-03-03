@@ -251,7 +251,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 	pglob->pattern_len = strlen(pos);
 	pglob->pattern = estrndup(pos, pglob->pattern_len);
 
-	if (strcspn(path, "*?") < (path_len - pglob->pattern_len)) {
+	if (strcspn(path, "*?[") < (path_len - pglob->pattern_len)) {
 		pglob->flags |= GLOB_APPEND;
 	}
 
