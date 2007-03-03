@@ -577,6 +577,50 @@ SPL_METHOD(DirectoryIterator, getFilename)
 }
 /* }}} */
 
+/* {{{ proto string SplFileInfo::getBasename([string $suffix]) U
+   Returns filename component of path */
+SPL_METHOD(SplFileInfo, getBasename)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	char *fname, *suffix = 0;
+	int flen, slen = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &suffix, &slen) == FAILURE) {
+		return;
+	}
+
+	if (intern->path_len && intern->path_len < intern->file_name_len) {
+		fname = intern->file_name + intern->path_len + 1;
+		flen = intern->file_name_len - (intern->path_len + 1);
+	} else {
+		fname = intern->file_name;
+		flen = intern->file_name_len;
+	}
+
+	php_basename(fname, flen, suffix, slen, &fname, &flen TSRMLS_CC);
+
+	RETURN_STRINGL(fname, flen, 0);
+}
+/* }}}*/   
+
+/* {{{ proto string DirectoryIterator::getBasename([string $suffix]) U
+   Returns filename component of current dir entry */
+SPL_METHOD(DirectoryIterator, getBasename)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	char *suffix = 0, *fname;
+	int slen = 0, flen;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &suffix, &slen) == FAILURE) {
+		return;
+	}
+
+	php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), suffix, slen, &fname, &flen TSRMLS_CC);
+
+	RETURN_STRINGL(fname, flen, 0);
+}
+/* }}} */
+
 /* {{{ proto string SplFileInfo::getPathname()
    Return path and filename */
 SPL_METHOD(SplFileInfo, getPathname)
@@ -760,6 +804,56 @@ FileInfoFunction(isDir, FS_IS_DIR)
    Returns true if file is symbolic link */
 FileInfoFunction(isLink, FS_IS_LINK)
 /* }}} */
+
+/* {{{ proto string SplFileInfo::getLinkTarget() U
+   Return the target of a symbolic link */
+SPL_METHOD(SplFileInfo, getLinkTarget)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	int ret;
+	char buff[MAXPATHLEN];
+
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
+
+	ret = readlink(intern->file_name, buff, MAXPATHLEN-1);
+
+	if (ret == -1) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Unable to read link %s, error: %s", intern->file_name, strerror(errno));
+		RETVAL_FALSE;
+	} else {
+		/* Append NULL to the end of the string */
+		buff[ret] = '\0';
+
+		RETVAL_STRINGL(buff, ret, 1);
+	}
+	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+}
+/* }}} */
+
+#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+/* {{{ proto string SplFileInfo::getRealPath()
+   Return the resolved path */
+SPL_METHOD(SplFileInfo, getRealPath)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	char buff[MAXPATHLEN];
+
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
+
+	if (VCWD_REALPATH(intern->file_name, buff)) {
+#ifdef ZTS
+		if (VCWD_ACCESS(buff, F_OK)) {
+			RETVAL_FALSE;
+		} else
+#endif
+		RETVAL_STRING(buff, 1);
+	} else {
+		RETVAL_FALSE;
+	}
+	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+}
+/* }}} */
+#endif
 
 /* {{{ proto SplFileObject SplFileInfo::openFile([string mode = 'r' [, bool use_include_path  [, resource context]]])
    Open the current file */
@@ -1286,12 +1380,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_info_optinalFileClass, 0, 0, 0)
 	ZEND_ARG_INFO(0, class_name)
 ZEND_END_ARG_INFO()
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_optinalSuffix, 0, 0, 0)
+	ZEND_ARG_INFO(0, suffix)
+ZEND_END_ARG_INFO()
+
 /* the method table */
 /* each method can have its own parameters and visibility */
 static zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       __construct,   arginfo_info___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPath,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getFilename,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileInfo,       getBasename,   arginfo_optinalSuffix, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPathname,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPerms,      NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getInode,      NULL, ZEND_ACC_PUBLIC)
@@ -1308,6 +1408,10 @@ static zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       isFile,        NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       isDir,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       isLink,        NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileInfo,       getLinkTarget, NULL, ZEND_ACC_PUBLIC)
+#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+	SPL_ME(SplFileInfo,       getRealPath,   NULL, ZEND_ACC_PUBLIC)
+#endif
 	SPL_ME(SplFileInfo,       getFileInfo,   arginfo_info_optinalFileClass, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPathInfo,   arginfo_info_optinalFileClass, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       openFile,      arginfo_info_openFile,         ZEND_ACC_PUBLIC)
@@ -1327,6 +1431,7 @@ ZEND_END_ARG_INFO()
 static zend_function_entry spl_DirectoryIterator_functions[] = {
 	SPL_ME(DirectoryIterator, __construct,   arginfo_dir___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, getFilename,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getBasename,   arginfo_optinalSuffix, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, isDot,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, valid,         NULL, ZEND_ACC_PUBLIC)

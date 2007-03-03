@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . libmysql (MySQL) to version 5.0.36
 - Upgraded SQLite 3 to version 3.3.13 (Ilia)
 - Upgraded PCRE to version 7.0 (Nuno)
+- Improved SPL (Marcus)
+  . Added SplFileInfo::getBasename(), DirectoryIterator::getBasename().
+  . Added SplFileInfo::getLinkTarget(), SplFileInfo::getRealPath().
+# All based on suggestions by Arnold Davies
 - Added --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
