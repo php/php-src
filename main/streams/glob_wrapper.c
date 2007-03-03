@@ -42,6 +42,8 @@ typedef struct {
 	int      flags;
 	char     *path;
 	size_t   path_len;
+	char     *pattern;
+	size_t   pattern_len;
 } glob_s_t;
 
 PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, int *plen STREAMS_DC TSRMLS_DC) /* {{{ */
@@ -66,6 +68,28 @@ PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, int *plen S
 }
 /* }}} */
 
+PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, int *plen STREAMS_DC TSRMLS_DC) /* {{{ */
+{
+	glob_s_t *pglob = (glob_s_t *)stream->abstract;
+	
+	if (pglob && pglob->pattern) {
+		if (plen) {
+			*plen = pglob->pattern_len;
+		}
+		if (copy) {
+			return estrndup(pglob->pattern, pglob->pattern_len);
+		} else {
+			return pglob->pattern;
+		}
+	} else {
+		if (plen) {
+			*plen = 0;
+		}
+		return NULL;
+	}
+}
+/* }}} */
+
 static void php_glob_stream_path_split(glob_s_t *pglob, char *path, int get_path, char **p_file TSRMLS_DC) /* {{{ */
 {
 	char *pos, *gpath = path;
@@ -75,7 +99,6 @@ static void php_glob_stream_path_split(glob_s_t *pglob, char *path, int get_path
 	}
 #if defined(PHP_WIN32) || defined(NETWARE)
 	if ((pos = strrchr(path, '\\')) != NULL) {
-	if (pos != NULL) {
 		path = pos+1;
 	}
 #endif
@@ -85,6 +108,9 @@ static void php_glob_stream_path_split(glob_s_t *pglob, char *path, int get_path
 	if (get_path) {
 		if (pglob->path) {
 			efree(pglob->path);
+		}
+		if (path != gpath) {
+			path--;
 		}
 		pglob->path_len = path - gpath;
 		pglob->path = estrndup(gpath, pglob->path_len);
@@ -126,6 +152,9 @@ static int php_glob_stream_close(php_stream *stream, int close_handle TSRMLS_DC)
 		if (pglob->path) {
 			efree(pglob->path);
 		}
+		if (pglob->pattern) {
+			efree(pglob->pattern);
+		}
 	}
 	efree(stream->abstract);
 	return 0;
@@ -163,7 +192,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 {
 	glob_s_t *pglob;
 	int ret;
-	char *tmp;
+	char *tmp, *pos;
 
 	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path TSRMLS_CC)) {
 		return NULL;
@@ -198,6 +227,19 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 			php_glob_stream_path_split(pglob, path, 1, &tmp TSRMLS_CC);
 		}
 	}
+
+	pos = path;
+	if ((tmp = strrchr(pos, '/')) != NULL) {
+		pos = tmp+1;
+	}
+#if defined(PHP_WIN32) || defined(NETWARE)
+	if ((tmp = strrchr(pos, '\\')) != NULL) {
+		pos = tmp+1;
+	}
+#endif
+
+	pglob->pattern_len = strlen(pos);
+	pglob->pattern = estrndup(pos, pglob->pattern_len);
 
 	return php_stream_alloc(&php_glob_stream_ops, pglob, 0, mode);
 }
