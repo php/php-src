@@ -18,7 +18,8 @@
 
 /* $Id$ */
 
-PHPAPI extern php_stream_wrapper php_glob_stream_wrapper;
+PHPAPI extern php_stream_wrapper  php_glob_stream_wrapper;
+PHPAPI extern php_stream_ops      php_glob_stream_ops;
 
 BEGIN_EXTERN_C()
 
