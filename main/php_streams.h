@@ -614,7 +614,7 @@ END_EXTERN_C()
 #define STREAM_DISABLE_OPEN_BASEDIR     0x00000400
 
 /* get (or create) a persistent version of the stream */
-#define STREAM_OPEN_PERSISTENT	        0x00000800
+#define STREAM_OPEN_PERSISTENT          0x00000800
 
 /* use glob stream for directory open in plain files stream */
 #define STREAM_USE_GLOB_DIR_OPEN        0x00001000
