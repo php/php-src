@@ -1769,10 +1769,14 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	}
 
 	if (wrapper) {
-
-		stream = wrapper->wops->stream_opener(wrapper,
+		if (!wrapper->wops->stream_opener) {
+			php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
+					"wrapper does not support stream open");
+		} else {
+			stream = wrapper->wops->stream_opener(wrapper,
 				path_to_open, mode, options ^ REPORT_ERRORS,
 				opened_path, context STREAMS_REL_CC TSRMLS_CC);
+		}
 
 		/* if the caller asked for a persistent stream but the wrapper did not
 		 * return one, force an error here */
