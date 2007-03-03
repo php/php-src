@@ -1504,11 +1504,13 @@ PHP_FUNCTION(ob_list_handlers)
 	if (ZEND_NUM_ARGS()) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
+
+	array_init(return_value);
+
 	if (!OG(active)) {
-		RETURN_FALSE;
+		return;
 	}
 	
-	array_init(return_value);
 	zend_stack_apply_with_argument(OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_list, return_value);
 }
 /* }}} */
