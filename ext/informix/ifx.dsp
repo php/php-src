@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /D ZEND_DEBUG=0 /D HAVE_IFX_IUS=1 /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "c:\ifx-client\incl\esql" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /D ZEND_DEBUG=0 /D HAVE_IFX_IUS=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 isqlt09a.lib php4ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386 /out:"..\..\Release_TS/php_ifx.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
+# ADD LINK32 isqlt09a.lib php4ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386 /out:"..\..\Release_TS/php_ifx.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline" /libpath:"c:\ifx-client\lib"
 
 !ELSEIF  "$(CFG)" == "ifx - Win32 Debug_TS"
 
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /D HAVE_IFX_IUS=1 /YX /FD /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "c:\ifx-client\incl\esql" /D "_DEBUG" /D ZEND_DEBUG=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /D HAVE_IFX_IUS=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x406 /d "_DEBUG"
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 isqlt09a.lib php4ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"Debug_TS/php_ifx.dll" /pdbtype:sept /libpath:"..\..\Debug_TS"
+# ADD LINK32 isqlt09a.lib php4ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"Debug_TS/php_ifx.dll" /pdbtype:sept /libpath:"..\..\Debug_TS" /libpath:"c:\ifx-client\lib"
 
 !ENDIF 
 
