@@ -1100,7 +1100,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
 
-	if (name.v == NULL) {
+	if (name.v == NULL || !name_length) {
 		return FAILURE;
 	}
 
