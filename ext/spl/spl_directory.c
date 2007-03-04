@@ -1286,7 +1286,7 @@ static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter TSRML
 		if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
 			object->u.dir.entry.d_name[0] = '\0';
 		}
-	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
+	} while (spl_filesystem_is_dot(object->u.dir.entry.d_name));
 	if (object->file_name) {
 		efree(object->file_name);
 		object->file_name = NULL;
@@ -1312,7 +1312,7 @@ static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 		if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
 			object->u.dir.entry.d_name[0] = '\0';
 		}
-	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
+	} while (spl_filesystem_is_dot(object->u.dir.entry.d_name));
 	if (iterator->current) {
 		zval_ptr_dtor(&iterator->current);
 		iterator->current = NULL;

@@ -1688,9 +1688,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_rec_regex_it___construct, 0, 0, 2)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_RecursiveRegexIterator[] = {
-	SPL_ME(RecursiveRegexIterator, __construct,      arginfo_rec_regex_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(ParentIterator,         hasChildren,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveRegexIterator, getChildren,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveRegexIterator,  __construct,      arginfo_rec_regex_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveFilterIterator, hasChildren,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveRegexIterator,  getChildren,      NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 #endif
