@@ -59,8 +59,8 @@ $(MCFILE): win32\build\wsyslog.mc
 _VC_MANIFEST_EMBED_EXE=
 _VC_MANIFEST_EMBED_DLL=
 !else
-_VC_MANIFEST_EMBED_EXE= $(MT) -nologo -manifest $@.manifest -outputresource:$@;1
-_VC_MANIFEST_EMBED_DLL= $(MT) -nologo -manifest $@.manifest -outputresource:$@;2
+_VC_MANIFEST_EMBED_EXE= if exist $@.manifest $(MT) -nologo -manifest $@.manifest -outputresource:$@;1
+_VC_MANIFEST_EMBED_DLL= if exist $@.manifest $(MT) -nologo -manifest $@.manifest -outputresource:$@;2
 !endif
 
 $(PHPDLL_RES): win32\build\template.rc
