@@ -839,7 +839,7 @@ SPL_METHOD(DirectoryIterator, isDot)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	RETURN_BOOL(!strcmp(intern->u.dir.entry.d_name, ".") || !strcmp(intern->u.dir.entry.d_name, ".."));
+	RETURN_BOOL(spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 }
 /* }}} */
 
