@@ -1,3 +1,142 @@
+2007-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams/glob_wrapper.c:
+      - Missed to add [ to meta char check
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - Glob might require us to refetch the path for every entry
+
+    * main/streams/glob_wrapper.c
+      main/streams/php_stream_glob_wrapper.h:
+      - Allow to retrieve flags with php_glob_stream_get_count()
+      - Detect meta chars in pathand switch to append mode so that path can
+        actually changes for each entry
+
+2007-03-03  Edin Kadribasic  <edin@krug.dk>
+
+    * (PHP_5_2)
+      NEWS:
+      Library update
+
+2007-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_directory.c:
+      - Add DirectoryIterator::count()
+
+    * main/streams/glob_wrapper.c
+      main/streams/php_stream_glob_wrapper.h:
+      - Allow to get number of entries of a glob stream
+
+    * main/php_streams.h:
+      - One more tab to go
+
+    * main/php_streams.h:
+      - Change to hex to help read-/maintainability
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - Add glob support for DirectoryIterator
+
+    * win32/php5dllts.dsp
+      win32/build/config.w32:
+      - Add glob stream to win build
+
+    * main/streams/glob_wrapper.c
+      main/streams/php_stream_glob_wrapper.h:
+      - Provide access to pattern used in glob
+
+    * main/streams/glob_wrapper.c
+      main/streams/php_stream_glob_wrapper.h:
+      - php_stream_is() requires php_glob_stream_ops to be public
+      - little bit of additional whitespace
+
+    * configure.in
+      ext/standard/basic_functions.c
+      main/php_streams.h
+      main/streams/glob_wrapper.c
+      main/streams/php_stream_glob_wrapper.h
+      main/streams/plain_wrapper.c:
+      - Add glob stream wrapper
+
+    * ext/standard/file.c:
+      - Fix realpath() logic
+
+    * (PHP_5_2)
+      main/streams/streams.c:
+      - MFH A stream wrapper might only allow directory access
+
+    * main/streams/streams.c:
+      -A stream wrapper might only allow directory access
+
+2007-03-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/string.c
+      ext/standard/tests/strings/bug40704.phpt
+      ext/standard/tests/strings/bug40704.phpt:
+      
+      Fixed bug #40704 (strip_tags() does not handle single quotes correctly)
+
+2007-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - The # line does not belong here
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_directory.c:
+      - MFH [DOC] Add SplFileInfo::getBasename(), DirectoryIterator::getBasename
+      - MFH Add SplFileInfo::getLinkTarget(), SplFileInfo::getRealPath()
+
+2007-03-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/session/mod_files.c
+      ext/session/session.c:
+      Adjust checks to allow paths without a trailing /
+
+2007-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_directory.c:
+      - SplFileInfo::getRealPath() is not always present
+
+    * ext/spl/spl_directory.c:
+      
+
+    * ext/spl/spl_directory.c:
+      - [DOC] Add SplInfo::getBasename(), DirectoryIterator::getBasename()
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      - Catch empty class name error earlier
+
+2007-03-03  Johannes Schlüter  <johannes@schlueters.de>
+
+    * main/output.c
+      tests/output/ob_020.phpt:
+      - Fix old behaviour, ob_list_handlers() should always return an array
+
+2007-03-03  Edin Kadribasic  <edin@krug.dk>
+
+    * (PHP_4_4)
+      ext/interbase/interbase.dsp
+      ext/snmp/snmp.dsp
+      ext/sybase_ct/sybase_ct.dsp
+      sapi/apache/php4apache.dsp
+      sapi/apache2handler/php4apache2.dsp
+      sapi/pi3web/php4pi3web.dsp:
+      Use standardised locations for libs and includes
+
+    * (PHP_4_4)
+      ext/informix/ifx.dsp:
+      Made compile without magic
+
+    * (PHP_5_2)
+      NEWS:
+      Lib upgrade update
+
 2007-03-02  Stanislav Malyshev  <stas@zend.com>
 
     * main/main.c
