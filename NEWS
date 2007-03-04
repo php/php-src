@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed bug #40709 (array_reduce() behaves strange with one item stored arrays).
   (Ilia)
+- Fixed bug #40703 (Resolved a possible namespace conflict between libxmlrpc
+  and MySQL's NDB table handler). (Ilia)
 - Fixed bug #40678 (Cross compilation fails). (Tony)
 - Fixed bug #40621 (Crash when constructor called inappropriately). (Tony)
 - Fixed bug #40609 (Segfaults when using more than one SoapVar in a request).
