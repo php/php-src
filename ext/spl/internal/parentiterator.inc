@@ -4,7 +4,7 @@
  * @ingroup SPL
  * @brief class FilterIterator
  * @author  Marcus Boerger
- * @date    2003 - 2005
+ * @date    2003 - 2006
  *
  * SPL - Standard PHP Library
  */
@@ -21,25 +21,11 @@
  */
 class ParentIterator extends RecursiveFilterIterator
 {
-	/** @param $it the RecursiveIterator to filter
-	 */
-	function __construct(RecursiveIterator $it)
-	{
-		parent::__construct($it);
-	}
-	
 	/** @return whetehr the current element has children
 	 */
 	function accept()
 	{
 		return $this->it->hasChildren();
-	}
-
-	/** @return the ParentIterator for the current elements children
-	 */
-	function getChildren()
-	{
-		return new ParentIterator($this->it->getChildren());
 	}
 }
 
