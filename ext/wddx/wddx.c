@@ -1034,9 +1034,9 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 					Z_STRVAL_P(ent->data) = estrndup(decoded, decoded_len);
 					Z_STRLEN_P(ent->data) = decoded_len;
 				} else {
+					Z_STRVAL_P(ent->data) = erealloc(Z_STRVAL_P(ent->data), Z_STRLEN_P(ent->data) + decoded_len + 1);
+					strlcpy(Z_STRVAL_P(ent->data) + Z_STRLEN_P(ent->data), decoded, decoded_len);
 					Z_STRLEN_P(ent->data) += decoded_len;
-					Z_STRVAL_P(ent->data) = erealloc(Z_STRVAL_P(ent->data), Z_STRLEN_P(ent->data) + 1);
-					strlcpy(Z_STRVAL_P(ent->data) + Z_STRLEN_P(ent->data), decoded, Z_STRLEN_P(ent->data) + 1);
 					Z_STRVAL_P(ent->data)[Z_STRLEN_P(ent->data)] = '\0';
 				}
 
