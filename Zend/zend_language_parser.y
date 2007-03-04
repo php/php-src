@@ -611,6 +611,9 @@ expr_without_variable:
 	|	expr '?' { zend_do_begin_qm_op(&$1, &$2 TSRMLS_CC); }
 		expr ':' { zend_do_qm_true(&$4, &$2, &$5 TSRMLS_CC); }
 		expr	 { zend_do_qm_false(&$$, &$7, &$2, &$5 TSRMLS_CC); }
+	|	expr '?' { zend_do_begin_qm_op(&$1, &$2 TSRMLS_CC); }
+		':'      { zend_do_qm_true(&$1, &$2, &$4 TSRMLS_CC); }
+		expr     { zend_do_qm_false(&$$, &$6, &$2, &$4 TSRMLS_CC); }
 	|	internal_functions_in_yacc { $$ = $1; }
 	|	T_INT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_LONG TSRMLS_CC); }
 	|	T_DOUBLE_CAST expr 	{ zend_do_cast(&$$, &$2, IS_DOUBLE TSRMLS_CC); }
