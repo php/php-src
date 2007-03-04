@@ -21,25 +21,11 @@
  */
 class ParentIterator extends RecursiveFilterIterator
 {
-	/** @param $it the RecursiveIterator to filter
-	 */
-	function __construct(RecursiveIterator $it)
-	{
-		parent::__construct($it);
-	}
-	
 	/** @return whetehr the current element has children
 	 */
 	function accept()
 	{
 		return $this->it->hasChildren();
-	}
-
-	/** @return the ParentIterator for the current elements children
-	 */
-	function getChildren()
-	{
-		return new ParentIterator($this->it->getChildren());
 	}
 }
 
