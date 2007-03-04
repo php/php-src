@@ -1206,24 +1206,22 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 
 	INIT_PZVAL(&zflags);
-	ZVAL_LONG(&zflags, intern->flags);
-
 	INIT_PZVAL(&zpath);
-	if (intern->flags & SPL_FILE_DIR_USE_GLOB) {
+	if ((intern->flags & (SPL_FILE_DIR_USE_GLOB|SPL_FILE_DIR_NO_GLOB_CHILD)) == SPL_FILE_DIR_USE_GLOB) {
+		ZVAL_LONG(&zflags, intern->flags);
 		Z_TYPE(zpath) = IS_STRING;
-		spprintf(&Z_STRVAL(zpath), 0, "%R%c%s",
+		Z_STRLEN(zpath) = spprintf(&Z_STRVAL(zpath), 0, "%R%c%s",
 			intern->file_name_type, intern->file_name,
 			DEFAULT_SLASH,
 			php_glob_stream_get_pattern(intern->u.dir.dirp, 0, NULL));
 	} else {
-		ZVAL_ZSTRL(&zpath, intern->file_name_type, intern->file_name, intern->file_name_len, 0);
+		ZVAL_LONG(&zflags, intern->flags & ~SPL_FILE_DIR_USE_GLOB);
+		ZVAL_ZSTRL(&zpath, intern->file_name_type, intern->file_name, intern->file_name_len, 1);
 	}
 
 	spl_instantiate_arg_ex2(spl_ce_RecursiveDirectoryIterator, &return_value, 0, &zpath, &zflags TSRMLS_CC);
 
-	if (intern->flags & SPL_FILE_DIR_USE_GLOB) {
-		efree(Z_STRVAL(zpath));
-	}
+	zval_dtor(&zpath);
 
 	subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
 	if (subdir) {
@@ -2509,7 +2507,8 @@ PHP_MINIT_FUNCTION(spl_directory)
 	REGISTER_SPL_SUB_CLASS_EX(DirectoryIterator, SplFileInfo, spl_filesystem_object_new, spl_DirectoryIterator_functions);
 	zend_class_implements(spl_ce_DirectoryIterator TSRMLS_CC, 1, zend_ce_iterator);
 
-	REGISTER_SPL_CLASS_CONST_LONG(DirectoryIterator, "USE_GLOB", SPL_FILE_DIR_USE_GLOB);
+	REGISTER_SPL_CLASS_CONST_LONG(DirectoryIterator, "USE_GLOB",        SPL_FILE_DIR_USE_GLOB);
+	REGISTER_SPL_CLASS_CONST_LONG(DirectoryIterator, "NO_GLOB_CHILD",   SPL_FILE_DIR_NO_GLOB_CHILD);
 
 	spl_ce_DirectoryIterator->get_iterator = spl_filesystem_dir_get_iterator;
 
