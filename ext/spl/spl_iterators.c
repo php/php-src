@@ -1349,41 +1349,6 @@ SPL_METHOD(ParentIterator, __construct)
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_ParentIterator, spl_ce_RecursiveIterator, DIT_ParentIterator);
 } /* }}} */
 
-/* {{{ proto bool ParentIterator::hasChildren() U
-   Check whether the inner iterator's current element has children */
-SPL_METHOD(ParentIterator, hasChildren)
-{
-	spl_dual_it_object   *intern;
-	zval                 *retval;
-
-	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "haschildren", &retval);
-	if (retval) {
-		RETURN_ZVAL(retval, 0, 1);
-	} else {
-		RETURN_FALSE;
-	}
-} /* }}} */
-
-/* {{{ proto ParentIterator ParentIterator::getChildren() U
-   Return the inner iterator's children contained in a ParentIterator */
-SPL_METHOD(ParentIterator, getChildren)
-{
-	spl_dual_it_object   *intern;
-	zval                 *retval;
-
-	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &retval);
-	if (!EG(exception) && retval) {
-		spl_instantiate_arg_ex1(Z_OBJCE_P(getThis()), &return_value, 0, retval TSRMLS_CC);
-	}
-	if (retval) {
-		zval_ptr_dtor(&retval);
-	}
-} /* }}} */
-
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 /* {{{ proto void RegexIterator::__construct(Iterator it, string regex [, int mode [, int flags [, int preg_flags]]]) U
    Create an RegexIterator from another iterator and a regular expression */
@@ -1700,10 +1665,7 @@ static zend_function_entry spl_funcs_RecursiveFilterIterator[] = {
 
 static zend_function_entry spl_funcs_ParentIterator[] = {
 	SPL_ME(ParentIterator,  __construct,      arginfo_parent_it___construct, ZEND_ACC_PUBLIC)
-	SPL_MA(ParentIterator,  accept,           ParentIterator, hasChildren, NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(ParentIterator,  hasChildren,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(ParentIterator,  getChildren,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         getInnerIterator, NULL, ZEND_ACC_PUBLIC)
+	SPL_MA(ParentIterator,  accept,           RecursiveFilterIterator, hasChildren, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -1754,9 +1716,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_rec_regex_it___construct, 0, 0, 2)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_RecursiveRegexIterator[] = {
-	SPL_ME(RecursiveRegexIterator, __construct,      arginfo_rec_regex_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(ParentIterator,         hasChildren,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveRegexIterator, getChildren,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveRegexIterator,  __construct,      arginfo_rec_regex_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveFilterIterator, hasChildren,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveRegexIterator,  getChildren,      NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 #endif
