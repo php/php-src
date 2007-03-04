@@ -448,6 +448,18 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 	return NULL;
 } /* }}} */
 
+static inline int spl_filesystem_is_dot(const char * d_name) /* {{{ */
+{
+	return !strcmp(d_name, ".") || !strcmp(d_name, "..");
+}
+/* }}} */
+
+static int spl_filesystem_is_invalid_or_dot(const char * d_name) /* {{{ */
+{
+	return d_name[0] == '\0' || spl_filesystem_is_dot(d_name);
+}
+/* }}} */
+
 /* {{{ proto void DirectoryIterator::__construct(string path)
  Cronstructs a new dir iterator from a path. */
 SPL_METHOD(DirectoryIterator, __construct)
@@ -681,7 +693,7 @@ SPL_METHOD(DirectoryIterator, isDot)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	RETURN_BOOL(!strcmp(intern->u.dir.entry.d_name, ".") || !strcmp(intern->u.dir.entry.d_name, ".."));
+	RETURN_BOOL(spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 }
 /* }}} */
 
@@ -972,7 +984,7 @@ SPL_METHOD(RecursiveDirectoryIterator, rewind)
 		if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
 			intern->u.dir.entry.d_name[0] = '\0';
 		}
-	} while (!strcmp(intern->u.dir.entry.d_name, ".") || !strcmp(intern->u.dir.entry.d_name, ".."));
+	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 }
 /* }}} */
 
@@ -987,7 +999,7 @@ SPL_METHOD(RecursiveDirectoryIterator, next)
 		if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
 			intern->u.dir.entry.d_name[0] = '\0';
 		}
-	} while (!strcmp(intern->u.dir.entry.d_name, ".") || !strcmp(intern->u.dir.entry.d_name, ".."));
+	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 	if (intern->file_name) {
 		efree(intern->file_name);
 		intern->file_name = NULL;
@@ -1002,7 +1014,7 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 	zend_bool allow_links = 0;
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
-	if (!strcmp(intern->u.dir.entry.d_name, ".") || !strcmp(intern->u.dir.entry.d_name, "..")) {
+	if (spl_filesystem_is_invalid_or_dot(intern->u.dir.entry.d_name)) {
 		RETURN_BOOL(0);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &allow_links) == FAILURE) {
@@ -1274,7 +1286,7 @@ static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter TSRML
 		if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
 			object->u.dir.entry.d_name[0] = '\0';
 		}
-	} while (!strcmp(object->u.dir.entry.d_name, ".") || !strcmp(object->u.dir.entry.d_name, ".."));
+	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 	if (object->file_name) {
 		efree(object->file_name);
 		object->file_name = NULL;
@@ -1300,7 +1312,7 @@ static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 		if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
 			object->u.dir.entry.d_name[0] = '\0';
 		}
-	} while (!strcmp(object->u.dir.entry.d_name, ".") || !strcmp(object->u.dir.entry.d_name, ".."));
+	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 	if (iterator->current) {
 		zval_ptr_dtor(&iterator->current);
 		iterator->current = NULL;
