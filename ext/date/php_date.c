@@ -300,6 +300,7 @@ static void date_object_free_storage_timezone(void *object TSRMLS_DC);
 static zend_object_value date_object_new_date(zend_class_entry *class_type TSRMLS_DC);
 static zend_object_value date_object_new_timezone(zend_class_entry *class_type TSRMLS_DC);
 static zend_object_value date_object_clone_date(zval *this_ptr TSRMLS_DC);
+static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC);
 static zend_object_value date_object_clone_timezone(zval *this_ptr TSRMLS_DC);
 
 /* This is need to ensure that session extension request shutdown occurs 1st, because it uses the date extension */ 
@@ -1589,6 +1590,7 @@ static void date_register_classes(TSRMLS_D)
 	date_ce_date = zend_register_internal_class_ex(&ce_date, NULL, NULL TSRMLS_CC);
 	memcpy(&date_object_handlers_date, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	date_object_handlers_date.clone_obj = date_object_clone_date;
+	date_object_handlers_date.compare_objects = date_object_compare_date;
 
 #define REGISTER_DATE_CLASS_CONST_STRING(const_name, value) \
 	zend_declare_class_constant_stringl(date_ce_date, const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
@@ -1658,6 +1660,27 @@ static zend_object_value date_object_clone_date(zval *this_ptr TSRMLS_DC)
 	}
 	
 	return new_ov;
+}
+
+static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC)
+{
+	if (	Z_TYPE_P(d1) == IS_OBJECT && Z_TYPE_P(d2) == IS_OBJECT &&
+			instanceof_function(Z_OBJCE_P(d1), date_ce_date TSRMLS_CC) &&
+			instanceof_function(Z_OBJCE_P(d2), date_ce_date TSRMLS_CC)) {
+		php_date_obj *o1 = zend_object_store_get_object(d1 TSRMLS_CC);
+		php_date_obj *o2 = zend_object_store_get_object(d2 TSRMLS_CC);
+		
+		if (!o1->time->sse_uptodate) {
+			timelib_update_ts(o1->time, o1->time->tz_info);
+		}
+		if (!o2->time->sse_uptodate) {
+			timelib_update_ts(o2->time, o2->time->tz_info);
+		}
+		
+		return (o1->time->sse == o2->time->sse) ? 0 : ((o1->time->sse < o2->time->sse) ? -1 : 1);
+	}
+	
+	return 1;
 }
 
 static inline zend_object_value date_object_new_timezone_ex(zend_class_entry *class_type, php_timezone_obj **ptr TSRMLS_DC)
