@@ -1,3 +1,16 @@
+2007-03-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_language_parser.y:
+      - Implement '?:'
+      [DOC] "expr1 ?: expr1" is a shortcut for: "expr1 ? expr1 : expr2" as
+            exists in gcc and discussed some time back. Note that this is not
+            an implementation ifsetor($var, default). While ifsetor would not
+            generate any message for non existing variables or array indices
+            the ternary shortcut does. Also the ternary shortcut does a boolean
+            evaluation rather then checking for isset(). That way ther ternary
+            shortcut can work on any expression while ifsetor can only work on
+            variables. Also to be silent one has do do: "@$expr1 ?: $expr2".
+
 2007-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute_API.c

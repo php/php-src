@@ -1,3 +1,101 @@
+2007-03-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/xmlrpc/libxmlrpc/base64.c
+      ext/xmlrpc/libxmlrpc/base64.h
+      ext/xmlrpc/libxmlrpc/xml_to_dandarpc.c
+      ext/xmlrpc/libxmlrpc/xml_to_soap.c
+      ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.c:
+      
+      Fixed bug #40703 (Resolved a possible namespace conflict between libxmlrpc
+      and MySQL's NDB table handler).
+
+    * ext/standard/tests/array/bug40709.phpt
+      ext/standard/tests/array/bug40709.phpt:
+      
+      file bug40709.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c:
+      
+      Fixed bug #40709 (array_reduce() behaves strange with one item stored
+      arrays).
+
+2007-03-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_language_parser.y:
+      - Implement '?:'
+      [DOC] "expr1 ?: expr1" is a shortcut for: "expr1 ? expr1 : expr2" as
+            exists in gcc and discussed some time back. Note that this is not
+            an implementation ifsetor($var, default). While ifsetor would not
+            generate any message for non existing variables or array indices
+            the ternary shortcut does. Also the ternary shortcut does a boolean
+            evaluation rather then checking for isset(). That way ther ternary
+            shortcut can work on any expression while ifsetor can only work on
+            variables. Also to be silent one has do do: "@$expr1 ?: $expr2".
+
+    * (PHP_5_2)
+      ext/spl/spl_directory.c
+      ext/spl/spl_iterators.c:
+      - Fix copy'n'paste issues
+
+    * (PHP_5_2)
+      ext/spl/spl_directory.c
+      ext/spl/spl_iterators.c
+      ext/spl/internal/parentiterator.inc:
+      - MFH simplify, synch docu/implementation
+
+    * ext/spl/spl_directory.c:
+      - Missed one is-dot check
+
+    * ext/spl/spl_iterators.c
+      ext/spl/internal/parentiterator.inc:
+      - Match docu with implementation
+      - RecursiveFilterIterator::accept() needs to be abstract
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_iterators.c:
+      - Simplify
+
+2007-03-04  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/wddx/wddx.c:
+      ik, make it memcpy
+
+    * (PHP_5_2)
+      ext/wddx/wddx.c:
+      fix wrong code
+
+2007-03-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - And finally use prefix style names for consistency sake
+
+2007-03-04  Edin Kadribasic  <edin@krug.dk>
+
+    * win32/build/Makefile:
+      MFB: Check that manifest file exists before trying to embed it
+
+    * (PHP_5_2)
+      win32/build/Makefile:
+      Check that manifest file exists before trying to embed it
+
+2007-03-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - Reverting glob on child logic makes globbing work better with the example
+        code
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - Fix a minor issue with glob support - forgot to set length of string
+      - Add ability to not use glob on subdirs
+
 2007-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * main/streams/glob_wrapper.c:
