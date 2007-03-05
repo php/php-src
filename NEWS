@@ -58,5 +58,6 @@ PHP                                                                        NEWS
 - Added shm_has_var() function. (Mike)
 - Added str_getcsv() function. (Sara)
 - Added ext/hash support to ext/session's ID generator. (Sara)
+- Fixed bug #35872 (Prevent object store references during RSHUTDOWN) (Andy)  
 
 
