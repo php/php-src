@@ -1534,9 +1534,9 @@ static zend_object_value date_object_clone_date(zval *this_ptr TSRMLS_DC)
 
 static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC)
 {
-	if (	Z_TYPE_P(d1) == IS_OBJECT && Z_TYPE_P(d2) == IS_OBJECT &&
-			instanceof_function(Z_OBJCE_P(d1), date_ce_date TSRMLS_CC) &&
-			instanceof_function(Z_OBJCE_P(d2), date_ce_date TSRMLS_CC)) {
+	if (Z_TYPE_P(d1) == IS_OBJECT && Z_TYPE_P(d2) == IS_OBJECT &&
+		instanceof_function(Z_OBJCE_P(d1), date_ce_date TSRMLS_CC) &&
+		instanceof_function(Z_OBJCE_P(d2), date_ce_date TSRMLS_CC)) {
 		php_date_obj *o1 = zend_object_store_get_object(d1 TSRMLS_CC);
 		php_date_obj *o2 = zend_object_store_get_object(d2 TSRMLS_CC);
 		
