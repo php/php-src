@@ -47,6 +47,7 @@ ZEND_BEGIN_MODULE_GLOBALS(com_dotnet)
 	zend_bool autoreg_case_sensitive;
 	void *dotnet_runtime_stuff; /* opaque to avoid cluttering up other modules */
 	int code_page; /* default code_page if left unspecified */
+	zend_bool rshutdown_started;
 ZEND_END_MODULE_GLOBALS(com_dotnet)
 
 #ifdef ZTS
