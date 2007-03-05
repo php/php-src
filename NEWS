@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #40703 (Resolved a possible namespace conflict between libxmlrpc
   and MySQL's NDB table handler). (Ilia)
+- Fixed bug #40961 (Incorrect results of DateTime equality check). (Mike)
 - Fixed bug #40678 (Cross compilation fails). (Tony)
 - Fixed bug #40621 (Crash when constructor called inappropriately). (Tony)
 - Fixed bug #40609 (Segfaults when using more than one SoapVar in a request).
