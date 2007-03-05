@@ -397,11 +397,11 @@ PHP_MINFO_FUNCTION(apache)
 		php_info_print_table_row(2, "Server Administrator", serv->server_admin);
 	}
 	
-	sprintf(tmp, "%s:%u", serv->server_hostname, serv->port);
+	snprintf(tmp, sizeof(tmp), "%s:%u", serv->server_hostname, serv->port);
 	php_info_print_table_row(2, "Hostname:Port", tmp);
 	
 #if !defined(WIN32) && !defined(WINNT)
-	sprintf(tmp, "%s(%d)/%d", unixd_config.user_name, unixd_config.user_id, unixd_config.group_id);
+	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", unixd_config.user_name, unixd_config.user_id, unixd_config.group_id);
 	php_info_print_table_row(2, "User/Group", tmp);
 #endif
 
