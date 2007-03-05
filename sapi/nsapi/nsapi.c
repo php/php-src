@@ -642,7 +642,7 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 		nsapi_free(value);
 	}
 
-	snprintf(buf, sizeof(buf), "%d", conf_getglobals()->Vport);
+	snprintf(buf, NS_BUF_SIZE, "%d", conf_getglobals()->Vport);
 	php_register_variable("SERVER_PORT", buf, track_vars_array TSRMLS_CC);
 	php_register_variable("SERVER_NAME", conf_getglobals()->Vserver_hostname, track_vars_array TSRMLS_CC);
 
@@ -695,7 +695,7 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 
 	/* special variables in error mode */
 	if (rc->http_error) {
-		snprintf(buf, sizeof(buf), "%d", rc->http_error);
+		snprintf(buf, NS_BUF_SIZE, "%d", rc->http_error);
 		php_register_variable("ERROR_TYPE", buf, track_vars_array TSRMLS_CC);
 	}
 }
