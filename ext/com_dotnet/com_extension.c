@@ -315,6 +315,7 @@ PHP_MSHUTDOWN_FUNCTION(com_dotnet)
  */
 PHP_RINIT_FUNCTION(com_dotnet)
 {
+	COMG(rshutdown_started) = 0;
 	return SUCCESS;
 }
 /* }}} */
@@ -328,6 +329,7 @@ PHP_RSHUTDOWN_FUNCTION(com_dotnet)
 		php_com_dotnet_rshutdown(TSRMLS_C);
 	}
 #endif
+	COMG(rshutdown_started) = 1;
 	return SUCCESS;
 }
 /* }}} */

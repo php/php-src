@@ -92,13 +92,17 @@ static inline void trace(char *fmt, ...)
 # define TSRMLS_FIXED()
 #endif
 
-#define FETCH_DISP(methname)	\
-	TSRMLS_FIXED() \
-	php_dispatchex *disp = (php_dispatchex*)This; \
-	trace(" PHP:%s %s\n", Z_OBJCE_P(disp->object)->name, methname); \
-	if (GetCurrentThreadId() != disp->engine_thread) \
-		return RPC_E_WRONG_THREAD;
-
+#define FETCH_DISP(methname)																			\
+	TSRMLS_FIXED() 																						\
+	php_dispatchex *disp = (php_dispatchex*)This; 														\
+	if (COMG(rshutdown_started)) {																		\
+		trace(" PHP Object:%p (name:unknown) %s\n", disp->object,  methname); 							\
+	} else {																							\
+		trace(" PHP Object:%p (name:%s) %s\n", disp->object, Z_OBJCE_P(disp->object)->name, methname); 	\
+	}																									\
+	if (GetCurrentThreadId() != disp->engine_thread) {													\
+		return RPC_E_WRONG_THREAD;																		\
+	}
 
 static HRESULT STDMETHODCALLTYPE disp_queryinterface( 
 	IDispatchEx *This,
@@ -534,7 +538,7 @@ static php_dispatchex *disp_constructor(zval *object TSRMLS_DC)
 {
 	php_dispatchex *disp = (php_dispatchex*)CoTaskMemAlloc(sizeof(php_dispatchex));
 
-	trace("constructing a COM proxy\n");
+	trace("constructing a COM wrapper for PHP object %p (%s)\n", object, Z_OBJCE_P(object)->name);
 	
 	if (disp == NULL)
 		return NULL;
@@ -559,8 +563,13 @@ static void disp_destructor(php_dispatchex *disp)
 {
 	TSRMLS_FETCH();
 	
-	trace("destroying COM wrapper for PHP object %s\n", Z_OBJCE_P(disp->object)->name);
-
+	/* Object store not available during request shutdown */
+	if (COMG(rshutdown_started)) {
+		trace("destroying COM wrapper for PHP object %p (name:unknown)\n", disp->object);
+	} else {
+		trace("destroying COM wrapper for PHP object %p (name:%s)\n", disp->object, Z_OBJCE_P(disp->object)->name);
+	}
+	
 	disp->id = 0;
 	
 	if (disp->refcount > 0)
