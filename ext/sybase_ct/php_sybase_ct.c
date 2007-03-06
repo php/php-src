@@ -1138,7 +1138,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 		result->num_rows++;
 		i= result->store ? result->num_rows- 1 : 0;
 		if (i >= result->blocks_initialized*SYBASE_ROWS_BLOCK) {
-			result->data = (zval **) erealloc(result->data, sizeof(zval *)*SYBASE_ROWS_BLOCK*(++result->blocks_initialized));
+			result->data = (zval **) safe_erealloc(result->data, SYBASE_ROWS_BLOCK*(++result->blocks_initialized), sizeof(zval *), 0);
 		}
 		if (result->store || 1 == result->num_rows) {
 			result->data[i] = (zval *) safe_emalloc(sizeof(zval), result->num_fields, 0);
