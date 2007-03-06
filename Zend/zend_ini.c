@@ -357,7 +357,7 @@ ZEND_API char *zend_ini_string(char *name, uint name_length, int orig)
 	return "";
 }
 
-
+#if TONY_20070307 
 static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 {
 	if (ini_entry->displayer) {
@@ -394,7 +394,7 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 		ZEND_WRITE(display_string, display_string_length);
 	}
 }
-
+#endif
 
 ZEND_INI_DISP(zend_ini_boolean_displayer_cb)
 {
