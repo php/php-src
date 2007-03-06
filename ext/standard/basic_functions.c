@@ -6363,9 +6363,15 @@ PHP_FUNCTION(import_request_variables)
 		return;
 	}
 
-	convert_to_text(prefix);
-	if (Z_UNILEN_P(prefix) == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No prefix specified - possible security hazard");
+	if (ZEND_NUM_ARGS() > 1) {
+		convert_to_text(prefix);
+
+		if (Z_UNILEN_P(prefix) == 0) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No prefix specified - possible security hazard");
+		}
+	} else {
+		MAKE_STD_ZVAL(prefix);
+		ZVAL_EMPTY_TEXT(prefix);
 	}
 
 	for (p = types; p && *p; p++) {
@@ -6387,6 +6393,10 @@ PHP_FUNCTION(import_request_variables)
 				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), (apply_func_args_t) copy_request_variable, 1, prefix);
 				break;
 		}
+	}
+
+	if (ZEND_NUM_ARGS() < 2) {
+		zval_ptr_dtor(&prefix);
 	}
 }
 /* }}} */
