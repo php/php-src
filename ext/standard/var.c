@@ -539,7 +539,7 @@ static void php_unicode_export(UChar *ustr, int ustr_len TSRMLS_DC)
 		U16_NEXT(ustr, i, ustr_len, cp);
 		switch (cp) {
 			case 0x0: /* '\0' */
-				PHPWRITE("\\0", 2);
+				PHPWRITE("\\000", 4);
 				break;
 
 			case 0x27: /* '\'' */
