@@ -35,7 +35,7 @@ onig_version(void)
 {
   static char s[12];
 
-  sprintf(s, sizeof(s), "%d.%d.%d",
+  sprintf(s, "%d.%d.%d",
           ONIGURUMA_VERSION_MAJOR,
           ONIGURUMA_VERSION_MINOR,
           ONIGURUMA_VERSION_TEENY);
@@ -47,7 +47,7 @@ onig_copyright(void)
 {
   static char s[58];
 
-  sprintf(s, sizeof(s), "Oniguruma %d.%d.%d : Copyright (C) 2002-2007 K.Kosako",
+  sprintf(s, "Oniguruma %d.%d.%d : Copyright (C) 2002-2007 K.Kosako",
           ONIGURUMA_VERSION_MAJOR,
           ONIGURUMA_VERSION_MINOR,
           ONIGURUMA_VERSION_TEENY);
