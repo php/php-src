@@ -33,7 +33,7 @@ $ctx->comment_preview[0] = 1;
 $ctx->comment_preview[1] = 2;
 var_dump($ctx->comment_preview);
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
   int(1)
@@ -46,9 +46,34 @@ array(2) {
   [1]=>
   int(2)
 }
-object(ArrayObject)#2 (2) {
+object(ArrayObject)#%d (1) {
+  ["storage":"ArrayObject":private]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+}
+--UEXPECTF--
+array(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
+}
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(ArrayObject)#%d (1) {
+  [u"storage":u"ArrayObject":private]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
 }

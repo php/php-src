@@ -24,7 +24,7 @@ $fp = fopen(dirname(__FILE__)."/test.txt","w");
 stream_filter_append($fp, "myfilter");
 stream_filter_append($fp, "myfilter");
 stream_filter_append($fp, "myfilter");
-fwrite($fp, "This is a test.\n");
+fwrite($fp, b"This is a test.\n");
 print "Done.\n";
 fclose($fp);
 // Uncommenting the following 'print' line causes the segfault to stop occuring
