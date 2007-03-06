@@ -80,7 +80,7 @@ yes
   AC_TRY_COMPILE([
 #include <ming.h>
   ], [
-int main(void) { SWFMovie_output(NULL, NULL, NULL, 0); return 0; }
+SWFMovie_output(NULL, NULL, NULL, 0);
   ], [
     AC_DEFINE(HAVE_MING_MOVIE_LEVEL, 1, [ ])
   ], [])
