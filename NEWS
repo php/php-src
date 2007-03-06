@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . openssl to version 0.9.8e
 - Upgraded SQLite 3 to version 3.3.13 (Ilia)
 - Upgraded PCRE to version 7.0 (Nuno)
+- Updated timezone database to version 2007.3. (Derick)
 - Improved SPL (Marcus)
   . Added SplFileInfo::getBasename(), DirectoryIterator::getBasename().
   . Added SplFileInfo::getLinkTarget(), SplFileInfo::getRealPath().
