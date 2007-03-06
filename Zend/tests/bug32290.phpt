@@ -93,14 +93,12 @@ var_dump($x->doSomethingStatic(1));
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===A===
 TestB::doSomething(1)
 
-Strict Standards: Non-static method TestA::doSomething() cannot be called statically in %s on line %d
-TestA::doSomething(2)
-int(1)
+Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %s on line %d
+NULL
 
 ===B===
 TestB::doSomethingThis(1)
@@ -110,9 +108,8 @@ int(1)
 ===C===
 TestB::doSomethingParent(1)
 
-Strict Standards: Non-static method TestA::doSomethingParent() cannot be called statically in %s on line %d
-TestA::doSomethingParent(2)
-int(1)
+Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %s on line %d
+NULL
 
 ===D===
 TestB::doSomethingParentThis(1)
