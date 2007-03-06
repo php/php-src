@@ -839,7 +839,7 @@ PHP_FUNCTION(sybase_query)
 	while (retvalue!=FAIL && retvalue!=NO_MORE_ROWS) {
 		result->num_rows++;
 		if (result->num_rows > blocks_initialized*SYBASE_ROWS_BLOCK) {
-			result->data = (zval ***) erealloc(result->data,sizeof(zval **)*SYBASE_ROWS_BLOCK*(++blocks_initialized));
+			result->data = (zval ***) safe_erealloc(result->data, SYBASE_ROWS_BLOCK*(++blocks_initialized), sizeof(zval **), 0);
 		}
 		result->data[i] = (zval **) safe_emalloc(sizeof(zval *), num_fields, 0);
 		for (j=1; j<=num_fields; j++) {
