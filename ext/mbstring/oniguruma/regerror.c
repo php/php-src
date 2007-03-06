@@ -278,7 +278,7 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
 
   va_init_list(args, fmt);
   n = vsnprintf((char* )buf, bufsize, (const char* )fmt, args);
-  if (n >= bufsize) {
+  if (n < 0 || n >= bufsize) {
 	n = bufsize - 1;
   }
   va_end(args);
@@ -309,7 +309,7 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
           int blen;
 
           while (len-- > 0) {
-            snprintf((char* )bs, sizeof(bs), "\\%03o", *p++ & 0377);
+            sprintf((char* )bs, "\\%03o", *p++ & 0377);
             blen = onigenc_str_bytelen_null(ONIG_ENCODING_ASCII, bs);
             bp = bs;
             while (blen-- > 0) *s++ = *bp++;
@@ -318,7 +318,7 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
       }
       else if (!ONIGENC_IS_CODE_PRINT(enc, *p) &&
 	       !ONIGENC_IS_CODE_SPACE(enc, *p)) {
-	snprintf((char* )bs, sizeof(bs), "\\%03o", *p++ & 0377);
+	sprintf((char* )bs, "\\%03o", *p++ & 0377);
 	len = onigenc_str_bytelen_null(ONIG_ENCODING_ASCII, bs);
         bp = bs;
 	while (len-- > 0) *s++ = *bp++;
