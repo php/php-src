@@ -2138,18 +2138,18 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		if (options & STREAM_LOCATE_WRAPPERS_ONLY) {
 			return NULL;
 		}
-		
+
 		/* The file:// wrapper may have been disabled/overridden */
-		if (FG(stream_wrappers)) {
-			if (!wrapperpp || zend_hash_find(wrapper_hash, "file", sizeof("file"), (void**)&wrapperpp) == FAILURE) {
+ 		if (FG(stream_wrappers)) {
+			if (zend_hash_find(wrapper_hash, "file", sizeof("file"), (void**)&wrapperpp) == FAILURE) {
 				if (options & REPORT_ERRORS) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Plainfiles wrapper disabled");
 				}
 				return NULL;
+			} else {
+				/* Handles overridden plain files wrapper */
+				plain_files_wrapper = *wrapperpp;
 			}
-
-			/* Handles overridden plain files wrapper */
-			plain_files_wrapper = *wrapperpp;
 		}
 
 		if (!php_stream_allow_url_fopen("file", sizeof("file") - 1) ||
