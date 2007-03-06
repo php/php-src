@@ -1,3 +1,63 @@
+2007-03-05  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_4)
+      ext/fdf/fdf.c:
+      MF5: use safe_emalloc
+
+    * (PHP_4_4)
+      sapi/isapi/php4isapi.c:
+      MF5: use srtlcat
+
+    * (PHP_4_4)
+      sapi/apache/php_apache.c
+      sapi/apache2handler/php_functions.c:
+      MF5: use snprintf
+
+    * (PHP_4_4)
+      ext/xmlrpc/libxmlrpc/xml_to_soap.c:
+      MF5: increase array size to fit buffer size
+
+    * (PHP_5_2)
+      ext/fdf/fdf.c:
+      use safe_emalloc
+
+2007-03-05  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      snprintf patch
+
+2007-03-05  andy wharmby  <wharmby@uk.ibm.com>
+
+    * NEWS:
+      Remove bug entry for 35872 as now in 5.2
+
+2007-03-05  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/date/php_date.c
+      ext/date/php_date.c:
+      - fix ws as requested by derick
+
+    * ext/date/php_date.c
+      ext/date/php_date.c:
+      - fix bug #40691: add comparison object handler
+
+2007-03-05  andy wharmby  <wharmby@uk.ibm.com>
+
+    * NEWS
+      NEWS
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_wrapper.c
+      ext/com_dotnet/com_wrapper.c
+      ext/com_dotnet/php_com_dotnet.h
+      ext/com_dotnet/php_com_dotnet.h:
+      Fixed bug #35872 (Prevent object store references during RSHUTDOWN)
+
 2007-03-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
