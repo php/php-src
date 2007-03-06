@@ -52,6 +52,8 @@ PHP                                                                        NEWS
 - Fixed bug #40451 (addAttribute() may crash when used with non-existent child 
   node). (Tony)
 - Fixed bug #40428 (imagepstext() doesn't accept optional parameter). (Pierre)
+- Fixed bug #40417 (Allow multiple instances of the same named PDO token in
+  prepared statement emulation code). (Ilia)
 - Fixed bug #40414 (possible endless fork() loop when running fastcgi).
   (Dmitry)
 - Fixed bug #40410 (ext/posix does not compile on MacOS 10.3.9). (Tony)
