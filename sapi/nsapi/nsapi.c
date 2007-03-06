@@ -585,7 +585,7 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 	register size_t i;
 	int pos;
 	char *value,*p;
-	char buf[2048];
+	char buf[32];
 	struct pb_entry *entry;
 
 	for (i = 0; i < nsapi_reqpb_size; i++) {
@@ -599,19 +599,22 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 		entry=rc->rq->headers->ht[i];
 		while (entry) {
 			if (strcasecmp(entry->param->name, "content-length")==0 || strcasecmp(entry->param->name, "content-type")==0) {
-				strlcpy(buf, entry->param->name, sizeof(buf));
+				value=estrdup(entry->param->name);
 				pos = 0;
 			} else {
-				slprintf(buf, sizeof(buf), "HTTP_%s", entry->param->name);
+				spprintf(&value, 0, "HTTP_%s", entry->param->name);
 				pos = 5;
 			}
-			for(p = buf + pos; *p; p++) {
-				*p = toupper(*p);
-				if (*p < 'A' || *p > 'Z') {
-					*p = '_';
+			if (value) {
+				for(p = value + pos; *p; p++) {
+					*p = toupper(*p);
+					if (*p < 'A' || *p > 'Z') {
+						*p = '_';
+					}
 				}
+				php_register_variable(value, entry->param->value, track_vars_array TSRMLS_CC);
+				efree(value);
 			}
-			php_register_variable(buf, entry->param->value, track_vars_array TSRMLS_CC);
 			entry=entry->next;
 		}
   	}
@@ -666,22 +669,27 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 	/* Create full Request-URI & Script-Name */
 	if (SG(request_info).request_uri) {
 		if (SG(request_info).query_string) {
-			slprintf(buf, sizeof(buf), "%s?%s", SG(request_info).request_uri, SG(request_info).query_string);
-		} else {
-			strlcpy(buf, SG(request_info).request_uri, sizeof(buf));
-		}
-		php_register_variable("REQUEST_URI", buf, track_vars_array TSRMLS_CC);
-
-		strlcpy(buf, SG(request_info).request_uri, sizeof(buf));
-		if (rc->path_info) {
-			pos = strlen(SG(request_info).request_uri) - strlen(rc->path_info);
-			if (pos>=0 && pos<sizeof(buf)) {
-				buf[pos] = '\0';
-			} else {
-				buf[0]='\0';
+			spprintf(&value, 0, "%s?%s", SG(request_info).request_uri, SG(request_info).query_string);
+			if (value) {
+				php_register_variable("REQUEST_URI", value, track_vars_array TSRMLS_CC);
+				efree(value);
 			}
+		} else {
+			php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
 		}
-		php_register_variable("SCRIPT_NAME", buf, track_vars_array TSRMLS_CC);
+
+		if (value = nsapi_strdup(SG(request_info).request_uri)) {
+			if (rc->path_info) {
+				pos = strlen(SG(request_info).request_uri) - strlen(rc->path_info);
+				if (pos>=0) {
+					value[pos] = '\0';
+				} else {
+					value[0]='\0';
+				}
+			}
+			php_register_variable("SCRIPT_NAME", value, track_vars_array TSRMLS_CC);
+			nsapi_free(value);
+		}
 	}
 	php_register_variable("SCRIPT_FILENAME", SG(request_info).path_translated, track_vars_array TSRMLS_CC);
 
