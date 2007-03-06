@@ -1465,7 +1465,7 @@ next_row:
 				/* add the row to our collection */
 				if (rres->nrows + 1 >= rres->alloc_rows) {
 					rres->alloc_rows = rres->alloc_rows ? rres->alloc_rows * 2 : 16;
-					rres->table = erealloc(rres->table, rres->alloc_rows * rres->ncolumns * sizeof(char *));
+					rres->table = safe_erealloc(rres->table, rres->alloc_rows, rres->ncolumns*sizeof(char *), 0);
 				}
 				base = rres->nrows * rres->ncolumns;
 				for (i = 0; i < rres->ncolumns; i++) {
