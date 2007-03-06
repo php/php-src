@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 6                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2007 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -246,7 +246,7 @@ static void php_nsapi_init_dynamic_symbols(void)
 		/* try user specified server_lib */
 		module = GetModuleHandle(nsapi_dll);
 		if (!module) {
-			log_error(LOG_WARN, "php5_init", NULL, NULL, "Cannot find DLL specified by server_lib parameter: %s", nsapi_dll);
+			log_error(LOG_WARN, "php6_init", NULL, NULL, "Cannot find DLL specified by server_lib parameter: %s", nsapi_dll);
 		}
 	} else {
 		/* find a LOADED dll module from nsapi_dlls */
@@ -783,7 +783,7 @@ static void nsapi_php_ini_entries(NSLS_D TSRMLS_DC)
   	}
 }
 
-void NSAPI_PUBLIC php5_close(void *vparam)
+void NSAPI_PUBLIC php6_close(void *vparam)
 {
 	if (nsapi_sapi_module.shutdown) {
 		nsapi_sapi_module.shutdown(&nsapi_sapi_module);
@@ -802,13 +802,13 @@ void NSAPI_PUBLIC php5_close(void *vparam)
 
 	tsrm_shutdown();
 
-	log_error(LOG_INFORM, "php5_close", NULL, NULL, "Shutdown PHP Module");
+	log_error(LOG_INFORM, "php6_close", NULL, NULL, "Shutdown PHP Module");
 }
 
 /*********************************************************
 / init SAF
 /
-/ Init fn="php5_init" [php_ini="/path/to/php.ini"] [server_lib="ns-httpdXX.dll"]
+/ Init fn="php6_init" [php_ini="/path/to/php.ini"] [server_lib="ns-httpdXX.dll"]
 /   Initialize the NSAPI module in magnus.conf
 /
 / php_ini: gives path to php.ini file
@@ -816,7 +816,7 @@ void NSAPI_PUBLIC php5_close(void *vparam)
 /  servact_* functions
 /
 /*********************************************************/
-int NSAPI_PUBLIC php5_init(pblock *pb, Session *sn, Request *rq)
+int NSAPI_PUBLIC php6_init(pblock *pb, Session *sn, Request *rq)
 {
 	php_core_globals *core_globals;
 	char *strval;
@@ -833,13 +833,13 @@ int NSAPI_PUBLIC php5_init(pblock *pb, Session *sn, Request *rq)
 
 	core_globals = ts_resource(core_globals_id);
 
-	/* look if php_ini parameter is given to php5_init */
+	/* look if php_ini parameter is given to php6_init */
 	if (strval = pblock_findval("php_ini", pb)) {
 		nsapi_sapi_module.php_ini_path_override = strdup(strval);
 	}
 	
 #ifdef PHP_WIN32
-	/* look if server_lib parameter is given to php5_init
+	/* look if server_lib parameter is given to php6_init
 	 * (this disables the automatic search for the newest ns-httpdXX.dll) */
 	if (strval = pblock_findval("server_lib", pb)) {
 		nsapi_dll = strdup(strval);
@@ -850,7 +850,7 @@ int NSAPI_PUBLIC php5_init(pblock *pb, Session *sn, Request *rq)
 	sapi_startup(&nsapi_sapi_module);
 	nsapi_sapi_module.startup(&nsapi_sapi_module);
 
-	daemon_atrestart(&php5_close, NULL);
+	daemon_atrestart(&php6_close, NULL);
 
 	log_error(LOG_INFORM, pblock_findval("fn", pb), sn, rq, "Initialized PHP Module (%d threads exspected)", threads);
 	return REQ_PROCEED;
@@ -859,19 +859,19 @@ int NSAPI_PUBLIC php5_init(pblock *pb, Session *sn, Request *rq)
 /*********************************************************
 / normal use in Service directive:
 /
-/ Service fn="php5_execute" type=... method=... [inikey=inivalue inikey=inivalue...]
+/ Service fn="php6_execute" type=... method=... [inikey=inivalue inikey=inivalue...]
 /
 / use in Service for a directory to supply a php-made directory listing instead of server default:
 /
-/ Service fn="php5_execute" type="magnus-internal/directory" script="/path/to/script.php" [inikey=inivalue inikey=inivalue...]
+/ Service fn="php6_execute" type="magnus-internal/directory" script="/path/to/script.php" [inikey=inivalue inikey=inivalue...]
 /
 / use in Error SAF to display php script as error page:
 /
-/ Error fn="php5_execute" code=XXX script="/path/to/script.php" [inikey=inivalue inikey=inivalue...]
-/ Error fn="php5_execute" reason="Reason" script="/path/to/script.php" [inikey=inivalue inikey=inivalue...]
+/ Error fn="php6_execute" code=XXX script="/path/to/script.php" [inikey=inivalue inikey=inivalue...]
+/ Error fn="php6_execute" reason="Reason" script="/path/to/script.php" [inikey=inivalue inikey=inivalue...]
 /
 /*********************************************************/
-int NSAPI_PUBLIC php5_execute(pblock *pb, Session *sn, Request *rq)
+int NSAPI_PUBLIC php6_execute(pblock *pb, Session *sn, Request *rq)
 {
 	int retval;
 	nsapi_request_context *request_context;
@@ -994,15 +994,15 @@ int NSAPI_PUBLIC php5_execute(pblock *pb, Session *sn, Request *rq)
 / will pass authentication through to php, and allow us to
 / check authentication with our scripts.
 /
-/ php5_auth_trans
+/ php6_auth_trans
 /   main function called from netscape server to authenticate
 /   a line in obj.conf:
-/		funcs=php5_auth_trans shlib="path/to/this/phpnsapi.dll"
+/		funcs=php6_auth_trans shlib="path/to/this/phpnsapi.dll"
 /	and:
 /		<Object ppath="path/to/be/authenticated/by/php/*">
-/		AuthTrans fn="php5_auth_trans"
+/		AuthTrans fn="php6_auth_trans"
 /*********************************************************/
-int NSAPI_PUBLIC php5_auth_trans(pblock * pb, Session * sn, Request * rq)
+int NSAPI_PUBLIC php6_auth_trans(pblock * pb, Session * sn, Request * rq)
 {
 	/* This is a DO NOTHING function that allows authentication
 	 * information
