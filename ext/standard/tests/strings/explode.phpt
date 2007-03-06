@@ -5,7 +5,8 @@ error_reporting=2047
 --FILE--
 <?php
 /* From http://bugs.php.net/19865 */
-echo md5(var_export(explode("\1", "a". chr(1). "b". chr(0). "d" . chr(1) . "f" . chr(1). "1" . chr(1) . "d"), TRUE));
+$s = (binary) var_export(explode(b"\1", (binary)"a". chr(1). "b". chr(0). "d" . chr(1) . "f" . chr(1). "1" . chr(1) . "d"), TRUE);
+echo md5($s);
 echo "\n";
 var_dump(@explode("", ""));
 var_dump(@explode("", NULL));
@@ -153,7 +154,7 @@ array(1) {
   string(10) "a lazy dog"
 }
 --UEXPECTF--
-26d4e18734cb2582df5055e2175223df
+6e5d59d5afd6693547a733219d079658
 bool(false)
 bool(false)
 bool(false)
