@@ -46,7 +46,7 @@ const mbfl_encoding mbfl_encoding_2022jpms = {
 	mbfl_no_encoding_2022jpms,
 	"ISO-2022-JP-MS",
 	"ISO-2022-JP",
-	NULL,
+	(const char *(*)[])&mbfl_encoding_2022jpms_aliases,
 	NULL,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
 };
