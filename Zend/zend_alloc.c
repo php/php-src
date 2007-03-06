@@ -708,6 +708,7 @@ static void zend_mm_free_cache(zend_mm_heap *heap)
 }
 #endif
 
+#if ZEND_MM_HEAP_PROTECTION || ZEND_MM_COOKIES
 static void zend_mm_random(unsigned char *buf, size_t size)
 {
 	size_t i = 0;
@@ -754,6 +755,7 @@ static void zend_mm_random(unsigned char *buf, size_t size)
 		t = buf[i++] << 1;
     }
 }
+#endif
 
 /* Notes:
  * - This function may alter the block_sizes values to match platform alignment
