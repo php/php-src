@@ -713,611 +713,627 @@ string(16) "some_page_ref123"
 --UEXPECT--
 array(1) {
   [u"path"]=>
-  string(0) ""
+  unicode(0) ""
 }
 array(1) {
   [u"path"]=>
-  string(12) "64.246.30.37"
+  unicode(12) "64.246.30.37"
 }
 array(2) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(12) "64.246.30.37"
+  unicode(12) "64.246.30.37"
 }
 array(3) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(12) "64.246.30.37"
+  unicode(12) "64.246.30.37"
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
 }
 array(1) {
   [u"path"]=>
-  string(13) "64.246.30.37/"
+  unicode(13) "64.246.30.37/"
 }
 array(3) {
   [u"host"]=>
-  string(12) "64.246.30.37"
+  unicode(12) "64.246.30.37"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
 }
 array(1) {
   [u"path"]=>
-  string(7) "php.net"
+  unicode(7) "php.net"
 }
 array(1) {
   [u"path"]=>
-  string(8) "php.net/"
+  unicode(8) "php.net/"
 }
 array(2) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(7) "php.net"
+  unicode(7) "php.net"
 }
 array(3) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(7) "php.net"
+  unicode(7) "php.net"
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
 }
 array(1) {
   [u"path"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
 }
 array(1) {
   [u"path"]=>
-  string(12) "www.php.net/"
+  unicode(12) "www.php.net/"
 }
 array(2) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
 }
 array(3) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
 }
 array(2) {
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
 }
 array(3) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
 }
 array(3) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
 }
 array(1) {
   [u"path"]=>
-  string(12) "www.php.net/"
+  unicode(12) "www.php.net/"
 }
 array(3) {
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
 }
 array(3) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(18) "/foo/bar/index.php"
+  unicode(18) "/foo/bar/index.php"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(53) "/this/is/a/very/deep/directory/structure/and/file.php"
+  unicode(53) "/this/is/a/very/deep/directory/structure/and/file.php"
 }
 array(5) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(53) "/this/is/a/very/deep/directory/structure/and/file.php"
+  unicode(53) "/this/is/a/very/deep/directory/structure/and/file.php"
   [u"query"]=>
-  string(37) "lots=1&of=2&parameters=3&too=4&here=5"
+  unicode(37) "lots=1&of=2&parameters=3&too=4&here=5"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(45) "/this/is/a/very/deep/directory/structure/and/"
+  unicode(45) "/this/is/a/very/deep/directory/structure/and/"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(53) "/this/is/a/very/deep/directory/structure/and/file.php"
+  unicode(53) "/this/is/a/very/deep/directory/structure/and/file.php"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(28) "/this/../a/../deep/directory"
+  unicode(28) "/this/../a/../deep/directory"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(29) "/this/../a/../deep/directory/"
+  unicode(29) "/this/../a/../deep/directory/"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(42) "/this/is/a/very/deep/directory/../file.php"
+  unicode(42) "/this/is/a/very/deep/directory/../file.php"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
 }
 array(5) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
   [u"fragment"]=>
-  string(3) "foo"
+  unicode(3) "foo"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
 }
 array(5) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
   [u"query"]=>
-  string(6) "test=1"
+  unicode(6) "test=1"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
   [u"query"]=>
-  string(7) "test=1&"
+  unicode(7) "test=1&"
 }
 array(5) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(1) "/"
+  unicode(1) "/"
   [u"query"]=>
-  string(1) "&"
+  unicode(1) "&"
 }
 array(5) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(7) "test=1&"
+  unicode(7) "test=1&"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(1) "&"
+  unicode(1) "&"
 }
 array(5) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(4) "foo&"
+  unicode(4) "foo&"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(4) "&foo"
+  unicode(4) "&foo"
 }
 array(5) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
+  unicode(31) "test=1&test2=char&test3=mixesCI"
 }
 array(5) {
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
+  unicode(31) "test=1&test2=char&test3=mixesCI"
   [u"fragment"]=>
-  string(16) "some_page_ref123"
+  unicode(16) "some_page_ref123"
 }
 array(7) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"user"]=>
-  string(6) "secret"
+  unicode(6) "secret"
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
+  unicode(31) "test=1&test2=char&test3=mixesCI"
   [u"fragment"]=>
-  string(16) "some_page_ref123"
+  unicode(16) "some_page_ref123"
 }
 array(6) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"user"]=>
-  string(6) "secret"
+  unicode(6) "secret"
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
+  unicode(31) "test=1&test2=char&test3=mixesCI"
   [u"fragment"]=>
-  string(16) "some_page_ref123"
+  unicode(16) "some_page_ref123"
 }
 array(7) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"pass"]=>
-  string(7) "hideout"
+  unicode(7) "hideout"
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
+  unicode(31) "test=1&test2=char&test3=mixesCI"
   [u"fragment"]=>
-  string(16) "some_page_ref123"
+  unicode(16) "some_page_ref123"
 }
 array(7) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"user"]=>
-  string(6) "secret"
+  unicode(6) "secret"
   [u"pass"]=>
-  string(7) "hideout"
+  unicode(7) "hideout"
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
+  unicode(31) "test=1&test2=char&test3=mixesCI"
   [u"fragment"]=>
-  string(16) "some_page_ref123"
+  unicode(16) "some_page_ref123"
 }
 array(7) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(19) "hideout@www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"user"]=>
-  string(6) "secret"
+  unicode(14) "secret@hideout"
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
+  unicode(31) "test=1&test2=char&test3=mixesCI"
   [u"fragment"]=>
-  string(16) "some_page_ref123"
+  unicode(16) "some_page_ref123"
 }
 array(8) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(11) "www.php.net"
+  unicode(11) "www.php.net"
   [u"port"]=>
   int(80)
   [u"user"]=>
-  string(6) "secret"
+  unicode(6) "secret"
   [u"pass"]=>
-  string(7) "hid:out"
+  unicode(7) "hid:out"
   [u"path"]=>
-  string(10) "/index.php"
+  unicode(10) "/index.php"
   [u"query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
+  unicode(31) "test=1&test2=char&test3=mixesCI"
   [u"fragment"]=>
-  string(16) "some_page_ref123"
+  unicode(16) "some_page_ref123"
 }
 array(2) {
   [u"scheme"]=>
-  string(4) "nntp"
+  unicode(4) "nntp"
   [u"host"]=>
-  string(12) "news.php.net"
+  unicode(12) "news.php.net"
 }
 array(3) {
   [u"scheme"]=>
-  string(3) "ftp"
+  unicode(3) "ftp"
   [u"host"]=>
-  string(11) "ftp.gnu.org"
+  unicode(11) "ftp.gnu.org"
   [u"path"]=>
-  string(22) "/gnu/glic/glibc.tar.gz"
+  unicode(22) "/gnu/glic/glibc.tar.gz"
 }
 array(2) {
   [u"scheme"]=>
-  string(4) "zlib"
+  unicode(4) "zlib"
   [u"path"]=>
-  string(14) "http://foo@bar"
+  unicode(14) "http://foo@bar"
 }
 array(2) {
   [u"scheme"]=>
-  string(4) "zlib"
+  unicode(4) "zlib"
   [u"path"]=>
-  string(12) "filename.txt"
+  unicode(12) "filename.txt"
 }
 array(2) {
   [u"scheme"]=>
-  string(4) "zlib"
+  unicode(4) "zlib"
   [u"path"]=>
-  string(25) "/path/to/my/file/file.txt"
+  unicode(25) "/path/to/my/file/file.txt"
 }
 array(3) {
   [u"scheme"]=>
-  string(3) "foo"
+  unicode(3) "foo"
   [u"host"]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [u"user"]=>
-  string(3) "foo"
+  unicode(3) "foo"
 }
 array(2) {
   [u"scheme"]=>
-  string(6) "mailto"
+  unicode(6) "mailto"
   [u"path"]=>
-  string(15) "me@mydomain.com"
+  unicode(15) "me@mydomain.com"
 }
 array(2) {
   [u"path"]=>
-  string(8) "/foo.php"
+  unicode(8) "/foo.php"
   [u"query"]=>
-  string(7) "a=b&c=d"
+  unicode(7) "a=b&c=d"
 }
 array(2) {
   [u"path"]=>
-  string(7) "foo.php"
+  unicode(7) "foo.php"
   [u"query"]=>
-  string(7) "a=b&c=d"
+  unicode(7) "a=b&c=d"
 }
 array(6) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(15) "www.example.com"
+  unicode(15) "www.example.com"
   [u"port"]=>
   int(8080)
   [u"user"]=>
-  string(4) "user"
+  unicode(4) "user"
   [u"pass"]=>
-  string(6) "passwd"
+  unicode(6) "passwd"
   [u"query"]=>
-  string(12) "bar=1&boom=0"
+  unicode(12) "bar=1&boom=0"
 }
 array(2) {
   [u"scheme"]=>
-  string(4) "file"
+  unicode(4) "file"
   [u"path"]=>
-  string(13) "/path/to/file"
+  unicode(13) "/path/to/file"
 }
 array(3) {
   [u"scheme"]=>
-  string(4) "file"
+  unicode(4) "file"
   [u"host"]=>
-  string(4) "path"
+  unicode(4) "path"
   [u"path"]=>
-  string(8) "/to/file"
+  unicode(8) "/to/file"
 }
 array(2) {
   [u"scheme"]=>
-  string(4) "file"
+  unicode(4) "file"
   [u"path"]=>
-  string(13) "/path/to/file"
+  unicode(13) "/path/to/file"
 }
 array(4) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(7) "1.2.3.4"
+  unicode(7) "1.2.3.4"
   [u"path"]=>
-  string(8) "/abc.asp"
+  unicode(8) "/abc.asp"
   [u"query"]=>
-  string(7) "a=1&b=2"
+  unicode(7) "a=1&b=2"
 }
 array(3) {
   [u"scheme"]=>
-  string(4) "http"
+  unicode(4) "http"
   [u"host"]=>
-  string(7) "foo.com"
+  unicode(7) "foo.com"
   [u"fragment"]=>
-  string(3) "bar"
+  unicode(3) "bar"
 }
 array(1) {
   [u"scheme"]=>
-  string(6) "scheme"
+  unicode(6) "scheme"
 }
 array(4) {
   [u"scheme"]=>
-  string(7) "foo+bar"
+  unicode(7) "foo+bar"
   [u"host"]=>
-  string(4) "bang"
+  unicode(4) "bang"
   [u"user"]=>
-  string(3) "baz"
+  unicode(3) "baz"
   [u"path"]=>
-  string(4) "/bla"
+  unicode(4) "/bla"
 }
 array(2) {
   [u"scheme"]=>
-  string(2) "gg"
+  unicode(2) "gg"
   [u"path"]=>
-  string(7) "9130731"
+  unicode(7) "9130731"
 }
-string(4) "http"
-string(11) "www.php.net"
+array(7) {
+  [u"scheme"]=>
+  unicode(4) "http"
+  [u"host"]=>
+  unicode(4) "host"
+  [u"user"]=>
+  unicode(4) "user"
+  [u"pass"]=>
+  unicode(5) "@pass"
+  [u"path"]=>
+  unicode(5) "/path"
+  [u"query"]=>
+  unicode(14) "argument?value"
+  [u"fragment"]=>
+  unicode(3) "etc"
+}
+unicode(4) "http"
+unicode(11) "www.php.net"
 int(80)
-string(6) "secret"
-string(7) "hideout"
-string(10) "/index.php"
-string(31) "test=1&test2=char&test3=mixesCI"
-string(16) "some_page_ref123"
+unicode(6) "secret"
+unicode(7) "hideout"
+unicode(10) "/index.php"
+unicode(31) "test=1&test2=char&test3=mixesCI"
+unicode(16) "some_page_ref123"

@@ -13,3 +13,7 @@ var_dump(http_build_query($array, 'foo', ';'));
 string(35) "foo=bar&baz=1&test=a+%27+%22+&0=abc"
 string(38) "foo=bar&baz=1&test=a+%27+%22+&foo0=abc"
 string(38) "foo=bar;baz=1;test=a+%27+%22+;foo0=abc"
+--UEXPECT--
+unicode(35) "foo=bar&baz=1&test=a+%27+%22+&0=abc"
+unicode(38) "foo=bar&baz=1&test=a+%27+%22+&foo0=abc"
+unicode(38) "foo=bar;baz=1;test=a+%27+%22+;foo0=abc"
