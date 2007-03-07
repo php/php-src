@@ -76,21 +76,49 @@ ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_
 #define estrndup_rel(s, length)					_estrndup((s), (length) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define zend_mem_block_size_rel(ptr)			_zend_mem_block_size((ptr) TSRMLS_CC ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 
+inline static void * __zend_malloc(size_t len)
+{
+  void *tmp = malloc(len);
+  if (tmp) {
+    return tmp;
+  }  
+  fprintf(stderr, "Out of memory\n");
+  exit(1);
+}
+
+inline static void * __zend_calloc(size_t len)
+{
+  void *tmp = __zend_malloc(len);
+  memset(tmp, 0, len);
+  return tmp;
+}
+
+inline static void * __zend_realloc(void *p, size_t len)
+{
+  p = realloc(p, len);
+  if (p) {
+    return p;
+  }  
+  fprintf(stderr, "Out of memory\n");
+  exit(1);
+}
+
+
 /* Selective persistent/non persistent allocation macros */
-#define pemalloc(size, persistent) ((persistent)?malloc(size):emalloc(size))
+#define pemalloc(size, persistent) ((persistent)?__zend_malloc(size):emalloc(size))
 #define safe_pemalloc(nmemb, size, offset, persistent)	((persistent)?_safe_malloc(nmemb, size, offset):safe_emalloc(nmemb, size, offset))
 #define pefree(ptr, persistent)  ((persistent)?free(ptr):efree(ptr))
-#define pecalloc(nmemb, size, persistent) ((persistent)?calloc((nmemb), (size)):ecalloc((nmemb), (size)))
-#define perealloc(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc((ptr), (size)))
+#define pecalloc(nmemb, size, persistent) ((persistent)?__zend_calloc((nmemb), (size)):ecalloc((nmemb), (size)))
+#define perealloc(ptr, size, persistent) ((persistent)?__zend_realloc((ptr), (size)):erealloc((ptr), (size)))
 #define safe_perealloc(ptr, nmemb, size, offset, persistent)	((persistent)?_safe_realloc((ptr), (nmemb), (size), (offset)):safe_erealloc((ptr), (nmemb), (size), (offset)))
-#define perealloc_recoverable(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_recoverable((ptr), (size)))
+#define perealloc_recoverable(ptr, size, persistent) ((persistent)?__zend_realloc((ptr), (size)):erealloc_recoverable((ptr), (size)))
 #define pestrdup(s, persistent) ((persistent)?strdup(s):estrdup(s))
 
-#define pemalloc_rel(size, persistent) ((persistent)?malloc(size):emalloc_rel(size))
+#define pemalloc_rel(size, persistent) ((persistent)?__zend_malloc(size):emalloc_rel(size))
 #define pefree_rel(ptr, persistent)	((persistent)?free(ptr):efree_rel(ptr))
-#define pecalloc_rel(nmemb, size, persistent) ((persistent)?calloc((nmemb), (size)):ecalloc_rel((nmemb), (size)))
-#define perealloc_rel(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_rel((ptr), (size)))
-#define perealloc_recoverable_rel(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_recoverable_rel((ptr), (size)))
+#define pecalloc_rel(nmemb, size, persistent) ((persistent)?__zend_calloc((nmemb), (size)):ecalloc_rel((nmemb), (size)))
+#define perealloc_rel(ptr, size, persistent) ((persistent)?__zend_realloc((ptr), (size)):erealloc_rel((ptr), (size)))
+#define perealloc_recoverable_rel(ptr, size, persistent) ((persistent)?__zend_realloc((ptr), (size)):erealloc_recoverable_rel((ptr), (size)))
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
 
 #define safe_estrdup(ptr)  ((ptr)?(estrdup(ptr)):STR_EMPTY_ALLOC())
