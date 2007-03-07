@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - Added --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
+- Fixed bug #40727 (segfault in PDO when failed to bind parameters). (Tony)
 - Fixed bug #40709 (array_reduce() behaves strange with one item stored arrays).
   (Ilia)
 - Fixed bug #40703 (Resolved a possible namespace conflict between libxmlrpc
