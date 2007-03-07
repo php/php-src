@@ -1,3 +1,158 @@
+2007-03-06  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonemap.h:
+      - MF52: Updated timezone database to version 2007.3.
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonemap.h:
+      - Updated timezone database to version 2007.3. (Derick)
+
+2007-03-06  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_ini.c:
+      comment out unused function
+      need to figure out why and what for it has been added in the first place..
+
+    * (PHP_5_2)
+      ext/mbstring/libmbfl/filters/mbfilter_iso2022_jp_ms.c:
+      use the aliases and eliminate one more compile warning
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.c:
+      MFH: declare zend_mm_random() only when needed
+
+    * ZendEngine2/zend_alloc.c:
+      declare zend_mm_random() only when needed
+
+    * ext/standard/var.c:
+      be consistent with non-unicode implementation
+
+2007-03-06  Sara Golemon  <sara@golemon.com>
+
+    * main/streams/streams.c:
+      Fix handling over overridden file:// wrapper
+
+2007-03-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/import_request.phpt:
+      fix segfault in import_request_variables() and its test
+      I'm not completely sure it's correct to import numeric vars like
+      _POST["1"] etc.
+
+2007-03-06  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi-readme.txt
+      sapi/nsapi/nsapi.c:
+      Update function names for PHP6 to php6*
+
+2007-03-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/var.c:
+      initialize variable
+
+    * ZendEngine2/tests/bug21478.phpt
+      ZendEngine2/tests/bug31720.phpt
+      ZendEngine2/tests/bug32290.phpt
+      ZendEngine2/tests/bug36214.phpt
+      ext/standard/tests/file/bug37158.phpt
+      ext/standard/tests/file/bug38450.phpt
+      ext/standard/tests/file/bug38450_1.phpt
+      ext/standard/tests/general_functions/call_user_func_return.phpt
+      ext/standard/tests/network/bug20134.phpt
+      ext/standard/tests/serialize/bug24063.phpt
+      ext/standard/tests/strings/bug20934.phpt
+      ext/standard/tests/strings/bug26817.phpt
+      ext/standard/tests/strings/bug29119.phpt
+      ext/standard/tests/strings/explode.phpt
+      ext/standard/tests/strings/http_build_query.phpt
+      ext/standard/tests/strings/metaphone.phpt
+      ext/standard/tests/strings/url_t.phpt:
+      fix tests
+
+2007-03-06  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      remove (large) static buffers for header names and request uri
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      use slprintf instead of snprintf and remove 0termination things (because
+      slprintf is always available now)
+
+2007-03-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/ming/config.m4:
+      fix AC_TRY_COMPILE usage
+
+2007-03-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_strtod.c:
+      Added missing allocation checks
+
+2007-03-06  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/bz2/bz2.c
+      ext/sqlite/sqlite.c
+      ext/sybase_ct/php_sybase_ct.c:
+      use safe_realloc
+
+    * (PHP_5_2)
+      ext/sybase/php_sybase_db.c:
+      use safe_erealloc
+
+2007-03-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mbstring/oniguruma/regerror.c:
+      - Add missing return value check
+
+    * (PHP_5_2)
+      ext/mbstring/oniguruma/regerror.c:
+      - Revert last part and fix issue under windows
+
+    * (PHP_5_2)
+      ext/mbstring/oniguruma/regversion.c:
+      - And the sizes too
+
+    * (PHP_5_2)
+      ext/mbstring/oniguruma/regversion.c:
+      - More to go
+
+    * (PHP_5_2)
+      ext/mbstring/oniguruma/regposerr.c:
+      - There you go
+
+    * (PHP_5_2)
+      ext/mbstring/oniguruma/regposerr.c:
+      - MFH Revert back to sprintf (we could define snprintf for windows but we
+      don't)
+
+    * ext/mbstring/oniguruma/regposerr.c:
+      - Revert back to sprintf (we could define snprintf for windows but we
+      don't)
+
+2007-03-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      
+      Fixed bug #40417 (Allow multiple instances of the same named PDO token in
+      prepared statement emulation code).
+
+2007-03-06  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/interbase/ibase_service.c:
+      fix broken snprintf code
+
 2007-03-05  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_4_4)
