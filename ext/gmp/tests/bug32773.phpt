@@ -15,8 +15,8 @@ echo gmp_strval(gmp_div_qr(10, 0))."\n";
 10 + 0 = 10
 10 + "0" = 10
 
-Warning: gmp_div(): Zero operand not allowed in %s on line %d
+Warning: gmp_div() [/phpmanual/function.gmp-div.html]: Zero operand not allowed in %s on line %d
 0
 
-Warning: gmp_div_qr(): Zero operand not allowed in %s on line %d
+Warning: gmp_div_qr() [/phpmanual/function.gmp-div-qr.html]: Zero operand not allowed in %s on line %d
 0
