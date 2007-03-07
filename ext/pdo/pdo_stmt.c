@@ -251,7 +251,10 @@ static void param_dtor(void *data) /* {{{ */
 		efree(param->name);
 	}
 
-	zval_ptr_dtor(&(param->parameter));
+	if (param->parameter) {
+		zval_ptr_dtor(&(param->parameter));
+		param->parameter = NULL;
+	}
 	if (param->driver_params) {
 		zval_ptr_dtor(&(param->driver_params));
 	}
@@ -1556,7 +1559,10 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 
 	ZVAL_ADDREF(param.parameter);
 	if (!really_register_bound_param(&param, stmt, is_param TSRMLS_CC)) {
-		zval_ptr_dtor(&(param.parameter));
+		if (param.parameter) {
+			zval_ptr_dtor(&(param.parameter));
+			param.parameter = NULL;
+		}
 		return 0;
 	}
 	return 1;
@@ -1589,7 +1595,10 @@ static PHP_METHOD(PDOStatement, bindValue)
 	
 	ZVAL_ADDREF(param.parameter);
 	if (!really_register_bound_param(&param, stmt, TRUE TSRMLS_CC)) {
-		zval_ptr_dtor(&(param.parameter));
+		if (param.parameter) {
+			zval_ptr_dtor(&(param.parameter));
+			param.parameter = NULL;
+		}
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
