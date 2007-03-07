@@ -1,3 +1,28 @@
+2007-03-06  Antony Dovgal  <antony@zend.com>
+
+    * zend_ini.c:
+      comment out unused function
+      need to figure out why and what for it has been added in the first place..
+
+    * (PHP_5_2)
+      zend_alloc.c:
+      MFH: declare zend_mm_random() only when needed
+
+    * zend_alloc.c:
+      declare zend_mm_random() only when needed
+
+    * tests/bug21478.phpt
+      tests/bug31720.phpt
+      tests/bug32290.phpt
+      tests/bug36214.phpt:
+      fix tests
+
+2007-03-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_strtod.c:
+      Added missing allocation checks
+
 2007-03-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_language_parser.y:
