@@ -8,7 +8,7 @@ AC_DEFUN([PDO_MYSQL_LIB_CHK], [
   str="$PDO_MYSQL_DIR/$1/libmysqlclient*"
   for j in `echo $str`; do
     if test -r $j; then
-      PDO_MYSQL_LIB_DIR=$MYSQL_DIR/$1
+      PDO_MYSQL_LIB_DIR=$PDO_MYSQL_DIR/$1
       break 2
     fi
   done
@@ -16,6 +16,11 @@ AC_DEFUN([PDO_MYSQL_LIB_CHK], [
 
 PHP_ARG_WITH(pdo-mysql, for MySQL support for PDO,
 [  --with-pdo-mysql[=DIR]    PDO: MySQL support. DIR is the MySQL base directory])
+
+if test -z "$PHP_ZLIB_DIR"; then
+  PHP_ARG_WITH(zlib-dir, for the location of libz,
+  [  --with-zlib-dir[=DIR]     PDO_MySQL: Set the path to libz install prefix], no, no)
+fi
 
 if test "$PHP_PDO_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
@@ -99,7 +104,26 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     PHP_EVAL_INCLINE($PDO_MYSQL_INCLUDE)
     PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
   ],[
-    AC_MSG_ERROR([mysql_query missing!?])
+    if test "$PHP_ZLIB_DIR" != "no"; then
+      PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR, PDO_MYSQL_SHARED_LIBADD)
+      PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_query, [], [
+        AC_MSG_ERROR([PDO_MYSQL configure failed. Please check config.log for more information.])
+      ], [
+        -L$PHP_ZLIB_DIR/$PHP_LIBDIR -L$PDO_MYSQL_LIB_DIR 
+      ])  
+      PDO_MYSQL_LIBS="$PDO_MYSQL_LIBS -L$PHP_ZLIB_DIR/$PHP_LIBDIR -lz"
+    else
+      PHP_ADD_LIBRARY(z,, PDO_MYSQL_SHARED_LIBADD)
+      PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_query, [], [
+        AC_MSG_ERROR([Try adding --with-zlib-dir=<DIR>. Please check config.log for more information.])
+      ], [
+        -L$PDO_MYSQL_LIB_DIR
+      ])   
+      PDO_MYSQL_LIBS="$PDO_MYSQL_LIBS -lz"
+    fi
+
+    PHP_EVAL_INCLINE($PDO_MYSQL_INCLUDE)
+    PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
   ],[
     $PDO_MYSQL_LIBS
   ])
