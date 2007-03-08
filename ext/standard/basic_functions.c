@@ -6130,6 +6130,12 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 				}
 			}
 
+			if (Z_TYPE_P(hash) != IS_ARRAY) {
+				zval_dtor(hash);
+				INIT_PZVAL(hash);
+				array_init(hash);
+			}
+
 			ALLOC_ZVAL(element);
 			*element = *arg2;
 			zval_copy_ctor(element);
