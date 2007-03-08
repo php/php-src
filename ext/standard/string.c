@@ -4655,7 +4655,7 @@ PHP_FUNCTION(substr_count)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length should be greater than 0.");
 				RETURN_FALSE;		
 			}
-			if ((p + Z_LVAL_PP(length)) > endp) {
+			if ((p + Z_LVAL_PP(length)) <= p || (p + Z_LVAL_PP(length)) > endp) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length value %ld exceeds string length.", Z_LVAL_PP(length));
 				RETURN_FALSE;
 			}
