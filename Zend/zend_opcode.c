@@ -427,6 +427,7 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
+			case ZEND_JMP_SET:
 				opline->op2.u.jmp_addr = &op_array->opcodes[opline->op2.u.opline_num];
 				break;
 		}

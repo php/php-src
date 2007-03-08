@@ -4206,6 +4206,43 @@ void zend_do_end_silence(znode *strudel_token TSRMLS_DC)
 }
 
 
+void zend_do_jmp_set(znode *value, znode *jmp_token, znode *colon_token TSRMLS_DC)
+{
+	int op_number = get_next_op_number(CG(active_op_array));
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_JMP_SET;
+	opline->result.op_type = IS_TMP_VAR;
+	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	opline->op1 = *value;
+	SET_UNUSED(opline->op2);
+	
+	*colon_token = opline->result;
+
+	jmp_token->u.opline_num = op_number;
+
+	INC_BPC(CG(active_op_array));
+}
+
+
+void zend_do_jmp_set_else(znode *result, znode *false_value, znode *jmp_token, znode *colon_token TSRMLS_DC)
+{
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_QM_ASSIGN;
+	opline->extended_value = 0;
+	opline->result = *colon_token;
+	opline->op1 = *false_value;
+	SET_UNUSED(opline->op2);
+	
+	*result = opline->result;
+
+	CG(active_op_array)->opcodes[jmp_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
+	
+	DEC_BPC(CG(active_op_array));
+}
+
+
 void zend_do_begin_qm_op(znode *cond, znode *qm_token TSRMLS_DC)
 {
 	int jmpz_op_number = get_next_op_number(CG(active_op_array));

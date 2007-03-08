@@ -1376,6 +1376,7 @@ void execute_new_code(TSRMLS_D)
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
+			case ZEND_JMP_SET:
 				opline->op2.u.jmp_addr = &CG(active_op_array)->opcodes[opline->op2.u.opline_num];
 				break;
 		}
