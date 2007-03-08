@@ -8583,11 +8583,11 @@ static int zend_binary_assign_op_helper_SPEC_VAR_CONST(int (*binary_op)(zval *re
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-				if (IS_VAR != IS_CV && !(free_op1.var != NULL)) {
+				if (object_ptr && IS_VAR != IS_CV && !(free_op1.var != NULL)) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -10067,11 +10067,11 @@ static int zend_binary_assign_op_helper_SPEC_VAR_TMP(int (*binary_op)(zval *resu
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-				if (IS_VAR != IS_CV && !(free_op1.var != NULL)) {
+				if (object_ptr && IS_VAR != IS_CV && !(free_op1.var != NULL)) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -11555,11 +11555,11 @@ static int zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_op)(zval *resu
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-				if (IS_VAR != IS_CV && !(free_op1.var != NULL)) {
+				if (object_ptr && IS_VAR != IS_CV && !(free_op1.var != NULL)) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -12847,11 +12847,11 @@ static int zend_binary_assign_op_helper_SPEC_VAR_UNUSED(int (*binary_op)(zval *r
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-				if (IS_VAR != IS_CV && !(free_op1.var != NULL)) {
+				if (object_ptr && IS_VAR != IS_CV && !(free_op1.var != NULL)) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -13516,11 +13516,11 @@ static int zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_op)(zval *resul
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-				if (IS_VAR != IS_CV && !(free_op1.var != NULL)) {
+				if (object_ptr && IS_VAR != IS_CV && !(free_op1.var != NULL)) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -14882,11 +14882,11 @@ static int zend_binary_assign_op_helper_SPEC_UNUSED_CONST(int (*binary_op)(zval 
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 
-				if (IS_UNUSED != IS_CV && !0) {
+				if (object_ptr && IS_UNUSED != IS_CV && !0) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -15885,11 +15885,11 @@ static int zend_binary_assign_op_helper_SPEC_UNUSED_TMP(int (*binary_op)(zval *r
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 
-				if (IS_UNUSED != IS_CV && !0) {
+				if (object_ptr && IS_UNUSED != IS_CV && !0) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -16849,11 +16849,11 @@ static int zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*binary_op)(zval *r
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 
-				if (IS_UNUSED != IS_CV && !0) {
+				if (object_ptr && IS_UNUSED != IS_CV && !0) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -17813,11 +17813,11 @@ static int zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(int (*binary_op)(zval
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 
-				if (IS_UNUSED != IS_CV && !0) {
+				if (object_ptr && IS_UNUSED != IS_CV && !0) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -18079,11 +18079,11 @@ static int zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binary_op)(zval *re
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 
-				if (IS_UNUSED != IS_CV && !0) {
+				if (object_ptr && IS_UNUSED != IS_CV && !0) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -20495,11 +20495,11 @@ static int zend_binary_assign_op_helper_SPEC_CV_CONST(int (*binary_op)(zval *res
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
 
-				if (IS_CV != IS_CV && !0) {
+				if (object_ptr && IS_CV != IS_CV && !0) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -21971,11 +21971,11 @@ static int zend_binary_assign_op_helper_SPEC_CV_TMP(int (*binary_op)(zval *resul
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
 
-				if (IS_CV != IS_CV && !0) {
+				if (object_ptr && IS_CV != IS_CV && !0) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -23451,11 +23451,11 @@ static int zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_op)(zval *resul
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
 
-				if (IS_CV != IS_CV && !0) {
+				if (object_ptr && IS_CV != IS_CV && !0) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -24734,11 +24734,11 @@ static int zend_binary_assign_op_helper_SPEC_CV_UNUSED(int (*binary_op)(zval *re
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
 
-				if (IS_CV != IS_CV && !0) {
+				if (object_ptr && IS_CV != IS_CV && !0) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
@@ -25402,11 +25402,11 @@ static int zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op)(zval *result
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
 
-				if (IS_CV != IS_CV && !0) {
+				if (object_ptr && IS_CV != IS_CV && !0) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					return zend_binary_assign_op_obj_helper_SPEC_CV_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
 					zend_op *op_data = opline+1;
