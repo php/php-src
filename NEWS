@@ -80,8 +80,10 @@ PHP                                                                        NEWS
   (jdolecek at netbsd dot org, Nuno)
 - Limit nesting level of input variables with max_input_nesting_level 
   as fix for MOPB-03-2007 (Stas)
-- Fix substr_compare and substr_count information leak (MOPB-14) (Stas, Ilia)
-- Fix crash on op-assign where argument is string offset (Brian, Stas)
+- Fixed substr_compare and substr_count information leak (MOPB-14) (Stas, Ilia)
+- Fixed crash on op-assign where argument is string offset (Brian, Stas)
+- Fixed bug #38710 (data leakage because of nonexisting boundary checking in 
+  statements in mysqli) (Stas)
 
 08 Feb 2007, PHP 5.2.1
 - Added read-timeout context option "timeout" for HTTP streams. (Hannes, Ilia). 
