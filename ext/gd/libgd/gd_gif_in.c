@@ -68,11 +68,29 @@ static struct {
 	int     disposal;
 } Gif89 = { -1, -1, -1, 0 };
 
+#define STACK_SIZE ((1<<(MAX_LWZ_BITS))*2)
+
+typedef struct {
+	unsigned char    buf[280];
+	int              curbit, lastbit, done, last_byte;
+} CODE_STATIC_DATA;
+
+typedef struct {
+	int fresh;
+	int code_size, set_code_size;
+	int max_code, max_code_size;
+	int firstcode, oldcode;
+	int clear_code, end_code;
+	int table[2][(1<< MAX_LWZ_BITS)];
+	int stack[STACK_SIZE], *sp;
+	CODE_STATIC_DATA scd;
+} LZW_STATIC_DATA;
+
 static int ReadColorMap (gdIOCtx *fd, int number, unsigned char (*buffer)[256]);
 static int DoExtension (gdIOCtx *fd, int label, int *Transparent);
 static int GetDataBlock (gdIOCtx *fd, unsigned char *buf);
-static int GetCode (gdIOCtx *fd, int code_size, int flag);
-static int LWZReadByte (gdIOCtx *fd, int flag, int input_code_size);
+static int GetCode (gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag);
+static int LWZReadByte (gdIOCtx *fd, LZW_STATIC_DATA *sd, int flag, int input_code_size);
 
 static void ReadImage (gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)[256], int interlace); /*1.4//, int ignore); */
 
@@ -257,10 +275,11 @@ static int ReadColorMap(gdIOCtx *fd, int number, unsigned char (*buffer)[256]) /
 
 static int DoExtension(gdIOCtx *fd, int label, int *Transparent) /* {{{ */
 {
-	static unsigned char     buf[256];
+	unsigned char buf[256];
 
 	switch (label) {
 		case 0xf9:              /* Graphic Control Extension */
+			memset(buf, 0, 4); /* initialize a few bytes in the case the next function fails */
 			(void) GetDataBlock(fd, (unsigned char*) buf);
 			Gif89.disposal    = (buf[0] >> 2) & 0x7;
 			Gif89.inputFlag   = (buf[0] >> 1) & 0x1;
@@ -322,119 +341,109 @@ static int GetDataBlock(gdIOCtx *fd, unsigned char *buf) /* {{{ */
 }
 /* }}} */
 
-static int GetCode_(gdIOCtx *fd, int code_size, int flag) /* {{{ */
+static int GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag) /* {{{ */
 {
-	static unsigned char    buf[280];
-	static int              curbit, lastbit, done, last_byte;
-	int                     i, j, ret;
-	unsigned char           count;
+	int           i, j, ret;
+	unsigned char count;
 
 	if (flag) {
-		curbit = 0;
-		lastbit = 0;
-		done = FALSE;
+		scd->curbit = 0;
+		scd->lastbit = 0;
+		scd->last_byte = 0;
+		scd->done = FALSE;
 		return 0;
 	}
 
-	if ( (curbit+code_size) >= lastbit) {
-		if (done) {
-			if (curbit >= lastbit) {
+	if ( (scd->curbit + code_size) >= scd->lastbit) {
+		if (scd->done) {
+			if (scd->curbit >= scd->lastbit) {
 				/* Oh well */
 			}
 			return -1;
 		}
-		buf[0] = buf[last_byte-2];
-		buf[1] = buf[last_byte-1];
+		scd->buf[0] = scd->buf[scd->last_byte-2];
+		scd->buf[1] = scd->buf[scd->last_byte-1];
 
-		if ((count = GetDataBlock(fd, &buf[2])) <= 0)
-			done = TRUE;
+		if ((count = GetDataBlock(fd, &scd->buf[2])) <= 0)
+			scd->done = TRUE;
 
-		last_byte = 2 + count;
-		curbit = (curbit - lastbit) + 16;
-		lastbit = (2+count)*8 ;
+		scd->last_byte = 2 + count;
+		scd->curbit = (scd->curbit - scd->lastbit) + 16;
+		scd->lastbit = (2+count)*8 ;
 	}
 
 	ret = 0;
-	for (i = curbit, j = 0; j < code_size; ++i, ++j)
-		ret |= ((buf[ i / 8 ] & (1 << (i % 8))) != 0) << j;
+	for (i = scd->curbit, j = 0; j < code_size; ++i, ++j)
+		ret |= ((scd->buf[ i / 8 ] & (1 << (i % 8))) != 0) << j;
 
-	curbit += code_size;
+	scd->curbit += code_size;
 	return ret;
 }
 
-static int GetCode(gdIOCtx *fd, int code_size, int flag) /* {{{ */
+static int GetCode(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag) /* {{{ */
 {
 	int rv;
 
-	rv = GetCode_(fd,code_size,flag);
+	rv = GetCode_(fd, scd, code_size, flag);
 	if (VERBOSE) php_gd_error_ex(E_NOTICE, "[GetCode(,%d,%d) returning %d]",code_size,flag,rv);
 	return(rv);
 }
 /* }}} */
 
-#define STACK_SIZE ((1<<(MAX_LWZ_BITS))*2)
-static int LWZReadByte_(gdIOCtx *fd, int flag, int input_code_size) /* {{{ */
+static int LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, int flag, int input_code_size) /* {{{ */
 {
-	static int      fresh = FALSE;
-	int             code, incode;
-	static int      code_size, set_code_size;
-	static int      max_code, max_code_size;
-	static int      firstcode, oldcode;
-	static int      clear_code, end_code;
-	static int      table[2][(1<< MAX_LWZ_BITS)];
-	static int      stack[STACK_SIZE], *sp;
-	register int    i;
+	int code, incode, i;
 
 	if (flag) {
-		set_code_size = input_code_size;
-		code_size = set_code_size+1;
-		clear_code = 1 << set_code_size ;
-		end_code = clear_code + 1;
-		max_code_size = 2*clear_code;
-		max_code = clear_code+2;
+		sd->set_code_size = input_code_size;
+		sd->code_size = sd->set_code_size+1;
+		sd->clear_code = 1 << sd->set_code_size ;
+		sd->end_code = sd->clear_code + 1;
+		sd->max_code_size = 2*sd->clear_code;
+		sd->max_code = sd->clear_code+2;
 
-		GetCode(fd, 0, TRUE);
+		GetCode(fd, &sd->scd, 0, TRUE);
 
-		fresh = TRUE;
+		sd->fresh = TRUE;
 
-		for (i = 0; i < clear_code; ++i) {
-			table[0][i] = 0;
-			table[1][i] = i;
+		for (i = 0; i < sd->clear_code; ++i) {
+			sd->table[0][i] = 0;
+			sd->table[1][i] = i;
 		}
 		for (; i < (1<<MAX_LWZ_BITS); ++i)
-			table[0][i] = table[1][0] = 0;
+			sd->table[0][i] = sd->table[1][0] = 0;
 
-		sp = stack;
+		sd->sp = sd->stack;
 
 		return 0;
-	} else if (fresh) {
-		fresh = FALSE;
+	} else if (sd->fresh) {
+		sd->fresh = FALSE;
 		do {
-			firstcode = oldcode =
-				GetCode(fd, code_size, FALSE);
-		} while (firstcode == clear_code);
-		return firstcode;
+			sd->firstcode = sd->oldcode =
+				GetCode(fd, &sd->scd, sd->code_size, FALSE);
+		} while (sd->firstcode == sd->clear_code);
+		return sd->firstcode;
 	}
 
-	if (sp > stack)
-		return *--sp;
+	if (sd->sp > sd->stack)
+		return *--sd->sp;
 
-	while ((code = GetCode(fd, code_size, FALSE)) >= 0) {
-		if (code == clear_code) {
-			for (i = 0; i < clear_code; ++i) {
-				table[0][i] = 0;
-				table[1][i] = i;
+	while ((code = GetCode(fd, &sd->scd, sd->code_size, FALSE)) >= 0) {
+		if (code == sd->clear_code) {
+			for (i = 0; i < sd->clear_code; ++i) {
+				sd->table[0][i] = 0;
+				sd->table[1][i] = i;
 			}
 			for (; i < (1<<MAX_LWZ_BITS); ++i)
-				table[0][i] = table[1][i] = 0;
-			code_size = set_code_size+1;
-			max_code_size = 2*clear_code;
-			max_code = clear_code+2;
-			sp = stack;
-			firstcode = oldcode =
-				GetCode(fd, code_size, FALSE);
-			return firstcode;
-		} else if (code == end_code) {
+				sd->table[0][i] = sd->table[1][i] = 0;
+			sd->code_size = sd->set_code_size+1;
+			sd->max_code_size = 2*sd->clear_code;
+			sd->max_code = sd->clear_code+2;
+			sd->sp = sd->stack;
+			sd->firstcode = sd->oldcode =
+				GetCode(fd, &sd->scd, sd->code_size, FALSE);
+			return sd->firstcode;
+		} else if (code == sd->end_code) {
 			int             count;
 			unsigned char   buf[260];
 
@@ -450,55 +459,55 @@ static int LWZReadByte_(gdIOCtx *fd, int flag, int input_code_size) /* {{{ */
 
 		incode = code;
 
-		if (sp == (stack + STACK_SIZE)) {
+		if (sd->sp == (sd->stack + STACK_SIZE)) {
 			/* Bad compressed data stream */
 			return -1;
 		}
 
-		if (code >= max_code) {
-			*sp++ = firstcode;
-			code = oldcode;
+		if (code >= sd->max_code) {
+			*sd->sp++ = sd->firstcode;
+			code = sd->oldcode;
 		}
 
-		while (code >= clear_code) {
-			if (sp == (stack + STACK_SIZE)) {
+		while (code >= sd->clear_code) {
+			if (sd->sp == (sd->stack + STACK_SIZE)) {
 				/* Bad compressed data stream */
 				return -1;
 			}
-			*sp++ = table[1][code];
-			if (code == table[0][code]) {
+			*sd->sp++ = sd->table[1][code];
+			if (code == sd->table[0][code]) {
 				/* Oh well */
 			}
-			code = table[0][code];
+			code = sd->table[0][code];
 		}
 
-		*sp++ = firstcode = table[1][code];
+		*sd->sp++ = sd->firstcode = sd->table[1][code];
 
-		if ((code = max_code) <(1<<MAX_LWZ_BITS)) {
-			table[0][code] = oldcode;
-			table[1][code] = firstcode;
-			++max_code;
-			if ((max_code >= max_code_size) &&
-					(max_code_size < (1<<MAX_LWZ_BITS))) {
-				max_code_size *= 2;
-				++code_size;
+		if ((code = sd->max_code) <(1<<MAX_LWZ_BITS)) {
+			sd->table[0][code] = sd->oldcode;
+			sd->table[1][code] = sd->firstcode;
+			++sd->max_code;
+			if ((sd->max_code >= sd->max_code_size) &&
+					(sd->max_code_size < (1<<MAX_LWZ_BITS))) {
+				sd->max_code_size *= 2;
+				++sd->code_size;
 			}
 		}
 
-		oldcode = incode;
+		sd->oldcode = incode;
 
-		if (sp > stack)
-			return *--sp;
+		if (sd->sp > sd->stack)
+			return *--sd->sp;
 	}
 	return code;
 }
 /* }}} */
 
-static int LWZReadByte(gdIOCtx *fd, int flag, int input_code_size) /* {{{ */
+static int LWZReadByte(gdIOCtx *fd, LZW_STATIC_DATA *sd, int flag, int input_code_size) /* {{{ */
 {
 	int rv;
 
-	rv = LWZReadByte_(fd,flag,input_code_size);
+	rv = LWZReadByte_(fd, sd, flag, input_code_size);
 	if (VERBOSE) php_gd_error_ex(E_NOTICE, "[LWZReadByte(,%d,%d) returning %d]",flag,input_code_size,rv);
 	return(rv);
 }
@@ -510,6 +519,7 @@ static void ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned 
 	int             v;
 	int             xpos = 0, ypos = 0, pass = 0;
 	int i;
+	LZW_STATIC_DATA sd;
 
 	/*
 	 **  Initialize the Compression routines
@@ -531,7 +541,7 @@ static void ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned 
 	}
 	/* Many (perhaps most) of these colors will remain marked open. */
 	im->colorsTotal = gdMaxColors;
-	if (LWZReadByte(fd, TRUE, c) < 0) {
+	if (LWZReadByte(fd, &sd, TRUE, c) < 0) {
 		return;
 	}
 
@@ -540,12 +550,12 @@ static void ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned 
 	 **  REMOVED For 1.4
 	 */
 	/*if (ignore) { */
-	/*        while (LWZReadByte(fd, FALSE, c) >= 0) */
+	/*        while (LWZReadByte(fd, &sd, FALSE, c) >= 0) */
 	/*                ; */
 	/*        return; */
 	/*} */
 
-	while ((v = LWZReadByte(fd,FALSE,c)) >= 0 ) {
+	while ((v = LWZReadByte(fd, &sd, FALSE, c)) >= 0 ) {
 		/* This how we recognize which colors are actually used. */
 		if (im->open[v]) {
 			im->open[v] = 0;
@@ -587,7 +597,7 @@ static void ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned 
 	}
 
 fini:
-	if (LWZReadByte(fd,FALSE,c)>=0) {
+	if (LWZReadByte(fd, &sd, FALSE, c)>=0) {
 		/* Ignore extra */
 	}
 }
