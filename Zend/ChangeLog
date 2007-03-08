@@ -1,3 +1,15 @@
+2007-03-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_alloc.h:
+      
+      Fixed calloc wrapper
+
+    * (PHP_5_2)
+      zend_alloc.h:
+      
+      Add checks around raw allocation code
+
 2007-03-06  Antony Dovgal  <antony@zend.com>
 
     * zend_ini.c:

@@ -1,3 +1,52 @@
+2007-03-07  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      fix MOPB#14
+
+2007-03-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/gmp/tests/bug32773.phpt:
+      fix test
+
+2007-03-07  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/array/array_slice.phpt:
+      New test case for array_slice
+
+2007-03-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/pdo_mysql/config.m4:
+      fix small typo
+      add --with-zlib-dir option (and simple automagic zlib detection)
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c:
+      MFH: fix #40727 (segfault in PDO when failed to bind parameters)
+
+    * ext/pdo/pdo_stmt.c:
+      fix #40727 (segfault in PDO when failed to bind parameters)
+
+2007-03-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.h:
+      
+      Fixed calloc wrapper
+
+    * (PHP_5_2)
+      ext/standard/browscap.c:
+      
+      malloc() -> pemalloc()
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.h:
+      
+      Add checks around raw allocation code
+
 2007-03-06  Derick Rethans  <php@derickrethans.nl>
 
     * ext/date/lib/timezonedb.h
