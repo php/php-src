@@ -4642,11 +4642,13 @@ PHP_FUNCTION(substr_count)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset should be greater than or equal to 0.");
 			RETURN_FALSE;		
 		}
-		p += Z_LVAL_PP(offset);
-		if (p > endp) {
+
+		if (Z_LVAL_PP(offset) > Z_STRLEN_PP(haystack)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value %ld exceeds string length.", Z_LVAL_PP(offset));
 			RETURN_FALSE;		
 		}
+		p += Z_LVAL_PP(offset);
+
 		if (ac == 4) {
 			convert_to_long_ex(length);
 			if (Z_LVAL_PP(length) <= 0) {
