@@ -3769,6 +3769,26 @@ ZEND_VM_HANDLER(58, ZEND_END_SILENCE, TMP, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(152, ZEND_JMP_SET, CONST|TMP|VAR|CV, ANY)
+{
+	zend_op *opline = EX(opline);
+	zend_free_op free_op1;
+	zval *value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	if (i_zend_is_true(value)) {
+		EX_T(opline->result.u.var).tmp_var = *value;
+		zendi_zval_copy_ctor(EX_T(opline->result.u.var).tmp_var);
+		FREE_OP1();
+#if DEBUG_ZEND>=2
+		printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
+#endif
+		ZEND_VM_JMP(opline->op2.u.jmp_addr);
+	}
+
+	FREE_OP1();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HANDLER(22, ZEND_QM_ASSIGN, CONST|TMP|VAR|CV, ANY)
 {
 	zend_op *opline = EX(opline);

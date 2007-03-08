@@ -506,6 +506,9 @@ void zend_do_exit(znode *result, znode *message TSRMLS_DC);
 void zend_do_begin_silence(znode *strudel_token TSRMLS_DC);
 void zend_do_end_silence(znode *strudel_token TSRMLS_DC);
 
+void zend_do_jmp_set(znode *value, znode *jmp_token, znode *colon_token TSRMLS_DC);
+void zend_do_jmp_set_else(znode *result, znode *false_value, znode *jmp_token, znode *colon_token TSRMLS_DC);
+
 void zend_do_begin_qm_op(znode *cond, znode *qm_token TSRMLS_DC);
 void zend_do_qm_true(znode *true_value, znode *qm_token, znode *colon_token TSRMLS_DC);
 void zend_do_qm_false(znode *result, znode *false_value, znode *qm_token, znode *colon_token TSRMLS_DC);
