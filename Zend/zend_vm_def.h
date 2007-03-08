@@ -408,11 +408,11 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W);
 
-				if (OP1_TYPE != IS_CV && !OP1_FREE) {
+				if (object_ptr && OP1_TYPE != IS_CV && !OP1_FREE) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
-				if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 					ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_obj_helper, binary_op, binary_op);
 				} else {
 					zend_op *op_data = opline+1;
