@@ -764,7 +764,16 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 						}
 #endif
 						else {
-							ZVAL_UTF8_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val, stmt->result.buf[i].buflen, ZSTR_DUPLICATE);
+#if defined(MYSQL_DATA_TRUNCATED) && MYSQL_VERSION_ID > 50002
+							if(ret == MYSQL_DATA_TRUNCATED && *(stmt->stmt->bind[i].error) != 0) {
+								/* result was truncated */
+								ZVAL_UTF8_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val, stmt->stmt->bind[i].buffer_length, ZSTR_DUPLICATE);
+							} else {
+#else
+							{
+#endif
+								ZVAL_UTF8_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val, stmt->result.buf[i].buflen, ZSTR_DUPLICATE);
+							}
 
 						} 
 						break;
