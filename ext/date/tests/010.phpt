@@ -9,7 +9,7 @@ date.timezone=UTC
   echo "Done\n";
 ?>
 --EXPECTF--
-array(70) {
+array(71) {
   [0]=>
   array(3) {
     ["dst"]=>
@@ -170,7 +170,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(20) "America/Indianapolis"
+    string(23) "America/Indiana/Winamac"
   }
   [18]=>
   array(3) {
@@ -179,7 +179,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(15) "America/Iqaluit"
+    string(20) "America/Indianapolis"
   }
   [19]=>
   array(3) {
@@ -188,7 +188,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(15) "America/Jamaica"
+    string(15) "America/Iqaluit"
   }
   [20]=>
   array(3) {
@@ -197,7 +197,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(27) "America/Kentucky/Louisville"
+    string(15) "America/Jamaica"
   }
   [21]=>
   array(3) {
@@ -206,7 +206,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(27) "America/Kentucky/Monticello"
+    string(27) "America/Kentucky/Louisville"
   }
   [22]=>
   array(3) {
@@ -215,7 +215,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(15) "America/Knox_IN"
+    string(27) "America/Kentucky/Monticello"
   }
   [23]=>
   array(3) {
@@ -224,7 +224,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(18) "America/Louisville"
+    string(15) "America/Knox_IN"
   }
   [24]=>
   array(3) {
@@ -233,7 +233,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(15) "America/Managua"
+    string(18) "America/Louisville"
   }
   [25]=>
   array(3) {
@@ -242,7 +242,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(17) "America/Menominee"
+    string(15) "America/Managua"
   }
   [26]=>
   array(3) {
@@ -251,7 +251,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(14) "America/Merida"
+    string(17) "America/Menominee"
   }
   [27]=>
   array(3) {
@@ -260,7 +260,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(16) "America/Montreal"
+    string(14) "America/Merida"
   }
   [28]=>
   array(3) {
@@ -269,7 +269,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(14) "America/Nassau"
+    string(16) "America/Montreal"
   }
   [29]=>
   array(3) {
@@ -278,7 +278,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(15) "America/Nipigon"
+    string(14) "America/Nassau"
   }
   [30]=>
   array(3) {
@@ -287,7 +287,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(14) "America/Panama"
+    string(15) "America/Nipigon"
   }
   [31]=>
   array(3) {
@@ -296,7 +296,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(19) "America/Pangnirtung"
+    string(14) "America/Panama"
   }
   [32]=>
   array(3) {
@@ -305,7 +305,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(22) "America/Port-au-Prince"
+    string(19) "America/Pangnirtung"
   }
   [33]=>
   array(3) {
@@ -314,7 +314,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(20) "America/Rankin_Inlet"
+    string(22) "America/Port-au-Prince"
   }
   [34]=>
   array(3) {
@@ -323,7 +323,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(21) "America/Santo_Domingo"
+    string(20) "America/Rankin_Inlet"
   }
   [35]=>
   array(3) {
@@ -332,7 +332,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(19) "America/Thunder_Bay"
+    string(21) "America/Santo_Domingo"
   }
   [36]=>
   array(3) {
@@ -341,7 +341,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(15) "America/Toronto"
+    string(19) "America/Thunder_Bay"
   }
   [37]=>
   array(3) {
@@ -350,7 +350,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(14) "Canada/Eastern"
+    string(15) "America/Toronto"
   }
   [38]=>
   array(3) {
@@ -359,7 +359,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(3) "EST"
+    string(14) "Canada/Eastern"
   }
   [39]=>
   array(3) {
@@ -368,7 +368,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(7) "EST5EDT"
+    string(3) "EST"
   }
   [40]=>
   array(3) {
@@ -377,7 +377,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(7) "Jamaica"
+    string(7) "EST5EDT"
   }
   [41]=>
   array(3) {
@@ -386,7 +386,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(10) "US/Central"
+    string(7) "Jamaica"
   }
   [42]=>
   array(3) {
@@ -395,7 +395,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(15) "US/East-Indiana"
+    string(10) "US/Central"
   }
   [43]=>
   array(3) {
@@ -404,7 +404,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(10) "US/Eastern"
+    string(15) "US/East-Indiana"
   }
   [44]=>
   array(3) {
@@ -413,7 +413,7 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(17) "US/Indiana-Starke"
+    string(10) "US/Eastern"
   }
   [45]=>
   array(3) {
@@ -422,16 +422,16 @@ array(70) {
     ["offset"]=>
     int(-18000)
     ["timezone_id"]=>
-    string(11) "US/Michigan"
+    string(17) "US/Indiana-Starke"
   }
   [46]=>
   array(3) {
     ["dst"]=>
     bool(false)
     ["offset"]=>
-    int(36000)
+    int(-18000)
     ["timezone_id"]=>
-    string(13) "Australia/ACT"
+    string(11) "US/Michigan"
   }
   [47]=>
   array(3) {
@@ -440,7 +440,7 @@ array(70) {
     ["offset"]=>
     int(36000)
     ["timezone_id"]=>
-    string(18) "Australia/Brisbane"
+    string(13) "Australia/ACT"
   }
   [48]=>
   array(3) {
@@ -449,7 +449,7 @@ array(70) {
     ["offset"]=>
     int(36000)
     ["timezone_id"]=>
-    string(18) "Australia/Canberra"
+    string(18) "Australia/Brisbane"
   }
   [49]=>
   array(3) {
@@ -458,7 +458,7 @@ array(70) {
     ["offset"]=>
     int(36000)
     ["timezone_id"]=>
-    string(16) "Australia/Currie"
+    string(18) "Australia/Canberra"
   }
   [50]=>
   array(3) {
@@ -467,7 +467,7 @@ array(70) {
     ["offset"]=>
     int(36000)
     ["timezone_id"]=>
-    string(16) "Australia/Hobart"
+    string(16) "Australia/Currie"
   }
   [51]=>
   array(3) {
@@ -476,7 +476,7 @@ array(70) {
     ["offset"]=>
     int(36000)
     ["timezone_id"]=>
-    string(18) "Australia/Lindeman"
+    string(16) "Australia/Hobart"
   }
   [52]=>
   array(3) {
@@ -485,7 +485,7 @@ array(70) {
     ["offset"]=>
     int(36000)
     ["timezone_id"]=>
-    string(19) "Australia/Melbourne"
+    string(18) "Australia/Lindeman"
   }
   [53]=>
   array(3) {
@@ -494,7 +494,7 @@ array(70) {
     ["offset"]=>
     int(36000)
     ["timezone_id"]=>
-    string(13) "Australia/NSW"
+    string(19) "Australia/Melbourne"
   }
   [54]=>
   array(3) {
@@ -503,7 +503,7 @@ array(70) {
     ["offset"]=>
     int(36000)
     ["timezone_id"]=>
-    string(20) "Australia/Queensland"
+    string(13) "Australia/NSW"
   }
   [55]=>
   array(3) {
@@ -512,7 +512,7 @@ array(70) {
     ["offset"]=>
     int(36000)
     ["timezone_id"]=>
-    string(16) "Australia/Sydney"
+    string(20) "Australia/Queensland"
   }
   [56]=>
   array(3) {
@@ -521,7 +521,7 @@ array(70) {
     ["offset"]=>
     int(36000)
     ["timezone_id"]=>
-    string(18) "Australia/Tasmania"
+    string(16) "Australia/Sydney"
   }
   [57]=>
   array(3) {
@@ -530,16 +530,16 @@ array(70) {
     ["offset"]=>
     int(36000)
     ["timezone_id"]=>
-    string(18) "Australia/Victoria"
+    string(18) "Australia/Tasmania"
   }
   [58]=>
   array(3) {
     ["dst"]=>
-    bool(true)
+    bool(false)
     ["offset"]=>
-    int(39600)
+    int(36000)
     ["timezone_id"]=>
-    string(19) "Australia/Melbourne"
+    string(18) "Australia/Victoria"
   }
   [59]=>
   array(3) {
@@ -548,7 +548,7 @@ array(70) {
     ["offset"]=>
     int(39600)
     ["timezone_id"]=>
-    string(13) "Australia/ACT"
+    string(19) "Australia/Melbourne"
   }
   [60]=>
   array(3) {
@@ -557,7 +557,7 @@ array(70) {
     ["offset"]=>
     int(39600)
     ["timezone_id"]=>
-    string(18) "Australia/Brisbane"
+    string(13) "Australia/ACT"
   }
   [61]=>
   array(3) {
@@ -566,7 +566,7 @@ array(70) {
     ["offset"]=>
     int(39600)
     ["timezone_id"]=>
-    string(18) "Australia/Canberra"
+    string(18) "Australia/Brisbane"
   }
   [62]=>
   array(3) {
@@ -575,7 +575,7 @@ array(70) {
     ["offset"]=>
     int(39600)
     ["timezone_id"]=>
-    string(16) "Australia/Currie"
+    string(18) "Australia/Canberra"
   }
   [63]=>
   array(3) {
@@ -584,7 +584,7 @@ array(70) {
     ["offset"]=>
     int(39600)
     ["timezone_id"]=>
-    string(16) "Australia/Hobart"
+    string(16) "Australia/Currie"
   }
   [64]=>
   array(3) {
@@ -593,7 +593,7 @@ array(70) {
     ["offset"]=>
     int(39600)
     ["timezone_id"]=>
-    string(18) "Australia/Lindeman"
+    string(16) "Australia/Hobart"
   }
   [65]=>
   array(3) {
@@ -602,7 +602,7 @@ array(70) {
     ["offset"]=>
     int(39600)
     ["timezone_id"]=>
-    string(13) "Australia/NSW"
+    string(18) "Australia/Lindeman"
   }
   [66]=>
   array(3) {
@@ -611,7 +611,7 @@ array(70) {
     ["offset"]=>
     int(39600)
     ["timezone_id"]=>
-    string(20) "Australia/Queensland"
+    string(13) "Australia/NSW"
   }
   [67]=>
   array(3) {
@@ -620,7 +620,7 @@ array(70) {
     ["offset"]=>
     int(39600)
     ["timezone_id"]=>
-    string(16) "Australia/Sydney"
+    string(20) "Australia/Queensland"
   }
   [68]=>
   array(3) {
@@ -629,9 +629,18 @@ array(70) {
     ["offset"]=>
     int(39600)
     ["timezone_id"]=>
-    string(18) "Australia/Tasmania"
+    string(16) "Australia/Sydney"
   }
   [69]=>
+  array(3) {
+    ["dst"]=>
+    bool(true)
+    ["offset"]=>
+    int(39600)
+    ["timezone_id"]=>
+    string(18) "Australia/Tasmania"
+  }
+  [70]=>
   array(3) {
     ["dst"]=>
     bool(true)
