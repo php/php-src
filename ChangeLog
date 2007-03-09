@@ -1,3 +1,101 @@
+2007-03-08  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/mysqli/mysqli_api.c:
+      MFB: fix crash/leak in bug #38710
+
+    * (PHP_5_2)
+      NEWS:
+      more fixes
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli_api.c:
+      fix crash/leak in bug #38710
+
+    * (PHP_5_2)
+      NEWS:
+      add news
+
+2007-03-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN: gd gif reading
+
+2007-03-08  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      MFB: fix crash on $x['x']['y'] += 1, patch by Brian Shire
+
+    * ZendEngine2/tests/offset_assign.phpt:
+      MFB test
+
+    * ZendEngine2/tests/offset_assign.phpt
+      ZendEngine2/tests/offset_assign.phpt:
+      
+      file offset_assign.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      fix crash on $x['x']['y'] += 1, patch by Brian Shire
+
+2007-03-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/gd/libgd/gd_gif_in.c:
+      MFB: fix thread unsafety in the gif reader code (merge from libgd cvs)
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gif_in.c:
+      fix thread unsafety in the gif reader code (merge from libgd cvs)
+
+2007-03-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      - Improved version of ternary shortcut
+
+2007-03-08  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      clarify checks and error messages
+
+2007-03-08  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug40752.phpt:
+      MFH: fix #40752 (parse_ini_file() segfaults when a scalar setting is
+      redeclared as an array)
+
+    * ext/standard/tests/general_functions/bug40752.phpt
+      ext/standard/tests/general_functions/bug40752.phpt:
+      
+      fix #40752 (parse_ini_file() segfaults when a scalar setting is redeclared
+      as an array)
+
+    * ext/standard/basic_functions.c:
+      fix #40752 (parse_ini_file() segfaults when a scalar setting is redeclared
+      as an array)
+
+2007-03-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Improved length parameter validation
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Improved offset validation
+
 2007-03-07  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)
