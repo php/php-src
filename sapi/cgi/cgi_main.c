@@ -1631,8 +1631,13 @@ consult the installation file that came with this distribution, or visit \n\
 				running from shell (so fp == NULL), then fail.
 			*/
 			if (retval == FAILURE && file_handle.handle.fp == NULL) {
-				SG(sapi_headers).http_response_code = 404;
-				PUTS("No input file specified.\n");
+				if (errno == EACCES) {
+					SG(sapi_headers).http_response_code = 403;
+					PUTS("Access denied.\n");
+				} else {
+					SG(sapi_headers).http_response_code = 404;
+					PUTS("No input file specified.\n");
+				}
 				/* we want to serve more requests if this is fastcgi
 				   so cleanup and continue, request shutdown is
 				   handled later */
