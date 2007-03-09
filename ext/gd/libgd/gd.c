@@ -847,7 +847,9 @@ static void gdImageTileApply (gdImagePtr im, int x, int y)
 	srcy = y % gdImageSY(im->tile);
 	if (im->trueColor) {
 		p = gdImageGetTrueColorPixel(im->tile, srcx, srcy);
-		gdImageSetPixel(im, x, y, p);
+		if (p != gdImageGetTransparent (im->tile)) {
+			gdImageSetPixel(im, x, y, p);
+		}
 	} else {
 		p = gdImageGetPixel(im->tile, srcx, srcy);
 		/* Allow for transparency */
@@ -1032,25 +1034,37 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 
 	/* Vertical */
 	if (x1==x2) {
-		if (y2 < y1) {
-			t = y2;
-			y2 = y1;
-			y1 = t;
-		}
+		if (thick > 1) {
+			int thickhalf = thick >> 1;
+			thickhalf = thick >> 1;
+			gdImageFilledRectangle(im, x1 - thickhalf, y1, x1 + thick - thickhalf - 1, y2, color);
+		} else {
+			if (y2 < y1) {
+				t = y2;
+				y2 = y1;
+				y1 = t;
+			}
 
-		for (;y1 <= y2; y1++) {
-			gdImageSetPixel(im, x1,y1, color);
+			for (;y1 <= y2; y1++) {
+				gdImageSetPixel(im, x1,y1, color);
+			}
 		}
 		return;
 	} else if (y1==y2) { 	/* Horizontal */
-		if (x2 < x1) {
-			t = x2;
-			x2 = x1;
-			x1 = t;
-		}
+		if (thick > 1) {
+			int thickhalf = thick >> 1;
+			thickhalf = thick >> 1;
+			gdImageFilledRectangle(im, x1, y1 - thickhalf, x2, y2 + thick - thickhalf - 1, color);
+		} else {
+			if (x2 < x1) {
+				t = x2;
+				x2 = x1;
+				x1 = t;
+			}
 
-		for (;x1 <= x2; x1++) {
-			gdImageSetPixel(im, x1,y1, color);
+			for (;x1 <= x2; x1++) {
+				gdImageSetPixel(im, x1,y1, color);
+			}
 		}
 		return;
 	}
@@ -3398,7 +3412,7 @@ int gdImageCompare (gdImagePtr im1, gdImagePtr im2)
 }
 
 int
-gdAlphaBlend (int dst, int src)
+gdAlphaBlendOld (int dst, int src)
 {
 	/* 2.0.12: TBB: alpha in the destination should be a
 	 * component of the result. Thanks to Frank Warmerdam for
@@ -3418,6 +3432,51 @@ gdAlphaBlend (int dst, int src)
 	    gdTrueColorGetBlue (src) / gdAlphaMax) +
 	   (gdTrueColorGetAlpha (src) *
 	    gdTrueColorGetBlue (dst)) / gdAlphaMax));
+}
+
+int gdAlphaBlend (int dst, int src) {
+    int src_alpha = gdTrueColorGetAlpha(src);
+    int dst_alpha, alpha, red, green, blue;
+    int src_weight, dst_weight, tot_weight;
+
+/* -------------------------------------------------------------------- */
+/*      Simple cases we want to handle fast.                            */
+/* -------------------------------------------------------------------- */
+    if( src_alpha == gdAlphaOpaque )
+        return src;
+
+    dst_alpha = gdTrueColorGetAlpha(dst);
+    if( src_alpha == gdAlphaTransparent )
+        return dst;
+    if( dst_alpha == gdAlphaTransparent )
+        return src;
+
+/* -------------------------------------------------------------------- */
+/*      What will the source and destination alphas be?  Note that      */
+/*      the destination weighting is substantially reduced as the       */
+/*      overlay becomes quite opaque.                                   */
+/* -------------------------------------------------------------------- */
+    src_weight = gdAlphaTransparent - src_alpha;
+    dst_weight = (gdAlphaTransparent - dst_alpha) * src_alpha / gdAlphaMax;
+    tot_weight = src_weight + dst_weight;
+    
+/* -------------------------------------------------------------------- */
+/*      What red, green and blue result values will we use?             */
+/* -------------------------------------------------------------------- */
+    alpha = src_alpha * dst_alpha / gdAlphaMax;
+
+    red = (gdTrueColorGetRed(src) * src_weight
+           + gdTrueColorGetRed(dst) * dst_weight) / tot_weight;
+    green = (gdTrueColorGetGreen(src) * src_weight
+           + gdTrueColorGetGreen(dst) * dst_weight) / tot_weight;
+    blue = (gdTrueColorGetBlue(src) * src_weight
+           + gdTrueColorGetBlue(dst) * dst_weight) / tot_weight;
+
+/* -------------------------------------------------------------------- */
+/*      Return merged result.                                           */
+/* -------------------------------------------------------------------- */
+    return ((alpha << 24) + (red << 16) + (green << 8) + blue);
+
 }
 
 void gdImageAlphaBlending (gdImagePtr im, int alphaBlendingArg)
