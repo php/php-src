@@ -1,3 +1,34 @@
+2007-03-08  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      MFB: fix crash on $x['x']['y'] += 1, patch by Brian Shire
+
+    * tests/offset_assign.phpt:
+      MFB test
+
+    * tests/offset_assign.phpt
+      tests/offset_assign.phpt:
+      
+      file offset_assign.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      fix crash on $x['x']['y'] += 1, patch by Brian Shire
+
+2007-03-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_opcode.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      - Improved version of ternary shortcut
+
 2007-03-07  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
