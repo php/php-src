@@ -2063,7 +2063,7 @@ PHP_FUNCTION(substr)
 	if (argc > 2) {
 		convert_to_long_ex(len);
 		l = Z_LVAL_PP(len);
-		if (l > Z_STRLEN_PP(str) || (l < 0 && -l > Z_STRLEN_PP(str))) {
+		if ((l < 0 && -l > Z_STRLEN_PP(str))) {
 			RETURN_FALSE;
 		}
 	} else {
