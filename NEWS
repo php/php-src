@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Added tidyNode::getParent() method (John, Nuno)
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
+- Fixed bug #40754 (added substr() & substr_replace() overflow checks). (Ilia)
 - Fixed bug #40752 (parse_ini_file() segfaults when a scalar setting is 
   redeclared as an array). (Tony)
 - Fixed bug #40727 (segfault in PDO when failed to bind parameters). (Tony)
