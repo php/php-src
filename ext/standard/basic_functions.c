@@ -6245,6 +6245,19 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 		} else if (!strcmp(hash_key->arKey, "GLOBALS")) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted GLOBALS variable overwrite.");
 			return 0; 
+		} else if (*hash_key->arKey == '_' && 
+				(
+					!strcmp(hash_key->arKey, "_GET") || 
+					!strcmp(hash_key->arKey, "_POST") || 
+					!strcmp(hash_key->arKey, "_COOKIE") || 
+					!strcmp(hash_key->arKey, "_ENV") || 
+					!strcmp(hash_key->arKey, "_SERVER") || 
+					!strcmp(hash_key->arKey, "_FILES") || 
+					!strcmp(hash_key->arKey, "_REQUEST")
+				)
+			) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted super-global (%s) variable overwrite.", hash_key->arKey);
+			return 0; 	
 		}
 	}
 
