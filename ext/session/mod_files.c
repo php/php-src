@@ -239,9 +239,6 @@ PS_OPEN_FUNC(files)
 	ps_files *data;
 	char *p;
 
-	data = ecalloc(sizeof(*data), 1);
-	PS_SET_MOD_DATA(data);
-
 	if (*save_path == '\0') {
 		save_path = php_get_temporary_directory();
 
@@ -252,6 +249,9 @@ PS_OPEN_FUNC(files)
 			return FAILURE;
 		}
 	}
+	
+	data = ecalloc(sizeof(*data), 1);
+	PS_SET_MOD_DATA(data);
 
 	data->fd = -1;
 	if ((p = strchr(save_path, ';'))) {

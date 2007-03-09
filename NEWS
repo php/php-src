@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, Version 4.4.7
+- Fixed bug #40747 (possible crash in session when save_path is out of 
+  open_basedir). (Tony)
 
 28 Feb 2007, Version 4.4.6
 
