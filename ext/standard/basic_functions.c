@@ -6252,6 +6252,7 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 					!strcmp(hash_key->arKey, "_COOKIE") || 
 					!strcmp(hash_key->arKey, "_ENV") || 
 					!strcmp(hash_key->arKey, "_SERVER") || 
+					!strcmp(hash_key->arKey, "_SESSION") || 
 					!strcmp(hash_key->arKey, "_FILES") || 
 					!strcmp(hash_key->arKey, "_REQUEST")
 				)
