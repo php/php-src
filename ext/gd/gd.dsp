@@ -104,6 +104,10 @@ SOURCE=.\gd.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\gd_security.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\gdttf.c
 # End Source File
 # End Group

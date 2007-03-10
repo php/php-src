@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, Version 4.4.7
+- Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
 - Fixed bug #40747 (possible crash in session when save_path is out of 
   open_basedir). (Tony)
 
