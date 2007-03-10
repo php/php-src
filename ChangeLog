@@ -1,3 +1,73 @@
+2007-03-09  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/mysqli/tests/bug38710.phpt:
+      add testcase
+
+    * ext/mysqli/tests/bug38710.phpt
+      ext/mysqli/tests/bug38710.phpt:
+      
+      file bug38710.phpt was initially added on branch PHP_5_2.
+
+2007-03-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Return HTTP 403 in case of "access denied".
+
+2007-03-09  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/session/mod_files.c:
+      fix #40747 (possible crash in session when save_path is out of
+      open_basedir)
+
+    * (PHP_5_2)
+      ext/standard/string.c
+      ext/standard/tests/strings/bug40754.phpt:
+      fix substr()
+      it's perfectly legal to do substr("str", 0, 1000000);
+
+    * (PHP_5_2)
+      ext/date/tests/010.phpt
+      ext/standard/tests/strings/substr_compare.phpt:
+      fix tests
+
+2007-03-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/bug40754.phpt
+      ext/standard/tests/strings/bug40754.phpt:
+      
+      Fixed bug #40754 (added substr() & substr_replace() overflow checks).
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      Add _SESSION to checklist
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      
+      Fixed a possible super-global overwrite inside import_request_variables().
+      
+
+2007-03-09  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/curl/interface.c:
+      MFB Off by ! in file:/// control char check
+
+    * (PHP_5_2)
+      ext/curl/interface.c:
+      Off by ! in the url control char check for file:/// urls
+
+2007-03-09  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c:
+      - #40764, line thickness not respected for horizontal and vertical lines
+
 2007-03-08  Stanislav Malyshev  <stas@zend.com>
 
     * ext/mysqli/mysqli_api.c:
