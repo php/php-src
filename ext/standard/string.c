@@ -2065,6 +2065,8 @@ PHP_FUNCTION(substr)
 		l = Z_LVAL_PP(len);
 		if ((l < 0 && -l > Z_STRLEN_PP(str))) {
 			RETURN_FALSE;
+		} else if (l > Z_STRLEN_PP(str)) {
+			l = Z_STRLEN_PP(str);
 		}
 	} else {
 		l = Z_STRLEN_PP(str);
