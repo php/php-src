@@ -1032,25 +1032,37 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 
 	/* Vertical */
 	if (x1==x2) {
-		if (y2 < y1) {
-			t = y2;
-			y2 = y1;
-			y1 = t;
-		}
+		if (thick > 1) {
+			int thickhalf = thick >> 1;
+			thickhalf = thick >> 1;
+			gdImageFilledRectangle(im, x1 - thickhalf, y1, x1 + thick - thickhalf - 1, y2, color);
+		} else {
+			if (y2 < y1) {
+				t = y2;
+				y2 = y1;
+				y1 = t;
+			}
 
-		for (;y1 <= y2; y1++) {
-			gdImageSetPixel(im, x1,y1, color);
+			for (;y1 <= y2; y1++) {
+				gdImageSetPixel(im, x1,y1, color);
+			}
 		}
 		return;
-	} else if (y1==y2) { /* Horizontal */
-		if (x2 < x1) {
-			t = x2;
-			x2 = x1;
-			x1 = t;
-		}
+	} else if (y1==y2) { 	/* Horizontal */
+		if (thick > 1) {
+			int thickhalf = thick >> 1;
+			thickhalf = thick >> 1;
+			gdImageFilledRectangle(im, x1, y1 - thickhalf, x2, y2 + thick - thickhalf - 1, color);
+		} else {
+			if (x2 < x1) {
+				t = x2;
+				x2 = x1;
+				x1 = t;
+			}
 
-		for (;x1 <= x2; x1++) {
-			gdImageSetPixel(im, x1,y1, color);
+			for (;x1 <= x2; x1++) {
+				gdImageSetPixel(im, x1,y1, color);
+			}
 		}
 		return;
 	}
