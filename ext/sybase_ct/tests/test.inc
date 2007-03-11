@@ -78,7 +78,8 @@
   // {{{ mixed sybase_select_single(resource dbh, string query)
   //     Fires an SQL query and returns the first value from the first row
   function sybase_select_single($dbh, $query) {
-    return array_shift(sybase_fetch_row(sybase_query($query, $dbh)));
+	$a = sybase_fetch_row(sybase_query($query, $dbh));
+	return array_shift($a);
   }
   // }}}
 ?>
