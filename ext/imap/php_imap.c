@@ -3895,7 +3895,7 @@ static void _php_imap_parse_address (ADDRESS *addresslist, char **fulladdress, z
 	addresstmp = addresslist;
 
 	if ((len = _php_imap_address_size(addresstmp))) {
-		tmpstr = (char *) malloc(len + 1);
+		tmpstr = (char *) pemalloc(len + 1, 1);
 		tmpstr[0] = '\0';
 		rfc822_write_address(tmpstr, addresstmp);
 		*fulladdress = tmpstr;
@@ -4316,7 +4316,7 @@ static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DA
 		}
 		return NULL;
 	} else {
-		char *buf = malloc(size + 1);
+		char *buf = pemalloc(size + 1, 1);
 		
 		if (f(stream, size, buf)) {
 			buf[size] = '\0';
