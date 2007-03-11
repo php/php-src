@@ -28,7 +28,7 @@
   
     // {{{ public static bool static_handler(int msgnumber, int severity, int state, int line, string text)
     //     Handles server messages
-    function static_handler($msgnumber, $severity, $state, $line, $text) {
+    static function static_handler($msgnumber, $severity, $state, $line, $text) {
       return sybase_msg_handler($msgnumber, $severity, $state, $line, $text);
     }
     // }}}
