@@ -1,3 +1,68 @@
+2007-03-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Re-added check removed by the previous patch
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      
+      Added additional checks for long input arrays inside
+      import_request_variables().
+      
+
+2007-03-10  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_4_4)
+      NEWS:
+      - NEWS entry for the ft cve
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/gd/config.m4
+      ext/gd/config.m4
+      ext/gd/config.w32
+      ext/gd/gd.dsp
+      ext/gd/libgd/gd_security.c
+      ext/gd/libgd/gd_security.c
+      ext/gd/libgd/gdhelpers.h
+      ext/gd/libgd/gdhelpers.h
+      ext/gd/libgd/wbmp.c
+      ext/gd/libgd/wbmp.c
+      ext/gd/tests/createfromwbmp2.phpt
+      ext/gd/tests/createfromwbmp2.phpt:
+      - MFH: CVE-2007-1001, integer overflow with invalid wbmp images
+
+    * (PHP_4_4)
+      ext/gd/libgd/gdft.c:
+      - Fix the Fix for CVE-2007-0455
+
+    * ext/gd/config.m4
+      ext/gd/config.w32
+      ext/gd/libgd/gd_security.c
+      ext/gd/libgd/gd_security.c
+      ext/gd/libgd/gd_security.c
+      ext/gd/libgd/gdhelpers.h
+      ext/gd/libgd/wbmp.c
+      ext/gd/tests/createfromwbmp2.phpt
+      ext/gd/tests/createfromwbmp2.phpt
+      ext/gd/tests/createfromwbmp2.phpt:
+      - CVE-2007-1001, integer overflow with invalid wbmp images
+
+    * ext/gd/libgd/gd.c
+      ext/gd/tests/bug40764.phpt:
+      - MFB: #40764, line thickness not respected for horizontal and vertical
+        lines
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/tests/bug40764.phpt
+      ext/gd/tests/bug40764.phpt:
+      - #40764, line thickness not respected for horizontal and vertical lines
+       - add test
+       - NEWS entry
+
 2007-03-09  Stanislav Malyshev  <stas@zend.com>
 
     * ext/mysqli/tests/bug38710.phpt:
