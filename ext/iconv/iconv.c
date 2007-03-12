@@ -679,28 +679,30 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 		return err;
 	}
 	
-	/* normalize the offset and the length */
-	if (offset < 0) {
-		if ((offset += total_len) < 0) {
-			offset = 0;
-		}
-	}
 	if (len < 0) {
 		if ((len += (total_len - offset)) < 0) {
-			len = 0;
+			return PHP_ICONV_ERR_SUCCESS;
+		}
+	}
+
+	if (offset < 0) {
+		if ((offset += total_len) < 0) {
+			return PHP_ICONV_ERR_SUCCESS;
 		}
 	}
 
 	if (offset >= total_len) {
 		return PHP_ICONV_ERR_SUCCESS;
 	}
-	
+
 	if ((offset + len) > total_len) {
 		/* trying to compute the length */
 		len = total_len - offset;
 	}
 
 	if (len == 0) {
+		smart_str_appendl(pretval, "", 0);
+		smart_str_0(pretval);
 		return PHP_ICONV_ERR_SUCCESS;
 	}
 	
@@ -1910,16 +1912,11 @@ PHP_FUNCTION(iconv_substr)
 	err = _php_iconv_substr(&retval, str, str_len, offset, length, charset); 
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 
-	if (err == PHP_ICONV_ERR_SUCCESS && str != NULL) {
-		if (retval.c != NULL) {
-			RETVAL_STRINGL(retval.c, retval.len, 0);
-		} else {
-			RETVAL_EMPTY_STRING();
-		}
-	} else {
-		smart_str_free(&retval);
-		RETVAL_FALSE;
+	if (err == PHP_ICONV_ERR_SUCCESS && str != NULL && retval.c != NULL) {
+		RETURN_STRINGL(retval.c, retval.len, 0);
 	}
+	smart_str_free(&retval);
+	RETURN_FALSE;
 }
 /* }}} */
 
