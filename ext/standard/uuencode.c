@@ -65,7 +65,7 @@
 
 #define PHP_UU_DEC(c) (((c) - ' ') & 077)
 
-PHPAPI int php_uuencode(char *src, int src_len, char **dest)
+PHPAPI int php_uuencode(char *src, int src_len, char **dest) /* {{{ */
 {
 	int len = 45;
 	char *p, *s, *e, *ee;
@@ -122,8 +122,9 @@ PHPAPI int php_uuencode(char *src, int src_len, char **dest)
 
 	return (p - *dest);
 }
+/* }}} */
 
-PHPAPI int php_uudecode(char *src, int src_len, char **dest)
+PHPAPI int php_uudecode(char *src, int src_len, char **dest) /* {{{ */
 {
 	int len, total_len=0;
 	char *s, *e, *p, *ee;
@@ -182,6 +183,7 @@ err:
 	efree(*dest);
 	return -1;
 }
+/* }}} */
 
 /* {{{ proto string convert_uuencode(string data) 
    uuencode a string */
@@ -220,3 +222,12 @@ PHP_FUNCTION(convert_uudecode)
 	RETURN_STRINGL(dst, dst_len, 0);
 }
 /* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
