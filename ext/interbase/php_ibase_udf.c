@@ -145,7 +145,7 @@ static void __attribute__((destructor)) fini()
 void exec_php(BLOBCALLBACK b, PARAMDSC *res, ISC_SHORT *init)
 {
 	int result, remaining = b->blob_total_length, i = 0;
-	char *code = malloc(remaining+1);
+	char *code = pemalloc(remaining+1, 1);
 	ISC_USHORT read;
 
 	for (code[remaining] = '\0'; remaining > 0; remaining -= read)
