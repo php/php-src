@@ -133,7 +133,7 @@ typedef union _sa_t {
 
 typedef struct _fcgi_mgmt_rec {
 	char*  name;
-	size_t name_len;
+	char   name_len;
 	char   val;
 } fcgi_mgmt_rec;
 
