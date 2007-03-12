@@ -1480,12 +1480,15 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 	opline->op2 = *method_name;
 
 	if (opline->op2.op_type == IS_CONST) {
+		char *lcname = zend_str_tolower_dup(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant));
 		if ((sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == Z_STRLEN(opline->op2.u.constant) &&
-		    memcmp(Z_STRVAL(opline->op2.u.constant), ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == 0) {
+		    memcmp(lcname, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == 0) {
 			zval_dtor(&opline->op2.u.constant);
 			SET_UNUSED(opline->op2);
+			efree(lcname);
 		} else {
-			zend_str_tolower(opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len);
+			efree(opline->op2.u.constant.value.str.val);
+			opline->op2.u.constant.value.str.val = lcname;
 		}
 	}
 
