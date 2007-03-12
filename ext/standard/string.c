@@ -2077,6 +2077,10 @@ PHP_FUNCTION(substr)
 		RETURN_FALSE;
 	}
 
+	if (l < 0 && (l + Z_STRLEN_PP(str) - f) < 0) {
+		RETURN_FALSE;
+	}
+
 	/* if "from" position is negative, count start position from the end
 	 * of the string
 	 */
