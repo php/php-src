@@ -17,8 +17,9 @@ PHP                                                                        NEWS
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
-- Fixed bug #40764, line thickness not respected for horizontal and vertical 
-  lines (Pierre)
+- Fixed bug #40784 (Case sensivity in constructor's fallback). (Tony)
+- Fixed bug #40764 (line thickness not respected for horizontal and vertical 
+  lines). (Pierre)
 - Fixed bug #40754 (added substr() & substr_replace() overflow checks). (Ilia)
 - Fixed bug #40752 (parse_ini_file() segfaults when a scalar setting is 
   redeclared as an array). (Tony)
