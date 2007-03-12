@@ -1714,6 +1714,9 @@ realloc_segment:
 		segment_copy = (zend_mm_segment *) ((char *)mm_block - ZEND_MM_ALIGNED_SEGMENT_SIZE);
 		if (segment_size < true_size ||
 		    heap->real_size + segment_size - segment_copy->size > heap->limit) {
+			if (ZEND_MM_IS_FREE_BLOCK(next_block)) {
+				zend_mm_add_to_free_list(heap, (zend_mm_free_block *) next_block);
+			}
 #if ZEND_MM_CACHE
 			zend_mm_free_cache(heap);
 #endif

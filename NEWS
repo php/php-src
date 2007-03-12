@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
 - Fixed bug #40784 (Case sensivity in constructor's fallback). (Tony)
+- Fixed bug #40770 (Apache child exits when PHP memory limit reached). (Dmitry)
 - Fixed bug #40764 (line thickness not respected for horizontal and vertical 
   lines). (Pierre)
 - Fixed bug #40754 (added substr() & substr_replace() overflow checks). (Ilia)
