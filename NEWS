@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 - Upgraded libraries bundled in the Windows distribution. (Edin)
   . c-client (imap) to version 2006e
   . libpq (PostgreSQL) to version 8.2.3
-  . libmysql (MySQL) to version 5.0.36
+  . libmysql (MySQL) to version 5.0.37
   . openssl to version 0.9.8e
 - Upgraded SQLite 3 to version 3.3.13 (Ilia)
 - Upgraded PCRE to version 7.0 (Nuno)
