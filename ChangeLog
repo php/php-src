@@ -1,3 +1,22 @@
+2007-03-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      
+      malloc() -> pemalloc()
+
+2007-03-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/sybase_ct/tests/test.inc:
+      one more fix
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/test.inc:
+      fix tests
+
+    * ext/sybase_ct/tests/test.inc:
+      fix sybase tests
+
 2007-03-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
