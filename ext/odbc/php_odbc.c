@@ -915,11 +915,10 @@ PHP_FUNCTION(odbc_prepare)
 	} else {
 		result->values = NULL;
 	}
-	result->id = zend_list_insert(result, le_result);	
 	zend_list_addref(conn->id);
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	RETURN_RESOURCE(result->id);
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);  
 }
 /* }}} */
 
@@ -1328,12 +1327,11 @@ PHP_FUNCTION(odbc_exec)
 	} else {
 		result->values = NULL;
 	}
-	result->id = zend_list_insert(result, le_result);
 	zend_list_addref(conn->id);
 	result->conn_ptr = conn;
 	result->fetched = 0;
 	
-	RETURN_RESOURCE(result->id);
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
 
@@ -2037,7 +2035,7 @@ PHP_FUNCTION(odbc_free_result)
 		result->values = NULL;
 	}
 			
-	zend_list_delete(result->id);
+	zend_list_delete(Z_LVAL_PP(pv_res));
 	
 	RETURN_TRUE;
 }
