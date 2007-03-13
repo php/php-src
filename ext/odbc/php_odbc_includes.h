@@ -236,7 +236,6 @@ typedef struct odbc_result_value {
 
 typedef struct odbc_result {
 	ODBC_SQL_STMT_T stmt;
-	int id;
 	odbc_result_value *values;
 	SWORD numcols;
 	SWORD numparams;
