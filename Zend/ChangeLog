@@ -1,3 +1,27 @@
+2007-03-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c
+      tests/bug40770.phpt:
+      Fixed bug #40770 (Apache child exits when PHP memory limit reached)
+
+    * tests/bug40770.phpt
+      tests/bug40770.phpt:
+      
+      file bug40770.phpt was initially added on branch PHP_5_2.
+
+2007-03-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_compile.c
+      tests/bug40784.phpt:
+      MFH: fix #40784 (Case sensivity in constructor's fallback)
+
+    * zend_compile.c
+      tests/bug40784.phpt
+      tests/bug40784.phpt:
+      fix #40784 (Case sensivity in constructor's fallback)
+
 2007-03-08  Stanislav Malyshev  <stas@zend.com>
 
     * zend_vm_def.h

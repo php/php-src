@@ -1,3 +1,70 @@
+2007-03-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      return false instead of empty string when -length is greater than (len -
+      offset)
+
+2007-03-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/interbase/php_ibase_udf.c:
+      
+      malloc() -> pemalloc()
+
+2007-03-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/uuencode.c:
+      fix folding and add missing footer
+
+    * (PHP_5_2)
+      ext/iconv/iconv.c
+      ext/iconv/tests/iconv_substr.phpt:
+      synchronize iconv_substr() behavior with substr()
+      no MFB so far, since substr() changes are not MFBed either
+
+2007-03-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug40770.phpt
+      ZendEngine2/tests/bug40770.phpt:
+      
+      file bug40770.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/tests/bug40770.phpt:
+      Fixed bug #40770 (Apache child exits when PHP memory limit reached)
+
+2007-03-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug40784.phpt:
+      MFH: fix #40784 (Case sensivity in constructor's fallback)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug40784.phpt
+      ZendEngine2/tests/bug40784.phpt:
+      fix #40784 (Case sensivity in constructor's fallback)
+
+2007-03-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed compilation warning
+
+2007-03-12  Edin Kadribasic  <edin@krug.dk>
+
+    * (PHP_5_2)
+      NEWS:
+      Lib upgrade news
+
 2007-03-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
