@@ -225,6 +225,10 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 #else
 	path_copy = path;
 #endif  
+
+	if ((PG(safe_mode) && (!php_checkuid(path_copy, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(path_copy TSRMLS_CC)) {
+		return NULL;
+	}
 	
 	/* try and open it directly first */
 	bz_file = BZ2_bzopen(path_copy, mode);
@@ -236,7 +240,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	
 	if (bz_file == NULL) {
 		/* that didn't work, so try and get something from the network/wrapper */
-		stream = php_stream_open_wrapper(path, mode, options | STREAM_WILL_CAST, opened_path);
+		stream = php_stream_open_wrapper(path, mode, options | STREAM_WILL_CAST | ENFORCE_SAFE_MODE, opened_path);
 	
 		if (stream) {
 			int fd;
