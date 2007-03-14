@@ -22,7 +22,6 @@ var_dump(preg_replace_callback('~\A.~', 'g', array(array('xyz'))));
 var_dump(preg_replace_callback('~\A.~', create_function('$m', 'return strtolower($m[0]);'), 'ABC'));
 ?>
 --EXPECTF--
-Warning: preg_replace_callback(): Unable to call custom replacement function in %spreg_replace_callback2.php on line %d
 array(3) {
   [0]=>
   string(12) "'a' 'b3' bcd"
@@ -39,7 +38,6 @@ array(1) {
 }
 string(3) "aBC"
 --UEXPECTF--
-Warning: preg_replace_callback(): Unable to call custom replacement function in %s on line %d
 array(3) {
   [0]=>
   unicode(12) "'a' 'b3' bcd"
