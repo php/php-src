@@ -117,7 +117,7 @@ ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_
 #define safe_eustrdup(ptr)  ((ptr)?(eustrdup((ptr))):STR_EMPTY_ALLOC())
 #define safe_eustrndup(ptr, len) ((ptr)?(eustrndup((ptr),(len))):STR_EMPTY_ALLOC())
 
-ZEND_API int zend_set_memory_limit(unsigned int memory_limit);
+ZEND_API int zend_set_memory_limit(size_t memory_limit);
 
 ZEND_API void start_memory_manager(TSRMLS_D);
 ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC);
