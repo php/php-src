@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? ??? 2007, Version 4.4.7
 - Fixed MOPB-21-2007 An open_basedir/safe_mode bypass inside the
   compress.bzip2 wraper. (Ilia)
+- Fixed MOPB-22-2007 PHP session_regenerate_id() Double Free Vulnerability.
+  (Ilia)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
 - Fixed CVE-2007-0455, Buffer overflow in gdImageStringFTEx (used by imagettf
   function) (Kees Cook, Pierre)

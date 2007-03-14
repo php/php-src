@@ -1396,7 +1396,10 @@ PHP_FUNCTION(session_regenerate_id)
 		RETURN_FALSE;
 	}
 	if (PS(session_status) == php_session_active) {
-		if (PS(id)) efree(PS(id));
+		if (PS(id)) {
+			efree(PS(id));
+			PS(id) = NULL;
+		}
 	
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
 
@@ -1688,6 +1691,7 @@ static void php_rshutdown_session_globals(TSRMLS_D)
 	}
 	if (PS(id)) {
 		efree(PS(id));
+		PS(id) = NULL;
 	}
 	PS(session_status)=php_session_none;
 }
