@@ -22,7 +22,7 @@ according to the current locale.
   <version>5.0.0rc1</version>
   <date>2004-03-19</date>
   <notes>
-package.xml added to support intallation using pear installer
+package.xml added to support installation using pear installer
   </notes>
   <filelist>
    <file role="doc" name="CREDITS"/>
