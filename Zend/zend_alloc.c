@@ -2060,7 +2060,7 @@ ZEND_API char *zend_strndup(const char *s, uint length)
 }
 
 
-ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
+ZEND_API int zend_set_memory_limit(size_t memory_limit)
 {
 	TSRMLS_FETCH();
 
