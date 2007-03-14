@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, Version 4.4.7
+- Fixed MOPB-21-2007 An open_basedir/safe_mode bypass inside the
+  compress.bzip2 wraper. (Ilia)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
 - Fixed CVE-2007-0455 (Kees Cook, Pierre)
 - Fixed bug #40747 (possible crash in session when save_path is out of 
