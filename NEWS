@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - Added --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)
 - Added openbasedir and safemode checks in zip:// stream wrapper (Pierre)
+- Fixed possible relative path issues in zip_open and TS mode (old API) (Pierre)
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
