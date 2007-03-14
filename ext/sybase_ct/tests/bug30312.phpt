@@ -23,5 +23,5 @@ Sybase-CT bug #30312 (sybase_unbuffered_query calls)
   var_dump($array[0]);
 ?>
 --EXPECTF--
-string(%d) "%s  %d %d %d:%d%s"
-string(%d) "%s  %d %d %d:%d%s"
+string(%d) "%s %d %d %d:%d%s"
+string(%d) "%s %d %d %d:%d%s"
