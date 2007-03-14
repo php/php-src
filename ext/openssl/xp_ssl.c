@@ -47,6 +47,7 @@ int php_openssl_get_x509_list_id(void);
 typedef struct _php_openssl_netstream_data_t {
 	php_netstream_data_t s;
 	SSL *ssl_handle;
+	struct timeval connect_timeout;
 	int enable_on_connect;
 	int is_client;
 	int ssl_active;
@@ -390,7 +391,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 	int n, retry = 1;
 
 	if (cparam->inputs.activate && !sslsock->ssl_active) {
-		float timeout = sslsock->s.timeout.tv_sec + sslsock->s.timeout.tv_usec / 1000000;
+		float timeout = sslsock->connect_timeout.tv_sec + sslsock->connect_timeout.tv_usec / 1000000;
 		int blocked = sslsock->s.is_blocked;
 
 		if (!sslsock->state_set) {
@@ -608,7 +609,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 						tv.tv_sec = FG(default_socket_timeout);
 						tv.tv_usec = 0;
 					} else {
-						tv = sslsock->s.timeout;
+						tv = sslsock->connect_timeout;
 					}
 				} else {
 					tv.tv_sec = value;
@@ -766,8 +767,13 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
 	memset(sslsock, 0, sizeof(*sslsock));
 
 	sslsock->s.is_blocked = 1;
-	sslsock->s.timeout.tv_sec = timeout->tv_sec;
-	sslsock->s.timeout.tv_usec = timeout->tv_usec;
+	/* this timeout is used by standard stream funcs, therefor it should use the default value */
+	sslsock->s.timeout.tv_sec = FG(default_socket_timeout);
+	sslsock->s.timeout.tv_usec = 0;
+
+	/* use separate timeout for our private funcs */
+	sslsock->connect_timeout.tv_sec = timeout->tv_sec;
+	sslsock->connect_timeout.tv_usec = timeout->tv_usec;
 
 	/* we don't know the socket until we have determined if we are binding or
 	 * connecting */
