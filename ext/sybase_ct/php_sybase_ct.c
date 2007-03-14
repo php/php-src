@@ -599,7 +599,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				convert_to_string_ex(yyhost);
 				host = Z_STRVAL_PP(yyhost);
 				user=passwd=charset=appname=NULL;
-				hashed_details_length = spprintf(hashed_details, 0, "sybase_%s____", Z_STRVAL_PP(yyhost));
+				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s____", Z_STRVAL_PP(yyhost));
 			}
 			break;
 		case 2: {
@@ -613,7 +613,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				host = Z_STRVAL_PP(yyhost);
 				user = Z_STRVAL_PP(yyuser);
 				passwd=charset=appname=NULL;
-				hashed_details_length = spprintf(hashed_details, 0, "sybase_%s_%s___", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser));
+				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s_%s___", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser));
 			}
 			break;
 		case 3: {
@@ -629,7 +629,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				user = Z_STRVAL_PP(yyuser);
 				passwd = Z_STRVAL_PP(yypasswd);
 				charset=appname=NULL;
-				hashed_details_length = spprintf(hashed_details, 0, "sybase_%s_%s_%s__", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd));
+				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s_%s_%s__", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd));
 			}
 			break;
 		case 4: {
@@ -647,7 +647,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				passwd = Z_STRVAL_PP(yypasswd);
 				charset = Z_STRVAL_PP(yycharset);
 				appname=NULL;
-				hashed_details_length = spprintf(hashed_details, 0, "sybase_%s_%s_%s_%s_", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd), Z_STRVAL_PP(yycharset));
+				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s_%s_%s_%s_", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd), Z_STRVAL_PP(yycharset));
 			}
 			break;
 		case 5: {
@@ -666,7 +666,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				passwd = Z_STRVAL_PP(yypasswd);
 				charset = Z_STRVAL_PP(yycharset);
 				appname = Z_STRVAL_PP(yyappname);
-				hashed_details_length = spprintf(hashed_details, 0, "sybase_%s_%s_%s_%s_%s", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd), Z_STRVAL_PP(yycharset), Z_STRVAL_PP(yyappname));
+				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s_%s_%s_%s_%s", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd), Z_STRVAL_PP(yycharset), Z_STRVAL_PP(yyappname));
 			}
 			break;
 		default:
