@@ -38,39 +38,39 @@ Sybase-CT sybase_field_* functions
 --EXPECTF--
 resource(%d) of type (sybase-ct result)
 int(4)
-class stdClass {
-  %s $name = 'id';
-  %s $max_length = 11;
-  %s $column_source = '';
-  %s $numeric = 1;
-  %s $type = 'int';
-}
-class stdClass {
-  %s $name = 'caption';
-  %s $max_length = 5;
-  %s $column_source = '';
-  %s $numeric = 0;
-  %s $type = 'string';
-}
-class stdClass {
-  %s $name = 'author';
-  %s $max_length = 4;
-  %s $column_source = '';
-  %s $numeric = 0;
-  %s $type = 'string';
-}
-class stdClass {
-  %s $name = 'lastchange';
-  %s $max_length = 29;
-  %s $column_source = '';
-  %s $numeric = 0;
-  %s $type = 'datetime';
-}
+stdClass::__set_state(array(
+   'name' => 'id',
+   'max_length' => 11,
+   'column_source' => '',
+   'numeric' => 1,
+   'type' => 'int',
+))
+stdClass::__set_state(array(
+   'name' => 'caption',
+   'max_length' => 5,
+   'column_source' => '',
+   'numeric' => 0,
+   'type' => 'string',
+))
+stdClass::__set_state(array(
+   'name' => 'author',
+   'max_length' => 4,
+   'column_source' => '',
+   'numeric' => 0,
+   'type' => 'string',
+))
+stdClass::__set_state(array(
+   'name' => 'lastchange',
+   'max_length' => 29,
+   'column_source' => '',
+   'numeric' => 0,
+   'type' => 'datetime',
+))
 bool(true)
-class stdClass {
-  %s $name = 'caption';
-  %s $max_length = 5;
-  %s $column_source = '';
-  %s $numeric = 0;
-  %s $type = 'string';
-}
+stdClass::__set_state(array(
+   'name' => 'caption',
+   'max_length' => 5,
+   'column_source' => '',
+   'numeric' => 0,
+   'type' => 'string',
+))
