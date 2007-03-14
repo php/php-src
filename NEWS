@@ -8,6 +8,7 @@ PHP 4                                                                      NEWS
   function) (Kees Cook, Pierre)
 - Fixed bug #40747 (possible crash in session when save_path is out of 
   open_basedir). (Tony)
+- Fixed MOPB-8, XSS in phpinfo() (Joe Orton, Stas)
 
 28 Feb 2007, Version 4.4.6
 
