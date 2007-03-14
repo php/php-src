@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
+- Fixed bug #40800 (cannot disable memory_limit with -1). (Dmitry, Tony)
 - Fixed bug #40784 (Case sensivity in constructor's fallback). (Tony)
 - Fixed bug #40770 (Apache child exits when PHP memory limit reached). (Dmitry)
 - Fixed bug #40764 (line thickness not respected for horizontal and vertical 
