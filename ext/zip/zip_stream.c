@@ -112,6 +112,10 @@ php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_D
 	}
 
 	if (filename) {
+		if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)) {
+			return NULL;
+		}
+
 		/* duplicate to make the stream za independent (esp. for MSHUTDOWN) */
 		stream_za = zip_open(filename, ZIP_CREATE, &err);
 		if (!stream_za) {
@@ -188,6 +192,11 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 
 	php_basename(path, path_len - fragment_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
 	fragment++;
+
+	if ((PG(safe_mode) && (!php_checkuid(file_dirname, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file_dirname TSRMLS_CC)) {
+		efree(file_basename);
+		return NULL;
+	}
 
 	za = zip_open(file_dirname, ZIP_CREATE, &err);
 	if (za) {
