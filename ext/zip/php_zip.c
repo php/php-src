@@ -788,6 +788,7 @@ static PHP_FUNCTION(zip_entry_read)
 			buffer[n] = 0;
 			RETURN_STRINGL(buffer, n, 0);
 		} else {
+			efree(buffer);
 			RETURN_EMPTY_STRING()
 		}
 	} else {
