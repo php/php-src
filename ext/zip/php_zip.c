@@ -927,6 +927,10 @@ static ZIPARCHIVE_METHOD(open)
 		RETURN_FALSE;
 	}
 
+	if (OPENBASEDIR_CHECKPATH(filename)) {
+		RETURN_FALSE;
+	}
+
 	if(!expand_filepath(filename, resolved_path TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -1065,6 +1069,10 @@ static ZIPARCHIVE_METHOD(addFile)
 			entry_name = filename;
 			entry_name_len = filename_len;
 		}
+	}
+
+	if (OPENBASEDIR_CHECKPATH(filename)) {
+		RETURN_FALSE;
 	}
 
 	if(!expand_filepath(filename, resolved_path TSRMLS_CC)) {
