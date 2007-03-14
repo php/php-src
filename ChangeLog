@@ -1,3 +1,19 @@
+2007-03-13  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_4)
+      Zend/zend.c
+      Zend/zend.h:
+      fix XSS in phpinfo() (MOPB 8) - patch by Joe Orton
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc_includes.h:
+      MFB: fix odbc resource handling, patch by Dave Lawson
+
+    * (PHP_5_2)
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc_includes.h:
+      fix odbc resource handling, patch by Dave Lawson
+
 2007-03-12  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
