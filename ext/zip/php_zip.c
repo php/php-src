@@ -122,6 +122,11 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		}
 
 		php_basename(file, file_len, NULL, 0, &file_basename, (unsigned int *)&file_basename_len TSRMLS_CC);
+		if (OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
+			efree(file_dirname_fullpath);
+			efree(file_basename);
+			return 0;
+		}
 	}
 	/* let see if the path already exists */
 	if (php_stream_stat_path(file_dirname_fullpath, &ssb) < 0) {
@@ -144,6 +149,16 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 	len = spprintf(&fullpath, 0, "%s/%s/%s", dest, file_dirname, file_basename);
 	if (!len) {
+		efree(file_dirname_fullpath);
+		efree(file_basename);
+		return 0;
+	}
+
+	/* check again the full path, not sure if it
+	 * is required, does a file can have a different
+	 * safemode status as its parent folder?
+	 */
+	if (OPENBASEDIR_CHECKPATH(fullpath)) {
 		efree(file_dirname_fullpath);
 		efree(file_basename);
 		return 0;
@@ -608,6 +623,9 @@ static PHP_FUNCTION(zip_open)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &filename_zval) == FAILURE) {
 		return;
+	}
+	if (OPENBASEDIR_CHECKPATH(filename)) {
+		RETURN_FALSE;
 	}
 
 	if (FAILURE == php_stream_path_param_encode(filename_zval, &filename, &filename_len, REPORT_ERRORS, FG(default_context))) {

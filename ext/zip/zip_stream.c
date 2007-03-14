@@ -12,6 +12,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
 #include "fopen_wrappers.h"
+#include "php_zip.h"
 
 #include "ext/standard/url.h"
 
@@ -112,6 +113,10 @@ php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_D
 	}
 
 	if (filename) {
+		if (OPENBASEDIR_CHECKPATH(filename)) {
+			return NULL;
+		}
+
 		/* duplicate to make the stream za independent (esp. for MSHUTDOWN) */
 		stream_za = zip_open(filename, ZIP_CREATE, &err);
 		if (!stream_za) {
@@ -188,6 +193,11 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 
 	php_basename(path, path_len - fragment_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
 	fragment++;
+
+	if (OPENBASEDIR_CHECKPATH(file_dirname)) {
+		efree(file_basename);
+		return NULL;
+	}
 
 	za = zip_open(file_dirname, ZIP_CREATE, &err);
 	if (za) {
