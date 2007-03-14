@@ -160,6 +160,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	 * safemode status as its parent folder?
 	 */
 	if (OPENBASEDIR_CHECKPATH(fullpath)) {
+		efree(fullpath);
 		efree(file_dirname_fullpath);
 		efree(file_basename);
 		return 0;
