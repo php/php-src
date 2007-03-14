@@ -30,6 +30,16 @@ extern zend_module_entry zip_module_entry;
 
 #include "lib/zip.h"
 
+/* {{{ OPENBASEDIR_CHECKPATH(filename) */
+#if (PHP_MAJOR_VERSION < 6)
+#define OPENBASEDIR_CHECKPATH(filename) \
+	(PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)
+#else 
+#define OPENBASEDIR_CHECKPATH(filename) \
+	php_check_open_basedir(filename TSRMLS_CC)
+#endif
+/* }}} */
+
 typedef struct _ze_zip_rsrc {
 	struct zip *za;
 	int index_current;
