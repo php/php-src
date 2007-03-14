@@ -846,6 +846,7 @@ new_session:
 	} else if (PS(invalid_session_id)) { /* address instances where the session read fails due to an invalid id */
 		PS(invalid_session_id) = 0;
 		efree(PS(id));
+		PS(id) = NULL;
 		goto new_session;
 	}
 }
@@ -1575,6 +1576,7 @@ PHP_FUNCTION(session_regenerate_id)
 				RETURN_FALSE;
 			}
 			efree(PS(id));
+			PS(id) = NULL;
 		}
 	
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
