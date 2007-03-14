@@ -20,6 +20,7 @@ Sybase-CT server message handler
         return;
         
       case 174:     // The function 'GETDATE' requires 0 arguments.
+      case 11021:   // Function GETDATE invoked with wrong number or type of argument(s)
         printf("*** Caught '%s'\n", trim($text));
         return;
     }
@@ -45,7 +46,7 @@ Sybase-CT server message handler
 --EXPECTF--
 bool(true)
 >>> Query: select getdate(NULL)
-*** Caught 'The function 'GETDATE' requires 0 arguments.'
+*** Caught '%s'
 <<< Return: boolean
 bool(false)
 >>> Query: print "Hi"
