@@ -1643,6 +1643,9 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 							zval_ptr_dtor(&retval2);
 						}
 					} else {
+						if (!EG(exception)) {
+							EG(exception) = old_exception;
+						}
 						zend_exception_error(EG(exception) TSRMLS_CC);
 					}
 					efree(params);
