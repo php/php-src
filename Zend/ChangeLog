@@ -1,3 +1,14 @@
+2007-03-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_alloc.c
+      zend_alloc.h:
+      MFH: fix #40800 (cannot disable memory_limit with -1)
+
+    * zend_alloc.c
+      zend_alloc.h:
+      fix #40800 (cannot disable memory_limit with -1)
+
 2007-03-12  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_alloc.c

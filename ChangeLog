@@ -1,3 +1,237 @@
+2007-03-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/preg_replace_callback2.phpt:
+      MFH: remove unnecessary warning in case of exception
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/tests/preg_replace_callback2.phpt:
+      don't emit any warnings in addition to an exception
+
+2007-03-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/session/session.c:
+      
+      MFB: Fixed MOPB-22-2007 PHP session_regenerate_id() Double Free
+      Vulnerability.
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      
+      Fixed MOPB-22-2007:PHP session_regenerate_id() Double Free Vulnerability
+      
+
+2007-03-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/xp_ssl.c:
+      MFH: fix #40750 (openssl stream wrapper ignores default_stream_timeout)
+
+    * ext/openssl/xp_ssl.c:
+      fix #40750 (openssl stream wrapper ignores default_stream_timeout)
+
+2007-03-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - leak in extract
+
+    * ext/zip/php_zip.c:
+      - MFB: Fixed a possible memory leak on open_basedir validation (Ilia)
+
+2007-03-14  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_4)
+      NEWS:
+      mopb 8 fix
+
+2007-03-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - add ::open to the safemode check entry
+
+    * (PHP_4_4)
+      NEWS:
+      - add summary of the CVE
+
+2007-03-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      
+      Fixed a possible memory leak on open_basedir validation
+
+    * (PHP_4_4)
+      NEWS:
+      
+      Bug fixing news
+
+2007-03-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - MFH: openbasedir and safemode check in ::open()
+
+    * ext/zip/php_zip.c:
+      - add openbase_dir checks in ::open and addFile()
+
+2007-03-14  Timm Friebe  <php@thekid.de>
+
+    * ext/sybase_ct/tests/bug30312.phpt:
+      - MFB: Changed expected output
+
+    * ext/sybase_ct/tests/test_fetch_object.phpt
+      ext/sybase_ct/tests/test_fetch_object.phpt
+      ext/sybase_ct/tests/test_fields.phpt
+      ext/sybase_ct/tests/test_fields.phpt:
+      - Changed expected output
+
+    * ext/sybase_ct/tests/test_msghandler_handled.phpt:
+      - MFB: Changed message handler also to handle message #11021
+      - Adjusted expected output
+
+2007-03-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      MFH: fix #40800 (cannot disable memory_limit with -1)
+
+2007-03-14  Timm Friebe  <php@thekid.de>
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/test_msghandler_handled.phpt:
+      - Changed message handler also to handle message #11021
+      - Adjusted expected output
+
+2007-03-14  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      fix #40800 (cannot disable memory_limit with -1)
+
+2007-03-14  Timm Friebe  <php@thekid.de>
+
+    * (PHP_5_2)
+      ext/sybase_ct/php_sybase_ct.c:
+      - Fixed segmentation fault in sybase_connect()
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/bug30312.phpt:
+      - Changed expected output
+
+2007-03-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - MFB: free rsrc on error in zip_read (old API)
+
+    * (PHP_5_2)
+      NEWS
+      ext/zip/php_zip.c:
+      - MFH: Fixed possible relative path issues in zip_open in TS mode (old API)
+
+    * ext/zip/php_zip.c:
+      - MFB: free buffer when zip_entry_read returns an empty entry
+
+    * ext/zip/php_zip.c
+      ext/zip/php_zip.h
+      ext/zip/zip_stream.c:
+      - MFB:
+       - rename SAFEMODE_CHECKFILE to OPENBASEDIR_CHECKPATH (can be used without
+         confusing in head without confusion)
+       - Add safemode and open basedir checks in zip:// wrapper (revert Ilia's
+         patch). Bug found by Stefan Esser in his MOPB-20-2007
+
+    * (PHP_5_2)
+      NEWS
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h
+      ext/zip/zip_stream.c:
+      - rename SAFEMODE_CHECKFILE to OPENBASEDIR_CHECKPATH (can be used without
+        confusing in head without confusion)
+      - Add safemode and open basedir checks in zip:// wrapper (revert Ilia's
+        patch). Bug found by Stefan Esser in his MOPB-20-2007
+
+    * (PHP_5_2)
+      ext/zip/tests/oo_getcomment.phpt:
+      - add more cases for getComment
+
+2007-03-14  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * ext/bcmath/package.xml
+      ext/bcmath/package.xml
+      ext/calendar/package.xml
+      ext/calendar/package.xml
+      ext/com_dotnet/package.xml
+      ext/com_dotnet/package.xml
+      ext/ctype/package.xml
+      ext/ctype/package.xml
+      ext/curl/package.xml
+      ext/curl/package.xml
+      ext/dbase/package.xml
+      ext/dbase/package.xml
+      ext/exif/package.xml
+      ext/exif/package.xml
+      ext/fdf/package.xml
+      ext/fdf/package.xml
+      ext/ftp/package.xml
+      ext/ftp/package.xml
+      ext/mime_magic/package.xml
+      ext/mime_magic/package.xml
+      ext/mysql/package.xml
+      ext/mysqli/package.xml
+      ext/mysqli/package.xml
+      ext/pcntl/package.xml
+      ext/pcntl/package.xml
+      ext/posix/package.xml
+      ext/posix/package.xml
+      ext/session/package.xml
+      ext/session/package.xml
+      ext/shmop/package.xml
+      ext/shmop/package.xml
+      ext/sockets/package.xml
+      ext/sockets/package.xml
+      ext/sysvmsg/package.xml
+      ext/sysvmsg/package.xml
+      ext/sysvsem/package.xml
+      ext/sysvsem/package.xml
+      ext/sysvshm/package.xml
+      ext/sysvshm/package.xml
+      ext/tokenizer/package.xml
+      ext/tokenizer/package.xml
+      ext/wddx/package.xml
+      ext/wddx/package.xml
+      ext/xml/package.xml
+      ext/xml/package.xml
+      ext/zlib/package.xml
+      ext/zlib/package.xml:
+      Typo
+
+2007-03-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/bz2/bz2.c:
+      
+      MFB: Added missing open_basedir & safe_mode checks to bzip:// wrapper.
+
+    * (PHP_5_2)
+      ext/bz2/bz2.c
+      ext/zip/zip_stream.c:
+      
+      Added missing open_basedir & safe_mode checks to zip:// and bzip://
+      wrappers.
+      
+      Issues idendtified by MOPB-20 and MOPB-21
+
 2007-03-13  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_4_4)
