@@ -750,7 +750,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 		fname = Z_STRVAL_P(fci->function_name);
 		fname_len = Z_STRLEN_P(fci->function_name);
-		if (calling_scope && (colon = strstr(fname, "::")) != NULL) {
+		if ((colon = strstr(fname, "::")) != NULL) {
 			int clen = colon - fname;
 			int mlen = fname_len - clen - 2;
 			zend_class_entry **pce, *ce_child = NULL;
