@@ -8,6 +8,8 @@ PHP 4                                                                      NEWS
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
 - Fixed CVE-2007-0455, Buffer overflow in gdImageStringFTEx (used by imagettf
   function) (Kees Cook, Pierre)
+- Fixed bug #40831 (cURL extension doesn't clean up the buffer of reused 
+  handle). (Tony)
 - Fixed bug #40747 (possible crash in session when save_path is out of 
   open_basedir). (Tony)
 - Fixed MOPB-8, XSS in phpinfo() (Joe Orton, Stas)

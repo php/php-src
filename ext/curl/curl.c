@@ -1262,10 +1262,6 @@ PHP_FUNCTION(curl_setopt)
 static void 
 cleanup_handle(php_curl *ch)
 {
-	if (ch->uses < 1) {
-		return;
-	}
-
 	if (ch->handlers->write->buf.len > 0) {
 		smart_str_free(&ch->handlers->write->buf);
 		ch->handlers->write->buf.len = 0;
