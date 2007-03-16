@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
 - Fixed bug #40815 (using strings like "class::func" and static methods in 
   set_exception_handler() might result in crash). (Tony)
+- Fixed bug #40805 (Failure executing function ibase_execute()). (Tony)
 - Fixed bug #40800 (cannot disable memory_limit with -1). (Dmitry, Tony)
 - Fixed bug #40784 (Case sensivity in constructor's fallback). (Tony)
 - Fixed bug #40770 (Apache child exits when PHP memory limit reached). (Dmitry)
