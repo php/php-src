@@ -391,7 +391,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				passwd = Z_STRVAL_PP(yypasswd);
 				charset = Z_STRVAL_PP(yycharset);
 				appname = Z_STRVAL_PP(yyappname);
-				hashed_details_length = spprintf(hashed_details, 0, "sybase_%s_%s_%s_%s_%s", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd), Z_STRVAL_PP(yycharset), Z_STRVAL_PP(yyappname));
+				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s_%s_%s_%s_%s", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd), Z_STRVAL_PP(yycharset), Z_STRVAL_PP(yyappname));
 			}
 			break;
 		default:
