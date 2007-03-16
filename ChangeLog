@@ -1,3 +1,33 @@
+2007-03-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/curl/curl.c:
+      fix #40831 (cURL extension doesn't clean up the buffer of reused handle)
+
+    * (PHP_5_2)
+      ext/interbase/ibase_query.c:
+      fix #40805 (Failure executing function ibase_execute())
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug40815.phpt:
+      fix #40815 (using strings like "class::func" and static methods in
+      set_exception_handler() might result in crash)
+
+    * ZendEngine2/tests/bug40815.phpt
+      ZendEngine2/tests/bug40815.phpt:
+      
+      new test
+
+    * ZendEngine2/zend.c:
+      reset the exception if it's still NULL
+
 2007-03-14  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
