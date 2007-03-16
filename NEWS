@@ -13,7 +13,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #40747 (possible crash in session when save_path is out of 
   open_basedir). (Tony)
 - Fixed MOPB-8, XSS in phpinfo() (Joe Orton, Stas)
-- Fixed UMR in in array_user_key_compare() (MOPB-24 by Stefan Esser) (Stas)
+- Fixed unallocated memory access/double free in in array_user_key_compare() 
+  (MOPB-24 by Stefan Esser) (Stas)
 
 28 Feb 2007, Version 4.4.6
 
