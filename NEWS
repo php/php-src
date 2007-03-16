@@ -100,7 +100,8 @@ PHP                                                                        NEWS
 - Fixed crash on op-assign where argument is string offset (Brian, Stas)
 - Fixed bug #38710 (data leakage because of nonexisting boundary checking in 
   statements in mysqli) (Stas)
-- Fixed UMR in in array_user_key_compare() (MOPB-24 by Stefan Esser) (Stas)
+- Fixed unallocated memory access/double free in in array_user_key_compare() 
+  (MOPB-24 by Stefan Esser) (Stas)
 
 08 Feb 2007, PHP 5.2.1
 - Added read-timeout context option "timeout" for HTTP streams. (Hannes, Ilia). 
