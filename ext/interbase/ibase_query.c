@@ -669,13 +669,13 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval ***b_vars, BIND_BUF *buf, /* {{{ 
 		var->sqldata = (void*)&buf[i].val;
 
 		switch (var->sqltype & ~1) {
-			struct tm *t, tmbuf;
+			struct tm t, tmbuf;
 
 			case SQL_TIMESTAMP:
 			case SQL_TYPE_DATE:
 			case SQL_TYPE_TIME:
 				if (Z_TYPE_P(b_var) == IS_LONG) {
-					t = php_gmtime_r(&Z_LVAL_P(b_var), &tmbuf);
+					php_gmtime_r(&Z_LVAL_P(b_var), &t);
 				} else {
 #ifdef HAVE_STRPTIME
 					char *format = INI_STR("ibase.timestampformat");
@@ -689,7 +689,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval ***b_vars, BIND_BUF *buf, /* {{{ 
 						case SQL_TYPE_TIME:
 							format = INI_STR("ibase.timeformat");
 					}
-					if (!strptime(Z_STRVAL_P(b_var), format, t)) {
+					if (!strptime(Z_STRVAL_P(b_var), format, &t)) {
 						/* strptime() cannot handle it, so let IB have a try */
 						break;
 					}
@@ -700,13 +700,13 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval ***b_vars, BIND_BUF *buf, /* {{{ 
 
 				switch (var->sqltype & ~1) {
 					default: /* == case SQL_TIMESTAMP */
-						isc_encode_timestamp(t, &buf[i].val.tsval);
+						isc_encode_timestamp(&t, &buf[i].val.tsval);
 						break;
 					case SQL_TYPE_DATE:
-						isc_encode_sql_date(t, &buf[i].val.dtval);
+						isc_encode_sql_date(&t, &buf[i].val.dtval);
 						break;
 					case SQL_TYPE_TIME:
-						isc_encode_sql_time(t, &buf[i].val.tmval);
+						isc_encode_sql_time(&t, &buf[i].val.tmval);
 						break;
 				}
 				continue;
