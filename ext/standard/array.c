@@ -703,40 +703,40 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 {
 	Bucket *f;
 	Bucket *s;
-	zval key1, key2;
+	zval *key1, *key2;
 	zval *args[2];
 	zval retval;
 	int status;
 
-	args[0] = &key1;
-	args[1] = &key2;
-	INIT_PZVAL(&key1);
-	INIT_PZVAL(&key2);
+	ALLOC_INIT_ZVAL(key1);
+	ALLOC_INIT_ZVAL(key2);
+	args[0] = key1;
+	args[1] = key2;
 	
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
 
 	if (f->nKeyLength) {
-		Z_STRVAL(key1) = estrndup(f->arKey, f->nKeyLength-1);
-		Z_STRLEN(key1) = f->nKeyLength-1;
-		Z_TYPE(key1) = IS_STRING;
+		Z_STRVAL_P(key1) = estrndup(f->arKey, f->nKeyLength-1);
+		Z_STRLEN_P(key1) = f->nKeyLength-1;
+		Z_TYPE_P(key1) = IS_STRING;
 	} else {
-		Z_LVAL(key1) = f->h;
-		Z_TYPE(key1) = IS_LONG;
+		Z_LVAL_P(key1) = f->h;
+		Z_TYPE_P(key1) = IS_LONG;
 	}
 	if (s->nKeyLength) {
-		Z_STRVAL(key2) = estrndup(s->arKey, s->nKeyLength-1);
-		Z_STRLEN(key2) = s->nKeyLength-1;
-		Z_TYPE(key2) = IS_STRING;
+		Z_STRVAL_P(key2) = estrndup(s->arKey, s->nKeyLength-1);
+		Z_STRLEN_P(key2) = s->nKeyLength-1;
+		Z_TYPE_P(key2) = IS_STRING;
 	} else {
-		Z_LVAL(key2) = s->h;
-		Z_TYPE(key2) = IS_LONG;
+		Z_LVAL_P(key2) = s->h;
+		Z_TYPE_P(key2) = IS_LONG;
 	}
 
 	status = call_user_function(EG(function_table), NULL, *BG(user_compare_func_name), &retval, 2, args TSRMLS_CC);
 	
-	zval_dtor(&key1);
-	zval_dtor(&key2);
+	zval_ptr_dtor(&key1);
+	zval_ptr_dtor(&key2);
 	
 	if (status == SUCCESS) {
 		convert_to_long(&retval);
