@@ -264,7 +264,7 @@ static zend_object_value reflection_objects_new(zend_class_entry *class_type TSR
 	return retval;
 }
 
-static zval * reflection_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
+static zval * reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 {
 	if (!object) {
 		ALLOC_ZVAL(object);
@@ -1038,7 +1038,7 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSR
 
 	MAKE_STD_ZVAL(name);
 	ZVAL_TEXTL(name, ce->name, ce->name_length, 1);
-	reflection_instanciate(reflection_class_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_class_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = ce;
 	intern->free_ptr = 0;
@@ -1064,7 +1064,7 @@ static void reflection_extension_factory(zval *object, char *name_str TSRMLS_DC)
 	}
 	free_alloca(lcname);
 
-	reflection_instanciate(reflection_extension_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_extension_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	MAKE_STD_ZVAL(name);
 	ZVAL_ASCII_STRINGL(name, module->name, name_len, 1);
@@ -1088,7 +1088,7 @@ static void reflection_parameter_factory(zend_function *fptr, struct _zend_arg_i
 	} else {
 		ZVAL_NULL(name);
 	}
-	reflection_instanciate(reflection_parameter_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_parameter_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	reference = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	reference->arg_info = arg_info;
@@ -1111,7 +1111,7 @@ static void reflection_function_factory(zend_function *function, zval *object TS
 	MAKE_STD_ZVAL(name);
 	ZVAL_TEXT(name, function->common.function_name, 1);
 
-	reflection_instanciate(reflection_function_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_function_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = function;
 	intern->free_ptr = 0;
@@ -1131,7 +1131,7 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 	MAKE_STD_ZVAL(classname);
 	ZVAL_TEXT(name, method->common.function_name, 1);
 	ZVAL_TEXTL(classname, ce->name, ce->name_length, 1);
-	reflection_instanciate(reflection_method_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_method_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = method;
 	intern->free_ptr = 0;
@@ -1176,7 +1176,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	ZVAL_TEXT(name, prop_name, 1);
 	ZVAL_TEXTL(classname, ce->name, ce->name_length, 1);
 
-	reflection_instanciate(reflection_property_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_property_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->ce = ce;
