@@ -692,43 +692,42 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 {
 	Bucket *f;
 	Bucket *s;
-	zval key1, key2;
-	zval *key1_ptr = &key1, *key2_ptr = &key2;
+	zval *key1, *key2;
 	zval **args[2];
 	zval *retval_ptr = NULL;
 	long result;
 
-	args[0] = &key1_ptr;
-	args[1] = &key2_ptr;
-	INIT_PZVAL(&key1);
-	INIT_PZVAL(&key2);
+	ALLOC_INIT_ZVAL(key1);
+	ALLOC_INIT_ZVAL(key2);
+	args[0] = &key1;
+	args[1] = &key2;
 	
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
 
 	if (f->nKeyLength == 0) {
-		Z_LVAL(key1) = f->h;
-		Z_TYPE(key1) = IS_LONG;
+		Z_LVAL_P(key1) = f->h;
+		Z_TYPE_P(key1) = IS_LONG;
 	} else if (f->key.type == IS_UNICODE) {
-		Z_USTRVAL(key1) = eustrndup(f->key.arKey.u, f->nKeyLength-1);
-		Z_USTRLEN(key1) = f->nKeyLength-1;
-		Z_TYPE(key1) = IS_UNICODE;
+		Z_USTRVAL_P(key1) = eustrndup(f->key.arKey.u, f->nKeyLength-1);
+		Z_USTRLEN_P(key1) = f->nKeyLength-1;
+		Z_TYPE_P(key1) = IS_UNICODE;
 	} else {
-		Z_STRVAL(key1) = estrndup(f->key.arKey.s, f->nKeyLength-1);
-		Z_STRLEN(key1) = f->nKeyLength-1;
-		Z_TYPE(key1) = f->key.type;
+		Z_STRVAL_P(key1) = estrndup(f->key.arKey.s, f->nKeyLength-1);
+		Z_STRLEN_P(key1) = f->nKeyLength-1;
+		Z_TYPE_P(key1) = f->key.type;
 	}
 	if (s->nKeyLength == 0) {
- 		Z_LVAL(key2) = s->h;
- 		Z_TYPE(key2) = IS_LONG;
+ 		Z_LVAL_P(key2) = s->h;
+ 		Z_TYPE_P(key2) = IS_LONG;
 	} else if (s->key.type == IS_UNICODE) {
-		Z_USTRVAL(key2) = eustrndup(s->key.arKey.u, s->nKeyLength-1);
-		Z_USTRLEN(key2) = s->nKeyLength-1;
-		Z_TYPE(key2) = IS_UNICODE;
+		Z_USTRVAL_P(key2) = eustrndup(s->key.arKey.u, s->nKeyLength-1);
+		Z_USTRLEN_P(key2) = s->nKeyLength-1;
+		Z_TYPE_P(key2) = IS_UNICODE;
 	} else {
-		Z_STRVAL(key2) = estrndup(s->key.arKey.s, s->nKeyLength-1);
-		Z_STRLEN(key2) = s->nKeyLength-1;
-		Z_TYPE(key2) = s->key.type;
+		Z_STRVAL_P(key2) = estrndup(s->key.arKey.s, s->nKeyLength-1);
+		Z_STRLEN_P(key2) = s->nKeyLength-1;
+		Z_TYPE_P(key2) = s->key.type;
  	}
 
 	BG(user_compare_fci).param_count = 2;
@@ -745,11 +744,12 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 		result = 0;
 	}
 	
-	zval_dtor(&key1);
-	zval_dtor(&key2);
+	zval_ptr_dtor(&key1);
+	zval_ptr_dtor(&key2);
 	
 	return result;
 }
+
 
 /* {{{ proto bool uksort(array array_arg, mixed comparator) U
    Sort an array by keys using a user-defined comparison function */
