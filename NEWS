@@ -25,6 +25,8 @@ PHP                                                                        NEWS
   set_exception_handler() might result in crash). (Tony)
 - Fixed bug #40805 (Failure executing function ibase_execute()). (Tony)
 - Fixed bug #40800 (cannot disable memory_limit with -1). (Dmitry, Tony)
+- Fixed bug #40794 (ReflectionObject::getValues() may crash when used with 
+  dynamic properties). (Tony)
 - Fixed bug #40784 (Case sensivity in constructor's fallback). (Tony)
 - Fixed bug #40770 (Apache child exits when PHP memory limit reached). (Dmitry)
 - Fixed bug #40764 (line thickness not respected for horizontal and vertical 
