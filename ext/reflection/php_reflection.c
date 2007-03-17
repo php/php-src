@@ -2027,7 +2027,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 		 * TODO: Think about moving these checks to the compiler or some sort of
 		 * lint-mode.
 		 */
-		if (0 == strncmp(param->arg_info->class_name.v, "self", sizeof("self")- 1)) {
+		if (ZEND_U_EQUAL(ZEND_STR_TYPE, param->arg_info->class_name, param->arg_info->class_name_len, "self", sizeof("self")- 1)) {
 			zend_class_entry *ce= param->fptr->common.scope;
 			if (!ce) {
 			   zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -2035,7 +2035,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 			   return;
 			}
 			pce= &ce;
-		} else if (0 == strncmp(param->arg_info->class_name.v, "parent", sizeof("parent")- 1)) {
+		} else if (ZEND_U_EQUAL(ZEND_STR_TYPE, param->arg_info->class_name,  param->arg_info->class_name_len, "parent", sizeof("parent")- 1)) {
 			zend_class_entry *ce= param->fptr->common.scope;
 			if (!ce) {
 			   zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
