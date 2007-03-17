@@ -174,7 +174,7 @@ static void string_free(string *str)
 /* Struct for properties */
 typedef struct _property_reference {
 	zend_class_entry *ce;
-	zend_property_info *prop;
+	zend_property_info prop;
 } property_reference;
 
 /* Struct for parameters */
@@ -1180,7 +1180,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->ce = ce;
-	reference->prop = prop;
+	reference->prop = *prop;
 	intern->ptr = reference;
 	intern->free_ptr = 1;
 	intern->ce = ce;
@@ -3267,7 +3267,7 @@ static int _adddynproperty(zval **pptr, int num_args, va_list args, zend_hash_ke
 		ZVAL_STRINGL(&member, hash_key->arKey.s, hash_key->nKeyLength-1, 0);
 	}
 	if (zend_get_property_info(ce, &member, 1 TSRMLS_CC) == &EG(std_property_info)) {
-		ALLOC_ZVAL(property);
+		MAKE_STD_ZVAL(property);
 		reflection_property_factory(ce, &EG(std_property_info), property TSRMLS_CC);
 		add_next_index_zval(retval, property);
 	}
@@ -3912,7 +3912,7 @@ ZEND_METHOD(reflection_property, __construct)
 
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->ce = ce;
-	reference->prop = property_info;
+	reference->prop = *property_info;
 	intern->ptr = reference;
 	intern->free_ptr = 1;
 	intern->ce = ce;
@@ -3930,7 +3930,7 @@ ZEND_METHOD(reflection_property, __toString)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 	string_init(&str);
-	_property_string(&str, ref->prop, NULL_ZSTR, "" TSRMLS_CC);
+	_property_string(&str, &ref->prop, NULL_ZSTR, "" TSRMLS_CC);
 	RETURN_U_STRINGL(ZEND_U_CONVERTER(UG(output_encoding_conv)), str.string, str.len - 1, ZSTR_AUTOFREE);
 }
 /* }}} */
@@ -3951,7 +3951,7 @@ static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
-	RETURN_BOOL(ref->prop->flags & mask);
+	RETURN_BOOL(ref->prop.flags & mask);
 }
 
 /* {{{ proto public bool ReflectionProperty::isPublic() U
@@ -4007,13 +4007,13 @@ ZEND_METHOD(reflection_property, getDefaultValue)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (ref->prop->flags & ZEND_ACC_STATIC) {
+	if (ref->prop.flags & ZEND_ACC_STATIC) {
 		prop_defaults = &ref->ce->default_static_members;
 	} else {
 		prop_defaults = &ref->ce->default_properties;
 	}
 
-	if (zend_u_hash_quick_find(prop_defaults, utype, ref->prop->name, ref->prop->name_length+1, ref->prop->h, (void**)&zdef) == SUCCESS) {
+	if (zend_u_hash_quick_find(prop_defaults, utype, ref->prop.name, ref->prop.name_length+1, ref->prop.h, (void**)&zdef) == SUCCESS) {
 		ALLOC_ZVAL(zv);
 		*zv = **zdef;
 		zval_copy_ctor(zv);
@@ -4034,7 +4034,7 @@ ZEND_METHOD(reflection_property, getModifiers)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETURN_LONG(ref->prop->flags);
+	RETURN_LONG(ref->prop.flags);
 }
 /* }}} */
 
@@ -4051,7 +4051,7 @@ ZEND_METHOD(reflection_property, getValue)
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!(ref->prop->flags & ZEND_ACC_PUBLIC)) {
+	if (!(ref->prop.flags & ZEND_ACC_PUBLIC)) {
 		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Cannot access non-public member %v::%v", intern->ce->name, Z_UNIVAL(name));
@@ -4059,18 +4059,18 @@ ZEND_METHOD(reflection_property, getValue)
 		return;
 	}
 
-	if ((ref->prop->flags & ZEND_ACC_STATIC)) {
+	if ((ref->prop.flags & ZEND_ACC_STATIC)) {
 		zend_update_class_constants(intern->ce TSRMLS_CC);
-		if (zend_u_hash_quick_find(CE_STATIC_MEMBERS(intern->ce), utype, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
-			zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop->name);
+		if (zend_u_hash_quick_find(CE_STATIC_MEMBERS(intern->ce), utype, ref->prop.name, ref->prop.name_length + 1, ref->prop.h, (void **) &member) == FAILURE) {
+			zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop.name);
 			/* Bails out */
 		}
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
 			return;
 		}
-		if (zend_u_hash_quick_find(Z_OBJPROP_P(object), utype, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
-			zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop->name);
+		if (zend_u_hash_quick_find(Z_OBJPROP_P(object), utype, ref->prop.name, ref->prop.name_length + 1, ref->prop.h, (void **) &member) == FAILURE) {
+			zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop.name);
 			/* Bails out */
 		}
 	}
@@ -4098,7 +4098,7 @@ ZEND_METHOD(reflection_property, setValue)
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!(ref->prop->flags & ZEND_ACC_PUBLIC)) {
+	if (!(ref->prop.flags & ZEND_ACC_PUBLIC)) {
 		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Cannot access non-public member %v::%v", intern->ce->name, Z_UNIVAL(name));
@@ -4106,7 +4106,7 @@ ZEND_METHOD(reflection_property, setValue)
 		return;
 	}
 
-	if ((ref->prop->flags & ZEND_ACC_STATIC)) {
+	if ((ref->prop.flags & ZEND_ACC_STATIC)) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &tmp, &value) == FAILURE) {
 				return;
@@ -4121,8 +4121,8 @@ ZEND_METHOD(reflection_property, setValue)
 		prop_table = Z_OBJPROP_P(object);
 	}
 
-	if (zend_u_hash_quick_find(prop_table, utype, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &variable_ptr) == FAILURE) {
-		zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop->name);
+	if (zend_u_hash_quick_find(prop_table, utype, ref->prop.name, ref->prop.name_length + 1, ref->prop.h, (void **) &variable_ptr) == FAILURE) {
+		zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop.name);
 		/* Bails out */
 	}
 	if (*variable_ptr == value) {
@@ -4145,7 +4145,7 @@ ZEND_METHOD(reflection_property, setValue)
 		if (PZVAL_IS_REF(value)) {
 			SEPARATE_ZVAL(&value);
 		}
-		zend_u_hash_quick_update(prop_table, utype, ref->prop->name, ref->prop->name_length+1, ref->prop->h, &value, sizeof(zval *), (void **) &foo);
+		zend_u_hash_quick_update(prop_table, utype, ref->prop.name, ref->prop.name_length+1, ref->prop.h, &value, sizeof(zval *), (void **) &foo);
 	}
 }
 /* }}} */
@@ -4164,7 +4164,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, ref->prop->name, ref->prop->name_length, &class_name, &prop_name) != SUCCESS) {
+	if (zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, ref->prop.name, ref->prop.name_length, &class_name, &prop_name) != SUCCESS) {
 		RETURN_FALSE;
 	}
 
@@ -4192,8 +4192,8 @@ ZEND_METHOD(reflection_property, getDocComment)
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
-	if (ref->prop->doc_comment.v) {
-		RETURN_ZSTRL(ZEND_STR_TYPE, ref->prop->doc_comment, ref->prop->doc_comment_len, 1);
+	if (ref->prop.doc_comment.v) {
+		RETURN_ZSTRL(ZEND_STR_TYPE, ref->prop.doc_comment, ref->prop.doc_comment_len, 1);
 	}
 	RETURN_FALSE;
 }
