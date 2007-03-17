@@ -1,3 +1,70 @@
+2007-03-16  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/strings/strcasecmp.phpt
+      ext/standard/tests/strings/strcmp.phpt:
+      Fixing %i - > %d, previously changed in error
+
+2007-03-16  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/sybase/php_sybase_db.c:
+      fix spprintf usage
+
+    * (PHP_4_4)
+      NEWS
+      NEWS:
+      clarify
+
+    * ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/array_user_key_compare.phpt
+      ext/standard/tests/array/array_user_key_compare.phpt:
+      Fix UMR in array_user_key_compare() (MOPB24 by Stefan Esser)
+
+    * (PHP_4_4)
+      NEWS:
+      fix for mopb-24
+
+    * (PHP_5_2)
+      NEWS:
+      array_user_key_compare() fix
+
+    * ext/standard/tests/array/array_user_key_compare.phpt
+      ext/standard/tests/array/array_user_key_compare.phpt
+      ext/standard/tests/array/array_user_key_compare.phpt:
+        1.1.4;
+      file array_user_key_compare.phpt was initially added on branch PHP_5_2.
+
+2007-03-16  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/strings/strcasecmp.phpt
+      ext/standard/tests/strings/strcmp.phpt:
+      Changed %d to %i in EXPECTF
+
+    * ext/standard/tests/strings/strcasecmp.phpt
+      ext/standard/tests/strings/strcmp.phpt
+      ext/standard/tests/strings/strlen.phpt:
+      new test cases for string functions
+
+2007-03-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/interbase/ibase_query.c:
+      MFB: fix #40805 (Failure executing function ibase_execute())
+
+2007-03-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/reflection/php_reflection.c:
+      MFB: Fugbix typo.
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c:
+      Fugbix typo.
+
 2007-03-15  Antony Dovgal  <antony@zend.com>
 
     * (PHP_4_4)
