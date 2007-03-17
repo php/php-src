@@ -1,7 +1,12 @@
 --TEST--
 show information about extension
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php 
+include "skipif.inc"; 
+if (!extension_loaded("reflection")) {
+	die("skip");
+}
+?>
 --FILE--
 <?php
 
