@@ -1,3 +1,34 @@
+2007-03-17  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug39884.phpt:
+      - Fix string compare in unicode mode
+
+2007-03-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c:
+      MFH: fix #40794 (ReflectionObject::getValues() may crash when used with
+      dynamic properties)
+
+    * ext/reflection/php_reflection.c:
+      fix #40794 (ReflectionObject::getValues() may crash when used with dynamic
+      properties)
+
+    * (PHP_5_2)
+      sapi/cli/tests/004.phpt
+      sapi/cli/tests/005.phpt
+      sapi/cli/tests/006.phpt:
+      fix tests
+
+    * sapi/cli/tests/004.phpt
+      sapi/cli/tests/005.phpt
+      sapi/cli/tests/006.phpt:
+      fix tests
+      
+      I was absolutely sure we removed --disable-reflection option.
+
 2007-03-16  Zoe Slattery  <zoe@uk.ibm.com>
 
     * ext/standard/tests/strings/strcasecmp.phpt
