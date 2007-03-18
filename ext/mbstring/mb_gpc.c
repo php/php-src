@@ -208,9 +208,8 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 	/* register_globals stuff
 	 * XXX: this feature is going to be deprecated? */
 
-	if (info->force_register_globals) {
-		prev_rg_state = PG(register_globals);
-		PG(register_globals) = 1;
+	if (info->force_register_globals && !(prev_rg_state = PG(register_globals))) {
+		zend_alter_ini_entry("register_globals", sizeof("register_globals"), "1", sizeof("1")-1, PHP_INI_PERDIR, PHP_INI_STAGE_RUNTIME);
 	}
 
 	if (!res || *res == '\0') {
@@ -343,8 +342,8 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 
 out:
 	/* register_global stuff */
-	if (info->force_register_globals) {
-		PG(register_globals) = prev_rg_state;
+	if (info->force_register_globals && !prev_rg_state) {
+		zend_alter_ini_entry("register_globals", sizeof("register_globals"), "0", sizeof("0")-1, PHP_INI_PERDIR, PHP_INI_STAGE_RUNTIME);
 	}
 
 	if (convd != NULL) {
