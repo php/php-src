@@ -1012,7 +1012,7 @@ PHP_FUNCTION(dom_node_insert_before)
 			new_child = xmlAddPrevSibling(refp, child);
 		}
 	} else {
-		if (child->parent == parentp){
+		if (child->parent != NULL){
 			xmlUnlinkNode(child);
 		}
 		if (child->type == XML_TEXT_NODE && parentp->last != NULL && parentp->last->type == XML_TEXT_NODE) {
