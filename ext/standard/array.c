@@ -597,7 +597,7 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 		convert_to_long_ex(&retval_ptr);
 		retval = Z_LVAL_P(retval_ptr);
 		zval_ptr_dtor(&retval_ptr);
-		return retval;
+		return retval < 0 ? -1 : retval > 0 ? 1 : 0;
 	} else {
 		return 0;
 	}
