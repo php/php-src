@@ -5,6 +5,8 @@ PHP 4                                                                      NEWS
   compress.bzip2 wraper. (Ilia)
 - Fixed MOPB-22-2007 PHP session_regenerate_id() Double Free Vulnerability.
   (Ilia)
+- Fixed MOPB-26-2007 mb_parse_str() can be used to activate
+  register_globals. (Ilia)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
 - Fixed CVE-2007-0455, Buffer overflow in gdImageStringFTEx (used by imagettf
   function) (Kees Cook, Pierre)
