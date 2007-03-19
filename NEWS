@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
 - Fixed bug #40848 (sorting issue on 64-bit Solaris). (Wez)
 - Fixed bug #40836 (Segfault in ext/dom). (Rob)
+- Fixed bug #40833 (Crash when using unset() on an ArrayAccess object retrieved
+  via __get()). (Dmitry)
 - Fixed bug #40815 (using strings like "class::func" and static methods in 
   set_exception_handler() might result in crash). (Tony)
 - Fixed bug #40805 (Failure executing function ibase_execute()). (Tony)
