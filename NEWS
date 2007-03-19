@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
+- Fixed bug #40854 (imap_mail_compose() creates an invalid terminator for 
+  multipart e-mails). (Ilia)
 - Fixed bug #40848 (sorting issue on 64-bit Solaris). (Wez)
 - Fixed bug #40836 (Segfault in ext/dom). (Rob)
 - Fixed bug #40833 (Crash when using unset() on an ArrayAccess object retrieved
