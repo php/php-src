@@ -9488,7 +9488,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (0) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -11027,7 +11027,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (1) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (1) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -12569,7 +12569,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (0) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -14584,7 +14584,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (0) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -15878,7 +15878,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_AR
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (0) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -16937,7 +16937,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	if (1) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (1) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -17954,7 +17954,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (0) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -19236,7 +19236,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (0) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -21933,7 +21933,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (0) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -23464,7 +23464,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (1) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (1) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -24998,7 +24998,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (0) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -27003,7 +27003,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (0) {
 		zval_ptr_dtor(&property);
 	} else {
