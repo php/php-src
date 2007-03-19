@@ -457,7 +457,7 @@ ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 }
 /* }}} */
 
-static Bigint * Balloc(int k)
+static Bigint * Balloc(int k) /* {{{ */
 {
 	int x;
 	Bigint *rv;
@@ -475,8 +475,9 @@ static Bigint * Balloc(int k)
 	rv->sign = rv->wds = 0;
 	return rv;
 }
+/* }}} */
 
-static void Bfree(Bigint *v)
+static void Bfree(Bigint *v) /* {{{ */
 {
 	if (v) {
 		_THREAD_PRIVATE_MUTEX_LOCK(dtoa_mutex);
@@ -485,6 +486,7 @@ static void Bfree(Bigint *v)
 		_THREAD_PRIVATE_MUTEX_UNLOCK(dtoa_mutex);
 	}
 }
+/* }}} */
 
 #define Bcopy(x,y) memcpy((char *)&x->sign, (char *)&y->sign, \
 		y->wds*sizeof(Long) + 2*sizeof(int))
@@ -492,7 +494,8 @@ static void Bfree(Bigint *v)
 /* return value is only used as a simple string, so mis-aligned parts
  * inside the Bigint are not at risk on strict align architectures
  */
-static char * rv_alloc(int i) {
+static char * rv_alloc(int i) /* {{{ */
+{
 	int j, k, *r;
 
 	j = sizeof(ULong);
@@ -505,9 +508,9 @@ static char * rv_alloc(int i) {
 	*r = k;
 	return (char *)(r+1);
 }
+/* }}} */
 
-
-static char * nrv_alloc(char *s, char **rve, int n)
+static char * nrv_alloc(char *s, char **rve, int n) /* {{{ */
 {
 	char *rv, *t;
 
@@ -520,8 +523,9 @@ static char * nrv_alloc(char *s, char **rve, int n)
 	}
 	return rv;
 }
+/* }}} */
 
-static Bigint * multadd(Bigint *b, int m, int a) /* multiply by m and add a */
+static Bigint * multadd(Bigint *b, int m, int a) /* multiply by m and add a */ /* {{{ */
 {
 	int i, wds;
 	ULong *x, y;
@@ -559,8 +563,9 @@ static Bigint * multadd(Bigint *b, int m, int a) /* multiply by m and add a */
 	}
 	return b;
 }
+/* }}} */
 
-static int hi0bits(ULong x)
+static int hi0bits(ULong x) /* {{{ */
 {
 	int k = 0;
 
@@ -588,8 +593,9 @@ static int hi0bits(ULong x)
 	}
 	return k;
 }
+/* }}} */
 
-static int lo0bits(ULong *y)
+static int lo0bits(ULong *y) /* {{{ */
 {
 	int k;
 	ULong x = *y;
@@ -632,8 +638,9 @@ static int lo0bits(ULong *y)
 	*y = x;
 	return k;
 }
+/* }}} */
 
-static Bigint * i2b(int i)
+static Bigint * i2b(int i) /* {{{ */
 {
 	Bigint *b;
 
@@ -642,8 +649,9 @@ static Bigint * i2b(int i)
 	b->wds = 1;
 	return b;
 }
+/* }}} */
 
-static Bigint * mult(Bigint *a, Bigint *b)
+static Bigint * mult(Bigint *a, Bigint *b) /* {{{ */
 {
 	Bigint *c;
 	int k, wa, wb, wc;
@@ -726,8 +734,9 @@ static Bigint * mult(Bigint *a, Bigint *b)
 	c->wds = wc;
 	return c;
 }
+/* }}} */
 
-static Bigint * s2b (CONST char *s, int nd0, int nd, ULong y9)
+static Bigint * s2b (CONST char *s, int nd0, int nd, ULong y9) /* {{{ */
 {
 	Bigint *b;
 	int i, k;
@@ -759,8 +768,9 @@ static Bigint * s2b (CONST char *s, int nd0, int nd, ULong y9)
 	}
 	return b;
 }
+/* }}} */
 
-static Bigint * pow5mult(Bigint *b, int k)
+static Bigint * pow5mult(Bigint *b, int k) /* {{{ */
 {
 	Bigint *b1, *p5, *p51;
 	int i;
@@ -800,9 +810,9 @@ static Bigint * pow5mult(Bigint *b, int k)
 	_THREAD_PRIVATE_MUTEX_UNLOCK(pow5mult_mutex);
 	return b;
 }
+/* }}} */
 
-
-static Bigint *lshift(Bigint *b, int k)
+static Bigint *lshift(Bigint *b, int k) /* {{{ */
 {
 	int i, k1, n, n1;
 	Bigint *b1;
@@ -859,8 +869,9 @@ static Bigint *lshift(Bigint *b, int k)
 	Bfree(b);
 	return b1;
 }
+/* }}} */
 
-static int cmp(Bigint *a, Bigint *b)
+static int cmp(Bigint *a, Bigint *b) /* {{{ */
 {
 	ULong *xa, *xa0, *xb, *xb0;
 	int i, j;
@@ -887,9 +898,9 @@ static int cmp(Bigint *a, Bigint *b)
 	}
 	return 0;
 }
+/* }}} */
 
-
-static Bigint * diff(Bigint *a, Bigint *b)
+static Bigint * diff(Bigint *a, Bigint *b) /* {{{ */
 {
 	Bigint *c;
 	int i, wa, wb;
@@ -963,8 +974,9 @@ static Bigint * diff(Bigint *a, Bigint *b)
 	c->wds = wa;
 	return c;
 }
+/* }}} */
 
-static double ulp (double _x)
+static double ulp (double _x) /* {{{ */
 {
 	_double x;
 	register Long L;
@@ -997,7 +1009,9 @@ static double ulp (double _x)
 #endif
 	return value(a);
 }
+/* }}} */
 
+/* static double b2d () {{{ */
 static double
 b2d
 #ifdef KR_headers
@@ -1067,9 +1081,9 @@ ret_d:
 #endif
 	return value(d);
 }
+/* }}} */
 
-
-static Bigint * d2b(double _d, int *e, int *bits)
+static Bigint * d2b(double _d, int *e, int *bits) /* {{{ */
 {
 	Bigint *b;
 	int de, i, k;
@@ -1189,11 +1203,12 @@ static Bigint * d2b(double _d, int *e, int *bits)
 #endif
 	return b;
 }
+/* }}} */
+
 #undef d0
 #undef d1
 
-
-static double ratio (Bigint *a, Bigint *b)
+static double ratio (Bigint *a, Bigint *b) /* {{{ */
 {
 	_double da, db;
 	int k, ka, kb;
@@ -1227,6 +1242,7 @@ static double ratio (Bigint *a, Bigint *b)
 #endif
 	return value(da) / value(db);
 }
+/* }}} */
 
 static CONST double
 tens[] = {
@@ -1254,8 +1270,7 @@ static CONST double tinytens[] = { 1e-16, 1e-32 };
 #endif
 #endif
 
-
-static int quorem(Bigint *b, Bigint *S)
+static int quorem(Bigint *b, Bigint *S) /* {{{ */
 {
 	int n;
 	Long borrow, y;
@@ -1354,8 +1369,9 @@ static int quorem(Bigint *b, Bigint *S)
 	}
 	return q;
 }
+/* }}} */
 
-static void destroy_freelist(void)
+static void destroy_freelist(void) /* {{{ */
 {
 	int i;
 	Bigint *tmp;
@@ -1372,14 +1388,15 @@ static void destroy_freelist(void)
 	_THREAD_PRIVATE_MUTEX_UNLOCK(dtoa_mutex);
 	
 }
+/* }}} */
 
-
-ZEND_API void zend_freedtoa(char *s)
+ZEND_API void zend_freedtoa(char *s) /* {{{ */
 {
 	Bigint *b = (Bigint *)((int *)s - 1);
 	b->maxwds = 1 << (b->k = *(int*)b);
 	Bfree(b);
 }
+/* }}} */
 
 /* dtoa for IEEE arithmetic (dmg): convert double to ASCII string.
  *
@@ -1415,7 +1432,7 @@ ZEND_API void zend_freedtoa(char *s)
  *     calculation.
  */
 
-ZEND_API char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign, char **rve)
+ZEND_API char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign, char **rve) /* {{{ */
 {
  /* Arguments ndigits, decpt, sign are similar to those
     of ecvt and fcvt; trailing zeros are suppressed from
@@ -2011,8 +2028,9 @@ ret1:
 		*rve = s;
 	return s0;
 }
+/* }}} */
 
-ZEND_API double zend_strtod (CONST char *s00, char **se)
+ZEND_API double zend_strtod (CONST char *s00, char **se) /* {{{ */
 {
 	int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign,
 		e, e1, esign, i, j, k, nd, nd0, nf, nz, nz0, sign;
@@ -2558,8 +2576,9 @@ ret:
 
 	return result;
 }
+/* }}} */
 
-ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr)
+ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 {
 	const UChar *u = nptr, *nstart;
 	UChar c = *u;
@@ -2643,6 +2662,7 @@ ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr)
 
 	return 0;
 }
+/* }}} */
 
 /*
  * Local variables:
