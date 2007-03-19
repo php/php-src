@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.66 2007-01-29 04:40:46 iliaa Exp $
+// $Id: confutils.js,v 1.67 2007-03-19 03:16:18 edink Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1045,7 +1045,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		var resname = generate_version_info_resource(dllname, configure_module_dirname);
 		var ld = "@$(CC)";
 
-		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + " $(BUILD_DIR)\\" + libname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
+		MFO.WriteLine("$(BUILD_DIR)\\" + libname + ": $(BUILD_DIR)\\" + dllname);
+		MFO.WriteBlankLines(1);
+		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
 		MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /link /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		MFO.WriteLine("\t-@$(_VC_MANIFEST_EMBED_DLL)");
 		MFO.WriteBlankLines(1);
