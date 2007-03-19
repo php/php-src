@@ -1,3 +1,47 @@
+2007-03-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/dom/node.c
+      ext/dom/tests/bug40836.phpt:
+      MFH: fix bug #40836 (Segfault in ext/dom)
+      add test
+
+    * ext/dom/node.c
+      ext/dom/tests/bug40836.phpt
+      ext/dom/tests/bug40836.phpt:
+      fix bug #40836 (Segfault in ext/dom)
+      add test
+
+2007-03-18  Wez Furlong  <wez.php.net@netevil.org>
+
+    * ext/standard/array.c:
+      MFB, #40848
+
+    * (PHP_5_2)
+      NEWS:
+      BFN, #40848
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      fixes #40848
+
+2007-03-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/mbstring/mbstring.c:
+      MFB:  Fixed MOPB-26-2007 mb_parse_str() can be used to activate
+      register_globals
+
+    * (PHP_5_2)
+      ext/mbstring/mb_gpc.c:
+      Fixed MOPB-26-2007 mb_parse_str() can be used to activate register_globals
+      
+
 2007-03-17  Johannes Schlüter  <johannes@schlueters.de>
 
     * ext/reflection/php_reflection.c
