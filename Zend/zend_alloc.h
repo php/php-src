@@ -221,8 +221,9 @@ struct _zend_mm_storage {
 	void *data;
 };
 
-ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, size_t block_size, void *params);
+ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, size_t block_size, size_t reserve_size, int internal, void *params);
 ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap TSRMLS_DC);
+ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap);
 
 #endif
 
