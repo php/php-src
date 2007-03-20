@@ -104,6 +104,8 @@ PHP                                                                        NEWS
 - Fixed bug #38406 (crash when assigning objects to SimpleXML attributes). (Tony)
 - Fixed bug #37799 (ftp_ssl_connect() falls back to non-ssl connection). (Nuno)
 - Fixed bug #36496 (SSL support in imap_open() not working on Windows). (Edin)
+- Fixed bug #36226 (Inconsistent handling when passing nillable arrays).
+  (Dmitry)
 - Fixed bug #35872 (Avoid crash caused by object store being referenced during RSHUTDOWN) (Andy) 
 - Fixed bug #34794 (proc_close() hangs when used with two processes).
   (jdolecek at netbsd dot org, Nuno)
