@@ -415,8 +415,21 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	
 /* {{{ mysqli_module_entry
  */
+/* Dependancies */
+static zend_module_dep mysqli_deps[] = {
+#if defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
+	ZEND_MOD_REQUIRED("spl")
+#endif
+	{NULL, NULL, NULL}
+};
+
 zend_module_entry mysqli_module_entry = {
+#if ZEND_MODULE_API_NO >= 20050922
+	STANDARD_MODULE_HEADER_EX, NULL,
+	mysqli_deps,
+#elif ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
+#endif
 	"mysqli",
 	mysqli_functions,
 	PHP_MINIT(mysqli),
