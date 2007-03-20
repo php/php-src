@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - Improved SPL (Marcus)
   . Added SplFileInfo::getBasename(), DirectoryIterator::getBasename().
   . Added SplFileInfo::getLinkTarget(), SplFileInfo::getRealPath().
+- Improved SOAP
+  . Added ability to encode arrays with "SOAP-ENC:Array" type instead of WSDL
+    type. To activate the ability use "feature"=>SOAP_USE_XSI_ARRAY_TYPE
+    option in SoapClient/SoapServer constructors. (Rob, Dmitry)
 - Added --ri switch to CLI which allows to check extension information. (Marcus)
 - Added tidyNode::getParent() method (John, Nuno)
 - Added openbasedir and safemode checks in zip:// stream wrapper and 
