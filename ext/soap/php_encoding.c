@@ -1187,7 +1187,8 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 							add_next_index_zval(array, val);
 						} while ((node = get_node(node->next, model->u.element->name)) != NULL);
 						val = array;
-					} else if ((SOAP_GLOBAL(features) & SOAP_SINGLE_ELEMENT_ARRAYS) && 
+					} else if ((Z_TYPE_P(val) != IS_NULL || !model->u.element->nillable) &&
+					           (SOAP_GLOBAL(features) & SOAP_SINGLE_ELEMENT_ARRAYS) && 
 					           (model->max_occurs == -1 || model->max_occurs > 1)) {
 						zval *array;
 
