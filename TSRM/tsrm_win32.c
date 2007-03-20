@@ -280,15 +280,16 @@ TSRM_API int shmget(int key, int size, int flags)
 	info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);
 
 	if ((!shm_handle && !info_handle)) {
-		if (flags & IPC_EXCL) {
-			return -1;
-		}
 		if (flags & IPC_CREAT) {
 			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, shm_segment);
 			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), shm_info);
 			created		= TRUE;
 		}
 		if ((!shm_handle || !info_handle)) {
+			return -1;
+		}
+	} else {
+		if (flags & IPC_EXCL) {
 			return -1;
 		}
 	}
