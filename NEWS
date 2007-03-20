@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Improved SPL (Marcus)
   . Added SplFileInfo::getBasename(), DirectoryIterator::getBasename().
   . Added SplFileInfo::getLinkTarget(), SplFileInfo::getRealPath().
+  . Made RecursiveFilterIterator::accept() abstract as stated in documentation.
 - Improved SOAP
   . Added ability to encode arrays with "SOAP-ENC:Array" type instead of WSDL
     type. To activate the ability use "feature"=>SOAP_USE_XSI_ARRAY_TYPE
@@ -29,6 +30,8 @@ PHP                                                                        NEWS
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
+- Fixed bug #40872 (inconsistency in offsetSet, offsetExists treatment of 
+  string enclosed integers). (Marcus)
 - Fixed bug #40854 (imap_mail_compose() creates an invalid terminator for 
   multipart e-mails). (Ilia)
 - Fixed bug #40848 (sorting issue on 64-bit Solaris). (Wez)
