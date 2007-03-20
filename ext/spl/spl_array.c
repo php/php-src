@@ -460,7 +460,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	long index;
-	zval *rv;
+	zval *rv, **tmp;
 
 	if (check_inherited && intern->fptr_offset_has) {
 		SEPARATE_ARG_IF_REF(offset);
@@ -480,9 +480,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 	case IS_STRING:
 	case IS_UNICODE:
 		if (check_empty) {
-			zval **tmp;
-			HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-			if (zend_u_hash_find(ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void **) &tmp) != FAILURE && zend_is_true(*tmp)) {
+			if (zend_symtable_find(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &tmp) != FAILURE && zend_is_true(*tmp)) {
 				return 1;
 			}
 			return 0;
