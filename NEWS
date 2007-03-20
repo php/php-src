@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Upgraded SQLite 3 to version 3.3.13 (Ilia)
 - Upgraded PCRE to version 7.0 (Nuno)
 - Updated timezone database to version 2007.3. (Derick)
+- Improved Zend Memory Manager to guarantee reasonable time for worst cases
+  of best-fit free block searching algorithm. (Dmitry)
 - Improved SPL (Marcus)
   . Added SplFileInfo::getBasename(), DirectoryIterator::getBasename().
   . Added SplFileInfo::getLinkTarget(), SplFileInfo::getRealPath().
@@ -29,6 +31,7 @@ PHP                                                                        NEWS
   via __get()). (Dmitry)
 - Fixed bug #40815 (using strings like "class::func" and static methods in 
   set_exception_handler() might result in crash). (Tony)
+- Fixed bug #40809 (Poor perfomance of ".="). (Dmitry)
 - Fixed bug #40805 (Failure executing function ibase_execute()). (Tony)
 - Fixed bug #40800 (cannot disable memory_limit with -1). (Dmitry, Tony)
 - Fixed bug #40794 (ReflectionObject::getValues() may crash when used with 
@@ -90,6 +93,8 @@ PHP                                                                        NEWS
 - Fixed Bug #40352 (FCGI_WEB_SERVER_ADDRS function get lost). (Dmitry)
 - Fixed bug #40286 (PHP fastcgi with PHP_FCGI_CHILDREN don't kill children when
   parent is killed). (Dmitry)
+- Fixed bug #40261 (Extremely slow data handling due to memory fragmentation).
+  (Dmitry)
 - Fixed bug #40236 (php -a function allocation eats memory). (Dmitry)
 - Fixed bug #40109 (iptcembed fails on non-jfif jpegs). (Tony)
 - Fixed bug #39836 (SplObjectStorage empty after unserialize). (Marcus)
