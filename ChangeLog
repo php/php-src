@@ -1,3 +1,62 @@
+2007-03-19  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_strtod.c:
+      add folding tags
+
+2007-03-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/imap/php_imap.c
+      ext/imap/tests/bug40854.phpt
+      ext/imap/tests/bug40854.phpt:
+      
+      Fixed bug #40854 (imap_mail_compose() creates an invalid terminator for
+      multipart e-mails).
+
+2007-03-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug40833.phpt:
+      Fixed bug #40833 (Crash when using unset() on an ArrayAccess object
+      retrieved via __get()).
+
+    * ZendEngine2/tests/bug40833.phpt
+      ZendEngine2/tests/bug40833.phpt:
+      
+      file bug40833.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed bug #40833 (Crash when using unset() on an ArrayAccess object
+      retrieved via __get())
+
+2007-03-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/session/session.c:
+      MFB
+
+    * (PHP_5_2)
+      ext/reflection/tests/bug40794.phpt:
+      new test
+
+    * ext/reflection/tests/bug40794.phpt
+      ext/reflection/tests/bug40794.phpt:
+      
+      new test
+
+2007-03-19  Edin Kadribasic  <edin@krug.dk>
+
+    * win32/build/confutils.js:
+      MFB: Make DLL only once (Wez)
+
+    * (PHP_5_2)
+      win32/build/confutils.js:
+      Make DLL only once (Wez)
+
 2007-03-18  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_2)

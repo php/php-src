@@ -1,3 +1,24 @@
+2007-03-19  Antony Dovgal  <antony@zend.com>
+
+    * zend_strtod.c:
+      add folding tags
+
+2007-03-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug40833.phpt:
+      Fixed bug #40833 (Crash when using unset() on an ArrayAccess object
+      retrieved via __get()).
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug40833.phpt
+      tests/bug40833.phpt:
+      Fixed bug #40833 (Crash when using unset() on an ArrayAccess object
+      retrieved via __get())
+
 2007-03-15  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
