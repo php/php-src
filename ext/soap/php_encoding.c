@@ -1622,6 +1622,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 		xmlAddChild(parent, xmlParam);
 		if (style == SOAP_ENCODED) {
 			set_xsi_nil(xmlParam);
+			set_ns_and_type(xmlParam, type);
 		}
 		return xmlParam;
 	}
@@ -2016,7 +2017,17 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 	xmlParam = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 	xmlAddChild(parent, xmlParam);
 
-	FIND_ZVAL_NULL(data, xmlParam, style);
+	if (!data || Z_TYPE_P(data) == IS_NULL) {
+		if (style == SOAP_ENCODED) {
+			set_xsi_nil(xmlParam);
+			if (SOAP_GLOBAL(features) & SOAP_USE_XSI_ARRAY_TYPE) {
+				set_ns_and_type_ex(xmlParam, (soap_version == SOAP_1_1) ? SOAP_1_1_ENC_NAMESPACE : SOAP_1_2_ENC_NAMESPACE, "Array");
+			} else {
+				set_ns_and_type(xmlParam, type);
+			}
+		}
+		return xmlParam;
+	}
 
 	if (Z_TYPE_P(data) == IS_ARRAY) {
 		sdlAttributePtr *arrayType;
@@ -2189,7 +2200,11 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 		efree(dims);
 	}
 	if (style == SOAP_ENCODED) {
-		set_ns_and_type(xmlParam, type);
+		if (SOAP_GLOBAL(features) & SOAP_USE_XSI_ARRAY_TYPE) {
+			set_ns_and_type_ex(xmlParam, (soap_version == SOAP_1_1) ? SOAP_1_1_ENC_NAMESPACE : SOAP_1_2_ENC_NAMESPACE, "Array");
+		} else {
+			set_ns_and_type(xmlParam, type);
+		}
 	}
 	return xmlParam;
 }
@@ -3014,9 +3029,9 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style, xmlNo
 			if (type->encode &&
 			    (type->encode->details.type == IS_ARRAY ||
 			     type->encode->details.type == SOAP_ENC_ARRAY)) {
-				ret = to_xml_array(enc, data, style, parent);
+				return to_xml_array(enc, data, style, parent);
 			} else {
-				ret = to_xml_object(enc, data, style, parent);
+				return to_xml_object(enc, data, style, parent);
 			}
 			break;
 		default:
