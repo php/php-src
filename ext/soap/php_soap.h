@@ -140,7 +140,8 @@ struct _soapService {
 #define SOAP_AUTHENTICATION_DIGEST  1
 
 #define SOAP_SINGLE_ELEMENT_ARRAYS  (1<<0)
-#define SOAP_WAIT_ONE_WAY_CALLS     (2<<0)
+#define SOAP_WAIT_ONE_WAY_CALLS     (1<<1)
+#define SOAP_USE_XSI_ARRAY_TYPE     (1<<2)
 
 #define WSDL_CACHE_NONE     0x0
 #define WSDL_CACHE_DISK     0x1
