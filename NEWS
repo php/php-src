@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - Added tidyNode::getParent() method (John, Nuno)
 - Added openbasedir and safemode checks in zip:// stream wrapper and 
   ZipArchive::open (Pierre)
+- Fixed shmop_open() with IPC_CREAT|IPC_EXCL flags on Windows. 
+  (Vladimir Kamaev, Tony).
 - Fixed possible leak in ZipArchive::extractTo when safemode checks fails (Ilia)
 - Fixed possible relative path issues in zip_open and TS mode (old API) (Pierre)
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
