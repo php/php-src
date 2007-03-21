@@ -32,6 +32,7 @@ PHP                                                                        NEWS
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
 - Fixed bug #40872 (inconsistency in offsetSet, offsetExists treatment of 
   string enclosed integers). (Marcus)
+- Fixed bug #40861 (Multiple +/- on relative units breaks strtotime()). (Ilia)
 - Fixed bug #40854 (imap_mail_compose() creates an invalid terminator for 
   multipart e-mails). (Ilia)
 - Fixed bug #40848 (sorting issue on 64-bit Solaris). (Wez)
