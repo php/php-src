@@ -1,3 +1,21 @@
+2007-03-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_alloc.h
+      zend_alloc.h
+      tests/bug40261.phpt
+      tests/bug40809.phpt:
+      Improved Zend Memory Manager to guarantee reasonable time for worst cases
+      of best-fit free block searching algorithm.
+
+    * tests/bug40261.phpt
+      tests/bug40261.phpt
+      tests/bug40809.phpt
+      tests/bug40809.phpt:
+      
+      file bug40261.phpt was initially added on branch PHP_5_2.
+
 2007-03-19  Antony Dovgal  <antony@zend.com>
 
     * zend_strtod.c:
