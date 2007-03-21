@@ -877,7 +877,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 
 	mydata = ecalloc(sizeof(phar_archive_data), 1);
 
-	/* check whetehr we have meta data, zero check works regardless of byte order */
+	/* check whether we have meta data, zero check works regardless of byte order */
 	if (phar_parse_metadata(fp, &buffer, endbuffer, &mydata->metadata TSRMLS_CC) == FAILURE) {
 		MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
 	}
