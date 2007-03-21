@@ -448,6 +448,12 @@ static timelib_ull timelib_get_unsigned_nr(char **ptr, int max_length)
 		}
 		++*ptr;
 	}
+
+	/* handle instances where there is more then one + or minus */
+	while (*(*ptr + 1) == '+' || *(*ptr + 1) == '-') {
+		++*ptr;
+	}
+
 	if (**ptr == '+') {
 		++*ptr;
 	} else if (**ptr == '-') {
@@ -875,7 +881,7 @@ dateshortwithtimelongtz = datenoyear iso8601normtz;
 reltextnumber = 'first'|'next'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eight'|'ninth'|'tenth'|'eleventh'|'twelfth'|'last'|'previous'|'this';
 reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'week'|'fortnight'|'forthnight'|'month'|'year') 's'?) | daytext;
 
-relnumber = ([+-]?[ \t]*[0-9]+);
+relnumber = ([+-]*[ \t]*[0-9]+);
 relative = relnumber space? reltextunit;
 relativetext = reltextnumber space reltextunit;
 
@@ -1387,7 +1393,6 @@ relativetext = reltextnumber space reltextunit;
 		DEBUG_OUTPUT("relativetext");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_RELATIVE();
-
 		while(*ptr) {
 			i = timelib_get_relative_text((char **) &ptr, &behavior);
 			timelib_eat_spaces((char **) &ptr);
