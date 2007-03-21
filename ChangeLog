@@ -1,3 +1,100 @@
+2007-03-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_array.c
+      ext/spl/tests/bug40872.phpt:
+      - MFH Fix Bug #40872 (inconsistency in offsetSet, offsetExists treatment
+        of string enclosed integers)
+
+    * ext/spl/spl_array.c
+      ext/spl/tests/bug40872.phpt
+      ext/spl/tests/bug40872.phpt:
+      - Fix Bug #40872 (inconsistency in offsetSet, offsetExists treatment of
+      string enclosed integers)
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli.c:
+      - MFH Optional dependency for SPL must be specified in header
+
+    * ext/mysqli/mysqli.c:
+      - Optional dependency for SPL must be specified in header
+
+2007-03-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      TSRM/tsrm_win32.c:
+      MFH: fix shmop_open() with IPC_CREAT|IPC_EXCL flags on win32
+
+    * TSRM/tsrm_win32.c:
+      fix shmop_open() with IPC_CREAT|IPC_EXCL flags on win32
+
+2007-03-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/schema/schema082.phpt
+      ext/soap/tests/schema/schema082.phpt
+      ext/soap/tests/schema/schema083.phpt
+      ext/soap/tests/schema/schema083.phpt
+      ext/soap/tests/schema/schema084.phpt
+      ext/soap/tests/schema/schema084.phpt
+      ext/soap/tests/schema/test_schema.inc:
+      
+      file schema082.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/php_soap.h
+      ext/soap/php_soap.h
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/tests/interop/Round2/Base/r2_base_009s.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_009s.phpt
+      ext/soap/tests/schema/schema081.phpt
+      ext/soap/tests/schema/schema081.phpt
+      ext/soap/tests/schema/schema082.phpt
+      ext/soap/tests/schema/schema083.phpt
+      ext/soap/tests/schema/schema084.phpt
+      ext/soap/tests/schema/test_schema.inc:
+      Added ability to encode arrays with "SOAP-ENC:Array" type instead of WSDL
+      type. To activate the ability use "feature"=>SOAP_USE_XSI_ARRAY_TYPE
+      option in SoapClient/SoapServer constructors.
+
+    * ext/soap/tests/bugs/bug36226-2.phpt
+      ext/soap/tests/bugs/bug36226-2.phpt
+      ext/soap/tests/bugs/bug36226-2.wsdl
+      ext/soap/tests/bugs/bug36226-2.wsdl:
+      
+      file bug36226-2.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/bugs/bug36226-2.phpt
+      ext/soap/tests/bugs/bug36226-2.wsdl:
+      Fixed bug #36226 (Inconsistent handling when passing nillable arrays)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/tests/bug40261.phpt
+      ZendEngine2/tests/bug40261.phpt
+      ZendEngine2/tests/bug40261.phpt
+      ZendEngine2/tests/bug40809.phpt
+      ZendEngine2/tests/bug40809.phpt
+      ZendEngine2/tests/bug40809.phpt:
+      Improved Zend Memory Manager to guarantee reasonable time for worst cases
+      of best-fit free block searching algorithm.
+
 2007-03-19  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/zend_strtod.c:
