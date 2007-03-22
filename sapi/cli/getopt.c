@@ -79,11 +79,16 @@ int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **opta
 	}
 	if ((argv[*optind][0] == '-') && (argv[*optind][1] == '-')) {
 		/* '--' indicates end of args if not followed by a known long option name */
+		if (argv[*optind][2] == '\0') {
+			(*optind)++;
+			return(EOF);
+		}
+
 		while (1) {
 			opts_idx++;
 			if (opts[opts_idx].opt_char == '-') {
 				(*optind)++;
-				return(EOF);
+				return(php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err));
 			} else if (opts[opts_idx].opt_name && !strcmp(&argv[*optind][2], opts[opts_idx].opt_name)) {
 				break;
 			}
