@@ -1,5 +1,5 @@
 --TEST--
-Phar::setStub()/commit()
+Phar::setStub()/stopBuffering()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --INI--
@@ -9,7 +9,7 @@ phar.readonly=0
 <?php
 $p = new Phar(dirname(__FILE__) . '/brandnewphar.phar', 0, 'brandnewphar.phar');
 $p['file1.txt'] = 'hi';
-$p->commit();
+$p->stopBuffering();
 var_dump($p->getStub());
 $p->setStub("<?php
 function __autoload(\$class)
