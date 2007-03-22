@@ -23,6 +23,9 @@ PHP                                                                        NEWS
 - Added tidyNode::getParent() method (John, Nuno)
 - Added openbasedir and safemode checks in zip:// stream wrapper and 
   ZipArchive::open (Pierre)
+- Added php_pdo_sqlite_external.dll, a version of the PDO SQLite driver that
+  links against an external sqlite3.dll.  This provides Windows users to upgrade
+  their sqlite3 version outside of the PHP release cycle.  (Wez, Edin)
 - Fixed shmop_open() with IPC_CREAT|IPC_EXCL flags on Windows. 
   (Vladimir Kamaev, Tony).
 - Fixed possible leak in ZipArchive::extractTo when safemode checks fails (Ilia)
