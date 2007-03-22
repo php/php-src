@@ -28,7 +28,7 @@ $stub = '<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
 $phar->setStub($stub);
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
-$phar->commit();
+$phar->stopBuffering();
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 

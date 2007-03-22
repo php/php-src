@@ -33,7 +33,7 @@ catch(exception $e)
 }
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
-$phar->commit();
+$phar->stopBuffering();
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
