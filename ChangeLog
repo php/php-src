@@ -1,3 +1,35 @@
+2007-03-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_4)
+      sapi/cli/getopt.c
+      sapi/cli/getopt.c:
+      - MFH Fix issue with long form of command line switches
+
+    * sapi/cli/getopt.c:
+      - Fix issue with long form of command line switches
+
+2007-03-21  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - Revert this patch, as the code was incorrect.
+      - It was also not committed to HEAD.
+
+2007-03-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/date/tests/bug40861.phpt
+      ext/date/tests/bug40861.phpt:
+      
+      file bug40861.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      
+      Fixed bug #40861 (Multiple +/- on relative units breaks strtotime()).
+
 2007-03-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
