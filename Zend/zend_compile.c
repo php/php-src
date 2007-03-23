@@ -3657,6 +3657,7 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 						opline->opcode = ZEND_FETCH_DIM_TMP_VAR;
 						break;
 				}
+				opline->extended_value = ZEND_FETCH_ADD_LOCK;
 			} else {
 				opline->opcode = ZEND_FETCH_DIM_R;
 			}
@@ -3668,7 +3669,6 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 			Z_TYPE(opline->op2.u.constant) = IS_LONG;
 			Z_LVAL(opline->op2.u.constant) = *((int *) dimension->data);
 			INIT_PZVAL(&opline->op2.u.constant);
-			opline->extended_value = ZEND_FETCH_ADD_LOCK;
 			last_container = opline->result;
 			dimension = dimension->next;
 		}
