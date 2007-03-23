@@ -1,3 +1,46 @@
+2007-03-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/date/tests/bug40861.phpt:
+      
+      Added -- test case
+
+2007-03-22  Douglas Goldstein  <cardoe@gentoo.org>
+
+    * (PHP_5_2)
+      ext/ldap/ldap.c:
+      Replaced all instances of ldap_get_values() with ldap_get_values_len(),
+      which returns back the length of the data so on non-NULL terminated data
+      we don't crash in a strlen(). Removed the PHP function ldap_get_values()
+      since it's the same thing as ldap_get_values_len() now and made it alias
+      ldap_get_values_len(). This should fix some random PHP<->LDAP crashes
+
+2007-03-22  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_4_4)
+      sapi/cli/getopt.c
+      sapi/cli/getopt.c
+      sapi/cli/tests/015.phpt:
+      - MFH: Fix handling of not existing long CLI options
+
+    * sapi/cli/getopt.c
+      sapi/cli/tests/015.phpt
+      sapi/cli/tests/015.phpt:
+      - Fix handling of not existing long CLI options
+
+2007-03-22  Wez Furlong  <wez.php.net@netevil.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_sqlite/config.w32:
+      Add php_pdo_sqlite_external.dll to windows build.
+      This allows the user to provide their own version of sqlite3.dll.
+      The php_pdo_sqlite.dll is still there, and will continue to be there.
+      It is built from the bundled sources.
+      [[DOC]]
+       (this should cc: phpdoc, if it's wrong, please let the docs folks know
+      :-)
+
 2007-03-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_4_4)
