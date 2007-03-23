@@ -42,8 +42,8 @@
   set, we call __set handler. If it fails, we do not change the array.
 
   for both handlers above, when we are inside __get/__set, no further calls for
-  __get/__set for these objects will be made, to prevent endless recursion and
-  enable accessors to change properties array.
+  __get/__set for this property of this object will be made, to prevent endless 
+  recursion and enable accessors to change properties array.
 
   if we have __call and method which is not part of the class function table is
   called, we cal __call handler.
