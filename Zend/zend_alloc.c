@@ -1969,6 +1969,50 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 		return p;
 	}
 
+#if ZEND_MM_CACHE
+	if (ZEND_MM_SMALL_SIZE(true_size)) {
+		size_t index = ZEND_MM_BUCKET_INDEX(true_size);
+		
+		if (heap->cache[index] != NULL) {
+			zend_mm_free_block *best_fit;
+			zend_mm_free_block **cache;
+
+#if ZEND_MM_CACHE_STAT
+			heap->cache_stat[index].count--;
+			heap->cache_stat[index].hit++;
+#endif
+			best_fit = heap->cache[index];
+			heap->cache[index] = best_fit->prev_free_block;
+			ZEND_MM_CHECK_MAGIC(best_fit, MEM_BLOCK_CACHED);
+			ZEND_MM_SET_DEBUG_INFO(best_fit, size, 1, 0);
+	
+			ptr = ZEND_MM_DATA_OF(best_fit);
+
+#if ZEND_DEBUG || ZEND_MM_HEAP_PROTECTION
+			memcpy(ptr, p, mm_block->debug.size);
+#else
+			memcpy(ptr, p, orig_size - ZEND_MM_ALIGNED_HEADER_SIZE);
+#endif
+
+			heap->cached -= true_size - orig_size;
+
+			index = ZEND_MM_BUCKET_INDEX(orig_size);
+			cache = &heap->cache[index];
+
+			((zend_mm_free_block*)mm_block)->prev_free_block = *cache;
+			*cache = (zend_mm_free_block*)mm_block;
+			ZEND_MM_SET_MAGIC(mm_block, MEM_BLOCK_CACHED);
+#if ZEND_MM_CACHE_STAT
+			if (++heap->cache_stat[index].count > heap->cache_stat[index].max_count) {
+				heap->cache_stat[index].max_count = heap->cache_stat[index].count;
+			}
+#endif
+
+			return ptr;
+		}
+	}
+#endif
+
 	next_block = ZEND_MM_BLOCK_AT(mm_block, orig_size);
 
 	if (ZEND_MM_IS_FREE_BLOCK(next_block)) {
