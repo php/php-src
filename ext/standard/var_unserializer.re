@@ -110,12 +110,18 @@ static UChar *unserialize_ustr(const unsigned char **p, int len)
 	return ustr;
 }
 
-static char *unserialize_str(const unsigned char **p, int len)
+static char *unserialize_str(const unsigned char **p, int *len)
 {
-	int i, j;
-	char *str = emalloc(len+1);
+	size_t i, j;
+	char *str = safe_emalloc(*len, 1, 1);
+	unsigned char *end = *p+*len;
 
-	for (i = 0; i < len; i++) {
+	if(end < *p) {
+		efree(str);
+		return NULL;
+	}
+
+	for (i = 0; i < *len && *p < end; i++) {
 		if (**p != '\\') {
 			str[i] = (char)**p;
 		} else {
@@ -139,6 +145,7 @@ static char *unserialize_str(const unsigned char **p, int len)
 		(*p)++;
 	}
 	str[i] = 0;
+	*len = i;
 	return str;
 }
 
@@ -570,7 +577,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 
-	if ((str = unserialize_str(&YYCURSOR, len)) == NULL) {
+	if ((str = unserialize_str(&YYCURSOR, &len)) == NULL) {
 		return 0;
 	}
 
