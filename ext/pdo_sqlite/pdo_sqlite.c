@@ -70,7 +70,7 @@ zend_module_entry pdo_sqlite_module_entry = {
 };
 /* }}} */
 
-#ifdef COMPILE_DL_PDO_SQLITE
+#if defined(COMPILE_DL_PDO_SQLITE) || defined(COMPILE_DL_PDO_SQLITE_EXTERNAL)
 ZEND_GET_MODULE(pdo_sqlite)
 #endif
 
