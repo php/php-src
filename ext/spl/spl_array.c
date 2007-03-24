@@ -492,7 +492,6 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 			index = Z_LVAL_P(offset);
 		}
 		if (check_empty) {
-			zval **tmp;
 			HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 			if (zend_hash_index_find(ht, index, (void **)&tmp) != FAILURE && zend_is_true(*tmp)) {
 				return 1;
