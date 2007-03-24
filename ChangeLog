@@ -1,3 +1,79 @@
+2007-03-23  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/tests/serialize/unserializeS.phpt:
+      MFB: fix MOPB-29 - unserialize modifier S does not calculate length
+      correctly
+
+2007-03-23  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/standard/var_unserializer.c:
+      regenerate to fix gcov build. plus use re2c bitvectors
+
+2007-03-23  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      fix MOPB-29 - unserialize modifier S does not calculate length correctly
+
+    * ext/standard/tests/serialize/unserializeS.phpt
+      ext/standard/tests/serialize/unserializeS.phpt:
+      
+      file unserializeS.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      fix MOPB-29 - unserialize modifier S does not calculate length correctly
+
+    * ZendEngine2/zend_object_handlers.c:
+      fix comment
+
+    * (PHP_5_2)
+      ZendEngine2/zend_object_handlers.c:
+      fix comment - guard system changed
+
+2007-03-23  Douglas Goldstein  <cardoe@gentoo.org>
+
+    * ext/ldap/ldap.c:
+      Replaced all instances of ldap_get_values() with ldap_get_values_len(),
+      which returns back the length of the data so on non-NULL terminated data
+      we don't crash in a strlen(). Removed the PHP function ldap_get_values()
+      since it's the same thing as ldap_get_values_len() now and made it alias
+      ldap_get_values_len(). This should fix some random PHP<->LDAP crashes
+
+2007-03-23  Wez Furlong  <wez.php.net@netevil.org>
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/pdo_sqlite.c:
+      export the module guy in the external dll version of the build
+
+2007-03-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug40899.phpt
+      ZendEngine2/tests/bug40899.phpt
+      ZendEngine2/tests/bug40899.phpt:
+      Fixed bug #40899 (memory leak when nesting list())
+
+2007-03-23  Antony Dovgal  <antony@zend.com>
+
+    * ext/mysqli/mysqli.c:
+      fix typo and bug #40898
+
+2007-03-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed bug #40883 (mysql_query() is allocating memory incorrectly). (Tony)
+
 2007-03-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
