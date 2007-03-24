@@ -1,3 +1,28 @@
+2007-03-23  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c:
+      fix comment
+
+    * (PHP_5_2)
+      zend_object_handlers.c:
+      fix comment - guard system changed
+
+2007-03-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug40899.phpt:
+      Fixed bug #40899 (memory leak when nesting list())
+
+    * tests/bug40899.phpt
+      tests/bug40899.phpt:
+      
+      file bug40899.phpt was initially added on branch PHP_5_2.
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Fixed bug #40883 (mysql_query() is allocating memory incorrectly). (Tony)
+
 2007-03-20  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_alloc.c
