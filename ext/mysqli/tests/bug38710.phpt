@@ -1,7 +1,7 @@
 --TEST--
 Bug #38710 (data leakage because of nonexisting boundary checking in statements)
 --SKIPIF--
-<?php if (!extension_loaded("mysqli")) print "skip"; ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 include "connect.inc";
