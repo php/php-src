@@ -43,8 +43,8 @@ $package->setReleaseVersion(phpversion('phar'));
 $package->setAPIVersion(Phar::apiVersion());
 $package->setReleaseStability('stable');
 $package->setAPIStability('stable');
-$package->setNotes($notes);
-$package->addGlobalReplacement('package-info', '@package_version@', 'version');
+$package->setNotes("\n$notes\n");
+//$package->addGlobalReplacement('package-info', '@package_version@', 'version');
 $package->generateContents();
 
 if (isset($_GET['make']) || (isset($_SERVER['argv']) && @$_SERVER['argv'][1] == 'make')) {

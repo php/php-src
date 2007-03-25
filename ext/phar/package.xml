@@ -1,26 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
-http://pear.php.net/dtd/tasks-1.0.xsd
-http://pear.php.net/dtd/package-2.0
-http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.4.11" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>phar</name>
  <channel>pecl.php.net</channel>
  <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
- <description>
-This is the extension version of PEAR's PHP_Archive package. Support for
+ <description>This is the extension version of PEAR&apos;s PHP_Archive package. Support for
 zlib, bz2 and crc32 is achieved without any dependency other than the external
 zlib or bz2 extension.
 
 .phar files can be read using the phar stream, or with the Phar class.  If the SPL extension
-is available, a Phar object can be used as an array to iterate over a phar's contents
+is available, a Phar object can be used as an array to iterate over a phar&apos;s contents
 or to read files directly from the phar.
 
 Phar archives can be created using the streams API or with the Phar class, if
 the phar.readonly ini variable is set to false.
 
 Full support for MD5 and SHA1 signatures is possible. Signatures can be required 
-if the ini variable phar.require_hash is set to true.
- </description>
+if the ini variable phar.require_hash is set to true.</description>
  <lead>
   <name>Greg Beaver</name>
   <user>cellog</user>
@@ -33,7 +28,8 @@ if the ini variable phar.require_hash is set to true.
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-03-22</date>
+ <date>2007-03-25</date>
+ <time>22:11:32</time>
  <version>
   <release>1.0.0</release>
   <api>1.0.0</api>
@@ -44,120 +40,123 @@ if the ini variable phar.require_hash is set to true.
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
-  *BACKWARDS COMPATIBILITY BREAK*
-  Rename Phar-&gt;begin/isFlushingToPhar/commit to startBuffering/isBuffering/stopBuffering
-  Note that isBuffering() returns the opposite value to isFlushingToPhar()
+*BACKWARDS COMPATIBILITY BREAK*
+Rename Phar-&gt;begin/isFlushingToPhar/commit to startBuffering/isBuffering/stopBuffering
+Note that isBuffering() returns the opposite value to isFlushingToPhar()
  </notes>
  <contents>
-  <dir name="/">
+  <dir baseinstalldir="/" name="/">
    <dir name="tests">
-    <file name="001.phpt" role="test"/>
-    <file name="002.phpt" role="test"/>
-    <file name="003.phpt" role="test"/>
-    <file name="003a.phpt" role="test"/>
-    <file name="004.phpt" role="test"/>
-    <file name="005.phpt" role="test"/>
-    <file name="006.phpt" role="test"/>
-    <file name="007.phpt" role="test"/>
-    <file name="008.phpt" role="test"/>
-    <file name="009.phpt" role="test"/>
-    <file name="010.phpt" role="test"/>
-    <file name="011.phpt" role="test"/>
-    <file name="012.phpt" role="test"/>
-    <file name="013.phpt" role="test"/>
-    <file name="014.phpt" role="test"/>
-    <file name="015.phpt" role="test"/>
-    <file name="015b.phpt" role="test"/>
-    <file name="016.phpt" role="test"/>
-    <file name="016b.phpt" role="test"/>
-    <file name="017.phpt" role="test"/>
-    <file name="018.phpt" role="test"/>
-    <file name="019.phpt" role="test"/>
-    <file name="019b.phpt" role="test"/>
-    <file name="019c.phpt" role="test"/>
-    <file name="020.phpt" role="test"/>
-    <file name="021.phpt" role="test"/>
-    <file name="022.phpt" role="test"/>
-    <file name="023.phpt" role="test"/>
-    <file name="024.phpt" role="test"/>
-    <file name="025.phpt" role="test"/>
-    <file name="026.phpt" role="test"/>
-    <file name="027.phpt" role="test"/>
-    <file name="028.phpt" role="test"/>
-    <file name="029.phpt" role="test"/>
-    <file name="030.phpt" role="test"/>
-    <file name="031.phpt" role="test"/>
-    <file name="032.phpt" role="test"/>
-    <file name="033.phpt" role="test"/>
-    <file name="033a.phpt" role="test"/>
-    <file name="create_new_and_modify.phpt" role="test"/>
-    <file name="create_new_phar.phpt" role="test"/>
-    <file name="create_new_phar_b.phpt" role="test"/>
-    <file name="create_new_phar_c.phpt" role="test"/>
-    <file name="create_path_error.phpt" role="test"/>
-    <file name="delete_in_phar.phpt" role="test"/>
-    <file name="delete_in_phar_b.phpt" role="test"/>
-    <file name="delete_in_phar_confirm.phpt" role="test"/>
-    <file name="extracted.inc" role="test"/>
-    <file name="extracted_001.phpt" role="test"/>
-    <file name="ini_set.phpt" role="test"/>
-    <file name="ini_set_off.phpt" role="test"/>
-    <file name="metadata_read.phpt" role="test"/>
-    <file name="metadata_write.phpt" role="test"/>
-    <file name="open_for_write_existing.phpt" role="test"/>
-    <file name="open_for_write_existing_b.phpt" role="test"/>
-    <file name="open_for_write_existing_c.phpt" role="test"/>
-    <file name="open_for_write_newfile.phpt" role="test"/>
-    <file name="open_for_write_newfile_b.phpt" role="test"/>
-    <file name="open_for_write_newfile_c.phpt" role="test"/>
-    <file name="phar_begin_setstub_commit.phpt" role="test"/>
-    <file name="phar_commitwrite.phpt" role="test"/>
-    <file name="phar_create_in_cwd.phpt" role="test"/>
-    <file name="phar_ctx_001.phpt" role="test"/>
-    <file name="phar_metadata_read.phpt" role="test"/>
-    <file name="phar_metadata_write.phpt" role="test"/>
-    <file name="phar_oo_001.phpt" role="test"/>
-    <file name="phar_oo_002.phpt" role="test"/>
-    <file name="phar_oo_003.phpt" role="test"/>
-    <file name="phar_oo_004.phpt" role="test"/>
-    <file name="phar_oo_005.phpt" role="test"/>
-    <file name="phar_oo_006.phpt" role="test"/>
-    <file name="phar_oo_007.phpt" role="test"/>
-    <file name="phar_oo_008.phpt" role="test"/>
-    <file name="phar_oo_009.phpt" role="test"/>
-    <file name="phar_oo_010.phpt" role="test"/>
-    <file name="phar_oo_011.phpt" role="test"/>
-    <file name="phar_oo_011b.phpt" role="test"/>
-    <file name="phar_oo_012.phpt" role="test"/>
-    <file name="phar_oo_012b.phpt" role="test"/>
-    <file name="phar_oo_012_confirm.phpt" role="test"/>
-    <file name="phar_oo_compressallbz2.phpt" role="test"/>
-    <file name="phar_oo_compressallgz.phpt" role="test"/>
-    <file name="phar_oo_compressed_001.phpt" role="test"/>
-    <file name="phar_oo_compressed_001b.phpt" role="test"/>
-    <file name="phar_oo_compressed_002.phpt" role="test"/>
-    <file name="phar_oo_compressed_002b.phpt" role="test"/>
-    <file name="phar_oo_test.inc" role="test"/>
-    <file name="phar_oo_uncompressall.phpt" role="test"/>
-    <file name="phar_stub.phpt" role="test"/>
-    <file name="phar_stub_write.phpt" role="test"/>
-    <file name="phar_test.inc" role="test"/>
-    <file name="refcount1.phpt" role="test"/>
-    <file name="rename.phpt" role="test"/>
-   </dir> <!-- /tests -->
-   <file name="LICENSE" role="doc"/>
-   <file name="config.m4" role="src"/>
-   <file name="config.w32" role="src"/>
-   <file name="Makefile.frag" role="src"/>
-   <file name="CREDITS" role="doc"/>
-   <file name="TODO" role="doc"/>
-   <file name="EXPERIMENTAL" role="src"/>
-   <file name="phar.c" role="src"/>
-   <file name="phar_object.c" role="src"/>
-   <file name="php_phar.h" role="src"/>
-   <file name="phar_internal.h" role="src"/>
-   <file name="phar_path_check.c" role="src"/>
-   <file name="phar_path_check.re" role="src"/>
+    <file name="001.phpt" role="test" />
+    <file name="002.phpt" role="test" />
+    <file name="003.phpt" role="test" />
+    <file name="003a.phpt" role="test" />
+    <file name="004.phpt" role="test" />
+    <file name="005.phpt" role="test" />
+    <file name="006.phpt" role="test" />
+    <file name="007.phpt" role="test" />
+    <file name="008.phpt" role="test" />
+    <file name="009.phpt" role="test" />
+    <file name="010.phpt" role="test" />
+    <file name="011.phpt" role="test" />
+    <file name="012.phpt" role="test" />
+    <file name="013.phpt" role="test" />
+    <file name="014.phpt" role="test" />
+    <file name="015.phpt" role="test" />
+    <file name="015b.phpt" role="test" />
+    <file name="016.phpt" role="test" />
+    <file name="016b.phpt" role="test" />
+    <file name="017.phpt" role="test" />
+    <file name="018.phpt" role="test" />
+    <file name="019.phpt" role="test" />
+    <file name="019b.phpt" role="test" />
+    <file name="019c.phpt" role="test" />
+    <file name="020.phpt" role="test" />
+    <file name="021.phpt" role="test" />
+    <file name="022.phpt" role="test" />
+    <file name="023.phpt" role="test" />
+    <file name="024.phpt" role="test" />
+    <file name="025.phpt" role="test" />
+    <file name="026.phpt" role="test" />
+    <file name="027.phpt" role="test" />
+    <file name="028.phpt" role="test" />
+    <file name="029.phpt" role="test" />
+    <file name="030.phpt" role="test" />
+    <file name="031.phpt" role="test" />
+    <file name="032.phpt" role="test" />
+    <file name="033.phpt" role="test" />
+    <file name="033a.phpt" role="test" />
+    <file name="create_new_and_modify.phpt" role="test" />
+    <file name="create_new_phar.phpt" role="test" />
+    <file name="create_new_phar_b.phpt" role="test" />
+    <file name="create_new_phar_c.phpt" role="test" />
+    <file name="create_path_error.phpt" role="test" />
+    <file name="delete_in_phar.phpt" role="test" />
+    <file name="delete_in_phar_b.phpt" role="test" />
+    <file name="delete_in_phar_confirm.phpt" role="test" />
+    <file name="extracted.inc" role="test" />
+    <file name="extracted_001.phpt" role="test" />
+    <file name="ini_set.phpt" role="test" />
+    <file name="ini_set_off.phpt" role="test" />
+    <file name="metadata_read.phpt" role="test" />
+    <file name="metadata_write.phpt" role="test" />
+    <file name="open_for_write_existing.phpt" role="test" />
+    <file name="open_for_write_existing_b.phpt" role="test" />
+    <file name="open_for_write_existing_c.phpt" role="test" />
+    <file name="open_for_write_newfile.phpt" role="test" />
+    <file name="open_for_write_newfile_b.phpt" role="test" />
+    <file name="open_for_write_newfile_c.phpt" role="test" />
+    <file name="phar_begin_setstub_commit.phpt" role="test" />
+    <file name="phar_commitwrite.phpt" role="test" />
+    <file name="phar_create_in_cwd.phpt" role="test" />
+    <file name="phar_ctx_001.phpt" role="test" />
+    <file name="phar_metadata_read.phpt" role="test" />
+    <file name="phar_metadata_write.phpt" role="test" />
+    <file name="phar_offset_get_error.phpt" role="test" />
+    <file name="phar_oo_001.phpt" role="test" />
+    <file name="phar_oo_002.phpt" role="test" />
+    <file name="phar_oo_003.phpt" role="test" />
+    <file name="phar_oo_004.phpt" role="test" />
+    <file name="phar_oo_005.phpt" role="test" />
+    <file name="phar_oo_006.phpt" role="test" />
+    <file name="phar_oo_007.phpt" role="test" />
+    <file name="phar_oo_008.phpt" role="test" />
+    <file name="phar_oo_009.phpt" role="test" />
+    <file name="phar_oo_010.phpt" role="test" />
+    <file name="phar_oo_011.phpt" role="test" />
+    <file name="phar_oo_011b.phpt" role="test" />
+    <file name="phar_oo_012.phpt" role="test" />
+    <file name="phar_oo_012b.phpt" role="test" />
+    <file name="phar_oo_012_confirm.phpt" role="test" />
+    <file name="phar_oo_compressallbz2.phpt" role="test" />
+    <file name="phar_oo_compressallgz.phpt" role="test" />
+    <file name="phar_oo_compressed_001.phpt" role="test" />
+    <file name="phar_oo_compressed_001b.phpt" role="test" />
+    <file name="phar_oo_compressed_002.phpt" role="test" />
+    <file name="phar_oo_compressed_002b.phpt" role="test" />
+    <file name="phar_oo_test.inc" role="test" />
+    <file name="phar_oo_uncompressall.phpt" role="test" />
+    <file name="phar_stub.phpt" role="test" />
+    <file name="phar_stub_error.phpt" role="test" />
+    <file name="phar_stub_write.phpt" role="test" />
+    <file name="phar_test.inc" role="test" />
+    <file name="refcount1.phpt" role="test" />
+    <file name="rename.phpt" role="test" />
+   </dir> <!-- //tests -->
+   <file name="config.m4" role="src" />
+   <file name="config.w32" role="src" />
+   <file name="CREDITS" role="data" />
+   <file name="EXPERIMENTAL" role="data" />
+   <file name="LICENSE" role="data" />
+   <file name="Makefile.frag" role="data" />
+   <file name="phar.c" role="src" />
+   <file name="phar.php" role="php" />
+   <file name="phar_internal.h" role="src" />
+   <file name="phar_object.c" role="src" />
+   <file name="phar_path_check.c" role="src" />
+   <file name="phar_path_check.re" role="data" />
+   <file name="php_phar.h" role="src" />
+   <file name="TODO" role="data" />
   </dir> <!-- / -->
  </contents>
  <dependencies>
@@ -173,16 +172,35 @@ if the ini variable phar.require_hash is set to true.
    <package>
     <name>bz2</name>
     <channel>pecl.php.net</channel>
-    <providesextension>bz2</providesextension>
    </package>
    <extension>
-    <name>zlib</name>
+    <name>spl</name>
    </extension>
    <extension>
-    <name>spl</name>
+    <name>zlib</name>
    </extension>
   </optional>
  </dependencies>
  <providesextension>phar</providesextension>
- <extsrcrelease/>
+ <extsrcrelease />
+ <extsrcrelease />
+ <changelog>
+  <release>
+   <version>
+    <release>1.0.0</release>
+    <api>1.0.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2007-03-25</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+*BACKWARDS COMPATIBILITY BREAK*
+Rename Phar-&gt;begin/isFlushingToPhar/commit to startBuffering/isBuffering/stopBuffering
+Note that isBuffering() returns the opposite value to isFlushingToPhar()
+   </notes>
+  </release>
+ </changelog>
 </package>
