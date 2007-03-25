@@ -1,3 +1,21 @@
+2007-03-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_array.c:
+      - Drop double variable declaration
+
+2007-03-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/ftp/ftp.c:
+      
+      MFB: Fixed CRLF injection inside ftp_putcmd().
+
+    * (PHP_5_2)
+      ext/ftp/ftp.c:
+      
+      Fixed CRLF injection inside ftp_putcmd().
+      
+
 2007-03-23  Stanislav Malyshev  <stas@zend.com>
 
     * ext/standard/var_unserializer.c
