@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.4.11" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.5.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>phar</name>
  <channel>pecl.php.net</channel>
  <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
@@ -29,7 +29,7 @@ if the ini variable phar.require_hash is set to true.</description>
   <active>yes</active>
  </lead>
  <date>2007-03-25</date>
- <time>23:41:57</time>
+ <time>18:19:28</time>
  <version>
   <release>1.0.0</release>
   <api>1.0.0</api>
@@ -110,6 +110,8 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
     <file name="phar_commitwrite.phpt" role="test" />
     <file name="phar_create_in_cwd.phpt" role="test" />
     <file name="phar_ctx_001.phpt" role="test" />
+    <file name="phar_get_suppoted_signatures_001.phpt" role="test" />
+    <file name="phar_get_suppoted_signatures_002.phpt" role="test" />
     <file name="phar_metadata_read.phpt" role="test" />
     <file name="phar_metadata_write.phpt" role="test" />
     <file name="phar_offset_get_error.phpt" role="test" />
@@ -176,6 +178,7 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
    <package>
     <name>hash</name>
     <channel>pecl.php.net</channel>
+    <providesextension>hash</providesextension>
    </package>
    <extension>
     <name>spl</name>
@@ -186,6 +189,7 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
   </optional>
  </dependencies>
  <providesextension>phar</providesextension>
+ <extsrcrelease />
  <extsrcrelease />
  <changelog>
   <release>
