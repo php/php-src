@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, Version 4.4.7
+- Fixed CRLF injection inside ftp_putcmd(). (Ilia)
+- Fixed MOPB-32-2007 (Double free inside session_decode()). (Ilia)
 - Fixed MOPB-21-2007 An open_basedir/safe_mode bypass inside the
   compress.bzip2 wraper. (Ilia)
 - Fixed MOPB-22-2007 PHP session_regenerate_id() Double Free Vulnerability.
