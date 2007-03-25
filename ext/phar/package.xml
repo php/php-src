@@ -29,7 +29,7 @@ if the ini variable phar.require_hash is set to true.</description>
   <active>yes</active>
  </lead>
  <date>2007-03-25</date>
- <time>22:11:32</time>
+ <time>22:34:16</time>
  <version>
   <release>1.0.0</release>
   <api>1.0.0</api>
@@ -145,18 +145,18 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
    </dir> <!-- //tests -->
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
-   <file name="CREDITS" role="data" />
-   <file name="EXPERIMENTAL" role="data" />
-   <file name="LICENSE" role="data" />
-   <file name="Makefile.frag" role="data" />
+   <file name="CREDITS" role="doc" />
+   <file name="EXPERIMENTAL" role="doc" />
+   <file name="LICENSE" role="doc" />
+   <file name="Makefile.frag" role="src" />
    <file name="phar.c" role="src" />
    <file name="phar.php" role="php" />
    <file name="phar_internal.h" role="src" />
    <file name="phar_object.c" role="src" />
    <file name="phar_path_check.c" role="src" />
-   <file name="phar_path_check.re" role="data" />
+   <file name="phar_path_check.re" role="src" />
    <file name="php_phar.h" role="src" />
-   <file name="TODO" role="data" />
+   <file name="TODO" role="doc" />
   </dir> <!-- / -->
  </contents>
  <dependencies>
@@ -182,7 +182,6 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
   </optional>
  </dependencies>
  <providesextension>phar</providesextension>
- <extsrcrelease />
  <extsrcrelease />
  <changelog>
   <release>
