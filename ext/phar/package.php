@@ -28,6 +28,14 @@ $options = array(
          'examples'     => 'doc',
          'tests'        => 'test',
     ),
+    'exceptions'        => array(
+         'CREDITS'            => 'doc',
+         'EXPERIMENTAL'       => 'doc',
+         'LICENSE'            => 'doc',
+         'Makefile.frag'      => 'src',
+         'phar_path_check.re' => 'src',
+         'TODO'               => 'doc',
+    ),
 );
 
 $package = PEAR_PackageFileManager2::importOptions(dirname(__FILE__) . '/package.xml', $options);
