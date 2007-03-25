@@ -1,5 +1,5 @@
 --TEST--
-Bug #3721 (Access to protected property of common base class)
+Bug #37212 (Access to protected property of common base class)
 --FILE--
 <?php
 
