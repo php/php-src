@@ -98,10 +98,12 @@
 ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_fname_map;
 	HashTable   phar_alias_map;
+	HashTable   phar_plain_map;
+	char*       extract_list;
 	int         readonly;
-	int         require_hash;
 	zend_bool   readonly_orig;
 	zend_bool   require_hash_orig;
+	int         require_hash;
 	int         request_done;
 ZEND_END_MODULE_GLOBALS(phar)
 
