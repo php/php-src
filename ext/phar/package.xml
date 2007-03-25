@@ -98,6 +98,8 @@ if the ini variable phar.require_hash is set to true.
     <file name="delete_in_phar.phpt" role="test"/>
     <file name="delete_in_phar_b.phpt" role="test"/>
     <file name="delete_in_phar_confirm.phpt" role="test"/>
+    <file name="extracted.inc" role="test"/>
+    <file name="extracted_001.phpt" role="test"/>
     <file name="ini_set.phpt" role="test"/>
     <file name="ini_set_off.phpt" role="test"/>
     <file name="metadata_read.phpt" role="test"/>

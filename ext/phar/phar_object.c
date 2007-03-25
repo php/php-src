@@ -28,6 +28,27 @@ static zend_class_entry *phar_ce_PharException;
 static zend_class_entry *phar_ce_entry;
 #endif
 
+static int phar_get_extract_list(void *pDest, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+{
+	zval *return_value = va_arg(args, zval*);
+
+	add_assoc_string_ex(return_value, hash_key->arKey, hash_key->nKeyLength, (char*)pDest, 1);
+	
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+/* {{ proto array Phar::getExtractList()
+ * Return array of extract list
+ */
+PHP_METHOD(Phar, getExtractList)
+{
+	array_init(return_value);
+
+	zend_hash_apply_with_arguments(&PHAR_G(phar_plain_map), phar_get_extract_list, 1, return_value);
+}
+/* }}} */
+
 /* {{{ proto mixed Phar::mapPhar([string alias])
  * Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
@@ -1177,6 +1198,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, canWrite,              NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, loadPhar,              arginfo_phar_loadPhar,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mapPhar,               arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, getExtractList,        NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 

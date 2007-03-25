@@ -32,9 +32,14 @@ Version 1.0.0
  
 Version 1.1.0
 
+ X Ability connect a phar file 'phar://whatever' to a directory. That way all
+   access to that phat archive are directed to the extracted directory. This
+   allows to have the installed files and the archieve keep the same includes.
+   [Marcus]
  * ability to have Phar object return file class as offsetGet() result
  * [optional] Phar->rollback() to abort a write transaction
  * implement GPG signing
+ * add SHA-2 support
  * ability to match files containing a metadata key opendir('phar://a.phar/?mime-type=image/jpeg')
    or foreach ($p->match('mime-type', 'image/jpeg') as $file)
  * Phar::copy($from, $to);

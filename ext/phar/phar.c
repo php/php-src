@@ -21,6 +21,7 @@
 
 #define PHAR_MAIN
 #include "phar_internal.h"
+#include "SAPI.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
 
@@ -69,9 +70,98 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 }
 /* }}}*/
 
+static void phar_split_extract_list(TSRMLS_D)
+{
+	char *tmp = estrdup(PHAR_GLOBALS->extract_list);
+	char *key;
+	char *lasts;
+	char *q;
+	int keylen;
+
+	zend_hash_clean(&(PHAR_GLOBALS->phar_plain_map));
+
+	for (key = php_strtok_r(tmp, ",", &lasts);
+			key;
+			key = php_strtok_r(NULL, ",", &lasts))
+	{
+		char *val = strchr(key, '=');
+
+		if (val) {	
+			*val++ = '\0';
+			for (q = key; *q; q++) {
+				*q = tolower(*q);
+			}
+			keylen = q - key + 1;
+			zend_hash_add(&(PHAR_GLOBALS->phar_plain_map), key, keylen, val, strlen(val)+1, NULL);
+		}
+	}
+	efree(tmp);
+}
+/* }}} */
+
+ZEND_INI_MH(phar_ini_extract_list) /* {{{ */
+{
+	PHAR_G(extract_list) = new_value;
+
+	if (stage == ZEND_INI_STAGE_RUNTIME) {
+		phar_split_extract_list(TSRMLS_C);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_INI_DISP(phar_ini_extract_list_disp) /*void name(zend_ini_entry *ini_entry, int type) {{{ */
+{
+	char *value;
+
+	if (type==ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
+		value = ini_entry->orig_value;
+	} else if (ini_entry->value) {
+		value = ini_entry->value;
+	} else {
+		value = NULL;
+	}
+
+	if (value) {
+		char *tmp = strdup(value);
+		char *key;
+		char *lasts;
+		char *q;
+	
+		if (!sapi_module.phpinfo_as_text) {
+			php_printf("<ul>");
+		}
+		for (key = php_strtok_r(tmp, ",", &lasts);
+				key;
+				key = php_strtok_r(NULL, ",", &lasts))
+		{
+			char *val = strchr(key, '=');
+	
+			if (val) {	
+				*val++ = '\0';
+				for (q = key; *q; q++) {
+					*q = tolower(*q);
+				}
+				if (sapi_module.phpinfo_as_text) {
+					php_printf("%s => %s", key, val);
+				} else {
+					php_printf("<li>%s => %s</li>", key, val);
+				}
+			}
+		}
+		if (!sapi_module.phpinfo_as_text) {
+			php_printf("</ul>");
+		}
+		free(tmp);
+	}
+}
+/* }}} */
+
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("phar.readonly",     "1", PHP_INI_ALL, phar_ini_modify_handler, readonly,     zend_phar_globals, phar_globals)
-	STD_PHP_INI_BOOLEAN("phar.require_hash", "1", PHP_INI_ALL, phar_ini_modify_handler, require_hash, zend_phar_globals, phar_globals)
+	STD_PHP_INI_BOOLEAN( "phar.readonly",     "1", PHP_INI_ALL, phar_ini_modify_handler, readonly,     zend_phar_globals, phar_globals)
+	STD_PHP_INI_BOOLEAN( "phar.require_hash", "1", PHP_INI_ALL, phar_ini_modify_handler, require_hash, zend_phar_globals, phar_globals)
+	STD_PHP_INI_ENTRY_EX("phar.extract_list", "",  PHP_INI_ALL, phar_ini_extract_list,   extract_list, zend_phar_globals, phar_globals, phar_ini_extract_list_disp)
 PHP_INI_END()
 
 /**
@@ -774,7 +864,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 				return FAILURE;
 			}
 
-			sig_len = phar_hex_str(digest, sizeof(digest), &signature);
+			sig_len = phar_hex_str((const char*)digest, sizeof(digest), &signature);
 			break;
 		}
 		case PHAR_SIG_MD5: {
@@ -809,7 +899,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 				return FAILURE;
 			}
 
-			sig_len = phar_hex_str(digest, sizeof(digest), &signature);
+			sig_len = phar_hex_str((const char*)digest, sizeof(digest), &signature);
 			break;
 		}
 		default:
@@ -1446,6 +1536,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	char *buffer;
 	char *error;
 	char *filter_name;
+	char *plain_map;
 	char tmpbuf[8];
 	HashTable *pharcontext;
 	php_url *resource = NULL;
@@ -1453,6 +1544,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	php_stream_filter *filter/*,  *consumed */;
 	php_uint32 offset, read, total, toread;
 	zval **pzoption, *metadata;
+	uint host_len;
 
 	resource = php_url_parse(path);
 
@@ -1473,10 +1565,21 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		return NULL;
 	}
 
+	host_len = strlen(resource->host);
+	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
+		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
+		fp = php_stream_open_wrapper_ex(internal_file, mode, options, opened_path, context);
+		if (!fp) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" extracted from \"%s\" could not be opened", internal_file, resource->host);
+		}
+		efree(internal_file);
+		return fp;
+	}
+
 	/* strip leading "/" */
 	internal_file = estrdup(resource->path + 1);
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
-		if (NULL == (idata = phar_get_or_create_entry_data(resource->host, strlen(resource->host), internal_file, strlen(internal_file), mode, &error TSRMLS_CC))) {
+		if (NULL == (idata = phar_get_or_create_entry_data(resource->host, host_len, internal_file, strlen(internal_file), mode, &error TSRMLS_CC))) {
 			if (error) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
 				efree(error);
@@ -1518,7 +1621,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		}
 		return fpf;
 	} else {
-		if ((FAILURE == phar_get_entry_data(&idata, resource->host, strlen(resource->host), internal_file, strlen(internal_file), "r", &error TSRMLS_CC)) || !idata) {
+		if ((FAILURE == phar_get_entry_data(&idata, resource->host, host_len, internal_file, strlen(internal_file), "r", &error TSRMLS_CC)) || !idata) {
 			if (error) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
 				efree(error);
@@ -2353,7 +2456,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			PHP_SHA1Final(digest, &context);
 			php_stream_write(newfile, (char *) digest, sizeof(digest));
 			sig_flags |= PHAR_SIG_SHA1;
-			archive->sig_len = phar_hex_str(digest, sizeof(digest), &archive->signature);
+			archive->sig_len = phar_hex_str((const char*)digest, sizeof(digest), &archive->signature);
 			break;
 		}
 		case PHAR_SIG_MD5: {
@@ -2367,7 +2470,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			PHP_MD5Final(digest, &context);
 			php_stream_write(newfile, (char *) digest, sizeof(digest));
 			sig_flags |= PHAR_SIG_MD5;
-			archive->sig_len = phar_hex_str(digest, sizeof(digest), &archive->signature);
+			archive->sig_len = phar_hex_str((const char*)digest, sizeof(digest), &archive->signature);
 			break;
 		}
 		}
@@ -3128,6 +3231,8 @@ PHP_RINIT_FUNCTION(phar) /* {{{ */
 	PHAR_GLOBALS->request_done = 0;
 	zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data, 0);
 	zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
+	zend_hash_init(&(PHAR_GLOBALS->phar_plain_map), sizeof(const char *), zend_get_hash_value, NULL, 0);
+	phar_split_extract_list(TSRMLS_C);
 	return SUCCESS;
 }
 /* }}} */
@@ -3135,8 +3240,9 @@ PHP_RINIT_FUNCTION(phar) /* {{{ */
 PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
-	PHAR_GLOBALS->phar_fname_map. pDestructor = destroy_phar_data_only;
+	PHAR_GLOBALS->phar_fname_map.pDestructor = destroy_phar_data_only;
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
+	zend_hash_destroy(&(PHAR_GLOBALS->phar_plain_map));
 	PHAR_GLOBALS->request_done = 1;
 	return SUCCESS;
 }
@@ -3161,9 +3267,14 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 #else
 		"disabled");
 #endif
-	php_info_print_table_row(1, "Phar based on pear/PHP_Archive, original concept by Davey Shafik");
-	php_info_print_table_row(1, "Phar fully realized by Gregory Beaver and Marcus Boerger");
 	php_info_print_table_end();
+
+	php_info_print_box_start(0);
+	PUTS("Phar based on pear/PHP_Archive, original concept by Davey Shafik.");
+	PUTS(!sapi_module.phpinfo_as_text?"<br />":"\n");	
+	PUTS("Phar fully realized by Gregory Beaver and Marcus Boerger.");
+	php_info_print_box_end();
+
 	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
