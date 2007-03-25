@@ -535,7 +535,6 @@ PS_SERIALIZER_DECODE_FUNC(php)
 
 		if (zend_hash_find(&EG(symbol_table), name, namelen + 1, (void **) &tmp) == SUCCESS) {
 			if ((Z_TYPE_PP(tmp) == IS_ARRAY && Z_ARRVAL_PP(tmp) == &EG(symbol_table)) || *tmp == PS(http_session_vars)) {
-				efree(name);
 				goto skip;
 			}
 		}
