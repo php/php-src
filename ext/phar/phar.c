@@ -832,6 +832,87 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		}
 		PHAR_GET_32(sig_ptr, sig_flags);
 		switch(sig_flags) {
+#if HAVE_HASH_EXT
+		case PHAR_SIG_SHA512: {
+			unsigned char digest[64], saved[64];
+			PHP_SHA512_CTX  context;
+
+			php_stream_rewind(fp);
+			PHP_SHA512Init(&context);
+			read_len -= sizeof(digest);
+			if (read_len > sizeof(buf)) {
+				read_size = sizeof(buf);
+			} else {
+				read_size = (int)read_len;
+			}
+			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
+				PHP_SHA512Update(&context, buf, len);
+				read_len -= (off_t)len;
+				if (read_len < read_size) {
+					read_size = (int)read_len;
+				}
+			}
+			PHP_SHA512Final(digest, &context);
+
+			if (read_len > 0
+			|| php_stream_read(fp, (char*)saved, sizeof(saved)) != sizeof(saved)
+			|| memcmp(digest, saved, sizeof(digest))) {
+				efree(savebuf);
+				php_stream_close(fp);
+				if (error) {
+					spprintf(error, 0, "phar \"%s\" has a broken signature", fname);
+				}
+				return FAILURE;
+			}
+
+			sig_len = phar_hex_str((const char*)digest, sizeof(digest), &signature);
+			break;
+		}
+		case PHAR_SIG_SHA256: {
+			unsigned char digest[32], saved[32];
+			PHP_SHA256_CTX  context;
+
+			php_stream_rewind(fp);
+			PHP_SHA256Init(&context);
+			read_len -= sizeof(digest);
+			if (read_len > sizeof(buf)) {
+				read_size = sizeof(buf);
+			} else {
+				read_size = (int)read_len;
+			}
+			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
+				PHP_SHA256Update(&context, buf, len);
+				read_len -= (off_t)len;
+				if (read_len < read_size) {
+					read_size = (int)read_len;
+				}
+			}
+			PHP_SHA256Final(digest, &context);
+
+			if (read_len > 0
+			|| php_stream_read(fp, (char*)saved, sizeof(saved)) != sizeof(saved)
+			|| memcmp(digest, saved, sizeof(digest))) {
+				efree(savebuf);
+				php_stream_close(fp);
+				if (error) {
+					spprintf(error, 0, "phar \"%s\" has a broken signature", fname);
+				}
+				return FAILURE;
+			}
+
+			sig_len = phar_hex_str((const char*)digest, sizeof(digest), &signature);
+			break;
+		}
+#else
+		case PHAR_SIG_SHA512:
+		case PHAR_SIG_SHA256:
+			efree(savebuf);
+			php_stream_close(fp);
+			if (error) {
+				spprintf(error, 0, "phar \"%s\" has a unsupported signature", fname);
+			}
+			return FAILURE;
+#endif
 		case PHAR_SIG_SHA1: {
 			unsigned char digest[20], saved[20];
 			PHP_SHA1_CTX  context;
@@ -906,7 +987,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 			efree(savebuf);
 			php_stream_close(fp);
 			if (error) {
-				spprintf(error, 0, "phar \"%s\" has a broken signature", fname);
+				spprintf(error, 0, "phar \"%s\" has a broken or unsupported signature", fname);
 			}
 			return FAILURE;
 		}
@@ -2445,6 +2526,47 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		case PHAR_SIG_PGP:
 			/* TODO: currently fall back to sha1,later do both */
 		default:
+#if HAVE_HASH_EXT
+		case PHAR_SIG_SHA512: {
+			unsigned char digest[64];
+			PHP_SHA512_CTX  context;
+
+			PHP_SHA512Init(&context);
+			while ((sig_len = php_stream_read(newfile, (char*)buf, sizeof(buf))) > 0) {
+				PHP_SHA512Update(&context, buf, sig_len);
+			}
+			PHP_SHA512Final(digest, &context);
+			php_stream_write(newfile, (char *) digest, sizeof(digest));
+			sig_flags |= PHAR_SIG_SHA512;
+			archive->sig_len = phar_hex_str((const char*)digest, sizeof(digest), &archive->signature);
+			break;
+		}
+		case PHAR_SIG_SHA256: {
+			unsigned char digest[32];
+			PHP_SHA256_CTX  context;
+
+			PHP_SHA256Init(&context);
+			while ((sig_len = php_stream_read(newfile, (char*)buf, sizeof(buf))) > 0) {
+				PHP_SHA256Update(&context, buf, sig_len);
+			}
+			PHP_SHA256Final(digest, &context);
+			php_stream_write(newfile, (char *) digest, sizeof(digest));
+			sig_flags |= PHAR_SIG_SHA256;
+			archive->sig_len = phar_hex_str((const char*)digest, sizeof(digest), &archive->signature);
+			break;
+		}
+#else
+		case PHAR_SIG_SHA512:
+		case PHAR_SIG_SHA256:
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			php_stream_close(newfile);
+			if (error) {
+				spprintf(error, 0, "unable to write contents of file \"%s\" to new phar \"%s\" with requested hash type", entry->filename, archive->fname);
+			}
+			return EOF;
+#endif
 		case PHAR_SIG_SHA1: {
 			unsigned char digest[20];
 			PHP_SHA1_CTX  context;

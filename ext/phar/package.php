@@ -44,6 +44,7 @@ $package->clearDeps();
 $package->setPhpDep('5.2.0');
 $package->setPearInstallerDep('1.4.3');
 $package->addPackageDepWithChannel('optional', 'bz2', 'pecl.php.net');
+$package->addPackageDepWithChannel('optional', 'hash', 'pecl.php.net');
 $package->addExtensionDep('optional', 'spl');
 $package->addExtensionDep('optional', 'zlib');
 $package->addRelease();
