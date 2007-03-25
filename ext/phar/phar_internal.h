@@ -53,6 +53,10 @@
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
+#if HAVE_HASH_EXT
+#include "ext/hash/php_hash.h"
+#include "ext/hash/php_hash_sha.h"
+#endif
 
 #ifndef E_RECOVERABLE_ERROR
 #define E_RECOVERABLE_ERROR E_ERROR
@@ -75,6 +79,8 @@
 
 #define PHAR_SIG_MD5              0x0001
 #define PHAR_SIG_SHA1             0x0002
+#define PHAR_SIG_SHA256           0x0003
+#define PHAR_SIG_SHA512           0x0004
 #define PHAR_SIG_PGP              0x0010
 
 #define PHAR_SIG_USE  PHAR_SIG_SHA1

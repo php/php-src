@@ -29,7 +29,7 @@ if the ini variable phar.require_hash is set to true.</description>
   <active>yes</active>
  </lead>
  <date>2007-03-25</date>
- <time>22:34:16</time>
+ <time>23:41:57</time>
  <version>
   <release>1.0.0</release>
   <api>1.0.0</api>
@@ -171,6 +171,10 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
   <optional>
    <package>
     <name>bz2</name>
+    <channel>pecl.php.net</channel>
+   </package>
+   <package>
+    <name>hash</name>
     <channel>pecl.php.net</channel>
    </package>
    <extension>

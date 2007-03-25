@@ -24,6 +24,6 @@ array(2) {
   ["hash"]=>
   string(40) "%s"
   ["hash_type"]=>
-  string(4) "sha1"
+  string(5) "SHA-1"
 }
 ===DONE===

@@ -350,6 +350,22 @@ PHP_METHOD(Phar, setStub)
 }
 /* }}} */
 
+/* {{{ proto array Phar::getSupportedSignatures()
+ * Return array of supported signature types
+ */
+PHP_METHOD(Phar, getSupportedSignatures)
+{
+	array_init(return_value);
+
+	add_next_index_stringl(return_value, "MD5", 3, 1);
+	add_next_index_stringl(return_value, "SHA-1", 5, 1);
+#if HAVE_HASH_EXT
+	add_next_index_stringl(return_value, "SHA-256", 7, 1);
+	add_next_index_stringl(return_value, "SHA-512", 7, 1);
+#endif
+}
+/* }}} */
+
 /* {{{ proto array|false Phar::getSignature()
  * Return signature or false
  */
@@ -362,10 +378,16 @@ PHP_METHOD(Phar, getSignature)
 		add_assoc_stringl(return_value, "hash", phar_obj->arc.archive->signature, phar_obj->arc.archive->sig_len, 1);
 		switch(phar_obj->arc.archive->sig_flags) {
 		case PHAR_SIG_MD5:
-			add_assoc_stringl(return_value, "hash_type", "md5", 3, 1);
+			add_assoc_stringl(return_value, "hash_type", "MD5", 3, 1);
 			break;
 		case PHAR_SIG_SHA1:
-			add_assoc_stringl(return_value, "hash_type", "sha1", 4, 1);
+			add_assoc_stringl(return_value, "hash_type", "SHA-1", 5, 1);
+			break;
+		case PHAR_SIG_SHA256:
+			add_assoc_stringl(return_value, "hash_type", "SHA-256", 7, 1);
+			break;
+		case PHAR_SIG_SHA512:
+			add_assoc_stringl(return_value, "hash_type", "SHA-512", 7, 1);
 			break;
 		}
 	} else {
@@ -1199,6 +1221,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, loadPhar,              arginfo_phar_loadPhar,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mapPhar,               arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getExtractList,        NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, getSupportedSignatures,NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
