@@ -353,7 +353,8 @@ PHP_METHOD(Phar, setStub)
 /* {{{ proto array Phar::setSignatureAlgorithm(int sigtype)
  * set the signature algorithm for a phar and apply it.  The
  * signature algorithm must be one of Phar::MD5, Phar::SHA1,
- * Phar::SHA256 or Phar::SHA512
+ * Phar::SHA256, Phar::SHA512, or Phar::PGP (pgp not yet supported and
+ * falls back to SHA-1)
  */
 PHP_METHOD(Phar, setSignatureAlgorithm)
 {
