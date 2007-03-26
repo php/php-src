@@ -83,8 +83,6 @@
 #define PHAR_SIG_SHA512           0x0004
 #define PHAR_SIG_PGP              0x0010
 
-#define PHAR_SIG_USE  PHAR_SIG_SHA1
-
 /* flags byte for each file adheres to these bitmasks.
    All unused values are reserved */
 #define PHAR_ENT_COMPRESSION_MASK 0x0000F000
