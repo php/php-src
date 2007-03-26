@@ -39,20 +39,31 @@ echo $e->getMessage();
 <?php 
 unlink(dirname(__FILE__) . '/brandnewphar.phar');
 ?>
---EXPECT--
-bool(false)
-array(1) {
-  [hash_type]=>
+--EXPECTF--
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(5) "SHA-1"
+}
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
   string(3) "MD5"
 }
-array(1) {
-  [hash_type]=>
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
   string(5) "SHA-1"
 }
 string (82) "SHA-256 and SHA-512 signatures are only supported if the hash extension is enabled"
 string (82) "SHA-256 and SHA-512 signatures are only supported if the hash extension is enabled"
-array(1) {
-  [hash_type]=>
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
   string(5) "SHA-1"
 }
 ===DONE===

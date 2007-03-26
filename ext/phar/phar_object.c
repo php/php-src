@@ -389,6 +389,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
 				efree(error);
 			}
+			break;
 		default :
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"Unknown signature algorithm specified");
