@@ -2522,9 +2522,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			efree(archive->signature);
 		}
 		
-		switch(PHAR_SIG_USE) {
-		case PHAR_SIG_PGP:
-			/* TODO: currently fall back to sha1,later do both */
+		switch(archive->sig_flags) {
 #if HAVE_HASH_EXT
 		case PHAR_SIG_SHA512: {
 			unsigned char digest[64];
@@ -2566,6 +2564,8 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			}
 			return EOF;
 #endif
+		case PHAR_SIG_PGP:
+			/* TODO: currently fall back to sha1,later do both */
 		default:
 		case PHAR_SIG_SHA1: {
 			unsigned char digest[20];

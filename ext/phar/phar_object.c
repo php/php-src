@@ -350,6 +350,51 @@ PHP_METHOD(Phar, setStub)
 }
 /* }}} */
 
+/* {{{ proto array Phar::setSignatureAlgorithm(int sigtype)
+ * set the signature algorithm for a phar and apply it.  The
+ * signature algorithm must be one of Phar::MD5, Phar::SHA1,
+ * Phar::SHA256 or Phar::SHA512
+ */
+PHP_METHOD(Phar, setSignatureAlgorithm)
+{
+	long algo;
+	char *error;
+	PHAR_ARCHIVE_OBJECT();
+	
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot change stub, phar is read-only");
+	}
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "l", &algo) != SUCCESS) {
+		return;
+	}
+
+	switch (algo) {
+		case PHAR_SIG_SHA256 :
+		case PHAR_SIG_SHA512 :
+#if !HAVE_HASH_EXT
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"SHA-256 and SHA-512 signatures are only supported if the hash extension is enabled");
+#endif
+		case PHAR_SIG_MD5 :
+		case PHAR_SIG_SHA1 :
+		case PHAR_SIG_PGP :
+			phar_obj->arc.archive->sig_flags = algo;
+			phar_obj->arc.archive->is_modified = 1;
+
+			phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+			if (error) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
+				efree(error);
+			}
+		default :
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"Unknown signature algorithm specified");
+	}
+}
+/* }}} */
+
 /* {{{ proto array Phar::getSupportedSignatures()
  * Return array of supported signature types
  */
@@ -1208,6 +1253,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, isBuffering,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setMetadata,           arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setSignatureAlgorithm, arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetExists,          arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetGet,             arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
@@ -1289,6 +1335,11 @@ void phar_object_init(TSRMLS_D) /* {{{ */
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "COMPRESSED", PHAR_ENT_COMPRESSION_MASK)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "GZ", PHAR_ENT_COMPRESSED_GZ)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "BZ2", PHAR_ENT_COMPRESSED_BZ2)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "MD5", PHAR_SIG_MD5)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA1", PHAR_SIG_SHA1)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA256", PHAR_SIG_SHA256)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA512", PHAR_SIG_SHA512)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PGP", PHAR_SIG_PGP)
 }
 /* }}} */
 
