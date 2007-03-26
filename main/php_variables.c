@@ -351,6 +351,8 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 void _php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
 	char **env, *p, *t;
+	int magic_quotes_gpc = PG(magic_quotes_gpc);
+	PG(magic_quotes_gpc) = 0;
 
 	for (env = environ; env != NULL && *env != NULL; env++) {
 		p = strchr(*env, '=');
@@ -361,6 +363,7 @@ void _php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 		php_register_variable(t, p+1, array_ptr TSRMLS_CC);
 		efree(t);
 	}
+	PG(magic_quotes_gpc) = magic_quotes_gpc;
 }
 
 

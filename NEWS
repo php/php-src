@@ -17,6 +17,7 @@ PHP 4                                                                      NEWS
   handle). (Tony)
 - Fixed bug #40747 (possible crash in session when save_path is out of 
   open_basedir). (Tony)
+- Fixed bug #40586 (_ENV vars get escaped when magic_quotes_gpc is on). (Tony)
 - Fixed MOPB-8, XSS in phpinfo() (Joe Orton, Stas)
 - Fixed unallocated memory access/double free in in array_user_key_compare() 
   (MOPB-24 by Stefan Esser) (Stas)
