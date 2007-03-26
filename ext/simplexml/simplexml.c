@@ -138,7 +138,14 @@ static xmlNodePtr sxe_get_element_by_offset(php_sxe_object *sxe, long offset, xm
 	long nodendx = 0;
 	
 	if (sxe->iter.type == SXE_ITER_NONE) {
-		return NULL;
+		if (offset == 0) {
+			if (cnt) {
+				*cnt = 0;
+			}
+			return node;
+		} else {
+			return NULL;
+		}
 	}
 	while (node && nodendx <= offset) {
 		SKIP_TEXT(node)
@@ -429,7 +436,7 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 	int				nodendx = 0;
 	int             test = 0;
 	int				new_value = 0;
-	long            cnt;
+	long            cnt = 0;
 	zval            tmp_zv, trim_zv, value_copy;
 
 	if (!member) {
@@ -1122,9 +1129,11 @@ SXE_METHOD(xpath)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement((xmlDocPtr) sxe->document->ptr), NULL TSRMLS_CC);
 	}
 
-	sxe->xpath->node = sxe->node->node;
+	nodeptr = php_sxe_get_first_node(sxe, sxe->node->node TSRMLS_CC);
 
- 	ns = xmlGetNsList((xmlDocPtr) sxe->document->ptr, (xmlNodePtr) sxe->node->node);
+	sxe->xpath->node = nodeptr;
+
+ 	ns = xmlGetNsList((xmlDocPtr) sxe->document->ptr, nodeptr);
 	if (ns != NULL) {
 		while (ns[nsnbr] != NULL) {
 			nsnbr++;
