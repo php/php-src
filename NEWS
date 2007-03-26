@@ -133,6 +133,8 @@ PHP                                                                        NEWS
 - Fixed crash on op-assign where argument is string offset (Brian, Stas)
 - Fixed bug #38710 (data leakage because of nonexisting boundary checking in 
   statements in mysqli) (Stas)
+- Fixed bug #37386 (autocreating element doesn't assign value to first node).
+  (Rob)
 - Fixed unallocated memory access/double free in in array_user_key_compare() 
   (MOPB-24 by Stefan Esser) (Stas)
 - Fixed wrong length calculation in unserialize S type
