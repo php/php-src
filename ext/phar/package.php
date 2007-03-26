@@ -43,7 +43,7 @@ $package = PEAR_PackageFileManager2::importOptions(dirname(__FILE__) . '/package
 $package->clearDeps();
 $package->setPhpDep('5.2.0');
 $package->setPearInstallerDep('1.4.3');
-$package->addPackageDepWithChannel('optional', 'bz2', 'pecl.php.net');
+$package->addPackageDepWithChannel('optional', 'bz2', 'pecl.php.net', false, false, false, false, 'bz2');
 // all this false business sets the <providesextension> tag that allows us to have hash built
 // in statically
 $package->addPackageDepWithChannel('optional', 'hash', 'pecl.php.net', false, false, false, false, 'hash');
