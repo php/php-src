@@ -28,8 +28,8 @@ if the ini variable phar.require_hash is set to true.</description>
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-03-25</date>
- <time>19:02:23</time>
+ <date>2007-03-26</date>
+ <time>10:50:25</time>
  <version>
   <release>1.0.0</release>
   <api>1.0.0</api>
@@ -176,6 +176,7 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
    <package>
     <name>bz2</name>
     <channel>pecl.php.net</channel>
+    <providesextension>bz2</providesextension>
    </package>
    <package>
     <name>hash</name>
@@ -194,6 +195,7 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
  <extsrcrelease />
  <extsrcrelease />
  <extsrcrelease />
+ <extsrcrelease />
  <changelog>
   <release>
    <version>
@@ -204,7 +206,7 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
     <release>stable</release>
     <api>stable</api>
    </stability>
-   <date>2007-03-25</date>
+   <date>2007-03-26</date>
    <license uri="http://www.php.net/license">PHP License</license>
    <notes>
 *BACKWARDS COMPATIBILITY BREAK*
