@@ -39,26 +39,41 @@ echo $e->getMessage();
 <?php 
 unlink(dirname(__FILE__) . '/brandnewphar.phar');
 ?>
---EXPECT--
-bool(false)
-array(1) {
-  [hash_type]=>
-  string(3) "MD5"
-}
-array(1) {
-  [hash_type]=>
+--EXPECTF--
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
   string(5) "SHA-1"
 }
-array(1) {
-  [hash_type]=>
-  string(5) "SHA-256"
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(3) "MD5"
 }
-array(1) {
-  [hash_type]=>
-  string(5) "SHA-512"
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(5) "SHA-1"
 }
-array(1) {
-  [hash_type]=>
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(7) "SHA-256"
+}
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(7) "SHA-512"
+}
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
   string(5) "SHA-1"
 }
 ===DONE===
