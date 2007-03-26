@@ -49,6 +49,7 @@ $package->addPackageDepWithChannel('optional', 'bz2', 'pecl.php.net', false, fal
 $package->addPackageDepWithChannel('optional', 'hash', 'pecl.php.net', false, false, false, false, 'hash');
 $package->addExtensionDep('optional', 'spl');
 $package->addExtensionDep('optional', 'zlib');
+$package->setPackageType('extsrc');
 $package->addRelease();
 $package->setReleaseVersion(phpversion('phar'));
 $package->setAPIVersion(Phar::apiVersion());

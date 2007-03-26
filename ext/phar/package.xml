@@ -29,7 +29,7 @@ if the ini variable phar.require_hash is set to true.</description>
   <active>yes</active>
  </lead>
  <date>2007-03-26</date>
- <time>10:50:25</time>
+ <time>10:51:19</time>
  <version>
   <release>1.0.0</release>
   <api>1.0.0</api>
@@ -192,9 +192,6 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
   </optional>
  </dependencies>
  <providesextension>phar</providesextension>
- <extsrcrelease />
- <extsrcrelease />
- <extsrcrelease />
  <extsrcrelease />
  <changelog>
   <release>
