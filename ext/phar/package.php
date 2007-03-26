@@ -1,10 +1,14 @@
 <?php
 
-$notes = <<<EOT
-*BACKWARDS COMPATIBILITY BREAK*
-Rename Phar->begin/isFlushingToPhar/commit to startBuffering/isBuffering/stopBuffering
-Note that isBuffering() returns the opposite value to isFlushingToPhar()
-EOT;
+$notes = '
+ * implement ability connect a phar file \'phar://whatever\' to a directory. That way all
+   access to that phar archive are directed to the extracted directory. This
+   allows to have the installed files and the archieve keep the same includes.
+   [Marcus]
+ * implement SHA-2 (256, 512) support [Marcus]
+ * implement setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
+   choose the kind of signature to use (PGP falls back to SHA1) [Greg]
+';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
 	die("Extension phar not present");
@@ -53,8 +57,8 @@ $package->setPackageType('extsrc');
 $package->addRelease();
 $package->setReleaseVersion(phpversion('phar'));
 $package->setAPIVersion(Phar::apiVersion());
-$package->setReleaseStability('stable');
-$package->setAPIStability('stable');
+$package->setReleaseStability('beta');
+$package->setAPIStability('beta');
 $package->setNotes("\n$notes\n");
 //$package->addGlobalReplacement('package-info', '@package_version@', 'version');
 $package->generateContents();

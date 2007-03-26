@@ -29,20 +29,26 @@ if the ini variable phar.require_hash is set to true.</description>
   <active>yes</active>
  </lead>
  <date>2007-03-26</date>
- <time>10:51:19</time>
+ <time>11:41:38</time>
  <version>
-  <release>1.0.0</release>
-  <api>1.0.0</api>
+  <release>1.1.0RC1</release>
+  <api>1.1.0</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
-*BACKWARDS COMPATIBILITY BREAK*
-Rename Phar-&gt;begin/isFlushingToPhar/commit to startBuffering/isBuffering/stopBuffering
-Note that isBuffering() returns the opposite value to isFlushingToPhar()
+
+ * implement ability connect a phar file &apos;phar://whatever&apos; to a directory. That way all
+   access to that phar archive are directed to the extracted directory. This
+   allows to have the installed files and the archieve keep the same includes.
+   [Marcus]
+ * implement SHA-2 (256, 512) support [Marcus]
+ * implement setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
+   choose the kind of signature to use (PGP falls back to SHA1) [Greg]
+
  </notes>
  <contents>
   <dir baseinstalldir="/" name="/">
@@ -196,6 +202,29 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
  <changelog>
   <release>
    <version>
+    <release>1.1.0RC1</release>
+    <api>1.1.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2007-03-26</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+
+ * implement ability connect a phar file &apos;phar://whatever&apos; to a directory. That way all
+   access to that phar archive are directed to the extracted directory. This
+   allows to have the installed files and the archieve keep the same includes.
+   [Marcus]
+ * implement SHA-2 (256, 512) support [Marcus]
+ * implement setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
+   choose the kind of signature to use (PGP falls back to SHA1) [Greg]
+
+   </notes>
+  </release>
+  <release>
+   <version>
     <release>1.0.0</release>
     <api>1.0.0</api>
    </version>
@@ -205,11 +234,9 @@ Note that isBuffering() returns the opposite value to isFlushingToPhar()
    </stability>
    <date>2007-03-26</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>
-*BACKWARDS COMPATIBILITY BREAK*
+   <notes>*BACKWARDS COMPATIBILITY BREAK*
 Rename Phar-&gt;begin/isFlushingToPhar/commit to startBuffering/isBuffering/stopBuffering
-Note that isBuffering() returns the opposite value to isFlushingToPhar()
-   </notes>
+Note that isBuffering() returns the opposite value to isFlushingToPhar()</notes>
   </release>
  </changelog>
 </package>
