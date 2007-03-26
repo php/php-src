@@ -1,3 +1,42 @@
+2007-03-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS:
+      Bug fixes
+
+    * (PHP_4_4)
+      ext/session/session.c:
+      
+      Fixed MOPB-32-2007 (Double free inside session_decode())
+
+2007-03-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pcre/config0.m4:
+      - Need to install headers
+
+2007-03-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug37212.phpt:
+      Typo
+
+2007-03-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      acinclude.m4:
+      MFB52:- Check if Makefile.frag actually exists before running sed on it.
+
+    * acinclude.m4:
+      MFB:- Check if Makefile.frag actually exists before running sed on it.
+
+    * (PHP_5_2)
+      acinclude.m4:
+      - Check if Makefile.frag actually exists before running sed on it.
+
+    * ext/mysqli/tests/bug38710.phpt
+      ext/mysqli/tests/bug38710.phpt:
+      - Fixed test to skip when mysqld is not running
+
 2007-03-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/spl/spl_array.c:

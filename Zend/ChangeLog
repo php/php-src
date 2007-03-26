@@ -1,3 +1,9 @@
+2007-03-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      tests/bug37212.phpt:
+      Typo
+
 2007-03-23  Stanislav Malyshev  <stas@zend.com>
 
     * zend_object_handlers.c:
