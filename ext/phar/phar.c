@@ -1653,6 +1653,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		if (!fp) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" extracted from \"%s\" could not be opened", internal_file, resource->host);
 		}
+		php_url_free(resource);
 		efree(internal_file);
 		return fp;
 	}
