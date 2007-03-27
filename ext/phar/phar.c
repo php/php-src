@@ -243,6 +243,9 @@ static void destroy_phar_data(void *pDest) /* {{{ */
 	phar_archive_data *phar_data = *(phar_archive_data **) pDest;
 	TSRMLS_FETCH();
 
+	if (PHAR_GLOBALS->request_ends) {
+		return destroy_phar_data_only(pDest);
+	}
 	zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_alias_map), phar_unalias_apply, phar_data TSRMLS_CC);
 	if (--phar_data->refcount < 0) {
 		phar_destroy_phar_data(phar_data TSRMLS_CC);
@@ -3420,9 +3423,10 @@ PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 PHP_RINIT_FUNCTION(phar) /* {{{ */
 {
 	PHAR_GLOBALS->request_done = 0;
-	zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data, 0);
+	PHAR_GLOBALS->request_ends = 0;
+	zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data,  0);
 	zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
-	zend_hash_init(&(PHAR_GLOBALS->phar_plain_map), sizeof(const char *), zend_get_hash_value, NULL, 0);
+	zend_hash_init(&(PHAR_GLOBALS->phar_plain_map), sizeof(const char *),       zend_get_hash_value, NULL, 0);
 	phar_split_extract_list(TSRMLS_C);
 	return SUCCESS;
 }
@@ -3430,8 +3434,8 @@ PHP_RINIT_FUNCTION(phar) /* {{{ */
 
 PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
+	PHAR_GLOBALS->request_ends = 1;
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
-	PHAR_GLOBALS->phar_fname_map.pDestructor = destroy_phar_data_only;
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_plain_map));
 	PHAR_GLOBALS->request_done = 1;
