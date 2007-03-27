@@ -109,6 +109,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	zend_bool   require_hash_orig;
 	int         require_hash;
 	int         request_done;
+	int         request_ends;
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)
