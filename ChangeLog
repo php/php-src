@@ -1,3 +1,57 @@
+2007-03-26  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug37386.phpt:
+      MFB: fix bug #37386 (autocreating element doesn't assign value to first
+      node)
+      all single SimpleXMLElements are addressable using offset 0
+      use correct node for xpath context node
+      add test
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug37386.phpt
+      ext/simplexml/tests/bug37386.phpt:
+      fix bug #37386 (autocreating element doesn't assign value to first node)
+      all single SimpleXMLElements are addressable using offset 0
+      use correct node for xpath context node
+      add test
+
+2007-03-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      main/php_variables.c:
+      revert by request of Derick
+
+    * (PHP_4_4)
+      NEWS
+      main/php_variables.c:
+      fix #40586 (_ENV vars get escaped when magic_quotes_gpc is on)
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/standard/string.c
+      ext/standard/string.c
+      ext/standard/tests/strings/bug40915.phpt:
+      MFH: fix #40915 (addcslashes unexpected behavior with binary input)
+
+    * ext/standard/tests/strings/bug40915.phpt
+      ext/standard/tests/strings/bug40915.phpt:
+      
+      fix #40915 (addcslashes unexpected behavior with binary input)
+
+    * ext/standard/string.c:
+      fix #40915 (addcslashes unexpected behavior with binary input)
+
+    * ext/ftp/ftp.c:
+      MFB
+
 2007-03-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)
