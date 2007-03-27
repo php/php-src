@@ -1,13 +1,8 @@
 <?php
 
 $notes = '
- * implement ability connect a phar file \'phar://whatever\' to a directory. That way all
-   access to that phar archive are directed to the extracted directory. This
-   allows to have the installed files and the archieve keep the same includes.
+ * Fix return value of unlink() and rename() when used for phar archievs.
    [Marcus]
- * implement SHA-2 (256, 512) support [Marcus]
- * implement setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
-   choose the kind of signature to use (PGP falls back to SHA1) [Greg]
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
@@ -50,7 +45,6 @@ $package->setPearInstallerDep('1.4.3');
 $package->addPackageDepWithChannel('optional', 'bz2', 'pecl.php.net', false, false, false, false, 'bz2');
 // all this false business sets the <providesextension> tag that allows us to have hash built
 // in statically
-$package->addPackageDepWithChannel('optional', 'hash', 'pecl.php.net', false, false, false, false, 'hash');
 $package->addExtensionDep('optional', 'spl');
 $package->addExtensionDep('optional', 'zlib');
 $package->setPackageType('extsrc');
