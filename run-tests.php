@@ -1690,7 +1690,14 @@ function settings2array($settings, &$ini_settings)
 			$setting = explode("=", $setting, 2);
 			$name = trim(strtolower($setting[0]));
 			$value = trim($setting[1]);
-			$ini_settings[$name] = $value;
+			if ($name == 'extension') {
+				if (!isset($ini_settings[$name])) {
+					$ini_settings[$name] = array();
+				}
+				$ini_settings[$name][] = $value;
+			} else {
+				$ini_settings[$name] = $value;
+			}
 		}
 	}
 }
@@ -1699,8 +1706,15 @@ function settings2params(&$ini_settings)
 {
 	$settings = '';
 	foreach($ini_settings as $name => $value) {
-		$value = addslashes($value);
-		$settings .= " -d \"$name=$value\"";
+		if (is_array($value)) {
+			foreach($value as $val) {
+				$val = addslashes($val);
+				$settings .= " -d \"$name=$val\"";
+			}
+		} else {
+			$value = addslashes($value);
+			$settings .= " -d \"$name=$value\"";
+		}
 	}
 	$ini_settings = $settings;
 }
