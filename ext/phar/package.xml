@@ -15,7 +15,8 @@ Phar archives can be created using the streams API or with the Phar class, if
 the phar.readonly ini variable is set to false.
 
 Full support for MD5 and SHA1 signatures is possible. Signatures can be required 
-if the ini variable phar.require_hash is set to true.</description>
+if the ini variable phar.require_hash is set to true. When PECL extension hash is
+avaiable then SHA-256 and SHA-512 signatures are supported as well.</description>
  <lead>
   <name>Greg Beaver</name>
   <user>cellog</user>
