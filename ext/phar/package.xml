@@ -31,7 +31,7 @@ if the ini variable phar.require_hash is set to true.</description>
  <date>2007-03-27</date>
  <time>21:53:42</time>
  <version>
-  <release>1.0.0</release>
+  <release>1.0.1</release>
   <api>1.0.0</api>
  </version>
  <stability>
@@ -181,29 +181,6 @@ if the ini variable phar.require_hash is set to true.</description>
  <providesextension>phar</providesextension>
  <extsrcrelease />
  <changelog>
-  <release>
-   <version>
-    <release>1.1.0RC1</release>
-    <api>1.1.0</api>
-   </version>
-   <stability>
-    <release>beta</release>
-    <api>beta</api>
-   </stability>
-   <date>2007-03-26</date>
-   <license uri="http://www.php.net/license">PHP License</license>
-   <notes>
-
- * implement ability connect a phar file &apos;phar://whatever&apos; to a directory. That way all
-   access to that phar archive are directed to the extracted directory. This
-   allows to have the installed files and the archieve keep the same includes.
-   [Marcus]
- * implement SHA-2 (256, 512) support [Marcus]
- * implement setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
-   choose the kind of signature to use (PGP falls back to SHA1) [Greg]
-
-   </notes>
-  </release>
   <release>
    <version>
     <release>1.0.0</release>
