@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, Version 4.4.7
+- Fixed MOPB-33-2007 PHP mail() Message ASCIIZ Byte Truncation. (Ilia)
 - Fixed CRLF injection inside ftp_putcmd(). (Ilia)
 - Fixed MOPB-32-2007 (Double free inside session_decode()). (Ilia)
 - Fixed MOPB-21-2007 An open_basedir/safe_mode bypass inside the
