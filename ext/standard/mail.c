@@ -58,7 +58,7 @@
 #define MAIL_ASCIIZ_CHECK(str, len)			\
 	p = str;					\
 	e = p + len;					\
-	while (p = memchr(p, '\0', (e - p))) {		\
+	while ((p = memchr(p, '\0', (e - p)))) {	\
 		*p = ' ';				\
 	}						\
 
