@@ -114,7 +114,7 @@ static char *unserialize_str(const unsigned char **p, int *len)
 {
 	size_t i, j;
 	char *str = safe_emalloc(*len, 1, 1);
-	unsigned char *end = *p+*len;
+	unsigned char *end = *(unsigned char **)p+*len;
 
 	if(end < *p) {
 		efree(str);
