@@ -126,7 +126,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 
 			if(++nest_level > PG(max_input_nesting_level)) {
 				/* too many levels of nesting */
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Input variable nesting level more than allowed %d (change max_input_nesting_level in php.ini to increase the limit)", PG(max_input_nesting_level));
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Input variable nesting level more than allowed %ld (change max_input_nesting_level in php.ini to increase the limit)", PG(max_input_nesting_level));
 			}
 
 			ip++;
