@@ -16,7 +16,7 @@ echo `"$php" --notexisting foo bar baz | grep Usage:`;
 echo "Done\n";
 ?>
 --EXPECTF--     
-PHP %d.%d.%d%s(cli) (built: %s)
+PHP %d.%d.%d%s(cli) (built: %s)%s
 Array
 (
     [0] => -
@@ -25,6 +25,6 @@ Array
     [3] => baz
 )
 
-PHP %d.%d.%d%s(cli) (built: %s)
+PHP %d.%d.%d%s(cli) (built: %s)%s
 Usage: php [options] [-f] <file> [--] [args...]
 Done
