@@ -93,6 +93,9 @@ typedef struct _fcgi_end_request_rec {
 
 typedef struct _fcgi_request {
 	int            listen_socket;
+#ifdef _WIN32
+	int            tcp;
+#endif
 	int            fd;
 	int            id;
 	int            keep;
