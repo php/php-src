@@ -3413,10 +3413,6 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(get_current_user,												arginfo_get_current_user)
 	PHP_FE(set_time_limit,													arginfo_set_time_limit)
 	PHP_FE(get_cfg_var,														arginfo_get_cfg_var)
-	PHP_DEP_FALIAS(magic_quotes_runtime, set_magic_quotes_runtime,			NULL)
-	PHP_DEP_FE(set_magic_quotes_runtime,									NULL)
-	PHP_DEP_FE(get_magic_quotes_gpc,										NULL)
-	PHP_DEP_FE(get_magic_quotes_runtime, 									NULL)
 	
 	PHP_FE(import_request_variables,										arginfo_import_request_variables)
 	PHP_FE(error_log,														arginfo_error_log)
@@ -4831,31 +4827,6 @@ PHP_FUNCTION(get_cfg_var)
 		RETURN_FALSE;
 	}
 	RETURN_UTF8_STRING(value, ZSTR_DUPLICATE);
-}
-/* }}} */
-
-/* {{{ proto false set_magic_quotes_runtime(void) U
-    Deprecation stub for magic quotes function */
-PHP_FUNCTION(set_magic_quotes_runtime)
-{
-	php_error_docref(NULL TSRMLS_CC, E_CORE_ERROR, "magic_quotes_runtime is not supported anymore");
-	RETURN_FALSE;
-}
-/* }}} */
-
-/* {{{ proto false get_magic_quotes_runtime(void) U
-    Deprecation stub for magic quotes function */
-PHP_FUNCTION(get_magic_quotes_runtime)
-{
-	RETURN_FALSE;
-}
-/* }}} */
-
-/* {{{ proto false get_magic_quotes_gpc(void) U
-    Deprecation stub for magic quotes function */
-PHP_FUNCTION(get_magic_quotes_gpc)
-{
-	RETURN_FALSE;
 }
 /* }}} */
 
