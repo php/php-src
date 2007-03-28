@@ -120,9 +120,7 @@ static zend_module_entry cgi_module_entry;
 
 static const opt_struct OPTIONS[] = {
 	{'a', 0, "interactive"},
-#ifndef PHP_WIN32
 	{'b', 1, "bindpath"},
-#endif
 	{'C', 0, "no-chdir"},
 	{'c', 1, "php-ini"},
 	{'d', 1, "define"},
@@ -611,9 +609,7 @@ static void php_cgi_usage(char *argv0)
 	php_printf("Usage: %s [-q] [-h] [-s] [-v] [-i] [-f <file>]\n"
 			   "       %s <file> [args...]\n"
 			   "  -a               Run interactively\n"
-#if !defined(PHP_WIN32)
 			   "  -b <address:port>|<port> Bind Path for external FASTCGI Server mode\n"
-#endif
 			   "  -C               Do not chdir to the script's directory\n"
 			   "  -c <path>|<file> Look for php.ini file in this directory\n"
 			   "  -n               No php.ini file will be used\n"
@@ -970,19 +966,6 @@ void fastcgi_cleanup(int signal)
 	exit(0);
 }
 
-#ifndef PHP_WIN32
-static int is_port_number(const char *bindpath)
-{
-	while (*bindpath) {
-		if (*bindpath < '0' || *bindpath > '9') {
-			return 0;
-		}
-		bindpath++;
-	}
-	return 1;
-}
-#endif
-
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("cgi.rfc2616_headers",     "0",  PHP_INI_ALL,    OnUpdateBool,   rfc2616_headers, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.nph",                 "0",  PHP_INI_ALL,    OnUpdateBool,   nph, php_cgi_globals_struct, php_cgi_globals)
@@ -1089,9 +1072,7 @@ int main(int argc, char *argv[])
 	int max_requests = 500;
 	int requests = 0;
 	int fastcgi = fcgi_is_fastcgi();
-#ifndef PHP_WIN32
 	char *bindpath = NULL;
-#endif
 	int fcgi_fd = 0;
 	fcgi_request request;
 #ifndef PHP_WIN32
@@ -1152,7 +1133,6 @@ int main(int argc, char *argv[])
 			case 'n':
 				cgi_sapi_module.php_ini_ignore = 1;
 				break;
-#ifndef PHP_WIN32
 			/* if we're started on command line, check to see if
 			   we are being started as an 'external' fastcgi
 			   server by accepting a bindpath parameter. */
@@ -1192,7 +1172,6 @@ int main(int argc, char *argv[])
 					bindpath = strdup(php_optarg);
 				}
 				break;
-#endif
 		}
 
 	}
@@ -1259,26 +1238,10 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-#ifndef PHP_WIN32
 	/* for windows, socket listening is broken in the fastcgi library itself
 	   so dissabling this feature on windows till time is available to fix it */
 	if (bindpath) {
-		/* Pass on the arg to the FastCGI library, with one exception.
-		 * If just a port is specified, then we prepend a ':' onto the
-		 * path (it's what the fastcgi library expects)
-		 */		
-		if (strchr(bindpath, ':') == NULL && is_port_number(bindpath)) {
-			char *tmp;
-
-			tmp = malloc(strlen(bindpath) + 2);
-			tmp[0] = ':';
-			memcpy(tmp + 1, bindpath, strlen(bindpath) + 1);
-
-			fcgi_fd = fcgi_listen(tmp, 128);
-			free(tmp);
-		} else {
-			fcgi_fd = fcgi_listen(bindpath, 128);
-		}
+		fcgi_fd = fcgi_listen(bindpath, 128);
 		if (fcgi_fd < 0) {
 			fprintf(stderr, "Couldn't create FastCGI listen socket on port %s\n", bindpath);
 #ifdef ZTS
@@ -1288,7 +1251,6 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 		fastcgi = fcgi_is_fastcgi();
 	}
-#endif
 	if (fastcgi) {
 		/* How many times to run PHP scripts before dying */
 		if (getenv("PHP_FCGI_MAX_REQUESTS")) {
@@ -1749,11 +1711,9 @@ fastcgi_request_done:
 			requests++;
 			if (max_requests && (requests == max_requests)) {
 				fcgi_finish_request(&request);
-#ifndef PHP_WIN32
 				if (bindpath) {
 					free(bindpath);
 				}
-#endif
 				break;
 			}
 			/* end of fastcgi loop */
