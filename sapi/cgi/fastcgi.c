@@ -32,6 +32,7 @@
 #include <windows.h>
 
 	typedef unsigned int size_t;
+	typedef unsigned int in_addr_t;
 
 	struct sockaddr_un {
 		short   sun_family;
@@ -70,6 +71,8 @@
 # include <arpa/inet.h>
 # include <netdb.h>
 # include <signal.h>
+
+# define closesocket(s) close(s)
 
 # if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
 #  include <sys/poll.h>
@@ -147,6 +150,7 @@ static const fcgi_mgmt_rec fcgi_mgmt_vars[] = {
 static int is_initialized = 0;
 static int is_fastcgi = 0;
 static int in_shutdown = 0;
+static in_addr_t *allowed_clients = NULL;
 
 #ifdef _WIN32
 
@@ -159,8 +163,6 @@ static DWORD WINAPI fcgi_shutdown_thread(LPVOID arg)
 }
 
 #else
-
-static in_addr_t *allowed_clients = NULL;
 
 static void fcgi_signal_handler(int signo)
 {
@@ -254,12 +256,89 @@ int fcgi_is_fastcgi(void)
 	}
 }
 
+#ifdef _WIN32
+/* Do some black magic with the NT security API.
+ * We prepare a DACL (Discretionary Access Control List) so that
+ * we, the creator, are allowed all access, while "Everyone Else"
+ * is only allowed to read and write to the pipe.
+ * This avoids security issues on shared hosts where a luser messes
+ * with the lower-level pipe settings and screws up the FastCGI service.
+ */
+static PACL prepare_named_pipe_acl(PSECURITY_DESCRIPTOR sd, LPSECURITY_ATTRIBUTES sa)
+{
+  DWORD req_acl_size;
+  char everyone_buf[32], owner_buf[32];
+  PSID sid_everyone, sid_owner;
+  SID_IDENTIFIER_AUTHORITY
+    siaWorld = SECURITY_WORLD_SID_AUTHORITY,
+    siaCreator = SECURITY_CREATOR_SID_AUTHORITY;
+  PACL acl;
+
+  sid_everyone = (PSID)&everyone_buf;
+  sid_owner = (PSID)&owner_buf;
+
+  req_acl_size = sizeof(ACL) +
+    (2 * ((sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD)) + GetSidLengthRequired(1)));
+
+  acl = malloc(req_acl_size);
+
+  if (acl == NULL) {
+    return NULL;
+  }
+
+  if (!InitializeSid(sid_everyone, &siaWorld, 1)) {
+    goto out_fail;
+  }
+  *GetSidSubAuthority(sid_everyone, 0) = SECURITY_WORLD_RID;
+
+  if (!InitializeSid(sid_owner, &siaCreator, 1)) {
+    goto out_fail;
+  }
+  *GetSidSubAuthority(sid_owner, 0) = SECURITY_CREATOR_OWNER_RID;
+
+  if (!InitializeAcl(acl, req_acl_size, ACL_REVISION)) {
+    goto out_fail;
+  }
+
+  if (!AddAccessAllowedAce(acl, ACL_REVISION, FILE_GENERIC_READ | FILE_GENERIC_WRITE, sid_everyone)) {
+    goto out_fail;
+  }
+
+  if (!AddAccessAllowedAce(acl, ACL_REVISION, FILE_ALL_ACCESS, sid_owner)) {
+    goto out_fail;
+  }
+
+  if (!InitializeSecurityDescriptor(sd, SECURITY_DESCRIPTOR_REVISION)) {
+    goto out_fail;
+  }
+
+  if (!SetSecurityDescriptorDacl(sd, TRUE, acl, FALSE)) {
+    goto out_fail;
+  }
+
+  sa->lpSecurityDescriptor = sd;
+
+  return acl;
+
+out_fail:
+  free(acl);
+  return NULL;
+}
+#endif
+
+static int is_port_number(const char *bindpath)
+{
+	while (*bindpath) {
+		if (*bindpath < '0' || *bindpath > '9') {
+			return 0;
+		}
+		bindpath++;
+	}
+	return 1;
+}
+
 int fcgi_listen(const char *path, int backlog)
 {
-#ifdef _WIN32
-	/* TODO: Support for manual binding on TCP sockets (php -b <port>) */
-	return -1;
-#else
 	char     *s;
 	int       tcp = 0;
 	char      host[MAXPATHLEN];
@@ -273,6 +352,12 @@ int fcgi_listen(const char *path, int backlog)
 		if (port != 0 && (s-path) < MAXPATHLEN) {
 			strncpy(host, path, s-path);
 			host[s-path] = '\0';
+			tcp = 1;
+		}
+	} else if (is_port_number(path)) {
+		port = atoi(path);
+		if (port != 0) {
+			host[0] = '\0';
 			tcp = 1;
 		}
 	}
@@ -303,6 +388,33 @@ int fcgi_listen(const char *path, int backlog)
 			}
 		}
 	} else {
+#ifdef _WIN32
+	    SECURITY_DESCRIPTOR  sd;
+    	SECURITY_ATTRIBUTES  sa;
+	    PACL                 acl;
+		HANDLE namedPipe;
+
+		memset(&sa, 0, sizeof(sa));
+		sa.nLength = sizeof(sa);
+		sa.bInheritHandle = FALSE;
+		acl = prepare_named_pipe_acl(&sd, &sa);
+
+		namedPipe = CreateNamedPipe(path,
+			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+			PIPE_TYPE_BYTE | PIPE_WAIT | PIPE_READMODE_BYTE,
+			PIPE_UNLIMITED_INSTANCES,
+			8192, 8192, 0, &sa);
+		if (namedPipe == INVALID_HANDLE_VALUE) {
+			return -1;
+		}		
+		listen_socket = _open_osfhandle((long)namedPipe, 0);
+		if (!is_initialized) {
+			fcgi_init();
+		}
+		is_fastcgi = 1;
+		return listen_socket;
+
+#else
 		int path_len = strlen(path);
 
 		if (path_len >= sizeof(sa.sa_unix.sun_path)) {
@@ -318,6 +430,7 @@ int fcgi_listen(const char *path, int backlog)
 		sa.sa_unix.sun_len = sock_len;
 #endif
 		unlink(path);
+#endif
 	}
 
 	/* Create, bind socket and start listen on it */
@@ -369,8 +482,13 @@ int fcgi_listen(const char *path, int backlog)
 		fcgi_init();
 	}
 	is_fastcgi = 1;
-	return listen_socket;
+
+#ifdef _WIN32
+	if (tcp) {
+		listen_socket = _open_osfhandle((long)listen_socket, 0);
+	}
 #endif
+	return listen_socket;
 }
 
 void fcgi_init_request(fcgi_request *req, int listen_socket)
@@ -385,6 +503,10 @@ void fcgi_init_request(fcgi_request *req, int listen_socket)
 
 	req->out_hdr  = NULL;
 	req->out_pos  = req->out_buf;
+
+#ifdef _WIN32
+	req->tcp = !GetNamedPipeInfo((HANDLE)_get_osfhandle(req->listen_socket), NULL, NULL, NULL, NULL);
+#endif
 }
 
 static inline ssize_t safe_write(fcgi_request *req, const void *buf, size_t count)
@@ -394,7 +516,18 @@ static inline ssize_t safe_write(fcgi_request *req, const void *buf, size_t coun
 
 	do {
 		errno = 0;
+#ifdef _WIN32
+		if (!req->tcp) {
+			ret = write(req->fd, ((char*)buf)+n, count-n);
+		} else {
+			ret = send(req->fd, ((char*)buf)+n, count-n, 0);
+			if (ret <= 0) {
+				errno = WSAGetLastError();
+			}
+		}
+#else
 		ret = write(req->fd, ((char*)buf)+n, count-n);
+#endif
 		if (ret > 0) {
 			n += ret;
 		} else if (ret <= 0 && errno != 0 && errno != EINTR) {
@@ -411,7 +544,18 @@ static inline ssize_t safe_read(fcgi_request *req, const void *buf, size_t count
 
 	do {
 		errno = 0;
+#ifdef _WIN32
+		if (!req->tcp) {
+			ret = read(req->fd, ((char*)buf)+n, count-n);
+		} else {
+			ret = recv(req->fd, ((char*)buf)+n, count-n, 0);
+			if (ret <= 0) {
+				errno = WSAGetLastError();
+			}
+		}
+#else
 		ret = read(req->fd, ((char*)buf)+n, count-n);
+#endif
 		if (ret > 0) {
 			n += ret;
 		} else if (ret == 0 && errno == 0) {
@@ -666,19 +810,29 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 	}
 
 #ifdef _WIN32
-	if (is_impersonate) {
+	if (is_impersonate && !req->tcp) {
 		RevertToSelf();
 	}
 #endif
 
 	if ((force || !req->keep) && req->fd >= 0) {
 #ifdef _WIN32
-		HANDLE pipe = (HANDLE)_get_osfhandle(req->fd);
+		if (!req->tcp) {
+			HANDLE pipe = (HANDLE)_get_osfhandle(req->fd);
 
-		if (!force) {
-			FlushFileBuffers(pipe);
+			if (!force) {
+				FlushFileBuffers(pipe);
+			}
+			DisconnectNamedPipe(pipe);
+		} else {
+			if (!force) {
+				char buf[8];
+
+				shutdown(req->fd, 1);
+				while (recv(req->fd, buf, sizeof(buf), 0) > 0) {}
+			}
+			closesocket(req->fd);
 		}
-		DisconnectNamedPipe(pipe);
 #else
 		if (!force) {
 			char buf[8];
@@ -707,33 +861,37 @@ int fcgi_accept_request(fcgi_request *req)
 					return -1;
 				}
 #ifdef _WIN32
-				pipe = (HANDLE)_get_osfhandle(req->listen_socket);
-
-				FCGI_LOCK(req->listen_socket);
-				ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-				if (!ConnectNamedPipe(pipe, &ov)) {
-					errno = GetLastError();
-					if (errno == ERROR_IO_PENDING) {
-						while (WaitForSingleObject(ov.hEvent, 1000) == WAIT_TIMEOUT) {
-							if (in_shutdown) {
-								CloseHandle(ov.hEvent);
-								FCGI_UNLOCK(req->listen_socket);
-								return -1;
+				if (!req->tcp) {
+					pipe = (HANDLE)_get_osfhandle(req->listen_socket);
+					FCGI_LOCK(req->listen_socket);
+					ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+					if (!ConnectNamedPipe(pipe, &ov)) {
+						errno = GetLastError();
+						if (errno == ERROR_IO_PENDING) {
+							while (WaitForSingleObject(ov.hEvent, 1000) == WAIT_TIMEOUT) {
+								if (in_shutdown) {
+									CloseHandle(ov.hEvent);
+									FCGI_UNLOCK(req->listen_socket);
+									return -1;
+								}
 							}
+						} else if (errno != ERROR_PIPE_CONNECTED) {
 						}
-					} else if (errno != ERROR_PIPE_CONNECTED) {
 					}
-				}
-				CloseHandle(ov.hEvent);
-				req->fd = req->listen_socket;
-				FCGI_UNLOCK(req->listen_socket);
+					CloseHandle(ov.hEvent);
+					req->fd = req->listen_socket;
+					FCGI_UNLOCK(req->listen_socket);
+				} else {
+					SOCKET listen_socket = (SOCKET)_get_osfhandle(req->listen_socket);
 #else
 				{
+					int listen_socket = req->listen_socket;
+#endif
 					sa_t sa;
 					socklen_t len = sizeof(sa);
 
 					FCGI_LOCK(req->listen_socket);
-					req->fd = accept(req->listen_socket, (struct sockaddr *)&sa, &len);
+					req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);
 					FCGI_UNLOCK(req->listen_socket);
 					if (req->fd >= 0 && allowed_clients) {
 						int n = 0;
@@ -748,13 +906,12 @@ int fcgi_accept_request(fcgi_request *req)
 			    		}
 						if (!allowed) {
 							fprintf(stderr, "Connection from disallowed IP address '%s' is dropped.\n", inet_ntoa(sa.sa_inet.sin_addr));
-							close(req->fd);
+							closesocket(req->fd);
 							req->fd = -1;
 							continue;
 						}
 					}
 				}
-#endif
 
 				if (req->fd < 0 && (in_shutdown || errno != EINTR)) {
 					return -1;
@@ -808,7 +965,7 @@ int fcgi_accept_request(fcgi_request *req)
 		}
 		if (fcgi_read_request(req)) {
 #ifdef _WIN32
-			if (is_impersonate) {
+			if (is_impersonate && !req->tcp) {
 				pipe = (HANDLE)_get_osfhandle(req->fd);
 				if (!ImpersonateNamedPipeClient(pipe)) {
 					fcgi_close(req, 1, 1);
