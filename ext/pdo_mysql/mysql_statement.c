@@ -2,12 +2,12 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
+  | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | http://www.php.net/license/3_0.txt.                                  |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -70,6 +70,8 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	efree(S);
 	return 1;
 }
+
+#define PDO_MYSQL_MAX_BUFFER 1024*1024 /* 1 megabyte */
 
 static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
@@ -142,10 +144,30 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 								S->fields[i].max_length? S->fields[i].max_length:
 								S->fields[i].length;
 							/* work-around for longtext and alike */
-							if (S->bound_result[i].buffer_length > H->max_buffer_size) {
-								S->bound_result[i].buffer_length = H->max_buffer_size;
+							if (S->bound_result[i].buffer_length > PDO_MYSQL_MAX_BUFFER) {
+								S->bound_result[i].buffer_length = PDO_MYSQL_MAX_BUFFER;
 							}
 					}
+#if 0
+					printf("%d: max_length=%d length=%d buffer_length=%d type=%d\n",
+							i,
+							S->fields[i].max_length,
+						  	S->fields[i].length,
+							S->bound_result[i].buffer_length,
+							S->fields[i].type
+							);
+#endif
+
+					/* there are cases where the length reported by mysql is too short.
+					 * eg: when describing a table that contains an enum column. Since
+					 * we have no way of knowing the true length either, we'll bump up
+					 * our buffer size to a reasonable size, just in case */
+					if (S->fields[i].max_length == 0 && S->bound_result[i].buffer_length < 128 && MYSQL_TYPE_VAR_STRING) {
+						S->bound_result[i].buffer_length = 128;
+					}
+
+					S->out_length[i] = 0;
+
 					S->bound_result[i].buffer = emalloc(S->bound_result[i].buffer_length);
 					S->bound_result[i].is_null = &S->out_null[i];
 					S->bound_result[i].length = &S->out_length[i];
@@ -222,7 +244,6 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 #if HAVE_MYSQL_STMT_PREPARE
 	if (S->stmt) {
 		mysql_stmt_free_result(S->stmt);
-		S->stmt = NULL;
 	}
 #endif
 	if (S->result) {
@@ -239,15 +260,15 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 		/* No more results */
 		return 0;
 	} else {
+		if ((my_ulonglong)-1 == (row_count = mysql_affected_rows(H->server))) {
+			pdo_mysql_error_stmt(stmt);
+			return 0;
+		}
+		
 		if (!H->buffered) {
 			S->result = mysql_use_result(H->server);
-			row_count = 0;
 		} else {
 			S->result = mysql_store_result(H->server);
-			if ((my_ulonglong)-1 == (row_count = mysql_affected_rows(H->server))) {
-				pdo_mysql_error_stmt(stmt);
-				return 0;
-			}
 		}
 
 		if (NULL == S->result) {
@@ -290,6 +311,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 			case PDO_PARAM_EVT_EXEC_PRE:
 				b = (MYSQL_BIND*)param->driver_data;
 
+				*b->is_null = 0;
 				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL || 
 						Z_TYPE_P(param->parameter) == IS_NULL) {
 					*b->is_null = 1;
@@ -301,9 +323,24 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 				}
 	
 				switch (PDO_PARAM_TYPE(param->param_type)) {
-					case PDO_PARAM_LOB:
 					case PDO_PARAM_STMT:
 						return 0;
+					case PDO_PARAM_LOB:
+						if (Z_TYPE_P(param->parameter) == IS_RESOURCE) {
+							php_stream *stm;
+							php_stream_from_zval_no_verify(stm, &param->parameter);
+							if (stm) {
+								SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
+								Z_TYPE_P(param->parameter) = IS_STRING;
+								Z_STRLEN_P(param->parameter) = php_stream_copy_to_mem(stm,
+									&Z_STRVAL_P(param->parameter), PHP_STREAM_COPY_ALL, 0);
+							} else {
+								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
+								return 0;
+							}
+						}
+						/* fall through */
+
 					default:
 						;
 				}
@@ -433,6 +470,13 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 			return 1;
 		}
 		*ptr = S->bound_result[colno].buffer;
+		if (S->out_length[colno] > S->bound_result[colno].buffer_length) {
+			/* mysql lied about the column width */
+			strcpy(stmt->error_code, "01004"); /* truncated */
+			S->out_length[colno] = S->bound_result[colno].buffer_length;
+			*len = S->out_length[colno];
+			return 0;
+		}
 		*len = S->out_length[colno];
 		return 1;
 	}
@@ -459,22 +503,11 @@ static char *type_to_name_native(int type)
         PDO_MYSQL_NATIVE_TYPE_NAME(FLOAT)
         PDO_MYSQL_NATIVE_TYPE_NAME(DOUBLE)
         PDO_MYSQL_NATIVE_TYPE_NAME(DECIMAL)
-#ifdef FIELD_TYPE_NEWDECIMAL
-        PDO_MYSQL_NATIVE_TYPE_NAME(NEWDECIMAL)
-#endif
-#ifdef FIELD_TYPE_GEOMETRY
-        PDO_MYSQL_NATIVE_TYPE_NAME(GEOMETRY)
-#endif
         PDO_MYSQL_NATIVE_TYPE_NAME(TIMESTAMP)
 #ifdef MYSQL_HAS_YEAR
         PDO_MYSQL_NATIVE_TYPE_NAME(YEAR)
 #endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(SET)
-        PDO_MYSQL_NATIVE_TYPE_NAME(ENUM)
         PDO_MYSQL_NATIVE_TYPE_NAME(DATE)
-#ifdef FIELD_TYPE_NEWDATE
-        PDO_MYSQL_NATIVE_TYPE_NAME(NEWDATE)
-#endif
         PDO_MYSQL_NATIVE_TYPE_NAME(TIME)
         PDO_MYSQL_NATIVE_TYPE_NAME(DATETIME)
         PDO_MYSQL_NATIVE_TYPE_NAME(TINY_BLOB)
@@ -497,7 +530,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 	if (!S->result) {
 		return FAILURE;
 	}
-	if (colno >= stmt->column_count || colno < 0) {
+	if (colno >= stmt->column_count) {
 		/* error invalid column */
 		return FAILURE;
 	}
@@ -540,14 +573,7 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 #if HAVE_MYSQL_STMT_PREPARE
 	if (S->stmt) {
-		int retval;
-		if (!S->H->buffered) {
-			retval = mysql_stmt_close(S->stmt);
-			S->stmt = NULL;
-		} else {
-			retval = mysql_stmt_free_result(S->stmt);
-		}
-		S->stmt = NULL;
+		int retval = mysql_stmt_free_result(S->stmt);
 		return retval ? 0 : 1;
 	}
 #endif

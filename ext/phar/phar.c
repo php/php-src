@@ -153,6 +153,9 @@ static void destroy_phar_data(void *pDest) /* {{{ */
 	phar_archive_data *phar_data = *(phar_archive_data **) pDest;
 	TSRMLS_FETCH();
 
+	if (PHAR_GLOBALS->request_ends) {
+		return destroy_phar_data_only(pDest);
+	}
 	zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_alias_map), phar_unalias_apply, phar_data TSRMLS_CC);
 	if (--phar_data->refcount < 0) {
 		phar_destroy_phar_data(phar_data TSRMLS_CC);
@@ -774,7 +777,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 				return FAILURE;
 			}
 
-			sig_len = phar_hex_str(digest, sizeof(digest), &signature);
+			sig_len = phar_hex_str((const char*)digest, sizeof(digest), &signature);
 			break;
 		}
 		case PHAR_SIG_MD5: {
@@ -809,7 +812,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 				return FAILURE;
 			}
 
-			sig_len = phar_hex_str(digest, sizeof(digest), &signature);
+			sig_len = phar_hex_str((const char*)digest, sizeof(digest), &signature);
 			break;
 		}
 		default:
@@ -2353,7 +2356,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			PHP_SHA1Final(digest, &context);
 			php_stream_write(newfile, (char *) digest, sizeof(digest));
 			sig_flags |= PHAR_SIG_SHA1;
-			archive->sig_len = phar_hex_str(digest, sizeof(digest), &archive->signature);
+			archive->sig_len = phar_hex_str((const char*)digest, sizeof(digest), &archive->signature);
 			break;
 		}
 		case PHAR_SIG_MD5: {
@@ -2367,7 +2370,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			PHP_MD5Final(digest, &context);
 			php_stream_write(newfile, (char *) digest, sizeof(digest));
 			sig_flags |= PHAR_SIG_MD5;
-			archive->sig_len = phar_hex_str(digest, sizeof(digest), &archive->signature);
+			archive->sig_len = phar_hex_str((const char*)digest, sizeof(digest), &archive->signature);
 			break;
 		}
 		}
@@ -2786,26 +2789,26 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	resource = php_url_parse(url);
 
 	if (!resource && (resource = phar_open_url(wrapper, url, "rb", options TSRMLS_CC)) == NULL) {
-		return FAILURE;
+		return 0;
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", url);
-		return FAILURE;
+		return 0;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar stream url \"%s\"", url);
-		return FAILURE;
+		return 0;
 	}
 
 	if (PHAR_G(readonly)) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
-		return FAILURE;
+		return 0;
 	}
 
 	/* need to copy to strip leading "/", will get touched again */
@@ -2818,7 +2821,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 		}
 		efree(internal_file);
 		php_url_free(resource);
-		return FAILURE;
+		return 0;
 	}
 	if (error) {
 		efree(error);
@@ -2827,7 +2830,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\", cannot unlink", internal_file, resource->host);
 		efree(internal_file);
 		php_url_free(resource);
-		return FAILURE;
+		return 0;
 	}
 	if (idata->internal_file->fp_refcount > 1) {
 		/* more than just our fp resource is open for this file */ 
@@ -2835,7 +2838,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 		efree(internal_file);
 		php_url_free(resource);
 		phar_entry_delref(idata TSRMLS_CC);
-		return FAILURE;
+		return 0;
 	}
 	php_url_free(resource);
 	efree(internal_file);
@@ -2844,7 +2847,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
 		efree(error);
 	}
-	return SUCCESS;
+	return 1;
 }
 /* }}} */
 
@@ -2857,19 +2860,19 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 
 	if (PHAR_G(readonly)) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
-		return FAILURE;
+		return 0;
 	}
 
 	resource_from = php_url_parse(url_from);
 	resource_to = php_url_parse(url_from);
 
 	if (!resource_from && (resource_from = phar_open_url(wrapper, url_from, "r+b", options TSRMLS_CC)) == NULL) {
-		return FAILURE;
+		return 0;
 	}
 	
 	if (!resource_to && (resource_to = phar_open_url(wrapper, url_to, "wb", options TSRMLS_CC)) == NULL) {
 		php_url_free(resource_from);
-		return FAILURE;
+		return 0;
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
@@ -2877,35 +2880,35 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		php_url_free(resource_from);
 		php_url_free(resource_to);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", url_from);
-		return FAILURE;
+		return 0;
 	}
 	
 	if (!resource_to->scheme || !resource_to->host || !resource_to->path) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", url_to);
-		return FAILURE;
+		return 0;
 	}
 
 	if (strcasecmp("phar", resource_from->scheme)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar stream url \"%s\"", url_from);
-		return FAILURE;
+		return 0;
 	}
 
 	if (strcasecmp("phar", resource_to->scheme)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar stream url \"%s\"", url_to);
-		return FAILURE;
+		return 0;
 	}
 
 	if (strcmp(resource_from->host, resource_to->host)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\", not within the same phar archive", url_from, url_to);
-		return FAILURE;
+		return 0;
 	}
 
 	/* need to copy to strip leading "/", will get touched again */
@@ -2921,7 +2924,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		efree(to_file);
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		return FAILURE;
+		return 0;
 	}
 	if (error) {
 		efree(error);
@@ -2932,7 +2935,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		efree(to_file);
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		return FAILURE;
+		return 0;
 	}
 	if (!(todata = phar_get_or_create_entry_data(resource_to->host, strlen(resource_to->host), to_file, strlen(to_file), "w", &error TSRMLS_CC))) {
 		/* constraints of fp refcount were not met */
@@ -2944,7 +2947,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		efree(to_file);
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		return FAILURE;
+		return 0;
 	}
 	if (error) {
 		efree(error);
@@ -2958,7 +2961,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		php_url_free(resource_to);
 		phar_entry_delref(fromdata TSRMLS_CC);
 		phar_entry_delref(todata TSRMLS_CC);
-		return FAILURE;
+		return 0;
 	}
 	if (todata->internal_file->fp_refcount > 1) {
 		/* more than just our fp resource is open for this file */ 
@@ -2969,7 +2972,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		php_url_free(resource_to);
 		phar_entry_delref(fromdata TSRMLS_CC);
 		phar_entry_delref(todata TSRMLS_CC);
-		return FAILURE;
+		return 0;
 	}
 
 	php_stream_seek(fromdata->internal_file->fp, 0, SEEK_SET);
@@ -2981,7 +2984,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		php_url_free(resource_to);
 		phar_entry_delref(fromdata TSRMLS_CC);
 		phar_entry_delref(todata TSRMLS_CC);
-		return FAILURE;
+		return 0;
 	}
 	phar_entry_delref(fromdata TSRMLS_CC);
 	phar_entry_delref(todata TSRMLS_CC);
@@ -2990,7 +2993,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	php_url_free(resource_from);
 	php_url_free(resource_to);
 	phar_wrapper_unlink(wrapper, url_from, 0, 0 TSRMLS_CC);
-	return SUCCESS;
+	return 1;
 }
 /* }}} */
 
@@ -3126,6 +3129,7 @@ PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 PHP_RINIT_FUNCTION(phar) /* {{{ */
 {
 	PHAR_GLOBALS->request_done = 0;
+	PHAR_GLOBALS->request_ends = 0;
 	zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data, 0);
 	zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
 	return SUCCESS;
@@ -3134,8 +3138,8 @@ PHP_RINIT_FUNCTION(phar) /* {{{ */
 
 PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
+	PHAR_GLOBALS->request_ends = 1;
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
-	PHAR_GLOBALS->phar_fname_map. pDestructor = destroy_phar_data_only;
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
 	PHAR_GLOBALS->request_done = 1;
 	return SUCCESS;

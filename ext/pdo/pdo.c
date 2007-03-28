@@ -2,12 +2,12 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
+  | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | http://www.php.net/license/3_0.txt.                                  |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -36,7 +36,6 @@
 static zend_class_entry *spl_ce_RuntimeException;
 
 ZEND_DECLARE_MODULE_GLOBALS(pdo)
-static PHP_GINIT_FUNCTION(pdo);
 
 /* True global resources - no need for thread safety here */
 
@@ -54,21 +53,9 @@ int php_pdo_list_entry(void)
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
 
-PDO_API zend_class_entry *php_pdo_get_dbh_ce(void)
-{
-	return pdo_dbh_ce;
-}
-
 PDO_API zend_class_entry *php_pdo_get_exception(void)
 {
 	return pdo_exception_ce;
-}
-
-PDO_API char *php_pdo_str_tolower_dup(const char *src, int len)
-{
-	char *dest = emalloc(len + 1);
-	zend_str_tolower_copy(dest, src, len);
-	return dest;
 }
 
 PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
@@ -87,7 +74,7 @@ PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
 		}
 	}
 #endif
-#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 2)
+#if (PHP_MAJOR_VERSION < 6)
 	return zend_exception_get_default();
 #else
 	return zend_exception_get_default(TSRMLS_C);
@@ -96,7 +83,7 @@ PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
 
 zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 
-/* {{{ proto array pdo_drivers()
+/* proto array pdo_drivers()
  Return array of available PDO drivers */
 PHP_FUNCTION(pdo_drivers)
 {
@@ -114,7 +101,7 @@ PHP_FUNCTION(pdo_drivers)
 /* }}} */
 
 /* {{{ pdo_functions[] */
-zend_function_entry pdo_functions[] = {
+function_entry pdo_functions[] = {
 	PHP_FE(pdo_drivers,             NULL)
 	{NULL, NULL, NULL}
 };
@@ -143,27 +130,26 @@ zend_module_entry pdo_module_entry = {
 	pdo_functions,
 	PHP_MINIT(pdo),
 	PHP_MSHUTDOWN(pdo),
-	NULL,
-	NULL,
+	PHP_RINIT(pdo),
+	PHP_RSHUTDOWN(pdo),
 	PHP_MINFO(pdo),
-	"1.1dev",
-	PHP_MODULE_GLOBALS(pdo),
-	PHP_GINIT(pdo),
-	NULL,
-	NULL,
-	STANDARD_MODULE_PROPERTIES_EX
+	"1.0.1",
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
-
-/* TODO: visit persistent handles: for each persistent statement handle,
- * remove bound parameter associations */
 
 #ifdef COMPILE_DL_PDO
 ZEND_GET_MODULE(pdo)
 #endif
 
-/* {{{ PHP_GINIT_FUNCTION */
-static PHP_GINIT_FUNCTION(pdo)
+/* {{{ PHP_INI */
+PHP_INI_BEGIN()
+    STD_PHP_INI_ENTRY("pdo.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_pdo_globals, pdo_globals)
+PHP_INI_END()
+/* }}} */
+
+/* {{{ php_pdo_init_globals */
+static void php_pdo_init_globals(zend_pdo_globals *pdo_globals)
 {
 	pdo_globals->global_value = 0;
 }
@@ -317,8 +303,11 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC)
 PHP_MINIT_FUNCTION(pdo)
 {
 	zend_class_entry ce;
-
+	
 	spl_ce_RuntimeException = NULL;
+
+	ZEND_INIT_MODULE_GLOBALS(pdo, php_pdo_init_globals, NULL);
+	REGISTER_INI_ENTRIES();
 
 	if (FAILURE == pdo_sqlstate_init_error_table()) {
 		return FAILURE;
@@ -345,8 +334,25 @@ PHP_MINIT_FUNCTION(pdo)
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(pdo)
 {
+	UNREGISTER_INI_ENTRIES();
 	zend_hash_destroy(&pdo_driver_hash);
 	pdo_sqlstate_fini_error_table();
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION */
+PHP_RINIT_FUNCTION(pdo)
+{
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
+PHP_RSHUTDOWN_FUNCTION(pdo)
+{
+	/* TODO: visit persistent handles: for each persistent statement handle,
+	 * remove bound parameter associations */
 	return SUCCESS;
 }
 /* }}} */
@@ -373,12 +379,13 @@ PHP_MINFO_FUNCTION(pdo)
 
 	if (drivers) {
 		efree(drivers);
-	} else {
-		efree(ldrivers);
 	}
 
 	php_info_print_table_end();
 
+#if 0
+	DISPLAY_INI_ENTRIES();
+#endif
 }
 /* }}} */
 

@@ -1,13 +1,13 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2007 The PHP Group                                |
+   | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
+   | This source file is subject to version 3.0 of the PHP license,       |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | http://www.php.net/license/3_0.txt.                                  |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -46,13 +46,11 @@ PHP_FUNCTION(sqlite_open);
 PHP_FUNCTION(sqlite_popen);
 PHP_FUNCTION(sqlite_close);
 PHP_FUNCTION(sqlite_query);
-PHP_FUNCTION(sqlite_exec);
 PHP_FUNCTION(sqlite_unbuffered_query);
 PHP_FUNCTION(sqlite_array_query);
 PHP_FUNCTION(sqlite_single_query);
 
 PHP_FUNCTION(sqlite_fetch_array);
-PHP_FUNCTION(sqlite_fetch_object);
 PHP_FUNCTION(sqlite_fetch_single);
 PHP_FUNCTION(sqlite_fetch_all);
 PHP_FUNCTION(sqlite_current);
@@ -64,11 +62,7 @@ PHP_FUNCTION(sqlite_field_name);
 PHP_FUNCTION(sqlite_seek);
 PHP_FUNCTION(sqlite_rewind);
 PHP_FUNCTION(sqlite_next);
-PHP_FUNCTION(sqlite_prev);
-PHP_FUNCTION(sqlite_key);
-
-PHP_FUNCTION(sqlite_valid);
-PHP_FUNCTION(sqlite_has_prev);
+PHP_FUNCTION(sqlite_has_more);
 
 PHP_FUNCTION(sqlite_libversion);
 PHP_FUNCTION(sqlite_libencoding);
@@ -88,15 +82,8 @@ PHP_FUNCTION(sqlite_create_function);
 PHP_FUNCTION(sqlite_udf_decode_binary);
 PHP_FUNCTION(sqlite_udf_encode_binary);
 
-PHP_FUNCTION(sqlite_factory);
-
-PHP_FUNCTION(sqlite_fetch_column_types);
-
 ZEND_BEGIN_MODULE_GLOBALS(sqlite)
-	long assoc_case;
-#ifdef SQLITE_ISO8859
-	UConverter *iso8859_conv;
-#endif
+	 long assoc_case;
 ZEND_END_MODULE_GLOBALS(sqlite)
 
 #ifdef ZTS

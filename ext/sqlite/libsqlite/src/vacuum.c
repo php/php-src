@@ -108,6 +108,7 @@ static int execsql(char **pzErrMsg, sqlite *db, const char *zSql){
 */
 static int vacuumCallback2(void *pArg, int argc, char **argv, char **NotUsed){
   vacuumStruct *p = (vacuumStruct*)pArg;
+  int rc = 0;
   const char *zSep = "(";
   int i;
 
@@ -126,8 +127,8 @@ static int vacuumCallback2(void *pArg, int argc, char **argv, char **NotUsed){
     }
   }
   appendText(&p->s2,")", 1);
-  p->rc = execsql(p->pzErrMsg, p->dbNew, p->s2.z);
-  return p->rc;
+  rc = execsql(p->pzErrMsg, p->dbNew, p->s2.z);
+  return rc;
 }
 
 /*
@@ -159,21 +160,39 @@ static int vacuumCallback1(void *pArg, int argc, char **argv, char **NotUsed){
       sqlite_freemem(zErrMsg);
     }
   }
-  if( rc!=SQLITE_ABORT ) p->rc = rc;
+  return rc;
+}
+
+/*
+** This callback is used to transfer PRAGMA settings from one database
+** to the other.  The value in argv[0] should be passed to a pragma
+** identified by ((vacuumStruct*)pArg)->zPragma.
+*/
+static int vacuumCallback3(void *pArg, int argc, char **argv, char **NotUsed){
+  vacuumStruct *p = (vacuumStruct*)pArg;
+  int rc = 0;
+  char zBuf[200];
+  assert( argc==1 );
+  if( argv==0 ) return 0;
+  assert( argv[0]!=0 );
+  assert( strlen(p->zPragma)<100 );
+  assert( strlen(argv[0])<30 );
+  sprintf(zBuf,"PRAGMA %s=%s;", p->zPragma, argv[0]);
+  rc = execsql(p->pzErrMsg, p->dbNew, zBuf);
   return rc;
 }
 
 /*
 ** Generate a random name of 20 character in length.
 */
-static void randomName(unsigned char *zBuf){
-  static const unsigned char zChars[] =
+static void randomName(char *zBuf){
+  static const char zChars[] =
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789";
   int i;
-  sqliteRandomness(20, zBuf);
   for(i=0; i<20; i++){
-    zBuf[i] = zChars[ zBuf[i]%(sizeof(zChars)-1) ];
+    int n = sqliteRandomByte() % (sizeof(zChars)-1);
+    zBuf[i] = zChars[n];
   }
 }
 #endif
@@ -208,13 +227,18 @@ int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
   char *zErrMsg;          /* Error message */
   vacuumStruct sVac;      /* Information passed to callbacks */
 
+  /* These are all of the pragmas that need to be transferred over
+  ** to the new database */
+  static const char *zPragma[] = {
+     "default_synchronous",
+     "default_cache_size",
+     /* "default_temp_store", */
+  };
+
   if( db->flags & SQLITE_InTrans ){
     sqliteSetString(pzErrMsg, "cannot VACUUM from within a transaction", 
        (char*)0);
     return SQLITE_ERROR;
-  }
-  if( db->flags & SQLITE_Interrupt ){
-    return SQLITE_INTERRUPT;
   }
   memset(&sVac, 0, sizeof(sVac));
 
@@ -233,7 +257,7 @@ int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
   strcpy(zTemp, zFilename);
   for(i=0; i<10; i++){
     zTemp[nFilename] = '-';
-    randomName((unsigned char*)&zTemp[nFilename+1]);
+    randomName(&zTemp[nFilename+1]);
     if( !sqliteOsFileExists(zTemp) ) break;
   }
   if( i>=10 ){
@@ -249,14 +273,21 @@ int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
        zTemp, " - ", zErrMsg, (char*)0);
     goto end_of_vacuum;
   }
-  if( (rc = execsql(pzErrMsg, db, "BEGIN"))!=0 ) goto end_of_vacuum;
-  if( (rc = execsql(pzErrMsg, dbNew, "PRAGMA synchronous=off; BEGIN"))!=0 ){
+  if( execsql(pzErrMsg, db, "BEGIN") ) goto end_of_vacuum;
+  if( execsql(pzErrMsg, dbNew, "PRAGMA synchronous=off; BEGIN") ){
     goto end_of_vacuum;
   }
   
   sVac.dbOld = db;
   sVac.dbNew = dbNew;
   sVac.pzErrMsg = pzErrMsg;
+  for(i=0; rc==SQLITE_OK && i<sizeof(zPragma)/sizeof(zPragma[0]); i++){
+    char zBuf[200];
+    assert( strlen(zPragma[i])<100 );
+    sprintf(zBuf, "PRAGMA %s;", zPragma[i]);
+    sVac.zPragma = zPragma[i];
+    rc = sqlite_exec(db, zBuf, vacuumCallback3, &sVac, &zErrMsg);
+  }
   if( rc==SQLITE_OK ){
     rc = sqlite_exec(db, 
       "SELECT type, name, sql FROM sqlite_master "
@@ -265,17 +296,6 @@ int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
       "SELECT type, name, sql FROM sqlite_master "
       "WHERE sql NOT NULL AND type=='view'",
       vacuumCallback1, &sVac, &zErrMsg);
-  }
-  if( rc==SQLITE_OK ){
-    int meta1[SQLITE_N_BTREE_META];
-    int meta2[SQLITE_N_BTREE_META];
-    sqliteBtreeGetMeta(db->aDb[0].pBt, meta1);
-    sqliteBtreeGetMeta(dbNew->aDb[0].pBt, meta2);
-    meta2[1] = meta1[1]+1;
-    meta2[3] = meta1[3];
-    meta2[4] = meta1[4];
-    meta2[6] = meta1[6];
-    rc = sqliteBtreeUpdateMeta(dbNew->aDb[0].pBt, meta2);
   }
   if( rc==SQLITE_OK ){
     rc = sqliteBtreeCopyFile(db->aDb[0].pBt, dbNew->aDb[0].pBt);
@@ -289,17 +309,13 @@ end_of_vacuum:
        zErrMsg, (char*)0);
   }
   sqlite_exec(db, "ROLLBACK", 0, 0, 0);
-  if( (dbNew && (dbNew->flags & SQLITE_Interrupt)) 
-         || (db->flags & SQLITE_Interrupt) ){
-    rc = SQLITE_INTERRUPT;
-  }
   if( dbNew ) sqlite_close(dbNew);
   sqliteOsDelete(zTemp);
   sqliteFree(zTemp);
   sqliteFree(sVac.s1.z);
   sqliteFree(sVac.s2.z);
   if( zErrMsg ) sqlite_freemem(zErrMsg);
-  if( rc==SQLITE_ABORT && sVac.rc!=SQLITE_INTERRUPT ) sVac.rc = SQLITE_ERROR;
-  return sVac.rc;
+  if( rc==SQLITE_ABORT ) rc = SQLITE_ERROR;
+  return rc;
 #endif
 }

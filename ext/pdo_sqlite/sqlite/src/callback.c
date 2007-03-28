@@ -29,19 +29,17 @@ static void callCollNeeded(sqlite3 *db, const char *zName, int nName){
   if( db->xCollNeeded ){
     char *zExternal = sqliteStrNDup(zName, nName);
     if( !zExternal ) return;
-    db->xCollNeeded(db->pCollNeededArg, db, (int)ENC(db), zExternal);
+    db->xCollNeeded(db->pCollNeededArg, db, (int)db->enc, zExternal);
     sqliteFree(zExternal);
   }
 #ifndef SQLITE_OMIT_UTF16
   if( db->xCollNeeded16 ){
     char const *zExternal;
-    sqlite3_value *pTmp = sqlite3ValueNew();
-    sqlite3ValueSetStr(pTmp, nName, zName, SQLITE_UTF8, SQLITE_STATIC);
+    sqlite3_value *pTmp = sqlite3GetTransientValue(db);
+    sqlite3ValueSetStr(pTmp, -1, zName, SQLITE_UTF8, SQLITE_STATIC);
     zExternal = sqlite3ValueText(pTmp, SQLITE_UTF16NATIVE);
-    if( zExternal ){
-      db->xCollNeeded16(db->pCollNeededArg, db, (int)ENC(db), zExternal);
-    }
-    sqlite3ValueFree(pTmp);
+    if( !zExternal ) return;
+    db->xCollNeeded16(db->pCollNeededArg, db, (int)db->enc, zExternal);
   }
 #endif
 }
@@ -92,14 +90,14 @@ CollSeq *sqlite3GetCollSeq(
 
   p = pColl;
   if( !p ){
-    p = sqlite3FindCollSeq(db, ENC(db), zName, nName, 0);
+    p = sqlite3FindCollSeq(db, db->enc, zName, nName, 0);
   }
   if( !p || !p->xCmp ){
     /* No collation sequence of this type for this encoding is registered.
     ** Call the collation factory to see if it can supply us with one.
     */
     callCollNeeded(db, zName, nName);
-    p = sqlite3FindCollSeq(db, ENC(db), zName, nName, 0);
+    p = sqlite3FindCollSeq(db, db->enc, zName, nName, 0);
   }
   if( p && !p->xCmp && synthCollSeq(db, p) ){
     p = 0;
@@ -130,7 +128,6 @@ int sqlite3CheckCollSeq(Parse *pParse, CollSeq *pColl){
       pParse->nErr++;
       return SQLITE_ERROR;
     }
-    assert( p==pColl );
   }
   return SQLITE_OK;
 }
@@ -178,11 +175,8 @@ static CollSeq *findCollSeqEntry(
       ** return the pColl pointer to be deleted (because it wasn't added
       ** to the hash table).
       */
-      assert( !pDel || (sqlite3MallocFailed() && pDel==pColl) );
-      if( pDel ){
-        sqliteFree(pDel);
-        pColl = 0;
-      }
+      assert( !pDel || (sqlite3_malloc_failed && pDel==pColl) );
+      sqliteFree(pDel);
     }
   }
   return pColl;
@@ -203,12 +197,7 @@ CollSeq *sqlite3FindCollSeq(
   int nName,
   int create
 ){
-  CollSeq *pColl;
-  if( zName ){
-    pColl = findCollSeqEntry(db, zName, nName, create);
-  }else{
-    pColl = db->pDfltColl;
-  }
+  CollSeq *pColl = findCollSeqEntry(db, zName, nName, create);
   assert( SQLITE_UTF8==1 && SQLITE_UTF16LE==2 && SQLITE_UTF16BE==3 );
   assert( enc>=SQLITE_UTF8 && enc<=SQLITE_UTF16BE );
   if( pColl ) pColl += enc-1;
@@ -297,7 +286,7 @@ FuncDef *sqlite3FindFunction(
   ** new entry to the hash table and return it.
   */
   if( createFlag && bestmatch<6 && 
-      (pBest = sqliteMalloc(sizeof(*pBest)+nName))!=0 ){
+      (pBest = sqliteMalloc(sizeof(*pBest)+nName)) ){
     pBest->nArg = nArg;
     pBest->pNext = pFirst;
     pBest->iPrefEnc = enc;
@@ -313,56 +302,4 @@ FuncDef *sqlite3FindFunction(
     return pBest;
   }
   return 0;
-}
-
-/*
-** Free all resources held by the schema structure. The void* argument points
-** at a Schema struct. This function does not call sqliteFree() on the 
-** pointer itself, it just cleans up subsiduary resources (i.e. the contents
-** of the schema hash tables).
-*/
-void sqlite3SchemaFree(void *p){
-  Hash temp1;
-  Hash temp2;
-  HashElem *pElem;
-  Schema *pSchema = (Schema *)p;
-
-  temp1 = pSchema->tblHash;
-  temp2 = pSchema->trigHash;
-  sqlite3HashInit(&pSchema->trigHash, SQLITE_HASH_STRING, 0);
-  sqlite3HashClear(&pSchema->aFKey);
-  sqlite3HashClear(&pSchema->idxHash);
-  for(pElem=sqliteHashFirst(&temp2); pElem; pElem=sqliteHashNext(pElem)){
-    sqlite3DeleteTrigger((Trigger*)sqliteHashData(pElem));
-  }
-  sqlite3HashClear(&temp2);
-  sqlite3HashInit(&pSchema->tblHash, SQLITE_HASH_STRING, 0);
-  for(pElem=sqliteHashFirst(&temp1); pElem; pElem=sqliteHashNext(pElem)){
-    Table *pTab = sqliteHashData(pElem);
-    sqlite3DeleteTable(0, pTab);
-  }
-  sqlite3HashClear(&temp1);
-  pSchema->pSeqTab = 0;
-  pSchema->flags &= ~DB_SchemaLoaded;
-}
-
-/*
-** Find and return the schema associated with a BTree.  Create
-** a new one if necessary.
-*/
-Schema *sqlite3SchemaGet(Btree *pBt){
-  Schema * p;
-  if( pBt ){
-    p = (Schema *)sqlite3BtreeSchema(pBt,sizeof(Schema),sqlite3SchemaFree);
-  }else{
-    p = (Schema *)sqliteMalloc(sizeof(Schema));
-  }
-  if( p && 0==p->file_format ){
-    sqlite3HashInit(&p->tblHash, SQLITE_HASH_STRING, 0);
-    sqlite3HashInit(&p->idxHash, SQLITE_HASH_STRING, 0);
-    sqlite3HashInit(&p->trigHash, SQLITE_HASH_STRING, 0);
-    sqlite3HashInit(&p->aFKey, SQLITE_HASH_STRING, 1);
-    p->enc = SQLITE_UTF8;
-  }
-  return p;
 }

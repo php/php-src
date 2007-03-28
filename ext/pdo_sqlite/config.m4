@@ -54,12 +54,12 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
     PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
     [
-      PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $PDO_SQLITE_DIR/$PHP_LIBDIR, PDO_SQLITE_SHARED_LIBADD)
+      PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $PDO_SQLITE_DIR/lib, PDO_SQLITE_SHARED_LIBADD)
       AC_DEFINE(HAVE_PDO_SQLITELIB,1,[ ])
     ],[
       AC_MSG_ERROR([wrong sqlite lib version or lib not found])
     ],[
-      -L$PDO_SQLITE_DIR/$PHP_LIBDIR -lm
+      -L$PDO_SQLITE_DIR/lib -lm
     ])
     PHP_CHECK_LIBRARY(sqlite3,sqlite3_key,[
       AC_DEFINE(HAVE_SQLITE3_KEY,1, [have commercial sqlite3 with crypto support])
@@ -72,26 +72,26 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     pdo_sqlite_sources="sqlite/src/attach.c sqlite/src/auth.c sqlite/src/btree.c \
       sqlite/src/build.c sqlite/src/callback.c sqlite/src/date.c sqlite/src/delete.c sqlite/src/expr.c \
       sqlite/src/func.c sqlite/src/hash.c sqlite/src/insert.c sqlite/src/legacy.c \
-      sqlite/src/main.c sqlite/src/os_unix.c sqlite/src/os_win.c sqlite/src/os.c \
+      sqlite/src/main.c sqlite/src/os_mac.c sqlite/src/os_unix.c sqlite/src/os_win.c \
       sqlite/src/pager.c sqlite/src/pragma.c sqlite/src/prepare.c \
       sqlite/src/printf.c sqlite/src/random.c sqlite/src/select.c \
-      sqlite/src/table.c sqlite/src/tokenize.c sqlite/src/analyze.c sqlite/src/complete.c \
+      sqlite/src/table.c sqlite/src/tokenize.c sqlite/src/analyze.c \
       sqlite/src/trigger.c sqlite/src/update.c sqlite/src/utf.c sqlite/src/util.c \
       sqlite/src/vacuum.c sqlite/src/vdbeapi.c sqlite/src/vdbeaux.c sqlite/src/vdbe.c \
       sqlite/src/vdbemem.c sqlite/src/where.c sqlite/src/parse.c sqlite/src/opcodes.c \
-      sqlite/src/alter.c sqlite/src/vdbefifo.c sqlite/src/vtab.c sqlite/src/loadext.c"
+      sqlite/src/alter.c sqlite/src/vdbefifo.c sqlite/src/experimental.c"
 
       PHP_NEW_EXTENSION(pdo_sqlite,
         $php_pdo_sqlite_sources_core $pdo_sqlite_sources,
-        $ext_shared,,-I@ext_builddir@/sqlite/src -DPDO_SQLITE_BUNDLED=1 -DSQLITE_OMIT_CURSOR -I$pdo_inc_path)
+        $ext_shared,,-I$ext_srcdir/sqlite/src -DPDO_SQLITE_BUNDLED=1 -DSQLITE_OMIT_CURSOR -I$pdo_inc_path)
 
       PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
       PHP_ADD_BUILD_DIR($ext_builddir/sqlite/src, 1)
       AC_CHECK_SIZEOF(char *,4)
       AC_DEFINE(SQLITE_PTR_SZ, SIZEOF_CHAR_P, [Size of a pointer])
-      PDO_SQLITE_VERSION=`cat $ext_srcdir/sqlite/VERSION | sed 's/[^0-9.]//g'`
+      PDO_SQLITE_VERSION=`cat $ext_srcdir/sqlite/VERSION`
       PDO_SQLITE_VERSION_NUMBER=`echo $PDO_SQLITE_VERSION | $AWK -F. '{printf("%d%03d%03d", $1, $2, $3)}'`
-      sed -e s/--VERS--/$PDO_SQLITE_VERSION/ -e s/--VERSION-NUMBER--/$PDO_SQLITE_VERSION_NUMBER/ $ext_srcdir/sqlite/src/sqlite.h.in > $ext_builddir/sqlite/src/sqlite3.h
+      sed -e s/--VERS--/$PDO_SQLITE_VERSION/ -e s/--VERSION-NUMBER--/$PDO_SQLITE_VERSION_NUMBER/ $ext_srcdir/sqlite/src/sqlite.h.in > $ext_srcdir/sqlite/src/sqlite3.h
 
       touch $ext_srcdir/sqlite/src/parse.c $ext_srcdir/sqlite/src/parse.h
 

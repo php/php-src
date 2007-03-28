@@ -37,8 +37,6 @@ var_dump(sqlite_fetch_all($r));
 var_dump(sqlite_fetch_array($r));
 var_dump(sqlite_fetch_all($r));
 
-sqlite_close($db);
-
 echo "DONE!\n";
 ?>
 --EXPECTF--
@@ -61,7 +59,7 @@ array(3) {
   }
 }
 
-Warning: sqlite_fetch_all(): One or more rowsets were already returned; returning NULL this time in %ssqlite_014.php on line %d
+Notice: sqlite_fetch_all(): One or more rowsets were already returned in %ssqlite_014.php on line %d
 array(0) {
 }
 unbuffered with fetch_array
@@ -115,83 +113,6 @@ array(3) {
   array(1) {
     [0]=>
     string(5) "three"
-  }
-}
-DONE!
---UEXPECTF--
-unbuffered twice
-array(3) {
-  [0]=>
-  array(1) {
-    [0]=>
-    unicode(3) "one"
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    unicode(3) "two"
-  }
-  [2]=>
-  array(1) {
-    [0]=>
-    unicode(5) "three"
-  }
-}
-
-Warning: sqlite_fetch_all(): One or more rowsets were already returned; returning NULL this time in %ssqlite_014.php on line %d
-array(0) {
-}
-unbuffered with fetch_array
-array(1) {
-  [0]=>
-  unicode(3) "one"
-}
-array(2) {
-  [0]=>
-  array(1) {
-    [0]=>
-    unicode(3) "two"
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    unicode(5) "three"
-  }
-}
-buffered
-array(3) {
-  [0]=>
-  array(1) {
-    [0]=>
-    unicode(3) "one"
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    unicode(3) "two"
-  }
-  [2]=>
-  array(1) {
-    [0]=>
-    unicode(5) "three"
-  }
-}
-bool(false)
-array(3) {
-  [0]=>
-  array(1) {
-    [0]=>
-    unicode(3) "one"
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    unicode(3) "two"
-  }
-  [2]=>
-  array(1) {
-    [0]=>
-    unicode(5) "three"
   }
 }
 DONE!

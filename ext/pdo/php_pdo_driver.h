@@ -2,12 +2,12 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
+  | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | http://www.php.net/license/3_0.txt.                                  |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -22,7 +22,6 @@
 #define PHP_PDO_DRIVER_H
 
 #include "php_pdo.h"
-#include "php_pdo_phpvers_compat.h"
 
 /* forward declarations */
 typedef struct _pdo_dbh_t 	pdo_dbh_t;
@@ -45,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20061209
+#define PDO_DRIVER_API	20051031
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -99,7 +98,6 @@ enum pdo_fetch_type {
 #define PDO_FETCH_UNIQUE    0x00030000  /* fetch into groups assuming first col is unique */
 #define PDO_FETCH_CLASSTYPE 0x00040000  /* fetch class gets its class name from 1st column */
 #define PDO_FETCH_SERIALIZE 0x00080000  /* fetch class instances by calling serialize */
-#define PDO_FETCH_PROPS_LATE 0x00100000  /* fetch props after calling ctor */
 
 /* fetch orientation for scrollable cursors */
 enum pdo_fetch_orientation {
@@ -131,8 +129,6 @@ enum pdo_attribute_type {
 	PDO_ATTR_DRIVER_NAME,		  /* name of the driver (as used in the constructor) */
 	PDO_ATTR_STRINGIFY_FETCHES,	/* converts integer/float types to strings during fetch */
 	PDO_ATTR_MAX_COLUMN_LEN,	/* make database calculate maximum length of data found in a column */
-	PDO_ATTR_DEFAULT_FETCH_MODE, /* Set the default fetch mode */
-	PDO_ATTR_EMULATE_PREPARES,  /* use query emulation rather than native */
 
 	/* this defines the start of the range for driver specific options.
 	 * Drivers should define their own attribute constants beginning with this
@@ -253,7 +249,7 @@ typedef int (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS
 
 /* return last insert id.  NULL indicates error condition, otherwise, the return value
  * MUST be an emalloc'd NULL terminated string. */
-typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, int *len TSRMLS_DC);
+typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC);
 
 /* fetch error information.  if stmt is not null, fetch information pertaining
  * to the statement, otherwise fetch global error information.  The driver
@@ -288,7 +284,7 @@ enum {
 	PDO_DBH_DRIVER_METHOD_KIND__MAX
 };
 
-typedef zend_function_entry *(*pdo_dbh_get_driver_methods_func)(pdo_dbh_t *dbh, int kind TSRMLS_DC);
+typedef function_entry *(*pdo_dbh_get_driver_methods_func)(pdo_dbh_t *dbh, int kind TSRMLS_DC);
 
 struct pdo_dbh_methods {
 	pdo_dbh_close_func		closer;
@@ -342,8 +338,7 @@ enum pdo_param_event {
 	PDO_PARAM_EVT_EXEC_PRE,
 	PDO_PARAM_EVT_EXEC_POST,
 	PDO_PARAM_EVT_FETCH_PRE,
-	PDO_PARAM_EVT_FETCH_POST,
-	PDO_PARAM_EVT_NORMALIZE,
+	PDO_PARAM_EVT_FETCH_POST
 };
 
 typedef int (*pdo_stmt_param_hook_func)(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type TSRMLS_DC);
@@ -492,7 +487,6 @@ struct _pdo_dbh_t {
 	pdo_driver_t *driver;
 	
 	zend_class_entry *def_stmt_ce;
-
 	zval *def_stmt_ctor_args;
 
 	/* when calling PDO::query(), we need to keep the error
@@ -501,15 +495,12 @@ struct _pdo_dbh_t {
 	 * when PDO::query() fails */
 	pdo_stmt_t *query_stmt;
 	zval query_stmt_zval;
-
-	/* defaults for fetches */
-	enum pdo_fetch_type default_fetch_type;
 };
 
 /* describes a column */
 struct pdo_column_data {
 	char *name;
-	int namelen;
+	long namelen;
 	unsigned long maxlen;
 	enum pdo_param_type param_type;
 	unsigned long precision;
@@ -522,7 +513,7 @@ struct pdo_column_data {
 struct pdo_bound_param_data {
 	long paramno; /* if -1, then it has a name, and we don't know the index *yet* */
 	char *name;
-	int namelen;
+	long namelen;
 
 	long max_value_len;	/* as a hint for pre-allocation */
 	
@@ -646,7 +637,6 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 		unsigned long data_source_len, struct pdo_data_src_parser *parsed,
 		int nparams);
 
-PDO_API zend_class_entry *php_pdo_get_dbh_ce(void);
 PDO_API zend_class_entry *php_pdo_get_exception(void);
 
 PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
@@ -654,9 +644,6 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 
 PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
 	const char *sqlstate, const char *supp TSRMLS_DC);
-
-PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh TSRMLS_DC);
-PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh TSRMLS_DC);
 
 PDO_API void php_pdo_stmt_addref(pdo_stmt_t *stmt TSRMLS_DC);
 PDO_API void php_pdo_stmt_delref(pdo_stmt_t *stmt TSRMLS_DC);

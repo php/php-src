@@ -9,6 +9,7 @@ sqlite.assoc_case=0
 require_once('blankdb.inc');
 echo "$db\n";
 sqlite_close($db);
+$db = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--

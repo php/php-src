@@ -112,17 +112,10 @@ void sqlite3AuthRead(
   int iSrc;             /* Index in pTabList->a[] of table being read */
   const char *zDBase;   /* Name of database being accessed */
   TriggerStack *pStack; /* The stack of current triggers */
-  int iDb;              /* The index of the database the expression refers to */
 
   if( db->xAuth==0 ) return;
   if( pExpr->op==TK_AS ) return;
   assert( pExpr->op==TK_COLUMN );
-  iDb = sqlite3SchemaToIndex(pParse->db, pExpr->pSchema);
-  if( iDb<0 ){
-    /* An attempt to read a column out of a subquery or other
-    ** temporary table. */
-    return;
-  }
   for(iSrc=0; pTabList && iSrc<pTabList->nSrc; iSrc++){
     if( pExpr->iTable==pTabList->a[iSrc].iCursor ) break;
   }
@@ -147,14 +140,14 @@ void sqlite3AuthRead(
   }else{
     zCol = "ROWID";
   }
-  assert( iDb>=0 && iDb<db->nDb );
-  zDBase = db->aDb[iDb].zName;
+  assert( pExpr->iDb<db->nDb );
+  zDBase = db->aDb[pExpr->iDb].zName;
   rc = db->xAuth(db->pAuthArg, SQLITE_READ, pTab->zName, zCol, zDBase, 
                  pParse->zAuthContext);
   if( rc==SQLITE_IGNORE ){
     pExpr->op = TK_NULL;
   }else if( rc==SQLITE_DENY ){
-    if( db->nDb>2 || iDb!=0 ){
+    if( db->nDb>2 || pExpr->iDb!=0 ){
       sqlite3ErrorMsg(pParse, "access to %s.%s.%s is prohibited", 
          zDBase, pTab->zName, zCol);
     }else{
@@ -182,10 +175,8 @@ int sqlite3AuthCheck(
   sqlite3 *db = pParse->db;
   int rc;
 
-  /* Don't do any authorization checks if the database is initialising
-  ** or if the parser is being invoked from within sqlite3_declare_vtab.
-  */
-  if( db->init.busy || IN_DECLARE_VTAB ){
+  /* Don't do any authorization checks if the database is initialising. */
+  if( db->init.busy ){
     return SQLITE_OK;
   }
 

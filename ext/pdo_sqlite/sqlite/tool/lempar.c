@@ -107,7 +107,7 @@
 **  yy_default[]       Default action for each state.
 */
 %%
-#define YY_SZ_ACTTAB (int)(sizeof(yy_action)/sizeof(yy_action[0]))
+#define YY_SZ_ACTTAB (sizeof(yy_action)/sizeof(yy_action[0]))
 
 /* The next table maps tokens into fallback tokens.  If a construct
 ** like the following:
@@ -321,12 +321,14 @@ void ParseFree(
 */
 static int yy_find_shift_action(
   yyParser *pParser,        /* The parser */
-  YYCODETYPE iLookAhead     /* The look-ahead token */
+  int iLookAhead            /* The look-ahead token */
 ){
   int i;
   int stateno = pParser->yystack[pParser->yyidx].stateno;
  
-  if( stateno>YY_SHIFT_MAX || (i = yy_shift_ofst[stateno])==YY_SHIFT_USE_DFLT ){
+  /* if( pParser->yyidx<0 ) return YY_NO_ACTION;  */
+  i = yy_shift_ofst[stateno];
+  if( i==YY_SHIFT_USE_DFLT ){
     return yy_default[stateno];
   }
   if( iLookAhead==YYNOCODE ){
@@ -334,35 +336,19 @@ static int yy_find_shift_action(
   }
   i += iLookAhead;
   if( i<0 || i>=YY_SZ_ACTTAB || yy_lookahead[i]!=iLookAhead ){
-    if( iLookAhead>0 ){
 #ifdef YYFALLBACK
-      int iFallback;            /* Fallback token */
-      if( iLookAhead<sizeof(yyFallback)/sizeof(yyFallback[0])
-             && (iFallback = yyFallback[iLookAhead])!=0 ){
+    int iFallback;            /* Fallback token */
+    if( iLookAhead<sizeof(yyFallback)/sizeof(yyFallback[0])
+           && (iFallback = yyFallback[iLookAhead])!=0 ){
 #ifndef NDEBUG
-        if( yyTraceFILE ){
-          fprintf(yyTraceFILE, "%sFALLBACK %s => %s\n",
-             yyTracePrompt, yyTokenName[iLookAhead], yyTokenName[iFallback]);
-        }
-#endif
-        return yy_find_shift_action(pParser, iFallback);
+      if( yyTraceFILE ){
+        fprintf(yyTraceFILE, "%sFALLBACK %s => %s\n",
+           yyTracePrompt, yyTokenName[iLookAhead], yyTokenName[iFallback]);
       }
 #endif
-#ifdef YYWILDCARD
-      {
-        int j = i - iLookAhead + YYWILDCARD;
-        if( j>=0 && j<YY_SZ_ACTTAB && yy_lookahead[j]==YYWILDCARD ){
-#ifndef NDEBUG
-          if( yyTraceFILE ){
-            fprintf(yyTraceFILE, "%sWILDCARD %s => %s\n",
-               yyTracePrompt, yyTokenName[iLookAhead], yyTokenName[YYWILDCARD]);
-          }
-#endif /* NDEBUG */
-          return yy_action[j];
-        }
-      }
-#endif /* YYWILDCARD */
+      return yy_find_shift_action(pParser, iFallback);
     }
+#endif
     return yy_default[stateno];
   }else{
     return yy_action[i];
@@ -379,13 +365,13 @@ static int yy_find_shift_action(
 */
 static int yy_find_reduce_action(
   int stateno,              /* Current state number */
-  YYCODETYPE iLookAhead     /* The look-ahead token */
+  int iLookAhead            /* The look-ahead token */
 ){
   int i;
   /* int stateno = pParser->yystack[pParser->yyidx].stateno; */
  
-  if( stateno>YY_REDUCE_MAX ||
-      (i = yy_reduce_ofst[stateno])==YY_REDUCE_USE_DFLT ){
+  i = yy_reduce_ofst[stateno];
+  if( i==YY_REDUCE_USE_DFLT ){
     return yy_default[stateno];
   }
   if( iLookAhead==YYNOCODE ){
@@ -470,7 +456,7 @@ static void yy_reduce(
   yymsp = &yypParser->yystack[yypParser->yyidx];
 #ifndef NDEBUG
   if( yyTraceFILE && yyruleno>=0 
-        && yyruleno<(int)(sizeof(yyRuleName)/sizeof(yyRuleName[0])) ){
+        && yyruleno<sizeof(yyRuleName)/sizeof(yyRuleName[0]) ){
     fprintf(yyTraceFILE, "%sReduce [%s].\n", yyTracePrompt,
       yyRuleName[yyruleno]);
   }
@@ -683,9 +669,7 @@ void Parse(
          while(
           yypParser->yyidx >= 0 &&
           yymx != YYERRORSYMBOL &&
-          (yyact = yy_find_reduce_action(
-                        yypParser->yystack[yypParser->yyidx].stateno,
-                        YYERRORSYMBOL)) >= YYNSTATE
+          (yyact = yy_find_shift_action(yypParser,YYERRORSYMBOL)) >= YYNSTATE
         ){
           yy_pop_parser_stack(yypParser);
         }

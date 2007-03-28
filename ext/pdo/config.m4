@@ -37,6 +37,7 @@ if test "$PHP_PDO" != "no"; then
   if test "$ext_shared" = "yes" ; then
     case $host_alias in
       *darwin*)
+        if test "$pdo_running_under_pear" = "1"; then
           AC_MSG_ERROR([
 Due to the way that loadable modules work on OSX/Darwin, you need to
 compile the PDO package statically into the PHP core.
@@ -44,6 +45,7 @@ compile the PDO package statically into the PHP core.
 Please follow the instructions at: http://netevil.org/node.php?nid=202
 for more detail on this issue.
           ])
+        fi
         ext_shared=no
         ;;
     esac
@@ -56,8 +58,11 @@ for more detail on this issue.
   
   ifdef([PHP_INSTALL_HEADERS],
   [
+    dnl Sadly, this is a complete NOP for pecl extensions
     PHP_INSTALL_HEADERS(ext/pdo, [php_pdo.h php_pdo_driver.h])
-  ], [
-    PHP_ADD_MAKEFILE_FRAGMENT
   ])
+
+  dnl so we always include the known-good working hack.
+  PHP_ADD_MAKEFILE_FRAGMENT
 fi
+

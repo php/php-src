@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2006 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -51,7 +51,9 @@ typedef struct {
 	sb2			indicator;
 
 	char *data;
-	unsigned long datalen;
+	ub4 datalen;
+
+	ub2 dtype;
 
 } pdo_oci_column;
 
@@ -64,6 +66,7 @@ typedef struct {
 	ub4		exec_type;
 	pdo_oci_column *cols;
 	pdo_oci_error_info einfo;
+	unsigned int have_blobs:1;
 } pdo_oci_stmt;
 
 typedef struct {

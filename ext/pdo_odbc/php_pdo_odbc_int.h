@@ -136,7 +136,7 @@ typedef struct {
 	unsigned long datalen;
 	long fetched_len;
 	SWORD	coltype;
-	char colname[32];
+	char colname[128];
 } pdo_odbc_column;
 
 typedef struct {
@@ -144,6 +144,8 @@ typedef struct {
 	pdo_odbc_column *cols;
 	pdo_odbc_db_handle *H;
 	pdo_odbc_errinfo einfo;
+	unsigned going_long:1;
+	unsigned _spare:31;
 } pdo_odbc_stmt;
 
 typedef struct {

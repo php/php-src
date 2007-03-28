@@ -2,12 +2,12 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
+  | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | http://www.php.net/license/3_0.txt.                                  |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -37,9 +37,7 @@ typedef struct {
 
 	unsigned attached:1;
 	unsigned buffered:1;
-	unsigned emulate_prepare:1;
 	unsigned _reserved:31;
-	unsigned long max_buffer_size;
 
 	pdo_mysql_error_info einfo;
 } pdo_mysql_db_handle;
@@ -84,7 +82,5 @@ enum {
 	PDO_MYSQL_ATTR_INIT_COMMAND,
 	PDO_MYSQL_ATTR_READ_DEFAULT_FILE,
 	PDO_MYSQL_ATTR_READ_DEFAULT_GROUP,
-	PDO_MYSQL_ATTR_MAX_BUFFER_SIZE,
-	PDO_MYSQL_ATTR_DIRECT_QUERY,
 };
 #endif

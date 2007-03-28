@@ -330,15 +330,15 @@ char *sqliteStrNDup(const char *z, int n){
 ** point to that string.  The 1st argument must either be NULL or 
 ** point to memory obtained from sqliteMalloc().
 */
-void sqliteSetString(char **pz, ...){
+void sqliteSetString(char **pz, const char *zFirst, ...){
   va_list ap;
   int nByte;
   const char *z;
   char *zResult;
 
   if( pz==0 ) return;
-  nByte = 1;
-  va_start(ap, pz);
+  nByte = strlen(zFirst) + 1;
+  va_start(ap, zFirst);
   while( (z = va_arg(ap, const char*))!=0 ){
     nByte += strlen(z);
   }
@@ -348,8 +348,9 @@ void sqliteSetString(char **pz, ...){
   if( zResult==0 ){
     return;
   }
-  *zResult = 0;
-  va_start(ap, pz);
+  strcpy(zResult, zFirst);
+  zResult += strlen(zResult);
+  va_start(ap, zFirst);
   while( (z = va_arg(ap, const char*))!=0 ){
     strcpy(zResult, z);
     zResult += strlen(zResult);
@@ -416,11 +417,120 @@ void sqliteSetNString(char **pz, ...){
 */
 void sqliteErrorMsg(Parse *pParse, const char *zFormat, ...){
   va_list ap;
+  int nByte;
+  int i, j;
+  char *z;
+  static char zNull[] = "NULL";
+
   pParse->nErr++;
-  sqliteFree(pParse->zErrMsg);
+  nByte = 1 + strlen(zFormat);
   va_start(ap, zFormat);
-  pParse->zErrMsg = sqliteVMPrintf(zFormat, ap);
+  for(i=0; zFormat[i]; i++){
+    if( zFormat[i]!='%' || zFormat[i+1]==0 ) continue;
+    i++;
+    switch( zFormat[i] ){
+      case 'd': {
+        (void)va_arg(ap, int);
+        nByte += 20;
+        break;
+      }
+      case 'z':
+      case 's': {
+        char *z2 = va_arg(ap, char*);
+        if( z2==0 ) z2 = zNull;
+        nByte += strlen(z2);
+        break;
+      }
+      case 'T': {
+        Token *p = va_arg(ap, Token*);
+        nByte += p->n;
+        break;
+      }
+      case 'S': {
+        SrcList *p = va_arg(ap, SrcList*);
+        int k = va_arg(ap, int);
+        assert( p->nSrc>k && k>=0 );
+        nByte += strlen(p->a[k].zName);
+        if( p->a[k].zDatabase && p->a[k].zDatabase[0] ){
+          nByte += strlen(p->a[k].zDatabase)+1;
+        }
+        break;
+      }
+      default: {
+        nByte++;
+        break;
+      }
+    }
+  }
   va_end(ap);
+  z = sqliteMalloc( nByte );
+  if( z==0 ) return;
+  sqliteFree(pParse->zErrMsg);
+  pParse->zErrMsg = z;
+  va_start(ap, zFormat);
+  for(i=j=0; zFormat[i]; i++){
+    if( zFormat[i]!='%' || zFormat[i+1]==0 ) continue;
+    if( i>j ){
+      memcpy(z, &zFormat[j], i-j);
+      z += i-j;
+    }
+    j = i+2;
+    i++;
+    switch( zFormat[i] ){
+      case 'd': {
+        int x = va_arg(ap, int);
+        sprintf(z, "%d", x);
+        z += strlen(z);
+        break;
+      }
+      case 'z':
+      case 's': {
+        int len;
+        char *z2 = va_arg(ap, char*);
+        if( z2==0 ) z2 = zNull;
+        len = strlen(z2);
+        memcpy(z, z2, len);
+        z += len;
+        if( zFormat[i]=='z' && z2!=zNull ){
+          sqliteFree(z2);
+        }
+        break;
+      }
+      case 'T': {
+        Token *p = va_arg(ap, Token*);
+        memcpy(z, p->z, p->n);
+        z += p->n;
+        break;
+      }
+      case 'S': {
+        int len;
+        SrcList *p = va_arg(ap, SrcList*);
+        int k = va_arg(ap, int);
+        assert( p->nSrc>k && k>=0 );
+        if( p->a[k].zDatabase && p->a[k].zDatabase[0] ){
+          len = strlen(p->a[k].zDatabase);
+          memcpy(z, p->a[k].zDatabase, len);
+          z += len;
+          *(z++) = '.';
+        }
+        len = strlen(p->a[k].zName);
+        memcpy(z, p->a[k].zName, len);
+        z += len;
+        break;
+      }
+      default: {
+        *(z++) = zFormat[i];
+        break;
+      }
+    }
+  }
+  va_end(ap);
+  if( i>j ){
+    memcpy(z, &zFormat[j], i-j);
+    z += i-j;
+  }
+  assert( (z - pParse->zErrMsg) < nByte );
+  *z = 0;
 }
 
 /*
@@ -503,14 +613,14 @@ int sqliteStrICmp(const char *zLeft, const char *zRight){
   a = (unsigned char *)zLeft;
   b = (unsigned char *)zRight;
   while( *a!=0 && UpperToLower[*a]==UpperToLower[*b]){ a++; b++; }
-  return UpperToLower[*a] - UpperToLower[*b];
+  return *a - *b;
 }
 int sqliteStrNICmp(const char *zLeft, const char *zRight, int N){
   register unsigned char *a, *b;
   a = (unsigned char *)zLeft;
   b = (unsigned char *)zRight;
   while( N-- > 0 && *a!=0 && UpperToLower[*a]==UpperToLower[*b]){ a++; b++; }
-  return N<0 ? 0 : UpperToLower[*a] - UpperToLower[*b];
+  return N<0 ? 0 : *a - *b;
 }
 
 /*
@@ -552,7 +662,7 @@ int sqliteIsNumber(const char *z){
 ** of "." depending on how locale is set.  But that would cause problems
 ** for SQL.  So this routine always uses "." regardless of locale.
 */
-double sqliteAtoF(const char *z, const char **pzEnd){
+double sqliteAtoF(const char *z){
   int sign = 1;
   LONGDOUBLE_TYPE v1 = 0.0;
   if( *z=='-' ){
@@ -600,7 +710,6 @@ double sqliteAtoF(const char *z, const char **pzEnd){
       v1 *= scale;
     }
   }
-  if( pzEnd ) *pzEnd = z;
   return sign<0 ? -v1 : v1;
 }
 
@@ -650,8 +759,8 @@ int sqliteCompare(const char *atext, const char *btext){
       result = -1;
     }else{
       double rA, rB;
-      rA = sqliteAtoF(atext, 0);
-      rB = sqliteAtoF(btext, 0);
+      rA = sqliteAtoF(atext);
+      rB = sqliteAtoF(btext);
       if( rA<rB ){
         result = -1;
       }else if( rA>rB ){
@@ -743,8 +852,8 @@ int sqliteSortCompare(const char *a, const char *b){
           res = -1;
           break;
         }
-        rA = sqliteAtoF(&a[1], 0);
-        rB = sqliteAtoF(&b[1], 0);
+        rA = sqliteAtoF(&a[1]);
+        rB = sqliteAtoF(&b[1]);
         if( rA<rB ){
           res = -1;
           break;

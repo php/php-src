@@ -103,12 +103,7 @@ PHP_FILEINFO_API zend_object_value finfo_objects_new(zend_class_entry *class_typ
 	intern = ecalloc(1, sizeof(struct finfo_object));
 	intern->zo.ce = class_type;
 	intern->zo.properties = NULL;
-#if ZEND_MODULE_API_NO >= 20050922
-	intern->zo.guards = NULL;
-#else
-	intern->zo.in_get = 0;
-	intern->zo.in_set = 0;
-#endif
+	intern->std.guards = NULL;
 	intern->ptr = NULL;
 
 	retval.handle = zend_objects_store_put(intern, finfo_objects_dtor, NULL, NULL TSRMLS_CC);
@@ -121,17 +116,10 @@ PHP_FILEINFO_API zend_object_value finfo_objects_new(zend_class_entry *class_typ
 /* {{{ finfo_class_functions
  */
 function_entry finfo_class_functions[] = {
-#if PHP_VERSION_ID >= 50200
-	ZEND_ME_MAPPING(finfo,          finfo_open,     NULL, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,NULL, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(file,           finfo_file,     NULL, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(buffer,         finfo_buffer,   NULL, ZEND_ACC_PUBLIC)
-#else
-	ZEND_ME_MAPPING(finfo,          finfo_open,     NULL)
-	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,NULL)
-	ZEND_ME_MAPPING(file,           finfo_file,     NULL)
-	ZEND_ME_MAPPING(buffer,         finfo_buffer,   NULL)
-#endif
+	ZEND_ME_MAPPING(finfo,		finfo_open,	NULL)
+	ZEND_ME_MAPPING(set_flags,	finfo_set_flags,NULL)
+	ZEND_ME_MAPPING(file,		finfo_file,	NULL)
+	ZEND_ME_MAPPING(buffer,		finfo_buffer,	NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -200,12 +188,8 @@ PHP_MINIT_FUNCTION(finfo)
 	REGISTER_LONG_CONSTANT("FILEINFO_COMPRESS",		MAGIC_COMPRESS, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILEINFO_DEVICES",		MAGIC_DEVICES, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILEINFO_CONTINUE",		MAGIC_CONTINUE, CONST_CS|CONST_PERSISTENT);
-#ifdef MAGIC_PRESERVE_ATIME
 	REGISTER_LONG_CONSTANT("FILEINFO_PRESERVE_ATIME",	MAGIC_PRESERVE_ATIME, CONST_CS|CONST_PERSISTENT);
-#endif
-#ifdef MAGIC_RAW
 	REGISTER_LONG_CONSTANT("FILEINFO_RAW",			MAGIC_RAW, CONST_CS|CONST_PERSISTENT);
-#endif
 
 	return SUCCESS;
 }

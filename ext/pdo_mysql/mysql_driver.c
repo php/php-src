@@ -2,12 +2,12 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
+  | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | http://www.php.net/license/3_0.txt.                                  |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -58,7 +58,16 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 		einfo   = &H->einfo;
 	}
 
-	einfo->errcode = mysql_errno(H->server);
+#if HAVE_MYSQL_STMT_PREPARE
+	if (S && S->stmt) {
+		einfo->errcode = mysql_stmt_errno(S->stmt);
+	}
+	else
+#endif
+	{
+		einfo->errcode = mysql_errno(H->server);
+	}
+
 	einfo->file = file;
 	einfo->line = line;
 
@@ -75,7 +84,7 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 				"Cannot execute queries while other unbuffered queries are active.  "
 				"Consider using PDOStatement::fetchAll().  Alternatively, if your code "
 				"is only ever going to run against mysql, you may enable query "
-				"buffering by setting the PDO_MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
+				"buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
 				dbh->is_persistent);
 		}
 	} else { /* no error */
@@ -97,13 +106,8 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 #endif
 
 	if (!dbh->methods) {
-#if PHP_VERSION_ID > 50200
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
 				*pdo_err, einfo->errcode, einfo->errmsg);
-#else
-		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
-				*pdo_err, einfo->errcode, einfo->errmsg);
-#endif
 	}
 /* printf("** [%s:%d] %s %s\n", file, line, *pdo_err, einfo->errmsg); */
 
@@ -164,10 +168,6 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &mysql_stmt_methods;
-
-	if (H->emulate_prepare) {
-		goto end;
-	}
 
 	/* TODO: add runtime check to determine if the server we are talking to supports
 	 * prepared statements; if it doesn't, we should set stmt->supports_placeholders
@@ -230,7 +230,6 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 
 fallback:
 #endif
-end:
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	
 	return 1;
@@ -267,7 +266,7 @@ static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	*quoted = safe_emalloc(2, unquotedlen, 3);
 	*quotedlen = mysql_real_escape_string(H->server, *quoted + 1, unquoted, unquotedlen);
-	(*quoted)[0] =(*quoted)[++*quotedlen] = '\'';
+	(*quoted)[0] =(*quoted)[++*quotedlen] = '"';
 	(*quoted)[++*quotedlen] = '\0';
 	return 1;
 }
@@ -313,9 +312,7 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_D
 	case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
 		((pdo_mysql_db_handle *)dbh->driver_data)->buffered = Z_BVAL_P(val);
 		return 1;
-	case PDO_MYSQL_ATTR_DIRECT_QUERY:
-		((pdo_mysql_db_handle *)dbh->driver_data)->emulate_prepare = Z_BVAL_P(val);
-		return 1;
+		
 	default:
 		return 0;
 	}
@@ -358,14 +355,6 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 			ZVAL_LONG(return_value, H->buffered);
 			return 1;
 
-		case PDO_MYSQL_ATTR_DIRECT_QUERY:
-			ZVAL_LONG(return_value, H->emulate_prepare);
-			return 1;
-
-		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
-			ZVAL_LONG(return_value, H->max_buffer_size);
-			return 1;
-
 		default:
 			return 0;	
 	}
@@ -373,34 +362,6 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 	return 1;
 }
 
-static int pdo_mysql_check_liveness(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
-{
-	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
-#if MYSQL_VERSION_ID <= 32230
-	void (*handler) (int);
-	unsigned int my_errno;
-#endif
-
-#if MYSQL_VERSION_ID > 32230
-	if (mysql_ping(H->server)) {
-		return FAILURE;
-	}
-#else /* no mysql_ping() */
-	handler=signal(SIGPIPE, SIG_IGN);
-	mysql_stat(H->server);
-	switch (mysql_errno(H->server)) {
-		case CR_SERVER_GONE_ERROR:
-		/* case CR_SERVER_LOST: I'm not sure this means the same as "gone" for us */
-			signal(SIGPIPE, handler);
-			return FAILURE;
-		default:
-			break;
-	}
-	signal(SIGPIPE, handler);
-#endif /* end mysql_ping() */
-	return SUCCESS;
-} 
-/* }}} */
 
 static struct pdo_dbh_methods mysql_methods = {
 	mysql_handle_closer,
@@ -414,7 +375,7 @@ static struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_last_insert_id,
 	pdo_mysql_fetch_error_func,
 	pdo_mysql_get_attribute,
-	pdo_mysql_check_liveness
+	NULL /* check_liveness: TODO: ping */
 };
 
 #ifndef PDO_MYSQL_UNIX_ADDR
@@ -464,7 +425,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 	
 	dbh->driver_data = H;
-	H->max_buffer_size = 1024 * 1024;
 
 	/* handle MySQL options */
 	if (driver_options) {
@@ -472,9 +432,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		long local_infile = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0 TSRMLS_CC);
 		char *init_cmd = NULL, *default_file = NULL, *default_group = NULL;
 
-		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1 TSRMLS_CC);
-		H->emulate_prepare = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_DIRECT_QUERY, 1 TSRMLS_CC);
-		H->max_buffer_size = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_MAX_BUFFER_SIZE, H->max_buffer_size TSRMLS_CC);
+		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 0 TSRMLS_CC);
 
 		if (mysql_options(H->server, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout)) {
 			pdo_mysql_error(dbh);
@@ -530,9 +488,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		goto cleanup;
 	}
 
-	if (!dbh->auto_commit) {
-		mysql_handle_autocommit(dbh TSRMLS_CC);
-	}
+	mysql_handle_autocommit(dbh TSRMLS_CC);
 
 	H->attached = 1;
 

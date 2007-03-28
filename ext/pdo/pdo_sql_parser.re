@@ -2,12 +2,12 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
+  | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | http://www.php.net/license/3_0.txt.                                  |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -29,14 +29,14 @@
 
 #define RET(i) {s->cur = cursor; return i; }
 
-#define YYCTYPE         unsigned char
+#define YYCTYPE         char
 #define YYCURSOR        cursor
-#define YYLIMIT         cursor
+#define YYLIMIT         s->lim
 #define YYMARKER        s->ptr
 #define YYFILL(n)
 
 typedef struct Scanner {
-	char 	*ptr, *cur, *tok;
+	char 	*lim, *ptr, *cur, *tok;
 } Scanner;
 
 static int scan(Scanner *s) 
@@ -48,13 +48,15 @@ static int scan(Scanner *s)
 	BINDCHR		= [:][a-zA-Z0-9_]+;
 	QUESTION	= [?];
 	SPECIALS	= [:?"'];
-	EOF		= [\000];
+	ESCQQ     	= [\\]["];
+	ESCQ     	= [\\]['];
+	EOF			= [\000];
 	ANYNOEOF	= [\001-\377];
 	*/
 
 	/*!re2c
-		(["] ([^"])* ["])		{ RET(PDO_PARSER_TEXT); }
-		(['] ([^'])* ['])		{ RET(PDO_PARSER_TEXT); }
+		(["] (ESCQQ|ANYNOEOF\[\\"])* ["])		{ RET(PDO_PARSER_TEXT); }
+		(['] (ESCQ|ANYNOEOF\[\\'])* ['])		{ RET(PDO_PARSER_TEXT); }
 		SPECIALS{2,}							{ RET(PDO_PARSER_TEXT); }
 		BINDCHR									{ RET(PDO_PARSER_BIND); }
 		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
@@ -90,6 +92,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 
 	ptr = *outquery;
 	s.cur = inquery;
+	s.lim = inquery + inquery_len;
 
 	/* phase 1: look for args */
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
@@ -125,9 +128,9 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 	if (query_type == (PDO_PLACEHOLDER_NAMED|PDO_PLACEHOLDER_POSITIONAL)) {
 		/* they mixed both types; punt */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "mixed named and positional parameters" TSRMLS_CC);
-		ret = -1;
-		goto clean_up;
+		return -1;
 	}
+
 
 	if (stmt->supports_placeholders == query_type && !stmt->named_rewrite_template) {
 		/* query matches native syntax */
@@ -152,13 +155,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 		ret = -1;
 		goto clean_up;
 	}
-
-	if (params && bindno != zend_hash_num_elements(params) && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "number of bound variables does not match number of tokens" TSRMLS_CC);
-		ret = -1;
-		goto clean_up;
-	}
-
+	
 	/* what are we going to do ? */
 	
 	if (stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
@@ -194,14 +191,11 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 							/* bork */
 							ret = -1;
 							strcpy(stmt->error_code, stmt->dbh->error_code);
-							if (buf) {
-								efree(buf);
-							}
+							efree(buf);
 							goto clean_up;
 						}
-						if (buf) {
-							efree(buf);
-						}
+						efree(buf);
+
 					} else {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
 						ret = -1;
@@ -293,25 +287,15 @@ rewrite:
 		}
 
 		for (plc = placeholders; plc; plc = plc->next) {
-			int skip_map = 0;
-			char *p;
-			name = estrndup(plc->pos, plc->len);
-
-			/* check if bound parameter is already available */
-			if (!strcmp(name, "?") || zend_hash_find(stmt->bound_param_map, name, plc->len + 1, (void**) &p) == FAILURE) {
-				snprintf(idxbuf, sizeof(idxbuf), tmpl, plc->bindno + 1);
-			} else {
-				memset(idxbuf, 0, sizeof(idxbuf));
-				memcpy(idxbuf, p, sizeof(idxbuf));
-				skip_map = 1;
-			}
-
+			snprintf(idxbuf, sizeof(idxbuf), tmpl, plc->bindno + 1);
 			plc->quoted = estrdup(idxbuf);
 			plc->qlen = strlen(plc->quoted);
 			plc->freeq = 1;
 			newbuffer_len += plc->qlen;
 
-			if (!skip_map && stmt->named_rewrite_template) {
+			name = estrndup(plc->pos, plc->len);
+
+			if (stmt->named_rewrite_template) {
 				/* create a mapping */
 				
 				zend_hash_update(stmt->bound_param_map, name, plc->len + 1, idxbuf, plc->qlen + 1, NULL);
@@ -404,6 +388,7 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 
 	ptr = *outquery;
 	s.cur = inquery;
+	s.lim = inquery + inquery_len;
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
 		if(t == PDO_PARSER_TEXT) {
 			memcpy(ptr, s.tok, s.cur - s.tok);

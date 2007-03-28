@@ -105,11 +105,7 @@ struct Keyword {
 #else
 #  define VIEW       0x00008000
 #endif
-#ifdef SQLITE_OMIT_VIRTUALTABLE
-#  define VTAB       0
-#else
-#  define VTAB       0x00010000
-#endif
+
 
 /*
 ** These are the keywords
@@ -159,7 +155,7 @@ static Keyword aKeywordTable[] = {
   { "ESCAPE",           "TK_ESCAPE",       ALWAYS                 },
   { "EXCEPT",           "TK_EXCEPT",       COMPOUND               },
   { "EXCLUSIVE",        "TK_EXCLUSIVE",    ALWAYS                 },
-  { "EXISTS",           "TK_EXISTS",       ALWAYS                 },
+  { "EXISTS",           "TK_EXISTS",       SUBQUERY               },
   { "EXPLAIN",          "TK_EXPLAIN",      EXPLAIN                },
   { "FAIL",             "TK_FAIL",         CONFLICT|TRIGGER       },
   { "FOR",              "TK_FOR",          TRIGGER                },
@@ -169,7 +165,6 @@ static Keyword aKeywordTable[] = {
   { "GLOB",             "TK_LIKE_KW",      ALWAYS                 },
   { "GROUP",            "TK_GROUP",        ALWAYS                 },
   { "HAVING",           "TK_HAVING",       ALWAYS                 },
-  { "IF",               "TK_IF",           ALWAYS                 },
   { "IGNORE",           "TK_IGNORE",       CONFLICT|TRIGGER       },
   { "IMMEDIATE",        "TK_IMMEDIATE",    ALWAYS                 },
   { "IN",               "TK_IN",           ALWAYS                 },
@@ -227,7 +222,6 @@ static Keyword aKeywordTable[] = {
   { "VACUUM",           "TK_VACUUM",       VACUUM                 },
   { "VALUES",           "TK_VALUES",       ALWAYS                 },
   { "VIEW",             "TK_VIEW",         VIEW                   },
-  { "VIRTUAL",          "TK_VIRTUAL",      VTAB                   },
   { "WHEN",             "TK_WHEN",         ALWAYS                 },
   { "WHERE",            "TK_WHERE",        ALWAYS                 },
 };
@@ -488,8 +482,8 @@ int main(int argc, char **argv){
 
   printf("  int h, i;\n");
   printf("  if( n<2 ) return TK_ID;\n");
-  printf("  h = ((charMap(z[0])*4) ^\n"
-         "      (charMap(z[n-1])*3) ^\n"
+  printf("  h = ((sqlite3UpperToLower[((unsigned char*)z)[0]]*4) ^\n"
+         "      (sqlite3UpperToLower[((unsigned char*)z)[n-1]]*3) ^\n"
          "      n) %% %d;\n", bestSize);
   printf("  for(i=((int)aHash[h])-1; i>=0; i=((int)aNext[i])-1){\n");
   printf("    if( aLen[i]==n &&"
@@ -499,8 +493,8 @@ int main(int argc, char **argv){
   printf("  }\n");
   printf("  return TK_ID;\n");
   printf("}\n");
-  printf("int sqlite3KeywordCode(const unsigned char *z, int n){\n");
-  printf("  return keywordCode((char*)z, n);\n");
+  printf("int sqlite3KeywordCode(const char *z, int n){\n");
+  printf("  return keywordCode(z, n);\n");
   printf("}\n");
 
   return 0;

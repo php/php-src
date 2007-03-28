@@ -54,8 +54,8 @@ int sqlite3_exec(
 
     pStmt = 0;
     rc = sqlite3_prepare(db, zSql, -1, &pStmt, &zLeftover);
-    assert( rc==SQLITE_OK || pStmt==0 );
     if( rc!=SQLITE_OK ){
+      if( pStmt ) sqlite3_finalize(pStmt);
       continue;
     }
     if( !pStmt ){
@@ -68,8 +68,9 @@ int sqlite3_exec(
     nCallback = 0;
 
     nCol = sqlite3_column_count(pStmt);
-    azCols = sqliteMalloc(2*nCol*sizeof(const char *) + 1);
-    if( azCols==0 ){
+    azCols = sqliteMalloc(2*nCol*sizeof(const char *));
+    if( nCol && !azCols ){
+      rc = SQLITE_NOMEM;
       goto exec_out;
     }
 
@@ -121,9 +122,11 @@ exec_out:
   if( pStmt ) sqlite3_finalize(pStmt);
   if( azCols ) sqliteFree(azCols);
 
-  rc = sqlite3ApiExit(0, rc);
+  if( sqlite3_malloc_failed ){
+    rc = SQLITE_NOMEM;
+  }
   if( rc!=SQLITE_OK && rc==sqlite3_errcode(db) && pzErrMsg ){
-    *pzErrMsg = sqlite3_malloc(1+strlen(sqlite3_errmsg(db)));
+    *pzErrMsg = malloc(1+strlen(sqlite3_errmsg(db)));
     if( *pzErrMsg ){
       strcpy(*pzErrMsg, sqlite3_errmsg(db));
     }

@@ -31,7 +31,7 @@ typedef struct TabResult {
   int nAlloc;
   int nRow;
   int nColumn;
-  long nData;
+  int nData;
   int rc;
 } TabResult;
 

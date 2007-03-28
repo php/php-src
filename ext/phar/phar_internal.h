@@ -58,7 +58,7 @@
 #define E_RECOVERABLE_ERROR E_ERROR
 #endif
 
-#define PHAR_EXT_VERSION_STR      "1.0.0"
+#define PHAR_EXT_VERSION_STR      "1.0.1"
 #define PHAR_API_VERSION_STR      "1.0.0"
 /* x.y.z maps to 0xyz0 */
 #define PHAR_API_VERSION          0x1000
@@ -103,6 +103,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	zend_bool   readonly_orig;
 	zend_bool   require_hash_orig;
 	int         request_done;
+	int         request_ends;
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)

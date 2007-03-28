@@ -22,17 +22,14 @@ foreach ($data as $str) {
 
 echo "====BUFFERED====\n";
 $r = sqlite_query("SELECT a, b from strings", $db);
-while (sqlite_valid($r)) {
+while (sqlite_has_more($r)) {
 	var_dump(sqlite_fetch_single($r));
 }
 echo "====UNBUFFERED====\n";
 $r = sqlite_unbuffered_query("SELECT a, b from strings", $db);
-while (sqlite_valid($r)) {
+while (sqlite_has_more($r)) {
 	var_dump(sqlite_fetch_single($r));
 }
-
-sqlite_close($db);
-
 echo "DONE!\n";
 ?>
 --EXPECT--
@@ -42,12 +39,4 @@ string(5) "three"
 ====UNBUFFERED====
 string(3) "one"
 string(5) "three"
-DONE!
---UEXPECT--
-====BUFFERED====
-unicode(3) "one"
-unicode(5) "three"
-====UNBUFFERED====
-unicode(3) "one"
-unicode(5) "three"
 DONE!

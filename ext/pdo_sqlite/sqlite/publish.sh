@@ -113,5 +113,3 @@ mv $HOME/rpm/SRPMS/sqlite-$vers*.rpm doc
 #
 #cp $srcdir/../historical/* doc
 make doc
-cd doc
-chmod 644 *.gz
