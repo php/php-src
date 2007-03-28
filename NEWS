@@ -107,6 +107,8 @@ PHP                                                                        NEWS
 - Fixed bug #40414 (possible endless fork() loop when running fastcgi).
   (Dmitry)
 - Fixed bug #40410 (ext/posix does not compile on MacOS 10.3.9). (Tony)
+- Fixed bug #40392 (memory leaks in PHP milter SAPI). 
+  (tuxracer69 at gmail dot com, Tony)
 - Fixed bug #40371 (pg_client_encoding() not working on Windows). (Edin)
 - Fixed Bug #40352 (FCGI_WEB_SERVER_ADDRS function get lost). (Dmitry)
 - Fixed bug #40286 (PHP fastcgi with PHP_FCGI_CHILDREN don't kill children when
