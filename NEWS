@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Upgraded SQLite 3 to version 3.3.13 (Ilia)
 - Upgraded PCRE to version 7.0 (Nuno)
 - Updated timezone database to version 2007.3. (Derick)
+- Improved FastCGI SAPI to support external pipe and socket servers on win32.
+  (Dmitry)
 - Improved Zend Memory Manager
   . guarantee of reasonable time for worst cases of best-fit free block
     searching algorithm. (Dmitry)
@@ -58,6 +60,7 @@ PHP                                                                        NEWS
 - Fixed bug #40770 (Apache child exits when PHP memory limit reached). (Dmitry)
 - Fixed bug #40764 (line thickness not respected for horizontal and vertical 
   lines). (Pierre)
+- Fixed bug #40758 (Test fcgi_is_fastcgi() is wrong on windows). (Dmitry)
 - Fixed bug #40754 (added substr() & substr_replace() overflow checks). (Ilia)
 - Fixed bug #40752 (parse_ini_file() segfaults when a scalar setting is 
   redeclared as an array). (Tony)
