@@ -503,14 +503,17 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 		{
 			OCIString *oci_string = *(OCIString **)element;
 			text *str;
+			ub4 str_len;
 			
 			PHP_OCI_CALL_RETURN(str, OCIStringPtr, (connection->env, oci_string));
 			
 			if (str) {
+				PHP_OCI_CALL_RETURN(str_len, OCIStringSize, (connection->env, oci_string));
+
 				if (UG(unicode)) {
-					ZVAL_UNICODE(*result_element, (UChar *)str, 1);
+					ZVAL_UNICODEL(*result_element, (UChar *)str, TEXT_CHARS(str_len), 1);
 				} else { 
-					ZVAL_STRING(*result_element, str, 1);
+					ZVAL_STRINGL(*result_element, str, str_len, 1);
 				}
 			}
 			return 0;
