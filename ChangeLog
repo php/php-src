@@ -1,3 +1,37 @@
+2007-03-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      run-tests.php:
+      - MFH Allow to load multipe extensions via -d
+
+    * run-tests.php:
+      - Allow to load multipe extensions via -d
+
+2007-03-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/standard/mail.c:
+      MF52: fix compile warning
+
+    * (PHP_5_2)
+      ext/standard/mail.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      fix compile warning
+
+2007-03-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/mail.c:
+      
+      MFB: MOPB-33-2007:PHP mail() Message ASCIIZ Byte Truncation
+
+    * (PHP_5_2)
+      ext/standard/mail.c:
+      
+      Fixed MOPB-33-2007:PHP mail() Message ASCIIZ Byte Truncation
+
 2007-03-26  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_2)
