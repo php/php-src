@@ -113,7 +113,7 @@ PHP                                                                        NEWS
 - Fixed bug #40392 (memory leaks in PHP milter SAPI). 
   (tuxracer69 at gmail dot com, Tony)
 - Fixed bug #40371 (pg_client_encoding() not working on Windows). (Edin)
-- Fixed Bug #40352 (FCGI_WEB_SERVER_ADDRS function get lost). (Dmitry)
+- Fixed bug #40352 (FCGI_WEB_SERVER_ADDRS function get lost). (Dmitry)
 - Fixed bug #40286 (PHP fastcgi with PHP_FCGI_CHILDREN don't kill children when
   parent is killed). (Dmitry)
 - Fixed bug #40261 (Extremely slow data handling due to memory fragmentation).
@@ -121,7 +121,7 @@ PHP                                                                        NEWS
 - Fixed bug #40236 (php -a function allocation eats memory). (Dmitry)
 - Fixed bug #40109 (iptcembed fails on non-jfif jpegs). (Tony)
 - Fixed bug #39836 (SplObjectStorage empty after unserialize). (Marcus)
-- Fixed Bug #39396 (stream_set_blocking crashes on Win32). (Ilia, maurice at
+- Fixed bug #39396 (stream_set_blocking crashes on Win32). (Ilia, maurice at
   iceblog dot de)
 - Fixed bug #39322 (proc_terminate() destroys process resource). (Nuno)
 - Fixed bug #38406 (crash when assigning objects to SimpleXML attributes). (Tony)
@@ -129,9 +129,12 @@ PHP                                                                        NEWS
 - Fixed bug #36496 (SSL support in imap_open() not working on Windows). (Edin)
 - Fixed bug #36226 (Inconsistent handling when passing nillable arrays).
   (Dmitry)
-- Fixed bug #35872 (Avoid crash caused by object store being referenced during RSHUTDOWN) (Andy) 
+- Fixed bug #35872 (Avoid crash caused by object store being referenced during 
+  RSHUTDOWN). (Andy) 
 - Fixed bug #34794 (proc_close() hangs when used with two processes).
   (jdolecek at netbsd dot org, Nuno)
+- Fixed PECL bug #10194 (crash in Oracle client when memory limit reached in 
+  the callback). (Tony)
 - Limit nesting level of input variables with max_input_nesting_level 
   as fix for MOPB-03-2007 (Stas)
 - Fixed substr_compare and substr_count information leak (MOPB-14) (Stas, Ilia)
@@ -248,7 +251,7 @@ PHP                                                                        NEWS
   missing). (Tony)
 - Fixed bug #40285 (The PDO prepare parser goes into an infinite loop in
   some instances). (Ilia)
-- Fixed Bug #40274 (Sessions fail with numeric root keys). (Ilia)
+- Fixed bug #40274 (Sessions fail with numeric root keys). (Ilia)
 - Fixed bug #40259 (ob_start call many times - memory error). (Dmitry)
 - Fixed bug #40231 (file_exists incorrectly reports false). (Dmitry)
 - Fixed bug #40228 (ZipArchive::extractTo does create empty directories 
