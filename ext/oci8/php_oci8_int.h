@@ -134,6 +134,7 @@ typedef struct { /* php_oci_descriptor {{{ */
 typedef struct { /* php_oci_lob_ctx {{{ */
 	char **lob_data;            /* address of pointer to LOB data */
 	ub4 *lob_len;               /* address of LOB length variable (bytes) */
+	ub4 alloc_len;
 } php_oci_lob_ctx; /* }}} */
 
 typedef struct { /* php_oci_collection {{{ */
