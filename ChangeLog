@@ -1,3 +1,100 @@
+2007-03-28  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_collection.c:
+      Oracle seems to return non zero terminated strings or strings with only 1
+      zero at the end in Unicode mode
+      surely u_strlen() doesn't like it, so lets use OCIStringSize() and avoid
+      u_strlen()
+
+2007-03-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h
+      sapi/cgi/fastcgi.h:
+      Improved FastCGI SAPI to support external pipe and socket servers on win32
+
+2007-03-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/cli/tests/015.phpt:
+      - Fixed test
+
+    * (PHP_5_2)
+      sapi/cli/tests/015.phpt:
+      - Fix test: Some people actually use --enable-debug here..
+
+2007-03-28  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/ltrim.phpt
+      ext/standard/tests/strings/rtrim.phpt
+      ext/standard/tests/strings/str_pad.phpt:
+      new ltrim, rtrim and str_pad tests
+
+    * ext/standard/tests/strings/ltrim.phpt
+      ext/standard/tests/strings/ltrim.phpt
+      ext/standard/tests/strings/rtrim.phpt
+      ext/standard/tests/strings/rtrim.phpt
+      ext/standard/tests/strings/str_pad.phpt
+      ext/standard/tests/strings/str_pad.phpt:
+      
+      New tests for ltrim, rtrim, str_pad
+
+2007-03-28  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/basic_functions.c
+      main/main.c:
+      drop deprecated funcs and change error level to E_WARNING
+
+    * (PHP_5_2)
+      sapi/milter/.cvsignore:
+      add .cvsignore
+
+    * sapi/milter/.cvsignore
+      sapi/milter/.cvsignore:
+      
+      add .cvsignore
+
+    * (PHP_5_2)
+      NEWS
+      sapi/milter/php_milter.c:
+      MFH: fix #40392 (memory leaks in PHP milter SAPI)
+
+    * sapi/milter/php_milter.c:
+      fix #40392 (memory leaks in PHP milter SAPI)
+      we should have dropped this SAPI years ago
+
+2007-03-28  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/strings/ucfirst1.phpt:
+      New ucfirst() test.
+
+    * ext/standard/tests/strings/printf.phpt:
+      new test for printf
+
+    * ext/standard/tests/strings/printf.phpt
+      ext/standard/tests/strings/printf.phpt
+      ext/standard/tests/strings/ucfirst.phpt:
+      
+      file printf.phpt was initially added on branch PHP_5_2.
+
+2007-03-28  Antony Dovgal  <antony@zend.com>
+
+    * main/php_variables.c:
+      fix compile warning
+
+2007-03-28  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/strcasecmp.phpt
+      ext/standard/tests/strings/strcmp.phpt
+      ext/standard/tests/strings/strlen.phpt:
+      Three new string tests for funtions strcasecmp, strcmp and strlen.
+
 2007-03-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
