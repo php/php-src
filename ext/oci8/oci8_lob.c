@@ -161,7 +161,13 @@ sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, ub4 len, ub1 piece)
 	switch (piece)
 	{
 		case OCI_LAST_PIECE:
-			*(ctx->lob_data) = erealloc(*(ctx->lob_data), (size_t) (*(ctx->lob_len) + lenp + TEXT_BYTES(1)));
+			if ((*(ctx->lob_len) + lenp) > (ctx->alloc_len)) {
+				/* this should not happen ever */
+				*(ctx->lob_data) = NULL;
+				*(ctx->lob_len) = 0;
+				return OCI_ERROR;
+			}
+
 			memcpy(*(ctx->lob_data) + *(ctx->lob_len), bufxp, (size_t) lenp);
 			*(ctx->lob_len) += lenp;
 			
@@ -174,14 +180,19 @@ sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, ub4 len, ub1 piece)
 
 		case OCI_FIRST_PIECE:
 		case OCI_NEXT_PIECE:
-			*(ctx->lob_data) = erealloc(*(ctx->lob_data), (size_t) (*(ctx->lob_len) + lenp));
+			if ((*(ctx->lob_len) + lenp) > ctx->alloc_len) {
+				/* this should not happen ever */
+				*(ctx->lob_data) = NULL;
+				*(ctx->lob_len) = 0;
+				return OCI_ERROR;
+			}
+
 			memcpy(*(ctx->lob_data) + *(ctx->lob_len), bufxp, (size_t) lenp);
 			*(ctx->lob_len) += lenp;
 			return OCI_CONTINUE;
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected LOB piece id received (value:%d)", piece);
-			efree(*(ctx->lob_data));
 			*(ctx->lob_data) = NULL;
 			*(ctx->lob_len) = 0;
 			return OCI_ERROR;
@@ -235,11 +246,13 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	int bytes_read, offset = 0;
 	int requested_len = read_length; /* this is by default */
 #endif
+	sb4 bytes_per_char = 1;
 
 	*data_len = 0;
 	*data = NULL_ZSTR;
 	ctx.lob_len = data_len;
 	ctx.lob_data = &(data->s);
+	ctx.alloc_len = 0;
 
 	if (php_oci_lob_get_length(descriptor, &length TSRMLS_CC)) {
 		return 1;
@@ -281,6 +294,21 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	if (php_oci_lob_get_type(descriptor, &lob_type TSRMLS_CC) > 0) {
 		return 1;
 	}
+
+	if (lob_type == OCI_IS_CLOB) {
+		PHP_OCI_CALL_RETURN(connection->errcode, OCINlsNumericInfoGet, (connection->env, connection->err, &bytes_per_char, OCI_NLS_CHARSET_MAXBYTESZ));
+
+		if (connection->errcode != OCI_SUCCESS) {
+			php_oci_error(connection->err, connection->errcode TSRMLS_CC);
+			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
+			return 1;
+		}
+	} else {
+		/* BLOBs don't have encoding, so bytes_per_char == 1 */
+	}
+
+	ctx.alloc_len = (requested_len + UBYTES(1)) * bytes_per_char;
+	data->s = ecalloc(bytes_per_char, requested_len + UBYTES(1));
 
 #ifdef HAVE_OCI_LOB_READ2
 	if (lob_type == OCI_IS_CLOB) {
