@@ -1214,6 +1214,7 @@ int main(int argc, char *argv[])
 				}
 				break;
 			}
+#if PHP_FASTCGI
 			/* if we're started on command line, check to see if
 			   we are being started as an 'external' fastcgi
 			   server by accepting a bindpath parameter. */
@@ -1222,6 +1223,7 @@ int main(int argc, char *argv[])
 					bindpath = strdup(php_optarg);
 				}
 				break;
+#endif
 		}
 
 	}
