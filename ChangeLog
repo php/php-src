@@ -1,3 +1,35 @@
+2007-03-29  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      Add missing #if check
+
+2007-03-29  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      add news entry
+      + minor text fixes
+
+    * (PHP_5_2)
+      ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/pecl_bug10194.phpt
+      ext/oci8/tests/pecl_bug10194_blob.phpt:
+      MFH: fix PECL bug #10194 (crash in Oracle client when memory limit reached
+      in the callback)
+      preallocate the required buffer, so that it would fail earlier.
+
+    * ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/pecl_bug10194.phpt
+      ext/oci8/tests/pecl_bug10194.phpt
+      ext/oci8/tests/pecl_bug10194_blob.phpt
+      ext/oci8/tests/pecl_bug10194_blob.phpt:
+      fix #10194 (crash in Oracle client when memory limit reached in the
+      callback)
+      preallocate the required buffer, so that it would fail earlier.
+
 2007-03-28  Antony Dovgal  <antony@zend.com>
 
     * ext/oci8/oci8_collection.c:
