@@ -48,8 +48,8 @@
 
 #define SKIP_LONG_HEADER_SEP(str, pos)										\
 	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
-		pos += 3;											\
-		while (str[pos] == ' ' || str[pos] == '\t') {							\
+		pos += 2;											\
+		while (str[pos + 1] == ' ' || str[pos + 1] == '\t') {							\
 			pos++;											\
 		}												\
 		continue;											\
