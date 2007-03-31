@@ -1,3 +1,27 @@
+2007-03-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      ext/soap/tests/bugs/bug34657.phpt:
+      new test
+
+    * ext/soap/tests/bugs/bug34657.phpt
+      ext/soap/tests/bugs/bug34657.phpt:
+      
+      new test
+
+2007-03-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/standard/mail.c:
+      
+      MFB: Fixed MOPB-34-2007:PHP mail() Header Injection Through Subject and To
+      Parameters
+
+    * (PHP_5_2)
+      ext/standard/mail.c:
+      Fixed MOPB-34-2007:PHP mail() Header Injection Through Subject and To
+      Parameters
+
 2007-03-29  Sara Golemon  <sara@golemon.com>
 
     * (PHP_5_2)
