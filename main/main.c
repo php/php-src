@@ -59,6 +59,7 @@
 #include "ext/standard/php_standard.h"
 #include "php_variables.h"
 #include "ext/standard/credits.h"
+#include "ext/standard/flock_compat.h"
 #ifdef PHP_WIN32
 #include <io.h>
 #include <fcntl.h>
@@ -358,10 +359,9 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 		log_file = VCWD_FOPEN(PG(error_log), "ab");
 		if (log_file != NULL) {
 			time(&error_time);
-			strftime(error_time_str, sizeof(error_time_str), "%d-%b-%Y %H:%M:%S", php_localtime_r(&error_time, &tmbuf)); 
-			fprintf(log_file, "[%s] ", error_time_str);
-			fprintf(log_file, "%s", log_message);
-			fprintf(log_file, "%s", PHP_EOL);
+			strftime(error_time_str, sizeof(error_time_str), "%d-%b-%Y %H:%M:%S", php_localtime_r(&error_time, &tmbuf));
+			php_flock(fileno(log_file), 2);
+			fprintf(log_file, "[%s] %s%s", error_time_str, log_message, PHP_EOL);
 			fclose(log_file);
 			return;
 		}
