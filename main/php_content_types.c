@@ -42,7 +42,7 @@ SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
 
 	/* $HTTP_RAW_POST_DATA registration */
 	if(!strcmp(SG(request_info).request_method, "POST")) {
-		if(NULL == SG(request_info).post_entry) {
+		if(NULL == SG(request_info).post_entry && SG(request_info).post_data) {
 			/* no post handler registered, so we just swallow the data */
 			sapi_read_standard_form_data(TSRMLS_C);
 			length = SG(request_info).post_data_length;
