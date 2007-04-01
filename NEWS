@@ -41,6 +41,7 @@ PHP                                                                        NEWS
   exceeded). (trickie at gmail dot com, Ilia)
 - Fixed bug #40915 (addcslashes unexpected behavior with binary input). (Tony)
 - Fixed bug #40899 (memory leak when nesting list()). (Dmitry)
+- Fixed bug #40897 (error_log file not locked). (Ilia)
 - Fixed bug #40883 (mysql_query() is allocating memory incorrectly). (Tony)
 - Fixed bug #40872 (inconsistency in offsetSet, offsetExists treatment of 
   string enclosed integers). (Marcus)
