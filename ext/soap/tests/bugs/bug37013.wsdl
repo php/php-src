@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions name="shoppingcart"
+ xmlns="http://schemas.xmlsoap.org/wsdl/"
+ xmlns:tns="urn:test.soapserver#"
+targetNamespace="urn:test.soapserver#"
+ xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+ xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xs="http://www.w3.org/2001/XMLSchema"
+ xmlns:types="urn:test.soapserver.types#">
+
+ <!-- all datatypes will be imported to namespace types: -->
+ <types>
+         <xs:schema targetNamespace="urn:test.soapserver.types#">
+                 <xs:complexType name="ThingWithParent">
+        <xs:all>
+         <xs:element name="id" type="xs:string"/>
+         <xs:element name="parent" type="types:ThingWithParent"/>
+         <xs:element name="children" type="types:ArrayOfThingWithParent"/>
+        </xs:all>
+       </xs:complexType>
+ <xs:complexType name="ArrayOfThingWithParent">
+  <xs:complexContent>
+   <xs:restriction base="soapenc:Array">
+      <xs:attribute ref="soapenc:arrayType"
+        wsdl:arrayType="tns:ThingWithParent[]"/>
+   </xs:restriction>
+  </xs:complexContent>
+ </xs:complexType>
+  </xs:schema>
+ </types>
+         <message name="getThingWithParent-request"/>
+         <message name="getThingWithParent-response">
+                 <part name="result" element="types:ThingWithParent"/>
+         </message>
+ <portType name="soapserver-porttype">
+  <operation name="getThingWithParent">
+   <input name="getThingWithParent-request" message="tns:getThingWithParent-request"/>
+   <output name="getThingWithParent-response" message="tns:getThingWithParent-response"/>
+  </operation>
+ </portType>
+ <binding name="soapserver-binding" type="tns:soapserver-porttype">
+  <soap:binding style="rpc"
+   transport="http://schemas.xmlsoap.org/soap/http"/>
+  <operation name="getThingWithParent">
+   <soap:operation soapAction="urn:test.soapserver.SoapServer#getThingWithParent"/>
+   <input>
+      <soap:body use="encoded"
+namespace="urn:test.soapserver#"
+encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+   </input>
+   <output>
+      <soap:body use="encoded"
+namespace="urn:test.soapserver#"
+encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+   </output>
+  </operation>
+ </binding>
+
+ <service name="soapserver">
+  <!-- @binding doesn't like to be tns: -->
+  <port name="soapserver-port" binding="tns:soapserver-binding">
+   <soap:address location="xxxxxxxxxxxx"/>
+  </port>
+ </service>
+
+</definitions>

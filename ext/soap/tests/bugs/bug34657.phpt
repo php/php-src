@@ -15,9 +15,9 @@ try {
 	echo get_class($e)."\n";
 }
 --EXPECTF--
-Warning: SoapClient::__construct(): php_network_getaddresses: getaddrinfo failed: Name or service not known in %sbug34657.php on line 3
+Warning: SoapClient::__construct(): php_network_getaddresses: getaddrinfo failed: %sbug34657.php on line 3
 
-Warning: SoapClient::__construct(http://i_dont_exist.com/some.wsdl): failed to open stream: No such file or directory in %sbug34657.php on line 3
+Warning: SoapClient::__construct(http://i_dont_exist.com/some.wsdl): failed to open stream: %sbug34657.php on line 3
 
 Warning: SoapClient::__construct(): I/O warning : failed to load external entity "http://i_dont_exist.com/some.wsdl" in %sbug34657.php on line 3
 SoapFault
