@@ -1,3 +1,18 @@
+2007-04-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      main/main.c:
+      
+      Fixed bug #40897 (error_log file not locked)
+
+    * (PHP_5_2)
+      NEWS
+      main/php_content_types.c:
+      
+      Fixed bug #40921 (php_default_post_reader crashes when post_max_size is
+      exceeded).
+
 2007-03-30  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_2)
