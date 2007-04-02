@@ -499,6 +499,7 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals TSRMLS_DC)
 	soap_globals->sdl = NULL;
 	soap_globals->soap_version = SOAP_1_1;
 	soap_globals->mem_cache = NULL;
+	soap_globals->ref_map = NULL;
 }
 
 PHP_MSHUTDOWN_FUNCTION(soap)
@@ -2945,7 +2946,9 @@ static void do_soap_call(zval* this_ptr,
 			xmlFreeDoc(request);
 
 			if (ret && Z_TYPE(response) == IS_STRING) {
+				encode_reset_ns();
 				ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), fn, NULL, return_value, output_headers TSRMLS_CC);
+				encode_finish();
 			}
 
 			zval_dtor(&response);
@@ -2987,7 +2990,9 @@ static void do_soap_call(zval* this_ptr,
 			xmlFreeDoc(request);
 
 			if (ret && Z_TYPE(response) == IS_STRING) {
+				encode_reset_ns();
 				ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, function, return_value, output_headers TSRMLS_CC);
+				encode_finish();
 			}
 
 			zval_dtor(&response);
@@ -3706,6 +3711,8 @@ static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, c
 	xmlAttrPtr attr;
 	sdlFunctionPtr function;
 
+	encode_reset_ns();
+
 	/* Get <Envelope> element */
 	env = NULL;
 	trav = request->children;
@@ -3954,6 +3961,9 @@ ignore_header:
 		func = func->children;
 	}
 	deserialize_parameters(func, function, num_params, parameters);
+	
+	encode_finish();
+
 	return function;
 }
 
@@ -4445,6 +4455,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 		}
 	}
 
+	encode_finish();
+
 	if (function && function->responseName == NULL &&
 	    body->children == NULL && head == NULL) {
 		xmlFreeDoc(doc);
@@ -4675,6 +4687,8 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 			}
 		}
 	}
+
+	encode_finish();
 
 	return doc;
 }
