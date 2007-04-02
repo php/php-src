@@ -745,11 +745,11 @@ PHP_FUNCTION(proc_open)
 	}
 	
 	if (bypass_shell) {
-		newprocok = CreateProcess(NULL, command, &security, &security, TRUE, NORMAL_PRIORITY_CLASS, env.envp, cwd, &si, &pi);
+		newprocok = CreateProcess(NULL, command, &security, &security, TRUE, NORMAL_PRIORITY_CLASS|CREATE_NO_WINDOW, env.envp, cwd, &si, &pi);
 	} else {
 		spprintf(&command_with_cmd, 0, "%s /c %s", GetVersion() < 0x80000000 ? COMSPEC_NT : COMSPEC_9X, command);
 
-		newprocok = CreateProcess(NULL, command_with_cmd, &security, &security, TRUE, NORMAL_PRIORITY_CLASS, env.envp, cwd, &si, &pi);
+		newprocok = CreateProcess(NULL, command_with_cmd, &security, &security, TRUE, NORMAL_PRIORITY_CLASS|CREATE_NO_WINDOW, env.envp, cwd, &si, &pi);
 		
 		efree(command_with_cmd);
 	}
