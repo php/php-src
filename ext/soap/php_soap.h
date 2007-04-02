@@ -168,6 +168,8 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable *class_map;
 	int        features;
 	HashTable  wsdl_cache;
+	int        cur_uniq_ref;
+	HashTable *ref_map;
 ZEND_END_MODULE_GLOBALS(soap)
 
 #ifdef PHP_WIN32
