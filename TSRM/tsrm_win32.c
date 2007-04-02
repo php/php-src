@@ -219,7 +219,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 
 	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c "));
 	sprintf(cmd, "%s /c %s", TWG(comspec), command);
-	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, NORMAL_PRIORITY_CLASS, env, cwd, &startup, &process)) {
+	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, NORMAL_PRIORITY_CLASS|CREATE_NO_WINDOW, env, cwd, &startup, &process)) {
 		return NULL;
 	}
 	free(cmd);
