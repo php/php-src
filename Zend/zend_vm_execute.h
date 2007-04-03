@@ -2669,8 +2669,12 @@ static int ZEND_FETCH_DIM_TMP_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 {
 	zend_op *opline = EX(opline);
 
-	zval *container = &opline->op1.u.constant;
+	zval *container;
 
+	if (IS_CONST == IS_VAR && EX_T(opline->op1.u.var).var.ptr == NULL) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+	container = &opline->op1.u.constant;
 	if (Z_TYPE_P(container) != IS_ARRAY) {
 		if (!RETURN_VALUE_UNUSED(&opline->result)) {
 			EX_T(opline->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
@@ -5367,8 +5371,12 @@ static int ZEND_FETCH_DIM_TMP_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
-	zval *container = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
+	zval *container;
 
+	if (IS_TMP_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr == NULL) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+	container = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	if (Z_TYPE_P(container) != IS_ARRAY) {
 		if (!RETURN_VALUE_UNUSED(&opline->result)) {
 			EX_T(opline->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
@@ -9201,11 +9209,14 @@ static int ZEND_FETCH_DIM_R_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1;
 	zval *dim = &opline->op2.u.constant;
 
+	/* No longer needed
 	if (opline->extended_value == ZEND_FETCH_ADD_LOCK &&
 	    IS_VAR != IS_CV &&
 	    EX_T(opline->op1.u.var).var.ptr_ptr) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
+	*/
+
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), dim, 0, BP_VAR_R TSRMLS_CC);
 
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -9507,6 +9518,33 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr);
 	FREE_OP_VAR_PTR(free_res);
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FETCH_DIM_TMP_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zend_free_op free_op1;
+	zval *container;
+
+	if (IS_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr == NULL) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+	container = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
+	if (Z_TYPE_P(container) != IS_ARRAY) {
+		if (!RETURN_VALUE_UNUSED(&opline->result)) {
+			EX_T(opline->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
+			PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr);
+		}
+	} else {
+
+		zval *dim = &opline->op2.u.constant;
+
+		EX_T(opline->result.u.var).var.ptr_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, BP_VAR_R TSRMLS_CC);
+		SELECTIVE_PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr, &opline->result);
+
+	}
+	AI_USE_PTR(EX_T(opline->result.u.var).var);
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -10740,11 +10778,14 @@ static int ZEND_FETCH_DIM_R_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1, free_op2;
 	zval *dim = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
+	/* No longer needed
 	if (opline->extended_value == ZEND_FETCH_ADD_LOCK &&
 	    IS_VAR != IS_CV &&
 	    EX_T(opline->op1.u.var).var.ptr_ptr) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
+	*/
+
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), dim, 1, BP_VAR_R TSRMLS_CC);
 	zval_dtor(free_op2.var);
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -12282,11 +12323,14 @@ static int ZEND_FETCH_DIM_R_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1, free_op2;
 	zval *dim = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
+	/* No longer needed
 	if (opline->extended_value == ZEND_FETCH_ADD_LOCK &&
 	    IS_VAR != IS_CV &&
 	    EX_T(opline->op1.u.var).var.ptr_ptr) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
+	*/
+
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), dim, 0, BP_VAR_R TSRMLS_CC);
 	if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -14297,11 +14341,14 @@ static int ZEND_FETCH_DIM_R_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1;
 	zval *dim = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
+	/* No longer needed
 	if (opline->extended_value == ZEND_FETCH_ADD_LOCK &&
 	    IS_VAR != IS_CV &&
 	    EX_T(opline->op1.u.var).var.ptr_ptr) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
+	*/
+
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), dim, 0, BP_VAR_R TSRMLS_CC);
 
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -21647,11 +21694,14 @@ static int ZEND_FETCH_DIM_R_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	zval *dim = &opline->op2.u.constant;
 
+	/* No longer needed
 	if (opline->extended_value == ZEND_FETCH_ADD_LOCK &&
 	    IS_CV != IS_CV &&
 	    EX_T(opline->op1.u.var).var.ptr_ptr) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
+	*/
+
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC), dim, 0, BP_VAR_R TSRMLS_CC);
 
 
@@ -21951,6 +22001,33 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr);
 	FREE_OP_VAR_PTR(free_res);
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FETCH_DIM_TMP_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+
+	zval *container;
+
+	if (IS_CV == IS_VAR && EX_T(opline->op1.u.var).var.ptr == NULL) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+	container = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
+	if (Z_TYPE_P(container) != IS_ARRAY) {
+		if (!RETURN_VALUE_UNUSED(&opline->result)) {
+			EX_T(opline->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
+			PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr);
+		}
+	} else {
+
+		zval *dim = &opline->op2.u.constant;
+
+		EX_T(opline->result.u.var).var.ptr_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, BP_VAR_R TSRMLS_CC);
+		SELECTIVE_PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr, &opline->result);
+
+	}
+	AI_USE_PTR(EX_T(opline->result.u.var).var);
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -23178,11 +23255,14 @@ static int ZEND_FETCH_DIM_R_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op2;
 	zval *dim = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
+	/* No longer needed
 	if (opline->extended_value == ZEND_FETCH_ADD_LOCK &&
 	    IS_CV != IS_CV &&
 	    EX_T(opline->op1.u.var).var.ptr_ptr) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
+	*/
+
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC), dim, 1, BP_VAR_R TSRMLS_CC);
 	zval_dtor(free_op2.var);
 
@@ -24712,11 +24792,14 @@ static int ZEND_FETCH_DIM_R_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op2;
 	zval *dim = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
+	/* No longer needed
 	if (opline->extended_value == ZEND_FETCH_ADD_LOCK &&
 	    IS_CV != IS_CV &&
 	    EX_T(opline->op1.u.var).var.ptr_ptr) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
+	*/
+
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC), dim, 0, BP_VAR_R TSRMLS_CC);
 	if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 
@@ -26717,11 +26800,14 @@ static int ZEND_FETCH_DIM_R_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	zval *dim = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
+	/* No longer needed
 	if (opline->extended_value == ZEND_FETCH_ADD_LOCK &&
 	    IS_CV != IS_CV &&
 	    EX_T(opline->op1.u.var).var.ptr_ptr) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
+	*/
+
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC), dim, 0, BP_VAR_R TSRMLS_CC);
 
 
@@ -30077,6 +30163,7 @@ void zend_init_opcodes_handlers()
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_FETCH_DIM_TMP_VAR_SPEC_VAR_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -30086,8 +30173,7 @@ void zend_init_opcodes_handlers()
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_FETCH_DIM_TMP_VAR_SPEC_CV_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
