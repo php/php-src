@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Changed allow_url_fopen/allow_url_include to allow
   per-wrapper enable/disable and runtime tightening. (Sara)
 
+- Removed undocumnted and incomplete support for strings in list() operator.
+  (Dmitry)
 - Removed old legacy:
   . "register_globals" support. (Pierre)
   . "register_long_arrays" ini option. (Dmitry)

@@ -1071,13 +1071,18 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 			opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 		} else {
 			while (opline>CG(active_op_array)->opcodes) {
-				if (opline->opcode == ZEND_FETCH_DIM_R
+				if (opline->opcode == ZEND_FETCH_DIM_TMP_VAR
 				    && opline->op1.op_type == IS_VAR
 				    && opline->op1.u.var == op1->u.var) {
 					/* This should the end of a list() construct
 					 * Mark its result as unused
 					 */
-					opline->extended_value = ZEND_FETCH_STANDARD;
+					opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+					opline->opcode = ZEND_SWITCH_FREE;
+					opline->extended_value = 0;
+					opline->op1 = *op1;
+					SET_UNUSED(opline->op2);
 					break;
 				} else if (opline->result.op_type==IS_VAR
 					&& opline->result.u.var == op1->u.var) {
@@ -3633,8 +3638,6 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 	zend_llist_element *dimension;
 	zend_op *opline;
 	znode last_container;
-	int last_op_number;
-	zend_op *last_op;
 
 	le = CG(list_llist).head;
 	while (le) {
@@ -3644,20 +3647,10 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 			if (dimension == tmp_dimension_llist->head) { /* first */
 				last_container = *expr;
-				switch (expr->op_type) {
-					case IS_VAR:
-					case IS_CV:
-						opline->opcode = ZEND_FETCH_DIM_R;
-						break;
-					case IS_TMP_VAR:
-						opline->opcode = ZEND_FETCH_DIM_TMP_VAR;
-						break;
-					case IS_CONST: /* fetch_dim_tmp_var will handle this bogus fetch */
-						zval_copy_ctor(&expr->u.constant);
-						opline->opcode = ZEND_FETCH_DIM_TMP_VAR;
-						break;
+				opline->opcode = ZEND_FETCH_DIM_TMP_VAR;
+				if (expr->op_type == IS_CONST) {
+					zval_copy_ctor(&expr->u.constant);
 				}
-				opline->extended_value = ZEND_FETCH_ADD_LOCK;
 			} else {
 				opline->opcode = ZEND_FETCH_DIM_R;
 			}
@@ -3675,8 +3668,6 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 		((list_llist_element *) le->data)->value = last_container;
 		zend_llist_destroy(&((list_llist_element *) le->data)->dimensions);
 		zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
-		last_op_number = get_next_op_number(CG(active_op_array))-1;
-		last_op = &CG(active_op_array)->opcodes[last_op_number];
 		zend_do_assign(result, &((list_llist_element *) le->data)->var, &((list_llist_element *) le->data)->value TSRMLS_CC);
 		zend_do_free(result TSRMLS_CC);
 		le = le->next;
