@@ -474,7 +474,11 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	realpath_cache_bucket *bucket;
 	time_t t = 0;
 	int ret;
+	int use_cache;
+	int use_relative_path = 0;
 	TSRMLS_FETCH();
+	
+	use_cache = ((use_realpath != CWD_EXPAND) && CWDG(realpath_cache_size_limit));
 
 	if (path_length == 0) 
 		return (0);
@@ -488,27 +492,32 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	/* cwd_length can be 0 when getcwd() fails.
 	 * This can happen under solaris when a dir does not have read permissions
 	 * but *does* have execute permissions */
-	if (!IS_ABSOLUTE_PATH(path, path_length) && (state->cwd_length > 0)) {
-		int orig_path_len;
-		int state_cwd_length = state->cwd_length;
+	if (!IS_ABSOLUTE_PATH(path, path_length)) {
+		if (state->cwd_length == 0) {
+			use_cache = 0;
+			use_relative_path = 1;
+		} else {
+			int orig_path_len;
+			int state_cwd_length = state->cwd_length;
 
 #ifdef TSRM_WIN32
-		if (IS_SLASH(path[0])) {
-			state_cwd_length = 2;
-		}
+			if (IS_SLASH(path[0])) {
+				state_cwd_length = 2;
+			}
 #endif
-		orig_path_len = path_length + state_cwd_length + 1;
-		if (orig_path_len >= MAXPATHLEN) {
-			return 1;
+			orig_path_len = path_length + state_cwd_length + 1;
+			if (orig_path_len >= MAXPATHLEN) {
+				return 1;
+			}
+			memcpy(orig_path, state->cwd, state_cwd_length);
+			orig_path[state_cwd_length] = DEFAULT_SLASH;
+			memcpy(orig_path + state_cwd_length + 1, path, path_length + 1);
+			path = orig_path;
+			path_length = orig_path_len; 
 		}
-		memcpy(orig_path, state->cwd, state_cwd_length);
-		orig_path[state_cwd_length] = DEFAULT_SLASH;
-		memcpy(orig_path + state_cwd_length + 1, path, path_length + 1);
-		path = orig_path;
-		path_length = orig_path_len; 
 	}
 
-	if (use_realpath != CWD_EXPAND && CWDG(realpath_cache_size_limit)) {
+	if (use_cache) {
 		t = CWDG(realpath_cache_ttl)?time(NULL):0;
 		if ((bucket = realpath_cache_find(path, path_length, t TSRMLS_CC)) != NULL) {		
 			int len = bucket->realpath_len;
@@ -591,6 +600,12 @@ no_realpath:
 			if (IS_DIRECTORY_UP(ptr, ptr_length)) {
 				char save;
 
+				if (use_relative_path) {
+					CWD_STATE_FREE(state);
+					*state = old_state;
+					return 1;
+				}
+
 				save = DEFAULT_SLASH;
 
 #define PREVIOUS state->cwd[state->cwd_length - 1]
@@ -610,33 +625,38 @@ no_realpath:
 					state->cwd_length--;
 				}
 			} else if (!IS_DIRECTORY_CURRENT(ptr, ptr_length)) {
-				state->cwd = (char *) realloc(state->cwd, state->cwd_length+ptr_length+1+1);
+				if (use_relative_path) {
+					state->cwd = (char *) realloc(state->cwd, state->cwd_length+ptr_length+1);
+					use_relative_path = 0;
+				} else {
+					state->cwd = (char *) realloc(state->cwd, state->cwd_length+ptr_length+1+1);
 #ifdef TSRM_WIN32
-				/* Windows 9x will consider C:\\Foo as a network path. Avoid it. */
-				if (state->cwd_length < 2 ||
-				    (state->cwd[state->cwd_length-1]!='\\' && state->cwd[state->cwd_length-1]!='/') ||
-						IsDBCSLeadByte(state->cwd[state->cwd_length-2])) {
-					state->cwd[state->cwd_length++] = DEFAULT_SLASH;
-				}
+					/* Windows 9x will consider C:\\Foo as a network path. Avoid it. */
+					if (state->cwd_length < 2 ||
+					    (state->cwd[state->cwd_length-1]!='\\' && state->cwd[state->cwd_length-1]!='/') ||
+							IsDBCSLeadByte(state->cwd[state->cwd_length-2])) {
+						state->cwd[state->cwd_length++] = DEFAULT_SLASH;
+					}
 #elif defined(NETWARE)
-				/* 
-				Below code keeps appending to state->cwd a File system seperator
-				cases where this appending should not happen is given below,
-				a) sys: should just be left as it is
-				b) sys:system should just be left as it is,
-					Colon is allowed only in the first token as volume names alone can have the : in their names.
-					Files and Directories cannot have : in their names
-					So the check goes like this,
-					For second token and above simply append the DEFAULT_SLASH to the state->cwd.
-					For first token check for the existence of : 
-					if it exists don't append the DEFAULT_SLASH to the state->cwd.
-				*/
-				if(((state->cwd_length == 0) && (strchr(ptr, ':') == NULL)) || (state->cwd_length > 0)) {
-					state->cwd[state->cwd_length++] = DEFAULT_SLASH;
-				}
+					/* 
+					Below code keeps appending to state->cwd a File system seperator
+					cases where this appending should not happen is given below,
+					a) sys: should just be left as it is
+					b) sys:system should just be left as it is,
+						Colon is allowed only in the first token as volume names alone can have the : in their names.
+						Files and Directories cannot have : in their names
+						So the check goes like this,
+						For second token and above simply append the DEFAULT_SLASH to the state->cwd.
+						For first token check for the existence of : 
+						if it exists don't append the DEFAULT_SLASH to the state->cwd.
+					*/
+					if(((state->cwd_length == 0) && (strchr(ptr, ':') == NULL)) || (state->cwd_length > 0)) {
+						state->cwd[state->cwd_length++] = DEFAULT_SLASH;
+					}
 #else
-				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
+					state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 #endif
+				}
 				memcpy(&state->cwd[state->cwd_length], ptr, ptr_length+1);
 
 #ifdef TSRM_WIN32
@@ -687,7 +707,7 @@ no_realpath:
 		}
 	}
 
-	if (use_realpath != CWD_EXPAND && CWDG(realpath_cache_size_limit)) {
+	if (use_cache) {
 		realpath_cache_add(path, path_length, state->cwd, state->cwd_length, t TSRMLS_CC);
 	}
 
