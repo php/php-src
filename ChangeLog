@@ -1,3 +1,99 @@
+2007-04-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Fixed typos
+
+2007-04-02  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      fix #33664
+
+    * TSRM/tsrm_win32.c
+      TSRM/tsrm_win32.c
+      ext/standard/proc_open.c
+      ext/standard/proc_open.c:
+      fix for #33664 Console window appears when using exec()
+
+2007-04-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/tests/strings/printf_64bit.phpt:
+      MFB- 64bit test
+
+    * ext/standard/tests/strings/printf_64bit.phpt
+      ext/standard/tests/strings/printf_64bit.phpt:
+      
+      file printf_64bit.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/printf.phpt:
+      MFB:- Make this 32bit only test. (will add 64bit version next)
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/printf.phpt:
+      - Make this 32bit only test. (will add 64bit version next)
+
+2007-04-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.h
+      ext/soap/php_encoding.h
+      ext/soap/php_soap.h
+      ext/soap/php_soap.h
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug34657.phpt
+      ext/soap/tests/bugs/bug36999.phpt
+      ext/soap/tests/bugs/bug36999.phpt
+      ext/soap/tests/bugs/bug36999.phpt
+      ext/soap/tests/bugs/bug36999.wsdl
+      ext/soap/tests/bugs/bug36999.wsdl
+      ext/soap/tests/bugs/bug36999.wsdl
+      ext/soap/tests/bugs/bug37013.phpt
+      ext/soap/tests/bugs/bug37013.phpt
+      ext/soap/tests/bugs/bug37013.phpt
+      ext/soap/tests/bugs/bug37013.wsdl
+      ext/soap/tests/bugs/bug37013.wsdl
+      ext/soap/tests/bugs/bug37013.wsdl
+      ext/soap/tests/interop/Round2/Base/r2_base_015p.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_015p.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_015s.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_015s.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_015w.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_015w.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_import3_002w.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_import3_002w.phpt
+      ext/soap/tests/interop/Round3/GroupE/r3_groupE_list_005w.phpt
+      ext/soap/tests/interop/Round3/GroupE/r3_groupE_list_005w.phpt
+      ext/soap/tests/interop/Round3/GroupE/r3_groupE_list_006w.phpt
+      ext/soap/tests/interop/Round3/GroupE/r3_groupE_list_006w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_014w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_014w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_015w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_015w.phpt:
+      Fixed bug #37013 (server hangs when returning circular object references)
+
+2007-04-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/info.c:
+      MFB52:- Changed phpinfo() to make difference between set php.ini path and
+      what was actually loaded.
+
+    * (PHP_5_2)
+      ext/standard/info.c:
+      - Changed phpinfo() to make difference between set php.ini path and what
+      was actually loaded.
+
+2007-04-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      ext/soap/tests/bugs/bug34657.phpt:
+      Fixed test
+
 2007-04-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
