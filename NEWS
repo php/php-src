@@ -126,6 +126,7 @@ PHP                                                                        NEWS
 - Fixed bug #39836 (SplObjectStorage empty after unserialize). (Marcus)
 - Fixed bug #39396 (stream_set_blocking crashes on Win32). (Ilia, maurice at
   iceblog dot de)
+- Fixed bug #39351 (relative include fails on Solaris). (Dmitry, Tony)
 - Fixed bug #39322 (proc_terminate() destroys process resource). (Nuno)
 - Fixed bug #38406 (crash when assigning objects to SimpleXML attributes). (Tony)
 - Fixed bug #37799 (ftp_ssl_connect() falls back to non-ssl connection). (Nuno)
