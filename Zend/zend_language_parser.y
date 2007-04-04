@@ -162,7 +162,7 @@ top_statement:
 		statement
 	|	function_declaration_statement	{ zend_do_early_binding(TSRMLS_C); }
 	|	class_declaration_statement		{ zend_do_early_binding(TSRMLS_C); }
-	|	T_HALT_COMPILER '(' ')' ';'   { zval c; if (zend_get_constant("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1, &c TSRMLS_CC)) { zval_dtor(&c); zend_error(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used once per request"); } else { REGISTER_MAIN_LONG_CONSTANT("__COMPILER_HALT_OFFSET__", zend_get_scanned_file_offset(TSRMLS_C), CONST_CS); } YYACCEPT; }
+	|	T_HALT_COMPILER '(' ')' ';'   { zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
 ;
 
 
