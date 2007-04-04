@@ -450,6 +450,7 @@ void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC);
 
 void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS_DC);
 
+void zend_do_halt_compiler_register(TSRMLS_D);
 
 void zend_do_push_object(znode *object TSRMLS_DC);
 void zend_do_pop_object(znode *object TSRMLS_DC);
