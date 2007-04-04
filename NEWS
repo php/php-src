@@ -38,6 +38,7 @@ PHP                                                                        NEWS
 - Added php_pdo_sqlite_external.dll, a version of the PDO SQLite driver that
   links against an external sqlite3.dll.  This provides Windows users to upgrade
   their sqlite3 version outside of the PHP release cycle.  (Wez, Edin)
+- Fixed possible multi bytes issues in openssl csr parser (Pierre)
 - Fixed shmop_open() with IPC_CREAT|IPC_EXCL flags on Windows. 
   (Vladimir Kamaev, Tony).
 - Fixed possible leak in ZipArchive::extractTo when safemode checks fails (Ilia)
@@ -134,6 +135,7 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #40236 (php -a function allocation eats memory). (Dmitry)
 - Fixed bug #40109 (iptcembed fails on non-jfif jpegs). (Tony)
+- Implement #39867 (openssl PKCS#12 support) (Marc Delling, Pierre)
 - Fixed bug #39836 (SplObjectStorage empty after unserialize). (Marcus)
 - Fixed bug #39396 (stream_set_blocking crashes on Win32). (Ilia, maurice at
   iceblog dot de)
