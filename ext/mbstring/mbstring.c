@@ -3301,12 +3301,19 @@ PHP_FUNCTION(mb_decode_numericentity)
 
 #define SKIP_LONG_HEADER_SEP_MBSTRING(str, pos)										\
 	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
-		pos += 3;											\
-		while (str[pos] == ' ' || str[pos] == '\t') {							\
+		pos += 2;											\
+		while (str[pos + 1] == ' ' || str[pos + 1] == '\t') {							\
 			pos++;											\
 		}												\
 		continue;											\
 	}
+
+#define MAIL_ASCIIZ_CHECK_MBSTRING(str, len)			\
+	pp = str;					\
+	ee = pp + len;					\
+	while ((pp = memchr(pp, '\0', (ee - pp)))) {	\
+		*pp = ' ';				\
+	}						\
 
 #define APPEND_ONE_CHAR(ch) do { \
 	if (token.a > 0) { \
@@ -3540,6 +3547,7 @@ PHP_FUNCTION(mb_send_mail)
 	HashTable ht_headers;
 	smart_str *s;
 	extern void mbfl_memory_device_unput(mbfl_memory_device *device);
+	char *pp, *ee;
     
 	if (PG(safe_mode) && (ZEND_NUM_ARGS() == 5)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The fifth parameter is disabled in SAFE MODE.");
@@ -3564,6 +3572,17 @@ PHP_FUNCTION(mb_send_mail)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss", &to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE) {
 		return;
+	}
+
+	/* ASCIIZ check */
+	MAIL_ASCIIZ_CHECK_MBSTRING(to, to_len);
+	MAIL_ASCIIZ_CHECK_MBSTRING(subject, subject_len);
+	MAIL_ASCIIZ_CHECK_MBSTRING(message, message_len);
+	if (headers) {
+		MAIL_ASCIIZ_CHECK_MBSTRING(headers, headers_len);
+	}
+	if (extra_cmd) {
+		MAIL_ASCIIZ_CHECK_MBSTRING(extra_cmd, extra_cmd_len);
 	}
 
 	zend_hash_init(&ht_headers, 0, NULL, (dtor_func_t) my_smart_str_dtor, 0);
@@ -3780,6 +3799,7 @@ PHP_FUNCTION(mb_send_mail)
 }
 
 #undef SKIP_LONG_HEADER_SEP_MBSTRING
+#undef MAIL_ASCIIZ_CHECK_MBSTRING
 #undef APPEND_ONE_CHAR
 #undef SEPARATE_SMART_STR
 #undef PHP_MBSTR_MAIL_MIME_HEADER1
