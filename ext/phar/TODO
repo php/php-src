@@ -36,15 +36,17 @@ Version 1.1.0
    access to that phar archive are directed to the extracted directory. This
    allows to have the installed files and the archieve keep the same includes.
    [Marcus]
- * ability to have Phar object return file class as offsetGet() result
- * [optional] Phar->rollback() to abort a write transaction
- * implement GPG signing
  X add SHA-2 (256, 512) support [Marcus]
  X setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
    choose the kind of signature to use (PGP falls back to SHA1) [Greg]
 
+ 
 Version 1.2.0
 
+ * ability to have Phar object return file class as offsetGet() result
+ * ability to store empty directories
+ * [optional] Phar->rollback() to abort a write transaction
+ * implement GPG signing
  * ability to match files containing a metadata key opendir('phar://a.phar/?mime-type=image/jpeg')
    or foreach ($p->match('mime-type', 'image/jpeg') as $file)
  * Phar::copy($from, $to);
