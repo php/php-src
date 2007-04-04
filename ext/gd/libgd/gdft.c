@@ -715,13 +715,15 @@ gdroundupdown (FT_F26Dot6 v1, int updown)
 
 void gdFontCacheShutdown()
 {
+	gdMutexLock(gdFontCacheMutex);
+
 	if (fontCache) {
-		gdMutexLock(gdFontCacheMutex);
 		gdCacheDelete(fontCache);
 		fontCache = NULL;
-		gdMutexUnlock(gdFontCacheMutex);
 		FT_Done_FreeType(library);
 	}
+
+	gdMutexUnlock(gdFontCacheMutex);
 }
 
 void gdFreeFontCache()
