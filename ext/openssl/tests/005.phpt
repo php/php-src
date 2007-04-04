@@ -1,34 +1,31 @@
 --TEST--
-openSSL: read public key from x.509 resource
+openssl_csr_get_subject() tests
 --SKIPIF--
-<?php 
-if (!extension_loaded("openssl")) die("skip"); 
-?>
+<?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
-<?php 
-$dir = dirname(__FILE__);
-$file_pub = $dir . '/bug37820cert.pem';
-$file_key = $dir . '/bug37820key.pem';
+<?php
 
-$priv_key = file_get_contents($file_key);
-$priv_key_id = openssl_get_privatekey($priv_key);
-
-$x509 = openssl_x509_read(file_get_contents($file_pub));
-
-$pub_key_id = openssl_get_publickey($x509);
-$data = "some custom data";
-if (!openssl_sign($data, $signature, $priv_key_id, OPENSSL_ALGO_MD5)) {
-	echo "openssl_sign failed.";
+$csr = file_get_contents(dirname(__FILE__) . '/005_crt.txt');
+if ($out = openssl_csr_get_subject($csr, 1)) {
+	var_dump($out);
+}
+echo "\n";
+$cn = utf8_decode($out['CN']);
+var_dump($cn);
+--EXPECTF--	
+array(6) {
+  ["C"]=>
+  string(2) "NL"
+  ["ST"]=>
+  string(13) "Noord Brabant"
+  ["L"]=>
+  string(4) "Uden"
+  ["O"]=>
+  string(10) "Triconnect"
+  ["OU"]=>
+  string(10) "Triconnect"
+  ["CN"]=>
+  string(15) "*.triconnect.nl"
 }
 
-$ok = openssl_verify($data, $signature, $pub_key_id, OPENSSL_ALGO_MD5);
-if ($ok == 1) {
-   echo "Ok";
-} elseif ($ok == 0) {
-   echo "openssl_verify failed.";
-}
-
-
-?>
---EXPECTF--
-Ok
+string(15) "*.triconnect.nl"
