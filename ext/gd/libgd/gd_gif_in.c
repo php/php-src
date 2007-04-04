@@ -142,7 +142,7 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 	/*1.4//int             imageCount = 0; */
 
 	int ZeroDataBlock = FALSE;
-
+	int haveGlobalColormap;
 	gdImagePtr im = 0;
 
 	/*1.4//imageNumber = 1; */
@@ -174,11 +174,13 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 	screen_width = imw = LM_to_uint(buf[0],buf[1]);
 	screen_height = imh = LM_to_uint(buf[2],buf[3]);
 
-	if (BitSet(buf[4], LOCALCOLORMAP)) {    /* Global Colormap */
+	haveGlobalColormap = BitSet(buf[4], LOCALCOLORMAP);    /* Global Colormap */
+	if (haveGlobalColormap) {
 		if (ReadColorMap(fd, BitPixel, ColorMap)) {
 			return 0;
 		}
 	}
+
 	for (;;) {
 		int top, left;
 		int width, height;
@@ -227,13 +229,18 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 			return 0;
 		}
 		im->interlace = BitSet(buf[8], INTERLACE);
-		if (! useGlobalColormap) {
+		if (!useGlobalColormap) {
 			if (ReadColorMap(fd, bitPixel, localColorMap)) { 
+				gdImageDestroy(im);
 				return 0;
 			}
 			ReadImage(im, fd, width, height, localColorMap, 
 					BitSet(buf[8], INTERLACE), &ZeroDataBlock);
 		} else {
+			if (!haveGlobalColormap) {
+				gdImageDestroy(im);
+				return 0;
+			}
 			ReadImage(im, fd, width, height,
 						ColorMap, 
 						BitSet(buf[8], INTERLACE), &ZeroDataBlock);
