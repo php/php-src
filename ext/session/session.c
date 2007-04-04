@@ -753,7 +753,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 				smart_str_free(&buf);				
 				return FAILURE;
 			}
-			smart_str_appendl(&buf, key.s, (unsigned char) key_length);
+			smart_str_appendl(&buf, key.s, key_length);
 		} else {
 			/* HASH_KEY_IS_UNICODE */
 			char *str = NULL;
