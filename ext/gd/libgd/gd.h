@@ -301,6 +301,14 @@ void gdImageStringUp(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s,
 void gdImageString16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color);
 void gdImageStringUp16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color);
 
+/*
+ * The following functions are required to be called prior to the
+ * use of any sort of threads in a module load / shutdown function
+ * respectively.
+ */
+void gdFontCacheMutexSetup();
+void gdFontCacheMutexShutdown();
+
 /* 2.0.16: for thread-safe use of gdImageStringFT and friends,
  * call this before allowing any thread to call gdImageStringFT.
  * Otherwise it is invoked by the first thread to invoke
