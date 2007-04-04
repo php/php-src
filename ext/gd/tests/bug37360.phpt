@@ -11,4 +11,5 @@ $im = imagecreatefromgif(dirname(__FILE__) . '/bug37360.gif');
 var_dump($im);
 ?>
 --EXPECTF--
-resource(%d) of type (gd)
+Warning: imagecreatefromgif(): '%s' is not a valid GIF file in %s on line %d
+bool(false)
