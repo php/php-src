@@ -169,6 +169,9 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 							err,
 							ebuf ? "OpenSSL Error messages:\n" : "",
 							ebuf ? ebuf : "");
+					if (ebuf) {
+						efree(ebuf);
+					}
 			}
 				
 			retry = 0;
