@@ -1,3 +1,52 @@
+2007-04-03  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      TSRM/tsrm_virtual_cwd.c:
+      MFH: fix #39351 (relative include fails on Solaris)
+
+    * TSRM/tsrm_virtual_cwd.c:
+      fix #39351 (relative include fails on Solaris)
+
+2007-04-03  Brian Shire  <shire@tekrat.com>
+
+    * ext/standard/pack.c
+      ext/standard/tests/strings/pack.phpt:
+      MFB: correction for previous fix to bug #38770 (pack/unpack is broken on
+      64bit)
+      fix pack test, correct space to tabs
+
+    * (PHP_5_2)
+      ext/standard/pack.c
+      ext/standard/tests/strings/pack.phpt:
+      correction for previous fix to bug #38770 (pack/unpack is broken on 64bit)
+      fix pack test, correct space to tabs
+
+2007-04-03  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/php_dom.c:
+      MFB: allow registered classes to be changed
+
+    * (PHP_5_2)
+      ext/dom/php_dom.c:
+      allow registered classes to be changed
+
+2007-04-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * NEWS:
+      Fugbix typo.
+
+2007-04-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Removed undocumnted and incomplete support for strings in list() operator
+
 2007-04-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

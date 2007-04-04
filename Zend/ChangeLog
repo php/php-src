@@ -1,3 +1,10 @@
+2007-04-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Removed undocumnted and incomplete support for strings in list() operator
+
 2007-03-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_5_2)
