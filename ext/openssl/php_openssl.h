@@ -63,6 +63,11 @@ PHP_FUNCTION(openssl_x509_checkpurpose);
 PHP_FUNCTION(openssl_x509_export);
 PHP_FUNCTION(openssl_x509_export_to_file);
 PHP_FUNCTION(openssl_x509_check_private_key);
+
+PHP_FUNCTION(openssl_pkcs12_export);
+PHP_FUNCTION(openssl_pkcs12_export_to_file);
+PHP_FUNCTION(openssl_pkcs12_read);
+
 PHP_FUNCTION(openssl_csr_new);
 PHP_FUNCTION(openssl_csr_export);
 PHP_FUNCTION(openssl_csr_export_to_file);
