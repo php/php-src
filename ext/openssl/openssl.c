@@ -1430,17 +1430,19 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	/* parse extra config from args array, promote this to an extra function */
 	if (args && zend_hash_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name"), (void**)&item) == SUCCESS)
 		friendly_name = Z_STRVAL_PP(item);
-	// certpbe (default RC2-40)
-	// keypbe (default 3DES)
-	// friendly_caname
+	/* certpbe (default RC2-40)
+	   keypbe (default 3DES)
+	   friendly_caname
+	*/
 
 	if (args && zend_hash_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts"), (void**)&item) == SUCCESS)
 		ca = php_array_to_X509_sk(item);
 	/* end parse extra config */
 
+	/*PKCS12 *PKCS12_create(char *pass, char *name, EVP_PKEY *pkey, X509 *cert, STACK_OF(X509) *ca,
+                                       int nid_key, int nid_cert, int iter, int mac_iter, int keytype);*/
+
 	p12 = PKCS12_create(pass, friendly_name, priv_key, cert, ca, 0, 0, 0, 0, 0);
-	//PKCS12 *PKCS12_create(char *pass, char *name, EVP_PKEY *pkey, X509 *cert, STACK_OF(X509) *ca,
-    //                                   int nid_key, int nid_cert, int iter, int mac_iter, int keytype);
 
 	bio_out = BIO_new_file(filename, "w"); 
 	if (bio_out) {
@@ -1506,9 +1508,6 @@ PHP_FUNCTION(openssl_pkcs12_export)
 	/* parse extra config from args array, promote this to an extra function */
 	if (args && zend_hash_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name"), (void**)&item) == SUCCESS)
 		friendly_name = Z_STRVAL_PP(item);
-	// certpbe (default RC2-40)
-	// keypbe (default 3DES)
-	// friendly_caname
 
 	if (args && zend_hash_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts"), (void**)&item) == SUCCESS)
 		ca = php_array_to_X509_sk(item);
