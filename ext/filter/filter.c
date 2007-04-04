@@ -776,8 +776,10 @@ PHP_FUNCTION(filter_input_array)
 		return;
 	}
 
-	if (op && ( (Z_TYPE_PP(op) == IS_LONG && !PHP_FILTER_ID_EXISTS(Z_LVAL_PP(op)))
-		|| Z_TYPE_PP(op) != IS_ARRAY)) {
+	if (op
+		&& (Z_TYPE_PP(op) != IS_ARRAY)
+		&& (Z_TYPE_PP(op) == IS_LONG && !PHP_FILTER_ID_EXISTS(Z_LVAL_PP(op)))
+		) {
 		RETURN_FALSE;
 	}
 
@@ -815,8 +817,10 @@ PHP_FUNCTION(filter_var_array)
 		return;
 	}
 
-	if (op && ( (Z_TYPE_PP(op) == IS_LONG && !PHP_FILTER_ID_EXISTS(Z_LVAL_PP(op)))
-		|| Z_TYPE_PP(op) != IS_ARRAY)) {
+	if (op
+		&& (Z_TYPE_PP(op) != IS_ARRAY)
+		&& (Z_TYPE_PP(op) == IS_LONG && !PHP_FILTER_ID_EXISTS(Z_LVAL_PP(op)))
+		) {
 		RETURN_FALSE;
 	}
 
