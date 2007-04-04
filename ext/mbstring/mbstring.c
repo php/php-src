@@ -3506,19 +3506,19 @@ PHP_FUNCTION(mb_decode_numericentity)
 #if HAVE_SENDMAIL
 #define SKIP_LONG_HEADER_SEP_MBSTRING(str, pos)						\
 	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
-		pos += 3;											\
-		while (str[pos] == ' ' || str[pos] == '\t') {		\
+		pos += 2;											\
+		while (str[pos + 1] == ' ' || str[pos + 1] == '\t') {							\
 			pos++;											\
 		}                                               \
 		continue;											\
 	}													\
-	else if (str[pos] == '\n' && (str[pos + 1] == ' ' || str[pos + 1] == '\t')) {	\
-		pos += 2;											\
-		while (str[pos] == ' ' || str[pos] == '\t') {		\
-			pos++;											\
-		}												\
-		continue;											\
-	}													\
+
+#define MAIL_ASCIIZ_CHECK_MBSTRING(str, len)			\
+	pp = str;					\
+	ee = pp + len;					\
+	while ((pp = memchr(pp, '\0', (ee - pp)))) {	\
+		*pp = ' ';				\
+	}						\
 
 PHP_FUNCTION(mb_send_mail)
 {
@@ -3536,7 +3536,8 @@ PHP_FUNCTION(mb_send_mail)
 	const mbfl_language *lang;
 	int err = 0;
 	char *to_r = NULL;
-	int to_len, i;
+	int to_len, extra_cmd_len, i;
+	char *pp, *ee;
 
     if (PG(safe_mode) && (ZEND_NUM_ARGS() == 5)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The fifth parameter is disabled in SAFE MODE.");
@@ -3569,6 +3570,8 @@ PHP_FUNCTION(mb_send_mail)
 	if (Z_STRVAL_PP(argv[0])) {
 		to = Z_STRVAL_PP(argv[0]);
 		to_len = Z_STRLEN_PP(argv[0]);
+		/* ASCIIZ check */
+		MAIL_ASCIIZ_CHECK_MBSTRING(to, to_len);
 		if (to_len > 0) {
 			to_r = estrndup(to, to_len);
 			for (; to_len; to_len--) {
@@ -3605,6 +3608,8 @@ we use the
 		orig_str.no_language = MBSTRG(current_language);
 		orig_str.val = (unsigned char *)Z_STRVAL_PP(argv[1]);
 		orig_str.len = Z_STRLEN_PP(argv[1]);
+		/* ASCIIZ check */
+		MAIL_ASCIIZ_CHECK_MBSTRING(orig_str.val, orig_str.len);
 		orig_str.no_encoding = MBSTRG(current_internal_encoding);
 		if (orig_str.no_encoding == mbfl_no_encoding_invalid
 		    || orig_str.no_encoding == mbfl_no_encoding_pass) {
@@ -3627,6 +3632,8 @@ we use the
 		orig_str.no_language = MBSTRG(current_language);
 		orig_str.val = Z_STRVAL_PP(argv[2]);
 		orig_str.len = Z_STRLEN_PP(argv[2]);
+		/* ASCIIZ check */
+		MAIL_ASCIIZ_CHECK_MBSTRING(orig_str.val, orig_str.len);
 		orig_str.no_encoding = MBSTRG(current_internal_encoding);
 
 		if (orig_str.no_encoding == mbfl_no_encoding_invalid
@@ -3663,6 +3670,8 @@ we use the
 		convert_to_string_ex(argv[3]);
 		p = Z_STRVAL_PP(argv[3]);
 		n = Z_STRLEN_PP(argv[3]);
+		/* ASCIIZ check */
+		MAIL_ASCIIZ_CHECK_MBSTRING(p, n);
 		mbfl_memory_device_strncat(&device, p, n);
 		if (p[n - 1] != '\n') {
 			mbfl_memory_device_strncat(&device, "\n", 1);
@@ -3686,6 +3695,9 @@ we use the
 	if (argc == 5) {	/* extra options that get passed to the mailer */
 		convert_to_string_ex(argv[4]);
 		extra_cmd = Z_STRVAL_PP(argv[4]);
+		extra_cmd_len = Z_STRLEN_PP(argv[4]);
+		/* ASCIIZ check */
+		MAIL_ASCIIZ_CHECK_MBSTRING(extra_cmd, extra_cmd_len);
 	}
 
 	if (extra_cmd) {
