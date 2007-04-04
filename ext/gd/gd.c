@@ -1147,11 +1147,7 @@ zend_module_entry gd_module_entry = {
 	"gd",
 	gd_functions,
 	PHP_MINIT(gd),
-#if HAVE_LIBT1
 	PHP_MSHUTDOWN(gd),
-#else
-	NULL,
-#endif
 	NULL,
 #if HAVE_LIBGD20 && HAVE_GD_STRINGFT && (HAVE_GD_FONTCACHESHUTDOWN || HAVE_GD_FREEFONTCACHE)
 	PHP_RSHUTDOWN(gd),
@@ -1195,16 +1191,20 @@ static void php_free_gd_font(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
-#if HAVE_LIBT1
+
 /* {{{ PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(gd)
 {
+#if HAVE_LIBT1
 	T1_CloseLib();
+#endif
+#if HAVE_GD_FONTMUTEX
+	gdFontCacheMutexShutdown();
+#endif
 	return SUCCESS;
 }
 /* }}} */
-#endif
 
 
 /* {{{ PHP_MINIT_FUNCTION
@@ -1213,6 +1213,9 @@ PHP_MINIT_FUNCTION(gd)
 {
 	le_gd = zend_register_list_destructors_ex(php_free_gd_image, NULL, "gd", module_number);
 	le_gd_font = zend_register_list_destructors_ex(php_free_gd_font, NULL, "gd font", module_number);
+#if HAVE_GD_FONTMUTEX
+	gdFontCacheMutexSetup();
+#endif
 #if HAVE_LIBT1
 	T1_SetBitmapPad(8);
 	T1_InitLib(NO_LOGFILE | IGNORE_CONFIGFILE | IGNORE_FONTDATABASE);
