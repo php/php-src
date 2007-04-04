@@ -1,6 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.2
+- Improved bundled GD
+  . Sync to 2.0.35
+  . colors allocated henceforth from the resulting image overwrite the palette 
+	  colors (Rob Leslie)
+  . Improved thread safety of the gif support (Roman Nemecek, Nuno, Pierre)
+	. Use the dimension of the GIF frame to create the destination image (Pierre)
+	. Load only once the local color map (Pierre)
+  . Improved thread safety of the freetype cache (Scott MacVicar, Nuno, Pierre)
 - Upgraded libraries bundled in the Windows distribution. (Edin)
   . c-client (imap) to version 2006e
   . libpq (PostgreSQL) to version 8.2.3
@@ -38,6 +46,8 @@ PHP                                                                        NEWS
 - Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
 - Fixed bug #40998 (long session array keys are truncated). (Tony)
+- Implement feature request #40947, allow a single filter as argument 
+  for filter_var_array (Pierre)
 - Fixed bug #40921 (php_default_post_reader crashes when post_max_size is
   exceeded). (trickie at gmail dot com, Ilia)
 - Fixed bug #40915 (addcslashes unexpected behavior with binary input). (Tony)
