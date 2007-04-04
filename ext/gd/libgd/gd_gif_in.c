@@ -61,12 +61,14 @@ static struct {
 } GifScreen;
 #endif
 
+#if 0
 static struct {
 	int     transparent;
 	int     delayTime;
 	int     inputFlag;
 	int     disposal;
 } Gif89 = { -1, -1, -1, 0 };
+#endif
 
 #define STACK_SIZE ((1<<(MAX_LWZ_BITS))*2)
 
@@ -87,14 +89,12 @@ typedef struct {
 } LZW_STATIC_DATA;
 
 static int ReadColorMap (gdIOCtx *fd, int number, unsigned char (*buffer)[256]);
-static int DoExtension (gdIOCtx *fd, int label, int *Transparent);
-static int GetDataBlock (gdIOCtx *fd, unsigned char *buf);
-static int GetCode (gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag);
-static int LWZReadByte (gdIOCtx *fd, LZW_STATIC_DATA *sd, int flag, int input_code_size);
+static int DoExtension (gdIOCtx *fd, int label, int *Transparent, int *ZeroDataBlockP);
+static int GetDataBlock (gdIOCtx *fd, unsigned char *buf, int *ZeroDataBlockP);
+static int GetCode (gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag, int *ZeroDataBlockP);
+static int LWZReadByte (gdIOCtx *fd, LZW_STATIC_DATA *sd, char flag, int input_code_size, int *ZeroDataBlockP);
 
-static void ReadImage (gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)[256], int interlace); /*1.4//, int ignore); */
-
-int ZeroDataBlock;
+static void ReadImage (gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)[256], int interlace, int *ZeroDataBlockP); /*1.4//, int ignore); */
 
 gdImagePtr gdImageCreateFromGifSource(gdSourcePtr inSource) /* {{{ */
 {
@@ -126,22 +126,25 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 {
 	/* 1.4       int imageNumber; */
 	int BitPixel;
+#if 0
 	int ColorResolution;
 	int Background;
 	int AspectRatio;
+#endif
 	int Transparent = (-1);
 	unsigned char   buf[16];
 	unsigned char   c;
 	unsigned char   ColorMap[3][MAXCOLORMAPSIZE];
 	unsigned char   localColorMap[3][MAXCOLORMAPSIZE];
-	int             imw, imh;
-	int             useGlobalColormap;
+	int             imw, imh, screen_width, screen_height;
+	int             gif87a, useGlobalColormap;
 	int             bitPixel;
 	int	       i;
 	/*1.4//int             imageCount = 0; */
 
+	int ZeroDataBlock = FALSE;
+
 	gdImagePtr im = 0;
-	ZeroDataBlock = FALSE;
 
 	/*1.4//imageNumber = 1; */
 	if (! ReadOK(fd,buf,6)) {
@@ -151,19 +154,26 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 		return 0;
 	}
 
-	if ((strncmp((char *)buf+3, "87a", 3) != 0) && (strncmp((char *)buf+3, "89a", 3) != 0)) {
+	if (memcmp((char *)buf+3, "87a", 3) == 0) {
+		gif87a = 1;
+	} else if (memcmp((char *)buf+3, "89a", 3) == 0) {
+		gif87a = 0;
+	} else {
 		return 0;
 	}
+
 	if (! ReadOK(fd,buf,7)) {
 		return 0;
 	}
+
 	BitPixel        = 2<<(buf[4]&0x07);
+#if 0
 	ColorResolution = (int) (((buf[4]&0x70)>>3)+1);
 	Background      = buf[5];
 	AspectRatio     = buf[6];
-
-	imw = LM_to_uint(buf[0],buf[1]);
-	imh = LM_to_uint(buf[2],buf[3]);
+#endif
+	screen_width = imw = LM_to_uint(buf[0],buf[1]);
+	screen_height = imh = LM_to_uint(buf[2],buf[3]);
 
 	if (BitSet(buf[4], LOCALCOLORMAP)) {    /* Global Colormap */
 		if (ReadColorMap(fd, BitPixel, ColorMap)) {
@@ -171,6 +181,9 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 		}
 	}
 	for (;;) {
+		int top, left;
+		int width, height;
+
 		if (! ReadOK(fd,&c,1)) {
 			return 0;
 		}
@@ -182,7 +195,7 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 			if (! ReadOK(fd,&c,1)) {
 				return 0;
 			}
-			DoExtension(fd, c, &Transparent);
+			DoExtension(fd, c, &Transparent, &ZeroDataBlock);
 			continue;
 		}
 
@@ -199,29 +212,33 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 		useGlobalColormap = ! BitSet(buf[8], LOCALCOLORMAP);
 
 		bitPixel = 1<<((buf[8]&0x07)+1);
+		left = LM_to_uint(buf[0], buf[1]);
+		top = LM_to_uint(buf[2], buf[3]);
+		width = LM_to_uint(buf[4], buf[5]);
+		height = LM_to_uint(buf[6], buf[7]);
 
+		if (left + width > screen_width || top + height > screen_height) {
+			if (VERBOSE) {
+				printf("Frame is not confined to screen dimension.\n");
+			}
+			return 0;
+		}
+
+		if (!(im = gdImageCreate(width, height))) {
+			return 0;
+		}
+		im->interlace = BitSet(buf[8], INTERLACE);
 		if (!useGlobalColormap) {
 			if (ReadColorMap(fd, bitPixel, localColorMap)) {
 				return 0;
 			}
-		}
-
-		if (!(im = gdImageCreate(imw, imh))) {
-			return 0;
-		}
-
-		im->interlace = BitSet(buf[8], INTERLACE);
-		if (! useGlobalColormap) {
-			ReadImage(im, fd, imw, imh, localColorMap,
-					BitSet(buf[8], INTERLACE));
-			/*1.4//imageCount != imageNumber); */
+			ReadImage(im, fd, width, height, localColorMap, 
+					BitSet(buf[8], INTERLACE), &ZeroDataBlock);
 		} else {
-			ReadImage(im, fd, imw, imh,
+			ReadImage(im, fd, width, height,
 					ColorMap,
-					BitSet(buf[8], INTERLACE));
-			/*1.4//imageCount != imageNumber); */
+						BitSet(buf[8], INTERLACE), &ZeroDataBlock);
 		}
-
 		if (Transparent != (-1)) {
 			gdImageColorTransparent(im, Transparent);
 		}
@@ -273,34 +290,37 @@ static int ReadColorMap(gdIOCtx *fd, int number, unsigned char (*buffer)[256]) /
 }
 /* }}} */
 
-static int DoExtension(gdIOCtx *fd, int label, int *Transparent) /* {{{ */
+static int
+DoExtension(gdIOCtx *fd, int label, int *Transparent, int *ZeroDataBlockP)
 {
 	unsigned char buf[256];
 
 	switch (label) {
 		case 0xf9:              /* Graphic Control Extension */
 			memset(buf, 0, 4); /* initialize a few bytes in the case the next function fails */
-			(void) GetDataBlock(fd, (unsigned char*) buf);
+               (void) GetDataBlock(fd, (unsigned char*) buf, ZeroDataBlockP);
+#if 0
 			Gif89.disposal    = (buf[0] >> 2) & 0x7;
 			Gif89.inputFlag   = (buf[0] >> 1) & 0x1;
 			Gif89.delayTime   = LM_to_uint(buf[1],buf[2]);
+#endif
 			if ((buf[0] & 0x1) != 0)
 				*Transparent = buf[3];
 
-			while (GetDataBlock(fd, (unsigned char*) buf) > 0)
-				;
+			while (GetDataBlock(fd, (unsigned char*) buf, ZeroDataBlockP) > 0);
 			return FALSE;
 		default:
 			break;
 	}
-	while (GetDataBlock(fd, (unsigned char*) buf) > 0)
+       while (GetDataBlock(fd, (unsigned char*) buf, ZeroDataBlockP) > 0)
 		;
 
 	return FALSE;
 }
 /* }}} */
 
-static int GetDataBlock_(gdIOCtx *fd, unsigned char *buf) /* {{{ */
+static int
+GetDataBlock_(gdIOCtx *fd, unsigned char *buf, int *ZeroDataBlockP)
 {
 	unsigned char   count;
 
@@ -308,7 +328,7 @@ static int GetDataBlock_(gdIOCtx *fd, unsigned char *buf) /* {{{ */
 		return -1;
 	}
 
-	ZeroDataBlock = count == 0;
+	*ZeroDataBlockP = count == 0;
 
 	if ((count != 0) && (! ReadOK(fd, buf, count))) {
 		return -1;
@@ -318,14 +338,16 @@ static int GetDataBlock_(gdIOCtx *fd, unsigned char *buf) /* {{{ */
 }
 /* }}} */
 
-static int GetDataBlock(gdIOCtx *fd, unsigned char *buf) /* {{{ */
+static int
+GetDataBlock(gdIOCtx *fd, unsigned char *buf, int *ZeroDataBlockP)
 {
 	int rv;
 	int i;
-	char *tmp = NULL;
 
-	rv = GetDataBlock_(fd,buf);
+
+	rv = GetDataBlock_(fd,buf, ZeroDataBlockP);
 	if (VERBOSE) {
+		char *tmp = NULL;
 		if (rv > 0) {
 			tmp = safe_emalloc(3 * rv, sizeof(char), 1);
 			for (i=0;i<rv;i++) {
@@ -341,7 +363,8 @@ static int GetDataBlock(gdIOCtx *fd, unsigned char *buf) /* {{{ */
 }
 /* }}} */
 
-static int GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag) /* {{{ */
+static int
+GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag, int *ZeroDataBlockP)
 {
 	int           i, j, ret;
 	unsigned char count;
@@ -364,7 +387,7 @@ static int GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag)
 		scd->buf[0] = scd->buf[scd->last_byte-2];
 		scd->buf[1] = scd->buf[scd->last_byte-1];
 
-		if ((count = GetDataBlock(fd, &scd->buf[2])) <= 0)
+		if ((count = GetDataBlock(fd, &scd->buf[2], ZeroDataBlockP)) <= 0)
 			scd->done = TRUE;
 
 		scd->last_byte = 2 + count;
@@ -380,17 +403,19 @@ static int GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag)
 	return ret;
 }
 
-static int GetCode(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag) /* {{{ */
+static int
+GetCode(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag, int *ZeroDataBlockP)
 {
 	int rv;
 
-	rv = GetCode_(fd, scd, code_size, flag);
-	if (VERBOSE) php_gd_error_ex(E_NOTICE, "[GetCode(,%d,%d) returning %d]",code_size,flag,rv);
+ rv = GetCode_(fd, scd, code_size,flag, ZeroDataBlockP);
+ if (VERBOSE) printf("[GetCode(,%d,%d) returning %d]\n",code_size,flag,rv);
 	return(rv);
 }
 /* }}} */
 
-static int LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, int flag, int input_code_size) /* {{{ */
+static int
+LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, char flag, int input_code_size, int *ZeroDataBlockP)
 {
 	int code, incode, i;
 
@@ -402,7 +427,7 @@ static int LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, int flag, int input_co
 		sd->max_code_size = 2*sd->clear_code;
 		sd->max_code = sd->clear_code+2;
 
-		GetCode(fd, &sd->scd, 0, TRUE);
+		GetCode(fd, &sd->scd, 0, TRUE, ZeroDataBlockP);
 
 		sd->fresh = TRUE;
 
@@ -420,7 +445,7 @@ static int LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, int flag, int input_co
 		sd->fresh = FALSE;
 		do {
 			sd->firstcode = sd->oldcode =
-				GetCode(fd, &sd->scd, sd->code_size, FALSE);
+			GetCode(fd, &sd->scd, sd->code_size, FALSE, ZeroDataBlockP);
 		} while (sd->firstcode == sd->clear_code);
 		return sd->firstcode;
 	}
@@ -428,7 +453,7 @@ static int LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, int flag, int input_co
 	if (sd->sp > sd->stack)
 		return *--sd->sp;
 
-	while ((code = GetCode(fd, &sd->scd, sd->code_size, FALSE)) >= 0) {
+		while ((code = GetCode(fd, &sd->scd, sd->code_size, FALSE, ZeroDataBlockP)) >= 0) {
 		if (code == sd->clear_code) {
 			for (i = 0; i < sd->clear_code; ++i) {
 				sd->table[0][i] = 0;
@@ -441,16 +466,16 @@ static int LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, int flag, int input_co
 			sd->max_code = sd->clear_code+2;
 			sd->sp = sd->stack;
 			sd->firstcode = sd->oldcode =
-				GetCode(fd, &sd->scd, sd->code_size, FALSE);
+								GetCode(fd, &sd->scd, sd->code_size, FALSE, ZeroDataBlockP);
 			return sd->firstcode;
 		} else if (code == sd->end_code) {
 			int             count;
 			unsigned char   buf[260];
 
-			if (ZeroDataBlock)
+			if (*ZeroDataBlockP)
 				return -2;
 
-			while ((count = GetDataBlock(fd, buf)) > 0)
+			while ((count = GetDataBlock(fd, buf, ZeroDataBlockP)) > 0)
 				;
 
 			if (count != 0)
@@ -503,17 +528,19 @@ static int LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, int flag, int input_co
 }
 /* }}} */
 
-static int LWZReadByte(gdIOCtx *fd, LZW_STATIC_DATA *sd, int flag, int input_code_size) /* {{{ */
+static int
+LWZReadByte(gdIOCtx *fd, LZW_STATIC_DATA *sd, char flag, int input_code_size, int *ZeroDataBlockP)
 {
 	int rv;
 
-	rv = LWZReadByte_(fd, sd, flag, input_code_size);
-	if (VERBOSE) php_gd_error_ex(E_NOTICE, "[LWZReadByte(,%d,%d) returning %d]",flag,input_code_size,rv);
+	rv = LWZReadByte_(fd, sd, flag, input_code_size, ZeroDataBlockP);
+	if (VERBOSE) printf("[LWZReadByte(,%d,%d) returning %d]\n",flag,input_code_size,rv);
 	return(rv);
 }
 /* }}} */
 
-static void ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)[256], int interlace) /* {{{ */ /*1.4//, int ignore) */
+static void
+ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)[256], int interlace, int *ZeroDataBlockP) /*1.4//, int ignore) */
 {
 	unsigned char   c;
 	int             v;
@@ -541,7 +568,7 @@ static void ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned 
 	}
 	/* Many (perhaps most) of these colors will remain marked open. */
 	im->colorsTotal = gdMaxColors;
-	if (LWZReadByte(fd, &sd, TRUE, c) < 0) {
+	if (LWZReadByte(fd, &sd, TRUE, c, ZeroDataBlockP) < 0) {
 		return;
 	}
 
@@ -555,7 +582,7 @@ static void ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned 
 	/*        return; */
 	/*} */
 
-	while ((v = LWZReadByte(fd, &sd, FALSE, c)) >= 0 ) {
+	while ((v = LWZReadByte(fd, &sd, FALSE, c, ZeroDataBlockP)) >= 0 ) {
 		/* This how we recognize which colors are actually used. */
 		if (im->open[v]) {
 			im->open[v] = 0;
@@ -597,7 +624,7 @@ static void ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned 
 	}
 
 fini:
-	if (LWZReadByte(fd, &sd, FALSE, c)>=0) {
+	if (LWZReadByte(fd, &sd, FALSE, c, ZeroDataBlockP) >=0) {
 		/* Ignore extra */
 	}
 }
