@@ -772,6 +772,7 @@ LOCAL (void)
       nim->green[icolor] = 255;
       nim->blue[icolor] = 255;
     }
+		nim->open[icolor] = 0;
 #endif
 }
 
