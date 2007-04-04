@@ -37,6 +37,7 @@ PHP                                                                        NEWS
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
+- Fixed bug #40998 (long session array keys are truncated). (Tony)
 - Fixed bug #40921 (php_default_post_reader crashes when post_max_size is
   exceeded). (trickie at gmail dot com, Ilia)
 - Fixed bug #40915 (addcslashes unexpected behavior with binary input). (Tony)
