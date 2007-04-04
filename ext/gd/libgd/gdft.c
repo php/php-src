@@ -698,10 +698,8 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 				} else {
 					/* find antialised color */
 					tc_key.bgcolor = *pixel;
-					gdMutexLock(gdFontCacheMutex);
 					tc_elem = (tweencolor_t *) gdCacheGet(tc_cache, &tc_key);
 					*pixel = tc_elem->tweencolor;
-					gdMutexUnlock(gdFontCacheMutex);
 				}
 			}
 		}
@@ -722,7 +720,6 @@ void gdFontCacheShutdown()
 		gdCacheDelete(fontCache);
 		fontCache = NULL;
 		gdMutexUnlock(gdFontCacheMutex);
-		gdMutexShutdown(gdFontCacheMutex);
 		FT_Done_FreeType(library);
 	}
 }
@@ -732,15 +729,23 @@ void gdFreeFontCache()
 	gdFontCacheShutdown();
 }
 
+void gdFontCacheMutexSetup()
+{
+	gdMutexSetup(gdFontCacheMutex);
+}
+
+void gdFontCacheMutexShutdown()
+{
+	gdMutexShutdown(gdFontCacheMutex);
+}
+
 int gdFontCacheSetup(void)
 {
 	if (fontCache) {
 		/* Already set up */
 		return 0;
 	}
-	gdMutexSetup(gdFontCacheMutex);
 	if (FT_Init_FreeType(&library)) {
-		gdMutexShutdown(gdFontCacheMutex);
 		return -1;
 	}
 	fontCache = gdCacheCreate (FONTCACHESIZE, fontTest, fontFetch, fontRelease);
@@ -803,15 +808,16 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 
 	/***** initialize font library and font cache on first call ******/
 
+	gdMutexLock(gdFontCacheMutex);
 	if (!fontCache) {
 		if (gdFontCacheSetup() != 0) {
 			gdCacheDelete(tc_cache);
+			gdMutexUnlock(gdFontCacheMutex);
 			return "Failure to initialize font library";
 		}
 	}
 	/*****/
 
-	gdMutexLock(gdFontCacheMutex);
 	/* get the font (via font cache) */
 	fontkey.fontlist = fontlist;
 	fontkey.library = &library;
