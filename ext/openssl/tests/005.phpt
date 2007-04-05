@@ -1,7 +1,10 @@
 --TEST--
 openssl_csr_get_subject() tests
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+<?php 
+if (!extension_loaded("openssl")) die("skip"); 
+if (!function_exists("utf8_decode")) die("skip");
+?>
 --FILE--
 <?php
 
