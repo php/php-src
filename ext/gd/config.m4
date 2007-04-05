@@ -245,8 +245,8 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],
 
   GD_VERNUM=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3 2> /dev/null`
 
-  if test "$GD_VERNUM" -lt "2000033"; then
-    AC_MSG_ERROR([GD version 2.0.33 or greater required.])
+  if test "$GD_VERNUM" -lt "2000034"; then
+    AC_MSG_ERROR([GD version 2.0.34 or greater required.])
   else
     AC_DEFINE_UNQUOTED(PHP_GD_VERSION_STRING, "$GD_VERSION", [GD library version])
     AC_MSG_RESULT([$GD_VERSION])
