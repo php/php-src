@@ -44,6 +44,7 @@
 #include <openssl/conf.h>
 #include <openssl/rand.h>
 #include <openssl/ssl.h>
+#include <openssl/pkcs12.h>
 
 #define DEFAULT_KEY_LENGTH	512
 #define MIN_KEY_LENGTH		384
@@ -1308,7 +1309,7 @@ PHP_FUNCTION(openssl_x509_free)
 
 /* {{{ x509 CSR functions */
 
-static void php_sk_X509_free(STACK_OF(X509) * sk)
+static void php_sk_X509_free(STACK_OF(X509) * sk) /* {{{ */
 {
 	for (;;) {
 		X509* x = sk_X509_pop(sk);
@@ -1317,8 +1318,9 @@ static void php_sk_X509_free(STACK_OF(X509) * sk)
 	}
 	sk_X509_free(sk);
 }
+/* }}} */
 
-static STACK_OF(X509) * php_array_to_X509_sk(zval ** zcerts)
+static STACK_OF(X509) * php_array_to_X509_sk(zval ** zcerts TSRMLS_DC) /* {{{ */
 {
 	HashPosition hpos;
 	zval ** zcertval;
@@ -1370,6 +1372,7 @@ static STACK_OF(X509) * php_array_to_X509_sk(zval ** zcerts)
   clean_exit:
     return sk;
 }
+/* }}} */
 
 /* {{{ proto bool openssl_pkcs12_export_to_file(mixed x509, string filename, mixed priv_key, string pass[, array args])
    Creates and exports a PKCS to file */
@@ -1389,8 +1392,9 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	zval ** item;
 	STACK_OF(X509) *ca = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zszs|a", &zcert, &filename, &filename_len, &zpkey, &pass, &pass_len, &args) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zszs|a", &zcert, &filename, &filename_len, &zpkey, &pass, &pass_len, &args) == FAILURE) {
 		return;
+	}
 
 	RETVAL_FALSE;
 	
@@ -1408,21 +1412,23 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "private key does not correspond to cert");
 		goto cleanup;
 	}
-	if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		goto cleanup;
 	}
 
 	/* parse extra config from args array, promote this to an extra function */
-	if (args && zend_hash_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name"), (void**)&item) == SUCCESS)
+	if (args && zend_hash_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name"), (void**)&item) == SUCCESS) {
 		friendly_name = Z_STRVAL_PP(item);
+	}
 	/*
 	 certpbe (default RC2-40)
 	 keypbe (default 3DES)
 	 friendly_caname
 	*/
 
-	if (args && zend_hash_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts"), (void**)&item) == SUCCESS)
-		ca = php_array_to_X509_sk(item);
+	if (args && zend_hash_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts"), (void**)&item) == SUCCESS) {
+		ca = php_array_to_X509_sk(item TSRMLS_CC);
+	}
 	/* end parse extra config */
 
 	/* 
@@ -1473,8 +1479,9 @@ PHP_FUNCTION(openssl_pkcs12_export)
 	zval ** item;
 	STACK_OF(X509) *ca = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzzs|a", &zcert, &zout, &zpkey, &pass, &pass_len, &args) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzzs|a", &zcert, &zout, &zpkey, &pass, &pass_len, &args) == FAILURE) {
 		return;
+	}
 
 	RETVAL_FALSE;
 	
@@ -1494,11 +1501,13 @@ PHP_FUNCTION(openssl_pkcs12_export)
 	}
 
 	/* parse extra config from args array, promote this to an extra function */
-	if (args && zend_hash_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name"), (void**)&item) == SUCCESS)
+	if (args && zend_hash_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name"), (void**)&item) == SUCCESS) {
 		friendly_name = Z_STRVAL_PP(item);
+	}
 
-	if (args && zend_hash_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts"), (void**)&item) == SUCCESS)
-		ca = php_array_to_X509_sk(item);
+	if (args && zend_hash_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts"), (void**)&item) == SUCCESS) {
+		ca = php_array_to_X509_sk(item TSRMLS_CC);
+	}
 	/* end parse extra config */
 	
 	p12 = PKCS12_create(pass, friendly_name, priv_key, cert, ca, 0, 0, 0, 0, 0);
@@ -1543,8 +1552,9 @@ PHP_FUNCTION(openssl_pkcs12_read)
 	BIO * bio_in = NULL;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzs", &zp12, &zout, &pass, &pass_len) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzs", &zp12, &zout, &pass, &pass_len) == FAILURE) {
 		return;
+	}
 
 	RETVAL_FALSE;
 	
@@ -1626,6 +1636,8 @@ PHP_FUNCTION(openssl_pkcs12_read)
 		X509_free(cert);
 	}
 }
+/* }}} */
+
 /* }}} */
 
 /* {{{ x509 CSR functions */
@@ -1931,8 +1943,9 @@ PHP_FUNCTION(openssl_csr_sign)
 	int i;
 	struct php_x509_request req;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ!Zl|a!l", &zcsr, &zcert, &zpkey, &num_days, &args, &serial) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ!Zl|a!l", &zcsr, &zcert, &zpkey, &num_days, &args, &serial) == FAILURE) {
 		return;
+	}
 
 	RETVAL_FALSE;
 	PHP_SSL_REQ_INIT(&req);
