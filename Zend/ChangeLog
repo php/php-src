@@ -1,3 +1,23 @@
+2007-04-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_language_parser.y
+      tests/halt_compiler1.phpt
+      tests/halt_compiler1.phpt
+      tests/halt_compiler2.phpt
+      tests/halt_compiler2.phpt
+      tests/halt_compiler3.phpt
+      tests/halt_compiler3.phpt
+      tests/halt_compiler4.phpt
+      tests/halt_compiler4.phpt:
+      
+      Addres limitation of __HALT_COMPILER() that allowed only one instance
+      per request.
+      
+
 2007-04-03  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c

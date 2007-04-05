@@ -1,3 +1,170 @@
+2007-04-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      - nuke c++ comments
+
+    * ext/openssl/openssl.c
+      ext/openssl/tests/005.phpt
+      ext/openssl/tests/005_crt.txt:
+      - MFB:
+       - implement #39867, PKCS#12 support
+       - Fix possible multibyte issues issue in the add_assoc function
+       - add test for openssl_csr_get_subject
+
+    * (PHP_5_2)
+      NEWS:
+      - #39867 and openssl MB fix
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c
+      ext/openssl/php_openssl.h
+      ext/openssl/tests/005.phpt:
+      - implement #39867, PKCS#12 support
+      - Fix possible multibyte issues issue in the add_assoc function
+      - add test for openssl_csr_get_subject
+
+    * (PHP_5_2)
+      NEWS:
+      - filter and gd entries
+
+    * ext/filter/filter.c:
+      - MFB: #40947, allow a single filter as argument for filter_var_arra
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      - #40947, allow a single filter as argument for filter_var_array
+
+2007-04-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/session/session.c
+      ext/session/session.c:
+      MFH: fix #40998 (long session array keys are truncated)
+
+    * ext/session/session.c:
+      fix #40998 (long session array keys are truncated)
+
+2007-04-04  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      Sync with mail function in mb_send_mail function(problem MOPB-33-2007:PHP
+      and MOPB-34-2007:PHP).
+
+2007-04-04  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/gd/libgd/gdft.c:
+      MFB: fix race condition on font cache shutdown
+
+    * (PHP_5_2)
+      ext/gd/libgd/gdft.c:
+      fix race condition on font cache shutdown
+
+2007-04-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd_gif_in.c:
+      - MFH:
+       - do not try to use the global color map when none was found (Nuno,
+      Pierre)
+       - free im on error
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gif_in.c:
+      - do not try to use the global color map when none was found (Nuno, Pierre)
+      - free im on error
+
+2007-04-04  Antony Dovgal  <antony@zend.com>
+
+    * ext/openssl/xp_ssl.c:
+      fix leak on error
+
+2007-04-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/gd.c
+      ext/gd/php_gd.h:
+      - MFH: don't declare MSHUTDOWN if both cachesetup and t1lib are not used
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/tests/bug37360.phpt:
+      - fix previous commit (missing #ifdef in shutdown declaration)
+      - MFB:
+       - Sync with gd 2.0.35 (bug #52, #60 and #66)
+        - Improve TS of gif loading code (Roman Nemecek, Nuno, Pierre)
+        - a frame size must be confined to the screen defition (Pierre)
+        - be sure to always read the dimensions in the frame and does not use
+          the screen size (see #66 for a side effect) (Pierre)
+        - Update #37360 test. The frame does not fit the logical screen (specs
+          tell that it must fit) (Pierre)
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/tests/bug37360.phpt:
+      - Sync with gd 2.0.35 (bug #52, #60 and #66)
+       - Improve TS of gif loading code (Roman Nemecek, Nuno, Pierre)
+       - a frame size must be confined to the screen defition (Pierre)
+       - be sure to always read the dimensions in the frame and does not use
+         the screen size (see #66 for a side effect) (Pierre)
+      - Update #37360 test. The frame does not fit the logical screen (specs
+        tell that it must fit) (Pierre)
+
+    * (PHP_5_2)
+      ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/php_gd.h
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gdft.c:
+      - MFH:
+       - remove double lock (tween colors cache is created in each thread, the
+         cache mutex is already locked earlier)
+       - #40858, other TS improvements for gd freetype cache management
+         cache initialization and shutdown is now done in MINIT and MSHUTDOWN.
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gdft.c:
+      - remove double lock (tween colors cache is created in each thread, the
+        cache mutex is already locked earlier)
+      - #40858, other TS improvements for gd freetype cache management
+        cache initialization and shutdown is now done in MINIT and MSHUTDOWN.
+
+2007-04-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/halt_compiler1.phpt
+      ZendEngine2/tests/halt_compiler1.phpt
+      ZendEngine2/tests/halt_compiler2.phpt
+      ZendEngine2/tests/halt_compiler2.phpt
+      ZendEngine2/tests/halt_compiler3.phpt
+      ZendEngine2/tests/halt_compiler3.phpt
+      ZendEngine2/tests/halt_compiler4.phpt
+      ZendEngine2/tests/halt_compiler4.phpt:
+      
+      Addres limitation of __HALT_COMPILER() that allowed only one instance
+      per request.
+      
+
+2007-04-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd_topal.c:
+      - MFB: colors allocated henceforth from the resulting image overwrite
+      	the palette colors (sync with 2.0.34) (Rob Leslie)
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_topal.c:
+      . colors allocated henceforth from the resulting image overwrite
+        the palette colors (sync with 2.0.34) (Rob Leslie)
+
 2007-04-03  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
