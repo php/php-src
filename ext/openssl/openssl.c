@@ -1565,11 +1565,10 @@ PHP_FUNCTION(openssl_pkcs12_read)
 	
 	if(d2i_PKCS12_bio(bio_in, &p12)) {
 		if(PKCS12_parse(p12, pass, &pkey, &cert, &ca)) {
+			BIO * bio_out;
 			
 			zval_dtor(zout);
 			array_init(zout);
-		
-			BIO * bio_out;
 
 			bio_out = BIO_new(BIO_s_mem());
 			if (PEM_write_bio_X509(bio_out, cert)) {
