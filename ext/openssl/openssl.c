@@ -1333,7 +1333,7 @@ static void php_sk_X509_free(STACK_OF(X509) * sk)
 	sk_X509_free(sk);
 }
 
-static STACK_OF(X509) * php_array_to_X509_sk(zval ** zcerts)
+static STACK_OF(X509) * php_array_to_X509_sk(zval ** zcerts TSRMLS_DC)
 {
 	HashPosition hpos;
 	zval ** zcertval;
@@ -1436,7 +1436,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	*/
 
 	if (args && zend_hash_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts"), (void**)&item) == SUCCESS)
-		ca = php_array_to_X509_sk(item);
+		ca = php_array_to_X509_sk(item TSRMLS_CC);
 	/* end parse extra config */
 
 	/*PKCS12 *PKCS12_create(char *pass, char *name, EVP_PKEY *pkey, X509 *cert, STACK_OF(X509) *ca,
@@ -1510,7 +1510,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 		friendly_name = Z_STRVAL_PP(item);
 
 	if (args && zend_hash_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts"), (void**)&item) == SUCCESS)
-		ca = php_array_to_X509_sk(item);
+		ca = php_array_to_X509_sk(item TSRMLS_CC);
 	/* end parse extra config */
 	
 	p12 = PKCS12_create(pass, friendly_name, priv_key, cert, ca, 0, 0, 0, 0, 0);
