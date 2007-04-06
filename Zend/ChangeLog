@@ -1,3 +1,23 @@
+2007-04-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/foreach.phpt
+      tests/foreach.phpt:
+      
+      file foreach.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      
+      Fixed foreach by-ref bug.
+      
+
+2007-04-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_API.c:
+      - MFH zend_info_call_*() stuff, fixes coverity issue #328, noticed by tony
+
 2007-04-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

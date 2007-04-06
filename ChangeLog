@@ -1,3 +1,70 @@
+2007-04-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/tests/foreach.phpt
+      ZendEngine2/tests/foreach.phpt:
+      
+      file foreach.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      
+      Fixed foreach by-ref bug.
+      
+
+2007-04-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c:
+      - MFH zend_info_call_*() stuff, fixes coverity issue #328, noticed by tony
+
+2007-04-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      fix win32 build
+
+2007-04-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/config.m4:
+      - depends on 2.0.34
+
+    * (PHP_5_2)
+      ext/gd/gd.c:
+      - reflect the "real" version to avoid confusions. Users should really use
+        only the bundled version
+
+    * (PHP_5_2)
+      ext/openssl/tests/005_crt.txt:
+      - MFB: import the right data 005_crt.txt
+
+2007-04-05  Antony Dovgal  <antony@zend.com>
+
+    * ext/gd/gd.c:
+      fix build without FreeType
+
+    * ext/openssl/openssl.c
+      ext/openssl/php_openssl.h
+      ext/openssl/tests/005.phpt:
+      fix build & test
+      improve coding style
+
+    * (PHP_5_2)
+      ext/openssl/tests/005.phpt:
+      fix test
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      fix ZTS build
+
+2007-04-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mcrypt/mcrypt.c:
+      
+      Fixed bug #40999 (mcrypt_create_iv() not using random seed).
+
 2007-04-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_2)
