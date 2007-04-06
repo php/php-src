@@ -1219,6 +1219,7 @@ PHP_MINIT_FUNCTION(gd)
 {
 	le_gd = zend_register_list_destructors_ex(php_free_gd_image, NULL, "gd", module_number);
 	le_gd_font = zend_register_list_destructors_ex(php_free_gd_font, NULL, "gd font", module_number);
+
 #if HAVE_GD_FONTMUTEX && HAVE_LIBFREETYPE
 	gdFontCacheMutexSetup();
 #endif
