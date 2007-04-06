@@ -1,5 +1,5 @@
 --TEST--
-Bug #40442 ()
+Bug #40442 (ArrayObject::offsetExists broke in 5.2.1, works in 5.2.0)
 --FILE--
 <?php
 $a = new ArrayObject();
