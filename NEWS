@@ -120,6 +120,8 @@ PHP                                                                        NEWS
   methods). (Tony)
 - Fixed bug #40451 (addAttribute() may crash when used with non-existent child 
   node). (Tony)
+- Fixed bug #40442 (ArrayObject::offsetExists broke in 5.2.1, works in 5.2.0).
+  (olivier at elma dot fr, Marcus)
 - Fixed bug #40428 (imagepstext() doesn't accept optional parameter). (Pierre)
 - Fixed bug #40417 (Allow multiple instances of the same named PDO token in
   prepared statement emulation code). (Ilia)
