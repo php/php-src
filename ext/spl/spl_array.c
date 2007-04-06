@@ -480,7 +480,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 	case IS_STRING:
 	case IS_UNICODE:
 		if (check_empty) {
-			if (zend_symtable_find(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &tmp) != FAILURE && zend_is_true(*tmp)) {
+			if (zend_u_symtable_find(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void **) &tmp) != FAILURE && zend_is_true(*tmp)) {
 				return 1;
 			}
 			return 0;
