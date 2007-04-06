@@ -225,11 +225,11 @@ printf("%d", $tempstring);
 --EXPECTF--
 *** Output for zero argument ***
 
-Warning: Wrong parameter count for printf() in /usr/src/php-5.2CVS/ext/standard/tests/strings/printf_64bit.php on line 20
+Warning: Wrong parameter count for printf() in %s on line %d
 
 *** Output for insufficient number of arguments ***
 
-Warning: printf(): Too few arguments in /usr/src/php-5.2CVS/ext/standard/tests/strings/printf_64bit.php on line 27
+Warning: printf(): Too few arguments in %s on line %d
 
 *** Output for scalar argument ***
 3
