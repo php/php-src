@@ -458,9 +458,25 @@ PHP_FUNCTION(spl_autoload_register)
 		}
 	
 		zend_u_str_tolower(Z_TYPE(zfunc_name), Z_UNIVAL(zfunc_name), Z_UNILEN(zfunc_name));
+		if (SPL_G(autoload_functions) && zend_u_hash_exists(SPL_G(autoload_functions), Z_TYPE(zfunc_name), Z_UNIVAL(zfunc_name), Z_UNILEN(zfunc_name)+1)) {
+			goto skip;
+		}
+
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
+			zstr lc_name;
+			size_t func_name_len = Z_UNISIZE(zfunc_name);
+			lc_name.v = Z_UNIVAL(zfunc_name).v = erealloc(Z_UNIVAL(zfunc_name).v, func_name_len + 1 + sizeof(long));
+			memcpy(lc_name.s + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(zend_object_handle));
+			func_name_len += sizeof(zend_object_handle);
+			lc_name.s[func_name_len] = '\0';
 			alfi.obj = *obj_ptr;
 			alfi.obj->refcount++;
+			if (Z_TYPE(zfunc_name) == IS_UNICODE) {
+				Z_UNILEN(zfunc_name) = func_name_len / sizeof(UChar);
+			} else {
+				Z_UNILEN(zfunc_name) = func_name_len;
+			}
 		} else {
 			alfi.obj = NULL;
 		}
@@ -482,7 +498,7 @@ PHP_FUNCTION(spl_autoload_register)
 		}
 
 		zend_u_hash_add(SPL_G(autoload_functions), Z_TYPE(zfunc_name), Z_UNIVAL(zfunc_name), Z_UNILEN(zfunc_name)+1, &alfi, sizeof(autoload_func_info), NULL);
-
+skip:
 		zval_dtor(&zfunc_name);
 	}
 
@@ -503,12 +519,13 @@ PHP_FUNCTION(spl_autoload_unregister)
 	zstr lc_name;
 	int success = FAILURE;
 	zend_function *spl_func_ptr;
+	zval **obj_ptr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcallable) == FAILURE) {
 		return;
 	}
 
-	if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_SYNTAX_ONLY, &zfunc_name, NULL, NULL, NULL TSRMLS_CC)) {
+	if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_SYNTAX_ONLY, &zfunc_name, NULL, NULL, &obj_ptr TSRMLS_CC)) {
 		zval_dtor(&zfunc_name);
 		RETURN_FALSE;
 	}
@@ -527,6 +544,17 @@ PHP_FUNCTION(spl_autoload_unregister)
 		} else {
 			/* remove specific */
 			success = zend_u_hash_del(SPL_G(autoload_functions), Z_TYPE(zfunc_name), lc_name, Z_UNILEN(zfunc_name)+1);
+			if (success != SUCCESS && obj_ptr) {
+				size_t func_name_len = Z_UNISIZE(zfunc_name);
+				lc_name.v = erealloc(lc_name.v, func_name_len + 1 + sizeof(long));
+				memcpy(lc_name.v + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(long));
+				func_name_len += sizeof(long);
+				lc_name.s[func_name_len] = '\0';
+				if (Z_TYPE(zfunc_name) == IS_UNICODE) {
+					func_name_len /= sizeof(UChar);
+				}
+				success = zend_u_hash_del(SPL_G(autoload_functions), Z_TYPE(zfunc_name), lc_name, func_name_len+1);
+			}
 		}
 	} else if ((Z_UNILEN(zfunc_name) == sizeof("spl_autoload")-1) &&
 	           (ZEND_U_EQUAL(Z_TYPE(zfunc_name), lc_name, Z_UNILEN(zfunc_name), "spl_autoload", sizeof("spl_autoload")-1))) {
