@@ -466,16 +466,18 @@ PHP_FUNCTION(spl_autoload_register)
 			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
 			zstr lc_name;
 			size_t func_name_len = Z_UNISIZE(zfunc_name);
-			lc_name.v = Z_UNIVAL(zfunc_name).v = erealloc(Z_UNIVAL(zfunc_name).v, func_name_len + 1 + sizeof(long));
+			lc_name.v = Z_UNIVAL(zfunc_name).v = erealloc(Z_UNIVAL(zfunc_name).v, func_name_len + 2 + sizeof(zend_object_handle));
 			memcpy(lc_name.s + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(zend_object_handle));
 			func_name_len += sizeof(zend_object_handle);
-			lc_name.s[func_name_len] = '\0';
 			alfi.obj = *obj_ptr;
 			alfi.obj->refcount++;
 			if (Z_TYPE(zfunc_name) == IS_UNICODE) {
-				Z_UNILEN(zfunc_name) = func_name_len / sizeof(UChar);
+				func_name_len /= sizeof(UChar);
+				Z_STRLEN(zfunc_name) = func_name_len;
+				lc_name.u[func_name_len] = '\0';
 			} else {
-				Z_UNILEN(zfunc_name) = func_name_len;
+				Z_STRLEN(zfunc_name) = func_name_len;
+				lc_name.s[func_name_len] = '\0';
 			}
 		} else {
 			alfi.obj = NULL;
