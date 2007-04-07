@@ -1,3 +1,101 @@
+2007-04-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/filestat.c:
+      MFB: clean & refactored disk_*() funcs implementation
+      Ilia, feel free to make these functions public, though I don't see why
+      would want to do that
+
+2007-04-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_array.c:
+      - Fix unicode issue
+
+    * ext/spl/php_spl.c:
+      - Fix unicode issue in unregister according to register solution
+
+    * ext/spl/php_spl.c:
+      - Fix unicode issue (our string termination test checks both ending bytes
+      instead of just one)
+
+    * ZendEngine2/zend_operators.h:
+      - Add a helper
+
+2007-04-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/printf_64bit.phpt
+      ext/standard/tests/strings/printf_64bit.phpt:
+      fix test
+
+2007-04-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * main/snprintf.h:
+      MFB
+
+    * (PHP_5_2)
+      main/snprintf.h:
+      We can't use the printf attribute here since we are supporting
+      non-standard formats (like 'F').
+
+2007-04-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/php_spl.c:
+      - Fix types
+
+    * ext/spl/php_spl.c:
+      - MFB #40091 fix
+
+2007-04-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      ext/soap/php_encoding.c:
+      Apologies. Didn't realize we were using custom snprintf().
+
+    * (PHP_5_2)
+      ext/soap/php_encoding.c:
+      Typo?
+
+2007-04-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_array.c:
+      - Fix 40442
+
+    * (PHP_5_2)
+      ext/spl/tests/bug40442.phpt:
+      - Add bug name
+
+    * (PHP_5_2)
+      ext/spl/php_spl.c:
+      - Better fix for #40091
+
+2007-04-06  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/config.w32:
+      - MFB: Fix windows mutex intialization, add  HAVE_GD_FONTMUTEX and
+        HAVE_LIBFREETYPE to config.w32 (Thanks to Frank for the report)
+
+    * (PHP_5_2)
+      ext/gd/config.w32
+      ext/gd/gd.c:
+      - Fix windows mutex intialization, add  HAVE_GD_FONTMUTEX and 
+      HAVE_LIBFREETYPE
+        to config.w32 (Thanks to Frank for the report)
+
+2007-04-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_array.c
+      ext/spl/tests/bug40442.phpt
+      ext/spl/tests/bug40442.phpt:
+      - Fix #40442
+
+2007-04-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      main/main.c:
+      Avoid locks when appening to the error log file
+
 2007-04-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ZendEngine2/tests/foreach.phpt
