@@ -1,3 +1,8 @@
+2007-04-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_operators.h:
+      - Add a helper
+
 2007-04-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * tests/foreach.phpt
