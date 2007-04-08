@@ -272,6 +272,7 @@ static void tokenize(zval *return_value TSRMLS_DC)
 	zval *keyword;
 	int token_type;
 	zend_bool destroy;
+	int token_line = 1;
 
 	CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING;
 
@@ -301,6 +302,7 @@ static void tokenize(zval *return_value TSRMLS_DC)
 			} else {
 				add_next_index_stringl(keyword, zendtext, zendleng, 1);
 			}
+			add_next_index_long(keyword, token_line);
 			add_next_index_zval(return_value, keyword);
 		} else {
 			add_next_index_stringl(return_value, zendtext, zendleng, 1);
@@ -309,6 +311,8 @@ static void tokenize(zval *return_value TSRMLS_DC)
 			zval_dtor(&token);
 		}
 		ZVAL_NULL(&token);
+
+		token_line = CG(zend_lineno);
 	}
 }
 
