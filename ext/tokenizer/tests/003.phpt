@@ -23,20 +23,24 @@ array(0) {
 }
 array(1) {
   [0]=>
-  array(2) {
+  array(3) {
     [0]=>
     int(%d)
     [1]=>
     string(1) "0"
+    [2]=>
+    int(1)
   }
 }
 array(1) {
   [0]=>
-  array(2) {
+  array(3) {
     [0]=>
     int(%d)
     [1]=>
     string(2) "-1"
+    [2]=>
+    int(1)
   }
 }
 Done
