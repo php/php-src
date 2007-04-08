@@ -35,6 +35,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_rand.h"
 
 static int le_mcrypt;
 
@@ -1039,8 +1040,7 @@ int php_mcrypt_iv(php_mcrypt_iv_source source, int size, char **iv_str, int *iv_
 		case PHP_MCRYPT_IV_SOURCE_RAND:
 				*iv_len = size;
 				while (size) {
-					unsigned int ctx;
-					(*iv_str)[--size] = 255.0 * php_rand_r(&ctx) / RAND_MAX;
+					(*iv_str)[--size] = 255.0 * php_rand(TSRMLS_C) / RAND_MAX;
 				}
 			break;
 	}
