@@ -38,6 +38,7 @@ PHP                                                                        NEWS
 - Added php_pdo_sqlite_external.dll, a version of the PDO SQLite driver that
   links against an external sqlite3.dll.  This provides Windows users to upgrade
   their sqlite3 version outside of the PHP release cycle.  (Wez, Edin)
+- Added linenumbers to array returned by token_get_all(). (Johannes)
 - Fixed possible multi bytes issues in openssl csr parser (Pierre)
 - Fixed shmop_open() with IPC_CREAT|IPC_EXCL flags on Windows. 
   (Vladimir Kamaev, Tony).
