@@ -27,6 +27,7 @@
 
 #include "php.h"
 #include <stdio.h>
+#include <fcntl.h>
 #ifdef PHP_WIN32
 #include "win32/time.h"
 #include "win32/signal.h"
@@ -440,7 +441,7 @@ static int module_shutdown = 0;
  */
 PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 {
-	FILE *log_file;
+	int fd = -1;
 	char error_time_str[128];
 	struct tm tmbuf;
 	time_t error_time;
@@ -453,14 +454,16 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 			return;
 		}
 #endif
-		log_file = VCWD_FOPEN(PG(error_log), "ab");
-		if (log_file != NULL) {
+		fd = VCWD_OPEN_MODE(PG(error_log), O_CREAT | O_APPEND | O_WRONLY, 0644);
+		if (fd != -1) {
+			char *tmp;
+			int len;
 			time(&error_time);
 			strftime(error_time_str, sizeof(error_time_str), "%d-%b-%Y %H:%M:%S", php_localtime_r(&error_time, &tmbuf));
-			fprintf(log_file, "[%s] ", error_time_str);
-			fprintf(log_file, "%s", log_message);
-			fprintf(log_file, "%s", PHP_EOL);
-			fclose(log_file);
+			len = spprintf(&tmp, 0, "[%s] %s%s", error_time_str, log_message, PHP_EOL);
+			write(fd, tmp, len);
+			efree(tmp); 
+			close(fd);
 			return;
 		}
 	}
