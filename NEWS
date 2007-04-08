@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2007, PHP 5.2.2
+05 Apr 2007, PHP 5.2.2RC1
 - Improved bundled GD
   . Sync to 2.0.35
   . colors allocated henceforth from the resulting image overwrite the palette 
@@ -66,6 +66,7 @@ PHP                                                                        NEWS
 - Fixed bug #40836 (Segfault in ext/dom). (Rob)
 - Fixed bug #40833 (Crash when using unset() on an ArrayAccess object retrieved
   via __get()). (Dmitry)
+- Fixed bug #40822 (pdo_mysql does not return rowCount() on select). (Ilia)
 - Fixed bug #40815 (using strings like "class::func" and static methods in 
   set_exception_handler() might result in crash). (Tony)
 - Fixed bug #40809 (Poor performance of ".="). (Dmitry)
