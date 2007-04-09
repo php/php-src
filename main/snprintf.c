@@ -603,8 +603,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 	struct lconv *lconv = NULL;
 #endif
 
-	TSRMLS_FETCH();
-
 	/*
 	 * Flag variables
 	 */
@@ -615,6 +613,8 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 	boolean_e adjust_precision;
 	boolean_e adjust_width;
 	bool_int is_negative;
+
+	TSRMLS_FETCH();
 
 	sp = odp->nextb;
 	bep = odp->buf_end;

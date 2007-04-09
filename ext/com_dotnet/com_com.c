@@ -665,7 +665,7 @@ PHP_FUNCTION(com_create_guid)
 	php_com_initialize(TSRMLS_C);
 	if (CoCreateGuid(&retval) == S_OK && StringFromCLSID(&retval, &guid_string) == S_OK) {
 		Z_TYPE_P(return_value) = IS_STRING;
-		Z_STRVAL_P(return_value) = php_com_olestring_to_string(guid_string, &Z_STRLEN_P(return_value), CP_ACP, 0);
+		Z_STRVAL_P(return_value) = php_com_olestring_to_string(guid_string, &Z_STRLEN_P(return_value), CP_ACP TSRMLS_CC);
 
 		CoTaskMemFree(guid_string);
 	} else {
