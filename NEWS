@@ -47,6 +47,8 @@ PHP                                                                        NEWS
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
+- Fixed bug #41026 (segfault when calling "self::method()" in shutdown functions).
+  (Tony)
 - Fixed bug #40999 (mcrypt_create_iv() not using random seed). (Ilia)
 - Fixed bug #40998 (long session array keys are truncated). (Tony)
 - Implement feature request #40947, allow a single filter as argument 
