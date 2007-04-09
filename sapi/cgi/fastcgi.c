@@ -31,7 +31,6 @@
 
 #include <windows.h>
 
-	typedef unsigned int size_t;
 	typedef unsigned int in_addr_t;
 
 	struct sockaddr_un {
