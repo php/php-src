@@ -1301,7 +1301,7 @@ not_relative_path:
 	
 #ifdef PHP_WIN32
 	if (IS_SLASH(filename[0])) {
-		int cwd_len;
+		size_t cwd_len;
 		char *cwd;
 		cwd = virtual_getcwd_ex(&cwd_len TSRMLS_CC);
 		/* getcwd() will return always return [DRIVE_LETTER]:/) on windows. */
