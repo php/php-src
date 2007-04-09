@@ -549,7 +549,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 			if (success != SUCCESS && obj_ptr) {
 				size_t func_name_len = Z_UNISIZE(zfunc_name);
 				lc_name.v = erealloc(lc_name.v, func_name_len + 2 + sizeof(zend_object_handle));
-				memcpy(lc_name.v + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(zend_object_handle));
+				memcpy(lc_name.s + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(zend_object_handle));
 				func_name_len += sizeof(zend_object_handle);
 				if (Z_TYPE(zfunc_name) == IS_UNICODE) {
 					func_name_len /= sizeof(UChar);
