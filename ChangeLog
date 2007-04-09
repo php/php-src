@@ -1,3 +1,35 @@
+2007-04-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_mysql/mysql_statement.c:
+      
+      Fixed bug #40822 (pdo_mysql does not return rowCount() on select).
+
+2007-04-08  Antony Dovgal  <antony@zend.com>
+
+    * ext/mcrypt/mcrypt.c:
+      MFB: fix #40999 (mcrypt_create_iv() not using random seed)
+
+    * main/main.c:
+      MFB: Avoid locks when appening to the error log file
+
+2007-04-08  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      NEWS
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tests/002.phpt
+      ext/tokenizer/tests/003.phpt
+      ext/tokenizer/tests/bug26463.phpt:
+      - MFH: Added linenumbers to array returned by token_get_all()
+
+    * ext/tokenizer/tokenizer.c
+      ext/tokenizer/tests/002.phpt
+      ext/tokenizer/tests/003.phpt
+      ext/tokenizer/tests/bug26463.phpt:
+      - Added linenumbers to array returned by token_get_all()
+
 2007-04-06  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
