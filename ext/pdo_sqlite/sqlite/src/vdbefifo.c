@@ -19,7 +19,7 @@
 ** Allocate a new FifoPage and return a pointer to it.  Return NULL if
 ** we run out of memory.  Leave space on the page for nEntry entries.
 */
-static FifoPage *allocatePage(int nEntry){
+static FifoPage *allocateFifoPage(int nEntry){
   FifoPage *pPage;
   if( nEntry>32767 ){
     nEntry = 32767;
@@ -50,12 +50,12 @@ int sqlite3VdbeFifoPush(Fifo *pFifo, i64 val){
   FifoPage *pPage;
   pPage = pFifo->pLast;
   if( pPage==0 ){
-    pPage = pFifo->pLast = pFifo->pFirst = allocatePage(20);
+    pPage = pFifo->pLast = pFifo->pFirst = allocateFifoPage(20);
     if( pPage==0 ){
       return SQLITE_NOMEM;
     }
   }else if( pPage->iWrite>=pPage->nSlot ){
-    pPage->pNext = allocatePage(pFifo->nEntry);
+    pPage->pNext = allocateFifoPage(pFifo->nEntry);
     if( pPage->pNext==0 ){
       return SQLITE_NOMEM;
     }

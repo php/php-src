@@ -15,6 +15,7 @@
 */
 #include "sqliteInt.h"
 
+#ifndef SQLITE_OMIT_ATTACH
 /*
 ** Resolve an expression that was part of an ATTACH or DETACH statement. This
 ** is slightly different from resolving a normal SQL expression, because simple
@@ -133,13 +134,14 @@ static void attachFunc(
         "attached databases must use the same text encoding as main database");
       goto attach_error;
     }
+    sqlite3PagerLockingMode(sqlite3BtreePager(aNew->pBt), db->dfltLockMode);
   }
   aNew->zName = sqliteStrDup(zName);
   aNew->safety_level = 3;
 
 #if SQLITE_HAS_CODEC
   {
-    extern int sqlite3CodecAttach(sqlite3*, int, void*, int);
+    extern int sqlite3CodecAttach(sqlite3*, int, const void*, int);
     extern void sqlite3CodecGetKey(sqlite3*, int, void**, int*);
     int nKey;
     char *zKey;
@@ -188,7 +190,7 @@ static void attachFunc(
     sqlite3ResetInternalSchema(db, 0);
     db->nDb = iDb;
     if( rc==SQLITE_NOMEM ){
-      if( !sqlite3MallocFailed() ) sqlite3FailedMalloc();
+      sqlite3FailedMalloc();
       sqlite3_snprintf(sizeof(zErr),zErr, "out of memory");
     }else{
       sqlite3_snprintf(sizeof(zErr),zErr, "unable to open database: %s", zFile);
@@ -350,14 +352,17 @@ void sqlite3Detach(Parse *pParse, Expr *pDbname){
 void sqlite3Attach(Parse *pParse, Expr *p, Expr *pDbname, Expr *pKey){
   codeAttach(pParse, SQLITE_ATTACH, "sqlite_attach", 3, p, p, pDbname, pKey);
 }
+#endif /* SQLITE_OMIT_ATTACH */
 
 /*
 ** Register the functions sqlite_attach and sqlite_detach.
 */
 void sqlite3AttachFunctions(sqlite3 *db){
+#ifndef SQLITE_OMIT_ATTACH
   static const int enc = SQLITE_UTF8;
   sqlite3CreateFunc(db, "sqlite_attach", 3, enc, db, attachFunc, 0, 0);
   sqlite3CreateFunc(db, "sqlite_detach", 1, enc, db, detachFunc, 0, 0);
+#endif
 }
 
 /*

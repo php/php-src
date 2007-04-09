@@ -9,19 +9,25 @@
 **    May you share freely, never taking more than you give.
 **
 *************************************************************************
-** A TCL Interface to SQLite
+** A TCL Interface to SQLite.  Append this file to sqlite3.c and
+** compile the whole thing to build a TCL-enabled version of SQLite.
 **
 ** $Id$
 */
-#ifndef NO_TCL     /* Omit this whole file if TCL is unavailable */
-
-#include "sqliteInt.h"
-#include "hash.h"
 #include "tcl.h"
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <ctype.h>
+
+/*
+** Some additional include files are needed if this file is not
+** appended to the amalgamation.
+*/
+#ifndef SQLITE_AMALGAMATION
+# include "sqliteInt.h"
+# include "hash.h"
+# include <stdlib.h>
+# include <string.h>
+# include <assert.h>
+# include <ctype.h>
+#endif
 
 /*
  * Windows needs to know which symbols to export.  Unix does not.
@@ -2205,12 +2211,14 @@ int TCLSH_MAIN(int argc, char **argv){
     extern int Sqlitetest6_Init(Tcl_Interp*);
     extern int Sqlitetest7_Init(Tcl_Interp*);
     extern int Sqlitetest8_Init(Tcl_Interp*);
+    extern int Sqlitetest9_Init(Tcl_Interp*);
     extern int Md5_Init(Tcl_Interp*);
     extern int Sqlitetestsse_Init(Tcl_Interp*);
     extern int Sqlitetestasync_Init(Tcl_Interp*);
     extern int Sqlitetesttclvar_Init(Tcl_Interp*);
     extern int Sqlitetestschema_Init(Tcl_Interp*);
     extern int Sqlitetest_autoext_Init(Tcl_Interp*);
+    extern int Sqlitetest_hexio_Init(Tcl_Interp*);
 
     Sqlitetest1_Init(interp);
     Sqlitetest2_Init(interp);
@@ -2220,10 +2228,12 @@ int TCLSH_MAIN(int argc, char **argv){
     Sqlitetest6_Init(interp);
     Sqlitetest7_Init(interp);
     Sqlitetest8_Init(interp);
+    Sqlitetest9_Init(interp);
     Sqlitetestasync_Init(interp);
     Sqlitetesttclvar_Init(interp);
     Sqlitetestschema_Init(interp);
     Sqlitetest_autoext_Init(interp);
+    Sqlitetest_hexio_Init(interp);
     Md5_Init(interp);
 #ifdef SQLITE_SSE
     Sqlitetestsse_Init(interp);
@@ -2254,5 +2264,3 @@ int TCLSH_MAIN(int argc, char **argv){
   return 0;
 }
 #endif /* TCLSH */
-
-#endif /* !defined(NO_TCL) */

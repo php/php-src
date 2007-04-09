@@ -142,8 +142,11 @@ struct sqlite3_api_routines {
   const void * (*value_text16be)(sqlite3_value*);
   const void * (*value_text16le)(sqlite3_value*);
   int  (*value_type)(sqlite3_value*);
-  char * (*vmprintf)(const char*,va_list);
+  char *(*vmprintf)(const char*,va_list);
   int (*overload_function)(sqlite3*, const char *zFuncName, int nArg);
+  int (*prepare_v2)(sqlite3*,const char*,int,sqlite3_stmt**,const char**);
+  int (*prepare16_v2)(sqlite3*,const void*,int,sqlite3_stmt**,const void**);
+  int (*clear_bindings)(sqlite3_stmt*);
 };
 
 /*
@@ -232,6 +235,8 @@ struct sqlite3_api_routines {
 #define sqlite3_open16                 sqlite3_api->open16
 #define sqlite3_prepare                sqlite3_api->prepare
 #define sqlite3_prepare16              sqlite3_api->prepare16
+#define sqlite3_prepare_v2             sqlite3_api->prepare_v2
+#define sqlite3_prepare16_v2           sqlite3_api->prepare16_v2
 #define sqlite3_profile                sqlite3_api->profile
 #define sqlite3_progress_handler       sqlite3_api->progress_handler
 #define sqlite3_realloc                sqlite3_api->realloc
@@ -274,6 +279,9 @@ struct sqlite3_api_routines {
 #define sqlite3_value_type             sqlite3_api->value_type
 #define sqlite3_vmprintf               sqlite3_api->vmprintf
 #define sqlite3_overload_function      sqlite3_api->overload_function
+#define sqlite3_prepare_v2             sqlite3_api->prepare_v2
+#define sqlite3_prepare16_v2           sqlite3_api->prepare16_v2
+#define sqlite3_clear_bindings         sqlite3_api->clear_bindings
 #endif /* SQLITE_CORE */
 
 #define SQLITE_EXTENSION_INIT1     const sqlite3_api_routines *sqlite3_api;

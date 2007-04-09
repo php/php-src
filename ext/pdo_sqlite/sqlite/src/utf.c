@@ -63,6 +63,12 @@
 #include "vdbeInt.h"
 
 /*
+** The following constant value is used by the SQLITE_BIGENDIAN and
+** SQLITE_LITTLEENDIAN macros.
+*/
+const int sqlite3one = 1;
+
+/*
 ** This table maps from the first byte of a UTF-8 character to the number
 ** of trailing bytes expected. A value '4' indicates that the table key
 ** is not a legal first byte for a UTF-8 character.

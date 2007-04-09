@@ -182,7 +182,7 @@ int sqlite3_exec(
 #define SQLITE_NOTFOUND    12   /* NOT USED. Table or record not found */
 #define SQLITE_FULL        13   /* Insertion failed because database is full */
 #define SQLITE_CANTOPEN    14   /* Unable to open the database file */
-#define SQLITE_PROTOCOL    15   /* Database lock protocol error */
+#define SQLITE_PROTOCOL    15   /* NOT USED. Database lock protocol error */
 #define SQLITE_EMPTY       16   /* Database is empty */
 #define SQLITE_SCHEMA      17   /* The database schema changed */
 #define SQLITE_TOOBIG      18   /* NOT USED. Too much data for one row */
@@ -230,6 +230,7 @@ int sqlite3_exec(
 #define SQLITE_IOERR_FSTAT         (SQLITE_IOERR | (7<<8))
 #define SQLITE_IOERR_UNLOCK        (SQLITE_IOERR | (8<<8))
 #define SQLITE_IOERR_RDLOCK        (SQLITE_IOERR | (9<<8))
+#define SQLITE_IOERR_DELETE        (SQLITE_IOERR | (10<<8))
 
 /*
 ** Enable or disable the extended result codes.
@@ -239,25 +240,29 @@ int sqlite3_extended_result_codes(sqlite3*, int onoff);
 /*
 ** Each entry in an SQLite table has a unique integer key.  (The key is
 ** the value of the INTEGER PRIMARY KEY column if there is such a column,
-** otherwise the key is generated at random.  The unique key is always
+** otherwise the key is generated automatically.  The unique key is always
 ** available as the ROWID, OID, or _ROWID_ column.)  The following routine
 ** returns the integer key of the most recent insert in the database.
-**
-** This function is similar to the mysql_insert_id() function from MySQL.
 */
 sqlite_int64 sqlite3_last_insert_rowid(sqlite3*);
 
 /*
 ** This function returns the number of database rows that were changed
-** (or inserted or deleted) by the most recent called sqlite3_exec().
+** (or inserted or deleted) by the most recent SQL statement.  Only
+** changes that are directly specified by the INSERT, UPDATE, or
+** DELETE statement are counted.  Auxiliary changes caused by
+** triggers are not counted.   Within the body of a trigger, however,
+** the sqlite3_changes() API can be called to find the number of
+** changes in the most recently completed INSERT, UPDATE, or DELETE
+** statement within the body of the trigger.
 **
 ** All changes are counted, even if they were later undone by a
 ** ROLLBACK or ABORT.  Except, changes associated with creating and
 ** dropping tables are not counted.
 **
-** If a callback invokes sqlite3_exec() recursively, then the changes
-** in the inner, recursive call are counted together with the changes
-** in the outer call.
+** If a callback invokes sqlite3_exec() or sqlite3_step() recursively,
+** then the changes in the inner, recursive call are counted together
+** with the changes in the outer call.
 **
 ** SQLite implements the command "DELETE FROM table" without a WHERE clause
 ** by dropping and recreating the table.  (This is much faster than going
@@ -292,6 +297,9 @@ int sqlite3_total_changes(sqlite3*);
 ** called in response to a user action such as pressing "Cancel"
 ** or Ctrl-C where the user wants a long query operation to halt
 ** immediately.
+**
+** It is safe to call this routine from a different thread that the
+** thread that is currently running the database operation. 
 */
 void sqlite3_interrupt(sqlite3*);
 
@@ -302,9 +310,13 @@ void sqlite3_interrupt(sqlite3*);
 ** sqlite3_complete16(), a nul-terminated machine byte order UTF-16 string
 ** is required.
 **
-** The algorithm is simple.  If the last token other than spaces
-** and comments is a semicolon, then return true.  otherwise return
-** false.
+** This routine is useful for command-line input to see of the user has
+** entered a complete statement of SQL or if the current statement needs
+** to be continued on the next line.  The algorithm is simple.  If the 
+** last token other than spaces and comments is a semicolon, then return 
+** true.  Actually, the algorithm is a little more complicated than that
+** in order to deal with triggers, but the basic idea is the same:  the
+** statement is not complete unless it ends in a semicolon.
 */
 int sqlite3_complete(const char *sql);
 int sqlite3_complete16(const void *sql);
@@ -743,31 +755,32 @@ typedef struct Mem sqlite3_value;
 
 /*
 ** In the SQL strings input to sqlite3_prepare() and sqlite3_prepare16(),
-** one or more literals can be replace by parameters "?" or ":AAA" or
-** "$VVV" where AAA is an identifer and VVV is a variable name according
-** to the syntax rules of the TCL programming language.
-** The value of these parameters (also called "host parameter names") can
-** be set using the routines listed below.
+** one or more literals can be replace by parameters "?" or "?NNN" or 
+** ":AAA" or "@AAA" or "$VVV" where NNN is a integer, AAA is an identifer,
+** and VVV is a variable name according  to the syntax rules of the
+** TCL programming language.  The value of these parameters (also called
+** "host parameter names") can be set using the routines listed below.
 **
-** In every case, the first parameter is a pointer to the sqlite3_stmt
-** structure returned from sqlite3_prepare().  The second parameter is the
-** index of the parameter.  The first parameter as an index of 1.  For
-** named parameters (":AAA" or "$VVV") you can use 
+** In every case, the first argument is a pointer to the sqlite3_stmt
+** structure returned from sqlite3_prepare().  The second argument is the
+** index of the host parameter name.  The first host parameter as an index 
+** of 1.  For named host parameters (":AAA" or "$VVV") you can use 
 ** sqlite3_bind_parameter_index() to get the correct index value given
-** the parameters name.  If the same named parameter occurs more than
+** the parameter name.  If the same named parameter occurs more than
 ** once, it is assigned the same index each time.
 **
-** The fifth parameter to sqlite3_bind_blob(), sqlite3_bind_text(), and
+** The fifth argument to sqlite3_bind_blob(), sqlite3_bind_text(), and
 ** sqlite3_bind_text16() is a destructor used to dispose of the BLOB or
 ** text after SQLite has finished with it.  If the fifth argument is the
 ** special value SQLITE_STATIC, then the library assumes that the information
 ** is in static, unmanaged space and does not need to be freed.  If the
 ** fifth argument has the value SQLITE_TRANSIENT, then SQLite makes its
-** own private copy of the data.
+** own private copy of the data before the sqlite3_bind_* routine returns.
 **
-** The sqlite3_bind_* routine must be called before sqlite3_step() after
-** an sqlite3_prepare() or sqlite3_reset().  Unbound parameterss are
-** interpreted as NULL.
+** The sqlite3_bind_* routine must be called before sqlite3_step() and after
+** an sqlite3_prepare() or sqlite3_reset().  Bindings persist across
+** multiple calls to sqlite3_reset() and sqlite3_step().  Unbound parameters 
+** are interpreted as NULL.
 */
 int sqlite3_bind_blob(sqlite3_stmt*, int, const void*, int n, void(*)(void*));
 int sqlite3_bind_double(sqlite3_stmt*, int, double);
@@ -779,13 +792,13 @@ int sqlite3_bind_text16(sqlite3_stmt*, int, const void*, int, void(*)(void*));
 int sqlite3_bind_value(sqlite3_stmt*, int, const sqlite3_value*);
 
 /*
-** Return the number of parameters in a compiled SQL statement.  This
+** Return the number of host parameters in a compiled SQL statement.  This
 ** routine was added to support DBD::SQLite.
 */
 int sqlite3_bind_parameter_count(sqlite3_stmt*);
 
 /*
-** Return the name of the i-th parameter.  Ordinary parameters "?" are
+** Return the name of the i-th name parameter.  Ordinary parameters "?" are
 ** nameless and a NULL is returned.  For parameters of the form :AAA or
 ** $VVV the complete text of the parameter name is returned, including
 ** the initial ":" or "$".  NULL is returned if the index is out of range.
@@ -821,7 +834,7 @@ const char *sqlite3_column_name(sqlite3_stmt*,int);
 const void *sqlite3_column_name16(sqlite3_stmt*,int);
 
 /*
-** The first parameter to the following calls is a compiled SQL statement.
+** The first argument to the following calls is a compiled SQL statement.
 ** These functions return information about the Nth column returned by 
 ** the statement, where N is the second function argument.
 **

@@ -21,17 +21,29 @@
 #include <ctype.h>
 
 /*
-** The following constant value is used by the SQLITE_BIGENDIAN and
-** SQLITE_LITTLEENDIAN macros.
-*/
-const int sqlite3one = 1;
-
-/*
 ** The version of the library
 */
 const char sqlite3_version[] = SQLITE_VERSION;
 const char *sqlite3_libversion(void){ return sqlite3_version; }
 int sqlite3_libversion_number(void){ return SQLITE_VERSION_NUMBER; }
+
+/*
+** If the following function pointer is not NULL and if
+** SQLITE_ENABLE_IOTRACE is enabled, then messages describing
+** I/O active are written using this function.  These messages
+** are intended for debugging activity only.
+*/
+void (*sqlite3_io_trace)(const char*, ...) = 0;
+
+/*
+** If the following global variable points to a string which is the
+** name of a directory, then that directory will be used to store
+** temporary files.
+**
+** See also the "PRAGMA temp_store_directory" SQL command.
+*/
+char *sqlite3_temp_directory = 0;
+
 
 /*
 ** This is the default collating function named "BINARY" which is always
@@ -128,6 +140,9 @@ int sqlite3_close(sqlite3 *db){
   ** cannot be opened for some reason. So this routine needs to run in
   ** that case. But maybe there should be an extra magic value for the
   ** "failed to open" state.
+  **
+  ** TODO: Coverage tests do not test the case where this condition is
+  ** true. It's hard to see how to cause it without messing with threads.
   */
   if( db->magic!=SQLITE_MAGIC_CLOSED && sqlite3SafetyOn(db) ){
     /* printf("DID NOT CLOSE\n"); fflush(stdout); */
@@ -239,7 +254,6 @@ const char *sqlite3ErrStr(int rc){
     case SQLITE_CORRUPT:    z = "database disk image is malformed";      break;
     case SQLITE_FULL:       z = "database or disk is full";              break;
     case SQLITE_CANTOPEN:   z = "unable to open database file";          break;
-    case SQLITE_PROTOCOL:   z = "database locking protocol failure";     break;
     case SQLITE_EMPTY:      z = "table contains no data";                break;
     case SQLITE_SCHEMA:     z = "database schema has changed";           break;
     case SQLITE_CONSTRAINT: z = "constraint failed";                     break;
@@ -722,7 +736,8 @@ int sqlite3BtreeFactory(
 */
 const char *sqlite3_errmsg(sqlite3 *db){
   const char *z;
-  if( !db || sqlite3MallocFailed() ){
+  assert( !sqlite3MallocFailed() );
+  if( !db ){
     return sqlite3ErrStr(SQLITE_NOMEM);
   }
   if( sqlite3SafetyCheck(db) || db->errCode==SQLITE_MISUSE ){
@@ -761,7 +776,8 @@ const void *sqlite3_errmsg16(sqlite3 *db){
   };
 
   const void *z;
-  if( sqlite3MallocFailed() ){
+  assert( !sqlite3MallocFailed() );
+  if( !db ){
     return (void *)(&outOfMemBe[SQLITE_UTF16NATIVE==SQLITE_UTF16LE?1:0]);
   }
   if( sqlite3SafetyCheck(db) || db->errCode==SQLITE_MISUSE ){
@@ -877,6 +893,9 @@ static int openDatabase(
 #if SQLITE_DEFAULT_FILE_FORMAT<4
                  | SQLITE_LegacyFileFmt
 #endif
+#ifdef SQLITE_ENABLE_LOAD_EXTENSION
+                 | SQLITE_LoadExtension
+#endif
       ;
   sqlite3HashInit(&db->aFunc, SQLITE_HASH_STRING, 0);
   sqlite3HashInit(&db->aCollSeq, SQLITE_HASH_STRING, 0);
@@ -956,6 +975,16 @@ static int openDatabase(
     extern int sqlite3Fts2Init(sqlite3*);
     sqlite3Fts2Init(db);
   }
+#endif
+
+  /* -DSQLITE_DEFAULT_LOCKING_MODE=1 makes EXCLUSIVE the default locking
+  ** mode.  -DSQLITE_DEFAULT_LOCKING_MODE=0 make NORMAL the default locking
+  ** mode.  Doing nothing at all also makes NORMAL the default.
+  */
+#ifdef SQLITE_DEFAULT_LOCKING_MODE
+  db->dfltLockMode = SQLITE_DEFAULT_LOCKING_MODE;
+  sqlite3PagerLockingMode(sqlite3BtreePager(db->aDb[0].pBt),
+                          SQLITE_DEFAULT_LOCKING_MODE);
 #endif
 
 opendb_out:
