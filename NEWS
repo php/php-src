@@ -14,7 +14,7 @@ PHP                                                                        NEWS
   . libpq (PostgreSQL) to version 8.2.3
   . libmysql (MySQL) to version 5.0.37
   . openssl to version 0.9.8e
-- Upgraded SQLite 3 to version 3.3.13 (Ilia)
+- Upgraded SQLite 3 to version 3.3.15 (Ilia)
 - Upgraded PCRE to version 7.0 (Nuno)
 - Updated timezone database to version 2007.3. (Derick)
 - Improved FastCGI SAPI to support external pipe and socket servers on win32.

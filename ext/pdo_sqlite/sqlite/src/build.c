@@ -82,7 +82,7 @@ void sqlite3TableLock(
   }
 
   nBytes = sizeof(TableLock) * (pParse->nTableLock+1);
-  sqliteReallocOrFree((void **)&pParse->aTableLock, nBytes);
+  pParse->aTableLock = sqliteReallocOrFree(pParse->aTableLock, nBytes);
   if( pParse->aTableLock ){
     p = &pParse->aTableLock[pParse->nTableLock++];
     p->iDb = iDb;
@@ -439,17 +439,6 @@ void sqlite3ResetInternalSchema(sqlite3 *db, int iDb){
     memcpy(db->aDbStatic, db->aDb, 2*sizeof(db->aDb[0]));
     sqliteFree(db->aDb);
     db->aDb = db->aDbStatic;
-  }
-}
-
-/*
-** This routine is called whenever a rollback occurs.  If there were
-** schema changes during the transaction, then we have to reset the
-** internal hash tables and reload them from disk.
-*/
-void sqlite3RollbackInternalChanges(sqlite3 *db){
-  if( db->flags & SQLITE_InternChanges ){
-    sqlite3ResetInternalSchema(db, 0);
   }
 }
 
@@ -887,7 +876,7 @@ void sqlite3StartTable(
     sqlite3VdbeAddOp(v, OP_NewRowid, 0, 0);
     sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
     sqlite3VdbeAddOp(v, OP_Null, 0, 0);
-    sqlite3VdbeAddOp(v, OP_Insert, 0, 0);
+    sqlite3VdbeAddOp(v, OP_Insert, 0, OPFLAG_APPEND);
     sqlite3VdbeAddOp(v, OP_Close, 0, 0);
     sqlite3VdbeAddOp(v, OP_Pull, 1, 0);
   }
@@ -2357,16 +2346,16 @@ void sqlite3CreateIndex(
     }
     if( !db->init.busy ){
       if( SQLITE_OK!=sqlite3ReadSchema(pParse) ) goto exit_create_index;
-      if( sqlite3FindIndex(db, zName, pDb->zName)!=0 ){
-        if( !ifNotExist ){
-          sqlite3ErrorMsg(pParse, "index %s already exists", zName);
-        }
-        goto exit_create_index;
-      }
       if( sqlite3FindTable(db, zName, 0)!=0 ){
         sqlite3ErrorMsg(pParse, "there is already a table named %s", zName);
         goto exit_create_index;
       }
+    }
+    if( sqlite3FindIndex(db, zName, pDb->zName)!=0 ){
+      if( !ifNotExist ){
+        sqlite3ErrorMsg(pParse, "index %s already exists", zName);
+      }
+      goto exit_create_index;
     }
   }else{
     char zBuf[30];
@@ -2783,44 +2772,46 @@ exit_drop_index:
 }
 
 /*
-** ppArray points into a structure where there is an array pointer
-** followed by two integers. The first integer is the
-** number of elements in the structure array.  The second integer
-** is the number of allocated slots in the array.
+** pArray is a pointer to an array of objects.  Each object in the
+** array is szEntry bytes in size.  This routine allocates a new
+** object on the end of the array.
 **
-** In other words, the structure looks something like this:
+** *pnEntry is the number of entries already in use.  *pnAlloc is
+** the previously allocated size of the array.  initSize is the
+** suggested initial array size allocation.
 **
-**        struct Example1 {
-**          struct subElem *aEntry;
-**          int nEntry;
-**          int nAlloc;
-**        }
+** The index of the new entry is returned in *pIdx.
 **
-** The pnEntry parameter points to the equivalent of Example1.nEntry.
-**
-** This routine allocates a new slot in the array, zeros it out,
-** and returns its index.  If malloc fails a negative number is returned.
-**
-** szEntry is the sizeof of a single array entry.  initSize is the 
-** number of array entries allocated on the initial allocation.
+** This routine returns a pointer to the array of objects.  This
+** might be the same as the pArray parameter or it might be a different
+** pointer if the array was resized.
 */
-int sqlite3ArrayAllocate(void **ppArray, int szEntry, int initSize){
-  char *p;
-  int *an = (int*)&ppArray[1];
-  if( an[0]>=an[1] ){
+void *sqlite3ArrayAllocate(
+  void *pArray,     /* Array of objects.  Might be reallocated */
+  int szEntry,      /* Size of each object in the array */
+  int initSize,     /* Suggested initial allocation, in elements */
+  int *pnEntry,     /* Number of objects currently in use */
+  int *pnAlloc,     /* Current size of the allocation, in elements */
+  int *pIdx         /* Write the index of a new slot here */
+){
+  char *z;
+  if( *pnEntry >= *pnAlloc ){
     void *pNew;
     int newSize;
-    newSize = an[1]*2 + initSize;
-    pNew = sqliteRealloc(*ppArray, newSize*szEntry);
+    newSize = (*pnAlloc)*2 + initSize;
+    pNew = sqliteRealloc(pArray, newSize*szEntry);
     if( pNew==0 ){
-      return -1;
+      *pIdx = -1;
+      return pArray;
     }
-    an[1] = newSize;
-    *ppArray = pNew;
+    *pnAlloc = newSize;
+    pArray = pNew;
   }
-  p = *ppArray;
-  memset(&p[an[0]*szEntry], 0, szEntry);
-  return an[0]++;
+  z = (char*)pArray;
+  memset(&z[*pnEntry * szEntry], 0, szEntry);
+  *pIdx = *pnEntry;
+  ++*pnEntry;
+  return pArray;
 }
 
 /*
@@ -2836,7 +2827,14 @@ IdList *sqlite3IdListAppend(IdList *pList, Token *pToken){
     if( pList==0 ) return 0;
     pList->nAlloc = 0;
   }
-  i = sqlite3ArrayAllocate((void**)&pList->a, sizeof(pList->a[0]), 5);
+  pList->a = sqlite3ArrayAllocate(
+      pList->a,
+      sizeof(pList->a[0]),
+      5,
+      &pList->nId,
+      &pList->nAlloc,
+      &i
+  );
   if( i<0 ){
     sqlite3IdListDelete(pList);
     return 0;

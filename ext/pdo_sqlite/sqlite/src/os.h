@@ -21,6 +21,18 @@
 ** Figure out if we are dealing with Unix, Windows, or some other
 ** operating system.
 */
+#if defined(OS_OTHER)
+# if OS_OTHER==1
+#   undef OS_UNIX
+#   define OS_UNIX 0
+#   undef OS_WIN
+#   define OS_WIN 0
+#   undef OS_OS2
+#   define OS_OS2 0
+# else
+#   undef OS_OTHER
+# endif
+#endif
 #if !defined(OS_UNIX) && !defined(OS_OTHER)
 # define OS_OTHER 0
 # ifndef OS_WIN
@@ -71,6 +83,13 @@
 */
 #ifndef SET_FULLSYNC
 # define SET_FULLSYNC(x,y)
+#endif
+
+/*
+** The default size of a disk sector
+*/
+#ifndef SQLITE_DEFAULT_SECTOR_SIZE
+# define SQLITE_DEFAULT_SECTOR_SIZE 512
 #endif
 
 /*
@@ -216,6 +235,7 @@ struct IoMethod {
   int (*xUnlock)(OsFile*, int);
   int (*xLockState)(OsFile *id);
   int (*xCheckReservedLock)(OsFile *id);
+  int (*xSectorSize)(OsFile *id);
 };
 
 /*
@@ -346,6 +366,7 @@ int sqlite3OsFileExists(const char*);
 char *sqlite3OsFullPathname(const char*);
 int sqlite3OsIsDirWritable(char*);
 int sqlite3OsSyncDirectory(const char*);
+int sqlite3OsSectorSize(OsFile *id);
 int sqlite3OsTempFileName(char*);
 int sqlite3OsRandomSeed(char*);
 int sqlite3OsSleep(int ms);
@@ -426,9 +447,12 @@ struct sqlite3OsVtbl {
 #endif
 
 
-#ifdef _SQLITE_OS_C_
+#if defined(_SQLITE_OS_C_) || defined(SQLITE_AMALGAMATION)
   /*
   ** The os.c file implements the global virtual function table.
+  ** We have to put this file here because the initializers
+  ** (ex: sqlite3OsRandomSeed) are macros that are about to be
+  ** redefined.
   */
   struct sqlite3OsVtbl sqlite3Os = {
     IF_DISKIO( sqlite3OsOpenReadWrite ),

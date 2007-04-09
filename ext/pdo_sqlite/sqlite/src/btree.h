@@ -67,6 +67,8 @@ int sqlite3BtreeGetReserve(Btree*);
 int sqlite3BtreeSetAutoVacuum(Btree *, int);
 int sqlite3BtreeGetAutoVacuum(Btree *);
 int sqlite3BtreeBeginTrans(Btree*,int);
+int sqlite3BtreeCommitPhaseOne(Btree*, const char *zMaster);
+int sqlite3BtreeCommitPhaseTwo(Btree*);
 int sqlite3BtreeCommit(Btree*);
 int sqlite3BtreeRollback(Btree*);
 int sqlite3BtreeBeginStmt(Btree*);
@@ -76,7 +78,6 @@ int sqlite3BtreeCreateTable(Btree*, int*, int flags);
 int sqlite3BtreeIsInTrans(Btree*);
 int sqlite3BtreeIsInStmt(Btree*);
 int sqlite3BtreeIsInReadTrans(Btree*);
-int sqlite3BtreeSync(Btree*, const char *zMaster);
 void *sqlite3BtreeSchema(Btree *, int, void(*)(void *));
 int sqlite3BtreeSchemaLocked(Btree *);
 int sqlite3BtreeLockTable(Btree *, int, u8);
@@ -114,10 +115,10 @@ void sqlite3BtreeSetCompare(
 );
 
 int sqlite3BtreeCloseCursor(BtCursor*);
-int sqlite3BtreeMoveto(BtCursor*, const void *pKey, i64 nKey, int *pRes);
+int sqlite3BtreeMoveto(BtCursor*,const void *pKey,i64 nKey,int bias,int *pRes);
 int sqlite3BtreeDelete(BtCursor*);
 int sqlite3BtreeInsert(BtCursor*, const void *pKey, i64 nKey,
-                                  const void *pData, int nData);
+                                  const void *pData, int nData, int bias);
 int sqlite3BtreeFirst(BtCursor*, int *pRes);
 int sqlite3BtreeLast(BtCursor*, int *pRes);
 int sqlite3BtreeNext(BtCursor*, int *pRes);

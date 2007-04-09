@@ -38,25 +38,23 @@ unsigned int sqlite3_pending_byte = 0x40000000;
 
 int sqlite3_os_trace = 0;
 #ifdef SQLITE_DEBUG
-static int last_page = 0;
-#define SEEK(X)           last_page=(X)
-#define TRACE1(X)         if( sqlite3_os_trace ) sqlite3DebugPrintf(X)
-#define TRACE2(X,Y)       if( sqlite3_os_trace ) sqlite3DebugPrintf(X,Y)
-#define TRACE3(X,Y,Z)     if( sqlite3_os_trace ) sqlite3DebugPrintf(X,Y,Z)
-#define TRACE4(X,Y,Z,A)   if( sqlite3_os_trace ) sqlite3DebugPrintf(X,Y,Z,A)
-#define TRACE5(X,Y,Z,A,B) if( sqlite3_os_trace ) sqlite3DebugPrintf(X,Y,Z,A,B)
-#define TRACE6(X,Y,Z,A,B,C) if(sqlite3_os_trace) sqlite3DebugPrintf(X,Y,Z,A,B,C)
-#define TRACE7(X,Y,Z,A,B,C,D) \
+#define OSTRACE1(X)         if( sqlite3_os_trace ) sqlite3DebugPrintf(X)
+#define OSTRACE2(X,Y)       if( sqlite3_os_trace ) sqlite3DebugPrintf(X,Y)
+#define OSTRACE3(X,Y,Z)     if( sqlite3_os_trace ) sqlite3DebugPrintf(X,Y,Z)
+#define OSTRACE4(X,Y,Z,A)   if( sqlite3_os_trace ) sqlite3DebugPrintf(X,Y,Z,A)
+#define OSTRACE5(X,Y,Z,A,B) if( sqlite3_os_trace ) sqlite3DebugPrintf(X,Y,Z,A,B)
+#define OSTRACE6(X,Y,Z,A,B,C) \
+    if(sqlite3_os_trace) sqlite3DebugPrintf(X,Y,Z,A,B,C)
+#define OSTRACE7(X,Y,Z,A,B,C,D) \
     if(sqlite3_os_trace) sqlite3DebugPrintf(X,Y,Z,A,B,C,D)
 #else
-#define SEEK(X)
-#define TRACE1(X)
-#define TRACE2(X,Y)
-#define TRACE3(X,Y,Z)
-#define TRACE4(X,Y,Z,A)
-#define TRACE5(X,Y,Z,A,B)
-#define TRACE6(X,Y,Z,A,B,C)
-#define TRACE7(X,Y,Z,A,B,C,D)
+#define OSTRACE1(X)
+#define OSTRACE2(X,Y)
+#define OSTRACE3(X,Y,Z)
+#define OSTRACE4(X,Y,Z,A)
+#define OSTRACE5(X,Y,Z,A,B)
+#define OSTRACE6(X,Y,Z,A,B,C)
+#define OSTRACE7(X,Y,Z,A,B,C,D)
 #endif
 
 /*
@@ -90,19 +88,23 @@ static unsigned int elapse;
 #ifdef SQLITE_TEST
 int sqlite3_io_error_hit = 0;
 int sqlite3_io_error_pending = 0;
+int sqlite3_io_error_persist = 0;
 int sqlite3_diskfull_pending = 0;
 int sqlite3_diskfull = 0;
 #define SimulateIOError(CODE)  \
-   if( sqlite3_io_error_pending ) \
-     if( sqlite3_io_error_pending-- == 1 ){ local_ioerr(); CODE; }
+  if( sqlite3_io_error_pending || sqlite3_io_error_hit ) \
+     if( sqlite3_io_error_pending-- == 1 \
+         || (sqlite3_io_error_persist && sqlite3_io_error_hit) ) \
+                { local_ioerr(); CODE; }
 static void local_ioerr(){
-  sqlite3_io_error_hit = 1;  /* Really just a place to set a breakpoint */
+  sqlite3_io_error_hit = 1;
 }
 #define SimulateDiskfullError(CODE) \
    if( sqlite3_diskfull_pending ){ \
      if( sqlite3_diskfull_pending == 1 ){ \
        local_ioerr(); \
        sqlite3_diskfull = 1; \
+       sqlite3_io_error_hit = 1; \
        CODE; \
      }else{ \
        sqlite3_diskfull_pending--; \
@@ -185,4 +187,11 @@ void sqlite3GenericFree(void *p){
 }
 /* Never actually used, but needed for the linker */
 int sqlite3GenericAllocationSize(void *p){ return 0; }
+#endif
+
+/*
+** The default size of a disk sector
+*/
+#ifndef PAGER_SECTOR_SIZE
+# define PAGER_SECTOR_SIZE 512
 #endif

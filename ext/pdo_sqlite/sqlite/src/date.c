@@ -565,7 +565,7 @@ static int parseModifier(const char *zMod, DateTime *p){
     case '8':
     case '9': {
       n = getValue(z, &r);
-      if( n<=0 ) break;
+      assert( n>=1 );
       if( z[n]==':' ){
         /* A modifier of the form (+|-)HH:MM:SS.FFF adds (or subtracts) the
         ** specified number of hours, minutes, seconds, and fractional seconds
@@ -815,7 +815,7 @@ static void strftimeFunc(
         case 'f': {
           double s = x.s;
           if( s>59.999 ) s = 59.999;
-          sqlite3_snprintf(7, &z[j],"%02.3f", s);
+          sqlite3_snprintf(7, &z[j],"%06.3f", s);
           j += strlen(&z[j]);
           break;
         }

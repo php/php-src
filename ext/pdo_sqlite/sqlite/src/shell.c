@@ -20,6 +20,7 @@
 #include <assert.h>
 #include "sqlite3.h"
 #include <ctype.h>
+#include <stdarg.h>
 
 #if !defined(_WIN32) && !defined(WIN32) && !defined(__MACOS__) && !defined(__OS2__)
 # include <signal.h>
@@ -96,6 +97,28 @@ static char *Argv0;
 */
 static char mainPrompt[20];     /* First line prompt. default: "sqlite> "*/
 static char continuePrompt[20]; /* Continuation prompt. default: "   ...> " */
+
+/*
+** Write I/O traces to the following stream.
+*/
+static FILE *iotrace = 0;
+
+/*
+** This routine works like printf in that its first argument is a
+** format string and subsequent arguments are values to be substituted
+** in place of % fields.  The result of formatting this string
+** is written to iotrace.
+*/
+static void iotracePrintf(const char *zFormat, ...){
+  va_list ap;
+  char *z;
+  if( iotrace==0 ) return;
+  va_start(ap, zFormat);
+  z = sqlite3_vmprintf(zFormat, ap);
+  va_end(ap);
+  fprintf(iotrace, "%s", z);
+  sqlite3_free(z);
+}
 
 
 /*
@@ -1216,6 +1239,26 @@ static int do_meta_command(char *zLine, struct callback_data *p){
     if( zErrMsg ){
       fprintf(stderr,"Error: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
+    }
+  }else
+
+  if( c=='i' && strncmp(azArg[0], "iotrace", n)==0 ){
+    extern void (*sqlite3_io_trace)(const char*, ...);
+    if( iotrace && iotrace!=stdout ) fclose(iotrace);
+    iotrace = 0;
+    if( nArg<2 ){
+      sqlite3_io_trace = 0;
+    }else if( strcmp(azArg[1], "-")==0 ){
+      sqlite3_io_trace = iotracePrintf;
+      iotrace = stdout;
+    }else{
+      iotrace = fopen(azArg[1], "w");
+      if( iotrace==0 ){
+        fprintf(stderr, "cannot open \"%s\"\n", azArg[1]);
+        sqlite3_io_trace = 0;
+      }else{
+        sqlite3_io_trace = iotracePrintf;
+      }
     }
   }else
 

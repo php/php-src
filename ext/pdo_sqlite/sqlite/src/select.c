@@ -66,6 +66,7 @@ Select *sqlite3SelectNew(
   pNew->pOrderBy = pOrderBy;
   pNew->isDistinct = isDistinct;
   pNew->op = TK_SELECT;
+  assert( pOffset==0 || pLimit!=0 );
   pNew->pLimit = pLimit;
   pNew->pOffset = pOffset;
   pNew->iLimit = -1;
@@ -532,7 +533,7 @@ static int selectInnerLoop(
       }else{
         sqlite3VdbeAddOp(v, OP_NewRowid, iParm, 0);
         sqlite3VdbeAddOp(v, OP_Pull, 1, 0);
-        sqlite3VdbeAddOp(v, OP_Insert, iParm, 0);
+        sqlite3VdbeAddOp(v, OP_Insert, iParm, OPFLAG_APPEND);
       }
       break;
     }
@@ -691,7 +692,7 @@ static void generateSortTail(
   int cont = sqlite3VdbeMakeLabel(v);
   int addr;
   int iTab;
-  int pseudoTab;
+  int pseudoTab = 0;
   ExprList *pOrderBy = p->pOrderBy;
 
   iTab = pOrderBy->iECursor;
@@ -711,7 +712,7 @@ static void generateSortTail(
     case SRT_EphemTab: {
       sqlite3VdbeAddOp(v, OP_NewRowid, iParm, 0);
       sqlite3VdbeAddOp(v, OP_Pull, 1, 0);
-      sqlite3VdbeAddOp(v, OP_Insert, iParm, 0);
+      sqlite3VdbeAddOp(v, OP_Insert, iParm, OPFLAG_APPEND);
       break;
     }
 #ifndef SQLITE_OMIT_SUBQUERY
@@ -2364,6 +2365,8 @@ static int simpleMinMaxQuery(Parse *pParse, Select *p, int eDest, int iParm){
   iCol = pExpr->iColumn;
   pTab = pSrc->a[0].pTab;
 
+  /* This optimization cannot be used with virtual tables. */
+  if( IsVirtual(pTab) ) return 0;
 
   /* If we get to here, it means the query is of the correct form.
   ** Check to make sure we have an index and make pIdx point to the
@@ -3142,11 +3145,7 @@ int sqlite3Select(
         for(i=0; i<sAggInfo.nColumn; i++){
           struct AggInfo_col *pCol = &sAggInfo.aCol[i];
           if( pCol->iSorterColumn<j ) continue;
-          if( pCol->iColumn<0 ){
-            sqlite3VdbeAddOp(v, OP_Rowid, pCol->iTable, 0);
-          }else{
-            sqlite3VdbeAddOp(v, OP_Column, pCol->iTable, pCol->iColumn);
-          }
+          sqlite3ExprCodeGetColumn(v, pCol->pTab, pCol->iColumn, pCol->iTable);
           j++;
         }
         sqlite3VdbeAddOp(v, OP_MakeRecord, j, 0);
@@ -3296,7 +3295,7 @@ select_end:
   return rc;
 }
 
-#if defined(SQLITE_TEST) || defined(SQLITE_DEBUG)
+#if defined(SQLITE_DEBUG)
 /*
 *******************************************************************************
 ** The following code is used for testing and debugging only.  The code

@@ -821,9 +821,8 @@ char *sqlite3_vmprintf(const char *zFormat, va_list ap){
 char *sqlite3_mprintf(const char *zFormat, ...){
   va_list ap;
   char *z;
-  char zBase[SQLITE_PRINT_BUF_SIZE];
   va_start(ap, zFormat);
-  z = base_vprintf(sqlite3_realloc, 0, zBase, sizeof(zBase), zFormat, ap);
+  z = sqlite3_vmprintf(zFormat, ap);
   va_end(ap);
   return z;
 }

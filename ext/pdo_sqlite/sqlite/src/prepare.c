@@ -310,10 +310,17 @@ static int sqlite3InitOne(sqlite3 *db, int iDb, char **pzErrMsg){
     rc = SQLITE_NOMEM;
     sqlite3ResetInternalSchema(db, 0);
   }
-  if( rc==SQLITE_OK ){
+  if( rc==SQLITE_OK || (db->flags&SQLITE_RecoveryMode)){
+    /* Black magic: If the SQLITE_RecoveryMode flag is set, then consider
+    ** the schema loaded, even if errors occured. In this situation the 
+    ** current sqlite3_prepare() operation will fail, but the following one
+    ** will attempt to compile the supplied statement against whatever subset
+    ** of the schema was loaded before the error occured. The primary
+    ** purpose of this is to allow access to the sqlite_master table
+    ** even when it's contents have been corrupted.
+    */
     DbSetProperty(db, iDb, DB_SchemaLoaded);
-  }else{
-    sqlite3ResetInternalSchema(db, iDb);
+    rc = SQLITE_OK;
   }
   return rc;
 }
@@ -559,7 +566,7 @@ int sqlite3Prepare(
 */
 int sqlite3Reprepare(Vdbe *p){
   int rc;
-  Vdbe *pNew;
+  sqlite3_stmt *pNew;
   const char *zSql;
   sqlite3 *db;
   
@@ -568,17 +575,17 @@ int sqlite3Reprepare(Vdbe *p){
     return 0;
   }
   db = sqlite3VdbeDb(p);
-  rc = sqlite3Prepare(db, zSql, -1, 0, (sqlite3_stmt**)&pNew, 0);
+  rc = sqlite3Prepare(db, zSql, -1, 0, &pNew, 0);
   if( rc ){
     assert( pNew==0 );
     return 0;
   }else{
     assert( pNew!=0 );
   }
-  sqlite3VdbeSwap(pNew, p);
-  sqlite3_transfer_bindings((sqlite3_stmt*)pNew, (sqlite3_stmt*)p);
-  sqlite3VdbeResetStepResult(pNew);
-  sqlite3VdbeFinalize(pNew);
+  sqlite3VdbeSwap((Vdbe*)pNew, p);
+  sqlite3_transfer_bindings(pNew, (sqlite3_stmt*)p);
+  sqlite3VdbeResetStepResult((Vdbe*)pNew);
+  sqlite3VdbeFinalize((Vdbe*)pNew);
   return 1;
 }
 

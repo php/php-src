@@ -83,7 +83,7 @@ void sqlite3_soft_heap_limit(int n){
 ** Release memory held by SQLite instances created by the current thread.
 */
 int sqlite3_release_memory(int n){
-  return sqlite3pager_release_memory(n);
+  return sqlite3PagerReleaseMemory(n);
 }
 #else
 /* If SQLITE_ENABLE_MEMORY_MANAGEMENT is not defined, then define a version
@@ -661,12 +661,13 @@ void *sqlite3Malloc(int n, int doMemManage){
   }
   return p;
 }
-void sqlite3ReallocOrFree(void **pp, int n){
-  void *p = sqlite3Realloc(*pp, n);
-  if( !p ){
-    sqlite3FreeX(*pp);
+void *sqlite3ReallocOrFree(void *p, int n){
+  void *pNew;
+  pNew = sqlite3Realloc(p, n);
+  if( !pNew ){
+    sqlite3FreeX(p);
   }
-  *pp = p;
+  return pNew;
 }
 
 /*
@@ -750,7 +751,7 @@ void sqlite3SetString(char **pz, ...){
   const char *z;
   char *zResult;
 
-  if( pz==0 ) return;
+  assert( pz!=0 );
   nByte = 1;
   va_start(ap, pz);
   while( (z = va_arg(ap, const char*))!=0 ){
@@ -1132,6 +1133,13 @@ int sqlite3FitsIn64Bits(const char *zNum){
 ** Return an error (non-zero) if the magic was not SQLITE_MAGIC_OPEN
 ** when this routine is called.
 **
+** This routine is called when entering an SQLite API.  The SQLITE_MAGIC_OPEN
+** value indicates that the database connection passed into the API is
+** open and is not being used by another thread.  By changing the value
+** to SQLITE_MAGIC_BUSY we indicate that the connection is in use.
+** sqlite3SafetyOff() below will change the value back to SQLITE_MAGIC_OPEN
+** when the API exits. 
+**
 ** This routine is a attempt to detect if two threads use the
 ** same sqlite* pointer at the same time.  There is a race 
 ** condition so it is possible that the error is not detected.
@@ -1165,11 +1173,11 @@ int sqlite3SafetyOff(sqlite3 *db){
   if( db->magic==SQLITE_MAGIC_BUSY ){
     db->magic = SQLITE_MAGIC_OPEN;
     return 0;
-  }else if( db->magic==SQLITE_MAGIC_OPEN ){
+  }else {
     db->magic = SQLITE_MAGIC_ERROR;
     db->u1.isInterrupted = 1;
+    return 1;
   }
-  return 1;
 }
 
 /*
@@ -1384,11 +1392,11 @@ void *sqlite3TextToPtr(const char *z){
     z++;
   }
   if( sizeof(p)==sizeof(v) ){
-    p = *(void**)&v;
+    memcpy(&p, &v, sizeof(p));
   }else{
     assert( sizeof(p)==sizeof(v2) );
     v2 = (u32)v;
-    p = *(void**)&v2;
+    memcpy(&p, &v2, sizeof(p));
   }
   return p;
 }
@@ -1461,9 +1469,11 @@ int sqlite3MallocFailed(){
 ** Set the "malloc has failed" condition to true for this thread.
 */
 void sqlite3FailedMalloc(){
-  sqlite3OsEnterMutex();
-  assert( mallocHasFailed==0 );
-  mallocHasFailed = 1;
+  if( !sqlite3MallocFailed() ){
+    sqlite3OsEnterMutex();
+    assert( mallocHasFailed==0 );
+    mallocHasFailed = 1;
+  }
 }
 
 #ifdef SQLITE_MEMDEBUG
