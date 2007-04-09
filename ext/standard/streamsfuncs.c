@@ -712,7 +712,7 @@ PHP_FUNCTION(stream_select)
 	struct timeval	tv;
 	struct timeval *tv_p = NULL;
 	fd_set			rfds, wfds, efds;
-	int				max_fd = 0;
+	php_socket_t	max_fd = 0;
 	int				retval, sets = 0;
 	long			usec = 0;
 	int				set_count, max_set_count = 0;

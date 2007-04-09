@@ -304,7 +304,7 @@ static const zend_mm_mem_handlers mem_handlers[] = {
 /* mm block type */
 typedef struct _zend_mm_block_info {
 #if ZEND_MM_COOKIES
-	unsigned long _cookie;
+	size_t _cookie;
 #endif
 	size_t _size;
 	size_t _prev;
@@ -429,7 +429,7 @@ struct _zend_mm_heap {
 static unsigned int _zend_mm_cookie = 0;
 
 # define ZEND_MM_COOKIE(block) \
-	(((unsigned long)(block)) ^ _zend_mm_cookie)
+	(((size_t)(block)) ^ _zend_mm_cookie)
 # define ZEND_MM_SET_COOKIE(block) \
 	(block)->info._cookie = ZEND_MM_COOKIE(block)
 # define ZEND_MM_CHECK_COOKIE(block) \
@@ -447,11 +447,17 @@ static unsigned int _zend_mm_cookie = 0;
 /* Reserved space for error reporting in case of memory overflow */
 #define ZEND_MM_RESERVE_SIZE            (8*1024)
 
-#define ZEND_MM_TYPE_MASK				0x3L
+#ifdef _WIN64
+# define ZEND_MM_LONG_CONST(x)	(x##i64)
+#else
+# define ZEND_MM_LONG_CONST(x)	(x##L)
+#endif
 
-#define ZEND_MM_FREE_BLOCK				0x0L
-#define ZEND_MM_USED_BLOCK				0x1L
-#define ZEND_MM_GUARD_BLOCK				0x3L
+#define ZEND_MM_TYPE_MASK		ZEND_MM_LONG_CONST(0x3)
+
+#define ZEND_MM_FREE_BLOCK		ZEND_MM_LONG_CONST(0x0)
+#define ZEND_MM_USED_BLOCK		ZEND_MM_LONG_CONST(0x1)
+#define ZEND_MM_GUARD_BLOCK		ZEND_MM_LONG_CONST(0x3)
 
 #define ZEND_MM_BLOCK(b, type, size)	do { \
 											size_t _size = (size); \
@@ -710,7 +716,7 @@ static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_free_blo
 			*p = mm_block;
 			mm_block->parent = p;
 			mm_block->prev_free_block = mm_block->next_free_block = mm_block;
-			heap->large_free_bitmap |= (1L << index);
+			heap->large_free_bitmap |= (ZEND_MM_LONG_CONST(1) << index);
 		} else {
 			size_t m;
 
@@ -743,7 +749,7 @@ static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_free_blo
 
 		prev = ZEND_MM_SMALL_FREE_BUCKET(heap, index);
 		if (prev->prev_free_block == prev) {
-			heap->free_bitmap |= (1L << index);
+			heap->free_bitmap |= (ZEND_MM_LONG_CONST(1) << index);
 		}
 		next = prev->next_free_block;
 
@@ -777,7 +783,7 @@ static inline void zend_mm_remove_from_free_list(zend_mm_heap *heap, zend_mm_fre
 			ZEND_MM_CHECK_TREE(mm_block);
 			*mm_block->parent = NULL;
 			if (mm_block->parent == &heap->large_free_buckets[index]) {
-				heap->large_free_bitmap &= ~(1L << index);
+				heap->large_free_bitmap &= ~(ZEND_MM_LONG_CONST(1) << index);
 		    }
 		} else {
 			while (*(cp = &(prev->child[prev->child[1] != NULL])) != NULL) {
@@ -815,7 +821,7 @@ subst_block:
 				size_t index = ZEND_MM_BUCKET_INDEX(ZEND_MM_FREE_BLOCK_SIZE(mm_block));
 
 				if (EXPECTED(heap->free_buckets[index*2] == heap->free_buckets[index*2+1])) {
-					heap->free_bitmap &= ~(1L << index);
+					heap->free_bitmap &= ~(ZEND_MM_LONG_CONST(1) << index);
 				}
 			}
 		} else if (UNEXPECTED(mm_block->parent != NULL)) {
@@ -1022,7 +1028,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 	heap->real_size = 0;
 	heap->overflow = 0;
 	heap->real_peak = 0;
-	heap->limit = 1L<<30;
+	heap->limit = ZEND_MM_LONG_CONST(1)<<(ZEND_MM_NUM_BUCKETS-2);
 	heap->size = 0;
 	heap->peak = 0;
 	heap->internal = internal;
@@ -1644,7 +1650,7 @@ static zend_mm_free_block *zend_mm_search_large_block(zend_mm_heap *heap, size_t
 				best_size = ZEND_MM_FREE_BLOCK_SIZE(p);
 				best_fit = p;
 			}
-			if ((m & (1L << (ZEND_MM_NUM_BUCKETS-1))) == 0) {
+			if ((m & (ZEND_MM_LONG_CONST(1) << (ZEND_MM_NUM_BUCKETS-1))) == 0) {
 				if (p->child[1]) {
 					rst = p->child[1];
 				}
