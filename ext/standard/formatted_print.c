@@ -53,7 +53,7 @@
 static char hexchars[] = "0123456789abcdef";
 static char HEXCHARS[] = "0123456789ABCDEF";
 
-
+/* php_spintf_appendchar() {{{ */
 inline static void
 php_sprintf_appendchar(char **buffer, int *pos, int *size, char add TSRMLS_DC)
 {
@@ -65,8 +65,9 @@ php_sprintf_appendchar(char **buffer, int *pos, int *size, char add TSRMLS_DC)
 	PRINTF_DEBUG(("sprintf: appending '%c', pos=\n", add, *pos));
 	(*buffer)[(*pos)++] = add;
 }
+/* }}} */
 
-
+/* php_spintf_appendstring() {{{ */
 inline static void
 php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 						   int min_width, int max_width, char padding,
@@ -115,8 +116,9 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 		}
 	}
 }
+/* }}} */
 
-
+/* php_spintf_appendint() {{{ */
 inline static void
 php_sprintf_appendint(char **buffer, int *pos, int *size, long number,
 						int width, char padding, int alignment, 
@@ -158,7 +160,9 @@ php_sprintf_appendint(char **buffer, int *pos, int *size, long number,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
 							 neg, 0, always_sign);
 }
+/* }}} */
 
+/* php_spintf_appenduint() {{{ */
 inline static void
 php_sprintf_appenduint(char **buffer, int *pos, int *size,
 					   unsigned long number,
@@ -188,7 +192,9 @@ php_sprintf_appenduint(char **buffer, int *pos, int *size,
 	php_sprintf_appendstring(buffer, pos, size, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i, 0, 0, 0);
 }
+/* }}} */
 
+/* php_spintf_appenddouble() {{{ */
 inline static void
 php_sprintf_appenddouble(char **buffer, int *pos,
 						 int *size, double number,
@@ -276,8 +282,9 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	php_sprintf_appendstring(buffer, pos, size, s, width, 0, padding,
 							 alignment, s_len, is_negative, 0, always_sign);
 }
+/* }}} */
 
-
+/* php_spintf_appendd2n() {{{ */
 inline static void
 php_sprintf_append2n(char **buffer, int *pos, int *size, long number,
 					 int width, char padding, int alignment, int n,
@@ -306,8 +313,9 @@ php_sprintf_append2n(char **buffer, int *pos, int *size, long number,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
 							 0, expprec, 0);
 }
+/* }}} */
 
-
+/* php_spintf_getnumber() {{{ */
 inline static int
 php_sprintf_getnumber(char *buffer, int *pos)
 {
@@ -327,8 +335,9 @@ php_sprintf_getnumber(char *buffer, int *pos)
 		return (int) num;
 	}
 }
+/* }}} */
 
-/* {{{ php_formatted_print
+/* php_formatted_print() {{{
  * New sprintf implementation for PHP.
  *
  * Modifiers:
@@ -769,7 +778,6 @@ PHP_FUNCTION(vfprintf)
 	RETURN_LONG(len);
 }
 /* }}} */
-
 
 /*
  * Local variables:
