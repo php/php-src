@@ -1,5 +1,5 @@
 --TEST--
-Bug: #40398 (parent and self callback functions erroneously called statically)
+Bug #40398 (parent and self callback functions erroneously called statically)
 --FILE--
 <?php
 
