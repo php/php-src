@@ -1,3 +1,21 @@
+2007-04-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Fixed 64-bit support
+
+2007-04-09  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_API.c
+      tests/bug41026.phpt:
+      fix #41026 (segfault when calling "self::method()" in shutdown functions)
+
+    * tests/bug41026.phpt
+      tests/bug41026.phpt:
+      
+      new test
+
 2007-04-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_operators.h:
