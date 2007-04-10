@@ -47,6 +47,8 @@ PHP                                                                        NEWS
 - Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
 - Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
 - Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
+- Fixed bug #41043 (pdo_oci crash when freeing error text with persistent 
+  connection). (Tony)
 - Fixed bug #41037 (unregister_tick_function() inside the tick function crash PHP).
   (Tony)
 - Fixed bug #41026 (segfault when calling "self::method()" in shutdown functions).

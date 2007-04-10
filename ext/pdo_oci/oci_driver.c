@@ -58,6 +58,7 @@ static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info
 ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, sword status, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	text errbuf[1024] = "<<Unknown>>";
+	char tmp_buf[2048];
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_error_info *einfo;
 	pdo_oci_stmt *S = NULL;
@@ -89,26 +90,33 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 			break;
 		case OCI_ERROR:
 			OCIErrorGet(err, (ub4)1, NULL, &einfo->errcode, errbuf, (ub4)sizeof(errbuf), OCI_HTYPE_ERROR);
-			spprintf(&einfo->errmsg, 0, "%s: %s (%s:%d)", what, errbuf, file, line);
+			slprintf(tmp_buf, sizeof(tmp_buf), "%s: %s (%s:%d)", what, errbuf, file, line);
+			einfo->errmsg = pestrdup(tmp_buf, dbh->is_persistent);
 			break;
 		case OCI_SUCCESS_WITH_INFO:
 			OCIErrorGet(err, (ub4)1, NULL, &einfo->errcode, errbuf, (ub4)sizeof(errbuf), OCI_HTYPE_ERROR);
-			spprintf(&einfo->errmsg, 0, "%s: OCI_SUCCESS_WITH_INFO: %s (%s:%d)", what, errbuf, file, line);
+			slprintf(tmp_buf, sizeof(tmp_buf), "%s: OCI_SUCCESS_WITH_INFO: %s (%s:%d)", what, errbuf, file, line);
+			einfo->errmsg = pestrdup(tmp_buf, dbh->is_persistent);
 			break;
 		case OCI_NEED_DATA:
-			spprintf(&einfo->errmsg, 0, "%s: OCI_NEED_DATA (%s:%d)", what, file, line);
+			slprintf(tmp_buf, sizeof(tmp_buf), "%s: OCI_NEED_DATA (%s:%d)", what, file, line);
+			einfo->errmsg = pestrdup(tmp_buf, dbh->is_persistent);
 			break;
 		case OCI_NO_DATA:
-			spprintf(&einfo->errmsg, 0, "%s: OCI_NO_DATA (%s:%d)", what, file, line);
+			slprintf(tmp_buf, sizeof(tmp_buf), "%s: OCI_NO_DATA (%s:%d)", what, file, line);
+			einfo->errmsg = pestrdup(tmp_buf, dbh->is_persistent);
 			break;
 		case OCI_INVALID_HANDLE:
-			spprintf(&einfo->errmsg, 0, "%s: OCI_INVALID_HANDLE (%s:%d)", what, file, line);
+			slprintf(tmp_buf, sizeof(tmp_buf), "%s: OCI_INVALID_HANDLE (%s:%d)", what, file, line);
+			einfo->errmsg = pestrdup(tmp_buf, dbh->is_persistent);
 			break;
 		case OCI_STILL_EXECUTING:
-			spprintf(&einfo->errmsg, 0, "%s: OCI_STILL_EXECUTING (%s:%d)", what, file, line);
+			slprintf(tmp_buf, sizeof(tmp_buf), "%s: OCI_STILL_EXECUTING (%s:%d)", what, file, line);
+			einfo->errmsg = pestrdup(tmp_buf, dbh->is_persistent);
 			break;
 		case OCI_CONTINUE:
-			spprintf(&einfo->errmsg, 0, "%s: OCI_CONTINUE (%s:%d)", what, file, line);
+			slprintf(tmp_buf, sizeof(tmp_buf), "%s: OCI_CONTINUE (%s:%d)", what, file, line);
+			einfo->errmsg = pestrdup(tmp_buf, dbh->is_persistent);
 			break;
 	}
 
