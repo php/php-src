@@ -35,8 +35,8 @@
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {		\
 	long   __lres  = (a) * (b);											\
-	double __dres  = (double)(a) * (double)(b);							\
-	double __delta = (double) __lres - __dres;							\
+	long double __dres  = (long double)(a) * (long double)(b);							\
+	long double __delta = (long double) __lres - __dres;							\
 	if ( ((usedval) = (( __dres + __delta ) != __dres))) {				\
 		(dval) = __dres;												\
 	} else {															\
