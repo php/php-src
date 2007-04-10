@@ -2,6 +2,8 @@
 token_get_all()
 --SKIPIF--
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--INI--
+short_open_tag=1
 --FILE--
 <?php
 
