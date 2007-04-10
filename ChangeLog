@@ -1,3 +1,114 @@
+2007-04-09  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/formatted_print.c:
+      fix folding tags
+
+2007-04-09  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/disk.phpt:
+      Fix test
+
+2007-04-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_sqlite/sqlite/VERSION
+      ext/pdo_sqlite/sqlite/src/analyze.c
+      ext/pdo_sqlite/sqlite/src/attach.c
+      ext/pdo_sqlite/sqlite/src/btree.c
+      ext/pdo_sqlite/sqlite/src/btree.h
+      ext/pdo_sqlite/sqlite/src/build.c
+      ext/pdo_sqlite/sqlite/src/date.c
+      ext/pdo_sqlite/sqlite/src/expr.c
+      ext/pdo_sqlite/sqlite/src/func.c
+      ext/pdo_sqlite/sqlite/src/hash.c
+      ext/pdo_sqlite/sqlite/src/insert.c
+      ext/pdo_sqlite/sqlite/src/keywordhash.h
+      ext/pdo_sqlite/sqlite/src/loadext.c
+      ext/pdo_sqlite/sqlite/src/main.c
+      ext/pdo_sqlite/sqlite/src/opcodes.c
+      ext/pdo_sqlite/sqlite/src/opcodes.h
+      ext/pdo_sqlite/sqlite/src/os.c
+      ext/pdo_sqlite/sqlite/src/os.h
+      ext/pdo_sqlite/sqlite/src/os_common.h
+      ext/pdo_sqlite/sqlite/src/os_unix.c
+      ext/pdo_sqlite/sqlite/src/os_win.c
+      ext/pdo_sqlite/sqlite/src/pager.c
+      ext/pdo_sqlite/sqlite/src/pager.h
+      ext/pdo_sqlite/sqlite/src/parse.c
+      ext/pdo_sqlite/sqlite/src/parse.h
+      ext/pdo_sqlite/sqlite/src/parse.y
+      ext/pdo_sqlite/sqlite/src/pragma.c
+      ext/pdo_sqlite/sqlite/src/prepare.c
+      ext/pdo_sqlite/sqlite/src/printf.c
+      ext/pdo_sqlite/sqlite/src/select.c
+      ext/pdo_sqlite/sqlite/src/shell.c
+      ext/pdo_sqlite/sqlite/src/sqlite.h.in
+      ext/pdo_sqlite/sqlite/src/sqlite3ext.h
+      ext/pdo_sqlite/sqlite/src/sqliteInt.h
+      ext/pdo_sqlite/sqlite/src/tclsqlite.c
+      ext/pdo_sqlite/sqlite/src/test1.c
+      ext/pdo_sqlite/sqlite/src/test2.c
+      ext/pdo_sqlite/sqlite/src/test3.c
+      ext/pdo_sqlite/sqlite/src/trigger.c
+      ext/pdo_sqlite/sqlite/src/update.c
+      ext/pdo_sqlite/sqlite/src/utf.c
+      ext/pdo_sqlite/sqlite/src/util.c
+      ext/pdo_sqlite/sqlite/src/vacuum.c
+      ext/pdo_sqlite/sqlite/src/vdbe.c
+      ext/pdo_sqlite/sqlite/src/vdbeInt.h
+      ext/pdo_sqlite/sqlite/src/vdbeapi.c
+      ext/pdo_sqlite/sqlite/src/vdbeaux.c
+      ext/pdo_sqlite/sqlite/src/vdbefifo.c
+      ext/pdo_sqlite/sqlite/src/vdbemem.c
+      ext/pdo_sqlite/sqlite/src/where.c:
+      Upgrade libsqlite 3 inside PDO sqlite to version 3.3.15
+
+2007-04-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Removed wrong size_t definition
+
+    * ext/spl/php_spl.c:
+      Usage of sizeof(void*) is not portable
+
+    * (PHP_5_2)
+      ext/com_dotnet/com_variant.c:
+      Fixed 64-bit issues
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_com.c
+      main/snprintf.c:
+      ZTS fix
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ext/spl/spl_directory.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      Fixed 64-bit support
+
+2007-04-09  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c
+      ZendEngine2/tests/bug41026.phpt:
+      fix #41026 (segfault when calling "self::method()" in shutdown functions)
+
+    * ZendEngine2/tests/bug41026.phpt
+      ZendEngine2/tests/bug41026.phpt:
+      
+      new test
+
 2007-04-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
