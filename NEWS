@@ -57,6 +57,8 @@ PHP                                                                        NEWS
 - Fixed bug #40998 (long session array keys are truncated). (Tony)
 - Implement feature request #40947, allow a single filter as argument 
   for filter_var_array (Pierre)
+- Fixed bug #40931 (open_basedir bypass via symlink and move_uploaded_file()). 
+  (Tony)
 - Fixed bug #40921 (php_default_post_reader crashes when post_max_size is
   exceeded). (trickie at gmail dot com, Ilia)
 - Fixed bug #40915 (addcslashes unexpected behavior with binary input). (Tony)
