@@ -191,7 +191,7 @@ PHP_FUNCTION(collator_create)
 	ucoll = ucol_open(collator_name, &status);
 	if (U_FAILURE(status)) {
 		/* UTODO handle error case properly */
-		zend_error(E_ERROR, "Could not open collator for locale %s", UG(default_locale));
+		zend_error(E_ERROR, "Could not open collator for locale %s", collator_name);
 		return;
 	}
 	collator_set_wrapper(object, zend_collator_create(ucoll) TSRMLS_CC);
@@ -199,7 +199,7 @@ PHP_FUNCTION(collator_create)
 /* }}} */
 
 /* {{{ proto int Collator::compare(string str1, string str2) U
-   Compare two strings using collation */
+   Compare two strings using collation }}} */
 /* {{{ proto int collator_compare(Collator coll, string str1, string str2) U
    Compare two strings using collation */
 PHP_FUNCTION(collator_compare)
@@ -218,7 +218,7 @@ PHP_FUNCTION(collator_compare)
 /* }}} */
 
 /* {{{ proto array Collator::sort(array input) U
-   Sort an array using collation */
+   Sort an array using collation }}} */
 /* {{{ proto array collator_sort(Collator coll, array input) U
    Sort an array using collation */
 PHP_FUNCTION(collator_sort)
@@ -248,7 +248,7 @@ PHP_FUNCTION(collator_sort)
 /* }}} */
 
 /* {{{ proto void Collator::setStrength(int strength) U
-   Set the collation strength */
+   Set the collation strength }}} */
 /* {{{ proto void collator_set_strength(Collator coll, int strength) U
    Set the collation strength */
 PHP_FUNCTION(collator_set_strength)
@@ -266,7 +266,7 @@ PHP_FUNCTION(collator_set_strength)
 /* }}} */
 
 /* {{{ proto int Collator::getStrength() U
-   Returns the current collation strength */
+   Returns the current collation strength }}} */
 /* {{{ proto int collator_get_strength(Collator coll) U
    Returns the current collation strength */
 PHP_FUNCTION(collator_get_strength)
@@ -283,7 +283,7 @@ PHP_FUNCTION(collator_get_strength)
 /* }}} */
 
 /* {{{ proto bool Collator::setAttribute(int attribute, int value) U
-   Set a collation attribute */
+   Set a collation attribute }}} */
 /* {{{ proto bool collator_set_attribute(Collator coll, int attribute, int value) U
    Set a collation attribute */
 PHP_FUNCTION(collator_set_attribute)
@@ -305,7 +305,7 @@ PHP_FUNCTION(collator_set_attribute)
 
 
 /* {{{ proto int Collator::getAttribute(int attribute) U
-   Returns a collation attribute */
+   Returns a collation attribute }}} */
 /* {{{ proto int collator_get_attribute(Collator coll, int attribute) U
    Returns a collation attribute */
 PHP_FUNCTION(collator_get_attribute)
