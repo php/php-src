@@ -26,6 +26,24 @@ STDOUT.WriteLine("Detected MS compiler version " + VCVERS);
 // 13 is vs.net 2003
 // 14 is vs.net 2005
 
+// do we use x64 or 80x86 version of compiler?
+function probe_msvc_compiler_x64(CL)
+{
+	// tricky escapes to get stderr redirection to work
+	var banner = execute('cmd /c ""' + CL + '" 2>&1"');
+	if (banner.match(/x64/)) {
+		return 1;		
+	}
+	return 0;
+}
+
+X64 = probe_msvc_compiler_x64(CL);
+if (X64) {
+	STDOUT.WriteLine("Detected 64-bit compiler");
+} else {
+	STDOUT.WriteLine("Detected 32-bit compiler");
+}
+
 // cygwin now ships with link.exe.  Avoid searching the cygwin path
 // for this, as we want the MS linker, not the fileutil
 PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
@@ -58,6 +76,11 @@ if (PHP_OBJECT_OUT_DIR.length) {
 		ERROR('you chosen output directory ' + PHP_OBJECT_OUT_DIR + ' does not exist');
 	}
 	PHP_OBJECT_OUT_DIR += '\\';
+} else if (X64) {
+	if (!FSO.FolderExists("x64")) {
+		FSO.CreateFolder("x64");
+	}
+	PHP_OBJECT_OUT_DIR = 'x64\\';
 }
 
 ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
@@ -100,7 +123,12 @@ if (VCVERS < 14) {
 if (VCVERS >= 14) {
 	// fun stuff: MS deprecated ANSI stdio and similar functions
 	// disable annoying warnings
-	ADD_FLAG('CFLAGS', ' /wd4996 ');
+	if (X64) {
+		ADD_FLAG('CFLAGS', ' /wd4996 ');
+//		ADD_FLAG('CFLAGS', ' /wd4996 /Wp64 ');
+	} else {
+		ADD_FLAG('CFLAGS', ' /wd4996 ');
+	}
 
 	if (PHP_DEBUG == "yes") {
 		// Set some debug/release specific options
@@ -125,7 +153,11 @@ DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_3
 
 // Set some debug/release specific options
 if (PHP_DEBUG == "yes") {
-	ADD_FLAG("CFLAGS", "/LDd /MDd /Gm /ZI /Od /D _DEBUG /D ZEND_DEBUG=1");
+	if (X64) {
+		ADD_FLAG("CFLAGS", "/LDd /MDd /Gm /Zi /Od /D _DEBUG /D ZEND_DEBUG=1");
+	} else {
+		ADD_FLAG("CFLAGS", "/LDd /MDd /Gm /ZI /Od /D _DEBUG /D ZEND_DEBUG=1");
+	}
 	ADD_FLAG("LDFLAGS", "/debug");
 	// Avoid problems when linking to release libraries that use the release
 	// version of the libc
@@ -176,18 +208,28 @@ ARG_WITH('php-build', 'Path to where you extracted http://www.php.net/extra/win3
 if (PHP_PHP_BUILD == 'no') {
 	if (FSO.FolderExists("..\\php_build")) {
 		PHP_PHP_BUILD = "..\\php_build";
-	} else if (FSO.FolderExists("..\\win32build")) {
-		PHP_PHP_BUILD = "..\\win32build";
-	} else if (FSO.FolderExists("..\\php-win32-dev\\php_build")) {
-		PHP_PHP_BUILD = "..\\php-win32-dev\\php_build";
+	} else {
+		if (X64) {
+			if (FSO.FolderExists("..\\win64build")) {
+				PHP_PHP_BUILD = "..\\win64build";
+			} else if (FSO.FolderExists("..\\php-win64-dev\\php_build")) {
+				PHP_PHP_BUILD = "..\\php-win64-dev\\php_build";
+			}
+		} else {
+			if (FSO.FolderExists("..\\win32build")) {
+				PHP_PHP_BUILD = "..\\win32build";
+			} else if (FSO.FolderExists("..\\php-win32-dev\\php_build")) {
+				PHP_PHP_BUILD = "..\\php-win32-dev\\php_build";
+			}
+		}
 	}
 }
 
 ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
 ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
 
-var php_usual_include_suspects = "..\\php_build\\include;..\\win32build\\include;..\\bindlib_w32";
-var php_usual_lib_suspects = "..\\php_build\\lib;..\\win32build\\lib;..\\bindlib_w32";
+var php_usual_include_suspects = PHP_PHP_BUILD+"\\include;..\\bindlib_w32";
+var php_usual_lib_suspects = PHP_PHP_BUILD+"\\lib;..\\bindlib_w32";
 
 // Poke around for some headers
 function probe_basic_headers()
@@ -323,7 +365,9 @@ ARG_WITH("snapshot-template", "Path to snapshot builder template dir", "no");
 
 if (PHP_SNAPSHOT_TEMPLATE == "no") {
 	/* default is as a sibling of the php_build dir */
-	if (FSO.FolderExists(PHP_PHP_BUILD + "\\..\\template")) {
+	if (FSO.FolderExists(PHP_PHP_BUILD + "\\template")) {
+		PHP_SNAPSHOT_TEMPLATE = FSO.GetAbsolutePathName(PHP_PHP_BUILD + "\\template");
+	} else if (FSO.FolderExists(PHP_PHP_BUILD + "\\..\\template")) {
 		PHP_SNAPSHOT_TEMPLATE = FSO.GetAbsolutePathName(PHP_PHP_BUILD + "\\..\\template");
 	}
 }
