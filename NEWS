@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-05 Apr 2007, PHP 5.2.2RC1
+10 Apr 2007, PHP 5.2.2RC1
 - Improved bundled GD
   . Sync to 2.0.35
   . colors allocated henceforth from the resulting image overwrite the palette 
