@@ -135,6 +135,9 @@ static int _clean_invalid_results(zend_rsrc_list_entry *le TSRMLS_DC)
 	return 0;
 }
 
+#define efree_n(x)  { efree(x); x = NULL; }
+#define efree_if(x) if (x) efree_n(x)
+
 static void _free_sybase_result(sybase_result *result)
 {
 	int i, j;
@@ -156,6 +159,19 @@ static void _free_sybase_result(sybase_result *result)
 		}
 		efree(result->fields);
 	}
+
+        if (result->tmp_buffer) {
+                for (i=0; i<result->num_fields; i++) {
+                        efree(result->tmp_buffer[i]);
+                }
+                efree(result->tmp_buffer);
+        }
+
+	efree_if(result->lengths);
+	efree_if(result->indicators);
+	efree_if(result->datafmt);
+	efree_if(result->numerics);
+	efree_if(result->types);
 
 	efree(result);
 }
@@ -246,7 +262,7 @@ static CS_RETCODE CS_PUBLIC _client_message_handler(CS_CONTEXT *context, CS_CONN
 	TSRMLS_FETCH();
 
 	if (CS_SEVERITY(errmsg->msgnumber) >= SybCtG(min_client_severity)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Client message:  %s (severity %d)", errmsg->msgstring, CS_SEVERITY(errmsg->msgnumber));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Client message:  %s (severity %ld)", errmsg->msgstring, CS_SEVERITY(errmsg->msgnumber));
 	}
 	STR_FREE(SybCtG(server_message));
 	SybCtG(server_message) = estrdup(errmsg->msgstring);
@@ -351,8 +367,8 @@ static CS_RETCODE CS_PUBLIC _server_message_handler(CS_CONTEXT *context, CS_CONN
 
 	/* Spit out a warning if neither of them has handled this message */
 	if (!handled) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Server message:  %s (severity %d, procedure %s)",
-				srvmsg->text, srvmsg->severity, ((srvmsg->proclen>0) ? srvmsg->proc : "N/A"));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Server message:  %s (severity %ld, procedure %s)",
+				srvmsg->text, (long)srvmsg->severity, ((srvmsg->proclen>0) ? srvmsg->proc : "N/A"));
 	}
 
 	return CS_SUCCEED;
@@ -1015,15 +1031,15 @@ static int php_sybase_finish_results(sybase_result *result TSRMLS_DC)
 	CS_RETCODE retcode;
 	CS_INT restype;
 	
-	efree(result->datafmt);
-	efree(result->lengths);
-	efree(result->indicators);
-	efree(result->numerics);
-	efree(result->types);
+	efree_n(result->datafmt);
+	efree_n(result->lengths);
+	efree_n(result->indicators);
+	efree_n(result->numerics);
+	efree_n(result->types);
 	for (i=0; i<result->num_fields; i++) {
 		efree(result->tmp_buffer[i]);
 	}
-	efree(result->tmp_buffer);
+	efree_n(result->tmp_buffer);
 
 	/* Indicate we have read all rows */
 	result->sybase_ptr->active_result_index= 0;
@@ -1105,7 +1121,7 @@ static int php_sybase_finish_results(sybase_result *result TSRMLS_DC)
 #define RETURN_DOUBLE_VAL(result, buf, length)          \
 	if ((length - 1) <= EG(precision)) {                \
 		errno = 0;                                      \
-		Z_DVAL(result) = strtod(buf, NULL);             \
+		Z_DVAL(result) = zend_strtod(buf, NULL);        \
 		if (errno != ERANGE) {                          \
 			Z_TYPE(result) = IS_DOUBLE;                 \
 		} else {                                        \
@@ -1127,14 +1143,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 	}
 	
 	if (numrows!=-1) numrows+= result->num_rows;
-	while ((retcode=ct_fetch(result->sybase_ptr->cmd, CS_UNUSED, CS_UNUSED, CS_UNUSED, NULL))==CS_SUCCEED
-			|| retcode==CS_ROW_FAIL) {
-		/*
-		if (retcode==CS_ROW_FAIL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Error reading row %d", result->num_rows);
-		}
-		*/
-		
+	while ((retcode=ct_fetch(result->sybase_ptr->cmd, CS_UNUSED, CS_UNUSED, CS_UNUSED, NULL))==CS_SUCCEED) {
 		result->num_rows++;
 		i= result->store ? result->num_rows- 1 : 0;
 		if (i >= result->blocks_initialized*SYBASE_ROWS_BLOCK) {
@@ -1191,7 +1200,11 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 		}
 		if (numrows!=-1 && result->num_rows>=numrows) break;
 	}
-	
+
+	if (retcode==CS_ROW_FAIL) {
+	        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Error reading row %d", result->num_rows);
+		return retcode;
+	}
 	result->last_retcode= retcode;
 	switch (retcode) {
 		case CS_END_DATA:
