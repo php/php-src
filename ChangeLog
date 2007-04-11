@@ -1,3 +1,119 @@
+2007-04-10  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/unicode/collator.c:
+      Wrong locale name.
+
+2007-04-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+2007-04-10  Antony Dovgal  <antony@zend.com>
+
+    * main/fopen_wrappers.c:
+      MFB: fix #40931 (open_basedir bypass via symlink and move_uploaded_file())
+
+2007-04-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.2RC1
+
+2007-04-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/fopen_wrappers.c:
+      fix #40931 (open_basedir bypass via symlink and move_uploaded_file())
+
+    * (PHP_5_2)
+      ext/soap/tests/bugs/bug34657.phpt:
+      skip test if openssl is present
+
+    * ext/soap/tests/bugs/bug34657.phpt:
+      skip test if openssl is present
+      in this case the error messages are different
+
+    * ext/standard/tests/network/inet_ipv6.phpt
+      ext/standard/tests/network/inet_ipv6.phpt:
+      skip this test on MacOS
+
+    * (PHP_5_2)
+      ext/standard/tests/general_functions/bug40398.phpt:
+      fix test name
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_oci/oci_driver.c:
+      fix #41043 (pdo_oci crash when freeing error text with persistent
+      connection)
+
+2007-04-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      - MFB Synch
+
+    * (PHP_5_2)
+      ext/sybase_ct/php_sybase_ct.c:
+      - WS/CS
+
+    * (PHP_5_2)
+      ext/sybase_ct/php_sybase_ct.c:
+      - Cleanup the cleanup
+
+2007-04-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/config.m4:
+      declare THREADSAFE explicitly (it's On if undefined)
+
+2007-04-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/zend_multiply.h:
+      MFB:- Fixed ZEND_SIGNED_MULTIPLY_LONG() so that ext/filter/tests/046.phpt
+      wont fail. (Integer overflow)
+
+    * (PHP_5_2)
+      ZendEngine2/zend_multiply.h:
+      - Fixed ZEND_SIGNED_MULTIPLY_LONG() so that ext/filter/tests/046.phpt wont
+      fail. (Integer overflow)
+
+2007-04-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/tokenizer/tests/002.phpt
+      ext/tokenizer/tests/002.phpt:
+      fix test
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug41037.phpt:
+      MFH: fix #41037 (unregister_tick_function() inside the tick function crash
+      PHP)
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug41037.phpt
+      ext/standard/tests/general_functions/bug41037.phpt:
+      fix #41037 (unregister_tick_function() inside the tick function crash PHP)
+
+    * ext/pdo_mysql/mysql_statement.c:
+      MFB
+
+2007-04-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * win32/build/config.w32
+      win32/build/config.w32
+      win32/build/config.w32.h.in
+      win32/build/config.w32.h.in:
+      Initial WIN64 support
+
 2007-04-09  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
