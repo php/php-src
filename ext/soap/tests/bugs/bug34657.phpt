@@ -23,8 +23,9 @@ try {
 } catch (Exception $e) {
 	echo get_class($e)."\n";
 }
+?>
 --EXPECTF--
-Warning: SoapClient::__construct(): php_network_getaddresses: getaddrinfo failed: %sbug34657.php on line 3
+Warning: SoapClient::__construct(): %s %sbug34657.php on line 3
 
 Warning: SoapClient::__construct(http://i_dont_exist.com/some.wsdl): failed to open stream: %sbug34657.php on line 3
 
