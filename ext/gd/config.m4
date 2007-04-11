@@ -288,6 +288,7 @@ dnl These are always defined with bundled library
   AC_DEFINE(HAVE_GD_GIF_READ,         1, [ ])
   AC_DEFINE(HAVE_GD_GIF_CREATE,       1, [ ])
   AC_DEFINE(HAVE_GD_FONTCACHESHUTDOWN,1, [ ])
+  AC_DEFINE(HAVE_GD_FONTMUTEX,        1, [ ])
 
 elif test "$PHP_GD" != "no"; then
 
