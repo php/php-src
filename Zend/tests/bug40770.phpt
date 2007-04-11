@@ -1,7 +1,7 @@
 --TEST--
 Bug #40770 Apache child exits when PHP memory limit reached 
 --INI--
-memory_limit=64M
+memory_limit=8M
 --FILE--
 <?php
 ini_set('display_errors',true);
@@ -12,4 +12,4 @@ for ($i=0; $i<=$mb; $i++) {
 }
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of 67108864 bytes exhausted%s(tried to allocate %d bytes) in %sbug40770.php on line 6
+Fatal error: Allowed memory size of 8388608 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
