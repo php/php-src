@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2007, PHP 5.2.2RC2
+- Fixed bug #40861 (strtotime() doesn't handle double negative relative time
+  units correctly). (Derick)
 
 10 Apr 2007, PHP 5.2.2RC1
 - Improved bundled GD
