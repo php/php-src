@@ -9,7 +9,6 @@ all: $(all_targets)
 	@echo
 	@echo "Build complete."
 	@echo "Don't forget to run 'make test'."
-	@echo "(It is safe to ignore warnings about tempnam and tmpnam)."
 	@echo
 	
 build-modules: $(PHP_MODULES)
