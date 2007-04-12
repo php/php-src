@@ -1,5 +1,7 @@
 --TEST--
 ReflectionObject::__toString (filtering privates/protected dynamic properties)
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class C1 {

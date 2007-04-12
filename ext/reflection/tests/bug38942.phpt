@@ -1,5 +1,7 @@
 --TEST--
 Bug #38942 (Double old-style-ctor inheritance)
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class foo {

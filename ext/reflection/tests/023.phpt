@@ -1,5 +1,7 @@
 --TEST--
 ReflectionClass::getDefaultProperties (filtering parent privates)
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class C1 {
