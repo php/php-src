@@ -705,7 +705,13 @@ default_socket_timeout = 60
 ;xmlrpc_errors = 0
 
 [Pcre]
+;PCRE library backtracking limit.
 ;pcre.recursion_limit=100000
+
+;PCRE library recursion limit. 
+;Please note that if you set this value to a high number you may consume all 
+;the available process stack and eventually crash PHP (due to reaching the 
+;stack size limit imposed by the Operating System).
 ;pcre.backtrack_limit=100000
 
 [Syslog]
