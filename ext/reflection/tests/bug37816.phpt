@@ -1,5 +1,7 @@
 --TEST--
 Bug #37816 (ReflectionProperty does not throw exception when accessing protected attribute)
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

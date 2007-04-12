@@ -1,5 +1,7 @@
 --TEST--
 ReflectionMethod::__construct() tests
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

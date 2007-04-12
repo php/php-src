@@ -1,5 +1,7 @@
 --TEST--
 Bug #38653 (memory leak in ReflectionClass::getConstant())
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

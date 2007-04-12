@@ -1,5 +1,7 @@
 --TEST--
 ReflectionMethod::__toString() tests (overriden method)
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class Foo {

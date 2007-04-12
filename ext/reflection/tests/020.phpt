@@ -1,5 +1,7 @@
 --TEST--
 ReflectionObject::hasProperty
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class Foo {
