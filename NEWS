@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed bug #41063 (chdir doesn't like root paths). (Dmitry)
 - Fixed bug #41061 ("visibility error" in ReflectionFunction::export()).
   (Johannes)
+- Fixed bug #41034 (json_encode() ignores null byte started keys in arrays).
+  (Ilia)
 - Fixed bug #40861 (strtotime() doesn't handle double negative relative time
   units correctly). (Derick)
 

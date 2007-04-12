@@ -177,7 +177,7 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
                     json_encode_r(buf, *data TSRMLS_CC);
                 } else if (r == 1) {
                     if (i == HASH_KEY_IS_STRING) {
-                        if (key[0] == '\0') {
+                        if (key[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
                             /* Skip protected and private members. */
                             continue;
                         }
