@@ -21,7 +21,7 @@ echo "Done\n";
 string(2) """"
 string(4) "null"
 string(4) "true"
-string(2) "{}"
+string(7) "{"":""}"
 string(5) "[[1]]"
 string(1) "1"
 string(38) ""\u0440\u0443\u0441\u0441\u0438\u0448""
