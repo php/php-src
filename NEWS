@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2007, PHP 5.2.2RC2
 - Fixed bug #41063 (chdir doesn't like root paths). (Dmitry)
+- Fixed bug #41061 ("visibility error" in ReflectionFunction::export()).
+  (Johannes)
 - Fixed bug #40861 (strtotime() doesn't handle double negative relative time
   units correctly). (Derick)
 
