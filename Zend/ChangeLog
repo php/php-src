@@ -1,3 +1,12 @@
+2007-04-11  Antony Dovgal  <antony@zend.com>
+
+    * tests/bug40770.phpt:
+      MFB
+
+    * (PHP_5_2)
+      tests/bug40770.phpt:
+      minor improvement
+
 2007-04-10  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * zend_multiply.h:
