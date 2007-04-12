@@ -1,3 +1,79 @@
+2007-04-11  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug40770.phpt
+      ext/date/tests/bug35885.phpt:
+      MFB
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug40770.phpt
+      ext/date/tests/bug35885.phpt:
+      minor improvement
+
+    * ext/soap/tests/bugs/bug34657.phpt
+      ext/soap/tests/bugs/bug34657.phpt:
+      improve test
+
+    * Makefile.global:
+      we don't ship libmysql anymore, so there is no need for this message
+
+2007-04-11  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/bug40861.phpt:
+      - MFH: Fixed bug #40861 (strtotime() doesn't handle double negative
+      relative
+        time units correctly).
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/bug40861.phpt:
+      - Fixed bug #40861 (strtotime() doesn't handle double negative relative
+      time
+        units correctly).
+
+2007-04-11  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/config.w32:
+      - add HAVE_GD_FONTMUTEX and HAVE_GD_FONTCACHESHUTDOWN to win32 build
+
+2007-04-11  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/array/array_merge.phpt
+      ext/standard/tests/array/array_push.phpt
+      ext/standard/tests/array/count_recursive.phpt
+      ext/standard/tests/strings/fprintf.phpt
+      ext/standard/tests/strings/md5.phpt:
+      new tests: array_merge, array_push, fprintf. modified tests:
+      count_recursive, md5.
+
+2007-04-11  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/config.w32:
+      - add HAVE_GD_FONTCACHESHUTDOWN to w32 build script (always here)
+
+2007-04-11  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/gd/config.m4:
+      fix #41048 (PHP6 Segmentation fault issue)
+
+2007-04-11  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to -dev.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - 4.4.7RC1.
+
 2007-04-10  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/unicode/collator.c:
