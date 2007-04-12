@@ -36,8 +36,8 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <api>1.1.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
