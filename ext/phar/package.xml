@@ -32,7 +32,7 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <date>2007-03-26</date>
  <time>11:41:38</time>
  <version>
-  <release>1.1.0RC1</release>
+  <release>1.1.0</release>
   <api>1.1.0</api>
  </version>
  <stability>
