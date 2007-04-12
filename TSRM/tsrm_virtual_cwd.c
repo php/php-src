@@ -567,6 +567,7 @@ no_realpath:
 		CWD_STATE_COPY(&old_state, state);
 
 #ifdef TSRM_WIN32
+		ret = 0;
 		is_unc = 0;
 		if (path_length >= 2 && path[1] == ':') {			
 			state->cwd = (char *) realloc(state->cwd, 2 + 1);
