@@ -37,7 +37,7 @@
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 #include "ext/mbstring/mbstring.h"
 
-static void safe_php_register_variable(char *var, char *strval, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
+static void safe_php_register_variable(char *var, char *strval, int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
 
 #define SAFE_RETURN { \
     php_mb_flush_gpc_variables(num_vars, val_list, len_list, array_ptr TSRMLS_CC); \
@@ -61,7 +61,7 @@ void php_mb_flush_gpc_variables(int num_vars, char **val_list, int *len_list, zv
 			php_mb_gpc_encoding_converter(val_list, len_list, num_vars, NULL, NULL TSRMLS_CC);
 		}
 		for (i=0; i<num_vars; i+=2){
-			safe_php_register_variable(val_list[i], val_list[i+1], array_ptr, 0 TSRMLS_CC);
+			safe_php_register_variable(val_list[i], val_list[i+1], len_list[i+1], array_ptr, 0 TSRMLS_CC);
 			efree(val_list[i]);
 			efree(val_list[i+1]);
 		} 
@@ -215,10 +215,10 @@ static zend_bool is_protected_variable(char *varname TSRMLS_DC)
 }
 
 
-static void safe_php_register_variable(char *var, char *strval, zval *track_vars_array, zend_bool override_protection TSRMLS_DC)
+static void safe_php_register_variable(char *var, char *strval, int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC)
 {
 	if (override_protection || !is_protected_variable(var TSRMLS_CC)) {
-		php_register_variable(var, strval, track_vars_array TSRMLS_CC);
+		php_register_variable_safe(var, strval, val_len, track_vars_array TSRMLS_CC);
 	}
 }
 
@@ -236,7 +236,7 @@ static void register_http_post_files_variable(char *strvar, char *val, zval *htt
 	int register_globals = PG(register_globals);
 
 	PG(register_globals) = 0;
-	safe_php_register_variable(strvar, val, http_post_files, override_protection TSRMLS_CC);
+	safe_php_register_variable(strvar, val, strlen(val), http_post_files, override_protection TSRMLS_CC);
 	PG(register_globals) = register_globals;
 }
 
@@ -749,7 +749,7 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes, i
   XXX: this is horrible memory-usage-wise, but we only expect
   to do this on small pieces of form data.
 */
-static char *multipart_buffer_read_body(multipart_buffer *self TSRMLS_DC)
+static char *multipart_buffer_read_body(multipart_buffer *self, unsigned int *len TSRMLS_DC)
 {
 	char buf[FILLUNIT], *out=NULL;
 	int total_bytes=0, read_bytes=0;
@@ -761,6 +761,7 @@ static char *multipart_buffer_read_body(multipart_buffer *self TSRMLS_DC)
 	}
 
 	if (out) out[total_bytes] = '\0';
+	*len = total_bytes;
 
 	return out;
 }
@@ -895,8 +896,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 			/* Normal form variable, safe to read all data into memory */
 			if (!filename && param) {
-
-				char *value = multipart_buffer_read_body(mbuff TSRMLS_CC);
+				unsigned int value_len; 
+				char *value = multipart_buffer_read_body(mbuff, &value_len TSRMLS_CC);
 
 				if (!value) {
 					value = estrdup("");
@@ -907,10 +908,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					php_mb_gpc_stack_variable(param, value, &val_list, &len_list, 
 											  &num_vars, &num_vars_max TSRMLS_CC);
 				} else {
-					safe_php_register_variable(param, value, array_ptr, 0 TSRMLS_CC);
+					safe_php_register_variable(param, value, value_len, array_ptr, 0 TSRMLS_CC);
 				}
 #else
-				safe_php_register_variable(param, value, array_ptr, 0 TSRMLS_CC);
+				safe_php_register_variable(param, value, value_len, array_ptr, 0 TSRMLS_CC);
 #endif
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
 					max_file_size = atol(value);
@@ -1104,9 +1105,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 filedone:
 #endif
 			if (s && s > filename) {
-				safe_php_register_variable(lbuf, s+1, NULL, 0 TSRMLS_CC);
+				safe_php_register_variable(lbuf, s+1, strlen(s+1), NULL, 0 TSRMLS_CC);
 			} else {
-				safe_php_register_variable(lbuf, filename, NULL, 0 TSRMLS_CC);
+				safe_php_register_variable(lbuf, filename, strlen(filename), NULL, 0 TSRMLS_CC);
 			}
 
 			/* Add $foo[name] */
@@ -1140,7 +1141,7 @@ filedone:
 			} else {
 				sprintf(lbuf, "%s_type", param);
 			}
-			safe_php_register_variable(lbuf, cd, NULL, 0 TSRMLS_CC);
+			safe_php_register_variable(lbuf, cd, strlen(cd), NULL, 0 TSRMLS_CC);
 
 			/* Add $foo[type] */
 			if (is_arr_upload) {
@@ -1162,7 +1163,7 @@ filedone:
 			magic_quotes_gpc = PG(magic_quotes_gpc);
 			PG(magic_quotes_gpc) = 0;
 			/* if param is of form xxx[.*] this will cut it to xxx */
-			safe_php_register_variable(param, temp_filename, NULL, 1 TSRMLS_CC);
+			safe_php_register_variable(param, temp_filename, strlen(temp_filename), NULL, 1 TSRMLS_CC);
 	
 			/* Add $foo[tmp_name] */
 			if (is_arr_upload) {
