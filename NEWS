@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2007, PHP 5.2.2RC2
+- Fixed bug #41075 (memleak when creating default object caused exception). 
+  (Dmitry)
 - Fixed bug #41063 (chdir doesn't like root paths). (Dmitry)
 - Fixed bug #41061 ("visibility error" in ReflectionFunction::export()).
   (Johannes)
