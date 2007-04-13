@@ -29,3 +29,6 @@ echo "Done\n";
 --EXPECTF--	
 string(40) "Creating default object from empty value"
 Done
+--UEXPECTF--	
+unicode(40) "Creating default object from empty value"
+Done
