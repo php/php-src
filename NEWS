@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, Version 4.4.7
+- Fixed bug #38236 (binary data gets corrupted on multipart/formdata POST)
+  (patch by ass3mbler@gmail.com)
 	
 11 Apr 2007, Version 4.4.7RC1
 - Fixed MOPB-33-2007 (PHP mail() Message ASCIIZ Byte Truncation). (Ilia)
