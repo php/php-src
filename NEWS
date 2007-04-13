@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   units correctly). (Derick)
 - Fixed bug #40290 (strtotime() returns unexpected result with particular
   timezone offset). (Derick)
+- Fixed bug #39965 (Latitude and longitude are backwards in date_sun_info()).
+  (Derick)
 
 
 10 Apr 2007, PHP 5.2.2RC1
