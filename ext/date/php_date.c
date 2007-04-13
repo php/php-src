@@ -25,6 +25,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_versioning.h"
+#include "ext/standard/php_math.h"
 #include "php_date.h"
 #include "lib/timelib.h"
 #include <time.h>
@@ -900,6 +901,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 			case 'H': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->h); break;
 			case 'i': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->i); break;
 			case 's': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->s); break;
+			case 'u': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%06d", (int) floor(t->f * 1000000)); break;
 
 			/* timezone */
 			case 'I': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", localtime ? offset->is_dst : 0); break;
