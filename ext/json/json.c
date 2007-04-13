@@ -303,7 +303,7 @@ static void json_escape_string(smart_str *buf, char *s, int len)
                 break;
             default:
                 {
-                    if (us < ' ' || (us & 127) == us)
+                    if (us >= ' ' && (us & 127) == us)
                     {
                         smart_str_appendc(buf, (unsigned char) us);
                     }
