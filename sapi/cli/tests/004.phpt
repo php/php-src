@@ -23,7 +23,7 @@ string(45) "Exception: Function unknown() does not exist
 "
 string(42) "Exception: Function echo() does not exist
 "
-string(117) "Function [ <internal> public function phpinfo ] {
+string(110) "Function [ <internal> function phpinfo ] {
 
   - Parameters [1] {
     Parameter #0 [ <optional> $what ]
