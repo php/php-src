@@ -2544,7 +2544,7 @@ PHP_FUNCTION(date_sun_info)
 	array_init(return_value);
 	
 	/* Get sun up/down and transit */
-	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -35.0/60, 1, &ddummy, &ddummy, &rise, &set, &transit);
+	rs = timelib_astro_rise_set_altitude(t, longitude, latitude, -35.0/60, 1, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
 			add_ascii_assoc_bool(return_value, "sunrise", 0);
@@ -2564,7 +2564,7 @@ PHP_FUNCTION(date_sun_info)
 	add_ascii_assoc_long(return_value, "transit", timelib_date_to_int(t2, &dummy));
 
 	/* Get civil twilight */
-	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -6.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
+	rs = timelib_astro_rise_set_altitude(t, longitude, latitude, -6.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
 			add_ascii_assoc_bool(return_value, "civil_twilight_begin", 0);
@@ -2582,7 +2582,7 @@ PHP_FUNCTION(date_sun_info)
 	}
 
 	/* Get nautical twilight */
-	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -12.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
+	rs = timelib_astro_rise_set_altitude(t, longitude, latitude, -12.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
 			add_ascii_assoc_bool(return_value, "nautical_twilight_begin", 0);
@@ -2600,7 +2600,7 @@ PHP_FUNCTION(date_sun_info)
 	}
 
 	/* Get astronomical twilight */
-	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -18.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
+	rs = timelib_astro_rise_set_altitude(t, longitude, latitude, -18.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
 			add_ascii_assoc_bool(return_value, "astronomical_twilight_begin", 0);
