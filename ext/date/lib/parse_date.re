@@ -1543,7 +1543,8 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 		} else {
 			timelib_error_container_dtor(in.errors);
 		}
-		in.time->y = in.time->d = in.time->m = in.time->h = in.time->i = in.time->s = in.time->f = in.time->z = in.time->dst = -1;
+		in.time->y = in.time->d = in.time->m = in.time->h = in.time->i = in.time->s = in.time->f = in.time->dst = -1;
+		in.time->z = -999999;
 		in.time->is_localtime = in.time->zone_type = 0;
 		return in.time;
 	}
@@ -1562,7 +1563,7 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 	in.time->i = -1;
 	in.time->s = -1;
 	in.time->f = -1;
-	in.time->z = -1;
+	in.time->z = -999999;
 	in.time->dst = -1;
 	in.tzdb = tzdb;
 	in.time->is_localtime = 0;
@@ -1599,7 +1600,7 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 	if (parsed->i == -1) parsed->i = now->i != -1 ? now->i : 0;
 	if (parsed->s == -1) parsed->s = now->s != -1 ? now->s : 0;
 	if (parsed->f == -1) parsed->f = now->f != -1 ? now->f : 0;
-	if (parsed->z == -1) parsed->z = now->z != -1 ? now->z : 0;
+	if (parsed->z == -999999) parsed->z = now->z != -999999 ? now->z : 0;
 	if (parsed->dst == -1) parsed->dst = now->dst != -1 ? now->dst : 0;
 
 	if (!parsed->tz_abbr) {
