@@ -65,35 +65,35 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
   }
 
   - Functions {
-    Function [ <internal> public function strtotime ] {
+    Function [ <internal> function strtotime ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $time ]
         Parameter #1 [ <optional> $now ]
       }
     }
-    Function [ <internal> public function date ] {
+    Function [ <internal> function date ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $format ]
         Parameter #1 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> public function idate ] {
+    Function [ <internal> function idate ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $format ]
         Parameter #1 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> public function gmdate ] {
+    Function [ <internal> function gmdate ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $format ]
         Parameter #1 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> public function mktime ] {
+    Function [ <internal> function mktime ] {
 
       - Parameters [6] {
         Parameter #0 [ <optional> $hour ]
@@ -104,7 +104,7 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
         Parameter #5 [ <optional> $year ]
       }
     }
-    Function [ <internal> public function gmmktime ] {
+    Function [ <internal> function gmmktime ] {
 
       - Parameters [6] {
         Parameter #0 [ <optional> $hour ]
@@ -115,7 +115,7 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
         Parameter #5 [ <optional> $year ]
       }
     }
-    Function [ <internal> public function checkdate ] {
+    Function [ <internal> function checkdate ] {
 
       - Parameters [3] {
         Parameter #0 [ <required> $month ]
@@ -123,84 +123,84 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
         Parameter #2 [ <required> $year ]
       }
     }
-    Function [ <internal> public function strftime ] {
+    Function [ <internal> function strftime ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $format ]
         Parameter #1 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> public function gmstrftime ] {
+    Function [ <internal> function gmstrftime ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $format ]
         Parameter #1 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> public function time ] {
+    Function [ <internal> function time ] {
 
       - Parameters [0] {
       }
     }
-    Function [ <internal> public function localtime ] {
+    Function [ <internal> function localtime ] {
 
       - Parameters [2] {
         Parameter #0 [ <optional> $timestamp ]
         Parameter #1 [ <optional> $associative_array ]
       }
     }
-    Function [ <internal> public function getdate ] {
+    Function [ <internal> function getdate ] {
 
       - Parameters [1] {
         Parameter #0 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> public function date_create ] {
+    Function [ <internal> function date_create ] {
     }
-    Function [ <internal> public function date_parse ] {
+    Function [ <internal> function date_parse ] {
     }
-    Function [ <internal> public function date_format ] {
+    Function [ <internal> function date_format ] {
     }
-    Function [ <internal> public function date_modify ] {
+    Function [ <internal> function date_modify ] {
     }
-    Function [ <internal> public function date_timezone_get ] {
+    Function [ <internal> function date_timezone_get ] {
     }
-    Function [ <internal> public function date_timezone_set ] {
+    Function [ <internal> function date_timezone_set ] {
     }
-    Function [ <internal> public function date_offset_get ] {
+    Function [ <internal> function date_offset_get ] {
     }
-    Function [ <internal> public function date_time_set ] {
+    Function [ <internal> function date_time_set ] {
     }
-    Function [ <internal> public function date_date_set ] {
+    Function [ <internal> function date_date_set ] {
     }
-    Function [ <internal> public function date_isodate_set ] {
+    Function [ <internal> function date_isodate_set ] {
     }
-    Function [ <internal> public function timezone_open ] {
+    Function [ <internal> function timezone_open ] {
     }
-    Function [ <internal> public function timezone_name_get ] {
+    Function [ <internal> function timezone_name_get ] {
     }
-    Function [ <internal> public function timezone_name_from_abbr ] {
+    Function [ <internal> function timezone_name_from_abbr ] {
     }
-    Function [ <internal> public function timezone_offset_get ] {
+    Function [ <internal> function timezone_offset_get ] {
     }
-    Function [ <internal> public function timezone_transitions_get ] {
+    Function [ <internal> function timezone_transitions_get ] {
     }
-    Function [ <internal> public function timezone_identifiers_list ] {
+    Function [ <internal> function timezone_identifiers_list ] {
     }
-    Function [ <internal> public function timezone_abbreviations_list ] {
+    Function [ <internal> function timezone_abbreviations_list ] {
     }
-    Function [ <internal> public function date_default_timezone_set ] {
+    Function [ <internal> function date_default_timezone_set ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $timezone_identifier ]
       }
     }
-    Function [ <internal> public function date_default_timezone_get ] {
+    Function [ <internal> function date_default_timezone_get ] {
 
       - Parameters [0] {
       }
     }
-    Function [ <internal> public function date_sunrise ] {
+    Function [ <internal> function date_sunrise ] {
 
       - Parameters [6] {
         Parameter #0 [ <required> $time ]
@@ -211,7 +211,7 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
         Parameter #5 [ <optional> $gmt_offset ]
       }
     }
-    Function [ <internal> public function date_sunset ] {
+    Function [ <internal> function date_sunset ] {
 
       - Parameters [6] {
         Parameter #0 [ <required> $time ]
@@ -222,7 +222,7 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
         Parameter #5 [ <optional> $gmt_offset ]
       }
     }
-    Function [ <internal> public function date_sun_info ] {
+    Function [ <internal> function date_sun_info ] {
 
       - Parameters [3] {
         Parameter #0 [ <required> $time ]
