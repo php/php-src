@@ -1,3 +1,106 @@
+2007-04-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      main/snprintf.c:
+      MFH: add support for %I64(u|d) to sprintf() utilities
+
+    * main/snprintf.c:
+      add support for %I64(u|d) to sprintf() utilities
+
+2007-04-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/json/json.c
+      ext/json/tests/002.phpt
+      ext/json/tests/bug41034.phpt
+      ext/json/tests/bug41034.phpt:
+      
+      Fixed bug #41034 (json_encode() ignores null byte started keys in arrays)
+
+2007-04-12  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug41061.phpt:
+      - Fix bug #41061 ("visibility error" in ReflectionFunction::export())
+
+    * ext/reflection/tests/bug41061.phpt
+      ext/reflection/tests/bug41061.phpt:
+      
+      - Add test
+
+2007-04-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed bug #41063 (chdir doesn't like root paths).
+
+2007-04-12  Antony Dovgal  <antony@zend.com>
+
+    * run-tests.php:
+      bail out if unicode.semantics is On (stream_select() is unable to cast
+      Unicode streams to FDs)
+      check stream_select() return value correctly and avoid endless loop
+
+    * ext/standard/streamsfuncs.c:
+      return success only if succeeded casting at least one stream to fd
+
+    * ext/reflection/tests/009.phpt
+      ext/reflection/tests/010.phpt
+      ext/reflection/tests/011.phpt
+      ext/reflection/tests/012.phpt
+      ext/reflection/tests/013.phpt
+      ext/reflection/tests/014.phpt
+      ext/reflection/tests/015.phpt
+      ext/reflection/tests/016.phpt
+      ext/reflection/tests/017.phpt
+      ext/reflection/tests/018.phpt
+      ext/reflection/tests/019.phpt
+      ext/reflection/tests/020.phpt
+      ext/reflection/tests/021.phpt
+      ext/reflection/tests/022.phpt
+      ext/reflection/tests/023.phpt
+      ext/reflection/tests/024.phpt
+      ext/reflection/tests/025.phpt
+      ext/reflection/tests/bug37816.phpt
+      ext/reflection/tests/bug38217.phpt
+      ext/reflection/tests/bug38653.phpt
+      ext/reflection/tests/bug38942.phpt
+      ext/reflection/tests/bug39001.phpt
+      ext/reflection/tests/bug39067.phpt
+      ext/reflection/tests/bug39884.phpt
+      ext/reflection/tests/bug40431.phpt:
+      add new test and SKIPIF sections
+
+    * php.ini-dist
+      php.ini-recommended:
+      swap the options
+
+    * (PHP_5_2)
+      ext/reflection/tests/008.phpt
+      ext/reflection/tests/009.phpt
+      ext/reflection/tests/bug37816.phpt
+      ext/reflection/tests/bug38217.phpt
+      ext/reflection/tests/bug38653.phpt
+      ext/reflection/tests/bug38942.phpt
+      ext/reflection/tests/bug39001.phpt
+      ext/reflection/tests/bug39067.phpt
+      ext/reflection/tests/bug39884.phpt
+      ext/reflection/tests/bug40431.phpt:
+      add missing SKIPIF sections
+
+    * (PHP_5_2)
+      ext/reflection/tests/009.phpt:
+      add new test
+
+    * php.ini-dist
+      php.ini-recommended:
+      add short descriptions for PCRE ini options
+
 2007-04-11  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/tests/bug40770.phpt
