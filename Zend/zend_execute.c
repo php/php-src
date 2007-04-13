@@ -611,7 +611,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		Z_OBJ_HT_P(object)->write_dimension(object, property_name, value TSRMLS_CC);
 	}
 
-	if (result && !RETURN_VALUE_UNUSED(result)) {
+	if (result && !RETURN_VALUE_UNUSED(result) && !EG(exception)) {
 		T(result->u.var).var.ptr = value;
 		T(result->u.var).var.ptr_ptr = &T(result->u.var).var.ptr; /* this is so that we could use it in FETCH_DIM_R, etc. - see bug #27876 */
 		PZVAL_LOCK(value);
