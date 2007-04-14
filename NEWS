@@ -29,7 +29,7 @@ PHP                                                                        NEWS
 	. Use the dimension of the GIF frame to create the destination image (Pierre)
 	. Load only once the local color map from a GIF data (Pierre)
   . Improved thread safety of the freetype cache (Scott MacVicar, Nuno, Pierre)
-	. imagearc huge CPU usage with large angles (Pierre)
+	. imagearc huge CPU usage with large angles, libgd bug #74 (Pierre)
 
 - Upgraded libraries bundled in the Windows distribution. (Edin)
   . c-client (imap) to version 2006e
