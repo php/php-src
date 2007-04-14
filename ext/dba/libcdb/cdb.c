@@ -68,7 +68,7 @@ static int cdb_match(struct cdb *c, char *key, unsigned int len, uint32 pos TSRM
 uint32 cdb_hash(char *buf, unsigned int len)
 {
 	uint32 h;
-	const unsigned char * b = buf;
+	const unsigned char * b = (unsigned char *)buf;
 
 	h = CDB_HASHSTART;
 	while (len--) {
