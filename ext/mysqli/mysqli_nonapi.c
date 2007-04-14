@@ -90,6 +90,10 @@ PHP_FUNCTION(mysqli_connect)
 	mysql_options(mysql->mysql, MYSQL_OPT_RECONNECT, (const char *)&my_true);
 #endif
 
+	if (!socket) {
+		socket = MyG(default_socket);
+	}
+
 	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, CLIENT_MULTI_RESULTS) == NULL) {
 		/* Save error messages */
 
