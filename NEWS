@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2007, PHP 5.2.2RC2
+- Fixed bug #41083 (mysql_ping() requires MYSQL_OPT_RECONNECT to be set since 
+  MySQL 5.0.13). (xiaojb at gmail dot com, Tony)
 - Fixed bug #41075 (memleak when creating default object caused exception). 
   (Dmitry)
 - Fixed bug #41063 (chdir doesn't like root paths). (Dmitry)
