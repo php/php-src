@@ -39,6 +39,9 @@ PHP_FUNCTION(mysqli_connect)
 	char 				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
 	unsigned int 		hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
 	long				port=0;
+#if MYSQL_VERSION_ID > 50012
+	my_bool				my_true = 1;
+#endif
 
 	if (getThis() && !ZEND_NUM_ARGS()) {
 		RETURN_NULL();
@@ -82,6 +85,10 @@ PHP_FUNCTION(mysqli_connect)
 		hostname[0] = '\0';
 		mysql_options(mysql->mysql, MYSQL_OPT_USE_EMBEDDED_CONNECTION, 0);
 	}
+#endif
+
+#if MYSQL_VERSION_ID > 50012
+	mysql_options(mysql->mysql, MYSQL_OPT_RECONNECT, (const char *)&my_true);
 #endif
 
 	if (!socket) {
