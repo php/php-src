@@ -1,3 +1,109 @@
+2007-04-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      ext/json/JSON_parser.c
+      ext/json/json.c:
+      Fix processing of control characters; they should be escaped as \u
+      sequences.
+
+2007-04-13  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h:
+      - MFB: Updated timezone database to version 2007.5. (Derick)
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/timezonedb.h:
+      - Updated timezone database to version 2007.5. (Derick)
+
+2007-04-13  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      fix #41075 (memleak when creating default object caused exception)
+
+2007-04-13  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c:
+      - MFB: Fixed bug #39416 (Milliseconds in date()).
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/php_date.c:
+      - Fixed bug #39416 (Milliseconds in date()).
+
+2007-04-13  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug41075.phpt:
+      add UEXPECTF
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug41075.phpt:
+      add new test
+
+    * ZendEngine2/tests/bug41075.phpt
+      ZendEngine2/tests/bug41075.phpt:
+      
+      new test
+
+    * (PHP_5_2)
+      sapi/cli/tests/004.phpt
+      sapi/cli/tests/006.phpt:
+      fix tests
+
+2007-04-13  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c
+      ext/date/tests/date_sun_info_001.phpt:
+      - MFB: Fixed bug #39965 (Latitude and longitude are backwards in
+      date_sun_info()).
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/php_date.c
+      ext/date/tests/date_sun_info_001.phpt
+      ext/date/tests/date_sun_info_002.phpt
+      ext/date/tests/date_sun_info_002.phpt:
+      - Fixed bug #39965 (Latitude and longitude are backwards in
+      date_sun_info()).
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - MFB: Fixed bug #40290 (strtotime() returns unexpected result with
+      particular
+        timezone offset).
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - Fixed bug #40290 (strtotime() returns unexpected result with particular
+        timezone offset).
+
+2007-04-13  Brian Shire  <shire@tekrat.com>
+
+    * ext/standard/tests/strings/pack.phpt:
+      MFB: reverting incorrect changes to pack test
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/pack.phpt:
+      reverting incorrect changes to pack test
+
+2007-04-13  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_4)
+      NEWS:
+      fix for #38236
+
+    * (PHP_4_4)
+      main/php_variables.c
+      main/rfc1867.c:
+      fix for #38236 (patch by ass3mbler@gmail.com)
+
 2007-04-12  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
