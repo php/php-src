@@ -1,3 +1,21 @@
+2007-04-13  Antony Dovgal  <antony@zend.com>
+
+    * zend_execute.c
+      zend_execute.c:
+      fix #41075 (memleak when creating default object caused exception)
+
+    * tests/bug41075.phpt:
+      add UEXPECTF
+
+    * (PHP_5_2)
+      tests/bug41075.phpt:
+      add new test
+
+    * tests/bug41075.phpt
+      tests/bug41075.phpt:
+      
+      new test
+
 2007-04-11  Antony Dovgal  <antony@zend.com>
 
     * tests/bug40770.phpt:
