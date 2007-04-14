@@ -487,6 +487,9 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #if MYSQL_VERSION_ID <= 32230
 	void (*handler) (int);
 #endif
+#if MYSQL_VERSION_ID > 50012
+	my_bool my_true = 1;
+#endif
 	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL, **z_new_link=NULL, **z_client_flags=NULL;
 	zend_bool free_host=0, new_link=0;
 	long connect_timeout;
@@ -669,8 +672,14 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 			mysql_init(&mysql->conn);
 
-			if (connect_timeout != -1)
+#if MYSQL_VERSION_ID > 50012
+			/* Reconnect has been off by default since MySQL 5.0.3; 
+			   this option is new in 5.0.13 and provides a way to set reconnection behavior explicitly. */
+			mysql_options(&mysql->conn, MYSQL_OPT_RECONNECT, (const char *)&my_true);
+#endif
+			if (connect_timeout != -1) {
 				mysql_options(&mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+			}
 
 			if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
@@ -774,8 +783,15 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 		mysql_init(&mysql->conn);
 
-		if (connect_timeout != -1)
-				mysql_options(&mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+#if MYSQL_VERSION_ID > 50012
+		/* Reconnect has been off by default since MySQL 5.0.3; 
+		 this option is new in 5.0.13 and provides a way to set reconnection behavior explicitly. */
+		mysql_options(&mysql->conn, MYSQL_OPT_RECONNECT, (const char *)&my_true);
+#endif
+
+		if (connect_timeout != -1) {
+			mysql_options(&mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+		}
 
 		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
