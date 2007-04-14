@@ -27,8 +27,10 @@ PHP                                                                        NEWS
 	  colors (Rob Leslie)
   . Improved thread safety of the gif support (Roman Nemecek, Nuno, Pierre)
 	. Use the dimension of the GIF frame to create the destination image (Pierre)
-	. Load only once the local color map (Pierre)
+	. Load only once the local color map from a GIF data (Pierre)
   . Improved thread safety of the freetype cache (Scott MacVicar, Nuno, Pierre)
+	. imagearc huge CPU usage with large angles (Pierre)
+
 - Upgraded libraries bundled in the Windows distribution. (Edin)
   . c-client (imap) to version 2006e
   . libpq (PostgreSQL) to version 8.2.3
