@@ -1607,6 +1607,14 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 	int lx = 0, ly = 0;
 	int fx = 0, fy = 0;
 
+	if (s > 360) {
+		s = s % 360;
+	}
+
+	if (e > 360) {
+		e = e % 360;
+	}
+
 	while (s<0) {
 		s += 360;
 	}
