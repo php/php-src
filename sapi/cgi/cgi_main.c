@@ -1738,16 +1738,13 @@ consult the installation file that came with this distribution, or visit \n\
 						php_get_highlight_struct(&syntax_highlighter_ini);
 						zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
 #if PHP_FASTCGI
-						if (!fastcgi)
-#endif
-						{
-							fclose(file_handle.handle.fp);
-							php_end_ob_buffers(1 TSRMLS_CC);
+						if (fastcgi) {
+							goto fastcgi_request_done;
 						}
-					}
-#if PHP_FASTCGI
-					if (!fastcgi)
 #endif
+						fclose(file_handle.handle.fp);
+						php_end_ob_buffers(1 TSRMLS_CC);
+					}
 					return SUCCESS;
 				}
 				break;
