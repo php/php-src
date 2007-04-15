@@ -1224,6 +1224,10 @@ int main(int argc, char *argv[])
 				}
 				break;
 #endif
+			case 's': /* generate highlighted HTML from source */
+				behavior = PHP_MODE_HIGHLIGHT;
+				break;
+
 		}
 
 	}
@@ -1524,10 +1528,6 @@ consult the installation file that came with this distribution, or visit \n\
 						no_headers = 1;
 						break;
 
-  				case 's': /* generate highlighted HTML from source */
-						behavior = PHP_MODE_HIGHLIGHT;
-						break;
-
 				case 'v': /* show php version & quit */
 						no_headers = 1;
 						if (php_request_startup(TSRMLS_C) == FAILURE) {
@@ -1737,9 +1737,17 @@ consult the installation file that came with this distribution, or visit \n\
 					if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
 						php_get_highlight_struct(&syntax_highlighter_ini);
 						zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
-						fclose(file_handle.handle.fp);
-						php_end_ob_buffers(1 TSRMLS_CC);
+#if PHP_FASTCGI
+						if (!fastcgi)
+#endif
+						{
+							fclose(file_handle.handle.fp);
+							php_end_ob_buffers(1 TSRMLS_CC);
+						}
 					}
+#if PHP_FASTCGI
+					if (!fastcgi)
+#endif
 					return SUCCESS;
 				}
 				break;
