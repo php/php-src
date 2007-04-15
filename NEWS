@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   (Johannes)
 - Fixed bug #41034 (json_encode() ignores null byte started keys in arrays).
   (Ilia)
+- Fixed bug #40935 (pdo_mysql does not raise an exception on empty
+  fetchAll()). (Ilia)
 - Fixed bug #40861 (strtotime() doesn't handle double negative relative time
   units correctly). (Derick)
 - Fixed bug #40290 (strtotime() returns unexpected result with particular
