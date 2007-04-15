@@ -1,3 +1,43 @@
+2007-04-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - add reference to the initial report (helps the packager)
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.c:
+      - MFH: libgd #74, gdImageFilledArc, huge CPU usage with large angles
+
+    * ext/gd/libgd/gd.c:
+      -  libgd #74, gdImageFilledArc, huge CPU usage with large angles
+
+2007-04-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/libcdb/cdb.c:
+      - Fix warning
+
+2007-04-14  Antony Dovgal  <antony@zend.com>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c:
+      use default socket (removed by mistake?)
+
+    * ext/mysqli/mysqli_nonapi.c:
+      set MYSQL_OPT_RECONNECT (see bug #41083)
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysql/php_mysql.c:
+      MFH: fix #41083 (mysql_ping() requires MYSQL_OPT_RECONNECT to be set since
+      MySQL 5.0.13)
+
+    * ext/mysql/php_mysql.c:
+      fix #41083 (mysql_ping() requires MYSQL_OPT_RECONNECT to be set since MySQL
+      5.0.13)
+
 2007-04-13  Andrei Zmievski  <andrei@gravitonic.com>
 
     * (PHP_5_2)
