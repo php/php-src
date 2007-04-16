@@ -28,6 +28,14 @@ typedef unsigned int zend_uint;
 typedef unsigned long zend_ulong;
 typedef unsigned short zend_ushort;
 
+#ifdef _WIN64
+typedef unsigned __int64 zend_intptr_t;
+typedef __int64 zend_uintptr_t;
+#else
+typedef long zend_intptr_t;
+typedef unsigned long zend_uintptr_t;
+#endif
+
 typedef unsigned int zend_object_handle;
 typedef struct _zend_object_handlers zend_object_handlers;
 
