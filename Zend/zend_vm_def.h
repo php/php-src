@@ -1909,7 +1909,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		}
 	}
 
-	zend_ptr_stack_2_push(&EG(argument_stack), (void *) opline->extended_value, NULL);
+	zend_ptr_stack_2_push(&EG(argument_stack), (void *)(zend_uintptr_t)opline->extended_value, NULL);
 
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 
@@ -1953,7 +1953,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			ulong arg_count;
 
 			p = (zval **) EG(argument_stack).top_element-2;
-			arg_count = (ulong) *p;
+			arg_count = (ulong)(zend_uintptr_t) *p;
 
 			while (arg_count>0) {
 				zend_verify_arg_type(EX(function_state).function, ++i, *(p-arg_count) TSRMLS_CC);

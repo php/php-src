@@ -226,7 +226,7 @@ static int zend_ini_refresh_cache(zend_ini_entry *p, int stage TSRMLS_DC)
 
 ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC)
 {
-	zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) zend_ini_refresh_cache, (void *)(long) stage TSRMLS_CC);
+	zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) zend_ini_refresh_cache, (void *)(zend_uintptr_t) stage TSRMLS_CC);
 }
 #endif
 

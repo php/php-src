@@ -228,10 +228,10 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	proc = process_get(NULL TSRMLS_CC);
 
 	if (read) {
-		fno = _open_osfhandle((long)in, _O_RDONLY | mode);
+		fno = _open_osfhandle((tsrm_intptr_t)in, _O_RDONLY | mode);
 		CloseHandle(out);
 	} else {
-		fno = _open_osfhandle((long)out, _O_WRONLY | mode);
+		fno = _open_osfhandle((tsrm_intptr_t)out, _O_WRONLY | mode);
 		CloseHandle(in);
 	}
 

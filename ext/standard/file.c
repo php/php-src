@@ -2087,7 +2087,8 @@ PHP_FUNCTION(fgetcsv)
 	int delimiter_len = 1, enclosure_len = 1, escape_len = 1;
 	long len = -1;
 	zstr buf;
-	int buf_len, argc = ZEND_NUM_ARGS();
+	size_t buf_len;
+	int argc = ZEND_NUM_ARGS();
 	php_stream *stream;
 	zval *zstream;
 	zend_uchar delimiter_free = 0, enclosure_free = 0, escape_free = 0;
@@ -2366,7 +2367,7 @@ with_enc:
 				/* Hungry? */
 				if (((e - p) < enclosure_len) && stream) {
 					/* Feed me! */
-					int new_len;
+					size_t new_len;
 					char *new_buf = php_stream_get_line(stream, NULL_ZSTR, 0, &new_len);
 
 					if (new_buf) {
@@ -2577,7 +2578,7 @@ with_enc:
 				/* Hungry? */
 				if (((e - p) < enclosure_len) && stream) {
 					/* Feed me! */
-					int new_len;
+					size_t new_len;
 					UChar *new_buf = (UChar*)php_stream_get_line_ex(stream, IS_UNICODE, NULL_ZSTR, 0, 0, &new_len);
 
 					if (new_buf) {

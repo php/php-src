@@ -156,7 +156,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 static inline void zend_ptr_stack_clear_multiple(TSRMLS_D)
 {
 	void **p = EG(argument_stack).top_element-2;
-	int delete_count = (ulong) *p;
+	int delete_count = (int)(zend_uintptr_t) *p;
 
 	EG(argument_stack).top -= (delete_count+2);
 	while (--delete_count>=0) {
@@ -170,7 +170,7 @@ static inline void zend_ptr_stack_clear_multiple(TSRMLS_D)
 static inline int zend_ptr_stack_get_arg(int requested_arg, void **data TSRMLS_DC)
 {
 	void **p = EG(argument_stack).top_element-2;
-	int arg_count = (ulong) *p;
+	int arg_count = (int)(zend_uintptr_t) *p;
 
 	if (requested_arg>arg_count) {
 		return FAILURE;

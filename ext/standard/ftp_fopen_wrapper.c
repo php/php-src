@@ -585,7 +585,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 	php_stream *innerstream = (php_stream *)stream->abstract;
 	size_t tmp_len;
 	char *basename;
-	size_t basename_len;
+	int basename_len;
 
 	if (count != sizeof(php_stream_dirent)) {
 		return 0;

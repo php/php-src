@@ -124,8 +124,7 @@ if (VCVERS >= 14) {
 	// fun stuff: MS deprecated ANSI stdio and similar functions
 	// disable annoying warnings
 	if (X64) {
-		ADD_FLAG('CFLAGS', ' /wd4996 ');
-//		ADD_FLAG('CFLAGS', ' /wd4996 /Wp64 ');
+		ADD_FLAG('CFLAGS', ' /wd4996 /Wp64 ');
 	} else {
 		ADD_FLAG('CFLAGS', ' /wd4996 ');
 	}
