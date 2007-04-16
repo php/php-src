@@ -112,7 +112,7 @@ void php_output_register_constants(TSRMLS_D)
 /* }}} */
 
 
-/* {{{ php_body_wirte
+/* {{{ php_body_write
  * Write body part */
 PHPAPI int php_body_write(const char *str, uint str_length TSRMLS_DC)
 {
@@ -120,7 +120,7 @@ PHPAPI int php_body_write(const char *str, uint str_length TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_header_wirte
+/* {{{ php_header_write
  * Write HTTP header */
 PHPAPI int php_header_write(const char *str, uint str_length TSRMLS_DC)
 {
