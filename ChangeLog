@@ -1,3 +1,30 @@
+2007-04-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/cgi/cgi_main.c:
+      MFB: Allow using syntax highlighting in fastcgi mode
+
+    * sapi/cgi/getopt.c
+      sapi/cgi/php_getopt.h:
+      MFB: sync getopt from CLI
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      - Allow using syntax highlighting under FastCGI mode.
+
+    * (PHP_5_2)
+      sapi/cgi/getopt.c
+      sapi/cgi/php_getopt.h:
+      - Synch these files from sapi/cli/ and allow using s.c. long-options
+        with CGI.
+
+2007-04-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_mysql/mysql_statement.c:
+      Fixed bug #40935 (pdo_mysql does not raise an exception on empty
+      fetchAll()).
+
 2007-04-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_2)
