@@ -1029,6 +1029,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 				/* adjust how many args we have left and restart loop */
 				num_args = num_args + 1 - iv;
+				i += iv;
 				continue;
 			} else {
 				*varargs = NULL;
