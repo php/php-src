@@ -1,5 +1,7 @@
 --TEST--
 highlight_string() handling of heredoc
+--INI--
+highlight.html=#000000
 --FILE--
 <?php
 $str = '
