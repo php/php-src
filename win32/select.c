@@ -63,8 +63,8 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 	/* build an array of handles for non-sockets */
 	for (i = 0; i < max_fd; i++) {
 		if (SAFE_FD_ISSET(i, rfds) || SAFE_FD_ISSET(i, wfds) || SAFE_FD_ISSET(i, efds)) {
-			handles[n_handles] = (HANDLE)_get_osfhandle(i);
-			if ((DWORD)handles[n_handles] == 0xffffffff) {
+			handles[n_handles] = (HANDLE)(zend_uintptr_t)_get_osfhandle(i);
+			if (handles[n_handles] == INVALID_HANDLE_VALUE) {
 				/* socket */
 				if (SAFE_FD_ISSET(i, rfds)) {
 					FD_SET(i, &sock_read);

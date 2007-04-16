@@ -472,7 +472,7 @@ ZEND_API int zend_is_true(zval *op)
 ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC)
 {
 	zval *p = *pp;
-	zend_bool inline_change = (zend_bool) (unsigned long) arg;
+	zend_bool inline_change = (zend_bool) (zend_uintptr_t) arg;
 	zval const_value;
 
 	if (Z_TYPE_P(p) == IS_CONSTANT) {
@@ -933,7 +933,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				if (fci->no_separation) {
 					if(i) {
 						/* hack to clean up the stack */
-						zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (long) i, NULL);
+						zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (zend_uintptr_t) i, NULL);
 						zend_ptr_stack_clear_multiple(TSRMLS_C);
 					}
 					if (old_func_name) {
@@ -979,7 +979,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		fci->param_count = 2;
 	}
 
-	zend_ptr_stack_2_push(&EG(argument_stack), (void *) (long) fci->param_count, NULL);
+	zend_ptr_stack_2_push(&EG(argument_stack), (void *) (zend_uintptr_t) fci->param_count, NULL);
 
 	original_function_state_ptr = EG(function_state_ptr);
 	EG(function_state_ptr) = &EX(function_state);

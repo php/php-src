@@ -171,14 +171,14 @@ ZEND_FUNCTION(func_num_args)
 	int arg_count;
 
 	p = EG(argument_stack).top_element-1-1;
-	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_num_args(); */
+	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_num_args(); */
 	p -= 1+arg_count;
 	if (*p) {
 		zend_error(E_ERROR, "func_num_args(): Can't be used as a function parameter");
 	}
 	--p;
 	if (p>=EG(argument_stack).elements) {
-		RETURN_LONG((ulong) *p);
+		RETURN_LONG((long)(zend_uintptr_t) *p);
 	} else {
 		zend_error(E_WARNING, "func_num_args():  Called from the global scope - no function context");
 		RETURN_LONG(-1);
@@ -209,7 +209,7 @@ ZEND_FUNCTION(func_get_arg)
 	}
 
 	p = EG(argument_stack).top_element-1-1;
-	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_get_arg(); */
+	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_get_arg(); */
 	p -= 1+arg_count;
 	if (*p) {
 		zend_error(E_ERROR, "func_get_arg(): Can't be used as a function parameter");
@@ -219,7 +219,7 @@ ZEND_FUNCTION(func_get_arg)
 		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
-	arg_count = (ulong) *p;
+	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (requested_offset>=arg_count) {
 		zend_error(E_WARNING, "func_get_arg():  Argument %ld not passed to function", requested_offset);
@@ -243,7 +243,7 @@ ZEND_FUNCTION(func_get_args)
 	int i;
 
 	p = EG(argument_stack).top_element-1-1;
-	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_get_args(); */
+	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_get_args(); */
 	p -= 1+arg_count;
 	if (*p) {
 		zend_error(E_ERROR, "func_get_args(): Can't be used as a function parameter");
@@ -254,7 +254,7 @@ ZEND_FUNCTION(func_get_args)
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
-	arg_count = (ulong) *p;
+	arg_count = (int)(zend_uintptr_t) *p;
 
 
 	array_init(return_value);
@@ -1786,7 +1786,7 @@ static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC)
 {
 	void **p = *curpos - 2;
 	zval *arg_array, **arg;
-	int arg_count = (ulong) *p;
+	int arg_count = (int)(zend_uintptr_t) *p;
 
 	*curpos -= (arg_count+2);
 

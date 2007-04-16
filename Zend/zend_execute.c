@@ -105,15 +105,15 @@ static inline void zend_pzval_unlock_free_func(zval *z)
 
 #define FREE_OP(should_free) \
 	if (should_free.var) { \
-		if ((long)should_free.var & 1L) { \
-			zval_dtor((zval*)((long)should_free.var & ~1L)); \
+		if ((zend_uintptr_t)should_free.var & 1L) { \
+			zval_dtor((zval*)((zend_uintptr_t)should_free.var & ~1L)); \
 		} else { \
 			zval_ptr_dtor(&should_free.var); \
 		} \
 	}
 
 #define FREE_OP_IF_VAR(should_free) \
-	if (should_free.var != NULL && (((long)should_free.var & 1L) == 0)) { \
+	if (should_free.var != NULL && (((zend_uintptr_t)should_free.var & 1L) == 0)) { \
 		zval_ptr_dtor(&should_free.var); \
 	}
 
@@ -122,9 +122,9 @@ static inline void zend_pzval_unlock_free_func(zval *z)
 		zval_ptr_dtor(&should_free.var); \
 	}
 
-#define TMP_FREE(z) (zval*)(((long)(z)) | 1L)
+#define TMP_FREE(z) (zval*)(((zend_uintptr_t)(z)) | 1L)
 
-#define IS_TMP_FREE(should_free) ((long)should_free.var & 1L)
+#define IS_TMP_FREE(should_free) ((zend_uintptr_t)should_free.var & 1L)
 
 #define INIT_PZVAL_COPY(z,v) \
 	(z)->value = (v)->value; \
