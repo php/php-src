@@ -50,6 +50,16 @@
 # define ZEND_MM_COOKIES ZEND_DEBUG
 #endif
 
+#ifdef _WIN64
+# define PTR_FMT "0x%0.16I64x"
+/*
+#elif sizeof(long) == 8
+# define PTR_FMT "0x%0.16lx"
+*/
+#else
+# define PTR_FMT "0x%0.8lx"
+#endif
+
 #if ZEND_DEBUG
 void zend_debug_alloc_output(char *format, ...)
 {
@@ -1180,7 +1190,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 				repeated = zend_mm_find_leaks(segment, p);
 				total += 1 + repeated;
 				if (repeated) {
-					zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)repeated);
+					zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated);
 				}
 #if ZEND_MM_CACHE
 			} else if (p->magic == MEM_BLOCK_CACHED) {
@@ -1221,7 +1231,7 @@ static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE
 	if (!silent) {
 		zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
 		zend_debug_alloc_output("---------------------------------------\n");
-		zend_debug_alloc_output("%s(%d) : Block 0x%0.8lX status:\n" ZEND_FILE_LINE_RELAY_CC, (long) ptr);
+		zend_debug_alloc_output("%s(%d) : Block "PTR_FMT" status:\n" ZEND_FILE_LINE_RELAY_CC, ptr);
 		if (__zend_orig_filename) {
 			zend_debug_alloc_output("%s(%d) : Actual location (location was relayed)\n" ZEND_FILE_LINE_ORIG_RELAY_CC);
 		}
@@ -1253,7 +1263,7 @@ static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE
 
 	if (p->info._size != ZEND_MM_NEXT_BLOCK(p)->info._prev) {
 		if (!silent) {
-			zend_debug_alloc_output("Invalid pointer: ((size=0x%0.8X) != (next.prev=0x%0.8X))\n", p->info._size, ZEND_MM_NEXT_BLOCK(p)->info._prev);
+			zend_debug_alloc_output("Invalid pointer: ((size="PTR_FMT") != (next.prev="PTR_FMT"))\n", p->info._size, ZEND_MM_NEXT_BLOCK(p)->info._prev);
 			had_problems = 1;
 		} else {
 			return zend_mm_check_ptr(heap, ptr, 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1262,7 +1272,7 @@ static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE
 	if (p->info._prev != ZEND_MM_GUARD_BLOCK &&
 	    ZEND_MM_PREV_BLOCK(p)->info._size != p->info._prev) {
 		if (!silent) {
-			zend_debug_alloc_output("Invalid pointer: ((prev=0x%0.8X) != (prev.size=0x%0.8X))\n", p->info._prev, ZEND_MM_PREV_BLOCK(p)->info._size);
+			zend_debug_alloc_output("Invalid pointer: ((prev="PTR_FMT") != (prev.size="PTR_FMT"))\n", p->info._prev, ZEND_MM_PREV_BLOCK(p)->info._size);
 			had_problems = 1;
 		} else {
 			return zend_mm_check_ptr(heap, ptr, 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);

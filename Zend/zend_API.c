@@ -44,7 +44,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...)
 	TSRMLS_FETCH();
 
 	p = EG(argument_stack).top_element-2;
-	arg_count = (ulong) *p;
+	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -82,7 +82,7 @@ ZEND_API int _zend_get_parameters_array(int ht, int param_count, zval **argument
 	zval *param_ptr;
 
 	p = EG(argument_stack).top_element-2;
-	arg_count = (ulong) *p;
+	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -122,7 +122,7 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...)
 	TSRMLS_FETCH();
 
 	p = EG(argument_stack).top_element-2;
-	arg_count = (ulong) *p;
+	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -145,7 +145,7 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_arr
 	int arg_count;
 
 	p = EG(argument_stack).top_element-2;
-	arg_count = (ulong) *p;
+	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -187,7 +187,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 	int arg_count;
 
 	p = EG(argument_stack).top_element-2;
-	arg_count = (ulong) *p;
+	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -698,7 +698,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	}
 
 	p = EG(argument_stack).top_element-2;
-	arg_count = (ulong) *p;
+	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (num_args > arg_count) {
 		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
@@ -878,7 +878,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 				zend_update_class_constants(class_type->parent TSRMLS_CC);
 			}
 #if ZTS
-			ALLOC_HASHTABLE(CG(static_members)[(long)(class_type->static_members)]);
+			ALLOC_HASHTABLE(CG(static_members)[(zend_intptr_t)(class_type->static_members)]);
 #else
 			ALLOC_HASHTABLE(class_type->static_members);
 #endif
