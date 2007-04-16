@@ -1,13 +1,13 @@
 #!/bin/sh
 ##
 ##  GNU shtool -- The GNU Portable Shell Tool
-##  Copyright (c) 1994-2005 Ralf S. Engelschall <rse@engelschall.com>
+##  Copyright (c) 1994-2006 Ralf S. Engelschall <rse@engelschall.com>
 ##
 ##  See http://www.gnu.org/software/shtool/ for more information.
 ##  See ftp://ftp.gnu.org/gnu/shtool/ for latest version.
 ##
-##  Version:  2.0.2 (15-Jun-2005)
-##  Contents: 4/19 available modules
+##  Version:  2.0.6 (19-Apr-2006)
+##  Contents: 5/19 available modules
 ##
 
 ##
@@ -41,6 +41,7 @@
 ##    echo       Print string with optional construct expansion
 ##    install    Install a program, script or datafile
 ##    mkdir      Make one or more directories
+##    platform   Platform Identification Utility
 ##    path       Deal with program paths
 ##
 ##  Not available commands (because module was not built-in):
@@ -54,24 +55,48 @@
 ##    rotate     Logfile rotation
 ##    tarball    Roll distribution tarballs
 ##    subst      Apply sed(1) substitution operations
-##    platform   Platform Identification Utility
 ##    arx        Extended archive command
 ##    slo        Separate linker options by library class
 ##    scpp       Sharing C Pre-Processor
 ##    version    Maintain a version information file
 ##
 
+#   maximum Bourne-Shell compatibility
+if [ ".$ZSH_VERSION" != . ] && (emulate sh) >/dev/null 2>&1; then
+    #   reconfigure zsh(1)
+    emulate sh
+    NULLCMD=:
+    alias -g '${1+"$@"}'='"$@"'
+elif [ ".$BASH_VERSION" != . ] && (set -o posix) >/dev/null 2>&1; then
+    #   reconfigure bash(1)
+    set -o posix
+fi
+
+#   maximum independence of NLS nuisances
+for var in \
+    LANG LANGUAGE LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE LC_IDENTIFICATION \
+    LC_MEASUREMENT LC_MESSAGES LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER \
+    LC_TELEPHONE LC_TIME
+do
+    if (set +x; test -z "`(eval $var=C; export $var) 2>&1`"); then
+        eval $var=C; export $var
+    else
+        unset $var
+    fi
+done
+
+#   initial command line handling
 if [ $# -eq 0 ]; then
     echo "$0:Error: invalid command line" 1>&2
     echo "$0:Hint:  run \`$0 -h' for usage" 1>&2
     exit 1
 fi
 if [ ".$1" = ".-h" ] || [ ".$1" = ".--help" ]; then
-    echo "This is GNU shtool, version 2.0.2 (15-Jun-2005)"
-    echo "Copyright (c) 1994-2005 Ralf S. Engelschall <rse@engelschall.com>"
-    echo "Report bugs to <bug-shtool@gnu.org>"
+    echo "This is GNU shtool, version 2.0.6 (19-Apr-2006)"
+    echo 'Copyright (c) 1994-2006 Ralf S. Engelschall <rse@engelschall.com>'
+    echo 'Report bugs to <bug-shtool@gnu.org>'
     echo ''
-    echo "Usage: shtool [<options>] [<cmd-name> [<cmd-options>] [<cmd-args>]]"
+    echo 'Usage: shtool [<options>] [<cmd-name> [<cmd-options>] [<cmd-args>]]'
     echo ''
     echo 'Available global <options>:'
     echo '  -v, --version   display shtool version information'
@@ -88,6 +113,10 @@ if [ ".$1" = ".-h" ] || [ ".$1" = ".--help" ]; then
     echo '  mkdir    [-t|--trace] [-f|--force] [-p|--parents] [-m|--mode'
     echo '           <mode>] [-o|--owner <owner>] [-g|--group <group>] <dir>'
     echo '           [<dir> ...]'
+    echo '  platform [-F|--format <format>] [-S|--sep <string>] [-C|--conc'
+    echo '           <string>] [-L|--lower] [-U|--upper] [-v|--verbose]'
+    echo '           [-c|--concise] [-n|--no-newline] [-t|--type <type>]'
+    echo '           [-V|--version] [-h|--help]'
     echo '  path     [-s|--suppress] [-r|--reverse] [-d|--dirname] [-b|--basename]'
     echo '           [-m|--magic] [-p|--path <path>] <str> [<str> ...]'
     echo ''
@@ -117,10 +146,6 @@ if [ ".$1" = ".-h" ] || [ ".$1" = ".--help" ]; then
     echo '           [-q|--quiet] [-s|--stealth] [-i|--interactive] [-b|--backup'
     echo '           <ext>] [-e|--exec <cmd>] [-f|--file <cmd-file>] [<file>]'
     echo '           [...]'
-    echo '  platform [-F|--format <format>] [-S|--sep <string>] [-C|--conc'
-    echo '           <string>] [-L|--lower] [-U|--upper] [-v|--verbose]'
-    echo '           [-c|--concise] [-n|--no-newline] [-t|--type <type>]'
-    echo '           [-V|--version] [-h|--help]'
     echo '  arx      [-t|--trace] [-C|--command <cmd>] <op> <archive> [<file>'
     echo '           ...]'
     echo '  slo      [-p|--prefix <str>] -- -L<dir> -l<lib> [-L<dir> -l<lib>'
@@ -136,11 +161,11 @@ if [ ".$1" = ".-h" ] || [ ".$1" = ".--help" ]; then
     exit 0
 fi
 if [ ".$1" = ".-v" ] || [ ".$1" = ".--version" ]; then
-    echo "GNU shtool 2.0.2 (15-Jun-2005)"
+    echo "GNU shtool 2.0.6 (19-Apr-2006)"
     exit 0
 fi
 if [ ".$1" = ".-r" ] || [ ".$1" = ".--recreate" ]; then
-    shtoolize -oshtool echo install mkdir path
+    shtoolize -oshtool echo install mkdir platform path
     exit 0
 fi
 if [ ".$1" = ".-d" ] || [ ".$1" = ".--debug" ]; then
@@ -149,7 +174,7 @@ if [ ".$1" = ".-d" ] || [ ".$1" = ".--debug" ]; then
 fi
 name=`echo "$0" | sed -e 's;.*/\([^/]*\)$;\1;' -e 's;-sh$;;' -e 's;\.sh$;;'`
 case "$name" in
-    echo|install|mkdir|path )
+    echo|install|mkdir|platform|path )
         #   implicit tool command selection
         tool="$name"
         ;;
@@ -206,6 +231,24 @@ case $tool in
         opt_m=""
         opt_o=""
         opt_g=""
+        ;;
+    platform )
+        str_tool="platform"
+        str_usage="[-F|--format <format>] [-S|--sep <string>] [-C|--conc <string>] [-L|--lower] [-U|--upper] [-v|--verbose] [-c|--concise] [-n|--no-newline] [-t|--type <type>] [-V|--version] [-h|--help]"
+        arg_spec="0="
+        opt_spec="F:S:C:L.U.v.c.n.t:d.V.h."
+        opt_alias="F:format,S:sep,C:conc,L:lower,U:upper,v:verbose,c:consise,t:type,n:no-newline,V:version,h:help"
+        opt_F="%{sp} (%{ap})"
+        opt_S=" "
+        opt_C="/"
+        opt_L=no
+        opt_U=no
+        opt_t=""
+        opt_v=no
+        opt_c=no
+        opt_n=no
+        opt_V=no
+        opt_h=no
         ;;
     path )
         str_tool="path"
@@ -430,7 +473,7 @@ case $tool in
 echo )
     ##
     ##  echo -- Print string with optional construct expansion
-    ##  Copyright (c) 1998-2005 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1998-2006 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     text="$*"
@@ -728,7 +771,7 @@ echo )
 install )
     ##
     ##  install -- Install a program, script or datafile
-    ##  Copyright (c) 1997-2005 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1997-2006 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     #   special case: "shtool install -d <dir> [...]" internally
@@ -891,7 +934,7 @@ install )
 mkdir )
     ##
     ##  mkdir -- Make one or more directories
-    ##  Copyright (c) 1996-2005 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1996-2006 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     errstatus=0
@@ -976,10 +1019,563 @@ mkdir )
     shtool_exit $errstatus
     ;;
 
+platform )
+    ##
+    ##  platform -- Platform Identification Utility
+    ##  Copyright (c) 2003-2006 Ralf S. Engelschall <rse@engelschall.com>
+    ##
+
+    #   option post-processing
+    if [ ".$opt_t" != . ]; then
+        case "$opt_t" in
+            binary )
+                #   binary package id (OpenPKG RPM)
+                opt_F="%<ap>-%<sp>"
+                opt_L=yes
+                opt_S=""
+                opt_C="+"
+                ;;
+            build )
+                #   build time checking (OpenPKG RPM)
+                opt_F="%<at>-%<st>"
+                opt_L=yes
+                opt_S=""
+                opt_C="+"
+                ;;
+            gnu )
+                #   GNU config.guess style <arch>-<vendor>-<os><osversion>
+                opt_F="%<at>-unknown-%<st>"
+                opt_L=yes
+                opt_S=""
+                opt_C="+"
+                ;;
+            web )
+                #   non-whitespace HTTP Server-header id
+                opt_F="%<sp>-%<ap>"
+                opt_S="/"
+                opt_C="+"
+                ;;
+            summary)
+                #   human readable verbose summary information
+                opt_F="Class:      %[sc] (%[ac])\\nProduct:    %[sp] (%[ap])\\nTechnology: %[st] (%[at])"
+                opt_S=" "
+                opt_C="/"
+                ;;
+            all-in-one )
+                #   full-table all-in-one information
+                opt_F=""
+                opt_F="${opt_F}concise architecture class:      %<ac>\\n"
+                opt_F="${opt_F}regular architecture class:      %{ac}\\n"
+                opt_F="${opt_F}verbose architecture class:      %[ac]\\n"
+                opt_F="${opt_F}concise architecture product:    %<ap>\\n"
+                opt_F="${opt_F}regular architecture product:    %{ap}\\n"
+                opt_F="${opt_F}verbose architecture product:    %[ap]\\n"
+                opt_F="${opt_F}concise architecture technology: %<at>\\n"
+                opt_F="${opt_F}regular architecture technology: %{at}\\n"
+                opt_F="${opt_F}verbose architecture technology: %[at]\\n"
+                opt_F="${opt_F}concise system class:            %<sc>\\n"
+                opt_F="${opt_F}regular system class:            %{sc}\\n"
+                opt_F="${opt_F}verbose system class:            %[sc]\\n"
+                opt_F="${opt_F}concise system product:          %<sp>\\n"
+                opt_F="${opt_F}regular system product:          %{sp}\\n"
+                opt_F="${opt_F}verbose system product:          %[sp]\\n"
+                opt_F="${opt_F}concise system technology:       %<st>\\n"
+                opt_F="${opt_F}regular system technology:       %{st}\\n"
+                opt_F="${opt_F}verbose system technology:       %[st]"
+                ;;
+            * )
+                echo "$msgprefix:Error: invalid type \`$opt_t'" 1>&2
+                exit 1
+                ;;
+        esac
+    fi
+
+    #   assemble initial platform information
+    UNAME_MACHINE=`(uname -m) 2>/dev/null` ||\
+    UNAME_MACHINE=`(uname -p) 2>/dev/null` ||\
+    UNAME_MACHINE='unknown'
+    UNAME_SYSTEM=`(uname -s) 2>/dev/null`  ||\
+    UNAME_SYSTEM='unknown'
+    UNAME_RELEASE=`(uname -r) 2>/dev/null` ||\
+    UNAME_RELEASE=`(uname -v) 2>/dev/null` ||\
+    UNAME_RELEASE='unknown'
+
+    UNAME="${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}"
+
+    AC=""; AP=""; AT=""
+    SC=""; SP=""; ST=""
+
+    #    dispatch into platform specific sections
+    case "${UNAME}" in
+
+        #   FreeBSD
+        *:FreeBSD:* )
+            #   determine architecture
+            AC="${UNAME_MACHINE}"
+            case "${AC}" in
+                i386 ) AC="iX86" ;;
+            esac
+            AP="${AC}"
+            AT="${AP}"
+            if [ ".${AT}" = ".iX86" ]; then
+                case "`(/sbin/sysctl -n hw.model) 2>&1`" in
+                    *"Xeon"* | *"Pentium Pro"* | *"Cyrix 6x86MX"* | *"Pentium II"* | *"Pentium III"* | *"Pentium 4"* | *"Celeron"* ) AT="i686" ;;
+                    *"Pentium"* ) AT="i586" ;; *"i486[SD]X"* | *"Cyrix 486"* | *"Cyrix [56]x86"* | *"Blue Lightning" | *"Cyrix 486S/DX" ) AT="i486" ;;
+                    *"i386[SD]X"* | *"NexGen 586"* ) AT="i386" ;;
+                esac
+            fi
+            #   determine system
+            r=`echo "${UNAME_RELEASE}" |\
+               sed -e 's;[()];;' -e 's/\(-.*\)$/[\1]/'`
+            ST="FreeBSD ${r}"
+            SP="${ST}"
+            case "${r}" in
+                1.* ) SC="4.3BSD" ;;
+                *   ) SC="4.4BSD" ;;
+            esac
+            ;;
+
+        #   NetBSD
+        *:NetBSD:* )
+            #   determine architecture
+            AT="${UNAME_MACHINE}"
+            AP="${AT}"
+            case "${AP}" in
+                i[3-6]86 ) AP="iX86" ;;
+            esac
+            AC="${AP}"
+            #   determine system
+            r=`echo "${UNAME_RELEASE}" | sed -e 's/\([-_].*\)$/[\1]/'`
+            ST="NetBSD ${r}"
+            SP="${ST}"
+            case "${r}" in
+                0.* ) SC="4.3BSD" ;;
+                *   ) SC="4.4BSD" ;;
+            esac
+            ;;
+
+        #   OpenBSD
+        *:OpenBSD:* )
+            #   determine architecture
+            AT="${UNAME_MACHINE}"
+            AP="${AT}"
+            case "${AP}" in
+                i[3-6]86 ) AP="iX86" ;;
+            esac
+            AC="${AP}"
+            #   determine system
+            r=`echo "${UNAME_RELEASE}" | sed -e 's/\([-_].*\)$/[\1]/'`
+            ST="OpenBSD ${r}"
+            SP="${ST}"
+            SC="4.4BSD"
+            ;;
+
+        #   GNU/Linux
+        *:Linux:* )
+            #   determine architecture
+            AT="${UNAME_MACHINE}"
+            case "${AT}" in
+               ia64     ) AT="IA64"   ;;
+               x86_64   ) AT='AMD64'  ;;
+               parisc   ) AT="HPPA32" ;;
+               parisc64 ) AT="HPPA64" ;;
+            esac
+            AP="${AT}"
+            case "${AP}" in
+               i[3-6]86 ) AP='iX86' ;;
+            esac
+            AC="${AP}"
+            #   determine system
+            v_kern=`echo "${UNAME_RELEASE}" |\
+                sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*/\1/'`
+            v_libc=`(strings /lib/libc.so.* | grep '^GLIBC_' | sed -e 's/^GLIBC_//' |\
+                env -i sort -n | sed -n -e '$p' | sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*/\1/') 2>/dev/null`
+            ST="GNU/<Linux >${v_libc}/<${v_kern}>"
+            if [ -f /etc/lsb-release ]; then
+                eval `( . /etc/lsb-release
+                    echo "SC=\"LSB${LSB_VERSION}\""
+                    if [ ".${DISTRIB_ID}" != . -a ".${DISTRIB_RELEASE}" != . ]; then
+                        echo "SP=\"${DISTRIB_ID} ${DISTRIB_RELEASE}\""
+                    fi
+                ) 2>/dev/null`
+            fi
+            if [ ".$SP" = . ]; then
+                for tagfile in x \
+                    `cd /etc && \
+                    /bin/ls *[_-]release *[_-]version 2>/dev/null | env -i sort | \
+                    sed -e '/^redhat-release$/d' -e '/^lsb-release$/d'; \
+                    echo redhat-release lsb-release`
+                do
+                    [ ".${tagfile}" = .x ] && continue
+                    [ ! -f "/etc/${tagfile}" ] && continue
+                    n=`echo ${tagfile} | sed -e 's/[_-]release$//' -e 's/[_-]version$//'`
+                    v=`(grep VERSION /etc/${tagfile}; cat /etc/${tagfile}) | grep '[0-9]' | sed -e 'q' |\
+                       sed -e 's/^/#/' \
+                           -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*$/\1/' \
+                           -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/' \
+                           -e 's/^#[^0-9]*\([0-9][0-9]*\).*$/\1/' \
+                           -e 's/^#.*$//'`
+                    case "`util_lower ${n}`" in
+                        redhat )
+                            if [ ".`grep 'Red Hat Enterprise Linux' /etc/${tagfile}`" != . ]; then
+                                n="<R>ed <H>at <E>nterprise <L>inux"
+                            else
+                                n="<R>ed <H>at <L>inux"
+                            fi
+                            ;;
+                        debian             ) n="Debian[ GNU/Linux]"        ;;
+                        ubuntu             ) n="Ubuntu[ GNU/Linux]"        ;;
+                        fedora             ) n="<Fedora> Core[ GNU/Linux]" ;;
+                        suse               ) n="SuSE[ Linux]"              ;;
+                        mandrake*|mandriva ) n="Mandriva[ Linux]"          ;;
+                        gentoo             ) n="Gentoo[ GNU/Linux]"        ;;
+                        slackware          ) n="Slackware[ Linux]"         ;;
+                        turbolinux         ) n="TurboLinux"                ;;
+                        unitedlinux        ) n="UnitedLinux"               ;;
+                        *                  ) n="${n}[ GNU/Linux]"          ;;
+                    esac
+                    case "$n" in
+                        *"<"*">"* ) SP="$n <$v>" ;;
+                        *         ) SP="$n $v"   ;;
+                    esac
+                    break
+                done
+            fi
+            [ ".$SP" = . ] && SP="${ST}"
+            [ ".$SC" = . ] && SC="LSB"
+            ;;
+
+        #   Sun Solaris
+        *:SunOS:* )
+            #   determine architecture
+            AT="${UNAME_MACHINE}"
+            case "${AT}" in
+                i86pc )
+                    AT="iX86"
+                    case "`(/bin/isainfo -k) 2>&1`" in
+                        amd64 ) AT="AMD64" ;;
+                    esac
+                    ;;
+            esac
+            AP="${AT}"
+            case "${AP}" in
+                sun4[cdm] ) AP="SPARC32" ;;
+                sun4[uv]  ) AP="SPARC64" ;;
+                sun4*     ) AP="SPARC"   ;;
+            esac
+            AC="${AP}"
+            case "${AC}" in
+                SPARC* ) AC="SPARC" ;;
+            esac
+            #   determine system
+            ST="[Sun ]SunOS ${UNAME_RELEASE}"
+            v=`echo "${UNAME_RELEASE}" |\
+               sed -e 's;^4\.;1.;' \
+                   -e 's;^5\.\([0-6]\)[^0-9]*$;2.\1;' \
+                   -e 's;^5\.\([0-9][0-9]*\).*;\1;'`
+            SP="[Sun ]Solaris $v"
+            case "${UNAME_RELEASE}" in
+                4.* ) SC="4.3BSD" ;;
+                5.* ) SC="SVR4"   ;;
+            esac
+            ;;
+
+        #   SCO UnixWare
+        *:UnixWare:* )
+            #   determine architecture
+            AT="${UNAME_MACHINE}"
+            case "${AT}" in
+                i[3-6]86 | ix86at ) AT="iX86" ;;
+            esac
+            AP="${AT}"
+            #   determine system
+            v=`/sbin/uname -v`
+            ST="[SCO ]UnixWare ${v}"
+            SP="${ST}"
+            SC="SVR${UNAME_RELEASE}"
+            ;;
+
+        #   QNX
+        *:QNX:* )
+            #   determine architecture
+            AT="${UNAME_MACHINE}"
+            case "${AT}" in
+                x86pc ) AT="iX86" ;;
+            esac
+            AP="${AT}"
+            #   determine system
+            v="${UNAME_RELEASE}"
+            ST="QNX[ Neutrino RTOS] ${v}"
+            v=`echo "${v}" | sed -e 's;^\([0-9][0-9]*\.[0-9][0-9]*\).*$;\1;'`
+            SP="QNX[ Neutrino RTOS] ${v}"
+            SC="QNX"
+            ;;
+
+        #   SGI IRIX
+        *:IRIX*:* )
+            #   determine architecture
+            AT="${UNAME_MACHINE}"
+            AP="${AT}"
+            case "${AP}:${UNAME_SYSTEM}" in
+                IP*:IRIX64 ) AP="MIPS64" ;;
+                IP*:*      ) AP="MIPS"   ;;
+            esac
+            AC="${AP}"
+            #   determine system
+            v=`(/bin/uname -R || /bin/uname -r) 2>/dev/null | sed -e 's;[0-9.]* ;;'`
+            ST="[SGI ]IRIX ${v}"
+            v="${UNAME_RELEASE}"
+            SP="[SGI ]IRIX ${v}"
+            SC="4.2BSD/SVR3"
+            ;;
+
+        #   HP HP-UX
+        *:HP-UX:* )
+            #   determine architecture
+            AT="${UNAME_MACHINE}"
+            case "${AT}" in
+                ia64 ) AT="IA64" ;;
+                9000/[34]?? ) AT=M68K ;;
+                9000/[678][0-9][0-9])
+                    sc_cpu_version=`/usr/bin/getconf SC_CPU_VERSION 2>/dev/null`
+                    sc_kernel_bits=`/usr/bin/getconf SC_KERNEL_BITS 2>/dev/null`
+                    case "${sc_cpu_version}" in
+                        523 ) AT="HPPA1.0" ;;
+                        528 ) AT="HPPA1.1" ;;
+                        532 ) AT="HPPA2.0"
+                            case "${sc_kernel_bits}" in
+                                32 ) AT="${AT}n" ;;
+                                64 ) AT="${AT}w" ;;
+                            esac
+                            ;;
+                    esac
+                    ;;
+            esac
+            AP="${AT}"
+            case "${AP}" in
+                HPPA* ) AP="HPPA" ;;
+            esac
+            AC="${AP}"
+            #   determine system
+            v=`echo "${UNAME_RELEASE}" | sed -e 's;^[^0-9]*;;'`
+            ST="[HP ]<HP>-<UX ${v}>"
+            SP="${ST}"
+            case "${v}" in
+                10.*   ) SC="SVR4.2" ;;
+                [7-9]* ) SC="SVR4"   ;;
+            esac
+            ;;
+
+        #   HP Tru64 (OSF1)
+        *:OSF1:* )
+            #   determine architecture
+            AP="${UNAME_MACHINE}"
+            case "${AP}" in
+                alpha ) AP="Alpha" ;;
+            esac
+            alpha_type=`(/usr/sbin/psrinfo -v) 2>/dev/null |\
+                sed -n -e 's/^.*The alpha \([^ ][^ ]*\).*processor.*$/\1/p' | sed -e 'q'`
+            AT="${AP}${alpha_type}"
+            AC="${AP}"
+            #   determine system
+            v=`echo "${UNAME_RELEASE}" | sed -e 's;^[VTX];;'`
+            ST="[HP ]Tru64 ${v}"
+            SP="${ST}"
+            SC="OSF1"
+            ;;
+
+        #   IBM AIX
+        *:AIX:* )
+            cpu_arch=rs6000
+            if [ -x /usr/sbin/lsdev -a -x /usr/sbin/lsattr ]; then
+                cpu_id=`/usr/sbin/lsdev -C -c processor -S available | sed 1q | awk '{ print $1 }'`
+                if [ ".`/usr/sbin/lsattr -El ${cpu_id} | grep -i powerpc`" != . ]; then
+                    cpu_arch=powerpc
+                fi
+            elif [ -d /QOpenSys ]; then
+                #   IBM i5/OS (aka OS/400) with PASE (Portable Application Solutions Environment)
+                cpu_arch=powerpc
+            fi
+            if [ -x /usr/bin/oslevel ]; then
+                os_level=`/usr/bin/oslevel`
+            else
+                os_level="`uname -v`.`uname -r`"
+            fi
+            os_level=`echo "${os_level}" |\
+                      sed -e 's;^\([0-9][0-9]*\.[0-9][0-9]*\)\(\.[0-9][0-9]*\)\(.*\)$;<\1>\2[\3];' \
+                          -e 's;^\([0-9][0-9]*\.[0-9][0-9]*\)\(.*\)$;<\1>\2;'`
+            AT="${cpu_arch}"
+            AP="${AT}"
+            AC="${AP}"
+            ST="[IBM ]<AIX >${os_level}"
+            SP="${ST}"
+            case "${os_level}" in
+                [12]* ) SC="SVR2" ;;
+                *     ) SC="SVR4" ;;
+            esac
+            ;;
+
+        #   Apple MacOS X Darwin
+        *:Darwin:* )
+            AT=`uname -p`
+            case "${AT}" in
+                powerpc ) AT="PPC" ;;
+            esac
+            AP="${AT}"
+            AC="${AP}"
+            case "${AC}" in
+                i?86 ) AC="iX86" ;;
+            esac
+            ST="[Apple ]${UNAME_SYSTEM} ${UNAME_RELEASE}"
+            SP="${ST}"
+            SC="4.4BSD/Mach3"
+            ;;
+
+        #   TODO ...ADD YOUR NEW PLATFORM CHECK HERE... TODO
+        # *:XXX:* )
+        #   ...
+        #   ;;
+
+        #   ...A STILL UNKNOWN PLATFORM...
+        * )
+            AT=`echo "${UNAME_MACHINE}" | sed -e "s; ;${opt_C};g"`
+            AP="${AT}"
+            AC="${AP}"
+            v=`echo "${UNAME_RELEASE}" |\
+               sed -e 's/^/#/' \
+                   -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*$/\1/' \
+                   -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/' \
+                   -e 's/^#[^0-9]*\([0-9][0-9]*\).*$/\1/' \
+                   -e 's/^#.*$/?/'`
+            ST="${UNAME_SYSTEM} ${v}"
+            SP="${ST}"
+            SC="${SP}"
+            ;;
+
+    esac
+
+    #   provide fallback values
+    [ ".$AT" = . ] && AT="${AP:-${AC}}"
+    [ ".$AP" = . ] && AP="${AT:-${AC}}"
+    [ ".$AC" = . ] && AC="${AP:-${AT}}"
+    [ ".$ST" = . ] && ST="${SP:-${SC}}"
+    [ ".$SP" = . ] && SP="${ST:-${SC}}"
+    [ ".$SC" = . ] && SC="${SP:-${ST}}"
+
+    #   support explicit enforced verbose/concise output
+    if [ ".$opt_v" = .yes ]; then
+        opt_F=`echo ":$opt_F" | sed -e 's/^://' -e 's/%\([as][cpt]\)/%[\1]/g'`
+    elif [ ".$opt_c" = .yes ]; then
+        opt_F=`echo ":$opt_F" | sed -e 's/^://' -e 's/%\([as][cpt]\)/%<\1>/g'`
+    fi
+
+    #   provide verbose and concise variants
+    AC_V=""; AC_N=""; AC_C=""
+    AP_V=""; AP_N=""; AP_C=""
+    AT_V=""; AT_N=""; AT_C=""
+    SC_V=""; SC_N=""; SC_C=""
+    SP_V=""; SP_N=""; SP_C=""
+    ST_V=""; ST_N=""; ST_C=""
+    for var_lc in at ap ac st sp sc; do
+        case "$opt_F" in
+            *"%[${val_lc}]"* | *"%{${val_lc}}"* | *"%${val_lc}"* | *"%<${val_lc}>"* )
+            var_uc=`util_upper "$var_lc"`
+            eval "val=\"\$${var_uc}\""
+            val_V=""; val_N=""; val_C=""
+            case "$opt_F" in
+                *"%[${var_lc}]"* )
+                    val_V=`echo ":$val" | \
+                           sed -e 's/^://' \
+                               -e 's;\[\([^]]*\)\];\1;g' \
+                               -e 's;<\([^>]*\)>;\1;g' \
+                               -e "s; ;§§;g" \
+                               -e "s;/;%%;g" \
+                               -e "s;§§;${opt_S};g" \
+                               -e "s;%%;${opt_C};g"`
+                    eval "${var_uc}_V=\"\${val_V}\""
+                    ;;
+            esac
+            case "$opt_F" in
+                *"%{${var_lc}}"* | *"%${var_lc}"* )
+                    val_N=`echo ":$val" | \
+                           sed -e 's/^://' \
+                               -e 's;\[\([^]]*\)\];;g' \
+                               -e 's;<\([^>]*\)>;\1;g' \
+                               -e "s; ;§§;g" \
+                               -e "s;/;%%;g" \
+                               -e "s;§§;${opt_S};g" \
+                               -e "s;%%;${opt_C};g"`
+                    eval "${var_uc}_N=\"\${val_N}\""
+                    ;;
+            esac
+            case "$opt_F" in
+                *"%<${var_lc}>"* )
+                    val_C=`echo ":$val" | \
+                           sed -e 's/^://' \
+                               -e 's;\[\([^]]*\)\];;g' \
+                               -e 's;[^<]*<\([^>]*\)>[^<]*;\1;g' \
+                               -e "s; ;§§;g" \
+                               -e "s;/;%%;g" \
+                               -e "s;§§;${opt_S};g" \
+                               -e "s;%%;${opt_C};g"`
+                    eval "${var_uc}_C=\"\${val_C}\""
+                    ;;
+            esac
+            ;;
+        esac
+    done
+
+    #   create output string
+    output=`echo ":$opt_F" |\
+            sed -e "s/^://" \
+                -e "s;%\\[ac\\];${AC_V};g" \
+                -e "s;%{ac};${AC_N};g" \
+                -e "s;%ac;${AC_N};g" \
+                -e "s;%<ac>;${AC_C};g" \
+                -e "s;%\\[ap\\];${AP_V};g" \
+                -e "s;%{ap};${AP_N};g" \
+                -e "s;%ap;${AP_N};g" \
+                -e "s;%<ap>;${AP_C};g" \
+                -e "s;%\\[at\\];${AT_V};g" \
+                -e "s;%{at};${AT_N};g" \
+                -e "s;%at;${AT_N};g" \
+                -e "s;%<at>;${AT_C};g" \
+                -e "s;%\\[sc\\];${SC_V};g" \
+                -e "s;%{sc};${SC_N};g" \
+                -e "s;%sc;${SC_N};g" \
+                -e "s;%<sc>;${SC_C};g" \
+                -e "s;%\\[sp\\];${SP_V};g" \
+                -e "s;%{sp};${SP_N};g" \
+                -e "s;%sp;${SP_N};g" \
+                -e "s;%<sp>;${SP_C};g" \
+                -e "s;%\\[st\\];${ST_V};g" \
+                -e "s;%{st};${ST_N};g" \
+                -e "s;%st;${ST_N};g" \
+                -e "s;%<st>;${ST_C};g" \
+                -e 's/\\\\n/^/g' |\
+             tr '^' '\012'`
+
+    #   support lower/upper-case mapping
+    if [ ".$opt_L" = .yes ]; then
+        output=`util_lower "$output"`
+    elif [ ".$opt_U" = .yes ]; then
+        output=`util_upper "$output"`
+    fi
+
+    #   display output string
+    if [ ".$opt_n" = .yes ]; then
+        echo . | awk '{ printf("%s", output); }' output="$output"
+    else
+        echo "$output"
+    fi
+
+    shtool_exit 0
+    ;;
+
 path )
     ##
     ##  path -- Deal with program paths
-    ##  Copyright (c) 1998-2005 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1998-2006 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     namelist="$*"
