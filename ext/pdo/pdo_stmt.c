@@ -2525,28 +2525,18 @@ static void row_prop_or_dim_delete(zval *object, zval *offset TSRMLS_DC)
 
 static HashTable *row_get_properties(zval *object TSRMLS_DC)
 {
-	zval *tmp;
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 	int i;
-	HashTable *ht;
-
-	MAKE_STD_ZVAL(tmp);
-	array_init(tmp);
 
 	for (i = 0; i < stmt->column_count; i++) {
 		zval *val;
 		MAKE_STD_ZVAL(val);
 		fetch_value(stmt, val, i, NULL TSRMLS_CC);
 
-		add_assoc_zval(tmp, stmt->columns[i].name, val);
+		zend_hash_update(stmt->properties, stmt->columns[i].name, stmt->columns[i].namelen + 1, (void *)&val, sizeof(zval *), NULL);
 	}
 
-	ht = Z_ARRVAL_P(tmp);
-
-	ZVAL_NULL(tmp);
-	FREE_ZVAL(tmp);
-
-	return ht;
+	return stmt->properties;
 }
 
 static union _zend_function *row_method_get(
