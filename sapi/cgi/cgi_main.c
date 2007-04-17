@@ -1106,6 +1106,7 @@ int main(int argc, char *argv[])
 #endif
 
 	sapi_startup(&cgi_sapi_module);
+	cgi_sapi_module.php_ini_path_override = NULL;
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY; /* sets default for file streams to binary */
@@ -1128,6 +1129,9 @@ int main(int argc, char *argv[])
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
 		switch (c) {
 			case 'c':
+				if (cgi_sapi_module.php_ini_path_override) {
+					free(cgi_sapi_module.php_ini_path_override);
+				}
 				cgi_sapi_module.php_ini_path_override = strdup(php_optarg);
 				break;
 			case 'n':
