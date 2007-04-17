@@ -110,6 +110,11 @@ PHP_FUNCTION(imagecolorclosestalpha);
 PHP_FUNCTION(imagecolorexactalpha);
 PHP_FUNCTION(imagecopyresampled);
 
+#ifdef PHP_WIN32
+PHP_FUNCTION(imagegrabwindow);
+PHP_FUNCTION(imagegrabscreen);
+#endif
+
 #ifdef HAVE_GD_BUNDLED
 PHP_FUNCTION(imagerotate);
 PHP_FUNCTION(imageantialias);

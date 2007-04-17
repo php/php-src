@@ -53,6 +53,9 @@
 #ifdef PHP_WIN32
 # include <io.h>
 # include <fcntl.h>
+# include <windows.h>
+# include <Winuser.h>
+# include <Wingdi.h>
 #endif
 
 #if HAVE_LIBGD
@@ -276,6 +279,17 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecopyresampled, 0)
 	ZEND_ARG_INFO(0, src_w)
 	ZEND_ARG_INFO(0, src_h)
 ZEND_END_ARG_INFO()
+
+#ifdef PHP_WIN32
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagegrabwindow, 0)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagegrabscreen, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 #ifdef HAVE_GD_BUNDLED
 static
@@ -960,6 +974,11 @@ zend_function_entry gd_functions[] = {
 	PHP_FE(imagecolorclosestalpha,					arginfo_imagecolorclosestalpha)
 	PHP_FE(imagecolorexactalpha,					arginfo_imagecolorexactalpha)
 	PHP_FE(imagecopyresampled,						arginfo_imagecopyresampled)
+
+#ifdef PHP_WIN32
+	PHP_FE(imagegrabwindow,							arginfo_imagegrabwindow)
+	PHP_FE(imagegrabscreen,							arginfo_imagegrabscreen)
+#endif
 
 #ifdef HAVE_GD_BUNDLED
 	PHP_FE(imagerotate,     						arginfo_imagerotate)
@@ -1853,6 +1872,155 @@ PHP_FUNCTION(imagecopyresampled)
 	RETURN_TRUE;
 }
 /* }}} */
+
+#ifdef PHP_WIN32
+/* {{{ proto resource imagegrabwindow(int window_handle [, int client_area])
+   Grab a window or its client area using a windows handle (HWND property in COM instance) */
+PHP_FUNCTION(imagegrabwindow)
+{
+	HWND window;
+	long client_area = 0;
+	RECT rc = {0};
+	RECT rc_win = {0};
+	int Width, Height;
+	HDC		hdc;
+	HDC memDC;
+	HBITMAP memBM;
+	HBITMAP hOld;
+	HINSTANCE handle;
+	long lwindow_handle;
+	typedef BOOL (WINAPI *tPrintWindow)(HWND, HDC,UINT);
+	tPrintWindow pPrintWindow = 0;
+	gdImagePtr im;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &lwindow_handle, &client_area) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	window = (HWND) lwindow_handle;
+
+	if (!IsWindow(window)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid window handle");
+		RETURN_FALSE;
+	}
+
+	hdc		= GetDC(0);
+
+	if (client_area) {
+		GetClientRect(window, &rc);
+		Width = rc.right;
+		Height = rc.bottom;
+	} else {
+		GetWindowRect(window, &rc);
+		Width	= rc.right - rc.left;
+		Height	= rc.bottom - rc.top;
+	}
+
+	Width		= (Width/4)*4;
+
+	memDC	= CreateCompatibleDC(hdc);
+	memBM	= CreateCompatibleBitmap(hdc, Width, Height);
+	hOld	= (HBITMAP) SelectObject (memDC, memBM);
+
+
+	handle = LoadLibrary("User32.dll");
+	if ( handle == 0 ) {
+		goto clean;
+	}
+	pPrintWindow = (tPrintWindow) GetProcAddress(handle, "PrintWindow");  
+
+	if ( pPrintWindow )  {
+		pPrintWindow(window, memDC, (UINT) client_area);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Windows API too old");
+		RETURN_FALSE;
+		goto clean;
+	}
+
+	FreeLibrary(handle);
+
+	im = gdImageCreateTrueColor(Width, Height);
+	if (im) {
+		int x,y;
+		for (y=0; y <= Height; y++) {
+			for (x=0; x <= Width; x++) {
+				int c = GetPixel(memDC, x,y);
+				gdImageSetPixel(im, x, y, gdTrueColor(GetRValue(c), GetGValue(c), GetBValue(c)));
+			}
+		}
+	}
+
+clean:
+	SelectObject(memDC,hOld);
+	DeleteObject(memBM);
+	DeleteDC(memDC);
+	ReleaseDC( 0, hdc );
+
+	if (!im) {
+		RETURN_FALSE;
+	} else {
+		ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
+	}
+}
+/* }}} */
+
+/* {{{ proto resource imagegrabscreen(int window_handle [, int client_area])
+   Grab a screenshot */
+PHP_FUNCTION(imagegrabscreen)
+{
+	HWND window = GetDesktopWindow();
+	RECT rc = {0};
+	int Width, Height;
+	HDC		hdc;
+	HDC memDC;
+	HBITMAP memBM;
+	HBITMAP hOld;
+	HINSTANCE handle;
+	long lwindow_handle;
+	typedef BOOL (WINAPI *tPrintWindow)(HWND, HDC,UINT);
+	tPrintWindow pPrintWindow = 0;
+	gdImagePtr im;
+	hdc		= GetDC(0);
+
+	if (!hdc) {
+		RETURN_FALSE;
+	}
+
+	GetWindowRect(window, &rc);
+	Width	= rc.right - rc.left;
+	Height	= rc.bottom - rc.top;
+
+	Width		= (Width/4)*4;
+
+	memDC	= CreateCompatibleDC(hdc);
+	memBM	= CreateCompatibleBitmap(hdc, Width, Height);
+	hOld	= (HBITMAP) SelectObject (memDC, memBM);
+	BitBlt( memDC, 0, 0, Width, Height , hdc, rc.left, rc.top , SRCCOPY );
+
+	im = gdImageCreateTrueColor(Width, Height);
+	if (im) {
+		int x,y;
+		for (y=0; y <= Height; y++) {
+			for (x=0; x <= Width; x++) {
+				int c = GetPixel(memDC, x,y);
+				gdImageSetPixel(im, x, y, gdTrueColor(GetRValue(c), GetGValue(c), GetBValue(c)));
+			}
+		}
+	}
+
+	SelectObject(memDC,hOld);
+	DeleteObject(memBM);
+	DeleteDC(memDC);
+	ReleaseDC( 0, hdc );
+
+	if (!im) {
+		RETURN_FALSE;
+	} else {
+		ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
+	}
+}
+/* }}} */
+#endif PHP_WIN32
 
 #ifdef HAVE_GD_BUNDLED
 /* {{{ proto resource imagerotate(resource src_im, float angle, int bgdcolor [, int ignoretransparent]) U
