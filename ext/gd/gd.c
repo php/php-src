@@ -1965,7 +1965,7 @@ clean:
 }
 /* }}} */
 
-/* {{{ proto resource imagegrabscreen(int window_handle [, int client_area])
+/* {{{ proto resource imagegrabscreen()
    Grab a screenshot */
 PHP_FUNCTION(imagegrabscreen)
 {
