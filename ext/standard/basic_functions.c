@@ -4443,8 +4443,15 @@ PHP_FUNCTION(putenv)
 		 * We try to avoid this by setting our own value first */
 		SetEnvironmentVariable(pe.key, "bugbug");
 #endif
-		
-		if (putenv(pe.putenv_string) == 0) {	/* success */
+
+#if HAVE_UNSETENV
+		if (!p) { /* no '=' means we want to unset it */
+			unsetenv(pe.putenv_string);
+		}
+		if (!p || putenv(pe.putenv_string) == 0) {  /* success */
+#else
+		if (putenv(pe.putenv_string) == 0) {    /* success */
+#endif
 			zend_hash_add(&BG(putenv_ht), pe.key, pe.key_len+1, (void **) &pe, sizeof(putenv_entry), NULL);
 #ifdef HAVE_TZSET
 			if (!strncmp(pe.key, "TZ", pe.key_len)) {
