@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 10 Apr 2007, PHP 5.2.2RC1
 - Improved bundled GD
   . Sync to 2.0.35
+  . Added imagegrabwindow and imagegrabscreen, capture a screen or a 
+	window using its handle (Pierre)
   . colors allocated henceforth from the resulting image overwrite the palette 
 	  colors (Rob Leslie)
   . Improved thread safety of the gif support (Roman Nemecek, Nuno, Pierre)
