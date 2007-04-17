@@ -1,3 +1,110 @@
+2007-04-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/json/JSON_parser.c
+      ext/json/tests/bug41067.phpt
+      ext/json/tests/bug41067.phpt:
+      
+      Fixed bug #41067 (json_encode() problem with UTF-16 input).
+
+2007-04-16  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      build/shtool:
+      MF52:- Updated bundled shtool to 2.0.6 and added "platform" command in it.
+
+    * build/shtool:
+      MFB:- Updated bundled shtool to 2.0.6 and added "platform" command in it.
+
+    * (PHP_5_2)
+      build/shtool:
+      - Updated bundled shtool to 2.0.6 and added "platform" command in it.
+
+2007-04-16  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ZendEngine2/zend_API.c:
+      - Fix zend_parse_parameters_ex() for format specifiers like "+f", like
+      multiple
+        values followed by forced parameters. Fixes tests like
+        ext/standard/tests/array/007.phpt and others
+
+2007-04-16  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/json/JSON_parser.c
+      ext/json/json.c:
+      MFB (handling of control characters)
+
+2007-04-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/head.c:
+      MFB use strlcat()
+      fix buffer overrun & bug #41101
+
+2007-04-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/TSRM.h
+      TSRM/TSRM.h
+      TSRM/tsrm_win32.c
+      TSRM/tsrm_win32.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_types.h
+      ZendEngine2/zend_types.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ext/standard/file.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/proc_open.c
+      ext/standard/proc_open.c
+      main/SAPI.c
+      main/SAPI.c
+      main/main.c
+      main/main.c
+      main/php_ini.c
+      main/php_ini.c
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c
+      win32/select.c
+      win32/select.c
+      win32/build/config.w32
+      win32/build/config.w32:
+      WIN64 support
+
+2007-04-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/json/tests/bug41034.phpt
+      ext/standard/tests/general_functions/highlight_heredoc.phpt
+      ext/standard/tests/general_functions/highlight_heredoc.phpt:
+      fix test
+
+2007-04-16  Brian Shire  <shire@tekrat.com>
+
+    * (PHP_5_2)
+      main/output.c:
+      fix fold typo
+
 2007-04-15  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * sapi/cgi/cgi_main.c:

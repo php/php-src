@@ -1,3 +1,41 @@
+2007-04-16  Johannes Schlüter  <johannes@schlueters.de>
+
+    * zend_API.c:
+      - Fix zend_parse_parameters_ex() for format specifiers like "+f", like
+      multiple
+        values followed by forced parameters. Fixes tests like
+        ext/standard/tests/array/007.phpt and others
+
+2007-04-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.c
+      zend_API.h
+      zend_API.h
+      zend_alloc.c
+      zend_alloc.c
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.c
+      zend_execute.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute.h
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_ini.c
+      zend_ini.c
+      zend_opcode.c
+      zend_opcode.c
+      zend_types.h
+      zend_types.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      WIN64 support
+
 2007-04-13  Antony Dovgal  <antony@zend.com>
 
     * zend_execute.c
