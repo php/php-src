@@ -1409,6 +1409,9 @@ consult the installation file that came with this distribution, or visit \n\
 							break;
 
   					case 'f': /* parse file */
+							if (script_file) {
+								efree(script_file);
+							}
 							script_file = estrdup(php_optarg);
 							no_headers = 1;
 							/* arguments after the file are considered script args */
