@@ -15,7 +15,7 @@
  * @version 1.0
  * @since PHP 5.0
  */
-interface RecursiveIterator implements Iterator
+interface RecursiveIterator extends Iterator
 {
 	/** @return whether the current element has children
 	 */
