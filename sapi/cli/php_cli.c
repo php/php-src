@@ -663,7 +663,10 @@ int main(int argc, char *argv[])
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0))!=-1) {
 		switch (c) {
 			case 'c':
-				cli_sapi_module.php_ini_path_override = strdup(php_optarg);
+				if (cli_sapi_module.php_ini_path_override) {
+					free(cli_sapi_module.php_ini_path_override);
+				}
+ 				cli_sapi_module.php_ini_path_override = strdup(php_optarg);
 				break;
 			case 'n':
 				cli_sapi_module.php_ini_ignore = 1;
