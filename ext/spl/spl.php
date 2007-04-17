@@ -32,12 +32,12 @@
  * 
  * SPL offers some advanced iterator algorithms:
  * 
- * - interface RecursiveIterator implements Iterator
+ * - interface RecursiveIterator extends Iterator
  * - interface OuterIterator extends Iterator
  * - class RecursiveIteratorIterator implements OuterIterator
  * - abstract class FilterIterator implements OuterIterator
  * - class ParentIterator extends FilterIterator implements RecursiveIterator
- * - interface SeekableIterator implements Iterator
+ * - interface SeekableIterator extends Iterator
  * - class LimitIterator implements OuterIterator
  * - class CachingIterator implements OuterIterator
  * - class RecursiveCachingIterator extends CachingIterator implements RecursiveIterator
