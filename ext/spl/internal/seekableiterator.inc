@@ -18,7 +18,7 @@
  * to seek on an iterator LimitIterator can use this to efficiently rewind
  * to offset.
  */
-interface SeekableIterator implements Iterator
+interface SeekableIterator extends Iterator
 {
 	/** Seek to an absolute position
 	 *
