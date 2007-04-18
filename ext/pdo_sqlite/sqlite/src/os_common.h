@@ -97,6 +97,7 @@ int sqlite3_diskfull = 0;
          || (sqlite3_io_error_persist && sqlite3_io_error_hit) ) \
                 { local_ioerr(); CODE; }
 static void local_ioerr(){
+  IOTRACE(("IOERR\n"));
   sqlite3_io_error_hit = 1;
 }
 #define SimulateDiskfullError(CODE) \

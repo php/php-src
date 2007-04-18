@@ -655,8 +655,8 @@ static void hexFunc(
   const unsigned char *pBlob;
   char *zHex, *z;
   assert( argc==1 );
-  pBlob = sqlite3_value_blob(argv[0]);
   n = sqlite3_value_bytes(argv[0]);
+  pBlob = sqlite3_value_blob(argv[0]);
   z = zHex = sqlite3_malloc(n*2 + 1);
   if( zHex==0 ) return;
   for(i=0; i<n; i++, pBlob++){

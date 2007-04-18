@@ -705,7 +705,7 @@ void sqlite3Insert(
         VdbeOp *pOp;
         sqlite3ExprCode(pParse, pList->a[keyColumn].pExpr);
         pOp = sqlite3VdbeGetOp(v, sqlite3VdbeCurrentAddr(v) - 1);
-        if( pOp->opcode==OP_Null ){
+        if( pOp && pOp->opcode==OP_Null ){
           appendFlag = 1;
           pOp->opcode = OP_NewRowid;
           pOp->p1 = base;
@@ -1374,10 +1374,10 @@ static int xferOptimization(
   int addr1, addr2;                /* Loop addresses */
   int emptyDestTest;               /* Address of test for empty pDest */
   int emptySrcTest;                /* Address of test for empty pSrc */
-  int memRowid = 0;                /* A memcell containing a rowid from pSrc */
   Vdbe *v;                         /* The VDBE we are building */
   KeyInfo *pKey;                   /* Key information for an index */
   int counterMem;                  /* Memory register used by AUTOINC */
+  int destHasUniqueIdx = 0;        /* True if pDest has a UNIQUE index */
 
   if( pSelect==0 ){
     return 0;   /* Must be of the form  INSERT INTO ... SELECT ... */
@@ -1474,6 +1474,9 @@ static int xferOptimization(
     }
   }
   for(pDestIdx=pDest->pIndex; pDestIdx; pDestIdx=pDestIdx->pNext){
+    if( pDestIdx->onError!=OE_None ){
+      destHasUniqueIdx = 1;
+    }
     for(pSrcIdx=pSrc->pIndex; pSrcIdx; pSrcIdx=pSrcIdx->pNext){
       if( xferCompatibleIndex(pDestIdx, pSrcIdx) ) break;
     }
@@ -1504,11 +1507,16 @@ static int xferOptimization(
   iDest = pParse->nTab++;
   counterMem = autoIncBegin(pParse, iDbDest, pDest);
   sqlite3OpenTable(pParse, iDest, iDbDest, pDest, OP_OpenWrite);
-  if( pDest->iPKey<0 && pDest->pIndex!=0 ){
+  if( (pDest->iPKey<0 && pDest->pIndex!=0) || destHasUniqueIdx ){
     /* If tables do not have an INTEGER PRIMARY KEY and there
     ** are indices to be copied and the destination is not empty,
     ** we have to disallow the transfer optimization because the
     ** the rowids might change which will mess up indexing.
+    **
+    ** Or if the destination has a UNIQUE index and is not empty,
+    ** we also disallow the transfer optimization because we cannot
+    ** insure that all entries in the union of DEST and SRC will be
+    ** unique.
     */
     addr1 = sqlite3VdbeAddOp(v, OP_Rewind, iDest, 0);
     emptyDestTest = sqlite3VdbeAddOp(v, OP_Goto, 0, 0);
@@ -1518,11 +1526,6 @@ static int xferOptimization(
   }
   sqlite3OpenTable(pParse, iSrc, iDbSrc, pSrc, OP_OpenRead);
   emptySrcTest = sqlite3VdbeAddOp(v, OP_Rewind, iSrc, 0);
-  if( pDest->pIndex!=0 ){
-    sqlite3VdbeAddOp(v, OP_Rowid, iSrc, 0);
-    memRowid = pParse->nMem++;
-    sqlite3VdbeAddOp(v, OP_MemStore, memRowid, pDest->iPKey>=0);
-  }
   if( pDest->iPKey>=0 ){
     addr1 = sqlite3VdbeAddOp(v, OP_Rowid, iSrc, 0);
     sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
@@ -1562,13 +1565,6 @@ static int xferOptimization(
                    (char*)pKey, P3_KEYINFO_HANDOFF);
     addr1 = sqlite3VdbeAddOp(v, OP_Rewind, iSrc, 0);
     sqlite3VdbeAddOp(v, OP_RowKey, iSrc, 0);
-    if( pDestIdx->onError!=OE_None ){
-      sqlite3VdbeAddOp(v, OP_MemLoad, memRowid, 0);
-      addr2 = sqlite3VdbeAddOp(v, OP_IsUnique, iDest, 0);
-      sqlite3VdbeOp3(v, OP_Halt, SQLITE_CONSTRAINT, onError, 
-                    "UNIQUE constraint failed", P3_STATIC);
-      sqlite3VdbeJumpHere(v, addr2);
-    }
     sqlite3VdbeAddOp(v, OP_IdxInsert, iDest, 1);
     sqlite3VdbeAddOp(v, OP_Next, iSrc, addr1+1);
     sqlite3VdbeJumpHere(v, addr1);

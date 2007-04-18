@@ -495,7 +495,7 @@ abort_parse:
     ** structure built up in pParse->pNewTable. The calling code (see vtab.c)
     ** will take responsibility for freeing the Table structure.
     */
-    sqlite3DeleteTable(pParse->db, pParse->pNewTable);
+    sqlite3DeleteTable(pParse->pNewTable);
   }
 
   sqlite3DeleteTrigger(pParse->pNewTrigger);

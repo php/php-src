@@ -408,6 +408,12 @@ static void winceDestroyLock(winFile *pFile){
     UnmapViewOfFile(pFile->shared);
     CloseHandle(pFile->hShared);
 
+    if( pFile->zDeleteOnClose ){
+      DeleteFileW(pFile->zDeleteOnClose);
+      sqliteFree(pFile->zDeleteOnClose);
+      pFile->zDeleteOnClose = 0;
+    }
+
     /* Done with the mutex */
     winceMutexRelease(pFile->hMutex);    
     CloseHandle(pFile->hMutex);
@@ -975,10 +981,6 @@ static int winClose(OsFile **pId){
     }while( rc==0 && cnt++ < MX_CLOSE_ATTEMPT && (Sleep(100), 1) );
 #if OS_WINCE
     winceDestroyLock(pFile);
-    if( pFile->zDeleteOnClose ){
-      DeleteFileW(pFile->zDeleteOnClose);
-      sqliteFree(pFile->zDeleteOnClose);
-    }
 #endif
     OpenCounter(-1);
     sqliteFree(pFile);
