@@ -61,4 +61,4 @@ PHP                                                                        NEWS
 - Added str_getcsv() function. (Sara)
 - Added ext/hash support to ext/session's ID generator. (Sara)
 
-
+- Fixed bug #40325 (Vary: header missing in gzip output handlers). (Mike)
