@@ -1,3 +1,182 @@
+2007-04-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/putenv.phpt:
+      MFH: fix putenv("var") (i.e. unset) on BSD systems
+      add test
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/putenv.phpt
+      ext/standard/tests/general_functions/putenv.phpt:
+      fix putenv("var") (i.e. unset) on BSD systems
+      add test
+
+    * sapi/cgi/tests/006.phpt
+      sapi/cgi/tests/006.phpt:
+      fix test
+
+2007-04-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/cgi/cgi_main.c:
+      MFB:- Fix a possible leak when multiple -c parameters are used
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      - Fix a possible leak when multiple -c parameters are used
+
+2007-04-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      sapi/cgi/tests/.cvsignore:
+      add .cvsignore
+
+    * sapi/cgi/tests/.cvsignore
+      sapi/cgi/tests/.cvsignore:
+      
+      add .cvsignore
+
+    * run-tests.php
+      run-tests.php
+      sapi/cgi/tests/001.phpt
+      sapi/cgi/tests/001.phpt
+      sapi/cgi/tests/001.phpt
+      sapi/cgi/tests/002.phpt
+      sapi/cgi/tests/002.phpt
+      sapi/cgi/tests/002.phpt
+      sapi/cgi/tests/003.phpt
+      sapi/cgi/tests/003.phpt
+      sapi/cgi/tests/003.phpt
+      sapi/cgi/tests/004.phpt
+      sapi/cgi/tests/004.phpt
+      sapi/cgi/tests/004.phpt
+      sapi/cgi/tests/005.phpt
+      sapi/cgi/tests/005.phpt
+      sapi/cgi/tests/005.phpt
+      sapi/cgi/tests/006.phpt
+      sapi/cgi/tests/006.phpt
+      sapi/cgi/tests/006.phpt
+      sapi/cgi/tests/007.phpt
+      sapi/cgi/tests/007.phpt
+      sapi/cgi/tests/007.phpt
+      sapi/cgi/tests/008.phpt
+      sapi/cgi/tests/008.phpt
+      sapi/cgi/tests/008.phpt
+      sapi/cgi/tests/include.inc
+      sapi/cgi/tests/include.inc
+      sapi/cgi/tests/include.inc
+      sapi/cgi/tests/skipif.inc
+      sapi/cgi/tests/skipif.inc
+      sapi/cgi/tests/skipif.inc:
+      add tests for CGI
+
+2007-04-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/cli/php_cli.c:
+      MFB
+
+2007-04-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      MFH: fix leak appearing when more than one -f option specified
+
+    * sapi/cgi/cgi_main.c:
+      fix leak appearing when more than one -f option specified
+
+2007-04-17  Sara Golemon  <sara@golemon.com>
+
+    * ext/curl/interface.c:
+      Add support for CURLOPT_TIMEOUT_MS and CURLOPT_CONNECTTIMEOUT_MS
+
+2007-04-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c:
+      fix leaks in row_get_properties()
+      thanks to Kellen Bombardier for noticing
+
+2007-04-17  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/gd/gd.c
+      ext/gd/gd.c:
+      Fix proto
+
+2007-04-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/gd.c:
+      - INFO_EX not INFO
+
+    * ext/gd/gd.c:
+      - +ZEND_BEGIN_ARG_INFO_EX not _INFO (thx bjori)
+
+    * (PHP_5_2)
+      NEWS:
+      - imagegrab* entry
+
+    * (PHP_5_2)
+      ext/gd/config.w32
+      ext/gd/gd.c
+      ext/gd/php_gd.h:
+      - MFH: add imagegrabwindow and imagegrabscreen (win32 only) [DOC]
+        capture a window using its handle or a full screen
+
+2007-04-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pdo_pgsql/pgsql_statement.c:
+      
+      Separate parm zval.
+
+2007-04-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c:
+      - fix arginfo
+
+    * ext/gd/config.w32
+      ext/gd/gd.c
+      ext/gd/php_gd.h:
+      - add imagegrabwindow and imagegrabscreen (win32 only)
+        capture a window using its handle or a full screen
+        optional bbox and to/from clipboard  will follow shortly
+
+2007-04-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      main/php_variables.c:
+      Fixed bug #41093 (magic_quotes_gpc ignores first arrays keys).
+
+2007-04-17  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/strings/ltrim.phpt:
+      Updated testcase ltrim()
+
+2007-04-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl.php
+      ext/spl/internal/recursiveiterator.inc
+      ext/spl/internal/seekableiterator.inc:
+      - MFH Fix #41109: recursiveiterator.inc says 'implements' Iterator instead
+      of 'extends'
+
+    * ext/spl/spl.php
+      ext/spl/internal/recursiveiterator.inc
+      ext/spl/internal/seekableiterator.inc:
+      - Fix #41109: recursiveiterator.inc says 'implements' Iterator instead of
+      'extends'
+
+2007-04-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/TSRM.h
+      TSRM/TSRM.h
+      ZendEngine2/zend_types.h
+      ZendEngine2/zend_types.h:
+      typo
+
 2007-04-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
