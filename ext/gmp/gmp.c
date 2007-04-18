@@ -1492,6 +1492,11 @@ ZEND_FUNCTION(gmp_setbit)
 			break;
 	}
 
+	if (index < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index must be greater than or equal to zero");
+		return;
+	}
+
 	if (set) {
 		mpz_setbit(*gmpnum_a, index);
 	} else {
@@ -1516,6 +1521,11 @@ ZEND_FUNCTION(gmp_clrbit)
 
 	convert_to_long_ex(ind_arg);
 	index = Z_LVAL_PP(ind_arg);
+	
+	if (index < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index must be greater than or equal to zero");
+		return;
+	}
 
 	mpz_clrbit(*gmpnum_a, index);
 }
