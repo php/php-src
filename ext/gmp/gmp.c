@@ -1580,6 +1580,11 @@ ZEND_FUNCTION(gmp_scan0)
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg);
 	convert_to_long_ex(start_arg);
 
+	if (Z_LVAL_PP(start_arg) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Starting index must be greater than or equal to zero");
+		RETURN_FALSE;
+	}
+
 	RETURN_LONG(mpz_scan0(*gmpnum_a, Z_LVAL_PP(start_arg)));
 }
 /* }}} */
@@ -1597,6 +1602,11 @@ ZEND_FUNCTION(gmp_scan1)
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg);
 	convert_to_long_ex(start_arg);
+	
+	if (Z_LVAL_PP(start_arg) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Starting index must be greater than or equal to zero");
+		RETURN_FALSE;
+	}
 
 	RETURN_LONG(mpz_scan1(*gmpnum_a, Z_LVAL_PP(start_arg)));
 }
