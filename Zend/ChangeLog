@@ -1,3 +1,9 @@
+2007-04-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_types.h
+      zend_types.h:
+      typo
+
 2007-04-16  Johannes Schlüter  <johannes@schlueters.de>
 
     * zend_API.c:
