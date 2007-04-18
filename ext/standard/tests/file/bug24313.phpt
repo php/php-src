@@ -1,5 +1,11 @@
 --TEST--
 Bug #24313 (file_exists() throws a warning on nonexistent files when is open_basedir enabled)
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip "/dev" is not available');
+}
+?>
 --INI--
 open_basedir=/dev
 --FILE--

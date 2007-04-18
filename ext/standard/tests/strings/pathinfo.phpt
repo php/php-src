@@ -57,7 +57,7 @@ array(4) {
 }
 array(3) {
   ["dirname"]=>
-  string(1) "/"
+  string(1) "%e"
   ["basename"]=>
   string(0) ""
   ["filename"]=>
@@ -75,7 +75,7 @@ array(4) {
 }
 array(4) {
   ["dirname"]=>
-  string(1) "/"
+  string(1) "%e"
   ["basename"]=>
   string(1) "."
   ["extension"]=>
@@ -96,15 +96,15 @@ array(4) {
 string(12) "pathinfo.php"
 string(8) "pathinfo"
 string(3) "php"
-string(%d) "%s/strings"
-string(%d) "%s/strings"
+string(%d) "%s%estrings"
+string(%d) "%s%estrings"
 string(12) "pathinfo.php"
 string(3) "php"
 string(12) "pathinfo.php"
-string(%d) "%s/strings"
+string(%d) "%s%estrings"
 string(12) "pathinfo.php"
-string(%d) "%s/strings"
-string(%d) "%s/strings"
+string(%d) "%s%estrings"
+string(%d) "%s%estrings"
 Done
 --UEXPECTF--
 Warning: pathinfo() expects at least 1 parameter, 0 given in %s on line %d
@@ -137,7 +137,7 @@ array(4) {
 }
 array(3) {
   [u"dirname"]=>
-  unicode(1) "/"
+  unicode(1) "%e"
   [u"basename"]=>
   unicode(0) ""
   [u"filename"]=>
@@ -155,7 +155,7 @@ array(4) {
 }
 array(4) {
   [u"dirname"]=>
-  unicode(1) "/"
+  unicode(1) "%e"
   [u"basename"]=>
   unicode(1) "."
   [u"extension"]=>
@@ -176,13 +176,13 @@ array(4) {
 unicode(12) "pathinfo.php"
 unicode(8) "pathinfo"
 unicode(3) "php"
-unicode(%d) "%s/strings"
-unicode(%d) "%s/strings"
+unicode(%d) "%s%estrings"
+unicode(%d) "%s%estrings"
 unicode(12) "pathinfo.php"
 unicode(3) "php"
 unicode(12) "pathinfo.php"
-unicode(%d) "%s/strings"
+unicode(%d) "%s%estrings"
 unicode(12) "pathinfo.php"
-unicode(%d) "%s/strings"
-unicode(%d) "%s/strings"
+unicode(%d) "%s%estrings"
+unicode(%d) "%s%estrings"
 Done
