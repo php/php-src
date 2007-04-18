@@ -16,8 +16,13 @@ output_handler=
 
 	/* Binary Data Test */
 	
-	$cmd = $php . ' -n -r \"readfile(@getenv(\'TEST_PHP_EXECUTABLE\')); \"';
-	$cmd = $php . ' -n -r \' passthru("'.$cmd.'"); \' > '.$tmpfile ;
+	if (substr(PHP_OS, 0, 3) != 'WIN') {
+		$cmd = $php . ' -n -r \"readfile(@getenv(\'TEST_PHP_EXECUTABLE\')); \"';
+		$cmd = $php . ' -n -r \' passthru("'.$cmd.'"); \' > '.$tmpfile ;
+	} else {
+		$cmd = $php . ' -n -r \"readfile(@getenv(\\\\\\"TEST_PHP_EXECUTABLE\\\\\\")); \"';
+		$cmd = $php . ' -n -r " passthru(\''.$cmd.'\');" > '.$tmpfile ;
+	}
 	exec($cmd);
 
 	if (md5_file($php) == md5_file($tmpfile)) {
