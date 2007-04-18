@@ -208,6 +208,8 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 			if (path_len > 1 && path_tmp[path_len - 2] == ':') {
 				/* this is c:\,  */
 				path_tmp[path_len] = '\0';
+			} else {
+				path_tmp[path_len - 1] = '\0';
 			}
 #else
 			path_tmp[path_len - 1] = '\0';
