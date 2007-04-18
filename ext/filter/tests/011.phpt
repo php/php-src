@@ -31,22 +31,22 @@ string(4) "test"
 string(18) "http://example.com"
 string(27) "&#60;b&#62;test&#60;/b&#62;"
 
-Notice: Object of class stdClass could not be converted to int in %s/011.php on line %d
+Notice: Object of class stdClass could not be converted to int in %s011.php on line %d
 bool(false)
 string(6) "string"
 float(12345.7)
 string(29) "&#60;p&#62;string&#60;/p&#62;"
 bool(false)
 
-Warning: filter_var() expects parameter 2 to be long, string given in %s/011.php on line %d
+Warning: filter_var() expects parameter 2 to be long, string given in %s011.php on line %d
 NULL
 
-Warning: filter_input() expects parameter 3 to be long, string given in %s/011.php on line %d
+Warning: filter_input() expects parameter 3 to be long, string given in %s011.php on line %d
 NULL
 
-Warning: filter_var() expects at most 3 parameters, 5 given in %s/011.php on line %d
+Warning: filter_var() expects at most 3 parameters, 5 given in %s011.php on line %d
 NULL
 
-Warning: filter_var() expects at most 3 parameters, 5 given in %s/011.php on line %d
+Warning: filter_var() expects at most 3 parameters, 5 given in %s011.php on line %d
 NULL
 Done
