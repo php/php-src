@@ -38,7 +38,7 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: filter_has_var() expects parameter 2 to be string, array given in %s/007.php on line %d
+Warning: filter_has_var() expects parameter 2 to be string, array given in %s007.php on line %d
 bool(false)
 bool(true)
 bool(true)
@@ -46,19 +46,19 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: filter_has_var() expects parameter 2 to be string, array given in %s/007.php on line %d
+Warning: filter_has_var() expects parameter 2 to be string, array given in %s007.php on line %d
 bool(false)
 bool(false)
 
-Warning: filter_has_var() expects parameter 1 to be long, string given in %s/007.php on line %d
+Warning: filter_has_var() expects parameter 1 to be long, string given in %s007.php on line %d
 bool(false)
 
-Warning: filter_has_var() expects parameter 1 to be long, array given in %s/007.php on line %d
+Warning: filter_has_var() expects parameter 1 to be long, array given in %s007.php on line %d
 bool(false)
 
-Warning: filter_has_var() expects parameter 1 to be long, array given in %s/007.php on line %d
+Warning: filter_has_var() expects parameter 1 to be long, array given in %s007.php on line %d
 bool(false)
 
-Warning: filter_has_var() expects parameter 1 to be long, string given in %s/007.php on line %d
+Warning: filter_has_var() expects parameter 1 to be long, string given in %s007.php on line %d
 bool(false)
 Done
