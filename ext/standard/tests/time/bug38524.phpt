@@ -1,5 +1,7 @@
 --TEST--
 Bug #38524 (strptime() does not initialize the internal date storage structure)
+--SKIPIF--
+<?php if (!function_exists('strptime')) echo "SKIP"; ?>
 --FILE--
 <?php
 	var_dump(strptime('2006-08-20', '%Y-%m-%d'));

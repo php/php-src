@@ -57,7 +57,7 @@ array(4) {
 }
 array(3) {
   ["dirname"]=>
-  string(1) "/"
+  string(1) "%e"
   ["basename"]=>
   string(0) ""
   ["filename"]=>
@@ -75,7 +75,7 @@ array(4) {
 }
 array(4) {
   ["dirname"]=>
-  string(1) "/"
+  string(1) "%e"
   ["basename"]=>
   string(1) "."
   ["extension"]=>
@@ -96,13 +96,13 @@ array(4) {
 string(12) "pathinfo.php"
 string(8) "pathinfo"
 string(3) "php"
-string(%d) "%s/strings"
-string(%d) "%s/strings"
+string(%d) "%s%estrings"
+string(%d) "%s%estrings"
 string(12) "pathinfo.php"
 string(3) "php"
 string(12) "pathinfo.php"
-string(%d) "%s/strings"
+string(%d) "%s%estrings"
 string(12) "pathinfo.php"
-string(%d) "%s/strings"
-string(%d) "%s/strings"
+string(%d) "%s%estrings"
+string(%d) "%s%estrings"
 Done
