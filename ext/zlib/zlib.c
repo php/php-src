@@ -124,6 +124,19 @@ int php_zlib_output_handler(void **handler_context, php_output_context *output_c
 	PHP_OUTPUT_TSRMLS(output_context);
 	
 	if (!php_zlib_output_encoding(TSRMLS_C)) {
+		/* "Vary: Accept-Encoding" header sent along uncompressed content breaks caching in MSIE,
+			so let's just send it with successfully compressed content or unless the complete
+			buffer gets discarded, see http://bugs.php.net/40325;
+			
+			Test as follows:
+			+Vary: $ HTTP_ACCEPT_ENCODING=gzip ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n";'
+			+Vary: $ HTTP_ACCEPT_ENCODING= ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n";'
+			-Vary: $ HTTP_ACCEPT_ENCODING=gzip ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n"; ob_end_clean();'
+			-Vary: $ HTTP_ACCEPT_ENCODING= ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n"; ob_end_clean();'
+		*/
+		if (output_context->op != (PHP_OUTPUT_HANDLER_START|PHP_OUTPUT_HANDLER_CLEAN|PHP_OUTPUT_HANDLER_FINAL)) {
+			sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
+		}
 		return FAILURE;
 	}
 	
@@ -218,8 +231,6 @@ int php_zlib_output_handler(void **handler_context, php_output_context *output_c
 					deflateEnd(&ctx->Z);
 					return FAILURE;
 			}
-			/* "Vary: Accept-Encoding" header sent along uncompressed content breaks caching in MSIE,
-			   so let's just send it with successfully compressed content, see http://bugs.php.net/40325 */
 			sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
 			php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE, NULL TSRMLS_CC);
 		}
