@@ -17,7 +17,7 @@ Notice: fopen(): Unable to find the wrapper "file" - did you forget to enable it
 
 Warning: fopen(): Plainfiles wrapper disabled in %s on line %d
 
-Warning: fopen(file:///%s): failed to open stream: no suitable wrapper could be found in %s on line %d
+Warning: fopen(file://%s): failed to open stream: no suitable wrapper could be found in %s on line %d
 bool(false)
 bool(true)
 resource(%d) of type (stream)
