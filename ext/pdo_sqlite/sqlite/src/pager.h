@@ -109,7 +109,7 @@ int sqlite3PagerStmtBegin(Pager*);
 int sqlite3PagerStmtCommit(Pager*);
 int sqlite3PagerStmtRollback(Pager*);
 void sqlite3PagerDontRollback(DbPage*);
-void sqlite3PagerDontWrite(Pager*, Pgno);
+void sqlite3PagerDontWrite(DbPage*);
 int sqlite3PagerRefcount(Pager*);
 int *sqlite3PagerStats(Pager*);
 void sqlite3PagerSetSafetyLevel(Pager*,int,int);

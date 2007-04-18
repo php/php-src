@@ -27,7 +27,7 @@ Table *sqlite3SrcListLookup(Parse *pParse, SrcList *pSrc){
   struct SrcList_item *pItem;
   for(i=0, pItem=pSrc->a; i<pSrc->nSrc; i++, pItem++){
     pTab = sqlite3LocateTable(pParse, pItem->zName, pItem->zDatabase);
-    sqlite3DeleteTable(pParse->db, pItem->pTab);
+    sqlite3DeleteTable(pItem->pTab);
     pItem->pTab = pTab;
     if( pTab ){
       pTab->nRef++;

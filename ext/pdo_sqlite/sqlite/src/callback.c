@@ -344,7 +344,7 @@ void sqlite3SchemaFree(void *p){
   sqlite3HashInit(&pSchema->tblHash, SQLITE_HASH_STRING, 0);
   for(pElem=sqliteHashFirst(&temp1); pElem; pElem=sqliteHashNext(pElem)){
     Table *pTab = sqliteHashData(pElem);
-    sqlite3DeleteTable(0, pTab);
+    sqlite3DeleteTable(pTab);
   }
   sqlite3HashClear(&temp1);
   pSchema->pSeqTab = 0;

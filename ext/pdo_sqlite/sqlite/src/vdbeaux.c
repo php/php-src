@@ -145,7 +145,6 @@ int sqlite3VdbeAddOp(Vdbe *p, int op, int p1, int p2){
   VdbeOp *pOp;
 
   i = p->nOp;
-  p->nOp++;
   assert( p->magic==VDBE_MAGIC_INIT );
   if( p->nOpAlloc<=i ){
     resizeOpArray(p, i+1);
@@ -153,6 +152,7 @@ int sqlite3VdbeAddOp(Vdbe *p, int op, int p1, int p2){
       return 0;
     }
   }
+  p->nOp++;
   pOp = &p->aOp[i];
   pOp->opcode = op;
   pOp->p1 = p1;
@@ -557,9 +557,8 @@ void sqlite3VdbeChangeP3(Vdbe *p, int addr, const char *zP3, int n){
 */
 void sqlite3VdbeComment(Vdbe *p, const char *zFormat, ...){
   va_list ap;
-  assert( p->nOp>0 );
-  assert( p->aOp==0 || p->aOp[p->nOp-1].p3==0 
-          || sqlite3MallocFailed() );
+  assert( p->nOp>0 || p->aOp==0 );
+  assert( p->aOp==0 || p->aOp[p->nOp-1].p3==0 || sqlite3MallocFailed() );
   va_start(ap, zFormat);
   sqlite3VdbeChangeP3(p, -1, sqlite3VMPrintf(zFormat, ap), P3_DYNAMIC);
   va_end(ap);
@@ -571,8 +570,8 @@ void sqlite3VdbeComment(Vdbe *p, const char *zFormat, ...){
 */
 VdbeOp *sqlite3VdbeGetOp(Vdbe *p, int addr){
   assert( p->magic==VDBE_MAGIC_INIT );
-  assert( addr>=0 && addr<p->nOp );
-  return &p->aOp[addr];
+  assert( (addr>=0 && addr<p->nOp) || sqlite3MallocFailed() );
+  return ((addr>=0 && addr<p->nOp)?(&p->aOp[addr]):0);
 }
 
 #if !defined(SQLITE_OMIT_EXPLAIN) || !defined(NDEBUG) \

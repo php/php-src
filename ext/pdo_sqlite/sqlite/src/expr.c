@@ -1420,7 +1420,9 @@ void sqlite3CodeSubselect(Parse *pParse, Expr *pExpr){
         int iParm = pExpr->iTable +  (((int)affinity)<<16);
         ExprList *pEList;
         assert( (pExpr->iTable&0x0000FFFF)==pExpr->iTable );
-        sqlite3Select(pParse, pExpr->pSelect, SRT_Set, iParm, 0, 0, 0, 0);
+        if( sqlite3Select(pParse, pExpr->pSelect, SRT_Set, iParm, 0, 0, 0, 0) ){
+          return;
+        }
         pEList = pExpr->pSelect->pEList;
         if( pEList && pEList->nExpr>0 ){ 
           keyInfo.aColl[0] = binaryCompareCollSeq(pParse, pExpr->pLeft,
@@ -1491,7 +1493,9 @@ void sqlite3CodeSubselect(Parse *pParse, Expr *pExpr){
       }
       sqlite3ExprDelete(pSel->pLimit);
       pSel->pLimit = sqlite3Expr(TK_INTEGER, 0, 0, &one);
-      sqlite3Select(pParse, pSel, sop, iMem, 0, 0, 0, 0);
+      if( sqlite3Select(pParse, pSel, sop, iMem, 0, 0, 0, 0) ){
+        return;
+      }
       break;
     }
   }

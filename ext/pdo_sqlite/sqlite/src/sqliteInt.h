@@ -381,6 +381,14 @@ struct Db {
 
 /*
 ** An instance of the following structure stores a database schema.
+**
+** If there are no virtual tables configured in this schema, the
+** Schema.db variable is set to NULL. After the first virtual table
+** has been added, it is set to point to the database connection 
+** used to create the connection. Once a virtual table has been
+** added to the Schema structure and the Schema.db variable populated, 
+** only that database connection may use the Schema to prepare 
+** statements.
 */
 struct Schema {
   int schema_cookie;   /* Database schema version number for this file */
@@ -393,6 +401,9 @@ struct Schema {
   u8 enc;              /* Text encoding used by this database */
   u16 flags;           /* Flags associated with this schema */
   int cache_size;      /* Number of pages to use in the cache */
+#ifndef SQLITE_OMIT_VIRTUALTABLE
+  sqlite3 *db;         /* "Owner" connection. See comment above */
+#endif
 };
 
 /*
@@ -1266,6 +1277,7 @@ struct Select {
   u8 isAgg;              /* True if this is an aggregate query */
   u8 usesEphm;           /* True if uses an OpenEphemeral opcode */
   u8 disallowOrderBy;    /* Do not allow an ORDER BY to be attached if TRUE */
+  char affinity;         /* MakeRecord with this affinity for SRT_Set */
   SrcList *pSrc;         /* The FROM clause */
   Expr *pWhere;          /* The WHERE clause */
   ExprList *pGroupBy;    /* The GROUP BY clause */
@@ -1631,7 +1643,7 @@ void sqlite3CreateView(Parse*,Token*,Token*,Token*,Select*,int,int);
 #endif
 
 void sqlite3DropTable(Parse*, SrcList*, int, int);
-void sqlite3DeleteTable(sqlite3*, Table*);
+void sqlite3DeleteTable(Table*);
 void sqlite3Insert(Parse*, SrcList*, ExprList*, Select*, IdList*, int);
 void *sqlite3ArrayAllocate(void*,int,int,int*,int*,int*);
 IdList *sqlite3IdListAppend(IdList*, Token*);
@@ -1889,7 +1901,7 @@ int sqlite3OpenTempDatabase(Parse *);
    int sqlite3VtabCommit(sqlite3 *db);
 #endif
 void sqlite3VtabLock(sqlite3_vtab*);
-void sqlite3VtabUnlock(sqlite3_vtab*);
+void sqlite3VtabUnlock(sqlite3*, sqlite3_vtab*);
 void sqlite3VtabBeginParse(Parse*, Token*, Token*, Token*);
 void sqlite3VtabFinishParse(Parse*, Token*);
 void sqlite3VtabArgInit(Parse*);

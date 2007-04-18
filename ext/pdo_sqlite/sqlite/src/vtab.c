@@ -56,10 +56,18 @@ void sqlite3VtabLock(sqlite3_vtab *pVtab){
 ** Unlock a virtual table.  When the last lock is removed,
 ** disconnect the virtual table.
 */
-void sqlite3VtabUnlock(sqlite3_vtab *pVtab){
+void sqlite3VtabUnlock(sqlite3 *db, sqlite3_vtab *pVtab){
   pVtab->nRef--;
+  assert(db);
+  assert(!sqlite3SafetyCheck(db));
   if( pVtab->nRef==0 ){
-    pVtab->pModule->xDisconnect(pVtab);
+    if( db->magic==SQLITE_MAGIC_BUSY ){
+      sqlite3SafetyOff(db);
+      pVtab->pModule->xDisconnect(pVtab);
+      sqlite3SafetyOn(db);
+    } else {
+      pVtab->pModule->xDisconnect(pVtab);
+    }
   }
 }
 
@@ -72,7 +80,7 @@ void sqlite3VtabClear(Table *p){
   sqlite3_vtab *pVtab = p->pVtab;
   if( pVtab ){
     assert( p->pMod && p->pMod->pModule );
-    sqlite3VtabUnlock(pVtab);
+    sqlite3VtabUnlock(p->pSchema->db, pVtab);
     p->pVtab = 0;
   }
   if( p->azModuleArg ){
@@ -123,6 +131,11 @@ void sqlite3VtabBeginParse(
 ){
   int iDb;              /* The database the table is being created in */
   Table *pTable;        /* The new virtual table */
+
+  if( sqlite3ThreadDataReadOnly()->useSharedData ){
+    sqlite3ErrorMsg(pParse, "Cannot use virtual tables in shared-cache mode");
+    return;
+  }
 
   sqlite3StartTable(pParse, pName1, pName2, 0, 0, 1, 0);
   pTable = pParse->pNewTable;
@@ -248,6 +261,7 @@ void sqlite3VtabFinishParse(Parse *pParse, Token *pEnd){
       assert( pTab==pOld );  /* Malloc must have failed inside HashInsert() */
       return;
     }
+    pSchema->db = pParse->db;
     pParse->pNewTable = 0;
   }
 }
@@ -296,6 +310,10 @@ static int vtabCallConstructor(
   int nArg = pTab->nModuleArg;
   char *zErr = 0;
   char *zModuleName = sqlite3MPrintf("%s", pTab->zName);
+
+  if( !zModuleName ){
+    return SQLITE_NOMEM;
+  }
 
   assert( !db->pVTab );
   assert( xConstruct );
@@ -457,6 +475,7 @@ int sqlite3_declare_vtab(sqlite3 *db, const char *zCreateTable){
     pTab->nCol = sParse.pNewTable->nCol;
     sParse.pNewTable->nCol = 0;
     sParse.pNewTable->aCol = 0;
+    db->pVTab = 0;
   } else {
     sqlite3Error(db, SQLITE_ERROR, zErr);
     sqliteFree(zErr);
@@ -465,12 +484,11 @@ int sqlite3_declare_vtab(sqlite3 *db, const char *zCreateTable){
   sParse.declareVtab = 0;
 
   sqlite3_finalize((sqlite3_stmt*)sParse.pVdbe);
-  sqlite3DeleteTable(0, sParse.pNewTable);
+  sqlite3DeleteTable(sParse.pNewTable);
   sParse.pNewTable = 0;
-  db->pVTab = 0;
 
   assert( (rc&0xff)==rc );
-  return rc;
+  return sqlite3ApiExit(db, rc);
 }
 
 /*
@@ -518,7 +536,7 @@ static void callFinaliser(sqlite3 *db, int offset){
     int (*x)(sqlite3_vtab *);
     x = *(int (**)(sqlite3_vtab *))((char *)pVtab->pModule + offset);
     if( x ) x(pVtab);
-    sqlite3VtabUnlock(pVtab);
+    sqlite3VtabUnlock(db, pVtab);
   }
   sqliteFree(db->aVTrans);
   db->nVTrans = 0;
