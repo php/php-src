@@ -76,10 +76,10 @@ Exception: MyCachingIterator does not use a full cache (see CachingIterator::__c
 Notice: Undefined index:  0 in %siterator_044.php on line %d
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 
-Warning: CachingIterator::offsetExists() expects exactly 1 parameter, 0 given in %s/iterator_044.php on line %d
+Warning: CachingIterator::offsetExists() expects exactly 1 parameter, 0 given in %siterator_044.php on line %d
 NULL
 
-Warning: CachingIterator::offsetGet() expects exactly 1 parameter, 0 given in %s/iterator_044.php on line %d
+Warning: CachingIterator::offsetGet() expects exactly 1 parameter, 0 given in %siterator_044.php on line %d
 NULL
 ===0===
 int(0)
