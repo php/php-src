@@ -60,6 +60,7 @@ static BOOLEAN shutdownPending = FALSE;
 static BOOLEAN shutdownNow = FALSE;
 
 static BOOLEAN bImpersonate = FALSE;
+static BOOLEAN bImpersonated = FALSE;
 /*
  * An enumeration of the file types
  * supported by the FD_TABLE structure.
@@ -308,14 +309,25 @@ int OS_SetImpersonate(void)
 
 int OS_StartImpersonation(void)
 {
-	return (!bImpersonate ||
-	        ((hListen != INVALID_HANDLE_VALUE) && 
-	         !ImpersonateNamedPipeClient(hListen)));
+	if (!bImpersonate) {
+		return 1;
+	} else if (hListen == INVALID_HANDLE_VALUE) {
+		return 1;
+	} else {
+		if (ImpersonateNamedPipeClient(hListen)) {
+			bImpersonated = TRUE;
+			return 1;
+		}
+	}
+	return 0;
 }
 
 void OS_StopImpersonation(void)
 {
-	if (bImpersonate) RevertToSelf();
+	if (bImpersonated) {
+		bImpersonated = FALSE;
+		RevertToSelf();
+	}
 }
 
 /*
@@ -1772,18 +1784,10 @@ static int acceptNamedPipe()
         }
     }
 
-    //
-    // impersonate the client
-    //
-    if(bImpersonate && OS_StartImpersonation()) {
-        DisconnectNamedPipe(hListen);
-    } else {
-		ipcFd = Win32NewDescriptor(FD_PIPE_SYNC, (int) hListen, -1);
-		if (ipcFd == -1) 
-		{
-			DisconnectNamedPipe(hListen);
-			OS_StopImpersonation();
-		}
+	ipcFd = Win32NewDescriptor(FD_PIPE_SYNC, (int) hListen, -1);
+	if (ipcFd == -1) 
+	{
+		DisconnectNamedPipe(hListen);
 	}
 
     return ipcFd;

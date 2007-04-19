@@ -2229,10 +2229,6 @@ int FCGX_Accept_r(FCGX_Request *reqDataPtr)
             if (reqDataPtr->ipcFd < 0) {
                 return (errno > 0) ? (0 - errno) : -9999;
             }
-#ifdef _WIN32
-		} else if (!OS_StartImpersonation()) {
-			FCGX_Free(reqDataPtr, 1);
-#endif
         }
         /*
          * A connection is open.  Read from the connection in order to
@@ -2279,6 +2275,16 @@ TryAgain:
         FCGX_Free(reqDataPtr, 1);
 
     } /* for (;;) */
+
+#ifdef _WIN32
+    /*
+     * impersonate the client
+     */
+	if (!OS_StartImpersonation()) {
+		goto TryAgain;
+	}
+#endif
+
     /*
      * Build the remaining data structures representing the new
      * request and return successfully to the caller.
