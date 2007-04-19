@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2007, PHP 5.2.2RC2
 - Upgraded SQLite 3 to version 3.3.16 (Ilia)
+- Fixed bug #41121 (range() overflow handling for large numbers on 32bit
+  machines). (Ilia)
 - Fixed bug #41109 (recursiveiterator.inc says "implements" Iterator instead of
   "extends"). (Marcus)
 - Fixed bug #41093 (magic_quotes_gpc ignores first arrays keys). (Arpad, Ilia)
