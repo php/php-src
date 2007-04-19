@@ -598,7 +598,7 @@ ZEND_API int zend_string_to_unicode(UConverter *conv, UChar **u, int *u_len, cha
 	int num_conv;
 
 	if (conv == NULL) {
-		conv = UG(runtime_encoding_conv);
+		conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
 	}
 
 	num_conv = zend_string_to_unicode_ex(conv, u, u_len, s, s_len, &status);
