@@ -25,7 +25,7 @@ echo test::$var;
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -l "$filename"`);
+var_dump(`"$php" -n -l $filename`);
 var_dump(`"$php" -n -l some.unknown`);
 
 $code = '
@@ -40,7 +40,7 @@ class test
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -l "$filename"`);
+var_dump(`"$php" -n -l $filename`);
 
 @unlink($filename);
 
