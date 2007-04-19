@@ -91,7 +91,7 @@ if test "$PHP_SQLITE" != "no"; then
     # use bundled library
     PHP_PROG_LEMON
     SQLITE_MODULE_TYPE=builtin
-    PHP_SQLITE_CFLAGS="-I@ext_builddir@/libsqlite/src $pdo_inc_path"
+    PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src -I@ext_builddir@/libsqlite/src $pdo_inc_path"
     sqlite_extra_sources="libsqlite/src/opcodes.c \
         libsqlite/src/parse.c libsqlite/src/encode.c \
         libsqlite/src/auth.c libsqlite/src/btree.c libsqlite/src/build.c \
