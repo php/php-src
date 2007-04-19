@@ -1865,36 +1865,45 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_IN_SCRIPTING>{LNUM} {
-	errno = 0;
-	Z_LVAL_P(zendlval) = strtol(yytext, NULL, 0);
-	if (errno == ERANGE) { /* overflow */
-		Z_DVAL_P(zendlval) = zend_strtod(yytext, NULL);
-		Z_TYPE_P(zendlval) = IS_DOUBLE;
-		return T_DNUMBER;
-	} else {
-		Z_TYPE_P(zendlval) = IS_LONG;
-		return T_LNUMBER;
-	}
+    if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
+        zendlval->value.lval = strtol(yytext, NULL, 0);
+    } else {
+        errno = 0;
+        zendlval->value.lval = strtol(yytext, NULL, 0);
+        if (errno == ERANGE) { /* Overflow */
+            if (yytext[0] == '0') { /* octal overflow */
+                zendlval->value.dval = zend_oct_strtod(yytext, NULL);
+            } else {
+                zendlval->value.dval = zend_strtod(yytext, NULL);
+            }
+            zendlval->type = IS_DOUBLE;
+            return T_DNUMBER;
+        }
+    }
+
+    zendlval->type = IS_LONG;
+    return T_LNUMBER;
 }
 
 <ST_IN_SCRIPTING>{HNUM} {
-	errno = 0;
-	Z_LVAL_P(zendlval) = strtoul(yytext, NULL, 16);
-	if (errno == ERANGE) { /* overflow */
-		/* not trying strtod - it returns trash on 0x-es */
-		Z_LVAL_P(zendlval) = LONG_MAX; /* maximal long */
-		zend_error(E_NOTICE,"Hex number is too big: %s", yytext);
-	} else {
-		if (Z_LVAL_P(zendlval) < 0) {
-			/* maintain consistency with the old way */
-			Z_DVAL_P(zendlval) = (unsigned long) Z_LVAL_P(zendlval);
-			Z_TYPE_P(zendlval) = IS_DOUBLE;
-			return T_DNUMBER;
-		}
-		Z_TYPE_P(zendlval) = IS_LONG;
-	}
-	Z_TYPE_P(zendlval) = IS_LONG;
-	return T_LNUMBER;
+    char *hex = yytext + 2; /* Skip "0x" */
+    int len = yyleng - 2;
+
+    /* Skip any leading 0s */
+    while (*hex == '0') {
+        hex++;
+        len--;
+    }
+
+    if (len < SIZEOF_LONG * 2 || (len == SIZEOF_LONG * 2 && *hex <= '7')) {
+        zendlval->value.lval = strtol(hex, NULL, 16);
+        zendlval->type = IS_LONG;
+        return T_LNUMBER;
+    } else {
+        zendlval->value.dval = zend_hex_strtod(hex, NULL);
+        zendlval->type = IS_DOUBLE;
+        return T_DNUMBER;
+    }
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LNUM}|{HNUM} { /* treat numbers (almost) as strings inside encapsulated strings */
