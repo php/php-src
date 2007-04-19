@@ -1271,11 +1271,11 @@ ZEND_FUNCTION(gmp_gcdext)
 	array_init(return_value);
 
 	ZEND_REGISTER_RESOURCE(&r, gmpnum_g, le_gmp);
-	add_assoc_resource(return_value, "g", Z_LVAL(r));
+	add_ascii_assoc_resource(return_value, "g", Z_LVAL(r));
 	ZEND_REGISTER_RESOURCE(&r, gmpnum_s, le_gmp);
-	add_assoc_resource(return_value, "s", Z_LVAL(r));
+	add_ascii_assoc_resource(return_value, "s", Z_LVAL(r));
 	ZEND_REGISTER_RESOURCE(&r, gmpnum_t, le_gmp);
-	add_assoc_resource(return_value, "t", Z_LVAL(r));
+	add_ascii_assoc_resource(return_value, "t", Z_LVAL(r));
 }
 /* }}} */
 

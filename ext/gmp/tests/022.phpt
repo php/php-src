@@ -81,3 +81,50 @@ NULL
 Warning: Wrong parameter count for gmp_gcdext() in %s on line %d
 NULL
 Done
+--UEXPECTF--
+unicode(1) "3"
+unicode(2) "-4"
+unicode(2) "11"
+unicode(1) "1"
+unicode(4) "-805"
+unicode(3) "359"
+unicode(1) "3"
+unicode(2) "32"
+unicode(5) "-2257"
+unicode(4) "3003"
+unicode(3) "-10"
+unicode(2) "19"
+unicode(1) "2"
+unicode(2) "67"
+unicode(2) "-3"
+unicode(2) "15"
+unicode(7) "-601519"
+unicode(1) "6"
+unicode(3) "345"
+unicode(1) "1"
+unicode(1) "0"
+unicode(1) "1"
+unicode(5) "84319"
+unicode(9) "-84241831"
+unicode(1) "1"
+unicode(13) "-156252240050"
+unicode(14) "16689072773537"
+unicode(3) "195"
+unicode(11) "46994884483"
+unicode(9) "-68772552"
+
+Warning: gmp_gcdext(): Unable to convert variable to GMP - wrong type in %s on line %d
+bool(false)
+
+Warning: gmp_gcdext(): Unable to convert variable to GMP - wrong type in %s on line %d
+bool(false)
+
+Warning: Wrong parameter count for gmp_gcdext() in %s on line %d
+NULL
+
+Warning: Wrong parameter count for gmp_gcdext() in %s on line %d
+NULL
+
+Warning: Wrong parameter count for gmp_gcdext() in %s on line %d
+NULL
+Done
