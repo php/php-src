@@ -2671,6 +2671,69 @@ ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 }
 /* }}} */
 
+ZEND_API double zend_hex_strtod(const char *str, char **endptr) /* {{{ */
+{
+    const char *s = str;
+    char c;
+    int any = 0;
+    double value = 0;
+
+    if (*s == '0' && (s[1] == 'x' || s[1] == 'X')) {
+        s += 2;
+    }
+
+    while ((c = *s++)) {
+        if (c >= '0' && c <= '9') {
+            c -= '0';
+        } else if (c >= 'A' && c <= 'F') {
+            c -= 'A' - 10;
+        } else if (c >= 'a' && c <= 'f') {
+            c -= 'a' - 10;
+        } else {
+            break;
+        }
+
+        any = 1;
+        value = value * 16 + c;
+    }
+
+    if (endptr != NULL) {
+        *endptr = (char *)(any ? s - 1 : str);
+    }
+
+    return value;
+}
+/* }}} */
+
+ZEND_API double zend_oct_strtod(const char *str, char **endptr) /* {{{ */
+{
+    const char *s = str;
+    char c;
+    double value = 0;
+    int any = 0;
+
+    /* skip leading zero */
+    s++;
+
+    while ((c = *s++)) {
+        if (c > '7') {
+            /* break and return the current value if the number is not well-formed
+             * that's what Linux strtol() does
+             */
+            break;
+        }
+        value = value * 8 + c - '0';
+        any = 1;
+    }
+
+    if (endptr != NULL) {
+        *endptr = (char *)(any ? s - 1 : str);
+    }
+
+    return value;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
