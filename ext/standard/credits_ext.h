@@ -46,7 +46,7 @@ CREDIT_LINE("mSQL", "Zeev Suraski");
 CREDIT_LINE("MS SQL", "Frank M. Kromann");
 CREDIT_LINE("Multibyte String Functions", "Tsukada Takuya, Rui Hirokawa");
 CREDIT_LINE("mySQL driver for PDO", "George Schlossnagle, Wez Furlong, Ilia Alshanetsky");
-CREDIT_LINE("MySQLi", "Zak Greant, Georg Richter");
+CREDIT_LINE("MySQLi", "Zak Greant, Georg Richter, Andrey Hristov, Ulf Wendel");
 CREDIT_LINE("MySQL", "Zeev Suraski, Zak Greant, Georg Richter");
 CREDIT_LINE("ncurses", "Ilia Alshanetsky, Wez Furlong, Hartmut Holzgraefe, Georg Richter");
 CREDIT_LINE("OCI8", "Stig Bakken, Thies C. Arntzen, Andy Sautins, David Benson, Maxim Maletsky, Harald Radi, Antony Dovgal, Andi Gutmans, Wez Furlong");
