@@ -1,3 +1,223 @@
+2007-04-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_sqlite/sqlite/VERSION
+      ext/pdo_sqlite/sqlite/src/btree.c
+      ext/pdo_sqlite/sqlite/src/build.c
+      ext/pdo_sqlite/sqlite/src/callback.c
+      ext/pdo_sqlite/sqlite/src/delete.c
+      ext/pdo_sqlite/sqlite/src/expr.c
+      ext/pdo_sqlite/sqlite/src/func.c
+      ext/pdo_sqlite/sqlite/src/insert.c
+      ext/pdo_sqlite/sqlite/src/keywordhash.h
+      ext/pdo_sqlite/sqlite/src/main.c
+      ext/pdo_sqlite/sqlite/src/os_common.h
+      ext/pdo_sqlite/sqlite/src/os_win.c
+      ext/pdo_sqlite/sqlite/src/pager.c
+      ext/pdo_sqlite/sqlite/src/pager.h
+      ext/pdo_sqlite/sqlite/src/parse.y
+      ext/pdo_sqlite/sqlite/src/select.c
+      ext/pdo_sqlite/sqlite/src/sqliteInt.h
+      ext/pdo_sqlite/sqlite/src/test1.c
+      ext/pdo_sqlite/sqlite/src/tokenize.c
+      ext/pdo_sqlite/sqlite/src/vdbe.c
+      ext/pdo_sqlite/sqlite/src/vdbeaux.c
+      ext/pdo_sqlite/sqlite/src/vtab.c:
+      Upgraded SQLite 3 to version 3.3.16
+
+2007-04-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/gmp/tests/012.phpt
+      ext/gmp/tests/013.phpt
+      ext/gmp/tests/014.phpt
+      ext/gmp/tests/015.phpt
+      ext/gmp/tests/016.phpt
+      ext/gmp/tests/017.phpt
+      ext/gmp/tests/018.phpt
+      ext/gmp/tests/019.phpt
+      ext/gmp/tests/020.phpt
+      ext/gmp/tests/021.phpt
+      ext/gmp/tests/022.phpt
+      ext/gmp/tests/023.phpt
+      ext/gmp/tests/024.phpt
+      ext/gmp/tests/025.phpt
+      ext/gmp/tests/026.phpt
+      ext/gmp/tests/027.phpt
+      ext/gmp/tests/028.phpt
+      ext/gmp/tests/029.phpt
+      ext/gmp/tests/030.phpt
+      ext/gmp/tests/031.phpt
+      ext/gmp/tests/032.phpt
+      ext/gmp/tests/033.phpt
+      ext/gmp/tests/034.phpt
+      ext/gmp/tests/035.phpt
+      ext/gmp/tests/036.phpt
+      ext/gmp/tests/037.phpt
+      ext/gmp/tests/038.phpt:
+      new tests for ext/gmp
+
+    * ext/gmp/tests/005.phpt
+      ext/gmp/tests/012.phpt
+      ext/gmp/tests/012.phpt
+      ext/gmp/tests/013.phpt
+      ext/gmp/tests/013.phpt
+      ext/gmp/tests/014.phpt
+      ext/gmp/tests/014.phpt
+      ext/gmp/tests/015.phpt
+      ext/gmp/tests/015.phpt
+      ext/gmp/tests/016.phpt
+      ext/gmp/tests/016.phpt
+      ext/gmp/tests/017.phpt
+      ext/gmp/tests/017.phpt
+      ext/gmp/tests/018.phpt
+      ext/gmp/tests/018.phpt
+      ext/gmp/tests/019.phpt
+      ext/gmp/tests/019.phpt
+      ext/gmp/tests/020.phpt
+      ext/gmp/tests/020.phpt
+      ext/gmp/tests/021.phpt
+      ext/gmp/tests/021.phpt
+      ext/gmp/tests/022.phpt
+      ext/gmp/tests/022.phpt
+      ext/gmp/tests/023.phpt
+      ext/gmp/tests/023.phpt
+      ext/gmp/tests/024.phpt
+      ext/gmp/tests/024.phpt
+      ext/gmp/tests/025.phpt
+      ext/gmp/tests/025.phpt
+      ext/gmp/tests/026.phpt
+      ext/gmp/tests/026.phpt
+      ext/gmp/tests/027.phpt
+      ext/gmp/tests/027.phpt
+      ext/gmp/tests/028.phpt
+      ext/gmp/tests/028.phpt
+      ext/gmp/tests/029.phpt
+      ext/gmp/tests/029.phpt
+      ext/gmp/tests/030.phpt
+      ext/gmp/tests/030.phpt
+      ext/gmp/tests/031.phpt
+      ext/gmp/tests/031.phpt
+      ext/gmp/tests/032.phpt
+      ext/gmp/tests/032.phpt
+      ext/gmp/tests/033.phpt
+      ext/gmp/tests/033.phpt
+      ext/gmp/tests/034.phpt
+      ext/gmp/tests/034.phpt
+      ext/gmp/tests/035.phpt
+      ext/gmp/tests/035.phpt
+      ext/gmp/tests/036.phpt
+      ext/gmp/tests/036.phpt
+      ext/gmp/tests/037.phpt
+      ext/gmp/tests/037.phpt
+      ext/gmp/tests/038.phpt
+      ext/gmp/tests/038.phpt:
+      add new tests for ext/gmp
+
+    * ext/gmp/gmp.c:
+      same for gmp_scan*()
+
+    * ext/gmp/gmp.c:
+      do not allow negative byte index
+      tests will follow soon
+
+2007-04-18  Michael Wallner  <mike@iworks.at>
+
+    * NEWS
+      ext/zlib/zlib.c:
+      - fixed bug #40325 (Vary: header missing in gzip output handlers); no MFH
+        [DOC] since PHP 6 a Vary header will be sent without regards to whether
+              the negotiation was successful or not and unless the complete
+              output buffer gets discarded
+
+2007-04-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      Fixed crash on win32 in case of negative size
+
+    * main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      Fixed crash
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.c:
+      Fixed endless loop in open_basedir check
+
+2007-04-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      EXTENSIONS:
+      update to reflect current status
+
+    * EXTENSIONS:
+      update EXTENSIONS file:
+      - drop extensions which have been moved to PECL
+      - add pdo*, zip, xmlreader, xmlwriter, json
+      - update maintainers lists and statuses to reflect current situation
+
+2007-04-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/standard/config.w32
+      main/main.c
+      win32/build/config.w32:
+      MFB: add file locking under windows
+      change win build to use common clock compat files
+
+    * (PHP_5_2)
+      ext/standard/config.w32
+      main/main.c
+      win32/build/config.w32:
+      add file locking under windows
+      change win build to use common clock compat files
+
+2007-04-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/spl/tests/iterator_044.phpt:
+      Fixed test
+
+2007-04-18  Antony Dovgal  <antony@zend.com>
+
+    * ext/hash/tests/hmac-md5.phpt
+      tests/output/ob_010.phpt
+      tests/output/ob_011.phpt:
+      more test fixes
+
+    * (PHP_5_2)
+      ext/dba/tests/dba007.phpt
+      ext/mcrypt/tests/bug35496.phpt
+      ext/pdo_mysql/tests/bug_37445.phpt
+      ext/spl/tests/iterator_044.phpt
+      tests/classes/abstract_static.phpt:
+      win32 test fixes
+
+2007-04-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/filter/tests/007.phpt
+      ext/filter/tests/007.phpt
+      ext/filter/tests/011.phpt
+      ext/filter/tests/011.phpt
+      ext/standard/tests/file/bug22414.phpt
+      ext/standard/tests/file/bug22414.phpt
+      ext/standard/tests/file/bug24313.phpt
+      ext/standard/tests/file/bug24313.phpt
+      ext/standard/tests/file/bug26615.phpt
+      ext/standard/tests/file/bug26615.phpt
+      ext/standard/tests/file/bug26938.phpt
+      ext/standard/tests/file/bug26938.phpt
+      ext/standard/tests/file/bug39367.phpt
+      ext/standard/tests/file/bug39367.phpt
+      ext/standard/tests/file/mkdir-002.phpt
+      ext/standard/tests/file/mkdir-002.phpt
+      ext/standard/tests/file/stream_001.phpt
+      ext/standard/tests/file/stream_001.phpt
+      ext/standard/tests/strings/pathinfo.phpt
+      ext/standard/tests/strings/pathinfo.phpt
+      ext/standard/tests/time/bug38524.phpt
+      ext/standard/tests/time/bug38524.phpt:
+      Fixed tests (win32)
+
 2007-04-17  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
