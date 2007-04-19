@@ -1719,7 +1719,14 @@ ZEND_API char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sig
 					if (value(d) > 0.5 + value(eps))
 						goto bump_up;
 					else if (value(d) < 0.5 - value(eps)) {
-						while(*--s == '0');
+						/* cut ALL traling zeros only if the number of chars is greater than precision
+						 * otherwise cut only extra zeros
+						 */
+						if (k < ndigits) {
+							while(*--s == '0' && (s - s0) > k);
+						} else {
+							while(*--s == '0');
+						}
 						s++;
 						goto ret1;
 					}

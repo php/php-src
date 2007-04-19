@@ -769,10 +769,24 @@ static UChar* zend_u_format_gdouble(double dnum, int ndigit, UChar *result)
 
 	p1 = zend_u_format_double(dnum, ndigit, &decpt, &sign, 1, buf1);
 	p2 = result;
-	if (sign)
+
+	if (sign) {
 		*p2++ = (UChar) 0x2d /*'-'*/;
-	for (i = ndigit - 1; i > 0 && p1[i] == (UChar) 0x30  /*'0'*/; i--)
-		ndigit--;
+	}
+	/* if decimal point position is less than precision, cut zeros only in fractional part */
+	if (decpt <= ndigit) {
+		i = ndigit - 1;
+		while (i > 0 && i >= decpt && p1[i] == (UChar) 0x30  /*'0'*/) {
+			ndigit--;
+			i--;
+		}
+	} else {
+	/* otherwise cut all trailing zeros */
+		for (i = ndigit - 1; i > 0 && p1[i] == (UChar) 0x30  /*'0'*/; i--) {
+			ndigit--;
+		}
+	}
+
 	if ((decpt >= 0 && decpt - ndigit > 4)
 		|| (decpt < 0 && decpt < -3)) {		/* use E-style */
 		decpt--;
