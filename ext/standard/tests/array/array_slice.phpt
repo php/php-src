@@ -109,7 +109,7 @@ Warning: array_slice() expects parameter %d to be array, integer given in %s on 
 
 *** Output for string Argument ***
 
-Warning: array_slice() expects parameter %d to be array, string given in /%s on line %d
+Warning: array_slice() expects parameter %d to be array, string given in %s on line %d%d
 
 *** Iteration 1 ***
 
@@ -1458,4 +1458,1373 @@ array(1) {
 array(1) {
   [0]=>
   string(5) "Three"
+}
+--UEXPECTF--
+*** Output for Zero Argument ***
+
+Warning: array_slice() expects at least 2 parameters, 0 given in %s on line %d
+
+*** Output for Single array Argument ***
+
+Warning: array_slice() expects at least 2 parameters, 1 given in %s on line %d
+
+*** Output for invalid number of Arguments ***
+
+Warning: array_slice() expects at most 4 parameters, 5 given in %s on line %d
+
+*** Output for scalar Argument ***
+
+Warning: array_slice() expects parameter 1 to be array, integer given in %s on line %d
+
+*** Output for string Argument ***
+
+Warning: array_slice() expects parameter 1 to be array, Unicode string given in %s on line %d
+
+*** Iteration 1 ***
+
+*** Variation with first two Arguments ***
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Variation with first three Arguments ***
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Iteration 2 ***
+
+*** Variation with first two Arguments ***
+array(8) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+  [2]=>
+  int(4)
+  [3]=>
+  int(5)
+  [4]=>
+  int(6)
+  [5]=>
+  int(7)
+  [6]=>
+  int(8)
+  [7]=>
+  int(9)
+}
+array(9) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+  [6]=>
+  int(7)
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+}
+array(2) {
+  [0]=>
+  int(8)
+  [1]=>
+  int(9)
+}
+
+*** Variation with first three Arguments ***
+array(3) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+  [2]=>
+  int(4)
+}
+array(0) {
+}
+array(5) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+  [2]=>
+  int(4)
+  [3]=>
+  int(5)
+  [4]=>
+  int(6)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(0) {
+}
+array(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+}
+array(2) {
+  [0]=>
+  int(8)
+  [1]=>
+  int(9)
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+array(3) {
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+array(0) {
+}
+array(5) {
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(0) {
+}
+array(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+}
+array(2) {
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Iteration 3 ***
+
+*** Variation with first two Arguments ***
+array(4) {
+  [0]=>
+  unicode(3) "Two"
+  [1]=>
+  unicode(5) "Three"
+  [2]=>
+  unicode(4) "Four"
+  [3]=>
+  unicode(4) "Five"
+}
+array(5) {
+  [0]=>
+  unicode(3) "One"
+  [1]=>
+  unicode(3) "Two"
+  [2]=>
+  unicode(5) "Three"
+  [3]=>
+  unicode(4) "Four"
+  [4]=>
+  unicode(4) "Five"
+}
+array(2) {
+  [0]=>
+  unicode(4) "Four"
+  [1]=>
+  unicode(4) "Five"
+}
+
+*** Variation with first three Arguments ***
+array(3) {
+  [0]=>
+  unicode(3) "Two"
+  [1]=>
+  unicode(5) "Three"
+  [2]=>
+  unicode(4) "Four"
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  unicode(3) "Two"
+}
+array(3) {
+  [0]=>
+  unicode(3) "One"
+  [1]=>
+  unicode(3) "Two"
+  [2]=>
+  unicode(5) "Three"
+}
+array(0) {
+}
+array(2) {
+  [0]=>
+  unicode(3) "One"
+  [1]=>
+  unicode(3) "Two"
+}
+array(2) {
+  [0]=>
+  unicode(4) "Four"
+  [1]=>
+  unicode(4) "Five"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+array(3) {
+  [1]=>
+  unicode(3) "Two"
+  [2]=>
+  unicode(5) "Three"
+  [3]=>
+  unicode(4) "Four"
+}
+array(0) {
+}
+array(1) {
+  [1]=>
+  unicode(3) "Two"
+}
+array(3) {
+  [0]=>
+  unicode(3) "One"
+  [1]=>
+  unicode(3) "Two"
+  [2]=>
+  unicode(5) "Three"
+}
+array(0) {
+}
+array(2) {
+  [0]=>
+  unicode(3) "One"
+  [1]=>
+  unicode(3) "Two"
+}
+array(2) {
+  [3]=>
+  unicode(4) "Four"
+  [4]=>
+  unicode(4) "Five"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Iteration 4 ***
+
+*** Variation with first two Arguments ***
+array(7) {
+  [0]=>
+  unicode(3) "six"
+  [1]=>
+  int(7)
+  [2]=>
+  unicode(5) "seven"
+  [3]=>
+  int(8)
+  [4]=>
+  unicode(5) "eight"
+  [5]=>
+  int(9)
+  [6]=>
+  unicode(4) "nine"
+}
+array(8) {
+  [0]=>
+  int(6)
+  [1]=>
+  unicode(3) "six"
+  [2]=>
+  int(7)
+  [3]=>
+  unicode(5) "seven"
+  [4]=>
+  int(8)
+  [5]=>
+  unicode(5) "eight"
+  [6]=>
+  int(9)
+  [7]=>
+  unicode(4) "nine"
+}
+array(2) {
+  [0]=>
+  int(9)
+  [1]=>
+  unicode(4) "nine"
+}
+
+*** Variation with first three Arguments ***
+array(3) {
+  [0]=>
+  unicode(3) "six"
+  [1]=>
+  int(7)
+  [2]=>
+  unicode(5) "seven"
+}
+array(0) {
+}
+array(4) {
+  [0]=>
+  unicode(3) "six"
+  [1]=>
+  int(7)
+  [2]=>
+  unicode(5) "seven"
+  [3]=>
+  int(8)
+}
+array(3) {
+  [0]=>
+  int(6)
+  [1]=>
+  unicode(3) "six"
+  [2]=>
+  int(7)
+}
+array(0) {
+}
+array(5) {
+  [0]=>
+  int(6)
+  [1]=>
+  unicode(3) "six"
+  [2]=>
+  int(7)
+  [3]=>
+  unicode(5) "seven"
+  [4]=>
+  int(8)
+}
+array(2) {
+  [0]=>
+  int(9)
+  [1]=>
+  unicode(4) "nine"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+array(3) {
+  [1]=>
+  unicode(3) "six"
+  [2]=>
+  int(7)
+  [3]=>
+  unicode(5) "seven"
+}
+array(0) {
+}
+array(4) {
+  [1]=>
+  unicode(3) "six"
+  [2]=>
+  int(7)
+  [3]=>
+  unicode(5) "seven"
+  [4]=>
+  int(8)
+}
+array(3) {
+  [0]=>
+  int(6)
+  [1]=>
+  unicode(3) "six"
+  [2]=>
+  int(7)
+}
+array(0) {
+}
+array(5) {
+  [0]=>
+  int(6)
+  [1]=>
+  unicode(3) "six"
+  [2]=>
+  int(7)
+  [3]=>
+  unicode(5) "seven"
+  [4]=>
+  int(8)
+}
+array(2) {
+  [6]=>
+  int(9)
+  [7]=>
+  unicode(4) "nine"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Iteration 5 ***
+
+*** Variation with first two Arguments ***
+array(4) {
+  [u"A"]=>
+  unicode(3) "AAA"
+  [u"c"]=>
+  unicode(3) "ccc"
+  [u"d"]=>
+  unicode(3) "ddd"
+  [u"e"]=>
+  unicode(3) "eee"
+}
+array(5) {
+  [u"a"]=>
+  unicode(3) "aaa"
+  [u"A"]=>
+  unicode(3) "AAA"
+  [u"c"]=>
+  unicode(3) "ccc"
+  [u"d"]=>
+  unicode(3) "ddd"
+  [u"e"]=>
+  unicode(3) "eee"
+}
+array(2) {
+  [u"d"]=>
+  unicode(3) "ddd"
+  [u"e"]=>
+  unicode(3) "eee"
+}
+
+*** Variation with first three Arguments ***
+array(3) {
+  [u"A"]=>
+  unicode(3) "AAA"
+  [u"c"]=>
+  unicode(3) "ccc"
+  [u"d"]=>
+  unicode(3) "ddd"
+}
+array(0) {
+}
+array(1) {
+  [u"A"]=>
+  unicode(3) "AAA"
+}
+array(3) {
+  [u"a"]=>
+  unicode(3) "aaa"
+  [u"A"]=>
+  unicode(3) "AAA"
+  [u"c"]=>
+  unicode(3) "ccc"
+}
+array(0) {
+}
+array(2) {
+  [u"a"]=>
+  unicode(3) "aaa"
+  [u"A"]=>
+  unicode(3) "AAA"
+}
+array(2) {
+  [u"d"]=>
+  unicode(3) "ddd"
+  [u"e"]=>
+  unicode(3) "eee"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+array(3) {
+  [u"A"]=>
+  unicode(3) "AAA"
+  [u"c"]=>
+  unicode(3) "ccc"
+  [u"d"]=>
+  unicode(3) "ddd"
+}
+array(0) {
+}
+array(1) {
+  [u"A"]=>
+  unicode(3) "AAA"
+}
+array(3) {
+  [u"a"]=>
+  unicode(3) "aaa"
+  [u"A"]=>
+  unicode(3) "AAA"
+  [u"c"]=>
+  unicode(3) "ccc"
+}
+array(0) {
+}
+array(2) {
+  [u"a"]=>
+  unicode(3) "aaa"
+  [u"A"]=>
+  unicode(3) "AAA"
+}
+array(2) {
+  [u"d"]=>
+  unicode(3) "ddd"
+  [u"e"]=>
+  unicode(3) "eee"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Iteration 6 ***
+
+*** Variation with first two Arguments ***
+array(4) {
+  [0]=>
+  unicode(3) "two"
+  [1]=>
+  unicode(5) "three"
+  [2]=>
+  unicode(4) "four"
+  [3]=>
+  unicode(4) "five"
+}
+array(5) {
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  unicode(3) "two"
+  [2]=>
+  unicode(5) "three"
+  [3]=>
+  unicode(4) "four"
+  [4]=>
+  unicode(4) "five"
+}
+array(2) {
+  [0]=>
+  unicode(4) "four"
+  [1]=>
+  unicode(4) "five"
+}
+
+*** Variation with first three Arguments ***
+array(3) {
+  [0]=>
+  unicode(3) "two"
+  [1]=>
+  unicode(5) "three"
+  [2]=>
+  unicode(4) "four"
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  unicode(3) "two"
+}
+array(3) {
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  unicode(3) "two"
+  [2]=>
+  unicode(5) "three"
+}
+array(0) {
+}
+array(2) {
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  unicode(3) "two"
+}
+array(2) {
+  [0]=>
+  unicode(4) "four"
+  [1]=>
+  unicode(4) "five"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+array(3) {
+  [2]=>
+  unicode(3) "two"
+  [3]=>
+  unicode(5) "three"
+  [4]=>
+  unicode(4) "four"
+}
+array(0) {
+}
+array(1) {
+  [2]=>
+  unicode(3) "two"
+}
+array(3) {
+  [1]=>
+  unicode(3) "one"
+  [2]=>
+  unicode(3) "two"
+  [3]=>
+  unicode(5) "three"
+}
+array(0) {
+}
+array(2) {
+  [1]=>
+  unicode(3) "one"
+  [2]=>
+  unicode(3) "two"
+}
+array(2) {
+  [4]=>
+  unicode(4) "four"
+  [5]=>
+  unicode(4) "five"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Iteration 7 ***
+
+*** Variation with first two Arguments ***
+array(4) {
+  [0]=>
+  unicode(3) "two"
+  [1]=>
+  int(7)
+  [2]=>
+  unicode(4) "four"
+  [3]=>
+  unicode(4) "five"
+}
+array(5) {
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  unicode(3) "two"
+  [2]=>
+  int(7)
+  [3]=>
+  unicode(4) "four"
+  [4]=>
+  unicode(4) "five"
+}
+array(2) {
+  [0]=>
+  unicode(4) "four"
+  [1]=>
+  unicode(4) "five"
+}
+
+*** Variation with first three Arguments ***
+array(3) {
+  [0]=>
+  unicode(3) "two"
+  [1]=>
+  int(7)
+  [2]=>
+  unicode(4) "four"
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  unicode(3) "two"
+}
+array(3) {
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  unicode(3) "two"
+  [2]=>
+  int(7)
+}
+array(0) {
+}
+array(2) {
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  unicode(3) "two"
+}
+array(2) {
+  [0]=>
+  unicode(4) "four"
+  [1]=>
+  unicode(4) "five"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+array(3) {
+  [2]=>
+  unicode(3) "two"
+  [3]=>
+  int(7)
+  [4]=>
+  unicode(4) "four"
+}
+array(0) {
+}
+array(1) {
+  [2]=>
+  unicode(3) "two"
+}
+array(3) {
+  [1]=>
+  unicode(3) "one"
+  [2]=>
+  unicode(3) "two"
+  [3]=>
+  int(7)
+}
+array(0) {
+}
+array(2) {
+  [1]=>
+  unicode(3) "one"
+  [2]=>
+  unicode(3) "two"
+}
+array(2) {
+  [4]=>
+  unicode(4) "four"
+  [5]=>
+  unicode(4) "five"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Iteration 8 ***
+
+*** Variation with first two Arguments ***
+array(9) {
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  int(6)
+  [u""]=>
+  unicode(5) "blank"
+  [2]=>
+  unicode(5) "float"
+  [u"F"]=>
+  unicode(3) "FFF"
+  [u"blank"]=>
+  unicode(0) ""
+  [3]=>
+  float(3.7)
+  [4]=>
+  unicode(4) "Five"
+  [5]=>
+  float(8.6)
+}
+array(10) {
+  [u"f"]=>
+  unicode(3) "fff"
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  int(6)
+  [u""]=>
+  unicode(5) "blank"
+  [2]=>
+  unicode(5) "float"
+  [u"F"]=>
+  unicode(3) "FFF"
+  [u"blank"]=>
+  unicode(0) ""
+  [3]=>
+  float(3.7)
+  [4]=>
+  unicode(4) "Five"
+  [5]=>
+  float(8.6)
+}
+array(2) {
+  [0]=>
+  unicode(4) "Five"
+  [1]=>
+  float(8.6)
+}
+
+*** Variation with first three Arguments ***
+array(3) {
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  int(6)
+  [u""]=>
+  unicode(5) "blank"
+}
+array(0) {
+}
+array(6) {
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  int(6)
+  [u""]=>
+  unicode(5) "blank"
+  [2]=>
+  unicode(5) "float"
+  [u"F"]=>
+  unicode(3) "FFF"
+  [u"blank"]=>
+  unicode(0) ""
+}
+array(3) {
+  [u"f"]=>
+  unicode(3) "fff"
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  int(6)
+}
+array(0) {
+}
+array(7) {
+  [u"f"]=>
+  unicode(3) "fff"
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  int(6)
+  [u""]=>
+  unicode(5) "blank"
+  [2]=>
+  unicode(5) "float"
+  [u"F"]=>
+  unicode(3) "FFF"
+  [u"blank"]=>
+  unicode(0) ""
+}
+array(2) {
+  [0]=>
+  unicode(4) "Five"
+  [1]=>
+  float(8.6)
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+array(3) {
+  [1]=>
+  unicode(3) "one"
+  [4]=>
+  int(6)
+  [u""]=>
+  unicode(5) "blank"
+}
+array(0) {
+}
+array(6) {
+  [1]=>
+  unicode(3) "one"
+  [4]=>
+  int(6)
+  [u""]=>
+  unicode(5) "blank"
+  [2]=>
+  unicode(5) "float"
+  [u"F"]=>
+  unicode(3) "FFF"
+  [u"blank"]=>
+  unicode(0) ""
+}
+array(3) {
+  [u"f"]=>
+  unicode(3) "fff"
+  [1]=>
+  unicode(3) "one"
+  [4]=>
+  int(6)
+}
+array(0) {
+}
+array(7) {
+  [u"f"]=>
+  unicode(3) "fff"
+  [1]=>
+  unicode(3) "one"
+  [4]=>
+  int(6)
+  [u""]=>
+  unicode(5) "blank"
+  [2]=>
+  unicode(5) "float"
+  [u"F"]=>
+  unicode(3) "FFF"
+  [u"blank"]=>
+  unicode(0) ""
+}
+array(2) {
+  [5]=>
+  unicode(4) "Five"
+  [6]=>
+  float(8.6)
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Iteration 9 ***
+
+*** Variation with first two Arguments ***
+array(3) {
+  [0]=>
+  unicode(4) "name"
+  [1]=>
+  unicode(3) "age"
+  [2]=>
+  unicode(2) "45"
+}
+array(4) {
+  [0]=>
+  int(12)
+  [1]=>
+  unicode(4) "name"
+  [2]=>
+  unicode(3) "age"
+  [3]=>
+  unicode(2) "45"
+}
+array(2) {
+  [0]=>
+  unicode(3) "age"
+  [1]=>
+  unicode(2) "45"
+}
+
+*** Variation with first three Arguments ***
+array(3) {
+  [0]=>
+  unicode(4) "name"
+  [1]=>
+  unicode(3) "age"
+  [2]=>
+  unicode(2) "45"
+}
+array(0) {
+}
+array(0) {
+}
+array(3) {
+  [0]=>
+  int(12)
+  [1]=>
+  unicode(4) "name"
+  [2]=>
+  unicode(3) "age"
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  int(12)
+}
+array(2) {
+  [0]=>
+  unicode(3) "age"
+  [1]=>
+  unicode(2) "45"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+array(3) {
+  [1]=>
+  unicode(4) "name"
+  [2]=>
+  unicode(3) "age"
+  [3]=>
+  unicode(2) "45"
+}
+array(0) {
+}
+array(0) {
+}
+array(3) {
+  [0]=>
+  int(12)
+  [1]=>
+  unicode(4) "name"
+  [2]=>
+  unicode(3) "age"
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  int(12)
+}
+array(2) {
+  [2]=>
+  unicode(3) "age"
+  [3]=>
+  unicode(2) "45"
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Iteration 10 ***
+
+*** Variation with first two Arguments ***
+array(2) {
+  [0]=>
+  array(5) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+    [2]=>
+    int(30)
+    [3]=>
+    int(40)
+    [4]=>
+    int(50)
+  }
+  [1]=>
+  array(0) {
+  }
+}
+array(3) {
+  [0]=>
+  array(3) {
+    [0]=>
+    unicode(3) "oNe"
+    [1]=>
+    unicode(3) "tWo"
+    [2]=>
+    int(4)
+  }
+  [1]=>
+  array(5) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+    [2]=>
+    int(30)
+    [3]=>
+    int(40)
+    [4]=>
+    int(50)
+  }
+  [2]=>
+  array(0) {
+  }
+}
+array(2) {
+  [0]=>
+  array(5) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+    [2]=>
+    int(30)
+    [3]=>
+    int(40)
+    [4]=>
+    int(50)
+  }
+  [1]=>
+  array(0) {
+  }
+}
+
+*** Variation with first three Arguments ***
+array(2) {
+  [0]=>
+  array(5) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+    [2]=>
+    int(30)
+    [3]=>
+    int(40)
+    [4]=>
+    int(50)
+  }
+  [1]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+array(0) {
+}
+array(3) {
+  [0]=>
+  array(3) {
+    [0]=>
+    unicode(3) "oNe"
+    [1]=>
+    unicode(3) "tWo"
+    [2]=>
+    int(4)
+  }
+  [1]=>
+  array(5) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+    [2]=>
+    int(30)
+    [3]=>
+    int(40)
+    [4]=>
+    int(50)
+  }
+  [2]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+array(0) {
+}
+array(2) {
+  [0]=>
+  array(5) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+    [2]=>
+    int(30)
+    [3]=>
+    int(40)
+    [4]=>
+    int(50)
+  }
+  [1]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+array(2) {
+  [1]=>
+  array(5) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+    [2]=>
+    int(30)
+    [3]=>
+    int(40)
+    [4]=>
+    int(50)
+  }
+  [2]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+array(0) {
+}
+array(3) {
+  [0]=>
+  array(3) {
+    [0]=>
+    unicode(3) "oNe"
+    [1]=>
+    unicode(3) "tWo"
+    [2]=>
+    int(4)
+  }
+  [1]=>
+  array(5) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+    [2]=>
+    int(30)
+    [3]=>
+    int(40)
+    [4]=>
+    int(50)
+  }
+  [2]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+array(0) {
+}
+array(2) {
+  [1]=>
+  array(5) {
+    [0]=>
+    int(10)
+    [1]=>
+    int(20)
+    [2]=>
+    int(30)
+    [3]=>
+    int(40)
+    [4]=>
+    int(50)
+  }
+  [2]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+array(0) {
+}
+
+*** Typical Variation of offset and length  Arguments ***
+array(1) {
+  [1]=>
+  unicode(3) "Two"
+}
+array(1) {
+  [0]=>
+  unicode(3) "Two"
+}
+array(1) {
+  [2]=>
+  unicode(5) "Three"
+}
+array(1) {
+  [0]=>
+  unicode(5) "Three"
 }
