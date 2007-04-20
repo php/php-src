@@ -2367,7 +2367,7 @@ PHP_FUNCTION(timezone_abbreviations_list)
 			add_ascii_assoc_null(element, "timezone_id");
 		}
 
-		if (zend_hash_find(HASH_OF(return_value), entry->name, strlen(entry->name) + 1, (void **) &abbr_array_pp) == FAILURE) {
+		if (zend_ascii_hash_find(HASH_OF(return_value), entry->name, strlen(entry->name) + 1, (void **) &abbr_array_pp) == FAILURE) {
 			MAKE_STD_ZVAL(abbr_array);
 			array_init(abbr_array);
 			add_ascii_assoc_zval(return_value, entry->name, abbr_array);
