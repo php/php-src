@@ -101,7 +101,7 @@ $arr = json_decode($arr_enc, true);
 var_dump($arr);
 
 ?>
---EXPECT--
+--EXPECTF--
 Testing: 
 [
     "JSON Test Pattern pass1",
@@ -613,14 +613,14 @@ array(14) {
     array(0) {
     }
     ["object"]=>
-    object(stdClass)%d (0) {
+    object(stdClass)#%d (0) {
     }
     ["123"]=>
-    object(stdClass)%d (1) {
+    object(stdClass)#%d (1) {
       ["456"]=>
-      object(stdClass)%d (1) {
+      object(stdClass)#%d (1) {
         ["abc"]=>
-        object(stdClass)%d (3) {
+        object(stdClass)#%d (3) {
           ["789"]=>
           string(3) "def"
           ["012"]=>
