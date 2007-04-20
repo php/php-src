@@ -1,6 +1,7 @@
 --TEST--
 Bug #41121 (range() overflow handling for large numbers on 32bit machines)
 --SKIPIF--
+<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
 --FILE--
 <?php
 
