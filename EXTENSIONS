@@ -360,7 +360,8 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gmp
-MAINTENANCE:         Unknown
+PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net>, Antony Dovgal <tony2001@php.net>
+MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.4
 -------------------------------------------------------------------------------
