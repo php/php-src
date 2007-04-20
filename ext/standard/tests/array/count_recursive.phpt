@@ -1,5 +1,7 @@
 --TEST--
 Test count() function 
+--SKIPIF--
+<?php if (!extension_loaded("spl")) die("skip no SPL extension"); ?>
 --FILE--
 <?php
 /* Prototype: int count ( mixed $var [, int $mode] );
