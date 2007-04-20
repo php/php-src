@@ -1,3 +1,89 @@
+2007-04-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/array/bug41121.phpt
+      ext/standard/tests/array/bug41121.phpt:
+      
+      file bug41121.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c:
+      Fixed bug #41121 (range() overflow handling for large numbers on 32bit
+      machines).
+
+    * ext/json/JSON_parser.c:
+      
+      MFB:  Fixed bug #41067 (json_encode() problem with UTF-16 input).
+
+2007-04-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_unicode.c:
+      Use ZEND_U_CONVERTER().
+
+2007-04-19  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.h
+      ZendEngine2/tests/hex_overflow_32bit.phpt
+      ZendEngine2/tests/oct_overflow_32bit.phpt:
+      fix #41118 (PHP does not handle overflow of octal integers)
+      MFB a small part of optimization patch applied only to 5_2
+
+2007-04-19  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/CREDITS:
+      The right place to edit
+
+    * (PHP_5_2)
+      ext/mysqli/CREDITS:
+      Hmm, the right place to edit
+
+    * ext/standard/credits_ext.h:
+      Update credits line
+
+    * (PHP_5_2)
+      ext/standard/credits_ext.h:
+      Update credits
+
+2007-04-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/gmp/gmp.c
+      ext/gmp/tests/022.phpt:
+      fix gmp_gcdext() in Unicode mode
+
+    * (PHP_5_2)
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/tests/double_to_string.phpt:
+      fix double-to-string conversion utils
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/tests/double_to_string.phpt
+      ZendEngine2/tests/double_to_string.phpt:
+      fix & unify double-to-string conversion utils
+
+2007-04-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cli/tests/009.phpt
+      sapi/cli/tests/009.phpt
+      sapi/cli/tests/011.phpt
+      sapi/cli/tests/011.phpt
+      sapi/cli/tests/012.phpt
+      sapi/cli/tests/012.phpt
+      sapi/cli/tests/014.phpt
+      sapi/cli/tests/014.phpt
+      sapi/cli/tests/015.phpt
+      sapi/cli/tests/015.phpt:
+      Fixed tests
+
+2007-04-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/sqlite/config.m4
+      ext/sqlite/config.m4:
+      - fix vpath build
+
 2007-04-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

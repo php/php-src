@@ -1,3 +1,30 @@
+2007-04-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_unicode.c:
+      Use ZEND_U_CONVERTER().
+
+2007-04-19  Antony Dovgal  <antony@zend.com>
+
+    * zend_language_scanner.l
+      zend_operators.h
+      zend_strtod.c
+      zend_strtod.h
+      tests/hex_overflow_32bit.phpt
+      tests/oct_overflow_32bit.phpt:
+      fix #41118 (PHP does not handle overflow of octal integers)
+      MFB a small part of optimization patch applied only to 5_2
+
+    * (PHP_5_2)
+      zend_strtod.c
+      tests/double_to_string.phpt:
+      fix double-to-string conversion utils
+
+    * zend_operators.c
+      zend_strtod.c
+      tests/double_to_string.phpt
+      tests/double_to_string.phpt:
+      fix & unify double-to-string conversion utils
+
 2007-04-17  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_types.h
