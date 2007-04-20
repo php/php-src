@@ -1,5 +1,5 @@
 --TEST--
-substr_compare()
+substr_compare() tests
 --FILE--
 <?php
 
