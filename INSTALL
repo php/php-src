@@ -11,7 +11,7 @@ Installing PHP
         Caudium
         fhttpd related notes
         Sun, iPlanet and Netscape servers on Sun Solaris
-        CGI and commandline setups
+        CGI and command line setups
         HP-UX specific installation notes
         OpenBSD installation notes
         Solaris specific installation tips
@@ -20,6 +20,7 @@ Installing PHP
    3. Installation on Mac OS X
 
         Using Packages
+        Using the bundled PHP
         Compiling for OS X Server
         Compiling for MacOS X Client
 
@@ -28,7 +29,7 @@ Installing PHP
         Introduction to PECL Installations
         Downloading PECL extensions
         PECL for Windows users
-        Compiling shared PECL extensions with PEAR
+        Compiling shared PECL extensions with the pecl command
         Compiling shared PECL extensions with phpize
         Compiling PECL extensions statically into PHP
 
@@ -90,7 +91,7 @@ Chapter 1. General Installation Considerations
 
    With PHP you can also write desktop GUI applications using the PHP-GTK
    extension. This is a completely different approach than writing web
-   pages, as you do not output any HTML, but manage windows and objects
+   pages, as you do not output any HTML, but manage Windows and objects
    within them. For more information about PHP-GTK, please visit the site
    dedicated to this extension. PHP-GTK is not included in the official
    PHP distribution.
@@ -124,10 +125,10 @@ Chapter 2. Installation on Unix systems
    package installation system. This can assist in setting up a standard
    configuration, but if you need to have a different set of features
    (such as a secure server, or a different database driver), you may need
-   to build PHP and/or your webserver. If you are unfamiliar with building
-   and compiling your own software, it is worth checking to see whether
-   somebody has already built a packaged version of PHP with the features
-   you need.
+   to build PHP and/or your web server. If you are unfamiliar with
+   building and compiling your own software, it is worth checking to see
+   whether somebody has already built a packaged version of PHP with the
+   features you need.
 
    Prerequisite knowledge and software for compiling:
 
@@ -139,8 +140,8 @@ Chapter 2. Installation on Unix systems
      * Any module specific components (such as gd, pdf libs, etc.)
 
    The initial PHP setup and configuration process is controlled by the
-   use of the commandline options of the configure script. You could get a
-   list of all available options along with short explanations running
+   use of the command line options of the configure script. You could get
+   a list of all available options along with short explanations running
    ./configure --help. Our manual documents the different options
    separately. You will find the core options in the appendix, while the
    different extension specific options are descibed on the reference
@@ -345,7 +346,7 @@ stop and start:
    will mean that you can compile apache separately, and don't have to
    recompile everything as you add to, or change, PHP. Building PHP into
    apache (static method) means that PHP will load and run faster. For
-   more information, see the Apache webpage on DSO support.
+   more information, see the Apache web page on DSO support.
 
      Note: Apache's default httpd.conf currently ships with a section
      that looks like this:
@@ -562,13 +563,13 @@ Sun, iPlanet and Netscape servers on Sun Solaris
    From PHP 4.3.3 on you can use PHP scripts with the NSAPI module to
    generate custom directory listings and error pages. Additional
    functions for Apache compatibility are also available. For support in
-   current webservers read the note about subrequests.
+   current web servers read the note about subrequests.
 
    You can find more information about setting up PHP for the Netscape
    Enterprise Server (NES) here:
    http://benoit.noss.free.fr/php/install-php4.html
 
-   To build PHP with Sun JSWS/Sun ONE WS/iPlanet/Netscape webservers,
+   To build PHP with Sun JSWS/Sun ONE WS/iPlanet/Netscape web servers,
    enter the proper install directory for the --with-nsapi=[DIR] option.
    The default directory is usually /opt/netscape/suitespot/. Please also
    read /php-xxx-version/sapi/nsapi/nsapi-readme.txt.
@@ -610,7 +611,7 @@ Sun, iPlanet and Netscape servers on Sun Solaris
    Configuration Instructions for Sun/iPlanet/Netscape. Firstly you may
    need to add some paths to the LD_LIBRARY_PATH environment for the
    server to find all the shared libs. This can best done in the start
-   script for your webserver. The start script is often located in:
+   script for your web server. The start script is often located in:
    /path/to/server/https-servername/start. You may also need to edit the
    configuration files that are located in:
    /path/to/server/https-servername/config/.
@@ -631,7 +632,7 @@ Init fn="php4_init" LateInit="yes" errorString="Failed to initialize PHP!" [php_
 ini="/path/to/php.ini"]
 
        (PHP >= 4.3.3) The php_ini parameter is optional but with it you
-       can place your php.ini in your webserver config directory.
+       can place your php.ini in your web server config directory.
     3. Configure the default object in obj.conf (for virtual server
        classes [version 6.0+] in their vserver.obj.conf):
 
@@ -684,8 +685,8 @@ AuthTrans fn=php4_auth_trans
 </Object>
 
      Note: The stacksize that PHP uses depends on the configuration of
-     the webserver. If you get crashes with very large PHP scripts, it is
-     recommended to raise it with the Admin Server (in the section
+     the web server. If you get crashes with very large PHP scripts, it
+     is recommended to raise it with the Admin Server (in the section
      "MAGNUS EDITOR").
      __________________________________________________________________
 
@@ -693,22 +694,21 @@ CGI environment and recommended modifications in php.ini
 
    Important when writing PHP scripts is the fact that Sun JSWS/Sun ONE
    WS/iPlanet/Netscape is a multithreaded web server. Because of that all
-   requests are running in the same process space (the space of the
-   webserver itself) and this space has only one environment. If you want
-   to get CGI variables like PATH_INFO, HTTP_HOST etc. it is not the
-   correct way to try this in the old PHP 3.x way with getenv() or a
-   similar way (register globals to environment, $_ENV). You would only
-   get the environment of the running webserver without any valid CGI
-   variables!
+   requests are running in the same process space (the space of the web
+   server itself) and this space has only one environment. If you want to
+   get CGI variables like PATH_INFO, HTTP_HOST etc. it is not the correct
+   way to try this in the old PHP 3.x way with getenv() or a similar way
+   (register globals to environment, $_ENV). You would only get the
+   environment of the running web server without any valid CGI variables!
 
      Note: Why are there (invalid) CGI variables in the environment?
 
-     Answer: This is because you started the webserver process from the
-     admin server which runs the startup script of the webserver, you
+     Answer: This is because you started the web server process from the
+     admin server which runs the startup script of the web server, you
      wanted to start, as a CGI script (a CGI script inside of the admin
-     server!). This is why the environment of the started webserver has
+     server!). This is why the environment of the started web server has
      some CGI environment variables in it. You can test this by starting
-     the webserver not from the administration server. Use the command
+     the web server not from the administration server. Use the command
      line as root user and start it manually - you will see there are no
      CGI-like environment variables.
 
@@ -749,8 +749,8 @@ pt.php" [inikey=value inikey=value...]
 Note about nsapi_virtual() and subrequests (PHP >= 4.3.3)
 
    The NSAPI module now supports the nsapi_virtual() function (alias:
-   virtual()) to make subrequests on the webserver and insert the result
-   in the webpage. This function uses some undocumented features from the
+   virtual()) to make subrequests on the web server and insert the result
+   in the web page. This function uses some undocumented features from the
    NSAPI library. On Unix the module automatically looks for the needed
    functions and uses them if available. If not, nsapi_virtual() is
    disabled.
@@ -758,10 +758,10 @@ Note about nsapi_virtual() and subrequests (PHP >= 4.3.3)
      Note: But be warned: Support for nsapi_virtual() is EXPERIMENTAL!!!
      __________________________________________________________________
 
-CGI and commandline setups
+CGI and command line setups
 
-   The default is to build PHP as a CGI program. This creates a
-   commandline interpreter, which can be used for CGI processing, or for
+   The default is to build PHP as a CGI program. This creates a command
+   line interpreter, which can be used for CGI processing, or for
    non-web-related PHP scripting. If you are running a web server PHP has
    module support for, you should generally go for that solution for
    performance reasons. However, the CGI version enables users to run
@@ -816,62 +816,18 @@ Using Variables
 HP-UX specific installation notes
 
    This section contains notes and hints specific to installing PHP on
-   HP-UX systems. (Contributed by paul_mckay at clearwater-it dot co dot
-   uk).
+   HP-UX systems.
 
-     Note: These tips were written for PHP 4.0.4 and Apache 1.3.9.
+   There are two main options for installing PHP on HP-UX systems. Either
+   compile it, or install a pre-compiled binary.
 
-    1. You need gzip, download a binary distribution from
-       http://hpux.connect.org.uk/ftp/hpux/Gnu/gzip-1.2.4a/gzip-1.2.4a-sd-
-       10.20.depot.Z uncompress the file and install using swinstall.
-    2. You need gcc, download a binary distribution from
-       http://gatekeep.cs.utah.edu/ftp/hpux/Gnu/gcc-2.95.2/gcc-2.95.2-sd-1
-       0.20.depot.gz. uncompress this file and install gcc using
-       swinstall.
-    3. You need the GNU binutils, you can download a binary distribution
-       from
-       http://hpux.connect.org.uk/ftp/hpux/Gnu/binutils-2.9.1/binutils-2.9
-       .1-sd-10.20.depot.gz. uncompress this file and install binutils
-       using swinstall.
-    4. You now need bison, you can download a binary distribution from
-       http://hpux.connect.org.uk/ftp/hpux/Gnu/bison-1.28/bison-1.28-sd-10
-       .20.depot.gz, install as above.
-    5. You now need flex, you need to download the source from one of the
-       http://www.gnu.org mirrors. It is in the non-gnu directory of the
-       ftp site. Download the file, gunzip, then tar -xvf it. Go into the
-       newly created flex directory and run ./configure, followed by make,
-       and then make install.
-       If you have errors here, it's probably because gcc etc. are not in
-       your PATH so add them to your PATH.
-    6. Download the PHP and apache sources.
-    7. gunzip and tar -xvf them. We need to hack a couple of files so that
-       they can compile OK.
-    8. Firstly the configure file needs to be hacked because it seems to
-       lose track of the fact that you are a hpux machine, there will be a
-       better way of doing this but a cheap and cheerful hack is to put
-       lt_target=hpux10.20 on line 47286 of the configure script.
-    9. Next, the Apache GuessOS file needs to be hacked. Under
-       apache_1.3.9/src/helpers change line 89 from echo
-       "hp${HPUXMACH}-hpux${HPUXVER}"; exit 0 to: echo
-       "hp${HPUXMACH}-hp-hpux${HPUXVER}"; exit 0
-   10. You cannot install PHP as a shared object under HP-UX so you must
-       compile it as a static, just follow the instructions at the Apache
-       page.
-   11. PHP and Apache should have compiled OK, but Apache won't start. you
-       need to create a new user for Apache, e.g. www, or apache. You then
-       change lines 252 and 253 of the conf/httpd.conf in Apache so that
-       instead of
+   Official pre-compiled packages are located here:
+   http://software.hp.com/
 
-User nobody
-Group nogroup
-
-       you have something like
-
-User www
-Group sys
-
-       This is because you can't run Apache as nobody under hp-ux. Apache
-       and PHP should then work.
+   Until this manual section is rewritten, the documentation about
+   compiling PHP (and related extensions) on HP-UX systems has been
+   removed. For now, consider reading the following external resource:
+   Building Apache and PHP on HP-UX 11.11
      __________________________________________________________________
 
 OpenBSD installation notes
@@ -1128,6 +1084,104 @@ Using Packages
      * Fink: http://fink.sourceforge.net/
      __________________________________________________________________
 
+Using the bundled PHP
+
+   PHP has come standard with Macs since OS X version 10.0.0. Enabling PHP
+   with the default web server requires uncommenting a few lines in the
+   Apache configuration file httpd.conf whereas the CGI and/or CLI are
+   enabled by default (easily accessible via the Terminal program).
+
+   Enabling PHP using the instructions below is meant for quickly setting
+   up a local development environment. It's highly recommended to always
+   upgrade PHP to the newest version. Like most live software, newer
+   versions are created to fix bugs and add features and PHP being is no
+   different. See the appropriate MAC OS X installation documentation for
+   further details. The following instructions are geared towards a
+   beginner with details provided for getting a default setup to work. All
+   users are encouraged to compile, or install a new packaged version.
+
+   The standard installation type is using mod_php, and enabling the
+   bundled mod_php on Mac OS X for the Apache web server (the default web
+   server, that is accessible via System Preferences) involves the
+   following steps:
+
+    1. Locate and open the Apache configuration file. By default, the
+       location is as follows: /etc/httpd/httpd.conf
+       Using Finder or Spotlight to find this file may prove difficult as
+       by default it's private and owned by the root user.
+
+     Note: One way to open this is by using a Unix based text editor in
+     the Terminal, for example nano, and because the file is owned by
+     root we'll use the sudo command to open it (as root) so for example
+     type the following into the Terminal Application (after, it will
+     prompt for a password): sudo nano /etc/httpd/httpd.conf
+     Noteworthy nano commands: ^w (search), ^o (save), and ^x (exit)
+     where ^ represents the Ctrl key.
+    2. With a text editor, uncomment the lines (by removing the #) that
+       look similar to the following (these two lines are often not
+       together, locate them both in the file):
+
+# LoadModule php4_module libexec/httpd/libphp4.so
+
+# AddModule mod_php4.c
+
+       Notice the location/path. When building PHP in the future, the
+       above files should be replaced or commented out.
+    3. Be sure the desired extensions will parse as PHP (examples: .php
+       .html and .inc)
+       Due to the following statement already existing in httpd.conf (as
+       of Mac Panther), once PHP is enabled the .php files will
+       automatically parse as PHP.
+
+<IfModule mod_php4.c>
+    # If php is turned on, we respect .php and .phps files.
+    AddType application/x-httpd-php .php
+    AddType application/x-httpd-php-source .phps
+
+    # Since most users will want index.php to work we
+    # also automatically enable index.php
+    <IfModule mod_dir.c>
+        DirectoryIndex index.html index.php
+    </IfModule>
+</IfModule>
+
+    4. Be sure the DirectoryIndex loads the desired default index file
+       This is also set in httpd.conf. Typically index.php and index.html
+       are used. By default index.php is enabled because it's also in the
+       PHP check shown above. Adjust accordingly.
+    5. Set the php.ini location or use the default
+       A typical default location on Mac OS X is /usr/local/php/php.ini
+       and a call to phpinfo() will reveal this information. If a php.ini
+       is not used, PHP will use all default values. See also the related
+       FAQ on finding php.ini.
+    6. Locate or set the DocumentRoot
+       This is the root directory for all the web files. Files in this
+       directory are served from the web server so the PHP files will
+       parse as PHP before outputting them to the browser. A typical
+       default path is /Library/WebServer/Documents but this can be set to
+       anything in httpd.conf. Alternatively, the default DocumentRoot for
+       individual users is /Users/yourusername/Sites
+    7. Create a phpinfo() file
+       The phpinfo() function will display information about PHP. Consider
+       creating a file in the DocumentRoot with the following PHP code:
+
+<?php phpinfo(); ?>
+
+    8. Restart Apache, and load the PHP file created above
+       To restart, either execute sudo apachectl graceful in the shell or
+       stop/start the "Personal Web Server" option in the OS X System
+       Preferences. By default, loading local files in the browser will
+       have an URL like so: http://localhost/info.php Or using the
+       DocumentRoot in the user directory is another option and would end
+       up looking like: http://localhost/~yourusername/info.php
+
+   The CLI (or CGI in older versions) is appropriately named php and
+   likely exists as /usr/bin/php. Open up the terminal, read the command
+   line section of the PHP manual, and execute php -v to check the PHP
+   version of this PHP binary. A call to phpinfo() will also reveal this
+   information.
+     __________________________________________________________________
+
 Compiling for OS X Server
 
    Mac OS X Server install.
@@ -1238,7 +1292,8 @@ Introduction to PECL Installations
    These instructions assume /your/phpsrcdir/ is the path to the PHP
    source distribution, and that extname is the name of the PECL
    extension. Adjust accordingly. These instructions also assume a
-   familiarity with the pear command.
+   familiarity with the pear command. The information in the PEAR manual
+   for the pear command also applies to the pecl command.
 
    To be useful, a shared extension must be built, installed, and loaded.
    The methods described below provide you with various instructions on
@@ -1263,7 +1318,7 @@ Downloading PECL extensions
        requirements and other similar details.
      * pecl download extname
        PECL extensions that have releases listed on the PECL web site are
-       available for download and installation using the pear command.
+       available for download and installation using the pecl command.
        Specific revisions may also be specified.
      * CVS
        Most PECL extensions also reside in CVS. A web-based view may be
@@ -1276,9 +1331,9 @@ $ cvs -d:pserver:cvsread@cvs.php.net:/repository co pecl/extname
 
      * Windows downloads
        Windows users may find compiled PECL binaries by downloading the
-       Collection of PECL modules from the PHP Downloads page, and by
-       retrieving a PECL Snapshot. To compile PHP under Windows, read the
-       appropriate chapter.
+       Collection of PECL modules from the PHP Downloads page, or by
+       retrieving a PECL Snapshot or an extension DLL on PECL4WIN. To
+       compile PHP under Windows, read the appropriate chapter.
      __________________________________________________________________
 
 PECL for Windows users
@@ -1293,9 +1348,9 @@ PECL for Windows users
    After doing this, restart the web server.
      __________________________________________________________________
 
-Compiling shared PECL extensions with PEAR
+Compiling shared PECL extensions with the pecl command
 
-   PEAR makes it easy to create shared PHP extensions. Using the pear
+   PECL makes it easy to create shared PHP extensions. Using the pecl
    command, do the following:
 
    $ pecl install extname
@@ -1304,7 +1359,7 @@ Compiling shared PECL extensions with PEAR
    extname.so into your extension_dir. extname.so may then be loaded via
    php.ini
 
-   By default, the pear command will not install packages that are marked
+   By default, the pecl command will not install packages that are marked
    with the alpha or beta state. If no stable packages are available, you
    may install a beta package using the following command:
 
@@ -1317,9 +1372,9 @@ Compiling shared PECL extensions with PEAR
 
 Compiling shared PECL extensions with phpize
 
-   Sometimes, using the pear installer is not an option. This could be
+   Sometimes, using the pecl installer is not an option. This could be
    because you're behind a firewall, or it could be because the extension
-   you want to install is not available as a PEAR compatible package, such
+   you want to install is not available as a PECL compatible package, such
    as unreleased extensions from CVS. If you need to build such an
    extension, you can use the lower-level build tools to perform the build
    manually.
@@ -1355,7 +1410,7 @@ Compiling PECL extensions statically into PHP
    regenerate its configure script.
 
 $ cd /your/phpsrcdir/ext
-$ pear download extname
+$ pecl download extname
 $ gzip -d < extname.tgz | tar -xvf -
 $ mv extname-x.x.x extname
 
@@ -1441,9 +1496,9 @@ The configuration file
      * The PHPRC environment variable. Before PHP 5.2.0 this was checked
        after the registry key mentioned below.
      * As of PHP 5.2.0, the following registry locations are searched in
-       order: HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath\x.y.z,
-       HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath\x.y and
-       HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath\x, where x, y and z
+       order: HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y.z\IniFilePath,
+       HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y\IniFilePath and
+       HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x\IniFilePath, where x, y and z
        mean the PHP major, minor and release versions.
      * HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath (Windows Registry
        location)

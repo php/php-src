@@ -6,8 +6,8 @@ Installing PHP
    1. General Installation Considerations
    2. Installation on Windows systems
 
-        Windows Installer (PHP 5.1 and earlier)
         Windows Installer (PHP 5.2 and later)
+        Windows Installer (PHP 5.1.0 and earlier)
         Manual Installation Steps
         ActiveScript
         Microsoft IIS / PWS
@@ -24,7 +24,7 @@ Installing PHP
         Introduction to PECL Installations
         Downloading PECL extensions
         PECL for Windows users
-        Compiling shared PECL extensions with PEAR
+        Compiling shared PECL extensions with the pecl command
         Compiling shared PECL extensions with phpize
         Compiling PECL extensions statically into PHP
 
@@ -86,7 +86,7 @@ Chapter 1. General Installation Considerations
 
    With PHP you can also write desktop GUI applications using the PHP-GTK
    extension. This is a completely different approach than writing web
-   pages, as you do not output any HTML, but manage windows and objects
+   pages, as you do not output any HTML, but manage Windows and objects
    within them. For more information about PHP-GTK, please visit the site
    dedicated to this extension. PHP-GTK is not included in the official
    PHP distribution.
@@ -123,46 +123,6 @@ Chapter 2. Installation on Windows systems
    those are endorsed by PHP.net, as we believe that the manual
    installation is the best choice to have your system secure and
    optimised.
-     __________________________________________________________________
-
-Windows Installer (PHP 5.1 and earlier)
-
-   The Windows PHP installer is available from the downloads page at
-   http://www.php.net/downloads.php. This installs the CGI version of PHP
-   and for IIS, PWS, and Xitami, it configures the web server as well. The
-   installer does not include any extra external PHP extensions
-   (php_*.dll) as you'll only find those in the Windows Zip Package and
-   PECL downloads.
-
-     Note: While the Windows installer is an easy way to make PHP work,
-     it is restricted in many aspects as, for example, the automatic
-     setup of extensions is not supported. Use of the installer isn't the
-     preferred method for installing PHP.
-
-   First, install your selected HTTP (web) server on your system, and make
-   sure that it works.
-
-   Run the executable installer and follow the instructions provided by
-   the installation wizard. Two types of installation are supported -
-   standard, which provides sensible defaults for all the settings it can,
-   and advanced, which asks questions as it goes along.
-
-   The installation wizard gathers enough information to set up the
-   php.ini file, and configure certain web servers to use PHP. One of the
-   web servers the PHP installer does not configure for is Apache, so
-   you'll need to configure it manually.
-
-   Once the installation has completed, the installer will inform you if
-   you need to restart your system, restart the server, or just start
-   using PHP.
-
-   Warning
-
-   Be aware, that this setup of PHP is not secure. If you would like to
-   have a secure PHP setup, you'd better go on the manual way, and set
-   every option carefully. This automatically working setup gives you an
-   instantly working PHP installation, but it is not meant to be used on
-   online servers.
      __________________________________________________________________
 
 Windows Installer (PHP 5.2 and later)
@@ -233,10 +193,8 @@ apache13 - Apache 1.3 module
 apache20 - Apache 2.0 module
 apache22 - Apache 2,2 module
 apacheCGI - Apache CGI executable
-iis4ISAPI - IIS 4+ ISAPI module
-iis4CGI - IIS 4+ CGI executable
-pws4 - PWS 4 CGI executable
-iis3 - IIS/PWS 3 CGI executable
+iis4ISAPI - IIS ISAPI module
+iis4CGI - IIS CGI executable
 NSAPI - Sun/iPlanet/Netscape server module
 Xitami - Xitami CGI executable
 Sambar - Sambar Server ISAPI module
@@ -248,6 +206,46 @@ Manual - PHP Manual in CHM Format
    line, visit
    http://msdn.microsoft.com/library/en-us/msi/setup/command_line_options.
    asp
+     __________________________________________________________________
+
+Windows Installer (PHP 5.1.0 and earlier)
+
+   The Windows PHP installer is available from the downloads page at
+   http://www.php.net/downloads.php. This installs the CGI version of PHP
+   and for IIS, PWS, and Xitami, it configures the web server as well. The
+   installer does not include any extra external PHP extensions
+   (php_*.dll) as you'll only find those in the Windows Zip Package and
+   PECL downloads.
+
+     Note: While the Windows installer is an easy way to make PHP work,
+     it is restricted in many aspects as, for example, the automatic
+     setup of extensions is not supported. Use of the installer isn't the
+     preferred method for installing PHP.
+
+   First, install your selected HTTP (web) server on your system, and make
+   sure that it works.
+
+   Run the executable installer and follow the instructions provided by
+   the installation wizard. Two types of installation are supported -
+   standard, which provides sensible defaults for all the settings it can,
+   and advanced, which asks questions as it goes along.
+
+   The installation wizard gathers enough information to set up the
+   php.ini file, and configure certain web servers to use PHP. One of the
+   web servers the PHP installer does not configure for is Apache, so
+   you'll need to configure it manually.
+
+   Once the installation has completed, the installer will inform you if
+   you need to restart your system, restart the server, or just start
+   using PHP.
+
+   Warning
+
+   Be aware, that this setup of PHP is not secure. If you would like to
+   have a secure PHP setup, you'd better go on the manual way, and set
+   every option carefully. This automatically working setup gives you an
+   instantly working PHP installation, but it is not meant to be used on
+   online servers.
      __________________________________________________________________
 
 Manual Installation Steps
@@ -299,7 +297,7 @@ c:\php
    |
    +--cli
    |  |
-   |  |-php.exe           -- CLI executable - ONLY for commandline scripting
+   |  |-php.exe           -- CLI executable - ONLY for command line scripting
    |
    +--dlls                -- support DLLs required by some extensions
    |  |
@@ -511,7 +509,7 @@ doc_root = c:\apache\htdocs // for Apache
        browscap.ini, read the following FAQ.
 
    PHP is now setup on your system. The next step is to choose a web
-   server, and enable it to run PHP. Choose a webserver from the table of
+   server, and enable it to run PHP. Choose a web server from the table of
    contents.
      __________________________________________________________________
 
@@ -519,13 +517,13 @@ ActiveScript
 
    This section contains notes specific to the ActiveScript installation.
 
-   ActiveScript is a windows only SAPI that enables you to use PHP script
+   ActiveScript is a Windows only SAPI that enables you to use PHP script
    in any ActiveScript compliant host, like Windows Script Host,
    ASP/ASP.NET, Windows Script Components or Microsoft Scriptlet control.
 
    As of PHP 5.0.1, ActiveScript has been moved to the PECL repository.
-   You may download this PECL extension DLL from the PHP Downloads page or
-   at http://snaps.php.net/.
+   The DLL for this PECL extension may be downloaded from either the PHP
+   Downloads page or from http://pecl4win.php.net/
 
      Note: You should read the manual installation steps first!
 
@@ -982,7 +980,7 @@ Sun, iPlanet and Netscape servers on Microsoft Windows
    From PHP 4.3.3 on you can use PHP scripts with the NSAPI module to
    generate custom directory listings and error pages. Additional
    functions for Apache compatibility are also available. For support in
-   current webservers read the note about subrequests.
+   current web servers read the note about subrequests.
      __________________________________________________________________
 
 CGI setup on Sun, iPlanet and Netscape servers
@@ -1035,7 +1033,7 @@ Init fn="php4_init" LateInit="yes" errorString="Failed to initialise PHP!" [php_
 ini="c:/path/to/php.ini"]
 
        (PHP >= 4.3.3) The php_ini parameter is optional but with it you
-       can place your php.ini in your webserver config directory.
+       can place your php.ini in your web server configuration directory.
      * Configure the default object in obj.conf (for virtual server
        classes [Sun Web Server 6.0+] in their vserver.obj.conf): In the
        <Object name="default"> section, place this line necessarily after
@@ -1069,8 +1067,8 @@ Service fn=php4_execute [inikey=value inikey=value ...]
      found here: http://benoit.noss.free.fr/php/install-php4.html
 
      Note: The stacksize that PHP uses depends on the configuration of
-     the webserver. If you get crashes with very large PHP scripts, it is
-     recommended to raise it with the Admin Server (in the section
+     the web server. If you get crashes with very large PHP scripts, it
+     is recommended to raise it with the Admin Server (in the section
      "MAGNUS EDITOR").
      __________________________________________________________________
 
@@ -1078,22 +1076,21 @@ CGI environment and recommended modifications in php.ini
 
    Important when writing PHP scripts is the fact that Sun JSWS/Sun ONE
    WS/iPlanet/Netscape is a multithreaded web server. Because of that all
-   requests are running in the same process space (the space of the
-   webserver itself) and this space has only one environment. If you want
-   to get CGI variables like PATH_INFO, HTTP_HOST etc. it is not the
-   correct way to try this in the old PHP 3.x way with getenv() or a
-   similar way (register globals to environment, $_ENV). You would only
-   get the environment of the running webserver without any valid CGI
-   variables!
+   requests are running in the same process space (the space of the web
+   server itself) and this space has only one environment. If you want to
+   get CGI variables like PATH_INFO, HTTP_HOST etc. it is not the correct
+   way to try this in the old PHP 3.x way with getenv() or a similar way
+   (register globals to environment, $_ENV). You would only get the
+   environment of the running web server without any valid CGI variables!
 
      Note: Why are there (invalid) CGI variables in the environment?
 
-     Answer: This is because you started the webserver process from the
-     admin server which runs the startup script of the webserver, you
+     Answer: This is because you started the web server process from the
+     admin server which runs the startup script of the web server, you
      wanted to start, as a CGI script (a CGI script inside of the admin
-     server!). This is why the environment of the started webserver has
+     server!). This is why the environment of the started web server has
      some CGI environment variables in it. You can test this by starting
-     the webserver not from the administration server. Use the command
+     the web server not from the administration server. Use the command
      line as root user and start it manually - you will see there are no
      CGI-like environment variables.
 
@@ -1134,8 +1131,8 @@ pt.php" [inikey=value inikey=value...]
 Note about nsapi_virtual() and subrequests (PHP >= 4.3.3)
 
    The NSAPI module now supports the nsapi_virtual() function (alias:
-   virtual()) to make subrequests on the webserver and insert the result
-   in the webpage. The problem is, that this function uses some
+   virtual()) to make subrequests on the web server and insert the result
+   in the web page. The problem is, that this function uses some
    undocumented features from the NSAPI library.
 
    Under Unix this is not a problem, because the module automatically
@@ -1225,6 +1222,14 @@ Sambar Server on Microsoft Windows
 
        (This line assumes that PHP was installed in c:\php.)
      * Now restart the Sambar server for the changes to take effect.
+
+     Note: If you intend to use PHP to communicate with resources which
+     are held on a different computer on your network, then you will need
+     to alter the account used by the Sambar Server Service. The default
+     account used for the Sambar Server Service is LocalSystem which will
+     not have access to remote resources. The account can be amended by
+     using the Services option from within the Windows Control Panel
+     Administation Tools.
      __________________________________________________________________
 
 Xitami on Microsoft Windows
@@ -1247,7 +1252,7 @@ Xitami on Microsoft Windows
    attacks. Please read our CGI security section to learn how to defend
    yourself from those attacks.
 
-     * Make sure the webserver is running, and point your browser to
+     * Make sure the web server is running, and point your browser to
        xitamis admin console (usually http://127.0.0.1/admin), and click
        on Configuration.
      * Navigate to the Filters, and put the extension which PHP should
@@ -1261,8 +1266,8 @@ Xitami on Microsoft Windows
 
 Installation of extensions on Windows
 
-   After installing PHP and a webserver on Windows, you will probably want
-   to install some extensions for added functionality. You can choose
+   After installing PHP and a web server on Windows, you will probably
+   want to install some extensions for added functionality. You can choose
    which extensions you would like to load when PHP starts by modifying
    your php.ini. You can also load a module dynamically in your script
    using dl().
@@ -1318,7 +1323,7 @@ extension=php_bz2.dll
        in PECL, and these extensions require a separate download.
 
      Note: If you are running a server module version of PHP remember to
-     restart your webserver to reflect your changes to php.ini.
+     restart your web server to reflect your changes to php.ini.
 
    The following table describes some of the extensions available and
    required additional dlls.
@@ -1412,7 +1417,8 @@ Introduction to PECL Installations
    These instructions assume /your/phpsrcdir/ is the path to the PHP
    source distribution, and that extname is the name of the PECL
    extension. Adjust accordingly. These instructions also assume a
-   familiarity with the pear command.
+   familiarity with the pear command. The information in the PEAR manual
+   for the pear command also applies to the pecl command.
 
    To be useful, a shared extension must be built, installed, and loaded.
    The methods described below provide you with various instructions on
@@ -1437,7 +1443,7 @@ Downloading PECL extensions
        requirements and other similar details.
      * pecl download extname
        PECL extensions that have releases listed on the PECL web site are
-       available for download and installation using the pear command.
+       available for download and installation using the pecl command.
        Specific revisions may also be specified.
      * CVS
        Most PECL extensions also reside in CVS. A web-based view may be
@@ -1450,9 +1456,9 @@ $ cvs -d:pserver:cvsread@cvs.php.net:/repository co pecl/extname
 
      * Windows downloads
        Windows users may find compiled PECL binaries by downloading the
-       Collection of PECL modules from the PHP Downloads page, and by
-       retrieving a PECL Snapshot. To compile PHP under Windows, read the
-       appropriate chapter.
+       Collection of PECL modules from the PHP Downloads page, or by
+       retrieving a PECL Snapshot or an extension DLL on PECL4WIN. To
+       compile PHP under Windows, read the appropriate chapter.
      __________________________________________________________________
 
 PECL for Windows users
@@ -1467,9 +1473,9 @@ PECL for Windows users
    After doing this, restart the web server.
      __________________________________________________________________
 
-Compiling shared PECL extensions with PEAR
+Compiling shared PECL extensions with the pecl command
 
-   PEAR makes it easy to create shared PHP extensions. Using the pear
+   PECL makes it easy to create shared PHP extensions. Using the pecl
    command, do the following:
 
    $ pecl install extname
@@ -1478,7 +1484,7 @@ Compiling shared PECL extensions with PEAR
    extname.so into your extension_dir. extname.so may then be loaded via
    php.ini
 
-   By default, the pear command will not install packages that are marked
+   By default, the pecl command will not install packages that are marked
    with the alpha or beta state. If no stable packages are available, you
    may install a beta package using the following command:
 
@@ -1491,9 +1497,9 @@ Compiling shared PECL extensions with PEAR
 
 Compiling shared PECL extensions with phpize
 
-   Sometimes, using the pear installer is not an option. This could be
+   Sometimes, using the pecl installer is not an option. This could be
    because you're behind a firewall, or it could be because the extension
-   you want to install is not available as a PEAR compatible package, such
+   you want to install is not available as a PECL compatible package, such
    as unreleased extensions from CVS. If you need to build such an
    extension, you can use the lower-level build tools to perform the build
    manually.
@@ -1529,7 +1535,7 @@ Compiling PECL extensions statically into PHP
    regenerate its configure script.
 
 $ cd /your/phpsrcdir/ext
-$ pear download extname
+$ pecl download extname
 $ gzip -d < extname.tgz | tar -xvf -
 $ mv extname-x.x.x extname
 
@@ -1615,9 +1621,9 @@ The configuration file
      * The PHPRC environment variable. Before PHP 5.2.0 this was checked
        after the registry key mentioned below.
      * As of PHP 5.2.0, the following registry locations are searched in
-       order: HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath\x.y.z,
-       HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath\x.y and
-       HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath\x, where x, y and z
+       order: HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y.z\IniFilePath,
+       HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y\IniFilePath and
+       HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x\IniFilePath, where x, y and z
        mean the PHP major, minor and release versions.
      * HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath (Windows Registry
        location)
