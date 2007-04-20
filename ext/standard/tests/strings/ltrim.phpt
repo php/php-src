@@ -71,3 +71,31 @@ string(5) "12345"
 string(0) ""
 
 Done
+--UEXPECTF--
+Warning: ltrim() expects at least 1 parameter, 0 given in %s on line %d
+NULL
+
+Warning: ltrim() expects at most 2 parameters, 3 given in %s on line %d
+NULL
+
+*** Testing with heredoc string ***
+unicode(17) "ng heredoc string"
+
+*** Testing Normal Behaviour ***
+unicode(10) "ltrim test"
+unicode(13) "   ltrim test"
+unicode(18) "        ltrim test"
+unicode(18) "        ltrim test"
+unicode(10) "ltrim test"
+unicode(11) " ltrim test"
+unicode(10) "ltrim test"
+unicode(10) "ltrim test"
+unicode(10) "ltrim test"
+
+*** Testing for  scalar argument ***
+unicode(5) "12345"
+
+*** Testing for  NULL argument ***
+unicode(0) ""
+
+Done
