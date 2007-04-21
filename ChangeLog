@@ -1,3 +1,77 @@
+2007-04-20  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/fprintf.phpt:
+      open the file in text mode and avoid downcoding
+
+    * ext/gd/tests/createfromwbmp2.phpt:
+      avoid 10 000 warnings
+
+    * ext/date/tests/010.phpt
+      ext/date/tests/date_parse_001.phpt
+      ext/date/tests/date_sun_info_001.phpt
+      ext/standard/tests/array/array_merge.phpt
+      ext/standard/tests/array/array_push.phpt
+      ext/standard/tests/array/array_slice.phpt
+      ext/standard/tests/array/array_user_key_compare.phpt
+      ext/standard/tests/array/count_recursive.phpt
+      ext/standard/tests/strings/ltrim.phpt
+      ext/standard/tests/strings/rtrim.phpt
+      ext/standard/tests/strings/str_pad.phpt
+      ext/standard/tests/strings/strcasecmp.phpt
+      ext/standard/tests/strings/strcmp.phpt
+      ext/standard/tests/strings/strlen.phpt
+      ext/standard/tests/strings/substr_compare.phpt
+      ext/standard/tests/strings/ucfirst1.phpt:
+      fix tests
+
+    * ext/date/php_date.c:
+      fix timezone_abbreviations_list() in unicode mode
+
+    * (PHP_5_2)
+      ext/standard/tests/array/bug41121.phpt:
+      make this test 32bit only
+
+2007-04-20  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/sqlite/src/parse.c:
+      fix gcov build
+
+    * (PHP_4_4)
+      INSTALL
+      INSTALL
+      win32/install.txt
+      win32/install.txt:
+      update install instructions (auto-generated from phpdoc XML sources)
+
+2007-04-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/json/tests/pass001.1.phpt:
+      apply correct fix
+
+    * (PHP_5_2)
+      ZendEngine2/tests/double_to_string_64bit.phpt:
+      new test
+
+    * ZendEngine2/tests/double_to_string_64bit.phpt
+      ZendEngine2/tests/double_to_string_64bit.phpt:
+      
+      new test
+
+    * EXTENSIONS:
+      update ext/gmp status and maintainers
+
+    * ext/filter/tests/bug7715.phpt
+      ext/filter/tests/bug7715.phpt
+      ext/json/tests/pass001.1.phpt
+      ext/json/tests/pass001.1.phpt
+      ext/libxml/tests/003.phpt:
+      fix test
+
+    * ZendEngine2/tests/double_to_string.phpt:
+      this test is for 32bit
+
 2007-04-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/tests/array/bug41121.phpt

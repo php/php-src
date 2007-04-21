@@ -1,3 +1,17 @@
+2007-04-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/double_to_string_64bit.phpt:
+      new test
+
+    * tests/double_to_string_64bit.phpt
+      tests/double_to_string_64bit.phpt:
+      
+      new test
+
+    * tests/double_to_string.phpt:
+      this test is for 32bit
+
 2007-04-19  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_unicode.c:
