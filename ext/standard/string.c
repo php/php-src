@@ -718,6 +718,9 @@ static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *ret
 	if ( what ) {
 		what = eustrndup(what, what_len);
 		php_expand_uchar_range(&what, &what_len TSRMLS_CC);
+	} else {
+		what = USTR_MAKE(" \n\r\t\v\0");
+		what_len = sizeof(" \n\r\t\v\0") - 1;
 	}
 
 	if ( mode & 1 ) {
