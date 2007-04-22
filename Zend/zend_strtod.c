@@ -2604,6 +2604,34 @@ ZEND_API double zend_hex_strtod(const char *str, char **endptr)
 	return value;
 }
 
+ZEND_API double zend_oct_strtod(const char *str, char **endptr)
+{
+	const char *s = str;
+	char c;
+	double value = 0;
+	int any = 0;
+
+	/* skip leading zero */
+	s++;
+
+	while ((c = *s++)) {
+		if (c > '7') {
+			/* break and return the current value if the number is not well-formed
+			 * that's what Linux strtol() does 
+			 */
+			break;
+		}
+		value = value * 8 + c - '0';
+		any = 1;
+	}
+
+	if (endptr != NULL) {
+		*endptr = (char *)(any ? s - 1 : str);
+	}
+
+	return value;
+}
+
 /*
  * Local variables:
  * tab-width: 4
