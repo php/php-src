@@ -6,7 +6,7 @@
  *
  * SPL - Standard PHP Library
  *
- * (c) Marcus Boerger, 2003 - 2006
+ * (c) Marcus Boerger, 2003 - 2007
  */
 
 /** @mainpage SPL - Standard PHP Library
@@ -118,20 +118,23 @@
  * - <a href="http://www.phpriot.com/d/articles/php/oop/oop-with-spl-php-5-1/index.html">Advanced OOP with SPL in PHP 5</a>
  * - <a href="http://www.devshed.com/c/a/PHP/The-Standard-PHP-Library-Part-1/">The Standard PHP Library, Part 1</a>
  * - <a href="http://www.devshed.com/c/a/PHP/The-Standard-PHP-Library-Part-2/">The Standard PHP Library, Part 2</a>
- * - <a href="http://www.wiki.cc/php/SPL">SPL on PHP Wiki</a>
  * - <a href="http://www.professionelle-softwareentwicklung-mit-php5.de/erste_auflage/oop.iterators.spl.html">Die Standard PHP Library (SPL) [german]</a>
  *
  * 10) Talks on SPL:
- * - SPL for the masses <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pps">[pps]</a>, <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pdf">[pdf]</a>
- * - From engine overloading to SPL <a href="http://somabo.de/talks/200505_cancun_from_engine_overloading_to_spl.pps">[pps]</a>, <a href="http://somabo.de/talks/200505_cancun_from_engine_overloading_to_spl.pdf">[pdf]</a>
- * - Happy SPLing <a href="http://somabo.de/talks/200509_toronto_happy_spling.pps">[pps]</a>, <a href="http://somabo.de/talks/200509_toronto_happy_spling.pdf">[pdf]</a>
- * - Debug session 1 <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_1.pps">[pps]</a>, <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_1.pdf">[pdf]</a>
- * - Debug session 2 <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_2.pps">[pps]</a>, <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_2.pdf">[pdf]</a>
+ * - SPL Update <a href="http://talks.somabo.de/200702_vancouver_spl_update.pps">[pps]</a>, <a href="http://talks.somabo.de/200702_vancouver_spl_update.pdf">[pdf]</a>
+ * - Happy SPLing <a href="http://talks.somabo.de/200509_toronto_happy_spling.pps">[pps]</a>, <a href="http://talks.somabo.de/200509_toronto_happy_spling.pdf">[pdf]</a>
+ * - From engine overloading to SPL <a href="http://talks.somabo.de/200505_cancun_from_engine_overloading_to_spl.pps">[pps]</a>, <a href="http://talks.somabo.de/200505_cancun_from_engine_overloading_to_spl.pdf">[pdf]</a>
+ * - SPL for the masses <a href="http://talks.somabo.de/200504_php_quebec_spl_for_the_masses.pps">[pps]</a>, <a href="http://talks.somabo.de/200504_php_quebec_spl_for_the_masses.pdf">[pdf]</a>
+ *
+ * 11) Debug sessions:
+ * - Debug session 1 <a href="200407_oscon_introduction_to_iterators_debug.pps">[pps]</a>, <a href="200407_oscon_introduction_to_iterators_debug.pdf">[pdf]</a>
+ * - Debug session 2 <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_1.pps">[pps]</a>, <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_1.pdf">[pdf]</a>, <a href="http://taks.somabo.de/200411_php_conference_frankfrurt_iterator_debug_session.swf">[swf]</a>
+ * - Debug session 3 <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_2.pps">[pps]</a>, <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_2.pdf">[pdf]</a>
  *
  * You can download this documentation as a chm file 
  * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
  *
- * (c) Marcus Boerger, 2003 - 2006
+ * (c) Marcus Boerger, 2003 - 2007
  */
 
 /** @defgroup ZendEngine Zend engine classes
@@ -928,6 +931,14 @@ class SplFileInfo
 	 */
 	function isLink() {/**/}
 
+	/** @return target of link.
+	 */
+	function getLinkTarget() {/**/}
+
+	/** @return The resolved path
+	 */
+	function getRealPath() {/**/}
+	
 	/** @return getPathname()
 	 */
 	function __toString() {/**/}
