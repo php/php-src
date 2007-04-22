@@ -28,7 +28,7 @@ class CallbackFilterIterator extends FilterIterator
 
 	private $callback; /**< callback to use */
 	private $mode;     /**< mode any of USE_VALUE, USE_KEY, USE_BOTH */
-	private $flags;    /**< flags */
+	private $flags;    /**< flags (REPLACE) */
 	private $key;      /**< key value */
 	private $current;  /**< current value */
 
@@ -36,8 +36,8 @@ class CallbackFilterIterator extends FilterIterator
 	 *
 	 * @param it        inner iterator (iterator to filter)
 	 * @param callback  callback function
-	 * @param mode      @copy $mode
-	 * @param flags     @copy $flags
+	 * @param mode      any of USE_VALUE, USE_KEY, USE_BOTH
+	 * @param flags     any of 0, REPLACE
 	 */
 	public function __construct(Iterator $it, $callback, $mode = self::USE_VALUE, $flags = 0)
 	{
@@ -82,37 +82,37 @@ class CallbackFilterIterator extends FilterIterator
 		}
 	}
 
-	/** @return @copy $key */
+	/** @return current key value */
 	function key()
 	{
 		return $this->key;
 	}
 
-	/** @return @copy $current */
+	/** @return current value */
 	function current()
 	{
 		return $this->current;
 	}
 
-	/** @return @copy $mode */
+	/** @return operation mode */
 	function getMode()
 	{
 		return $this->mode;
 	}
 
-	/** @param $mode set new mode, @see $mode */
+	/** @param $mode set new mode, @see mode */
 	function setMode($mode)
 	{
 		$this->mode = $mode;
 	}
 
-	/** @return @copy $flags */
+	/** @return operation flags */
 	function getFlags()
 	{
 		return $this->flags;
 	}
 
-	/** @param $flags set new flags, @see @copy $flags */
+	/** @param $flags set new flags, @see flags */
 	function setFlags($flags)
 	{
 		$this->flags = $flags;
