@@ -1247,7 +1247,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		errno = 0;
 		zendlval->value.lval = strtol(yytext, NULL, 0);
 		if (errno == ERANGE) { /* Overflow */
-			zendlval->value.dval = zend_strtod(yytext, NULL);
+			if (yytext[0] == '0') { /* octal overflow */
+				zendlval->value.dval = zend_oct_strtod(yytext, NULL);
+			} else {
+				zendlval->value.dval = zend_strtod(yytext, NULL);
+			}
 			zendlval->type = IS_DOUBLE;
 			return T_DNUMBER;
 		}
