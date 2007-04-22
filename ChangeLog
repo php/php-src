@@ -1,3 +1,8 @@
+2007-04-21  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/standard/tests/strings/ucfirst.phpt:
+      - Fix test
+
 2007-04-20  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/tests/strings/fprintf.phpt:
