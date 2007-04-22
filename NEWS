@@ -1,7 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2007, PHP 5.2.2RC2
+- Fixed commandline handling fro CLI and CGI. (Marcus, Johannes)
 - Upgraded SQLite 3 to version 3.3.16 (Ilia)
+- Updated timezone database to version 2007.5. (Derick)
 - Fixed bug #41159 (mysql_pconnect() hash does not account for connect
   flags). (Ilia)
 - Fixed bug #41121 (range() overflow handling for large numbers on 32bit
@@ -29,7 +31,6 @@ PHP                                                                        NEWS
 - Fixed bug #39965 (Latitude and longitude are backwards in date_sun_info()).
   (Derick)
 - Fixed bug #39416 (Milliseconds in date()). (Derick)
-- Updated timezone database to version 2007.5. (Derick)
 
 
 10 Apr 2007, PHP 5.2.2RC1
