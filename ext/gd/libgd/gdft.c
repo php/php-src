@@ -377,7 +377,11 @@ static void *fontFetch (char **error, void *key)
 		path = gdEstrdup (fontsearchpath);
 
 		/* if name is an absolute filename then test directly */
+#ifdef NETWARE
+		if (*name == '/' || (name[0] != 0 && strstr(name, ":/"))) {
+#else
 		if (*name == '/' || (name[0] != 0 && name[1] == ':' && (name[2] == '/' || name[2] == '\\'))) {
+#endif
 			snprintf(fullname, sizeof(fullname) - 1, "%s", name);
 			if (access(fullname, R_OK) == 0) {
 				font_found++;
