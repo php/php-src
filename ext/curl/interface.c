@@ -475,8 +475,9 @@ PHP_MINIT_FUNCTION(curl)
  	REGISTER_CURL_CONSTANT(CURLAUTH_ANYSAFE);
 #endif
 
-#if LIBCURL_VERSION_NUM > 0x070a06 /* CURLOPT_PROXYAUTH is available since curl 7.10.7 */
+#if LIBCURL_VERSION_NUM > 0x070a06 /* CURLOPT_PROXYAUTH & CURLOPT_FTP_CREATE_MISSING_DIRS are available since curl 7.10.7 */
 	REGISTER_CURL_CONSTANT(CURLOPT_PROXYAUTH);
+	REGISTER_CURL_CONSTANT(CURLOPT_FTP_CREATE_MISSING_DIRS);
 #endif
 
 	/* Constants effecting the way CURLOPT_CLOSEPOLICY works */
@@ -1271,8 +1272,9 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #if LIBCURL_VERSION_NUM > 0x070a05 /* CURLOPT_HTTPAUTH is available since curl 7.10.6 */
 		case CURLOPT_HTTPAUTH:
 #endif
-#if LIBCURL_VERSION_NUM > 0x070a06 /* CURLOPT_PROXYAUTH is available since curl 7.10.7 */
+#if LIBCURL_VERSION_NUM > 0x070a06 /* CURLOPT_PROXYAUTH & CURLOPT_FTP_CREATE_MISSING_DIRS are available since curl 7.10.7 */
 		case CURLOPT_PROXYAUTH:
+		case CURLOPT_FTP_CREATE_MISSING_DIRS:
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x070c02
