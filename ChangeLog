@@ -1,3 +1,63 @@
+2007-04-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.h
+      ZendEngine2/tests/hex_overflow_32bit.phpt
+      ZendEngine2/tests/oct_overflow_32bit.phpt:
+      MFH: fix #41118 (PHP does not handle overflow of octal integers)
+
+    * ext/standard/tests/strings/printf.phpt
+      ext/standard/tests/strings/str_pad.phpt
+      ext/standard/tests/strings/strlen.phpt:
+      fix tests
+
+    * ext/standard/string.c:
+      fix [l]trim() in unicode mode
+
+2007-04-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl.php
+      ext/spl/examples/callbackfilteriterator.inc:
+      - Update docu
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+    * sapi/cli/tests/003-2.phpt
+      sapi/cli/tests/003-2.phpt:
+      
+      - Add new test
+
+    * sapi/cgi/getopt.c
+      sapi/cli/getopt.c:
+      - Merge getopt fixes from re2c
+
+2007-04-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysql/php_mysql.c:
+      
+      Fixed bug #41159 (mysql_pconnect() hash does not account for connect
+      flags).
+
+2007-04-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * win32/registry.c
+      win32/registry.c:
+      Fixed buffer overflow
+
+    * (PHP_5_2)
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_compound2_001w.phpt:
+      Fixed test
+
 2007-04-21  Johannes Schlüter  <johannes@schlueters.de>
 
     * ext/standard/tests/strings/ucfirst.phpt:

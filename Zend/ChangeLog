@@ -1,3 +1,13 @@
+2007-04-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_language_scanner.l
+      zend_strtod.c
+      zend_strtod.h
+      tests/hex_overflow_32bit.phpt
+      tests/oct_overflow_32bit.phpt:
+      MFH: fix #41118 (PHP does not handle overflow of octal integers)
+
 2007-04-20  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
