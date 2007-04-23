@@ -390,7 +390,7 @@ found at:
 .SH AUTHORS
 The PHP Group: Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, Sam Ruby, Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski.
 .P
-Additional work for the CLI sapi was done by Edin Kadribasic and Marcus Boerger.
+Additional work for the CLI sapi was done by Edin Kadribasic, Marcus Boerger and Johannes Schlueter.
 .P
 A List of active developers can be found here:
 .PD 0
