@@ -468,7 +468,7 @@ static void php_cli_usage(char *argv0)
 				"  args...          Arguments passed to script. Use -- args when first argument\n"
 				"                   starts with - or script is read from stdin\n"
 				"\n"
-				"  --ini            Show ini configuration files\n"
+				"  --ini            Show configuration file names\n"
 				"\n"
 #if (HAVE_REFLECTION)
 				"  --rf <name>      Show information about function <name>.\n"
