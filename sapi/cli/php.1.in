@@ -304,6 +304,9 @@ Shows information about extension
 .IR name
 Shows configuration for extension
 .B name
+.TP
+.B \-\-ini
+Show ini configuration files
 .SH FILES
 .TP 15
 .B php\-cli.ini
