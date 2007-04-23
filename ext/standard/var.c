@@ -682,8 +682,8 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	   by its object handle and the class entry since 5.0. */
 	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
 		p = smart_str_print_long(id + sizeof(id) - 1,
-				(((unsigned long)Z_OBJCE_P(var) << 5)
-				| ((unsigned long)Z_OBJCE_P(var) >> (sizeof(long) * 8 - 5)))
+				(((size_t)Z_OBJCE_P(var) << 5)
+				| ((size_t)Z_OBJCE_P(var) >> (sizeof(long) * 8 - 5)))
 				+ (long) Z_OBJ_HANDLE_P(var));
 		*(--p) = 'O';
 		len = id + sizeof(id) - 1 - p;
