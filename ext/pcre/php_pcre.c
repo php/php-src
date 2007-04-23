@@ -69,7 +69,7 @@ typedef struct {
 ZEND_DECLARE_MODULE_GLOBALS(pcre);
 
 
-static void pcre_handle_exec_error(int pcre_code TSRMLS_DC)
+static void pcre_handle_exec_error(int pcre_code TSRMLS_DC) /* {{{ */
 {
 	int preg_code = 0;
 
@@ -93,9 +93,10 @@ static void pcre_handle_exec_error(int pcre_code TSRMLS_DC)
 
 	PCRE_G(error_code) = preg_code;
 }
+/* }}} */
 
 
-static void php_free_pcre_cache(void *data)
+static void php_free_pcre_cache(void *data) /* {{{ */
 {
 	pcre_cache_entry *pce = (pcre_cache_entry *) data;
 	if (!pce) return;
@@ -106,20 +107,23 @@ static void php_free_pcre_cache(void *data)
 	pefree(pce->locale, 1);
 #endif
 }
+/* }}} */
 
 
-static PHP_GINIT_FUNCTION(pcre)
+static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 {
 	zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
 	pcre_globals->backtrack_limit = 0;
 	pcre_globals->recursion_limit = 0;
 	pcre_globals->error_code      = PHP_PCRE_NO_ERROR;
 }
+/* }}} */
 
-static PHP_GSHUTDOWN_FUNCTION(pcre)
+static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 {
 	zend_hash_destroy(&pcre_globals->pcre_cache);
 }
+/* }}} */
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "100000", PHP_INI_ALL, OnUpdateLong, backtrack_limit, zend_pcre_globals, pcre_globals)
@@ -1035,7 +1039,9 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 	return php_pcre_replace_impl(pce, subject, subject_len, replace_val, 
 		is_callable_replace, result_len, limit, replace_count TSRMLS_CC);
 }
+/* }}} */
 
+/* {{{ php_pcre_replace_impl() */
 PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *replace_val, 
 	int is_callable_replace, int *result_len, int limit, int *replace_count TSRMLS_DC)
 {
@@ -1797,7 +1803,9 @@ PHP_FUNCTION(preg_grep)
 	
 	php_pcre_grep_impl(pce, input, return_value, flags TSRMLS_CC);
 }
+/* }}} */
 
+/* {{{ php_pcre_grep_impl */
 PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return_value,
 	long flags TSRMLS_DC)
 {
