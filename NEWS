@@ -12,8 +12,6 @@ PHP                                                                        NEWS
 - Fixed bug #41109 (recursiveiterator.inc says "implements" Iterator instead of
   "extends"). (Marcus)
 - Fixed bug #41093 (magic_quotes_gpc ignores first arrays keys). (Arpad, Ilia)
-- Fixed bug #41083 (mysql_ping() requires MYSQL_OPT_RECONNECT to be set since 
-  MySQL 5.0.13). (xiaojb at gmail dot com, Tony)
 - Fixed bug #41075 (memleak when creating default object caused exception). 
   (Dmitry)
 - Fixed bug #41067 (json_encode() problem with UTF-16 input). (jp at df5ea
