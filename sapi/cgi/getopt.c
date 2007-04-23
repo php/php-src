@@ -145,7 +145,8 @@ int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **opta
 		}
 		return opts[opts_idx].opt_char;
 	} else {
-		if (arg_start >= 2) {
+		/* multiple options specified as one (exclude long opts) */
+		if (arg_start >= 2 && !((argv[*optind][0] == '-') && (argv[*optind][1] == '-'))) {
 			if (!argv[*optind][optchr+1])
 			{
 				dash = 0;
