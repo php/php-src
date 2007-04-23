@@ -91,21 +91,29 @@
 
 #include "php_getopt.h"
 
+PHPAPI extern char *php_ini_opened_path;
+PHPAPI extern char *php_ini_scanned_files;
+
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
 
-#define PHP_MODE_STANDARD      1
-#define PHP_MODE_HIGHLIGHT     2
-#define PHP_MODE_INDENT        3
-#define PHP_MODE_LINT          4
-#define PHP_MODE_STRIP         5
-#define PHP_MODE_CLI_DIRECT    6
-#define PHP_MODE_PROCESS_STDIN 7
-#define PHP_MODE_REFLECTION_FUNCTION    8
-#define PHP_MODE_REFLECTION_CLASS       9
-#define PHP_MODE_REFLECTION_EXTENSION   10
-#define PHP_MODE_REFLECTION_EXT_INFO    11
+enum behavior_mode {
+	PHP_MODE_STANDARD,
+	PHP_MODE_HIGHLIGHT,
+#if 0 /* not yet operational, see also below ... */
+	PHP_MODE_INDENT,
+#endif
+	PHP_MODE_LINT,
+	PHP_MODE_STRIP,
+	PHP_MODE_CLI_DIRECT,
+	PHP_MODE_PROCESS_STDIN,
+	PHP_MODE_REFLECTION_FUNCTION,
+	PHP_MODE_REFLECTION_CLASS,
+	PHP_MODE_REFLECTION_EXTENSION,
+	PHP_MODE_REFLECTION_EXT_INFO,
+	PHP_MODE_SHOW_INI_CONFIG
+};
 
 #define HARDCODED_INI			\
 	"html_errors=0\n"			\
@@ -153,9 +161,10 @@ static const opt_struct OPTIONS[] = {
 	{11,  1, "rclass"},
 	{12,  1, "re"},
 	{12,  1, "rextension"},
+#endif
 	{13,  1, "ri"},
 	{13,  1, "rextinfo"},
-#endif
+	{14,  0, "ini"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -459,13 +468,15 @@ static void php_cli_usage(char *argv0)
 				"  args...          Arguments passed to script. Use -- args when first argument\n"
 				"                   starts with - or script is read from stdin\n"
 				"\n"
+				"  --ini            Show ini configuration files\n"
+				"\n"
 #if (HAVE_REFLECTION)
 				"  --rf <name>      Show information about function <name>.\n"
 				"  --rc <name>      Show information about class <name>.\n"
 				"  --re <name>      Show information about extension <name>.\n"
+#endif
 				"  --ri <name>      Show configuration for extension <name>.\n"
 				"\n"
-#endif
 				, prog, prog, prog, prog, prog, prog);
 }
 /* }}} */
@@ -583,7 +594,7 @@ int main(int argc, char *argv[])
 	int c;
 	zend_file_handle file_handle;
 /* temporary locals */
-	int behavior=PHP_MODE_STANDARD;
+	enum behavior_mode behavior = PHP_MODE_STANDARD;
 #ifdef HAVE_REFLECTION
 	char *reflection_what = NULL;
 #endif
@@ -971,11 +982,14 @@ int main(int argc, char *argv[])
 				behavior=PHP_MODE_REFLECTION_EXTENSION;
 				reflection_what = php_optarg;
 				break;
+#endif
 			case 13:
 				behavior=PHP_MODE_REFLECTION_EXT_INFO;
 				reflection_what = php_optarg;
 				break;
-#endif
+			case 14:
+				behavior = PHP_MODE_SHOW_INI_CONFIG;
+				break;
 			default:
 				break;
 			}
@@ -1243,6 +1257,8 @@ int main(int argc, char *argv[])
 					zend_execute_data execute_data;
 
 					switch (behavior) {
+						default:
+							break;
 						case PHP_MODE_REFLECTION_FUNCTION:
 							if (strstr(reflection_what, "::")) {
 								pce = reflection_method_ptr;
@@ -1282,6 +1298,7 @@ int main(int argc, char *argv[])
 
 					break;
 				}
+#endif /* reflection */
 			case PHP_MODE_REFLECTION_EXT_INFO:
 				{
 					int len = strlen(reflection_what);
@@ -1298,7 +1315,14 @@ int main(int argc, char *argv[])
 					efree(lcname);
 					break;
 				}
-#endif /* reflection */
+			case PHP_MODE_SHOW_INI_CONFIG:
+				{
+					zend_printf("Configuration File (php.ini) Path: %s\n", PHP_CONFIG_FILE_PATH);
+					zend_printf("Loaded Configuration File:         %s\n", php_ini_opened_path ? php_ini_opened_path : "(none)");
+					zend_printf("Scan for additional .ini files in: %s\n", *PHP_CONFIG_FILE_SCAN_DIR ? PHP_CONFIG_FILE_SCAN_DIR : "(none)");
+					zend_printf("Additional .ini files parsed:      %s\n", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
+					break;
+				}
 			}
 		}
 
