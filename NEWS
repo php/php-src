@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - Fixed bug #41118 (PHP does not handle overflow of octal integers). (Tony)
 - Fixed bug #41109 (recursiveiterator.inc says "implements" Iterator instead of
   "extends"). (Marcus)
+- Fixed bug #40130 (TTF usage doesn't work properly under Netware). (Scott,
+  gk at gknw dot de)
 - Fixed bug #41093 (magic_quotes_gpc ignores first arrays keys). (Arpad, Ilia)
 - Fixed bug #41075 (memleak when creating default object caused exception). 
   (Dmitry)
