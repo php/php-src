@@ -242,6 +242,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_gmp_clrbit, 0)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
+	static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_testbit, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
 static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_popcount, 0)
 	ZEND_ARG_INFO(0, a)
@@ -308,6 +314,7 @@ zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_xor,	arginfo_gmp_xor)
 	ZEND_FE(gmp_setbit,	arginfo_gmp_setbit)
 	ZEND_FE(gmp_clrbit,	arginfo_gmp_clrbit)
+	ZEND_FE(gmp_testbit,	arginfo_gmp_testbit)
 	ZEND_FE(gmp_scan0, arginfo_gmp_scan0)
 	ZEND_FE(gmp_scan1, arginfo_gmp_scan1)
 	ZEND_FE(gmp_popcount, arginfo_gmp_popcount)
@@ -1528,6 +1535,35 @@ ZEND_FUNCTION(gmp_clrbit)
 	}
 
 	mpz_clrbit(*gmpnum_a, index);
+}
+/* }}} */
+
+/* {{{ proto bool gmp_testbit(resource a, int index) U
+   Tests if bit is set in a */
+ZEND_FUNCTION(gmp_testbit)
+{
+	zval **a_arg, **ind_arg;
+	int index;
+	mpz_t *gmpnum_a;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &a_arg, &ind_arg) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(gmpnum_a, mpz_t *, a_arg, -1, GMP_RESOURCE_NAME, le_gmp);
+
+	convert_to_long_ex(ind_arg);
+	index = Z_LVAL_PP(ind_arg);
+	
+	if (index < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index must be greater than or equal to zero");
+		RETURN_FALSE;
+	}
+
+	if (mpz_tstbit(*gmpnum_a, index)) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 

@@ -57,6 +57,7 @@ PHP                                                                        NEWS
     set params during context creation. (Sara)
   . "context" and "binary_pipes" params in "other_options" arg. (Sara)
   . stream_resolve_include_path(). (Sara)
+- Added gmp_testbit() function. (Tony)
 - Added shm_has_var() function. (Mike)
 - Added str_getcsv() function. (Sara)
 - Added ext/hash support to ext/session's ID generator. (Sara)
