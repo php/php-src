@@ -656,7 +656,10 @@ define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 /* We got failed Tests, offer the user to send an e-mail to QA team, unless NO_INTERACTION is set */
 if (!getenv('NO_INTERACTION')) {
 	$fp = fopen("php://stdin", "r+");
-	echo "\nYou may have found a problem in PHP.\nWe would like to send this report automatically to the\n";
+	if ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['WARNED'] || $sum_results['LEAKED']) {
+		echo "\nYou may have found a problem in PHP.";
+	}
+	echo "\nWe would like to send this report automatically to the\n";
 	echo "PHP QA team, to give us a better understanding of how\nthe test cases are doing. If you don't want to send it\n";
 	echo "immediately, you can choose \"s\" to save the report to\na file that you can send us later.\n";
 	echo "Do you want to send this report now? [Yns]: ";
