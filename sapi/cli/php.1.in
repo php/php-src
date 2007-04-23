@@ -306,7 +306,7 @@ Shows configuration for extension
 .B name
 .TP
 .B \-\-ini
-Show ini configuration files
+Show configuration file names
 .SH FILES
 .TP 15
 .B php\-cli.ini
