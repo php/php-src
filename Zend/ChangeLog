@@ -1,3 +1,9 @@
+2007-04-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_operators.c
+      zend_operators.c:
+      WIN64 support
+
 2007-04-22  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
