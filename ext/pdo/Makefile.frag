@@ -2,7 +2,8 @@ phpincludedir=$(prefix)/include/php
 
 PDO_HEADER_FILES= \
 	php_pdo.h \
-	php_pdo_driver.h
+	php_pdo_driver.h \
+	php_pdo_phpvers_compat.h
 
 install-pdo-headers:
 	@echo "Installing PDO headers:          $(INSTALL_ROOT)$(phpincludedir)/ext/pdo/"
