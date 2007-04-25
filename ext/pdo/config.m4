@@ -56,7 +56,7 @@ for more detail on this issue.
   
   ifdef([PHP_INSTALL_HEADERS],
   [
-    PHP_INSTALL_HEADERS(ext/pdo, [php_pdo.h php_pdo_driver.h])
+    PHP_INSTALL_HEADERS(ext/pdo, [php_pdo.h php_pdo_driver.h php_pdo_phpvers_compat.h])
   ], [
     PHP_ADD_MAKEFILE_FRAGMENT
   ])
