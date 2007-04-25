@@ -351,7 +351,26 @@ int php_init_config(TSRMLS_D)
 #else
 		if (sapi_module.executable_location) {
 			binary_location = (char *)emalloc(PATH_MAX);
-			if (!realpath(sapi_module.executable_location, binary_location)) {
+			if (!strchr(sapi_module.executable_location, '/')) {
+				char *path;
+				int found = 0;
+
+				if ((path = getenv("PATH")) != NULL) {
+					char *search_dir, search_path[MAXPATHLEN];
+
+					while ((search_dir = strsep(&path, ":")) != NULL) {
+						snprintf(search_path, MAXPATHLEN, "%s/%s", search_dir, sapi_module.executable_location);
+						if (VCWD_REALPATH(search_path, binary_location) && !VCWD_ACCESS(binary_location, X_OK)) {
+							found = 1;
+							break;
+						}
+					}
+				}
+				if (!found) {
+					efree(binary_location);
+					binary_location = NULL;
+				}
+			} else if (!VCWD_REALPATH(sapi_module.executable_location, binary_location) || VCWD_ACCESS(binary_location, X_OK)) {
 				efree(binary_location);
 				binary_location = NULL;			 
 			}
