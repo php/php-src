@@ -881,6 +881,7 @@ SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D))
 {
+	TSRMLS_FETCH();
 	if (EG(in_execution)) {
 		return FAILURE;
 	}
@@ -891,6 +892,7 @@ SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRML
 
 SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC))
 {
+	TSRMLS_FETCH();
 	if (EG(in_execution)) {
 		return FAILURE;
 	}
@@ -900,6 +902,7 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 
 SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC))
 {
+	TSRMLS_FETCH();
 	if (EG(in_execution)) {
 		return FAILURE;
 	}
