@@ -627,7 +627,7 @@ expr_without_variable:
 	|	'@' { zend_do_begin_silence(&$1 TSRMLS_CC); } expr { zend_do_end_silence(&$1 TSRMLS_CC); $$ = $3; }
 	|	scalar				{ $$ = $1; }
 	|	T_ARRAY '(' array_pair_list ')' { $$ = $3; }
-	|	'`' encaps_list '`' { zend_do_shell_exec(&$$, &$2 TSRMLS_CC); }
+	|	'`' { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; } encaps_list '`' { zend_do_shell_exec(&$$, &$3 TSRMLS_CC); }
 	|	T_PRINT expr  { zend_do_print(&$$, &$2 TSRMLS_CC); }
 ;
 
