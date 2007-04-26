@@ -1,5 +1,7 @@
 --TEST--
 Reflection Bug #29986 (Class constants won't work with predefined constants when using ReflectionClass)
+--INI--
+precision=14
 --SKIPIF--
 <?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
