@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Apr 2007, PHP 5.2.3RC3
+
 26 Apr 2007, PHP 5.2.2RC2
 - Added GMP_VERSION constant. (Tony)
 - Fixed commandline handling fro CLI and CGI. (Marcus, Johannes)
