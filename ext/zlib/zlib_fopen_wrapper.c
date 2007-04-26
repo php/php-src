@@ -76,7 +76,7 @@ static int php_gziop_close(php_stream *stream, int close_handle TSRMLS_DC)
 			self->gz_file = NULL;
 		}
 		if (self->stream) {
-			php_stream_close(self->stream);
+			php_stream_free(self->stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PRESERVE_HANDLE);
 			self->stream = NULL;
 		}
 	}
