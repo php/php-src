@@ -1,5 +1,7 @@
 --TEST--
 Test printf() function (32bit)
+--INI--
+precision=14
 --SKIPIF--
 <?php
 if (PHP_INT_MAX > 2147483647) {
