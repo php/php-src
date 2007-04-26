@@ -1,3 +1,64 @@
+2007-04-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      TODO-PHP5:
+      
+      Update TODO: filter extension was added
+
+2007-04-25  Antony Dovgal  <antony@zend.com>
+
+    * ext/gmp/gmp.c
+      ext/gmp/tests/011.phpt:
+      add GMP_VERSION constant
+      add test
+      do not allow zero operand in gmp_divexact()
+
+2007-04-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/SAPI.c
+      main/SAPI.c:
+      ZTS fix
+
+2007-04-25  Antony Dovgal  <antony@zend.com>
+
+    * main/SAPI.c:
+      MFB: Fix crashes when SAPI handlers are overriden in dl()-ed extensions
+
+    * (PHP_5_2)
+      main/SAPI.c:
+      fix ZTS build
+
+2007-04-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * main/php_ini.c:
+      - Don't pick up php.ini from cwd on BSDs
+      - "Resolve" (with the help of $PATH) to /path/to/php and pick up
+      	the php.ini from there
+
+    * sapi/cli/php_cli.c:
+      rename --ri core to --ri main
+
+2007-04-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      main/SAPI.c:
+      Fixed crashes because of SAPI handlers overrding from inside of dl()-ed
+      extensions
+
+2007-04-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/pdo/.cvsignore
+      ext/pdo/Makefile.frag
+      ext/pdo/config.m4:
+      > date: 2006/12/09 22:18:42;  author: wez;  state: Exp;  lines: +14 -6
+      > merge PHP 5 pdo into HEAD.  This source compiles on both PHP 5 and PHP
+      6.
+      > If you're poking around in here, please make sure that any changes you
+      make
+      > compile on both PHP 5 and 6.  Thanks!
+      
+      Same goes for Wez. :) (pecl build broken for pdo drivers)
+
 2007-04-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
