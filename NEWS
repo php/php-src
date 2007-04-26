@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2007, PHP 5.2.2RC2
+- Added GMP_VERSION constant. (Tony)
 - Fixed commandline handling fro CLI and CGI. (Marcus, Johannes)
 - Upgraded SQLite 3 to version 3.3.16 (Ilia)
 - Updated timezone database to version 2007.5. (Derick)
