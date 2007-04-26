@@ -1,5 +1,7 @@
 --TEST--
 overflow check for _php_math_basetozval
+--INI--
+precision=14
 --FILE--
 <?php
 

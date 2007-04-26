@@ -1,5 +1,7 @@
 --TEST--
 Math constants
+--INI--
+precision=14
 --FILE--
 <?php
 $constants = array(
