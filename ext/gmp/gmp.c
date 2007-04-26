@@ -389,6 +389,7 @@ ZEND_MODULE_STARTUP_D(gmp)
 	REGISTER_LONG_CONSTANT("GMP_ROUND_ZERO", GMP_ROUND_ZERO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_PLUSINF", GMP_ROUND_PLUSINF, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_MINUSINF", GMP_ROUND_MINUSINF, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("GMP_VERSION", (char *)gmp_version, CONST_CS | CONST_PERSISTENT);
 
 	mp_set_memory_functions(gmp_emalloc, gmp_erealloc, gmp_efree);
 
@@ -415,6 +416,7 @@ ZEND_MODULE_INFO_D(gmp)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "gmp support", "enabled");
+	php_info_print_table_row(2, "GMP version", gmp_version);
 	php_info_print_table_end();
 }
 /* }}} */
@@ -996,7 +998,13 @@ ZEND_FUNCTION(gmp_mod)
    Divide a by b using exact division algorithm */
 ZEND_FUNCTION(gmp_divexact)
 {
-	gmp_binary_op(mpz_divexact);
+	zval **a_arg, **b_arg;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &a_arg, &b_arg) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+	
+	gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_divexact, NULL, 0, 1 TSRMLS_CC);
 }
 /* }}} */
 
