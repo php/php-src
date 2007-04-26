@@ -1,5 +1,7 @@
 --TEST--
 disk_total_space() and disk_free_space() tests
+--INI--
+precision=14
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
