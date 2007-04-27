@@ -3,6 +3,9 @@ gmp_divexact() tests (OK to fail with GMP =< 4.2.1)
 --FILE--
 <?php
 
+var_dump(gmp_divexact(1, 1, 1));
+var_dump(gmp_divexact());
+
 $r = gmp_divexact("233", "23345555555555555555555555");
 var_dump(gmp_strval($r));
 
@@ -29,6 +32,11 @@ var_dump(gmp_strval($r));
 echo "Done\n";
 ?>
 --EXPECTF--	
+Warning: Wrong parameter count for gmp_divexact() in %s on line %d
+NULL
+
+Warning: Wrong parameter count for gmp_divexact() in %s on line %d
+NULL
 string(1) "0"
 
 Warning: gmp_divexact(): Zero operand not allowed in %s on line %d

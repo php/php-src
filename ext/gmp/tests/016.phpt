@@ -25,6 +25,12 @@ var_dump(gmp_powm(array(),array()));
 var_dump(gmp_powm(array()));
 var_dump(gmp_powm());
 
+$n = gmp_init("-5");
+var_dump(gmp_powm(10, $n, 10));
+
+$n = gmp_init("0");
+var_dump(gmp_powm(10, $n, 10));
+
 echo "Done\n";
 ?>
 --EXPECTF--	
@@ -58,4 +64,8 @@ NULL
 
 Warning: Wrong parameter count for gmp_powm() in %s on line %d
 NULL
+
+Warning: gmp_powm(): Second parameter cannot be less than 0 in %s on line %d
+bool(false)
+resource(%d) of type (GMP integer)
 Done
