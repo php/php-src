@@ -1,3 +1,30 @@
+2007-04-26  Antony Dovgal  <antony@zend.com>
+
+    * tests/double_to_string.phpt
+      tests/double_to_string.phpt
+      tests/hex_overflow_32bit.phpt
+      tests/hex_overflow_32bit.phpt
+      tests/oct_overflow_32bit.phpt
+      tests/oct_overflow_32bit.phpt:
+      fix tests
+
+    * zend_strtod.c:
+      add Id tag
+
+    * zend.c
+      zend.h:
+      fix build on Tru64
+
+2007-04-26  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_language_parser.y:
+      Set CG(literal_type) for backticks.
+
+2007-04-26  Antony Dovgal  <antony@zend.com>
+
+    * tests/bug35655.phpt:
+      remove highlight.bg
+
 2007-04-23  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_operators.c
