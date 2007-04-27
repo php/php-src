@@ -570,9 +570,8 @@ ZEND_API int convert_to_boolean(zval *op)
 			{
 				UChar *strval = Z_USTRVAL_P(op);
 
-				if (Z_USTRVAL_P(op) == 0
-					|| (Z_USTRLEN_P(op)==1 &&
-						(Z_USTRVAL_P(op)[0]=='0'))) {
+				if (Z_USTRLEN_P(op) == 0
+					|| (Z_USTRLEN_P(op)==1 && Z_USTRVAL_P(op)[0]=='0')) {
 					Z_LVAL_P(op) = 0;
 				} else {
 					Z_LVAL_P(op) = 1;
