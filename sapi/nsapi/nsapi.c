@@ -709,7 +709,11 @@ static void nsapi_log_message(char *message)
 	TSRMLS_FETCH();
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 
-	log_error(LOG_INFORM, pblock_findval("fn", rc->pb), rc->sn, rc->rq, "%s", message);
+	if (rc) {
+		log_error(LOG_INFORM, pblock_findval("fn", rc->pb), rc->sn, rc->rq, "%s", message);
+	} else {
+		log_error(LOG_INFORM, "php5", NULL, NULL, "%s", message);
+	}
 }
 
 static time_t sapi_nsapi_get_request_time(TSRMLS_D)
