@@ -1,3 +1,107 @@
+2007-04-26  Antony Dovgal  <antony@zend.com>
+
+    * ext/filter/tests/010.phpt
+      ext/filter/tests/011.phpt
+      ext/filter/tests/bug7715.phpt
+      ext/json/tests/bug40503.phpt
+      ext/json/tests/pass001.1.phpt
+      ext/json/tests/pass001.phpt
+      ext/reflection/tests/bug29986.phpt
+      ext/standard/tests/array/array_sum.phpt
+      ext/standard/tests/array/bug41121.phpt
+      ext/standard/tests/file/disk.phpt
+      ext/standard/tests/math/constants.phpt
+      ext/standard/tests/math/hexdec.phpt
+      ext/standard/tests/serialize/bug31442.phpt
+      ext/standard/tests/strings/printf.phpt:
+      fix tests
+      add test for yet not merged fix
+
+    * ZendEngine2/tests/double_to_string.phpt
+      ZendEngine2/tests/double_to_string.phpt
+      ZendEngine2/tests/hex_overflow_32bit.phpt
+      ZendEngine2/tests/hex_overflow_32bit.phpt
+      ZendEngine2/tests/oct_overflow_32bit.phpt
+      ZendEngine2/tests/oct_overflow_32bit.phpt
+      ext/filter/tests/010.phpt
+      ext/filter/tests/011.phpt
+      ext/filter/tests/bug7715.phpt
+      ext/json/tests/bug40503.phpt
+      ext/json/tests/pass001.1.phpt
+      ext/json/tests/pass001.phpt
+      ext/reflection/tests/bug29986.phpt
+      ext/standard/tests/array/array_sum.phpt
+      ext/standard/tests/array/bug41121.phpt
+      ext/standard/tests/file/disk.phpt
+      ext/standard/tests/math/constants.phpt
+      ext/standard/tests/math/hexdec.phpt
+      ext/standard/tests/serialize/bug31442.phpt
+      ext/standard/tests/strings/printf.phpt
+      ext/standard/tests/strings/ucfirst.phpt:
+      fix tests
+
+    * ZendEngine2/zend_strtod.c:
+      add Id tag
+
+2007-04-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.2.2RC2
+
+2007-04-26  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h:
+      fix build on Tru64
+
+2007-04-26  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_language_parser.y:
+      Set CG(literal_type) for backticks.
+
+2007-04-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gmp/gmp.c
+      ext/gmp/tests/011.phpt:
+      MFH: add test & GMP_VERSION constant
+      do not allow zero operand in gmp_divexact()
+
+2007-04-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/zlib/zlib_fopen_wrapper.c
+      ext/zlib/zlib_fopen_wrapper.c:
+      Prevent double close() of the same file handle
+
+2007-04-26  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug35655.phpt:
+      remove highlight.bg
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/standard/tests/strings/highlight_file.phpt
+      main/main.c
+      tests/strings/004.phpt
+      tests/strings/bug26703.phpt:
+      removed unused highlight.bg ini option
+
+2007-04-26  Johannes Schlüter  <johannes@schlueters.de>
+
+    * tests/classes/bug26737.phpt:
+      - Fix test
+
 2007-04-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
