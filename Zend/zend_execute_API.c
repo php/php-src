@@ -622,6 +622,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	char *fname, *colon;
 	int fname_len;
 
+	*fci->retval_ptr_ptr = NULL;
+
 	if (!EG(active)) {
 		return FAILURE; /* executor is already inactive */
 	}
@@ -651,11 +653,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		 */
 		memset(&execute_data, 0, sizeof(zend_execute_data));
 	}
-
-	/* we may return SUCCESS, and yet retval may be uninitialized,
-	 * if there was an exception...
-	 */
-	*fci->retval_ptr_ptr = NULL;
 
 	if (!fci_cache || !fci_cache->initialized) {
 		if (Z_TYPE_P(fci->function_name)==IS_ARRAY) { /* assume array($obj, $name) couple */
