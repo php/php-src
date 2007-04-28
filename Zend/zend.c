@@ -462,10 +462,6 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %v could not be converted to string", Z_OBJCE_P(expr)->name);
 			ZVAL_EMPTY_UNICODE(expr_copy);
 			break;
-		case IS_ARRAY:
-			Z_USTRLEN_P(expr_copy) = sizeof("Array")-1;
-			Z_USTRVAL_P(expr_copy) = zend_ascii_to_unicode("Array", sizeof("Array") ZEND_FILE_LINE_CC);
-			break;
 		default:
 			*expr_copy = *expr;
 			zval_copy_ctor(expr_copy);
