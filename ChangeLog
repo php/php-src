@@ -1,3 +1,90 @@
+2007-04-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/cast_to_array.phpt
+      ZendEngine2/tests/cast_to_bool.phpt
+      ZendEngine2/tests/cast_to_double.phpt
+      ZendEngine2/tests/cast_to_int.phpt
+      ZendEngine2/tests/cast_to_object.phpt
+      ZendEngine2/tests/cast_to_string.phpt
+      ZendEngine2/tests/settype_array.phpt
+      ZendEngine2/tests/settype_bool.phpt
+      ZendEngine2/tests/settype_double.phpt
+      ZendEngine2/tests/settype_int.phpt
+      ZendEngine2/tests/settype_null.phpt
+      ZendEngine2/tests/settype_object.phpt
+      ZendEngine2/tests/settype_resource.phpt
+      ZendEngine2/tests/settype_string.phpt:
+      add new tests
+
+    * ZendEngine2/tests/cast_to_array.phpt
+      ZendEngine2/tests/cast_to_array.phpt
+      ZendEngine2/tests/cast_to_bool.phpt
+      ZendEngine2/tests/cast_to_bool.phpt
+      ZendEngine2/tests/cast_to_double.phpt
+      ZendEngine2/tests/cast_to_double.phpt
+      ZendEngine2/tests/cast_to_int.phpt
+      ZendEngine2/tests/cast_to_int.phpt
+      ZendEngine2/tests/cast_to_object.phpt
+      ZendEngine2/tests/cast_to_object.phpt
+      ZendEngine2/tests/cast_to_string.phpt
+      ZendEngine2/tests/cast_to_string.phpt
+      ZendEngine2/tests/settype_array.phpt
+      ZendEngine2/tests/settype_array.phpt
+      ZendEngine2/tests/settype_bool.phpt
+      ZendEngine2/tests/settype_bool.phpt
+      ZendEngine2/tests/settype_double.phpt
+      ZendEngine2/tests/settype_double.phpt
+      ZendEngine2/tests/settype_int.phpt
+      ZendEngine2/tests/settype_int.phpt
+      ZendEngine2/tests/settype_null.phpt
+      ZendEngine2/tests/settype_null.phpt
+      ZendEngine2/tests/settype_object.phpt
+      ZendEngine2/tests/settype_object.phpt
+      ZendEngine2/tests/settype_resource.phpt
+      ZendEngine2/tests/settype_resource.phpt
+      ZendEngine2/tests/settype_string.phpt
+      ZendEngine2/tests/settype_string.phpt:
+      
+      add new tests
+
+    * ZendEngine2/zend_operators.c:
+      fix typo (Z_USTRVAL_P -> Z_USTRLEN_P) and CS
+
+2007-04-27  Edin Kadribasic  <edin@krug.dk>
+
+    * (PHP_5_2)
+      main/php_version.h:
+      Sync with configure.in
+
+2007-04-27  Antony Dovgal  <antony@zend.com>
+
+    * ext/gmp/tests/011.phpt
+      ext/gmp/tests/016.phpt
+      ext/gmp/tests/040.phpt:
+      improve the tests
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug41209.phpt:
+      MFH: initialize retval_ptr_ptr before returning FAILURE
+      this fixes invalid read in #41209
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug41209.phpt
+      ZendEngine2/tests/bug41209.phpt:
+      initialize retval_ptr_ptr before returning FAILURE
+      this fixes invalid read in #41209
+
+2007-04-27  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_5_2)
+      sapi/nsapi/nsapi.c:
+      MFH: Fix crash on server startup when log message is printed
+
+    * sapi/nsapi/nsapi.c:
+      Fix crash on server startup when log message is printed
+
 2007-04-26  Antony Dovgal  <antony@zend.com>
 
     * ext/filter/tests/010.phpt

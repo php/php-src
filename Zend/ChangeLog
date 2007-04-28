@@ -1,3 +1,68 @@
+2007-04-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/cast_to_array.phpt
+      tests/cast_to_bool.phpt
+      tests/cast_to_double.phpt
+      tests/cast_to_int.phpt
+      tests/cast_to_object.phpt
+      tests/cast_to_string.phpt
+      tests/settype_array.phpt
+      tests/settype_bool.phpt
+      tests/settype_double.phpt
+      tests/settype_int.phpt
+      tests/settype_null.phpt
+      tests/settype_object.phpt
+      tests/settype_resource.phpt
+      tests/settype_string.phpt:
+      add new tests
+
+    * tests/cast_to_array.phpt
+      tests/cast_to_array.phpt
+      tests/cast_to_bool.phpt
+      tests/cast_to_bool.phpt
+      tests/cast_to_double.phpt
+      tests/cast_to_double.phpt
+      tests/cast_to_int.phpt
+      tests/cast_to_int.phpt
+      tests/cast_to_object.phpt
+      tests/cast_to_object.phpt
+      tests/cast_to_string.phpt
+      tests/cast_to_string.phpt
+      tests/settype_array.phpt
+      tests/settype_array.phpt
+      tests/settype_bool.phpt
+      tests/settype_bool.phpt
+      tests/settype_double.phpt
+      tests/settype_double.phpt
+      tests/settype_int.phpt
+      tests/settype_int.phpt
+      tests/settype_null.phpt
+      tests/settype_null.phpt
+      tests/settype_object.phpt
+      tests/settype_object.phpt
+      tests/settype_resource.phpt
+      tests/settype_resource.phpt
+      tests/settype_string.phpt
+      tests/settype_string.phpt:
+      
+      add new tests
+
+    * zend_operators.c:
+      fix typo (Z_USTRVAL_P -> Z_USTRLEN_P) and CS
+
+    * (PHP_5_2)
+      zend_execute_API.c
+      tests/bug41209.phpt:
+      MFH: initialize retval_ptr_ptr before returning FAILURE
+      this fixes invalid read in #41209
+
+    * zend_execute_API.c
+      tests/bug41209.phpt
+      tests/bug41209.phpt:
+      initialize retval_ptr_ptr before returning FAILURE
+      this fixes invalid read in #41209
+
 2007-04-26  Antony Dovgal  <antony@zend.com>
 
     * tests/double_to_string.phpt
