@@ -1697,7 +1697,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	int use_copy1, use_copy2;
 	zend_uchar result_type;
 
-	if (Z_TYPE_P(op1) == IS_UNICODE || Z_TYPE_P(op2) == IS_UNICODE) {
+	if (Z_TYPE_P(op1) == IS_UNICODE || Z_TYPE_P(op2) == IS_UNICODE || UG(unicode)) {
 		zend_make_unicode_zval(op1, &op1_copy, &use_copy1);
 		zend_make_unicode_zval(op2, &op2_copy, &use_copy2);
 		result_type = IS_UNICODE;
