@@ -1,3 +1,83 @@
+2007-04-28  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend.c:
+      this case is handled in convert_to_unicode(), no need to duplicate it
+
+    * ZendEngine2/zend_operators.c:
+      convert non-strings to unicode in unicode mode
+
+    * (PHP_5_2)
+      ZendEngine2/tests/add_001.phpt
+      ZendEngine2/tests/add_002.phpt
+      ZendEngine2/tests/add_003.phpt
+      ZendEngine2/tests/add_004.phpt
+      ZendEngine2/tests/add_005.phpt
+      ZendEngine2/tests/add_006.phpt
+      ZendEngine2/tests/add_007.phpt
+      ZendEngine2/tests/and_001.phpt
+      ZendEngine2/tests/concat_001.phpt
+      ZendEngine2/tests/div_001.phpt
+      ZendEngine2/tests/div_002.phpt
+      ZendEngine2/tests/mod_001.phpt
+      ZendEngine2/tests/mul_001.phpt
+      ZendEngine2/tests/not_001.phpt
+      ZendEngine2/tests/not_002.phpt
+      ZendEngine2/tests/or_001.phpt
+      ZendEngine2/tests/shift_001.phpt
+      ZendEngine2/tests/shift_002.phpt
+      ZendEngine2/tests/sub_001.phpt
+      ZendEngine2/tests/xor_001.phpt
+      ZendEngine2/tests/xor_002.phpt
+      ZendEngine2/tests/xor_003.phpt:
+      add new tests
+
+    * ZendEngine2/tests/add_001.phpt
+      ZendEngine2/tests/add_001.phpt
+      ZendEngine2/tests/add_002.phpt
+      ZendEngine2/tests/add_002.phpt
+      ZendEngine2/tests/add_003.phpt
+      ZendEngine2/tests/add_003.phpt
+      ZendEngine2/tests/add_004.phpt
+      ZendEngine2/tests/add_004.phpt
+      ZendEngine2/tests/add_005.phpt
+      ZendEngine2/tests/add_005.phpt
+      ZendEngine2/tests/add_006.phpt
+      ZendEngine2/tests/add_006.phpt
+      ZendEngine2/tests/add_007.phpt
+      ZendEngine2/tests/add_007.phpt
+      ZendEngine2/tests/and_001.phpt
+      ZendEngine2/tests/and_001.phpt
+      ZendEngine2/tests/concat_001.phpt
+      ZendEngine2/tests/concat_001.phpt
+      ZendEngine2/tests/div_001.phpt
+      ZendEngine2/tests/div_001.phpt
+      ZendEngine2/tests/div_002.phpt
+      ZendEngine2/tests/div_002.phpt
+      ZendEngine2/tests/mod_001.phpt
+      ZendEngine2/tests/mod_001.phpt
+      ZendEngine2/tests/mul_001.phpt
+      ZendEngine2/tests/mul_001.phpt
+      ZendEngine2/tests/not_001.phpt
+      ZendEngine2/tests/not_001.phpt
+      ZendEngine2/tests/not_002.phpt
+      ZendEngine2/tests/not_002.phpt
+      ZendEngine2/tests/or_001.phpt
+      ZendEngine2/tests/or_001.phpt
+      ZendEngine2/tests/shift_001.phpt
+      ZendEngine2/tests/shift_001.phpt
+      ZendEngine2/tests/shift_002.phpt
+      ZendEngine2/tests/shift_002.phpt
+      ZendEngine2/tests/sub_001.phpt
+      ZendEngine2/tests/sub_001.phpt
+      ZendEngine2/tests/xor_001.phpt
+      ZendEngine2/tests/xor_001.phpt
+      ZendEngine2/tests/xor_002.phpt
+      ZendEngine2/tests/xor_002.phpt
+      ZendEngine2/tests/xor_003.phpt
+      ZendEngine2/tests/xor_003.phpt:
+      
+      add new tests
+
 2007-04-27  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)

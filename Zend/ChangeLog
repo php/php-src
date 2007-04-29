@@ -1,3 +1,83 @@
+2007-04-28  Antony Dovgal  <antony@zend.com>
+
+    * zend.c:
+      this case is handled in convert_to_unicode(), no need to duplicate it
+
+    * zend_operators.c:
+      convert non-strings to unicode in unicode mode
+
+    * (PHP_5_2)
+      tests/add_001.phpt
+      tests/add_002.phpt
+      tests/add_003.phpt
+      tests/add_004.phpt
+      tests/add_005.phpt
+      tests/add_006.phpt
+      tests/add_007.phpt
+      tests/and_001.phpt
+      tests/concat_001.phpt
+      tests/div_001.phpt
+      tests/div_002.phpt
+      tests/mod_001.phpt
+      tests/mul_001.phpt
+      tests/not_001.phpt
+      tests/not_002.phpt
+      tests/or_001.phpt
+      tests/shift_001.phpt
+      tests/shift_002.phpt
+      tests/sub_001.phpt
+      tests/xor_001.phpt
+      tests/xor_002.phpt
+      tests/xor_003.phpt:
+      add new tests
+
+    * tests/add_001.phpt
+      tests/add_001.phpt
+      tests/add_002.phpt
+      tests/add_002.phpt
+      tests/add_003.phpt
+      tests/add_003.phpt
+      tests/add_004.phpt
+      tests/add_004.phpt
+      tests/add_005.phpt
+      tests/add_005.phpt
+      tests/add_006.phpt
+      tests/add_006.phpt
+      tests/add_007.phpt
+      tests/add_007.phpt
+      tests/and_001.phpt
+      tests/and_001.phpt
+      tests/concat_001.phpt
+      tests/concat_001.phpt
+      tests/div_001.phpt
+      tests/div_001.phpt
+      tests/div_002.phpt
+      tests/div_002.phpt
+      tests/mod_001.phpt
+      tests/mod_001.phpt
+      tests/mul_001.phpt
+      tests/mul_001.phpt
+      tests/not_001.phpt
+      tests/not_001.phpt
+      tests/not_002.phpt
+      tests/not_002.phpt
+      tests/or_001.phpt
+      tests/or_001.phpt
+      tests/shift_001.phpt
+      tests/shift_001.phpt
+      tests/shift_002.phpt
+      tests/shift_002.phpt
+      tests/sub_001.phpt
+      tests/sub_001.phpt
+      tests/xor_001.phpt
+      tests/xor_001.phpt
+      tests/xor_002.phpt
+      tests/xor_002.phpt
+      tests/xor_003.phpt
+      tests/xor_003.phpt:
+      
+      add new tests
+
 2007-04-27  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
