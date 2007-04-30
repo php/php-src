@@ -2867,17 +2867,24 @@ ZEND_API int zend_fcall_info_init(zval *callable, zend_fcall_info *fci, zend_fca
 	fci->size = sizeof(*fci);
 	fci->function_table = ce ? &ce->function_table : EG(function_table);
 	fci->object_pp = obj;
-	fci->function_name = NULL;
+	fci->function_name = callable;
 	fci->retval_ptr_ptr = NULL;
 	fci->param_count = 0;
 	fci->params = NULL;
 	fci->no_separation = 1;
 	fci->symbol_table = NULL;
 
-	fcc->initialized = 1;
-	fcc->function_handler = func;
-	fcc->calling_scope = ce;
-	fcc->object_pp = obj;
+	if (ZEND_U_EQUAL(ZEND_STR_TYPE, func->common.function_name, USTR_LEN(func->common.function_name), ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1)) { 
+		fcc->initialized = 0;
+		fcc->function_handler = NULL;
+		fcc->calling_scope = NULL;
+		fcc->object_pp = NULL;
+	} else {
+		fcc->initialized = 1;
+		fcc->function_handler = func;
+		fcc->calling_scope = ce;
+		fcc->object_pp = obj;
+	}
 
 	return SUCCESS;
 }
