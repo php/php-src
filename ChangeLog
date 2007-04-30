@@ -1,3 +1,31 @@
+2007-04-29  Edin Kadribasic  <edin@krug.dk>
+
+    * ext/zlib/php_zlib.def:
+      MFB: Sync with zlib
+
+    * (PHP_5_2)
+      ext/zlib/php_zlib.def:
+      Sync with zlib
+
+2007-04-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c:
+      
+      Fixed bug #41215 (setAttribute return code reversed).
+
+2007-04-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      typofix..and exactly HOW or WHAT in commandline handling was fixed?
+
+    * (PHP_5_2)
+      ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h:
+      - Updated credits
+
 2007-04-28  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/zend.c:
