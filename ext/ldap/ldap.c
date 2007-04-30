@@ -376,9 +376,9 @@ PHP_FUNCTION(ldap_connect)
 	int hostlen;
 	long port = 389; /* Default port */
 #ifdef HAVE_ORALDAP
-	char *wallet, *walletpasswd;
-	int walletlen, walletpasswdlen;
-	long authmode;
+	char *wallet = NULL, *walletpasswd = NULL;
+	int walletlen = 0, walletpasswdlen = 0;
+	long authmode = GSLC_SSL_NO_AUTH;
 	int ssl=0;
 #endif
 	ldap_linkdata *ld;
