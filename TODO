@@ -96,13 +96,6 @@ ext/pcntl
     * Remove all zend_extension code
     * Add object callback support to pcntl_signal()
 
-ext/pgsql
----------
-    For PHP 4.3.0:
-    * Add pg_metadata() with metadata cache feature.
-    * Add pg_convert() to check and convert array value for query.
-    * Add pg_insert/pg_update/pg_delete/pg_select for simple query.
-
 ext/session
 -----------
     For PHP 4.3.0:
