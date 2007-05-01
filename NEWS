@@ -1,10 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, Version 4.4.7
-- Fixed bug #38236 (binary data gets corrupted on multipart/formdata POST)
+- Fixed bug #41252 (Calling mcrypt_generic without first calling
+  mcrypt_generic_init crashes). (Derick)
+- Fixed bug #38236 (Binary data gets corrupted on multipart/formdata POST)
   (patch by ass3mbler@gmail.com)
-- Fixed huge CPU usage in imagearc when used with large angles (Pierre)
-  (libgd bug #74)
+- Fixed huge CPU usage in imagearc when used with large angles (libgd bug #74).
+  (Pierre)
 
 11 Apr 2007, Version 4.4.7RC1
 - Fixed MOPB-33-2007 (PHP mail() Message ASCIIZ Byte Truncation). (Ilia)
@@ -30,7 +32,6 @@ PHP 4                                                                      NEWS
 - Fixed CRLF injection inside ftp_putcmd(). (Ilia)
 
 28 Feb 2007, Version 4.4.6
-
 - Updated PCRE to version 7.0. (Nuno)
 - Fixed segfault in ext/session when register_globals=On. (Tony)
 - Fixed bug #40635 (segfault in cURL extension). (Tony)
