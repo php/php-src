@@ -12,7 +12,7 @@ $dom = new domdocument;
 $data = file_get_contents(dirname(__FILE__)."/xinclude.xml");
 $data = str_replace('compress.zlib://ext/dom/tests/','compress.zlib://'.dirname(__FILE__).'/', $data);
 
-$dom->loadXML($data);
+$dom->loadXML((binary)$data);
 
 $dom->xinclude();
 print $dom->saveXML()."\n";
