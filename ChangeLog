@@ -1,3 +1,41 @@
+2007-04-30  Antony Dovgal  <antony@zend.com>
+
+    * ext/ldap/ldap.c:
+      initialize optional parameters
+
+2007-04-30  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c
+      ext/spl/tests/spl_007.phpt:
+      - MFH Fix "f" modifier for zend_parse_parameters_ex in case of a __call
+      call
+
+    * ext/spl/tests/spl_007.phpt
+      ext/spl/tests/spl_007.phpt:
+      
+      - Add new test
+
+    * ZendEngine2/zend_API.c:
+      - Fix "f" modifier for zend_parse_parameters_ex in case of a __call call
+        (fixes Zend/tests/bug19859.phpt and Zend/tests/bug34260.phpt)
+
+2007-04-30  Edin Kadribasic  <edin@krug.dk>
+
+    * (PHP_5_2)
+      main/php_version.h:
+      Sync correctly with configure.in
+
+2007-04-30  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/tests/concat_002.phpt:
+      make concatenating two binary strings a special case
+
 2007-04-29  Edin Kadribasic  <edin@krug.dk>
 
     * ext/zlib/php_zlib.def:
