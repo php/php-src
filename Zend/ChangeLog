@@ -1,3 +1,20 @@
+2007-04-30  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      zend_API.c:
+      - MFH Fix "f" modifier for zend_parse_parameters_ex in case of a __call
+      call
+
+    * zend_API.c:
+      - Fix "f" modifier for zend_parse_parameters_ex in case of a __call call
+        (fixes Zend/tests/bug19859.phpt and Zend/tests/bug34260.phpt)
+
+2007-04-30  Antony Dovgal  <antony@zend.com>
+
+    * zend_operators.c
+      tests/concat_002.phpt:
+      make concatenating two binary strings a special case
+
 2007-04-28  Antony Dovgal  <antony@zend.com>
 
     * zend.c:
