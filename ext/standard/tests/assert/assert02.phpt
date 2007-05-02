@@ -31,12 +31,12 @@ Warning: assert(): Assertion "$a" failed in %sassert02.php on line %d
 
 Parse error: %s error%sassert02.php(%d) : assert code on line 1
 in handler()
-string(64) "assert(): Failure evaluating code: 
+string(%d) "assert(): Failure evaluating code: 
 aa=sd+as+safsafasfaçsafçsafç"
 
 Warning: assert(): Assertion "0" failed in %sassert02.php on line %d
 
 Parse error: %s error%sassert02.php(%d) : assert code on line 1
 in handler()
-string(64) "assert(): Failure evaluating code: 
+string(%d) "assert(): Failure evaluating code: 
 aa=sd+as+safsafasfaçsafçsafç"
