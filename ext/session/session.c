@@ -265,7 +265,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 {
 	PHP_MD5_CTX md5_context;
 	PHP_SHA1_CTX sha1_context;
-#ifdef HAVE_HASH_EXT
+#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 	void *hash_context;
 #endif
 	unsigned char *digest;
@@ -302,7 +302,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 			PHP_SHA1Update(&sha1_context, (unsigned char *) buf, strlen(buf));
 			digest_len = 20;
 			break;
-#ifdef HAVE_HASH_EXT
+#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 		case PS_HASH_FUNC_OTHER:
 			if (!PS(hash_ops)) {
 				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid session hash function");
@@ -342,7 +342,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 					case PS_HASH_FUNC_SHA1:
 						PHP_SHA1Update(&sha1_context, rbuf, n);
 						break;
-#ifdef HAVE_HASH_EXT
+#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 					case PS_HASH_FUNC_OTHER:
 						PS(hash_ops)->hash_update(hash_context, rbuf, n);
 						break;
@@ -362,7 +362,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 		case PS_HASH_FUNC_SHA1:
 			PHP_SHA1Final(digest, &sha1_context);
 			break;
-#ifdef HAVE_HASH_EXT
+#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 		case PS_HASH_FUNC_OTHER:
 			PS(hash_ops)->hash_final(digest, hash_context);
 			efree(hash_context);
@@ -568,7 +568,7 @@ static PHP_INI_MH(OnUpdateHashFunc)
         long val;
 	char *endptr = NULL;
 
-#ifdef HAVE_HASH_EXT
+#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 	PS(hash_ops) = NULL;
 #endif
 
@@ -594,7 +594,7 @@ static PHP_INI_MH(OnUpdateHashFunc)
 		return SUCCESS;
 	}
 
-#ifdef HAVE_HASH_EXT
+#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 {
 	php_hash_ops *ops = php_hash_fetch_ops(new_value, new_value_length);
 
