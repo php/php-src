@@ -135,11 +135,12 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 							new_path[path_len] = '/';
 							memcpy(new_path+path_len+1, name, name_len+1);
 							zend_str_tolower(new_path, path_len+name_len+1);
+							name_len += path_len+1;
 						} else {
 							memcpy(new_path, name, name_len+1);
 							zend_str_tolower(new_path, name_len);
 						}
-						if (LoadDirectory(directories, subkey, new_path, path_len+name_len, ht)) {
+						if (LoadDirectory(directories, subkey, new_path, name_len, ht)) {
 							ret = 1;
 						}
 						RegCloseKey(subkey);
