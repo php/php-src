@@ -1563,6 +1563,8 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 						property = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 						xmlAddChild(node, property);
 						set_xsi_nil(property);
+					} else if (Z_TYPE_P(data) == IS_NULL && model->min_occurs == 0) {
+						return 1;
 					} else {
 						property = master_to_xml(enc, data, style, node);
 						if (property->children && property->children->content &&
