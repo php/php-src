@@ -1,13 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2007, PHP 5.2.3RC3
-- Fixed altering $this via argument named "this". (Dmitry)
 - Fixed iterator_apply() with a callback using __call(). (Johannes)
 - Fixed bug #41215 (setAttribute return code reversed). (Ilia)
 - Fixed bug #41192 (Per Directory Values only work for one key). (Dmitry)
-- Fixed bug #41097 (ext/soap returning associative array as indexed without
-  using WSDL). (Dmitry)
-- Fixed bug #41004 (minOccurs="0" and null class member variable). (Dmitry)
 
 26 Apr 2007, PHP 5.2.2RC2
 - Added GMP_VERSION constant. (Tony)
