@@ -1342,9 +1342,18 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 
 void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, znode *varname, zend_uchar pass_by_reference TSRMLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *opline;
 	zend_arg_info *cur_arg_info;
 
+	if (CG(active_op_array)->scope &&
+		((CG(active_op_array)->fn_flags & ZEND_ACC_STATIC) == 0) &&
+	    (Z_TYPE(varname->u.constant) == IS_STRING || Z_TYPE(varname->u.constant) == IS_UNICODE) &&
+	    Z_UNILEN(varname->u.constant) == (sizeof("this")-1) &&
+	    ZEND_U_EQUAL(Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant), "this", sizeof("this")-1)) {
+		zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+	}
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	CG(active_op_array)->num_args++;
 	opline->opcode = op;
 	opline->result = *var;
