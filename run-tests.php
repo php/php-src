@@ -1176,6 +1176,12 @@ TEST $file
 			save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
+
+			if ($leak_check) {
+				$env['USE_ZEND_ALLOC'] = '0';
+			} else {
+				$env['USE_ZEND_ALLOC'] = '1';
+			}
 			$output = system_with_timeout("$extra $php -q $ini_settings $test_skipif", $env);
 			if (!$cfg['keep']['skip']) {
 				@unlink($test_skipif);
