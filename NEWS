@@ -1,15 +1,69 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Apr 2007, PHP 5.2.3RC3
+03 May 2007, PHP 5.2.2
+- Improved bundled GD
+  . Sync to 2.0.35
+  . Added imagegrabwindow and imagegrabscreen, capture a screen or a 
+	window using its handle (Pierre)
+  . colors allocated henceforth from the resulting image overwrite the palette 
+	  colors (Rob Leslie)
+  . Improved thread safety of the gif support (Roman Nemecek, Nuno, Pierre)
+	. Use the dimension of the GIF frame to create the destination image (Pierre)
+	. Load only once the local color map from a GIF data (Pierre)
+  . Improved thread safety of the freetype cache (Scott MacVicar, Nuno, Pierre)
+	. imagearc huge CPU usage with large angles, libgd bug #74 (Pierre)
+- Improved FastCGI SAPI to support external pipe and socket servers on win32.
+  (Dmitry)
+- Improved Zend Memory Manager
+  . guarantee of reasonable time for worst cases of best-fit free block
+    searching algorithm. (Dmitry)
+  . better cache usage and less fragmentation on erealloc() (Tony, Dmitry)
+- Improved SPL (Marcus)
+  . Added SplFileInfo::getBasename(), DirectoryIterator::getBasename().
+  . Added SplFileInfo::getLinkTarget(), SplFileInfo::getRealPath().
+  . Made RecursiveFilterIterator::accept() abstract as stated in documentation.
+- Improved SOAP
+  . Added ability to encode arrays with "SOAP-ENC:Array" type instead of WSDL
+    type. To activate the ability use "feature"=>SOAP_USE_XSI_ARRAY_TYPE
+    option in SoapClient/SoapServer constructors. (Rob, Dmitry)
+
+- Added GMP_VERSION constant. (Tony)
+- Added --ri switch to CLI which allows to check extension information. (Marcus)
+- Added tidyNode::getParent() method (John, Nuno)
+- Added openbasedir and safemode checks in zip:// stream wrapper and 
+  ZipArchive::open (Pierre)
+- Added php_pdo_sqlite_external.dll, a version of the PDO SQLite driver that
+  links against an external sqlite3.dll.  This provides Windows users to upgrade
+  their sqlite3 version outside of the PHP release cycle.  (Wez, Edin)
+- Added linenumbers to array returned by token_get_all(). (Johannes)
+
+- Upgraded SQLite 3 to version 3.3.16 (Ilia)
+- Upgraded libraries bundled in the Windows distribution. (Edin)
+  . c-client (imap) to version 2006e
+  . libpq (PostgreSQL) to version 8.2.3
+  . libmysql (MySQL) to version 5.0.37
+  . openssl to version 0.9.8e
+- Upgraded PCRE to version 7.0 (Nuno)
+
+- Updated timezone database to version 2007.5. (Derick)
+
+- Fixed commandline handling for CLI and CGI. (Marcus, Johannes)
 - Fixed iterator_apply() with a callback using __call(). (Johannes)
+- Fixed possible multi bytes issues in openssl csr parser (Pierre)
+- Fixed shmop_open() with IPC_CREAT|IPC_EXCL flags on Windows. 
+  (Vladimir Kamaev, Tony).
+- Fixed possible leak in ZipArchive::extractTo when safemode checks fails (Ilia)
+- Fixed possible relative path issues in zip_open and TS mode (old API) (Pierre)
+- Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
+- Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
+- Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
+- Fixed unallocated memory access/double free in in array_user_key_compare() 
+  (MOPB-24 by Stefan Esser) (Stas)
+- Fixed wrong length calculation in unserialize S type
+  (MOPB-29 by Stefan Esser) (Stas)
+
 - Fixed bug #41215 (setAttribute return code reversed). (Ilia)
 - Fixed bug #41192 (Per Directory Values only work for one key). (Dmitry)
-
-26 Apr 2007, PHP 5.2.2RC2
-- Added GMP_VERSION constant. (Tony)
-- Fixed commandline handling for CLI and CGI. (Marcus, Johannes)
-- Upgraded SQLite 3 to version 3.3.16 (Ilia)
-- Updated timezone database to version 2007.5. (Derick)
 - Fixed bug #41175 (addAttribute() fails to add an attribute with an empty
   value). (Ilia)
 - Fixed bug #41159 (mysql_pconnect() hash does not account for connect
@@ -29,79 +83,20 @@ PHP                                                                        NEWS
 - Fixed bug #41063 (chdir doesn't like root paths). (Dmitry)
 - Fixed bug #41061 ("visibility error" in ReflectionFunction::export()).
   (Johannes)
-- Fixed bug #41034 (json_encode() ignores null byte started keys in arrays).
-  (Ilia)
-- Fixed bug #40935 (pdo_mysql does not raise an exception on empty
-  fetchAll()). (Ilia)
-- Fixed bug #40861 (strtotime() doesn't handle double negative relative time
-  units correctly). (Derick)
-- Fixed bug #40290 (strtotime() returns unexpected result with particular
-  timezone offset). (Derick)
-- Fixed bug #39965 (Latitude and longitude are backwards in date_sun_info()).
-  (Derick)
-- Fixed bug #39416 (Milliseconds in date()). (Derick)
-
-
-10 Apr 2007, PHP 5.2.2RC1
-- Improved bundled GD
-  . Sync to 2.0.35
-  . Added imagegrabwindow and imagegrabscreen, capture a screen or a 
-	window using its handle (Pierre)
-  . colors allocated henceforth from the resulting image overwrite the palette 
-	  colors (Rob Leslie)
-  . Improved thread safety of the gif support (Roman Nemecek, Nuno, Pierre)
-	. Use the dimension of the GIF frame to create the destination image (Pierre)
-	. Load only once the local color map from a GIF data (Pierre)
-  . Improved thread safety of the freetype cache (Scott MacVicar, Nuno, Pierre)
-	. imagearc huge CPU usage with large angles, libgd bug #74 (Pierre)
-
-- Upgraded libraries bundled in the Windows distribution. (Edin)
-  . c-client (imap) to version 2006e
-  . libpq (PostgreSQL) to version 8.2.3
-  . libmysql (MySQL) to version 5.0.37
-  . openssl to version 0.9.8e
-- Upgraded PCRE to version 7.0 (Nuno)
-- Updated timezone database to version 2007.3. (Derick)
-- Improved FastCGI SAPI to support external pipe and socket servers on win32.
-  (Dmitry)
-- Improved Zend Memory Manager
-  . guarantee of reasonable time for worst cases of best-fit free block
-    searching algorithm. (Dmitry)
-  . better cache usage and less fragmentation on erealloc() (Tony, Dmitry)
-- Improved SPL (Marcus)
-  . Added SplFileInfo::getBasename(), DirectoryIterator::getBasename().
-  . Added SplFileInfo::getLinkTarget(), SplFileInfo::getRealPath().
-  . Made RecursiveFilterIterator::accept() abstract as stated in documentation.
-- Improved SOAP
-  . Added ability to encode arrays with "SOAP-ENC:Array" type instead of WSDL
-    type. To activate the ability use "feature"=>SOAP_USE_XSI_ARRAY_TYPE
-    option in SoapClient/SoapServer constructors. (Rob, Dmitry)
-- Added --ri switch to CLI which allows to check extension information. (Marcus)
-- Added tidyNode::getParent() method (John, Nuno)
-- Added openbasedir and safemode checks in zip:// stream wrapper and 
-  ZipArchive::open (Pierre)
-- Added php_pdo_sqlite_external.dll, a version of the PDO SQLite driver that
-  links against an external sqlite3.dll.  This provides Windows users to upgrade
-  their sqlite3 version outside of the PHP release cycle.  (Wez, Edin)
-- Added linenumbers to array returned by token_get_all(). (Johannes)
-- Fixed possible multi bytes issues in openssl csr parser (Pierre)
-- Fixed shmop_open() with IPC_CREAT|IPC_EXCL flags on Windows. 
-  (Vladimir Kamaev, Tony).
-- Fixed possible leak in ZipArchive::extractTo when safemode checks fails (Ilia)
-- Fixed possible relative path issues in zip_open and TS mode (old API) (Pierre)
-- Fixed zend_llist_remove_tail (Michael Wallner, Dmitry)
-- Fixed a thread safety issue in gd gif read code (Nuno, Roman Nemecek)
-- Fixed CVE-2007-1001, GD wbmp used with invalid image size (Pierre)
 - Fixed bug #41043 (pdo_oci crash when freeing error text with persistent 
   connection). (Tony)
 - Fixed bug #41037 (unregister_tick_function() inside the tick function crash PHP).
   (Tony)
+- Fixed bug #41034 (json_encode() ignores null byte started keys in arrays).
+  (Ilia)
 - Fixed bug #41026 (segfault when calling "self::method()" in shutdown functions).
   (Tony)
 - Fixed bug #40999 (mcrypt_create_iv() not using random seed). (Ilia)
 - Fixed bug #40998 (long session array keys are truncated). (Tony)
 - Implement feature request #40947, allow a single filter as argument 
   for filter_var_array (Pierre)
+- Fixed bug #40935 (pdo_mysql does not raise an exception on empty
+  fetchAll()). (Ilia)
 - Fixed bug #40931 (open_basedir bypass via symlink and move_uploaded_file()). 
   (Tony)
 - Fixed bug #40921 (php_default_post_reader crashes when post_max_size is
@@ -112,7 +107,8 @@ PHP                                                                        NEWS
 - Fixed bug #40883 (mysql_query() is allocating memory incorrectly). (Tony)
 - Fixed bug #40872 (inconsistency in offsetSet, offsetExists treatment of 
   string enclosed integers). (Marcus)
-- Fixed bug #40861 (Multiple +/- on relative units breaks strtotime()). (Ilia)
+- Fixed bug #40861 (strtotime() doesn't handle double negative relative time
+  units correctly). (Derick, Ilia)
 - Fixed bug #40854 (imap_mail_compose() creates an invalid terminator for 
   multipart e-mails). (Ilia)
 - Fixed bug #40848 (sorting issue on 64-bit Solaris). (Wez)
@@ -187,14 +183,19 @@ PHP                                                                        NEWS
   (tuxracer69 at gmail dot com, Tony)
 - Fixed bug #40371 (pg_client_encoding() not working on Windows). (Edin)
 - Fixed bug #40352 (FCGI_WEB_SERVER_ADDRS function get lost). (Dmitry)
+- Fixed bug #40290 (strtotime() returns unexpected result with particular
+  timezone offset). (Derick)
 - Fixed bug #40286 (PHP fastcgi with PHP_FCGI_CHILDREN don't kill children when
   parent is killed). (Dmitry)
 - Fixed bug #40261 (Extremely slow data handling due to memory fragmentation).
   (Dmitry)
 - Fixed bug #40236 (php -a function allocation eats memory). (Dmitry)
 - Fixed bug #40109 (iptcembed fails on non-jfif jpegs). (Tony)
+- Fixed bug #39965 (Latitude and longitude are backwards in date_sun_info()).
+  (Derick)
 - Implement #39867 (openssl PKCS#12 support) (Marc Delling, Pierre)
 - Fixed bug #39836 (SplObjectStorage empty after unserialize). (Marcus)
+- Fixed bug #39416 (Milliseconds in date()). (Derick)
 - Fixed bug #39396 (stream_set_blocking crashes on Win32). (Ilia, maurice at
   iceblog dot de)
 - Fixed bug #39351 (relative include fails on Solaris). (Dmitry, Tony)
@@ -220,12 +221,9 @@ PHP                                                                        NEWS
   (Rob)
 - Fixed bug #37013 (server hangs when returning circular object references).
   (Dmitry)
-- Fixed unallocated memory access/double free in in array_user_key_compare() 
-  (MOPB-24 by Stefan Esser) (Stas)
-- Fixed wrong length calculation in unserialize S type
-  (MOPB-29 by Stefan Esser) (Stas)
 - Fixed bug #33664 Console window appears when using exec() 
   (Richard Quadling, Stas)
+
 
 08 Feb 2007, PHP 5.2.1
 - Added read-timeout context option "timeout" for HTTP streams. (Hannes, Ilia). 
