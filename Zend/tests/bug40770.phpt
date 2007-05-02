@@ -2,6 +2,13 @@
 Bug #40770 Apache child exits when PHP memory limit reached 
 --INI--
 memory_limit=8M
+--SKIPIF--
+<?php
+$zend_mm_enabled = getenv("USE_ZEND_ALLOC");
+if ($zend_mm_enabled === "0") {
+	die("skip Zend MM disabled");
+}
+?>
 --FILE--
 <?php
 ini_set('display_errors',true);
