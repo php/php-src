@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? Apr 2007, PHP 5.2.3RC3
 - Fixed iterator_apply() with a callback using __call(). (Johannes)
 - Fixed bug #41215 (setAttribute return code reversed). (Ilia)
+- Fixed bug #41097 (ext/soap returning associative array as indexed without
+  using WSDL). (Dmitry)
 
 26 Apr 2007, PHP 5.2.2RC2
 - Added GMP_VERSION constant. (Tony)
