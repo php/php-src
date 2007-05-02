@@ -1,3 +1,37 @@
+2007-05-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      TODO:
+      Removed completed TODO items
+
+2007-05-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/bug41252.phpt:
+      - Fixed bug #41252 (Calling mcrypt_generic without first calling
+        mcrypt_generic_init crashes).
+
+    * ext/mcrypt/tests/bug41252.phpt
+      ext/mcrypt/tests/bug41252.phpt
+      ext/mcrypt/tests/bug41252.phpt:
+        1.1.4;
+      - Added test case for bug #41252.
+
+2007-05-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/dom/tests/dom_xinclude.phpt:
+      - Fix test
+
+2007-05-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/str_pad.phpt
+      ext/standard/tests/strings/strcasecmp.phpt
+      ext/standard/tests/strings/strcmp.phpt:
+      Remove quotes
+
 2007-04-30  Antony Dovgal  <antony@zend.com>
 
     * ext/ldap/ldap.c:
