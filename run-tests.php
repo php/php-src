@@ -1215,6 +1215,12 @@ TEST $file
 
 			$ini_settings .= " -dunicode.semantics=" . (int)$unicode_test;
 
+			if ($leak_check) {
+				$env['USE_ZEND_ALLOC'] = '0';
+			} else {
+				$env['USE_ZEND_ALLOC'] = '1';
+			}
+
 			$output = system_with_timeout("$extra $php -q $ini_settings $test_skipif", $env);
 			if (!$cfg['keep']['skip']) {
 				@unlink($test_skipif);
