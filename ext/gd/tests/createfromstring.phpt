@@ -3,6 +3,7 @@ imagecreatefromstring
 --SKIPIF--
 <?php
         if (!function_exists('imagecreatefromstring')) die("skip gd extension not available\n");
+		if (!function_exists('imagepng')) die("skip no imagpng()\n");
 ?>
 --FILE--
 <?php
