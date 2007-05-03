@@ -647,8 +647,8 @@ PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 	int argc, i, count;
 	int *key_sizes;
 	
-	argc = ZEND_NUM_ARGS();
 	MCRYPT_GET_TD_ARG
+	argc = ZEND_NUM_ARGS();
 
 	key_sizes = mcrypt_enc_get_supported_key_sizes (pm->td, &count);
 
