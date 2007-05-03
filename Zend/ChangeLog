@@ -1,3 +1,35 @@
+2007-05-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      zend_compile.c:
+      Reverted the following fixed because of php-5.2.2 release process
+      - Fixed altering $this via argument named "this".
+      - Fixed bug #41097 (ext/soap returning associative array as indexed
+      without
+        using WSDL).
+      - Fixed bug #41004 (minOccurs="0" and null class member variable).
+
+2007-05-02  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/bug40770.phpt:
+      add SKIPIF section
+
+    * tests/bug40770.phpt:
+      this test is only valid when Zend MM is enabled
+
+2007-05-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug41117_1.phpt:
+      Fixed altering $this via argument named "this"
+
+    * tests/bug41117_1.phpt
+      tests/bug41117_1.phpt:
+      
+      file bug41117_1.phpt was initially added on branch PHP_5_2.
+
 2007-04-30  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_2)

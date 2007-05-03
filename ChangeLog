@@ -1,3 +1,108 @@
+2007-05-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.2
+
+2007-05-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ext/soap/php_encoding.c:
+      Reverted the following fixed because of php-5.2.2 release process
+      - Fixed altering $this via argument named "this".
+      - Fixed bug #41097 (ext/soap returning associative array as indexed
+      without
+        using WSDL).
+      - Fixed bug #41004 (minOccurs="0" and null class member variable).
+
+2007-05-02  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug40770.phpt:
+      add SKIPIF section
+
+    * ZendEngine2/tests/bug40770.phpt:
+      this test is only valid when Zend MM is enabled
+
+    * run-tests.php:
+      make USE_ZEND_ALLOC env var available in SKIPIF section
+
+2007-05-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug41117_1.phpt
+      ZendEngine2/tests/bug41117_1.phpt:
+      
+      file bug41117_1.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug41117_1.phpt:
+      Fixed altering $this via argument named "this"
+
+2007-05-02  Antony Dovgal  <antony@zend.com>
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+      fix build when ext/hash is compiled as shared module
+
+2007-05-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      win32/registry.c
+      win32/registry.c:
+      Fixed bug #41192 (Per Directory Values only work for one key)
+
+    * ext/soap/tests/bugs/bug41004.phpt
+      ext/soap/tests/bugs/bug41004.phpt
+      ext/soap/tests/bugs/bug41004.wsdl
+      ext/soap/tests/bugs/bug41004.wsdl:
+      
+      file bug41004.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/bugs/bug41004.phpt
+      ext/soap/tests/bugs/bug41004.wsdl:
+      Fixed bug #41004 (minOccurs="0" and null class member variable)
+
+    * ext/soap/tests/schema/schema085.phpt:
+      New test
+
+    * ext/soap/tests/schema/schema085.phpt
+      ext/soap/tests/schema/schema085.phpt:
+      
+      file schema085.phpt was initially added on branch PHP_5_2.
+
+    * ext/soap/tests/bugs/bug41097.phpt
+      ext/soap/tests/bugs/bug41097.phpt:
+      
+      file bug41097.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug41097.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_compound2_001w.phpt:
+      Fixed bug #41097 (ext/soap returning associative array as indexed without
+      using WSDL)
+
+    * ext/standard/tests/assert/assert02.phpt
+      ext/standard/tests/assert/assert02.phpt:
+      Fixed test
+
 2007-05-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
