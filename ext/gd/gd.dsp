@@ -104,10 +104,6 @@ SOURCE=.\gd.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gd_security.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gdttf.c
 # End Source File
 # End Group
@@ -332,6 +328,10 @@ SOURCE=.\libgd\gd_png.c
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_security.c
 # End Source File
 # Begin Source File
 
