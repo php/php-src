@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed ext/filter Email Validation Vulnerability (MOPB-24 by Stefan Esser)
   (Ilia)
 - Fixed altering $this via argument named "this". (Dmitry)
+- Fixed bug #41287 (Namespace functions don't allow xmlns defintion to be 
+  optional). (Rob)
 - Fixed bug #41257: (lookupNamespaceURI does not work as expected). (Rob)
 - Fixed bug #41097 (ext/soap returning associative array as indexed without
   using WSDL). (Dmitry)
