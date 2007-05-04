@@ -709,6 +709,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 					} else {
 						nsptr = dom_get_ns(elemp, uri, &errorcode, prefix);
 					}
+					xmlReconciliateNs(elemp->doc, elemp);
 				}
 			} else {
 				if (is_xmlns == 1) {
