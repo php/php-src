@@ -211,15 +211,22 @@ AC_DEFUN([PHP_GD_FREETYPE2],[
       fi
     done
 
-    if test -n "$FREETYPE2_DIR" ; then
+    if test -z "$FREETYPE2_DIR"; then
+      AC_MSG_ERROR([freetype.h not found.])
+    fi
+
+    PHP_CHECK_LIBRARY(freetype, FT_New_Face,
+    [
       PHP_ADD_LIBRARY_WITH_PATH(freetype, $FREETYPE2_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
       PHP_ADD_INCLUDE($FREETYPE2_DIR/include)
       PHP_ADD_INCLUDE($FREETYPE2_INC_DIR)
       AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
       AC_DEFINE(HAVE_LIBFREETYPE,1,[ ])
-    else
-      AC_MSG_ERROR([freetype2 not found!])
-    fi
+    ],[
+      AC_MSG_ERROR([Problem with freetype.(a|so). Please check config.log for more information.])
+    ],[
+      -L$FREETYPE2_DIR/$PHP_LIBDIR
+    ])
   else
     AC_MSG_RESULT([If configure fails try --with-freetype-dir=<DIR>])
   fi
@@ -440,6 +447,10 @@ if test "$PHP_GD" != "no"; then
     GDLIB_CFLAGS="-I$ext_srcdir/libgd $GDLIB_CFLAGS"
     PHP_ADD_BUILD_DIR($ext_builddir/libgd)
     GD_HEADER_DIRS="ext/gd/ ext/gd/libgd/"
+
+    PHP_TEST_BUILD(foobar, [], [
+      AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
+    ], [ -L$GD_LIB $GD_SHARED_LIBADD ], [char foobar () {}])
   else
     GD_HEADER_DIRS="ext/gd/"
     GDLIB_CFLAGS="-I$GD_INCLUDE $GDLIB_CFLAGS"
