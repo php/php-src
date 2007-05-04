@@ -517,7 +517,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 				tidyBufInit(&output);
 
 				tidySaveBuffer (doc, &output);
-				RETVAL_STRINGL(output.bp, output.size ? output.size-1 : 0, 1);
+				RETVAL_STRINGL((char*)output.bp, output.size ? output.size-1 : 0, 1);
 				tidyBufFree(&output);
 			} else {
 				RETVAL_FALSE;
@@ -685,7 +685,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
 			tidyBufInit(&output);
 			tidySaveBuffer (obj->ptdoc->doc, &output);
-			ZVAL_STRINGL(out, output.bp, output.size ? output.size-1 : 0, TRUE);
+			ZVAL_STRINGL(out, (char*)output.bp, output.size ? output.size-1 : 0, TRUE);
 			tidyBufFree(&output);
 			break;
 
@@ -720,7 +720,7 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 			if (obj->ptdoc) {
 				tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
 			}
-			ZVAL_STRINGL(out, buf.bp, buf.size ? buf.size-1 : 0, TRUE);
+			ZVAL_STRINGL(out, (char*)buf.bp, buf.size ? buf.size-1 : 0, TRUE);
 			tidyBufFree(&buf);
 			break;
 
@@ -742,7 +742,7 @@ static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 	
 	if (output.size) {
 		MAKE_STD_ZVAL(temp);
-		ZVAL_STRINGL(temp, output.bp, output.size-1, TRUE);
+		ZVAL_STRINGL(temp, (char*)output.bp, output.size-1, TRUE);
 		zend_hash_update(obj->std.properties, "value", sizeof("value"), (void *)&temp, sizeof(zval *), NULL);
 	}
 	
@@ -750,7 +750,7 @@ static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 
 	if (obj->ptdoc->errbuf->size) {
 		MAKE_STD_ZVAL(temp);
-		ZVAL_STRINGL(temp, obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1, TRUE);
+		ZVAL_STRINGL(temp, (char*)obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1, TRUE);
 		zend_hash_update(obj->std.properties, "errorBuffer", sizeof("errorBuffer"), (void *)&temp, sizeof(zval *), NULL);
 	}
 }
@@ -1039,7 +1039,7 @@ static PHP_FUNCTION(ob_tidyhandler)
 			tidyBufInit(&output);
 
 			tidySaveBuffer(doc, &output);
-			RETVAL_STRINGL(output.bp, output.size ? output.size-1 : 0, 1);
+			RETVAL_STRINGL((char*)output.bp, output.size ? output.size-1 : 0, 1);
 
 			tidyBufFree(&output);
 		}
@@ -1088,7 +1088,7 @@ static PHP_FUNCTION(tidy_get_error_buffer)
 	TIDY_FETCH_OBJECT;
 
 	if (obj->ptdoc->errbuf && obj->ptdoc->errbuf->bp) {
-		RETURN_STRINGL(obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1, 1);
+		RETURN_STRINGL((char*)obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1, 1);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1105,7 +1105,7 @@ static PHP_FUNCTION(tidy_get_output)
 	tidyBufInit(&output);
 	tidySaveBuffer(obj->ptdoc->doc, &output);
 
-	RETVAL_STRINGL(output.bp, output.size ? output.size-1 : 0, 1);
+	RETVAL_STRINGL((char*)output.bp, output.size ? output.size-1 : 0, 1);
 
 	tidyBufFree(&output);
 }
