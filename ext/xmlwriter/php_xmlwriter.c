@@ -570,7 +570,7 @@ static PHP_FUNCTION(xmlwriter_start_attribute_ns)
 	zval *this = getThis();
 	
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s&", 
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s!&", 
 			&prefix, &prefix_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &uri, &uri_len, UG(utf8_conv)) == FAILURE) {
 			return;
 		}
@@ -578,7 +578,7 @@ static PHP_FUNCTION(xmlwriter_start_attribute_ns)
 	} else
 #endif
 	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&s&s&", &pind, 
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&s&s!&", &pind, 
 			&prefix, &prefix_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &uri, &uri_len, UG(utf8_conv)) == FAILURE) {
 			return;
 		}
@@ -660,7 +660,7 @@ static PHP_FUNCTION(xmlwriter_write_attribute_ns)
 	zval *this = getThis();
 	
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s&s&", 
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s!&s&", 
 			&prefix, &prefix_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), 
 			&uri, &uri_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv)) == FAILURE) {
 			return;
@@ -669,7 +669,7 @@ static PHP_FUNCTION(xmlwriter_write_attribute_ns)
 	} else
 #endif
 	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&s&s&s&", &pind, 
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&s&s!&s&", &pind, 
 			&prefix, &prefix_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), 
 			&uri, &uri_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv)) == FAILURE) {
 			return;
@@ -715,7 +715,7 @@ static PHP_FUNCTION(xmlwriter_start_element_ns)
 	zval *this = getThis();
 	
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!&s&s&",
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!&s&s!&",
 			&prefix, &prefix_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &uri, &uri_len, UG(utf8_conv)) == FAILURE) {
 			return;
 		}
@@ -723,7 +723,7 @@ static PHP_FUNCTION(xmlwriter_start_element_ns)
 	} else
 #endif
 	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs!&s&s&", &pind, 
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs!&s&s!&", &pind, 
 			&prefix, &prefix_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &uri, &uri_len, UG(utf8_conv)) == FAILURE) {
 			return;
 		}
@@ -819,7 +819,7 @@ static PHP_FUNCTION(xmlwriter_write_element_ns)
 	zval *this = getThis();
 	
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!&s&s&s&", 
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!&s&s!&s&", 
 			&prefix, &prefix_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &uri, &uri_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv)) == FAILURE) {
 			return;
 		}
@@ -827,7 +827,7 @@ static PHP_FUNCTION(xmlwriter_write_element_ns)
 	} else
 #endif
 	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs!&s&s&s&", &pind, 
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs!&s&s!&s&", &pind, 
 			&prefix, &prefix_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &uri, &uri_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv)) == FAILURE) {
 			return;
 		}
