@@ -36,5 +36,5 @@ Current Value of 'tab-size': int(8)
 Warning: tidy::getOpt(): Unknown Tidy Configuration Option 'bogus-opt' in %s007.php on line 10
 bool(false)
 
-Warning: tidy_getopt(): Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received in %s007.php on line 11
+Warning: Could not convert Unicode string to binary string (converter US-ASCII failed on character {U+00E0} at offset 17) in %s007.php on line 11
 bool(false)

@@ -1173,22 +1173,15 @@ static int php_tidy_output_handler(void **nothing, php_output_context *output_co
    Parse a document stored in a string */
 static PHP_FUNCTION(tidy_parse_string)
 {
-	zstr input, enc = NULL_ZSTR;
-	zend_uchar input_type, enc_type = IS_STRING;
+	zstr input;
+	char *enc = NULL;
+	zend_uchar input_type;
 	int input_len, enc_len;
 	zval **options = NULL;
 	PHPTidyObj *obj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|Zt", &input, &input_len, &input_type, &options, &enc, &enc_len, &enc_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|Zs&", &input, &input_len, &input_type, &options, &enc, &enc_len, UG(ascii_conv)) == FAILURE) {
 		RETURN_FALSE;
-	}
-
-	if (enc_type != IS_STRING) {
-		enc.s = zend_unicode_to_ascii(enc.u, enc_len TSRMLS_CC);
-		if (!enc.s) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
-			RETURN_FALSE;
-		}
 	}
 
 	tidy_instanciate(tidy_ce_doc, return_value TSRMLS_CC);
@@ -1196,14 +1189,10 @@ static PHP_FUNCTION(tidy_parse_string)
 
 	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
 
-	if (php_tidy_parse_string(obj, input.s, input_len, enc.s TSRMLS_CC) == FAILURE) {
+	if (php_tidy_parse_string(obj, input.s, input_len, enc TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value);
 		INIT_ZVAL(*return_value);
 		RETVAL_FALSE;
-	}
-
-	if (enc_type != IS_STRING) {
-		efree(enc.s);
 	}
 }
 /* }}} */
@@ -1339,46 +1328,29 @@ static PHP_FUNCTION(tidy_get_release)
 static PHP_FUNCTION(tidy_get_opt_doc)
 {
 	PHPTidyObj *obj;
-	char *optval;
-	zstr optname;
-	zend_uchar optname_type;
+	char *optval, *optname;
 	int optname_len;
 	TidyOption opt;
 
 	TIDY_SET_CONTEXT;
 
 	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &optname, &optname_len, &optname_type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &optname, &optname_len, UG(ascii_conv)) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, NULL, "Ot", &object, tidy_ce_doc, &optname, &optname_len, &optname_type) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
-
-	if (optname_type != IS_STRING) {
-		optname.s = zend_unicode_to_ascii(optname.u, optname_len TSRMLS_CC);
-		if (!optname.s) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, NULL, "Os&", &object, tidy_ce_doc, &optname, &optname_len, UG(ascii_conv)) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
 
 	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
 
-	opt = tidyGetOptionByName(obj->ptdoc->doc, optname.s);
+	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
 
 	if (!opt) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname.s);
-		if (optname_type != IS_STRING) {
-			efree(optname.s);
-		}
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
 		RETURN_FALSE;
-	}
-
-	if (optname_type != IS_STRING) {
-		efree(optname.s);
 	}
 
 	if ( (optval = (char *) tidyOptGetDoc(obj->ptdoc->doc, opt)) ) {
@@ -1515,47 +1487,30 @@ static PHP_FUNCTION(tidy_config_count)
 static PHP_FUNCTION(tidy_getopt)
 {  
 	PHPTidyObj *obj;
-	zstr optname;
-	void *optval;
+	void *optval, *optname;
 	int optname_len;
 	TidyOption opt;
 	TidyOptionType optt;
-	zend_uchar optname_type;
 
 	TIDY_SET_CONTEXT;
 
 	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &optname, &optname_len, &optname_type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &optname, &optname_len, UG(ascii_conv)) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, NULL, "Ot", &object, tidy_ce_doc, &optname, &optname_len, &optname_type) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
-
-	if (optname_type != IS_STRING) {
-		optname.s = zend_unicode_to_ascii(optname.u, optname_len TSRMLS_CC);
-		if (!optname.s) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, NULL, "Os&", &object, tidy_ce_doc, &optname, &optname_len, UG(ascii_conv)) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
 
 	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
 
-	opt = tidyGetOptionByName(obj->ptdoc->doc, optname.s);
+	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
 
 	if (!opt) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname.s);
-		if (optname_type != IS_STRING) {
-			efree(optname.s);
-		}
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
 		RETURN_FALSE;
-	}
-
-	if (optname_type != IS_STRING) {
-		efree(optname.s);
 	}
 
 	optval = php_tidy_get_opt_val(obj->ptdoc, opt, &optt TSRMLS_CC);
