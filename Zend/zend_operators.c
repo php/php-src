@@ -2662,19 +2662,23 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 		(ret2=is_numeric_string(Z_STRVAL_P(s2), Z_STRLEN_P(s2), &lval2, &dval2, 0))) {
 		if ((ret1==IS_DOUBLE) || (ret2==IS_DOUBLE)) {
 			if (ret1!=IS_DOUBLE) {
-				dval1 = zend_strtod(Z_STRVAL_P(s1), NULL);
+				dval1 = (double) lval1;
 			} else if (ret2!=IS_DOUBLE) {
-				dval2 = zend_strtod(Z_STRVAL_P(s2), NULL);
+				dval2 = (double) lval2;
+			} else if (dval1 == dval2 && !zend_finite(dval1)) {
+				/* Both values overflowed and have the same sign,
+				 * so a numeric comparison would be inaccurate */
+				goto string_cmp;
 			}
-			Z_DVAL_P(result) = dval1 - dval2;
-			Z_LVAL_P(result) = ZEND_NORMALIZE_BOOL(Z_DVAL_P(result));
-			Z_TYPE_P(result) = IS_LONG;
+			result->value.dval = dval1 - dval2;
+			result->value.lval = ZEND_NORMALIZE_BOOL(result->value.dval);
+			result->type = IS_LONG;
 		} else { /* they both have to be long's */
-			Z_LVAL_P(result) = lval1 - lval2;
-			Z_LVAL_P(result) = ZEND_NORMALIZE_BOOL(Z_LVAL_P(result));
-			Z_TYPE_P(result) = IS_LONG;
+			result->value.lval = lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0);
+			result->type = IS_LONG;
 		}
 	} else {
+string_cmp:
 		Z_LVAL_P(result) = zend_binary_zval_strcmp(s1, s2);
 		Z_LVAL_P(result) = ZEND_NORMALIZE_BOOL(Z_LVAL_P(result));
 		Z_TYPE_P(result) = IS_LONG;
@@ -2706,19 +2710,23 @@ ZEND_API void zendi_u_smart_strcmp(zval *result, zval *s1, zval *s2)
 		(ret2=is_numeric_unicode(Z_USTRVAL_P(s2), Z_USTRLEN_P(s2), &lval2, &dval2, 0))) {
 		if ((ret1==IS_DOUBLE) || (ret2==IS_DOUBLE)) {
 			if (ret1!=IS_DOUBLE) {
-				dval1 = zend_u_strtod(Z_USTRVAL_P(s1), NULL);
+				dval1 = (double) lval1;
 			} else if (ret2!=IS_DOUBLE) {
-				dval2 = zend_u_strtod(Z_USTRVAL_P(s2), NULL);
+				dval2 = (double) lval2;
+			} else if (dval1 == dval2 && !zend_finite(dval1)) {
+				/* Both values overflowed and have the same sign,
+				 * so a numeric comparison would be inaccurate */
+				goto string_cmp;
 			}
-			Z_DVAL_P(result) = dval1 - dval2;
-			Z_LVAL_P(result) = ZEND_NORMALIZE_BOOL(Z_DVAL_P(result));
-			Z_TYPE_P(result) = IS_LONG;
+			result->value.dval = dval1 - dval2;
+			result->value.lval = ZEND_NORMALIZE_BOOL(result->value.dval);
+			result->type = IS_LONG;
 		} else { /* they both have to be long's */
-			Z_LVAL_P(result) = lval1 - lval2;
-			Z_LVAL_P(result) = ZEND_NORMALIZE_BOOL(Z_LVAL_P(result));
-			Z_TYPE_P(result) = IS_LONG;
+			result->value.lval = lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0);
+			result->type = IS_LONG;
 		}
 	} else {
+string_cmp:
 		Z_LVAL_P(result) = zend_u_binary_zval_strcmp(s1, s2);
 		Z_LVAL_P(result) = ZEND_NORMALIZE_BOOL(Z_LVAL_P(result));
 		Z_TYPE_P(result) = IS_LONG;
