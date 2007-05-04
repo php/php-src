@@ -4,10 +4,10 @@
 ARG_ENABLE('apache2filter', 'Build Apache 2.x filter', 'no');
 
 if (PHP_APACHE2FILTER != "no") {
-	if (CHECK_HEADER_ADD_INCLUDE("httpd.h", "CFLAGS_APACHE2FILTER", PHP_PHP_BUILD + "\\apache2\\include") &&
-			CHECK_LIB("libhttpd.lib", "apache2filter", PHP_PHP_BUILD + "\\apache2\\lib") &&
-			CHECK_LIB("libapr.lib", "apache2filter", PHP_PHP_BUILD + "\\apache2\\lib") &&
-			CHECK_LIB("libaprutil.lib", "apache2filter", PHP_PHP_BUILD + "\\apache2\\lib")
+	if (CHECK_HEADER_ADD_INCLUDE("httpd.h", "CFLAGS_APACHE2FILTER", PHP_PHP_BUILD + "\\include\\apache2") &&
+			CHECK_LIB("libhttpd.lib", "apache2filter", PHP_PHP_BUILD + "\\lib\\apache2") &&
+			CHECK_LIB("libapr.lib", "apache2filter", PHP_PHP_BUILD + "\\lib\\apache2") &&
+			CHECK_LIB("libaprutil.lib", "apache2filter", PHP_PHP_BUILD + "\\lib\\apache2")
 			) {
 		SAPI('apache2filter', 'sapi_apache2.c apache_config.c php_functions.c',
 				'php' + PHP_VERSION + 'apache2_filter.dll',
