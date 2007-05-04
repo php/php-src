@@ -2528,7 +2528,7 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 	if (zend_hash_del(CG(class_table), class_name, class_name_length+1)==FAILURE) {
 		return FAILURE;
 	}
-	INIT_CLASS_ENTRY(disabled_class, class_name, disabled_class_new);
+	INIT_OVERLOADED_CLASS_ENTRY_EX(disabled_class, class_name, class_name_length, disabled_class_new, NULL, NULL, NULL, NULL, NULL);
 	disabled_class.create_object = display_disabled_class;
 	disabled_class.name_length = class_name_length;
 	zend_register_internal_class(&disabled_class TSRMLS_CC);
