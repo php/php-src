@@ -926,8 +926,8 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, zval *dim
 
 	switch (ztype) {
 		case IS_NULL:
-			ztype = IS_STRING;
-			offset_key.s = "";
+			ztype = ZEND_STR_TYPE;
+			offset_key = EMPTY_ZSTR;
 			offset_key_length = 0;
 			goto fetch_string_dim;
 
