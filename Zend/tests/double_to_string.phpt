@@ -35,7 +35,7 @@ echo "Done\n";
 --EXPECTF--	
 string(7) "2.9E+17"
 string(7) "2.9E+14"
-string(14) "29000000000000"
+string(%d) "2%s"
 string(14) "29000000000000"
 string(14) "29000000000001"
 string(13) "29000.7123123"
@@ -53,7 +53,7 @@ Done
 --UEXPECTF--
 unicode(7) "2.9E+17"
 unicode(7) "2.9E+14"
-unicode(14) "29000000000000"
+unicode(%d) "2%s"
 unicode(14) "29000000000000"
 unicode(14) "29000000000001"
 unicode(13) "29000.7123123"
