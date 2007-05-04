@@ -13,4 +13,5 @@ $t = new test;
 echo "Done\n";
 ?>
 --EXPECTF--	
-Fatal error: Class 'stdclass' not found in %s on line %d
+Warning: test() has been disabled for security reasons in %s on line %d
+Done
