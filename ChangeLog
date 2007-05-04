@@ -1,3 +1,66 @@
+2007-05-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/logical_filters.c
+      ext/filter/tests/PMOPB45.phpt
+      ext/filter/tests/PMOPB45.phpt:
+      
+      Fixed ext/filter Email Validation Vulnerability
+      (MOPB-24 by Stefan Esser)
+
+2007-05-03  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to dev.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - 4.4.7 preparations.
+
+2007-05-03  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ZendEngine2/tests/bug40236.phpt:
+      - Fix skipif
+
+2007-05-03  Antony Dovgal  <antony@zend.com>
+
+    * ext/gd/tests/createfromstring.phpt
+      ext/gd/tests/createfromstring.phpt:
+      improve test
+
+2007-05-03  Edin Kadribasic  <edin@krug.dk>
+
+    * ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.c:
+      MFB Fix Windows Build
+
+    * (PHP_5_2)
+      ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.c:
+      Fix Windows Build
+
+    * (PHP_4_4)
+      ext/gd/.cvsignore:
+      No need for workspace files
+
+    * (PHP_4_4)
+      ext/gd/gd.dsp
+      ext/mcrypt/mcrypt.c:
+      Fix build
+
+2007-05-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
 2007-05-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

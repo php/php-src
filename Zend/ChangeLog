@@ -1,3 +1,8 @@
+2007-05-03  Johannes Schlüter  <johannes@schlueters.de>
+
+    * tests/bug40236.phpt:
+      - Fix skipif
+
 2007-05-02  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_2)
