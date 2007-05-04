@@ -4,10 +4,10 @@
 ARG_ENABLE('apache2handler', 'Build Apache 2.x handler', 'no');
 
 if (PHP_APACHE2HANDLER != "no") {
-	if (CHECK_HEADER_ADD_INCLUDE("httpd.h", "CFLAGS_APACHE2HANDLER", PHP_PHP_BUILD + "\\apache2\\include") &&
-			CHECK_LIB("libhttpd.lib", "apache2handler", PHP_PHP_BUILD + "\\apache2\\lib") &&
-			CHECK_LIB("libapr.lib", "apache2handler", PHP_PHP_BUILD + "\\apache2\\lib") &&
-			CHECK_LIB("libaprutil.lib", "apache2handler", PHP_PHP_BUILD + "\\apache2\\lib")
+	if (CHECK_HEADER_ADD_INCLUDE("httpd.h", "CFLAGS_APACHE2HANDLER", PHP_PHP_BUILD + "\\include\\apache2") &&
+			CHECK_LIB("libhttpd.lib", "apache2handler", PHP_PHP_BUILD + "\\lib\\apache2") &&
+			CHECK_LIB("libapr.lib", "apache2handler", PHP_PHP_BUILD + "\\lib\\apache2") &&
+			CHECK_LIB("libaprutil.lib", "apache2handler", PHP_PHP_BUILD + "\\lib\\apache2")
 			) {
 		SAPI('apache2handler', 'mod_php.c sapi_apache2.c apache_config.c php_functions.c',
 				'php' + PHP_VERSION + 'apache2.dll',
