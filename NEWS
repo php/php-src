@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 - Fixed ext/filter Email Validation Vulnerability (MOPB-24 by Stefan Esser)
   (Ilia)
 - Fixed altering $this via argument named "this". (Dmitry)
+- Fixed bug #41097 (ext/soap returning associative array as indexed without
+  using WSDL). (Dmitry)
+- Fixed bug #41004 (minOccurs="0" and null class member variable). (Dmitry)
 
 03 May 2007, PHP 5.2.2
 - Improved bundled GD
