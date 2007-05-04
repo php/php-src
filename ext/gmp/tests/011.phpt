@@ -1,5 +1,11 @@
 --TEST--
-gmp_divexact() tests (OK to fail with GMP =< 4.2.1)
+gmp_divexact() tests
+--SKIPIF--
+<?php 
+if (!defined('GMP_VERSION') || version_compare("4.2.1", GMP_VERSION, ">=")) {
+	die("skip your GMP is too old and will crash");
+}
+?>
 --FILE--
 <?php
 
