@@ -26,7 +26,7 @@ AC_DEFUN([PHP_OCI_IF_DEFINED],[
 
 AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
   AC_CHECK_SIZEOF(long int, 4)
-  AC_MSG_CHECKING([checking if we're at 64-bit platform])
+  AC_MSG_CHECKING([if we're at 64-bit platform])
   if test "$ac_cv_sizeof_long_int" = "4" ; then
     AC_MSG_RESULT([no])
     TMP_OCI8_LIB_DIR=lib32 
@@ -101,7 +101,7 @@ PHP_ARG_WITH(oci8, for Oracle (OCI8) support,
                           Use --with-oci8=instantclient,/path/to/oic/lib
                           to use an Oracle Instant Client installation])
 
-  AC_MSG_CHECKING([checking PHP version])
+  AC_MSG_CHECKING([PHP version])
 
   tmp_version=$PHP_VERSION
   if test -z "$tmp_version"; then
