@@ -276,9 +276,9 @@ BEGIN_EXTERN_C()
 #endif
 
 /* The following definition of Storeinc is appropriate for MIPS processors.
- *  * An alternative that might be better on some machines is
- *   * #define Storeinc(a,b,c) (*a++ = b << 16 | c & 0xffff)
- *    */
+ * An alternative that might be better on some machines is
+ * #define Storeinc(a,b,c) (*a++ = b << 16 | c & 0xffff)
+ */
 #if defined(IEEE_LITTLE_ENDIAN) + defined(VAX) + defined(__arm__)
 #define Storeinc(a,b,c) (((unsigned short *)a)[1] = (unsigned short)b, \
 		((unsigned short *)a)[0] = (unsigned short)c, a++)
