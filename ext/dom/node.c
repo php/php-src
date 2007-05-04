@@ -1587,8 +1587,11 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+		nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
+	}
 
-	if (uri_len > 0) {
+	if (nodep && uri_len > 0) {
 		nsptr = xmlSearchNs(nodep->doc, nodep, NULL);
 		if (nsptr && xmlStrEqual(nsptr->href, uri)) {
 			RETURN_TRUE;
@@ -1618,6 +1621,12 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+		nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
+		if (nodep == NULL) {
+			RETURN_NULL();
+		}
+	}
 
 	nsptr = xmlSearchNs(nodep->doc, nodep, prefix);
 	if (nsptr && nsptr->href != NULL) {
