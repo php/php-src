@@ -2170,7 +2170,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 	}
 	if (unload) { /* before unloading, display all remaining bad function in the module */
 		if (scope) {
-			free_alloca(lc_class_name.v);
+			efree(lc_class_name.v);
 		}
 		while (ptr->fname) {
 			if (zend_hash_exists(target_function_table, ptr->fname, strlen(ptr->fname)+1)) {
