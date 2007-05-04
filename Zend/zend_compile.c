@@ -97,7 +97,7 @@ static void build_runtime_defined_function_key(zval *result, zend_uchar type, zs
 	filename_length = strlen(filename);
 	Z_UNILEN_P(result) = 1+name_length+filename_length+char_pos_len;
 	if (type == IS_UNICODE) {
-		Z_USTRVAL_P(result) = (UChar *) eumalloc(Z_STRLEN_P(result)+1);		
+		Z_USTRVAL_P(result) = (UChar *) eumalloc(Z_STRLEN_P(result)+1);
 		Z_USTRVAL_P(result)[0] = 0;
 		memcpy(Z_USTRVAL_P(result)+1, name.u, UBYTES(name_length));
 
@@ -2212,7 +2212,7 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 	}
 
 	if (parent_flags & ZEND_ACC_PRIVATE) {
-		child->common.prototype = NULL;		
+		child->common.prototype = NULL;
 	} else if (parent_flags & ZEND_ACC_ABSTRACT) {
 		child->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
 		child->common.prototype = parent;
@@ -2467,10 +2467,10 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 			}
 		}
 		ce->interfaces[ce->num_interfaces++] = iface;
-	
+
 		zend_hash_merge_ex(&ce->constants_table, &iface->constants_table, (copy_ctor_func_t) zval_add_ref, sizeof(zval *), (merge_checker_func_t) do_inherit_constant_check, iface);
 		zend_hash_merge_ex(&ce->function_table, &iface->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
-	
+
 		do_implement_interface(ce, iface TSRMLS_CC);
 		zend_do_inherit_interfaces(ce, iface TSRMLS_CC);
 	}
@@ -4223,7 +4223,7 @@ void zend_do_jmp_set(znode *value, znode *jmp_token, znode *colon_token TSRMLS_D
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *value;
 	SET_UNUSED(opline->op2);
-	
+
 	*colon_token = opline->result;
 
 	jmp_token->u.opline_num = op_number;
@@ -4241,11 +4241,11 @@ void zend_do_jmp_set_else(znode *result, znode *false_value, znode *jmp_token, z
 	opline->result = *colon_token;
 	opline->op1 = *false_value;
 	SET_UNUSED(opline->op2);
-	
+
 	*result = opline->result;
 
 	CG(active_op_array)->opcodes[jmp_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
-	
+
 	DEC_BPC(CG(active_op_array));
 }
 
