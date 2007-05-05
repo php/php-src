@@ -168,10 +168,10 @@ static const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
-static int print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
+static int print_module_info(zend_module_entry *module TSRMLS_DC)
 {
 	php_printf("%s\n", module->name);
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
@@ -191,14 +191,14 @@ static void print_modules(TSRMLS_D)
 	zend_hash_init(&sorted_registry, 50, NULL, NULL, 1);
 	zend_hash_copy(&sorted_registry, &module_registry, NULL, &tmp, sizeof(zend_module_entry));
 	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
-	zend_hash_apply_with_argument(&sorted_registry, (apply_func_arg_t) print_module_info, NULL TSRMLS_CC);
+	zend_hash_apply(&sorted_registry, (apply_func_t) print_module_info TSRMLS_CC);
 	zend_hash_destroy(&sorted_registry);
 }
 
 static int print_extension_info(zend_extension *ext, void *arg TSRMLS_DC)
 {
 	php_printf("%s\n", ext->name);
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 static int extension_name_cmp(const zend_llist_element **f,
@@ -215,7 +215,7 @@ static void print_extensions(TSRMLS_D)
 	zend_llist_copy(&sorted_exts, &zend_extensions);
 	sorted_exts.dtor = NULL;
 	zend_llist_sort(&sorted_exts, extension_name_cmp TSRMLS_CC);
-	zend_llist_apply_with_argument(&sorted_exts, (llist_apply_with_arg_func_t) print_extension_info, NULL TSRMLS_CC);
+	zend_llist_apply(&sorted_exts, (llist_apply_func_t) print_extension_info TSRMLS_CC);
 	zend_llist_destroy(&sorted_exts);
 }
 
