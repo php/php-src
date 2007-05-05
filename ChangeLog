@@ -1,3 +1,159 @@
+2007-05-04  Antony Dovgal  <antony@zend.com>
+
+    * ext/gmp/tests/011.phpt:
+      check GMP version and skip the test if it's <= 4.2.1
+
+2007-05-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      - WS/CS
+
+2007-05-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      ext/gd/config.m4:
+      MFH:- Prevent bugs like #41265 being submitted from now on.
+
+    * ext/gd/config.m4:
+      - Prevent bugs like #41265 being submitted from now on.
+
+2007-05-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS
+      NEWS:
+      BFN
+
+    * ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/tests/bug41287.phpt:
+      MFB: Fix bug #41287 (Namespace functions don't allow xmlns to be optional)
+      add test
+
+    * (PHP_5_2)
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/tests/bug41287.phpt
+      ext/xmlwriter/tests/bug41287.phpt:
+      Fix bug #41287 (Namespace functions don't allow xmlns to be optional)
+      add test
+
+    * ext/dom/element.c
+      ext/dom/node.c
+      ext/dom/tests/bug41257.phpt:
+      MFB: fix bug #41257 (lookupNamespaceURI does not work as expected)
+      fix related issue in isDefaultNamespace
+      add test
+      reconcile namespaces when setting attribute in a new namespace
+
+    * (PHP_5_2)
+      ext/dom/element.c
+      ext/dom/node.c
+      ext/dom/tests/bug41257.phpt
+      ext/dom/tests/bug41257.phpt:
+      fix bug #41257 (lookupNamespaceURI does not work as expected)
+      fix related issue in isDefaultNamespace
+      add test
+      reconcile namespaces when setting attribute in a new namespace
+
+2007-05-04  Edin Kadribasic  <edin@krug.dk>
+
+    * sapi/apache2filter/config.w32
+      sapi/apache2handler/config.w32:
+      MFB: Update Apache 2 libs to 2.0.59 on the build box and standardize the
+      dirs
+
+    * (PHP_5_2)
+      sapi/apache2filter/config.w32
+      sapi/apache2handler/config.w32:
+      Update Apache 2 libs to 2.0.59 on the build box and standardize the dirs
+
+2007-05-04  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/tidy.c
+      ext/tidy/tests/007.phpt:
+      use the new 's&' parameter type and simplify the code
+
+    * (PHP_5_2)
+      ext/tidy/tidy.c:
+      get ride of warnings (different signdess)
+
+2007-05-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      ws
+
+    * ZendEngine2/zend_API.c:
+      Fixed wrong deallocation
+
+2007-05-04  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      fix comments
+
+    * (PHP_5_2)
+      ZendEngine2/tests/compare_001.phpt
+      ZendEngine2/tests/compare_002.phpt
+      ZendEngine2/tests/compare_003.phpt
+      ZendEngine2/tests/compare_004.phpt
+      ZendEngine2/tests/compare_005.phpt
+      ZendEngine2/tests/compare_006.phpt
+      ZendEngine2/tests/decrement_001.phpt
+      ZendEngine2/tests/increment_001.phpt:
+      add tests
+
+    * ZendEngine2/tests/cast_to_string.phpt
+      ZendEngine2/tests/compare_001.phpt
+      ZendEngine2/tests/compare_001.phpt
+      ZendEngine2/tests/compare_002.phpt
+      ZendEngine2/tests/compare_002.phpt
+      ZendEngine2/tests/compare_003.phpt
+      ZendEngine2/tests/compare_003.phpt
+      ZendEngine2/tests/compare_004.phpt
+      ZendEngine2/tests/compare_004.phpt
+      ZendEngine2/tests/compare_005.phpt
+      ZendEngine2/tests/compare_005.phpt
+      ZendEngine2/tests/compare_006.phpt
+      ZendEngine2/tests/compare_006.phpt
+      ZendEngine2/tests/decrement_001.phpt
+      ZendEngine2/tests/decrement_001.phpt
+      ZendEngine2/tests/increment_001.phpt
+      ZendEngine2/tests/increment_001.phpt:
+      new tests
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/tests/errmsg_021.phpt:
+      fix disabled classes
+
+    * ZendEngine2/zend_execute.c:
+      fix arrays with NULL keys in Unicode mode
+
+    * ext/oci8/config.m4:
+      fix spelling
+
+    * ZendEngine2/zend_operators.c:
+      merge one more missing patch from 5_2
+      thank you for not doing MFB
+
+    * ext/oci8/config.m4:
+      fix "checking checking" noticed by Mikko
+
+    * ZendEngine2/tests/double_to_string.phpt:
+      fix machine dependent test
+
+2007-05-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c:
+      - Fixed bug #41097 (ext/soap returning associative array as indexed without
+        using WSDL).
+      - Fixed bug #41004 (minOccurs="0" and null class member variable).
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c:
+      Fixed altering $this via argument named "this"
+
 2007-05-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
