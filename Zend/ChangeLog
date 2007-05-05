@@ -1,3 +1,67 @@
+2007-05-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c:
+      ws
+
+    * zend_API.c:
+      Fixed wrong deallocation
+
+2007-05-04  Antony Dovgal  <antony@zend.com>
+
+    * zend_strtod.c
+      zend_strtod.c:
+      fix comments
+
+    * (PHP_5_2)
+      tests/compare_001.phpt
+      tests/compare_002.phpt
+      tests/compare_003.phpt
+      tests/compare_004.phpt
+      tests/compare_005.phpt
+      tests/compare_006.phpt
+      tests/decrement_001.phpt
+      tests/increment_001.phpt:
+      add tests
+
+    * tests/cast_to_string.phpt
+      tests/compare_001.phpt
+      tests/compare_001.phpt
+      tests/compare_002.phpt
+      tests/compare_002.phpt
+      tests/compare_003.phpt
+      tests/compare_003.phpt
+      tests/compare_004.phpt
+      tests/compare_004.phpt
+      tests/compare_005.phpt
+      tests/compare_005.phpt
+      tests/compare_006.phpt
+      tests/compare_006.phpt
+      tests/decrement_001.phpt
+      tests/decrement_001.phpt
+      tests/increment_001.phpt
+      tests/increment_001.phpt:
+      new tests
+
+    * zend_API.c
+      tests/errmsg_021.phpt:
+      fix disabled classes
+
+    * zend_execute.c:
+      fix arrays with NULL keys in Unicode mode
+
+    * zend_operators.c:
+      merge one more missing patch from 5_2
+      thank you for not doing MFB
+
+    * tests/double_to_string.phpt:
+      fix machine dependent test
+
+2007-05-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      zend_compile.c:
+      Fixed altering $this via argument named "this"
+
 2007-05-03  Johannes Schlüter  <johannes@schlueters.de>
 
     * tests/bug40236.phpt:
