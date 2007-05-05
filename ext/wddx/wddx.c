@@ -984,6 +984,9 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 									goto bigint;
 								}
 								l = (long) d;
+								if (l != d) {
+									goto bigint;
+								}
 							case IS_LONG:
 								zend_hash_index_update(target_hash, l, &ent1->data, sizeof(zval *), NULL);
 								break;
