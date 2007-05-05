@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Fixed altering $this via argument named "this". (Dmitry)
 - Fixed bug #41287 (Namespace functions don't allow xmlns defintion to be 
   optional). (Rob)
+- Fixed bug #41285 (Improved fix for CVE-2007-1887 to work with non-bundled
+  sqlite2 lib). (Ilia)
 - Fixed bug #41283 (Bug with serializing array key that are doubles or
   floats). (Ilia)
 - Fixed bug #41257: (lookupNamespaceURI does not work as expected). (Rob)
