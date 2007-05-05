@@ -91,6 +91,9 @@
 
 #include "php_getopt.h"
 
+PHPAPI extern char *php_ini_opened_path;
+PHPAPI extern char *php_ini_scanned_files;
+
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -106,6 +109,7 @@
 #define PHP_MODE_REFLECTION_CLASS       9
 #define PHP_MODE_REFLECTION_EXTENSION   10
 #define PHP_MODE_REFLECTION_EXT_INFO    11
+#define PHP_MODE_SHOW_INI_CONFIG        12
 
 #define HARDCODED_INI			\
 	"html_errors=0\n"			\
@@ -153,16 +157,17 @@ static const opt_struct OPTIONS[] = {
 	{11,  1, "rclass"},
 	{12,  1, "re"},
 	{12,  1, "rextension"},
+#endif
 	{13,  1, "ri"},
 	{13,  1, "rextinfo"},
-#endif
+	{14,  0, "ini"},
 	{'-', 0, NULL} /* end of args */
 };
 
-static int print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
+static int print_module_info(zend_module_entry *module TSRMLS_DC)
 {
 	php_printf("%s\n", module->name);
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
@@ -182,14 +187,14 @@ static void print_modules(TSRMLS_D)
 	zend_hash_init(&sorted_registry, 50, NULL, NULL, 1);
 	zend_hash_copy(&sorted_registry, &module_registry, NULL, &tmp, sizeof(zend_module_entry));
 	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
-	zend_hash_apply_with_argument(&sorted_registry, (apply_func_arg_t) print_module_info, NULL TSRMLS_CC);
+	zend_hash_apply(&sorted_registry, (apply_func_t) print_module_info TSRMLS_CC);
 	zend_hash_destroy(&sorted_registry);
 }
 
 static int print_extension_info(zend_extension *ext, void *arg TSRMLS_DC)
 {
 	php_printf("%s\n", ext->name);
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 static int extension_name_cmp(const zend_llist_element **f,
@@ -206,7 +211,7 @@ static void print_extensions(TSRMLS_D)
 	zend_llist_copy(&sorted_exts, &zend_extensions);
 	sorted_exts.dtor = NULL;
 	zend_llist_sort(&sorted_exts, extension_name_cmp TSRMLS_CC);
-	zend_llist_apply_with_argument(&sorted_exts, (llist_apply_with_arg_func_t) print_extension_info, NULL TSRMLS_CC);
+	zend_llist_apply(&sorted_exts, (llist_apply_func_t) print_extension_info TSRMLS_CC);
 	zend_llist_destroy(&sorted_exts);
 }
 
@@ -448,13 +453,15 @@ static void php_cli_usage(char *argv0)
 				"  args...          Arguments passed to script. Use -- args when first argument\n"
 				"                   starts with - or script is read from stdin\n"
 				"\n"
+				"  --ini            Show configuration file names\n"
+				"\n"
 #if (HAVE_REFLECTION)
 				"  --rf <name>      Show information about function <name>.\n"
 				"  --rc <name>      Show information about class <name>.\n"
 				"  --re <name>      Show information about extension <name>.\n"
+#endif
 				"  --ri <name>      Show configuration for extension <name>.\n"
 				"\n"
-#endif
 				, prog, prog, prog, prog, prog, prog);
 }
 /* }}} */
@@ -959,11 +966,14 @@ int main(int argc, char *argv[])
 				behavior=PHP_MODE_REFLECTION_EXTENSION;
 				reflection_what = php_optarg;
 				break;
+#endif
 			case 13:
 				behavior=PHP_MODE_REFLECTION_EXT_INFO;
 				reflection_what = php_optarg;
 				break;
-#endif
+			case 14:
+				behavior = PHP_MODE_SHOW_INI_CONFIG;
+				break;
 			default:
 				break;
 			}
@@ -1231,6 +1241,8 @@ int main(int argc, char *argv[])
 					zend_execute_data execute_data;
 
 					switch (behavior) {
+						default:
+							break;
 						case PHP_MODE_REFLECTION_FUNCTION:
 							if (strstr(reflection_what, "::")) {
 								pce = reflection_method_ptr;
@@ -1270,6 +1282,7 @@ int main(int argc, char *argv[])
 
 					break;
 				}
+#endif /* reflection */
 			case PHP_MODE_REFLECTION_EXT_INFO:
 				{
 					int len = strlen(reflection_what);
@@ -1290,7 +1303,14 @@ int main(int argc, char *argv[])
 					efree(lcname);
 					break;
 				}
-#endif /* reflection */
+			case PHP_MODE_SHOW_INI_CONFIG:
+				{
+					zend_printf("Configuration File (php.ini) Path: %s\n", PHP_CONFIG_FILE_PATH);
+					zend_printf("Loaded Configuration File:         %s\n", php_ini_opened_path ? php_ini_opened_path : "(none)");
+					zend_printf("Scan for additional .ini files in: %s\n", *PHP_CONFIG_FILE_SCAN_DIR ? PHP_CONFIG_FILE_SCAN_DIR : "(none)");
+					zend_printf("Additional .ini files parsed:      %s\n", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
+					break;
+				}
 			}
 		}
 
