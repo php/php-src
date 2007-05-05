@@ -195,7 +195,7 @@ static void print_modules(TSRMLS_D)
 	zend_hash_destroy(&sorted_registry);
 }
 
-static int print_extension_info(zend_extension *ext, void *arg TSRMLS_DC)
+static int print_extension_info(zend_extension *ext TSRMLS_DC)
 {
 	php_printf("%s\n", ext->name);
 	return ZEND_HASH_APPLY_KEEP;
