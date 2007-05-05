@@ -25,5 +25,5 @@ var_dump( $a ); // 1A
 string(2) "2B"
 string(2) "1A"
 --UEXPECT--
-unicode(2) "2B"
-unicode(2) "1A"
+string(2) "2B"
+string(2) "1A"
