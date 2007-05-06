@@ -1,3 +1,94 @@
+2007-05-05  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/compare_001.phpt
+      ZendEngine2/tests/compare_001.phpt
+      ZendEngine2/tests/compare_002.phpt
+      ZendEngine2/tests/compare_002.phpt
+      ZendEngine2/tests/compare_003.phpt
+      ZendEngine2/tests/compare_003.phpt
+      ZendEngine2/tests/compare_004.phpt
+      ZendEngine2/tests/compare_004.phpt
+      ZendEngine2/tests/compare_005.phpt
+      ZendEngine2/tests/compare_005.phpt
+      ZendEngine2/tests/compare_006.phpt
+      ZendEngine2/tests/compare_006.phpt
+      ZendEngine2/tests/decrement_001.phpt
+      ZendEngine2/tests/decrement_001.phpt
+      ZendEngine2/tests/exception_handler_001.phpt
+      ZendEngine2/tests/exception_handler_001.phpt
+      ZendEngine2/tests/exception_handler_001.phpt
+      ZendEngine2/tests/exception_handler_002.phpt
+      ZendEngine2/tests/exception_handler_002.phpt
+      ZendEngine2/tests/exception_handler_002.phpt
+      ZendEngine2/tests/exception_handler_003.phpt
+      ZendEngine2/tests/exception_handler_003.phpt
+      ZendEngine2/tests/exception_handler_003.phpt
+      ZendEngine2/tests/exception_handler_004.phpt
+      ZendEngine2/tests/exception_handler_004.phpt
+      ZendEngine2/tests/exception_handler_004.phpt
+      ZendEngine2/tests/exception_handler_005.phpt
+      ZendEngine2/tests/exception_handler_005.phpt
+      ZendEngine2/tests/exception_handler_005.phpt
+      ZendEngine2/tests/exception_handler_006.phpt
+      ZendEngine2/tests/exception_handler_006.phpt
+      ZendEngine2/tests/exception_handler_006.phpt:
+      fix tests, add more
+
+2007-05-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/iconv/tests/iconv004.phpt:
+      fix test on systems where php.ini has something else than default settings
+
+2007-05-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      sapi/cli/php_cli.c:
+      - MFH --ri does not require ext/Reflection
+      - MFH --ini to show ini files being used
+
+2007-05-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/sqlite/sess_sqlite.c
+      ext/sqlite/sqlite.c:
+      
+      Fixed bug #41285 (Improved fix for CVE-2007-1887 to work with non-bundled
+      sqlite2 lib).
+
+2007-05-05  Michael Wallner  <mike@iworks.at>
+
+    * tests/func/006.phpt:
+      - output handler buffers are always binary, thanks Johannes
+
+2007-05-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/wddx/wddx.c:
+      
+      Fixed bug #41283 (Bug with serializing array key that are doubles or
+      floats).
+
+    * ext/wddx/tests/bug41283.phpt
+      ext/wddx/tests/bug41283.phpt:
+      
+      file bug41283.phpt was initially added on branch PHP_5_2.
+
+2007-05-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      - Fix function signature
+
+    * acinclude.m4:
+      - Update version in error message as well
+
+    * acinclude.m4:
+      - Fix re2c check and bump requirement to 0.12.0
+
+    * sapi/cli/php_cli.c:
+      - Simplify/use consts
+
 2007-05-04  Antony Dovgal  <antony@zend.com>
 
     * ext/gmp/tests/011.phpt:
