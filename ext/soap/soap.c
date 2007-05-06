@@ -140,8 +140,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	SOAP_GLOBAL(soap_version) = _old_soap_version;
 #endif
 
-#define HTTP_RAW_POST_DATA "HTTP_RAW_POST_DATA"
-
 #define ZERO_PARAM() \
 	if (ZEND_NUM_ARGS() != 0) \
  		WRONG_PARAM_COUNT;
@@ -1403,7 +1401,7 @@ PHP_METHOD(SoapServer, handle)
 	sdlPtr old_sdl = NULL;
 	soapServicePtr service;
 	xmlDocPtr doc_request=NULL, doc_return;
-	zval function_name, **params, **raw_post, *soap_obj, retval;
+	zval function_name, **params, *soap_obj, retval;
 	char *fn_name, cont_len[30];
 	int num_params = 0, size, i, call_status = 0;
 	xmlChar *buf;
@@ -1478,8 +1476,9 @@ PHP_METHOD(SoapServer, handle)
 	}
 
 	if (ZEND_NUM_ARGS() == 0) {
-		if (zend_hash_find(&EG(symbol_table), HTTP_RAW_POST_DATA, sizeof(HTTP_RAW_POST_DATA), (void **) &raw_post)!=FAILURE
-			&& ((*raw_post)->type==IS_STRING)) {
+		if (SG(request_info).raw_post_data) {
+			char *post_data = SG(request_info).raw_post_data;
+			int post_data_length = SG(request_info).raw_post_data_length;
 			zval **server_vars, **encoding;
 
 			zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
@@ -1497,13 +1496,13 @@ PHP_METHOD(SoapServer, handle)
 				    zend_hash_exists(EG(function_table), "gzinflate", sizeof("gzinflate"))) {
 					ZVAL_STRING(&func, "gzinflate", 0);
 					params[0] = &param;
-					ZVAL_STRINGL(params[0], Z_STRVAL_PP(raw_post)+10, Z_STRLEN_PP(raw_post)-10, 0);
+					ZVAL_STRINGL(params[0], post_data+10, post_data_length-10, 0);
 					INIT_PZVAL(params[0]);
 				} else if (strcmp(Z_STRVAL_PP(encoding),"deflate") == 0 &&
 		           zend_hash_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress"))) {
 					ZVAL_STRING(&func, "gzuncompress", 0);
 					params[0] = &param;
-					ZVAL_STRINGL(params[0], Z_STRVAL_PP(raw_post), Z_STRLEN_PP(raw_post), 0);
+					ZVAL_STRINGL(params[0], post_data, post_data_length, 0);
 					INIT_PZVAL(params[0]);
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_ERROR,"Request is compressed with unknown compression '%s'",Z_STRVAL_PP(encoding));
@@ -1516,16 +1515,9 @@ PHP_METHOD(SoapServer, handle)
 					php_error_docref(NULL TSRMLS_CC, E_ERROR,"Can't uncompress compressed request");
 				}
 			} else {
-				doc_request = soap_xmlParseMemory(Z_STRVAL_PP(raw_post),Z_STRLEN_PP(raw_post));
+				doc_request = soap_xmlParseMemory(post_data, post_data_length);
 			}
 		} else {
-			if (SG(request_info).request_method &&
-	    		strcmp(SG(request_info).request_method, "POST") == 0) {
-				if (!zend_ini_long("always_populate_raw_post_data", sizeof("always_populate_raw_post_data"), 0)) {
-					php_error_docref(NULL TSRMLS_CC, E_ERROR, "PHP-SOAP requires 'always_populate_raw_post_data' to be on please check your php.ini file");
-				}
-			}
-			soap_server_fault("Server", "Bad Request. Can't find HTTP_RAW_POST_DATA", NULL, NULL, NULL TSRMLS_CC);
 			return;
 		}
 	} else {
