@@ -1,7 +1,7 @@
 --TEST--
 ini_get_all() tests
 --SKIPIF--
-<?php if (!extension_loaded("pcre")) die("skip"); ?>
+<?php if (!extension_loaded("reflection")) die("skip"); ?>
 --FILE--
 <?php
 
