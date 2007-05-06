@@ -595,9 +595,7 @@ int main(int argc, char *argv[])
 	zend_file_handle file_handle;
 /* temporary locals */
 	enum behavior_mode behavior = PHP_MODE_STANDARD;
-#ifdef HAVE_REFLECTION
 	char *reflection_what = NULL;
-#endif
 	int orig_optind=php_optind;
 	char *orig_optarg=php_optarg;
 	char *arg_free=NULL, **arg_excp=&arg_free;
