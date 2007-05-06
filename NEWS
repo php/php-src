@@ -9,8 +9,8 @@ PHP                                                                        NEWS
   optional). (Rob)
 - Fixed bug #41285 (Improved fix for CVE-2007-1887 to work with non-bundled
   sqlite2 lib). (Ilia)
-- Fixed bug #41283 (Bug with serializing array key that are doubles or
-  floats). (Ilia)
+- Fixed bug #41283 (Bug with deserializing array key that are doubles or
+  floats in wddx). (Ilia)
 - Fixed bug #41257: (lookupNamespaceURI does not work as expected). (Rob)
 - Fixed bug #41097 (ext/soap returning associative array as indexed without
   using WSDL). (Dmitry)
