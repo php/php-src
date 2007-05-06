@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed altering $this via argument named "this". (Dmitry)
 - Fixed PHP CLI to use the php.ini from the binary location. (Hannes)
+- Fixed bug #41293 (Fixed creation of HTTP_RAW_POST_DATA when there is no
+  default post handler). (Ilia)
 - Fixed bug #41287 (Namespace functions don't allow xmlns defintion to be 
   optional). (Rob)
 - Fixed bug #41285 (Improved fix for CVE-2007-1887 to work with non-bundled
