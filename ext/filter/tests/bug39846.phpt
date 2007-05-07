@@ -1,5 +1,5 @@
 --TEST--
-Bug #39846 ipv4 trailing data validation
+Bug #39846 (ipv4 trailing data validation)
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--

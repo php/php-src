@@ -1,5 +1,5 @@
 --TEST--
-Bug #38600: infinite loop in pcre with extended class
+Bug #38600 (infinite loop in pcre with extended class)
 --FILE--
 <?php
 $foo = 'bla bla bla';

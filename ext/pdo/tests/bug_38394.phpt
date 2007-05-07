@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PHP Bug #38394: Prepared statement error stops subsequent statements
+PDO Common: Bug #38394 (Prepared statement error stops subsequent statements)
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');

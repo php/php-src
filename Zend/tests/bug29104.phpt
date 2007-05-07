@@ -1,5 +1,5 @@
 --TEST--
-Bug #29104 Function declaration in method doesn't work 
+Bug #29104 (Function declaration in method doesn't work)
 --FILE--
 <?php
 class A

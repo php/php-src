@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PHP Bug #34687: query doesn't return error information
+PDO Common: Bug #34687 (query doesn't return error information)
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');

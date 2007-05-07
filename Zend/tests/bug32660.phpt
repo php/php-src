@@ -1,5 +1,5 @@
 --TEST--
-Bug #32660 Assignment by reference causes crash when field access is overloaded (__get) 
+Bug #32660 (Assignment by reference causes crash when field access is overloaded (__get))
 --FILE--
 <?php
 class A

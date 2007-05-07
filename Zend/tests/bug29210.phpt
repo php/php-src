@@ -1,5 +1,5 @@
 --TEST--
-Bug #29210 Function: is_callable - no support for private and protected classes 
+Bug #29210 (Function: is_callable - no support for private and protected classes)
 --FILE--
 <?php
 class test_class {

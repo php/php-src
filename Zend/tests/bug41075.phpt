@@ -1,5 +1,5 @@
 --TEST--
-Bug #41075(memleak when creating default object caused exception)
+Bug #41075 (memleak when creating default object caused exception)
 --FILE--
 <?php
 

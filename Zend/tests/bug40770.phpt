@@ -1,5 +1,5 @@
 --TEST--
-Bug #40770 Apache child exits when PHP memory limit reached 
+Bug #40770 (Apache child exits when PHP memory limit reached)
 --INI--
 memory_limit=8M
 --SKIPIF--

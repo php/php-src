@@ -1,5 +1,5 @@
 --TEST--
-Bug #34785
+Bug #34785 (Can not properly subclass mysqli_stmt)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

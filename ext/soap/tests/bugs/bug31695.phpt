@@ -1,5 +1,5 @@
 --TEST--
-Bug #31695 Cannot redefine endpoint when using WSDL
+Bug #31695 (Cannot redefine endpoint when using WSDL)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

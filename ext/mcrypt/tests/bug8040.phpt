@@ -1,5 +1,5 @@
 --TEST--
-Bug #8040
+Bug #8040 (MCRYPT_MODE_* do not seem to exist)
 --SKIPIF--
 <?php if (!extension_loaded("mcrypt")) print "skip"; ?>
 --FILE--
