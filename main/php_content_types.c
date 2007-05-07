@@ -47,7 +47,9 @@ SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
 			sapi_read_standard_form_data(TSRMLS_C);
 		}
 
-		if (PG(always_populate_raw_post_data) && SG(request_info).post_data) {
+		/* For unknown content types we create HTTP_RAW_POST_DATA even if always_populate_raw_post_data off,
+		 * this is in-effecient, but we need to keep doing it for BC reasons (for now) */
+		if ((PG(always_populate_raw_post_data) || NULL == SG(request_info).post_entry) && SG(request_info).post_data) {
 			length = SG(request_info).post_data_length;
 			data = estrndup(SG(request_info).post_data, length);
 			SET_VAR_STRINGL("HTTP_RAW_POST_DATA", data, length);
