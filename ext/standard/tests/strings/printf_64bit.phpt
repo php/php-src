@@ -6,6 +6,8 @@ if (!(PHP_INT_MAX > 2147483647)) {
         die("skip 64bit test only");
 }
 ?>
+--INI--
+precision=14
 --FILE--
 <?php
 
