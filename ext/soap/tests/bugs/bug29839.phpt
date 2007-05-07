@@ -1,5 +1,5 @@
 --TEST--
-Bug #29839 incorrect convert (xml:lang to lang)
+Bug #29839 (incorrect convert (xml:lang to lang))
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

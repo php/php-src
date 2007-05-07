@@ -1,5 +1,5 @@
 --TEST--
-Bug #32776 SOAP doesn't support one-way operations
+Bug #32776 (SOAP doesn't support one-way operations)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

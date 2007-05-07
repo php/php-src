@@ -1,5 +1,5 @@
 --TEST--
-PDO OCI Bug #33707
+PDO OCI Bug #33707 (Errors in select statements not reported)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');

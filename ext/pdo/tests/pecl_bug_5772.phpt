@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PECL Bug #5772 PDO::FETCH_FUNC breaks on mixed case func name
+PDO Common: PECL Bug #5772 (PDO::FETCH_FUNC breaks on mixed case func name)
 --SKIPIF--
 <?php # vim:ft=php:
 if (!extension_loaded('pdo')) die('skip');

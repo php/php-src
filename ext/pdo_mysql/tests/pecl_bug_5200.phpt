@@ -1,5 +1,5 @@
 --TEST--
-PDO MySQL PECL Bug #5200
+PDO MySQL PECL Bug #5200 (Describe table gives unexpected result mysql and type enum)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');

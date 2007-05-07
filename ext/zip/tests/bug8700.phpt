@@ -1,5 +1,5 @@
 --TEST--
-bug #8700, getFromIndex(0) fails
+Bug #8700 (getFromIndex(0) fails)
 --SKIPIF--
 <?php
 /* $Id$ */

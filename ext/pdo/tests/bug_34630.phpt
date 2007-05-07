@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PHP Bug #34630: inserting streams as LOBs
+PDO Common: Bug #34630 (inserting streams as LOBs)
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');

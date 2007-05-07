@@ -1,5 +1,5 @@
 --TEST--
-bug #37090: mysqli_set_charset return code
+Bug #37090 (mysqli_set_charset return code)
 --SKIPIF--
 <?php require_once('skipif.inc'); 
 if (!function_exists('mysqli_set_charset')) {

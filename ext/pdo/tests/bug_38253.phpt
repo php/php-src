@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PHP Bug #38253: PDO produces segfault with default fetch mode
+PDO Common: Bug #38253 (PDO produces segfault with default fetch mode)
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');

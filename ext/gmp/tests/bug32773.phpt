@@ -1,5 +1,5 @@
 --TEST--
-Bug #32773 binary GMP functions returns unexpected value, when second parameter is int(0)
+Bug #32773 (binary GMP functions returns unexpected value, when second parameter is int(0))
 --SKIPIF--
 <?php if (!extension_loaded("gmp")) print "skip"; ?>
 --FILE--

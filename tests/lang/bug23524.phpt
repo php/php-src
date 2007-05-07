@@ -1,5 +1,5 @@
 --TEST--
-Bug #23524 Improper handling of constants in array indeces
+Bug #23524 (Improper handling of constants in array indices)
 --FILE--
 <?php
   echo "Begin\n";

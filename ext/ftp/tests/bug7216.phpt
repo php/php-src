@@ -1,5 +1,5 @@
 --TEST--
-Bug #7216: ftp_mkdir returns nothing
+Bug #7216 (ftp_mkdir returns nothing)
 --SKIPIF--
 <?php
 require 'skipif.inc';

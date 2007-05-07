@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PHP Bug #36428: Incorrect error message for PDO::fetchAll
+PDO Common: Bug #36428 (Incorrect error message for PDO::fetchAll())
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');

@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PHP Bug #35671: binding by name breakage
+PDO Common: Bug #35671 (binding by name breakage)
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');

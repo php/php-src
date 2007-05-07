@@ -1,5 +1,5 @@
 --TEST--
-Bug #21758: preg_replace_callback() not working with class methods
+Bug #21758 (preg_replace_callback() not working with class methods)
 --FILE--
 <?php
   class Foo {

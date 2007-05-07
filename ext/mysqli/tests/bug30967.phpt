@@ -1,5 +1,5 @@
 --TEST--
-Bug #30967 testcase (properties)
+Bug #30967 (problems with properties declared in the class extending the class extending MySQLi)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
