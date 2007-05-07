@@ -1,5 +1,7 @@
 --TEST--
 casting different variables to double 
+--INI--
+precision=14
 --FILE--
 <?php
 

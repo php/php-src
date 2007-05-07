@@ -1,5 +1,7 @@
 --TEST--
 adding numbers to strings
+--INI--
+precision=14
 --FILE--
 <?php
 
