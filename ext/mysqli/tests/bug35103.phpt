@@ -1,5 +1,5 @@
 --TEST--
-bug #35103 Bad handling of unsigned bigint
+Bug #35103 (Bad handling of unsigned bigint)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

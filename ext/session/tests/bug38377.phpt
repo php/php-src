@@ -1,5 +1,5 @@
 --TEST--
-bug #38377 (session_destroy() gives warning after session_regenerate_id())
+Bug #38377 (session_destroy() gives warning after session_regenerate_id())
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

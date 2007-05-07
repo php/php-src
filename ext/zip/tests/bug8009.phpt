@@ -1,5 +1,5 @@
 --TEST--
-bug #8009, cannot add again same entry to an archive
+Bug #8009 (cannot add again same entry to an archive)
 --SKIPIF--
 <?php
 /* $Id$ */

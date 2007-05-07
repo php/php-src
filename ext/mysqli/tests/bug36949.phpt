@@ -1,5 +1,5 @@
 --TEST--
-bug #36949
+Bug #36949 (invalid internal mysqli objects dtor)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
