@@ -1,5 +1,5 @@
 --TEST--
-Bug #35142 SOAP Client/Server Complex Object Support 
+Bug #35142 (SOAP Client/Server Complex Object Support)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --INI--

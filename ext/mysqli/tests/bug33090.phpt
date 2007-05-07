@@ -1,5 +1,5 @@
 --TEST--
-Bug #33090
+Bug #33090 (mysql_prepare doesn't return an error)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

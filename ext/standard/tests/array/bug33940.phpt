@@ -1,5 +1,5 @@
 --TEST--
-Bug #33940 array_map() fails to pass by reference when called recursively
+Bug #33940 (array_map() fails to pass by reference when called recursively)
 --INI--
 error_reporting=4095
 allow_call_time_pass_reference=1

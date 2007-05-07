@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PECL Bug #5809 PDOStatement::execute(array()) changes param
+PDO Common: PECL Bug #5809 (PDOStatement::execute(array()) changes param)
 --SKIPIF--
 <?php # vim:ft=php:
 if (!extension_loaded('pdo')) die('skip');

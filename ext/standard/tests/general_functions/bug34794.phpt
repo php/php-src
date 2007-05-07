@@ -1,5 +1,5 @@
 --TEST--
-bug #34794: proc_close() hangs when used with two processes
+Bug #34794 (proc_close() hangs when used with two processes)
 --SKIPIF--
 <?php
 if (!is_executable('/bin/cat')) echo 'skip cat not found';

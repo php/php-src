@@ -1,5 +1,5 @@
 --TEST--
-Bug #30994 SOAP server unable to handle request with references 
+Bug #30994 (SOAP server unable to handle request with references)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

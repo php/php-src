@@ -1,5 +1,5 @@
 --TEST--
-Bug #28974 array_(p)slice() treats large lengths incorrectly - overflow
+Bug #28974 (array_(p)slice() treats large lengths incorrectly - overflow)
 --FILE--
 <?php
 $a = $b = $c = array(0,1,2,3,4,5);

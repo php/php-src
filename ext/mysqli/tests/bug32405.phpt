@@ -1,5 +1,5 @@
 --TEST--
-Bug #32405
+Bug #32405 (mysqli->fetch() is returning bad data)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

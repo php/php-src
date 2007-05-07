@@ -1,5 +1,5 @@
 --TEST--
-Bug #41004 minOccurs="0" and null class member variable 
+Bug #41004 (minOccurs="0" and null class member variable)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

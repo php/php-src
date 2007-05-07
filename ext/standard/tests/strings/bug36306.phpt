@@ -1,5 +1,5 @@
 --TEST--
-Bug #36306 crc32() 64bit
+Bug #36306 (crc32() 64bit)
 --FILE--
 <?php
 

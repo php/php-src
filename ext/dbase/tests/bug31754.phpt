@@ -1,5 +1,5 @@
 --TEST--
-Bug #31754: (dbase_open() fails for mode = 1)
+Bug #31754 (dbase_open() fails for mode = 1)
 --SKIPIF--
 <?php
 if (!extension_loaded('dbase')) {
