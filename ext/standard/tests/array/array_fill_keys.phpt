@@ -1,5 +1,7 @@
 --TEST--
 basic array_fill_keys test
+--INI--
+precision=14
 --FILE--
 <?php
 	var_dump(array_fill_keys('test', 1));

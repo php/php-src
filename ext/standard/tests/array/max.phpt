@@ -1,5 +1,7 @@
 --TEST--
 max() tests
+--INI--
+precision=14
 --FILE--
 <?php
 

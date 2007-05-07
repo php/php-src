@@ -1,5 +1,7 @@
 --TEST--
 sprintf %f #2
+--INI--
+precision=14
 --FILE--
 <?php
 var_dump(sprintf("%.3F", 100.426));

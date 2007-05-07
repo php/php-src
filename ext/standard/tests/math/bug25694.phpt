@@ -1,5 +1,7 @@
 --TEST--
 Bug #25694 (round() and number_format() inconsistency)
+--INI--
+precision=14
 --FILE--
 <?php
 echo "round 0.045 = " . round(0.045, 2) . "\n";
