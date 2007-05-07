@@ -1,3 +1,61 @@
+2007-05-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/soap.c:
+      
+      Allow SOAP extension's handler() to work even when
+      always_populate_raw_post_data is off.
+      
+
+    * (PHP_5_2)
+      NEWS
+      main/php_content_types.c:
+      
+      Fixed bug #41293 (Fixed creation of HTTP_RAW_POST_DATA when there is no
+      default post handler).
+
+    * tests/basic/025.phpt
+      tests/basic/025.phpt:
+      
+      file 025.phpt was initially added on branch PHP_5_2.
+
+    * tests/basic/024.phpt
+      tests/basic/024.phpt:
+      
+      file 024.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Clarify bug fix details
+
+2007-05-06  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/php_ini.c:
+      MFH: Fixed PHP CLI to use the php.ini from the binary location
+
+2007-05-06  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ZendEngine2/tests/concat_001.phpt:
+      - Fix test
+
+2007-05-06  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/general_functions/ini_get_all.phpt:
+      Fix test
+
+    * ext/standard/tests/general_functions/ini_get_all.phpt:
+      Fix test
+
+2007-05-06  Johannes Schlüter  <johannes@schlueters.de>
+
+    * sapi/cli/php_cli.c:
+      - Fix build without reflection
+
 2007-05-05  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/tests/compare_001.phpt

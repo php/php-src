@@ -1,3 +1,8 @@
+2007-05-06  Johannes Schlüter  <johannes@schlueters.de>
+
+    * tests/concat_001.phpt:
+      - Fix test
+
 2007-05-05  Antony Dovgal  <antony@zend.com>
 
     * tests/compare_001.phpt
