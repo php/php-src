@@ -1,5 +1,7 @@
 --TEST--
 min() tests
+--INI--
+precision=14
 --FILE--
 <?php
 

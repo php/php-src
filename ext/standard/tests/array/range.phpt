@@ -1,5 +1,7 @@
 --TEST--
 range()
+--INI--
+precision=14
 --FILE--
 <?php
 	var_dump(range(1, 100));
