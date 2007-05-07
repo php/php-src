@@ -2,6 +2,8 @@
 SOAP Interop Round3 GroupD Compound2 001 (php/wsdl): echoEmployee
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 class Person {

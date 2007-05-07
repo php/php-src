@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupI XSD 011 (php/wsdl): echoFloatMultiOccurs
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 $client = new SoapClient(dirname(__FILE__)."/round4_groupI_xsd.wsdl",array("trace"=>1,"exceptions"=>0));

@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupH Complex Doc Lit 002 (php/wsdl): echoBaseStructFault
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 class SOAPStruct {

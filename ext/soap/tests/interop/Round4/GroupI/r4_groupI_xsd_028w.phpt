@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupI XSD 028 (php/wsdl): echoAnyType
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 class SOAPComplexType {

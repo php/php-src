@@ -2,6 +2,8 @@
 SOAP Interop Round2 base 015 (php/wsdl): echoStructArray
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 class SOAPStruct {

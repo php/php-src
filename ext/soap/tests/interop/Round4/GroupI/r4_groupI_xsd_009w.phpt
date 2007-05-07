@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupI XSD 009 (php/wsdl): echoComplexType(minOccur=0)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 class SOAPComplexType {

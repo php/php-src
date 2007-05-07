@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupI XSD 022 (php/wsdl): echoSimpleTypesAsComplexType(minOccurs=0)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 $client = new SoapClient(dirname(__FILE__)."/round4_groupI_xsd.wsdl",array("trace"=>1,"exceptions"=>0));
