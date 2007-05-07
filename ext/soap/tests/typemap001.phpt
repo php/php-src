@@ -51,7 +51,7 @@ $options=Array(
 
 $server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);
 $server->setClass("test");
-$server->handle();
+$server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
 ?>
 --EXPECT--

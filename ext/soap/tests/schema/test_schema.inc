@@ -66,7 +66,7 @@ EOF;
   if ($style == "rpc") {
     $HTTP_RAW_POST_DATA = $req;
     ob_start();
-    $y->handle();
+    $y->handle($HTTP_RAW_POST_DATA);
     ob_end_clean();
     echo $req;
     var_dump($val);
