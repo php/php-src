@@ -1,5 +1,5 @@
 --TEST--
-Bug #39583: FTP always transfers in binary mode
+Bug #39583 (FTP always transfers in binary mode)
 --SKIPIF--
 <?php
 require 'skipif.inc';

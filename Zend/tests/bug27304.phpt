@@ -1,5 +1,5 @@
 --TEST--
-Bug #27304
+Bug #27304 (static functions don't function properly)
 --FILE--
 <?php
 

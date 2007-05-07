@@ -1,5 +1,5 @@
 --TEST--
-Bug #31422 No Error-Logging on SoapServer-Side
+Bug #31422 (No Error-Logging on SoapServer-Side)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

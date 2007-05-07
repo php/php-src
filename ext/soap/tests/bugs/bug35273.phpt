@@ -1,5 +1,5 @@
 --TEST--
-Bug #35273 Error in mapping soap - java types 
+Bug #35273 (Error in mapping soap - java types)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

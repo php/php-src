@@ -1,5 +1,5 @@
 --TEST--
-Bug #35437 Segfault or Invalid Opcode 137/1/4 
+Bug #35437 (Segfault or Invalid Opcode 137/1/4)
 --FILE--
 <?php
 function err2exception($errno, $errstr)

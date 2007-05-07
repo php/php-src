@@ -1,5 +1,5 @@
 --TEST--
-Bug #40195: pcre 6.7 regression
+Bug #40195 (pcre 6.7 regression)
 --FILE--
 <?php
 

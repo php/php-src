@@ -1,5 +1,5 @@
 --TEST--
-Bug #16069
+Bug #16069 (ICONV transliteration failure)
 --SKIPIF--
 <?php
 include( 'skipif.inc' );

@@ -1,5 +1,5 @@
 --TEST--
-Bug #32833 Invalid opcode 
+Bug #32833 (Invalid opcode with $a[] .= '')
 --FILE--
 <?php 
 $test = array();

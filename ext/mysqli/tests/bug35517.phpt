@@ -1,5 +1,5 @@
 --TEST--
-Bug #35517 mysqli_stmt_fetch returns NULL
+Bug #35517 (mysqli_stmt_fetch returns NULL)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

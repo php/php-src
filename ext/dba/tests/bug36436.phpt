@@ -1,5 +1,5 @@
 --TEST--
-Bug #36436 DBA problem with Berkeley DB4 
+Bug #36436 (DBA problem with Berkeley DB4)
 --SKIPIF--
 <?php 
 	$handler = 'db4';

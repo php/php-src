@@ -1,5 +1,5 @@
 --TEST--
-PDO MySQL Bug #33689
+PDO MySQL Bug #33689 (query() execute() and fetch() return false on valid select queries)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');

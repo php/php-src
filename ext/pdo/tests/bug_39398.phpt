@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PHP Bug #39398: Booleans are not automatically translated to integers
+PDO Common: Bug #39398 (Booleans are not automatically translated to integers)
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');

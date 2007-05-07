@@ -1,5 +1,5 @@
 --TEST--
-Bug #30928 When Using WSDL, SoapServer doesn't handle private or protected properties 
+Bug #30928 (When Using WSDL, SoapServer doesn't handle private or protected properties)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

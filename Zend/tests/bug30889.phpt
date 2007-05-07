@@ -1,5 +1,5 @@
 --TEST--
-Bug #30889 Conflict between __get/__set and ++ operator
+Bug #30889 (Conflict between __get/__set and ++ operator)
 --FILE--
 <?php
 class overloaded

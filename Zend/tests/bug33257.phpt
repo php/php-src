@@ -1,5 +1,5 @@
 --TEST--
-Bug #33257 array_splice() inconsistent when passed function instead of variable 
+Bug #33257 (array_splice() inconsistent when passed function instead of variable)
 --INI--
 error_reporting=4095
 --FILE--

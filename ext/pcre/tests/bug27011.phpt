@@ -1,5 +1,5 @@
 --TEST--
-Bug #27011: segfault in preg_match_all()
+Bug #27011 (segfault in preg_match_all())
 --FILE--
 <?php
 
