@@ -1,5 +1,5 @@
 --TEST--
-bug #36010 (Crash when executing SQL statment with lob parameter twice)
+Bug #36010 (Crash when executing SQL statment with lob parameter twice)
 --SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
 --FILE--

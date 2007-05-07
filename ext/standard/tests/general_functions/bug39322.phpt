@@ -1,5 +1,5 @@
 --TEST--
-bug #39322: proc_terminate() loosing process resource
+Bug #39322 (proc_terminate() loosing process resource)
 --SKIPIF--
 <?php
 if (!is_executable('/bin/sleep')) echo 'skip sleep not found';

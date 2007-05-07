@@ -1,5 +1,5 @@
 --TEST--
-bug #36745 : LOAD DATA LOCAL INFILE doesn't return correct error message                                            
+Bug #36745 (LOAD DATA LOCAL INFILE doesn't return correct error message)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

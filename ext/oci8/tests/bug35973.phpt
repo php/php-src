@@ -1,5 +1,5 @@
 --TEST--
-bug #35973 (Error ORA-24806 occurs when trying to fetch a NCLOB field)
+Bug #35973 (Error ORA-24806 occurs when trying to fetch a NCLOB field)
 --SKIPIF--
 <?php if (!extension_loaded("oci8")) print "skip"; ?>
 --FILE--

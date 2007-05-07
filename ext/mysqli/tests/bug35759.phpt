@@ -1,5 +1,5 @@
 --TEST--
-bug #35759 : mysqli_stmt_bind_result() makes huge allocation when column empty
+Bug #35759 (mysqli_stmt_bind_result() makes huge allocation when column empty)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

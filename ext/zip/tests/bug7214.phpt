@@ -1,5 +1,5 @@
 --TEST--
-bug #7214, zip_entry_read() binary safe
+Bug #7214 (zip_entry_read() binary safe)
 --SKIPIF--
 <?php
 /* $Id$ */

@@ -1,5 +1,5 @@
 --TEST--
-bug #36802 : crashes with mysql_init                                            
+Bug #36802 (crashes with with mysqli_set_charset())
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

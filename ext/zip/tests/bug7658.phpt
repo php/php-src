@@ -1,5 +1,5 @@
 --TEST--
-bug #7658, modify archive with general bit flag 3 set
+Bug #7658 (modify archive with general bit flag 3 set)
 --SKIPIF--
 <?php
 /* $Id$ */
