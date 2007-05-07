@@ -15,7 +15,7 @@ $create_st[] = "create table mytab (mydata varchar2(20), seqcol number)";
 
 foreach ($create_st as $statement) {
 	$stmt = oci_parse($c, $statement);
-	oci_execute($stmt);
+	@oci_execute($stmt);
 }
 
 define('MYLIMIT', 200);
