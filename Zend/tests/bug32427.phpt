@@ -1,5 +1,5 @@
 --TEST--
-Bug #32427 Interfaces are not allowed 'static' access modifier
+Bug #32427 (Interfaces are not allowed 'static' access modifier)
 --FILE--
 <?php
 

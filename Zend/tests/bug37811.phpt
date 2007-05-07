@@ -1,5 +1,5 @@
 --TEST--
-Bug #37811 define not using toString on objects
+Bug #37811 (define not using toString on objects)
 --FILE--
 <?php
 

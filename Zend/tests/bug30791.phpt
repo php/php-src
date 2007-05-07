@@ -1,5 +1,5 @@
 --TEST--
-Bug #30791 magic methods (__sleep/__wakeup/__toString) call __call if object is overloaded 
+Bug #30791 (magic methods (__sleep/__wakeup/__toString) call __call if object is overloaded)
 --FILE--
 <?php
 

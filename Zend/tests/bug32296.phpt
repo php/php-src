@@ -1,5 +1,5 @@
 --TEST--
-Bug #32296 get_class_methods output has changed between 5.0.2 and 5.0.3 
+Bug #32296 (get_class_methods output has changed between 5.0.2 and 5.0.3)
 --FILE--
 <?php
 abstract class space{

@@ -1,5 +1,5 @@
 --TEST--
-Bug #32674 exception in iterator causes crash
+Bug #32674 (exception in iterator causes crash)
 --FILE--
 <?php
 class collection implements Iterator {
