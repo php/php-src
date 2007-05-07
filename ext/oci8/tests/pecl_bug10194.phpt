@@ -44,4 +44,4 @@ require dirname(__FILE__).'/drop_table.inc';
 echo "Done\n";
 ?>
 --EXPECTF--	
-Fatal error: Allowed memory size of 10485760 bytes exhausted at %s:%d (tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of 10485760 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
