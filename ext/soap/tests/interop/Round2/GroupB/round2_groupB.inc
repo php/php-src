@@ -33,5 +33,5 @@ class SOAP_Interop_GroupB {
 
 $server = new SoapServer(dirname(__FILE__)."/round2_groupB.wsdl");
 $server->setClass("SOAP_Interop_GroupB");
-$server->handle();
+$server->handle($HTTP_RAW_POST_DATA);
 ?>

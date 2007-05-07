@@ -1,19 +1,12 @@
 --TEST--
 SOAP Server 20: compressed request (deflate)
 --SKIPIF--
-<?php require_once('skipif.inc'); 
-  if (!extension_loaded('zlib')) die('skip zlib extension not available');
+<?php 
+	if (php_sapi_name()=='cli') echo 'skip';
+	require_once('skipif.inc'); 
+	if (!extension_loaded('zlib')) die('skip zlib extension not available');
 ?>
---FILE--
-<?php
-function test() {
-  return "Hello World";
-}
-
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction("test");
-
-$HTTP_RAW_POST_DATA = gzcompress(<<<EOF
+--POST--
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <SOAP-ENV:Envelope
   SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
@@ -25,9 +18,16 @@ $HTTP_RAW_POST_DATA = gzcompress(<<<EOF
     <ns1:test xmlns:ns1="http://testuri.org" />
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
-EOF
-, 9);
-$_SERVER['HTTP_CONTENT_ENCODING'] = "deflate";
+--DEFLATE_POST--
+1
+--FILE--
+<?php
+function test() {
+  return "Hello World";
+}
+
+$server = new soapserver(null,array('uri'=>"http://testuri.org"));
+$server->addfunction("test");
 $server->handle();
 echo "ok\n";
 ?>
