@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2007 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ Returns:        number of capturing subpatterns
                 or negative values on error
 */
 
-PCRE_DATA_SCOPE int
+PCRE_EXP_DEFN int
 pcre_info(const pcre *argument_re, int *optptr, int *first_byte)
 {
 real_pcre internal_re;

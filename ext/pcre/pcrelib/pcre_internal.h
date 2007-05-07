@@ -7,7 +7,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2007 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -69,11 +69,7 @@ be absolutely sure we get our version. */
 
 /* Get the definitions provided by running "configure" */
 
-#ifdef PHP_WIN32
-# include "config.w32.h"
-#else
-# include <php_config.h>
-#endif
+#include "config.h"
 
 /* Standard C headers plus the external interface definition. The only time
 setjmp and stdarg are used is when NO_RECURSE is set. */
@@ -87,8 +83,58 @@ setjmp and stdarg are used is when NO_RECURSE is set. */
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef PCRE_SPY
-#define PCRE_DEFINITION       /* Win32 __declspec(export) trigger for .dll */
+/* When compiling a DLL for Windows, the exported symbols have to be declared
+using some MS magic. I found some useful information on this web page:
+http://msdn2.microsoft.com/en-us/library/y4h7bcy6(VS.80).aspx. According to the
+information there, using __declspec(dllexport) without "extern" we have a
+definition; with "extern" we have a declaration. The settings here override the
+setting in pcre.h (which is included below); it defines only PCRE_EXP_DECL,
+which is all that is needed for applications (they just import the symbols). We
+use:
+
+  PCRE_EXP_DECL       for declarations
+  PCRE_EXP_DEFN       for definitions of exported functions
+  PCRE_EXP_DATA_DEFN  for definitions of exported variables
+
+The reason for the two DEFN macros is that in non-Windows environments, one
+does not want to have "extern" before variable definitions because it leads to
+compiler warnings. So we distinguish between functions and variables. In
+Windows, the two should always be the same.
+
+The reason for wrapping this in #ifndef PCRE_EXP_DECL is so that pcretest,
+which is an application, but needs to import this file in order to "peek" at
+internals, can #include pcre.h first to get an application's-eye view.
+
+In principle, people compiling for non-Windows, non-Unix-like (i.e. uncommon,
+special-purpose environments) might want to stick other stuff in front of
+exported symbols. That's why, in the non-Windows case, we set PCRE_EXP_DEFN and
+PCRE_EXP_DATA_DEFN only if they are not already set. */
+
+#ifndef PCRE_EXP_DECL
+#  ifdef _WIN32
+#    ifdef DLL_EXPORT
+#      define PCRE_EXP_DECL       extern __declspec(dllexport)
+#      define PCRE_EXP_DEFN       __declspec(dllexport)
+#      define PCRE_EXP_DATA_DEFN  __declspec(dllexport)
+#    else
+#      define PCRE_EXP_DECL       extern
+#      define PCRE_EXP_DEFN
+#      define PCRE_EXP_DATA_DEFN
+#    endif
+#
+#  else
+#    ifdef __cplusplus
+#      define PCRE_EXP_DECL       extern "C"
+#    else
+#      define PCRE_EXP_DECL       extern
+#    endif
+#    ifndef PCRE_EXP_DEFN
+#      define PCRE_EXP_DEFN       PCRE_EXP_DECL
+#    endif
+#    ifndef PCRE_EXP_DATA_DEFN
+#      define PCRE_EXP_DATA_DEFN
+#    endif
+#  endif
 #endif
 
 /* We need to have types that specify unsigned 16-bit and 32-bit integers. We
@@ -129,21 +175,22 @@ characters only go up to 0x7fffffff (though Unicode doesn't go beyond
 #define NOTACHAR 0xffffffff
 
 /* PCRE is able to support several different kinds of newline (CR, LF, CRLF,
-and "all" at present). The following macros are used to package up testing for
-newlines. NLBLOCK, PSSTART, and PSEND are defined in the various modules to
-indicate in which datablock the parameters exist, and what the start/end of
-string field names are. */
+"any" and "anycrlf" at present). The following macros are used to package up
+testing for newlines. NLBLOCK, PSSTART, and PSEND are defined in the various
+modules to indicate in which datablock the parameters exist, and what the
+start/end of string field names are. */
 
-#define NLTYPE_FIXED   0     /* Newline is a fixed length string */
-#define NLTYPE_ANY     1     /* Newline is any Unicode line ending */
+#define NLTYPE_FIXED    0     /* Newline is a fixed length string */
+#define NLTYPE_ANY      1     /* Newline is any Unicode line ending */
+#define NLTYPE_ANYCRLF  2     /* Newline is CR, LF, or CRLF */
 
 /* This macro checks for a newline at the given position */
 
 #define IS_NEWLINE(p) \
   ((NLBLOCK->nltype != NLTYPE_FIXED)? \
     ((p) < NLBLOCK->PSEND && \
-     _pcre_is_newline((p), NLBLOCK->PSEND, &(NLBLOCK->nllen), utf8) \
-    ) \
+     _pcre_is_newline((p), NLBLOCK->nltype, NLBLOCK->PSEND, &(NLBLOCK->nllen),\
+       utf8)) \
     : \
     ((p) <= NLBLOCK->PSEND - NLBLOCK->nllen && \
      (p)[0] == NLBLOCK->nl[0] && \
@@ -156,8 +203,8 @@ string field names are. */
 #define WAS_NEWLINE(p) \
   ((NLBLOCK->nltype != NLTYPE_FIXED)? \
     ((p) > NLBLOCK->PSSTART && \
-     _pcre_was_newline((p), NLBLOCK->PSSTART, &(NLBLOCK->nllen), utf8) \
-    ) \
+     _pcre_was_newline((p), NLBLOCK->nltype, NLBLOCK->PSSTART, \
+       &(NLBLOCK->nllen), utf8)) \
     : \
     ((p) >= NLBLOCK->PSSTART + NLBLOCK->nllen && \
      (p)[-NLBLOCK->nllen] == NLBLOCK->nl[0] && \
@@ -182,10 +229,12 @@ must begin with PCRE_. */
 #define USPTR const unsigned char *
 #endif
 
+
+
 /* Include the public PCRE header and the definitions of UCP character property
 values. */
 
-#include "pcre.h"
+#include <pcre.h>
 #include "ucp.h"
 
 /* When compiling for use with the Virtual Pascal compiler, these functions
@@ -193,7 +242,9 @@ need to have their names changed. PCRE must be compiled with the -DVPCOMPAT
 option on the command line. */
 
 #ifdef VPCOMPAT
+#define strlen(s)        _strlen(s)
 #define strncmp(s1,s2,m) _strncmp(s1,s2,m)
+#define memcmp(s,c,n)    _memcmp(s,c,n)
 #define memcpy(d,s,n)    _memcpy(d,s,n)
 #define memmove(d,s,n)   _memmove(d,s,n)
 #define memset(s,c,n)    _memset(s,c,n)
@@ -202,23 +253,31 @@ option on the command line. */
 /* To cope with SunOS4 and other systems that lack memmove() but have bcopy(),
 define a macro for memmove() if HAVE_MEMMOVE is false, provided that HAVE_BCOPY
 is set. Otherwise, include an emulating function for those systems that have
-neither (there some non-Unix environments where this is the case). This assumes
-that all calls to memmove are moving strings upwards in store, which is the
-case in PCRE. */
+neither (there some non-Unix environments where this is the case). */
 
-#if ! HAVE_MEMMOVE
+#ifndef HAVE_MEMMOVE
 #undef  memmove        /* some systems may have a macro */
-#if HAVE_BCOPY
+#ifdef HAVE_BCOPY
 #define memmove(a, b, c) bcopy(b, a, c)
 #else  /* HAVE_BCOPY */
 static void *
-pcre_memmove(unsigned char *dest, const unsigned char *src, size_t n)
+pcre_memmove(void *d, const void *s, size_t n)
 {
 size_t i;
-dest += n;
-src += n;
-for (i = 0; i < n; ++i) *(--dest) =  *(--src);
-return dest;
+unsigned char *dest = (unsigned char *)d;
+const unsigned char *src = (const unsigned char *)s;
+if (dest > src)
+  {
+  dest += n;
+  src += n;
+  for (i = 0; i < n; ++i) *(--dest) = *(--src);
+  return (void *)dest;
+  }
+else
+  {
+  for (i = 0; i < n; ++i) *dest++ = *src++;
+  return (void *)(dest - n);
+  }
 }
 #define memmove(a, b, c) pcre_memmove(a, b, c)
 #endif   /* not HAVE_BCOPY */
@@ -443,7 +502,8 @@ bits. */
 /* Masks for identifying the public options that are permitted at compile
 time, run time, or study time, respectively. */
 
-#define PCRE_NEWLINE_BITS (PCRE_NEWLINE_CR|PCRE_NEWLINE_LF|PCRE_NEWLINE_ANY)
+#define PCRE_NEWLINE_BITS (PCRE_NEWLINE_CR|PCRE_NEWLINE_LF|PCRE_NEWLINE_ANY| \
+                           PCRE_NEWLINE_ANYCRLF)
 
 #define PUBLIC_OPTIONS \
   (PCRE_CASELESS|PCRE_EXTENDED|PCRE_ANCHORED|PCRE_MULTILINE| \
@@ -889,16 +949,6 @@ typedef struct recursion_info {
   int saved_max;                /* Number of saved offsets */
 } recursion_info;
 
-/* When compiling in a mode that doesn't use recursive calls to match(),
-a structure is used to remember local variables on the heap. It is defined in
-pcre_exec.c, close to the match() function, so that it is easy to keep it in
-step with any changes of local variable. However, the pointer to the current
-frame must be saved in some "static" place over a longjmp(). We declare the
-structure here so that we can put a pointer in the match_data structure. NOTE:
-This isn't used for a "normal" compilation of pcre. */
-
-struct heapframe;
-
 /* Structure for building a chain of data for holding the values of the subject
 pointer at the start of each subpattern, so as to detect when an empty string
 has been matched by a subpattern - to break infinite loops. */
@@ -944,7 +994,6 @@ typedef struct match_data {
   int    eptrn;                 /* Next free eptrblock */
   recursion_info *recursive;    /* Linked list of recursion data */
   void  *callout_data;          /* To pass back to callouts */
-  struct heapframe *thisframe;  /* Used only when compiling for no recursion */
 } match_data;
 
 /* A similar structure is used for the same purpose by the DFA matching
@@ -1030,16 +1079,16 @@ extern const uschar _pcre_OP_lengths[];
 one of the exported public functions. They have to be "external" in the C
 sense, but are not part of the PCRE public API. */
 
-extern BOOL         _pcre_is_newline(const uschar *, const uschar *, int *,
-                      BOOL);
+extern BOOL         _pcre_is_newline(const uschar *, int, const uschar *,
+                      int *, BOOL);
 extern int          _pcre_ord2utf8(int, uschar *);
 extern real_pcre   *_pcre_try_flipped(const real_pcre *, real_pcre *,
                       const pcre_study_data *, pcre_study_data *);
 extern int          _pcre_ucp_findprop(const unsigned int, int *, int *);
 extern unsigned int _pcre_ucp_othercase(const unsigned int);
 extern int          _pcre_valid_utf8(const uschar *, int);
-extern BOOL         _pcre_was_newline(const uschar *, const uschar *, int *,
-                      BOOL);
+extern BOOL         _pcre_was_newline(const uschar *, int, const uschar *,
+                      int *, BOOL);
 extern BOOL         _pcre_xclass(int, const uschar *);
 
 #endif

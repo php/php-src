@@ -6952,4 +6952,42 @@ No match
     \nfoo 
  0: \x0afoo
 
+/^$/mg<any>
+    abc\r\rxyz
+ 0: 
+    abc\n\rxyz  
+ 0: 
+    ** Failers 
+No match
+    abc\r\nxyz
+No match
+
+/^X/m
+    XABC
+ 0: X
+    ** Failers 
+No match
+    XABC\B
+No match
+
+/(?m)^$/<any>g+
+    abc\r\n\r\n
+ 0: 
+ 0+ \x0d\x0a
+
+/(?m)^$|^\r\n/<any>g+ 
+    abc\r\n\r\n
+ 0: \x0d\x0a
+ 0+ 
+ 1: 
+    
+/(?m)$/<any>g+ 
+    abc\r\n\r\n
+ 0: 
+ 0+ \x0d\x0a\x0d\x0a
+ 0: 
+ 0+ \x0d\x0a
+ 0: 
+ 0+ 
+
 / End of testinput7 /
