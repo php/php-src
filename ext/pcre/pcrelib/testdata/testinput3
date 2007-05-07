@@ -86,6 +86,6 @@
     >>>\xaa<<<
     >>>\xba<<< 
     
-/[[:alpha:]][[:lower:]][[:upper:]]/DLfr_FR 
+/[[:alpha:]][[:lower:]][[:upper:]]/DZLfr_FR 
 
 / End of testinput3 /

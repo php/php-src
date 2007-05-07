@@ -4229,4 +4229,24 @@
     \r\nfoo 
     \nfoo 
 
+/^$/mg<any>
+    abc\r\rxyz
+    abc\n\rxyz  
+    ** Failers 
+    abc\r\nxyz
+
+/^X/m
+    XABC
+    ** Failers 
+    XABC\B
+
+/(?m)^$/<any>g+
+    abc\r\n\r\n
+
+/(?m)^$|^\r\n/<any>g+ 
+    abc\r\n\r\n
+    
+/(?m)$/<any>g+ 
+    abc\r\n\r\n
+
 / End of testinput7 /
