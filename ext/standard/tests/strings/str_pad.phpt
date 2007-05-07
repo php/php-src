@@ -1,5 +1,7 @@
 --TEST--
 str_pad() tests
+--INI--
+precision=14
 --FILE--
 <?php
 /* Pad a string to a certain length with another string */
