@@ -1,5 +1,5 @@
 --TEST--
-Bug #30702 cannot initialize class variable from class constant
+Bug #30702 (cannot initialize class variable from class constant)
 --FILE--
 <?php
 class foo {

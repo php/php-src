@@ -1,5 +1,5 @@
 --TEST--
-Bug #38220 Crash on some object operations 
+Bug #38220 (Crash on some object operations)
 --FILE--
 <?php
 class drv {

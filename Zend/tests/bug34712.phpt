@@ -1,5 +1,5 @@
 --TEST--
-Bug #34712 zend.ze1_compatibility_mode = on segfault 
+Bug #34712 (zend.ze1_compatibility_mode = on segfault)
 --INI--
 zend.ze1_compatibility_mode=1
 error_reporting=4095
