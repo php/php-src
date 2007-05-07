@@ -2,6 +2,8 @@
 SOAP XML Schema 4: simpleType/restriction (reference to undefined type)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 include "test_schema.inc";

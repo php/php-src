@@ -7,6 +7,8 @@ if (!function_exists('setlocale')) die('skip setlocale() not available');
 if (!@setlocale(LC_ALL, 'sv_SE', 'sv_SE.ISO8859-1')) die('skip sv_SE locale not available');
 if (!@setlocale(LC_ALL, 'en_US', 'en_US.ISO8859-1')) die('skip en_US locale not available');
 ?>
+--INI--
+precision=14
 --FILE--
 <?php
 function test(){

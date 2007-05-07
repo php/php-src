@@ -2,6 +2,8 @@
 SOAP 1.2: T42 echoStructArray
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 $HTTP_RAW_POST_DATA = <<<EOF

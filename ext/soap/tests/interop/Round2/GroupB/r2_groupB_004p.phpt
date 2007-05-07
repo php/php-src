@@ -2,6 +2,8 @@
 SOAP Interop Round2 groupB 004 (php/direct): echoNestedStruct
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 $param = (object)array(

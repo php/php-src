@@ -2,6 +2,8 @@
 SOAP Interop Round3 GroupD Import3 002 (php/wsdl): echoStructArray
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 class SOAPStruct {

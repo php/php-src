@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupH Complex RPC Enc 009 (php/wsdl): echoMultipleFaults2(3)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 class BaseStruct {

@@ -6,6 +6,8 @@ SOAP Server 20: compressed request (deflate)
 	require_once('skipif.inc'); 
 	if (!extension_loaded('zlib')) die('skip zlib extension not available');
 ?>
+--INI--
+precision=14
 --POST--
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <SOAP-ENV:Envelope

@@ -6,6 +6,8 @@ SOAP Server 19: compressed request (gzip)
 	require_once('skipif.inc'); 
 	if (!extension_loaded('zlib')) die('skip zlib extension not available');
 ?>
+--INI--
+precision=14
 --POST--
 <SOAP-ENV:Envelope
   SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"

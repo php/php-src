@@ -2,6 +2,8 @@
 SOAP handling of <any>
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 class SOAPComplexType {
