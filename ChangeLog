@@ -1,3 +1,589 @@
+2007-05-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      main/php_content_types.c
+      tests/basic/026.phpt
+      tests/basic/026.phpt:
+      Register RAW_POST_DATA even when always_populate_raw_post_data is off in
+      instances where content type is not known
+
+2007-05-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/soap/tests/any.phpt
+      ext/soap/tests/server019.phpt
+      ext/soap/tests/server020.phpt
+      ext/soap/tests/bugs/bug39815.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_012p.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_012s.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_012w.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_013p.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_013s.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_013w.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_014p.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_014s.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_014w.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_015p.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_015s.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_015w.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_001p.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_001s.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_001w.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_002p.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_002s.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_002w.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_004p.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_004s.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_004w.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_005p.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_005s.phpt
+      ext/soap/tests/interop/Round2/GroupB/r2_groupB_005w.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_compound1_001w.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_compound2_001w.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_doclit_003w.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_doclitparams_003w.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_import2_001w.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_import3_001w.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_import3_002w.phpt
+      ext/soap/tests/interop/Round3/GroupD/r3_groupD_rpcenc_003w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_doclit_001w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_doclit_002w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_doclit_003w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_doclit_004w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_doclit_005w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_doclit_006w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_rpcenc_001w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_rpcenc_002w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_rpcenc_003w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_rpcenc_004w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_rpcenc_005w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_rpcenc_006w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_rpcenc_007w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_rpcenc_008w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_rpcenc_009w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_complex_rpcenc_010w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_doclit_004w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_doclit_005w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_doclit_006w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_doclit_007w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_doclit_008w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_doclit_009w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_doclit_010w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_doclit_011w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_rpcenc_004w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_rpcenc_005w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_rpcenc_006w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_rpcenc_007w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_rpcenc_008w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_rpcenc_009w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_rpcenc_010w.phpt
+      ext/soap/tests/interop/Round4/GroupH/r4_groupH_simple_rpcenc_011w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_003w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_008w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_009w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_011w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_014w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_015w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_019w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_020w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_021w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_022w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_023w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_024w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_025w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_028w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_032w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_033w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_035w.phpt
+      ext/soap/tests/schema/schema004.phpt
+      ext/soap/tests/schema/schema014.phpt
+      ext/soap/tests/schema/schema016.phpt
+      ext/soap/tests/schema/schema017.phpt
+      ext/soap/tests/schema/schema020.phpt
+      ext/soap/tests/schema/schema022.phpt
+      ext/soap/tests/schema/schema054.phpt
+      ext/soap/tests/schema/schema055.phpt
+      ext/soap/tests/schema/schema063.phpt
+      ext/soap/tests/soap12/T42.phpt
+      ext/soap/tests/soap12/T47.phpt:
+      fix tests (add precision)
+
+    * ZendEngine2/tests/add_006.phpt
+      ZendEngine2/tests/add_006.phpt
+      ZendEngine2/tests/bug37212.phpt
+      ZendEngine2/tests/cast_to_double.phpt
+      ZendEngine2/tests/cast_to_double.phpt
+      ZendEngine2/tests/decrement_001.phpt
+      ZendEngine2/tests/decrement_001.phpt
+      ZendEngine2/tests/double_to_string_64bit.phpt
+      ZendEngine2/tests/double_to_string_64bit.phpt
+      ZendEngine2/tests/increment_001.phpt
+      ZendEngine2/tests/increment_001.phpt
+      ZendEngine2/tests/settype_double.phpt
+      ZendEngine2/tests/settype_double.phpt
+      ext/oci8/tests/pecl_bug10194.phpt
+      ext/oci8/tests/pecl_bug10194.phpt
+      ext/oci8/tests/pecl_bug10194_blob.phpt
+      ext/oci8/tests/pecl_bug10194_blob.phpt
+      ext/standard/tests/array/array_fill_keys.phpt
+      ext/standard/tests/array/array_fill_keys.phpt
+      ext/standard/tests/array/max.phpt
+      ext/standard/tests/array/max.phpt
+      ext/standard/tests/array/min.phpt
+      ext/standard/tests/array/min.phpt
+      ext/standard/tests/array/range.phpt
+      ext/standard/tests/array/range.phpt
+      ext/standard/tests/math/bug25694.phpt
+      ext/standard/tests/math/bug25694.phpt
+      ext/standard/tests/strings/sprintf_f_2.phpt
+      ext/standard/tests/strings/sprintf_f_2.phpt
+      ext/standard/tests/strings/str_pad.phpt
+      ext/standard/tests/strings/str_pad.phpt:
+      fix tests
+
+2007-05-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/soap/tests/server029.phpt
+      ext/soap/tests/server029.phpt
+      ext/soap/tests/typemap001.phpt
+      ext/soap/tests/typemap002.phpt
+      ext/soap/tests/typemap005.phpt
+      ext/soap/tests/typemap006.phpt
+      ext/soap/tests/typemap009.phpt
+      ext/soap/tests/typemap010.phpt
+      ext/soap/tests/typemap013.phpt
+      ext/soap/tests/bugs/bug28751.phpt
+      ext/soap/tests/bugs/bug30994.phpt
+      ext/soap/tests/bugs/bug31422.phpt
+      ext/soap/tests/bugs/bug36629.phpt
+      ext/soap/tests/bugs/bug39832.phpt
+      ext/soap/tests/interop/Round2/Base/round2_base.inc
+      ext/soap/tests/interop/Round2/GroupB/round2_groupB.inc
+      ext/soap/tests/interop/Round3/GroupD/round3_groupD_compound1.inc
+      ext/soap/tests/interop/Round3/GroupD/round3_groupD_compound2.inc
+      ext/soap/tests/interop/Round3/GroupD/round3_groupD_doclit.inc
+      ext/soap/tests/interop/Round3/GroupD/round3_groupD_doclitparams.inc
+      ext/soap/tests/interop/Round3/GroupD/round3_groupD_emptysa.inc
+      ext/soap/tests/interop/Round3/GroupD/round3_groupD_import1.inc
+      ext/soap/tests/interop/Round3/GroupD/round3_groupD_import2.inc
+      ext/soap/tests/interop/Round3/GroupD/round3_groupD_import3.inc
+      ext/soap/tests/interop/Round3/GroupD/round3_groupD_rpcenc.inc
+      ext/soap/tests/interop/Round3/GroupE/round3_groupE_list.inc
+      ext/soap/tests/interop/Round3/GroupF/round3_groupF_ext.inc
+      ext/soap/tests/interop/Round3/GroupF/round3_groupF_headers.inc
+      ext/soap/tests/interop/Round4/GroupG/round4_groupG_dimedoc.inc
+      ext/soap/tests/interop/Round4/GroupG/round4_groupG_dimerpc.inc
+      ext/soap/tests/interop/Round4/GroupG/round4_groupG_mimedoc.inc
+      ext/soap/tests/interop/Round4/GroupG/round4_groupG_mimerpc.inc
+      ext/soap/tests/interop/Round4/GroupH/round4_groupH_complex_doclit.inc
+      ext/soap/tests/interop/Round4/GroupH/round4_groupH_complex_rpcenc.inc
+      ext/soap/tests/interop/Round4/GroupH/round4_groupH_simple_doclit.inc
+      ext/soap/tests/interop/Round4/GroupH/round4_groupH_simple_rpcenc.inc
+      ext/soap/tests/interop/Round4/GroupH/round4_groupH_soapfault.inc:
+      
+      file server029.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/soap/tests/classmap001.phpt
+      ext/soap/tests/server001.phpt
+      ext/soap/tests/server002.phpt
+      ext/soap/tests/server003.phpt
+      ext/soap/tests/server004.phpt
+      ext/soap/tests/server005.phpt
+      ext/soap/tests/server006.phpt
+      ext/soap/tests/server009.phpt
+      ext/soap/tests/server010.phpt
+      ext/soap/tests/server013.phpt
+      ext/soap/tests/server014.phpt
+      ext/soap/tests/server016.phpt
+      ext/soap/tests/server017.phpt
+      ext/soap/tests/server018.phpt
+      ext/soap/tests/server019.phpt
+      ext/soap/tests/server020.phpt
+      ext/soap/tests/server021.phpt
+      ext/soap/tests/server022.phpt
+      ext/soap/tests/server023.phpt
+      ext/soap/tests/server024.phpt
+      ext/soap/tests/server025.phpt
+      ext/soap/tests/server026.phpt
+      ext/soap/tests/server028.phpt
+      ext/soap/tests/interop/Round4/GroupI/round4_groupI_xsd.inc
+      ext/soap/tests/schema/test_schema.inc
+      ext/soap/tests/soap12/soap12-test.inc:
+      
+      Fixed SOAP tests and added additional tests to ensure processing POST data
+      works based on server001.phpt
+
+    * (PHP_5_2)
+      run-tests.php:
+      
+      Added support for --GZIP_POST-- and --DEFLATE_POST-- that allows emulation
+      of compressed POST input
+
+2007-05-07  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug22725.phpt
+      ZendEngine2/tests/bug22725.phpt
+      ZendEngine2/tests/bug27304.phpt
+      ZendEngine2/tests/bug27304.phpt
+      ZendEngine2/tests/bug29104.phpt
+      ZendEngine2/tests/bug29104.phpt
+      ZendEngine2/tests/bug29210.phpt
+      ZendEngine2/tests/bug29210.phpt
+      ZendEngine2/tests/bug30519.phpt
+      ZendEngine2/tests/bug30519.phpt
+      ZendEngine2/tests/bug30702.phpt
+      ZendEngine2/tests/bug30702.phpt
+      ZendEngine2/tests/bug30791.phpt
+      ZendEngine2/tests/bug30791.phpt
+      ZendEngine2/tests/bug30889.phpt
+      ZendEngine2/tests/bug30889.phpt
+      ZendEngine2/tests/bug32296.phpt
+      ZendEngine2/tests/bug32296.phpt
+      ZendEngine2/tests/bug32427.phpt
+      ZendEngine2/tests/bug32427.phpt
+      ZendEngine2/tests/bug32660.phpt
+      ZendEngine2/tests/bug32660.phpt
+      ZendEngine2/tests/bug32674.phpt
+      ZendEngine2/tests/bug32674.phpt
+      ZendEngine2/tests/bug32833.phpt
+      ZendEngine2/tests/bug32833.phpt
+      ZendEngine2/tests/bug33257.phpt
+      ZendEngine2/tests/bug33257.phpt
+      ZendEngine2/tests/bug33771.phpt
+      ZendEngine2/tests/bug34712.phpt
+      ZendEngine2/tests/bug35437.phpt
+      ZendEngine2/tests/bug35437.phpt
+      ZendEngine2/tests/bug37811.phpt
+      ZendEngine2/tests/bug37811.phpt
+      ZendEngine2/tests/bug38220.phpt
+      ZendEngine2/tests/bug38220.phpt
+      ZendEngine2/tests/bug40770.phpt
+      ZendEngine2/tests/bug40770.phpt
+      ZendEngine2/tests/bug40809.phpt
+      ZendEngine2/tests/bug40809.phpt
+      ZendEngine2/tests/bug41075.phpt
+      ZendEngine2/tests/bug41075.phpt
+      ext/dba/tests/bug36436.phpt
+      ext/dba/tests/bug36436.phpt
+      ext/dbase/tests/bug31754.phpt
+      ext/dbase/tests/bug31754.phpt
+      ext/dom/tests/bug36756.phpt
+      ext/dom/tests/bug36756.phpt
+      ext/filter/tests/bug39763.phpt
+      ext/filter/tests/bug39846.phpt
+      ext/ftp/tests/bug27809.phpt
+      ext/ftp/tests/bug27809.phpt
+      ext/ftp/tests/bug37799.phpt
+      ext/ftp/tests/bug37799.phpt
+      ext/ftp/tests/bug39458-2.phpt
+      ext/ftp/tests/bug39458-2.phpt
+      ext/ftp/tests/bug39458.phpt
+      ext/ftp/tests/bug39458.phpt
+      ext/ftp/tests/bug39583-2.phpt
+      ext/ftp/tests/bug39583-2.phpt
+      ext/ftp/tests/bug39583.phpt
+      ext/ftp/tests/bug39583.phpt
+      ext/ftp/tests/bug7216-2.phpt
+      ext/ftp/tests/bug7216-2.phpt
+      ext/ftp/tests/bug7216.phpt
+      ext/ftp/tests/bug7216.phpt
+      ext/gmp/tests/bug32773.phpt
+      ext/gmp/tests/bug32773.phpt
+      ext/iconv/tests/bug16069.phpt
+      ext/iconv/tests/bug16069.phpt
+      ext/mcrypt/tests/bug37595.phpt
+      ext/mcrypt/tests/bug37595.phpt
+      ext/mcrypt/tests/bug8040.phpt
+      ext/mcrypt/tests/bug8040.phpt
+      ext/mysqli/tests/bug28817.phpt
+      ext/mysqli/tests/bug28817.phpt
+      ext/mysqli/tests/bug30967.phpt
+      ext/mysqli/tests/bug30967.phpt
+      ext/mysqli/tests/bug31141.phpt
+      ext/mysqli/tests/bug31141.phpt
+      ext/mysqli/tests/bug31668.phpt
+      ext/mysqli/tests/bug31668.phpt
+      ext/mysqli/tests/bug32405.phpt
+      ext/mysqli/tests/bug32405.phpt
+      ext/mysqli/tests/bug33090.phpt
+      ext/mysqli/tests/bug33090.phpt
+      ext/mysqli/tests/bug33263.phpt
+      ext/mysqli/tests/bug33263.phpt
+      ext/mysqli/tests/bug34785.phpt
+      ext/mysqli/tests/bug34785.phpt
+      ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/bug35103.phpt
+      ext/mysqli/tests/bug35103.phpt
+      ext/mysqli/tests/bug35517.phpt
+      ext/mysqli/tests/bug35517.phpt
+      ext/mysqli/tests/bug35759.phpt
+      ext/mysqli/tests/bug35759.phpt
+      ext/mysqli/tests/bug36420.phpt
+      ext/mysqli/tests/bug36420.phpt
+      ext/mysqli/tests/bug36745.phpt
+      ext/mysqli/tests/bug36745.phpt
+      ext/mysqli/tests/bug36802.phpt
+      ext/mysqli/tests/bug36802.phpt
+      ext/mysqli/tests/bug36949.phpt
+      ext/mysqli/tests/bug36949.phpt
+      ext/mysqli/tests/bug37090.phpt
+      ext/oci8/tests/bug27303.phpt
+      ext/oci8/tests/bug27303.phpt
+      ext/oci8/tests/bug27303_2.phpt
+      ext/oci8/tests/bug27303_2.phpt
+      ext/oci8/tests/bug27303_3.phpt
+      ext/oci8/tests/bug27303_3.phpt
+      ext/oci8/tests/bug27303_4.phpt
+      ext/oci8/tests/bug27303_4.phpt
+      ext/oci8/tests/bug32325.phpt
+      ext/oci8/tests/bug32325.phpt
+      ext/oci8/tests/bug35973.phpt
+      ext/oci8/tests/bug35973.phpt
+      ext/oci8/tests/bug36010.phpt
+      ext/oci8/tests/bug36010.phpt
+      ext/oci8/tests/bug38161.phpt
+      ext/oci8/tests/bug38161.phpt
+      ext/pcre/tests/bug21758.phpt
+      ext/pcre/tests/bug27011.phpt
+      ext/pcre/tests/bug27011.phpt
+      ext/pcre/tests/bug38600.phpt
+      ext/pcre/tests/bug38600.phpt
+      ext/pcre/tests/bug40195.phpt
+      ext/pcre/tests/bug40195.phpt
+      ext/pdo/tests/bug_34630.phpt
+      ext/pdo/tests/bug_34630.phpt
+      ext/pdo/tests/bug_34687.phpt
+      ext/pdo/tests/bug_34687.phpt
+      ext/pdo/tests/bug_35671.phpt
+      ext/pdo/tests/bug_36428.phpt
+      ext/pdo/tests/bug_36428.phpt
+      ext/pdo/tests/bug_38253.phpt
+      ext/pdo/tests/bug_38253.phpt
+      ext/pdo/tests/bug_38394.phpt
+      ext/pdo/tests/bug_38394.phpt
+      ext/pdo/tests/bug_39398.phpt
+      ext/pdo/tests/bug_39398.phpt
+      ext/pdo/tests/pecl_bug_5217.phpt
+      ext/pdo/tests/pecl_bug_5217.phpt
+      ext/pdo/tests/pecl_bug_5772.phpt
+      ext/pdo/tests/pecl_bug_5809.phpt
+      ext/pdo_mysql/tests/bug_33689.phpt
+      ext/pdo_mysql/tests/bug_33689.phpt
+      ext/pdo_mysql/tests/pecl_bug_5200.phpt
+      ext/pdo_mysql/tests/pecl_bug_5780.phpt
+      ext/pdo_mysql/tests/pecl_bug_5802.phpt
+      ext/pdo_oci/tests/bug_33707.phpt
+      ext/pdo_pgsql/tests/bug_33876.phpt
+      ext/pdo_pgsql/tests/bug_33876.phpt
+      ext/pgsql/tests/80_bug14383.phpt
+      ext/pgsql/tests/80_bug14383.phpt
+      ext/pgsql/tests/80_bug24499.phpt
+      ext/pgsql/tests/80_bug24499.phpt
+      ext/pgsql/tests/80_bug27597.phpt
+      ext/pgsql/tests/80_bug27597.phpt
+      ext/session/tests/bug31454.phpt
+      ext/session/tests/bug31454.phpt
+      ext/session/tests/bug36459.phpt
+      ext/session/tests/bug36459.phpt
+      ext/session/tests/bug38377.phpt
+      ext/session/tests/bug38377.phpt
+      ext/simplexml/tests/bug37565.phpt
+      ext/simplexml/tests/bug37565.phpt
+      ext/soap/tests/bugs/bug29839.phpt
+      ext/soap/tests/bugs/bug29839.phpt
+      ext/soap/tests/bugs/bug30106.phpt
+      ext/soap/tests/bugs/bug30106.phpt
+      ext/soap/tests/bugs/bug30799.phpt
+      ext/soap/tests/bugs/bug30799.phpt
+      ext/soap/tests/bugs/bug30928.phpt
+      ext/soap/tests/bugs/bug30928.phpt
+      ext/soap/tests/bugs/bug30994.phpt
+      ext/soap/tests/bugs/bug30994.phpt
+      ext/soap/tests/bugs/bug31422.phpt
+      ext/soap/tests/bugs/bug31422.phpt
+      ext/soap/tests/bugs/bug31695.phpt
+      ext/soap/tests/bugs/bug31695.phpt
+      ext/soap/tests/bugs/bug31755.phpt
+      ext/soap/tests/bugs/bug31755.phpt
+      ext/soap/tests/bugs/bug32776.phpt
+      ext/soap/tests/bugs/bug32776.phpt
+      ext/soap/tests/bugs/bug34453.phpt
+      ext/soap/tests/bugs/bug34453.phpt
+      ext/soap/tests/bugs/bug35142.phpt
+      ext/soap/tests/bugs/bug35142.phpt
+      ext/soap/tests/bugs/bug35273.phpt
+      ext/soap/tests/bugs/bug35273.phpt
+      ext/soap/tests/bugs/bug36226.phpt
+      ext/soap/tests/bugs/bug36226.phpt
+      ext/soap/tests/bugs/bug41004.phpt
+      ext/soap/tests/bugs/bug41004.phpt
+      ext/spl/tests/bug33136.phpt
+      ext/spl/tests/bug33136.phpt
+      ext/spl/tests/bug36287.phpt
+      ext/spl/tests/bug36287.phpt
+      ext/standard/tests/array/bug28974.phpt
+      ext/standard/tests/array/bug28974.phpt
+      ext/standard/tests/array/bug29253.phpt
+      ext/standard/tests/array/bug29253.phpt
+      ext/standard/tests/array/bug33940.phpt
+      ext/standard/tests/array/bug33940.phpt
+      ext/standard/tests/array/bug34982.phpt
+      ext/standard/tests/array/bug34982.phpt
+      ext/standard/tests/general_functions/bug34794.phpt
+      ext/standard/tests/general_functions/bug34794.phpt
+      ext/standard/tests/general_functions/bug39322.phpt
+      ext/standard/tests/general_functions/bug39322.phpt
+      ext/standard/tests/general_functions/is_resource.phpt
+      ext/standard/tests/general_functions/is_resource.phpt
+      ext/standard/tests/strings/bug36306.phpt
+      ext/standard/tests/strings/bug36306.phpt
+      ext/zip/tests/bug7214.phpt
+      ext/zip/tests/bug7214.phpt
+      ext/zip/tests/bug7658.phpt
+      ext/zip/tests/bug7658.phpt
+      ext/zip/tests/bug8009.phpt
+      ext/zip/tests/bug8009.phpt
+      ext/zip/tests/bug8700.phpt
+      ext/zip/tests/bug8700.phpt
+      tests/lang/031.phpt
+      tests/lang/031.phpt
+      tests/lang/bug23524.phpt
+      tests/lang/bug23524.phpt:
+      fix test names
+
+2007-05-07  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * main/php_compat.h:
+      update pcre symbols list
+
+    * ext/pcre/tests/bug21758.phpt
+      ext/pcre/tests/bug21758.phpt:
+      fix test title
+
+    * ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/COPYING
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/HACKING
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/libpcre.def
+      ext/pcre/pcrelib/libpcreposix.def
+      ext/pcre/pcrelib/pcre.def
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_chartables.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_scanner.cc
+      ext/pcre/pcrelib/pcre_scanner.h
+      ext/pcre/pcrelib/pcre_scanner_unittest.cc
+      ext/pcre/pcrelib/pcre_stringpiece.cc
+      ext/pcre/pcrelib/pcre_stringpiece.h
+      ext/pcre/pcrelib/pcre_stringpiece_unittest.cc
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcrecpp.cc
+      ext/pcre/pcrelib/pcrecpp.h
+      ext/pcre/pcrelib/pcrecpp_unittest.cc
+      ext/pcre/pcrelib/pcrecpparg.h
+      ext/pcre/pcrelib/pcredemo.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/ucptable.c
+      ext/pcre/pcrelib/ucptable.h
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/.cvsignore
+      ext/pcre/pcrelib/testdata/grepinputx
+      ext/pcre/pcrelib/testdata/grepoutput
+      ext/pcre/pcrelib/testdata/grepoutputN
+      ext/pcre/pcrelib/testdata/testinput10
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput3
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput10
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput3
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput9:
+      update bundled PCRE to version 7.2 RC1. if everything goes right, this will
+      be merged later to php 5.x
+
+2007-05-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/gd.c:
+      - MFH: fix build when use with a museum freetype version (1.x)
+
+    * ext/gd/gd.c:
+      - fix build when use with a museum freetype version (1.x)
+
+2007-05-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/compare_001_64bit.phpt
+      ZendEngine2/tests/compare_002_64bit.phpt
+      ZendEngine2/tests/compare_003_64bit.phpt
+      ZendEngine2/tests/compare_004_64bit.phpt
+      ZendEngine2/tests/compare_005_64bit.phpt
+      ZendEngine2/tests/compare_006_64bit.phpt
+      ZendEngine2/tests/decrement_001_64bit.phpt:
+      add 64bit version of the tests
+
+    * ZendEngine2/tests/compare_001_64bit.phpt
+      ZendEngine2/tests/compare_001_64bit.phpt
+      ZendEngine2/tests/compare_002_64bit.phpt
+      ZendEngine2/tests/compare_002_64bit.phpt
+      ZendEngine2/tests/compare_003_64bit.phpt
+      ZendEngine2/tests/compare_003_64bit.phpt
+      ZendEngine2/tests/compare_004_64bit.phpt
+      ZendEngine2/tests/compare_004_64bit.phpt
+      ZendEngine2/tests/compare_005_64bit.phpt
+      ZendEngine2/tests/compare_005_64bit.phpt
+      ZendEngine2/tests/compare_006_64bit.phpt
+      ZendEngine2/tests/compare_006_64bit.phpt
+      ZendEngine2/tests/decrement_001_64bit.phpt
+      ZendEngine2/tests/decrement_001_64bit.phpt:
+      
+      add 64bit version of the tests
+
+    * ext/oci8/tests/bug27303.phpt
+      ext/oci8/tests/bug27303.phpt
+      ext/standard/tests/strings/printf_64bit.phpt
+      ext/standard/tests/strings/printf_64bit.phpt:
+      fix test
+
 2007-05-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

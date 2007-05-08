@@ -1,3 +1,91 @@
+2007-05-07  Antony Dovgal  <antony@zend.com>
+
+    * tests/add_006.phpt
+      tests/add_006.phpt
+      tests/bug37212.phpt
+      tests/cast_to_double.phpt
+      tests/cast_to_double.phpt
+      tests/decrement_001.phpt
+      tests/decrement_001.phpt
+      tests/double_to_string_64bit.phpt
+      tests/double_to_string_64bit.phpt
+      tests/increment_001.phpt
+      tests/increment_001.phpt
+      tests/settype_double.phpt
+      tests/settype_double.phpt:
+      fix tests
+
+    * tests/bug22725.phpt
+      tests/bug22725.phpt
+      tests/bug27304.phpt
+      tests/bug27304.phpt
+      tests/bug29104.phpt
+      tests/bug29104.phpt
+      tests/bug29210.phpt
+      tests/bug29210.phpt
+      tests/bug30519.phpt
+      tests/bug30519.phpt
+      tests/bug30702.phpt
+      tests/bug30702.phpt
+      tests/bug30791.phpt
+      tests/bug30791.phpt
+      tests/bug30889.phpt
+      tests/bug30889.phpt
+      tests/bug32296.phpt
+      tests/bug32296.phpt
+      tests/bug32427.phpt
+      tests/bug32427.phpt
+      tests/bug32660.phpt
+      tests/bug32660.phpt
+      tests/bug32674.phpt
+      tests/bug32674.phpt
+      tests/bug32833.phpt
+      tests/bug32833.phpt
+      tests/bug33257.phpt
+      tests/bug33257.phpt
+      tests/bug33771.phpt
+      tests/bug34712.phpt
+      tests/bug35437.phpt
+      tests/bug35437.phpt
+      tests/bug37811.phpt
+      tests/bug37811.phpt
+      tests/bug38220.phpt
+      tests/bug38220.phpt
+      tests/bug40770.phpt
+      tests/bug40770.phpt
+      tests/bug40809.phpt
+      tests/bug40809.phpt
+      tests/bug41075.phpt
+      tests/bug41075.phpt:
+      fix test names
+
+    * (PHP_5_2)
+      tests/compare_001_64bit.phpt
+      tests/compare_002_64bit.phpt
+      tests/compare_003_64bit.phpt
+      tests/compare_004_64bit.phpt
+      tests/compare_005_64bit.phpt
+      tests/compare_006_64bit.phpt
+      tests/decrement_001_64bit.phpt:
+      add 64bit version of the tests
+
+    * tests/compare_001_64bit.phpt
+      tests/compare_001_64bit.phpt
+      tests/compare_002_64bit.phpt
+      tests/compare_002_64bit.phpt
+      tests/compare_003_64bit.phpt
+      tests/compare_003_64bit.phpt
+      tests/compare_004_64bit.phpt
+      tests/compare_004_64bit.phpt
+      tests/compare_005_64bit.phpt
+      tests/compare_005_64bit.phpt
+      tests/compare_006_64bit.phpt
+      tests/compare_006_64bit.phpt
+      tests/decrement_001_64bit.phpt
+      tests/decrement_001_64bit.phpt:
+      
+      add 64bit version of the tests
+
 2007-05-06  Johannes Schlüter  <johannes@schlueters.de>
 
     * tests/concat_001.phpt:
