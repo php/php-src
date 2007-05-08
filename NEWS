@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed altering $this via argument named "this". (Dmitry)
 - Fixed PHP CLI to use the php.ini from the binary location. (Hannes)
+- Fixed bug #41326 (Writing empty tags with Xmlwriter::WriteElement[ns])
+  (Pierre)
 - Fixed bug #41321 (downgrade read errors in getimagesize() to E_NOTICE).
   (Ilia)
 - Fixed bug #41304 (compress.zlib temp files left). (Dmitry)

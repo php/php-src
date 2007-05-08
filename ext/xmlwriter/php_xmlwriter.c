@@ -695,7 +695,6 @@ static PHP_FUNCTION(xmlwriter_start_element)
 }
 /* }}} */
 
-
 /* {{{ proto bool xmlwriter_start_element_ns(resource xmlwriter, string prefix, string name, string uri)
 Create start namespaced element tag - returns FALSE on error */
 static PHP_FUNCTION(xmlwriter_start_element_ns)
@@ -756,20 +755,21 @@ static PHP_FUNCTION(xmlwriter_full_end_element)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_element(resource xmlwriter, string name, string content)
+/* {{{ proto bool xmlwriter_write_element(resource xmlwriter, string name[, string content])
 Write full element tag - returns FALSE on error */
 static PHP_FUNCTION(xmlwriter_write_element)
 {
 	zval *pind;
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
-	char *name, *content;
+	char *name, *content = NULL;
 	int name_len, content_len, retval;
+
 #ifdef ZEND_ENGINE_2
 	zval *this = getThis();
 	
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s",
 			&name, &name_len, &content, &content_len) == FAILURE) {
 			return;
 		}
@@ -789,7 +789,18 @@ static PHP_FUNCTION(xmlwriter_write_element)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteElement(ptr, (xmlChar *)name, (xmlChar *)content);
+		if (!content || content_len < 1) {
+			retval = xmlTextWriterStartElement(ptr, (xmlChar *)name);
+            if (retval == -1) {
+                RETURN_FALSE;
+            }
+			xmlTextWriterEndElement(ptr);
+            if (retval == -1) {
+                RETURN_FALSE;
+            }
+		} else {
+			retval = xmlTextWriterWriteElement(ptr, (xmlChar *)name, (xmlChar *)content);
+		}
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -799,21 +810,21 @@ static PHP_FUNCTION(xmlwriter_write_element)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_element_ns(resource xmlwriter, string prefix, string name, string uri, string content)
+/* {{{ proto bool xmlwriter_write_element_ns(resource xmlwriter, string prefix, string name, string uri[, string content])
 Write full namesapced element tag - returns FALSE on error */
 static PHP_FUNCTION(xmlwriter_write_element_ns)
 {
 	zval *pind;
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
-	char *name, *prefix, *uri, *content;
+	char *name, *prefix, *uri, *content = NULL;
 	int name_len, prefix_len, uri_len, content_len, retval;
 
 #ifdef ZEND_ENGINE_2
 	zval *this = getThis();
 	
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!ss!s", 
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!ss!|s", 
 			&prefix, &prefix_len, &name, &name_len, &uri, &uri_len, &content, &content_len) == FAILURE) {
 			return;
 		}
@@ -821,7 +832,7 @@ static PHP_FUNCTION(xmlwriter_write_element_ns)
 	} else
 #endif
 	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs!ss!s", &pind, 
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs!ss!|s", &pind, 
 			&prefix, &prefix_len, &name, &name_len, &uri, &uri_len, &content, &content_len) == FAILURE) {
 			return;
 		}
@@ -833,7 +844,18 @@ static PHP_FUNCTION(xmlwriter_write_element_ns)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteElementNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri, (xmlChar *)content);
+		if (!content || content_len < 1) {
+			retval = xmlTextWriterStartElementNS(ptr,(xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri);
+            if (retval == -1) {
+                RETURN_FALSE;
+            }
+			retval = xmlTextWriterEndElement(ptr);
+            if (retval == -1) {
+                RETURN_FALSE;
+            }
+		} else {
+			retval = xmlTextWriterWriteElementNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri, (xmlChar *)content);
+		}
 		if (retval != -1) {
 			RETURN_TRUE;
 		}

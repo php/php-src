@@ -30,14 +30,14 @@ print $xw->flush(true);
 --EXPECTF--
 <?xml version="1.0"?>
 <test:test xmlns:test="urn:x-test:">
- <test:foo></test:foo>
- <bar xmlns="urn:x-test:"></bar>
- <bar xmlns=""></bar>
+ <test:foo/>
+ <bar xmlns="urn:x-test:"/>
+ <bar xmlns=""/>
 </test:test>
 
 <?xml version="1.0"?>
 <test:test xmlns:test="urn:x-test:">
- <test:foo></test:foo>
- <bar xmlns="urn:x-test:"></bar>
- <bar xmlns=""></bar>
+ <test:foo/>
+ <bar xmlns="urn:x-test:"/>
+ <bar xmlns=""/>
 </test:test>
