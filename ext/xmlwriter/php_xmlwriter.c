@@ -769,13 +769,13 @@ static PHP_FUNCTION(xmlwriter_write_element)
 	zval *pind;
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
-	char *name, *content;
+	char *name, *content = NULL;
 	int name_len, content_len, retval;
 #ifdef ZEND_ENGINE_2
 	zval *this = getThis();
 	
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&",
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|s&",
 			&name, &name_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv)) == FAILURE) {
 			return;
 		}
@@ -783,7 +783,7 @@ static PHP_FUNCTION(xmlwriter_write_element)
 	} else
 #endif
 	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&s&", &pind, 
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&|s&", &pind, 
 			&name, &name_len, UG(utf8_conv), &content, &content_len, UG(utf8_conv)) == FAILURE) {
 			return;
 		}
@@ -795,7 +795,18 @@ static PHP_FUNCTION(xmlwriter_write_element)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteElement(ptr, (xmlChar *)name, (xmlChar *)content);
+        if (!content || content_len < 1) {
+            retval = xmlTextWriterStartElement(ptr, (xmlChar *)name);
+			if (retval == -1) {
+				RETURN_FALSE;
+			}
+            retval = xmlTextWriterEndElement(ptr);
+			if (retval == -1) {
+				RETURN_FALSE;
+			}
+        } else {
+            retval = xmlTextWriterWriteElement(ptr, (xmlChar *)name, (xmlChar *)content);
+        }
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -839,7 +850,18 @@ static PHP_FUNCTION(xmlwriter_write_element_ns)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteElementNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri, (xmlChar *)content);
+        if (!content || content_len < 1) {
+            retval = xmlTextWriterStartElementNS(ptr,(xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri);
+            if (retval == -1) {
+                RETURN_FALSE;
+            }
+            retval = xmlTextWriterEndElement(ptr);
+            if (retval == -1) {
+                RETURN_FALSE;
+            }
+        } else {
+            retval = xmlTextWriterWriteElementNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri, (xmlChar *)content);
+        }
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
