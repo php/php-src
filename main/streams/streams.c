@@ -2433,6 +2433,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 			case PHP_STREAM_UNCHANGED:
 				return stream;
 			case PHP_STREAM_RELEASED:
+				if (newstream->orig_path) {
+					pefree(newstream->orig_path, persistent);
+				}
 				newstream->orig_path = pestrdup(path, persistent);
 				return newstream;
 			default:

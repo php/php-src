@@ -76,7 +76,7 @@ static int php_gziop_close(php_stream *stream, int close_handle TSRMLS_DC)
 			self->gz_file = NULL;
 		}
 		if (self->stream) {
-			php_stream_free(self->stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PRESERVE_HANDLE);
+			php_stream_close(self->stream);
 			self->stream = NULL;
 		}
 	}
@@ -130,7 +130,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 		int fd;
 
 		if (SUCCESS == php_stream_cast(innerstream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
-			self->gz_file = gzdopen(fd, mode);
+			self->gz_file = gzdopen(dup(fd), mode);
 			self->stream = innerstream;
 			if (self->gz_file)	{
 				stream = php_stream_alloc_rel(&php_stream_gzio_ops, self, 0, mode);
