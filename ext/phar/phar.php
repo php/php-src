@@ -19,23 +19,23 @@ if (!class_exists('DirectoryTreeIterator'))
 			parent::__construct(
 				new RecursiveCachingIterator(
 					new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::KEY_AS_FILENAME
-					), 
+					),
 					CachingIterator::CALL_TOSTRING|CachingIterator::CATCH_GET_CHILD
-				), 
+				),
 				parent::SELF_FIRST
 			);
 		}
-	
+
 		function current()
 		{
 			$tree = '';
 			for ($l=0; $l < $this->getDepth(); $l++) {
 				$tree .= $this->getSubIterator($l)->hasNext() ? '| ' : '  ';
 			}
-			return $tree . ($this->getSubIterator($l)->hasNext() ? '|-' : '\-') 
+			return $tree . ($this->getSubIterator($l)->hasNext() ? '|-' : '\-')
 			       . $this->getSubIterator($l)->__toString();
 		}
-	
+
 		function __call($func, $params)
 		{
 			return call_user_func_array(array($this->getSubIterator(), $func), $params);
@@ -54,9 +54,9 @@ if (!class_exists('DirectoryGraphIterator'))
 					new ParentIterator(
 						new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::KEY_AS_FILENAME
 						)
-					), 
+					),
 					CachingIterator::CALL_TOSTRING|CachingIterator::CATCH_GET_CHILD
-				), 
+				),
 				parent::SELF_FIRST
 			);
 		}
@@ -78,7 +78,7 @@ if (!class_exists('CLICommand'))
 			$this->argv = $argv;
 			$this->cmds = self::getCommands($this);
 			$this->types= self::getArgTypes($this);
-			
+
 			if ($argc < 2)
 			{
 				echo "No command given, check ${argv[0]} help\n";
@@ -173,7 +173,7 @@ if (!class_exists('CLICommand'))
 					exit(1);
 				}
 			}
-			
+
 			call_user_func(array($this, $this->cmds[$command]['run']));
 		}
 
@@ -182,7 +182,7 @@ if (!class_exists('CLICommand'))
 			$a = array();
 			$r = new ReflectionClass($cmdclass);
 			$l = strlen($prefix);
-			
+
 			foreach($r->getMethods() as $m)
 			{
 				if (substr($m->name, 0, $l) == $prefix)
@@ -209,10 +209,25 @@ if (!class_exists('CLICommand'))
 		{
 			return self::getSubFuncs($cmdclass, 'cli_cmd_', array('arg','inf','run'));
 		}
-		
+
 		static function getArgTypes(CLICommand $cmdclass)
 		{
 			return self::getSubFuncs($cmdclass, 'cli_arg_', array('typ'));
+		}
+
+		static function cli_arg_typ_file($arg)
+		{
+			if (!file_exists($arg))
+			{
+				echo "Requested file '$arg' does not exist.\n";
+				exit(1);
+			}
+			return $arg;
+		}
+	
+		static function cli_arg_typ_filecont($arg)
+		{
+			return file_get_contents(self::cli_arg_typ_file($arg));
 		}
 	}
 }
@@ -241,12 +256,12 @@ class PharCommand extends CLICommand
 			exit(1);
 		}
 	}
-	
+
 	static function cli_arg_typ_pharurl($arg)
 	{
 		return 'phar://' . self::cli_arg_typ_pharfile($arg);
 	}
-	
+
 	static function cli_arg_typ_phar($arg)
 	{
 		try
@@ -311,37 +326,79 @@ EOF;
 		return array(
 			'f' => array('type'=>'pharnew', 'val'=>NULL,      'required'=>1),
 			'a' => array('type'=>'alias',   'val'=>'newphar', 'required'=>1),
-			''  => array('type'=>'any',     'val'=>NULL,      'required'=>1),
+			's' => array('type'=>'file',    'val'=>NULL),
 			'r' => array('type'=>'regex',   'val'=>NULL),
+			''  => array('type'=>'any',     'val'=>NULL,      'required'=>1),
 			);
 	}
 
-	static function cli_cmd_run_pack()
+	function cli_cmd_run_pack()
 	{
-		$archive = $this->args['f'];
-		$alias   = $this->args['a'];
-		$input   = $this->args['i'];
-		$regex   = $this->args['r'];
+		if (ini_get('phar.readonly'))
+		{
+			echo "Creating phar files is disabled by ini setting 'phar.readonly'.\n";
+			exit(1);
+		}
+		if (Phar::canWrite() == version_compare(phpversion('phar'), '1.2', '<'))
+		{
+			echo "Creating phar files is disabled, Phar::canWrite() returned false.\n";
+			exit(1);
+		}
+
+		$archive = $this->args['f']['val'];
+		$alias   = $this->args['a']['val'];
+		$stub    = $this->args['s']['val'];
+		$regex   = $this->args['r']['val'];
+		$input   = $this->args['']['val'];
 
 		$phar  = new Phar($archive, 0, $alias);
+
+		$phar->startBuffering();
+		
+		if (isset($stub))
+		{
+			$phar->setStub(file_get_contents($stub));
+			$stub = new SplFileInfo($stub);
+		}
+
+		if (!is_array($input))
+		{
+			$this->phar_add($phar, $input, $regex, $stub);
+		}
+		else
+		{
+			foreach($input as $i)
+			{
+				$this->phar_add($phar, $i, $regex, $stub);
+			}
+		}
+
+		$phar->compressAllFilesBZIP2();
+		$phar->stopBuffering();
+		exit(0);
+	}
+
+	static function phar_add(Phar $phar, $input, $regex, SplFileInfo $stub)
+	{
 		$dir   = new RecursiveDirectoryIterator($input);
 		$dir   = new RecursiveIteratorIterator($dir);
+
 		if (isset($regex))
 		{
-			$dir  = new RegexIterator($dir, '/'. $argv[3].'/');
+			$dir = new RegexIterator($dir, '/'. $regex . '/');
 		}
 
 		try
 		{
-			$phar->begin();
-			foreach($dir as $f)
+			foreach($dir as $file)
 			{
-				echo "$f\n";
-				$phar[$file] = file_get_contents($file);
+				if (empty($stub) || $file->getRealPath() != $stub->getRealPath())
+				{
+					$f = $dir->getSubPathName();
+					echo "$f\n";
+					$phar[$f] = file_get_contents($file);
+				}
 			}
-			$phar->compressAllFilesBZIP2();
-			$phar->commit();
-			exit(0);
 		}
 		catch(Excpetion $e)
 		{
@@ -370,7 +427,7 @@ EOF;
 			echo "$f\n";
 		}
 	}
-		
+
 	static function cli_cmd_inf_tree()
 	{
 		return "Get a directory tree for a PHAR archive.";
