@@ -3016,7 +3016,7 @@ PHAR_ADD_ENTRY:
 }
 /* }}}*/
 
-#if defined(PHP_VERSION_ID) && PHP_VERSION_ID < 50300
+#if defined(PHP_VERSION_ID) && (PHP_VERSION_ID < 50300 || PHP_VERSION_ID >= 60000)
 
 static int _php_stream_unlink(char *url, int options, php_stream_context *context TSRMLS_DC)
 {

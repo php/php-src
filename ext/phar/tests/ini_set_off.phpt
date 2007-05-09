@@ -50,35 +50,36 @@ var_dump(ini_set('phar.readonly', 0));
 var_dump(Phar::canWrite());
 var_dump(ini_get('phar.require_hash'));
 var_dump(ini_get('phar.readonly'));
-__HALT_COMPILER();
 ?>
+===DONE===
 --EXPECT--
 string(1) "0"
 string(1) "0"
 string(1) "1"
 string(1) "1"
-bool(false)
+bool(true)
 yes
 string(1) "0"
 string(1) "0"
 string(3) "yes"
 string(3) "yes"
-bool(true)
+bool(false)
 on
 string(1) "0"
 string(1) "0"
 string(2) "on"
 string(2) "on"
-bool(true)
+bool(false)
 true
 string(1) "0"
 string(1) "0"
-bool(true)
+bool(false)
 string(4) "true"
 string(4) "true"
 0
 string(4) "true"
 string(4) "true"
-bool(false)
+bool(true)
 string(1) "0"
 string(1) "0"
+===DONE===
