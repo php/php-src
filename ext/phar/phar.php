@@ -1,8 +1,6 @@
 #!/usr/bin/php
 <?php
 
-$cmds = array();
-
 foreach(array("SPL", "Reflection", "Phar") as $ext)
 {
 	if (!extension_loaded($ext))
@@ -65,16 +63,212 @@ if (!class_exists('DirectoryGraphIterator'))
 	}
 }
 
-class PharCommand
+if (!class_exists('CLICommand'))
 {
-	static function phar_inf_help()
+	abstract class CLICommand
+	{
+		protected $argc;
+		protected $argv;
+		protected $cmds = array();
+		protected $args = array();
+
+		function __construct($argc, array $argv)
+		{
+			$this->argc = $argc;
+			$this->argv = $argv;
+			$this->cmds = self::getCommands($this);
+			$this->types= self::getArgTypes($this);
+			
+			if ($argc < 2)
+			{
+				echo "No command given, check ${argv[0]} help\n";
+				exit(1);
+			}
+			elseif (!isset($this->cmds[$argv[1]]['run']))
+			{
+				echo "Unknown command '${argv[1]}', check ${argv[0]} help\n";
+				exit(1);
+			}
+			else
+			{
+				$command = $argv[1];
+			}
+
+			if (isset($this->cmds[$command]['arg']))
+			{
+				$this->args = call_user_func(array($this, $this->cmds[$command]['arg']));
+				$i = 1;
+				$missing = false;
+				while (++$i < $argc)
+				{
+					if ($argv[$i][0] == '-')
+					{
+						if (strlen($argv[$i]) == 2 && isset($this->args[$argv[$i][1]]))
+						{
+							$arg = $argv[$i][1];
+							if (++$i >= $argc)
+							{
+								echo "Missing argument to parameter '$arg' of command '$command', check ${argv[0]} help\n";
+								exit(1);
+							}
+							else
+							{
+								$type = $this->args[$arg]['type'];
+
+								if (isset($this->types[$type]['typ']))
+								{
+									$this->args[$arg]['val'] = call_user_func(array($this, $this->types[$type]['typ']), $argv[$i]);
+								}
+								else
+								{
+									$this->args[$arg]['val'] = $argv[$i];
+								}
+							}
+						}
+						else
+						{
+							echo "Unknown parameter '${argv[$i]}' to command $command, check ${argv[0]} help\n";
+							exit(1);
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+				if (isset($this->args['']))
+				{
+					if ($i >= $argc)
+					{
+						if (isset($this->args['']['require']) && $this->args['']['require'])
+						{
+							echo "Missing default trailing arguments to command $command, check ${argv[0]} help\n";
+							$missing = true;
+						}
+					}
+					else
+					{
+						$this->args['']['val'] = array();
+						while($i < $argc)
+						{
+							$this->args['']['val'][] = $argv[$i++];
+						}
+					}
+				}
+				else if ($i < $argc)
+				{
+					echo "Unexpected default arguments to command $command, check ${argv[0]} help\n";
+					exit(1);
+				}
+				foreach($this->args as $arg => $inf)
+				{
+					if (strlen($arg) && !isset($inf['val']) && isset($inf['required']) && $inf['required'])
+					{
+						echo "Missing parameter '-$arg' to command $command, check ${argv[0]} help\n";
+						$missing = true;
+					}
+				}
+				if ($missing)
+				{
+					exit(1);
+				}
+			}
+			
+			call_user_func(array($this, $this->cmds[$command]['run']));
+		}
+
+		static function getSubFuncs(CLICommand $cmdclass, $prefix, array $subs)
+		{
+			$a = array();
+			$r = new ReflectionClass($cmdclass);
+			$l = strlen($prefix);
+			
+			foreach($r->getMethods() as $m)
+			{
+				if (substr($m->name, 0, $l) == $prefix)
+				{
+					foreach($subs as $sub)
+					{
+						$what = substr($m->name, $l+strlen($sub)+1);
+						$func = $prefix . $sub . '_' . $what;
+						if ($r->hasMethod($func))
+						{
+							if (!isset($a[$what]))
+							{
+								$a[$what] = array();
+							}
+							$a[$what][$sub] = /*$m->class . '::' .*/ $func;
+						}
+					}
+				}
+			}
+			return $a;
+		}
+
+		static function getCommands(CLICommand $cmdclass)
+		{
+			return self::getSubFuncs($cmdclass, 'cli_cmd_', array('arg','inf','run'));
+		}
+		
+		static function getArgTypes(CLICommand $cmdclass)
+		{
+			return self::getSubFuncs($cmdclass, 'cli_arg_', array('typ'));
+		}
+	}
+}
+
+class PharCommand extends CLICommand
+{
+	static function cli_arg_typ_pharfile($arg)
+	{
+		try
+		{
+			if (!file_exists($arg) && file_exists($ps = dirname(__FILE__).'/'.$arg))
+			{
+				$arg = $ps;
+			}
+			if (!Phar::loadPhar($arg))
+			{
+				"Unable to open phar '$phar'\n";
+				exit(1);
+			}
+			return $arg;
+		}
+		catch(Exception $e)
+		{
+			echo "Exception while opening phar '$arg':\n";
+			echo $e->getMessage() . "\n";
+			exit(1);
+		}
+	}
+	
+	static function cli_arg_typ_pharurl($arg)
+	{
+		return 'phar://' . self::cli_arg_typ_pharfile($arg);
+	}
+	
+	static function cli_arg_typ_phar($arg)
+	{
+		try
+		{
+			return new Phar(self::cli_arg_typ_pharfile($arg));
+		}
+		catch(Exception $e)
+		{
+			echo "Exception while opening phar '$argv':\n";
+			echo $e->getMessage() . "\n";
+			exit(1);
+		}
+	}
+
+	static function cli_cmd_inf_help()
 	{
 		return "This help.";
 	}
 
-	static function phar_cmd_help()
+	function cli_cmd_run_help()
 	{
-		global $cmds, $argc, $argv;
+		$argv = $this->argv;
 
 		echo <<<EOF
 $argv[0] command [options]
@@ -88,15 +282,15 @@ Commands:
 
 EOF;
 		$l = 0;
-		foreach($cmds as $name => $funcs)
+		foreach($this->cmds as $name => $funcs)
 		{
 			$l = max($l, strlen($name));
 		}
-		foreach($cmds as $name => $funcs)
+		foreach($this->cmds as $name => $funcs)
 		{
 			if (isset($funcs['inf']))
 			{
-				$inf = call_user_func($funcs['inf']);
+				$inf = call_user_func(array($this, $funcs['inf']));
 			}
 			else
 			{
@@ -107,12 +301,12 @@ EOF;
 		exit(0);
 	}
 
-	static function phar_inf_pack()
+	static function cli_cmd_inf_pack()
 	{
 		return "Pack files into a PHAR archive.";
 	}
 
-	static function phar_arg_pack()
+	static function cli_cmd_arg_pack()
 	{
 		return array(
 			'f' => array('type'=>'pharnew', 'val'=>NULL,      'required'=>1),
@@ -122,14 +316,12 @@ EOF;
 			);
 	}
 
-	static function phar_cmd_pack()
+	static function cli_cmd_run_pack()
 	{
-		global $args;
-
-		$archive = $args['f'];
-		$alias   = $args['a'];
-		$input   = $args['i'];
-		$regex   = $args['r'];
+		$archive = $this->args['f'];
+		$alias   = $this->args['a'];
+		$input   = $this->args['i'];
+		$regex   = $this->args['r'];
 
 		$phar  = new Phar($archive, 0, $alias);
 		$dir   = new RecursiveDirectoryIterator($input);
@@ -159,204 +351,47 @@ EOF;
 		}
 	}
 
-	static function phar_inf_list()
+	static function cli_cmd_inf_list()
 	{
 		return "List contents of a PHAR archive.";
 	}
 
-	static function phar_arg_list()
+	static function cli_cmd_arg_list()
 	{
 		return array(
 			'f' => array('type'=>'pharurl', 'val'=>NULL, 'required'=>1),
 			);
 	}
 
-	static function phar_cmd_list()
+	function cli_cmd_run_list()
 	{
-		global $args;
-		
-		foreach(new DirectoryTreeIterator($args['f']['val']) as $f)
+		foreach(new DirectoryTreeIterator($this->args['f']['val']) as $f)
 		{
 			echo "$f\n";
 		}
 	}
 		
-	static function phar_inf_trre()
+	static function cli_cmd_inf_tree()
 	{
 		return "Get a directory tree for a PHAR archive.";
 	}
 
-	static function phar_arg_tree()
+	static function cli_cmd_arg_tree()
 	{
 		return array(
 			'f' => array('type'=>'pharurl', 'val'=>NULL, 'required'=>1),
 			);
 	}
 
-	static function phar_cmd_tree()
+	function cli_cmd_run_tree()
 	{
-		global $args;
-		
-		foreach(new DirectoryGraphIterator($args['f']['val']) as $f)
+		foreach(new DirectoryGraphIterator($this->args['f']['val']) as $f)
 		{
 			echo "$f\n";
 		}
 	}
 }
 
-$r = new ReflectionClass('PharCommand');
-
-foreach($r->getMethods() as $m)
-{
-	if (substr($m->name, 0, 9) == 'phar_cmd_')
-	{
-		$cmd = substr($m->name, 9);
-		foreach(array('arg','cmd','inf') as $sub)
-		{
-			$func = 'phar_' . $sub . '_' . $cmd;
-			if ($r->hasMethod($func))
-			{
-				$cmds[$cmd][$sub] = $m->class . '::' . $func;
-			}
-		}
-	}
-}
-
-if ($argc < 2)
-{
-	echo "No command given, check ${argv[0]} help\n";
-	exit(1);
-}
-elseif (!isset($cmds[$argv[1]]['cmd']))
-{
-	echo "Unknown command '${argv[1]}', check ${argv[0]} help\n";
-	exit(1);
-}
-else
-{
-	$command = $argv[1];
-}
-
-if (isset($cmds[$command]['arg']))
-{
-	$args = call_user_func($cmds[$command]['arg']);
-	$i = 1;
-	$missing = false;
-	while (++$i < $argc)
-	{
-		if ($argv[$i][0] == '-')
-		{
-			if (strlen($argv[$i]) == 2 && isset($args[$argv[$i][1]]))
-			{
-				$arg = $argv[$i][1];
-				if (++$i >= $argc)
-				{
-					echo "Missing argument to parameter '$arg' of command '$command', check ${argv[0]} help\n";
-					exit(1);
-				}
-				else
-				{
-					switch($type = $args[$arg]['type'])
-					{
-					case 'pharnew':
-						
-						break;
-					case 'phar':
-					case 'pharurl':
-					case 'pharfile':
-						try
-						{
-							$phar = $argv[$i];
-							if (!file_exists($phar) && file_exists($ps = dirname(__FILE__).'/'.$phar))
-							{
-								$phar = $ps;
-							}
-							if (!Phar::loadPhar($phar))
-							{
-								"Unable to open phar '$phar'\n";
-								exit(1);
-							}
-							switch($type)
-							{
-							case 'phar':
-								$phar = new Phar($phar);
-								break;
-							case 'pharurl':
-								$phar = 'phar://'.$phar;
-								break;
-							case 'pharfile':
-							default:
-								// just keep it
-								break;
-							}
-						}
-						catch(Exception $e)
-						{
-							echo "Exception while opening phar '${argv[$i]}':\n";
-							echo $e->getMessage() . "\n";
-							exit(1);
-						}
-						$args[$arg]['val'] = $phar;
-						break;
-					default:
-						$args[$arg]['val'] = $argv[$i];
-						break;
-					}
-				}
-			}
-			else
-			{
-				echo "Unknown parameter '${argv[$i]}' to command $command, check ${argv[0]} help\n";
-				exit(1);
-			}
-		}
-		else
-		{
-			break;
-		}
-	}
-	if (isset($args['']))
-	{
-		if ($i >= $argc)
-		{
-			if (isset($args['']['require']) && $args['']['require'])
-			{
-				echo "Missing default trailing arguments to command $command, check ${argv[0]} help\n";
-				$missing = true;
-			}
-		}
-		else
-		{
-			$args['']['val'] = array();
-			while($i < $argc)
-			{
-				$args['']['val'][] = $argv[$i++];
-			}
-		}
-	}
-	else if ($i < $argc)
-	{
-		echo "Unexpected default arguments to command $command, check ${argv[0]} help\n";
-		exit(1);
-	}
-	foreach($args as $arg => $inf)
-	{
-		if (strlen($arg) && !isset($inf['val']) && isset($inf['required']) && $inf['required'])
-		{
-			echo "Missing parameter '-$arg' to command $command, check ${argv[0]} help\n";
-			$missing = true;
-		}
-	}
-	if ($missing)
-	{
-		exit(1);
-	}
-}
-else
-{
-	$args = array();
-}
-
-call_user_func($cmds[$command]['cmd']);
+new PharCommand($argc, $argv);
 
 ?>
