@@ -345,6 +345,13 @@ int fcgi_listen(const char *path, int backlog)
 	int       listen_socket;
 	sa_t      sa;
 	socklen_t sock_len;
+#ifdef SO_REUSEADDR
+# ifdef _WIN32
+	BOOL reuse = 1;
+# else
+	int reuse = 1;
+# endif
+#endif
 
 	if ((s = strchr(path, ':'))) {
 		port = atoi(s+1);
@@ -434,6 +441,9 @@ int fcgi_listen(const char *path, int backlog)
 
 	/* Create, bind socket and start listen on it */
 	if ((listen_socket = socket(sa.sa.sa_family, SOCK_STREAM, 0)) < 0 ||
+#ifdef SO_REUSEADDR
+	    setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse)) < 0 ||
+#endif
 	    bind(listen_socket, (struct sockaddr *) &sa, sock_len) < 0 ||
 	    listen(listen_socket, backlog) < 0) {
 
