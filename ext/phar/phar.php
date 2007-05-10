@@ -71,13 +71,14 @@ if (!class_exists('CLICommand'))
 		protected $argv;
 		protected $cmds = array();
 		protected $args = array();
+		protected $typs = array();
 
 		function __construct($argc, array $argv)
 		{
 			$this->argc = $argc;
 			$this->argv = $argv;
 			$this->cmds = self::getCommands($this);
-			$this->types= self::getArgTypes($this);
+			$this->typs = self::getArgTyps($this);
 
 			if ($argc < 2)
 			{
@@ -113,11 +114,11 @@ if (!class_exists('CLICommand'))
 							}
 							else
 							{
-								$type = $this->args[$arg]['type'];
+								$typ = $this->args[$arg]['typ'];
 
-								if (isset($this->types[$type]['typ']))
+								if (isset($this->typs[$typ]['typ']))
 								{
-									$this->args[$arg]['val'] = call_user_func(array($this, $this->types[$type]['typ']), $argv[$i], $this->args[$arg]);
+									$this->args[$arg]['val'] = call_user_func(array($this, $this->typs[$typ]['typ']), $argv[$i], $this->args[$arg]);
 								}
 								else
 								{
@@ -210,7 +211,7 @@ if (!class_exists('CLICommand'))
 			return self::getSubFuncs($cmdclass, 'cli_cmd_', array('arg','inf','run'));
 		}
 
-		static function getArgTypes(CLICommand $cmdclass)
+		static function getArgTyps(CLICommand $cmdclass)
 		{
 			return self::getSubFuncs($cmdclass, 'cli_arg_', array('typ'));
 		}
@@ -316,7 +317,7 @@ EOF;
 								$arg = "... ";
 							}
 							$inf .= $sp . $arg . $conf['inf'] . "\n";
-							if ($conf['type'] == 'select')
+							if ($conf['typ'] == 'select')
 							{
 								$l2  = 0;
 								foreach($conf['select'] as $opt => $what)
@@ -413,12 +414,12 @@ class PharCommand extends CLICommand
 	static function cli_cmd_arg_pack()
 	{
 		return array(
-			'f' => array('type'=>'pharnew', 'val'=>NULL,      'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
-			'a' => array('type'=>'alias',   'val'=>'newphar', 'required'=>1, 'inf'=>'<alias>  Provide an alias name for the phar file.'),
-			's' => array('type'=>'file',    'val'=>NULL,                     'inf'=>'<stub>   Select the stub file (excluded from list of input files/dirs).'),
-			'r' => array('type'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Specifies a regular expression for input files.'),
-			'c' => array('type'=>'select',  'val'=>NULL,                     'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression')),
-			''  => array('type'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories.'),
+			'f' => array('typ'=>'pharnew', 'val'=>NULL,      'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
+			'a' => array('typ'=>'alias',   'val'=>'newphar', 'required'=>1, 'inf'=>'<alias>  Provide an alias name for the phar file.'),
+			's' => array('typ'=>'file',    'val'=>NULL,                     'inf'=>'<stub>   Select the stub file (excluded from list of input files/dirs).'),
+			'r' => array('typ'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Specifies a regular expression for input files.'),
+			'c' => array('typ'=>'select',  'val'=>NULL,                     'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression')),
+			''  => array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories.'),
 			);
 	}
 
@@ -519,7 +520,7 @@ class PharCommand extends CLICommand
 	static function cli_cmd_arg_list()
 	{
 		return array(
-			'f' => array('type'=>'pharurl', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
+			'f' => array('typ'=>'pharurl', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
 			);
 	}
 
@@ -539,7 +540,7 @@ class PharCommand extends CLICommand
 	static function cli_cmd_arg_tree()
 	{
 		return array(
-			'f' => array('type'=>'pharurl', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
+			'f' => array('typ'=>'pharurl', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
 			);
 	}
 
@@ -559,8 +560,8 @@ class PharCommand extends CLICommand
 	static function cli_cmd_arg_extract()
 	{
 		return array(
-			'f' => array('type'=>'phar', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the PHAR file to extract.'),
-			''  => array('type'=>'dir',  'val'=>'.',                 'inf'=>'<dir>    Directory to extract to (defaults to \'.\''),
+			'f' => array('typ'=>'phar', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the PHAR file to extract.'),
+			''  => array('typ'=>'dir',  'val'=>'.',                 'inf'=>'<dir>    Directory to extract to (defaults to \'.\''),
 			);
 	}
 
