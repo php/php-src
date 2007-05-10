@@ -566,7 +566,7 @@ class PharCommand extends CLICommand
 	{
 		return array(
 			'f' => array('typ'=>'phar', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the PHAR file to extract.'),
-			''  => array('typ'=>'dir',  'val'=>'.',                 'inf'=>'<dir>    Directory to extract to (defaults to \'.\''),
+			''  => array('typ'=>'dir',  'val'=>'.',                 'inf'=>'<dir>    Directory to extract to (defaults to \'.\').'),
 			);
 	}
 
