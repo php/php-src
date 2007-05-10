@@ -31,6 +31,7 @@ $options = array(
          'docs'         => 'doc',
          'examples'     => 'doc',
          'tests'        => 'test',
+         'phar'         => 'src',
     ),
     'exceptions'        => array(
          'CREDITS'            => 'doc',
