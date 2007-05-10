@@ -2915,7 +2915,7 @@ PHP_FUNCTION(strripos)
 			u_e = haystack.u + haystack_len - needle_len;
 		} else {
 			u_p = haystack.u;
-			if (-offset > haystack_len) {
+			if (-offset > haystack_len || -offset < 0) {
 				RETURN_FALSE;
 			} else {
 				cu_offset = haystack_len;
@@ -2953,7 +2953,7 @@ PHP_FUNCTION(strripos)
 				e = haystack.s + haystack_len - 1;
 			} else {
 				p = haystack.s;
-				if (-offset > haystack_len) {
+				if (-offset > haystack_len || -offset < 0) {
 					RETURN_FALSE;
 				} else {
 					e = haystack.s + haystack_len + offset;
@@ -2984,7 +2984,7 @@ PHP_FUNCTION(strripos)
 			p = haystack_dup + offset;
 			e = haystack_dup + haystack_len - needle_len;
 		} else {
-			if (-offset > haystack_len) {
+			if (-offset > haystack_len || -offset < 0) {
 				efree(haystack_dup);
 				efree(needle_dup);
 				RETURN_FALSE;
