@@ -5447,6 +5447,9 @@ PHP_FUNCTION(highlight_file)
 	php_get_highlight_struct(&syntax_highlighter_ini);
 
 	if (highlight_file(filename, &syntax_highlighter_ini TSRMLS_CC) == FAILURE) {
+		if (i) { 
+			php_end_ob_buffer (1, 0 TSRMLS_CC); 
+		}
 		RETURN_FALSE;
 	}
 
@@ -5480,6 +5483,8 @@ PHP_FUNCTION(php_strip_whitespace)
 	file_handle.opened_path = NULL;
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 	if (open_file_for_scanning(&file_handle TSRMLS_CC)==FAILURE) {
+		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
+		php_end_ob_buffer(1, 0 TSRMLS_CC);
 		RETURN_EMPTY_STRING();
 	}
 
@@ -5522,6 +5527,10 @@ PHP_FUNCTION(highlight_string)
 
 	if (highlight_string(*expr, &syntax_highlighter_ini, hicompiled_string_description TSRMLS_CC) == FAILURE) {
 		efree(hicompiled_string_description);
+		EG(error_reporting) = old_error_reporting;
+		if (i) {
+			php_end_ob_buffer (1, 0 TSRMLS_CC); 
+		}
 		RETURN_FALSE;
 	}
 	efree(hicompiled_string_description);
