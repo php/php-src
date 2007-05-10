@@ -357,13 +357,16 @@ int php_init_config(TSRMLS_D)
 
 				if ((path = getenv("PATH")) != NULL) {
 					char *search_dir, search_path[MAXPATHLEN];
+					char *last;
 
-					while ((search_dir = strsep(&path, ":")) != NULL) {
+					search_dir = php_strtok_r(path, ":", &last);
+					while (search_dir) {
 						snprintf(search_path, MAXPATHLEN, "%s/%s", search_dir, sapi_module.executable_location);
 						if (VCWD_REALPATH(search_path, binary_location) && !VCWD_ACCESS(binary_location, X_OK)) {
 							found = 1;
 							break;
 						}
+						search_dir = php_strtok_r(NULL, ":", &last);
 					}
 				}
 				if (!found) {
