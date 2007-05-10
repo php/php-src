@@ -117,7 +117,7 @@ if (!class_exists('CLICommand'))
 
 								if (isset($this->types[$type]['typ']))
 								{
-									$this->args[$arg]['val'] = call_user_func(array($this, $this->types[$type]['typ']), $argv[$i]);
+									$this->args[$arg]['val'] = call_user_func(array($this, $this->types[$type]['typ']), $argv[$i], $this->args[$arg]);
 								}
 								else
 								{
@@ -215,6 +215,21 @@ if (!class_exists('CLICommand'))
 			return self::getSubFuncs($cmdclass, 'cli_arg_', array('typ'));
 		}
 
+		static function cli_arg_typ_bool($arg)
+		{
+			return (bool)$arg;
+		}
+	
+		static function cli_arg_typ_select($arg, $cfg)
+		{
+			if (!in_array($arg, array_keys($cfg['select'])))
+			{
+				echo "Parameter value '$arg' not one of '" . join("', '", array_keys($cfg['select'])) . "'.\n";
+				exit(1);
+			}
+			return $arg;
+		}
+
 		static function cli_arg_typ_file($arg)
 		{
 			if (!file_exists($arg))
@@ -229,11 +244,84 @@ if (!class_exists('CLICommand'))
 		{
 			return file_get_contents(self::cli_arg_typ_file($arg));
 		}
+
+		function cli_get_SP2($l1, $l2, $arg_inf)
+		{
+			return str_repeat(' ', $l1 + 2 + 8);
+		}
+
+		static function cli_cmd_inf_help()
+		{
+			return "This help.";
+		}
+	
+		function cli_cmd_run_help()
+		{
+			$argv = $this->argv;
+	
+			echo <<<EOF
+$argv[0] <command> [options]
+
+Commands:
+
+
+EOF;
+			$l = 0;
+			foreach($this->cmds as $name => $funcs)
+			{
+				$l = max($l, strlen($name));
+			}
+			$sp = str_repeat(' ', $l+2);
+			foreach($this->cmds as $name => $funcs)
+			{
+				$inf = sprintf("%${l}s  ", $name);
+				if (isset($funcs['inf']))
+				{
+					$inf .= call_user_func(array($this, $funcs['inf'])) . "\n";
+					if (isset($funcs['arg']))
+					{
+						$inf .= "\n";
+						foreach(call_user_func(array($this, $funcs['arg'])) as $arg => $conf)
+						{
+							if (strlen($arg))
+							{
+								$arg = "-$arg  ";
+							}
+							else
+							{
+								$arg = "... ";
+							}
+							$inf .= $sp . $arg . $conf['inf'] . "\n";
+							if ($conf['type'] == 'select')
+							{
+								$l2  = 0;
+								foreach($conf['select'] as $opt => $what)
+								{
+									$l2 = max($l2, strlen($opt));
+								}
+								$sp2 = $this->cli_get_SP2($l, $l2, $inf);
+								foreach($conf['select'] as $opt => $what)
+								{
+									$inf .= $sp2 . sprintf("%-${l2}s  ", $opt) . $what . "\n";
+								}
+							}
+						}
+					}
+				}
+				echo "$inf\n\n";
+			}
+			exit(0);
+		}
 	}
 }
 
 class PharCommand extends CLICommand
 {
+	function cli_get_SP2($l1, $l2, $arg_inf)
+	{
+		return str_repeat(' ', $l1 + 2 + 17);
+	}
+
 	static function cli_arg_typ_pharfile($arg)
 	{
 		try
@@ -276,46 +364,6 @@ class PharCommand extends CLICommand
 		}
 	}
 
-	static function cli_cmd_inf_help()
-	{
-		return "This help.";
-	}
-
-	function cli_cmd_run_help()
-	{
-		$argv = $this->argv;
-
-		echo <<<EOF
-$argv[0] command [options]
-
-General options:
--f <file>   Specifies the phar file to work on.
--a <alias>  Specifies the phar alias.
--r <regex>  Specifies a regular expression for input files.
-
-Commands:
-
-EOF;
-		$l = 0;
-		foreach($this->cmds as $name => $funcs)
-		{
-			$l = max($l, strlen($name));
-		}
-		foreach($this->cmds as $name => $funcs)
-		{
-			if (isset($funcs['inf']))
-			{
-				$inf = call_user_func(array($this, $funcs['inf']));
-			}
-			else
-			{
-				$inf = "";
-			}
-			printf("%${l}s  %s\n\n", $name, $inf);
-		}
-		exit(0);
-	}
-
 	static function cli_cmd_inf_pack()
 	{
 		return "Pack files into a PHAR archive.";
@@ -324,11 +372,12 @@ EOF;
 	static function cli_cmd_arg_pack()
 	{
 		return array(
-			'f' => array('type'=>'pharnew', 'val'=>NULL,      'required'=>1),
-			'a' => array('type'=>'alias',   'val'=>'newphar', 'required'=>1),
-			's' => array('type'=>'file',    'val'=>NULL),
-			'r' => array('type'=>'regex',   'val'=>NULL),
-			''  => array('type'=>'any',     'val'=>NULL,      'required'=>1),
+			'f' => array('type'=>'pharnew', 'val'=>NULL,      'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
+			'a' => array('type'=>'alias',   'val'=>'newphar', 'required'=>1, 'inf'=>'<alias>  Provide an alias name for the phar file.'),
+			's' => array('type'=>'file',    'val'=>NULL,                     'inf'=>'<stub>   Select the stub file (excluded from list of input files/dirs).'),
+			'r' => array('type'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Specifies a regular expression for input files.'),
+			'c' => array('type'=>'select',  'val'=>NULL,                     'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression')),
+			''  => array('type'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories.'),
 			);
 	}
 
@@ -373,8 +422,21 @@ EOF;
 			}
 		}
 
-		$phar->compressAllFilesBZIP2();
 		$phar->stopBuffering();
+
+		switch($this->args['c']['val'])
+		{
+		case 'gz':
+		case 'gzip':
+			$phar->compressAllFilesGZ();
+			break;
+		case 'bz2':
+		case 'bzip2':
+			$phar->compressAllFilesBZIP2();		
+			break;
+		default:
+			break;
+		}
 		exit(0);
 	}
 
@@ -416,7 +478,7 @@ EOF;
 	static function cli_cmd_arg_list()
 	{
 		return array(
-			'f' => array('type'=>'pharurl', 'val'=>NULL, 'required'=>1),
+			'f' => array('type'=>'pharurl', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
 			);
 	}
 
@@ -436,7 +498,7 @@ EOF;
 	static function cli_cmd_arg_tree()
 	{
 		return array(
-			'f' => array('type'=>'pharurl', 'val'=>NULL, 'required'=>1),
+			'f' => array('type'=>'pharurl', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
 			);
 	}
 
