@@ -114,16 +114,7 @@ if (!class_exists('CLICommand'))
 							}
 							else
 							{
-								$typ = $this->args[$arg]['typ'];
-
-								if (isset($this->typs[$typ]['typ']))
-								{
-									$this->args[$arg]['val'] = call_user_func(array($this, $this->typs[$typ]['typ']), $argv[$i], $this->args[$arg]);
-								}
-								else
-								{
-									$this->args[$arg]['val'] = $argv[$i];
-								}
+								$this->args[$arg]['val'] = $this->checkArgTyp($arg, $i, $argc, $argv);
 							}
 						}
 						else
@@ -176,6 +167,20 @@ if (!class_exists('CLICommand'))
 			}
 
 			call_user_func(array($this, $this->cmds[$command]['run']), $this->args);
+		}
+
+		function checkArgTyp($arg, $i, $argc, $argv)
+		{
+			$typ = $this->args[$arg]['typ'];
+
+			if (isset($this->typs[$typ]['typ']))
+			{
+				return call_user_func(array($this, $this->typs[$typ]['typ']), $argv[$i], $this->args[$arg]);
+			}
+			else
+			{
+				return $argv[$i];
+			}
 		}
 
 		static function getSubFuncs(CLICommand $cmdclass, $prefix, array $subs)
