@@ -20,13 +20,14 @@ abstract class CLICommand
 	protected $argv;
 	protected $cmds = array();
 	protected $args = array();
+	protected $typs = array();
 
 	function __construct($argc, array $argv)
 	{
 		$this->argc = $argc;
 		$this->argv = $argv;
 		$this->cmds = self::getCommands($this);
-		$this->types= self::getArgTypes($this);
+		$this->typs = self::getArgTyps($this);
 		
 		if ($argc < 2)
 		{
@@ -62,11 +63,11 @@ abstract class CLICommand
 						}
 						else
 						{
-							$type = $this->args[$arg]['type'];
+							$typ = $this->args[$arg]['typ'];
 
-							if (isset($this->types[$type]['typ']))
+							if (isset($this->typs[$typ]['typ']))
 							{
-								$this->args[$arg]['val'] = call_user_func(array($this, $this->types[$type]['typ']), $argv[$i], $this->args[$arg]);
+								$this->args[$arg]['val'] = call_user_func(array($this, $this->typs[$typ]['typ']), $argv[$i], $this->args[$arg]);
 							}
 							else
 							{
@@ -159,7 +160,7 @@ abstract class CLICommand
 		return self::getSubFuncs($cmdclass, 'cli_cmd_', array('arg','inf','run'));
 	}
 	
-	static function getArgTypes(CLICommand $cmdclass)
+	static function getArgTyps(CLICommand $cmdclass)
 	{
 		return self::getSubFuncs($cmdclass, 'cli_arg_', array('typ'));
 	}
@@ -267,7 +268,7 @@ Commands:
 							$arg = "... ";
 						}
 						$inf .= $sp . $arg . $conf['inf'] . "\n";
-						if ($conf['type'] == 'select')
+						if ($conf['typ'] == 'select')
 						{
 							$l2 = 0;
 							foreach($conf['select'] as $opt => $what)
