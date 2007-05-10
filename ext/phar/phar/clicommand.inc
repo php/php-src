@@ -123,7 +123,7 @@ abstract class CLICommand
 			}
 		}
 		
-		call_user_func(array($this, $this->cmds[$command]['run']));
+		call_user_func(array($this, $this->cmds[$command]['run']), $this->args);
 	}
 
 	static function getSubFuncs(CLICommand $cmdclass, $prefix, array $subs)
@@ -177,6 +177,18 @@ abstract class CLICommand
 			exit(1);
 		}
 		return $arg;
+	}
+
+	static function cli_arg_typ_dir($arg)
+	{
+		$f = realpath($arg);
+echo "DIR: '$arg' = '$f'\n";
+		if ($f===false || !file_exists($f) || !is_dir($f))
+		{
+			echo "Requested path '$arg' does not exist.\n";
+			exit(1);
+		}
+		return $f;
 	}
 
 	static function cli_arg_typ_file($arg)
@@ -237,7 +249,7 @@ Commands:
 		$sp = str_repeat(' ', $l+2);
 		foreach($this->cmds as $name => $funcs)
 		{
-			$inf = sprintf("%${l}s  ", $name);
+			$inf = $name . substr($sp, strlen($name));
 			if (isset($funcs['inf']))
 			{
 				$inf .= call_user_func(array($this, $funcs['inf'])) . "\n";
