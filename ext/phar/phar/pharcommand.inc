@@ -225,6 +225,64 @@ class PharCommand extends CLICommand
 			echo "$f\n";
 		}
 	}
+
+	static function cli_cmd_inf_extract()
+	{
+		return "Extract a PHAR package to a directory.";
+	}
+
+	static function cli_cmd_arg_extract()
+	{
+		return array(
+			'f' => array('type'=>'phar', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the PHAR file to extract.'),
+			''  => array('type'=>'dir',  'val'=>'.',                 'inf'=>'<dir>    Directory to extract to (defaults to \'.\''),
+			);
+	}
+
+	static function cli_cmd_run_extract($args)
+	{
+		$dir = $args['']['val'];
+		if (is_array($dir))
+		{
+			if (count($dir) != 1)
+			{
+				echo "Only one target directory allowed.\n";
+				exit(1);
+			}
+			else
+			{
+				$dir = $dir[0];
+			}
+		}
+		$phar = $args['f']['val'];
+		$base = $phar->getPathname();
+		$bend = strpos($base, '.phar');
+		$bend = strpos($base, '/', $bend);
+		$base = substr($base, 0, $bend + 1);
+		$blen = strlen($base);
+		foreach(new RecursiveIteratorIterator($phar) as $pn => $f)
+		{
+			$sub = substr($pn, $blen);
+			$target = $dir . '/' . $sub;
+			if (!file_exists(dirname($target)))
+			{
+				if (!@mkdir(dirname($target)))
+				{
+					echo "  ..unable to create dir\n";
+					exit(1);
+				}
+			}
+			echo "$sub";
+			if (!@copy($f, $target))
+			{
+				echo " ...error\n";
+			}
+			else
+			{
+				echo " ...ok\n";
+			}
+		}
+	}
 }
 
 ?>
