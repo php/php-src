@@ -181,12 +181,26 @@ abstract class CLICommand
 
 	static function cli_arg_typ_file($arg)
 	{
-		if (!file_exists($arg))
+		$f = new SplFileInfo($arg);
+		$f = $f->getRealPath();
+		if ($f===false || !file_exists($f))
 		{
 			echo "Requested file '$arg' does not exist.\n";
 			exit(1);
 		}
-		return $arg;
+		return $f;
+	}
+
+	static function cli_arg_typ_filenew($arg)
+	{
+		$d = dirname($arg);
+		$f = realpath($d);
+		if ($f === false)
+		{
+			echo "Path for file '$arg' does not exist.\n";
+			exit(1);
+		}
+		return $f . substr($arg, strlen($d));;
 	}
 
 	static function cli_arg_typ_filecont($arg)

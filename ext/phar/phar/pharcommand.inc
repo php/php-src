@@ -21,20 +21,37 @@ class PharCommand extends CLICommand
 		return str_repeat(' ', $l1 + 2 + 17);
 	}
 
+	static function strEndsWith($haystack, $needle)
+	{
+		return substr($haystack, -strlen($needle)) == $needle;
+	}
+
+	static function cli_arg_typ_pharnew($arg)
+	{
+		$pharfile = self::cli_arg_typ_filenew($arg);
+		if (!self::strEndsWith($pharfile, '.phar')
+		&&  !self::strEndsWith($pharfile, '.phar.php')
+		&&  !self::strEndsWith($pharfile, '.phar.bz2')
+		&&  !self::strEndsWith($pharfile, '.phar.gz')
+		)
+		{
+			echo "Phar files must have file extension '.pahr', '.parh.php', '.phar.bz2' or 'phar.gz'.\n";
+			exit(1);
+		}
+		return $pharfile;
+	}
+
 	static function cli_arg_typ_pharfile($arg)
 	{
 		try
 		{
-			if (!file_exists($arg) && file_exists($ps = dirname(__FILE__).'/'.$arg))
+			$pharfile = self::cli_arg_typ_file($arg);
+			if (!Phar::loadPhar($pharfile))
 			{
-				$arg = $ps;
-			}
-			if (!Phar::loadPhar($arg))
-			{
-				"Unable to open phar '$phar'\n";
+				"Unable to open phar '$arg'\n";
 				exit(1);
 			}
-			return $arg;
+			return $pharfile;
 		}
 		catch(Exception $e)
 		{
