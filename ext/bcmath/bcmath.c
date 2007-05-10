@@ -142,7 +142,7 @@ ZEND_GET_MODULE(bcmath)
 
 /* {{{ PHP_INI */
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("bcmath.scale", "0", PHP_INI_ALL, OnUpdateLong, bc_precision, zend_bcmath_globals, bcmath_globals)
+	STD_PHP_INI_ENTRY("bcmath.scale", "0", PHP_INI_ALL, OnUpdateLongGEZero, bc_precision, zend_bcmath_globals, bcmath_globals)
 PHP_INI_END()
 /* }}} */
 
