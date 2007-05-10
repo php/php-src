@@ -5380,6 +5380,9 @@ PHP_FUNCTION(highlight_file)
 	}
 
 	if (ret == FAILURE) {
+		if (i) {
+			php_output_end(TSRMLS_C);
+		}
 		RETURN_FALSE;
 	}
 
@@ -5420,6 +5423,7 @@ PHP_FUNCTION(php_strip_whitespace)
 	file_handle.opened_path = NULL;
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 	if (open_file_for_scanning(&file_handle TSRMLS_CC)==FAILURE) {
+		php_output_end(TSRMLS_C);
 		if (filename_type == IS_UNICODE) {
 			efree(filename);
 		}
@@ -5478,6 +5482,10 @@ PHP_FUNCTION(highlight_string)
 
 	if (highlight_string(*expr, &syntax_highlighter_ini, hicompiled_string_description TSRMLS_CC) == FAILURE) {
 		efree(hicompiled_string_description);
+		EG(error_reporting) = old_error_reporting;
+		if (i) {
+			php_output_end(TSRMLS_C); 
+		}
 		RETURN_FALSE;
 	}
 	efree(hicompiled_string_description);
