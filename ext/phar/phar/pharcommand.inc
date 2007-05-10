@@ -119,7 +119,7 @@ class PharCommand extends CLICommand
 		$phar  = new Phar($archive, 0, $alias);
 
 		$phar->startBuffering();
-		
+
 		if (isset($stub))
 		{
 			$phar->setStub(file_get_contents($stub));
@@ -148,7 +148,7 @@ class PharCommand extends CLICommand
 			break;
 		case 'bz2':
 		case 'bzip2':
-			$phar->compressAllFilesBZIP2();		
+			$phar->compressAllFilesBZIP2();
 			break;
 		default:
 			break;

@@ -28,7 +28,7 @@ abstract class CLICommand
 		$this->argv = $argv;
 		$this->cmds = self::getCommands($this);
 		$this->typs = self::getArgTyps($this);
-		
+
 		if ($argc < 2)
 		{
 			echo "No command given, check ${argv[0]} help\n";
@@ -123,7 +123,7 @@ abstract class CLICommand
 				exit(1);
 			}
 		}
-		
+
 		call_user_func(array($this, $this->cmds[$command]['run']), $this->args);
 	}
 
@@ -132,7 +132,7 @@ abstract class CLICommand
 		$a = array();
 		$r = new ReflectionClass($cmdclass);
 		$l = strlen($prefix);
-		
+
 		foreach($r->getMethods() as $m)
 		{
 			if (substr($m->name, 0, $l) == $prefix)
@@ -159,7 +159,7 @@ abstract class CLICommand
 	{
 		return self::getSubFuncs($cmdclass, 'cli_cmd_', array('arg','inf','run'));
 	}
-	
+
 	static function getArgTyps(CLICommand $cmdclass)
 	{
 		return self::getSubFuncs($cmdclass, 'cli_arg_', array('typ'));

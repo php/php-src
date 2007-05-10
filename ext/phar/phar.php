@@ -220,7 +220,7 @@ if (!class_exists('CLICommand'))
 		{
 			return (bool)$arg;
 		}
-	
+
 		static function cli_arg_typ_select($arg, $cfg)
 		{
 			if (!in_array($arg, array_keys($cfg['select'])))
@@ -241,7 +241,7 @@ if (!class_exists('CLICommand'))
 			}
 			return $f;
 		}
-	
+
 		static function cli_arg_typ_file($arg)
 		{
 			$f = realpath($arg);
@@ -252,7 +252,7 @@ if (!class_exists('CLICommand'))
 			}
 			return $f;
 		}
-	
+
 		static function cli_arg_typ_filenew($arg)
 		{
 			$d = dirname($arg);
@@ -279,11 +279,11 @@ if (!class_exists('CLICommand'))
 		{
 			return "This help.";
 		}
-	
+
 		function cli_cmd_run_help()
 		{
 			$argv = $this->argv;
-	
+
 			echo <<<EOF
 $argv[0] <command> [options]
 
@@ -445,7 +445,7 @@ class PharCommand extends CLICommand
 		$phar  = new Phar($archive, 0, $alias);
 
 		$phar->startBuffering();
-		
+
 		if (isset($stub))
 		{
 			$phar->setStub(file_get_contents($stub));
@@ -474,7 +474,7 @@ class PharCommand extends CLICommand
 			break;
 		case 'bz2':
 		case 'bzip2':
-			$phar->compressAllFilesBZIP2();		
+			$phar->compressAllFilesBZIP2();
 			break;
 		default:
 			break;
