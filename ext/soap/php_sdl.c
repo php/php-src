@@ -654,6 +654,7 @@ static sdlPtr load_wsdl(char *struri TSRMLS_DC)
 		for (i = 0; i < n; i++) {
 			xmlNodePtr *tmp, service;
 			xmlNodePtr trav, port;
+			int has_soap_port = 0;
 
 			zend_hash_get_current_data(&ctx.services, (void **)&tmp);
 			service = *tmp;
@@ -716,8 +717,15 @@ static sdlPtr load_wsdl(char *struri TSRMLS_DC)
 				  trav2 = trav2->next;
 				}
 				if (!address) {
-					soap_error0(E_ERROR, "Parsing WSDL: No address associated with <port>");
+					if (has_soap_port || trav->next) {
+						efree(tmpbinding);
+						trav = trav->next;
+						continue;
+					} else {
+						soap_error0(E_ERROR, "Parsing WSDL: No address associated with <port>");
+					}
 				}
+				has_soap_port = 1;
 
 				location = get_attribute(address->properties, "location");
 				if (!location) {
