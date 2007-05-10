@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 - Fixed bug #41304 (compress.zlib temp files left). (Dmitry)
 - Fixed bug #41293 (Fixed creation of HTTP_RAW_POST_DATA when there is no
   default post handler). (Ilia)
+- Fixed bug #41291 (FastCGI does not set SO_REUSEADDR). 
+  (fmajid at kefta dot com, Dmitry)
 - Fixed gd build when used with freetype 1.x (Pierre, Tony)
 - Fixed bug #41287 (Namespace functions don't allow xmlns definition to be 
   optional). (Rob)
