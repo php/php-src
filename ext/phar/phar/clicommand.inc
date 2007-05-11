@@ -225,9 +225,14 @@ abstract class CLICommand
 		return file_get_contents(self::cli_arg_typ_file($arg));
 	}
 
-	function cli_get_SP2($l1, $l2, $arg_inf)
+	function cli_get_SP2($l1, $arg_inf)
 	{
-		return str_repeat(' ', $l1 + 2 + 8);
+		return str_repeat(' ', $l1 + 2 + 4 + 8);
+	}
+
+	function cli_get_SP3($l1, $l2, $arg_inf)
+	{
+		return str_repeat(' ', $l1 + 2 + 4 + 8 + 2 + $l2 + 2);
 	}
 
 	static function cli_cmd_inf_help()
@@ -259,18 +264,21 @@ abstract class CLICommand
 			{
 				$arg = "... ";
 			}
-			$inf .= $this->cli_wordwrap($sp . $arg . $conf['inf'], $l, $sp) . "\n";
+			$sp2 = $this->cli_get_SP2($l, $inf);
+			$l2  = strlen($sp2);
+			$inf .= $this->cli_wordwrap($sp . $arg . $conf['inf'], $l2, $sp2) . "\n";
 			if ($conf['typ'] == 'select')
 			{
-				$l2 = 0;
+				$ls = 0;
 				foreach($conf['select'] as $opt => $what)
 				{
-					$l2 = max($l2, strlen($opt));
+					$ls = max($ls, strlen($opt));
 				}
-				$sp2 = $this->cli_get_SP2($l, $l2, $inf);
+				$sp3 = $this->cli_get_SP3($l, $ls, $inf);
+				$l3  = strlen($sp3);
 				foreach($conf['select'] as $opt => $what)
 				{
-					$inf .= $sp2 . sprintf("%-${l2}s  ", $opt) . $what . "\n";
+					$inf .= $this->cli_wordwrap($sp2 . "  " . sprintf("%-${ls}s  ", $opt) . $what, $l3, $sp3) . "\n";
 				}
 			}
 		}
