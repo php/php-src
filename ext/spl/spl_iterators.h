@@ -94,6 +94,7 @@ enum {
 enum {
 	/* public */
 	REGIT_USE_KEY            = 0x00000001,
+	REGIT_INVERTED           = 0x00000002,
 };
 
 typedef enum {
