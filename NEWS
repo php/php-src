@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - Fixed bug #41097 (ext/soap returning associative array as indexed without
   using WSDL). (Dmitry)
 - Fixed bug #41004 (minOccurs="0" and null class member variable). (Dmitry)
+- Fixed bug #39542 (Behaviour of require/include different to < 5.2.0).
+  (Dmitry)
 
 03 May 2007, PHP 5.2.2
 - Improved bundled GD
