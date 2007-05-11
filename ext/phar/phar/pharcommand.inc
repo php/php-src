@@ -21,6 +21,31 @@ class PharCommand extends CLICommand
 		return str_repeat(' ', $l1 + 2 + 17);
 	}
 
+	static function phar_args($which, $phartyp)
+	{
+		$phar_args = array(
+			'a' => array('typ'=>'alias',  'val'=>'newphar', 'inf'=>'<alias>  Provide an alias name for the phar file.'),
+			'c' => array('typ'=>'select', 'val'=>NULL,      'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression')),
+			'f' => array('typ'=>$phartyp, 'val'=>NULL,      'inf'=>'<file>   Specifies the phar file to work on.'),
+			'i' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Specifies a regular expression for input files.'),
+			's' => array('typ'=>'file',   'val'=>NULL,      'inf'=>'<stub>   Select the stub file (excluded from list of input files/dirs).'),
+			'x' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Regular expression for input files to exclude.'),
+		);
+		$args = array();
+		foreach($phar_args as $lkey => $cfg)
+		{
+			$ukey = strtoupper($lkey);
+			$required = strpos($which, $ukey) !== false;
+			$optional = strpos($which, $lkey) !== false;
+			if ($required || $optional)
+			{
+				$args[$lkey] = $cfg;
+				$args[$lkey]['required'] = $required;
+			}
+		}
+		return $args;
+	}
+
 	static function strEndsWith($haystack, $needle)
 	{
 		return substr($haystack, -strlen($needle)) == $needle;
@@ -87,15 +112,9 @@ class PharCommand extends CLICommand
 
 	static function cli_cmd_arg_pack()
 	{
-		return array(
-			'f' => array('typ'=>'pharnew', 'val'=>NULL,      'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
-			'a' => array('typ'=>'alias',   'val'=>'newphar', 'required'=>1, 'inf'=>'<alias>  Provide an alias name for the phar file.'),
-			's' => array('typ'=>'file',    'val'=>NULL,                     'inf'=>'<stub>   Select the stub file (excluded from list of input files/dirs).'),
-			'r' => array('typ'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Specifies a regular expression for input files.'),
-			'x' => array('typ'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Regular expression for input files to exclude.'),
-			'c' => array('typ'=>'select',  'val'=>NULL,                     'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression')),
-			''  => array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories.'),
-			);
+		$args = self::phar_args('AcFrsx', 'pharnew');
+		$args[''] = array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories.');
+		return $args;
 	}
 
 	function cli_cmd_run_pack()
@@ -114,7 +133,7 @@ class PharCommand extends CLICommand
 		$archive = $this->args['f']['val'];
 		$alias   = $this->args['a']['val'];
 		$stub    = $this->args['s']['val'];
-		$regex   = $this->args['r']['val'];
+		$regex   = $this->args['i']['val'];
 		$invregex= $this->args['x']['val'];
 		$input   = $this->args['']['val'];
 
@@ -193,6 +212,32 @@ class PharCommand extends CLICommand
 		}
 	}
 
+	function phar_dir_echo($f)
+	{
+		echo "$f\n";
+	}
+
+	function phar_dir_operation(RecursiveIteratorIterator $dir, $func)
+	{
+		$regex   = $this->args['i']['val'];
+		$invregex= $this->args['x']['val'];
+
+		if (isset($regex))
+		{
+			$dir = new RegexIterator($dir, '/'. $regex . '/');
+		}
+
+		if (isset($invregex))
+		{
+			$dir = new InvertedRegexIterator($dir, '/'. $invregex . '/');
+		}
+
+		foreach($dir as $f)
+		{
+			call_user_func($func, $f);
+		}
+	}
+
 	static function cli_cmd_inf_list()
 	{
 		return "List contents of a PHAR archive.";
@@ -200,17 +245,12 @@ class PharCommand extends CLICommand
 
 	static function cli_cmd_arg_list()
 	{
-		return array(
-			'f' => array('typ'=>'pharurl', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
-			);
+		return self::phar_args('Fix', 'pharurl');
 	}
 
 	function cli_cmd_run_list()
 	{
-		foreach(new DirectoryTreeIterator($this->args['f']['val']) as $f)
-		{
-			echo "$f\n";
-		}
+		$this->phar_dir_operation(new DirectoryTreeIterator($this->args['f']['val']), array($this, 'phar_dir_echo'));
 	}
 
 	static function cli_cmd_inf_tree()
@@ -220,17 +260,12 @@ class PharCommand extends CLICommand
 
 	static function cli_cmd_arg_tree()
 	{
-		return array(
-			'f' => array('typ'=>'pharurl', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
-			);
+		return self::phar_args('Fix', 'pharurl');
 	}
 
 	function cli_cmd_run_tree()
 	{
-		foreach(new DirectoryGraphIterator($this->args['f']['val']) as $f)
-		{
-			echo "$f\n";
-		}
+		$this->phar_dir_operation(new DirectoryGraphIterator($this->args['f']['val']), array($this, 'phar_dir_echo'));
 	}
 
 	static function cli_cmd_inf_extract()
@@ -240,10 +275,9 @@ class PharCommand extends CLICommand
 
 	static function cli_cmd_arg_extract()
 	{
-		return array(
-			'f' => array('typ'=>'phar', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the PHAR file to extract.'),
-			''  => array('typ'=>'dir',  'val'=>'.',                 'inf'=>'         Directory to extract to (defaults to \'.\').'),
-			);
+		$args = self::phar_args('Fix', 'phar');
+		$args[''] = array('typ'=>'dir',  'val'=>'.',                 'inf'=>'         Directory to extract to (defaults to \'.\').');
+		return $args;
 	}
 
 	static function cli_cmd_run_extract($args)

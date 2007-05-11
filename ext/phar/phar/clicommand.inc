@@ -235,6 +235,51 @@ abstract class CLICommand
 		return "This help.";
 	}
 
+	private function cli_help_get_args($args, $l, $sp, $required)
+	{
+		$inf = "";
+		foreach(call_user_func(array($this, $args)) as $arg => $conf)
+		{
+			if ((isset($conf['required']) && $conf['required']) != $required)
+			{
+				continue;
+			}
+			if (strlen($arg))
+			{
+				$arg = "-$arg  ";
+			}
+			else
+			{
+				$arg = "... ";
+			}
+			$inf .= $sp . $arg . $conf['inf'] . "\n";
+			if ($conf['typ'] == 'select')
+			{
+				$l2 = 0;
+				foreach($conf['select'] as $opt => $what)
+				{
+					$l2 = max($l2, strlen($opt));
+				}
+				$sp2 = $this->cli_get_SP2($l, $l2, $inf);
+				foreach($conf['select'] as $opt => $what)
+				{
+					$inf .= $sp2 . sprintf("%-${l2}s  ", $opt) . $what . "\n";
+				}
+			}
+		}
+		if (strlen($inf))
+		{
+			if ($required)
+			{
+				return $sp . "Required arguments:\n\n" . $inf;
+			}
+			else
+			{
+				return $sp . "Optional arguments:\n\n". $inf;
+			}
+		}
+	}
+
 	function cli_cmd_run_help()
 	{
 		$argv = $this->argv;
@@ -262,31 +307,9 @@ Commands:
 				if (isset($funcs['arg']))
 				{
 					$inf .= "\n";
-					foreach(call_user_func(array($this, $funcs['arg'])) as $arg => $conf)
-					{
-						if (strlen($arg))
-						{
-							$arg = "-$arg  ";
-						}
-						else
-						{
-							$arg = "... ";
-						}
-						$inf .= $sp . $arg . $conf['inf'] . "\n";
-						if ($conf['typ'] == 'select')
-						{
-							$l2 = 0;
-							foreach($conf['select'] as $opt => $what)
-							{
-								$l2 = max($l2, strlen($opt));
-							}
-							$sp2 = $this->cli_get_SP2($l, $l2, $inf);
-							foreach($conf['select'] as $opt => $what)
-							{
-								$inf .= $sp2 . sprintf("%-${l2}s  ", $opt) . $what . "\n";
-							}
-						}
-					}
+					$inf .= $this->cli_help_get_args($funcs['arg'], $l, $sp, true);
+					$inf .= "\n";
+					$inf .= $this->cli_help_get_args($funcs['arg'], $l, $sp, false);
 				}
 			}
 			echo "$inf\n\n";
