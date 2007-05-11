@@ -63,6 +63,17 @@ if (!class_exists('DirectoryGraphIterator'))
 	}
 }
 
+if (!class_exists('InvertedRegexIterator'))
+{
+	class InvertedRegexIterator extends RegexIterator
+	{
+		function accept()
+		{
+			return !RegexIterator::accept();
+		}
+	}
+}
+
 if (!class_exists('CLICommand'))
 {
 	abstract class CLICommand
@@ -423,6 +434,7 @@ class PharCommand extends CLICommand
 			'a' => array('typ'=>'alias',   'val'=>'newphar', 'required'=>1, 'inf'=>'<alias>  Provide an alias name for the phar file.'),
 			's' => array('typ'=>'file',    'val'=>NULL,                     'inf'=>'<stub>   Select the stub file (excluded from list of input files/dirs).'),
 			'r' => array('typ'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Specifies a regular expression for input files.'),
+			'x' => array('typ'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Regular expression for input files to exclude.'),
 			'c' => array('typ'=>'select',  'val'=>NULL,                     'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression')),
 			''  => array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories.'),
 			);
@@ -445,6 +457,7 @@ class PharCommand extends CLICommand
 		$alias   = $this->args['a']['val'];
 		$stub    = $this->args['s']['val'];
 		$regex   = $this->args['r']['val'];
+		$invregex= $this->args['x']['val'];
 		$input   = $this->args['']['val'];
 
 		$phar  = new Phar($archive, 0, $alias);
@@ -459,13 +472,13 @@ class PharCommand extends CLICommand
 
 		if (!is_array($input))
 		{
-			$this->phar_add($phar, $input, $regex, $stub);
+			$this->phar_add($phar, $input, $regex, $invregex, $stub);
 		}
 		else
 		{
 			foreach($input as $i)
 			{
-				$this->phar_add($phar, $i, $regex, $stub);
+				$this->phar_add($phar, $i, $regex, $invregex, $stub);
 			}
 		}
 
@@ -487,7 +500,7 @@ class PharCommand extends CLICommand
 		exit(0);
 	}
 
-	static function phar_add(Phar $phar, $input, $regex, SplFileInfo $stub)
+	static function phar_add(Phar $phar, $input, $regex, $invregex, SplFileInfo $stub)
 	{
 		$dir   = new RecursiveDirectoryIterator($input);
 		$dir   = new RecursiveIteratorIterator($dir);
@@ -495,6 +508,11 @@ class PharCommand extends CLICommand
 		if (isset($regex))
 		{
 			$dir = new RegexIterator($dir, '/'. $regex . '/');
+		}
+
+		if (isset($invregex))
+		{
+			$dir = new InvertedRegexIterator($dir, '/'. $invregex . '/');
 		}
 
 		try
@@ -566,7 +584,7 @@ class PharCommand extends CLICommand
 	{
 		return array(
 			'f' => array('typ'=>'phar', 'val'=>NULL, 'required'=>1, 'inf'=>'<file>   Specifies the PHAR file to extract.'),
-			''  => array('typ'=>'dir',  'val'=>'.',                 'inf'=>'<dir>    Directory to extract to (defaults to \'.\').'),
+			''  => array('typ'=>'dir',  'val'=>'.',                 'inf'=>'         Directory to extract to (defaults to \'.\').'),
 			);
 	}
 
