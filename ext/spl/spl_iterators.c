@@ -1426,6 +1426,10 @@ SPL_METHOD(RegexIterator, accept)
 		}
 	}
 
+	if (intern->u.regex.flags & REGIT_INVERTED) {
+		RETVAL_BOOL(Z_LVAL_P(return_value));
+	}
+
 	if (use_copy) {
 		efree(subject);
 	}
