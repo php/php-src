@@ -259,7 +259,7 @@ abstract class CLICommand
 			{
 				$arg = "... ";
 			}
-			$inf .= $sp . $arg . $conf['inf'] . "\n";
+			$inf .= $this->cli_wordwrap($sp . $arg . $conf['inf'], $l, $sp) . "\n";
 			if ($conf['typ'] == 'select')
 			{
 				$l2 = 0;
