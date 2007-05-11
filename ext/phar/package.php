@@ -2,7 +2,8 @@
 
 $notes = '
  * fix Phar::CanWrite() [Marcus]
- * add phar command (phar.php) [Marcus] 
+ * add preliminary phar command (phar.php) [Marcus] 
+ * add phar command (phar.phar) [Marcus]
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
