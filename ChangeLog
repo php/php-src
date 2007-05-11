@@ -1,3 +1,118 @@
+2007-05-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/strripos_offset.phpt:
+      MFH: fix segfault in strripos() when offset == INT_MAX+1
+      identified and repoted by Joxean Koret
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/strripos_offset.phpt
+      ext/standard/tests/strings/strripos_offset.phpt:
+      fix segfault in strripos() when offset == INT_MAX+1
+      identified and repoted by Joxean Koret
+
+    * ext/soap/php_http.c:
+      add missing header
+
+    * (PHP_5_2)
+      ext/soap/php_http.c:
+      %d -> %ld
+
+    * ext/soap/php_http.c:
+      MFB
+
+2007-05-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/soap/php_http.c:
+      
+      Fixed random number generation for http auth mechanism in SOAP
+      
+
+2007-05-10  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * main/php_ini.c:
+      MFB - use php_strtok_r() rather than strsep()
+
+    * (PHP_5_2)
+      main/php_ini.c:
+      use php_strtok_r() rather than strsep()
+
+2007-05-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c
+      ext/standard/tests/strings/005.phpt
+      ext/standard/tests/strings/006.phpt
+      ext/standard/tests/strings/007.phpt:
+      MFH: flush output buffer when/if
+      highlight_string()/php_strip_whitespace()/highlight_string() fail
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/strings/005.phpt
+      ext/standard/tests/strings/005.phpt
+      ext/standard/tests/strings/006.phpt
+      ext/standard/tests/strings/006.phpt
+      ext/standard/tests/strings/007.phpt
+      ext/standard/tests/strings/007.phpt:
+      flush output buffer when/if
+      highlight_string()/php_strip_whitespace()/highlight_string() fail
+
+2007-05-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed bug #41291 (FastCGI does not set SO_REUSEADDR). (fmajid at kefta dot
+      com)
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_sdl.c
+      ext/soap/php_sdl.c
+      ext/soap/tests/bugs/bug41337.phpt
+      ext/soap/tests/bugs/bug41337.phpt
+      ext/soap/tests/bugs/bug41337.phpt
+      ext/soap/tests/bugs/bug41337.wsdl
+      ext/soap/tests/bugs/bug41337.wsdl
+      ext/soap/tests/bugs/bug41337.wsdl:
+      Fixed bug #41337 (WSDL parsing doesn't ignore non soap bindings)
+
+2007-05-10  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/standard/tests/network/bug41347.phpt
+      ext/standard/tests/network/bug41347.phpt:
+      
+      file bug41347.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/dns.c:
+      Fixed bug #41347 (checkdnsrr() segfaults on empty hostname).
+
+2007-05-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/image/iptcembed_001.phpt
+      ext/standard/tests/image/iptcembed_001.phpt:
+      
+      cleanup temp test data
+
+    * ext/standard/iptc.c
+      ext/standard/tests/image/iptcembed_001.phpt:
+      fix segfault in iptcembed()
+
+    * (PHP_5_2)
+      ext/bcmath/bcmath.c:
+      MFH: bcmath.scale must be greater or equal to zero
+
+    * ext/bcmath/bcmath.c:
+      bcmath.scale must be greater or equal to zero
+      looks like negative value cannot cause any problems, but it's still
+      invalid
+
 2007-05-09  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
