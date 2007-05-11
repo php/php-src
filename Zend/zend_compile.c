@@ -4034,7 +4034,11 @@ void zend_do_foreach_cont(znode *foreach_token, znode *open_brackets_token, znod
 		/* Change "write context" into "read context" */
 		fetch->extended_value = 0;  /* reset ZEND_FE_RESET_VARIABLE */
 		while (fetch != end) {
-			(--fetch)->opcode -= 3; /* FETCH_W -> FETCH_R */
+			--fetch;
+			if (fetch->opcode == ZEND_FETCH_DIM_W && fetch->op2.op_type == IS_UNUSED) {
+				zend_error(E_COMPILE_ERROR, "Cannot use [] for reading");
+			}
+			fetch->opcode -= 3; /* FETCH_W -> FETCH_R */
 		}
 		/* prevent double SWITCH_FREE */
 		zend_stack_top(&CG(foreach_copy_stack), (void **) &foreach_copy);
