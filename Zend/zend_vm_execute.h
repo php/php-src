@@ -1958,22 +1958,19 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
 				zend_file_handle file_handle;
-				char cwd[MAXPATHLEN];
-				cwd_state state;
 
 				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
-					cwd[0] = '\0';
-				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
-					cwd[0] = '\0';
+					cwd_state state;
+
+					state.cwd_length = 0;
+					state.cwd = malloc(1);
+					state.cwd[0] = 0;
+
+					failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+						zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
+
+					free(state.cwd);
 				}
-
-				state.cwd_length = strlen(cwd);
-				state.cwd = zend_strndup(cwd, state.cwd_length);
-
-				failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
-					zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
-
-				free(state.cwd);
 
 				if (failure_retval) {
 					/* do nothing */
@@ -4525,22 +4522,19 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
 				zend_file_handle file_handle;
-				char cwd[MAXPATHLEN];
-				cwd_state state;
 
 				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
-					cwd[0] = '\0';
-				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
-					cwd[0] = '\0';
+					cwd_state state;
+
+					state.cwd_length = 0;
+					state.cwd = malloc(1);
+					state.cwd[0] = 0;
+
+					failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+						zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
+
+					free(state.cwd);
 				}
-
-				state.cwd_length = strlen(cwd);
-				state.cwd = zend_strndup(cwd, state.cwd_length);
-
-				failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
-					zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
-
-				free(state.cwd);
 
 				if (failure_retval) {
 					/* do nothing */
@@ -7659,22 +7653,19 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
 				zend_file_handle file_handle;
-				char cwd[MAXPATHLEN];
-				cwd_state state;
 
 				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
-					cwd[0] = '\0';
-				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
-					cwd[0] = '\0';
+					cwd_state state;
+
+					state.cwd_length = 0;
+					state.cwd = malloc(1);
+					state.cwd[0] = 0;
+
+					failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+						zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
+
+					free(state.cwd);
 				}
-
-				state.cwd_length = strlen(cwd);
-				state.cwd = zend_strndup(cwd, state.cwd_length);
-
-				failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
-					zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
-
-				free(state.cwd);
 
 				if (failure_retval) {
 					/* do nothing */
@@ -19723,22 +19714,19 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
 				zend_file_handle file_handle;
-				char cwd[MAXPATHLEN];
-				cwd_state state;
 
 				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
-					cwd[0] = '\0';
-				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
-					cwd[0] = '\0';
+					cwd_state state;
+
+					state.cwd_length = 0;
+					state.cwd = malloc(1);
+					state.cwd[0] = 0;
+
+					failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+						zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
+
+					free(state.cwd);
 				}
-
-				state.cwd_length = strlen(cwd);
-				state.cwd = zend_strndup(cwd, state.cwd_length);
-
-				failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
-					zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
-
-				free(state.cwd);
 
 				if (failure_retval) {
 					/* do nothing */
