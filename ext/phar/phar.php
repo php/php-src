@@ -308,6 +308,7 @@ Commands:
 
 EOF;
 			$l = 0;
+			ksort($this->cmds);
 			foreach($this->cmds as $name => $funcs)
 			{
 				$l = max($l, strlen($name));
