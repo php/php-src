@@ -234,11 +234,18 @@ abstract class CLICommand
 	{
 		return "This help.";
 	}
+	
+	private function cli_wordwrap($what, $l, $sp)
+	{
+		$l = max(80 - $l, 40); // minimum length
+		$what = str_replace("\n", "\n".$sp, $what);
+		return wordwrap($what, $l, "\n".$sp);
+	}
 
-	private function cli_help_get_args($args, $l, $sp, $required)
+	private function cli_help_get_args($func, $l, $sp, $required)
 	{
 		$inf = "";
-		foreach(call_user_func(array($this, $args)) as $arg => $conf)
+		foreach(call_user_func($func, $l, $sp) as $arg => $conf)
 		{
 			if ((isset($conf['required']) && $conf['required']) != $required)
 			{
@@ -303,13 +310,13 @@ Commands:
 			$inf = $name . substr($sp, strlen($name));
 			if (isset($funcs['inf']))
 			{
-				$inf .= call_user_func(array($this, $funcs['inf'])) . "\n";
+				$inf .= $this->cli_wordwrap(call_user_func(array($this, $funcs['inf'])), $l, $sp) . "\n";
 				if (isset($funcs['arg']))
 				{
 					$inf .= "\n";
-					$inf .= $this->cli_help_get_args($funcs['arg'], $l, $sp, true);
+					$inf .= $this->cli_help_get_args(array($this, $funcs['arg']), $l, $sp, true);
 					$inf .= "\n";
-					$inf .= $this->cli_help_get_args($funcs['arg'], $l, $sp, false);
+					$inf .= $this->cli_help_get_args(array($this, $funcs['arg']), $l, $sp, false);
 				}
 			}
 			echo "$inf\n\n";
