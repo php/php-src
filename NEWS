@@ -27,7 +27,9 @@ PHP                                                                        NEWS
   sqlite2 lib). (Ilia)
 - Fixed bug #41283 (Bug with deserializing array key that are doubles or
   floats in wddx). (Ilia)
-- Fixed bug #41257: (lookupNamespaceURI does not work as expected). (Rob)
+- Fixed bug #41257 (lookupNamespaceURI does not work as expected). (Rob)
+- Fixed bug #41134 (zend_ts_hash_clean not thread-safe). 
+  (marco dot cova at gmail dot com, Tony)
 - Fixed bug #41097 (ext/soap returning associative array as indexed without
   using WSDL). (Dmitry)
 - Fixed bug #41004 (minOccurs="0" and null class member variable). (Dmitry)
