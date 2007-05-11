@@ -212,12 +212,12 @@ class PharCommand extends CLICommand
 		}
 	}
 
-	function phar_dir_echo($f)
+	function phar_dir_echo($pn, $f)
 	{
 		echo "$f\n";
 	}
 
-	function phar_dir_operation(RecursiveIteratorIterator $dir, $func)
+	function phar_dir_operation(RecursiveIteratorIterator $dir, $func, array $args = array())
 	{
 		$regex   = $this->args['i']['val'];
 		$invregex= $this->args['x']['val'];
@@ -232,9 +232,9 @@ class PharCommand extends CLICommand
 			$dir = new InvertedRegexIterator($dir, '/'. $invregex . '/');
 		}
 
-		foreach($dir as $f)
+		foreach($dir as $pn => $f)
 		{
-			call_user_func($func, $f);
+			call_user_func($func, $pn, $f, $args);
 		}
 	}
 
@@ -280,7 +280,7 @@ class PharCommand extends CLICommand
 		return $args;
 	}
 
-	static function cli_cmd_run_extract($args)
+	function cli_cmd_run_extract($args)
 	{
 		$dir = $args['']['val'];
 		if (is_array($dir))
@@ -301,27 +301,32 @@ class PharCommand extends CLICommand
 		$bend = strpos($base, '/', $bend);
 		$base = substr($base, 0, $bend + 1);
 		$blen = strlen($base);
-		foreach(new RecursiveIteratorIterator($phar) as $pn => $f)
+		
+		$this->phar_dir_operation(new RecursiveIteratorIterator($phar), array($this, 'phar_dir_extract'), array($blen, $dir));
+	}
+	
+	function phar_dir_extract($pn, $f, $args)
+	{
+		$blen   = $args[0];
+		$dir    = $args[1];
+		$sub    = substr($pn, $blen);
+		$target = $dir . '/' . $sub;
+		if (!file_exists(dirname($target)))
 		{
-			$sub = substr($pn, $blen);
-			$target = $dir . '/' . $sub;
-			if (!file_exists(dirname($target)))
+			if (!@mkdir(dirname($target)))
 			{
-				if (!@mkdir(dirname($target)))
-				{
-					echo "  ..unable to create dir\n";
-					exit(1);
-				}
+				echo "  ..unable to create dir\n";
+				exit(1);
 			}
-			echo "$sub";
-			if (!@copy($f, $target))
-			{
-				echo " ...error\n";
-			}
-			else
-			{
-				echo " ...ok\n";
-			}
+		}
+		echo "$sub";
+		if (!@copy($f, $target))
+		{
+			echo " ...error\n";
+		}
+		else
+		{
+			echo " ...ok\n";
 		}
 	}
 }
