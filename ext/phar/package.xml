@@ -203,24 +203,18 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <changelog>
   <release>
    <version>
-    <release>1.1.0RC1</release>
-    <api>1.1.0</api>
+    <release>1.0.1</release>
+    <api>1.0.1</api>
    </version>
    <stability>
-    <release>beta</release>
-    <api>beta</api>
+    <release>stable</release>
+    <api>stable</api>
    </stability>
-   <date>2007-03-26</date>
+   <date>2007-03-28</date>
    <license uri="http://www.php.net/license">PHP License</license>
    <notes>
 
- * implement ability connect a phar file &apos;phar://whatever&apos; to a directory. That way all
-   access to that phar archive are directed to the extracted directory. This
-   allows to have the installed files and the archieve keep the same includes.
-   [Marcus]
- * implement SHA-2 (256, 512) support [Marcus]
- * implement setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
-   choose the kind of signature to use (PGP falls back to SHA1) [Greg]
+ * Fix return value of unlink() and rename() when used for phar archievs. [Marcus]
 
    </notes>
   </release>
