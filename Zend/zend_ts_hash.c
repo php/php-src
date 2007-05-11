@@ -81,17 +81,22 @@ ZEND_API int _zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, hash_func_t pHas
 
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht)
 {
+	begin_write(ht);
+	zend_hash_destroy(TS_HASH(ht));
+	end_write(ht);
+
 #ifdef ZTS
 	tsrm_mutex_free(ht->mx_reader);
 	tsrm_mutex_free(ht->mx_writer);
 #endif
-	zend_hash_destroy(TS_HASH(ht));
 }
 
 ZEND_API void zend_ts_hash_clean(TsHashTable *ht)
 {
 	ht->reader = 0;
+	begin_write(ht);
 	zend_hash_clean(TS_HASH(ht));
+	end_write(ht);
 }
 
 ZEND_API int _zend_ts_hash_add_or_update(TsHashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
@@ -140,11 +145,14 @@ ZEND_API int zend_ts_hash_add_empty_element(TsHashTable *ht, char *arKey, uint n
 
 ZEND_API void zend_ts_hash_graceful_destroy(TsHashTable *ht)
 {
+	begin_write(ht);
+	zend_hash_graceful_destroy(TS_HASH(ht));
+	end_write(ht);
+
 #ifdef ZTS
 	tsrm_mutex_free(ht->mx_reader);
 	tsrm_mutex_free(ht->mx_reader);
 #endif
-	zend_hash_graceful_destroy(TS_HASH(ht));
 }
 
 ZEND_API void zend_ts_hash_apply(TsHashTable *ht, apply_func_t apply_func TSRMLS_DC)
