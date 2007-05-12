@@ -242,9 +242,11 @@ abstract class CLICommand
 	
 	private function cli_wordwrap($what, $l, $sp)
 	{
-		$l = max(80 - $l, 40); // minimum length
-		$what = str_replace("\n", "\n".$sp, $what);
-		return wordwrap($what, $l, "\n".$sp);
+		$p = max(79 - $l, 40);     // minimum length for paragraph
+		$b = substr($what, 0, $l); // strip out initial $l
+		$r = substr($what, $l);    // remainder
+		$r = str_replace("\n", "\n".$sp, $r); // in remainder replace \n's
+		return $b . wordwrap($r, $p, "\n".$sp);
 	}
 
 	private function cli_help_get_args($func, $l, $sp, $required)
