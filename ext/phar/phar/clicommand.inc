@@ -175,6 +175,25 @@ abstract class CLICommand
 		return (bool)$arg;
 	}
 
+	static function cli_arg_typ_regex($arg)
+	{
+		if (strlen($arg))
+		{
+			if (strlen($arg) > 1 && $arg[0] == $arg[strlen($arg)-1] && strpos('/,', $arg) !== false)
+			{
+				return $arg;
+			}
+			else
+			{
+				return '/' . $arg . '/';
+			}
+		}
+		else
+		{
+			return NULL;
+		}
+	}
+
 	static function cli_arg_typ_select($arg, $cfg)
 	{
 		if (!in_array($arg, array_keys($cfg['select'])))

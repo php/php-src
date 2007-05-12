@@ -191,12 +191,12 @@ class PharCommand extends CLICommand
 
 		if (isset($regex))
 		{
-			$dir = new RegexIterator($dir, '/'. $regex . '/');
+			$dir = new RegexIterator($dir, $regex);
 		}
 
 		if (isset($invregex))
 		{
-			$dir = new InvertedRegexIterator($dir, '/'. $invregex . '/');
+			$dir = new InvertedRegexIterator($dir, $invregex);
 		}
 
 		try
@@ -231,12 +231,12 @@ class PharCommand extends CLICommand
 
 		if (isset($regex))
 		{
-			$dir = new RegexIterator($dir, '/'. $regex . '/');
+			$dir = new RegexIterator($dir, $regex);
 		}
 
 		if (isset($invregex))
 		{
-			$dir = new InvertedRegexIterator($dir, '/'. $invregex . '/');
+			$dir = new InvertedRegexIterator($dir, $invregex);
 		}
 
 		foreach($dir as $pn => $f)
