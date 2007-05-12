@@ -1,12 +1,13 @@
 --TEST--
-Test array_shift() function
+Test array_pop() function
 --FILE--
 <?php
-/* Prototype: mixed array_shift( array &array );
- * Description: Shifts the first value of the array off and returns it.
+
+/* Prototype: mixed array_pop( array &array );
+ * Description: Pops and returns the last value of the array.
  */
 
-array_shift($GLOBALS);
+array_pop($GLOBALS);
 
 $empty_array = array();
 $number = 5;
@@ -16,7 +17,7 @@ $str = "abc";
 /* Various combinations of arrays to be used for the test */
 $mixed_array = array(
   array(),
-  array( 1,2,3,4,5,6,7,8,9 ), 
+  array( 1,2,3,4,5,6,7,8,9 ),
   array( "One", "_Two", "Three", "Four", "Five" ),
   array( 6, "six", 7, "seven", 8, "eight", 9, "nine" ),
   array( "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee" ),
@@ -27,42 +28,41 @@ $mixed_array = array(
   array( 12, "name", 'age', '45' ),
   array( array("oNe", "tWo", 4), array(10, 20, 30, 40, 50), array() ),
   array( "one" => 1, "one" => 2, "three" => 3, 3, 4, 3 => 33, 4 => 44, 5, 6,
-                              5.4 => 54, 5.7 => 57, "5.4" => 554, "5.7" => 557 )
+          5.4 => 54, 5.7 => 57, "5.4" => 554, "5.7" => 557 )
 );
 
 /* Testing Error Conditions */
 echo "\n*** Testing Error Conditions ***\n";
 
 /* Zero argument  */
-var_dump( array_shift() );
+var_dump( array_pop() );
 
 /* Scalar argument */
-var_dump( array_shift($number) );
+var_dump( array_pop($number) );
 
 /* String argument */
-var_dump( array_shift($str) );
+var_dump( array_pop($str) );
 
 /* Invalid Number of arguments */
-var_dump( array_shift($mixed_array[1],$mixed_array[2]) );
+var_dump( array_pop($mixed_array[1],$mixed_array[2]) );
 
 /* Empty Array as argument */
-var_dump( array_shift($empty_array) );
+var_dump( array_pop($empty_array) );
 
 /* Loop to test normal functionality with different arrays inputs */
-echo "\n*** Testing with various array inputs ***\n";
+echo "\n*** Normal testing with various array inputs ***\n";
 
 $counter = 1;
-foreach( $mixed_array as $sub_array ) { 
-  echo "\n-- Input Array for Iteration $counter is -- \n";
-  print_r( $sub_array );
-  echo "\nOutput after shift is :\n";
-  var_dump( array_shift($sub_array) );
-  $counter++;
+foreach( $mixed_array as $sub_array )
+{ 
+ echo "\n-- Input Array for Iteration $counter is --\n";
+ print_r( $sub_array );
+ echo "\nOutput after Pop is :\n";
+ var_dump( array_pop($sub_array) );
+ $counter++;
 } 
 
-/*Checking for internal array pointer beint reset when shift is called */
-
-echo"\n*** Checking for internal array pointer being reset when shift is called ***\n";
+echo"\n*** Checking for internal array pointer being reset when pop is called ***\n";
 
 echo "\nCurrent Element is : ";
 var_dump( current($mixed_array[1]) );
@@ -73,41 +73,41 @@ var_dump( next($mixed_array[1]) );
 echo "\nNext Element is : ";
 var_dump( next($mixed_array[1]) );
 
-echo "\nshifted Element is : ";
-var_dump( array_shift($mixed_array[1]) );
+echo "\nPOPed Element is : ";
+var_dump( array_pop($mixed_array[1]) );
 
-echo "\nCurrent Element after shift operation is: ";
+echo "\nCurrent Element after POP operation is: ";
 var_dump( current($mixed_array[1]) );
 
-echo"Done";
+echo"\nDone";
 ?>
 --EXPECTF--
 *** Testing Error Conditions ***
 
-Warning: Wrong parameter count for array_shift() in %s line %d
+Warning: Wrong parameter count for array_pop() in %s on line %d
 NULL
 
-Warning: array_shift(): The argument should be an array in %s on line %d
+Warning: array_pop(): The argument should be an array in %s on line %d
 NULL
 
-Warning: array_shift(): The argument should be an array in %s on line %d
+Warning: array_pop(): The argument should be an array in %s on line %d
 NULL
 
-Warning: Wrong parameter count for array_shift() in %s on line %d
+Warning: Wrong parameter count for array_pop() in %s on line %d
 NULL
 NULL
 
-*** Testing with various array inputs ***
+*** Normal testing with various array inputs ***
 
--- Input Array for Iteration 1 is -- 
+-- Input Array for Iteration 1 is --
 Array
 (
 )
 
-Output after shift is :
+Output after Pop is :
 NULL
 
--- Input Array for Iteration 2 is -- 
+-- Input Array for Iteration 2 is --
 Array
 (
     [0] => 1
@@ -121,10 +121,10 @@ Array
     [8] => 9
 )
 
-Output after shift is :
-int(1)
+Output after Pop is :
+int(9)
 
--- Input Array for Iteration 3 is -- 
+-- Input Array for Iteration 3 is --
 Array
 (
     [0] => One
@@ -134,10 +134,10 @@ Array
     [4] => Five
 )
 
-Output after shift is :
-string(3) "One"
+Output after Pop is :
+string(4) "Five"
 
--- Input Array for Iteration 4 is -- 
+-- Input Array for Iteration 4 is --
 Array
 (
     [0] => 6
@@ -150,10 +150,10 @@ Array
     [7] => nine
 )
 
-Output after shift is :
-int(6)
+Output after Pop is :
+string(4) "nine"
 
--- Input Array for Iteration 5 is -- 
+-- Input Array for Iteration 5 is --
 Array
 (
     [a] => aaa
@@ -163,10 +163,10 @@ Array
     [e] => eee
 )
 
-Output after shift is :
-string(3) "aaa"
+Output after Pop is :
+string(3) "eee"
 
--- Input Array for Iteration 6 is -- 
+-- Input Array for Iteration 6 is --
 Array
 (
     [1] => one
@@ -176,10 +176,10 @@ Array
     [5] => five
 )
 
-Output after shift is :
-string(3) "one"
+Output after Pop is :
+string(4) "five"
 
--- Input Array for Iteration 7 is -- 
+-- Input Array for Iteration 7 is --
 Array
 (
     [1] => one
@@ -189,10 +189,10 @@ Array
     [5] => five
 )
 
-Output after shift is :
-string(3) "one"
+Output after Pop is :
+string(4) "five"
 
--- Input Array for Iteration 8 is -- 
+-- Input Array for Iteration 8 is --
 Array
 (
     [f] => fff
@@ -209,10 +209,10 @@ Array
     [a] => 
 )
 
-Output after shift is :
-string(3) "fff"
+Output after Pop is :
+NULL
 
--- Input Array for Iteration 9 is -- 
+-- Input Array for Iteration 9 is --
 Array
 (
     [0] => 12
@@ -221,10 +221,10 @@ Array
     [3] => 45
 )
 
-Output after shift is :
-int(12)
+Output after Pop is :
+string(2) "45"
 
--- Input Array for Iteration 10 is -- 
+-- Input Array for Iteration 10 is --
 Array
 (
     [0] => Array
@@ -249,17 +249,11 @@ Array
 
 )
 
-Output after shift is :
-array(3) {
-  [0]=>
-  string(3) "oNe"
-  [1]=>
-  string(3) "tWo"
-  [2]=>
-  int(4)
+Output after Pop is :
+array(0) {
 }
 
--- Input Array for Iteration 11 is -- 
+-- Input Array for Iteration 11 is --
 Array
 (
     [one] => 2
@@ -274,10 +268,10 @@ Array
     [5.7] => 557
 )
 
-Output after shift is :
-int(2)
+Output after Pop is :
+int(557)
 
-*** Checking for internal array pointer being reset when shift is called ***
+*** Checking for internal array pointer being reset when pop is called ***
 
 Current Element is : int(1)
 
@@ -285,7 +279,8 @@ Next Element is : int(2)
 
 Next Element is : int(3)
 
-shifted Element is : int(1)
+POPed Element is : int(9)
 
-Current Element after shift operation is: int(2)
+Current Element after POP operation is: int(1)
+
 Done
