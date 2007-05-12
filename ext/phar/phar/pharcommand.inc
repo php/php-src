@@ -16,9 +16,14 @@
  */
 class PharCommand extends CLICommand
 {
-	function cli_get_SP2($l1, $l2, $arg_inf)
+	function cli_get_SP2($l1, $arg_inf)
 	{
-		return str_repeat(' ', $l1 + 2 + 17);
+		return str_repeat(' ', $l1 + 2 + 4 + 9);
+	}
+
+	function cli_get_SP3($l1, $l2, $arg_inf)
+	{
+		return str_repeat(' ', $l1 + 2 + 4 + 9 + 2 + $l2 + 2);
 	}
 
 	static function phar_args($which, $phartyp)
@@ -28,7 +33,7 @@ class PharCommand extends CLICommand
 			'c' => array('typ'=>'select', 'val'=>NULL,      'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression')),
 			'f' => array('typ'=>$phartyp, 'val'=>NULL,      'inf'=>'<file>   Specifies the phar file to work on.'),
 			'i' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Specifies a regular expression for input files.'),
-			's' => array('typ'=>'file',   'val'=>NULL,      'inf'=>'<stub>   Select the stub file (excluded from list of input files/dirs).'),
+			's' => array('typ'=>'file',   'val'=>NULL,      'inf'=>'<stub>   Select the stub file.'),
 			'x' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Regular expression for input files to exclude.'),
 		);
 		$args = array();
@@ -107,13 +112,15 @@ class PharCommand extends CLICommand
 
 	static function cli_cmd_inf_pack()
 	{
-		return "Pack files into a PHAR archive.";
+		return "Pack files into a PHAR archive.\n"
+			.  "When using -s <stub>, then the stub file is being excluded from the list of input files/dirs."
+			;
 	}
 
 	static function cli_cmd_arg_pack()
 	{
-		$args = self::phar_args('AcFrsx', 'pharnew');
-		$args[''] = array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories.');
+		$args = self::phar_args('AcFisx', 'pharnew');
+		$args[''] = array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories. If -i is in use then ONLY files and matching thegiven regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.');
 		return $args;
 	}
 
@@ -328,6 +335,42 @@ class PharCommand extends CLICommand
 		{
 			echo " ...ok\n";
 		}
+	}
+
+	function cli_cmd_inf_setstub()
+	{
+		return "Set the stub of a PHAR file.\n";
+	}
+	
+	function cli_cmd_arg_setstub()
+	{
+		return self::phar_args('Fs', 'phar');
+	}
+	
+	function cli_cmd_run_setstub()
+	{
+		$phar = $args['f']['val'];
+		$stub = $this->args['s']['val'];
+	
+		$phar->setStub(file_get_contents($stub));
+	}
+	
+	function cli_cmd_inf_getstub()
+	{
+		return "Get the stub of a PHAR file.\n";
+	}
+
+	function cli_cmd_arg_getstub()
+	{
+		return self::phar_args('Fs', 'phar');
+	}
+
+	function cli_cmd_run_getstub()
+	{
+		$phar = $args['f']['val'];
+		$stub = $this->args['s']['val'];
+
+		file_put_contents($stub, $phar->getStub());
 	}
 }
 
