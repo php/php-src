@@ -1,3 +1,71 @@
+2007-05-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/sysvsem/sysvsem.c:
+      remove warnings in resource dtor
+
+    * (PHP_5_2)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ts_hash.c:
+      MFH: fix #41134 (zend_ts_hash_clean not thread-safe)
+      fix also zend_ts_hash_*destroy()
+
+    * ZendEngine2/zend_ts_hash.c:
+      fix #41134 (zend_ts_hash_clean not thread-safe)
+      fix also zend_ts_hash_*destroy()
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug41351.phpt
+      ZendEngine2/tests/bug41351_2.phpt
+      ZendEngine2/tests/bug41351_3.phpt:
+      MFH: fix #41351 (Invalid opcode with foreach ($a[] as $b))
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug41351.phpt
+      ZendEngine2/tests/bug41351.phpt
+      ZendEngine2/tests/bug41351_2.phpt
+      ZendEngine2/tests/bug41351_2.phpt
+      ZendEngine2/tests/bug41351_3.phpt
+      ZendEngine2/tests/bug41351_3.phpt:
+      fix #41351 (Invalid opcode with foreach ($a[] as $b))
+
+2007-05-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug39542.phpt
+      ZendEngine2/tests/bug39542.phpt
+      ZendEngine2/tests/bug39542/bug39542.php
+      ZendEngine2/tests/bug39542/bug39542.php:
+      
+      file bug39542.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug39542.phpt
+      ZendEngine2/tests/bug39542/bug39542.php:
+      Fixed bug #39542 (Behaviour of require/include different to < 5.2.0)
+
+    * ext/soap/php_http.c:
+      Fixed compilation error
+
+2007-05-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.h:
+       - MFH Add invert option to RegexIterator
+
+    * ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.h:
+      -Addvert optionto RegexIterator
+
 2007-05-10  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)

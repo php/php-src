@@ -1,3 +1,47 @@
+2007-05-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_ts_hash.c:
+      MFH: fix #41134 (zend_ts_hash_clean not thread-safe)
+      fix also zend_ts_hash_*destroy()
+
+    * zend_ts_hash.c:
+      fix #41134 (zend_ts_hash_clean not thread-safe)
+      fix also zend_ts_hash_*destroy()
+
+    * (PHP_5_2)
+      zend_compile.c
+      tests/bug41351.phpt
+      tests/bug41351_2.phpt
+      tests/bug41351_3.phpt:
+      MFH: fix #41351 (Invalid opcode with foreach ($a[] as $b))
+
+    * zend_compile.c
+      tests/bug41351.phpt
+      tests/bug41351.phpt
+      tests/bug41351_2.phpt
+      tests/bug41351_2.phpt
+      tests/bug41351_3.phpt
+      tests/bug41351_3.phpt:
+      fix #41351 (Invalid opcode with foreach ($a[] as $b))
+
+2007-05-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug39542.phpt
+      tests/bug39542/bug39542.php:
+      Fixed bug #39542 (Behaviour of require/include different to < 5.2.0)
+
+    * tests/bug39542.phpt
+      tests/bug39542.phpt
+      tests/bug39542/bug39542.php
+      tests/bug39542/bug39542.php:
+      
+      file bug39542.phpt was initially added on branch PHP_5_2.
+
 2007-05-07  Antony Dovgal  <antony@zend.com>
 
     * tests/add_006.phpt
