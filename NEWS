@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Fixed altering $this via argument named "this". (Dmitry)
 - Fixed PHP CLI to use the php.ini from the binary location. (Hannes)
 - Fixed segfault in strripos(). (Tony, Joxean Koret)
+- Fixed bug #41353 (crash in openssl_pkcs12_read() on invalid input). (Ilia)
 - Fixed bug #41351 (Invalid opcode with foreach ($a[] as $b)). (Dmitry, Tony)
 - Fixed bug #41347 (checkdnsrr() segfaults on empty hostname). (Scott)
 - Fixed bug #41337 (WSDL parsing doesn't ignore non soap bindings). (Dmitry)
