@@ -1,3 +1,152 @@
+2007-05-12  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      main/php_ini.c:
+      MFH: bug#41361 (shell_exec() does not find binaries)
+
+    * main/php_ini.c:
+      Fixed bug#41361 (shell_exec() does not find binaries)
+
+2007-05-12  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ZendEngine2/tests/019.phpt:
+      New version of 019.phpt
+
+    * ext/standard/tests/general_functions/debug_zval_dump_b.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_e.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_o.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_v.phpt
+      ext/standard/tests/general_functions/is_array.phpt
+      ext/standard/tests/general_functions/is_bool.phpt
+      ext/standard/tests/general_functions/is_float.phpt
+      ext/standard/tests/general_functions/is_int.phpt
+      ext/standard/tests/general_functions/is_null.phpt
+      ext/standard/tests/general_functions/is_numeric.phpt
+      ext/standard/tests/general_functions/is_object.phpt
+      ext/standard/tests/general_functions/is_scalar.phpt
+      ext/standard/tests/general_functions/is_string.phpt
+      ext/standard/tests/general_functions/print_r.phpt
+      ext/standard/tests/general_functions/strval.phpt
+      ext/standard/tests/general_functions/var_dump.phpt:
+      New version of debug_zval_dump_b.phpt, debug_zval_dump_v.phpt,
+      is_float.phpt, is_numeric.phpt, is_string.phpt, var_dump.phpt,
+      debug_zval_dump_e.phpt, is_array.phpt, is_int.phpt, is_object.phpt,
+      print_r.phpt,
+      debug_zval_dump_o.phpt, is_bool.phpt, is_null.phpt, is_scalar.phpt,
+      strval.phpt
+
+    * ext/standard/tests/strings/addcslashes.phpt
+      ext/standard/tests/strings/chr_ord.phpt
+      ext/standard/tests/strings/implode1.phpt
+      ext/standard/tests/strings/md5_file.phpt
+      ext/standard/tests/strings/str_repeat.phpt
+      ext/standard/tests/strings/str_replace.phpt
+      ext/standard/tests/strings/strpos.phpt
+      ext/standard/tests/strings/strstr.phpt
+      ext/standard/tests/strings/substr.phpt
+      ext/standard/tests/strings/substr_count.phpt
+      ext/standard/tests/strings/trim1.phpt:
+      New version of addcslashes.phpt, implode1.phpt, strpos.phpt,
+      str_replace.phpt, substr_count.phpt,  trim1.phpt, chr_ord.phpt,
+      md5_file.phpt, str_repeat.phpt, strstr.phpt, substr.phpt
+
+    * ext/standard/tests/array/005.phpt
+      ext/standard/tests/array/009.phpt
+      ext/standard/tests/array/array_change_key_case.phpt
+      ext/standard/tests/array/array_key_exists.phpt
+      ext/standard/tests/array/array_keys.phpt
+      ext/standard/tests/array/array_map.phpt
+      ext/standard/tests/array/array_pop.phpt
+      ext/standard/tests/array/array_search.phpt
+      ext/standard/tests/array/array_values.phpt
+      ext/standard/tests/array/each.phpt
+      ext/standard/tests/array/end.phpt
+      ext/standard/tests/array/extract.phpt:
+      New version of 005.phpt, array_keys.phpt, array_values.phpt, extract.phpt,
+      009.phpt, array_map.phpt, each.phpt, array_change_key_case.phpt,
+      array_pop.phpt, end.phpt, array_key_exists.phpt,  array_search.phpt,
+      extract.php
+
+    * ext/standard/tests/general_functions/debug_zval_dump_b.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_b.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_e.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_e.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_o.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_o.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_v.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_v.phpt
+      ext/standard/tests/general_functions/is_array.phpt
+      ext/standard/tests/general_functions/is_array.phpt
+      ext/standard/tests/general_functions/is_bool.phpt
+      ext/standard/tests/general_functions/is_bool.phpt
+      ext/standard/tests/general_functions/is_float.phpt
+      ext/standard/tests/general_functions/is_float.phpt
+      ext/standard/tests/general_functions/is_int.phpt
+      ext/standard/tests/general_functions/is_int.phpt
+      ext/standard/tests/general_functions/is_null.phpt
+      ext/standard/tests/general_functions/is_null.phpt
+      ext/standard/tests/general_functions/is_numeric.phpt
+      ext/standard/tests/general_functions/is_numeric.phpt
+      ext/standard/tests/general_functions/is_object.phpt
+      ext/standard/tests/general_functions/is_object.phpt
+      ext/standard/tests/general_functions/is_scalar.phpt
+      ext/standard/tests/general_functions/is_scalar.phpt
+      ext/standard/tests/general_functions/is_string.phpt
+      ext/standard/tests/general_functions/is_string.phpt
+      ext/standard/tests/general_functions/print_r.phpt
+      ext/standard/tests/general_functions/print_r.phpt
+      ext/standard/tests/general_functions/strval.phpt
+      ext/standard/tests/general_functions/strval.phpt
+      ext/standard/tests/general_functions/var_dump.phpt
+      ext/standard/tests/general_functions/var_dump.phpt:
+      
+      file debug_zval_dump_b.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/addcslashes.phpt
+      ext/standard/tests/strings/addcslashes.phpt
+      ext/standard/tests/strings/chr_ord.phpt
+      ext/standard/tests/strings/implode1.phpt
+      ext/standard/tests/strings/md5_file.phpt
+      ext/standard/tests/strings/md5_file.phpt
+      ext/standard/tests/strings/str_repeat.phpt
+      ext/standard/tests/strings/str_replace.phpt
+      ext/standard/tests/strings/strpos.phpt
+      ext/standard/tests/strings/strstr.phpt
+      ext/standard/tests/strings/substr.phpt
+      ext/standard/tests/strings/substr.phpt
+      ext/standard/tests/strings/substr_count.phpt
+      ext/standard/tests/strings/trim1.phpt
+      ext/standard/tests/strings/trim1.phpt:
+      
+      file addcslashes.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/tests/array/005.phpt
+      ext/standard/tests/array/array_change_key_case.phpt
+      ext/standard/tests/array/array_key_exists.phpt
+      ext/standard/tests/array/array_keys.phpt
+      ext/standard/tests/array/array_keys.phpt
+      ext/standard/tests/array/array_map.phpt
+      ext/standard/tests/array/array_map.phpt
+      ext/standard/tests/array/array_pop.phpt
+      ext/standard/tests/array/array_pop.phpt
+      ext/standard/tests/array/array_search.phpt
+      ext/standard/tests/array/array_values.phpt
+      ext/standard/tests/array/each.phpt
+      ext/standard/tests/array/each.phpt
+      ext/standard/tests/array/end.phpt
+      ext/standard/tests/array/end.phpt
+      ext/standard/tests/array/extract.phpt
+      ext/standard/tests/array/extract.phpt:
+      New version of 005.phpt, array_change_key_case.phpt, array_key_exists.phpt,
+      array_keys.phpt, array_map.phpt, array_pop.phpt, array_search.phpt,
+      array_values.phpt, each.phpt, end.phpt, extract.phpt
+
+    * ext/standard/tests/array/009.phpt
+      ext/standard/tests/array/009.phpt:
+      
+      file 009.phpt was initially added on branch PHP_5_2.
+
 2007-05-11  Antony Dovgal  <antony@zend.com>
 
     * ext/sysvsem/sysvsem.c:
