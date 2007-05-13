@@ -1,3 +1,8 @@
+2007-05-12  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * tests/019.phpt:
+      New version of 019.phpt
+
 2007-05-11  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
