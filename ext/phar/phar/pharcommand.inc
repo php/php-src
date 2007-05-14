@@ -33,12 +33,22 @@ class PharCommand extends CLICommand
 			'c' => array('typ'=>'select', 'val'=>NULL,      'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression')),
 			'e' => array('typ'=>'entry',  'val'=>NULL,      'inf'=>'<entry>  Name of entry to work on (must include PHAR internal directory name if any).'),
 			'f' => array('typ'=>$phartyp, 'val'=>NULL,      'inf'=>'<file>   Specifies the phar file to work on.'),
-			'h' => array('typ'=>'select', 'val'=>NULL,      'inf'=>'<method> Selects the hash algorithmn.', 'select'=>array('md5'=>'MD5','sha1'=>'SHA1','sha256'=>'SHA256','sha512'=>'SHA512')),
+			'h' => array('typ'=>'select', 'val'=>NULL,      'inf'=>'<method> Selects the hash algorithmn.', 'select'=>array('md5'=>'MD5','sha1'=>'SHA1')),
 			'i' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Specifies a regular expression for input files.'),
 			'm' => array('typ'=>'any',    'val'=>NULL,      'inf'=>'<meta>   Meta data to store with entry or read from.'),
 			's' => array('typ'=>'file',   'val'=>NULL,      'inf'=>'<stub>   Select the stub file.'),
 			'x' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Regular expression for input files to exclude.'),
 		);
+		$hash_avail = Phar::getSupportedSignatures();
+		if (in_array('SHA-256', $hash_avail))
+		{
+			$phar_args['h']['select']['sha256'] = 'SHA256';
+		}
+		if (in_array('SHA-512', Phar::getSupportedSignatures()))
+		{
+			$phar_args['h']['select']['sha512'] = 'SHA512';
+		}
+		
 		$args = array();
 		foreach($phar_args as $lkey => $cfg)
 		{
