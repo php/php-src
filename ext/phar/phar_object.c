@@ -1056,6 +1056,7 @@ PHP_METHOD(PharFileInfo, getMetadata)
  */
 PHP_METHOD(PharFileInfo, setMetadata)
 {
+	char *error;
 	zval *metadata;
 	PHAR_ENTRY_OBJECT();
 
@@ -1070,6 +1071,12 @@ PHP_METHOD(PharFileInfo, setMetadata)
 
 	MAKE_STD_ZVAL(entry_obj->ent.entry->metadata);
 	ZVAL_ZVAL(entry_obj->ent.entry->metadata, metadata, 1, 0);
+
+	phar_flush(entry_obj->ent.entry->phar, 0, 0, &error TSRMLS_CC);
+	if (error) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		efree(error);
+	}
 }
 /* }}} */
 
@@ -1078,12 +1085,21 @@ PHP_METHOD(PharFileInfo, setMetadata)
  */
 PHP_METHOD(PharFileInfo, delMetadata)
 {
+	char *error;
 	PHAR_ENTRY_OBJECT();
 
 	if (entry_obj->ent.entry->metadata) {
 		zval_ptr_dtor(&entry_obj->ent.entry->metadata);
 		entry_obj->ent.entry->metadata = NULL;
-		RETURN_TRUE;
+
+		phar_flush(entry_obj->ent.entry->phar, 0, 0, &error TSRMLS_CC);
+		if (error) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			efree(error);
+			RETURN_FALSE;
+		} else {
+			RETURN_TRUE;
+		}
 	} else {
 		RETURN_FALSE;
 	}
