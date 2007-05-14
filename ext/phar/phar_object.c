@@ -1027,6 +1027,17 @@ PHP_METHOD(PharFileInfo, chmod)
 }
 /* }}} */
 
+/* {{{ proto int PharFileInfo::hasMetaData()
+ * Returns the metadata of the entry
+ */
+PHP_METHOD(PharFileInfo, hasMetadata)
+{
+	PHAR_ENTRY_OBJECT();
+	
+	RETURN_BOOL(entry_obj->ent.entry->metadata != NULL);
+}
+/* }}} */
+
 /* {{{ proto int PharFileInfo::getMetaData()
  * Returns the metadata of the entry
  */
@@ -1041,7 +1052,7 @@ PHP_METHOD(PharFileInfo, getMetadata)
 /* }}} */
 
 /* {{{ proto int PharFileInfo::setMetaData(mixed $metadata)
- * Returns the metadata of the entry
+ * Sets the metadata of the entry
  */
 PHP_METHOD(PharFileInfo, setMetadata)
 {
@@ -1059,6 +1070,23 @@ PHP_METHOD(PharFileInfo, setMetadata)
 
 	MAKE_STD_ZVAL(entry_obj->ent.entry->metadata);
 	ZVAL_ZVAL(entry_obj->ent.entry->metadata, metadata, 1, 0);
+}
+/* }}} */
+
+/* {{{ proto bool PharFileInfo::delMetaData()
+ * Deletes the metadata of the entry
+ */
+PHP_METHOD(PharFileInfo, delMetadata)
+{
+	PHAR_ENTRY_OBJECT();
+
+	if (entry_obj->ent.entry->metadata) {
+		zval_ptr_dtor(&entry_obj->ent.entry->metadata);
+		entry_obj->ent.entry->metadata = NULL;
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -1292,8 +1320,10 @@ zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, getCRC32,           NULL,                       0)
 	PHP_ME(PharFileInfo, isCRCChecked,       NULL,                       0)
 	PHP_ME(PharFileInfo, getPharFlags,       NULL,                       0)
+	PHP_ME(PharFileInfo, hasMetadata,        NULL,                       0)
 	PHP_ME(PharFileInfo, getMetadata,        NULL,                       0)
 	PHP_ME(PharFileInfo, setMetadata,        arginfo_entry_setMetadata,  0)
+	PHP_ME(PharFileInfo, delMetadata,        NULL,                       0)
 	PHP_ME(PharFileInfo, chmod,              arginfo_entry_setMetadata,  0)
 	{NULL, NULL, NULL}
 };
