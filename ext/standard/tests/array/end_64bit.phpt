@@ -223,16 +223,16 @@ resource(6) of type (stream)
 
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for end() in /home/tony/php-src_5_2/ext/standard/tests/array/end_64bit.php on line 102
+Warning: Wrong parameter count for end() in %s on line %d
 NULL
 
-Warning: Wrong parameter count for end() in /home/tony/php-src_5_2/ext/standard/tests/array/end_64bit.php on line 103
+Warning: Wrong parameter count for end() in %s on line %d
 NULL
 
-Warning: end(): Passed variable is not an array or object in /home/tony/php-src_5_2/ext/standard/tests/array/end_64bit.php on line 108
+Warning: end(): Passed variable is not an array or object in %s on line %d
 bool(false)
 
-Warning: end(): Passed variable is not an array or object in /home/tony/php-src_5_2/ext/standard/tests/array/end_64bit.php on line 109
+Warning: end(): Passed variable is not an array or object in %s on line %d
 bool(false)
 bool(false)
 Done
