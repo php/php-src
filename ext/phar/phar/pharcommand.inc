@@ -500,7 +500,7 @@ class PharCommand extends CLICommand
 		{
 			exit(1);
 		}
-		echo serialize($phar[$entry]->getMeta());
+		echo serialize($phar[$entry]->getMetadata());
 	}
 
 	function cli_cmd_inf_meta_del()
