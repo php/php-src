@@ -1,5 +1,7 @@
 --TEST--
 Test array_merge() function
+--INI--
+precision=14
 --FILE--
 <?php
 /* Prototype: array array_merge(array $array1 [, array $array2 [, array $...]]);
