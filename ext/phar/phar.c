@@ -2086,7 +2086,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	php_stream *file, *oldfile, *newfile, *stubfile;
 	php_stream_filter *filter;
 	php_serialize_data_t metadata_hash;
-	smart_str metadata_str = {0};
+	smart_str main_metadata_str = {0};
 
 	if (error) {
 		*error = NULL;
@@ -2205,13 +2205,13 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	zend_hash_apply(&archive->manifest, phar_flush_clean_deleted_apply TSRMLS_CC);
 
 	/* compress as necessary, calculate crcs, serialize meta-data, manifest size, and file sizes */
-	metadata_str.c = 0;
+	main_metadata_str.c = 0;
 	if (archive->metadata) {
 		PHP_VAR_SERIALIZE_INIT(metadata_hash);
-		php_var_serialize(&metadata_str, &archive->metadata, &metadata_hash TSRMLS_CC);
+		php_var_serialize(&main_metadata_str, &archive->metadata, &metadata_hash TSRMLS_CC);
 		PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
 	} else {
-		metadata_str.len = 0;
+		main_metadata_str.len = 0;
 	}
 	new_manifest_count = 0;
 	offset = 0;
@@ -2238,10 +2238,13 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			if (entry->metadata_str.c) {
 				smart_str_free(&entry->metadata_str);
 			}
+			entry->metadata_str.c = 0;
+			entry->metadata_str.len = 0;
 			PHP_VAR_SERIALIZE_INIT(metadata_hash);
 			php_var_serialize(&entry->metadata_str, &entry->metadata, &metadata_hash TSRMLS_CC);
 			PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
 		} else {
+			entry->metadata_str.c = 0;
 			entry->metadata_str.len = 0;
 		}
 
@@ -2349,7 +2352,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		archive->alias_len = 0;
 	}
 
-	manifest_len = offset + archive->alias_len + sizeof(manifest) + metadata_str.len;
+	manifest_len = offset + archive->alias_len + sizeof(manifest) + main_metadata_str.len;
 	phar_set_32(manifest, manifest_len);
 	phar_set_32(manifest+4, new_manifest_count);
 	*(manifest + 8) = (unsigned char) (((PHAR_API_VERSION) >> 8) & 0xFF);
@@ -2373,12 +2376,12 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	
 	archive->alias_len = restore_alias_len;
 	
-	metadata_str.c = 0;
-	phar_set_32(manifest, metadata_str.len);
-	if (metadata_str.len) {
+	//main_metadata_str.c = 0;
+	phar_set_32(manifest, main_metadata_str.len);
+	if (main_metadata_str.len) {
 		if (4 != php_stream_write(newfile, manifest, 4) ||
-		metadata_str.len != php_stream_write(newfile, metadata_str.c, metadata_str.len)) {
-			smart_str_free(&metadata_str);
+		main_metadata_str.len != php_stream_write(newfile, main_metadata_str.c, main_metadata_str.len)) {
+			smart_str_free(&main_metadata_str);
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -2391,7 +2394,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		} 
 	} else {
 		if (4 != php_stream_write(newfile, manifest, 4)) {
-			smart_str_free(&metadata_str);
+			smart_str_free(&main_metadata_str);
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -2403,7 +2406,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			return EOF;
 		}
 	}
-	smart_str_free(&metadata_str);
+	smart_str_free(&main_metadata_str);
 	
 	/* re-calculate the manifest location to simplify later code */
 	manifest_ftell = php_stream_tell(newfile);
