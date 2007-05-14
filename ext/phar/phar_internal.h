@@ -157,6 +157,7 @@ typedef struct _phar_entry_info {
 	int                      is_modified:1;
 	int                      is_deleted:1;
 	phar_archive_data        *phar;
+	smart_str                metadata_str;
 } phar_entry_info;
 
 /* information about a phar file (the archive itself) */
