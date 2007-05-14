@@ -1,3 +1,13 @@
+2007-05-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/openssl.c
+      ext/openssl/tests/bug41353.phpt
+      ext/openssl/tests/bug41353.phpt:
+      
+      Fixed bug #41353 (crash in openssl_pkcs12_read() on invalid input).
+
 2007-05-12  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_5_2)
