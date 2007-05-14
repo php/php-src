@@ -5,6 +5,7 @@ $notes = '
  * fix Phar::CanWrite() [Marcus]
  * add preliminary phar command (phar.php) [Marcus] 
  * add phar command (phar.phar) [Marcus]
+ * list all available compression methods using Phar::getSupportedCompression() [Marcus]
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
