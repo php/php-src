@@ -43,11 +43,12 @@ Version 1.1.0
  
 Version 1.2.0
 
- * add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
- * fix Phar::CanWrite() [Marcus]
- * add preliminary phar command (phar.php) [Marcus] 
- * add phar command (phar.phar) [Marcus]
- * list all available signature methods
+ X add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
+ X fix Phar::CanWrite() [Marcus]
+ X add preliminary phar command (phar.php) [Marcus] 
+ X add phar command (phar.phar) [Marcus]
+ X list all available compression methods using Phar::getSupportedCompression() [Marcus]
+
  * ability to have Phar object return file class as offsetGet() result
  * ability to store empty directories
  * [optional] Phar->rollback() to abort a write transaction

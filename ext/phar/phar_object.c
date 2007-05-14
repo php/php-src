@@ -413,6 +413,22 @@ PHP_METHOD(Phar, getSupportedSignatures)
 }
 /* }}} */
 
+/* {{{ proto array Phar::getSupportedCompression()
+ * Return array of supported comparession algorithms
+ */
+PHP_METHOD(Phar, getSupportedCompression)
+{
+	array_init(return_value);
+
+#if !HAVE_ZLIB
+	add_next_index_stringl(return_value, "GZ", 2, 1);
+#endif
+#if !HAVE_BZ2
+	add_next_index_stringl(return_value, "BZIP2", 5, 1);
+#endif
+}
+/* }}} */
+
 /* {{{ proto array|false Phar::getSignature()
  * Return signature or false
  */
@@ -1314,6 +1330,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, mapPhar,               arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getExtractList,        NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getSupportedSignatures,NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, getSupportedCompression,NULL,                     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
