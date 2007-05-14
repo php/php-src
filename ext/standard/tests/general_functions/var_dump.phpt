@@ -1,7 +1,12 @@
 --TEST--
 Test var_dump() function
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
+--INI--
+precision=14
 --FILE--
-
 <?php
 /* Prototype: void var_dump ( mixed $expression [, mixed $expression [, $...]] );
    Description: Displays structured information about one or more expressions that includes its type and value.
@@ -13,7 +18,7 @@ function check_vardump( $variables ) {
   $counter = 1;
   foreach( $variables as $variable ) {
     echo "-- Iteration $counter --\n";
-    var_dump( $variable );
+    var_dump($variable);
     $counter++;
   }
 }
@@ -36,7 +41,7 @@ $integers = array (
   017777777777,  // max posotive octal integer
   -020000000000  // min range of octal integer
 );		    
-/* calling check_vardump() to display contents of integer variables
+/* calling check_vardump() to display contents of integer variables 
    using var_dump() */
 check_vardump($integers);
 
@@ -75,7 +80,7 @@ $floats = array (
   020000000001,  // float value, beyond max positive int
   -020000000001  // float value, beyond max negative int 
 );
-/* calling check_vardump() to display contents of float variables
+/* calling check_vardump() to display contents of float variables 
    using var_dump() */
 check_vardump($floats);
 
@@ -96,7 +101,7 @@ $strings = array (
   "abcd\0efgh\0ijkl\x00mnop\x000qrst\00uvwx\0000yz",  // strings with octal NULL
   "1234\t\n5678\n\t9100\rabcda"  // strings with escape characters
 );
-/* calling check_vardump() to display contents of strings
+/* calling check_vardump() to display contents of strings 
    using var_dump() */
 check_vardump($strings);
 
@@ -128,7 +133,6 @@ $arrays = array (
   array(10.5, 5.6),
   array("string", "test"),
   array('string', 'test'),
-  $array1 = array(1,2,3,4, &$array1)  // recursive array
 );
 /* calling check_vardump() to display contents of an array
    using var_dump() */
@@ -283,7 +287,7 @@ echo "\n*** Testing error conditions ***\n";
 var_dump();
 
 /* closing resource handle used */
-closedir($dir_handle);
+closedir($dir_handle); 
 
 echo "Done\n";
 ?>
@@ -566,41 +570,6 @@ array(2) {
   string(6) "string"
   [1]=>
   string(4) "test"
-}
--- Iteration 16 --
-array(5) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(4)
-  [4]=>
-  &array(5) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-    [3]=>
-    int(4)
-    [4]=>
-    &array(5) {
-      [0]=>
-      int(1)
-      [1]=>
-      int(2)
-      [2]=>
-      int(3)
-      [3]=>
-      int(4)
-      [4]=>
-      *RECURSION*
-    }
-  }
 }
 
 *** Testing var_dump() on object variables ***
@@ -1337,7 +1306,7 @@ array(14) {
 	9100
 abcda"
 }
-array(16) {
+array(15) {
   [0]=>
   array(0) {
   }
@@ -1432,41 +1401,6 @@ array(16) {
     string(6) "string"
     [1]=>
     string(4) "test"
-  }
-  [15]=>
-  array(5) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-    [3]=>
-    int(4)
-    [4]=>
-    &array(5) {
-      [0]=>
-      int(1)
-      [1]=>
-      int(2)
-      [2]=>
-      int(3)
-      [3]=>
-      int(4)
-      [4]=>
-      &array(5) {
-        [0]=>
-        int(1)
-        [1]=>
-        int(2)
-        [2]=>
-        int(3)
-        [3]=>
-        int(4)
-        [4]=>
-        *RECURSION*
-      }
-    }
   }
 }
 array(4) {
@@ -1972,6 +1906,1626 @@ array(6) {
 New anonymous function:  lambda_1
 string(9) "2 * 3 = 6"
 string(9) " lambda_2"
+
+*** Testing error conditions ***
+
+Warning: Wrong parameter count for var_dump() in %s on line %d
+Done
+--UEXPECTF--
+*** Testing var_dump() on integer variables ***
+-- Iteration 1 --
+int(0)
+-- Iteration 2 --
+int(83)
+-- Iteration 3 --
+int(123000000)
+-- Iteration 4 --
+int(-83)
+-- Iteration 5 --
+int(-12300000)
+-- Iteration 6 --
+array(10) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+  [6]=>
+  int(7)
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+  [9]=>
+  int(10)
+}
+-- Iteration 7 --
+array(10) {
+  [0]=>
+  int(-1)
+  [1]=>
+  int(-2)
+  [2]=>
+  int(-3)
+  [3]=>
+  int(-4)
+  [4]=>
+  int(-5)
+  [5]=>
+  int(-6)
+  [6]=>
+  int(-7)
+  [7]=>
+  int(-8)
+  [8]=>
+  int(-9)
+  [9]=>
+  int(-10)
+}
+-- Iteration 8 --
+int(2147483647)
+-- Iteration 9 --
+float(2147483648)
+-- Iteration 10 --
+float(-2147483648)
+-- Iteration 11 --
+int(-2147483647)
+-- Iteration 12 --
+int(2147483647)
+-- Iteration 13 --
+float(-2147483648)
+-- Iteration 14 --
+int(2147483647)
+-- Iteration 15 --
+float(-2147483648)
+
+*** Testing var_dump() on float variables ***
+-- Iteration 1 --
+float(0)
+-- Iteration 2 --
+float(0)
+-- Iteration 3 --
+float(1.234)
+-- Iteration 4 --
+float(-1.234)
+-- Iteration 5 --
+float(-2)
+-- Iteration 6 --
+float(2)
+-- Iteration 7 --
+float(-0.5)
+-- Iteration 8 --
+float(0.567)
+-- Iteration 9 --
+float(-0.00067)
+-- Iteration 10 --
+float(-670)
+-- Iteration 11 --
+float(670)
+-- Iteration 12 --
+float(670)
+-- Iteration 13 --
+float(-0.00410003)
+-- Iteration 14 --
+float(-4100.03)
+-- Iteration 15 --
+float(0.004100003)
+-- Iteration 16 --
+float(4100.003)
+-- Iteration 17 --
+float(100000)
+-- Iteration 18 --
+float(-100000)
+-- Iteration 19 --
+float(1.0E-5)
+-- Iteration 20 --
+float(-1.0E-5)
+-- Iteration 21 --
+float(100000)
+-- Iteration 22 --
+float(-100000)
+-- Iteration 23 --
+float(100000)
+-- Iteration 24 --
+float(-100000)
+-- Iteration 25 --
+float(100000)
+-- Iteration 26 --
+float(-100000)
+-- Iteration 27 --
+float(1.0E-5)
+-- Iteration 28 --
+float(-1.0E-5)
+-- Iteration 29 --
+float(-2147483649)
+-- Iteration 30 --
+float(2147483649)
+-- Iteration 31 --
+float(2147483649)
+-- Iteration 32 --
+float(-2147483649)
+
+*** Testing var_dump() on string variables ***
+-- Iteration 1 --
+unicode(0) ""
+-- Iteration 2 --
+unicode(0) ""
+-- Iteration 3 --
+unicode(1) " "
+-- Iteration 4 --
+unicode(1) " "
+-- Iteration 5 --
+unicode(1) "0"
+-- Iteration 6 --
+unicode(1) " "
+-- Iteration 7 --
+unicode(2) "\0"
+-- Iteration 8 --
+unicode(1) "	"
+-- Iteration 9 --
+unicode(2) "\t"
+-- Iteration 10 --
+unicode(3) "PHP"
+-- Iteration 11 --
+unicode(3) "PHP"
+-- Iteration 12 --
+unicode(29) "abcd n1234 05678 00efgh\xijkl"
+-- Iteration 13 --
+unicode(34) "abcd efgh ijkl mnop 0qrst uvwx 0yz"
+-- Iteration 14 --
+unicode(22) "1234	
+5678
+	9100
+abcda"
+
+*** Testing var_dump() on boolean variables ***
+-- Iteration 1 --
+bool(true)
+-- Iteration 2 --
+bool(false)
+-- Iteration 3 --
+bool(true)
+-- Iteration 4 --
+bool(false)
+
+*** Testing var_dump() on array variables ***
+-- Iteration 1 --
+array(0) {
+}
+-- Iteration 2 --
+array(1) {
+  [0]=>
+  NULL
+}
+-- Iteration 3 --
+array(1) {
+  [0]=>
+  NULL
+}
+-- Iteration 4 --
+array(1) {
+  [0]=>
+  bool(true)
+}
+-- Iteration 5 --
+array(1) {
+  [0]=>
+  unicode(0) ""
+}
+-- Iteration 6 --
+array(1) {
+  [0]=>
+  unicode(0) ""
+}
+-- Iteration 7 --
+array(2) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+}
+-- Iteration 8 --
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    unicode(1) "a"
+    [1]=>
+    unicode(1) "b"
+  }
+}
+-- Iteration 9 --
+array(1) {
+  [1]=>
+  unicode(3) "One"
+}
+-- Iteration 10 --
+array(1) {
+  [u"test"]=>
+  unicode(8) "is_array"
+}
+-- Iteration 11 --
+array(1) {
+  [0]=>
+  int(0)
+}
+-- Iteration 12 --
+array(1) {
+  [0]=>
+  int(-1)
+}
+-- Iteration 13 --
+array(2) {
+  [0]=>
+  float(10.5)
+  [1]=>
+  float(5.6)
+}
+-- Iteration 14 --
+array(2) {
+  [0]=>
+  unicode(6) "string"
+  [1]=>
+  unicode(4) "test"
+}
+-- Iteration 15 --
+array(2) {
+  [0]=>
+  unicode(6) "string"
+  [1]=>
+  unicode(4) "test"
+}
+
+*** Testing var_dump() on object variables ***
+-- Iteration 1 --
+object(object_class)#%d (7) {
+  [u"value"]=>
+  int(50)
+  [u"public_var1"]=>
+  int(10)
+  [u"private_var1":u"object_class":private]=>
+  int(20)
+  [u"private_var2":u"object_class":private]=>
+  int(21)
+  [u"protected_var1":protected]=>
+  unicode(8) "string_1"
+  [u"protected_var2":protected]=>
+  unicode(8) "string_2"
+  [u"public_var2"]=>
+  int(11)
+}
+-- Iteration 2 --
+object(no_member_class)#%d (0) {
+}
+-- Iteration 3 --
+object(contains_object_class)#%d (7) {
+  [u"p"]=>
+  int(30)
+  [u"class_object1"]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [u"class_object2"]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [u"class_object3":u"contains_object_class":private]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [u"class_object4":protected]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [u"no_member_class_object"]=>
+  object(no_member_class)#%d (0) {
+  }
+  [u"class_object5"]=>
+  object(contains_object_class)#%d (7) {
+    [u"p"]=>
+    int(30)
+    [u"class_object1"]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object2"]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object3":u"contains_object_class":private]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object4":protected]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"no_member_class_object"]=>
+    object(no_member_class)#%d (0) {
+    }
+    [u"class_object5"]=>
+    *RECURSION*
+  }
+}
+-- Iteration 4 --
+object(contains_object_class)#%d (7) {
+  [u"p"]=>
+  int(30)
+  [u"class_object1"]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [u"class_object2"]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [u"class_object3":u"contains_object_class":private]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [u"class_object4":protected]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [u"no_member_class_object"]=>
+  object(no_member_class)#%d (0) {
+  }
+  [u"class_object5"]=>
+  object(contains_object_class)#%d (7) {
+    [u"p"]=>
+    int(30)
+    [u"class_object1"]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object2"]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object3":u"contains_object_class":private]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object4":protected]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"no_member_class_object"]=>
+    object(no_member_class)#%d (0) {
+    }
+    [u"class_object5"]=>
+    *RECURSION*
+  }
+}
+-- Iteration 5 --
+object(object_class)#%d (7) {
+  [u"value"]=>
+  int(50)
+  [u"public_var1"]=>
+  int(10)
+  [u"private_var1":u"object_class":private]=>
+  int(20)
+  [u"private_var2":u"object_class":private]=>
+  int(21)
+  [u"protected_var1":protected]=>
+  unicode(8) "string_1"
+  [u"protected_var2":protected]=>
+  unicode(8) "string_2"
+  [u"public_var2"]=>
+  int(11)
+}
+-- Iteration 6 --
+object(object_class)#%d (7) {
+  [u"value"]=>
+  int(50)
+  [u"public_var1"]=>
+  int(10)
+  [u"private_var1":u"object_class":private]=>
+  int(20)
+  [u"private_var2":u"object_class":private]=>
+  int(21)
+  [u"protected_var1":protected]=>
+  unicode(8) "string_1"
+  [u"protected_var2":protected]=>
+  unicode(8) "string_2"
+  [u"public_var2"]=>
+  int(11)
+}
+-- Iteration 7 --
+object(no_member_class)#%d (0) {
+}
+-- Iteration 8 --
+object(object_class)#%d (7) {
+  [u"value"]=>
+  int(50)
+  [u"public_var1"]=>
+  int(10)
+  [u"private_var1":u"object_class":private]=>
+  int(20)
+  [u"private_var2":u"object_class":private]=>
+  int(21)
+  [u"protected_var1":protected]=>
+  unicode(8) "string_1"
+  [u"protected_var2":protected]=>
+  unicode(8) "string_2"
+  [u"public_var2"]=>
+  int(11)
+}
+-- Iteration 9 --
+NULL
+
+** Testing var_dump() on objects having circular reference **
+object(object_class)#%d (8) {
+  [u"value"]=>
+  int(50)
+  [u"public_var1"]=>
+  int(10)
+  [u"private_var1":u"object_class":private]=>
+  int(20)
+  [u"private_var2":u"object_class":private]=>
+  int(21)
+  [u"protected_var1":protected]=>
+  unicode(8) "string_1"
+  [u"protected_var2":protected]=>
+  unicode(8) "string_2"
+  [u"public_var2"]=>
+  int(11)
+  [u"obj"]=>
+  &object(object_class)#%d (8) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+    [u"obj"]=>
+    &object(object_class)#%d (8) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+      [u"obj"]=>
+      &object(object_class)#%d (8) {
+        [u"value"]=>
+        int(50)
+        [u"public_var1"]=>
+        int(10)
+        [u"private_var1":u"object_class":private]=>
+        int(20)
+        [u"private_var2":u"object_class":private]=>
+        int(21)
+        [u"protected_var1":protected]=>
+        unicode(8) "string_1"
+        [u"protected_var2":protected]=>
+        unicode(8) "string_2"
+        [u"public_var2"]=>
+        int(11)
+        [u"obj"]=>
+        *RECURSION*
+      }
+    }
+  }
+}
+
+*** Testing var_dump() on resources ***
+-- Iteration 1 --
+resource(%d) of type (stream)
+-- Iteration 2 --
+resource(%d) of type (stream)
+
+*** Testing var_dump() on different combinations of scalar 
+            and non-scalar variables ***
+-- Iteration 1 --
+array(3) {
+  [0]=>
+  int(123)
+  [1]=>
+  float(-1.2345)
+  [2]=>
+  unicode(1) "a"
+}
+-- Iteration 2 --
+array(4) {
+  [0]=>
+  unicode(1) "d"
+  [1]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(3)
+    [2]=>
+    int(5)
+  }
+  [2]=>
+  bool(true)
+  [3]=>
+  NULL
+}
+-- Iteration 3 --
+array(4) {
+  [0]=>
+  object(no_member_class)#%d (0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  bool(false)
+  [3]=>
+  int(0)
+}
+-- Iteration 4 --
+array(6) {
+  [0]=>
+  float(0)
+  [1]=>
+  unicode(11) "Where am I?"
+  [2]=>
+  array(3) {
+    [0]=>
+    int(7)
+    [1]=>
+    int(8)
+    [2]=>
+    int(9)
+  }
+  [3]=>
+  bool(true)
+  [4]=>
+  unicode(1) "A"
+  [5]=>
+  int(987654321)
+}
+-- Iteration 5 --
+array(4) {
+  [0]=>
+  NULL
+  [1]=>
+  float(20000000000)
+  [2]=>
+  float(79.1)
+  [3]=>
+  float(4.599998)
+}
+-- Iteration 6 --
+array(4) {
+  [0]=>
+  unicode(27) "array(1,2,3,4)1.0000002TRUE"
+  [1]=>
+  NULL
+  [2]=>
+  float(4611333)
+  [3]=>
+  unicode(5) "/00\7"
+}
+
+*** Testing var_dump() on miscelleneous input arguments ***
+-- Iteration 1 --
+NULL
+-- Iteration 2 --
+NULL
+-- Iteration 3 --
+NULL
+-- Iteration 4 --
+NULL
+
+*** Testing var_dump() on multiple arguments ***
+array(15) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(83)
+  [2]=>
+  int(123000000)
+  [3]=>
+  int(-83)
+  [4]=>
+  int(-12300000)
+  [5]=>
+  array(10) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+    [3]=>
+    int(4)
+    [4]=>
+    int(5)
+    [5]=>
+    int(6)
+    [6]=>
+    int(7)
+    [7]=>
+    int(8)
+    [8]=>
+    int(9)
+    [9]=>
+    int(10)
+  }
+  [6]=>
+  array(10) {
+    [0]=>
+    int(-1)
+    [1]=>
+    int(-2)
+    [2]=>
+    int(-3)
+    [3]=>
+    int(-4)
+    [4]=>
+    int(-5)
+    [5]=>
+    int(-6)
+    [6]=>
+    int(-7)
+    [7]=>
+    int(-8)
+    [8]=>
+    int(-9)
+    [9]=>
+    int(-10)
+  }
+  [7]=>
+  int(2147483647)
+  [8]=>
+  float(2147483648)
+  [9]=>
+  float(-2147483648)
+  [10]=>
+  int(-2147483647)
+  [11]=>
+  int(2147483647)
+  [12]=>
+  float(-2147483648)
+  [13]=>
+  int(2147483647)
+  [14]=>
+  float(-2147483648)
+}
+array(32) {
+  [0]=>
+  float(0)
+  [1]=>
+  float(0)
+  [2]=>
+  float(1.234)
+  [3]=>
+  float(-1.234)
+  [4]=>
+  float(-2)
+  [5]=>
+  float(2)
+  [6]=>
+  float(-0.5)
+  [7]=>
+  float(0.567)
+  [8]=>
+  float(-0.00067)
+  [9]=>
+  float(-670)
+  [10]=>
+  float(670)
+  [11]=>
+  float(670)
+  [12]=>
+  float(-0.00410003)
+  [13]=>
+  float(-4100.03)
+  [14]=>
+  float(0.004100003)
+  [15]=>
+  float(4100.003)
+  [16]=>
+  float(100000)
+  [17]=>
+  float(-100000)
+  [18]=>
+  float(1.0E-5)
+  [19]=>
+  float(-1.0E-5)
+  [20]=>
+  float(100000)
+  [21]=>
+  float(-100000)
+  [22]=>
+  float(100000)
+  [23]=>
+  float(-100000)
+  [24]=>
+  float(100000)
+  [25]=>
+  float(-100000)
+  [26]=>
+  float(1.0E-5)
+  [27]=>
+  float(-1.0E-5)
+  [28]=>
+  float(-2147483649)
+  [29]=>
+  float(2147483649)
+  [30]=>
+  float(2147483649)
+  [31]=>
+  float(-2147483649)
+}
+array(14) {
+  [0]=>
+  unicode(0) ""
+  [1]=>
+  unicode(0) ""
+  [2]=>
+  unicode(1) " "
+  [3]=>
+  unicode(1) " "
+  [4]=>
+  unicode(1) "0"
+  [5]=>
+  unicode(1) " "
+  [6]=>
+  unicode(2) "\0"
+  [7]=>
+  unicode(1) "	"
+  [8]=>
+  unicode(2) "\t"
+  [9]=>
+  unicode(3) "PHP"
+  [10]=>
+  unicode(3) "PHP"
+  [11]=>
+  unicode(29) "abcd n1234 05678 00efgh\xijkl"
+  [12]=>
+  unicode(34) "abcd efgh ijkl mnop 0qrst uvwx 0yz"
+  [13]=>
+  unicode(22) "1234	
+5678
+	9100
+abcda"
+}
+array(15) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    NULL
+  }
+  [2]=>
+  array(1) {
+    [0]=>
+    NULL
+  }
+  [3]=>
+  array(1) {
+    [0]=>
+    bool(true)
+  }
+  [4]=>
+  array(1) {
+    [0]=>
+    unicode(0) ""
+  }
+  [5]=>
+  array(1) {
+    [0]=>
+    unicode(0) ""
+  }
+  [6]=>
+  array(2) {
+    [0]=>
+    array(0) {
+    }
+    [1]=>
+    array(0) {
+    }
+  }
+  [7]=>
+  array(2) {
+    [0]=>
+    array(2) {
+      [0]=>
+      int(1)
+      [1]=>
+      int(2)
+    }
+    [1]=>
+    array(2) {
+      [0]=>
+      unicode(1) "a"
+      [1]=>
+      unicode(1) "b"
+    }
+  }
+  [8]=>
+  array(1) {
+    [1]=>
+    unicode(3) "One"
+  }
+  [9]=>
+  array(1) {
+    [u"test"]=>
+    unicode(8) "is_array"
+  }
+  [10]=>
+  array(1) {
+    [0]=>
+    int(0)
+  }
+  [11]=>
+  array(1) {
+    [0]=>
+    int(-1)
+  }
+  [12]=>
+  array(2) {
+    [0]=>
+    float(10.5)
+    [1]=>
+    float(5.6)
+  }
+  [13]=>
+  array(2) {
+    [0]=>
+    unicode(6) "string"
+    [1]=>
+    unicode(4) "test"
+  }
+  [14]=>
+  array(2) {
+    [0]=>
+    unicode(6) "string"
+    [1]=>
+    unicode(4) "test"
+  }
+}
+array(4) {
+  [0]=>
+  bool(true)
+  [1]=>
+  bool(false)
+  [2]=>
+  bool(true)
+  [3]=>
+  bool(false)
+}
+array(2) {
+  [0]=>
+  resource(%d) of type (stream)
+  [1]=>
+  resource(%d) of type (stream)
+}
+array(9) {
+  [0]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [1]=>
+  object(no_member_class)#%d (0) {
+  }
+  [2]=>
+  object(contains_object_class)#%d (7) {
+    [u"p"]=>
+    int(30)
+    [u"class_object1"]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object2"]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object3":u"contains_object_class":private]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object4":protected]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"no_member_class_object"]=>
+    object(no_member_class)#%d (0) {
+    }
+    [u"class_object5"]=>
+    object(contains_object_class)#%d (7) {
+      [u"p"]=>
+      int(30)
+      [u"class_object1"]=>
+      object(object_class)#%d (7) {
+        [u"value"]=>
+        int(50)
+        [u"public_var1"]=>
+        int(10)
+        [u"private_var1":u"object_class":private]=>
+        int(20)
+        [u"private_var2":u"object_class":private]=>
+        int(21)
+        [u"protected_var1":protected]=>
+        unicode(8) "string_1"
+        [u"protected_var2":protected]=>
+        unicode(8) "string_2"
+        [u"public_var2"]=>
+        int(11)
+      }
+      [u"class_object2"]=>
+      object(object_class)#%d (7) {
+        [u"value"]=>
+        int(50)
+        [u"public_var1"]=>
+        int(10)
+        [u"private_var1":u"object_class":private]=>
+        int(20)
+        [u"private_var2":u"object_class":private]=>
+        int(21)
+        [u"protected_var1":protected]=>
+        unicode(8) "string_1"
+        [u"protected_var2":protected]=>
+        unicode(8) "string_2"
+        [u"public_var2"]=>
+        int(11)
+      }
+      [u"class_object3":u"contains_object_class":private]=>
+      object(object_class)#%d (7) {
+        [u"value"]=>
+        int(50)
+        [u"public_var1"]=>
+        int(10)
+        [u"private_var1":u"object_class":private]=>
+        int(20)
+        [u"private_var2":u"object_class":private]=>
+        int(21)
+        [u"protected_var1":protected]=>
+        unicode(8) "string_1"
+        [u"protected_var2":protected]=>
+        unicode(8) "string_2"
+        [u"public_var2"]=>
+        int(11)
+      }
+      [u"class_object4":protected]=>
+      object(object_class)#%d (7) {
+        [u"value"]=>
+        int(50)
+        [u"public_var1"]=>
+        int(10)
+        [u"private_var1":u"object_class":private]=>
+        int(20)
+        [u"private_var2":u"object_class":private]=>
+        int(21)
+        [u"protected_var1":protected]=>
+        unicode(8) "string_1"
+        [u"protected_var2":protected]=>
+        unicode(8) "string_2"
+        [u"public_var2"]=>
+        int(11)
+      }
+      [u"no_member_class_object"]=>
+      object(no_member_class)#%d (0) {
+      }
+      [u"class_object5"]=>
+      *RECURSION*
+    }
+  }
+  [3]=>
+  object(contains_object_class)#%d (7) {
+    [u"p"]=>
+    int(30)
+    [u"class_object1"]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object2"]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object3":u"contains_object_class":private]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"class_object4":protected]=>
+    object(object_class)#%d (7) {
+      [u"value"]=>
+      int(50)
+      [u"public_var1"]=>
+      int(10)
+      [u"private_var1":u"object_class":private]=>
+      int(20)
+      [u"private_var2":u"object_class":private]=>
+      int(21)
+      [u"protected_var1":protected]=>
+      unicode(8) "string_1"
+      [u"protected_var2":protected]=>
+      unicode(8) "string_2"
+      [u"public_var2"]=>
+      int(11)
+    }
+    [u"no_member_class_object"]=>
+    object(no_member_class)#%d (0) {
+    }
+    [u"class_object5"]=>
+    object(contains_object_class)#%d (7) {
+      [u"p"]=>
+      int(30)
+      [u"class_object1"]=>
+      object(object_class)#%d (7) {
+        [u"value"]=>
+        int(50)
+        [u"public_var1"]=>
+        int(10)
+        [u"private_var1":u"object_class":private]=>
+        int(20)
+        [u"private_var2":u"object_class":private]=>
+        int(21)
+        [u"protected_var1":protected]=>
+        unicode(8) "string_1"
+        [u"protected_var2":protected]=>
+        unicode(8) "string_2"
+        [u"public_var2"]=>
+        int(11)
+      }
+      [u"class_object2"]=>
+      object(object_class)#%d (7) {
+        [u"value"]=>
+        int(50)
+        [u"public_var1"]=>
+        int(10)
+        [u"private_var1":u"object_class":private]=>
+        int(20)
+        [u"private_var2":u"object_class":private]=>
+        int(21)
+        [u"protected_var1":protected]=>
+        unicode(8) "string_1"
+        [u"protected_var2":protected]=>
+        unicode(8) "string_2"
+        [u"public_var2"]=>
+        int(11)
+      }
+      [u"class_object3":u"contains_object_class":private]=>
+      object(object_class)#%d (7) {
+        [u"value"]=>
+        int(50)
+        [u"public_var1"]=>
+        int(10)
+        [u"private_var1":u"object_class":private]=>
+        int(20)
+        [u"private_var2":u"object_class":private]=>
+        int(21)
+        [u"protected_var1":protected]=>
+        unicode(8) "string_1"
+        [u"protected_var2":protected]=>
+        unicode(8) "string_2"
+        [u"public_var2"]=>
+        int(11)
+      }
+      [u"class_object4":protected]=>
+      object(object_class)#%d (7) {
+        [u"value"]=>
+        int(50)
+        [u"public_var1"]=>
+        int(10)
+        [u"private_var1":u"object_class":private]=>
+        int(20)
+        [u"private_var2":u"object_class":private]=>
+        int(21)
+        [u"protected_var1":protected]=>
+        unicode(8) "string_1"
+        [u"protected_var2":protected]=>
+        unicode(8) "string_2"
+        [u"public_var2"]=>
+        int(11)
+      }
+      [u"no_member_class_object"]=>
+      object(no_member_class)#%d (0) {
+      }
+      [u"class_object5"]=>
+      *RECURSION*
+    }
+  }
+  [4]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [5]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [6]=>
+  object(no_member_class)#%d (0) {
+  }
+  [7]=>
+  object(object_class)#%d (7) {
+    [u"value"]=>
+    int(50)
+    [u"public_var1"]=>
+    int(10)
+    [u"private_var1":u"object_class":private]=>
+    int(20)
+    [u"private_var2":u"object_class":private]=>
+    int(21)
+    [u"protected_var1":protected]=>
+    unicode(8) "string_1"
+    [u"protected_var2":protected]=>
+    unicode(8) "string_2"
+    [u"public_var2"]=>
+    int(11)
+  }
+  [8]=>
+  NULL
+}
+array(4) {
+  [0]=>
+  NULL
+  [1]=>
+  NULL
+  [2]=>
+  NULL
+  [3]=>
+  NULL
+}
+array(6) {
+  [0]=>
+  array(3) {
+    [0]=>
+    int(123)
+    [1]=>
+    float(-1.2345)
+    [2]=>
+    unicode(1) "a"
+  }
+  [1]=>
+  array(4) {
+    [0]=>
+    unicode(1) "d"
+    [1]=>
+    array(3) {
+      [0]=>
+      int(1)
+      [1]=>
+      int(3)
+      [2]=>
+      int(5)
+    }
+    [2]=>
+    bool(true)
+    [3]=>
+    NULL
+  }
+  [2]=>
+  array(4) {
+    [0]=>
+    object(no_member_class)#%d (0) {
+    }
+    [1]=>
+    array(0) {
+    }
+    [2]=>
+    bool(false)
+    [3]=>
+    int(0)
+  }
+  [3]=>
+  array(6) {
+    [0]=>
+    float(0)
+    [1]=>
+    unicode(11) "Where am I?"
+    [2]=>
+    array(3) {
+      [0]=>
+      int(7)
+      [1]=>
+      int(8)
+      [2]=>
+      int(9)
+    }
+    [3]=>
+    bool(true)
+    [4]=>
+    unicode(1) "A"
+    [5]=>
+    int(987654321)
+  }
+  [4]=>
+  array(4) {
+    [0]=>
+    NULL
+    [1]=>
+    float(20000000000)
+    [2]=>
+    float(79.1)
+    [3]=>
+    float(4.599998)
+  }
+  [5]=>
+  array(4) {
+    [0]=>
+    unicode(27) "array(1,2,3,4)1.0000002TRUE"
+    [1]=>
+    NULL
+    [2]=>
+    float(4611333)
+    [3]=>
+    unicode(5) "/00\7"
+  }
+}
+
+*** Testing var_dump() on anonymous functions ***
+New anonymous function:  lambda_1
+unicode(9) "2 * 3 = 6"
+unicode(9) " lambda_2"
 
 *** Testing error conditions ***
 

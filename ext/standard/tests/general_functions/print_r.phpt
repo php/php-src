@@ -1,7 +1,12 @@
 --TEST--
 Test print_r() function
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
+--INI--
+precision=14
 --FILE--
-
 <?php
 /* Prototype: bool print_r ( mixed $expression [, bool $return] );
    Description: Prints human-readable information about a variable
@@ -135,7 +140,6 @@ $arrays = array (
   array(10.5, 5.6),
   array("string", "test"),
   array('string', 'test'),
-  $array1 = array(1,2,3,4, &$array1)  // recursive array
 );
 /* calling check_printr() to display contents of $arrays */
 check_printr($arrays);
@@ -955,61 +959,6 @@ Array
     [1] => test
 )
 
--- Iteration 16 --
-Array
-(
-    [0] => 1
-    [1] => 2
-    [2] => 3
-    [3] => 4
-    [4] => Array
-        (
-            [0] => 1
-            [1] => 2
-            [2] => 3
-            [3] => 4
-            [4] => Array
- *RECURSION*
-        )
-
-)
-
-Array
-(
-    [0] => 1
-    [1] => 2
-    [2] => 3
-    [3] => 4
-    [4] => Array
-        (
-            [0] => 1
-            [1] => 2
-            [2] => 3
-            [3] => 4
-            [4] => Array
- *RECURSION*
-        )
-
-)
-
-Array
-(
-    [0] => 1
-    [1] => 2
-    [2] => 3
-    [3] => 4
-    [4] => Array
-        (
-            [0] => 1
-            [1] => 2
-            [2] => 3
-            [3] => 4
-            [4] => Array
- *RECURSION*
-        )
-
-)
-
 *** Testing print_r() on object variables ***
 
 -- Iteration 1 --
@@ -1538,13 +1487,13 @@ object_class Object
 *** Testing print_r() on resources ***
 
 -- Iteration 1 --
-Resource id #%d
-Resource id #%d
-Resource id #%d
+Resource id #5
+Resource id #5
+Resource id #5
 -- Iteration 2 --
-Resource id #%d
-Resource id #%d
-Resource id #%d
+Resource id #6
+Resource id #6
+Resource id #6
 *** Testing print_r() on different combinations of scalar 
             and non-scalar variables ***
 
