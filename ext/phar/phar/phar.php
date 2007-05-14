@@ -18,6 +18,12 @@ foreach(array("SPL", "Reflection", "Phar") as $ext)
 	}
 }
 
+if (version_compare(phpversion('phar'), '1.2.0', '<'))
+{
+	echo "Phar extension version 1.2.0 or later requireed.\n";
+	exit(1);
+}
+
 function command_include($file)
 {
 	$file = 'phar://' . __FILE__ . '/' . $file;
