@@ -1,7 +1,12 @@
 --TEST--
 Test var_dump() function
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
+--INI--
+precision=14
 --FILE--
-
 <?php
 /* Prototype: void var_dump ( mixed $expression [, mixed $expression [, $...]] );
    Description: Displays structured information about one or more expressions that includes its type and value.
@@ -128,7 +133,6 @@ $arrays = array (
   array(10.5, 5.6),
   array("string", "test"),
   array('string', 'test'),
-  $array1 = array(1,2,3,4, &$array1)  // recursive array
 );
 /* calling check_vardump() to display contents of an array
    using var_dump() */
@@ -566,41 +570,6 @@ array(2) {
   string(6) "string"
   [1]=>
   string(4) "test"
-}
--- Iteration 16 --
-array(5) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(4)
-  [4]=>
-  &array(5) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-    [3]=>
-    int(4)
-    [4]=>
-    &array(5) {
-      [0]=>
-      int(1)
-      [1]=>
-      int(2)
-      [2]=>
-      int(3)
-      [3]=>
-      int(4)
-      [4]=>
-      *RECURSION*
-    }
-  }
 }
 
 *** Testing var_dump() on object variables ***
@@ -1337,7 +1306,7 @@ array(14) {
 	9100
 abcda"
 }
-array(16) {
+array(15) {
   [0]=>
   array(0) {
   }
@@ -1432,41 +1401,6 @@ array(16) {
     string(6) "string"
     [1]=>
     string(4) "test"
-  }
-  [15]=>
-  array(5) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-    [3]=>
-    int(4)
-    [4]=>
-    &array(5) {
-      [0]=>
-      int(1)
-      [1]=>
-      int(2)
-      [2]=>
-      int(3)
-      [3]=>
-      int(4)
-      [4]=>
-      &array(5) {
-        [0]=>
-        int(1)
-        [1]=>
-        int(2)
-        [2]=>
-        int(3)
-        [3]=>
-        int(4)
-        [4]=>
-        *RECURSION*
-      }
-    }
   }
 }
 array(4) {

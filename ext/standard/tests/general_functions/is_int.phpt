@@ -1,5 +1,9 @@
 --TEST--
 Test is_int() & it's FALIASes: is_long() & is_integer() functions
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
 --FILE--
 <?php
 /* Prototype: bool is_int ( mixed $var );

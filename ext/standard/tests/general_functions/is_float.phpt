@@ -1,5 +1,9 @@
 --TEST--
 Test is_float() & it's FALIASes: is_double() & is_real() functions
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
 --FILE--
 <?php
 /* Prototype: bool is_float ( mixed $var );
