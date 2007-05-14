@@ -110,11 +110,10 @@ int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 	if (wholetext != NULL) {
 		ZVAL_XML_STRING(*retval, wholetext, ZSTR_DUPLICATE);
+		xmlFree(wholetext);
 	} else {
 		ZVAL_EMPTY_STRING(*retval);
 	}
-
-	xmlFree(wholetext);
 
 	return SUCCESS;
 }
