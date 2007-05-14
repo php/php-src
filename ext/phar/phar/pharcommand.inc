@@ -31,8 +31,11 @@ class PharCommand extends CLICommand
 		$phar_args = array(
 			'a' => array('typ'=>'alias',  'val'=>'newphar', 'inf'=>'<alias>  Provide an alias name for the phar file.'),
 			'c' => array('typ'=>'select', 'val'=>NULL,      'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression')),
+			'e' => array('typ'=>'entry',  'val'=>NULL,      'inf'=>'<entry>  Name of entry to work on (must include PHAR internal directory name if any).'),
 			'f' => array('typ'=>$phartyp, 'val'=>NULL,      'inf'=>'<file>   Specifies the phar file to work on.'),
+			'h' => array('typ'=>'select', 'val'=>NULL,      'inf'=>'<method> Selects the hash algorithmn.', 'select'=>array('md5'=>'MD5','sha1'=>'SHA1','sha256'=>'SHA256','sha512'=>'SHA512')),
 			'i' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Specifies a regular expression for input files.'),
+			'm' => array('typ'=>'any',    'val'=>NULL,      'inf'=>'<meta>   Meta data to store with entry or read from.'),
 			's' => array('typ'=>'file',   'val'=>NULL,      'inf'=>'<stub>   Select the stub file.'),
 			'x' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Regular expression for input files to exclude.'),
 		);
@@ -110,6 +113,12 @@ class PharCommand extends CLICommand
 		}
 	}
 
+	static function cli_arg_typ_entry($arg)
+	{
+		// no further check atm, maybe check for no '/' at beginning
+		return $arg;
+	}
+
 	static function cli_cmd_inf_pack()
 	{
 		return "Pack files into a PHAR archive.\n"
@@ -119,7 +128,7 @@ class PharCommand extends CLICommand
 
 	static function cli_cmd_arg_pack()
 	{
-		$args = self::phar_args('AcFisx', 'pharnew');
+		$args = self::phar_args('AcFhisx', 'pharnew');
 		$args[''] = array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories. If -i is in use then ONLY files and matching thegiven regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.');
 		return $args;
 	}
@@ -137,10 +146,11 @@ class PharCommand extends CLICommand
 			exit(1);
 		}
 
-		$archive = $this->args['f']['val'];
 		$alias   = $this->args['a']['val'];
-		$stub    = $this->args['s']['val'];
+		$archive = $this->args['f']['val'];
+		$hash    = $this->args['h']['val'];
 		$regex   = $this->args['i']['val'];
+		$stub    = $this->args['s']['val'];
 		$invregex= $this->args['x']['val'];
 		$input   = $this->args['']['val'];
 
@@ -166,8 +176,6 @@ class PharCommand extends CLICommand
 			}
 		}
 
-		$phar->stopBuffering();
-
 		switch($this->args['c']['val'])
 		{
 		case 'gz':
@@ -179,8 +187,16 @@ class PharCommand extends CLICommand
 			$phar->compressAllFilesBZIP2();
 			break;
 		default:
+			$phar->uncompressAllFiles();
 			break;
 		}
+
+		if ($hash)
+		{		
+			$phar->setSignatureAlgorithm($hash);
+		}
+
+		$phar->stopBuffering();
 		exit(0);
 	}
 
@@ -287,9 +303,9 @@ class PharCommand extends CLICommand
 		return $args;
 	}
 
-	function cli_cmd_run_extract($args)
+	function cli_cmd_run_extract()
 	{
-		$dir = $args['']['val'];
+		$dir = $this->args['']['val'];
 		if (is_array($dir))
 		{
 			if (count($dir) != 1)
@@ -337,40 +353,234 @@ class PharCommand extends CLICommand
 		}
 	}
 
-	function cli_cmd_inf_setstub()
+	function cli_cmd_inf_stub_set()
 	{
-		return "Set the stub of a PHAR file.\n";
+		return "Set the stub of a PHAR file. "
+		. "If no input file is specified as stub then stdin is being used.";
 	}
 	
-	function cli_cmd_arg_setstub()
+	function cli_cmd_arg_stub_set()
 	{
-		return self::phar_args('Fs', 'phar');
+		$args = self::phar_args('Fs', 'phar');
+		$args['s']['val'] = 'php://stdin';
+		return $args;
 	}
 	
-	function cli_cmd_run_setstub()
+	function cli_cmd_run_stub_set($args)
 	{
-		$phar = $args['f']['val'];
+		$phar = $this->args['f']['val'];
 		$stub = $this->args['s']['val'];
 	
 		$phar->setStub(file_get_contents($stub));
 	}
 	
-	function cli_cmd_inf_getstub()
+	function cli_cmd_inf_stub_get()
 	{
-		return "Get the stub of a PHAR file.\n";
+		return "Get the stub of a PHAR file. "
+		. "If no output file is specified as stub then stdout is being used.";
 	}
 
-	function cli_cmd_arg_getstub()
+	function cli_cmd_arg_stub_get()
 	{
-		return self::phar_args('Fs', 'phar');
+		$args = self::phar_args('Fs', 'phar');
+		$args['s']['val'] = 'php://stdin';
+		return $args;
 	}
 
-	function cli_cmd_run_getstub()
+	function cli_cmd_run_stub_get($args)
 	{
-		$phar = $args['f']['val'];
+		$phar = $this->args['f']['val'];
 		$stub = $this->args['s']['val'];
 
 		file_put_contents($stub, $phar->getStub());
+	}
+
+	function cli_cmd_inf_compress()
+	{
+		return "Compress or uncompress all files.";
+	}
+
+	function cli_cmd_arg_compress()
+	{
+		return self::phar_args('FC', 'phar');
+	}
+
+	function cli_cmd_run_compress()
+	{
+		$phar = $this->args['f']['val'];
+
+		switch($this->args['c']['val'])
+		{
+		case 'gz':
+		case 'gzip':
+			$phar->compressAllFilesGZ();
+			break;
+		case 'bz2':
+		case 'bzip2':
+			$phar->compressAllFilesBZIP2();
+			break;
+		default:
+			$phar->uncompressAllFiles();
+			break;
+		}
+	}
+
+	function cli_cmd_inf_sign()
+	{
+		return "Set signature hash algorithm.";
+	}
+
+	function cli_cmd_arg_sign()
+	{
+		return self::phar_args('FH', 'phar');
+	}
+
+	function cli_cmd_run_sign()
+	{
+		$phar = $this->args['f']['val'];
+		$hash = $this->args['h']['val'];
+		
+		$phar->setSignatureAlgorithm($hash);
+	}
+
+	function cli_cmd_inf_meta_set()
+	{
+		return "Set meta data of a PHAR entry using serialized input. "
+		. "If no input file is specified for meta data then stdin is being used.";
+	}
+
+	function cli_cmd_arg_meta_set()
+	{
+		$args = self::phar_args('FEm', 'phar');
+		$args['m']['val'] = 'php://stdin';
+		return $args;
+	}
+
+	function cli_cmd_run_meta_set()
+	{
+		$phar  = $this->args['f']['val'];
+		$entry = $this->args['e']['val'];
+		$meta  = $this->args['m']['val'];
+
+		$phar->startBuffering();
+		$phar[$entry]->setMetadata(unserialize($meta));
+		$phar->stopBuffering();
+	}
+
+	function cli_cmd_inf_meta_get()
+	{
+		return "Get meta information of a PHAR entry in serialized from. "
+		. "If no output file is specified for meta data then stdout is being used.";
+	}
+
+	function cli_cmd_arg_meta_get()
+	{
+		$args = self::phar_args('FEm', 'phar');
+		$args['m']['val'] = 'php://stdout';
+		return $args;
+	}
+
+	function cli_cmd_run_meta_get()
+	{
+		$phar  = $this->args['f']['val'];
+		$entry = $this->args['e']['val'];
+		$meta  = $this->args['m']['val'];
+
+		$version = phpversion('phar');
+		$meta    = version_compare($version, '1.2.0', '>=');
+
+		if (($meta && !$phar[$entry]->hasMetadata())
+		|| (!$meta && !$phar[$entry]->getMetadata()))
+		{
+			exit(1);
+		}
+		echo serialize($phar[$entry]->getMeta());
+	}
+
+	function cli_cmd_inf_meta_del()
+	{
+		return "Delete meta information of a PHAR entry.";
+	}
+
+	function cli_cmd_arg_meta_del()
+	{
+		return self::phar_args('FE', 'phar');
+	}
+
+	function cli_cmd_run_meta_del()
+	{
+		$phar  = $this->args['f']['val'];
+		$entry = $this->args['e']['val'];
+
+		exit($phar[$entry]->delMetadata() ? 0 : 1);
+	}
+
+	function cli_cmd_inf_info()
+	{
+		return "Get information about a PHAR package.";
+	}
+
+	function cli_cmd_arg_info()
+	{
+		return self::phar_args('F', 'phar');		
+	}
+
+	function cli_cmd_run_info($args)
+	{
+		$phar  = $this->args['f']['val'];
+
+		$hash  = $phar->getsignature();
+
+		if (!$hash)
+		{
+			echo "Hash: NONE\n";
+		}
+		else
+		{
+			echo "Hash Type: ${hash['hash_type']}\n";
+			echo "Hash: ${hash['hash']}\n";
+		}
+
+		$csize   = 0;
+		$usize   = 0;
+		$count   = 0;
+		$ccount  = 0;
+		$ucount  = 0;
+		$mcount  = 0;
+		$version = phpversion('phar');
+		$meta    = version_compare($version, '1.2.0', '>=');
+
+		foreach(new RecursiveIteratorIterator($phar) as $ent)
+		{
+			$count++;
+			if ($ent->isCompressed())
+			{
+				$ccount++;
+			}
+			else
+			{
+				$ucount++;
+			}
+			if ($meta)
+			{
+				if ($ent->hasMetadata())
+				{
+					$mcount++;
+				}
+			}
+			else{
+				$mdata = $ent->getMetadata();
+				if (isset($mdata))
+				{
+					$mcount++;
+				}
+			}
+		}
+
+		echo "Entries: $count\n";
+		echo "Compressed: $ccount\n";
+		echo "Uncompressed: $ucount\n";
+		echo "Metadata: $mcount\n";
 	}
 }
 
