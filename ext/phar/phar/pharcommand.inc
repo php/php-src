@@ -150,7 +150,7 @@ class PharCommand extends CLICommand
 			echo "Creating phar files is disabled by ini setting 'phar.readonly'.\n";
 			exit(1);
 		}
-		if (Phar::canWrite() == version_compare(phpversion('phar'), '1.2', '<'))
+		if (Phar::canWrite())
 		{
 			echo "Creating phar files is disabled, Phar::canWrite() returned false.\n";
 			exit(1);
@@ -496,11 +496,7 @@ class PharCommand extends CLICommand
 		$entry = $this->args['e']['val'];
 		$meta  = $this->args['m']['val'];
 
-		$version = phpversion('phar');
-		$meta    = version_compare($version, '1.2.0', '>=');
-
-		if (($meta && !$phar[$entry]->hasMetadata())
-		|| (!$meta && !$phar[$entry]->getMetadata()))
+		if (!$phar[$entry]->hasMetadata())
 		{
 			exit(1);
 		}
@@ -557,8 +553,6 @@ class PharCommand extends CLICommand
 		$ccount  = 0;
 		$ucount  = 0;
 		$mcount  = 0;
-		$version = phpversion('phar');
-		$meta    = version_compare($version, '1.2.0', '>=');
 
 		foreach(new RecursiveIteratorIterator($phar) as $ent)
 		{
@@ -571,19 +565,9 @@ class PharCommand extends CLICommand
 			{
 				$ucount++;
 			}
-			if ($meta)
+			if ($ent->hasMetadata())
 			{
-				if ($ent->hasMetadata())
-				{
-					$mcount++;
-				}
-			}
-			else{
-				$mdata = $ent->getMetadata();
-				if (isset($mdata))
-				{
-					$mcount++;
-				}
+				$mcount++;
 			}
 		}
 
