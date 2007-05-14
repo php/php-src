@@ -1,6 +1,7 @@
 <?php
 
 $notes = '
+ * add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
  * fix Phar::CanWrite() [Marcus]
  * add preliminary phar command (phar.php) [Marcus] 
  * add phar command (phar.phar) [Marcus]
