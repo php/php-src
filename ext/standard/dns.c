@@ -265,8 +265,7 @@ PHP_FUNCTION(dns_check_record)
 			type = T_MX;
 			convert_to_string_ex(arg1);
 			
-			if (Z_STRLEN_PP(arg1) == 0)
-			{
+			if (Z_STRLEN_PP(arg1) == 0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Host cannot be empty");
 				RETURN_FALSE;
 			}
@@ -279,8 +278,7 @@ PHP_FUNCTION(dns_check_record)
 			convert_to_string_ex(arg1);
 			convert_to_string_ex(arg2);
 
-			if (Z_STRLEN_PP(arg1) == 0 || Z_STRLEN_PP(arg2) == 0)
-			{
+			if (Z_STRLEN_PP(arg1) == 0 || Z_STRLEN_PP(arg2) == 0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Host and type cannot be empty");
 				RETURN_FALSE;
 			}
