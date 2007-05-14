@@ -91,6 +91,9 @@ PHP_FUNCTION(mysql_stat);
 PHP_FUNCTION(mysql_thread_id);
 PHP_FUNCTION(mysql_client_encoding);
 PHP_FUNCTION(mysql_ping);
+#if (MYSQL_VERSION_ID >= 40113 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID >= 50007
+PHP_FUNCTION(mysql_set_charset);
+#endif
 
 ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long default_link;

@@ -95,6 +95,10 @@ static int le_result, le_link, le_plink;
 #define MYSQL_HAS_YEAR
 #endif
 
+#if (MYSQL_VERSION_ID >= 40113 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID >= 50007
+#define MYSQL_HAS_SET_CHARSET
+#endif
+
 #define MYSQL_ASSOC		1<<0
 #define MYSQL_NUM		1<<1
 #define MYSQL_BOTH		(MYSQL_ASSOC|MYSQL_NUM)
@@ -175,7 +179,9 @@ zend_function_entry mysql_functions[] = {
 #endif
 
 	PHP_FE(mysql_info,		            				NULL)
-	 
+#ifdef MYSQL_HAS_SET_CHARSET
+	PHP_FE(mysql_set_charset,							NULL)
+#endif
 	/* for downwards compatability */
 	PHP_FALIAS(mysql,				mysql_db_query,		NULL)
 	PHP_FALIAS(mysql_fieldname,		mysql_field_name,	NULL)
@@ -611,7 +617,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			if (UG(unicode)) {
-#if MYSQL_VERSION_ID > 40112
+#ifdef MYSQL_HAS_SET_CHARSET
 				mysql_set_character_set(&mysql->conn, "utf8");
 #else
 				char *encoding = (char *)mysql_character_set_name(&mysql->conn);
@@ -1047,6 +1053,42 @@ PHP_FUNCTION(mysql_client_encoding)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	RETURN_UTF8_STRING((char *)mysql_character_set_name(&mysql->conn), ZSTR_DUPLICATE);
+}
+/* }}} */
+#endif
+
+#ifdef MYSQL_HAS_SET_CHARSET
+/* {{{ proto bool mysql_set_charset(string csname [, int link_identifier]) U
+   sets client character set */
+PHP_FUNCTION(mysql_set_charset)
+{
+	zval *mysql_link = NULL;
+	char *csname;
+	int id = -1, csname_len;
+	php_mysql_conn *mysql;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|r", &csname, &csname_len, UG(utf8_conv), &mysql_link) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (ZEND_NUM_ARGS() == 1) {
+		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		CHECK_LINK(id);
+	}
+
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
+
+	/* Only allow the use of this function with unicode.semantics=On */
+	if (UG(unicode) && (csname_len != 4  || strncasecmp(csname, "utf8", 4))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Character set %s is not supported when running PHP with unicode.semantics=On.", csname);
+		RETURN_FALSE;
+	}
+
+	if (!mysql_set_character_set(&mysql->conn, csname)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 #endif
