@@ -650,6 +650,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
 					case IS_STRING:
+					case IS_UNICODE:
 					case IS_LONG:
 					case IS_DOUBLE:
 					case IS_BOOL:
