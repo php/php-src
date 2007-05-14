@@ -1,5 +1,7 @@
 --TEST--
 Test strval() function
+--INI--
+precision=14
 --FILE--
 <?php
 /* Prototype: string strval ( mixed $var );
