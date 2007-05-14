@@ -2376,7 +2376,6 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	
 	archive->alias_len = restore_alias_len;
 	
-	//main_metadata_str.c = 0;
 	phar_set_32(manifest, main_metadata_str.len);
 	if (main_metadata_str.len) {
 		if (4 != php_stream_write(newfile, manifest, 4) ||
