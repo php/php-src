@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.3
+- Added function mysql_set_charset(). Allows connection encoding to be altered
+  at run time. (Scott)
 - Allow SOAP extension's handler() to work even when
   always_populate_raw_post_data is off. (Ilia)
 - Fixed ext/filter Email Validation Vulnerability (MOPB-24 by Stefan Esser)
