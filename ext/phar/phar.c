@@ -2231,6 +2231,15 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		++new_manifest_count;
 		offset += 4 + entry->filename_len + sizeof(entry_buffer);
 
+		metadata_str.c = 0;
+		if (entry->metadata) {
+			PHP_VAR_SERIALIZE_INIT(metadata_hash);
+			php_var_serialize(&metadata_str, &entry->metadata, &metadata_hash TSRMLS_CC);
+			PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
+			offset += metadata_str.len;
+			smart_str_free(&metadata_str);
+		}
+
 		/* compress and rehash as necessary */
 		if (oldfile && !entry->is_modified) {
 			continue;
