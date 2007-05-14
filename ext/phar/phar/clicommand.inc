@@ -146,6 +146,7 @@ abstract class CLICommand
 				{
 					$what = substr($m->name, $l+strlen($sub)+1);
 					$func = $prefix . $sub . '_' . $what;
+					$what = str_replace('_', '-', $what);
 					if ($r->hasMethod($func))
 					{
 						if (!isset($a[$what]))
@@ -316,25 +317,52 @@ abstract class CLICommand
 		}
 	}
 
+	function cli_cmd_arg_help()
+	{
+		return array('' => array('typ'=>'any','val'=>NULL,'inf'=>'Optional command to retrieve help for.'));
+	}
+
 	function cli_cmd_run_help()
 	{
-		$argv = $this->argv;
-
-		echo "
-$argv[0] <command> [options]
-
-Commands:
-
-
-";
-		$l = 0;
-		ksort($this->cmds);
-		foreach($this->cmds as $name => $funcs)
+		$argv  = $this->argv;
+		$which = $this->args['']['val'];
+		if (isset($which))
 		{
-			$l = max($l, strlen($name));
+			if (count($which) != 1)
+			{
+				echo "More than one command given.\n";
+				exit(1);
+			}
+			$which = $which[0];
+			if (!array_key_exists($which, $this->cmds))
+			{
+				echo "Unknown command, cannot retrieve help.\n";
+				exit(1);
+			}
+			$l = strlen($which);
+			$cmds = array($which => $this->cmds[$which]);
 		}
-		$sp = str_repeat(' ', $l+2);
-		foreach($this->cmds as $name => $funcs)
+		else
+		{
+			echo "\n$argv[0] <command> [options]\n\n";
+			$l = 0;
+			ksort($this->cmds);
+			foreach($this->cmds as $name => $funcs)
+			{
+				$l = max($l, strlen($name));
+			}
+			$inf = "Commands:";
+			$lst = "";
+			$ind = strlen($inf) + 1;
+			foreach($this->cmds as $name => $funcs)
+			{
+				$lst .= ' ' . $name;
+			}
+			echo $this->cli_wordwrap($inf.$lst, $ind, str_repeat(' ', $ind)) . "\n\n";
+			$cmds = $this->cmds;
+		}
+		$sp = str_repeat(' ', $l + 2);
+		foreach($cmds as $name => $funcs)
 		{
 			$inf = $name . substr($sp, strlen($name));
 			if (isset($funcs['inf']))
