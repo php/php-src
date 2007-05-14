@@ -1068,7 +1068,7 @@ PHP_FUNCTION(mysql_set_charset)
 	php_mysql_conn *mysql;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|r", &csname, &csname_len, UG(utf8_conv), &mysql_link) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	if (ZEND_NUM_ARGS() == 1) {
