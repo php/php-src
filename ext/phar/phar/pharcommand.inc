@@ -591,15 +591,16 @@ class PharCommand extends CLICommand
 		$phar  = $this->args['f']['val'];
 
 		$hash  = $phar->getsignature();
+		$infos = array();
 
 		if (!$hash)
 		{
-			echo "Hash: NONE\n";
+			$infos['Hash'] = 'NONE';
 		}
 		else
 		{
-			echo "Hash Type: ${hash['hash_type']}\n";
-			echo "Hash: ${hash['hash']}\n";
+			$infos['Hash Type'] = $hash['hash_type'];
+			$infos['Hash'] = $hash['hash'];
 		}
 
 		$csize   = 0;
@@ -626,10 +627,20 @@ class PharCommand extends CLICommand
 			}
 		}
 
-		echo "Entries: $count\n";
-		echo "Compressed: $ccount\n";
-		echo "Uncompressed: $ucount\n";
-		echo "Metadata: $mcount\n";
+		$infos['Entries'] = $count;
+		$infos['Compressed'] = $ccount;
+		$infos['Uncompressed'] = $ucount;
+		$infos['Metadata'] = $mcount;
+
+		$l = 0;
+		foreach($infos as $which => $val)
+		{
+			$l = max(strlen($which), $l);
+		}
+		foreach($infos as $which => $val)
+		{
+			echo $which . ':' . str_repeat(' ', $l + 1 - strlen($which)) . $val . "\n";
+		}
 	}
 }
 
