@@ -35,7 +35,7 @@ class PharCommand extends CLICommand
 			'f' => array('typ'=>$phartyp, 'val'=>NULL,      'inf'=>'<file>   Specifies the phar file to work on.'),
 			'h' => array('typ'=>'select', 'val'=>NULL,      'inf'=>'<method> Selects the hash algorithmn.', 'select'=>array('md5'=>'MD5','sha1'=>'SHA1')),
 			'i' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Specifies a regular expression for input files.'),
-			'm' => array('typ'=>'any',    'val'=>NULL,      'inf'=>'<meta>   Meta data to store with entry or read from.'),
+			'm' => array('typ'=>'any',    'val'=>NULL,      'inf'=>'<meta>   Meta data to store with entry (serialized php data).'),
 			's' => array('typ'=>'file',   'val'=>NULL,      'inf'=>'<stub>   Select the stub file.'),
 			'x' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Regular expression for input files to exclude.'),
 		);
@@ -80,17 +80,13 @@ class PharCommand extends CLICommand
 
 	static function cli_arg_typ_pharnew($arg)
 	{
-		$pharfile = self::cli_arg_typ_filenew($arg);
-		if (!self::strEndsWith($pharfile, '.phar')
-		&&  !self::strEndsWith($pharfile, '.phar.php')
-		&&  !self::strEndsWith($pharfile, '.phar.bz2')
-		&&  !self::strEndsWith($pharfile, '.phar.gz')
-		)
+		$arg = self::cli_arg_typ_filenew($arg);
+		if (!Phar::isValidPharFilename($arg))
 		{
-			echo "Phar files must have file extension '.pahr', '.parh.php', '.phar.bz2' or 'phar.gz'.\n";
+			echo "Phar files must have file extension '.phar', '.phar.php', '.phar.bz2' or 'phar.gz'.\n";
 			exit(1);
 		}
-		return $pharfile;
+		return $arg;
 	}
 
 	static function cli_arg_typ_pharfile($arg)
@@ -509,13 +505,13 @@ class PharCommand extends CLICommand
 
 	function cli_cmd_inf_meta_set()
 	{
-		return "Set meta data of a PHAR entry using serialized input. "
+		return "Set meta data of a PHAR entry or a PHAR package using serialized input. "
 		. "If no input file is specified for meta data then stdin is being used.";
 	}
 
 	function cli_cmd_arg_meta_set()
 	{
-		$args = self::phar_args('FEm', 'phar');
+		$args = self::phar_args('Fem', 'phar');
 		$args['m']['val'] = 'php://stdin';
 		return $args;
 	}
@@ -527,20 +523,27 @@ class PharCommand extends CLICommand
 		$meta  = $this->args['m']['val'];
 
 		$phar->startBuffering();
-		$phar[$entry]->setMetadata(unserialize($meta));
+		if (isset($entry))
+		{
+			$phar[$entry]->setMetadata(unserialize($meta));
+		}
+		else
+		{
+			$phar->setMetadata(unserialize($meta));
+		}
 		$phar->stopBuffering();
 	}
 
 	function cli_cmd_inf_meta_get()
 	{
-		return "Get meta information of a PHAR entry in serialized from. "
+		return "Get meta information of a PHAR entry or a PHAR package in serialized from. "
 		. "If no output file is specified for meta data then stdout is being used.";
 	}
 
 	function cli_cmd_arg_meta_get()
 	{
-		$args = self::phar_args('FEm', 'phar');
-		$args['m']['val'] = 'php://stdout';
+		$args = self::phar_args('Fem', 'phar');
+		//$args['m']['val'] = 'php://stdout';
 		return $args;
 	}
 
@@ -548,23 +551,33 @@ class PharCommand extends CLICommand
 	{
 		$phar  = $this->args['f']['val'];
 		$entry = $this->args['e']['val'];
-		$meta  = $this->args['m']['val'];
 
-		if (!$phar[$entry]->hasMetadata())
+		if (isset($entry))
 		{
-			exit(1);
+			if (!$phar[$entry]->hasMetadata())
+			{
+				exit(1);
+			}
+			echo serialize($phar[$entry]->getMetadata());
 		}
-		echo serialize($phar[$entry]->getMetadata());
+		else
+		{
+			if (!$phar->hasMetadata())
+			{
+				exit(1);
+			}
+			echo serialize($phar->getMetadata());
+		}
 	}
 
 	function cli_cmd_inf_meta_del()
 	{
-		return "Delete meta information of a PHAR entry.";
+		return "Delete meta information of a PHAR entry or a PHAR package.";
 	}
 
 	function cli_cmd_arg_meta_del()
 	{
-		return self::phar_args('FE', 'phar');
+		return self::phar_args('Fe', 'phar');
 	}
 
 	function cli_cmd_run_meta_del()
@@ -572,7 +585,14 @@ class PharCommand extends CLICommand
 		$phar  = $this->args['f']['val'];
 		$entry = $this->args['e']['val'];
 
-		exit($phar[$entry]->delMetadata() ? 0 : 1);
+		if (isset($entry))
+		{
+			exit($phar[$entry]->delMetadata() ? 0 : 1);
+		}
+		else
+		{
+			exit($phar->delMetadata() ? 0 : 1);
+		}
 	}
 
 	function cli_cmd_inf_info()
@@ -645,7 +665,7 @@ class PharCommand extends CLICommand
 		$infos['Compressed-bz2'] = $compalg['BZ2'];
 		$infos['Uncompressed-size'] = $usize;
 		$infos['Compressed-size'] = $csize;
-		$infos['Compression-ratio'] = sprintf('%.1g%%', $csize * 100 / $usize);
+		$infos['Compression-ratio'] = sprintf('%.3g%%', ($csize * 100) / $usize);
 		$infos['Metadata'] = $mcount;
 
 		$l = 0;
