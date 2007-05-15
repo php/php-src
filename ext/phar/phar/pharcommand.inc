@@ -29,15 +29,57 @@ class PharCommand extends CLICommand
 	static function phar_args($which, $phartyp)
 	{
 		$phar_args = array(
-			'a' => array('typ'=>'alias',  'val'=>'newphar', 'inf'=>'<alias>  Provide an alias name for the phar file.'),
-			'c' => array('typ'=>'compalg','val'=>NULL,      'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('0'=>'No compression','none'=>'No compression','auto'=>'Automatically select compression algorithm')),
-			'e' => array('typ'=>'entry',  'val'=>NULL,      'inf'=>'<entry>  Name of entry to work on (must include PHAR internal directory name if any).'),
-			'f' => array('typ'=>$phartyp, 'val'=>NULL,      'inf'=>'<file>   Specifies the phar file to work on.'),
-			'h' => array('typ'=>'select', 'val'=>NULL,      'inf'=>'<method> Selects the hash algorithmn.', 'select'=>array('md5'=>'MD5','sha1'=>'SHA1')),
-			'i' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Specifies a regular expression for input files.'),
-			'm' => array('typ'=>'any',    'val'=>NULL,      'inf'=>'<meta>   Meta data to store with entry (serialized php data).'),
-			's' => array('typ'=>'file',   'val'=>NULL,      'inf'=>'<stub>   Select the stub file.'),
-			'x' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Regular expression for input files to exclude.'),
+			'a' => array(
+                'typ' => 'alias',  
+                'val' => 'newphar', 
+                'inf' => '<alias>  Provide an alias name for the phar file.'
+            ),
+			'c' => array(
+                'typ'   => 'compalg',
+                'val'   => NULL,      
+                'inf'   => '<algo>   Compression algorithmus.', 
+                'select' => array(
+                    '0'    => 'No compression',
+                    'none' => 'No compression',
+                    'auto' => 'Automatically select compression algorithm'
+                )
+            ),
+			'e' => array(
+                'typ' => 'entry',  
+                'val' => NULL,      
+                'inf' => '<entry>  Name of entry to work on (must include PHAR internal directory name if any).'
+            ),
+			'f' => array(
+                'typ' => $phartyp, 
+                'val' => NULL,      
+                'inf' => '<file>   Specifies the phar file to work on.'
+            ),
+			'h' => array(
+                'typ'    => 'select', 
+                'val'    => NULL,      
+                'inf'    => '<method> Selects the hash algorithmn.', 
+                'select' => array('md5' => 'MD5','sha1' => 'SHA1')
+            ),
+			'i' => array(
+                'typ' => 'regex',  
+                'val' => NULL,      
+                'inf' => '<regex>  Specifies a regular expression for input files.'
+            ),
+			'm' => array(
+                'typ' => 'any',    
+                'val' => NULL,      
+                'inf' => '<meta>   Meta data to store with entry (serialized php data).'
+            ),
+			's' => array(
+                'typ' => 'file',   
+                'val' => NULL,      
+                'inf' => '<stub>   Select the stub file.'
+            ),
+			'x' => array(
+                'typ' => 'regex',  
+                'val' => NULL,      
+                'inf' => '<regex>  Regular expression for input files to exclude.'
+            ),
 		);
 		if (extension_loaded('zlib'))
 		{
