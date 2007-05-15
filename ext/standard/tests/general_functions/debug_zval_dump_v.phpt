@@ -1,5 +1,7 @@
 --TEST--
 Test debug_zval_dump() function : usage variations
+--INI--
+allow_call_time_pass_reference=1
 --FILE--
 <?php
 /* Prototype: void debug_zval_dump ( mixed $variable );
