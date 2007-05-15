@@ -134,6 +134,21 @@ PHP_METHOD(Phar, canWrite)
 }
 /* }}} */
 
+/* {{{ proto bool Phar::isValidPharFilename(string filename)
+ * Returns whether the given filename is a vaild phar filename */
+PHP_METHOD(Phar, isValidPharFilename)
+{
+	char *fname, *ext_str;
+	int fname_len, ext_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len) == SUCCESS);
+}
+/* }}} */
+
 #if HAVE_SPL
 /**
  * from spl_directory
@@ -812,8 +827,19 @@ PHP_METHOD(Phar, getStub)
 }
 /* }}}*/
 
+/* {{{ proto int Phar::hasMetaData()
+ * Returns whether phar has global metadata
+ */
+PHP_METHOD(Phar, hasMetadata)
+{
+	PHAR_ARCHIVE_OBJECT();
+
+	RETURN_BOOL(phar_obj->arc.archive->metadata != NULL);
+}
+/* }}} */
+
 /* {{{ proto int Phar::getMetaData()
- * Returns the metadata of the phar
+ * Returns the global metadata of the phar
  */
 PHP_METHOD(Phar, getMetadata)
 {
@@ -826,10 +852,11 @@ PHP_METHOD(Phar, getMetadata)
 /* }}} */
 
 /* {{{ proto int Phar::setMetaData(mixed $metadata)
- * Returns the metadata of the phar
+ * Sets the global metadata of the phar
  */
 PHP_METHOD(Phar, setMetadata)
 {
+	char *error;
 	zval *metadata;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -844,6 +871,38 @@ PHP_METHOD(Phar, setMetadata)
 
 	MAKE_STD_ZVAL(phar_obj->arc.archive->metadata);
 	ZVAL_ZVAL(phar_obj->arc.archive->metadata, metadata, 1, 0);
+
+	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+	if (error) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		efree(error);
+	}
+}
+/* }}} */
+
+/* {{{ proto int Phar::delMetaData()
+ * Deletes the global metadata of the phar
+ */
+PHP_METHOD(Phar, delMetadata)
+{
+	char *error;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (phar_obj->arc.archive->metadata) {
+		zval_ptr_dtor(&phar_obj->arc.archive->metadata);
+		phar_obj->arc.archive->metadata = NULL;
+
+		phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+		if (error) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			efree(error);
+			RETURN_FALSE;
+		} else {
+			RETURN_TRUE;
+		}
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -1307,12 +1366,14 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressAllFilesBZIP2, NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, count,                 NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, delMetadata,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getMetadata,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getModified,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getSignature,          NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getStub,               NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getVersion,            NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isBuffering,           NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, hasMetadata,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setMetadata,           arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setSignatureAlgorithm, arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)
