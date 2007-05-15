@@ -289,7 +289,7 @@ abstract class CLICommand
 			$sp2 = $this->cli_get_SP2($l, $inf);
 			$l2  = strlen($sp2);
 			$inf .= $this->cli_wordwrap($sp . $arg . $conf['inf'], $l2, $sp2) . "\n";
-			if ($conf['typ'] == 'select')
+			if (isset($conf['select']) && count($conf['select']))
 			{
 				$ls = 0;
 				foreach($conf['select'] as $opt => $what)

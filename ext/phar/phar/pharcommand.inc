@@ -30,7 +30,7 @@ class PharCommand extends CLICommand
 	{
 		$phar_args = array(
 			'a' => array('typ'=>'alias',  'val'=>'newphar', 'inf'=>'<alias>  Provide an alias name for the phar file.'),
-			'c' => array('typ'=>'select', 'val'=>NULL,      'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression')),
+			'c' => array('typ'=>'compalg','val'=>NULL,      'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('0'=>'No compression','none'=>'No compression','auto'=>'Automatically select compression algorithm')),
 			'e' => array('typ'=>'entry',  'val'=>NULL,      'inf'=>'<entry>  Name of entry to work on (must include PHAR internal directory name if any).'),
 			'f' => array('typ'=>$phartyp, 'val'=>NULL,      'inf'=>'<file>   Specifies the phar file to work on.'),
 			'h' => array('typ'=>'select', 'val'=>NULL,      'inf'=>'<method> Selects the hash algorithmn.', 'select'=>array('md5'=>'MD5','sha1'=>'SHA1')),
@@ -39,6 +39,16 @@ class PharCommand extends CLICommand
 			's' => array('typ'=>'file',   'val'=>NULL,      'inf'=>'<stub>   Select the stub file.'),
 			'x' => array('typ'=>'regex',  'val'=>NULL,      'inf'=>'<regex>  Regular expression for input files to exclude.'),
 		);
+		if (extension_loaded('zlib'))
+		{
+			$phar_args['c']['select']['gz']    = 'GZip compression';
+			$phar_args['c']['select']['gzip']  = 'GZip compression';
+		}
+		if (extension_loaded('bz2'))
+		{
+			$phar_args['c']['select']['bz2']   = 'BZip2 compression';
+			$phar_args['c']['select']['bzip2'] = 'BZip2 compression';
+		}
 		$hash_avail = Phar::getSupportedSignatures();
 		if (in_array('SHA-256', $hash_avail))
 		{
@@ -48,7 +58,6 @@ class PharCommand extends CLICommand
 		{
 			$phar_args['h']['select']['sha512'] = 'SHA512';
 		}
-		
 		$args = array();
 		foreach($phar_args as $lkey => $cfg)
 		{
@@ -126,6 +135,30 @@ class PharCommand extends CLICommand
 	static function cli_arg_typ_entry($arg)
 	{
 		// no further check atm, maybe check for no '/' at beginning
+		return $arg;
+	}
+
+	static function cli_arg_typ_compalg($arg, $cfg)
+	{
+		$arg = cli_cmd_typ_select($arg, $cfg);
+		switch($arg)
+		{
+		case 'auto':
+			if (extension_loaded('zlib'))
+			{
+				$arg = 'gz';
+			}
+			else if (extension_loaded('bz2'))
+			{
+				$arg = 'bz2';
+			}
+			else
+			{
+				$arg = '0';
+			}
+			break;
+		case 'bz2':
+		}
 		return $arg;
 	}
 
@@ -407,30 +440,52 @@ class PharCommand extends CLICommand
 
 	function cli_cmd_inf_compress()
 	{
-		return "Compress or uncompress all files.";
+		return "Compress or uncompress all files or a selected entry.";
 	}
 
 	function cli_cmd_arg_compress()
 	{
-		return self::phar_args('FC', 'phar');
+		return self::phar_args('FCe', 'phar');
 	}
 
 	function cli_cmd_run_compress()
 	{
-		$phar = $this->args['f']['val'];
+		$phar  = $this->args['f']['val'];
+		$entry = $this->args['e']['val'];
 
 		switch($this->args['c']['val'])
 		{
 		case 'gz':
 		case 'gzip':
-			$phar->compressAllFilesGZ();
+			if (isset($entry))
+			{
+				$phar[$entry]->setCompressedGZ();
+			}
+			else
+			{
+				$phar->compressAllFilesGZ();
+			}
 			break;
 		case 'bz2':
 		case 'bzip2':
-			$phar->compressAllFilesBZIP2();
+			if (isset($entry))
+			{
+				$phar[$entry]->setCompressedBZIP2();
+			}
+			else
+			{
+				$phar->compressAllFilesBZIP2();
+			}
 			break;
 		default:
-			$phar->uncompressAllFiles();
+			if (isset($entry))
+			{
+				$phar[$entry]->setUncompressed();
+			}
+			else
+			{
+				$phar->uncompressAllFiles();
+			}
 			break;
 		}
 	}
