@@ -423,6 +423,29 @@ class PharCommand extends CLICommand
 		}
 	}
 
+	static function cli_arg_typ_compalg($arg, $cfg)
+	{
+		$arg = self::cli_arg_typ_select($arg, $cfg);
+		switch($arg)
+		{
+		case 'auto':
+			if (extension_loaded('zlib'))
+			{
+				$arg = 'gz';
+			}
+			else if (extension_loaded('bz2'))
+			{
+				$arg = 'bz2';
+			}
+			else
+			{
+				$arg = '0';
+			}
+			break;
+		}
+		return $arg;
+	}
+
 	static function cli_cmd_inf_pack()
 	{
 		return "Pack files into a PHAR archive.";
@@ -432,7 +455,7 @@ class PharCommand extends CLICommand
 	{
 		return array(
 			'a' => array('typ'=>'alias',   'val'=>'newphar', 'required'=>1, 'inf'=>'<alias>  Provide an alias name for the phar file.'),
-			'c' => array('typ'=>'select',  'val'=>NULL,                     'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression')),
+			'c' => array('typ'=>'compalg', 'val'=>NULL,                     'inf'=>'<algo>   Compression algorithmus.', 'select'=>array('gz'=>'GZip compression','gzip'=>'GZip compression','bzip2'=>'BZip2 compression','bz'=>'BZip2 compression','bz2'=>'BZip2 compression','0'=>'No compression','none'=>'No compression','auto'=>'Automatically select compression algorithm')),
 			'f' => array('typ'=>'pharnew', 'val'=>NULL,      'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
 			'h' => array('typ'=>'select',  'val'=>NULL,                     'inf'=>'<method> Selects the hash algorithmn.', 'select'=>array('md5'=>'MD5','sha1'=>'SHA1','sha256'=>'SHA256','sha512'=>'SHA512')),
 			'i' => array('typ'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Specifies a regular expression for input files.'),
