@@ -458,8 +458,8 @@ PHP_FUNCTION(stream_wrapper_register)
 			if (zend_hash_exists(php_stream_get_url_stream_wrappers_hash(), protocol, protocol_len)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol %s:// is already defined", protocol);
 			} else {
-				/* Should never happen */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to register wrapper class %s to %s://", classname, protocol);
+				/* Hash doesn't exist so it must have been an invalid protocol scheme */
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid protocol scheme specified. Unable to register wrapper class %s to %s://", classname, protocol);
 			}
 		}
 	} else {
