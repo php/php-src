@@ -645,6 +645,7 @@ class PharCommand extends CLICommand
 		$infos['Compressed-bz2'] = $compalg['BZ2'];
 		$infos['Uncompressed-size'] = $usize;
 		$infos['Compressed-size'] = $csize;
+		$infos['Compression-ratio'] = sprintf('%.1g%%', $csize * 100 / $usize);
 		$infos['Metadata'] = $mcount;
 
 		$l = 0;
