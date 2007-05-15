@@ -140,7 +140,7 @@ class PharCommand extends CLICommand
 
 	static function cli_arg_typ_compalg($arg, $cfg)
 	{
-		$arg = cli_cmd_typ_select($arg, $cfg);
+		$arg = self::cli_arg_typ_select($arg, $cfg);
 		switch($arg)
 		{
 		case 'auto':
@@ -157,7 +157,6 @@ class PharCommand extends CLICommand
 				$arg = '0';
 			}
 			break;
-		case 'bz2':
 		}
 		return $arg;
 	}
@@ -595,11 +594,11 @@ class PharCommand extends CLICommand
 
 		if (!$hash)
 		{
-			$infos['Hash'] = 'NONE';
+			$infos['Hash-type'] = 'NONE';
 		}
 		else
 		{
-			$infos['Hash Type'] = $hash['hash_type'];
+			$infos['Hash-type'] = $hash['hash_type'];
 			$infos['Hash'] = $hash['hash'];
 		}
 
@@ -609,6 +608,7 @@ class PharCommand extends CLICommand
 		$ccount  = 0;
 		$ucount  = 0;
 		$mcount  = 0;
+		$compalg = array('GZ'=>0, 'BZ2'=>0);
 
 		foreach(new RecursiveIteratorIterator($phar) as $ent)
 		{
@@ -616,11 +616,22 @@ class PharCommand extends CLICommand
 			if ($ent->isCompressed())
 			{
 				$ccount++;
+				$csize += $ent->getCompressedSize();
+				if ($ent->isCompressedGZ())
+				{
+					$compalg['GZ']++;
+				}
+				else if ($ent->isCompressedBZIP2())
+				{
+					$compalg['BZ2']++;
+				}
 			}
 			else
 			{
 				$ucount++;
+				$csize += $ent->getSize();
 			}
+			$usize += $ent->getSize();
 			if ($ent->hasMetadata())
 			{
 				$mcount++;
@@ -628,8 +639,12 @@ class PharCommand extends CLICommand
 		}
 
 		$infos['Entries'] = $count;
-		$infos['Compressed'] = $ccount;
-		$infos['Uncompressed'] = $ucount;
+		$infos['Uncompressed-files'] = $ucount;
+		$infos['Compressed-files'] = $ccount;
+		$infos['Compressed-gz'] = $compalg['GZ'];
+		$infos['Compressed-bz2'] = $compalg['BZ2'];
+		$infos['Uncompressed-size'] = $usize;
+		$infos['Compressed-size'] = $csize;
 		$infos['Metadata'] = $mcount;
 
 		$l = 0;
