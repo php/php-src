@@ -257,7 +257,7 @@ abstract class CLICommand
 
 	static function cli_cmd_inf_help()
 	{
-		return "This help.";
+		return "This help or help for a selected command.";
 	}
 	
 	private function cli_wordwrap($what, $l, $sp)
