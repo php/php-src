@@ -1,3 +1,163 @@
+2007-05-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      News file cleanup
+
+2007-05-14  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/mysql/php_mysql.c:
+      MFB: Typo from old parsing API spotted by bjori
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysql/php_mysql.c:
+      Prefix NEWS item so documentation team know of new function and typo from
+      old parsing API spotted by bjori
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+      MFB: Add mysql_set_charset() so that the connection encoding can be
+      changed. This is similar to the SET NAMES statement but allows the
+      mysql_real_escape_string to use the correct character set.
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+      Add mysql_set_charset() so that the connection encoding can be changed.
+      This is similar to the SET NAMES statement but allows the
+      mysql_real_escape_string to use the correct character set.
+
+2007-05-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/end_64bit.phpt:
+      fix test
+
+2007-05-14  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/standard/dns.c
+      ext/standard/tests/network/bug41347.phpt:
+      MFB: Fixed bug #41347 (checkdnsrr() segfaults on empty hostname).
+
+2007-05-14  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/array/array_merge.phpt
+      ext/standard/tests/array/array_values.phpt
+      ext/standard/tests/array/end.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_b.phpt
+      ext/standard/tests/general_functions/print_r.phpt
+      ext/standard/tests/general_functions/strval.phpt
+      ext/standard/tests/general_functions/var_dump.phpt
+      ext/standard/tests/strings/addcslashes.phpt
+      ext/standard/tests/strings/implode1.phpt
+      ext/standard/tests/strings/str_repeat.phpt
+      ext/standard/tests/strings/str_replace.phpt
+      ext/standard/tests/strings/strpos.phpt
+      ext/standard/tests/strings/ucfirst1.phpt:
+      fix tests, add UEXPECTF
+
+    * ZendEngine2/zend_API.c:
+      allow passing Unicode strings when a boolean is expected
+
+    * main/php_ini.c:
+      use estrdup() and plug the leak
+
+2007-05-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/text.c:
+      MFB: free wholetext properly
+
+    * (PHP_5_2)
+      ext/dom/text.c:
+      free wholetext properly
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/dom/text.c
+      ext/dom/text.c
+      ext/dom/tests/bug41374.phpt:
+      Fixed bug #41374 (wholetext concats values of wrong nodes).
+      add test
+
+    * ext/dom/tests/bug41374.phpt
+      ext/dom/tests/bug41374.phpt:
+      
+      file bug41374.phpt was initially added on branch PHP_5_2.
+
+2007-05-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/dns.c:
+      fix CS
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/implode1.phpt:
+      remove floats, their text representation varies depending on many factors
+
+    * ext/standard/tests/array/array_keys_64bit.phpt
+      ext/standard/tests/array/array_keys_64bit.phpt
+      ext/standard/tests/array/array_values_64bit.phpt
+      ext/standard/tests/array/array_values_64bit.phpt
+      ext/standard/tests/array/end_64bit.phpt
+      ext/standard/tests/array/end_64bit.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_b_64bit.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_b_64bit.phpt
+      ext/standard/tests/general_functions/is_float_64bit.phpt
+      ext/standard/tests/general_functions/is_float_64bit.phpt
+      ext/standard/tests/general_functions/is_int_64bit.phpt
+      ext/standard/tests/general_functions/is_int_64bit.phpt
+      ext/standard/tests/general_functions/print_r_64bit.phpt
+      ext/standard/tests/general_functions/print_r_64bit.phpt
+      ext/standard/tests/general_functions/var_dump_64bit.phpt
+      ext/standard/tests/general_functions/var_dump_64bit.phpt:
+      
+      file array_keys_64bit.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/tests/general_functions/strval.phpt:
+      fix precision
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_keys.phpt
+      ext/standard/tests/array/array_values.phpt
+      ext/standard/tests/array/end.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_b.phpt
+      ext/standard/tests/general_functions/is_float.phpt
+      ext/standard/tests/general_functions/is_int.phpt
+      ext/standard/tests/general_functions/print_r.phpt
+      ext/standard/tests/general_functions/var_dump.phpt:
+      fix tests - make them 32bit only, 64bit version will be later
+      add --INI-- section
+      remove recursive arrays, that thing should be in a separate test
+
+2007-05-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/tests/bug41287.phpt
+      ext/xmlwriter/tests/bug41326.phpt:
+      - [@DOC] MFH: #41326, better fix. It restores BC and allows both canonical
+        and short form:
+        - when $content is given, the closing tag will be generated (even for
+      empty
+        string)
+        - when $content is ignored or NULL is given, the short form will be used
+
+    * ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/tests/bug41287.phpt
+      ext/xmlwriter/tests/bug41326.phpt:
+      - [@DOC]#41326, better fix. It restores BC and allows both canonical and
+      short
+        form:
+        - when $content is given, the closing tag will be generated (even for
+      empty
+        string)
+        - when $content is ignored or NULL is given, the short form will be used
+
 2007-05-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

@@ -1,3 +1,8 @@
+2007-05-14  Antony Dovgal  <antony@zend.com>
+
+    * zend_API.c:
+      allow passing Unicode strings when a boolean is expected
+
 2007-05-12  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * tests/019.phpt:
