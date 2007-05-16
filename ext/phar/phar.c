@@ -289,6 +289,8 @@ static int phar_get_archive(phar_archive_data **archive, char *fname, int fname_
 {
 	phar_archive_data *fd, **fd_ptr;
 
+	phar_request_initialize(TSRMLS_C);
+
 	if (error) {
 		*error = NULL;
 	}
@@ -1147,6 +1149,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	mydata->sig_flags = sig_flags;
 	mydata->sig_len = sig_len;
 	mydata->signature = signature;
+	phar_request_initialize(TSRMLS_C);
 	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
 	if (register_alias) {
 		mydata->is_explicit_alias = 1;
@@ -1240,6 +1243,7 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 	} else {
 		register_alias = 1;
 	}
+	phar_request_initialize(TSRMLS_C);
 	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
 	if (register_alias) {
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
@@ -1675,6 +1679,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	}
 
 	host_len = strlen(resource->host);
+	phar_request_initialize(TSRMLS_C);
 	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
 		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
 		fp = php_stream_open_wrapper_ex(internal_file, mode, options, opened_path, context);
@@ -2847,6 +2852,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	}
 
 	host_len = strlen(resource->host);
+	phar_request_initialize(TSRMLS_C);
 	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
 		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
 		retval = php_stream_stat_path_ex(internal_file, flags, ssb, context);
@@ -3099,6 +3105,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	}
 
 	host_len = strlen(resource->host);
+	phar_request_initialize(TSRMLS_C);
 	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
 		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
 		retval = php_stream_unlink(internal_file, options, context);
@@ -3217,6 +3224,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	}
 
 	host_len = strlen(resource_from->host);
+	phar_request_initialize(TSRMLS_C);
 	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource_from->host, host_len+1, (void **)&plain_map) == SUCCESS) {
 		/*TODO:use php_stream_rename() once available*/
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive", url_from, url_to);
@@ -3349,6 +3357,7 @@ static php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path
 	}
 
 	host_len = strlen(resource->host);
+	phar_request_initialize(TSRMLS_C);
 	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
 		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
 		ret = php_stream_opendir(internal_file, options, context);
@@ -3455,20 +3464,32 @@ PHP_RINIT_FUNCTION(phar) /* {{{ */
 {
 	PHAR_GLOBALS->request_done = 0;
 	PHAR_GLOBALS->request_ends = 0;
-	zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data,  0);
-	zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
-	zend_hash_init(&(PHAR_GLOBALS->phar_plain_map), sizeof(const char *),       zend_get_hash_value, NULL, 0);
-	phar_split_extract_list(TSRMLS_C);
+	PHAR_GLOBALS->request_init = 0;
 	return SUCCESS;
+}
+
+void phar_request_initialize(TSRMLS_D) /* {{{ */
+{
+	if (!PHAR_GLOBALS->request_init)
+	{
+		PHAR_GLOBALS->request_init = 1;
+		zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data,  0);
+		zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
+		zend_hash_init(&(PHAR_GLOBALS->phar_plain_map), sizeof(const char *),       zend_get_hash_value, NULL, 0);
+		phar_split_extract_list(TSRMLS_C);
+	}
 }
 /* }}} */
 
 PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
 	PHAR_GLOBALS->request_ends = 1;
-	zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
-	zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
-	zend_hash_destroy(&(PHAR_GLOBALS->phar_plain_map));
+	if (PHAR_GLOBALS->request_init)
+	{
+		zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
+		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
+		zend_hash_destroy(&(PHAR_GLOBALS->phar_plain_map));
+	}
 	PHAR_GLOBALS->request_done = 1;
 	return SUCCESS;
 }

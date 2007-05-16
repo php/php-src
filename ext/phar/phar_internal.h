@@ -107,6 +107,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         readonly;
 	zend_bool   readonly_orig;
 	zend_bool   require_hash_orig;
+	int         request_init;
 	int         require_hash;
 	int         request_done;
 	int         request_ends;
@@ -222,6 +223,8 @@ union _phar_entry_object {
 #endif
 
 BEGIN_EXTERN_C()
+
+void phar_request_initialize(TSRMLS_D);
 
 void phar_object_init(TSRMLS_D);
 
