@@ -1870,7 +1870,10 @@ static int lockBtree(BtShared *pBt){
     if( memcmp(page1, zMagicHeader, 16)!=0 ){
       goto page1_init_failed;
     }
-    if( page1[18]>1 || page1[19]>1 ){
+    if( page1[18]>1 ){
+      pBt->readOnly = 1;
+    }
+    if( page1[19]>1 ){
       goto page1_init_failed;
     }
     pageSize = get2byte(&page1[16]);
@@ -2068,11 +2071,15 @@ int sqlite3BtreeBeginTrans(Btree *p, int wrflag){
     if( pBt->pPage1==0 ){
       rc = lockBtree(pBt);
     }
-  
+
     if( rc==SQLITE_OK && wrflag ){
-      rc = sqlite3PagerBegin(pBt->pPage1->pDbPage, wrflag>1);
-      if( rc==SQLITE_OK ){
-        rc = newDatabase(pBt);
+      if( pBt->readOnly ){
+        rc = SQLITE_READONLY;
+      }else{
+        rc = sqlite3PagerBegin(pBt->pPage1->pDbPage, wrflag>1);
+        if( rc==SQLITE_OK ){
+          rc = newDatabase(pBt);
+        }
       }
     }
   
@@ -2781,6 +2788,9 @@ int sqlite3BtreeCursor(
     rc = lockBtreeWithRetry(p);
     if( rc!=SQLITE_OK ){
       return rc;
+    }
+    if( pBt->readOnly && wrFlag ){
+      return SQLITE_READONLY;
     }
   }
   pCur = sqliteMalloc( sizeof(*pCur) );
@@ -3519,26 +3529,22 @@ int sqlite3BtreeNext(BtCursor *pCur, int *pRes){
   int rc;
   MemPage *pPage;
 
-#ifndef SQLITE_OMIT_SHARED_CACHE
   rc = restoreOrClearCursorPosition(pCur);
   if( rc!=SQLITE_OK ){
     return rc;
   }
-#endif 
   assert( pRes!=0 );
   pPage = pCur->pPage;
   if( CURSOR_INVALID==pCur->eState ){
     *pRes = 1;
     return SQLITE_OK;
   }
-#ifndef SQLITE_OMIT_SHARED_CACHE
   if( pCur->skip>0 ){
     pCur->skip = 0;
     *pRes = 0;
     return SQLITE_OK;
   }
   pCur->skip = 0;
-#endif 
 
   assert( pPage->isInit );
   assert( pCur->idx<pPage->nCell );
@@ -3589,24 +3595,20 @@ int sqlite3BtreePrevious(BtCursor *pCur, int *pRes){
   Pgno pgno;
   MemPage *pPage;
 
-#ifndef SQLITE_OMIT_SHARED_CACHE
   rc = restoreOrClearCursorPosition(pCur);
   if( rc!=SQLITE_OK ){
     return rc;
   }
-#endif
   if( CURSOR_INVALID==pCur->eState ){
     *pRes = 1;
     return SQLITE_OK;
   }
-#ifndef SQLITE_OMIT_SHARED_CACHE
   if( pCur->skip<0 ){
     pCur->skip = 0;
     *pRes = 0;
     return SQLITE_OK;
   }
   pCur->skip = 0;
-#endif
 
   pPage = pCur->pPage;
   assert( pPage->isInit );
