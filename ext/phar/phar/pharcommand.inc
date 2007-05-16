@@ -553,13 +553,17 @@ class PharCommand extends CLICommand
 	function cli_cmd_inf_meta_set()
 	{
 		return "Set meta data of a PHAR entry or a PHAR package using serialized input. "
-		. "If no input file is specified for meta data then stdin is being used.";
+		. "If no input file is specified for meta data then stdin is being used.\n"
+		. "You can also specify a particular index using -k. In that case the metadata is "
+		. "expected to be an array and the value of the given index is being set. If "
+		. "the metadata is not present or empty a new array will be created. If the "
+		. "metadata is present and a flat value then the return value is 1. Also using -k "
+		. "the input is been taken directly rather then being serialized.";
 	}
 
 	function cli_cmd_arg_meta_set()
 	{
-		$args = self::phar_args('Fem', 'phar');
-		$args['m']['val'] = 'php://stdin';
+		$args = self::phar_args('FekM', 'phar');
 		return $args;
 	}
 
@@ -567,16 +571,53 @@ class PharCommand extends CLICommand
 	{
 		$phar  = $this->args['f']['val'];
 		$entry = $this->args['e']['val'];
+		$index = $this->args['k']['val'];
 		$meta  = $this->args['m']['val'];
 
 		$phar->startBuffering();
-		if (isset($entry))
+		if (isset($index))
 		{
-			$phar[$entry]->setMetadata(unserialize($meta));
+			if (isset($entry))
+			{
+				if ($phar[$entry]->hasMetadata())
+				{
+					$old = $phar[$entry]->getMetadata();
+				}
+				else
+				{
+					$old = array();
+				}
+			}
+			else
+			{
+				if ($phar->hasMetadata())
+				{
+					$old = $phar->getMetadata();
+				}
+				else
+				{
+					$old = array();
+				}
+			}
+			if (!is_array($old))
+			{
+				echo "Metadata is a flat value while an index operation was issued.";
+				exit(1);
+			}
+			$old[$index] = $meta;
+			$meta = $old;
 		}
 		else
 		{
-			$phar->setMetadata(unserialize($meta));
+			$meta = unserialize($meta);
+		}
+		if (isset($entry))
+		{
+			$phar[$entry]->setMetadata($meta);
+		}
+		else
+		{
+			$phar->setMetadata($meta);
 		}
 		$phar->stopBuffering();
 	}
@@ -639,26 +680,64 @@ class PharCommand extends CLICommand
 
 	function cli_cmd_inf_meta_del()
 	{
-		return "Delete meta information of a PHAR entry or a PHAR package.";
+		return "Delete meta information of a PHAR entry or a PHAR package.\n"
+		     . "If -k is given then the metadata is expected to be an array "
+		     . "and the given index is being deleted.\n"
+		     . "If something was deleted the return value is 0 otherwise it is 1.";
 	}
 
 	function cli_cmd_arg_meta_del()
 	{
-		return self::phar_args('Fe', 'phar');
+		return self::phar_args('Fek', 'phar');
 	}
 
 	function cli_cmd_run_meta_del()
 	{
 		$phar  = $this->args['f']['val'];
 		$entry = $this->args['e']['val'];
+		$index = $this->argr['k']['val'];
 
 		if (isset($entry))
 		{
-			exit($phar[$entry]->delMetadata() ? 0 : 1);
+			if (isset($index))
+			{
+				if (!$phar[$entry]->hasMetadata())
+				{
+					exit(1);
+				}
+				$meta = $phar[$entry]->getMetadata();
+				if (!is_array($meta))
+				{
+					exit(1);
+				}
+				unset($meta[$index]);
+				$phar[$entry]->setMetadata($meta);
+			}
+			else
+			{
+				exit($phar[$entry]->delMetadata() ? 0 : 1);
+			}
 		}
 		else
 		{
-			exit($phar->delMetadata() ? 0 : 1);
+			if (isset($index))
+			{
+				if (!$phar->hasMetadata())
+				{
+					exit(1);
+				}
+				$meta = $phar->getMetadata();
+				if (!is_array($meta))
+				{
+					exit(1);
+				}
+				unset($meta[$index]);
+				$phar->setMetadata($meta);
+			}
+			else
+			{
+				exit($phar->delMetadata() ? 0 : 1);
+			}
 		}
 	}
 
