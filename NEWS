@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - Fixed bug #41378 (fastcgi protocol lacks support for Reason-Phrase in 
   "Status:" header). (anight at eyelinkmedia dot com, Dmitry)
 - Fixed bug #41374 (wholetext concats values of wrong nodes). (Rob)
+- Fixed bug #41358 (configure cannot determine libcurl's SSL lib as of v7.16.2)
+  (Mike)
 - Fixed bug #41353 (crash in openssl_pkcs12_read() on invalid input). (Ilia)
 - Fixed bug #41351 (Invalid opcode with foreach ($a[] as $b)). (Dmitry, Tony)
 - Fixed bug #41347 (checkdnsrr() segfaults on empty hostname). (Scott)
