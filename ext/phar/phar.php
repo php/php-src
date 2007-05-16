@@ -459,6 +459,7 @@ class PharCommand extends CLICommand
 			'f' => array('typ'=>'pharnew', 'val'=>NULL,      'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
 			'h' => array('typ'=>'select',  'val'=>NULL,                     'inf'=>'<method> Selects the hash algorithmn.', 'select'=>array('md5'=>'MD5','sha1'=>'SHA1','sha256'=>'SHA256','sha512'=>'SHA512')),
 			'i' => array('typ'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Specifies a regular expression for input files.'),
+			'p' => array('typ'=>'file',    'val'=>NULL,                     'inf'=>'<loader> Location of PHP_Archive class file (pear list-files PHP_Archive).'),
 			's' => array('typ'=>'file',    'val'=>NULL,                     'inf'=>'<stub>   Select the stub file (excluded from list of input files/dirs).'),
 			'x' => array('typ'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Regular expression for input files to exclude.'),
 			''  => array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories.'),
@@ -482,6 +483,7 @@ class PharCommand extends CLICommand
 		$archive = $this->args['f']['val'];
 		$hash    = $this->args['h']['val'];
 		$regex   = $this->args['i']['val'];
+		$loader  = $this->args['p']['val'];
 		$stub    = $this->args['s']['val'];
 		$invregex= $this->args['x']['val'];
 		$input   = $this->args['']['val'];
@@ -492,7 +494,25 @@ class PharCommand extends CLICommand
 
 		if (isset($stub))
 		{
-			$phar->setStub(file_get_contents($stub));
+			if (isset($loader))
+			{
+				$c = file_get_contents($stub);
+				$s = '';
+				if (substr($c,0,2) == '#!') {
+					$s.= substr($c,0,strpos($c, "\n")+1);
+				}				
+				$s.= '<?php if (!class_exists("Phar",0) && !class_exists("PHP_Archive")) { ?>';
+				$s.= file_get_contents($loader);
+				$s.= '<?php } ?>';
+				if (substr($c,0,1) == '#') {
+					$s.= substr($c,strpos($c, "\n")+1);
+				}
+				$phar->setStub($s);
+			}
+			else
+			{
+				$phar->setStub(file_get_contents($stub));
+			}
 			$stub = new SplFileInfo($stub);
 		}
 
