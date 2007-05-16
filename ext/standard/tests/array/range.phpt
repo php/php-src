@@ -1,35 +1,115 @@
 --TEST--
-range()
---INI--
-precision=14
+Test range() function
 --FILE--
 <?php
-	var_dump(range(1, 100));
-	var_dump(range(100, 1));
-	
-	var_dump(range("1", "100"));
-	var_dump(range("100", "1"));
-	
-	var_dump(range("a", "z"));
-	var_dump(range("z", "a"));
-	var_dump(range("q", "q"));
-	
-	var_dump(range(5, 5));
-	
-	var_dump(range(5.1, 10.1));
-	var_dump(range(10.1, 5.1));
-	
-	var_dump(range("5.1", "10.1"));
-	var_dump(range("10.1", "5.1"));
-	
-	var_dump(range(1, 5, 0.1));
-	var_dump(range(5, 1, 0.1));
-	
-	var_dump(range(1, 5, "0.1"));
-	var_dump(range("1", "5", 0.1));
+/* Prototype: array range ( mixed $low, mixed $high [, number $step] );
+   Description: Create an array containing a range of elements
+*/
+
+echo "*** Testing range() function on basic operations ***\n";
+
+echo "\n-- Integers as Low and High --\n";
+echo "-- An array of elements from low to high --\n";
+var_dump( range(1, 10) );
+echo "\n-- An array of elements from high to low --\n";
+var_dump( range(10, 1) );
+
+echo "\n-- Numeric Strings as Low and High --\n";	
+echo "-- An array of elements from low to high --\n";
+var_dump( range("1", "10") );
+echo "\n-- An array of elements from high to low --\n";
+var_dump( range("10", "1") );
+
+echo "\n-- Chars as Low and High --\n";	
+echo "-- An array of elements from low to high --\n";
+var_dump( range("a", "z") );
+echo "\n-- An array of elements from high to low --\n";
+var_dump( range("z", "a") );
+
+echo "\n-- Low and High are equal --\n";
+var_dump( range(5, 5) );
+var_dump( range("q", "q") );
+
+echo "\n-- floats as Low and High --\n";	
+var_dump( range(5.1, 10.1) );
+var_dump( range(10.1, 5.1) );
+
+var_dump( range("5.1", "10.1") );
+var_dump( range("10.1", "5.1") );
+
+echo "\n-- Passing step with Low and High --\n";	
+var_dump( range(1, 2, 0.1) );
+var_dump( range(2, 1, 0.1) );
+
+var_dump( range(1, 2, "0.1") );
+var_dump( range("1", "2", 0.1) ); 
+
+echo "\n-- Testing basic string with step --\n";
+var_dump( range("abcd", "mnop", 2) );
+
+echo "\n*** Testing range() with various low and high values ***";
+$low_arr = array( "ABCD", -10.5555, TRUE, NULL, FALSE, "", array(1,2));
+$high_arr = array( "ABCD", -10.5555, TRUE, NULL, FALSE, "", array(1,2));
+
+for( $i = 0; $i < count($low_arr); $i++) {
+  for( $j = 0; $j < count($high_arr); $j++) {
+    echo "\n-- creating an array with low = '$low_arr[$i]' and high = '$high_arr[$j]' --\n";
+    var_dump( range( $low_arr[$i], $high_arr[$j] ) );
+  }
+}
+
+
+echo "\n*** Possible variatins with steps ***\n";
+var_dump( range( 1, 5, TRUE ) );
+var_dump( range( 1, 5, array(1, 2) ) );
+
+echo "\n*** Testing max/outof range values ***\n";
+/*var_dump( range("a", "z", 255) );
+var_dump( range("z", "a", 255) ); */
+var_dump( range(2147483645, 2147483646) );
+var_dump( range(2147483646, 2147483648) );
+var_dump( range(-2147483647, -2147483646) );
+var_dump( range(-2147483648, -2147483647) );
+var_dump( range(-2147483649, -2147483647) );
+
+echo "\n*** Testing error conditions ***\n";
+
+echo "\n-- Testing ( (low < high) && (step = 0) ) --"; 
+var_dump( range(1, 2, 0) );
+var_dump( range("a", "b", 0) );
+
+echo "\n\n-- Testing ( (low > high) && (step = 0) ) --";
+var_dump( range(2, 1, 0) );
+var_dump( range("b", "a", 0) );
+
+echo "\n\n-- Testing ( (low < high) && (high-low < step) ) --";
+var_dump( range(1.0, 7.0, 6.5) );
+
+echo "\n\n-- Testing ( (low > high) && (low-high < step) ) --";
+var_dump( range(7.0, 1.0, 6.5) );
+
+echo "\n-- Testing Invalid number of arguments --";        
+var_dump( range() );  // No.of args = 0
+var_dump( range(1) );  // No.of args < expected
+var_dump( range(1,2,3,4) );  // No.of args > expected
+var_dump( range(-1, -2, 2) );  
+var_dump( range("a", "j", "z") );
+
+echo "\n-- Testing Invalid steps --";
+$step_arr = array( "string", NULL, FALSE, "", "\0" );
+
+foreach( $step_arr as $step ) {
+  var_dump( range( 1, 5, $step ) );
+}
+
+echo "\nDone";
 ?>
---EXPECT--
-array(100) {
+--EXPECTF--
+*** Testing range() function on basic operations ***
+
+-- Integers as Low and High --
+-- An array of elements from low to high --
+array(10) {
   [0]=>
   int(1)
   [1]=>
@@ -50,390 +130,35 @@ array(100) {
   int(9)
   [9]=>
   int(10)
-  [10]=>
-  int(11)
-  [11]=>
-  int(12)
-  [12]=>
-  int(13)
-  [13]=>
-  int(14)
-  [14]=>
-  int(15)
-  [15]=>
-  int(16)
-  [16]=>
-  int(17)
-  [17]=>
-  int(18)
-  [18]=>
-  int(19)
-  [19]=>
-  int(20)
-  [20]=>
-  int(21)
-  [21]=>
-  int(22)
-  [22]=>
-  int(23)
-  [23]=>
-  int(24)
-  [24]=>
-  int(25)
-  [25]=>
-  int(26)
-  [26]=>
-  int(27)
-  [27]=>
-  int(28)
-  [28]=>
-  int(29)
-  [29]=>
-  int(30)
-  [30]=>
-  int(31)
-  [31]=>
-  int(32)
-  [32]=>
-  int(33)
-  [33]=>
-  int(34)
-  [34]=>
-  int(35)
-  [35]=>
-  int(36)
-  [36]=>
-  int(37)
-  [37]=>
-  int(38)
-  [38]=>
-  int(39)
-  [39]=>
-  int(40)
-  [40]=>
-  int(41)
-  [41]=>
-  int(42)
-  [42]=>
-  int(43)
-  [43]=>
-  int(44)
-  [44]=>
-  int(45)
-  [45]=>
-  int(46)
-  [46]=>
-  int(47)
-  [47]=>
-  int(48)
-  [48]=>
-  int(49)
-  [49]=>
-  int(50)
-  [50]=>
-  int(51)
-  [51]=>
-  int(52)
-  [52]=>
-  int(53)
-  [53]=>
-  int(54)
-  [54]=>
-  int(55)
-  [55]=>
-  int(56)
-  [56]=>
-  int(57)
-  [57]=>
-  int(58)
-  [58]=>
-  int(59)
-  [59]=>
-  int(60)
-  [60]=>
-  int(61)
-  [61]=>
-  int(62)
-  [62]=>
-  int(63)
-  [63]=>
-  int(64)
-  [64]=>
-  int(65)
-  [65]=>
-  int(66)
-  [66]=>
-  int(67)
-  [67]=>
-  int(68)
-  [68]=>
-  int(69)
-  [69]=>
-  int(70)
-  [70]=>
-  int(71)
-  [71]=>
-  int(72)
-  [72]=>
-  int(73)
-  [73]=>
-  int(74)
-  [74]=>
-  int(75)
-  [75]=>
-  int(76)
-  [76]=>
-  int(77)
-  [77]=>
-  int(78)
-  [78]=>
-  int(79)
-  [79]=>
-  int(80)
-  [80]=>
-  int(81)
-  [81]=>
-  int(82)
-  [82]=>
-  int(83)
-  [83]=>
-  int(84)
-  [84]=>
-  int(85)
-  [85]=>
-  int(86)
-  [86]=>
-  int(87)
-  [87]=>
-  int(88)
-  [88]=>
-  int(89)
-  [89]=>
-  int(90)
-  [90]=>
-  int(91)
-  [91]=>
-  int(92)
-  [92]=>
-  int(93)
-  [93]=>
-  int(94)
-  [94]=>
-  int(95)
-  [95]=>
-  int(96)
-  [96]=>
-  int(97)
-  [97]=>
-  int(98)
-  [98]=>
-  int(99)
-  [99]=>
-  int(100)
 }
-array(100) {
+
+-- An array of elements from high to low --
+array(10) {
   [0]=>
-  int(100)
-  [1]=>
-  int(99)
-  [2]=>
-  int(98)
-  [3]=>
-  int(97)
-  [4]=>
-  int(96)
-  [5]=>
-  int(95)
-  [6]=>
-  int(94)
-  [7]=>
-  int(93)
-  [8]=>
-  int(92)
-  [9]=>
-  int(91)
-  [10]=>
-  int(90)
-  [11]=>
-  int(89)
-  [12]=>
-  int(88)
-  [13]=>
-  int(87)
-  [14]=>
-  int(86)
-  [15]=>
-  int(85)
-  [16]=>
-  int(84)
-  [17]=>
-  int(83)
-  [18]=>
-  int(82)
-  [19]=>
-  int(81)
-  [20]=>
-  int(80)
-  [21]=>
-  int(79)
-  [22]=>
-  int(78)
-  [23]=>
-  int(77)
-  [24]=>
-  int(76)
-  [25]=>
-  int(75)
-  [26]=>
-  int(74)
-  [27]=>
-  int(73)
-  [28]=>
-  int(72)
-  [29]=>
-  int(71)
-  [30]=>
-  int(70)
-  [31]=>
-  int(69)
-  [32]=>
-  int(68)
-  [33]=>
-  int(67)
-  [34]=>
-  int(66)
-  [35]=>
-  int(65)
-  [36]=>
-  int(64)
-  [37]=>
-  int(63)
-  [38]=>
-  int(62)
-  [39]=>
-  int(61)
-  [40]=>
-  int(60)
-  [41]=>
-  int(59)
-  [42]=>
-  int(58)
-  [43]=>
-  int(57)
-  [44]=>
-  int(56)
-  [45]=>
-  int(55)
-  [46]=>
-  int(54)
-  [47]=>
-  int(53)
-  [48]=>
-  int(52)
-  [49]=>
-  int(51)
-  [50]=>
-  int(50)
-  [51]=>
-  int(49)
-  [52]=>
-  int(48)
-  [53]=>
-  int(47)
-  [54]=>
-  int(46)
-  [55]=>
-  int(45)
-  [56]=>
-  int(44)
-  [57]=>
-  int(43)
-  [58]=>
-  int(42)
-  [59]=>
-  int(41)
-  [60]=>
-  int(40)
-  [61]=>
-  int(39)
-  [62]=>
-  int(38)
-  [63]=>
-  int(37)
-  [64]=>
-  int(36)
-  [65]=>
-  int(35)
-  [66]=>
-  int(34)
-  [67]=>
-  int(33)
-  [68]=>
-  int(32)
-  [69]=>
-  int(31)
-  [70]=>
-  int(30)
-  [71]=>
-  int(29)
-  [72]=>
-  int(28)
-  [73]=>
-  int(27)
-  [74]=>
-  int(26)
-  [75]=>
-  int(25)
-  [76]=>
-  int(24)
-  [77]=>
-  int(23)
-  [78]=>
-  int(22)
-  [79]=>
-  int(21)
-  [80]=>
-  int(20)
-  [81]=>
-  int(19)
-  [82]=>
-  int(18)
-  [83]=>
-  int(17)
-  [84]=>
-  int(16)
-  [85]=>
-  int(15)
-  [86]=>
-  int(14)
-  [87]=>
-  int(13)
-  [88]=>
-  int(12)
-  [89]=>
-  int(11)
-  [90]=>
   int(10)
-  [91]=>
+  [1]=>
   int(9)
-  [92]=>
+  [2]=>
   int(8)
-  [93]=>
+  [3]=>
   int(7)
-  [94]=>
+  [4]=>
   int(6)
-  [95]=>
+  [5]=>
   int(5)
-  [96]=>
+  [6]=>
   int(4)
-  [97]=>
+  [7]=>
   int(3)
-  [98]=>
+  [8]=>
   int(2)
-  [99]=>
+  [9]=>
   int(1)
 }
-array(100) {
+
+-- Numeric Strings as Low and High --
+-- An array of elements from low to high --
+array(10) {
   [0]=>
   int(1)
   [1]=>
@@ -454,389 +179,34 @@ array(100) {
   int(9)
   [9]=>
   int(10)
-  [10]=>
-  int(11)
-  [11]=>
-  int(12)
-  [12]=>
-  int(13)
-  [13]=>
-  int(14)
-  [14]=>
-  int(15)
-  [15]=>
-  int(16)
-  [16]=>
-  int(17)
-  [17]=>
-  int(18)
-  [18]=>
-  int(19)
-  [19]=>
-  int(20)
-  [20]=>
-  int(21)
-  [21]=>
-  int(22)
-  [22]=>
-  int(23)
-  [23]=>
-  int(24)
-  [24]=>
-  int(25)
-  [25]=>
-  int(26)
-  [26]=>
-  int(27)
-  [27]=>
-  int(28)
-  [28]=>
-  int(29)
-  [29]=>
-  int(30)
-  [30]=>
-  int(31)
-  [31]=>
-  int(32)
-  [32]=>
-  int(33)
-  [33]=>
-  int(34)
-  [34]=>
-  int(35)
-  [35]=>
-  int(36)
-  [36]=>
-  int(37)
-  [37]=>
-  int(38)
-  [38]=>
-  int(39)
-  [39]=>
-  int(40)
-  [40]=>
-  int(41)
-  [41]=>
-  int(42)
-  [42]=>
-  int(43)
-  [43]=>
-  int(44)
-  [44]=>
-  int(45)
-  [45]=>
-  int(46)
-  [46]=>
-  int(47)
-  [47]=>
-  int(48)
-  [48]=>
-  int(49)
-  [49]=>
-  int(50)
-  [50]=>
-  int(51)
-  [51]=>
-  int(52)
-  [52]=>
-  int(53)
-  [53]=>
-  int(54)
-  [54]=>
-  int(55)
-  [55]=>
-  int(56)
-  [56]=>
-  int(57)
-  [57]=>
-  int(58)
-  [58]=>
-  int(59)
-  [59]=>
-  int(60)
-  [60]=>
-  int(61)
-  [61]=>
-  int(62)
-  [62]=>
-  int(63)
-  [63]=>
-  int(64)
-  [64]=>
-  int(65)
-  [65]=>
-  int(66)
-  [66]=>
-  int(67)
-  [67]=>
-  int(68)
-  [68]=>
-  int(69)
-  [69]=>
-  int(70)
-  [70]=>
-  int(71)
-  [71]=>
-  int(72)
-  [72]=>
-  int(73)
-  [73]=>
-  int(74)
-  [74]=>
-  int(75)
-  [75]=>
-  int(76)
-  [76]=>
-  int(77)
-  [77]=>
-  int(78)
-  [78]=>
-  int(79)
-  [79]=>
-  int(80)
-  [80]=>
-  int(81)
-  [81]=>
-  int(82)
-  [82]=>
-  int(83)
-  [83]=>
-  int(84)
-  [84]=>
-  int(85)
-  [85]=>
-  int(86)
-  [86]=>
-  int(87)
-  [87]=>
-  int(88)
-  [88]=>
-  int(89)
-  [89]=>
-  int(90)
-  [90]=>
-  int(91)
-  [91]=>
-  int(92)
-  [92]=>
-  int(93)
-  [93]=>
-  int(94)
-  [94]=>
-  int(95)
-  [95]=>
-  int(96)
-  [96]=>
-  int(97)
-  [97]=>
-  int(98)
-  [98]=>
-  int(99)
-  [99]=>
-  int(100)
 }
-array(100) {
+
+-- An array of elements from high to low --
+array(10) {
   [0]=>
-  int(100)
-  [1]=>
-  int(99)
-  [2]=>
-  int(98)
-  [3]=>
-  int(97)
-  [4]=>
-  int(96)
-  [5]=>
-  int(95)
-  [6]=>
-  int(94)
-  [7]=>
-  int(93)
-  [8]=>
-  int(92)
-  [9]=>
-  int(91)
-  [10]=>
-  int(90)
-  [11]=>
-  int(89)
-  [12]=>
-  int(88)
-  [13]=>
-  int(87)
-  [14]=>
-  int(86)
-  [15]=>
-  int(85)
-  [16]=>
-  int(84)
-  [17]=>
-  int(83)
-  [18]=>
-  int(82)
-  [19]=>
-  int(81)
-  [20]=>
-  int(80)
-  [21]=>
-  int(79)
-  [22]=>
-  int(78)
-  [23]=>
-  int(77)
-  [24]=>
-  int(76)
-  [25]=>
-  int(75)
-  [26]=>
-  int(74)
-  [27]=>
-  int(73)
-  [28]=>
-  int(72)
-  [29]=>
-  int(71)
-  [30]=>
-  int(70)
-  [31]=>
-  int(69)
-  [32]=>
-  int(68)
-  [33]=>
-  int(67)
-  [34]=>
-  int(66)
-  [35]=>
-  int(65)
-  [36]=>
-  int(64)
-  [37]=>
-  int(63)
-  [38]=>
-  int(62)
-  [39]=>
-  int(61)
-  [40]=>
-  int(60)
-  [41]=>
-  int(59)
-  [42]=>
-  int(58)
-  [43]=>
-  int(57)
-  [44]=>
-  int(56)
-  [45]=>
-  int(55)
-  [46]=>
-  int(54)
-  [47]=>
-  int(53)
-  [48]=>
-  int(52)
-  [49]=>
-  int(51)
-  [50]=>
-  int(50)
-  [51]=>
-  int(49)
-  [52]=>
-  int(48)
-  [53]=>
-  int(47)
-  [54]=>
-  int(46)
-  [55]=>
-  int(45)
-  [56]=>
-  int(44)
-  [57]=>
-  int(43)
-  [58]=>
-  int(42)
-  [59]=>
-  int(41)
-  [60]=>
-  int(40)
-  [61]=>
-  int(39)
-  [62]=>
-  int(38)
-  [63]=>
-  int(37)
-  [64]=>
-  int(36)
-  [65]=>
-  int(35)
-  [66]=>
-  int(34)
-  [67]=>
-  int(33)
-  [68]=>
-  int(32)
-  [69]=>
-  int(31)
-  [70]=>
-  int(30)
-  [71]=>
-  int(29)
-  [72]=>
-  int(28)
-  [73]=>
-  int(27)
-  [74]=>
-  int(26)
-  [75]=>
-  int(25)
-  [76]=>
-  int(24)
-  [77]=>
-  int(23)
-  [78]=>
-  int(22)
-  [79]=>
-  int(21)
-  [80]=>
-  int(20)
-  [81]=>
-  int(19)
-  [82]=>
-  int(18)
-  [83]=>
-  int(17)
-  [84]=>
-  int(16)
-  [85]=>
-  int(15)
-  [86]=>
-  int(14)
-  [87]=>
-  int(13)
-  [88]=>
-  int(12)
-  [89]=>
-  int(11)
-  [90]=>
   int(10)
-  [91]=>
+  [1]=>
   int(9)
-  [92]=>
+  [2]=>
   int(8)
-  [93]=>
+  [3]=>
   int(7)
-  [94]=>
+  [4]=>
   int(6)
-  [95]=>
+  [5]=>
   int(5)
-  [96]=>
+  [6]=>
   int(4)
-  [97]=>
+  [7]=>
   int(3)
-  [98]=>
+  [8]=>
   int(2)
-  [99]=>
+  [9]=>
   int(1)
 }
+
+-- Chars as Low and High --
+-- An array of elements from low to high --
 array(26) {
   [0]=>
   string(1) "a"
@@ -891,6 +261,8 @@ array(26) {
   [25]=>
   string(1) "z"
 }
+
+-- An array of elements from high to low --
 array(26) {
   [0]=>
   string(1) "z"
@@ -945,408 +317,906 @@ array(26) {
   [25]=>
   string(1) "a"
 }
+
+-- Low and High are equal --
+array(1) {
+  [0]=>
+  int(5)
+}
 array(1) {
   [0]=>
   string(1) "q"
 }
+
+-- floats as Low and High --
+array(6) {
+  [0]=>
+  float(5.1)
+  [1]=>
+  float(6.1)
+  [2]=>
+  float(7.1)
+  [3]=>
+  float(8.1)
+  [4]=>
+  float(9.1)
+  [5]=>
+  float(10.1)
+}
+array(6) {
+  [0]=>
+  float(10.1)
+  [1]=>
+  float(9.1)
+  [2]=>
+  float(8.1)
+  [3]=>
+  float(7.1)
+  [4]=>
+  float(6.1)
+  [5]=>
+  float(5.1)
+}
+array(6) {
+  [0]=>
+  float(5.1)
+  [1]=>
+  float(6.1)
+  [2]=>
+  float(7.1)
+  [3]=>
+  float(8.1)
+  [4]=>
+  float(9.1)
+  [5]=>
+  float(10.1)
+}
+array(6) {
+  [0]=>
+  float(10.1)
+  [1]=>
+  float(9.1)
+  [2]=>
+  float(8.1)
+  [3]=>
+  float(7.1)
+  [4]=>
+  float(6.1)
+  [5]=>
+  float(5.1)
+}
+
+-- Passing step with Low and High --
+array(11) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(1.1)
+  [2]=>
+  float(1.2)
+  [3]=>
+  float(1.3)
+  [4]=>
+  float(1.4)
+  [5]=>
+  float(1.5)
+  [6]=>
+  float(1.6)
+  [7]=>
+  float(1.7)
+  [8]=>
+  float(1.8)
+  [9]=>
+  float(1.9)
+  [10]=>
+  float(2)
+}
+array(11) {
+  [0]=>
+  float(2)
+  [1]=>
+  float(1.9)
+  [2]=>
+  float(1.8)
+  [3]=>
+  float(1.7)
+  [4]=>
+  float(1.6)
+  [5]=>
+  float(1.5)
+  [6]=>
+  float(1.4)
+  [7]=>
+  float(1.3)
+  [8]=>
+  float(1.2)
+  [9]=>
+  float(1.1)
+  [10]=>
+  float(1)
+}
+array(11) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(1.1)
+  [2]=>
+  float(1.2)
+  [3]=>
+  float(1.3)
+  [4]=>
+  float(1.4)
+  [5]=>
+  float(1.5)
+  [6]=>
+  float(1.6)
+  [7]=>
+  float(1.7)
+  [8]=>
+  float(1.8)
+  [9]=>
+  float(1.9)
+  [10]=>
+  float(2)
+}
+array(11) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(1.1)
+  [2]=>
+  float(1.2)
+  [3]=>
+  float(1.3)
+  [4]=>
+  float(1.4)
+  [5]=>
+  float(1.5)
+  [6]=>
+  float(1.6)
+  [7]=>
+  float(1.7)
+  [8]=>
+  float(1.8)
+  [9]=>
+  float(1.9)
+  [10]=>
+  float(2)
+}
+
+-- Testing basic string with step --
+array(7) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "e"
+  [3]=>
+  string(1) "g"
+  [4]=>
+  string(1) "i"
+  [5]=>
+  string(1) "k"
+  [6]=>
+  string(1) "m"
+}
+
+*** Testing range() with various low and high values ***
+-- creating an array with low = 'ABCD' and high = 'ABCD' --
 array(1) {
   [0]=>
+  string(1) "A"
+}
+
+-- creating an array with low = 'ABCD' and high = '-10.5555' --
+array(11) {
+  [0]=>
+  float(0)
+  [1]=>
+  float(-1)
+  [2]=>
+  float(-2)
+  [3]=>
+  float(-3)
+  [4]=>
+  float(-4)
+  [5]=>
+  float(-5)
+  [6]=>
+  float(-6)
+  [7]=>
+  float(-7)
+  [8]=>
+  float(-8)
+  [9]=>
+  float(-9)
+  [10]=>
+  float(-10)
+}
+
+-- creating an array with low = 'ABCD' and high = '1' --
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = 'ABCD' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'ABCD' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'ABCD' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'ABCD' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  string(1) "A"
+}
+
+-- creating an array with low = '-10.5555' and high = 'ABCD' --
+array(11) {
+  [0]=>
+  float(-10.5555)
+  [1]=>
+  float(-9.5555)
+  [2]=>
+  float(-8.5555)
+  [3]=>
+  float(-7.5555)
+  [4]=>
+  float(-6.5555)
+  [5]=>
+  float(-5.5555)
+  [6]=>
+  float(-4.5555)
+  [7]=>
+  float(-3.5555)
+  [8]=>
+  float(-2.5555)
+  [9]=>
+  float(-1.5555)
+  [10]=>
+  float(-0.5555)
+}
+
+-- creating an array with low = '-10.5555' and high = '-10.5555' --
+array(1) {
+  [0]=>
+  float(-10.5555)
+}
+
+-- creating an array with low = '-10.5555' and high = '1' --
+array(12) {
+  [0]=>
+  float(-10.5555)
+  [1]=>
+  float(-9.5555)
+  [2]=>
+  float(-8.5555)
+  [3]=>
+  float(-7.5555)
+  [4]=>
+  float(-6.5555)
+  [5]=>
+  float(-5.5555)
+  [6]=>
+  float(-4.5555)
+  [7]=>
+  float(-3.5555)
+  [8]=>
+  float(-2.5555)
+  [9]=>
+  float(-1.5555)
+  [10]=>
+  float(-0.5555)
+  [11]=>
+  float(0.4445)
+}
+
+-- creating an array with low = '-10.5555' and high = '' --
+array(11) {
+  [0]=>
+  int(-10)
+  [1]=>
+  int(-9)
+  [2]=>
+  int(-8)
+  [3]=>
+  int(-7)
+  [4]=>
+  int(-6)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-4)
+  [7]=>
+  int(-3)
+  [8]=>
+  int(-2)
+  [9]=>
+  int(-1)
+  [10]=>
+  int(0)
+}
+
+-- creating an array with low = '-10.5555' and high = '' --
+array(11) {
+  [0]=>
+  int(-10)
+  [1]=>
+  int(-9)
+  [2]=>
+  int(-8)
+  [3]=>
+  int(-7)
+  [4]=>
+  int(-6)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-4)
+  [7]=>
+  int(-3)
+  [8]=>
+  int(-2)
+  [9]=>
+  int(-1)
+  [10]=>
+  int(0)
+}
+
+-- creating an array with low = '-10.5555' and high = '' --
+array(11) {
+  [0]=>
+  int(-10)
+  [1]=>
+  int(-9)
+  [2]=>
+  int(-8)
+  [3]=>
+  int(-7)
+  [4]=>
+  int(-6)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-4)
+  [7]=>
+  int(-3)
+  [8]=>
+  int(-2)
+  [9]=>
+  int(-1)
+  [10]=>
+  int(0)
+}
+
+-- creating an array with low = '-10.5555' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(11) {
+  [0]=>
+  float(-10.5555)
+  [1]=>
+  float(-9.5555)
+  [2]=>
+  float(-8.5555)
+  [3]=>
+  float(-7.5555)
+  [4]=>
+  float(-6.5555)
+  [5]=>
+  float(-5.5555)
+  [6]=>
+  float(-4.5555)
+  [7]=>
+  float(-3.5555)
+  [8]=>
+  float(-2.5555)
+  [9]=>
+  float(-1.5555)
+  [10]=>
+  float(-0.5555)
+}
+
+-- creating an array with low = '1' and high = 'ABCD' --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+
+-- creating an array with low = '1' and high = '-10.5555' --
+array(12) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(0)
+  [2]=>
+  float(-1)
+  [3]=>
+  float(-2)
+  [4]=>
+  float(-3)
+  [5]=>
+  float(-4)
+  [6]=>
+  float(-5)
+  [7]=>
+  float(-6)
+  [8]=>
+  float(-7)
+  [9]=>
+  float(-8)
+  [10]=>
+  float(-9)
+  [11]=>
+  float(-10)
+}
+
+-- creating an array with low = '1' and high = '1' --
+array(1) {
+  [0]=>
+  int(1)
+}
+
+-- creating an array with low = '1' and high = '' --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+
+-- creating an array with low = '1' and high = '' --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+
+-- creating an array with low = '1' and high = '' --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+
+-- creating an array with low = '1' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'ABCD' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '-10.5555' --
+array(11) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(-1)
+  [2]=>
+  int(-2)
+  [3]=>
+  int(-3)
+  [4]=>
+  int(-4)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-6)
+  [7]=>
+  int(-7)
+  [8]=>
+  int(-8)
+  [9]=>
+  int(-9)
+  [10]=>
+  int(-10)
+}
+
+-- creating an array with low = '' and high = '1' --
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'ABCD' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '-10.5555' --
+array(11) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(-1)
+  [2]=>
+  int(-2)
+  [3]=>
+  int(-3)
+  [4]=>
+  int(-4)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-6)
+  [7]=>
+  int(-7)
+  [8]=>
+  int(-8)
+  [9]=>
+  int(-9)
+  [10]=>
+  int(-10)
+}
+
+-- creating an array with low = '' and high = '1' --
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'ABCD' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '-10.5555' --
+array(11) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(-1)
+  [2]=>
+  int(-2)
+  [3]=>
+  int(-3)
+  [4]=>
+  int(-4)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-6)
+  [7]=>
+  int(-7)
+  [8]=>
+  int(-8)
+  [9]=>
+  int(-9)
+  [10]=>
+  int(-10)
+}
+
+-- creating an array with low = '' and high = '1' --
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = 'ABCD' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  string(1) "A"
+}
+
+-- creating an array with low = 'Array' and high = '-10.5555' --
+
+Notice: Array to string conversion in %s on line %d
+array(11) {
+  [0]=>
+  float(0)
+  [1]=>
+  float(-1)
+  [2]=>
+  float(-2)
+  [3]=>
+  float(-3)
+  [4]=>
+  float(-4)
+  [5]=>
+  float(-5)
+  [6]=>
+  float(-6)
+  [7]=>
+  float(-7)
+  [8]=>
+  float(-8)
+  [9]=>
+  float(-9)
+  [10]=>
+  float(-10)
+}
+
+-- creating an array with low = 'Array' and high = '1' --
+
+Notice: Array to string conversion in %s on line %d
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = 'Array' and high = '' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = '' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = '' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  string(1) "A"
+}
+
+*** Possible variatins with steps ***
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
   int(5)
 }
-array(6) {
+array(5) {
   [0]=>
-  float(5.1)
+  int(1)
   [1]=>
-  float(6.1)
+  int(2)
   [2]=>
-  float(7.1)
+  int(3)
   [3]=>
-  float(8.1)
+  int(4)
   [4]=>
-  float(9.1)
-  [5]=>
-  float(10.1)
+  int(5)
 }
-array(6) {
+
+*** Testing max/outof range values ***
+array(2) {
   [0]=>
-  float(10.1)
+  int(2147483645)
   [1]=>
-  float(9.1)
-  [2]=>
-  float(8.1)
-  [3]=>
-  float(7.1)
-  [4]=>
-  float(6.1)
-  [5]=>
-  float(5.1)
+  int(2147483646)
 }
-array(6) {
+array(3) {
   [0]=>
-  float(5.1)
+  float(2147483646)
   [1]=>
-  float(6.1)
+  float(2147483647)
   [2]=>
-  float(7.1)
-  [3]=>
-  float(8.1)
-  [4]=>
-  float(9.1)
-  [5]=>
-  float(10.1)
+  float(2147483648)
 }
-array(6) {
+array(2) {
   [0]=>
-  float(10.1)
+  int(-2147483647)
   [1]=>
-  float(9.1)
-  [2]=>
-  float(8.1)
-  [3]=>
-  float(7.1)
-  [4]=>
-  float(6.1)
-  [5]=>
-  float(5.1)
+  int(-2147483646)
 }
-array(41) {
+array(2) {
   [0]=>
-  float(1)
+  int(-2147483648)
   [1]=>
-  float(1.1)
-  [2]=>
-  float(1.2)
-  [3]=>
-  float(1.3)
-  [4]=>
-  float(1.4)
-  [5]=>
-  float(1.5)
-  [6]=>
-  float(1.6)
-  [7]=>
-  float(1.7)
-  [8]=>
-  float(1.8)
-  [9]=>
-  float(1.9)
-  [10]=>
-  float(2)
-  [11]=>
-  float(2.1)
-  [12]=>
-  float(2.2)
-  [13]=>
-  float(2.3)
-  [14]=>
-  float(2.4)
-  [15]=>
-  float(2.5)
-  [16]=>
-  float(2.6)
-  [17]=>
-  float(2.7)
-  [18]=>
-  float(2.8)
-  [19]=>
-  float(2.9)
-  [20]=>
-  float(3)
-  [21]=>
-  float(3.1)
-  [22]=>
-  float(3.2)
-  [23]=>
-  float(3.3)
-  [24]=>
-  float(3.4)
-  [25]=>
-  float(3.5)
-  [26]=>
-  float(3.6)
-  [27]=>
-  float(3.7)
-  [28]=>
-  float(3.8)
-  [29]=>
-  float(3.9)
-  [30]=>
-  float(4)
-  [31]=>
-  float(4.1)
-  [32]=>
-  float(4.2)
-  [33]=>
-  float(4.3)
-  [34]=>
-  float(4.4)
-  [35]=>
-  float(4.5)
-  [36]=>
-  float(4.6)
-  [37]=>
-  float(4.7)
-  [38]=>
-  float(4.8)
-  [39]=>
-  float(4.9)
-  [40]=>
-  float(5)
+  int(-2147483647)
 }
-array(41) {
+array(3) {
   [0]=>
-  float(5)
+  float(-2147483649)
   [1]=>
-  float(4.9)
+  float(-2147483648)
   [2]=>
-  float(4.8)
-  [3]=>
-  float(4.7)
-  [4]=>
-  float(4.6)
-  [5]=>
-  float(4.5)
-  [6]=>
-  float(4.4)
-  [7]=>
-  float(4.3)
-  [8]=>
-  float(4.2)
-  [9]=>
-  float(4.1)
-  [10]=>
-  float(4)
-  [11]=>
-  float(3.9)
-  [12]=>
-  float(3.8)
-  [13]=>
-  float(3.7)
-  [14]=>
-  float(3.6)
-  [15]=>
-  float(3.5)
-  [16]=>
-  float(3.4)
-  [17]=>
-  float(3.3)
-  [18]=>
-  float(3.2)
-  [19]=>
-  float(3.1)
-  [20]=>
-  float(3)
-  [21]=>
-  float(2.9)
-  [22]=>
-  float(2.8)
-  [23]=>
-  float(2.7)
-  [24]=>
-  float(2.6)
-  [25]=>
-  float(2.5)
-  [26]=>
-  float(2.4)
-  [27]=>
-  float(2.3)
-  [28]=>
-  float(2.2)
-  [29]=>
-  float(2.1)
-  [30]=>
-  float(2)
-  [31]=>
-  float(1.9)
-  [32]=>
-  float(1.8)
-  [33]=>
-  float(1.7)
-  [34]=>
-  float(1.6)
-  [35]=>
-  float(1.5)
-  [36]=>
-  float(1.4)
-  [37]=>
-  float(1.3)
-  [38]=>
-  float(1.2)
-  [39]=>
-  float(1.1)
-  [40]=>
-  float(1)
+  float(-2147483647)
 }
-array(41) {
-  [0]=>
-  float(1)
-  [1]=>
-  float(1.1)
-  [2]=>
-  float(1.2)
-  [3]=>
-  float(1.3)
-  [4]=>
-  float(1.4)
-  [5]=>
-  float(1.5)
-  [6]=>
-  float(1.6)
-  [7]=>
-  float(1.7)
-  [8]=>
-  float(1.8)
-  [9]=>
-  float(1.9)
-  [10]=>
-  float(2)
-  [11]=>
-  float(2.1)
-  [12]=>
-  float(2.2)
-  [13]=>
-  float(2.3)
-  [14]=>
-  float(2.4)
-  [15]=>
-  float(2.5)
-  [16]=>
-  float(2.6)
-  [17]=>
-  float(2.7)
-  [18]=>
-  float(2.8)
-  [19]=>
-  float(2.9)
-  [20]=>
-  float(3)
-  [21]=>
-  float(3.1)
-  [22]=>
-  float(3.2)
-  [23]=>
-  float(3.3)
-  [24]=>
-  float(3.4)
-  [25]=>
-  float(3.5)
-  [26]=>
-  float(3.6)
-  [27]=>
-  float(3.7)
-  [28]=>
-  float(3.8)
-  [29]=>
-  float(3.9)
-  [30]=>
-  float(4)
-  [31]=>
-  float(4.1)
-  [32]=>
-  float(4.2)
-  [33]=>
-  float(4.3)
-  [34]=>
-  float(4.4)
-  [35]=>
-  float(4.5)
-  [36]=>
-  float(4.6)
-  [37]=>
-  float(4.7)
-  [38]=>
-  float(4.8)
-  [39]=>
-  float(4.9)
-  [40]=>
-  float(5)
-}
-array(41) {
-  [0]=>
-  float(1)
-  [1]=>
-  float(1.1)
-  [2]=>
-  float(1.2)
-  [3]=>
-  float(1.3)
-  [4]=>
-  float(1.4)
-  [5]=>
-  float(1.5)
-  [6]=>
-  float(1.6)
-  [7]=>
-  float(1.7)
-  [8]=>
-  float(1.8)
-  [9]=>
-  float(1.9)
-  [10]=>
-  float(2)
-  [11]=>
-  float(2.1)
-  [12]=>
-  float(2.2)
-  [13]=>
-  float(2.3)
-  [14]=>
-  float(2.4)
-  [15]=>
-  float(2.5)
-  [16]=>
-  float(2.6)
-  [17]=>
-  float(2.7)
-  [18]=>
-  float(2.8)
-  [19]=>
-  float(2.9)
-  [20]=>
-  float(3)
-  [21]=>
-  float(3.1)
-  [22]=>
-  float(3.2)
-  [23]=>
-  float(3.3)
-  [24]=>
-  float(3.4)
-  [25]=>
-  float(3.5)
-  [26]=>
-  float(3.6)
-  [27]=>
-  float(3.7)
-  [28]=>
-  float(3.8)
-  [29]=>
-  float(3.9)
-  [30]=>
-  float(4)
-  [31]=>
-  float(4.1)
-  [32]=>
-  float(4.2)
-  [33]=>
-  float(4.3)
-  [34]=>
-  float(4.4)
-  [35]=>
-  float(4.5)
-  [36]=>
-  float(4.6)
-  [37]=>
-  float(4.7)
-  [38]=>
-  float(4.8)
-  [39]=>
-  float(4.9)
-  [40]=>
-  float(5)
-}
---UEXPECT--
-array(100) {
+
+*** Testing error conditions ***
+
+-- Testing ( (low < high) && (step = 0) ) --
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+
+-- Testing ( (low > high) && (step = 0) ) --
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+
+-- Testing ( (low < high) && (high-low < step) ) --
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+
+-- Testing ( (low > high) && (low-high < step) ) --
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+-- Testing Invalid number of arguments --
+Warning: range() expects at least 2 parameters, 0 given in %s on line %d
+bool(false)
+
+Warning: range() expects at least 2 parameters, 1 given in %s on line %d
+bool(false)
+
+Warning: range() expects at most 3 parameters, 4 given in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+-- Testing Invalid steps --
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Done
+--UEXPECTF--
+*** Testing range() function on basic operations ***
+
+-- Integers as Low and High --
+-- An array of elements from low to high --
+array(10) {
   [0]=>
   int(1)
   [1]=>
@@ -1367,390 +1237,35 @@ array(100) {
   int(9)
   [9]=>
   int(10)
-  [10]=>
-  int(11)
-  [11]=>
-  int(12)
-  [12]=>
-  int(13)
-  [13]=>
-  int(14)
-  [14]=>
-  int(15)
-  [15]=>
-  int(16)
-  [16]=>
-  int(17)
-  [17]=>
-  int(18)
-  [18]=>
-  int(19)
-  [19]=>
-  int(20)
-  [20]=>
-  int(21)
-  [21]=>
-  int(22)
-  [22]=>
-  int(23)
-  [23]=>
-  int(24)
-  [24]=>
-  int(25)
-  [25]=>
-  int(26)
-  [26]=>
-  int(27)
-  [27]=>
-  int(28)
-  [28]=>
-  int(29)
-  [29]=>
-  int(30)
-  [30]=>
-  int(31)
-  [31]=>
-  int(32)
-  [32]=>
-  int(33)
-  [33]=>
-  int(34)
-  [34]=>
-  int(35)
-  [35]=>
-  int(36)
-  [36]=>
-  int(37)
-  [37]=>
-  int(38)
-  [38]=>
-  int(39)
-  [39]=>
-  int(40)
-  [40]=>
-  int(41)
-  [41]=>
-  int(42)
-  [42]=>
-  int(43)
-  [43]=>
-  int(44)
-  [44]=>
-  int(45)
-  [45]=>
-  int(46)
-  [46]=>
-  int(47)
-  [47]=>
-  int(48)
-  [48]=>
-  int(49)
-  [49]=>
-  int(50)
-  [50]=>
-  int(51)
-  [51]=>
-  int(52)
-  [52]=>
-  int(53)
-  [53]=>
-  int(54)
-  [54]=>
-  int(55)
-  [55]=>
-  int(56)
-  [56]=>
-  int(57)
-  [57]=>
-  int(58)
-  [58]=>
-  int(59)
-  [59]=>
-  int(60)
-  [60]=>
-  int(61)
-  [61]=>
-  int(62)
-  [62]=>
-  int(63)
-  [63]=>
-  int(64)
-  [64]=>
-  int(65)
-  [65]=>
-  int(66)
-  [66]=>
-  int(67)
-  [67]=>
-  int(68)
-  [68]=>
-  int(69)
-  [69]=>
-  int(70)
-  [70]=>
-  int(71)
-  [71]=>
-  int(72)
-  [72]=>
-  int(73)
-  [73]=>
-  int(74)
-  [74]=>
-  int(75)
-  [75]=>
-  int(76)
-  [76]=>
-  int(77)
-  [77]=>
-  int(78)
-  [78]=>
-  int(79)
-  [79]=>
-  int(80)
-  [80]=>
-  int(81)
-  [81]=>
-  int(82)
-  [82]=>
-  int(83)
-  [83]=>
-  int(84)
-  [84]=>
-  int(85)
-  [85]=>
-  int(86)
-  [86]=>
-  int(87)
-  [87]=>
-  int(88)
-  [88]=>
-  int(89)
-  [89]=>
-  int(90)
-  [90]=>
-  int(91)
-  [91]=>
-  int(92)
-  [92]=>
-  int(93)
-  [93]=>
-  int(94)
-  [94]=>
-  int(95)
-  [95]=>
-  int(96)
-  [96]=>
-  int(97)
-  [97]=>
-  int(98)
-  [98]=>
-  int(99)
-  [99]=>
-  int(100)
 }
-array(100) {
+
+-- An array of elements from high to low --
+array(10) {
   [0]=>
-  int(100)
-  [1]=>
-  int(99)
-  [2]=>
-  int(98)
-  [3]=>
-  int(97)
-  [4]=>
-  int(96)
-  [5]=>
-  int(95)
-  [6]=>
-  int(94)
-  [7]=>
-  int(93)
-  [8]=>
-  int(92)
-  [9]=>
-  int(91)
-  [10]=>
-  int(90)
-  [11]=>
-  int(89)
-  [12]=>
-  int(88)
-  [13]=>
-  int(87)
-  [14]=>
-  int(86)
-  [15]=>
-  int(85)
-  [16]=>
-  int(84)
-  [17]=>
-  int(83)
-  [18]=>
-  int(82)
-  [19]=>
-  int(81)
-  [20]=>
-  int(80)
-  [21]=>
-  int(79)
-  [22]=>
-  int(78)
-  [23]=>
-  int(77)
-  [24]=>
-  int(76)
-  [25]=>
-  int(75)
-  [26]=>
-  int(74)
-  [27]=>
-  int(73)
-  [28]=>
-  int(72)
-  [29]=>
-  int(71)
-  [30]=>
-  int(70)
-  [31]=>
-  int(69)
-  [32]=>
-  int(68)
-  [33]=>
-  int(67)
-  [34]=>
-  int(66)
-  [35]=>
-  int(65)
-  [36]=>
-  int(64)
-  [37]=>
-  int(63)
-  [38]=>
-  int(62)
-  [39]=>
-  int(61)
-  [40]=>
-  int(60)
-  [41]=>
-  int(59)
-  [42]=>
-  int(58)
-  [43]=>
-  int(57)
-  [44]=>
-  int(56)
-  [45]=>
-  int(55)
-  [46]=>
-  int(54)
-  [47]=>
-  int(53)
-  [48]=>
-  int(52)
-  [49]=>
-  int(51)
-  [50]=>
-  int(50)
-  [51]=>
-  int(49)
-  [52]=>
-  int(48)
-  [53]=>
-  int(47)
-  [54]=>
-  int(46)
-  [55]=>
-  int(45)
-  [56]=>
-  int(44)
-  [57]=>
-  int(43)
-  [58]=>
-  int(42)
-  [59]=>
-  int(41)
-  [60]=>
-  int(40)
-  [61]=>
-  int(39)
-  [62]=>
-  int(38)
-  [63]=>
-  int(37)
-  [64]=>
-  int(36)
-  [65]=>
-  int(35)
-  [66]=>
-  int(34)
-  [67]=>
-  int(33)
-  [68]=>
-  int(32)
-  [69]=>
-  int(31)
-  [70]=>
-  int(30)
-  [71]=>
-  int(29)
-  [72]=>
-  int(28)
-  [73]=>
-  int(27)
-  [74]=>
-  int(26)
-  [75]=>
-  int(25)
-  [76]=>
-  int(24)
-  [77]=>
-  int(23)
-  [78]=>
-  int(22)
-  [79]=>
-  int(21)
-  [80]=>
-  int(20)
-  [81]=>
-  int(19)
-  [82]=>
-  int(18)
-  [83]=>
-  int(17)
-  [84]=>
-  int(16)
-  [85]=>
-  int(15)
-  [86]=>
-  int(14)
-  [87]=>
-  int(13)
-  [88]=>
-  int(12)
-  [89]=>
-  int(11)
-  [90]=>
   int(10)
-  [91]=>
+  [1]=>
   int(9)
-  [92]=>
+  [2]=>
   int(8)
-  [93]=>
+  [3]=>
   int(7)
-  [94]=>
+  [4]=>
   int(6)
-  [95]=>
+  [5]=>
   int(5)
-  [96]=>
+  [6]=>
   int(4)
-  [97]=>
+  [7]=>
   int(3)
-  [98]=>
+  [8]=>
   int(2)
-  [99]=>
+  [9]=>
   int(1)
 }
-array(100) {
+
+-- Numeric Strings as Low and High --
+-- An array of elements from low to high --
+array(10) {
   [0]=>
   int(1)
   [1]=>
@@ -1771,389 +1286,34 @@ array(100) {
   int(9)
   [9]=>
   int(10)
-  [10]=>
-  int(11)
-  [11]=>
-  int(12)
-  [12]=>
-  int(13)
-  [13]=>
-  int(14)
-  [14]=>
-  int(15)
-  [15]=>
-  int(16)
-  [16]=>
-  int(17)
-  [17]=>
-  int(18)
-  [18]=>
-  int(19)
-  [19]=>
-  int(20)
-  [20]=>
-  int(21)
-  [21]=>
-  int(22)
-  [22]=>
-  int(23)
-  [23]=>
-  int(24)
-  [24]=>
-  int(25)
-  [25]=>
-  int(26)
-  [26]=>
-  int(27)
-  [27]=>
-  int(28)
-  [28]=>
-  int(29)
-  [29]=>
-  int(30)
-  [30]=>
-  int(31)
-  [31]=>
-  int(32)
-  [32]=>
-  int(33)
-  [33]=>
-  int(34)
-  [34]=>
-  int(35)
-  [35]=>
-  int(36)
-  [36]=>
-  int(37)
-  [37]=>
-  int(38)
-  [38]=>
-  int(39)
-  [39]=>
-  int(40)
-  [40]=>
-  int(41)
-  [41]=>
-  int(42)
-  [42]=>
-  int(43)
-  [43]=>
-  int(44)
-  [44]=>
-  int(45)
-  [45]=>
-  int(46)
-  [46]=>
-  int(47)
-  [47]=>
-  int(48)
-  [48]=>
-  int(49)
-  [49]=>
-  int(50)
-  [50]=>
-  int(51)
-  [51]=>
-  int(52)
-  [52]=>
-  int(53)
-  [53]=>
-  int(54)
-  [54]=>
-  int(55)
-  [55]=>
-  int(56)
-  [56]=>
-  int(57)
-  [57]=>
-  int(58)
-  [58]=>
-  int(59)
-  [59]=>
-  int(60)
-  [60]=>
-  int(61)
-  [61]=>
-  int(62)
-  [62]=>
-  int(63)
-  [63]=>
-  int(64)
-  [64]=>
-  int(65)
-  [65]=>
-  int(66)
-  [66]=>
-  int(67)
-  [67]=>
-  int(68)
-  [68]=>
-  int(69)
-  [69]=>
-  int(70)
-  [70]=>
-  int(71)
-  [71]=>
-  int(72)
-  [72]=>
-  int(73)
-  [73]=>
-  int(74)
-  [74]=>
-  int(75)
-  [75]=>
-  int(76)
-  [76]=>
-  int(77)
-  [77]=>
-  int(78)
-  [78]=>
-  int(79)
-  [79]=>
-  int(80)
-  [80]=>
-  int(81)
-  [81]=>
-  int(82)
-  [82]=>
-  int(83)
-  [83]=>
-  int(84)
-  [84]=>
-  int(85)
-  [85]=>
-  int(86)
-  [86]=>
-  int(87)
-  [87]=>
-  int(88)
-  [88]=>
-  int(89)
-  [89]=>
-  int(90)
-  [90]=>
-  int(91)
-  [91]=>
-  int(92)
-  [92]=>
-  int(93)
-  [93]=>
-  int(94)
-  [94]=>
-  int(95)
-  [95]=>
-  int(96)
-  [96]=>
-  int(97)
-  [97]=>
-  int(98)
-  [98]=>
-  int(99)
-  [99]=>
-  int(100)
 }
-array(100) {
+
+-- An array of elements from high to low --
+array(10) {
   [0]=>
-  int(100)
-  [1]=>
-  int(99)
-  [2]=>
-  int(98)
-  [3]=>
-  int(97)
-  [4]=>
-  int(96)
-  [5]=>
-  int(95)
-  [6]=>
-  int(94)
-  [7]=>
-  int(93)
-  [8]=>
-  int(92)
-  [9]=>
-  int(91)
-  [10]=>
-  int(90)
-  [11]=>
-  int(89)
-  [12]=>
-  int(88)
-  [13]=>
-  int(87)
-  [14]=>
-  int(86)
-  [15]=>
-  int(85)
-  [16]=>
-  int(84)
-  [17]=>
-  int(83)
-  [18]=>
-  int(82)
-  [19]=>
-  int(81)
-  [20]=>
-  int(80)
-  [21]=>
-  int(79)
-  [22]=>
-  int(78)
-  [23]=>
-  int(77)
-  [24]=>
-  int(76)
-  [25]=>
-  int(75)
-  [26]=>
-  int(74)
-  [27]=>
-  int(73)
-  [28]=>
-  int(72)
-  [29]=>
-  int(71)
-  [30]=>
-  int(70)
-  [31]=>
-  int(69)
-  [32]=>
-  int(68)
-  [33]=>
-  int(67)
-  [34]=>
-  int(66)
-  [35]=>
-  int(65)
-  [36]=>
-  int(64)
-  [37]=>
-  int(63)
-  [38]=>
-  int(62)
-  [39]=>
-  int(61)
-  [40]=>
-  int(60)
-  [41]=>
-  int(59)
-  [42]=>
-  int(58)
-  [43]=>
-  int(57)
-  [44]=>
-  int(56)
-  [45]=>
-  int(55)
-  [46]=>
-  int(54)
-  [47]=>
-  int(53)
-  [48]=>
-  int(52)
-  [49]=>
-  int(51)
-  [50]=>
-  int(50)
-  [51]=>
-  int(49)
-  [52]=>
-  int(48)
-  [53]=>
-  int(47)
-  [54]=>
-  int(46)
-  [55]=>
-  int(45)
-  [56]=>
-  int(44)
-  [57]=>
-  int(43)
-  [58]=>
-  int(42)
-  [59]=>
-  int(41)
-  [60]=>
-  int(40)
-  [61]=>
-  int(39)
-  [62]=>
-  int(38)
-  [63]=>
-  int(37)
-  [64]=>
-  int(36)
-  [65]=>
-  int(35)
-  [66]=>
-  int(34)
-  [67]=>
-  int(33)
-  [68]=>
-  int(32)
-  [69]=>
-  int(31)
-  [70]=>
-  int(30)
-  [71]=>
-  int(29)
-  [72]=>
-  int(28)
-  [73]=>
-  int(27)
-  [74]=>
-  int(26)
-  [75]=>
-  int(25)
-  [76]=>
-  int(24)
-  [77]=>
-  int(23)
-  [78]=>
-  int(22)
-  [79]=>
-  int(21)
-  [80]=>
-  int(20)
-  [81]=>
-  int(19)
-  [82]=>
-  int(18)
-  [83]=>
-  int(17)
-  [84]=>
-  int(16)
-  [85]=>
-  int(15)
-  [86]=>
-  int(14)
-  [87]=>
-  int(13)
-  [88]=>
-  int(12)
-  [89]=>
-  int(11)
-  [90]=>
   int(10)
-  [91]=>
+  [1]=>
   int(9)
-  [92]=>
+  [2]=>
   int(8)
-  [93]=>
+  [3]=>
   int(7)
-  [94]=>
+  [4]=>
   int(6)
-  [95]=>
+  [5]=>
   int(5)
-  [96]=>
+  [6]=>
   int(4)
-  [97]=>
+  [7]=>
   int(3)
-  [98]=>
+  [8]=>
   int(2)
-  [99]=>
+  [9]=>
   int(1)
 }
+
+-- Chars as Low and High --
+-- An array of elements from low to high --
 array(26) {
   [0]=>
   unicode(1) "a"
@@ -2208,6 +1368,8 @@ array(26) {
   [25]=>
   unicode(1) "z"
 }
+
+-- An array of elements from high to low --
 array(26) {
   [0]=>
   unicode(1) "z"
@@ -2262,14 +1424,18 @@ array(26) {
   [25]=>
   unicode(1) "a"
 }
-array(1) {
-  [0]=>
-  unicode(1) "q"
-}
+
+-- Low and High are equal --
 array(1) {
   [0]=>
   int(5)
 }
+array(1) {
+  [0]=>
+  unicode(1) "q"
+}
+
+-- floats as Low and High --
 array(6) {
   [0]=>
   float(5.1)
@@ -2326,7 +1492,9 @@ array(6) {
   [5]=>
   float(5.1)
 }
-array(41) {
+
+-- Passing step with Low and High --
+array(11) {
   [0]=>
   float(1)
   [1]=>
@@ -2349,152 +1517,32 @@ array(41) {
   float(1.9)
   [10]=>
   float(2)
-  [11]=>
-  float(2.1)
-  [12]=>
-  float(2.2)
-  [13]=>
-  float(2.3)
-  [14]=>
-  float(2.4)
-  [15]=>
-  float(2.5)
-  [16]=>
-  float(2.6)
-  [17]=>
-  float(2.7)
-  [18]=>
-  float(2.8)
-  [19]=>
-  float(2.9)
-  [20]=>
-  float(3)
-  [21]=>
-  float(3.1)
-  [22]=>
-  float(3.2)
-  [23]=>
-  float(3.3)
-  [24]=>
-  float(3.4)
-  [25]=>
-  float(3.5)
-  [26]=>
-  float(3.6)
-  [27]=>
-  float(3.7)
-  [28]=>
-  float(3.8)
-  [29]=>
-  float(3.9)
-  [30]=>
-  float(4)
-  [31]=>
-  float(4.1)
-  [32]=>
-  float(4.2)
-  [33]=>
-  float(4.3)
-  [34]=>
-  float(4.4)
-  [35]=>
-  float(4.5)
-  [36]=>
-  float(4.6)
-  [37]=>
-  float(4.7)
-  [38]=>
-  float(4.8)
-  [39]=>
-  float(4.9)
-  [40]=>
-  float(5)
 }
-array(41) {
+array(11) {
   [0]=>
-  float(5)
-  [1]=>
-  float(4.9)
-  [2]=>
-  float(4.8)
-  [3]=>
-  float(4.7)
-  [4]=>
-  float(4.6)
-  [5]=>
-  float(4.5)
-  [6]=>
-  float(4.4)
-  [7]=>
-  float(4.3)
-  [8]=>
-  float(4.2)
-  [9]=>
-  float(4.1)
-  [10]=>
-  float(4)
-  [11]=>
-  float(3.9)
-  [12]=>
-  float(3.8)
-  [13]=>
-  float(3.7)
-  [14]=>
-  float(3.6)
-  [15]=>
-  float(3.5)
-  [16]=>
-  float(3.4)
-  [17]=>
-  float(3.3)
-  [18]=>
-  float(3.2)
-  [19]=>
-  float(3.1)
-  [20]=>
-  float(3)
-  [21]=>
-  float(2.9)
-  [22]=>
-  float(2.8)
-  [23]=>
-  float(2.7)
-  [24]=>
-  float(2.6)
-  [25]=>
-  float(2.5)
-  [26]=>
-  float(2.4)
-  [27]=>
-  float(2.3)
-  [28]=>
-  float(2.2)
-  [29]=>
-  float(2.1)
-  [30]=>
   float(2)
-  [31]=>
+  [1]=>
   float(1.9)
-  [32]=>
+  [2]=>
   float(1.8)
-  [33]=>
+  [3]=>
   float(1.7)
-  [34]=>
+  [4]=>
   float(1.6)
-  [35]=>
+  [5]=>
   float(1.5)
-  [36]=>
+  [6]=>
   float(1.4)
-  [37]=>
+  [7]=>
   float(1.3)
-  [38]=>
+  [8]=>
   float(1.2)
-  [39]=>
+  [9]=>
   float(1.1)
-  [40]=>
+  [10]=>
   float(1)
 }
-array(41) {
+array(11) {
   [0]=>
   float(1)
   [1]=>
@@ -2517,68 +1565,8 @@ array(41) {
   float(1.9)
   [10]=>
   float(2)
-  [11]=>
-  float(2.1)
-  [12]=>
-  float(2.2)
-  [13]=>
-  float(2.3)
-  [14]=>
-  float(2.4)
-  [15]=>
-  float(2.5)
-  [16]=>
-  float(2.6)
-  [17]=>
-  float(2.7)
-  [18]=>
-  float(2.8)
-  [19]=>
-  float(2.9)
-  [20]=>
-  float(3)
-  [21]=>
-  float(3.1)
-  [22]=>
-  float(3.2)
-  [23]=>
-  float(3.3)
-  [24]=>
-  float(3.4)
-  [25]=>
-  float(3.5)
-  [26]=>
-  float(3.6)
-  [27]=>
-  float(3.7)
-  [28]=>
-  float(3.8)
-  [29]=>
-  float(3.9)
-  [30]=>
-  float(4)
-  [31]=>
-  float(4.1)
-  [32]=>
-  float(4.2)
-  [33]=>
-  float(4.3)
-  [34]=>
-  float(4.4)
-  [35]=>
-  float(4.5)
-  [36]=>
-  float(4.6)
-  [37]=>
-  float(4.7)
-  [38]=>
-  float(4.8)
-  [39]=>
-  float(4.9)
-  [40]=>
-  float(5)
 }
-array(41) {
+array(11) {
   [0]=>
   float(1)
   [1]=>
@@ -2601,64 +1589,731 @@ array(41) {
   float(1.9)
   [10]=>
   float(2)
-  [11]=>
-  float(2.1)
-  [12]=>
-  float(2.2)
-  [13]=>
-  float(2.3)
-  [14]=>
-  float(2.4)
-  [15]=>
-  float(2.5)
-  [16]=>
-  float(2.6)
-  [17]=>
-  float(2.7)
-  [18]=>
-  float(2.8)
-  [19]=>
-  float(2.9)
-  [20]=>
-  float(3)
-  [21]=>
-  float(3.1)
-  [22]=>
-  float(3.2)
-  [23]=>
-  float(3.3)
-  [24]=>
-  float(3.4)
-  [25]=>
-  float(3.5)
-  [26]=>
-  float(3.6)
-  [27]=>
-  float(3.7)
-  [28]=>
-  float(3.8)
-  [29]=>
-  float(3.9)
-  [30]=>
-  float(4)
-  [31]=>
-  float(4.1)
-  [32]=>
-  float(4.2)
-  [33]=>
-  float(4.3)
-  [34]=>
-  float(4.4)
-  [35]=>
-  float(4.5)
-  [36]=>
-  float(4.6)
-  [37]=>
-  float(4.7)
-  [38]=>
-  float(4.8)
-  [39]=>
-  float(4.9)
-  [40]=>
-  float(5)
 }
+
+-- Testing basic string with step --
+array(7) {
+  [0]=>
+  unicode(1) "a"
+  [1]=>
+  unicode(1) "c"
+  [2]=>
+  unicode(1) "e"
+  [3]=>
+  unicode(1) "g"
+  [4]=>
+  unicode(1) "i"
+  [5]=>
+  unicode(1) "k"
+  [6]=>
+  unicode(1) "m"
+}
+
+*** Testing range() with various low and high values ***
+-- creating an array with low = 'ABCD' and high = 'ABCD' --
+array(1) {
+  [0]=>
+  unicode(1) "A"
+}
+
+-- creating an array with low = 'ABCD' and high = '-10.5555' --
+array(11) {
+  [0]=>
+  float(0)
+  [1]=>
+  float(-1)
+  [2]=>
+  float(-2)
+  [3]=>
+  float(-3)
+  [4]=>
+  float(-4)
+  [5]=>
+  float(-5)
+  [6]=>
+  float(-6)
+  [7]=>
+  float(-7)
+  [8]=>
+  float(-8)
+  [9]=>
+  float(-9)
+  [10]=>
+  float(-10)
+}
+
+-- creating an array with low = 'ABCD' and high = '1' --
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = 'ABCD' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'ABCD' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'ABCD' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'ABCD' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  unicode(1) "A"
+}
+
+-- creating an array with low = '-10.5555' and high = 'ABCD' --
+array(11) {
+  [0]=>
+  float(-10.5555)
+  [1]=>
+  float(-9.5555)
+  [2]=>
+  float(-8.5555)
+  [3]=>
+  float(-7.5555)
+  [4]=>
+  float(-6.5555)
+  [5]=>
+  float(-5.5555)
+  [6]=>
+  float(-4.5555)
+  [7]=>
+  float(-3.5555)
+  [8]=>
+  float(-2.5555)
+  [9]=>
+  float(-1.5555)
+  [10]=>
+  float(-0.5555)
+}
+
+-- creating an array with low = '-10.5555' and high = '-10.5555' --
+array(1) {
+  [0]=>
+  float(-10.5555)
+}
+
+-- creating an array with low = '-10.5555' and high = '1' --
+array(12) {
+  [0]=>
+  float(-10.5555)
+  [1]=>
+  float(-9.5555)
+  [2]=>
+  float(-8.5555)
+  [3]=>
+  float(-7.5555)
+  [4]=>
+  float(-6.5555)
+  [5]=>
+  float(-5.5555)
+  [6]=>
+  float(-4.5555)
+  [7]=>
+  float(-3.5555)
+  [8]=>
+  float(-2.5555)
+  [9]=>
+  float(-1.5555)
+  [10]=>
+  float(-0.5555)
+  [11]=>
+  float(0.4445)
+}
+
+-- creating an array with low = '-10.5555' and high = '' --
+array(11) {
+  [0]=>
+  int(-10)
+  [1]=>
+  int(-9)
+  [2]=>
+  int(-8)
+  [3]=>
+  int(-7)
+  [4]=>
+  int(-6)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-4)
+  [7]=>
+  int(-3)
+  [8]=>
+  int(-2)
+  [9]=>
+  int(-1)
+  [10]=>
+  int(0)
+}
+
+-- creating an array with low = '-10.5555' and high = '' --
+array(11) {
+  [0]=>
+  int(-10)
+  [1]=>
+  int(-9)
+  [2]=>
+  int(-8)
+  [3]=>
+  int(-7)
+  [4]=>
+  int(-6)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-4)
+  [7]=>
+  int(-3)
+  [8]=>
+  int(-2)
+  [9]=>
+  int(-1)
+  [10]=>
+  int(0)
+}
+
+-- creating an array with low = '-10.5555' and high = '' --
+array(11) {
+  [0]=>
+  int(-10)
+  [1]=>
+  int(-9)
+  [2]=>
+  int(-8)
+  [3]=>
+  int(-7)
+  [4]=>
+  int(-6)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-4)
+  [7]=>
+  int(-3)
+  [8]=>
+  int(-2)
+  [9]=>
+  int(-1)
+  [10]=>
+  int(0)
+}
+
+-- creating an array with low = '-10.5555' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(11) {
+  [0]=>
+  float(-10.5555)
+  [1]=>
+  float(-9.5555)
+  [2]=>
+  float(-8.5555)
+  [3]=>
+  float(-7.5555)
+  [4]=>
+  float(-6.5555)
+  [5]=>
+  float(-5.5555)
+  [6]=>
+  float(-4.5555)
+  [7]=>
+  float(-3.5555)
+  [8]=>
+  float(-2.5555)
+  [9]=>
+  float(-1.5555)
+  [10]=>
+  float(-0.5555)
+}
+
+-- creating an array with low = '1' and high = 'ABCD' --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+
+-- creating an array with low = '1' and high = '-10.5555' --
+array(12) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(0)
+  [2]=>
+  float(-1)
+  [3]=>
+  float(-2)
+  [4]=>
+  float(-3)
+  [5]=>
+  float(-4)
+  [6]=>
+  float(-5)
+  [7]=>
+  float(-6)
+  [8]=>
+  float(-7)
+  [9]=>
+  float(-8)
+  [10]=>
+  float(-9)
+  [11]=>
+  float(-10)
+}
+
+-- creating an array with low = '1' and high = '1' --
+array(1) {
+  [0]=>
+  int(1)
+}
+
+-- creating an array with low = '1' and high = '' --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+
+-- creating an array with low = '1' and high = '' --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+
+-- creating an array with low = '1' and high = '' --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+
+-- creating an array with low = '1' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'ABCD' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '-10.5555' --
+array(11) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(-1)
+  [2]=>
+  int(-2)
+  [3]=>
+  int(-3)
+  [4]=>
+  int(-4)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-6)
+  [7]=>
+  int(-7)
+  [8]=>
+  int(-8)
+  [9]=>
+  int(-9)
+  [10]=>
+  int(-10)
+}
+
+-- creating an array with low = '' and high = '1' --
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'ABCD' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '-10.5555' --
+array(11) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(-1)
+  [2]=>
+  int(-2)
+  [3]=>
+  int(-3)
+  [4]=>
+  int(-4)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-6)
+  [7]=>
+  int(-7)
+  [8]=>
+  int(-8)
+  [9]=>
+  int(-9)
+  [10]=>
+  int(-10)
+}
+
+-- creating an array with low = '' and high = '1' --
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'ABCD' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '-10.5555' --
+array(11) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(-1)
+  [2]=>
+  int(-2)
+  [3]=>
+  int(-3)
+  [4]=>
+  int(-4)
+  [5]=>
+  int(-5)
+  [6]=>
+  int(-6)
+  [7]=>
+  int(-7)
+  [8]=>
+  int(-8)
+  [9]=>
+  int(-9)
+  [10]=>
+  int(-10)
+}
+
+-- creating an array with low = '' and high = '1' --
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = 'ABCD' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  unicode(1) "A"
+}
+
+-- creating an array with low = 'Array' and high = '-10.5555' --
+
+Notice: Array to string conversion in %s on line %d
+array(11) {
+  [0]=>
+  float(0)
+  [1]=>
+  float(-1)
+  [2]=>
+  float(-2)
+  [3]=>
+  float(-3)
+  [4]=>
+  float(-4)
+  [5]=>
+  float(-5)
+  [6]=>
+  float(-6)
+  [7]=>
+  float(-7)
+  [8]=>
+  float(-8)
+  [9]=>
+  float(-9)
+  [10]=>
+  float(-10)
+}
+
+-- creating an array with low = 'Array' and high = '1' --
+
+Notice: Array to string conversion in %s on line %d
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = 'Array' and high = '' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = '' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = '' --
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = 'Array' --
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+array(1) {
+  [0]=>
+  unicode(1) "A"
+}
+
+*** Possible variatins with steps ***
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+
+*** Testing max/outof range values ***
+array(2) {
+  [0]=>
+  int(2147483645)
+  [1]=>
+  int(2147483646)
+}
+array(3) {
+  [0]=>
+  float(2147483646)
+  [1]=>
+  float(2147483647)
+  [2]=>
+  float(2147483648)
+}
+array(2) {
+  [0]=>
+  int(-2147483647)
+  [1]=>
+  int(-2147483646)
+}
+array(2) {
+  [0]=>
+  int(-2147483648)
+  [1]=>
+  int(-2147483647)
+}
+array(3) {
+  [0]=>
+  float(-2147483649)
+  [1]=>
+  float(-2147483648)
+  [2]=>
+  float(-2147483647)
+}
+
+*** Testing error conditions ***
+
+-- Testing ( (low < high) && (step = 0) ) --
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+
+-- Testing ( (low > high) && (step = 0) ) --
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+
+-- Testing ( (low < high) && (high-low < step) ) --
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+
+-- Testing ( (low > high) && (low-high < step) ) --
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+-- Testing Invalid number of arguments --
+Warning: range() expects at least 2 parameters, 0 given in %s on line %d
+bool(false)
+
+Warning: range() expects at least 2 parameters, 1 given in %s on line %d
+bool(false)
+
+Warning: range() expects at most 3 parameters, 4 given in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+-- Testing Invalid steps --
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
