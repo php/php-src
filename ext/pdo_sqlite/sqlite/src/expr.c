@@ -237,12 +237,12 @@ Expr *sqlite3Expr(int op, Expr *pLeft, Expr *pRight, const Token *pToken){
   }else if( pLeft ){
     if( pRight ){
       sqlite3ExprSpan(pNew, &pLeft->span, &pRight->span);
-      if( pRight->flags && EP_ExpCollate ){
+      if( pRight->flags & EP_ExpCollate ){
         pNew->flags |= EP_ExpCollate;
         pNew->pColl = pRight->pColl;
       }
     }
-    if( pLeft->flags && EP_ExpCollate ){
+    if( pLeft->flags & EP_ExpCollate ){
       pNew->flags |= EP_ExpCollate;
       pNew->pColl = pLeft->pColl;
     }

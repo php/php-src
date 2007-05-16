@@ -1,8 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.3
+- Upgraded SQLite 3 to version 3.3.16 (Ilia)
 - Added PDO::FETCH_KEY_PAIR mode that will fetch a 2 column result set into 
-  an associated array.
+  an associated array. (Ilia)
 - Added function mysql_set_charset(). Allows connection encoding to be 
   altered at run time. (Scott)
 - Allow SOAP extension's handler() to work even when

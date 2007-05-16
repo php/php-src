@@ -37,28 +37,32 @@
 #endif
 
 #ifdef SQLITE_OMIT_AUTHORIZATION
-# define sqlite3_set_authorizer     0
+# define sqlite3_set_authorizer         0
 #endif
 
 #ifdef SQLITE_OMIT_UTF16
-# define sqlite3_bind_text16        0
-# define sqlite3_collation_needed16 0
-# define sqlite3_column_decltype16  0
-# define sqlite3_column_name16      0
-# define sqlite3_column_text16      0
-# define sqlite3_complete16         0
-# define sqlite3_create_collation16 0
-# define sqlite3_create_function16  0
-# define sqlite3_errmsg16           0
-# define sqlite3_open16             0
-# define sqlite3_prepare16          0
-# define sqlite3_result_error16     0
-# define sqlite3_result_text16      0
-# define sqlite3_result_text16be    0
-# define sqlite3_result_text16le    0
-# define sqlite3_value_text16       0
-# define sqlite3_value_text16be     0
-# define sqlite3_value_text16le     0
+# define sqlite3_bind_text16            0
+# define sqlite3_collation_needed16     0
+# define sqlite3_column_decltype16      0
+# define sqlite3_column_name16          0
+# define sqlite3_column_text16          0
+# define sqlite3_complete16             0
+# define sqlite3_create_collation16     0
+# define sqlite3_create_function16      0
+# define sqlite3_errmsg16               0
+# define sqlite3_open16                 0
+# define sqlite3_prepare16              0
+# define sqlite3_prepare16_v2           0
+# define sqlite3_result_error16         0
+# define sqlite3_result_text16          0
+# define sqlite3_result_text16be        0
+# define sqlite3_result_text16le        0
+# define sqlite3_value_text16           0
+# define sqlite3_value_text16be         0
+# define sqlite3_value_text16le         0
+# define sqlite3_column_database_name16 0
+# define sqlite3_column_table_name16    0
+# define sqlite3_column_origin_name16   0
 #endif
 
 #ifdef SQLITE_OMIT_COMPLETE

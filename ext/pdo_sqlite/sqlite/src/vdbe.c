@@ -2369,7 +2369,11 @@ case OP_AutoCommit: {       /* no-push */
         return SQLITE_BUSY;
       }
     }
-    return SQLITE_DONE;
+    if( p->rc==SQLITE_OK ){
+      return SQLITE_DONE;
+    }else{
+      return SQLITE_ERROR;
+    }
   }else{
     sqlite3SetString(&p->zErrMsg,
         (!i)?"cannot start a transaction within a transaction":(

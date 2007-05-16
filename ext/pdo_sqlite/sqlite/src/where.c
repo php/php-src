@@ -26,11 +26,6 @@
 #define BMS  (sizeof(Bitmask)*8)
 
 /*
-** Determine the number of elements in an array.
-*/
-#define ARRAYSIZE(X)  (sizeof(X)/sizeof(X[0]))
-
-/*
 ** Trace output macros
 */
 #if defined(SQLITE_TEST) || defined(SQLITE_DEBUG)
@@ -195,7 +190,7 @@ static void whereClauseInit(
   pWC->pParse = pParse;
   pWC->pMaskSet = pMaskSet;
   pWC->nTerm = 0;
-  pWC->nSlot = ARRAYSIZE(pWC->aStatic);
+  pWC->nSlot = ArraySize(pWC->aStatic);
   pWC->a = pWC->aStatic;
 }
 
@@ -310,7 +305,7 @@ static Bitmask getMask(ExprMaskSet *pMaskSet, int iCursor){
 ** array will never overflow.
 */
 static void createMask(ExprMaskSet *pMaskSet, int iCursor){
-  assert( pMaskSet->n < ARRAYSIZE(pMaskSet->ix) );
+  assert( pMaskSet->n < ArraySize(pMaskSet->ix) );
   pMaskSet->ix[pMaskSet->n++] = iCursor;
 }
 
