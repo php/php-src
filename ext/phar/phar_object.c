@@ -45,6 +45,7 @@ PHP_METHOD(Phar, getExtractList)
 {
 	array_init(return_value);
 
+	phar_request_initialize(TSRMLS_C);
 	zend_hash_apply_with_arguments(&PHAR_G(phar_plain_map), phar_get_extract_list, 1, return_value);
 }
 /* }}} */

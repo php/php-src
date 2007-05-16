@@ -48,8 +48,8 @@ Version 1.2.0
  X add preliminary phar command (phar.php) [Marcus] 
  X add phar command (phar.phar) [Marcus]
  X list all available compression methods using Phar::getSupportedCompression() [Marcus]
+ X Reduce RINIT to variable initialization, no fcall, hashinit [Marcus]
 
- * Reduce RINIT to variable initialization, no fcall, hashinit
  * Provide an additional header that allows better compatibility with PHP 4
    __HALT_COMPILER();function __HALT_COMPILER(){}$a=<<<PHARDATABEGIN\n
  * ability to have Phar object return file class as offsetGet() result
