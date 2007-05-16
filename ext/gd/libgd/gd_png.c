@@ -71,7 +71,11 @@ static void gdPngErrorHandler (png_structp png_ptr, png_const_charp msg)
 
 static void gdPngReadData (png_structp png_ptr, png_bytep data, png_size_t length)
 {
-	gdGetBuf(data, length, (gdIOCtx *) png_get_io_ptr(png_ptr));
+	int check;
+	check = gdGetBuf(data, length, (gdIOCtx *) png_get_io_ptr(png_ptr));
+	if (check != length) {
+		png_error(png_ptr, "Read Error: truncated data");
+	}
 }
 
 static void gdPngWriteData (png_structp png_ptr, png_bytep data, png_size_t length)
