@@ -1,3 +1,44 @@
+2007-05-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/general_functions/debug_zval_dump_b.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_b_64bit.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_v.phpt:
+      fix tests
+
+    * ext/standard/tests/general_functions/debug_zval_dump_b.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_v.phpt:
+      fix test
+
+2007-05-15  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/userspace.c:
+      MFH: Fixed bug #41390 (Clarify error message with invalid protocol scheme)
+
+    * main/streams/userspace.c:
+      Fixed bug #41390 (Clarify error message with invalid protocol scheme
+      syntax)
+
+2007-05-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      add the original author of the patch
+
+2007-05-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+      Fixed bug #41378 (fastcgi protocol lacks support for Reason-Phrase in
+      "Status:" header)
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      Fixed bug #41378 (fastcgi protocol lacks support for Reason-Phrase in 
+      "Status:" header)
+
 2007-05-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
