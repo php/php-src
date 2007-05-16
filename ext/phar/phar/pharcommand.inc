@@ -220,7 +220,7 @@ class PharCommand extends CLICommand
 			echo "Creating phar files is disabled by ini setting 'phar.readonly'.\n";
 			exit(1);
 		}
-		if (Phar::canWrite())
+		if (!Phar::canWrite())
 		{
 			echo "Creating phar files is disabled, Phar::canWrite() returned false.\n";
 			exit(1);
