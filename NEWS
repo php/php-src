@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   altered at run time. (Scott)
 - Allow SOAP extension's handler() to work even when
   always_populate_raw_post_data is off. (Ilia)
+- Fixed possible infinite loop in imagepng (libgd #86) (by Xavier Roche)
+  (Pierre)
 - Fixed ext/filter Email Validation Vulnerability (MOPB-24 by Stefan Esser)
   (Ilia)
 - Fixed altering $this via argument named "this". (Dmitry)
