@@ -1275,6 +1275,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 		p += lensess + 1;
 		if ((q = strpbrk(p, "/?\\"))) {
 			PS(id) = estrndup(p, q - p);
+			PS(send_cookie) = 0;
 		}
 	}
 
