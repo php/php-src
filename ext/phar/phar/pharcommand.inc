@@ -65,6 +65,11 @@ class PharCommand extends CLICommand
                 'val' => NULL,      
                 'inf' => '<regex>  Specifies a regular expression for input files.'
             ),
+            'k' => array(
+            	'typ' => 'any',
+            	'val' => NULL,
+            	'inf' => '<index>  Subscription index to work on.',
+            ),
 			'm' => array(
                 'typ' => 'any',    
                 'val' => NULL,      
@@ -579,13 +584,16 @@ class PharCommand extends CLICommand
 	function cli_cmd_inf_meta_get()
 	{
 		return "Get meta information of a PHAR entry or a PHAR package in serialized from. "
-		. "If no output file is specified for meta data then stdout is being used.";
+		. "If no output file is specified for meta data then stdout is being used.\n"
+		. "You can also specify a particular index using -k. In that case the metadata is "
+		. "expected to be an array and the value of the given index is returned using echo "
+		. "rather than using serialize. If that index does not exist or no meta data is "
+		. "present then the return value is 1.";
 	}
 
 	function cli_cmd_arg_meta_get()
 	{
-		$args = self::phar_args('Fem', 'phar');
-		//$args['m']['val'] = 'php://stdout';
+		$args = self::phar_args('Fek', 'phar');
 		return $args;
 	}
 
@@ -593,6 +601,7 @@ class PharCommand extends CLICommand
 	{
 		$phar  = $this->args['f']['val'];
 		$entry = $this->args['e']['val'];
+		$index = $this->args['k']['val'];
 
 		if (isset($entry))
 		{
@@ -600,7 +609,7 @@ class PharCommand extends CLICommand
 			{
 				exit(1);
 			}
-			echo serialize($phar[$entry]->getMetadata());
+			$meta = $phar[$entry]->getMetadata();
 		}
 		else
 		{
@@ -608,7 +617,23 @@ class PharCommand extends CLICommand
 			{
 				exit(1);
 			}
-			echo serialize($phar->getMetadata());
+			$meta = $phar->getMetadata();
+		}
+		if (isset($index))
+		{
+			if (isset($meta[$index]))
+			{
+				echo $meta[$index];
+				exit(0);
+			}
+			else
+			{
+				exit(1);
+			}
+		}
+		else
+		{
+			echo serialize($meta);
 		}
 	}
 
@@ -708,7 +733,8 @@ class PharCommand extends CLICommand
 		$infos['Uncompressed-size'] = $usize;
 		$infos['Compressed-size'] = $csize;
 		$infos['Compression-ratio'] = sprintf('%.3g%%', ($csize * 100) / $usize);
-		$infos['Metadata'] = $mcount;
+		$infos['Metadata-global'] = $phar->hasMetadata();
+		$infos['Metadata-files'] = $mcount;
 
 		$l = 0;
 		foreach($infos as $which => $val)
