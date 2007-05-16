@@ -3031,12 +3031,17 @@ ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *f
 
 ZEND_API char *zend_get_module_version(char *module_name)
 {
+	char *lname;
+	int name_len = strlen(module_name);
 	zend_module_entry *module;
 
-	if (zend_hash_find(&module_registry, module_name, strlen(module_name) + 1,
+	lname = zend_str_tolower_dup(module_name, name_len);
+	if (zend_hash_find(&module_registry, lname, name_len + 1,
 	                   (void**)&module) == FAILURE) {
+		efree(lname);
 		return NULL;
 	}
+	efree(lname);
 	return module->version;
 }
 
