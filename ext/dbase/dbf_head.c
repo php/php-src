@@ -184,7 +184,7 @@ int put_dbf_field(dbhead_t *dbh, dbfield_t *dbf)
 	/* build the on disk field info */
 	scp = dbf->db_fname; dcp = dbfield.dbf_name;
 
-	strncpy(dbfield.dbf_name, dbf->db_fname, DBF_NAMELEN);
+	strlcpy(dbfield.dbf_name, dbf->db_fname, DBF_NAMELEN + 1);
 
 	dbfield.dbf_type = dbf->db_type;
 	switch (dbf->db_type) {
@@ -215,7 +215,7 @@ void put_dbf_info(dbhead_t *dbh)
 	int		fcnt;
 
 	if ((cp = db_cur_date(NULL))) {
-		strlcpy(dbh->db_date, cp, 8);
+		strlcpy(dbh->db_date, cp, 9);
 		free(cp);
 	}
 	put_dbf_head(dbh);
