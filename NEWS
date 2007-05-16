@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - Fixed segfault in strripos(). (Tony, Joxean Koret)
 - Fixed bug #41403 (json_decode cannot decode floats if localeconv 
   decimal_point is not '.'). (Tony)
+- Fixed bug #41394 (dbase_create creates file with corrupted header). (Tony)
 - Fixed bug #41390 (Clarify error message with invalid protocol scheme).
   (Scott)
 - Fixed bug #41378 (fastcgi protocol lacks support for Reason-Phrase in 
