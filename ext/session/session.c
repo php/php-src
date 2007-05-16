@@ -1120,8 +1120,10 @@ PHPAPI void php_session_start(TSRMLS_D)
 		char *q;
 
 		p += lensess + 1;
-		if ((q = strpbrk(p, "/?\\")))
+		if ((q = strpbrk(p, "/?\\"))) {
 			PS(id) = estrndup(p, q - p);
+			PS(send_cookie) = 0;
+		}
 	}
 
 	/* check whether the current request was referred to by
