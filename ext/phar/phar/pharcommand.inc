@@ -743,17 +743,19 @@ class PharCommand extends CLICommand
 
 	function cli_cmd_inf_info()
 	{
-		return "Get information about a PHAR package.";
+		return "Get information about a PHAR package.\n"
+		     . "Using -k it is possible to return a single value.";
 	}
 
 	function cli_cmd_arg_info()
 	{
-		return self::phar_args('F', 'phar');		
+		return self::phar_args('Fk', 'phar');		
 	}
 
 	function cli_cmd_run_info($args)
 	{
 		$phar  = $this->args['f']['val'];
+		$index = $this->args['k']['val'];
 
 		$hash  = $phar->getsignature();
 		$infos = array();
@@ -815,6 +817,16 @@ class PharCommand extends CLICommand
 		$infos['Metadata-global'] = $phar->hasMetadata();
 		$infos['Metadata-files'] = $mcount;
 
+		if (isset($index))
+		{
+			if (!isset($infos[$index]))
+			{
+				echo "Requested value does not exist.";
+				exit(1);
+			}
+			echo $infos[$index];
+			exit(0);
+		}
 		$l = 0;
 		foreach($infos as $which => $val)
 		{
