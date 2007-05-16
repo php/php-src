@@ -9,6 +9,20 @@
  *
  * Phar Command
  */
+
+if (!extension_loaded("phar"))
+{
+	if (!class_exists("PHP_Archive"))
+	{
+		echo "PHP_Archive not available.\n";
+		exit(1);
+	}
+	if (!class_exists("Phar"))
+	{
+		class Phar extends PHP_Archive {}
+	}
+}
+
 foreach(array("SPL", "Reflection", "Phar") as $ext)
 {
 	if (!extension_loaded($ext))

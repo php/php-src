@@ -75,6 +75,11 @@ class PharCommand extends CLICommand
                 'val' => NULL,      
                 'inf' => '<meta>   Meta data to store with entry (serialized php data).'
             ),
+            'p' => array(
+            	'typ' => 'file',
+            	'val' => NULL,
+            	'inf' => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive).',
+            ),
 			's' => array(
                 'typ' => 'file',   
                 'val' => NULL,      
@@ -213,7 +218,7 @@ class PharCommand extends CLICommand
 
 	static function cli_cmd_arg_pack()
 	{
-		$args = self::phar_args('AcFhisx', 'pharnew');
+		$args = self::phar_args('AcFhipsx', 'pharnew');
 		$args[''] = array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories. If -i is in use then ONLY files and matching thegiven regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.');
 		return $args;
 	}
@@ -235,6 +240,7 @@ class PharCommand extends CLICommand
 		$archive = $this->args['f']['val'];
 		$hash    = $this->args['h']['val'];
 		$regex   = $this->args['i']['val'];
+		$loader  = $this->args['p']['val'];
 		$stub    = $this->args['s']['val'];
 		$invregex= $this->args['x']['val'];
 		$input   = $this->args['']['val'];
@@ -245,7 +251,25 @@ class PharCommand extends CLICommand
 
 		if (isset($stub))
 		{
-			$phar->setStub(file_get_contents($stub));
+			if (isset($loader))
+			{
+				$c = file_get_contents($stub);
+				$s = '';
+				if (substr($c,0,2) == '#!') {
+					$s.= substr($c,0,strpos($c, "\n")+1);
+				}				
+				$s.= '<?php if (!class_exists("Phar",0) && !class_exists("PHP_Archive")) { ?>';
+				$s.= file_get_contents($loader);
+				$s.= '<?php } ?>';
+				if (substr($c,0,1) == '#') {
+					$s.= substr($c,strpos($c, "\n")+1);
+				}
+				$phar->setStub($s);
+			}
+			else
+			{
+				$phar->setStub(file_get_contents($stub));
+			}
 			$stub = new SplFileInfo($stub);
 		}
 
