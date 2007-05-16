@@ -4,6 +4,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #38798 (OpenSSL init corrected in php5 but not in php4). (Tony)
 	
 04 May 2007, Version 4.4.7
+- Fixed libgd #86 (Fixed possible infinite loop in imagecreatefrompng) 
+  (Reported by Xavier Roche) (Pierre)
 - Fixed MOPB-33-2007 (PHP mail() Message ASCIIZ Byte Truncation). (Ilia)
 - Fixed MOPB-32-2007 (Double free inside session_decode()). (Ilia)
 - Fixed MOPB-26-2007 (mb_parse_str() can be used to activate
