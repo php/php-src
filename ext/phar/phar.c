@@ -3548,7 +3548,7 @@ zend_module_entry phar_module_entry = {
 	phar_functions,
 	PHP_MINIT(phar),
 	PHP_MSHUTDOWN(phar),
-	PHP_RINIT(phar),
+	NULL,
 	PHP_RSHUTDOWN(phar),
 	PHP_MINFO(phar),
 	PHAR_EXT_VERSION_STR,
