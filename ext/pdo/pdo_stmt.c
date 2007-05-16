@@ -896,6 +896,21 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 				}
 				break;
 
+			case PDO_FETCH_KEY_PAIR:
+				if (stmt->column_count != 2) {
+					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain extactly 2 columns." TSRMLS_CC);
+					return 0;
+				}
+
+				if (!return_all) {
+					ALLOC_HASHTABLE(return_value->value.ht);
+					zend_hash_init(return_value->value.ht, 1, NULL, ZVAL_PTR_DTOR, 0);
+					Z_TYPE_P(return_value) = IS_ARRAY;
+				} else {
+					array_init(return_value);
+				}
+				break;
+
 			case PDO_FETCH_COLUMN:
 				if (stmt->fetch.column >= 0 && stmt->fetch.column < stmt->column_count) {
 					fetch_value(stmt, return_value, stmt->fetch.column, NULL TSRMLS_CC);
@@ -1018,6 +1033,25 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 			switch (how) {
 				case PDO_FETCH_ASSOC:
 					add_assoc_zval(return_value, stmt->columns[i].name, val);
+					break;
+					
+				case PDO_FETCH_KEY_PAIR:
+					{
+						zval *tmp;
+						MAKE_STD_ZVAL(tmp);
+						fetch_value(stmt, tmp, ++i, NULL TSRMLS_CC);
+						
+						if (Z_TYPE_P(val) == IS_STRING) {
+							zend_symtable_update(Z_ARRVAL_P(return_value), Z_STRVAL_P(val), Z_STRLEN_P(val) + 1, &tmp, sizeof(zval *), NULL);
+						} else if (Z_TYPE_P(val) = IS_LONG) {
+							zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(val), tmp, sizeof(tmp), NULL);
+						} else {
+							convert_to_string(val);
+							zend_symtable_update(Z_ARRVAL_P(return_value), Z_STRVAL_P(val), Z_STRLEN_P(val) + 1, &tmp, sizeof(zval *), NULL);
+						}
+						zval_dtor(val);
+						FREE_ZVAL(val);
+					}
 					break;
 
 				case PDO_FETCH_USE_DEFAULT:
