@@ -91,6 +91,7 @@ enum pdo_fetch_type {
 	PDO_FETCH_INTO,		/* fetch row into an existing object */
 	PDO_FETCH_FUNC,		/* fetch into function and return its result */
 	PDO_FETCH_NAMED,    /* like PDO_FETCH_ASSOC, but can handle duplicate names */
+	PDO_FETCH_KEY_PAIR,	/* fetch into an array where the 1st column is a key and all subsequent columns are values */
 	PDO_FETCH__MAX /* must be last */
 };
 
