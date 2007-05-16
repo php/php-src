@@ -260,7 +260,7 @@ class PharCommand extends CLICommand
 				}				
 				$s.= '<?php if (!class_exists("Phar",0) && !class_exists("PHP_Archive")) { ?>';
 				$s.= file_get_contents($loader);
-				$s.= '<?php } ?>';
+				$s.= '<?php class Phar extends PHP_Archive {} } ?>';
 				if (substr($c,0,1) == '#') {
 					$s.= substr($c,strpos($c, "\n")+1);
 				}
