@@ -1,5 +1,5 @@
 --TEST--
-Bug #39780 (PNG image with CRC/data error raises a fatal error)
+libgd #86 (Possible infinite loop in imagecreatefrompng)
 --SKIPIF--
 <?php 
 	if (!extension_loaded('gd')) die("skip gd extension not available\n"); 
