@@ -288,7 +288,7 @@ static void json_create_zval(zval **z, smart_str *buf, int type)
     }
     else if (type == IS_DOUBLE)
     {
-        ZVAL_DOUBLE(*z, atof(buf->c));
+        ZVAL_DOUBLE(*z, zend_strtod(buf->c, NULL));
     }
     else if (type == IS_STRING)
     {
