@@ -1671,7 +1671,7 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP, TMP|VAR|CV)
 	if (opline->extended_value == IS_UNICODE) {
 		zend_make_unicode_zval(var, &var_copy, &use_copy);
 	} else {
-		zend_make_printable_zval(var, &var_copy, &use_copy);
+		zend_make_string_zval(var, &var_copy, &use_copy);
 	}
 	if (use_copy) {
 		var = &var_copy;
