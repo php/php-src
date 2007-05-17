@@ -1961,7 +1961,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			if (UG(unicode)) {
 				zend_make_unicode_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
 			} else {
-				zend_make_printable_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
+				zend_make_string_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
 			}
 			if (use_copy) {
 				*intern->u.caching.zstr = expr_copy;
