@@ -5837,7 +5837,7 @@ static int ZEND_ADD_VAR_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (opline->extended_value == IS_UNICODE) {
 		zend_make_unicode_zval(var, &var_copy, &use_copy);
 	} else {
-		zend_make_printable_zval(var, &var_copy, &use_copy);
+		zend_make_string_zval(var, &var_copy, &use_copy);
 	}
 	if (use_copy) {
 		var = &var_copy;
@@ -6285,7 +6285,7 @@ static int ZEND_ADD_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (opline->extended_value == IS_UNICODE) {
 		zend_make_unicode_zval(var, &var_copy, &use_copy);
 	} else {
-		zend_make_printable_zval(var, &var_copy, &use_copy);
+		zend_make_string_zval(var, &var_copy, &use_copy);
 	}
 	if (use_copy) {
 		var = &var_copy;
@@ -6827,7 +6827,7 @@ static int ZEND_ADD_VAR_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (opline->extended_value == IS_UNICODE) {
 		zend_make_unicode_zval(var, &var_copy, &use_copy);
 	} else {
-		zend_make_printable_zval(var, &var_copy, &use_copy);
+		zend_make_string_zval(var, &var_copy, &use_copy);
 	}
 	if (use_copy) {
 		var = &var_copy;
