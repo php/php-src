@@ -13,9 +13,9 @@ var_dump($im);
 ?>
 --EXPECTF--
 
-Warning: imagecreatefrompng(): gd-png:  fatal libpng error: Read Error: truncated data in /home/pierre/cvs/php_5_2/ext/gd/tests/bug39780.php on line 3
+Warning: imagecreatefrompng(): gd-png:  fatal libpng error: Read Error: truncated data in %s on line %d
 
-Warning: imagecreatefrompng(): gd-png error: setjmp returns error condition in /home/pierre/cvs/php_5_2/ext/gd/tests/bug39780.php on line 3
+Warning: imagecreatefrompng(): gd-png error: setjmp returns error condition in %s on line %d
 
-Warning: imagecreatefrompng(): '/home/pierre/cvs/php_5_2/ext/gd/tests/bug39780.png' is not a valid PNG file in /home/pierre/cvs/php_5_2/ext/gd/tests/bug39780.php on line 3
+Warning: imagecreatefrompng(): '%sbug39780.png' is not a valid PNG file in %s on line %d
 bool(false)
