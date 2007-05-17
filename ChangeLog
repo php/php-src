@@ -1,3 +1,155 @@
+2007-05-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/tests/libgd00086.phpt
+      ext/gd/tests/libgd00086.phpt:
+      - fix title
+
+    * (PHP_4_4)
+      NEWS
+      ext/gd/libgd/gd_png.c:
+      - MFH: libgd #86: Fixed possible infinite loop in libgd/gd_png.c, fix test
+          (Reported by Xavier Roche)
+
+    * (PHP_5_2)
+      ext/gd/tests/bug39780.phpt:
+      - MFH: libgd #86: Fixed possible infinite loop in libgd/gd_png.c, fix test
+         (Reported by Xavier Roche)
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/libgd/gd_png.c
+      ext/gd/tests/libgd00086.phpt
+      ext/gd/tests/libgd00086.png:
+      - MFH: libgd #86: Fixed possible infinite loop in libgd/gd_png.c
+        (Reported by Xavier Roche)
+
+    * ext/gd/tests/libgd00086.phpt
+      ext/gd/tests/libgd00086.phpt
+      ext/gd/tests/libgd00086.png
+      ext/gd/tests/libgd00086.png:
+      
+      - libgd #86: Fixed possible infinite loop in libgd/gd_png.c
+        (Reported by Xavier Roche)
+
+    * ext/gd/libgd/gd_png.c:
+      - libgd #86: Fixed possible infinite loop in libgd/gd_png.c
+        (Reported by Xavier Roche)
+
+2007-05-16  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+    * ext/curl/config.m4:
+      MFB: r1.28.2.3.2.4
+
+    * (PHP_5_2)
+      ext/curl/config.m4:
+      - fixed bug #41358: configure cannot determine libcurl's SSL lib as of
+      v7.16.2
+
+2007-05-16  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/array/range.phpt
+      ext/standard/tests/array/range.phpt:
+      Updated range() test
+
+2007-05-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_sqlite/sqlite/VERSION
+      ext/pdo_sqlite/sqlite/src/btree.c
+      ext/pdo_sqlite/sqlite/src/expr.c
+      ext/pdo_sqlite/sqlite/src/keywordhash.h
+      ext/pdo_sqlite/sqlite/src/legacy.c
+      ext/pdo_sqlite/sqlite/src/loadext.c
+      ext/pdo_sqlite/sqlite/src/parse.c
+      ext/pdo_sqlite/sqlite/src/prepare.c
+      ext/pdo_sqlite/sqlite/src/test1.c
+      ext/pdo_sqlite/sqlite/src/vdbe.c
+      ext/pdo_sqlite/sqlite/src/vtab.c
+      ext/pdo_sqlite/sqlite/src/where.c:
+      Upgraded libsqlite3 to SQLite 3.3
+
+    * (PHP_5_2)
+      ext/pdo/tests/pdo_034.phpt:
+      Make test work in sqlite
+
+    * ext/pdo/pdo_stmt.c:
+      
+      Fixed a typo
+
+2007-05-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c:
+      typofix
+
+2007-05-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo/php_pdo_driver.h:
+      
+      MFB: PDO:FETCH_KEY_PAIR
+
+    * (PHP_5_2)
+      NEWS:
+      news
+
+    * (PHP_5_2)
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo/php_pdo_driver.h
+      ext/pdo/tests/pdo_034.phpt
+      ext/pdo/tests/pdo_034.phpt:
+      [DOC] Added PDO::FETCH_KEY_PAIR mode that will fetch a 2 column result set
+      into an associated array.
+
+2007-05-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c:
+      - MFH Extensions are indexed lowercased and not case aware
+
+    * ZendEngine2/zend_API.c:
+      - Extensions are indexed lowercased and not case aware
+
+2007-05-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/dbase/dbf_head.c:
+      MFH: fix #41394 (dbase_create creates file with corrupted header)
+
+    * ext/dbase/dbf_head.c:
+      fix #41394 (dbase_create creates file with corrupted header)
+
+    * (PHP_5_2)
+      NEWS
+      ext/json/JSON_parser.c
+      ext/json/tests/bug41403.phpt:
+      MFH: fix #41403 (json_decode cannot decode floats if localeconv
+      decimal_point is not '.')
+
+    * ext/json/JSON_parser.c
+      ext/json/tests/bug41403.phpt
+      ext/json/tests/bug41403.phpt:
+      fix #41403 (json_decode cannot decode floats if localeconv decimal_point is
+      not '.')
+
+2007-05-16  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/session/session.c
+      ext/session/session.c
+      ext/session/session.c:
+      do not send cookie when session is passed in URL, same as it happens with
+      GET/POST
+
 2007-05-15  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
