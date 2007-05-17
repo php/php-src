@@ -204,7 +204,7 @@ PHP_FUNCTION(strval)
 	if (UG(unicode)) {
 		zend_make_unicode_zval(*num, &expr_copy, &use_copy);
 	} else {
-		zend_make_printable_zval(*num, &expr_copy, &use_copy);
+		zend_make_string_zval(*num, &expr_copy, &use_copy);
 	}
 	if (use_copy) {
 		tmp = &expr_copy;
