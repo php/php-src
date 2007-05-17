@@ -58,7 +58,7 @@ array(5) {
   }
 }
 
-Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error: PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain extactly 2 columns. in %s/tests/pdo_034.php on line %d
+Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error: PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain extactly 2 columns. in %s/tests%spdo_034.php on line %d
 
-Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error%s/tests/pdo_034.php on line %d
+Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error%s/tests%spdo_034.php on line %d
 bool(false)
