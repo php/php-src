@@ -23,19 +23,13 @@ if (!extension_loaded("phar"))
 	}
 }
 
-foreach(array("SPL", "Reflection", "Phar") as $ext)
+foreach(array("SPL", "Reflection") as $ext)
 {
 	if (!extension_loaded($ext))
 	{
 		echo "$argv[0] requires PHP extension $ext.\n";
 		exit(1);
 	}
-}
-
-if (version_compare(phpversion('phar'), '1.2.0', '<'))
-{
-	echo "Phar extension version 1.2.0 or later requireed.\n";
-	exit(1);
 }
 
 function command_include($file)
