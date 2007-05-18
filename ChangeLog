@@ -1,3 +1,50 @@
+2007-05-17  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/sqlite/src/parse.c:
+      fix gcov build.......
+
+2007-05-17  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/concat_003.phpt:
+      add test
+
+    * ext/spl/spl_iterators.c
+      ext/standard/formatted_print.c
+      ext/standard/type.c:
+      zend_make_printable_zval -> zend_make_string_zval
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      use zend_make_string_zval(), we want to see the notices
+
+    * ZendEngine2/tests/concat_001.phpt
+      ext/gd/tests/bug39780.phpt:
+      fix test
+
+    * (PHP_5_2)
+      NEWS:
+      news entry
+
+    * (PHP_5_2)
+      ext/pdo_mysql/mysql_statement.c:
+      implement FR #41416 (getColumnMeta() should also return table name)
+
+2007-05-17  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/pdo/tests/pdo_034.phpt:
+      Fix paths for ext/sqlite
+
+2007-05-17  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c
+      ext/standard/lcg.c
+      ext/standard/php_ext_syslog.h
+      ext/standard/syslog.c:
+      Get rid of a useless RINIT and an empty RSHUTDOWN on non-Windows
+
 2007-05-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_2)

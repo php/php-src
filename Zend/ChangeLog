@@ -1,3 +1,15 @@
+2007-05-17  Antony Dovgal  <antony@zend.com>
+
+    * tests/concat_003.phpt:
+      add test
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      use zend_make_string_zval(), we want to see the notices
+
+    * tests/concat_001.phpt:
+      fix test
+
 2007-05-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
