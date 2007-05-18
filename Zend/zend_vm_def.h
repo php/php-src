@@ -1619,11 +1619,14 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP, TMP|VAR|CV)
 	zend_free_op free_op1, free_op2;
 	zval *var = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	zval var_copy;
-	int use_copy;
+	int use_copy = 0;
 
-	zend_make_printable_zval(var, &var_copy, &use_copy);
-	if (use_copy) {
-		var = &var_copy;
+	if (Z_TYPE_P(var) != IS_STRING) {
+		zend_make_printable_zval(var, &var_copy, &use_copy);
+
+		if (use_copy) {
+			var = &var_copy;
+		}
 	}
 	add_string_to_string(	&EX_T(opline->result.u.var).tmp_var,
 							GET_OP1_ZVAL_PTR(BP_VAR_NA),
