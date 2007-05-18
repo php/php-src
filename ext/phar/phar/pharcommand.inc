@@ -31,7 +31,7 @@ class PharCommand extends CLICommand
 		$phar_args = array(
 			'a' => array(
                 'typ' => 'alias',  
-                'val' => 'newphar', 
+                'val' => NULL, 
                 'inf' => '<alias>  Provide an alias name for the phar file.'
             ),
 			'c' => array(
@@ -218,7 +218,7 @@ class PharCommand extends CLICommand
 
 	static function cli_cmd_arg_pack()
 	{
-		$args = self::phar_args('AcFhipsx', 'pharnew');
+		$args = self::phar_args('acFhipsx', 'pharnew');
 		$args[''] = array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories. If -i is in use then ONLY files and matching thegiven regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.');
 		return $args;
 	}
@@ -783,6 +783,11 @@ class PharCommand extends CLICommand
 
 		$hash  = $phar->getsignature();
 		$infos = array();
+
+		if ($phar->getAlias())
+		{
+			$infos['Alias'] = $phar->getAlias();
+		}
 
 		if (!$hash)
 		{
