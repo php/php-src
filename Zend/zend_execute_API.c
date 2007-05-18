@@ -711,6 +711,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 
 		if (fci->object_pp) {
+			if (Z_TYPE_PP(fci->object_pp) == IS_OBJECT
+				&& (!EG(objects_store).object_buckets || !EG(objects_store).object_buckets[Z_OBJ_HANDLE_PP(fci->object_pp)].valid)) {
+				return FAILURE;
+			}
 			/* TBI!! new object handlers */
 			if (Z_TYPE_PP(fci->object_pp) == IS_OBJECT) {
 				if (!IS_ZEND_STD_OBJECT(**fci->object_pp)) {
@@ -905,6 +909,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		calling_scope = fci_cache->calling_scope;
 		fci->object_pp = fci_cache->object_pp;
 		EX(object) = fci->object_pp ? *fci->object_pp : NULL;
+		if (fci->object_pp && Z_TYPE_PP(fci->object_pp) == IS_OBJECT
+			&& (!EG(objects_store).object_buckets || !EG(objects_store).object_buckets[Z_OBJ_HANDLE_PP(fci->object_pp)].valid)) {
+			return FAILURE;
+		}
 	}
 
 	if (EX(function_state).function->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
