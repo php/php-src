@@ -1,5 +1,7 @@
 --TEST--
 Test str_replace() function
+--INI--
+precision=14
 --FILE--
 <?php
 /* 

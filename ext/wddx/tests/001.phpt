@@ -2,6 +2,8 @@
 wddx deserialization test
 --SKIPIF--
 <?php if (!extension_loaded("wddx")) print "skip"; ?>
+--INI--
+precision=14
 --FILE--
 <?php
 	$path = dirname(__FILE__);
