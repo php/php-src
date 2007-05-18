@@ -128,7 +128,7 @@ if (!ini_get('register_long_arrays')) {
 	$HTTP_COOKIE_VARS =& $_COOKIE;
 	$HTTP_SERVER_VARS =& $_SERVER;
 	$HTTP_ENV_VARS =& $_ENV;
-	$HTTP_FILES_VARS =& $_FILES;
+	$HTTP_POST_FILES =& $_FILES;
 }
 ?>
 
