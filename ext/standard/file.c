@@ -566,6 +566,11 @@ PHP_FUNCTION(file_get_contents)
 		RETURN_FALSE;
 	}
 
+	if (maxlen < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length must be greater than or equal to zero");
+		RETURN_FALSE;
+	}
+
 	if (offset > 0 && php_stream_seek(stream, offset, SEEK_SET) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream", offset);
 		php_stream_close(stream);
