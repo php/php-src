@@ -3460,14 +3460,6 @@ PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 }
 /* }}} */
 
-PHP_RINIT_FUNCTION(phar) /* {{{ */
-{
-	PHAR_GLOBALS->request_done = 0;
-	PHAR_GLOBALS->request_ends = 0;
-	PHAR_GLOBALS->request_init = 0;
-	return SUCCESS;
-}
-
 void phar_request_initialize(TSRMLS_D) /* {{{ */
 {
 	if (!PHAR_GLOBALS->request_init)
