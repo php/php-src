@@ -1393,7 +1393,7 @@ PHP_FUNCTION(extract)
 
 	if (prefix) {
 		convert_to_text(prefix);
-		if (!php_valid_var_name(Z_UNIVAL_P(prefix), Z_UNILEN_P(prefix), Z_TYPE_P(prefix))) {
+		if (Z_UNILEN_P(prefix) && !php_valid_var_name(Z_UNIVAL_P(prefix), Z_UNILEN_P(prefix), Z_TYPE_P(prefix))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid identifier");
 			return;
 		}
