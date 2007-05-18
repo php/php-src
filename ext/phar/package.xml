@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.5.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.5.4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>phar</name>
  <channel>pecl.php.net</channel>
  <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
@@ -29,10 +29,10 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-04-12</date>
- <time>22:58:38</time>
+ <date>2007-05-18</date>
+ <time>06:32:38</time>
  <version>
-  <release>1.1.0</release>
+  <release>1.2.0</release>
   <api>1.1.0</api>
  </version>
  <stability>
@@ -42,17 +42,25 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
 
- * implement ability connect a phar file &apos;phar://whatever&apos; to a directory. That way all
-   access to that phar archive are directed to the extracted directory. This
-   allows to have the installed files and the archieve keep the same includes.
-   [Marcus]
- * implement SHA-2 (256, 512) support [Marcus]
- * implement setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
-   choose the kind of signature to use (PGP falls back to SHA1) [Greg]
+ * add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
+ * add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
+ * fix Phar::CanWrite() [Marcus]
+ * add preliminary phar command (phar.php) [Marcus] 
+ * add phar command (phar.phar) [Marcus]
+ * list all available compression methods using Phar::getSupportedCompression() [Marcus]
+ * remove RINIT [Marcus]
 
  </notes>
  <contents>
   <dir baseinstalldir="/" name="/">
+   <dir name="phar">
+    <file name="clicommand.inc" role="src" />
+    <file name="directorygraphiterator.inc" role="src" />
+    <file name="directorytreeiterator.inc" role="src" />
+    <file name="invertedregexiterator.inc" role="src" />
+    <file name="phar.php" role="src" />
+    <file name="pharcommand.inc" role="src" />
+   </dir> <!-- /phar -->
    <dir name="tests">
     <file name="001.phpt" role="test" />
     <file name="002.phpt" role="test" />
@@ -107,6 +115,7 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
     <file name="ini_set_off.phpt" role="test" />
     <file name="metadata_read.phpt" role="test" />
     <file name="metadata_write.phpt" role="test" />
+    <file name="metadata_write_commit.phpt" role="test" />
     <file name="open_for_write_existing.phpt" role="test" />
     <file name="open_for_write_existing_b.phpt" role="test" />
     <file name="open_for_write_existing_c.phpt" role="test" />
@@ -153,11 +162,10 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
     <file name="phar_test.inc" role="test" />
     <file name="refcount1.phpt" role="test" />
     <file name="rename.phpt" role="test" />
-   </dir> <!-- //tests -->
+   </dir> <!-- /tests -->
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />
-   <file name="EXPERIMENTAL" role="doc" />
    <file name="LICENSE" role="doc" />
    <file name="Makefile.frag" role="src" />
    <file name="phar.c" role="src" />
@@ -203,6 +211,29 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <changelog>
   <release>
    <version>
+    <release>1.2.0</release>
+    <api>1.1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2007-05-18</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+
+ * add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
+ * add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
+ * fix Phar::CanWrite() [Marcus]
+ * add preliminary phar command (phar.php) [Marcus] 
+ * add phar command (phar.phar) [Marcus]
+ * list all available compression methods using Phar::getSupportedCompression() [Marcus]
+ * remove RINIT [Marcus]
+
+   </notes>
+  </release>
+  <release>
+   <version>
     <release>1.1.0</release>
     <api>1.1.0</api>
    </version>
@@ -212,17 +243,13 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
    </stability>
    <date>2007-04-12</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>
-
- * implement ability connect a phar file &apos;phar://whatever&apos; to a directory. That way all
-   access to that phar archive are directed to the extracted directory. This
-   allows to have the installed files and the archieve keep the same includes.
-   [Marcus]
- * implement SHA-2 (256, 512) support [Marcus]
- * implement setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
-   choose the kind of signature to use (PGP falls back to SHA1) [Greg]
-
-   </notes>
+   <notes>* implement ability connect a phar file &apos;phar://whatever&apos; to a directory. That way all
+  access to that phar archive are directed to the extracted directory. This
+  allows to have the installed files and the archieve keep the same includes.
+  [Marcus]
+* implement SHA-2 (256, 512) support [Marcus]
+* implement setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
+  choose the kind of signature to use (PGP falls back to SHA1) [Greg]</notes>
   </release>
   <release>
    <version>
@@ -235,11 +262,7 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
    </stability>
    <date>2007-03-28</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>
-
- * Fix return value of unlink() and rename() when used for phar archievs. [Marcus]
-
-   </notes>
+   <notes>* Fix return value of unlink() and rename() when used for phar archievs. [Marcus]</notes>
   </release>
   <release>
    <version>
