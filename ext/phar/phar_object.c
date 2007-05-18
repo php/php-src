@@ -1393,6 +1393,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, getExtractList,        NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getSupportedSignatures,NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getSupportedCompression,NULL,                     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, isValidPharFilename,   NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
