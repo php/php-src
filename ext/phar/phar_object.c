@@ -193,7 +193,7 @@ PHP_METHOD(Phar, __construct)
 	phar_archive_data   *phar_data;
 	zval *zobj = getThis(), arg1, arg2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &fname, &fname_len, &flags, &alias, &alias_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls!", &fname, &fname_len, &flags, &alias, &alias_len) == FAILURE) {
 		return;
 	}
 
@@ -260,6 +260,19 @@ PHP_METHOD(Phar, count)
 	PHAR_ARCHIVE_OBJECT();
 	
 	RETURN_LONG(zend_hash_num_elements(&phar_obj->arc.archive->manifest));
+}
+/* }}} */
+
+/* {{{ proto int Phar::getAlias()
+ * Returns the alias for the PHAR or NULL
+ */
+PHP_METHOD(Phar, getAlias)
+{
+	PHAR_ARCHIVE_OBJECT();
+
+	if (phar_obj->arc.archive->alias && phar_obj->arc.archive->alias != phar_obj->arc.archive->fname) {
+		RETURN_STRINGL(phar_obj->arc.archive->alias, phar_obj->arc.archive->alias_len, 1);
+	}
 }
 /* }}} */
 
@@ -1368,6 +1381,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, compressAllFilesBZIP2, NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, count,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, delMetadata,           NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getAlias,              NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getMetadata,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getModified,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getSignature,          NULL,                      ZEND_ACC_PUBLIC)
