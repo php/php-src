@@ -7,6 +7,8 @@ require 'ext/pdo_mysql/tests/config.inc';
 require 'ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
+--INI--
+precision=14
 --FILE--
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
@@ -24,7 +26,7 @@ $stmt = $db->prepare('SELECT * from test');
 print_r($stmt->getColumnMeta(0));
 $stmt->execute();
 print_r($stmt->getColumnMeta(0));
-
+?>
 --EXPECTF--
 object(PDOStatement)#%d (1) {
   ["queryString"]=>
@@ -43,6 +45,7 @@ Array
             [0] => not_null
         )
 
+    [table] => test
     [name] => bar
     [len] => 11
     [precision] => 0

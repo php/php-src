@@ -2,6 +2,8 @@
 mysqli fetch (bind_param + bind_result) 
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 	include "connect.inc";
