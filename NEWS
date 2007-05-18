@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Fixed altering $this via argument named "this". (Dmitry)
 - Fixed PHP CLI to use the php.ini from the binary location. (Hannes)
 - Fixed segfault in strripos(). (Tony, Joxean Koret)
+- Fixed bug #41421 (Uncaught exception from a stream wrapper segfaults). 
+  (Tony, Dmitry)
 - Fixed bug #41403 (json_decode cannot decode floats if localeconv 
   decimal_point is not '.'). (Tony)
 - Fixed bug #41394 (dbase_create creates file with corrupted header). (Tony)
