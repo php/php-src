@@ -282,12 +282,15 @@ static void tokenize(zval *return_value TSRMLS_DC)
 	while ((token_type = lex_scan(&token TSRMLS_CC))) {
 		destroy = 1;
 		switch (token_type) {
+			case T_CLOSE_TAG:
+				if (zendtext[zendleng - 1] != '>') {
+					CG(zend_lineno)++;
+				}
 			case T_OPEN_TAG:
 			case T_OPEN_TAG_WITH_ECHO:
 			case T_WHITESPACE:
 			case T_COMMENT:
 			case T_DOC_COMMENT:
-			case T_CLOSE_TAG:
 				destroy = 0;
 				break;
 		}
@@ -297,6 +300,10 @@ static void tokenize(zval *return_value TSRMLS_DC)
 			array_init(keyword);
 			add_next_index_long(keyword, token_type);
 			if (token_type == T_END_HEREDOC) {
+				if (CG(increment_lineno)) {
+					token_line = ++CG(zend_lineno);
+					CG(increment_lineno) = 0;
+				}
 				add_next_index_stringl(keyword, Z_STRVAL(token), Z_STRLEN(token), 1);
 				efree(Z_STRVAL(token));
 			} else {
@@ -372,8 +379,6 @@ get_token_type_name(int token_type)
 		case T_VARIABLE: return "T_VARIABLE";
 		case T_NUM_STRING: return "T_NUM_STRING";
 		case T_INLINE_HTML: return "T_INLINE_HTML";
-		case T_CHARACTER: return "T_CHARACTER";
-		case T_BAD_CHARACTER: return "T_BAD_CHARACTER";
 		case T_ENCAPSED_AND_WHITESPACE: return "T_ENCAPSED_AND_WHITESPACE";
 		case T_CONSTANT_ENCAPSED_STRING: return "T_CONSTANT_ENCAPSED_STRING";
 		case T_ECHO: return "T_ECHO";

@@ -24,8 +24,6 @@
  * LALR shift/reduce conflicts and how they are resolved:
  *
  * - 2 shift/reduce conflicts due to the dangeling elseif/else ambiguity.  Solved by shift.
- * - 1 shift/reduce conflict due to arrays within encapsulated strings. Solved by shift.
- * - 1 shift/reduce conflict due to objects within encapsulated strings.  Solved by shift.
  *
  */
 
@@ -49,7 +47,7 @@
 %}
 
 %pure_parser
-%expect 4
+%expect 2
 
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
 %left ','
@@ -718,9 +716,9 @@ scalar:
 	|	class_constant	{ $$ = $1; }
 	|	common_scalar			{ $$ = $1; }
 	|	'"' { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; } encaps_list '"' { $$ = $3; }
-	|	T_START_HEREDOC { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; } encaps_list T_END_HEREDOC { $$ = $3; zend_do_end_heredoc(TSRMLS_C); }
+	|	T_START_HEREDOC { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; } encaps_list T_END_HEREDOC { $$ = $3; }
 	|	T_BINARY_DOUBLE { CG(literal_type) = IS_STRING; } encaps_list '"' { $$ = $3; }
-	|	T_BINARY_HEREDOC { CG(literal_type) = IS_STRING; } encaps_list T_END_HEREDOC { $$ = $3; zend_do_end_heredoc(TSRMLS_C); }
+	|	T_BINARY_HEREDOC { CG(literal_type) = IS_STRING; } encaps_list T_END_HEREDOC { $$ = $3; }
 ;
 
 
@@ -879,16 +877,7 @@ non_empty_array_pair_list:
 
 encaps_list:
 		encaps_list encaps_var { zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC);  zend_do_add_variable(&$$, &$1, &$2 TSRMLS_CC); }
-	|	encaps_list T_STRING			{ zend_do_add_string(&$$, &$1, &$2 TSRMLS_CC); }
-	|	encaps_list T_NUM_STRING		{ zend_do_add_string(&$$, &$1, &$2 TSRMLS_CC); }
 	|	encaps_list T_ENCAPSED_AND_WHITESPACE	{ zend_do_add_string(&$$, &$1, &$2 TSRMLS_CC); }
-	|	encaps_list T_CHARACTER 		{ zend_do_add_char(&$$, &$1, &$2 TSRMLS_CC); }
-	|	encaps_list T_BAD_CHARACTER		{ zend_do_add_string(&$$, &$1, &$2 TSRMLS_CC); }
-	|	encaps_list '['		{ Z_LVAL($2.u.constant) = (long) '['; zend_do_add_char(&$$, &$1, &$2 TSRMLS_CC); }
-	|	encaps_list ']'		{ Z_LVAL($2.u.constant) = (long) ']'; zend_do_add_char(&$$, &$1, &$2 TSRMLS_CC); }
-	|	encaps_list '{'		{ Z_LVAL($2.u.constant) = (long) '{'; zend_do_add_char(&$$, &$1, &$2 TSRMLS_CC); }
-	|	encaps_list '}'		{ Z_LVAL($2.u.constant) = (long) '}'; zend_do_add_char(&$$, &$1, &$2 TSRMLS_CC); }
-	|	encaps_list T_OBJECT_OPERATOR  { znode tmp;  Z_LVAL($2.u.constant) = (long) '-';  zend_do_add_char(&tmp, &$1, &$2 TSRMLS_CC);  Z_LVAL($2.u.constant) = (long) '>'; zend_do_add_char(&$$, &tmp, &$2 TSRMLS_CC); }
 	|	/* empty */			{ zend_do_init_string(&$$ TSRMLS_CC); }
 
 ;

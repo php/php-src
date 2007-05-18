@@ -1629,7 +1629,7 @@ ZEND_VM_HANDLER(53, ZEND_INIT_STRING, ANY, ANY)
 		Z_STRVAL_P(tmp) = emalloc(1);
 		Z_STRVAL_P(tmp)[0] = 0;
 		Z_STRLEN_P(tmp) = 0;
-		Z_TYPE_P(tmp) = EX(opline)->extended_value;
+		Z_TYPE_P(tmp) = IS_STRING;
 	}
 	tmp->refcount = 1;
 	tmp->is_ref = 0;
@@ -1666,15 +1666,18 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP, TMP|VAR|CV)
 	zend_free_op free_op1, free_op2;
 	zval *var = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	zval var_copy;
-	int use_copy;
+	int use_copy = 0;
 
-	if (opline->extended_value == IS_UNICODE) {
-		zend_make_unicode_zval(var, &var_copy, &use_copy);
-	} else {
-		zend_make_string_zval(var, &var_copy, &use_copy);
-	}
-	if (use_copy) {
-		var = &var_copy;
+	if (Z_TYPE_P(var) != opline->extended_value) {
+		if (opline->extended_value == IS_UNICODE) {
+			zend_make_unicode_zval(var, &var_copy, &use_copy);
+		} else {
+			zend_make_string_zval(var, &var_copy, &use_copy);
+		}
+
+		if (use_copy) {
+			var = &var_copy;
+		}
 	}
 	add_string_to_string(&EX_T(opline->result.u.var).tmp_var,
 						 GET_OP1_ZVAL_PTR(BP_VAR_NA), var);

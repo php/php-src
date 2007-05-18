@@ -37,8 +37,11 @@
 %x ST_DOUBLE_QUOTES
 %x ST_BACKQUOTE
 %x ST_HEREDOC
+%x ST_START_HEREDOC
+%x ST_END_HEREDOC
 %x ST_LOOKING_FOR_PROPERTY
 %x ST_LOOKING_FOR_VARNAME
+%x ST_VAR_OFFSET
 %x ST_COMMENT
 %x ST_DOC_COMMENT
 %x ST_ONE_LINE_COMMENT
@@ -99,9 +102,7 @@ do {																			\
 	char *p = (s), *boundary = p+(l);											\
 																				\
 	while (p<boundary) {														\
-		if (*p == '\n') {														\
-			CG(zend_lineno)++;													\
-		} else if ((*p == '\r') && (p+1 < boundary) && (*(p+1) != '\n')) {		\
+		if (*p == '\n' || (*p == '\r' && (*(p+1) != '\n'))) {					\
 			CG(zend_lineno)++;													\
 		}																		\
 		p++;																	\
@@ -313,30 +314,6 @@ static inline int8_t zend_get_hex_digit(UChar c) {
     return -1;
 }
 
-static inline zend_bool zend_digits_to_codepoint(char *s, char *end, UChar32 *c, int8_t digits)
-{
-	int8_t n = 0;
-	int8_t digit = 0;
-	UChar32 codepoint = 0;
-
-	while (s < end && n < digits) {
-		digit = zend_get_hex_digit((UChar)*s);
-		if (digit < 0) {
-			break;
-		}
-		codepoint = (codepoint << 4) | digit;
-		++s;
-		++n;
-	}
-
-	if (n < digits) {
-		return 0;
-	}
-
-	*c = codepoint;
-	return 1;
-}
-
 static inline zend_bool zend_udigits_to_codepoint(UChar *s, UChar *end, UChar32 *c, int8_t digits)
 {
 	int8_t n = 0;
@@ -359,20 +336,6 @@ static inline zend_bool zend_udigits_to_codepoint(UChar *s, UChar *end, UChar32 
 
 	*c = codepoint;
 	return 1;
-}
-
-static inline int zend_uchar_from_name(char *name, UChar32 *c)
-{
-	UChar32 codepoint = 0;
-	UErrorCode status = U_ZERO_ERROR;
-
-	codepoint = u_charFromName(U_UNICODE_CHAR_NAME, name, &status);
-	if (U_SUCCESS(status)) {
-		*c = codepoint;
-		return 1;
-	} else {
-		return 0;
-	}
 }
 
 static inline int zend_uchar_from_uname(UChar *name, int name_len, UChar32 *c TSRMLS_DC)
@@ -1029,7 +992,7 @@ END_EXTERN_C()
 	Z_STRVAL_P(zendlval) = (char *)estrndup(yytext, yyleng); \
 	Z_STRLEN_P(zendlval) = yyleng;
 
-int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
+static int zend_scan_unicode_escape_string(zval *zendlval, char *str, int len, UChar quote_type, int type TSRMLS_DC)
 {
 	register UChar *s, *t, c;
 	UChar *end;
@@ -1039,9 +1002,7 @@ int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 	int8_t bits;
 	int8_t n;
 
-	HANDLE_NEWLINES(yytext, yyleng);
-
-	if (!zend_copy_scanner_string(zendlval, yytext+1, yyleng-2, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, str, len, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 
@@ -1074,9 +1035,15 @@ int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 					*t++ = (UChar) 0x09; /*'\t'*/
 					Z_USTRLEN_P(zendlval)--;
 					break;
+				case 0x22:               /*'"'*/
+				case 0x60:               /*'`'*/
+					if (c != quote_type) {
+						*t++ = 0x5C; /*'\\'*/
+						*t++ = *s;
+						break;
+					}
 				case 0x5C:               /*'\\'*/
 				case 0x24:               /*'$'*/
-				case 0x22:               /*'"'*/
 					*t++ = *s;
 					Z_USTRLEN_P(zendlval)--;
 					break;
@@ -1110,20 +1077,26 @@ int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 					max_digits = 6;
 					Z_USTRLEN_P(zendlval)--;
 					break;
+				case 0x78:               /*'x'*/
+				case 0x58:               /*'X'*/
+					if ((digit = zend_get_hex_digit(*(s+1))) >= 0) {
+						min_digits = 1;
+						max_digits = 2;
+						Z_USTRLEN_P(zendlval)--;
+						s++;
+						n = 1; /* already have one digit */
+						codepoint = digit;
+					} else {
+						*t++ = 0x5C; /*'\\'*/
+						*t++ = *s;
+					}
+					break;
 				default:
 					digit = zend_get_octal_digit(*s);
 					if (digit >= 0) {
 						min_digits = 1;
 						max_digits = 3;
 						bits = 3;
-						n = 1; /* already have one digit */
-						codepoint = digit;
-					} else if (c == 0x78  /*'x'*/
-							   && (s+1) < end && (digit = zend_get_hex_digit(*(s+1))) >= 0) {
-						min_digits = 1;
-						max_digits = 2;
-						Z_USTRLEN_P(zendlval)--;
-						s++;
 						n = 1; /* already have one digit */
 						codepoint = digit;
 					} else {
@@ -1163,25 +1136,29 @@ int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 					efree(Z_USTRVAL_P(zendlval));
 					return 0;
 				}
-			} else {
-				s++;
+
+				/* s is already incremented and not past a newline */
+				continue;
 			}
 		} else {
-			*t++ = *s++;
+			*t++ = *s;
 		}
+
+		if (*s == 0x0A /*'\n'*/ || (*s == 0x0D /*'\r'*/ && (*(s+1) != 0x0A /*'\n'*/))) {
+			CG(zend_lineno)++;
+		}
+		s++;
 	}
 	*t = 0;
 
-	return T_CONSTANT_ENCAPSED_STRING;
+	return type;
 }
 
-int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
+static int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 {
 	register UChar *s, *t;
 	UChar *end;
 	UChar32 codepoint = 0;
-
-	HANDLE_NEWLINES(yytext, yyleng);
 
 	if (!zend_copy_scanner_string(zendlval, yytext+1, yyleng-2, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
@@ -1265,25 +1242,26 @@ int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 					*t++ = *s;
 					break;
 			}
-			s++;
 		} else {
-			*t++ = *s++;
+			*t++ = *s;
 		}
+
+		if (*s == 0x0A /*'\n'*/ || (*s == 0x0D /*'\r'*/ && (*(s+1) != 0x0A /*'\n'*/))) {
+			CG(zend_lineno)++;
+		}
+		s++;
 	}
 	*t = 0;
 
 	return T_CONSTANT_ENCAPSED_STRING;
 }
 
-int zend_scan_binary_double_string(zval *zendlval, int bprefix TSRMLS_DC)
+static void zend_scan_binary_escape_string(zval *zendlval, char *str, int len, char quote_type TSRMLS_DC)
 {
 	register char *s, *t;
 	char *end;
 
-	Z_STRVAL_P(zendlval) = estrndup(yytext+bprefix+1, yyleng-bprefix-2);
-	Z_STRLEN_P(zendlval) = yyleng-bprefix-2;
-	Z_TYPE_P(zendlval) = IS_STRING;
-	HANDLE_NEWLINES(yytext, yyleng);
+	ZVAL_STRINGL(zendlval, str, len, 1);
 
 	/* convert escape sequences */
 	s = t = Z_STRVAL_P(zendlval);
@@ -1307,36 +1285,28 @@ int zend_scan_binary_double_string(zval *zendlval, int bprefix TSRMLS_DC)
 					*t++ = '\t';
 					Z_STRLEN_P(zendlval)--;
 					break;
+				case '"':
+				case '`':
+					if (*s != quote_type) {
+						*t++ = '\\';
+						*t++ = *s;
+						break;
+					}
 				case '\\':
 				case '$':
-				case '"':
 					*t++ = *s;
 					Z_STRLEN_P(zendlval)--;
 					break;
-				default:
-					/* check for an octal */
-					if (ZEND_IS_OCT(*s)) {
-						char octal_buf[4] = { 0, 0, 0, 0 };
-
-						octal_buf[0] = *s;
-						Z_STRLEN_P(zendlval)--;
-						if ((s+1)<end && ZEND_IS_OCT(*(s+1))) {
-							octal_buf[1] = *(++s);
-							Z_STRLEN_P(zendlval)--;
-							if ((s+1)<end && ZEND_IS_OCT(*(s+1))) {
-								octal_buf[2] = *(++s);
-								Z_STRLEN_P(zendlval)--;
-							}
-						}
-						*t++ = (char) strtol(octal_buf, NULL, 8);
-					} else if (*s=='x' && (s+1)<end && ZEND_IS_HEX(*(s+1))) {
-						char hex_buf[3] = { 0, 0, 0};
+				case 'x':
+				case 'X':
+					if (ZEND_IS_HEX(*(s+1))) {
+						char hex_buf[3] = { 0, 0, 0 };
 
 						Z_STRLEN_P(zendlval)--; /* for the 'x' */
 
 						hex_buf[0] = *(++s);
 						Z_STRLEN_P(zendlval)--;
-						if ((s+1)<end && ZEND_IS_HEX(*(s+1))) {
+						if (ZEND_IS_HEX(*(s+1))) {
 							hex_buf[1] = *(++s);
 							Z_STRLEN_P(zendlval)--;
 						}
@@ -1346,26 +1316,46 @@ int zend_scan_binary_double_string(zval *zendlval, int bprefix TSRMLS_DC)
 						*t++ = *s;
 					}
 					break;
+				default:
+					/* check for an octal */
+					if (ZEND_IS_OCT(*s)) {
+						char octal_buf[4] = { 0, 0, 0, 0 };
+
+						octal_buf[0] = *s;
+						Z_STRLEN_P(zendlval)--;
+						if (ZEND_IS_OCT(*(s+1))) {
+							octal_buf[1] = *(++s);
+							Z_STRLEN_P(zendlval)--;
+							if (ZEND_IS_OCT(*(s+1))) {
+								octal_buf[2] = *(++s);
+								Z_STRLEN_P(zendlval)--;
+							}
+						}
+						*t++ = (char) strtol(octal_buf, NULL, 8);
+					} else {
+						*t++ = '\\';
+						*t++ = *s;
+					}
+					break;
 			}
-			s++;
 		} else {
-			*t++ = *s++;
+			*t++ = *s;
 		}
+
+		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
+			CG(zend_lineno)++;
+		}
+		s++;
 	}
 	*t = 0;
-
-	return T_CONSTANT_ENCAPSED_STRING;
 }
 
-int zend_scan_binary_single_string(zval *zendlval, int bprefix TSRMLS_DC)
+static void zend_scan_binary_single_string(zval *zendlval, char *str, int len TSRMLS_DC)
 {
 	register char *s, *t;
 	char *end;
 
-	Z_STRVAL_P(zendlval) = estrndup(yytext+bprefix+1, yyleng-bprefix-2);
-	Z_STRLEN_P(zendlval) = yyleng-bprefix-2;
-	Z_TYPE_P(zendlval) = IS_STRING;
-	HANDLE_NEWLINES(yytext, yyleng);
+	ZVAL_STRINGL(zendlval, str, len, 1);
 
 	/* convert escape sequences */
 	s = t = Z_STRVAL_P(zendlval);
@@ -1387,14 +1377,16 @@ int zend_scan_binary_single_string(zval *zendlval, int bprefix TSRMLS_DC)
 					*t++ = *s;
 					break;
 			}
-			s++;
 		} else {
-			*t++ = *s++;
+			*t++ = *s;
 		}
+
+		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
+			CG(zend_lineno)++;
+		}
+		s++;
 	}
 	*t = 0;
-
-	return T_CONSTANT_ENCAPSED_STRING;
 }
 
 %}
@@ -1407,10 +1399,60 @@ LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
 TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
-ENCAPSED_TOKENS [\[\]{}$]
-ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 ANY_CHAR (.|[\n])
 NEWLINE ("\r"|"\n"|"\r\n")
+
+/*
+ * LITERAL_DOLLAR matches unescaped $ that aren't followed by a label character
+ * or a { and therefore will be taken literally. The case of literal $ before
+ * a variable or "${" is handled in a rule for each string type
+ */
+DOUBLE_QUOTES_LITERAL_DOLLAR ("$"+([^a-zA-Z_\x7f-\xff$"\\{]|("\\"{ANY_CHAR})))
+BACKQUOTE_LITERAL_DOLLAR     ("$"+([^a-zA-Z_\x7f-\xff$`\\{]|("\\"{ANY_CHAR})))
+HEREDOC_LITERAL_DOLLAR       ("$"+([^a-zA-Z_\x7f-\xff$\n\r\\{]|("\\"[^\n\r])))
+
+/*
+ * Usually, HEREDOC_NEWLINE will just function like a simple NEWLINE, but some
+ * special cases need to be handled. HEREDOC_CHARS doesn't allow a line to
+ * match when { or $, and/or \ is at the end. (("{"*|"$"*)"\\"?) handles that,
+ * along with cases where { or $, and/or \ is the ONLY thing on a line
+ *
+ * The other case is when a line contains a label, followed by ONLY
+ * { or $, and/or \  Handled by ({LABEL}";"?((("{"+|"$"+)"\\"?)|"\\"))
+ */
+HEREDOC_NEWLINE ((({LABEL}";"?((("{"+|"$"+)"\\"?)|"\\"))|(("{"*|"$"*)"\\"?)){NEWLINE})
+
+/*
+ * This pattern is just used in the next 2 for matching { or literal $, and/or
+ * \ escape sequence immediately at the beginning of a line or after a label
+ */
+HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR (("{"+[^$\n\r\\{])|("{"*"\\"[^\n\r])|{HEREDOC_LITERAL_DOLLAR})
+
+/*
+ * These 2 label-related patterns allow HEREDOC_CHARS to continue "regular"
+ * matching after a newline that starts with either a non-label character or a
+ * label that isn't followed by a newline. Like HEREDOC_CHARS, they won't match
+ * a variable or "{$"  Matching a newline, and possibly label, up TO a variable
+ * or "{$", is handled in the heredoc rules
+ *
+ * The HEREDOC_LABEL_NO_NEWLINE pattern (";"[^$\n\r\\{]) handles cases where ;
+ * follows a label. [^a-zA-Z0-9_\x7f-\xff;$\n\r\\{] is needed to prevent a label
+ * character or ; from matching on a possible (real) ending label
+ */
+HEREDOC_NON_LABEL ([^a-zA-Z_\x7f-\xff$\n\r\\{]|{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})
+HEREDOC_LABEL_NO_NEWLINE ({LABEL}([^a-zA-Z0-9_\x7f-\xff;$\n\r\\{]|(";"[^$\n\r\\{])|(";"?{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})))
+
+/*
+ * CHARS matches everything up to a variable or "{$"
+ * {'s are matched as long as they aren't followed by a $
+ * The case of { before "{$" is handled in a rule for each string type
+ *
+ * For heredocs, matching continues across/after newlines if/when it's known
+ * that the next line doesn't contain a possible ending label
+ */
+DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{DOUBLE_QUOTES_LITERAL_DOLLAR})
+BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
+HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({HEREDOC_NEWLINE}+({HEREDOC_NON_LABEL}|{HEREDOC_LABEL_NO_NEWLINE})))
 
 %option noyylineno
 %option noyywrap
@@ -1560,8 +1602,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_IMPLEMENTS;
 }
 
-<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"->" {
+<ST_IN_SCRIPTING>"->" {
 	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
+	return T_OBJECT_OPERATOR;
+}
+
+<ST_LOOKING_FOR_PROPERTY>"->" {
 	return T_OBJECT_OPERATOR;
 }
 
@@ -1906,7 +1952,19 @@ NEWLINE ("\r"|"\n"|"\r\n")
     }
 }
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LNUM}|{HNUM} { /* treat numbers (almost) as strings inside encapsulated strings */
+<ST_VAR_OFFSET>0|([1-9][0-9]*) { /* Offset could be treated as a long */
+	if (yyleng < MAX_LENGTH_OF_LONG - 1 || (yyleng == MAX_LENGTH_OF_LONG - 1 && strcmp(yytext, long_min_digits) < 0)) {
+		Z_LVAL_P(zendlval) = strtol(yytext, NULL, 10);
+		Z_TYPE_P(zendlval) = IS_LONG;
+	} else {
+		if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
+			return 0;
+		}
+	}
+	return T_NUM_STRING;
+}
+
+<ST_VAR_OFFSET>{LNUM}|{HNUM} { /* Offset must be treated as a string */
 	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
@@ -2080,7 +2138,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_OPEN_TAG;
 }
 
-<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL} {
+<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
 	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
@@ -2088,6 +2146,54 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		return 0;
 	}
 	return T_VARIABLE;
+}
+
+%{
+/* Make sure a label character follows "->", otherwise there is no property
+ * and "->" will be taken literally
+ */ %}
+<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x7f-\xff] {
+	yyless(yyleng - 3);
+	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
+
+	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+		return 0;
+	}
+	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
+		return 0;
+	}
+	return T_VARIABLE;
+}
+
+%{
+/* A [ always designates a variable offset, regardless of what follows
+ */ %}
+<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"[" {
+	yyless(yyleng - 1);
+	yy_push_state(ST_VAR_OFFSET TSRMLS_CC);
+
+	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+		return 0;
+	}
+	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
+		return 0;
+	}
+	return T_VARIABLE;
+}
+
+<ST_VAR_OFFSET>"]" {
+	yy_pop_state(TSRMLS_C);
+	return ']';
+}
+
+<ST_VAR_OFFSET>{TOKENS}|[{}] {
+	/* Only '[' can be valid, but returning other tokens will allow a more explicit parse error */
+	return yytext[0];
+}
+
+<ST_VAR_OFFSET>[ \n\r\t'"`\\#] {
+	yyless(0);
+	yy_pop_state(TSRMLS_C);
 }
 
 <ST_IN_SCRIPTING>{LABEL} {
@@ -2100,7 +2206,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_STRING;
 }
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LABEL} {
+<ST_VAR_OFFSET>{LABEL} {
 	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
@@ -2230,37 +2336,44 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_IN_SCRIPTING>(["]([^$"\\]|("\\".))*["]) {
+%{
+/* ("{"*|"$"*) handles { or $ at the end of a string (or the entire contents)
+ */ %}
+<ST_IN_SCRIPTING>(["]{DOUBLE_QUOTES_CHARS}*("{"*|"$"*)["]) {
 	if (UG(unicode)) {
-		return zend_scan_unicode_double_string(zendlval TSRMLS_CC);
+		return zend_scan_unicode_escape_string(zendlval, yytext+1, yyleng-2, 0x22 /*'"'*/, T_CONSTANT_ENCAPSED_STRING TSRMLS_CC);
 	} else {
-		return zend_scan_binary_double_string(zendlval, 0 TSRMLS_CC);
+		zend_scan_binary_escape_string(zendlval, yytext+1, yyleng-2, '"' TSRMLS_CC);
+		return T_CONSTANT_ENCAPSED_STRING;
 	}
 }
 
 
-<ST_IN_SCRIPTING>(b["]([^$"\\]|("\\".))*["]) {
-	return zend_scan_binary_double_string(zendlval, 1 TSRMLS_CC);
+<ST_IN_SCRIPTING>(b["]{DOUBLE_QUOTES_CHARS}*("{"*|"$"*)["]) {
+	zend_scan_binary_escape_string(zendlval, yytext+2, yyleng-3, '"' TSRMLS_CC);
+	return T_CONSTANT_ENCAPSED_STRING;
 }
 
 
-<ST_IN_SCRIPTING>([']([^'\\]|("\\".))*[']) {
+<ST_IN_SCRIPTING>([']([^'\\]|("\\"{ANY_CHAR}))*[']) {
 	if (UG(unicode)) {
 		return zend_scan_unicode_single_string(zendlval TSRMLS_CC);
 	} else {
-		return zend_scan_binary_single_string(zendlval, 0 TSRMLS_CC);
+		zend_scan_binary_single_string(zendlval, yytext+1, yyleng-2 TSRMLS_CC);
+		return T_CONSTANT_ENCAPSED_STRING;
 	}
 }
 
 
-<ST_IN_SCRIPTING>("b'"([^'\\]|("\\".))*[']) {
-	return zend_scan_binary_single_string(zendlval, 1 TSRMLS_CC);
+<ST_IN_SCRIPTING>("b'"([^'\\]|("\\"{ANY_CHAR}))*[']) {
+	zend_scan_binary_single_string(zendlval, yytext+2, yyleng-3 TSRMLS_CC);
+	return T_CONSTANT_ENCAPSED_STRING;
 }
 
 
 <ST_IN_SCRIPTING>["] {
 	BEGIN(ST_DOUBLE_QUOTES);
-	return '\"';
+	return '"';
 }
 
 <ST_IN_SCRIPTING>b["] {
@@ -2278,7 +2391,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		CG(heredoc_len)--;
 	}
 	CG(heredoc) = estrndup(s, CG(heredoc_len));
-	BEGIN(ST_HEREDOC);
+	BEGIN(ST_START_HEREDOC);
 	return T_BINARY_HEREDOC;
 }
 
@@ -2293,7 +2406,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		CG(heredoc_len)--;
 	}
 	CG(heredoc) = estrndup(s, CG(heredoc_len));
-	BEGIN(ST_HEREDOC);
+	BEGIN(ST_START_HEREDOC);
 	return T_START_HEREDOC;
 }
 
@@ -2304,204 +2417,180 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_HEREDOC>^{LABEL}(";")?{NEWLINE} {
-	int label_len;
+<ST_START_HEREDOC>{ANY_CHAR} {
+	yyless(0);
+	BEGIN(ST_HEREDOC);
+}
 
-	if (yytext[yyleng-2]=='\r') {
-		label_len = yyleng-2;
-	} else {
-		label_len = yyleng-1;
-	}
+<ST_START_HEREDOC>{LABEL}";"?[\n\r] {
+	int label_len = yyleng - 1;
 
 	if (yytext[label_len-1]==';') {
 		label_len--;
 	}
 
+	yyless(label_len);
+
 	if (label_len==CG(heredoc_len) && !memcmp(yytext, CG(heredoc), label_len)) {
-		Z_STRVAL_P(zendlval) = estrndup(yytext, label_len); /* unput destroys yytext */
+		Z_STRVAL_P(zendlval) = CG(heredoc);
 		Z_STRLEN_P(zendlval) = label_len;
-		yyless(yyleng - (yyleng - label_len));
-		efree(CG(heredoc));
 		CG(heredoc)=NULL;
 		CG(heredoc_len)=0;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_END_HEREDOC;
 	} else {
-		CG(zend_lineno)++;
-		if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-			return 0;
+		yymore();
+		BEGIN(ST_HEREDOC);
+	}
+}
+
+%{
+/* Match everything up to and including a possible ending label, so if the label
+ * doesn't match, it's kept with the rest of the string
+ *
+ * {HEREDOC_NEWLINE}+ handles the case of more than one newline sequence that
+ * couldn't be matched with HEREDOC_CHARS, because of the following label
+ */ %}
+<ST_HEREDOC>{HEREDOC_CHARS}*{HEREDOC_NEWLINE}+{LABEL}";"?[\n\r] {
+	char *end = yytext + yyleng - 1;
+
+	if (end[-1] == ';') {
+		end--;
+		yyleng--;
+	}
+
+	if (yyleng > CG(heredoc_len) && !memcmp(end - CG(heredoc_len), CG(heredoc), CG(heredoc_len))) {
+		int len = yyleng - CG(heredoc_len) - 2; /* 2 for newline before and after label */
+
+		if (len > 0 && yytext[len - 1] == '\r' && yytext[len] == '\n') {
+			len--;
 		}
-		return T_STRING;
+
+		/* Go back before last label char, to match in ST_END_HEREDOC state */
+		yyless(yyleng - 2);
+
+		/* Subtract the remaining label length. yyleng must include newline
+		 * before label, for zend_highlight/strip, tokenizer, etc. */
+		yyleng -= CG(heredoc_len) - 1;
+
+		CG(increment_lineno) = 1; /* For newline before label */
+		BEGIN(ST_END_HEREDOC);
+
+		if (CG(literal_type) == IS_UNICODE) {
+			return zend_scan_unicode_escape_string(zendlval, yytext, len, 0, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
+		} else {
+			zend_scan_binary_escape_string(zendlval, yytext, len, 0 TSRMLS_CC);
+			return T_ENCAPSED_AND_WHITESPACE;
+		}
+	} else {
+		/* Go back to end of label, so there's something to match again in case
+		 * there's a variable at the beginning of the next line */
+		yyless(yyleng - 1);
+		yymore();
 	}
 }
 
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ESCAPED_AND_WHITESPACE} {
-	HANDLE_NEWLINES(yytext, yyleng);
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
-	return T_ENCAPSED_AND_WHITESPACE;
+<ST_END_HEREDOC>{ANY_CHAR} {
+	Z_STRVAL_P(zendlval) = CG(heredoc);
+	Z_STRLEN_P(zendlval) = CG(heredoc_len);
+	yytext = Z_STRVAL_P(zendlval);
+	yyleng = Z_STRLEN_P(zendlval);
+	CG(heredoc) = NULL;
+	CG(heredoc_len) = 0;
+	BEGIN(ST_IN_SCRIPTING);
+	return T_END_HEREDOC;
 }
 
-<ST_DOUBLE_QUOTES>[`]+ {
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
-	return T_ENCAPSED_AND_WHITESPACE;
-}
-
-
-<ST_BACKQUOTE>["]+ {
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
-	return T_ENCAPSED_AND_WHITESPACE;
-}
-
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"$"[^a-zA-Z_\x7f-\xff{] {
-	Z_LVAL_P(zendlval) = (long) yytext[0];
-	if (yyleng == 2) {
-		yyless(1);
-	}
-	return T_CHARACTER;
-}
-
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ENCAPSED_TOKENS} {
-	Z_LVAL_P(zendlval) = (long) yytext[0];
-	return yytext[0];
-}
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
-	Z_LVAL_P(zendlval) = (long) yytext[0];
+	Z_LVAL_P(zendlval) = (long) '{';
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	yyless(1);
 	return T_CURLY_OPEN;
 }
 
 
-<ST_DOUBLE_QUOTES>"\\\"" {
-	Z_LVAL_P(zendlval) = (long) '"';
-	return T_CHARACTER;
+<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}+ {
+	if (CG(literal_type) == IS_UNICODE) {
+		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x22 /*'"'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
+	} else {
+		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '"' TSRMLS_CC);
+		return T_ENCAPSED_AND_WHITESPACE;
+	}
 }
 
-<ST_BACKQUOTE>"\\`" {
-	Z_LVAL_P(zendlval) = (long) '`';
-	return T_CHARACTER;
-}
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\"[0-7]{1,3} {
-	Z_LVAL_P(zendlval) = strtol(yytext+1, NULL, 8);
-	return T_CHARACTER;
-}
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\x"[0-9A-Fa-f]{1,2} {
-	Z_LVAL_P(zendlval) = strtol (yytext+2, NULL, 16);
-	return T_CHARACTER;
-}
-
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\u"[0-9A-Fa-f]{0,6} {
-	UChar32 codepoint;
-	int req_digits = (yytext[1] == 'U') ? 6 : 4;
+%{
+/* "{"{2,}|"$"{2,} handles { before "{$" or literal $ before a variable or "${"
+ * (("{"+|"$"+)["]) handles { or $ at the end of a string
+ *
+ * Same for backquotes and heredocs, except the second case doesn't apply to
+ * heredocs. yyless(yyleng - 1) is used to correct taking one character too many
+ */ %}
+<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)["])) {
+	yyless(yyleng - 1);
 
 	if (CG(literal_type) == IS_UNICODE) {
-		if (zend_digits_to_codepoint(yytext+2, yytext+yyleng, &codepoint, req_digits)) {
-			if (codepoint <= 0x10FFFF) {
-				Z_LVAL_P(zendlval) = (long) codepoint;
-				/* give back if we grabbed more than needed for \u case */
-				if (yyleng > req_digits + 2) {
-					yyless(req_digits + 2);
-				}
-				return T_CHARACTER;
-			} else {
-				zend_error(E_COMPILE_WARNING,"\\U%06x is above the highest valid codepoint 0x10FFFF", codepoint);
-				return 0;
-			}
-		} else {
-			zend_error(E_COMPILE_WARNING,"\\%c escape sequence requires exactly %d hexadecimal digits", yytext[1], req_digits);
-			return 0;
-		}
+		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x22 /*'"'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
 	} else {
-		zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC);
-		return T_STRING;
+		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '"' TSRMLS_CC);
+		return T_ENCAPSED_AND_WHITESPACE;
 	}
 }
 
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\C"("{"[A-Z0-9 -]+"}")? {
-	UChar32 codepoint;
-
-	if (CG(literal_type) == IS_UNICODE && (yytext[1] == 'C')) {
-		/* minimum valid string is \C{.} */
-		if (yyleng >= 5) {
-			/* safe, since we have } at the end */
-			yytext[yyleng-1] = 0;
-			if (zend_uchar_from_name(yytext+3, &codepoint)) {
-				Z_LVAL_P(zendlval) = (long) codepoint;
-				return T_CHARACTER;
-			} else {
-				zend_error(E_COMPILE_WARNING, "Invalid Unicode character name: '%s'", yytext+3);
-				return 0;
-			}
-		} else {
-			zend_error(E_COMPILE_WARNING, "Invalid \\C{..} sequence");
-			return 0;
-		}
+<ST_BACKQUOTE>{BACKQUOTE_CHARS}+ {
+	if (CG(literal_type) == IS_UNICODE) {
+		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x60 /*'`'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
 	} else {
-		zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC);
-		return T_STRING;
+		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '`' TSRMLS_CC);
+		return T_ENCAPSED_AND_WHITESPACE;
 	}
 }
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\{" {
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
-	return T_STRING;
-}
+<ST_BACKQUOTE>{BACKQUOTE_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)[`])) {
+	yyless(yyleng - 1);
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\"{ANY_CHAR} {
-	switch (yytext[1]) {
-		case 'n':
-			Z_LVAL_P(zendlval) = (long) '\n';
-			break;
-		case 't':
-			Z_LVAL_P(zendlval) = (long) '\t';
-			break;
-		case 'r':
-			Z_LVAL_P(zendlval) = (long) '\r';
-			break;
-		case '\\':
-			Z_LVAL_P(zendlval) = (long) '\\';
-			break;
-		case '$':
-			Z_LVAL_P(zendlval) = (long) yytext[1];
-			break;
-		default:
-			if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-				return 0;
-			}
-			return T_BAD_CHARACTER;
-			break;
+	if (CG(literal_type) == IS_UNICODE) {
+		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x60 /*'`'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
+	} else {
+		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '`' TSRMLS_CC);
+		return T_ENCAPSED_AND_WHITESPACE;
 	}
-	return T_CHARACTER;
 }
 
 
-<ST_HEREDOC>["'`]+ {
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
+%{
+/* ({HEREDOC_NEWLINE}+({LABEL}";"?)?)? handles the possible case of newline
+ * sequences, possibly followed by a label, that couldn't be matched with
+ * HEREDOC_CHARS because of a following variable or "{$"
+ *
+ * This doesn't affect real ending labels, as they are followed by a newline,
+ * which will result in a longer match for the correct rule if present
+ */ %}
+<ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)? {
+	if (CG(literal_type) == IS_UNICODE) {
+		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
+	} else {
+		zend_scan_binary_escape_string(zendlval, yytext, yyleng, 0 TSRMLS_CC);
+		return T_ENCAPSED_AND_WHITESPACE;
 	}
-	return T_ENCAPSED_AND_WHITESPACE;
+}
+
+<ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)?("{"{2,}|"$"{2,}) {
+	yyless(yyleng - 1);
+
+	if (CG(literal_type) == IS_UNICODE) {
+		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
+	} else {
+		zend_scan_binary_escape_string(zendlval, yytext, yyleng, 0 TSRMLS_CC);
+		return T_ENCAPSED_AND_WHITESPACE;
+	}
 }
 
 
 <ST_DOUBLE_QUOTES>["] {
 	BEGIN(ST_IN_SCRIPTING);
-	return '\"';
+	return '"';
 }
 
 
@@ -2511,10 +2600,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,INITIAL,ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY><<EOF>> {
-	return 0;
-}
-
 <ST_COMMENT,ST_DOC_COMMENT><<EOF>> {
 	zend_error(E_COMPILE_WARNING,"Unterminated comment starting line %d", CG(comment_start_line));
 	return 0;
@@ -2522,6 +2607,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 
-<ST_IN_SCRIPTING,INITIAL,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ANY_CHAR} {
+<ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
 }
