@@ -122,7 +122,7 @@ static int ZEND_INIT_STRING_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		Z_STRVAL_P(tmp) = emalloc(1);
 		Z_STRVAL_P(tmp)[0] = 0;
 		Z_STRLEN_P(tmp) = 0;
-		Z_TYPE_P(tmp) = EX(opline)->extended_value;
+		Z_TYPE_P(tmp) = IS_STRING;
 	}
 	tmp->refcount = 1;
 	tmp->is_ref = 0;
@@ -5832,15 +5832,18 @@ static int ZEND_ADD_VAR_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1, free_op2;
 	zval *var = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zval var_copy;
-	int use_copy;
+	int use_copy = 0;
 
-	if (opline->extended_value == IS_UNICODE) {
-		zend_make_unicode_zval(var, &var_copy, &use_copy);
-	} else {
-		zend_make_string_zval(var, &var_copy, &use_copy);
-	}
-	if (use_copy) {
-		var = &var_copy;
+	if (Z_TYPE_P(var) != opline->extended_value) {
+		if (opline->extended_value == IS_UNICODE) {
+			zend_make_unicode_zval(var, &var_copy, &use_copy);
+		} else {
+			zend_make_string_zval(var, &var_copy, &use_copy);
+		}
+
+		if (use_copy) {
+			var = &var_copy;
+		}
 	}
 	add_string_to_string(&EX_T(opline->result.u.var).tmp_var,
 						 _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), var);
@@ -6280,15 +6283,18 @@ static int ZEND_ADD_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1, free_op2;
 	zval *var = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zval var_copy;
-	int use_copy;
+	int use_copy = 0;
 
-	if (opline->extended_value == IS_UNICODE) {
-		zend_make_unicode_zval(var, &var_copy, &use_copy);
-	} else {
-		zend_make_string_zval(var, &var_copy, &use_copy);
-	}
-	if (use_copy) {
-		var = &var_copy;
+	if (Z_TYPE_P(var) != opline->extended_value) {
+		if (opline->extended_value == IS_UNICODE) {
+			zend_make_unicode_zval(var, &var_copy, &use_copy);
+		} else {
+			zend_make_string_zval(var, &var_copy, &use_copy);
+		}
+
+		if (use_copy) {
+			var = &var_copy;
+		}
 	}
 	add_string_to_string(&EX_T(opline->result.u.var).tmp_var,
 						 _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), var);
@@ -6822,15 +6828,18 @@ static int ZEND_ADD_VAR_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1;
 	zval *var = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zval var_copy;
-	int use_copy;
+	int use_copy = 0;
 
-	if (opline->extended_value == IS_UNICODE) {
-		zend_make_unicode_zval(var, &var_copy, &use_copy);
-	} else {
-		zend_make_string_zval(var, &var_copy, &use_copy);
-	}
-	if (use_copy) {
-		var = &var_copy;
+	if (Z_TYPE_P(var) != opline->extended_value) {
+		if (opline->extended_value == IS_UNICODE) {
+			zend_make_unicode_zval(var, &var_copy, &use_copy);
+		} else {
+			zend_make_string_zval(var, &var_copy, &use_copy);
+		}
+
+		if (use_copy) {
+			var = &var_copy;
+		}
 	}
 	add_string_to_string(&EX_T(opline->result.u.var).tmp_var,
 						 _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), var);

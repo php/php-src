@@ -989,25 +989,25 @@ void zend_do_init_string(znode *result TSRMLS_DC)
 }
 
 
-void zend_do_add_char(znode *result, znode *op1, znode *op2 TSRMLS_DC)
-{
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_ADD_CHAR;
-	opline->op1 = *op1;
-	opline->op2 = *op2;
-	opline->op2.op_type = IS_CONST;
-	opline->extended_value = CG(literal_type);
-	opline->result = opline->op1;
-	*result = opline->result;
-}
-
-
 void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *opline;
 
-	opline->opcode = ZEND_ADD_STRING;
+	if (Z_UNILEN(op2->u.constant) > 1) {
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_ADD_STRING;
+	} else if (Z_UNILEN(op2->u.constant) == 1) {
+		int ch = (Z_TYPE(op2->u.constant) == IS_UNICODE) ? *Z_USTRVAL(op2->u.constant) : *Z_STRVAL(op2->u.constant);
+
+		/* Free memory and use ZEND_ADD_CHAR in case of 1 character strings */
+		efree(Z_UNIVAL(op2->u.constant).v);
+		ZVAL_LONG(&op2->u.constant, ch);
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_ADD_CHAR;
+	} else { /* String can be empty after a variable at the end of a heredoc */
+		efree(Z_UNIVAL(op2->u.constant).v);
+		return;
+	}
 	opline->op1 = *op1;
 	opline->op2 = *op2;
 	opline->op2.op_type = IS_CONST;
@@ -4154,33 +4154,6 @@ void zend_do_declare_end(znode *declare_token TSRMLS_DC)
 }
 
 
-void zend_do_end_heredoc(TSRMLS_D)
-{
-	int opline_num = get_next_op_number(CG(active_op_array))-1;
-	zend_op *opline = &CG(active_op_array)->opcodes[opline_num];
-
-	if (opline->opcode != ZEND_ADD_STRING) {
-		return;
-	}
-
-	if (Z_TYPE(opline->op2.u.constant) == IS_UNICODE) {
-		Z_USTRVAL(opline->op2.u.constant)[(Z_USTRLEN(opline->op2.u.constant)--)-1] = 0;
-		if (Z_USTRLEN(opline->op2.u.constant)>0) {
-			if (Z_USTRVAL(opline->op2.u.constant)[Z_USTRLEN(opline->op2.u.constant)-1]=='\r') {
-				Z_USTRVAL(opline->op2.u.constant)[(Z_USTRLEN(opline->op2.u.constant)--)-1] = 0;
-			}
-		}
-	} else {
-		Z_STRVAL(opline->op2.u.constant)[(Z_STRLEN(opline->op2.u.constant)--)-1] = 0;
-		if (Z_STRLEN(opline->op2.u.constant)>0) {
-			if (Z_STRVAL(opline->op2.u.constant)[Z_STRLEN(opline->op2.u.constant)-1]=='\r') {
-				Z_STRVAL(opline->op2.u.constant)[(Z_STRLEN(opline->op2.u.constant)--)-1] = 0;
-			}
-		}
-	}
-}
-
-
 void zend_do_exit(znode *result, znode *message TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -4425,12 +4398,12 @@ int zendlex(znode *zendlval TSRMLS_DC)
 {
 	int retval;
 
-again:
 	if (CG(increment_lineno)) {
 		CG(zend_lineno)++;
 		CG(increment_lineno) = 0;
 	}
 
+again:
 	Z_TYPE(zendlval->u.constant) = IS_LONG;
 	retval = lex_scan(&zendlval->u.constant TSRMLS_CC);
 	switch (retval) {
@@ -4441,8 +4414,7 @@ again:
 			goto again;
 
 		case T_CLOSE_TAG:
-			if (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1]=='\n'
-				|| (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-2]=='\r' && LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1])) {
+			if (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1] != '>') {
 				CG(increment_lineno) = 1;
 			}
 			retval = ';'; /* implicit ; */

@@ -404,7 +404,6 @@ void zend_check_writable_variable(znode *variable);
 void zend_do_free(znode *op1 TSRMLS_DC);
 
 void zend_do_init_string(znode *result TSRMLS_DC);
-void zend_do_add_char(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 
@@ -498,8 +497,6 @@ void zend_do_foreach_end(znode *foreach_token, znode *as_token TSRMLS_DC);
 void zend_do_declare_begin(TSRMLS_D);
 void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC);
 void zend_do_declare_end(znode *declare_token TSRMLS_DC);
-
-void zend_do_end_heredoc(TSRMLS_D);
 
 void zend_do_exit(znode *result, znode *message TSRMLS_DC);
 
