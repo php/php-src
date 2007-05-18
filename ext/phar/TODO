@@ -44,11 +44,14 @@ Version 1.1.0
 Version 1.2.0
 
  X add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
+ X add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
  X fix Phar::CanWrite() [Marcus]
  X add preliminary phar command (phar.php) [Marcus] 
  X add phar command (phar.phar) [Marcus]
  X list all available compression methods using Phar::getSupportedCompression() [Marcus]
- X Reduce RINIT to variable initialization, no fcall, hashinit [Marcus]
+ X Remove RINIT [Marcus]
+
+Version 1.3.0
 
  * Provide an additional header that allows better compatibility with PHP 4
    __HALT_COMPILER();function __HALT_COMPILER(){}$a=<<<PHARDATABEGIN\n
@@ -64,3 +67,4 @@ Version 1.2.0
    $addinfo = array('alias','flags','metadata','stub'...)
  * Layout: Option to compress all content rather than single files.
    That excludes stub and anifest haeder.
+ * stream context option for cleaning crap paths like phar://blah.phar/file//to\\here.php
