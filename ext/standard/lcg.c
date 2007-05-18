@@ -106,14 +106,6 @@ PHP_MINIT_FUNCTION(lcg)
 	return SUCCESS;
 }
 
-PHP_RINIT_FUNCTION(lcg)
-{
-	if (!LCG(seeded)) {
-		lcg_seed(TSRMLS_C);
-	}
-	return SUCCESS;
-}
-
 /* {{{ proto float lcg_value() U
    Returns a value from the combined linear congruential generator */
 PHP_FUNCTION(lcg_value)
