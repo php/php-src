@@ -4,7 +4,7 @@ Test range() function
 precision=14
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -1118,11 +1118,11 @@ array(2) {
 }
 array(3) {
   [0]=>
-  float(2147483646)
+  int(2147483646)
   [1]=>
-  float(2147483647)
+  int(2147483647)
   [2]=>
-  float(2147483648)
+  int(2147483648)
 }
 array(2) {
   [0]=>
@@ -1132,17 +1132,17 @@ array(2) {
 }
 array(2) {
   [0]=>
-  float(-2147483648)
+  int(-2147483648)
   [1]=>
-  float(-2147483647)
+  int(-2147483647)
 }
 array(3) {
   [0]=>
-  float(-2147483649)
+  int(-2147483649)
   [1]=>
-  float(-2147483648)
+  int(-2147483648)
   [2]=>
-  float(-2147483647)
+  int(-2147483647)
 }
 
 *** Testing error conditions ***
