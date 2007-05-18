@@ -1,13 +1,8 @@
 <?php
 
 $notes = '
- * add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
- * add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
- * fix Phar::CanWrite() [Marcus]
- * add preliminary phar command (phar.php) [Marcus] 
- * add phar command (phar.phar) [Marcus]
- * list all available compression methods using Phar::getSupportedCompression() [Marcus]
- * remove RINIT [Marcus]
+ * add Phar::getAlias() [Marcus]
+ * Made -a optional in pack subcommand of phar.phar [Marcus]
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
