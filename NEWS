@@ -24,6 +24,7 @@ PHP                                                                        NEWS
   (Tony, Dmitry)
 - Fixed bug #41403 (json_decode cannot decode floats if localeconv 
   decimal_point is not '.'). (Tony)
+- Fixed bug #41401 (wrong unary operator precedence). (Stas)
 - Fixed bug #41394 (dbase_create creates file with corrupted header). (Tony)
 - Fixed bug #41390 (Clarify error message with invalid protocol scheme).
   (Scott)
@@ -60,7 +61,6 @@ PHP                                                                        NEWS
 - Fixed bug #41004 (minOccurs="0" and null class member variable). (Dmitry)
 - Fixed bug #39542 (Behaviour of require/include different to < 5.2.0).
   (Dmitry)
-- Fixed bug #41401 (wrong unary operator precedence) (Stas)
 
 03 May 2007, PHP 5.2.2
 - Improved bundled GD
