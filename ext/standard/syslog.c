@@ -114,13 +114,13 @@ PHP_RINIT_FUNCTION(syslog)
 }
 
 
+#ifdef PHP_WIN32
 PHP_RSHUTDOWN_FUNCTION(syslog)
 {
-#ifdef PHP_WIN32
 	closelog();
-#endif
 	return SUCCESS;
 }
+#endif
 
 PHP_MSHUTDOWN_FUNCTION(syslog)
 {
