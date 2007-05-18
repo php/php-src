@@ -35,11 +35,13 @@
 
 %x ST_IN_SCRIPTING
 %x ST_DOUBLE_QUOTES
-%x ST_SINGLE_QUOTE
 %x ST_BACKQUOTE
 %x ST_HEREDOC
+%x ST_START_HEREDOC
+%x ST_END_HEREDOC
 %x ST_LOOKING_FOR_PROPERTY
 %x ST_LOOKING_FOR_VARNAME
+%x ST_VAR_OFFSET
 %x ST_COMMENT
 %x ST_DOC_COMMENT
 %x ST_ONE_LINE_COMMENT
@@ -96,9 +98,7 @@ do {																			\
 	char *p = (s), *boundary = p+(l);											\
 																				\
 	while (p<boundary) {														\
-		if (*p == '\n') {														\
-			CG(zend_lineno)++;													\
-		} else if ((*p == '\r') && (p+1 < boundary) && (*(p+1) != '\n')) {		\
+		if (*p == '\n' || (*p == '\r' && (*(p+1) != '\n'))) {					\
 			CG(zend_lineno)++;													\
 		}																		\
 		p++;																	\
@@ -789,6 +789,109 @@ ZEND_API int zend_multibyte_read_script(TSRMLS_D)
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng); \
 	zendlval->value.str.len = yyleng;
 #endif /* ZEND_MULTIBYTE */
+
+static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type TSRMLS_DC)
+{
+	register char *s, *t;
+	char *end;
+
+	ZVAL_STRINGL(zendlval, str, len, 1);
+
+	/* convert escape sequences */
+	s = t = zendlval->value.str.val;
+	end = s+zendlval->value.str.len;
+	while (s<end) {
+		if (*s=='\\') {
+			s++;
+			if (s>=end) {
+				continue;
+			}
+			switch(*s) {
+				case 'n':
+					*t++ = '\n';
+					zendlval->value.str.len--;
+					break;
+				case 'r':
+					*t++ = '\r';
+					zendlval->value.str.len--;
+					break;
+				case 't':
+					*t++ = '\t';
+					zendlval->value.str.len--;
+					break;
+				case '"':
+				case '`':
+					if (*s != quote_type) {
+						*t++ = '\\';
+						*t++ = *s;
+						break;
+					}
+				case '\\':
+				case '$':
+					*t++ = *s;
+					zendlval->value.str.len--;
+					break;
+				case 'x':
+				case 'X':
+					if (ZEND_IS_HEX(*(s+1))) {
+						char hex_buf[3] = { 0, 0, 0 };
+
+						zendlval->value.str.len--; /* for the 'x' */
+
+						hex_buf[0] = *(++s);
+						zendlval->value.str.len--;
+						if (ZEND_IS_HEX(*(s+1))) {
+							hex_buf[1] = *(++s);
+							zendlval->value.str.len--;
+						}
+						*t++ = (char) strtol(hex_buf, NULL, 16);
+					} else {
+						*t++ = '\\';
+						*t++ = *s;
+					}
+					break;
+				default:
+					/* check for an octal */
+					if (ZEND_IS_OCT(*s)) {
+						char octal_buf[4] = { 0, 0, 0, 0 };
+
+						octal_buf[0] = *s;
+						zendlval->value.str.len--;
+						if (ZEND_IS_OCT(*(s+1))) {
+							octal_buf[1] = *(++s);
+							zendlval->value.str.len--;
+							if (ZEND_IS_OCT(*(s+1))) {
+								octal_buf[2] = *(++s);
+								zendlval->value.str.len--;
+							}
+						}
+						*t++ = (char) strtol(octal_buf, NULL, 8);
+					} else {
+						*t++ = '\\';
+						*t++ = *s;
+					}
+					break;
+			}
+		} else {
+			*t++ = *s;
+		}
+
+		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
+			CG(zend_lineno)++;
+		}
+		s++;
+	}
+	*t = 0;
+
+#ifdef ZEND_MULTIBYTE
+	if (SCNG(output_filter)) {
+		s = zendlval->value.str.val;
+		SCNG(output_filter)(&(zendlval->value.str.val), &(zendlval->value.str.len), s, zendlval->value.str.len TSRMLS_CC);
+		efree(s);
+	}
+#endif /* ZEND_MULTIBYTE */
+}
+
 %}
 
 LNUM	[0-9]+
@@ -799,10 +902,60 @@ LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
 TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
-ENCAPSED_TOKENS [\[\]{}$]
-ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 ANY_CHAR (.|[\n])
 NEWLINE ("\r"|"\n"|"\r\n")
+
+/*
+ * LITERAL_DOLLAR matches unescaped $ that aren't followed by a label character
+ * or a { and therefore will be taken literally. The case of literal $ before
+ * a variable or "${" is handled in a rule for each string type
+ */
+DOUBLE_QUOTES_LITERAL_DOLLAR ("$"+([^a-zA-Z_\x7f-\xff$"\\{]|("\\"{ANY_CHAR})))
+BACKQUOTE_LITERAL_DOLLAR     ("$"+([^a-zA-Z_\x7f-\xff$`\\{]|("\\"{ANY_CHAR})))
+HEREDOC_LITERAL_DOLLAR       ("$"+([^a-zA-Z_\x7f-\xff$\n\r\\{]|("\\"[^\n\r])))
+
+/*
+ * Usually, HEREDOC_NEWLINE will just function like a simple NEWLINE, but some
+ * special cases need to be handled. HEREDOC_CHARS doesn't allow a line to
+ * match when { or $, and/or \ is at the end. (("{"*|"$"*)"\\"?) handles that,
+ * along with cases where { or $, and/or \ is the ONLY thing on a line
+ *
+ * The other case is when a line contains a label, followed by ONLY
+ * { or $, and/or \  Handled by ({LABEL}";"?((("{"+|"$"+)"\\"?)|"\\"))
+ */
+HEREDOC_NEWLINE ((({LABEL}";"?((("{"+|"$"+)"\\"?)|"\\"))|(("{"*|"$"*)"\\"?)){NEWLINE})
+
+/*
+ * This pattern is just used in the next 2 for matching { or literal $, and/or
+ * \ escape sequence immediately at the beginning of a line or after a label
+ */
+HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR (("{"+[^$\n\r\\{])|("{"*"\\"[^\n\r])|{HEREDOC_LITERAL_DOLLAR})
+
+/*
+ * These 2 label-related patterns allow HEREDOC_CHARS to continue "regular"
+ * matching after a newline that starts with either a non-label character or a
+ * label that isn't followed by a newline. Like HEREDOC_CHARS, they won't match
+ * a variable or "{$"  Matching a newline, and possibly label, up TO a variable
+ * or "{$", is handled in the heredoc rules
+ *
+ * The HEREDOC_LABEL_NO_NEWLINE pattern (";"[^$\n\r\\{]) handles cases where ;
+ * follows a label. [^a-zA-Z0-9_\x7f-\xff;$\n\r\\{] is needed to prevent a label
+ * character or ; from matching on a possible (real) ending label
+ */
+HEREDOC_NON_LABEL ([^a-zA-Z_\x7f-\xff$\n\r\\{]|{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})
+HEREDOC_LABEL_NO_NEWLINE ({LABEL}([^a-zA-Z0-9_\x7f-\xff;$\n\r\\{]|(";"[^$\n\r\\{])|(";"?{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})))
+
+/*
+ * CHARS matches everything up to a variable or "{$"
+ * {'s are matched as long as they aren't followed by a $
+ * The case of { before "{$" is handled in a rule for each string type
+ *
+ * For heredocs, matching continues across/after newlines if/when it's known
+ * that the next line doesn't contain a possible ending label
+ */
+DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{DOUBLE_QUOTES_LITERAL_DOLLAR})
+BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
+HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({HEREDOC_NEWLINE}+({HEREDOC_NON_LABEL}|{HEREDOC_LABEL_NO_NEWLINE})))
 
 %option noyylineno
 %option noyywrap
@@ -948,8 +1101,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_IMPLEMENTS;
 }
 
-<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"->" {
+<ST_IN_SCRIPTING>"->" {
 	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
+	return T_OBJECT_OPERATOR;
+}
+
+<ST_LOOKING_FOR_PROPERTY>"->" {
 	return T_OBJECT_OPERATOR;
 }
 
@@ -1282,7 +1439,19 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 }
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LNUM}|{HNUM} { /* treat numbers (almost) as strings inside encapsulated strings */
+<ST_VAR_OFFSET>0|([1-9][0-9]*) { /* Offset could be treated as a long */
+	if (yyleng < MAX_LENGTH_OF_LONG - 1 || (yyleng == MAX_LENGTH_OF_LONG - 1 && strcmp(yytext, long_min_digits) < 0)) {
+		zendlval->value.lval = strtol(yytext, NULL, 10);
+		zendlval->type = IS_LONG;
+	} else {
+		zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
+		zendlval->value.str.len = yyleng;
+		zendlval->type = IS_STRING;
+	}
+	return T_NUM_STRING;
+}
+
+<ST_VAR_OFFSET>{LNUM}|{HNUM} { /* Offset must be treated as a string */
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1445,19 +1614,51 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_OPEN_TAG;
 }
 
-<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL} {
+<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	zendlval->type = IS_STRING;
 	return T_VARIABLE;
 }
 
-<ST_IN_SCRIPTING>{LABEL} {
-	zend_copy_value(zendlval, yytext, yyleng);
+%{
+/* Make sure a label character follows "->", otherwise there is no property
+ * and "->" will be taken literally
+ */ %}
+<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x7f-\xff] {
+	yyless(yyleng - 3);
+	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
+	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	zendlval->type = IS_STRING;
-	return T_STRING;
+	return T_VARIABLE;
 }
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LABEL} {
+%{
+/* A [ always designates a variable offset, regardless of what follows
+ */ %}
+<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"[" {
+	yyless(yyleng - 1);
+	yy_push_state(ST_VAR_OFFSET TSRMLS_CC);
+	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
+	zendlval->type = IS_STRING;
+	return T_VARIABLE;
+}
+
+<ST_VAR_OFFSET>"]" {
+	yy_pop_state(TSRMLS_C);
+	return ']';
+}
+
+<ST_VAR_OFFSET>{TOKENS}|[{}] {
+	/* Only '[' can be valid, but returning other tokens will allow a more explicit parse error */
+	return yytext[0];
+}
+
+<ST_VAR_OFFSET>[ \n\r\t'"`\\#] {
+	yyless(0);
+	yy_pop_state(TSRMLS_C);
+}
+
+<ST_IN_SCRIPTING,ST_VAR_OFFSET>{LABEL} {
 	zend_copy_value(zendlval, yytext, yyleng);
 	zendlval->type = IS_STRING;
 	return T_STRING;
@@ -1581,106 +1782,25 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_IN_SCRIPTING>("b"?["]([^$"\\]|("\\".))*["]) {
-	register char *s, *t;
-	char *end;
-	int bprefix = (*yytext == 'b') ? 1 : 0;
+%{
+/* ("{"*|"$"*) handles { or $ at the end of a string (or the entire contents)
+ */ %}
+<ST_IN_SCRIPTING>(b?["]{DOUBLE_QUOTES_CHARS}*("{"*|"$"*)["]) {
+	int bprefix = (yytext[0] != '"') ? 1 : 0;
 
-	zendlval->value.str.val = estrndup(yytext+bprefix+1, yyleng-bprefix-2);
-	zendlval->value.str.len = yyleng-bprefix-2;
-	zendlval->type = IS_STRING;
-	HANDLE_NEWLINES(yytext, yyleng);
-
-	/* convert escape sequences */
-	s = t = zendlval->value.str.val;
-	end = s+zendlval->value.str.len;
-	while (s<end) {
-		if (*s=='\\') {
-			s++;
-			if (s>=end) {
-				continue;
-			}
-			switch(*s) {
-				case 'n':
-					*t++ = '\n';
-					zendlval->value.str.len--;
-					break;
-				case 'r':
-					*t++ = '\r';
-					zendlval->value.str.len--;
-					break;
-				case 't':
-					*t++ = '\t';
-					zendlval->value.str.len--;
-					break;
-				case '\\':
-				case '$':
-				case '"':
-					*t++ = *s;
-					zendlval->value.str.len--;
-					break;
-				default:
-					/* check for an octal */
-					if (ZEND_IS_OCT(*s)) {
-						char octal_buf[4] = { 0, 0, 0, 0 };
-
-						octal_buf[0] = *s;
-						zendlval->value.str.len--;
-						if ((s+1)<end && ZEND_IS_OCT(*(s+1))) {
-							octal_buf[1] = *(++s);
-							zendlval->value.str.len--;
-							if ((s+1)<end && ZEND_IS_OCT(*(s+1))) {
-								octal_buf[2] = *(++s);
-								zendlval->value.str.len--;
-							}
-						}
-						*t++ = (char) strtol(octal_buf, NULL, 8);
-					} else if (*s=='x' && (s+1)<end && ZEND_IS_HEX(*(s+1))) {
-						char hex_buf[3] = { 0, 0, 0};
-
-						zendlval->value.str.len--; /* for the 'x' */
-
-						hex_buf[0] = *(++s);
-						zendlval->value.str.len--;
-						if ((s+1)<end && ZEND_IS_HEX(*(s+1))) {
-							hex_buf[1] = *(++s);
-							zendlval->value.str.len--;
-						}
-						*t++ = (char) strtol(hex_buf, NULL, 16);
-					} else {
-						*t++ = '\\';
-						*t++ = *s;
-					}
-					break;
-			}
-			s++;
-		} else {
-			*t++ = *s++;
-		}
-	}
-	*t = 0;
-
-#ifdef ZEND_MULTIBYTE
-	if (SCNG(output_filter)) {
-		s = zendlval->value.str.val;
-		SCNG(output_filter)(&(zendlval->value.str.val), &(zendlval->value.str.len), s, zendlval->value.str.len TSRMLS_CC);
-		efree(s);
-	}
-#endif /* ZEND_MULTIBYTE */
-
+	zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"' TSRMLS_CC);
 	return T_CONSTANT_ENCAPSED_STRING;
 }
 
 
-<ST_IN_SCRIPTING>("b"?[']([^'\\]|("\\".))*[']) {
+<ST_IN_SCRIPTING>(b?[']([^'\\]|("\\"{ANY_CHAR}))*[']) {
 	register char *s, *t;
 	char *end;
-	int bprefix = (*yytext == 'b') ? 1 : 0;
+	int bprefix = (yytext[0] != '\'') ? 1 : 0;
 
 	zendlval->value.str.val = estrndup(yytext+bprefix+1, yyleng-bprefix-2);
 	zendlval->value.str.len = yyleng-bprefix-2;
 	zendlval->type = IS_STRING;
-	HANDLE_NEWLINES(yytext, yyleng);
 
 	/* convert escape sequences */
 	s = t = zendlval->value.str.val;
@@ -1702,10 +1822,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 					*t++ = *s;
 					break;
 			}
-			s++;
 		} else {
-			*t++ = *s++;
+			*t++ = *s;
 		}
+
+		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
+			CG(zend_lineno)++;
+		}
+		s++;
 	}
 	*t = 0;
 
@@ -1723,13 +1847,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>b?["] {
 	BEGIN(ST_DOUBLE_QUOTES);
-	return '\"';
+	return '"';
 }
 
 
-<ST_IN_SCRIPTING>"b"?"<<<"{TABS_AND_SPACES}{LABEL}{NEWLINE} {
+<ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}{LABEL}{NEWLINE} {
 	char *s;
-	int bprefix = (*yytext == 'b') ? 1 : 0;
+	int bprefix = (yytext[0] != '<') ? 1 : 0;
 
 	CG(zend_lineno)++;
 	CG(heredoc_len) = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
@@ -1739,7 +1863,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		CG(heredoc_len)--;
 	}
 	CG(heredoc) = estrndup(s, CG(heredoc_len));
-	BEGIN(ST_HEREDOC);
+	BEGIN(ST_START_HEREDOC);
 	return T_START_HEREDOC;
 }
 
@@ -1750,171 +1874,148 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_IN_SCRIPTING>b?['] {
-	BEGIN(ST_SINGLE_QUOTE);
-	return '\'';
+<ST_START_HEREDOC>{ANY_CHAR} {
+	yyless(0);
+	BEGIN(ST_HEREDOC);
 }
 
-
-<ST_HEREDOC>^{LABEL}(";")?{NEWLINE} {
-	int label_len;
-
-	if (yytext[yyleng-2]=='\r') {
-		label_len = yyleng-2;
-	} else {
-		label_len = yyleng-1;
-	}
+<ST_START_HEREDOC>{LABEL}";"?[\n\r] {
+	int label_len = yyleng - 1;
 
 	if (yytext[label_len-1]==';') {
 		label_len--;
 	}
 
+	yyless(label_len);
+
 	if (label_len==CG(heredoc_len) && !memcmp(yytext, CG(heredoc), label_len)) {
-		zendlval->value.str.val = estrndup(yytext, label_len); /* unput destroys yytext */
+		zendlval->value.str.val = CG(heredoc);
 		zendlval->value.str.len = label_len;
-		yyless(yyleng - (yyleng - label_len));
-		efree(CG(heredoc));
 		CG(heredoc)=NULL;
 		CG(heredoc_len)=0;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_END_HEREDOC;
 	} else {
-		CG(zend_lineno)++;
-		zend_copy_value(zendlval, yytext, yyleng);
-		zendlval->type = IS_STRING;
-		return T_STRING;
+		yymore();
+		BEGIN(ST_HEREDOC);
 	}
 }
 
+%{
+/* Match everything up to and including a possible ending label, so if the label
+ * doesn't match, it's kept with the rest of the string
+ *
+ * {HEREDOC_NEWLINE}+ handles the case of more than one newline sequence that
+ * couldn't be matched with HEREDOC_CHARS, because of the following label
+ */ %}
+<ST_HEREDOC>{HEREDOC_CHARS}*{HEREDOC_NEWLINE}+{LABEL}";"?[\n\r] {
+	char *end = yytext + yyleng - 1;
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ESCAPED_AND_WHITESPACE} {
-	HANDLE_NEWLINES(yytext, yyleng);
-	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
-	return T_ENCAPSED_AND_WHITESPACE;
-}
-
-<ST_SINGLE_QUOTE>([^'\\]|\\[^'\\])+ {
-	HANDLE_NEWLINES(yytext, yyleng);
-	zend_copy_value(zendlval, yytext, yyleng);
-	zendlval->type = IS_STRING;
-	return T_ENCAPSED_AND_WHITESPACE;
-}
-
-
-<ST_DOUBLE_QUOTES>[`]+ {
-	zend_copy_value(zendlval, yytext, yyleng);
-	zendlval->type = IS_STRING;
-	return T_ENCAPSED_AND_WHITESPACE;
-}
-
-
-<ST_BACKQUOTE>["]+ {
-	zend_copy_value(zendlval, yytext, yyleng);
-	zendlval->type = IS_STRING;
-	return T_ENCAPSED_AND_WHITESPACE;
-}
-
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"$"[^a-zA-Z_\x7f-\xff{] {
-	zendlval->value.lval = (long) yytext[0];
-	if (yyleng == 2) {
-		yyless(1);
+	if (end[-1] == ';') {
+		end--;
+		yyleng--;
 	}
-	return T_CHARACTER;
+
+	if (yyleng > CG(heredoc_len) && !memcmp(end - CG(heredoc_len), CG(heredoc), CG(heredoc_len))) {
+		int len = yyleng - CG(heredoc_len) - 2; /* 2 for newline before and after label */
+
+		if (len > 0 && yytext[len - 1] == '\r' && yytext[len] == '\n') {
+			len--;
+		}
+
+		/* Go back before last label char, to match in ST_END_HEREDOC state */
+		yyless(yyleng - 2);
+
+		/* Subtract the remaining label length. yyleng must include newline
+		 * before label, for zend_highlight/strip, tokenizer, etc. */
+		yyleng -= CG(heredoc_len) - 1;
+
+		CG(increment_lineno) = 1; /* For newline before label */
+		BEGIN(ST_END_HEREDOC);
+		zend_scan_escape_string(zendlval, yytext, len, 0 TSRMLS_CC);
+		return T_ENCAPSED_AND_WHITESPACE;
+	} else {
+		/* Go back to end of label, so there's something to match again in case
+		 * there's a variable at the beginning of the next line */
+		yyless(yyleng - 1);
+		yymore();
+	}
 }
 
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ENCAPSED_TOKENS} {
-	zendlval->value.lval = (long) yytext[0];
-	return yytext[0];
+<ST_END_HEREDOC>{ANY_CHAR} {
+	zendlval->value.str.val = CG(heredoc);
+	zendlval->value.str.len = CG(heredoc_len);
+	yytext = zendlval->value.str.val;
+	yyleng = zendlval->value.str.len;
+	CG(heredoc) = NULL;
+	CG(heredoc_len) = 0;
+	BEGIN(ST_IN_SCRIPTING);
+	return T_END_HEREDOC;
 }
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\{" {
-	zendlval->value.str.val = estrndup("\\{", sizeof("\\{") - 1);
-	zendlval->value.str.len = sizeof("\\{") - 1;
-	zendlval->type = IS_STRING;
-	return T_STRING;
-}
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
-	zendlval->value.lval = (long) yytext[0];
+	zendlval->value.lval = (long) '{';
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	yyless(1);
 	return T_CURLY_OPEN;
 }
 
 
-<ST_SINGLE_QUOTE>"\\'" {
-	zendlval->value.lval = (long) '\'';
-	return T_CHARACTER;
+<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}+ {
+	zend_scan_escape_string(zendlval, yytext, yyleng, '"' TSRMLS_CC);
+	return T_ENCAPSED_AND_WHITESPACE;
 }
 
-<ST_SINGLE_QUOTE>"\\\\" {
-	zendlval->value.lval = (long)'\\';
-	return T_CHARACTER;
-}
-
-<ST_DOUBLE_QUOTES>"\\\"" {
-	zendlval->value.lval = (long) '"';
-	return T_CHARACTER;
-}
-
-<ST_BACKQUOTE>"\\`" {
-	zendlval->value.lval = (long) '`';
-	return T_CHARACTER;
-}
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\"[0-7]{1,3} {
-	zendlval->value.lval = strtol(yytext+1, NULL, 8);
-	return T_CHARACTER;
-}
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\x"[0-9A-Fa-f]{1,2} {
-	zendlval->value.lval = strtol (yytext+2, NULL, 16);
-	return T_CHARACTER;
-}
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\"{ANY_CHAR} {
-	switch (yytext[1]) {
-		case 'n':
-			zendlval->value.lval = (long) '\n';
-			break;
-		case 't':
-			zendlval->value.lval = (long) '\t';
-			break;
-		case 'r':
-			zendlval->value.lval = (long) '\r';
-			break;
-		case '\\':
-			zendlval->value.lval = (long) '\\';
-			break;
-		case '$':
-			zendlval->value.lval = (long) yytext[1];
-			break;
-		default:
-			zendlval->value.str.val = estrndup(yytext, yyleng);
-			zendlval->value.str.len = yyleng;
-			zendlval->type = IS_STRING;
-			return T_BAD_CHARACTER;
-			break;
-	}
-	return T_CHARACTER;
+%{
+/* "{"{2,}|"$"{2,} handles { before "{$" or literal $ before a variable or "${"
+ * (("{"+|"$"+)["]) handles { or $ at the end of a string
+ *
+ * Same for backquotes and heredocs, except the second case doesn't apply to
+ * heredocs. yyless(yyleng - 1) is used to correct taking one character too many
+ */ %}
+<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)["])) {
+	yyless(yyleng - 1);
+	zend_scan_escape_string(zendlval, yytext, yyleng, '"' TSRMLS_CC);
+	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 
-<ST_HEREDOC>["'`]+ {
-	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+<ST_BACKQUOTE>{BACKQUOTE_CHARS}+ {
+	zend_scan_escape_string(zendlval, yytext, yyleng, '`' TSRMLS_CC);
+	return T_ENCAPSED_AND_WHITESPACE;
+}
+
+<ST_BACKQUOTE>{BACKQUOTE_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)[`])) {
+	yyless(yyleng - 1);
+	zend_scan_escape_string(zendlval, yytext, yyleng, '`' TSRMLS_CC);
+	return T_ENCAPSED_AND_WHITESPACE;
+}
+
+
+%{
+/* ({HEREDOC_NEWLINE}+({LABEL}";"?)?)? handles the possible case of newline
+ * sequences, possibly followed by a label, that couldn't be matched with
+ * HEREDOC_CHARS because of a following variable or "{$"
+ *
+ * This doesn't affect real ending labels, as they are followed by a newline,
+ * which will result in a longer match for the correct rule if present
+ */ %}
+<ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)? {
+	zend_scan_escape_string(zendlval, yytext, yyleng, 0 TSRMLS_CC);
+	return T_ENCAPSED_AND_WHITESPACE;
+}
+
+<ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)?("{"{2,}|"$"{2,}) {
+	yyless(yyleng - 1);
+	zend_scan_escape_string(zendlval, yytext, yyleng, 0 TSRMLS_CC);
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 
 <ST_DOUBLE_QUOTES>["] {
 	BEGIN(ST_IN_SCRIPTING);
-	return '\"';
+	return '"';
 }
 
 
@@ -1924,16 +2025,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_SINGLE_QUOTE>['] {
-	BEGIN(ST_IN_SCRIPTING);
-	return '\'';
-}
-
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,INITIAL,ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY><<EOF>> {
-	return 0;
-}
-
 <ST_COMMENT,ST_DOC_COMMENT><<EOF>> {
 	zend_error(E_COMPILE_WARNING,"Unterminated comment starting line %d", CG(comment_start_line));
 	return 0;
@@ -1941,6 +2032,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 
-<ST_IN_SCRIPTING,INITIAL,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_SINGLE_QUOTE,ST_HEREDOC>{ANY_CHAR} {
+<ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
 }
