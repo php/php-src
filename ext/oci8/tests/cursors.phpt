@@ -45,40 +45,15 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-array(5) {
+array(2) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
-  NULL
 }
 bool(true)
 
-Warning: oci_fetch_assoc(): ORA-01002: fetch out of sequence in %s on line %d
-bool(false)
-bool(true)
-Done
---UEXPECTF--
-array(5) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
-  [u"BLOB"]=>
-  NULL
-  [u"CLOB"]=>
-  NULL
-  [u"STRING"]=>
-  NULL
-}
-bool(true)
-
-Warning: oci_fetch_assoc(): ORA-01002: fetch out of sequence in %s on line %d
+Warning: oci_fetch_assoc()%sORA-01002: fetch out of sequence in %scursors.php on line %d
 bool(false)
 bool(true)
 Done

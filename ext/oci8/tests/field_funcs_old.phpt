@@ -54,7 +54,7 @@ require dirname(__FILE__).'/drop_table.inc';
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 array(5) {
   [0]=>
   string(1) "1"
@@ -71,14 +71,14 @@ bool(false)
 string(2) "ID"
 string(6) "NUMBER"
 int(2)
-int(%d)
+int(0)
 int(0)
 int(22)
 bool(false)
 string(5) "VALUE"
 string(6) "NUMBER"
 int(2)
-int(%d)
+int(0)
 int(0)
 int(22)
 bool(true)
@@ -97,56 +97,7 @@ int(0)
 int(4000)
 bool(true)
 string(6) "STRING"
-string(8) "VARCHAR2"
-int(1)
-int(0)
-int(0)
-int(10)
-Done
---UEXPECTF--
-array(5) {
-  [0]=>
-  unicode(1) "1"
-  [1]=>
-  unicode(1) "1"
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  NULL
-}
-bool(false)
-unicode(2) "ID"
-unicode(6) "NUMBER"
-int(2)
-int(0)
-int(0)
-int(22)
-bool(false)
-unicode(5) "VALUE"
-unicode(6) "NUMBER"
-int(2)
-int(0)
-int(0)
-int(22)
-bool(true)
-unicode(4) "BLOB"
-unicode(4) "BLOB"
-int(113)
-int(0)
-int(0)
-int(4000)
-bool(true)
-unicode(4) "CLOB"
-unicode(4) "CLOB"
-int(112)
-int(0)
-int(0)
-int(4000)
-bool(true)
-unicode(6) "STRING"
-unicode(8) "VARCHAR2"
+string(7) "VARCHAR"
 int(1)
 int(0)
 int(0)

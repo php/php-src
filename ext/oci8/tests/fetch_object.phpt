@@ -42,79 +42,23 @@ require dirname(__FILE__).'/drop_table.inc';
 echo "Done\n";
 
 ?>
---EXPECTF--
-object(stdClass)#%d (5) {
+--EXPECT--
+object(stdClass)#1 (2) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
-  NULL
 }
-object(stdClass)#%d (5) {
+object(stdClass)#2 (2) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
-  NULL
 }
-object(stdClass)#%d (5) {
+object(stdClass)#1 (2) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
-  NULL
-}
-Done
---UEXPECTF--
-object(stdClass)#%d (5) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
-  [u"BLOB"]=>
-  NULL
-  [u"CLOB"]=>
-  NULL
-  [u"STRING"]=>
-  NULL
-}
-object(stdClass)#%d (5) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
-  [u"BLOB"]=>
-  NULL
-  [u"CLOB"]=>
-  NULL
-  [u"STRING"]=>
-  NULL
-}
-object(stdClass)#%d (5) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
-  [u"BLOB"]=>
-  NULL
-  [u"CLOB"]=>
-  NULL
-  [u"STRING"]=>
-  NULL
 }
 Done

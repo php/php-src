@@ -1,8 +1,0 @@
-<!ENTITY amp     "&#38;#38;">
-<!ENTITY gt      "&#62;">
-<!ENTITY % coreattrs "title CDATA #IMPLIED">
-<!ENTITY % attrs "%coreattrs;">
-<!ATTLIST foo bar CDATA #IMPLIED>
-<!ELEMENT foo (#PCDATA)>
-<!ELEMENT root (foo)+>
-<!ATTLIST th %attrs; >

@@ -23,7 +23,7 @@ oci_execute($statement, OCI_DEFAULT);
 var_dump($blob);
 
 var_dump($blob->size());
-var_dump($blob->write((binary)str_repeat("string.", 1000)));
+var_dump($blob->write(str_repeat("string.", 1000)));
 var_dump($blob->size());
 oci_commit($c);
 
@@ -58,29 +58,6 @@ array(2) {
   ["BLOB"]=>
   object(OCI-Lob)#%d (1) {
     ["descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-}
-int(7000)
-int(7000)
-Done
---UEXPECTF--
-object(OCI-Lob)#%d (1) {
-  [u"descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-int(0)
-int(7000)
-int(7000)
-array(2) {
-  [0]=>
-  object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-  [u"BLOB"]=>
-  object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }

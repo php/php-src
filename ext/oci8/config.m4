@@ -26,7 +26,7 @@ AC_DEFUN([PHP_OCI_IF_DEFINED],[
 
 AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
   AC_CHECK_SIZEOF(long int, 4)
-  AC_MSG_CHECKING([if we're on a 64-bit platform])
+  AC_MSG_CHECKING([checking if we're at 64-bit platform])
   if test "$ac_cv_sizeof_long_int" = "4" ; then
     AC_MSG_RESULT([no])
     TMP_OCI8_LIB_DIR=lib32 
@@ -50,7 +50,7 @@ AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
 
 AC_DEFUN([AC_OCI8IC_VERSION],[
   AC_MSG_CHECKING([Oracle Instant Client version])
-  if test -f $PHP_OCI8_INSTANT_CLIENT/libnnz10.$SHLIB_SUFFIX_NAME; then
+  if test -f $PHP_OCI8_INSTANT_CLIENT/libociei.$SHLIB_SUFFIX_NAME; then
     if test -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
       if test ! -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME; then
         AC_MSG_ERROR([Link from $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME to libclntsh.$SHLIB_SUFFIX_NAME.10.1 not found])
@@ -99,36 +99,7 @@ PHP_ARG_WITH(oci8, for Oracle (OCI8) support,
 [  --with-oci8[=DIR]       Include Oracle (OCI8) support. 
                           The default DIR is ORACLE_HOME.
                           Use --with-oci8=instantclient,/path/to/oic/lib
-                          to use an Oracle Instant Client installation])
-
-  AC_MSG_CHECKING([PHP version])
-
-  tmp_version=$PHP_VERSION
-  if test -z "$tmp_version"; then
-    if test -z "$PHP_CONFIG"; then
-      AC_MSG_ERROR([php-config not found])
-    fi
-    php_version=`$PHP_CONFIG --version 2>/dev/null|head -n 1|sed -e 's#\([0-9]\.[0-9]*\.[0-9]*\)\(.*\)#\1#'`
-  else
-    php_version=`echo "$tmp_version"|sed -e 's#\([0-9]\.[0-9]*\.[0-9]*\)\(.*\)#\1#'`
-  fi
-
-  if test -z "$php_version"; then
-    AC_MSG_ERROR([failed to detect PHP version, please report])
-  fi
-
-  ac_IFS=$IFS
-  IFS="."
-  set $php_version
-  IFS=$ac_IFS
-  oci8_php_version=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3`
-
-  if test "$oci8_php_version" -le "4003010"; then
-    AC_MSG_ERROR([You need at least PHP 4.3.10 to be able to use this version of OCI8. PHP $php_version found])
-  else
-    AC_MSG_RESULT([$php_version, ok])
-  fi
-
+                          to use Oracle Instant Client installation])
 
 PHP_OCI8_INSTANT_CLIENT="no"
 
@@ -261,13 +232,6 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
       ], [], [
         -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
       ])
-
-      PHP_CHECK_LIBRARY(clntsh, OCILobRead2,
-      [
-        AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])
-      ], [], [
-        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-      ])
  
       ;;
       
@@ -278,7 +242,6 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
       AC_DEFINE(HAVE_OCI_ENV_NLS_CREATE,1,[ ])
       AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
       AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
-      AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])
       AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
       AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
       ;;
@@ -345,13 +308,13 @@ dnl version in /usr/lib
   AC_MSG_CHECKING([Oracle Instant Client SDK header directory])
 
 dnl Header directory for Instant Client SDK RPM install
-  OCISDKRPMINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!^/usr/lib/oracle/\(.*\)/client/lib[/]*$!/usr/include/oracle/\1/client!'`
+  OCISDKRPMINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!^/usr/lib/oracle/\(.*\)/client/lib[[/]]*$!/usr/include/oracle/\1/client!'`
 
 dnl Header directory for Instant Client SDK zip file install
   OCISDKZIPINC=$PHP_OCI8_INSTANT_CLIENT/sdk/include
 
 dnl Header directory for manual installation
-  OCISDKMANINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!\(.*\)/lib[/]*$!\1/include!'`
+  OCISDKMANINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!\(.*\)/lib[[/]]*$!\1/include!'`
   
   if test -f "$OCISDKRPMINC/oci.h"; then
     AC_MSG_RESULT($OCISDKRPMINC)
@@ -391,7 +354,6 @@ dnl Header directory for manual installation
   AC_DEFINE(HAVE_OCI_ENV_NLS_CREATE,1,[ ])
   AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
   AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
-  AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])
   AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
   AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
 

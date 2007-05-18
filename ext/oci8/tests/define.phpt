@@ -39,6 +39,3 @@ echo "Done\n";
 --EXPECT--
 string(4) "some"
 Done
---UEXPECT--
-unicode(4) "some"
-Done

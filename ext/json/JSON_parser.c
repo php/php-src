@@ -139,7 +139,7 @@ SOFTWARE.
     This table maps the 128 ASCII characters into the 32 character classes.
     The remaining Unicode characters should be mapped to S_ETC.
 */
-static const int ascii_class[128] = {
+static int ascii_class[128] = {
     S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR,
     S_ERR, S_WSP, S_WSP, S_ERR, S_ERR, S_WSP, S_ERR, S_ERR,
     S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR,
@@ -168,8 +168,8 @@ static const int ascii_class[128] = {
     0 and 29. An action is a negative number between -1 and -9. A JSON text is
     accepted if the end of the text is in state 9 and mode is MODE_DONE.
 */
-static const int state_transition_table[30][31] = {
-/* 0*/ { 0, 0,-8,-1,-6,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+static int state_transition_table[30][31] = {
+/* 0*/ { 0, 0,-8,-1,-6,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
 /* 1*/ { 1, 1,-1,-9,-1,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
 /* 2*/ { 2, 2,-8,-1,-6,-5,-1,-1, 3,-1,-1,-1,20,-1,21,22,-1,-1,-1,-1,-1,13,-1,17,-1,-1,10,-1,-1,-1,-1},
 /* 3*/ { 3,-1, 3, 3, 3, 3, 3, 3,-4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
@@ -278,7 +278,7 @@ static int dehexchar(char c)
 }
 
 
-static void json_create_zval(zval **z, smart_str *buf, int type TSRMLS_DC)
+static void json_create_zval(zval **z, smart_str *buf, int type)
 {
     ALLOC_INIT_ZVAL(*z);
 
@@ -288,11 +288,11 @@ static void json_create_zval(zval **z, smart_str *buf, int type TSRMLS_DC)
     }
     else if (type == IS_DOUBLE)
     {
-        ZVAL_DOUBLE(*z, zend_strtod(buf->c, NULL));
+        ZVAL_DOUBLE(*z, atof(buf->c));
     }
     else if (type == IS_STRING)
     {
-        ZVAL_UTF8_STRINGL(*z, buf->c, buf->len, ZSTR_DUPLICATE);
+        ZVAL_STRINGL(*z, buf->c, buf->len, 1);
     }
     else if (type == IS_BOOL)
     {
@@ -316,25 +316,6 @@ static void utf16_to_utf8(smart_str *buf, unsigned short utf16)
         smart_str_appendc(buf, 0xc0 | (utf16 >> 6));
         smart_str_appendc(buf, 0x80 | (utf16 & 0x3f));
     }
-    else if ((utf16 & 0xfc00) == 0xdc00
-                && buf->len >= 3
-                && ((unsigned char) buf->c[buf->len - 3]) == 0xed
-                && ((unsigned char) buf->c[buf->len - 2] & 0xf0) == 0xa0
-                && ((unsigned char) buf->c[buf->len - 1] & 0xc0) == 0x80)
-    {
-        /* found surrogate pair */
-        unsigned long utf32;
-
-        utf32 = (((buf->c[buf->len - 2] & 0xf) << 16)
-                    | ((buf->c[buf->len - 1] & 0x3f) << 10)
-                    | (utf16 & 0x3ff)) + 0x10000;
-        buf->len -= 3;
-
-        smart_str_appendc(buf, 0xf0 | (utf32 >> 18));
-        smart_str_appendc(buf, 0x80 | ((utf32 >> 12) & 0x3f));
-        smart_str_appendc(buf, 0x80 | ((utf32 >> 6) & 0x3f));
-        smart_str_appendc(buf, 0x80 | (utf32 & 0x3f));
-    }
     else
     {
         smart_str_appendc(buf, 0xe0 | (utf16 >> 12));
@@ -357,14 +338,14 @@ static void attach_zval(json_parser *json, int up, int cur, smart_str *key, int 
     {
         if (!assoc)
         {
-            add_utf8_property_zval_ex(root, (key->len ? key->c : "_empty_"), (key->len ? (key->len + 1) : sizeof("_empty_")), child TSRMLS_CC);
+            add_property_zval(root, key->c, child);
 #if PHP_MAJOR_VERSION >= 5
             ZVAL_DELREF(child);
 #endif
         }
         else
         {
-            add_utf8_assoc_zval_ex(root, (key->len ? key->c : "_empty_"), (key->len ? (key->len + 1) : sizeof("_empty_")), child);
+            add_assoc_zval(root, key->c, child);
         }
         key->len = 0;
     }
@@ -407,7 +388,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
     smart_str key = {0};
 
     int type = -1;
-    unsigned short utf16 = 0;
+    unsigned short utf16;
 
     JSON(the_top) = -1;
     push(&the_json, z, MODE_DONE);
@@ -496,18 +477,18 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
                     zval *mval;
                     smart_str_0(&buf);
 
-                    json_create_zval(&mval, &buf, type TSRMLS_CC);
+                    json_create_zval(&mval, &buf, type);
 
                     if (!assoc)
                     {
-                        add_utf8_property_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
+                        add_property_zval(JSON(the_zstack)[JSON(the_top)], key.c, mval);
 #if PHP_MAJOR_VERSION >= 5
                         ZVAL_DELREF(mval);
 #endif
                     }
                     else
                     {
-                        add_utf8_assoc_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval);
+                        add_assoc_zval(JSON(the_zstack)[JSON(the_top)], key.c, mval);
                     }
                     key.len = 0;
                     buf.len = 0;
@@ -568,7 +549,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
                     zval *mval;
                     smart_str_0(&buf);
 
-                    json_create_zval(&mval, &buf, type TSRMLS_CC);
+                    json_create_zval(&mval, &buf, type);
                     add_next_index_zval(JSON(the_zstack)[JSON(the_top)], mval);
                     buf.len = 0;
                     JSON_RESET_TYPE();
@@ -596,14 +577,6 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
                 case MODE_OBJECT:
                     the_state = 9;
                     break;
- 				case MODE_DONE:
-					if (type == IS_STRING) {
-						smart_str_0(&buf);
-						ZVAL_UTF8_STRINGL(z, buf.c, buf.len, ZSTR_DUPLICATE);
-						the_state = 9;
-						break;
-					}
-					/* fall through if not IS_STRING */
                 default:
                     FREE_BUFFERS();
                     return false;
@@ -621,7 +594,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
                      JSON(the_stack[JSON(the_top)]) == MODE_ARRAY))
                 {
                     smart_str_0(&buf);
-                    json_create_zval(&mval, &buf, type TSRMLS_CC);
+                    json_create_zval(&mval, &buf, type);
                 }
 
                 switch (JSON(the_stack)[JSON(the_top)]) {
@@ -631,14 +604,14 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
                             {
                                 if (!assoc)
                                 {
-                                    add_utf8_property_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
+                                    add_property_zval(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), mval);
 #if PHP_MAJOR_VERSION >= 5
                                     ZVAL_DELREF(mval);
 #endif
                                 }
                                 else
                                 {
-                                    add_utf8_assoc_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval);
+                                    add_assoc_zval(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), mval);
                                 }
                                 key.len = 0;
                             }

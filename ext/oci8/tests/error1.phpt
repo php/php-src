@@ -12,30 +12,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: oci_connect(): ORA-12154: TNS:could not resolve %s in %s on line %d
+Warning: oci_connect(): ORA-12154: TNS:could not resolve the connect identifier specified in %s on line %d
 bool(false)
-array(4) {
-  ["code"]=>
-  int(12154)
-  ["message"]=>
-  string(%d) "ORA-12154: TNS:could not resolve %s"
-  ["offset"]=>
-  int(0)
-  ["sqltext"]=>
-  string(0) ""
-}
-Done
---UEXPECTF--
-Warning: oci_connect(): ORA-12154: TNS:could not resolve %s in %s on line %d
 bool(false)
-array(4) {
-  [u"code"]=>
-  int(12154)
-  [u"message"]=>
-  unicode(%d) "ORA-12154: TNS:could not resolve %s"
-  [u"offset"]=>
-  int(0)
-  [u"sqltext"]=>
-  unicode(0) ""
-}
 Done

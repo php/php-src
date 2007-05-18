@@ -62,21 +62,3 @@ array(2) {
 }
 bool(true)
 Done
---UEXPECTF--
-array(2) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
-}
-bool(true)
-
-Warning: ocifetchinto(): ORA-01002: fetch out of sequence in %s on line %d
-array(2) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
-}
-bool(true)
-Done

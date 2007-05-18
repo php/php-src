@@ -22,9 +22,9 @@ oci_execute($statement, OCI_DEFAULT);
 
 var_dump($blob);
 
-var_dump($blob->write(b"test"));
+var_dump($blob->write("test"));
 var_dump($blob->rewind());
-var_dump($blob->write(b"str"));
+var_dump($blob->write("str"));
 var_dump($blob->seek(10, OCI_SEEK_SET));
 
 oci_commit($c);
@@ -71,31 +71,6 @@ array(2) {
   ["BLOB"]=>
   object(OCI-Lob)#%d (1) {
     ["descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-}
-bool(true)
-string(4) "strt"
-string(8) "strtstrt"
-Done
---UEXPECTF--
-object(OCI-Lob)#%d (1) {
-  [u"descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-int(4)
-bool(true)
-int(3)
-bool(true)
-array(2) {
-  [0]=>
-  object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-  [u"BLOB"]=>
-  object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2006 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #ifndef PHP_JSON_H
 #define PHP_JSON_H
 
-#define PHP_JSON_VERSION "1.2.1"
+#define PHP_JSON_VERSION "1.2.0"
 
 extern zend_module_entry json_module_entry;
 #define phpext_json_ptr &json_module_entry
@@ -41,7 +41,14 @@ PHP_MINFO_FUNCTION(json);
 PHP_FUNCTION(json_encode);
 PHP_FUNCTION(json_decode);
 
+#ifdef ZTS
+#define JSON_G(v) TSRMG(json_globals_id, zend_json_globals *, v)
+#else
+#define JSON_G(v) (json_globals.v)
+#endif
+
 #endif  /* PHP_JSON_H */
+
 
 /*
  * Local variables:

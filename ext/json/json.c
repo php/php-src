@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2006 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,12 @@
 #include "JSON_parser.h"
 #include "php_json.h"
 
-static const char digits[] = "0123456789abcdef";
+/* If you declare any globals in php_json.h uncomment this:
+ZEND_DECLARE_MODULE_GLOBALS(json)
+*/
+
+/* True global resources - no need for thread safety here */
+static int le_json;
 
 /* {{{ json_functions[]
  *
@@ -79,16 +84,22 @@ PHP_MINFO_FUNCTION(json)
 /* }}} */
 
 static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC);
-static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type);
+static void json_escape_string(smart_str *buf, char *s, int len TSRMLS_DC);
 
-static int json_determine_array_type(zval **val TSRMLS_DC) /* {{{ */
-{
+static int json_determine_array_type(zval **val TSRMLS_DC) {
     int i;
-    HashTable *myht = HASH_OF(*val);
+    HashTable *myht;
+
+    if (Z_TYPE_PP(val) == IS_ARRAY) {
+        myht = HASH_OF(*val);
+    } else {
+        myht = Z_OBJPROP_PP(val);
+        return 1;
+    }
 
     i = myht ? zend_hash_num_elements(myht) : 0;
     if (i > 0) {
-        zstr key;
+        char *key;
         ulong index, idx;
         uint key_len;
         HashPosition pos;
@@ -100,7 +111,7 @@ static int json_determine_array_type(zval **val TSRMLS_DC) /* {{{ */
             if (i == HASH_KEY_NON_EXISTANT)
                 break;
 
-            if (i == HASH_KEY_IS_STRING || i == HASH_KEY_IS_UNICODE) {
+            if (i == HASH_KEY_IS_STRING) {
                 return 1;
             } else {
                 if (index != idx) {
@@ -113,10 +124,8 @@ static int json_determine_array_type(zval **val TSRMLS_DC) /* {{{ */
 
     return 0;
 }
-/* }}} */
 
-static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) /* {{{ */
-{
+static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
     int i, r;
     HashTable *myht;
 
@@ -126,12 +135,6 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) /* {{{ */
     } else {
         myht = Z_OBJPROP_PP(val);
         r = 1;
-    }
-
-    if (myht && myht->nApplyCount > 1) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
-        smart_str_appendl(buf, "null", 4);
-        return;
     }
 
     if (r == 0)
@@ -145,13 +148,13 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) /* {{{ */
 
     i = myht ? zend_hash_num_elements(myht) : 0;
     if (i > 0) {
-        zstr key;
+        char *key;
         zval **data;
         ulong index;
         uint key_len;
         HashPosition pos;
-        HashTable *tmp_ht;
-        int need_comma = 0;
+        int htlen = i;
+        int wpos = 0;
 
         zend_hash_internal_pointer_reset_ex(myht, &pos);
         for (;; zend_hash_move_forward_ex(myht, &pos)) {
@@ -160,44 +163,20 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) /* {{{ */
                 break;
 
             if (zend_hash_get_current_data_ex(myht, (void **) &data, &pos) == SUCCESS) {
-                tmp_ht = HASH_OF(*data);
-                if (tmp_ht) {
-                    tmp_ht->nApplyCount++;
-                }
-
                 if (r == 0) {
-                    if (need_comma) {
-                        smart_str_appendc(buf, ',');
-                    } else {
-                        need_comma = 1;
-                    }
- 
                     json_encode_r(buf, *data TSRMLS_CC);
                 } else if (r == 1) {
-                    if (i == HASH_KEY_IS_STRING ||
-						i == HASH_KEY_IS_UNICODE) {
-                        if (key.s[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
+                    if (i == HASH_KEY_IS_STRING) {
+                        if (key[0] == '\0') {
                             /* Skip protected and private members. */
                             continue;
                         }
 
-                        if (need_comma) {
-                            smart_str_appendc(buf, ',');
-                        } else {
-                            need_comma = 1;
-                        }
-
-                        json_escape_string(buf, key, key_len - 1, (i==HASH_KEY_IS_UNICODE)?IS_UNICODE:IS_STRING);
+                        json_escape_string(buf, key, key_len - 1 TSRMLS_CC);
                         smart_str_appendc(buf, ':');
 
                         json_encode_r(buf, *data TSRMLS_CC);
                     } else {
-                        if (need_comma) {
-                            smart_str_appendc(buf, ',');
-                        } else {
-                            need_comma = 1;
-                        }
-                        
                         smart_str_appendc(buf, '"');
                         smart_str_append_long(buf, (long) index);
                         smart_str_appendc(buf, '"');
@@ -207,8 +186,9 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) /* {{{ */
                     }
                 }
 
-                if (tmp_ht) {
-                    tmp_ht->nApplyCount--;
+                if (htlen > 1 && wpos++ < htlen - 1)
+                {
+                    smart_str_appendc(buf, ',');
                 }
             }
         }
@@ -223,11 +203,10 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) /* {{{ */
         smart_str_appendc(buf, '}');
     }
 }
-/* }}} */
 
 #define REVERSE16(us) (((us & 0xf) << 12) | (((us >> 4) & 0xf) << 8) | (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf))
 
-static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type) /* {{{ */
+static void json_escape_string(smart_str *buf, char *s, int len TSRMLS_DC)
 {
     int pos = 0;
     unsigned short us;
@@ -239,23 +218,19 @@ static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type)
         return;
     }
 
-	if (type == IS_UNICODE) {
-		utf16 = (unsigned short *) s.u;
-	} else {	
-		utf16 = (unsigned short *) safe_emalloc(len, sizeof(unsigned short), 0);
+    utf16 = (unsigned short *) emalloc(len * sizeof(unsigned short));
 
-		len = utf8_to_utf16(utf16, s.s, len);
-		if (len <= 0)
-		{
-			if (utf16)
-			{
-				efree(utf16);
-			}
+    len = utf8_to_utf16(utf16, s, len);
+    if (len <= 0)
+    {
+        if (utf16)
+        {
+            efree(utf16);
+        }
 
-			smart_str_appendl(buf, "\"\"", 2);
-			return;
-		}
-	}
+        smart_str_appendl(buf, "\"\"", 2);
+        return;
+    }
 
     smart_str_appendc(buf, '"');
 
@@ -307,7 +282,7 @@ static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type)
                 break;
             default:
                 {
-                    if (us >= ' ' && (us & 127) == us)
+                    if (us < ' ' || (us & 127) == us)
                     {
                         smart_str_appendc(buf, (unsigned char) us);
                     }
@@ -330,15 +305,10 @@ static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type)
     }
 
     smart_str_appendc(buf, '"');
-
-	if (type == IS_STRING) {
-		efree(utf16);
-	}
+    efree(utf16);
 }
-/* }}} */
 
-static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) /* {{{ */
-{
+static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) {
     switch (Z_TYPE_P(val)) {
         case IS_NULL:
             smart_str_appendl(buf, "null", 4);
@@ -362,25 +332,24 @@ static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) /* {{{ */
                 int len;
                 double dbl = Z_DVAL_P(val);
 
-                if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
+                if (!zend_isinf(dbl) && !zend_isnan(dbl))
+                {
                     len = spprintf(&d, 0, "%.9g", dbl);
-                    if (d) {
-                        if (dbl > LONG_MAX && !memchr(d, '.', len)) {
-                            smart_str_append_unsigned(buf, (unsigned long)Z_DVAL_P(val));
-                        } else {
-                            smart_str_appendl(buf, d, len);
-                        }
+                    if (d)
+                    {
+                        smart_str_appendl(buf, d, len);
                         efree(d);
                     }
-                } else {
+                }
+                else
+                {
                     zend_error(E_WARNING, "[json] (json_encode_r) double %.9g does not conform to the JSON spec, encoded as 0.", dbl);
                     smart_str_appendc(buf, '0');
                 }
             }
             break;
         case IS_STRING:
-		case IS_UNICODE:
-            json_escape_string(buf, Z_UNIVAL_P(val), Z_UNILEN_P(val), Z_TYPE_P(val));
+            json_escape_string(buf, Z_STRVAL_P(val), Z_STRLEN_P(val) TSRMLS_CC);
             break;
         case IS_ARRAY:
         case IS_OBJECT:
@@ -394,10 +363,7 @@ static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) /* {{{ */
 
     return;
 }
-/* }}} */
 
-/* {{{ proto string json_encode(mixed data) U
-   Returns the JSON representation of a value */
 PHP_FUNCTION(json_encode)
 {
     zval *parameter;
@@ -409,53 +375,40 @@ PHP_FUNCTION(json_encode)
 
     json_encode_r(&buf, parameter TSRMLS_CC);
 
-	/*
-	 * Return as binary string, since the result is 99% likely to be just
-	 * echo'ed out and we want to avoid overhead of double conversion.
-	 */
     ZVAL_STRINGL(return_value, buf.c, buf.len, 1);
 
     smart_str_free(&buf);
 }
-/* }}} */
 
-/* {{{ proto mixed json_decode(string json [, bool assoc]) U
-   Decodes the JSON representation into a PHP value */
 PHP_FUNCTION(json_decode)
 {
-    zstr str;
-    int str_len, utf16_len;
-	zend_uchar str_type;
+    char *parameter;
+    int parameter_len, utf16_len;
     zend_bool assoc = 0; /* return JS objects as PHP objects by default */
     zval *z;
     unsigned short *utf16;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &str, &str_len, &str_type, &assoc) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &parameter, &parameter_len, &assoc) == FAILURE) {
         return;
     }
 
-    if (!str_len)
+    if (!parameter_len)
     {
         RETURN_NULL();
     }
 
-	if (str_type == IS_UNICODE) {
-		utf16 = str.u;
-		utf16_len = str_len;
-	} else {
-		utf16 = (unsigned short *) safe_emalloc((str_len+1), sizeof(unsigned short), 0);
+    utf16 = (unsigned short *) emalloc((parameter_len+1) * sizeof(unsigned short));
 
-		utf16_len = utf8_to_utf16(utf16, str.s, str_len);
-		if (utf16_len <= 0)
-		{
-			if (utf16)
-			{
-				efree(utf16);
-			}
+    utf16_len = utf8_to_utf16(utf16, parameter, parameter_len);
+    if (utf16_len <= 0)
+    {
+        if (utf16)
+        {
+            efree(utf16);
+        }
 
-			RETURN_NULL();
-		}
-	}
+        RETURN_NULL();
+    }
 
     ALLOC_INIT_ZVAL(z);
     if (JSON_parser(z, utf16, utf16_len, assoc TSRMLS_CC))
@@ -463,71 +416,16 @@ PHP_FUNCTION(json_decode)
         *return_value = *z;
 
         FREE_ZVAL(z);
-		if (str_type == IS_STRING) {
-			efree(utf16);
-		}
-    } else if (str_type == IS_STRING) {
-		double d;
-		int type;
-		long p;
-
-		zval_dtor(z);
-		FREE_ZVAL(z);
-		efree(utf16);
-
-		if (str_len == 4) {
-			if (!strcasecmp(str.s, "null")) {
-				RETURN_NULL();
-			} else if (!strcasecmp(str.s, "true")) {
-				RETURN_BOOL(1);
-			}
-		} else if (str_len == 5 && !strcasecmp(str.s, "false")) {
-			RETURN_BOOL(0);
-		}
-		if ((type = is_numeric_string(str.s, str_len, &p, &d, 0)) != 0) {
-			if (type == IS_LONG) {
-				RETURN_LONG(p);
-			} else if (type == IS_DOUBLE) {
-				RETURN_DOUBLE(d);
-			}
-		}
-		if (*str.s == '"' || str.s[str_len] == '"') {
-			RETURN_STRINGL(str.s+1, str_len-2, 1);
-		} else {
-			RETURN_STRINGL(str.s, str_len, 1);
-		}
-	} else {
-		double d;
-		int type;
-		long p;
-
-		zval_dtor(z);
-		FREE_ZVAL(z);
-
-		if (str_len == 4) {
-			if (ZEND_U_CASE_EQUAL(IS_UNICODE, str, str_len, "null", sizeof("null")-1)) {
-				RETURN_NULL();
-			} else if (ZEND_U_CASE_EQUAL(IS_UNICODE, str, str_len, "true", sizeof("true")-1)) {
-				RETURN_BOOL(1);
-			}
-		} else if (str_len == 5 && ZEND_U_CASE_EQUAL(IS_UNICODE, str, str_len, "false", sizeof("false")-1)) {
-			RETURN_BOOL(0);
-		}
-		if ((type = is_numeric_unicode(str.u, str_len, &p, &d, 0)) != 0) {
-			if (type == IS_LONG) {
-				RETURN_LONG(p);
-			} else if (type == IS_DOUBLE) {
-				RETURN_DOUBLE(d);
-			}
-		}
-		if (*str.u == 0x22 /*'"'*/ || str.u[str_len] == 0x22 /*'"'*/) {
-			RETURN_UNICODEL(str.u+1, str_len-2, 1);
-		} else {
-			RETURN_UNICODEL(str.u, str_len, 1);
-		}
-	}
+        efree(utf16);
+    }
+    else
+    {
+        zval_dtor(z);
+        FREE_ZVAL(z);
+        efree(utf16);
+        RETURN_NULL();
+    }
 }
-/* }}} */
 
 /*
  * Local variables:
