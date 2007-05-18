@@ -33,7 +33,6 @@ PHPAPI double php_combined_lcg(TSRMLS_D);
 PHP_FUNCTION(lcg_value);
 
 PHP_MINIT_FUNCTION(lcg);
-PHP_RINIT_FUNCTION(lcg);
 
 #ifdef ZTS
 #define LCG(v) TSRMG(lcg_globals_id, php_lcg_globals *, v)

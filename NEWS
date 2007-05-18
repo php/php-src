@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.3
+- Optimized out a couple of per-request syscalls (Rasmus)
 - Upgraded SQLite 3 to version 3.3.16 (Ilia)
 - Added PDO::FETCH_KEY_PAIR mode that will fetch a 2 column result set into 
   an associated array. (Ilia)
