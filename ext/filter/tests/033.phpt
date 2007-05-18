@@ -2,6 +2,8 @@
 Test all filters returned by filter_list()
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 include dirname(__FILE__) . '/033_run.inc';
