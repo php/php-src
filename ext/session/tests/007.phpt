@@ -10,6 +10,7 @@ register_globals=1
 session.bug_compat_42=1
 session.serialize_handler=php
 session.save_handler=files
+precision=14
 --FILE--
 <?php
 error_reporting(E_ALL);

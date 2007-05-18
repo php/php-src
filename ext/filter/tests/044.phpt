@@ -2,6 +2,8 @@
 Integer validation with spaces
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
+--INI--
+precision=14
 --FILE--
 <?php 
 $vals = array(
