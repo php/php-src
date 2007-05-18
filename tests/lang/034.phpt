@@ -6,6 +6,8 @@ if (setlocale(LC_NUMERIC, "de_DE", "de", "german", "ge", "de_DE.ISO8859-1") === 
 	print "skip";
 }
 ?>
+--INI--
+precision=14
 --FILE--
 <?php 
 # activate the german locale
