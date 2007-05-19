@@ -350,7 +350,7 @@ int php_init_config(TSRMLS_D)
 		}
 #else
 		if (sapi_module.executable_location) {
-			binary_location = (char *)emalloc(PATH_MAX);
+			binary_location = (char *)emalloc(MAXPATHLEN);
 			if (!strchr(sapi_module.executable_location, '/')) {
 				char *envpath, *path;
 				int found = 0;
