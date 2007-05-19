@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - Fixed segfault in strripos(). (Tony, Joxean Koret)
 - Fixed bug #41430 (Fatal error with negative values of maxlen parameter of 
   file_get_contents()). (Tony)
+- fixed bug #41423 (PHP assumes wrongly that certain ciphers are enabled in 
+  OpenSSL) (Pierre)
 - Fixed bug #41421 (Uncaught exception from a stream wrapper segfaults). 
   (Tony, Dmitry)
 - Fixed bug #41403 (json_decode cannot decode floats if localeconv 
