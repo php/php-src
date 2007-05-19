@@ -2305,8 +2305,8 @@ PHP_FUNCTION(ob_iconv_handler)
 				ICONVG(output_encoding), ICONVG(internal_encoding));
 		_php_iconv_show_error(err, ICONVG(output_encoding), ICONVG(internal_encoding) TSRMLS_CC);
 		if (out_buffer != NULL) {
-			spprintf(&content_type, 0, "Content-Type:%s; charset=%s", mimetype, ICONVG(output_encoding));
-			if (content_type && sapi_add_header(content_type, strlen(content_type), 0) != FAILURE) {
+			int len = spprintf(&content_type, 0, "Content-Type:%s; charset=%s", mimetype, ICONVG(output_encoding));
+			if (content_type && sapi_add_header(content_type, len, 0) != FAILURE) {
 				SG(sapi_headers).send_default_content_type = 0;
 			}
 			if (mimetype_alloced) {
