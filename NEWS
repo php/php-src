@@ -13,7 +13,7 @@ PHP                                                                        NEWS
 - Implemented FR #41416 (getColumnMeta() should also return table name). (Tony)
 - Fixed possible infinite loop in imagecreatefrompng (libgd #86) 
   (by Xavier Roche) (Pierre)
-- Fixed ext/filter Email Validation Vulnerability (MOPB-44 by Stefan Esser)
+- Fixed ext/filter Email Validation Vulnerability (MOPB-45 by Stefan Esser)
   (Ilia)
 - Fixed altering $this via argument named "this". (Dmitry)
 - Fixed PHP CLI to use the php.ini from the binary location. (Hannes)
