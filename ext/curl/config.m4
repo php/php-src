@@ -58,7 +58,7 @@ if test "$PHP_CURL" != "no"; then
    save_CFLAGS="$CFLAGS"
    CFLAGS="`$CURL_CONFIG --cflags`"
    save_LDFLAGS="$LDFALGS"
-   LDFLAGS="`$CURL_CONFIG --libs` -Wl,--rpath -Wl,$CURL_DIR/$PHP_LIBDIR"
+   LDFLAGS="`$CURL_CONFIG --libs` $ld_runpath_switch$CURL_DIR/$PHP_LIBDIR"
    
    AC_CHECK_HEADER([openssl/crypto.h], [
     AC_MSG_CHECKING([for openssl support in libcurl])
