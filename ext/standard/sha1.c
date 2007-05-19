@@ -23,17 +23,11 @@
 /* This code is heavily based on the PHP md5 implementation */ 
 
 #include "sha1.h"
+#include "md5.h"
 
 PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
 {
-	int i;
-
-	for (i = 0; i < 20; i++) {
-		sprintf(sha1str, "%02x", digest[i]);
-		sha1str += 2;
-	}
-
-	*sha1str = '\0';
+	return make_digest_ex(sha1str, digest, 20);
 }
 
 /* {{{ proto string sha1(string str [, bool raw_output])
@@ -58,7 +52,7 @@ PHP_FUNCTION(sha1)
 	if (raw_output) {
 		RETURN_STRINGL(digest, 20, 1);
 	} else {
-		make_sha1_digest(sha1str, digest);
+		make_digest_ex(sha1str, digest, 20);
 		RETVAL_STRING(sha1str, 1);
 	}
 
@@ -107,7 +101,7 @@ PHP_FUNCTION(sha1_file)
 	if (raw_output) {
 		RETURN_STRINGL(digest, 20, 1);
 	} else {
-		make_sha1_digest(sha1str, digest);
+		make_digest_ex(sha1str, digest, 20);
 		RETVAL_STRING(sha1str, 1);
 	}
 }
