@@ -45,6 +45,8 @@ ZEND_GET_MODULE(spl)
 
 ZEND_DECLARE_MODULE_GLOBALS(spl)
 
+#define SPL_DEFAULT_FILE_EXTRNSIONS ".inc,.php"
+
 /* {{{ spl_functions_none
  */
 zend_function_entry spl_functions_none[] = {
@@ -271,7 +273,11 @@ PHP_FUNCTION(spl_autoload)
 		RETURN_FALSE;
 	}
 
-	copy = pos1 = estrndup(file_exts, file_exts_len);
+	if (file_exts == NULL) { /* autoload_extensions is not intialzed, set to defaults */
+		copy = pos1 = estrndup(SPL_DEFAULT_FILE_EXTRNSIONS, sizeof(SPL_DEFAULT_FILE_EXTRNSIONS)-1);
+	} else {
+		copy = pos1 = estrndup(file_exts, file_exts_len);
+	}
 	lc_name = zend_str_tolower_dup(class_name, class_name_len);
 	while(pos1 && *pos1 && !EG(exception)) {
 		EG(return_value_ptr_ptr) = original_return_value;
@@ -328,7 +334,11 @@ PHP_FUNCTION(spl_autoload_extensions)
 		SPL_G(autoload_extensions_len) = file_exts_len;
 	}
 
-	RETURN_STRINGL(SPL_G(autoload_extensions), SPL_G(autoload_extensions_len), 1);
+	if (SPL_G(autoload_extensions) == NULL) {
+		RETURN_STRINGL(SPL_DEFAULT_FILE_EXTRNSIONS, sizeof(SPL_DEFAULT_FILE_EXTRNSIONS) - 1, 1);
+	} else {
+		RETURN_STRINGL(SPL_G(autoload_extensions), SPL_G(autoload_extensions_len), 1);
+	}
 } /* }}} */
 
 typedef struct {
@@ -717,8 +727,8 @@ PHP_MINIT_FUNCTION(spl)
 
 PHP_RINIT_FUNCTION(spl) /* {{{ */
 {
-	SPL_G(autoload_extensions) = estrndup(".inc,.php", sizeof(".inc,.php")-1);
-	SPL_G(autoload_extensions_len) = sizeof(".inc,.php")-1;
+	SPL_G(autoload_extensions) = NULL;
+	SPL_G(autoload_extensions_len) = 0;
 	SPL_G(autoload_functions) = NULL;
 	return SUCCESS;
 } /* }}} */
