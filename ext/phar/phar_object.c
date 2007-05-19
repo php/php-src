@@ -56,7 +56,7 @@ PHP_METHOD(Phar, mapPhar)
 {
 	char *alias = NULL, *error;
 	int alias_len = 0;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &alias, &alias_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!", &alias, &alias_len) == FAILURE) {
 		return;
 	}
 
@@ -74,7 +74,7 @@ PHP_METHOD(Phar, loadPhar)
 	char *fname, *alias = NULL, *error;
 	int fname_len, alias_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &fname, &fname_len, &alias, &alias_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &fname, &fname_len, &alias, &alias_len) == FAILURE) {
 		return;
 	}
 	RETVAL_BOOL(phar_open_filename(fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, &error TSRMLS_CC) == SUCCESS);
