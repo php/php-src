@@ -1,3 +1,150 @@
+2007-05-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      reorder
+
+2007-05-18  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      news about #41401
+
+    * ZendEngine2/zend_language_parser.y:
+      fix unary operator precision (bug #41401)
+
+2007-05-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/range.phpt
+      ext/standard/tests/array/range_64bit.phpt
+      ext/standard/tests/array/range_64bit.phpt:
+      fix test
+      add separate test for 64bit
+
+    * ext/standard/file.c
+      ext/standard/file.c:
+      fix leak and check for < 0 only of the 5th arg was passed
+
+2007-05-18  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/tests/bug41401.phpt:
+      add test for 41401
+
+    * ZendEngine2/tests/bug41401.phpt
+      ZendEngine2/tests/bug41401.phpt:
+      
+      file bug41401.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ZendEngine2/zend_language_parser.y:
+      fix #41401 - parser precedence on unary operators
+
+2007-05-18  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/array.c:
+      fix #41432 (extract() does not accept empty prefix)
+
+2007-05-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tests/001.phpt
+      ext/tokenizer/tests/bug26463.phpt:
+      Improved compilation of heredocs and interpolated strings. (Matt)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tests/001.phpt:
+      Improved compilation of heredocs and interpolated strings. (Matt, Dmitry)
+
+2007-05-18  Johannes Schlüter  <johannes@schlueters.de>
+
+    * README.UPDATING_TO_PHP6:
+      - Use the right variable name
+
+2007-05-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      ext/standard/basic_functions.c
+      ext/standard/lcg.c
+      ext/standard/php_ext_syslog.h
+      ext/standard/php_lcg.h
+      ext/standard/syslog.c:
+      MFB syscall optimizations
+
+2007-05-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/file.c:
+      MFH: fix #41430 (Fatal error with negative values of maxlen parameter of
+      file_get_contents())
+
+    * ext/standard/file.c:
+      fix #41430 (Fatal error with negative values of maxlen parameter of
+      file_get_contents())
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug41421.phpt:
+      MFH: fix #41421 (Uncaught exception from a stream wrapper segfaults)
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug41421.phpt
+      ZendEngine2/tests/bug41421.phpt:
+      fix #41421 (Uncaught exception from a stream wrapper segfaults)
+
+2007-05-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      ext/standard/php_lcg.h:
+      Get rid of a stray time() syscall in tsrm and clean up lcg rinit
+
+2007-05-18  Antony Dovgal  <antony@zend.com>
+
+    * ext/filter/tests/031.phpt
+      ext/filter/tests/031.phpt
+      ext/filter/tests/033.phpt
+      ext/filter/tests/033.phpt
+      ext/filter/tests/044.phpt
+      ext/filter/tests/044.phpt
+      ext/filter/tests/filter_data.phpt
+      ext/filter/tests/filter_data.phpt
+      ext/mysqli/tests/019.phpt
+      ext/mysqli/tests/019.phpt
+      ext/pdo_mysql/tests/bug_33689.phpt
+      ext/pdo_mysql/tests/bug_33689.phpt
+      ext/session/tests/007.phpt
+      ext/session/tests/008-php4.2.3.phpt
+      ext/standard/tests/strings/addcslashes.phpt
+      ext/standard/tests/strings/str_repeat.phpt
+      ext/standard/tests/strings/str_replace.phpt
+      ext/standard/tests/strings/strpos.phpt
+      ext/wddx/tests/001.phpt
+      ext/wddx/tests/001.phpt
+      tests/lang/034.phpt
+      tests/lang/034.phpt:
+      fix tests
+
 2007-05-17  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * (PHP_5_2)

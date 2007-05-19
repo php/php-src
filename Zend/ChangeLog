@@ -1,3 +1,51 @@
+2007-05-18  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_language_parser.y:
+      fix unary operator precision (bug #41401)
+
+    * tests/bug41401.phpt:
+      add test for 41401
+
+    * tests/bug41401.phpt
+      tests/bug41401.phpt:
+      
+      file bug41401.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      zend_language_parser.y:
+      fix #41401 - parser precedence on unary operators
+
+2007-05-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Improved compilation of heredocs and interpolated strings. (Matt)
+
+    * (PHP_5_2)
+      zend_compile.c
+      zend_compile.h
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Improved compilation of heredocs and interpolated strings. (Matt, Dmitry)
+
+2007-05-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_execute_API.c
+      tests/bug41421.phpt:
+      MFH: fix #41421 (Uncaught exception from a stream wrapper segfaults)
+
+    * zend_execute_API.c
+      tests/bug41421.phpt
+      tests/bug41421.phpt:
+      fix #41421 (Uncaught exception from a stream wrapper segfaults)
+
 2007-05-17  Antony Dovgal  <antony@zend.com>
 
     * tests/concat_003.phpt:
