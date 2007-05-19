@@ -41,7 +41,6 @@ extern zend_module_entry sockets_module_entry;
 
 PHP_MINIT_FUNCTION(sockets);
 PHP_MINFO_FUNCTION(sockets);
-PHP_RINIT_FUNCTION(sockets);
 PHP_RSHUTDOWN_FUNCTION(sockets);
 
 PHP_FUNCTION(socket_select);

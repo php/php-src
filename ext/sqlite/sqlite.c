@@ -295,7 +295,7 @@ zend_module_entry sqlite_module_entry = {
 	sqlite_functions,
 	PHP_MINIT(sqlite),
 	PHP_MSHUTDOWN(sqlite),
-	PHP_RINIT(sqlite),
+	NULL,
 	PHP_RSHUTDOWN(sqlite),
 	PHP_MINFO(sqlite),
 #if ZEND_MODULE_API_NO >= 20010901
@@ -1121,11 +1121,6 @@ PHP_MSHUTDOWN_FUNCTION(sqlite)
     php_pdo_unregister_driver(&pdo_sqlite2_driver);
 #endif
 
-	return SUCCESS;
-}
-
-PHP_RINIT_FUNCTION(sqlite)
-{
 	return SUCCESS;
 }
 
