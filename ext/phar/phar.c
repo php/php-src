@@ -3483,7 +3483,7 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_plain_map));
-		PHAR_GLOBALS->request_done = 0;
+		PHAR_GLOBALS->request_init = 0;
 	}
 	PHAR_GLOBALS->request_done = 1;
 	return SUCCESS;
