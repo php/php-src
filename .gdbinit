@@ -8,7 +8,7 @@ define ____executor_globals
 end
 
 document ____executor_globals
-	portable way of accessing executor_globals
+	portable way of accessing executor_globals, set $eg
 	ZTS detection is automatically based on ext/standard module struct
 end
 
@@ -122,7 +122,7 @@ define ____printzv_contents
 		if ! $arg1
 			printf "{\n"
 			set $ind = $ind + 1
-			____print_ht $zvalue->value.ht 0
+			____print_ht $zvalue->value.ht 0 1
 			set $ind = $ind - 1
 			set $i = $ind
 			while $i > 0
@@ -155,7 +155,7 @@ define ____printzv_contents
 					printf "(%d): ", $ht->nNumOfElements
 					printf "{\n"
 					set $ind = $ind + 1
-					____print_ht $ht 1
+					____print_ht $ht 1 1
 					set $ind = $ind - 1
 					set $i = $ind
 					while $i > 0
@@ -243,8 +243,6 @@ define ____print_ht
 	set $p = $ht->pListHead
 
 	while $p != 0
-		set $zval = *(zval **)$p->pData
-
 		set $i = $ind
 		while $i > 0
 			printf "  "
@@ -269,7 +267,17 @@ define ____print_ht
 			printf "%d => ", $p->h
 		end
 
-		____printzv $zval 1
+		if $arg1 == 0
+			printf "%p\n", (void*)$p->pData
+		end
+		if $arg1 == 1
+			set $zval = *(zval **)$p->pData
+			____printzv $zval 1
+		end
+		if $arg1 == 2
+			printf "%s\n", (char*)$p->pData
+		end
+
 		set $p = $p->pListNext
 	end
 end
@@ -277,12 +285,34 @@ end
 define print_ht
 	set $ind = 1
 	printf "[0x%08x] {\n", $arg0
-	____print_ht $arg0 0
+	____print_ht $arg0 0 1
 	printf "}\n"
 end
 
 document print_ht
 	dumps elements of HashTable made of zval
+end
+
+define print_htptr
+	set $ind = 1
+	printf "[0x%08x] {\n", $arg0
+	____print_ht $arg0 0 0
+	printf "}\n"
+end
+
+document print_htptr
+	dumps elements of HashTable made of pointers
+end
+
+define print_htstr
+	set $ind = 1
+	printf "[0x%08x] {\n", $arg0
+	____print_ht $arg0 0 2
+	printf "}\n"
+end
+
+document print_htstr
+	dumps elements of HashTable made of strings
 end
 
 define ____print_ft
