@@ -1,3 +1,93 @@
+2007-05-19  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - MFB:
+       - Fixed a possible crash in the event directory cannot be created, due to
+      a
+         double free. (Ilia)
+       - Use the same tests for zip_stat
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - use the same checks for zip_stat
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/openssl.c:
+      - #41423. PHP assumes wrongly that certain ciphers are enabled in OpenSSL
+
+    * ext/openssl/openssl.c:
+      - #41423, PHP assumes wrongly that certain ciphers are enabled in OpenSSL
+
+2007-05-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/md5.c
+      ext/standard/md5.h
+      ext/standard/sha1.c:
+      
+      Optimized digest generation in md5() and sha1() functions by using code
+      from ext/hash. This makes the functions 20-50% faster on short strings.
+
+2007-05-19  Michael Wallner  <mike@iworks.at>
+
+    * ext/curl/config.m4:
+       - fix compiler/linker agnostic runpath switch
+
+    * (PHP_5_2)
+      ext/curl/config.m4:
+      - fix compile/linker agnostic runpath switch
+
+2007-05-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      CS fixes
+      Fixed a possible crash in the event directory cannot be created, due to a
+      double free.
+
+    * (PHP_5_2)
+      ext/spl/php_spl.c:
+      
+      Fixed typo in constant name
+
+    * (PHP_5_2)
+      ext/spl/php_spl.c:
+      Eliminate memory allocation in RINIT for spl
+
+    * (PHP_5_2)
+      ext/sockets/php_sockets.h
+      ext/sockets/sockets.c
+      ext/sqlite/php_sqlite.h
+      ext/sqlite/sqlite.c:
+      
+      Remove pointless RINIT
+
+    * (PHP_5_2)
+      ext/iconv/iconv.c:
+      
+      Avoid strlen()
+
+    * (PHP_5_2)
+      ext/pdo/tests/pdo_034.phpt:
+      Fixed test to work with postgresql
+
+2007-05-19  Antony Dovgal  <antony@zend.com>
+
+    * main/php_ini.c:
+      use correct constant
+
+2007-05-19  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      and now the right number
+
+    * (PHP_5_2)
+      NEWS:
+      fix reference
+
 2007-05-18  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
