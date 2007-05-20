@@ -3465,6 +3465,8 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 	if (!PHAR_GLOBALS->request_init)
 	{
 		PHAR_GLOBALS->request_init = 1;
+		PHAR_GLOBALS->request_ends = 0;
+		PHAR_GLOBALS->request_done = 0;
 		zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data,  0);
 		zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
 		zend_hash_init(&(PHAR_GLOBALS->phar_plain_map), sizeof(const char *),       zend_get_hash_value, NULL, 0);
@@ -3481,6 +3483,7 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_plain_map));
+		PHAR_GLOBALS->request_done = 0;
 	}
 	PHAR_GLOBALS->request_done = 1;
 	return SUCCESS;
