@@ -3,6 +3,7 @@
 $notes = '
  * add Phar::getAlias() [Marcus]
  * Made -a optional in pack subcommand of phar.phar [Marcus]
+ * Fix issue with apache module [Marcus]
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
