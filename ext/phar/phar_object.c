@@ -54,10 +54,22 @@ PHP_METHOD(Phar, getExtractList)
  * Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
 {
-	char *alias = NULL, *error;
-	int alias_len = 0;
+	char *fname, *alias = NULL, *error, *plain_map;
+	int fname_len, alias_len = 0;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!", &alias, &alias_len) == FAILURE) {
 		return;
+	}
+
+	phar_request_initialize(TSRMLS_C);
+	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_plain_map))) {
+		fname = zend_get_executed_filename(TSRMLS_C);
+		fname_len = strlen(fname);
+		if((alias && 
+		    zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), alias, alias_len+1, (void **)&plain_map) == SUCCESS)
+		|| (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), fname, fname_len+1, (void **)&plain_map) == SUCCESS)
+		) {
+			RETURN_STRING(plain_map, 1);
+		}
 	}
 
 	RETVAL_BOOL(phar_open_compiled_file(alias, alias_len, &error TSRMLS_CC) == SUCCESS);
@@ -71,12 +83,23 @@ PHP_METHOD(Phar, mapPhar)
  * Loads any phar archive with an alias */
 PHP_METHOD(Phar, loadPhar)
 {
-	char *fname, *alias = NULL, *error;
+	char *fname, *alias = NULL, *error, *plain_map;
 	int fname_len, alias_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &fname, &fname_len, &alias, &alias_len) == FAILURE) {
 		return;
 	}
+
+	phar_request_initialize(TSRMLS_C);
+	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_plain_map))) {
+		if((alias && 
+		    zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), alias, alias_len+1, (void **)&plain_map) == SUCCESS)
+		|| (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), fname, fname_len+1, (void **)&plain_map) == SUCCESS)
+		) {
+			RETURN_STRING(plain_map, 1);
+		}
+	}
+
 	RETVAL_BOOL(phar_open_filename(fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, &error TSRMLS_CC) == SUCCESS);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
