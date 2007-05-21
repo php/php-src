@@ -717,7 +717,7 @@ static sdlPtr load_wsdl(char *struri TSRMLS_DC)
 				  trav2 = trav2->next;
 				}
 				if (!address) {
-					if (has_soap_port || trav->next) {
+					if (has_soap_port || trav->next || i < n-1) {
 						efree(tmpbinding);
 						trav = trav->next;
 						continue;
