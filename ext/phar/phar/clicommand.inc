@@ -31,13 +31,11 @@ abstract class CLICommand
 
 		if ($argc < 2)
 		{
-			echo "No command given, check ${argv[0]} help\n";
-			exit(1);
+			self::error("No command given, check ${argv[0]} help\n");
 		}
 		elseif (!isset($this->cmds[$argv[1]]['run']))
 		{
-			echo "Unknown command '${argv[1]}', check ${argv[0]} help\n";
-			exit(1);
+			self::error("Unknown command '${argv[1]}', check ${argv[0]} help\n");
 		}
 		else
 		{
@@ -58,8 +56,7 @@ abstract class CLICommand
 						$arg = $argv[$i][1];
 						if (++$i >= $argc)
 						{
-							echo "Missing argument to parameter '$arg' of command '$command', check ${argv[0]} help\n";
-							exit(1);
+							self::error("Missing argument to parameter '$arg' of command '$command', check ${argv[0]} help\n");
 						}
 						else
 						{
@@ -68,8 +65,7 @@ abstract class CLICommand
 					}
 					else
 					{
-						echo "Unknown parameter '${argv[$i]}' to command $command, check ${argv[0]} help\n";
-						exit(1);
+						self::error("Unknown parameter '${argv[$i]}' to command $command, check ${argv[0]} help\n");
 					}
 				}
 				else
@@ -98,24 +94,30 @@ abstract class CLICommand
 			}
 			else if ($i < $argc)
 			{
-				echo "Unexpected default arguments to command $command, check ${argv[0]} help\n";
-				exit(1);
+				self::error("Unexpected default arguments to command $command, check ${argv[0]} help\n");
 			}
+			$missing = '';
 			foreach($this->args as $arg => $inf)
 			{
 				if (strlen($arg) && !isset($inf['val']) && isset($inf['required']) && $inf['required'])
 				{
-					echo "Missing parameter '-$arg' to command $command, check ${argv[0]} help\n";
-					$missing = true;
+					$missing .= "Missing parameter '-$arg' to command $command.\n";
 				}
 			}
-			if ($missing)
+			if (strlen($missing))
 			{
-				exit(1);
+				$missing .= "Check ${argv[0]} help\n";
+				self::error($missing);
 			}
 		}
 
 		call_user_func(array($this, $this->cmds[$command]['run']), $this->args);
+	}
+
+	static function error($msg, $exit_code = 1)
+	{
+		fprintf(STDERR, $msg);
+		exit($exit_code);
 	}
 
 	function checkArgTyp($arg, $i, $argc, $argv)
@@ -124,7 +126,7 @@ abstract class CLICommand
 
 		if (isset($this->typs[$typ]['typ']))
 		{
-			return call_user_func(array($this, $this->typs[$typ]['typ']), $argv[$i], $this->args[$arg]);
+			return call_user_func(array($this, $this->typs[$typ]['typ']), $argv[$i], $this->args[$arg], $arg);
 		}
 		else
 		{
@@ -171,12 +173,21 @@ abstract class CLICommand
 		return self::getSubFuncs($cmdclass, 'cli_arg_', array('typ'));
 	}
 
-	static function cli_arg_typ_bool($arg)
+	static function cli_arg_typ_bool($arg, $cfg, $key)
 	{
 		return (bool)$arg;
 	}
 
-	static function cli_arg_typ_regex($arg)
+	static function cli_arg_typ_int($arg, $cfg, $key)
+	{
+		if ((int)$arg != $arg)
+		{
+			self::error("Argument to -$key must be an integer.\n");
+		}
+		return (int)$arg;
+	}
+
+	static function cli_arg_typ_regex($arg, $cfg, $key)
 	{
 		if (strlen($arg))
 		{
@@ -195,54 +206,49 @@ abstract class CLICommand
 		}
 	}
 
-	static function cli_arg_typ_select($arg, $cfg)
+	static function cli_arg_typ_select($arg, $cfg, $key)
 	{
 		if (!in_array($arg, array_keys($cfg['select'])))
 		{
-			echo "Parameter value '$arg' not one of '" . join("', '", array_keys($cfg['select'])) . "'.\n";
-			exit(1);
+			self::error("Parameter value '$arg' not one of '" . join("', '", array_keys($cfg['select'])) . "'.\n");
 		}
 		return $arg;
 	}
 
-	static function cli_arg_typ_dir($arg)
+	static function cli_arg_typ_dir($arg, $cfg, $key)
 	{
 		$f = realpath($arg);
 		if ($f===false || !file_exists($f) || !is_dir($f))
 		{
-			echo "Requested path '$arg' does not exist.\n";
-			exit(1);
+			self::error("Requested path '$arg' does not exist.\n");
 		}
 		return $f;
 	}
 
-	static function cli_arg_typ_file($arg)
+	static function cli_arg_typ_file($arg, $cfg, $key)
 	{
-		$f = new SplFileInfo($arg);
-		$f = $f->getRealPath();
+		$f = realpath($arg);
 		if ($f===false || !file_exists($f))
 		{
-			echo "Requested file '$arg' does not exist.\n";
-			exit(1);
+			self::error("Requested file '$arg' does not exist.\n");
 		}
 		return $f;
 	}
 
-	static function cli_arg_typ_filenew($arg)
+	static function cli_arg_typ_filenew($arg, $cfg, $key)
 	{
 		$d = dirname($arg);
 		$f = realpath($d);
 		if ($f === false)
 		{
-			echo "Path for file '$arg' does not exist.\n";
-			exit(1);
+			self::error("Path for file '$arg' does not exist.\n");
 		}
 		return $f . substr($arg, strlen($d));;
 	}
 
-	static function cli_arg_typ_filecont($arg)
+	static function cli_arg_typ_filecont($arg, $cfg, $key)
 	{
-		return file_get_contents(self::cli_arg_typ_file($arg));
+		return file_get_contents(self::cli_arg_typ_file($arg, $cfg, $key));
 	}
 
 	function cli_get_SP2($l1, $arg_inf)
@@ -330,14 +336,12 @@ abstract class CLICommand
 		{
 			if (count($which) != 1)
 			{
-				echo "More than one command given.\n";
-				exit(1);
+				self::error("More than one command given.\n");
 			}
 			$which = $which[0];
 			if (!array_key_exists($which, $this->cmds))
 			{
-				echo "Unknown command, cannot retrieve help.\n";
-				exit(1);
+				self::error("Unknown command, cannot retrieve help.\n");
 			}
 			$l = strlen($which);
 			$cmds = array($which => $this->cmds[$which]);
