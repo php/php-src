@@ -258,12 +258,6 @@ if test "$enable_maintainer_zts" = "yes"; then
   PTHREADS_FLAGS
 fi
 
-if test "$PHP_ENABLE_FASTCGI" = "yes"; then
-  PHP_CONFIGURE_PART(Running FastCGI checks)
-  sinclude(sapi/cgi/libfcgi/acinclude.m4)
-  sinclude(sapi/cgi/libfcgi/libfcgi.m4)
-fi
-
 divert(3)
 
 dnl ## In diversion 3 we check for compile-time options to the PHP
