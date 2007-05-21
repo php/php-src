@@ -3,7 +3,10 @@
 $notes = '
  * add Phar::getAlias() [Marcus]
  * Made -a optional in pack subcommand of phar.phar [Marcus]
- * Fix issue with apache module [Marcus]
+ * Fix issue with apache module and extracted archives [Marcus]
+ * Send all error messages to stderr in phar.phar [Marcus]
+ * Added new subcommands add and delete to phar.phar [Marcus]
+ * Made Phar::loadPhar() and Phar::mapPhar() ignore extracted archives [Marcus]
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
