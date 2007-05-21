@@ -35,7 +35,7 @@ PHP                                                                        NEWS
   (Scott)
 - Fixed bug #41378 (fastcgi protocol lacks support for Reason-Phrase in 
   "Status:" header). (anight at eyelinkmedia dot com, Dmitry)
-- Fixed bug #41374 (wholetext concats values of wrong nodes). (Rob)
+- Fixed bug #41374 (whole text concats values of wrong nodes). (Rob)
 - Fixed bug #41358 (configure cannot determine libcurl's SSL lib as of v7.16.2)
   (Mike)
 - Fixed bug #41353 (crash in openssl_pkcs12_read() on invalid input). (Ilia)
@@ -64,7 +64,7 @@ PHP                                                                        NEWS
 - Fixed bug #41097 (ext/soap returning associative array as indexed without
   using WSDL). (Dmitry)
 - Fixed bug #41004 (minOccurs="0" and null class member variable). (Dmitry)
-- Fixed bug #39542 (Behaviour of require/include different to < 5.2.0).
+- Fixed bug #39542 (Behavior of require/include different to < 5.2.0).
   (Dmitry)
 
 03 May 2007, PHP 5.2.2
