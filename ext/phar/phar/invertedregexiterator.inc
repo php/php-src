@@ -14,7 +14,7 @@
  * @author  Marcus Boerger
  * @version 1.0
  */
-class InvertedRegexIterator extends FilterIterator
+class InvertedRegexIterator extends RegexIterator
 {
 	/** @return !RegexIterator::accept()
 	 */	
