@@ -172,6 +172,7 @@ dnl parameters(version, library list, function)
 AC_DEFUN([PHP_DBA_DB_CHECK],[
   for LIB in $2; do
     if test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.a -o -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.$SHLIB_SUFFIX_NAME; then
+      lib_found=""
       PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/$PHP_LIBDIR, -l$LIB,[
         AC_TRY_LINK([
 #include "$THIS_INCLUDE"
@@ -185,10 +186,14 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
 #endif
           ],[
             THIS_LIBS=$LIB
-            break
+            lib_found=1
           ])
         ])
       ])
+      if test -n "$lib_found"; then
+        lib_found="";
+        break;
+      fi
     fi
   done
   if test -z "$THIS_LIBS"; then
