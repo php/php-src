@@ -1759,8 +1759,8 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_D
 		zend_make_unicode_zval(op1, &op1_copy, &use_copy1);
 		zend_make_unicode_zval(op2, &op2_copy, &use_copy2);
 	} else {
-		zend_make_printable_zval(op1, &op1_copy, &use_copy1);
-		zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+		zend_make_string_zval(op1, &op1_copy, &use_copy1);
+		zend_make_string_zval(op2, &op2_copy, &use_copy2);
 	}
 
 	if (use_copy1) {
@@ -1795,8 +1795,8 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 		zend_make_unicode_zval(op1, &op1_copy, &use_copy1);
 		zend_make_unicode_zval(op2, &op2_copy, &use_copy2);
 	} else {
-		zend_make_printable_zval(op1, &op1_copy, &use_copy1);
-		zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+		zend_make_string_zval(op1, &op1_copy, &use_copy1);
+		zend_make_string_zval(op2, &op2_copy, &use_copy2);
 	}
 
 	if (use_copy1) {
