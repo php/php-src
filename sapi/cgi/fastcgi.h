@@ -112,6 +112,7 @@ typedef struct _fcgi_request {
 } fcgi_request;
 
 int fcgi_init(void);
+void fcgi_shutdown(void);
 int fcgi_is_fastcgi(void);
 int fcgi_in_shutdown(void);
 int fcgi_listen(const char *path, int backlog);

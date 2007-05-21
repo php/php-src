@@ -1429,6 +1429,9 @@ consult the installation file that came with this distribution, or visit \n\
 			switch (c) {
 				case 'h':
 				case '?':
+#if PHP_FASTCGI
+					fcgi_shutdown();
+#endif
 					no_headers = 1;
 					php_output_startup();
 					php_output_activate(TSRMLS_C);
@@ -1823,6 +1826,7 @@ fastcgi_request_done:
 			}
 			/* end of fastcgi loop */
 		}
+		fcgi_shutdown();
 #endif
 
 		if (cgi_sapi_module.php_ini_path_override) {

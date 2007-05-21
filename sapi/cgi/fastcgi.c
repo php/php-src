@@ -255,6 +255,11 @@ int fcgi_is_fastcgi(void)
 	}
 }
 
+void fcgi_shutdown(void)
+{
+	is_fastcgi = 0;
+}
+
 #ifdef _WIN32
 /* Do some black magic with the NT security API.
  * We prepare a DACL (Discretionary Access Control List) so that
