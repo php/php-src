@@ -1369,6 +1369,7 @@ consult the installation file that came with this distribution, or visit \n\
 			switch (c) {
 				case 'h':
 				case '?':
+					fcgi_shutdown();
 					no_headers = 1;
 					php_output_tearup();
 					SG(headers_sent) = 1;
@@ -1735,6 +1736,7 @@ fastcgi_request_done:
 			}
 			/* end of fastcgi loop */
 		}
+		fcgi_shutdown();
 
 		if (cgi_sapi_module.php_ini_path_override) {
 			free(cgi_sapi_module.php_ini_path_override);

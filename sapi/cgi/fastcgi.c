@@ -177,6 +177,11 @@ int fcgi_in_shutdown(void)
 	return in_shutdown;
 }
 
+void fcgi_shutdown(void)
+{
+	is_fastcgi = 0;
+}
+
 int fcgi_init(void)
 {
 	if (!is_initialized) {
