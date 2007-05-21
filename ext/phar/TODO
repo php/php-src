@@ -54,7 +54,9 @@ Version 1.2.0
 Version 1.2.1
 
  X Add Phar::getAlias() [Marcus]
- X Made -a optional in pack subcommand of phar.phar [Marcus]
+ * Add Phar::setAlias()
+ X Make -a optional in pack subcommand of phar.phar [Marcus]
+ X Make Phar::loadPhar() and Phar::mapPhar() ignore extracted archives
 
 Version 1.3.0
 
