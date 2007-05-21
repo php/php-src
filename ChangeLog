@@ -1,3 +1,26 @@
+2007-05-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * .gdbinit:
+      - Add print_htptr, print_htstr
+
+    * run-tests.php:
+      - Update copyright
+
+    * run-tests.php:
+      - Make it executeable
+
+2007-05-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cgi/tests/009.phpt
+      sapi/cgi/tests/009.phpt:
+      
+      file 009.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      Fixed a possible crash when PATH_INFO is not provided but the path contains
+      path info information
+
 2007-05-19  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/zip/php_zip.c:
