@@ -37,7 +37,7 @@ class PharCommand extends CLICommand
 			'c' => array(
                 'typ'   => 'compalg',
                 'val'   => NULL,      
-                'inf'   => '<algo>   Compression algorithmus.', 
+                'inf'   => '<algo>   Compression algorithm.', 
                 'select' => array(
                     '0'    => 'No compression',
                     'none' => 'No compression',
@@ -70,6 +70,11 @@ class PharCommand extends CLICommand
             	'val' => NULL,
             	'inf' => '<index>  Subscription index to work on.',
             ),
+            'l' => array(
+            	'typ' => 'int',
+            	'val' => 0,
+            	'inf' => '<level>  Number of preceeding subdirectories to strip from file entries.',
+            ),
 			'm' => array(
                 'typ' => 'any',    
                 'val' => NULL,      
@@ -78,7 +83,8 @@ class PharCommand extends CLICommand
             'p' => array(
             	'typ' => 'file',
             	'val' => NULL,
-            	'inf' => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive).',
+            	'inf' => '<loader> Location of PHP_Archive class file. To find the file use the '
+            	                 .'following: \'pear list-files PHP_Archive|grep Archive.php\'.',
             ),
 			's' => array(
                 'typ' => 'file',   
@@ -130,65 +136,59 @@ class PharCommand extends CLICommand
 		return substr($haystack, -strlen($needle)) == $needle;
 	}
 
-	static function cli_arg_typ_pharnew($arg)
+	static function cli_arg_typ_pharnew($arg, $cfg, $key)
 	{
-		$arg = self::cli_arg_typ_filenew($arg);
+		$arg = self::cli_arg_typ_filenew($arg, $cfg, $key);
 		if (!Phar::isValidPharFilename($arg))
 		{
-			echo "Phar files must have file extension '.phar', '.phar.php', '.phar.bz2' or 'phar.gz'.\n";
-			exit(1);
+			self::error("Phar files must have file extension '.phar', '.phar.php', '.phar.bz2' or 'phar.gz'.\n");
 		}
 		return $arg;
 	}
 
-	static function cli_arg_typ_pharfile($arg)
+	static function cli_arg_typ_pharfile($arg, $cfg, $key)
 	{
 		try
 		{
-			$pharfile = self::cli_arg_typ_file($arg);
+			$pharfile = self::cli_arg_typ_file($arg, $cfg, $key);
 			if (!Phar::loadPhar($pharfile))
 			{
-				"Unable to open phar '$arg'\n";
-				exit(1);
+				self::error("Unable to open phar '$arg'\n");
 			}
 			return $pharfile;
 		}
 		catch(Exception $e)
 		{
-			echo "Exception while opening phar '$arg':\n";
-			echo $e->getMessage() . "\n";
-			exit(1);
+			self::error("Exception while opening phar '$arg':\n" . $e->getMessage() . "\n");
 		}
 	}
 
-	static function cli_arg_typ_pharurl($arg)
+	static function cli_arg_typ_pharurl($arg, $cfg, $key)
 	{
-		return 'phar://' . self::cli_arg_typ_pharfile($arg);
+		return 'phar://' . self::cli_arg_typ_pharfile($arg, $cfg, $key);
 	}
 
-	static function cli_arg_typ_phar($arg)
+	static function cli_arg_typ_phar($arg, $cfg, $key)
 	{
 		try
 		{
-			return new Phar(self::cli_arg_typ_pharfile($arg));
+			return new Phar(self::cli_arg_typ_pharfile($arg, $cfg, $key));
 		}
 		catch(Exception $e)
 		{
-			echo "Exception while opening phar '$argv':\n";
-			echo $e->getMessage() . "\n";
-			exit(1);
+			self::error("Exception while opening phar '$argv':\n" . $e->getMessage() . "\n");
 		}
 	}
 
-	static function cli_arg_typ_entry($arg)
+	static function cli_arg_typ_entry($arg, $cfg, $key)
 	{
 		// no further check atm, maybe check for no '/' at beginning
 		return $arg;
 	}
 
-	static function cli_arg_typ_compalg($arg, $cfg)
+	static function cli_arg_typ_compalg($arg, $cfg, $key)
 	{
-		$arg = self::cli_arg_typ_select($arg, $cfg);
+		$arg = self::cli_arg_typ_select($arg, $cfg, $key);
 		switch($arg)
 		{
 		case 'auto':
@@ -212,13 +212,14 @@ class PharCommand extends CLICommand
 	static function cli_cmd_inf_pack()
 	{
 		return "Pack files into a PHAR archive.\n"
-			.  "When using -s <stub>, then the stub file is being excluded from the list of input files/dirs."
+			.  "When using -s <stub>, then the stub file is being excluded from the list of input files/dirs.\n"
+			.  "To create an archive that contains PEAR class PHP_Archive then point -p argument to PHP/Archive.php.\n"
 			;
 	}
 
 	static function cli_cmd_arg_pack()
 	{
-		$args = self::phar_args('acFhipsx', 'pharnew');
+		$args = self::phar_args('acFhilpsx', 'pharnew');
 		$args[''] = array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories. If -i is in use then ONLY files and matching thegiven regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.');
 		return $args;
 	}
@@ -227,19 +228,18 @@ class PharCommand extends CLICommand
 	{
 		if (ini_get('phar.readonly'))
 		{
-			echo "Creating phar files is disabled by ini setting 'phar.readonly'.\n";
-			exit(1);
+			self::error("Creating phar files is disabled by ini setting 'phar.readonly'.\n");
 		}
 		if (!Phar::canWrite())
 		{
-			echo "Creating phar files is disabled, Phar::canWrite() returned false.\n";
-			exit(1);
+			self::error("Creating phar files is disabled, Phar::canWrite() returned false.\n");
 		}
 
 		$alias   = $this->args['a']['val'];
 		$archive = $this->args['f']['val'];
 		$hash    = $this->args['h']['val'];
 		$regex   = $this->args['i']['val'];
+		$level   = $this->args['l']['val'];
 		$loader  = $this->args['p']['val'];
 		$stub    = $this->args['s']['val'];
 		$invregex= $this->args['x']['val'];
@@ -275,13 +275,13 @@ class PharCommand extends CLICommand
 
 		if (!is_array($input))
 		{
-			$this->phar_add($phar, $input, $regex, $invregex, $stub);
+			$this->phar_add($phar, $level, $input, $regex, $invregex, $stub, NULL);
 		}
 		else
 		{
 			foreach($input as $i)
 			{
-				$this->phar_add($phar, $i, $regex, $invregex, $stub);
+				$this->phar_add($phar, $level, $i, $regex, $invregex, $stub, NULL);
 			}
 		}
 
@@ -309,8 +309,12 @@ class PharCommand extends CLICommand
 		exit(0);
 	}
 
-	static function phar_add(Phar $phar, $input, $regex, $invregex, SplFileInfo $stub)
+	static function phar_add(Phar $phar, $level, $input, $regex, $invregex, SplFileInfo $stub = NULL, $compress = NULL)
 	{
+		if (@is_file($input) && !is_dir($input))
+		{
+			return self::phar_add_file($phar, $level, $input, $input, $compress);
+		}
 		$dir   = new RecursiveDirectoryIterator($input);
 		$dir   = new RecursiveIteratorIterator($dir);
 
@@ -330,17 +334,37 @@ class PharCommand extends CLICommand
 			{
 				if (empty($stub) || $file->getRealPath() != $stub->getRealPath())
 				{
-					$f = $dir->getSubPathName();
-					echo "$f\n";
-					$phar[$f] = file_get_contents($file);
+					self::phar_add_file($phar, $level, $dir->getSubPathName(), $file, $compress);
 				}
 			}
 		}
 		catch(Excpetion $e)
 		{
-			echo "Unable to complete operation on file '$file'\n";
-			echo $e->getMessage() . "\n";
-			exit(1);
+			self::error("Unable to complete operation on file '$file'\n" . $e->getMessage() . "\n");
+		}
+	}
+
+	static function phar_add_file(Phar $phar, $level, $entry, $file, $compress)
+	{
+		$entry = str_replace('//', '/', $entry);
+		while($level-- > 0 && ($p = strpos($entry, '/')) !== false)
+		{
+			$entry = substr($entry, $p+1);
+		}
+		echo "$entry\n";
+		$phar[$entry] = file_get_contents($file);
+		switch($compress)
+		{
+		case 'gz':
+		case 'gzip':
+			$phar[$entry]->setCompressedGZ();
+			break;
+		case 'bz2':
+		case 'bzip2':
+			$phar[$entry]->setCompressedBZIP2();
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -419,8 +443,7 @@ class PharCommand extends CLICommand
 		{
 			if (count($dir) != 1)
 			{
-				echo "Only one target directory allowed.\n";
-				exit(1);
+				self::error("Only one target directory allowed.\n");
 			}
 			else
 			{
@@ -448,7 +471,7 @@ class PharCommand extends CLICommand
 			if (!@mkdir(dirname($target)))
 			{
 				echo "  ..unable to create dir\n";
-				exit(1);
+				self::error("Operation could not be completed\n");
 			}
 		}
 		echo "$sub";
@@ -460,6 +483,64 @@ class PharCommand extends CLICommand
 		{
 			echo " ...ok\n";
 		}
+	}
+
+	static function cli_cmd_inf_delete()
+	{
+		return "Delete entry from a PHAR package.";
+	}
+
+	static function cli_cmd_arg_delete()
+	{
+		return self::phar_args('FE', 'phar');
+	}
+
+	function cli_cmd_run_delete()
+	{
+		$phar  = $this->args['f']['val'];
+		$entry = $this->args['e']['val'];
+
+		$phar->startBuffering();
+		unset($phar[$entry]);
+		$phar->stopBuffering();
+	}
+
+	static function cli_cmd_inf_add()
+	{
+		return "Add entries to a PHAR package.";
+	}
+
+	static function cli_cmd_arg_add()
+	{
+		$args = self::phar_args('acFilx', 'phar');
+		$args[''] = array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories. If -i is in use then ONLY files and matching thegiven regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.');
+		return $args;
+	}
+
+	function cli_cmd_run_add()
+	{
+		$compress= $this->args['c']['val'];
+		$phar    = $this->args['f']['val'];
+		$regex   = $this->args['i']['val'];
+		$level   = $this->args['l']['val'];
+		$invregex= $this->args['x']['val'];
+		$input   = $this->args['']['val'];
+
+		$phar->startBuffering();
+
+		if (!is_array($input))
+		{
+			$this->phar_add($phar, $level, $input, $regex, $invregex, NULL, $compress);
+		}
+		else
+		{
+			foreach($input as $i)
+			{
+				$this->phar_add($phar, $level, $i, $regex, $invregex, NULL, $compress);
+			}
+		}
+		$phar->stopBuffering();
+		exit(0);
 	}
 
 	function cli_cmd_inf_stub_set()
@@ -475,7 +556,7 @@ class PharCommand extends CLICommand
 		return $args;
 	}
 	
-	function cli_cmd_run_stub_set($args)
+	function cli_cmd_run_stub_set()
 	{
 		$phar = $this->args['f']['val'];
 		$stub = $this->args['s']['val'];
@@ -496,7 +577,7 @@ class PharCommand extends CLICommand
 		return $args;
 	}
 
-	function cli_cmd_run_stub_get($args)
+	function cli_cmd_run_stub_get()
 	{
 		$phar = $this->args['f']['val'];
 		$stub = $this->args['s']['val'];
@@ -587,8 +668,7 @@ class PharCommand extends CLICommand
 
 	function cli_cmd_arg_meta_set()
 	{
-		$args = self::phar_args('FekM', 'phar');
-		return $args;
+		return self::phar_args('FekM', 'phar');
 	}
 
 	function cli_cmd_run_meta_set()
@@ -625,8 +705,7 @@ class PharCommand extends CLICommand
 			}
 			if (!is_array($old))
 			{
-				echo "Metadata is a flat value while an index operation was issued.";
-				exit(1);
+				self::error('Metadata is a flat value while an index operation was issued.');
 			}
 			$old[$index] = $meta;
 			$meta = $old;
@@ -658,8 +737,7 @@ class PharCommand extends CLICommand
 
 	function cli_cmd_arg_meta_get()
 	{
-		$args = self::phar_args('Fek', 'phar');
-		return $args;
+		return self::phar_args('Fek', 'phar');
 	}
 
 	function cli_cmd_run_meta_get()
@@ -776,7 +854,7 @@ class PharCommand extends CLICommand
 		return self::phar_args('Fk', 'phar');		
 	}
 
-	function cli_cmd_run_info($args)
+	function cli_cmd_run_info()
 	{
 		$phar  = $this->args['f']['val'];
 		$index = $this->args['k']['val'];
@@ -843,15 +921,14 @@ class PharCommand extends CLICommand
 		$infos['Uncompressed-size'] = $usize;
 		$infos['Compressed-size'] = $csize;
 		$infos['Compression-ratio'] = sprintf('%.3g%%', ($csize * 100) / $usize);
-		$infos['Metadata-global'] = $phar->hasMetadata();
+		$infos['Metadata-global'] = $phar->hasMetadata()*1;
 		$infos['Metadata-files'] = $mcount;
 
 		if (isset($index))
 		{
 			if (!isset($infos[$index]))
 			{
-				echo "Requested value does not exist.";
-				exit(1);
+				self::error("Requested value '$index' does not exist.\n");
 			}
 			echo $infos[$index];
 			exit(0);
