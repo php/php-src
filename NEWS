@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Optimized out a couple of per-request syscalls (Rasmus)
 - Optimized digest generation in md5() and sha1() functions. (Ilia)
 - Upgraded SQLite 3 to version 3.3.16 (Ilia)
+- Added a 4th parameter flag to htmlspecialchars() and htmlentities() that 
+  makes the function not encode existing html entities. (Ilia)
 - Added PDO::FETCH_KEY_PAIR mode that will fetch a 2 column result set into 
   an associated array. (Ilia)
 - Added function mysql_set_charset(). Allows connection encoding to be 
