@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   makes the function not encode existing html entities. (Ilia)
 - Added PDO::FETCH_KEY_PAIR mode that will fetch a 2 column result set into 
   an associated array. (Ilia)
+- Added CURLOPT_TIMEOUT_MS and CURLOPT_CONNECTTIMEOUT_MS cURL constants. (Sara)
 - Added --ini switch to CLI that prints out configuration file names. (Marcus)
 - Added function mysql_set_charset(). Allows connection encoding to be 
   altered at run time. (Scott)
