@@ -65,7 +65,7 @@ article::__set_state(array(
    'lastchange' => '%s',
 ))
 
-Notice: sybase_fetch_object(): Sybase:  Class *** has not been declared in %s/test_fetch_object.php on line %d
+Notice: sybase_fetch_object(): Sybase:  Class *** has not been declared in %stest_fetch_object.php on line %d
 stdClass::__set_state(array(
    'id' => 1,
    'caption' => 'Hello',
