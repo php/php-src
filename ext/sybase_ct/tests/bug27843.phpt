@@ -15,7 +15,7 @@ Sybase-CT bug #27843 (notices when query is a stored procedure)
 
   // Check if stored procedure already exists
   $sp_name= 'phpt_bug27843';
-  var_dump(sybase_select_db('tempdb', $db));
+  var_dump(sybase_select_db(TEMPDB, $db));
   if (!sybase_select_single($db, 'select object_id("'.$sp_name.'")')) {
     echo "Stored procedure {$sp_name} not found, creating\n";
     var_dump(sybase_query('

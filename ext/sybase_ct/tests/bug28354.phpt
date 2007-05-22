@@ -17,7 +17,7 @@ Sybase-CT bug #28354 (sybase_free_result crash)
 
   // Check if stored procedure already exists
   $sp_name= 'phpt_bug28354';
-  var_dump(sybase_select_db('tempdb', $db));
+  var_dump(sybase_select_db(TEMPDB, $db));
   if (!sybase_select_single($db, 'select object_id("'.$sp_name.'")')) {
     echo "Stored procedure {$sp_name} not found, creating\n";
     var_dump(sybase_query('
