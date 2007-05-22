@@ -1078,12 +1078,15 @@ empty_source:
 }
 /* }}} */
 
-
+PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
+{
+	return php_escape_html_entities_ex(old, oldlen, newlen, all, quote_style, hint_charset, 1 TSRMLS_CC);
+}
 
 
 /* {{{ php_escape_html_entities
  */
-PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
+PHPAPI char *php_escape_html_entities_ex(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset, zend_bool double_encode TSRMLS_DC)
 {
 	int i, j, maxlen, len;
 	char *replaced;
@@ -1145,8 +1148,34 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 			int is_basic = 0;
 
 			if (this_char == '&') {
-				memcpy(replaced + len, "&amp;", sizeof("&amp;") - 1);
-				len += sizeof("&amp;") - 1;
+				if (double_encode) {
+encode_amp:
+					memcpy(replaced + len, "&amp;", sizeof("&amp;") - 1);
+					len += sizeof("&amp;") - 1;
+				} else {
+					char *e = memchr(old + i, ';', len - i);
+					char *s = old + i + 1;
+
+					if (!e || (e - s) > 10) { /* minor optimization to avoid "entities" over 10 chars in length */
+						goto encode_amp;
+					} else {
+						if (*s == '#') { /* numeric entities */
+							s++;
+							while (s < e) {
+								if (!isdigit(*s++)) {
+									goto encode_amp;
+								}
+							}
+						} else { /* text entities */
+							while (s < e) {
+								if (!isalnum(*s++)) {
+									goto encode_amp;
+								}
+							}
+						}
+						replaced[len++] = '&';
+					}
+				}
 				is_basic = 1;
 			} else {
 				for (j = 0; basic_entities[j].charcode != 0; j++) {
@@ -1193,12 +1222,13 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	int len;
 	long quote_style = ENT_COMPAT;
 	char *replaced;
+	zend_bool double_encode = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len, &quote_style, &hint_charset, &hint_charset_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lsb", &str, &str_len, &quote_style, &hint_charset, &hint_charset_len, &double_encode) == FAILURE) {
 		return;
 	}
 
-	replaced = php_escape_html_entities(str, str_len, &len, all, quote_style, hint_charset TSRMLS_CC);
+	replaced = php_escape_html_entities_ex(str, str_len, &len, all, quote_style, hint_charset, double_encode TSRMLS_CC);
 	RETVAL_STRINGL(replaced, len, 0);
 }
 /* }}} */
