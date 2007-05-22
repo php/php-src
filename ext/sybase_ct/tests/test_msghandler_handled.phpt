@@ -65,6 +65,5 @@ Cannot handle message #249
 
 Warning: sybase_query(): Sybase:  Server message:  Syntax error during explicit conversion of VARCHAR value 'notadate' to a DATETIME field.
  (severity 16, procedure N/A) in %s on line %d
-<<< Return: resource
-array(0) {
-}
+<<< Return: boolean
+bool(false)
