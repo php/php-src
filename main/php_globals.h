@@ -141,6 +141,7 @@ struct _php_core_globals {
 	zend_bool always_populate_raw_post_data;
 	
 	long serialize_precision;
+	long max_input_nesting_level;
 };
 
 

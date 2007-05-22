@@ -338,6 +338,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("upload_max_filesize",	"2M",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateInt,			upload_max_filesize,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("post_max_size",			"8M",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateInt,			post_max_size,			sapi_globals_struct,sapi_globals)
 	STD_PHP_INI_ENTRY("upload_tmp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	upload_tmp_dir,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("max_input_nesting_level", "500",      PHP_INI_SYSTEM|PHP_INI_PERDIR,      OnUpdateLongGEZero, max_input_nesting_level,            php_core_globals,   core_globals)
 
 	STD_PHP_INI_ENTRY("user_dir",				NULL,		PHP_INI_SYSTEM,		OnUpdateString,			user_dir,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("variables_order",		NULL,		PHP_INI_ALL,		OnUpdateStringUnempty,	variables_order,		php_core_globals,	core_globals)
