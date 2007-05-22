@@ -8,6 +8,7 @@
   define('HOST',     '****');
   define('USER',     '****');
   define('PASSWORD', '****');
+  define('TEMPDB',   'tempdb');
 
   // {{{ bool sybase_msg_handler(int msgnumber, int severity, int state, int line, string text)
   //     Handles server messages
