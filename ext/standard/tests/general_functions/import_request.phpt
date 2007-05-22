@@ -37,7 +37,7 @@ NULL
 
 Notice: import_request_variables(): No prefix specified - possible security hazard in %s on line %d
 
-Warning: import_request_variables(): Attempted GLOBALS variable overwrite. in %s on line %d
+Warning: import_request_variables(): Attempted GLOBALS variable overwrite in %s on line %d
 
 Warning: import_request_variables(): Numeric key detected - possible security hazard. in %s on line %d
 NULL
@@ -50,13 +50,11 @@ NULL
 NULL
 
 Notice: Undefined variable: g_ap in %s on line %d
-
-Notice: Undefined variable: g_1 in %s on line %d
 string(1) "1"
 string(3) "heh"
 string(1) "3"
 NULL
-NULL
+string(2) "hm"
 NULL
 string(1) "1"
 string(3) "heh"
