@@ -6261,51 +6261,25 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 	prefix = va_arg(args, char *);
 	prefix_len = va_arg(args, uint);
 
-	if (!prefix_len) {
-		if (!hash_key->nKeyLength) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric key detected - possible security hazard.");
-			return 0;
-		} else if (!strcmp(hash_key->arKey, "GLOBALS")) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted GLOBALS variable overwrite.");
-			return 0; 
-		} else if (*hash_key->arKey == '_' && 
-				(
-					!strcmp(hash_key->arKey, "_GET") || 
-					!strcmp(hash_key->arKey, "_POST") || 
-					!strcmp(hash_key->arKey, "_COOKIE") || 
-					!strcmp(hash_key->arKey, "_ENV") || 
-					!strcmp(hash_key->arKey, "_SERVER") || 
-					!strcmp(hash_key->arKey, "_SESSION") || 
-					!strcmp(hash_key->arKey, "_FILES") || 
-					!strcmp(hash_key->arKey, "_REQUEST")
-				)
-			) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted super-global (%s) variable overwrite.", hash_key->arKey);
-			return 0; 	
-		} else if (*hash_key->arKey == 'H' && 
-				(
-					!strcmp(hash_key->arKey, "HTTP_POST_VARS") || 
-					!strcmp(hash_key->arKey, "HTTP_GET_VARS") || 
-					!strcmp(hash_key->arKey, "HTTP_COOKIE_VARS") || 
-					!strcmp(hash_key->arKey, "HTTP_ENV_VARS") || 
-					!strcmp(hash_key->arKey, "HTTP_SERVER_VARS") || 
-					!strcmp(hash_key->arKey, "HTTP_RAW_POST_DATA") || 
-					!strcmp(hash_key->arKey, "HTTP_POST_FILES")
-				)
-			) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted long input array (%s) overwrite.", hash_key->arKey);
-			return 0; 	
-		}
+	if (!prefix_len && !hash_key->nKeyLength) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric key detected - possible security hazard.");
+		return 0;
 	}
 
 	if (hash_key->nKeyLength) {
 		new_key_len = prefix_len + hash_key->nKeyLength;
-		new_key = (char *) emalloc(new_key_len);
+		new_key = (char *) emalloc(new_key_len); /* +1 comes from nKeyLength */
 
 		memcpy(new_key, prefix, prefix_len);
 		memcpy(new_key+prefix_len, hash_key->arKey, hash_key->nKeyLength);
 	} else {
 		new_key_len = spprintf(&new_key, 0, "%s%ld", prefix, hash_key->h);
+		new_key_len++;
+	}
+
+	if (php_varname_check(new_key, new_key_len, 0 TSRMLS_CC) == FAILURE) {
+		efree(new_key);
+		return 0;
 	}
 
 	zend_delete_global_variable(new_key, new_key_len-1 TSRMLS_CC);
