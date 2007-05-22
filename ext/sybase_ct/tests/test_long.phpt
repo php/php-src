@@ -15,7 +15,7 @@ Sybase-CT select LONG_MAX / LONG_MIN
   define('LONG_MIN', -LONG_MAX - 1);
 
   $db= sybase_connect_ex();
-  var_dump(sybase_select_db('tempdb', $db));
+  var_dump(sybase_select_db(TEMPDB, $db));
   
   // Create table and insert some values
   var_dump(sybase_query('create table test_long (value numeric(20, 0))'));
