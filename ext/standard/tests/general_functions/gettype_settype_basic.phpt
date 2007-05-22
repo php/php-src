@@ -1,5 +1,7 @@
 --TEST--
 Test gettype() & settype() functions : basic functionalities
+--INI--
+precision=14
 --FILE--
 <?php
 /* Prototype: string gettype ( mixed $var );
