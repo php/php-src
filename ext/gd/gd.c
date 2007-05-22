@@ -2563,6 +2563,14 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 			}
 			(*func_p)(im, fp);
 			break;
+#ifdef HAVE_GD_GD2
+		case PHP_GDIMG_TYPE_GD2:
+			if (quality == -1) {
+				quality = 128;
+			}
+			(*func_p)(im, fp, quality, type);
+			break;
+#endif
 		default:
 			if (quality == -1) {
 				quality = 128;
