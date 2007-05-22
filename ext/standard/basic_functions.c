@@ -1665,6 +1665,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, quote_style)
 	ZEND_ARG_INFO(0, charset)
+	ZEND_ARG_INFO(0, double_encode)
 ZEND_END_ARG_INFO()
 
 static
@@ -1685,6 +1686,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlentities, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, quote_style)
 	ZEND_ARG_INFO(0, charset)
+	ZEND_ARG_INFO(0, double_encode)
 ZEND_END_ARG_INFO()
 
 static
