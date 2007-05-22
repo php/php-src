@@ -68,4 +68,101 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hash);
 	
 PHPAPI zend_class_entry *php_create_empty_class(char *class_name, int len);
 
+static inline int php_varname_check_string(char * name, int name_len, zend_bool silent TSRMLS_DC) /* {{{ */
+{
+	if (name_len == sizeof("GLOBALS")-1 && !memcmp(name, "GLOBALS", sizeof("GLOBALS")-1)) {
+		if (!silent) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted GLOBALS variable overwrite");
+		}
+		return FAILURE;
+	} else if (name[0] == '_' &&
+				(
+				 (name_len == sizeof("_GET")-1 && !memcmp(name, "_GET", sizeof("_GET"))) ||
+				 (name_len == sizeof("_POST")-1 && !memcmp(name, "_POST", sizeof("_POST"))) ||
+				 (name_len == sizeof("_COOKIE")-1 && !memcmp(name, "_COOKIE", sizeof("_COOKIE"))) ||
+				 (name_len == sizeof("_ENV")-1 && !memcmp(name, "_ENV", sizeof("_ENV"))) ||
+				 (name_len == sizeof("_SERVER")-1 && !memcmp(name, "_SERVER", sizeof("_SERVER"))) ||
+				 (name_len == sizeof("_SESSION")-1 && !memcmp(name, "_SESSION", sizeof("_SESSION"))) ||
+				 (name_len == sizeof("_FILES")-1 && !memcmp(name, "_FILES", sizeof("_FILES"))) ||
+				 (name_len == sizeof("_REQUEST")-1 && !memcmp(name, "_REQUEST", sizeof("_REQUEST")))
+				)
+		   ) {
+			if (!silent) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted super-global (%s) variable overwrite", name);
+			}
+			return FAILURE;
+	} else if (name[0] == 'H' &&
+			(
+			 (name_len == sizeof("HTTP_POST_VARS")-1 && !memcmp(name, "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"))) ||
+			 (name_len == sizeof("HTTP_GET_VARS")-1 && !memcmp(name, "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"))) ||
+			 (name_len == sizeof("HTTP_COOKIE_VARS")-1 && !memcmp(name, "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"))) ||
+			 (name_len == sizeof("HTTP_ENV_VARS")-1 && !memcmp(name, "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"))) ||
+			 (name_len == sizeof("HTTP_SESSION_VARS")-1 && !memcmp(name, "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"))) ||
+			 (name_len == sizeof("HTTP_SERVER_VARS")-1 && !memcmp(name, "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"))) ||
+			 (name_len == sizeof("HTTP_RAW_POST_DATA")-1 && !memcmp(name, "HTTP_RAW_POST_DATA", sizeof("HTTP_RAW_POST_DATA"))) ||
+			 (name_len == sizeof("HTTP_POST_VARS")-1 && !memcmp(name, "HTTP_POST_FILES", sizeof("HTTP_POST_FILES")))
+			)
+			) {
+		if (!silent) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted long input array (%s) overwrite", name);
+		}
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+static inline int php_varname_check_unicode(UChar *name, int name_len, zend_bool silent TSRMLS_DC) /* {{{ */
+{
+	if (name_len == sizeof("GLOBALS")-1 && !zend_cmp_unicode_and_literal(name, name_len, "GLOBALS", sizeof("GLOBALS")-1)) {
+		if (!silent) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted GLOBALS variable overwrite");
+		}
+		return FAILURE;
+	} else if (name[0] == 0x5f /* '_' */ &&
+			(
+			 (name_len == sizeof("_GET")-1 && !zend_cmp_unicode_and_literal(name, name_len, "_GET", sizeof("_GET")-1)) ||
+			 (name_len == sizeof("_POST")-1 && !zend_cmp_unicode_and_literal(name, name_len, "_POST", sizeof("_POST")-1)) ||
+			 (name_len == sizeof("_COOKIE")-1 && !zend_cmp_unicode_and_literal(name, name_len, "_COOKIE", sizeof("_COOKIE")-1)) ||
+			 (name_len == sizeof("_ENV")-1 && !zend_cmp_unicode_and_literal(name, name_len, "_ENV", sizeof("_ENV")-1)) ||
+			 (name_len == sizeof("_SERVER")-1 && !zend_cmp_unicode_and_literal(name, name_len, "_SERVER", sizeof("_SERVER")-1)) ||
+			 (name_len == sizeof("_SESSION")-1 && !zend_cmp_unicode_and_literal(name, name_len, "_SESSION", sizeof("_SESSION")-1)) ||
+			 (name_len == sizeof("_FILES")-1 && !zend_cmp_unicode_and_literal(name, name_len, "_FILES", sizeof("_FILES")-1)) ||
+			 (name_len == sizeof("_REQUEST")-1 && !zend_cmp_unicode_and_literal(name, name_len, "_REQUEST", sizeof("_REQUEST")-1))
+			)
+			) {
+		if (!silent) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted super-global (%r) variable overwrite", name);
+		}
+		return FAILURE;
+	} else if (name[0] == 0x48 /* 'H' */ &&
+			(
+			 (name_len == sizeof("HTTP_POST_VARS")-1 && !zend_cmp_unicode_and_literal(name, name_len, "HTTP_POST_VARS", sizeof("HTTP_POST_VARS")-1)) ||
+			 (name_len == sizeof("HTTP_GET_VARS")-1 && !zend_cmp_unicode_and_literal(name, name_len, "HTTP_GET_VARS", sizeof("HTTP_GET_VARS")-1)) ||
+			 (name_len == sizeof("HTTP_COOKIE_VARS")-1 && !zend_cmp_unicode_and_literal(name, name_len, "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS")-1)) ||
+			 (name_len == sizeof("HTTP_ENV_VARS")-1 && !zend_cmp_unicode_and_literal(name, name_len, "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS")-1)) ||
+			 (name_len == sizeof("HTTP_SESSION_VARS")-1 && !zend_cmp_unicode_and_literal(name, name_len, "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS")-1)) ||
+			 (name_len == sizeof("HTTP_SERVER_VARS")-1 && !zend_cmp_unicode_and_literal(name, name_len, "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS")-1)) ||
+			 (name_len == sizeof("HTTP_RAW_POST_DATA")-1 && !zend_cmp_unicode_and_literal(name, name_len, "HTTP_RAW_POST_DATA", sizeof("HTTP_RAW_POST_DATA")-1)) ||
+			 (name_len == sizeof("HTTP_POST_FILES")-1 && !zend_cmp_unicode_and_literal(name, name_len, "HTTP_POST_FILES", sizeof("HTTP_POST_FILES")-1))
+			)
+			) {
+		if (!silent) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted long input array (%r) overwrite", name);
+		}
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+static inline int php_varname_check(zend_uchar type, zstr name, int name_len, zend_bool silent TSRMLS_DC) /* {{{ */
+{
+	if (type == IS_UNICODE) {
+		return php_varname_check_unicode(name.u, name_len, silent TSRMLS_CC);
+	}
+	return php_varname_check_string(name.s, name_len, silent TSRMLS_CC);
+}
+/* }}} */
+
 #endif /* PHP_VAR_H */

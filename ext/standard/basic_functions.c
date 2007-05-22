@@ -6321,16 +6321,10 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 	prefix = va_arg(args, zval *);
 	prefix_len = Z_UNILEN_P(prefix);
 
-	if (!prefix_len) {
-		if (!hash_key->nKeyLength) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric key detected - possible security hazard");
-			return 0;
-		} else if (hash_key->nKeyLength == sizeof("GLOBALS") &&
-		           ZEND_U_EQUAL(hash_key->type, hash_key->arKey, hash_key->nKeyLength-1, "GLOBALS", sizeof("GLOBALS")-1)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted GLOBALS variable overwrite");
-			return 0; 
-		}
-	}
+	if (!prefix_len && !hash_key->nKeyLength) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric key detected - possible security hazard");
+		return 0;
+	} 
 
 	if (hash_key->nKeyLength) {
 		php_prefix_varname(&new_key, prefix, hash_key->arKey, hash_key->nKeyLength-1, hash_key->type, 0 TSRMLS_CC);
@@ -6340,6 +6334,11 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 		convert_to_text(&num);
 		php_prefix_varname(&new_key, prefix, Z_UNIVAL(num), Z_UNILEN(num), Z_TYPE(num), 0 TSRMLS_CC);
 		zval_dtor(&num);
+	}
+
+	if (php_varname_check(Z_TYPE(new_key), Z_UNIVAL(new_key), Z_UNILEN(new_key), 0 TSRMLS_CC) == FAILURE) {
+		zval_dtor(&new_key);
+		return 0;
 	}
 
 	zend_u_delete_global_variable(Z_TYPE(new_key), Z_UNIVAL(new_key), Z_UNILEN(new_key) TSRMLS_CC);
