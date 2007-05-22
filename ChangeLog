@@ -1,3 +1,71 @@
+2007-05-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Fixed typos
+
+2007-05-21  Michael Wallner  <mike@iworks.at>
+
+    * ext/curl/config.m4:
+      MFB: first check the SSL lib string in libcurl and then the header
+
+    * (PHP_5_2)
+      ext/curl/config.m4:
+      - first check the SSL lib string in libcurl and then the header
+
+2007-05-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_sdl.c
+      ext/soap/php_sdl.c
+      ext/soap/tests/bugs/bug41337_2.phpt
+      ext/soap/tests/bugs/bug41337_2.wsdl
+      ext/soap/tests/bugs/bug41337_2_1.wsdl:
+      Fixed bug #41337 WSDL parsing doesn't ignore non soap bindings
+
+    * ext/soap/tests/bugs/bug41337_2.phpt
+      ext/soap/tests/bugs/bug41337_2.phpt
+      ext/soap/tests/bugs/bug41337_2.wsdl
+      ext/soap/tests/bugs/bug41337_2.wsdl
+      ext/soap/tests/bugs/bug41337_2_1.wsdl
+      ext/soap/tests/bugs/bug41337_2_1.wsdl:
+      
+      file bug41337_2.phpt was initially added on branch PHP_5_2.
+
+2007-05-21  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/dba/config.m4:
+      MFH: fix #41455 (ext/dba/config.m4 pollutes global $LIBS and $LDFLAGS)
+
+    * ext/dba/config.m4:
+      fix #41455 (ext/dba/config.m4 pollutes global $LIBS and $LDFLAGS)
+
+2007-05-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h
+      sapi/cgi/fastcgi.h:
+      Fixed crash on "php -b 1234 -unknown-option"
+
+    * configure.in
+      configure.in
+      sapi/cgi/config9.m4:
+      libfcgi cleanup (Andrei Nigmatulin)
+
+2007-05-21  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      use zend_make_string_zval()
+      thanks Matt!
+
+    * ZendEngine2/zend_execute_API.c:
+      check if fci->object_pp points to NULL
+
 2007-05-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * .gdbinit:
