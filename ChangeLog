@@ -1,3 +1,231 @@
+2007-05-22  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      new curl constants
+
+2007-05-22  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_4)
+      main/main.c
+      main/php_globals.h
+      main/php_variables.c:
+      fix for  CVE-2007-1285 - crash on deep input variable nesting
+
+2007-05-22  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/general_functions/gettype_settype_basic.phpt
+      ext/standard/tests/general_functions/import_request.phpt:
+      fix test
+
+2007-05-22  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Add entry about --ini
+
+2007-05-22  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/general_functions/gettype_settype_basic.phpt
+      ext/standard/tests/general_functions/gettype_settype_error.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation1.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation2.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation3.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation4.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation5.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation6.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation7.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation8.phpt:
+      New version of gettype_settype_basic.phpt, 
+      gettype_settype_variation3.phpt, gettype_settype_variation7.phpt,
+      gettype_settype_error.phpt, gettype_settype_variation4.phpt, 
+      gettype_settype_variation8.phpt, gettype_settype_variation1.phpt, 
+      gettype_settype_variation5.phpt, gettype_settype_variation2.phpt, 
+      gettype_settype_variation6.phpt
+
+    * ext/standard/tests/strings/basename_basic.phpt
+      ext/standard/tests/strings/basename_error.phpt
+      ext/standard/tests/strings/basename_variation.phpt:
+      New version of basename_basic.phpt  basename_error.phpt 
+      basename_variation.phpt
+
+    * ext/standard/tests/general_functions/gettype_settype_error.phpt
+      ext/standard/tests/general_functions/gettype_settype_error.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation1.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation1.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation5.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation5.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation8.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation8.phpt:
+      
+      file gettype_settype_error.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/general_functions/gettype_settype_basic.phpt
+      ext/standard/tests/general_functions/gettype_settype_basic.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation2.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation2.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation3.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation3.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation4.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation4.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation6.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation6.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation7.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation7.phpt:
+      
+      file gettype_settype_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/basename_basic.phpt
+      ext/standard/tests/strings/basename_basic.phpt
+      ext/standard/tests/strings/basename_error.phpt
+      ext/standard/tests/strings/basename_error.phpt
+      ext/standard/tests/strings/basename_variation.phpt
+      ext/standard/tests/strings/basename_variation.phpt:
+      
+      file basename_basic.phpt was initially added on branch PHP_5_2.
+
+2007-05-22  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/credits.c:
+      Philip, the new phpdoc editor \o/
+
+    * (PHP_5_2)
+      ext/standard/credits.c:
+      Ladies and gentelmens,
+      I bring you our new documentation editor....
+      Philip Olson!
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c
+      ext/standard/html.c:
+      Update proto&arginfo for double_encode in htmlspecialchars()&htmlentities()
+
+2007-05-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - add cve ref
+
+2007-05-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c
+      ext/standard/php_var.h
+      ext/standard/tests/general_functions/import_request1.phpt
+      ext/standard/tests/general_functions/import_request2.phpt
+      ext/standard/tests/general_functions/import_request3.phpt:
+      MFH: improve variable name checks
+      add more tests
+
+    * ext/standard/tests/general_functions/import_request1.phpt
+      ext/standard/tests/general_functions/import_request1.phpt
+      ext/standard/tests/general_functions/import_request2.phpt
+      ext/standard/tests/general_functions/import_request2.phpt
+      ext/standard/tests/general_functions/import_request3.phpt
+      ext/standard/tests/general_functions/import_request3.phpt:
+      
+      improve variable name checks
+      add more tests
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_var.h:
+      improve variable name checks
+      add more tests
+
+2007-05-22  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+      MFB: max_input_nesting_level
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended:
+      Add max_input_nesting_level
+
+2007-05-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/html.c
+      ext/standard/html.h
+      ext/standard/tests/strings/htmlentities18.phpt
+      ext/standard/tests/strings/htmlentities18.phpt:
+      
+      [DOC] Added a 4th parameter flag to htmlspecialchars() and htmlentities()
+      that makes the function not encode existing html entities. The feature is
+      disabled by default and can be activated by passing FALSE as the 4th param
+
+2007-05-22  Timm Friebe  <php@thekid.de>
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/test_long.phpt:
+      - Changed hardcoded "tempdb" database name to a constant
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/test_msghandler_handled.phpt:
+      - Fixed expectancy in for SQL query <select convert(datetime, "notadate")>
+        This query should return bool(false) and not a resource() because
+        the above is a syntax error
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/test.inc:
+      - Added constant TEMPDB, defaulting to "tempdb"
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/bug22403.phpt
+      ext/sybase_ct/tests/bug27843.phpt
+      ext/sybase_ct/tests/bug28354.phpt:
+      - Changed hardcoded "tempdb" database name to a constant
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/bug26407.phpt
+      ext/sybase_ct/tests/test_fetch_object.phpt
+      ext/sybase_ct/tests/test_msghandler.phpt
+      ext/sybase_ct/tests/test_unbuffered_query.phpt:
+      - Fixed tests on Windows
+
+2007-05-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/gd.c
+      ext/gd/tests/bug41442.phpt:
+      MFH: fix #41442 (imagegd2() under output control)
+
+    * ext/gd/tests/bug39780.phpt
+      ext/gd/tests/createfromwbmp2.phpt
+      ext/standard/tests/general_functions/gettype_settype_basic.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation1.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation1.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation2.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation2.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation3.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation3.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation4.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation4.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation5.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation5.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation6.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation6.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation7.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation7.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation8.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation8.phpt:
+      fix tests
+
+    * ext/gd/gd.c
+      ext/gd/tests/bug41442.phpt
+      ext/gd/tests/bug41442.phpt:
+      fix #41442 (imagegd2() under output control)
+
+2007-05-22  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      ext/curl/interface.c:
+      MFH(r-1.112) Add CURLOPT_TIMEOUT_MS and CURLOPT_CONNECTTIMEOUT_MS option
+      constants
+
 2007-05-21  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
