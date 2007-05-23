@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, Version 4.4.8
+- Limit nesting level of input variables with max_input_nesting_level
+  as fix for MOPB-03-2007. (Stas)
 - Fixed bug #38798 (OpenSSL init corrected in php5 but not in php4). (Tony)
 	
 04 May 2007, Version 4.4.7
