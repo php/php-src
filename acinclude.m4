@@ -2050,8 +2050,9 @@ dnl it should be removed once we drop support of autoconf 2.13 (if ever)
   
   case $php_cv_flex_version in
     ""|invalid[)]
-      flex_msg="flex versions supported for regeneration of the Zend/PHP parsers: $flex_version_list (found: $flex_version)."
-      AC_MSG_ERROR([$flex_msg])
+      flex_msg="flex versions supported for regeneration of the Zend/PHP parsers: $flex_version_list  (found: $flex_version)."
+      AC_MSG_WARN([$flex_msg])
+      LEX="exit 0;"
       ;;
   esac
   PHP_SUBST(LEX)
