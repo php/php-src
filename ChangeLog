@@ -1,3 +1,27 @@
+2007-05-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.PARAMETER_PARSING_API:
+      - Fix f
+
+2007-05-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/math.c:
+      
+      Simplify code
+
+2007-05-23  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_4_4)
+      ext/standard/credits.c:
+      Credit Philip as the phpdoc editor
+
+    * (PHP_4_4)
+      NEWS
+      php.ini-dist
+      php.ini-recommended:
+      note on max_input_nesting_level
+
 2007-05-22  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_5_2)
