@@ -1648,14 +1648,17 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 	return ']';
 }
 
-<ST_VAR_OFFSET>{TOKENS}|[{}] {
+<ST_VAR_OFFSET>{TOKENS}|[{}"`] {
 	/* Only '[' can be valid, but returning other tokens will allow a more explicit parse error */
 	return yytext[0];
 }
 
-<ST_VAR_OFFSET>[ \n\r\t'"`\\#] {
+<ST_VAR_OFFSET>[ \n\r\t\\'#] {
+	/* Invalid rule to return a more explicit parse error with proper line number */
 	yyless(0);
 	yy_pop_state(TSRMLS_C);
+	ZVAL_EMPTY_STRING(zendlval); /* Empty since it won't be used */
+	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{LABEL} {
@@ -1935,8 +1938,8 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 		zend_scan_escape_string(zendlval, yytext, len, 0 TSRMLS_CC);
 		return T_ENCAPSED_AND_WHITESPACE;
 	} else {
-		/* Go back to end of label, so there's something to match again in case
-		 * there's a variable at the beginning of the next line */
+		/* Go back to end of label, so the next match works correctly in case of
+		 * a variable or another label at the beginning of the next line */
 		yyless(yyleng - 1);
 		yymore();
 	}
