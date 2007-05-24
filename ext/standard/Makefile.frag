@@ -7,4 +7,4 @@ $(srcdir)/url_scanner_ex.c: $(srcdir)/url_scanner_ex.re
 
 $(builddir)/info.lo: $(builddir)/../../main/build-defs.h
 
-$(builddir)/basic_functions.lo: Zend/zend_language_parser.h
+$(builddir)/basic_functions.lo: $(top_srcdir)/Zend/zend_language_parser.h
