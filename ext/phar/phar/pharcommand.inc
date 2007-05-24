@@ -1145,15 +1145,6 @@ class PharCommand extends CLICommand
                "If something was deleted the return value is 0 otherwise it is 1.";
     }
     // }}}
-    // {{{ public function cli_cmd_inf_meta_del
-    function cli_cmd_inf_meta_del()     
-    {   
-        return "Delete meta information of a PHAR entry or a PHAR package.\n"   
-            . "If -k is given then the metadata is expected to be an array "   
-            . "and the given index is being deleted.\n"    
-            . "If something was deleted the return value is 0 otherwise it is 1.";                  
-    }
-    // }}}
     // {{{ public function cli_cmd_arg_meta_del
     /**
      * CliC ommand Arg Metadelete
