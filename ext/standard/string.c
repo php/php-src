@@ -4735,6 +4735,7 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 	php_charmask((unsigned char*)what, wlength, flags TSRMLS_CC);
 
 	for (source = str, end = source + length, target = new_str; source < end; source++) {
+		c = *source;
 		if (flags[(unsigned char)c]) {
 			if ((unsigned char) c < 32 || (unsigned char) c > 126) {
 				*target++ = '\\';
