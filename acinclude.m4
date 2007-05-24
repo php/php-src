@@ -2019,7 +2019,7 @@ dnl we only support certain flex versions
   flex_version_list="2.5.4"
    
   AC_PROG_LEX
-  if test -n "$LEX"; then
+  if test "$LEX" = "flex"; then
 dnl AC_DECL_YYTEXT is obsolete since autoconf 2.50 and merged into AC_PROG_LEX
 dnl this is what causes that annoying "PHP_PROG_LEX is expanded from" warning with autoconf 2.50+
 dnl it should be removed once we drop support of autoconf 2.13 (if ever)
@@ -2034,7 +2034,7 @@ dnl it should be removed once we drop support of autoconf 2.13 (if ever)
     LEX_CFLAGS="-DYY_USE_CONST"
   fi
 
-  if test "$LEX"; then
+  if test "$LEX" = "flex"; then
     AC_CACHE_CHECK([for flex version], php_cv_flex_version, [
       flex_version=`$LEX -V -v --version 2>/dev/null | $SED -e 's/^.* //'`
       php_cv_flex_version=invalid
