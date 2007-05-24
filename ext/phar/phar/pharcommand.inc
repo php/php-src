@@ -58,12 +58,12 @@ class PharCommand extends CLICommand
     {
         $phar_args = array(
             'a' => array(
-                'type' => 'alias',
+                'typ' => 'alias',
                 'val'  => NULL,
                 'inf'  => '<alias>  Provide an alias name for the phar file.'
             ),
             'c' => array(
-                'type'   => 'compalg',
+                'typ'   => 'compalg',
                 'val'    => NULL,
                 'inf'    => '<algo>   Compression algorithm.',
                 'select' => array(
@@ -73,53 +73,53 @@ class PharCommand extends CLICommand
                 )
             ),
             'e' => array(
-                'type' => 'entry',
+                'typ' => 'entry',
                 'val'  => NULL,
                 'inf'  => '<entry>  Name of entry to work on (must include PHAR internal directory name if any).'
             ),
             'f' => array(
-                'type' => $phartype,
+                'typ' => $phartype,
                 'val'  => NULL,
                 'inf'  => '<file>   Specifies the phar file to work on.'
             ),
             'h' => array(
-                'type'   => 'select',
+                'typ'   => 'select',
                 'val'    => NULL,
                 'inf'    => '<method> Selects the hash algorithmn.',
                 'select' => array('md5' => 'MD5','sha1' => 'SHA1')
             ),
             'i' => array(
-                'type' => 'regex',
+                'typ' => 'regex',
                 'val' => NULL,
                 'inf' => '<regex>  Specifies a regular expression for input files.'
             ),
             'k' => array(
-                'type' => 'any',
+                'typ' => 'any',
                 'val'  => NULL,
                 'inf'  => '<index> Subscription index to work on.',
             ),
             'l' => array(
-                'type' => 'int',
+                'typ' => 'int',
                 'val'  => 0,
                 'inf'  => '<level> Number of preceeding subdirectories to strip from file entries',
             ),
             'm' => array(
-                'type' => 'any',
+                'typ' => 'any',
                 'val' => NULL,
                 'inf' => '<meta>   Meta data to store with entry (serialized php data).'
             ),
             'p' => array(
-                'type' => 'file',
+                'typ' => 'file',
                 'val'  => NULL,
                 'inf'  => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive).',
             ),
             's' => array(
-                'type' => 'file',
+                'typ' => 'file',
                 'val' => NULL,
                 'inf' => '<stub>   Select the stub file.'
             ),
             'x' => array(
-                'type' => 'regex',
+                'typ' => 'regex',
                 'val' => NULL,
                 'inf' => '<regex>  Regular expression for input files to exclude.'
             ),
@@ -176,39 +176,40 @@ class PharCommand extends CLICommand
         return substr($haystack, -strlen($needle)) == $needle;
     }
     // }}}
-    // {{{ static function cli_arg_type_pharnew
+    // {{{ static function cli_arg_typ_pharnew
     /**
-     * New phar
+     * Argument type new phar
      *
      * @param  string $arg  The new phar component.
      * @param  string $cfg  Configuration to pass to a new file
      * @param  string $key  The key 
      * @return string $arg  The new argument file.
      */
-    static function cli_arg_type_pharnew($arg, $cfg, $key)
+    static function cli_arg_typ_pharnew($arg, $cfg, $key)
     {
-        $arg = self::cli_arg_type_filenew($arg, $cfg, $key);
+        $arg = self::cli_arg_typ_filenew($arg, $cfg, $key);
         if (!Phar::isValidPharFilename($arg)) {
             self::error("Phar files must have file extension '.phar', '.phar.php', '.phar.bz2' or 'phar.gz'.\n");
         }
         return $arg;
     }
     // }}}
-    // {{{ static function cli_arg_type_pharfile
+    // {{{ static function cli_arg_typ_pharfile
     /**
-     * Phar file
+     * Argument type existing Phar file
      * 
-     * Return a file from a phar archive.
+     * Return filenam eof an existing Phar.
      *
      * @param  string $arg      The file in the phar to open.
      * @param  string $cfg      The configuration information
      * @param  string $key      The key information.
-     * @return string $pharfile The loaded phar file.
+     * @return string $pharfile The name of the loaded Phar file.
+     * @note The Phar will be loaded
      */
-    static function cli_arg_type_pharfile($arg, $cfg, $key)
+    static function cli_arg_typ_pharfile($arg, $cfg, $key)
     {
         try {
-            $pharfile = self::cli_arg_type_file($arg, $cfg, $key);
+            $pharfile = self::cli_arg_typ_file($arg, $cfg, $key);
 
             if (!Phar::loadPhar($pharfile)) {
                 self::error("Unable to open phar '$arg'\n");
@@ -220,67 +221,68 @@ class PharCommand extends CLICommand
         }
     }
     // }}}
-    // {{{ static function cli_arg_type_pharurl
+    // {{{ static function cli_arg_typ_pharurl
     /**
-     * Phar url-like
+     * Argument type Phar url-like
      * 
-     * Return a file using a url like call
+     * Check the argument as cli_arg_Typ_phar and return its name prefixed 
+     * with phar://
      * 
      * Ex:
      * <code>
      *  $arg = 'pharchive.phar/file.php';
-     *  cli_arg_type_pharurl($arg)
+     *  cli_arg_typ_pharurl($arg)
      * </code>
      *
      * @param  string $arg The url-like phar archive to retrieve.
      * @return string The phar file-archive.
      */
-    static function cli_arg_type_pharurl($arg, $cfg, $key)
+    static function cli_arg_typ_pharurl($arg, $cfg, $key)
     {
-        return 'phar://' . self::cli_arg_type_pharfile($arg, $cfg, $key);
+        return 'phar://' . self::cli_arg_typ_pharfile($arg, $cfg, $key);
     }
     // }}}
-    // {{{ static function cli_arg_type_phar
+    // {{{ static function cli_arg_typ_phar
     /**
-     * Cli type phar
+     * Cli argument type phar
      *
      * @param  string $arg  The phar archive to use.
      * @return object new Phar of the passed argument.
      */
-    static function cli_arg_type_phar($arg, $cfg, $key)
+    static function cli_arg_typ_phar($arg, $cfg, $key)
     {
         try {
-            return new Phar(self::cli_arg_type_pharfile($arg, $cfg, $key));
+            return new Phar(self::cli_arg_typ_pharfile($arg, $cfg, $key));
         } catch(Exception $e) {
             self::error("Exception while opening phar '$argv':\n" . $e->getMessage() . "\n");
         }
     }
     // }}}
-    // {{{ static function cli_arg_type_entry
+    // {{{ static function cli_arg_typ_entry
     /**
-     * Type Entry
+     * Argument type Entry name
      *
      * @param  string $arg The argument (the entry)
      * @return string $arg The entry itself.
      */
-    static function cli_arg_type_entry($arg, $cfg, $key)
+    static function cli_arg_typ_entry($arg, $cfg, $key)
     {
         // no further check atm, maybe check for no '/' at beginning
         return $arg;
     }
     // }}}
-    // {{{ static function cli_arg_type_compalg
+    // {{{ static function cli_arg_typ_compalg
     /**
-     * Enter description here...
+     * Argument type compression algorithm
      *
      * @param  string $arg  The phar selection
      * @param  string $cfg  The config option.
      * @param  string $key  The key information.
-     * @return string $arg  The phar select
+     * @return string $arg  The selected algorithm
      */
-    static function cli_arg_type_compalg($arg, $cfg, $key)
+    static function cli_arg_typ_compalg($arg, $cfg, $key)
     {
-        $arg = self::cli_arg_type_select($arg, $cfg, $key);
+        $arg = self::cli_arg_typ_select($arg, $cfg, $key);
         
         switch($arg) {
             case 'auto':
@@ -322,7 +324,7 @@ class PharCommand extends CLICommand
         $args = self::phar_args('acFhilpsx', 'pharnew');
         
         $args[''] = array(
-            'type'     => 'any',     
+            'typ'     => 'any',     
             'val'      => NULL,      
             'required' => 1, 
             'inf'      => '         Any number of input files and directories. If -i is in use then ONLY files and matching thegiven regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.',

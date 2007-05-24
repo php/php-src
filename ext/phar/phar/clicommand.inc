@@ -20,14 +20,14 @@ abstract class CLICommand
     protected $argv;
     protected $cmds = array();
     protected $args = array();
-    protected $types = array();
+    protected $typs = array();
 
     function __construct($argc, array $argv)
     {
         $this->argc = $argc;
         $this->argv = $argv;
         $this->cmds = self::getCommands($this);
-        $this->types = self::getArgTyps($this);
+        $this->typs = self::getArgTyps($this);
 
         if ($argc < 2) {
             self::error("No command given, check ${argv[0]} help\n");
@@ -92,12 +92,12 @@ abstract class CLICommand
         exit($exit_code);
     }
 
-    function checkArgType($arg, $i, $argc, $argv)
+    function checkArgTyp($arg, $i, $argc, $argv)
     {
-        $typ = $this->args[$arg]['type'];
+        $typ = $this->args[$arg]['typ'];
 
-        if (isset($this->types[$type]['type'])) {
-            return call_user_func(array($this, $this->types[$type]['type']), $argv[$i], $this->args[$arg], $arg);
+        if (isset($this->typs[$typ]['typ'])) {
+            return call_user_func(array($this, $this->typs[$typ]['typ']), $argv[$i], $this->args[$arg], $arg);
         } else {
             return $argv[$i];
         }
@@ -139,16 +139,16 @@ abstract class CLICommand
 
     static function getArgTyps(CLICommand $cmdclass)
     {
-        return self::getSubFuncs($cmdclass, 'cli_arg_', array('type'));
+        return self::getSubFuncs($cmdclass, 'cli_arg_', array('typ'));
     }
 
-    static function cli_arg_type_bool($arg, $cfg, $key)
+    static function cli_arg_typ_bool($arg, $cfg, $key)
     {
         return (bool)$arg;
     }
 
     
-    static function cli_arg_type_int($arg, $cfg, $key) 
+    static function cli_arg_typ_int($arg, $cfg, $key) 
     {
         if ((int)$arg != $arg) {
             self::error("Argument to -$key must be an integer.\n");
@@ -157,7 +157,7 @@ abstract class CLICommand
         return (int)$arg;
     }
     
-    static function cli_arg_type_regex($arg, $cfg, $key)
+    static function cli_arg_typ_regex($arg, $cfg, $key)
     {
         if (strlen($arg))
         {
@@ -176,7 +176,7 @@ abstract class CLICommand
         }
     }
 
-    static function cli_arg_type_select($arg, $cfg, $key)
+    static function cli_arg_typ_select($arg, $cfg, $key)
     {
         if (!in_array($arg, array_keys($cfg['select']))) {
             self::error("Parameter value '$arg' not one of '" . join("', '", array_keys($cfg['select'])) . "'.\n");
@@ -184,7 +184,7 @@ abstract class CLICommand
         return $arg;
     }
 
-    static function cli_arg_type_dir($arg, $cfg, $key)
+    static function cli_arg_typ_dir($arg, $cfg, $key)
     {
         $f = realpath($arg);
 
@@ -194,7 +194,7 @@ abstract class CLICommand
         return $f;
     }
 
-    static function cli_arg_type_file($arg)
+    static function cli_arg_typ_file($arg)
     {
         $f = new SplFileInfo($arg);
         $f = $f->getRealPath();
@@ -206,7 +206,7 @@ abstract class CLICommand
         return $f;
     }
 
-    static function cli_arg_type_filenew($arg, $cfg, $key)
+    static function cli_arg_typ_filenew($arg, $cfg, $key)
     {
         $d = dirname($arg);
         $f = realpath($d);
@@ -217,9 +217,9 @@ abstract class CLICommand
         return $f . substr($arg, strlen($d));;
     }
 
-    static function cli_arg_type_filecont($arg, $cfg, $key)
+    static function cli_arg_typ_filecont($arg, $cfg, $key)
     {
-        return file_get_contents(self::cli_arg_type_file($arg, $cfg, $key));
+        return file_get_contents(self::cli_arg_typ_file($arg, $cfg, $key));
     }
 
     function cli_get_SP2($l1, $arg_inf)
@@ -296,7 +296,7 @@ abstract class CLICommand
 
     function cli_cmd_arg_help()
     {
-        return array('' => array('type'=>'any','val'=>NULL,'inf'=>'Optional command to retrieve help for.'));
+        return array('' => array('typ'=>'any','val'=>NULL,'inf'=>'Optional command to retrieve help for.'));
     }
 
     function cli_cmd_run_help()
