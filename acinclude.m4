@@ -2019,7 +2019,7 @@ AC_DEFUN([PHP_PROG_LEX], [
   flex_version_list="2.5.4"
    
   AC_PROG_LEX
-  if test -n "$LEX"; then
+  if test "$LEX" = "flex"; then
     AC_DECL_YYTEXT
     :
   fi
@@ -2031,7 +2031,7 @@ AC_DEFUN([PHP_PROG_LEX], [
     LEX_CFLAGS="-DYY_USE_CONST"
   fi
 
-  if test "$LEX"; then
+  if test "$LEX" = "flex"; then
     AC_CACHE_CHECK([for flex version], php_cv_flex_version, [
       flex_version=`$LEX -V -v --version 2>/dev/null | $SED -e 's/^.* //'`
       php_cv_flex_version=invalid
