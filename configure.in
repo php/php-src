@@ -1298,9 +1298,6 @@ all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_CLI_TARGET)"
 install_targets="$install_modules install-build install-headers install-programs $install_pear"
 
 case $PHP_SAPI in
-  cgi)
-    install_targets="install-sapi $install_targets"
-    ;;
   cli)
     install_targets="$PHP_INSTALL_CLI_TARGET $install_targets"
     ;;
