@@ -31,7 +31,6 @@
 
 #include "tsrm_virtual_cwd.h"
 #include "tsrm_strtok_r.h"
-#include "SAPI.h"
 
 #ifdef TSRM_WIN32
 #include <io.h>
@@ -519,7 +518,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	}
 
 	if (use_cache) {
-		t = CWDG(realpath_cache_ttl)?sapi_get_request_time(TSRMLS_C):0;
+		t = CWDG(realpath_cache_ttl)?time(0):0;
 		if ((bucket = realpath_cache_find(path, path_length, t TSRMLS_CC)) != NULL) {		
 			int len = bucket->realpath_len;
 
