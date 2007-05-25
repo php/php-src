@@ -1,5 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Jun 2007, PHP 5.2.3
+
+
 24 May 2007, PHP 5.2.3RC1
 - Changed CGI install target to php-cgi and 'make install' to install CLI
   when CGI is selected. (Jani)
