@@ -387,6 +387,8 @@ static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) {
     return;
 }
 
+/* {{{ proto string json_encode(mixed data)
+   Returns the JSON representation of a value */
 static PHP_FUNCTION(json_encode)
 {
     zval *parameter;
@@ -402,7 +404,10 @@ static PHP_FUNCTION(json_encode)
 
     smart_str_free(&buf);
 }
+/* }}} */
 
+/* {{{ proto mixed json_decode(string json [, bool assoc])
+   Decodes the JSON representation into a PHP value */
 static PHP_FUNCTION(json_decode)
 {
     char *parameter;
@@ -476,6 +481,7 @@ static PHP_FUNCTION(json_decode)
 	}
     }
 }
+/* }}} */
 
 /*
  * Local variables:
