@@ -96,6 +96,9 @@
 ;     are emitted for non-critical errors, but that could be a symptom of a bigger
 ;     problem.  Most notably, this will cause error messages about the use
 ;     of uninitialized variables to be displayed.
+; - short_open_tag = Off           [Portability]
+;     Using short tags is discouraged when developing code meant for redistribution
+;     since short tags may not be supported on the target server.
 
 ;;;;;;;;;;;;;;;;;;;;
 ; Language Options ;
