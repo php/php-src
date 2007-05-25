@@ -1,3 +1,90 @@
+2007-05-24  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in
+      sapi/cgi/config9.m4:
+      MFB:- Unify installation of SAPIs: CGI is no exception anymore.
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      sapi/cgi/config9.m4:
+      - Unify installation of SAPIs: CGI is no exception anymore.
+
+2007-05-24  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      ext/json/JSON_parser.c:
+      Make the code match the commit comment
+
+    * ext/json/JSON_parser.c:
+      MFB 5_2 - increase json parser depth from 20 to 128
+
+    * (PHP_5_2)
+      ext/json/JSON_parser.c:
+      I don't see any reason to leave the stack limitation at 20.  We have
+      reports of this limit being hit now and as far as I can tell bumping it
+      to 128 isn't going break anything in the parser code.
+
+2007-05-24  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Makefile.frag
+      acinclude.m4
+      configure.in
+      ext/standard/Makefile.frag
+      ext/tokenizer/Makefile.frag:
+      MFB
+
+    * (PHP_5_2)
+      Makefile.frag
+      acinclude.m4
+      configure.in
+      ext/standard/Makefile.frag
+      ext/tokenizer/Makefile.frag:
+      - Allow build without flex/bison installed (fixes builddir != srcdir build
+        when using distributed sources which inlude pre-generated bison/flex
+        output. See bug #38762 for more..)
+
+2007-05-24  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/standard/string.c
+      ext/standard/string.c
+      ext/standard/string.c
+      ext/standard/string.c:
+      MFB 5_2
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Uh, only meant to remove the null check, not the assignment
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Avoid running off the end of a non-null terminated string.  Not that we
+      should have any of those, but a mistake in an extension could hit this
+      and the check doesn't actually make any sense as far as I am concerned.
+
+2007-05-24  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4:
+      MFB:- Fix previous fix. (just revert of Stefan's bad fix..)
+
+    * (PHP_5_2)
+      acinclude.m4:
+      - Fix previous fix. (just revert of Stefan's bad fix..)
+
+    * acinclude.m4:
+      MFB:- Fix idiotic change in logic. (hint: flex is _REQUIRED_ for building
+      PHP!
+
+    * (PHP_5_2)
+      acinclude.m4:
+      - Fix idiotic change in logic. (hint: flex is _REQUIRED_ for building PHP!
+
+2007-05-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l:
+      Impoved error reporting on parser errors (Matt, Dmitry)
+
 2007-05-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * README.PARAMETER_PARSING_API:
