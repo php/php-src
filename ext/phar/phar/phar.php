@@ -47,4 +47,4 @@ spl_autoload_register('command_autoload');
 
 new PharCommand($argc, $argv);
 
-__HALT_COMPILER();
+__HALT_COMPILER(); ?>
