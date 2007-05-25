@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Improved compilation of heredocs and interpolated strings. (Matt, Dmitry)
 - Optimized out a couple of per-request syscalls (Rasmus)
 - Optimized digest generation in md5() and sha1() functions. (Ilia)
+- Increased json nested data from 20 to 128. (Rasmus)
 - Upgraded SQLite 3 to version 3.3.16 (Ilia)
 - Added a 4th parameter flag to htmlspecialchars() and htmlentities() that 
   makes the function not encode existing html entities. (Ilia)
