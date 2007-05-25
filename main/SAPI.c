@@ -988,8 +988,8 @@ SAPI_API time_t sapi_get_request_time(TSRMLS_D)
 {
 	if(SG(global_request_time)) return SG(global_request_time);
 
-	if (sapi_module.get_request_time) {
-		SG(global_request_time) = (SG(server_context))?sapi_module.get_request_time(TSRMLS_C):time(0);
+	if (sapi_module.get_request_time && SG(server_context)) {
+		SG(global_request_time) = sapi_module.get_request_time(TSRMLS_C);
 	} else {
 		SG(global_request_time) = time(0);
 	}
