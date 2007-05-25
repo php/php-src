@@ -108,6 +108,9 @@
 ;     It's not possible to decide to force a variable to be passed by reference
 ;     when calling a function.  The PHP 4 style to do this is by making the
 ;     function require the relevant argument by reference.
+; - short_open_tag = Off           [Portability]
+;     Using short tags is discouraged when developing code meant for redistribution
+;     since short tags may not be supported on the target server.
 
 ;;;;;;;;;;;;;;;;;;;;
 ; Language Options ;
