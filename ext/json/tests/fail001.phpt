@@ -24,7 +24,8 @@ $tests = array('"A JSON payload should be an object or array, not a string."',
                '["Illegal backslash escape: \\x15"]',
                '["Illegal backslash escape: \\\'"]',
                '["Illegal backslash escape: \\017"]',
-               '[[[[[[[[[[[[[[[[[[[["Too deep"]]]]]]]]]]]]]]]]]]]]',
+               '[[[[[[[[[[[[[[[[[[[["Not too deep anymore"]]]]]]]]]]]]]]]]]]]]',
+               '[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["I am to deep"]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]',
                '{"Missing colon" null}',
                '{"Double colon":: null}',
                '{"Comma instead of colon", null}',
@@ -128,7 +129,132 @@ AS OBJECT
 NULL
 AS ARRAY
 NULL
-Testing: [[[[[[[[[[[[[[[[[[[["Too deep"]]]]]]]]]]]]]]]]]]]]
+Testing: [[[[[[[[[[[[[[[[[[[["Not too deep anymore"]]]]]]]]]]]]]]]]]]]]
+AS OBJECT
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [0]=>
+        array(1) {
+          [0]=>
+          array(1) {
+            [0]=>
+            array(1) {
+              [0]=>
+              array(1) {
+                [0]=>
+                array(1) {
+                  [0]=>
+                  array(1) {
+                    [0]=>
+                    array(1) {
+                      [0]=>
+                      array(1) {
+                        [0]=>
+                        array(1) {
+                          [0]=>
+                          array(1) {
+                            [0]=>
+                            array(1) {
+                              [0]=>
+                              array(1) {
+                                [0]=>
+                                array(1) {
+                                  [0]=>
+                                  array(1) {
+                                    [0]=>
+                                    array(1) {
+                                      [0]=>
+                                      array(1) {
+                                        [0]=>
+                                        string(20) "Not too deep anymore"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+AS ARRAY
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [0]=>
+        array(1) {
+          [0]=>
+          array(1) {
+            [0]=>
+            array(1) {
+              [0]=>
+              array(1) {
+                [0]=>
+                array(1) {
+                  [0]=>
+                  array(1) {
+                    [0]=>
+                    array(1) {
+                      [0]=>
+                      array(1) {
+                        [0]=>
+                        array(1) {
+                          [0]=>
+                          array(1) {
+                            [0]=>
+                            array(1) {
+                              [0]=>
+                              array(1) {
+                                [0]=>
+                                array(1) {
+                                  [0]=>
+                                  array(1) {
+                                    [0]=>
+                                    array(1) {
+                                      [0]=>
+                                      array(1) {
+                                        [0]=>
+                                        string(20) "Not too deep anymore"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+Testing: [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["I am to deep"]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
 AS OBJECT
 NULL
 AS ARRAY
@@ -163,3 +289,4 @@ AS OBJECT
 NULL
 AS ARRAY
 NULL
+
