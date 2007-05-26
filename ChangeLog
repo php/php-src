@@ -1,3 +1,159 @@
+2007-05-25  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      TSRM/tsrm_virtual_cwd.c:
+      Remove simple optimization here for now until we clean up this SAPI/TSRM
+      mess.
+
+2007-05-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      php.ini-recommended:
+      MFH: Mention why short_open_tags is off (bug#37068)
+
+    * php.ini-recommended:
+      Mention why short_open_tags is off (bug#37068)
+
+    * (PHP_5_2)
+      ext/standard/html.c:
+      Allow skipping hint_charset (fixes
+      ext/standard/tests/strings/htmlentities18.phpt)
+
+2007-05-25  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/file/fgetc_basic.phpt
+      ext/standard/tests/file/fgetc_error.phpt
+      ext/standard/tests/file/file.inc
+      ext/standard/tests/file/fileinode_basic.phpt
+      ext/standard/tests/file/fileinode_error.phpt
+      ext/standard/tests/file/fileinode_variation.phpt
+      ext/standard/tests/file/filetype_basic.phpt
+      ext/standard/tests/file/filetype_error.phpt
+      ext/standard/tests/file/filetype_variation.phpt
+      ext/standard/tests/file/flock_basic.phpt
+      ext/standard/tests/file/flock_error.phpt
+      ext/standard/tests/file/flock_variation.phpt
+      ext/standard/tests/file/fnmatch_basic.phpt
+      ext/standard/tests/file/fnmatch_error.phpt
+      ext/standard/tests/file/fnmatch_variation.phpt
+      ext/standard/tests/file/fpassthru_basic.phpt
+      ext/standard/tests/file/fpassthru_error.phpt
+      ext/standard/tests/file/fpassthru_variation.phpt
+      ext/standard/tests/general_functions/intval.phpt
+      ext/standard/tests/general_functions/var_export.phpt
+      ext/standard/tests/strings/dirname_basic.phpt
+      ext/standard/tests/strings/dirname_error.phpt
+      ext/standard/tests/strings/dirname_variation.phpt
+      ext/standard/tests/strings/explode1.phpt:
+      New tests for file/general_functions/strings
+
+    * ext/standard/tests/file/fgetc_basic.phpt
+      ext/standard/tests/file/fgetc_basic.phpt
+      ext/standard/tests/file/fgetc_error.phpt
+      ext/standard/tests/file/fgetc_error.phpt
+      ext/standard/tests/file/file.inc
+      ext/standard/tests/file/file.inc
+      ext/standard/tests/file/fileinode_basic.phpt
+      ext/standard/tests/file/fileinode_basic.phpt
+      ext/standard/tests/file/fileinode_error.phpt
+      ext/standard/tests/file/fileinode_error.phpt
+      ext/standard/tests/file/fileinode_variation.phpt
+      ext/standard/tests/file/fileinode_variation.phpt
+      ext/standard/tests/file/filetype_basic.phpt
+      ext/standard/tests/file/filetype_basic.phpt
+      ext/standard/tests/file/filetype_error.phpt
+      ext/standard/tests/file/filetype_error.phpt
+      ext/standard/tests/file/filetype_variation.phpt
+      ext/standard/tests/file/filetype_variation.phpt
+      ext/standard/tests/file/flock_basic.phpt
+      ext/standard/tests/file/flock_basic.phpt
+      ext/standard/tests/file/flock_error.phpt
+      ext/standard/tests/file/flock_error.phpt
+      ext/standard/tests/file/flock_variation.phpt
+      ext/standard/tests/file/flock_variation.phpt
+      ext/standard/tests/file/fnmatch_basic.phpt
+      ext/standard/tests/file/fnmatch_basic.phpt
+      ext/standard/tests/file/fnmatch_error.phpt
+      ext/standard/tests/file/fnmatch_error.phpt
+      ext/standard/tests/file/fnmatch_variation.phpt
+      ext/standard/tests/file/fnmatch_variation.phpt
+      ext/standard/tests/file/fpassthru_basic.phpt
+      ext/standard/tests/file/fpassthru_basic.phpt
+      ext/standard/tests/file/fpassthru_error.phpt
+      ext/standard/tests/file/fpassthru_error.phpt
+      ext/standard/tests/file/fpassthru_variation.phpt
+      ext/standard/tests/file/fpassthru_variation.phpt
+      ext/standard/tests/general_functions/intval.phpt
+      ext/standard/tests/general_functions/intval.phpt
+      ext/standard/tests/general_functions/var_export.phpt
+      ext/standard/tests/general_functions/var_export.phpt
+      ext/standard/tests/strings/dirname_basic.phpt
+      ext/standard/tests/strings/dirname_basic.phpt
+      ext/standard/tests/strings/dirname_error.phpt
+      ext/standard/tests/strings/dirname_error.phpt
+      ext/standard/tests/strings/dirname_variation.phpt
+      ext/standard/tests/strings/dirname_variation.phpt
+      ext/standard/tests/strings/explode1.phpt
+      ext/standard/tests/strings/explode1.phpt:
+      
+      file fgetc_basic.phpt was initially added on branch PHP_5_2.
+
+2007-05-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/json/json.c:
+      MFH: protos (patch by jeffg at activestate dot com)
+
+2007-05-25  Michael Wallner  <mike@iworks.at>
+
+    * ext/curl/config.m4
+      ext/curl/config.m4:
+      - fix typo
+
+2007-05-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Mention json nesting dept bump
+
+    * ext/json/tests/fail001.phpt:
+      MFB: Fix test after stack limit bump
+
+    * (PHP_5_2)
+      ext/json/tests/fail001.phpt:
+      This test should only test failures
+
+    * (PHP_5_2)
+      ext/json/tests/fail001.phpt:
+      Fix test after stack limit bump
+
+2007-05-25  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      main/SAPI.c:
+      Slightly cleaner code
+
+    * main/SAPI.c
+      main/SAPI.c:
+      Optimize sapi_get_request_time() slightly making it use the cached time
+      and also checking if there is a server_context before trying to call
+      the request_time sapi hook.
+
+2007-05-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.2.3RC1
+
 2007-05-24  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * configure.in
