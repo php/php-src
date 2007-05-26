@@ -751,9 +751,9 @@ PHP_MINFO_FUNCTION(hash)
 		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, NULL, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
 #if (PHP_MAJOR_VERSION >= 6)
-		s += snprintf(s, e - s, "%s ", str.s);
+		s += slprintf(s, e - s, "%s ", str.s);
 #else
-		s += snprintf(s, e - s, "%s ", str);
+		s += slprintf(s, e - s, "%s ", str);
 #endif
 	}
 	*s = 0;
