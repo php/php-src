@@ -21,4 +21,4 @@ Warning: Phar::mapPhar() expects at most 1 parameter, 2 given in %s002.php on li
 Warning: Phar::mapPhar() expects at most 1 parameter, 2 given in %s002.php on line %d
 
 Warning: Phar::mapPhar() expects at most 1 parameter, 3 given in %s002.php on line %d
-internal corruption of phar "%s002.php" (truncated manifest)
+internal corruption of phar "%s002.php" (truncated manifest at manifest length)

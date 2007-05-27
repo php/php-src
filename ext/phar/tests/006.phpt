@@ -11,4 +11,4 @@ echo $e->getMessage();
 }
 __HALT_COMPILER(); ?>
 --EXPECTF--
-internal corruption of phar "%s" (truncated manifest)
+internal corruption of phar "%s" (truncated manifest at manifest length)
