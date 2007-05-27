@@ -754,17 +754,17 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 
 	buffer = b32;
 	if (3 != php_stream_read(fp, buffer, 3)) {
-		MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+		MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at script end)")
 	}
 	if ((*buffer == ' ' || *buffer == '\n') && *(buffer + 1) == '?' && *(buffer + 2) == '>') {
 		int nextchar;
 		halt_offset += 3;
 		if (EOF == (nextchar = php_stream_getc(fp))) {
-			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at script end)")
 		}
 		if ((char) nextchar == '\r') {
 			if (EOF == (nextchar = php_stream_getc(fp))) {
-				MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+				MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at script end)")
 			}
 			halt_offset++;
 		}
@@ -780,7 +780,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	/* read in manifest */
 	buffer = b32;
 	if (4 != php_stream_read(fp, buffer, 4)) {
-		MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+		MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at manifest length)")
 	}
 	PHAR_GET_32(buffer, manifest_len);
 	if (manifest_len > 1048576) {
@@ -790,10 +790,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	buffer = (char *)emalloc(manifest_len);
 	savebuf = buffer;
 	endbuffer = buffer + manifest_len;
-	if (manifest_len != php_stream_read(fp, buffer, manifest_len)) {
-		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
-	}
-	if (manifest_len < 10) {
+	if (manifest_len < 10 || manifest_len != php_stream_read(fp, buffer, manifest_len)) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest header)")
 	}
 
@@ -1327,7 +1324,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 	halt_offset = 0;
 	while(!php_stream_eof(fp)) {
 		if ((got = php_stream_read(fp, buffer+tokenlen, readsize)) < tokenlen) {
-			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated entry)")
 		}
 		if ((pos = strstr(buffer, token)) != NULL) {
 			halt_offset += (pos - buffer); /* no -tokenlen+tokenlen here */
@@ -1831,6 +1828,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 					efree(buffer);
 					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
 					phar_entry_delref(idata TSRMLS_CC);
+					php_stream_filter_remove(filter, 1 TSRMLS_CC);
 					efree(internal_file);
 					return NULL;
 				}
@@ -2106,7 +2104,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	char manifest[18], entry_buffer[24];
 	off_t manifest_ftell;
 	long offset;
-	size_t wrote, read;
+	size_t wrote;
 	php_uint32 manifest_len, mytime, loc, new_manifest_count;
 	php_uint32 newcrc32;
 	php_stream *file, *oldfile, *newfile, *stubfile;
@@ -2295,9 +2293,9 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		entry->is_crc_checked = 1;
 		if (!(entry->flags & PHAR_ENT_COMPRESSION_MASK)) {
 			/* not compressed */
+			entry->compressed_filesize = entry->uncompressed_filesize;
 			continue;
 		}
-		php_stream_rewind(file);
 		filter = php_stream_filter_create(phar_compress_filter(entry, 0), NULL, 0 TSRMLS_CC);
 		if (!filter) {
 			if (closeoldfile) {
@@ -2316,12 +2314,10 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			efree(buf);
 			return EOF;
 		}
-		php_stream_filter_append(&file->readfilters, filter);
 
 		/* create new file that holds the compressed version */
 		/* work around inability to specify freedom in write and strictness
 		in read count */
-		entry->compressed_filesize = 0;
 		entry->cfp = php_stream_fopen_tmpfile();
 		if (!entry->cfp) {
 			if (error) {
@@ -2334,26 +2330,12 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			efree(buf);
 			return EOF;
 		}
-		do {
-			read = php_stream_read(file, buf, 8192);
-			if (read) {
-				if (read != php_stream_write(entry->cfp, buf, read)) {
-					if (error) {
-						spprintf(error, 0, "unable to write to file \"%s\" while creating new phar \"%s\"", entry->filename, archive->fname);
-					}
-					efree(buf);
-					php_stream_filter_remove(filter, 1 TSRMLS_CC);
-					php_stream_close(entry->cfp);
-					entry->cfp = 0;
-					if (closeoldfile) {
-						php_stream_close(oldfile);
-					}
-					php_stream_close(newfile);
-					return EOF;
-				}
-				entry->compressed_filesize += read;
-			}
-		} while (read);
+		php_stream_flush(file);
+		php_stream_rewind(file);
+		php_stream_filter_append(&file->readfilters, filter);
+		entry->compressed_filesize = php_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize+8192 TSRMLS_CC);
+		php_stream_filter_flush(filter, 1 TSRMLS_CC);
+		entry->compressed_filesize += php_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize+8192 TSRMLS_CC);
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
 		/* generate crc on compressed file */
 		php_stream_rewind(entry->cfp);

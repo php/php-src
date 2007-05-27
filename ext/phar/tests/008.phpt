@@ -18,4 +18,4 @@ echo $e->getMessage();
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-internal corruption of phar "%s" (truncated manifest)
+internal corruption of phar "%s" (truncated manifest header)
