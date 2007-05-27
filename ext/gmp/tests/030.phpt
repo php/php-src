@@ -1,5 +1,7 @@
 --TEST--
 gmp_or() basic tests
+--SKIPIF--
+<?php if (!extension_loaded("gmp")) print "skip"; ?>
 --FILE--
 <?php
 
