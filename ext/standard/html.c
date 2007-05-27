@@ -1153,7 +1153,7 @@ encode_amp:
 					memcpy(replaced + len, "&amp;", sizeof("&amp;") - 1);
 					len += sizeof("&amp;") - 1;
 				} else {
-					char *e = memchr(old + i, ';', len - i);
+					char *e = memchr(old + i, ';', oldlen - i);
 					char *s = old + i + 1;
 
 					if (!e || (e - s) > 10) { /* minor optimization to avoid "entities" over 10 chars in length */
