@@ -364,7 +364,7 @@ static void attach_zval(json_parser *json, int up, int cur, smart_str *key, int 
         }
         else
         {
-            add_assoc_zval_ex(root, (key->len ? key->c : "_empty_"), (key->len ? (key->len + 1) : sizeof("_empty_")), child);
+            add_assoc_zval_ex(root, (key->len ? key->c : ""), (key->len ? (key->len + 1) : sizeof("")), child);
         }
         key->len = 0;
     }
@@ -507,7 +507,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
                     }
                     else
                     {
-                        add_assoc_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval);
+                        add_assoc_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval);
                     }
                     key.len = 0;
                     buf.len = 0;
@@ -638,7 +638,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
                                 }
                                 else
                                 {
-                                    add_assoc_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval);
+                                    add_assoc_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval);
                                 }
                                 key.len = 0;
                             }
