@@ -28,7 +28,7 @@
 
 PHPAPI void make_digest(char *md5str, unsigned char *digest)
 {
-	return make_digest_ex(md5str, digest, strlen(digest));
+	make_digest_ex(md5str, digest, strlen(digest));
 }
 
 PHPAPI void make_digest_ex(char *md5str, unsigned char *digest, int len)
