@@ -6,36 +6,42 @@ PHP                                                                        NEWS
 24 May 2007, PHP 5.2.3RC1
 - Changed CGI install target to php-cgi and 'make install' to install CLI
   when CGI is selected. (Jani)
+- Changed JSON maximum nesting depth from 20 to 128. (Rasmus)
+
 - Improved compilation of heredocs and interpolated strings. (Matt, Dmitry)
-- Optimized out a couple of per-request syscalls (Rasmus)
+- Optimized out a couple of per-request syscalls. (Rasmus)
 - Optimized digest generation in md5() and sha1() functions. (Ilia)
-- Increased json nested data from 20 to 128. (Rasmus)
-- Upgraded SQLite 3 to version 3.3.16 (Ilia)
+- Upgraded bundled SQLite 3 to version 3.3.16. (Ilia)
+
+- Addded "max_input_nesting_level" php.ini option to limit nesting level of 
+  input variables. Fix for MOPB-03-2007. (Stas)
 - Added a 4th parameter flag to htmlspecialchars() and htmlentities() that 
   makes the function not encode existing html entities. (Ilia)
 - Added PDO::FETCH_KEY_PAIR mode that will fetch a 2 column result set into 
   an associated array. (Ilia)
 - Added CURLOPT_TIMEOUT_MS and CURLOPT_CONNECTTIMEOUT_MS cURL constants. (Sara)
 - Added --ini switch to CLI that prints out configuration file names. (Marcus)
-- Added function mysql_set_charset(). Allows connection encoding to be 
-  altered at run time. (Scott)
-- Allow SOAP extension's handler() to work even when
-  always_populate_raw_post_data is off. (Ilia)
+- Added mysql_set_charset() to allow runtime altering of connection encoding.
+  (Scott)
+
 - Implemented FR #41416 (getColumnMeta() should also return table name). (Tony)
-- Fixed possible infinite loop in imagecreatefrompng (libgd #86) 
-  (by Xavier Roche, CVE-2007-2756) (Pierre)
-- Fixed ext/filter Email Validation Vulnerability (MOPB-45 by Stefan Esser)
+
+- Fixed SOAP extension's handler() to work even when
+  "always_populate_raw_post_data" is off. (Ilia)
+- Fixed possible infinite loop in imagecreatefrompng. (libgd #86) 
+  (by Xavier Roche, CVE-2007-2756). (Pierre)
+- Fixed ext/filter Email Validation Vulnerability (MOPB-45 by Stefan Esser).
   (Ilia)
 - Fixed altering $this via argument named "this". (Dmitry)
-- Fixed PHP CLI to use the php.ini from the binary location. (Hannes)
+- Fixed PHP CLI usage of php.ini from the binary location. (Hannes)
 - Fixed segfault in strripos(). (Tony, Joxean Koret)
 - Fixed bug #41455 (ext/dba/config.m4 pollutes global $LIBS and $LDFLAGS). 
   (mmarek at suse dot cz, Tony)
 - Fixed bug #41442 (imagegd2() under output control). (Tony)
 - Fixed bug #41430 (Fatal error with negative values of maxlen parameter of 
   file_get_contents()). (Tony)
-- fixed bug #41423 (PHP assumes wrongly that certain ciphers are enabled in 
-  OpenSSL) (Pierre)
+- Fixed bug #41423 (PHP assumes wrongly that certain ciphers are enabled in 
+  OpenSSL). (Pierre)
 - Fixed bug #41421 (Uncaught exception from a stream wrapper segfaults). 
   (Tony, Dmitry)
 - Fixed bug #41403 (json_decode cannot decode floats if localeconv 
@@ -47,7 +53,7 @@ PHP                                                                        NEWS
 - Fixed bug #41378 (fastcgi protocol lacks support for Reason-Phrase in 
   "Status:" header). (anight at eyelinkmedia dot com, Dmitry)
 - Fixed bug #41374 (whole text concats values of wrong nodes). (Rob)
-- Fixed bug #41358 (configure cannot determine libcurl's SSL lib as of v7.16.2)
+- Fixed bug #41358 (configure cannot determine SSL lib with libcurl >= 7.16.2).
   (Mike)
 - Fixed bug #41353 (crash in openssl_pkcs12_read() on invalid input). (Ilia)
 - Fixed bug #41351 (Invalid opcode with foreach ($a[] as $b)). (Dmitry, Tony)
@@ -289,8 +295,6 @@ PHP                                                                        NEWS
   (jdolecek at netbsd dot org, Nuno)
 - Fixed PECL bug #10194 (crash in Oracle client when memory limit reached in 
   the callback). (Tony)
-- Limit nesting level of input variables with max_input_nesting_level 
-  as fix for MOPB-03-2007 (Stas)
 - Fixed substr_compare and substr_count information leak (MOPB-14) (Stas, Ilia)
 - Fixed crash on op-assign where argument is string offset (Brian, Stas)
 - Fixed bug #38710 (data leakage because of nonexisting boundary checking in 
