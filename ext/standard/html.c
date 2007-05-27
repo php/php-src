@@ -1154,7 +1154,7 @@ encode_amp:
 					len += sizeof("&amp;") - 1;
 				} else {
 					char *e = memchr(old + i, ';', oldlen - i);
-					char *s = old + i + 1;
+					char *s = old + i;
 
 					if (!e || (e - s) > 10) { /* minor optimization to avoid "entities" over 10 chars in length */
 						goto encode_amp;
