@@ -1,5 +1,5 @@
 --TEST--
-Phar::setStub()/getStub()
+Phar::setStub()/getStub() from file
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --INI--
@@ -26,7 +26,7 @@ var_dump($phar->getStub() == $stub);
 
 $stub = '<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
 $sexp = $stub . "\r\n";
-
+$stub = fopen('data://,'.$stub, 'r');
 $phar->setStub($stub);
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);

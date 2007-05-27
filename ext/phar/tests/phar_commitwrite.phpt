@@ -28,14 +28,15 @@ var_dump($p->getStub());
 unlink(dirname(__FILE__) . '/brandnewphar.phar');
 ?>
 --EXPECT--
-string(24) "<?php __HALT_COMPILER();"
-string(198) "<?php
+string(29) "<?php __HALT_COMPILER(); ?>
+"
+string(200) "<?php
 function __autoload($class)
 {
     include 'phar://' . str_replace('_', '/', $class);
 }
 Phar::mapPhar('brandnewphar.phar');
 include 'phar://brandnewphar.phar/startup.php';
-__HALT_COMPILER();
-?>"
+__HALT_COMPILER(); ?>
+"
 ===DONE===
