@@ -2371,6 +2371,14 @@ PHP_FUNCTION(realpath)
 	convert_to_string_ex(path);
 
 	if (VCWD_REALPATH(Z_STRVAL_PP(path), resolved_path_buff)) {
+		if (PG(safe_mode) && (!php_checkuid(resolved_path_buff, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			RETURN_FALSE;
+		}
+
+		if (php_check_open_basedir(resolved_path_buff TSRMLS_CC)) {
+			RETURN_FALSE;
+		}
+
 #ifdef ZTS
 		if (VCWD_ACCESS(resolved_path_buff, F_OK)) {
 			RETURN_FALSE;
