@@ -7,6 +7,7 @@ $notes = '
  * Send all error messages to stderr in phar.phar [Marcus]
  * Added new subcommands add and delete to phar.phar [Marcus]
  * Made Phar::loadPhar() and Phar::mapPhar() ignore extracted archives [Marcus]
+ * Fix issue with compressed entries and uncompressing entries [Marcus]
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
