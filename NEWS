@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Fixed bug #41492 (open_basedir/safe_mode bypass inside realpath()). (Ilia)
 - Fixed bug #41504 (json_decode() incorrectly decodes JSON arrays with empty
   string keys). (Ilia)
+- Fixed bug #41477 (no arginfo about SoapClient::__soapCall()). (Ilia)
 - Fixed bug #41236 (Regression in timeout handling of non-blocking SSL
   connections during reads and writes). (Ilia)
 
