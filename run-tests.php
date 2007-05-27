@@ -105,7 +105,7 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
 	$php_cgi = getenv('TEST_PHP_CGI_EXECUTABLE');
 	if ($php_cgi=='auto') {
-		$php_cgi = $cwd.'/sapi/cgi/php';
+		$php_cgi = $cwd.'/sapi/cgi/php-cgi';
 		putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
 	}
 	$environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
@@ -1078,9 +1078,9 @@ TEST $file
 		if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) ."/php-cgi.exe")) {
 			$old_php = $php;
 			$php = realpath(dirname($php) ."/php-cgi.exe") .' -C ';
-		} elseif (file_exists("./sapi/cgi/php")) {
+		} elseif (file_exists("./sapi/cgi/php-cgi")) {
 			$old_php = $php;
-			$php = realpath("./sapi/cgi/php") . ' -C ';
+			$php = realpath("./sapi/cgi/php-cgi") . ' -C ';
 		} else {
 			show_result("SKIP", $tested, $tested_file, $unicode_semantics, "reason: CGI not available");
 			return 'SKIPPED';
