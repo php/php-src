@@ -17,7 +17,7 @@ $p->setStub('<?php var_dump("First"); Phar::mapPhar("brandnewphar.phar"); __HALT
 include 'phar://brandnewphar.phar/a.php';
 var_dump($p->getStub());
 $p['b.php'] = '<?php var_dump("World");';
-$p->setStub('<?php var_dump("Second"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>');
+$p->setStub('<?php var_dump("Second"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER();');
 include 'phar://brandnewphar.phar/b.php';
 var_dump($p->getStub());
 $p->stopBuffering();
@@ -36,12 +36,15 @@ unlink(dirname(__FILE__) . '/brandnewphar.phar');
 bool(true)
 bool(false)
 string(5) "Hello"
-string(82) "<?php var_dump("First"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>"
+string(84) "<?php var_dump("First"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>
+"
 string(5) "World"
-string(83) "<?php var_dump("Second"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>"
+string(85) "<?php var_dump("Second"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>
+"
 ===COMMIT===
 bool(true)
 string(5) "Hello"
 string(5) "World"
-string(83) "<?php var_dump("Second"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>"
+string(85) "<?php var_dump("Second"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>
+"
 ===DONE===
