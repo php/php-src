@@ -27,7 +27,7 @@
 
 PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
 {
-	return make_digest_ex(sha1str, digest, 20);
+	make_digest_ex(sha1str, digest, 20);
 }
 
 /* {{{ proto string sha1(string str [, bool raw_output])
