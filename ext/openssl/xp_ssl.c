@@ -84,7 +84,7 @@ static int is_http_stream_talking_to_iis(php_stream *stream TSRMLS_DC)
 	return 0;
 }
 
-static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
+static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init TSRMLS_DC)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 	int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
@@ -104,7 +104,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 			/* re-negotiation, or perhaps the SSL layer needs more
 			 * packets: retry in next iteration */
 			errno = EAGAIN;
-			retry = 1;
+			retry = is_init ? 1 : sslsock->s.is_blocked;
 			break;
 		case SSL_ERROR_SYSCALL:
 			if (ERR_peek_error() == 0) {
@@ -193,7 +193,7 @@ static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size
 			didwrite = SSL_write(sslsock->ssl_handle, buf, count);
 
 			if (didwrite <= 0) {
-				retry = handle_ssl_error(stream, didwrite TSRMLS_CC);
+				retry = handle_ssl_error(stream, didwrite, 0 TSRMLS_CC); 
 			} else {
 				break;
 			}
@@ -226,7 +226,7 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 			nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);
 
 			if (nr_bytes <= 0) {
-				retry = handle_ssl_error(stream, nr_bytes TSRMLS_CC);
+				retry = handle_ssl_error(stream, nr_bytes, 0 TSRMLS_CC);
 				stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
 				
 			} else {
@@ -373,7 +373,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	}
 
 	if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {
-		handle_ssl_error(stream, 0 TSRMLS_CC);
+		handle_ssl_error(stream, 0, 1 TSRMLS_CC);
 	}
 
 	if (cparam->inputs.session) {
@@ -428,7 +428,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 			}
 
 			if (n <= 0) {
-				retry = handle_ssl_error(stream, n TSRMLS_CC);
+				retry = handle_ssl_error(stream, n, 1 TSRMLS_CC); 
 			} else {
 				break;
 			}
