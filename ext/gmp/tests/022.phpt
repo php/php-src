@@ -1,5 +1,7 @@
 --TEST--
 gmp_gcdext() basic tests
+--SKIPIF--
+<?php if (!extension_loaded("gmp")) print "skip"; ?>
 --FILE--
 <?php
 
