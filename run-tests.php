@@ -1391,6 +1391,15 @@ TEST $file
 	} elseif (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
 		$post = trim($section_text['POST']);
+
+		if (array_key_exists('GZIP_POST', $section_text) && function_exists('gzencode')) {
+			$post = gzencode($post, 9, FORCE_GZIP);
+			$env['HTTP_CONTENT_ENCODING'] = 'gzip';
+		} else if (array_key_exists('DEFLATE_POST', $section_text) && function_exists('gzcompress')) {
+			$post = gzcompress($post, 9);
+			$env['HTTP_CONTENT_ENCODING'] = 'deflate';
+		}
+
 		save_text($tmp_post, $post);
 		$content_length = strlen($post);
 
