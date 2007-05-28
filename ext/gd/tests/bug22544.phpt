@@ -5,9 +5,6 @@ Bug #22544 (TrueColor transparency in PNG images).
 	if (!extension_loaded('gd')) {	
 		die("skip gd extension not available\n");
 	}
-	if (!GD_BUNDLED) {
-		die('skip external GD libraries may fail');
-	}
 ?>
 --FILE--
 <?php

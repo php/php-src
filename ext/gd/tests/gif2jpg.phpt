@@ -1,13 +1,11 @@
 --TEST--
 gif --> jpeg conversion test
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}
-	if (!GD_BUNDLED) {
-		die("skip external GD libraries always fail");
-	}
+
 	if (!function_exists("imagejpeg")) {
 		die("skip jpeg support unavailable");
 	}

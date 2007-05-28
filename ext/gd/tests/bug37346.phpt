@@ -1,9 +1,8 @@
 --TEST--
 Bug #37346 (gdimagecreatefromgif, bad colormap)
 --SKIPIF--
-<?php 
-	if (!extension_loaded('gd')) die("skip gd extension not available\n"); 
-	if (!GD_BUNDLED) die('skip external GD libraries always fail');
+<?php
+	if (!extension_loaded('gd')) die("skip gd extension not available\n");
 ?>
 --FILE--
 <?php

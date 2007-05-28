@@ -1,13 +1,11 @@
 --TEST--
 imagefilter() function test
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}
-	if (!GD_BUNDLED) {
-		die("skip this test requires bundled gd library.");
-	}
+	if (!function_exists("imagefilter")) die("skip requires bundled GD library\n");
 ?>
 --FILE--
 <?php
@@ -15,7 +13,7 @@ $no_arg_filters = array(
 	"IMG_FILTER_NEGATE",
 	"IMG_FILTER_GRAYSCALE",
 	"IMG_FILTER_EDGEDETECT",
-	"IMG_FILTER_GAUSSIAN_BLUR", 
+	"IMG_FILTER_GAUSSIAN_BLUR",
 	"IMG_FILTER_SELECTIVE_BLUR",
 	"IMG_FILTER_EMBOSS",
 	"IMG_FILTER_MEAN_REMOVAL"
@@ -33,7 +31,7 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 		} else {
 			echo "$filt failed\n";
 		}
-	} 
+	}
 
 	$im = imagecreatefrompng($SOURCE_IMG);
 	
