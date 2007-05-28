@@ -37,7 +37,6 @@ extern zend_module_entry tokenizer_module_entry;
 PHP_MINIT_FUNCTION(tokenizer);
 PHP_MINFO_FUNCTION(tokenizer);
 
-PHP_FUNCTION(confirm_tokenizer_compiled);	/* For testing, remove later. */
 PHP_FUNCTION(token_get_all);
 PHP_FUNCTION(token_name);
 
