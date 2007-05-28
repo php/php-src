@@ -1794,9 +1794,9 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 #endif
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted at %s:%d (tried to allocate %ld bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted at %s:%d (tried to allocate %lu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted (tried to allocate %ld bytes)", heap->limit, size);
+			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted (tried to allocate %lu bytes)", heap->limit, size);
 #endif
 		}
 
@@ -1810,9 +1810,9 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 out_of_memory:
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %ld bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %lu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Out of memory (allocated %ld) (tried to allocate %ld bytes)", heap->real_size, size);
+			zend_mm_safe_error(heap, "Out of memory (allocated %ld) (tried to allocate %lu bytes)", heap->real_size, size);
 #endif
 			return NULL;
 		}
@@ -2283,7 +2283,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 	       "rm"(offset));
 	
 	if (UNEXPECTED(overflow)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zd * %zd + %zd)", nmemb, size, offset);
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
 		return 0;
 	}
 	return res;
@@ -2298,7 +2298,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 	double _delta = (double)res - _d;
 
 	if (UNEXPECTED((_d + _delta ) != _d)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zd * %zd + %zd)", nmemb, size, offset);
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
 		return 0;
 	}
 	return res;
