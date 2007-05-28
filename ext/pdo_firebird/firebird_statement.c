@@ -655,8 +655,7 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, long attr, zval *val TS
 				RECORD_ERROR(stmt);
 				return 0;
 			}
-			strncpy(S->name, Z_STRVAL_P(val), sizeof(S->name));
-			S->name[sizeof(S->name)] = 0;
+			strlcpy(S->name, Z_STRVAL_P(val), sizeof(S->name));
 			break;
 	}
 	return 1;

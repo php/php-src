@@ -1542,13 +1542,13 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkcs12_read(mixed PKCS12, array &certs, string pass)
+/* {{{ proto bool openssl_pkcs12_read(string PKCS12, array &certs, string pass)
    Parses a PKCS12 to an array */
 PHP_FUNCTION(openssl_pkcs12_read)
 {
-	zval *zp12 = NULL, *zout = NULL, *zextracerts, *zcert, *zpkey;
-	char * pass;
-	int pass_len;
+	zval *zout = NULL, *zextracerts, *zcert, *zpkey;
+	char *pass, *zp12;
+	int pass_len, zp12_len;
 	PKCS12 * p12 = NULL;
 	EVP_PKEY * pkey = NULL;
 	X509 * cert = NULL;
@@ -1556,7 +1556,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 	BIO * bio_in = NULL;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzs", &zp12, &zout, &pass, &pass_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szs", &zp12, &zout, &pass, &pass_len) == FAILURE) {
 		return;
 	}
 
@@ -1564,7 +1564,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 	
 	bio_in = BIO_new(BIO_s_mem());
 	
-	if(!BIO_write(bio_in, Z_STRVAL_P(zp12), Z_STRLEN_P(zp12)))
+	if(!BIO_write(bio_in, zp12, zp12_len))
 		goto cleanup;
 	
 	if(d2i_PKCS12_bio(bio_in, &p12)) {
