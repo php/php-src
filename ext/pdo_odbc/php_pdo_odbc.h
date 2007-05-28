@@ -40,8 +40,6 @@ PHP_RINIT_FUNCTION(pdo_odbc);
 PHP_RSHUTDOWN_FUNCTION(pdo_odbc);
 PHP_MINFO_FUNCTION(pdo_odbc);
 
-PHP_FUNCTION(confirm_pdo_odbc_compiled);	/* For testing, remove later. */
-
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
