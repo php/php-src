@@ -147,7 +147,7 @@ static inline zend_uchar is_numeric_string(char *str, int length, long *lval, do
 	return 0;
 }
 
-static inline zend_uchar is_numeric_unicode(UChar *str, int length, long *lval, double *dval, zend_bool allow_errors)
+static inline zend_uchar is_numeric_unicode(UChar *str, int length, long *lval, double *dval, int allow_errors)
 {
 	long local_lval;
 	double local_dval;
@@ -198,6 +198,13 @@ static inline zend_uchar is_numeric_unicode(UChar *str, int length, long *lval, 
 			}
 			return IS_DOUBLE;
 		}
+	}
+
+	if (!allow_errors) {
+		return 0;
+	}
+	if (allow_errors == -1) {
+		zend_error(E_NOTICE, "A non well formed numeric value encountered");
 	}
 
 	if (allow_errors) {
