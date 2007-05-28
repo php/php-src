@@ -50,13 +50,14 @@ PHP_METHOD(Phar, getExtractList)
 }
 /* }}} */
 
-/* {{{ proto mixed Phar::mapPhar([string alias])
+/* {{{ proto mixed Phar::mapPhar([string alias, [int dataoffset]])
  * Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
 {
 	char *fname, *alias = NULL, *error, *plain_map;
 	int fname_len, alias_len = 0;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!", &alias, &alias_len) == FAILURE) {
+	long dataoffset;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!l", &alias, &alias_len, &dataoffset) == FAILURE) {
 		return;
 	}
 
