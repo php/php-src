@@ -2399,7 +2399,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 					return_val = req->priv_key;
 				}
 				break;
-#ifndef NO_DSA
+#if !defined(NO_DSA) && defined(HAVE_DSA_DEFAULT_METHOD)
 			case OPENSSL_KEYTYPE_DSA:
 				{
 					DSA *dsapar = DSA_generate_parameters(req->priv_key_bits, NULL, 0, NULL, NULL, NULL, NULL);
@@ -3278,7 +3278,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
 			cryptedlen = RSA_private_decrypt(data_len, 
-					(char *)data, 
+					(unsigned char *)data, 
 					crypttemp, 
 					pkey->pkey.rsa, 
 					padding);
