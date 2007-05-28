@@ -30,7 +30,6 @@ if ($p1 && $p2 && $p3 && $p4 && $p5) {
 }
 imagedestroy($im);
 
-
 $im = imagecreatetruecolor(6,6);
 imagefill($im, 0,0, 0xffffff);
 
