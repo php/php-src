@@ -1842,13 +1842,13 @@ double_str:
 			add_next_index_double(return_value, low);
 		}
 	} else {
-		int low, high;
+		double low, high;
 		long lstep;
 long_str:
-		convert_to_long(zlow);
-		convert_to_long(zhigh);
-		low = Z_LVAL_P(zlow);
-		high = Z_LVAL_P(zhigh);
+		convert_to_double(zlow);
+		convert_to_double(zhigh);
+		low = Z_DVAL_P(zlow);
+		high = Z_DVAL_P(zhigh);
 		lstep = (long) step;
 				
 		if (low > high) { 		/* Negative steps */
@@ -1857,18 +1857,18 @@ long_str:
 				goto err;
 			}
 			for (; low >= high; low -= lstep) {
-				add_next_index_long(return_value, low);
+				add_next_index_long(return_value, (long)low);
 			}	
-		} else if (high > low) { 	/* Positive steps */
+ 		} else if (high > low) { 	/* Positive steps */
 			if (high - low < lstep || lstep <= 0) {
 				err = 1;
 				goto err;
 			}
 			for (; low <= high; low += lstep) {
-				add_next_index_long(return_value, low);
+				add_next_index_long(return_value, (long)low);
 			}	
 		} else {
-			add_next_index_long(return_value, low);
+			add_next_index_long(return_value, (long)low);
 		}
 	}
 err:
@@ -4104,7 +4104,7 @@ PHP_FUNCTION(array_reduce)
 		zend_hash_move_forward_ex(htbl, &pos);
 	}
 	
-	RETVAL_ZVAL(result, 0, 1);
+	RETVAL_ZVAL(result, 1, 1);
 }
 /* }}} */
 

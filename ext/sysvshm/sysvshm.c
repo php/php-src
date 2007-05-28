@@ -118,6 +118,11 @@ PHP_FUNCTION(shm_attach)
 		RETURN_FALSE;
 	}
 
+	if (shm_size < 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Segment size must be greater then zero.");
+		RETURN_FALSE;
+  	}
+
 	shm_list_ptr = (sysvshm_shm *) emalloc(sizeof(sysvshm_shm));
 
 	/* get the id from a specified key or create new shared memory */
