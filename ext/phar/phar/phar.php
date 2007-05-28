@@ -41,7 +41,7 @@ function command_autoload($classname)
     command_include(strtolower($classname) . '.inc');
 }
 
-Phar::loadPhar(__FILE__);
+Phar::mapPhar();
 
 spl_autoload_register('command_autoload');
 
