@@ -377,7 +377,7 @@ class PharCommand extends CLICommand
 			foreach(split("\n", `pear list-files PHP_Archive`) as $ent)
 			{
 				$matches = NULL;
-				if (preg_match(",^php[ \t]+([^ \t].*pear[\\\\/]PHP[\\\\/]Ar#chive.php)$,", $ent, $matches))
+				if (preg_match(",^php[ \t]+([^ \t].*pear[\\\\/]PHP[\\\\/]Archive.php)$,", $ent, $matches))
 				{
 					$found = $matches[1];
 					break;
