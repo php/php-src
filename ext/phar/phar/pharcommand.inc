@@ -111,7 +111,14 @@ class PharCommand extends CLICommand
             'p' => array(
                 'typ' => 'loader',
                 'val' => NULL,
-                'inf' => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive). You can use \'0\' or \'1\' to locate it automatically using the mentioned pear command. When using \'0\' the command does not error out when the class file cannot be located.',
+                'inf' => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive).'
+                         .'You can use \'0\' or \'1\' to locate it automatically using the mentioned '
+                         .'pear command. When using \'0\' the command does not error out when the '
+                         .'class file cannot be located. This switch also adds some code around the '
+                         .'stub so that class PHP_Archive gets registered as phar:// stream wrapper '
+                         .'if necessary. And finally this switch will add the file phar.inc from '
+                         .'this package and load it to ensure class Phar is present.'
+                         ,
             ),
             's' => array(
                 'typ' => 'file',
@@ -409,11 +416,14 @@ class PharCommand extends CLICommand
                     $s .= substr($c, 0, strpos($c, "\n") + 1);
                 }
 
-                $s .= '<?php if (!class_exists("Phar",0) && !class_exists("PHP_Archive")) { ?>';
-                $s .= file_get_contents($loader);
-                $s .= '<?php class Phar extends PHP_Archive { } ';
-                $s .= '} ';
-                $s .= 'if (!in_array(\'phar\', stream_get_wrappers())) { stream_wrapper_register(\'phar\', \'Phar\'); } ';
+				$s .= "<?php if (!class_exists('PHP_Archive')) {\n?>";
+				$s .= file_get_contents($loader);
+                $s .= "<?php\n";
+                $s .= "}\n";
+                $s .= "if (!in_array('phar', stream_get_wrappers())) {\n\tstream_wrapper_register('phar', 'PHP_Archive');\n}\n";
+				$s .= "if (!class_exists('Phar',0)) {\n";
+                $s .= "\tinclude 'phar://'.__FILE__.'/phar.inc';\n";
+                $s .= "}\n";
                 $s .= '?>';
 
                 if (substr($c,0,1) == '#') {
@@ -428,11 +438,19 @@ class PharCommand extends CLICommand
         }
 
         if (!is_array($input)) {
-            $this->phar_add($phar, $level, $input, $regex, $invregex, $stub, NULL);
+            $this->phar_add($phar, $level, $input, $regex, $invregex, $stub, NULL, isset($loader));
         } else {
             foreach($input as $i) {
-                $this->phar_add($phar, $level, $i, $regex, $invregex, $stub);
+                $this->phar_add($phar, $level, $i, $regex, $invregex, $stub, NULL, isset($loader));
             }
+        }
+
+        if (isset($loader)) {
+        	if (substr(__FILE__, -15) == 'pharcommand.inc') {
+	            self::phar_add_file($phar, 0, 'phar.inc', 'phar://'.__FILE__.'/phar.inc', NULL);
+	        } else {
+	            self::phar_add_file($phar, 0, 'phar.inc', dirname(__FILE__).'/phar/phar.inc', NULL);
+	        }
         }
 
         switch($this->args['c']['val']) {
@@ -464,13 +482,15 @@ class PharCommand extends CLICommand
      * This function will take a directory and iterate through
      * it and get the files to insert into the Phar archive.
      * 
-     * @param Phar   $phar      The phar object.
-     * @param string $input     The input directory
-     * @param string $regex     The regex use in RegexIterator.
-     * @param string $invregex  The InvertedRegexIterator expression.
-     * @param SplFileInfo $stub
+     * @param Phar        $phar      The phar object.
+     * @param string      $input     The input directory
+     * @param string      $regex     The regex use in RegexIterator.
+     * @param string      $invregex  The InvertedRegexIterator expression.
+     * @param SplFileInfo $stub Stub file object    
+     * @param mixed       $compress  Compression algorithm or NULL
+     * @param boolean     $noloader  Whether to prevent adding the loader
      */
-    static function phar_add(Phar $phar, $level, $input, $regex, $invregex, SplFileInfo $stub = NULL, $compress = NULL)
+    static function phar_add(Phar $phar, $level, $input, $regex, $invregex, SplFileInfo $stub = NULL, $compress = NULL, $noloader = false)
     {
         if ($input && is_file($input) && !is_dir($input)) {
             return self::phar_add_file($phar, $level, $input, $input, $compress);
@@ -489,7 +509,7 @@ class PharCommand extends CLICommand
         try {
             foreach($dir as $file) {
                 if (empty($stub) || $file->getRealPath() != $stub->getRealPath()) {
-                    self::phar_add_file($phar, $level, $dir->getSubPathName(), $file, $compress);
+                    self::phar_add_file($phar, $level, $dir->getSubPathName(), $file, $compress, $noloader);
                 }
             }
         } catch(Excpetion $e) {
@@ -503,18 +523,23 @@ class PharCommand extends CLICommand
      *
      * This function adds a file to a phar archive.
      *
-     * @param Phar   $phar     The phar object
-     * @param string $level    The level of the file.
-     * @param string $entry    The entry point
-     * @param string $file     The file to add to the archive
-     * @param string $compress The compression scheme for the file.
+     * @param Phar    $phar      The phar object
+     * @param string  $level     The level of the file.
+     * @param string  $entry     The entry point
+     * @param string  $file      The file to add to the archive
+     * @param string  $compress  The compression scheme for the file.
+     * @param boolean $noloader  Whether to prevent adding the loader
      */
-    static function phar_add_file(Phar $phar, $level, $entry, $file, $compress)
+    static function phar_add_file(Phar $phar, $level, $entry, $file, $compress, $noloader = false)
     {
         $entry = str_replace('//', '/', $entry);
         while($level-- > 0 && ($p = strpos($entry, '/')) !== false) {
             $entry = substr($entry, $p+1);
         }
+
+		if ($noloader && $entry == 'phar.inc') {
+			return;
+		}
 
         echo "$entry\n";
 
@@ -1331,7 +1356,7 @@ class PharCommand extends CLICommand
         $infos['Compressed-bz2']     = $compalg['BZ2'];
         $infos['Uncompressed-size']  = $usize;
         $infos['Compressed-size']    = $csize;
-        $infos['Compression-ratio']  = sprintf('%.3g%%', ($csize * 100) / $usize);
+        $infos['Compression-ratio']  = sprintf('%.3g%%', $usize ? ($csize * 100) / $usize : 100);
         $infos['Metadata-global']    = $phar->hasMetadata() * 1;
         $infos['Metadata-files']     = $mcount;
         $infos['Stub-size']          = strlen($phar->getStub());
