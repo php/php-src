@@ -1002,8 +1002,8 @@ int php_mcrypt_iv(php_mcrypt_iv_source source, int size, char **iv_str, int *iv_
 	int fd, n;
 	size_t read_bytes;
 	
-	if (size <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not create an IV with size 0 or smaller");
+	if (size <= 0 || size >= INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not create an IV with a size of less then 1 or greater then %d", INT_MAX);
 		return FAILURE;
 	}
 	
