@@ -1,3 +1,161 @@
+2007-05-27  Antony Dovgal  <antony@zend.com>
+
+    * run-tests.php
+      sapi/cgi/tests/include.inc:
+      "sapi/cgi/php" -> "sapi/cgi/php-cgi"
+
+    * ext/openssl/tests/bug38255.phpt
+      ext/openssl/tests/bug38261.phpt:
+      fix tests
+
+    * ext/openssl/xp_ssl.c:
+      MFB: fix #41236 (Regression in timeout handling of non-blocking SSL
+      connections during reads and writes).
+      Everybody please calm down, we can always fix such issues without starting
+      a war..
+
+2007-05-27  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      sapi/cgi/.cvsignore:
+      the binary is called php-cgi now
+
+    * sapi/cgi/.cvsignore:
+      The binary is called php-cgi now
+
+2007-05-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * php.ini-dist
+      php.ini-recommended:
+      - Add missing entry
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended:
+      MFH: add missing entries, these are in PHP_4_4 branch..
+
+2007-05-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/json/tests/pass001.1.phpt
+      ext/json/tests/pass001.phpt:
+      Adjust tests to reflect the new expected output
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Fixed SQLite version
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug41477.phpt
+      ext/soap/tests/bugs/bug41477.phpt:
+      
+      Fixed bug #41477 (no arginfo about SoapClient::__soapCall()).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/file.c:
+      Fixed bug #41492 (open_basedir/safe_mode bypass inside realpath()).
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/xp_ssl.c:
+      
+      Fixed bug #41236 (Regression in timeout handling of non-blocking SSL
+      connections during reads and writes).
+
+    * (PHP_5_2)
+      NEWS
+      ext/json/JSON_parser.c
+      ext/json/tests/bug41504.phpt
+      ext/json/tests/bug41504.phpt:
+      
+      Fixed bug #41504 (json_decode() incorrectly decodes JSON arrays with empty
+      string keys).
+
+2007-05-27  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/standard/html.c
+      ext/standard/tests/strings/htmlentities18.phpt:
+      fix handling of &&amp; by htmlentities 'no-double-encode'
+      expand the test cases
+
+    * (PHP_5_2)
+      ext/standard/html.c:
+      fix the new 'no-double-encoding' feature of htmlspecialchars()  (the length
+      for char search was wrong. this could lead to crashes..)
+
+    * (PHP_5_2)
+      ext/standard/md5.c:
+      make make_digest() output a 16-byte string so that it wont break the
+      internal PHP API (it was breaking the SOAP extension)
+
+2007-05-27  Antony Dovgal  <antony@zend.com>
+
+    * ext/gmp/tests/001.phpt
+      ext/gmp/tests/011.phpt
+      ext/gmp/tests/012.phpt
+      ext/gmp/tests/013.phpt
+      ext/gmp/tests/014.phpt
+      ext/gmp/tests/015.phpt
+      ext/gmp/tests/016.phpt
+      ext/gmp/tests/017.phpt
+      ext/gmp/tests/018.phpt
+      ext/gmp/tests/019.phpt
+      ext/gmp/tests/020.phpt
+      ext/gmp/tests/021.phpt
+      ext/gmp/tests/022.phpt
+      ext/gmp/tests/023.phpt
+      ext/gmp/tests/024.phpt
+      ext/gmp/tests/025.phpt
+      ext/gmp/tests/026.phpt
+      ext/gmp/tests/027.phpt
+      ext/gmp/tests/028.phpt
+      ext/gmp/tests/029.phpt
+      ext/gmp/tests/030.phpt
+      ext/gmp/tests/031.phpt
+      ext/gmp/tests/032.phpt
+      ext/gmp/tests/033.phpt
+      ext/gmp/tests/034.phpt
+      ext/gmp/tests/035.phpt
+      ext/gmp/tests/036.phpt
+      ext/gmp/tests/037.phpt
+      ext/gmp/tests/038.phpt
+      ext/gmp/tests/039.phpt
+      ext/gmp/tests/040.phpt:
+      add missing skipif sections
+
+    * (PHP_4_4)
+      ext/standard/basic_functions.c
+      ext/standard/php_var.h:
+      MFH: improve variable name checks (by popular demands..)
+
+2007-05-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS:
+      fix news
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/md5.c
+      ext/standard/sha1.c:
+      - Fixed bug #41511 (Compile failure under IRIX 6.5.30 building md5.c)
+
+2007-05-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/filetype_variation.phpt:
+      check for required func
+
+    * (PHP_5_2)
+      ext/standard/tests/general_functions/intval.phpt:
+      fix test
+
 2007-05-26  Sara Golemon  <sara@golemon.com>
 
     * ext/hash/hash.c:
