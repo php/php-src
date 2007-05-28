@@ -111,7 +111,7 @@ class PharCommand extends CLICommand
             'p' => array(
                 'typ' => 'loader',
                 'val' => NULL,
-                'inf' => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive). You can use \'auto\' or \'optional\' to locate it automatically using the mentioned pear command. When using \'optional\' the command does not error out when the class file cannot be located.',
+                'inf' => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive). You can use \'0\' or \'1\' to locate it automatically using the mentioned pear command. When using \'0\' the command does not error out when the class file cannot be located.',
             ),
             's' => array(
                 'typ' => 'file',
@@ -188,7 +188,7 @@ class PharCommand extends CLICommand
      */
     static function cli_arg_typ_loader($arg, $cfg, $key)
     {
-        if ($arg == 'auto' || $arg == 'optional') {
+        if (($arg == '0' || $arg == '1') && !file_exists($arg)) {
             $found = NULL;
             foreach(split("\n", `pear list-files PHP_Archive`) as $ent) {
                 $matches = NULL;
@@ -199,7 +199,7 @@ class PharCommand extends CLICommand
             }
             if (!isset($found)) {
             	$msg = "Pear package PHP_Archive or Archive.php class file not found.\n";
-            	if ($arg == 'optional') {
+            	if ($arg == '0') {
             		self::notice($msg);
             	} else {
             		self::error($msg);
