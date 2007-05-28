@@ -363,6 +363,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt,
 #endif
 
 	if (!S->result) {
+		strcpy(stmt->error_code, "HY000");
 		return 0;	
 	}
 	if ((S->current_data = mysql_fetch_row(S->result)) == NULL) {
