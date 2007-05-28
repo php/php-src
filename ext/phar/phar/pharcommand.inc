@@ -1331,6 +1331,7 @@ class PharCommand extends CLICommand
         $infos['Compression-ratio']  = sprintf('%.3g%%', ($csize * 100) / $usize);
         $infos['Metadata-global']    = $phar->hasMetadata() * 1;
         $infos['Metadata-files']     = $mcount;
+        $infos['Stub-size']          = strlen($phar->getStub());
 
         if (isset($index)) {
             if (!isset($infos[$index])) {
