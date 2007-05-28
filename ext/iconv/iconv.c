@@ -363,8 +363,8 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 		}
 		
 		if (mimetype != NULL && !(output_context->op & PHP_OUTPUT_HANDLER_CLEAN)) {
-			spprintf(&content_type, 0, "Content-Type: %.*s; charset=%s", mimetype_len?mimetype_len:strlen(mimetype), mimetype, ICONVG(output_encoding));
-			if (content_type && SUCCESS == sapi_add_header(content_type, strlen(content_type), 0)) {
+			int len = spprintf(&content_type, 0, "Content-Type: %.*s; charset=%s", mimetype_len?mimetype_len:strlen(mimetype), mimetype, ICONVG(output_encoding));
+			if (content_type && SUCCESS == sapi_add_header(content_type, len, 0)) {
 				SG(sapi_headers).send_default_content_type = 0;
 				php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE, NULL TSRMLS_CC);
 			}
