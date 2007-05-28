@@ -180,8 +180,8 @@ class PharCommand extends CLICommand
     /**
      * Argument type loader
      *
-     * @param string $arg   Either 'auto' or an filename that contains class 
-     *                      PHP_Archive
+     * @param string $arg   Either 'auto', 'optional' or an filename that 
+     *                      contains class PHP_Archive
      * @param  string $cfg  Configuration to pass to a new file
      * @param  string $key  The key 
      * @return string $arg  The argument.
@@ -197,8 +197,13 @@ class PharCommand extends CLICommand
                     break;
                 }
             }
-            if (!isset($found) && $arg != 'optional') {
-                self::error("Pear package PHP_Archive or Archive.php class file not found.\n");
+            if (!isset($found)) {
+            	$msg = "Pear package PHP_Archive or Archive.php class file not found.\n";
+            	if ($arg == 'optional') {
+            		self::notice($msg);
+            	} else {
+            		self::error($msg);
+            	}
             }
             $arg = $found;
         }
