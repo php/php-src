@@ -1253,8 +1253,6 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	/* for windows, socket listening is broken in the fastcgi library itself
-	   so dissabling this feature on windows till time is available to fix it */
 	if (bindpath) {
 		fcgi_fd = fcgi_listen(bindpath, 128);
 		if (fcgi_fd < 0) {
