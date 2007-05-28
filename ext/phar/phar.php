@@ -371,7 +371,7 @@ class PharCommand extends CLICommand
 
 	static function cli_arg_typ_loader($arg)
 	{
-		if ($arg == 'auto' || $arg == 'optional')
+		if (($arg == '0' || $arg == '1') && !file_exists($arg))
 		{
 			$found = NULL;
 			foreach(split("\n", `pear list-files PHP_Archive`) as $ent)
@@ -385,7 +385,7 @@ class PharCommand extends CLICommand
 			}
 			if (!isset($found)) {
 				echo "Pear package PHP_Archive or Archive.php class file not found.\n";
-				if ($arg != 'optional')
+				if ($arg != '0')
 				{
 					exit(1);
 				}
@@ -485,7 +485,7 @@ class PharCommand extends CLICommand
 			'f' => array('typ'=>'pharnew', 'val'=>NULL,      'required'=>1, 'inf'=>'<file>   Specifies the phar file to work on.'),
 			'h' => array('typ'=>'select',  'val'=>NULL,                     'inf'=>'<method> Selects the hash algorithmn.', 'select'=>array('md5'=>'MD5','sha1'=>'SHA1','sha256'=>'SHA256','sha512'=>'SHA512')),
 			'i' => array('typ'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Specifies a regular expression for input files.'),
-			'p' => array('typ'=>'loader',  'val'=>NULL,                     'inf'=>'<loader> Location of PHP_Archive class file (pear list-files PHP_Archive). You can use \'auto\' or \'optional\' to locate it automatically using the mentioned pear command. When using \'optional\' the command does not error out when the class file cannot be located.'),
+			'p' => array('typ'=>'loader',  'val'=>NULL,                     'inf'=>'<loader> Location of PHP_Archive class file (pear list-files PHP_Archive). You can use \'0\' or \'1\' to locate it automatically using the mentioned pear command. When using \'0\' the command does not error out when the class file cannot be located.'),
 			's' => array('typ'=>'file',    'val'=>NULL,                     'inf'=>'<stub>   Select the stub file (excluded from list of input files/dirs).'),
 			'x' => array('typ'=>'regex',   'val'=>NULL,                     'inf'=>'<regex>  Regular expression for input files to exclude.'),
 			''  => array('typ'=>'any',     'val'=>NULL,      'required'=>1, 'inf'=>'         Any number of input files and directories.'),
