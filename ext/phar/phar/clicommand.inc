@@ -86,9 +86,14 @@ abstract class CLICommand
         call_user_func(array($this, $this->cmds[$command]['run']), $this->args);
     }
 
-    static function error ($msg, $exit_code = 1) 
+    static function notice ($msg)
     {
         fprintf(STDERR, $msg);
+    }
+
+    static function error ($msg, $exit_code = 1) 
+    {
+        notice($msg);
         exit($exit_code);
     }
 
