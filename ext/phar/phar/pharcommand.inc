@@ -59,13 +59,13 @@ class PharCommand extends CLICommand
         $phar_args = array(
             'a' => array(
                 'typ' => 'alias',
-                'val'  => NULL,
-                'inf'  => '<alias>  Provide an alias name for the phar file.'
+                'val' => NULL,
+                'inf' => '<alias>  Provide an alias name for the phar file.'
             ),
             'c' => array(
-                'typ'   => 'compalg',
-                'val'    => NULL,
-                'inf'    => '<algo>   Compression algorithm.',
+                'typ' => 'compalg',
+                'val' => NULL,
+                'inf' => '<algo>   Compression algorithm.',
                 'select' => array(
                     '0'    => 'No compression',
                     'none' => 'No compression',
@@ -74,18 +74,18 @@ class PharCommand extends CLICommand
             ),
             'e' => array(
                 'typ' => 'entry',
-                'val'  => NULL,
-                'inf'  => '<entry>  Name of entry to work on (must include PHAR internal directory name if any).'
+                'val' => NULL,
+                'inf' => '<entry>  Name of entry to work on (must include PHAR internal directory name if any).'
             ),
             'f' => array(
                 'typ' => $phartype,
-                'val'  => NULL,
-                'inf'  => '<file>   Specifies the phar file to work on.'
+                'val' => NULL,
+                'inf' => '<file>   Specifies the phar file to work on.'
             ),
             'h' => array(
-                'typ'   => 'select',
-                'val'    => NULL,
-                'inf'    => '<method> Selects the hash algorithmn.',
+                'typ' => 'select',
+                'val' => NULL,
+                'inf' => '<method> Selects the hash algorithmn.',
                 'select' => array('md5' => 'MD5','sha1' => 'SHA1')
             ),
             'i' => array(
@@ -95,13 +95,13 @@ class PharCommand extends CLICommand
             ),
             'k' => array(
                 'typ' => 'any',
-                'val'  => NULL,
-                'inf'  => '<index> Subscription index to work on.',
+                'val' => NULL,
+                'inf' => '<index>  Subscription index to work on.',
             ),
             'l' => array(
                 'typ' => 'int',
-                'val'  => 0,
-                'inf'  => '<level> Number of preceeding subdirectories to strip from file entries',
+                'val' => 0,
+                'inf' => '<level>  Number of preceeding subdirectories to strip from file entries',
             ),
             'm' => array(
                 'typ' => 'any',
@@ -110,8 +110,8 @@ class PharCommand extends CLICommand
             ),
             'p' => array(
                 'typ' => 'loader',
-                'val'  => NULL,
-                'inf'  => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive). You can use \'auto\' or \'optional\' to locate it automatically using the mentioned pear command. When using \'optional\' the command does not error out when the class file cannot be located.',
+                'val' => NULL,
+                'inf' => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive). You can use \'auto\' or \'optional\' to locate it automatically using the mentioned pear command. When using \'optional\' the command does not error out when the class file cannot be located.',
             ),
             's' => array(
                 'typ' => 'file',
