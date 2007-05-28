@@ -371,7 +371,7 @@ class PharCommand extends CLICommand
 
 	static function cli_arg_typ_loader($arg)
 	{
-		if ($arg == 'auto')
+		if ($arg == 'auto' || $arg == 'optional')
 		{
 			$found = NULL;
 			foreach(split("\n", `pear list-files PHP_Archive`) as $ent)
