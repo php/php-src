@@ -205,6 +205,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 						S->param_lengths[param->paramno] = 1;
 						S->param_formats[param->paramno] = 1;
 					} else {
+						SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
 						convert_to_string(param->parameter);
 						S->param_values[param->paramno] = Z_STRVAL_P(param->parameter);
 						S->param_lengths[param->paramno] = Z_STRLEN_P(param->parameter);

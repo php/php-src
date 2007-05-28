@@ -38,7 +38,6 @@ extern zend_module_entry sqlite_module_entry;
 
 PHP_MINIT_FUNCTION(sqlite);
 PHP_MSHUTDOWN_FUNCTION(sqlite);
-PHP_RINIT_FUNCTION(sqlite);
 PHP_RSHUTDOWN_FUNCTION(sqlite);
 PHP_MINFO_FUNCTION(sqlite);
 
