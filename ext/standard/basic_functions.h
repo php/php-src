@@ -45,7 +45,6 @@ PHP_RSHUTDOWN_FUNCTION(basic);
 PHP_MINFO_FUNCTION(basic);
 
 PHP_FUNCTION(constant);
-PHP_FUNCTION(toggle_short_open_tag);
 PHP_FUNCTION(sleep);
 PHP_FUNCTION(usleep);
 #if HAVE_NANOSLEEP
