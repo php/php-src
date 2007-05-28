@@ -55,6 +55,7 @@ typedef struct {
 } PHP_MD5_CTX;
 
 PHPAPI void make_digest(char *md5str, unsigned char *digest);
+PHPAPI void make_digest_ex(char *md5str, unsigned char *digest, int len);
 PHPAPI void PHP_MD5Init(PHP_MD5_CTX *);
 PHPAPI void PHP_MD5Update(PHP_MD5_CTX *, const unsigned char *, unsigned int);
 PHPAPI void PHP_MD5Final(unsigned char[16], PHP_MD5_CTX *);
