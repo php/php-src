@@ -1605,8 +1605,8 @@ SXE_METHOD(addAttribute)
 		return;
 	}
 
-	if (qname_len == 0 || value_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute name and value are required");
+	if (qname_len == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute name is required");
 		return;
 	}
 
