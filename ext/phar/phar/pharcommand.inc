@@ -109,9 +109,9 @@ class PharCommand extends CLICommand
                 'inf' => '<meta>   Meta data to store with entry (serialized php data).'
             ),
             'p' => array(
-                'typ' => 'file',
+                'typ' => 'loader',
                 'val'  => NULL,
-                'inf'  => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive).',
+                'inf'  => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive). You can use \'auto\' or \'optional\' to locate it automatically using the mentioned pear command. When using \'optional\' the command does not error out when the class file cannot be located.',
             ),
             's' => array(
                 'typ' => 'file',
@@ -174,6 +174,35 @@ class PharCommand extends CLICommand
     static function strEndsWith($haystack, $needle)
     {
         return substr($haystack, -strlen($needle)) == $needle;
+    }
+    // }}}
+    // {{{ static function cli_arg_typ_loader
+    /**
+     * Argument type loader
+     *
+     * @param string $arg   Either 'auto' or an filename that contains class 
+     *                      PHP_Archive
+     * @param  string $cfg  Configuration to pass to a new file
+     * @param  string $key  The key 
+     * @return string $arg  The argument.
+     */
+    static function cli_arg_typ_loader($arg, $cfg, $key)
+    {
+        if ($arg == 'auto' || $arg == 'optional') {
+            $found = NULL;
+            foreach(split("\n", `pear list-files PHP_Archive`) as $ent) {
+                $matches = NULL;
+                if (preg_match(",^php[ \t]+([^ \t].*pear[\\\\/]PHP[\\\\/]Archive.php)$,", $ent, $matches)) {
+                    $found = $matches[1];
+                    break;
+                }
+            }
+            if (!isset($found) && $arg != 'optional') {
+                self::error("Pear package PHP_Archive or Archive.php class file not found.\n");
+            }
+            $arg = $found;
+        }
+        return self::cli_arg_typ_file($arg);
     }
     // }}}
     // {{{ static function cli_arg_typ_pharnew
