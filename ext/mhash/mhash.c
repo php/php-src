@@ -65,8 +65,12 @@ ZEND_GET_MODULE(mhash)
 
 #define NO_ARGS() (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ""))
 
+#ifndef HAVE_MHASH_GET_HASH_NAME_STATIC_PROTO
 extern const char *mhash_get_hash_name_static(hashid hash);
+#endif
+#ifndef HAVE_MHASH_GET_KEYGEN_NAME_STATIC_PROTO
 extern const char *mhash_get_keygen_name_static(hashid type);
+#endif
 
 /* {{{ int php_mhash */
 int php_mhash(hashid hash, const char *input_str, int input_len, const char *key_str, int key_len, char **enc, int *len TSRMLS_DC)
