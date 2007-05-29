@@ -1138,6 +1138,11 @@ PHPAPI PHP_FUNCTION(fgets)
 		RETURN_NULL();
 	}
 
+	if (length <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
+		RETURN_FALSE;
+	}
+
 	if (length == 1) {
 		/* For BC reasons, fgets() should only return length-1 bytes. */
 		RETURN_FALSE;
