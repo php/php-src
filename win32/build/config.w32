@@ -126,7 +126,7 @@ if (VCVERS >= 14) {
 	if (X64) {
 		ADD_FLAG('CFLAGS', ' /wd4996 /Wp64 ');
 	} else {
-		ADD_FLAG('CFLAGS', ' /wd4996 ');
+		ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
 	}
 
 	if (PHP_DEBUG == "yes") {
