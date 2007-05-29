@@ -449,7 +449,7 @@ PHP_FUNCTION(glob)
 
 	/* we assume that any glob pattern will match files from one directory only
 	   so checking the dirname of the first match should be sufficient */
-	strncpy(cwd, globbuf.gl_pathv[0], MAXPATHLEN);
+	strlcpy(cwd, globbuf.gl_pathv[0], MAXPATHLEN);
 
 	if (php_check_open_basedir(cwd TSRMLS_CC)) {
 		RETURN_FALSE;
