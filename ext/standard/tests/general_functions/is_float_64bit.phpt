@@ -1,9 +1,11 @@
 --TEST--
-Test is_float() & it's FALIAS: is_double() & is_real() functions
+Test is_float() & it's FALIASes: is_double() & is_real() functions
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
+--INI--
+precision=14
 --FILE--
 <?php
 /* Prototype: bool is_float ( mixed $var );
@@ -149,29 +151,29 @@ closedir($dfp);
 --EXPECTF--
 *** Testing is_float(), is_double() and is_real() with float values***
 -- Iteration 1 --
-bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 2 --
-bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 3 --
-bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 4 --
-bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 5 --
-bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 6 --
-bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 7 --
 bool(true)
 bool(true)
