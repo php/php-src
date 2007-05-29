@@ -1,3 +1,151 @@
+2007-05-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php
+      server-tests.php
+      TSRM/tsrm_virtual_cwd.c
+      ext/bz2/bz2.c
+      ext/dbase/dbf_rec.c
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/interbase/php_ibase_udf.c
+      ext/mcrypt/mcrypt.c
+      ext/mime_magic/mime_magic.c
+      ext/mysql/php_mysql.c
+      ext/openssl/openssl.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo_firebird/firebird_statement.c
+      ext/pdo_mysql/mysql_statement.c
+      ext/pdo_pgsql/pgsql_statement.c
+      ext/shmop/shmop.c
+      ext/simplexml/simplexml.c
+      ext/soap/php_http.c
+      ext/sockets/php_sockets.h
+      ext/sockets/sockets.c
+      ext/sqlite/php_sqlite.h
+      ext/sqlite/sess_sqlite.c
+      ext/sqlite/sqlite.c
+      ext/standard/array.c
+      ext/standard/browscap.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/md5.c
+      ext/standard/md5.h
+      ext/standard/proc_open.c
+      ext/standard/sha1.c
+      ext/standard/url_scanner.c
+      ext/sysvshm/sysvshm.c
+      ext/wddx/wddx.c
+      ext/xmlrpc/libxmlrpc/xml_to_dandarpc.c
+      ext/xmlrpc/libxmlrpc/xml_to_soap.c
+      ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.c
+      main/php_content_types.c
+      main/streams/plain_wrapper.c:
+      
+      MFB
+
+2007-05-28  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_operators.h:
+      fix #41517 (different behaviour of floatval() in Unicode mode)
+
+    * ext/openssl/tests/bug36732.phpt
+      ext/openssl/tests/bug36732.phpt
+      ext/openssl/tests/bug41353.phpt
+      ext/openssl/tests/bug41353.phpt:
+      fix test names
+
+2007-05-28  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/tests/bug19366.phpt
+      ext/gd/tests/bug22544.phpt
+      ext/gd/tests/bug24155.phpt
+      ext/gd/tests/bug24594.phpt
+      ext/gd/tests/bug27582_1.phpt
+      ext/gd/tests/bug28147.phpt
+      ext/gd/tests/bug36697.phpt
+      ext/gd/tests/bug37346.phpt
+      ext/gd/tests/bug37360.phpt
+      ext/gd/tests/bug38112.phpt
+      ext/gd/tests/bug39082.phpt
+      ext/gd/tests/bug39273.phpt
+      ext/gd/tests/bug39286.phpt
+      ext/gd/tests/bug39366.phpt
+      ext/gd/tests/bug39508.phpt
+      ext/gd/tests/bug39780.phpt
+      ext/gd/tests/bug39780_extern.phpt
+      ext/gd/tests/createfromgd2.phpt
+      ext/gd/tests/createfromwbmp.phpt
+      ext/gd/tests/createfromwbmp2_extern.phpt
+      ext/gd/tests/dashedlines.phpt
+      ext/gd/tests/gif2gd.phpt
+      ext/gd/tests/gif2jpg.phpt
+      ext/gd/tests/gif2png.phpt
+      ext/gd/tests/imagefilter.phpt
+      ext/gd/tests/imagewbmp.phpt
+      ext/gd/tests/jpeg2png.phpt
+      ext/gd/tests/jpg2gd.phpt
+      ext/gd/tests/libgd00086.phpt
+      ext/gd/tests/libgd00086_extern.phpt
+      ext/gd/tests/png2gd.phpt
+      ext/gd/tests/pngcomp.phpt
+      ext/gd/tests/xpm2gd.phpt
+      ext/gd/tests/xpm2jpg.phpt
+      ext/gd/tests/xpm2png.phpt:
+      - enable tests even when an external GD is used. Latest releases
+        (2.0.34 or 2.0.35) work.
+        NB: if you use Debian, you'll realize how bad their package is and start
+        to either use the source or push all patches I posted to their bugs
+        tracker
+
+    * ext/gd/tests/createfromwbmp2.phpt:
+      - fix test, requires binary string
+
+    * (PHP_5_2)
+      ext/openssl/tests/bug37820.phpt
+      ext/openssl/tests/bug39217.phpt:
+      - MFH:
+       - tests for #39217
+       - skip test if openssl is too old
+
+    * ext/openssl/openssl.c:
+      - MFB: enable DSA key if HAVE_DSA_DEFAULT_METHOD is set
+
+    * ext/openssl/tests/bug36732.phpt
+      ext/openssl/tests/bug41353.phpt:
+      - skip if openssl is too old
+      - MFB test bug41353.phpt
+
+2007-05-28  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/pdo_odbc/php_pdo_odbc.h
+      ext/standard/basic_functions.h
+      ext/tokenizer/php_tokenizer.h:
+      Remove weird useless entries
+
+2007-05-28  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      reorder
+
+2007-05-28  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/reflection/php_reflection.c:
+      Fix logic
+
+2007-05-28  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_alloc.c:
+      use unsigned modifiers
+
+2007-05-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Removed deprecated comment
+
 2007-05-27  Antony Dovgal  <antony@zend.com>
 
     * run-tests.php
