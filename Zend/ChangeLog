@@ -1,3 +1,12 @@
+2007-05-28  Antony Dovgal  <antony@zend.com>
+
+    * zend_API.c
+      zend_operators.h:
+      fix #41517 (different behaviour of floatval() in Unicode mode)
+
+    * zend_alloc.c:
+      use unsigned modifiers
+
 2007-05-24  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_language_scanner.l
