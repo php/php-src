@@ -280,16 +280,24 @@ string(0) ""
 -- Iteration 1 --
 string(6) "Object"
 -- Iteration 2 --
-string(14) "Resource id #5"
+string(14) "Resource id #%d"
 -- Iteration 3 --
-string(14) "Resource id #6"
+string(14) "Resource id #%d"
 -- Iteration 4 --
+
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 5 --
+
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 6 --
+
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 7 --
+
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 8 --
 string(0) ""
@@ -432,9 +440,9 @@ unicode(0) ""
 -- Iteration 1 --
 unicode(6) "Object"
 -- Iteration 2 --
-unicode(%d) "Resource id #%d"
+unicode(14) "Resource id #%d"
 -- Iteration 3 --
-unicode(%d) "Resource id #%d"
+unicode(14) "Resource id #%d"
 -- Iteration 4 --
 
 Notice: Array to string conversion in %s on line %d
