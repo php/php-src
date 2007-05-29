@@ -1,7 +1,7 @@
 --TEST--
 mysql_affected_rows()
 --SKIPIF--
-<?php // require_once('skipif.inc'); ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
     include "connect.inc";
