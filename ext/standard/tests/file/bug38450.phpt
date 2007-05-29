@@ -118,7 +118,7 @@ unicode(12) "constructor!"
 line1
 line2
 line3
-string(18) "line1
+unicode(18) "line1
 line2
 line3
 "

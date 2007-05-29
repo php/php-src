@@ -837,3 +837,727 @@ object(object_class)#%d (7) refcount(1){
   }
 }
 Done
+--UEXPECTF--
+*** Testing debug_zval_dump() on objects ***
+-- Iteration 1 --
+object(object_class)#%d (6) refcount(4){
+  [u"value1"]=>
+  long(5) refcount(1)
+  [u"value2":u"object_class":private]=>
+  long(10) refcount(5)
+  [u"value3":protected]=>
+  long(20) refcount(5)
+  [u"value4"]=>
+  long(30) refcount(6)
+  [u"array_var"]=>
+  array(2) refcount(5){
+    [u"key1" { 006b 0065 0079 0031 }]=>
+    long(1) refcount(1)
+    [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+    long(3) refcount(1)
+  }
+  [u"object_class1"]=>
+  object(object_class)#%d (6) refcount(4){
+    [u"value1"]=>
+    long(5) refcount(1)
+    [u"value2":u"object_class":private]=>
+    long(10) refcount(5)
+    [u"value3":protected]=>
+    long(20) refcount(5)
+    [u"value4"]=>
+    long(30) refcount(6)
+    [u"array_var"]=>
+    array(2) refcount(5){
+      [u"key1" { 006b 0065 0079 0031 }]=>
+      long(1) refcount(1)
+      [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+      long(3) refcount(1)
+    }
+    [u"object_class1"]=>
+    *RECURSION*
+  }
+}
+-- Iteration 2 --
+object(no_member_class)#%d (0) refcount(3){
+}
+-- Iteration 3 --
+object(contains_object_class)#%d (9) refcount(3){
+  [u"p"]=>
+  long(30) refcount(2)
+  [u"p1":protected]=>
+  long(40) refcount(2)
+  [u"p2":u"contains_object_class":private]=>
+  long(50) refcount(2)
+  [u"class_object1"]=>
+  object(object_class)#%d (6) refcount(5){
+    [u"value1"]=>
+    long(5) refcount(1)
+    [u"value2":u"object_class":private]=>
+    long(10) refcount(5)
+    [u"value3":protected]=>
+    long(20) refcount(5)
+    [u"value4"]=>
+    long(30) refcount(6)
+    [u"array_var"]=>
+    array(2) refcount(5){
+      [u"key1" { 006b 0065 0079 0031 }]=>
+      long(1) refcount(1)
+      [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+      long(3) refcount(1)
+    }
+    [u"object_class1"]=>
+    object(object_class)#%d (6) refcount(5){
+      [u"value1"]=>
+      long(5) refcount(1)
+      [u"value2":u"object_class":private]=>
+      long(10) refcount(5)
+      [u"value3":protected]=>
+      long(20) refcount(5)
+      [u"value4"]=>
+      long(30) refcount(6)
+      [u"array_var"]=>
+      array(2) refcount(5){
+        [u"key1" { 006b 0065 0079 0031 }]=>
+        long(1) refcount(1)
+        [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+        long(3) refcount(1)
+      }
+      [u"object_class1"]=>
+      *RECURSION*
+    }
+  }
+  [u"class_object2"]=>
+  object(object_class)#%d (6) refcount(5){
+    [u"value1"]=>
+    long(5) refcount(1)
+    [u"value2":u"object_class":private]=>
+    long(10) refcount(5)
+    [u"value3":protected]=>
+    long(20) refcount(5)
+    [u"value4"]=>
+    long(30) refcount(6)
+    [u"array_var"]=>
+    array(2) refcount(5){
+      [u"key1" { 006b 0065 0079 0031 }]=>
+      long(1) refcount(1)
+      [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+      long(3) refcount(1)
+    }
+    [u"object_class1"]=>
+    object(object_class)#%d (6) refcount(5){
+      [u"value1"]=>
+      long(5) refcount(1)
+      [u"value2":u"object_class":private]=>
+      long(10) refcount(5)
+      [u"value3":protected]=>
+      long(20) refcount(5)
+      [u"value4"]=>
+      long(30) refcount(6)
+      [u"array_var"]=>
+      array(2) refcount(5){
+        [u"key1" { 006b 0065 0079 0031 }]=>
+        long(1) refcount(1)
+        [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+        long(3) refcount(1)
+      }
+      [u"object_class1"]=>
+      *RECURSION*
+    }
+  }
+  [u"class_object3":u"contains_object_class":private]=>
+  object(object_class)#%d (6) refcount(5){
+    [u"value1"]=>
+    long(5) refcount(1)
+    [u"value2":u"object_class":private]=>
+    long(10) refcount(5)
+    [u"value3":protected]=>
+    long(20) refcount(5)
+    [u"value4"]=>
+    long(30) refcount(6)
+    [u"array_var"]=>
+    array(2) refcount(5){
+      [u"key1" { 006b 0065 0079 0031 }]=>
+      long(1) refcount(1)
+      [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+      long(3) refcount(1)
+    }
+    [u"object_class1"]=>
+    object(object_class)#%d (6) refcount(5){
+      [u"value1"]=>
+      long(5) refcount(1)
+      [u"value2":u"object_class":private]=>
+      long(10) refcount(5)
+      [u"value3":protected]=>
+      long(20) refcount(5)
+      [u"value4"]=>
+      long(30) refcount(6)
+      [u"array_var"]=>
+      array(2) refcount(5){
+        [u"key1" { 006b 0065 0079 0031 }]=>
+        long(1) refcount(1)
+        [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+        long(3) refcount(1)
+      }
+      [u"object_class1"]=>
+      *RECURSION*
+    }
+  }
+  [u"class_object4":protected]=>
+  object(object_class)#%d (6) refcount(5){
+    [u"value1"]=>
+    long(5) refcount(1)
+    [u"value2":u"object_class":private]=>
+    long(10) refcount(5)
+    [u"value3":protected]=>
+    long(20) refcount(5)
+    [u"value4"]=>
+    long(30) refcount(6)
+    [u"array_var"]=>
+    array(2) refcount(5){
+      [u"key1" { 006b 0065 0079 0031 }]=>
+      long(1) refcount(1)
+      [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+      long(3) refcount(1)
+    }
+    [u"object_class1"]=>
+    object(object_class)#%d (6) refcount(5){
+      [u"value1"]=>
+      long(5) refcount(1)
+      [u"value2":u"object_class":private]=>
+      long(10) refcount(5)
+      [u"value3":protected]=>
+      long(20) refcount(5)
+      [u"value4"]=>
+      long(30) refcount(6)
+      [u"array_var"]=>
+      array(2) refcount(5){
+        [u"key1" { 006b 0065 0079 0031 }]=>
+        long(1) refcount(1)
+        [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+        long(3) refcount(1)
+      }
+      [u"object_class1"]=>
+      *RECURSION*
+    }
+  }
+  [u"no_member_class_object"]=>
+  object(no_member_class)#%d (0) refcount(2){
+  }
+  [u"class_object5"]=>
+  object(contains_object_class)#%d (9) refcount(1){
+    [u"p"]=>
+    long(30) refcount(2)
+    [u"p1":protected]=>
+    long(40) refcount(2)
+    [u"p2":u"contains_object_class":private]=>
+    long(50) refcount(2)
+    [u"class_object1"]=>
+    object(object_class)#%d (6) refcount(5){
+      [u"value1"]=>
+      long(5) refcount(1)
+      [u"value2":u"object_class":private]=>
+      long(10) refcount(5)
+      [u"value3":protected]=>
+      long(20) refcount(5)
+      [u"value4"]=>
+      long(30) refcount(6)
+      [u"array_var"]=>
+      array(2) refcount(5){
+        [u"key1" { 006b 0065 0079 0031 }]=>
+        long(1) refcount(1)
+        [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+        long(3) refcount(1)
+      }
+      [u"object_class1"]=>
+      object(object_class)#%d (6) refcount(5){
+        [u"value1"]=>
+        long(5) refcount(1)
+        [u"value2":u"object_class":private]=>
+        long(10) refcount(5)
+        [u"value3":protected]=>
+        long(20) refcount(5)
+        [u"value4"]=>
+        long(30) refcount(6)
+        [u"array_var"]=>
+        array(2) refcount(5){
+          [u"key1" { 006b 0065 0079 0031 }]=>
+          long(1) refcount(1)
+          [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+          long(3) refcount(1)
+        }
+        [u"object_class1"]=>
+        *RECURSION*
+      }
+    }
+    [u"class_object2"]=>
+    object(object_class)#%d (6) refcount(5){
+      [u"value1"]=>
+      long(5) refcount(1)
+      [u"value2":u"object_class":private]=>
+      long(10) refcount(5)
+      [u"value3":protected]=>
+      long(20) refcount(5)
+      [u"value4"]=>
+      long(30) refcount(6)
+      [u"array_var"]=>
+      array(2) refcount(5){
+        [u"key1" { 006b 0065 0079 0031 }]=>
+        long(1) refcount(1)
+        [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+        long(3) refcount(1)
+      }
+      [u"object_class1"]=>
+      object(object_class)#%d (6) refcount(5){
+        [u"value1"]=>
+        long(5) refcount(1)
+        [u"value2":u"object_class":private]=>
+        long(10) refcount(5)
+        [u"value3":protected]=>
+        long(20) refcount(5)
+        [u"value4"]=>
+        long(30) refcount(6)
+        [u"array_var"]=>
+        array(2) refcount(5){
+          [u"key1" { 006b 0065 0079 0031 }]=>
+          long(1) refcount(1)
+          [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+          long(3) refcount(1)
+        }
+        [u"object_class1"]=>
+        *RECURSION*
+      }
+    }
+    [u"class_object3":u"contains_object_class":private]=>
+    object(object_class)#%d (6) refcount(5){
+      [u"value1"]=>
+      long(5) refcount(1)
+      [u"value2":u"object_class":private]=>
+      long(10) refcount(5)
+      [u"value3":protected]=>
+      long(20) refcount(5)
+      [u"value4"]=>
+      long(30) refcount(6)
+      [u"array_var"]=>
+      array(2) refcount(5){
+        [u"key1" { 006b 0065 0079 0031 }]=>
+        long(1) refcount(1)
+        [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+        long(3) refcount(1)
+      }
+      [u"object_class1"]=>
+      object(object_class)#%d (6) refcount(5){
+        [u"value1"]=>
+        long(5) refcount(1)
+        [u"value2":u"object_class":private]=>
+        long(10) refcount(5)
+        [u"value3":protected]=>
+        long(20) refcount(5)
+        [u"value4"]=>
+        long(30) refcount(6)
+        [u"array_var"]=>
+        array(2) refcount(5){
+          [u"key1" { 006b 0065 0079 0031 }]=>
+          long(1) refcount(1)
+          [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+          long(3) refcount(1)
+        }
+        [u"object_class1"]=>
+        *RECURSION*
+      }
+    }
+    [u"class_object4":protected]=>
+    object(object_class)#%d (6) refcount(5){
+      [u"value1"]=>
+      long(5) refcount(1)
+      [u"value2":u"object_class":private]=>
+      long(10) refcount(5)
+      [u"value3":protected]=>
+      long(20) refcount(5)
+      [u"value4"]=>
+      long(30) refcount(6)
+      [u"array_var"]=>
+      array(2) refcount(5){
+        [u"key1" { 006b 0065 0079 0031 }]=>
+        long(1) refcount(1)
+        [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+        long(3) refcount(1)
+      }
+      [u"object_class1"]=>
+      object(object_class)#%d (6) refcount(5){
+        [u"value1"]=>
+        long(5) refcount(1)
+        [u"value2":u"object_class":private]=>
+        long(10) refcount(5)
+        [u"value3":protected]=>
+        long(20) refcount(5)
+        [u"value4"]=>
+        long(30) refcount(6)
+        [u"array_var"]=>
+        array(2) refcount(5){
+          [u"key1" { 006b 0065 0079 0031 }]=>
+          long(1) refcount(1)
+          [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+          long(3) refcount(1)
+        }
+        [u"object_class1"]=>
+        *RECURSION*
+      }
+    }
+    [u"no_member_class_object"]=>
+    object(no_member_class)#%d (0) refcount(2){
+    }
+    [u"class_object5"]=>
+    *RECURSION*
+  }
+}
+-- Iteration 4 --
+object(object_class)#%d (6) refcount(7){
+  [u"value1"]=>
+  long(5) refcount(1)
+  [u"value2":u"object_class":private]=>
+  long(10) refcount(5)
+  [u"value3":protected]=>
+  long(20) refcount(5)
+  [u"value4"]=>
+  long(30) refcount(6)
+  [u"array_var"]=>
+  array(2) refcount(5){
+    [u"key1" { 006b 0065 0079 0031 }]=>
+    long(1) refcount(1)
+    [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+    long(3) refcount(1)
+  }
+  [u"object_class1"]=>
+  object(object_class)#%d (6) refcount(7){
+    [u"value1"]=>
+    long(5) refcount(1)
+    [u"value2":u"object_class":private]=>
+    long(10) refcount(5)
+    [u"value3":protected]=>
+    long(20) refcount(5)
+    [u"value4"]=>
+    long(30) refcount(6)
+    [u"array_var"]=>
+    array(2) refcount(5){
+      [u"key1" { 006b 0065 0079 0031 }]=>
+      long(1) refcount(1)
+      [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+      long(3) refcount(1)
+    }
+    [u"object_class1"]=>
+    *RECURSION*
+  }
+}
+-- Iteration 5 --
+object(object_class)#%d (6) refcount(7){
+  [u"value1"]=>
+  long(5) refcount(1)
+  [u"value2":u"object_class":private]=>
+  long(10) refcount(5)
+  [u"value3":protected]=>
+  long(20) refcount(5)
+  [u"value4"]=>
+  long(30) refcount(6)
+  [u"array_var"]=>
+  array(2) refcount(5){
+    [u"key1" { 006b 0065 0079 0031 }]=>
+    long(1) refcount(1)
+    [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+    long(3) refcount(1)
+  }
+  [u"object_class1"]=>
+  object(object_class)#%d (6) refcount(7){
+    [u"value1"]=>
+    long(5) refcount(1)
+    [u"value2":u"object_class":private]=>
+    long(10) refcount(5)
+    [u"value3":protected]=>
+    long(20) refcount(5)
+    [u"value4"]=>
+    long(30) refcount(6)
+    [u"array_var"]=>
+    array(2) refcount(5){
+      [u"key1" { 006b 0065 0079 0031 }]=>
+      long(1) refcount(1)
+      [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+      long(3) refcount(1)
+    }
+    [u"object_class1"]=>
+    *RECURSION*
+  }
+}
+-- Iteration 6 --
+object(no_member_class)#%d (0) refcount(4){
+}
+-- Iteration 7 --
+NULL refcount(1)
+-- Iteration 8 --
+object(object_class)#%d (6) refcount(7){
+  [u"value1"]=>
+  long(5) refcount(1)
+  [u"value2":u"object_class":private]=>
+  long(10) refcount(5)
+  [u"value3":protected]=>
+  long(20) refcount(5)
+  [u"value4"]=>
+  long(30) refcount(6)
+  [u"array_var"]=>
+  array(2) refcount(5){
+    [u"key1" { 006b 0065 0079 0031 }]=>
+    long(1) refcount(1)
+    [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+    long(3) refcount(1)
+  }
+  [u"object_class1"]=>
+  object(object_class)#%d (6) refcount(7){
+    [u"value1"]=>
+    long(5) refcount(1)
+    [u"value2":u"object_class":private]=>
+    long(10) refcount(5)
+    [u"value3":protected]=>
+    long(20) refcount(5)
+    [u"value4"]=>
+    long(30) refcount(6)
+    [u"array_var"]=>
+    array(2) refcount(5){
+      [u"key1" { 006b 0065 0079 0031 }]=>
+      long(1) refcount(1)
+      [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+      long(3) refcount(1)
+    }
+    [u"object_class1"]=>
+    *RECURSION*
+  }
+}
+-- Iteration 9 --
+object(object_class)#%d (6) refcount(7){
+  [u"value1"]=>
+  long(5) refcount(1)
+  [u"value2":u"object_class":private]=>
+  long(10) refcount(5)
+  [u"value3":protected]=>
+  long(20) refcount(5)
+  [u"value4"]=>
+  long(30) refcount(6)
+  [u"array_var"]=>
+  array(2) refcount(5){
+    [u"key1" { 006b 0065 0079 0031 }]=>
+    long(1) refcount(1)
+    [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+    long(3) refcount(1)
+  }
+  [u"object_class1"]=>
+  object(object_class)#%d (6) refcount(7){
+    [u"value1"]=>
+    long(5) refcount(1)
+    [u"value2":u"object_class":private]=>
+    long(10) refcount(5)
+    [u"value3":protected]=>
+    long(20) refcount(5)
+    [u"value4"]=>
+    long(30) refcount(6)
+    [u"array_var"]=>
+    array(2) refcount(5){
+      [u"key1" { 006b 0065 0079 0031 }]=>
+      long(1) refcount(1)
+      [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+      long(3) refcount(1)
+    }
+    [u"object_class1"]=>
+    *RECURSION*
+  }
+}
+-- Iteration 10 --
+long(30) refcount(8)
+-- Iteration 11 --
+NULL refcount(1)
+
+-- Testing debug_zval_dump() on overwritten object variables --
+long(500) refcount(1)
+long(500) refcount(1)
+long(500) refcount(1)
+long(500) refcount(1)
+
+-- Testing debug_zval_dump() on objects having circular reference --
+object(object_class)#%d (7) refcount(1){
+  [u"value1"]=>
+  long(5) refcount(1)
+  [u"value2":u"object_class":private]=>
+  long(10) refcount(7)
+  [u"value3":protected]=>
+  long(20) refcount(7)
+  [u"value4"]=>
+  long(30) refcount(8)
+  [u"array_var"]=>
+  array(2) refcount(7){
+    [u"key1" { 006b 0065 0079 0031 }]=>
+    long(1) refcount(1)
+    [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+    long(3) refcount(1)
+  }
+  [u"object_class1"]=>
+  object(object_class)#%d (7) refcount(1){
+    [u"value1"]=>
+    long(5) refcount(1)
+    [u"value2":u"object_class":private]=>
+    long(10) refcount(7)
+    [u"value3":protected]=>
+    long(20) refcount(7)
+    [u"value4"]=>
+    long(30) refcount(8)
+    [u"array_var"]=>
+    array(2) refcount(7){
+      [u"key1" { 006b 0065 0079 0031 }]=>
+      long(1) refcount(1)
+      [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+      long(3) refcount(1)
+    }
+    [u"object_class1"]=>
+    *RECURSION*
+    [u"obj"]=>
+    &object(object_class)#%d (7) refcount(2){
+      [u"value1"]=>
+      long(5) refcount(1)
+      [u"value2":u"object_class":private]=>
+      long(10) refcount(7)
+      [u"value3":protected]=>
+      long(20) refcount(7)
+      [u"value4"]=>
+      long(30) refcount(8)
+      [u"array_var"]=>
+      array(2) refcount(7){
+        [u"key1" { 006b 0065 0079 0031 }]=>
+        long(1) refcount(1)
+        [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+        long(3) refcount(1)
+      }
+      [u"object_class1"]=>
+      object(object_class)#%d (7) refcount(1){
+        [u"value1"]=>
+        long(5) refcount(1)
+        [u"value2":u"object_class":private]=>
+        long(10) refcount(7)
+        [u"value3":protected]=>
+        long(20) refcount(7)
+        [u"value4"]=>
+        long(30) refcount(8)
+        [u"array_var"]=>
+        array(2) refcount(7){
+          [u"key1" { 006b 0065 0079 0031 }]=>
+          long(1) refcount(1)
+          [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+          long(3) refcount(1)
+        }
+        [u"object_class1"]=>
+        *RECURSION*
+        [u"obj"]=>
+        *RECURSION*
+      }
+      [u"obj"]=>
+      *RECURSION*
+    }
+  }
+  [u"obj"]=>
+  &object(object_class)#%d (7) refcount(2){
+    [u"value1"]=>
+    long(5) refcount(1)
+    [u"value2":u"object_class":private]=>
+    long(10) refcount(7)
+    [u"value3":protected]=>
+    long(20) refcount(7)
+    [u"value4"]=>
+    long(30) refcount(8)
+    [u"array_var"]=>
+    array(2) refcount(7){
+      [u"key1" { 006b 0065 0079 0031 }]=>
+      long(1) refcount(1)
+      [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+      long(3) refcount(1)
+    }
+    [u"object_class1"]=>
+    object(object_class)#%d (7) refcount(1){
+      [u"value1"]=>
+      long(5) refcount(1)
+      [u"value2":u"object_class":private]=>
+      long(10) refcount(7)
+      [u"value3":protected]=>
+      long(20) refcount(7)
+      [u"value4"]=>
+      long(30) refcount(8)
+      [u"array_var"]=>
+      array(2) refcount(7){
+        [u"key1" { 006b 0065 0079 0031 }]=>
+        long(1) refcount(1)
+        [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+        long(3) refcount(1)
+      }
+      [u"object_class1"]=>
+      *RECURSION*
+      [u"obj"]=>
+      &object(object_class)#%d (7) refcount(2){
+        [u"value1"]=>
+        long(5) refcount(1)
+        [u"value2":u"object_class":private]=>
+        long(10) refcount(7)
+        [u"value3":protected]=>
+        long(20) refcount(7)
+        [u"value4"]=>
+        long(30) refcount(8)
+        [u"array_var"]=>
+        array(2) refcount(7){
+          [u"key1" { 006b 0065 0079 0031 }]=>
+          long(1) refcount(1)
+          [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+          long(3) refcount(1)
+        }
+        [u"object_class1"]=>
+        *RECURSION*
+        [u"obj"]=>
+        *RECURSION*
+      }
+    }
+    [u"obj"]=>
+    &object(object_class)#%d (7) refcount(2){
+      [u"value1"]=>
+      long(5) refcount(1)
+      [u"value2":u"object_class":private]=>
+      long(10) refcount(7)
+      [u"value3":protected]=>
+      long(20) refcount(7)
+      [u"value4"]=>
+      long(30) refcount(8)
+      [u"array_var"]=>
+      array(2) refcount(7){
+        [u"key1" { 006b 0065 0079 0031 }]=>
+        long(1) refcount(1)
+        [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+        long(3) refcount(1)
+      }
+      [u"object_class1"]=>
+      *RECURSION*
+      [u"obj"]=>
+      &object(object_class)#%d (7) refcount(2){
+        [u"value1"]=>
+        long(5) refcount(1)
+        [u"value2":u"object_class":private]=>
+        long(10) refcount(7)
+        [u"value3":protected]=>
+        long(20) refcount(7)
+        [u"value4"]=>
+        long(30) refcount(8)
+        [u"array_var"]=>
+        array(2) refcount(7){
+          [u"key1" { 006b 0065 0079 0031 }]=>
+          long(1) refcount(1)
+          [u"key2 " { 006b 0065 0079 0032 0020 }]=>
+          long(3) refcount(1)
+        }
+        [u"object_class1"]=>
+        *RECURSION*
+        [u"obj"]=>
+        *RECURSION*
+      }
+    }
+  }
+}
+Done

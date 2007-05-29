@@ -5,6 +5,10 @@ Test filetype() function: Variations
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip no fnmatch() on Windows');
 }
+if (!function_exists("posix_mkfifo")) {
+	die("skip no posix_mkfifo()");
+}
+?>
 --FILE--
 <?php
 /*
