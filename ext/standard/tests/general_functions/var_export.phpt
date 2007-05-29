@@ -1,5 +1,7 @@
 --TEST--
 Test var_export() function
+--INI--
+precision=14
 --FILE--
 <?php
 /* Prototype: mixed var_export( mixed expression [, bool return]);
