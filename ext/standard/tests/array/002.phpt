@@ -29,7 +29,7 @@ foreach (array ('arsort', 'asort', 'krsort', 'ksort', 'rsort', 'sort') as $test_
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 Unsorted data:
 array(8) {
   [0]=>
@@ -129,6 +129,16 @@ array(8) {
   float(-0.33333333333333)
 }
 Using SORT_STRING
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
 array(8) {
   [1000]=>
   string(4) "test"
@@ -227,6 +237,16 @@ array(8) {
   int(27)
 }
 Using SORT_STRING
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
 array(8) {
   [16777216]=>
   float(-0.33333333333333)
@@ -521,6 +541,16 @@ array(8) {
   float(-0.33333333333333)
 }
 Using SORT_STRING
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
 array(8) {
   [0]=>
   string(4) "test"
@@ -619,6 +649,16 @@ array(8) {
   int(27)
 }
 Using SORT_STRING
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
 array(8) {
   [0]=>
   float(-0.33333333333333)
@@ -642,7 +682,7 @@ array(8) {
   [7]=>
   string(4) "test"
 }
---UEXPECT--
+--UEXPECTF--
 Unsorted data:
 array(8) {
   [0]=>
@@ -742,6 +782,16 @@ array(8) {
   float(-0.33333333333333)
 }
 Using SORT_STRING
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
 array(8) {
   [1000]=>
   unicode(4) "test"
@@ -840,6 +890,16 @@ array(8) {
   int(27)
 }
 Using SORT_STRING
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
 array(8) {
   [16777216]=>
   float(-0.33333333333333)
@@ -1134,6 +1194,16 @@ array(8) {
   float(-0.33333333333333)
 }
 Using SORT_STRING
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
 array(8) {
   [0]=>
   unicode(4) "test"
@@ -1232,6 +1302,16 @@ array(8) {
   int(27)
 }
 Using SORT_STRING
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
+
+Notice: Array to string conversion in %s on line %d
 array(8) {
   [0]=>
   float(-0.33333333333333)
