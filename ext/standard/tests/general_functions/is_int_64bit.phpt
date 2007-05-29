@@ -2,8 +2,10 @@
 Test is_int() & it's FALIASes: is_long() & is_integer() functions
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
+--INI--
+precision=14
 --FILE--
 <?php
 /* Prototype: bool is_int ( mixed $var );
@@ -16,6 +18,7 @@ $valid_ints = array(
   0,
   1,
   -1,
+  -2147483648, // max negative integer value
   -2147483647, 
   2147483647,  // max positive integer value
   2147483640,
@@ -23,10 +26,12 @@ $valid_ints = array(
   0x12ab,
   0Xfff,
   0XFA,
+  -0x80000000, // max negative integer as hexadecimal
   0x7fffffff,  // max postive integer as hexadecimal
   0x7FFFFFFF,  // max postive integer as hexadecimal
   0123,        // integer as octal
   01912,       // should be quivalent to octal 1
+  -020000000000, // max negative integer as octal
   017777777777,  // max positive integer as octal
 );
 /* loop to check that is_int() recognizes different 
@@ -210,32 +215,44 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+--Iteration 16--
+bool(true)
+bool(true)
+bool(true)
+--Iteration 17--
+bool(true)
+bool(true)
+bool(true)
+--Iteration 18--
+bool(true)
+bool(true)
+bool(true)
 
 *** Testing is_int(), is_integer() & is_long() with  non integer values ***
 --Iteration 1--
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
 --Iteration 2--
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
 --Iteration 3--
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
 --Iteration 4--
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
 --Iteration 5--
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
 --Iteration 6--
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
 --Iteration 7--
 bool(false)
 bool(false)
@@ -449,4 +466,3 @@ NULL
 Warning: is_long() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
-
