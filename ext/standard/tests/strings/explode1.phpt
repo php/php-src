@@ -2,6 +2,7 @@
 Test explode() function
 --INI--
 error_reporting=2047
+precision=14
 --FILE--
 <?php
 /* Prototype: array explode ( string $delimiter, string $string [, int $limit] );
