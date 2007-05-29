@@ -707,11 +707,10 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	if (fptr->common.fn_flags & ZEND_ACC_DEPRECATED) {
 		string_printf(str, ", deprecated");
 	}
-#if MBO_0
 	if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function*)fptr)->module) {
 		string_printf(str, ":%s", ((zend_internal_function*)fptr)->module->name);
 	}
-#endif
+
 	if (scope && fptr->common.scope) {
 		if (fptr->common.scope != scope) {
 			string_printf(str, ", inherits %s", fptr->common.scope->name);
@@ -1741,7 +1740,6 @@ ZEND_METHOD(reflection_function, getParameters)
 }
 /* }}} */
 
-#if MBO_0
 /* {{{ proto public ReflectionExtension|NULL ReflectionFunction::getExtension()
    Returns NULL or the extension the function belongs to */
 ZEND_METHOD(reflection_function, getExtension)
@@ -1765,9 +1763,7 @@ ZEND_METHOD(reflection_function, getExtension)
 	}
 }
 /* }}} */
-#endif
 
-#if MBO_0
 /* {{{ proto public string|false ReflectionFunction::getExtensionName()
    Returns false or the name of the extension the function belongs to */
 ZEND_METHOD(reflection_function, getExtensionName)
@@ -1791,7 +1787,6 @@ ZEND_METHOD(reflection_function, getExtensionName)
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ proto public static mixed ReflectionParameter::export(mixed function, mixed parameter [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
@@ -1956,7 +1951,6 @@ ZEND_METHOD(reflection_parameter, getName)
 }
 /* }}} */
 
-#if MBO_0
 /* {{{ proto public ReflectionFunction ReflectionParameter::getDeclaringFunction()
    Returns the ReflectionFunction for the function of this parameter */
 ZEND_METHOD(reflection_parameter, getDeclaringFunction)
@@ -1974,7 +1968,6 @@ ZEND_METHOD(reflection_parameter, getDeclaringFunction)
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ proto public ReflectionClass|NULL ReflectionParameter::getDeclaringClass()
    Returns in which class this parameter is defined (not the typehint of the parameter) */
@@ -2089,7 +2082,6 @@ ZEND_METHOD(reflection_parameter, isPassedByReference)
 }
 /* }}} */
 
-#if MBO_0
 /* {{{ proto public bool ReflectionParameter::getPosition()
    Returns whether this parameter is an optional parameter */
 ZEND_METHOD(reflection_parameter, getPosition)
@@ -2103,7 +2095,6 @@ ZEND_METHOD(reflection_parameter, getPosition)
 	RETVAL_LONG(param->offset);
 }
 /* }}} */
-#endif
 
 /* {{{ proto public bool ReflectionParameter::isOptional()
    Returns whether this parameter is an optional parameter */
@@ -4458,10 +4449,8 @@ static zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, getParameters, NULL, 0)
 	ZEND_ME(reflection_function, getNumberOfParameters, NULL, 0)
 	ZEND_ME(reflection_function, getNumberOfRequiredParameters, NULL, 0)
-#if MBO_0
 	ZEND_ME(reflection_function, getExtension, NULL, 0)
 	ZEND_ME(reflection_function, getExtensionName, NULL, 0)
-#endif
 	ZEND_ME(reflection_function, isDeprecated, NULL, 0)
 	{NULL, NULL, NULL}
 };
@@ -4735,16 +4724,12 @@ static zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, __toString, NULL, 0)
 	ZEND_ME(reflection_parameter, getName, NULL, 0)
 	ZEND_ME(reflection_parameter, isPassedByReference, NULL, 0)
-#if MBO_0
 	ZEND_ME(reflection_parameter, getDeclaringFunction, NULL, 0)
-#endif
 	ZEND_ME(reflection_parameter, getDeclaringClass, NULL, 0)
 	ZEND_ME(reflection_parameter, getClass, NULL, 0)
 	ZEND_ME(reflection_parameter, isArray, NULL, 0)
 	ZEND_ME(reflection_parameter, allowsNull, NULL, 0)
-#if MBO_0
 	ZEND_ME(reflection_parameter, getPosition, NULL, 0)
-#endif
 	ZEND_ME(reflection_parameter, isOptional, NULL, 0)
 	ZEND_ME(reflection_parameter, isDefaultValueAvailable, NULL, 0)
 	ZEND_ME(reflection_parameter, getDefaultValue, NULL, 0)
