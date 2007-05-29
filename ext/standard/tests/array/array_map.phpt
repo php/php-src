@@ -416,3 +416,303 @@ array(1) {
   string(41) "Static_Function_helloWorld(): Hello World"
 }
 Done
+--UEXPECTF--
+*** Testing basic operations ***
+array(0) {
+}
+array(0) {
+}
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(1)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    int(2)
+    [1]=>
+    int(2)
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(3)
+  }
+}
+array(4) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(1)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    int(2)
+    [1]=>
+    int(2)
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    NULL
+    [1]=>
+    int(3)
+  }
+  [3]=>
+  array(2) {
+    [0]=>
+    NULL
+    [1]=>
+    int(4)
+  }
+}
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    unicode(3) "Jan"
+    [1]=>
+    unicode(2) "31"
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    unicode(3) "Feb"
+    [1]=>
+    unicode(2) "28"
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    unicode(5) "March"
+    [1]=>
+    unicode(2) "31"
+  }
+}
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    unicode(4) "Text"
+    [1]=>
+    int(4)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    unicode(5) "Words"
+    [1]=>
+    int(5)
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    unicode(6) "Lineup"
+    [1]=>
+    int(6)
+  }
+}
+array(4) {
+  [0]=>
+  array(2) {
+    [0]=>
+    unicode(1) "a"
+    [1]=>
+    NULL
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    unicode(2) "ab"
+    [1]=>
+    NULL
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    unicode(3) "abc"
+    [1]=>
+    NULL
+  }
+  [3]=>
+  array(2) {
+    [0]=>
+    unicode(4) "abcd"
+    [1]=>
+    NULL
+  }
+}
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    unicode(2) "01"
+    [1]=>
+    unicode(3) "Jan"
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    unicode(2) "02"
+    [1]=>
+    unicode(3) "Feb"
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    unicode(2) "03"
+    [1]=>
+    unicode(5) "March"
+  }
+}
+array(3) {
+  [u"key1"]=>
+  int(1)
+  [u"key2"]=>
+  int(4)
+  [u"key3"]=>
+  int(9)
+}
+
+*** Testing possible variations ***
+array(5) {
+  [0]=>
+  int(6)
+  [1]=>
+  int(8)
+  [2]=>
+  int(10)
+  [3]=>
+  int(8)
+  [4]=>
+  int(9)
+}
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    unicode(5) "Hello"
+    [1]=>
+    unicode(5) "World"
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    unicode(4) "Good"
+    [1]=>
+    unicode(3) "Day"
+  }
+}
+Array
+(
+    [0] => 1
+    [1] => 4
+    [2] => 9
+)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(4)
+  [2]=>
+  array(4) {
+    [0]=>
+    int(9)
+    [1]=>
+    int(16)
+    [2]=>
+    array(2) {
+      [0]=>
+      int(25)
+      [1]=>
+      int(4)
+    }
+    [3]=>
+    array(0) {
+    }
+  }
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(4)
+  [2]=>
+  int(9)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(4)
+  [2]=>
+  int(9)
+}
+
+*** Testing error conditions ***
+
+Warning: array_map(): Argument #2 should be an array in %s on line %d
+NULL
+
+Warning: array_map(): Argument #2 should be an array in %s on line %d
+NULL
+
+Warning: array_map(): Argument #2 should be an array in %s on line %d
+NULL
+
+Warning: array_map() expects at least 2 parameters, 0 given in %s on line %d
+NULL
+
+Warning: array_map() expects parameter 1 to be valid callback, Unicode string given in %s on line %d
+NULL
+
+Warning: array_map() expects parameter 1 to be valid callback, Unicode string given in %s on line %d
+NULL
+
+Warning: array_map() expects parameter 1 to be valid callback, Unicode string given in %s on line %d
+NULL
+
+Warning: array_map() expects parameter 1 to be valid callback, Unicode string given in %s on line %d
+NULL
+
+Warning: array_map() expects parameter 1 to be valid callback, Unicode string given in %s on line %d
+NULL
+
+Warning: array_map() expects parameter 1 to be valid callback, Unicode string given in %s on line %d
+NULL
+
+Warning: array_map() expects parameter 1 to be valid callback, Unicode string given in %s on line %d
+NULL
+
+Warning: array_map() expects parameter 1 to be valid callback, Unicode string given in %s on line %d
+NULL
+
+*** Testing operation on objects ***
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(4)
+  [2]=>
+  int(9)
+}
+
+Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d
+NULL
+
+Warning: array_map() expects at least 2 parameters, 1 given in %s on line %d
+NULL
+array(1) {
+  [0]=>
+  unicode(41) "Static_Function_helloWorld(): Hello World"
+}
+Done
