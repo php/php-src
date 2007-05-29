@@ -27,27 +27,13 @@ $tidy->cleanRepair();
 var_dump($tidy->value);
 
 ?>
---EXPECT--
-string(117) "<html>
+--EXPECTF--
+string(11%d) "<html>
 <head>
 <title></title>
 </head>
 <body>
-<wps:block>
-<wps:var>
-<wps:value></wps:var>
-</wps:block>
-</body>
-</html>"
---UEXPECT--
-unicode(117) "<html>
-<head>
-<title></title>
-</head>
-<body>
-<wps:block>
-<wps:var>
-<wps:value></wps:var>
-</wps:block>
+<wps:block>%w<wps:var>
+<wps:value></wps:var>%w</wps:block>
 </body>
 </html>"
