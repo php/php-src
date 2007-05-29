@@ -801,8 +801,8 @@ static void init_request_info(TSRMLS_D)
 						 * out what SCRIPT_NAME should be
 						 */
 						int slen = len - strlen(pt);
-						int pilen = strlen(env_path_info);
-						char *path_info = env_path_info + pilen - slen;
+						int pilen = env_path_info ? strlen(env_path_info) : 0;
+						char *path_info = env_path_info ? env_path_info + pilen - slen : NULL;
 
 						if (orig_path_info != path_info) {
 							if (orig_path_info) {
@@ -842,10 +842,12 @@ static void init_request_info(TSRMLS_D)
 							env_script_name = pt + l;
 
 							/* PATH_TRANSATED = DOCUMENT_ROOT + PATH_INFO */
-							path_translated_len = l + strlen(env_path_info);
+							path_translated_len = l + (env_path_info ? strlen(env_path_info) : 0);
 							path_translated = (char *) emalloc(path_translated_len + 1);
 							memcpy(path_translated, env_document_root, l);
-							memcpy(path_translated + l, env_path_info, (path_translated_len - l));
+							if (env_path_info) {
+								memcpy(path_translated + l, env_path_info, (path_translated_len - l));
+							}
 							path_translated[path_translated_len] = '\0';
 							if (orig_path_translated) {
 								_sapi_cgibin_putenv("ORIG_PATH_TRANSLATED", orig_path_translated TSRMLS_CC);
@@ -857,12 +859,14 @@ static void init_request_info(TSRMLS_D)
 						) {
 							/* PATH_TRANSATED = PATH_TRANSATED - SCRIPT_NAME + PATH_INFO */
 							int ptlen = strlen(pt) - strlen(env_script_name);
-							int path_translated_len = ptlen + strlen(env_path_info);
+							int path_translated_len = ptlen + env_path_info ? strlen(env_path_info) : 0;
 							char *path_translated = NULL;
 
 							path_translated = (char *) emalloc(path_translated_len + 1);
 							memcpy(path_translated, pt, ptlen);
-							memcpy(path_translated + ptlen, env_path_info, path_translated_len - ptlen);
+							if (env_path_info) {
+								memcpy(path_translated + ptlen, env_path_info, path_translated_len - ptlen);
+							}
 							path_translated[path_translated_len] = '\0';
 							if (orig_path_translated) {
 								_sapi_cgibin_putenv("ORIG_PATH_TRANSLATED", orig_path_translated TSRMLS_CC);
