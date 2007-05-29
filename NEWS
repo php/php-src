@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2007, PHP 5.2.3
+- Fixed bug #41525 (ReflectionParameter::getPosition() not available). (Marcus)
 - Fixed bug #41511 (Compile failure under IRIX 6.5.30 building md5.c). (Jani)
 - Fixed bug #41504 (json_decode() incorrectly decodes JSON arrays with empty
   string keys). (Ilia)
