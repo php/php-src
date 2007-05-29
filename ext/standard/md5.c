@@ -75,7 +75,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	if (raw_output) {
 		RETVAL_STRINGL((char*)digest, 16, 1);
 	} else {
-		make_digest_ex(md5str, digest. 16);
+		make_digest_ex(md5str, digest, 16);
 		RETVAL_ASCII_STRING(md5str, ZSTR_DUPLICATE);
 	}
 
