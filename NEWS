@@ -1,18 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jun 2007, PHP 5.2.3
-- Fixed an interger overflow inside chunk_split(), identified by Gerhard
-  Wagner (Ilia) 
-- Fixed bug #41525 (ReflectionParameter::getPosition() not available). (Marcus)
-- Fixed bug #41511 (Compile failure under IRIX 6.5.30 building md5.c). (Jani)
-- Fixed bug #41504 (json_decode() incorrectly decodes JSON arrays with empty
-  string keys). (Ilia)
-- Fixed bug #41492 (open_basedir/safe_mode bypass inside realpath()). (Ilia)
-- Fixed bug #41477 (no arginfo about SoapClient::__soapCall()). (Ilia)
-- Fixed bug #41236 (Regression in timeout handling of non-blocking SSL
-  connections during reads and writes). (Ilia)
-
-24 May 2007, PHP 5.2.3RC1
+31 May 2007, PHP 5.2.3
 - Changed CGI install target to php-cgi and 'make install' to install CLI
   when CGI is selected. (Jani)
 - Changed JSON maximum nesting depth from 20 to 128. (Rasmus)
@@ -35,6 +23,8 @@ PHP                                                                        NEWS
 
 - Implemented FR #41416 (getColumnMeta() should also return table name). (Tony)
 
+- Fixed an interger overflow inside chunk_split(), identified by Gerhard
+  Wagner (Ilia) 
 - Fixed SOAP extension's handler() to work even when
   "always_populate_raw_post_data" is off. (Ilia)
 - Fixed possible infinite loop in imagecreatefrompng. (libgd #86) 
@@ -44,6 +34,12 @@ PHP                                                                        NEWS
 - Fixed altering $this via argument named "this". (Dmitry)
 - Fixed PHP CLI usage of php.ini from the binary location. (Hannes)
 - Fixed segfault in strripos(). (Tony, Joxean Koret)
+- Fixed bug #41525 (ReflectionParameter::getPosition() not available). (Marcus)
+- Fixed bug #41511 (Compile failure under IRIX 6.5.30 building md5.c). (Jani)
+- Fixed bug #41504 (json_decode() incorrectly decodes JSON arrays with empty
+  string keys). (Ilia)
+- Fixed bug #41492 (open_basedir/safe_mode bypass inside realpath()). (Ilia)
+- Fixed bug #41477 (no arginfo about SoapClient::__soapCall()). (Ilia)
 - Fixed bug #41455 (ext/dba/config.m4 pollutes global $LIBS and $LDFLAGS). 
   (mmarek at suse dot cz, Tony)
 - Fixed bug #41442 (imagegd2() under output control). (Tony)
@@ -85,6 +81,8 @@ PHP                                                                        NEWS
 - Fixed bug #41283 (Bug with deserializing array key that are doubles or
   floats in wddx). (Ilia)
 - Fixed bug #41257 (lookupNamespaceURI does not work as expected). (Rob)
+- Fixed bug #41236 (Regression in timeout handling of non-blocking SSL
+  connections during reads and writes). (Ilia)
 - Fixed bug #41134 (zend_ts_hash_clean not thread-safe). 
   (marco dot cova at gmail dot com, Tony)
 - Fixed bug #41097 (ext/soap returning associative array as indexed without
