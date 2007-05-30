@@ -93,7 +93,7 @@ abstract class CLICommand
 
     static function error ($msg, $exit_code = 1) 
     {
-        notice($msg);
+        self::notice($msg);
         exit($exit_code);
     }
 
