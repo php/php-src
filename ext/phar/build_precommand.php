@@ -56,5 +56,3 @@ foreach($classes as $name)
 }
 
 ?>
-
-new PharCommand($argc, $argv);
