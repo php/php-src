@@ -1135,10 +1135,10 @@ PHPAPI PHP_FUNCTION(fgets)
 	size_t retlen = 0;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &zstream, &length) == FAILURE) {
-		RETURN_NULL();
+		return;
 	}
 
-	if (length <= 0) {
+	if (ZEND_NUM_ARGS() == 2 && length <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
@@ -1208,6 +1208,11 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lZ", &zstream, &length, &allow) == FAILURE) {
 		return;
+	}
+
+	if (ZEND_NUM_ARGS() >= 2 && length <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
+		RETURN_FALSE;
 	}
 
 	if (length == 1) {
