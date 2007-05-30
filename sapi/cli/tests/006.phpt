@@ -23,7 +23,7 @@ string(44) "Exception: Extension unknown does not exist
 "
 string(37) "Exception: Extension  does not exist
 "
-string(%d) "Extension [ <persistent> extension #%d date version %s ] {
+string(%d) "Extension [ <persistent> extension #21 date version 5.2.3RC2-dev ] {
 
   - Dependencies {
     Dependency [ session (Optional) ]
@@ -65,35 +65,35 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
   }
 
   - Functions {
-    Function [ <internal> function strtotime ] {
+    Function [ <internal:date> function strtotime ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $time ]
         Parameter #1 [ <optional> $now ]
       }
     }
-    Function [ <internal> function date ] {
+    Function [ <internal:date> function date ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $format ]
         Parameter #1 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> function idate ] {
+    Function [ <internal:date> function idate ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $format ]
         Parameter #1 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> function gmdate ] {
+    Function [ <internal:date> function gmdate ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $format ]
         Parameter #1 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> function mktime ] {
+    Function [ <internal:date> function mktime ] {
 
       - Parameters [6] {
         Parameter #0 [ <optional> $hour ]
@@ -104,7 +104,7 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
         Parameter #5 [ <optional> $year ]
       }
     }
-    Function [ <internal> function gmmktime ] {
+    Function [ <internal:date> function gmmktime ] {
 
       - Parameters [6] {
         Parameter #0 [ <optional> $hour ]
@@ -115,7 +115,7 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
         Parameter #5 [ <optional> $year ]
       }
     }
-    Function [ <internal> function checkdate ] {
+    Function [ <internal:date> function checkdate ] {
 
       - Parameters [3] {
         Parameter #0 [ <required> $month ]
@@ -123,84 +123,84 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
         Parameter #2 [ <required> $year ]
       }
     }
-    Function [ <internal> function strftime ] {
+    Function [ <internal:date> function strftime ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $format ]
         Parameter #1 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> function gmstrftime ] {
+    Function [ <internal:date> function gmstrftime ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $format ]
         Parameter #1 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> function time ] {
+    Function [ <internal:date> function time ] {
 
       - Parameters [0] {
       }
     }
-    Function [ <internal> function localtime ] {
+    Function [ <internal:date> function localtime ] {
 
       - Parameters [2] {
         Parameter #0 [ <optional> $timestamp ]
         Parameter #1 [ <optional> $associative_array ]
       }
     }
-    Function [ <internal> function getdate ] {
+    Function [ <internal:date> function getdate ] {
 
       - Parameters [1] {
         Parameter #0 [ <optional> $timestamp ]
       }
     }
-    Function [ <internal> function date_create ] {
+    Function [ <internal:date> function date_create ] {
     }
-    Function [ <internal> function date_parse ] {
+    Function [ <internal:date> function date_parse ] {
     }
-    Function [ <internal> function date_format ] {
+    Function [ <internal:date> function date_format ] {
     }
-    Function [ <internal> function date_modify ] {
+    Function [ <internal:date> function date_modify ] {
     }
-    Function [ <internal> function date_timezone_get ] {
+    Function [ <internal:date> function date_timezone_get ] {
     }
-    Function [ <internal> function date_timezone_set ] {
+    Function [ <internal:date> function date_timezone_set ] {
     }
-    Function [ <internal> function date_offset_get ] {
+    Function [ <internal:date> function date_offset_get ] {
     }
-    Function [ <internal> function date_time_set ] {
+    Function [ <internal:date> function date_time_set ] {
     }
-    Function [ <internal> function date_date_set ] {
+    Function [ <internal:date> function date_date_set ] {
     }
-    Function [ <internal> function date_isodate_set ] {
+    Function [ <internal:date> function date_isodate_set ] {
     }
-    Function [ <internal> function timezone_open ] {
+    Function [ <internal:date> function timezone_open ] {
     }
-    Function [ <internal> function timezone_name_get ] {
+    Function [ <internal:date> function timezone_name_get ] {
     }
-    Function [ <internal> function timezone_name_from_abbr ] {
+    Function [ <internal:date> function timezone_name_from_abbr ] {
     }
-    Function [ <internal> function timezone_offset_get ] {
+    Function [ <internal:date> function timezone_offset_get ] {
     }
-    Function [ <internal> function timezone_transitions_get ] {
+    Function [ <internal:date> function timezone_transitions_get ] {
     }
-    Function [ <internal> function timezone_identifiers_list ] {
+    Function [ <internal:date> function timezone_identifiers_list ] {
     }
-    Function [ <internal> function timezone_abbreviations_list ] {
+    Function [ <internal:date> function timezone_abbreviations_list ] {
     }
-    Function [ <internal> function date_default_timezone_set ] {
+    Function [ <internal:date> function date_default_timezone_set ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $timezone_identifier ]
       }
     }
-    Function [ <internal> function date_default_timezone_get ] {
+    Function [ <internal:date> function date_default_timezone_get ] {
 
       - Parameters [0] {
       }
     }
-    Function [ <internal> function date_sunrise ] {
+    Function [ <internal:date> function date_sunrise ] {
 
       - Parameters [6] {
         Parameter #0 [ <required> $time ]
@@ -211,7 +211,7 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
         Parameter #5 [ <optional> $gmt_offset ]
       }
     }
-    Function [ <internal> function date_sunset ] {
+    Function [ <internal:date> function date_sunset ] {
 
       - Parameters [6] {
         Parameter #0 [ <required> $time ]
@@ -222,7 +222,7 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
         Parameter #5 [ <optional> $gmt_offset ]
       }
     }
-    Function [ <internal> function date_sun_info ] {
+    Function [ <internal:date> function date_sun_info ] {
 
       - Parameters [3] {
         Parameter #0 [ <required> $time ]
@@ -259,31 +259,31 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
       }
 
       - Methods [9] {
-        Method [ <internal, ctor> public method __construct ] {
+        Method [ <internal:date, ctor> public method __construct ] {
         }
 
-        Method [ <internal> public method format ] {
+        Method [ <internal:date> public method format ] {
         }
 
-        Method [ <internal> public method modify ] {
+        Method [ <internal:date> public method modify ] {
         }
 
-        Method [ <internal> public method getTimezone ] {
+        Method [ <internal:date> public method getTimezone ] {
         }
 
-        Method [ <internal> public method setTimezone ] {
+        Method [ <internal:date> public method setTimezone ] {
         }
 
-        Method [ <internal> public method getOffset ] {
+        Method [ <internal:date> public method getOffset ] {
         }
 
-        Method [ <internal> public method setTime ] {
+        Method [ <internal:date> public method setTime ] {
         }
 
-        Method [ <internal> public method setDate ] {
+        Method [ <internal:date> public method setDate ] {
         }
 
-        Method [ <internal> public method setISODate ] {
+        Method [ <internal:date> public method setISODate ] {
         }
       }
     }
@@ -297,10 +297,10 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
       }
 
       - Static methods [2] {
-        Method [ <internal> static public method listAbbreviations ] {
+        Method [ <internal:date> static public method listAbbreviations ] {
         }
 
-        Method [ <internal> static public method listIdentifiers ] {
+        Method [ <internal:date> static public method listIdentifiers ] {
         }
       }
 
@@ -308,16 +308,16 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
       }
 
       - Methods [4] {
-        Method [ <internal, ctor> public method __construct ] {
+        Method [ <internal:date, ctor> public method __construct ] {
         }
 
-        Method [ <internal> public method getName ] {
+        Method [ <internal:date> public method getName ] {
         }
 
-        Method [ <internal> public method getOffset ] {
+        Method [ <internal:date> public method getOffset ] {
         }
 
-        Method [ <internal> public method getTransitions ] {
+        Method [ <internal:date> public method getTransitions ] {
         }
       }
     }
