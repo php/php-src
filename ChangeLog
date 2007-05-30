@@ -1,3 +1,117 @@
+2007-05-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/dl.c:
+      more typofixes
+
+2007-05-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/tests/foreach.phpt
+      ext/filter/logical_filters.c
+      ext/filter/tests/PMOPB45.phpt
+      ext/imap/tests/bug40854.phpt
+      ext/pgsql/pgsql.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/mail.c
+      ext/standard/user_filters.c
+      ext/standard/tests/array/bug40709.phpt
+      ext/standard/tests/strings/bug40432.phpt
+      ext/standard/tests/strings/bug40704.phpt
+      ext/standard/tests/strings/bug40754.phpt
+      ext/standard/tests/strings/htmlentities18.phpt
+      ext/sybase/php_sybase_db.c
+      ext/tidy/tests/024.phpt
+      ext/wddx/tests/bug41283.phpt
+      ext/xmlrpc/libxmlrpc/base64.c
+      ext/xmlrpc/libxmlrpc/base64.h
+      main/streams/transports.c
+      sapi/cgi/cgi_main.c:
+      
+      MFB
+
+2007-05-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/file.c:
+      fix #41516 (fgets() returns a line of text when length parameter is <= 0)
+
+    * ext/standard/user_filters.c:
+      fix typo & build
+
+2007-05-29  Stanislav Malyshev  <stas@zend.com>
+
+    * win32/build/config.w32:
+      fix build on msvc 8
+
+2007-05-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/general_functions/debug_zval_dump_b_64bit.phpt
+      ext/standard/tests/general_functions/intval.phpt
+      ext/standard/tests/general_functions/is_float.phpt
+      ext/standard/tests/general_functions/is_float_64bit.phpt
+      ext/standard/tests/general_functions/is_int.phpt
+      ext/standard/tests/general_functions/is_int_64bit.phpt
+      ext/standard/tests/general_functions/print_r_64bit.phpt
+      ext/standard/tests/general_functions/var_dump_64bit.phpt:
+      fix tests, add 64bit versions
+
+2007-05-29  Michael Wallner  <mike@iworks.at>
+
+    * ext/mhash/config.m4
+      ext/mhash/mhash.c:
+      - fix build where mhash.h is not declaring
+        mhash_get_hash_name_static and/or
+        mhash_get_keygen_name_static protos
+
+2007-05-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/array/002.phpt
+      ext/standard/tests/array/005.phpt
+      ext/standard/tests/array/009.phpt
+      ext/standard/tests/array/array_change_key_case.phpt
+      ext/standard/tests/array/array_keys.phpt
+      ext/standard/tests/array/array_map.phpt
+      ext/standard/tests/array/array_pop.phpt
+      ext/standard/tests/array/array_search.phpt
+      ext/standard/tests/array/each.phpt:
+      fix tests in unicode mode
+
+    * ZendEngine2/tests/compare_001_64bit.phpt
+      ZendEngine2/tests/compare_002_64bit.phpt
+      ZendEngine2/tests/compare_003_64bit.phpt
+      ZendEngine2/tests/compare_004_64bit.phpt
+      ZendEngine2/tests/compare_005_64bit.phpt
+      ZendEngine2/tests/compare_006_64bit.phpt
+      ext/standard/tests/file/bug38450.phpt
+      ext/standard/tests/file/bug38450_1.phpt
+      ext/standard/tests/file/filetype_variation.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_o.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_v.phpt
+      ext/standard/tests/general_functions/strval.phpt
+      ext/standard/tests/general_functions/var_export.phpt
+      ext/standard/tests/general_functions/var_export.phpt
+      ext/standard/tests/strings/explode1.phpt
+      ext/standard/tests/strings/explode1.phpt:
+      fix tests
+
+    * ZendEngine2/tests/019.phpt
+      ext/json/tests/fail001.phpt
+      ext/mysql/tests/mysql_affected_rows.phpt
+      ext/standard/tests/array/bug29253.phpt
+      tests/classes/array_access_010.phpt:
+      fix test
+
+2007-05-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c:
+      - Bug #41525 ReflectionParameter::getPosition() not available
+
+2007-05-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/md5.c:
+      fix typo
+
 2007-05-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * run-tests.php
