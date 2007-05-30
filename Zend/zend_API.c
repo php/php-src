@@ -1629,6 +1629,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		target_function_table = CG(function_table);
 	}
 	internal_function->type = ZEND_INTERNAL_FUNCTION;
+	internal_function->module = EG(current_module);
 	
 	if (scope) {
 		class_name_len = strlen(scope->name);
