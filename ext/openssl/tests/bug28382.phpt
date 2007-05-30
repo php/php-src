@@ -1,5 +1,5 @@
 --TEST--
-#28382, openssl_x509_parse extensions support
+Bug #28382 (openssl_x509_parse extensions support)
 --SKIPIF--
 <?php 
 if (!extension_loaded("openssl")) die("skip"); 
