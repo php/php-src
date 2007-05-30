@@ -26,9 +26,9 @@
   <email>mike@php.net</email>
   <active>yes</active>
  </lead>
- <date>2006-00-00</date>
+ <date>2007-05-30</date>
  <version>
-  <release>1.3</release>
+  <release>1.4</release>
   <api>1.0</api>
  </version>
  <stability>
@@ -37,7 +37,9 @@
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
-* Fixed PHP bug #37192 - cc may complain about non-constant initializers in hash_adler.c
+* Fix builds (PHP 4 only)
+* Added ripemd256, and ripemd320 to supported algorithms
+* Added function reflection information (PHP5+ only)
 ]]>
  </notes>
  <contents>

@@ -364,6 +364,7 @@ PHP_FUNCTION(hash_init)
 		RETURN_FALSE;
 	}
 
+#if PHP_MAJOR_VERSION >= 6
 	if (key_type == IS_UNICODE) {
 		key = zend_unicode_to_ascii((UChar*)key, key_len TSRMLS_CC);
 		if (!key) {
@@ -372,6 +373,7 @@ PHP_FUNCTION(hash_init)
 			RETURN_FALSE;
 		}
 	}
+#endif
 
 	context = emalloc(ops->context_size);
 	ops->hash_init(context);
@@ -406,9 +408,11 @@ PHP_FUNCTION(hash_init)
 		hash->key = (unsigned char *) K;
 	}
 
+#if PHP_MAJOR_VERSION >= 6
 	if (key_type == IS_UNICODE) {
 		efree(key);
 	}
+#endif
 
 	ZEND_REGISTER_RESOURCE(return_value, hash, php_hash_le_hash);
 }
@@ -498,7 +502,7 @@ PHP_FUNCTION(hash_update_file)
 {
 	zval *zhash, *zcontext = NULL;
 	php_hash_data *hash;
-	php_stream_context *context;
+	void *stream_context;
 	php_stream *stream;
 	char *filename, buf[1024];
 	int filename_len, n;
@@ -509,24 +513,29 @@ PHP_FUNCTION(hash_update_file)
 		return;
 	}
 
-	context = php_stream_context_from_zval(zcontext, 0);
+	stream_context = php_stream_context_from_zval(zcontext, 0);
 
 	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar *)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar *)filename, filename_len, REPORT_ERRORS, stream_context) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
-#else
+#elif defined(php_stream_context_from_zval)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
 		return;
 	}
 
-	context = php_stream_context_from_zval(zcontext, 0);
+	stream_context = php_stream_context_from_zval(zcontext, 0);
+#else
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &zhash, &filename, &filename_len) == FAILURE) {
+		return;
+	}
+	stream_context = NULL;
 #endif
 
 	ZEND_FETCH_RESOURCE(hash, php_hash_data*, &zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
 
-	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, NULL, stream_context);
 	if (filename_type != IS_STRING) {
 		/* Original filename was UNICODE, this string is a converted copy */
 		efree(filename);
@@ -766,6 +775,7 @@ PHP_MINFO_FUNCTION(hash)
 /* }}} */
 
 /* {{{ arginfo */
+#if PHP_MAJOR_VERSION >= 5
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash, 0, 0, 2)
 	ZEND_ARG_INFO(0, algo)
@@ -833,24 +843,28 @@ static
 ZEND_BEGIN_ARG_INFO(arginfo_hash_algos, 0)
 ZEND_END_ARG_INFO()
 
+#	define PHP_HASH_FE(n) PHP_FE(n,arginfo_##n)
+#else
+#	define PHP_HASH_FE(n) PHP_FE(n,NULL)
+#endif
 /* }}} */
 
 /* {{{ hash_functions[]
  */
 zend_function_entry hash_functions[] = {
-	PHP_FE(hash,									arginfo_hash)
-	PHP_FE(hash_file,								arginfo_hash_file)
+	PHP_HASH_FE(hash)
+	PHP_HASH_FE(hash_file)
 
-	PHP_FE(hash_hmac,								arginfo_hash_hmac)
-	PHP_FE(hash_hmac_file,							arginfo_hash_hmac_file)
+	PHP_HASH_FE(hash_hmac)
+	PHP_HASH_FE(hash_hmac_file)
 
-	PHP_FE(hash_init,								arginfo_hash_init)
-	PHP_FE(hash_update,								arginfo_hash_update)
-	PHP_FE(hash_update_stream,						arginfo_hash_update_stream)
-	PHP_FE(hash_update_file,						arginfo_hash_update_file)
-	PHP_FE(hash_final,								arginfo_hash_final)
+	PHP_HASH_FE(hash_init)
+	PHP_HASH_FE(hash_update)
+	PHP_HASH_FE(hash_update_stream)
+	PHP_HASH_FE(hash_update_file)
+	PHP_HASH_FE(hash_final)
 
-	PHP_FE(hash_algos,								arginfo_hash_algos)
+	PHP_HASH_FE(hash_algos)
 
 	{NULL, NULL, NULL}
 };

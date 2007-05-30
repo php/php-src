@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.4.6">
+<package version="1.0" packagerversion="1.5.1">
  <name>hash</name>
  <summary>HASH Message Digest Framework</summary>
  <description>Native implementations of common message digest algorithms using a generic factory method
@@ -20,11 +20,13 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.3</version>
-  <date>2006-04-25</date>
+  <version>1.4</version>
+  <date>2007-05-30</date>
   <license>PHP</license>
   <state>stable</state>
-  <notes>* Fixed PHP bug #37192 - cc may complain about non-constant initializers in hash_adler.c
+  <notes>* Fix builds (PHP 4 only)
+* Added ripemd256, and ripemd320 to supported algorithms
+* Added function reflection information (PHP5+ only)
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.0.0"/>

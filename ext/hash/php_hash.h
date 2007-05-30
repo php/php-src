@@ -24,6 +24,10 @@
 #include "php.h"
 #include "php_hash_types.h"
 
+#ifndef slprintf
+#	define slprintf snprintf
+#endif
+
 #define PHP_HASH_EXTNAME	"hash"
 #define PHP_HASH_EXTVER		"1.0"
 #define PHP_HASH_RESNAME	"Hash Context"
