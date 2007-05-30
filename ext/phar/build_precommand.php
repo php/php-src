@@ -55,4 +55,6 @@ foreach($classes as $name)
 	echo "\n}\n\n";
 }
 
+echo 'new PharCommand($argc, $argv);'."\n";
+
 ?>
