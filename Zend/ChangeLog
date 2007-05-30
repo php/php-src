@@ -1,3 +1,22 @@
+2007-05-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/foreach.phpt:
+      
+      MFB
+
+2007-05-29  Antony Dovgal  <antony@zend.com>
+
+    * tests/compare_001_64bit.phpt
+      tests/compare_002_64bit.phpt
+      tests/compare_003_64bit.phpt
+      tests/compare_004_64bit.phpt
+      tests/compare_005_64bit.phpt
+      tests/compare_006_64bit.phpt:
+      fix tests
+
+    * tests/019.phpt:
+      fix test
+
 2007-05-28  Antony Dovgal  <antony@zend.com>
 
     * zend_API.c
