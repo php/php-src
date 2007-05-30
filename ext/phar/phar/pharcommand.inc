@@ -375,6 +375,59 @@ class PharCommand extends CLICommand
         return $args;
     }
     // }}}
+    // {{{ function phar_set_stub_begin
+    /**
+     * Set the stub
+     */
+    public function phar_set_stub_begin(Phar $phar, $stub, $loader = NULL)
+    {
+        if (isset($stub)) {
+            if (isset($loader)) {
+                $c = file_get_contents($stub);
+                $s = '';
+
+                if (substr($c, 0, 2) == '#!') {
+                    $s .= substr($c, 0, strpos($c, "\n") + 1);
+                }
+
+				$s .= "<?php if (!class_exists('PHP_Archive')) {\n?>";
+				$s .= file_get_contents($loader);
+                $s .= "<?php\n";
+                $s .= "}\n";
+                $s .= "if (!in_array('phar', stream_get_wrappers())) {\n\tstream_wrapper_register('phar', 'PHP_Archive');\n}\n";
+				$s .= "if (!class_exists('Phar',0)) {\n";
+                $s .= "\tinclude 'phar://'.__FILE__.'/phar.inc';\n";
+                $s .= "}\n";
+                $s .= '?>';
+
+                if (substr($c,0,1) == '#') {
+                    $s.= substr($c,strpos($c, "\n")+1);
+                }
+
+                $phar->setStub($s);
+            } else {
+                $phar->setStub(file_get_contents($stub));
+            }
+            return new SplFileInfo($stub);
+        }
+        return NULL;
+    }
+    // }}}
+    // {{{ function phar_set_stub_end
+    /**
+     * Set stub end
+     */
+    public function phar_set_stub_end(Phar $phar, $stub, $loader = NULL)
+    {
+        if (isset($stub) && isset($loader)) {
+        	if (substr(__FILE__, -15) == 'pharcommand.inc') {
+	            self::phar_add_file($phar, 0, 'phar.inc', 'phar://'.__FILE__.'/phar.inc', NULL);
+	        } else {
+	            self::phar_add_file($phar, 0, 'phar.inc', dirname(__FILE__).'/phar/phar.inc', NULL);
+	        }
+        }
+    }
+    // }}}
     // {{{ function cli_cmd_run_pack
     /**
      * Pack a new Phar
@@ -407,35 +460,7 @@ class PharCommand extends CLICommand
 
         $phar->startBuffering();
 
-        if (isset($stub)) {
-            if (isset($loader)) {
-                $c = file_get_contents($stub);
-                $s = '';
-
-                if (substr($c, 0, 2) == '#!') {
-                    $s .= substr($c, 0, strpos($c, "\n") + 1);
-                }
-
-				$s .= "<?php if (!class_exists('PHP_Archive')) {\n?>";
-				$s .= file_get_contents($loader);
-                $s .= "<?php\n";
-                $s .= "}\n";
-                $s .= "if (!in_array('phar', stream_get_wrappers())) {\n\tstream_wrapper_register('phar', 'PHP_Archive');\n}\n";
-				$s .= "if (!class_exists('Phar',0)) {\n";
-                $s .= "\tinclude 'phar://'.__FILE__.'/phar.inc';\n";
-                $s .= "}\n";
-                $s .= '?>';
-
-                if (substr($c,0,1) == '#') {
-                    $s.= substr($c,strpos($c, "\n")+1);
-                }
-
-                $phar->setStub($s);
-            } else {
-                $phar->setStub(file_get_contents($stub));
-            }
-            $stub = new SplFileInfo($stub);
-        }
+		$stub = $this->phar_set_stub_begin($phar, $stub, $loader);
 
         if (!is_array($input)) {
             $this->phar_add($phar, $level, $input, $regex, $invregex, $stub, NULL, isset($loader));
@@ -445,13 +470,7 @@ class PharCommand extends CLICommand
             }
         }
 
-        if (isset($loader)) {
-        	if (substr(__FILE__, -15) == 'pharcommand.inc') {
-	            self::phar_add_file($phar, 0, 'phar.inc', 'phar://'.__FILE__.'/phar.inc', NULL);
-	        } else {
-	            self::phar_add_file($phar, 0, 'phar.inc', dirname(__FILE__).'/phar/phar.inc', NULL);
-	        }
-        }
+		$this->phar_set_stub_end($phar, $stub, $loader);
 
         switch($this->args['c']['val']) {
             case 'gz':
@@ -891,7 +910,7 @@ class PharCommand extends CLICommand
      */
     public function cli_cmd_arg_stub_set()
     {
-        $args = self::phar_args('Fs', 'phar');
+        $args = self::phar_args('Fps', 'phar');
         $args['s']['val'] = 'php://stdin';
         return $args;
     }
@@ -904,10 +923,12 @@ class PharCommand extends CLICommand
      */
     public function cli_cmd_run_stub_set()
     {
-        $phar = $this->args['f']['val'];
-        $stub = $this->args['s']['val'];
+        $phar   = $this->args['f']['val'];
+        $stub   = $this->args['s']['val'];
+        $loader = $this->args['p']['val'];
 
-        $phar->setStub(file_get_contents($stub));
+		$this->phar_set_stub_begin($phar, $stub, $loader);
+		$this->phar_set_stub_end($phar, $stub, $loader);
     }
     // }}}
     // {{{ public function cli_cmd_inf_stub_get
