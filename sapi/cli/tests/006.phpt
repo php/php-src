@@ -7,6 +7,8 @@ if (!extension_loaded("reflection")) {
 	die("skip");
 }
 ?>
+--INI--
+date.timezone=
 --FILE--
 <?php
 
@@ -31,7 +33,7 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
 
   - INI {
     Entry [ date.timezone <ALL> ]
-      Current = '%s'
+      Current = ''
     }
     Entry [ date.default_latitude <ALL> ]
       Current = '%s'
