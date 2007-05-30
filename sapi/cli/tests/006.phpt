@@ -23,7 +23,7 @@ string(44) "Exception: Extension unknown does not exist
 "
 string(37) "Exception: Extension  does not exist
 "
-string(%d) "Extension [ <persistent> extension #21 date version 5.2.3RC2-dev ] {
+string(%d) "Extension [ <persistent> extension #%d date version %s ] {
 
   - Dependencies {
     Dependency [ session (Optional) ]
@@ -31,7 +31,7 @@ string(%d) "Extension [ <persistent> extension #21 date version 5.2.3RC2-dev ] {
 
   - INI {
     Entry [ date.timezone <ALL> ]
-      Current = ''
+      Current = '%s'
     }
     Entry [ date.default_latitude <ALL> ]
       Current = '%s'
