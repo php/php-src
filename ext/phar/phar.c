@@ -1421,7 +1421,7 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC) /* {{{ */
 {
 	php_url *resource;
-	char *arch, *entry = NULL, *error;
+	char *arch = NULL, *entry = NULL, *error;
 	int arch_len, entry_len;
 
 	if (!strncasecmp(filename, "phar://", 7)) {
@@ -1431,7 +1431,9 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 		}		
 		if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz/.phar.bz2)", filename);
-			efree(arch);
+			if (arch) {
+				efree(arch);
+			}
 			if (entry) {
 				efree(entry);
 			}
