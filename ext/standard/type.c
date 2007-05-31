@@ -215,7 +215,7 @@ PHP_FUNCTION(strval)
 }
 /* }}} */
 
-static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
+static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 {
 	zval *arg;
 
@@ -274,7 +274,7 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 		RETURN_FALSE;
 	}
 }
-
+/* }}} */
 
 /* {{{ proto bool is_null(mixed var) U
    Returns true if variable is null */
