@@ -1,3 +1,104 @@
+2007-05-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.3
+
+2007-05-30  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_interfaces.c:
+      remove semicolons and make SunCC happy
+
+    * ext/openssl/tests/bug28382.phpt
+      ext/openssl/tests/bug28382.phpt
+      ext/openssl/tests/bug39217.phpt
+      ext/openssl/tests/bug39217.phpt:
+      fix test names
+
+2007-05-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/openssl/tests/bug39217cert1.txt
+      ext/openssl/tests/bug39217cert2.txt:
+      - add missing cert (thx Tony)
+
+2007-05-30  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      sapi/cli/tests/006.phpt:
+      fix test (second try)
+
+    * (PHP_5_2)
+      sapi/cli/tests/006.phpt:
+      fix test
+
+    * (PHP_5_2)
+      TSRM/tsrm_virtual_cwd.c:
+      MFH: fix lstat() function resolving symlinks
+
+    * TSRM/tsrm_virtual_cwd.c:
+      fix lstat() function resolving symlinks
+      patch by Scott MacVicar
+
+    * (PHP_5_2)
+      sapi/cli/tests/004.phpt
+      sapi/cli/tests/006.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c:
+      set module in internal_function struct
+
+    * ext/standard/file.c:
+      check length only when it's specified
+      add the same check to fgetss()
+
+2007-05-30  Michael Wallner  <mike@iworks.at>
+
+    * (RELEASE_1_4)
+      ext/hash/hash.c
+      ext/hash/package.xml
+      ext/hash/package2.xml
+      ext/hash/php_hash.h:
+      - version agnosticism (PECL/HEAD)
+      - release 1.4
+
+2007-05-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/chunk_split.phpt:
+      
+      MFB: Fixed an interger overflow inside chunk_split(), identified by
+      Gerhard Wagner
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/chunk_split.phpt:
+      
+      MFH: Fixed an interger overflow inside chunk_split(), identified by
+      Gerhard
+      Wagner
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/chunk_split.phpt:
+      
+      Fixed an interger overflow inside chunk_split(), identified by Gerhard
+      Wagner
+
 2007-05-29  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/dl.c:

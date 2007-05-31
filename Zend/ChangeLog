@@ -1,3 +1,13 @@
+2007-05-30  Antony Dovgal  <antony@zend.com>
+
+    * zend_exceptions.c
+      zend_interfaces.c:
+      remove semicolons and make SunCC happy
+
+    * (PHP_5_2)
+      zend_API.c:
+      set module in internal_function struct
+
 2007-05-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * tests/foreach.phpt:
