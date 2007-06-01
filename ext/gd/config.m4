@@ -383,7 +383,7 @@ dnl T1LIB support is gdlib independent
 
     PHP_TEST_BUILD(foobar, [], [
       AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
-    ], [ -L$GD_LIB $GD_SHARED_LIBADD ], [char foobar () {}])
+    ], [ $GD_SHARED_LIBADD ], [char foobar () {}])
   else
     GD_INCDIR=`$GDLIB_CONFIG --includedir`
     GD_CFLAGS=`$GDLIB_CONFIG --cflags`
