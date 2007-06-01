@@ -450,7 +450,7 @@ if test "$PHP_GD" != "no"; then
 
     PHP_TEST_BUILD(foobar, [], [
       AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
-    ], [ -L$GD_LIB $GD_SHARED_LIBADD ], [char foobar () {}])
+    ], [ $GD_SHARED_LIBADD ], [char foobar () {}])
   else
     GD_HEADER_DIRS="ext/gd/"
     GDLIB_CFLAGS="-I$GD_INCLUDE $GDLIB_CFLAGS"
