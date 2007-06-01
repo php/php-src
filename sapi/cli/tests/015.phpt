@@ -31,5 +31,5 @@ Array
 )
 
 PHP %d.%d.%d%s(cli) (built: %s)%s
-Usage: php [options] [-f] <file> [--] [args...]
+Usage: %s [options] [-f] <file> [--] [args...]
 Done
