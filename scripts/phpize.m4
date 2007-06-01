@@ -67,6 +67,7 @@ install_targets=install-modules
 phplibdir="`pwd`/modules"
 CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
 CFLAGS_CLEAN='$(CFLAGS)'
+CXXFLAGS_CLEAN='$(CXXFLAGS)'
 
 test "$prefix" = "NONE" && prefix="/usr/local"
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
@@ -89,6 +90,7 @@ PHP_SUBST(CPP)
 PHP_SUBST(CPPFLAGS)
 PHP_SUBST(CXX)
 PHP_SUBST(CXXFLAGS)
+PHP_SUBST(CXXFLAGS_CLEAN)
 PHP_SUBST(EXTENSION_DIR)
 PHP_SUBST(EXTRA_LDFLAGS)
 PHP_SUBST(EXTRA_LIBS)
