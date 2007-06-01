@@ -476,7 +476,7 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 			entry->fp = php_stream_fopen_tmpfile();
 			if (!entry->fp) {
 				if (error) {
-					spprintf(error, 0, "phar error: unable to create temprary file");
+					spprintf(error, 0, "phar error: unable to create temporary file");
 				}
 				return FAILURE;
 			}
@@ -513,7 +513,7 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /**
- * Removes an entry, either by actually removingit or by marking it.
+ * Removes an entry, either by actually removing it or by marking it.
  */
 void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 {
@@ -570,7 +570,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	etemp.fp = php_stream_fopen_tmpfile();
 	if (!etemp.fp) {
 		if (error) {
-			spprintf(error, 0, "phar error: unable to create temorary file");
+			spprintf(error, 0, "phar error: unable to create temporary file");
 		}
 		return NULL;
 	}
@@ -754,18 +754,18 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 
 	buffer = b32;
 	if (3 != php_stream_read(fp, buffer, 3)) {
-		MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at script end)")
+		MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at stub end)")
 	}
 	if ((*buffer == ' ' || *buffer == '\n') && *(buffer + 1) == '?' && *(buffer + 2) == '>') {
 		int nextchar;
 		halt_offset += 3;
 		if (EOF == (nextchar = php_stream_getc(fp))) {
-			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at script end)")
+			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at stub end)")
 		}
 		if ((char) nextchar == '\r') {
 			/* if we have an \r we require an \n as well */
 			if (EOF == (nextchar = php_stream_getc(fp)) || (char)nextchar != '\n') {
-				MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at script end)")
+				MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at stub end)")
 			}
 			halt_offset++;
 		}
