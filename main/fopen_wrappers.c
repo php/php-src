@@ -229,8 +229,8 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 			}
 		}
 
+		resolved_name_len = strlen(resolved_name);
 		if (path_tmp[path_len - 1] == PHP_DIR_SEPARATOR) {
-			resolved_name_len = strlen(resolved_name);
 			if (resolved_name[resolved_name_len - 1] != PHP_DIR_SEPARATOR) {
 				resolved_name[resolved_name_len] = PHP_DIR_SEPARATOR;
 				resolved_name[++resolved_name_len] = '\0';
@@ -246,6 +246,16 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 			/* File is in the right directory */
 			return 0;
 		} else {
+			/* /openbasedir/ and /openbasedir are the same directory */
+			if (resolved_basedir_len == (resolved_name_len + 1) && resolved_basedir[resolved_basedir_len - 1] == PHP_DIR_SEPARATOR) {
+#if defined(PHP_WIN32) || defined(NETWARE)
+				if (strncasecmp(resolved_basedir, resolved_name, resolved_name_len) == 0) {
+#else
+				if (strncmp(resolved_basedir, resolved_name, resolved_name_len) == 0) {
+#endif
+					return 0;
+				}
+			}
 			return -1;
 		}
 	} else {
