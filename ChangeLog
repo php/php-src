@@ -1,3 +1,8 @@
+2007-05-31  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/type.c:
+      fix folding
+
 2007-05-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
