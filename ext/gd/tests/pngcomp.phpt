@@ -1,13 +1,11 @@
 --TEST--
 png compression test
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}
-	if (!GD_BUNDLED) {
-		die("skip external GD libraries always fail");
-	}	
+
 	if (!function_exists("imagecreatefrompng") || !function_exists("imagepng")) {
 		die("skip png support unavailable");
 	}
@@ -27,7 +25,7 @@ png compression test
         if ($col == 0xffffff) {
                 echo "ok\n";
         }
-	
+
 	@unlink($cwd . "/test_pngcomp.png");
 ?>
 --EXPECT--

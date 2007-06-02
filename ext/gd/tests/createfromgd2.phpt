@@ -3,7 +3,6 @@ imagecreatefromgd2
 --SKIPIF--
 <?php
         if (!function_exists('imagecreatefromgd2')) die("skip gd extension not available\n");
-        if (!GD_BUNDLED) die('skip external GD libraries always fail');
 ?>
 --FILE--
 <?php

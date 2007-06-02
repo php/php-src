@@ -1,13 +1,11 @@
 --TEST--
 imagefilter() function test
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}
-	if (!GD_BUNDLED) {
-		die("skip this test requires bundled gd library.");
-	}
+	if (!function_exists("imagefilter")) die("skip requires bundled GD library\n");
 ?>
 --FILE--
 <?php
@@ -15,7 +13,7 @@ $no_arg_filters = array(
 	"IMG_FILTER_NEGATE",
 	"IMG_FILTER_GRAYSCALE",
 	"IMG_FILTER_EDGEDETECT",
-	"IMG_FILTER_GAUSSIAN_BLUR", 
+	"IMG_FILTER_GAUSSIAN_BLUR",
 	"IMG_FILTER_SELECTIVE_BLUR",
 	"IMG_FILTER_EMBOSS",
 	"IMG_FILTER_MEAN_REMOVAL"
@@ -23,7 +21,7 @@ $no_arg_filters = array(
 
 $SAVE_DIR = dirname(__FILE__);
 $SOURCE_IMG = $SAVE_DIR . "/test.png";
-	
+
 	foreach ($no_arg_filters as $filt) {
 		$im = imagecreatefrompng($SOURCE_IMG);
 		if (imagefilter($im, constant($filt))) {
@@ -33,10 +31,10 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 		} else {
 			echo "$filt failed\n";
 		}
-	} 
+	}
 
 	$im = imagecreatefrompng($SOURCE_IMG);
-	
+
 	if (imagefilter($im, IMG_FILTER_SMOOTH, -1924.124)) {
 		imagepng($im, $SAVE_DIR . "/IMG_FILTER_SMOOTH.png");
 		echo "IMG_FILTER_SMOOTH success\n";
@@ -44,9 +42,9 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	} else {
 		echo "IMG_FILTER_SMOOTH failed\n";
 	}
-	
+
 	$im = imagecreatefrompng($SOURCE_IMG);
-	
+
 	if (imagefilter($im, IMG_FILTER_COLORIZE, -127.12, -127.98, 127)) {
 		imagepng($im, $SAVE_DIR . "/IMG_FILTER_COLORIZE.png");
 		echo "IMG_FILTER_COLORIZE success\n";
@@ -54,9 +52,9 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	} else {
 		echo "IMG_FILTER_COLORIZE failed\n";
 	}
-	
+
 	$im = imagecreatefrompng($SOURCE_IMG);
-	
+
 	if (imagefilter($im, IMG_FILTER_CONTRAST, -90)) {
 		imagepng($im, $SAVE_DIR . "/IMG_FILTER_CONTRAST.png");
 		echo "IMG_FILTER_CONTRAST success\n";
@@ -66,7 +64,7 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	}
 
 	$im = imagecreatefrompng($SOURCE_IMG);
-	
+
 	if (imagefilter($im, IMG_FILTER_BRIGHTNESS, 98)) {
 		imagepng($im, $SAVE_DIR . "/IMG_FILTER_BRIGHTNESS.png");
 		echo "IMG_FILTER_BRIGHTNESS success\n";

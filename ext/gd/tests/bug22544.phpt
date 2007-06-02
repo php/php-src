@@ -1,12 +1,9 @@
 --TEST--
 Bug #22544 (TrueColor transparency in PNG images).
 --SKIPIF--
-<?php 
-	if (!extension_loaded('gd')) {	
+<?php
+	if (!extension_loaded('gd')) {
 		die("skip gd extension not available\n");
-	}
-	if (!GD_BUNDLED) {
-		die('skip external GD libraries may fail');
 	}
 ?>
 --FILE--
@@ -19,7 +16,7 @@ Bug #22544 (TrueColor transparency in PNG images).
 	imageColorTransparent($image, $transparent);
 	imageFilledRectangle($image, 0, 0, 640-1, 100-1, $transparent);
 	imagePng($image, $dest);
-	echo md5_file($dest) . "\n";	
+	echo md5_file($dest) . "\n";
 	@unlink($dest);
 ?>
 --EXPECT--

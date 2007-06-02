@@ -5,9 +5,6 @@ Bug #24594 (Filling an area using tiles).
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available\n");
 	}
-	if (!GD_BUNDLED) {
-		die('skip external GD libraries may fail');
-	}
 ?>
 --FILE--
 <?php
@@ -82,4 +79,4 @@ Bug #24594 (Filling an area using tiles).
 ?>
 --EXPECT--
 000000111111101010
-111111111111111111 
+111111111111111111

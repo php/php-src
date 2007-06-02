@@ -1,13 +1,11 @@
 --TEST--
 xpm --> jpeg conversion test
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}
-	if (!GD_BUNDLED) {
-		die("skip external GD libraries always fail");
-	}
+
 	if (!function_exists("imagejpeg")) {
 		die("skip jpeg support unavailable");
 	}
@@ -22,7 +20,7 @@ xpm --> jpeg conversion test
 	echo "XPM to JPEG conversion: ";
 	echo imagejpeg(imagecreatefromxpm($cwd . "/conv_test.xpm"), $cwd . "/test_xpm.jpeg") ? 'ok' : 'failed';
 	echo "\n";
-	
+
 	@unlink($cwd . "/test_xpm.jpeg");
 ?>
 --EXPECT--

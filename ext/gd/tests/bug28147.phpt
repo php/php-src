@@ -1,9 +1,9 @@
 --TEST--
 Bug #28147 (Crash with anti-aliased line)
 --SKIPIF--
-<?php 
-	if (!extension_loaded('gd')) die("skip gd extension not available\n"); 
-	if (!GD_BUNDLED) die('skip external GD libraries always fail');
+<?php
+	if (!extension_loaded('gd')) die("skip gd extension not available\n");
+	if (!function_exists("imageantialias")) die("skip requires bundled GD library\n");
 ?>
 --FILE--
 <?php
@@ -13,12 +13,12 @@ Bug #28147 (Crash with anti-aliased line)
 $im  = imagecreatetruecolor(300, 300);
 $w  = imagecolorallocate($im, 255, 255, 255);
 $red = imagecolorallocate($im, 255, 0, 0);
-                                                                                                                                
+
 imagefilledrectangle($im,0,0,299,299,$w);
-                                                                                                                                
+
 imageantialias($im,true);
 imageline($im, 299, 299, 0, 299, $red);
-                                                                                                                                
+
 imagedestroy($im);
 
 echo "Alive\n";
