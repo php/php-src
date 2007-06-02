@@ -1,12 +1,9 @@
 --TEST--
 Bug #38112 (GIF Invalid Code size ).
 --SKIPIF--
-<?php 
-	if (!extension_loaded('gd')) {	
+<?php
+	if (!extension_loaded('gd')) {
 		die("skip gd extension not available\n");
-	}
-	if (!GD_BUNDLED) {
-		die('skip external GD libraries may fail');
 	}
 ?>
 --FILE--

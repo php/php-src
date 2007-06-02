@@ -1,13 +1,11 @@
 --TEST--
 xpm --> png conversion test
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}
-	if (!GD_BUNDLED) {
-		die("skip external GD libraries always fail");
-	}
+
 	if (!function_exists("imagepng")) {
 		die("skip png support unavailable");
 	}
@@ -22,7 +20,7 @@ xpm --> png conversion test
 	echo "XPM to PNG conversion: ";
 	echo imagepng(imagecreatefromxpm($cwd . "/conv_test.xpm"), $cwd . "/test_xpm.png") ? 'ok' : 'failed';
 	echo "\n";
-	
+
 	@unlink($cwd . "/test_xpm.png");
 ?>
 --EXPECT--

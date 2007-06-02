@@ -3,7 +3,6 @@ imagecreatefromwbmp
 --SKIPIF--
 <?php
         if (!function_exists('imagecreatefromwbmp')) die("skip gd extension not available\n");
-        if (!GD_BUNDLED) die('skip external GD libraries always fail');
 ?>
 --FILE--
 <?php
