@@ -1,3 +1,54 @@
+2007-06-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/cli/tests/015.phpt
+      sapi/cli/tests/015.phpt:
+      fix test
+
+    * (PHP_5_2)
+      ext/gd/config.m4:
+      MFH: - Fixed bug #41555 (configure failure: regression caused by fix for
+      #41265)
+
+    * ext/gd/config.m4:
+      - Fixed bug #41555 (configure failure: regression caused by fix for #41265
+
+    * (PHP_4_4)
+      scripts/phpize.m4:
+      MFH:- Add missing CXXFLAGS_CLEAN variable.
+
+    * (PHP_5_2)
+      scripts/phpize.m4:
+      MFH: - Add missing CXXFLAGS_CLEAN variable.
+
+    * scripts/phpize.m4:
+      - Add missing CXXFLAGS_CLEAN variable.
+
+2007-06-01  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/tests/general_functions/bug41518.phpt
+      main/fopen_wrappers.c:
+      MFH: fix #41518 (file_exists() warns of open_basedir restriction on
+      non-existent file)
+
+    * ext/standard/tests/general_functions/bug41518.phpt
+      ext/standard/tests/general_functions/bug41518.phpt
+      main/fopen_wrappers.c:
+      
+      fix #41518 (file_exists() warns of open_basedir restriction on
+      non-existent file)
+
+    * (PHP_5_2)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: fix #39330 (apache2handler does not call shutdown actions before
+      apache child die)
+
+    * sapi/apache2handler/sapi_apache2.c:
+      fix #39330 (apache2handler does not call shutdown actions before apache
+      child die)
+
 2007-05-31  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/type.c:
