@@ -1560,7 +1560,7 @@ PHP_FUNCTION(imagecreatetruecolor)
 		return;
 	}
 
-	if (x_size <= 0 || y_size <= 0) {
+	if (x_size <= 0 || y_size <= 0 ||  x_size >= INT_MAX || y_size >= INT_MAX) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid image dimensions");
 		RETURN_FALSE;
 	}
@@ -2109,7 +2109,7 @@ PHP_FUNCTION(imagecreate)
 		return;
 	}
 
-	if (x_size <= 0 || y_size <= 0) {
+	if (x_size <= 0 || y_size <= 0 ||  x_size >= INT_MAX || y_size >= INT_MAX) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid image dimensions");
 		RETURN_FALSE;
 	}
