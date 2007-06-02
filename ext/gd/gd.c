@@ -1718,7 +1718,9 @@ PHP_FUNCTION(imagecreatetruecolor)
 	convert_to_long_ex(x_size);
 	convert_to_long_ex(y_size);
 
-	if (Z_LVAL_PP(x_size) <= 0 || Z_LVAL_PP(y_size) <= 0) {
+	if (Z_LVAL_PP(x_size) <= 0 || Z_LVAL_PP(y_size) <= 0 ||
+			Z_LVAL_PP(x_size) >= INT_MAX || Z_LVAL_PP(y_size) >= INT_MAX 
+		) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid image dimensions");
 		RETURN_FALSE;
 	}
@@ -2326,7 +2328,9 @@ PHP_FUNCTION(imagecreate)
 	convert_to_long_ex(x_size);
 	convert_to_long_ex(y_size);
 
-	if (Z_LVAL_PP(x_size) <= 0 || Z_LVAL_PP(y_size) <= 0) {
+	if (Z_LVAL_PP(x_size) <= 0 || Z_LVAL_PP(y_size) <= 0 ||
+			Z_LVAL_PP(x_size) >= INT_MAX || Z_LVAL_PP(y_size) >= INT_MAX
+		) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid image dimensions");
 		RETURN_FALSE;
 	}
