@@ -996,6 +996,9 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 	zval *this = getThis();
 	char *dirname;
 	int   dirname_len;
+	int idx;
+	struct zip_stat sb;
+	char *s;
 
 	if (!this) {
 		RETURN_FALSE;
@@ -1007,14 +1010,39 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 			&dirname, &dirname_len, UG(ascii_conv)) == FAILURE) {
 		return;
 	}
+
 	if (dirname_len<1) {
 		RETURN_FALSE;
 	}
 
-	if (zip_add_dir(intern, (const char *)dirname) < 0) {
-		RETURN_FALSE;
+    if (dirname[dirname_len-1] != '/') {
+		s=(char *)emalloc(dirname_len+2);
+		strcpy(s, dirname);
+		s[dirname_len] = '/';
+		s[dirname_len+1] = '\0';
+    } else {
+		s = dirname;
 	}
-	RETURN_TRUE;
+
+	idx = zip_stat(intern, s, 0, &sb);
+	if (idx >= 0) {
+		RETVAL_FALSE;
+	} else {
+		/* reset the error */
+		if (intern->error.str) {
+			_zip_error_fini(&intern->error);
+		}
+		_zip_error_init(&intern->error);
+
+		if (zip_add_dir(intern, (const char *)s) == -1) {
+			RETVAL_FALSE;
+		}
+		RETVAL_TRUE;
+	}
+
+	if (s != dirname) {
+		efree(s);
+	}
 }
 /* }}} */
 
