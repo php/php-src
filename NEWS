@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Improved fix for MOPB-03-2007. (Ilia)
 - Corrected fix for CVE-2007-2872. (Ilia)
 - Added GD version constants GD_MAJOR_VERSION, GD_MINOR_VERSION
+- Fixed crash in ZipArchive::addEmptyDir when a directory already
+  exists (pecl bug #11216) (Pierre)
   GD_RELEASE_VERSION, GD_EXTRA_VERSION and GD_VERSION_STRING. (Pierre)
 - Fixed bug #41576 (configure failure when using --without-apxs or some
   other SAPIs disabling options). (Jani)
@@ -24,7 +26,7 @@ PHP                                                                        NEWS
 - Optimized digest generation in md5() and sha1() functions. (Ilia)
 - Upgraded bundled SQLite 3 to version 3.3.17. (Ilia)
 
-- Addded "max_input_nesting_level" php.ini option to limit nesting level of 
+- Added "max_input_nesting_level" php.ini option to limit nesting level of 
   input variables. Fix for MOPB-03-2007. (Stas)
 - Added a 4th parameter flag to htmlspecialchars() and htmlentities() that 
   makes the function not encode existing html entities. (Ilia)

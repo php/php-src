@@ -120,7 +120,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 			len = spprintf(&file_dirname_fullpath, 0, "%s", dest);
 		}
 
-		php_basename(file, file_len, NULL, 0, &file_basename, (unsigned int *)&file_basename_len TSRMLS_CC);
+		php_basename(file, file_len, NULL, 0, &file_basename, (size_t *)&file_basename_len TSRMLS_CC);
 
 		if (OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
 			efree(file_dirname_fullpath);
@@ -1005,7 +1005,6 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 	}
 
     if (dirname[dirname_len-1] != '/') {
-
 		s=(char *)emalloc(dirname_len+2);
 		strcpy(s, dirname);
 		s[dirname_len] = '/';
@@ -1016,14 +1015,23 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 
 	idx = zip_stat(intern, s, 0, &sb);
 	if (idx >= 0) {
-		RETURN_FALSE;
+		RETVAL_FALSE;
+	} else {
+		/* reset the error */
+		if (intern->error.str) {
+			_zip_error_fini(&intern->error);
+		}
+		_zip_error_init(&intern->error);
+
+		if (zip_add_dir(intern, (const char *)s) == -1) {
+			RETVAL_FALSE;
+		}
+		RETVAL_TRUE;
 	}
 
-	if (zip_add_dir(intern, (const char *)s) == -1) {
-		RETURN_FALSE;
+	if (s != dirname) {
+		efree(s);
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
