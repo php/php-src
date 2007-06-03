@@ -133,8 +133,22 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 			int new_idx_len = 0;
 
 			if(++nest_level > PG(max_input_nesting_level)) {
+				HashTable *ht;
 				/* too many levels of nesting */
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Input variable nesting level more than allowed %ld (change max_input_nesting_level in php.ini to increase the limit)", PG(max_input_nesting_level));
+
+				if (track_vars_array) {
+					ht = Z_ARRVAL_P(track_vars_array);
+				} else if (PG(register_globals)) {
+					ht = EG(active_symbol_table);
+				}
+
+				zend_hash_del(ht, var, var_len + 1);
+				zval_dtor(val);
+
+				if (!PG(display_errors)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variable nesting level more than allowed %ld (change max_input_nesting_level in php.ini to increase the limit)", PG(max_input_nesting_level));
+				}
+				return;
 			}
 
 			ip++;
@@ -150,9 +164,9 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 					/* PHP variables cannot contain '[' in their names, so we replace the character with a '_' */
 					*(index_s - 1) = '_';
 
-					index_len = var_len = 0;
+					index_len = 0;
 					if (index) {
-						index_len = var_len = strlen(index);
+						index_len = strlen(index);
 					}
 					goto plain_var;
 					return;
@@ -818,8 +832,6 @@ int php_hash_environment(TSRMLS_D)
 {
 	char *p;
 	unsigned char _gpc_flags[5] = {0, 0, 0, 0, 0};
-	zval *dummy_track_vars_array = NULL;
-	zend_bool initialized_dummy_track_vars_array=0;
 	zend_bool jit_initialization = PG(auto_globals_jit);
 	struct auto_global_record {
 		char *name;
@@ -893,15 +905,9 @@ int php_hash_environment(TSRMLS_D)
 			continue;
 		}
 		if (!PG(http_globals)[i]) {
-			if (!initialized_dummy_track_vars_array) {
-				ALLOC_ZVAL(dummy_track_vars_array);
-				array_init(dummy_track_vars_array);
-				INIT_PZVAL(dummy_track_vars_array);
-				initialized_dummy_track_vars_array = 1;
-			} else {
-				dummy_track_vars_array->refcount++;
-			}
-			PG(http_globals)[i] = dummy_track_vars_array;
+			ALLOC_ZVAL(PG(http_globals)[i]);
+			array_init(PG(http_globals)[i]);
+			INIT_PZVAL(PG(http_globals)[i]);
 		}
 
 		PG(http_globals)[i]->refcount++;
