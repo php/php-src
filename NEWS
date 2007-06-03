@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.4
 - Improved fix for MOPB-02-2007. (Ilia)
+- Corrected fix for CVE-2007-2872. (Ilia)
 - Added GD version constants GD_MAJOR_VERSION, GD_MINOR_VERSION
   GD_RELEASE_VERSION, GD_EXTRA_VERSION and GD_VERSION_STRING (Pierre)
 - Fixed bug #41518 (file_exists() warns of open_basedir restriction on 
