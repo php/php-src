@@ -7,14 +7,20 @@ AC_ARG_WITH(apxs2filter,
 [  --with-apxs2filter[=FILE]   
                           EXPERIMENTAL: Build shared Apache 2.0 Filter module. FILE is the optional
                           pathname to the Apache apxs tool [apxs]],[
-  if test "$withval" = "yes"; then
+  PHP_APXS2FILTER=$withval
+],[
+  PHP_APXS2FILTER=no
+])
+
+if test "$PHP_APXS2FILTER" != "no"; then
+  if test "$PHP_APXS2FILTER" = "yes"; then
     APXS=apxs
     $APXS -q CFLAGS >/dev/null 2>&1
     if test "$?" != "0" && test -x /usr/sbin/apxs; then
       APXS=/usr/sbin/apxs
     fi
   else
-    PHP_EXPAND_PATH($withval, APXS)
+    PHP_EXPAND_PATH($PHP_APXS2FILTER, APXS)
   fi
 
   $APXS -q CFLAGS >/dev/null 2>&1
@@ -119,11 +125,10 @@ AC_ARG_WITH(apxs2filter,
     PHP_BUILD_THREAD_SAFE
   fi
   AC_MSG_RESULT(yes)
-  
   PHP_SUBST(APXS)
-],[
+else
   AC_MSG_RESULT(no)
-])
+fi
 
 dnl ## Local Variables:
 dnl ## tab-width: 4
