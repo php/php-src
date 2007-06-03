@@ -1511,18 +1511,20 @@ static PHP_ATTRIBUTE_MALLOC char *php_chunk_split(char *src, int srclen, char *e
 	char *p, *q;
 	int chunks; /* complete chunks! */
 	int restlen;
-	int out_len;
+	float out_len;
 
 	chunks = srclen / chunklen;
 	restlen = srclen - chunks * chunklen; /* srclen % chunklen */
 
-	out_len = (srclen + (chunks + 1) * endlen + 1);
+	out_len = chunks + 1;
+	out_len *= endlen;
+	out_len += srclen + 1;
 
 	if (out_len > INT_MAX || out_len <= 0) {
 		return NULL;
 	}
 
-	dest = safe_emalloc(out_len, sizeof(char), 0);
+	dest = safe_emalloc((int)out_len, sizeof(char), 0);
 
 	for (p = src, q = dest; p < (src + srclen - chunklen + 1); ) {
 		memcpy(q, p, chunklen);
