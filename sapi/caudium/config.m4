@@ -6,22 +6,27 @@ RESULT=no
 AC_MSG_CHECKING(for Caudium support)
 AC_ARG_WITH(caudium, 
 [  --with-caudium[=DIR]    Build PHP as a Pike module for use with Caudium.
-                          DIR is the Caudium server dir [/usr/local/caudium/server]],
-[
+                          DIR is the Caudium server dir [/usr/local/caudium/server]],[
+  PHP_CAUDIUM=$withval
+], [
+  PHP_CAUDIUM=no
+])
+
+if test "$PHP_CAUDIUM" != "no"; then
     if test "$prefix" = "NONE"; then CPREF=/usr/local/; fi
-	if test ! -d $withval ; then
+	if test ! -d $PHP_CAUDIUM ; then
       if test "$prefix" = "NONE"; then
-	     withval=/usr/local/caudium/server/
+	     PHP_CAUDIUM=/usr/local/caudium/server/
 	  else
-	     withval=$prefix/caudium/server/
+	     PHP_CAUDIUM=$prefix/caudium/server/
       fi
 	fi
-	if test -f $withval/bin/caudium; then
-		PIKE=$withval/bin/caudium
-	elif test -f $withval/bin/pike; then
-		PIKE=$withval/bin/pike
+	if test -f $PHP_CAUDIUM/bin/caudium; then
+		PIKE=$PHP_CAUDIUM/bin/caudium
+	elif test -f $PHP_CAUDIUM/bin/pike; then
+		PIKE=$PHP_CAUDIUM/bin/pike
 	else
-		AC_MSG_ERROR(Couldn't find a pike in $withval/bin/)
+		AC_MSG_ERROR(Couldn't find a pike in $PHP_CAUDIUM/bin/)
 	fi
     if $PIKE -e 'float v; int rel;sscanf(version(), "Pike v%f release %d", v, rel);v += rel/10000.0; if(v < 7.0268) exit(1); exit(0);'; then
 		PIKE_MODULE_DIR=`$PIKE --show-paths 2>&1| grep '^Module' | sed -e 's/.*: //'`
@@ -82,14 +87,13 @@ AC_ARG_WITH(caudium,
     PIKE_VERSION=`$PIKE -e 'string v; int rel;sscanf(version(), "Pike v%s release %d", v, rel); write(v+"."+rel);'`   
 	AC_DEFINE(HAVE_CAUDIUM,1,[Whether to compile with Caudium support])
     PHP_SELECT_SAPI(caudium, shared, caudium.c)
-	INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $withval/lib/$PIKE_VERSION/PHP5.so"
+	INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $PHP_CAUDIUM/lib/$PIKE_VERSION/PHP5.so"
 	RESULT="	*** Pike binary used:         $PIKE
 	*** Pike include dir(s) used: $PIKE_INCLUDE_DIR
 	*** Pike version:             $PIKE_VERSION"
     dnl Always use threads since thread-free support really blows.
     PHP_BUILD_THREAD_SAFE
-
-])
+fi
 AC_MSG_RESULT($RESULT)
 
 dnl ## Local Variables:
