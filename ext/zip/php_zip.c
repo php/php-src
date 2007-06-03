@@ -1036,8 +1036,9 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 
 		if (zip_add_dir(intern, (const char *)s) == -1) {
 			RETVAL_FALSE;
+		} else {
+			RETVAL_TRUE;
 		}
-		RETVAL_TRUE;
 	}
 
 	if (s != dirname) {
