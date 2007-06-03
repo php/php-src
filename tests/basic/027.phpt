@@ -32,4 +32,4 @@ array(4) {
     }
   }
 }
-string(124) "Unknown: Input variable nesting level more than allowed 10 (change max_input_nesting_level in php.ini to increase the limit)"
+string(124) "Unknown: Input variable nesting level exceeded 10. To increase the level change max_input_nesting_level in php.ini."
