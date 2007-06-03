@@ -1,3 +1,51 @@
+2007-06-02  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c:
+      - MFB: sx/sy must be > 0 and < INT_MAX
+
+    * (PHP_5_2)
+      ext/gd/gd.c:
+      - sx/sy must be > 0 and < INT_MAX
+
+    * (PHP_5_2)
+      ext/gd/tests/bug19366.phpt
+      ext/gd/tests/bug22544.phpt
+      ext/gd/tests/bug24155.phpt
+      ext/gd/tests/bug24594.phpt
+      ext/gd/tests/bug27582_1.phpt
+      ext/gd/tests/bug28147.phpt
+      ext/gd/tests/bug36697.phpt
+      ext/gd/tests/bug37346.phpt
+      ext/gd/tests/bug37360.phpt
+      ext/gd/tests/bug38112.phpt
+      ext/gd/tests/bug39082.phpt
+      ext/gd/tests/bug39273.phpt
+      ext/gd/tests/bug39286.phpt
+      ext/gd/tests/bug39366.phpt
+      ext/gd/tests/bug39508.phpt
+      ext/gd/tests/bug39780.phpt
+      ext/gd/tests/bug39780_extern.phpt
+      ext/gd/tests/createfromgd2.phpt
+      ext/gd/tests/createfromwbmp.phpt
+      ext/gd/tests/createfromwbmp2.phpt
+      ext/gd/tests/createfromwbmp2_extern.phpt
+      ext/gd/tests/gif2gd.phpt
+      ext/gd/tests/gif2jpg.phpt
+      ext/gd/tests/gif2png.phpt
+      ext/gd/tests/imagefilter.phpt
+      ext/gd/tests/imagewbmp.phpt
+      ext/gd/tests/jpeg2png.phpt
+      ext/gd/tests/jpg2gd.phpt
+      ext/gd/tests/libgd00086.phpt
+      ext/gd/tests/libgd00086_extern.phpt
+      ext/gd/tests/png2gd.phpt
+      ext/gd/tests/pngcomp.phpt
+      ext/gd/tests/xpm2gd.phpt
+      ext/gd/tests/xpm2jpg.phpt
+      ext/gd/tests/xpm2png.phpt:
+      - enable tests even when an external GD is used. Latest releases
+        (2.0.34 or 2.0.35) work.
+
 2007-06-01  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * sapi/cli/tests/015.phpt
