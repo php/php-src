@@ -21,7 +21,7 @@ if test "$PHP_PHTTPD" != "no"; then
   PHP_SELECT_SAPI(phttpd, shared, phttpd.c)
   INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)$PHP_PHTTPD/modules/"
   RESULT=yes
-])
+fi
 AC_MSG_RESULT($RESULT)
 
 dnl ## Local Variables:
