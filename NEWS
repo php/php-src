@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.4
+- Improved fix for MOPB-02-2007. (Ilia)
 - Fixed bug #41518 (file_exists() warns of open_basedir restriction on 
   non-existent file). (Tony)
 - Fixed bug #39330 (apache2handler does not call shutdown actions before 
