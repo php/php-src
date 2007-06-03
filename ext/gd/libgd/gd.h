@@ -11,6 +11,12 @@ extern "C" {
 
 #include "php_compat.h"
 
+#define GD_MAJOR_VERSION 2
+#define GD_MINOR_VERSION 0
+#define GD_RELEASE_VERSION 35
+#define GD_EXTRA_VERSION ""
+#define GD_VERSION_STRING "2.0.35"
+
 #ifdef NETWARE
 /* default fontpath for netware systems */
 #define DEFAULT_FONTPATH "sys:/java/nwgfx/lib/x11/fonts/ttf;."
