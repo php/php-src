@@ -15,6 +15,7 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE_
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
+@$db->exec("SET NAMES 'LATIN1'"); // needed for PostgreSQL
 $db->exec("CREATE TABLE test (id INTEGER)");
 $db->exec("INSERT INTO test (id) VALUES (1)");
 
