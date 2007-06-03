@@ -4,15 +4,18 @@ dnl
 
 RESULT=no
 AC_MSG_CHECKING(for Pi3Web support)
-
 AC_ARG_WITH(pi3web,
-[  --with-pi3web[=DIR]     Build PHP as Pi3Web module],
-[
-if test "$withval" != "no"; then
-	if test "$withval" = "yes"; then
+[  --with-pi3web[=DIR]     Build PHP as Pi3Web module],[
+  PHP_PI3WEB=$withval
+], [
+  PHP_PI3WEB=no
+])
+
+if test "$PHP_PI3WEB" != "no"; then
+	if test "$PHP_PI3WEB" = "yes"; then
 		PI3PATH=../.. # the default
 	else
-		PI3PATH=$withval
+		PI3PATH=$PHP_PI3WEB
 	fi
 	test -f "$PI3PATH/PiAPI/PiAPI.h" || AC_MSG_ERROR(Unable to find PiAPI.h in $PI3PATH/PiAPI)
 	PHP_BUILD_THREAD_SAFE
@@ -27,7 +30,6 @@ if test "$withval" != "no"; then
 else
 	RESULT=no
 fi
-])
 AC_MSG_RESULT($RESULT)
 
 dnl ## Local Variables:

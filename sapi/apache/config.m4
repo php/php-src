@@ -22,14 +22,20 @@ AC_MSG_CHECKING(for Apache 1.x module support via DSO through APXS)
 AC_ARG_WITH(apxs,
 [  --with-apxs[=FILE]      Build shared Apache 1.x module. FILE is the optional
                           pathname to the Apache apxs tool [apxs]],[
-  if test "$withval" = "yes"; then
+  PHP_APXS=$withval
+],[
+  PHP_APXS=no
+])
+
+if test "$PHP_APXS" != "no"; then
+  if test "$PHP_APXS" = "yes"; then
     APXS=apxs
     $APXS -q CFLAGS >/dev/null 2>&1
     if test "$?" != "0" && test -x /usr/sbin/apxs; then #SUSE 6.x 
       APXS=/usr/sbin/apxs
     fi
   else
-    PHP_EXPAND_PATH($withval, APXS)
+    PHP_EXPAND_PATH($PHP_APXS, APXS)
   fi
 
   $APXS -q CFLAGS >/dev/null 2>&1
@@ -113,36 +119,40 @@ AC_ARG_WITH(apxs,
   AC_DEFINE(HAVE_AP_COMPAT_H,1,[ ])
   AC_DEFINE(HAVE_APACHE,1,[ ])
   AC_MSG_RESULT(yes)
-],[
+else
   AC_MSG_RESULT(no)
-])
+fi
 
-if test "$PHP_SAPI" != "apache"; then
 AC_MSG_CHECKING(for Apache 1.x module support)
 AC_ARG_WITH(apache,
 [  --with-apache[=DIR]     Build Apache 1.x module. DIR is the top-level Apache
                           build directory [/usr/local/apache]],[
-
-  APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php.* sapi/apache/libphp6.module"
-
   if test "$withval" = "yes"; then
     # Apache's default directory
-    withval=/usr/local/apache
+    PHP_APACHE=/usr/local/apache
+  else
+    PHP_APACHE=$withval
   fi
-  if test "$withval" != "no"; then
+], [
+  PHP_APACHE=no
+])
+
+if test "$PHP_SAPI" != "apache" && test "$PHP_APACHE" != "no"; then
+  APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php.* sapi/apache/libphp6.module"
+
+  if test "$PHP_APACHE" != "no"; then
     AC_DEFINE(HAVE_APACHE,1,[ ])
     APACHE_MODULE=yes
-    PHP_EXPAND_PATH($withval, withval)
-    
+    PHP_EXPAND_PATH($PHP_APACHE, PHP_APACHE)
     # For Apache 2.0.x
-    if test -f $withval/include/httpd.h &&
-         test -f $withval/srclib/apr/include/apr_general.h ; then
+    if test -f $PHP_APACHE/include/httpd.h &&
+         test -f $PHP_APACHE/srclib/apr/include/apr_general.h ; then
       AC_MSG_ERROR([Use --with-apxs2 with Apache 2.x!])
     # For Apache 1.3.x
-    elif test -f $withval/src/main/httpd.h; then
+    elif test -f $PHP_APACHE/src/main/httpd.h; then
       APACHE_HAS_REGEX=1
-      APACHE_INCLUDE="-I$withval/src/main -I$withval/src/os/unix -I$withval/src/ap"
-      APACHE_TARGET=$withval/src/modules/php6
+      APACHE_INCLUDE="-I$PHP_APACHE/src/main -I$PHP_APACHE/src/os/unix -I$PHP_APACHE/src/ap"
+      APACHE_TARGET=$PHP_APACHE/src/modules/php6
       if test ! -d $APACHE_TARGET; then
         mkdir $APACHE_TARGET
       fi
@@ -151,24 +161,24 @@ AC_ARG_WITH(apache,
       PHP_LIBS="-Lmodules/php6 -L../modules/php6 -L../../modules/php6 -lmodphp6"
       AC_MSG_RESULT(yes - Apache 1.3.x)
       STRONGHOLD=
-      if test -f $withval/src/include/ap_config.h; then
+      if test -f $PHP_APACHE/src/include/ap_config.h; then
         AC_DEFINE(HAVE_AP_CONFIG_H,1,[ ])
       fi
-      if test -f $withval/src/include/ap_compat.h; then
+      if test -f $PHP_APACHE/src/include/ap_compat.h; then
         AC_DEFINE(HAVE_AP_COMPAT_H,1,[ ])
-        if test ! -f $withval/src/include/ap_config_auto.h; then
+        if test ! -f $PHP_APACHE/src/include/ap_config_auto.h; then
           AC_MSG_ERROR(Please run Apache\'s configure or src/Configure program once and try again)
         fi
       else
-        if test -f $withval/src/include/compat.h; then
+        if test -f $PHP_APACHE/src/include/compat.h; then
           AC_DEFINE(HAVE_OLD_COMPAT_H,1,[ ])
         fi
       fi
     # Also for Apache 1.3.x
-    elif test -f $withval/src/include/httpd.h; then
+    elif test -f $PHP_APACHE/src/include/httpd.h; then
       APACHE_HAS_REGEX=1
-      APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
-      APACHE_TARGET=$withval/src/modules/php6
+      APACHE_INCLUDE="-I$PHP_APACHE/src/include -I$PHP_APACHE/src/os/unix"
+      APACHE_TARGET=$PHP_APACHE/src/modules/php6
       if test ! -d $APACHE_TARGET; then
         mkdir $APACHE_TARGET
       fi
@@ -177,52 +187,48 @@ AC_ARG_WITH(apache,
       APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp6.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
       AC_MSG_RESULT(yes - Apache 1.3.x)
       STRONGHOLD=
-      if test -f $withval/src/include/ap_config.h; then
+      if test -f $PHP_APACHE/src/include/ap_config.h; then
         AC_DEFINE(HAVE_AP_CONFIG_H,1,[ ])
       fi
-      if test -f $withval/src/include/ap_compat.h; then
+      if test -f $PHP_APACHE/src/include/ap_compat.h; then
         AC_DEFINE(HAVE_AP_COMPAT_H,1,[ ])
-        if test ! -f $withval/src/include/ap_config_auto.h; then
+        if test ! -f $PHP_APACHE/src/include/ap_config_auto.h; then
           AC_MSG_ERROR(Please run Apache\'s configure or src/Configure program once and try again)
         fi
       else
-        if test -f $withval/src/include/compat.h; then
+        if test -f $PHP_APACHE/src/include/compat.h; then
           AC_DEFINE(HAVE_OLD_COMPAT_H,1,[ ])
         fi
       fi
     # For StrongHold 2.2
-    elif test -f $withval/apache/httpd.h; then
-      APACHE_INCLUDE="-I$withval/apache -I$withval/ssl/include"
-      APACHE_TARGET=$withval/apache
+    elif test -f $PHP_APACHE/apache/httpd.h; then
+      APACHE_INCLUDE="-I$PHP_APACHE/apache -I$PHP_APACHE/ssl/include"
+      APACHE_TARGET=$PHP_APACHE/apache
       PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php.c php_apache.c, $APACHE_INCLUDE)
       PHP_LIBS="-Lmodules/php6 -L../modules/php6 -L../../modules/php6 -lmodphp6"
       APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp6.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET"
       STRONGHOLD=-DSTRONGHOLD=1
       AC_MSG_RESULT(yes - StrongHold)
-      if test -f $withval/apache/ap_config.h; then
+      if test -f $PHP_APACHE/apache/ap_config.h; then
         AC_DEFINE(HAVE_AP_CONFIG_H,1,[ ])
       fi
-      if test -f $withval/src/ap_compat.h; then
+      if test -f $PHP_APACHE/src/ap_compat.h; then
         AC_DEFINE(HAVE_AP_COMPAT_H,1,[ ])
-        if test ! -f $withval/src/include/ap_config_auto.h; then
+        if test ! -f $PHP_APACHE/src/include/ap_config_auto.h; then
           AC_MSG_ERROR(Please run Apache\'s configure or src/Configure program once and try again)
         fi
       else
-        if test -f $withval/src/compat.h; then
+        if test -f $PHP_APACHE/src/compat.h; then
           AC_DEFINE(HAVE_OLD_COMPAT_H,1,[ ])
         fi
       fi
     else
       AC_MSG_RESULT(no)
-      AC_MSG_ERROR(Invalid Apache directory - unable to find httpd.h under $withval)
+      AC_MSG_ERROR(Invalid Apache directory - unable to find httpd.h under $PHP_APACHE)
     fi
   else
     AC_MSG_RESULT(no)
   fi
-],[
-  AC_MSG_RESULT(no)
-])
-
 fi
 
 AC_MSG_CHECKING(for mod_charset compatibility option)
