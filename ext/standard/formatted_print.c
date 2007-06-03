@@ -278,7 +278,7 @@ php_sprintf_appenduint(char **buffer, int *pos, int *size,
 
 	PRINTF_DEBUG(("sprintf: appenduint(%x, %x, %x, %d, %d, '%c', %d)\n",
 				  *buffer, pos, size, number, width, padding, alignment));
-	magn = (unsigned int) number;
+	magn = (unsigned long) number;
 
 	/* Can't right-pad 0's on integers */
 	if (alignment == 0 && padding == '0') padding = ' ';
