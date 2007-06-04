@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   GD_RELEASE_VERSION, GD_EXTRA_VERSION and GD_VERSION_STRING. (Pierre)
 - Fixed bug #41576 (configure failure when using --without-apxs or some
   other SAPIs disabling options). (Jani)
+- Fixed bug #41567 (json_encode() double conversion is inconsistent with
+  PHP). (Lucas, Ilia)
 - Fixed bug #41555 (configure failure: regression caused by fix for #41265).
   (Jani)
 - Fixed bug #41518 (file_exists() warns of open_basedir restriction on 
