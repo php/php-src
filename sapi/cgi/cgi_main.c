@@ -1682,7 +1682,9 @@ consult the installation file that came with this distribution, or visit \n\
 		*/
 		retval = FAILURE;
 		if (cgi || SG(request_info).path_translated) {
-			retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
+			if (!php_check_open_basedir(SG(request_info).path_translated TSRMLS_CC)) {
+				retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
+			}
 		}
 		/* 
 			if we are unable to open path_translated and we are not
@@ -1704,9 +1706,21 @@ consult the installation file that came with this distribution, or visit \n\
 				goto fastcgi_request_done;
 			}
 #endif
+
+			STR_FREE(SG(request_info).path_translated);
+
+			if (free_query_string && SG(request_info).query_string) {
+				free(SG(request_info).query_string);
+				SG(request_info).query_string = NULL;
+			}
+
 			php_request_shutdown((void *) 0);
 			SG(server_context) = NULL;
 			php_module_shutdown(TSRMLS_C);
+			sapi_shutdown();
+#ifdef ZTS
+			tsrm_shutdown();
+#endif
 			return FAILURE;
 		}
 
