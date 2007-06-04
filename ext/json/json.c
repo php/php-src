@@ -363,7 +363,7 @@ static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) /* {{{ */
                 double dbl = Z_DVAL_P(val);
 
                 if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
-                    len = spprintf(&d, 0, "%.9g", dbl);
+		    len = spprintf(&d, 0, "%.*g", (int) EG(precision), dbl);
                     if (d) {
                         if (dbl > LONG_MAX && !memchr(d, '.', len)) {
                             smart_str_append_unsigned(buf, (unsigned long)Z_DVAL_P(val));
