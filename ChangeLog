@@ -1,3 +1,185 @@
+2007-06-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      tests/basic/027.phpt:
+      fix test
+
+2007-06-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      sapi/cgi/tests/009.phpt:
+      fix test
+
+    * sapi/cgi/tests/009.phpt:
+      add missing test
+
+    * sapi/phttpd/config.m4:
+      another missed ])
+
+    * sapi/isapi/config.m4:
+      fix configure
+
+2007-06-03  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - MFB: fix logic
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - fix logic (goto is a gift, I should use it :)
+
+    * ext/zip/php_zip.c
+      ext/zip/tests/bug11216.phpt:
+      - MFB: PECL #11216, addEmptyDir crashes if the directory already exists
+
+    * (PHP_5_2)
+      NEWS
+      ext/zip/php_zip.c
+      ext/zip/tests/bug11216.phpt:
+      - pecl bug #11216, better fix, leak removed and improved test
+      - typo in news, better late than never (-d)
+
+2007-06-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      bug news
+
+    * (PHP_5_2)
+      sapi/apache/config.m4
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4
+      sapi/apache_hooks/config.m4
+      sapi/caudium/config.m4
+      sapi/embed/config.m4
+      sapi/isapi/config.m4
+      sapi/milter/config.m4
+      sapi/phttpd/config.m4
+      sapi/pi3web/config.m4
+      sapi/roxen/config.m4
+      sapi/thttpd/config.m4
+      sapi/tux/config.m4
+      sapi/webjames/config.m4:
+      MFH:- Fixed bug #41576 (misbehaviour when using --without-apxs)
+
+    * sapi/apache/config.m4
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4
+      sapi/apache_hooks/config.m4
+      sapi/caudium/config.m4
+      sapi/embed/config.m4
+      sapi/isapi/config.m4
+      sapi/milter/config.m4
+      sapi/phttpd/config.m4
+      sapi/pi3web/config.m4
+      sapi/roxen/config.m4
+      sapi/thttpd/config.m4
+      sapi/tux/config.m4
+      sapi/webjames/config.m4:
+      - Fixed bug #41576 (misbehaviour when using --without-apxs)
+
+2007-06-03  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/tests/bug11216.phpt
+      ext/zip/tests/bug11216.phpt:
+      
+      file bug11216.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - PECL #11216, addEmptyDir crashes if the directory already exists
+
+2007-06-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      fix news
+
+2007-06-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c
+      ext/standard/string.c
+      ext/standard/tests/strings/chunk_split.phpt
+      ext/standard/tests/strings/chunk_split.phpt:
+      MFB: Corrected fix for CVE-2007-2872
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/chunk_split.phpt:
+      Corrected fix for CVE-2007-2872
+
+2007-06-03  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/gd.c
+      ext/gd/libgd/gd.h:
+      - MFH: @DOC add constants GD_MAJOR_VERSION, GD_MINOR_VERSION,
+      GD_RELEASE_VERSION
+        GD_EXTRA_VERSION and GD_VERSION_STRING
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.h:
+      - @DOC add constants GD_MAJOR_VERSION, GD_MINOR_VERSION, GD_RELEASE_VERSION
+        GD_EXTRA_VERSION and GD_VERSION_STRING
+      - fix #ifdef else clause
+
+2007-06-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pdo/tests/bug_36798.phpt:
+      
+      Fixed test for PostgreSQL
+
+2007-06-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      main/php_variables.c
+      main/php_variables.c
+      tests/basic/027.phpt
+      tests/basic/027.phpt:
+      MFH:- Improved the error message for exceeding max_input_nesting_level.
+
+    * main/php_variables.c
+      tests/basic/027.phpt:
+      - Improved the error message for exceeding max_input_nesting_level.
+
+2007-06-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      main/php_variables.c
+      tests/basic/027.phpt:
+      
+      MFB: Improved fix for MOPB-02-2007
+
+    * main/php_variables.c
+      tests/basic/027.phpt
+      tests/basic/027.phpt:
+      MFB: Improved fix for MOPB-02-2007
+
+    * (PHP_5_2)
+      NEWS
+      main/php_variables.c:
+      Improved fix for MOPB-02-2007
+
+    * tests/basic/027.phpt
+      tests/basic/027.phpt:
+      
+      file 027.phpt was initially added on branch PHP_5_2.
+
+2007-06-03  Brian Shire  <shire@tekrat.com>
+
+    * (PHP_5_2)
+      ext/standard/formatted_print.c:
+      MFH: Change printf %u behavior so that it does not truncate numbers at
+      32-bits.  (Reported by Aditya Agarwal.)
+
+    * ext/standard/formatted_print.c:
+      Change printf %u behavior so that it does not truncate numbers at 32-bits. 
+      (Reported by Aditya Agarwal.)
+
 2007-06-02  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/gd/gd.c:
