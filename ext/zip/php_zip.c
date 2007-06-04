@@ -1015,12 +1015,12 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 		RETURN_FALSE;
 	}
 
-    if (dirname[dirname_len-1] != '/') {
+	if (dirname[dirname_len-1] != '/') {
 		s=(char *)emalloc(dirname_len+2);
 		strcpy(s, dirname);
 		s[dirname_len] = '/';
 		s[dirname_len+1] = '\0';
-    } else {
+	} else {
 		s = dirname;
 	}
 
