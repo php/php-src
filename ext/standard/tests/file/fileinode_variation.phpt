@@ -5,6 +5,7 @@ Test fileinode() function: Variations
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip no fnmatch() on Windows');
 }
+?>
 --FILE--
 <?php
 /* 
