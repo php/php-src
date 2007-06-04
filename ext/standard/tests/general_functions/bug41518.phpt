@@ -20,6 +20,8 @@ touch($tmp_file);
 var_dump(file_exists($tmp_file)); //exists
 var_dump(file_exists($tmp_file."nosuchfile")); //doesn't exist
 
+@unlink($tmp_file);
+
 echo "Done\n";
 ?>
 --EXPECTF--	
