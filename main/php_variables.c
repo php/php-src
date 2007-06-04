@@ -136,11 +136,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 				HashTable *ht;
 				/* too many levels of nesting */
 
-				if (track_vars_array) {
-					ht = Z_ARRVAL_P(track_vars_array);
-				} else if (PG(register_globals)) {
-					ht = EG(active_symbol_table);
-				}
+				ht = Z_ARRVAL_P(track_vars_array);
 
 				zend_hash_del(ht, var, var_len + 1);
 				zval_dtor(val);
