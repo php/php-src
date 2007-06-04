@@ -59,8 +59,6 @@
 #include "zend_highlight.h"
 #include "zend_indent.h"
 
-/* {{{ cli_is_valid_code
- */
 typedef enum {
 	body,
 	sstring,
@@ -74,7 +72,7 @@ typedef enum {
 	outside,
 } php_code_type;
 
-int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC)
+int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC) /* {{{ */
 {
 	int valid_end = 1, last_valid_end;
 	int brackets_count = 0;
@@ -430,9 +428,7 @@ TODO:
 	return retval;
 } /* }}} */
 
-/* {{{ cli_code_completion
- */
-char **cli_code_completion(const char *text, int start, int end)
+char **cli_code_completion(const char *text, int start, int end) /* {{{ */
 {
 	return rl_completion_matches(text, cli_completion_generator);
 }
