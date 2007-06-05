@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Fixed crash in ZipArchive::addEmptyDir when a directory already
   exists (pecl bug #11216) (Pierre)
   GD_RELEASE_VERSION, GD_EXTRA_VERSION and GD_VERSION_STRING. (Pierre)
+- Fixed bug #41594 (Statement cache is flushed too frequently). (Tony)
 - Fixed bug #41576 (configure failure when using --without-apxs or some
   other SAPIs disabling options). (Jani)
 - Fixed bug #41567 (json_encode() double conversion is inconsistent with
