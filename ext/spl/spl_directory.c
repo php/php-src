@@ -829,7 +829,11 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
+#ifdef HAVE_SYMLINK
 	ret = readlink(intern->file_name, buff, MAXPATHLEN-1);
+#else
+	ret = -1; /* always fail if not implemented */
+#endif
 
 	if (ret == -1) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Unable to read link %s, error: %s", intern->file_name, strerror(errno));
