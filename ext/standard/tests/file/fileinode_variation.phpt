@@ -3,7 +3,7 @@ Test fileinode() function: Variations
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no fnmatch() on Windows');
+    die('skip no link()/symlink() on Windows');
 }
 --FILE--
 <?php
