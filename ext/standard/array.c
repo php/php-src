@@ -50,6 +50,7 @@
 #include "ext/spl/spl_array.h"
 #endif
 
+/* {{{ defines */
 #define EXTR_OVERWRITE			0
 #define EXTR_SKIP				1
 #define EXTR_PREFIX_SAME		2
@@ -91,6 +92,7 @@
 #define INTERSECT_COMP_KEY_USER      1
 
 #define DOUBLE_DRIFT_FIX	0.000000000000001
+/* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(array)
 
@@ -102,7 +104,7 @@ static void php_array_init_globals(zend_array_globals *array_globals)
 }
 /* }}} */
 
-PHP_MINIT_FUNCTION(array)
+PHP_MINIT_FUNCTION(array) /* {{{ */
 {
 	ZEND_INIT_MODULE_GLOBALS(array, php_array_init_globals, NULL); 
 
@@ -131,8 +133,9 @@ PHP_MINIT_FUNCTION(array)
 	
 	return SUCCESS;
 }
+/* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(array)
+PHP_MSHUTDOWN_FUNCTION(array) /* {{{ */
 {
 #ifdef ZTS
 	ts_free_id(array_globals_id);
@@ -140,8 +143,9 @@ PHP_MSHUTDOWN_FUNCTION(array)
 
 	return SUCCESS;
 }
+/* }}} */
 
-static void set_compare_func(int sort_type TSRMLS_DC)
+static void set_compare_func(int sort_type TSRMLS_DC) /* {{{ */
 {
 	switch (sort_type) {
 		case SORT_NUMERIC:
@@ -164,8 +168,9 @@ static void set_compare_func(int sort_type TSRMLS_DC)
 			break;
 	}
 }
+/* }}} */
 
-static int array_key_compare(const void *a, const void *b TSRMLS_DC)
+static int array_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
 	Bucket *f;
 	Bucket *s;
@@ -218,11 +223,13 @@ static int array_key_compare(const void *a, const void *b TSRMLS_DC)
 
 	return 0;
 }
+/* }}} */
 
-static int array_reverse_key_compare(const void *a, const void *b TSRMLS_DC)
+static int array_reverse_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
 	return array_key_compare(a, b TSRMLS_CC) * -1;
 }
+/* }}} */
 
 /* {{{ proto bool krsort(array &array_arg [, int sort_flags])
    Sort an array by key value in reverse order */
@@ -268,8 +275,7 @@ PHP_FUNCTION(ksort)
 }
 /* }}} */
 
-
-static int php_count_recursive(zval *array, long mode TSRMLS_DC)
+static int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 {
 	long cnt = 0;
 	zval **element;
@@ -289,6 +295,7 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC)
 
 	return cnt;
 }
+/* }}} */
 
 /* {{{ proto int count(mixed var [, int mode])
    Count the number of elements in a variable (usually an array) */
@@ -343,7 +350,7 @@ PHP_FUNCTION(count)
  *
  * This is not correct any more, depends on what compare_func is set to.
  */
-static int array_data_compare(const void *a, const void *b TSRMLS_DC)
+static int array_data_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
 	Bucket *f;
 	Bucket *s;
@@ -381,13 +388,15 @@ static int array_data_compare(const void *a, const void *b TSRMLS_DC)
 
 	return 0;
 }
+/* }}} */
 
-static int array_reverse_data_compare(const void *a, const void *b TSRMLS_DC)
+static int array_reverse_data_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
 	return array_data_compare(a, b TSRMLS_CC)*-1;
 }
+/* }}} */
 
-static int array_natural_general_compare(const void *a, const void *b, int fold_case)
+static int array_natural_general_compare(const void *a, const void *b, int fold_case) /* {{{ */
 {
 	Bucket *f, *s;
 	zval *fval, *sval;
@@ -419,18 +428,21 @@ static int array_natural_general_compare(const void *a, const void *b, int fold_
 	
 	return result;
 }
+/* }}} */
 
-static int array_natural_compare(const void *a, const void *b TSRMLS_DC)
+static int array_natural_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
 	return array_natural_general_compare(a, b, 0);
 }
+/* }}} */
 
-static int array_natural_case_compare(const void *a, const void *b TSRMLS_DC)
+static int array_natural_case_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
 	return array_natural_general_compare(a, b, 1);
 }
+/* }}} */
 
-static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
+static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 {
 	zval **array;
 	HashTable *target_hash;
@@ -457,7 +469,7 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 
 	RETURN_TRUE;
 }
-
+/* }}} */
 
 /* {{{ proto void natsort(array &array_arg)
    Sort an array using natural sort */
@@ -467,7 +479,6 @@ PHP_FUNCTION(natsort)
 }
 /* }}} */
 
-
 /* {{{ proto void natcasesort(array &array_arg)
    Sort an array using case-insensitive natural sort */
 PHP_FUNCTION(natcasesort)
@@ -475,7 +486,6 @@ PHP_FUNCTION(natcasesort)
 	php_natsort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
 
 /* {{{ proto bool asort(array &array_arg [, int sort_flags])
    Sort an array and maintain index association */
@@ -565,7 +575,7 @@ PHP_FUNCTION(rsort)
 }
 /* }}} */
 
-static int array_user_compare(const void *a, const void *b TSRMLS_DC)
+static int array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
 	Bucket *f;
 	Bucket *s;
@@ -601,6 +611,7 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 		return 0;
 	}
 }
+/* }}} */
 
 /* check if comparison function is valid */
 #define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
@@ -631,7 +642,6 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 #define PHP_ARRAY_CMP_FUNC_RESTORE() \
         BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
         BG(user_compare_func_name) = old_compare_func; \
-
 
 /* {{{ proto bool usort(array array_arg, string cmp_function)
    Sort an array by values using a user-defined comparison function */
@@ -699,7 +709,7 @@ PHP_FUNCTION(uasort)
 }
 /* }}} */
 
-static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
+static int array_user_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
 	Bucket *f;
 	Bucket *s;
@@ -745,6 +755,7 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 		return 0;
 	}
 }
+/* }}} */
 
 /* {{{ proto bool uksort(array array_arg, string cmp_function)
    Sort an array by keys using a user-defined comparison function */
@@ -1042,7 +1053,7 @@ PHP_FUNCTION(max)
 }
 /* }}} */
 
-static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive TSRMLS_DC)
+static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive TSRMLS_DC) /* {{{ */
 {
 	zval **args[3],			/* Arguments to userland function */
 		  *retval_ptr,			/* Return value - unused */
@@ -1126,6 +1137,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 	
 	return 0;
 }
+/* }}} */
 
 /* {{{ proto bool array_walk(array input, string funcname [, mixed userdata])
    Apply a user function to every member of an array */
@@ -1189,8 +1201,7 @@ PHP_FUNCTION(array_walk_recursive)
 }
 /* }}} */
 
-
-/* void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
+/* void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) {{{ 
  *	  0 = return boolean
  *	  1 = return key
  */
@@ -1251,7 +1262,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 
 	RETURN_FALSE;
 }
-
+/* }}} */
 
 /* {{{ proto bool in_array(mixed needle, array haystack [, bool strict])
    Checks if the given value exists in the array */
@@ -1269,8 +1280,7 @@ PHP_FUNCTION(array_search)
 }
 /* }}} */
 
-
-static int php_valid_var_name(char *var_name, int len)
+static int php_valid_var_name(char *var_name, int len) /* {{{ */
 {
 	int i;
 	
@@ -1290,7 +1300,7 @@ static int php_valid_var_name(char *var_name, int len)
 	
 	return 1;
 }
-
+/* }}} */
 
 /* {{{ proto int extract(array var_array [, int extract_type [, string prefix]])
    Imports variables into symbol table from an array */
@@ -1466,8 +1476,7 @@ PHP_FUNCTION(extract)
 }
 /* }}} */
 
-
-static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry)
+static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry) /* {{{ */
 {
 	zval **value_ptr, *value, *data;
 	
@@ -1496,7 +1505,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 		}
 	}
 }
-
+/* }}} */
 
 /* {{{ proto array compact(mixed var_names [, mixed ...])
    Creates a hash containing variables and their values */
@@ -1756,7 +1765,7 @@ err:
 }
 /* }}} */
 
-static void array_data_shuffle(zval *array TSRMLS_DC)
+static void array_data_shuffle(zval *array TSRMLS_DC) /* {{{ */
 {
 	Bucket **elems, *temp;
 	HashTable *hash;
@@ -1810,6 +1819,7 @@ static void array_data_shuffle(zval *array TSRMLS_DC)
 
 	efree(elems);
 }
+/* }}} */
 
 /* {{{ proto bool shuffle(array array_arg)
    Randomly shuffle the contents of an array */
@@ -1827,11 +1837,7 @@ PHP_FUNCTION(shuffle)
 }
 /* }}} */
 
-
-/* HashTable* php_splice(HashTable *in_hash, int offset, int length,
-						 zval ***list, int list_count, HashTable **removed) */
-HashTable* php_splice(HashTable *in_hash, int offset, int length,
-					  zval ***list, int list_count, HashTable **removed)
+HashTable* php_splice(HashTable *in_hash, int offset, int length, zval ***list, int list_count, HashTable **removed) /* {{{ */
 {
 	HashTable 	*out_hash = NULL;	/* Output hashtable */
 	int			 num_in,			/* Number of entries in the input hashtable */
@@ -1915,7 +1921,6 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 }
 /* }}} */
 
-
 /* {{{ proto int array_push(array stack, mixed var [, mixed ...])
    Pushes elements onto the end of the array */
 PHP_FUNCTION(array_push)
@@ -1960,7 +1965,6 @@ PHP_FUNCTION(array_push)
 	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));
 }
 /* }}} */
-
 
 /* {{{ void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int which_end) */
 static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
@@ -2037,7 +2041,6 @@ PHP_FUNCTION(array_pop)
 }
 /* }}} */
 
-
 /* {{{ proto mixed array_shift(array stack)
    Pops an element off the beginning of the array */
 PHP_FUNCTION(array_shift)
@@ -2045,7 +2048,6 @@ PHP_FUNCTION(array_shift)
 	_phpi_pop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
-
 
 /* {{{ proto int array_unshift(array stack, mixed var [, mixed ...])
    Pushes elements onto the beginning of the array */
@@ -2093,7 +2095,6 @@ PHP_FUNCTION(array_unshift)
 	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));
 }
 /* }}} */
-
 
 /* {{{ proto array array_splice(array input, int offset [, int length [, array replacement]])
    Removes the elements designated by offset and length and replace them with supplied array */
@@ -2174,7 +2175,6 @@ PHP_FUNCTION(array_splice)
 	efree(args);
 }
 /* }}} */
-
 
 /* {{{ proto array array_slice(array input, int offset [, int length [, bool preserve_keys]])
    Returns elements specified by offset and length */
@@ -2281,8 +2281,7 @@ PHP_FUNCTION(array_slice)
 }
 /* }}} */
 
-
-PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC)
+PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC) /* {{{ */
 {
 	zval **src_entry, **dest_entry;
 	char *string_key;
@@ -2327,8 +2326,9 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 
 	return 1;
 }
+/* }}} */
 
-static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
+static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive) /* {{{ */
 {
 	zval ***args = NULL;
 	int argc, i, params_ok = 1;
@@ -2367,7 +2367,7 @@ static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 	
 	efree(args);
 }
-
+/* }}} */
 
 /* {{{ proto array array_merge(array arr1, array arr2 [, array ...])
    Merges elements from passed arrays into one array */
@@ -2377,7 +2377,6 @@ PHP_FUNCTION(array_merge)
 }
 /* }}} */
 
-
 /* {{{ proto array array_merge_recursive(array arr1, array arr2 [, array ...])
    Recursively merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge_recursive)
@@ -2385,7 +2384,6 @@ PHP_FUNCTION(array_merge_recursive)
 	php_array_merge_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
 
 /* {{{ proto array array_keys(array input [, mixed search_value[, bool strict]])
    Return just the keys from the input array, optionally only for the specified search_value */
@@ -2462,7 +2460,6 @@ PHP_FUNCTION(array_keys)
 }
 /* }}} */
 
-
 /* {{{ proto array array_values(array input)
    Return just the values from the input array */
 PHP_FUNCTION(array_values)
@@ -2496,7 +2493,6 @@ PHP_FUNCTION(array_values)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto array array_count_values(array input)
    Return the value as key and the frequency of that value in input as value */
@@ -2554,7 +2550,6 @@ PHP_FUNCTION(array_count_values)
 }
 /* }}} */
 
-
 /* {{{ proto array array_reverse(array input [, bool preserve keys])
    Return input as a new array with the order of the entries reversed */
 PHP_FUNCTION(array_reverse)
@@ -2608,7 +2603,6 @@ PHP_FUNCTION(array_reverse)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto array array_pad(array input, int pad_size, mixed pad_value)
    Returns a copy of input array padded with pad_value to size pad_size */
@@ -2858,7 +2852,7 @@ PHP_FUNCTION(array_unique)
 }
 /* }}} */
 
-static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type)
+static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type) /* {{{ */
 {
 	zval ***args = NULL;
 	HashTable *hash;
@@ -3168,6 +3162,7 @@ out:
 	efree(lists);
 	efree(args);
 }
+/* }}} */
 
 /* {{{ proto array array_intersect_key(array arr1, array arr2 [, array ...])
    Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). Equivalent of array_intersect_assoc() but does not do compare of the data. */
@@ -3205,7 +3200,6 @@ PHP_FUNCTION(array_uintersect)
 }
 /* }}} */
 
-
 /* {{{ proto array array_intersect_assoc(array arr1, array arr2 [, array ...])
    Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check */
 PHP_FUNCTION(array_intersect_assoc)
@@ -3214,7 +3208,6 @@ PHP_FUNCTION(array_intersect_assoc)
 				INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_INTERNAL);
 }
 /* }}} */
-
 
 /* {{{ proto array array_uintersect_assoc(array arr1, array arr2 [, array ...], callback data_compare_func)
    Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Data is compared by using an user-supplied callback. */
@@ -3243,8 +3236,7 @@ PHP_FUNCTION(array_uintersect_uassoc)
 }
 /* }}} */
 
-
-static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type)
+static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type) /* {{{ */
 {
 	zval ***args = NULL;
 	HashTable *hash;
@@ -3552,7 +3544,7 @@ out:
 	efree(lists);
 	efree(args);
 }
-
+/* }}} */
 
 /* {{{ proto array array_diff_key(array arr1, array arr2 [, array ...])
    Returns the entries of arr1 that have keys which are not present in any of the others arguments. This function is like array_diff() but works on the keys instead of the values. The associativity is preserved. */
@@ -3572,7 +3564,6 @@ PHP_FUNCTION(array_diff_ukey)
 }
 /* }}} */
 
-
 /* {{{ proto array array_diff(array arr1, array arr2 [, array ...])
    Returns the entries of arr1 that have values which are not present in any of the others arguments. */
 PHP_FUNCTION(array_diff)
@@ -3590,7 +3581,6 @@ PHP_FUNCTION(array_udiff)
 			 DIFF_COMP_DATA_USER, DIFF_COMP_KEY_INTERNAL);
 }
 /* }}} */
-
 
 /* {{{ proto array array_diff_assoc(array arr1, array arr2 [, array ...])
    Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal */
@@ -3610,7 +3600,6 @@ PHP_FUNCTION(array_diff_uassoc)
 }
 /* }}} */
 
-
 /* {{{ proto array array_udiff_assoc(array arr1, array arr2 [, array ...], callback key_comp_func)
    Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function. */
 PHP_FUNCTION(array_udiff_assoc)
@@ -3629,12 +3618,11 @@ PHP_FUNCTION(array_udiff_uassoc)
 }
 /* }}} */
 
-
 #define MULTISORT_ORDER	0
 #define MULTISORT_TYPE	1
 #define MULTISORT_LAST	2
 
-int multisort_compare(const void *a, const void *b TSRMLS_DC)
+int multisort_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
 	Bucket **ab = *(Bucket ***)a;
 	Bucket **bb = *(Bucket ***)b;
@@ -3656,6 +3644,7 @@ int multisort_compare(const void *a, const void *b TSRMLS_DC)
 
 	return result;
 }
+/* }}} */
 
 #define MULTISORT_ABORT						\
 	for (k = 0; k < MULTISORT_LAST; k++)	\
@@ -3847,7 +3836,6 @@ PHP_FUNCTION(array_multisort)
 }
 /* }}} */
 
-
 /* {{{ proto mixed array_rand(array input [, int num_req])
    Return key/keys for random entry/entries in the array */
 PHP_FUNCTION(array_rand)
@@ -4017,7 +4005,6 @@ PHP_FUNCTION(array_product)
 }
 /* }}} */
 
-
 /* {{{ proto mixed array_reduce(array input, mixed callback [, int initial])
    Iteratively reduce the array to a single value via the callback. */
 PHP_FUNCTION(array_reduce)
@@ -4108,7 +4095,6 @@ PHP_FUNCTION(array_reduce)
 }
 /* }}} */
 
-
 /* {{{ proto array array_filter(array input [, mixed callback])
    Filters elements from the array via the callback. */
 PHP_FUNCTION(array_filter)
@@ -4198,7 +4184,6 @@ PHP_FUNCTION(array_filter)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto array array_map(mixed callback, array input1 [, array input2 ,...])
    Applies the callback to the elements in given arrays. */
@@ -4362,7 +4347,6 @@ PHP_FUNCTION(array_map)
 }
 /* }}} */
 
-
 /* {{{ proto bool array_key_exists(mixed key, array search)
    Checks if the given key or index exists in the array */
 PHP_FUNCTION(array_key_exists)
@@ -4404,7 +4388,6 @@ PHP_FUNCTION(array_key_exists)
 
 }
 /* }}} */
-
 
 /* {{{ proto array array_chunk(array input, int size [, bool preserve_keys])
    Split array into chunks */
