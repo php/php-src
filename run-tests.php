@@ -149,6 +149,7 @@ $ini_overwrites = array(
 		'output_buffering=Off',
 		'error_reporting=8191',
 		'display_errors=1',
+		'display_startup_errors=1',
 		'log_errors=0',
 		'html_errors=0',
 		'track_errors=1',
