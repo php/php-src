@@ -1,3 +1,14 @@
+2007-06-04  Antony Dovgal  <antony@zend.com>
+
+    * zend_constants.c
+      tests/class_constants_001.phpt
+      tests/class_constants_002.phpt
+      tests/class_constants_003.phpt:
+      change E_NOTICE to E_ERROR when using a class constant from non-existent
+      class
+      (noticed by Jani)
+      add tests
+
 2007-05-30  Antony Dovgal  <antony@zend.com>
 
     * zend_exceptions.c
