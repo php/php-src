@@ -204,7 +204,7 @@ PHP_FUNCTION(bin2hex)
 }
 /* }}} */
 
-static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
+static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
 {
 	char *s11, *s22;
 	int len1, len2;
@@ -256,6 +256,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	}
 	
 }
+/* }}} */
 
 /* {{{ proto int strspn(string str, string mask [, start [, len]])
    Finds length of initial segment consisting entirely of characters found in mask. If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) */
@@ -830,7 +831,6 @@ PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_valu
 #undef EXPLODE_ALLOC_STEP
 }
 /* }}} */
-
 
 /* {{{ proto array explode(string separator, string str [, int limit])
    Splits a string on string separator and return array of components. If limit is positive only limit number of components is returned. If limit is negative all components except the last abs(limit) are returned. */
@@ -2122,7 +2122,6 @@ PHP_FUNCTION(substr)
 }
 /* }}} */
 
-
 /* {{{ proto mixed substr_replace(mixed str, mixed repl, mixed start [, mixed length])
    Replaces part of a string with another string */
 PHP_FUNCTION(substr_replace)
@@ -2353,9 +2352,6 @@ PHP_FUNCTION(substr_replace)
 	} /* if */
 }
 /* }}} */
-
-
-
 
 /* {{{ proto string quotemeta(string str)
    Quotes meta characters */
@@ -3402,8 +3398,7 @@ PHPAPI char *php_str_to_str(char *haystack, int length,
 {
 	return php_str_to_str_ex(haystack, length, needle, needle_len, str, str_len, _new_length, 1, NULL);
 } 
-/* }}}
- */
+/* }}} */
 
 /* {{{ php_str_replace_in_subject
  */
@@ -3812,7 +3807,6 @@ PHP_FUNCTION(hebrevc)
 }
 /* }}} */
 
-
 /* {{{ proto string nl2br(string str)
    Converts newlines to HTML line breaks */
 PHP_FUNCTION(nl2br)
@@ -3887,7 +3881,6 @@ PHP_FUNCTION(nl2br)
 	RETURN_STRINGL(tmp, new_length, 0);
 }
 /* }}} */
-
 
 /* {{{ proto string strip_tags(string str [, string allowable_tags])
    Strips HTML and PHP tags from a string */
@@ -4127,10 +4120,11 @@ int php_tag_find(char *tag, int len, char *set) {
 }
 /* }}} */
 
-PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len)
+PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len) /* {{{ */
 {
 	return php_strip_tags_ex(rbuf, len, stateptr, allow, allow_len, 0);
 }
+/* }}} */
 
 /* {{{ php_strip_tags
  
@@ -4854,8 +4848,7 @@ PHP_FUNCTION(str_rot13)
 }
 /* }}} */
 
-
-static void php_string_shuffle(char *str, long len TSRMLS_DC)
+static void php_string_shuffle(char *str, long len TSRMLS_DC) /* {{{ */
 {
 	long n_elems, rnd_idx, n_left;
 	char temp;
@@ -4879,7 +4872,7 @@ static void php_string_shuffle(char *str, long len TSRMLS_DC)
 		}
 	}
 }
-
+/* }}} */
 
 /* {{{ proto void str_shuffle(string str)
    Shuffles string. One permutation of all possible is created */
