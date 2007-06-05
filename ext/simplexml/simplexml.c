@@ -238,7 +238,7 @@ next_iter:
 
 /* {{{ sxe_prop_dim_read()
  */
-static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, zend_bool attribs, zend_bool silent TSRMLS_DC)
+static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, zend_bool attribs, int type TSRMLS_DC)
 {
 	zval           *return_value;
 	php_sxe_object *sxe;
@@ -248,6 +248,12 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 	zval            tmp_zv;
 	int             nodendx = 0;
 	int             test = 0;
+
+	if (!member) {
+		return_value = &EG(uninitialized_zval);
+		return_value->is_ref = 1;
+		return return_value;
+	}
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
@@ -357,7 +363,7 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
  */
 static zval * sxe_property_read(zval *object, zval *member, int type TSRMLS_DC)
 {
-	return sxe_prop_dim_read(object, member, 1, 0, type == BP_VAR_IS TSRMLS_CC);
+	return sxe_prop_dim_read(object, member, 1, 0, type TSRMLS_CC);
 }
 /* }}} */
 
@@ -365,7 +371,7 @@ static zval * sxe_property_read(zval *object, zval *member, int type TSRMLS_DC)
  */
 static zval * sxe_dimension_read(zval *object, zval *offset, int type TSRMLS_DC)
 {
-	return sxe_prop_dim_read(object, offset, 0, 1, 0 TSRMLS_CC);
+	return sxe_prop_dim_read(object, offset, 0, 1, type TSRMLS_CC);
 }
 /* }}} */
 
