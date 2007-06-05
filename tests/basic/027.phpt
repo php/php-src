@@ -32,4 +32,25 @@ array(4) {
     }
   }
 }
-string(115) "Unknown: Input variable nesting level exceeded 10. To increase the limit change max_input_nesting_level in php.ini."
+string(106) "Input variable nesting level exceeded 10. To increase the limit change max_input_nesting_level in php.ini."
+--UEXPECT--
+array(4) {
+  [u"a"]=>
+  unicode(1) "1"
+  [u"b"]=>
+  unicode(3) "ZYX"
+  [u"d"]=>
+  unicode(3) "123"
+  [u"e"]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [u"["]=>
+        unicode(1) "3"
+      }
+    }
+  }
+}
+unicode(106) "Input variable nesting level exceeded 10. To increase the limit change max_input_nesting_level in php.ini."
