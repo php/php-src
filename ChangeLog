@@ -1,3 +1,107 @@
+2007-06-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/json/json.c:
+      
+      MFB: Fixed bug #41567 (json_encode() double conversion is inconsistent
+      with
+      PHP).
+
+    * (PHP_5_2)
+      NEWS
+      ext/json/json.c
+      ext/json/tests/bug41567.phpt
+      ext/json/tests/bug41567.phpt:
+      
+      Fixed bug #41567 (json_encode() double conversion is inconsistent with
+      PHP).
+
+2007-06-04  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/filter/.cvsignore
+      ext/pdo/.cvsignore
+      ext/pdo_mysql/.cvsignore
+      ext/pdo_mysql/.cvsignore
+      ext/pdo_oci/.cvsignore
+      ext/pdo_oci/.cvsignore
+      ext/pdo_pgsql/.cvsignore
+      ext/pdo_pgsql/.cvsignore
+      ext/pdo_sqlite/.cvsignore
+      ext/unicode/.cvsignore
+      ext/xmlreader/.cvsignore
+      ext/xmlwriter/.cvsignore
+      ext/zip/.cvsignore
+      ext/zip/lib/.cvsignore:
+      ignore *.gcno
+
+2007-06-04  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/general_functions/bug41518.phpt:
+      clean up temp file
+
+2007-06-04  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/file/fileinode_variation.phpt:
+      missing ?> in skipif section
+
+2007-06-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      news entry
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      MFH: add missing open_basedir checks to CGI
+
+    * sapi/cgi/cgi_main.c:
+      add missing open_basedir checks to CGI
+
+    * (PHP_5_2)
+      sapi/cli/getopt.c
+      sapi/cli/php_cli.c
+      sapi/cli/php_cli_readline.c:
+      fix folding
+
+    * ZendEngine2/zend_constants.c
+      ZendEngine2/tests/class_constants_001.phpt
+      ZendEngine2/tests/class_constants_002.phpt
+      ZendEngine2/tests/class_constants_003.phpt:
+      change E_NOTICE to E_ERROR when using a class constant from non-existent
+      class
+      (noticed by Jani)
+      add tests
+
+    * main/php_variables.c:
+      no register_globals in HEAD
+
+    * ext/zip/php_zip.c
+      ext/zip/php_zip.c:
+      fix ws
+
+2007-06-04  Brian Shire  <shire@tekrat.com>
+
+    * ext/standard/tests/array/bug35014_64bit.phpt
+      ext/standard/tests/strings/bug23894.phpt
+      ext/standard/tests/strings/bug26973.phpt
+      ext/standard/tests/strings/printf_64bit.phpt
+      ext/standard/tests/strings/sprintf_f_2.phpt:
+      MFB: fix sprintf/printf %u tests so they work correctly on both 32-bit and
+      64-bit. (broken in previous fix)
+
+    * (PHP_5_2)
+      ext/standard/tests/array/bug35014_64bit.phpt
+      ext/standard/tests/strings/bug23894.phpt
+      ext/standard/tests/strings/bug26973.phpt
+      ext/standard/tests/strings/printf_64bit.phpt
+      ext/standard/tests/strings/sprintf_f_2.phpt:
+      fix sprintf/printf %u tests so they work correctly on both 32-bit and
+      64-bit. (broken in previous fix)
+
+2007-06-04  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * tests/basic/027.phpt:
+      Fix the expected results
+
 2007-06-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_5_2)
