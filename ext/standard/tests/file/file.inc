@@ -7,7 +7,7 @@
        delete_links() : delete links 
        fill_files()   : fill file with specified contents 
        change_file_perms : Change permission of files 
-
+       fill_buffer()  : fills buffer with specified contents
 */ 
 
 define('file_not_found', 2, 1);
@@ -26,6 +26,51 @@ function create_file($filename, $mode = "w") {
   if ( $file_handle == false )
     return false;
   fclose($file_handle);
+  return true;
+}
+
+/*
+ Function : bool fill_buffer(string &$buffer, string $fill_type, int $fill_size);
+ Description: Fills the $buffer with data as specified with requested size.
+   $buffer = buffer to be filled
+   $fill_type:
+       "text" = fills with string of size $file_size
+       "numeric" = fills with numeric value of size $file_size
+       "text_with_new_line" = similar to "text" fill type but writes with new line
+       "alphanumeric" = fills with alphnumeric values
+ Returns: true on success, false on invalid fill type
+*/
+function fill_buffer(&$buffer, $fill_type, $fill_size) {
+
+  if ( $fill_type == "text" ) {
+    $data = "text ";
+    $size_divider = strlen($data);
+    $add_value = strlen($data);
+  } else if ( $fill_type == "text_with_new_line" ) {
+    $data = "line\nline of text\n";
+    $size_divider = strlen($data);
+    $add_value = strlen($data);
+  } else if ( $fill_type == "alphanumeric" ) {
+    $data = "ab12 ";
+    $size_divider = strlen($data);
+    $add_value = strlen($data);
+  } else if ( $fill_type == "numeric" ) {
+    $data = 2;
+    $size_divider = 1;
+    $add_value = 0;
+  } else {
+    // invalid fill type;
+    return false;
+  }
+
+  $tmp_buff = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
+
+  if ( strlen($tmp_buff) > $fill_size ) {
+    $buffer = substr($tmp_buff, 0, $fill_size);
+  } else {
+    $buffer = $tmp_buff;
+  }
+
   return true;
 }
 
