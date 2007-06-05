@@ -275,11 +275,29 @@ PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_a
 	index = var;
 	index_len = var_len;
 
-	while (1) {
-		if (is_array) {
+	if (is_array) {
+		int nest_level = 0;
+		while (1) {
 			zstr escaped_index = NULL_ZSTR;
 			UChar *index_s;
 			int new_idx_len = 0;
+
+			if(++nest_level > PG(max_input_nesting_level)) {
+				HashTable *ht;
+				zstr tmp_var;
+				/* too many levels of nesting */
+
+				ht = Z_ARRVAL_P(track_vars_array);
+
+				tmp_var.u = var;
+				zend_u_hash_del(ht, IS_UNICODE, tmp_var, var_len + 1);
+				zval_dtor(val);
+
+				if (!PG(display_errors)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variable nesting level exceeded %ld. To increase the limit change max_input_nesting_level in php.ini.", PG(max_input_nesting_level));
+				}
+				return;
+			}
 
 			ip++;
 			index_s = ip;
@@ -334,23 +352,22 @@ PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_a
 			} else {
 				is_array = 0;
 			}
-		} else {
+		}
+	} else {
 plain_var:
-			MAKE_STD_ZVAL(gpc_element);
-			gpc_element->value = val->value;
-			Z_TYPE_P(gpc_element) = Z_TYPE_P(val);
-			if (!index) {
-				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
-			} else {
-				/* UTODO fix for php_addslashes case */
-				//char *escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
-				zstr escaped_index;
+		MAKE_STD_ZVAL(gpc_element);
+		gpc_element->value = val->value;
+		Z_TYPE_P(gpc_element) = Z_TYPE_P(val);
+		if (!index) {
+			zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+		} else {
+			/* UTODO fix for php_addslashes case */
+			//char *escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
+			zstr escaped_index;
 
-				escaped_index.u = index;
-				zend_u_symtable_update(symtable1, IS_UNICODE, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
-				//efree(escaped_index);
-			}
-			break;
+			escaped_index.u = index;
+			zend_u_symtable_update(symtable1, IS_UNICODE, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+			//efree(escaped_index);
 		}
 	}
 }
