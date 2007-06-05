@@ -1945,6 +1945,15 @@ END_EXTERN_C()
 									}													\
 								}
 
+#define SET_VAR_ASCII_STRINGL(n, v, l) {												\
+									{													\
+										zval *var;										\
+										ALLOC_ZVAL(var);								\
+										ZVAL_ASCII_STRINGL(var, v, l, ZSTR_AUTOFREE);	\
+										ZEND_SET_GLOBAL_VAR(n, var);					\
+									}													\
+								}
+
 #define SET_VAR_LONG(n, v)	{															\
 								{														\
 									zval *var;											\
