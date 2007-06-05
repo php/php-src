@@ -28,6 +28,7 @@
 #define PDO_PARSER_EOI 4
 
 #define RET(i) {s->cur = cursor; return i; }
+#define SKIP_ONE(i) {s->cur = s->tok + 1; return 1; }
 
 #define YYCTYPE         unsigned char
 #define YYCURSOR        cursor
@@ -57,9 +58,9 @@ static int scan(Scanner *s)
 		(["] ([^"])* ["])		{ RET(PDO_PARSER_TEXT); }
 		(['] ([^'])* ['])		{ RET(PDO_PARSER_TEXT); }
 		MULTICHAR{2,}							{ RET(PDO_PARSER_TEXT); }
-		BINDCHR									{ RET(PDO_PARSER_BIND); }
+		BINDCHR						{ RET(PDO_PARSER_BIND); }
 		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
-		SPECIALS								{ RET(PDO_PARSER_TEXT); }
+		SPECIALS								{ SKIP_ONE(PDO_PARSER_TEXT); }
 		(ANYNOEOF\SPECIALS)+ 					{ RET(PDO_PARSER_TEXT); }
 		EOF										{ RET(PDO_PARSER_EOI); }
 	*/	
@@ -96,6 +97,10 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
 		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS) {
 			if (t == PDO_PARSER_BIND) {
+				int len = s.cur - s.tok;
+				if ((inquery < (s.cur - len)) && isalnum(*(s.cur - len - 1))) {
+					continue;
+				}
 				query_type |= PDO_PLACEHOLDER_NAMED;
 			} else {
 				query_type |= PDO_PLACEHOLDER_POSITIONAL;
