@@ -544,8 +544,6 @@ Done
 --UEXPECTF--
 *** Testing fgetc() : basic operations ***
 --- Outerloop iteration 1 ---
-
-Notice: fwrite(): 1024 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 -- Innerloop iteration 1 of Outerloop Iteration 1 --
 -- Testing fgetc() : file opened using r mode --
 string(1) "2"
@@ -703,8 +701,6 @@ int(6)
 bool(false)
 resource(13) of type (stream)
 --- Outerloop iteration 2 ---
-
-Notice: fwrite(): 1024 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 -- Innerloop iteration 1 of Outerloop Iteration 2 --
 -- Testing fgetc() : file opened using r mode --
 string(1) "t"
@@ -862,8 +858,6 @@ int(6)
 bool(false)
 resource(21) of type (stream)
 --- Outerloop iteration 3 ---
-
-Notice: fwrite(): 1024 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 -- Innerloop iteration 1 of Outerloop Iteration 3 --
 -- Testing fgetc() : file opened using r mode --
 string(1) "l"

@@ -79,7 +79,7 @@ rmdir("$file_path/dir/subdir");
 rmdir("$file_path/dir");
 
 echo "\n*** Done ***";
-
+?>
 --EXPECTF--
 *** Testing fileinode() with files, links and directories ***
 -- Testing with files --
@@ -107,10 +107,6 @@ echo "\n*** Done ***";
 --UEXPECTF--
 *** Testing fileinode() with files, links and directories ***
 -- Testing with files --
-
-Notice: fwrite(): 1024 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
-
-Notice: fwrite(): 1024 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 %d
 %d
 -- Testing with links: hard link --

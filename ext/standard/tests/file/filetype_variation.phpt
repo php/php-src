@@ -73,10 +73,6 @@ fifo
 *** Done ***
 --UEXPECTF--
 *** Testing filetype() with various types ***
-
-Notice: fwrite(): 1024 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
-
-Notice: fwrite(): 1024 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 -- Checking with files --
 file
 file
