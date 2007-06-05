@@ -7,6 +7,7 @@
        delete_links() : delete links 
        fill_files()   : fill file with specified contents 
        change_file_perms : Change permission of files 
+       fill_buffer    : fill buffer with specified contents
 
 */ 
 
@@ -30,7 +31,52 @@ function create_file($filename, $mode = "w") {
 }
 
 /*
- Function : bool fill_file(resource $file_handle, string $fill_type, string $file_size);
+ Function : bool fill_buffer(string &$buffer, string $fill_type, int $fill_size);
+ Description: Fills the $buffer with data as specified with requested size.
+   $buffer = buffer to be filled
+   $fill_type: 
+       "text" = fills with string of size $file_size
+       "numeric" = fills with numeric value of size $file_size
+       "text_with_new_line" = similar to "text" fill type but writes with new line
+       "alphanumeric" = fills with alphnumeric values 
+ Returns: true on success, false on invalid fill type
+*/
+function fill_buffer(&$buffer, $fill_type, $fill_size) {
+
+  if ( $fill_type == "text" ) {
+    $data = "text ";
+    $size_divider = strlen($data);
+    $add_value = strlen($data);
+  } else if ( $fill_type == "text_with_new_line" ) {
+    $data = "line\nline of text\n";
+    $size_divider = strlen($data);
+    $add_value = strlen($data);
+  } else if ( $fill_type == "alphanumeric" ) {
+    $data = "ab12 ";
+    $size_divider = strlen($data);
+    $add_value = strlen($data);
+  } else if ( $fill_type == "numeric" ) {
+    $data = 2;
+    $size_divider = 1;
+    $add_value = 0;
+  } else {
+    // invalid fill type;
+    return false;
+  }
+
+  $tmp_buff = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
+  
+  if ( strlen($tmp_buff) > $fill_size ) {
+    $buffer = substr($tmp_buff, 0, $fill_size);
+  } else {
+    $buffer = $tmp_buff;
+  }
+
+  return true;
+}
+
+/*
+ Function : bool fill_file(resource $file_handle, string $fill_type, int $file_size);
  Description: Fills the file with data as specified with requested size.
    $file_handle = file handle, opened with write options,
    $fill_type: 
@@ -79,7 +125,7 @@ function fill_file($file_handle, $fill_type, $file_size) {
         $chunk_size = $size;
       }
       $num_values = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
-      $bytes_written = fwrite($file_handle, $num_values, $chunk_size);
+      $bytes_written = fwrite($file_handle, (binary)$num_values, $chunk_size);
       if ( $bytes_written != $chunk_size ) {
             return false;
       }
@@ -87,7 +133,7 @@ function fill_file($file_handle, $fill_type, $file_size) {
     } while ( $size > 0 );
   } else {
     $num_values = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
-    $bytes_written = fwrite($file_handle, $num_values, $file_size);
+    $bytes_written = fwrite($file_handle, (binary)$num_values, $file_size);
     if ( $bytes_written != $chunk_size ) {
       return false;
     }
@@ -185,7 +231,7 @@ function create_files( $file_path,
                        $content_type = "numeric",
                        $permission = 0755,
                        $size = 1,
-                       $mode = "w",
+                       $mode = "wb",
                        $name_prefix = "file",
                        $name_suffix = 1,
                        $flag = "kilobytes",
