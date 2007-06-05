@@ -982,7 +982,7 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 	}
 
 #ifdef HAVE_SYMLINK
-	ret = readlink(intern->file_name, buff, MAXPATHLEN-1);
+	ret = readlink(intern->file_name.s, buff, MAXPATHLEN-1);
 #else
 	ret = -1; /* always fail if not implemented */
 #endif
