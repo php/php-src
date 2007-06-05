@@ -212,7 +212,7 @@ PHP_FUNCTION(bin2hex)
 }
 /* }}} */
 
-static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
+static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
 {
 	void *s1, *s2;
 	int len1, len2;
@@ -288,6 +288,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	}
 
 }
+/* }}} */
 
 /* {{{ proto int strspn(string str, string mask [, start [, len]]) U
    Finds length of initial segment consisting entirely of characters found in mask. If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) */
@@ -1644,7 +1645,6 @@ PHPAPI UChar* php_u_strtotitle(UChar *s, int32_t *len, const char* locale)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto string strtotitle(string str) U
    Makes a string titlecase */
@@ -3960,7 +3960,7 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 }
 /* }}} */
 
-static HashTable* php_u_strtr_array_prepare_hashtable(HashTable *hash, int *minlen_out, int *maxlen_out TSRMLS_DC)
+static HashTable* php_u_strtr_array_prepare_hashtable(HashTable *hash, int *minlen_out, int *maxlen_out TSRMLS_DC) /* {{{ */
 {
 	HashTable *tmp_hash = emalloc(sizeof(HashTable));
 	HashPosition hpos;
@@ -4014,6 +4014,7 @@ static HashTable* php_u_strtr_array_prepare_hashtable(HashTable *hash, int *minl
 	*maxlen_out = maxlen;
 	return tmp_hash;
 }
+/* }}} */
 
 /* {{{ php_u_strtr_array
  */
@@ -6516,10 +6517,11 @@ reg_u_char:
 }
 /* }}} */
 
-PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len)
+PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len) /* {{{ */
 {
 	return php_strip_tags_ex(rbuf, len, stateptr, allow, allow_len, 0);
 }
+/* }}} */
 
 /* {{{ php_strip_tags
  */
@@ -7391,7 +7393,6 @@ static char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
 U_STRING_DECL(u_rot13_from, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", sizeof(rot13_from)-1);
 U_STRING_DECL(u_rot13_to, "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM", sizeof(rot13_to)-1);
 
-
 /* {{{ proto string str_rot13(string str) U
    Perform the rot13 transform on a string */
 PHP_FUNCTION(str_rot13)
@@ -7422,8 +7423,7 @@ PHP_FUNCTION(str_rot13)
 }
 /* }}} */
 
-
-static void php_string_shuffle(zstr str, int len, zend_uchar str_type TSRMLS_DC)
+static void php_string_shuffle(zstr str, int len, zend_uchar str_type TSRMLS_DC) /* {{{ */
 {
 	int rnd_idx, n_left;
 	char temp;
@@ -7455,7 +7455,7 @@ static void php_string_shuffle(zstr str, int len, zend_uchar str_type TSRMLS_DC)
 		}
 	}
 }
-
+/* }}} */
 
 /* {{{ proto void str_shuffle(string str) U
    Shuffles string. One permutation of all possible is created */
