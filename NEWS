@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - Fixed size calculation in chunk_split() (Stas)
 - Fixed integer overlow in str[c]spn() (Stas)
 - Fixed UMR in money_format() (Stas, Ilia)
+- Added missing format validator to unpack() function (Ilia)
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 - Fixed bug #41608 (segfault on a weird code with objects and switch()). 
