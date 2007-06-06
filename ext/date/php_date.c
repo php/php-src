@@ -2484,12 +2484,13 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 		RETURN_LONG(calc_sunset ? set : rise);
 	}
 	N = (calc_sunset ? h_set : h_rise) + gmt_offset;
-	while (N > 24) {
-		N -= 24;
+
+	if (N > 24) {
+		N %= 24;
+	} else if (N < 0) {
+		N = N % 24 + 24;
 	}
-	while (N < 0) {
-		N += 24;
-	}
+
 	switch (retformat) {
 		case SUNFUNCS_RET_STRING:
 			sprintf(retstr, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
