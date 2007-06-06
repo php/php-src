@@ -31,7 +31,7 @@
 #include "php_bcmath.h"
 #include "libbcmath/src/bcmath.h"
 
-ZEND_DECLARE_MODULE_GLOBALS(bcmath);
+ZEND_DECLARE_MODULE_GLOBALS(bcmath)
 static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
 
@@ -229,7 +229,7 @@ PHP_FUNCTION(bcadd)
 					WRONG_PARAM_COUNT;
 				}
 				convert_to_long_ex(scale_param);
-				scale = (int) (Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
+				scale = (int) ((int)Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
 				break;
 		default:
 				WRONG_PARAM_COUNT;
@@ -275,7 +275,7 @@ PHP_FUNCTION(bcsub)
 					WRONG_PARAM_COUNT;
 				}
 				convert_to_long_ex(scale_param);
-				scale = (int) (Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
+				scale = (int) ((int)Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
 				break;
 		default:
 				WRONG_PARAM_COUNT;
@@ -321,7 +321,7 @@ PHP_FUNCTION(bcmul)
 					WRONG_PARAM_COUNT;
 				}
 				convert_to_long_ex(scale_param);
-				scale = (int) (Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
+				scale = (int) ((int)Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
 				break;
 		default:
 				WRONG_PARAM_COUNT;
@@ -367,7 +367,7 @@ PHP_FUNCTION(bcdiv)
 					WRONG_PARAM_COUNT;
 				}
 				convert_to_long_ex(scale_param);
-				scale = (int) (Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
+				scale = (int) ((int)Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
 				break;
 		default:
 				WRONG_PARAM_COUNT;
@@ -449,6 +449,7 @@ PHP_FUNCTION(bcpowmod)
 	int left_len, right_len, modulous_len;
 	bc_num first, second, mod, result;
 	long scale = BCG(bc_precision);
+	int scale_int;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|l", &left, &left_len, &right, &right_len, &modulous, &modulous_len, &scale) == FAILURE) {
 		return;
@@ -461,7 +462,10 @@ PHP_FUNCTION(bcpowmod)
 	php_str2num(&first, left TSRMLS_CC);
 	php_str2num(&second, right TSRMLS_CC);
 	php_str2num(&mod, modulous TSRMLS_CC);
-	bc_raisemod(first, second, mod, &result, scale TSRMLS_CC);
+
+	scale_int = (int) ((int)scale < 0) ? 0 : scale;
+
+	bc_raisemod(first, second, mod, &result, scale_int TSRMLS_CC);
 	if (result->n_scale > scale) {
 		result->n_scale = scale;
 	}
@@ -495,7 +499,7 @@ PHP_FUNCTION(bcpow)
 					WRONG_PARAM_COUNT;
 				}
 				convert_to_long_ex(scale_param);
-				scale = (int) (Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
+				scale = (int) ((int)Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
 				break;
 		default:
 				WRONG_PARAM_COUNT;
@@ -541,7 +545,7 @@ PHP_FUNCTION(bcsqrt)
 					WRONG_PARAM_COUNT;
 				}
 				convert_to_long_ex(scale_param);
-				scale = (int) (Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
+				scale = (int) ((int)Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
 				break;
 		default:
 				WRONG_PARAM_COUNT;
@@ -584,7 +588,7 @@ PHP_FUNCTION(bccomp)
 					WRONG_PARAM_COUNT;
 				}
 				convert_to_long_ex(scale_param);
-				scale = (int) (Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
+				scale = (int) ((int)Z_LVAL_PP(scale_param) < 0) ? 0 : Z_LVAL_PP(scale_param);
 				break;
 		default:
 				WRONG_PARAM_COUNT;
