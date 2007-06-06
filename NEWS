@@ -4,11 +4,13 @@ PHP                                                                        NEWS
 - Improved fix for MOPB-03-2007. (Ilia)
 - Corrected fix for CVE-2007-2872. (Ilia)
 - Added GD version constants GD_MAJOR_VERSION, GD_MINOR_VERSION
+  GD_RELEASE_VERSION, GD_EXTRA_VERSION and GD_VERSION_STRING. (Pierre)
 - Added missing open_basedir checks to CGI. (anight at eyelinkmedia dot com, 
   Tony)
-- Fixed crash in ZipArchive::addEmptyDir when a directory already
-  exists (pecl bug #11216) (Pierre)
-  GD_RELEASE_VERSION, GD_EXTRA_VERSION and GD_VERSION_STRING. (Pierre)
+- Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
+  already exists). (Pierre)
+- Fixed bug #41608 (segfault on a weird code with objects and switch()). 
+  (Tony)
 - Fixed bug #41600 (url rewriter tags doesn't work with namespaced tags).
   (Ilia)
 - Fixed bug #41596 (Fixed a crash inside pdo_pgsql on some non-well-formed
