@@ -96,8 +96,9 @@ print_r(unpack("v", pack("v", 0)));
 print_r(unpack("v", pack("v", -1000)));
 print_r(unpack("v", pack("v", -64434)));
 print_r(unpack("v", pack("v", -65535)));
+print_r(unpack(-2147483647, "junk"));
 ?>
---EXPECT--
+--EXPECTF--
 Array
 (
     [1] => h
@@ -383,3 +384,5 @@ Array
 (
     [1] => 1
 )
+
+Warning: unpack(): Invalid format type - in %s on line %d
