@@ -239,8 +239,12 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 		}
 	}
 	
-	if ((start + len) > len1) {
+	if (len > len1 - start) {
 		len = len1 - start;
+	}
+
+	if(len == 0) {
+		RETURN_LONG(0);
 	}
 
 	if (behavior == STR_STRSPN) {
@@ -1956,18 +1960,23 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int c
 	char *p, *q;
 	int chunks; /* complete chunks! */
 	int restlen;
-	float out_len; 
+	int out_len; 
 
 	chunks = srclen / chunklen;
 	restlen = srclen - chunks * chunklen; /* srclen % chunklen */
 
-	out_len = chunks + 1;
-	out_len *= endlen;
-	out_len += srclen + 1;
-
-	if (out_len > INT_MAX || out_len <= 0) {
+	if(chunks > INT_MAX - 1) {
 		return NULL;
 	}
+	out_len = chunks + 1;
+	if(out_len > INT_MAX/endlen) {
+		return NULL;
+	}
+	out_len *= endlen;
+	if(out_len > INT_MAX - srclen - 1) {
+		return NULL;
+	}
+	out_len += srclen + 1;
 
 	dest = safe_emalloc((int)out_len, sizeof(char), 0);
 
@@ -4985,11 +4994,26 @@ PHP_FUNCTION(str_word_count)
 PHP_FUNCTION(money_format)
 {
 	int format_len = 0, str_len;
-	char *format, *str;
+	char *format, *str, *p, *e;
 	double value;
+	zend_bool check = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sd", &format, &format_len, &value) == FAILURE) {
 		return;
+	}
+
+	p = format;
+	e = p + format_len;
+	while ((p = memchr(p, '%', (e - p)))) {
+		if (*(p + 1) == '%') {
+			p += 2;	
+		} else if (!check) {
+			check = 1;
+			p++;
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only a single %%i or %%n token can be used");
+			RETURN_FALSE;
+		}
 	}
 
 	str_len = format_len + 1024;
