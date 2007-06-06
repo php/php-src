@@ -63,7 +63,7 @@ function fill_buffer(&$buffer, $fill_type, $fill_size) {
     return false;
   }
 
-  $tmp_buff = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
+  $tmp_buff = str_repeat($data, ($fill_size/$size_divider) + $add_value );
 
   if ( strlen($tmp_buff) > $fill_size ) {
     $buffer = substr($tmp_buff, 0, $fill_size);
@@ -273,27 +273,26 @@ function create_files( $file_path,
 
   if ( $content_type == "empty" ) {
     $return_value['filled'] = $count;
-    return $return_value;
-  }
-
-  // fill the file with specifiec type of data and size
-  $tmp_name_suffix = $name_suffix;
-  for($loop_counter = 1; $loop_counter <= $count; $loop_counter ++) {
-    $filename = $file_path."/".$name_prefix.$tmp_name_suffix.$file_extension;
-    $file_handle = fopen($filename, $mode);
-    if($file_handle == false) {
-      fclose($file_handle);
-      return $return_value;
-    } // end of if
+  } else {
+    // fill the file with specifiec type of data and size
+    $tmp_name_suffix = $name_suffix;
+    for($loop_counter = 1; $loop_counter <= $count; $loop_counter ++) {
+      $filename = $file_path."/".$name_prefix.$tmp_name_suffix.$file_extension;
+      $file_handle = fopen($filename, $mode);
+      if($file_handle == false) {
+        fclose($file_handle);
+        return $return_value;
+      } // end of if
  
-    // call fill_file() to fill the file 
-    if( fill_file($file_handle, $content_type, $file_size) )
-      $return_value['filled']++;
+      // call fill_file() to fill the file 
+      if( fill_file($file_handle, $content_type, $file_size) )
+        $return_value['filled']++;
     
-    fclose($file_handle);
+      fclose($file_handle);
 
-    $tmp_name_suffix++;
-  } // end of for
+      $tmp_name_suffix++;
+    } // end of for
+  }
 
   // change all file's permissions
   $return_value['perms_changed'] = change_file_perms($file_path, $count, $permission, $name_prefix, 
