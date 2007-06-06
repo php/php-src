@@ -389,7 +389,7 @@ static inline void zend_switch_free(zend_op *opline, temp_variable *Ts TSRMLS_DC
 				 * quick & silent get_zval_ptr, and FREE_OP
 				 */
 				PZVAL_UNLOCK_FREE(T->str_offset.str);
-			} else {
+			} else if (T(opline->op1.u.var).var.ptr) {
 				zval_ptr_dtor(&T(opline->op1.u.var).var.ptr);
 				if (opline->extended_value & ZEND_FE_RESET_VARIABLE) { /* foreach() free */
 					zval_ptr_dtor(&T(opline->op1.u.var).var.ptr);
