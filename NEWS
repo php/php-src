@@ -7,8 +7,9 @@ PHP                                                                        NEWS
   GD_RELEASE_VERSION, GD_EXTRA_VERSION and GD_VERSION_STRING. (Pierre)
 - Added missing open_basedir checks to CGI. (anight at eyelinkmedia dot com, 
   Tony)
-- Fixed several integer overflows in bundled GD library reported by 
-  Mattias Bengtsson. (Tony)
+- Fixed several integer overflows in ImageCreate(), ImageCreateTrueColor(), 
+  ImageCopyResampled() and ImageFilledPolygon() reported by Mattias Bengtsson. 
+  (Tony)
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 - Fixed bug #41608 (segfault on a weird code with objects and switch()). 
