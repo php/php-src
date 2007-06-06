@@ -31,7 +31,7 @@
 #include "php_bcmath.h"
 #include "libbcmath/src/bcmath.h"
 
-ZEND_DECLARE_MODULE_GLOBALS(bcmath);
+ZEND_DECLARE_MODULE_GLOBALS(bcmath)
 static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
 
@@ -210,7 +210,6 @@ static void php_str2num(bc_num *num, char *str TSRMLS_DC)
 }
 /* }}} */
 
-
 /* {{{ proto string bcadd(string left_operand, string right_operand [, int scale]) U
    Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
@@ -224,7 +223,7 @@ PHP_FUNCTION(bcadd)
 		return;
 	}
 
-	if (scale < 0) {
+	if ((int)scale < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
 		scale = 0;
 	}
@@ -261,7 +260,7 @@ PHP_FUNCTION(bcsub)
 		return;
 	}
 
-	if (scale < 0) {
+	if ((int)scale < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
 		scale = 0;
 	}
@@ -298,7 +297,7 @@ PHP_FUNCTION(bcmul)
 		return;
 	}
 
-	if (scale < 0) {
+	if ((int)scale < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
 		scale = 0;
 	}
@@ -335,7 +334,7 @@ PHP_FUNCTION(bcdiv)
 		return;
 	}
 
-	if (scale < 0) {
+	if ((int)scale < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
 		scale = 0;
 	}
@@ -406,7 +405,7 @@ PHP_FUNCTION(bcpowmod)
 		return;
 	}
 
-	if (scale < 0) {
+	if ((int)scale < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
 		scale = 0;
 	}
@@ -449,7 +448,7 @@ PHP_FUNCTION(bcpow)
 		return;
 	}
 
-	if (scale < 0) {
+	if ((int)scale < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
 		scale = 0;
 	}
@@ -488,7 +487,7 @@ PHP_FUNCTION(bcsqrt)
 		return;
 	}
 
-	if (scale < 0) {
+	if ((int)scale < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
 		scale = 0;
 	}
@@ -521,7 +520,7 @@ PHP_FUNCTION(bccomp)
 		return;
 	}
 
-	if (scale < 0) {
+	if ((int)scale < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
 		scale = 0;
 	}
@@ -549,9 +548,9 @@ PHP_FUNCTION(bcscale)
 		return;
 	}
 
-	if (scale < 0) {
+	if ((int)scale < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
-		scale = 0;
+		RETURN_FALSE;
 	}
 	
 	BCG(bc_precision) = scale;
