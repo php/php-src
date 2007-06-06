@@ -2486,9 +2486,9 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	N = (calc_sunset ? h_set : h_rise) + gmt_offset;
 
 	if (N > 24) {
-		N %= 24;
+		N -= floor(N / 24) * N;
 	} else if (N < 0) {
-		N = N % 24 + 24;
+		N = floor(N / 24) * -N + 24;
 	}
 
 	switch (retformat) {
