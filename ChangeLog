@@ -1,3 +1,160 @@
+2007-06-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      
+      MFB: Fixed bug #41596 (Fixed a crash inside pdo_pgsql on some
+      non-well-formed SQL queries).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      
+      Fixed bug #41596 (Fixed a crash inside pdo_pgsql on some non-well-formed
+      SQL queries).
+
+2007-06-05  Antony Dovgal  <antony@zend.com>
+
+    * ext/spl/spl_directory.c:
+      fix build
+
+    * ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/string.c
+      ext/standard/string.c:
+      fix folding
+
+    * ext/spl/spl_directory.c:
+      no readlink() on windows
+
+    * run-tests.php:
+      enable display_startup_errors
+
+2007-06-05  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/file/fileinode_variation.phpt
+      ext/standard/tests/file/fileinode_variation.phpt
+      ext/standard/tests/file/filetype_variation.phpt
+      ext/standard/tests/file/filetype_variation.phpt:
+      Fixing incorrect comment in test cases fileinode_variation and
+      filetype_variation
+
+2007-06-05  Antony Dovgal  <antony@zend.com>
+
+    * tests/basic/024.phpt
+      tests/basic/025.phpt
+      tests/basic/026.phpt
+      tests/basic/027.phpt:
+      fix test, add missing ones
+
+    * ZendEngine2/zend_API.h:
+      add SET_VAR_ASCII_STRINGL()
+
+    * main/php_content_types.c:
+      fix HTTP_RAW_POST_DATA in Unicode mode
+
+    * main/php_variables.c:
+      port the max_input_nesting_level ini option to Unicode mode
+
+    * (PHP_5_2)
+      run-tests.php
+      tests/basic/025.phpt:
+      enable display_startup_errors, fix test
+
+    * (PHP_5_2)
+      NEWS
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug41582.phpt:
+      MFH: fix #41582 (SimpleXML crashes when accessing newly created element)
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug41582.phpt
+      ext/simplexml/tests/bug41582.phpt:
+      fix #41582 (SimpleXML crashes when accessing newly created element)
+
+2007-06-05  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/general_functions/floatval.phpt
+      ext/standard/tests/general_functions/is_callable.phpt:
+      new test cases for general functions
+
+    * ext/standard/tests/file/is_executable_basic-win32.phpt
+      ext/standard/tests/file/is_executable_basic.phpt
+      ext/standard/tests/file/is_executable_error.phpt
+      ext/standard/tests/file/is_readable_basic-win32.phpt
+      ext/standard/tests/file/is_readable_basic.phpt
+      ext/standard/tests/file/is_readable_error.phpt
+      ext/standard/tests/file/is_writable_basic.phpt
+      ext/standard/tests/file/is_writable_error.phpt
+      ext/standard/tests/file/mkdir_rmdir_error.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation-win32.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation.phpt
+      ext/standard/tests/file/pathinfo_basic.phpt
+      ext/standard/tests/file/pathinfo_error.phpt
+      ext/standard/tests/file/pathinfo_variaton.phpt:
+      New test cases for file system functions
+
+    * ext/standard/tests/general_functions/floatval.phpt
+      ext/standard/tests/general_functions/floatval.phpt
+      ext/standard/tests/general_functions/is_callable.phpt
+      ext/standard/tests/general_functions/is_callable.phpt:
+      
+      file floatval.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/is_executable_basic-win32.phpt
+      ext/standard/tests/file/is_executable_basic-win32.phpt
+      ext/standard/tests/file/is_executable_basic.phpt
+      ext/standard/tests/file/is_executable_basic.phpt
+      ext/standard/tests/file/is_executable_error.phpt
+      ext/standard/tests/file/is_executable_error.phpt
+      ext/standard/tests/file/is_readable_basic-win32.phpt
+      ext/standard/tests/file/is_readable_basic-win32.phpt
+      ext/standard/tests/file/is_readable_basic.phpt
+      ext/standard/tests/file/is_readable_basic.phpt
+      ext/standard/tests/file/is_readable_error.phpt
+      ext/standard/tests/file/is_readable_error.phpt
+      ext/standard/tests/file/is_writable_basic.phpt
+      ext/standard/tests/file/is_writable_basic.phpt
+      ext/standard/tests/file/is_writable_error.phpt
+      ext/standard/tests/file/is_writable_error.phpt
+      ext/standard/tests/file/mkdir_rmdir_error.phpt
+      ext/standard/tests/file/mkdir_rmdir_error.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation-win32.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation-win32.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation.phpt
+      ext/standard/tests/file/pathinfo_basic.phpt
+      ext/standard/tests/file/pathinfo_basic.phpt
+      ext/standard/tests/file/pathinfo_error.phpt
+      ext/standard/tests/file/pathinfo_error.phpt
+      ext/standard/tests/file/pathinfo_variaton.phpt
+      ext/standard/tests/file/pathinfo_variaton.phpt:
+      
+      file is_executable_basic-win32.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/tests/file/file.inc:
+      Added fill_buffer() function
+
+    * ext/standard/tests/file/fgetc_basic.phpt
+      ext/standard/tests/file/fileinode_variation.phpt
+      ext/standard/tests/file/filetype_variation.phpt:
+      Updated test output in line with changes to file.inc
+
+    * ext/standard/tests/file/file.inc:
+      Added fill_buffer() and fixed file_fill() to write binary data only
+
+2007-06-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/oci8/oci8_statement.c:
+      MFH: fix #41594 (Statement cache is flushed too frequently)
+
+    * ext/oci8/oci8_statement.c:
+      fix #41594 (Statement cache is flushed too frequently)
+
 2007-06-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/json/json.c:
