@@ -120,6 +120,15 @@ gdImagePtr gdImageCreate (int sx, int sy)
 {
 	int i;
 	gdImagePtr im;
+
+	if (overflow2(sx, sy)) {
+		return NULL;
+	}
+
+	if (overflow2(sizeof(unsigned char *), sy)) {
+		return NULL;
+	}
+
 	im = (gdImage *) gdMalloc(sizeof(gdImage));
 	memset(im, 0, sizeof(gdImage));
 	/* Row-major ever since gd 1.3 */
@@ -162,6 +171,19 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 {
 	int i;
 	gdImagePtr im;
+
+	if (overflow2(sx, sy)) {
+		return NULL;
+	}
+
+	if (overflow2(sizeof(unsigned char *), sy)) {
+		return NULL;
+	}
+	
+	if (overflow2(sizeof(int), sx)) {
+		return NULL;
+	}
+
 	im = (gdImage *) gdMalloc(sizeof(gdImage));
 	memset(im, 0, sizeof(gdImage));
 	im->tpixels = (int **) gdMalloc(sizeof(int *) * sy);
@@ -2404,6 +2426,14 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 	int *stx, *sty;
 	/* We only need to use floating point to determine the correct stretch vector for one line's worth. */
 	double accum;
+	
+	if (overflow2(sizeof(int), srcW)) {
+		return;
+	}
+	if (overflow2(sizeof(int), srcH)) {
+		return;
+	}
+
 	stx = (int *) gdMalloc (sizeof (int) * srcW);
 	sty = (int *) gdMalloc (sizeof (int) * srcH);
 	accum = 0;
@@ -3195,6 +3225,10 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 		return;
 	}
 
+	if (overflow2(sizeof(int), n)) {
+		return;
+	}
+
 	if (c == gdAntiAliased) {
 		fill_color = im->AA_color;
 	} else {
@@ -3208,6 +3242,9 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	if (im->polyAllocated < n) {
 		while (im->polyAllocated < n) {
 			im->polyAllocated *= 2;
+		}
+		if (overflow2(sizeof(int), im->polyAllocated)) {
+			return;
 		}
 		im->polyInts = (int *) gdRealloc(im->polyInts, sizeof(int) * im->polyAllocated);
 	}
