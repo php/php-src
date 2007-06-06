@@ -613,6 +613,12 @@ PHP_FUNCTION(unpack)
 			case 'd':
 				size = sizeof(double);
 				break;
+
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid format type %c", type);
+				zval_dtor(return_value);
+				RETURN_FALSE;
+				break;
 		}
 
 		/* Do actual unpacking */
