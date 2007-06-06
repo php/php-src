@@ -93,6 +93,7 @@ PHP_INI_END()
 any = [\000-\377];
 N = (any\[<]);
 alpha = [a-zA-Z];
+alphanamespace = [a-zA-Z:];
 alphadash = ([a-zA-Z] | "-");
 */
 
@@ -291,7 +292,7 @@ state_plain:
 state_tag:	
 	start = YYCURSOR;
 /*!re2c
-  alpha+	{ handle_tag(STD_ARGS); /* Sets STATE */; passthru(STD_ARGS); if (STATE == STATE_PLAIN) goto state_plain; else goto state_next_arg; }
+  alphanamespace+	{ handle_tag(STD_ARGS); /* Sets STATE */; passthru(STD_ARGS); if (STATE == STATE_PLAIN) goto state_plain; else goto state_next_arg; }
   any		{ passthru(STD_ARGS); goto state_plain_begin; }
 */
 
