@@ -671,6 +671,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 
 			mysql = (php_mysql_conn *) le->ptr;
+			mysql->active_result_id = 0;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_plink);
 	} else { /* non persistent */
