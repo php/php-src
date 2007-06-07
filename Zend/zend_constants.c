@@ -259,15 +259,16 @@ ZEND_API int zend_get_constant_ex(char *name, uint name_len, zval *result, zend_
 				retval = 0;
 			}
 		}
-		efree(class_name);
 
 		if (retval && ce) {
 			if (zend_hash_find(&((*ce)->constants_table), constant_name, const_name_len+1, (void **) &ret_constant) != SUCCESS) {
 				retval = 0;
 			}
 		} else {
+			zend_error(E_ERROR, "Class '%s' not found", class_name);
 			retval = 0;
 		}
+		efree(class_name);
 
 		if (retval) {
 			zval_update_constant(ret_constant, (void*)1 TSRMLS_CC);
