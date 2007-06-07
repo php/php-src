@@ -2373,6 +2373,7 @@ PHP_FUNCTION(ncurses_panel_above)
 		FETCH_PANEL(panel, &phandle);
 		above = panel_above(*panel);
 	} else {
+		IS_NCURSES_INITIALIZED();
 		above = panel_above((PANEL *)0);
 	}
 
