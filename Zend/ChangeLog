@@ -1,3 +1,21 @@
+2007-06-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_operators.c:
+      MFH: minor optimization - make sure the objects are not the same instance
+      before we start comparing their properties
+
+    * zend_operators.c:
+      minor optimization - make sure the objects are not the same instance before
+      we start comparing their properties
+
+    * (PHP_5_2)
+      zend_execute.c:
+      MFH: fix #41608 (segfault on a weird code with objects and switch())
+
+    * zend_execute.c:
+      fix #41608 (segfault on a weird code with objects and switch())
+
 2007-06-05  Antony Dovgal  <antony@zend.com>
 
     * zend_API.h:
