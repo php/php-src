@@ -1,3 +1,249 @@
+2007-06-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/date/php_date.c:
+      
+      MFB: Adjust previous patch to work on all compilers
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      
+      Adjust previous patch to work on all compilers
+
+    * ext/date/php_date.c:
+      
+      MFB: Optimize out a loop
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      
+      Optimize out a loop
+
+2007-06-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      fix news
+
+2007-06-06  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/pack.phpt:
+      revert - already have unpack.phpt
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/pack.phpt:
+      add edge case test
+
+2007-06-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/bcmath/bcmath.c:
+      MFH: improve the checks for integer overflow
+
+    * ext/bcmath/bcmath.c:
+      improve the checks
+
+2007-06-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/pack.c
+      ext/standard/pack.c
+      ext/standard/tests/strings/unpack.phpt
+      ext/standard/tests/strings/unpack.phpt:
+      
+      MFB: Added missing format validator to unpack() function
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/pack.c:
+      
+      Added missing format validator to unpack() function
+
+    * ext/standard/tests/strings/unpack.phpt
+      ext/standard/tests/strings/unpack.phpt
+      ext/standard/tests/strings/unpack.phpt:
+        1.1.4;
+      file unpack.phpt was initially added on branch PHP_5_2.
+
+2007-06-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c:
+      improve the check
+
+2007-06-06  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/string.c:
+      MF5: Fix chunk_split fix - avoid using floats
+      MF5: Fix money_format - don't give strfmon more arguments then supplied
+      MF5: Fix str[c]spn integer overflow
+
+    * (PHP_5_2)
+      NEWS:
+      new fixes
+
+    * (PHP_4_4)
+      ext/standard/string.c
+      ext/standard/string.c:
+      Fix chunk_split fix - avoid using floats
+      Fix money_format - don't give strfmon more arguments then supplied
+      Fix str[c]spn integer overflow
+
+    * (PHP_4_4)
+      ext/standard/tests/strings/moneyformat.phpt:
+      update test for 4
+
+2007-06-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      Makefile.global:
+      MFH:- Fix passing of shared extensions to run-tests.php
+
+    * Makefile.global:
+      - Fix for passing of shared extensions to run-tests.php
+
+2007-06-06  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      fix the chunks fix
+
+    * ext/standard/tests/strings/moneyformat.phpt
+      ext/standard/tests/strings/moneyformat.phpt
+      ext/standard/tests/strings/moneyformat.phpt:
+      fix test format
+
+    * (PHP_4_4)
+      ext/standard/tests/strings/moneyformat.phpt:
+      add tests for moneyformat
+
+    * ext/standard/tests/strings/chunk_split.phpt
+      ext/standard/tests/strings/chunk_split.phpt
+      ext/standard/tests/strings/chunk_split.phpt
+      ext/standard/tests/strings/strcspn.phpt
+      ext/standard/tests/strings/strcspn.phpt
+      ext/standard/tests/strings/strcspn.phpt:
+      add some edge cases
+
+    * ext/standard/tests/strings/moneyformat.phpt
+      ext/standard/tests/strings/moneyformat.phpt:
+      
+      add moneyformat test
+
+    * ext/standard/tests/strings/moneyformat.phpt
+      ext/standard/tests/strings/moneyformat.phpt:
+      
+      file moneyformat.phpt was initially added on branch PHP_5_2.
+
+2007-06-06  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/disk_free_space_basic.phpt
+      ext/standard/tests/file/disk_free_space_variation.phpt
+      ext/standard/tests/file/disk_total_space_basic.phpt
+      ext/standard/tests/file/disk_total_space_variation.phpt
+      ext/standard/tests/file/file_basic.phpt
+      ext/standard/tests/file/file_error.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_basic.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_error.phpt
+      ext/standard/tests/file/file_variation.phpt
+      ext/standard/tests/file/is_executable_variation.phpt
+      ext/standard/tests/file/is_readable_variation.phpt
+      ext/standard/tests/file/is_writable_variation.phpt:
+      New tests for file handling
+
+    * ext/standard/tests/file/disk_free_space_basic.phpt
+      ext/standard/tests/file/disk_free_space_basic.phpt
+      ext/standard/tests/file/disk_free_space_variation.phpt
+      ext/standard/tests/file/disk_free_space_variation.phpt
+      ext/standard/tests/file/disk_total_space_basic.phpt
+      ext/standard/tests/file/disk_total_space_basic.phpt
+      ext/standard/tests/file/disk_total_space_variation.phpt
+      ext/standard/tests/file/disk_total_space_variation.phpt
+      ext/standard/tests/file/file_basic.phpt
+      ext/standard/tests/file/file_basic.phpt
+      ext/standard/tests/file/file_error.phpt
+      ext/standard/tests/file/file_error.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_basic.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_basic.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_error.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_error.phpt
+      ext/standard/tests/file/file_variation.phpt
+      ext/standard/tests/file/file_variation.phpt
+      ext/standard/tests/file/is_executable_variation.phpt
+      ext/standard/tests/file/is_executable_variation.phpt
+      ext/standard/tests/file/is_readable_variation.phpt
+      ext/standard/tests/file/is_readable_variation.phpt
+      ext/standard/tests/file/is_writable_variation.phpt
+      ext/standard/tests/file/is_writable_variation.phpt:
+      
+      New tests for file handling
+
+    * ext/standard/tests/file/file.inc
+      ext/standard/tests/file/file.inc:
+      fixed file permission for new empty file
+
+2007-06-06  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/url_scanner_ex.c:
+      fix gcov build..
+
+    * (PHP_5_2)
+      ext/standard/url_scanner_ex.c:
+      fix gcov build for the 100th time..
+
+2007-06-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_operators.c:
+      MFH: minor optimization - make sure the objects are not the same instance
+      before we start comparing their properties
+
+    * ZendEngine2/zend_operators.c:
+      minor optimization - make sure the objects are not the same instance before
+      we start comparing their properties
+
+    * (PHP_5_2)
+      NEWS:
+      more details
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/gd.c
+      ext/gd/libgd/gd.c:
+      MFH: fix several integer overflows in GD
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.c:
+      fix several integer overflows in GD
+
+    * (PHP_5_2)
+      NEWS:
+      BFN + fix other entries
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute.c:
+      MFH: fix #41608 (segfault on a weird code with objects and switch())
+
+    * ZendEngine2/zend_execute.c:
+      fix #41608 (segfault on a weird code with objects and switch())
+
+2007-06-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/tests/bug41600.phpt
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+      
+      MFB: Fixed bug #41600 (url rewriter tags doesn't work with namespaced
+      tags).
+
+    * (PHP_5_2)
+      NEWS
+      ext/session/tests/bug41600.phpt
+      ext/session/tests/bug41600.phpt
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+      
+      Fixed bug #41600 (url rewriter tags doesn't work with namespaced tags).
+
 2007-06-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pdo/pdo_sql_parser.c
