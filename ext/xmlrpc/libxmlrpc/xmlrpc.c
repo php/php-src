@@ -43,6 +43,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   9/1999 - 10/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.10  2007/01/01 09:29:33  sebastian
+ *   Bump year.
+ *
  *   Revision 1.9  2007/11/30 16:38:53  iliaa
  *   zts fixes
  *
@@ -236,6 +239,9 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
 static int date_to_ISO8601 (time_t value, char *buf, int length) {
    struct tm *tm, tmbuf;
    tm = php_localtime_r(&value, &tmbuf);
+   if (!tm) {
+	   return 0;
+   }
 #if 0  /* TODO: soap seems to favor this method. xmlrpc the latter. */
 	return strftime (buf, length, "%Y-%m-%dT%H:%M:%SZ", tm);
 #else

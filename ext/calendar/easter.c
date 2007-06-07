@@ -36,10 +36,14 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	/* Default to the current year if year parameter is not given */
 	{
 		time_t a;
-		struct tm b;
+		struct tm b, *res;
 		time(&a);
-		php_localtime_r(&a, &b);
-		year = 1900 + b.tm_year;
+		res = php_localtime_r(&a, &b);
+		if (!res) {
+			year = 1900;
+		} else {
+			year = 1900 + b.tm_year;
+		}
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,

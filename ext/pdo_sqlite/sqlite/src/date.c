@@ -415,8 +415,10 @@ static double localtimeOffset(DateTime *p){
   computeJD(&x);
   t = (x.rJD-2440587.5)*86400.0 + 0.5;
   sqlite3OsEnterMutex();
-  pTm = php_localtime_r
-(&t, &tmbuf);
+  pTm = php_localtime_r(&t, &tmbuf);
+  if (!pTm) {
+	  return 0;
+  }
   y.Y = pTm->tm_year + 1900;
   y.M = pTm->tm_mon + 1;
   y.D = pTm->tm_mday;
