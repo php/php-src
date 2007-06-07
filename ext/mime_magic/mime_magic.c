@@ -1764,6 +1764,9 @@ static void mprint(union VALUETYPE *p, struct magic *m)
 		{
 			char ctimebuf[52];
 			pp = php_ctime_r((time_t *) &p->l, ctimebuf);
+			if (!pp) {
+				return;
+			}
 			if ((rt = strchr(pp, '\n')) != NULL) {
 				*rt = '\0';
 			}
