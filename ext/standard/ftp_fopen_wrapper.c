@@ -808,6 +808,9 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, int f
 		/* figure out the GMT offset */
 		stamp = time(NULL);
 		gmt = php_gmtime_r(&stamp, &tmbuf);
+		if (!gmt) {
+			goto mdtm_error;
+		}
 		gmt->tm_isdst = -1;
 
 		/* apply the GMT offset */
