@@ -47,8 +47,11 @@ PHP_FUNCTION(unixtojd)
   }
 
   ta = php_localtime_r(&timestamp, &tmbuf);
+  if (!ta) {
+	  RETURN_FALSE;
+  }
+
   jdate = GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1, ta->tm_mday);
-  
   RETURN_LONG(jdate);
 }
 /* }}} */
