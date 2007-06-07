@@ -930,11 +930,16 @@ static char *week_days[] = {
 static inline void strcpy_gmt(char *ubuf, time_t *when)
 {
 	char buf[MAX_STR];
-	struct tm tm;
+	struct tm tm, *res;
 	int n;
 	
-	php_gmtime_r(when, &tm);
+	res = php_gmtime_r(when, &tm);
 	
+	if (!res) {
+		buf[0] = '\0';
+		return;
+	}
+
 	n = snprintf(buf, sizeof(buf), "%s, %02d %s %d %02d:%02d:%02d GMT", /* SAFE */
 				week_days[tm.tm_wday], tm.tm_mday, 
 				month_names[tm.tm_mon], tm.tm_year + 1900, 

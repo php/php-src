@@ -1012,6 +1012,9 @@ ftp_mdtm(ftpbuf_t *ftp, const char *path)
 	/* figure out the GMT offset */
 	stamp = time(NULL);
 	gmt = php_gmtime_r(&stamp, &tmbuf);
+	if (!gmt) {
+		return -1;
+	}
 	gmt->tm_isdst = -1;
 
 	/* apply the GMT offset */
