@@ -5,7 +5,7 @@ precision=14
 --SKIPIF--
 <?php
   if (!extension_loaded('json')) die('skip: json extension not available');
-  if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+  if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
