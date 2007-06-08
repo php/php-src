@@ -550,6 +550,9 @@ ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)
        /*} */
 
        while ((v = LWZReadByte(fd,FALSE,c)) >= 0 ) {
+				if (v >= gdMaxColors) {
+					v = 0;
+				}
                /* This how we recognize which colors are actually used. */
                if (im->open[v]) {
                        im->open[v] = 0;

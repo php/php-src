@@ -6,8 +6,9 @@ PHP 4                                                                      NEWS
   Wagner (Ilia)
 - Addded "max_input_nesting_level" php.ini option to limit nesting level of 
   input variables. Fix for MOPB-03-2007. (Stas)
+- Fixed bug #41630 (segfault when an invalid color index is present in
+  the image data). (Reported by Elliot <wccoder@gmail dot com>) (Pierre)
 - Fixed bug #38798 (OpenSSL init corrected in php5 but not in php4). (Tony)
-	
 04 May 2007, Version 4.4.7
 - Fixed libgd #86 (Fixed possible infinite loop in imagecreatefrompng) 
   (Reported by Xavier Roche) (Pierre)
