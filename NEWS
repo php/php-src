@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Added missing open_basedir checks to CGI. (anight at eyelinkmedia dot com, 
   Tony)
 - Added missing format validator to unpack() function. (Ilia)
+- Added missing error check inside bcpowmod(). (Ilia)
 - Fixed several integer overflows in ImageCreate(), ImageCreateTrueColor(), 
   ImageCopyResampled() and ImageFilledPolygon() reported by Mattias Bengtsson. 
   (Tony)

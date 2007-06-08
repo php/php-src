@@ -465,13 +465,17 @@ PHP_FUNCTION(bcpowmod)
 
 	scale_int = (int) ((int)scale < 0) ? 0 : scale;
 
-	bc_raisemod(first, second, mod, &result, scale_int TSRMLS_CC);
-	if (result->n_scale > scale) {
-		result->n_scale = scale;
+	if (bc_raisemod(first, second, mod, &result, scale_int TSRMLS_CC) != -1) {
+		if (result->n_scale > scale) {
+			result->n_scale = scale;
+		}
+		Z_STRVAL_P(return_value) = bc_num2str(result);
+		Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+		Z_TYPE_P(return_value) = IS_STRING;
+	} else {
+		RETVAL_FALSE;
 	}
-	Z_STRVAL_P(return_value) = bc_num2str(result);
-	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-	Z_TYPE_P(return_value) = IS_STRING;
+	
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&mod);
