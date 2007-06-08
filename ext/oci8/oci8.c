@@ -1417,7 +1417,7 @@ open:
 	}
 
 #if HAVE_OCI_STMT_PREPARE2
-	if (connection->is_persistent) {
+	{
 		ub4 statement_cache_size = (OCI_G(statement_cache_size) > 0) ? OCI_G(statement_cache_size) : 0;
 
 		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->svc, (ub4) OCI_HTYPE_SVCCTX, (ub4 *) &statement_cache_size, 0, (ub4) OCI_ATTR_STMTCACHESIZE, OCI_G(err)));
