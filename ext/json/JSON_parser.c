@@ -357,7 +357,7 @@ static void attach_zval(json_parser *json, int up, int cur, smart_str *key, int 
     {
         if (!assoc)
         {
-            add_utf8_property_zval_ex(root, (key->len ? key->c : ""), (key->len ? (key->len + 1) : sizeof("")), child TSRMLS_CC);
+            add_utf8_property_zval_ex(root, (key->len ? key->c : "_empty_"), (key->len ? (key->len + 1) : sizeof("_empty_")), child TSRMLS_CC);
 #if PHP_MAJOR_VERSION >= 5
             ZVAL_DELREF(child);
 #endif
@@ -500,7 +500,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
 
                     if (!assoc)
                     {
-                        add_utf8_property_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval TSRMLS_CC);
+                        add_utf8_property_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
 #if PHP_MAJOR_VERSION >= 5
                         ZVAL_DELREF(mval);
 #endif
@@ -631,7 +631,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
                             {
                                 if (!assoc)
                                 {
-                                    add_utf8_property_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval TSRMLS_CC);
+                                    add_utf8_property_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
 #if PHP_MAJOR_VERSION >= 5
                                     ZVAL_DELREF(mval);
 #endif
