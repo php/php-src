@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   Tony)
 - Added missing format validator to unpack() function. (Ilia)
 - Added missing error check inside bcpowmod(). (Ilia)
+- Enabled statement cache for non-persistent OCI8 connections. 
+  (Chris Jones, Tony)
 - Fixed several integer overflows in ImageCreate(), ImageCreateTrueColor(), 
   ImageCopyResampled() and ImageFilledPolygon() reported by Mattias Bengtsson. 
   (Tony)
