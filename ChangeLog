@@ -1,3 +1,81 @@
+2007-06-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/date/php_date.c:
+      
+      MFB: Final shot at the date issue
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      
+      Final shot at the date issue
+
+2007-06-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gif_in.c:
+      - #41630, fix segfault when an invalid color index is present in the image
+        data
+
+2007-06-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.c:
+      MFH: reset active_result_id when fetching persistent connection
+      patch by Peter Christensen
+
+    * ext/mysql/php_mysql.c:
+      reset active_result_id when fetching persistent connection
+      patch by Peter Christensen
+
+    * ext/calendar/easter.c
+      ext/pdo_sqlite/sqlite/src/date.c
+      ext/sqlite/libsqlite/src/date.c
+      ext/standard/info.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.c:
+      php_localtime_r() checks
+
+    * ext/ftp/ftp.c
+      ext/interbase/ibase_query.c
+      ext/session/session.c
+      ext/standard/datetime.c
+      ext/standard/ftp_fopen_wrapper.c:
+      php_gmtime_r() fixes
+
+    * ext/calendar/cal_unix.c
+      ext/date/php_date.c
+      ext/mime_magic/mime_magic.c
+      main/main.c:
+      check return value of *time_r() functions for NULL
+      more checks will follow
+
+    * (PHP_5_2)
+      ext/calendar/cal_unix.c
+      ext/date/php_date.c
+      ext/mime_magic/mime_magic.c
+      main/main.c:
+      MFH: check return value of *time_r() functions for NULL
+
+    * (PHP_5_2)
+      ZendEngine2/zend_constants.c
+      ZendEngine2/tests/class_constants_001.phpt
+      ZendEngine2/tests/class_constants_002.phpt
+      ZendEngine2/tests/class_constants_003.phpt:
+      MFH: change E_NOTICE to E_ERROR when using a class constant from
+      non-existent class
+      (noticed by Jani)
+      add tests
+
+2007-06-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/date/php_date.c:
+      
+      Fixed typo
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      Fixed typo
+
 2007-06-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/date/php_date.c:
