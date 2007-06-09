@@ -1,3 +1,14 @@
+2007-06-08  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_ini.c:
+      MFH: fix #41561 (Values set with php_admin_* in httpd.conf can be
+      overwritten with ini_set())
+
+    * zend_ini.c:
+      fix #41561 (Values set with php_admin_* in httpd.conf can be overwritten
+      with ini_set())
+
 2007-06-07  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
