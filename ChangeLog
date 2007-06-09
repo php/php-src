@@ -1,3 +1,79 @@
+2007-06-08  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      bfn
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c:
+      MFH: fix #41561 (Values set with php_admin_* in httpd.conf can be
+      overwritten with ini_set())
+
+    * ZendEngine2/zend_ini.c:
+      fix #41561 (Values set with php_admin_* in httpd.conf can be overwritten
+      with ini_set())
+
+    * ext/json/tests/pass001.1.phpt
+      ext/json/tests/pass001.1_64bit.phpt
+      ext/json/tests/pass001.phpt:
+      fix tests
+
+    * ext/json/JSON_parser.c:
+      oops, empty properties are not allowed
+
+    * ext/json/JSON_parser.c:
+      MFB: fix #41504 (json_decode() incorrectly decodes JSON arrays with empty
+      string keys).
+
+    * (PHP_5_2)
+      NEWS:
+      news
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c
+      ext/oci8/oci8_statement.c:
+      MFH: enable statement cache for non-persistent connections (patch by Chris
+      Jones)
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_statement.c:
+      enable statement cache for non-persistent connections (patch by Chris
+      Jones)
+
+    * (PHP_5_2)
+      ext/json/tests/pass001.1_64bit.phpt:
+      adjust test for 64bit
+
+    * (PHP_5_2)
+      ext/json/tests/pass001.1.phpt
+      ext/json/tests/pass001.1_64bit.phpt
+      ext/json/tests/pass001.1_64bit.phpt:
+      fix test, add 64bit version
+
+2007-06-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/gd/libgd/gd_gif_in.c:
+      - MFH:#41630, segfault when an invalid color index is present in the image
+        data
+
+    * (PHP_5_2)
+      NEWS:
+      - #41630 entry
+
+    * ext/gd/libgd/gd_gif_in.c:
+      - MFB: #41630, fix segfault when an invalid color index is present in the
+        image data
+
+2007-06-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/bcmath/bcmath.c:
+      
+      Added missing error check inside bcpowmod().
+
 2007-06-07  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/date/php_date.c:
