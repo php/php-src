@@ -77,6 +77,7 @@ test: all
 		CC="$(CC)" \
 			$(PHP_EXECUTABLE) $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -U -d extension_dir=modules/ $(PHP_TEST_SHARED_EXTENSIONS) tests/; \
 	elif test ! -z "$(SAPI_CLI_PATH)" && test -x "$(SAPI_CLI_PATH)"; then \
+		$(EGREP) -v '^extension[\t\ ]=' `$(top_builddir)/$(SAPI_CLI_PATH) -r 'echo php_ini_loaded_file();'` > $(top_builddir)/tmp-php.ini; \
 		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
 		TEST_PHP_SRCDIR=$(top_srcdir) \
 		CC="$(CC)" \
@@ -87,6 +88,7 @@ test: all
 
 utest: all
 	-@if test ! -z "$(SAPI_CLI_PATH)" && test -x "$(SAPI_CLI_PATH)"; then \
+		$(EGREP) -v '^extension[\t\ ]=' `$(top_builddir)/$(SAPI_CLI_PATH) -r 'echo php_ini_loaded_file();'` > $(top_builddir)/tmp-php.ini; \
 		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
 		TEST_PHP_SRCDIR=$(top_srcdir) \
 		CC="$(CC)" \
@@ -97,6 +99,7 @@ utest: all
 
 ntest: all
 	-@if test ! -z "$(SAPI_CLI_PATH)" && test -x "$(SAPI_CLI_PATH)"; then \
+		$(EGREP) -v '^extension[\t\ ]=' `$(top_builddir)/$(SAPI_CLI_PATH) -r 'echo php_ini_loaded_file();'` > $(top_builddir)/tmp-php.ini; \
 		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
 		TEST_PHP_SRCDIR=$(top_srcdir) \
 		CC="$(CC)" \
