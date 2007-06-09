@@ -1107,6 +1107,18 @@ PHP_FUNCTION(php_ini_scanned_files)
 }
 /* }}} */
 
+/* {{{ proto string php_ini_loaded_file(void)
+   Return the actual loaded ini filename */
+PHP_FUNCTION(php_ini_loaded_file)
+{
+	if (php_ini_opened_path) {
+		RETURN_STRING(php_ini_opened_path, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
