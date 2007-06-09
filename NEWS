@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Fixed money_format() not to accept multiple %i or %n tokens. (Stas, Ilia)
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
+- Fixed bug #41640 (get_class_vars produces error on class constants).
+  (Johannes)
 - Fixed bug #41630 (segfault when an invalid color index is present in
   the image data). (Reported by Elliot <wccoder@gmail dot com>) (Pierre)
 - Fixed bug #41608 (segfault on a weird code with objects and switch()). 
