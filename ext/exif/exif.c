@@ -3723,7 +3723,9 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 
 	if (ImageInfo->FileSize >= 2) {
 		php_stream_seek(ImageInfo->infile, 0, SEEK_SET);
-		php_stream_read(ImageInfo->infile, (char*)file_header, 2);
+		if (php_stream_read(ImageInfo->infile, (char*)file_header, 2) != 2) {
+			return FALSE;
+		}
 		if ((file_header[0]==0xff) && (file_header[1]==M_SOI)) {
 			ImageInfo->FileType = IMAGE_FILETYPE_JPEG;
 			if (exif_scan_JPEG_header(ImageInfo TSRMLS_CC)) {
@@ -3732,7 +3734,9 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid JPEG file");
 			}
 		} else if (ImageInfo->FileSize >= 8) {
-			php_stream_read(ImageInfo->infile, (char*)(file_header+2), 6);
+			if (php_stream_read(ImageInfo->infile, (char*)(file_header+2), 6) != 6) {
+				return FALSE;
+			}
 			if (!memcmp(file_header, "II\x2A\x00", 4)) {
 				ImageInfo->FileType = IMAGE_FILETYPE_TIFF_II;
 				ImageInfo->motorola_intel = 0;
@@ -3828,20 +3832,14 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 		return FALSE;
 	}
 
-	php_basename(FileName, strlen(FileName), NULL, 0, &(ImageInfo->FileName), NULL TSRMLS_CC);
-	ImageInfo->read_thumbnail = read_thumbnail;
-	ImageInfo->read_all = read_all;
-	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;
-
-	ImageInfo->encode_unicode    = safe_estrdup(EXIF_G(encode_unicode));
-	ImageInfo->decode_unicode_be = safe_estrdup(EXIF_G(decode_unicode_be));
-	ImageInfo->decode_unicode_le = safe_estrdup(EXIF_G(decode_unicode_le));
-	ImageInfo->encode_jis        = safe_estrdup(EXIF_G(encode_jis));
-	ImageInfo->decode_jis_be     = safe_estrdup(EXIF_G(decode_jis_be));
-	ImageInfo->decode_jis_le     = safe_estrdup(EXIF_G(decode_jis_le));
-
 	if (php_stream_is(ImageInfo->infile, PHP_STREAM_IS_STDIO)) {
 		if (VCWD_STAT(FileName, &st) >= 0) {
+			if ((st.st_mode & S_IFMT) != S_IFREG) {
+				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Not a file");
+				php_stream_close(ImageInfo->infile);
+				return FALSE;
+			}
+
 			/* Store file date/time. */
 #ifdef NETWARE
 			ImageInfo->FileDateTime = st.st_mtime.tv_sec;
@@ -3858,6 +3856,19 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 			php_stream_seek(ImageInfo->infile, 0, SEEK_SET);
 		}
 	}
+
+	php_basename(FileName, strlen(FileName), NULL, 0, &(ImageInfo->FileName), NULL TSRMLS_CC);
+	ImageInfo->read_thumbnail = read_thumbnail;
+	ImageInfo->read_all = read_all;
+	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;
+
+	ImageInfo->encode_unicode    = safe_estrdup(EXIF_G(encode_unicode));
+	ImageInfo->decode_unicode_be = safe_estrdup(EXIF_G(decode_unicode_be));
+	ImageInfo->decode_unicode_le = safe_estrdup(EXIF_G(decode_unicode_le));
+	ImageInfo->encode_jis        = safe_estrdup(EXIF_G(encode_jis));
+	ImageInfo->decode_jis_be     = safe_estrdup(EXIF_G(decode_jis_be));
+	ImageInfo->decode_jis_le     = safe_estrdup(EXIF_G(decode_jis_le));
+
 
 	ImageInfo->ifd_nesting_level = 0;
 
