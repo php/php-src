@@ -1,3 +1,12 @@
+2007-06-09  Johannes Schlüter  <johannes@schlueters.de>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      tests/bug41640.phpt
+      tests/bug41640.phpt
+      tests/bug41640.phpt:
+      Fix #41640 (get_class_vars produces error on class constants)
+
 2007-06-08  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)

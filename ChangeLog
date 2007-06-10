@@ -1,3 +1,44 @@
+2007-06-09  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Makefile.global:
+      MFB
+
+    * (PHP_5_2)
+      Makefile.global:
+      - Fix special case of no ini file in use or not found
+
+    * Makefile.global:
+      - fix "make test" issue with extension entries
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/info.c
+      ext/standard/info.h:
+      MFH:- Added php_ini_loaded_file() function which returns the path to the
+      actual
+        php.ini in use.
+
+    * ext/standard/basic_functions.c
+      ext/standard/info.c
+      ext/standard/info.h:
+      - Added php_ini_loaded_file() function which returns the path to the actual
+        php.ini in use.
+
+2007-06-09  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug41640.phpt:
+      Fix #41640 (get_class_vars produces error on class constants)
+
+    * ZendEngine2/tests/bug41640.phpt
+      ZendEngine2/tests/bug41640.phpt:
+      
+      Fix #41640 (get_class_vars produces error on class constants)
+
 2007-06-08  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
