@@ -986,22 +986,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						/* Clean up class name var entry */
 						zval_ptr_dtor(&ent1->data);
 					} else {
-						long l;  
-						double d;
-				
-						switch (is_numeric_string(ent1->varname, strlen(ent1->varname), &l, &d, 0)) {
-							case IS_DOUBLE:
-								if (d > INT_MAX) {
-									goto bigint;
-								}
-								l = (long) d;
-							case IS_LONG:
-								zend_hash_index_update(target_hash, l, &ent1->data, sizeof(zval *), NULL);
-								break;
-							default:
-bigint:
-								zend_hash_update(target_hash,ent1->varname, strlen(ent1->varname)+1, &ent1->data, sizeof(zval *), NULL);
-						}
+						zend_hash_update(target_hash, ent1->varname, strlen(ent1->varname)+1, &ent1->data, sizeof(zval *), NULL);
 					}
 					efree(ent1->varname);
 				} else	{
