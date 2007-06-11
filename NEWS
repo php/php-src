@@ -4,6 +4,8 @@ PHP 4                                                                      NEWS
 - Improved fix for MOPB-02-2007 (Ilia)
 - Fixed an interger overflow inside chunk_split(), identified by Gerhard
   Wagner (Ilia)
+- Fixed integer overlow in str[c]spn() (Stas)
+- Fixed UMR in money_format() (Stas, Ilia)
 - Addded "max_input_nesting_level" php.ini option to limit nesting level of 
   input variables. Fix for MOPB-03-2007. (Stas)
 - Fixed bug #41630 (segfault when an invalid color index is present in
