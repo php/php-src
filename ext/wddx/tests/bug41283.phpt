@@ -20,7 +20,7 @@ array(1) {
       string(5) "One 1"
       ["1.2"]=>
       string(5) "One 2"
-      [1]=>
+      ["1.0"]=>
       string(5) "Three"
     }
   }
