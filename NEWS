@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2007, PHP 5.2.4
 - Improved fix for MOPB-03-2007. (Ilia)
 - Corrected fix for CVE-2007-2872. (Ilia)
+- Enabled statement cache for non-persistent OCI8 connections. 
+  (Chris Jones, Tony)
+
 - Added php_ini_loaded_file() function which returns the path to the actual
   php.ini in use. (Jani)
 - Added GD version constants GD_MAJOR_VERSION, GD_MINOR_VERSION
@@ -11,16 +14,17 @@ PHP                                                                        NEWS
   Tony)
 - Added missing format validator to unpack() function. (Ilia)
 - Added missing error check inside bcpowmod(). (Ilia)
-- Enabled statement cache for non-persistent OCI8 connections. 
-  (Chris Jones, Tony)
+
 - Fixed several integer overflows in ImageCreate(), ImageCreateTrueColor(), 
   ImageCopyResampled() and ImageFilledPolygon() reported by Mattias Bengtsson. 
   (Tony)
 - Fixed size calculation in chunk_split(). (Stas)
 - Fixed integer overlow in str[c]spn(). (Stas)
 - Fixed money_format() not to accept multiple %i or %n tokens. (Stas, Ilia)
+
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
+
 - Fixed bug #41640 (get_class_vars produces error on class constants).
   (Johannes)
 - Fixed bug #41630 (segfault when an invalid color index is present in
@@ -72,8 +76,8 @@ PHP                                                                        NEWS
 
 - Implemented FR #41416 (getColumnMeta() should also return table name). (Tony)
 
-- Fixed an interger overflow inside chunk_split(), identified by Gerhard
-  Wagner (Ilia) 
+- Fixed an integer overflow inside chunk_split(). Identified by Gerhard Wagner.
+  (Ilia) 
 - Fixed SOAP extension's handler() to work even when
   "always_populate_raw_post_data" is off. (Ilia)
 - Fixed possible infinite loop in imagecreatefrompng. (libgd #86) 
