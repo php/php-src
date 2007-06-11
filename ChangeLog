@@ -1,3 +1,13 @@
+2007-06-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/exif/exif.c:
+      MFB: Fixed memory corruption when reading exif data of a non-file
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      
+      Fixed memory corruption when reading exif data of a non-file
+
 2007-06-09  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * Makefile.global:
