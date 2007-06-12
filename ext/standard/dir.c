@@ -385,7 +385,6 @@ PHP_NAMED_FUNCTION(php_if_readdir)
    Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
-	char cwd[MAXPATHLEN];
 	int cwd_skip = 0;
 #ifdef ZTS
 	char work_pattern[MAXPATHLEN];
@@ -422,6 +421,19 @@ PHP_FUNCTION(glob)
 	} 
 #endif
 
+	if (PG(open_basedir) && *PG(open_basedir)) {
+		size_t base_len = php_dirname(pattern, strlen(pattern));
+		char pos = pattern[base_len];
+
+		pattern[base_len] = '\0';
+
+		if (php_check_open_basedir(pattern TSRMLS_CC)) {
+			RETURN_FALSE;
+		}
+
+		pattern[base_len] = pos;
+	}
+
 	globbuf.gl_offs = 0;
 	if (0 != (ret = glob(pattern, flags & GLOB_FLAGMASK, NULL, &globbuf))) {
 #ifdef GLOB_NOMATCH
@@ -445,14 +457,6 @@ PHP_FUNCTION(glob)
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
 		array_init(return_value);
 		return;
-	}
-
-	/* we assume that any glob pattern will match files from one directory only
-	   so checking the dirname of the first match should be sufficient */
-	strlcpy(cwd, globbuf.gl_pathv[0], MAXPATHLEN);
-
-	if (php_check_open_basedir(cwd TSRMLS_CC)) {
-		RETURN_FALSE;
 	}
 
 	array_init(return_value);
