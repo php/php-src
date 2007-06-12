@@ -387,6 +387,7 @@ PHP_FUNCTION(glob)
 {
 	int cwd_skip = 0;
 #ifdef ZTS
+	char cwd[MAXPATHLEN];
 	char work_pattern[MAXPATHLEN];
 	char *result;
 #endif
