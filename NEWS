@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #41655 (open_basedir bypass via glob()). (Ilia)
 - Fixed bug #41640 (get_class_vars produces error on class constants).
   (Johannes)
 - Fixed bug #41630 (segfault when an invalid color index is present in
@@ -46,8 +47,7 @@ PHP                                                                        NEWS
   with ini_set()). (Tony, Dmitry)
 - Fixed bug #41555 (configure failure: regression caused by fix for #41265).
   (Jani)
-- Fixed bug #41527 (WDDX deserialize numeric string array key). (php_lists
-  at realplain dot com, Ilia)
+- Fixed bug #41527 (WDDX deserialize numeric string array key). (Matt, Ilia)
 - Fixed bug #41518 (file_exists() warns of open_basedir restriction on 
   non-existent file). (Tony)
 - Fixed bug #39330 (apache2handler does not call shutdown actions before 
