@@ -1,3 +1,17 @@
+2007-06-11  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * tests/get_defined_vars.phpt:
+      New testcase for get_defined_vars() function: get_defined_vars.phpt
+
+    * tests/get_defined_vars.phpt
+      tests/get_defined_vars.phpt:
+      
+      file get_defined_vars.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      tests/019.phpt:
+      New testcase for unset(), isset() and empty functions : 019.phpt
+
 2007-06-09  Johannes Schlüter  <johannes@schlueters.de>
 
     * zend_builtin_functions.c
