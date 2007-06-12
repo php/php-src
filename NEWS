@@ -29,8 +29,8 @@ PHP 4                                                                      NEWS
 - Fixed CVE-2007-1001 (GD wbmp used with invalid image size). (Pierre)
 - Fixed CVE-2007-0455 (Buffer overflow in gdImageStringFTEx, used by imagettf
   function). (Kees Cook, Pierre)
-- Fixed bug #41527 (WDDX deserialize numeric string array key). (php_lists
-  at realplain dot com, Ilia)
+- Fixed bug #41655 (open_basedir bypass via glob()). (Ilia)
+- Fixed bug #41527 (WDDX deserialize numeric string array key). (Matt, Ilia)
 - Fixed bug #41252 (Calling mcrypt_generic without first calling
   mcrypt_generic_init crashes). (Derick)
 - Fixed bug #40998 (long session array keys are truncated). (Tony)
