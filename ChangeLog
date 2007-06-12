@@ -1,3 +1,127 @@
+2007-06-11  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      regroup
+
+    * (PHP_4_4)
+      NEWS:
+      Human readable..
+
+2007-06-11  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_4)
+      NEWS:
+      record fixes
+
+2007-06-11  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/005_basic.phpt
+      ext/standard/tests/file/005_error.phpt
+      ext/standard/tests/file/005_variation-win32.phpt
+      ext/standard/tests/file/005_variation.phpt
+      ext/standard/tests/file/006_basic.phpt
+      ext/standard/tests/file/006_error.phpt
+      ext/standard/tests/file/006_variation.phpt
+      ext/standard/tests/file/007_basic.phpt
+      ext/standard/tests/file/007_error.phpt
+      ext/standard/tests/file/popen_pclose_basic-win32.phpt
+      ext/standard/tests/file/popen_pclose_basic.phpt
+      ext/standard/tests/file/popen_pclose_error-win32.phpt
+      ext/standard/tests/file/popen_pclose_error.phpt
+      ext/standard/tests/file/readlink_realpath_basic.phpt
+      ext/standard/tests/file/readlink_realpath_error.phpt
+      ext/standard/tests/file/readlink_realpath_variation.phpt
+      ext/standard/tests/file/realpath_basic-win32.phpt
+      ext/standard/tests/file/realpath_error-win32.phpt
+      ext/standard/tests/file/realpath_variation-win32.phpt:
+       New tests for file handling system functions
+
+    * ZendEngine2/tests/get_defined_vars.phpt:
+      New testcase for get_defined_vars() function: get_defined_vars.phpt
+
+    * ext/standard/tests/file/005_basic.phpt
+      ext/standard/tests/file/005_basic.phpt
+      ext/standard/tests/file/005_error.phpt
+      ext/standard/tests/file/005_error.phpt
+      ext/standard/tests/file/005_variation-win32.phpt
+      ext/standard/tests/file/005_variation-win32.phpt
+      ext/standard/tests/file/005_variation.phpt
+      ext/standard/tests/file/005_variation.phpt
+      ext/standard/tests/file/006_basic.phpt
+      ext/standard/tests/file/006_basic.phpt
+      ext/standard/tests/file/006_error.phpt
+      ext/standard/tests/file/006_error.phpt
+      ext/standard/tests/file/006_variation.phpt
+      ext/standard/tests/file/006_variation.phpt
+      ext/standard/tests/file/007_basic.phpt
+      ext/standard/tests/file/007_basic.phpt
+      ext/standard/tests/file/007_error.phpt
+      ext/standard/tests/file/007_error.phpt
+      ext/standard/tests/file/popen_pclose_basic-win32.phpt
+      ext/standard/tests/file/popen_pclose_basic-win32.phpt
+      ext/standard/tests/file/popen_pclose_basic.phpt
+      ext/standard/tests/file/popen_pclose_basic.phpt
+      ext/standard/tests/file/popen_pclose_error-win32.phpt
+      ext/standard/tests/file/popen_pclose_error-win32.phpt
+      ext/standard/tests/file/popen_pclose_error.phpt
+      ext/standard/tests/file/popen_pclose_error.phpt
+      ext/standard/tests/file/readlink_realpath_basic.phpt
+      ext/standard/tests/file/readlink_realpath_basic.phpt
+      ext/standard/tests/file/readlink_realpath_error.phpt
+      ext/standard/tests/file/readlink_realpath_error.phpt
+      ext/standard/tests/file/readlink_realpath_variation.phpt
+      ext/standard/tests/file/readlink_realpath_variation.phpt
+      ext/standard/tests/file/realpath_basic-win32.phpt
+      ext/standard/tests/file/realpath_basic-win32.phpt
+      ext/standard/tests/file/realpath_error-win32.phpt
+      ext/standard/tests/file/realpath_error-win32.phpt
+      ext/standard/tests/file/realpath_variation-win32.phpt
+      ext/standard/tests/file/realpath_variation-win32.phpt:
+      
+      file 005_basic.phpt was initially added on branch PHP_5_2.
+
+    * ZendEngine2/tests/get_defined_vars.phpt
+      ZendEngine2/tests/get_defined_vars.phpt:
+      
+      file get_defined_vars.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ZendEngine2/tests/019.phpt:
+      New testcase for unset(), isset() and empty functions : 019.phpt
+
+2007-06-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/wddx/wddx.c
+      ext/wddx/tests/bug41527.phpt:
+      
+      MFB: WDDX deserialize numeric string array key
+
+    * ext/wddx/wddx.c
+      ext/wddx/tests/bug41283.phpt
+      ext/wddx/tests/bug41527.phpt
+      ext/wddx/tests/bug41527.phpt:
+      
+      MFB: Fixed bug #41527 (WDDX deserialize numeric string array key).
+
+    * (PHP_5_2)
+      ext/wddx/tests/bug41283.phpt:
+      Fixed test
+
+    * (PHP_5_2)
+      NEWS
+      ext/wddx/wddx.c
+      ext/wddx/tests/bug41527.phpt
+      ext/wddx/tests/bug41527.phpt:
+      
+      Fixed bug #41527 (WDDX deserialize numeric string array key).
+
+    * (PHP_5_2)
+      ext/json/tests/pass001.1.phpt:
+      Update test
+
 2007-06-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/exif/exif.c:
