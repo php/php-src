@@ -363,15 +363,9 @@ static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) /* {{{ */
                 double dbl = Z_DVAL_P(val);
 
                 if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
-		    len = spprintf(&d, 0, "%.*g", (int) EG(precision), dbl);
-                    if (d) {
-                        if (dbl > LONG_MAX && !memchr(d, '.', len)) {
-                            smart_str_append_unsigned(buf, (unsigned long)Z_DVAL_P(val));
-                        } else {
-                            smart_str_appendl(buf, d, len);
-                        }
+			len = spprintf(&d, 0, "%.*g", (int) EG(precision), dbl);
+			smart_str_appendl(buf, d, len);
                         efree(d);
-                    }
                 } else {
                     zend_error(E_WARNING, "[json] (json_encode_r) double %.9g does not conform to the JSON spec, encoded as 0.", dbl);
                     smart_str_appendc(buf, '0');
