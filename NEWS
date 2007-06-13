@@ -28,6 +28,8 @@ PHP                                                                        NEWS
 - Fixed bug #41655 (open_basedir bypass via glob()). (Ilia)
 - Fixed bug #41640 (get_class_vars produces error on class constants).
   (Johannes)
+- Fixed bug #41633 (Crash instantiating classes with self-referencing
+  constants). (Dmitry)
 - Fixed bug #41630 (segfault when an invalid color index is present in
   the image data). (Reported by Elliot <wccoder@gmail dot com>) (Pierre)
 - Fixed bug #41608 (segfault on a weird code with objects and switch()). 
