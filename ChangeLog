@@ -1,3 +1,40 @@
+2007-06-12  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/simplexml/tests/bug37565.phpt:
+      - Fix test
+
+2007-06-12  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * .cvsignore
+      .cvsignore:
+      ignore tmp-php.ini
+
+2007-06-12  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c:
+      Display PCRE ini entries as part of module info
+
+    * ext/standard/dir.c
+      ext/standard/dir.c
+      ext/standard/dir.c:
+      Fix ZTS build
+
+2007-06-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/dir.c
+      ext/standard/dir.c:
+      
+      MFB: Fixed bug #41655 (open_basedir bypass via glob())
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/dir.c:
+      
+      Fixed bug #41655 (open_basedir bypass via glob())
+
 2007-06-11  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_2)
