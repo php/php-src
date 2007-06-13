@@ -2613,7 +2613,11 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, CONST|UNUSED, CONST)
 	ce = EX_T(opline->op1.u.var).class_entry;
 
 	if (zend_hash_find(&ce->constants_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
+		zend_class_entry *old_scope = EG(scope);
+
+		EG(scope) = ce;
 		zval_update_constant(value, (void *) 1 TSRMLS_CC);
+		EG(scope) = old_scope;
 		EX_T(opline->result.u.var).tmp_var = **value;
 		zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 	} else {
