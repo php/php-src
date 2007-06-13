@@ -8,9 +8,11 @@ $xml = new SimpleXMLElement('<?xml version="1.0" standalone="yes"?>
 
 $xml->movie[]->characters->character[0]->name = 'Miss Coder';
 
-var_dump($xml->asXml());
+echo($xml->asXml());
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Fatal error: Cannot use object of type stdClass as array in %s on line %d
+--EXPECT--
+<?xml version="1.0" standalone="yes"?>
+<collection><movie><characters><character><name>Miss Coder</name></character></characters></movie></collection>
+Done
