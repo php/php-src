@@ -453,6 +453,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 	zval *p = *pp;
 	zend_bool inline_change = (zend_bool) (zend_uintptr_t) arg;
 	zval const_value;
+	char *colon;
 
 	if (Z_TYPE_P(p) == IS_CONSTANT) {
 		int refcount;
@@ -465,6 +466,9 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		is_ref = p->is_ref;
 
 		if (!zend_get_constant_ex(p->value.str.val, p->value.str.len, &const_value, scope TSRMLS_CC)) {
+			if ((colon = memchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p))) && colon[1] == ':') {
+				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
+			}
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 					   p->value.str.val,
 					   p->value.str.val);
@@ -504,6 +508,9 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				continue;
 			}
 			if (!zend_get_constant_ex(str_index, str_index_len-1, &const_value, scope TSRMLS_CC)) {
+				if ((colon = memchr(str_index, ':', str_index_len-1)) && colon[1] == ':') {
+					zend_error(E_ERROR, "Undefined class constant '%s'", str_index);
+				}
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str_index, str_index);
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
