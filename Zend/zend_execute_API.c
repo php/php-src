@@ -469,6 +469,10 @@ ZEND_API int zend_is_true(zval *op)
 
 #include "../TSRM/tsrm_strtok_r.h"
 
+#define IS_VISITED_CONSTANT       IS_CONSTANT_INDEX
+#define IS_CONSTANT_VISITED(p)    (Z_TYPE_P(p) & IS_VISITED_CONSTANT)
+#define MARK_CONSTANT_VISITED(p)  Z_TYPE_P(p) |= IS_VISITED_CONSTANT
+
 ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC)
 {
 	zval *p = *pp;
@@ -476,12 +480,16 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 	zval const_value;
 	zstr colon;
 
-	if (Z_TYPE_P(p) == IS_CONSTANT) {
+	if (IS_CONSTANT_VISITED(p)) {
+		zend_error(E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
+	} else if (Z_TYPE_P(p) == IS_CONSTANT) {
 		int refcount;
 		zend_uchar is_ref;
 
 		SEPARATE_ZVAL_IF_NOT_REF(pp);
 		p = *pp;
+
+		MARK_CONSTANT_VISITED(p);
 
 		refcount = p->refcount;
 		is_ref = p->is_ref;
