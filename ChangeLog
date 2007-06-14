@@ -1,3 +1,109 @@
+2007-06-13  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/copy_basic.phpt
+      ext/standard/tests/file/copy_error.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_variation.phpt
+      ext/standard/tests/file/filegroup_basic.phpt
+      ext/standard/tests/file/filegroup_error.phpt
+      ext/standard/tests/file/fileowner_basic.phpt
+      ext/standard/tests/file/fileowner_error.phpt
+      ext/standard/tests/file/fwrite_basic-win32.phpt
+      ext/standard/tests/file/fwrite_basic.phpt
+      ext/standard/tests/file/fwrite_variation-win32.phpt
+      ext/standard/tests/file/fwrite_variation.phpt:
+      New tests for file system handling functions
+
+    * ext/standard/tests/file/copy_basic.phpt
+      ext/standard/tests/file/copy_basic.phpt
+      ext/standard/tests/file/copy_error.phpt
+      ext/standard/tests/file/copy_error.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_variation.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_variation.phpt
+      ext/standard/tests/file/filegroup_basic.phpt
+      ext/standard/tests/file/filegroup_basic.phpt
+      ext/standard/tests/file/filegroup_error.phpt
+      ext/standard/tests/file/filegroup_error.phpt
+      ext/standard/tests/file/fileowner_basic.phpt
+      ext/standard/tests/file/fileowner_basic.phpt
+      ext/standard/tests/file/fileowner_error.phpt
+      ext/standard/tests/file/fileowner_error.phpt
+      ext/standard/tests/file/fwrite_basic-win32.phpt
+      ext/standard/tests/file/fwrite_basic-win32.phpt
+      ext/standard/tests/file/fwrite_basic.phpt
+      ext/standard/tests/file/fwrite_basic.phpt
+      ext/standard/tests/file/fwrite_error.phpt
+      ext/standard/tests/file/fwrite_error.phpt
+      ext/standard/tests/file/fwrite_variation-win32.phpt
+      ext/standard/tests/file/fwrite_variation-win32.phpt
+      ext/standard/tests/file/fwrite_variation.phpt
+      ext/standard/tests/file/fwrite_variation.phpt:
+      
+      file copy_basic.phpt was initially added on branch PHP_5_2.
+
+2007-06-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/json/JSON_parser.c:
+      
+      MFB: Handle very small longs via double
+
+    * (PHP_5_2)
+      ext/json/JSON_parser.c:
+      
+      Handle very small longs via double
+
+    * ext/json/JSON_parser.c
+      ext/json/json.c:
+      MFB: Fixed bug #41673 (json_encode breaks large numbers in arrays).
+
+    * (PHP_5_2)
+      NEWS
+      ext/json/JSON_parser.c
+      ext/json/json.c
+      ext/json/tests/pass001.1.phpt:
+      Fixed bug #41673 (json_encode breaks large numbers in arrays).
+
+2007-06-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug41633_3.phpt
+      ZendEngine2/tests/bug41633_3.phpt
+      ZendEngine2/tests/bug41633_3.phpt:
+      Fixed bug #41633 (Crash instantiating classes with self-referencing
+      constants)
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug41633_1.phpt
+      ZendEngine2/tests/bug41633_2.phpt:
+      Fixed some class constant issues related to bug #41633
+
+    * ZendEngine2/tests/bug41633_1.phpt
+      ZendEngine2/tests/bug41633_1.phpt
+      ZendEngine2/tests/bug41633_2.phpt
+      ZendEngine2/tests/bug41633_2.phpt:
+      
+      file bug41633_1.phpt was initially added on branch PHP_5_2.
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/027.phpt
+      ext/simplexml/tests/bug35785.phpt
+      ext/simplexml/tests/bug41582.phpt:
+      Fixed wrong fic for bug #41582
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/027.phpt
+      ext/simplexml/tests/bug35785.phpt
+      ext/simplexml/tests/bug41582.phpt:
+      Fixed wrong fix for bug #41582
+
 2007-06-12  Johannes Schlüter  <johannes@schlueters.de>
 
     * ext/simplexml/tests/bug37565.phpt:
