@@ -646,7 +646,7 @@ PHP_FUNCTION(file_put_contents)
 	if (flags & PHP_FILE_APPEND) {
 		mode[0] = 'a';
 	}
-	if (flags & PHP_FILE_BINARY) {
+	if (flags & PHP_FILE_BINARY || (Z_TYPE_P(data) == IS_STRING)) {
 		mode[1] = 'b';
 	} else if (flags & PHP_FILE_TEXT) {
 		mode[1] = 't';
