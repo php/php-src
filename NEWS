@@ -45,6 +45,8 @@ PHP                                                                        NEWS
   other SAPIs disabling options). (Jani)
 - Fixed bug #41567 (json_encode() double conversion is inconsistent with
   PHP). (Lucas, Ilia)
+- Fixed bug #41566 (SOAP Server not properly generating href attributes).
+  (Dmitry)
 - Fixed bug #41561 (Values set with php_admin_* in httpd.conf can be overwritten 
   with ini_set()). (Tony, Dmitry)
 - Fixed bug #41555 (configure failure: regression caused by fix for #41265).
