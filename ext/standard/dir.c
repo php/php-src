@@ -482,6 +482,11 @@ PHP_FUNCTION(scandir)
 		return;
 	}
 
+	if (dirn_len < 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Directory name cannot be empty");
+		RETURN_FALSE;
+	}
+
 	if (zcontext) {
 		context = php_stream_context_from_zval(zcontext, 0);
 	}

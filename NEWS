@@ -92,6 +92,7 @@ PHP                                                                        NEWS
 - Fixed altering $this via argument named "this". (Dmitry)
 - Fixed PHP CLI usage of php.ini from the binary location. (Hannes)
 - Fixed segfault in strripos(). (Tony, Joxean Koret)
+- Fixed bug #41693 (scandir() allows empty directory names). (Ilia)
 - Fixed bug #41673 (json_encode breaks large numbers in arrays). (Ilia)
 - Fixed bug #41525 (ReflectionParameter::getPosition() not available). (Marcus)
 - Fixed bug #41511 (Compile failure under IRIX 6.5.30 building md5.c). (Jani)
