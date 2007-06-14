@@ -355,4 +355,42 @@ can't tell the difference.) --/
     a\n\n\n\rb
     a\r
 
+/\H\h\V\v/8
+    X X\x0a
+    X\x09X\x0b
+    ** Failers
+    \x{a0} X\x0a   
+    
+/\H*\h+\V?\v{3,4}/8 
+    \x09\x20\x{a0}X\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\x{a0}\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\x{a0}\x0a\x0b\x0c
+    ** Failers 
+    \x09\x20\x{a0}\x0a\x0b
+     
+/\H\h\V\v/8
+    \x{3001}\x{3000}\x{2030}\x{2028}
+    X\x{180e}X\x{85}
+    ** Failers
+    \x{2009} X\x0a   
+    
+/\H*\h+\V?\v{3,4}/8 
+    \x{1680}\x{180e}\x{2007}X\x{2028}\x{2029}\x0c\x0d\x0a
+    \x09\x{205f}\x{a0}\x0a\x{2029}\x0c\x{2028}\x0a
+    \x09\x20\x{202f}\x0a\x0b\x0c
+    ** Failers 
+    \x09\x{200a}\x{a0}\x{2028}\x0b
+     
+/[\h]/8BZ
+    >\x{1680}
+
+/[\h]{3,}/8BZ
+    >\x{1680}\x{180e}\x{2000}\x{2003}\x{200a}\x{202f}\x{205f}\x{3000}<
+
+/[\v]/8BZ
+
+/[\H]/8BZ
+
+/[\V]/8BZ
+
 / End of testinput5 /

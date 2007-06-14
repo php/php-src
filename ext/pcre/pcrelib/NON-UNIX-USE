@@ -46,6 +46,12 @@ The following are generic comments about building the PCRE C library "by hand".
     An alternative approach is not to edit config.h, but to use -D on the
     compiler command line to make any changes that you need.
 
+    NOTE: There have been occasions when the way in which certain parameters in
+    config.h are used has changed between releases. (In the configure/make
+    world, this is handled automatically.) When upgrading to a new release, you
+    are strongly advised to review config.h.generic before re-using what you
+    had previously.
+
 (2) Copy or rename the file pcre.h.generic as pcre.h.
 
 (3) EITHER:
@@ -127,7 +133,7 @@ for use with VP/Borland: makevp_c.txt, makevp_l.txt, makevp.bat, pcregexp.pas.
 
 COMMENTS ABOUT WIN32 BUILDS
 
-There are two ways of building PCRE using the "congifure, make, make install"
+There are two ways of building PCRE using the "configure, make, make install"
 paradigm on Windows systems: using MinGW or using Cygwin. These are not at all
 the same thing; they are completely different from each other. There is also
 some experimental, undocumented support for building using "cmake", which you
@@ -159,7 +165,11 @@ On both MinGW and Cygwin, PCRE should build correctly using:
   ./configure && make && make install
 
 This should create two libraries called libpcre and libpcreposix, and, if you
-have enabled building the C++ wrapper, a third one called libpcrecpp.
+have enabled building the C++ wrapper, a third one called libpcrecpp. These are
+independent libraries: when you like with libpcreposix or libpcrecpp you must
+also link with libpcre, which contains the basic functions. (Some earlier
+releases of PCRE included the basic libpcre functions in libpcreposix. This no
+longer happens.)
 
 If you want to statically link your program against a non-dll .a file, you must
 define PCRE_STATIC before including pcre.h, otherwise the pcre_malloc() and
@@ -274,5 +284,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 24 April 2007
+Last Updated: 13 June 2007
 ****

@@ -1,8 +1,12 @@
+
 #include <php_compat.h>
 #undef PACKAGE_NAME
 #undef PACKAGE_VERSION
 #undef PACKAGE_TARNAME
 #undef PACKAGE_STRING
+
+#define SUPPORT_UCP
+#define SUPPORT_UTF8
 
 
 /* config.h.  Generated from config.h.in by configure.  */
@@ -220,13 +224,13 @@ them both to 0; an emulation function will be used. */
 #define PACKAGE_NAME "PCRE"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE 7.2-RC1"
+#define PACKAGE_STRING "PCRE 7.2-RC3"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "7.2-RC1"
+#define PACKAGE_VERSION "7.2-RC3"
 
 
 /* If you are compiling for a system other than a Unix-like system or
@@ -241,9 +245,7 @@ them both to 0; an emulation function will be used. */
 /* #undef PCRE_EXP_DEFN */
 
 /* Define if linking statically (TODO: make nice with Libtool) */
-#ifndef PCRE_STATIC
-#define PCRE_STATIC 1
-#endif
+/* #undef PCRE_STATIC */
 
 /* When calling PCRE via the POSIX interface, additional working storage is
    required for holding the pointers to capturing substrings because PCRE
@@ -263,18 +265,14 @@ them both to 0; an emulation function will be used. */
 #endif
 
 /* Define to enable support for Unicode properties */
-#ifndef SUPPORT_UCP
-#define SUPPORT_UCP
-#endif
+/* #undef SUPPORT_UCP */
 
 /* Define to enable support for the UTF-8 Unicode encoding. */
-#ifndef SUPPORT_UTF8
-#define SUPPORT_UTF8
-#endif
+/* #undef SUPPORT_UTF8 */
 
 /* Version number of package */
 #ifndef VERSION
-#define VERSION "7.2-RC1"
+#define VERSION "7.2-RC3"
 #endif
 
 /* Define to empty if `const' does not conform to ANSI C. */

@@ -1494,8 +1494,8 @@
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)\12\123/
     abcdefghijk\12S
 
-/ab\hdef/
-    abhdef
+/ab\idef/
+    abidef
 
 /a{0}bc/
     bc
@@ -4017,5 +4017,8 @@
 /\z(?<!\n)/
   abc
   abc\n  
+
+/(.*(.)?)*/
+    abcd
 
 / End of testinput1 /

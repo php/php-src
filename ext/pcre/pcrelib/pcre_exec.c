@@ -226,7 +226,7 @@ actuall used in this definition. */
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw) \
   { \
   printf("match() called in line %d\n", __LINE__); \
-  rrc = match(ra,rb,rc,rd,re,rf,rg,rdepth+1); \
+  rrc = match(ra,rb,mstart,rc,rd,re,rf,rg,rdepth+1); \
   printf("to line %d\n", __LINE__); \
   }
 #define RRETURN(ra) \
@@ -236,7 +236,7 @@ actuall used in this definition. */
   }
 #else
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw) \
-  rrc = match(ra,rb,rc,rd,re,rf,rg,rdepth+1)
+  rrc = match(ra,rb,mstart,rc,rd,re,rf,rg,rdepth+1)
 #define RRETURN(ra) return ra
 #endif
 
@@ -255,6 +255,7 @@ argument of match(), which never changes. */
   frame->Xwhere = rw; \
   newframe->Xeptr = ra;\
   newframe->Xecode = rb;\
+  newframe->Xmstart = mstart;\
   newframe->Xoffset_top = rc;\
   newframe->Xims = re;\
   newframe->Xeptrb = rf;\
@@ -291,6 +292,7 @@ typedef struct heapframe {
 
   const uschar *Xeptr;
   const uschar *Xecode;
+  const uschar *Xmstart;
   int Xoffset_top;
   long int Xims;
   eptrblock *Xeptrb;
@@ -371,6 +373,8 @@ made performance worse.
 Arguments:
    eptr        pointer to current character in subject
    ecode       pointer to current position in compiled code
+   mstart      pointer to the current match start position (can be modified
+                 by encountering \K)
    offset_top  current top pointer
    md          pointer to "static" info for the match
    ims         current /i, /m, and /s options
@@ -390,7 +394,7 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 */
 
 static int
-match(REGISTER USPTR eptr, REGISTER const uschar *ecode,
+match(REGISTER USPTR eptr, REGISTER const uschar *ecode, const uschar *mstart,
   int offset_top, match_data *md, unsigned long int ims, eptrblock *eptrb,
   int flags, unsigned int rdepth)
 {
@@ -418,6 +422,7 @@ frame->Xprevframe = NULL;            /* Marks the top level */
 
 frame->Xeptr = eptr;
 frame->Xecode = ecode;
+frame->Xmstart = mstart;
 frame->Xoffset_top = offset_top;
 frame->Xims = ims;
 frame->Xeptrb = eptrb;
@@ -432,6 +437,7 @@ HEAP_RECURSE:
 
 #define eptr               frame->Xeptr
 #define ecode              frame->Xecode
+#define mstart             frame->Xmstart
 #define offset_top         frame->Xoffset_top
 #define ims                frame->Xims
 #define eptrb              frame->Xeptrb
@@ -610,7 +616,7 @@ for (;;)
 
   if (md->partial &&
       eptr >= md->end_subject &&
-      eptr > md->start_match)
+      eptr > mstart)
     md->hitend = TRUE;
 
   switch(op)
@@ -787,7 +793,7 @@ for (;;)
       md->recursive = rec->prevrec;
       memmove(md->offset_vector, rec->offset_save,
         rec->saved_max * sizeof(int));
-      md->start_match = rec->save_start;
+      mstart = rec->save_start;
       ims = original_ims;
       ecode = rec->after_call;
       break;
@@ -796,9 +802,10 @@ for (;;)
     /* Otherwise, if PCRE_NOTEMPTY is set, fail if we have matched an empty
     string - backtracking will then try other alternatives, if any. */
 
-    if (md->notempty && eptr == md->start_match) RRETURN(MATCH_NOMATCH);
-    md->end_match_ptr = eptr;          /* Record where we ended */
-    md->end_offset_top = offset_top;   /* and how many extracts were taken */
+    if (md->notempty && eptr == mstart) RRETURN(MATCH_NOMATCH);
+    md->end_match_ptr = eptr;           /* Record where we ended */
+    md->end_offset_top = offset_top;    /* and how many extracts were taken */
+    md->start_match_ptr = mstart;  /* and the start (\K can modify) */
     RRETURN(MATCH_MATCH);
 
     /* Change option settings */
@@ -904,7 +911,7 @@ for (;;)
       cb.offset_vector    = md->offset_vector;
       cb.subject          = (PCRE_SPTR)md->start_subject;
       cb.subject_length   = md->end_subject - md->start_subject;
-      cb.start_match      = md->start_match - md->start_subject;
+      cb.start_match      = mstart - md->start_subject;
       cb.current_position = eptr - md->start_subject;
       cb.pattern_position = GET(ecode, 2);
       cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
@@ -966,8 +973,8 @@ for (;;)
 
       memcpy(new_recursive.offset_save, md->offset_vector,
             new_recursive.saved_max * sizeof(int));
-      new_recursive.save_start = md->start_match;
-      md->start_match = eptr;
+      new_recursive.save_start = mstart;
+      mstart = eptr;
 
       /* OK, now we can do the recursion. For each top-level alternative we
       restore the offset and recursion data. */
@@ -1180,7 +1187,7 @@ for (;;)
         recursion_info *rec = md->recursive;
         DPRINTF(("Recursion (%d) succeeded - continuing\n", number));
         md->recursive = rec->prevrec;
-        md->start_match = rec->save_start;
+        mstart = rec->save_start;
         memcpy(md->offset_vector, rec->offset_save,
           rec->saved_max * sizeof(int));
         ecode = rec->after_call;
@@ -1257,6 +1264,13 @@ for (;;)
 
     case OP_SOM:
     if (eptr != md->start_subject + md->start_offset) RRETURN(MATCH_NOMATCH);
+    ecode++;
+    break;
+
+    /* Reset the start of match point */
+
+    case OP_SET_SOM:
+    mstart = eptr;
     ecode++;
     break;
 
@@ -1463,6 +1477,102 @@ for (;;)
       case 0x0085:
       case 0x2028:
       case 0x2029:
+      break;
+      }
+    ecode++;
+    break;
+
+    case OP_NOT_HSPACE:
+    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    GETCHARINCTEST(c, eptr);
+    switch(c)
+      {
+      default: break;
+      case 0x09:      /* HT */
+      case 0x20:      /* SPACE */
+      case 0xa0:      /* NBSP */
+      case 0x1680:    /* OGHAM SPACE MARK */
+      case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+      case 0x2000:    /* EN QUAD */
+      case 0x2001:    /* EM QUAD */
+      case 0x2002:    /* EN SPACE */
+      case 0x2003:    /* EM SPACE */
+      case 0x2004:    /* THREE-PER-EM SPACE */
+      case 0x2005:    /* FOUR-PER-EM SPACE */
+      case 0x2006:    /* SIX-PER-EM SPACE */
+      case 0x2007:    /* FIGURE SPACE */
+      case 0x2008:    /* PUNCTUATION SPACE */
+      case 0x2009:    /* THIN SPACE */
+      case 0x200A:    /* HAIR SPACE */
+      case 0x202f:    /* NARROW NO-BREAK SPACE */
+      case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+      case 0x3000:    /* IDEOGRAPHIC SPACE */
+      RRETURN(MATCH_NOMATCH);
+      }
+    ecode++;
+    break;
+
+    case OP_HSPACE:
+    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    GETCHARINCTEST(c, eptr);
+    switch(c)
+      {
+      default: RRETURN(MATCH_NOMATCH);
+      case 0x09:      /* HT */
+      case 0x20:      /* SPACE */
+      case 0xa0:      /* NBSP */
+      case 0x1680:    /* OGHAM SPACE MARK */
+      case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+      case 0x2000:    /* EN QUAD */
+      case 0x2001:    /* EM QUAD */
+      case 0x2002:    /* EN SPACE */
+      case 0x2003:    /* EM SPACE */
+      case 0x2004:    /* THREE-PER-EM SPACE */
+      case 0x2005:    /* FOUR-PER-EM SPACE */
+      case 0x2006:    /* SIX-PER-EM SPACE */
+      case 0x2007:    /* FIGURE SPACE */
+      case 0x2008:    /* PUNCTUATION SPACE */
+      case 0x2009:    /* THIN SPACE */
+      case 0x200A:    /* HAIR SPACE */
+      case 0x202f:    /* NARROW NO-BREAK SPACE */
+      case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+      case 0x3000:    /* IDEOGRAPHIC SPACE */
+      break;
+      }
+    ecode++;
+    break;
+
+    case OP_NOT_VSPACE:
+    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    GETCHARINCTEST(c, eptr);
+    switch(c)
+      {
+      default: break;
+      case 0x0a:      /* LF */
+      case 0x0b:      /* VT */
+      case 0x0c:      /* FF */
+      case 0x0d:      /* CR */
+      case 0x85:      /* NEL */
+      case 0x2028:    /* LINE SEPARATOR */
+      case 0x2029:    /* PARAGRAPH SEPARATOR */
+      RRETURN(MATCH_NOMATCH);
+      }
+    ecode++;
+    break;
+
+    case OP_VSPACE:
+    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    GETCHARINCTEST(c, eptr);
+    switch(c)
+      {
+      default: RRETURN(MATCH_NOMATCH);
+      case 0x0a:      /* LF */
+      case 0x0b:      /* VT */
+      case 0x0c:      /* FF */
+      case 0x0d:      /* CR */
+      case 0x85:      /* NEL */
+      case 0x2028:    /* LINE SEPARATOR */
+      case 0x2029:    /* PARAGRAPH SEPARATOR */
       break;
       }
     ecode++;
@@ -2800,6 +2910,110 @@ for (;;)
           }
         break;
 
+        case OP_NOT_HSPACE:
+        for (i = 1; i <= min; i++)
+          {
+          if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+          GETCHARINC(c, eptr);
+          switch(c)
+            {
+            default: break;
+            case 0x09:      /* HT */
+            case 0x20:      /* SPACE */
+            case 0xa0:      /* NBSP */
+            case 0x1680:    /* OGHAM SPACE MARK */
+            case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+            case 0x2000:    /* EN QUAD */
+            case 0x2001:    /* EM QUAD */
+            case 0x2002:    /* EN SPACE */
+            case 0x2003:    /* EM SPACE */
+            case 0x2004:    /* THREE-PER-EM SPACE */
+            case 0x2005:    /* FOUR-PER-EM SPACE */
+            case 0x2006:    /* SIX-PER-EM SPACE */
+            case 0x2007:    /* FIGURE SPACE */
+            case 0x2008:    /* PUNCTUATION SPACE */
+            case 0x2009:    /* THIN SPACE */
+            case 0x200A:    /* HAIR SPACE */
+            case 0x202f:    /* NARROW NO-BREAK SPACE */
+            case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+            case 0x3000:    /* IDEOGRAPHIC SPACE */
+            RRETURN(MATCH_NOMATCH);
+            }
+          }
+        break;
+
+        case OP_HSPACE:
+        for (i = 1; i <= min; i++)
+          {
+          if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+          GETCHARINC(c, eptr);
+          switch(c)
+            {
+            default: RRETURN(MATCH_NOMATCH);
+            case 0x09:      /* HT */
+            case 0x20:      /* SPACE */
+            case 0xa0:      /* NBSP */
+            case 0x1680:    /* OGHAM SPACE MARK */
+            case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+            case 0x2000:    /* EN QUAD */
+            case 0x2001:    /* EM QUAD */
+            case 0x2002:    /* EN SPACE */
+            case 0x2003:    /* EM SPACE */
+            case 0x2004:    /* THREE-PER-EM SPACE */
+            case 0x2005:    /* FOUR-PER-EM SPACE */
+            case 0x2006:    /* SIX-PER-EM SPACE */
+            case 0x2007:    /* FIGURE SPACE */
+            case 0x2008:    /* PUNCTUATION SPACE */
+            case 0x2009:    /* THIN SPACE */
+            case 0x200A:    /* HAIR SPACE */
+            case 0x202f:    /* NARROW NO-BREAK SPACE */
+            case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+            case 0x3000:    /* IDEOGRAPHIC SPACE */
+            break;
+            }
+          }
+        break;
+
+        case OP_NOT_VSPACE:
+        for (i = 1; i <= min; i++)
+          {
+          if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+          GETCHARINC(c, eptr);
+          switch(c)
+            {
+            default: break;
+            case 0x0a:      /* LF */
+            case 0x0b:      /* VT */
+            case 0x0c:      /* FF */
+            case 0x0d:      /* CR */
+            case 0x85:      /* NEL */
+            case 0x2028:    /* LINE SEPARATOR */
+            case 0x2029:    /* PARAGRAPH SEPARATOR */
+            RRETURN(MATCH_NOMATCH);
+            }
+          }
+        break;
+
+        case OP_VSPACE:
+        for (i = 1; i <= min; i++)
+          {
+          if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+          GETCHARINC(c, eptr);
+          switch(c)
+            {
+            default: RRETURN(MATCH_NOMATCH);
+            case 0x0a:      /* LF */
+            case 0x0b:      /* VT */
+            case 0x0c:      /* FF */
+            case 0x0d:      /* CR */
+            case 0x85:      /* NEL */
+            case 0x2028:    /* LINE SEPARATOR */
+            case 0x2029:    /* PARAGRAPH SEPARATOR */
+            break;
+            }
+          }
+        break;
+
         case OP_NOT_DIGIT:
         for (i = 1; i <= min; i++)
           {
@@ -2906,6 +3120,70 @@ for (;;)
             case 0x000b:
             case 0x000c:
             case 0x0085:
+            break;
+            }
+          }
+        break;
+
+        case OP_NOT_HSPACE:
+        for (i = 1; i <= min; i++)
+          {
+          if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+          switch(*eptr++)
+            {
+            default: break;
+            case 0x09:      /* HT */
+            case 0x20:      /* SPACE */
+            case 0xa0:      /* NBSP */
+            RRETURN(MATCH_NOMATCH);
+            }
+          }
+        break;
+
+        case OP_HSPACE:
+        for (i = 1; i <= min; i++)
+          {
+          if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+          switch(*eptr++)
+            {
+            default: RRETURN(MATCH_NOMATCH);
+            case 0x09:      /* HT */
+            case 0x20:      /* SPACE */
+            case 0xa0:      /* NBSP */
+            break;
+            }
+          }
+        break;
+
+        case OP_NOT_VSPACE:
+        for (i = 1; i <= min; i++)
+          {
+          if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+          switch(*eptr++)
+            {
+            default: break;
+            case 0x0a:      /* LF */
+            case 0x0b:      /* VT */
+            case 0x0c:      /* FF */
+            case 0x0d:      /* CR */
+            case 0x85:      /* NEL */
+            RRETURN(MATCH_NOMATCH);
+            }
+          }
+        break;
+
+        case OP_VSPACE:
+        for (i = 1; i <= min; i++)
+          {
+          if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+          switch(*eptr++)
+            {
+            default: RRETURN(MATCH_NOMATCH);
+            case 0x0a:      /* LF */
+            case 0x0b:      /* VT */
+            case 0x0c:      /* FF */
+            case 0x0d:      /* CR */
+            case 0x85:      /* NEL */
             break;
             }
           }
@@ -3102,6 +3380,90 @@ for (;;)
               }
             break;
 
+            case OP_NOT_HSPACE:
+            switch(c)
+              {
+              default: break;
+              case 0x09:      /* HT */
+              case 0x20:      /* SPACE */
+              case 0xa0:      /* NBSP */
+              case 0x1680:    /* OGHAM SPACE MARK */
+              case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+              case 0x2000:    /* EN QUAD */
+              case 0x2001:    /* EM QUAD */
+              case 0x2002:    /* EN SPACE */
+              case 0x2003:    /* EM SPACE */
+              case 0x2004:    /* THREE-PER-EM SPACE */
+              case 0x2005:    /* FOUR-PER-EM SPACE */
+              case 0x2006:    /* SIX-PER-EM SPACE */
+              case 0x2007:    /* FIGURE SPACE */
+              case 0x2008:    /* PUNCTUATION SPACE */
+              case 0x2009:    /* THIN SPACE */
+              case 0x200A:    /* HAIR SPACE */
+              case 0x202f:    /* NARROW NO-BREAK SPACE */
+              case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+              case 0x3000:    /* IDEOGRAPHIC SPACE */
+              RRETURN(MATCH_NOMATCH);
+              }
+            break;
+
+            case OP_HSPACE:
+            switch(c)
+              {
+              default: RRETURN(MATCH_NOMATCH);
+              case 0x09:      /* HT */
+              case 0x20:      /* SPACE */
+              case 0xa0:      /* NBSP */
+              case 0x1680:    /* OGHAM SPACE MARK */
+              case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+              case 0x2000:    /* EN QUAD */
+              case 0x2001:    /* EM QUAD */
+              case 0x2002:    /* EN SPACE */
+              case 0x2003:    /* EM SPACE */
+              case 0x2004:    /* THREE-PER-EM SPACE */
+              case 0x2005:    /* FOUR-PER-EM SPACE */
+              case 0x2006:    /* SIX-PER-EM SPACE */
+              case 0x2007:    /* FIGURE SPACE */
+              case 0x2008:    /* PUNCTUATION SPACE */
+              case 0x2009:    /* THIN SPACE */
+              case 0x200A:    /* HAIR SPACE */
+              case 0x202f:    /* NARROW NO-BREAK SPACE */
+              case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+              case 0x3000:    /* IDEOGRAPHIC SPACE */
+              break;
+              }
+            break;
+
+            case OP_NOT_VSPACE:
+            switch(c)
+              {
+              default: break;
+              case 0x0a:      /* LF */
+              case 0x0b:      /* VT */
+              case 0x0c:      /* FF */
+              case 0x0d:      /* CR */
+              case 0x85:      /* NEL */
+              case 0x2028:    /* LINE SEPARATOR */
+              case 0x2029:    /* PARAGRAPH SEPARATOR */
+              RRETURN(MATCH_NOMATCH);
+              }
+            break;
+
+            case OP_VSPACE:
+            switch(c)
+              {
+              default: RRETURN(MATCH_NOMATCH);
+              case 0x0a:      /* LF */
+              case 0x0b:      /* VT */
+              case 0x0c:      /* FF */
+              case 0x0d:      /* CR */
+              case 0x85:      /* NEL */
+              case 0x2028:    /* LINE SEPARATOR */
+              case 0x2029:    /* PARAGRAPH SEPARATOR */
+              break;
+              }
+            break;
+
             case OP_NOT_DIGIT:
             if (c < 256 && (md->ctypes[c] & ctype_digit) != 0)
               RRETURN(MATCH_NOMATCH);
@@ -3169,6 +3531,54 @@ for (;;)
               case 0x000b:
               case 0x000c:
               case 0x0085:
+              break;
+              }
+            break;
+
+            case OP_NOT_HSPACE:
+            switch(c)
+              {
+              default: break;
+              case 0x09:      /* HT */
+              case 0x20:      /* SPACE */
+              case 0xa0:      /* NBSP */
+              RRETURN(MATCH_NOMATCH);
+              }
+            break;
+
+            case OP_HSPACE:
+            switch(c)
+              {
+              default: RRETURN(MATCH_NOMATCH);
+              case 0x09:      /* HT */
+              case 0x20:      /* SPACE */
+              case 0xa0:      /* NBSP */
+              break;
+              }
+            break;
+
+            case OP_NOT_VSPACE:
+            switch(c)
+              {
+              default: break;
+              case 0x0a:      /* LF */
+              case 0x0b:      /* VT */
+              case 0x0c:      /* FF */
+              case 0x0d:      /* CR */
+              case 0x85:      /* NEL */
+              RRETURN(MATCH_NOMATCH);
+              }
+            break;
+
+            case OP_VSPACE:
+            switch(c)
+              {
+              default: RRETURN(MATCH_NOMATCH);
+              case 0x0a:      /* LF */
+              case 0x0b:      /* VT */
+              case 0x0c:      /* FF */
+              case 0x0d:      /* CR */
+              case 0x85:      /* NEL */
               break;
               }
             break;
@@ -3434,6 +3844,70 @@ for (;;)
             }
           break;
 
+          case OP_NOT_HSPACE:
+          case OP_HSPACE:
+          for (i = min; i < max; i++)
+            {
+            BOOL gotspace;
+            int len = 1;
+            if (eptr >= md->end_subject) break;
+            GETCHARLEN(c, eptr, len);
+            switch(c)
+              {
+              default: gotspace = FALSE; break;
+              case 0x09:      /* HT */
+              case 0x20:      /* SPACE */
+              case 0xa0:      /* NBSP */
+              case 0x1680:    /* OGHAM SPACE MARK */
+              case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+              case 0x2000:    /* EN QUAD */
+              case 0x2001:    /* EM QUAD */
+              case 0x2002:    /* EN SPACE */
+              case 0x2003:    /* EM SPACE */
+              case 0x2004:    /* THREE-PER-EM SPACE */
+              case 0x2005:    /* FOUR-PER-EM SPACE */
+              case 0x2006:    /* SIX-PER-EM SPACE */
+              case 0x2007:    /* FIGURE SPACE */
+              case 0x2008:    /* PUNCTUATION SPACE */
+              case 0x2009:    /* THIN SPACE */
+              case 0x200A:    /* HAIR SPACE */
+              case 0x202f:    /* NARROW NO-BREAK SPACE */
+              case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+              case 0x3000:    /* IDEOGRAPHIC SPACE */
+              gotspace = TRUE;
+              break;
+              }
+            if (gotspace == (ctype == OP_NOT_HSPACE)) break;
+            eptr += len;
+            }
+          break;
+
+          case OP_NOT_VSPACE:
+          case OP_VSPACE:
+          for (i = min; i < max; i++)
+            {
+            BOOL gotspace;
+            int len = 1;
+            if (eptr >= md->end_subject) break;
+            GETCHARLEN(c, eptr, len);
+            switch(c)
+              {
+              default: gotspace = FALSE; break;
+              case 0x0a:      /* LF */
+              case 0x0b:      /* VT */
+              case 0x0c:      /* FF */
+              case 0x0d:      /* CR */
+              case 0x85:      /* NEL */
+              case 0x2028:    /* LINE SEPARATOR */
+              case 0x2029:    /* PARAGRAPH SEPARATOR */
+              gotspace = TRUE;
+              break;
+              }
+            if (gotspace == (ctype == OP_NOT_VSPACE)) break;
+            eptr += len;
+            }
+          break;
+
           case OP_NOT_DIGIT:
           for (i = min; i < max; i++)
             {
@@ -3557,6 +4031,48 @@ for (;;)
                 break;
               eptr++;
               }
+            }
+          break;
+
+          case OP_NOT_HSPACE:
+          for (i = min; i < max; i++)
+            {
+            if (eptr >= md->end_subject) break;
+            c = *eptr;
+            if (c == 0x09 || c == 0x20 || c == 0xa0) break;
+            eptr++;
+            }
+          break;
+
+          case OP_HSPACE:
+          for (i = min; i < max; i++)
+            {
+            if (eptr >= md->end_subject) break;
+            c = *eptr;
+            if (c != 0x09 && c != 0x20 && c != 0xa0) break;
+            eptr++;
+            }
+          break;
+
+          case OP_NOT_VSPACE:
+          for (i = min; i < max; i++)
+            {
+            if (eptr >= md->end_subject) break;
+            c = *eptr;
+            if (c == 0x0a || c == 0x0b || c == 0x0c || c == 0x0d || c == 0x85)
+              break;
+            eptr++;
+            }
+          break;
+
+          case OP_VSPACE:
+          for (i = min; i < max; i++)
+            {
+            if (eptr >= md->end_subject) break;
+            c = *eptr;
+            if (c != 0x0a && c != 0x0b && c != 0x0c && c != 0x0d && c != 0x85)
+              break;
+            eptr++;
             }
           break;
 
@@ -3684,6 +4200,7 @@ Undefine all the macros that were defined above to handle this. */
 #ifdef NO_RECURSE
 #undef eptr
 #undef ecode
+#undef mstart
 #undef offset_top
 #undef ims
 #undef eptrb
@@ -4163,10 +4680,11 @@ for(;;)
 
   /* OK, we can now run the match. */
 
-  md->start_match = start_match;
+  md->start_match_ptr = start_match;      /* Insurance */
   md->match_call_count = 0;
   md->eptrn = 0;                          /* Next free eptrchain slot */
-  rc = match(start_match, md->start_code, 2, md, ims, NULL, 0, 0);
+  rc = match(start_match, md->start_code, start_match, 2, md,
+    ims, NULL, 0, 0);
 
   /* Any return other than MATCH_NOMATCH breaks the loop. */
 
@@ -4246,11 +4764,13 @@ if (rc == MATCH_MATCH)
 
   rc = md->offset_overflow? 0 : md->end_offset_top/2;
 
-  /* If there is space, set up the whole thing as substring 0. */
+  /* If there is space, set up the whole thing as substring 0. The value of
+  md->start_match_ptr might be modified if \K was encountered on the success
+  matching path. */
 
   if (offsetcount < 2) rc = 0; else
     {
-    offsets[0] = start_match - md->start_subject;
+    offsets[0] = md->start_match_ptr - md->start_subject;
     offsets[1] = md->end_match_ptr - md->start_subject;
     }
 

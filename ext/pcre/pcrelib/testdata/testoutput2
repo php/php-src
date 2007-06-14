@@ -78,10 +78,10 @@ No match
     def\nabc
 No match
 
-/ab\hdef/X
+/ab\idef/X
 Failed: unrecognized character follows \ at offset 3
 
-/(?X)ab\hdef/X
+/(?X)ab\idef/X
 Failed: unrecognized character follows \ at offset 7
 
 /x{5,4}/
@@ -6193,6 +6193,7 @@ Named capturing subpatterns:
   B   3
   C   4
 Options: anchored
+Duplicate name status changes
 No first char
 No need char
     a bc d\CA\CB\CC
@@ -8066,16 +8067,16 @@ No match
 Failed: reference to non-existent subpattern at offset 4
 
 /^(a)\g/
-Failed: \g is not followed by an (optionally braced) non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
 
 /^(a)\g{0}/
-Failed: \g is not followed by an (optionally braced) non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
 
 /^(a)\g{3/
-Failed: \g is not followed by an (optionally braced) non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
 
 /^(a)\g{4a}/
-Failed: \g is not followed by an (optionally braced) non-zero number at offset 4
+Failed: reference to non-existent subpattern at offset 9
 
 /^a.b/<lf>
     a\rb
@@ -8168,5 +8169,609 @@ No match
 No match
     XABC\B
 No match
+
+/(ab|c)(?-1)/BZ
+------------------------------------------------------------------
+        Bra 0
+        Bra 1
+        ab
+        Alt
+        c
+        Ket
+        Once
+        Recurse
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    abc
+ 0: abc
+ 1: ab
+
+/xy(?+1)(abc)/BZ
+------------------------------------------------------------------
+        Bra 0
+        xy
+        Once
+        Recurse
+        Ket
+        Bra 1
+        abc
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    xyabcabc
+ 0: xyabcabc
+ 1: abc
+    ** Failers
+No match
+    xyabc  
+No match
+    
+/x(?-0)y/
+Failed: (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number at offset 5
+
+/x(?-1)y/
+Failed: reference to non-existent subpattern at offset 5
+
+/x(?+0)y/ 
+Failed: (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number at offset 5
+
+/x(?+1)y/
+Failed: reference to non-existent subpattern at offset 5
+
+/^(abc)?(?(-1)X|Y)/BZ
+------------------------------------------------------------------
+        Bra 0
+        ^
+        Brazero
+        Bra 1
+        abc
+        Ket
+        Cond
+      1 Cond ref
+        X
+        Alt
+        Y
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    abcX
+ 0: abcX
+ 1: abc
+    Y
+ 0: Y
+    ** Failers
+No match
+    abcY   
+No match
+    
+/^((?(+1)X|Y)(abc))+/BZ 
+------------------------------------------------------------------
+        Bra 0
+        ^
+        Bra 1
+        Cond
+      2 Cond ref
+        X
+        Alt
+        Y
+        Ket
+        Bra 2
+        abc
+        Ket
+        KetRmax
+        Ket
+        End
+------------------------------------------------------------------
+    YabcXabc
+ 0: YabcXabc
+ 1: Xabc
+ 2: abc
+    YabcXabcXabc
+ 0: YabcXabcXabc
+ 1: Xabc
+ 2: abc
+    ** Failers
+No match
+    XabcXabc  
+No match
+
+/(?(-1)a)/BZ
+Failed: reference to non-existent subpattern at offset 6
+
+/((?(-1)a))/BZ
+------------------------------------------------------------------
+        Bra 0
+        Bra 1
+        Cond
+      1 Cond ref
+        a
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/((?(-2)a))/BZ
+Failed: reference to non-existent subpattern at offset 7
+
+/^(?(+1)X|Y)/BZ
+------------------------------------------------------------------
+        Bra 0
+        ^
+        Cond
+      1 Cond ref
+        X
+        Alt
+        Y
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    Y
+ 0: Y
+
+/(foo)\Kbar/
+    foobar
+ 0: bar
+ 1: foo
+   
+/(foo)(\Kbar|baz)/
+    foobar
+ 0: bar
+ 1: foo
+ 2: bar
+    foobaz 
+ 0: foobaz
+ 1: foo
+ 2: baz
+
+/(foo\Kbar)baz/
+    foobarbaz
+ 0: barbaz
+ 1: foobar
+
+/(?<A>tom|bon)-\k{A}/
+    tom-tom
+ 0: tom-tom
+ 1: tom
+    bon-bon 
+ 0: bon-bon
+ 1: bon
+    ** Failers
+No match
+    tom-bon  
+No match
+
+/(?<A>tom|bon)-\g{A}/
+    tom-tom
+ 0: tom-tom
+ 1: tom
+    bon-bon 
+ 0: bon-bon
+ 1: bon
+    
+/\g{A/ 
+Failed: syntax error in subpattern name (missing terminator) at offset 4
+
+/(?|(abc)|(xyz))/BZ
+------------------------------------------------------------------
+        Bra 0
+        Bra 0
+        Bra 1
+        abc
+        Ket
+        Alt
+        Bra 1
+        xyz
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+   >abc<
+ 0: abc
+ 1: abc
+   >xyz< 
+ 0: xyz
+ 1: xyz
+
+/(x)(?|(abc)|(xyz))(x)/BZ
+------------------------------------------------------------------
+        Bra 0
+        Bra 1
+        x
+        Ket
+        Bra 0
+        Bra 2
+        abc
+        Ket
+        Alt
+        Bra 2
+        xyz
+        Ket
+        Ket
+        Bra 3
+        x
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    xabcx
+ 0: xabcx
+ 1: x
+ 2: abc
+ 3: x
+    xxyzx 
+ 0: xxyzx
+ 1: x
+ 2: xyz
+ 3: x
+
+/(x)(?|(abc)(pqr)|(xyz))(x)/BZ
+------------------------------------------------------------------
+        Bra 0
+        Bra 1
+        x
+        Ket
+        Bra 0
+        Bra 2
+        abc
+        Ket
+        Bra 3
+        pqr
+        Ket
+        Alt
+        Bra 2
+        xyz
+        Ket
+        Ket
+        Bra 4
+        x
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    xabcpqrx
+ 0: xabcpqrx
+ 1: x
+ 2: abc
+ 3: pqr
+ 4: x
+    xxyzx 
+ 0: xxyzx
+ 1: x
+ 2: xyz
+ 3: <unset>
+ 4: x
+
+/(?|(abc)|(xyz))\1/
+    abcabc
+ 0: abcabc
+ 1: abc
+    xyzxyz 
+ 0: xyzxyz
+ 1: xyz
+    ** Failers
+No match
+    abcxyz
+No match
+    xyzabc   
+No match
+    
+/(?|(abc)|(xyz))(?1)/
+    abcabc
+ 0: abcabc
+ 1: abc
+    xyzabc 
+ 0: xyzabc
+ 1: xyz
+    ** Failers 
+No match
+    xyzxyz 
+No match
+ 
+/\H\h\V\v/
+    X X\x0a
+ 0: X X\x0a
+    X\x09X\x0b
+ 0: X\x09X\x0b
+    ** Failers
+No match
+    \xa0 X\x0a   
+No match
+    
+/\H*\h+\V?\v{3,4}/ 
+    \x09\x20\xa0X\x0a\x0b\x0c\x0d\x0a
+ 0: \x09 \xa0X\x0a\x0b\x0c\x0d
+    \x09\x20\xa0\x0a\x0b\x0c\x0d\x0a
+ 0: \x09 \xa0\x0a\x0b\x0c\x0d
+    \x09\x20\xa0\x0a\x0b\x0c
+ 0: \x09 \xa0\x0a\x0b\x0c
+    ** Failers 
+No match
+    \x09\x20\xa0\x0a\x0b
+No match
+     
+/\H{3,4}/
+    XY  ABCDE
+ 0: ABCD
+    XY  PQR ST 
+ 0: PQR
+    
+/.\h{3,4}./
+    XY  AB    PQRS
+ 0: B    P
+
+/\h*X\h?\H+Y\H?Z/
+    >XNNNYZ
+ 0: XNNNYZ
+    >  X NYQZ
+ 0:   X NYQZ
+    ** Failers
+No match
+    >XYZ   
+No match
+    >  X NY Z
+No match
+
+/\v*X\v?Y\v+Z\V*\x0a\V+\x0b\V{2,3}\x0c/
+    >XY\x0aZ\x0aA\x0bNN\x0c
+ 0: XY\x0aZ\x0aA\x0bNN\x0c
+    >\x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
+ 0: \x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
+
+/[\h]/BZ
+------------------------------------------------------------------
+        Bra 0
+        [\x09 \xa0]
+        Ket
+        End
+------------------------------------------------------------------
+    >\x09<
+ 0: \x09
+
+/[\h]+/BZ
+------------------------------------------------------------------
+        Bra 0
+        [\x09 \xa0]+
+        Ket
+        End
+------------------------------------------------------------------
+    >\x09\x20\xa0<
+ 0: \x09 \xa0
+
+/[\v]/BZ
+------------------------------------------------------------------
+        Bra 0
+        [\x0a-\x0d\x85]
+        Ket
+        End
+------------------------------------------------------------------
+
+/[\H]/BZ
+------------------------------------------------------------------
+        Bra 0
+        [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff]
+        Ket
+        End
+------------------------------------------------------------------
+
+/[^\h]/BZ
+------------------------------------------------------------------
+        Bra 0
+        [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff] (neg)
+        Ket
+        End
+------------------------------------------------------------------
+
+/[\V]/BZ
+------------------------------------------------------------------
+        Bra 0
+        [\x00-\x09\x0e-\x84\x86-\xff]
+        Ket
+        End
+------------------------------------------------------------------
+
+/[\x0a\V]/BZ
+------------------------------------------------------------------
+        Bra 0
+        [\x00-\x0a\x0e-\x84\x86-\xff]
+        Ket
+        End
+------------------------------------------------------------------
+
+/\H++X/BZ
+------------------------------------------------------------------
+        Bra 0
+        \H++
+        X
+        Ket
+        End
+------------------------------------------------------------------
+    ** Failers
+No match
+    XXXX
+No match
+    
+/\H+\hY/BZ
+------------------------------------------------------------------
+        Bra 0
+        \H++
+        \h
+        Y
+        Ket
+        End
+------------------------------------------------------------------
+    XXXX Y 
+ 0: XXXX Y
+
+/\H+ Y/BZ
+------------------------------------------------------------------
+        Bra 0
+        \H++
+         Y
+        Ket
+        End
+------------------------------------------------------------------
+
+/\h+A/BZ
+------------------------------------------------------------------
+        Bra 0
+        \h++
+        A
+        Ket
+        End
+------------------------------------------------------------------
+
+/\v*B/BZ
+------------------------------------------------------------------
+        Bra 0
+        \v*+
+        B
+        Ket
+        End
+------------------------------------------------------------------
+
+/\V+\x0a/BZ
+------------------------------------------------------------------
+        Bra 0
+        \V++
+        \x0a
+        Ket
+        End
+------------------------------------------------------------------
+
+/A+\h/BZ
+------------------------------------------------------------------
+        Bra 0
+        A++
+        \h
+        Ket
+        End
+------------------------------------------------------------------
+
+/ *\H/BZ
+------------------------------------------------------------------
+        Bra 0
+         *+
+        \H
+        Ket
+        End
+------------------------------------------------------------------
+
+/A*\v/BZ
+------------------------------------------------------------------
+        Bra 0
+        A*+
+        \v
+        Ket
+        End
+------------------------------------------------------------------
+
+/\x0b*\V/BZ
+------------------------------------------------------------------
+        Bra 0
+        \x0b*+
+        \V
+        Ket
+        End
+------------------------------------------------------------------
+
+/\d+\h/BZ
+------------------------------------------------------------------
+        Bra 0
+        \d++
+        \h
+        Ket
+        End
+------------------------------------------------------------------
+
+/\d*\v/BZ
+------------------------------------------------------------------
+        Bra 0
+        \d*+
+        \v
+        Ket
+        End
+------------------------------------------------------------------
+
+/S+\h\S+\v/BZ
+------------------------------------------------------------------
+        Bra 0
+        S++
+        \h
+        \S++
+        \v
+        Ket
+        End
+------------------------------------------------------------------
+
+/\w{3,}\h\w+\v/BZ
+------------------------------------------------------------------
+        Bra 0
+        \w{3}
+        \w*+
+        \h
+        \w++
+        \v
+        Ket
+        End
+------------------------------------------------------------------
+
+/\h+\d\h+\w\h+\S\h+\H/BZ
+------------------------------------------------------------------
+        Bra 0
+        \h++
+        \d
+        \h++
+        \w
+        \h++
+        \S
+        \h++
+        \H
+        Ket
+        End
+------------------------------------------------------------------
+
+/\v+\d\v+\w\v+\S\v+\V/BZ
+------------------------------------------------------------------
+        Bra 0
+        \v++
+        \d
+        \v++
+        \w
+        \v+
+        \S
+        \v++
+        \V
+        Ket
+        End
+------------------------------------------------------------------
+
+/\H+\h\H+\d/BZ
+------------------------------------------------------------------
+        Bra 0
+        \H++
+        \h
+        \H+
+        \d
+        Ket
+        End
+------------------------------------------------------------------
+
+/\V+\v\V+\w/BZ
+------------------------------------------------------------------
+        Bra 0
+        \V++
+        \v
+        \V+
+        \w
+        Ket
+        End
+------------------------------------------------------------------
 
 / End of testinput2 /
