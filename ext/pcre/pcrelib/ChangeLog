@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.2 01-May-07
+Version 7.2 13-June-07
 ---------------------
 
  1. If the fr_FR locale cannot be found for test 3, try the "french" locale,
@@ -21,6 +21,53 @@ Version 7.2 01-May-07
     stack recursion. This gives a massive performance boost under BSD, but just
     a small improvement under Linux. However, it saves one field in the frame
     in all cases.
+
+ 6. Added more features from the forthcoming Perl 5.10:
+
+    (a) (?-n) (where n is a string of digits) is a relative subroutine or
+        recursion call. It refers to the nth most recently opened parentheses.
+
+    (b) (?+n) is also a relative subroutine call; it refers to the nth next
+        to be opened parentheses.
+
+    (c) Conditions that refer to capturing parentheses can be specified
+        relatively, for example, (?(-2)... or (?(+3)...
+
+    (d) \K resets the start of the current match so that everything before
+        is not part of it.
+
+    (e) \k{name} is synonymous with \k<name> and \k'name' (.NET compatible).
+
+    (f) \g{name} is another synonym - part of Perl 5.10's unification of
+        reference syntax.
+
+    (g) (?| introduces a group in which the numbering of parentheses in each
+        alternative starts with the same number.
+
+    (h) \h, \H, \v, and \V match horizontal and vertical whitespace.
+
+ 7. Added two new calls to pcre_fullinfo(): PCRE_INFO_OKPARTIAL and
+    PCRE_INFO_JCHANGED.
+
+ 8. A pattern such as  (.*(.)?)*  caused pcre_exec() to fail by either not
+    terminating or by crashing. Diagnosed by Viktor Griph; it was in the code
+    for detecting groups that can match an empty string.
+
+ 9. A pattern with a very large number of alternatives (more than several
+    hundred) was running out of internal workspace during the pre-compile
+    phase, where pcre_compile() figures out how much memory will be needed. A
+    bit of new cunning has reduced the workspace needed for groups with
+    alternatives. The 1000-alternative test pattern now uses 12 bytes of
+    workspace instead of running out of the 4096 that are available.
+
+10. Inserted some missing (unsigned int) casts to get rid of compiler warnings.
+
+11. Applied patch from Google to remove an optimization that didn't quite work.
+    The report of the bug said:
+
+      pcrecpp::RE("a*").FullMatch("aaa") matches, while
+      pcrecpp::RE("a*?").FullMatch("aaa") does not, and
+      pcrecpp::RE("a*?\\z").FullMatch("aaa") does again.
 
 
 Version 7.1 24-Apr-07

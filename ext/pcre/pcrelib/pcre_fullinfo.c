@@ -140,6 +140,14 @@ switch (what)
   *((const uschar **)where) = (const uschar *)(_pcre_default_tables);
   break;
 
+  case PCRE_INFO_OKPARTIAL:
+  *((int *)where) = (re->options & PCRE_NOPARTIAL) == 0;
+  break;
+
+  case PCRE_INFO_JCHANGED:
+  *((int *)where) = (re->options & PCRE_JCHANGED) != 0;
+  break;
+
   default: return PCRE_ERROR_BADOPTION;
   }
 

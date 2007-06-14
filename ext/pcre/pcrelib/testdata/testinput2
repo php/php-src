@@ -28,9 +28,9 @@
     *** Failers
     def\nabc
 
-/ab\hdef/X
+/ab\idef/X
 
-/(?X)ab\hdef/X
+/(?X)ab\idef/X
 
 /x{5,4}/
 
@@ -2155,5 +2155,175 @@ a random value. /Ix
     XABC
     ** Failers 
     XABC\B
+
+/(ab|c)(?-1)/BZ
+    abc
+
+/xy(?+1)(abc)/BZ
+    xyabcabc
+    ** Failers
+    xyabc  
+    
+/x(?-0)y/
+
+/x(?-1)y/
+
+/x(?+0)y/ 
+
+/x(?+1)y/
+
+/^(abc)?(?(-1)X|Y)/BZ
+    abcX
+    Y
+    ** Failers
+    abcY   
+    
+/^((?(+1)X|Y)(abc))+/BZ 
+    YabcXabc
+    YabcXabcXabc
+    ** Failers
+    XabcXabc  
+
+/(?(-1)a)/BZ
+
+/((?(-1)a))/BZ
+
+/((?(-2)a))/BZ
+
+/^(?(+1)X|Y)/BZ
+    Y
+
+/(foo)\Kbar/
+    foobar
+   
+/(foo)(\Kbar|baz)/
+    foobar
+    foobaz 
+
+/(foo\Kbar)baz/
+    foobarbaz
+
+/(?<A>tom|bon)-\k{A}/
+    tom-tom
+    bon-bon 
+    ** Failers
+    tom-bon  
+
+/(?<A>tom|bon)-\g{A}/
+    tom-tom
+    bon-bon 
+    
+/\g{A/ 
+
+/(?|(abc)|(xyz))/BZ
+   >abc<
+   >xyz< 
+
+/(x)(?|(abc)|(xyz))(x)/BZ
+    xabcx
+    xxyzx 
+
+/(x)(?|(abc)(pqr)|(xyz))(x)/BZ
+    xabcpqrx
+    xxyzx 
+
+/(?|(abc)|(xyz))\1/
+    abcabc
+    xyzxyz 
+    ** Failers
+    abcxyz
+    xyzabc   
+    
+/(?|(abc)|(xyz))(?1)/
+    abcabc
+    xyzabc 
+    ** Failers 
+    xyzxyz 
+ 
+/\H\h\V\v/
+    X X\x0a
+    X\x09X\x0b
+    ** Failers
+    \xa0 X\x0a   
+    
+/\H*\h+\V?\v{3,4}/ 
+    \x09\x20\xa0X\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\xa0\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\xa0\x0a\x0b\x0c
+    ** Failers 
+    \x09\x20\xa0\x0a\x0b
+     
+/\H{3,4}/
+    XY  ABCDE
+    XY  PQR ST 
+    
+/.\h{3,4}./
+    XY  AB    PQRS
+
+/\h*X\h?\H+Y\H?Z/
+    >XNNNYZ
+    >  X NYQZ
+    ** Failers
+    >XYZ   
+    >  X NY Z
+
+/\v*X\v?Y\v+Z\V*\x0a\V+\x0b\V{2,3}\x0c/
+    >XY\x0aZ\x0aA\x0bNN\x0c
+    >\x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
+
+/[\h]/BZ
+    >\x09<
+
+/[\h]+/BZ
+    >\x09\x20\xa0<
+
+/[\v]/BZ
+
+/[\H]/BZ
+
+/[^\h]/BZ
+
+/[\V]/BZ
+
+/[\x0a\V]/BZ
+
+/\H++X/BZ
+    ** Failers
+    XXXX
+    
+/\H+\hY/BZ
+    XXXX Y 
+
+/\H+ Y/BZ
+
+/\h+A/BZ
+
+/\v*B/BZ
+
+/\V+\x0a/BZ
+
+/A+\h/BZ
+
+/ *\H/BZ
+
+/A*\v/BZ
+
+/\x0b*\V/BZ
+
+/\d+\h/BZ
+
+/\d*\v/BZ
+
+/S+\h\S+\v/BZ
+
+/\w{3,}\h\w+\v/BZ
+
+/\h+\d\h+\w\h+\S\h+\H/BZ
+
+/\v+\d\v+\w\v+\S\v+\V/BZ
+
+/\H+\h\H+\d/BZ
+
+/\V+\v\V+\w/BZ
 
 / End of testinput2 /

@@ -80,7 +80,7 @@ static const int eint[] = {
   REG_BADPAT,  /* malformed number or name after (?( */
   REG_BADPAT,  /* conditional group contains more than two branches */
   REG_BADPAT,  /* assertion expected after (?( */
-  REG_BADPAT,  /* (?R or (?digits must be followed by ) */
+  REG_BADPAT,  /* (?R or (?[+-]digits must be followed by ) */
   REG_ECTYPE,  /* unknown POSIX class name */
   REG_BADPAT,  /* POSIX collating elements are not supported */
   REG_INVARG,  /* this version of PCRE is not compiled with PCRE_UTF8 support */
@@ -108,7 +108,8 @@ static const int eint[] = {
   REG_BADPAT,  /* DEFINE group contains more than one branch */
   REG_BADPAT,  /* repeating a DEFINE group is not allowed */
   REG_INVARG,  /* inconsistent NEWLINE options */
-  REG_BADPAT   /* \g is not followed followed by an (optionally braced) non-zero number */
+  REG_BADPAT,  /* \g is not followed followed by an (optionally braced) non-zero number */
+  REG_BADPAT   /* (?+ or (?- must be followed by a non-zero number */
 };
 
 /* Table of texts corresponding to POSIX error codes */
