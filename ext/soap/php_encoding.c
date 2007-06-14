@@ -297,6 +297,10 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node TSRMLS_DC) {
 				}
 				if (attr) {
 					id = (char*)attr->children->content;
+					smart_str_appendc(&prefix, '#');
+					smart_str_appends(&prefix, id);
+					smart_str_0(&prefix);
+					id = prefix.c;
 				} else {
 					SOAP_GLOBAL(cur_uniq_ref)++;
 					smart_str_appendl(&prefix, "#ref", 4);
@@ -310,6 +314,10 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node TSRMLS_DC) {
 				attr = get_attribute_ex(attr, "id", SOAP_1_2_ENC_NAMESPACE);
 				if (attr) {
 					id = (char*)attr->children->content;
+					smart_str_appendc(&prefix, '#');
+					smart_str_appends(&prefix, id);
+					smart_str_0(&prefix);
+					id = prefix.c;
 				} else {
 					SOAP_GLOBAL(cur_uniq_ref)++;
 					smart_str_appendl(&prefix, "#ref", 4);
