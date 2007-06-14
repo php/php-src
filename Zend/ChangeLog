@@ -1,3 +1,33 @@
+2007-06-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      tests/bug41633_3.phpt:
+      Fixed bug #41633 (Crash instantiating classes with self-referencing
+      constants)
+
+    * tests/bug41633_3.phpt
+      tests/bug41633_3.phpt:
+      
+      file bug41633_3.phpt was initially added on branch PHP_5_2.
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug41633_1.phpt
+      tests/bug41633_2.phpt:
+      Fixed some class constant issues related to bug #41633
+
+    * tests/bug41633_1.phpt
+      tests/bug41633_1.phpt
+      tests/bug41633_2.phpt
+      tests/bug41633_2.phpt:
+      
+      file bug41633_1.phpt was initially added on branch PHP_5_2.
+
 2007-06-11  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * tests/get_defined_vars.phpt:
