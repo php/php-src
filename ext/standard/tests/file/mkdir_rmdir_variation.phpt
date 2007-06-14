@@ -5,6 +5,16 @@ Test mkdir() and rmdir() functions: usage variations
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. only for LINUX');
 }
+// Skip if being run by root (files are always readable, writeable and executable)
+$filename = dirname(__FILE__)."/is_readable_root_check.tmp";
+$fp = fopen($filename, 'w');
+fclose($fp);
+if(fileowner($filename) == 0) {
+	unlink ($filename);
+	die('skip...cannot be run as root\n');
+}
+
+unlink($filename);
 ?>
 --FILE--
 <?php
