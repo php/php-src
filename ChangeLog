@@ -1,3 +1,105 @@
+2007-06-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/file/bug41693.phpt
+      ext/standard/tests/file/bug41693.phpt:
+      
+      file bug41693.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/dir.c:
+      
+      Fixed bug #41693 (scandir() allows empty directory names).
+
+2007-06-14  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/rename_basic.phpt
+      ext/standard/tests/file/rename_error.phpt:
+      New tests for file system handling functions
+
+    * ext/standard/tests/file/rename_basic.phpt
+      ext/standard/tests/file/rename_basic.phpt
+      ext/standard/tests/file/rename_error.phpt
+      ext/standard/tests/file/rename_error.phpt:
+      
+      file rename_basic.phpt was initially added on branch PHP_5_2.
+
+2007-06-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/file.c:
+      - #41609, file_put_contents is not binary safe when a binary string is
+        given (make it consistent with fwrite&co when unicode=1)
+
+2007-06-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/upgrade-pcre.php
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/HACKING
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput8
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput8:
+      upgrade to PCRE 7.2 RC3
+      add script to automate upgrade of the bundled PCRE lib
+
+2007-06-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd.c:
+      - MFB: Fixed regression introduced by the fix for the libgd bug #74
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/libgd/gd.c:
+      - Fixed regression introduced by the fix for the libgd bug #74
+
+2007-06-14  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/file/is_executable_basic.phpt
+      ext/standard/tests/file/is_executable_basic.phpt
+      ext/standard/tests/file/is_executable_variation.phpt
+      ext/standard/tests/file/is_executable_variation.phpt
+      ext/standard/tests/file/is_readable_basic.phpt
+      ext/standard/tests/file/is_readable_basic.phpt
+      ext/standard/tests/file/is_readable_variation.phpt
+      ext/standard/tests/file/is_readable_variation.phpt
+      ext/standard/tests/file/is_writable_basic.phpt
+      ext/standard/tests/file/is_writable_basic.phpt
+      ext/standard/tests/file/is_writable_variation.phpt
+      ext/standard/tests/file/is_writable_variation.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation.phpt:
+      Tests are not valid if run by root - adding check to skip is user is root.
+
+2007-06-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug41566.phpt
+      ext/soap/tests/bugs/bug41566.phpt:
+      
+      file bug41566.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/bugs/bug41566.phpt:
+      Fixed bug #41566 (SOAP Server not properly generating href attributes)
+
 2007-06-13  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * ext/standard/tests/file/copy_basic.phpt
