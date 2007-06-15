@@ -1763,6 +1763,36 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* start additional PHP extensions */
 	php_register_extensions(&additional_modules, num_additional_modules TSRMLS_CC);
 
+#if defined(PHP_WIN32) && defined(_MSC_VER) && (_MSC_VER >= 1400)
+static _invalid_parameter_handler old_invalid_parameter_handler;
+
+void dummy_invalid_parameter_handler(
+		const wchar_t *expression,
+		const wchar_t *function,
+		const wchar_t *file,
+		unsigned int   line,
+		uintptr_t      pEwserved)
+{
+	static int called = 0;
+	char buf[1024];
+	int len;
+
+	if (!called) {
+		called = 1;
+		if (function) {
+			if (file) {
+				len = _snprintf(buf, sizeof(buf)-1, "Invalid parameter detected in CRT function '%ws' (%ws:%d)", function, file, line);
+			} else {
+				len = _snprintf(buf, sizeof(buf)-1, "Invalid parameter detected in CRT function '%ws'", function);
+			}
+		} else {
+			len = _snprintf(buf, sizeof(buf)-1, "Invalid CRT parameters detected");
+		}
+		zend_error(E_WARNING, "%s", buf);
+		called = 0;
+	}
+}
+#endif
 
 	/* load and startup extensions compiled as shared objects (aka DLLs)
 	   as requested by php.ini entries
@@ -1872,6 +1902,12 @@ void php_module_shutdown(TSRMLS_D)
 #else
 	ts_free_id(core_globals_id);	
 #endif
+
+#if defined(PHP_WIN32) && defined(_MSC_VER) && (_MSC_VER >= 1400)
+	if (old_invalid_parameter_handler == NULL) {
+		_set_invalid_parameter_handler(old_invalid_parameter_handler);
+	}
+#endif
 }
 /* }}} */
 
@@ -1967,6 +2003,13 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		fchdir(old_cwd_fd);
 		close(old_cwd_fd);
 	}
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+	old_invalid_parameter_handler =
+		_set_invalid_parameter_handler(dummy_invalid_parameter_handler);
+	if (old_invalid_parameter_handler != NULL) {
+		_set_invalid_parameter_handler(old_invalid_parameter_handler);
+	}
+#endif
 #else
 	if (old_cwd[0] != '\0') {
 		VCWD_CHDIR(old_cwd);
