@@ -398,7 +398,7 @@ static void php_session_initialize(TSRMLS_D)
 	int vallen;
 
 	/* check session name for invalid characters */
-	if (PS(id) && strpbrk(PS(id), "\r\n\t <>'\"\\")) {
+	if (PS(id) && strpbrk(PS(id), "\r\n\t <>'\"\\()@,;:[]?={}&%")) {
 		efree(PS(id));
 		PS(id) = NULL;
 	}
