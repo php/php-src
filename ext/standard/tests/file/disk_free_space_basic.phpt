@@ -1,5 +1,7 @@
 --TEST--
 Test disk_free_space and its alias diskfreespace() functions : basic functionality
+--INI--
+memory_limit=32M
 --FILE--
 <?php
 /*
