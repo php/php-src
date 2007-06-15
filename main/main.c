@@ -931,17 +931,28 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		/* no break - intentionally */
 		case E_ERROR:
 		case E_RECOVERABLE_ERROR:
-		/* case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
+		case E_PARSE:
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
 			EG(exit_status) = 255;
 			if (module_initialized) {
-				/* restore memory limit */
-				zend_set_memory_limit(PG(memory_limit));
-				efree(buffer);
-				zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
-				zend_bailout();
-				return;
+				if (!SG(headers_sent) &&
+				    SG(sapi_headers).http_response_code == 200) {
+					sapi_header_line ctr = {0};
+	
+					ctr.line = "HTTP/1.0 500 Internal Server Error";
+					ctr.line_len = strlen(ctr.line);
+					sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+				}
+				/* the parser would return 1 (failure), we can bail out nicely */
+				if (type != E_PARSE) {
+					/* restore memory limit */
+					zend_set_memory_limit(PG(memory_limit));
+					efree(buffer);
+					zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
+					zend_bailout();
+					return;
+				}
 			}
 			break;
 	}
