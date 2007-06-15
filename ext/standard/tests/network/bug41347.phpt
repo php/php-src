@@ -3,7 +3,7 @@ dns_check_record() segfault with empty host
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('No windows support');
+    die('skip No windows support');
 }
 ?>
 --FILE--
