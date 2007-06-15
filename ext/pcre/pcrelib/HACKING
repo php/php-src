@@ -129,13 +129,18 @@ These items are all just one byte long
   OP_ANYBYTE             match any single byte, even in UTF-8 mode
   OP_SOD                 match start of data: \A
   OP_SOM,                start of match (subject + offset): \G
+  OP_SET_SOM,            set start of match (\K) 
   OP_CIRC                ^ (start of data, or after \n in multiline)
   OP_NOT_WORD_BOUNDARY   \W
   OP_WORD_BOUNDARY       \w
   OP_NOT_DIGIT           \D
   OP_DIGIT               \d
+  OP_NOT_HSPACE          \H
+  OP_HSPACE              \h  
   OP_NOT_WHITESPACE      \S
   OP_WHITESPACE          \s
+  OP_NOT_VSPACE          \V
+  OP_VSPACE              \v  
   OP_NOT_WORDCHAR        \W
   OP_WORDCHAR            \w
   OP_EODN                match end of data or \n at end: \Z
@@ -399,4 +404,4 @@ at compile time, and so does not cause anything to be put into the compiled
 data.
 
 Philip Hazel
-November 2006
+June 2007

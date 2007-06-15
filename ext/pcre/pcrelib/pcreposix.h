@@ -9,7 +9,7 @@
 Compatible Regular Expression library. It defines the things POSIX says should
 be there. I hope.
 
-            Copyright (c) 1997-2006 University of Cambridge
+            Copyright (c) 1997-2007 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -105,40 +105,36 @@ typedef struct {
   regoff_t rm_eo;
 } regmatch_t;
 
-/* Win32 uses DLL by default; it needs special stuff for exported functions
-when building PCRE. */
+/* When an application links to a PCRE DLL in Windows, the symbols that are
+imported have to be identified as such. When building PCRE, the appropriate
+export settings are needed. */
 
-#ifndef PCRE_DATA_SCOPE
 #ifdef _WIN32
-#  ifdef PCRE_DEFINITION
-#    ifdef DLL_EXPORT
-#      define PCRE_DATA_SCOPE __declspec(dllexport)
-#    endif
-#  else
-#    ifndef PCRE_STATIC
-#      define PCRE_DATA_SCOPE extern __declspec(dllimport)
-#    endif
+#  ifndef PCREPOSIX_STATIC
+#    define PCREPOSIX_EXP_DECL extern __declspec(dllimport)
+#    define PCREPOSIX_EXP_DEFN  __declspec(dllimport)
 #  endif
 #endif
-#endif
 
-/* Otherwise, we use the standard "extern". */
+/* By default, we use the standard "extern" declarations. */
 
-#ifndef PCRE_DATA_SCOPE
+#ifndef PCREPOSIX_EXP_DECL
 #  ifdef __cplusplus
-#    define PCRE_DATA_SCOPE     extern "C"
+#    define PCREPOSIX_EXP_DECL  extern "C"
+#    define PCREPOSIX_EXP_DEFN  extern "C"
 #  else
-#    define PCRE_DATA_SCOPE     extern
+#    define PCREPOSIX_EXP_DECL  extern
+#    define PCREPOSIX_EXP_DEFN  extern
 #  endif
 #endif
 
 /* The functions */
 
-PCRE_DATA_SCOPE int regcomp(regex_t *, const char *, int);
-PCRE_DATA_SCOPE int regexec(const regex_t *, const char *, size_t,
-                  regmatch_t *, int);
-PCRE_DATA_SCOPE size_t regerror(int, const regex_t *, char *, size_t);
-PCRE_DATA_SCOPE void regfree(regex_t *);
+PCREPOSIX_EXP_DECL int regcomp(regex_t *, const char *, int);
+PCREPOSIX_EXP_DECL int regexec(const regex_t *, const char *, size_t,
+                     regmatch_t *, int);
+PCREPOSIX_EXP_DECL size_t regerror(int, const regex_t *, char *, size_t);
+PCREPOSIX_EXP_DECL void regfree(regex_t *);
 
 #ifdef __cplusplus
 }   /* extern "C" */

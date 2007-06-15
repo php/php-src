@@ -548,73 +548,72 @@ No match
     WXYZ 
 No match
 
-/[\p{L}]/D
+/[\p{L}]/DZ
 ------------------------------------------------------------------
-  0  11 Bra 0
-  3     [\p{L}]
- 11  11 Ket
- 14     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-No options
-No first char
-No need char
-
-/[\p{^L}]/D
-------------------------------------------------------------------
-  0  11 Bra 0
-  3     [\P{L}]
- 11  11 Ket
- 14     End
+        Bra 0
+        [\p{L}]
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 No options
 No first char
 No need char
 
-/[\P{L}]/D
+/[\p{^L}]/DZ
 ------------------------------------------------------------------
-  0  11 Bra 0
-  3     [\P{L}]
- 11  11 Ket
- 14     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-No options
-No first char
-No need char
-
-/[\P{^L}]/D
-------------------------------------------------------------------
-  0  11 Bra 0
-  3     [\p{L}]
- 11  11 Ket
- 14     End
+        Bra 0
+        [\P{L}]
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 No options
 No first char
 No need char
 
-/[abc\p{L}\x{0660}]/8D
+/[\P{L}]/DZ
 ------------------------------------------------------------------
-  0  46 Bra 0
-  3     [a-c\p{L}\x{660}]
- 46  46 Ket
- 49     End
+        Bra 0
+        [\P{L}]
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+
+/[\P{^L}]/DZ
+------------------------------------------------------------------
+        Bra 0
+        [\p{L}]
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+
+/[abc\p{L}\x{0660}]/8DZ
+------------------------------------------------------------------
+        Bra 0
+        [a-c\p{L}\x{660}]
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf8
 No first char
 No need char
 
-/[\p{Nd}]/8DM
-Memory allocation (code space): 15
+/[\p{Nd}]/8DZ
 ------------------------------------------------------------------
-  0  11 Bra 0
-  3     [\p{Nd}]
- 11  11 Ket
- 14     End
+        Bra 0
+        [\p{Nd}]
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf8
@@ -623,13 +622,12 @@ No need char
     1234
  0: 1
 
-/[\p{Nd}+-]+/8DM
-Memory allocation (code space): 48
+/[\p{Nd}+-]+/8DZ
 ------------------------------------------------------------------
-  0  44 Bra 0
-  3     [+\-\p{Nd}]+
- 44  44 Ket
- 47     End
+        Bra 0
+        [+\-\p{Nd}]+
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Partial matching not supported
@@ -779,48 +777,48 @@ No match
     A\x{391}\x{10427}\x{ff3a}\x{1fb8}
  0: A\x{391}\x{10427}\x{ff3a}\x{1fb8}
 
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8iD
+/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8iDZ
 ------------------------------------------------------------------
-  0  21 Bra 0
-  3  NC A\x{391}\x{10427}\x{ff3a}\x{1fb0}
- 21  21 Ket
- 24     End
+        Bra 0
+     NC A\x{391}\x{10427}\x{ff3a}\x{1fb0}
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: caseless utf8
 First char = 'A' (caseless)
 No need char
 
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8D
+/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8DZ
 ------------------------------------------------------------------
-  0  21 Bra 0
-  3     A\x{391}\x{10427}\x{ff3a}\x{1fb0}
- 21  21 Ket
- 24     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 'A'
-Need char = 176
-
-/AB\x{1fb0}/8D
-------------------------------------------------------------------
-  0  11 Bra 0
-  3     AB\x{1fb0}
- 11  11 Ket
- 14     End
+        Bra 0
+        A\x{391}\x{10427}\x{ff3a}\x{1fb0}
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf8
 First char = 'A'
 Need char = 176
 
-/AB\x{1fb0}/8Di
+/AB\x{1fb0}/8DZ
 ------------------------------------------------------------------
-  0  11 Bra 0
-  3  NC AB\x{1fb0}
- 11  11 Ket
- 14     End
+        Bra 0
+        AB\x{1fb0}
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf8
+First char = 'A'
+Need char = 176
+
+/AB\x{1fb0}/8DZi
+------------------------------------------------------------------
+        Bra 0
+     NC AB\x{1fb0}
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: caseless utf8
@@ -857,12 +855,12 @@ Need char = 'B' (caseless)
     \x{e0} 
  0: \x{e0}
 
-/[\x{105}-\x{109}]/8iD
+/[\x{105}-\x{109}]/8iDZ
 ------------------------------------------------------------------
-  0  13 Bra 0
-  3     [\x{104}-\x{109}]
- 13  13 Ket
- 16     End
+        Bra 0
+        [\x{104}-\x{109}]
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: caseless utf8
@@ -881,12 +879,12 @@ No match
     \x{10a} 
 No match
     
-/[z-\x{100}]/8iD 
+/[z-\x{100}]/8iDZ 
 ------------------------------------------------------------------
-  0  20 Bra 0
-  3     [Z\x{39c}\x{178}z-\x{101}]
- 20  20 Ket
- 23     End
+        Bra 0
+        [Z\x{39c}\x{178}z-\x{101}]
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: caseless utf8
@@ -919,12 +917,12 @@ No match
     y           
 No match
 
-/[z-\x{100}]/8Di
+/[z-\x{100}]/8DZi
 ------------------------------------------------------------------
-  0  20 Bra 0
-  3     [Z\x{39c}\x{178}z-\x{101}]
- 20  20 Ket
- 23     End
+        Bra 0
+        [Z\x{39c}\x{178}z-\x{101}]
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: caseless utf8
@@ -1432,4 +1430,18 @@ of case for anything other than the ASCII letters. /
     \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
  0: \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
 
+/The next two are special cases where the lengths of the different cases of the 
+same character differ. The first went wrong with heap fram storage; the 2nd
+was broken in all cases./
+
+/^\x{023a}+?(\x{0130}+)/8i
+  \x{023a}\x{2c65}\x{0130}
+ 0: \x{23a}\x{2c65}\x{130}
+ 1: \x{130}
+  
+/^\x{023a}+([^X])/8i
+  \x{023a}\x{2c65}X
+ 0: \x{23a}\x{2c65}
+ 1: \x{2c65}
+ 
 / End of testinput6 /

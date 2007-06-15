@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.4
+- Upgraded PCRE to version 7.2 (Nuno)
 - HTTP 500 is sent to browser in case of PHP error instead of blank page.
   (Dmitry, Andrei Nigmatulin)
 - Improved fix for MOPB-03-2007. (Ilia)

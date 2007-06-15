@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2007 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,7 @@ Returns:     number of characters placed in the buffer
 int
 _pcre_ord2utf8(int cvalue, uschar *buffer)
 {
+#ifdef SUPPORT_UTF8
 register int i, j;
 for (i = 0; i < _pcre_utf8_table1_size; i++)
   if (cvalue <= _pcre_utf8_table1[i]) break;
@@ -73,6 +74,9 @@ for (j = i; j > 0; j--)
  }
 *buffer = _pcre_utf8_table2[i] | cvalue;
 return i + 1;
+#else
+return 0;   /* Keep compiler happy; this function won't ever be */
+#endif      /* called when SUPPORT_UTF8 is not defined. */
 }
 
 /* End of pcre_ord2utf8.c */
