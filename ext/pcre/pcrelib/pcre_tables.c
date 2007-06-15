@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2007 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,8 @@ const uschar _pcre_OP_lengths[] = { OP_LENGTHS };
 
 /* These are the breakpoints for different numbers of bytes in a UTF-8
 character. */
+
+#ifdef SUPPORT_UTF8
 
 const int _pcre_utf8_table1[] =
   { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff};
@@ -193,5 +195,7 @@ const ucp_type_table _pcre_utt[] = {
 };
 
 const int _pcre_utt_size = sizeof(_pcre_utt)/sizeof(ucp_type_table);
+
+#endif  /* SUPPORT_UTF8 */
 
 /* End of pcre_tables.c */

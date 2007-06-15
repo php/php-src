@@ -3039,9 +3039,9 @@ No match
     abcdefghijk\12S
  0: abcdefghijk\x0aS
 
-/ab\hdef/
-    abhdef
- 0: abhdef
+/ab\idef/
+    abidef
+ 0: abidef
 
 /a{0}bc/
     bc
@@ -6951,5 +6951,125 @@ No match
  0: \x0d\x0afoo
     \nfoo 
  0: \x0afoo
+
+/^$/mg<any>
+    abc\r\rxyz
+ 0: 
+    abc\n\rxyz  
+ 0: 
+    ** Failers 
+No match
+    abc\r\nxyz
+No match
+
+/^X/m
+    XABC
+ 0: X
+    ** Failers 
+No match
+    XABC\B
+No match
+
+/(?m)^$/<any>g+
+    abc\r\n\r\n
+ 0: 
+ 0+ \x0d\x0a
+
+/(?m)^$|^\r\n/<any>g+ 
+    abc\r\n\r\n
+ 0: \x0d\x0a
+ 0+ 
+ 1: 
+    
+/(?m)$/<any>g+ 
+    abc\r\n\r\n
+ 0: 
+ 0+ \x0d\x0a\x0d\x0a
+ 0: 
+ 0+ \x0d\x0a
+ 0: 
+ 0+ 
+
+/(?|(abc)|(xyz))/
+   >abc<
+ 0: abc
+   >xyz< 
+ 0: xyz
+
+/(x)(?|(abc)|(xyz))(x)/
+    xabcx
+ 0: xabcx
+    xxyzx 
+ 0: xxyzx
+
+/(x)(?|(abc)(pqr)|(xyz))(x)/
+    xabcpqrx
+ 0: xabcpqrx
+    xxyzx 
+ 0: xxyzx
+
+/(?|(abc)|(xyz))(?1)/
+    abcabc
+ 0: abcabc
+    xyzabc 
+ 0: xyzabc
+    ** Failers 
+No match
+    xyzxyz 
+No match
+ 
+/\H\h\V\v/
+    X X\x0a
+ 0: X X\x0a
+    X\x09X\x0b
+ 0: X\x09X\x0b
+    ** Failers
+No match
+    \xa0 X\x0a   
+No match
+    
+/\H*\h+\V?\v{3,4}/ 
+    \x09\x20\xa0X\x0a\x0b\x0c\x0d\x0a
+ 0: \x09 \xa0X\x0a\x0b\x0c\x0d
+ 1: \x09 \xa0X\x0a\x0b\x0c
+    \x09\x20\xa0\x0a\x0b\x0c\x0d\x0a
+ 0: \x09 \xa0\x0a\x0b\x0c\x0d
+ 1: \x09 \xa0\x0a\x0b\x0c
+    \x09\x20\xa0\x0a\x0b\x0c
+ 0: \x09 \xa0\x0a\x0b\x0c
+    ** Failers 
+No match
+    \x09\x20\xa0\x0a\x0b
+No match
+     
+/\H{3,4}/
+    XY  ABCDE
+ 0: ABCD
+ 1: ABC
+    XY  PQR ST 
+ 0: PQR
+    
+/.\h{3,4}./
+    XY  AB    PQRS
+ 0: B    P
+ 1: B    
+
+/\h*X\h?\H+Y\H?Z/
+    >XNNNYZ
+ 0: XNNNYZ
+    >  X NYQZ
+ 0:   X NYQZ
+    ** Failers
+No match
+    >XYZ   
+No match
+    >  X NY Z
+No match
+
+/\v*X\v?Y\v+Z\V*\x0a\V+\x0b\V{2,3}\x0c/
+    >XY\x0aZ\x0aA\x0bNN\x0c
+ 0: XY\x0aZ\x0aA\x0bNN\x0c
+    >\x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
+ 0: \x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
 
 / End of testinput7 /

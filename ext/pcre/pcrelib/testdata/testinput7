@@ -1931,8 +1931,8 @@
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)\12\123/
     abcdefghijk\12S
 
-/ab\hdef/
-    abhdef
+/ab\idef/
+    abidef
 
 /a{0}bc/
     bc
@@ -4228,5 +4228,74 @@
     afoo
     \r\nfoo 
     \nfoo 
+
+/^$/mg<any>
+    abc\r\rxyz
+    abc\n\rxyz  
+    ** Failers 
+    abc\r\nxyz
+
+/^X/m
+    XABC
+    ** Failers 
+    XABC\B
+
+/(?m)^$/<any>g+
+    abc\r\n\r\n
+
+/(?m)^$|^\r\n/<any>g+ 
+    abc\r\n\r\n
+    
+/(?m)$/<any>g+ 
+    abc\r\n\r\n
+
+/(?|(abc)|(xyz))/
+   >abc<
+   >xyz< 
+
+/(x)(?|(abc)|(xyz))(x)/
+    xabcx
+    xxyzx 
+
+/(x)(?|(abc)(pqr)|(xyz))(x)/
+    xabcpqrx
+    xxyzx 
+
+/(?|(abc)|(xyz))(?1)/
+    abcabc
+    xyzabc 
+    ** Failers 
+    xyzxyz 
+ 
+/\H\h\V\v/
+    X X\x0a
+    X\x09X\x0b
+    ** Failers
+    \xa0 X\x0a   
+    
+/\H*\h+\V?\v{3,4}/ 
+    \x09\x20\xa0X\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\xa0\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\xa0\x0a\x0b\x0c
+    ** Failers 
+    \x09\x20\xa0\x0a\x0b
+     
+/\H{3,4}/
+    XY  ABCDE
+    XY  PQR ST 
+    
+/.\h{3,4}./
+    XY  AB    PQRS
+
+/\h*X\h?\H+Y\H?Z/
+    >XNNNYZ
+    >  X NYQZ
+    ** Failers
+    >XYZ   
+    >  X NY Z
+
+/\v*X\v?Y\v+Z\V*\x0a\V+\x0b\V{2,3}\x0c/
+    >XY\x0aZ\x0aA\x0bNN\x0c
+    >\x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
 
 / End of testinput7 /

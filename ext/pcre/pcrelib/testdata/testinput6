@@ -323,20 +323,20 @@
     ** Failers
     WXYZ 
 
-/[\p{L}]/D
+/[\p{L}]/DZ
 
-/[\p{^L}]/D
+/[\p{^L}]/DZ
 
-/[\P{L}]/D
+/[\P{L}]/DZ
 
-/[\P{^L}]/D
+/[\P{^L}]/DZ
 
-/[abc\p{L}\x{0660}]/8D
+/[abc\p{L}\x{0660}]/8DZ
 
-/[\p{Nd}]/8DM
+/[\p{Nd}]/8DZ
     1234
 
-/[\p{Nd}+-]+/8DM
+/[\p{Nd}+-]+/8DZ
     1234
     12-34
     12+\x{661}-34  
@@ -425,13 +425,13 @@
     A\x{391}\x{10427}\x{ff5a}\x{1fb0}
     A\x{391}\x{10427}\x{ff3a}\x{1fb8}
 
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8iD
+/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8iDZ
 
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8D
+/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8DZ
 
-/AB\x{1fb0}/8D
+/AB\x{1fb0}/8DZ
 
-/AB\x{1fb0}/8Di
+/AB\x{1fb0}/8DZi
 
 /\x{391}+/8i
     \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}
@@ -452,7 +452,7 @@
     \x{c0}
     \x{e0} 
 
-/[\x{105}-\x{109}]/8iD
+/[\x{105}-\x{109}]/8iDZ
     \x{104}
     \x{105}
     \x{109}  
@@ -460,7 +460,7 @@
     \x{100}
     \x{10a} 
     
-/[z-\x{100}]/8iD 
+/[z-\x{100}]/8iDZ 
     Z
     z
     \x{39c}
@@ -475,7 +475,7 @@
     Y
     y           
 
-/[z-\x{100}]/8Di
+/[z-\x{100}]/8DZi
 
 /^\X/8
     A
@@ -762,4 +762,14 @@ of case for anything other than the ASCII letters. /
 /^\p{Balinese}\p{Cuneiform}\p{Nko}\p{Phags_Pa}\p{Phoenician}/8
     \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
 
+/The next two are special cases where the lengths of the different cases of the 
+same character differ. The first went wrong with heap fram storage; the 2nd
+was broken in all cases./
+
+/^\x{023a}+?(\x{0130}+)/8i
+  \x{023a}\x{2c65}\x{0130}
+  
+/^\x{023a}+([^X])/8i
+  \x{023a}\x{2c65}X
+ 
 / End of testinput6 /
