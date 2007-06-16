@@ -398,7 +398,7 @@ static void php_session_initialize(TSRMLS_D)
 	int vallen;
 
 	/* check session name for invalid characters */
-	if (PS(id) && strpbrk(PS(id), "\r\n\t <>'\"\\()@,;:[]?={}&%")) {
+	if (PS(id) && strpbrk(PS(id), "\r\n\t <>'\"\\")) {
 		efree(PS(id));
 		PS(id) = NULL;
 	}
@@ -1069,6 +1069,7 @@ static void php_session_send_cookie(TSRMLS_D)
 {
 	smart_str ncookie = {0};
 	char *date_fmt = NULL;
+	char *e_session_name, *e_id;
 
 	if (SG(headers_sent)) {
 		char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
@@ -1082,11 +1083,18 @@ static void php_session_send_cookie(TSRMLS_D)
 		}	
 		return;
 	}
+	
+	/* URL encode session_name and id because they might be user supplied */
+	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)), NULL);
+	e_id = php_url_encode(PS(id), strlen(PS(id)), NULL);
 
 	smart_str_appends(&ncookie, COOKIE_SET_COOKIE);
-	smart_str_appends(&ncookie, PS(session_name));
+	smart_str_appends(&ncookie, e_session_name);
 	smart_str_appendc(&ncookie, '=');
-	smart_str_appends(&ncookie, PS(id));
+	smart_str_appends(&ncookie, e_id);
+	
+	efree(e_session_name);
+	efree(e_id);
 	
 	if (PS(cookie_lifetime) > 0) {
 		struct timeval tv;
