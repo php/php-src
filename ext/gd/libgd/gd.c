@@ -1037,86 +1037,92 @@ void gdImageAABlend (gdImagePtr im)
 	}
 }
 
+static void gdImageHLine(gdImagePtr im, int y, int x1, int x2, int col)
+{
+	if (im->thick > 1) {
+		int thickhalf = im->thick >> 1;
+		gdImageFilledRectangle(im, x1, y - thickhalf, x2, y + im->thick - thickhalf - 1, col);
+	} else {
+		if (x2 < x1) {
+			int t = x2;
+			x2 = x1;
+			x1 = t;
+		}
+
+		for (;x1 <= x2; x1++) {
+			gdImageSetPixel(im, x1, y, col);
+		}
+	}
+	return;
+}
+
+static void gdImageVLine(gdImagePtr im, int x, int y1, int y2, int col)
+{
+	if (im->thick > 1) {
+		int thickhalf = im->thick >> 1;
+		gdImageFilledRectangle(im, x - thickhalf, y1, x + im->thick - thickhalf - 1, y2, col);
+	} else {
+		if (y2 < y1) {
+			int t = y1;
+			y1 = y2;
+			y2 = t;
+		}
+
+		for (;y1 <= y2; y1++) {
+			gdImageSetPixel(im, x, y1, col);
+		}
+	}
+	return;
+}
 
 /* Bresenham as presented in Foley & Van Dam */
 void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 {
-	int t;
 	int dx, dy, incr1, incr2, d, x, y, xend, yend, xdirflag, ydirflag;
 	int wid;
 	int w, wstart;
 	int thick = im->thick;
+
+	if (color == gdAntiAliased) {
+		/* 
+		   gdAntiAliased passed as color: use the much faster, much cheaper
+		   and equally attractive gdImageAALine implementation. That
+		   clips too, so don't clip twice.
+		   */
+		gdImageAALine(im, x1, y1, x2, y2, im->AA_color); 
+		return;
+	}
 
 	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
 	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im))) {
 		return;
 	}
 
-	/* Vertical */
-	if (x1==x2) {
-		if (thick > 1) {
-			int thickhalf = thick >> 1;
-			thickhalf = thick >> 1;
-			gdImageFilledRectangle(im, x1 - thickhalf, y1, x1 + thick - thickhalf - 1, y2, color);
-		} else {
-			if (y2 < y1) {
-				t = y2;
-				y2 = y1;
-				y1 = t;
-			}
+	dx = abs (x2 - x1);
+	dy = abs (y2 - y1);
 
-			for (;y1 <= y2; y1++) {
-				gdImageSetPixel(im, x1,y1, color);
-			}
-		}
+	if (dx == 0) {
+		gdImageVLine(im, x1, y1, y2, color);
 		return;
-	} else if (y1==y2) { 	/* Horizontal */
-		if (thick > 1) {
-			int thickhalf = thick >> 1;
-			thickhalf = thick >> 1;
-			gdImageFilledRectangle(im, x1, y1 - thickhalf, x2, y2 + thick - thickhalf - 1, color);
-		} else {
-			if (x2 < x1) {
-				t = x2;
-				x2 = x1;
-				x1 = t;
-			}
-
-			for (;x1 <= x2; x1++) {
-				gdImageSetPixel(im, x1,y1, color);
-			}
-		}
+	} else if (dy == 0) {
+		gdImageHLine(im, y1, x1, x2, color);
 		return;
 	}
 
-	/* gdAntiAliased passed as color: set anti-aliased line (AAL) global vars. */
-	if (color == gdAntiAliased) {
-		im->AAL_x1 = x1;
-		im->AAL_y1 = y1;
-		im->AAL_x2 = x2;
-		im->AAL_y2 = y2;
-
-		/* Compute what we can for point-to-line distance calculation later. */
-		im->AAL_Bx_Ax = x2 - x1;
-		im->AAL_By_Ay = y2 - y1;
-		im->AAL_LAB_2 = (im->AAL_Bx_Ax * im->AAL_Bx_Ax) + (im->AAL_By_Ay * im->AAL_By_Ay);
-		im->AAL_LAB = sqrt (im->AAL_LAB_2);
-
-		/* For AA, we must draw pixels outside the width of the line.  Keep in
-		 * mind that this will be curtailed by cos/sin of theta later.
-		 */
-		thick += 4;
-	}
-
-	dx = abs(x2 - x1);
-	dy = abs(y2 - y1);
 	if (dy <= dx) {
 		/* More-or-less horizontal. use wid for vertical stroke */
 		/* Doug Claar: watch out for NaN in atan2 (2.0.5) */
 		if ((dx == 0) && (dy == 0)) {
 			wid = 1;
 		} else {
-			wid = (int)(thick * cos (atan2 (dy, dx)));
+			/* 2.0.12: Michael Schwartz: divide rather than multiply;
+TBB: but watch out for /0! */
+			double ac = cos (atan2 (dy, dx));
+			if (ac != 0) {
+				wid = thick / ac;
+			} else {
+				wid = 1;
+			}
 			if (wid == 0) {
 				wid = 1;
 			}
@@ -1175,12 +1181,13 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 		/* More-or-less vertical. use wid for horizontal stroke */
 		/* 2.0.12: Michael Schwartz: divide rather than multiply;
 		   TBB: but watch out for /0! */
-		double as = sin(atan2(dy, dx));
+		double as = sin (atan2 (dy, dx));
 		if (as != 0) {
-			if (!(wid = thick / as)) {
-				wid = 1;
-			}
+			wid = thick / as;
 		} else {
+				wid = 1;
+		}
+		if (wid == 0) {
 			wid = 1;
 		}
 
@@ -1234,11 +1241,6 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 				}
 			}
 		}
-	}
-
-	/* If this is the only line we are drawing, go ahead and blend. */
-	if (color == gdAntiAliased && !im->AA_polygon) {
-		gdImageAABlend(im);
 	}
 }
 
@@ -1941,7 +1943,7 @@ struct seg {int y, xl, xr, dy;};
 #define FILL_POP(Y, XL, XR, DY) \
     {sp--; Y = sp->y+(DY = sp->dy); XL = sp->xl; XR = sp->xr;}
 
-static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc);
+void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc);
 
 void gdImageFill(gdImagePtr im, int x, int y, int nc)
 {
@@ -2042,16 +2044,16 @@ done:
 	im->alphaBlendingFlag = alphablending_bak;	
 }
 
-static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
+void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 {
-	int l, x1, x2, dy;
+	int i,l, x1, x2, dy;
 	int oc;   /* old pixel value */
 	int tiled;
 	int wx2,wy2;
 	/* stack of filled segments */
 	struct seg *stack;
 	struct seg *sp;
-	char *pts;
+	char **pts;
 
 	if (!im->tile) {
 		return;
@@ -2061,7 +2063,11 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 	tiled = nc==gdTiled;
 
 	nc =  gdImageTileGet(im,x,y);
-	pts = (char *) ecalloc(im->sy * im->sx, sizeof(char));
+	pts = (char **) ecalloc(im->sy, sizeof(char*));
+
+	for (i=0; i<im->sy;i++) {
+		pts[i] = (char *) ecalloc(im->sx, sizeof(char));
+	}
 
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
 	sp = stack;
@@ -2074,9 +2080,9 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
  	FILL_PUSH(y+1, x, x, -1);
 	while (sp>stack) {
 		FILL_POP(y, x1, x2, dy);
-		for (x=x1; x>=0 && (!pts[y + x*wx2] && gdImageGetPixel(im,x,y)==oc); x--) {
+		for (x=x1; x>=0 && (!pts[y][x] && gdImageGetPixel(im,x,y)==oc); x--) {
 			nc = gdImageTileGet(im,x,y);
-			pts[y + x*wx2]=1;
+			pts[y][x]=1;
 			gdImageSetPixel(im,x, y, nc);
 		}
 		if (x>=x1) {
@@ -2090,9 +2096,9 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 		}
 		x = x1+1;
 		do {
-			for (; x<wx2 && (!pts[y + x*wx2] && gdImageGetPixel(im,x, y)==oc) ; x++) {
+			for (; x<wx2 && (!pts[y][x] && gdImageGetPixel(im,x, y)==oc) ; x++) {
 				nc = gdImageTileGet(im,x,y);
-				pts[y + x*wx2]=1;
+				pts[y][x]=1;
 				gdImageSetPixel(im, x, y, nc);
 			}
 			FILL_PUSH(y, l, x-1, dy);
@@ -2100,11 +2106,13 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 			if (x>x2+1) {
 				FILL_PUSH(y, x2+1, x-1, -dy);
 			}
-skip:			for (x++; x<=x2 && (pts[y + x*wx2] || gdImageGetPixel(im,x, y)!=oc); x++);
+skip:			for (x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
 			l = x;
 		} while (x<=x2);
 	}
-
+	for (i=0; i<im->sy;i++) {
+		efree(pts[i]);
+	}
 	efree(pts);
 	efree(stack);
 }
