@@ -46,6 +46,7 @@
 #include "ext/standard/php_rand.h"                   /* for RAND_MAX */
 #include "ext/standard/info.h"
 #include "ext/standard/php_smart_str.h"
+#include "ext/standard/url.h"
 
 #include "mod_files.h"
 #include "mod_user.h"
