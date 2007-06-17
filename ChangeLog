@@ -1,3 +1,11 @@
+2007-06-16  Stefan Esser  <php@nopiracy.de>
+
+    * ext/session/session.c:
+      Fix attribute injection security bug correctly by URL encoding session
+      name and session value. (in future maybe encode path/domain, too)
+      
+      Remove backward compatibility breaking blacklist of characters.
+
 2007-06-15  Stanislav Malyshev  <stas@zend.com>
 
     * ext/session/session.c
