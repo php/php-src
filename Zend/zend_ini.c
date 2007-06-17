@@ -55,7 +55,9 @@ static int zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage TSRMLS
 				ini_entry->on_modify(ini_entry, ini_entry->orig_value, ini_entry->orig_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage TSRMLS_CC);
 			} zend_end_try();
 		}
-		efree(ini_entry->value);
+		if (ini_entry->value != ini_entry->orig_value) {
+			efree(ini_entry->value);
+		}
 		ini_entry->value = ini_entry->orig_value;
 		ini_entry->value_length = ini_entry->orig_value_length;
 		ini_entry->modified = 0;
@@ -234,13 +236,10 @@ ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value,
 {
 	zend_ini_entry *ini_entry;
 	char *duplicate;
+	zend_bool modified;
 	TSRMLS_FETCH();
 
 	if (zend_hash_find(EG(ini_directives), name, name_length, (void **) &ini_entry)==FAILURE) {
-		return FAILURE;
-	}
-
-	if (!(ini_entry->modifiable & modify_type)) {
 		return FAILURE;
 	}
 
@@ -248,20 +247,28 @@ ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value,
 		ini_entry->modifiable = ZEND_INI_SYSTEM;
 	}
 
+	if (!(ini_entry->modifiable & modify_type)) {
+		return FAILURE;
+	}
+
+	modified = ini_entry->modified;
+
+	if (!EG(modified_ini_directives)) {
+		ALLOC_HASHTABLE(EG(modified_ini_directives));
+		zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
+	}
+	if (!modified) {
+		ini_entry->orig_value = ini_entry->value;
+		ini_entry->orig_value_length = ini_entry->value_length;
+		ini_entry->modified = 1;
+		zend_hash_add(EG(modified_ini_directives), name, name_length, &ini_entry, sizeof(zend_ini_entry*), NULL);
+	}
+
 	duplicate = estrndup(new_value, new_value_length);
-	
+
 	if (!ini_entry->on_modify
 		|| ini_entry->on_modify(ini_entry, duplicate, new_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage TSRMLS_CC)==SUCCESS) {
-		if (!ini_entry->modified) {
-			ini_entry->orig_value = ini_entry->value;
-			ini_entry->orig_value_length = ini_entry->value_length;
-			ini_entry->modified = 1;
-			if (!EG(modified_ini_directives)) {
-				ALLOC_HASHTABLE(EG(modified_ini_directives));
-				zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
-			}
-			zend_hash_add(EG(modified_ini_directives), name, name_length, &ini_entry, sizeof(zend_ini_entry*), NULL);
-		} else { /* we already changed the value, free the changed value */
+		if (modified && ini_entry->orig_value != ini_entry->value) { /* we already changed the value, free the changed value */
 			efree(ini_entry->value);
 		}
 		ini_entry->value = duplicate;
