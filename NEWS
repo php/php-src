@@ -29,6 +29,7 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #41717 (imagepolygon does not respect thickness). (Pierre)
 - Fixed bug #41655 (open_basedir bypass via glob()). (Ilia)
 - Fixed bug #41640 (get_class_vars produces error on class constants).
   (Johannes)
