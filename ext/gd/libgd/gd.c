@@ -3657,9 +3657,7 @@ int gdImageNegate(gdImagePtr src)
 			if (new_pxl == -1) {
 				new_pxl = gdImageColorClosestAlpha(src, 255-r, 255-g, 255-b, a);
 			}
-			if ((y >= 0) && (y < src->sy)) {
-				gdImageSetPixel (src, x, y, new_pxl);
-			}
+			gdImageSetPixel (src, x, y, new_pxl);
 		}
 	}
 	return 1;
@@ -3692,9 +3690,7 @@ int gdImageGrayScale(gdImagePtr src)
 			if (new_pxl == -1) {
 				new_pxl = gdImageColorClosestAlpha(src, r, g, b, a);
 			}
-			if ((y >= 0) && (y < src->sy)) {
-				gdImageSetPixel (src, x, y, new_pxl);
-			}
+			gdImageSetPixel (src, x, y, new_pxl);
 		}
 	}
 	return 1;
@@ -3739,9 +3735,7 @@ int gdImageBrightness(gdImagePtr src, int brightness)
 			if (new_pxl == -1) {
 				new_pxl = gdImageColorClosestAlpha(src, (int)r, (int)g, (int)b, a);
 			}
-			if ((y >= 0) && (y < src->sy)) {
-				gdImageSetPixel (src, x, y, new_pxl);
-			}
+			gdImageSetPixel (src, x, y, new_pxl);
 		}
 	}
 	return 1;
@@ -3801,9 +3795,7 @@ int gdImageContrast(gdImagePtr src, double contrast)
 			if (new_pxl == -1) {
 				new_pxl = gdImageColorClosestAlpha(src, (int)rf, (int)gf, (int)bf, a);
 			}
-			if ((y >= 0) && (y < src->sy)) {
-				gdImageSetPixel (src, x, y, new_pxl);
-			}
+			gdImageSetPixel (src, x, y, new_pxl);
 		}
 	}
 	return 1;
@@ -3844,9 +3836,7 @@ int gdImageColor(gdImagePtr src, int red, int green, int blue)
 			if (new_pxl == -1) {
 				new_pxl = gdImageColorClosestAlpha(src, (int)r, (int)g, (int)b, a);
 			}
-			if ((y >= 0) && (y < src->sy)) {
-				gdImageSetPixel (src, x, y, new_pxl);
-			}
+			gdImageSetPixel (src, x, y, new_pxl);
 		}
 	}
 	return 1;
@@ -3902,9 +3892,7 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 			if (new_pxl == -1) {
 				new_pxl = gdImageColorClosestAlpha(src, (int)new_r, (int)new_g, (int)new_b, new_a);
 			}
-			if ((y >= 0) && (y < src->sy)) {
-				gdImageSetPixel (src, x, y, new_pxl);
-			}
+			gdImageSetPixel (src, x, y, new_pxl);
 		}
 	}
 	gdImageDestroy(srcback);
@@ -4024,9 +4012,7 @@ int gdImageSelectiveBlur( gdImagePtr src)
 			if (new_pxl == -1) {
 				new_pxl = gdImageColorClosestAlpha(src, (int)new_r, (int)new_g, (int)new_b, new_a);
 			}
-			if ((y >= 0) && (y < src->sy)) {
-				gdImageSetPixel (src, x, y, new_pxl);
-			}
+			gdImageSetPixel (src, x, y, new_pxl);
 		}
 	}
 	gdImageDestroy(srcback);
