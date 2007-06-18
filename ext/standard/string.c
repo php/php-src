@@ -7894,7 +7894,7 @@ PHP_FUNCTION(substr_compare)
 		}
 
 		if(len > s1_len - offset) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length cannot exceed initial string length");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The specified segment exceeds string length");
 			RETURN_FALSE;
 		}
 
