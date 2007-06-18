@@ -32,25 +32,25 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: substr_count(): Offset value 2147483647 exceeds string length. in %s on line %d
+Warning: substr_count(): Offset value 2147483647 exceeds string length in %s on line %d
 bool(false)
 
 Warning: substr_compare(): The start position cannot exceed initial string length in %s on line %d
 bool(false)
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: substr_count(): Offset value 2147483647 exceeds string length. in %s on line %d
+Warning: substr_count(): Offset value 2147483647 exceeds string length in %s on line %d
 bool(false)
 
-Warning: substr_count(): Length value 2147483647 exceeds string length. in %s on line %d
+Warning: substr_count(): Length value 2147483647 exceeds string length in %s on line %d
 bool(false)
 
-Warning: strpos(): Offset not contained in string. in %s on line %d
+Warning: strpos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
 Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
@@ -60,4 +60,39 @@ Notice: strripos(): Offset is greater than the length of haystack string in %s o
 bool(false)
 int(2)
 string(8) "abcdeabc"
+bool(false)
+--UEXPECTF--	
+unicode(4) "bcde"
+bool(false)
+bool(false)
+bool(false)
+
+Warning: substr_count(): Offset value 2147483647 exceeds string length in %s on line %d
+bool(false)
+
+Warning: substr_compare(): The start position cannot exceed initial string length in %s on line %d
+bool(false)
+
+Warning: stripos(): Offset not contained in string in %s on line %d
+bool(false)
+
+Warning: substr_count(): Offset value 2147483647 exceeds string length in %s on line %d
+bool(false)
+
+Warning: substr_count(): Length value 2147483647 exceeds string length in %s on line %d
+bool(false)
+
+Warning: strpos(): Offset not contained in string in %s on line %d
+bool(false)
+
+Warning: stripos(): Offset not contained in string in %s on line %d
+bool(false)
+
+Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+bool(false)
+
+Notice: strripos(): Offset is greater than the length of haystack string in %s on line %d
+bool(false)
+int(2)
+unicode(8) "abcdeabc"
 bool(false)

@@ -7208,7 +7208,7 @@ PHP_FUNCTION(substr_count)
 				tmp = (char *)p + length;
 			}
 			if (tmp > endp) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value %ld exceeds string length", offset);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length value %ld exceeds string length", length);
 				RETURN_FALSE;
 			} else {
 				endp = tmp;
@@ -7888,8 +7888,13 @@ PHP_FUNCTION(substr_compare)
 			offset = (offset < 0) ? 0 : offset;
 		}
 
-		if ((offset + len) > s1_len) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The specified segment exceeds string length");
+		if(offset > s1_len) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The start position cannot exceed initial string length");
+			RETURN_FALSE;
+		}
+
+		if(len > s1_len - offset) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length cannot exceed initial string length");
 			RETURN_FALSE;
 		}
 
