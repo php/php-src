@@ -708,7 +708,7 @@ no_realpath:
 		}
 	}
 
-	if (use_cache) {
+	if (use_cache && (use_realpath == CWD_REALPATH)) {
 		realpath_cache_add(path, path_length, state->cwd, state->cwd_length, t TSRMLS_CC);
 	}
 

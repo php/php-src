@@ -103,11 +103,11 @@ rmdir("$name_prefix/");
 
 -- Iteration 1 --
 string(%d) "%s/readlink_realpath_basic/home/readlink_realpath_basic.tmp"
-string(%d) "%s/readlink_realpath_basic/home/readlink_realpath_basic_link.tmp"
+string(%d) "%s/readlink_realpath_basic/home/readlink_realpath_basic.tmp"
 
 -- Iteration 2 --
 string(%d) "%s/readlink_realpath_basic/home/test/readlink_realpath_basic.tmp"
-string(%d) "%s/readlink_realpath_basic/home/test/readlink_realpath_basic_link.tmp"
+string(%d) "%s/readlink_realpath_basic/home/test/readlink_realpath_basic.tmp"
 
 -- Iteration 3 --
 string(%d) "%s/readlink_realpath_basic/home/test/readlink_realpath_basic.tmp"
@@ -115,7 +115,7 @@ string(%d) "%s/readlink_realpath_basic/home/test/readlink_realpath_basic.tmp"
 
 -- Iteration 4 --
 string(%d) "%s/readlink_realpath_basic/home/readlink_realpath_basic.tmp"
-string(%d) "%s/readlink_realpath_basic/home/readlink_realpath_basic_link.tmp"
+string(%d) "%s/readlink_realpath_basic/home/readlink_realpath_basic.tmp"
 
 -- Iteration 5 --
 
