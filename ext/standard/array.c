@@ -2213,7 +2213,7 @@ PHP_FUNCTION(array_slice)
 	   is not passed */
 	convert_to_long_ex(offset);
 	offset_val = Z_LVAL_PP(offset);
-	if (argc >= 3) {
+	if (argc >= 3 && Z_TYPE_PP(length) != IS_NULL) {
 		convert_to_long_ex(length);
 		length_val = Z_LVAL_PP(length);
 	} else {
