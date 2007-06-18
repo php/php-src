@@ -2,12 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.4
 - Upgraded PCRE to version 7.2 (Nuno)
-- HTTP 500 is sent to browser in case of PHP error instead of blank page.
-  (Dmitry, Andrei Nigmatulin)
 - Improved fix for MOPB-03-2007. (Ilia)
 - Corrected fix for CVE-2007-2872. (Ilia)
-- Enabled statement cache for non-persistent OCI8 connections. 
+- Enabled statement cache for non-persistent OCI8 connections.
   (Chris Jones, Tony)
+
+- Changed error handler to send HTTP 500 instead of blank page on PHP errors.
+  (Dmitry, Andrei Nigmatulin)
 
 - Added php_ini_loaded_file() function which returns the path to the actual
   php.ini in use. (Jani)
