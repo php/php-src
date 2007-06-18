@@ -8,6 +8,8 @@ PHP 4                                                                      NEWS
 - Fixed money_format() not to accept multiple %i or %n tokens. (Stas, Ilia)
 - Addded "max_input_nesting_level" php.ini option to limit nesting level of 
   input variables. Fix for MOPB-03-2007. (Stas)
+- Fixed INFILE LOCAL option handling with MySQL - now not allowed when 
+  open_basedir or safe_mode is active (Stas)
 - Fixed bug #41630 (segfault when an invalid color index is present in
   the image data). (Reported by Elliot <wccoder@gmail dot com>) (Pierre)
 - Fixed bug #41628 (PHP settings leak between Virtual Hosts in
