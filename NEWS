@@ -39,6 +39,8 @@ PHP                                                                        NEWS
   constants). (Dmitry)
 - Fixed bug #41630 (segfault when an invalid color index is present in
   the image data). (Reported by Elliot <wccoder@gmail dot com>) (Pierre)
+- Fixed bug #41628 (PHP settings leak between Virtual Hosts in
+  Apache 1.3). (Scott, manuel at mausz dot at)
 - Fixed bug #41608 (segfault on a weird code with objects and switch()). 
   (Tony)
 - Fixed bug #41600 (url rewriter tags doesn't work with namespaced tags).
