@@ -14,12 +14,12 @@ $b = array(
 //	1000000, // works, but test would take too long
 );
 
-$s = '';
+$s = b'';
 $i = 0;
 
 foreach ($b as $size) {
 	do {
-		$s .= chr(rand(0,255));
+		$s .= (binary)chr(rand(0,255));
 	} while (++$i < $size);
 	var_dump($s === gzinflate(gzdeflate($s)));
 	var_dump($s === gzuncompress(gzcompress($s)));
