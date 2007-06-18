@@ -6314,6 +6314,7 @@ PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, i
 	int32_t idx = 0, tmp, codepts;
 	UChar32 ch, next, prev1, prev2, last, doctype[6];
 	int br = 0, depth = 0, state = 0, i;
+	UChar in_q = 0;
 
 	if (stateptr)
 		state = *stateptr;
@@ -6389,10 +6390,14 @@ PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, i
 				break;
 			}
 
+			if (in_q) {
+				break;
+			}
+			
 			switch (state) {
 			case 1: /* HTML/XML */
 				last = ch;
-				state = 0;
+				in_q = state = 0;
 				if (allow_len) {
 					tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
 					*(tp++) = ch;
@@ -6407,19 +6412,19 @@ PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, i
 
 			case 2: /* PHP */
 				if (!br && last != 0x22 && prev1 == 0x3F) { /* '"' & '?' */
-					state = 0;
+					in_q = state = 0;
 					tp = tbuf;
 				}
 				break;
 
 			case 3:
-				state = 0;
+				in_q = state = 0;
 				tp = tbuf;
 				break;
 
 			case 4: /* JavaScript/CSS/etc... */
 				if (codepts >= 2 && prev1 == 0x2D && prev2 == 0x2D) { /* '-' */
-					state = 0;
+					in_q = state = 0;
 					tp = tbuf;
 				}
 				break;
@@ -6443,6 +6448,13 @@ PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, i
 			} else if (allow_len && state == 1) {
 				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
 				*(tp++) = ch;
+			}
+			if (state && prev1 != 0x27 /*'\\'*/ && (!in_q || ch == in_q)) {
+				if (in_q) {
+					in_q = 0;
+				} else {
+					in_q = ch;
+				}
 			}
 			break;
 
@@ -6541,7 +6553,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow, int allow_len, zend_bool allow_tag_spaces)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
-	int br, i=0, depth=0;
+	int br, i=0, depth=0, in_q=0;
 	int state = 0;
 
 	if (stateptr)
@@ -6615,10 +6627,14 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 					break;
 				}
 
+				if (in_q) {
+					break;
+				}
+
 				switch (state) {
 					case 1: /* HTML/XML */
 						lc = '>';
-						state = 0;
+						in_q = state = 0;
 						if (allow) {
 							tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 							*(tp++) = '>';
@@ -6633,19 +6649,19 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 
 					case 2: /* PHP */
 						if (!br && lc != '\"' && *(p-1) == '?') {
-							state = 0;
+							in_q = state = 0;
 							tp = tbuf;
 						}
 						break;
 
 					case 3:
-						state = 0;
+						in_q = state = 0;
 						tp = tbuf;
 						break;
 
 					case 4: /* JavaScript/CSS/etc... */
 						if (p >= buf + 2 && *(p-1) == '-' && *(p-2) == '-') {
-							state = 0;
+							in_q = state = 0;
 							tp = tbuf;
 						}
 						break;
@@ -6669,6 +6685,13 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 				} else if (allow && state == 1) {
 					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 					*(tp++) = c;
+				}
+				if (state && p != buf && *(p-1) != '\\' && (!in_q || *p == in_q)) {
+					if (in_q) {
+						in_q = 0;
+					} else {
+						in_q = *p;
+					}
 				}
 				break;
 
