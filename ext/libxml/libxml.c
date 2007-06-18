@@ -674,6 +674,7 @@ static PHP_RSHUTDOWN_FUNCTION(libxml)
 		efree(LIBXML(error_list));
 		LIBXML(error_list) = NULL;
 	}
+	xmlResetLastError();
 
 	return SUCCESS;
 }
