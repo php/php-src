@@ -749,9 +749,15 @@ static void *php_create_dir(pool *p, char *dummy)
  */
 static void *php_merge_dir(pool *p, void *basev, void *addv)
 {
-	/* This function *must* return addv, and not modify basev */
-	zend_hash_merge_ex((HashTable *) addv, (HashTable *) basev, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
-	return addv;
+	/* This function *must* not modify addv or basev */
+	HashTable *new;
+
+	/* need a copy of addv to merge */
+	new = php_create_dir(p, "php_merge_dir");
+	zend_hash_copy(new, (HashTable *) addv, (copy_ctor_func_t) copy_per_dir_entry, NULL, sizeof(php_per_dir_entry));
+
+	zend_hash_merge_ex(new, (HashTable *) basev, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
+	return new;
 }
 /* }}} */
 
