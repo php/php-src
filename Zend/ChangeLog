@@ -1,3 +1,10 @@
+2007-06-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_ini.c:
+      
+      Fixed zend_alter_ini_entry() memory_limit interruption vulnerability.
+
 2007-06-13  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute_API.c

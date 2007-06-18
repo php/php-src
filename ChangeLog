@@ -1,3 +1,59 @@
+2007-06-17  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c:
+      malloc+memset == calloc (sync with libgd)
+
+2007-06-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd.c:
+      - Re commit "sync with libgd: improve _gdImageFillTiled()", I reverted
+        it in my previous commit
+
+    * ext/gd/libgd/gd.c:
+      - MFB: Drop useless tests (Daniel Diaz)
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c:
+      - Drop useless tests (Daniel Diaz)
+
+2007-06-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_ini.c:
+      
+      Fixed zend_alter_ini_entry() memory_limit interruption vulnerability.
+
+    * (PHP_4_4)
+      ext/session/session.c:
+      
+      : Fixed compiler warning
+
+    * ext/session/session.c:
+      
+      MFB: Fixed compiler warning
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      
+      Fixed compiler warning
+
+2007-06-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/libgd/gd.c:
+      - MFH: #41717, imagepolygon does not respect thickness
+        (sync with libgd)
+
+    * ext/gd/libgd/gd.c:
+      - #41717, imagepolygon does not respect thickness
+        (sync with libgd)
+
+    * ext/standard/image.c:
+      - MFB: #41321, read error downgraded to E_NOTICE
+
 2007-06-16  Stefan Esser  <php@nopiracy.de>
 
     * ext/session/session.c:
