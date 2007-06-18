@@ -10,6 +10,8 @@ PHP 4                                                                      NEWS
   input variables. Fix for MOPB-03-2007. (Stas)
 - Fixed bug #41630 (segfault when an invalid color index is present in
   the image data). (Reported by Elliot <wccoder@gmail dot com>) (Pierre)
+- Fixed bug #41628 (PHP settings leak between Virtual Hosts in
+  Apache 1.3). (Scott, manuel at mausz dot at)
 - Fixed bug #38798 (OpenSSL init corrected in php5 but not in php4). (Tony)
 
 04 May 2007, Version 4.4.7
