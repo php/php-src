@@ -135,10 +135,10 @@ rmdir("$name_prefix/");
 -- Testing readlink() and realpath() with softlink, linkname stored inside an object --
 bool(true)
 string(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
-string(%d) "%s/readlink_realpath_variation/home/readlink_realpath_variation_link.tmp"
+string(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
 bool(true)
 string(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
-string(%d) "%s/readlink_realpath_variation_link.tmp"
+string(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
 
 -- Testing readlink() and realpath() with hardlink, linkname stored inside an object --
 bool(true)
@@ -157,14 +157,14 @@ string(%d) "%s/readlink_realpath_variation_link.tmp"
 -- Testing readlink() and realpath() with softlink, linkname stored inside an array --
 bool(true)
 string(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
-string(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation_link.tmp"
+string(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
 
 Warning: symlink(): No such file or directory in %s on line %d
 bool(false)
 
 Warning: readlink(): No such file or directory in %s on line %d
 bool(false)
-string(%d) "%s/home/readlink_realpath_variation_link.tmp"
+bool(false)
 
 Warning: unlink(%s/./readlink_realpath_variation/home/../home//tests//..//..//..//home//readlink_realpath_variation_link.tmp/): No such file or directory in %s on line %d
 
@@ -180,7 +180,7 @@ bool(false)
 
 Warning: readlink(): No such file or directory in %s on line %d
 bool(false)
-string(%d) "%s/home/readlink_realpath_variation_link.tmp"
+bool(false)
 
 Warning: unlink(%s/./readlink_realpath_variation/home/../home//tests//..//..//..//home//readlink_realpath_variation_link.tmp/): No such file or directory in %s on line %d
 
@@ -224,10 +224,10 @@ Done
 -- Testing readlink() and realpath() with softlink, linkname stored inside an object --
 bool(true)
 unicode(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
-unicode(%d) "%s/readlink_realpath_variation/home/readlink_realpath_variation_link.tmp"
+unicode(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
 bool(true)
 unicode(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
-unicode(%d) "%s/readlink_realpath_variation_link.tmp"
+unicode(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
 
 -- Testing readlink() and realpath() with hardlink, linkname stored inside an object --
 bool(true)
@@ -246,14 +246,14 @@ unicode(%d) "%s/readlink_realpath_variation_link.tmp"
 -- Testing readlink() and realpath() with softlink, linkname stored inside an array --
 bool(true)
 unicode(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
-unicode(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation_link.tmp"
+unicode(%d) "%s/readlink_realpath_variation/home/tests/link/readlink_realpath_variation.tmp"
 
 Warning: symlink(): No such file or directory in %s on line %d
 bool(false)
 
 Warning: readlink(): No such file or directory in %s on line %d
 bool(false)
-unicode(%d) "%s/home/readlink_realpath_variation_link.tmp"
+bool(false)
 
 Warning: unlink(%s/./readlink_realpath_variation/home/../home//tests//..//..//..//home//readlink_realpath_variation_link.tmp/): No such file or directory in %s on line %d
 
@@ -269,7 +269,7 @@ bool(false)
 
 Warning: readlink(): No such file or directory in %s on line %d
 bool(false)
-unicode(%d) "%s/home/readlink_realpath_variation_link.tmp"
+bool(false)
 
 Warning: unlink(%s/./readlink_realpath_variation/home/../home//tests//..//..//..//home//readlink_realpath_variation_link.tmp/): No such file or directory in %s on line %d
 
