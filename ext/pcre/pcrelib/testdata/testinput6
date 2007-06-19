@@ -771,5 +771,11 @@ was broken in all cases./
   
 /^\x{023a}+([^X])/8i
   \x{023a}\x{2c65}X
+
+/Check property support in non-UTF-8 mode/
  
+/\p{L}{4}/
+    123abcdefg
+    123abc\xc4\xc5zz
+
 / End of testinput6 /

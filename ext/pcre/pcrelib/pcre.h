@@ -43,8 +43,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define PCRE_MAJOR          7
 #define PCRE_MINOR          2
-#define PCRE_PRERELEASE     -RC3
-#define PCRE_DATE           2007-06-13
+#define PCRE_PRERELEASE     
+#define PCRE_DATE           2007-06-19
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE, the appropriate
