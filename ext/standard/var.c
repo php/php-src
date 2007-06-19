@@ -584,7 +584,7 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 		php_printf("%ld", Z_LVAL_PP(struc));
 		break;
 	case IS_DOUBLE:
-		php_printf("%.*G", (int) EG(precision), Z_DVAL_PP(struc));
+		php_printf("%.*H", (int) EG(precision), Z_DVAL_PP(struc));
 		break;
 	case IS_STRING:
 		tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\\0", 3 TSRMLS_CC);
