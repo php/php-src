@@ -20,7 +20,7 @@ PHP                                                                        NEWS
 - Added missing error check inside bcpowmod(). (Ilia)
 
 - Fixed var_export() to use the new H modifier so that it can generate
-  parsable PHP code for floats again, independent of the locale.
+  parseable PHP code for floats, independent of the locale. (Derick)
 - Fixed regression introduced by the fix for the libgd bug #74 (Pierre)
 - Fixed several integer overflows in ImageCreate(), ImageCreateTrueColor(), 
   ImageCopyResampled() and ImageFilledPolygon() reported by Mattias Bengtsson. 
