@@ -3047,8 +3047,10 @@ BACKSLASH
    Unicode character properties
 
        When PCRE is built with Unicode character property support, three addi-
-       tional escape sequences to match  character  properties  are  available
-       when UTF-8 mode is selected. They are:
+       tional escape sequences that match characters with specific  properties
+       are  available.   When not in UTF-8 mode, these sequences are of course
+       limited to testing characters whose codepoints are less than  256,  but
+       they do work in this mode.  The extra escape sequences are:
 
          \p{xx}   a character with the xx property
          \P{xx}   a character without the xx property
@@ -3162,7 +3164,9 @@ BACKSLASH
        That is, it matches a character without the "mark"  property,  followed
        by  zero  or  more  characters with the "mark" property, and treats the
        sequence as an atomic group (see below).  Characters  with  the  "mark"
-       property are typically accents that affect the preceding character.
+       property  are  typically  accents  that affect the preceding character.
+       None of them have codepoints less than 256, so  in  non-UTF-8  mode  \X
+       matches any one character.
 
        Matching  characters  by Unicode property is not fast, because PCRE has
        to search a structure that contains  data  for  over  fifteen  thousand
@@ -4539,7 +4543,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 13 June 2007
+       Last updated: 19 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 

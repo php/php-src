@@ -1443,5 +1443,13 @@ was broken in all cases./
   \x{023a}\x{2c65}X
  0: \x{23a}\x{2c65}
  1: \x{2c65}
+
+/Check property support in non-UTF-8 mode/
  
+/\p{L}{4}/
+    123abcdefg
+ 0: abcd
+    123abc\xc4\xc5zz
+ 0: abc\xc4
+
 / End of testinput6 /

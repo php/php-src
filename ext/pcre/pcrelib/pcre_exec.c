@@ -2786,7 +2786,7 @@ for (;;)
           for (i = 1; i <= min; i++)
             {
             if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             }
           break;
 
@@ -2794,7 +2794,7 @@ for (;;)
           for (i = 1; i <= min; i++)
             {
             if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
             if ((prop_chartype == ucp_Lu ||
                  prop_chartype == ucp_Ll ||
@@ -2807,7 +2807,7 @@ for (;;)
           for (i = 1; i <= min; i++)
             {
             if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
             if ((prop_category == prop_value) == prop_fail_result)
               RRETURN(MATCH_NOMATCH);
@@ -2818,7 +2818,7 @@ for (;;)
           for (i = 1; i <= min; i++)
             {
             if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
             if ((prop_chartype == prop_value) == prop_fail_result)
               RRETURN(MATCH_NOMATCH);
@@ -2829,7 +2829,7 @@ for (;;)
           for (i = 1; i <= min; i++)
             {
             if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
             if ((prop_script == prop_value) == prop_fail_result)
               RRETURN(MATCH_NOMATCH);
