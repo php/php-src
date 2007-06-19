@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Added missing format validator to unpack() function. (Ilia)
 - Added missing error check inside bcpowmod(). (Ilia)
 
+- Fixed var_export() to use the new H modifier so that it can generate
+  parsable PHP code for floats again, independent of the locale.
 - Fixed regression introduced by the fix for the libgd bug #74 (Pierre)
 - Fixed several integer overflows in ImageCreate(), ImageCreateTrueColor(), 
   ImageCopyResampled() and ImageFilledPolygon() reported by Mattias Bengtsson. 
