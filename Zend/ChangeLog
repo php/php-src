@@ -1,3 +1,12 @@
+2007-06-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      MTH: Fixed foreach by-ref bug
+
+    * tests/unset_cv08.phpt:
+      Fixed test
+
 2007-06-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
