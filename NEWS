@@ -26,7 +26,7 @@ PHP                                                                        NEWS
   ImageCopyResampled() and ImageFilledPolygon() reported by Mattias Bengtsson. 
   (Tony)
 - Fixed size calculation in chunk_split(). (Stas)
-- Fixed integer overlow in str[c]spn(). (Stas)
+- Fixed integer overflow in str[c]spn(). (Stas)
 - Fixed money_format() not to accept multiple %i or %n tokens. (Stas, Ilia)
 - Fixed zend_alter_ini_entry() memory_limit interruption vulnerability.
   (Ilia)
@@ -36,7 +36,7 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
-- Fixed bug #41724 (libxml_get_last_error() - errors survice request scope).
+- Fixed bug #41724 (libxml_get_last_error() - errors service request scope).
   (thekid at php dot net, Ilia)
 - Fixed bug #41717 (imagepolygon does not respect thickness). (Pierre)
 - Fixed bug #41686 (Omitting length param in array_slice not possible).
