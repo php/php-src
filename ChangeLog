@@ -1,3 +1,75 @@
+2007-06-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      
+      Fixed a memory leak inside load_all_certs_file()
+
+2007-06-19  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      bfn
+
+2007-06-19  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/tests/bug40909.phpt:
+      new test
+
+    * ext/pcre/tests/bug40909.phpt
+      ext/pcre/tests/bug40909.phpt:
+      
+      file bug40909.phpt was initially added on branch PHP_5_2.
+
+    * ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput9:
+      final PCRE 7.2 release
+
+    * (PHP_5_2)
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput9:
+      final PCRE 7.2 release :-)
+
+2007-06-19  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/var.c
+      ext/standard/tests/general_functions/var_export-locale.phpt
+      main/snprintf.c
+      main/spprintf.c:
+      - MFH: Added the H modifier to create non-locale-aware non-fixed-precision
+        float representations.
+      - MFH: Fixed var_export() to use the new H modifier so that it can
+      generate
+        parsable PHP code for floats again, independent of the locale.
+
+    * ext/standard/var.c
+      ext/standard/tests/general_functions/var_export-locale.phpt
+      ext/standard/tests/general_functions/var_export-locale.phpt
+      main/snprintf.c
+      main/spprintf.c:
+      - Added the H modifier to create non-locale-aware non-fixed-precision float
+        representations.
+      - Fixed var_export() to use the new H modifier so that it can generate
+        parsable PHP code for floats again, independent of the locale.
+
 2007-06-18  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_2)
