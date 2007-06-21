@@ -1748,6 +1748,10 @@ fastcgi_request_done:
 				if (bindpath) {
 					free(bindpath);
 				}
+				if (max_requests != 1) {
+					/* no need to return exit_status of the last request */
+					exit_status = 0;
+				}
 				break;
 			}
 			/* end of fastcgi loop */
