@@ -1,3 +1,15 @@
+2007-06-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Fixed typos
+
+2007-06-20  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/openssl/openssl.c:
+      - MFB:  Fixed a memory leak inside load_all_certs_file()
+
 2007-06-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
