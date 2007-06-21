@@ -6,8 +6,12 @@
        create_links() : crate links of different types
        delete_links() : delete links 
        fill_files()   : fill file with specified contents 
-       change_file_perms : Change permission of files 
-       fill_buffer    : fill buffer with specified contents
+       change_file_perms() : Change permission of files 
+       fill_buffer()    : fill buffer with specified contents
+       compare_self_stat() : compares the first 13 elements of the 
+                             stat with the corresponding named key values of 
+                             the same stat. 
+       compare_stats() : Compares two stat values
 
 */ 
 
@@ -515,3 +519,113 @@ function delete_links($file_path,
 }
 
 
+
+/*
+ Prototype:
+  function compare_self_stat( array $stat );
+ Description:
+  Compares the each of the first 13 values of the stat array with the 
+  corresponding next 13 values of the same stat for equality
+  $stat = stat array
+
+ Retuns: true when all of them match, false otherwise
+*/
+function compare_self_stat( array $stat )
+{
+  //return value
+  $return_value = true;
+
+  // named keys present in a stat
+  $string_keys = array("dev", "ino", "mode", "nlink", "uid", "gid", 
+                       "rdev", "size", "atime", "mtime", "ctime",
+                       "blksize", "blocks");
+
+  // first numeric key
+  $key = 0;
+
+  // compare the values in the stat, which are accessed using numeric key with
+  // values accessed using string keys
+  foreach($string_keys as $str_key)
+  {
+    if($stat[$key] != $stat[$str_key]) {
+      echo "stat[$key] doesn't match with stat[$str_key]\n";
+      $flag = false;
+      $key++;
+    }
+    else {
+      $key++;
+    }
+  } // end of foreach
+
+  return $return_value;
+}// end of compare_self_stat
+
+/*
+Prototype:
+  function compare_stats( array $stat1, array $stat2, array $fields, 
+                          [string $op = "==", [ bool $flag = false] ]);
+Description:
+  Compares two stat values, stat value should be obtained by stat/lstat
+  $stat1 = first stat array
+  $stat2 = second stat array
+  $op = type of the comparision to be perform between elements of stat1 and stat2
+    "!=" compare for not equal
+    "==" comprae for equality
+    ">"  if each element of stat1 is > than stat2
+    "<"  if each element of stat1 is < than stat2
+  $fields = contains the key of the elements that needs to be compared. 
+            type of the comparision is based on $op argument value
+  $flag = specify true to dump the stat1 and stat2 
+*/
+
+$all_stat_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, "dev", "ino", "mode", "nlink", "uid", "gid", "rdev", "size", "atime", "mtime", "ctime", "blksize", "blocks");
+
+function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
+  // dump the stat if requested
+  if ( $flag == true ) {
+    var_dump($stat1);
+    var_dump($stat2);
+  }
+
+  $result = true;
+
+  // compare values of given key from each stat array 
+  for($index = 0; $index < count($fields); $index++) 
+  {
+    switch( $op )
+    {
+       case "==":
+         if ( $stat1[ $fields[$index] ] != $stat2[ $fields[$index] ] ) {
+           $result = false;
+           echo "stat1 do not match with stat2 at key value: $fields[$index]\n";
+         }
+         break;
+
+       case "!=":
+         if ( $stat1[ $fields[$index] ] != $stat2[ $fields[$index] ] ) {
+           // do nothing as its not equal, else will take care of if equal
+         } else {
+           $result = false;
+           echo "stat1 equals stat2 at key value: $fields[$index]\n";
+         }
+         break;
+
+       case ">":
+         if ( $stat1[ $fields[$index] ] <= $stat2[ $fields[$index] ] ) {
+           $result = false;
+           echo "stat1 is not greater than stat2 at key value: $fields[$index]\n";
+         }
+         break;
+
+       case "<":
+         if ( $stat1[ $fields[$index] ] >= $stat2[ $fields[$index] ] ) {
+           $result = false;
+           echo "stat1 is not lesser than stat2 at key value: $fields[$index]\n";
+         }
+         break;
+    }
+  }
+  return $result;
+}
+
+?>
