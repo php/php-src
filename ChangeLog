@@ -1,3 +1,54 @@
+2007-06-21  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/filesize_variation-win32.phpt
+      ext/standard/tests/file/filesize_variation.phpt
+      ext/standard/tests/file/lstat_stat_basic.phpt
+      ext/standard/tests/file/lstat_stat_error.phpt
+      ext/standard/tests/file/rename_variation-win32.phpt
+      ext/standard/tests/file/rename_variation.phpt
+      ext/standard/tests/file/stat_basic-win32.phpt
+      ext/standard/tests/file/stat_error-win32.phpt:
+      New tests for file system handling functions
+
+    * ext/standard/tests/file/filesize_variation-win32.phpt
+      ext/standard/tests/file/filesize_variation-win32.phpt
+      ext/standard/tests/file/filesize_variation.phpt
+      ext/standard/tests/file/filesize_variation.phpt
+      ext/standard/tests/file/lstat_stat_basic.phpt
+      ext/standard/tests/file/lstat_stat_basic.phpt
+      ext/standard/tests/file/lstat_stat_error.phpt
+      ext/standard/tests/file/lstat_stat_error.phpt
+      ext/standard/tests/file/rename_variation-win32.phpt
+      ext/standard/tests/file/rename_variation-win32.phpt
+      ext/standard/tests/file/rename_variation.phpt
+      ext/standard/tests/file/rename_variation.phpt
+      ext/standard/tests/file/stat_basic-win32.phpt
+      ext/standard/tests/file/stat_basic-win32.phpt
+      ext/standard/tests/file/stat_error-win32.phpt
+      ext/standard/tests/file/stat_error-win32.phpt:
+      
+      file filesize_variation-win32.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/file.inc
+      ext/standard/tests/file/file.inc:
+      New functons to compare stat array
+
+2007-06-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c:
+      Proper fix for bug #39215 Inappropriate close of stdin/stdout/stderr
+
+    * php.ini-dist
+      php.ini-dist
+      php.ini-recommended
+      php.ini-recommended:
+      Fixed default values
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      no need to return exit status of the last fastcgi request
+
 2007-06-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
