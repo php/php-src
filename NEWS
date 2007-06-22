@@ -5,6 +5,8 @@ PHP 4                                                                      NEWS
 - Fixed an integer overflow inside chunk_split(). Identified by Gerhard Wagner.
   (Ilia)
 - Fixed integer overlow in str[c]spn(). (Stas)
+- Fixed regression in glob when open_basedir is on introduced by #41655 fix
+  (Pierre)
 - Fixed money_format() not to accept multiple %i or %n tokens. (Stas, Ilia)
 - Addded "max_input_nesting_level" php.ini option to limit nesting level of 
   input variables. Fix for MOPB-03-2007. (Stas)
