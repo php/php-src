@@ -10,6 +10,8 @@ PHP 4                                                                      NEWS
   input variables. Fix for MOPB-03-2007. (Stas)
 - Fixed INFILE LOCAL option handling with MySQL - now not allowed when 
   open_basedir or safe_mode is active (Stas)
+- Fixed bug #41765 (Recode crashes/does not work on amd64) 
+  (nexus at smoula dot net, Stas)
 - Fixed bug #41630 (segfault when an invalid color index is present in
   the image data). (Reported by Elliot <wccoder@gmail dot com>) (Pierre)
 - Fixed bug #41628 (PHP settings leak between Virtual Hosts in
