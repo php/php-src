@@ -132,7 +132,7 @@ PHP_FUNCTION(recode_string)
 	zval **str;
 	zval **req;
 	bool success;
-	int r_len=0, r_alen =0;
+	size_t r_len=0, r_alen =0;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &req, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
