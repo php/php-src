@@ -107,7 +107,7 @@ array(26) {
   [5]=>
   int(%d)
   [6]=>
-  int(%d)
+  int(%i)
   [7]=>
   int(%d)
   [8]=>
@@ -117,9 +117,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -133,7 +133,7 @@ array(26) {
   ["gid"]=>
   int(%d)
   ["rdev"]=>
-  int(%d)
+  int(%i)
   ["size"]=>
   int(%d)
   ["atime"]=>
@@ -143,9 +143,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 array(26) {
   [0]=>
@@ -161,7 +161,7 @@ array(26) {
   [5]=>
   int(%d)
   [6]=>
-  int(%d)
+  int(%i)
   [7]=>
   int(%d)
   [8]=>
@@ -171,9 +171,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -187,7 +187,7 @@ array(26) {
   ["gid"]=>
   int(%d)
   ["rdev"]=>
-  int(%d)
+  int(%i)
   ["size"]=>
   int(%d)
   ["atime"]=>
@@ -197,9 +197,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 bool(true)
 -- comparing difference in file stats before and after creating link to it --
@@ -217,7 +217,7 @@ array(26) {
   [5]=>
   int(%d)
   [6]=>
-  int(%d)
+  int(%i)
   [7]=>
   int(%d)
   [8]=>
@@ -227,9 +227,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -243,7 +243,7 @@ array(26) {
   ["gid"]=>
   int(%d)
   ["rdev"]=>
-  int(%d)
+  int(%i)
   ["size"]=>
   int(%d)
   ["atime"]=>
@@ -253,9 +253,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 array(26) {
   [0]=>
@@ -271,7 +271,7 @@ array(26) {
   [5]=>
   int(%d)
   [6]=>
-  int(%d)
+  int(%i)
   [7]=>
   int(%d)
   [8]=>
@@ -281,9 +281,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -297,7 +297,7 @@ array(26) {
   ["gid"]=>
   int(%d)
   ["rdev"]=>
-  int(%d)
+  int(%i)
   ["size"]=>
   int(%d)
   ["atime"]=>
@@ -307,9 +307,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 bool(true)
 Done
