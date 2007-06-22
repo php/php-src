@@ -132,7 +132,7 @@ PHP_FUNCTION(recode_string)
 {
 	RECODE_REQUEST request = NULL;
 	char *r = NULL;
-	int r_len = 0, r_alen = 0;
+	size_t r_len = 0, r_alen = 0;
 	int req_len, str_len;
 	char *req, *str;
 
