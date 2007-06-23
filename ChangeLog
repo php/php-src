@@ -1,3 +1,67 @@
+2007-06-22  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/lstat_stat_basic.phpt:
+      Reverting test to original after dicsussion with Raghu. Will open bugzilla
+      for Linux/VMware behaviour
+
+    * (PHP_5_2)
+      ext/standard/tests/file/lstat_stat_basic.phpt:
+      Changed expected output so that this runs on Linux under VMWare as well as
+      Linux.
+
+2007-06-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/tests/file/bug41655_1.phpt
+      ext/standard/tests/file/bug41655_1.phpt
+      ext/standard/tests/file/bug41655_2.phpt
+      ext/standard/tests/file/bug41655_2.phpt:
+      - MFB: add test cases for #41655
+
+    * ext/standard/tests/file/bug41655_1.phpt
+      ext/standard/tests/file/bug41655_1.phpt
+      ext/standard/tests/file/bug41655_1.phpt
+      ext/standard/tests/file/bug41655_2.phpt
+      ext/standard/tests/file/bug41655_2.phpt
+      ext/standard/tests/file/bug41655_2.phpt:
+        1.1.4;
+      file bug41655_1.phpt was initially added on branch PHP_4_4.
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/dir.c:
+      - fix build
+      - fix regression in glob introduced by #41655 fix and add test cases
+
+2007-06-22  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/symlink_link_linkinfo_is_link_basic.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_basic.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation.phpt:
+      New tests for file system handling functions
+
+    * ext/standard/tests/file/symlink_link_linkinfo_is_link_basic.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation.phpt:
+      
+      file symlink_link_linkinfo_is_link_basic.phpt was initially added on
+      branch PHP_5_2.
+
+2007-06-22  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS:
+      Fixed bug #41765 (Recode crashes/does not work on amd64)
+
+    * ext/recode/recode.c
+      ext/recode/recode.c
+      ext/recode/recode.c:
+      fix #41765
+
 2007-06-21  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * ext/standard/tests/file/filesize_variation-win32.phpt
