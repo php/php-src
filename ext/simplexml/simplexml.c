@@ -271,9 +271,6 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 		name = Z_STRVAL_P(member);
 	}
 
-	MAKE_STD_ZVAL(return_value);
-	ZVAL_NULL(return_value);
-
 	GET_NODE(sxe, node);
 
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
@@ -293,6 +290,9 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 			return NULL;
 		}
 	}
+
+	MAKE_STD_ZVAL(return_value);
+	ZVAL_NULL(return_value);
 
 	if (node) {
 		if (attribs) {
