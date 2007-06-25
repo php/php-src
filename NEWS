@@ -76,6 +76,8 @@ PHP                                                                        NEWS
 - Fixed bug #41527 (WDDX deserialize numeric string array key). (Matt, Ilia)
 - Fixed bug #41518 (file_exists() warns of open_basedir restriction on 
   non-existent file). (Tony)
+- Fixed bug #41350 (my_thread_global_end() error during request shutdown
+  on Windows). (Scott, Andrey)
 - Fixed bug #39330 (apache2handler does not call shutdown actions before 
   apache child die). (isk at ecommerce dot com, Gopal, Tony)
 
