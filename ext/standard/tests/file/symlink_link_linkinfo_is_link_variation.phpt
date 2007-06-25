@@ -450,32 +450,32 @@ rmdir($dirname);
 
 -- Working with soft links --
 bool(true)
-int(%d)
+int(%i)
 bool(true)
 
 -- Working with hard links --
 bool(true)
-int(%d)
+int(%i)
 bool(false)
 
 *** Testing symlink(), link(), linkinfo() and is_link() with linknames stored as members of an array ***
 
 -- Working with soft links --
 bool(true)
-int(%d)
+int(%i)
 bool(true)
 
 -- Working with hard links --
 bool(true)
-int(%d)
+int(%i)
 bool(false)
 
 *** Creating a hard link to a non-existent file ***
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): No such file or directory in %s on line %i
 bool(false)
 
-Warning: linkinfo(): No such file or directory in %s on line %d
+Warning: linkinfo(): No such file or directory in %s on line %i
 int(-1)
 bool(false)
 
@@ -539,7 +539,7 @@ Size of file and hard link are same
 bool(true)
 bool(true)
 
-Warning: linkinfo(): No such file or directory in %s on line %d
+Warning: linkinfo(): No such file or directory in %s on line %i
 int(-1)
 bool(false)
 
@@ -548,49 +548,49 @@ bool(true)
 
 -- Working with soft links --
 
-Warning: symlink(): Permission denied in %s on line %d
+Warning: symlink(): Permission denied in %s on line %i
 bool(false)
 
-Warning: linkinfo(): Permission denied in %s on line %d
+Warning: linkinfo(): Permission denied in %s on line %i
 int(-1)
 bool(false)
 
 -- Working with hard links --
 
-Warning: link(): Permission denied in %s on line %d
+Warning: link(): Permission denied in %s on line %i
 bool(false)
 
-Warning: linkinfo(): Permission denied in %s on line %d
+Warning: linkinfo(): Permission denied in %s on line %i
 int(-1)
 bool(false)
 
 *** Create soft link to file and then to itself ***
 bool(true)
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink(): File exists in %s on line %i
 bool(false)
 
 *** Create soft link to directory and then to itself ***
 bool(true)
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink(): File exists in %s on line %i
 bool(false)
 
 *** Create hard link to file and then to itself ***
 bool(true)
 
-Warning: link(): File exists in %s on line %d
+Warning: link(): File exists in %s on line %i
 bool(false)
 
 *** Create hard link in different directory with same filename ***
 
-Warning: link(): File exists in %s on line %d
+Warning: link(): File exists in %s on line %i
 bool(false)
 bool(true)
 
 *** Create soft link in different directory with same filename ***
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink(): File exists in %s on line %i
 bool(false)
 bool(true)
 
@@ -598,57 +598,57 @@ bool(true)
 bool(true)
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
-  int(%d)
+  int(%i)
   [2]=>
-  int(%d)
+  int(%i)
   [3]=>
   int(1)
   [4]=>
-  int(%d)
+  int(%i)
   [5]=>
-  int(%d)
+  int(%i)
   [6]=>
-  int(%d)
+  int(%i)
   [7]=>
-  int(%d)
+  int(%i)
   [8]=>
-  int(%d)
+  int(%i)
   [9]=>
-  int(%d)
+  int(%i)
   [10]=>
-  int(%d)
+  int(%i)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
-  int(%d)
+  int(%i)
   ["mode"]=>
-  int(%d)
+  int(%i)
   ["nlink"]=>
   int(1)
   ["uid"]=>
-  int(%d)
+  int(%i)
   ["gid"]=>
-  int(%d)
+  int(%i)
   ["rdev"]=>
-  int(%d)
+  int(%i)
   ["size"]=>
-  int(%d)
+  int(%i)
   ["atime"]=>
-  int(%d)
+  int(%i)
   ["mtime"]=>
-  int(%d)
+  int(%i)
   ["ctime"]=>
-  int(%d)
+  int(%i)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 linkinfo() value matches lstat['dev']
@@ -657,57 +657,57 @@ linkinfo() value matches lstat['dev']
 bool(true)
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
-  int(%d)
+  int(%i)
   [2]=>
-  int(%d)
+  int(%i)
   [3]=>
   int(2)
   [4]=>
-  int(%d)
+  int(%i)
   [5]=>
-  int(%d)
+  int(%i)
   [6]=>
-  int(%d)
+  int(%i)
   [7]=>
-  int(%d)
+  int(%i)
   [8]=>
-  int(%d)
+  int(%i)
   [9]=>
-  int(%d)
+  int(%i)
   [10]=>
-  int(%d)
+  int(%i)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
-  int(%d)
+  int(%i)
   ["mode"]=>
-  int(%d)
+  int(%i)
   ["nlink"]=>
   int(2)
   ["uid"]=>
-  int(%d)
+  int(%i)
   ["gid"]=>
-  int(%d)
+  int(%i)
   ["rdev"]=>
-  int(%d)
+  int(%i)
   ["size"]=>
-  int(%d)
+  int(%i)
   ["atime"]=>
-  int(%d)
+  int(%i)
   ["mtime"]=>
-  int(%d)
+  int(%i)
   ["ctime"]=>
-  int(%d)
+  int(%i)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 linkinfo() value matches lstat['dev']
@@ -716,57 +716,57 @@ linkinfo() value matches lstat['dev']
 bool(true)
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
-  int(%d)
+  int(%i)
   [2]=>
-  int(%d)
+  int(%i)
   [3]=>
   int(1)
   [4]=>
-  int(%d)
+  int(%i)
   [5]=>
-  int(%d)
+  int(%i)
   [6]=>
-  int(%d)
+  int(%i)
   [7]=>
-  int(%d)
+  int(%i)
   [8]=>
-  int(%d)
+  int(%i)
   [9]=>
-  int(%d)
+  int(%i)
   [10]=>
-  int(%d)
+  int(%i)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
-  int(%d)
+  int(%i)
   ["mode"]=>
-  int(%d)
+  int(%i)
   ["nlink"]=>
   int(1)
   ["uid"]=>
-  int(%d)
+  int(%i)
   ["gid"]=>
-  int(%d)
+  int(%i)
   ["rdev"]=>
-  int(%d)
+  int(%i)
   ["size"]=>
-  int(%d)
+  int(%i)
   ["atime"]=>
-  int(%d)
+  int(%i)
   ["mtime"]=>
-  int(%d)
+  int(%i)
   ["ctime"]=>
-  int(%d)
+  int(%i)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 linkinfo() value matches lstat['dev']
@@ -776,39 +776,39 @@ Done
 
 -- Working with soft links --
 bool(true)
-int(%d)
+int(%i)
 bool(true)
 
 -- Working with hard links --
 bool(true)
-int(%d)
+int(%i)
 bool(false)
 
 *** Testing symlink(), link(), linkinfo() and is_link() with linknames stored as members of an array ***
 
 -- Working with soft links --
 bool(true)
-int(%d)
+int(%i)
 bool(true)
 
 -- Working with hard links --
 bool(true)
-int(%d)
+int(%i)
 bool(false)
 
 *** Creating a hard link to a non-existent file ***
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): No such file or directory in %s on line %i
 bool(false)
 
-Warning: linkinfo(): No such file or directory in %s on line %d
+Warning: linkinfo(): No such file or directory in %s on line %i
 int(-1)
 bool(false)
 
 *** Accessing and updating data of file through soft link ***
 bool(true)
 
-Notice: fwrite(): 80 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
+Notice: fwrite(): 80 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %i
 
 -- Access data of the file through the soft link --
 string(80) "texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttext"
@@ -821,7 +821,7 @@ Soft link size remains same
 
 -- Updating file with data through soft link --
 
-Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
+Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %i
 string(91) "texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttextHello World"
 
 -- Check size of soft link and file --
@@ -832,7 +832,7 @@ Soft link size remains same
 
 -- Updating file with data and check data through soft link --
 
-Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
+Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %i
 string(11) "Hello World"
 
 -- Check size of soft link and file --
@@ -843,7 +843,7 @@ Soft link size remains same
 
 *** Accessing and updating data of file through hard link ***
 
-Notice: fwrite(): 80 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
+Notice: fwrite(): 80 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %i
 
 -- Access data of the file through the hard link --
 bool(true)
@@ -855,7 +855,7 @@ Size of file and hard link are same
 
 -- Updating file with data through hard link --
 
-Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
+Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %i
 string(91) "texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttextHello World"
 
 -- Check size of hard link and file --
@@ -864,7 +864,7 @@ Size of file and hard link are same
 
 -- Updating file with data and check data through hard link --
 
-Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
+Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %i
 string(11) "Hello World"
 
 -- Check size of hard link and file --
@@ -877,7 +877,7 @@ Size of file and hard link are same
 bool(true)
 bool(true)
 
-Warning: linkinfo(): No such file or directory in %s on line %d
+Warning: linkinfo(): No such file or directory in %s on line %i
 int(-1)
 bool(false)
 
@@ -886,49 +886,49 @@ bool(true)
 
 -- Working with soft links --
 
-Warning: symlink(): Permission denied in %s on line %d
+Warning: symlink(): Permission denied in %s on line %i
 bool(false)
 
-Warning: linkinfo(): Permission denied in %s on line %d
+Warning: linkinfo(): Permission denied in %s on line %i
 int(-1)
 bool(false)
 
 -- Working with hard links --
 
-Warning: link(): Permission denied in %s on line %d
+Warning: link(): Permission denied in %s on line %i
 bool(false)
 
-Warning: linkinfo(): Permission denied in %s on line %d
+Warning: linkinfo(): Permission denied in %s on line %i
 int(-1)
 bool(false)
 
 *** Create soft link to file and then to itself ***
 bool(true)
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink(): File exists in %s on line %i
 bool(false)
 
 *** Create soft link to directory and then to itself ***
 bool(true)
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink(): File exists in %s on line %i
 bool(false)
 
 *** Create hard link to file and then to itself ***
 bool(true)
 
-Warning: link(): File exists in %s on line %d
+Warning: link(): File exists in %s on line %i
 bool(false)
 
 *** Create hard link in different directory with same filename ***
 
-Warning: link(): File exists in %s on line %d
+Warning: link(): File exists in %s on line %i
 bool(false)
 bool(true)
 
 *** Create soft link in different directory with same filename ***
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink(): File exists in %s on line %i
 bool(false)
 bool(true)
 
@@ -936,57 +936,57 @@ bool(true)
 bool(true)
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
-  int(%d)
+  int(%i)
   [2]=>
-  int(%d)
+  int(%i)
   [3]=>
   int(1)
   [4]=>
-  int(%d)
+  int(%i)
   [5]=>
-  int(%d)
+  int(%i)
   [6]=>
-  int(%d)
+  int(%i)
   [7]=>
-  int(%d)
+  int(%i)
   [8]=>
-  int(%d)
+  int(%i)
   [9]=>
-  int(%d)
+  int(%i)
   [10]=>
-  int(%d)
+  int(%i)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   [u"dev"]=>
-  int(%d)
+  int(%i)
   [u"ino"]=>
-  int(%d)
+  int(%i)
   [u"mode"]=>
-  int(%d)
+  int(%i)
   [u"nlink"]=>
   int(1)
   [u"uid"]=>
-  int(%d)
+  int(%i)
   [u"gid"]=>
-  int(%d)
+  int(%i)
   [u"rdev"]=>
-  int(%d)
+  int(%i)
   [u"size"]=>
-  int(%d)
+  int(%i)
   [u"atime"]=>
-  int(%d)
+  int(%i)
   [u"mtime"]=>
-  int(%d)
+  int(%i)
   [u"ctime"]=>
-  int(%d)
+  int(%i)
   [u"blksize"]=>
-  int(%d)
+  int(%i)
   [u"blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 linkinfo() value matches lstat['dev']
@@ -995,57 +995,57 @@ linkinfo() value matches lstat['dev']
 bool(true)
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
-  int(%d)
+  int(%i)
   [2]=>
-  int(%d)
+  int(%i)
   [3]=>
   int(2)
   [4]=>
-  int(%d)
+  int(%i)
   [5]=>
-  int(%d)
+  int(%i)
   [6]=>
-  int(%d)
+  int(%i)
   [7]=>
-  int(%d)
+  int(%i)
   [8]=>
-  int(%d)
+  int(%i)
   [9]=>
-  int(%d)
+  int(%i)
   [10]=>
-  int(%d)
+  int(%i)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   [u"dev"]=>
-  int(%d)
+  int(%i)
   [u"ino"]=>
-  int(%d)
+  int(%i)
   [u"mode"]=>
-  int(%d)
+  int(%i)
   [u"nlink"]=>
   int(2)
   [u"uid"]=>
-  int(%d)
+  int(%i)
   [u"gid"]=>
-  int(%d)
+  int(%i)
   [u"rdev"]=>
-  int(%d)
+  int(%i)
   [u"size"]=>
-  int(%d)
+  int(%i)
   [u"atime"]=>
-  int(%d)
+  int(%i)
   [u"mtime"]=>
-  int(%d)
+  int(%i)
   [u"ctime"]=>
-  int(%d)
+  int(%i)
   [u"blksize"]=>
-  int(%d)
+  int(%i)
   [u"blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 linkinfo() value matches lstat['dev']
@@ -1054,57 +1054,57 @@ linkinfo() value matches lstat['dev']
 bool(true)
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
-  int(%d)
+  int(%i)
   [2]=>
-  int(%d)
+  int(%i)
   [3]=>
   int(1)
   [4]=>
-  int(%d)
+  int(%i)
   [5]=>
-  int(%d)
+  int(%i)
   [6]=>
-  int(%d)
+  int(%i)
   [7]=>
-  int(%d)
+  int(%i)
   [8]=>
-  int(%d)
+  int(%i)
   [9]=>
-  int(%d)
+  int(%i)
   [10]=>
-  int(%d)
+  int(%i)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   [u"dev"]=>
-  int(%d)
+  int(%i)
   [u"ino"]=>
-  int(%d)
+  int(%i)
   [u"mode"]=>
-  int(%d)
+  int(%i)
   [u"nlink"]=>
   int(1)
   [u"uid"]=>
-  int(%d)
+  int(%i)
   [u"gid"]=>
-  int(%d)
+  int(%i)
   [u"rdev"]=>
-  int(%d)
+  int(%i)
   [u"size"]=>
-  int(%d)
+  int(%i)
   [u"atime"]=>
-  int(%d)
+  int(%i)
   [u"mtime"]=>
-  int(%d)
+  int(%i)
   [u"ctime"]=>
-  int(%d)
+  int(%i)
   [u"blksize"]=>
-  int(%d)
+  int(%i)
   [u"blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 linkinfo() value matches lstat['dev']
