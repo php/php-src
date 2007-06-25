@@ -1,3 +1,21 @@
+2007-06-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c:
+      
+      Fixed bug #41685 (array_push() fails to warn when next index is already
+      occupied).
+
+2007-06-24  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/simplexml/simplexml.c:
+      MFB:fix memleak in sxe_prop_dim_read()
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c:
+      fix memleak in sxe_prop_dim_read()
+
 2007-06-22  Zoe Slattery  <zoe@uk.ibm.com>
 
     * (PHP_5_2)
