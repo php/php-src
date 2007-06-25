@@ -5455,7 +5455,18 @@ PHP_FUNCTION(highlight_file)
 
 	if (highlight_file(filename, &syntax_highlighter_ini TSRMLS_CC) == FAILURE) {
 		if (i) { 
-			php_end_ob_buffer (1, 0 TSRMLS_CC); 
+			int res = php_ob_get_buffer(return_value TSRMLS_CC);
+
+			/* flush the buffer only if there is something to flush */
+			if (res == SUCCESS && Z_STRLEN_P(return_value) > 0) {
+				php_end_ob_buffer (1, 0 TSRMLS_CC);
+				zval_dtor(return_value);
+			} else {
+				php_end_ob_buffer (0, 0 TSRMLS_CC);
+				if (res == SUCCESS) {
+					zval_dtor(return_value);
+				}
+			}
 		}
 		RETURN_FALSE;
 	}
@@ -5482,8 +5493,6 @@ PHP_FUNCTION(php_strip_whitespace)
 		RETURN_FALSE;
 	}
 
-	php_start_ob_buffer(NULL, 0, 1 TSRMLS_CC);
-
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = filename;
 	file_handle.free_filename = 0;
@@ -5491,9 +5500,10 @@ PHP_FUNCTION(php_strip_whitespace)
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 	if (open_file_for_scanning(&file_handle TSRMLS_CC)==FAILURE) {
 		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
-		php_end_ob_buffer(1, 0 TSRMLS_CC);
 		RETURN_EMPTY_STRING();
 	}
+
+	php_start_ob_buffer(NULL, 0, 1 TSRMLS_CC);
 
 	zend_strip(TSRMLS_C);
 	
