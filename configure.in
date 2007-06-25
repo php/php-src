@@ -371,6 +371,7 @@ sys/poll.h \
 sys/resource.h \
 sys/select.h \
 sys/socket.h \
+sys/stat.h \
 sys/statfs.h \
 sys/statvfs.h \
 sys/vfs.h \
