@@ -859,8 +859,7 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, ub1 type, char *data,
 			break;
 	}
 
-	if (!data || data_len <= 0) {
-		/* nothing to write, silently fail */
+	if (data_len < 0) {
 		return 1;
 	}
 
