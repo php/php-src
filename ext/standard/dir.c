@@ -427,7 +427,7 @@ PHP_FUNCTION(glob)
 		char *basename = estrndup(pattern, pattern_len);
 		
 		php_dirname(basename, pattern_len);
-		if (php_check_open_basedir(pattern TSRMLS_CC)) {
+		if (php_check_open_basedir(basename TSRMLS_CC)) {
 			efree(basename);
 			RETURN_FALSE;
 		}
