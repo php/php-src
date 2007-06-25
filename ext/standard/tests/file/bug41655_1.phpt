@@ -7,4 +7,4 @@ open_basedir=/tmp
 	$a=glob("./*.jpeg");
 ?>
 --EXPECTF--
-Warning: glob() [%s]: open_basedir restriction in effect. File(.) is not within the allowed path(s): (/tmp) in %s on line %d
+Warning: glob(): open_basedir restriction in effect. File(.) is not within the allowed path(s): (/tmp) in %s on line %d
