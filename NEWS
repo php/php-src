@@ -36,7 +36,9 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
-- Fixed bug #41765 (Recode crashes/does not work on amd64) 
+- Fixed bug #41773 (php_strip_whitespace() sends headers with errors 
+  suppressed). (Tony)
+- Fixed bug #41765 (Recode crashes/does not work on amd64). 
   (nexus at smoula dot net, Stas)
 - Fixed bug #41724 (libxml_get_last_error() - errors service request scope).
   (thekid at php dot net, Ilia)
