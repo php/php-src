@@ -397,19 +397,19 @@ PHP_FUNCTION(glob)
 #endif
 
 	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
-		size_t base_len = php_dirname(pattern, strlen(pattern));
-		char pos = pattern[base_len];
-
-		pattern[base_len] = '\0';
-
-		if (PG(safe_mode) && (!php_checkuid(pattern, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		int pattern_len = strlen(pattern);
+		char *basename = estrndup(pattern, pattern_len);
+		
+		php_dirname(basename, pattern_len);
+		if (PG(safe_mode) && (!php_checkuid(basename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			efree(basename);
 			RETURN_FALSE;
 		}
-		if (php_check_open_basedir(pattern TSRMLS_CC)) {
+		if (php_check_open_basedir(basename TSRMLS_CC)) {
+			efree(basename);
 			RETURN_FALSE;
 		}
-
-		pattern[base_len] = pos;
+		efree(basename);
 	}
 
 	globbuf.gl_offs = 0;
