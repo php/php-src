@@ -5,7 +5,7 @@ shm_detach() tests
 --FILE--
 <?php
 
-$key = ftok(__FILE__, 'q');
+$key = ftok(dirname(__FILE__)."/003.phpt", 'q');
 
 var_dump(shm_detach());
 var_dump(shm_detach(1,1));
@@ -21,6 +21,14 @@ var_dump(shm_detach(1));
 var_dump(shm_detach(-1));
 
 echo "Done\n";
+?>
+--CLEAN--
+<?php
+
+$key = ftok(dirname(__FILE__)."/003.phpt", 'q');
+$s = shm_attach($key);
+shm_remove($s);
+
 ?>
 --EXPECTF--
 Warning: shm_detach() expects exactly 1 parameter, 0 given in %s003.php on line %d
