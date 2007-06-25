@@ -662,6 +662,10 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_REPORT_ALL", MYSQLI_REPORT_ALL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_REPORT_OFF", 0, CONST_CS | CONST_PERSISTENT);
 
+	if (mysql_server_init(0, NULL, NULL)) {
+		return FAILURE;
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -670,6 +674,16 @@ PHP_MINIT_FUNCTION(mysqli)
  */
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
+#ifdef PHP_WIN32
+	unsigned long client_ver = mysql_get_client_version;
+	/* Can't call mysql_server_end() multiple times prior to 5.0.42 on Windows */
+	if ((client_ver > 50042 && client_ver < 50100) || client_ver > 50122) {
+		mysql_server_end();
+	}
+#else
+	mysql_server_end();
+#endif
+
 	zend_hash_destroy(&mysqli_driver_properties);
 	zend_hash_destroy(&mysqli_result_properties);
 	zend_hash_destroy(&mysqli_stmt_properties);
@@ -686,6 +700,11 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
+#ifdef ZTS
+	if (mysql_thread_init()) {
+		return FAILURE;
+	}
+#endif
 	MyG(error_msg) = NULL;
 	MyG(error_no) = 0;
 
@@ -697,6 +716,9 @@ PHP_RINIT_FUNCTION(mysqli)
  */
 PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
+#ifdef ZTS
+	mysql_thread_end();
+#endif
 	if (MyG(error_msg)) {
 		efree(MyG(error_msg));
 	}
