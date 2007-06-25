@@ -395,6 +395,10 @@ ZEND_MODULE_STARTUP_D(mysql)
 	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_INTERACTIVE", CLIENT_INTERACTIVE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_IGNORE_SPACE", CLIENT_IGNORE_SPACE, CONST_CS | CONST_PERSISTENT); 
 
+	if (mysql_server_init(0, NULL, NULL)) {
+		return FAILURE;
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -403,6 +407,16 @@ ZEND_MODULE_STARTUP_D(mysql)
  */
 PHP_MSHUTDOWN_FUNCTION(mysql)
 {
+#ifdef PHP_WIN32
+	unsigned long client_ver = mysql_get_client_version;
+	/* Can't call mysql_server_end() multiple times prior to 5.0.42 on Windows */
+	if ((client_ver > 50042 && client_ver < 50100) || client_ver > 50122) {
+		mysql_server_end();
+	}
+#else
+	mysql_server_end();
+#endif
+
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -412,6 +426,11 @@ PHP_MSHUTDOWN_FUNCTION(mysql)
  */
 PHP_RINIT_FUNCTION(mysql)
 {
+#ifdef ZTS
+	if (mysql_thread_init()) {
+		return FAILURE;
+	}
+#endif
 	MySG(default_link)=-1;
 	MySG(num_links) = MySG(num_persistent);
 	/* Reset connect error/errno on every request */
@@ -426,6 +445,9 @@ PHP_RINIT_FUNCTION(mysql)
  */
 PHP_RSHUTDOWN_FUNCTION(mysql)
 {
+#ifdef ZTS
+	mysql_thread_end();
+#endif
 	if (MySG(trace_mode)) {
 		if (MySG(result_allocated)){
 			php_error_docref("function.mysql-free-result" TSRMLS_CC, E_WARNING, "%lu result set(s) not freed. Use mysql_free_result to free result sets which were requested using mysql_query()", MySG(result_allocated));
