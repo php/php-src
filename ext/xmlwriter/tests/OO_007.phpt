@@ -33,7 +33,7 @@ print $output;
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-   <ns1:child1 xmlns:ns1="urn:ns1" ns1:att1="a&amp;b" xmlns:ns1="urn:ns1" att2="double&quot; single'" ns1:att2="&lt;&gt;&quot;'&amp;" xmlns:ns1="urn:ns1">
+   <ns1:child1 ns1:att1="a&amp;b" att2="double&quot; single'" ns1:att2="&lt;&gt;&quot;'&amp;" xmlns:ns1="urn:ns1">
       <chars>special characters: &lt;&gt;&quot;'&amp;</chars>
    </ns1:child1>
 </root>
