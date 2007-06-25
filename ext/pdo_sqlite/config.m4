@@ -112,10 +112,10 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 EOF
       AC_CHECK_FUNCS(usleep nanosleep)
       AC_CHECK_HEADERS(time.h)
-      
-      dnl Solaris fix
-      PHP_CHECK_LIBRARY(rt, fdatasync, [PHP_ADD_LIBRARY(rt,, PDO_SQLITE_SHARED_LIBADD)])
   fi
+
+  dnl Solaris fix
+  PHP_CHECK_LIBRARY(rt, fdatasync, [PHP_ADD_LIBRARY(rt,, PDO_SQLITE_SHARED_LIBADD)])
 
   ifdef([PHP_ADD_EXTENSION_DEP],
   [
