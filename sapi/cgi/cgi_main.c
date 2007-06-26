@@ -766,7 +766,7 @@ static void init_request_info(TSRMLS_D)
 		char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT")-1 TSRMLS_CC);
 
 		if (CGIG(fix_pathinfo)) {
-			char *real_path;
+			char *real_path = NULL;
 			char *orig_path_translated = env_path_translated;
 			char *orig_path_info = env_path_info;
 			char *orig_script_name = env_script_name;
@@ -926,6 +926,9 @@ static void init_request_info(TSRMLS_D)
 					efree(pt);
 				}
 			} else {
+				if (real_path) {
+					script_path_translated = real_path;
+				}
 				/* make sure path_info/translated are empty */
 				if (!orig_script_filename ||
 					(script_path_translated != orig_script_filename) ||
@@ -951,8 +954,10 @@ static void init_request_info(TSRMLS_D)
 				} else {
 					SG(request_info).request_uri = env_script_name;
 				}
+				if (real_path) {
+					free(real_path);
+				}
 			}			
-			free(real_path);
 		} else {
 #endif
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
