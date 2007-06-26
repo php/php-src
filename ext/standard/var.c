@@ -20,8 +20,6 @@
 
 /* $Id$ */
 
-
-
 /* {{{ includes 
 */
 
@@ -39,10 +37,8 @@
 #define Z_REFCOUNT_PP(a) ((*a)->refcount)
 
 /* }}} */
-/* {{{ php_var_dump */
 
-/* temporary, for debugging */
-static void php_var_dump_unicode(UChar *ustr, int length, int verbose, char *quote, int escape TSRMLS_DC)
+static void php_var_dump_unicode(UChar *ustr, int length, int verbose, char *quote, int escape TSRMLS_DC) /* {{{ */
 {
 	UChar32 c;
 	int i;
@@ -251,8 +247,6 @@ head_done:
 
 /* }}} */
 
-
-
 /* {{{ proto void var_dump(mixed var) U
    Dumps a string representation of variable to output */
 PHP_FUNCTION(var_dump)
@@ -275,7 +269,6 @@ PHP_FUNCTION(var_dump)
 	efree(args);
 }
 /* }}} */
-
 
 /* {{{ proto void var_inspect(mixed var) U
    Dumps a string representation of variable to output (verbose form) */
@@ -300,9 +293,7 @@ PHP_FUNCTION(var_inspect)
 }
 /* }}} */
 
-/* {{{ debug_zval_dump */
-
-static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
 	TSRMLS_FETCH();
@@ -475,10 +466,7 @@ PHP_FUNCTION(debug_zval_dump)
 }
 /* }}} */
 
-
-/* {{{ php_var_export */
-
-static int php_array_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+static int php_array_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
 	TSRMLS_FETCH();
@@ -634,7 +622,6 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 
 /* }}} */
 
-
 /* {{{ proto mixed var_export(mixed var [, bool return]) U
    Outputs or returns a string representation of a variable */
 PHP_FUNCTION(var_export)
@@ -665,13 +652,9 @@ PHP_FUNCTION(var_export)
 }
 /* }}} */
 
-
-
-/* {{{ php_var_serialize */
-
 static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var_hash TSRMLS_DC);
 
-static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old TSRMLS_DC)
+static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old TSRMLS_DC) /* {{{ */
 {
 	ulong var_no;
 	char id[32], *p;
@@ -707,15 +690,17 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	zend_hash_add(var_hash, p, len, &var_no, sizeof(var_no), NULL);
 	return SUCCESS;
 }
+/* }}} */
 
-static inline void php_var_serialize_long(smart_str *buf, long val)
+static inline void php_var_serialize_long(smart_str *buf, long val) /* {{{ */
 {
 	smart_str_appendl(buf, "i:", 2);
 	smart_str_append_long(buf, val);
 	smart_str_appendc(buf, ';');
 }
+/* }}} */
 
-static inline void php_var_serialize_string(smart_str *buf, char *str, int len)
+static inline void php_var_serialize_string(smart_str *buf, char *str, int len) /* {{{ */
 {
 	static const char hex[] = "0123456789abcdef";
 	unsigned char c;
@@ -738,8 +723,9 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, int len)
 
 	smart_str_appendl(buf, "\";", 2);
 }
+/* }}} */
 
-static inline void php_var_serialize_ustr(smart_str *buf, UChar *ustr, int len)
+static inline void php_var_serialize_ustr(smart_str *buf, UChar *ustr, int len) /* {{{ */
 {
 	static const char hex[] = "0123456789abcdef";
 	UChar c;
@@ -758,8 +744,9 @@ static inline void php_var_serialize_ustr(smart_str *buf, UChar *ustr, int len)
 		}
 	}
 }
+/* }}} */
 
-static inline void php_var_serialize_unicode(smart_str *buf, UChar *ustr, int len)
+static inline void php_var_serialize_unicode(smart_str *buf, UChar *ustr, int len) /* {{{ */
 {
 	smart_str_appendl(buf, "U:", 2);
 	smart_str_append_long(buf, len);
@@ -767,8 +754,9 @@ static inline void php_var_serialize_unicode(smart_str *buf, UChar *ustr, int le
 	php_var_serialize_ustr(buf, ustr, len);
 	smart_str_appendl(buf, "\";", 2);
 }
+/* }}} */
 
-static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc TSRMLS_DC)
+static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc TSRMLS_DC) /* {{{ */
 {
 	PHP_CLASS_ATTRIBUTES;
 
@@ -785,8 +773,9 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 	PHP_CLEANUP_CLASS_ATTRIBUTES();
 	return incomplete_class;
 }
+/* }}} */
 
-static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, HashTable *var_hash TSRMLS_DC)
+static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, HashTable *var_hash TSRMLS_DC) /* {{{ */
 {
 	int count;
 	zend_bool  incomplete_class;
@@ -905,9 +894,9 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 	}
 	smart_str_appendc(buf, '}');
 }
+/* }}} */
 
-
-static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var_hash TSRMLS_DC)
+static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var_hash TSRMLS_DC) /* {{{ */
 {
 	int i;
 	ulong *var_already;
@@ -1121,15 +1110,15 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 			return;
 	} 
 }
+/* }}} */
 
-PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash TSRMLS_DC)
+PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash TSRMLS_DC) /* {{{ */
 {
 	php_var_serialize_intern(buf, *struc, var_hash TSRMLS_CC);
 	smart_str_0(buf);
 }
-	
 /* }}} */
-
+	
 /* {{{ proto string serialize(mixed variable) U
    Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
@@ -1161,6 +1150,7 @@ PHP_FUNCTION(serialize)
 }
 
 /* }}} */
+
 /* {{{ proto mixed unserialize(string variable_representation) U
    Takes a string representation of variable and recreates it */
 
