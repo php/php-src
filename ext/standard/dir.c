@@ -24,6 +24,7 @@
 #include "fopen_wrappers.h"
 #include "file.h"
 #include "php_dir.h"
+#include "php_string.h"
 #include "php_scandir.h"
 
 #ifdef HAVE_DIRENT_H
