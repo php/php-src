@@ -6122,7 +6122,7 @@ PHP_FUNCTION(move_uploaded_file)
 
 static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, zval *arr)
 {
-	zval *element;
+	zval *element, name;
 	TSRMLS_FETCH();
 
 	switch (callback_type) {
@@ -6136,29 +6136,17 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 			*element = *arg2;
 			zval_copy_ctor(element);
 			INIT_PZVAL(element);
+
+			name = *arg1;
+			zval_copy_ctor(&name);
+			INIT_PZVAL(&name);
+
 			if (UG(unicode)) {
 				convert_to_unicode_with_converter(element, UG(utf8_conv));
+				convert_to_unicode_with_converter(&name, UG(utf8_conv));
 			}
-			if (is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) != IS_LONG) { 
-				zstr key;
-				int key_len;
-
-				if (UG(unicode)) {
-					if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) TSRMLS_CC) == FAILURE) {
-						return;
-					}
-				} else {
-					key.s = Z_STRVAL_P(arg1);
-					key_len = Z_STRLEN_P(arg1);
-				}
-				zend_u_hash_update(Z_ARRVAL_P(arr), ZEND_STR_TYPE, key, key_len+1, &element, sizeof(zval *), NULL);
-				if (UG(unicode)) {
-					efree(key.u);
-				}
-			} else {
-				ulong key = (ulong) zend_atoi(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
-				zend_hash_index_update(Z_ARRVAL_P(arr), key, &element, sizeof(zval *), NULL);
-			}
+			zend_u_symtable_update(Z_ARRVAL_P(arr), ZEND_STR_TYPE, Z_UNIVAL(name), Z_UNILEN(name)+1, &element, sizeof(zval *), NULL);
+			zval_dtor(&name);
 			break;
 
 		case ZEND_INI_PARSER_POP_ENTRY:
@@ -6170,7 +6158,18 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 				break;
 			}
 
-			if (is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) != IS_LONG) {
+			if (!(Z_STRLEN_P(arg1) > 1 && Z_STRVAL_P(arg1)[0]=='0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) == IS_LONG) {
+				ulong key = (ulong) zend_atoi(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
+				if (zend_hash_index_find(Z_ARRVAL_P(arr), key, (void **) &find_hash) == FAILURE) {
+						ALLOC_ZVAL(hash);
+						INIT_PZVAL(hash);
+						array_init(hash);
+
+						zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash, sizeof(zval *), NULL);
+				} else {
+					hash = *find_hash;
+				}
+			} else {
 				zstr key;
 				int key_len;
 
@@ -6195,17 +6194,6 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 
 				if (UG(unicode)) {
 					efree(key.u);
-				}
-			} else {
-				ulong key = (ulong) zend_atoi(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
-				if (zend_hash_index_find(Z_ARRVAL_P(arr), key, (void **) &find_hash) == FAILURE) {
-						ALLOC_ZVAL(hash);
-						INIT_PZVAL(hash);
-						array_init(hash);
-
-						zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash, sizeof(zval *), NULL);
-				} else {
-					hash = *find_hash;
 				}
 			}
 
@@ -6233,31 +6221,21 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 
 static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback_type, zval *arr)
 {
+	zval name;
 	TSRMLS_FETCH();
 
 	if (callback_type == ZEND_INI_PARSER_SECTION) {
 		MAKE_STD_ZVAL(BG(active_ini_file_section));
 		array_init(BG(active_ini_file_section));
-		if (is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) != IS_LONG) {
-			zstr key;
-			int key_len;
+		name = *arg1;
+		zval_copy_ctor(&name);
+		INIT_PZVAL(&name);
 
-			if (UG(unicode)) {
-				if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) TSRMLS_CC) == FAILURE) {
-					return;
-				}
-			} else {
-				key.s = Z_STRVAL_P(arg1);
-				key_len = Z_STRLEN_P(arg1);
-			}
-			zend_u_hash_update(Z_ARRVAL_P(arr), ZEND_STR_TYPE, key, key_len+1, &BG(active_ini_file_section), sizeof(zval *), NULL);
-			if (UG(unicode)) {
-				efree(key.u);
-			}
-		} else {
-			ulong key = (ulong) zend_atoi(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
-			zend_hash_index_update(Z_ARRVAL_P(arr), key, &BG(active_ini_file_section), sizeof(zval *), NULL);
+		if (UG(unicode)) {
+			convert_to_unicode_with_converter(&name, UG(utf8_conv));
 		}
+		zend_u_symtable_update(Z_ARRVAL_P(arr), ZEND_STR_TYPE, Z_UNIVAL(name), Z_UNILEN(name)+1, &BG(active_ini_file_section), sizeof(zval *), NULL);
+		zval_dtor(&name);
 	} else if (arg2) {
 		zval *active_arr;
 
