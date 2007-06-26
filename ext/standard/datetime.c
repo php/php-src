@@ -49,7 +49,7 @@ char *day_short_names[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-/* {{{ php_std_date
+/* {{{ PHPAPI char *php_std_date(time_t t TSRMLS_DC)
    Return date string in standard format for http headers */
 PHPAPI char *php_std_date(time_t t TSRMLS_DC)
 {
@@ -84,7 +84,6 @@ PHPAPI char *php_std_date(time_t t TSRMLS_DC)
 	return (str);
 }
 /* }}} */
-
 
 #if HAVE_STRPTIME
 #ifndef HAVE_STRPTIME_DECL_FAILS
@@ -155,6 +154,7 @@ PHP_FUNCTION(strptime)
 	}
 }
 /* }}} */
+
 #endif
 
 /*

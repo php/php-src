@@ -92,7 +92,7 @@ extern char *crypt(char *__key, char *__salt);
 
 #define PHP_CRYPT_RAND php_rand(TSRMLS_C)
 
-PHP_MINIT_FUNCTION(crypt)
+PHP_MINIT_FUNCTION(crypt) /* {{{ */
 {
 	REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", PHP_MAX_SALT_LEN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_STD_DES", PHP_STD_DES_CRYPT, CONST_CS | CONST_PERSISTENT);
@@ -102,17 +102,18 @@ PHP_MINIT_FUNCTION(crypt)
 
 	return SUCCESS;
 }
-
+/* }}} */
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-static void php_to64(char *s, long v, int n)
+static void php_to64(char *s, long v, int n) /* {{{ */
 {
 	while (--n >= 0) {
 		*s++ = itoa64[v&0x3f]; 		
 		v >>= 6;
 	} 
 } 
+/* }}} */
 
 /* {{{ proto string crypt(string str [, string salt]) U
    Hash a string */
