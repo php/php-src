@@ -22,7 +22,7 @@
 #include "php.h"
 #include "base64.h"
 
-/* {{{ */
+/* {{{ base64 tables */
 static const char base64_table[] =
 	{ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
 	  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -53,8 +53,7 @@ static const short base64_reverse_table[256] = {
 };
 /* }}} */
 
-/* {{{ php_base64_encode */
-PHPAPI unsigned char *php_base64_encode(const unsigned char *str, int length, int *ret_length)
+PHPAPI unsigned char *php_base64_encode(const unsigned char *str, int length, int *ret_length) /* {{{ */
 {
 	const unsigned char *current = str;
 	unsigned char *p;
@@ -135,14 +134,13 @@ void php_base64_init()
 */
 /* }}} */
 
-PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length)
+PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length) /* {{{ */
 {
 	return php_base64_decode_ex(str, length, ret_length, 0);
 }
+/* }}} */
 
-/* {{{ php_base64_decode */
-/* as above, but backwards. :) */
-PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length, int *ret_length, zend_bool strict)
+PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length, int *ret_length, zend_bool strict) /* {{{ */
 {
 	const unsigned char *current = str;
 	int ch, i = 0, j = 0, k;
@@ -223,7 +221,6 @@ PHP_FUNCTION(base64_encode)
 }
 /* }}} */
 
-
 /* {{{ proto binary base64_decode(binary str[, bool strict]) U
    Decodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_decode)
@@ -244,7 +241,6 @@ PHP_FUNCTION(base64_decode)
 	}
 }
 /* }}} */
-
 
 /*
  * Local variables:

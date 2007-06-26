@@ -33,7 +33,7 @@ static zval *current_section;
 
 /* OBJECTS_FIXME: This whole extension needs going through. The use of objects looks pretty broken here */
 
-static void browscap_entry_dtor(zval **zvalue)
+static void browscap_entry_dtor(zval **zvalue) /* {{{ */
 {
 	if (Z_TYPE_PP(zvalue) == IS_ARRAY) {
 		zend_hash_destroy(Z_ARRVAL_PP(zvalue));
@@ -45,10 +45,9 @@ static void browscap_entry_dtor(zval **zvalue)
 	}
 	free(*zvalue);
 }
+/* }}} */
 
-/* {{{ convert_browscap_pattern
- */
-static void convert_browscap_pattern(zval *pattern)
+static void convert_browscap_pattern(zval *pattern) /* {{{ */
 {
 	register int i, j;
 	char *t;
@@ -86,9 +85,7 @@ static void convert_browscap_pattern(zval *pattern)
 }
 /* }}} */
 
-/* {{{ php_browscap_parser_cb
- */
-static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, void *arg)
+static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, void *arg) /* {{{ */
 {
 	if (!arg1) {
 		return;
@@ -148,9 +145,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
-PHP_MINIT_FUNCTION(browscap)
+PHP_MINIT_FUNCTION(browscap) /* {{{ */
 {
 	char *browscap = INI_STR("browscap");
 
@@ -178,9 +173,7 @@ PHP_MINIT_FUNCTION(browscap)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
-PHP_MSHUTDOWN_FUNCTION(browscap)
+PHP_MSHUTDOWN_FUNCTION(browscap) /* {{{ */
 {
 	char *browscap = INI_STR("browscap");
 	if (browscap && browscap[0]) {
@@ -190,10 +183,7 @@ PHP_MSHUTDOWN_FUNCTION(browscap)
 }
 /* }}} */
 
-
-/* {{{ browser_reg_compare
- */
-static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_hash_key *key)
+static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_hash_key *key) /* {{{ */
 {
 	zval **browser_regex, **previous_match;
 	regex_t r;
