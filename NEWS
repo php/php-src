@@ -36,6 +36,8 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #41795 (checkdnsrr does not support DNS_TXT type). 
+  (lucas at facebook dot com, Tony)
 - Fixed bug #41773 (php_strip_whitespace() sends headers with errors 
   suppressed). (Tony)
 - Fixed bug #41765 (Recode crashes/does not work on amd64). 
