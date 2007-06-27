@@ -38,6 +38,8 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #41813 (segmentation fault when using string offset as an object).
+  (judas dot iscariote at gmail dot com, Tony)
 - Fixed bug #41795 (checkdnsrr does not support DNS_TXT type). 
   (lucas at facebook dot com, Tony)
 - Fixed bug #41773 (php_strip_whitespace() sends headers with errors 
