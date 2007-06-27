@@ -1,3 +1,82 @@
+2007-06-26  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/assert.c
+      ext/standard/base64.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/credits.c
+      ext/standard/crypt.c
+      ext/standard/css.c
+      ext/standard/cyr_convert.c
+      ext/standard/datetime.c
+      ext/standard/var.c:
+      fix ws & folding
+
+2007-06-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed bug #40419 (Trailing Slash in CGI request don't work)
+
+2007-06-26  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/dir.c:
+      add missing include and fix warning
+
+    * ext/xmlwriter/tests/007.phpt
+      ext/xmlwriter/tests/OO_007.phpt:
+      MFB
+
+    * (PHP_5_2)
+      ext/xmlwriter/tests/007.phpt
+      ext/xmlwriter/tests/OO_007.phpt:
+      fix tests as discussed
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug41445.phpt
+      ext/standard/tests/general_functions/bug41445_1.phpt:
+      MFH: fix #41445 (parse_ini_file() has a problem with certain types of
+      integer as sections)
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug41445.phpt
+      ext/standard/tests/general_functions/bug41445.phpt
+      ext/standard/tests/general_functions/bug41445_1.phpt
+      ext/standard/tests/general_functions/bug41445_1.phpt:
+      fix #41445 (parse_ini_file() has a problem with certain types of integer as
+      sections)
+
+    * (PHP_5_2)
+      ext/standard/var.c:
+      fix ws
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/dns.c:
+      MFH: fix #41795 (checkdnsrr does not support DNS_TXT type)
+      patch by lucas at facebook dot com
+
+    * ext/standard/dns.c:
+      fix #41795 (checkdnsrr does not support DNS_TXT type)
+
+    * Makefile.global:
+      fix 'make test' on platforms with broken shells
+
+2007-06-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo_mysql/tests/bug_41698.phpt
+      ext/pdo_mysql/tests/bug_41698.phpt:
+      
+      Fixed bug #41698 (float parameters truncated to integer in prepared
+      statements).
+
 2007-06-25  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/tests/file/bug41655_1.phpt
