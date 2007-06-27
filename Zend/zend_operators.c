@@ -1499,7 +1499,7 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		Z_STRLEN_P(result) = result_len;
 		return SUCCESS;
 	}
-	if (Z_TYPE_P(op1) == IS_UNICODE || Z_TYPE_P(op2) == IS_UNICODE) {
+	if (Z_TYPE_P(op1) == IS_UNICODE && Z_TYPE_P(op2) == IS_UNICODE) {
 		zend_error(E_ERROR, "Unsupported operand types");
 		return FAILURE;
 	}
@@ -1543,7 +1543,7 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		return SUCCESS;
 	}
 
-	if (Z_TYPE_P(op1) == IS_UNICODE || Z_TYPE_P(op2) == IS_UNICODE) {
+	if (Z_TYPE_P(op1) == IS_UNICODE && Z_TYPE_P(op2) == IS_UNICODE) {
 		zend_error(E_ERROR, "Unsupported operand types");
 		return FAILURE;
 	}
@@ -1588,7 +1588,7 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		return SUCCESS;
 	}
 
-	if (Z_TYPE_P(op1) == IS_UNICODE || Z_TYPE_P(op2) == IS_UNICODE) {
+	if (Z_TYPE_P(op1) == IS_UNICODE && Z_TYPE_P(op2) == IS_UNICODE) {
 		zend_error(E_ERROR, "Unsupported operand types");
 		return FAILURE;
 	}
@@ -1606,11 +1606,6 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 
-	if (Z_TYPE_P(op1) == IS_UNICODE || Z_TYPE_P(op2) == IS_UNICODE) {
-		zend_error(E_ERROR, "Unsupported operand types");
-		return FAILURE;
-	}
-
 	zendi_convert_to_long(op1, op1_copy, result);
 	zendi_convert_to_long(op2, op2_copy, result);
 	Z_LVAL_P(result) = Z_LVAL_P(op1) << Z_LVAL_P(op2);
@@ -1622,11 +1617,6 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
-
-	if (Z_TYPE_P(op1) == IS_UNICODE || Z_TYPE_P(op2) == IS_UNICODE) {
-		zend_error(E_ERROR, "Unsupported operand types");
-		return FAILURE;
-	}
 
 	zendi_convert_to_long(op1, op1_copy, result);
 	zendi_convert_to_long(op2, op2_copy, result);
