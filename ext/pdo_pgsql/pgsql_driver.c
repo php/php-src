@@ -476,6 +476,17 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 	return 1;
 }
 
+/* {{{ */
+static int pdo_pgsql_check_liveness(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	if (PQstatus(H->server) == CONNECTION_BAD) {
+		PQreset(H->server);
+	}
+	return (PQstatus(H->server) == CONNECTION_OK) ? SUCCESS : FAILURE;
+}
+/* }}} */
+
 static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -650,7 +661,7 @@ static struct pdo_dbh_methods pgsql_methods = {
 	pdo_pgsql_last_insert_id,
 	pdo_pgsql_fetch_error_func,
 	pdo_pgsql_get_attribute,
-	NULL,	/* check_liveness */
+	pdo_pgsql_check_liveness,	/* check_liveness */
 	pdo_pgsql_get_driver_methods  /* get_driver_methods */
 };
 
