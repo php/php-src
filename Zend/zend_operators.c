@@ -2274,6 +2274,80 @@ static void increment_string(zval *str)
     }
 }
 
+static void increment_unicode(zval *str)
+{
+    int carry=0;
+    int pos=Z_USTRLEN_P(str)-1;
+    UChar *s=Z_USTRVAL_P(str);
+    UChar *t;
+    int last=0; /* Shut up the compiler warning */
+    int ch;
+
+	if (Z_USTRLEN_P(str) == 0) {
+		USTR_FREE(Z_USTRVAL_P(str));
+		ZVAL_ASCII_STRINGL(str, "1", sizeof("1")-1, 1);
+		return;
+	}
+
+	while (pos >= 0) {
+        ch = s[pos];
+        if (ch >= 'a' && ch <= 'z') {
+            if (ch == 'z') {
+                s[pos] = 'a';
+                carry=1;
+            } else {
+                s[pos]++;
+                carry=0;
+            }
+            last=LOWER_CASE;
+        } else if (ch >= 'A' && ch <= 'Z') {
+            if (ch == 'Z') {
+                s[pos] = 'A';
+                carry=1;
+            } else {
+                s[pos]++;
+                carry=0;
+            }
+            last=UPPER_CASE;
+        } else if (ch >= '0' && ch <= '9') {
+            if (ch == '9') {
+                s[pos] = '0';
+                carry=1;
+            } else {
+                s[pos]++;
+                carry=0;
+            }
+            last = NUMERIC;
+        } else {
+            carry=0;
+            break;
+        }
+        if (carry == 0) {
+            break;
+        }
+        pos--;
+    }
+
+    if (carry) {
+        t = (UChar *) eumalloc(Z_USTRLEN_P(str)+1+1);
+        memcpy(t+1, Z_USTRVAL_P(str), UBYTES(Z_USTRLEN_P(str)));
+        Z_USTRLEN_P(str)++;
+        t[Z_USTRLEN_P(str)] = 0;
+        switch (last) {
+            case NUMERIC:
+            	t[0] = '1';
+            	break;
+            case UPPER_CASE:
+            	t[0] = 'A';
+            	break;
+            case LOWER_CASE:
+            	t[0] = 'a';
+            	break;
+        }
+        USTR_FREE(Z_USTRVAL_P(str));
+        Z_USTRVAL_P(str) = t;
+    }
+}
 
 ZEND_API int increment_function(zval *op1)
 {
@@ -2323,8 +2397,34 @@ ZEND_API int increment_function(zval *op1)
 				}
 			}
 			break;
-		case IS_UNICODE:
-			zend_error(E_ERROR, "Unsupported operand type");
+		case IS_UNICODE: {
+				long lval;
+				double dval;
+				UChar *ustrval = Z_USTRVAL_P(op1);
+
+				switch (is_numeric_unicode(ustrval, Z_USTRLEN_P(op1), &lval, &dval, 0)) {
+					case IS_LONG:
+						if (lval == LONG_MAX) {
+							/* switch to double */
+							double d = (double)lval;
+							ZVAL_DOUBLE(op1, d+1);
+						} else {
+						Z_LVAL_P(op1) = lval+1;
+						Z_TYPE_P(op1) = IS_LONG;
+						}
+						efree(ustrval); /* should never be empty_string */
+						break;
+					case IS_DOUBLE:
+						Z_DVAL_P(op1) = dval+1;
+						Z_TYPE_P(op1) = IS_DOUBLE;
+						efree(ustrval); /* should never be empty_string */
+						break;
+					default:
+						/* Perl style string increment */
+						increment_unicode(op1);
+						break;
+				}
+			}
 			break;
 		default:
 			return FAILURE;
@@ -2376,7 +2476,29 @@ ZEND_API int decrement_function(zval *op1)
 			}
 			break;
 		case IS_UNICODE:
-			zend_error(E_ERROR, "Unsupported operand type");
+			if (Z_USTRLEN_P(op1) == 0) { /* consider as 0 */
+				USTR_FREE(Z_USTRVAL_P(op1));
+				Z_LVAL_P(op1) = -1;
+				Z_TYPE_P(op1) = IS_LONG;
+				break;
+			}
+			switch (is_numeric_unicode(Z_USTRVAL_P(op1), Z_USTRLEN_P(op1), &lval, &dval, 0)) {
+				case IS_LONG:
+					USTR_FREE(Z_USTRVAL_P(op1));
+					if (lval == LONG_MIN) {
+						double d = (double)lval;
+						ZVAL_DOUBLE(op1, d-1);
+					} else {
+						Z_LVAL_P(op1) = lval-1;
+						Z_TYPE_P(op1) = IS_LONG;
+					}
+					break;
+				case IS_DOUBLE:
+					USTR_FREE(Z_USTRVAL_P(op1));
+					Z_DVAL_P(op1) = dval - 1;
+					Z_TYPE_P(op1) = IS_DOUBLE;
+					break;
+			}
 			break;
 		default:
 			return FAILURE;
