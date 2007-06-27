@@ -481,7 +481,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 	zstr colon;
 
 	if (IS_CONSTANT_VISITED(p)) {
-		zend_error(E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
+		zend_error(E_ERROR, "Cannot declare self-referencing constant '%v'", Z_UNIVAL_P(p));
 	} else if (Z_TYPE_P(p) == IS_CONSTANT) {
 		int refcount;
 		zend_uchar is_ref;
