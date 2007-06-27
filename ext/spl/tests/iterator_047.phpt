@@ -72,6 +72,8 @@ int(0)
 int(0)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
+
+Notice: Array to string conversion in %s on line %d
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(10)
@@ -80,6 +82,8 @@ int(2)
 int(2)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
+
+Notice: Array to string conversion in %s on line %d
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(30)
@@ -88,20 +92,22 @@ int(4)
 int(4)
 ===1===
 MyRecursiveArrayIterator::hasChildren()
-Exception: State 1: MyRecursiveArrayIterator::hasChildren() in %siterator_047.php on line %d
+Exception: State 1: MyRecursiveArrayIterator::hasChildren() in %s on line %d
 ===2===
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(0)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
-Exception: State 2: MyRecursiveArrayIterator::getChildren() in %siterator_047.php on line %d
+Exception: State 2: MyRecursiveArrayIterator::getChildren() in %s on line %d
 ===3===
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(0)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
+
+Notice: Array to string conversion in %s on line %d
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(10)
@@ -110,6 +116,8 @@ int(2)
 int(2)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
+
+Notice: Array to string conversion in %s on line %d
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(30)
