@@ -1035,6 +1035,44 @@ dnl Checks for structures, typedefs, broken functions, etc.
 dnl -------------------------------------------------------------------------
 
 dnl
+dnl PHP_CHECK_SIZEOF(TYPE [, CROSS-SIZE])
+dnl Enhanced version of AC_CHECK_SIZEOF for checking more types 
+dnl than just those defined in stdio.h
+dnl
+AC_DEFUN(PHP_CHECK_SIZEOF,
+[changequote(<<, >>)dnl
+dnl The name to #define.
+define(<<AC_TYPE_NAME>>, translit(sizeof_$1, [a-z *], [A-Z_P]))dnl
+dnl The cache variable name.
+define(<<AC_CV_NAME>>, translit(ac_cv_sizeof_$1, [ *], [_p]))dnl
+changequote([, ])dnl
+AC_MSG_CHECKING(size of $1)
+AC_CACHE_VAL(AC_CV_NAME,
+[AC_TRY_RUN([#include <stdio.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+int main()
+{
+	FILE *f=fopen("conftestval", "w");
+	if (!f) return(1);
+		fprintf(f, "%d\n", sizeof($1));
+		return(0);
+	}], AC_CV_NAME=`cat conftestval`, AC_CV_NAME=0, ifelse([$2], , , AC_CV_NAME=$2))])dnl
+AC_MSG_RESULT($AC_CV_NAME)
+AC_DEFINE_UNQUOTED(AC_TYPE_NAME, $AC_CV_NAME, [The number of bytes in a $1.])
+undefine([AC_TYPE_NAME])dnl
+undefine([AC_CV_NAME])dnl
+])
+
+dnl
 dnl PHP_CHECK_IN_ADDR_T
 dnl
 AC_DEFUN([PHP_CHECK_IN_ADDR_T], [
@@ -2713,6 +2751,9 @@ php_cv_crypt_r_style=struct_crypt_data_gnu_source)
   fi
 ])
 
+dnl
+dnl PHP_TEST_WRITE_STDOUT
+dnl
 AC_DEFUN([PHP_TEST_WRITE_STDOUT],[
   AC_CACHE_CHECK(whether writing to stdout works,ac_cv_write_stdout,[
     AC_TRY_RUN([
