@@ -3,19 +3,19 @@ bitwise OR and strings
 --FILE--
 <?php
 
-$s = "323423";
-$s1 = "2323.555";
+$s = b"323423";
+$s1 = b"2323.555";
 
 var_dump($s | $s1);
 var_dump($s1 | $s);
 
-$s = "some";
-$s1 = "test";
+$s = b"some";
+$s1 = b"test";
 
 var_dump($s | $s1);
 
-$s = "some";
-$s |= "test";
+$s = b"some";
+$s |= b"test";
 
 var_dump($s);
 

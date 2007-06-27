@@ -13,3 +13,8 @@ array(1) {
   ["x"]=>
   int(1)
 }
+--UEXPECT--
+array(1) {
+  [u"x"]=>
+  int(1)
+}

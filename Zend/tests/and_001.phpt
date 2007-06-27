@@ -3,28 +3,28 @@ bitwise AND and strings
 --FILE--
 <?php
 
-$s = "123";
-$s1 = "234";
+$s = b"123";
+$s1 = b"234";
 
 var_dump($s & $s1);
 
-$s = "test";
-$s1 = "some";
+$s = b"test";
+$s1 = b"some";
 
 var_dump($s & $s1);
 
-$s = "test long";
-$s1 = "some";
+$s = b"test long";
+$s1 = b"some";
 
 var_dump($s & $s1);
 
-$s = "test";
-$s1 = "some long";
+$s = b"test";
+$s1 = b"some long";
 
 var_dump($s & $s1);
 
-$s = "test";
-$s &= "some long";
+$s = b"test";
+$s &= b"some long";
 
 var_dump($s);
 

@@ -3,28 +3,28 @@ XORing strings
 --FILE--
 <?php
 
-$s = "123";
-$s1 = "234";
+$s = b"123";
+$s1 = b"234";
 var_dump(bin2hex($s ^ $s1));
 
-$s = "1235";
-$s1 = "234";
+$s = b"1235";
+$s1 = b"234";
 var_dump(bin2hex($s ^ $s1));
 
-$s = "some";
-$s1 = "test";
+$s = b"some";
+$s1 = b"test";
 var_dump(bin2hex($s ^ $s1));
 
-$s = "some long";
-$s1 = "test";
+$s = b"some long";
+$s1 = b"test";
 var_dump(bin2hex($s ^ $s1));
 
-$s = "some";
-$s1 = "test long";
+$s = b"some";
+$s1 = b"test long";
 var_dump(bin2hex($s ^ $s1));
 
-$s = "some";
-$s ^= "test long";
+$s = b"some";
+$s ^= b"test long";
 var_dump(bin2hex($s));
 
 echo "Done\n";
@@ -36,4 +36,12 @@ string(8) "070a1e11"
 string(8) "070a1e11"
 string(8) "070a1e11"
 string(8) "070a1e11"
+Done
+--UEXPECTF--	
+unicode(6) "030107"
+unicode(6) "030107"
+unicode(8) "070a1e11"
+unicode(8) "070a1e11"
+unicode(8) "070a1e11"
+unicode(8) "070a1e11"
 Done
