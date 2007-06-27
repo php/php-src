@@ -53,6 +53,8 @@ PHP                                                                        NEWS
   (Chris Jones, Tony)
 - Fixed bug #41698 (float parameters truncated to integer in prepared 
   statements). (Ilia)
+- Fixed bug #41692 (ArrayObject shows weird behaviour in respect to 
+  inheritance). (Tony)
 - Fixed bug #41686 (Omitting length param in array_slice not possible).
   (Ilia)
 - Fixed bug #41685 (array_push() fails to warn when next index is already
