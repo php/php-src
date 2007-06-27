@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Changed error handler to send HTTP 500 instead of blank page on PHP errors.
   (Dmitry, Andrei Nigmatulin)
 
+- Added persistent connection status checker to pdo_pgsql (Elvis
+  Pranskevichus, Ilia)
 - Added php_ini_loaded_file() function which returns the path to the actual
   php.ini in use. (Jani)
 - Added GD version constants GD_MAJOR_VERSION, GD_MINOR_VERSION
