@@ -931,7 +931,7 @@ SPL_METHOD(Array, __construct)
 {
 	zval *object = getThis();
 	spl_array_object *intern;
-	zval *array;
+	zval **array;
 	long ar_flags = 0;
 	zend_class_entry *ce_get_iterator = zend_ce_iterator;
 
@@ -942,9 +942,13 @@ SPL_METHOD(Array, __construct)
 
 	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
+	}
+
+	if (Z_TYPE_PP(array) == IS_ARRAY) {
+		SEPARATE_ZVAL_IF_NOT_REF(array);
 	}
 
 	if (ZEND_NUM_ARGS() > 2) {
@@ -953,25 +957,25 @@ SPL_METHOD(Array, __construct)
 
 	ar_flags &= ~SPL_ARRAY_INT_MASK;
 
-	if (Z_TYPE_P(array) == IS_OBJECT && (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator)) {
+	if (Z_TYPE_PP(array) == IS_OBJECT && (Z_OBJ_HT_PP(array) == &spl_handler_ArrayObject || Z_OBJ_HT_PP(array) == &spl_handler_ArrayIterator)) {
 		zval_ptr_dtor(&intern->array);
 		if (ZEND_NUM_ARGS() == 1)
 		{
-			spl_array_object *other = (spl_array_object*)zend_object_store_get_object(array TSRMLS_CC);
+			spl_array_object *other = (spl_array_object*)zend_object_store_get_object(*array TSRMLS_CC);
 			ar_flags = other->ar_flags & ~SPL_ARRAY_INT_MASK;
 		}		
 		ar_flags |= SPL_ARRAY_USE_OTHER;
-		intern->array = array;
+		intern->array = *array;
 	} else {
-		if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
+		if (Z_TYPE_PP(array) != IS_OBJECT && Z_TYPE_PP(array) != IS_ARRAY) {
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
 			return;
 		}
 		zval_ptr_dtor(&intern->array);
-		intern->array = array;
+		intern->array = *array;
 	}
-	if (object == array) {
+	if (object == *array) {
 		intern->ar_flags |= SPL_ARRAY_IS_SELF;
 		intern->ar_flags &= ~SPL_ARRAY_USE_OTHER;
 	} else {
@@ -979,12 +983,12 @@ SPL_METHOD(Array, __construct)
 	}
 	intern->ar_flags |= ar_flags;
 	ZVAL_ADDREF(intern->array);
-	if (Z_TYPE_P(array) == IS_OBJECT) {
-		zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
+	if (Z_TYPE_PP(array) == IS_OBJECT) {
+		zend_object_get_properties_t handler = Z_OBJ_HANDLER_PP(array, get_properties);
 		if ((handler != std_object_handlers.get_properties && handler != spl_array_get_properties)
 		|| !spl_array_get_hash_table(intern, 0 TSRMLS_CC)) {
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Overloaded object of type %v is not compatible with %v", Z_OBJCE_P(array)->name, intern->std.ce->name);
+			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Overloaded object of type %v is not compatible with %v", Z_OBJCE_PP(array)->name, intern->std.ce->name);
 			return;
 		}
 	}
