@@ -69,7 +69,7 @@ install-headers:
 	
 install-su: install-pear
 
-PHP_TEST_SHARED_EXTENSIONS=`(if test ! -z "$(PHP_MODULES)"; then for i in $(PHP_MODULES); do . $$i ; echo -n "-d extension=$$dlname "; done; fi;)`
+PHP_TEST_SHARED_EXTENSIONS=`(if test ! -z "$(PHP_MODULES)"; then for i in "$(PHP_MODULES)"; do . $$i ; echo -n '-d extension=$$dlname '; done; fi;)`
 PHP_TEST_SETTINGS=-d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1'
 
 test: all 
