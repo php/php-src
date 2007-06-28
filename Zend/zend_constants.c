@@ -348,7 +348,27 @@ ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval
 				retval=0;
 			}
 		} else {
-			retval=0;
+			char haltoff[] = "__COMPILER_HALT_OFFSET__";
+			if (!EG(in_execution)) {
+				retval = 0;
+			} else if (name_len == sizeof("__COMPILER_HALT_OFFSET__") - 1 && memcmp(haltoff, name.s, name_len) == 0) {
+				char *cfilename;
+				zstr haltname;
+				int len, clen;
+				cfilename = zend_get_executed_filename(TSRMLS_C);
+				clen = strlen(cfilename);
+				/* check for __COMPILER_HALT_OFFSET__ */
+				zend_mangle_property_name(&haltname.s, &len, haltoff,
+					sizeof("__COMPILER_HALT_OFFSET__") - 1, cfilename, clen, 0);
+				if (zend_u_hash_find(EG(zend_constants), IS_STRING, haltname, len+1, (void **) &c) == SUCCESS) {
+					retval=1;
+				} else {
+					retval=0;
+				}
+				pefree(haltname.s, 0);
+			} else {
+				retval=0;
+			}
 		}
 		efree(lookup_name.v);
 	}
@@ -374,6 +394,7 @@ ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_D
 	zstr lookup_name;
 	zstr name;
 	int ret = SUCCESS;
+	static char haltoff[] = "__COMPILER_HALT_OFFSET__";
 
 #if 0
 	printf("Registering constant for module %d\n", c->module_number);
@@ -389,6 +410,13 @@ ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_D
 		lookup_name = NULL_ZSTR;
 	}
 
+	if (EG(in_execution) && lookup_name_len == sizeof("__COMPILER_HALT_OFFSET__") && memcmp(haltoff, name.s, lookup_name_len) == 0) {
+		zend_error(E_NOTICE,"Constant %R already defined", type, name);
+		if (lookup_name.v) {
+			efree(lookup_name.v);
+		}
+		ret = FAILURE;
+	}
 	if (zend_u_hash_add(EG(zend_constants), type, name, lookup_name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
 		zend_error(E_NOTICE,"Constant %R already defined", type, name);
 		free(c->name.v);
