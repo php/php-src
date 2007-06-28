@@ -739,6 +739,8 @@ END_EXTERN_C()
 #define ZEND_TOSTRING_FUNC_NAME     "__tostring"
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
 
+#define ZEND_HALT_CONSTANT_NAME	    "__COMPILER_HALT_OFFSET__"
+
 #endif /* ZEND_COMPILE_H */
 
 /*
