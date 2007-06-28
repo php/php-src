@@ -58,29 +58,6 @@ foreach ($arrays as $item) {
 	echo "\n";
 }
 
-echo "\n*** Testing possible variations ***\n";
-$int_var  = -19;
-$item = array ("one" => 1, "two" => 2, "THREE" => 3, "FOUR" => "four");
-
-/* use 'case' argument other than CASE_LOWER & CASE_UPPER */
-var_dump(array_change_key_case($item, 5)); 
-
-/* when keys are different in terms of only case */
-/* should return one value key pair with key being in lowercase */
-var_dump( array_change_key_case( array("ONE" => 1, "one" => 3, "One" => 4) ) ); 
-
-/* should return one value key pair with key being in uppercase */
-var_dump( array_change_key_case( array("ONE" => 1, "one" => 2, "One" => 3), CASE_UPPER ) ); 
-var_dump( array_change_key_case( array("ONE" => 1, "one" => 1, "One" => 2), 5 ) ); 
-
-echo "\n*** Testing error conditions ***\n";
-/* generate different failure conditions */
-var_dump( array_change_key_case($int_var) ); // args less than expected
-var_dump( array_change_key_case($int_var, CASE_UPPER) ); // invalid first argument
-var_dump( array_change_key_case( array("ONE" => 1, "one" => 6, "One" => 5), "CASE_UPPER" ) ); //invalid 2rd arg
-var_dump( array_change_key_case() ); // Zero argument
-var_dump( array_change_key_case($item, $item["one"], "CASE_UPPER") ); // more than expected numbers
-
 echo "end\n";
 ?>
 --EXPECTF--
@@ -837,47 +814,6 @@ array(4) {
   string(4) "four"
 }
 
-
-*** Testing possible variations ***
-array(4) {
-  ["ONE"]=>
-  int(1)
-  ["TWO"]=>
-  int(2)
-  ["THREE"]=>
-  int(3)
-  ["FOUR"]=>
-  string(4) "four"
-}
-array(1) {
-  ["one"]=>
-  int(4)
-}
-array(1) {
-  ["ONE"]=>
-  int(3)
-}
-array(1) {
-  ["ONE"]=>
-  int(2)
-}
-
-*** Testing error conditions ***
-
-Warning: array_change_key_case() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: array_change_key_case() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: array_change_key_case() expects parameter 2 to be long, string given in %s on line %d
-NULL
-
-Warning: array_change_key_case() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: array_change_key_case() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 end
 --UEXPECTF--
 *** Testing basic operations ***
@@ -1633,45 +1569,4 @@ array(4) {
   unicode(4) "four"
 }
 
-
-*** Testing possible variations ***
-array(4) {
-  [u"ONE"]=>
-  int(1)
-  [u"TWO"]=>
-  int(2)
-  [u"THREE"]=>
-  int(3)
-  [u"FOUR"]=>
-  unicode(4) "four"
-}
-array(1) {
-  [u"one"]=>
-  int(4)
-}
-array(1) {
-  [u"ONE"]=>
-  int(3)
-}
-array(1) {
-  [u"ONE"]=>
-  int(2)
-}
-
-*** Testing error conditions ***
-
-Warning: array_change_key_case() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: array_change_key_case() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: array_change_key_case() expects parameter 2 to be long, Unicode string given in %s on line %d
-NULL
-
-Warning: array_change_key_case() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: array_change_key_case() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 end
