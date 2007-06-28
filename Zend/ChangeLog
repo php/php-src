@@ -1,3 +1,66 @@
+2007-06-27  Antony Dovgal  <antony@zend.com>
+
+    * tests/double_to_string.phpt
+      tests/double_to_string.phpt:
+      fix test
+
+2007-06-27  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * tests/selfParent_001.phpt
+      tests/selfParent_002.phpt:
+      Tests for constant initialisation
+
+    * tests/selfParent_001.phpt
+      tests/selfParent_001.phpt
+      tests/selfParent_002.phpt
+      tests/selfParent_002.phpt:
+      
+      file selfParent_001.phpt was initially added on branch PHP_5_2.
+
+2007-06-27  Antony Dovgal  <antony@zend.com>
+
+    * zend_operators.c:
+      fix ZTS build
+
+2007-06-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c:
+      Unicode support
+
+    * zend_operators.c
+      tests/and_001.phpt
+      tests/bug41640.phpt
+      tests/not_001.phpt
+      tests/or_001.phpt
+      tests/xor_002.phpt:
+      Fixed bitwise operations with numeric unicode strings
+
+    * zend_operators.c
+      tests/decrement_001.phpt
+      tests/decrement_001_64bit.phpt
+      tests/increment_001.phpt:
+      Implemented ++ and -- operations for unicode strings
+
+2007-06-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/bug41813.phpt:
+      add test
+
+    * tests/bug41813.phpt
+      tests/bug41813.phpt:
+      
+      add test
+
+    * zend_execute.c:
+      MFB: fix #41813 (segmentation fault when using string offset as an object)
+      patch by judas dot iscariote at gmail dot com
+
+    * (PHP_5_2)
+      zend_execute.c:
+      fix #41813 (segmentation fault when using string offset as an object)
+      patch by judas dot iscariote at gmail dot com
+
 2007-06-18  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h

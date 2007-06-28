@@ -1,3 +1,122 @@
+2007-06-27  Antony Dovgal  <antony@zend.com>
+
+    * Makefile.global:
+      more ksh fixes
+
+    * (PHP_5_2)
+      Makefile.global:
+      ksh is a pita
+
+    * ZendEngine2/tests/double_to_string.phpt
+      ZendEngine2/tests/double_to_string.phpt:
+      fix test
+
+2007-06-27  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ZendEngine2/tests/selfParent_001.phpt
+      ZendEngine2/tests/selfParent_002.phpt:
+      Tests for constant initialisation
+
+    * ZendEngine2/tests/selfParent_001.phpt
+      ZendEngine2/tests/selfParent_001.phpt
+      ZendEngine2/tests/selfParent_002.phpt
+      ZendEngine2/tests/selfParent_002.phpt:
+      
+      file selfParent_001.phpt was initially added on branch PHP_5_2.
+
+2007-06-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      acinclude.m4
+      configure.in:
+      MFH:- Added PHP_CHECK_SIZEOF macro (special version of AC_CHECK_SIZEOF)
+
+    * acinclude.m4
+      configure.in:
+      - Added PHP_CHECK_SIZEOF macro (special version of AC_CHECK_SIZEOF)
+
+2007-06-27  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      fix ZTS build
+
+    * ext/spl/spl_array.c
+      ext/spl/tests/iterator_026.phpt
+      ext/spl/tests/iterator_047.phpt:
+      apply corrected fix
+      fix tests
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_array.c
+      ext/spl/tests/bug41692.phpt:
+      MFH: fix #41692 (ArrayObject shows weird behaviour in respect to
+      inheritance)
+
+    * ext/spl/tests/bug41692.phpt
+      ext/spl/tests/bug41692.phpt:
+      
+      fix #41692 (ArrayObject shows weird behaviour in respect to inheritance)
+
+    * ext/spl/spl_array.c:
+      fix #41692 (ArrayObject shows weird behaviour in respect to inheritance)
+
+2007-06-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+      Unicode support
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/tests/and_001.phpt
+      ZendEngine2/tests/bug41640.phpt
+      ZendEngine2/tests/not_001.phpt
+      ZendEngine2/tests/or_001.phpt
+      ZendEngine2/tests/xor_002.phpt:
+      Fixed bitwise operations with numeric unicode strings
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/tests/decrement_001.phpt
+      ZendEngine2/tests/decrement_001_64bit.phpt
+      ZendEngine2/tests/increment_001.phpt:
+      Implemented ++ and -- operations for unicode strings
+
+2007-06-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug41813.phpt:
+      add test
+
+    * ZendEngine2/tests/bug41813.phpt
+      ZendEngine2/tests/bug41813.phpt:
+      
+      add test
+
+    * ZendEngine2/zend_execute.c:
+      MFB: fix #41813 (segmentation fault when using string offset as an object)
+      patch by judas dot iscariote at gmail dot com
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute.c:
+      fix #41813 (segmentation fault when using string offset as an object)
+      patch by judas dot iscariote at gmail dot com
+
+2007-06-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_dbh.c:
+      Fixed a crash inside PDO when there is more then one instance of a
+      persistent connection inside a script and PDO object is extended by class
+      with a destructor
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_pgsql/pgsql_driver.c:
+      Added persistent connection status checker to pdo_pgsql
+
 2007-06-26  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/assert.c
