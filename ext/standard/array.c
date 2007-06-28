@@ -1719,16 +1719,18 @@ PHP_FUNCTION(range)
 		}
 	}	
 
-	/* Unify types */
-	str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_P(zlow), Z_TYPE_P(zhigh));
-	convert_to_explicit_type(zlow, str_type);
-	convert_to_explicit_type(zhigh, str_type);
+	if (!is_step_double && ((Z_TYPE_P(zlow) == IS_STRING || Z_TYPE_P(zlow) == IS_UNICODE) && (Z_TYPE_P(zhigh) == IS_STRING || Z_TYPE_P(zhigh) == IS_UNICODE))) {
+		/* Unify types */
+		str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_P(zlow), Z_TYPE_P(zhigh));
+		convert_to_explicit_type(zlow, str_type);
+		convert_to_explicit_type(zhigh, str_type);
+	}
 
 	/* Initialize the return_value as an array. */
 	array_init(return_value);
 
 	/* If the range is given as strings, generate an array of characters. */
-	if ((Z_TYPE_P(zlow) == IS_STRING) && 
+	if (Z_TYPE_P(zlow) == IS_STRING && Z_TYPE_P(zhigh) == IS_STRING && 
 		Z_STRLEN_P(zlow) >= 1 && Z_STRLEN_P(zhigh) >= 1) {
 		zend_uchar type1, type2;
 		unsigned char *low, *high;
@@ -1774,7 +1776,7 @@ PHP_FUNCTION(range)
 		} else {
 			add_next_index_stringl(return_value, (char*)low, 1, 1);
 		}
-	} else if (Z_TYPE_P(zlow) == IS_UNICODE &&
+	} else if (Z_TYPE_P(zlow) == IS_UNICODE && Z_TYPE_P(zhigh) == IS_UNICODE &&
 			   Z_USTRLEN_P(zlow) >= 1 && Z_USTRLEN_P(zhigh) >= 1) {
 		zend_uchar type1, type2;
 		UChar32 low, high;
