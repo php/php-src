@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 
 - Added persistent connection status checker to pdo_pgsql (Elvis
   Pranskevichus, Ilia)
+- Added support for ATTR_TIMEOUT inside pdo_pgsql driver. (Ilia)
 - Added php_ini_loaded_file() function which returns the path to the actual
   php.ini in use. (Jani)
 - Added GD version constants GD_MAJOR_VERSION, GD_MINOR_VERSION
