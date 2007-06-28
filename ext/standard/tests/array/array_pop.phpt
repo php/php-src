@@ -3,10 +3,6 @@ Test array_pop() function
 --FILE--
 <?php
 
-/* Prototype: mixed array_pop( array &array );
- * Description: Pops and returns the last value of the array.
- */
-
 array_pop($GLOBALS);
 
 $empty_array = array();
@@ -31,24 +27,6 @@ $mixed_array = array(
           5.4 => 54, 5.7 => 57, "5.4" => 554, "5.7" => 557 )
 );
 
-/* Testing Error Conditions */
-echo "\n*** Testing Error Conditions ***\n";
-
-/* Zero argument  */
-var_dump( array_pop() );
-
-/* Scalar argument */
-var_dump( array_pop($number) );
-
-/* String argument */
-var_dump( array_pop($str) );
-
-/* Invalid Number of arguments */
-var_dump( array_pop($mixed_array[1],$mixed_array[2]) );
-
-/* Empty Array as argument */
-var_dump( array_pop($empty_array) );
-
 /* Loop to test normal functionality with different arrays inputs */
 echo "\n*** Normal testing with various array inputs ***\n";
 
@@ -62,41 +40,9 @@ foreach( $mixed_array as $sub_array )
  $counter++;
 } 
 
-echo"\n*** Checking for internal array pointer being reset when pop is called ***\n";
-
-echo "\nCurrent Element is : ";
-var_dump( current($mixed_array[1]) );
-
-echo "\nNext Element is : ";
-var_dump( next($mixed_array[1]) );
-
-echo "\nNext Element is : ";
-var_dump( next($mixed_array[1]) );
-
-echo "\nPOPed Element is : ";
-var_dump( array_pop($mixed_array[1]) );
-
-echo "\nCurrent Element after POP operation is: ";
-var_dump( current($mixed_array[1]) );
-
 echo"\nDone";
 ?>
 --EXPECTF--
-*** Testing Error Conditions ***
-
-Warning: array_pop() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: array_pop() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: array_pop() expects parameter 1 to be array, string given in %s on line %d
-NULL
-
-Warning: array_pop() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-NULL
-
 *** Normal testing with various array inputs ***
 
 -- Input Array for Iteration 1 is --
@@ -271,35 +217,8 @@ Array
 Output after Pop is :
 int(557)
 
-*** Checking for internal array pointer being reset when pop is called ***
-
-Current Element is : int(1)
-
-Next Element is : int(2)
-
-Next Element is : int(3)
-
-POPed Element is : int(9)
-
-Current Element after POP operation is: int(1)
-
 Done
 --UEXPECTF--
-*** Testing Error Conditions ***
-
-Warning: array_pop() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: array_pop() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: array_pop() expects parameter 1 to be array, Unicode string given in %s on line %d
-NULL
-
-Warning: array_pop() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-NULL
-
 *** Normal testing with various array inputs ***
 
 -- Input Array for Iteration 1 is --
@@ -473,17 +392,5 @@ Array
 
 Output after Pop is :
 int(557)
-
-*** Checking for internal array pointer being reset when pop is called ***
-
-Current Element is : int(1)
-
-Next Element is : int(2)
-
-Next Element is : int(3)
-
-POPed Element is : int(9)
-
-Current Element after POP operation is: int(1)
 
 Done
