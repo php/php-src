@@ -6,6 +6,7 @@ exec_prefix="`eval echo @exec_prefix@`"
 phpdir="`eval echo @libdir@`/build"
 includedir="`eval echo @includedir@`/php"
 builddir="`pwd`"
+SED="@SED@"
 
 FILES_BUILD="mkdep.awk scan_makefile_in.awk shtool libtool.m4"
 FILES="acinclude.m4 Makefile.global config.sub config.guess ltmain.sh run-tests*.php"
@@ -56,9 +57,9 @@ phpize_check_configm4()
 phpize_get_api_numbers()
 {
   # extracting API NOs:
-  PHP_API_VERSION=`grep '#define PHP_API_VERSION' $includedir/main/php.h|sed 's/#define PHP_API_VERSION//'`
-  ZEND_MODULE_API_NO=`grep '#define ZEND_MODULE_API_NO' $includedir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO//'`
-  ZEND_EXTENSION_API_NO=`grep '#define ZEND_EXTENSION_API_NO' $includedir/Zend/zend_extensions.h|sed 's/#define ZEND_EXTENSION_API_NO//'`
+  PHP_API_VERSION=`grep '#define PHP_API_VERSION' $includedir/main/php.h|$SED 's/#define PHP_API_VERSION//'`
+  ZEND_MODULE_API_NO=`grep '#define ZEND_MODULE_API_NO' $includedir/Zend/zend_modules.h|$SED 's/#define ZEND_MODULE_API_NO//'`
+  ZEND_EXTENSION_API_NO=`grep '#define ZEND_EXTENSION_API_NO' $includedir/Zend/zend_extensions.h|$SED 's/#define ZEND_EXTENSION_API_NO//'`
 }
 
 phpize_print_api_numbers()
@@ -131,7 +132,7 @@ phpize_copy_files()
 
 phpize_replace_prefix()
 {
-  sed \
+  $SED \
   -e "s#@prefix@#$prefix#" \
   < "$phpdir/phpize.m4" > configure.in
 }
