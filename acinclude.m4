@@ -2523,8 +2523,8 @@ dnl
 AC_DEFUN([PHP_CONFIG_NICE],[
   AC_REQUIRE([AC_PROG_EGREP])
   AC_REQUIRE([LT_AC_PROG_SED])
-  PHP_SUBST(EGREP)
-  PHP_SUBST(SED)
+  PHP_SUBST_OLD(EGREP)
+  PHP_SUBST_OLD(SED)
   test -f $1 && mv $1 $1.old
   rm -f $1.old
   cat >$1<<EOF
@@ -2553,18 +2553,20 @@ EOF
        	  break;
         fi
         echo "'[$]arg' \\" >> $1
-        CONFIGURE_COMMAND="$CONFIGURE_COMMAND '[$]arg'"
+        CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS '[$]arg'"
      else
         if test `expr -- $arg : "'--.*"` = 0; then
        	  break;
         fi
         echo "[$]arg \\" >> $1
-        CONFIGURE_COMMAND="$CONFIGURE_COMMAND [$]arg"
+        CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS [$]arg"
      fi
   done
   echo '"[$]@"' >> $1
   chmod +x $1
+  CONFIGURE_COMMAND="$CONFIGURE_COMMAND $CONFIGURE_OPTIONS"
   PHP_SUBST_OLD(CONFIGURE_COMMAND)
+  PHP_SUBST_OLD(CONFIGURE_OPTIONS)
 ])
 
 dnl
