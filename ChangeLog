@@ -1,3 +1,125 @@
+2007-06-28  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_constants.c:
+      remove unused vars
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c:
+      Fix HALT constant handling in unicode mode
+
+2007-06-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_dbh.c:
+      When working with persistent connections re-initialize options on each
+      connection. Flags like error reporting may differ.
+
+2007-06-28  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/tests/details.inc
+      ext/standard/tests/array/array_values_errors.phpt:
+      MFB
+
+    * (PHP_5_2)
+      ext/oci8/tests/details.inc:
+      add env vars for test settings (like in PDO)
+
+    * sapi/apache2handler/sapi_apache2.c:
+      fix crash on shutdown on Win32
+      patch by Scott
+
+    * ext/standard/array.c:
+      synchronized range() behaviour in HEAD with 5_2
+
+    * ext/standard/tests/array/array_pop.phpt
+      ext/standard/tests/array/array_pop_errors.phpt
+      ext/standard/tests/array/array_pop_errors.phpt
+      ext/standard/tests/array/array_pop_variation.phpt
+      ext/standard/tests/array/array_pop_variation.phpt
+      ext/standard/tests/array/array_values.phpt
+      ext/standard/tests/array/array_values.phpt
+      ext/standard/tests/array/array_values_64bit.phpt
+      ext/standard/tests/array/array_values_errors.phpt
+      ext/standard/tests/array/array_values_variation.phpt
+      ext/standard/tests/array/array_values_variation_64bit.phpt
+      ext/standard/tests/array/range.phpt
+      ext/standard/tests/array/range_errors.phpt
+      ext/standard/tests/array/range_errors.phpt
+      ext/standard/tests/array/range_variation.phpt
+      ext/standard/tests/array/range_variation.phpt
+      ext/standard/tests/array/range_variation1.phpt
+      ext/standard/tests/array/range_variation1.phpt
+      ext/standard/tests/array/range_variation1_64bit.phpt
+      ext/standard/tests/array/range_variation1_64bit.phpt:
+      more smaller tests
+
+    * ext/standard/tests/array/array_search.phpt
+      ext/standard/tests/array/array_search_errors.phpt
+      ext/standard/tests/array/array_search_errors.phpt
+      ext/standard/tests/array/array_search_variation.phpt
+      ext/standard/tests/array/array_search_variation.phpt
+      ext/standard/tests/array/array_search_variation1.phpt
+      ext/standard/tests/array/array_search_variation1.phpt
+      ext/standard/tests/array/array_search_variation2.phpt
+      ext/standard/tests/array/array_search_variation2.phpt
+      ext/standard/tests/array/array_search_variation3.phpt
+      ext/standard/tests/array/array_search_variation3.phpt:
+      divide array_search.phpt into several smaller tests
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_values_errors.phpt:
+      remove 32bit restriction
+
+    * ext/standard/tests/array/array_values_errors.phpt
+      ext/standard/tests/array/array_values_errors.phpt
+      ext/standard/tests/array/array_values_variation.phpt
+      ext/standard/tests/array/array_values_variation.phpt
+      ext/standard/tests/array/array_values_variation_64bit.phpt
+      ext/standard/tests/array/array_values_variation_64bit.phpt:
+      
+      more smaller tests
+
+    * ext/standard/tests/array/array_change_key_case.phpt
+      ext/standard/tests/array/array_change_key_case_errors.phpt
+      ext/standard/tests/array/array_change_key_case_errors.phpt
+      ext/standard/tests/array/array_change_key_case_variation.phpt
+      ext/standard/tests/array/array_change_key_case_variation.phpt:
+      divide the test into several smaller ones
+
+2007-06-28  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli_api.c:
+      Remove dot at the end of the message
+
+2007-06-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c
+      ext/pdo_pgsql/pgsql_driver.c:
+      
+      Added support for ATTR_TIMEOUT inside pdo_pgsql driver.
+      Fixed a bug inside PDO's "use persistent" connection detection mechanism
+      that would trigger connections on "" and "0" values
+
+2007-06-28  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/halt_compiler1.phpt
+      ZendEngine2/tests/halt_compiler2.phpt
+      ZendEngine2/tests/halt_compiler3.phpt
+      ZendEngine2/tests/halt_compiler4.phpt:
+      MF5 __HALT_COMPILER fix:
+      Remove limitation of __HALT_COMPILER() that allowed only one instance
+      per request.
+      
+
 2007-06-27  Antony Dovgal  <antony@zend.com>
 
     * Makefile.global:
