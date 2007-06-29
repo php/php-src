@@ -1,7 +1,7 @@
 --TEST--
 Bug #41567 (json_encode() double conversion is inconsistent with PHP)
 --SKIPIF--
-<?php if (!extension_loaded('json')) prit 'skip'; ?>
+<?php if (!extension_loaded('json')) print 'skip'; ?>
 --FILE--
 <?php
 
