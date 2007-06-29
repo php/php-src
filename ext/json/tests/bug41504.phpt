@@ -1,7 +1,7 @@
 --TEST--
 Bug #41504 (json_decode() converts empty array keys to "_empty_")
 --SKIPIF--
-if (!extension_loaded('json')) die('skip');
+<?php if (!extension_loaded('json')) print 'skip'; ?>
 --FILE--
 <?php
 
