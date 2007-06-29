@@ -67,8 +67,14 @@ install-headers:
 		done; \
 	fi
 
-PHP_TEST_SHARED_EXTENSIONS=`(if test ! -z "$(PHP_MODULES)"; then for i in $(PHP_MODULES); do . $$i ; echo -n "-d extension=$$dlname "; done; fi;)`
-PHP_TEST_SETTINGS=-d 'open_basedir=' -d 'output_buffering=0' -d 'memory_limit=-1'
+PHP_TEST_SETTINGS = -d 'open_basedir=' -d 'output_buffering=0' -d 'memory_limit=-1'
+PHP_TEST_SHARED_EXTENSIONS =  ` \
+	if test "$(PHP_MODULES)"; then \
+		for i in "$(PHP_MODULES)"; do \
+			. $$i; shared_exts="$$exts -d extension=$$dlname"; \
+		done; \
+		echo $$shared_exts; \
+	fi`
 
 test: all
 	-@if test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
@@ -78,10 +84,10 @@ test: all
 			$(PHP_EXECUTABLE) $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -U -d extension_dir=modules/ $(PHP_TEST_SHARED_EXTENSIONS) tests/; \
 	elif test ! -z "$(SAPI_CLI_PATH)" && test -x "$(SAPI_CLI_PATH)"; then \
 		INI_FILE=`$(top_builddir)/$(SAPI_CLI_PATH) -r 'echo php_ini_loaded_file();'`; \
-		if test -z "$(INI_FILE)"; then \
-			echo "" > $(top_builddir)/tmp-php.ini; \
-		else \
+		if test "$(INI_FILE)"; then \
 			$(EGREP) -v '^extension[\t\ ]=' "$(INI_FILE)" > $(top_builddir)/tmp-php.ini; \
+		else \
+			echo > $(top_builddir)/tmp-php.ini; \
 		fi; \
 		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
 		TEST_PHP_SRCDIR=$(top_srcdir) \
