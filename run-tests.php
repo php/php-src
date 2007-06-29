@@ -1076,15 +1076,23 @@ TEST $file
 
 	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
 	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['COOKIE'])) {
-		if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) ."/php-cgi.exe")) {
+		if (isset($php_cgi)) {
+			$old_php = $php;
+			$php = $php_cgi .' -C ';
+		} else if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) ."/php-cgi.exe")) {
 			$old_php = $php;
 			$php = realpath(dirname($php) ."/php-cgi.exe") .' -C ';
-		} elseif (file_exists("./sapi/cgi/php-cgi")) {
-			$old_php = $php;
-			$php = realpath("./sapi/cgi/php-cgi") . ' -C ';
 		} else {
-			show_result("SKIP", $tested, $tested_file, $unicode_semantics, "reason: CGI not available");
-			return 'SKIPPED';
+			if (file_exists(dirname($php)."/../../sapi/cgi/php-cgi")) {
+				$old_php = $php;
+				$php = realpath(dirname($php)."/../../sapi/cgi/php-cgi") . ' -C ';
+			} else if (file_exists("./sapi/cgi/php-cgi")) {
+				$old_php = $php;
+				$php = realpath("./sapi/cgi/php-cgi") . ' -C ';
+			} else {
+				show_result("SKIP", $tested, $tested_file, "reason: CGI not available");
+				return 'SKIPPED';
+			}
 		}
 	}
 
