@@ -32,6 +32,8 @@
 #include <libxml/xmlschemas.h>
 #endif
 
+#include "ext/libxml/php_libxml.h"
+
 typedef struct _idsIterator idsIterator;
 struct _idsIterator {
 	xmlChar *elementId;
@@ -1532,7 +1534,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	xmlDoc *docp = NULL, *newdoc;
 	dom_doc_propsptr doc_prop;
 	dom_object *intern;
-	char *source;
+	zstr source;
 	int source_len, refcount, ret;
 	zend_uchar source_type = IS_STRING;
 	long options = 0;
@@ -1542,14 +1544,8 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		id = NULL;
 	}
 
-	if (mode == DOM_LOAD_FILE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &source, &source_len, &source_type, &options) == FAILURE) {
-			return;
-		}
-	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|l", &source, &source_len, &options) == FAILURE) {
-			return;
-		}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &source, &source_len, &source_type, &options) == FAILURE) {
+		return;
 	}
 
 	if (!source_len) {
@@ -1558,15 +1554,19 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	}
 
 	if (source_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &source, &source_len, (UChar*)source, source_len, REPORT_ERRORS, NULL) == FAILURE) {
-			RETURN_FALSE;
+		if (mode == DOM_LOAD_FILE) {
+			if (php_stream_path_encode(NULL, &source.s, &source_len, source.u, source_len, REPORT_ERRORS, NULL) == FAILURE) {
+				RETURN_FALSE;
+			}
+		} else {
+			source.s = php_libxml_unicode_to_string(source.u, source_len, &source_len TSRMLS_CC);
 		}
 	}
 
-	newdoc = dom_document_parser(id, mode, source, options TSRMLS_CC);
+	newdoc = dom_document_parser(id, mode, source.s, options TSRMLS_CC);
 
 	if (source_type == IS_UNICODE) {
-		efree(source);
+		efree(source.s);
 	}
 
 	if (!newdoc)
@@ -1860,13 +1860,13 @@ PHP_FUNCTION(dom_document_validate)
  
 
 #if defined(LIBXML_SCHEMAS_ENABLED)
-static void
-_dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
+static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	zval *id;
 	xmlDoc *docp;
 	dom_object *intern;
-	char *source = NULL, *valid_file = NULL;
+	zstr source = NULL_ZSTR;
+	char *valid_file = NULL;
 	int source_len = 0;
 	xmlSchemaParserCtxtPtr  parser;
 	xmlSchemaPtr            sptr;
@@ -1875,14 +1875,8 @@ _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	char resolved_path[MAXPATHLEN + 1];
 	zend_uchar source_type = IS_STRING;
 
-	if (type == DOM_LOAD_FILE) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ot", &id, dom_document_class_entry, &source, &source_len, &source_type) == FAILURE) {
-			return;
-		}
-	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_document_class_entry, &source, &source_len) == FAILURE) {
-			return;
-		}
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ot", &id, dom_document_class_entry, &source, &source_len, &source_type) == FAILURE) {
+		return;
 	}
 
 	if (source_len == 0) {
@@ -1895,15 +1889,15 @@ _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	switch (type) {
 	case DOM_LOAD_FILE:
 		if (source_type == IS_UNICODE) {
-			if (php_stream_path_encode(NULL, &source, &source_len, (UChar*)source, source_len, REPORT_ERRORS, NULL) == FAILURE) {
+			if (php_stream_path_encode(NULL, &source.s, &source_len, source.u, source_len, REPORT_ERRORS, NULL) == FAILURE) {
 				RETURN_FALSE;
 			}
 		}
 
-		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		valid_file = _dom_get_valid_file_path(source.s, resolved_path, MAXPATHLEN  TSRMLS_CC);
 		if (!valid_file) {
 			if (source_type == IS_UNICODE) {
-				efree(source);
+				efree(source.s);
 			}
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Schema file source");
 			RETURN_FALSE;
@@ -1911,13 +1905,19 @@ _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 		parser = xmlSchemaNewParserCtxt(valid_file);
 
 		if (source_type == IS_UNICODE) {
-			efree(source);
+			efree(source.s);
 		}
 		break;
 	case DOM_LOAD_STRING:
-		parser = xmlSchemaNewMemParserCtxt(source, source_len);
+		if (source_type == IS_UNICODE) {
+			source.s = php_libxml_unicode_to_string(source.u, source_len, &source_len TSRMLS_CC);
+		}
+		parser = xmlSchemaNewMemParserCtxt(source.s, source_len);
 		/* If loading from memory, we need to set the base directory for the document 
 		   but it is not apparent how to do that for schema's */
+		if (source_type == IS_UNICODE) {
+			efree(source.s);
+		}
 		break;
 	default:
 		return;
@@ -1976,7 +1976,8 @@ _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	zval *id;
 	xmlDoc *docp;
 	dom_object *intern;
-	char *source = NULL, *valid_file = NULL;
+	zstr source = NULL_ZSTR;
+	char *valid_file = NULL;
 	int source_len = 0;
 	xmlRelaxNGParserCtxtPtr parser;
 	xmlRelaxNGPtr           sptr;
@@ -1985,14 +1986,8 @@ _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	char resolved_path[MAXPATHLEN + 1];
 	zend_uchar source_type = IS_STRING;
 
-	if (type == DOM_LOAD_FILE) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ot", &id, dom_document_class_entry, &source, &source_len, &source_type) == FAILURE) {
-			return;
-		}
-	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_document_class_entry, &source, &source_len) == FAILURE) {
-			return;
-		}
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ot", &id, dom_document_class_entry, &source, &source_len, &source_type) == FAILURE) {
+		return;
 	}
 
 	if (source_len == 0) {
@@ -2005,27 +2000,33 @@ _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	switch (type) {
 	case DOM_LOAD_FILE:
 		if (source_type == IS_UNICODE) {
-			if (php_stream_path_encode(NULL, &source, &source_len, (UChar*)source, source_len, REPORT_ERRORS, NULL) == FAILURE) {
+			if (php_stream_path_encode(NULL, &source.s, &source_len, source.u, source_len, REPORT_ERRORS, NULL) == FAILURE) {
 				RETURN_FALSE;
 			}
 		}
-		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		valid_file = _dom_get_valid_file_path(source.s, resolved_path, MAXPATHLEN  TSRMLS_CC);
 		if (!valid_file) {
 			if (source_type == IS_UNICODE) {
-				efree(source);
+				efree(source.s);
 			}
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid RelaxNG file source");
 			RETURN_FALSE;
 		}
 		parser = xmlRelaxNGNewParserCtxt(valid_file);
 		if (source_type == IS_UNICODE) {
-			efree(source);
+			efree(source.s);
 		}
 		break;
 	case DOM_LOAD_STRING:
-		parser = xmlRelaxNGNewMemParserCtxt(source, source_len);
+		if (source_type == IS_UNICODE) {
+			source.s = php_libxml_unicode_to_string(source.u, source_len, &source_len TSRMLS_CC);
+		}
+		parser = xmlRelaxNGNewMemParserCtxt(source.s, source_len);
 		/* If loading from memory, we need to set the base directory for the document 
 		   but it is not apparent how to do that for schema's */
+		if (source_type == IS_UNICODE) {
+			efree(source.s);
+		}
 		break;
 	default:
 		return;
@@ -2087,21 +2088,15 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	xmlDoc *docp = NULL, *newdoc;
 	dom_object *intern;
 	dom_doc_propsptr doc_prop;
-	char *source;
+	zstr source;
 	int source_len, refcount, ret;
 	htmlParserCtxtPtr ctxt;
 	zend_uchar source_type = IS_STRING;
 
 	id = getThis();
 
-	if (mode == DOM_LOAD_FILE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &source, &source_len, &source_type) == FAILURE) {
-			return;
-		}
-	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &source, &source_len) == FAILURE) {
-			return;
-		}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &source, &source_len, &source_type) == FAILURE) {
+		return;
 	}
 
 	if (!source_len) {
@@ -2111,19 +2106,26 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	if (mode == DOM_LOAD_FILE) {
 		if (source_type == IS_UNICODE) {
-			if (php_stream_path_encode(NULL, &source, &source_len, (UChar*)source, source_len, REPORT_ERRORS, NULL) == FAILURE) {
+			if (php_stream_path_encode(NULL, &source.s, &source_len, source.u, source_len, REPORT_ERRORS, NULL) == FAILURE) {
 				RETURN_FALSE;
 			}
 		}
 
-		ctxt = htmlCreateFileParserCtxt(source, NULL);
+		ctxt = htmlCreateFileParserCtxt(source.s, NULL);
 
 		if (source_type == IS_UNICODE) {
-			efree(source);
+			efree(source.s);
 		}
 	} else {
-		source_len = xmlStrlen(source);
-		ctxt = htmlCreateMemoryParserCtxt(source, source_len);
+		if (source_type == IS_UNICODE) {
+			source.s = php_libxml_unicode_to_string(source.u, source_len, &source_len TSRMLS_CC);
+		}
+
+		ctxt = htmlCreateMemoryParserCtxt(source.s, source_len);
+
+		if (source_type == IS_UNICODE) {
+			efree(source.s);
+		}
 	}
 
 	if (!ctxt) {

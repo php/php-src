@@ -30,6 +30,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
+#include "ext/libxml/php_libxml.h"
 #include "php_simplexml.h"
 #include "php_simplexml_exports.h"
 #include "zend_exceptions.h"
@@ -2059,8 +2060,9 @@ PHP_FUNCTION(simplexml_load_file)
 PHP_FUNCTION(simplexml_load_string)
 {
 	php_sxe_object *sxe;
-	char           *data;
+	zstr            data;
 	int             data_len;
+	zend_uchar      data_type;
 	xmlDocPtr       docp;
 	char           *ns = NULL;
 	int             ns_len = 0;
@@ -2068,11 +2070,17 @@ PHP_FUNCTION(simplexml_load_string)
 	zend_class_entry *ce= sxe_class_entry;
 	zend_bool       isprefix = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|C!ls&b", &data, &data_len, &ce, &options, &ns, &ns_len, UG(utf8_conv), &isprefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|C!ls&b", &data, &data_len, &data_type, &ce, &options, &ns, &ns_len, UG(utf8_conv), &isprefix) == FAILURE) {
 		return;
 	}
 
-	docp = xmlReadMemory(data, data_len, NULL, NULL, options);
+	if (data_type == IS_UNICODE) {
+		data.s = php_libxml_unicode_to_string(data.u, data_len, &data_len TSRMLS_CC);
+	}
+	docp = xmlReadMemory(data.s, data_len, NULL, NULL, options);
+	if (data_type == IS_UNICODE) {
+		efree(data.s);
+	}
 
 	if (! docp) {
 		RETURN_FALSE;

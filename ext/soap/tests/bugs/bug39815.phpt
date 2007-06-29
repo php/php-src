@@ -32,10 +32,10 @@ class LocalSoapClient extends SoapClient {
 $x = new LocalSoapClient(NULL,array('location'=>'test://', 
                                    'uri'=>'http://testuri.org',
                                    "trace"=>1)); 
-setlocale(LC_ALL,"sv_SE","sv_SE.ISO8859-1");
+@setlocale(LC_ALL,"sv_SE","sv_SE.ISO8859-1");
 var_dump($x->test());
 echo $x->__getLastResponse();
-setlocale(LC_ALL,"en_US","en_US.ISO8859-1");
+@setlocale(LC_ALL,"en_US","en_US.ISO8859-1");
 var_dump($x->test());
 echo $x->__getLastResponse();
 --EXPECT--
