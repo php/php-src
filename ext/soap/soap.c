@@ -296,12 +296,9 @@ ZEND_GET_MODULE(soap)
 
 char* soap_unicode_to_string(UChar *ustr, int ustr_len TSRMLS_DC)
 {
-	UErrorCode errCode = 0;
-	char *tmp;
-	int tmp_len;
+	int dummy;
 
-	zend_unicode_to_string_ex(UG(utf8_conv), &tmp, &tmp_len, ustr, ustr_len, &errCode);
-	return tmp;
+	return php_libxml_unicode_to_string(ustr, ustr_len, &dummy TSRMLS_CC);
 }
 
 void soap_decode_string(zval *ret, char* str TSRMLS_DC)

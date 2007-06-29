@@ -1059,6 +1059,107 @@ void php_libxml_node_decrement_resource(php_libxml_node_object *object TSRMLS_DC
 }
 /* }}} */
 
+PHP_LIBXML_API char* php_libxml_unicode_to_string(UChar *ustr, int ustr_len, int *str_len TSRMLS_DC)
+{
+	UErrorCode errCode = 0;
+	char *tmp;
+	int tmp_len;
+
+	zend_unicode_to_string_ex(UG(utf8_conv), &tmp, &tmp_len, ustr, ustr_len, &errCode);
+	*str_len = tmp_len;
+
+	/* Substitute uncoding with "utf8" */
+	if (tmp[0] == '<' &&
+	    tmp[1] == '?' &&
+	    tmp[2] == 'x' &&
+	    tmp[3] == 'm' &&
+	    tmp[4] == 'l') {
+		char *s = tmp + sizeof("<?xml")-1;
+
+		while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
+			++s;
+		}
+		while (*s != 0 && *s != '?' && *s != '>') {
+			if ((*s >= 'a' && *s <= 'z') || (*s >= 'A' && *s <= 'Z')) {
+				char *attr = s;
+				char *val;
+				int attr_len, val_len;
+
+				while ((*s >= 'a' && *s <= 'z') ||
+				       (*s >= 'A' && *s <= 'Z') ||
+				       (*s >= '0' && *s <= '9') ||
+				       (*s == '_')) {
+					++s;
+				}
+				attr_len = s - attr;
+				while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
+					++s;
+				}
+				if (*s == '=') {
+					++s;
+				} else {
+					break;
+				}
+				while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
+					++s;
+				}
+				if (*s == '"') {
+					++s;
+				} else {
+					break;
+				}
+				val = s;
+				while (*s != 0 && *s != '"') {
+					++s;
+				}
+				if (*s == '"') {
+					val_len = s - val;
+					++s;
+				} else {
+					break;
+				}
+
+				while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
+					++s;
+				}
+
+				if (attr_len == sizeof("encoding")-1 &&
+				    strncasecmp(attr, "encoding", sizeof("encoding")-1) == 0) {
+				    if (val_len >= sizeof("utf-8")-1) {
+				    	val[0] = 'u';
+				    	val[1] = 't';
+				    	val[2] = 'f';
+				    	val[3] = '-';
+				    	val[4] = '8';
+				    	val[5] = '"';
+				    	while (val_len > sizeof("utf-8")-1) {
+				    		val[val_len] = ' ';
+				    		--val_len;
+				    	}
+				    }else if (val_len >= sizeof("utf8")-1) {
+				    	val[0] = 'u';
+				    	val[1] = 't';
+				    	val[2] = 'f';
+				    	val[3] = '8';
+				    	val[4] = '"';
+				    	while (val_len > sizeof("utf8")-1) {
+				    		val[val_len] = ' ';
+				    		--val_len;
+				    	}
+				    } else {
+				    	/* Encoding name too short */
+				    	break;
+				    }
+				}
+
+			} else {
+				break;
+			}
+		}
+	}
+	return tmp;
+}
+
 #ifdef PHP_WIN32
 PHP_LIBXML_API BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
