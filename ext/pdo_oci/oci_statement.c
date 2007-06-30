@@ -32,18 +32,22 @@
 #include "Zend/zend_extensions.h"
 
 #define STMT_CALL(name, params)	\
-	S->last_err = name params; \
-	S->last_err = _oci_error(S->err, stmt->dbh, stmt, #name, S->last_err, __FILE__, __LINE__ TSRMLS_CC); \
-	if (S->last_err) { \
-		return 0; \
-	}
+	do { \
+		S->last_err = name params;										\
+		S->last_err = _oci_error(S->err, stmt->dbh, stmt, #name, S->last_err, FALSE, __FILE__, __LINE__ TSRMLS_CC); \
+		if (S->last_err) {												\
+			return 0;													\
+		}																\
+	} while(0)
 
 #define STMT_CALL_MSG(name, msg, params)	\
-	S->last_err = name params; \
-	S->last_err = _oci_error(S->err, stmt->dbh, stmt, #name ": " #msg, S->last_err, __FILE__, __LINE__ TSRMLS_CC); \
-	if (S->last_err) { \
-		return 0; \
-	}
+	do { \
+		S->last_err = name params;										\
+		S->last_err = _oci_error(S->err, stmt->dbh, stmt, #name ": " #msg, S->last_err, FALSE, __FILE__, __LINE__ TSRMLS_CC); \
+		if (S->last_err) {												\
+			return 0;													\
+		}																\
+	} while(0)
 
 static php_stream *oci_create_lob_stream(pdo_stmt_t *stmt, OCILobLocator *lob TSRMLS_DC);
 
@@ -52,7 +56,7 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	HashTable *BC = stmt->bound_columns;
 	HashTable *BP = stmt->bound_params;
-	
+
 	int i;
 
 	if (S->stmt) {
@@ -75,18 +79,18 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		FREE_HASHTABLE(stmt->bound_columns);
 		stmt->bound_columns = NULL;
 	}
-	
+
 	if (BP) {
 		zend_hash_destroy(BP);
 		FREE_HASHTABLE(stmt->bound_params);
 		stmt->bound_params = NULL;
 	}
-	
+
 	if (S->einfo.errmsg) {
 		efree(S->einfo.errmsg);
 		S->einfo.errmsg = NULL;
 	}
-	
+
 	if (S->cols) {
 		for (i = 0; i < stmt->column_count; i++) {
 			if (S->cols[i].data) {
@@ -150,7 +154,7 @@ static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 				(S->stmt, OCI_HTYPE_STMT, &colcount, 0, OCI_ATTR_PARAM_COUNT, S->err));
 
 		stmt->column_count = (int)colcount;
-	
+
 		if (S->cols) {
 			int i;
 			for (i = 0; i < stmt->column_count; i++) {
@@ -170,7 +174,7 @@ static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 		S->cols = ecalloc(colcount, sizeof(pdo_oci_column));
 	}
-	
+
 	STMT_CALL_MSG(OCIAttrGet, "ATTR_ROW_COUNT",
 			(S->stmt, OCI_HTYPE_STMT, &rowcount, 0, OCI_ATTR_ROW_COUNT, S->err));
 	stmt->row_count = (long)rowcount;
@@ -188,7 +192,7 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "param is NULL in oci_bind_input_cb; this should not happen");
 		return OCI_ERROR;
 	}
-	
+
 	*indpp = &P->indicator;
 
 	if (P->thing) {
@@ -229,8 +233,8 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 		*rcodepp = &P->retcode;
 		*indpp = &P->indicator;
 		return OCI_CONTINUE;
-	} 
-	
+	}
+
 	if (Z_TYPE_P(param->parameter) == IS_OBJECT || Z_TYPE_P(param->parameter) == IS_RESOURCE) {
 		return OCI_CONTINUE;
 	}
@@ -242,7 +246,7 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 	Z_STRVAL_P(param->parameter) = ecalloc(1, Z_STRLEN_P(param->parameter)+1);
 	P->used_for_output = 1;
 
-	P->actual_len = Z_STRLEN_P(param->parameter);	
+	P->actual_len = Z_STRLEN_P(param->parameter);
 	*alenpp = &P->actual_len;
 	*bufpp = Z_STRVAL_P(param->parameter);
 	*piecep = OCI_ONE_PIECE;
@@ -260,7 +264,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 	if (param->is_param) {
 		pdo_oci_bound_param *P;
 		sb4 value_sz = -1;
-		
+
 		P = (pdo_oci_bound_param*)param->driver_data;
 
 		switch (event_type) {
@@ -274,7 +278,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 			case PDO_PARAM_EVT_ALLOC:
 				P = (pdo_oci_bound_param*)ecalloc(1, sizeof(pdo_oci_bound_param));
 				param->driver_data = P;
-			
+
 				/* figure out what we're doing */
 				switch (PDO_PARAM_TYPE(param->param_type)) {
 					case PDO_PARAM_STMT:
@@ -293,9 +297,9 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 						if (param->max_value_len == 0) {
 							value_sz = 1332; /* maximum size before value is interpreted as a LONG value */
 						}
-						
+
 				}
-				
+
 				if (param->name) {
 					STMT_CALL(OCIBindByName, (S->stmt,
 							&P->bind, S->err, (text*)param->name,
@@ -309,7 +313,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 							&P->indicator, 0, &P->retcode, 0, 0,
 							OCI_DATA_AT_EXEC));
 				}
-			
+
 				STMT_CALL(OCIBindDynamic, (P->bind,
 							S->err,
 							param, oci_bind_input_cb,
@@ -421,7 +425,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 				return 1;
 		}
 	}
-	
+
 	return 1;
 } /* }}} */
 
@@ -459,7 +463,7 @@ static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,	long
 	if (S->last_err == OCI_SUCCESS_WITH_INFO || S->last_err == OCI_SUCCESS) {
 		return 1;
 	}
-	
+
 	oci_stmt_error("OCIStmtFetch");
 
 	return 0;
@@ -528,7 +532,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 	col->name = estrndup(colname, namelen);
 
 	S->cols[colno].dtype = dtype;
-	
+
 	/* how much room do we need to store the field */
 	switch (dtype) {
 		case SQLT_LBI:
@@ -550,7 +554,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 			S->cols[colno].datalen = sizeof(OCILobLocator*);
 			dyn = TRUE;
 			break;
-																																
+
 		case SQLT_BIN:
 		default:
 			if (dtype == SQLT_DAT || dtype == SQLT_NUM
@@ -588,7 +592,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 		STMT_CALL(OCIDefineDynamic, (S->cols[colno].def, S->err, &S->cols[colno],
 				oci_define_callback));
 	}
-	
+
 	return 1;
 } /* }}} */
 
@@ -614,7 +618,7 @@ static size_t oci_blob_write(php_stream *stream, const char *buf, size_t count T
 	if (r != OCI_SUCCESS) {
 		return (size_t)-1;
 	}
-	
+
 	self->offset += amt;
 	return amt;
 }
@@ -665,7 +669,7 @@ static int oci_blob_seek(php_stream *stream, off_t offset, int whence, off_t *ne
 {
 	struct oci_lob_self *self = (struct oci_lob_self*)stream->abstract;
 
-	return -1;	
+	return -1;
 }
 */
 
@@ -723,7 +727,7 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned lo
 			*len = 0;
 			return *ptr ? 1 : 0;
 		}
-		
+
 		*ptr = C->data;
 		*len = C->fetched_len;
 		return 1;
