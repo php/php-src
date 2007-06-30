@@ -31,19 +31,23 @@
 #include "php_pdo_oci_int.h"
 #include "Zend/zend_extensions.h"
 
-#define STMT_CALL(name, params)	\
-	S->last_err = name params; \
-	S->last_err = _oci_error(S->err, stmt->dbh, stmt, #name, S->last_err, __FILE__, __LINE__ TSRMLS_CC); \
-	if (S->last_err) { \
-		return 0; \
-	}
+#define STMT_CALL(name, params)											\
+	do {																\
+		S->last_err = name params;										\
+		S->last_err = _oci_error(S->err, stmt->dbh, stmt, #name, S->last_err, FALSE, __FILE__, __LINE__ TSRMLS_CC); \
+		if (S->last_err) {												\
+			return 0;													\
+		}																\
+	} while(0)
 
-#define STMT_CALL_MSG(name, msg, params)	\
-	S->last_err = name params; \
-	S->last_err = _oci_error(S->err, stmt->dbh, stmt, #name ": " #msg, S->last_err, __FILE__, __LINE__ TSRMLS_CC); \
-	if (S->last_err) { \
-		return 0; \
-	}
+#define STMT_CALL_MSG(name, msg, params)								\
+	do {																\
+		S->last_err = name params;										\
+		S->last_err = _oci_error(S->err, stmt->dbh, stmt, #name ": " #msg, S->last_err, FALSE, __FILE__, __LINE__ TSRMLS_CC); \
+		if (S->last_err) {												\
+			return 0;													\
+		}																\
+	} while(0)
 
 
 static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
