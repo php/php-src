@@ -1,3 +1,152 @@
+2007-06-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Makefile.global:
+      - More portable..
+
+2007-06-29  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/pdo_oci/tests/pecl_bug_6364.phpt:
+      MFB. Test for old bug fixed in some previous, unknown change
+
+    * ext/pdo_oci/tests/pecl_bug_6364.phpt
+      ext/pdo_oci/tests/pecl_bug_6364.phpt:
+      
+      file pecl_bug_6364.phpt was initially added on branch PHP_5_2.
+
+2007-06-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/string.c:
+      ord() must not convert binary data to unicode in unicode mode
+
+2007-06-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Makefile.global:
+      - More portable solution
+
+2007-06-29  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/README:
+      MFB. Add testing steps
+
+2007-06-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      ext/json/tests/bug41567.phpt:
+      typo
+
+    * (PHP_5_2)
+      ext/json/tests/bug41504.phpt
+      ext/json/tests/bug41567.phpt
+      scripts/php-config.in
+      scripts/php-config.in:
+      oops
+
+2007-06-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/dom/document.c
+      ext/dom/tests/dom002u.phpt
+      ext/libxml/libxml.c
+      ext/libxml/php_libxml.h
+      ext/simplexml/simplexml.c
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug39815.phpt:
+      Allowed loading XML from unicode strings
+
+2007-06-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      ext/json/tests/bug41403.phpt
+      ext/json/tests/bug41504.phpt
+      ext/json/tests/bug41567.phpt:
+      - Added missing SKIPIFs
+
+    * ext/json/tests/bug41403.phpt:
+      - Added missing SKIPIF
+
+2007-06-29  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/rename_variation.phpt
+      ext/standard/tests/file/rename_variation1.phpt
+      ext/standard/tests/file/rename_variation2.phpt
+      ext/standard/tests/file/rename_variation3.phpt
+      ext/standard/tests/file/rename_variation4.phpt
+      ext/standard/tests/file/rename_variation5.phpt:
+      divide the test into smaller tests
+
+    * ext/standard/tests/file/rename_variation2.phpt
+      ext/standard/tests/file/rename_variation2.phpt
+      ext/standard/tests/file/rename_variation3.phpt
+      ext/standard/tests/file/rename_variation3.phpt:
+      
+      cleanup tmp files
+
+    * ext/standard/tests/file/rename_variation.phpt
+      ext/standard/tests/file/rename_variation1.phpt
+      ext/standard/tests/file/rename_variation1.phpt
+      ext/standard/tests/file/rename_variation2.phpt
+      ext/standard/tests/file/rename_variation3.phpt
+      ext/standard/tests/file/rename_variation4.phpt
+      ext/standard/tests/file/rename_variation4.phpt
+      ext/standard/tests/file/rename_variation5.phpt
+      ext/standard/tests/file/rename_variation5.phpt:
+      divide the test into smaller ones
+
+    * Makefile.global:
+      remove the quotes in for
+
+2007-06-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * run-tests.php
+      run-tests.php:
+      Fixed CGI tests
+
+2007-06-29  Antony Dovgal  <antony@zend.com>
+
+    * Makefile.global:
+      fix `make test` with shared extensions
+      
+
+2007-06-29  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_2)
+      ext/pdo_oci/oci_driver.c
+      ext/pdo_oci/php_pdo_oci_int.h:
+      Un-DOSify line terminators.  No merge to 6 required.
+
+    * (PHP_5_2)
+      ext/oci8/README:
+      Add testing steps
+
+2007-06-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      acinclude.m4
+      configure.in
+      scripts/php-config.in
+      scripts/phpize.in
+      scripts/man1/php-config.1.in:
+      MFH:- Improved php-config:
+      MFH:  . Added --configure-options option to get configure line for current
+      build
+      MFH:  . Added --php-sapis option which shows SAPIs available
+      MFH:  . Fixed problem with missing php binary when CLI is not build but
+      CGI is.
+      MFH:- Fixed broken sed issues in phpize script
+
+    * acinclude.m4
+      configure.in
+      scripts/php-config.in
+      scripts/phpize.in
+      scripts/man1/php-config.1.in:
+      - Improved php-config:
+        . Added --configure-options option to get configure line for current
+      build
+        . Added --php-sapis option which shows SAPIs available
+        . Fixed problem with missing php binary when CLI is not build but CGI
+      is.
+      - Fixed broken sed issues in phpize script
+
 2007-06-28  Stanislav Malyshev  <stas@zend.com>
 
     * ZendEngine2/zend_compile.c
