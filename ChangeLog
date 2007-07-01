@@ -1,3 +1,22 @@
+2007-06-30  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/pdo_oci/oci_driver.c
+      ext/pdo_oci/oci_statement.c
+      ext/pdo_oci/php_pdo_oci_int.h
+      ext/pdo_oci/tests/pecl_bug_11345.phpt:
+      MFB: Fix Bug #11345 Seg fault after NLS environment initialization error
+
+    * ext/pdo_oci/tests/pecl_bug_11345.phpt
+      ext/pdo_oci/tests/pecl_bug_11345.phpt:
+      
+      file pecl_bug_11345.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/pdo_oci/oci_driver.c
+      ext/pdo_oci/oci_statement.c
+      ext/pdo_oci/php_pdo_oci_int.h:
+      Fix Bug #11345 Seg fault after NLS environment initialization error
+
 2007-06-29  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * Makefile.global:
