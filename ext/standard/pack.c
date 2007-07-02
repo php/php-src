@@ -659,7 +659,7 @@ PHP_FUNCTION(unpack)
 								break;
 						}
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len + 1, 1);
+						add_rt_assoc_stringl(return_value, n, &input[inputpos], len + 1, 1);
 						break;
 					}
 					
@@ -701,7 +701,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						buf[len] = '\0';
-						add_assoc_stringl(return_value, n, buf, len, 1);
+						add_rt_assoc_stringl(return_value, n, buf, len, 1);
 						efree(buf);
 						break;
 					}
@@ -710,7 +710,7 @@ PHP_FUNCTION(unpack)
 					case 'C': {
 						int issigned = (type == 'c') ? (input[inputpos] & 0x80) : 0;
 						long v = php_unpack(&input[inputpos], 1, issigned, byte_map);
-						add_assoc_long(return_value, n, v);
+						add_rt_assoc_long(return_value, n, v);
 						break;
 					}
 
@@ -731,7 +731,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						v = php_unpack(&input[inputpos], 2, issigned, map);
-						add_assoc_long(return_value, n, v);
+						add_rt_assoc_long(return_value, n, v);
 						break;
 					}
 
@@ -747,7 +747,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						v |= php_unpack(&input[inputpos], sizeof(int), issigned, int_map);
-						add_assoc_long(return_value, n, v);
+						add_rt_assoc_long(return_value, n, v);
 						break;
 					}
 
@@ -774,7 +774,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						v |= php_unpack(&input[inputpos], 4, issigned, map);
-						add_assoc_long(return_value, n, v);
+						add_rt_assoc_long(return_value, n, v);
 						break;
 					}
 
@@ -782,7 +782,7 @@ PHP_FUNCTION(unpack)
 						float v;
 
 						memcpy(&v, &input[inputpos], sizeof(float));
-						add_assoc_double(return_value, n, (double)v);
+						add_rt_assoc_double(return_value, n, (double)v);
 						break;
 					}
 
@@ -790,7 +790,7 @@ PHP_FUNCTION(unpack)
 						double v;
 
 						memcpy(&v, &input[inputpos], sizeof(double));
-						add_assoc_double(return_value, n, v);
+						add_rt_assoc_double(return_value, n, v);
 						break;
 					}
 
