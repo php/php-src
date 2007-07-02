@@ -60,6 +60,7 @@ PHP                                                                        NEWS
 - Fixed bug #41717 (imagepolygon does not respect thickness). (Pierre)
 - Fixed bug #41711 (NULL temporary lobs not supported in OCI8). 
   (Chris Jones, Tony)
+- Fixed bug #41770 (SSL: fatal protocol error due to buffer issues). (Ilia)
 - Fixed bug #41698 (float parameters truncated to integer in prepared 
   statements). (Ilia)
 - Fixed bug #41692 (ArrayObject shows weird behavior in respect to 
