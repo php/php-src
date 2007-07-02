@@ -1,3 +1,13 @@
+2007-07-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/file.c:
+      MFH: - Fixed bug #41865 (fputcsv(): 2nd parameter is not optional)
+
+    * ext/standard/file.c:
+      - Fixed bug #41865 (fputcsv(): 2nd parameter is not optional)
+
 2007-06-30  Christopher Jones  <christopher.jones@oracle.com>
 
     * ext/pdo_oci/oci_driver.c
