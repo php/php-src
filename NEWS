@@ -39,6 +39,7 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #41867 (getName is broken). (Rob)
 - Fixed bug #41865 (fputcsv(): 2nd parameter is not optional). (Jani)
 - Fixed bug #41813 (segmentation fault when using string offset as an object).
   (judas dot iscariote at gmail dot com, Tony)
