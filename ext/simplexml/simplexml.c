@@ -1550,9 +1550,13 @@ SXE_METHOD(getName)
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
 	GET_NODE(sxe, node);
-	
-	namelen = xmlStrlen(node->name);
-	RETVAL_XML_STRING_LEN((char *) node->name, namelen, ZSTR_DUPLICATE);
+	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+	if (node) {
+		namelen = xmlStrlen(node->name);
+		RETVAL_XML_STRING_LEN((char *) node->name, namelen, ZSTR_DUPLICATE);
+	} else {
+		RETURN_EMPTY_TEXT();
+	}
 }
 /* }}} */
 
