@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Corrected fix for CVE-2007-2872. (Ilia)
 - Enabled statement cache for non-persistent OCI8 connections.
   (Chris Jones, Tony)
+- Enabled changing the size of statement cache for non-persistent OCI8
+  connections. (Chris Jones, Tony)
 
 - Changed error handler to send HTTP 500 instead of blank page on PHP errors.
   (Dmitry, Andrei Nigmatulin)
@@ -36,6 +38,8 @@ PHP                                                                        NEWS
 - Fixed INFILE LOCAL option handling with MySQL extensions not to be allowed 
   when open_basedir or safe_mode is active. (Stas)
 
+- Fixed PECL Bug #11345 (PDO_OCI crash after National language Support
+  "NLS" environment initialization error) (Chris Jones)
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
@@ -79,7 +83,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #41596 (Fixed a crash inside pdo_pgsql on some non-well-formed
   SQL queries). (Ilia)
-- Fixed bug #41594 (Statement cache is flushed too frequently). (Tony)
+- Fixed bug #41594 (OCI8 statement cache is flushed too frequently). (Tony)
 - Fixed bug #41582 (SimpleXML crashes when accessing newly created element).
   (Tony)
 - Fixed bug #41576 (configure failure when using --without-apxs or some
