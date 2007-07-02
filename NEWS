@@ -41,6 +41,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #41867 (getName is broken). (Rob)
 - Fixed bug #41865 (fputcsv(): 2nd parameter is not optional). (Jani)
+- Fixed bug #41845 (pgsql extension does not compile with PostgreSQL <7.4).
+  (Ilia)
 - Fixed bug #41813 (segmentation fault when using string offset as an object).
   (judas dot iscariote at gmail dot com, Tony)
 - Fixed bug #41795 (checkdnsrr does not support DNS_TXT type). 
@@ -56,7 +58,7 @@ PHP                                                                        NEWS
   (Chris Jones, Tony)
 - Fixed bug #41698 (float parameters truncated to integer in prepared 
   statements). (Ilia)
-- Fixed bug #41692 (ArrayObject shows weird behaviour in respect to 
+- Fixed bug #41692 (ArrayObject shows weird behavior in respect to 
   inheritance). (Tony)
 - Fixed bug #41686 (Omitting length param in array_slice not possible).
   (Ilia)
