@@ -3,10 +3,8 @@ dnl config.m4 for extension sqlite
 dnl vim:et:ts=2:sw=2
 
 PHP_ARG_WITH(sqlite, for sqlite support,
-[  --without-sqlite        Do not include sqlite support.
-                          Use --with-sqlite=DIR to specify DIR where
-                          Sqlite include and library files are located,
-                          if not using bundled library.], yes)
+[  --without-sqlite        Do not include sqlite support.  DIR is the sqlite base
+                          install directory [BUNDLED]], yes)
 
 PHP_ARG_ENABLE(sqlite-utf8, whether to disable UTF-8 support in libsqlite (charset changes to ISO-8859-1),
 [  --disable-sqlite-utf8     SQLite: Disable UTF-8 support for SQLite (use ISO8859)], yes, no)

@@ -719,8 +719,7 @@ esac
 
 PHP_ARG_WITH(config-file-path,[path to configuration file],
 [  --with-config-file-path=PATH
-                          Set the path in which to look for php.ini
-                          [PREFIX/lib]], DEFAULT, no)
+                          Set the path in which to look for php.ini [PREFIX/lib]], DEFAULT, no)
 
 if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
   case $PHP_LAYOUT in
