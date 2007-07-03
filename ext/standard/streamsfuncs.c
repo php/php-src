@@ -1647,6 +1647,37 @@ PHP_FUNCTION(stream_resolve_include_path)
 }
 /* }}} */
 
+/* {{{ proto bool stream_is_local(resource stream|string url) U
+*/
+PHP_FUNCTION(stream_is_local)
+{
+	zval *zstream;
+	php_stream *stream = NULL;
+	php_stream_wrapper *wrapper = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zstream) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if(Z_TYPE_P(zstream) == IS_RESOURCE) {
+		php_stream_from_zval(stream, &zstream);
+		if(stream == NULL) {
+			RETURN_FALSE;
+		}
+		wrapper = stream->wrapper;
+	} else {
+		convert_to_string_ex(&zstream);
+		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(zstream), NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC);
+	}
+
+	if(!wrapper) {
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(wrapper->is_url==0);
+}
+/* }}} */
+
 #ifdef HAVE_SHUTDOWN
 /* {{{ proto int stream_socket_shutdown(resource stream, int how) U
 	causes all or part of a full-duplex connection on the socket associated

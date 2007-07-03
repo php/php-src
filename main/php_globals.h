@@ -142,6 +142,7 @@ struct _php_core_globals {
 	zend_bool com_initialized;
 #endif
 	long max_input_nesting_level;
+	zend_bool in_user_include;
 };
 
 

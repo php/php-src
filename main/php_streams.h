@@ -619,6 +619,9 @@ END_EXTERN_C()
 /* use glob stream for directory open in plain files stream */
 #define STREAM_USE_GLOB_DIR_OPEN        0x00001000
 
+/* use glob stream for directory open in plain files stream */
+#define STREAM_DISABLE_URL_PROTECTION   0x00002000
+
 /* Antique - no longer has meaning */
 #define IGNORE_URL_WIN 0
 
@@ -669,7 +672,7 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 
 PHP_INI_MH(OnUpdateAllowUrl);
 PHPAPI int php_stream_wrapper_is_allowed(const char *wrapper, int wrapper_len, const char *setting TSRMLS_DC);
-#define php_stream_allow_url_fopen(wrapper, wrapper_len)	php_stream_wrapper_is_allowed((wrapper), (wrapper_len), PG(allow_url_fopen_list) TSRMLS_CC)
+#define php_stream_allow_url_fopen(wrapper, wrapper_len)	php_stream_wrapper_is_allowed((wrapper), (wrapper_len), PG(in_user_include)?PG(allow_url_include_list):PG(allow_url_fopen_list) TSRMLS_CC)
 #define php_stream_allow_url_include(wrapper, wrapper_len)	php_stream_wrapper_is_allowed((wrapper), (wrapper_len), PG(allow_url_include_list) TSRMLS_CC)
 
 /* Give other modules access to the url_stream_wrappers_hash and stream_filters_hash */
@@ -683,6 +686,8 @@ extern php_stream_wrapper_ops *php_stream_user_wrapper_ops;
 END_EXTERN_C()
 #endif
 
+/* Definitions for user streams */
+#define PHP_STREAM_IS_URL		1
 /*
  * Local variables:
  * tab-width: 4

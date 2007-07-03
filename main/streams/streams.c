@@ -2163,8 +2163,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		return plain_files_wrapper;
 	}
 
-	if (!php_stream_allow_url_fopen(protocol, n) ||
-		((options & STREAM_OPEN_FOR_INCLUDE) && !php_stream_allow_url_include(protocol, n)) ) {
+	if (((options & STREAM_DISABLE_URL_PROTECTION) == 0) &&
+	    (!php_stream_allow_url_fopen(protocol, n) ||
+		 ((options & STREAM_OPEN_FOR_INCLUDE) && !php_stream_allow_url_include(protocol, n)))) {
 		if (options & REPORT_ERRORS) {
 			/* protocol[n] probably isn't '\0' */
 			char *protocol_dup = estrndup(protocol, n);
@@ -2797,7 +2798,7 @@ PHPAPI int _php_stream_path_encode(php_stream_wrapper *wrapper,
 
 				return FAILURE;
 			}
-			wrapper = php_stream_locate_url_wrapper(scheme, NULL, options TSRMLS_CC);
+			wrapper = php_stream_locate_url_wrapper(scheme, NULL, options | STREAM_DISABLE_URL_PROTECTION TSRMLS_CC);
 			efree(scheme);
 			if (!wrapper) {
 				*pathenc = NULL;
