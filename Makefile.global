@@ -85,8 +85,8 @@ test: all
 			$(PHP_EXECUTABLE) $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -d extension_dir=modules/ $(PHP_TEST_SHARED_EXTENSIONS) tests/; \
 	elif test ! -z "$(SAPI_CLI_PATH)" && test -x "$(SAPI_CLI_PATH)"; then \
 		INI_FILE=`$(top_builddir)/$(SAPI_CLI_PATH) -r 'echo php_ini_loaded_file();'`; \
-		if test "$(INI_FILE)"; then \
-			$(EGREP) -v '^extension[\t\ ]=' "$(INI_FILE)" > $(top_builddir)/tmp-php.ini; \
+		if test "$$INI_FILE"; then \
+			$(EGREP) -v '^extension[\t\ ]*=' "$$INI_FILE" > $(top_builddir)/tmp-php.ini; \
 		else \
 			echo > $(top_builddir)/tmp-php.ini; \
 		fi; \
