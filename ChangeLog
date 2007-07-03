@@ -1,3 +1,49 @@
+2007-07-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/xp_ssl.c:
+      
+      Fixed bug #41770 (SSL: fatal protocol error due to buffer issues).
+
+    * (PHP_5_2)
+      NEWS:
+      oracle BFN
+
+    * (PHP_5_2)
+      NEWS
+      ext/pgsql/pgsql.c:
+      
+      Fixed bug #41845 (pgsql extension does not compile with PostgreSQL <7.4)
+
+2007-07-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/simplexml/simplexml.c:
+      Allow unicode XML
+
+2007-07-02  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug41867.phpt:
+      MFB: fix bug #41867 (getName is broken)
+      add test
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug41867.phpt
+      ext/simplexml/tests/bug41867.phpt:
+      fix bug #41867 (getName is broken)
+      add test
+
+2007-07-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/pack.c:
+      Unicode support
+
 2007-07-01  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_2)
