@@ -547,6 +547,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			}
 			goto no_realpath;
 		}
+		use_realpath = CWD_REALPATH;
 		CWD_STATE_COPY(&old_state, state);
 
 		state->cwd_length = strlen(resolved_path);
