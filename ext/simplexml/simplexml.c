@@ -1458,15 +1458,12 @@ SXE_METHOD(getNamespaces)
 	GET_NODE(sxe, node);
 	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 
-	while (node) {
-		SKIP_TEXT(node)
+	if (node) {
 		if (node->type == XML_ELEMENT_NODE) {
 			sxe_add_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
 		} else if (node->type == XML_ATTRIBUTE_NODE && node->ns) {
 			sxe_add_namespace_name(return_value, node->ns TSRMLS_CC);
 		}
-next_iter:
-		node = node->next;
 	}
 }
 /* }}} */
