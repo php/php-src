@@ -205,9 +205,10 @@ ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ main/streams/userspace.c */
 static
-ZEND_BEGIN_ARG_INFO(arginfo_stream_wrapper_register, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_wrapper_register, 0, 0, 2)
 	ZEND_ARG_INFO(0, protocol)
 	ZEND_ARG_INFO(0, classname)
+	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
 static
@@ -2347,6 +2348,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_stream_get_wrappers, 0)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO(arginfo_stream_is_local, 0)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_select, 0, 0, 4)
 	ZEND_ARG_INFO(1, read_streams) /* ARRAY_INFO(1, read_streams, 1) */
 	ZEND_ARG_INFO(1, write_streams) /* ARRAY_INFO(1, write_streams, 1) */
@@ -3596,6 +3602,7 @@ zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_wrapper_restore,											arginfo_stream_wrapper_restore)
 	PHP_FE(stream_get_wrappers,												arginfo_stream_get_wrappers)
 	PHP_FE(stream_get_transports,											arginfo_stream_get_transports)
+	PHP_FE(stream_is_local,												arginfo_stream_is_local)
 	PHP_FE(get_headers,														arginfo_get_headers)
 
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)

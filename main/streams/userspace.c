@@ -81,6 +81,7 @@ PHP_MINIT_FUNCTION(user_streams)
 	REGISTER_LONG_CONSTANT("STREAM_URL_STAT_QUIET", 	PHP_STREAM_URL_STAT_QUIET,		CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_MKDIR_RECURSIVE",	PHP_STREAM_MKDIR_RECURSIVE,		CONST_CS|CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("STREAM_IS_URL",	PHP_STREAM_IS_URL,		CONST_CS|CONST_PERSISTENT);
 	return SUCCESS;
 }
 
@@ -215,6 +216,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	int call_result;
 	php_stream *stream = NULL;
 	zval *zcontext = NULL;
+	zend_bool old_in_user_include;
 
 	/* Try to catch bad usage without preventing flexibility */
 	if (FG(user_stream_current_filename) != NULL && strcmp(filename, FG(user_stream_current_filename)) == 0) {
@@ -223,6 +225,17 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	}
 	FG(user_stream_current_filename) = filename;
 	
+	/* if the user stream was registered as local and we are in include context,
+		we add allow_url_include restrictions to allow_url_fopen ones */
+	/* we need only is_url == 0 here since if is_url == 1 and remote wrappers
+		were restricted we wouldn't get here */
+	old_in_user_include = PG(in_user_include);
+	if(uwrap->wrapper.is_url == 0 && 
+		(options & STREAM_OPEN_FOR_INCLUDE) && 
+		(PG(allow_url_include_list) == NULL || strlen(PG(allow_url_include_list)) !=1 || PG(allow_url_include_list)[0] != '*')) {
+		PG(in_user_include) = 1;
+	}
+
 	us = emalloc(sizeof(*us));
 	us->wrapper = uwrap;	
 
@@ -258,6 +271,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 			FREE_ZVAL(us->object);
 			efree(us);
 			FG(user_stream_current_filename) = NULL;
+			PG(in_user_include) = old_in_user_include;
 			return NULL;
 		} else {
 			if (retval_ptr) {
@@ -338,7 +352,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	zval_ptr_dtor(&zfilename);
 
 	FG(user_stream_current_filename) = NULL;
-		
+
+	PG(in_user_include) = old_in_user_include;
 	return stream;
 }
 
@@ -436,8 +451,9 @@ PHP_FUNCTION(stream_wrapper_register)
 	int protocol_len, classname_len;
 	struct php_user_stream_wrapper * uwrap;
 	int rsrc_id;
+	long flags = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &protocol, &protocol_len, &classname, &classname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &protocol, &protocol_len, &classname, &classname_len, &flags) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
@@ -446,6 +462,7 @@ PHP_FUNCTION(stream_wrapper_register)
 	uwrap->classname = estrndup(classname, classname_len);
 	uwrap->wrapper.wops = &user_stream_wops;
 	uwrap->wrapper.abstract = uwrap;
+	uwrap->wrapper.is_url = ((flags & PHP_STREAM_IS_URL) != 0);
 
 	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, uwrap, le_protocols);
 

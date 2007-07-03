@@ -1232,6 +1232,7 @@ int php_request_startup(TSRMLS_D)
 		PG(modules_activated) = 0;
 		PG(header_is_being_sent) = 0;
 		PG(connection_status) = PHP_CONNECTION_NORMAL;
+		PG(in_user_include) = 0;
 
 		zend_activate(TSRMLS_C);
 		sapi_activate(TSRMLS_C);
