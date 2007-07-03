@@ -7,8 +7,8 @@ dnl Configure options
 dnl 
 
 PHP_ARG_WITH(gd, for GD support,
-[  --with-gd[=FILE]        Include GD support. FILE is the optional pathname to gdlib-config.
-                          If FILE is not set, the bundled GD library will be used])
+[  --with-gd[=FILE]        Include GD support.  FILE is the optional
+                          pathname to gdlib-config [BUNDLED]])
 
 if test -z "$PHP_JPEG_DIR"; then
   PHP_ARG_WITH(jpeg-dir, for the location of libjpeg,
