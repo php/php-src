@@ -83,15 +83,15 @@ test: all
 			$(PHP_EXECUTABLE) $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -U -d extension_dir=modules/ $(PHP_TEST_SHARED_EXTENSIONS) tests/; \
 	elif test ! -z "$(SAPI_CLI_PATH)" && test -x "$(SAPI_CLI_PATH)"; then \
 		INI_FILE=`$(top_builddir)/$(SAPI_CLI_PATH) -r 'echo php_ini_loaded_file();'`; \
-		if test "$(INI_FILE)"; then \
-			$(EGREP) -v '^extension[\t\ ]=' "$(INI_FILE)" > $(top_builddir)/tmp-php.ini; \
+		if test "$$INI_FILE"; then \
+			$(EGREP) -v '^extension[\t\ ]*=' "$$INI_FILE" > $(top_builddir)/tmp-php.ini; \
 		else \
 			echo > $(top_builddir)/tmp-php.ini; \
 		fi; \
 		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
 		TEST_PHP_SRCDIR=$(top_srcdir) \
 		CC="$(CC)" \
-			$(top_builddir)/$(SAPI_CLI_PATH) $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -U -d extension_dir=$(top_builddir)/modules/ $(PHP_TEST_SHARED_EXTENSIONS) $(TESTS); \
+			$(top_builddir)/$(SAPI_CLI_PATH) $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -c $(top_builddir)/tmp-php.ini -U -d extension_dir=$(top_builddir)/modules/ $(PHP_TEST_SHARED_EXTENSIONS) $(TESTS); \
 	else \
 		echo "ERROR: Cannot run tests without CLI sapi."; \
 	fi
