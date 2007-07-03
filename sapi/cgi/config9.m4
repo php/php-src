@@ -12,9 +12,8 @@ AC_ARG_ENABLE(cgi,
 
 AC_ARG_ENABLE(force-cgi-redirect,
 [  --enable-force-cgi-redirect
-                            CGI: Enable the security check for internal server
-                            redirects.  You should use this if you are
-                            running the CGI version with Apache],
+                            CGI: Enable security check for internal server
+                            redirects. Use this if you run the PHP CGI with Apache],
 [
   PHP_FORCE_CGI_REDIRECT=$enableval
 ],[
@@ -22,10 +21,9 @@ AC_ARG_ENABLE(force-cgi-redirect,
 ])
 
 AC_ARG_ENABLE(discard-path,
-[  --enable-discard-path     CGI: If this is enabled, the PHP CGI binary
-                            can safely be placed outside of the
-                            web tree and people will not be able
-                            to circumvent .htaccess security],
+[  --enable-discard-path     CGI: When this is enabled the PHP CGI binary can 
+                            safely be placed outside of the web tree and people
+                            will not be able to circumvent .htaccess security],
 [
   PHP_DISCARD_PATH=$enableval
 ],[
@@ -33,8 +31,7 @@ AC_ARG_ENABLE(discard-path,
 ])
 
 AC_ARG_ENABLE(fastcgi,
-[  --enable-fastcgi          CGI: If this is enabled, the cgi module will
-                            be built with support for fastcgi also],
+[  --enable-fastcgi          CGI: Enable FastCGI support in the CGI binary],
 [
   PHP_ENABLE_FASTCGI=$enableval
 ],[

@@ -99,8 +99,7 @@ AC_DEFUN([PHP_ODBC_FIND_EMPRESS_BCS_LIBS],[
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Adabas support)
 AC_ARG_WITH(adabas,
-[  --with-adabas[=DIR]     Include Adabas D support.  DIR is the Adabas base
-                          install directory [/usr/local]],
+[  --with-adabas[=DIR]     Include Adabas D support [/usr/local]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -132,8 +131,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for SAP DB support)
 AC_ARG_WITH(sapdb,
-[  --with-sapdb[=DIR]      Include SAP DB support.  DIR is SAP DB base
-                          install directory [/usr/local]],
+[  --with-sapdb[=DIR]      Include SAP DB support [/usr/local]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -158,8 +156,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Solid support)
 AC_ARG_WITH(solid,
-[  --with-solid[=DIR]      Include Solid support.  DIR is the Solid base
-                          install directory, defaults to /usr/local/solid],
+[  --with-solid[=DIR]      Include Solid support [/usr/local/solid]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -190,8 +187,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for IBM DB2 support)
 AC_ARG_WITH(ibm-db2,
-[  --with-ibm-db2[=DIR]    Include IBM DB2 support.  DIR is the DB2 base
-                          install directory, defaults to /home/db2inst1/sqllib],
+[  --with-ibm-db2[=DIR]    Include IBM DB2 support [/home/db2inst1/sqllib]],
 [
   PHP_WITH_SHARED
   if test "$withval" != "no"; then
@@ -234,8 +230,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for ODBCRouter.com support)
 AC_ARG_WITH(ODBCRouter,
-[  --with-ODBCRouter[=DIR] Include ODBCRouter.com support.  DIR is ODBCRouter base
-                          install directory [/usr]],
+[  --with-ODBCRouter[=DIR] Include ODBCRouter.com support [/usr]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -261,10 +256,8 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Empress support)
 AC_ARG_WITH(empress,
-[  --with-empress[=DIR]    Include Empress support.  DIR is the Empress base
-                          install directory, defaults to \$EMPRESSPATH.
-                          From PHP 4, this option only supports Empress Version
-                          8.60 and above],
+[  --with-empress[=DIR]    Include Empress support [\$EMPRESSPATH]
+                          (Empress Version >= 8.60 required)],
 [
   PHP_WITH_SHARED
   if test "$withval" != "no"; then
@@ -293,9 +286,8 @@ if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Empress local access support)
 AC_ARG_WITH(empress-bcs,
 [  --with-empress-bcs[=DIR]
-                          Include Empress Local Access support.  DIR is the 
-                          Empress base install directory. (Empress Version >= 8.60 required)
-                          [\$EMPRESSPATH]],
+                          Include Empress Local Access support [\$EMPRESSPATH]
+                          (Empress Version >= 8.60 required)],
 [
   PHP_WITH_SHARED
   if test "$withval" != "no"; then
@@ -339,8 +331,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Birdstep support)
 AC_ARG_WITH(birdstep,
-[  --with-birdstep[=DIR]   Include Birdstep support.  DIR is the Birdstep base
-                          install directory [/usr/local/birdstep]],
+[  --with-birdstep[=DIR]   Include Birdstep support [/usr/local/birdstep]],
 [
   PHP_WITH_SHARED
 
@@ -395,15 +386,12 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for a custom ODBC support)
 AC_ARG_WITH(custom-odbc,
-[  --with-custom-odbc[=DIR]      
-                          Include a user defined ODBC support.
-                          The DIR is ODBC install base directory, 
-                          which defaults to /usr/local.
-                          Make sure to define CUSTOM_ODBC_LIBS and
-                          have some odbc.h in your include dirs.
-                          E.g., you should define following for 
-                          Sybase SQL Anywhere 5.5.00 on QNX, prior to
-                          run configure script:
+[  --with-custom-odbc[=DIR]
+                          Include user defined ODBC support. DIR is ODBC install base
+                          directory [/usr/local]. Make sure to define CUSTOM_ODBC_LIBS and
+                          have some odbc.h in your include dirs. f.e. you should define 
+                          following for Sybase SQL Anywhere 5.5.00 on QNX, prior to
+                          running this configure script:
                               CPPFLAGS=\"-DODBC_QNX -DSQLANY_BUG\"
                               LDFLAGS=-lunix
                               CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\"],
@@ -431,8 +419,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for iODBC support)
 AC_ARG_WITH(iodbc,
-[  --with-iodbc[=DIR]      Include iODBC support.  DIR is the iODBC base
-                          install directory [/usr/local]],
+[  --with-iodbc[=DIR]      Include iODBC support [/usr/local]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -459,8 +446,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Easysoft ODBC-ODBC Bridge support)
 AC_ARG_WITH(esoob,
-[  --with-esoob[=DIR]      Include Easysoft OOB support. DIR is the OOB base
-                          install directory [/usr/local/easysoft/oob/client]],
+[  --with-esoob[=DIR]      Include Easysoft OOB support [/usr/local/easysoft/oob/client]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -486,8 +472,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for unixODBC support)
 AC_ARG_WITH(unixODBC,
-[  --with-unixODBC[=DIR]   Include unixODBC support.  DIR is the unixODBC base
-                          install directory [/usr/local]],
+[  --with-unixODBC[=DIR]   Include unixODBC support [/usr/local]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -514,10 +499,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for DBMaker support)
 AC_ARG_WITH(dbmaker,
-[  --with-dbmaker[=DIR]    Include DBMaker support.  DIR is the DBMaker base
-                          install directory, defaults to where the latest 
-                          version of DBMaker is installed (such as
-                          /home/dbmaker/3.6)],
+[  --with-dbmaker[=DIR]    Include DBMaker support],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then

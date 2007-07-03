@@ -19,7 +19,7 @@ PHP_ARG_WITH(pdo-mysql, for MySQL support for PDO,
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz,
-  [  --with-zlib-dir[=DIR]     PDO_MySQL: Set the path to libz install prefix], no, no)
+  [  --with-zlib-dir[=DIR]       PDO_MySQL: Set the path to libz install prefix], no, no)
 fi
 
 if test "$PHP_PDO_MYSQL" != "no"; then
