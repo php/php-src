@@ -6,10 +6,8 @@ dnl By default we'll compile and link against the bundled PCRE library
 dnl if DIR is supplied, we'll use that for linking
 
 PHP_ARG_WITH(pcre-regex,for PCRE support,
-[  --without-pcre-regex    Do not include Perl Compatible Regular Expressions 
-                          support. Use --with-pcre-regex=DIR to specify DIR
-                          where PCRE's include and library files are located,
-                          if not using bundled library.],yes)
+[  --without-pcre-regex    Do not include Perl Compatible Regular Expressions support.
+                          DIR is the PCRE install prefix [BUNDLED]], yes)
 
 if test "$PHP_PCRE_REGEX" != "no"; then
   if test "$PHP_PCRE_REGEX" = "yes"; then

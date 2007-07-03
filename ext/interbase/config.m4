@@ -4,7 +4,7 @@ dnl
 
 PHP_ARG_WITH(interbase,for InterBase support,
 [  --with-interbase[=DIR]  Include InterBase support.  DIR is the InterBase base
-                          install directory, defaults to /usr/interbase])
+                          install directory [/usr/interbase]])
 
 if test "$PHP_INTERBASE" != "no"; then
   if test "$PHP_INTERBASE" = "yes"; then

@@ -4,7 +4,7 @@ dnl
 
 PHP_ARG_WITH(mime-magic, whether to include mime_magic support,
 [  --with-mime-magic[=FILE]  
-                          Include mime_magic support (deprecated)])
+                          Include mime_magic support (DEPRECATED!!)])
 
 if test "$PHP_MIME_MAGIC" != "no"; then
 
