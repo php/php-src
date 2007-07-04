@@ -797,6 +797,11 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 					attr = attr->next;
 				}
 			}
+			if (exists && check_empty == 1 &&
+				(!attr->children || !attr->children->content || !attr->children->content[0] || !xmlStrcmp(attr->children->content, "0")) ) {
+				/* Attribute with no content in it's text node */
+				exists = 0;
+			}
 		}
 
 		if (elements) {
@@ -819,6 +824,11 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 			}
 			if (node) {
 				exists = 1;
+                                if (check_empty == 1 && 
+					(!node->children || (node->children->type == XML_TEXT_NODE && !node->children->next &&
+						(!node->children->content || !node->children->content[0] || !xmlStrcmp(node->children->content, "0")))) ) {
+					exists = 0;
+				}
 			}
 		}
 	}
