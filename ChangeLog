@@ -1,3 +1,188 @@
+2007-07-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/shmop/package2.xml
+      ext/shmop/package2.xml:
+      
+      file package2.xml was initially added on branch PHP_5_2.
+
+2007-07-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in
+      ext/dom/config.m4
+      ext/gd/config.m4
+      ext/hash/config.m4
+      ext/interbase/config.m4
+      ext/json/config.m4
+      ext/libxml/config0.m4
+      ext/mime_magic/config.m4
+      ext/msql/config.m4
+      ext/mssql/config.m4
+      ext/mysqli/config.m4
+      ext/oci8/config.m4
+      ext/odbc/config.m4
+      ext/pcre/config0.m4
+      ext/pdo_dblib/config.m4
+      ext/pdo_firebird/config.m4
+      ext/pdo_oci/config.m4
+      ext/pdo_sqlite/config.m4
+      ext/sqlite/config.m4
+      ext/sybase/config.m4
+      ext/sybase_ct/config.m4
+      ext/xsl/config.m4
+      ext/zip/config.m4:
+      - Fix some configure --help texts
+
+2007-07-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * Makefile.global
+      Makefile.global:
+      Fixed "make test" mistakes
+
+2007-07-03  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/tests/lob_040.phpt:
+      MFB: new test
+
+    * ext/oci8/tests/lob_040.phpt
+      ext/oci8/tests/lob_040.phpt:
+      
+      file lob_040.phpt was initially added on branch PHP_5_2.
+
+2007-07-03  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug41861.phpt:
+      MFB: fix bug #41861 (getNamespaces() returns namespaces of node's siblings)
+      add test
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug41861.phpt
+      ext/simplexml/tests/bug41861.phpt:
+      fix bug #41861 (getNamespaces() returns namespaces of node's siblings)
+      add test
+
+2007-07-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Store existent file in realpath cache
+
+    * ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h
+      ext/standard/tests/file/include_userstream_001.phpt
+      ext/standard/tests/file/include_userstream_002.phpt
+      main/main.c
+      main/php_globals.h
+      main/php_streams.h
+      main/streams/streams.c
+      main/streams/userspace.c:
+      Added ability to create local or remote (URL) user streams
+      Local user streams must not be able to open(), URLs if allow_url_include
+      is off
+      Implemented new function stream_is_local()
+      [
+      - stream_wrapper_register() extended with additional optional argument
+      "flags"
+        of type long. This time only one flag is implemented - STREAM_IS_URL,
+      that
+        means that userstream wrapper is remote (URL). By default stream is
+      local.
+      - stream_is_local() is a new function that accepts stream and tell if this
+        stream is local or remote (URL)
+      ]
+
+2007-07-03  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/006_variation1.phpt
+      ext/standard/tests/file/006_variation2.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_variation1.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_variation2.phpt
+      ext/standard/tests/file/filesize_variation1-win32.phpt
+      ext/standard/tests/file/filesize_variation1.phpt
+      ext/standard/tests/file/filesize_variation2-win32.phpt
+      ext/standard/tests/file/filesize_variation2.phpt
+      ext/standard/tests/file/filesize_variation3-win32.phpt
+      ext/standard/tests/file/filesize_variation3.phpt
+      ext/standard/tests/file/filesize_variation4-win32.phpt
+      ext/standard/tests/file/filesize_variation4.phpt
+      ext/standard/tests/file/fwrite_variation1-win32.phpt
+      ext/standard/tests/file/fwrite_variation1.phpt
+      ext/standard/tests/file/fwrite_variation2-win32.phpt
+      ext/standard/tests/file/fwrite_variation2.phpt
+      ext/standard/tests/file/fwrite_variation3-win32.phpt
+      ext/standard/tests/file/fwrite_variation3.phpt
+      ext/standard/tests/file/fwrite_variation4-win32.phpt
+      ext/standard/tests/file/fwrite_variation4.phpt:
+      Smaller testcases for 006_variation.phpt,
+      file_get_contents_file_put_contents_variation.phpt,
+      filesize_variation.phpt, filesize_variation-win32.phpt,
+      fwrite_variation.phpt, fwrite_variation-win32.phpt.
+      Fix for filesize_variation to match filesize using %d
+
+    * ext/standard/tests/file/006_variation1.phpt
+      ext/standard/tests/file/006_variation1.phpt
+      ext/standard/tests/file/006_variation2.phpt
+      ext/standard/tests/file/006_variation2.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_variation1.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_variation1.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_variation2.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_variation2.phpt
+      ext/standard/tests/file/filesize_variation1-win32.phpt
+      ext/standard/tests/file/filesize_variation1-win32.phpt
+      ext/standard/tests/file/filesize_variation1.phpt
+      ext/standard/tests/file/filesize_variation1.phpt
+      ext/standard/tests/file/filesize_variation2-win32.phpt
+      ext/standard/tests/file/filesize_variation2-win32.phpt
+      ext/standard/tests/file/filesize_variation2.phpt
+      ext/standard/tests/file/filesize_variation2.phpt
+      ext/standard/tests/file/filesize_variation3-win32.phpt
+      ext/standard/tests/file/filesize_variation3-win32.phpt
+      ext/standard/tests/file/filesize_variation3.phpt
+      ext/standard/tests/file/filesize_variation3.phpt
+      ext/standard/tests/file/filesize_variation4-win32.phpt
+      ext/standard/tests/file/filesize_variation4-win32.phpt
+      ext/standard/tests/file/filesize_variation4.phpt
+      ext/standard/tests/file/filesize_variation4.phpt
+      ext/standard/tests/file/fwrite_variation1-win32.phpt
+      ext/standard/tests/file/fwrite_variation1-win32.phpt
+      ext/standard/tests/file/fwrite_variation1.phpt
+      ext/standard/tests/file/fwrite_variation1.phpt
+      ext/standard/tests/file/fwrite_variation2-win32.phpt
+      ext/standard/tests/file/fwrite_variation2-win32.phpt
+      ext/standard/tests/file/fwrite_variation2.phpt
+      ext/standard/tests/file/fwrite_variation2.phpt
+      ext/standard/tests/file/fwrite_variation3-win32.phpt
+      ext/standard/tests/file/fwrite_variation3-win32.phpt
+      ext/standard/tests/file/fwrite_variation3.phpt
+      ext/standard/tests/file/fwrite_variation3.phpt
+      ext/standard/tests/file/fwrite_variation4-win32.phpt
+      ext/standard/tests/file/fwrite_variation4-win32.phpt
+      ext/standard/tests/file/fwrite_variation4.phpt
+      ext/standard/tests/file/fwrite_variation4.phpt:
+      
+      file 006_variation1.phpt was initially added on branch PHP_5_2.
+
+2007-07-03  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/pdo_oci/oci_driver.c
+      ext/pdo_oci/tests/pdo_oci_quote1.phpt:
+      MFB: Basic PDO->quote() for PDO_OCI
+
+    * ext/pdo_oci/tests/pdo_oci_quote1.phpt
+      ext/pdo_oci/tests/pdo_oci_quote1.phpt:
+      
+      file pdo_oci_quote1.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/pdo_oci/oci_driver.c:
+      Added basic PDO->quote() functionality to PDO_OCI
+
 2007-07-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
