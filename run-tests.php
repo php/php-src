@@ -1231,7 +1231,7 @@ TEST $file
 				$env['USE_ZEND_ALLOC'] = '1';
 			}
 
-			$output = system_with_timeout("$extra $php -q $ini_settings $test_skipif", $env);
+			$output = system_with_timeout("$extra $php $pass_options -q $ini_settings $test_skipif", $env);
 			if (!$cfg['keep']['skip']) {
 				@unlink($test_skipif);
 			}
@@ -1462,7 +1462,7 @@ COMMAND $cmd
 				settings2params($clean_params);
 				$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 					"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
-				system_with_timeout("$extra $php -q $clean_params $test_clean", $env);
+				system_with_timeout("$extra $php $pass_options -q $clean_params $test_clean", $env);
 			}
 			if (!$cfg['keep']['clean']) {
 				@unlink($test_clean);
