@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   Tony)
 - Added missing format validator to unpack() function. (Ilia)
 - Added missing error check inside bcpowmod(). (Ilia)
+- Added CURLOPT_PRIVATE & CURLINFO_PRIVATE constants. 
+  (Andrey A. Belashkov, Tony)
 
 - Fixed var_export() to use the new H modifier so that it can generate
   parseable PHP code for floats, independent of the locale. (Derick)
