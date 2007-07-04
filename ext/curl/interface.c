@@ -482,6 +482,8 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_FTP_CREATE_MISSING_DIRS);
 #endif
 
+	REGISTER_CURL_CONSTANT(CURLOPT_PRIVATE);
+
 	/* Constants effecting the way CURLOPT_CLOSEPOLICY works */
 	REGISTER_CURL_CONSTANT(CURLCLOSEPOLICY_LEAST_RECENTLY_USED);
 	REGISTER_CURL_CONSTANT(CURLCLOSEPOLICY_LEAST_TRAFFIC);
@@ -511,6 +513,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_TIME);
 	REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_COUNT);
 	REGISTER_CURL_CONSTANT(CURLINFO_HEADER_OUT);
+	REGISTER_CURL_CONSTANT(CURLINFO_PRIVATE);
 
 	/* cURL protocol constants (curl_version) */
 	REGISTER_CURL_CONSTANT(CURL_VERSION_IPV6);
@@ -1299,6 +1302,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			}
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
+		case CURLOPT_PRIVATE:
 		case CURLOPT_URL:
 		case CURLOPT_PROXY:
 		case CURLOPT_USERPWD:
@@ -1802,6 +1806,7 @@ PHP_FUNCTION(curl_getinfo)
 	} else {
 		option = Z_LVAL_PP(zoption);
 		switch (option) {
+			case CURLINFO_PRIVATE:
 			case CURLINFO_EFFECTIVE_URL: 
 			case CURLINFO_CONTENT_TYPE: {
  				char *s_code = NULL;
