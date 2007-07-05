@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.4
 - Upgraded PCRE to version 7.2 (Nuno)
+- Updated timezone database to version 2007.6. (Derick)
+
 - Improved fix for MOPB-03-2007. (Ilia)
 - Corrected fix for CVE-2007-2872. (Ilia)
 - Enabled statement cache for non-persistent OCI8 connections.
