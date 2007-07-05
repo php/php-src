@@ -2,8 +2,8 @@
 Test filegroup() function: basic functionality
 --SKIPIF--
 <?php
-if (!function_exists("posix_getgrgid")) { 
-   die("skip no posix_getgrgid");
+if( substr(PHP_OS, 0, 3) == 'WIN') {
+  die('skip Not valid for Windows');
 }
 ?>
 --FILE--
@@ -17,7 +17,7 @@ echo "*** Testing filegroup(): basic functionality ***\n";
 echo "-- Testing with the file or directory created by owner --\n";
 
 $file_path = dirname(__FILE__);
-var_dump( posix_getgrgid( filegroup(__FILE__) ) );
+var_dump( filegroup(__FILE__) );
 var_dump( filegroup(".") );
 var_dump( filegroup("./..") );
 
@@ -55,42 +55,22 @@ rmdir($dir_name);
 --EXPECTF--
 *** Testing filegroup(): basic functionality ***
 -- Testing with the file or directory created by owner --
-array(4) {
-  ["name"]=>
-  string(%d) "%s"
-  ["passwd"]=>
-  string(1) "x"
-  ["members"]=>
-  array(0) {
-  }
-  ["gid"]=>
-  int(%d)
-}
+int(%d)
 int(%d)
 int(%d)
 int(%d)
 int(%d)
 
 -- Testing with the standard file or directory --
-int(0)
-int(0)
-int(0)
+int(%d)
+int(%d)
+int(%d)
 
 *** Done ***
 --UEXPECTF--
 *** Testing filegroup(): basic functionality ***
 -- Testing with the file or directory created by owner --
-array(4) {
-  ["name"]=>
-  string(%d) "%s"
-  ["passwd"]=>
-  string(1) "x"
-  ["members"]=>
-  array(0) {
-  }
-  ["gid"]=>
-  int(%d)
-}
+int(%d)
 int(%d)
 int(%d)
 
@@ -99,8 +79,8 @@ int(%d)
 int(%d)
 
 -- Testing with the standard file or directory --
-int(0)
-int(0)
-int(0)
+int(%d)
+int(%d)
+int(%d)
 
 *** Done ***
