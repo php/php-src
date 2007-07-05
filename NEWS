@@ -48,6 +48,8 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #41909 (var_export() is locale sensitive when exporting float
+  values). (Derick)
 - Fixed bug #41867 (getName is broken). (Rob)
 - Fixed bug #41865 (fputcsv(): 2nd parameter is not optional). (Jani)
 - Fixed bug #41861 (getNamespaces() returns the namespaces of a node's 
