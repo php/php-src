@@ -1024,7 +1024,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			}
 			intern->u.regex.mode = mode;
 			intern->u.regex.regex = estrndup(regex, regex_len);
-			intern->u.regex.pce = pcre_get_compiled_regex_cache(regex, regex_len TSRMLS_CC);
+			intern->u.regex.pce = pcre_get_compiled_regex_cache(ZEND_STR_TYPE, regex, regex_len TSRMLS_CC);
 			if (intern->u.regex.pce == NULL) {
 				/* pcre_get_compiled_regex_cache has already sent error */
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -1417,7 +1417,7 @@ SPL_METHOD(RegexIterator, accept)
 		}
 		zval_ptr_dtor(&intern->current.data);
 		ALLOC_INIT_ZVAL(intern->current.data);
-		php_pcre_match_impl(intern->u.regex.pce, subject, subject_len, &zcount, 
+		php_pcre_match_impl(intern->u.regex.pce, ZEND_STR_TYPE, subject, subject_len, &zcount, 
 			intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.use_flags, intern->u.regex.preg_flags, 0 TSRMLS_CC);
 		count = zend_hash_num_elements(Z_ARRVAL_P(intern->current.data));
 		RETVAL_BOOL(count > 0);
@@ -1430,14 +1430,14 @@ SPL_METHOD(RegexIterator, accept)
 		}
 		zval_ptr_dtor(&intern->current.data);
 		ALLOC_INIT_ZVAL(intern->current.data);
-		php_pcre_split_impl(intern->u.regex.pce, subject, subject_len, intern->current.data, -1, intern->u.regex.preg_flags TSRMLS_CC);
+		php_pcre_split_impl(intern->u.regex.pce, ZEND_STR_TYPE, subject, subject_len, intern->current.data, -1, intern->u.regex.preg_flags TSRMLS_CC);
 		count = zend_hash_num_elements(Z_ARRVAL_P(intern->current.data));
 		RETVAL_BOOL(count > 1);
 		break;
 
 	case REGIT_MODE_REPLACE:
 		replacement = zend_read_property(intern->std.ce, getThis(), "replacement", sizeof("replacement")-1, 1 TSRMLS_CC);
-		result = php_pcre_replace_impl(intern->u.regex.pce, subject, subject_len, replacement, 0, &result_len, 0, NULL TSRMLS_CC);
+		result = php_pcre_replace_impl(intern->u.regex.pce, ZEND_STR_TYPE, subject, subject_len, replacement, 0, &result_len, 0, NULL TSRMLS_CC);
 		
 		if (intern->u.regex.flags & REGIT_USE_KEY) {
 			if (intern->current.key_type != HASH_KEY_IS_LONG) {

@@ -165,7 +165,7 @@ static char *php_win32_mail_trim_header(char *header TSRMLS_DC)
 	MAKE_STD_ZVAL(replace);
 	ZVAL_STRING(replace, PHP_WIN32_MAIL_UNIFY_REPLACE, 0);
 
-	result = php_pcre_replace(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1,
+	result = php_pcre_replace(IS_STRING, PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1,
 							  header, strlen(header),
 							  replace,
 							  0,
@@ -179,7 +179,7 @@ static char *php_win32_mail_trim_header(char *header TSRMLS_DC)
 
 	ZVAL_STRING(replace, PHP_WIN32_MAIL_RMVDBL_REPLACE, 0);
 
-	result2 = php_pcre_replace(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1,
+	result2 = php_pcre_replace(IS_STRING, PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1,
 							   result, result_len,
 							   replace,
 							   0,

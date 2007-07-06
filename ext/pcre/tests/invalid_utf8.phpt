@@ -9,7 +9,7 @@ if (@preg_match_all('/./u', "", $matches) === false) {
 --FILE--
 <?php
 
-$string = urldecode("search%e4"); 
+$string = urldecode(b"search%e4"); 
 $result = preg_replace("#(&\#x*)([0-9A-F]+);*#iu","$1$2;",$string); 
 var_dump($result); 
 var_dump(preg_last_error());
