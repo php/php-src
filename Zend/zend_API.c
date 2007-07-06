@@ -1863,17 +1863,17 @@ try_again:
 				if (dep->type == MODULE_DEP_REQUIRED || dep->type == MODULE_DEP_OPTIONAL) {
 					b2 = b1 + 1;
 					while (b2 < end) {
-				  	r = (zend_module_entry*)(*b2)->pData;
-				  	if (strcasecmp(dep->name, r->name) == 0) {
-				  		tmp  = *b1;
-				  		*b1 = *b2;
-				  		*b2 = tmp;
-				  	  goto try_again;
-				  	}
-				  	b2++;
-				  }
-			  }
-			  dep++;
+						r = (zend_module_entry*)(*b2)->pData;
+						if (strcasecmp(dep->name, r->name) == 0) {
+							tmp  = *b1;
+							*b1 = *b2;
+							*b2 = tmp;
+							goto try_again;
+						}
+						b2++;
+					}
+				}
+				dep++;
 			}
 		}
 		b1++;
