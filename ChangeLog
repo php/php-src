@@ -1,3 +1,76 @@
+2007-07-05  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS:
+      - Marking already fixed bug in NEWS file (Bug #41909).
+
+2007-07-05  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/006_error.phpt
+      ext/standard/tests/file/006_error.phpt
+      ext/standard/tests/file/filegroup_basic.phpt
+      ext/standard/tests/file/filegroup_basic.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_basic1.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_basic2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error1.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation1.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation3.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation4.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation5.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation6.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation7.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation8.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation9.phpt:
+      fix test: 006_error.phpt & filegroup_basic.phpt
+      fix and smaller tests for
+      symlink_link_linkinfo_is_link[basic|error|variation].phpt
+
+    * ext/standard/tests/file/symlink_link_linkinfo_is_link_basic1.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_basic1.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_basic2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_basic2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation3.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation3.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation4.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation4.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation5.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation5.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation6.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation6.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation7.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation7.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation8.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation8.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation9.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation9.phpt:
+      
+      file symlink_link_linkinfo_is_link_basic1.phpt was initially added on
+      branch PHP_5_2.
+
+    * ext/standard/tests/file/symlink_link_linkinfo_is_link_error1.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error1.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation1.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation1.phpt:
+      
+      file symlink_link_linkinfo_is_link_error1.phpt was initially added on
+      branch PHP_5_2.
+
+2007-07-05  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/timezonedb.h:
+      - MFH: Updated timezone database to 2007.6 (2007f).
+
+    * ext/date/lib/timezonedb.h:
+      - Updated to 2007f.
+
 2007-07-04  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
