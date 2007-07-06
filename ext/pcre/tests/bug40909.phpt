@@ -36,3 +36,22 @@ array(3) {
     string(19) ""simpleValueInside""
   }
 }
+--UEXPECT--
+int(1)
+array(3) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(33) " an_attribute="simpleValueInside""
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(12) "an_attribute"
+  }
+  [2]=>
+  array(1) {
+    [0]=>
+    unicode(19) ""simpleValueInside""
+  }
+}

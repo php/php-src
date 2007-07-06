@@ -191,7 +191,7 @@ static int pcre_clean_cache(void *data, void *arg TSRMLS_DC)
 
 /* {{{ pcre_get_compiled_regex_cache
  */
-PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_len TSRMLS_DC)
+PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_uchar utype, char *regex, int regex_len TSRMLS_DC)
 {
 	pcre				*re = NULL;
 	pcre_extra			*extra;
@@ -333,7 +333,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 		}
 	}
 
-	if (UG(unicode)) {
+	if (utype == IS_UNICODE) {
 		coptions |= PCRE_UTF8;
 	}
 
@@ -405,7 +405,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
  */
 PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options TSRMLS_DC)
 {
-	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex, strlen(regex) TSRMLS_CC);
+	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(ZEND_STR_TYPE, regex, strlen(regex) TSRMLS_CC);
 
 	if (extra) {
 		*extra = pce ? pce->extra : NULL;
@@ -422,7 +422,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
  */
 PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *preg_options, int *compile_options TSRMLS_DC)
 {
-	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex, strlen(regex) TSRMLS_CC);
+	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(ZEND_STR_TYPE, regex, strlen(regex) TSRMLS_CC);
 	
 	if (extra) {
 		*extra = pce ? pce->extra : NULL;
@@ -439,7 +439,7 @@ PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *pr
 /* }}} */
 
 /* {{{ add_offset_pair */
-static inline void add_offset_pair(zval *result, char *str, int len, int offset, char *name, offset_map_t *prev TSRMLS_DC)
+static inline void add_offset_pair(zval *result, zend_uchar utype, char *str, int len, int offset, char *name, offset_map_t *prev TSRMLS_DC)
 {
 	zval *match_pair;
 	int tmp;
@@ -449,16 +449,25 @@ static inline void add_offset_pair(zval *result, char *str, int len, int offset,
 	INIT_PZVAL(match_pair);
 
 	/* Add (match, offset) to the return value */
-	add_next_index_utf8_stringl(match_pair, str, len, 1);
+	if (utype == IS_UNICODE) {
+		add_next_index_utf8_stringl(match_pair, str, len, 1);
+	} else {
+		add_next_index_stringl(match_pair, str, len, 1);
+	}
 
 	/* Calculate codepoint offset from the previous chunk */
 	if (offset) {
-		tmp = prev->byte_offset;
-		while (tmp < offset) {
-			U8_FWD_1(prev->str, tmp, offset);
-			prev->cp_offset++;
-		}
-		prev->byte_offset = tmp;
+		if (utype == IS_UNICODE) {
+			tmp = prev->byte_offset;
+			while (tmp < offset) {
+				U8_FWD_1(prev->str, tmp, offset);
+				prev->cp_offset++;
+			}
+			prev->byte_offset = tmp;
+		} else {
+			prev->cp_offset = offset;
+			prev->byte_offset = offset;
+		}		
 	}
 	add_next_index_long(match_pair, prev->cp_offset);
 	
@@ -511,7 +520,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	}
 	
 	/* Compile regex or get it from cache. */
-	if ((pce = pcre_get_compiled_regex_cache(regex.s, regex_len TSRMLS_CC)) == NULL) {
+	if ((pce = pcre_get_compiled_regex_cache(str_type, regex.s, regex_len TSRMLS_CC)) == NULL) {
 		if (str_type == IS_UNICODE) {
 			efree(regex_utf8);
 			efree(subject_utf8);
@@ -519,7 +528,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		RETURN_FALSE;
 	}
 
-	php_pcre_match_impl(pce, subject.s, subject_len, return_value, subpats, 
+	php_pcre_match_impl(pce, str_type, subject.s, subject_len, return_value, subpats, 
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset TSRMLS_CC);
 
 	if (str_type == IS_UNICODE) {
@@ -530,7 +539,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 /* }}} */
 
 /* {{{ php_pcre_match_impl */
-PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
+PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_uchar utype, char *subject, int subject_len, zval *return_value,
 	zval *subpats, int global, int use_flags, long flags, long start_offset TSRMLS_DC)
 {
 	zval			*result_set,		/* Holds a set of subpatterns after
@@ -580,7 +589,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		offset_capture = 0;
 	}
 
-	if (UG(unicode)) {
+	if (utype == IS_UNICODE) {
 		int k = 0;
 		/* Calculate byte offset from codepoint offset */
 		if (start_offset < 0) {
@@ -590,7 +599,6 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			U8_FWD_N(subject, k, subject_len, start_offset);
 		}
 		start_offset = k;
-		exoptions |= PCRE_NO_UTF8_CHECK;
 	} else {
 		/* Negative offset counts from the end of the string. */
 		if (start_offset < 0) {
@@ -598,6 +606,9 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			if (start_offset < 0) {
 				start_offset = 0;
 			}
+		}
+		if (!(pce->compile_options & PCRE_UTF8)) {
+			exoptions |= PCRE_NO_UTF8_CHECK;
 		}
 	}
 
@@ -712,11 +723,14 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						/* For each subpattern, insert it into the appropriate array. */
 						for (i = 0; i < count; i++) {
 							if (offset_capture) {
-								add_offset_pair(match_sets[i], (char *)stringlist[i],
+								add_offset_pair(match_sets[i], utype, (char *)stringlist[i],
 												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL, &map TSRMLS_CC);
-							} else {
+							} else if (utype == IS_UNICODE) {
 								add_next_index_utf8_stringl(match_sets[i], (char *)stringlist[i],
 															offsets[(i<<1)+1] - offsets[i<<1], 1);
+							} else {
+								add_next_index_stringl(match_sets[i], (char *)stringlist[i],
+														offsets[(i<<1)+1] - offsets[i<<1], 1);
 							}
 						}
 						/*
@@ -744,16 +758,23 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						/* Add all the subpatterns to it */
 						for (i = 0; i < count; i++) {
 							if (offset_capture) {
-								add_offset_pair(result_set, (char *)stringlist[i],
+								add_offset_pair(result_set, utype, (char *)stringlist[i],
 												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1],
 												subpat_names[i], &map TSRMLS_CC);
-							} else {
+							} else if (utype == IS_UNICODE) {
 								if (subpat_names[i]) {
-									add_assoc_utf8_stringl(result_set, subpat_names[i], (char *)stringlist[i],
+									add_utf8_assoc_utf8_stringl(result_set, subpat_names[i], (char *)stringlist[i],
 														   offsets[(i<<1)+1] - offsets[i<<1], 1);
 								}
 								add_next_index_utf8_stringl(result_set, (char *)stringlist[i],
 															offsets[(i<<1)+1] - offsets[i<<1], 1);
+							} else {
+								if (subpat_names[i]) {
+									add_rt_assoc_stringl(result_set, subpat_names[i], (char *)stringlist[i],
+													   offsets[(i<<1)+1] - offsets[i<<1], 1);
+								}
+								add_next_index_stringl(result_set, (char *)stringlist[i],
+														offsets[(i<<1)+1] - offsets[i<<1], 1);
 							}
 						}
 						/* And add it to the output array */
@@ -763,16 +784,23 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 					/* For each subpattern, insert it into the subpatterns array. */
 					for (i = 0; i < count; i++) {
 						if (offset_capture) {
-							add_offset_pair(subpats, (char *)stringlist[i],
+							add_offset_pair(subpats, utype, (char *)stringlist[i],
 											offsets[(i<<1)+1] - offsets[i<<1],
 											offsets[i<<1], subpat_names[i], &map TSRMLS_CC);
-						} else {
+						} else if (utype == IS_UNICODE) {
 							if (subpat_names[i]) {
-								add_assoc_utf8_stringl(subpats, subpat_names[i], (char *)stringlist[i],
+								add_utf8_assoc_utf8_stringl(subpats, subpat_names[i], (char *)stringlist[i],
 													   offsets[(i<<1)+1] - offsets[i<<1], 1);
 							}
 							add_next_index_utf8_stringl(subpats, (char *)stringlist[i],
 														offsets[(i<<1)+1] - offsets[i<<1], 1);
+						} else {
+							if (subpat_names[i]) {
+								add_rt_assoc_stringl(subpats, subpat_names[i], (char *)stringlist[i],
+												   offsets[(i<<1)+1] - offsets[i<<1], 1);
+							}
+							add_next_index_stringl(subpats, (char *)stringlist[i],
+													offsets[(i<<1)+1] - offsets[i<<1], 1);
 						}
 					}
 				}
@@ -786,7 +814,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
 				offsets[0] = start_offset;
-				if (UG(unicode) || pce->compile_options & PCRE_UTF8) {
+				if (utype == IS_UNICODE || pce->compile_options & PCRE_UTF8) {
 					offsets[1] = start_offset;
 					U8_FWD_1(subject, offsets[1], subject_len);
 				} else {
@@ -1026,7 +1054,8 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 
 /* {{{ php_pcre_replace
  */
-PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
+PHPAPI char *php_pcre_replace(zend_uchar utype,
+							  char *regex,   int regex_len,
 							  char *subject, int subject_len,
 							  zval *replace_val, int is_callable_replace,
 							  int *result_len, int limit, int *replace_count TSRMLS_DC)
@@ -1034,17 +1063,17 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 	pcre_cache_entry	*pce;			    /* Compiled regular expression */
 
 	/* Compile regex or get it from cache. */
-	if ((pce = pcre_get_compiled_regex_cache(regex, regex_len TSRMLS_CC)) == NULL) {
+	if ((pce = pcre_get_compiled_regex_cache(utype, regex, regex_len TSRMLS_CC)) == NULL) {
 		return NULL;
 	}
 
-	return php_pcre_replace_impl(pce, subject, subject_len, replace_val, 
+	return php_pcre_replace_impl(pce, utype, subject, subject_len, replace_val, 
 		is_callable_replace, result_len, limit, replace_count TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ php_pcre_replace_impl() */
-PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *replace_val, 
+PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, zend_uchar utype, char *subject, int subject_len, zval *replace_val, 
 	int is_callable_replace, int *result_len, int limit, int *replace_count TSRMLS_DC)
 {
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
@@ -1112,7 +1141,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 	start_offset = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-	if (UG(unicode)) {
+	if (utype != IS_UNICODE && !(pce->compile_options & PCRE_UTF8)) {
 		exoptions |= PCRE_NO_UTF8_CHECK;
 	}
 	
@@ -1227,7 +1256,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
 				offsets[0] = start_offset;
-				if (UG(unicode) || pce->compile_options & PCRE_UTF8) {
+				if (utype == IS_UNICODE || pce->compile_options & PCRE_UTF8) {
 					offsets[1] = start_offset;
 					U8_FWD_1(subject, offsets[1], subject_len);
 				} else {
@@ -1284,8 +1313,10 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 	char		*subject_value,
 				*result;
 	int			 subject_len;
+	zend_uchar   utype;
 
 	/* Make sure we're dealing with strings. */	
+	utype = Z_TYPE_PP(subject);
 	convert_to_string_with_converter_ex(subject, UG(utf8_conv));
 
 	ZVAL_STRINGL(&empty_replace, "", 0, 0);
@@ -1325,7 +1356,8 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 			
 			/* Do the actual replacement and put the result back into subject_value
 			   for further replacements. */
-			if ((result = php_pcre_replace(Z_STRVAL_PP(regex_entry),
+			if ((result = php_pcre_replace(utype,
+										   Z_STRVAL_PP(regex_entry),
 										   Z_STRLEN_PP(regex_entry),
 										   subject_value,
 										   subject_len,
@@ -1344,7 +1376,8 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 
 		return subject_value;
 	} else {
-		result = php_pcre_replace(Z_STRVAL_P(regex),
+		result = php_pcre_replace(utype,
+								  Z_STRVAL_P(regex),
 								  Z_STRLEN_P(regex),
 								  Z_STRVAL_PP(subject),
 								  Z_STRLEN_PP(subject),
@@ -1375,7 +1408,8 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 	ulong			 num_key;
 	zval			 callback_name;
 	int				 replace_count=0;
-	int				*replace_count_ptr=NULL; 
+	int				*replace_count_ptr=NULL;
+	zend_uchar       utype;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z/z/|lz", &regex,
 							  &replace, &subject, &limit, &zcount) == FAILURE) {
@@ -1419,21 +1453,34 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data(Z_ARRVAL_P(subject), (void **)&subject_entry) == SUCCESS) {
 			SEPARATE_ZVAL(subject_entry);
+			utype = Z_TYPE_PP(subject_entry);
 			if ((result = php_replace_in_subject(regex, replace, subject_entry, &result_len, limit, is_callable_replace, replace_count_ptr TSRMLS_CC)) != NULL) {
 
 				/* Add to return array */
 				switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(subject), &string_key, &string_key_len, &num_key, 0, NULL))
 				{
 					case HASH_KEY_IS_UNICODE:
-						add_u_assoc_utf8_stringl_ex(return_value, IS_UNICODE, string_key, string_key_len, result, result_len, ZSTR_AUTOFREE);
+						if (utype == IS_UNICODE || (UG(unicode) && utype != IS_STRING)) {
+							add_u_assoc_utf8_stringl_ex(return_value, IS_UNICODE, string_key, string_key_len, result, result_len, ZSTR_AUTOFREE);
+						} else {
+							add_u_assoc_stringl_ex(return_value, IS_UNICODE, string_key, string_key_len, result, result_len, 0);
+						}
 						break;
 
 					case HASH_KEY_IS_STRING:
-						add_u_assoc_utf8_stringl_ex(return_value, IS_STRING, string_key, string_key_len, result, result_len, ZSTR_AUTOFREE);
+						if (utype == IS_UNICODE || (UG(unicode) && utype != IS_STRING)) {
+							add_u_assoc_utf8_stringl_ex(return_value, IS_STRING, string_key, string_key_len, result, result_len, ZSTR_AUTOFREE);
+						} else {
+							add_u_assoc_stringl_ex(return_value, IS_STRING, string_key, string_key_len, result, result_len, 0);
+						}
 						break;
 
 					case HASH_KEY_IS_LONG:
-						add_index_utf8_stringl(return_value, num_key, result, result_len, ZSTR_AUTOFREE);
+						if (utype == IS_UNICODE || (UG(unicode) && utype != IS_STRING)) {
+							add_index_utf8_stringl(return_value, num_key, result, result_len, ZSTR_AUTOFREE);
+						} else {
+							add_index_stringl(return_value, num_key, result, result_len, 0);
+						}
 						break;
 				}
 			}
@@ -1441,8 +1488,13 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 			zend_hash_move_forward(Z_ARRVAL_P(subject));
 		}
 	} else {	/* if subject is not an array */
+		utype = Z_TYPE_P(subject);
 		if ((result = php_replace_in_subject(regex, replace, &subject, &result_len, limit, is_callable_replace, replace_count_ptr TSRMLS_CC)) != NULL) {
-			RETVAL_UTF8_STRINGL(result, result_len, ZSTR_AUTOFREE);
+			if (utype == IS_UNICODE || (UG(unicode) && utype != IS_STRING)) {
+				RETVAL_UTF8_STRINGL(result, result_len, ZSTR_AUTOFREE);
+			} else {
+				RETVAL_STRINGL(result, result_len, 0);
+			}
 		}
 	}
 	if (replace_count_ptr) {
@@ -1501,7 +1553,7 @@ PHP_FUNCTION(preg_split)
 	}
 
 	/* Compile regex or get it from cache. */
-	if ((pce = pcre_get_compiled_regex_cache(regex.s, regex_len TSRMLS_CC)) == NULL) {
+	if ((pce = pcre_get_compiled_regex_cache(str_type, regex.s, regex_len TSRMLS_CC)) == NULL) {
 		if (str_type == IS_UNICODE) {
 			efree(regex_utf8);
 			efree(subject_utf8);
@@ -1509,7 +1561,7 @@ PHP_FUNCTION(preg_split)
 		RETURN_FALSE;
 	}
 
-	php_pcre_split_impl(pce, subject.s, subject_len, return_value, limit_val, flags TSRMLS_CC);
+	php_pcre_split_impl(pce, str_type, subject.s, subject_len, return_value, limit_val, flags TSRMLS_CC);
 
 	if (str_type == IS_UNICODE) {
 		efree(regex_utf8);
@@ -1520,7 +1572,7 @@ PHP_FUNCTION(preg_split)
 
 /* {{{ php_pcre_split_impl
  */
-PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
+PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_uchar utype, char *subject, int subject_len, zval *return_value,
 	long limit_val, long flags TSRMLS_DC)
 {
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
@@ -1574,7 +1626,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	match = NULL;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-	if (UG(unicode)) {
+	if (utype != IS_UNICODE && !(pce->compile_options & PCRE_UTF8)) {
 		exoptions |= PCRE_NO_UTF8_CHECK;
 	}
 	
@@ -1598,11 +1650,15 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 				if (offset_capture) {
 					/* Add (match, offset) pair to the return value */
-					add_offset_pair(return_value, last_match, &subject[offsets[0]]-last_match, next_offset, NULL, &map TSRMLS_CC);
-				} else {
+					add_offset_pair(return_value, utype, last_match, &subject[offsets[0]]-last_match, next_offset, NULL, &map TSRMLS_CC);
+				} else if (utype == IS_UNICODE) {
 					/* Add the piece to the return value */
 					add_next_index_utf8_stringl(return_value, last_match,
 												&subject[offsets[0]]-last_match, 1);
+				} else {
+					/* Add the piece to the return value */
+					add_next_index_stringl(return_value, last_match,
+											&subject[offsets[0]]-last_match, 1);
 				}
 
 				/* One less left to do */
@@ -1620,11 +1676,14 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 					/* If we have matched a delimiter */
 					if (!no_empty || match_len > 0) {
 						if (offset_capture) {
-							add_offset_pair(return_value, &subject[offsets[i<<1]], match_len,
+							add_offset_pair(return_value, utype, &subject[offsets[i<<1]], match_len,
 											offsets[i<<1], NULL, &map TSRMLS_CC);
-						} else {
+						} else if (utype == IS_UNICODE) {
 							add_next_index_utf8_stringl(return_value, &subject[offsets[i<<1]],
 														match_len, 1);
+						} else {
+							add_next_index_stringl(return_value, &subject[offsets[i<<1]],
+													match_len, 1);
 						}
 					}
 				}
@@ -1636,7 +1695,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
 				offsets[0] = start_offset;
-				if (UG(unicode) || pce->compile_options & PCRE_UTF8) {
+				if (utype == IS_UNICODE || pce->compile_options & PCRE_UTF8) {
 					offsets[1] = start_offset;
 					U8_FWD_1(subject, offsets[1], subject_len);
 				} else {
@@ -1664,11 +1723,14 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	{
 		if (offset_capture) {
 			/* Add the last (match, offset) pair to the return value */
-			add_offset_pair(return_value, &subject[start_offset],
+			add_offset_pair(return_value, utype, &subject[start_offset],
 							subject_len - start_offset, start_offset, NULL, &map TSRMLS_CC);
-		} else {
+		} else if (utype == IS_UNICODE) {
 			/* Add the last piece to the return value */
 			add_next_index_utf8_stringl(return_value, last_match, subject + subject_len - last_match, 1);
+		} else {
+			/* Add the last piece to the return value */
+			add_next_index_stringl(return_value, last_match, subject + subject_len - last_match, 1);
 		}
 	}
 	
@@ -1786,24 +1848,41 @@ PHP_FUNCTION(preg_quote)
    Searches array and returns entries which match regex */
 PHP_FUNCTION(preg_grep)
 {
-	char				*regex;			/* Regular expression */
+	zstr				 regex;			/* Regular expression */
 	int				 	 regex_len;
+	char*				 regex_utf8;
+	int				 	 regex_utf8_len;
+	zend_uchar           regex_type;
 	zval				*input;			/* Input array */
 	long				 flags = 0;		/* Match control flags */
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
+	UErrorCode			 status = U_ZERO_ERROR;
 
 	/* Get arguments and do error checking */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&a|l", &regex,
-							  &regex_len, UG(utf8_conv), &input, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ta|l", &regex,
+							  &regex_len, &regex_type, &input, &flags) == FAILURE) {
 		return;
 	}
 	
+	if (regex_type == IS_UNICODE) {
+		zend_unicode_to_string_ex(UG(utf8_conv), &regex_utf8, &regex_utf8_len, regex.u, regex_len, &status);
+		regex.s = regex_utf8;
+		regex_len = regex_utf8_len;
+	}
+
 	/* Compile regex or get it from cache. */
-	if ((pce = pcre_get_compiled_regex_cache(regex, regex_len TSRMLS_CC)) == NULL) {
+	if ((pce = pcre_get_compiled_regex_cache(regex_type, regex.s, regex_len TSRMLS_CC)) == NULL) {
+		if (regex_type == IS_UNICODE) {
+			efree(regex_utf8);
+		}
 		RETURN_FALSE;
 	}
 	
 	php_pcre_grep_impl(pce, input, return_value, flags TSRMLS_CC);
+
+	if (regex_type == IS_UNICODE) {
+		efree(regex_utf8);
+	}
 }
 /* }}} */
 
@@ -1849,10 +1928,6 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-	if (UG(unicode)) {
-		exoptions |= PCRE_NO_UTF8_CHECK;
-	}
-
 	/* Go through the input array */
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(input));
 	while(zend_hash_get_current_data(Z_ARRVAL_P(input), (void **)&entry) == SUCCESS) {
@@ -1866,7 +1941,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 		/* Perform the match */
 		count = pcre_exec(pce->re, extra, Z_STRVAL(subject), Z_STRLEN(subject),
-						  0, exoptions, offsets, size_offsets);
+						  0, exoptions | ((Z_TYPE_PP(entry) != IS_UNICODE && !(pce->compile_options & PCRE_UTF8))?PCRE_NO_UTF8_CHECK:0), offsets, size_offsets);
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
