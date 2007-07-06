@@ -5,9 +5,17 @@ Test fileperms() & chmod() functions: basic functionality
 if (substr(PHP_OS, 0, 3) == 'WIN') {
  die('skip Not on Windows');
 }
-elseif (get_current_user() == 'root') {
- die("skip Do not run with root permissions");
+// Skip if being run by root
+$filename = dirname(__FILE__)."/006_root_check.tmp";
+$fp = fopen($filename, 'w');
+fclose($fp);
+if(fileowner($filename) == 0) {
+        unlink ($filename);
+        die('skip...cannot be run as root\n');
 }
+
+unlink($filename);
+
 ?>
 --FILE--
 <?php
