@@ -196,7 +196,7 @@ typedef struct {
 
 static zend_object_handlers reflection_object_handlers;
 
-static void _default_get_entry(zval *object, char *name, int name_len, zval *return_value TSRMLS_DC)
+static void _default_get_entry(zval *object, char *name, int name_len, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	zval **value;
 
@@ -208,16 +208,18 @@ static void _default_get_entry(zval *object, char *name, int name_len, zval *ret
 	zval_copy_ctor(return_value);
 	INIT_PZVAL(return_value);
 }
+/* }}} */
 
-static void reflection_register_implement(zend_class_entry *class_entry, zend_class_entry *interface_entry TSRMLS_DC)
+static void reflection_register_implement(zend_class_entry *class_entry, zend_class_entry *interface_entry TSRMLS_DC) /* {{{ */
 {
 	zend_uint num_interfaces = ++class_entry->num_interfaces;
 
 	class_entry->interfaces = (zend_class_entry **) realloc(class_entry->interfaces, sizeof(zend_class_entry *) * num_interfaces);
 	class_entry->interfaces[num_interfaces - 1] = interface_entry;
 }
+/* }}} */
 
-static void reflection_free_objects_storage(void *object TSRMLS_DC)
+static void reflection_free_objects_storage(void *object TSRMLS_DC) /* {{{ */
 {
 	reflection_object *intern = (reflection_object *) object;
 
@@ -230,8 +232,9 @@ static void reflection_free_objects_storage(void *object TSRMLS_DC)
 	}
 	zend_objects_free_object_storage(object TSRMLS_CC);
 }
+/* }}} */
 
-static void reflection_objects_clone(void *object, void **object_clone TSRMLS_DC)
+static void reflection_objects_clone(void *object, void **object_clone TSRMLS_DC) /* {{{ */
 {
 	reflection_object *intern = (reflection_object *) object;
 	reflection_object **intern_clone = (reflection_object **) object_clone;
@@ -245,8 +248,9 @@ static void reflection_objects_clone(void *object, void **object_clone TSRMLS_DC
 		zval_add_ref(&intern->obj);
 	}
 }
+/* }}} */
 
-static zend_object_value reflection_objects_new(zend_class_entry *class_type TSRMLS_DC)
+static zend_object_value reflection_objects_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
 	zval tmp;
 	zend_object_value retval;
@@ -263,8 +267,9 @@ static zend_object_value reflection_objects_new(zend_class_entry *class_type TSR
 	retval.handlers = &reflection_object_handlers;
 	return retval;
 }
+/* }}} */
 
-static zval * reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
+static zval * reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC) /* {{{ */
 {
 	if (!object) {
 		ALLOC_ZVAL(object);
@@ -275,6 +280,7 @@ static zval * reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_
 	object->is_ref = 1;
 	return object;
 }
+/* }}} */
 
 static void _const_string(string *str, zstr name, zval *value, char *indent TSRMLS_DC);
 static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char *indent TSRMLS_DC);
@@ -836,7 +842,7 @@ static void _property_string(string *str, zend_property_info *prop, zstr sz_prop
 }
 /* }}} */
 
-static int _extension_ini_string(zend_ini_entry *ini_entry, int num_args, va_list args, zend_hash_key *hash_key)
+static int _extension_ini_string(zend_ini_entry *ini_entry, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	string *str = va_arg(args, string *);
 	char *indent = va_arg(args, char *);
@@ -870,8 +876,9 @@ static int _extension_ini_string(zend_ini_entry *ini_entry, int num_args, va_lis
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
-static int _extension_class_string(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key)
+static int _extension_class_string(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	string *str = va_arg(args, string *);
 	char *indent = va_arg(args, char *);
@@ -886,8 +893,9 @@ static int _extension_class_string(zend_class_entry **pce, int num_args, va_list
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
-static int _extension_const_string(zend_constant *constant, int num_args, va_list args, zend_hash_key *hash_key)
+static int _extension_const_string(zend_constant *constant, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	string *str = va_arg(args, string *);
 	char *indent = va_arg(args, char *);
@@ -901,6 +909,7 @@ static int _extension_const_string(zend_constant *constant, int num_args, va_lis
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
 /* {{{ _extension_string */
 static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC)
@@ -3944,7 +3953,7 @@ ZEND_METHOD(reflection_property, getName)
 }
 /* }}} */
 
-static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
+static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /* {{{ */
 {
 	reflection_object *intern;
 	property_reference *ref;
@@ -3953,6 +3962,7 @@ static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 	GET_REFLECTION_OBJECT_PTR(ref);
 	RETURN_BOOL(ref->prop.flags & mask);
 }
+/* }}} */
 
 /* {{{ proto public bool ReflectionProperty::isPublic() U
    Returns whether this property is public */
@@ -4322,7 +4332,7 @@ ZEND_METHOD(reflection_extension, getFunctions)
 }
 /* }}} */
 
-static int _addconstant(zend_constant *constant, int num_args, va_list args, zend_hash_key *hash_key)
+static int _addconstant(zend_constant *constant, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zval *const_val;
 	zval *retval = va_arg(args, zval*);
@@ -4339,6 +4349,7 @@ static int _addconstant(zend_constant *constant, int num_args, va_list args, zen
 	}
 	return 0;
 }
+/* }}} */
 
 /* {{{ proto public array ReflectionExtension::getConstants() U
    Returns an associative array containing this extension's constants and their values */
