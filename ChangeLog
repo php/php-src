@@ -1,3 +1,108 @@
+2007-07-06  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/tests/field_funcs.phpt
+      ext/oci8/tests/field_funcs2.phpt
+      ext/oci8/tests/field_funcs_old.phpt:
+      Bug #41917: New OCI8 tests for scale and precision
+
+    * (PHP_5_2)
+      ext/oci8/tests/field_funcs.phpt
+      ext/oci8/tests/field_funcs2.phpt
+      ext/oci8/tests/field_funcs2.phpt
+      ext/oci8/tests/field_funcs_old.phpt:
+      -** empty log message ***
+
+2007-07-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h
+      ext/pcre/tests/bug27103.phpt
+      ext/pcre/tests/bug40909.phpt
+      ext/pcre/tests/invalid_utf8.phpt
+      ext/spl/spl_iterators.c
+      win32/sendmail.c:
+      PCRE unicode/binary support
+
+2007-07-06  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/is_executable_variation1.phpt
+      ext/standard/tests/file/is_executable_variation2.phpt
+      ext/standard/tests/file/is_executable_variation3.phpt
+      ext/standard/tests/file/is_readable_variation1.phpt
+      ext/standard/tests/file/is_readable_variation2.phpt
+      ext/standard/tests/file/is_readable_variation3.phpt
+      ext/standard/tests/file/is_writable_variation1.phpt
+      ext/standard/tests/file/is_writable_variation2.phpt
+      ext/standard/tests/file/is_writable_variation3.phpt:
+      Fix and smaller testcases for is_readable_variation.phpt,
+      is_executable_variation.phpt & is_writable_variation.phpt
+
+    * ext/standard/tests/file/is_executable_variation1.phpt
+      ext/standard/tests/file/is_executable_variation1.phpt
+      ext/standard/tests/file/is_executable_variation2.phpt
+      ext/standard/tests/file/is_executable_variation2.phpt
+      ext/standard/tests/file/is_executable_variation3.phpt
+      ext/standard/tests/file/is_executable_variation3.phpt
+      ext/standard/tests/file/is_readable_variation1.phpt
+      ext/standard/tests/file/is_readable_variation1.phpt
+      ext/standard/tests/file/is_readable_variation2.phpt
+      ext/standard/tests/file/is_readable_variation2.phpt
+      ext/standard/tests/file/is_readable_variation3.phpt
+      ext/standard/tests/file/is_readable_variation3.phpt
+      ext/standard/tests/file/is_writable_variation1.phpt
+      ext/standard/tests/file/is_writable_variation1.phpt
+      ext/standard/tests/file/is_writable_variation2.phpt
+      ext/standard/tests/file/is_writable_variation2.phpt
+      ext/standard/tests/file/is_writable_variation3.phpt
+      ext/standard/tests/file/is_writable_variation3.phpt:
+      
+      Fix and smaller testcases for is_executable_variation.phpt,
+      is_readable_variation.phpt & is_writable_variation.phpt
+
+2007-07-06  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_API.c:
+      fix indentation and make Andrey happy =)
+
+    * ext/reflection/php_reflection.c:
+      fix folding
+
+    * configure.in:
+      fix #41908 (CFLAGS="-Os" ./configure --enable-debug fails)
+      patch by christian at hoffie dot info
+
+    * (PHP_5_2)
+      NEWS
+      configure.in:
+      MFH: fix #41908 (CFLAGS="-Os" ./configure --enable-debug fails)
+      patch by christian at hoffie dot info
+
+2007-07-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c:
+      Unicode support fix
+
+2007-07-06  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/006_basic.phpt
+      ext/standard/tests/file/006_variation1.phpt
+      ext/standard/tests/file/006_variation2.phpt:
+      better check for root user
+
+    * ext/standard/tests/file/006_basic.phpt
+      ext/standard/tests/file/006_variation1.phpt
+      ext/standard/tests/file/006_variation2.phpt:
+      Better check for root user
+
+2007-07-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      
+      Fixed NOTICE message
+
 2007-07-05  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_2)
