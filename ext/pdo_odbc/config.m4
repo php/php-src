@@ -74,13 +74,13 @@ if test "$PHP_PDO_ODBC" != "no"; then
         ;;
 
     unixODBC|unixodbc)
-        pdo_odbc_def_libdir=/usr/local/lib
+        pdo_odbc_def_libdir=/usr/local/$PHP_LIBDIR
         pdo_odbc_def_incdir=/usr/local/include
         pdo_odbc_def_lib=odbc
         ;;
 
     ODBCRouter|odbcrouter)
-        pdo_odbc_def_libdir=/usr/lib
+        pdo_odbc_def_libdir=/usr/$PHP_LIBDIR
         pdo_odbc_def_incdir=/usr/include
         pdo_odbc_def_lib=odbcsdk
         ;;
@@ -99,7 +99,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
 
   if test -n "$pdo_odbc_dir"; then
     PDO_ODBC_INCDIR="$pdo_odbc_dir/include"
-    PDO_ODBC_LIBDIR="$pdo_odbc_dir/lib"
+    PDO_ODBC_LIBDIR="$pdo_odbc_dir/$PHP_LIBDIR"
   else
     PDO_ODBC_INCDIR="$pdo_odbc_def_incdir"
     PDO_ODBC_LIBDIR="$pdo_odbc_def_libdir"
