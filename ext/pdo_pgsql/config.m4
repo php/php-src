@@ -16,7 +16,7 @@ if test "$PHP_PDO_PGSQL" != "no"; then
 
   AC_MSG_CHECKING(for pg_config)
   for i in $PHP_PDO_PGSQL $PHP_PDO_PGSQL/bin /usr/local/pgsql/bin /usr/local/bin /usr/bin ""; do
-	if test -x $i/pg_config; then
+    if test -x $i/pg_config; then
       PG_CONFIG="$i/pg_config"
       break;
     fi
@@ -70,12 +70,12 @@ if test "$PHP_PDO_PGSQL" != "no"; then
 
   AC_MSG_CHECKING([for openssl dependencies])
   if grep -q openssl $PGSQL_INCLUDE/libpq-fe.h ; then
-	 AC_MSG_RESULT([yes])
-	 if pkg-config openssl ; then
+    AC_MSG_RESULT([yes])
+    if pkg-config openssl ; then
       PDO_PGSQL_CFLAGS="`pkg-config openssl --cflags`"
     fi
   else
-	 AC_MSG_RESULT([no])
+    AC_MSG_RESULT([no])
   fi
 
   old_LIBS=$LIBS
@@ -108,7 +108,7 @@ if test "$PHP_PDO_PGSQL" != "no"; then
 
   ifdef([PHP_CHECK_PDO_INCLUDES],
   [
-  	PHP_CHECK_PDO_INCLUDES
+    PHP_CHECK_PDO_INCLUDES
   ],[
     AC_MSG_CHECKING([for PDO includes])
     if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
