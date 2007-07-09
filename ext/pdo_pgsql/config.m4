@@ -71,8 +71,10 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   AC_MSG_CHECKING([for openssl dependencies])
   if grep -q openssl $PGSQL_INCLUDE/libpq-fe.h ; then
     AC_MSG_RESULT([yes])
-    if pkg-config openssl ; then
-      PDO_PGSQL_CFLAGS="`pkg-config openssl --cflags`"
+    dnl First try to find pkg-config
+    AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+    if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists openssl; then
+      PDO_PGSQL_CFLAGS=`$PKG_CONFIG openssl --cflags`
     fi
   else
     AC_MSG_RESULT([no])
