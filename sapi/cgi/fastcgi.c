@@ -927,7 +927,11 @@ int fcgi_accept_request(fcgi_request *req)
 					}
 				}
 
+#ifdef _WIN32
 				if (req->fd < 0 && (in_shutdown || errno != EINTR)) {
+#else
+				if (req->fd < 0 && (in_shutdown || (errno != EINTR && errno != ECONNABORTED))) {
+#endif
 					return -1;
 				}
 
