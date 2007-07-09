@@ -14,15 +14,15 @@ PHP                                                                        NEWS
 - Changed error handler to send HTTP 500 instead of blank page on PHP errors.
   (Dmitry, Andrei Nigmatulin)
 
-- Added persistent connection status checker to pdo_pgsql (Elvis
-  Pranskevichus, Ilia)
+- Added persistent connection status checker to pdo_pgsql.
+  (Elvis Pranskevichus, Ilia)
 - Added support for ATTR_TIMEOUT inside pdo_pgsql driver. (Ilia)
 - Added php_ini_loaded_file() function which returns the path to the actual
   php.ini in use. (Jani)
 - Added GD version constants GD_MAJOR_VERSION, GD_MINOR_VERSION
   GD_RELEASE_VERSION, GD_EXTRA_VERSION and GD_VERSION_STRING. (Pierre)
-- Added missing open_basedir checks to CGI. (anight at eyelinkmedia dot com, 
-  Tony)
+- Added missing open_basedir checks to CGI.
+  (anight at eyelinkmedia dot com, Tony)
 - Added missing format validator to unpack() function. (Ilia)
 - Added missing error check inside bcpowmod(). (Ilia)
 - Added CURLOPT_PRIVATE & CURLINFO_PRIVATE constants. 
@@ -30,7 +30,7 @@ PHP                                                                        NEWS
 
 - Fixed var_export() to use the new H modifier so that it can generate
   parseable PHP code for floats, independent of the locale. (Derick)
-- Fixed regression introduced by the fix for the libgd bug #74 (Pierre)
+- Fixed regression introduced by the fix for the libgd bug #74. (Pierre)
 - Fixed several integer overflows in ImageCreate(), ImageCreateTrueColor(), 
   ImageCopyResampled() and ImageFilledPolygon() reported by Mattias Bengtsson. 
   (Tony)
@@ -43,21 +43,21 @@ PHP                                                                        NEWS
   when open_basedir or safe_mode is active. (Stas)
 - Fixed SimpleXML's behavior when used with empty(). (Sara)
 
-- Fixed PECL Bug #11345 (PDO_OCI crash after National language Support
-  "NLS" environment initialization error) (Chris Jones)
+- Fixed PECL Bug #11345 (PDO_OCI crash after National language Support "NLS"
+  environment initialization error). (Chris Jones)
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
-- Fixed bug #41919 (crash in string to array conversion). (judas dot
-  iscariote at gmail dot com, Ilia)
+- Fixed bug #41919 (crash in string to array conversion).
+  (judas dot iscariote at gmail dot com, Ilia)
 - Fixed bug #41908 (CFLAGS="-Os" ./configure --enable-debug fails). 
   (christian at hoffie dot info, Tony) 
 - Fixed bug #41909 (var_export() is locale sensitive when exporting float
   values). (Derick)
-- Fixed bug #41867 (getName is broken). (Rob)
+- Fixed bug #41867 (SimpleXML: getName is broken). (Rob)
 - Fixed bug #41865 (fputcsv(): 2nd parameter is not optional). (Jani)
-- Fixed bug #41861 (getNamespaces() returns the namespaces of a node's 
-  siblings). (Rob)
+- Fixed bug #41861 (SimpleXML: getNamespaces() returns the namespaces of 
+  a node's siblings). (Rob)
 - Fixed bug #41845 (pgsql extension does not compile with PostgreSQL <7.4).
   (Ilia)
 - Fixed bug #41813 (segmentation fault when using string offset as an object).
@@ -100,13 +100,13 @@ PHP                                                                        NEWS
 - Fixed bug #41594 (OCI8 statement cache is flushed too frequently). (Tony)
 - Fixed bug #41582 (SimpleXML crashes when accessing newly created element).
   (Tony)
-- Fixed bug #41576 (configure failure when using --without-apxs or some
-  other SAPIs disabling options). (Jani)
-- Fixed bug #41567 (json_encode() double conversion is inconsistent with
-  PHP). (Lucas, Ilia)
+- Fixed bug #41576 (configure failure when using --without-apxs or some other
+  SAPIs disabling options). (Jani)
+- Fixed bug #41567 (json_encode() double conversion is inconsistent with PHP).
+  (Lucas, Ilia)
 - Fixed bug #41566 (SOAP Server not properly generating href attributes).
   (Dmitry)
-- Fixed bug #41561 (Values set with php_admin_* in httpd.conf can be overwritten 
+- Fixed bug #41561 (php_admin_* values set in httpd.conf can be overwritten 
   with ini_set()). (Tony, Dmitry)
 - Fixed bug #41555 (configure failure: regression caused by fix for #41265).
   (Jani)
