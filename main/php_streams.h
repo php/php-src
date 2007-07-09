@@ -499,6 +499,9 @@ END_EXTERN_C()
 /* get (or create) a persistent version of the stream */
 #define STREAM_OPEN_PERSISTENT	2048
 
+/* don't check allow_url_fopen and allow_url_include */
+#define STREAM_DISABLE_URL_PROTECTION   0x00002000
+
 /* Antique - no longer has meaning */
 #define IGNORE_URL_WIN 0
 
@@ -549,6 +552,9 @@ PHPAPI HashTable *_php_get_stream_filters_hash(TSRMLS_D);
 PHPAPI HashTable *php_get_stream_filters_hash_global();
 END_EXTERN_C()
 #endif
+
+/* Definitions for user streams */
+#define PHP_STREAM_IS_URL		1
 
 /*
  * Local variables:

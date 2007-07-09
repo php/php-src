@@ -1606,7 +1606,11 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		return &php_plain_files_wrapper;
 	}
 
-	if ((wrapperpp && (*wrapperpp)->is_url) && (!PG(allow_url_fopen) || ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include))) ) {
+	if (wrapperpp && (*wrapperpp)->is_url && 	    
+        (options & STREAM_DISABLE_URL_PROTECTION) == 0 &&
+	    (!PG(allow_url_fopen) || 
+	     ((options & STREAM_OPEN_FOR_INCLUDE) ||
+	      PG(in_user_include)) && !PG(allow_url_include))) {
 		if (options & REPORT_ERRORS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL file-access is disabled in the server configuration");
 		}
