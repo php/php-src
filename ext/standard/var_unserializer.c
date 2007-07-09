@@ -112,18 +112,22 @@ static UChar *unserialize_ustr(const unsigned char **p, int len)
 	return ustr;
 }
 
-static char *unserialize_str(const unsigned char **p, int *len)
+static char *unserialize_str(const unsigned char **p, size_t *len, size_t maxlen)
 {
 	size_t i, j;
 	char *str = safe_emalloc(*len, 1, 1);
-	unsigned char *end = *(unsigned char **)p+*len;
+	unsigned char *end = *(unsigned char **)p+maxlen;
 
 	if(end < *p) {
 		efree(str);
 		return NULL;
 	}
 
-	for (i = 0; i < *len && *p < end; i++) {
+	for (i = 0; i < *len; i++) {
+		if (*p >= end) {
+			efree(str);
+			return NULL;
+		}
 		if (**p != '\\') {
 			str[i] = (char)**p;
 		} else {
@@ -142,7 +146,6 @@ static char *unserialize_str(const unsigned char **p, int *len)
 					return NULL;
 				}
 			}
-			end += 2;
 			str[i] = (char)ch;
 		}
 		(*p)++;
@@ -866,7 +869,7 @@ yy49:
 		return 0;
 	}
 
-	if ((str = unserialize_str(&YYCURSOR, &len)) == NULL) {
+	if ((str = unserialize_str(&YYCURSOR, &len, maxlen)) == NULL) {
 		return 0;
 	}
 
