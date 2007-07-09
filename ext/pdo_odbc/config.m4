@@ -19,8 +19,7 @@ define([PDO_ODBC_HELP_TEXT],[[
                             
                               --with-pdo-odbc=generic,dir,libname,ldflags,cflags
 
-                            This extension will always be created as a shared extension
-                            named pdo_odbc.so]])
+                            When build as shared the extension filename is always pdo_odbc.so]])
 
 PHP_ARG_WITH(pdo-odbc, for ODBC v3 support for PDO,
 [  --with-pdo-odbc=flavour,dir
