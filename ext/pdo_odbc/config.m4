@@ -89,7 +89,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
         pdo_odbc_def_lib="`echo $PHP_PDO_ODBC | cut -d, -f3`"
         pdo_odbc_def_ldflags="`echo $PHP_PDO_ODBC | cut -d, -f4`"
         pdo_odbc_def_cflags="`echo $PHP_PDO_ODBC | cut -d, -f5`"
-        pdo_odbc_flavour="$pdo_odbc_flavour ($pdo_odbc_def_lib)"
+        pdo_odbc_flavour="generic-$pdo_odbc_def_lib"
         ;;
 
       *)
