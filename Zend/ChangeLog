@@ -1,3 +1,10 @@
+2007-07-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/bug41919.phpt
+      tests/bug41919.phpt:
+      
+      file bug41919.phpt was initially added on branch PHP_5_2.
+
 2007-07-06  Antony Dovgal  <antony@zend.com>
 
     * zend_API.c:
