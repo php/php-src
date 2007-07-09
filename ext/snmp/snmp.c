@@ -184,7 +184,7 @@ ZEND_GET_MODULE(snmp)
  */
 static PHP_GINIT_FUNCTION(snmp)
 {
-	snmp_globals->valueretrieval = 0;
+	snmp_globals->valueretrieval = SNMP_VALUE_LIBRARY;
 }
 /* }}} */
 
@@ -262,7 +262,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 
 	buf[0] = 0;
 
-	if (SNMP_G(valueretrieval) == 0) {
+	if (SNMP_G(valueretrieval) == SNMP_VALUE_LIBRARY) {
 #ifdef HAVE_NET_SNMP
 		snprint_value(buf, sizeof(buf), vars->name, vars->name_length, vars);
 #else
@@ -332,7 +332,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 		break;
 	}
 
-	if (SNMP_G(valueretrieval) == 1) {
+	if (SNMP_G(valueretrieval) == SNMP_VALUE_PLAIN) {
 		*snmpval = *val;
 		zval_copy_ctor(snmpval);
 	} else {
