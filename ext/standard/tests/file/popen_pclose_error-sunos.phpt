@@ -2,8 +2,8 @@
 Test popen() and pclose function: error conditions
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) == 'WIN' || substr(PHP_OS, 0, 3) == 'Sun')
-  die("skip Not Valid for Windows and Sun Solaris");
+if( substr(PHP_OS, 0, 3) != 'Sun')
+  die("skip Only valid for Sun Solaris");
 ?>
 
 --FILE--
@@ -40,10 +40,8 @@ NULL
 
 Warning: Wrong parameter count for popen() in %s on line %d
 NULL
-
-Warning: popen(abc.txt,rw): %s on line %d
-bool(false)
-
+resource(%d) of type (stream)
+sh: abc.txt: not found
 Warning: Wrong parameter count for pclose() in %s on line %d
 NULL
 

@@ -69,5 +69,5 @@ Warning: Wrong parameter count for realpath() in %s on line %d
 NULL
 
 *** Testing realpath() on a non-existent file ***
-bool(false)
+%s
 Done
