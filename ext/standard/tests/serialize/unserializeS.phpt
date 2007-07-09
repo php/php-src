@@ -11,4 +11,4 @@ $data = unserialize($str);
 var_dump($data);
 
 --EXPECT--
-string(100) "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+bool(false)
