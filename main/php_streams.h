@@ -619,7 +619,7 @@ END_EXTERN_C()
 /* use glob stream for directory open in plain files stream */
 #define STREAM_USE_GLOB_DIR_OPEN        0x00001000
 
-/* use glob stream for directory open in plain files stream */
+/* don't check allow_url_fopen and allow_url_include */
 #define STREAM_DISABLE_URL_PROTECTION   0x00002000
 
 /* Antique - no longer has meaning */
