@@ -138,18 +138,22 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 
 /* }}} */
 
-static char *unserialize_str(const unsigned char **p, size_t *len)
+static char *unserialize_str(const unsigned char **p, size_t *len, size_t maxlen)
 {
 	size_t i, j;
 	char *str = safe_emalloc(*len, 1, 1);
-	unsigned char *end = *(unsigned char **)p+*len;
+	unsigned char *end = *(unsigned char **)p+maxlen;
 
 	if(end < *p) {
 		efree(str);
 		return NULL;
 	}
 
-	for (i = 0; i < *len && *p < end; i++) {
+	for (i = 0; i < *len; i++) {
+		if (*p >= end) {
+			efree(str);
+			return NULL;
+		}
 		if (**p != '\\') {
 			str[i] = (char)**p;
 		} else {
@@ -525,7 +529,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 
-	if ((str = unserialize_str(&YYCURSOR, &len)) == NULL) {
+	if ((str = unserialize_str(&YYCURSOR, &len, maxlen)) == NULL) {
 		return 0;
 	}
 
