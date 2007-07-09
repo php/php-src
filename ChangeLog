@@ -1,3 +1,45 @@
+2007-07-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/tests/bug41919.phpt
+      ZendEngine2/tests/bug41919.phpt:
+      
+      Fixed bug #41919 (crash in string to array conversion)
+
+2007-07-08  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/006_variation.phpt
+      ext/standard/tests/file/006_variation.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_variation.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_variation.phpt
+      ext/standard/tests/file/filesize_variation-win32.phpt
+      ext/standard/tests/file/filesize_variation-win32.phpt
+      ext/standard/tests/file/filesize_variation.phpt
+      ext/standard/tests/file/filesize_variation.phpt
+      ext/standard/tests/file/fwrite_variation-win32.phpt
+      ext/standard/tests/file/fwrite_variation-win32.phpt
+      ext/standard/tests/file/fwrite_variation.phpt
+      ext/standard/tests/file/fwrite_variation.phpt
+      ext/standard/tests/file/is_executable_variation.phpt
+      ext/standard/tests/file/is_executable_variation.phpt
+      ext/standard/tests/file/is_readable_variation.phpt
+      ext/standard/tests/file/is_readable_variation.phpt
+      ext/standard/tests/file/is_writable_variation.phpt
+      ext/standard/tests/file/is_writable_variation.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_basic.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_basic.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation.phpt:
+      These files are now split into one or more smaller testcases, hence being
+      deleted.
+
+    * (PHP_5_2)
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation6.phpt:
+      Run only on 32-bit OS
+
 2007-07-06  Christopher Jones  <christopher.jones@oracle.com>
 
     * ext/oci8/tests/field_funcs.phpt
