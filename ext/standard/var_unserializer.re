@@ -140,6 +140,7 @@ static char *unserialize_str(const unsigned char **p, int *len)
 					return NULL;
 				}
 			}
+			end += 2;
 			str[i] = (char)ch;
 		}
 		(*p)++;
