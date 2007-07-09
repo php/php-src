@@ -120,6 +120,8 @@ PHP                                                                        NEWS
 - Fixed bug #40419 (Trailing Slash in CGI request don't work). (Dmitry)
 - Fixed bug #39330 (apache2handler does not call shutdown actions before 
   apache child die). (isk at ecommerce dot com, Gopal, Tony)
+- Fixed bug #35981 (pdo-pgsql should not use pkg-config when not present).
+  (Jani)
 
 31 May 2007, PHP 5.2.3
 - Changed CGI install target to php-cgi and 'make install' to install CLI
@@ -218,14 +220,14 @@ PHP                                                                        NEWS
 - Improved bundled GD
   . Sync to 2.0.35
   . Added imagegrabwindow and imagegrabscreen, capture a screen or a 
-	window using its handle (Pierre)
+    window using its handle (Pierre)
   . colors allocated henceforth from the resulting image overwrite the palette 
-	  colors (Rob Leslie)
+    colors (Rob Leslie)
   . Improved thread safety of the gif support (Roman Nemecek, Nuno, Pierre)
-	. Use the dimension of the GIF frame to create the destination image (Pierre)
-	. Load only once the local color map from a GIF data (Pierre)
+  . Use the dimension of the GIF frame to create the destination image (Pierre)
+  . Load only once the local color map from a GIF data (Pierre)
   . Improved thread safety of the freetype cache (Scott MacVicar, Nuno, Pierre)
-	. imagearc huge CPU usage with large angles, libgd bug #74 (Pierre)
+  . imagearc huge CPU usage with large angles, libgd bug #74 (Pierre)
 - Improved FastCGI SAPI to support external pipe and socket servers on win32.
   (Dmitry)
 - Improved Zend Memory Manager
@@ -1371,7 +1373,7 @@ PHP                                                                        NEWS
   aborted" FastCGI err). (Dmitry)
 - Fixed bug #37192 (cc may complain about non-constant initializers in 
   hash_adler.c). (Mike)
-- Fixed bug #37191 (chmod takes off sticky bit when safe_mode is On). (Tony)	
+- Fixed bug #37191 (chmod takes off sticky bit when safe_mode is On). (Tony)
 - Fixed bug #37167 (PDO segfaults when throwing exception from the 
   fetch handler). (Tony)
 - Fixed bug #37162 (wddx does not build as a shared extension).
