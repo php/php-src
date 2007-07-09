@@ -11,3 +11,6 @@ echo "Done\n";
 --EXPECT--	
 string(26) "Bug ' Trigger Missing Text"
 Done
+--UEXPECT--	
+unicode(26) "Bug ' Trigger Missing Text"
+Done
