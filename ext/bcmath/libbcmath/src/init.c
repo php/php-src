@@ -51,7 +51,7 @@ _bc_new_num_ex (length, scale, persistent)
   bc_num temp;
 
   /* PHP Change:  malloc() -> pemalloc(), removed free_list code */
-  temp = (bc_num) pemalloc (sizeof(bc_struct)+length+scale, persistent);
+  temp = (bc_num) safe_pemalloc (1, sizeof(bc_struct)+length, scale, persistent);
 #if 0
   if (_bc_Free_list != NULL) {
     temp = _bc_Free_list;
@@ -66,7 +66,7 @@ _bc_new_num_ex (length, scale, persistent)
   temp->n_scale = scale;
   temp->n_refs = 1;
   /* PHP Change:  malloc() -> pemalloc() */
-  temp->n_ptr = (char *) pemalloc (length+scale, persistent);
+  temp->n_ptr = (char *) safe_pemalloc (1, length, scale, persistent);
   if (temp->n_ptr == NULL) bc_out_of_memory();
   temp->n_value = temp->n_ptr;
   memset (temp->n_ptr, 0, length+scale);
