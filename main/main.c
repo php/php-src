@@ -356,11 +356,11 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 			return;
 		}
 #endif
-		if (PG(safe_mode) && (!php_checkuid(PG(error_log), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		if (PG(safe_mode) && (!php_checkuid(PG(error_log), NULL, CHECKUID_CHECK_FILE_AND_DIR|CHECKUID_NO_ERRORS))) {
 			return FAILURE;
 		}
 
-		if (PG(open_basedir) && php_check_open_basedir(PG(error_log) TSRMLS_CC)) {
+		if (PG(open_basedir) && php_check_open_basedir_ex(PG(error_log), 0 TSRMLS_CC)) {
 			return FAILURE;
 		}
 		
