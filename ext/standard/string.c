@@ -2788,6 +2788,7 @@ PHP_FUNCTION(strrpos)
 		if (offset >= 0) {
 			U16_FWD_N(haystack.u, cu_offset, haystack_len, offset);
 			if (cu_offset > haystack_len - needle_len) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
 			u_p = haystack.u + cu_offset;
@@ -2795,11 +2796,13 @@ PHP_FUNCTION(strrpos)
 		} else {
 			u_p = haystack.u;
 			if (-offset > haystack_len) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			} else {
 				cu_offset = haystack_len;
 				U16_BACK_N(haystack.u, 0, cu_offset, -offset);
 				if (cu_offset == 0) {
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 					RETURN_FALSE;
 				}
 				if (needle_len > haystack_len - cu_offset) {
@@ -2823,12 +2826,14 @@ PHP_FUNCTION(strrpos)
 	} else {
 		if (offset >= 0) {
 			if (offset > haystack_len) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
 			p = haystack.s + offset;
 			e = haystack.s + haystack_len - needle_len;
 		} else {
 			if (-offset > haystack_len) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
 
@@ -2913,6 +2918,7 @@ PHP_FUNCTION(strripos)
 		if (offset >= 0) {
 			U16_FWD_N(haystack.u, cu_offset, haystack_len, offset);
 			if (cu_offset > haystack_len - needle_len) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
 			u_p = haystack.u + cu_offset;
@@ -2920,11 +2926,13 @@ PHP_FUNCTION(strripos)
 		} else {
 			u_p = haystack.u;
 			if (-offset > haystack_len || offset < -INT_MAX) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			} else {
 				cu_offset = haystack_len;
 				U16_BACK_N(haystack.u, 0, cu_offset, -offset);
 				if (cu_offset == 0) {
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 					RETURN_FALSE;
 				}
 				if (needle_len > haystack_len - cu_offset) {
@@ -2951,6 +2959,7 @@ PHP_FUNCTION(strripos)
 			   Can also avoid tolower emallocs */
 			if (offset >= 0) {
 				if (offset > haystack_len) {
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 					RETURN_FALSE;
 				}
 				p = haystack.s + offset;
@@ -2958,6 +2967,7 @@ PHP_FUNCTION(strripos)
 			} else {
 				p = haystack.s;
 				if (-offset > haystack_len || offset < INT_MAX) {
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 					RETURN_FALSE;
 				} else {
 					e = haystack.s + haystack_len + offset;
@@ -2983,6 +2993,7 @@ PHP_FUNCTION(strripos)
 			if (offset > haystack_len) {
 				efree(haystack_dup);
 				efree(needle_dup);
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
 			p = haystack_dup + offset;
@@ -2991,6 +3002,7 @@ PHP_FUNCTION(strripos)
 			if (-offset > haystack_len || offset < -INT_MAX) {
 				efree(haystack_dup);
 				efree(needle_dup);
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			} 
 			p = haystack_dup;
@@ -3269,9 +3281,10 @@ PHP_FUNCTION(substr)
 
 /* {{{ php_adjust_limits
  */
-PHPAPI void php_adjust_limits(zval **str, int *f, int *l)
+static int php_adjust_limits(zval **str, int *f, int *l)
 {
 	int str_codepts;
+	int ret = 1;
 
 	if (Z_TYPE_PP(str) == IS_UNICODE) {
 		str_codepts = u_countChar32(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str));
@@ -3297,9 +3310,15 @@ PHPAPI void php_adjust_limits(zval **str, int *f, int *l)
 			*l = 0;
 		}
 	}
+	if (*f > str_codepts || (*f < 0 && -(*f) > str_codepts)) {
+		ret = 0;
+	} else if (*l > str_codepts || (*l < 0 && -(*l) > str_codepts)) {
+		ret = 0;
+	}
 	if (((unsigned)(*f) + (unsigned)(*l)) > str_codepts) {
 		*l = str_codepts - *f;
 	}
+	return ret;
 }
 /* }}} */
 
@@ -3436,7 +3455,9 @@ PHP_FUNCTION(substr_replace)
 				convert_to_explicit_type_ex(str, str_type);
 				convert_to_explicit_type_ex(tmp_repl, str_type);
 			}
-			php_adjust_limits(str, &f, &l);
+			if (!php_adjust_limits(str, &f, &l)) {
+				RETURN_FALSE;
+			}
 			result_len = php_do_substr_replace(&result, str, tmp_repl, f, l TSRMLS_CC);
 
 			if (Z_TYPE_PP(str) == IS_UNICODE) {
