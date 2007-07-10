@@ -123,6 +123,7 @@ PHP_FUNCTION(symlink)
 	convert_to_string_ex(frompath);
 
 	if (!expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC) || !expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
@@ -179,6 +180,7 @@ PHP_FUNCTION(link)
 	convert_to_string_ex(frompath);
 
 	if (!expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC) || !expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 

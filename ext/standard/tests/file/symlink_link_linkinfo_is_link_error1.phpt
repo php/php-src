@@ -67,6 +67,7 @@ echo "Done\n";
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/symlink_link_linkinfo_is_link_error1.tmp");
+@unlink(dirname(__FILE__)."/symlink_link_linkinfo_is_link_link_error1.tmp");
 ?>
 --EXPECTF--
 *** Testing symlink() for error conditions ***
