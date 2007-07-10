@@ -44,6 +44,8 @@ PHP                                                                        NEWS
 - Fixed INFILE LOCAL option handling with MySQL extensions not to be allowed 
   when open_basedir or safe_mode is active. (Stas)
 - Fixed SimpleXML's behavior when used with empty(). (Sara)
+- Fixed session.save_path and error_log values to be checked against
+  open_basedir and safe_mode (Stas, Maksymilian Arciemowicz)
 
 - Fixed PECL Bug #11345 (PDO_OCI crash after National language Support "NLS"
   environment initialization error). (Chris Jones)
