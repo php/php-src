@@ -1,7 +1,7 @@
 --TEST--
 Unicode identifiers normalization ($$)
---INI--
-unicode.semantics=on
+--SKIPIF--
+<?php if (!unicode_semantics()) die('skip unicode.semantics=off'); ?>
 --FILE--
 <?php
 $a = "\u212B";
