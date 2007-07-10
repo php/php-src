@@ -27,3 +27,16 @@ array(4) {
   string(1) "e"
 }
 string(4) "yes!"
+--UEXPECT--
+bool(false)
+array(4) {
+  [0]=>
+  unicode(5) "abcde"
+  [1]=>
+  unicode(2) "ab"
+  [2]=>
+  unicode(2) "cd"
+  [3]=>
+  unicode(1) "e"
+}
+unicode(4) "yes!"

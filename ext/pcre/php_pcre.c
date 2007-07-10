@@ -1422,7 +1422,9 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 	}
 
 	if (is_callable_replace) {
-		convert_to_text(replace);
+		if (Z_TYPE_P(replace) != IS_ARRAY) {
+			convert_to_text(replace);
+		}
 		if (!zend_is_callable(replace, 0, &callback_name)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires argument 2, '%R', to be a valid callback", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
 			zval_dtor(&callback_name);
