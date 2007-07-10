@@ -29,13 +29,12 @@
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
 
-
 #ifndef ZTS
 ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
-static void zend_duplicate_property_info(zend_property_info *property_info)
+static void zend_duplicate_property_info(zend_property_info *property_info) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -51,9 +50,9 @@ static void zend_duplicate_property_info(zend_property_info *property_info)
 		}
 	}
 }
+/* }}} */
 
-
-static void zend_duplicate_property_info_internal(zend_property_info *property_info)
+static void zend_duplicate_property_info_internal(zend_property_info *property_info) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -63,23 +62,24 @@ static void zend_duplicate_property_info_internal(zend_property_info *property_i
 		property_info->name.s = zend_strndup(property_info->name.s, property_info->name_length);
 	}
 }
+/* }}} */
 
-
-static void zend_destroy_property_info(zend_property_info *property_info)
+static void zend_destroy_property_info(zend_property_info *property_info) /* {{{ */
 {
 	efree(property_info->name.v);
 	if (property_info->doc_comment.v) {
 		efree(property_info->doc_comment.v);
 	}
 }
+/* }}} */
 
-
-static void zend_destroy_property_info_internal(zend_property_info *property_info)
+static void zend_destroy_property_info_internal(zend_property_info *property_info) /* {{{ */
 {
 	free(property_info->name.v);
 }
+/* }}} */
 
-static void build_runtime_defined_function_key(zval *result, zend_uchar type, zstr name, int name_length TSRMLS_DC)
+static void build_runtime_defined_function_key(zval *result, zend_uchar type, zstr name, int name_length TSRMLS_DC) /* {{{ */
 {
 	char char_pos_buf[32];
 	uint char_pos_len;
@@ -116,16 +116,16 @@ static void build_runtime_defined_function_key(zval *result, zend_uchar type, zs
 	}
 	result->refcount = 1;
 }
+/* }}} */
 
-
-int zend_auto_global_arm(zend_auto_global *auto_global TSRMLS_DC)
+int zend_auto_global_arm(zend_auto_global *auto_global TSRMLS_DC) /* {{{ */
 {
 	auto_global->armed = (auto_global->auto_global_callback ? 1 : 0);
 	return 0;
 }
+/* }}} */
 
-
-int zend_auto_global_disable_jit(char *varname, zend_uint varname_length TSRMLS_DC)
+int zend_auto_global_disable_jit(char *varname, zend_uint varname_length TSRMLS_DC) /* {{{ */
 {
 	zend_auto_global *auto_global;
 
@@ -135,16 +135,16 @@ int zend_auto_global_disable_jit(char *varname, zend_uint varname_length TSRMLS_
 	auto_global->armed = 0;
 	return SUCCESS;
 }
+/* }}} */
 
-
-static void init_compiler_declarables(TSRMLS_D)
+static void init_compiler_declarables(TSRMLS_D) /* {{{ */
 {
 	Z_TYPE(CG(declarables).ticks) = IS_LONG;
 	Z_LVAL(CG(declarables).ticks) = 0;
 }
+/* }}} */
 
-
-void zend_init_compiler_data_structures(TSRMLS_D)
+void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 {
 	zend_stack_init(&CG(bp_stack));
 	zend_stack_init(&CG(function_call_stack));
@@ -165,9 +165,9 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	zend_stack_init(&CG(labels_stack));
 	CG(labels) = NULL;
 }
+/* }}} */
 
-
-void init_compiler(TSRMLS_D)
+void init_compiler(TSRMLS_D) /* {{{ */
 {
 	CG(auto_globals_cache) = emalloc(sizeof(zval**) * zend_hash_num_elements(CG(auto_globals)));
 	CG(active_op_array) = NULL;
@@ -178,9 +178,9 @@ void init_compiler(TSRMLS_D)
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_file_handle_dtor, 0);
 	CG(unclean_shutdown) = 0;
 }
+/* }}} */
 
-
-void shutdown_compiler(TSRMLS_D)
+void shutdown_compiler(TSRMLS_D) /* {{{ */
 {
 	efree(CG(auto_globals_cache));
 	CG(auto_globals_cache) = NULL;
@@ -196,9 +196,9 @@ void shutdown_compiler(TSRMLS_D)
 	zend_llist_destroy(&CG(open_files));
 	zend_stack_destroy(&CG(labels_stack));
 }
+/* }}} */
 
-
-ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename TSRMLS_DC)
+ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename TSRMLS_DC) /* {{{ */
 {
 	char **pp, *p;
 	int length = strlen(new_compiled_filename);
@@ -212,33 +212,33 @@ ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename TSRMLS_DC)
 	CG(compiled_filename) = p;
 	return p;
 }
+/* }}} */
 
-
-ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TSRMLS_DC)
+ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TSRMLS_DC) /* {{{ */
 {
 	CG(compiled_filename) = original_compiled_filename;
 }
+/* }}} */
 
-
-ZEND_API char *zend_get_compiled_filename(TSRMLS_D)
+ZEND_API char *zend_get_compiled_filename(TSRMLS_D) /* {{{ */
 {
 	return CG(compiled_filename);
 }
+/* }}} */
 
-
-ZEND_API int zend_get_compiled_lineno(TSRMLS_D)
+ZEND_API int zend_get_compiled_lineno(TSRMLS_D) /* {{{ */
 {
 	return CG(zend_lineno);
 }
+/* }}} */
 
-
-ZEND_API zend_bool zend_is_compiling(TSRMLS_D)
+ZEND_API zend_bool zend_is_compiling(TSRMLS_D) /* {{{ */
 {
 	return CG(in_compilation);
 }
+/* }}} */
 
-
-ZEND_API char *zend_set_compiled_script_encoding(char *new_script_enc TSRMLS_DC)
+ZEND_API char *zend_set_compiled_script_encoding(char *new_script_enc TSRMLS_DC) /* {{{ */
 {
 	char **pp, *p;
 	int length = strlen(new_script_enc);
@@ -252,26 +252,27 @@ ZEND_API char *zend_set_compiled_script_encoding(char *new_script_enc TSRMLS_DC)
 	CG(script_encoding) = p;
 	return p;
 }
+/* }}} */
 
-
-ZEND_API void zend_restore_compiled_script_encoding(char *original_script_enc TSRMLS_DC)
+ZEND_API void zend_restore_compiled_script_encoding(char *original_script_enc TSRMLS_DC) /* {{{ */
 {
 	CG(script_encoding) = original_script_enc;
 }
+/* }}} */
 
-
-ZEND_API char *zend_get_compiled_script_encoding(TSRMLS_D)
+ZEND_API char *zend_get_compiled_script_encoding(TSRMLS_D) /* {{{ */
 {
 	return CG(script_encoding);
 }
+/* }}} */
 
-
-static zend_uint get_temporary_variable(zend_op_array *op_array)
+static zend_uint get_temporary_variable(zend_op_array *op_array) /* {{{ */
 {
 	return (op_array->T)++ * sizeof(temp_variable);
 }
+/* }}} */
 
-static int lookup_cv(zend_op_array *op_array, zend_uchar type, zstr name, int name_len)
+static int lookup_cv(zend_op_array *op_array, zend_uchar type, zstr name, int name_len) /* {{{ */
 {
 	int i = 0;
 	ulong hash_value = zend_u_inline_hash_func(type, name, name_len+1);
@@ -296,9 +297,9 @@ static int lookup_cv(zend_op_array *op_array, zend_uchar type, zstr name, int na
 	op_array->vars[i].hash_value = hash_value;
 	return i;
 }
+/* }}} */
 
-
-void zend_do_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
+void zend_do_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -309,9 +310,9 @@ void zend_do_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRM
 	opline->op2 = *op2;
 	*result = opline->result;
 }
+/* }}} */
 
-
-void zend_do_unary_op(zend_uchar op, znode *result, znode *op1 TSRMLS_DC)
+void zend_do_unary_op(zend_uchar op, znode *result, znode *op1 TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -322,18 +323,19 @@ void zend_do_unary_op(zend_uchar op, znode *result, znode *op1 TSRMLS_DC)
 	*result = opline->result;
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
 #define MAKE_NOP(opline)	{ opline->opcode = ZEND_NOP;  memset(&opline->result,0,sizeof(znode)); memset(&opline->op1,0,sizeof(znode)); memset(&opline->op2,0,sizeof(znode)); opline->result.op_type=opline->op1.op_type=opline->op2.op_type=IS_UNUSED;  }
 
-
-static void zend_do_op_data(zend_op *data_op, znode *value TSRMLS_DC)
+static void zend_do_op_data(zend_op *data_op, znode *value TSRMLS_DC) /* {{{ */
 {
 	data_op->opcode = ZEND_OP_DATA;
 	data_op->op1 = *value;
 	SET_UNUSED(data_op->op2);
 }
+/* }}} */
 
-void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
+void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC) /* {{{ */
 {
 	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -374,8 +376,9 @@ void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *o
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	*result = opline->result;
 }
+/* }}} */
 
-void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar op TSRMLS_DC)
+void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar op TSRMLS_DC) /* {{{ */
 {
 	zend_op opline;
 	zend_op *opline_ptr;
@@ -425,14 +428,16 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 		zend_llist_add_element(fetch_list_ptr, opline_ptr);
 	}
 }
+/* }}} */
 
-void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC)
+void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC) /* {{{ */
 {
 	/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
 	fetch_simple_variable_ex(result, varname, bp, ZEND_FETCH_W TSRMLS_CC);
 }
+/* }}} */
 
-void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC)
+void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC) /* {{{ */
 {
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *le;
@@ -483,16 +488,17 @@ void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC)
 		}
 	}
 }
+/* }}} */
 
-void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC)
+void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC) /* {{{ */
 {
 	fetch_simple_variable(result, varname, 1 TSRMLS_CC);
 
 	fetch_array_dim(result, result, first_dim TSRMLS_CC);
 }
+/* }}} */
 
-
-void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC)
+void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC) /* {{{ */
 {
 	zend_op opline;
 	zend_llist *fetch_list_ptr;
@@ -510,15 +516,15 @@ void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC)
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
 	zend_llist_add_element(fetch_list_ptr, &opline);
 }
+/* }}} */
 
-
-void fetch_string_offset(znode *result, znode *parent, znode *offset TSRMLS_DC)
+void fetch_string_offset(znode *result, znode *parent, znode *offset TSRMLS_DC) /* {{{ */
 {
 	fetch_array_dim(result, parent, offset TSRMLS_CC);
 }
+/* }}} */
 
-
-void zend_do_print(znode *result, znode *arg TSRMLS_DC)
+void zend_do_print(znode *result, znode *arg TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -529,9 +535,9 @@ void zend_do_print(znode *result, znode *arg TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 	*result = opline->result;
 }
+/* }}} */
 
-
-void zend_do_echo(znode *arg, zend_bool inline_html TSRMLS_DC)
+void zend_do_echo(znode *arg, zend_bool inline_html TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -540,8 +546,9 @@ void zend_do_echo(znode *arg, zend_bool inline_html TSRMLS_DC)
 	opline->extended_value = inline_html;
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body TSRMLS_DC)
+void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body TSRMLS_DC) /* {{{ */
 {
 	char *method_type;
 
@@ -572,8 +579,9 @@ void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body
 		}
 	}
 }
+/* }}} */
 
-static zend_bool opline_is_fetch_this(zend_op *opline TSRMLS_DC)
+static zend_bool opline_is_fetch_this(zend_op *opline TSRMLS_DC) /* {{{ */
 {
 	if ((opline->opcode == ZEND_FETCH_W) && (opline->op1.op_type == IS_CONST)
 		&& (Z_TYPE(opline->op1.u.constant) == IS_STRING ||
@@ -585,8 +593,9 @@ static zend_bool opline_is_fetch_this(zend_op *opline TSRMLS_DC)
 		return 0;
 	}
 }
+/* }}} */
 
-void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
+void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {{{ */
 {
 	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -646,15 +655,17 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	*result = opline->result;
 }
+/* }}} */
 
-static inline zend_bool zend_is_function_or_method_call(znode *variable)
+static inline zend_bool zend_is_function_or_method_call(znode *variable) /* {{{ */
 {
 	zend_uint type = variable->u.EA.type;
 
 	return  ((type & ZEND_PARSED_METHOD_CALL) || (type == ZEND_PARSED_FUNCTION_CALL));
 }
+/* }}} */
 
-void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC)
+void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC) /* {{{ */
 {
 	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -686,9 +697,9 @@ void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC)
 	opline->op1 = *lvar;
 	opline->op2 = *rvar;
 }
+/* }}} */
 
-
-static inline void do_begin_loop(TSRMLS_D)
+static inline void do_begin_loop(TSRMLS_D) /* {{{ */
 {
 	zend_brk_cont_element *brk_cont_element;
 	int parent;
@@ -699,17 +710,17 @@ static inline void do_begin_loop(TSRMLS_D)
 	brk_cont_element->start = get_next_op_number(CG(active_op_array));
 	brk_cont_element->parent = parent;
 }
+/* }}} */
 
-
-static inline void do_end_loop(int cont_addr TSRMLS_DC)
+static inline void do_end_loop(int cont_addr TSRMLS_DC) /* {{{ */
 {
 	CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].cont = cont_addr;
 	CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].brk = get_next_op_number(CG(active_op_array));
 	CG(active_op_array)->current_brk_cont = CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].parent;
 }
+/* }}} */
 
-
-void zend_do_while_cond(znode *expr, znode *close_bracket_token TSRMLS_DC)
+void zend_do_while_cond(znode *expr, znode *close_bracket_token TSRMLS_DC) /* {{{ */
 {
 	int while_cond_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -722,9 +733,9 @@ void zend_do_while_cond(znode *expr, znode *close_bracket_token TSRMLS_DC)
 	do_begin_loop(TSRMLS_C);
 	INC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_while_end(znode *while_token, znode *close_bracket_token TSRMLS_DC)
+void zend_do_while_end(znode *while_token, znode *close_bracket_token TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -741,9 +752,9 @@ void zend_do_while_end(znode *while_token, znode *close_bracket_token TSRMLS_DC)
 
 	DEC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_for_cond(znode *expr, znode *second_semicolon_token TSRMLS_DC)
+void zend_do_for_cond(znode *expr, znode *second_semicolon_token TSRMLS_DC) /* {{{ */
 {
 	int for_cond_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -753,9 +764,9 @@ void zend_do_for_cond(znode *expr, znode *second_semicolon_token TSRMLS_DC)
 	second_semicolon_token->u.opline_num = for_cond_op_number;
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-void zend_do_for_before_statement(znode *cond_start, znode *second_semicolon_token TSRMLS_DC)
+void zend_do_for_before_statement(znode *cond_start, znode *second_semicolon_token TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -769,9 +780,9 @@ void zend_do_for_before_statement(znode *cond_start, znode *second_semicolon_tok
 
 	INC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_for_end(znode *second_semicolon_token TSRMLS_DC)
+void zend_do_for_end(znode *second_semicolon_token TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -785,9 +796,9 @@ void zend_do_for_end(znode *second_semicolon_token TSRMLS_DC)
 
 	DEC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
+void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC) /* {{{ */
 {
 	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline;
@@ -814,9 +825,9 @@ void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	*result = opline->result;
 }
+/* }}} */
 
-
-void zend_do_post_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
+void zend_do_post_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC) /* {{{ */
 {
 	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline;
@@ -841,9 +852,9 @@ void zend_do_post_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	*result = opline->result;
 }
+/* }}} */
 
-
-void zend_do_if_cond(znode *cond, znode *closing_bracket_token TSRMLS_DC)
+void zend_do_if_cond(znode *cond, znode *closing_bracket_token TSRMLS_DC) /* {{{ */
 {
 	int if_cond_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -854,9 +865,9 @@ void zend_do_if_cond(znode *cond, znode *closing_bracket_token TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 	INC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_if_after_statement(znode *closing_bracket_token, unsigned char initialize TSRMLS_DC)
+void zend_do_if_after_statement(znode *closing_bracket_token, unsigned char initialize TSRMLS_DC) /* {{{ */
 {
 	int if_end_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -877,9 +888,9 @@ void zend_do_if_after_statement(znode *closing_bracket_token, unsigned char init
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-void zend_do_if_end(TSRMLS_D)
+void zend_do_if_end(TSRMLS_D) /* {{{ */
 {
 	int next_op_number = get_next_op_number(CG(active_op_array));
 	zend_llist *jmp_list_ptr;
@@ -893,8 +904,9 @@ void zend_do_if_end(TSRMLS_D)
 	zend_stack_del_top(&CG(bp_stack));
 	DEC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-void zend_check_writable_variable(znode *variable)
+void zend_check_writable_variable(znode *variable) /* {{{ */
 {
 	zend_uint type = variable->u.EA.type;
 
@@ -905,17 +917,18 @@ void zend_check_writable_variable(znode *variable)
 		zend_error(E_COMPILE_ERROR, "Can't use function return value in write context");
 	}
 }
+/* }}} */
 
-void zend_do_begin_variable_parse(TSRMLS_D)
+void zend_do_begin_variable_parse(TSRMLS_D) /* {{{ */
 {
 	zend_llist fetch_list;
 
 	zend_llist_init(&fetch_list, sizeof(zend_op), NULL, 0);
 	zend_stack_push(&CG(bp_stack), (void *) &fetch_list, sizeof(zend_llist));
 }
+/* }}} */
 
-
-void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
+void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC) /* {{{ */
 {
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *le;
@@ -973,9 +986,9 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 	zend_llist_destroy(fetch_list_ptr);
 	zend_stack_del_top(&CG(bp_stack));
 }
+/* }}} */
 
-
-void zend_do_init_string(znode *result TSRMLS_DC)
+void zend_do_init_string(znode *result TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -987,9 +1000,9 @@ void zend_do_init_string(znode *result TSRMLS_DC)
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC)
+void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -1014,9 +1027,9 @@ void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC)
 	opline->result = opline->op1;
 	*result = opline->result;
 }
+/* }}} */
 
-
-void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC)
+void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -1051,8 +1064,9 @@ void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC)
 	opline->extended_value = CG(literal_type);
 	*result = opline->result;
 }
+/* }}} */
 
-void zend_do_free(znode *op1 TSRMLS_DC)
+void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 {
 	if (op1->op_type==IS_TMP_VAR) {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -1098,9 +1112,9 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 		zval_dtor(&op1->u.constant);
 	}
 }
+/* }}} */
 
-
-int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier)
+int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier) /* {{{ */
 {
 	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_PPP_MASK)
 		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_PPP_MASK)
@@ -1112,9 +1126,9 @@ int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier)
 	}
 	return (Z_LVAL(current_access_type->u.constant) | Z_LVAL(new_modifier->u.constant));
 }
+/* }}} */
 
-
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC)
+void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC) /* {{{ */
 {
 	zend_op_array op_array;
 	zstr name = Z_UNIVAL(function_name->u.constant);
@@ -1276,8 +1290,9 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	zend_stack_push(&CG(labels_stack), (void *) &CG(labels), sizeof(HashTable*));
 	CG(labels) = NULL;
 }
+/* }}} */
 
-void zend_do_handle_exception(TSRMLS_D)
+void zend_do_handle_exception(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -1285,9 +1300,9 @@ void zend_do_handle_exception(TSRMLS_D)
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
+void zend_do_end_function_declaration(znode *function_token TSRMLS_DC) /* {{{ */
 {
 	unsigned int lcname_len;
 	zstr lcname;
@@ -1338,9 +1353,9 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 	zend_stack_del_top(&CG(switch_cond_stack));
 	zend_stack_del_top(&CG(foreach_copy_stack));
 }
+/* }}} */
 
-
-void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, znode *varname, zend_uchar pass_by_reference TSRMLS_DC)
+void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, znode *varname, zend_uchar pass_by_reference TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	zend_arg_info *cur_arg_info;
@@ -1412,9 +1427,9 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	}
 	opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 }
+/* }}} */
 
-
-int zend_do_begin_function_call(znode *function_name TSRMLS_DC)
+int zend_do_begin_function_call(znode *function_name TSRMLS_DC) /* {{{ */
 {
 	zend_function *function;
 	unsigned int lcname_len;
@@ -1451,10 +1466,9 @@ int zend_do_begin_function_call(znode *function_name TSRMLS_DC)
 	zend_do_extended_fcall_begin(TSRMLS_C);
 	return 0;
 }
+/* }}} */
 
-
-
-void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
+void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 {
 	zend_op *last_op;
 	int last_op_number;
@@ -1495,9 +1509,9 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 	zend_do_extended_fcall_begin(TSRMLS_C);
 }
+/* }}} */
 
-
-void zend_do_clone(znode *result, znode *expr TSRMLS_DC)
+void zend_do_clone(znode *result, znode *expr TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -1508,9 +1522,9 @@ void zend_do_clone(znode *result, znode *expr TSRMLS_DC)
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	*result = opline->result;
 }
+/* }}} */
 
-
-void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC)
+void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC) /* {{{ */
 {
 	unsigned char *ptr = NULL;
 	zend_op *opline;
@@ -1525,9 +1539,9 @@ void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC)
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 	zend_do_extended_fcall_begin(TSRMLS_C);
 }
+/* }}} */
 
-
-void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC)
+void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 {
 	long fetch_class_op_number;
 	zend_op *opline;
@@ -1562,9 +1576,9 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC)
 	opline->result.op_type = IS_CONST; /* FIXME: Hack so that INIT_FCALL_BY_NAME still knows this is a class */
 	*result = opline->result;
 }
+/* }}} */
 
-
-void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_name TSRMLS_DC)
+void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_name TSRMLS_DC) /* {{{ */
 {
 	zend_uint length;
 
@@ -1589,8 +1603,9 @@ void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *cla
 	}
 	Z_STRLEN(result->u.constant) = length;
 }
+/* }}} */
 
-void zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC)
+void zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC) /* {{{ */
 {
 	unsigned char *ptr = NULL;
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -1629,9 +1644,9 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 	zend_do_extended_fcall_begin(TSRMLS_C);
 }
+/* }}} */
 
-
-void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC)
+void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -1660,9 +1675,9 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 	zend_stack_del_top(&CG(function_call_stack));
 	opline->extended_value = Z_LVAL(argument_list->u.constant);
 }
+/* }}} */
 
-
-void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
+void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	int original_op=op;
@@ -1758,9 +1773,9 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 	opline->op2.u.opline_num = offset;
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-static int generate_free_switch_expr(zend_switch_entry *switch_entry TSRMLS_DC)
+static int generate_free_switch_expr(zend_switch_entry *switch_entry TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -1776,8 +1791,9 @@ static int generate_free_switch_expr(zend_switch_entry *switch_entry TSRMLS_DC)
 	opline->extended_value = 0;
 	return 0;
 }
+/* }}} */
 
-static int generate_free_foreach_copy(zend_op *foreach_copy TSRMLS_DC)
+static int generate_free_foreach_copy(zend_op *foreach_copy TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -1804,8 +1820,9 @@ static int generate_free_foreach_copy(zend_op *foreach_copy TSRMLS_DC)
 
 	return 0;
 }
+/* }}} */
 
-void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC)
+void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -1848,9 +1865,9 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC)
 
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-static int zend_add_try_element(zend_uint try_op TSRMLS_DC)
+static int zend_add_try_element(zend_uint try_op TSRMLS_DC) /* {{{ */
 {
 	int try_catch_offset = CG(active_op_array)->last_try_catch++;
 
@@ -1858,20 +1875,21 @@ static int zend_add_try_element(zend_uint try_op TSRMLS_DC)
 	CG(active_op_array)->try_catch_array[try_catch_offset].try_op = try_op;
 	return try_catch_offset;
 }
+/* }}} */
 
-static void zend_add_catch_element(int offset, zend_uint catch_op TSRMLS_DC)
+static void zend_add_catch_element(int offset, zend_uint catch_op TSRMLS_DC) /* {{{ */
 {
 	CG(active_op_array)->try_catch_array[offset].catch_op = catch_op;
 }
+/* }}} */
 
-
-void zend_do_first_catch(znode *open_parentheses TSRMLS_DC)
+void zend_do_first_catch(znode *open_parentheses TSRMLS_DC) /* {{{ */
 {
 	open_parentheses->u.opline_num = get_next_op_number(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_initialize_try_catch_element(znode *try_token TSRMLS_DC)
+void zend_initialize_try_catch_element(znode *try_token TSRMLS_DC) /* {{{ */
 {
 	int jmp_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -1890,9 +1908,9 @@ void zend_initialize_try_catch_element(znode *try_token TSRMLS_DC)
 
 	zend_add_catch_element(try_token->u.opline_num, get_next_op_number(CG(active_op_array)) TSRMLS_CC);
 }
+/* }}} */
 
-
-void zend_do_mark_last_catch(znode *first_catch, znode *last_additional_catch TSRMLS_DC)
+void zend_do_mark_last_catch(znode *first_catch, znode *last_additional_catch TSRMLS_DC) /* {{{ */
 {
 	CG(active_op_array)->last--;
 	zend_do_if_end(TSRMLS_C);
@@ -1905,16 +1923,16 @@ void zend_do_mark_last_catch(znode *first_catch, znode *last_additional_catch TS
 	}
 	DEC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_try(znode *try_token TSRMLS_DC)
+void zend_do_try(znode *try_token TSRMLS_DC) /* {{{ */
 {
 	try_token->u.opline_num = zend_add_try_element(get_next_op_number(CG(active_op_array)) TSRMLS_CC);
 	INC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, zend_bool first_catch TSRMLS_DC)
+void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, zend_bool first_catch TSRMLS_DC) /* {{{ */
 {
 	long catch_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline;
@@ -1935,8 +1953,9 @@ void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var,
 
 	try_token->u.opline_num = catch_op_number;
 }
+/* }}} */
 
-void zend_do_end_catch(znode *try_token TSRMLS_DC)
+void zend_do_end_catch(znode *try_token TSRMLS_DC) /* {{{ */
 {
 	int jmp_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -1952,8 +1971,9 @@ void zend_do_end_catch(znode *try_token TSRMLS_DC)
 
 	CG(active_op_array)->opcodes[try_token->u.opline_num].extended_value = get_next_op_number(CG(active_op_array));
 }
+/* }}} */
 
-void zend_do_throw(znode *expr TSRMLS_DC)
+void zend_do_throw(znode *expr TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -1962,8 +1982,9 @@ void zend_do_throw(znode *expr TSRMLS_DC)
 	opline->op1 = *expr;
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-ZEND_API void function_add_ref(zend_function *function TSRMLS_DC)
+ZEND_API void function_add_ref(zend_function *function TSRMLS_DC) /* {{{ */
 {
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_op_array *op_array = &function->op_array;
@@ -2000,8 +2021,9 @@ ZEND_API void function_add_ref(zend_function *function TSRMLS_DC)
 		}
 	}
 }
+/* }}} */
 
-static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC)
+static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	if (!ce->parent) {
 		return;
@@ -2067,9 +2089,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC)
 		}
 	}
 }
+/* }}} */
 
-
-char *zend_visibility_string(zend_uint fn_flags)
+char *zend_visibility_string(zend_uint fn_flags) /* {{{ */
 {
 	if (fn_flags & ZEND_ACC_PRIVATE) {
 		return "private";
@@ -2082,9 +2104,9 @@ char *zend_visibility_string(zend_uint fn_flags)
 	}
 	return "";
 }
+/* }}} */
 
-
-static void do_inherit_method(zend_function *function)
+static void do_inherit_method(zend_function *function) /* {{{ */
 {
 	/* The class entry of the derived function intentionally remains the same
 	 * as that of the parent class.  That allows us to know in which context
@@ -2093,9 +2115,9 @@ static void do_inherit_method(zend_function *function)
 	TSRMLS_FETCH();
 	function_add_ref(function TSRMLS_CC);
 }
+/* }}} */
 
-
-static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_function *proto TSRMLS_DC)
+static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_function *proto TSRMLS_DC) /* {{{ */
 {
 	zend_uint i;
 
@@ -2153,9 +2175,9 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_fu
 	}
 	return 1;
 }
+/* }}} */
 
-
-static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, zend_hash_key *hash_key, zend_class_entry *child_ce)
+static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, zend_hash_key *hash_key, zend_class_entry *child_ce) /* {{{ */
 {
 	zend_uint child_flags;
 	zend_uint parent_flags = parent->common.fn_flags;
@@ -2233,9 +2255,9 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 
 	return 0;
 }
+/* }}} */
 
-
-static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_property_info *parent_info, zend_hash_key *hash_key, zend_class_entry *ce)
+static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_property_info *parent_info, zend_hash_key *hash_key, zend_class_entry *ce) /* {{{ */
 {
 	zend_property_info *child_info;
 	zend_class_entry *parent_ce = ce->parent;
@@ -2324,10 +2346,9 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 		return 1;	/* Copy from parent */
 	}
 }
+/* }}} */
 
-
-
-static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC)
+static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC) /* {{{ */
 {
 	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && iface->interface_gets_implemented && iface->interface_gets_implemented(iface, ce TSRMLS_CC) == FAILURE) {
 		zend_error(E_CORE_ERROR, "Class %v could not implement interface %v", ce->name, iface->name);
@@ -2336,9 +2357,9 @@ static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry
 		zend_error(E_ERROR, "Interface %v cannot not implement itself", ce->name);
 	}
 }
+/* }}} */
 
-
-ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC)
+ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC) /* {{{ */
 {
 	/* expects interface to be contained in ce's interface list already */
 	zend_uint i, ce_num, if_num = iface->num_interfaces;
@@ -2373,9 +2394,9 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry 
 		do_implement_interface(ce, ce->interfaces[ce_num++] TSRMLS_CC);
 	}
 }
+/* }}} */
 
-
-static int inherit_static_prop(zval **p, int num_args, va_list args, zend_hash_key *key)
+static int inherit_static_prop(zval **p, int num_args, va_list args, zend_hash_key *key) /* {{{ */
 {
 	HashTable *target = va_arg(args, HashTable*);
 
@@ -2387,9 +2408,9 @@ static int inherit_static_prop(zval **p, int num_args, va_list args, zend_hash_k
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
-
-ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC)
+ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC) /* {{{ */
 {
 	if ((ce->ce_flags & ZEND_ACC_INTERFACE)
 		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
@@ -2424,9 +2445,9 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		zend_verify_abstract_class(ce TSRMLS_CC);
 	}
 }
+/* }}} */
 
-
-static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zval **parent_constant, zend_hash_key *hash_key, zend_class_entry *iface)
+static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zval **parent_constant, zend_hash_key *hash_key, zend_class_entry *iface) /* {{{ */
 {
 	zval **old_constant;
 
@@ -2438,9 +2459,9 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zva
 	}
 	return 1;
 }
+/* }}} */
 
-
-ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC)
+ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC) /* {{{ */
 {
 	zend_uint i, ignore = 0;
 	zend_uint current_iface_num = ce->num_interfaces;
@@ -2475,9 +2496,9 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		zend_do_inherit_interfaces(ce, iface TSRMLS_CC);
 	}
 }
+/* }}} */
 
-
-ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, zend_bool compile_time)
+ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, zend_bool compile_time) /* {{{ */
 {
 	zend_function *function;
 
@@ -2511,9 +2532,9 @@ ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, zend_b
 		return SUCCESS;
 	}
 }
+/* }}} */
 
-
-ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC)
+ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce, **pce;
 
@@ -2542,9 +2563,9 @@ ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *class_table
 		return ce;
 	}
 }
+/* }}} */
 
-
-ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time TSRMLS_DC)
+ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce, **pce;
 	int found_ce;
@@ -2586,9 +2607,9 @@ ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *c
 	}
 	return ce;
 }
+/* }}} */
 
-
-void zend_do_early_binding(TSRMLS_D)
+void zend_do_early_binding(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 	HashTable *table;
@@ -2674,9 +2695,9 @@ void zend_do_early_binding(TSRMLS_D)
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-void zend_do_boolean_or_begin(znode *expr1, znode *op_token TSRMLS_DC)
+void zend_do_boolean_or_begin(znode *expr1, znode *op_token TSRMLS_DC) /* {{{ */
 {
 	int next_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -2695,9 +2716,9 @@ void zend_do_boolean_or_begin(znode *expr1, znode *op_token TSRMLS_DC)
 
 	*expr1 = opline->result;
 }
+/* }}} */
 
-
-void zend_do_boolean_or_end(znode *result, znode *expr1, znode *expr2, znode *op_token TSRMLS_DC)
+void zend_do_boolean_or_end(znode *result, znode *expr1, znode *expr2, znode *op_token TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -2709,9 +2730,9 @@ void zend_do_boolean_or_end(znode *result, znode *expr1, znode *expr2, znode *op
 
 	CG(active_op_array)->opcodes[op_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_boolean_and_begin(znode *expr1, znode *op_token TSRMLS_DC)
+void zend_do_boolean_and_begin(znode *expr1, znode *op_token TSRMLS_DC) /* {{{ */
 {
 	int next_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -2730,9 +2751,9 @@ void zend_do_boolean_and_begin(znode *expr1, znode *op_token TSRMLS_DC)
 
 	*expr1 = opline->result;
 }
+/* }}} */
 
-
-void zend_do_boolean_and_end(znode *result, znode *expr1, znode *expr2, znode *op_token TSRMLS_DC)
+void zend_do_boolean_and_end(znode *result, znode *expr1, znode *expr2, znode *op_token TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -2744,16 +2765,16 @@ void zend_do_boolean_and_end(znode *result, znode *expr1, znode *expr2, znode *o
 
 	CG(active_op_array)->opcodes[op_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_do_while_begin(TSRMLS_D)
+void zend_do_do_while_begin(TSRMLS_D) /* {{{ */
 {
 	do_begin_loop(TSRMLS_C);
 	INC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_do_while_end(znode *do_token, znode *expr_open_bracket, znode *expr TSRMLS_DC)
+void zend_do_do_while_end(znode *do_token, znode *expr_open_bracket, znode *expr TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -2766,9 +2787,9 @@ void zend_do_do_while_end(znode *do_token, znode *expr_open_bracket, znode *expr
 
 	DEC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_brk_cont(zend_uchar op, znode *expr TSRMLS_DC)
+void zend_do_brk_cont(zend_uchar op, znode *expr TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -2789,9 +2810,9 @@ void zend_do_brk_cont(zend_uchar op, znode *expr TSRMLS_DC)
 		opline->op2.op_type = IS_CONST;
 	}
 }
+/* }}} */
 
-
-void zend_do_switch_cond(znode *cond TSRMLS_DC)
+void zend_do_switch_cond(znode *cond TSRMLS_DC) /* {{{ */
 {
 	zend_switch_entry switch_entry;
 
@@ -2804,10 +2825,9 @@ void zend_do_switch_cond(znode *cond TSRMLS_DC)
 
 	INC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-
-void zend_do_switch_end(znode *case_list TSRMLS_DC)
+void zend_do_switch_end(znode *case_list TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	zend_switch_entry *switch_entry_ptr;
@@ -2848,9 +2868,9 @@ void zend_do_switch_end(znode *case_list TSRMLS_DC)
 
 	DEC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_case_before_statement(znode *case_list, znode *case_token, znode *case_expr TSRMLS_DC)
+void zend_do_case_before_statement(znode *case_list, znode *case_token, znode *case_expr TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	int next_op_number;
@@ -2885,9 +2905,9 @@ void zend_do_case_before_statement(znode *case_list, znode *case_token, znode *c
 	next_op_number = get_next_op_number(CG(active_op_array));
 	CG(active_op_array)->opcodes[case_list->u.opline_num].op1.u.opline_num = next_op_number;
 }
+/* }}} */
 
-
-void zend_do_case_after_statement(znode *result, znode *case_token TSRMLS_DC)
+void zend_do_case_after_statement(znode *result, znode *case_token TSRMLS_DC) /* {{{ */
 {
 	int next_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -2906,10 +2926,9 @@ void zend_do_case_after_statement(znode *result, znode *case_token TSRMLS_DC)
 			break;
 	}
 }
+/* }}} */
 
-
-
-void zend_do_default_before_statement(znode *case_list, znode *default_token TSRMLS_DC)
+void zend_do_default_before_statement(znode *case_list, znode *default_token TSRMLS_DC) /* {{{ */
 {
 	int next_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -2930,9 +2949,9 @@ void zend_do_default_before_statement(znode *case_list, znode *default_token TSR
 	}
 	CG(active_op_array)->opcodes[case_list->u.opline_num].op1.u.opline_num = next_op_number;
 }
+/* }}} */
 
-
-void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name TSRMLS_DC)
+void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	int doing_inheritance = 0;
@@ -3016,9 +3035,9 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 		CG(doc_comment_len) = 0;
 	}
 }
+/* }}} */
 
-
-static void do_verify_abstract_class(TSRMLS_D)
+static void do_verify_abstract_class(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -3026,9 +3045,9 @@ static void do_verify_abstract_class(TSRMLS_D)
 	opline->op1 = CG(implementing_class);
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRMLS_DC)
+void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = CG(active_class_entry);
 
@@ -3070,9 +3089,9 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 	}
 	CG(active_class_entry) = NULL;
 }
+/* }}} */
 
-
-void zend_do_implements_interface(znode *interface_znode TSRMLS_DC)
+void zend_do_implements_interface(znode *interface_znode TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -3099,9 +3118,9 @@ void zend_do_implements_interface(znode *interface_znode TSRMLS_DC)
 	opline->op2 = *interface_znode;
 	opline->extended_value = CG(active_class_entry)->num_interfaces++;
 }
+/* }}} */
 
-
-ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length, int internal)
+ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length, int internal) /* {{{ */
 {
 	char *prop_name;
 	int prop_name_length;
@@ -3115,8 +3134,9 @@ ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, char *src
 	*dest = prop_name;
 	*dest_length = prop_name_length;
 }
+/* }}} */
 
-ZEND_API void zend_u_mangle_property_name(zstr *dest, int *dest_length, zend_uchar type, zstr src1, int src1_length, zstr src2, int src2_length, int internal)
+ZEND_API void zend_u_mangle_property_name(zstr *dest, int *dest_length, zend_uchar type, zstr src1, int src1_length, zstr src2, int src2_length, int internal) /* {{{ */
 {
 	if (type == IS_UNICODE) {
 		UChar *prop_name;
@@ -3139,22 +3159,25 @@ ZEND_API void zend_u_mangle_property_name(zstr *dest, int *dest_length, zend_uch
 		zend_mangle_property_name(&dest->s, dest_length, src1.s, src1_length, src2.s, src2_length, internal);
 	}
 }
+/* }}} */
 
-static int zend_strnlen(const char* s, int maxlen)
+static int zend_strnlen(const char* s, int maxlen) /* {{{ */
 {
 	int len = 0;
 	while (*s++ && maxlen--) len++;
 	return len;
 }
+/* }}} */
 
-static int zend_u_strnlen(const UChar* s, int maxlen)
+static int zend_u_strnlen(const UChar* s, int maxlen) /* {{{ */
 {
 	int len = 0;
 	while (*s++ && maxlen--) len++;
 	return len;
 }
+/* }}} */
 
-ZEND_API int zend_unmangle_property_name(char *mangled_property, int len, char **class_name, char **prop_name)
+ZEND_API int zend_unmangle_property_name(char *mangled_property, int len, char **class_name, char **prop_name) /* {{{ */
 {
 	int class_name_len;
 
@@ -3180,8 +3203,9 @@ ZEND_API int zend_unmangle_property_name(char *mangled_property, int len, char *
 	*prop_name = (*class_name)+class_name_len;
 	return SUCCESS;
 }
+/* }}} */
 
-ZEND_API int zend_u_unmangle_property_name(zend_uchar type, zstr mangled_property, int len, zstr *class_name, zstr *prop_name)
+ZEND_API int zend_u_unmangle_property_name(zend_uchar type, zstr mangled_property, int len, zstr *class_name, zstr *prop_name) /* {{{ */
 {
 	if (type == IS_UNICODE) {
 		int class_name_len;
@@ -3215,8 +3239,9 @@ ZEND_API int zend_u_unmangle_property_name(zend_uchar type, zstr mangled_propert
 		return zend_unmangle_property_name(mangled_property.s, len, &class_name->s, &prop_name->s);
 	}
 }
+/* }}} */
 
-void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC)
+void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC) /* {{{ */
 {
 	zval *property;
 	zend_property_info *existing_property_info;
@@ -3260,9 +3285,9 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 	zend_u_declare_property_ex(CG(active_class_entry), Z_TYPE(var_name->u.constant), Z_UNIVAL(var_name->u.constant), Z_UNILEN(var_name->u.constant), property, access_type, comment, comment_len TSRMLS_CC);
 	efree(Z_STRVAL(var_name->u.constant));
 }
+/* }}} */
 
-
-void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC)
+void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC) /* {{{ */
 {
 	zval *property;
 
@@ -3279,10 +3304,9 @@ void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC)
 	}
 	FREE_PNODE(var_name);
 }
+/* }}} */
 
-
-
-void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS_DC)
+void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS_DC) /* {{{ */
 {
 	zend_op opline;
 	zend_llist *fetch_list_ptr;
@@ -3337,8 +3361,9 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 
 	zend_llist_add_element(fetch_list_ptr, &opline);
 }
+/* }}} */
 
-void zend_do_halt_compiler_register(TSRMLS_D)
+void zend_do_halt_compiler_register(TSRMLS_D) /* {{{ */
 {
 	char *name, *cfilename;
 	int len, clen;
@@ -3349,9 +3374,9 @@ void zend_do_halt_compiler_register(TSRMLS_D)
 	zend_register_long_constant(name, len+1, zend_get_scanned_file_offset(TSRMLS_C), CONST_CS, 0 TSRMLS_CC);
 	pefree(name, 0);
 }
+/* }}} */
 
-
-void zend_do_declare_implicit_property(TSRMLS_D)
+void zend_do_declare_implicit_property(TSRMLS_D) /* {{{ */
 {
 /* Fixes bug #26182. Not sure why we needed to do this in the first place.
    Has to be checked with Zeev.
@@ -3387,15 +3412,15 @@ void zend_do_declare_implicit_property(TSRMLS_D)
 	}
 #endif
 }
+/* }}} */
 
-
-void zend_do_push_object(znode *object TSRMLS_DC)
+void zend_do_push_object(znode *object TSRMLS_DC) /* {{{ */
 {
 	zend_stack_push(&CG(object_stack), object, sizeof(znode));
 }
+/* }}} */
 
-
-void zend_do_pop_object(znode *object TSRMLS_DC)
+void zend_do_pop_object(znode *object TSRMLS_DC) /* {{{ */
 {
 	if (object) {
 		znode *tmp;
@@ -3405,9 +3430,9 @@ void zend_do_pop_object(znode *object TSRMLS_DC)
 	}
 	zend_stack_del_top(&CG(object_stack));
 }
+/* }}} */
 
-
-void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC)
+void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	unsigned char *ptr = NULL;
@@ -3422,9 +3447,9 @@ void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC)
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
 }
+/* }}} */
 
-
-void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_list TSRMLS_DC)
+void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_list TSRMLS_DC) /* {{{ */
 {
 	znode ctor_result;
 
@@ -3434,8 +3459,9 @@ void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_lis
 	CG(active_op_array)->opcodes[new_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
 	*result = CG(active_op_array)->opcodes[new_token->u.opline_num].result;
 }
+/* }}} */
 
-static int zend_constant_ct_subst(znode *result, zval *const_name TSRMLS_DC)
+static int zend_constant_ct_subst(znode *result, zval *const_name TSRMLS_DC) /* {{{ */
 {
 	zend_constant *c = NULL;
 
@@ -3462,9 +3488,9 @@ static int zend_constant_ct_subst(znode *result, zval *const_name TSRMLS_DC)
 	}
 	return 0;
 }
+/* }}} */
 
-
-void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode TSRMLS_DC)
+void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode TSRMLS_DC) /* {{{ */
 {
 	switch (mode) {
 		case ZEND_CT:
@@ -3496,9 +3522,9 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 			break;
 	}
 }
+/* }}} */
 
-
-void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC)
+void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -3529,10 +3555,9 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 	*result = opline->result;
 }
+/* }}} */
 
-
-
-void zend_do_init_array(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC)
+void zend_do_init_array(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -3553,9 +3578,9 @@ void zend_do_init_array(znode *result, znode *expr, znode *offset, zend_bool is_
 	}
 	opline->extended_value = is_ref;
 }
+/* }}} */
 
-
-void zend_do_add_array_element(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC)
+void zend_do_add_array_element(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -3569,10 +3594,9 @@ void zend_do_add_array_element(znode *result, znode *expr, znode *offset, zend_b
 	}
 	opline->extended_value = is_ref;
 }
+/* }}} */
 
-
-
-void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
+void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr) /* {{{ */
 {
 	zval *element;
 	TSRMLS_FETCH();
@@ -3611,9 +3635,9 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
 		zend_hash_next_index_insert(Z_ARRVAL(result->u.constant), &element, sizeof(zval *), NULL);
 	}
 }
+/* }}} */
 
-
-void zend_do_add_list_element(znode *element TSRMLS_DC)
+void zend_do_add_list_element(znode *element TSRMLS_DC) /* {{{ */
 {
 	list_llist_element lle;
 
@@ -3626,23 +3650,23 @@ void zend_do_add_list_element(znode *element TSRMLS_DC)
 	}
 	(*((int *)CG(dimension_llist).tail->data))++;
 }
+/* }}} */
 
-
-void zend_do_new_list_begin(TSRMLS_D)
+void zend_do_new_list_begin(TSRMLS_D) /* {{{ */
 {
 	int current_dimension = 0;
 	zend_llist_add_element(&CG(dimension_llist), &current_dimension);
 }
+/* }}} */
 
-
-void zend_do_new_list_end(TSRMLS_D)
+void zend_do_new_list_end(TSRMLS_D) /* {{{ */
 {
 	zend_llist_remove_tail(&CG(dimension_llist));
 	(*((int *)CG(dimension_llist).tail->data))++;
 }
+/* }}} */
 
-
-void zend_do_list_init(TSRMLS_D)
+void zend_do_list_init(TSRMLS_D) /* {{{ */
 {
 	zend_stack_push(&CG(list_stack), &CG(list_llist), sizeof(zend_llist));
 	zend_stack_push(&CG(list_stack), &CG(dimension_llist), sizeof(zend_llist));
@@ -3650,9 +3674,9 @@ void zend_do_list_init(TSRMLS_D)
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
 	zend_do_new_list_begin(TSRMLS_C);
 }
+/* }}} */
 
-
-void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
+void zend_do_list_end(znode *result, znode *expr TSRMLS_DC) /* {{{ */
 {
 	zend_llist_element *le;
 	zend_llist_element *dimension;
@@ -3707,8 +3731,9 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 		zend_stack_del_top(&CG(list_stack));
 	}
 }
+/* }}} */
 
-void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC)
+void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC) /* {{{ */
 {
 	zval *tmp;
 	zend_op *opline;
@@ -3748,8 +3773,9 @@ void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int
 
 /*	zval_dtor(&varname->u.constant); */
 }
+/* }}} */
 
-void zend_do_fetch_global_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC)
+void zend_do_fetch_global_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	znode lval;
@@ -3773,9 +3799,9 @@ void zend_do_fetch_global_variable(znode *varname, znode *static_assignment, int
 	zend_do_assign_ref(NULL, &lval, &result TSRMLS_CC);
 	CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
 }
+/* }}} */
 
-
-void zend_do_cast(znode *result, znode *expr, int type TSRMLS_DC)
+void zend_do_cast(znode *result, znode *expr, int type TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -3787,9 +3813,9 @@ void zend_do_cast(znode *result, znode *expr, int type TSRMLS_DC)
 	opline->extended_value = type;
 	*result = opline->result;
 }
+/* }}} */
 
-
-void zend_do_include_or_eval(int type, znode *result, znode *op1 TSRMLS_DC)
+void zend_do_include_or_eval(int type, znode *result, znode *op1 TSRMLS_DC) /* {{{ */
 {
 	zend_do_extended_fcall_begin(TSRMLS_C);
 	{
@@ -3805,9 +3831,9 @@ void zend_do_include_or_eval(int type, znode *result, znode *op1 TSRMLS_DC)
 	}
 	zend_do_extended_fcall_end(TSRMLS_C);
 }
+/* }}} */
 
-
-void zend_do_indirect_references(znode *result, znode *num_references, znode *variable TSRMLS_DC)
+void zend_do_indirect_references(znode *result, znode *num_references, znode *variable TSRMLS_DC) /* {{{ */
 {
 	int i;
 
@@ -3820,9 +3846,9 @@ void zend_do_indirect_references(znode *result, znode *num_references, znode *va
 	zend_do_begin_variable_parse(TSRMLS_C);
 	fetch_simple_variable(result, variable, 1 TSRMLS_CC);
 }
+/* }}} */
 
-
-void zend_do_unset(znode *variable TSRMLS_DC)
+void zend_do_unset(znode *variable TSRMLS_DC) /* {{{ */
 {
 	zend_op *last_op;
 
@@ -3859,9 +3885,9 @@ void zend_do_unset(znode *variable TSRMLS_DC)
 		}
 	}
 }
+/* }}} */
 
-
-void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC)
+void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC) /* {{{ */
 {
 	zend_op *last_op;
 
@@ -3904,9 +3930,9 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 
 	*result = last_op->result;
 }
+/* }}} */
 
-
-void zend_do_instanceof(znode *result, znode *expr, znode *class_znode, int type TSRMLS_DC)
+void zend_do_instanceof(znode *result, znode *expr, znode *class_znode, int type TSRMLS_DC) /* {{{ */
 {
 	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline;
@@ -3932,9 +3958,9 @@ void zend_do_instanceof(znode *result, znode *expr, znode *class_znode, int type
 
 	*result = opline->result;
 }
+/* }}} */
 
-
-void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, znode *array, znode *as_token, int variable TSRMLS_DC)
+void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, znode *array, znode *as_token, int variable TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	zend_bool is_variable;
@@ -4004,9 +4030,9 @@ void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, zno
 	SET_UNUSED(opline->op2);
 	SET_UNUSED(opline->result);
 }
+/* }}} */
 
-
-void zend_do_foreach_cont(znode *foreach_token, znode *open_brackets_token, znode *as_token, znode *value, znode *key TSRMLS_DC)
+void zend_do_foreach_cont(znode *foreach_token, znode *open_brackets_token, znode *as_token, znode *value, znode *key TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	znode dummy, value_node;
@@ -4084,9 +4110,9 @@ void zend_do_foreach_cont(znode *foreach_token, znode *open_brackets_token, znod
 	do_begin_loop(TSRMLS_C);
 	INC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_foreach_end(znode *foreach_token, znode *as_token TSRMLS_DC)
+void zend_do_foreach_end(znode *foreach_token, znode *as_token TSRMLS_DC) /* {{{ */
 {
 	zend_op *container_ptr;
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -4107,15 +4133,15 @@ void zend_do_foreach_end(znode *foreach_token, znode *as_token TSRMLS_DC)
 
 	DEC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_declare_begin(TSRMLS_D)
+void zend_do_declare_begin(TSRMLS_D) /* {{{ */
 {
 	zend_stack_push(&CG(declare_stack), &CG(declarables), sizeof(zend_declarables));
 }
+/* }}} */
 
-
-void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
+void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 {
 	if (ZEND_U_EQUAL(Z_TYPE(var->u.constant), Z_UNIVAL(var->u.constant), Z_UNILEN(var->u.constant), "ticks", sizeof("ticks")-1)) {
 		convert_to_long(&val->u.constant);
@@ -4151,9 +4177,9 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 	}
 	zval_dtor(&var->u.constant);
 }
+/* }}} */
 
-
-void zend_do_declare_end(znode *declare_token TSRMLS_DC)
+void zend_do_declare_end(znode *declare_token TSRMLS_DC) /* {{{ */
 {
 	zend_declarables *declarables;
 
@@ -4163,9 +4189,9 @@ void zend_do_declare_end(znode *declare_token TSRMLS_DC)
 		CG(declarables) = *declarables;
 	}
 }
+/* }}} */
 
-
-void zend_do_exit(znode *result, znode *message TSRMLS_DC)
+void zend_do_exit(znode *result, znode *message TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -4177,8 +4203,9 @@ void zend_do_exit(znode *result, znode *message TSRMLS_DC)
 	Z_TYPE(result->u.constant) = IS_BOOL;
 	Z_LVAL(result->u.constant) = 1;
 }
+/* }}} */
 
-void zend_do_begin_silence(znode *strudel_token TSRMLS_DC)
+void zend_do_begin_silence(znode *strudel_token TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -4189,9 +4216,9 @@ void zend_do_begin_silence(znode *strudel_token TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 	*strudel_token = opline->result;
 }
+/* }}} */
 
-
-void zend_do_end_silence(znode *strudel_token TSRMLS_DC)
+void zend_do_end_silence(znode *strudel_token TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -4199,9 +4226,9 @@ void zend_do_end_silence(znode *strudel_token TSRMLS_DC)
 	opline->op1 = *strudel_token;
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-void zend_do_jmp_set(znode *value, znode *jmp_token, znode *colon_token TSRMLS_DC)
+void zend_do_jmp_set(znode *value, znode *jmp_token, znode *colon_token TSRMLS_DC) /* {{{ */
 {
 	int op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -4218,9 +4245,9 @@ void zend_do_jmp_set(znode *value, znode *jmp_token, znode *colon_token TSRMLS_D
 
 	INC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_jmp_set_else(znode *result, znode *false_value, znode *jmp_token, znode *colon_token TSRMLS_DC)
+void zend_do_jmp_set_else(znode *result, znode *false_value, znode *jmp_token, znode *colon_token TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -4236,9 +4263,9 @@ void zend_do_jmp_set_else(znode *result, znode *false_value, znode *jmp_token, z
 
 	DEC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_begin_qm_op(znode *cond, znode *qm_token TSRMLS_DC)
+void zend_do_begin_qm_op(znode *cond, znode *qm_token TSRMLS_DC) /* {{{ */
 {
 	int jmpz_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline;
@@ -4253,9 +4280,9 @@ void zend_do_begin_qm_op(znode *cond, znode *qm_token TSRMLS_DC)
 
 	INC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_qm_true(znode *true_value, znode *qm_token, znode *colon_token TSRMLS_DC)
+void zend_do_qm_true(znode *true_value, znode *qm_token, znode *colon_token TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -4275,9 +4302,9 @@ void zend_do_qm_true(znode *true_value, znode *qm_token, znode *colon_token TSRM
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-void zend_do_qm_false(znode *result, znode *false_value, znode *qm_token, znode *colon_token TSRMLS_DC)
+void zend_do_qm_false(znode *result, znode *false_value, znode *qm_token, znode *colon_token TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -4292,9 +4319,9 @@ void zend_do_qm_false(znode *result, znode *false_value, znode *qm_token, znode 
 
 	DEC_BPC(CG(active_op_array));
 }
+/* }}} */
 
-
-void zend_do_extended_info(TSRMLS_D)
+void zend_do_extended_info(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline;
 
@@ -4308,9 +4335,9 @@ void zend_do_extended_info(TSRMLS_D)
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-void zend_do_extended_fcall_begin(TSRMLS_D)
+void zend_do_extended_fcall_begin(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline;
 
@@ -4324,9 +4351,9 @@ void zend_do_extended_fcall_begin(TSRMLS_D)
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-void zend_do_extended_fcall_end(TSRMLS_D)
+void zend_do_extended_fcall_end(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline;
 
@@ -4340,9 +4367,9 @@ void zend_do_extended_fcall_end(TSRMLS_D)
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
+/* }}} */
 
-
-void zend_do_ticks(TSRMLS_D)
+void zend_do_ticks(TSRMLS_D) /* {{{ */
 {
 	if (Z_LVAL(CG(declarables).ticks)) {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -4353,14 +4380,15 @@ void zend_do_ticks(TSRMLS_D)
 		SET_UNUSED(opline->op2);
 	}
 }
+/* }}} */
 
-void zend_auto_global_dtor(zend_auto_global *auto_global)
+void zend_auto_global_dtor(zend_auto_global *auto_global) /* {{{ */
 {
 	free(auto_global->name);
 }
+/* }}} */
 
-
-zend_bool zend_u_is_auto_global_ex(zend_uchar type, zstr name, uint name_len, zend_bool runtime, zend_auto_global **ret TSRMLS_DC)
+zend_bool zend_u_is_auto_global_ex(zend_uchar type, zstr name, uint name_len, zend_bool runtime, zend_auto_global **ret TSRMLS_DC) /* {{{ */
 {
 	zend_auto_global *auto_global;
 
@@ -4375,19 +4403,21 @@ zend_bool zend_u_is_auto_global_ex(zend_uchar type, zstr name, uint name_len, ze
 	}
 	return 0;
 }
+/* }}} */
 
-zend_bool zend_u_is_auto_global(zend_uchar type, zstr name, uint name_len TSRMLS_DC)
+zend_bool zend_u_is_auto_global(zend_uchar type, zstr name, uint name_len TSRMLS_DC) /* {{{ */
 {
 	return zend_u_is_auto_global_ex(type, name, name_len, 0, NULL TSRMLS_CC);
 }
+/* }}} */
 
-zend_bool zend_is_auto_global(char *name, uint name_len TSRMLS_DC)
+zend_bool zend_is_auto_global(char *name, uint name_len TSRMLS_DC) /* {{{ */
 {
 	return zend_u_is_auto_global_ex(IS_STRING, ZSTR(name), name_len, 0, NULL TSRMLS_CC);
 }
+/* }}} */
 
-
-int zend_register_auto_global_ex(char *name, uint name_len, zend_auto_global_callback auto_global_callback, zend_bool runtime TSRMLS_DC)
+int zend_register_auto_global_ex(char *name, uint name_len, zend_auto_global_callback auto_global_callback, zend_bool runtime TSRMLS_DC) /* {{{ */
 {
 	zend_auto_global auto_global;
 
@@ -4399,13 +4429,15 @@ int zend_register_auto_global_ex(char *name, uint name_len, zend_auto_global_cal
 
 	return zend_hash_add(CG(auto_globals), name, name_len+1, &auto_global, sizeof(zend_auto_global), NULL);
 }
+/* }}} */
 
-int zend_register_auto_global(char *name, uint name_len, zend_auto_global_callback auto_global_callback TSRMLS_DC)
+int zend_register_auto_global(char *name, uint name_len, zend_auto_global_callback auto_global_callback TSRMLS_DC) /* {{{ */
 {
 	return zend_register_auto_global_ex(name, name_len, auto_global_callback, 0 TSRMLS_CC);
 }
+/* }}} */
 
-int zendlex(znode *zendlval TSRMLS_DC)
+int zendlex(znode *zendlval TSRMLS_DC) /* {{{ */
 {
 	int retval;
 
@@ -4442,9 +4474,9 @@ again:
 	zendlval->op_type = IS_CONST;
 	return retval;
 }
+/* }}} */
 
-
-ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC)
+ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC) /* {{{ */
 {
 	zend_bool persistent_hashes = (ce->type == ZEND_INTERNAL_CLASS) ? 1 : 0;
 	dtor_func_t zval_ptr_dtor_func = ((persistent_hashes) ? ZVAL_INTERNAL_PTR_DTOR : ZVAL_PTR_DTOR);
@@ -4505,9 +4537,9 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->builtin_functions = NULL;
 	}
 }
+/* }}} */
 
-
-int zend_get_class_fetch_type(zend_uchar type, zstr class_name, uint class_name_len)
+int zend_get_class_fetch_type(zend_uchar type, zstr class_name, uint class_name_len) /* {{{ */
 {
 	if ((class_name_len == sizeof("self")-1) &&
 	    ZEND_U_EQUAL(type, class_name, class_name_len, "self", sizeof("self")-1)) {
@@ -4519,16 +4551,18 @@ int zend_get_class_fetch_type(zend_uchar type, zstr class_name, uint class_name_
 		return ZEND_FETCH_CLASS_DEFAULT;
 	}
 }
+/* }}} */
 
-ZEND_API zstr zend_get_compiled_variable_name(zend_op_array *op_array, zend_uint var, int* name_len)
+ZEND_API zstr zend_get_compiled_variable_name(zend_op_array *op_array, zend_uint var, int* name_len) /* {{{ */
 {
 	if (name_len) {
 		*name_len = op_array->vars[var].name_len;
 	}
 	return op_array->vars[var].name;
 }
+/* }}} */
 
-void zend_do_normalization(znode *result, znode *str TSRMLS_DC)
+void zend_do_normalization(znode *result, znode *str TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -4544,8 +4578,9 @@ void zend_do_normalization(znode *result, znode *str TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 	*result = opline->result;
 }
+/* }}} */
 
-void zend_do_label(znode *label TSRMLS_DC)
+void zend_do_label(znode *label TSRMLS_DC) /* {{{ */
 {
 	zend_op_array *oparray = CG(active_op_array);
 	zend_label dest;
@@ -4566,8 +4601,9 @@ void zend_do_label(znode *label TSRMLS_DC)
 	/* Done with label now */
 	zval_dtor(&label->u.constant);
 }
+/* }}} */
 
-void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC)
+void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC) /* {{{ */
 {
 	zend_label *dest;
 	long current, distance;
@@ -4618,8 +4654,9 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 		DEC_BPC(op_array);
     }
 }
+/* }}} */
 
-void zend_do_goto(znode *label TSRMLS_DC)
+void zend_do_goto(znode *label TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -4629,8 +4666,9 @@ void zend_do_goto(znode *label TSRMLS_DC)
 	opline->op2 = *label;
 	zend_resolve_goto_label(CG(active_op_array), opline, 0 TSRMLS_CC);
 }
+/* }}} */
 
-void zend_release_labels(TSRMLS_D)
+void zend_release_labels(TSRMLS_D) /* {{{ */
 {
 	if (CG(labels)) {
 		zend_hash_destroy(CG(labels));
@@ -4646,6 +4684,7 @@ void zend_release_labels(TSRMLS_D)
 		CG(labels) = NULL;
 	}
 }
+/* }}} */
 
 /*
  * Local variables:
