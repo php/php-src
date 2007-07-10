@@ -135,6 +135,7 @@ PHP_FUNCTION(symlink)
 	}
 
 	if (!expand_filepath(frompath, source_p TSRMLS_CC) || !expand_filepath(topath, dest_p TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
@@ -185,6 +186,7 @@ PHP_FUNCTION(link)
 	}
 
 	if (!expand_filepath(frompath, source_p TSRMLS_CC) || !expand_filepath(topath, dest_p TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
