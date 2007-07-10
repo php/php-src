@@ -579,7 +579,9 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC)
 	char cwd[MAXPATHLEN];
 	char *result;
 
-	if (IS_ABSOLUTE_PATH(filepath, strlen(filepath))) {
+	if (!filepath[0]) {
+		return NULL;
+	} else if (IS_ABSOLUTE_PATH(filepath, strlen(filepath))) {
 		cwd[0] = '\0';
 	} else{
 		result = VCWD_GETCWD(cwd, MAXPATHLEN);
