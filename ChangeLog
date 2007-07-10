@@ -1,3 +1,208 @@
+2007-07-09  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/filestat.c:
+      fix build on b0rked OSes (see #41920)
+
+2007-07-09  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/mkdir_rmdir_variation.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation.phpt
+      ext/standard/tests/file/readlink_realpath_basic.phpt
+      ext/standard/tests/file/readlink_realpath_basic.phpt
+      ext/standard/tests/file/readlink_realpath_variation.phpt
+      ext/standard/tests/file/readlink_realpath_variation.phpt:
+      These testcases are now split into smaller testcases, hence being deleted
+
+    * ext/standard/tests/file/mkdir_rmdir_variation1.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation2.phpt
+      ext/standard/tests/file/readlink_realpath_basic1.phpt
+      ext/standard/tests/file/readlink_realpath_basic2.phpt
+      ext/standard/tests/file/readlink_realpath_error.phpt
+      ext/standard/tests/file/readlink_realpath_variation1.phpt
+      ext/standard/tests/file/readlink_realpath_variation2.phpt
+      ext/standard/tests/file/readlink_realpath_variation3.phpt:
+      Fix and smaller testcases for mkdir_rmdir_variation.phpt, 
+      readlink_realpath_basic.phpt, readlink_realpath_error.phpt &
+      readlink_realpath_variation.phpt
+
+    * ext/standard/tests/file/mkdir_rmdir_variation1.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation1.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation2.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation2.phpt
+      ext/standard/tests/file/popen_pclose_error.phpt
+      ext/standard/tests/file/readlink_realpath_basic1.phpt
+      ext/standard/tests/file/readlink_realpath_basic1.phpt
+      ext/standard/tests/file/readlink_realpath_basic2.phpt
+      ext/standard/tests/file/readlink_realpath_basic2.phpt
+      ext/standard/tests/file/readlink_realpath_error.phpt
+      ext/standard/tests/file/readlink_realpath_variation1.phpt
+      ext/standard/tests/file/readlink_realpath_variation1.phpt
+      ext/standard/tests/file/readlink_realpath_variation2.phpt
+      ext/standard/tests/file/readlink_realpath_variation2.phpt
+      ext/standard/tests/file/readlink_realpath_variation3.phpt
+      ext/standard/tests/file/readlink_realpath_variation3.phpt:
+      
+      file mkdir_rmdir_variation1.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/popen_pclose_error-sunos.phpt
+      ext/standard/tests/file/popen_pclose_error-sunos.phpt:
+      
+      file popen_pclose_error-sunos.phpt was initially added on branch PHP_5_2.
+
+2007-07-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h
+      ext/standard/tests/file/include_userstream_001.phpt
+      ext/standard/tests/file/include_userstream_002.phpt
+      main/main.c
+      main/php_globals.h
+      main/php_streams.h
+      main/streams/streams.c
+      main/streams/userspace.c:
+      Added ability to create local or remote (URL) user streams
+      Local user streams must not be able to open(), URLs if allow_url_include
+      is off
+      Implemented new function stream_is_local()
+      [
+      - stream_wrapper_register() extended with additional optional argument
+      "flags"
+        of type long. This time only one flag is implemented
+      - STREAM_IS_URL, that means that userstream wrapper is remote (URL).
+        By default stream is local.
+      - stream_is_local() is a new function that accepts stream and tell if this
+        stream is local or remote (URL)
+      ]
+
+    * main/php_streams.h:
+      wrong comments
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Fixed custom unserialixe() in unicode mode
+
+    * ext/standard/tests/array/count_recursive.phpt:
+      Fixed test
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.re
+      ext/standard/tests/serialize/unserializeS.phpt
+      ext/standard/tests/serialize/unserializeS.phpt:
+      Proper fix for MOPB-29
+
+    * ext/standard/array.c:
+      wrong condition
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Fixed deserialization of escaped strings
+
+2007-07-09  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ext/snmp/snmp.c:
+      MFH: use defined values instead of plain integers
+
+    * ext/snmp/snmp.c:
+      - Use the defined values instead of plain integers here
+
+2007-07-09  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/array_append_COW.phpt
+      ZendEngine2/tests/array_unshift_COW.phpt:
+      array copy on write tests
+
+    * (PHP_5_2)
+      ext/reflection/tests/reflectionClass_constructor_001.phpt
+      ext/reflection/tests/reflectionClass_constructor_002.phpt:
+      ReflectionClass  constructor tests
+
+    * ZendEngine2/tests/array_append_COW.phpt
+      ZendEngine2/tests/array_append_COW.phpt
+      ZendEngine2/tests/array_unshift_COW.phpt
+      ZendEngine2/tests/array_unshift_COW.phpt:
+      
+      array copy on write tests
+
+    * ext/reflection/tests/reflectionClass_constructor_001.phpt
+      ext/reflection/tests/reflectionClass_constructor_001.phpt
+      ext/reflection/tests/reflectionClass_constructor_002.phpt
+      ext/reflection/tests/reflectionClass_constructor_002.phpt:
+      
+      ReflectionClass  constructor tests
+
+2007-07-09  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      bfn
+
+    * (PHP_5_2)
+      ext/pdo_pgsql/config.m4:
+      MFH:- Fixed bug #35981 (pdo-pgsql should not use pkg-config when not
+      present)
+
+    * ext/pdo_pgsql/config.m4:
+      - Fixed bug #35981 (pdo-pgsql should not use pkg-config when not present)
+
+    * ext/pdo_pgsql/config.m4:
+      no tabs
+
+    * ext/pdo_odbc/config.m4:
+      - Better wording
+
+    * (PHP_5_2)
+      ext/pdo_odbc/config.m4:
+      MFH: - Use $PHP_LIBDIR where appropriate
+
+    * ext/pdo_odbc/config.m4:
+      - Use $PHP_LIBDIR where appropriate
+
+2007-07-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      ECONNABORTED is not a critical error (Andrei Nigmatulin)
+
+    * ext/standard/tests/math/bug30695.phpt
+      ext/standard/tests/strings/bug40704.phpt
+      ext/standard/tests/strings/md5.phpt
+      ext/standard/tests/strings/md5_file.phpt
+      ext/standard/tests/strings/substr.phpt
+      ext/standard/tests/strings/trim1.phpt:
+      Fixed tests
+
+2007-07-09  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ext/pdo_odbc/config.m4:
+      MFH: Fixed bug #41870 (PDO_ODBC module linking fails with iODBC)
+
+    * ext/pdo_odbc/config.m4:
+      - Fixed bug #41870 (PDO_ODBC module linking fails with iODBC)
+
+    * (PHP_5_2)
+      NEWS:
+      fix news
+
+2007-07-09  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/php_oci8_int.h:
+      use correct types for scale and precision
+
+2007-07-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug41919.phpt
+      ZendEngine2/tests/bug41919.phpt:
+      Fixed bug #41919
+
 2007-07-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

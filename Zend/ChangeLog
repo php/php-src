@@ -1,3 +1,25 @@
+2007-07-09  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * (PHP_5_2)
+      tests/array_append_COW.phpt
+      tests/array_unshift_COW.phpt:
+      array copy on write tests
+
+    * tests/array_append_COW.phpt
+      tests/array_append_COW.phpt
+      tests/array_unshift_COW.phpt
+      tests/array_unshift_COW.phpt:
+      
+      array copy on write tests
+
+2007-07-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c
+      tests/bug41919.phpt
+      tests/bug41919.phpt:
+      Fixed bug #41919
+
 2007-07-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * tests/bug41919.phpt
