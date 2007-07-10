@@ -68,9 +68,6 @@ Collection Object
 (
     [data:Collection:private] => Array
         (
-            [0] => foo
-            [1] => bar
-            [foo] => baz
         )
 
     [storage:ArrayObject:private] => Array
@@ -101,9 +98,6 @@ Collection Object
 (
     [data:Collection:private] => Array
         (
-            [0] => foo
-            [1] => bar
-            [foo] => baz
         )
 
     [storage:ArrayObject:private] => Array
