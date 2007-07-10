@@ -50,6 +50,8 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #41947 (SimpleXML incorrectly registers empty strings as 
+  namespaces). (Rob)
 - Fixed bug #41919 (crash in string to array conversion).
   (judas dot iscariote at gmail dot com, Ilia)
 - Fixed bug #41908 (CFLAGS="-Os" ./configure --enable-debug fails). 
