@@ -1633,11 +1633,16 @@ SXE_METHOD(addChild)
 	newnode = xmlNewChild(node, NULL, localname, (xmlChar *)value);
 
 	if (nsuri != NULL) {
-		nsptr = xmlSearchNsByHref(node->doc, node, (xmlChar *)nsuri);
-		if (nsptr == NULL) {
+		if (nsuri_len == 0) {
+			newnode->ns = NULL;
 			nsptr = xmlNewNs(newnode, (xmlChar *)nsuri, prefix);
+		} else {
+			nsptr = xmlSearchNsByHref(node->doc, node, (xmlChar *)nsuri);
+			if (nsptr == NULL) {
+				nsptr = xmlNewNs(newnode, (xmlChar *)nsuri, prefix);
+			}
+			newnode->ns = nsptr;
 		}
-		newnode->ns = nsptr;
 	}
 
 	_node_as_zval(sxe, newnode, return_value, SXE_ITER_NONE, (char *)localname, prefix, 0 TSRMLS_CC);
