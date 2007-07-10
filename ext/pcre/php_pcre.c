@@ -594,7 +594,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 		/* Calculate byte offset from codepoint offset */
 		if (start_offset < 0) {
 			k = subject_len;
-			U8_BACK_N(subject, 0, k, -start_offset);
+			U8_BACK_N((unsigned char*)subject, 0, k, -start_offset);
 		} else {
 			U8_FWD_N(subject, k, subject_len, start_offset);
 		}
@@ -1772,7 +1772,7 @@ PHP_FUNCTION(preg_quote)
 
 	if (delim && *delim) {
 		if (UG(unicode)) {
-			U8_GET(delim, 0, 0, delim_len, delim_char);
+			U8_GET((unsigned char*)delim, 0, 0, delim_len, delim_char);
 		} else {
 			delim_char = (UChar32)delim[0];
 		}
@@ -1899,7 +1899,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
 	zstr			 string_key;
-	int				 string_key_len;
+	uint			 string_key_len;
 	ulong			 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
 										   entries */
