@@ -13,7 +13,7 @@ PHP 4                                                                      NEWS
 - Fixed INFILE LOCAL option handling with MySQL - now not allowed when 
   open_basedir or safe_mode is active (Stas)
 - Fixed session.save_path and error_log values to be checked against
-  open_basedir and safe_mode (Stas, Maksymilian Arciemowicz)
+  open_basedir and safe_mode (CVE-2007-3378) (Stas, Maksymilian Arciemowicz)
 - Fixed bug #41765 (Recode crashes/does not work on amd64) 
   (nexus at smoula dot net, Stas)
 - Fixed bug #41630 (segfault when an invalid color index is present in
