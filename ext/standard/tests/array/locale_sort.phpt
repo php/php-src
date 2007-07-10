@@ -2,29 +2,25 @@
 Sort with SORT_LOCALE_STRING
 --SKIPIF--
 <?php
-if (false == @setlocale(LC_CTYPE, "fr_FR", "fr_FR.UTF-8")) {
+if (false == setlocale(LC_CTYPE, "fr_FR", "fr_FR.ISO8859-1")) {
   die("skip setlocale() failed\n");
-}
-if (!function_exists("locale_set_default")) {
-  die("sip locale_set_default() function\n");
 }
 ?>
 --INI--
-unicode.script_encoding=UTF-8
-unicode.output_encoding=UTF-8
+unicode.script_encoding=ISO8859-1
+unicode.output_encoding=ISO8859-1
 --FILE--
 <?php
-@setlocale(LC_ALL, 'fr_FR', 'fr_FR.UTF-8');
-locale_set_default('fr_FR');
+setlocale(LC_ALL, 'fr_FR', 'fr_FR.ISO8859-1');
 $table = array("AB" => "Alberta",
 "BC" => "Colombie-Britannique",
 "MB" => "Manitoba",
 "NB" => "Nouveau-Brunswick",
 "NL" => "Terre-Neuve-et-Labrador",
-"NS" => "Nouvelle-Ã‰cosse",
+"NS" => "Nouvelle-Écosse",
 "ON" => "Ontario",
-"PE" => "ÃŽle-du-Prince-Ã‰douard",
-"QC" => "QuÃ©bec",
+"PE" => "Île-du-Prince-Édouard",
+"QC" => "Québec",
 "SK" => "Saskatchewan",
 "NT" => "Territoires du Nord-Ouest",
 "NU" => "Nunavut",
@@ -39,19 +35,19 @@ array(13) {
   ["BC"]=>
   string(20) "Colombie-Britannique"
   ["PE"]=>
-  string(21) "ÃŽle-du-Prince-Ã‰douard"
+  string(21) "Île-du-Prince-Édouard"
   ["MB"]=>
   string(8) "Manitoba"
   ["NB"]=>
   string(17) "Nouveau-Brunswick"
   ["NS"]=>
-  string(15) "Nouvelle-Ã‰cosse"
+  string(15) "Nouvelle-Écosse"
   ["NU"]=>
   string(7) "Nunavut"
   ["ON"]=>
   string(7) "Ontario"
   ["QC"]=>
-  string(6) "QuÃ©bec"
+  string(6) "Québec"
   ["SK"]=>
   string(12) "Saskatchewan"
   ["NL"]=>
@@ -68,19 +64,19 @@ array(13) {
   [u"BC"]=>
   unicode(20) "Colombie-Britannique"
   [u"PE"]=>
-  unicode(21) "ÃŽle-du-Prince-Ã‰douard"
+  unicode(21) "Île-du-Prince-Édouard"
   [u"MB"]=>
   unicode(8) "Manitoba"
   [u"NB"]=>
   unicode(17) "Nouveau-Brunswick"
   [u"NS"]=>
-  unicode(15) "Nouvelle-Ã‰cosse"
+  unicode(15) "Nouvelle-Écosse"
   [u"NU"]=>
   unicode(7) "Nunavut"
   [u"ON"]=>
   unicode(7) "Ontario"
   [u"QC"]=>
-  unicode(6) "QuÃ©bec"
+  unicode(6) "Québec"
   [u"SK"]=>
   unicode(12) "Saskatchewan"
   [u"NL"]=>
