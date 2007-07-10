@@ -1131,12 +1131,15 @@ PHPAPI PHP_FUNCTION(fgets)
 	zval *zstream;
 	int argc = ZEND_NUM_ARGS();
 	long length = -1;
-	zstr buf;
+	long len;
+	zstr buf, line;
 	size_t retlen = 0;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &zstream, &length) == FAILURE) {
 		return;
 	}
+
+	php_stream_from_zval(stream, &zstream);
 
 	if (ZEND_NUM_ARGS() == 2 && length <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
@@ -1147,20 +1150,26 @@ PHPAPI PHP_FUNCTION(fgets)
 		/* For BC reasons, fgets() should only return length-1 bytes. */
 		RETURN_FALSE;
 	} else if (length > 1) {
+		len = length;
+		buf.v = ecalloc(len, (stream->readbuf_type == IS_UNICODE) ? sizeof(UChar) : sizeof(char));
 		length--;
+	} else {
+		buf.v = NULL;
+		len = -1;
 	}
 
-	php_stream_from_zval(stream, &zstream);
-
-	buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, length, &retlen);
-	if (!buf.v) {
+	line.v = php_stream_get_line_ex(stream, stream->readbuf_type, buf, len, length, &retlen);
+	if (!line.v) {
+		if (buf.v) {
+			efree(buf.v);
+		}
 		RETURN_FALSE;
 	}
 
 	if (stream->readbuf_type == IS_UNICODE) {
-		RETURN_UNICODEL(buf.u, retlen, 0);
+		RETURN_UNICODEL(line.u, retlen, 0);
 	} else { /* IS_STRING */
-		RETURN_STRINGL(buf.s, retlen, 0);
+		RETURN_STRINGL(line.s, retlen, 0);
 	}
 }
 /* }}} */
@@ -1203,12 +1212,16 @@ PHPAPI PHP_FUNCTION(fgetss)
 	zval *zstream;
 	php_stream *stream;
 	long length = 0;
+	long len;
 	zval **allow = NULL;
 	size_t retlen = 0;
+	zstr buf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lZ", &zstream, &length, &allow) == FAILURE) {
 		return;
 	}
+
+	php_stream_from_zval(stream, &zstream);
 
 	if (ZEND_NUM_ARGS() >= 2 && length <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
@@ -1219,17 +1232,24 @@ PHPAPI PHP_FUNCTION(fgetss)
 		/* For BC reasons, fgetss() should only return length-1 bytes. */
 		RETURN_FALSE;
 	} else if (length > 1) {
+		len = length;
+		buf.v = ecalloc(len, (stream->readbuf_type == IS_UNICODE) ? sizeof(UChar) : sizeof(char));
 		length--;
+	} else {
+		buf.v = NULL;
+		len = -1;
 	}
 
-	php_stream_from_zval(stream, &zstream);
-
 	if (stream->readbuf_type == IS_UNICODE) {
-		UChar *buf = php_stream_get_line_ex(stream, IS_UNICODE, NULL_ZSTR, 0, length, &retlen);
+		UChar *line;
 		UChar *allowed = NULL;
 		int allowed_len = 0;
 
-		if (!buf) {
+		line = php_stream_get_line_ex(stream, IS_UNICODE, buf, len, length, &retlen);
+		if (!line) {
+		    if (buf.v) {
+		    	efree(buf.v);
+		    }
 			RETURN_FALSE;
 		}
 
@@ -1238,15 +1258,19 @@ PHPAPI PHP_FUNCTION(fgetss)
 			allowed = Z_USTRVAL_PP(allow);
 			allowed_len = Z_USTRLEN_PP(allow);
 		}
-		retlen = php_u_strip_tags(buf, retlen, &stream->fgetss_state, allowed, allowed_len TSRMLS_CC);
+		retlen = php_u_strip_tags(line, retlen, &stream->fgetss_state, allowed, allowed_len TSRMLS_CC);
 
-		RETURN_UNICODEL(buf, retlen, 0);
+		RETURN_UNICODEL(line, retlen, 0);
 	} else { /* IS_STRING */
-		char *buf = php_stream_get_line_ex(stream, IS_STRING, NULL_ZSTR, 0, length, &retlen);
+		char *line;
 		char *allowed = NULL;
 		int allowed_len = 0;
 
-		if (!buf) {
+		line = php_stream_get_line_ex(stream, IS_STRING, buf, len, length, &retlen);
+		if (!line) {
+		    if (buf.v) {
+		    	efree(buf.v);
+		    }
 			RETURN_FALSE;
 		}
 
@@ -1255,9 +1279,9 @@ PHPAPI PHP_FUNCTION(fgetss)
 			allowed = Z_STRVAL_PP(allow);
 			allowed_len = Z_STRLEN_PP(allow);
 		}
-		retlen = php_strip_tags(buf, retlen, &stream->fgetss_state, allowed, allowed_len);
+		retlen = php_strip_tags(line, retlen, &stream->fgetss_state, allowed, allowed_len);
 
-		RETURN_STRINGL(buf, retlen, 0);
+		RETURN_STRINGL(line, retlen, 0);
 	}
 }
 /* }}} */
