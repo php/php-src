@@ -2,57 +2,36 @@ dnl
 dnl $Id$
 dnl
 
-AC_ARG_ENABLE(cgi,
-[  --disable-cgi           Disable building CGI version of PHP],
-[
-  PHP_SAPI_CGI=$enableval
-],[
-  PHP_SAPI_CGI=yes
-])
+PHP_ARG_ENABLE(cgi,,
+[  --disable-cgi           Disable building CGI version of PHP], yes, no)
 
-AC_ARG_ENABLE(force-cgi-redirect,
+PHP_ARG_ENABLE(fastcgi,,
+[  --enable-fastcgi          CGI: Enable FastCGI support in the CGI binary], no, no)
+
+PHP_ARG_ENABLE(force-cgi-redirect,,
 [  --enable-force-cgi-redirect
                             CGI: Enable security check for internal server
-                            redirects. Use this if you run the PHP CGI with Apache],
-[
-  PHP_FORCE_CGI_REDIRECT=$enableval
-],[
-  PHP_FORCE_CGI_REDIRECT=no
-])
+                            redirects. Use this if you run the PHP CGI with Apache], no, no)
 
-AC_ARG_ENABLE(discard-path,
+PHP_ARG_ENABLE(discard-path,,
 [  --enable-discard-path     CGI: When this is enabled the PHP CGI binary can 
                             safely be placed outside of the web tree and people
-                            will not be able to circumvent .htaccess security],
-[
-  PHP_DISCARD_PATH=$enableval
-],[
-  PHP_DISCARD_PATH=no
-])
+                            will not be able to circumvent .htaccess security], no, no)
 
-AC_ARG_ENABLE(fastcgi,
-[  --enable-fastcgi          CGI: Enable FastCGI support in the CGI binary],
-[
-  PHP_ENABLE_FASTCGI=$enableval
-],[
-  PHP_ENABLE_FASTCGI=no
-])
-
-AC_ARG_ENABLE(path-info-check,
+PHP_ARG_ENABLE(path-info-check,,
 [  --disable-path-info-check CGI: If this is disabled, paths such as
-                            /info.php/test?a=b will fail to work],
-[
-  PHP_ENABLE_PATHINFO_CHECK=$enableval
-],[
-  PHP_ENABLE_PATHINFO_CHECK=yes
-])
+                            /info.php/test?a=b will fail to work], yes, no)
 
+dnl
+dnl CGI setup
+dnl
 if test "$PHP_SAPI" = "default"; then
-  AC_MSG_CHECKING(for CGI build)
-  if test "$PHP_SAPI_CGI" != "no"; then
+  AC_MSG_CHECKING(whether to build CGI binary)
+  if test "$PHP_CGI" != "no"; then
     AC_MSG_RESULT(yes)
-
     PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cgi/Makefile.frag)
+
+    dnl Set filename
     case $host_alias in
       *cygwin* )
         SAPI_CGI_PATH=sapi/cgi/php-cgi.exe
@@ -63,16 +42,29 @@ if test "$PHP_SAPI" = "default"; then
     esac
     PHP_SUBST(SAPI_CGI_PATH)
 
+    dnl --enable-fastcgi
+    AC_MSG_CHECKING(whether to enable fastcgi support)
+    if test "$PHP_FASTCGI" = "yes"; then
+      PHP_ENABLE_FASTCGI=1
+      PHP_FCGI_FILES="fastcgi.c"
+    else
+      PHP_ENABLE_FASTCGI=0
+      PHP_FCGI_FILES=
+    fi
+    AC_DEFINE_UNQUOTED(PHP_FASTCGI, $PHP_ENABLE_FASTCGI, [ ])
+    AC_MSG_RESULT($PHP_FASTCGI)
+
+    dnl --enable-force-cgi-redirect
     AC_MSG_CHECKING(whether to force Apache CGI redirect)
     if test "$PHP_FORCE_CGI_REDIRECT" = "yes"; then
-      REDIRECT=1
+      CGI_REDIRECT=1
     else
-      REDIRECT=0
+      CGI_REDIRECT=0
     fi
-    AC_DEFINE_UNQUOTED(FORCE_CGI_REDIRECT,$REDIRECT,[ ])
+    AC_DEFINE_UNQUOTED(FORCE_CGI_REDIRECT, $CGI_REDIRECT, [ ])
     AC_MSG_RESULT($PHP_FORCE_CGI_REDIRECT)
 
-
+    dnl --enable-discard-path
     AC_MSG_CHECKING(whether to discard path_info + path_translated)
     if test "$PHP_DISCARD_PATH" = "yes"; then
       DISCARD_PATH=1
@@ -82,28 +74,19 @@ if test "$PHP_SAPI" = "default"; then
     AC_DEFINE_UNQUOTED(DISCARD_PATH, $DISCARD_PATH, [ ])
     AC_MSG_RESULT($PHP_DISCARD_PATH)
 
+    dnl --enable-path-info-check
     AC_MSG_CHECKING(whether to enable path info checking)
-    if test "$PHP_ENABLE_PATHINFO_CHECK" = "yes"; then
+    if test "$PHP_PATH_INFO_CHECK" = "yes"; then
       ENABLE_PATHINFO_CHECK=1
     else
       ENABLE_PATHINFO_CHECK=0
     fi
     AC_DEFINE_UNQUOTED(ENABLE_PATHINFO_CHECK, $ENABLE_PATHINFO_CHECK, [ ])
-    AC_MSG_RESULT($PHP_ENABLE_PATHINFO_CHECK)
+    AC_MSG_RESULT($PHP_PATH_INFO_CHECK)
 
-    AC_MSG_CHECKING(whether to enable fastcgi support)
-    if test "$PHP_ENABLE_FASTCGI" = "yes"; then
-      PHP_FASTCGI=1
-      PHP_FCGI_FILES="fastcgi.c"
-    else
-      PHP_FASTCGI=0
-      PHP_FCGI_FILES=""
-    fi
-    AC_DEFINE_UNQUOTED(PHP_FASTCGI, $PHP_FASTCGI, [ ])
-    AC_MSG_RESULT($PHP_ENABLE_FASTCGI)
-
+    dnl Set install target and select SAPI
     INSTALL_IT="@echo \"Installing PHP CGI binary: \$(INSTALL_ROOT)\$(bindir)/\"; \$(INSTALL) -m 0755 \$(SAPI_CGI_PATH) \$(INSTALL_ROOT)\$(bindir)/\$(program_prefix)php-cgi\$(program_suffix)\$(EXEEXT)"
-    PHP_SELECT_SAPI(cgi, program, $PHP_FCGI_FILES cgi_main.c getopt.c, , '$(SAPI_CGI_PATH)')
+    PHP_SELECT_SAPI(cgi, program, $PHP_FCGI_FILES cgi_main.c getopt.c,, '$(SAPI_CGI_PATH)')
 
     case $host_alias in
       *aix*)
@@ -119,7 +102,7 @@ if test "$PHP_SAPI" = "default"; then
 
     PHP_SUBST(BUILD_CGI)
 
-  elif test "$PHP_SAPI_CLI" != "no"; then
+  elif test "$PHP_CLI" != "no"; then
     AC_MSG_RESULT(no)
     OVERALL_TARGET=
     PHP_SAPI=cli   

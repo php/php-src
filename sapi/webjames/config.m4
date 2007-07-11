@@ -2,14 +2,11 @@ dnl
 dnl $Id$
 dnl
 
-AC_ARG_WITH(webjames,
-[  --with-webjames=SRCDIR  Build PHP as a WebJames module (RISC OS only)],[
-  PHP_WEBJAMES=$withval
-],[
-  PHP_WEBJAMES=no
-])
+PHP_ARG_WITH(webjames,,
+[  --with-webjames=SRCDIR  Build PHP as a WebJames module (RISC OS only)], no, no)
 
-AC_MSG_CHECKING(for webjames)
+AC_MSG_CHECKING([for webjames])
+
 if test "$PHP_WEBJAMES" != "no"; then
   PHP_EXPAND_PATH($PHP_WEBJAMES, PHP_WEBJAMES)
   INSTALL_IT="\

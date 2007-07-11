@@ -2,15 +2,9 @@ dnl
 dnl $Id$
 dnl
 
-AC_MSG_CHECKING(for Milter support)
-AC_ARG_WITH(milter,
-[  --with-milter[=DIR]     Build PHP as Milter application],[
-  PHP_MILTER=$withval
-], [
-  PHP_MILTER=no
-])
+PHP_ARG_WITH(milter, for Milter support,
+[  --with-milter[=DIR]     Build PHP as Milter application], no, no)
 
-RESULT=no
 if test "$PHP_MILTER" != "no"; then
   if test "$PHP_MILTER" = "yes"; then
     if test -f /usr/lib/libmilter.a ; then
@@ -19,7 +13,7 @@ if test "$PHP_MILTER" != "no"; then
       if test -f /usr/lib/libmilter/libmilter.a ; then
         MILTERPATH=/usr/lib/libmilter
       else
-        AC_MSG_ERROR(Unable to find libmilter.a)
+        AC_MSG_ERROR([Unable to find libmilter.a])
       fi
     fi
   else
@@ -33,8 +27,6 @@ if test "$PHP_MILTER" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(milter, $MILTERPATH,)
   BUILD_MILTER="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_SAPI_OBJS) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_MILTER_PATH)"
   INSTALL_IT="\$(INSTALL) -m 0755 \$(SAPI_MILTER_PATH) \$(bindir)/php-milter"
-  RESULT=yes
   PHP_SUBST(SAPI_MILTER_PATH)
   PHP_SUBST(BUILD_MILTER)
 fi
-AC_MSG_RESULT($RESULT)
