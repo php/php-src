@@ -37,9 +37,9 @@ AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
 
   AC_MSG_CHECKING([OCI8 libraries dir])
   if test -d "$OCI8_DIR/lib" -a ! -d "$OCI8_DIR/lib32"; then
-	OCI8_LIB_DIR=lib
+    OCI8_LIB_DIR=lib
   elif ! test -d "$OCI8_DIR/lib" -a -d "$OCI8_DIR/lib32"; then
-	OCI8_LIB_DIR=lib32
+    OCI8_LIB_DIR=lib32
   elif test -d "$OCI8_DIR/lib" -a -d "$OCI8_DIR/lib32"; then
     OCI8_LIB_DIR=$TMP_OCI8_LIB_DIR
   else
@@ -100,6 +100,7 @@ PHP_ARG_WITH(oci8, for Oracle (OCI8) support,
                           Use --with-oci8=instantclient,/path/to/oic/lib 
                           for an Oracle Instant Client installation])
 
+if test "$PHP_OCI8" != "no"; then 
   AC_MSG_CHECKING([PHP version])
 
   tmp_version=$PHP_VERSION
@@ -127,22 +128,22 @@ PHP_ARG_WITH(oci8, for Oracle (OCI8) support,
   else
     AC_MSG_RESULT([$php_version, ok])
   fi
-
+fi
 
 PHP_OCI8_INSTANT_CLIENT="no"
 
 if test "`echo $PHP_OCI8 | cut -d, -f2`" = "instantclient"; then
-	PHP_OCI8_INSTANT_CLIENT="`echo $PHP_OCI8 | cut -d, -f3`"
+    PHP_OCI8_INSTANT_CLIENT="`echo $PHP_OCI8 | cut -d, -f3`"
     PHP_OCI8="`echo $PHP_OCI8 | cut -d, -f1,4`"
-	if test "$PHP_OCI8_INSTANT_CLIENT" = ""; then
-		PHP_OCI8_INSTANT_CLIENT="yes"
-	fi
+    if test "$PHP_OCI8_INSTANT_CLIENT" = ""; then
+        PHP_OCI8_INSTANT_CLIENT="yes"
+    fi
 elif test "`echo $PHP_OCI8 | cut -d, -f1`" = "instantclient"; then
-	PHP_OCI8_INSTANT_CLIENT="`echo $PHP_OCI8 | cut -d, -f2`"
+    PHP_OCI8_INSTANT_CLIENT="`echo $PHP_OCI8 | cut -d, -f2`"
     PHP_OCI8="`echo $PHP_OCI8 | cut -d, -f3,4`"
-	if test "$PHP_OCI8_INSTANT_CLIENT" = ""; then
-		PHP_OCI8_INSTANT_CLIENT="yes"
-	fi
+    if test "$PHP_OCI8_INSTANT_CLIENT" = ""; then
+        PHP_OCI8_INSTANT_CLIENT="yes"
+    fi
 fi
 
 if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
@@ -215,7 +216,7 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
         -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
       ])
 
-	  PHP_CHECK_LIBRARY(clntsh, OCIStmtPrepare2,
+      PHP_CHECK_LIBRARY(clntsh, OCIStmtPrepare2,
       [
         AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
       ], [], [
