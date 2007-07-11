@@ -5,9 +5,8 @@ divert(3)dnl
 dnl
 dnl Check if flush should be called explicitly after buffered io
 dnl
-AC_DEFUN([AC_FLUSH_IO],[
-  AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io], ac_cv_flush_io,[
-  AC_TRY_RUN( [
+AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io], ac_cv_flush_io,[
+AC_TRY_RUN( [
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -48,24 +47,21 @@ int main(int argc, char **argv)
 ],[
   ac_cv_flush_io=no
 ])])
-  if test "$ac_cv_flush_io" = "yes"; then
-    AC_DEFINE(HAVE_FLUSHIO, 1, [Define if flush should be called explicitly after a buffered io.])
-  fi
-])
+if test "$ac_cv_flush_io" = "yes"; then
+  AC_DEFINE(HAVE_FLUSHIO, 1, [Define if flush should be called explicitly after a buffered io.])
+fi
 
 dnl
 dnl Check for crypt() capabilities
 dnl
-AC_DEFUN([AC_CRYPT_CAP],[
-
-  if test "$ac_cv_func_crypt" = "no"; then
+if test "$ac_cv_func_crypt" = "no"; then
   AC_CHECK_LIB(crypt, crypt, [
     LIBS="-lcrypt $LIBS -lcrypt"
     AC_DEFINE(HAVE_CRYPT, 1, [ ])
   ])
-  fi
+fi
   
-  AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
+AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
   AC_TRY_RUN([
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -82,21 +78,20 @@ main() {
 	exit(0);
 #endif
 }],[
-    ac_cv_crypt_des=yes
-  ],[
-    ac_cv_crypt_des=no
-  ],[
-    ac_cv_crypt_des=yes
-  ])
-  ])
-  if test "$ac_cv_crypt_des" = "yes"; then
-    ac_result=1
-  else
-    ac_result=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, $ac_result, [Whether the system supports standard DES salt])
+  ac_cv_crypt_des=yes
+],[
+  ac_cv_crypt_des=no
+],[
+  ac_cv_crypt_des=yes
+])])
+if test "$ac_cv_crypt_des" = "yes"; then
+  ac_result=1
+else
+  ac_result=0
+fi
+AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, $ac_result, [Whether the system supports standard DES salt])
 
-  AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
+AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
   AC_TRY_RUN([
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -108,27 +103,26 @@ main() {
 
 main() {
 #if HAVE_CRYPT
-    exit (strcmp((char *)crypt("rasmuslerdorf","_J9..rasm"),"_J9..rasmBYk8r9AiWNc"));
+  exit (strcmp((char *)crypt("rasmuslerdorf","_J9..rasm"),"_J9..rasmBYk8r9AiWNc"));
 #else
-	exit(0);
+  exit(0);
 #endif
 }],[
-    ac_cv_crypt_ext_des=yes
-  ],[
-    ac_cv_crypt_ext_des=no
-  ],[
-    ac_cv_crypt_ext_des=no
-  ])
-  ])
-  if test "$ac_cv_crypt_ext_des" = "yes"; then
-    ac_result=1
-  else
-    ac_result=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, $ac_result, [Whether the system supports extended DES salt])
+  ac_cv_crypt_ext_des=yes
+],[
+  ac_cv_crypt_ext_des=no
+],[
+  ac_cv_crypt_ext_des=no
+])])
+if test "$ac_cv_crypt_ext_des" = "yes"; then
+  ac_result=1
+else
+  ac_result=0
+fi
+AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, $ac_result, [Whether the system supports extended DES salt])
 
-  AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
-  AC_TRY_RUN([
+AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
+AC_TRY_RUN([
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -153,25 +147,24 @@ main() {
 	exit(0);
 #endif
 }],[
-    ac_cv_crypt_md5=yes
-  ],[
-    ac_cv_crypt_md5=no
-  ],[
-    ac_cv_crypt_md5=no
-  ])
-  ])
-  if test "$ac_cv_crypt_md5" = "yes"; then
-    ac_result=1
-  else
-    if test "$ac_cv_crypt_des" != "yes"; then
-      PHP_DEBUG_MACRO(debug.log)
-    fi
-    ac_result=0
+  ac_cv_crypt_md5=yes
+],[
+  ac_cv_crypt_md5=no
+],[
+  ac_cv_crypt_md5=no
+])])
+if test "$ac_cv_crypt_md5" = "yes"; then
+  ac_result=1
+else
+  if test "$ac_cv_crypt_des" != "yes"; then
+    PHP_DEBUG_MACRO(debug.log)
   fi
-  AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, $ac_result, [Whether the system supports MD5 salt])
+  ac_result=0
+fi
+AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, $ac_result, [Whether the system supports MD5 salt])
 
-  AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
-  AC_TRY_RUN([
+AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
+AC_TRY_RUN([
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -193,81 +186,72 @@ main() {
 	exit(0);
 #endif
 }],[
-    ac_cv_crypt_blowfish=yes
-  ],[
-    ac_cv_crypt_blowfish=no
-  ],[
-    ac_cv_crypt_blowfish=no
-  ])
-  ])
-  if test "$ac_cv_crypt_blowfish" = "yes"; then
-    ac_result=1
-  else
-    ac_result=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, $ac_result, [Whether the system supports BlowFish salt])
-])
+  ac_cv_crypt_blowfish=yes
+],[
+  ac_cv_crypt_blowfish=no
+],[
+  ac_cv_crypt_blowfish=no
+])])
+if test "$ac_cv_crypt_blowfish" = "yes"; then
+  ac_result=1
+else
+  ac_result=0
+fi
+AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, $ac_result, [Whether the system supports BlowFish salt])
 
-AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot)
-
-AC_CRYPT_CAP
-AC_FLUSH_IO
+dnl
+dnl Check for available functions
+dnl
+AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass isinf isnan)
+AC_FUNC_FNMATCH	
 
 divert(5)dnl
 
-AC_ARG_WITH(regex,
+dnl
+dnl Check for regex library type
+dnl
+PHP_ARG_WITH(regex, for selected regex library type,
 [  --with-regex=TYPE       regex library type: system, apache, php. [TYPE=php]
-                          WARNING: Do NOT use unless you know what you are doing!],
-[
-  case $withval in 
-    system)
-      if test "$PHP_SAPI" = "apache" || test "$PHP_SAPI" = "apache2filter" || test "$PHP_SAPI" = "apache2handler"; then
-        REGEX_TYPE=php
-      else
-        REGEX_TYPE=system
-      fi
-      ;;
-    apache)
-      REGEX_TYPE=apache
-      ;;
-    php)
+                          WARNING: Do NOT use unless you know what you are doing!], php, no)
+
+case $PHP_REGEX in
+  system)
+    if test "$PHP_SAPI" = "apache" || test "$PHP_SAPI" = "apache2filter" || test "$PHP_SAPI" = "apache2handler"; then
       REGEX_TYPE=php
-      ;;
-    *)
-      REGEX_TYPE=php
-      AC_MSG_WARN(Invalid regex library type. Using default value: php)
-      ;;
-  esac
-],[
-  REGEX_TYPE=php
-])
+    else
+      REGEX_TYPE=system
+    fi
+    ;;
+  apache)
+    REGEX_TYPE=apache
+    ;;
+  php)
+    REGEX_TYPE=php
+    ;;
+  *)
+    REGEX_TYPE=php
+    AC_MSG_WARN(Invalid regex library type. Using default value: php)
+    ;;
+esac
 
-PHP_REGEX
-
-AC_FUNC_FNMATCH	
-
-dnl Take a look and see if there is a support means of creating a new process
-dnl and defining which handles it receives
-AC_DEFUN([PHP_CHECK_IF_SUPPORT_PROC_OPEN],[
-  
-  AC_CACHE_VAL(php_can_support_proc_open,[
-    AC_CHECK_FUNCS(fork CreateProcess, [
-      php_can_support_proc_open=yes
-      break
-    ],[
-      php_can_support_proc_open=no
-    ])
-  ])
-  
-  AC_MSG_CHECKING([if your OS can spawn processes with inherited handles])
-  if test "$php_can_support_proc_open" = "yes"; then
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(PHP_CAN_SUPPORT_PROC_OPEN,1, [Define if your system has fork/vfork/CreateProcess])
-  else
-    AC_MSG_RESULT(no)
-  fi
-
-])
+if test "$REGEX_TYPE" = "php"; then
+  AC_DEFINE(HAVE_REGEX_T_RE_MAGIC, 1, [ ])
+  AC_DEFINE(HSREGEX,1,[ ])
+  AC_DEFINE(REGEX,1,[ ])  
+  PHP_ADD_SOURCES(regex, regcomp.c regexec.c regerror.c regfree.c)
+elif test "$REGEX_TYPE" = "system"; then
+  AC_DEFINE(REGEX,0,[ ])
+  dnl Check if field re_magic exists in struct regex_t
+  AC_CACHE_CHECK([whether field re_magic exists in struct regex_t], ac_cv_regex_t_re_magic, [
+  AC_TRY_COMPILE([#include <sys/types.h>
+#include <regex.h>], [regex_t rt; rt.re_magic;],
+  [ac_cv_regex_t_re_magic=yes], [ac_cv_regex_t_re_magic=no])])
+  if test "$ac_cv_regex_t_re_magic" = "yes"; then
+    AC_DEFINE([HAVE_REGEX_T_RE_MAGIC], [ ], 1)   
+  fi 
+fi   
+AC_MSG_CHECKING([which regex library to use])
+AC_MSG_RESULT([$REGEX_TYPE])
 
 dnl
 dnl round fuzz
@@ -294,15 +278,30 @@ AC_TRY_RUN([
 ])
 AC_DEFINE_UNQUOTED(PHP_ROUND_FUZZ, $PHP_ROUND_FUZZ, [ see #24142 ])
 
-PHP_CHECK_IF_SUPPORT_PROC_OPEN
+dnl
+dnl Check if there is a support means of creating a new process
+dnl and defining which handles it receives
+dnl
+AC_CACHE_VAL(php_can_support_proc_open,[
+AC_CHECK_FUNCS(fork CreateProcess, [
+  php_can_support_proc_open=yes
+  break
+],[
+  php_can_support_proc_open=no
+])])
+AC_MSG_CHECKING([if your OS can spawn processes with inherited handles])
+if test "$php_can_support_proc_open" = "yes"; then
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(PHP_CAN_SUPPORT_PROC_OPEN,1, [Define if your system has fork/vfork/CreateProcess])
+else
+  AC_MSG_RESULT(no)
+fi
 
 dnl getopt long options disabled for now
 dnl as we can't be sure that we get the right getopt.h here
 dnl using the standard AC_CHECK macros
 dnl AC_CHECK_HEADERS(getopt.h)
 dnl AC_CHECK_FUNCS(getopt_long getopt_long_only)
-
-AC_CHECK_FUNCS(glob strfmon nice)
 
 if test "$PHP_SAPI" = "cgi" || test "$PHP_SAPI" = "cli" || test "$PHP_SAPI" = "embed"; then
   AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
@@ -315,41 +314,12 @@ dnl
 PHP_CHECK_FUNC(res_nmkquery, resolv, bind, socket)
 PHP_CHECK_FUNC(res_nsend, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_expand, resolv, bind, socket)
-dnl already done PHP_CHECK_FUNC(dn_skipname, resolv, bind, socket)
 
 dnl
-dnl Check for i18n capabilities
+dnl Check if atof() accepts NAN
 dnl
-AC_DEFUN([PHP_CHECK_I18N_FUNCS],[
-  AC_CHECK_HEADERS([wchar.h])
-  AC_CHECK_FUNCS([mblen])
-  AC_CHECK_FUNCS([mbrlen mbsinit],,,[
-#ifdef HAVE_WCHAR_H
-# include <wchar.h>
-#endif
-  ])
-  AC_CACHE_CHECK([for mbstate_t], [ac_cv_type_mbstate_t],[
-    AC_TRY_COMPILE([
-#ifdef HAVE_WCHAR_H
-# include <wchar.h>
-#endif
-    ],[
-int __tmp__() { mbstate_t a; }
-    ],[
-      ac_cv_type_mbstate_t=yes
-    ],[
-      ac_cv_type_mbstate_t=no
-    ])
-  ])
-  if test "$ac_cv_type_mbstate_t" = "yes"; then
-    AC_DEFINE([HAVE_MBSTATE_T], 1, [Define if your system has mbstate_t in wchar.h])
-  fi
-])
-
-AC_CHECK_FUNCS(fpclass isinf isnan)
-
 AC_CACHE_CHECK(whether atof() accepts NAN, ac_cv_atof_accept_nan,[
-  AC_TRY_RUN([
+AC_TRY_RUN([
 #include <math.h>
 #include <stdlib.h>
 
@@ -365,20 +335,22 @@ int main(int argc, char** argv)
 {
 	return zend_isnan(atof("NAN")) ? 0 : 1;
 }
-  ],[
-      ac_cv_atof_accept_nan=yes
-  ],[
-      ac_cv_atof_accept_nan=no
-  ],[
-      ac_cv_atof_accept_nan=no
-  ])
-])
+],[
+  ac_cv_atof_accept_nan=yes
+],[
+  ac_cv_atof_accept_nan=no
+],[
+  ac_cv_atof_accept_nan=no
+])])
 if test "$ac_cv_atof_accept_nan" = "yes"; then
   AC_DEFINE([HAVE_ATOF_ACCEPTS_NAN], 1, [whether atof() accepts NAN])
 fi
 
+dnl
+dnl Check if atof() accepts INF
+dnl
 AC_CACHE_CHECK(whether atof() accepts INF, ac_cv_atof_accept_inf,[
-  AC_TRY_RUN([
+AC_TRY_RUN([
 #include <math.h>
 #include <stdlib.h>
 
@@ -397,20 +369,22 @@ int main(int argc, char** argv)
 {
 	return zend_isinf(atof("INF")) && zend_isinf(atof("-INF")) ? 0 : 1;
 }
-  ],[
-      ac_cv_atof_accept_inf=yes
-  ],[
-      ac_cv_atof_accept_inf=no
-  ],[
-      ac_cv_atof_accept_inf=no
-  ])
-])
+],[
+  ac_cv_atof_accept_inf=yes
+],[
+  ac_cv_atof_accept_inf=no
+],[
+  ac_cv_atof_accept_inf=no
+])])
 if test "$ac_cv_atof_accept_inf" = "yes"; then
   AC_DEFINE([HAVE_ATOF_ACCEPTS_INF], 1, [whether atof() accepts INF])
 fi
 
+dnl
+dnl Check if HUGE_VAL == INF
+dnl
 AC_CACHE_CHECK(whether HUGE_VAL == INF, ac_cv_huge_val_inf,[
-  AC_TRY_RUN([
+AC_TRY_RUN([
 #include <math.h>
 #include <stdlib.h>
 
@@ -429,21 +403,23 @@ int main(int argc, char** argv)
 {
 	return zend_isinf(HUGE_VAL) ? 0 : 1;
 }
-  ],[
-      ac_cv_huge_val_inf=yes
-  ],[
-      ac_cv_huge_val_inf=no
-  ],[
-      ac_cv_huge_val_inf=yes
-  ])
-])
+],[
+  ac_cv_huge_val_inf=yes
+],[
+  ac_cv_huge_val_inf=no
+],[
+  ac_cv_huge_val_inf=yes
+])])
 dnl This is the most probable fallback so we assume yes in case of cross compile.
 if test "$ac_cv_huge_val_inf" = "yes"; then
   AC_DEFINE([HAVE_HUGE_VAL_INF], 1, [whether HUGE_VAL == INF])
 fi
 
+dnl
+dnl Check if HUGE_VAL + -HUGEVAL == NAN
+dnl
 AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
-  AC_TRY_RUN([
+AC_TRY_RUN([
 #include <math.h>
 #include <stdlib.h>
 
@@ -464,41 +440,69 @@ int main(int argc, char** argv)
 	return zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
 #endif
 }
-  ],[
-      ac_cv_huge_val_nan=yes
-  ],[
-      ac_cv_huge_val_nan=no
-  ],[
-      ac_cv_huge_val_nan=yes
-  ])
-])
+],[
+  ac_cv_huge_val_nan=yes
+],[
+  ac_cv_huge_val_nan=no
+],[
+  ac_cv_huge_val_nan=yes
+])])
 dnl This is the most probable fallback so we assume yes in case of cross compile.
 if test "$ac_cv_huge_val_nan" = "yes"; then
   AC_DEFINE([HAVE_HUGE_VAL_NAN], 1, [whether HUGE_VAL + -HUGEVAL == NAN])
 fi
 
+dnl
+dnl Check for strptime()
+dnl
 AC_CACHE_CHECK(whether strptime() declaration fails, ac_cv_strptime_decl_fails,[
-  AC_TRY_COMPILE([
+AC_TRY_COMPILE([
 #include <time.h>
-  ],[
+],[
 #ifndef HAVE_STRPTIME
 #error no strptime() on this platform
 #else
 /* use invalid strptime() declaration to see if it fails to compile */
 int strptime(const char *s, const char *format, struct tm *tm);
 #endif
-  ],[
-      ac_cv_strptime_decl_fails=no
-  ],[
-      ac_cv_strptime_decl_fails=yes
-  ])
-])
+],[
+  ac_cv_strptime_decl_fails=no
+],[
+  ac_cv_strptime_decl_fails=yes
+])])
 if test "$ac_cv_strptime_decl_fails" = "yes"; then
   AC_DEFINE([HAVE_STRPTIME_DECL_FAILS], 1, [whether strptime() declaration fails])
 fi
 
-PHP_CHECK_I18N_FUNCS
+dnl
+dnl Check for i18n capabilities
+dnl
+AC_CHECK_HEADERS([wchar.h])
+AC_CHECK_FUNCS([mblen])
+AC_CHECK_FUNCS([mbrlen mbsinit],,,[
+#ifdef HAVE_WCHAR_H
+# include <wchar.h>
+#endif
+])
+AC_CACHE_CHECK([for mbstate_t], [ac_cv_type_mbstate_t],[
+AC_TRY_COMPILE([
+#ifdef HAVE_WCHAR_H
+# include <wchar.h>
+#endif
+],[
+int __tmp__() { mbstate_t a; }
+],[
+  ac_cv_type_mbstate_t=yes
+],[
+  ac_cv_type_mbstate_t=no
+])])
+if test "$ac_cv_type_mbstate_t" = "yes"; then
+  AC_DEFINE([HAVE_MBSTATE_T], 1, [Define if your system has mbstate_t in wchar.h])
+fi
 
+dnl
+dnl Setup extension sources
+dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
                             cyr_convert.c datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
                             flock_compat.c formatted_print.c fsock.c head.c html.c image.c \
@@ -512,6 +516,4 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             filters.c proc_open.c streamsfuncs.c http.c)
 
 PHP_ADD_MAKEFILE_FRAGMENT
-
 PHP_INSTALL_HEADERS([ext/standard/])
-
