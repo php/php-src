@@ -283,11 +283,11 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 				str = X509_NAME_ENTRY_get_data(ne);
 				if (ASN1_STRING_type(str) != V_ASN1_UTF8STRING) {
 					to_add_len = ASN1_STRING_to_UTF8(&to_add, str);
-					add_next_index_stringl(subentries, (char *)to_add, to_add_len, 1);
+					add_next_index_utf8_stringl(subentries, (char *)to_add, to_add_len, 1);
 				} else {
 					to_add = ASN1_STRING_data(str);
 					to_add_len = ASN1_STRING_length(str);
-					add_next_index_stringl(subentries, (char *)to_add, to_add_len, 1);
+					add_next_index_utf8_stringl(subentries, (char *)to_add, to_add_len, 1);
 				}
 			}
 			last = j;
@@ -295,24 +295,36 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 		i = last;
 		
 		if (obj_cnt > 1) {
-			add_assoc_zval_ex(subitem, sname, strlen(sname) + 1, subentries);
+			add_ascii_assoc_zval_ex(subitem, sname, strlen(sname) + 1, subentries);
 		} else {
 			zval_dtor(subentries);
 			FREE_ZVAL(subentries);
 			if (obj_cnt && str) {
-				add_assoc_stringl(subitem, sname, (char *)to_add, to_add_len, 1);
+				add_ascii_assoc_utf8_stringl(subitem, sname, (char *)to_add, to_add_len, 1);
 			}
 		}
 	}
 	if (key != NULL) {
-		zend_hash_update(HASH_OF(val), key, strlen(key) + 1, (void *)&subitem, sizeof(subitem), NULL);
+		add_ascii_assoc_zval_ex(val, key, strlen(key) + 1, subitem);
 	}
 }
 /* }}} */
 
 static void add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str) /* {{{ */
 {
-	add_assoc_stringl(val, key, (char *)str->data, str->length, 1);
+	unsigned char *data;
+	int data_len;
+	TSRMLS_FETCH();
+
+	if (ASN1_STRING_type(str) != V_ASN1_UTF8STRING) {
+		data = ASN1_STRING_data(str);
+		data_len = ASN1_STRING_length(str);
+		add_ascii_assoc_stringl(val, key, (char*)data, data_len, 1);
+	} else {
+		data = ASN1_STRING_data(str);
+		data_len = ASN1_STRING_length(str);
+		add_ascii_assoc_utf8_stringl(val, key, (char*)data, data_len, 1);
+	}
 }
 /* }}} */
 
@@ -443,13 +455,15 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 			req->config_filename, req->var, req->req_config TSRMLS_CC) == FAILURE) return FAILURE
 
 #define SET_OPTIONAL_STRING_ARG(key, varname, defval)	\
-	if (optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), key, sizeof(key), (void**)&item) == SUCCESS) \
+	if (optional_args && zend_ascii_hash_find(Z_ARRVAL_P(optional_args), key, sizeof(key), (void**)&item) == SUCCESS) { \
+		convert_to_string_ex(item); \
 		varname = Z_STRVAL_PP(item); \
-	else \
-		varname = defval
+	} else \
+		varname = defval;
+
 
 #define SET_OPTIONAL_LONG_ARG(key, varname, defval)	\
-	if (optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), key, sizeof(key), (void**)&item) == SUCCESS) \
+	if (optional_args && zend_ascii_hash_find(Z_ARRVAL_P(optional_args), key, sizeof(key), (void**)&item) == SUCCESS) \
 		varname = Z_LVAL_PP(item); \
 	else \
 		varname = defval
@@ -985,8 +999,11 @@ PHP_FUNCTION(openssl_x509_parse)
 	char * tmpstr;
 	zval * subitem;
 	X509_EXTENSION *extension;
-	ASN1_OCTET_STRING *extdata;
 	char *extname;
+	BIO  *bio_out;
+	BUF_MEM *bio_buf;
+	char buf[256];
+
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|b", &zcert, &useshortnames) == FAILURE) {
 		return;
@@ -998,37 +1015,37 @@ PHP_FUNCTION(openssl_x509_parse)
 	array_init(return_value);
 
 	if (cert->name) {
-		add_assoc_string(return_value, "name", cert->name, 1);
+		add_ascii_assoc_string(return_value, "name", cert->name, 1);
 	}
-/*	add_assoc_bool(return_value, "valid", cert->valid); */
+/*	add_ascii_assoc_bool(return_value, "valid", cert->valid); */
 
 	add_assoc_name_entry(return_value, "subject", 		X509_get_subject_name(cert), useshortnames TSRMLS_CC);
 	/* hash as used in CA directories to lookup cert by subject name */
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%08lx", X509_subject_name_hash(cert));
-		add_assoc_string(return_value, "hash", buf, 1);
+		add_ascii_assoc_string(return_value, "hash", buf, 1);
 	}
 	
 	add_assoc_name_entry(return_value, "issuer", 		X509_get_issuer_name(cert), useshortnames TSRMLS_CC);
-	add_assoc_long(return_value, "version", 			X509_get_version(cert));
+	add_ascii_assoc_long(return_value, "version", 			X509_get_version(cert));
 
-	add_assoc_string(return_value, "serialNumber", i2s_ASN1_INTEGER(NULL, X509_get_serialNumber(cert)), 1);
+	add_ascii_assoc_string(return_value, "serialNumber", i2s_ASN1_INTEGER(NULL, X509_get_serialNumber(cert)), 1);
 
 	add_assoc_asn1_string(return_value, "validFrom", 	X509_get_notBefore(cert));
 	add_assoc_asn1_string(return_value, "validTo", 		X509_get_notAfter(cert));
 
-	add_assoc_long(return_value, "validFrom_time_t", 	asn1_time_to_time_t(X509_get_notBefore(cert) TSRMLS_CC));
-	add_assoc_long(return_value, "validTo_time_t", 		asn1_time_to_time_t(X509_get_notAfter(cert) TSRMLS_CC));
+	add_ascii_assoc_long(return_value, "validFrom_time_t", 	asn1_time_to_time_t(X509_get_notBefore(cert) TSRMLS_CC));
+	add_ascii_assoc_long(return_value, "validTo_time_t", 		asn1_time_to_time_t(X509_get_notAfter(cert) TSRMLS_CC));
 
 	tmpstr = (char *)X509_alias_get0(cert, NULL);
 	if (tmpstr) {
-		add_assoc_string(return_value, "alias", tmpstr, 1);
+		add_ascii_assoc_string(return_value, "alias", tmpstr, 1);
 	}
 /*
-	add_assoc_long(return_value, "signaturetypeLONG", X509_get_signature_type(cert));
-	add_assoc_string(return_value, "signaturetype", OBJ_nid2sn(X509_get_signature_type(cert)), 1);
-	add_assoc_string(return_value, "signaturetypeLN", OBJ_nid2ln(X509_get_signature_type(cert)), 1);
+	add_ascii_assoc_long(return_value, "signaturetypeLONG", X509_get_signature_type(cert));
+	add_ascii_assoc_string(return_value, "signaturetype", OBJ_nid2sn(X509_get_signature_type(cert)), 1);
+	add_ascii_assoc_string(return_value, "signaturetypeLN", OBJ_nid2ln(X509_get_signature_type(cert)), 1);
 */
 	MAKE_STD_ZVAL(subitem);
 	array_init(subitem);
@@ -1060,19 +1077,29 @@ PHP_FUNCTION(openssl_x509_parse)
 
 		add_index_zval(subitem, id, subsub);
 	}
-	add_assoc_zval(return_value, "purposes", subitem);
+	add_ascii_assoc_zval(return_value, "purposes", subitem);
 
 	MAKE_STD_ZVAL(subitem);
 	array_init(subitem);
 
-
 	for (i = 0; i < X509_get_ext_count(cert); i++) {
 		extension = X509_get_ext(cert, i);
-		extdata = X509_EXTENSION_get_data(extension);
-		extname = (char *)OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
-		add_assoc_asn1_string(subitem, extname, extdata);
+		if (OBJ_obj2nid(X509_EXTENSION_get_object(extension)) != NID_undef) {
+			extname = (char *)OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
+		} else {
+			OBJ_obj2txt(buf, sizeof(buf)-1, X509_EXTENSION_get_object(extension), 1);
+			extname = buf;
+		}
+		bio_out = BIO_new(BIO_s_mem());
+		if (X509V3_EXT_print(bio_out, extension, 0, 0)) {
+			BIO_get_mem_ptr(bio_out, &bio_buf);
+			add_ascii_assoc_utf8_stringl(subitem, extname, bio_buf->data, bio_buf->length, 1);
+		} else {
+			add_assoc_asn1_string(subitem, extname, X509_EXTENSION_get_data(extension));
+		}
+		BIO_free(bio_out);
 	}
-	add_assoc_zval(return_value, "extensions", subitem);
+	add_ascii_assoc_zval(return_value, "extensions", subitem);
 
 	if (certresource == -1 && cert) {
 		X509_free(cert);
@@ -1583,7 +1610,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				MAKE_STD_ZVAL(zcert);
 				ZVAL_STRINGL(zcert, bio_buf->data, bio_buf->length, 1);
-				add_assoc_zval(zout, "cert", zcert);
+				add_ascii_assoc_zval(zout, "cert", zcert);
 			}
 			BIO_free(bio_out);
 
@@ -1593,7 +1620,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				MAKE_STD_ZVAL(zpkey);
 				ZVAL_STRINGL(zpkey, bio_buf->data, bio_buf->length, 1);
-				add_assoc_zval(zout, "pkey", zpkey);
+				add_ascii_assoc_zval(zout, "pkey", zpkey);
 			}
 			BIO_free(bio_out);
 
@@ -1620,7 +1647,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 			}
 			if(ca) {
 				sk_X509_free(ca);
-				add_assoc_zval(zout, "extracerts", zextracerts);
+				add_ascii_assoc_zval(zout, "extracerts", zextracerts);
 			} else {
 				zval_dtor(zextracerts);
 			}
@@ -1687,25 +1714,39 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			zstr strindex = NULL_ZSTR;
 			uint strindexlen = 0;
 			ulong intindex;
+			zend_uchar index_type;
+			zval index;
 			
-			zend_hash_get_current_key_ex(HASH_OF(dn), &strindex, &strindexlen, &intindex, 0, &hpos);
+			index_type = zend_hash_get_current_key_ex(HASH_OF(dn), &strindex, &strindexlen, &intindex, 0, &hpos);
+			if (index_type == IS_UNICODE) {
+				ZVAL_UNICODEL(&index, strindex.u, strindexlen-1, 1);
+				convert_to_string(&index);
+			} else {
+				ZVAL_STRINGL(&index, strindex.s, strindexlen-1, 0);
+			}
 
 			convert_to_string_ex(item);
 
-			if (strindex.s) {
+			if (Z_STRVAL(index)) {
 				int nid;
 
-				nid = OBJ_txt2nid(strindex.s);
+				nid = OBJ_txt2nid(Z_STRVAL(index));
 				if (nid != NID_undef) {
 					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_ASC, 
 								(unsigned char*)Z_STRVAL_PP(item), -1, -1, 0))
 					{
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_PP(item));
+						if (index_type == IS_UNICODE) {
+							zval_dtor(&index);
+						}
 						return FAILURE;
 					}
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: %s is not a recognized name", strindex.s);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: %s is not a recognized name", Z_STRVAL(index));
 				}
+			}
+			if (index_type == IS_UNICODE) {
+				zval_dtor(&index);
 			}
 			zend_hash_move_forward_ex(HASH_OF(dn), &hpos);
 		}
@@ -1762,22 +1803,37 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 				zstr strindex;
 				uint strindexlen;
 				ulong intindex;
+				zend_uchar index_type;
+				zval index;
 
-				zend_hash_get_current_key_ex(HASH_OF(attribs), &strindex, &strindexlen, &intindex, 0, &hpos);
+				index_type = zend_hash_get_current_key_ex(HASH_OF(attribs), &strindex, &strindexlen, &intindex, 0, &hpos);
+				if (index_type == IS_UNICODE) {
+					ZVAL_UNICODEL(&index, strindex.u, strindexlen-1, 1);
+					convert_to_string(&index);
+				} else {
+					ZVAL_STRINGL(&index, strindex.s, strindexlen-1, 0);
+				}
+
 				convert_to_string_ex(item);
 
-				if (strindex.s) {
+				if (Z_STRVAL(index)) {
 					int nid;
 
-					nid = OBJ_txt2nid(strindex.s);
+					nid = OBJ_txt2nid(Z_STRVAL(index));
 					if (nid != NID_undef) {
 						if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_ASC, (unsigned char*)Z_STRVAL_PP(item), -1, -1, 0)) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "attribs: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_PP(item));
+							if (index_type == IS_UNICODE) {
+								zval_dtor(&index);
+							}
 							return FAILURE;
 						}
 					} else {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: %s is not a recognized name", strindex.s);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: %s is not a recognized name", Z_STRVAL(index));
 					}
+				}
+				if (index_type == IS_UNICODE) {
+					zval_dtor(&index);
 				}
 				zend_hash_move_forward_ex(HASH_OF(attribs), &hpos);
 			}
@@ -2704,8 +2760,8 @@ PHP_FUNCTION(openssl_pkey_get_details)
 	pbio_len = BIO_get_mem_data(out, &pbio);
 
 	array_init(return_value);
-	add_assoc_long(return_value, "bits", EVP_PKEY_bits(pkey));
-	add_assoc_stringl(return_value, "key", pbio, pbio_len, 1);
+	add_ascii_assoc_long(return_value, "bits", EVP_PKEY_bits(pkey));
+	add_ascii_assoc_stringl(return_value, "key", pbio, pbio_len, 1);
 	/*TODO: Use the real values once the openssl constants are used 
 	 * See the enum at the top of this file
 	 */
@@ -2732,7 +2788,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			ktype = -1;
 			break;
 	}
-	add_assoc_long(return_value, "type", ktype);
+	add_ascii_assoc_long(return_value, "type", ktype);
 
 	BIO_free(out);
 }
