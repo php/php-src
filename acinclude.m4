@@ -2609,6 +2609,53 @@ EOF
 ])
 
 dnl
+dnl PHP_CHECK_CONFIGURE_OPTIONS
+dnl
+AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
+  for arg in $ac_configure_args; do
+    case $arg in
+      --with-*[)]
+      	arg_name="`echo [$]arg | $SED -e 's/--with-//g' -e 's/=.*//g'`"
+        ;;
+      --without-*[)]
+      	arg_name="`echo [$]arg | $SED -e 's/--without-//g' -e 's/=.*//g'`"
+        ;;
+      --enable-*[)]
+      	arg_name="`echo [$]arg | $SED -e 's/--enable-//g' -e 's/=.*//g'`"
+        ;;
+      --disable-*[)]
+      	arg_name="`echo [$]arg | $SED -e 's/--disable-//g' -e 's/=.*//g'`"
+        ;;
+      *[)]
+      	continue
+        ;;
+    esac
+    case $arg_name in
+      # Allow --disable-all / --enable-all
+      all[)];;
+
+      # Allow certain libtool options
+      libtool-lock | pic | tags | shared | static | fast-install | gnu-ld[)];;
+
+      # Allow certain TSRM options
+      tsrm-pth | tsrm-st | tsrm-pthreads[)];;
+
+      # Allow certain Zend options
+      zend-vm | maintainer-zts | inline-optimization | zend-multibyte[)];;
+
+      # All the rest must be set using the PHP_ARG_* macros
+      *[)]
+        is_arg_set=PHP_[]`echo [$]arg_name | tr 'abcdefghijklmnopqrstuvwxyz-' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ_'`
+        if eval test -z "\$$is_arg_set"; then
+          PHP_UNKNOWN_CONFIGURE_OPTIONS="$PHP_UNKNOWN_CONFIGURE_OPTIONS
+[$]arg"
+        fi
+        ;;
+    esac
+  done
+])
+
+dnl
 dnl PHP_CHECK_PDO_INCLUDES([found [, not-found]])
 dnl
 AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
