@@ -2,17 +2,12 @@ dnl
 dnl $Id$
 dnl
 
-AC_ARG_ENABLE(cgi,
-[  --disable-cgi           Disable building CGI version of PHP],
-[
-  PHP_SAPI_CGI=$enableval
-],[
-  PHP_SAPI_CGI=yes
-])
+PHP_ARG_ENABLE(cgi,,
+[  --disable-cgi           Disable building CGI version of PHP], yes, no)
 
 if test "$PHP_SAPI" = "default"; then
   AC_MSG_CHECKING(for CGI build)
-  if test "$PHP_SAPI_CGI" != "no"; then
+  if test "$PHP_CGI" != "no"; then
     AC_MSG_RESULT(yes)
 
     AC_MSG_CHECKING([for socklen_t in sys/socket.h])
@@ -42,6 +37,8 @@ if test "$PHP_SAPI" = "default"; then
     esac
 
     PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cgi/Makefile.frag)
+    
+    dnl Set filename
     case $host_alias in
       *cygwin* )
         SAPI_CGI_PATH=sapi/cgi/php-cgi.exe
@@ -52,7 +49,7 @@ if test "$PHP_SAPI" = "default"; then
     esac
     PHP_SUBST(SAPI_CGI_PATH)
 
-    INSTALL_IT="@echo \"Installing PHP CGI into: \$(INSTALL_ROOT)\$(bindir)/\"; \$(INSTALL) -m 0755 \$(SAPI_CGI_PATH) \$(INSTALL_ROOT)\$(bindir)/\$(program_prefix)php-cgi\$(program_suffix)\$(EXEEXT)"
+    INSTALL_IT="@echo \"Installing PHP CGI binary: \$(INSTALL_ROOT)\$(bindir)/\"; \$(INSTALL) -m 0755 \$(SAPI_CGI_PATH) \$(INSTALL_ROOT)\$(bindir)/\$(program_prefix)php-cgi\$(program_suffix)\$(EXEEXT)"
     PHP_SELECT_SAPI(cgi, program, fastcgi.c cgi_main.c getopt.c, , '$(SAPI_CGI_PATH)')
 
     case $host_alias in
@@ -69,7 +66,7 @@ if test "$PHP_SAPI" = "default"; then
 
     PHP_SUBST(BUILD_CGI)
 
-  elif test "$PHP_SAPI_CLI" != "no"; then
+  elif test "$PHP_CLI" != "no"; then
     AC_MSG_RESULT(no)
     OVERALL_TARGET=
     PHP_SAPI=cli   
