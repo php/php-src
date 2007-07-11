@@ -1,4 +1,4 @@
- ## $Id$ -*- autoconf -*-
+## $Id$ -*- autoconf -*-
 dnl ## Process this file with autoconf to produce a configure script.
 
 divert(1)
@@ -129,9 +129,8 @@ AC_AIX
 AC_PROG_LN_S
 
 dnl Support systems with system libraries in e.g. /usr/lib64
-AC_ARG_WITH(libdir,
-[  --with-libdir=NAME      Look for libraries in .../NAME rather than .../lib],
-[PHP_LIBDIR=$withval], [PHP_LIBDIR=lib])
+PHP_ARG_WITH(libdir, for system library directory,
+[  --with-libdir=NAME      Look for libraries in .../NAME rather than .../lib],lib,no)
 
 dnl check for -R, etc. switch
 PHP_RUNPATH_SWITCH
@@ -704,9 +703,9 @@ else
   ZEND_DEBUG=no
 fi
 
-PHP_ARG_WITH(layout,[layout of installed files],
-[  --with-layout=TYPE      Set how installed files will be laid out.  Type is
-                          one of "PHP" or "GNU" [TYPE=PHP]], PHP, no)
+PHP_ARG_WITH(layout, layout of installed files,
+[  --with-layout=TYPE      Set how installed files will be laid out.  Type can
+                          be either PHP or GNU [PHP]], PHP, no)
 
 case $PHP_LAYOUT in
   GNU)
@@ -717,7 +716,7 @@ case $PHP_LAYOUT in
     ;;
 esac
 
-PHP_ARG_WITH(config-file-path,[path to configuration file],
+PHP_ARG_WITH(config-file-path, path to configuration file,
 [  --with-config-file-path=PATH
                           Set the path in which to look for php.ini [PREFIX/lib]], DEFAULT, no)
 
@@ -732,16 +731,18 @@ if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
   esac
 fi
 
-PHP_ARG_WITH(config-file-scan-dir,[where to scan for configuration files],
+AC_MSG_CHECKING([where to scan for configuration files])
+PHP_ARG_WITH(config-file-scan-dir,
 [  --with-config-file-scan-dir=PATH
                           Set the path where to scan for configuration files], DEFAULT, no) 
 if test "$PHP_CONFIG_FILE_SCAN_DIR" = "DEFAULT"; then
   PHP_CONFIG_FILE_SCAN_DIR=
 fi
+AC_MSG_RESULT([$PHP_CONFIG_FILE_SCAN_DIR])
 
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
-PHP_ARG_ENABLE(sigchild,whether to enable PHP's own SIGCHLD handler,
+PHP_ARG_ENABLE(sigchild, whether to enable PHP's own SIGCHLD handler,
 [  --enable-sigchild       Enable PHP's own SIGCHLD handler], no, no)
 
 if test "$PHP_SIGCHILD" = "yes"; then
@@ -766,20 +767,19 @@ if test "$PHP_LIBGCC" = "yes"; then
   PHP_ADD_LIBRARY(gcc, yes)
 fi
 
-PHP_ARG_ENABLE(short-tags,whether to enable short tags by default,
-[  --disable-short-tags    Disable the short-form <? start tag by default],yes, no)
+PHP_ARG_ENABLE(short-tags, whether to enable short tags by default,
+[  --disable-short-tags    Disable the short-form <? start tag by default], yes, no)
 
 if test "$PHP_SHORT_TAGS" = "yes"; then
-  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG,"1",[ ])
+  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG, "1", [ ])
 else
-  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG,"0",[ ])
+  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG, "0", [ ])
 fi
 
-PHP_ARG_ENABLE(dmalloc,whether to enable dmalloc,
+PHP_ARG_ENABLE(dmalloc, whether to enable dmalloc,
 [  --enable-dmalloc        Enable dmalloc], no, no)
 
 if test "$PHP_DMALLOC" = "yes"; then
-  
   AC_CHECK_LIB(dmalloc, dmalloc_error, [
     PHP_ADD_LIBRARY(dmalloc)
     AC_DEFINE(HAVE_DMALLOC,1,[Whether you have dmalloc])
@@ -789,25 +789,23 @@ if test "$PHP_DMALLOC" = "yes"; then
   ])
 fi
 
-PHP_ARG_ENABLE(ipv6,whether to enable IPv6 support,
+PHP_ARG_ENABLE(ipv6, whether to enable IPv6 support,
 [  --disable-ipv6          Disable IPv6 support], yes, no)
 
 if test "$PHP_IPV6" != "no" && test "$ac_cv_ipv6_support" = yes; then
-  AC_DEFINE(HAVE_IPV6,1,[Whether to enable IPv6 support])
+  AC_DEFINE(HAVE_IPV6, 1, [Whether to enable IPv6 support])
 fi
 
 AC_MSG_CHECKING([how big to make fd sets])
-AC_ARG_ENABLE(fd-setsize,
-[  --enable-fd-setsize     Set size of descriptor sets],[
-  if test "x$enableval" != "xyes"; then
-    CPPFLAGS="$CPPFLAGS -DFD_SETSIZE=$enableval"
-    AC_MSG_RESULT(using $enableval)
-  else
-    AC_MSG_RESULT(using system default)
-  fi
-],[
-  AC_MSG_RESULT(using system default)
-])
+PHP_ARG_ENABLE(fd-setsize,,
+[  --enable-fd-setsize     Set size of descriptor sets], no, no)
+
+if test "$PHP_FD_SETSIZE" != "yes"; then
+  CPPFLAGS="$CPPFLAGS -DFD_SETSIZE=$PHP_FD_SETSIZE"
+  AC_MSG_RESULT([using $PHP_FD_SETSIZE])
+else
+  AC_MSG_RESULT([using system default])
+fi
 
 dnl ## check for ICU library location and version
 PHP_SETUP_ICU
@@ -1045,7 +1043,7 @@ case $host_alias in
   ;;
 esac
 
-if test "$PHP_SAPI_CLI" != "no"; then
+if test "$PHP_CLI" != "no"; then
   PHP_CLI_TARGET="\$(SAPI_CLI_PATH)"
   PHP_INSTALL_CLI_TARGET="install-cli"
   PHP_ADD_SOURCES(sapi/cli, php_cli.c php_cli_readline.c getopt.c,, cli)
@@ -1263,6 +1261,14 @@ scripts/phpize scripts/man1/phpize.1 \
 scripts/php-config scripts/man1/php-config.1 \
 $PHP_OUTPUT_FILES"
 
+dnl
+dnl Check for unknown configure options
+dnl
+PHP_CHECK_CONFIGURE_OPTIONS
+
+dnl
+dnl Generate build files
+dnl
 AC_OUTPUT($ALL_OUTPUT_FILES, [], [
 
 if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test "\$CONFIG_FILES" = " $ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
@@ -1322,23 +1328,6 @@ dnl  fi
     echo "| and make the changes described there and try again.                |"
   fi
 
-  # Warn about CGI version with no extra security options.
-  if test "$PHP_SAPI" = "cgi"; then
-    if test "$REDIRECT" = "0"; then
-      if test "$DISCARD_PATH" = "0"; then
-        echo "+--------------------------------------------------------------------+"
-        echo "|                        *** WARNING ***                             |"
-        echo "|                                                                    |"
-        echo "| You will be compiling the CGI version of PHP without any           |"
-        echo "| redirection checking.  By putting this cgi binary somewhere in     |"
-        echo "| your web space, users may be able to circumvent existing .htaccess |"
-        echo "| security by loading files directly through the parser.  See        |"
-        echo "| http://www.php.net/manual/security.php for more details.           |"
-      fi
-    fi
-  fi
-
-
   if test -n "$DEBUG_LOG"; then
     rm -f config.cache
 cat <<X
@@ -1395,6 +1384,15 @@ cat <<X
 Thank you for using PHP.
 
 X
+
+  # Output unknown configure options
+  if test "$PHP_UNKNOWN_CONFIGURE_OPTIONS"; then
+    echo "Notice: Following unknown configure options were used:
+$PHP_UNKNOWN_CONFIGURE_OPTIONS
+
+Check '[$]0 --help' for available options
+"
+  fi
 
 fi
 ])
