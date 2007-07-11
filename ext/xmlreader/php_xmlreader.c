@@ -1094,14 +1094,20 @@ PHP_METHOD(xmlreader, XML)
 	int source_len = 0, encoding_len = 0;
 	long options = 0;
 	xmlreader_object *intern = NULL;
-	char *source, *uri = NULL, *encoding = NULL;
+	zstr source;
+	char *uri = NULL, *encoding = NULL;
 	int resolved_path_len;
 	char *directory=NULL, resolved_path[MAXPATHLEN];
 	xmlParserInputBufferPtr inputbfr;
 	xmlTextReaderPtr reader = NULL;
+	zend_uchar source_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|s!l", &source, &source_len, &source_type, &encoding, &encoding_len, &options) == FAILURE) {
 		return;
+	}
+
+	if (source_type == IS_UNICODE) {
+		source.s = php_libxml_unicode_to_string(source.u, source_len, &source_len TSRMLS_CC);
 	}
 
 	id = getThis();
@@ -1118,7 +1124,11 @@ PHP_METHOD(xmlreader, XML)
 		RETURN_FALSE;
 	}
 
-	inputbfr = xmlParserInputBufferCreateMem(source, source_len, XML_CHAR_ENCODING_NONE);
+	inputbfr = xmlParserInputBufferCreateMem(source.s, source_len, XML_CHAR_ENCODING_NONE);
+
+	if (source_type == IS_UNICODE) {
+		efree(source.s);
+	}
 
     if (inputbfr != NULL) {
 /* Get the URI of the current script so that we can set the base directory in libxml */
