@@ -20,7 +20,6 @@
 /* $Id$ */
 
 #include <stdio.h>
-
 #include "zend.h"
 
 #ifdef HAVE_STDARG_H
@@ -28,7 +27,7 @@
 #endif
 
 #if ZEND_BROKEN_SPRINTF
-int zend_sprintf(char *buffer, const char *format, ...)
+int zend_sprintf(char *buffer, const char *format, ...) /* {{{ */
 {
 	va_list args;
 
@@ -38,6 +37,7 @@ int zend_sprintf(char *buffer, const char *format, ...)
 
 	return strlen(buffer);
 }
+/* }}} */
 #endif
 
 /*

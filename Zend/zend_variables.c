@@ -26,8 +26,7 @@
 #include "zend_constants.h"
 #include "zend_list.h"
 
-
-ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
+ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC) /* {{{ */
 {
 	switch (Z_TYPE_P(zvalue) & ~IS_CONSTANT_INDEX) {
 		case IS_CONSTANT: {
@@ -78,9 +77,9 @@ dtor_unicode:
 			break;
 	}
 }
+/* }}} */
 
-
-ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
+ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC) /* {{{ */
 {
 	switch (Z_TYPE_P(zvalue) & ~IS_CONSTANT_INDEX) {
 		case IS_CONSTANT: {
@@ -111,15 +110,15 @@ dtor_unicode:
 			break;
 	}
 }
+/* }}} */
 
-
-ZEND_API void zval_add_ref(zval **p)
+ZEND_API void zval_add_ref(zval **p) /* {{{ */
 {
 	(*p)->refcount++;
 }
+/* }}} */
 
-
-ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
+ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) /* {{{ */
 {
 	switch (Z_TYPE_P(zvalue)) {
 		case IS_RESOURCE: {
@@ -170,42 +169,44 @@ copy_unicode:
 			break;
 	}
 }
+/* }}} */
 
-ZEND_API int zend_print_variable(zval *var)
+ZEND_API int zend_print_variable(zval *var) /* {{{ */
 {
 	return zend_print_zval(var, 0);
 }
-
+/* }}} */
 
 #if ZEND_DEBUG
-ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue)
+ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue) /* {{{ */
 {
 	zval_copy_ctor(zvalue);
 }
+/* }}} */
 
-
-ZEND_API void _zval_dtor_wrapper(zval *zvalue)
+ZEND_API void _zval_dtor_wrapper(zval *zvalue) /* {{{ */
 {
 	zval_dtor(zvalue);
 }
+/* }}} */
 
-
-ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue)
+ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue) /* {{{ */
 {
 	zval_internal_dtor(zvalue);
 }
+/* }}} */
 
-
-ZEND_API void _zval_ptr_dtor_wrapper(zval **zval_ptr)
+ZEND_API void _zval_ptr_dtor_wrapper(zval **zval_ptr) /* {{{ */
 {
 	zval_ptr_dtor(zval_ptr);
 }
+/* }}} */
 
-
-ZEND_API void _zval_internal_ptr_dtor_wrapper(zval **zval_ptr)
+ZEND_API void _zval_internal_ptr_dtor_wrapper(zval **zval_ptr) /* {{{ */
 {
 	zval_internal_ptr_dtor(zval_ptr);
 }
+/* }}} */
 #endif
 
 /*

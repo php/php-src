@@ -30,8 +30,7 @@
 #define zendtext LANG_SCNG(yy_text)
 #define zendleng LANG_SCNG(yy_leng)
 
-
-static void handle_whitespace(int *emit_whitespace)
+static void handle_whitespace(int *emit_whitespace) /* {{{ */
 {
 	unsigned char c;
 	int i;
@@ -45,9 +44,9 @@ static void handle_whitespace(int *emit_whitespace)
 	}
 	memset(emit_whitespace, 0, sizeof(int)*256);
 }
+/* }}} */
 
-
-ZEND_API void zend_indent()
+ZEND_API void zend_indent() /* {{{ */
 {
 	zval token;
 	int token_type;
@@ -146,6 +145,7 @@ dflt_printout:
 		Z_TYPE(token) = 0;
 	}
 }
+/* }}} */
 
 /*
  * Local variables:

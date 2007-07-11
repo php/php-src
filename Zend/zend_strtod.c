@@ -445,6 +445,7 @@ ZEND_API int zend_startup_strtod(void) /* {{{ */
 	return 1;
 }
 /* }}} */
+
 ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 {
 	destroy_freelist();
