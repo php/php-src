@@ -36,7 +36,6 @@
 #include "safe_mode.h"
 #include "exec.h"
 
-#if HAVE_SENDMAIL
 #ifdef PHP_WIN32
 #include "win32/sendmail.h"
 #endif
@@ -294,13 +293,6 @@ PHP_MINFO_FUNCTION(mail)
 #endif
 }
 /* }}} */
-
-#else
-
-PHP_FUNCTION(mail) {}
-PHP_MINFO_FUNCTION(mail) {}
-
-#endif
 
 /*
  * Local variables:

@@ -24,11 +24,7 @@
 PHP_FUNCTION(mail);
 PHP_MINFO_FUNCTION(mail);
 
-#if HAVE_SENDMAIL
-
 PHP_FUNCTION(ezmlm_hash);
 PHPAPI extern int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd TSRMLS_DC);
-
-#endif
 
 #endif /* PHP_MAIL_H */

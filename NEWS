@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 
 - Changed error handler to send HTTP 500 instead of blank page on PHP errors.
   (Dmitry, Andrei Nigmatulin)
+- Changed mail() function to be always available. (Johannes)
 
 - Added persistent connection status checker to pdo_pgsql.
   (Elvis Pranskevichus, Ilia)
