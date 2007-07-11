@@ -2256,6 +2256,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 		} else {
 			tmp = **zphrase;
 			zval_copy_ctor(&tmp);
+			convert_to_string(&tmp);
 			passphrase = Z_STRVAL(tmp);
 		}
 
