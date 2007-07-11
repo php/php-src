@@ -8,6 +8,9 @@ PHP_ARG_WITH(snmp,for SNMP support,
 PHP_ARG_WITH(openssl-dir,OpenSSL dir for SNMP,
 [  --with-openssl-dir[=DIR]  SNMP: openssl install prefix], no, no)
 
+PHP_ARG_ENABLE(ucd-snmp-hack, whether to enable UCD SNMP hack, 
+[  --enable-ucd-snmp-hack    SNMP: Enable UCD SNMP hack], no, no)
+
 if test "$PHP_SNMP" != "no"; then
 
   dnl
@@ -119,19 +122,10 @@ if test "$PHP_SNMP" != "no"; then
     $SNMP_SHARED_LIBADD
   ])
 
+  if test "$PHP_UCD_SNMP_HACK" = "yes" ; then
+    AC_DEFINE(UCD_SNMP_HACK, 1, [ ])
+  fi
+  
   PHP_NEW_EXTENSION(snmp, snmp.c, $ext_shared)
   PHP_SUBST(SNMP_SHARED_LIBADD)
 fi
-
-AC_MSG_CHECKING(whether to enable UCD SNMP hack)
-AC_ARG_ENABLE(ucd-snmp-hack,
-[  --enable-ucd-snmp-hack    SNMP: Enable UCD SNMP hack],[
-  if test "$enableval" = "yes" ; then
-    AC_DEFINE(UCD_SNMP_HACK, 1, [ ])
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
-],[
-  AC_MSG_RESULT(no)
-])
