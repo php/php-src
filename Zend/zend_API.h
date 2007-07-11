@@ -420,6 +420,7 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 		if (UG(unicode)) { \
 			int ___u_len = length; \
 			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+			___u_str[___u_len] = 0; \
 			if ((flags) & ZSTR_AUTOFREE) { \
 				efree(str); \
 			} \
@@ -563,6 +564,7 @@ ZEND_API int add_ascii_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *v
 		if (UG(unicode)) { \
 			int ___u_len = length; \
 			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+			___u_str[___u_len] = 0; \
 			if ((flags) & ZSTR_AUTOFREE) { \
 				efree(str); \
 			} \
@@ -707,6 +709,7 @@ ZEND_API int add_rt_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 		if (UG(unicode)) { \
 			int ___u_len  = length; \
 			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+			___u_str[___u_len] = 0; \
 			if ((flags) & ZSTR_AUTOFREE) { \
 				efree(str); \
 			} \
@@ -851,6 +854,7 @@ ZEND_API int add_utf8_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *va
 		if (UG(unicode)) { \
 			int ___u_len = length; \
 			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+			___u_str[___u_len] = 0; \
 			if ((flags) & ZSTR_AUTOFREE) { \
 				efree(str); \
 			} \
@@ -1005,6 +1009,7 @@ ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval 
 		if (UG(unicode)) { \
 			int ___u_len = length; \
 			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+			___u_str[___u_len] = 0; \
 			if ((flags) & ZSTR_AUTOFREE) { \
 				efree(str); \
 			} \
@@ -1123,6 +1128,7 @@ ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_
 		if (UG(unicode)) { \
 			int ___u_len = length; \
 			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+			___u_str[___u_len] = 0; \
 			if ((flags) & ZSTR_AUTOFREE) { \
 				efree(str); \
 			} \
@@ -1267,6 +1273,7 @@ ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
 		if (UG(unicode)) { \
 			int ___u_len = length; \
 			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+			___u_str[___u_len] = 0; \
 			if ((flags) & ZSTR_AUTOFREE) { \
 				efree(str); \
 			} \
@@ -1390,6 +1397,7 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 		if (UG(unicode)) { \
 			int ___u_len = length; \
 			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+			___u_str[___u_len] = 0; \
 			if ((flags) & ZSTR_AUTOFREE) { \
 				efree(str); \
 			} \
@@ -1644,6 +1652,7 @@ END_EXTERN_C()
 			char *__s = (s); \
 			int __s_len = strlen(__s); \
 			UChar *u_str = zend_ascii_to_unicode(__s, __s_len+1 ZEND_FILE_LINE_CC); \
+			u_str[__s_len] = 0; \
 			if ((flags) & ZSTR_AUTOFREE) { \
 				efree(__s); \
 			} \
@@ -1661,6 +1670,7 @@ END_EXTERN_C()
 			char *__s = (s); \
 			int __s_len  = (l); \
 			UChar *u_str = zend_ascii_to_unicode((__s), (__s_len)+1 ZEND_FILE_LINE_CC); \
+			u_str[__s_len] = 0; \
 			if ((flags) & ZSTR_AUTOFREE) { \
 				efree(__s); \
 			} \
