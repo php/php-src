@@ -4,9 +4,6 @@ dnl
 
 if test "$PHP_PDO" != "no"; then
 
-AC_DEFUN([PHP_PGSQL_CHECK_FUNCTIONS],[
-])
-
 PHP_ARG_WITH(pdo-pgsql,for PostgreSQL support for PDO,
 [  --with-pdo-pgsql[=DIR]    PDO: PostgreSQL support.  DIR is the PostgreSQL base
                             install directory or the path to pg_config])
@@ -63,7 +60,7 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   fi
 
   if test -z "$PGSQL_INCLUDE" -a -z "$PGSQL_LIBDIR" ; then
-    AC_MSG_ERROR([Unable to find libpq anywhere under $withval])
+    AC_MSG_ERROR([Unable to find libpq anywhere under $PGSQL_SEARCH_PATHS])
   fi
 
   AC_DEFINE(HAVE_PDO_PGSQL,1,[Whether to build PostgreSQL for PDO support or not])
