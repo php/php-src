@@ -3697,7 +3697,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 		case IS_UNICODE:
 			if (zend_u_lookup_class(Z_TYPE_P(class_name), Z_UNIVAL_P(class_name), Z_UNILEN_P(class_name), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-						"Interface %R does not exist", Z_TYPE_P(class_name), Z_UNIVAL_P(class_name));
+						"Class %R does not exist", Z_TYPE_P(class_name), Z_UNIVAL_P(class_name));
 				return;
 			}
 			class_ce = *pce;
