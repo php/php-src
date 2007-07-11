@@ -1,3 +1,198 @@
+2007-07-10  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS:
+      add CVE ref
+
+    * ext/standard/mail.c
+      ext/standard/mail.c:
+      Escape mail.force_extra_parameters value
+
+    * (PHP_4_4)
+      NEWS:
+      report fix
+
+2007-07-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/streams/plain_wrapper.c:
+      - fix concurrent reader/writer use case
+        (we read, while the other process writes -> if we don't try
+         read we won't notice that the file has been growing.)
+
+2007-07-10  Stanislav Malyshev  <stas@zend.com>
+
+    * main/main.c
+      main/main.c
+      main/main.c:
+      check if write is allowed before writing to error log
+
+    * (PHP_5_2)
+      main/main.c:
+      suppress warnings to avoid potential loop
+
+    * ext/session/mod_files.c
+      ext/session/mod_files.c
+      ext/session/mod_files.c:
+      always check save_path (issue reported by Maksymilian Arciemowicz)
+
+    * (PHP_5_2)
+      NEWS:
+      fixes
+
+2007-07-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/file.c:
+      Fixed fgets() and fgetss() with limits
+
+2007-07-10  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/reflection/tests/reflectionClass_FileInfo_basic.phpt
+      ext/reflection/tests/reflectionClass_FileInfo_error.phpt
+      ext/reflection/tests/reflectionClass_getConstant_basic.phpt
+      ext/reflection/tests/reflectionClass_getConstant_error.phpt
+      ext/reflection/tests/reflectionClass_getConstants_basic.phpt
+      ext/reflection/tests/reflectionClass_getConstants_error.phpt
+      ext/reflection/tests/reflectionClass_getConstructor_basic.phpt
+      ext/reflection/tests/reflectionClass_getConstructor_error.phpt:
+      tests for reflectionClass
+
+    * ext/reflection/tests/reflectionClass_FileInfo_basic.phpt
+      ext/reflection/tests/reflectionClass_FileInfo_basic.phpt
+      ext/reflection/tests/reflectionClass_FileInfo_error.phpt
+      ext/reflection/tests/reflectionClass_FileInfo_error.phpt
+      ext/reflection/tests/reflectionClass_getConstant_basic.phpt
+      ext/reflection/tests/reflectionClass_getConstant_basic.phpt
+      ext/reflection/tests/reflectionClass_getConstant_error.phpt
+      ext/reflection/tests/reflectionClass_getConstant_error.phpt
+      ext/reflection/tests/reflectionClass_getConstants_basic.phpt
+      ext/reflection/tests/reflectionClass_getConstants_basic.phpt
+      ext/reflection/tests/reflectionClass_getConstants_error.phpt
+      ext/reflection/tests/reflectionClass_getConstants_error.phpt
+      ext/reflection/tests/reflectionClass_getConstructor_basic.phpt
+      ext/reflection/tests/reflectionClass_getConstructor_basic.phpt
+      ext/reflection/tests/reflectionClass_getConstructor_error.phpt
+      ext/reflection/tests/reflectionClass_getConstructor_error.phpt:
+      
+      Tests for reflectionClass
+
+2007-07-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/html.c:
+      MFB htmlentities() / htmlspecialchars() "don't double encode" flag support
+
+2007-07-10  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c:
+      fix folding and ws
+
+2007-07-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/strripos_offset.phpt:
+      Fixed limit warnings in non-unicode mode
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      ext/standard/link.c
+      ext/standard/link.c
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error1.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error1.phpt
+      main/fopen_wrappers.c
+      main/fopen_wrappers.c:
+      Fixed symlink("", "somthing") and link("", "somthing") in ZTS mode
+
+2007-07-10  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug41947.phpt:
+      MFB: fix bug #41947 (SimpleXML incorrectly registers empty strings as
+      namespaces
+      add test
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug41947.phpt
+      ext/simplexml/tests/bug41947.phpt:
+      fix bug #41947 (SimpleXML incorrectly registers empty strings as namespaces
+      add test
+
+2007-07-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      main/streams/streams.c:
+      Fixed warning
+
+2007-07-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/bcmath/libbcmath/src/div.c
+      ext/bcmath/libbcmath/src/init.c
+      ext/bcmath/libbcmath/src/num2str.c:
+      use safe_emalloc()
+
+2007-07-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/unicode/autodetect-SCSU.phpt
+      tests/unicode/autodetect-UTF16BE.phpt
+      tests/unicode/autodetect-UTF16LE.phpt
+      tests/unicode/autodetect-UTF32BE.phpt
+      tests/unicode/autodetect-UTF32LE.phpt
+      tests/unicode/autodetect-UTF7.phpt
+      tests/unicode/autodetect-UTF8.phpt
+      tests/unicode/enc-HZ.phpt
+      tests/unicode/enc-ISO-2022-KR.phpt
+      tests/unicode/enc-JIS.phpt
+      tests/unicode/enc-SJIS.phpt
+      tests/unicode/encrt-HZ.phpt
+      tests/unicode/encrt-ISO-2022-KR.phpt
+      tests/unicode/encrt-JIS.phpt
+      tests/unicode/encrt-SJIS.phpt
+      tests/unicode/normalize_001.phpt
+      tests/unicode/normalize_002.phpt
+      tests/unicode/normalize_003.phpt
+      tests/unicode/normalize_004.phpt:
+      Skip unicode tests in non-unicode mode
+
+2007-07-10  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * acinclude.m4
+      configure.in:
+      - Removed --enable-versioning
+
+2007-07-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/pcre/php_pcre.c:
+      Fixed compilation warnings
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/tests/bug21732.phpt:
+      Fixed preg_replace_callback() with callback defined by array
+
+    * ext/openssl/openssl.c:
+      Fixed bug #41353
+
+    * ext/date/tests/date_create-3.phpt
+      ext/dom/tests/dom005.phpt
+      ext/json/tests/pass001.1.phpt
+      ext/spl/tests/bug33136.phpt
+      ext/standard/tests/array/locale_sort.phpt:
+      Fixed test
+
+2007-07-10  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/popen_pclose_error-sunos.phpt
+      ext/standard/tests/file/popen_pclose_error.phpt:
+      fix and new test for sunos
+
 2007-07-09  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/filestat.c:

@@ -1,3 +1,12 @@
+2007-07-10  Antony Dovgal  <antony@zend.com>
+
+    * zend.c
+      zend_API.c
+      zend_alloc.c
+      zend_builtin_functions.c
+      zend_compile.c:
+      fix folding and ws
+
 2007-07-09  Zoe Slattery  <zoe@uk.ibm.com>
 
     * (PHP_5_2)
