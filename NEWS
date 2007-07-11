@@ -6,7 +6,7 @@ PHP                                                                        NEWS
 - Upgraded PCRE to version 7.2 (Nuno)
 - Updated timezone database to version 2007.6. (Derick)
 
-- Improced openssl_x509_parse() to return extensions in readable form. (Dmitry)
+- Improved openssl_x509_parse() to return extensions in readable form. (Dmitry)
 - Improved fix for MOPB-03-2007. (Ilia)
 - Corrected fix for CVE-2007-2872. (Ilia)
 - Enabled statement cache for non-persistent OCI8 connections.
@@ -32,7 +32,10 @@ PHP                                                                        NEWS
 - Added CURLOPT_PRIVATE & CURLINFO_PRIVATE constants. 
   (Andrey A. Belashkov, Tony)
 
-- Fixed crash in OpenSSL extension because of non-strin passphrase. (Dmitry)
+- Implemented FR #41884 (ReflectionClass::getDefaultProperties() does not handle 
+  static attributes). (Tony)
+
+- Fixed crash in OpenSSL extension because of non-string passphrase. (Dmitry)
 - Fixed var_export() to use the new H modifier so that it can generate
   parseable PHP code for floats, independent of the locale. (Derick)
 - Fixed regression introduced by the fix for the libgd bug #74. (Pierre)
