@@ -3317,7 +3317,6 @@ PHP_FUNCTION(mb_decode_numericentity)
 /* {{{ proto int mb_send_mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
  *  Sends an email message with MIME scheme
  */
-#if HAVE_SENDMAIL
 
 #define SKIP_LONG_HEADER_SEP_MBSTRING(str, pos)										\
 	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
@@ -3821,16 +3820,6 @@ PHP_FUNCTION(mb_send_mail)
 #undef PHP_MBSTR_MAIL_MIME_HEADER2
 #undef PHP_MBSTR_MAIL_MIME_HEADER3
 #undef PHP_MBSTR_MAIL_MIME_HEADER4
-
-#else	/* HAVE_SENDMAIL */
-
-PHP_FUNCTION(mb_send_mail)
-{
-	RETURN_FALSE;
-}
-
-#endif	/* HAVE_SENDMAIL */
-
 /* }}} */
 
 /* {{{ proto mixed mb_get_info([string type])

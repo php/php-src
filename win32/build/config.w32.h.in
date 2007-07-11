@@ -55,7 +55,6 @@
 #undef HAVE_SETITIMER
 #undef HAVE_IODBC
 #define HAVE_LIBDL 1
-#define HAVE_SENDMAIL 1
 #define HAVE_GETTIMEOFDAY 1
 #define HAVE_PUTENV 1
 #define HAVE_LIMITS_H 1
