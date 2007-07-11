@@ -22,7 +22,7 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 </MOVIE>
 </LIST>';
 
-$dtdfile = rawurlencode(dirname(__FILE__)) . b'/dtdexample.dtd'; 
+$dtdfile = rawurlencode((binary)dirname(__FILE__)) . b'/dtdexample.dtd'; 
 $file = dirname(__FILE__) . '/__008.xml';
 file_put_contents($file, $xmlstring);
 
