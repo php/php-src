@@ -1703,6 +1703,9 @@ PHP_FUNCTION(utf8_decode)
 		RETURN_FALSE;
 	}
 
+	if (data_type == IS_UNICODE) {
+		RETURN_UNICODEL(data, data_len, 1);
+	}
 	if (UG(unicode)) {
 		decoded = xml_utf8_decode(data, data_len, &len, NULL);
 	} else {
