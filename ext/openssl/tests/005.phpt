@@ -32,3 +32,20 @@ array(6) {
 }
 
 string(15) "*.triconnect.nl"
+--UEXPECTF--	
+array(6) {
+  [u"C"]=>
+  unicode(2) "NL"
+  [u"ST"]=>
+  unicode(13) "Noord Brabant"
+  [u"L"]=>
+  unicode(4) "Uden"
+  [u"O"]=>
+  unicode(10) "Triconnect"
+  [u"OU"]=>
+  unicode(10) "Triconnect"
+  [u"CN"]=>
+  unicode(15) "*.triconnect.nl"
+}
+
+unicode(15) "*.triconnect.nl"
