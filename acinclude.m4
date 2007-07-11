@@ -2122,30 +2122,16 @@ dnl
 dnl Common setup macro for ICU
 dnl
 AC_DEFUN([PHP_SETUP_ICU],[
-  unset PHP_ICU_DIR
+  PHP_ARG_WITH(icu-dir, for location of ICU headers and libraries,
+  [  --with-icu-dir=DIR      Specify where ICU libraries and headers can be found], DEFAULT, no)
 
-  AC_MSG_CHECKING([for location of ICU headers and libraries])
-
-  AC_ARG_WITH(icu-dir,
-  [  --with-icu-dir=DIR      Specify where ICU libraries and headers can be found], 
-  [
-    if test "x$withval" != "xyes"; then
-      PHP_ICU_DIR=$withval
-    else
-      PHP_ICU_DIR=DEFAULT
-    fi
-  ], [
+  if test "$PHP_ICU_DIR" = "no"; then
     PHP_ICU_DIR=DEFAULT
-  ])
+  fi
 
   if test "$PHP_ICU_DIR" = "DEFAULT"; then
-    ICU_CONFIG=icu-config
-    for i in /usr/local/bin /usr/bin; do
-      if test -x "$i/icu-config"; then
-        ICU_CONFIG=$i/icu-config
-        break;
-      fi
-    done
+    dnl Try to find icu-config
+    AC_PATH_PROG(ICU_CONFIG, icu-config, no, [$PATH:/usr/local/bin])
   else
     ICU_CONFIG="$PHP_ICU_DIR/bin/icu-config"
   fi
@@ -2167,7 +2153,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
     IFS=$ac_IFS
     icu_version=`expr [$]1 \* 1000 + [$]2`
     AC_MSG_RESULT([found $icu_version_full])
-	
+
     if test "$icu_version" -lt "3004"; then
       AC_MSG_ERROR([ICU version 3.4 or later is required])
     fi
@@ -2178,7 +2164,6 @@ AC_DEFUN([PHP_SETUP_ICU],[
     PHP_EVAL_LIBLINE($ICU_LIBS, $1)
   fi
 ])
-
 
 dnl
 dnl PHP_SETUP_KERBEROS(shared-add [, action-found [, action-not-found]])
