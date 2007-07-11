@@ -2,35 +2,34 @@
 mysql_fetch_lengths()
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
 --FILE--
 <?php
-    include "connect.inc";
-    
-    $tmp    = NULL;
-    $link   = NULL;
+include "connect.inc";
 
-    if (!is_null($tmp = @mysql_fetch_lengths()))
-        printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+$tmp    = NULL;
+$link   = NULL;
 
-    if (false !== ($tmp = @mysql_fetch_lengths($link)))
-        printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+if (!is_null($tmp = @mysql_fetch_lengths()))
+	printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-    require('table.inc');
-    if (!$res = mysql_query("SELECT id, label FROM test ORDER BY id LIMIT 1", $link)) {
-        printf("[003] [%d] %s\n", mysql_errno($link), mysql_error($link));
-    }
-    
-    while ($row = mysql_fetch_assoc($res))
-        var_dump(mysql_fetch_lengths($res));
-    var_dump(mysql_fetch_lengths($res));
+if (false !== ($tmp = @mysql_fetch_lengths($link)))
+	printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-    mysql_free_result($res);
-    
-    var_dump(mysql_fetch_lengths($res));
-    
-    mysql_close($link);
-    print "done!";
+require('table.inc');
+if (!$res = mysql_query("SELECT id, label FROM test ORDER BY id LIMIT 1", $link)) {
+	printf("[003] [%d] %s\n", mysql_errno($link), mysql_error($link));
+}
+
+while ($row = mysql_fetch_assoc($res))
+	var_dump(mysql_fetch_lengths($res));
+var_dump(mysql_fetch_lengths($res));
+
+mysql_free_result($res);
+
+var_dump(mysql_fetch_lengths($res));
+
+mysql_close($link);
+print "done!";
 ?>
 --EXPECTF--
 array(2) {
@@ -43,4 +42,4 @@ bool(false)
 
 Warning: mysql_fetch_lengths(): %d is not a valid MySQL result resource in %s on line %d
 bool(false)
-done! 
+done!
