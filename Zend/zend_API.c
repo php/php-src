@@ -368,7 +368,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 							double d;
 							int type;
 
-							if ((type = is_numeric_unicode(Z_USTRVAL_PP(arg), Z_USTRLEN_PP(arg), p, &d, 0)) == 0) {
+							if ((type = is_numeric_unicode(Z_USTRVAL_PP(arg), Z_USTRLEN_PP(arg), p, &d, -1)) == 0) {
 								return "long";
 							} else if (type == IS_DOUBLE) {
 								*p = (long) d;
