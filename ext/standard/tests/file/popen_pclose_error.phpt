@@ -2,10 +2,9 @@
 Test popen() and pclose function: error conditions
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) == 'WIN' || substr(PHP_OS, 0, 3) == 'Sun')
-  die("skip Not Valid for Windows and Sun Solaris");
+if(substr(PHP_OS, 0, 3) == 'WIN' || strtoupper( substr(PHP_OS, 0, 3) ) == 'SUN')
+  die("skip Not Valid for Windows & Sun Solaris");
 ?>
-
 --FILE--
 <?php
 /*
