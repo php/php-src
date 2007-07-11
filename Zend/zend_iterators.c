@@ -48,20 +48,22 @@ static zend_object_handlers iterator_object_handlers = {
 	NULL  /* count */
 };
 
-ZEND_API void zend_register_iterator_wrapper(TSRMLS_D)
+ZEND_API void zend_register_iterator_wrapper(TSRMLS_D) /* {{{ */
 {
 	INIT_CLASS_ENTRY(zend_iterator_class_entry, "__iterator_wrapper", NULL);
 	free(zend_iterator_class_entry.name.s);
 	zend_iterator_class_entry.name.s = "__iterator_wrapper";
 }
+/* }}} */
 
-static void iter_wrapper_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+static void iter_wrapper_dtor(void *object, zend_object_handle handle TSRMLS_DC) /* {{{ */
 {
 	zend_object_iterator *iter = (zend_object_iterator*)object;
 	iter->funcs->dtor(iter TSRMLS_CC);
 }
+/* }}} */
 
-ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC)
+ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
 	zval *wrapped;
 
@@ -72,9 +74,9 @@ ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC)
 
 	return wrapped;
 }
+/* }}} */
 
-ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
-	zval *array_ptr, zend_object_iterator **iter TSRMLS_DC)
+ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(zval *array_ptr, zend_object_iterator **iter TSRMLS_DC) /* {{{ */
 {
 	switch (Z_TYPE_P(array_ptr)) {
 		case IS_OBJECT:
@@ -97,6 +99,7 @@ ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
 			return ZEND_ITER_INVALID;
 	}
 }
+/* }}} */
 
 /*
  * Local variables:

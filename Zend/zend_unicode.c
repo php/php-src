@@ -813,7 +813,7 @@ void zend_register_unicode_exceptions(TSRMLS_D)
 }
 /* }}} */
 
-zend_collator* zend_collator_create(UCollator *coll)
+zend_collator* zend_collator_create(UCollator *coll) /* {{{ */
 {
 	zend_collator *zcoll = NULL;
 
@@ -823,8 +823,9 @@ zend_collator* zend_collator_create(UCollator *coll)
 
 	return zcoll;
 }
+/* }}} */
 
-void zend_collator_destroy(zend_collator *zcoll)
+void zend_collator_destroy(zend_collator *zcoll) /* {{{ */
 {
 	zcoll->refcount--;
 	if (zcoll->refcount == 0) {
@@ -832,7 +833,7 @@ void zend_collator_destroy(zend_collator *zcoll)
 		efree(zcoll);
 	}
 }
-
+/* }}} */
 
 /*
  * Local variables:

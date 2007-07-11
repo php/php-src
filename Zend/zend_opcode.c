@@ -31,26 +31,29 @@
 
 extern int zend_spprintf(char **message, int max_len, char *format, ...);
 
-static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
+static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	if (extension->op_array_ctor) {
 		extension->op_array_ctor(op_array);
 	}
 }
+/* }}} */
 
-static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
+static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	if (extension->op_array_dtor) {
 		extension->op_array_dtor(op_array);
 	}
 }
+/* }}} */
 
-static void op_array_alloc_ops(zend_op_array *op_array)
+static void op_array_alloc_ops(zend_op_array *op_array) /* {{{ */
 {
 	op_array->opcodes = erealloc(op_array->opcodes, (op_array->size)*sizeof(zend_op));
 }
+/* }}} */
 
-void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size TSRMLS_DC)
+void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size TSRMLS_DC) /* {{{ */
 {
 	op_array->type = type;
 
@@ -106,8 +109,9 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_ctor_handler, op_array TSRMLS_CC);
 }
+/* }}} */
 
-ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC)
+ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC) /* {{{ */
 {
 	switch (function->type) {
 		case ZEND_USER_FUNCTION:
@@ -118,15 +122,17 @@ ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC)
 			break;
 	}
 }
+/* }}} */
 
-ZEND_API void zend_function_dtor(zend_function *function)
+ZEND_API void zend_function_dtor(zend_function *function) /* {{{ */
 {
 	TSRMLS_FETCH();
 
 	destroy_zend_function(function TSRMLS_CC);
 }
+/* }}} */
 
-ZEND_API void zend_u_function_dtor(zend_function *function)
+ZEND_API void zend_u_function_dtor(zend_function *function) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -151,15 +157,17 @@ ZEND_API void zend_u_function_dtor(zend_function *function)
 		}
 	}
 }
+/* }}} */
 
-static void zend_cleanup_op_array_data(zend_op_array *op_array)
+static void zend_cleanup_op_array_data(zend_op_array *op_array) /* {{{ */
 {
 	if (op_array->static_variables) {
 		zend_hash_clean(op_array->static_variables);
 	}
 }
+/* }}} */
 
-ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC)
+ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC) /* {{{ */
 {
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_cleanup_op_array_data((zend_op_array *) function);
@@ -168,16 +176,18 @@ ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC)
 		return ZEND_HASH_APPLY_STOP;
 	}
 }
+/* }}} */
 
-ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC)
+ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC) /* {{{ */
 {
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_cleanup_op_array_data((zend_op_array *) function);
 	}
 	return 0;
 }
+/* }}} */
 
-ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
+ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC) /* {{{ */
 {
 	if ((*pce)->type == ZEND_USER_CLASS) {
 		/* Clean all parts that can contain run-time data */
@@ -196,8 +206,9 @@ ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 	}
 	return 0;
 }
+/* }}} */
 
-ZEND_API void destroy_zend_class(zend_class_entry **pce)
+ZEND_API void destroy_zend_class(zend_class_entry **pce) /* {{{ */
 {
 	zend_class_entry *ce = *pce;
 
@@ -237,13 +248,15 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			break;
 	}
 }
+/* }}} */
 
-void zend_class_add_ref(zend_class_entry **ce)
+void zend_class_add_ref(zend_class_entry **ce) /* {{{ */
 {
 	(*ce)->refcount++;
 }
+/* }}} */
 
-ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
+ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = op_array->opcodes+op_array->last;
@@ -311,15 +324,17 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 		efree(op_array->arg_info);
 	}
 }
+/* }}} */
 
-void init_op(zend_op *op TSRMLS_DC)
+void init_op(zend_op *op TSRMLS_DC) /* {{{ */
 {
 	memset(op, 0, sizeof(zend_op));
 	op->lineno = CG(zend_lineno);
 	SET_UNUSED(op->result);
 }
+/* }}} */
 
-zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC)
+zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	zend_uint next_op_num = op_array->last++;
 	zend_op *next_op;
@@ -341,20 +356,23 @@ zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC)
 
 	return next_op;
 }
+/* }}} */
 
-int get_next_op_number(zend_op_array *op_array)
+int get_next_op_number(zend_op_array *op_array) /* {{{ */
 {
 	return op_array->last;
 }
+/* }}} */
 
-zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array)
+zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array) /* {{{ */
 {
 	op_array->last_brk_cont++;
 	op_array->brk_cont_array = erealloc(op_array->brk_cont_array, sizeof(zend_brk_cont_element)*op_array->last_brk_cont);
 	return &op_array->brk_cont_array[op_array->last_brk_cont-1];
 }
+/* }}} */
 
-static void zend_update_extended_info(zend_op_array *op_array TSRMLS_DC)
+static void zend_update_extended_info(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = op_array->opcodes, *end=opline+op_array->last;
 
@@ -376,15 +394,17 @@ static void zend_update_extended_info(zend_op_array *op_array TSRMLS_DC)
 		opline++;
 	}
 }
+/* }}} */
 
-static void zend_extension_op_array_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
+static void zend_extension_op_array_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	if (extension->op_array_handler) {
 		extension->op_array_handler(op_array);
 	}
 }
+/* }}} */
 
-int pass_two(zend_op_array *op_array TSRMLS_DC)
+int pass_two(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline, *end;
 
@@ -438,8 +458,9 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 	op_array->done_pass_two = 1;
 	return 0;
 }
+/* }}} */
 
-int print_class(zend_class_entry *class_entry TSRMLS_DC)
+int print_class(zend_class_entry *class_entry TSRMLS_DC) /* {{{ */
 {
 	char *tmp;
 
@@ -452,8 +473,9 @@ int print_class(zend_class_entry *class_entry TSRMLS_DC)
 	efree(tmp);
 	return 0;
 }
+/* }}} */
 
-ZEND_API unary_op_type get_unary_op(int opcode)
+ZEND_API unary_op_type get_unary_op(int opcode) /* {{{ */
 {
 	switch (opcode) {
 		case ZEND_BW_NOT:
@@ -467,8 +489,9 @@ ZEND_API unary_op_type get_unary_op(int opcode)
 			break;
 	}
 }
+/* }}} */
 
-ZEND_API void *get_binary_op(int opcode)
+ZEND_API void *get_binary_op(int opcode) /* {{{ */
 {
 	switch (opcode) {
 		case ZEND_ADD:
@@ -538,6 +561,7 @@ ZEND_API void *get_binary_op(int opcode)
 			break;
 	}
 }
+/* }}} */
 
 /*
  * Local variables:

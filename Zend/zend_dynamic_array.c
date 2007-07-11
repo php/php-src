@@ -28,7 +28,7 @@ typedef struct _dynamic_array {
         unsigned int allocated;
 } dynamic_array;
 
-ZEND_API int zend_dynamic_array_init(dynamic_array *da, unsigned int element_size, unsigned int size)
+ZEND_API int zend_dynamic_array_init(dynamic_array *da, unsigned int element_size, unsigned int size) /* {{{ */
 {
 	da->element_size = element_size;
 	da->allocated = size;
@@ -39,8 +39,9 @@ ZEND_API int zend_dynamic_array_init(dynamic_array *da, unsigned int element_siz
 	}
 	return 0;
 }
+/* }}} */
 
-ZEND_API void *zend_dynamic_array_push(dynamic_array *da)
+ZEND_API void *zend_dynamic_array_push(dynamic_array *da) /* {{{ */
 {
 	if (da->current == da->allocated) {
 		da->allocated *= 2;
@@ -48,20 +49,23 @@ ZEND_API void *zend_dynamic_array_push(dynamic_array *da)
 	}
 	return (void *)(da->array+(da->current++)*da->element_size);
 }
+/* }}} */
 
-ZEND_API void *zend_dynamic_array_pop(dynamic_array *da)
+ZEND_API void *zend_dynamic_array_pop(dynamic_array *da) /* {{{ */
 {
 	return (void *)(da->array+(--(da->current))*da->element_size);
 
 }
+/* }}} */
 
-ZEND_API void *zend_dynamic_array_get_element(dynamic_array *da, unsigned int index)
+ZEND_API void *zend_dynamic_array_get_element(dynamic_array *da, unsigned int index) /* {{{ */
 {
 	if (index >= da->current) {
 		return NULL;
 	}
 	return (void *)(da->array+index*da->element_size);
 }
+/* }}} */
 
 /*
  * Local variables:

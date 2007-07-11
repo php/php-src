@@ -24,24 +24,26 @@
 
 ZEND_DLIMPORT int isatty(int fd);
 
-static size_t zend_stream_stdio_reader(void *handle, char *buf, size_t len TSRMLS_DC)
+static size_t zend_stream_stdio_reader(void *handle, char *buf, size_t len TSRMLS_DC) /* {{{ */
 {
 	return fread(buf, 1, len, (FILE*)handle);
 }
+/* }}} */
 
-static void zend_stream_stdio_closer(void *handle TSRMLS_DC)
+static void zend_stream_stdio_closer(void *handle TSRMLS_DC) /* {{{ */
 {
 	if ((FILE*)handle != stdin)
 		fclose((FILE*)handle);
 }
+/* }}} */
 
-static long zend_stream_stdio_fteller(void *handle TSRMLS_DC)
+static long zend_stream_stdio_fteller(void *handle TSRMLS_DC) /* {{{ */
 {
 	return ftell((FILE*) handle);
 }
+/* }}} */
 
-
-ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSRMLS_DC)
+ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* {{{ */
 {
 	if (zend_stream_open_function) {
 		return zend_stream_open_function(filename, handle TSRMLS_CC);
@@ -54,8 +56,9 @@ ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSR
 
 	return (handle->handle.fp) ? SUCCESS : FAILURE;
 }
+/* }}} */
 
-ZEND_API int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC)
+ZEND_API int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC) /* {{{ */
 {
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FILENAME:
@@ -95,8 +98,9 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
-ZEND_API size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC)
+ZEND_API size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC) /* {{{ */
 {
 	if (file_handle->handle.stream.interactive) {
 		int c = '*';
@@ -120,8 +124,9 @@ ZEND_API size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_
 	}
 	return file_handle->handle.stream.reader(file_handle->handle.stream.handle, buf, len TSRMLS_CC);
 }
+/* }}} */
 
-ZEND_API int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC)
+ZEND_API int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC) /* {{{ */
 {
 	char buf;
 
@@ -130,13 +135,24 @@ ZEND_API int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC)
 	}
 	return EOF;
 }
+/* }}} */
 
-ZEND_API int zend_stream_ferror(zend_file_handle *file_handle TSRMLS_DC)
+ZEND_API int zend_stream_ferror(zend_file_handle *file_handle TSRMLS_DC) /* {{{ */
 {
 	return 0;
 }
+/* }}} */
 
-ZEND_API long zend_stream_ftell(zend_file_handle *file_handle TSRMLS_DC)
+ZEND_API long zend_stream_ftell(zend_file_handle *file_handle TSRMLS_DC) /* {{{ */
 {
 	return file_handle->handle.stream.fteller(file_handle->handle.stream.handle TSRMLS_CC);
 }
+/* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

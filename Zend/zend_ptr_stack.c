@@ -25,15 +25,15 @@
 # include <stdarg.h>
 #endif
 
-ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack)
+ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack) /* {{{ */
 {
 	stack->top_element = stack->elements = (void **) emalloc(sizeof(void *)*PTR_STACK_BLOCK_SIZE);
 	stack->max = PTR_STACK_BLOCK_SIZE;
 	stack->top = 0;
 }
+/* }}} */
 
-
-ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...)
+ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...) /* {{{ */
 {
 	va_list ptr;
 	void *elem;
@@ -49,9 +49,9 @@ ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...)
 	}
 	va_end(ptr);
 }
+/* }}} */
 
-
-ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...)
+ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...) /* {{{ */
 {
 	va_list ptr;
 	void **elem;
@@ -65,18 +65,17 @@ ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...)
 	}
 	va_end(ptr);
 }
+/* }}} */
 
-
-
-ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack)
+ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack) /* {{{ */
 {
 	if (stack->elements) {
 		efree(stack->elements);
 	}
 }
+/* }}} */
 
-
-ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *))
+ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *)) /* {{{ */
 {
 	int i = stack->top;
 
@@ -84,9 +83,9 @@ ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *))
 		func(stack->elements[i]);
 	}
 }
+/* }}} */
 
-
-ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements)
+ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements) /* {{{ */
 {
 	zend_ptr_stack_apply(stack, func);
 	if (free_elements) {
@@ -99,12 +98,13 @@ ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), 
 	stack->top = 0;
 	stack->top_element = stack->elements;
 }
+/* }}} */
 
-
-ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack)
+ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack) /* {{{ */
 {
 	return stack->top;
 }
+/* }}} */
 
 /*
  * Local variables:

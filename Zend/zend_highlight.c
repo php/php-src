@@ -27,7 +27,7 @@
 #include "zend_globals.h"
 #include "zend_operators.h"
 
-ZEND_API void zend_html_putc(char c)
+ZEND_API void zend_html_putc(char c) /* {{{ */
 {
 	switch (c) {
 		case '\n':
@@ -53,9 +53,9 @@ ZEND_API void zend_html_putc(char c)
 			break;
 	}
 }
+/* }}} */
 
-
-ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
+ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC) /* {{{ */
 {
 	const char *ptr=s, *end=s+len;
 
@@ -69,10 +69,9 @@ ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 		}
 	}
 }
+/* }}} */
 
-
-
-ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC)
+ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC) /* {{{ */
 {
 	zval token;
 	int token_type;
@@ -167,10 +166,9 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	zend_printf("</span>\n");
 	zend_printf("</code>");
 }
+/* }}} */
 
-
-
-ZEND_API void zend_strip(TSRMLS_D)
+ZEND_API void zend_strip(TSRMLS_D) /* {{{ */
 {
 	zval token;
 	int token_type;
@@ -230,6 +228,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 		prev_space = Z_TYPE(token) = 0;
 	}
 }
+/* }}} */
 
 /*
  * Local variables:

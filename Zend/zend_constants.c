@@ -26,17 +26,16 @@
 #include "zend_operators.h"
 #include "zend_globals.h"
 
-
-void free_zend_constant(zend_constant *c)
+void free_zend_constant(zend_constant *c) /* {{{ */
 {
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_dtor(&c->value);
 	}
 	free(c->name.v);
 }
+/* }}} */
 
-
-void copy_zend_constant(zend_constant *c)
+void copy_zend_constant(zend_constant *c) /* {{{ */
 {
 	TSRMLS_FETCH();
 	if (UG(unicode)) {
@@ -48,29 +47,29 @@ void copy_zend_constant(zend_constant *c)
 		zval_copy_ctor(&c->value);
 	}
 }
+/* }}} */
 
-
-void zend_copy_constants(HashTable *target, HashTable *source)
+void zend_copy_constants(HashTable *target, HashTable *source) /* {{{ */
 {
 	zend_constant tmp_constant;
 
 	zend_hash_copy(target, source, (copy_ctor_func_t) copy_zend_constant, &tmp_constant, sizeof(zend_constant));
 }
+/* }}} */
 
-
-static int clean_non_persistent_constant(zend_constant *c TSRMLS_DC)
+static int clean_non_persistent_constant(zend_constant *c TSRMLS_DC) /* {{{ */
 {
 	return (c->flags & CONST_PERSISTENT) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
 }
+/* }}} */
 
-
-static int clean_non_persistent_constant_full(zend_constant *c TSRMLS_DC)
+static int clean_non_persistent_constant_full(zend_constant *c TSRMLS_DC) /* {{{ */
 {
 	return (c->flags & CONST_PERSISTENT) ? 0 : 1;
 }
+/* }}} */
 
-
-static int clean_module_constant(zend_constant *c, int *module_number TSRMLS_DC)
+static int clean_module_constant(zend_constant *c, int *module_number TSRMLS_DC) /* {{{ */
 {
 	if (c->module_number == *module_number) {
 		return 1;
@@ -78,15 +77,15 @@ static int clean_module_constant(zend_constant *c, int *module_number TSRMLS_DC)
 		return 0;
 	}
 }
+/* }}} */
 
-
-void clean_module_constants(int module_number TSRMLS_DC)
+void clean_module_constants(int module_number TSRMLS_DC) /* {{{ */
 {
 	zend_hash_apply_with_argument(EG(zend_constants), (apply_func_arg_t) clean_module_constant, (void *) &module_number TSRMLS_CC);
 }
+/* }}} */
 
-
-int zend_startup_constants(TSRMLS_D)
+int zend_startup_constants(TSRMLS_D) /* {{{ */
 {
 	EG(zend_constants) = (HashTable *) malloc(sizeof(HashTable));
 
@@ -95,10 +94,9 @@ int zend_startup_constants(TSRMLS_D)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
-
-
-void zend_register_standard_constants(TSRMLS_D)
+void zend_register_standard_constants(TSRMLS_D) /* {{{ */
 {
 	REGISTER_MAIN_LONG_CONSTANT("E_ERROR", E_ERROR, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("E_RECOVERABLE_ERROR", E_RECOVERABLE_ERROR, CONST_PERSISTENT | CONST_CS);
@@ -162,17 +160,17 @@ void zend_register_standard_constants(TSRMLS_D)
 		zend_register_constant(&c TSRMLS_CC);
 	}
 }
+/* }}} */
 
-
-int zend_shutdown_constants(TSRMLS_D)
+int zend_shutdown_constants(TSRMLS_D) /* {{{ */
 {
 	zend_hash_destroy(EG(zend_constants));
 	free(EG(zend_constants));
 	return SUCCESS;
 }
+/* }}} */
 
-
-void clean_non_persistent_constants(TSRMLS_D)
+void clean_non_persistent_constants(TSRMLS_D) /* {{{ */
 {
 	if (EG(full_tables_cleanup)) {
 		zend_hash_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC);
@@ -180,9 +178,9 @@ void clean_non_persistent_constants(TSRMLS_D)
 		zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant TSRMLS_CC);
 	}
 }
+/* }}} */
 
-
-ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, int flags, int module_number TSRMLS_DC) /* {{{ */
 {
 	zend_constant c;
 
@@ -200,9 +198,9 @@ ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, 
 	c.module_number = module_number;
 	zend_u_register_constant(ZEND_STR_TYPE, &c TSRMLS_CC);
 }
+/* }}} */
 
-
-ZEND_API void zend_register_double_constant(char *name, uint name_len, double dval, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_double_constant(char *name, uint name_len, double dval, int flags, int module_number TSRMLS_DC) /* {{{ */
 {
 	zend_constant c;
 
@@ -220,9 +218,9 @@ ZEND_API void zend_register_double_constant(char *name, uint name_len, double dv
 	c.module_number = module_number;
 	zend_u_register_constant(ZEND_STR_TYPE, &c TSRMLS_CC);
 }
+/* }}} */
 
-
-ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *strval, uint strlen, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *strval, uint strlen, int flags, int module_number TSRMLS_DC) /* {{{ */
 {
 	zend_constant c;
 
@@ -252,15 +250,15 @@ ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *st
 	c.module_number = module_number;
 	zend_u_register_constant(ZEND_STR_TYPE, &c TSRMLS_CC);
 }
+/* }}} */
 
-
-ZEND_API void zend_register_string_constant(char *name, uint name_len, char *strval, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_string_constant(char *name, uint name_len, char *strval, int flags, int module_number TSRMLS_DC) /* {{{ */
 {
 	zend_register_stringl_constant(name, name_len, strval, strlen(strval), flags, module_number TSRMLS_CC);
 }
+/* }}} */
 
-
-ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval *result, zend_class_entry *scope TSRMLS_DC)
+ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval *result, zend_class_entry *scope TSRMLS_DC) /* {{{ */
 {
 	zend_constant *c;
 	int retval = 1;
@@ -381,13 +379,15 @@ ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval
 
 	return retval;
 }
+/* }}} */
 
-ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
+ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC) /* {{{ */
 {
 	return zend_u_get_constant(IS_STRING, ZSTR(name), name_len, result, NULL TSRMLS_CC);
 }
+/* }}} */
 
-ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_DC)
+ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_DC) /* {{{ */
 {
 	unsigned int  lookup_name_len;
 	zstr lookup_name;
@@ -428,8 +428,9 @@ ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_D
 	}
 	return ret;
 }
+/* }}} */
 
-ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
+ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC) /* {{{ */
 {
 	if (UG(unicode)) {
 		UChar *ustr;
@@ -452,6 +453,8 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		return zend_u_register_constant(IS_STRING, c TSRMLS_CC);
 	}
 }
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

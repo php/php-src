@@ -19,12 +19,11 @@
 /* $Id$ */
 
 #include "zend.h"
-
 #include <limits.h>
 
 #define QSORT_STACK_SIZE (sizeof(size_t) * CHAR_BIT)
 
-static void _zend_qsort_swap(void *a, void *b, size_t siz)
+static void _zend_qsort_swap(void *a, void *b, size_t siz) /* {{{ */
 {
 	register char  *tmp_a_char;
 	register char  *tmp_b_char;
@@ -52,8 +51,9 @@ static void _zend_qsort_swap(void *a, void *b, size_t siz)
 		*tmp_b_char++ = t_c;
 	}
 }
+/* }}} */
 
-ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t compare TSRMLS_DC)
+ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t compare TSRMLS_DC) /* {{{ */
 {
 	void           *begin_stack[QSORT_STACK_SIZE];
 	void           *end_stack[QSORT_STACK_SIZE];
@@ -116,6 +116,7 @@ ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t co
 		}
 	}
 }
+/* }}} */
 
 /*
  * Local Variables:

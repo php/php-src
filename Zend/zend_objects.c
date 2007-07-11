@@ -26,7 +26,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSRMLS_DC)
+ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	ALLOC_HASHTABLE(object->properties);
 	zend_u_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
@@ -34,8 +34,9 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSR
 	object->ce = ce;	
 	object->guards = NULL;
 }
+/* }}} */
 
-ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
+ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC) /* {{{ */
 {
 	if (object->guards) {
 		zend_hash_destroy(object->guards);
@@ -46,8 +47,9 @@ ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
 		FREE_HASHTABLE(object->properties);
 	}
 }
+/* }}} */
 
-ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
+ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC) /* {{{ */
 {
 	zend_function *destructor = object->ce->destructor;
 
@@ -115,8 +117,9 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 		zval_ptr_dtor(&obj);
 	}
 }
+/* }}} */
 
-ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC)
+ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC) /* {{{ */
 {
 	if (object->guards) {
 		zend_hash_destroy(object->guards);
@@ -126,8 +129,9 @@ ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC)
 	FREE_HASHTABLE(object->properties);
 	efree(object);
 }
+/* }}} */
 
-ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type TSRMLS_DC)
+ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
 	zend_object_value retval;
 
@@ -138,13 +142,15 @@ ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_ent
 	(*object)->guards = NULL;
 	return retval;
 }
+/* }}} */
 
-ZEND_API zend_object *zend_objects_get_address(zval *zobject TSRMLS_DC)
+ZEND_API zend_object *zend_objects_get_address(zval *zobject TSRMLS_DC) /* {{{ */
 {
 	return (zend_object *)zend_object_store_get_object(zobject TSRMLS_CC);
 }
+/* }}} */
 
-ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_value new_obj_val, zend_object *old_object, zend_object_handle handle TSRMLS_DC)
+ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_value new_obj_val, zend_object *old_object, zend_object_handle handle TSRMLS_DC) /* {{{ */
 {
 	zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
 	if (old_object->ce->clone) {
@@ -160,8 +166,9 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
 		zval_ptr_dtor(&new_obj);
 	}
 }
+/* }}} */
 
-ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
+ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC) /* {{{ */
 {
 	zend_object_value new_obj_val;
 	zend_object *old_object;
@@ -180,6 +187,7 @@ ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 
 	return new_obj_val;
 }
+/* }}} */
 
 /*
  * Local variables:
