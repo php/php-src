@@ -1,12 +1,12 @@
 --TEST--
-resultset constructor 
+resultset constructor
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd);
+	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	$mysql->real_query("SELECT 'foo' FROM DUAL");
 
@@ -17,9 +17,17 @@ resultset constructor
 	$mysql->close();
 
 	var_dump($row);
+	print "done!";
 ?>
 --EXPECTF--
 array(1) {
   [0]=>
-  %s(3) "foo"
+  string(3) "foo"
 }
+done!
+--UEXPECTF--
+array(1) {
+  [0]=>
+  unicode(3) "foo"
+}
+done!

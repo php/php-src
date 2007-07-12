@@ -6,9 +6,11 @@ mysqli ping
 <?php
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd, "test");
+	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 	var_dump($mysql->ping());
 	$mysql->close();
+	print "done!";
 ?>
 --EXPECT--
 bool(true)
+done!

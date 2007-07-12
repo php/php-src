@@ -6,18 +6,27 @@ mysqli_driver properties
 <?php
 	include "connect.inc";
 
-    var_dump( $driver->embedded);
-    var_dump( $driver->client_version);
-    var_dump( $driver->client_info);
-    var_dump( $driver->driver_version);
-	var_dump( $driver->reconnect);
-	var_dump( $driver->report_mode);
-    
+	var_dump($driver->embedded);
+	var_dump($driver->client_version);
+	var_dump($driver->client_info);
+	var_dump($driver->driver_version);
+	var_dump($driver->reconnect);
+	var_dump($driver->report_mode);
+	print "done!";
 ?>
 --EXPECTF--
 bool(%s)
 int(%d)
-%s(%d) "%s"
+string(%d) "%s"
 int(%d)
 bool(%s)
 int(%d)
+done!
+--UEXPECTF--
+bool(%s)
+int(%d)
+unicode(%d) "%s"
+int(%d)
+bool(%s)
+int(%d)
+done!

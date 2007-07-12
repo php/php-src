@@ -6,29 +6,40 @@ mysqli multi_query, next_result, more_results
 <?php
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd, "test");
+	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 	$mysql->multi_query('SELECT 1;SELECT 2');
 	do {
-		$res = $mysql->store_result();	
+		$res = $mysql->store_result();
 		if ($mysql->errno == 0) {
 			while ($arr = $res->fetch_assoc()) {
 				var_dump($arr);
 			}
 			$res->free();
 		}
-		if ($mysql->more_results()) {
-			echo "---\n";
+		if (!$mysql->more_results()) {
+			break;
 		}
-	} while ($mysql->next_result());
+	} while (@$mysql->next_result());
 	$mysql->close();
+	print "done!";
 ?>
 --EXPECTF--
 array(1) {
   [1]=>
-  %s(1) "1"
+  string(1) "1"
 }
----
 array(1) {
   [2]=>
-  %s(1) "2"
+  string(1) "2"
 }
+done!
+--UEXPECTF--
+array(1) {
+  [1]=>
+  unicode(1) "1"
+}
+array(1) {
+  [2]=>
+  unicode(1) "2"
+}
+done!
