@@ -5,23 +5,28 @@ mysqli fetch tinyint values
 --FILE--
 <?php
 	include "connect.inc";
-	
+
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
-	mysqli_select_db($link, "test");
-	mysqli_query($link, "SET sql_mode=''");
+	if (!mysqli_query($link, "SET sql_mode=''"))
+		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-  	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch");
-  	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 tinyint,
-                                                     c2 tinyint unsigned,
-                                                     c3 tinyint not NULL,
-                                                     c4 tinyint,
-                                                     c5 tinyint,
-                                                     c6 tinyint unsigned,
-                                                     c7 tinyint)");
+	if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch"))
+		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_query($link, "INSERT INTO test_bind_fetch VALUES (-23,300,0,-100,-127,+30,0)");
+	$rc = mysqli_query($link, "CREATE TABLE test_bind_fetch(c1 tinyint,
+													c2 tinyint unsigned,
+													c3 tinyint not NULL,
+													c4 tinyint,
+													c5 tinyint,
+													c6 tinyint unsigned,
+													c7 tinyint) ENGINE=" . $engine);
+	if (!$rc)
+		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!mysqli_query($link, "INSERT INTO test_bind_fetch VALUES (-23,300,0,-100,-127,+30,0)"))
+		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch");
 	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);
@@ -34,6 +39,7 @@ mysqli fetch tinyint values
 
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECT--
 array(7) {
@@ -52,3 +58,4 @@ array(7) {
   [6]=>
   int(0)
 }
+done!

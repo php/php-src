@@ -7,12 +7,13 @@ mysqli fetch char/text long
 	include "connect.inc";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
-	mysqli_select_db($link, "test");
-
-  	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch");
-  	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 char(10), c2 text)");
+	if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch"))
+		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		
+	if (!mysqli_query($link, "CREATE TABLE test_bind_fetch(c1 char(10), c2 text) ENGINE=" . $engine))
+		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$a = str_repeat("A1", 32000);
 
@@ -30,11 +31,21 @@ mysqli fetch char/text long
 
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECTF--
 array(2) {
   [0]=>
-  %s(10) "1234567890"
+  string(10) "1234567890"
   [1]=>
-  %s(13) "32K String ok"
+  string(13) "32K String ok"
 }
+done!
+--UEXPECTF--
+array(2) {
+  [0]=>
+  unicode(10) "1234567890"
+  [1]=>
+  unicode(13) "32K String ok"
+}
+done!
