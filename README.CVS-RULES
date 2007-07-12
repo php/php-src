@@ -39,8 +39,7 @@ HEAD     Will become PHP 6.0. This CVS branch is for active development.
 PHP_5_2  Is used to release the PHP 5.2.x series. Only minor feature
          enhancements may go in here, but please keep that as infrequent as
          possible.
-PHP_5_1  Is used to release the PHP 5.1.x series. Only bugfixes are permitted
-         on this branch (Consult the releasemaster prior to commit).
+PHP_5_1  This branch is closed.
 PHP_4_4  Is used to release the PHP 4.4.x series. Only bugfixes are permitted
          on this branch (Consult the releasemaster prior to commit).
 PHP_4_3  This branch is closed.
@@ -99,9 +98,13 @@ For string.c:
 
 The # lines will be omitted from the ChangeLog automagically.
 
+Use the [DOC] tag in your log message whenever you feel that your changes
+imply a documentation modification. The php-doc team will automatically
+get notified about your commit through the php-doc mailing list.
+
 If you fix some bugs, you should note the bug ID numbers in your
 commit message. Bug ID should be prefixed by "#" for easier access to
-bug report when developers are browsing CVS via. LXR or Bonsai.
+bug report when developers are browsing CVS via LXR or Bonsai.
 
 Example:
 
