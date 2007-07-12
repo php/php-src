@@ -3785,7 +3785,7 @@ PHP_FUNCTION(mb_send_mail)
 	headers = (char *)device.buffer;
 
 	if (force_extra_parameters) {
-		extra_cmd = estrdup(force_extra_parameters);
+		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	} 
