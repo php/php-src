@@ -5,9 +5,9 @@ function test: mysqli_stat
 --FILE--
 <?php
 	include "connect.inc";
-	
+
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	$status = mysqli_stat($link);
 
@@ -15,6 +15,8 @@ function test: mysqli_stat
 	var_dump(strlen($status) > 0);
 
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECT--
 bool(true)
+done!

@@ -4,27 +4,30 @@ mysqli bind_param/bind_result date
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+	/* NOTE: There's an option in mysqlnd which controls if data and
+	time are returned as unicode or not. Consider this if you consider
+	adding a UEXPECTF to the test. */
 
 	include "connect.inc";
-	
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
 
-	mysqli_select_db($link, "test");
+	/*** test mysqli_connect 127.0.0.1 ***/
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+
+	mysqli_select_db($link, $db);
 	mysqli_query($link, "SET sql_mode=''");
-		
+
 	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_result");
-  	mysqli_query($link,"CREATE TABLE test_bind_result(c1 date, c2 time, 
-                                                        c3 timestamp(14), 
-                                                        c4 year, 
-                                                        c5 datetime, 
-                                                        c6 timestamp(4), 
+	mysqli_query($link,"CREATE TABLE test_bind_result(c1 date, c2 time,
+                                                        c3 timestamp(14),
+                                                        c4 year,
+                                                        c5 datetime,
+                                                        c6 timestamp(4),
                                                         c7 timestamp(6))");
 
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_result VALUES (?,?,?,?,?,?,?)");
 	mysqli_bind_param($stmt, "sssssss", $d1, $d2, $d3, $d4, $d5, $d6, $d7);
 
-  	$d1 = "2002-01-02";
+	$d1 = "2002-01-02";
 	$d2 = "12:49:00";
 	$d3 = "2002-01-02 17:46:59";
 	$d4 = "2010";
@@ -37,9 +40,9 @@ mysqli bind_param/bind_result date
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_result");
 
-  	mysqli_bind_result($stmt,$c1, $c2, $c3, $c4, $c5, $c6, $c7);
-	
- 	mysqli_execute($stmt);
+	mysqli_bind_result($stmt,$c1, $c2, $c3, $c4, $c5, $c6, $c7);
+
+	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
 
 	$test = array($c1,$c2,$c3,$c4,$c5,$c6,$c7);
@@ -48,6 +51,8 @@ mysqli bind_param/bind_result date
 
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
+
+	print "done!";
 ?>
 --EXPECTF--
 array(7) {
@@ -66,3 +71,4 @@ array(7) {
   [6]=>
   %s(19) "1999-12-29 00:00:00"
 }
+done!

@@ -5,15 +5,15 @@ mysqli bind_param/bind_prepare fetch long values
 --FILE--
 <?php
 	include "connect.inc";
-	
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
 
-	mysqli_select_db($link, "test");
+	/*** test mysqli_connect 127.0.0.1 ***/
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+
+	mysqli_select_db($link, $db);
 	mysqli_query($link, "SET sql_mode=''");
 
-  	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch");
-  	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 int unsigned,
+	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch");
+	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 int unsigned,
                                                      c2 int unsigned,
                                                      c3 int,
                                                      c4 int,
@@ -45,6 +45,8 @@ mysqli bind_param/bind_prepare fetch long values
 
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
+
+	print "done!";
 ?>
 --EXPECT--
 array(7) {
@@ -63,3 +65,4 @@ array(7) {
   [6]=>
   int(0)
 }
+done!
