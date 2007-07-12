@@ -5,11 +5,11 @@ mysqli_get_metadata
 --FILE--
 <?php
 	include "connect.inc";
-	
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
 
-	mysqli_select_db($link, "test");
+	/*** test mysqli_connect 127.0.0.1 ***/
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+
+	mysqli_select_db($link, $db);
 
 	mysqli_query($link, "DROP TABLE IF EXISTS test_affected");
 	mysqli_query($link, "CREATE TABLE test_affected (foo int, bar varchar(10) character set latin1)");
@@ -31,14 +31,15 @@ mysqli_get_metadata
 	while ($field = mysqli_fetch_field($result)) {
 		var_dump($field);
 	}
-    
+
 	print_r(mysqli_fetch_lengths($result));
-    
+
 	mysqli_free_result($result);
 
 
-	mysqli_stmt_close($stmt);	
+	mysqli_stmt_close($stmt);
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECTF--
 === fetch_fields ===
@@ -194,6 +195,7 @@ object(stdClass)#5 (11) {
   ["decimals"]=>
   int(0)
 }
+done!
 --UEXPECTF--
 === fetch_fields ===
 array(2) {
@@ -348,3 +350,4 @@ object(stdClass)#5 (11) {
   [u"decimals"]=>
   int(0)
 }
+done!

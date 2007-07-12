@@ -5,15 +5,15 @@ mysqli_fetch_object
 --FILE--
 <?php
 	include "connect.inc";
-	
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
 
-	mysqli_select_db($link, "test");
+	/*** test mysqli_connect 127.0.0.1 ***/
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+
+	mysqli_select_db($link, $db);
 	mysqli_query($link, "SET sql_mode=''");
 
-  	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch");
-  	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 smallint unsigned,
+	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch");
+	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 smallint unsigned,
                                                      c2 smallint unsigned,
                                                      c3 smallint,
                                                      c4 smallint,
@@ -42,6 +42,7 @@ mysqli_fetch_object
 	var_dump($test);
 
 	mysqli_close($link);
+	print "done!"
 ?>
 --EXPECTF--
 object(stdClass)#%d (7) {
@@ -60,6 +61,7 @@ object(stdClass)#%d (7) {
   ["c7"]=>
   string(1) "0"
 }
+done!
 --UEXPECTF--
 object(stdClass)#%d (7) {
   [u"c1"]=>
@@ -77,3 +79,4 @@ object(stdClass)#%d (7) {
   [u"c7"]=>
   unicode(1) "0"
 }
+done!
