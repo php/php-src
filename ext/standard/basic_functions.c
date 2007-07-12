@@ -5032,7 +5032,7 @@ PHP_FUNCTION(error_get_last)
    Call a user function which is the first parameter */
 PHP_FUNCTION(call_user_func)
 {
-	zval *retval_ptr = return_value;
+	zval *retval_ptr = NULL;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
@@ -5040,13 +5040,12 @@ PHP_FUNCTION(call_user_func)
 		return;
 	}
 
-	fci.retval_ptr_ptr = return_value_ptr;
+	fci.retval_ptr_ptr = &retval_ptr;
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS) {
-		zval_ptr_dtor(&retval_ptr);
-	}
-	if (!*return_value_ptr) {
-		ALLOC_INIT_ZVAL(*return_value_ptr);
+		*return_value = **fci.retval_ptr_ptr;
+		zval_copy_ctor(return_value);
+		zval_ptr_dtor(fci.retval_ptr_ptr);
 	}
 
 	if (fci.params) {
@@ -5059,7 +5058,7 @@ PHP_FUNCTION(call_user_func)
    Call a user function which is the first parameter with the arguments contained in array */
 PHP_FUNCTION(call_user_func_array)
 {
-	zval *params, *retval_ptr = return_value;
+	zval *params, *retval_ptr = NULL;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
@@ -5067,15 +5066,13 @@ PHP_FUNCTION(call_user_func_array)
 		return;
 	}
 
-	fci.retval_ptr_ptr = return_value_ptr;
-
 	zend_fcall_info_args(&fci, params TSRMLS_CC);
+	fci.retval_ptr_ptr = &retval_ptr;
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS) {
-		zval_ptr_dtor(&retval_ptr);
-	}
-	if (!*return_value_ptr) {
-		ALLOC_INIT_ZVAL(*return_value_ptr);
+		*return_value = **fci.retval_ptr_ptr;
+		zval_copy_ctor(return_value);
+		zval_ptr_dtor(fci.retval_ptr_ptr);
 	}
 
 	zend_fcall_info_args_clear(&fci, 1);
