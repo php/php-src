@@ -15,6 +15,9 @@ if (strlen(fread($reader, 10)) > 0) {
 	echo "OK\n";
 }
 
+fclose($writer);
+fclose($reader);
+
 @unlink($filename);
 
 echo "Done\n";
