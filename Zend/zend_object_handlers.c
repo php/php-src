@@ -800,7 +800,9 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 		/* Ensure that we haven't overridden a private function and end up calling
 		 * the overriding public function...
 		 */
-		if (EG(scope) && fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
+		if (EG(scope) &&
+		    is_derived_class(fbc->common.scope, EG(scope)) &&
+		    fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
 			zend_function *priv_fbc;
 
 			if (zend_hash_find(&EG(scope)->function_table, lc_method_name, method_len+1, (void **) &priv_fbc)==SUCCESS
