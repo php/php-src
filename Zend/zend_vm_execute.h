@@ -667,69 +667,6 @@ static int ZEND_FETCH_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zval *function_name;
-	zend_class_entry *ce;
-
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
-
-	ce = EX_T(opline->op1.u.var).class_entry;
-	if(IS_CONST != IS_UNUSED) {
-		zstr function_name_strval;
-		unsigned int function_name_strlen;
-		zend_bool is_const = (IS_CONST == IS_CONST);
-
-
-		if (is_const) {
-			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
-			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
-		} else {
-			function_name = &opline->op2.u.constant;
-
-			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
-				zend_error_noreturn(E_ERROR, "Function name must be a string");
-			}
-			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
-		}
-
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
-
-		if (!is_const) {
-			efree(function_name_strval.v);
-
-		}
-	} else {
-		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
-		}
-		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
-		}
-		EX(fbc) = ce->constructor;
-	}
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
-		EX(object) = NULL;
-	} else {
-		if (IS_CONST != IS_UNUSED &&
-		    EG(This) &&
-		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
-
-		}
-		if ((EX(object) = EG(This))) {
-			EX(object)->refcount++;
-		}
-	}
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -753,10 +690,38 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
 
-	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	if (IS_CONST != IS_CONST &&
+	    ((Z_TYPE_P(function_name) == IS_UNICODE &&
+	      Z_USTRVAL_P(function_name)[0] == ':' &&
+	      Z_USTRVAL_P(function_name)[1] == ':') ||
+	     (Z_TYPE_P(function_name) == IS_STRING &&
+	      Z_STRVAL_P(function_name)[0] == ':' &&
+	      Z_STRVAL_P(function_name)[1] == ':'))) {
+		if (Z_TYPE_P(function_name) == IS_UNICODE) {
+			lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+		} else {
+			lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+		}
+	} else {
+		lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	}
 	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE) {
 		efree(lcname.v);
-		zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+
+		if (IS_CONST == IS_CONST && opline->op1.op_type == IS_CONST) {
+			if (Z_TYPE_P(function_name) == IS_UNICODE) {
+				lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+			} else {
+				lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+			}
+			if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE ||
+			    function->type != ZEND_INTERNAL_FUNCTION) {
+				efree(lcname.v);
+				zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+			}
+		} else {
+			zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+		}
 	}
 
 	efree(lcname.v);
@@ -888,69 +853,6 @@ static int ZEND_FETCH_CLASS_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zval *function_name;
-	zend_class_entry *ce;
-
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
-
-	ce = EX_T(opline->op1.u.var).class_entry;
-	if(IS_TMP_VAR != IS_UNUSED) {
-		zstr function_name_strval;
-		unsigned int function_name_strlen;
-		zend_bool is_const = (IS_TMP_VAR == IS_CONST);
-		zend_free_op free_op2;
-
-		if (is_const) {
-			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
-			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
-		} else {
-			function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
-			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
-				zend_error_noreturn(E_ERROR, "Function name must be a string");
-			}
-			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
-		}
-
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
-
-		if (!is_const) {
-			efree(function_name_strval.v);
-			zval_dtor(free_op2.var);
-		}
-	} else {
-		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
-		}
-		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
-		}
-		EX(fbc) = ce->constructor;
-	}
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
-		EX(object) = NULL;
-	} else {
-		if (IS_TMP_VAR != IS_UNUSED &&
-		    EG(This) &&
-		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
-
-		}
-		if ((EX(object) = EG(This))) {
-			EX(object)->refcount++;
-		}
-	}
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -974,10 +876,38 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
 
-	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	if (IS_TMP_VAR != IS_CONST &&
+	    ((Z_TYPE_P(function_name) == IS_UNICODE &&
+	      Z_USTRVAL_P(function_name)[0] == ':' &&
+	      Z_USTRVAL_P(function_name)[1] == ':') ||
+	     (Z_TYPE_P(function_name) == IS_STRING &&
+	      Z_STRVAL_P(function_name)[0] == ':' &&
+	      Z_STRVAL_P(function_name)[1] == ':'))) {
+		if (Z_TYPE_P(function_name) == IS_UNICODE) {
+			lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+		} else {
+			lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+		}
+	} else {
+		lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	}
 	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE) {
 		efree(lcname.v);
-		zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+
+		if (IS_TMP_VAR == IS_CONST && opline->op1.op_type == IS_CONST) {
+			if (Z_TYPE_P(function_name) == IS_UNICODE) {
+				lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+			} else {
+				lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+			}
+			if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE ||
+			    function->type != ZEND_INTERNAL_FUNCTION) {
+				efree(lcname.v);
+				zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+			}
+		} else {
+			zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+		}
 	}
 
 	efree(lcname.v);
@@ -1024,69 +954,6 @@ static int ZEND_FETCH_CLASS_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zval *function_name;
-	zend_class_entry *ce;
-
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
-
-	ce = EX_T(opline->op1.u.var).class_entry;
-	if(IS_VAR != IS_UNUSED) {
-		zstr function_name_strval;
-		unsigned int function_name_strlen;
-		zend_bool is_const = (IS_VAR == IS_CONST);
-		zend_free_op free_op2;
-
-		if (is_const) {
-			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
-			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
-		} else {
-			function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
-			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
-				zend_error_noreturn(E_ERROR, "Function name must be a string");
-			}
-			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
-		}
-
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
-
-		if (!is_const) {
-			efree(function_name_strval.v);
-			if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
-		}
-	} else {
-		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
-		}
-		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
-		}
-		EX(fbc) = ce->constructor;
-	}
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
-		EX(object) = NULL;
-	} else {
-		if (IS_VAR != IS_UNUSED &&
-		    EG(This) &&
-		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
-
-		}
-		if ((EX(object) = EG(This))) {
-			EX(object)->refcount++;
-		}
-	}
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -1110,10 +977,38 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
 
-	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	if (IS_VAR != IS_CONST &&
+	    ((Z_TYPE_P(function_name) == IS_UNICODE &&
+	      Z_USTRVAL_P(function_name)[0] == ':' &&
+	      Z_USTRVAL_P(function_name)[1] == ':') ||
+	     (Z_TYPE_P(function_name) == IS_STRING &&
+	      Z_STRVAL_P(function_name)[0] == ':' &&
+	      Z_STRVAL_P(function_name)[1] == ':'))) {
+		if (Z_TYPE_P(function_name) == IS_UNICODE) {
+			lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+		} else {
+			lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+		}
+	} else {
+		lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	}
 	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE) {
 		efree(lcname.v);
-		zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+
+		if (IS_VAR == IS_CONST && opline->op1.op_type == IS_CONST) {
+			if (Z_TYPE_P(function_name) == IS_UNICODE) {
+				lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+			} else {
+				lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+			}
+			if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE ||
+			    function->type != ZEND_INTERNAL_FUNCTION) {
+				efree(lcname.v);
+				zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+			}
+		} else {
+			zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+		}
 	}
 
 	efree(lcname.v);
@@ -1159,69 +1054,6 @@ static int ZEND_FETCH_CLASS_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zval *function_name;
-	zend_class_entry *ce;
-
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
-
-	ce = EX_T(opline->op1.u.var).class_entry;
-	if(IS_UNUSED != IS_UNUSED) {
-		zstr function_name_strval;
-		unsigned int function_name_strlen;
-		zend_bool is_const = (IS_UNUSED == IS_CONST);
-
-
-		if (is_const) {
-			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
-			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
-		} else {
-			function_name = NULL;
-
-			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
-				zend_error_noreturn(E_ERROR, "Function name must be a string");
-			}
-			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
-		}
-
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
-
-		if (!is_const) {
-			efree(function_name_strval.v);
-
-		}
-	} else {
-		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
-		}
-		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
-		}
-		EX(fbc) = ce->constructor;
-	}
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
-		EX(object) = NULL;
-	} else {
-		if (IS_UNUSED != IS_UNUSED &&
-		    EG(This) &&
-		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
-
-		}
-		if ((EX(object) = EG(This))) {
-			EX(object)->refcount++;
-		}
-	}
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_FETCH_CLASS_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -1252,69 +1084,6 @@ static int ZEND_FETCH_CLASS_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zval *function_name;
-	zend_class_entry *ce;
-
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
-
-	ce = EX_T(opline->op1.u.var).class_entry;
-	if(IS_CV != IS_UNUSED) {
-		zstr function_name_strval;
-		unsigned int function_name_strlen;
-		zend_bool is_const = (IS_CV == IS_CONST);
-
-
-		if (is_const) {
-			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
-			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
-		} else {
-			function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-
-			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
-				zend_error_noreturn(E_ERROR, "Function name must be a string");
-			}
-			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
-		}
-
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
-
-		if (!is_const) {
-			efree(function_name_strval.v);
-
-		}
-	} else {
-		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
-		}
-		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
-		}
-		EX(fbc) = ce->constructor;
-	}
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
-		EX(object) = NULL;
-	} else {
-		if (IS_CV != IS_UNUSED &&
-		    EG(This) &&
-		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
-
-		}
-		if ((EX(object) = EG(This))) {
-			EX(object)->refcount++;
-		}
-	}
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -1338,10 +1107,38 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
 
-	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	if (IS_CV != IS_CONST &&
+	    ((Z_TYPE_P(function_name) == IS_UNICODE &&
+	      Z_USTRVAL_P(function_name)[0] == ':' &&
+	      Z_USTRVAL_P(function_name)[1] == ':') ||
+	     (Z_TYPE_P(function_name) == IS_STRING &&
+	      Z_STRVAL_P(function_name)[0] == ':' &&
+	      Z_STRVAL_P(function_name)[1] == ':'))) {
+		if (Z_TYPE_P(function_name) == IS_UNICODE) {
+			lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+		} else {
+			lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+		}
+	} else {
+		lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	}
 	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE) {
 		efree(lcname.v);
-		zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+
+		if (IS_CV == IS_CONST && opline->op1.op_type == IS_CONST) {
+			if (Z_TYPE_P(function_name) == IS_UNICODE) {
+				lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+			} else {
+				lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+			}
+			if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE ||
+			    function->type != ZEND_INTERNAL_FUNCTION) {
+				efree(lcname.v);
+				zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+			}
+		} else {
+			zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+		}
 	}
 
 	efree(lcname.v);
@@ -2692,6 +2489,107 @@ static int ZEND_FETCH_DIM_TMP_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *function_name;
+	zend_class_entry *ce;
+
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
+
+	if (IS_CONST == IS_CONST && IS_CONST == IS_CONST) {
+		/* try a function in namespace */
+		zstr fname, lcname;
+		unsigned int len, lcname_len;
+
+		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
+		if (UG(unicode)) {
+			fname.u = eumalloc(len + 1);
+			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
+            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
+			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
+				Z_USTRVAL(opline->op2.u.constant),
+				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
+			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
+		} else {
+			fname.s = emalloc(len + 1);
+			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
+            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
+			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRLEN(opline->op2.u.constant)+1);
+			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
+		}
+		efree(fname.v);
+
+		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+			efree(lcname.v);
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+		efree(lcname.v);
+
+		/* no function found. try a static method in class */
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
+	if(IS_CONST != IS_UNUSED) {
+		zstr function_name_strval;
+		unsigned int function_name_strlen;
+		zend_bool is_const = (IS_CONST == IS_CONST);
+
+
+		if (is_const) {
+			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
+			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+		} else {
+			function_name = &opline->op2.u.constant;
+
+			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
+				zend_error_noreturn(E_ERROR, "Function name must be a string");
+			}
+			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+		}
+
+		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+
+		if (!is_const) {
+			efree(function_name_strval.v);
+
+		}
+	} else {
+		if(!ce->constructor) {
+			zend_error_noreturn(E_ERROR, "Can not call constructor");
+		}
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
+		}
+		EX(fbc) = ce->constructor;
+	}
+
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+		EX(object) = NULL;
+	} else {
+		if (IS_CONST != IS_UNUSED &&
+		    EG(This) &&
+		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+		    /* We are calling method of the other (incompatible) class,
+		       but passing $this. This is done for compatibility with php-4. */
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+
+		}
+		if ((EX(object) = EG(This))) {
+			EX(object)->refcount++;
+		}
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_CASE_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -2720,53 +2618,6 @@ static int ZEND_CASE_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		EX_T(opline->op1.u.var).var.ptr_ptr = NULL;
 		AI_USE_PTR(EX_T(opline->op1.u.var).var);
 	}
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static int ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_class_entry *ce = NULL;
-	zval **value;
-
-	if (IS_CONST == IS_UNUSED) {
-/* This seems to be a reminant of namespaces
-		if (EG(scope)) {
-			ce = EG(scope);
-			if (zend_hash_find(&ce->constants_table, Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
-				zval_update_constant(value, (void *) 1 TSRMLS_CC);
-				EX_T(opline->result.u.var).tmp_var = **value;
-				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-				ZEND_VM_NEXT_OPCODE();
-			}
-		}
-*/
-		if (!zend_u_get_constant(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var, NULL TSRMLS_CC)) {
-			zend_error(E_NOTICE, "Use of undefined constant %R - assumed '%R'",
-				Z_TYPE(opline->op2.u.constant),
-				Z_UNIVAL(opline->op2.u.constant),
-				Z_TYPE(opline->op2.u.constant),
-				Z_UNIVAL(opline->op2.u.constant));
-			EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
-			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-		}
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	ce = EX_T(opline->op1.u.var).class_entry;
-
-	if (zend_u_hash_find(&ce->constants_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
-		zend_class_entry *old_scope = EG(scope);
-
-		EG(scope) = ce;
-		zval_update_constant(value, (void *) 1 TSRMLS_CC);
-		EG(scope) = old_scope;
-		EX_T(opline->result.u.var).tmp_var = **value;
-		zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-	} else {
-		zend_error_noreturn(E_ERROR, "Undefined class constant '%R'", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
-	}
-
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -3095,6 +2946,107 @@ static int ZEND_BOOL_XOR_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		_get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC) TSRMLS_CC);
 
 	zval_dtor(free_op2.var);
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *function_name;
+	zend_class_entry *ce;
+
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
+
+	if (IS_CONST == IS_CONST && IS_TMP_VAR == IS_CONST) {
+		/* try a function in namespace */
+		zstr fname, lcname;
+		unsigned int len, lcname_len;
+
+		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
+		if (UG(unicode)) {
+			fname.u = eumalloc(len + 1);
+			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
+            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
+			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
+				Z_USTRVAL(opline->op2.u.constant),
+				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
+			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
+		} else {
+			fname.s = emalloc(len + 1);
+			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
+            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
+			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRLEN(opline->op2.u.constant)+1);
+			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
+		}
+		efree(fname.v);
+
+		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+			efree(lcname.v);
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+		efree(lcname.v);
+
+		/* no function found. try a static method in class */
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
+	if(IS_TMP_VAR != IS_UNUSED) {
+		zstr function_name_strval;
+		unsigned int function_name_strlen;
+		zend_bool is_const = (IS_TMP_VAR == IS_CONST);
+		zend_free_op free_op2;
+
+		if (is_const) {
+			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
+			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+		} else {
+			function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
+
+			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
+				zend_error_noreturn(E_ERROR, "Function name must be a string");
+			}
+			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+		}
+
+		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+
+		if (!is_const) {
+			efree(function_name_strval.v);
+			zval_dtor(free_op2.var);
+		}
+	} else {
+		if(!ce->constructor) {
+			zend_error_noreturn(E_ERROR, "Can not call constructor");
+		}
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
+		}
+		EX(fbc) = ce->constructor;
+	}
+
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+		EX(object) = NULL;
+	} else {
+		if (IS_TMP_VAR != IS_UNUSED &&
+		    EG(This) &&
+		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+		    /* We are calling method of the other (incompatible) class,
+		       but passing $this. This is done for compatibility with php-4. */
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+
+		}
+		if ((EX(object) = EG(This))) {
+			EX(object)->refcount++;
+		}
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -3458,6 +3410,107 @@ static int ZEND_BOOL_XOR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *function_name;
+	zend_class_entry *ce;
+
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
+
+	if (IS_CONST == IS_CONST && IS_VAR == IS_CONST) {
+		/* try a function in namespace */
+		zstr fname, lcname;
+		unsigned int len, lcname_len;
+
+		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
+		if (UG(unicode)) {
+			fname.u = eumalloc(len + 1);
+			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
+            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
+			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
+				Z_USTRVAL(opline->op2.u.constant),
+				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
+			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
+		} else {
+			fname.s = emalloc(len + 1);
+			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
+            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
+			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRLEN(opline->op2.u.constant)+1);
+			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
+		}
+		efree(fname.v);
+
+		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+			efree(lcname.v);
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+		efree(lcname.v);
+
+		/* no function found. try a static method in class */
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
+	if(IS_VAR != IS_UNUSED) {
+		zstr function_name_strval;
+		unsigned int function_name_strlen;
+		zend_bool is_const = (IS_VAR == IS_CONST);
+		zend_free_op free_op2;
+
+		if (is_const) {
+			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
+			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+		} else {
+			function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
+
+			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
+				zend_error_noreturn(E_ERROR, "Function name must be a string");
+			}
+			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+		}
+
+		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+
+		if (!is_const) {
+			efree(function_name_strval.v);
+			if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+		}
+	} else {
+		if(!ce->constructor) {
+			zend_error_noreturn(E_ERROR, "Can not call constructor");
+		}
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
+		}
+		EX(fbc) = ce->constructor;
+	}
+
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+		EX(object) = NULL;
+	} else {
+		if (IS_VAR != IS_UNUSED &&
+		    EG(This) &&
+		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+		    /* We are calling method of the other (incompatible) class,
+		       but passing $this. This is done for compatibility with php-4. */
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+
+		}
+		if ((EX(object) = EG(This))) {
+			EX(object)->refcount++;
+		}
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_CASE_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -3582,6 +3635,107 @@ static int ZEND_INIT_ARRAY_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
 	}
+}
+
+static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *function_name;
+	zend_class_entry *ce;
+
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
+
+	if (IS_CONST == IS_CONST && IS_UNUSED == IS_CONST) {
+		/* try a function in namespace */
+		zstr fname, lcname;
+		unsigned int len, lcname_len;
+
+		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
+		if (UG(unicode)) {
+			fname.u = eumalloc(len + 1);
+			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
+            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
+			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
+				Z_USTRVAL(opline->op2.u.constant),
+				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
+			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
+		} else {
+			fname.s = emalloc(len + 1);
+			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
+            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
+			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRLEN(opline->op2.u.constant)+1);
+			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
+		}
+		efree(fname.v);
+
+		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+			efree(lcname.v);
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+		efree(lcname.v);
+
+		/* no function found. try a static method in class */
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
+	if(IS_UNUSED != IS_UNUSED) {
+		zstr function_name_strval;
+		unsigned int function_name_strlen;
+		zend_bool is_const = (IS_UNUSED == IS_CONST);
+
+
+		if (is_const) {
+			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
+			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+		} else {
+			function_name = NULL;
+
+			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
+				zend_error_noreturn(E_ERROR, "Function name must be a string");
+			}
+			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+		}
+
+		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+
+		if (!is_const) {
+			efree(function_name_strval.v);
+
+		}
+	} else {
+		if(!ce->constructor) {
+			zend_error_noreturn(E_ERROR, "Can not call constructor");
+		}
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
+		}
+		EX(fbc) = ce->constructor;
+	}
+
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+		EX(object) = NULL;
+	} else {
+		if (IS_UNUSED != IS_UNUSED &&
+		    EG(This) &&
+		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+		    /* We are calling method of the other (incompatible) class,
+		       but passing $this. This is done for compatibility with php-4. */
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+
+		}
+		if ((EX(object) = EG(This))) {
+			EX(object)->refcount++;
+		}
+	}
+
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -3908,6 +4062,107 @@ static int ZEND_BOOL_XOR_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		&opline->op1.u.constant,
 		_get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC) TSRMLS_CC);
 
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *function_name;
+	zend_class_entry *ce;
+
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
+
+	if (IS_CONST == IS_CONST && IS_CV == IS_CONST) {
+		/* try a function in namespace */
+		zstr fname, lcname;
+		unsigned int len, lcname_len;
+
+		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
+		if (UG(unicode)) {
+			fname.u = eumalloc(len + 1);
+			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
+            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
+			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
+				Z_USTRVAL(opline->op2.u.constant),
+				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
+			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
+		} else {
+			fname.s = emalloc(len + 1);
+			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
+            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
+			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRLEN(opline->op2.u.constant)+1);
+			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
+		}
+		efree(fname.v);
+
+		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+			efree(lcname.v);
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+		efree(lcname.v);
+
+		/* no function found. try a static method in class */
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
+	if(IS_CV != IS_UNUSED) {
+		zstr function_name_strval;
+		unsigned int function_name_strlen;
+		zend_bool is_const = (IS_CV == IS_CONST);
+
+
+		if (is_const) {
+			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
+			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+		} else {
+			function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+
+			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
+				zend_error_noreturn(E_ERROR, "Function name must be a string");
+			}
+			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+		}
+
+		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+
+		if (!is_const) {
+			efree(function_name_strval.v);
+
+		}
+	} else {
+		if(!ce->constructor) {
+			zend_error_noreturn(E_ERROR, "Can not call constructor");
+		}
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
+		}
+		EX(fbc) = ce->constructor;
+	}
+
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+		EX(object) = NULL;
+	} else {
+		if (IS_CV != IS_UNUSED &&
+		    EG(This) &&
+		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+		    /* We are calling method of the other (incompatible) class,
+		       but passing $this. This is done for compatibility with php-4. */
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+
+		}
+		if ((EX(object) = EG(This))) {
+			EX(object)->refcount++;
+		}
+	}
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -9676,6 +9931,107 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *function_name;
+	zend_class_entry *ce;
+
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
+
+	if (IS_VAR == IS_CONST && IS_CONST == IS_CONST) {
+		/* try a function in namespace */
+		zstr fname, lcname;
+		unsigned int len, lcname_len;
+
+		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
+		if (UG(unicode)) {
+			fname.u = eumalloc(len + 1);
+			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
+            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
+			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
+				Z_USTRVAL(opline->op2.u.constant),
+				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
+			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
+		} else {
+			fname.s = emalloc(len + 1);
+			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
+            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
+			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRLEN(opline->op2.u.constant)+1);
+			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
+		}
+		efree(fname.v);
+
+		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+			efree(lcname.v);
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+		efree(lcname.v);
+
+		/* no function found. try a static method in class */
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
+	if(IS_CONST != IS_UNUSED) {
+		zstr function_name_strval;
+		unsigned int function_name_strlen;
+		zend_bool is_const = (IS_CONST == IS_CONST);
+
+
+		if (is_const) {
+			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
+			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+		} else {
+			function_name = &opline->op2.u.constant;
+
+			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
+				zend_error_noreturn(E_ERROR, "Function name must be a string");
+			}
+			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+		}
+
+		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+
+		if (!is_const) {
+			efree(function_name_strval.v);
+
+		}
+	} else {
+		if(!ce->constructor) {
+			zend_error_noreturn(E_ERROR, "Can not call constructor");
+		}
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
+		}
+		EX(fbc) = ce->constructor;
+	}
+
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+		EX(object) = NULL;
+	} else {
+		if (IS_CONST != IS_UNUSED &&
+		    EG(This) &&
+		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+		    /* We are calling method of the other (incompatible) class,
+		       but passing $this. This is done for compatibility with php-4. */
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+
+		}
+		if ((EX(object) = EG(This))) {
+			EX(object)->refcount++;
+		}
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_CASE_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -9704,6 +10060,53 @@ static int ZEND_CASE_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		EX_T(opline->op1.u.var).var.ptr_ptr = NULL;
 		AI_USE_PTR(EX_T(opline->op1.u.var).var);
 	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zend_class_entry *ce = NULL;
+	zval **value;
+
+	if (IS_VAR == IS_UNUSED) {
+/* This seems to be a reminant of namespaces
+		if (EG(scope)) {
+			ce = EG(scope);
+			if (zend_hash_find(&ce->constants_table, Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
+				zval_update_constant(value, (void *) 1 TSRMLS_CC);
+				EX_T(opline->result.u.var).tmp_var = **value;
+				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+*/
+		if (!zend_u_get_constant(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var, NULL TSRMLS_CC)) {
+			zend_error(E_NOTICE, "Use of undefined constant %R - assumed '%R'",
+				Z_TYPE(opline->op2.u.constant),
+				Z_UNIVAL(opline->op2.u.constant),
+				Z_TYPE(opline->op2.u.constant),
+				Z_UNIVAL(opline->op2.u.constant));
+			EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	ce = EX_T(opline->op1.u.var).class_entry;
+
+	if (zend_u_hash_find(&ce->constants_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
+		zend_class_entry *old_scope = EG(scope);
+
+		EG(scope) = ce;
+		zval_update_constant(value, (void *) 1 TSRMLS_CC);
+		EG(scope) = old_scope;
+		EX_T(opline->result.u.var).tmp_var = **value;
+		zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
+	} else {
+		zend_error_noreturn(E_ERROR, "Undefined class constant '%R'", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -11216,6 +11619,107 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	zval_dtor(free_op2.var);
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *function_name;
+	zend_class_entry *ce;
+
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
+
+	if (IS_VAR == IS_CONST && IS_TMP_VAR == IS_CONST) {
+		/* try a function in namespace */
+		zstr fname, lcname;
+		unsigned int len, lcname_len;
+
+		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
+		if (UG(unicode)) {
+			fname.u = eumalloc(len + 1);
+			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
+            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
+			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
+				Z_USTRVAL(opline->op2.u.constant),
+				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
+			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
+		} else {
+			fname.s = emalloc(len + 1);
+			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
+            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
+			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRLEN(opline->op2.u.constant)+1);
+			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
+		}
+		efree(fname.v);
+
+		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+			efree(lcname.v);
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+		efree(lcname.v);
+
+		/* no function found. try a static method in class */
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
+	if(IS_TMP_VAR != IS_UNUSED) {
+		zstr function_name_strval;
+		unsigned int function_name_strlen;
+		zend_bool is_const = (IS_TMP_VAR == IS_CONST);
+		zend_free_op free_op2;
+
+		if (is_const) {
+			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
+			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+		} else {
+			function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
+
+			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
+				zend_error_noreturn(E_ERROR, "Function name must be a string");
+			}
+			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+		}
+
+		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+
+		if (!is_const) {
+			efree(function_name_strval.v);
+			zval_dtor(free_op2.var);
+		}
+	} else {
+		if(!ce->constructor) {
+			zend_error_noreturn(E_ERROR, "Can not call constructor");
+		}
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
+		}
+		EX(fbc) = ce->constructor;
+	}
+
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+		EX(object) = NULL;
+	} else {
+		if (IS_TMP_VAR != IS_UNUSED &&
+		    EG(This) &&
+		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+		    /* We are calling method of the other (incompatible) class,
+		       but passing $this. This is done for compatibility with php-4. */
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+
+		}
+		if ((EX(object) = EG(This))) {
+			EX(object)->refcount++;
+		}
+	}
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -12803,6 +13307,107 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *function_name;
+	zend_class_entry *ce;
+
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
+
+	if (IS_VAR == IS_CONST && IS_VAR == IS_CONST) {
+		/* try a function in namespace */
+		zstr fname, lcname;
+		unsigned int len, lcname_len;
+
+		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
+		if (UG(unicode)) {
+			fname.u = eumalloc(len + 1);
+			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
+            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
+			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
+				Z_USTRVAL(opline->op2.u.constant),
+				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
+			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
+		} else {
+			fname.s = emalloc(len + 1);
+			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
+            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
+			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRLEN(opline->op2.u.constant)+1);
+			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
+		}
+		efree(fname.v);
+
+		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+			efree(lcname.v);
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+		efree(lcname.v);
+
+		/* no function found. try a static method in class */
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
+	if(IS_VAR != IS_UNUSED) {
+		zstr function_name_strval;
+		unsigned int function_name_strlen;
+		zend_bool is_const = (IS_VAR == IS_CONST);
+		zend_free_op free_op2;
+
+		if (is_const) {
+			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
+			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+		} else {
+			function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
+
+			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
+				zend_error_noreturn(E_ERROR, "Function name must be a string");
+			}
+			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+		}
+
+		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+
+		if (!is_const) {
+			efree(function_name_strval.v);
+			if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+		}
+	} else {
+		if(!ce->constructor) {
+			zend_error_noreturn(E_ERROR, "Can not call constructor");
+		}
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
+		}
+		EX(fbc) = ce->constructor;
+	}
+
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+		EX(object) = NULL;
+	} else {
+		if (IS_VAR != IS_UNUSED &&
+		    EG(This) &&
+		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+		    /* We are calling method of the other (incompatible) class,
+		       but passing $this. This is done for compatibility with php-4. */
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+
+		}
+		if ((EX(object) = EG(This))) {
+			EX(object)->refcount++;
+		}
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_CASE_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -13581,6 +14186,107 @@ static int ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
  	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	/* assign_dim has two opcodes! */
 	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *function_name;
+	zend_class_entry *ce;
+
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
+
+	if (IS_VAR == IS_CONST && IS_UNUSED == IS_CONST) {
+		/* try a function in namespace */
+		zstr fname, lcname;
+		unsigned int len, lcname_len;
+
+		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
+		if (UG(unicode)) {
+			fname.u = eumalloc(len + 1);
+			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
+            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
+			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
+				Z_USTRVAL(opline->op2.u.constant),
+				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
+			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
+		} else {
+			fname.s = emalloc(len + 1);
+			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
+            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
+			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRLEN(opline->op2.u.constant)+1);
+			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
+		}
+		efree(fname.v);
+
+		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+			efree(lcname.v);
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+		efree(lcname.v);
+
+		/* no function found. try a static method in class */
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
+	if(IS_UNUSED != IS_UNUSED) {
+		zstr function_name_strval;
+		unsigned int function_name_strlen;
+		zend_bool is_const = (IS_UNUSED == IS_CONST);
+
+
+		if (is_const) {
+			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
+			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+		} else {
+			function_name = NULL;
+
+			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
+				zend_error_noreturn(E_ERROR, "Function name must be a string");
+			}
+			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+		}
+
+		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+
+		if (!is_const) {
+			efree(function_name_strval.v);
+
+		}
+	} else {
+		if(!ce->constructor) {
+			zend_error_noreturn(E_ERROR, "Can not call constructor");
+		}
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
+		}
+		EX(fbc) = ce->constructor;
+	}
+
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+		EX(object) = NULL;
+	} else {
+		if (IS_UNUSED != IS_UNUSED &&
+		    EG(This) &&
+		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+		    /* We are calling method of the other (incompatible) class,
+		       but passing $this. This is done for compatibility with php-4. */
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+
+		}
+		if ((EX(object) = EG(This))) {
+			EX(object)->refcount++;
+		}
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -14813,6 +15519,107 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *function_name;
+	zend_class_entry *ce;
+
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
+
+	if (IS_VAR == IS_CONST && IS_CV == IS_CONST) {
+		/* try a function in namespace */
+		zstr fname, lcname;
+		unsigned int len, lcname_len;
+
+		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
+		if (UG(unicode)) {
+			fname.u = eumalloc(len + 1);
+			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
+            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
+			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
+				Z_USTRVAL(opline->op2.u.constant),
+				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
+			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
+		} else {
+			fname.s = emalloc(len + 1);
+			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
+            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
+			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRLEN(opline->op2.u.constant)+1);
+			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
+		}
+		efree(fname.v);
+
+		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+			efree(lcname.v);
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+		efree(lcname.v);
+
+		/* no function found. try a static method in class */
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
+	if(IS_CV != IS_UNUSED) {
+		zstr function_name_strval;
+		unsigned int function_name_strlen;
+		zend_bool is_const = (IS_CV == IS_CONST);
+
+
+		if (is_const) {
+			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
+			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+		} else {
+			function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+
+			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
+				zend_error_noreturn(E_ERROR, "Function name must be a string");
+			}
+			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+		}
+
+		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+
+		if (!is_const) {
+			efree(function_name_strval.v);
+
+		}
+	} else {
+		if(!ce->constructor) {
+			zend_error_noreturn(E_ERROR, "Can not call constructor");
+		}
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_error(E_COMPILE_ERROR, "Cannot call private %v::__construct()", ce->name);
+		}
+		EX(fbc) = ce->constructor;
+	}
+
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+		EX(object) = NULL;
+	} else {
+		if (IS_CV != IS_UNUSED &&
+		    EG(This) &&
+		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+		    /* We are calling method of the other (incompatible) class,
+		       but passing $this. This is done for compatibility with php-4. */
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+
+		}
+		if ((EX(object) = EG(This))) {
+			EX(object)->refcount++;
+		}
+	}
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -30195,7 +31002,6 @@ void zend_init_opcodes_handlers()
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -30206,6 +31012,7 @@ void zend_init_opcodes_handlers()
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -30545,31 +31352,31 @@ void zend_init_opcodes_handlers()
   	ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER,
-  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER,
+  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER,
+  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER,
+  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER,
+  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER,
+  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER,
+  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER,
+  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER,
+  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER,
+  	ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER,
   	ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER,
   	ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER,

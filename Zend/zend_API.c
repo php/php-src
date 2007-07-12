@@ -2594,14 +2594,36 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 	*ce_ptr = NULL;
 	*fptr_ptr = NULL;
 
+	if (!ce_org) {
+		if (Z_TYPE_P(callable) == IS_UNICODE &&
+		    Z_USTRVAL_P(callable)[0] == ':' &&
+		    Z_USTRVAL_P(callable)[1] == ':') {
+			lmname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(callable)+2), Z_USTRLEN_P(callable)-2, 1, &mlen);
+		} else if (Z_TYPE_P(callable) == IS_STRING &&
+		    Z_STRVAL_P(callable)[0] == ':' &&
+		    Z_STRVAL_P(callable)[1] == ':') {
+			lmname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(callable)+2), Z_STRLEN_P(callable)-2, 1, &mlen);
+		} else {
+			lmname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), Z_UNILEN_P(callable), 1, &mlen);
+		}
+		if (zend_u_hash_find(EG(function_table), Z_TYPE_P(callable), lmname, mlen+1, (void**)&fptr) == SUCCESS) {
+			*fptr_ptr = fptr;
+			efree(lmname.v);
+			return 1;
+		}
+		efree(lmname.v);
+	}
 	if (Z_TYPE_P(callable) == IS_UNICODE) {
-		if ((colon.u = u_strstr(Z_USTRVAL_P(callable), u_doublecolon)) != NULL) {
+		if ((colon.u = u_strrstr(Z_USTRVAL_P(callable), u_doublecolon)) != NULL) {
 			mlen = u_strlen(colon.u+2);
 			clen = Z_USTRLEN_P(callable) - mlen - 2;
 			mname.u = colon.u + 2;
 		}
 	} else {
-		if ((colon.s = strstr(Z_STRVAL_P(callable), "::")) != NULL) {
+		if ((colon.s = zend_memrchr(Z_STRVAL_P(callable), ':', Z_STRLEN_P(callable))) != NULL &&
+		     colon.s > Z_STRVAL_P(callable) &&
+		     *(colon.s-1) == ':') {
+			colon.s--;
 			clen = colon.s - Z_STRVAL_P(callable);
 			mlen = Z_STRLEN_P(callable) - clen - 2;
 			mname.s = colon.s + 2;

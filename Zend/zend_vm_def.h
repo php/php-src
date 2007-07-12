@@ -1783,7 +1783,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
+ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUSED|CV)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
@@ -1791,7 +1791,45 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
-	ce = EX_T(opline->op1.u.var).class_entry;
+	if (OP1_TYPE == IS_CONST && OP2_TYPE == IS_CONST) {
+		/* try a function in namespace */
+		zstr fname, lcname;
+		unsigned int len, lcname_len;
+	
+		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
+		if (UG(unicode)) {
+			fname.u = eumalloc(len + 1);
+			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
+            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
+			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
+				Z_USTRVAL(opline->op2.u.constant),
+				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
+			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
+		} else {
+			fname.s = emalloc(len + 1);
+			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
+            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
+			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRLEN(opline->op2.u.constant)+1);
+			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
+		}
+		efree(fname.v);
+
+		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+			efree(lcname.v);
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+		efree(lcname.v);
+
+		/* no function found. try a static method in class */		
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
 	if(OP2_TYPE != IS_UNUSED) {
 		zstr function_name_strval;
 		unsigned int function_name_strlen;
@@ -1869,10 +1907,38 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
 
-	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	if (OP2_TYPE != IS_CONST && 
+	    ((Z_TYPE_P(function_name) == IS_UNICODE &&
+	      Z_USTRVAL_P(function_name)[0] == ':' &&
+	      Z_USTRVAL_P(function_name)[1] == ':') ||
+	     (Z_TYPE_P(function_name) == IS_STRING &&
+	      Z_STRVAL_P(function_name)[0] == ':' &&
+	      Z_STRVAL_P(function_name)[1] == ':'))) {
+		if (Z_TYPE_P(function_name) == IS_UNICODE) {
+			lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+		} else {
+			lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+		}
+	} else {
+		lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	}
 	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE) {
 		efree(lcname.v);
-		zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+
+		if (OP2_TYPE == IS_CONST && opline->op1.op_type == IS_CONST) {
+			if (Z_TYPE_P(function_name) == IS_UNICODE) {
+				lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+			} else {
+				lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+			}
+			if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE ||
+			    function->type != ZEND_INTERNAL_FUNCTION) {
+				efree(lcname.v);
+				zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+			}
+		} else {
+			zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
+		}
 	}
 
 	efree(lcname.v);
@@ -2638,7 +2704,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, CONST|UNUSED, CONST)
+ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|UNUSED, CONST)
 {
 	zend_op *opline = EX(opline);
 	zend_class_entry *ce = NULL;

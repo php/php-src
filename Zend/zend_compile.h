@@ -411,7 +411,7 @@ int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier)
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(znode *function_token TSRMLS_DC);
 void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, znode *varname, zend_bool pass_by_reference TSRMLS_DC);
-int zend_do_begin_function_call(znode *function_name TSRMLS_DC);
+int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
 void zend_do_clone(znode *result, znode *expr TSRMLS_DC);
 void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC);
@@ -423,7 +423,7 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 void zend_do_handle_exception(TSRMLS_D);
 
 void zend_do_try(znode *try_token TSRMLS_DC);
-void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, zend_bool first_catch TSRMLS_DC);
+void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, znode *first_catch TSRMLS_DC);
 void zend_do_end_catch(znode *try_token TSRMLS_DC);
 void zend_do_throw(znode *expr TSRMLS_DC);
 
@@ -518,6 +518,11 @@ void zend_do_extended_fcall_end(TSRMLS_D);
 void zend_do_ticks(TSRMLS_D);
 
 void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body TSRMLS_DC);
+
+void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRMLS_DC);
+void zend_do_namespace(znode *name TSRMLS_DC);
+void zend_do_import(znode *name, znode *new_name TSRMLS_DC);
+void zend_do_end_compilation(TSRMLS_D);
 
 ZEND_API void function_add_ref(zend_function *function TSRMLS_DC);
 
@@ -628,6 +633,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_CLASS_INTERFACE	6
 #define ZEND_FETCH_CLASS_FLAGS        0xF0
 #define ZEND_FETCH_CLASS_NO_NORMALIZE 0x10
+#define ZEND_FETCH_CLASS_RT_NS_CHECK  0x20
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD  0x80
 
 /* variable parsing type (compile-time) */
