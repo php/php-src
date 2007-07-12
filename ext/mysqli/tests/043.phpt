@@ -5,14 +5,14 @@ mysqli_bind_param (UPDATE)
 --FILE--
 <?php
 	include "connect.inc";
-	
+
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
-	mysqli_select_db($link, "test");
+	mysqli_select_db($link, $db);
 
-  	mysqli_query($link,"DROP TABLE IF EXISTS test_update");
-  	mysqli_query($link,"CREATE TABLE test_update(a varchar(10),
+	mysqli_query($link,"DROP TABLE IF EXISTS test_update");
+	mysqli_query($link,"CREATE TABLE test_update(a varchar(10),
                                                      b int)");
 
 	mysqli_query($link, "INSERT INTO test_update VALUES ('foo', 2)");
@@ -34,9 +34,17 @@ mysqli_bind_param (UPDATE)
 	var_dump($test);
 
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECTF--
 array(1) {
   [0]=>
-  %s(15) "Rasmus is No. 1"
+  string(15) "Rasmus is No. 1"
 }
+done!
+--UEXPECF--
+array(1) {
+  [0]=>
+  unicode(15) "Rasmus is No. 1"
+}
+done!

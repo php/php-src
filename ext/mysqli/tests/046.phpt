@@ -5,11 +5,11 @@ mysqli_stmt_affected_rows (delete)
 --FILE--
 <?php
 	include "connect.inc";
-	
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
 
-	mysqli_select_db($link, "test");
+	/*** test mysqli_connect 127.0.0.1 ***/
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+
+	mysqli_select_db($link, $db);
 
 	mysqli_query($link, "DROP TABLE IF EXISTS test_affected");
 	mysqli_query($link, "CREATE TABLE test_affected (foo int)");
@@ -24,10 +24,12 @@ mysqli_stmt_affected_rows (delete)
 	mysqli_execute($stmt);
 	$x = mysqli_stmt_affected_rows($stmt);
 
-	mysqli_stmt_close($stmt);	
+	mysqli_stmt_close($stmt);
 	var_dump($x==1);
 
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECT--
 bool(true)
+done!
