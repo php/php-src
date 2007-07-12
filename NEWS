@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   (Dmitry, Andrei Nigmatulin)
 - Changed mail() function to be always available. (Johannes)
 
+- Added check for unknown options passed to configure. (Jani)
 - Added persistent connection status checker to pdo_pgsql.
   (Elvis Pranskevichus, Ilia)
 - Added support for ATTR_TIMEOUT inside pdo_pgsql driver. (Ilia)
@@ -74,6 +75,7 @@ PHP                                                                        NEWS
   a node's siblings). (Rob)
 - Fixed bug #41845 (pgsql extension does not compile with PostgreSQL <7.4).
   (Ilia)
+- Fixed bug #41815 (Concurrent read/write fails when EOF is reached). (Sascha)
 - Fixed bug #41813 (segmentation fault when using string offset as an object).
   (judas dot iscariote at gmail dot com, Tony)
 - Fixed bug #41795 (checkdnsrr does not support DNS_TXT type). 
