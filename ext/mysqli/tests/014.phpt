@@ -1,12 +1,16 @@
 --TEST--
-mysqli autocommit/commit/rollback 
+mysqli autocommit/commit/rollback
 --SKIPIF--
 <?php
 	require_once('skipif.inc');
 	include "connect.inc";
-	$link = mysqli_connect($host, $user, $passwd);
-	$result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'");
-	$row = mysqli_fetch_row($result);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	if (!$result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'")) {
+		die("skip Cannot check for required InnoDB suppot");
+	}
+	if (!$row = mysqli_fetch_row($result))
+		die("skip Cannot check for required InnoDB suppot");
+
 	mysqli_free_result($result);
 	mysqli_close($link);
 	if ($row[1] == "DISABLED" || $row[1] == "NO") {
@@ -17,53 +21,92 @@ mysqli autocommit/commit/rollback
 --FILE--
 <?php
 	include "connect.inc";
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
-	mysqli_select_db($link, "test");
+	if (!mysqli_autocommit($link, TRUE))
+		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_autocommit($link, TRUE);
+	if (!mysqli_query($link, "DROP TABLE IF EXISTS ac_01"))
+		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-  	mysqli_query($link,"DROP TABLE IF EXISTS ac_01");
+	if (!mysqli_query($link, "CREATE TABLE ac_01(a int, b varchar(10)) type=InnoDB"))
+		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_query($link,"CREATE TABLE ac_01(a int, b varchar(10)) type=InnoDB");
+	if (!mysqli_query($link, "INSERT INTO ac_01 VALUES (1, 'foobar')"))
+		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_query($link, "INSERT INTO ac_01 VALUES (1, 'foobar')");
-	mysqli_autocommit($link, FALSE);
-	mysqli_query($link, "DELETE FROM ac_01");
-	mysqli_query($link, "INSERT INTO ac_01 VALUES (2, 'egon')");
+	if (!mysqli_autocommit($link, FALSE))
+		printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_rollback($link);
+	if (!mysqli_query($link, "DELETE FROM ac_01"))
+		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$result = mysqli_query($link, "SELECT * FROM ac_01");
+	if (!mysqli_query($link, "INSERT INTO ac_01 VALUES (2, 'egon')"))
+		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!mysqli_rollback($link))
+		printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!$result = mysqli_query($link, "SELECT * FROM ac_01"))
+		printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
 	printf("Num_of_rows=%d\n", mysqli_num_rows($result));
-	$row = mysqli_fetch_row($result);
+	if (!$row = mysqli_fetch_row($result))
+		printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
 	mysqli_free_result($result);
 
 	var_dump($row);
 
-	mysqli_query($link, "DELETE FROM ac_01");
-	mysqli_query($link, "INSERT INTO ac_01 VALUES (2, 'egon')");
-	mysqli_commit($link);
+	if (!mysqli_query($link, "DELETE FROM ac_01"))
+		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$result = mysqli_query($link, "SELECT * FROM ac_01");
-	$row = mysqli_fetch_row($result);
+	if (!mysqli_query($link, "INSERT INTO ac_01 VALUES (2, 'egon')"))
+		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!mysqli_commit($link))
+		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!$result = mysqli_query($link, "SELECT * FROM ac_01"))
+		printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!$row = mysqli_fetch_row($result))
+		printf("[014] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
 	mysqli_free_result($result);
 
 	var_dump($row);
 
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECTF--
 Num_of_rows=1
 array(2) {
   [0]=>
-  %s(1) "1"
+  string(1) "1"
   [1]=>
-  %s(6) "foobar"
+  string(6) "foobar"
 }
 array(2) {
   [0]=>
-  %s(1) "2"
+  string(1) "2"
   [1]=>
-  %s(4) "egon"
+  string(4) "egon"
 }
+done!
+--UEXPECTF--
+Num_of_rows=1
+array(2) {
+  [0]=>
+  unicode(1) "1"
+  [1]=>
+  unicode(6) "foobar"
+}
+array(2) {
+  [0]=>
+  unicode(1) "2"
+  [1]=>
+  unicode(4) "egon"
+}
+done!
