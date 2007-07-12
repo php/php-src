@@ -42,6 +42,8 @@
 # endif
 #endif
 
+#define TIMELIB_UNSET   -99999
+
 #define TIMELIB_SECOND  1
 #define TIMELIB_MINUTE  2
 #define TIMELIB_HOUR    3
@@ -112,7 +114,7 @@ typedef unsigned char uchar;
 #define TIMELIB_ADJUST_RELATIVE_WEEKDAY() if (in->time.have_weekday_relative && (in.rel.d > 0)) { in.rel.d -= 7; }
 
 #define TIMELIB_PROCESS_YEAR(x) { \
-	if ((x) == -1) {         \
+	if ((x) == TIMELIB_UNSET) {         \
 	/*	(x) = 0; */          \
 	} else if ((x) < 100) {  \
 		if ((x) < 70) {      \
@@ -381,12 +383,12 @@ static char *timelib_string(Scanner *s)
 static timelib_sll timelib_get_nr(char **ptr, int max_length)
 {
 	char *begin, *end, *str;
-	timelib_sll tmp_nr = -1;
+	timelib_sll tmp_nr = TIMELIB_UNSET;
 	int len = 0;
 
 	while ((**ptr < '0') || (**ptr > '9')) {
 		if (**ptr == '\0') {
-			return -1;
+			return TIMELIB_UNSET;
 		}
 		++*ptr;
 	}
@@ -416,12 +418,12 @@ static void timelib_skip_day_suffix(char **ptr)
 static double timelib_get_frac_nr(char **ptr, int max_length)
 {
 	char *begin, *end, *str;
-	double tmp_nr = -1;
+	double tmp_nr = TIMELIB_UNSET;
 	int len = 0;
 
 	while ((**ptr != '.') && ((**ptr < '0') || (**ptr > '9'))) {
 		if (**ptr == '\0') {
-			return -1;
+			return TIMELIB_UNSET;
 		}
 		++*ptr;
 	}
@@ -444,7 +446,7 @@ static timelib_ull timelib_get_unsigned_nr(char **ptr, int max_length)
 
 	while (((**ptr < '0') || (**ptr > '9')) && (**ptr != '+') && (**ptr != '-')) {
 		if (**ptr == '\0') {
-			return -1;
+			return TIMELIB_UNSET;
 		}
 		++*ptr;
 	}
@@ -794,12 +796,13 @@ day   = ([0-2]?[0-9] | "3"[01]) daysuf?;
 year  = [0-9]{1,4};
 year2 = [0-9]{2};
 year4 = [0-9]{4};
+year4withsign = [+-]? [0-9]{4};
 
 dayofyear = "00"[1-9] | "0"[1-9][0-9] | [1-2][0-9][0-9] | "3"[0-5][0-9] | "36"[0-6];
 weekofyear = "0"[1-9] | [1-4][0-9] | "5"[0-3];
 
-monthlz = "0" [1-9] | "1" [0-2];
-daylz   = "0" [1-9] | [1-2][0-9] | "3" [01];
+monthlz = "0" [0-9] | "1" [0-2];
+daylz   = "0" [0-9] | [1-2][0-9] | "3" [01];
 
 dayfull = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
 dayabbr = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
@@ -834,10 +837,12 @@ americanshort    = month "/" day;
 american         = month "/" day "/" year;
 iso8601dateslash = year4 "/" monthlz "/" daylz "/"?;
 dateslash        = year4 "/" month "/" day;
+iso8601date4     = year4withsign "-" monthlz "-" daylz;
+iso8601date2     = year2 "-" monthlz "-" daylz;
 gnudateshorter   = year4 "-" month;
 gnudateshort     = year "-" month "-" day;
-iso8601date      = year4 "-" monthlz "-" daylz;
-pointeddate      = day [.\t-] month [.-] year;
+pointeddate4     = day [.\t-] month [.-] year4;
+pointeddate2     = day [.\t-] month [.-] year2;
 datefull         = day ([ \t.-])* monthtext ([ \t.-])* year;
 datenoday        = monthtext ([ .\t-])* year4;
 datenodayrev     = year4 ([ .\t-])* monthtext;
@@ -1088,14 +1093,27 @@ relativetext = reltextnumber space reltextunit;
 		return TIMELIB_AMERICAN;
 	}
 
-	iso8601date | iso8601dateslash | dateslash
+	iso8601date4 | iso8601dateslash | dateslash
 	{
-		DEBUG_OUTPUT("iso8601date | iso8601dateslash | dateslash");
+		DEBUG_OUTPUT("iso8601date4 | iso8601date2 | iso8601dateslash | dateslash");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_DATE();
+		s->time->y = timelib_get_unsigned_nr((char **) &ptr, 4);
+		s->time->m = timelib_get_nr((char **) &ptr, 2);
+		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		TIMELIB_DEINIT;
+		return TIMELIB_ISO_DATE;
+	}
+
+	iso8601date2
+	{
+		DEBUG_OUTPUT("iso8601date2");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		s->time->m = timelib_get_nr((char **) &ptr, 2);
 		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		TIMELIB_PROCESS_YEAR(s->time->y);
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
 	}
@@ -1139,14 +1157,26 @@ relativetext = reltextnumber space reltextunit;
 		return TIMELIB_DATE_FULL;
 	}
 
-	pointeddate
+	pointeddate4
 	{
-		DEBUG_OUTPUT("pointed date");
+		DEBUG_OUTPUT("pointed date YYYY");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->d = timelib_get_nr((char **) &ptr, 2);
 		s->time->m = timelib_get_nr((char **) &ptr, 2);
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
+		TIMELIB_DEINIT;
+		return TIMELIB_DATE_FULL_POINTED;
+	}
+
+	pointeddate2
+	{
+		DEBUG_OUTPUT("pointed date YY");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_DATE();
+		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		s->time->m = timelib_get_nr((char **) &ptr, 2);
+		s->time->y = timelib_get_nr((char **) &ptr, 2);
 		TIMELIB_PROCESS_YEAR(s->time->y);
 		TIMELIB_DEINIT;
 		return TIMELIB_DATE_FULL_POINTED;
@@ -1535,7 +1565,7 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 			e--;
 		}
 	}
-	if (e - s < 1) {
+	if (e - s < 0) {
 		in.time = timelib_time_ctor();
 		add_error(&in, "Empty string");
 		if (errors) {
@@ -1543,8 +1573,7 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 		} else {
 			timelib_error_container_dtor(in.errors);
 		}
-		in.time->y = in.time->d = in.time->m = in.time->h = in.time->i = in.time->s = in.time->f = in.time->dst = -1;
-		in.time->z = -999999;
+		in.time->y = in.time->d = in.time->m = in.time->h = in.time->i = in.time->s = in.time->f = in.time->dst = in.time->z = TIMELIB_UNSET;
 		in.time->is_localtime = in.time->zone_type = 0;
 		return in.time;
 	}
@@ -1556,15 +1585,15 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 	in.lim = in.str + (e - s) + YYMAXFILL;
 	in.cur = in.str;
 	in.time = timelib_time_ctor();
-	in.time->y = -1;
-	in.time->d = -1;
-	in.time->m = -1;
-	in.time->h = -1;
-	in.time->i = -1;
-	in.time->s = -1;
-	in.time->f = -1;
-	in.time->z = -999999;
-	in.time->dst = -1;
+	in.time->y = TIMELIB_UNSET;
+	in.time->d = TIMELIB_UNSET;
+	in.time->m = TIMELIB_UNSET;
+	in.time->h = TIMELIB_UNSET;
+	in.time->i = TIMELIB_UNSET;
+	in.time->s = TIMELIB_UNSET;
+	in.time->f = TIMELIB_UNSET;
+	in.time->z = TIMELIB_UNSET;
+	in.time->dst = TIMELIB_UNSET;
 	in.tzdb = tzdb;
 	in.time->is_localtime = 0;
 	in.time->zone_type = 0;
@@ -1593,15 +1622,15 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 		parsed->s = 0;
 		parsed->f = 0;
 	}
-	if (parsed->y == -1) parsed->y = now->y != -1 ? now->y : 0;
-	if (parsed->d == -1) parsed->d = now->d != -1 ? now->d : 0;
-	if (parsed->m == -1) parsed->m = now->m != -1 ? now->m : 0;
-	if (parsed->h == -1) parsed->h = now->h != -1 ? now->h : 0;
-	if (parsed->i == -1) parsed->i = now->i != -1 ? now->i : 0;
-	if (parsed->s == -1) parsed->s = now->s != -1 ? now->s : 0;
-	if (parsed->f == -1) parsed->f = now->f != -1 ? now->f : 0;
-	if (parsed->z == -999999) parsed->z = now->z != -999999 ? now->z : 0;
-	if (parsed->dst == -1) parsed->dst = now->dst != -1 ? now->dst : 0;
+	if (parsed->y == TIMELIB_UNSET) parsed->y = now->y != TIMELIB_UNSET ? now->y : 0;
+	if (parsed->d == TIMELIB_UNSET) parsed->d = now->d != TIMELIB_UNSET ? now->d : 0;
+	if (parsed->m == TIMELIB_UNSET) parsed->m = now->m != TIMELIB_UNSET ? now->m : 0;
+	if (parsed->h == TIMELIB_UNSET) parsed->h = now->h != TIMELIB_UNSET ? now->h : 0;
+	if (parsed->i == TIMELIB_UNSET) parsed->i = now->i != TIMELIB_UNSET ? now->i : 0;
+	if (parsed->s == TIMELIB_UNSET) parsed->s = now->s != TIMELIB_UNSET ? now->s : 0;
+	if (parsed->f == TIMELIB_UNSET) parsed->f = now->f != TIMELIB_UNSET ? now->f : 0;
+	if (parsed->z == TIMELIB_UNSET) parsed->z = now->z != TIMELIB_UNSET ? now->z : 0;
+	if (parsed->dst == TIMELIB_UNSET) parsed->dst = now->dst != TIMELIB_UNSET ? now->dst : 0;
 
 	if (!parsed->tz_abbr) {
 		parsed->tz_abbr = now->tz_abbr ? strdup(now->tz_abbr) : NULL;
