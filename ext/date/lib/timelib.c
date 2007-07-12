@@ -167,8 +167,8 @@ void timelib_dump_date(timelib_time *d, int options)
 	if ((options & 2) == 2) {
 		printf("TYPE: %d ", d->zone_type);
 	}
-	printf("TS: %lld | %04lld-%02lld-%02lld %02lld:%02lld:%02lld",
-		d->sse, d->y, d->m, d->d, d->h, d->i, d->s);
+	printf("TS: %lld | %s%04lld-%02lld-%02lld %02lld:%02lld:%02lld",
+		d->sse, d->y < 0 ? "-" : "", llabs(d->y), d->m, d->d, d->h, d->i, d->s);
 	if (d->f > +0.0) {
 		printf(" %.5f", d->f);
 	}
