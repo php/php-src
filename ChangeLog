@@ -1,3 +1,433 @@
+2007-07-11  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      configure.in
+      ext/odbc/config.m4
+      sapi/aolserver/config.m4
+      sapi/apache/config.m4
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4
+      sapi/apache_hooks/config.m4
+      sapi/caudium/config.m4
+      sapi/cgi/config9.m4
+      sapi/cli/config.m4
+      sapi/continuity/config.m4
+      sapi/embed/config.m4
+      sapi/isapi/config.m4
+      sapi/milter/config.m4
+      sapi/nsapi/config.m4
+      sapi/phttpd/config.m4
+      sapi/pi3web/config.m4
+      sapi/roxen/config.m4
+      sapi/thttpd/config.m4
+      sapi/tux/config.m4
+      sapi/webjames/config.m4:
+      MFH: - Changed AC_ARG_* options to PHP_ARG_* options.
+      MFH: - Some cleanups here and there
+      MFH: - Enabled PHP_CHECK_CONFIGURE_OPTIONS (checks for unknown configure
+      MFH:   options)
+
+    * configure.in:
+      - Enabled PHP_CHECK_CONFIGURE_OPTIONS (check for unknown configure options)
+
+    * ext/odbc/config.m4:
+      - Changed all AC_ARG_* options to PHP_ARG_* options.
+
+    * sapi/aolserver/config.m4
+      sapi/apache/config.m4
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4
+      sapi/apache_hooks/config.m4
+      sapi/caudium/config.m4
+      sapi/cgi/config9.m4
+      sapi/cli/config.m4
+      sapi/continuity/config.m4
+      sapi/embed/config.m4
+      sapi/isapi/config.m4
+      sapi/milter/config.m4
+      sapi/nsapi/config.m4
+      sapi/phttpd/config.m4
+      sapi/pi3web/config.m4
+      sapi/roxen/config.m4
+      sapi/thttpd/config.m4
+      sapi/tux/README
+      sapi/tux/config.m4
+      sapi/webjames/config.m4:
+      - Changed all AC_ARG_* options to PHP_ARG_* options and cleaned up some
+
+2007-07-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/config.m4:
+      check PHP version only when enabled
+      and replace tabs with spaces
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug41884.phpt
+      ext/reflection/tests/bug41884.phpt:
+      implement (or fix?) #41884 (ReflectionClass::getDefaultProperties() does
+      not handle static attributes)
+
+2007-07-11  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/pdo_pgsql/config.m4
+      ext/pgsql/config.m4:
+      - Removed unused empty macro and nuked illegal use of $withval
+
+    * acinclude.m4:
+      MFB: PHP_CHECK_CONFIGURE_OPTIONS
+
+2007-07-11  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/reflection/tests/reflectionClass_getName_basic.phpt
+      ext/reflection/tests/reflectionClass_getName_error.phpt
+      ext/reflection/tests/reflectionClass_getName_error1.phpt
+      ext/reflection/tests/reflectionClass_isInstance_basic.phpt
+      ext/reflection/tests/reflectionClass_isInstance_error.phpt
+      ext/reflection/tests/reflectionClass_isInstantiable_basic.phpt
+      ext/reflection/tests/reflectionClass_isInstantiable_error.phpt
+      ext/reflection/tests/reflectionClass_isInstantiable_variation.phpt
+      ext/reflection/tests/reflectionClass_isInternal_basic.phpt
+      ext/reflection/tests/reflectionClass_isInternal_error.phpt
+      ext/reflection/tests/reflectionClass_isSubclassOf_basic.phpt
+      ext/reflection/tests/reflectionClass_isSubclassOf_error.phpt
+      ext/reflection/tests/reflectionClass_isSubclassOf_error1.phpt
+      ext/reflection/tests/reflectionClass_isUserDefined_basic.phpt
+      ext/reflection/tests/reflectionClass_isUserDefined_error.phpt:
+      More reflectionClass tests
+
+    * ext/reflection/tests/reflectionClass_getName_basic.phpt
+      ext/reflection/tests/reflectionClass_getName_basic.phpt
+      ext/reflection/tests/reflectionClass_getName_error.phpt
+      ext/reflection/tests/reflectionClass_getName_error.phpt
+      ext/reflection/tests/reflectionClass_getName_error1.phpt
+      ext/reflection/tests/reflectionClass_getName_error1.phpt
+      ext/reflection/tests/reflectionClass_isInstance_basic.phpt
+      ext/reflection/tests/reflectionClass_isInstance_basic.phpt
+      ext/reflection/tests/reflectionClass_isInstance_error.phpt
+      ext/reflection/tests/reflectionClass_isInstance_error.phpt
+      ext/reflection/tests/reflectionClass_isInstantiable_basic.phpt
+      ext/reflection/tests/reflectionClass_isInstantiable_basic.phpt
+      ext/reflection/tests/reflectionClass_isInstantiable_error.phpt
+      ext/reflection/tests/reflectionClass_isInstantiable_error.phpt
+      ext/reflection/tests/reflectionClass_isInstantiable_variation.phpt
+      ext/reflection/tests/reflectionClass_isInstantiable_variation.phpt
+      ext/reflection/tests/reflectionClass_isInternal_basic.phpt
+      ext/reflection/tests/reflectionClass_isInternal_basic.phpt
+      ext/reflection/tests/reflectionClass_isInternal_error.phpt
+      ext/reflection/tests/reflectionClass_isInternal_error.phpt
+      ext/reflection/tests/reflectionClass_isSubclassOf_basic.phpt
+      ext/reflection/tests/reflectionClass_isSubclassOf_basic.phpt
+      ext/reflection/tests/reflectionClass_isSubclassOf_error.phpt
+      ext/reflection/tests/reflectionClass_isSubclassOf_error.phpt
+      ext/reflection/tests/reflectionClass_isSubclassOf_error1.phpt
+      ext/reflection/tests/reflectionClass_isSubclassOf_error1.phpt
+      ext/reflection/tests/reflectionClass_isUserDefined_basic.phpt
+      ext/reflection/tests/reflectionClass_isUserDefined_basic.phpt
+      ext/reflection/tests/reflectionClass_isUserDefined_error.phpt
+      ext/reflection/tests/reflectionClass_isUserDefined_error.phpt:
+      
+      file reflectionClass_getName_basic.phpt was initially added on branch
+      PHP_5_2.
+
+2007-07-11  Johannes Schlüter  <johannes@schlueters.de>
+
+    * acinclude.m4
+      ext/mbstring/mbstring.c
+      ext/standard/basic_functions.c
+      ext/standard/mail.c
+      ext/standard/php_mail.h
+      main/config.w32.h
+      main/main.c
+      win32/build/config.w32.h.in:
+      - Always enable mail() function
+
+2007-07-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlreader/tests/008.phpt
+      main/streams/memory.c:
+      Unicode support
+
+2007-07-11  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_num_fields.phpt:
+      Whitespace/CS only
+
+    * ext/mysql/tests/mysql_list_processes.phpt:
+      Whitespace/Coding Standards and check added for default connection.
+
+2007-07-11  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/standard/tests/strings/count_chars.phpt:
+      Fix test for unicode mode
+
+2007-07-11  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_fetch_field.phpt:
+      Whitespace and more testing.
+
+    * ext/mysql/tests/mysql_insert_id.phpt
+      ext/mysql/tests/mysql_list_dbs.phpt:
+      Whitespace and new checks for default connection.
+
+2007-07-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.h:
+      Fixed ascii->unicode conversion (terminating unicode character must be 0)
+
+2007-07-11  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      acinclude.m4:
+      - Introducing 1st part of "show unknown configure options" and nuked
+      PHP_REGEX macro for good
+
+2007-07-11  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_info.phpt
+      ext/mysql/tests/mysql_list_fields.phpt:
+      Whitespace only
+
+    * ext/mysql/tests/mysql_get_host_info.phpt
+      ext/mysql/tests/mysql_get_proto_info.phpt
+      ext/mysql/tests/mysql_get_server_info.phpt:
+      Mainly Whitespace/CS changes. Partly "too many arguments" check added.
+
+    * ext/mysql/tests/mysql_get_client_info.phpt:
+      Whitespace and new "too many arguments" check.
+
+    * ext/mysql/tests/mysql_free_result.phpt:
+      Whitespace/Coding Standards and new check what happens if one tries to
+      free not a mysql resource but a file resource.
+
+    * ext/mysql/tests/mysql_field_type.phpt:
+      Whitespace/Coding Standard
+
+    * ext/mysql/tests/mysql_field_name.phpt
+      ext/mysql/tests/mysql_field_seek.phpt
+      ext/mysql/tests/mysql_field_table.phpt:
+      Removing reference to skipifemb.inc which is not needed and
+      Whitespace/Coding Standards.
+
+2007-07-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/streams/streams.c
+      main/streams/streams.c:
+      Fixed wrong warning
+
+2007-07-11  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_field_len.phpt:
+      Whitespace and the usual suspect: skipifemb.inc
+
+    * ext/mysql/tests/mysql_field_flags.phpt:
+      Whitespace/Coding Standards, removal of skipifemb.inc, improved testing
+      and checking for expected field types.
+
+    * ext/mysql/tests/mysql_fetch_row.phpt:
+      Whitespace and - as usual - removing skipifemb.inc
+
+    * ext/mysql/tests/mysql_fetch_object.phpt:
+      Whitespace/Coding Standards, removing reference to skipifemb.inc,
+      tweaking EXPECTF.
+
+    * ext/mysql/tests/mysql_fetch_lengths.phpt:
+      Whitespace. Removing reference to skipifemb.inc.
+
+    * ext/mysql/tests/mysql_fetch_array.phpt:
+      Aside from whitespace / coding standards this one is more interesting.
+      We added a flag to check if a MySQL column type is a binary type. If so,
+      ext/mysql should return data for such columns not as unicode strings but
+      as binary strings if unicode.semantics is on.
+
+    * ext/mysql/tests/mysql_fetch_assoc.phpt:
+      Whitespace / Coding Standards
+
+2007-07-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/reflection/php_reflection.c:
+      fix typo and bug #41962
+
+2007-07-11  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_escape_string.phpt:
+      1) Whitespace / Coding Standards
+      2) Don't even dare to have variables that sound like connection parameters
+      and don't come from connect.inc
+      3) skipifem.inc is not there for ext/mysql tests
+
+    * ext/mysql/tests/mysql_errno.phpt
+      ext/mysql/tests/mysql_error.phpt:
+      Whitespace/Coding Standards.
+      The tests origin from ext/mysqli/tests. ext/mysqli/tests should have a
+      skipifemb.inc, which is not needed and not available for ext/mysql/tests.
+      Nevertheless the tests tried to include that file.
+
+2007-07-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/array/extract.phpt
+      ext/standard/tests/file/flock_error.phpt:
+      Fixed tests
+
+    * ZendEngine2/zend_API.c:
+      Made uniform error reporting for unicode/non-unicode modes
+
+2007-07-11  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_db_query.phpt:
+      Whitespace/Coding Standards.
+      Test for default link added.
+
+    * ext/mysql/tests/mysql_db_name.phpt
+      ext/mysql/tests/mysql_drop_db.phpt:
+      Those two should be whitespace / coding standards only. However, in some of
+      my commit messages I might be wrong, it's hard to say what we added to the
+      tests and I might miss this or that little detail, although I check the
+      diff
+      before commit.
+
+    * ext/mysql/tests/mysql_create_db.phpt
+      ext/mysql/tests/mysql_data_seek.phpt:
+      Should be whitespace/coding standards changes only.
+
+    * ext/mysql/tests/mysql_connect.phpt:
+      Mostly whitespace (replacing spaces with tab). Additional, weak test for
+      "host:port:socket" syntax, just to make sure we cover the underlying
+      C code.
+
+2007-07-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/openssl.c
+      ext/openssl/tests/bug28382.phpt:
+      mproced openssl_x509_parse() to return extensions in readable form
+
+    * ext/openssl/openssl.c
+      ext/openssl/tests/005.phpt
+      ext/openssl/tests/bug28382.phpt:
+      Unicode support
+      improved openssl_x509_parse() extensions support
+
+2007-07-11  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_affected_rows.phpt
+      ext/mysql/tests/mysql_client_encoding.phpt
+      ext/mysql/tests/mysql_close.phpt:
+      Whitespace: replacing spaces with tab to follow coding conventions.
+      
+      One tiny change in mysql_close.phpt: don't overrule connection parameter
+      in any of the tests. Alway take connection parameter, including the
+      database
+      name ($db), from connect.inc.
+
+2007-07-11  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/config.m4:
+      - Nuke extra AC_MSG_CHECKING
+
+    * (PHP_5_2)
+      ext/standard/config.m4:
+      MFH: cleanup, removed unnecessary macro definitions
+
+2007-07-11  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_constants.c
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_dynamic_array.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_extensions.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_indent.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_iterators.c
+      ZendEngine2/zend_list.c
+      ZendEngine2/zend_llist.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_ptr_stack.c
+      ZendEngine2/zend_qsort.c
+      ZendEngine2/zend_sprintf.c
+      ZendEngine2/zend_stack.c
+      ZendEngine2/zend_static_allocator.c
+      ZendEngine2/zend_stream.c
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_ts_hash.c
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_variables.c:
+      fix folding, CS and WS
+
+2007-07-11  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/001.phpt
+      ext/mysql/tests/002.phpt
+      ext/mysql/tests/003.phpt
+      ext/mysql/tests/connect.inc
+      ext/mysql/tests/skipif.inc
+      ext/mysql/tests/table.inc:
+      Trying to fix broken tests. The last set of files committed a few weeks ago
+      broke almost all tests. I'll try to merge the CVS with a working set of
+      tests from the mysqlnd development repository. With this first set of
+      changes most tests should run (and pass) again.
+      
+      Note the additional environment variables in connect.inc that you can
+      use to control a test run.
+      
+      More changes to come.
+
+2007-07-11  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * acinclude.m4:
+      - Improved PHP_SETUP_ICU
+
+    * acinclude.m4
+      ext/standard/config.m4:
+      - Cleanup, nuked some unnecessary macros.
+
+    * main/main.c:
+      - No return value for void function
+
+2007-07-11  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/popen_pclose_error-sunos.phpt
+      ext/standard/tests/file/popen_pclose_error.phpt:
+      better check for skip
+
+2007-07-11  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ext/snmp/config.m4:
+      MFH: Changed AC_ARG_ENABLE to PHP_ARG_ENABLE
+
+    * ext/snmp/config.m4:
+      - Changed AC_ARG_ENABLE to PHP_ARG_ENABLE
+
+2007-07-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/xml/xml.c:
+      unicode support
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      Fixed memory leak
+
+    * ext/openssl/openssl.c:
+      Fixed crash on non-string passphrase and unicode support
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      Fixed crash on non-string passphrase
+
+    * tests/classes/serialize_001.phpt:
+      removed seccond --UEXPECT--
+
 2007-07-10  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_4_4)
