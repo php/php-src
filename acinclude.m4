@@ -2119,7 +2119,7 @@ dnl
 dnl Common setup macro for ICU
 dnl
 AC_DEFUN([PHP_SETUP_ICU],[
-  PHP_ARG_WITH(icu-dir, for location of ICU headers and libraries,
+  PHP_ARG_WITH(icu-dir,,
   [  --with-icu-dir=DIR      Specify where ICU libraries and headers can be found], DEFAULT, no)
 
   if test "$PHP_ICU_DIR" = "no"; then
@@ -2133,13 +2133,15 @@ AC_DEFUN([PHP_SETUP_ICU],[
     ICU_CONFIG="$PHP_ICU_DIR/bin/icu-config"
   fi
 
+  AC_MSG_CHECKING([for location of ICU headers and libraries])
+
   dnl Trust icu-config to know better what the install prefix is..
   icu_install_prefix=`$ICU_CONFIG --prefix 2> /dev/null`
   if test "$?" != "0" || test -z "$icu_install_prefix"; then
     AC_MSG_RESULT([not found])
     AC_MSG_ERROR([Unable to detect ICU prefix or $ICU_CONFIG failed. Please verify ICU install prefix and make sure icu-config works.])
   else
-    AC_MSG_RESULT([found in $icu_install_prefix])
+    AC_MSG_RESULT([$icu_install_prefix])
 
     dnl Check ICU version
     AC_MSG_CHECKING([for ICU 3.4 or greater])
