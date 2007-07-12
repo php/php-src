@@ -38,8 +38,12 @@ var_dump(mysql_errno($link));
 if ($link = @mysql_connect($host . '_unknown', $user . '_unknown', $passwd, true)) {
 	printf("[005] Can connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 		$host . '_unknown', $user . '_unknown', $db, $port, $socket);
+} else {
+	$errno = mysql_errno();
+	if (!is_int($errno))
+		printf("[006] Expecting int/any (e.g 1046, 2005) got %s/%s\n", gettype($errno), $errno);
+
 }
-var_dump(mysql_errno());
 
 print "done!";
 ?>
@@ -49,5 +53,4 @@ int(%d)
 
 Warning: mysql_errno(): %d is not a valid MySQL-Link resource in %s on line %d
 bool(false)
-int(%d)
 done!
