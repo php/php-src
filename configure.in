@@ -732,7 +732,7 @@ if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
 fi
 
 AC_MSG_CHECKING([where to scan for configuration files])
-PHP_ARG_WITH(config-file-scan-dir,
+PHP_ARG_WITH(config-file-scan-dir,,
 [  --with-config-file-scan-dir=PATH
                           Set the path where to scan for configuration files], DEFAULT, no) 
 if test "$PHP_CONFIG_FILE_SCAN_DIR" = "DEFAULT"; then
