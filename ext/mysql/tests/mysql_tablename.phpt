@@ -1,12 +1,7 @@
 --TEST--
 mysql_tablename()
 --SKIPIF--
-<?php
-require_once('skipif.inc');
-require_once('connect.inc');
-if ($IS_MYSQLND && !function_exists('mysql_tablename'))
-    die("skip - deprecated function not implemented in mysqlnd");
-?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 include "connect.inc";
