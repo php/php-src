@@ -503,15 +503,15 @@ typedef struct {
 
 /* {{{ _php_sasl_setdefs
  */
-static php_ldap_bictx *_php_sasl_setdefs(LDAP *ld, char *sasl_mech, char *sasl_realm, char *binddn, char *pass, char *sasl_authz_id)
+static php_ldap_bictx *_php_sasl_setdefs(LDAP *ld, char *sasl_mech, char *sasl_realm, char *sasl_authc_id, char *passwd, char *sasl_authz_id)
 {
 	php_ldap_bictx *ctx;
 
 	ctx = ber_memalloc(sizeof(php_ldap_bictx));	
 	ctx->mech    = (sasl_mech) ? ber_strdup(sasl_mech) : NULL;
 	ctx->realm   = (sasl_realm) ? ber_strdup(sasl_realm) : NULL;
-	ctx->authcid = (binddn) ? ber_strdup(binddn) : NULL;
-	ctx->passwd  = (pass) ? ber_strdup(pass) : NULL;
+	ctx->authcid = (sasl_authc_id) ? ber_strdup(sasl_authc_id) : NULL;
+	ctx->passwd  = (passwd) ? ber_strdup(passwd) : NULL;
 	ctx->authzid = (sasl_authz_id) ? ber_strdup(sasl_authz_id) : NULL;
 
 	if (ctx->mech == NULL) {
@@ -577,28 +577,29 @@ static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in
 }
 /* }}} */
 
-/* {{{ proto bool ldap_sasl_bind(resource link [, string binddn, string password, string sasl_mech, string sasl_realm, string sasl_authz_id, string props])
+/* {{{ proto bool ldap_sasl_bind(resource link [, string binddn, string password, string sasl_mech, string sasl_realm, string sasl_authc_id, string sasl_authz_id, string props])
    Bind to LDAP directory using SASL */
 PHP_FUNCTION(ldap_sasl_bind)
 {
 	zval *link;
 	ldap_linkdata *ld;
 	char *binddn = NULL;
-	char *pass = NULL;
+	char *passwd = NULL;
 	char *sasl_mech = NULL;
 	char *sasl_realm = NULL;
 	char *sasl_authz_id = NULL;
+	char *sasl_authc_id = NULL;
 	char *props = NULL;
-	int rc, dn_len, pass_len, mech_len, realm_len, authz_id_len, props_len;
+	int rc, dn_len, passwd_len, mech_len, realm_len, authc_id_len, authz_id_len, props_len;
 	php_ldap_bictx *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ssssss", &link, &binddn, &dn_len, &pass, &pass_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authz_id, &authz_id_len, &props, &props_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|sssssss", &link, &binddn, &dn_len, &passwd, &passwd_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authc_id, &authc_id_len, &sasl_authz_id, &authz_id_len, &props, &props_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
 
-	ctx = _php_sasl_setdefs(ld->link, sasl_mech, sasl_realm, binddn, pass, sasl_authz_id);
+	ctx = _php_sasl_setdefs(ld->link, sasl_mech, sasl_realm, sasl_authc_id, passwd, sasl_authz_id);
 
 	if (props) {
 		ldap_set_option(ld->link, LDAP_OPT_X_SASL_SECPROPS, props);
