@@ -1,3 +1,43 @@
+2007-07-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.h:
+      Fixed ascii->unicode conversion (terminating unicode character must be 0)
+
+    * zend_API.c:
+      Made uniform error reporting for unicode/non-unicode modes
+
+2007-07-11  Antony Dovgal  <antony@zend.com>
+
+    * zend_constants.c
+      zend_default_classes.c
+      zend_dynamic_array.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_extensions.c
+      zend_hash.c
+      zend_highlight.c
+      zend_indent.c
+      zend_ini.c
+      zend_iterators.c
+      zend_list.c
+      zend_llist.c
+      zend_object_handlers.c
+      zend_objects.c
+      zend_objects_API.c
+      zend_opcode.c
+      zend_operators.c
+      zend_ptr_stack.c
+      zend_qsort.c
+      zend_sprintf.c
+      zend_stack.c
+      zend_static_allocator.c
+      zend_stream.c
+      zend_strtod.c
+      zend_ts_hash.c
+      zend_unicode.c
+      zend_variables.c:
+      fix folding, CS and WS
+
 2007-07-10  Antony Dovgal  <antony@zend.com>
 
     * zend.c
