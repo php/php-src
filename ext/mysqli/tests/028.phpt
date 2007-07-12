@@ -5,15 +5,20 @@ function test: mysqli_character_set_name
 --FILE--
 <?php
 	include "connect.inc";
-	
+
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	$cset = substr(mysqli_character_set_name($link),0,6);
 
 	var_dump($cset);
 
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECTF--
-%s(%d) "%s"
+string(%d) "%s"
+done!
+--UEXPECTF--
+unicode(%d) "%s"
+done!
