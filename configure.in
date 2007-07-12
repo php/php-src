@@ -800,9 +800,13 @@ AC_MSG_CHECKING([how big to make fd sets])
 PHP_ARG_ENABLE(fd-setsize,,
 [  --enable-fd-setsize     Set size of descriptor sets], no, no)
 
-if test "$PHP_FD_SETSIZE" != "yes"; then
-  CPPFLAGS="$CPPFLAGS -DFD_SETSIZE=$PHP_FD_SETSIZE"
-  AC_MSG_RESULT([using $PHP_FD_SETSIZE])
+if test "$PHP_FD_SETSIZE" != "no"; then
+  if test "0$PHP_FD_SETSIZE" -gt 0 2>/dev/null; then
+    CPPFLAGS="$CPPFLAGS -DFD_SETSIZE=$PHP_FD_SETSIZE"
+    AC_MSG_RESULT([using $PHP_FD_SETSIZE])
+  else
+    AC_MSG_ERROR([Invalid value passed to --enable-fd-setsize!])
+  fi
 else
   AC_MSG_RESULT([using system default])
 fi
