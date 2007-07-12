@@ -58,6 +58,8 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #41961 (Ensure search for hidden private methods does not stray
+  from class hierarchy). (robin_fernandes at uk dot ibm dot com)
 - Fixed bug #41947 (SimpleXML incorrectly registers empty strings as 
   namespaces). (Rob)
 - Fixed bug #41919 (crash in string to array conversion).
