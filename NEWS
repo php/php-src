@@ -142,9 +142,11 @@ PHP                                                                        NEWS
   integer as sections). (Tony)
 - Fixed bug #41350 (my_thread_global_end() error during request shutdown
   on Windows). (Scott, Andrey)
-- Fixed bug #40419 (Trailing Slash in CGI request don't work). (Dmitry)
+- Fixed bug #40419 (Trailing slash in CGI request does not work). (Dmitry)
 - Fixed bug #39330 (apache2handler does not call shutdown actions before 
   apache child die). (isk at ecommerce dot com, Gopal, Tony)
+- Fixed bug #39291 (ldap_sasl_bind() misses the sasl_authc_id parameter).
+  (diafour at gmail dot com, Jani)
 - Fixed bug #35981 (pdo-pgsql should not use pkg-config when not present).
   (Jani)
 
