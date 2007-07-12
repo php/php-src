@@ -35,6 +35,13 @@ if (!$res = mysql_query('SELECT "this is sql but with semicolon" AS valid ; ', $
 var_dump(mysql_fetch_assoc($res));
 mysql_free_result($res);
 
+if (!$res = mysql_query('SELECT "a" AS ""', $link))
+	printf("[007a] [%d] %s\n", mysql_errno($link), mysql_error($link));
+
+var_dump($tmp = mysql_fetch_assoc($res));
+var_dump($tmp[""]);
+mysql_free_result($res);
+
 if (false !== ($res = mysql_query('SELECT "this is sql but with semicolon" AS valid ; SHOW VARIABLES', $link)))
 	printf("[008] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
@@ -87,6 +94,11 @@ array(1) {
   ["valid"]=>
   string(30) "this is sql but with semicolon"
 }
+array(1) {
+  [""]=>
+  string(1) "a"
+}
+string(1) "a"
 
 Warning: mysql_query(): %d is not a valid MySQL-Link resource in %s on line %d
 done!
@@ -95,6 +107,11 @@ array(1) {
   [u"valid"]=>
   unicode(30) "this is sql but with semicolon"
 }
+array(1) {
+  [u""]=>
+  unicode(1) "a"
+}
+unicode(1) "a"
 
 Warning: mysql_query(): %d is not a valid MySQL-Link resource in %s on line %d
 done!
