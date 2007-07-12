@@ -883,7 +883,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 			/* year */
 			case 'L': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", timelib_is_leap((int) t->y)); break;
 			case 'y': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->y % 100); break;
-			case 'Y': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%04d", (int) t->y); break;
+			case 'Y': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s%04d", t->y < 0 ? "-" : "", abs((int) t->y)); break;
 
 			/* time */
 			case 'a': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_lower_full(t->h >= 12 ? 1 : 0, localized)); break;
@@ -1869,7 +1869,7 @@ PHP_FUNCTION(date_parse)
 	parsed_time = timelib_strtotime(date, date_len, &error, DATE_TIMEZONEDB);
 	array_init(return_value);
 #define PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(name, elem) \
-	if (parsed_time->elem == -1) {               \
+	if (parsed_time->elem == -99999) {               \
 		add_ascii_assoc_bool(return_value, #name, 0); \
 	} else {                                       \
 		add_ascii_assoc_long(return_value, #name, parsed_time->elem); \
@@ -1881,7 +1881,7 @@ PHP_FUNCTION(date_parse)
 	PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(minute,    i);
 	PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(second,    s);
 	
-	if (parsed_time->f == -1) {
+	if (parsed_time->f == -99999) {
 		add_ascii_assoc_bool(return_value, "fraction", 0);
 	} else {
 		add_ascii_assoc_double(return_value, "fraction", parsed_time->f);
