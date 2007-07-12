@@ -6,9 +6,9 @@ function test: mysqli_num_fields() 2
 <?php
 
 	include "connect.inc";
-	
+
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	mysqli_real_query($link, "SHOW VARIABLES");
 
@@ -21,6 +21,8 @@ function test: mysqli_num_fields() 2
 	var_dump($num);
 
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECT--
 int(2)
+done!

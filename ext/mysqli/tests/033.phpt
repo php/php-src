@@ -6,15 +6,20 @@ function test: mysqli_get_host_info
 --FILE--
 <?php
 	include "connect.inc";
-	
+
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	$hinfo = mysqli_get_host_info($link);
 
 	var_dump(str_replace('/','', $hinfo));
 
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECTF--
 string(%d) "%s via %s"
+done!
+--UEXPECTF--
+unicode(%d) "%s via %s"
+done!

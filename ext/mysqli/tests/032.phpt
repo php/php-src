@@ -5,11 +5,11 @@ function test: mysqli_info
 --FILE--
 <?php
 	include "connect.inc";
-	
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
 
-	mysqli_select_db($link, "test");
+	/*** test mysqli_connect 127.0.0.1 ***/
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+
+	mysqli_select_db($link, $db);
 
 	mysqli_query($link, "drop table if exists general_test");
 	mysqli_query($link, "create table general_test (a int)");
@@ -20,6 +20,11 @@ function test: mysqli_info
 	var_dump($afc);
 
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECTF--
-%s(38) "Records: 3  Duplicates: 0  Warnings: 0"
+string(38) "Records: 3  Duplicates: 0  Warnings: 0"
+done!
+--UEXPECTF--
+unicode(38) "Records: 3  Duplicates: 0  Warnings: 0"
+done!
