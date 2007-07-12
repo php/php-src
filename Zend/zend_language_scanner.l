@@ -1699,6 +1699,14 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 	return T_REQUIRE_ONCE;
 }
 
+<ST_IN_SCRIPTING>"namespace" {
+	return T_NAMESPACE;
+}
+
+<ST_IN_SCRIPTING>"import" {
+	return T_IMPORT;
+}
+
 <ST_IN_SCRIPTING>"use" {
 	return T_USE;
 }
@@ -2070,6 +2078,16 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 	}
 	ZVAL_RT_STRING(zendlval, filename, 1);
 	return T_FILE;
+}
+
+<ST_IN_SCRIPTING>"__NAMESPACE__" {
+	if (CG(current_namespace)) {
+		*zendlval = *CG(current_namespace);
+		zval_copy_ctor(zendlval);
+	} else {
+		ZVAL_EMPTY_TEXT(zendlval);
+	}
+	return T_NS_C;
 }
 
 <INITIAL>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {

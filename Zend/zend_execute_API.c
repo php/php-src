@@ -1123,7 +1123,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	zval *retval_ptr = NULL;
 	int retval;
 	unsigned int lc_name_len;
-	zstr lc_name;
+	zstr lc_name, lc_free;
 	zval *exception;
 	char dummy = 1;
 	zend_fcall_info fcall_info;
@@ -1134,15 +1134,26 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	}
 
 	if (do_normalize) {
-		lc_name = zend_u_str_case_fold(type, name, name_length, 1, &lc_name_len);
+		lc_free = lc_name = zend_u_str_case_fold(type, name, name_length, 1, &lc_name_len);
 	} else {
 		lc_name = name;
 		lc_name_len = name_length;
 	}
+	if (type == IS_UNICODE &&
+	    lc_name.u[0] == ':' &&
+	    lc_name.u[1] == ':') {
+		lc_name.u += 2;
+		lc_name_len -= 2;
+	} else if (type == IS_STRING &&
+	           lc_name.s[0] == ':' &&
+	           lc_name.s[1] == ':') {
+		lc_name.s += 2;
+		lc_name_len -= 2;
+	}
 
 	if (zend_u_hash_find(EG(class_table), type, lc_name, lc_name_len+1, (void **) ce) == SUCCESS) {
 		if (do_normalize) {
-			efree(lc_name.v);
+			efree(lc_free.v);
 		}
 		return SUCCESS;
 	}
@@ -1152,7 +1163,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	*/
 	if (!use_autoload || zend_is_compiling(TSRMLS_C)) {
 		if (do_normalize) {
-			efree(lc_name.v);
+			efree(lc_free.v);
 		}
 		return FAILURE;
 	}
@@ -1164,7 +1175,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 
 	if (zend_u_hash_add(EG(in_autoload), type, lc_name, lc_name_len+1, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
 		if (do_normalize) {
-			efree(lc_name.v);
+			efree(lc_free.v);
 		}
 		return FAILURE;
 	}
@@ -1208,14 +1219,14 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	if (retval == FAILURE) {
 		EG(exception) = exception;
 		if (do_normalize) {
-			efree(lc_name.v);
+			efree(lc_free.v);
 		}
 		return FAILURE;
 	}
 
 	if (EG(exception) && exception) {
 		if (do_normalize) {
-			efree(lc_name.v);
+			efree(lc_free.v);
 		}
 		zend_error(E_ERROR, "Function %s(%R) threw an exception of type '%v'", ZEND_AUTOLOAD_FUNC_NAME, type, name, Z_OBJCE_P(EG(exception))->name);
 		return FAILURE;
@@ -1229,7 +1240,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 
 	retval = zend_u_hash_find(EG(class_table), type, lc_name, lc_name_len + 1, (void **) ce);
 	if (do_normalize) {
-		efree(lc_name.v);
+		efree(lc_free.v);
 	}
 	return retval;
 }
@@ -1636,6 +1647,7 @@ ZEND_API zend_class_entry *zend_u_fetch_class(zend_uchar type, zstr class_name, 
 	zend_class_entry **pce;
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD)  ? 0 : 1;
 	int do_normalize = (fetch_type & ZEND_FETCH_CLASS_NO_NORMALIZE) ? 0 : 1;
+	int rt_ns_check  = (fetch_type & ZEND_FETCH_CLASS_RT_NS_CHECK)  ? 1 : 0;
 	zstr lcname = class_name;
 
 	fetch_type = fetch_type & ~ZEND_FETCH_CLASS_FLAGS;
@@ -1672,6 +1684,36 @@ check_fetch_type:
 	}
 
 	if (zend_u_lookup_class_ex(type, lcname, class_name_len, use_autoload, do_normalize, &pce TSRMLS_CC)==FAILURE) {
+		if (rt_ns_check) {
+			/* Check if we have internal class with the same name */
+			zstr php_name;
+			
+			if (type == IS_UNICODE) {
+				php_name.u = u_memrchr(lcname.u, ':', class_name_len);
+				if (php_name.u) {
+					php_name.u++;
+					if (zend_u_lookup_class_ex(type, php_name, class_name_len-(php_name.u-lcname.u), 0, do_normalize, &pce TSRMLS_CC)==SUCCESS &&
+					    (*pce)->type == ZEND_INTERNAL_CLASS) {
+						if (lcname.v != class_name.v) {
+							efree(lcname.v);
+						}
+						return *pce;
+					}
+				}
+			} else {
+				php_name.s = zend_memrchr(lcname.s, ':', class_name_len);
+				if (php_name.s) {
+					php_name.s++;
+					if (zend_u_lookup_class_ex(type, php_name, class_name_len-(php_name.s-lcname.s), 0, do_normalize, &pce TSRMLS_CC)==SUCCESS &&
+					    (*pce)->type == ZEND_INTERNAL_CLASS) {
+						if (lcname.v != class_name.v) {
+							efree(lcname.v);
+						}
+						return *pce;
+					}
+				}
+			}
+		}
 		if (use_autoload) {
 			if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
 				zend_error(E_ERROR, "Interface '%R' not found", type, class_name);
