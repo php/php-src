@@ -7,7 +7,7 @@ mysqli thread_id & kill
 <?php
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd, "test");
+	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	var_dump($mysql->ping());
 
@@ -17,7 +17,7 @@ mysqli thread_id & kill
 
 	$mysql->close();
 
-	$mysql = new mysqli($host, $user, $passwd, "test");
+	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	var_dump(mysqli_ping($mysql));
 
@@ -26,6 +26,7 @@ mysqli thread_id & kill
 	var_dump(mysqli_ping($mysql));
 
 	$mysql->close();
+	print "done!";
 ?>
 --EXPECT--
 bool(true)
@@ -34,3 +35,4 @@ bool(false)
 bool(true)
 bool(true)
 bool(false)
+done!

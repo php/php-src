@@ -6,7 +6,7 @@ NULL binding
 <?php
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd);
+	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	$stmt = new mysqli_stmt($mysql, "SELECT NULL FROM DUAL");
 	$stmt->execute();
