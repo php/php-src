@@ -28,11 +28,7 @@
 		m = NULL;	\
 	}			\
 
-#if defined(_MSC_VER)
-	#define TIMELIB_LLABS(y) y < 0 ? (y * -1) : y
-#else
-	#define TIMELIB_LLABS(y) llabs(y)
-#endif
+#define TIMELIB_LLABS(y) (y < 0 ? (y * -1) : y)
 
 timelib_time* timelib_time_ctor()
 {
