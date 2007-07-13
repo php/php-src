@@ -1941,6 +1941,21 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 		}
 	}
 
+	if ((Z_TYPE_P(op1) == IS_NULL && Z_TYPE_P(op2) == IS_UNICODE)
+		|| (Z_TYPE_P(op2) == IS_NULL && Z_TYPE_P(op1) == IS_UNICODE)) {
+		UChar *empty_str = USTR_MAKE("");
+
+		if (Z_TYPE_P(op1) == IS_NULL) {
+			ZVAL_LONG(result, zend_u_binary_strcmp(empty_str, 0, Z_USTRVAL_P(op2), Z_USTRLEN_P(op2)));
+			efree(empty_str);
+			COMPARE_RETURN_AND_FREE(SUCCESS);
+		} else {
+			ZVAL_LONG(result, zend_u_binary_strcmp(Z_USTRVAL_P(op1), Z_USTRLEN_P(op1), empty_str, 0));
+			efree(empty_str);
+			COMPARE_RETURN_AND_FREE(SUCCESS);
+		}
+	}
+
 	if ((Z_TYPE_P(op1) == IS_UNICODE || Z_TYPE_P(op1) == IS_STRING) &&
 	    (Z_TYPE_P(op2) == IS_UNICODE || Z_TYPE_P(op2) == IS_STRING)) {
 
