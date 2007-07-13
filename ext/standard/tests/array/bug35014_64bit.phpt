@@ -31,8 +31,8 @@ int(3)
 int(9)
 float(1)
 int(9999999800000001)
-float(2.8404260053903E+20)
-int(8589934590)
+float(1.219953680145E+30)
+float(3.6893488147419E+19)
 --UEXPECTF--
 Warning: array_product() expects parameter 1 to be array, Unicode string given in %s on line %d
 NULL

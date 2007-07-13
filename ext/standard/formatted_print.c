@@ -308,7 +308,7 @@ php_u_sprintf_appenduint(UChar **buffer, int *pos, int *size,
 	register unsigned long magn, nmagn;
 	register unsigned int i = NUM_BUF_SIZE - 1;
 
-	magn = (unsigned int) number;
+	magn = (unsigned long) number;
 
 	/* Can't right-pad 0's on integers */
 	if (alignment == 0 && padding == 0x30 /* '0' */) padding = 0x20 /* ' ' */;
