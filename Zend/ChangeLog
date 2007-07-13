@@ -1,3 +1,74 @@
+2007-07-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      tests/bug41919.phpt:
+      
+      revise test to reflect recent code
+
+    * (PHP_5_2)
+      zend_execute.c:
+      Commit previously missing patch for bug #41919
+
+2007-07-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug41961.phpt:
+      Fixed bug #41961 (Ensure search for hidden private methods does not stray
+      from class hierarchy). (robin_fernandes at uk dot ibm dot com)
+
+    * tests/bug41961.phpt
+      tests/bug41961.phpt:
+      
+      file bug41961.phpt was initially added on branch PHP_5_2.
+
+2007-07-12  Antony Dovgal  <antony@zend.com>
+
+    * tests/020.phpt:
+      add new test
+
+    * tests/020.phpt
+      tests/020.phpt:
+      
+      file 020.phpt was initially added on branch PHP_5_2.
+
+2007-07-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute_API.c
+      zend_globals.h
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/ns_001.phpt
+      tests/ns_002.phpt
+      tests/ns_003.phpt
+      tests/ns_004.phpt
+      tests/ns_005.phpt
+      tests/ns_006.phpt
+      tests/ns_007.phpt
+      tests/ns_008.phpt
+      tests/ns_009.phpt
+      tests/ns_011.phpt
+      tests/ns_012.phpt
+      tests/ns_013.phpt
+      tests/ns_014.phpt
+      tests/ns_015.phpt
+      tests/ns_016.phpt
+      tests/ns_017.phpt
+      tests/ns_018.phpt
+      tests/ns_019.phpt
+      tests/ns_021.phpt
+      tests/ns_022.phpt
+      tests/ns_023.phpt
+      tests/ns_024.phpt
+      tests/ns_031.phpt
+      tests/ns_032.phpt:
+      Namespaces
+
 2007-07-11  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_API.h:
