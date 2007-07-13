@@ -1,3 +1,585 @@
+2007-07-12  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_4_4)
+      README.CVS-RULES
+      README.CVS-RULES:
+      MFH: - Mention [DOC] tag in the README
+      - PHP_5_1 is closed meanwhile
+      - Fixed a small typo
+
+    * README.CVS-RULES:
+      - Mention [DOC] tag in the README
+      - PHP_5_1 is closed meanwhile
+      - Fixed a small typo
+
+2007-07-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug41919.phpt:
+      
+      revise test to reflect recent code
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute.c:
+      Commit previously missing patch for bug #41919
+
+2007-07-12  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS
+      ext/ldap/ldap.c:
+      MFH: - Fixed bug #39291 (ldap_sasl_bind() misses the sasl_authc_id
+      parameter).
+
+    * ext/ldap/ldap.c:
+      - Fixed bug #39291 (ldap_sasl_bind() is mising sasl_authc_id paratemeter)
+
+2007-07-12  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/reflection/tests/reflectionObject_FileInfo_basic.phpt
+      ext/reflection/tests/reflectionObject_FileInfo_error.phpt
+      ext/reflection/tests/reflectionObject_constructor_basic.phpt
+      ext/reflection/tests/reflectionObject_constructor_error.phpt
+      ext/reflection/tests/reflectionObject_getConstant_basic.phpt
+      ext/reflection/tests/reflectionObject_getConstant_error.phpt
+      ext/reflection/tests/reflectionObject_getConstants_basic.phpt
+      ext/reflection/tests/reflectionObject_getConstants_error.phpt
+      ext/reflection/tests/reflectionObject_getConstructor_basic.phpt
+      ext/reflection/tests/reflectionObject_getConstructor_error.phpt
+      ext/reflection/tests/reflectionObject_getName_basic.phpt
+      ext/reflection/tests/reflectionObject_getName_error.phpt
+      ext/reflection/tests/reflectionObject_getName_error1.phpt
+      ext/reflection/tests/reflectionObject_isInstance_basic.phpt
+      ext/reflection/tests/reflectionObject_isInstance_error.phpt
+      ext/reflection/tests/reflectionObject_isInstantiable_basic.phpt
+      ext/reflection/tests/reflectionObject_isInstantiable_error.phpt
+      ext/reflection/tests/reflectionObject_isInstantiable_variation.phpt
+      ext/reflection/tests/reflectionObject_isInternal_basic.phpt
+      ext/reflection/tests/reflectionObject_isInternal_error.phpt
+      ext/reflection/tests/reflectionObject_isSubclassOf_basic.phpt
+      ext/reflection/tests/reflectionObject_isSubclassOf_error.phpt
+      ext/reflection/tests/reflectionObject_isUserDefined_basic.phpt
+      ext/reflection/tests/reflectionObject_isUserDefined_error.phpt:
+      reflectionObject tests
+
+    * ext/reflection/tests/reflectionObject_FileInfo_basic.phpt
+      ext/reflection/tests/reflectionObject_FileInfo_basic.phpt
+      ext/reflection/tests/reflectionObject_FileInfo_error.phpt
+      ext/reflection/tests/reflectionObject_FileInfo_error.phpt
+      ext/reflection/tests/reflectionObject_constructor_basic.phpt
+      ext/reflection/tests/reflectionObject_constructor_basic.phpt
+      ext/reflection/tests/reflectionObject_constructor_error.phpt
+      ext/reflection/tests/reflectionObject_constructor_error.phpt
+      ext/reflection/tests/reflectionObject_getConstant_basic.phpt
+      ext/reflection/tests/reflectionObject_getConstant_basic.phpt
+      ext/reflection/tests/reflectionObject_getConstant_error.phpt
+      ext/reflection/tests/reflectionObject_getConstant_error.phpt
+      ext/reflection/tests/reflectionObject_getConstants_basic.phpt
+      ext/reflection/tests/reflectionObject_getConstants_basic.phpt
+      ext/reflection/tests/reflectionObject_getConstants_error.phpt
+      ext/reflection/tests/reflectionObject_getConstants_error.phpt
+      ext/reflection/tests/reflectionObject_getConstructor_basic.phpt
+      ext/reflection/tests/reflectionObject_getConstructor_basic.phpt
+      ext/reflection/tests/reflectionObject_getConstructor_error.phpt
+      ext/reflection/tests/reflectionObject_getConstructor_error.phpt
+      ext/reflection/tests/reflectionObject_getName_basic.phpt
+      ext/reflection/tests/reflectionObject_getName_basic.phpt
+      ext/reflection/tests/reflectionObject_getName_error.phpt
+      ext/reflection/tests/reflectionObject_getName_error.phpt
+      ext/reflection/tests/reflectionObject_getName_error1.phpt
+      ext/reflection/tests/reflectionObject_getName_error1.phpt
+      ext/reflection/tests/reflectionObject_isInstance_basic.phpt
+      ext/reflection/tests/reflectionObject_isInstance_basic.phpt
+      ext/reflection/tests/reflectionObject_isInstance_error.phpt
+      ext/reflection/tests/reflectionObject_isInstance_error.phpt
+      ext/reflection/tests/reflectionObject_isInstantiable_basic.phpt
+      ext/reflection/tests/reflectionObject_isInstantiable_basic.phpt
+      ext/reflection/tests/reflectionObject_isInstantiable_error.phpt
+      ext/reflection/tests/reflectionObject_isInstantiable_error.phpt
+      ext/reflection/tests/reflectionObject_isInstantiable_variation.phpt
+      ext/reflection/tests/reflectionObject_isInstantiable_variation.phpt
+      ext/reflection/tests/reflectionObject_isInternal_basic.phpt
+      ext/reflection/tests/reflectionObject_isInternal_basic.phpt
+      ext/reflection/tests/reflectionObject_isInternal_error.phpt
+      ext/reflection/tests/reflectionObject_isInternal_error.phpt
+      ext/reflection/tests/reflectionObject_isSubclassOf_basic.phpt
+      ext/reflection/tests/reflectionObject_isSubclassOf_basic.phpt
+      ext/reflection/tests/reflectionObject_isSubclassOf_error.phpt
+      ext/reflection/tests/reflectionObject_isSubclassOf_error.phpt
+      ext/reflection/tests/reflectionObject_isUserDefined_basic.phpt
+      ext/reflection/tests/reflectionObject_isUserDefined_basic.phpt
+      ext/reflection/tests/reflectionObject_isUserDefined_error.phpt
+      ext/reflection/tests/reflectionObject_isUserDefined_error.phpt:
+      
+      file reflectionObject_FileInfo_basic.phpt was initially added on branch
+      PHP_5_2.
+
+2007-07-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysqli/tests/060.phpt
+      ext/mysqli/tests/061.phpt
+      ext/mysqli/tests/062.phpt
+      ext/mysqli/tests/063.phpt
+      ext/mysqli/tests/064.phpt
+      ext/mysqli/tests/065.phpt
+      ext/mysqli/tests/066.phpt
+      ext/mysqli/tests/067.phpt
+      ext/mysqli/tests/068.phpt
+      ext/mysqli/tests/069.phpt
+      ext/mysqli/tests/070.phpt
+      ext/mysqli/tests/071.phpt
+      ext/mysqli/tests/072.phpt
+      ext/mysqli/tests/073.phpt
+      ext/mysqli/tests/074.phpt:
+      The last bunch of changes to the old 0*.phpt tests. Once final time a
+      verbose explanation of changes:
+      
+           - take connection parameter from connect.inc
+           - use proper UEXPECTF
+           - have 'print "done!"' or similar at the end to detect crashes
+           - whitespace changes where needed
+           - take care of portability: PHP 5 vs. PHP 5, MySQL 4.1 - 6.0
+           - understand return value checking as sometime that makes you type
+             more when you write but makes you happy when you debug
+
+    * ext/mysqli/tests/050.phpt
+      ext/mysqli/tests/051.phpt
+      ext/mysqli/tests/052.phpt
+      ext/mysqli/tests/053.phpt
+      ext/mysqli/tests/054.phpt
+      ext/mysqli/tests/055.phpt
+      ext/mysqli/tests/056.phpt
+      ext/mysqli/tests/057.phpt
+      ext/mysqli/tests/058.phpt
+      ext/mysqli/tests/059.phpt:
+      Will this never end?
+         - connection parameter tweaking
+         - a bit of whitespace here and there
+         - use UEXPECTF if need be
+
+    * ext/mysqli/tests/040.phpt
+      ext/mysqli/tests/041.phpt
+      ext/mysqli/tests/042.phpt
+      ext/mysqli/tests/043.phpt
+      ext/mysqli/tests/044.phpt
+      ext/mysqli/tests/045.phpt
+      ext/mysqli/tests/046.phpt
+      ext/mysqli/tests/047.phpt
+      ext/mysqli/tests/048.phpt
+      ext/mysqli/tests/049.phpt:
+      As usual:
+      
+       - connection parameter tweaking
+       - a bit of whitespace here and there
+       - use UEXPECTF if need be
+
+    * ext/mysqli/tests/030.phpt
+      ext/mysqli/tests/031.phpt
+      ext/mysqli/tests/032.phpt
+      ext/mysqli/tests/033.phpt
+      ext/mysqli/tests/034.phpt
+      ext/mysqli/tests/035.phpt
+      ext/mysqli/tests/036.phpt
+      ext/mysqli/tests/037.phpt
+      ext/mysqli/tests/038.phpt
+      ext/mysqli/tests/039.phpt:
+      Connection parameter should be taken from connect.inc and used all in
+      mysqli_connect() and friends. Use UEXPECTF instead of crippled EXPECTF.
+
+    * ext/mysqli/tests/020.phpt
+      ext/mysqli/tests/021.phpt
+      ext/mysqli/tests/022.phpt
+      ext/mysqli/tests/023.phpt
+      ext/mysqli/tests/024.phpt
+      ext/mysqli/tests/025.phpt
+      ext/mysqli/tests/026.phpt
+      ext/mysqli/tests/027.phpt
+      ext/mysqli/tests/028.phpt
+      ext/mysqli/tests/029.phpt:
+      I forgot to mention: some will fail. In particular in unicode mode.
+      
+      Next 10 in row to be tweaked:
+      
+           - take connection parameter from connect.inc
+           - use proper UEXPECTF
+           - have 'print "done!"' or similar at the end to detect crashes
+           - whitespace changes where needed
+           - take care of portability: PHP 5 vs. PHP 5, MySQL 4.1 - 6.0
+           - understand return value checking as sometime that makes you type
+             more when you write but makes you happy when you debug
+
+    * ext/mysqli/tests/010.phpt
+      ext/mysqli/tests/011.phpt
+      ext/mysqli/tests/012.phpt
+      ext/mysqli/tests/013.phpt
+      ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/015.phpt
+      ext/mysqli/tests/016.phpt
+      ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/018.phpt
+      ext/mysqli/tests/019.phpt:
+      Next 10 in row to be tweaked:
+      
+         - take connection parameter from connect.inc
+         - use proper UEXPECTF
+         - have 'print "done!"' or similar at the end to detect crashes
+         - whitespace changes where needed
+         - take care of portability: PHP 5 vs. PHP 5, MySQL 4.1 - 6.0
+         - understand return value checking as sometime that makes you type
+           more when you write but makes you happy when you debug
+
+    * ext/mysqli/tests/005.phpt
+      ext/mysqli/tests/006.phpt
+      ext/mysqli/tests/007.phpt
+      ext/mysqli/tests/008.phpt
+      ext/mysqli/tests/009.phpt:
+      The usual tweaking:
+      
+       - take connection parameter from connect.inc
+       - use proper UEXPECTF
+       - have 'print "done!"' or similar at the end to detect crashes
+       - whitespace changes where needed
+       - take care of portability: PHP 5 vs. PHP 5, MySQL 4.1 - 6.0
+
+    * ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/004.phpt:
+      Pretty much the same cosmetics and tweaking as before (proper UEXPECTF,
+      "done!" at the end to detect crashes, connection parameter tweaking, ...)
+      -
+      plus: check return codes even if failures are unlikely.
+
+    * ext/mysqli/tests/002.phpt:
+      More typical changes:
+      
+      1) Try to have portable SQL, don't create your own schema unless the test
+         wants to test exactly this
+      2) Don't rely on default SQL sort orders
+      3) Use proper UEXPECTF. There have been a lot of tiny unicode issues when
+         ext/mysqli has returned a binary string in unicode mode although a
+         unicode string could be expected and vice versa
+
+    * ext/mysqli/tests/001.phpt:
+      All the upcoming changes in the 0*.phpt files are pretty much the same.
+      I'll
+      describe them only once in with a bit of detail.
+      
+      1) Correct Whitespace (space vs. tab) if need be
+      2) Recall: you get the connection parameter from connect.inc, no DB name,
+      no
+         port no other connection parameter in any of the tests!
+      3) At the end of each test you find a "print 'done!'" or similar. This is
+         most helpful to detect crashing/segfaulting tests with all
+      run-tests.php
+         versions.
+
+    * ext/mysqli/tests/mysqli_affected_rows.phpt
+      ext/mysqli/tests/mysqli_affected_rows_oo.phpt
+      ext/mysqli/tests/mysqli_autocommit.phpt
+      ext/mysqli/tests/mysqli_autocommit_oo.phpt:
+      Adding tests for mysqli_affected_rows() and mysqli_autocommit()
+
+    * ext/mysqli/tests/table.inc:
+      Some of the upcoming new tests will use this little helper to create a
+      very simple MySQL table with some data in it to play with.
+
+    * ext/mysqli/tests/skipif.inc:
+      Some tests intentionally fail connecting to the DB. Not being able to
+      connect is no reason to skip the test. Also, no test should have
+      hard-wired
+      connection parameter in it. Connection parameters come from connect.inc
+      (see environment variables in connect.inc).
+
+    * ext/mysqli/tests/connect.inc:
+      Starting to merge the latest set of ext/mysqli tests from the mysqlnd
+      SVN repro into HEAD. Again, it might happen that I crash the set of tests
+      and don't mention one or the other change while merging. Blame me...
+      
+      1) Note the new environment variables to control the test run
+      2) Variables $IS_MYSQLND and $MYSQLND_VERSION are for writing portable
+      tests
+      3) sys_get_temp_dir function is for PHP5/PHP6 portability
+
+2007-07-12  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/parse_date.c:
+      - Commit generated file.
+
+    * ext/date/php_date.c:
+      - Missing file in commit.
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.c
+      ext/date/lib/unixtime2tm.c
+      ext/date/tests/bug35499.phpt
+      ext/date/tests/bug41523.phpt
+      ext/date/tests/bug41709.phpt
+      ext/date/tests/bug41842.phpt
+      ext/date/tests/bug41844.phpt
+      ext/date/tests/bug41964.phpt:
+      - MFH: Fixed bug #41964 (strtotime returns a timestamp for non-time string
+      of
+        pattern '(A|a) .+').
+      - MFH: Fixed bug #41844 (Format returns incorrect number of digits for
+      negative
+        years -0001 to -0999).
+      - MFH: Fixed bug #41842 (Cannot create years < 0100 & negative years with
+        date_create or new DateTime).
+      - MFH: Fixed bug #41709 (strtotime() does not handle 00.00.0000).
+      - MFH: Fixed bug #41523 (strtotime('0000-00-00 00:00:00') is parsed as
+        1999-11-30).
+
+    * ext/date/tests/bug41523.phpt
+      ext/date/tests/bug41523.phpt
+      ext/date/tests/bug41709.phpt
+      ext/date/tests/bug41709.phpt
+      ext/date/tests/bug41842.phpt
+      ext/date/tests/bug41842.phpt
+      ext/date/tests/bug41844.phpt
+      ext/date/tests/bug41844.phpt
+      ext/date/tests/bug41964.phpt
+      ext/date/tests/bug41964.phpt:
+      
+      - Fixed bug #41964 (strtotime returns a timestamp for non-time string of
+        pattern '(A|a) .+').
+      - Fixed bug #41844 (Format returns incorrect number of digits for negative
+        years -0001 to -0999).
+      - Fixed bug #41842 (Cannot create years < 0100 & negative years with
+        date_create or new DateTime).
+      - Fixed bug #41709 (strtotime() does not handle 00.00.0000).
+      - Fixed bug #41523 (strtotime('0000-00-00 00:00:00') is parsed as
+      1999-11-30).
+
+    * ext/date/lib/parse_date.re
+      ext/date/lib/timelib.c
+      ext/date/lib/unixtime2tm.c
+      ext/date/tests/bug35499.phpt:
+      - Fixed bug #41964 (strtotime returns a timestamp for non-time string of
+        pattern '(A|a) .+').
+      - Fixed bug #41844 (Format returns incorrect number of digits for negative
+        years -0001 to -0999).
+      - Fixed bug #41842 (Cannot create years < 0100 & negative years with
+        date_create or new DateTime).
+      - Fixed bug #41709 (strtotime() does not handle 00.00.0000).
+      - Fixed bug #41523 (strtotime('0000-00-00 00:00:00') is parsed as
+      1999-11-30).
+
+2007-07-12  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * acinclude.m4:
+      fix the configure output
+
+    * ext/standard/tests/strings/fprintf.phpt:
+      fix test
+
+    * ext/unicode/config.m4
+      ext/unicode/config.w32
+      ext/unicode/unicode.dsp:
+      - Removed unnecessary stuff
+
+2007-07-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_result.phpt:
+      1) Whitespace/CS
+      2) Playing with column aliases
+
+    * ext/mysql/tests/mysql_query.phpt:
+      Testing SELECT "a" AS "". This is nice to test strcmp() and similar...
+
+2007-07-12  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      Synced mail function in mb_send_mail function(Escape
+      mail.force_extra_parameters value).
+
+2007-07-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/unicode/unicode.c:
+      fix MINFO handler
+
+2007-07-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_constants.phpt:
+      Blame me for not checking in a version that's been cleaned up with
+      regards to Whitespace/CS...
+
+    * ext/mysql/tests/mysql_set_charset.phpt:
+      Whoever has hacked this function into ext/mysql,  here's a "test" for it.
+
+    * ext/mysql/tests/mysql_phpinfo.phpt:
+      Checking the phpinfo() entries of ext/mysql
+
+    * ext/mysql/tests/mysql_list_tables.phpt:
+      Adding test for mysql_list_tables()
+
+2007-07-12  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * configure.in:
+      - missing comma
+
+2007-07-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_constants.phpt:
+      Checks if ext/mysql exposes all constants it should expose.
+
+    * ext/mysql/tests/mysql_tablename.phpt:
+      No skipping needed anymore, function is there even with mysqlnd.
+
+    * ext/mysql/tests/mysql_errno.phpt:
+      A bit more verbose message in case of problems. It's been helpful to
+      debug a cross-server version issue.
+
+    * ext/mysql/tests/mysql_unbuffered_query.phpt:
+      1) Whitespace/CS
+      2) Fixing [U]EXPECTF to be portable among different MySQL Server versions
+
+    * ext/mysql/tests/mysql_thread_id.phpt:
+      1) Whitespace/CS
+      2) Added test for default link
+
+    * ext/mysql/tests/mysql_tablename.phpt:
+      1) Whitespace/CS
+      2) Added: skip test with mysqlnd, mysqlnd does not support this function
+      currently
+
+    * ext/mysql/tests/mysql_stat.phpt:
+      1) Whitespace/CS
+      2) Added check for default connection
+
+    * ext/mysql/tests/mysql_select_db.phpt:
+      1) Whitespace/CS
+      2) Fixing [U]EXPECTF to accept whatever db/schema name gets used for the
+      test run
+
+2007-07-12  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/reg.c:
+      MFB: fix warning
+
+    * (PHP_5_2)
+      configure.in:
+      MFH: fix invalid logic + prevent non-integers to be passed
+
+    * configure.in:
+      - Fix invalid logic (plus made it possible to pass only integers to this)
+
+    * ext/standard/tests/file/bug41815.phpt:
+      - Added test for bug #41815
+
+    * ext/standard/tests/file/bug41815.phpt
+      ext/standard/tests/file/bug41815.phpt
+      main/streams/plain_wrapper.c:
+      
+      file bug41815.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS:
+      MFH: - Fixed bug #41815 (Concurrent read/write fails when EOF is reached)
+
+2007-07-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_real_escape_string.phpt:
+      1) Whitespace/CS
+      2) Tiny check for default link added
+
+    * ext/mysql/tests/mysql_query.phpt:
+      1) Whitespace/CS
+      2) Portability: don't expect any values and have them in the [U]EXPECTF,
+      if they will be available only with certain MySQL Server versions.
+
+2007-07-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug41961.phpt
+      ZendEngine2/tests/bug41961.phpt
+      ZendEngine2/tests/bug41961.phpt:
+      Fixed bug #41961 (Ensure search for hidden private methods does not stray
+      from class hierarchy). (robin_fernandes at uk dot ibm dot com)
+
+2007-07-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_ping.phpt:
+      1) Whitespace/CS
+      2) One line added to test default connection
+
+    * ext/mysql/tests/mysql_pconnect.phpt:
+      1) Whitespace/CS
+      2) Test mysql.default_socket only if we're using a socket to connect
+
+    * ext/mysql/tests/mysql_num_rows.phpt:
+      Whitespace/CS only
+
+2007-07-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      fix ws, cs and folding
+
+    * ext/json/JSON_parser.c
+      ext/json/utf8_decode.c
+      ext/json/utf8_to_utf16.c:
+      fix WS, CS and other S
+
+    * ZendEngine2/tests/020.phpt:
+      add new test
+
+    * ZendEngine2/tests/020.phpt
+      ZendEngine2/tests/020.phpt:
+      
+      file 020.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/general_functions/is_callable.phpt
+      ext/standard/tests/general_functions/is_callable.phpt:
+      fix test
+
+2007-07-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/ns_001.phpt
+      ZendEngine2/tests/ns_002.phpt
+      ZendEngine2/tests/ns_003.phpt
+      ZendEngine2/tests/ns_004.phpt
+      ZendEngine2/tests/ns_005.phpt
+      ZendEngine2/tests/ns_006.phpt
+      ZendEngine2/tests/ns_007.phpt
+      ZendEngine2/tests/ns_008.phpt
+      ZendEngine2/tests/ns_009.phpt
+      ZendEngine2/tests/ns_011.phpt
+      ZendEngine2/tests/ns_012.phpt
+      ZendEngine2/tests/ns_013.phpt
+      ZendEngine2/tests/ns_014.phpt
+      ZendEngine2/tests/ns_015.phpt
+      ZendEngine2/tests/ns_016.phpt
+      ZendEngine2/tests/ns_017.phpt
+      ZendEngine2/tests/ns_018.phpt
+      ZendEngine2/tests/ns_019.phpt
+      ZendEngine2/tests/ns_021.phpt
+      ZendEngine2/tests/ns_022.phpt
+      ZendEngine2/tests/ns_023.phpt
+      ZendEngine2/tests/ns_024.phpt
+      ZendEngine2/tests/ns_031.phpt
+      ZendEngine2/tests/ns_032.phpt:
+      Namespaces
+
+2007-07-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug41970.phpt:
+      fix #41970 (call_user_func_*() leaks on failure)
+
 2007-07-11  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * (PHP_5_2)
