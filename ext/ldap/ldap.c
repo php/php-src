@@ -75,6 +75,7 @@ typedef struct {
 
 typedef struct {
 	LDAPMessage *data;
+	BerElement *ber;
 	int id;
 } ldap_resultentry;
 
@@ -91,7 +92,7 @@ static
 		ZEND_ARG_PASS_INFO(1)
 	ZEND_END_ARG_INFO();
 
-static int le_link, le_result, le_result_entry, le_ber_entry;
+static int le_link, le_result, le_result_entry;
 
 /*
 	This is just a small subset of the functionality provided by the LDAP library. All the 
@@ -217,6 +218,10 @@ static void _free_ldap_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static void _free_ldap_result_entry(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	ldap_resultentry *entry = (ldap_resultentry *)rsrc->ptr;
+
+	if (entry->ber != NULL) {
+		ber_free(entry->ber, 0);
+	}
 	zend_list_delete(entry->id);
 	efree(entry);
 } 
@@ -286,10 +291,9 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT | CONST_CS);
 #endif
 
-	le_result = zend_register_list_destructors_ex(_free_ldap_result, NULL, "ldap result", module_number);
 	le_link = zend_register_list_destructors_ex(_close_ldap_link, NULL, "ldap link", module_number);
+	le_result = zend_register_list_destructors_ex(_free_ldap_result, NULL, "ldap result", module_number);
 	le_result_entry = zend_register_list_destructors_ex(_free_ldap_result_entry, NULL, "ldap result entry", module_number);
-	le_ber_entry = zend_register_list_destructors_ex(NULL, NULL, "ldap ber entry", module_number);
 
 	Z_TYPE(ldap_module_entry) = type;
 
@@ -993,6 +997,7 @@ PHP_FUNCTION(ldap_first_entry)
 		resultentry->id = Z_LVAL_PP(result);
 		zend_list_addref(resultentry->id);
 		resultentry->data = entry;
+		resultentry->ber = NULL;
 	}
 }
 /* }}} */
@@ -1021,6 +1026,7 @@ PHP_FUNCTION(ldap_next_entry)
 		resultentry_next->id = resultentry->id;
 		zend_list_addref(resultentry->id);
 		resultentry_next->data = entry_next;
+		resultentry_next->ber = NULL;
 	}
 }
 /* }}} */
@@ -1091,8 +1097,9 @@ PHP_FUNCTION(ldap_get_entries)
 			attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
 		}
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
-		if (ber != NULL)
+		if (ber != NULL) {
 			ber_free(ber, 0);
+		}
 #endif
 
 		add_assoc_long(tmp1, "count", num_attrib);
@@ -1115,28 +1122,25 @@ PHP_FUNCTION(ldap_get_entries)
 }
 /* }}} */
 
-/* {{{ proto string ldap_first_attribute(resource link, resource result_entry, int ber)
+/* {{{ proto string ldap_first_attribute(resource link, resource result_entry)
    Return first attribute */
 PHP_FUNCTION(ldap_first_attribute)
 {
-	zval **link, **result_entry, **berp;
+	zval **link, **result_entry;
 	ldap_linkdata *ld;
 	ldap_resultentry *resultentry;
-	BerElement *ber;
 	char *attribute;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &link, &result_entry, &berp) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &link, &result_entry) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, link, -1, "ldap link", le_link);
 	ZEND_FETCH_RESOURCE(resultentry, ldap_resultentry *, result_entry, -1, "ldap result entry", le_result_entry);
 
-	if ((attribute = ldap_first_attribute(ld->link, resultentry->data, &ber)) == NULL) {
+	if ((attribute = ldap_first_attribute(ld->link, resultentry->data, &resultentry->ber)) == NULL) {
 		RETURN_FALSE;
 	} else {
-		ZEND_REGISTER_RESOURCE(*berp, ber, le_ber_entry);
-
 		RETVAL_STRING(attribute, 1);
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
 		ldap_memfree(attribute);
@@ -1145,29 +1149,31 @@ PHP_FUNCTION(ldap_first_attribute)
 }
 /* }}} */
 
-/* {{{ proto string ldap_next_attribute(resource link, resource result_entry, resource ber)
+/* {{{ proto string ldap_next_attribute(resource link, resource result_entry)
    Get the next attribute in result */
 PHP_FUNCTION(ldap_next_attribute)
 {
-	zval **link, **result_entry, **berp;
+	zval **link, **result_entry;
 	ldap_linkdata *ld;
 	ldap_resultentry *resultentry;
-	BerElement *ber;
 	char *attribute;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &link, &result_entry, &berp) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &link, &result_entry) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, link, -1, "ldap link", le_link);
 	ZEND_FETCH_RESOURCE(resultentry, ldap_resultentry *, result_entry, -1, "ldap result entry", le_result_entry);
-	ZEND_FETCH_RESOURCE(ber, BerElement *, berp, -1, "ldap ber entry", le_ber_entry);
 
-	if ((attribute = ldap_next_attribute(ld->link, resultentry->data, ber)) == NULL) {
+	if ((attribute = ldap_next_attribute(ld->link, resultentry->data, resultentry->ber)) == NULL) {
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
+		if (resultentry->ber != NULL) {
+			ber_free(resultentry->ber, 0);
+			resultentry->ber = NULL;
+		}
+#endif
 		RETURN_FALSE;
 	} else {
-		ZEND_REGISTER_RESOURCE(*berp, ber, le_ber_entry);
-
 		RETVAL_STRING(attribute, 1);
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
 		ldap_memfree(attribute);
@@ -1222,9 +1228,9 @@ PHP_FUNCTION(ldap_get_attributes)
 		attribute = ldap_next_attribute(ld->link, resultentry->data, ber);
 	}
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
-		if (ber != NULL) {
-			ber_free(ber, 0);
-		}
+	if (ber != NULL) {
+		ber_free(ber, 0);
+	}
 #endif
 	
 	add_assoc_long(return_value, "count", num_attrib);

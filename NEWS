@@ -142,6 +142,8 @@ PHP                                                                        NEWS
   integer as sections). (Tony)
 - Fixed bug #41350 (my_thread_global_end() error during request shutdown
   on Windows). (Scott, Andrey)
+- Fixed bug #41127 (Memory leak in ldap_{first|next}_attribute functions).
+  (Jani)
 - Fixed bug #40419 (Trailing slash in CGI request does not work). (Dmitry)
 - Fixed bug #39330 (apache2handler does not call shutdown actions before 
   apache child die). (isk at ecommerce dot com, Gopal, Tony)
