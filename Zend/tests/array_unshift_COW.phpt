@@ -1,6 +1,5 @@
 --TEST--
- Tests that array unshift code is correctly dealing with copy on write and
- splitting on  reference.
+Tests that array unshift code is correctly dealing with copy on write and splitting on  reference.
 --FILE--
 <?php
 	$a=array();
