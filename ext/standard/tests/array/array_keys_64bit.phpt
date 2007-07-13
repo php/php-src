@@ -2,8 +2,10 @@
 Test array_keys() function
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
+--INI--
+precision=14
 --FILE--
 <?php
 /*
@@ -100,11 +102,12 @@ var_dump(array_keys());  // Zero arguments
 var_dump(array_keys(array(), "", TRUE, 100));  // args > expected
 var_dump(array_keys(array(1,2,3, array() => array())));  // (W)illegal offset
 
+echo "Done\n";
+
+--CLEAN--
 /* Closing the resource handles */
 fclose( $resource1 );
 closedir( $resource2 );
-
-echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing array_keys() on basic array operation ***
@@ -414,14 +417,18 @@ array(1) {
 }
 
 *** Testing array_keys() on range of values ***
-array(4) {
+array(6) {
   [0]=>
   int(2147483647)
   [1]=>
-  int(-2147483648)
+  int(2147483648)
   [2]=>
   int(-2147483647)
   [3]=>
+  int(-2147483648)
+  [4]=>
+  int(-2147483649)
+  [5]=>
   int(0)
 }
 
@@ -438,380 +445,19 @@ array(0) {
 }
 
 *** Testing error conditions ***
-Warning: array_keys() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_keys(): The first argument should be an array in %s on line %d
 NULL
 
-Warning: array_keys() expects parameter 1 to be array, string given in %s on line %d
+Warning: array_keys(): The first argument should be an array in %s on line %d
 NULL
 
-Warning: array_keys() expects parameter 1 to be array, object given in %s on line %d
+Warning: array_keys(): The first argument should be an array in %s on line %d
 NULL
 
-Warning: array_keys() expects at least 1 parameter, 0 given in %s on line %d
+Warning: Wrong parameter count for array_keys() in %s on line %d
 NULL
 
-Warning: array_keys() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
-Warning: Illegal offset type in %s on line %d
-array(3) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-}
-Done
---UEXPECTF--
-*** Testing array_keys() on basic array operation ***
-array(5) {
-  [0]=>
-  unicode(1) "a"
-  [1]=>
-  unicode(1) "b"
-  [2]=>
-  int(2)
-  [3]=>
-  int(-23)
-  [4]=>
-  int(3)
-}
-
-*** Testing array_keys() on various arrays ***
--- Iteration 0 --
-array(0) {
-}
-
--- Iteration 1 --
-array(1) {
-  [0]=>
-  int(0)
-}
-
--- Iteration 2 --
-array(1) {
-  [0]=>
-  int(0)
-}
-
--- Iteration 3 --
-array(1) {
-  [0]=>
-  unicode(5) "Hello"
-}
-
--- Iteration 4 --
-array(1) {
-  [0]=>
-  unicode(0) ""
-}
-
--- Iteration 5 --
-array(4) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  unicode(1) "d"
-}
-
--- Iteration 6 --
-array(4) {
-  [0]=>
-  unicode(1) "a"
-  [1]=>
-  unicode(1) "b"
-  [2]=>
-  unicode(1) "c"
-  [3]=>
-  unicode(1) "d"
-}
-
--- Iteration 7 --
-array(4) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-}
-
--- Iteration 8 --
-array(5) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  unicode(1) "a"
-  [3]=>
-  int(3)
-  [4]=>
-  int(5)
-}
-
--- Iteration 9 --
-array(5) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(0)
-  [2]=>
-  unicode(0) ""
-  [3]=>
-  int(2)
-  [4]=>
-  int(3)
-}
-
--- Iteration 10 --
-array(3) {
-  [0]=>
-  unicode(1) "a"
-  [1]=>
-  unicode(2) "ab"
-  [2]=>
-  unicode(2) "cd"
-}
-
--- Iteration 11 --
-array(4) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  unicode(0) ""
-}
-
-*** Testing array_keys() on all the types other than arrays ***
--- Loose type checking --
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(-1)
-  [2]=>
-  unicode(3) "php"
-}
-
--- strict type checking --
-array(0) {
-}
-
--- Loose type checking --
-array(4) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  unicode(0) ""
-}
-
--- strict type checking --
-array(0) {
-}
-
--- Loose type checking --
-array(1) {
-  [0]=>
-  int(1)
-}
-
--- strict type checking --
-array(0) {
-}
-
--- Loose type checking --
-array(4) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(2)
-  [2]=>
-  unicode(3) "php"
-  [3]=>
-  unicode(0) ""
-}
-
--- strict type checking --
-array(0) {
-}
-
--- Loose type checking --
-array(1) {
-  [0]=>
-  int(-1)
-}
-
--- strict type checking --
-array(0) {
-}
-
--- Loose type checking --
-array(1) {
-  [0]=>
-  int(1)
-}
-
--- strict type checking --
-array(1) {
-  [0]=>
-  int(1)
-}
-
--- Loose type checking --
-array(2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(2)
-}
-
--- strict type checking --
-array(1) {
-  [0]=>
-  int(0)
-}
-
--- Loose type checking --
-array(1) {
-  [0]=>
-  int(-1)
-}
-
--- strict type checking --
-array(1) {
-  [0]=>
-  int(-1)
-}
-
--- Loose type checking --
-array(4) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  unicode(0) ""
-}
-
--- strict type checking --
-array(1) {
-  [0]=>
-  int(2)
-}
-
--- Loose type checking --
-array(2) {
-  [0]=>
-  int(2)
-  [1]=>
-  int(3)
-}
-
--- strict type checking --
-array(1) {
-  [0]=>
-  int(3)
-}
-
--- Loose type checking --
-array(1) {
-  [0]=>
-  unicode(3) "php"
-}
-
--- strict type checking --
-array(1) {
-  [0]=>
-  unicode(3) "php"
-}
-
--- Loose type checking --
-array(2) {
-  [0]=>
-  int(2)
-  [1]=>
-  unicode(0) ""
-}
-
--- strict type checking --
-array(1) {
-  [0]=>
-  unicode(0) ""
-}
-
-*** Testing array_keys() with resource type ***
-array(1) {
-  [0]=>
-  int(0)
-}
-array(1) {
-  [0]=>
-  int(0)
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-
-*** Testing array_keys() on range of values ***
-array(4) {
-  [0]=>
-  int(2147483647)
-  [1]=>
-  int(-2147483648)
-  [2]=>
-  int(-2147483647)
-  [3]=>
-  int(0)
-}
-
-*** Testing array_keys() on an array created on the fly ***
-array(3) {
-  [0]=>
-  unicode(1) "a"
-  [1]=>
-  unicode(1) "b"
-  [2]=>
-  unicode(1) "c"
-}
-array(0) {
-}
-
-*** Testing error conditions ***
-Warning: array_keys() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: array_keys() expects parameter 1 to be array, Unicode string given in %s on line %d
-NULL
-
-Warning: array_keys() expects parameter 1 to be array, object given in %s on line %d
-NULL
-
-Warning: array_keys() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: array_keys() expects at most 3 parameters, 4 given in %s on line %d
+Warning: Wrong parameter count for array_keys() in %s on line %d
 NULL
 
 Warning: Illegal offset type in %s on line %d
