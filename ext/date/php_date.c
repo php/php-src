@@ -1915,16 +1915,16 @@ PHP_FUNCTION(date_parse)
 				break;
 			case TIMELIB_ZONETYPE_ID:
 				if (parsed_time->tz_abbr) {
-					add_ascii_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
+					add_ascii_assoc_ascii_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
 				}
 				if (parsed_time->tz_info) {
-					add_ascii_assoc_string(return_value, "tz_id", parsed_time->tz_info->name, 1);
+					add_ascii_assoc_ascii_string(return_value, "tz_id", parsed_time->tz_info->name, 1);
 				}
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
 				PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(zone, z);
 				add_ascii_assoc_bool(return_value, "is_dst", parsed_time->dst);
-				add_ascii_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
+				add_ascii_assoc_ascii_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
 				break;
 		}
 	}
@@ -2318,7 +2318,7 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_ascii_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, tzobj->tz->trans[i], 0 TSRMLS_CC), 0);
 		add_ascii_assoc_long(element, "offset", tzobj->tz->type[tzobj->tz->trans_idx[i]].offset);
 		add_ascii_assoc_bool(element, "isdst",  tzobj->tz->type[tzobj->tz->trans_idx[i]].isdst);
-		add_ascii_assoc_string(element, "abbr", &tzobj->tz->timezone_abbr[tzobj->tz->type[tzobj->tz->trans_idx[i]].abbr_idx], 1);
+		add_ascii_assoc_ascii_string(element, "abbr", &tzobj->tz->timezone_abbr[tzobj->tz->type[tzobj->tz->trans_idx[i]].abbr_idx], 1);
 
 		add_next_index_zval(return_value, element);
 	}
@@ -2364,7 +2364,7 @@ PHP_FUNCTION(timezone_abbreviations_list)
 		add_ascii_assoc_bool(element, "dst", entry->type);
 		add_ascii_assoc_long(element, "offset", entry->gmtoffset);
 		if (entry->full_tz_name) {
-			add_ascii_assoc_string(element, "timezone_id", entry->full_tz_name, 1);
+			add_ascii_assoc_ascii_string(element, "timezone_id", entry->full_tz_name, 1);
 		} else {
 			add_ascii_assoc_null(element, "timezone_id");
 		}
