@@ -1729,6 +1729,24 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 	zend_op *opline;
 	ulong fetch_type;
 	
+	if (method_name->op_type == IS_CONST) {
+		zstr lcname;
+		unsigned int lcname_len;
+
+		lcname = zend_u_str_case_fold(Z_TYPE(method_name->u.constant), Z_UNIVAL(method_name->u.constant), Z_UNILEN(method_name->u.constant), 0, &lcname_len);
+
+		if ((sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == Z_UNILEN(method_name->u.constant) &&
+				ZEND_U_EQUAL(Z_TYPE(method_name->u.constant), lcname, Z_UNILEN(method_name->u.constant), ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1)) {
+			zval_dtor(&method_name->u.constant);
+			SET_UNUSED(*method_name);
+			efree(lcname.v);
+		} else {
+			efree(Z_USTRVAL(method_name->u.constant));
+			Z_UNIVAL(method_name->u.constant) = lcname;
+			Z_UNILEN(method_name->u.constant) = lcname_len;
+		}
+	}
+
 	if (class_name->op_type == IS_CONST &&
 		method_name->op_type == IS_CONST &&
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_TYPE(class_name->u.constant), Z_UNIVAL(class_name->u.constant), Z_UNILEN(class_name->u.constant))) {
@@ -1745,33 +1763,6 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 	opline->extended_value = fetch_type;
 	opline->op1 = class_node;
 	opline->op2 = *method_name;
-
-	if (opline->op2.op_type == IS_CONST) {
-		zstr lcname;
-		unsigned int lcname_len;
-
-		if (Z_TYPE(opline->op2.u.constant) == IS_UNICODE) {
-			lcname = zend_u_str_case_fold(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), 0, &lcname_len);
-		} else {
-			lcname.s = zend_str_tolower_dup(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant));
-		}
-
-		if ((sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == Z_UNILEN(opline->op2.u.constant) &&
-				ZEND_U_EQUAL(Z_TYPE(opline->op2.u.constant), lcname, Z_UNILEN(opline->op2.u.constant), ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1)) {
-			zval_dtor(&opline->op2.u.constant);
-			SET_UNUSED(opline->op2);
-			efree(lcname.v);
-		} else {
-			if (Z_TYPE(opline->op2.u.constant) == IS_UNICODE) {
-				efree(Z_USTRVAL(opline->op2.u.constant));
-				Z_USTRVAL(opline->op2.u.constant) = lcname.u;
-				Z_USTRLEN(opline->op2.u.constant) = lcname_len;
-			} else {
-				efree(Z_STRVAL(opline->op2.u.constant));
-				Z_STRVAL(opline->op2.u.constant) = lcname.s;
-			}
-		}
-	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 	zend_do_extended_fcall_begin(TSRMLS_C);
