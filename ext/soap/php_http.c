@@ -284,6 +284,7 @@ int make_http_soap_request(zval  *this_ptr,
 				request_size = Z_STRLEN(retval);
 			} else {
 				if (request != buf) {efree(request);}
+				smart_str_free(&soap_headers_z);
 				return FALSE;
 			}
 	  }
@@ -305,6 +306,7 @@ try_again:
 	  if (phpurl != NULL) {php_url_free(phpurl);}
 		if (request != buf) {efree(request);}
 		add_soap_fault(this_ptr, "HTTP", "Unable to parse URL", NULL, NULL TSRMLS_CC);
+		smart_str_free(&soap_headers_z);
 		return FALSE;
 	}
 
@@ -315,6 +317,7 @@ try_again:
 		php_url_free(phpurl);
 		if (request != buf) {efree(request);}
 		add_soap_fault(this_ptr, "HTTP", "Unknown protocol. Only http and https are allowed.", NULL, NULL TSRMLS_CC);
+		smart_str_free(&soap_headers_z);
 		return FALSE;
 	}
 
@@ -328,6 +331,7 @@ try_again:
 		if (request != buf) {efree(request);}
 		add_soap_fault(this_ptr, "HTTP", "SSL support is not available in this build", NULL, NULL TSRMLS_CC);
 		zend_alter_ini_entry("allow_url_fopen", sizeof("allow_url_fopen"), old_allow_url_fopen_list, strlen(old_allow_url_fopen_list), PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
+		smart_str_free(&soap_headers_z);
 		return FALSE;
 	}
 
@@ -381,6 +385,7 @@ try_again:
 			if (request != buf) {efree(request);}
 			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL TSRMLS_CC);
 			zend_alter_ini_entry("allow_url_fopen", sizeof("allow_url_fopen"), old_allow_url_fopen_list, strlen(old_allow_url_fopen_list), PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
+			smart_str_free(&soap_headers_z);
 			return FALSE;
 		}
 	}
@@ -437,7 +442,6 @@ try_again:
 		}
 
 		smart_str_append(&soap_headers, &soap_headers_z);
-		smart_str_free(&soap_headers_z);
 
 		if (soap_version == SOAP_1_2) {
 			smart_str_append_const(&soap_headers,"Content-Type: application/soap+xml; charset=utf-8");
@@ -690,12 +694,14 @@ try_again:
 			client->stream = NULL;
 			client->use_proxy = 0;
 			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL TSRMLS_CC);
+			smart_str_free(&soap_headers_z);
 			return FALSE;
 		}
 		smart_str_free(&soap_headers);
 
 	} else {
 		add_soap_fault(this_ptr, "HTTP", "Failed to create stream??", NULL, NULL TSRMLS_CC);
+		smart_str_free(&soap_headers_z);
 		return FALSE;
 	}
 
@@ -703,6 +709,7 @@ try_again:
 		php_stream_close(stream);
 		client->stream = NULL;
 		client->use_proxy = 0;
+		smart_str_free(&soap_headers_z);
 		return TRUE;
 	}
 
@@ -714,6 +721,7 @@ try_again:
 			client->stream = NULL;
 			client->use_proxy = 0;
 			add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL TSRMLS_CC);
+			smart_str_free(&soap_headers_z);
 			return FALSE;
 		}
 
@@ -867,6 +875,7 @@ try_again:
 		if (http_msg) {
 			efree(http_msg);
 		}
+		smart_str_free(&soap_headers_z);
 		return FALSE;
 	}
 
@@ -1009,6 +1018,7 @@ try_again:
 		}
 		if (auth) efree(auth);
 	}
+	smart_str_free(&soap_headers_z);
 
 	/* Check and see if the server even sent a xml document */
 	content_type = get_http_header_value(http_headers,"Content-Type: ");
