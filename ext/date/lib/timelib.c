@@ -28,6 +28,12 @@
 		m = NULL;	\
 	}			\
 
+#if defined(_MSC_VER)
+	#define TIMELIB_LLABS(y) y < 0 ? (y * -1) : y
+#else
+	#define TIMELIB_LLABS(y) llabs(y)
+#endif
+
 timelib_time* timelib_time_ctor()
 {
 	timelib_time *t;
@@ -168,7 +174,7 @@ void timelib_dump_date(timelib_time *d, int options)
 		printf("TYPE: %d ", d->zone_type);
 	}
 	printf("TS: %lld | %s%04lld-%02lld-%02lld %02lld:%02lld:%02lld",
-		d->sse, d->y < 0 ? "-" : "", llabs(d->y), d->m, d->d, d->h, d->i, d->s);
+		d->sse, d->y < 0 ? "-" : "", TIMELIB_LLABS(d->y), d->m, d->d, d->h, d->i, d->s);
 	if (d->f > +0.0) {
 		printf(" %.5f", d->f);
 	}
