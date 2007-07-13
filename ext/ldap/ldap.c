@@ -1130,8 +1130,9 @@ PHP_FUNCTION(ldap_first_attribute)
 	ldap_linkdata *ld;
 	ldap_resultentry *resultentry;
 	char *attribute;
+	int argc = ZEND_NUM_ARGS();
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &link, &result_entry) == FAILURE) {
+	if ((argc < 2 || argc > 3) || zend_get_parameters_ex(2, &link, &result_entry) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1157,8 +1158,9 @@ PHP_FUNCTION(ldap_next_attribute)
 	ldap_linkdata *ld;
 	ldap_resultentry *resultentry;
 	char *attribute;
+	int argc = ZEND_NUM_ARGS();
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &link, &result_entry) == FAILURE) {
+	if ((argc < 2 || argc > 3) || zend_get_parameters_ex(2, &link, &result_entry) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
