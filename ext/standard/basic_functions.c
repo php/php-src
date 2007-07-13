@@ -5042,10 +5042,8 @@ PHP_FUNCTION(call_user_func)
 
 	fci.retval_ptr_ptr = &retval_ptr;
 
-	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS) {
-		*return_value = **fci.retval_ptr_ptr;
-		zval_copy_ctor(return_value);
-		zval_ptr_dtor(fci.retval_ptr_ptr);
+	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {
+		COPY_PZVAL_TO_ZVAL(*return_value, *fci.retval_ptr_ptr);
 	}
 
 	if (fci.params) {
@@ -5069,10 +5067,8 @@ PHP_FUNCTION(call_user_func_array)
 	zend_fcall_info_args(&fci, params TSRMLS_CC);
 	fci.retval_ptr_ptr = &retval_ptr;
 
-	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS) {
-		*return_value = **fci.retval_ptr_ptr;
-		zval_copy_ctor(return_value);
-		zval_ptr_dtor(fci.retval_ptr_ptr);
+	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {
+		COPY_PZVAL_TO_ZVAL(*return_value, *fci.retval_ptr_ptr);
 	}
 
 	zend_fcall_info_args_clear(&fci, 1);
