@@ -1087,9 +1087,6 @@ empty_source:
 }
 /* }}} */
 
-
-
-
 /* {{{ php_escape_html_entities
  */
 PHPAPI char *php_escape_html_entities_ex(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset, zend_bool double_encode TSRMLS_DC)
@@ -1219,10 +1216,11 @@ encode_amp:
 }
 /* }}} */
 
-PHPAPI char *php_escape_html_entities(char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
+PHPAPI char *php_escape_html_entities(char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC) /* {{{ */
 {
 	return php_escape_html_entities_ex((unsigned char*)old, oldlen, newlen, all, quote_style, hint_charset, 1 TSRMLS_CC);
 }
+/* }}} */
 
 /* {{{ php_html_entities
  */
@@ -1409,7 +1407,6 @@ PHP_FUNCTION(html_entity_decode)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto string htmlentities(string string [, int quote_style[, string charset[, bool double_encode]]])
    Convert all applicable characters to HTML entities */

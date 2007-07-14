@@ -103,7 +103,7 @@ PHP_MINIT_FUNCTION(syslog)
 }
 /* }}} */
 
-PHP_RINIT_FUNCTION(syslog)
+PHP_RINIT_FUNCTION(syslog) /* {{{ */
 {
 	if (INI_INT("define_syslog_variables")) {
 		start_syslog(TSRMLS_C);
@@ -112,23 +112,25 @@ PHP_RINIT_FUNCTION(syslog)
 	}
 	return SUCCESS;
 }
-
+/* }}} */
 
 #ifdef PHP_WIN32
-PHP_RSHUTDOWN_FUNCTION(syslog)
+PHP_RSHUTDOWN_FUNCTION(syslog) /* {{{ */
 {
 	closelog();
 	return SUCCESS;
 }
+/* }}} */
 #endif
 
-PHP_MSHUTDOWN_FUNCTION(syslog)
+PHP_MSHUTDOWN_FUNCTION(syslog) /* {{{ */
 {
 	if (BG(syslog_device)) {
 		free(BG(syslog_device));
 	}
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ start_syslog
  */

@@ -50,7 +50,7 @@
 #define SEC_IN_MIN 60
 
 #ifdef HAVE_GETTIMEOFDAY
-static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
+static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	zend_bool get_as_float = 0;
 	struct timeval tp = {0};
@@ -88,6 +88,7 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_ASCII_STRING(ret, ZSTR_DUPLICATE);
 	}
 }
+/* }}} */
 
 /* {{{ proto mixed microtime([bool get_as_float]) U
    Returns either a string or a float containing the current time in seconds and microseconds */

@@ -31,28 +31,32 @@
 #include "php_fopen_wrappers.h"
 #include "SAPI.h"
 
-static size_t php_stream_output_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static size_t php_stream_output_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	PHPWRITE(buf, count);
 	return count;
 }
+/* }}} */
 
-static size_t php_stream_output_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static size_t php_stream_output_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	stream->eof = 1;
 	return 0;
 }
+/* }}} */
 
-static int php_stream_output_close(php_stream *stream, int close_handle TSRMLS_DC)
+static int php_stream_output_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
 	return 0;
 }
+/* }}} */
 
-static int php_stream_output_flush(php_stream *stream TSRMLS_DC)
+static int php_stream_output_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	sapi_flush(TSRMLS_C);
 	return 0;
 }
+/* }}} */
 
 php_stream_ops php_stream_output_ops = {
 	php_stream_output_write,
@@ -66,12 +70,13 @@ php_stream_ops php_stream_output_ops = {
 	NULL  /* set_option */
 };
 
-static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	return -1;
 }
+/* }}} */
 
-static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	off_t *position = (off_t*)stream->abstract;
 	size_t read_bytes = 0;
@@ -102,18 +107,21 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 	SG(read_post_bytes) += read_bytes;
     return read_bytes;
 }
+/* }}} */
 
-static int php_stream_input_close(php_stream *stream, int close_handle TSRMLS_DC)
+static int php_stream_input_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
 	efree(stream->abstract);
 
 	return 0;
 }
+/* }}} */
 
-static int php_stream_input_flush(php_stream *stream TSRMLS_DC)
+static int php_stream_input_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	return -1;
 }
+/* }}} */
 
 php_stream_ops php_stream_input_ops = {
 	php_stream_input_write,
@@ -127,7 +135,8 @@ php_stream_ops php_stream_input_ops = {
 	NULL  /* set_option */
 };
 
-static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain TSRMLS_DC) {
+static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain TSRMLS_DC) /* {{{ */
+{
 	char *p, *token;
 	php_stream_filter *temp_filter;
 
@@ -150,9 +159,9 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 		p = php_strtok_r(NULL, "|", &token);
 	}
 }
+/* }}} */
 
-
-php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	int fd = -1;
 	int mode_rw = 0;
@@ -303,6 +312,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
  
 	return stream;
 }
+/* }}} */
 
 static php_stream_wrapper_ops php_stdio_wops = {
 	php_stream_url_wrap_php,

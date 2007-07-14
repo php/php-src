@@ -32,18 +32,19 @@
 #define BUFSIZE 256
 #endif
 
-int php_url_scanner_activate(TSRMLS_D)
+int php_url_scanner_activate(TSRMLS_D) /* {{{ */
 {
 	url_adapt(NULL,0,NULL,NULL);
 	return SUCCESS;
 }
+/* }}} */
 
-
-int php_url_scanner_deactivate(TSRMLS_D)
+int php_url_scanner_deactivate(TSRMLS_D) /* {{{ */
 {
 	url_adapt(NULL,0,NULL,NULL);
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ url_attr_addon
  */

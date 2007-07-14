@@ -145,6 +145,7 @@ PHPAPI int php_le_stream_context(void)
 }
 
 /* }}} */
+
 /* {{{ Module-Stuff */
 
 static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
@@ -303,15 +304,14 @@ PHP_MINIT_FUNCTION(file)
 
 /* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(file)
+PHP_MSHUTDOWN_FUNCTION(file) /* {{{ */
 {
 #ifndef ZTS
 	file_globals_dtor(&file_globals TSRMLS_CC);
 #endif
 	return SUCCESS;
 }
-
-
+/* }}} */
 
 /* {{{ proto bool flock(resource fp, int operation [, int &wouldblock]) U
    Portable file locking */
@@ -1876,10 +1876,11 @@ PHP_FUNCTION(copy)
 }
 /* }}} */
 
-PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
+PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC) /* {{{ */
 {
 	return php_copy_file_ex(src, dest, 0 TSRMLS_CC);
 }
+/* }}} */
 
 /* {{{ php_copy_file
  */
@@ -2515,12 +2516,7 @@ post_enc:
 #define PHP_FGETCSV_UNI_CHECK(p, e, m, mlen) ((p) < (e) && (((mlen) == 1 && *(p) == *(m)) || ((mlen) > 1 && (((e) - (p)) >= (mlen)) && memcmp((p), (m), UBYTES(mlen)) == 0)))
 
 /* Unicode mode fgetcsv */
-PHPAPI void php_u_fgetcsv(php_stream *stream,
-		UChar *delimiter, int delimiter_len,
-		UChar *enclosure, int enclosure_len,
-		UChar *escape, int escape_len,
-		UChar *buffer, int buffer_len,
-		zval *return_value TSRMLS_DC)
+PHPAPI void php_u_fgetcsv(php_stream *stream, UChar *delimiter, int delimiter_len, UChar *enclosure, int enclosure_len, UChar *escape, int escape_len, UChar *buffer, int buffer_len, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	php_fgetcsv_state state = PHP_FGETCSV_READY;
 	UChar *p = buffer, *e = buffer + buffer_len, *field_start = NULL, *field_end = NULL;

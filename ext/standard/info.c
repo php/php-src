@@ -61,7 +61,7 @@ ZEND_EXTERN_MODULE_GLOBALS(iconv)
 PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_files;
 
-static int php_info_print_html_esc(const char *str, int len)
+static int php_info_print_html_esc(const char *str, int len) /* {{{ */
 {
 	int new_len, written;
 	char *new_str;
@@ -72,8 +72,9 @@ static int php_info_print_html_esc(const char *str, int len)
 	efree(new_str);
 	return written;
 }
+/* }}} */
 
-static int php_info_uprint_html_esc(const UChar *str, int len)
+static int php_info_uprint_html_esc(const UChar *str, int len) /* {{{ */
 {
 	UErrorCode status = U_ZERO_ERROR;
 	char *new_str = NULL;
@@ -88,8 +89,9 @@ static int php_info_uprint_html_esc(const UChar *str, int len)
 	efree(new_str);
 	return written;
 }
+/* }}} */
 
-static int php_info_printf(const char *fmt, ...)
+static int php_info_printf(const char *fmt, ...) /* {{{ */
 {
 	char *buf;
 	int len, written;
@@ -104,28 +106,31 @@ static int php_info_printf(const char *fmt, ...)
 	efree(buf);
 	return written;
 }
+/* }}} */
 
-static void php_info_print_request_uri(TSRMLS_D)
+static void php_info_print_request_uri(TSRMLS_D) /* {{{ */
 {
 	if (SG(request_info).request_uri) {
 		php_info_print_html_esc(SG(request_info).request_uri, strlen(SG(request_info).request_uri));
 	}
 }
+/* }}} */
 
-
-static int php_info_print(const char *str)
+static int php_info_print(const char *str) /* {{{ */
 {
 	TSRMLS_FETCH();
 	return php_output_write_utf8(str, strlen(str) TSRMLS_CC);
 }
+/* }}} */
 
-static int php_info_uprint(const UChar *str, int len)
+static int php_info_uprint(const UChar *str, int len) /* {{{ */
 {
 	TSRMLS_FETCH();
 	return php_output_write_unicode(str, len TSRMLS_CC);
 }
+/* }}} */
 
-static void php_info_print_stream_hash(const char *name, HashTable *ht TSRMLS_DC)
+static void php_info_print_stream_hash(const char *name, HashTable *ht TSRMLS_DC) /* {{{ */
 {
 	zstr key;
 	uint len;
@@ -173,6 +178,7 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht TSRMLS_DC
 		php_info_print_table_row(2, name, "disabled");
 	}
 }
+/* }}} */
 
 PHPAPI void php_info_print_module(zend_module_entry *module TSRMLS_DC) /* {{{ */
 {
@@ -321,7 +327,6 @@ void php_info_print_style(TSRMLS_D)
 }
 /* }}} */
 
-
 /* {{{ php_info_html_esc
  */
 PHPAPI char *php_info_html_esc(char *string TSRMLS_DC)
@@ -330,7 +335,6 @@ PHPAPI char *php_info_html_esc(char *string TSRMLS_DC)
 	return php_escape_html_entities(string, strlen(string), &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 }
 /* }}} */
-
 
 /* {{{ php_get_uname
  */
@@ -445,7 +449,6 @@ PHPAPI char *php_get_uname(char mode)
 	return estrdup(php_uname);
 }
 /* }}} */
-
 
 /* {{{ php_print_info_htmlhead
  */
@@ -725,8 +728,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 }
 /* }}} */
 
-
-PHPAPI void php_info_print_table_start()
+PHPAPI void php_info_print_table_start() /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("<table border=\"0\" cellpadding=\"3\" width=\"600\">\n");
@@ -734,16 +736,18 @@ PHPAPI void php_info_print_table_start()
 		php_info_print("\n");
 	}	
 }
+/* }}} */
 
-PHPAPI void php_info_print_table_end()
+PHPAPI void php_info_print_table_end() /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("</table><br />\n");
 	}
 
 }
+/* }}} */
 
-PHPAPI void php_info_print_box_start(int flag)
+PHPAPI void php_info_print_box_start(int flag) /* {{{ */
 {
 	php_info_print_table_start();
 	if (flag) {
@@ -758,16 +762,18 @@ PHPAPI void php_info_print_box_start(int flag)
 		}	
 	}
 }
+/* }}} */
 
-PHPAPI void php_info_print_box_end()
+PHPAPI void php_info_print_box_end() /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("</td></tr>\n");
 	}
 	php_info_print_table_end();
 }
+/* }}} */
 
-PHPAPI void php_info_print_hr()
+PHPAPI void php_info_print_hr() /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("<hr />\n");
@@ -775,8 +781,9 @@ PHPAPI void php_info_print_hr()
 		php_info_print("\n\n _______________________________________________________________________\n\n");
 	}
 }
+/* }}} */
 
-PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header)
+PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header) /* {{{ */
 {
 	int spaces;
 
@@ -787,6 +794,7 @@ PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header)
 		php_info_printf("%*s%s%*s\n", (int)(spaces/2), " ", header, (int)(spaces/2), " ");
 	}	
 }
+/* }}} */
 
 /* {{{ php_info_print_table_header
  */
@@ -988,7 +996,6 @@ PHP_FUNCTION(phpcredits)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ php_logo_guid
  */

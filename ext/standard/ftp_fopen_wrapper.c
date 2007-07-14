@@ -69,31 +69,27 @@
 #include "php_fopen_wrappers.h"
 
 
-static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer_size TSRMLS_DC)
+static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer_size TSRMLS_DC) /* {{{ */
 {
 	while (php_stream_gets(stream, ZSTR(buffer), buffer_size-1) &&
 		   !(isdigit((int) buffer[0]) && isdigit((int) buffer[1]) &&
 			 isdigit((int) buffer[2]) && buffer[3] == ' '));
 	return strtol(buffer, NULL, 10);
 }
+/* }}} */
 #define GET_FTP_RESULT(stream)	get_ftp_result((stream), tmp_line, sizeof(tmp_line) TSRMLS_CC)
 
 #define FTPS_ENCRYPT_DATA 1
 
-static int php_stream_ftp_stream_stat(php_stream_wrapper *wrapper,
-		php_stream *stream,
-		php_stream_statbuf *ssb
-		TSRMLS_DC)
+static int php_stream_ftp_stream_stat(php_stream_wrapper *wrapper, php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
 {
 	/* For now, we return with a failure code to prevent the underlying
 	 * file's details from being used instead. */
 	return -1;
 }
+/* }}} */
 
-
-static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper,
-		php_stream *stream
-		TSRMLS_DC)
+static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper, php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	php_stream *controlstream = (php_stream *)stream->wrapperdata;
 	
@@ -104,6 +100,7 @@ static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper,
 	}
 	return 0;
 }
+/* }}} */
 
 /* {{{ php_ftp_fopen_connect
  */

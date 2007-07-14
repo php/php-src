@@ -1502,7 +1502,6 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 }
 /* }}} */
 
-
 /* {{{ proto bool stream_default_encoding(string encoding) U
 Convenience wrapper for ini_set('unicode.stream_encoding', $encoding) */
 PHP_FUNCTION(stream_default_encoding)
@@ -1518,7 +1517,6 @@ PHP_FUNCTION(stream_default_encoding)
 							encoding, encoding_len, PHP_INI_ALL, PHP_INI_STAGE_RUNTIME));
 }
 /* }}} */
-
 
 /* {{{ proto void stream_encoding(resource stream[, string encoding]) U
 Set character set for stream encoding

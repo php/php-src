@@ -50,7 +50,7 @@ PHP_FUNCTION(header)
 }
 /* }}} */
 
-PHPAPI int php_header(TSRMLS_D)
+PHPAPI int php_header(TSRMLS_D) /* {{{ */
 {
 	if (sapi_send_headers(TSRMLS_C)==FAILURE || SG(request_info).headers_only) {
 		return 0; /* don't allow output */
@@ -58,9 +58,10 @@ PHPAPI int php_header(TSRMLS_D)
 		return 1; /* allow output */
 	}
 }
+/* }}} */
 
 
-PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
+PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC) /* {{{ */
 {
 	char *cookie, *encoded_value = NULL;
 	int len=sizeof("Set-Cookie: ");
@@ -143,7 +144,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	efree(cookie);
 	return result;
 }
-
+/* }}} */
 
 /* php_set_cookie(name, value, expires, path, domain, secure) */
 /* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]]) U
@@ -195,7 +196,6 @@ PHP_FUNCTION(setrawcookie)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto bool headers_sent([string &$file [, int &$line]]) U
    Returns true if headers have already been sent, false otherwise */
@@ -256,6 +256,7 @@ static void php_head_apply_header_list_to_hash(void *data, void *arg TSRMLS_DC)
 		add_next_index_ascii_string((zval *)arg, (char *)(sapi_header->header), 1);
 	}
 }
+/* }}} */
 
 /* {{{ proto array headers_list(void) U
    Return list of headers to be sent / already sent */
