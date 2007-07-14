@@ -1915,9 +1915,15 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 	      Z_STRVAL_P(function_name)[0] == ':' &&
 	      Z_STRVAL_P(function_name)[1] == ':'))) {
 		if (Z_TYPE_P(function_name) == IS_UNICODE) {
-			lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+			zstr tmp;
+
+			tmp.u = Z_USTRVAL_P(function_name) + 2;
+			lcname = zend_u_str_case_fold(IS_UNICODE, tmp, function_name_strlen-2, 1, &lcname_len);
 		} else {
-			lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+2), function_name_strlen-2, 1, &lcname_len);
+			zstr tmp;
+
+			tmp.s = Z_STRVAL_P(function_name) + 2;
+			lcname = zend_u_str_case_fold(IS_STRING, tmp, function_name_strlen-2, 1, &lcname_len);
 		}
 	} else {
 		lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
@@ -1927,9 +1933,15 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 
 		if (OP2_TYPE == IS_CONST && opline->op1.op_type == IS_CONST) {
 			if (Z_TYPE_P(function_name) == IS_UNICODE) {
-				lcname = zend_u_str_case_fold(IS_UNICODE, (zstr)(Z_USTRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+				zstr tmp;
+
+				tmp.u = Z_USTRVAL_P(function_name) + Z_LVAL(opline->op1.u.constant);
+				lcname = zend_u_str_case_fold(IS_UNICODE, tmp, function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
 			} else {
-				lcname = zend_u_str_case_fold(IS_STRING, (zstr)(Z_STRVAL_P(function_name)+Z_LVAL(opline->op1.u.constant)), function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
+				zstr tmp;
+
+				tmp.s = Z_STRVAL_P(function_name) + Z_LVAL(opline->op1.u.constant);
+				lcname = zend_u_str_case_fold(IS_STRING, tmp, function_name_strlen-Z_LVAL(opline->op1.u.constant), 1, &lcname_len);
 			}
 			if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE ||
 			    function->type != ZEND_INTERNAL_FUNCTION) {
