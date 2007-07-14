@@ -165,7 +165,7 @@ err:
 }
 /* }}} */
 
-static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode)
+static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	char *cmd;
 	int cmd_len;
@@ -211,6 +211,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		efree(cmd);
 	}
 }
+/* }}} */
 
 /* {{{ proto string exec(string command [, array &output [, int &return_value]]) U
    Execute an external program */

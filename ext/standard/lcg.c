@@ -53,7 +53,7 @@ static php_lcg_globals lcg_globals;
 
 static void lcg_seed(TSRMLS_D);
 
-PHPAPI double php_combined_lcg(TSRMLS_D)
+PHPAPI double php_combined_lcg(TSRMLS_D) /* {{{ */
 {
 	php_int32 q;
 	php_int32 z;
@@ -72,8 +72,9 @@ PHPAPI double php_combined_lcg(TSRMLS_D)
 
 	return z * 4.656613e-10;
 }
+/* }}} */
 
-static void lcg_seed(TSRMLS_D)
+static void lcg_seed(TSRMLS_D) /* {{{ */
 {
 	struct timeval tv;
 
@@ -90,13 +91,15 @@ static void lcg_seed(TSRMLS_D)
 
 	LCG(seeded) = 1;
 }
+/* }}} */
 
-static void lcg_init_globals(php_lcg_globals *lcg_globals_p TSRMLS_DC)
+static void lcg_init_globals(php_lcg_globals *lcg_globals_p TSRMLS_DC) /* {{{ */
 {
 	LCG(seeded) = 0;
 }
+/* }}} */
 
-PHP_MINIT_FUNCTION(lcg)
+PHP_MINIT_FUNCTION(lcg) /* {{{ */
 {
 #ifdef ZTS
 	ts_allocate_id(&lcg_globals_id, sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
@@ -105,6 +108,7 @@ PHP_MINIT_FUNCTION(lcg)
 #endif
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ proto float lcg_value() U
    Returns a value from the combined linear congruential generator */

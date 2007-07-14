@@ -136,15 +136,17 @@ PHPAPI char *php_replace_controlchars_ex(char *str, int len)
 } 
 /* }}} */
 
-PHPAPI char *php_replace_controlchars(char *str)
+PHPAPI char *php_replace_controlchars(char *str) /* {{{ */
 {
 	return php_replace_controlchars_ex(str, strlen(str));
 } 
+/* }}} */
 
-PHPAPI php_url *php_url_parse(char const *str)
+PHPAPI php_url *php_url_parse(char const *str) /* {{{ */
 {
 	return php_url_parse_ex(str, strlen(str));
 }
+/* }}} */
 
 /* {{{ php_url_parse
  */

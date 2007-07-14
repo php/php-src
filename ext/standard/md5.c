@@ -27,12 +27,13 @@
 #include "md5.h"
 #include "ext/standard/file.h"
 
-PHPAPI void make_digest(char *md5str, unsigned char *digest)
+PHPAPI void make_digest(char *md5str, unsigned char *digest) /* {{{ */
 {
 	make_digest_ex(md5str, digest, 16);
 }
+/* }}} */
 
-PHPAPI void make_digest_ex(char *md5str, unsigned char *digest, int len)
+PHPAPI void make_digest_ex(char *md5str, unsigned char *digest, int len) /* {{{ */
 {
 	static const char hexits[17] = "0123456789abcdef";
 	int i;
@@ -43,6 +44,7 @@ PHPAPI void make_digest_ex(char *md5str, unsigned char *digest, int len)
 	}
 	md5str[len * 2] = '\0';
 }
+/* }}} */
 
 /* {{{ proto string md5(string str, [ bool raw_output]) U
    Calculate the md5 hash of a string */

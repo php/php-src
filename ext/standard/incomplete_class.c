@@ -57,7 +57,7 @@ static void incomplete_class_message(zval *object, int error_type TSRMLS_DC)
 }
 /* }}} */
 
-static zval *incomplete_class_get_property(zval *object, zval *member, int type TSRMLS_DC)
+static zval *incomplete_class_get_property(zval *object, zval *member, int type TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 	if(type == BP_VAR_W || type == BP_VAR_RW) {
@@ -66,33 +66,40 @@ static zval *incomplete_class_get_property(zval *object, zval *member, int type 
 		return EG(uninitialized_zval_ptr);
 	}
 }
+/* }}} */
 
-static void incomplete_class_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+static void incomplete_class_write_property(zval *object, zval *member, zval *value TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 }
+/* }}} */
 	
-static zval **incomplete_class_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC)
+static zval **incomplete_class_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 	return &EG(error_zval_ptr);
 }
+/* }}} */
 
-static void incomplete_class_unset_property(zval *object, zval *member TSRMLS_DC)
+static void incomplete_class_unset_property(zval *object, zval *member TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 }
+/* }}} */
 
-static int incomplete_class_has_property(zval *object, zval *member, int check_empty TSRMLS_DC)
+static int incomplete_class_has_property(zval *object, zval *member, int check_empty TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 	return 0;
 }
+/* }}} */
 
-static union _zend_function *incomplete_class_get_method(zval **object, zstr method, int method_len TSRMLS_DC) {
+static union _zend_function *incomplete_class_get_method(zval **object, zstr method, int method_len TSRMLS_DC) /* {{{ */
+{
 	incomplete_class_message(*object, E_ERROR TSRMLS_CC);
 	return NULL;
 }
+/* }}} */
 
 /* {{{ php_create_incomplete_class
  */

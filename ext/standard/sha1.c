@@ -26,10 +26,11 @@
 #include "sha1.h"
 #include "md5.h"
 
-PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
+PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest) /* {{{ */
 {
 	make_digest_ex(sha1str, digest, 20);
 }
+/* }}} */
 
 /* {{{ proto string sha1(string str [, bool raw_output]) U
    Calculate the sha1 hash of a string */
@@ -72,7 +73,6 @@ PHP_FUNCTION(sha1)
 }
 
 /* }}} */
-
 
 /* {{{ proto string sha1_file(string filename [, bool raw_output]) U
    Calculate the sha1 hash of given filename */
@@ -129,7 +129,6 @@ PHP_FUNCTION(sha1_file)
 	}
 }
 /* }}} */
-
 
 static void SHA1Transform(php_uint32[5], const unsigned char[64]);
 static void SHA1Encode(unsigned char *, php_uint32 *, unsigned int);

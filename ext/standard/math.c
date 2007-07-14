@@ -1065,8 +1065,6 @@ PHP_FUNCTION(fmod)
 }
 /* }}} */
 
-
-
 /*
  * Local variables:
  * tab-width: 4

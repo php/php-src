@@ -92,13 +92,14 @@ long php_getuid(void)
 }
 /* }}} */
 
-long php_getgid(void)
+long php_getgid(void) /* {{{ */
 {
 	TSRMLS_FETCH();
 
 	php_statpage(TSRMLS_C);
 	return (BG(page_gid));
 }
+/* }}} */
 
 /* {{{ proto int getmyuid(void) U
    Get PHP script owner's UID */
@@ -158,11 +159,12 @@ PHP_FUNCTION(getmyinode)
 }
 /* }}} */
 
-PHPAPI time_t php_getlastmod(TSRMLS_D)
+PHPAPI time_t php_getlastmod(TSRMLS_D) /* {{{ */
 {
 	php_statpage(TSRMLS_C);
 	return BG(page_mtime);
 }
+/* }}} */
 
 /* {{{ proto int getlastmod(void) U
    Get time of last page modification */

@@ -1038,6 +1038,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 /* }}} */
 
 /* another quickie macro to make defining similar functions easier */
+/* {{{ FileFunction(name, funcnum) */
 #define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	char *filename; \
@@ -1060,6 +1061,8 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 		efree(filename); \
 	} \
 }
+
+/* }}} */
 
 /* {{{ proto int fileperms(string filename) U
    Get file permissions */

@@ -92,33 +92,37 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 }
 /* }}} */
 
-static void _free_reg_cache(reg_cache *rc) 
+static void _free_reg_cache(reg_cache *rc)  /* {{{ */
 {
 	regfree(&rc->preg);
 }
+/* }}} */
 
 #undef regfree
 #define regfree(a);
 #undef regcomp
 #define regcomp(a, b, c) _php_regcomp(a, b, c)
 	
-static void php_reg_init_globals(zend_reg_globals *reg_globals TSRMLS_DC)
+static void php_reg_init_globals(zend_reg_globals *reg_globals TSRMLS_DC) /* {{{ */
 {
 	zend_hash_init(&reg_globals->ht_rc, 0, NULL, (void (*)(void *)) _free_reg_cache, 1);
 }
+/* }}} */
 
-static void php_reg_destroy_globals(zend_reg_globals *reg_globals TSRMLS_DC)
+static void php_reg_destroy_globals(zend_reg_globals *reg_globals TSRMLS_DC) /* {{{ */
 {
 	zend_hash_destroy(&reg_globals->ht_rc);
 }
+/* }}} */
 
-PHP_MINIT_FUNCTION(regex)
+PHP_MINIT_FUNCTION(regex) /* {{{ */
 {
 	ZEND_INIT_MODULE_GLOBALS(reg, php_reg_init_globals, php_reg_destroy_globals);
 	return SUCCESS;
 }
+/* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(regex)
+PHP_MSHUTDOWN_FUNCTION(regex) /* {{{ */
 {
 #ifndef ZTS
 	php_reg_destroy_globals(&reg_globals TSRMLS_CC);
@@ -126,8 +130,9 @@ PHP_MSHUTDOWN_FUNCTION(regex)
 
 	return SUCCESS;
 }
+/* }}} */
 
-PHP_MINFO_FUNCTION(regex)
+PHP_MINFO_FUNCTION(regex) /* {{{ */
 {
 #if HSREGEX
 	php_info_print_table_row(2, "Regex Library", "Bundled library enabled");
@@ -135,7 +140,7 @@ PHP_MINFO_FUNCTION(regex)
 	php_info_print_table_row(2, "Regex Library", "System library enabled");
 #endif
 }
-
+/* }}} */
 
 /* {{{ php_reg_eprint
  * php_reg_eprint - convert error number to name

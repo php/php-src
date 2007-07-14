@@ -79,6 +79,7 @@ php_canonicalize_version(const char *version)
 }
 
 /* }}} */
+
 /* {{{ compare_special_version_forms() */
 
 typedef struct {
@@ -120,6 +121,7 @@ compare_special_version_forms(char *form1, char *form2)
 }
 
 /* }}} */
+
 /* {{{ php_version_compare() */
 
 PHPAPI int

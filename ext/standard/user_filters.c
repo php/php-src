@@ -84,7 +84,7 @@ static zend_function_entry user_filter_class_funcs[] = {
 
 static zend_class_entry user_filter_class_entry;
 
-static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
+static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor) /* {{{ */
 {
 	php_stream_bucket *bucket = (php_stream_bucket *)rsrc->ptr;
 	if (bucket) {
@@ -92,8 +92,9 @@ static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 		bucket = NULL;
 	}
 }
+/* }}} */
 
-PHP_MINIT_FUNCTION(user_filters)
+PHP_MINIT_FUNCTION(user_filters) /* {{{ */
 {
 	zend_class_entry *php_user_filter;
 	/* init the filter class ancestor */
@@ -131,8 +132,9 @@ PHP_MINIT_FUNCTION(user_filters)
 	
 	return SUCCESS;
 }
+/* }}} */
 
-PHP_RSHUTDOWN_FUNCTION(user_filters)
+PHP_RSHUTDOWN_FUNCTION(user_filters) /* {{{ */
 {
 	if (BG(user_filter_map)) {
 		zend_hash_destroy(BG(user_filter_map));
@@ -142,8 +144,9 @@ PHP_RSHUTDOWN_FUNCTION(user_filters)
 
 	return SUCCESS;
 }
+/* }}} */
 
-static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
+static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC) /* {{{ */
 {
 	zval *obj = (zval*)thisfilter->abstract;
 	zval func_name;
@@ -170,15 +173,9 @@ static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 	/* kill the object */
 	zval_ptr_dtor(&obj);
 }
+/* }}} */
 
-php_stream_filter_status_t userfilter_filter(
-			php_stream *stream,
-			php_stream_filter *thisfilter,
-			php_stream_bucket_brigade *buckets_in,
-			php_stream_bucket_brigade *buckets_out,
-			size_t *consumed,
-			int flags
-			TSRMLS_DC)
+php_stream_filter_status_t userfilter_filter( php_stream *stream, php_stream_filter *thisfilter, php_stream_bucket_brigade *buckets_in,	php_stream_bucket_brigade *buckets_out, size_t *consumed, int flags TSRMLS_DC) /* {{{ */
 {
 	int ret = PSFS_ERR_FATAL;
 	zval *obj = (zval*)thisfilter->abstract;
@@ -244,6 +241,7 @@ php_stream_filter_status_t userfilter_filter(
 
 	return ret;
 }
+/* }}} */
 
 static php_stream_filter_ops userfilter_ops = {
 	userfilter_filter,
@@ -252,8 +250,7 @@ static php_stream_filter_ops userfilter_ops = {
 	PSFO_FLAG_OUTPUTS_SAME
 };
 
-static php_stream_filter *user_filter_factory_create(const char *filtername,
-		zval *filterparams, int persistent TSRMLS_DC)
+static php_stream_filter *user_filter_factory_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC) /* {{{ */
 {
 	struct php_user_filter_data *fdat = NULL;
 	php_stream_filter *filter;
@@ -378,15 +375,17 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 	return filter;
 }
+/* }}} */
 
 static php_stream_filter_factory user_filter_factory = {
 	user_filter_factory_create
 };
 
-static void filter_item_dtor(struct php_user_filter_data *fdat)
+static void filter_item_dtor(struct php_user_filter_data *fdat) /* {{{ */
 {
 	efree(fdat->classname.v);
 }
+/* }}} */
 
 /* {{{ proto object stream_bucket_make_writeable(resource brigade) U
    Return a bucket object from the brigade for operating on */
@@ -632,7 +631,6 @@ PHP_FUNCTION(stream_filter_register)
 	efree(fdat);
 }
 /* }}} */
-
 
 /*
  * Local variables:
