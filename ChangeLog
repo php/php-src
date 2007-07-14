@@ -1,3 +1,203 @@
+2007-07-13  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend_API.c:
+      Wrong function name in error message
+
+2007-07-13  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/date/lib/timelib.c:
+      - MFH: Let's always use the macro as llabs() requires c99.
+
+    * ext/date/lib/timelib.c:
+      - Let's always use the macro as llabs() requires c99.
+
+2007-07-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/array/locale_sort.phpt
+      ext/standard/tests/general_functions/call_user_func_return.phpt:
+      fix test
+
+    * ext/standard/tests/array/array_keys_variation_003.phpt:
+      add key values to the output
+
+    * ZendEngine2/zend_operators.c:
+      ("0" == NULL) must be false even in Unicode mode
+
+    * ext/standard/tests/array/array_keys_variation_002_64bit.phpt
+      ext/standard/tests/array/array_keys_variation_002_64bit.phpt:
+      
+      add 64bit version
+
+    * ext/standard/tests/array/array_keys_variation_004.phpt
+      ext/standard/tests/array/array_keys_variation_004.phpt
+      ext/standard/tests/array/array_keys_variation_005.phpt
+      ext/standard/tests/array/array_keys_variation_005.phpt:
+      
+      split one more huge test into several smaller ones
+
+    * ext/standard/tests/array/array_keys.phpt
+      ext/standard/tests/array/array_keys_64bit.phpt
+      ext/standard/tests/array/array_keys_basic.phpt
+      ext/standard/tests/array/array_keys_error.phpt
+      ext/standard/tests/array/array_keys_error.phpt
+      ext/standard/tests/array/array_keys_variation_001.phpt
+      ext/standard/tests/array/array_keys_variation_001.phpt
+      ext/standard/tests/array/array_keys_variation_002.phpt
+      ext/standard/tests/array/array_keys_variation_002.phpt
+      ext/standard/tests/array/array_keys_variation_003.phpt
+      ext/standard/tests/array/array_keys_variation_003.phpt:
+      split one more huge test into several smaller ones
+
+    * ext/standard/tests/array/array_keys.phpt
+      ext/standard/tests/array/array_keys_64bit.phpt:
+      fix test, add 64bit version
+
+    * ext/standard/formatted_print.c
+      ext/standard/tests/array/bug35014_64bit.phpt:
+      fix %u in Unicode mode
+
+    * ZendEngine2/tests/array_append_COW.phpt
+      ZendEngine2/tests/array_unshift_COW.phpt
+      ZendEngine2/tests/double_to_string_64bit.phpt:
+      fix tests
+
+2007-07-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/date/php_date.c
+      ext/date/tests/010.phpt
+      ext/date/tests/bug35499.phpt
+      ext/date/tests/bug41523.phpt
+      ext/date/tests/bug41964.phpt:
+      Unicode support
+
+2007-07-13  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/assert/assert_basic.phpt
+      ext/standard/tests/assert/assert_basic1.phpt
+      ext/standard/tests/assert/assert_basic2.phpt
+      ext/standard/tests/assert/assert_basic3.phpt
+      ext/standard/tests/assert/assert_basic4.phpt
+      ext/standard/tests/assert/assert_basic5.phpt
+      ext/standard/tests/assert/assert_error.phpt
+      ext/standard/tests/assert/assert_error1.phpt
+      ext/standard/tests/assert/assert_variation.phpt:
+      Assert test cases
+
+    * ext/standard/tests/assert/assert_basic.phpt
+      ext/standard/tests/assert/assert_basic.phpt
+      ext/standard/tests/assert/assert_basic1.phpt
+      ext/standard/tests/assert/assert_basic1.phpt
+      ext/standard/tests/assert/assert_basic3.phpt
+      ext/standard/tests/assert/assert_basic3.phpt
+      ext/standard/tests/assert/assert_basic4.phpt
+      ext/standard/tests/assert/assert_basic4.phpt
+      ext/standard/tests/assert/assert_basic5.phpt
+      ext/standard/tests/assert/assert_basic5.phpt
+      ext/standard/tests/assert/assert_error.phpt
+      ext/standard/tests/assert/assert_error.phpt
+      ext/standard/tests/assert/assert_error1.phpt
+      ext/standard/tests/assert/assert_error1.phpt
+      ext/standard/tests/assert/assert_variation.phpt
+      ext/standard/tests/assert/assert_variation.phpt:
+      
+      Assert test cases
+
+2007-07-13  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/dba/config.m4:
+      - fix wrong logic
+
+2007-07-13  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/assert/assert_basic2.phpt
+      ext/standard/tests/assert/assert_basic2.phpt:
+      
+      Assert test
+
+2007-07-13  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/dba/config.m4:
+      - Fixed some issues with enabling builtin stuff when anything else is
+        enabled
+      - Changed all AC_ARG_* options to PHP_ARG_* options
+      - Cleanups.
+
+2007-07-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/soap.c
+      ext/soap/soap.c:
+      Fixed bug #41635 (SoapServer and zlib.output_compression with FastCGI
+      result in major slowdown
+
+2007-07-13  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/date/lib/timelib.c:
+      MFH: use macro - llabs not always available on win32
+
+    * ext/date/lib/timelib.c:
+      use macro - llabs not always available on win32
+
+2007-07-13  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ext/ldap/ldap.c:
+      - Do not break thousands of scripts.. (will remove in 5.3)
+
+2007-07-13  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/config.m4:
+      MFH: don't allow $PHP_OCI8 to be empty if OCI8 is enabled
+      fixes bug #41988
+
+    * ext/oci8/config.m4:
+      don't allow $PHP_OCI8 to be empty when OCI8 is enabled
+
+2007-07-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_http.c
+      ext/soap/php_http.c:
+      Fixed memleak
+
+2007-07-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/basic_functions.c:
+      simplify the patch and prevent NULL retval_ptr_ptr's
+
+2007-07-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Fixed erong compilation for static call to constructor
+
+2007-07-13  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ext/ldap/ldap.c:
+      MFH: - Make sure people call ldap_first_attribute() before
+      ldap_next_attribute()
+
+    * ext/ldap/ldap.c:
+      - Make sure people call ldap_first_attribute() before ldap_next_attribute()
+
+    * (PHP_5_2)
+      NEWS
+      ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+      MFH:- Fixed bug #41127 (Memory leak in ldap_{first|next}_attribute
+      functions)
+
+    * ext/ldap/php_ldap.h:
+      - Removed non-existing function entry
+
+    * ext/ldap/ldap.c:
+      - Fixed bug #41127 (Memory leak in ldap_{first|next}_attribute functions)
+      [DOC] The last parameter "ber" is removed by this fix! (It's not needed)
+
 2007-07-12  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_4_4)
