@@ -1,3 +1,23 @@
+2007-07-13  Sara Golemon  <sara@golemon.com>
+
+    * zend_API.c:
+      Wrong function name in error message
+
+2007-07-13  Antony Dovgal  <antony@zend.com>
+
+    * zend_operators.c:
+      ("0" == NULL) must be false even in Unicode mode
+
+    * tests/array_append_COW.phpt
+      tests/array_unshift_COW.phpt
+      tests/double_to_string_64bit.phpt:
+      fix tests
+
+2007-07-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c:
+      Fixed erong compilation for static call to constructor
+
 2007-07-12  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
