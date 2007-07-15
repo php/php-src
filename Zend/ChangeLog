@@ -1,3 +1,13 @@
+2007-07-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug41919.phpt:
+      Fixed test
+
+    * zend_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Fixed compilation on Windows
+
 2007-07-13  Sara Golemon  <sara@golemon.com>
 
     * zend_API.c:
