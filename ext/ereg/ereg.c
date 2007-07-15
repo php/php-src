@@ -22,18 +22,96 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "php.h"
-#include "php_string.h"
-#include "reg.h"
+#include "ext/standard/php_string.h"
+#include "php_ereg.h"
 #include "ext/standard/info.h"
 
-ZEND_DECLARE_MODULE_GLOBALS(reg)
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ereg, 0, 0, 2)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, string) 
+	ZEND_ARG_INFO(1, registers) /* ARRAY_INFO(1, registers, 1) */
+ZEND_END_ARG_INFO()
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_eregi, 0, 0, 2)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, string) 
+	ZEND_ARG_INFO(1, registers) /* ARRAY_INFO(1, registers, 1) */
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ereg_replace, 0)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, replacement)
+	ZEND_ARG_INFO(0, string)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_eregi_replace, 0)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, replacement)
+	ZEND_ARG_INFO(0, string)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_split, 0, 0, 2)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, string) 
+	ZEND_ARG_INFO(0, limit)  
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_spliti, 0, 0, 2)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, string) 
+	ZEND_ARG_INFO(0, limit)  
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_sql_regcase, 0)
+	ZEND_ARG_INFO(0, string)
+ZEND_END_ARG_INFO()
+/* }}} */
+
+/* {{{ Function table */
+zend_function_entry ereg_functions[] = {
+	PHP_FE(ereg,						arginfo_ereg)  
+	PHP_FE(ereg_replace,				arginfo_ereg_replace)
+	PHP_FE(eregi,						arginfo_eregi)
+	PHP_FE(eregi_replace,				arginfo_eregi_replace)   
+	PHP_FE(split,						arginfo_split)
+	PHP_FE(spliti,						arginfo_spliti)
+	PHP_FE(sql_regcase,					arginfo_sql_regcase)
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
+/* {{{ reg_cache */
 typedef struct {
 	regex_t preg;
 	int cflags;
 } reg_cache;
-
 static int reg_magic = 0;
+/* }}} */
+
+ZEND_DECLARE_MODULE_GLOBALS(ereg)
+
+/* {{{ Module entry */
+zend_module_entry ereg_module_entry = {
+	STANDARD_MODULE_HEADER,
+	"ereg",
+	ereg_functions,
+	PHP_MINIT(ereg),
+	PHP_MSHUTDOWN(ereg),
+	NULL,
+	NULL,
+	PHP_MINFO(ereg),
+	NO_VERSION_YET,
+	STANDARD_MODULE_PROPERTIES
+};
+/* }}} */
 
 /* {{{ _php_regcomp
  */
@@ -44,7 +122,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 	reg_cache *rc = NULL;
 	TSRMLS_FETCH();
 	
-	if(zend_hash_find(&REG(ht_rc), (char *) pattern, patlen+1, (void **) &rc) == SUCCESS
+	if(zend_hash_find(&EREG(ht_rc), (char *) pattern, patlen+1, (void **) &rc) == SUCCESS
 	   && rc->cflags == cflags) {
 #ifdef HAVE_REGEX_T_RE_MAGIC
 		/*
@@ -52,7 +130,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 		 * is, we flush it and compile the pattern from scratch.
 		 */
 		if (rc->preg.re_magic != reg_magic) {
-			zend_hash_clean(&REG(ht_rc));
+			zend_hash_clean(&EREG(ht_rc));
 		} else {
 			memcpy(preg, &rc->preg, sizeof(*preg));
 			return r;
@@ -71,7 +149,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 		 * it's good.
 		 */
 		if (!reg_magic) reg_magic = preg->re_magic;
-		zend_hash_update(&REG(ht_rc), (char *) pattern, patlen+1,
+		zend_hash_update(&EREG(ht_rc), (char *) pattern, patlen+1,
 						 (void *) &rcp, sizeof(rcp), NULL);
 	}
 #else
@@ -83,7 +161,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 
 			rcp.cflags = cflags;
 			memcpy(&rcp.preg, preg, sizeof(*preg));
-			zend_hash_update(&REG(ht_rc), (char *) pattern, patlen+1,
+			zend_hash_update(&EREG(ht_rc), (char *) pattern, patlen+1,
 							 (void *) &rcp, sizeof(rcp), NULL);
 		}
 	}
@@ -92,60 +170,57 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 }
 /* }}} */
 
-static void _free_reg_cache(reg_cache *rc)  /* {{{ */
+static void _free_ereg_cache(reg_cache *rc) 
 {
 	regfree(&rc->preg);
 }
-/* }}} */
 
 #undef regfree
 #define regfree(a);
 #undef regcomp
 #define regcomp(a, b, c) _php_regcomp(a, b, c)
 	
-static void php_reg_init_globals(zend_reg_globals *reg_globals TSRMLS_DC) /* {{{ */
+static void php_ereg_init_globals(zend_ereg_globals *ereg_globals TSRMLS_DC)
 {
-	zend_hash_init(&reg_globals->ht_rc, 0, NULL, (void (*)(void *)) _free_reg_cache, 1);
+	zend_hash_init(&ereg_globals->ht_rc, 0, NULL, (void (*)(void *)) _free_ereg_cache, 1);
 }
-/* }}} */
 
-static void php_reg_destroy_globals(zend_reg_globals *reg_globals TSRMLS_DC) /* {{{ */
+static void php_ereg_destroy_globals(zend_ereg_globals *ereg_globals TSRMLS_DC)
 {
-	zend_hash_destroy(&reg_globals->ht_rc);
+	zend_hash_destroy(&ereg_globals->ht_rc);
 }
-/* }}} */
 
-PHP_MINIT_FUNCTION(regex) /* {{{ */
+PHP_MINIT_FUNCTION(ereg)
 {
-	ZEND_INIT_MODULE_GLOBALS(reg, php_reg_init_globals, php_reg_destroy_globals);
+	ZEND_INIT_MODULE_GLOBALS(ereg, php_ereg_init_globals, php_ereg_destroy_globals);
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(regex) /* {{{ */
+PHP_MSHUTDOWN_FUNCTION(ereg)
 {
 #ifndef ZTS
-	php_reg_destroy_globals(&reg_globals TSRMLS_CC);
+	php_ereg_destroy_globals(&ereg_globals TSRMLS_CC);
 #endif
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MINFO_FUNCTION(regex) /* {{{ */
+PHP_MINFO_FUNCTION(ereg)
 {
+	php_info_print_table_start();
 #if HSREGEX
 	php_info_print_table_row(2, "Regex Library", "Bundled library enabled");
 #else
 	php_info_print_table_row(2, "Regex Library", "System library enabled");
 #endif
+	php_info_print_table_end();
 }
-/* }}} */
 
-/* {{{ php_reg_eprint
- * php_reg_eprint - convert error number to name
+
+/* {{{ php_ereg_eprint
+ * php_ereg_eprint - convert error number to name
  */
-static void php_reg_eprint(int err, regex_t *re) {
+static void php_ereg_eprint(int err, regex_t *re) {
 	char *buf = NULL, *message = NULL;
 	size_t len;
 	size_t buf_len;
@@ -203,7 +278,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	int   argc = ZEND_NUM_ARGS();
 	
 	if (argc < 2 || argc > 3 ||
-	    zend_get_parameters_ex(argc, &regex, &findin, &array) == FAILURE) {
+		zend_get_parameters_ex(argc, &regex, &findin, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -226,7 +301,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (err) {
-		php_reg_eprint(err, &re);
+		php_ereg_eprint(err, &re);
 		RETURN_FALSE;
 	}
 
@@ -240,7 +315,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	/* actually execute the regular expression */
 	err = regexec(&re, string, re.re_nsub+1, subs, 0);
 	if (err && err != REG_NOMATCH) {
-		php_reg_eprint(err, &re);
+		php_ereg_eprint(err, &re);
 		regfree(&re);
 		efree(subs);
 		RETURN_FALSE;
@@ -297,15 +372,15 @@ PHP_FUNCTION(eregi)
 }
 /* }}} */
 
-/* {{{ php_reg_replace
+/* {{{ php_ereg_replace
  * this is the meat and potatoes of regex replacement! */
-PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended)
+PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended)
 {
 	regex_t re;
 	regmatch_t *subs;
 
 	char *buf,	/* buf is where we build the replaced string */
-	     *nbuf,	/* nbuf is used when we grow the buffer */
+		 *nbuf,	/* nbuf is used when we grow the buffer */
 		 *walkbuf; /* used to walk buf when replacing backrefs */
 	const char *walk; /* used to walk replacement string for backrefs */
 	int buf_len;
@@ -323,7 +398,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 
 	err = regcomp(&re, pattern, copts);
 	if (err) {
-		php_reg_eprint(err, &re);
+		php_ereg_eprint(err, &re);
 		return ((char *) -1);
 	}
 
@@ -342,7 +417,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 		err = regexec(&re, &string[pos], re.re_nsub+1, subs, (pos ? REG_NOTBOL : 0));
 
 		if (err && err != REG_NOMATCH) {
-			php_reg_eprint(err, &re);
+			php_ereg_eprint(err, &re);
 			efree(subs);
 			efree(buf);
 			regfree(&re);
@@ -363,7 +438,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 				if ('\\' == *walk && isdigit((unsigned char)walk[1]) && ((unsigned char)walk[1]) - '0' <= (int)re.re_nsub) {
 					if (subs[walk[1] - '0'].rm_so > -1 && subs[walk[1] - '0'].rm_eo > -1) {
 						new_l += subs[walk[1] - '0'].rm_eo - subs[walk[1] - '0'].rm_so;
-					}    
+					}
 					walk += 2;
 				} else {
 					new_l++;
@@ -443,9 +518,9 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 }
 /* }}} */
 
-/* {{{ php_ereg_replace
+/* {{{ php_do_ereg_replace
  */
-static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
+static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	zval **arg_pattern,
 		**arg_replace,
@@ -456,7 +531,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *ret;
 	
 	if (ZEND_NUM_ARGS() != 3 || 
-	    zend_get_parameters_ex(3, &arg_pattern, &arg_replace, &arg_string) == FAILURE) {
+		zend_get_parameters_ex(3, &arg_pattern, &arg_replace, &arg_string) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -491,7 +566,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		string = STR_EMPTY_ALLOC();
 
 	/* do the actual work */
-	ret = php_reg_replace(pattern, replace, string, icase, 1);
+	ret = php_ereg_replace(pattern, replace, string, icase, 1);
 	if (ret == (char *) -1) {
 		RETVAL_FALSE;
 	} else {
@@ -509,7 +584,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
    Replace regular expression */
 PHP_FUNCTION(ereg_replace)
 {
-	php_ereg_replace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_do_ereg_replace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -517,7 +592,7 @@ PHP_FUNCTION(ereg_replace)
    Case insensitive replace regular expression */
 PHP_FUNCTION(eregi_replace)
 {
-	php_ereg_replace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_do_ereg_replace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -533,27 +608,27 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	int argc = ZEND_NUM_ARGS();
 
 	if (argc < 2 || argc > 3 ||
-	    zend_get_parameters_ex(argc, &spliton, &str, &arg_count) == FAILURE) {
+		zend_get_parameters_ex(argc, &spliton, &str, &arg_count) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-    
+
 	if (argc > 2) {
 		convert_to_long_ex(arg_count);
 		count = Z_LVAL_PP(arg_count);
 	}
-    
+
 	if (icase)
 		copts = REG_ICASE;
-    
-	convert_to_string_ex(spliton);                                        
-	convert_to_string_ex(str);                                            
+
+	convert_to_string_ex(spliton);
+	convert_to_string_ex(str);
 
 	strp = Z_STRVAL_PP(str);
 	endp = strp + Z_STRLEN_PP(str);
 
 	err = regcomp(&re, Z_STRVAL_PP(spliton), REG_EXTENDED | copts);
 	if (err) {
-		php_reg_eprint(err, &re);
+		php_ereg_eprint(err, &re);
 		RETURN_FALSE;
 	}
 
@@ -595,7 +670,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	/* see if we encountered an error */
 	if (err && err != REG_NOMATCH) {
-		php_reg_eprint(err, &re);
+		php_ereg_eprint(err, &re);
 		regfree(&re);
 		zend_hash_destroy(Z_ARRVAL_P(return_value));
 		efree(Z_ARRVAL_P(return_value));

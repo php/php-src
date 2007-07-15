@@ -51,7 +51,6 @@
 /*#include "ext/com/php_COM.h"
 #include "ext/com/php_VARIANT.h"*/
 #include "ext/ftp/php_ftp.h"
-#include "ext/standard/reg.h"
 #include "ext/pcre/php_pcre.h"
 /*#include "ext/odbc/php_odbc.h"*/	/* Commented out for now */
 #include "ext/session/php_session.h"

@@ -98,7 +98,7 @@ if (PHP_PREFIX == '') {
 }
 DEFINE('PHP_PREFIX', PHP_PREFIX);
 
-DEFINE("BASE_INCLUDES", "/I . /I main /I regex /I Zend /I TSRM /I ext ");
+DEFINE("BASE_INCLUDES", "/I . /I main /I Zend /I TSRM /I ext ");
 
 // CFLAGS for building the PHP dll
 DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP5DLLTS_EXPORTS /D PHP_EXPORTS \
@@ -331,8 +331,6 @@ ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c 
 
 ADD_SOURCES("win32", "crypt_win32.c glob.c md5crypt.c readdir.c \
 	registry.c select.c sendmail.c time.c wfile.c winutil.c wsyslog.c globals.c");
-
-ADD_SOURCES("regex", "regcomp.c regerror.c regexec.c regfree.c");
 
 STDOUT.WriteBlankLines(1);
 

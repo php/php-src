@@ -2192,54 +2192,6 @@ static
 ZEND_BEGIN_ARG_INFO(arginfo_mt_getrandmax, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ reg.c */
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ereg, 0, 0, 2)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(1, registers) /* ARRAY_INFO(1, registers, 1) */
-ZEND_END_ARG_INFO()
-
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_eregi, 0, 0, 2)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(1, registers) /* ARRAY_INFO(1, registers, 1) */
-ZEND_END_ARG_INFO()
-
-static
-ZEND_BEGIN_ARG_INFO(arginfo_ereg_replace, 0)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, replacement)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
-static
-ZEND_BEGIN_ARG_INFO(arginfo_eregi_replace, 0)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, replacement)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_split, 0, 0, 2)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, limit)
-ZEND_END_ARG_INFO()
-
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_spliti, 0, 0, 2)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, limit)
-ZEND_END_ARG_INFO()
-
-static
-ZEND_BEGIN_ARG_INFO(arginfo_sql_regcase, 0)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ sha1.c */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sha1, 0, 0, 1)
@@ -3241,6 +3193,7 @@ zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(similar_text,													arginfo_similar_text)
 	PHP_FE(explode,															arginfo_explode)
 	PHP_FE(implode,															arginfo_implode)
+	PHP_FALIAS(join,				implode,								arginfo_implode)
 	PHP_FE(setlocale,														arginfo_setlocale)
 	PHP_FE(localeconv,														arginfo_localeconv)
 
@@ -3514,16 +3467,6 @@ zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_object,														arginfo_is_object)
 	PHP_FE(is_scalar,														arginfo_is_scalar)
 	PHP_FE(is_callable,														arginfo_is_callable)
-
-	/* functions from reg.c */
-	PHP_FE(ereg,															arginfo_ereg)
-	PHP_FE(ereg_replace,													arginfo_ereg_replace)
-	PHP_FE(eregi,															arginfo_eregi)
-	PHP_FE(eregi_replace,													arginfo_eregi_replace)
-	PHP_FE(split,															arginfo_split)
-	PHP_FE(spliti,															arginfo_spliti)
-	PHP_FALIAS(join,				implode,								arginfo_implode)
-	PHP_FE(sql_regcase,														arginfo_sql_regcase)
 
 	/* functions from file.c */
 	PHP_FE(pclose,															arginfo_pclose)
@@ -4035,7 +3978,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
 
-	PHP_MINIT(regex)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(file)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(pack)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(browscap)(INIT_FUNC_ARGS_PASSTHRU);
@@ -4114,7 +4056,6 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 
 	UNREGISTER_INI_ENTRIES();
 
-	PHP_MSHUTDOWN(regex)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_MSHUTDOWN(browscap)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_MSHUTDOWN(array)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_MSHUTDOWN(assert)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
@@ -4228,7 +4169,6 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 PHP_MINFO_FUNCTION(basic) /* {{{ */
 {
 	php_info_print_table_start();
-	PHP_MINFO(regex)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 	PHP_MINFO(dl)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 	PHP_MINFO(mail)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 	php_info_print_table_end();

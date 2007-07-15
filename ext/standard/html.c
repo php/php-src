@@ -43,7 +43,6 @@
 #else
 #include <php_config.h>
 #endif
-#include "reg.h"
 #include "html.h"
 #include "php_string.h"
 #include "SAPI.h"

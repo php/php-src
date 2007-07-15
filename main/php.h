@@ -71,8 +71,6 @@
 #define PHP_OS      PHP_UNAME
 #endif
 
-#include "php_regex.h"
-
 #if HAVE_ASSERT_H
 #if PHP_DEBUG
 #undef NDEBUG
@@ -191,10 +189,6 @@ typedef zval pval;
 
 #ifndef HAVE_STRERROR
 char *strerror(int);
-#endif
-
-#if (REGEX == 1 || REGEX == 0) && !defined(NO_REGEX_EXTRA_H)
-#include "regex/regex_extra.h"
 #endif
 
 #if HAVE_PWD_H

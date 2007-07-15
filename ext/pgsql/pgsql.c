@@ -36,6 +36,7 @@
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/php_smart_str.h"
+#include "ext/ereg/php_regex.h"
 
 #undef PACKAGE_BUGREPORT
 #undef PACKAGE_NAME
