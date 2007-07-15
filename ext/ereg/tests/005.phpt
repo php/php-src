@@ -1,5 +1,7 @@
 --TEST--
 Test Regular expression register support in ereg
+--SKIPIF--
+<?php if (unicode_semantics()) die('skip unicode.semantics=on'); ?>        
 --FILE--
 <?php $a="This is a nice and simple string";
   echo ereg(".*(is).*(is).*",$a,$registers);
