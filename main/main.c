@@ -921,23 +921,25 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 }
 /* }}} */
 
-
-static void stream_closer_for_zend(void *handle TSRMLS_DC)
+static void stream_closer_for_zend(void *handle TSRMLS_DC) /* {{{ */
 {
 	php_stream_close((php_stream*)handle);
 }
+/* }}} */
 
-static long stream_fteller_for_zend(void *handle TSRMLS_DC)
+static long stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
 {
 	return (long)php_stream_tell((php_stream*)handle);
 }
+/* }}} */
 
-static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle TSRMLS_DC)
+static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle TSRMLS_DC) /* {{{ */
 {
 	return php_stream_open_for_zend_ex(filename, handle, ENFORCE_SAFE_MODE|USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
 }
+/* }}} */
 
-PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode TSRMLS_DC)
+PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream;
 
@@ -959,6 +961,7 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 	}
 	return FAILURE;
 }
+/* }}} */
 
 /* {{{ php_get_configuration_directive_for_zend
  */
@@ -1387,7 +1390,6 @@ void php_request_shutdown(void *dummy)
 }
 /* }}} */
 
-
 /* {{{ php_com_initialize
  */
 PHPAPI void php_com_initialize(TSRMLS_D)
@@ -1605,7 +1607,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
 
 	/* this will read in php.ini, set up the configuration parameters,
-	   load zend extensions and register php function extensions 
+	   load zend extensions and register php function extensions
 	   to be loaded later */
 	if (php_init_config(TSRMLS_C) == FAILURE) {
 		return FAILURE;
@@ -1683,7 +1685,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* start additional PHP extensions */
 	php_register_extensions(&additional_modules, num_additional_modules TSRMLS_CC);
 
-
 	/* load and startup extensions compiled as shared objects (aka DLLs)
 	   as requested by php.ini entries
 	   theese are loaded after initialization of internal extensions
@@ -1756,7 +1757,8 @@ void php_module_shutdown(TSRMLS_D)
 	sapi_flush(TSRMLS_C);
 
 	zend_shutdown(TSRMLS_C);
-
+	
+	/* Destroys filter & transport registries too */
 	php_shutdown_stream_wrappers(module_number TSRMLS_CC);
 
 	php_shutdown_info_logos();
@@ -1785,7 +1787,6 @@ void php_module_shutdown(TSRMLS_D)
 #endif
 }
 /* }}} */
-
 
 /* {{{ php_execute_script
  */
@@ -1873,6 +1874,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			zend_set_timeout(INI_INT("max_execution_time"));
 		}
 		retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
+
 	} zend_end_try();
 
 #if HAVE_BROKEN_GETCWD
