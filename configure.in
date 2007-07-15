@@ -11,9 +11,9 @@ dnl ## Diversion 2 is the initial checking of OS features, programs,
 dnl ## libraries and so on.
 
 dnl ## In diversion 3 we check for compile-time options to the PHP
-dnl ## core and how to deal with different system dependencies.  This
-dnl ## includes what regex library is used and whether debugging or short
-dnl ## tags are enabled, and the default behaviour of php.ini options.
+dnl ## core and how to deal with different system dependencies. 
+dnl ## This includes whether debugging or short tags are enabled
+dnl ## and the default behaviour of php.ini options.
 dnl ## This is also where an SAPI interface is selected (choosing between
 dnl ## Apache module, CGI etc.)
 
@@ -260,10 +260,9 @@ fi
 divert(3)
 
 dnl ## In diversion 3 we check for compile-time options to the PHP
-dnl ## core and how to deal with different system dependencies.  This
-dnl ## includes what regex library is used and whether debugging or short
-dnl ## tags are enabled, and the default behaviour of php.ini options.
-
+dnl ## core and how to deal with different system dependencies. 
+dnl ## This includes whether debugging or short tags are enabled
+dnl ## and the default behaviour of php.ini options.
 
 dnl Starting system checks.
 dnl -------------------------------------------------------------------------
@@ -507,7 +506,6 @@ putenv \
 realpath \
 random \
 rand_r \
-regcomp \
 res_search \
 scandir \
 setitimer \
@@ -1189,7 +1187,7 @@ esac
 PHP_SUBST(all_targets)
 PHP_SUBST(install_targets)
 
-PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/ regex/])
+PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c)
 
@@ -1243,7 +1241,6 @@ fi
 PHP_ADD_SOURCES_X(Zend, zend_execute.c,,PHP_GLOBAL_OBJS,,$flag)
 
 PHP_ADD_BUILD_DIR(main main/streams)
-PHP_ADD_BUILD_DIR(regex)
 PHP_ADD_BUILD_DIR(sapi/$PHP_SAPI sapi/cli)
 PHP_ADD_BUILD_DIR(TSRM)
 PHP_ADD_BUILD_DIR(Zend)

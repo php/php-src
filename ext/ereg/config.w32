@@ -1,0 +1,7 @@
+// $Id$
+// vim:ft=javascript
+
+EXTENSION("ereg", "ereg.c", false /* never shared */, "-Iext/ereg/regex");
+ADD_SOURCES("ext/ereg/regex", "regcomp.c regexec.c regerror.c regfree.c", "ereg");
+AC_DEFINE('REGEX', 1, 'Bundled regex');
+AC_DEFINE('HSREGEX', 1, 'Bundled regex');

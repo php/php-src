@@ -60,7 +60,6 @@
 #if HAVE_FTP
 #include "ext/ftp/php_ftp.h"
 #endif
-#include "ext/standard/reg.h"
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
 #endif
