@@ -1337,6 +1337,16 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
+	/* 6.5 free last error information */
+	if (PG(last_error_message)) {
+		free(PG(last_error_message));
+		PG(last_error_message) = NULL;
+	}
+	if (PG(last_error_file)) {
+		free(PG(last_error_file));
+		PG(last_error_file) = NULL;
+	}
+
 	/* 7. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate(TSRMLS_C);
 
