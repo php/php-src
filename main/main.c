@@ -564,8 +564,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	} else if (php_during_module_shutdown()) {
 		stage = "PHP Shutdown";
 	} else if (EG(current_execute_data) &&
-	           EG(current_execute_data)->opline &&
-	           EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+				EG(current_execute_data)->opline &&
+				EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL
+	) {
 		switch (EG(current_execute_data)->opline->op2.u.constant.value.lval) {
 			case ZEND_EVAL:
 				function.s = "eval";
@@ -940,9 +941,10 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			EG(exit_status) = 255;
 			if (module_initialized) {
 				if (!SG(headers_sent) &&
-				    SG(sapi_headers).http_response_code == 200) {
+					SG(sapi_headers).http_response_code == 200
+				) {
 					sapi_header_line ctr = {0};
-	
+
 					ctr.line = "HTTP/1.0 500 Internal Server Error";
 					ctr.line_len = strlen(ctr.line);
 					sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
@@ -1257,7 +1259,7 @@ int php_request_startup(TSRMLS_D)
 
 		if (PG(output_handler) && PG(output_handler)[0]) {
 			zval *oh;
-			
+
 			MAKE_STD_ZVAL(oh);
 			ZVAL_ASCII_STRING(oh, PG(output_handler), ZSTR_DUPLICATE);
 			php_output_start_user(oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
@@ -1449,6 +1451,16 @@ void php_request_shutdown(void *dummy)
 			}
 		}
 	} zend_end_try();
+
+	/* 6.5 free last error information */
+	if (PG(last_error_message)) {
+		free(PG(last_error_message));
+		PG(last_error_message) = NULL;
+	}
+	if (PG(last_error_file)) {
+		free(PG(last_error_file));
+		PG(last_error_file) = NULL;
+	}
 
 	/* 7. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate(TSRMLS_C);
@@ -1922,7 +1934,7 @@ void php_module_shutdown(TSRMLS_D)
 #ifndef ZTS
 	core_globals_dtor(&core_globals TSRMLS_CC);
 #else
-	ts_free_id(core_globals_id);	
+	ts_free_id(core_globals_id);
 #endif
 
 #if defined(PHP_WIN32) && defined(_MSC_VER) && (_MSC_VER >= 1400)
@@ -1980,8 +1992,9 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
 		 */
  		if (primary_file->filename &&
- 		    primary_file->opened_path == NULL &&
- 		    primary_file->type != ZEND_HANDLE_FILENAME) {
+ 			primary_file->opened_path == NULL &&
+ 			primary_file->type != ZEND_HANDLE_FILENAME
+		) {
 			int realfile_len;
 			int dummy = 1;
 			if (VCWD_REALPATH(primary_file->filename, realfile)) {
