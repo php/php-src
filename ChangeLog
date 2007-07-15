@@ -1,3 +1,62 @@
+2007-07-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/filter/.cvsignore
+      ext/pdo/.cvsignore
+      ext/pdo_mysql/.cvsignore
+      ext/pdo_mysql/.cvsignore
+      ext/pdo_oci/.cvsignore
+      ext/pdo_oci/.cvsignore
+      ext/pdo_pgsql/.cvsignore
+      ext/pdo_pgsql/.cvsignore
+      ext/pdo_sqlite/.cvsignore
+      ext/unicode/.cvsignore
+      ext/xmlreader/.cvsignore
+      ext/xmlwriter/.cvsignore
+      ext/zip/.cvsignore
+      ext/zip/lib/.cvsignore:
+      ignore *.gcda
+
+2007-07-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug41919.phpt:
+      Fixed test
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed compilation on Windows
+
+2007-07-14  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/flock_compat.c
+      ext/standard/fsock.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/head.c
+      ext/standard/html.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/incomplete_class.c
+      ext/standard/info.c
+      ext/standard/lcg.c
+      ext/standard/math.c
+      ext/standard/md5.c
+      ext/standard/metaphone.c
+      ext/standard/microtime.c
+      ext/standard/pageinfo.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/quot_print.c
+      ext/standard/reg.c
+      ext/standard/sha1.c
+      ext/standard/streamsfuncs.c
+      ext/standard/syslog.c
+      ext/standard/url.c
+      ext/standard/url_scanner.c
+      ext/standard/user_filters.c
+      ext/standard/versioning.c:
+      fix ws, cs & folding
+
 2007-07-13  Sara Golemon  <sara@golemon.com>
 
     * ZendEngine2/zend_API.c:
