@@ -1,5 +1,7 @@
 --TEST--
 Test empty result buffer in reg_replace
+--SKIPIF--
+<?php if (unicode_semantics()) die('skip unicode.semantics=on'); ?>        
 --FILE--
 <?php 
 	$a="abcd";

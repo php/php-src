@@ -1,5 +1,7 @@
 --TEST--
 Test split()
+--SKIPIF--
+<?php if (unicode_semantics()) die('skip unicode.semantics=on'); ?>        
 --FILE--
 <?php
 	$a=split("[[:space:]]","this is	a
