@@ -696,6 +696,7 @@ dnl If extension-or-not is yes (default), then do the ENABLE_ALL check and run
 dnl the PHP_ARG_ANALYZE_EX.
 dnl
 AC_DEFUN([PHP_ARG_WITH],[
+php_with_[]translit($1,A-Z0-9-,a-z0-9_)=ifelse($4,,no,$4)
 PHP_REAL_ARG_WITH([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z0-9-,A-Z0-9_),[ifelse($5,,yes,$5)])
 ])
 
@@ -723,7 +724,8 @@ dnl If extension-or-not is yes (default), then do the ENABLE_ALL check and run
 dnl the PHP_ARG_ANALYZE_EX.
 dnl
 AC_DEFUN([PHP_ARG_ENABLE],[
-PHP_REAL_ARG_ENABLE([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z-,A-Z_),[ifelse($5,,yes,$5)])
+php_enable_[]translit($1,A-Z0-9-,a-z0-9_)=ifelse($4,,no,$4)
+PHP_REAL_ARG_ENABLE([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z0-9-,A-Z0-9_),[ifelse($5,,yes,$5)])
 ])
 
 dnl PHP_REAL_ARG_ENABLE
@@ -2617,16 +2619,16 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
   for arg in $ac_configure_args; do
     case $arg in
       --with-*[)]
-      	arg_name="`echo [$]arg | $SED -e 's/--with-//g' -e 's/=.*//g'`"
+      	arg_name="`echo [$]arg | $SED -e 's/--with-/with-/g' -e 's/=.*//g'`"
         ;;
       --without-*[)]
-      	arg_name="`echo [$]arg | $SED -e 's/--without-//g' -e 's/=.*//g'`"
+      	arg_name="`echo [$]arg | $SED -e 's/--without-/with-/g' -e 's/=.*//g'`"
         ;;
       --enable-*[)]
-      	arg_name="`echo [$]arg | $SED -e 's/--enable-//g' -e 's/=.*//g'`"
+      	arg_name="`echo [$]arg | $SED -e 's/--enable-/enable-/g' -e 's/=.*//g'`"
         ;;
       --disable-*[)]
-      	arg_name="`echo [$]arg | $SED -e 's/--disable-//g' -e 's/=.*//g'`"
+      	arg_name="`echo [$]arg | $SED -e 's/--disable-/enable-/g' -e 's/=.*//g'`"
         ;;
       *[)]
       	continue
@@ -2634,20 +2636,21 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
     esac
     case $arg_name in
       # Allow --disable-all / --enable-all
-      all[)];;
+      enable-all[)];;
 
       # Allow certain libtool options
-      libtool-lock | pic | tags | shared | static | fast-install | gnu-ld[)];;
+      enable-libtool-lock | with-pic | with-tags | enable-shared | enable-static | enable-fast-install | with-gnu-ld[)];;
 
       # Allow certain TSRM options
-      tsrm-pth | tsrm-st | tsrm-pthreads[)];;
+      with-tsrm-pth | with-tsrm-st | with-tsrm-pthreads[)];;
 
       # Allow certain Zend options
-      zend-vm | maintainer-zts | inline-optimization | zend-multibyte[)];;
+      with-zend-vm | enable-maintainer-zts | enable-inline-optimization | enable-zend-multibyte[)];;
 
       # All the rest must be set using the PHP_ARG_* macros
+      # PHP_ARG_* macros set php_enable_<arg_name> or php_with_<arg_name>
       *[)]
-        is_arg_set=PHP_[]`echo [$]arg_name | tr 'abcdefghijklmnopqrstuvwxyz-' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ_'`
+        is_arg_set=php_[]`echo [$]arg_name | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ-' 'abcdefghijklmnopqrstuvwxyz_'`
         if eval test -z "\$$is_arg_set"; then
           PHP_UNKNOWN_CONFIGURE_OPTIONS="$PHP_UNKNOWN_CONFIGURE_OPTIONS
 [$]arg"
