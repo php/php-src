@@ -364,23 +364,9 @@ static PHP_METHOD(PDO, dbh_constructor)
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
 	}
 
-	if (options) {
-		zval **attr_value;
-		char *str_key;
-		long long_key;
-			
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(options));
-		while (SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(options), (void**)&attr_value) 
-			&& HASH_KEY_IS_LONG == zend_hash_get_current_key(Z_ARRVAL_P(options), &str_key, &long_key, 0)) {
-				
-			pdo_dbh_attribute_set(dbh, long_key, *attr_value TSRMLS_CC);
-			zend_hash_move_forward(Z_ARRVAL_P(options));
-		}
-	}
-
 	if (!call_factory) {
 		/* we got a persistent guy from our cache */
-		return;
+		goto options;
 	}
 
 	if (driver->db_handle_factory(dbh, options TSRMLS_CC)) {
@@ -404,8 +390,22 @@ static PHP_METHOD(PDO, dbh_constructor)
 		}
 
 		dbh->driver = driver;
+options:
+		if (options) {
+			zval **attr_value;
+			char *str_key;
+			long long_key;
+			
+			zend_hash_internal_pointer_reset(Z_ARRVAL_P(options));
+			while (SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(options), (void**)&attr_value) 
+				&& HASH_KEY_IS_LONG == zend_hash_get_current_key(Z_ARRVAL_P(options), &str_key, &long_key, 0)) {
+				
+				pdo_dbh_attribute_set(dbh, long_key, *attr_value TSRMLS_CC);
+				zend_hash_move_forward(Z_ARRVAL_P(options));
+			}
+		}
 
-		return;	
+		return;
 	}
 
 	/* the connection failed; things will tidy up in free_storage */
