@@ -1,5 +1,7 @@
 --TEST--
 Bug #41867 (getName is broken)
+--SKIPIF--
+<?php if (!extension_loaded("simplexml")) die("skip"); ?>
 --FILE--
 <?php
 

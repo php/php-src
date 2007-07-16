@@ -1,5 +1,7 @@
 --TEST--
 Bug #41692 (ArrayObject shows weird behaviour in respect to inheritance)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) die("skip"); ?>
 --FILE--
 <?php
 

@@ -1,5 +1,7 @@
 --TEST--
 Bug #36226 (Inconsistent handling when passing nillable arrays)
+--SKIPIF--
+<?php if (!extension_loaded("soap")) die("skip"); ?>
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

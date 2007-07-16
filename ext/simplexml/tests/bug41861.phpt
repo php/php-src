@@ -1,5 +1,7 @@
 --TEST--
 Bug #41861 (getNamespaces() returns the namespaces of a node's siblings)
+--SKIPIF--
+<?php if (!extension_loaded("simplexml")) die("skip"); ?>
 --FILE--
 <?php
 
