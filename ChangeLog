@@ -1,3 +1,180 @@
+2007-07-15  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/ereg/tests/001.phpt
+      ext/ereg/tests/002.phpt
+      ext/ereg/tests/003.phpt
+      ext/ereg/tests/004.phpt
+      ext/ereg/tests/005.phpt
+      ext/ereg/tests/006.phpt
+      ext/ereg/tests/007.phpt
+      ext/ereg/tests/008.phpt
+      ext/ereg/tests/009.phpt
+      ext/ereg/tests/010.phpt
+      ext/ereg/tests/011.phpt
+      ext/ereg/tests/012.phpt
+      ext/ereg/tests/013.phpt
+      ext/ereg/tests/014.phpt
+      ext/ereg/tests/015.phpt
+      ext/ereg/tests/016.phpt:
+      - Skip these tests always if unicode.semantics=on
+
+    * configure.in
+      ext/ereg/config.w32
+      ext/ereg/config0.m4
+      ext/ereg/ereg.c
+      ext/ereg/php_ereg.h
+      ext/ereg/php_regex.h
+      ext/pgsql/pgsql.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/config.m4
+      ext/standard/config.w32
+      ext/standard/html.c
+      ext/standard/php_standard.h
+      ext/standard/reg.c
+      ext/standard/reg.h
+      ext/standard/string.c
+      main/internal_functions_nw.c
+      main/internal_functions_win32.c
+      main/php.h
+      main/php_regex.h
+      sapi/apache/php_apache_http.h
+      sapi/apache_hooks/php_apache_http.h
+      win32/build/config.w32:
+      - Moved the old regex functions to it's own extension: ereg
+
+2007-07-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      ext/ereg/ereg.c
+      ext/ereg/php_ereg.h
+      ext/ereg/php_regex.h
+      ext/ereg/regex/.cvsignore
+      ext/ereg/regex/COPYRIGHT
+      ext/ereg/regex/README
+      ext/ereg/regex/WHATSNEW
+      ext/ereg/regex/cclass.h
+      ext/ereg/regex/cname.h
+      ext/ereg/regex/debug.c
+      ext/ereg/regex/debug.ih
+      ext/ereg/regex/engine.c
+      ext/ereg/regex/engine.ih
+      ext/ereg/regex/main.c
+      ext/ereg/regex/main.ih
+      ext/ereg/regex/mkh
+      ext/ereg/regex/regcomp.c
+      ext/ereg/regex/regcomp.ih
+      ext/ereg/regex/regerror.c
+      ext/ereg/regex/regerror.ih
+      ext/ereg/regex/regex.3
+      ext/ereg/regex/regex.7
+      ext/ereg/regex/regex.dsp
+      ext/ereg/regex/regex.dsw
+      ext/ereg/regex/regex.h
+      ext/ereg/regex/regex.mak
+      ext/ereg/regex/regex2.h
+      ext/ereg/regex/regex_extra.h
+      ext/ereg/regex/regexec.c
+      ext/ereg/regex/regfree.c
+      ext/ereg/regex/split.c
+      ext/ereg/regex/tests
+      ext/ereg/regex/utils.h
+      ext/ereg/tests/.cvsignore
+      ext/ereg/tests/001.phpt
+      ext/ereg/tests/002.phpt
+      ext/ereg/tests/003.phpt
+      ext/ereg/tests/004.phpt
+      ext/ereg/tests/005.phpt
+      ext/ereg/tests/006.phpt
+      ext/ereg/tests/007.phpt
+      ext/ereg/tests/008.phpt
+      ext/ereg/tests/009.phpt
+      ext/ereg/tests/010.phpt
+      ext/ereg/tests/011.phpt
+      ext/ereg/tests/012.phpt
+      ext/ereg/tests/013.phpt
+      ext/ereg/tests/014.phpt
+      ext/ereg/tests/015.phpt
+      ext/ereg/tests/016.phpt:
+      - Removed ereg extension from PHP_4_4 branch (never will be added here)
+
+2007-07-15  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ext/ereg/ereg.c
+      ext/ereg/php_ereg.h
+      ext/ereg/php_regex.h
+      ext/ereg/regex/.cvsignore
+      ext/ereg/regex/COPYRIGHT
+      ext/ereg/regex/README
+      ext/ereg/regex/WHATSNEW
+      ext/ereg/regex/cclass.h
+      ext/ereg/regex/cname.h
+      ext/ereg/regex/debug.c
+      ext/ereg/regex/debug.ih
+      ext/ereg/regex/engine.c
+      ext/ereg/regex/engine.ih
+      ext/ereg/regex/main.c
+      ext/ereg/regex/main.ih
+      ext/ereg/regex/mkh
+      ext/ereg/regex/regcomp.c
+      ext/ereg/regex/regcomp.ih
+      ext/ereg/regex/regerror.c
+      ext/ereg/regex/regerror.ih
+      ext/ereg/regex/regex.3
+      ext/ereg/regex/regex.7
+      ext/ereg/regex/regex.dsp
+      ext/ereg/regex/regex.dsw
+      ext/ereg/regex/regex.h
+      ext/ereg/regex/regex.mak
+      ext/ereg/regex/regex2.h
+      ext/ereg/regex/regex_extra.h
+      ext/ereg/regex/regexec.c
+      ext/ereg/regex/regfree.c
+      ext/ereg/regex/split.c
+      ext/ereg/regex/tests
+      ext/ereg/regex/utils.h
+      ext/ereg/tests/.cvsignore
+      ext/ereg/tests/001.phpt
+      ext/ereg/tests/002.phpt
+      ext/ereg/tests/003.phpt
+      ext/ereg/tests/004.phpt
+      ext/ereg/tests/005.phpt
+      ext/ereg/tests/006.phpt
+      ext/ereg/tests/007.phpt
+      ext/ereg/tests/008.phpt
+      ext/ereg/tests/009.phpt
+      ext/ereg/tests/010.phpt
+      ext/ereg/tests/011.phpt
+      ext/ereg/tests/012.phpt
+      ext/ereg/tests/013.phpt
+      ext/ereg/tests/014.phpt
+      ext/ereg/tests/015.phpt
+      ext/ereg/tests/016.phpt:
+      - Remove ereg/ from PHP_5_2 branch. (not yet wanted here :)
+
+    * ext/ereg/.cvsignore
+      ext/ereg/CREDITS:
+      - Initial commit (files will be moved from elsewhere in CVS!)
+
+    * (PHP_5_2)
+      main/main.c:
+      MFH: folding tags and some more ws fixes
+
+    * main/main.c:
+      MFB: free error messages + ws fix
+
+    * main/build-defs.h.in:
+      - Unused macros removed
+
+2007-07-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      main/main.c:
+      
+      Clear out last error & last error file information at the end of the
+      request to ensure that they don't propogate to the next request
+
 2007-07-14  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/filter/.cvsignore
