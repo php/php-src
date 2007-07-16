@@ -31,7 +31,7 @@ $file = dirname(__FILE__) . 'fgetcsv.csv';
 
 $fp = fopen($file, "w");
 foreach ($list as $v) {
-	fputcsv($fp, split(',', $v));
+	fputcsv($fp, explode(',', $v));
 }
 fclose($fp);
 
