@@ -1636,7 +1636,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 	php_oci_descriptor *descriptor;
 	ub4 lob_length;
 	int column_size;
-	zstr lob_buffer, zstr_data = (zstr)column->data;
+	zstr lob_buffer, zstr_data = ZSTR(column->data);
 	
 	if (column->indicator == -1) { /* column is NULL */ 
 		ZVAL_NULL(value); 
