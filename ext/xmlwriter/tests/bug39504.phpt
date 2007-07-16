@@ -1,5 +1,9 @@
 --TEST--
 Bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag, not enity)
+--SKIPIF--
+<?php 
+if (!extension_loaded("xmlwriter")) die("skip"); 
+?>
 --FILE--
 <?php
 
