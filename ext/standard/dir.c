@@ -398,6 +398,7 @@ PHP_FUNCTION(glob)
 		efree(dirname);
 	}
 
+	memset(&globbuf, 0, sizeof(glob_t));
 	globbuf.gl_offs = 0;
 	if (0 != (ret = glob(pattern, flags & GLOB_FLAGMASK, NULL, &globbuf))) {
 #ifdef GLOB_NOMATCH
