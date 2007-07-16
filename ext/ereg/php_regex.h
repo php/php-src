@@ -27,15 +27,14 @@
  * 1.. bundled regex
  */
 
-#if REGEX
-/* get aliases */
-#include "ext/ereg/regex/regex_extra.h"
-#include "ext/ereg/regex/regex.h"
+#if (REGEX == 1)
+/* Define aliases */
+#define regexec php_regexec
+#define regerror php_regerror
+#define regfree php_regfree
+#define regcomp php_regcomp
 
-/* get rid of aliases */
-#define PHP_NO_ALIASES
-#include "ext/ereg/regex/regex_extra.h"
-#undef PHP_NO_ALIASES
+#include "ext/ereg/regex/regex.h"
 
 #undef _PCREPOSIX_H
 #define _PCREPOSIX_H 1
@@ -55,6 +54,7 @@
 #ifndef _H_REGEX
 #define _H_REGEX 1              /* This one is for AIX */
 #endif
+
 #elif REGEX == 0
 #include <regex.h>
 #ifndef _REGEX_H_
@@ -63,8 +63,3 @@
 #endif
 
 #endif /* PHP_REGEX_H */
-
-/* No frame, regex_extra.h must be included always */
-#if (REGEX == 1 || REGEX == 0) && !defined(NO_REGEX_EXTRA_H)
-#include "ext/ereg/regex/regex_extra.h"
-#endif
