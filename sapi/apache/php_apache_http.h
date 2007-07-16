@@ -20,8 +20,6 @@
 
 /* $Id$ */
 
-#define NO_REGEX_EXTRA_H
-
 #ifdef WIN32
 #include <stddef.h>
 #endif
