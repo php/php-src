@@ -87,13 +87,13 @@ bool(false)
 Warning: symlink(): %s in %s on line %d
 bool(false)
 
-Warning: symlink(): No such file or directory in %s on line %d
+Warning: symlink(): %s in %s on line %d
 bool(false)
 
-Warning: symlink(): No such file or directory in %s on line %d
+Warning: symlink(): %s in %s on line %d
 bool(false)
 
-Warning: symlink(): No such file or directory in %s on line %d
+Warning: symlink(): %s in %s on line %d
 bool(false)
 
 *** Testing linkinfo() for error conditions ***
@@ -104,12 +104,12 @@ NULL
 Warning: Wrong parameter count for linkinfo() in %s on line %d
 NULL
 
-Warning: linkinfo(): No such file or directory in %s on line %d
+Warning: linkinfo(): %s in %s on line %d
 int(-1)
 
-Warning: linkinfo(): No such file or directory in %s on line %d
+Warning: linkinfo(): %s in %s on line %d
 int(-1)
 
-Warning: linkinfo(): No such file or directory in %s on line %d
+Warning: linkinfo(): %s in %s on line %d
 int(-1)
 Done
