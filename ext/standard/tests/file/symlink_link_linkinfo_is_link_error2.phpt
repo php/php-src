@@ -75,22 +75,22 @@ NULL
 Warning: Wrong parameter count for link() in %s on line %d
 NULL
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
 *** Testing is_link() for error conditions ***
