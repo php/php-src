@@ -1,5 +1,7 @@
 --TEST--
 mcrypt basic
+--SKIPIF--
+<?php if (!extension_loaded("mcrypt")) print "skip"; ?>
 --FILE--
 <?php
 $as = mcrypt_list_algorithms();
