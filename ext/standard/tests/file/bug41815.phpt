@@ -6,7 +6,7 @@ Bug #41815 (Concurrent read/write fails when EOF is reached)
 $filename = dirname(__FILE__)."/concur_rw.txt";
 
 @unlink($filename);
-$writer = fopen($filename, "w");
+$writer = fopen($filename, "wt");
 $reader = fopen($filename, "r");
 fread($reader, 1);
 fwrite($writer, "foo");
