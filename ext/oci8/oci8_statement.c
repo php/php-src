@@ -234,7 +234,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 							(void *) column->oci_define,
 							OCI_HTYPE_DEFINE,
 							statement->err,
-							((void*)zstr_data.s) + column->retlen4,
+							((char *)zstr_data.s) + column->retlen4,
 							&(column->cb_retlen),
 							piecep,
 							&column->indicator,
