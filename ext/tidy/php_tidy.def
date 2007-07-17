@@ -12,8 +12,6 @@ tidyBufPopByte
 tidyBufGetByte
 tidyBufEndOfInput
 tidyBufUngetByte
-initInputBuffer
-initOutputBuffer
 tidyCreate
 tidyRelease
 tidySetAppData
