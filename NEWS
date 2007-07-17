@@ -154,6 +154,8 @@ PHP                                                                        NEWS
   apache child die). (isk at ecommerce dot com, Gopal, Tony)
 - Fixed bug #39291 (ldap_sasl_bind() misses the sasl_authc_id parameter).
   (diafour at gmail dot com, Jani)
+- Fixed bugs #36796, #36918, #41371 (stream_set_blocking() does not work).
+  (Jani)
 - Fixed bug #35981 (pdo-pgsql should not use pkg-config when not present).
   (Jani)
 
