@@ -119,6 +119,7 @@ PHP_ARG_WITH(adabas,,
     PHP_ADD_LIBRARY(sqlrte)
     PHP_ADD_LIBRARY_WITH_PATH(odbc_adabas, $abs_builddir/ext/odbc)
     ODBC_TYPE=adabas
+    ODBC_INCDIR=$PHP_ADABAS/incl
     PHP_ODBC_CHECK_HEADER(sqlext.h)
     AC_DEFINE(HAVE_ADABAS,1,[ ])
     AC_MSG_RESULT([$ext_output])
