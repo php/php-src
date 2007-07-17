@@ -211,7 +211,7 @@ PHPAPI const char* php_get_temporary_directory(void)
  * This function should do its best to return a file pointer to a newly created
  * unique file, on every platform.
  */
-PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, char **opened_path_p TSRMLS_DC)
+PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, char **opened_path_p, zend_bool open_basedir_check TSRMLS_DC)
 {
 	int fd;
 	const char *temp_dir;
@@ -227,7 +227,7 @@ PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, char **opened
 def_tmp:
 		temp_dir = php_get_temporary_directory();
 
-		if (temp_dir && *temp_dir != '\0' && !php_check_open_basedir(temp_dir TSRMLS_CC)) {
+		if (temp_dir && *temp_dir != '\0' && (!open_basedir_check || !php_check_open_basedir(temp_dir TSRMLS_CC))) {
 			return php_do_open_temporary_file(temp_dir, pfx, opened_path_p TSRMLS_CC);
 		} else {
 			return -1;
@@ -241,6 +241,11 @@ def_tmp:
 		goto def_tmp;
 	}
 	return fd;
+}
+
+PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, char **opened_path_p TSRMLS_DC)
+{
+	return php_open_temporary_fd_ex(dir, pfx, opened_path_p, 0 TSRMLS_CC);
 }
 
 PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p TSRMLS_DC)
