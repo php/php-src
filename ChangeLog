@@ -1,3 +1,137 @@
+2007-07-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/standard/dir.c:
+      MF52: initialize glob struct
+
+    * ext/standard/dir.c:
+      MFB: initialize glob struct
+
+    * (PHP_5_2)
+      ext/standard/dir.c:
+      initialize glob struct
+
+    * ext/pdo_dblib/pdo_dblib.c:
+      fix typo
+
+    * ext/oci8/oci8_statement.c:
+      more build fixes
+
+    * ext/oci8/oci8.c
+      sapi/apache/config.w32:
+      fix win32 build
+
+    * ext/mbstring/config.w32:
+      there is no such file
+
+2007-07-16  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/symlink_link_linkinfo_is_link_error1.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error1.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error2.phpt:
+      fix tests
+
+2007-07-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_dbh.c:
+      Fixed a possible crash inside the constructor
+
+2007-07-16  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/disk_free_space_error-win32.phpt
+      ext/standard/tests/file/disk_free_space_error.phpt
+      ext/standard/tests/file/disk_total_space_error-win32.phpt
+      ext/standard/tests/file/disk_total_space_error.phpt:
+      New testcases
+
+    * ext/standard/tests/file/disk_free_space_error-win32.phpt
+      ext/standard/tests/file/disk_free_space_error-win32.phpt
+      ext/standard/tests/file/disk_free_space_error.phpt
+      ext/standard/tests/file/disk_free_space_error.phpt
+      ext/standard/tests/file/disk_total_space_error-win32.phpt
+      ext/standard/tests/file/disk_total_space_error-win32.phpt
+      ext/standard/tests/file/disk_total_space_error.phpt
+      ext/standard/tests/file/disk_total_space_error.phpt:
+      
+      file disk_free_space_error-win32.phpt was initially added on branch
+      PHP_5_2.
+
+2007-07-16  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/ereg/config.w32:
+      - Fix win32 build (I guess..:)
+
+2007-07-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/simplexml/tests/bug40451.phpt
+      ext/simplexml/tests/bug41582.phpt
+      ext/simplexml/tests/bug41861.phpt
+      ext/simplexml/tests/bug41867.phpt
+      ext/simplexml/tests/bug41947.phpt
+      ext/soap/tests/bugs/bug36226-2.phpt
+      ext/spl/tests/bug40872.phpt
+      ext/spl/tests/bug41692.phpt:
+      add missing skipifs
+
+2007-07-16  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/ereg/config0.m4
+      ext/ereg/php_regex.h
+      ext/ereg/regex/regex_extra.h
+      ext/ereg/regex/utils.h
+      sapi/apache/php_apache_http.h
+      sapi/apache_hooks/php_apache_http.h:
+      - Cleanup and simplify
+
+2007-07-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/mcrypt/tests/basic.phpt
+      ext/mcrypt/tests/bug37595.phpt:
+      add skipif
+
+    * ext/xmlwriter/tests/010.phpt
+      ext/xmlwriter/tests/bug39504.phpt
+      ext/xmlwriter/tests/bug41287.phpt
+      ext/xmlwriter/tests/bug41326.phpt:
+      add missing skipif sections
+
+2007-07-16  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * main/SAPI.c:
+      - Removed leftovers from nuking safe-mode
+
+    * ext/standard/tests/file/fputcsv.phpt:
+      - Use explode instead of split (ereg goes bye bye..)
+
+2007-07-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/substr_count.phpt
+      ext/standard/tests/strings/substr_count_basic.phpt
+      ext/standard/tests/strings/substr_count_basic.phpt
+      ext/standard/tests/strings/substr_count_error.phpt
+      ext/standard/tests/strings/substr_count_error.phpt
+      ext/standard/tests/strings/substr_count_variation_001.phpt
+      ext/standard/tests/strings/substr_count_variation_001.phpt
+      ext/standard/tests/strings/substr_count_variation_002.phpt
+      ext/standard/tests/strings/substr_count_variation_002.phpt:
+      split test
+
+    * ext/standard/tests/file/bug41815.phpt
+      ext/standard/tests/serialize/bug37947.phpt
+      ext/sysvshm/tests/001.phpt:
+      fix test
+
+2007-07-16  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * acinclude.m4:
+      - The --enable-zend-multibyte option does not exist in PHP 6
+
+    * acinclude.m4
+      acinclude.m4:
+      - Fix issue in differentiating between --with-* and --enable-*
+
 2007-07-15  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * ext/ereg/tests/001.phpt
