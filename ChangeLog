@@ -1,3 +1,58 @@
+2007-07-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.h
+      main/rfc1867.c:
+      
+      Allow file uploads to bypass open_basedir checks (fixes regression)
+
+2007-07-17  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * main/network.c:
+      ws fix
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/xp_socket.c:
+      MFH:- Fixed bugs #36796, #36918, #41371 (stream_set_blocking() does not
+      work)
+
+    * main/streams/xp_socket.c:
+      - Fixed bugs #36796, #36918, #41371 (stream_set_blocking() does not work)
+
+    * (PHP_5_2)
+      NEWS
+      ext/odbc/config.m4:
+      MFH:- Fixed bug #42019 (configure option --with-adabas=DIR does not work)
+
+    * ext/odbc/config.m4:
+      - Fixed bug #42019 (configure option --with-adabas=DIR does not work)
+
+2007-07-17  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/php_tidy.def:
+      MFB: update
+
+    * (PHP_5_2)
+      ext/tidy/php_tidy.def:
+      update for latest library rlease
+
+2007-07-17  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/ldap/ldap.c:
+      MFB: %f -> %F
+
+    * (PHP_5_2)
+      NEWS
+      ext/ldap/ldap.c:
+      MFH:- Fixed bug #42015 (ldap_rename() gets server error "DSA is unwilling
+      to perform")
+
+    * ext/ldap/ldap.c:
+      - Fixed bug #42015 (ldap_rename() gets server error "DSA is unwilling to
+      perform")
+
 2007-07-16  Antony Dovgal  <antony@zend.com>
 
     * (PHP_4_4)
