@@ -677,7 +677,8 @@ void php_oci_lob_free (php_oci_descriptor *descriptor TSRMLS_DC)
  Import LOB contents from the given file */
 int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename TSRMLS_DC)
 {
-	int fp, loblen;
+	int fp;
+	ub4 loblen;
 	OCILobLocator *lob = (OCILobLocator *)descriptor->descriptor;
 	php_oci_connection *connection = descriptor->connection;
 	char buf[8192];
@@ -700,9 +701,9 @@ int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename TSRMLS_DC
 					connection->err, 
 					lob, 
 					&loblen, 
-					(ub4) offset, 
+					offset, 
 					(dvoid *) &buf, 
-					(ub4) loblen, 
+					loblen, 
 					OCI_ONE_PIECE, 
 					(dvoid *)0, 
 					(OCICallbackLobWrite) 0, 
