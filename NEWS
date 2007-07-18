@@ -9,8 +9,6 @@ PHP                                                                        NEWS
 - Improved openssl_x509_parse() to return extensions in readable form. (Dmitry)
 - Improved fix for MOPB-03-2007. (Ilia)
 - Corrected fix for CVE-2007-2872. (Ilia)
-- Enabled statement cache for non-persistent OCI8 connections.
-  (Chris Jones, Tony)
 - Enabled changing the size of statement cache for non-persistent OCI8
   connections. (Chris Jones, Tony)
 
