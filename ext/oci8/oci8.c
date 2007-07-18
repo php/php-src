@@ -433,7 +433,7 @@ oci_error:
 	OCIErrorGet(OCI_G(env), (ub4)1, NULL, &error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR);
 
 	if (error_code) {
-		int tmp_buf_len = strlen(tmp_buf);
+		int tmp_buf_len = strlen((char *)tmp_buf);
 
 		if (tmp_buf_len > 0 && tmp_buf[tmp_buf_len - 1] == '\n') {
 			tmp_buf[tmp_buf_len - 1] = '\0';
@@ -930,14 +930,14 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf TSRMLS_DC)
 			UChar *tmp_buf;
 			int tmp_buf_len;
 
-			err_buf_len = strlen(err_buf);
+			err_buf_len = strlen((char *)err_buf);
 
 			if (err_buf_len && err_buf[err_buf_len - 1] == '\n') {
 				err_buf[err_buf_len - 1] = '\0';
 				err_buf_len--;
 			}
 
-			if (zend_string_to_unicode(UG(ascii_conv), &tmp_buf, &tmp_buf_len, err_buf, err_buf_len TSRMLS_CC) == SUCCESS) {
+			if (zend_string_to_unicode(UG(ascii_conv), &tmp_buf, &tmp_buf_len, (char *)err_buf, err_buf_len TSRMLS_CC) == SUCCESS) {
 				*error_buf = (text *)eustrndup(tmp_buf, tmp_buf_len);
 				efree(tmp_buf);
 			}
@@ -948,14 +948,14 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf TSRMLS_DC)
 					err_buf[UBYTES(err_buf_len - 1)] = '\0';
 				}
 			} else {
-				err_buf_len = strlen(err_buf);
+				err_buf_len = strlen((char *)err_buf);
 				if (err_buf_len && err_buf[err_buf_len - 1] == '\n') {
 					err_buf[err_buf_len - 1] = '\0';
 				}
 			}
 			
 			if (err_buf_len && error_buf) {
-				*error_buf = estrndup(err_buf, TEXT_BYTES(err_buf_len));
+				*error_buf = (text *)estrndup((char *)err_buf, TEXT_BYTES(err_buf_len));
 			}
 		}
 	}
@@ -1073,7 +1073,7 @@ php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr 
 #if HAVE_OCI_ENV_NLS_CREATE
 	if (!UG(unicode)) {
 		if (charset.s && *charset.s) {
-			PHP_OCI_CALL_RETURN(charsetid, OCINlsCharSetNameToId, (OCI_G(env), charset.s));
+			PHP_OCI_CALL_RETURN(charsetid, OCINlsCharSetNameToId, (OCI_G(env), (CONST oratext *)charset.s));
 			if (!charsetid) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid character set name: %s", charset.s);
 			} else {
