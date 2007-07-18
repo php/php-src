@@ -838,8 +838,8 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 				break;
 			case SQLT_ODT:
 				for (i = 0; i < bind->array.current_length; i++) {
-					char buff[1024];
-					int buff_len = 1024;
+					oratext buff[1024];
+					ub4 buff_len = 1024;
 
 					memset((void*)buff,0,sizeof(buff));
 							
@@ -851,7 +851,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 							php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 							ZVAL_NULL(*entry);
 						} else {
-							ZVAL_STRINGL(*entry, buff, buff_len, 1);
+							ZVAL_STRINGL(*entry, (char *)buff, buff_len, 1);
 						}
 						zend_hash_move_forward(hash);
 					} else {
@@ -860,7 +860,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 							php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 							add_next_index_null(bind->zval);
 						} else {
-							add_next_index_stringl(bind->zval, buff, buff_len, 1);
+							add_next_index_stringl(bind->zval, (char *)buff, buff_len, 1);
 						}
 					}
 				}
@@ -877,10 +877,10 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 					int curr_element_length = bind->array.element_lengths[i];
 					if ((i < bind->array.old_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 						zval_dtor(*entry);
-						ZVAL_STRINGL(*entry, ((text *)bind->array.elements)+i*bind->array.max_length, curr_element_length, 1);
+						ZVAL_STRINGL(*entry, (char *)(((text *)bind->array.elements)+i*bind->array.max_length), curr_element_length, 1);
 						zend_hash_move_forward(hash);
 					} else {
-						add_next_index_stringl(bind->zval, ((text *)bind->array.elements)+i*bind->array.max_length, curr_element_length, 1);
+						add_next_index_stringl(bind->zval, (char *)(((text *)bind->array.elements)+i*bind->array.max_length), curr_element_length, 1);
 					}
 				}
 				break;
@@ -1553,7 +1553,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 			
 			convert_to_string_ex(entry);
-			PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, 0, NULL, 0, &oci_date));
+			PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, (CONST text *)Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, 0, NULL, 0, &oci_date));
 
 			if (connection->errcode != OCI_SUCCESS) {
 				/* failed to convert string to date */
@@ -1567,7 +1567,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 			((OCIDate *)bind->array.elements)[i] = oci_date;
 			zend_hash_move_forward(hash);
 		} else {
-			PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, "01-JAN-00", sizeof("01-JAN-00")-1, NULL, 0, NULL, 0, &oci_date));
+			PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, (CONST text *)"01-JAN-00", sizeof("01-JAN-00")-1, NULL, 0, NULL, 0, &oci_date));
 
 			if (connection->errcode != OCI_SUCCESS) {
 				/* failed to convert string to date */
