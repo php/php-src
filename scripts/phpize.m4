@@ -7,37 +7,7 @@ AC_INIT(config.m4)
 
 PHP_CONFIG_NICE(config.nice)
 
-AC_DEFUN([PHP_WITH_PHP_CONFIG],[
-  AC_ARG_WITH(php-config,
-[  --with-php-config=PATH],[
-  PHP_CONFIG=$withval
-],[
-  PHP_CONFIG=php-config
-])
-
-  prefix=`$PHP_CONFIG --prefix 2>/dev/null`
-  phpincludedir=`$PHP_CONFIG --include-dir 2>/dev/null`
-  INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
-  EXTENSION_DIR=`$PHP_CONFIG --extension-dir`
-  PHP_EXECUTABLE=`$PHP_CONFIG --php-binary`
- 
-  if test -z "$prefix"; then
-    AC_MSG_ERROR(Cannot find php-config. Please use --with-php-config=PATH)
-  fi
-
-  php_shtool=$srcdir/build/shtool
-  PHP_INIT_BUILD_SYSTEM
-
-  AC_MSG_CHECKING(for PHP prefix)
-  AC_MSG_RESULT($prefix)
-  AC_MSG_CHECKING(for PHP includes)
-  AC_MSG_RESULT($INCLUDES)
-  AC_MSG_CHECKING(for PHP extension directory)
-  AC_MSG_RESULT($EXTENSION_DIR)
-  AC_MSG_CHECKING(for PHP installed headers prefix)
-  AC_MSG_RESULT($phpincludedir)
-])
-dnl
+dnl 
 AC_DEFUN([PHP_EXT_BUILDDIR],[.])dnl
 AC_DEFUN([PHP_EXT_DIR],[""])dnl
 AC_DEFUN([PHP_EXT_SRCDIR],[$abs_srcdir])dnl
@@ -54,18 +24,42 @@ AC_PROG_CC
 AC_PROG_CC_C_O
 
 dnl Support systems with system libraries in e.g. /usr/lib64
-AC_ARG_WITH(libdir,
-[  --with-libdir=NAME      Look for libraries in .../NAME rather than .../lib],
-[PHP_LIBDIR=$withval], [PHP_LIBDIR=lib])
+PHP_ARG_WITH(libdir, for system library directory,
+[  --with-libdir=NAME      Look for libraries in .../NAME rather than .../lib], lib, no)
 
 PHP_RUNPATH_SWITCH
 PHP_SHLIB_SUFFIX_NAMES
-PHP_WITH_PHP_CONFIG
 
+dnl Find php-config script
+PHP_ARG_WITH(config,,
+[  --with-php-config=PATH  Path to php-config [php-config]], php-config, no)
+
+prefix=`$PHP_CONFIG --prefix 2>/dev/null`
+phpincludedir=`$PHP_CONFIG --include-dir 2>/dev/null`
+INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
+EXTENSION_DIR=`$PHP_CONFIG --extension-dir 2>/dev/null`
+PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
+ 
+if test -z "$prefix"; then
+  AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])
+fi
+
+php_shtool=$srcdir/build/shtool
+PHP_INIT_BUILD_SYSTEM
+
+AC_MSG_CHECKING([for PHP prefix])
+AC_MSG_RESULT([$prefix])
+AC_MSG_CHECKING([for PHP includes])
+AC_MSG_RESULT([$INCLUDES])
+AC_MSG_CHECKING([for PHP extension directory])
+AC_MSG_RESULT([$EXTENSION_DIR])
+AC_MSG_CHECKING([for PHP installed headers prefix])
+AC_MSG_RESULT([$phpincludedir])
+
+dnl Always shared
 PHP_BUILD_SHARED
 
-AC_PREFIX_DEFAULT()
-
+dnl Required programs
 PHP_PROG_RE2C
 PHP_PROG_AWK
     
