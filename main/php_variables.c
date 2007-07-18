@@ -141,6 +141,8 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 				zend_hash_del(ht, var, var_len + 1);
 				zval_dtor(val);
 
+				/* do not output the error message to the screen,
+				 this helps us to to avoid "information disclosure" */
 				if (!PG(display_errors)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variable nesting level exceeded %ld. To increase the limit change max_input_nesting_level in php.ini.", PG(max_input_nesting_level));
 				}
@@ -293,6 +295,8 @@ PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_a
 				zend_u_hash_del(ht, IS_UNICODE, tmp_var, var_len + 1);
 				zval_dtor(val);
 
+				/* do not output the error message to the screen,
+				 this helps us to to avoid "information disclosure" */
 				if (!PG(display_errors)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variable nesting level exceeded %ld. To increase the limit change max_input_nesting_level in php.ini.", PG(max_input_nesting_level));
 				}
