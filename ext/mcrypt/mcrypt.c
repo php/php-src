@@ -44,7 +44,7 @@ typedef struct _php_mcrypt {
 	zend_bool init;
 } php_mcrypt;
 
-zend_function_entry mcrypt_functions[] = {
+zend_function_entry mcrypt_functions[] = { /* {{{ */
 	PHP_FE(mcrypt_ecb, NULL)
 	PHP_FE(mcrypt_cbc, NULL)
 	PHP_FE(mcrypt_cfb, NULL)
@@ -89,6 +89,7 @@ zend_function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_module_close, NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 static PHP_MINFO_FUNCTION(mcrypt);
 static PHP_MINIT_FUNCTION(mcrypt);
@@ -155,7 +156,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mcrypt.modes_dir",      NULL, PHP_INI_ALL, OnUpdateString, modes_dir, zend_mcrypt_globals, mcrypt_globals)
 PHP_INI_END()
 
-static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 {
 	php_mcrypt *pm = (php_mcrypt *) rsrc->ptr;
 	if (pm) {	
@@ -165,9 +166,9 @@ static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		rsrc->ptr = NULL;
 	}
 }
-
+/* }}} */
     
-static PHP_MINIT_FUNCTION(mcrypt)
+static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 {
 	le_mcrypt = zend_register_list_destructors_ex(php_mcrypt_module_dtor, NULL, "mcrypt", module_number);
     
@@ -222,16 +223,18 @@ static PHP_MINIT_FUNCTION(mcrypt)
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
+/* }}} */
 
-static PHP_MSHUTDOWN_FUNCTION(mcrypt)
+static PHP_MSHUTDOWN_FUNCTION(mcrypt) /* {{{ */
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
+/* }}} */
 
 #include "ext/standard/php_smart_str.h"
 
-PHP_MINFO_FUNCTION(mcrypt)
+PHP_MINFO_FUNCTION(mcrypt) /* {{{ */
 {
 	char **modules;
 	char mcrypt_api_no[16];
@@ -275,7 +278,7 @@ PHP_MINFO_FUNCTION(mcrypt)
 	
 	DISPLAY_INI_ENTRIES();
 }
-
+/* }}} */
 
 /* {{{ proto resource mcrypt_module_open(string cipher, string cipher_directory, string mode, string mode_directory) U
    Opens the module of the algorithm and the mode to be used */
@@ -314,7 +317,6 @@ PHP_FUNCTION(mcrypt_module_open)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto int mcrypt_generic_init(resource td, binary key, binary iv) U
    This function initializes all buffers for the specific module */
@@ -372,7 +374,6 @@ PHP_FUNCTION(mcrypt_generic_init)
 }
 /* }}} */
 
-
 /* {{{ proto binary mcrypt_generic(resource td, binary data) U
    This function encrypts the plaintext */
 PHP_FUNCTION(mcrypt_generic)
@@ -412,7 +413,6 @@ PHP_FUNCTION(mcrypt_generic)
 }
 /* }}} */
 
-
 /* {{{ proto binary mdecrypt_generic(resource td, binary data) U
    This function decrypts the plaintext */
 PHP_FUNCTION(mdecrypt_generic)
@@ -451,7 +451,6 @@ PHP_FUNCTION(mdecrypt_generic)
 }
 /* }}} */
 
-
 /* {{{ proto array mcrypt_enc_get_supported_key_sizes(resource td) U
    This function decrypts the crypttext */
 PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
@@ -472,7 +471,6 @@ PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 }
 /* }}} */
 
-
 /* {{{ proto int mcrypt_enc_self_test(resource td) U
    This function runs the self test on the algorithm specified by the descriptor td */
 PHP_FUNCTION(mcrypt_enc_self_test)
@@ -492,7 +490,6 @@ PHP_FUNCTION(mcrypt_module_close)
 }
 /* }}} */
 
-
 /* {{{ proto bool mcrypt_generic_deinit(resource td) U
    This function terminates encrypt specified by the descriptor td */
 PHP_FUNCTION(mcrypt_generic_deinit)
@@ -506,7 +503,6 @@ PHP_FUNCTION(mcrypt_generic_deinit)
 	RETURN_TRUE
 }
 /* }}} */
-
 
 /* {{{ proto bool mcrypt_enc_is_block_algorithm_mode(resource td) U
    Returns TRUE if the mode is for use with block algorithms */
@@ -522,7 +518,6 @@ PHP_FUNCTION(mcrypt_enc_is_block_algorithm_mode)
 }
 /* }}} */
 
-
 /* {{{ proto bool mcrypt_enc_is_block_algorithm(resource td) U
    Returns TRUE if the alrogithm is a block algorithms */
 PHP_FUNCTION(mcrypt_enc_is_block_algorithm)
@@ -536,7 +531,6 @@ PHP_FUNCTION(mcrypt_enc_is_block_algorithm)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto bool mcrypt_enc_is_block_mode(resource td) U
    Returns TRUE if the mode outputs blocks */
@@ -552,7 +546,6 @@ PHP_FUNCTION(mcrypt_enc_is_block_mode)
 }
 /* }}} */
 
-
 /* {{{ proto int mcrypt_enc_get_block_size(resource td) U
    Returns the block size of the cipher specified by the descriptor td */
 PHP_FUNCTION(mcrypt_enc_get_block_size)
@@ -561,7 +554,6 @@ PHP_FUNCTION(mcrypt_enc_get_block_size)
 	RETURN_LONG(mcrypt_enc_get_block_size(pm->td));
 }
 /* }}} */
-
 
 /* {{{ proto int mcrypt_enc_get_key_size(resource td) U
    Returns the maximum supported key size in bytes of the algorithm specified by the descriptor td */
@@ -572,7 +564,6 @@ PHP_FUNCTION(mcrypt_enc_get_key_size)
 }
 /* }}} */
 
-
 /* {{{ proto int mcrypt_enc_get_iv_size(resource td) U
    Returns the size of the IV in bytes of the algorithm specified by the descriptor td */
 PHP_FUNCTION(mcrypt_enc_get_iv_size)
@@ -581,7 +572,6 @@ PHP_FUNCTION(mcrypt_enc_get_iv_size)
 	RETURN_LONG(mcrypt_enc_get_iv_size(pm->td));
 }
 /* }}} */
-
 
 /* {{{ proto string mcrypt_enc_get_algorithms_name(resource td) U
    Returns the name of the algorithm specified by the descriptor td */
@@ -596,7 +586,6 @@ PHP_FUNCTION(mcrypt_enc_get_algorithms_name)
 }
 /* }}} */
 
-
 /* {{{ proto string mcrypt_enc_get_modes_name(resource td) U
    Returns the name of the mode specified by the descriptor td */
 PHP_FUNCTION(mcrypt_enc_get_modes_name)
@@ -609,7 +598,6 @@ PHP_FUNCTION(mcrypt_enc_get_modes_name)
 	mcrypt_free(name);
 }
 /* }}} */
-
 
 /* {{{ proto bool mcrypt_module_self_test(string algorithm [, string lib_dir]) U
    Does a self test of the module "module" */
@@ -625,7 +613,6 @@ PHP_FUNCTION(mcrypt_module_self_test)
 }
 /* }}} */
 
-
 /* {{{ proto bool mcrypt_module_is_block_algorithm_mode(string mode [, string lib_dir]) U
    Returns TRUE if the mode is for use with block algorithms */
 PHP_FUNCTION(mcrypt_module_is_block_algorithm_mode)
@@ -639,7 +626,6 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm_mode)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto bool mcrypt_module_is_block_algorithm(string algorithm [, string lib_dir]) U
    Returns TRUE if the algorithm is a block algorithm */
@@ -655,7 +641,6 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm)
 }
 /* }}} */
 
-
 /* {{{ proto bool mcrypt_module_is_block_mode(string mode [, string lib_dir]) U
    Returns TRUE if the mode outputs blocks of bytes */
 PHP_FUNCTION(mcrypt_module_is_block_mode)
@@ -670,7 +655,6 @@ PHP_FUNCTION(mcrypt_module_is_block_mode)
 }
 /* }}} */
 
-
 /* {{{ proto int mcrypt_module_get_algo_block_size(string algorithm [, string lib_dir]) U
    Returns the block size of the algorithm */
 PHP_FUNCTION(mcrypt_module_get_algo_block_size)
@@ -681,7 +665,6 @@ PHP_FUNCTION(mcrypt_module_get_algo_block_size)
 }
 /* }}} */
 
-
 /* {{{ proto int mcrypt_module_get_algo_key_size(string algorithm [, string lib_dir]) U
    Returns the maximum supported key size of the algorithm */
 PHP_FUNCTION(mcrypt_module_get_algo_key_size)
@@ -691,7 +674,6 @@ PHP_FUNCTION(mcrypt_module_get_algo_key_size)
 	RETURN_LONG(mcrypt_module_get_algo_key_size(module, dir));
 }
 /* }}} */
-
 
 /* {{{ proto array mcrypt_module_get_supported_key_sizes(string algorithm [, string lib_dir]) U
    This function decrypts the crypttext */
@@ -711,7 +693,6 @@ PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 	mcrypt_free(key_sizes);
 }
 /* }}} */
-
 
 /* {{{ proto array mcrypt_list_algorithms([string lib_dir]) U
    List all algorithms in "module_dir" */
@@ -767,7 +748,6 @@ PHP_FUNCTION(mcrypt_list_modes)
 }
 /* }}} */
 
-
 /* {{{ proto int mcrypt_get_key_size(string cipher, string module) U
    Get the key size of cipher */
 PHP_FUNCTION(mcrypt_get_key_size)
@@ -796,7 +776,6 @@ PHP_FUNCTION(mcrypt_get_key_size)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto int mcrypt_get_block_size(string cipher, string module) U
    Get the key size of cipher */
@@ -827,7 +806,6 @@ PHP_FUNCTION(mcrypt_get_block_size)
 }
 /* }}} */
 
-
 /* {{{ proto int mcrypt_get_iv_size(string cipher, string module) U
    Get the IV size of cipher (Usually the same as the blocksize) */
 PHP_FUNCTION(mcrypt_get_iv_size)
@@ -856,7 +834,6 @@ PHP_FUNCTION(mcrypt_get_iv_size)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto string mcrypt_get_cipher_name(string cipher) U
    Get the name of cipher */
@@ -976,7 +953,6 @@ PHP_FUNCTION(mcrypt_ofb)
 	_php_mcrypt_func(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, ZEND_STRL("ofb"));
 }
 /* }}} */
-
 
 /* {{{ proto binary mcrypt_create_iv(int size, int source) U
    Create an initialization vector (IV) */
