@@ -434,13 +434,13 @@ int(1) > NULL
 int(1) <= bool(true)
 int(1) > bool(false)
 int(1)
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  <= object(stdClass)#%d (0) {}
 int(1)
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  <= object(stdClass)#%d (0) {}
 int(1)
-Notice: Object of class test could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class test could not be converted to int in %s on line %d
  <= object(test)#%d (0) {}
 int(1) <= array(0) {}
 int(1) > int(-9223372036854775808)
@@ -457,13 +457,13 @@ float(2.5) > NULL
 float(2.5) <= bool(true)
 float(2.5) > bool(false)
 float(2.5)
-Notice: Object of class stdClass could not be converted to double in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to double in %s on line %d
  > object(stdClass)#%d (0) {}
 float(2.5)
-Notice: Object of class stdClass could not be converted to double in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to double in %s on line %d
  > object(stdClass)#%d (0) {}
 float(2.5)
-Notice: Object of class test could not be converted to double in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class test could not be converted to double in %s on line %d
  > object(test)#%d (0) {}
 float(2.5) <= array(0) {}
 float(2.5) > int(-9223372036854775808)
@@ -480,13 +480,13 @@ int(0) <= NULL
 int(0) <= bool(true)
 int(0) <= bool(false)
 int(0)
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  <= object(stdClass)#%d (0) {}
 int(0)
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  <= object(stdClass)#%d (0) {}
 int(0)
-Notice: Object of class test could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class test could not be converted to int in %s on line %d
  <= object(test)#%d (0) {}
 int(0) <= array(0) {}
 int(0) > int(-9223372036854775808)
@@ -596,13 +596,13 @@ bool(false) <= unicode(20) "-9223372036854775808"
 object(stdClass)#%d (0) {} > array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 object(stdClass)#%d (0) {} > unicode(0) ""
 object(stdClass)#%d (0) {}
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  <= int(1)
 object(stdClass)#%d (0) {}
-Notice: Object of class stdClass could not be converted to double in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to double in %s on line %d
  <= float(2.5)
 object(stdClass)#%d (0) {}
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  > int(0)
 object(stdClass)#%d (0) {} > unicode(6) "string"
 object(stdClass)#%d (0) {} > unicode(3) "123"
@@ -615,19 +615,19 @@ object(stdClass)#%d (0) {} <= object(stdClass)#%d (0) {}
 object(stdClass)#%d (0) {} <= object(test)#%d (0) {}
 object(stdClass)#%d (0) {} > array(0) {}
 object(stdClass)#%d (0) {}
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  > int(-9223372036854775808)
 object(stdClass)#%d (0) {} > unicode(20) "-9223372036854775808"
 object(stdClass)#%d (0) {} > array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 object(stdClass)#%d (0) {} > unicode(0) ""
 object(stdClass)#%d (0) {}
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  <= int(1)
 object(stdClass)#%d (0) {}
-Notice: Object of class stdClass could not be converted to double in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to double in %s on line %d
  <= float(2.5)
 object(stdClass)#%d (0) {}
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  > int(0)
 object(stdClass)#%d (0) {} > unicode(6) "string"
 object(stdClass)#%d (0) {} > unicode(3) "123"
@@ -640,19 +640,19 @@ object(stdClass)#%d (0) {} <= object(stdClass)#%d (0) {}
 object(stdClass)#%d (0) {} <= object(test)#%d (0) {}
 object(stdClass)#%d (0) {} > array(0) {}
 object(stdClass)#%d (0) {}
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  > int(-9223372036854775808)
 object(stdClass)#%d (0) {} > unicode(20) "-9223372036854775808"
 object(test)#%d (0) {} > array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 object(test)#%d (0) {} > unicode(0) ""
 object(test)#%d (0) {}
-Notice: Object of class test could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class test could not be converted to int in %s on line %d
  <= int(1)
 object(test)#%d (0) {}
-Notice: Object of class test could not be converted to double in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class test could not be converted to double in %s on line %d
  <= float(2.5)
 object(test)#%d (0) {}
-Notice: Object of class test could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class test could not be converted to int in %s on line %d
  > int(0)
 object(test)#%d (0) {} > unicode(6) "string"
 object(test)#%d (0) {} > unicode(3) "123"
@@ -665,7 +665,7 @@ object(test)#%d (0) {} <= object(stdClass)#%d (0) {}
 object(test)#%d (0) {} <= object(test)#%d (0) {}
 object(test)#%d (0) {} > array(0) {}
 object(test)#%d (0) {}
-Notice: Object of class test could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class test could not be converted to int in %s on line %d
  > int(-9223372036854775808)
 object(test)#%d (0) {} > unicode(20) "-9223372036854775808"
 array(0) {} <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
@@ -697,13 +697,13 @@ int(-9223372036854775808) > NULL
 int(-9223372036854775808) <= bool(true)
 int(-9223372036854775808) > bool(false)
 int(-9223372036854775808)
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  <= object(stdClass)#%d (0) {}
 int(-9223372036854775808)
-Notice: Object of class stdClass could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class stdClass could not be converted to int in %s on line %d
  <= object(stdClass)#%d (0) {}
 int(-9223372036854775808)
-Notice: Object of class test could not be converted to int in /local/qa/head/Zend/tests/compare_003_64bit.php on line 38
+Notice: Object of class test could not be converted to int in %s on line %d
  <= object(test)#%d (0) {}
 int(-9223372036854775808) <= array(0) {}
 int(-9223372036854775808) <= int(-9223372036854775808)
