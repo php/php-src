@@ -2074,8 +2074,17 @@ AC_DEFUN([PHP_PROG_LEX], [
   
   case $php_cv_flex_version in
     ""|invalid[)]
-      flex_msg="flex versions supported for regeneration of the Zend/PHP parsers: $flex_version_list  (found: $flex_version)."
-      AC_MSG_WARN([$flex_msg])
+      if test -f "$abs_srcdir/Zend/zend_language_scanner.c" && test -f "$abs_srcdir/Zend/zend_ini_scanner.c"; then
+        AC_MSG_WARN([flex versions supported for regeneration of the Zend/PHP parsers: $flex_version_list  (found: $flex_version)])
+      else
+        flex_msg="Supported flex versions are: $flex_version_list"
+        if test "$flex_version" = "none"; then
+          flex_msg="flex not found. flex is required to generate the Zend/PHP parsers! $flex_msg"
+        else
+          flex_msg="Found invalid flex version: $flex_version. $flex_msg"
+        fi
+        AC_MSG_ERROR([$flex_msg])
+      fi
       LEX="exit 0;"
       ;;
   esac
