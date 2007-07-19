@@ -6038,7 +6038,7 @@ PHP_FUNCTION(move_uploaded_file)
 	}
 
 	VCWD_UNLINK(new_path);
-	if (rename(old_path, new_path) == 0) {
+	if (VCWD_RENAME(old_path, new_path) == 0) {
 		successful = 1;
 	} else if (php_copy_file_ex(old_path, new_path, STREAM_DISABLE_OPEN_BASEDIR TSRMLS_CC) == SUCCESS) {
 		VCWD_UNLINK(old_path);
