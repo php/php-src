@@ -1,16 +1,17 @@
 --TEST--
-Test fprintf() function (variation - 7)
+Test fprintf() function (variation - 8)
 --SKIPIF--
 <?php
 $data_file = dirname(__FILE__) . '/dump.txt';
 if (!($fp = fopen($data_file, 'w'))) {
   die('skip File dump.txt could not be created');
 }
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
 
+$int_variation = array( "%d", "%-d", "%+d", "%7.2d", "%-7.2d", "%07.2d", "%-07.2d", "%'#7.2d" );
 $int_numbers = array( 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" );
 
 /* creating dumping file */
@@ -18,11 +19,11 @@ $data_file = dirname(__FILE__) . '/dump.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
-/* octal type variations */
-fprintf($fp, "\n*** Testing fprintf() for octals ***\n");
-foreach( $int_numbers as $octal_num ) {
+/* hexadecimal type variations */
+fprintf($fp, "\n*** Testing fprintf() for hexadecimals ***\n");
+foreach( $int_numbers as $hexa_num ) {
  fprintf( $fp, "\n");
- fprintf( $fp, "%o", $octal_num );
+ fprintf( $fp, "%x", $hexa_num );
 }
 
 fclose($fp);
@@ -34,14 +35,14 @@ unlink($data_file);
 
 ?>
 --EXPECTF--
-*** Testing fprintf() for octals ***
+*** Testing fprintf() for hexadecimals ***
 
 0
 1
-37777777777
+ffffffffffffffff
 2
-37777777776
-131004725
-37646773053
-2322
+fffffffffffffffe
+16409d5
+fffffffffe9bf62b
+4d2
 Done

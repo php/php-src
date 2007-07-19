@@ -3,7 +3,7 @@ Test fprintf() function (variation - 9)
 --SKIPIF--
 <?php
 $data_file = dirname(__FILE__) . '/dump.txt';
-if !($fp = fopen($data_file, 'w')) {
+if (!($fp = fopen($data_file, 'w'))) {
   die('skip File dump.txt could not be created');
 }
 ?>
