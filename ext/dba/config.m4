@@ -196,6 +196,9 @@ PHP_DBA_STD_RESULT(ndbm)
 dnl Berkeley specific (library and version test)
 dnl parameters(version, library list, function)
 AC_DEFUN([PHP_DBA_DB_CHECK],[
+  if test -z "$THIS_INCLUDE"; then
+    AC_MSG_ERROR([DBA: Could not find necessary header file(s).])
+  fi
   for LIB in $2; do
     if test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.a || test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.$SHLIB_SUFFIX_NAME; then
       lib_found="";
@@ -223,11 +226,11 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     fi
   done
   if test -z "$THIS_LIBS"; then
-    AC_MSG_CHECKING(for db$1 major version)
-    AC_MSG_ERROR(Header contains different version)
+    AC_MSG_CHECKING([for db$1 major version])
+    AC_MSG_ERROR([Header contains different version])
   fi
   if test "$1" = "4"; then
-    AC_MSG_CHECKING(for db4 minor version and patch level)
+    AC_MSG_CHECKING([for db4 minor version and patch level])
     AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
 #if DB_VERSION_MINOR != 1 || DB_VERSION_PATCH >= 25
@@ -236,11 +239,11 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     ],[
       AC_MSG_RESULT(ok)
     ],[
-      AC_MSG_ERROR(Version 4.1 requires patch level 25)
+      AC_MSG_ERROR([Version 4.1 requires patch level 25])
     ])
   fi
   if test "$ext_shared" = "yes"; then
-    AC_MSG_CHECKING(if dba can be used as shared extension)
+    AC_MSG_CHECKING([if dba can be used as shared extension])
     AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
 #if DB_VERSION_MAJOR > 3 || (DB_VERSION_MAJOR == 3 && DB_VERSION_MINOR > 2)
@@ -249,7 +252,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     ],[
       AC_MSG_RESULT(yes)
     ],[
-      AC_MSG_ERROR(At least version 3.3 is required)
+      AC_MSG_ERROR([At least version 3.3 is required])
     ])
   fi
   if test -n "$THIS_LIBS"; then
@@ -257,12 +260,14 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     if test -n "$THIS_INCLUDE"; then
       AC_DEFINE_UNQUOTED(DB$1_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
     fi
+  else
+    AC_MSG_ERROR([DBA: Could not find necessary library.])
   fi
+  THIS_RESULT=yes
   DB$1_LIBS=$THIS_LIBS
   DB$1_PREFIX=$THIS_PREFIX
   DB$1_INCLUDE=$THIS_INCLUDE
   PHP_DBA_STD_ASSIGN
-  PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
 ])
 
@@ -273,6 +278,10 @@ if test "$PHP_DB4" != "no"; then
     if test -f "$i/db4/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/db4/db.h
+      break
+    elif test -f "$i/include/db4.5/db.h"; then
+      THIS_PREFIX=$i
+      THIS_INCLUDE=$i/include/db4.5/db.h
       break
     elif test -f "$i/include/db4/db.h"; then
       THIS_PREFIX=$i
