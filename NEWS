@@ -143,6 +143,8 @@ PHP                                                                        NEWS
   non-existent file). (Tony)
 - Fixed bug #41445 (parse_ini_file() has a problem with certain types of 
   integer as sections). (Tony)
+- Fixed bug #41433 (DBA: configure fails to include correct db.h for db4).
+  (Jani)
 - Fixed bug #41350 (my_thread_global_end() error during request shutdown
   on Windows). (Scott, Andrey)
 - Fixed bug #41127 (Memory leak in ldap_{first|next}_attribute functions).
