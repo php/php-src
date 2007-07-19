@@ -30,12 +30,14 @@ var_dump(symlink($filename, $linkname));
 $dest_linkname = $file_path."/rename_variation_soft_link2.tmp";
 var_dump( rename( $linkname, $dest_linkname) );
 //ensure that link was renamed 
+clearstatcache();
 var_dump( file_exists($linkname) );  // expecting false
 var_dump( file_exists($dest_linkname) );  // expecting true
 
 // rename a link across dir
 var_dump( rename($dest_linkname, $dest_dir."/rename_variation_soft_link2.tmp"));
 //ensure that link got renamed
+clearstatcache();
 var_dump( file_exists($dest_linkname) );  // expecting false
 var_dump( file_exists($dest_dir."/rename_variation_soft_link2.tmp") ); // expecting true
 
