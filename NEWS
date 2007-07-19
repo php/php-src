@@ -60,6 +60,7 @@ PHP                                                                        NEWS
 - Fixed bug #42019 (configure option --with-adabas=DIR does not work). (Jani)
 - Fixed bug #42015 (ldap_rename(): server error "DSA is unwilling to perform").
   (bob at mroczka dot com, Jani)
+- Fixed bug #41989 (move_uploaded_file() & relative path in ZTS mode). (Tony)
 - Fixed bug #41964 (strtotime returns a timestamp for non-time string of
   pattern '(A|a) .+'). (Derick)
 - Fixed bug #41961 (Ensure search for hidden private methods does not stray
