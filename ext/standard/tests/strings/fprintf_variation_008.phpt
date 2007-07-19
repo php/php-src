@@ -3,9 +3,10 @@ Test fprintf() function (variation - 8)
 --SKIPIF--
 <?php
 $data_file = dirname(__FILE__) . '/dump.txt';
-if !($fp = fopen($data_file, 'w')) {
+if (!($fp = fopen($data_file, 'w'))) {
   die('skip File dump.txt could not be created');
 }
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php

@@ -1,11 +1,12 @@
 --TEST--
-Test fprintf() function (variation - 5)
+Test fprintf() function (variation - 6)
 --SKIPIF--
 <?php
 $data_file = dirname(__FILE__) . '/dump.txt';
 if (!($fp = fopen($data_file, 'w'))) {
   die('skip File dump.txt could not be created');
 }
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -17,11 +18,11 @@ $data_file = dirname(__FILE__) . '/dump.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
-/* %e type variations */
-fprintf($fp, "\n*** Testing fprintf() for scientific type ***\n");
-foreach( $int_numbers as $num ) {
+/* unsigned int type variation */
+fprintf($fp, "\n*** Testing fprintf() for unsigned integers ***\n");
+foreach( $int_numbers as $unsig_num ) {
   fprintf( $fp, "\n");
-  fprintf( $fp, "%e", $num );
+  fprintf( $fp, "%u", $unsig_num );
 }
 
 fclose($fp);
@@ -33,14 +34,14 @@ unlink($data_file);
 
 ?>
 --EXPECTF--
-*** Testing fprintf() for scientific type ***
+*** Testing fprintf() for unsigned integers ***
 
-0.000000e+0
-1.000000e+0
--1.000000e+0
-2.700000e+0
--2.700000e+0
-2.333333e+7
--2.333333e+7
-1.234000e+3
+0
+1
+18446744073709551615
+2
+18446744073709551614
+23333333
+18446744073686218283
+1234
 Done
