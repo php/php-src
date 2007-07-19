@@ -470,17 +470,16 @@ static void zend_assign_to_variable_reference(zval **variable_ptr_ptr, zval **va
 }
 /* }}} */
 
+/* this should modify object only if it's empty */
 static inline void make_real_object(zval **object_ptr TSRMLS_DC) /* {{{ */
 {
-/* this should modify object only if it's empty */
 	if (Z_TYPE_PP(object_ptr) == IS_NULL
-		|| (Z_TYPE_PP(object_ptr) == IS_BOOL && Z_LVAL_PP(object_ptr)==0)
+		|| (Z_TYPE_PP(object_ptr) == IS_BOOL && Z_LVAL_PP(object_ptr) == 0)
 		|| (Z_TYPE_PP(object_ptr) == IS_STRING && Z_STRLEN_PP(object_ptr) == 0)
-		|| (Z_TYPE_PP(object_ptr) == IS_UNICODE && Z_USTRLEN_PP(object_ptr) == 0)) {
-		if (!PZVAL_IS_REF(*object_ptr)) {
-			SEPARATE_ZVAL(object_ptr);
-		}
+		|| (Z_TYPE_PP(object_ptr) == IS_UNICODE && Z_USTRLEN_PP(object_ptr) == 0)
+	) {
 		zend_error(E_STRICT, "Creating default object from empty value");
+		SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
 		zval_dtor(*object_ptr);
 		object_init(*object_ptr);
 	}
