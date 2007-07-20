@@ -1,3 +1,125 @@
+2007-07-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/basic_functions.c:
+      fix #41989 (move_uploaded_file() & relative path in ZTS mode)
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c:
+      MFH: fix #41989 (move_uploaded_file() & relative path in ZTS mode)
+
+2007-07-19  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute.c:
+      MFH: Use SEPARATE_ZVAL_IF_NOT_REF for cleaner code.
+
+    * ZendEngine2/zend_execute.c:
+      - Use the SEPARATE_ZVAL_IF_NOT_REF macro (cleanup code)
+
+2007-07-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/fprintf_variation_001.phpt
+      ext/standard/tests/strings/fprintf_variation_002.phpt
+      ext/standard/tests/strings/fprintf_variation_003.phpt
+      ext/standard/tests/strings/fprintf_variation_003_64bit.phpt
+      ext/standard/tests/strings/fprintf_variation_003_64bit.phpt
+      ext/standard/tests/strings/fprintf_variation_004.phpt
+      ext/standard/tests/strings/fprintf_variation_005.phpt
+      ext/standard/tests/strings/fprintf_variation_006.phpt
+      ext/standard/tests/strings/fprintf_variation_006_64bit.phpt
+      ext/standard/tests/strings/fprintf_variation_006_64bit.phpt
+      ext/standard/tests/strings/fprintf_variation_007.phpt
+      ext/standard/tests/strings/fprintf_variation_007_64bit.phpt
+      ext/standard/tests/strings/fprintf_variation_007_64bit.phpt
+      ext/standard/tests/strings/fprintf_variation_008.phpt
+      ext/standard/tests/strings/fprintf_variation_008_64bit.phpt
+      ext/standard/tests/strings/fprintf_variation_008_64bit.phpt
+      ext/standard/tests/strings/fprintf_variation_009.phpt:
+      fix tests, add 64bit versions
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/fprintf_error.phpt
+      ext/standard/tests/strings/fprintf_variation_001.phpt
+      ext/standard/tests/strings/fprintf_variation_002.phpt
+      ext/standard/tests/strings/fprintf_variation_003.phpt
+      ext/standard/tests/strings/fprintf_variation_004.phpt
+      ext/standard/tests/strings/fprintf_variation_005.phpt
+      ext/standard/tests/strings/fprintf_variation_006.phpt
+      ext/standard/tests/strings/fprintf_variation_007.phpt
+      ext/standard/tests/strings/fprintf_variation_008.phpt
+      ext/standard/tests/strings/fprintf_variation_009.phpt:
+      add new tests from HEAD
+
+    * ext/standard/tests/strings/fprintf.phpt
+      ext/standard/tests/strings/fprintf_error.phpt
+      ext/standard/tests/strings/fprintf_error.phpt
+      ext/standard/tests/strings/fprintf_variation_001.phpt
+      ext/standard/tests/strings/fprintf_variation_001.phpt
+      ext/standard/tests/strings/fprintf_variation_002.phpt
+      ext/standard/tests/strings/fprintf_variation_002.phpt
+      ext/standard/tests/strings/fprintf_variation_003.phpt
+      ext/standard/tests/strings/fprintf_variation_003.phpt
+      ext/standard/tests/strings/fprintf_variation_004.phpt
+      ext/standard/tests/strings/fprintf_variation_004.phpt
+      ext/standard/tests/strings/fprintf_variation_005.phpt
+      ext/standard/tests/strings/fprintf_variation_005.phpt
+      ext/standard/tests/strings/fprintf_variation_006.phpt
+      ext/standard/tests/strings/fprintf_variation_006.phpt
+      ext/standard/tests/strings/fprintf_variation_007.phpt
+      ext/standard/tests/strings/fprintf_variation_007.phpt
+      ext/standard/tests/strings/fprintf_variation_008.phpt
+      ext/standard/tests/strings/fprintf_variation_008.phpt
+      ext/standard/tests/strings/fprintf_variation_009.phpt
+      ext/standard/tests/strings/fprintf_variation_009.phpt:
+      split the test
+
+    * ext/mcrypt/tests/bug41252.phpt:
+      fix unicode mode
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/mcrypt.c:
+      fix ws & folding
+
+2007-07-19  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ZendEngine2/README.ZEND_MM:
+      Beautify and reword a bit.
+
+    * (PHP_5_2)
+      acinclude.m4:
+      MFH:- Stop configure if scanner files are not found and invalid/no flex is
+      found
+
+    * acinclude.m4:
+      - Stop configure if scanner files are not found and invalid/no flex is
+      found
+
+2007-07-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/file/rename_variation2.phpt:
+      make sure the cache is flushed when doing stat calls
+
+2007-07-19  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS
+      ext/dba/config.m4:
+      MFH:- Fixed bug #41433 (DBA: configure fails to include correct db.h for
+      db4)
+
+    * ext/dba/config.m4:
+      - Fixed bug #41433 (DBA: configure fails to include correct db.h for db4)
+
+2007-07-19  Antony Dovgal  <antony@zend.com>
+
+    * main/fopen_wrappers.c:
+      use constant
+
+    * ZendEngine2/tests/compare_003_64bit.phpt
+      ext/mcrypt/tests/bug41252.phpt:
+      fix test
+
 2007-07-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
