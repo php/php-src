@@ -103,6 +103,7 @@ PHP                                                                        NEWS
   statements). (Ilia)
 - Fixed bug #41692 (ArrayObject shows weird behavior in respect to 
   inheritance). (Tony)
+- Fixed bug #41691 (ArrayObject::exchangeArray hangs Apache). (Tony)
 - Fixed bug #41686 (Omitting length param in array_slice not possible).
   (Ilia)
 - Fixed bug #41685 (array_push() fails to warn when next index is already
