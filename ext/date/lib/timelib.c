@@ -30,7 +30,7 @@
 
 #define TIMELIB_LLABS(y) (y < 0 ? (y * -1) : y)
 
-timelib_time* timelib_time_ctor()
+timelib_time* timelib_time_ctor(void)
 {
 	timelib_time *t;
 	t = calloc(1, sizeof(timelib_time));
@@ -55,7 +55,7 @@ void timelib_time_dtor(timelib_time* t)
 	TIMELIB_TIME_FREE(t);
 }
 
-timelib_time_offset* timelib_time_offset_ctor()
+timelib_time_offset* timelib_time_offset_ctor(void)
 {
 	timelib_time_offset *t;
 	t = calloc(1, sizeof(timelib_time_offset));

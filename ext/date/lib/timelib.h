@@ -79,17 +79,17 @@ const timelib_tzdb *timelib_builtin_db(void);
 const timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *count);
 
 /* From timelib.c */
-timelib_tzinfo* timelib_tzinfo_ctor();
+timelib_tzinfo* timelib_tzinfo_ctor(char *name);
 void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr);
 void timelib_time_tz_name_update(timelib_time* tm, char* tz_name);
 void timelib_tzinfo_dtor(timelib_tzinfo *tz);
 timelib_tzinfo* timelib_tzinfo_clone(timelib_tzinfo *tz);
 
-timelib_time* timelib_time_ctor();
+timelib_time* timelib_time_ctor(void);
 void timelib_time_set_option(timelib_time* tm, int option, void* option_value);
 void timelib_time_dtor(timelib_time* t);
 
-timelib_time_offset* timelib_time_offset_ctor();
+timelib_time_offset* timelib_time_offset_ctor(void);
 void timelib_time_offset_dtor(timelib_time_offset* t);
 
 void timelib_error_container_dtor(timelib_error_container *errors);
