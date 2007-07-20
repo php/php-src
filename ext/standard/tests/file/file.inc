@@ -138,7 +138,7 @@ function fill_file($file_handle, $fill_type, $file_size) {
   } else {
     $num_values = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
     $bytes_written = fwrite($file_handle, (binary)$num_values, $file_size);
-    if ( $bytes_written != $chunk_size ) {
+    if ( $bytes_written != $file_size ) {
       return false;
     }
   }
