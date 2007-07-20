@@ -4,8 +4,8 @@ Bug #41252 (Calling mcrypt_generic without first calling mcrypt_generic_init cra
 <?php if (!extension_loaded("mcrypt")) print "skip"; ?>
 --FILE--
 <?php
-$td = mcrypt_module_open(MCRYPT_DES, b'', MCRYPT_MODE_ECB, b'');
-echo mcrypt_generic($td,b'aaaaaaaa');
+$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
+echo mcrypt_generic($td,'aaaaaaaa');
 print "I'm alive!\n";
 ?>
 --EXPECTF--
