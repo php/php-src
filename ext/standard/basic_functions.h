@@ -137,7 +137,7 @@ PHP_MINIT_FUNCTION(user_filters);
 PHP_RSHUTDOWN_FUNCTION(user_filters);
 
 PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers TSRMLS_DC);
-PHPAPI char *php_get_current_user();
+PHPAPI char *php_get_current_user(void);
 PHPAPI int php_prefix_varname(zval *result, zval *prefix, zstr var_name, int var_name_len, int var_name_type, zend_bool add_underscore TSRMLS_DC);
 
 #if SIZEOF_INT == 4
@@ -244,7 +244,7 @@ typedef struct {
 #define SAFE_MODE_PROTECTED_ENV_VARS	"LD_LIBRARY_PATH"
 #define SAFE_MODE_ALLOWED_ENV_VARS		"PHP_"
 
-PHPAPI double php_get_nan();
-PHPAPI double php_get_inf();
+PHPAPI double php_get_nan(void);
+PHPAPI double php_get_inf(void);
 
 #endif /* BASIC_FUNCTIONS_H */

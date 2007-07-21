@@ -104,7 +104,7 @@ PHPAPI unsigned char *php_base64_encode(const unsigned char *str, int length, in
 /* generate reverse table (do not set index 0 to 64)
 static unsigned short base64_reverse_table[256];
 #define rt base64_reverse_table
-void php_base64_init()
+void php_base64_init(void)
 {
 	char *s = emalloc(10240), *sp;
 	char *chp;
