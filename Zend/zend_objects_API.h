@@ -81,7 +81,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 
 ZEND_API zval *zend_object_create_proxy(zval *object, zval *member TSRMLS_DC);
 
-ZEND_API zend_object_handlers *zend_get_std_object_handlers();
+ZEND_API zend_object_handlers *zend_get_std_object_handlers(void);
 END_EXTERN_C()
 
 #endif /* ZEND_OBJECTS_H */
