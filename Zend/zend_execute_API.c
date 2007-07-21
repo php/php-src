@@ -57,7 +57,8 @@ UChar u_return[sizeof("return ")];
 UChar u_semicolon[sizeof(" ;")];
 UChar u_doublecolon[sizeof(" ;")];
 
-void init_unicode_strings() {
+void init_unicode_strings(void)
+{
 	u_charsToUChars("main", u_main, sizeof("main"));
 	u_charsToUChars("return ", u_return, sizeof("return "));
 	u_charsToUChars(" ;", u_semicolon, sizeof(" ;"));
@@ -1545,7 +1546,7 @@ static unsigned __stdcall timeout_thread_proc(void *pArgs) /* {{{ */
 }
 /* }}} */
 
-void zend_init_timeout_thread() /* {{{ */
+void zend_init_timeout_thread(void) /* {{{ */
 {
 	timeout_thread_event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	timeout_thread_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -1554,7 +1555,7 @@ void zend_init_timeout_thread() /* {{{ */
 }
 /* }}} */
 
-void zend_shutdown_timeout_thread() /* {{{ */
+void zend_shutdown_timeout_thread(void) /* {{{ */
 {
 	if (!timeout_thread_initialized) {
 		return;

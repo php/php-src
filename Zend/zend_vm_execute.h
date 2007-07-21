@@ -28572,7 +28572,7 @@ static int ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-void zend_init_opcodes_handlers()
+void zend_init_opcodes_handlers(void)
 {
   static const opcode_handler_t labels[] = {
   	ZEND_NOP_SPEC_HANDLER,

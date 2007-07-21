@@ -484,7 +484,7 @@ END_EXTERN_C()
 #endif
 
 #ifdef ZEND_USE_TOLOWER_L
-ZEND_API void zend_update_current_locale();
+ZEND_API void zend_update_current_locale(void);
 #else
 #define zend_update_current_locale()
 #endif
