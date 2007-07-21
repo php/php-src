@@ -32,7 +32,7 @@
 static HashTable stream_filters_hash;
 
 /* Should only be used during core initialization */
-PHPAPI HashTable *php_get_stream_filters_hash_global()
+PHPAPI HashTable *php_get_stream_filters_hash_global(void)
 {
 	return &stream_filters_hash;
 }
