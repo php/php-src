@@ -1,3 +1,60 @@
+2007-07-20  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/date/lib/timelib.c
+      ext/date/lib/timelib.h:
+      - Fix warnings
+
+2007-07-20  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/file.inc
+      ext/standard/tests/file/readfile_basic-win32.phpt
+      ext/standard/tests/file/readfile_basic.phpt
+      ext/standard/tests/file/readfile_error.phpt
+      ext/standard/tests/file/readfile_variation1.phpt
+      ext/standard/tests/file/readfile_variation2.phpt
+      ext/standard/tests/file/readfile_variation3.phpt
+      ext/standard/tests/file/umask_basic.phpt
+      ext/standard/tests/file/umask_error.phpt:
+      Fix for fill_file() function in file.inc
+      New testcases for readfile() and umask() functions
+
+    * (PHP_5_2)
+      ext/standard/tests/file/file.inc
+      ext/standard/tests/file/readfile_basic-win32.phpt
+      ext/standard/tests/file/readfile_basic-win32.phpt
+      ext/standard/tests/file/readfile_basic.phpt
+      ext/standard/tests/file/readfile_basic.phpt
+      ext/standard/tests/file/readfile_error.phpt
+      ext/standard/tests/file/readfile_error.phpt
+      ext/standard/tests/file/readfile_variation1.phpt
+      ext/standard/tests/file/readfile_variation1.phpt
+      ext/standard/tests/file/readfile_variation2.phpt
+      ext/standard/tests/file/readfile_variation2.phpt
+      ext/standard/tests/file/readfile_variation3.phpt
+      ext/standard/tests/file/readfile_variation3.phpt
+      ext/standard/tests/file/umask_basic.phpt
+      ext/standard/tests/file/umask_basic.phpt
+      ext/standard/tests/file/umask_error.phpt
+      ext/standard/tests/file/umask_error.phpt:
+      Fix for fill_file() in file.inc
+      New testcases for readfile() and umask() functions
+
+2007-07-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_array.c
+      ext/spl/tests/bug41691.phpt:
+      MFH: fix #41691 (ArrayObject::exchangeArray hangs Apache)
+
+    * ext/spl/spl_array.c
+      ext/spl/tests/bug41691.phpt
+      ext/spl/tests/bug41691.phpt:
+      fix #41691 (ArrayObject::exchangeArray hangs Apache)
+
+    * ext/mcrypt/tests/bug41252.phpt:
+      revert
+
 2007-07-19  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/basic_functions.c:
