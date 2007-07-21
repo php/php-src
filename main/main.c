@@ -512,14 +512,14 @@ PHPAPI int php_printf(const char *format, ...)
 /* {{{ php_verror helpers */
 
 /* {{{ php_during_module_startup */
-static int php_during_module_startup()
+static int php_during_module_startup(void)
 {
 	return module_startup;
 }
 /* }}} */
 
 /* {{{ php_during_module_shutdown */
-static int php_during_module_shutdown()
+static int php_during_module_shutdown(void)
 {
 	return module_shutdown;
 }
@@ -1869,7 +1869,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 }
 /* }}} */
 
-void php_module_shutdown_for_exec()
+void php_module_shutdown_for_exec(void)
 {
 	/* used to close fd's in the range 3.255 here, but it's problematic */
 }
@@ -2165,7 +2165,7 @@ PHPAPI int php_lint_script(zend_file_handle *file TSRMLS_DC)
 #ifdef PHP_WIN32
 /* {{{ dummy_indent
    just so that this symbol gets exported... */
-PHPAPI void dummy_indent()
+PHPAPI void dummy_indent(void)
 {
 	zend_indent();
 }
