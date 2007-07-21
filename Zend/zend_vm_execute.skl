@@ -71,7 +71,7 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 
 {%EXTERNAL_EXECUTOR%}
 
-void {%INITIALIZER_NAME%}()
+void {%INITIALIZER_NAME%}(void)
 {
   {%EXTERNAL_LABELS%}
 }

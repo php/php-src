@@ -560,7 +560,7 @@ static void scanner_globals_ctor(zend_scanner_globals *scanner_globals_p TSRMLS_
 	scanner_globals_p->yy_start_stack = 0;
 }
 
-void zend_init_opcodes_handlers();
+void zend_init_opcodes_handlers(void);
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions)
 {
@@ -811,7 +811,7 @@ void zend_append_version_info(zend_extension *extension)
 }
 
 
-ZEND_API char *get_zend_version()
+ZEND_API char *get_zend_version(void)
 {
 	return zend_version_info;
 }
