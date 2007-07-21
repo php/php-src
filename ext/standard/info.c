@@ -781,7 +781,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 /* }}} */
 
 
-PHPAPI void php_info_print_table_start()
+PHPAPI void php_info_print_table_start(void)
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_printf("<table border=\"0\" cellpadding=\"3\" width=\"600\">\n");
@@ -790,7 +790,7 @@ PHPAPI void php_info_print_table_start()
 	}	
 }
 
-PHPAPI void php_info_print_table_end()
+PHPAPI void php_info_print_table_end(void)
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_printf("</table><br />\n");
@@ -814,7 +814,7 @@ PHPAPI void php_info_print_box_start(int flag)
 	}
 }
 
-PHPAPI void php_info_print_box_end()
+PHPAPI void php_info_print_box_end(void)
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_printf("</td></tr>\n");
@@ -822,7 +822,7 @@ PHPAPI void php_info_print_box_end()
 	php_info_print_table_end();
 }
 
-PHPAPI void php_info_print_hr()
+PHPAPI void php_info_print_hr(void)
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_printf("<hr />\n");
@@ -1056,7 +1056,7 @@ PHP_FUNCTION(phpcredits)
 
 /* {{{ php_logo_guid
  */
-PHPAPI char *php_logo_guid()
+PHPAPI char *php_logo_guid(void)
 {
 	char *logo_guid;
 
