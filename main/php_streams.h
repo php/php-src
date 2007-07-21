@@ -549,7 +549,7 @@ PHPAPI HashTable *_php_stream_get_url_stream_wrappers_hash(TSRMLS_D);
 PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void);
 PHPAPI HashTable *_php_get_stream_filters_hash(TSRMLS_D);
 #define php_get_stream_filters_hash()	_php_get_stream_filters_hash(TSRMLS_C)
-PHPAPI HashTable *php_get_stream_filters_hash_global();
+PHPAPI HashTable *php_get_stream_filters_hash_global(void);
 END_EXTERN_C()
 #endif
 
