@@ -2602,7 +2602,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval.v);
@@ -3062,7 +3066,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDL
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval.v);
@@ -3523,7 +3531,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDL
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval.v);
@@ -3750,7 +3762,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HA
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval.v);
@@ -4179,7 +4195,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLE
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval.v);
@@ -10044,7 +10064,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDL
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval.v);
@@ -11736,7 +11760,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval.v);
@@ -13420,7 +13448,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval.v);
@@ -14302,7 +14334,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval.v);
@@ -15636,7 +15672,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval.v);
