@@ -1222,6 +1222,8 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 				CG(active_class_entry)->clone = (zend_function *) CG(active_op_array);
 			} else if ((lcname_len == sizeof(ZEND_CALL_FUNC_NAME)-1) && (ZEND_U_EQUAL(Z_TYPE(function_name->u.constant), lcname, lcname_len, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
 				CG(active_class_entry)->__call = (zend_function *) CG(active_op_array);
+			} else if ((lcname_len == sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1) && (ZEND_U_EQUAL(Z_TYPE(function_name->u.constant), lcname, lcname_len, ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1))) {
+				CG(active_class_entry)->__callstatic = (zend_function *) CG(active_op_array);
 			} else if ((lcname_len == sizeof(ZEND_GET_FUNC_NAME)-1) && (ZEND_U_EQUAL(Z_TYPE(function_name->u.constant), lcname, lcname_len, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)-1))) {
 				CG(active_class_entry)->__get = (zend_function *) CG(active_op_array);
 			} else if ((lcname_len == sizeof(ZEND_SET_FUNC_NAME)-1) && (ZEND_U_EQUAL(Z_TYPE(function_name->u.constant), lcname, lcname_len, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)-1))) {
@@ -2184,6 +2186,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC) /* {{{
 	}
 	if (!ce->__call) {
 		ce->__call = ce->parent->__call;
+	}
+	if (!ce->__callstatic) {
+		ce->__callstatic = ce->parent->__callstatic;
 	}
 	if (!ce->__tostring) {
 		ce->__tostring = ce->parent->__tostring;
@@ -4670,11 +4675,13 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->__unset = NULL;
 		ce->__isset = NULL;
 		ce->__call = NULL;
+		ce->__callstatic = NULL;
 		ce->__tostring = NULL;
 		ce->create_object = NULL;
 		ce->get_iterator = NULL;
 		ce->iterator_funcs.funcs = NULL;
 		ce->interface_gets_implemented = NULL;
+		ce->get_static_method = NULL;
 		ce->parent = NULL;
 		ce->num_interfaces = 0;
 		ce->interfaces = NULL;

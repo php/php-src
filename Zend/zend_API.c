@@ -2026,6 +2026,9 @@ ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_
 	} else if (lcname_len == sizeof(ZEND_CALL_FUNC_NAME) - 1 &&
 	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1) && fptr->common.num_args != 2) {
 		zend_error(error_type, "Method %v::%s() must take exactly 2 arguments", ce->name, ZEND_CALL_FUNC_NAME);
+	} else if (lcname_len == sizeof(ZEND_CALLSTATIC_FUNC_NAME) - 1 &&
+	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1) && fptr->common.num_args != 2) {
+		zend_error(error_type, "Method %v::%s() must take exactly 2 arguments", ce->name, ZEND_CALLSTATIC_FUNC_NAME);
 	} else if (lcname_len == sizeof(ZEND_TOSTRING_FUNC_NAME) - 1 &&
 	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && fptr->common.num_args != 0) {
 		zend_error(error_type, "Method %v::%s() cannot take arguments", ce->name, ZEND_TOSTRING_FUNC_NAME);
@@ -2043,7 +2046,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
-	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__tostring = NULL;
+	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL;
 	char *lowercase_name;
 	int fname_len;
 	zstr lc_class_name = NULL_ZSTR;
@@ -2186,6 +2189,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 				clone = reg_function;
 			} else if ((fname_len == sizeof(ZEND_CALL_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME))) {
 				__call = reg_function;
+			} else if ((fname_len == sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME))) {
+				__callstatic = reg_function;
 			} else if ((fname_len == sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME))) {
 				__tostring = reg_function;
 			} else if ((fname_len == sizeof(ZEND_GET_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME))) {
@@ -2226,6 +2231,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		scope->destructor = dtor;
 		scope->clone = clone;
 		scope->__call = __call;
+		scope->__callstatic = __callstatic;
 		scope->__tostring = __tostring;
 		scope->__get = __get;
 		scope->__set = __set;
@@ -2257,6 +2263,12 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 				zend_error(error_type, "Method %v::%v() cannot be static", scope->name, __call->common.function_name);
 			}
 			__call->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
+		}
+		if (__callstatic) {
+			if (!(__callstatic->common.fn_flags & ZEND_ACC_STATIC)) {
+				zend_error(error_type, "Method %v::%v() must be static", scope->name, __callstatic->common.function_name);
+			}
+			__callstatic->common.fn_flags |= ZEND_ACC_STATIC;
 		}
 		if (__tostring) {
 			if (__tostring->common.fn_flags & ZEND_ACC_STATIC) {
@@ -2662,6 +2674,10 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 			retval = (*ce_ptr)->__call != NULL;
 			*fptr_ptr = (*ce_ptr)->__call;
 		}
+		if (!*zobj_ptr_ptr && *ce_ptr && (*ce_ptr)->__callstatic) {
+			retval = 1;
+			*fptr_ptr = (*ce_ptr)->__callstatic;
+		}
 	} else {
 		*fptr_ptr = fptr;
 		if (*ce_ptr) {
@@ -2951,7 +2967,8 @@ ZEND_API int zend_fcall_info_init(zval *callable, zend_fcall_info *fci, zend_fca
 	fci->no_separation = 1;
 	fci->symbol_table = NULL;
 
-	if (ZEND_U_EQUAL(ZEND_STR_TYPE, func->common.function_name, USTR_LEN(func->common.function_name), ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1)) { 
+	if (ZEND_U_CASE_EQUAL(ZEND_STR_TYPE, func->common.function_name, USTR_LEN(func->common.function_name), ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1) ||
+	    ZEND_U_CASE_EQUAL(ZEND_STR_TYPE, func->common.function_name, USTR_LEN(func->common.function_name), ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1)) { 
 		fcc->initialized = 0;
 		fcc->function_handler = NULL;
 		fcc->calling_scope = NULL;
