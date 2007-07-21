@@ -122,7 +122,7 @@ static zend_function_entry libxml_functions[] = {
 };
 
 zend_module_entry libxml_module_entry = {
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 	"libxml",                /* extension name */
 	libxml_functions,        /* extension function list */
 	PHP_MINIT(libxml),       /* extension-wide startup function */
@@ -130,11 +130,11 @@ zend_module_entry libxml_module_entry = {
 	PHP_RINIT(libxml),       /* per-request startup function */
 	PHP_RSHUTDOWN(libxml),   /* per-request shutdown function */
 	PHP_MINFO(libxml),       /* information function */
-    NO_VERSION_YET,
-    PHP_MODULE_GLOBALS(libxml), /* globals descriptor */
-    PHP_GINIT(libxml),          /* globals ctor */
-    NULL,                       /* globals dtor */
-    NULL,                       /* post deactivate */
+	NO_VERSION_YET,
+	PHP_MODULE_GLOBALS(libxml), /* globals descriptor */
+	PHP_GINIT(libxml),          /* globals ctor */
+	NULL,                       /* globals dtor */
+	NULL,                       /* post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
@@ -363,10 +363,10 @@ static int php_libxml_streams_IO_close(void *context)
 static xmlParserInputBufferPtr
 php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 {
-    xmlParserInputBufferPtr ret;
-    void *context = NULL;
+	xmlParserInputBufferPtr ret;
+	void *context = NULL;
 
-    if (URI == NULL)
+	if (URI == NULL)
 		return(NULL);
 
 	context = php_libxml_streams_IO_open_read_wrapper(URI);
@@ -392,10 +392,10 @@ php_libxml_output_buffer_create_filename(const char *URI,
                               xmlCharEncodingHandlerPtr encoder,
                               int compression ATTRIBUTE_UNUSED)
 {
-    xmlOutputBufferPtr ret;
-    xmlURIPtr puri;
-    void *context = NULL;
-    char *unescaped = NULL;
+	xmlOutputBufferPtr ret;
+	xmlURIPtr puri;
+	void *context = NULL;
+	char *unescaped = NULL;
 
 	if (URI == NULL)
 		return(NULL);
@@ -432,7 +432,8 @@ php_libxml_output_buffer_create_filename(const char *URI,
 	return(ret);
 }
 
-static int _php_libxml_free_error(xmlErrorPtr error) {
+static int _php_libxml_free_error(xmlErrorPtr error)
+{
 	/* This will free the libxml alloc'd memory */
 	xmlResetError(error);
 	return 1;
@@ -566,7 +567,8 @@ PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...)
 }
 
 
-PHP_LIBXML_API void php_libxml_initialize() {
+PHP_LIBXML_API void php_libxml_initialize(void)
+{
 	if (!_php_libxml_initialized) {
 		/* we should be the only one's to ever init!! */
 		xmlInitParser();
@@ -577,7 +579,8 @@ PHP_LIBXML_API void php_libxml_initialize() {
 	}
 }
 
-PHP_LIBXML_API void php_libxml_shutdown() {
+PHP_LIBXML_API void php_libxml_shutdown(void) 
+{
 	if (_php_libxml_initialized) {
 #if defined(LIBXML_SCHEMAS_ENABLED)
 		xmlRelaxNGCleanupTypes();
@@ -588,7 +591,8 @@ PHP_LIBXML_API void php_libxml_shutdown() {
 	}
 }
 
-PHP_LIBXML_API zval *php_libxml_switch_context(zval *context TSRMLS_DC) {
+PHP_LIBXML_API zval *php_libxml_switch_context(zval *context TSRMLS_DC)
+{
 	zval *oldcontext;
 
 	oldcontext = LIBXML(stream_context);
@@ -643,7 +647,7 @@ static PHP_RINIT_FUNCTION(libxml)
 	xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
 	xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
 	xmlOutputBufferCreateFilenameDefault(php_libxml_output_buffer_create_filename);
-    return SUCCESS;
+	return SUCCESS;
 }
 
 
@@ -821,7 +825,7 @@ static PHP_FUNCTION(libxml_get_errors)
 /* }}} */
 
 /* {{{ proto void libxml_clear_errors() U
-    Clear last error from libxml */
+   Clear last error from libxml */
 static PHP_FUNCTION(libxml_clear_errors)
 {
 	xmlResetLastError();
@@ -922,7 +926,8 @@ int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr nod
 	return ret_refcount;
 }
 
-int php_libxml_decrement_node_ptr(php_libxml_node_object *object TSRMLS_DC) {
+int php_libxml_decrement_node_ptr(php_libxml_node_object *object TSRMLS_DC)
+{
 	int ret_refcount = -1;
 	php_libxml_node_ptr *obj_node;
 
@@ -941,7 +946,8 @@ int php_libxml_decrement_node_ptr(php_libxml_node_object *object TSRMLS_DC) {
 	return ret_refcount;
 }
 
-int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp TSRMLS_DC) {
+int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp TSRMLS_DC)
+{
 	int ret_refcount = -1;
 
 	if (object->document != NULL) {
@@ -960,7 +966,8 @@ int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp 
 	return ret_refcount;
 }
 
-int php_libxml_decrement_doc_ref(php_libxml_node_object *object TSRMLS_DC) {
+int php_libxml_decrement_doc_ref(php_libxml_node_object *object TSRMLS_DC)
+{
 	int ret_refcount = -1;
 
 	if (object != NULL && object->document != NULL) {
