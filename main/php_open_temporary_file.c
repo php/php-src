@@ -151,7 +151,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 /* Cache the chosen temporary directory. */
 static char* temporary_directory;
 
-PHPAPI void php_shutdown_temporary_directory()
+PHPAPI void php_shutdown_temporary_directory(void)
 {
 	if (temporary_directory) {
 		free(temporary_directory);

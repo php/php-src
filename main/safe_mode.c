@@ -188,7 +188,8 @@ PHPAPI int php_checkuid_ex(const char *filename, const char *fopen_mode, int mod
 	return 0;
 }
 
-PHPAPI int php_checkuid(const char *filename, const char *fopen_mode, int mode) {
+PHPAPI int php_checkuid(const char *filename, const char *fopen_mode, int mode)
+{
 #ifdef NETWARE
 /* NetWare don't have uid*/
 	return 1;
@@ -197,7 +198,7 @@ PHPAPI int php_checkuid(const char *filename, const char *fopen_mode, int mode) 
 #endif
 }
 
-PHPAPI char *php_get_current_user()
+PHPAPI char *php_get_current_user(void)
 {
 	struct stat *pstat;
 	TSRMLS_FETCH();
