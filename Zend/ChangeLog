@@ -1,3 +1,36 @@
+2007-07-21  Sara Golemon  <sara@golemon.com>
+
+    * zend.h
+      zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_execute_API.c
+      zend_interfaces.c
+      zend_object_handlers.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/call_static.phpt
+      tests/object_handlers.phpt:
+      Add support got zend_class_entry->get_static_method() and matching
+      __callStatic() userspace method @doc
+
+2007-07-21  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * zend.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_extensions.c
+      zend_indent.c
+      zend_objects_API.c
+      zend_objects_API.h
+      zend_operators.c
+      zend_operators.h
+      zend_vm.h
+      zend_vm_execute.h
+      zend_vm_execute.skl:
+      - Fix compile warnings
+
 2007-07-19  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * (PHP_5_2)
