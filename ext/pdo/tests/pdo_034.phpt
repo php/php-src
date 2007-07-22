@@ -23,6 +23,7 @@ for ($i = 0; $i < 5; $i++) {
 var_dump($db->query("SELECT a,b FROM test")->fetch(PDO::FETCH_KEY_PAIR));
 var_dump($db->query("SELECT a,b FROM test")->fetchAll(PDO::FETCH_KEY_PAIR));
 var_dump($db->query("SELECT * FROM test")->fetch(PDO::FETCH_KEY_PAIR));
+var_dump($db->query("SELECT a,a FROM test")->fetchAll(PDO::FETCH_KEY_PAIR));
 
 ?>
 --EXPECTF--
@@ -31,34 +32,31 @@ array(1) {
   string(1) "0"
 }
 array(5) {
-  [0]=>
-  array(1) {
-    ["test0"]=>
-    string(1) "0"
-  }
-  [1]=>
-  array(1) {
-    ["test1"]=>
-    string(1) "1"
-  }
-  [2]=>
-  array(1) {
-    ["test2"]=>
-    string(1) "2"
-  }
-  [3]=>
-  array(1) {
-    ["test3"]=>
-    string(1) "3"
-  }
-  [4]=>
-  array(1) {
-    ["test4"]=>
-    string(1) "4"
-  }
+  ["test0"]=>
+  string(1) "0"
+  ["test1"]=>
+  string(1) "1"
+  ["test2"]=>
+  string(1) "2"
+  ["test3"]=>
+  string(1) "3"
+  ["test4"]=>
+  string(1) "4"
 }
 
-Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error: PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain extactly 2 columns. in %s/tests%spdo_034.php on line %d
+Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error: PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain extactly 2 columns. in %s/pdo_034.php on line %d
 
-Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error%s/tests%spdo_034.php on line %d
+Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error in %s/pdo_034.php on line %d
 bool(false)
+array(5) {
+  ["test0"]=>
+  string(5) "test0"
+  ["test1"]=>
+  string(5) "test1"
+  ["test2"]=>
+  string(5) "test2"
+  ["test3"]=>
+  string(5) "test3"
+  ["test4"]=>
+  string(5) "test4"
+}

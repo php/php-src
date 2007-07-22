@@ -1521,7 +1521,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	if (!error)	{
 		PDO_STMT_CLEAR_ERR();
 		MAKE_STD_ZVAL(data);
-		if (how & (PDO_FETCH_GROUP|PDO_FETCH_KEY_PAIR)) {
+		if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR) {
 			array_init(return_value);
 			return_all = return_value;
 		} else {
@@ -1533,11 +1533,11 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		}
 	}
 	if (!error) {
-		if (how & PDO_FETCH_GROUP) {
+		if ((how & PDO_FETCH_GROUP)) {
 			do {
 				MAKE_STD_ZVAL(data);
 			} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
-		} else if (how & PDO_FETCH_KEY_PAIR) {
+		} else if (how == PDO_FETCH_KEY_PAIR) {
 			while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
 		} else {
 			array_init(return_value);
