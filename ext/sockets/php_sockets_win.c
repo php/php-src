@@ -81,29 +81,4 @@ int inet_aton(const char *cp, struct in_addr *inp) {
 
   return 1;
 }
-
-int fcntl(int fd, int cmd, ...) {
-	va_list va;
-	int retval, io, mode;
-	
-	va_start(va, cmd);
-
-	switch(cmd) {
-		case F_GETFL:
-		case F_SETFD:
-		case F_GETFD:
-		default:
-			retval = -1;
-			break;
-
-		case F_SETFL:
-			io = va_arg(va, int);
-			mode = io == O_NONBLOCK ? 1 : 0;
-			retval = ioctlsocket(fd, io, &mode);
-			break;
-	}
-
-	va_end(va);
-	return retval;
-}
 #endif
