@@ -1,3 +1,273 @@
+2007-07-21  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/umask_variation1.phpt
+      ext/standard/tests/file/umask_variation2.phpt:
+      New testcases for umask() function
+
+    * ext/standard/tests/file/umask_variation1.phpt
+      ext/standard/tests/file/umask_variation1.phpt
+      ext/standard/tests/file/umask_variation2.phpt
+      ext/standard/tests/file/umask_variation2.phpt:
+      
+      file umask_variation1.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/tests/file/lstat_stat_variation1.phpt
+      ext/standard/tests/file/lstat_stat_variation2.phpt
+      ext/standard/tests/file/lstat_stat_variation3.phpt
+      ext/standard/tests/file/lstat_stat_variation4.phpt
+      ext/standard/tests/file/lstat_stat_variation5.phpt
+      ext/standard/tests/file/lstat_stat_variation6.phpt:
+      New testcases for lstat() and stat() functions
+
+    * (PHP_5_2)
+      ext/standard/tests/file/is_file_variation1.phpt
+      ext/standard/tests/file/is_file_variation2.phpt
+      ext/standard/tests/file/is_file_variation3.phpt
+      ext/standard/tests/file/is_file_variation4.phpt:
+      New testcases for is_file() function
+
+    * (PHP_5_2)
+      ext/standard/tests/file/is_dir_variation1.phpt
+      ext/standard/tests/file/is_dir_variation2.phpt
+      ext/standard/tests/file/is_dir_variation3.phpt
+      ext/standard/tests/file/is_dir_variation4.phpt:
+      New testcases for is_dir() function
+
+    * (PHP_5_2)
+      ext/standard/tests/file/fseek_ftell_rewind_basic1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_basic2-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_basic2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error3.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation3.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation4-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation4.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation5.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation6-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation6.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation7.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation8-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation8.phpt:
+      New testcases for fseek(), ftell() and rewind() functions
+
+    * ext/standard/tests/file/lstat_stat_variation1.phpt
+      ext/standard/tests/file/lstat_stat_variation1.phpt
+      ext/standard/tests/file/lstat_stat_variation2.phpt
+      ext/standard/tests/file/lstat_stat_variation2.phpt
+      ext/standard/tests/file/lstat_stat_variation3.phpt
+      ext/standard/tests/file/lstat_stat_variation3.phpt
+      ext/standard/tests/file/lstat_stat_variation4.phpt
+      ext/standard/tests/file/lstat_stat_variation4.phpt
+      ext/standard/tests/file/lstat_stat_variation5.phpt
+      ext/standard/tests/file/lstat_stat_variation5.phpt
+      ext/standard/tests/file/lstat_stat_variation6.phpt
+      ext/standard/tests/file/lstat_stat_variation6.phpt:
+      
+      New testcases for lstat() and stat() functions
+
+    * ext/standard/tests/file/is_file_variation1.phpt
+      ext/standard/tests/file/is_file_variation1.phpt
+      ext/standard/tests/file/is_file_variation2.phpt
+      ext/standard/tests/file/is_file_variation2.phpt
+      ext/standard/tests/file/is_file_variation3.phpt
+      ext/standard/tests/file/is_file_variation3.phpt
+      ext/standard/tests/file/is_file_variation4.phpt
+      ext/standard/tests/file/is_file_variation4.phpt:
+      
+      New testcases for is_file() function
+
+    * ext/standard/tests/file/is_dir_variation1.phpt
+      ext/standard/tests/file/is_dir_variation1.phpt
+      ext/standard/tests/file/is_dir_variation2.phpt
+      ext/standard/tests/file/is_dir_variation2.phpt
+      ext/standard/tests/file/is_dir_variation3.phpt
+      ext/standard/tests/file/is_dir_variation3.phpt
+      ext/standard/tests/file/is_dir_variation4.phpt
+      ext/standard/tests/file/is_dir_variation4.phpt:
+      
+      New testcases for is_dir() function
+
+    * ext/standard/tests/file/fseek_ftell_rewind_basic1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_basic1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_basic2-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_basic2-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_basic2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_basic2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error3.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error3.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation2-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation3.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation3.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation4-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation4-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation4.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation4.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation5.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation5.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation6-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation6-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation6.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation6.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation7.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation7.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation8-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation8-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation8.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation8.phpt:
+      
+      New testcases for fseek(), ftell() & rewind() functions
+
+    * ext/standard/tests/file/fflush_basic.phpt
+      ext/standard/tests/file/fflush_error.phpt
+      ext/standard/tests/file/fflush_variation1-win32.phpt
+      ext/standard/tests/file/fflush_variation1.phpt
+      ext/standard/tests/file/fflush_variation2.phpt
+      ext/standard/tests/file/fflush_variation3.phpt
+      ext/standard/tests/file/fflush_variation4.phpt:
+      New testcases for fflush() function
+
+    * ext/standard/tests/file/fflush_basic.phpt
+      ext/standard/tests/file/fflush_basic.phpt
+      ext/standard/tests/file/fflush_variation1-win32.phpt
+      ext/standard/tests/file/fflush_variation1-win32.phpt
+      ext/standard/tests/file/fflush_variation3.phpt
+      ext/standard/tests/file/fflush_variation3.phpt
+      ext/standard/tests/file/fflush_variation4.phpt
+      ext/standard/tests/file/fflush_variation4.phpt:
+      
+      file fflush_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/fflush_error.phpt
+      ext/standard/tests/file/fflush_error.phpt
+      ext/standard/tests/file/fflush_variation1.phpt
+      ext/standard/tests/file/fflush_variation1.phpt
+      ext/standard/tests/file/fflush_variation2.phpt
+      ext/standard/tests/file/fflush_variation2.phpt:
+      
+      file fflush_error.phpt was initially added on branch PHP_5_2.
+
+2007-07-21  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      win32/build/confutils.js:
+      - MFH: Allow the use of a user defined template.rc file to override the
+        default ones. This makes it possible to include the extension's version
+        inside the version properties of the generated extension DLL instead
+        of the PHP version the extension is build against.
+
+    * win32/build/confutils.js:
+      - Allow the use of a user defined template.rc file to override the
+        default ones. This makes it possible to include the extension's version
+        inside the version properties of the generated extension DLL instead
+        of the PHP version the extension is build against.
+
+2007-07-21  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/fgetc_variation1.phpt
+      ext/standard/tests/file/fgetc_variation2.phpt
+      ext/standard/tests/file/fgetc_variation3.phpt
+      ext/standard/tests/file/fgetc_variation4.phpt
+      ext/standard/tests/file/fgets_basic.phpt
+      ext/standard/tests/file/fgets_error.phpt
+      ext/standard/tests/file/fgets_variation1.phpt
+      ext/standard/tests/file/fgets_variation2.phpt
+      ext/standard/tests/file/fgets_variation3.phpt
+      ext/standard/tests/file/fgets_variation4-win32.phpt
+      ext/standard/tests/file/fgets_variation4.phpt
+      ext/standard/tests/file/fgets_variation5.phpt
+      ext/standard/tests/file/fgets_variation6-win32.phpt
+      ext/standard/tests/file/fgets_variation6.phpt
+      ext/standard/tests/file/fwrite_error.phpt:
+      New testcases for fwrite(), fgetc() and fgets() functions
+
+    * ext/standard/tests/file/fgetc_variation1.phpt
+      ext/standard/tests/file/fgetc_variation1.phpt
+      ext/standard/tests/file/fgetc_variation2.phpt
+      ext/standard/tests/file/fgetc_variation2.phpt
+      ext/standard/tests/file/fgetc_variation3.phpt
+      ext/standard/tests/file/fgetc_variation3.phpt
+      ext/standard/tests/file/fgetc_variation4.phpt
+      ext/standard/tests/file/fgetc_variation4.phpt
+      ext/standard/tests/file/fgets_basic.phpt
+      ext/standard/tests/file/fgets_basic.phpt
+      ext/standard/tests/file/fgets_error.phpt
+      ext/standard/tests/file/fgets_error.phpt
+      ext/standard/tests/file/fgets_variation1.phpt
+      ext/standard/tests/file/fgets_variation1.phpt
+      ext/standard/tests/file/fgets_variation2.phpt
+      ext/standard/tests/file/fgets_variation2.phpt
+      ext/standard/tests/file/fgets_variation3.phpt
+      ext/standard/tests/file/fgets_variation3.phpt
+      ext/standard/tests/file/fgets_variation4-win32.phpt
+      ext/standard/tests/file/fgets_variation4-win32.phpt
+      ext/standard/tests/file/fgets_variation4.phpt
+      ext/standard/tests/file/fgets_variation4.phpt
+      ext/standard/tests/file/fgets_variation5.phpt
+      ext/standard/tests/file/fgets_variation5.phpt
+      ext/standard/tests/file/fgets_variation6-win32.phpt
+      ext/standard/tests/file/fgets_variation6-win32.phpt
+      ext/standard/tests/file/fgets_variation6.phpt
+      ext/standard/tests/file/fgets_variation6.phpt:
+      
+      file fgetc_variation1.phpt was initially added on branch PHP_5_2.
+
+2007-07-21  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/call_static.phpt
+      ZendEngine2/tests/object_handlers.phpt:
+      Add support got zend_class_entry->get_static_method() and matching
+      __callStatic() userspace method @doc
+
+2007-07-21  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/libxml/libxml.c
+      ext/libxml/php_libxml.h:
+      - ws + compile warning fixes
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_extensions.c
+      ZendEngine2/zend_indent.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_vm.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ext/standard/base64.c
+      ext/standard/basic_functions.h
+      ext/standard/info.c
+      main/main.c
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.h
+      main/php_streams.h
+      main/streams/filter.c:
+      - Fix compile warnings
+
 2007-07-20  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * ext/date/lib/timelib.c
