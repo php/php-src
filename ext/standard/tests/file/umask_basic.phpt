@@ -7,7 +7,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 ?>
 --FILE--
-<?
+<?php
 /* Prototype: int umask ( [int $mask] );
    Description: Changes the current umask
 */
