@@ -911,8 +911,9 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain extactly 2 columns." TSRMLS_CC);
 					return 0;
 				}
-
-				array_init(return_value);
+				if (!return_all) {
+					array_init(return_value);
+				}
 				break;
 
 			case PDO_FETCH_COLUMN:
@@ -1018,7 +1019,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 				return 0;
 		}
 		
-		if (return_all) {
+		if (return_all && how != PDO_FETCH_KEY_PAIR) {
 			INIT_PZVAL(&grp_val);
 			fetch_value(stmt, &grp_val, i, NULL TSRMLS_CC);
 			convert_to_string(&grp_val);
@@ -1044,17 +1045,15 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 						zval *tmp;
 						MAKE_STD_ZVAL(tmp);
 						fetch_value(stmt, tmp, ++i, NULL TSRMLS_CC);
-						
-						if (Z_TYPE_P(val) == IS_STRING) {
-							zend_symtable_update(Z_ARRVAL_P(return_value), Z_STRVAL_P(val), Z_STRLEN_P(val) + 1, &tmp, sizeof(zval *), NULL);
-						} else if (Z_TYPE_P(val) == IS_LONG) {
-							zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(val), tmp, sizeof(tmp), NULL);
+
+						if (Z_TYPE_P(val) == IS_LONG) {
+							zend_hash_index_update((return_all ? Z_ARRVAL_P(return_all) : Z_ARRVAL_P(return_value)), Z_LVAL_P(val), &tmp, sizeof(zval *), NULL);
 						} else {
 							convert_to_string(val);
-							zend_symtable_update(Z_ARRVAL_P(return_value), Z_STRVAL_P(val), Z_STRLEN_P(val) + 1, &tmp, sizeof(zval *), NULL);
+							zend_symtable_update((return_all ? Z_ARRVAL_P(return_all) : Z_ARRVAL_P(return_value)), Z_STRVAL_P(val), Z_STRLEN_P(val) + 1, &tmp, sizeof(zval *), NULL);
 						}
-						zval_dtor(val);
-						FREE_ZVAL(val);
+						zval_ptr_dtor(&val);
+						return 1;
 					}
 					break;
 
@@ -1522,7 +1521,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	if (!error)	{
 		PDO_STMT_CLEAR_ERR();
 		MAKE_STD_ZVAL(data);
-		if (how & PDO_FETCH_GROUP) {
+		if (how & (PDO_FETCH_GROUP|PDO_FETCH_KEY_PAIR)) {
 			array_init(return_value);
 			return_all = return_value;
 		} else {
@@ -1534,10 +1533,12 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		}
 	}
 	if (!error) {
-		if ((how & PDO_FETCH_GROUP)) {
+		if (how & PDO_FETCH_GROUP) {
 			do {
 				MAKE_STD_ZVAL(data);
 			} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
+		} else if (how & PDO_FETCH_KEY_PAIR) {
+			while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
 		} else {
 			array_init(return_value);
 			do {
