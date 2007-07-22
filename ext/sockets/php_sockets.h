@@ -45,7 +45,9 @@ PHP_RSHUTDOWN_FUNCTION(sockets);
 
 PHP_FUNCTION(socket_select);
 PHP_FUNCTION(socket_create_listen);
+#ifdef HAVE_SOCKETPAIR
 PHP_FUNCTION(socket_create_pair);
+#endif
 PHP_FUNCTION(socket_accept);
 PHP_FUNCTION(socket_set_nonblock);
 PHP_FUNCTION(socket_set_block);
