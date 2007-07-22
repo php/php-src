@@ -162,6 +162,8 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #35981 (pdo-pgsql should not use pkg-config when not present).
   (Jani)
+- Fixed bug #21197 (socket_read() outputs error with PHP_NORMAL_READ).
+  (Nuno, Jani)
 
 31 May 2007, PHP 5.2.3
 - Changed CGI install target to php-cgi and 'make install' to install CLI

@@ -30,6 +30,7 @@
 #if HAVE_SOCKETS
 
 #include "php_network.h"
+#include "ext/standard/file.h"
 #include "ext/standard/info.h"
 #include "php_ini.h"
 
@@ -211,6 +212,7 @@ static int php_open_listen_sock(php_socket **php_sock, int port, int backlog TSR
 	la.sin_port = htons((unsigned short) port);
 
 	sock->bsd_socket = socket(PF_INET, SOCK_STREAM, 0);
+	sock->blocking = 1;
 
 	if (IS_INVALID_SOCKET(sock)) {
 		PHP_SOCKET_ERROR(sock, "unable to create listening socket", errno);
@@ -245,6 +247,7 @@ static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct
 
 	*new_sock = out_sock;
 	salen = sizeof(*la);
+	out_sock->blocking = 1;
 
 	out_sock->bsd_socket = accept(in_sock->bsd_socket, la, &salen);
 
@@ -259,7 +262,7 @@ static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct
 /* }}} */
 
 /* {{{ php_read -- wrapper around read() so that it only reads to a \r or \n. */
-static int php_read(int bsd_socket, void *buf, size_t maxlen, int flags)
+static int php_read(php_socket *sock, void *buf, size_t maxlen, int flags)
 {
 	int m = 0;
 	size_t n = 0;
@@ -267,14 +270,16 @@ static int php_read(int bsd_socket, void *buf, size_t maxlen, int flags)
 	int nonblock = 0;
 	char *t = (char *) buf;
 
-	m = fcntl(bsd_socket, F_GETFL);
+#ifndef PHP_WIN32
+	m = fcntl(sock->bsd_socket, F_GETFL);
 	if (m < 0) {
 		return m;
 	}
-
 	nonblock = (m & O_NONBLOCK);
 	m = 0;
-
+#else
+	nonblock = !sock->blocking;
+#endif
 	set_errno(0);
 
 	*t = '\0';
@@ -298,7 +303,7 @@ static int php_read(int bsd_socket, void *buf, size_t maxlen, int flags)
 		}
 
 		if (n < maxlen) {
-			m = recv(bsd_socket, (void *) t, 1, flags);
+			m = recv(sock->bsd_socket, (void *) t, 1, flags);
 		}
 
 		if (errno != 0 && errno != ESPIPE && errno != EAGAIN) {
@@ -689,6 +694,7 @@ PHP_FUNCTION(socket_create_listen)
 	}
 
 	php_sock->error = 0;
+	php_sock->blocking = 1;
 
 	ZEND_REGISTER_RESOURCE(return_value, php_sock, le_socket);
 }
@@ -713,6 +719,7 @@ PHP_FUNCTION(socket_accept)
 	}
 
 	new_sock->error = 0;
+	new_sock->blocking = 1;
 
 	ZEND_REGISTER_RESOURCE(return_value, new_sock, le_socket);
 }
@@ -724,7 +731,6 @@ PHP_FUNCTION(socket_set_nonblock)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	int			flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
 		return;
@@ -732,18 +738,10 @@ PHP_FUNCTION(socket_set_nonblock)
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
-	flags = fcntl(php_sock->bsd_socket, F_GETFL);
-
-	/* Safely append non blocking to other flags unless the get fails.
-	 * Note: This does not abort on failure becuse getfl will always fail
-	 *       under the current win32 code. */
-	if (flags > -1) flags |= O_NONBLOCK;
-		else flags = O_NONBLOCK;
-
-	if (fcntl(php_sock->bsd_socket, F_SETFL, flags) > -1) {
+	if (php_set_sock_blocking(php_sock->bsd_socket, 0 TSRMLS_CC) == SUCCESS) {
+		php_sock->blocking = 0;
 		RETURN_TRUE;
 	}
-
 	RETURN_FALSE;
 }
 /* }}} */
@@ -754,7 +752,6 @@ PHP_FUNCTION(socket_set_block)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	int			flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
 		return;
@@ -762,18 +759,10 @@ PHP_FUNCTION(socket_set_block)
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
-	flags = fcntl(php_sock->bsd_socket, F_GETFL);
-
-	/* Safely remove blocking from flags unless the get fails.
-	 * Note: This does not abort on failure becuse getfl will always fail
-	 *       under the current win32 code. */
-	if (flags > -1) flags &= ~O_NONBLOCK;
-		else flags = 0;
-
-	if (fcntl(php_sock->bsd_socket, F_SETFL, flags) > -1) {
+	if (php_set_sock_blocking(php_sock->bsd_socket, 1 TSRMLS_CC) == SUCCESS) {
+		php_sock->blocking = 1;
 		RETURN_TRUE;
 	}
-
 	RETURN_FALSE;
 }
 /* }}} */
@@ -796,7 +785,6 @@ PHP_FUNCTION(socket_listen)
 		PHP_SOCKET_ERROR(php_sock, "unable to listen on socket", errno);
 		RETURN_FALSE;
 	}
-
 	RETURN_TRUE;
 }
 /* }}} */
@@ -876,7 +864,7 @@ PHP_FUNCTION(socket_read)
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
 	if (type == PHP_NORMAL_READ) {
-		retval = php_read(php_sock->bsd_socket, tmpbuf, length, 0);
+		retval = php_read(php_sock, tmpbuf, length, 0);
 	} else {
 		retval = recv(php_sock->bsd_socket, tmpbuf, length, 0);
 	}
@@ -1072,7 +1060,7 @@ PHP_FUNCTION(socket_create)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &arg1, &arg2, &arg3) == FAILURE) {
 		efree(php_sock);
 		return;
-    }
+	}
 
 	if (arg1 != AF_UNIX
 #if HAVE_IPV6
@@ -1099,6 +1087,7 @@ PHP_FUNCTION(socket_create)
 	}
 
 	php_sock->error = 0;
+	php_sock->blocking = 1;
 
 	ZEND_REGISTER_RESOURCE(return_value, php_sock, le_socket);
 }
@@ -1491,7 +1480,6 @@ PHP_FUNCTION(socket_sendto)
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
-
 	switch (php_sock->type) {
 		case AF_UNIX:
 			memset(&s_un, 0, sizeof(s_un));
@@ -1604,6 +1592,7 @@ PHP_FUNCTION(socket_get_option)
 #endif
 
 			array_init(return_value);
+
 			add_assoc_long(return_value, "sec", tv.tv_sec);
 			add_assoc_long(return_value, "usec", tv.tv_usec);
 			break;
@@ -1615,6 +1604,7 @@ PHP_FUNCTION(socket_get_option)
 				PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
 				RETURN_FALSE;
 			}
+
 			RETURN_LONG(other_val);
 			break;
 	}
@@ -1632,14 +1622,13 @@ PHP_FUNCTION(socket_set_option)
 #ifdef PHP_WIN32
 	int				timeout;
 #else
-	struct timeval tv;
+	struct			timeval tv;
 #endif
 	long			level, optname;
 	void 			*opt_ptr;
 	HashTable 		*opt_ht;
 	zval 			**l_onoff, **l_linger;
 	zval 			**sec, **usec;
-
 	/* key name constants */
 	char			*l_onoff_key = "l_onoff";
 	char			*l_linger_key = "l_linger";
@@ -1777,6 +1766,8 @@ PHP_FUNCTION(socket_create_pair)
 	php_sock[1]->type		= domain;
 	php_sock[0]->error		= 0;
 	php_sock[1]->error		= 0;
+	php_sock[0]->blocking	= 1;
+	php_sock[1]->blocking	= 1;
 
 	ZEND_REGISTER_RESOURCE(retval[0], php_sock[0], le_socket);
 	ZEND_REGISTER_RESOURCE(retval[1], php_sock[1], le_socket);
