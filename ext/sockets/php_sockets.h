@@ -83,13 +83,14 @@ typedef struct {
 	PHP_SOCKET bsd_socket;
 	int		type;
 	int		error;
+	int		blocking;
 } php_socket;
 
 /* Prototypes */
 #ifdef ilia_0 /* not needed, only causes a compiler warning */
 static int php_open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC);
 static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la TSRMLS_DC);
-static int php_read(int bsd_socket, void *buf, size_t maxlen, int flags);
+static int php_read(php_socket *sock, void *buf, size_t maxlen, int flags);
 static char *php_strerror(int error TSRMLS_DC);
 #endif
 
