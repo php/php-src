@@ -14,12 +14,12 @@ mysqli bind_param/bind_result tinyint values
 
 	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch");
 	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 tinyint,
-                                                     c2 tinyint unsigned,
-                                                     c3 tinyint not NULL,
-                                                     c4 tinyint,
-                                                     c5 tinyint,
-                                                     c6 tinyint unsigned,
-                                                     c7 tinyint)");
+		c2 tinyint unsigned,
+		c3 tinyint not NULL,
+		c4 tinyint,
+		c5 tinyint,
+		c6 tinyint unsigned,
+		c7 tinyint)");
 
 	$stmt = mysqli_prepare ($link, "INSERT INTO test_bind_fetch VALUES(?,?,?,?,?,?,?)");
 	mysqli_bind_param($stmt, "iiiiiii", $c1,$c2,$c3,$c4,$c5,$c6,$c7);

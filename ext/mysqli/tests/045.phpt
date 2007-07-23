@@ -31,6 +31,11 @@ mysqli_bind_result (SHOW)
 	mysqli_bind_result($stmt, $c1, $c2);
 	mysqli_fetch($stmt);
 	mysqli_stmt_close($stmt);
+	if (ini_get("unicode.semantics") && mysqli_get_server_version($link) < 50000) {
+		/* variables are binary */
+		settype($c1, "unicode");
+		settype($c2, "unicode");
+	}
 	$test = array ($c1,$c2);
 
 	var_dump($test);

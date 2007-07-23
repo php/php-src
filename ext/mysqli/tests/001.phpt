@@ -34,13 +34,13 @@ mysqli connect
 
 	/* temporary addition for Kent's setup, Win32 box */
 	for ($i = 0; $i < 10; $i++) {
-	    if (!$link = mysqli_init())
-	       printf("[001 + %d] mysqli_init() failed, [%d] %s\n", $i, mysqli_connect_errno(), mysqli_connect_error());
+		if (!$link = mysqli_init())
+			printf("[001 + %d] mysqli_init() failed, [%d] %s\n", $i, mysqli_connect_errno(), mysqli_connect_error());
 
-	    if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
-	       printf("[002 + %d] mysqli_real_connect() failed, [%d] %s\n", $i, mysqli_connect_errno(), mysqli_connect_error());
+		if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
+			printf("[002 + %d] mysqli_real_connect() failed, [%d] %s\n", $i, mysqli_connect_errno(), mysqli_connect_error());
 
-	    mysqli_close($link);
+		mysqli_close($link);
 	}
 
 	/*** test mysqli_real_connect compressed ***/

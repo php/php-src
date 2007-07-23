@@ -20,12 +20,12 @@ mysqli_fetch_object with classes
 
 	mysqli_query($link,"DROP TABLE IF EXISTS test_fetch");
 	mysqli_query($link,"CREATE TABLE test_fetch(c1 smallint unsigned,
-                                                     c2 smallint unsigned,
-                                                     c3 smallint,
-                                                     c4 smallint,
-                                                     c5 smallint,
-                                                     c6 smallint unsigned,
-                                                     c7 smallint)");
+		c2 smallint unsigned,
+		c3 smallint,
+		c4 smallint,
+		c5 smallint,
+		c6 smallint unsigned,
+		c7 smallint)");
 
 	mysqli_query($link, "INSERT INTO test_fetch VALUES ( -23, 35999, NULL, -500, -9999999, -0, 0)");
 
