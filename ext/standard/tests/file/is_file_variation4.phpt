@@ -57,35 +57,15 @@ rmdir($dir_name);
 - Iteration 1 -
 bool(true)
 - Iteration 2 -
-bool(true)
+bool(false)
 - Iteration 3 -
 bool(true)
 - Iteration 4 -
 bool(true)
 - Iteration 5 -
-bool(true)
+bool(false)
 - Iteration 6 -
-bool(true)
-- Iteration 7 -
-bool(true)
-- Iteration 8 -
-bool(true)
-
-*** Done ***
---UEXPECTF--
-*** Testing is_file() with different notations of file names ***
-- Iteration 1 -
-bool(true)
-- Iteration 2 -
-bool(true)
-- Iteration 3 -
-bool(true)
-- Iteration 4 -
-bool(true)
-- Iteration 5 -
-bool(true)
-- Iteration 6 -
-bool(true)
+bool(false)
 - Iteration 7 -
 bool(true)
 - Iteration 8 -
