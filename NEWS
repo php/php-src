@@ -59,6 +59,7 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #42071 (ini scanner allows using NULL as option name). (Jani)
 - Fixed bug #42019 (configure option --with-adabas=DIR does not work). (Jani)
 - Fixed bug #42015 (ldap_rename(): server error "DSA is unwilling to perform").
   (bob at mroczka dot com, Jani)
