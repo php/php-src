@@ -27,6 +27,8 @@ $tests = <<<TESTS
 
 "123|==1234567890|==123" === wordwrap("123 1234567890 123", 10, "|==", 1)
 
+FALSE === @wordwrap(chr(0), 0, "")
+
 TESTS;
 
 include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
