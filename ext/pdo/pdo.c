@@ -54,12 +54,12 @@ int php_pdo_list_entry(void)
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
 
-PDO_API zend_class_entry *php_pdo_get_dbh_ce()
+PDO_API zend_class_entry *php_pdo_get_dbh_ce(void)
 {
 	return pdo_dbh_ce;
 }
 
-PDO_API zend_class_entry *php_pdo_get_exception()
+PDO_API zend_class_entry *php_pdo_get_exception(void)
 {
 	return pdo_exception_ce;
 }
