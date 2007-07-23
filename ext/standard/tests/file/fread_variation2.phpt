@@ -1,5 +1,5 @@
 --TEST--
-Test fread() function : usage variations - read some/all chars, write only mode(fails, see bug#42036)
+Test fread() function : usage variations - read some/all chars, write only mode (Bug #42036)
 --FILE--
 <?php
 /*
@@ -101,7 +101,7 @@ foreach($file_content_types as $file_content_type) {
   } // end of inner foreach loop
 }// end of outer foreach loop
 
-echo"Done\n";
+echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing fread() : usage variations ***
