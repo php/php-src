@@ -48,6 +48,10 @@ ZEND_API ts_rsrc_id ini_scanner_globals_id;
 ZEND_API zend_scanner_globals ini_scanner_globals;
 #endif
 
+# define YY_INPUT(buf, result, max_size) \
+	if ( ((result = zend_stream_read(yyin, buf, max_size TSRMLS_CC)) == 0) \
+		  && zend_stream_ferror( yyin TSRMLS_CC) ) \
+		YY_FATAL_ERROR( "input in flex scanner failed" );
 
 static char *ini_filename;
 
@@ -56,18 +60,15 @@ void init_ini_scanner(TSRMLS_D)
 	SCNG(lineno)=1;
 }
 
-
 int zend_ini_scanner_get_lineno(TSRMLS_D)
 {
 	return SCNG(lineno);
 }
 
-
 char *zend_ini_scanner_get_filename(TSRMLS_D)
 {
 	return ini_filename;
 }
-
 
 int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 {
@@ -82,7 +83,6 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 	return SUCCESS;
 }
 
-
 int zend_ini_prepare_string_for_scanning(char *str TSRMLS_DC)
 {
 	int len = strlen(str);
@@ -92,7 +92,6 @@ int zend_ini_prepare_string_for_scanning(char *str TSRMLS_DC)
 	ini_filename = NULL;
 	return SUCCESS;
 }
-
 
 void zend_ini_close_file(zend_file_handle *fh TSRMLS_DC)
 {
@@ -113,17 +112,17 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <INITIAL>[ ]*("true"|"on"|"yes")[ ]* {
-	ini_lval->value.str.val = zend_strndup("1", 1);
-	ini_lval->value.str.len = 1;
-	ini_lval->type = IS_STRING;
+	Z_STRVAL_P(ini_lval) = zend_strndup("1", 1);
+	Z_STRLEN_P(ini_lval) = 1;
+	Z_TYPE_P(ini_lval) = IS_STRING;
 	return CFG_TRUE;
 }
 
 
-<INITIAL>[ ]*("false"|"off"|"no"|"none")[ ]* {
-	ini_lval->value.str.val = zend_strndup("", 0);
-	ini_lval->value.str.len = 0;
-	ini_lval->type = IS_STRING;
+<INITIAL>[ ]*("false"|"off"|"no"|"none"|"null")[ ]* {
+	Z_STRVAL_P(ini_lval) = zend_strndup("", 0);
+	Z_STRLEN_P(ini_lval) = 0;
+	Z_TYPE_P(ini_lval) = IS_STRING;
 	return CFG_FALSE;
 }
 
@@ -142,12 +141,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	yytext++;
 	yyleng--;
 
-	ini_lval->value.str.val = zend_strndup(yytext, yyleng);
-	ini_lval->value.str.len = yyleng;
-	ini_lval->type = IS_STRING;
+	Z_STRVAL_P(ini_lval) = zend_strndup(yytext, yyleng);
+	Z_STRLEN_P(ini_lval) = yyleng;
+	Z_TYPE_P(ini_lval) = IS_STRING;
 	return SECTION;
 }
-
 
 <INITIAL>["][^"]*["] {
 	char *p = yytext;
@@ -168,14 +166,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	/* eat leading " */
 	yytext++;
 
-	ini_lval->value.str.val = zend_strndup(yytext, yyleng - 2);
-	ini_lval->value.str.len = yyleng - 2;
-	ini_lval->type = IS_STRING;
+	Z_STRVAL_P(ini_lval) = zend_strndup(yytext, yyleng - 2);
+	Z_STRLEN_P(ini_lval) = yyleng - 2;
+	Z_TYPE_P(ini_lval) = IS_STRING;
 	return TC_ENCAPSULATED_STRING;
-}
-
-<INITIAL>[&|~$(){}!] {
-	return yytext[0];
 }
 
 <INITIAL>"${" {
@@ -183,7 +177,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <INITIAL>"}" {
-	ini_lval->value.lval = (long) yytext[0];
+	Z_LVAL_P(ini_lval) = (long) yytext[0];
+	return yytext[0];
+}
+
+<INITIAL>[&|~$(){}!] {
 	return yytext[0];
 }
 
@@ -210,9 +208,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 	}
 	if (yyleng!=0) {
-		ini_lval->value.str.val = zend_strndup(yytext, yyleng);
-		ini_lval->value.str.len = yyleng;
-		ini_lval->type = IS_STRING;
+		Z_STRVAL_P(ini_lval) = zend_strndup(yytext, yyleng);
+		Z_STRLEN_P(ini_lval) = yyleng;
+		Z_TYPE_P(ini_lval) = IS_STRING;
 		return TC_STRING;
 	} else {
 		/* whitespace */

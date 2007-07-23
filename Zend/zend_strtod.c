@@ -91,6 +91,7 @@
 
 /* $Id$ */
 
+#include <zend_operators.h>
 #include <zend_strtod.h>
 
 #ifdef ZTS
