@@ -7309,7 +7309,7 @@ PHP_FUNCTION(str_pad)
 	}
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
-	if (num_pad_chars < 0) {
+	if (pad_length < 0 || num_pad_chars < 0) {
 		if (input_type == IS_UNICODE) {
 			RETURN_UNICODEL((UChar *)input, input_len, 1);
 		} else {
