@@ -978,6 +978,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 		while (func->fname) {
 			if (zend_hash_find(EG(function_table), func->fname, strlen(func->fname) + 1, (void**) &fptr) == FAILURE) {
 				zend_error(E_WARNING, "Internal error: Cannot find extension function %s in global function table", func->fname);
+				func++;
 				continue;
 			}
 			
@@ -4214,6 +4215,7 @@ ZEND_METHOD(reflection_extension, getFunctions)
 		while (func->fname) {
 			if (zend_hash_find(EG(function_table), func->fname, strlen(func->fname) + 1, (void**) &fptr) == FAILURE) {
 				zend_error(E_WARNING, "Internal error: Cannot find extension function %s in global function table", func->fname);
+				func++;
 				continue;
 			}
 			
