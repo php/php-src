@@ -14,12 +14,12 @@ mysqli bind_param/bind_prepare fetch long values
 
 	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch");
 	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 int unsigned,
-                                                     c2 int unsigned,
-                                                     c3 int,
-                                                     c4 int,
-                                                     c5 int,
-                                                     c6 int unsigned,
-                                                     c7 int)");
+		c2 int unsigned,
+		c3 int,
+		c4 int,
+		c5 int,
+		c6 int unsigned,
+		c7 int)");
 
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_fetch VALUES (?,?,?,?,?,?,?)");
 	mysqli_bind_param($stmt, "iiiiiii", $c1,$c2,$c3,$c4,$c5,$c6,$c7);

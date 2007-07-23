@@ -10,9 +10,9 @@ function test: nested selects (cursors)
 
 	/* skip cursor test for versions < 50004 */
 	if ((!$IS_MYSQLND && mysqli_get_client_version() < 50009) ||
-	     (mysqli_get_server_version($link) < 50009)) {
-		  die(sprintf("skip Client library doesn't support cursors (%s/%s)",
-		      mysqli_get_client_version(), mysqli_get_server_version($link));
+			(mysqli_get_server_version($link) < 50009)) {
+			die(sprintf("skip Client library doesn't support cursors (%s/%s)",
+					mysqli_get_client_version(), mysqli_get_server_version($link));
 	}
 	mysqli_close($link);
 ?>
@@ -21,8 +21,8 @@ function test: nested selects (cursors)
 
 	function open_cursor($mysql, $query) {
 		if (!is_object($stmt = $mysql->prepare($query))) {
-		  printf("[001] Cannot create statement object for '%s', [%d] %s\n",
-		      $query, $mysql->errno, $mysql->error);
+			printf("[001] Cannot create statement object for '%s', [%d] %s\n",
+					$query, $mysql->errno, $mysql->error);
 		}
 
 		$stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_READ_ONLY);
@@ -30,10 +30,15 @@ function test: nested selects (cursors)
 	}
 
 	include "connect.inc";
-	$a = array();
-
-	/*** test mysqli_connect 127.0.0.1 ***/
 	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
+
+	if ((!$IS_MYSQLND && mysqli_get_client_version() < 50009) ||
+		(mysqli_get_server_version($mysql) < 50009)) {
+		/* we really want to skip it... */
+		die(var_dump(63));
+	}
+
+	$a = array();
 
 	for ($i=0;$i < 3; $i++) {
 		$mysql->query("DROP TABLE IF EXISTS cursor$i");

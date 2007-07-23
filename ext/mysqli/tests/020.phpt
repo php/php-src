@@ -18,11 +18,11 @@ mysqli bind_param/bind_result date
 
 	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_result");
 	mysqli_query($link,"CREATE TABLE test_bind_result(c1 date, c2 time,
-                                                        c3 timestamp(14),
-                                                        c4 year,
-                                                        c5 datetime,
-                                                        c6 timestamp(4),
-                                                        c7 timestamp(6))");
+		c3 timestamp(14),
+		c4 year,
+		c5 datetime,
+		c6 timestamp(4),
+		c7 timestamp(6))");
 
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_result VALUES (?,?,?,?,?,?,?)");
 	mysqli_bind_param($stmt, "sssssss", $d1, $d2, $d3, $d4, $d5, $d6, $d7);

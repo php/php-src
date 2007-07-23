@@ -12,13 +12,13 @@ mysqli bind_result (OO-Style)
 	$mysql->select_db($db);
 	$mysql->query("DROP TABLE IF EXISTS test_fetch_null");
 
-  	$mysql->query("CREATE TABLE test_fetch_null(col1 tinyint, col2 smallint,
-                                                       col3 int, col4 bigint,
-                                                       col5 float, col6 double,
-                                                       col7 date, col8 time,
-                                                       col9 varbinary(10),
-                                                       col10 varchar(50),
-                                                       col11 char(20))");
+	$mysql->query("CREATE TABLE test_fetch_null(col1 tinyint, col2 smallint,
+		col3 int, col4 bigint,
+		col5 float, col6 double,
+		col7 date, col8 time,
+		col9 varbinary(10),
+		col10 varchar(50),
+		col11 char(20))");
 
 	$mysql->query("INSERT INTO test_fetch_null(col1,col10, col11) VALUES(1,'foo1', 1000),(2,'foo2', 88),(3,'foo3', 389789)");
 

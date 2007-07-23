@@ -27,17 +27,18 @@ mysqli fetch bigint values (ok to fail with 4.1.x)
 													c4 bigint unsigned,
 													c5 bigint unsigned,
 													c6 bigint unsigned,
-													c7 bigint unsigned) ENGINE=" . $engine);
+													c7 bigint unsigned,
+													c8 bigint unsigned) ENGINE=" . $engine);
 	if (!$rc)
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$rc = mysqli_query($link, "INSERT INTO test_bind_fetch (c2,c3,c4,c5,c6,c7) ".
-							  "VALUES (-23,4.0,33333333333333,0,-333333333333,99.9)");
+	$rc = mysqli_query($link, "INSERT INTO test_bind_fetch (c2,c3,c4,c5,c6,c7,c8) ".
+							  "VALUES (-23,4.0,33333333333333,0,-333333333333,99.9,1234)");
 	if (!$rc)
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch");
-	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);
+	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8);
 	mysqli_execute($stmt);
 	$rc = mysqli_fetch($stmt);
 
@@ -47,7 +48,8 @@ mysqli fetch bigint values (ok to fail with 4.1.x)
 			$c6 = 0;
 		}
 	}
-	$test = array($c1,$c2,$c3,$c4,$c5,$c6,$c7);
+	$c8 = 4567;// change this to test how mysqli/mysqlnd handles is_ref changing
+	$test = array($c1,$c2,$c3,$c4,$c5,$c6,$c7,$c8);
 
 	var_dump($test);
 
@@ -75,7 +77,7 @@ mysqli fetch bigint values (ok to fail with 4.1.x)
 ?>
 
 --EXPECTF--
-array(7) {
+array(8) {
   [0]=>
   int(5)
   [1]=>
@@ -90,12 +92,14 @@ array(7) {
   int(0)
   [6]=>
   int(100)
+  [7]=>
+  int(4567)
 }
 20123456
 3123456789
 done!
 --UEXPECTF--
-array(7) {
+array(8) {
   [0]=>
   int(5)
   [1]=>
@@ -110,6 +114,8 @@ array(7) {
   int(0)
   [6]=>
   int(100)
+  [7]=>
+  int(4567)
 }
 20123456
 3123456789
