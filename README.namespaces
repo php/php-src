@@ -1,0 +1,103 @@
+Main assumption of the model is that the problem that we are to solve is the
+problem of the very long class names in PHP libraries. We would not attempt
+to take autoloader's job or create packaging model - only make names
+manageable. 
+
+Namespaces are defined the following way: 
+
+Zend/DB/Connection.php: 
+<?php 
+namespace Zend::DB;
+
+class Connection {
+}
+
+function connect() {
+}
+?>
+
+Namespace definition does the following: 
+All class and function names inside are automatically prefixed with
+namespace name. Inside namespace, local name always takes precedence over
+global name. It is possible to use the same namespace in several PHP files.
+The namespace declaration statement must be the very first statement in
+file.
+
+Every class and function from namespace can be referred to by the full name
+- e.g. Zend::DB::Connection or Zend::DB::connect - at any time. 
+
+<?php
+require 'Zend/Db/Connection.php';
+$x = new Zend::DB::Connection;
+Zend::DB::connect();
+?>
+
+Namespace or class name can be imported: 
+
+<?php 
+require 'Zend/Db/Connection.php';
+import Zend::DB;
+import Zend::DB::Connection as DbConnection;
+$x = new Zend::DB::Connection();
+$y = new DB::connection();
+$z = new DbConnection();
+DB::connect();
+?>
+
+import statement only defines name aliasing. It may create name alias for
+namespace or class. The simple form of statement "import A::B::C::D;" is
+equivalent to "import A::B::C::D as D;". Import statement can be used at any
+time in global scope (not inside function/class) and takes effect from the
+point of definition down to the end of file. It is recommended however to
+place imports at the beginning of the file. Import statements have effect
+only on file where they are written.
+
+The special "empty" namespace (:: prefix) is useful as explicit global
+namespace qualification. All class and function names started from ::
+interpreted as global. <?php namespace A::B::C;
+
+$con = ::mysql_connect(...);
+?>
+
+A special constant __NAMESPACE__ indicates the current namespace. It can be
+used to construct fully-qualified names to pass them as callbacks.
+
+<?php
+namespace A::B::C;
+
+function foo() {
+}
+
+set_error_handler(__NAMESPACE__ . "::foo");
+?>
+
+In global namespace __NAMESPACE__ constant has value of empty string.
+
+Names inside namespace are resolved according to the following rules.
+
+1) all qualified names are translated during compilation according to
+current import rules. So if we have "import A::B::C;" and then "C::D::e();"
+it is translated to "A::B::C::D::e()"
+2) unqualified class names translated during compilation according to
+current import rules. So if we have "import A::B::C;" and then "new C();" it
+is translated to "new A::B::C()"
+
+3) calls to unqualified functions that are defined in current namespace
+interpreted as calls to corresponding functions
+4) calls to unqualified functions that are not defined in current namespace
+are resolved in run-time. The call to function foo() inside namespace (A::B)
+first tries to find and call function from current namespace A::B::foo() and
+if it doesn't exist PHP tries to call internal function foo(). Note that
+using foo() in namespace you can call only internal PHP functions, however
+using ::foo() you are able to call any function from global namespace.
+5) unqualified class names are resolved at run-time. E.q. "new Exception()"
+first tries to use (end even __autoload()) class from current namespace and
+in case of failure uses internal PHP class. Note that using "new A" in
+namespace you can call only create internal PHP class, however using "new
+::A" you are able to create any class from global namespace
+6) Calls to qualified functions are resolved at run-time. Call to
+"A::B::foo()" first tries to call function foo() from namespace "A::B", then
+it tries to find class "A::B (__autoload() it if necessary) and call its
+static function foo() 
+7) qualified class names are interpreted as class from corresponding
+namespace. So "new A::B::C()" creates class "C" from namespace "A::B".
