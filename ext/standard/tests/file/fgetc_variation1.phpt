@@ -1,5 +1,5 @@
 --TEST--
-Test fgetc() function : usage variations - read when file pointer at EOF(fails, see bug#42037)
+Test fgetc() function : usage variations - read when file pointer at EOF (Bug #42037)
 --FILE--
 <?php
 /*
