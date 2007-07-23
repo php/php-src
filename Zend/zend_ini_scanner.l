@@ -60,18 +60,15 @@ void init_ini_scanner(TSRMLS_D)
 	SCNG(lineno)=1;
 }
 
-
 int zend_ini_scanner_get_lineno(TSRMLS_D)
 {
 	return SCNG(lineno);
 }
 
-
 char *zend_ini_scanner_get_filename(TSRMLS_D)
 {
 	return ini_filename;
 }
-
 
 int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 {
@@ -85,7 +82,6 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 	ini_filename = fh->filename;
 	return SUCCESS;
 }
-
 
 int zend_ini_prepare_string_for_scanning(char *str TSRMLS_DC)
 {
@@ -123,7 +119,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<INITIAL>[ ]*("false"|"off"|"no"|"none")[ ]* {
+<INITIAL>[ ]*("false"|"off"|"no"|"none"|"null")[ ]* {
 	Z_STRVAL_P(ini_lval) = zend_strndup("", 0);
 	Z_STRLEN_P(ini_lval) = 0;
 	Z_TYPE_P(ini_lval) = IS_STRING;
@@ -151,7 +147,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return SECTION;
 }
 
-
 <INITIAL>["][^"]*["] {
 	char *p = yytext;
 
@@ -177,16 +172,16 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return TC_ENCAPSULATED_STRING;
 }
 
-<INITIAL>[&|~$(){}!] {
-	return yytext[0];
-}
-
 <INITIAL>"${" {
 	return TC_DOLLAR_CURLY;
 }
 
 <INITIAL>"}" {
 	Z_LVAL_P(ini_lval) = (long) yytext[0];
+	return yytext[0];
+}
+
+<INITIAL>[&|~$(){}!] {
 	return yytext[0];
 }
 
