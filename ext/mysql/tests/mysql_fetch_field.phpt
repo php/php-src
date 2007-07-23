@@ -4,106 +4,106 @@ mysql_fetch_field()
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-    include "connect.inc";
-    
-    $tmp    = NULL;
-    $link   = NULL;
-    
-    // Note: no SQL type tests, internally the same function gets used as for mysql_fetch_array() which does a lot of SQL type test
-    if (!is_null($tmp = @mysql_fetch_field()))
-        printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	include "connect.inc";
 
-    if (false !== ($tmp = @mysql_fetch_field($link)))
-        printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+	$tmp    = NULL;
+	$link   = NULL;
 
-    require('table.inc');
-    
-    
-    $version = mysql_get_server_info($link);    
-    if (!preg_match('@(\d+)\.(\d+)\.(\d+)@ism', $version, $matches))
-        printf("[003] Cannot get server version\n");
-    $version = ($matches[1] * 100) + ($matches[2] * 10) + $matches[3];
-    
-    if (!$res = mysql_query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1", $link)) {
-        printf("[004] [%d] %s\n", mysql_errno($link), mysql_error($link));
-    }
+	// Note: no SQL type tests, internally the same function gets used as for mysql_fetch_array() which does a lot of SQL type test
+	if (!is_null($tmp = @mysql_fetch_field()))
+		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-    while ($tmp = mysql_fetch_field($res))
-        var_dump($tmp);
-    var_dump($tmp);
+	if (false !== ($tmp = @mysql_fetch_field($link)))
+		printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-    mysql_free_result($res);
-    
-    if (!$res = mysql_query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1", $link)) {
-        printf("[005] [%d] %s\n", mysql_errno($link), mysql_error($link));
-    }
-    if (false !== ($tmp = mysql_fetch_field($res, PHP_INT_MAX * 2))) 
-        printf("[006] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
-        
-    mysql_free_result($res);
-    
-    if (false !== ($tmp = mysql_fetch_field($res)))
-        printf("[007] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-        
-    $types = array(
-                    'BIT'               => array(1, 'int'),
-                    'TINYINT'           => array(1, 'int'),
-                    'BOOL'              => array('true', 'int'),
-                    'SMALLINT'          => array(32767, 'int'),
-                    'MEDIUMINT'         => array(8388607, 'int'),
-                    'INT'               => array(100, 'int'),
-                    'BIGINT'            => array(100, 'int'),
-                    'FLOAT'             => array(100, 'real'),
-                    'DOUBLE'            => array(100, 'real'),
-                    'DECIMAL'           => array(100, 'real'),
-                    'DATE'              => array(@date('Y-m-d'), 'date'),
-                    'DATETIME'          => array(@date('Y-m-d H:i:s'), 'datetime'),
-                    'TIMESTAMP'         => array(@date('Y-m-d H:i:s'), 'timestamp'),
-                    'TIME'              => array(@date('H:i:s'), 'time'),
-                    'YEAR'              => array(@date('Y'), 'year'),
-                    'CHAR(1)'           => array('a', 'string'),
-                    'VARCHAR(1)'        => array('a', 'string'),
-                    'BINARY(1)'         => array('a', 'string'),
-                    'VARBINARY(1)'      => array('a', 'string'),
-                    'TINYBLOB'          => array('a', 'blob'),
-                    'TINYTEXT'          => array('a', 'blob'),
-                    'BLOB'              => array('a', 'blob'),
-                    'TEXT'              => array('a', 'blob'),
-                    'MEDIUMBLOB'        => array('a', 'blob'),
-                    'MEDIUMTEXT'        => array('a', 'blob'),
-                    'LONGBLOB'          => array('a', 'blob'),
-                    'LONGTEXT'          => array('a', 'blob'),
-                    'ENUM("a", "b")'    => array('a', 'string'), /* !!! */
-                    'SET("a", "b")'     => array('a', 'string'), /* !!! */
-                  );
-                  
-    foreach ($types as $type_name => $type_desc) {
-        if (!mysql_query("DROP TABLE IF EXISTS test", $link))
-            printf("[008/%s] [%d] %s\n", $type_name, mysql_errno($link), mysql_error($link));
-        if (!mysql_query(sprintf("CREATE TABLE test(id INT, label %s) ENGINE = %s", $type_name, $engine), $link)) {
-            // server and/or engine might not support the data type            
-            continue;
-        }
-        if (!mysql_query(sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $type_desc[0]), $link)) {
-            printf("[009/%s] [%d] %s\n", $type_name, mysql_errno($link), mysql_error($link));
-            continue;
-        }
-        if (!$res = mysql_query("SELECT id, label FROM test", $link)) {
-            printf("[010/%s] [%d] %s\n", $type_name, mysql_errno($link), mysql_error($link));
-            continue;
-        }
-        if (!$tmp = mysql_fetch_field($res, 1)) {
-            printf("[011/%s] [%d] %s\n", $type_name, mysql_errno($link), mysql_error($link));
-        }
-        
-        if ($type_desc[1] != $tmp->type) {
-            printf("[012/%s] Expecting type '%s' got '%s'\n", $type_name, $type_desc[1], $tmp->type);
-        }
-        mysql_free_result($res);            
-    }
-    
-    mysql_close($link);
-    print "done!";
+	require('table.inc');
+
+
+	$version = mysql_get_server_info($link);
+	if (!preg_match('@(\d+)\.(\d+)\.(\d+)@ism', $version, $matches))
+		printf("[003] Cannot get server version\n");
+	$version = ($matches[1] * 100) + ($matches[2] * 10) + $matches[3];
+
+	if (!$res = mysql_query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1", $link)) {
+		printf("[004] [%d] %s\n", mysql_errno($link), mysql_error($link));
+	}
+
+	while ($tmp = mysql_fetch_field($res))
+		var_dump($tmp);
+	var_dump($tmp);
+
+	mysql_free_result($res);
+
+	if (!$res = mysql_query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1", $link)) {
+		printf("[005] [%d] %s\n", mysql_errno($link), mysql_error($link));
+	}
+	if (false !== ($tmp = mysql_fetch_field($res, PHP_INT_MAX * 2)))
+		printf("[006] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
+
+	mysql_free_result($res);
+
+	if (false !== ($tmp = mysql_fetch_field($res)))
+		printf("[007] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+
+	$types = array(
+		'BIT'               => array(1, 'int'),
+		'TINYINT'           => array(1, 'int'),
+		'BOOL'              => array('true', 'int'),
+		'SMALLINT'          => array(32767, 'int'),
+		'MEDIUMINT'         => array(8388607, 'int'),
+		'INT'               => array(100, 'int'),
+		'BIGINT'            => array(100, 'int'),
+		'FLOAT'             => array(100, 'real'),
+		'DOUBLE'            => array(100, 'real'),
+		'DECIMAL'           => array(100, 'real'),
+		'DATE'              => array(@date('Y-m-d'), 'date'),
+		'DATETIME'          => array(@date('Y-m-d H:i:s'), 'datetime'),
+		'TIMESTAMP'         => array(@date('Y-m-d H:i:s'), 'timestamp'),
+		'TIME'              => array(@date('H:i:s'), 'time'),
+		'YEAR'              => array(@date('Y'), 'year'),
+		'CHAR(1)'           => array('a', 'string'),
+		'VARCHAR(1)'        => array('a', 'string'),
+		'BINARY(1)'         => array('a', 'string'),
+		'VARBINARY(1)'      => array('a', 'string'),
+		'TINYBLOB'          => array('a', 'blob'),
+		'TINYTEXT'          => array('a', 'blob'),
+		'BLOB'              => array('a', 'blob'),
+		'TEXT'              => array('a', 'blob'),
+		'MEDIUMBLOB'        => array('a', 'blob'),
+		'MEDIUMTEXT'        => array('a', 'blob'),
+		'LONGBLOB'          => array('a', 'blob'),
+		'LONGTEXT'          => array('a', 'blob'),
+		'ENUM("a", "b")'    => array('a', 'string'), /* !!! */
+		'SET("a", "b")'     => array('a', 'string'), /* !!! */
+	);
+
+	foreach ($types as $type_name => $type_desc) {
+		if (!mysql_query("DROP TABLE IF EXISTS test", $link))
+			printf("[008/%s] [%d] %s\n", $type_name, mysql_errno($link), mysql_error($link));
+		if (!mysql_query(sprintf("CREATE TABLE test(id INT, label %s) ENGINE = %s", $type_name, $engine), $link)) {
+			// server and/or engine might not support the data type
+			continue;
+		}
+		if (!mysql_query(sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $type_desc[0]), $link)) {
+			printf("[009/%s] [%d] %s\n", $type_name, mysql_errno($link), mysql_error($link));
+			continue;
+		}
+		if (!$res = mysql_query("SELECT id, label FROM test", $link)) {
+			printf("[010/%s] [%d] %s\n", $type_name, mysql_errno($link), mysql_error($link));
+			continue;
+		}
+		if (!$tmp = mysql_fetch_field($res, 1)) {
+			printf("[011/%s] [%d] %s\n", $type_name, mysql_errno($link), mysql_error($link));
+		}
+
+		if ($type_desc[1] != $tmp->type) {
+			printf("[012/%s] Expecting type '%s' got '%s'\n", $type_name, $type_desc[1], $tmp->type);
+		}
+		mysql_free_result($res);
+	}
+
+	mysql_close($link);
+	print "done!";
 ?>
 --EXPECTF--
 object(stdClass)#%d (13) {
