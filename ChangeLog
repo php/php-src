@@ -1,3 +1,173 @@
+2007-07-22  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS
+      ext/sockets/php_sockets.h
+      ext/sockets/php_sockets_win.c
+      ext/sockets/php_sockets_win.h
+      ext/sockets/sockets.c:
+      MFH:- Fixed bug #21197 (socket_read() outputs error with PHP_NORMAL_READ)
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/php_sockets_win.c
+      ext/sockets/php_sockets_win.h
+      ext/sockets/sockets.c:
+      - Fixed bug #21197 (socket_read() outputs error with PHP_NORMAL_READ)
+
+    * (PHP_5_2)
+      ext/sockets/sockets.c:
+      MFH: ws fix + sync U stuff for patches to MFB easier
+
+    * ext/sockets/sockets.c:
+      WS fix
+
+    * (PHP_5_2)
+      ext/sockets/config.m4:
+      - Test properly for socketpair inside an extension.
+
+    * ext/sockets/config.m4
+      ext/sockets/php_sockets.h
+      ext/sockets/sockets.c:
+      MFB: sockepair is not always available
+
+2007-07-22  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/fread_variation3-win32.phpt
+      ext/standard/tests/file/fread_variation4-win32.phpt:
+      More new testcases for fread() function
+
+    * ext/standard/tests/file/fread_variation3-win32.phpt
+      ext/standard/tests/file/fread_variation3-win32.phpt
+      ext/standard/tests/file/fread_variation4-win32.phpt
+      ext/standard/tests/file/fread_variation4-win32.phpt:
+      
+      More new testcases for fread() function
+
+    * ext/standard/tests/file/fread_variation1.phpt
+      ext/standard/tests/file/fread_variation2.phpt
+      ext/standard/tests/file/fread_variation3.phpt
+      ext/standard/tests/file/fread_variation4.phpt:
+      New testcases for fread() functions
+
+    * ext/standard/tests/file/fread_variation1.phpt
+      ext/standard/tests/file/fread_variation1.phpt
+      ext/standard/tests/file/fread_variation2.phpt
+      ext/standard/tests/file/fread_variation2.phpt
+      ext/standard/tests/file/fread_variation3.phpt
+      ext/standard/tests/file/fread_variation3.phpt
+      ext/standard/tests/file/fread_variation4.phpt
+      ext/standard/tests/file/fread_variation4.phpt:
+      
+      file fread_variation1.phpt was initially added on branch PHP_5_2.
+
+2007-07-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/wordwrap.phpt:
+      
+      Fixed "Floating point exception" inside wordwrap()
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c
+      ext/pdo/tests/pdo_034.phpt:
+      Added test for KEY_PAIR code and fixed KEY_PAIR detection code
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c:
+      Fixed PDO_FETCH_KEY_PAIR implementation for fetchAll()
+
+2007-07-22  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/stat_variation1-win32.phpt
+      ext/standard/tests/file/stat_variation2-win32.phpt
+      ext/standard/tests/file/stat_variation3-win32.phpt
+      ext/standard/tests/file/stat_variation4-win32.phpt
+      ext/standard/tests/file/stat_variation5-win32.phpt
+      ext/standard/tests/file/stat_variation6-win32.phpt
+      ext/standard/tests/file/stat_variation7-win32.phpt
+      ext/standard/tests/file/stat_variation8-win32.phpt:
+      New testcases for stat() function on windows
+
+    * (PHP_5_2)
+      ext/standard/tests/file/ftruncate_error.phpt
+      ext/standard/tests/file/ftruncate_variation1-win32.phpt
+      ext/standard/tests/file/ftruncate_variation1.phpt
+      ext/standard/tests/file/ftruncate_variation2-win32.phpt
+      ext/standard/tests/file/ftruncate_variation2.phpt
+      ext/standard/tests/file/ftruncate_variation3-win32.phpt
+      ext/standard/tests/file/ftruncate_variation3.phpt
+      ext/standard/tests/file/ftruncate_variation4-win32.phpt
+      ext/standard/tests/file/ftruncate_variation4.phpt
+      ext/standard/tests/file/ftruncate_variation5-win32.phpt
+      ext/standard/tests/file/ftruncate_variation5.phpt
+      ext/standard/tests/file/ftruncate_variation6-win32.phpt
+      ext/standard/tests/file/ftruncate_variation6.phpt
+      ext/standard/tests/file/ftruncate_variation7-win32.phpt
+      ext/standard/tests/file/ftruncate_variation7.phpt:
+      New testcases for ftruncate() function
+
+    * ext/standard/tests/file/stat_variation1-win32.phpt
+      ext/standard/tests/file/stat_variation1-win32.phpt
+      ext/standard/tests/file/stat_variation2-win32.phpt
+      ext/standard/tests/file/stat_variation2-win32.phpt
+      ext/standard/tests/file/stat_variation3-win32.phpt
+      ext/standard/tests/file/stat_variation3-win32.phpt
+      ext/standard/tests/file/stat_variation4-win32.phpt
+      ext/standard/tests/file/stat_variation4-win32.phpt
+      ext/standard/tests/file/stat_variation5-win32.phpt
+      ext/standard/tests/file/stat_variation5-win32.phpt
+      ext/standard/tests/file/stat_variation6-win32.phpt
+      ext/standard/tests/file/stat_variation6-win32.phpt
+      ext/standard/tests/file/stat_variation7-win32.phpt
+      ext/standard/tests/file/stat_variation7-win32.phpt
+      ext/standard/tests/file/stat_variation8-win32.phpt
+      ext/standard/tests/file/stat_variation8-win32.phpt:
+      
+      smaller testcases for stat() function on Windows
+
+    * ext/standard/tests/file/ftruncate_error.phpt
+      ext/standard/tests/file/ftruncate_error.phpt
+      ext/standard/tests/file/ftruncate_variation1-win32.phpt
+      ext/standard/tests/file/ftruncate_variation1-win32.phpt
+      ext/standard/tests/file/ftruncate_variation1.phpt
+      ext/standard/tests/file/ftruncate_variation1.phpt
+      ext/standard/tests/file/ftruncate_variation2-win32.phpt
+      ext/standard/tests/file/ftruncate_variation2-win32.phpt
+      ext/standard/tests/file/ftruncate_variation2.phpt
+      ext/standard/tests/file/ftruncate_variation2.phpt
+      ext/standard/tests/file/ftruncate_variation3-win32.phpt
+      ext/standard/tests/file/ftruncate_variation3-win32.phpt
+      ext/standard/tests/file/ftruncate_variation3.phpt
+      ext/standard/tests/file/ftruncate_variation3.phpt
+      ext/standard/tests/file/ftruncate_variation4-win32.phpt
+      ext/standard/tests/file/ftruncate_variation4-win32.phpt
+      ext/standard/tests/file/ftruncate_variation4.phpt
+      ext/standard/tests/file/ftruncate_variation4.phpt
+      ext/standard/tests/file/ftruncate_variation5-win32.phpt
+      ext/standard/tests/file/ftruncate_variation5-win32.phpt
+      ext/standard/tests/file/ftruncate_variation5.phpt
+      ext/standard/tests/file/ftruncate_variation5.phpt
+      ext/standard/tests/file/ftruncate_variation6-win32.phpt
+      ext/standard/tests/file/ftruncate_variation6-win32.phpt
+      ext/standard/tests/file/ftruncate_variation6.phpt
+      ext/standard/tests/file/ftruncate_variation6.phpt
+      ext/standard/tests/file/ftruncate_variation7-win32.phpt
+      ext/standard/tests/file/ftruncate_variation7-win32.phpt
+      ext/standard/tests/file/ftruncate_variation7.phpt
+      ext/standard/tests/file/ftruncate_variation7.phpt:
+      
+      New testcases for ftruncate() function
+
+    * ext/standard/tests/file/umask_basic.phpt
+      ext/standard/tests/file/umask_basic.phpt
+      ext/standard/tests/file/umask_error.phpt
+      ext/standard/tests/file/umask_error.phpt:
+      fix tests
+
 2007-07-21  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * ext/standard/tests/file/umask_variation1.phpt
