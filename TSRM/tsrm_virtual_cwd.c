@@ -692,6 +692,15 @@ no_realpath:
 			}
 			ptr = tsrm_strtok_r(NULL, TOKENIZER_STRING, &tok);
 		}
+#if defined(TSRM_WIN32) || defined(NETWARE)
+		if (path[path_length-1] == '\\' || path[path_length-1] == '/') {
+#else 
+		if (path[path_length-1] == '/') {
+#endif
+			state->cwd = (char*)realloc(state->cwd, state->cwd_length + 2);
+			state->cwd[state->cwd_length++] = DEFAULT_SLASH;
+			state->cwd[state->cwd_length] = 0;
+		}
 
 		free(free_path);
 
@@ -979,14 +988,14 @@ CWD_API int virtual_rename(char *oldname, char *newname TSRMLS_DC)
 	int retval;
 
 	CWD_STATE_COPY(&old_state, &CWDG(cwd));
-	if (virtual_file_ex(&old_state, oldname, NULL, CWD_REALPATH)) {
+	if (virtual_file_ex(&old_state, oldname, NULL, CWD_EXPAND)) {
 		CWD_STATE_FREE(&old_state);
 		return -1;
 	}
 	oldname = old_state.cwd;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, newname, NULL, CWD_FILEPATH)) {
+	if (virtual_file_ex(&new_state, newname, NULL, CWD_EXPAND)) {
 		CWD_STATE_FREE(&old_state);
 		CWD_STATE_FREE(&new_state);
 		return -1;
