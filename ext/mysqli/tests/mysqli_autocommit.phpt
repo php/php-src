@@ -146,7 +146,7 @@ mysqli_autocommit()
 	if (NULL !== ($tmp = @mysqli_autocommit($link, false)))
 		printf("[033] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	print "done!\n";
+	print "done!";
 ?>
 --EXPECTF--
 done!
