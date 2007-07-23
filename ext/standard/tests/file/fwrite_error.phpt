@@ -1,5 +1,5 @@
 --TEST--
-Test fwrite() function : error conditions (fails, see bug#42057)
+Test fwrite() function : error conditions (Bug #42057)
 --FILE--
 <?php
 /*
