@@ -1,5 +1,5 @@
 --TEST--
-Test fgetc() function : usage variations - write only modes (fails, see bug#42036)
+Test fgetc() function : usage variations - write only modes (Bug #42036)
 --FILE--
 <?php
 /*
