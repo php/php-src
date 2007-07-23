@@ -57,15 +57,15 @@ rmdir($dir_name);
 - Iteration 1 -
 bool(true)
 - Iteration 2 -
-bool(true)
+bool(false)
 - Iteration 3 -
 bool(true)
 - Iteration 4 -
 bool(true)
 - Iteration 5 -
-bool(true)
+bool(false)
 - Iteration 6 -
-bool(true)
+bool(false)
 - Iteration 7 -
 bool(true)
 - Iteration 8 -
