@@ -210,7 +210,10 @@ static PHP_INI_MH(OnUpdateTimeout)
 	zend_set_timeout(EG(timeout_seconds));
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_INI_MH
+ */
 static ZEND_INI_MH(OnUpdateOutputEncoding)
 {
 	if (new_value) {
