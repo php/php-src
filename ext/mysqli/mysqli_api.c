@@ -145,13 +145,13 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 		switch (types[ofs]) {
 			case 'd': /* Double */
 				bind[ofs].buffer_type = MYSQL_TYPE_DOUBLE;
-				bind[ofs].buffer = (gptr)&Z_DVAL_PP(args[i]);
+				bind[ofs].buffer = (char*)&Z_DVAL_PP(args[i]);
 				bind[ofs].is_null = &stmt->param.is_null[ofs];
 				break;
 
 			case 'i': /* Integer */
 				bind[ofs].buffer_type = MYSQL_TYPE_LONG;
-				bind[ofs].buffer = (gptr)&Z_LVAL_PP(args[i]);
+				bind[ofs].buffer = (char*)&Z_LVAL_PP(args[i]);
 				bind[ofs].is_null = &stmt->param.is_null[ofs];
 				break;
 
@@ -620,11 +620,11 @@ PHP_FUNCTION(mysqli_stmt_execute)
 						break;
 					case MYSQL_TYPE_DOUBLE:
 						convert_to_double_ex(&stmt->param.vars[i]);
-						stmt->stmt->params[i].buffer = (gptr)&Z_LVAL_PP(&stmt->param.vars[i]);
+						stmt->stmt->params[i].buffer = (char*)&Z_LVAL_PP(&stmt->param.vars[i]);
 						break;
 					case MYSQL_TYPE_LONG:
 						convert_to_long_ex(&stmt->param.vars[i]);
-						stmt->stmt->params[i].buffer = (gptr)&Z_LVAL_PP(&stmt->param.vars[i]);
+						stmt->stmt->params[i].buffer = (char*)&Z_LVAL_PP(&stmt->param.vars[i]);
 						break;
 					default:
 						break;
