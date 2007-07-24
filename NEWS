@@ -169,6 +169,10 @@ PHP                                                                        NEWS
 - Fixed bug #41127 (Memory leak in ldap_{first|next}_attribute functions).
   (Jani)
 - Fixed bug #40757 (get_object_vars get nothing in child class). (Dmitry)
+- Fixed bug #40705 (Iterating within function moves original array pointer).
+  (Dmitry)
+- Fixed bug #40509 (key() function changed behaviour if global array is used
+  within function). (Dmitry)
 - Fixed bug #40419 (Trailing slash in CGI request does not work). (Dmitry)
 - Fixed bug #39330 (apache2handler does not call shutdown actions before 
   apache child die). (isk at ecommerce dot com, Gopal, Tony)
