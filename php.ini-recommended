@@ -357,6 +357,18 @@ error_reporting  =  E_ALL
 ; instead (see below).  Keeping display_errors enabled on a production web site
 ; may reveal security information to end users, such as file paths on your Web
 ; server, your database schema or other information.
+;
+; possible values for display_errors:
+;
+; Off          - Do not display any errors 
+; stderr       - Display errors to STDERR (affects only CGI/CLI binaries!)   
+; On or stdout - Display errors to STDOUT (default)
+;  
+; To output errors to STDERR with CGI/CLI:              
+;display_errors = "stderr"
+;
+; Default
+;
 display_errors = Off
 
 ; Even when display_errors is on, errors that occur during PHP's startup

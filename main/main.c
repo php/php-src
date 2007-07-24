@@ -213,6 +213,89 @@ static PHP_INI_MH(OnUpdateTimeout)
 }
 /* }}} */
 
+/* {{{ php_get_display_errors_mode() helper function
+ */
+static int php_get_display_errors_mode(char *value, int value_length)
+{
+	int mode;
+	
+	if (value_length == 2 && !strcasecmp("on", value)) {
+		mode = PHP_DISPLAY_ERRORS_STDOUT;
+	} else if (value_length == 3 && !strcasecmp("yes", value)) {
+		mode = PHP_DISPLAY_ERRORS_STDOUT;
+	} else if (value_length == 4 && !strcasecmp("true", value)) {
+		mode = PHP_DISPLAY_ERRORS_STDOUT;
+	} else if (value_length == 6 && !strcasecmp(value, "stderr")) {
+		mode = PHP_DISPLAY_ERRORS_STDERR;
+	} else if (value_length == 6 && !strcasecmp(value, "stdout")) {
+		mode = PHP_DISPLAY_ERRORS_STDOUT;
+	} else {
+		mode = atoi(value);
+		if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
+			mode = PHP_DISPLAY_ERRORS_STDOUT;
+		}
+	}
+	return mode;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnUpdateDisplayErrors)
+{
+	PG(display_errors) = (zend_bool) php_get_display_errors_mode(new_value, new_value_length);
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_DISP
+ */
+static PHP_INI_DISP(display_errors_mode)
+{
+	int mode, tmp_value_length, cgi_or_cli;
+	char *tmp_value;
+
+	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
+		tmp_value = (ini_entry->orig_value ? ini_entry->orig_value : NULL );
+		tmp_value_length = ini_entry->orig_value_length;
+	} else if (ini_entry->value) {
+		tmp_value = ini_entry->value;
+		tmp_value_length = ini_entry->value_length;
+	} else {
+		tmp_value = NULL;
+		tmp_value_length = 0;
+	}
+
+	mode = php_get_display_errors_mode(tmp_value, tmp_value_length);
+
+	/* Display 'On' for other SAPIs instead of STDOUT or STDERR */
+	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi"));
+
+	switch (mode) {
+		case PHP_DISPLAY_ERRORS_STDERR:
+			if (cgi_or_cli ) {
+				PUTS("STDERR");
+			} else {
+				PUTS("On");
+			}
+			break;
+
+		case PHP_DISPLAY_ERRORS_STDOUT:
+			if (cgi_or_cli ) {
+				PUTS("STDOUT");
+			} else {
+				PUTS("On");
+			}
+			break;
+
+		default:
+			PUTS("Off");
+			break;
+	}
+}
+/* }}} */
+
 /* Need to convert to strings and make use of:
  * PHP_SAFE_MODE
  *
@@ -246,7 +329,7 @@ PHP_INI_BEGIN()
 
 	STD_PHP_INI_BOOLEAN("allow_call_time_pass_reference",	"1",	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,	allow_call_time_pass_reference,	zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_BOOLEAN("asp_tags",				"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			asp_tags,				zend_compiler_globals,	compiler_globals)
-	STD_PHP_INI_BOOLEAN("display_errors",		"1",		PHP_INI_ALL,		OnUpdateBool,			display_errors,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY_EX("display_errors",		"1",		PHP_INI_ALL,		OnUpdateDisplayErrors,	display_errors,			php_core_globals,	core_globals, display_errors_mode)
 	STD_PHP_INI_BOOLEAN("display_startup_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
@@ -809,7 +892,14 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
 					}
 				} else {
-					php_printf("%s\n%s: %s in %s on line %d\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+					/* Write CLI/CGI errors to stderr if display_errors = "stderr" */
+					if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi")) &&
+						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
+					) {
+						fprintf(stderr, "%s: %s in %s on line %d\n", error_type_str, buffer, error_filename, error_lineno);
+					} else {
+						php_printf("%s\n%s: %s in %s on line %d\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+					}
 				}
 			}
 		}
