@@ -49,12 +49,12 @@ array(1) {
 }
 Base::__construct
 array(3) {
-  ["Baz"]=>
-  int(4)
   ["Foo"]=>
   int(1)
   ["Bar"]=>
   int(2)
+  ["Baz"]=>
+  int(3)
 }
 Child::__construct
 array(3) {
