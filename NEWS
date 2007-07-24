@@ -62,8 +62,8 @@ PHP                                                                        NEWS
 - Fixed bug #42072 (No warning message for clearstatcache() with arguments).
   (Ilia)
 - Fixed bug #42071 (ini scanner allows using NULL as option name). (Jani)
-- Fixed bug #42027 is_file() / is_dir() matches file/dirnames with wildcard
-  char or trailing slash. (Dmitry)
+- Fixed bug #42027 (is_file() / is_dir() matches file/dirnames with wildcard
+  char or trailing slash in Windows). (Dmitry)
 - Fixed bug #42019 (configure option --with-adabas=DIR does not work). (Jani)
 - Fixed bug #42015 (ldap_rename(): server error "DSA is unwilling to perform").
   (bob at mroczka dot com, Jani)
