@@ -30,6 +30,7 @@ PHP                                                                        NEWS
 - Added missing error check inside bcpowmod(). (Ilia)
 - Added CURLOPT_PRIVATE & CURLINFO_PRIVATE constants. 
   (Andrey A. Belashkov, Tony)
+- Added missing MSG_EOR and MSG_EOF constants to sockets extension. (Jani)
 
 - Implemented FR #41884 (ReflectionClass::getDefaultProperties() does not handle 
   static attributes). (Tony)
