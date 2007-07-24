@@ -26,7 +26,7 @@ elif test "$PHP_MYSQLI" != "no"; then
     AC_DEFINE(HAVE_EMBEDDED_MYSQLI, 1, [embedded MySQL support enabled])
     MYSQL_LIB_CFG='--libmysqld-libs'
     dnl mysqlnd doesn't support embedded, so we have to add some extra stuff
-    extra_sources="mysqli_embedded.c"
+    mysqli_extra_sources="mysqli_embedded.c"
   elif test "$enable_maintainer_zts" = "yes"; then
     MYSQL_LIB_CFG='--libs_r'
     MYSQL_LIB_NAME='mysqlclient_r'
@@ -60,14 +60,14 @@ elif test "$PHP_MYSQLI" != "no"; then
     $MYSQLI_LIBLINE
   ])
 
-  extra_sources="$extra_sources mysqli_repl.c"
+  mysqli_extra_sources="$mysqli_extra_sources mysqli_repl.c"
 fi
 
 dnl Build extension
-if test -n "$extra_sources" || test "$PHP_MYSQLI" != "no"; then
+if test -n "$mysqli_extra_sources" || test "$PHP_MYSQLI" != "no"; then
   mysqli_sources="mysqli.c mysqli_api.c mysqli_prop.c mysqli_nonapi.c \
                   mysqli_fe.c mysqli_report.c mysqli_driver.c mysqli_warning.c \
-                  mysqli_exception.c $extra_sources"
+                  mysqli_exception.c $mysqli_extra_sources"
   PHP_NEW_EXTENSION(mysqli, $mysqli_sources, $ext_shared)
   PHP_SUBST(MYSQLI_SHARED_LIBADD)
 
