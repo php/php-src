@@ -59,62 +59,62 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Typdefs for easyier portability */
 
-#ifndef HAVE_INT8
-#ifndef HAVE_INT8_T
+#if (SIZEOF_INT8 == 0)
+#if (SIZEOF_INT8_T == 0)
 typedef signed char int8;			/* Signed integer >= 8    bits */
 #else
 typedef int8_t int8;				/* Signed integer >= 8    bits */
 #endif
 #endif
 
-#ifndef HAVE_UINT8
-#ifndef HAVE_UINT8_T
+#if (SIZEOF_UINT8 == 0)
+#if (SIZEOF_UINT8_T == 0)
 typedef unsigned char uint8;		/* Unsigned integer >= 8    bits */
 #else
 typedef uint8_t uint8;				/* Signed integer >= 8    bits */
 #endif
 #endif
 
-#ifndef HAVE_INT16
-#ifndef HAVE_INT16_T
+#if (SIZEOF_INT16 == 0)
+#if (SIZEOF_INT16_T == 0)
 typedef signed short int16;			/* Signed integer >= 16 bits */
 #else
 typedef int16_t int16;				/* Signed integer >= 16 bits */
 #endif
 #endif
 
-#ifndef HAVE_UINT16
-#ifndef HAVE_UINT16_T
+#if (SIZEOF_UINT16 == 0)
+#if (SIZEOF_UINT16_T == 0)
 typedef unsigned short uint16;		/* Signed integer >= 16 bits */
 #else
 typedef uint16_t uint16;			/* Signed integer >= 16 bits */
 #endif
 #endif
 
-#ifndef HAVE_UCHAR
+#if (SIZEOF_UCHAR == 0)
 typedef unsigned char uchar;		/* Short for unsigned char */
 #endif
 
 
-#if defined(HAVE_INT32_T) && defined (HAVE_UINT32_T)
+#if (SIZEOF_INT32_T != 0) && (SIZEOF_UINT32_T != 0)
 typedef int32_t int32;
 typedef uint32_t uint32;
 
 #elif SIZEOF_INT == 4
 
-#ifndef HAVE_INT32
+#ifndef (SIZEOF_INT32 == 0)
 typedef signed int int32;
 #endif
-#ifndef HAVE_UINT32
+#ifndef (SIZEOF_UINT32 == 0)
 typedef unsigned int uint32;
 #endif
 
 #elif SIZEOF_LONG == 4
 
-#ifndef HAVE_INT32
+#ifndef (SIZEOF_INT32 == 0)
 typedef signed long int32;
 #endif
-#ifndef HAVE_UINT32
+#ifndef (SIZEOF_UINT32 == 0)
 typedef unsigned long uint32;
 #endif
 
@@ -122,7 +122,7 @@ typedef unsigned long uint32;
 error "Neither int or long is of 4 bytes width"
 #endif
 
-#if !defined(HAVE_ULONG) && !defined(__USE_MISC) && !defined(ulong)
+#if (SIZEOF_ULONG == 0) && !defined(__USE_MISC) && !defined(ulong)
 typedef unsigned long    ulong;    /* Short for unsigned long */
 #endif
 #ifndef longlong_defined
@@ -487,14 +487,14 @@ typedef __int64 mynd_longlong;
 #ifndef L64
 #define L64(x) x##LL
 #endif
-#ifndef HAVE_UINT64_T
+#if (SIZEOF_UINT64_T == 0)
 typedef unsigned long long my_uint64;
 typedef unsigned long long mynd_ulonglong;
 #else
 typedef uint64_t my_uint64;
 typedef uint64_t mynd_ulonglong;
 #endif
-#ifndef HAVE_INT64_T
+#if (SIZEOF_INT64_T == 0)
 typedef long long my_int64;
 typedef long long mynd_longlong;
 #else
