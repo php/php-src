@@ -771,12 +771,17 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
 {
 	Bucket *p;
 	void *new_entry;
+	zend_bool setTargetPointer;
 
 	IS_CONSISTENT(source);
 	IS_CONSISTENT(target);
 
+	setTargetPointer = !target->pInternalPointer;
 	p = source->pListHead;
 	while (p) {
+		if (setTargetPointer && source->pInternalPointer == p) {
+			target->pInternalPointer = NULL;
+		}
 		if (p->nKeyLength) {
 			zend_hash_quick_update(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &new_entry);
 		} else {
@@ -787,7 +792,9 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
 		}
 		p = p->pListNext;
 	}
-	target->pInternalPointer = target->pListHead;
+	if (!target->pInternalPointer) {
+		target->pInternalPointer = target->pListHead;
+	}
 }
 
 
