@@ -1155,17 +1155,19 @@ static char *get_http_header_value(char *headers, char *type)
 
 			/* match */
 			tmp = pos + typelen;
-			eol = strstr(tmp, "\r\n");
+			eol = strchr(tmp, '\n');
 			if (eol == NULL) {
 				eol = headers + headerslen;
+			} else if (eol > tmp && *(eol-1) == '\r') {
+				eol--;
 			}
 			return estrndup(tmp, eol - tmp);
 		}
 
 		/* find next line */
-		pos = strstr(pos, "\r\n");
+		pos = strchr(pos, '\n');
 		if (pos) {
-			pos += 2;
+			pos++;
 		}
 
 	} while (pos);
@@ -1205,7 +1207,7 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 	}
 
 	if (header_chunked) {
-		char done, chunk_size[10];
+		char ch, done, chunk_size[10], headerbuf[8192];
 
 		done = FALSE;
 
@@ -1233,11 +1235,20 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 						len_size += len_read;
 	 					http_buf_size += len_read;
  					}
- 				}
 
-				/* Eat up '\r' '\n' */
-				php_stream_getc(stream);
-				php_stream_getc(stream);
+					/* Eat up '\r' '\n' */
+					ch = php_stream_getc(stream);
+					if (ch == '\r') {
+						ch = php_stream_getc(stream);
+					}
+					if (ch != '\n') {
+						/* Somthing wrong in chunked encoding */
+						if (http_buf) {
+							efree(http_buf);
+						}
+						return FALSE;
+					}
+ 				}
 			} else {
 				/* Somthing wrong in chunked encoding */
 				if (http_buf) {
@@ -1247,6 +1258,19 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 			}
 			if (buf_size == 0) {
 				done = TRUE;
+			}
+		}
+
+		/* Ignore trailer headers */
+		while (1) {
+			if (!php_stream_gets(stream, ZSTR(headerbuf), sizeof(headerbuf))) {
+				break;
+			}
+
+			if ((headerbuf[0] == '\r' && headerbuf[1] == '\n') ||
+			    (headerbuf[0] == '\n')) {
+				/* empty line marks end of headers */
+				break;
 			}
 		}
 
@@ -1296,7 +1320,8 @@ static int get_http_headers(php_stream *stream, char **response, int *out_size T
 			break;
 		}
 
-		if (strcmp(headerbuf, "\r\n") == 0) {
+		if ((headerbuf[0] == '\r' && headerbuf[1] == '\n') ||
+		    (headerbuf[0] == '\n')) {
 			/* empty line marks end of headers */
 			done = TRUE;
 			break;
