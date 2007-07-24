@@ -1,5 +1,5 @@
 --TEST--
-Bug # 37277 (cloning Dom Documents or Nodes does not work)
+Bug #37277 (cloning Dom Documents or Nodes does not work)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
