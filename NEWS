@@ -64,6 +64,7 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #42090 (json_decode causes segmentation fault). (Hannes)
 - Fixed bug #42072 (No warning message for clearstatcache() with arguments).
   (Ilia)
 - Fixed bug #42071 (ini scanner allows using NULL as option name). (Jani)
