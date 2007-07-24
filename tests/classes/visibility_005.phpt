@@ -52,6 +52,7 @@ d=>4
 ===derived::function===
 a=>1
 b=>2
+c=>3
 d=>4
 ===derived,foreach===
 a=>1

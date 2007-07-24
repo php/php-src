@@ -164,7 +164,7 @@ static int zend_verify_property_access(zend_property_info *property_info, zend_c
 		case ZEND_ACC_PROTECTED:
 			return zend_check_protected(property_info->ce, EG(scope));
 		case ZEND_ACC_PRIVATE:
-			if (ce==EG(scope) && EG(scope)) {
+			if ((ce==EG(scope) || property_info->ce == EG(scope)) && EG(scope)) {
 				return 1;
 			} else {
 				return 0;
