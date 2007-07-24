@@ -565,6 +565,13 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 #endif
 no_realpath:
 
+#ifdef TSRM_WIN32
+		if (memchr(path, '*', path_length) ||
+		    memchr(path, '?', path_length)) {
+			return 1;
+		}
+#endif
+
 		free_path = path_copy = tsrm_strndup(path, path_length);
 		CWD_STATE_COPY(&old_state, state);
 
