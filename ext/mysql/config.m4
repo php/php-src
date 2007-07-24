@@ -40,7 +40,8 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
 
 
 PHP_ARG_WITH(mysql, for MySQL support,
-[  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base directory])
+[  --with-mysql[=DIR]        Include MySQL support. DIR is the MySQL base directory.
+                            If mysqlnd is passed as DIR, the MySQL native driver will be used])
 
 PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
 [  --with-mysql-sock[=DIR]   MySQL: Location of the MySQL unix socket pointer.
@@ -51,9 +52,11 @@ if test -z "$PHP_ZLIB_DIR"; then
   [  --with-zlib-dir[=DIR]     MySQL: Set the path to libz install prefix], no, no)
 fi
 
+if test "$PHP_MYSQL" = "mysqlnd"; then
+  dnl enables build of mysqnd library
+  PHP_MYSQLND_ENABLED=yes
 
-if test "$PHP_MYSQL" != "no"; then
-  AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
+elif test "$PHP_MYSQL" != "no"; then
 
   AC_MSG_CHECKING([for MySQL UNIX socket location])
   if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
@@ -97,6 +100,11 @@ Note that the MySQL client library is not bundled anymore!])
       ;;
   esac
 
+  dnl for compat with PHP 4 build system
+  if test -z "$PHP_LIBDIR"; then
+    PHP_LIBDIR=lib
+  fi
+
   for i in $PHP_LIBDIR $PHP_LIBDIR/mysql; do
     MYSQL_LIB_CHK($i)
   done
@@ -132,14 +140,25 @@ Note that the MySQL client library is not bundled anymore!])
   PHP_ADD_LIBRARY_WITH_PATH($MYSQL_LIBNAME, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
   PHP_ADD_INCLUDE($MYSQL_INC_DIR)
 
-  PHP_NEW_EXTENSION(mysql, php_mysql.c, $ext_shared)
 
   MYSQL_MODULE_TYPE=external
   MYSQL_LIBS="-L$MYSQL_LIB_DIR -l$MYSQL_LIBNAME $MYSQL_LIBS"
   MYSQL_INCLUDE=-I$MYSQL_INC_DIR
  
-  PHP_SUBST(MYSQL_SHARED_LIBADD)
   PHP_SUBST_OLD(MYSQL_MODULE_TYPE)
   PHP_SUBST_OLD(MYSQL_LIBS)
   PHP_SUBST_OLD(MYSQL_INCLUDE)
+fi
+
+dnl Enable extension
+if test "$PHP_MYSQL" != "no"; then
+  AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
+  PHP_NEW_EXTENSION(mysql, php_mysql.c, $ext_shared)
+  PHP_SUBST(MYSQL_SHARED_LIBADD)
+
+  dnl These 3 lines are neeeded to be able to build ext/mysql and/or ext/mysqli with/without mysqlnd.
+  dnl Need to do this here for the file to be always available.
+  $php_shtool mkdir -p ext/mysql/
+  echo > ext/mysql/php_have_mysqlnd.h
+  test "$PHP_MYSQL" = "mysqlnd" && PHP_DEFINE(HAVE_MYSQLND, 1, [ext/mysql])
 fi

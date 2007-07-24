@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 6                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2007 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -12,7 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Georg Richter <georg@php.net>                                |
+  | Authors: Georg Richter <georg@php.net>                               |
+  |          Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 
   $Id$ 
@@ -27,7 +29,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "php_mysqli.h"
+#include "php_mysqli_structs.h"
 
 #define CHECK_STATUS(value) \
 	if (((MYSQLI_RESOURCE *)obj->ptr)->status < value ) { \
@@ -40,7 +42,7 @@
 MYSQL *p; \
 ALLOC_ZVAL(*retval);\
 if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name);\
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %v", obj->zo.ce->name);\
 	ZVAL_NULL(*retval);\
 	return SUCCESS; \
 } else { \
@@ -52,7 +54,7 @@ if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 MYSQL_RES *p; \
 ALLOC_ZVAL(*retval);\
 if (!obj->ptr) { \
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name);\
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %v", obj->zo.ce->name);\
 	ZVAL_NULL(*retval);\
 	return SUCCESS; \
 } else { \
@@ -65,7 +67,7 @@ if (!obj->ptr) { \
 MYSQL_STMT *p; \
 ALLOC_ZVAL(*retval);\
 if (!obj->ptr) { \
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name);\
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %v", obj->zo.ce->name);\
 	ZVAL_NULL(*retval);\
 	return SUCCESS; \
 } else { \
@@ -125,7 +127,7 @@ static int link_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	ALLOC_ZVAL(*retval);
 	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
-	ZVAL_STRING(*retval, MYSQL_SERVER_VERSION, 1);
+	ZVAL_UTF8_STRING(*retval, MYSQL_SERVER_VERSION, ZSTR_DUPLICATE)
 	return SUCCESS;
 }
 /* }}} */
@@ -145,7 +147,7 @@ static int link_connect_error_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	ALLOC_ZVAL(*retval);
 	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
-	ZVAL_STRING(*retval, MyG(error_msg), 1);
+	ZVAL_UTF8_STRING(*retval, MyG(error_msg), ZSTR_DUPLICATE)
 	return SUCCESS;
 }
 /* }}} */
@@ -221,24 +223,23 @@ static int result_type_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 static int result_lengths_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MYSQL_RES *p;
+	ulong *ret;
 
 	ALLOC_ZVAL(*retval);
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID);
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
-	if (!p || !p->field_count) {
+	if (!p || !p->field_count || !(ret = mysql_fetch_lengths(p)))
+	{
 		ZVAL_NULL(*retval);
 	} else {
 		ulong i;
-		zval *l;
 
 		array_init(*retval);
 
 		for (i=0; i < p->field_count; i++) {
-			MAKE_STD_ZVAL(l);
-			ZVAL_LONG(l, p->lengths[i]);
-			add_index_zval(*retval, i, l);
-		}	
+			add_index_long(*retval, i, ret[i]);
+		}
 	}
 	return SUCCESS;
 }
