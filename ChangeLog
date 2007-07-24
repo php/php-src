@@ -1,3 +1,447 @@
+2007-07-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/filestat.c:
+      
+      Fixed bug #42072 (No warning message for clearstatcache() with arguments).
+
+2007-07-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/pdo/tests/pdo_034.phpt
+      ext/standard/tests/strings/str_pad.phpt
+      ext/standard/tests/strings/str_pad.phpt:
+      fix test
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_keys.phpt
+      ext/standard/tests/array/array_keys_64bit.phpt:
+      remove the tests, they've been splitted into smaller ones
+
+2007-07-23  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend.h
+      ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_strtod.c:
+      MFH: - Fixed buf #42071 (ini scanner allows using NULL as option name).
+      MFH: Use Z_* macros to access the zvals.
+
+2007-07-23  Stanislav Malyshev  <stas@zend.com>
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      README.namespaces:
+      add announcement copy as README for easier reference
+
+2007-07-23  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ZendEngine2/zend_ini_scanner.l:
+      - Fixed bug #42071 (ini scanner allows NULL to be used as option name)
+
+    * (PHP_5_2)
+      ext/standard/string.c
+      ext/standard/tests/strings/str_pad.phpt:
+      MFH: Fixed str_pad() when passed huge negative pad length.
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/standard/string.c
+      ext/standard/tests/strings/str_pad.phpt:
+      - Fixed str_pad() when passed huge negative pad_length
+
+2007-07-23  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_autocommit.phpt
+      ext/mysqli/tests/mysqli_autocommit_oo.phpt
+      ext/mysqli/tests/mysqli_change_user.phpt
+      ext/mysqli/tests/mysqli_change_user_oo.phpt
+      ext/mysqli/tests/mysqli_character_set.phpt
+      ext/mysqli/tests/mysqli_character_set_name.phpt
+      ext/mysqli/tests/mysqli_character_set_name_oo.phpt
+      ext/mysqli/tests/mysqli_close.phpt
+      ext/mysqli/tests/mysqli_close_oo.phpt
+      ext/mysqli/tests/mysqli_commit.phpt
+      ext/mysqli/tests/mysqli_commit_oo.phpt
+      ext/mysqli/tests/mysqli_constants.phpt
+      ext/mysqli/tests/mysqli_constants_categories.phpt
+      ext/mysqli/tests/mysqli_data_seek.phpt
+      ext/mysqli/tests/mysqli_data_seek_oo.phpt
+      ext/mysqli/tests/mysqli_debug.phpt
+      ext/mysqli/tests/mysqli_disable_reads_from_master.phpt
+      ext/mysqli/tests/mysqli_disable_rpl_parse.phpt
+      ext/mysqli/tests/mysqli_driver.phpt
+      ext/mysqli/tests/mysqli_dump_debug_info.phpt
+      ext/mysqli/tests/mysqli_dump_debug_info_oo.phpt
+      ext/mysqli/tests/mysqli_embedded_connect.phpt
+      ext/mysqli/tests/mysqli_enable_reads_from_master.phpt
+      ext/mysqli/tests/mysqli_enable_rpl_parse.phpt
+      ext/mysqli/tests/mysqli_errno.phpt
+      ext/mysqli/tests/mysqli_errno_oo.phpt
+      ext/mysqli/tests/mysqli_error.phpt
+      ext/mysqli/tests/mysqli_error_oo.phpt
+      ext/mysqli/tests/mysqli_error_unicode.phpt
+      ext/mysqli/tests/mysqli_explain_metadata.phpt
+      ext/mysqli/tests/mysqli_fetch_lengths.phpt
+      ext/mysqli/tests/mysqli_fetch_lengths_oo.phpt
+      ext/mysqli/tests/mysqli_field_count.phpt
+      ext/mysqli/tests/mysqli_field_seek.phpt
+      ext/mysqli/tests/mysqli_field_tell.phpt
+      ext/mysqli/tests/mysqli_free_result.phpt
+      ext/mysqli/tests/mysqli_get_charset.phpt
+      ext/mysqli/tests/mysqli_get_client_info.phpt
+      ext/mysqli/tests/mysqli_get_client_version.phpt
+      ext/mysqli/tests/mysqli_get_connection_stats.phpt
+      ext/mysqli/tests/mysqli_get_host_info.phpt
+      ext/mysqli/tests/mysqli_get_proto_info.phpt
+      ext/mysqli/tests/mysqli_get_server_info.phpt
+      ext/mysqli/tests/mysqli_get_server_version.phpt
+      ext/mysqli/tests/mysqli_get_warnings.phpt
+      ext/mysqli/tests/mysqli_info.phpt
+      ext/mysqli/tests/mysqli_init.phpt
+      ext/mysqli/tests/mysqli_insert_id.phpt
+      ext/mysqli/tests/mysqli_kill.phpt
+      ext/mysqli/tests/mysqli_more_results.phpt
+      ext/mysqli/tests/mysqli_multi_query.phpt
+      ext/mysqli/tests/mysqli_mysqli_result_invalid_mode.phpt
+      ext/mysqli/tests/mysqli_next_result.phpt
+      ext/mysqli/tests/mysqli_num_fields.phpt
+      ext/mysqli/tests/mysqli_num_rows.phpt
+      ext/mysqli/tests/mysqli_options.phpt
+      ext/mysqli/tests/mysqli_options_init_command.phpt
+      ext/mysqli/tests/mysqli_pconnect.phpt
+      ext/mysqli/tests/mysqli_phpinfo.phpt
+      ext/mysqli/tests/mysqli_ping.phpt
+      ext/mysqli/tests/mysqli_prepare.phpt
+      ext/mysqli/tests/mysqli_prepare_no_object.phpt
+      ext/mysqli/tests/mysqli_query.phpt
+      ext/mysqli/tests/mysqli_query_unicode.phpt
+      ext/mysqli/tests/mysqli_real_escape_string.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_unicode.phpt
+      ext/mysqli/tests/mysqli_real_query.phpt
+      ext/mysqli/tests/mysqli_report.phpt
+      ext/mysqli/tests/mysqli_report_wo_ps.phpt
+      ext/mysqli/tests/mysqli_result_references.phpt
+      ext/mysqli/tests/mysqli_result_references_mysqlnd.phpt
+      ext/mysqli/tests/mysqli_rollback.phpt
+      ext/mysqli/tests/mysqli_select_db.phpt
+      ext/mysqli/tests/mysqli_set_charset.phpt
+      ext/mysqli/tests/mysqli_set_opt.phpt
+      ext/mysqli/tests/mysqli_set_opt_numeric_and_datetime_as_unicode.phpt
+      ext/mysqli/tests/mysqli_sqlstate.phpt
+      ext/mysqli/tests/mysqli_ssl_set.phpt
+      ext/mysqli/tests/mysqli_stat.phpt
+      ext/mysqli/tests/mysqli_stmt_affected_rows.phpt
+      ext/mysqli/tests/mysqli_stmt_attr_get.phpt
+      ext/mysqli/tests/mysqli_stmt_attr_get_prefetch.phpt
+      ext/mysqli/tests/mysqli_stmt_attr_set.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_param.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_param_references.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_param_type_juggling.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_result.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_result_bit.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_result_references.phpt
+      ext/mysqli/tests/mysqli_stmt_close.phpt
+      ext/mysqli/tests/mysqli_stmt_data_seek.phpt
+      ext/mysqli/tests/mysqli_stmt_errno.phpt
+      ext/mysqli/tests/mysqli_stmt_error.phpt
+      ext/mysqli/tests/mysqli_stmt_execute.phpt
+      ext/mysqli/tests/mysqli_stmt_fetch.phpt
+      ext/mysqli/tests/mysqli_stmt_fetch_bit.phpt
+      ext/mysqli/tests/mysqli_stmt_fetch_fields_win32_unicode.phpt
+      ext/mysqli/tests/mysqli_stmt_field_count.phpt
+      ext/mysqli/tests/mysqli_stmt_free_result.phpt
+      ext/mysqli/tests/mysqli_stmt_get_warnings.phpt
+      ext/mysqli/tests/mysqli_stmt_init.phpt
+      ext/mysqli/tests/mysqli_stmt_insert_id.phpt
+      ext/mysqli/tests/mysqli_stmt_num_rows.phpt
+      ext/mysqli/tests/mysqli_stmt_param_count.phpt
+      ext/mysqli/tests/mysqli_stmt_prepare.phpt
+      ext/mysqli/tests/mysqli_stmt_reset.phpt
+      ext/mysqli/tests/mysqli_stmt_result_metadata.phpt
+      ext/mysqli/tests/mysqli_stmt_result_metadata_sqltests.phpt
+      ext/mysqli/tests/mysqli_stmt_sqlstate.phpt
+      ext/mysqli/tests/mysqli_stmt_store_result.phpt
+      ext/mysqli/tests/mysqli_store_result.phpt
+      ext/mysqli/tests/mysqli_thread_id.phpt
+      ext/mysqli/tests/mysqli_thread_safe.phpt
+      ext/mysqli/tests/mysqli_use_result.phpt
+      ext/mysqli/tests/mysqli_warning_count.phpt:
+      Damn, Pierre is clever.
+      
+      [14:35] <_jani_> nixnutz_: why don't you just commit everything in one
+      go..?
+      [14:35] <_jani_> this "spamming" is getting quite boring..
+      [14:36] <Pierre> 20€/commit :)
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_stmt_send_long_data.phpt
+      ext/mysqli/tests/mysqli_stmt_send_long_data_packet_size_libmysql.phpt
+      ext/mysqli/tests/mysqli_stmt_send_long_data_packet_size_mysqlnd.phpt:
+      Tests for mysqli_stmt_send_long_data()
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_driver_unclonable.phpt
+      ext/mysqli/tests/mysqli_result_unclonable.phpt
+      ext/mysqli/tests/mysqli_stmt_unclonable.phpt
+      ext/mysqli/tests/mysqli_unclonable.phpt
+      ext/mysqli/tests/mysqli_warning_unclonable.phpt:
+      Tests which verify that you really cannot clone any of the mysqli
+      objects. Technically it might be possible to tweak ext/mysqli and make
+      the objects cloneable - tough, we haven't checked in depth.
+      
+      So, if one is interested, raise a discussion.
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_fetch_field.phpt
+      ext/mysqli/tests/mysqli_fetch_field_direct.phpt
+      ext/mysqli/tests/mysqli_fetch_field_direct_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_field_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_fields.phpt:
+      Tests that check mysqli_fetch_field(), mysqli_fetch_field_direct() and
+      retrieve metadata
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_fetch_object.phpt
+      ext/mysqli/tests/mysqli_fetch_object_no_constructor.phpt
+      ext/mysqli/tests/mysqli_fetch_object_no_object.phpt
+      ext/mysqli/tests/mysqli_fetch_object_oo.phpt:
+      Tests for mysqli_fetch_object()
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_fetch_all.phpt
+      ext/mysqli/tests/mysqli_fetch_all_oo.phpt:
+      Another nice new function that comes with mysqlnd: return all rows of
+      a result set in one array. This is handy if want to fetch all results and
+      pass the data directly to a template engine, for example. In this case
+      you save a loop.
+      
+      1) Currently:
+        $all_rows = array();
+        while ($row = mysqli_fetch_assoc($res))
+         $all_rows[] = $row;
+      
+      2) With mysqli_fetch_all:
+        $all_rows = mysqli_fetch_all($res, MYSQL_ASSOC)
+      
+      Note: if you need the loop for processing each row, try variant 1) for
+      performance reasons.
+
+2007-07-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/json/json.c:
+      fix ws/folding
+
+2007-07-23  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_get_cache_stats.phpt
+      ext/mysqli/tests/mysqli_get_cache_stats_free_buffered.phpt
+      ext/mysqli/tests/mysqli_get_client_stats.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result2.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result_bit.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result_field_count.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result_metadata.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result_metadata_fetch_field.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result_seek.phpt:
+      Adding tests for a few new functions that come with mysqlnd:
+      
+        mysqli_stmt_get_result() - create mysqli_result set from stmt
+        mysqli_get_cache_stats() - mysqlnd internal status/stats
+        mysqli_get_client_stats() - mysqlnd internal status/stats/
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_fork.phpt:
+      Playing with background processing: parent and child process fetching data
+      from the "same" result handle and checking with each other if the fetched
+      rows are the same or not. Inspired by a bug report. There seem to be
+      really
+      people doing this...
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_fetch_array.phpt
+      ext/mysqli/tests/mysqli_fetch_array_assoc.phpt
+      ext/mysqli/tests/mysqli_fetch_array_many_rows.phpt
+      ext/mysqli/tests/mysqli_fetch_array_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc_bit.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc_no_alias.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc_no_alias_utf8.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_row.phpt:
+      Tests for mysqli_fetch_assoc(), mysqli_fetch_array(), mysqli_fetch_row()
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_connect.phpt
+      ext/mysqli/tests/mysqli_connect_errno.phpt
+      ext/mysqli/tests/mysqli_connect_error.phpt
+      ext/mysqli/tests/mysqli_connect_oo.phpt
+      ext/mysqli/tests/mysqli_connect_oo_defaults.phpt
+      ext/mysqli/tests/mysqli_connect_oo_warnings.phpt
+      ext/mysqli/tests/mysqli_connect_twice.phpt
+      ext/mysqli/tests/mysqli_real_connect.phpt:
+      Tests for mysqli_connect(), mysqli_real_connect(), mysqli_connect_errno(),
+      mysqli_connect_error()
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_set_local_infile_default.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_bad_character.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_buffer_overflow.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_close_link.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_closefile.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_kill_link.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_negative_len.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_nested_call.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_new_query.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_nofileop.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_replace_buffer.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_short_len.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_unregister.phpt:
+      Tests that deal with mysqli_set_local_infile_handler() and
+      mysqli_set_local_infile_default()
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/mysqli_class_mysqli_driver_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_driver_reflection.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_reflection.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_result_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_result_reflection.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_stmt_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_warning.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_warning_reflection.phpt:
+      Adding new tests that check the interface of the classes exported by mysqli
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysqli/tests/001.phpt
+      ext/mysqli/tests/002.phpt
+      ext/mysqli/tests/009.phpt
+      ext/mysqli/tests/020.phpt
+      ext/mysqli/tests/023.phpt
+      ext/mysqli/tests/024.phpt
+      ext/mysqli/tests/025.phpt
+      ext/mysqli/tests/045.phpt
+      ext/mysqli/tests/048.phpt
+      ext/mysqli/tests/060.phpt
+      ext/mysqli/tests/065.phpt
+      ext/mysqli/tests/067.phpt
+      ext/mysqli/tests/connect.inc
+      ext/mysqli/tests/skipif.inc
+      ext/mysqli/tests/skipifemb.inc
+      ext/mysqli/tests/skipifnotemb.inc
+      ext/mysqli/tests/table.inc:
+      Primarily whitespace/CS - synching with mysqlnd SVN repository
+
+2007-07-23  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/wordwrap.phpt:
+      MFB: Fixed "Floating point exception" inside wordwrap()
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/standard/tests/file/fgetc_variation1.phpt
+      ext/standard/tests/file/fwrite_error.phpt
+      ext/standard/tests/file/is_file_variation4.phpt:
+      fix descriptions
+
+2007-07-23  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/standard/tests/file/glob_variation-win32.phpt:
+      More new testcases for glob()
+
+2007-07-23  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/standard/tests/file/fgetc_variation3.phpt
+      ext/standard/tests/file/fgets_variation1.phpt
+      ext/standard/tests/file/fread_variation2.phpt:
+      fix test descriptions
+
+2007-07-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/rename_variation6.phpt
+      ext/standard/tests/file/rename_variation7.phpt:
+      more tests
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/standard/tests/file/rename_variation6.phpt
+      ext/standard/tests/file/rename_variation6.phpt
+      ext/standard/tests/file/rename_variation7.phpt
+      ext/standard/tests/file/rename_variation7.phpt:
+      
+      more tests
+
+2007-07-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/file/is_file_variation4.phpt
+      ext/standard/tests/file/is_file_variation4.phpt:
+      Fixed wrong expectation
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed rename() in ZTS to allow renaming of symbolic links;
+      Consistent handling of trailing slash
+
+2007-07-23  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/mysql/tests/connect.inc
+      ext/mysql/tests/mysql_fetch_field.phpt
+      ext/mysql/tests/mysql_stat.phpt
+      ext/mysql/tests/skipif.inc
+      ext/mysql/tests/table.inc:
+      Whitespace (space to tab)/CS
+      
+      With this commit the MySQL internal mysqlnd set of ext/mysql tests is in
+      sync with HEAD. It's likely that php.net/HEAD fails on quite some tests.
+      Using ext/mysql from the MySQL internal mysqlnd SVN there should be zero
+      failures. Merging the MySQL internal mysqlnd SVN into HEAD will happen
+      soon so that we get a bug free version on php.net in the near future.
+
+2007-07-23  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/glob_variation-win32.phpt
+      ext/standard/tests/file/glob_variation-win32.phpt:
+      
+      file glob_variation-win32.phpt was initially added on branch PHP_5_2.
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/standard/tests/file/glob_basic.phpt
+      ext/standard/tests/file/glob_error.phpt
+      ext/standard/tests/file/glob_variation.phpt:
+      New testcases for glob() function
+
+    * ext/standard/tests/file/glob_basic.phpt
+      ext/standard/tests/file/glob_basic.phpt
+      ext/standard/tests/file/glob_error.phpt
+      ext/standard/tests/file/glob_error.phpt
+      ext/standard/tests/file/glob_variation.phpt
+      ext/standard/tests/file/glob_variation.phpt:
+      
+      file glob_basic.phpt was initially added on branch PHP_5_2.
+
+2007-07-23  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      ext/reflection/php_reflection.c:
+      MFB: Avoid endless loop
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c:
+      Avoid endless loop
+
 2007-07-22  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * (PHP_5_2)
