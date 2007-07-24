@@ -31,6 +31,10 @@
 #include <sys/un.h>
 #endif
 
+#ifndef MSG_DONTWAIT
+# define MSG_DONTWAIT 0
+#endif
+
 php_stream_ops php_stream_generic_socket_ops;
 PHPAPI php_stream_ops php_stream_socket_ops;
 php_stream_ops php_stream_udp_socket_ops;
@@ -59,7 +63,7 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 		ptimeout = &sock->timeout;
 
 retry:
-	didwrite = send(sock->socket, buf, count, 0);
+	didwrite = send(sock->socket, buf, count, (sock->is_blocked && ptimeout) ? MSG_DONTWAIT : 0);
 
 	if (didwrite <= 0) {
 		long err = php_socket_errno();
@@ -148,7 +152,7 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 			return 0;
 	}
 
-	nr_bytes = recv(sock->socket, buf, count, 0);
+	nr_bytes = recv(sock->socket, buf, count, (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);
 
 	stream->eof = (nr_bytes == 0 || (nr_bytes == -1 && php_socket_errno() != EWOULDBLOCK));
 

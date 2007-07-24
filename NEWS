@@ -72,6 +72,7 @@ PHP                                                                        NEWS
 - Fixed bug #42015 (ldap_rename(): server error "DSA is unwilling to perform").
   (bob at mroczka dot com, Jani)
 - Fixed bug #41989 (move_uploaded_file() & relative path in ZTS mode). (Tony)
+- Fixed bug #41984 (Hangs on large SoapClient requests). (Dmitry)
 - Fixed bug #41983 (Error Fetching http headers terminated by '\n'). (Dmitry)
 - Fixed bug #41964 (strtotime returns a timestamp for non-time string of
   pattern '(A|a) .+'). (Derick)
