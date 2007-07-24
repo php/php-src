@@ -4512,6 +4512,20 @@ ZEND_METHOD(reflection_extension, getDependencies)
 }
 /* }}} */
 
+/* {{{ proto public void ReflectionExtension::info() U
+       Prints phpinfo block for the extension */
+ZEND_METHOD(reflection_extension, info)
+{
+	reflection_object *intern;
+	zend_module_entry *module;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);
+	GET_REFLECTION_OBJECT_PTR(module);
+
+	php_info_print_module(module TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ method tables */
 static zend_function_entry reflection_exception_functions[] = {
 	{NULL, NULL, NULL}
@@ -4889,6 +4903,7 @@ static zend_function_entry reflection_extension_functions[] = {
 	ZEND_ME(reflection_extension, getClasses, NULL, 0)
 	ZEND_ME(reflection_extension, getClassNames, NULL, 0)
 	ZEND_ME(reflection_extension, getDependencies, NULL, 0)
+	ZEND_ME(reflection_extension, info, NULL, 0)
 	{NULL, NULL, NULL}
 };
 /* }}} */
