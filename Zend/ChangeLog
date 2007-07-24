@@ -1,3 +1,17 @@
+2007-07-23  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      zend.h
+      zend_ini_parser.y
+      zend_ini_scanner.l
+      zend_strtod.c:
+      MFH: - Fixed buf #42071 (ini scanner allows using NULL as option name).
+      MFH: Use Z_* macros to access the zvals.
+
+    * (BEFORE_IMPORT_OF_MYSQLND)
+      zend_ini_scanner.l:
+      - Fixed bug #42071 (ini scanner allows NULL to be used as option name)
+
 2007-07-21  Sara Golemon  <sara@golemon.com>
 
     * zend.h
