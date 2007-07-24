@@ -76,6 +76,8 @@ PHP                                                                        NEWS
   from class hierarchy). (robin_fernandes at uk dot ibm dot com)
 - Fixed bug #41947 (SimpleXML incorrectly registers empty strings as 
   namespaces). (Rob)
+- Fixed bug #41929 (Foreach on object does not iterate over all visible
+  properties). (Dmitry)
 - Fixed bug #41919 (crash in string to array conversion).
   (judas dot iscariote at gmail dot com, Ilia)
 - Fixed bug #41908 (CFLAGS="-Os" ./configure --enable-debug fails). 
@@ -160,6 +162,7 @@ PHP                                                                        NEWS
   on Windows). (Scott, Andrey)
 - Fixed bug #41127 (Memory leak in ldap_{first|next}_attribute functions).
   (Jani)
+- Fixed bug #40757 (get_object_vars get nothing in child class). (Dmitry)
 - Fixed bug #40419 (Trailing slash in CGI request does not work). (Dmitry)
 - Fixed bug #39330 (apache2handler does not call shutdown actions before 
   apache child die). (isk at ecommerce dot com, Gopal, Tony)
