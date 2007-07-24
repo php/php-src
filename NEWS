@@ -35,6 +35,8 @@ PHP                                                                        NEWS
   (Andrey A. Belashkov, Tony)
 - Added missing MSG_EOR and MSG_EOF constants to sockets extension. (Jani)
 - Added PCRE_VERSION constant. (Tony)
+- Added ReflectionExtension::info() function to print the phpinfo() block for
+  an extension. (Johannes)
 
 - Implemented FR #41884 (ReflectionClass::getDefaultProperties() does not handle 
   static attributes). (Tony)
