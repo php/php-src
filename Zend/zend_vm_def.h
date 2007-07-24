@@ -3324,11 +3324,9 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 				array_ptr->refcount++;
 			}
 		} else {
-			if (OP1_TYPE == IS_VAR &&
-				free_op1.var == NULL &&
+			if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) &&
 			    !array_ptr->is_ref &&
 			    array_ptr->refcount > 1) {
-				/* non-separated return value from function */
 				zval *tmp;
 
 				ALLOC_ZVAL(tmp);
