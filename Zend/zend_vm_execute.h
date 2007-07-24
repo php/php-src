@@ -1969,7 +1969,7 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
+
 	zval *array_ptr, **array_ptr_ptr;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
@@ -2016,11 +2016,9 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				array_ptr->refcount++;
 			}
 		} else {
-			if (IS_CONST == IS_VAR &&
-				free_op1.var == NULL &&
+			if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) &&
 			    !array_ptr->is_ref &&
 			    array_ptr->refcount > 1) {
-				/* non-separated return value from function */
 				zval *tmp;
 
 				ALLOC_ZVAL(tmp);
@@ -5176,11 +5174,9 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				array_ptr->refcount++;
 			}
 		} else {
-			if (IS_TMP_VAR == IS_VAR &&
-				free_op1.var == NULL &&
+			if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) &&
 			    !array_ptr->is_ref &&
 			    array_ptr->refcount > 1) {
-				/* non-separated return value from function */
 				zval *tmp;
 
 				ALLOC_ZVAL(tmp);
@@ -8446,11 +8442,9 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				array_ptr->refcount++;
 			}
 		} else {
-			if (IS_VAR == IS_VAR &&
-				free_op1.var == NULL &&
+			if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) &&
 			    !array_ptr->is_ref &&
 			    array_ptr->refcount > 1) {
-				/* non-separated return value from function */
 				zval *tmp;
 
 				ALLOC_ZVAL(tmp);
@@ -21620,7 +21614,7 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
+
 	zval *array_ptr, **array_ptr_ptr;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
@@ -21667,11 +21661,9 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				array_ptr->refcount++;
 			}
 		} else {
-			if (IS_CV == IS_VAR &&
-				free_op1.var == NULL &&
+			if ((IS_CV == IS_VAR || IS_CV == IS_CV) &&
 			    !array_ptr->is_ref &&
 			    array_ptr->refcount > 1) {
-				/* non-separated return value from function */
 				zval *tmp;
 
 				ALLOC_ZVAL(tmp);
