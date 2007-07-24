@@ -485,7 +485,7 @@ PHP_FUNCTION(json_decode)
 				RETURN_DOUBLE(d);
 			}
 		}
-		if (*str.s == '"' || str.s[str_len] == '"') {
+		if (str_len > 1 && *str.s == '"' && str.s[str_len-1] == '"') {
 			RETURN_STRINGL(str.s+1, str_len-2, 1);
 		} else {
 			RETURN_STRINGL(str.s, str_len, 1);
@@ -514,7 +514,7 @@ PHP_FUNCTION(json_decode)
 				RETURN_DOUBLE(d);
 			}
 		}
-		if (*str.u == 0x22 /*'"'*/ || str.u[str_len] == 0x22 /*'"'*/) {
+		if (str_len > 1 && *str.u == 0x22 /*'"'*/ && str.u[str_len-1] == 0x22 /*'"'*/) {
 			RETURN_UNICODEL(str.u+1, str_len-2, 1);
 		} else {
 			RETURN_UNICODEL(str.u, str_len, 1);
