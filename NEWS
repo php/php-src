@@ -34,6 +34,7 @@ PHP                                                                        NEWS
 - Added CURLOPT_PRIVATE & CURLINFO_PRIVATE constants. 
   (Andrey A. Belashkov, Tony)
 - Added missing MSG_EOR and MSG_EOF constants to sockets extension. (Jani)
+- Added PCRE_VERSION constant. (Tony)
 
 - Implemented FR #41884 (ReflectionClass::getDefaultProperties() does not handle 
   static attributes). (Tony)
