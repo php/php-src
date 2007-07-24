@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - Enabled changing the size of statement cache for non-persistent OCI8
   connections. (Chris Jones, Tony)
 
+- Changed "display_errors" php.ini option to accept "stderr" as value which
+  makes the error messages to be outputted to STDERR instead of STDOUT with 
+  CGI and CLI SAPIs (FR #22839). (Jani)
 - Changed error handler to send HTTP 500 instead of blank page on PHP errors.
   (Dmitry, Andrei Nigmatulin)
 - Changed mail() function to be always available. (Johannes)
