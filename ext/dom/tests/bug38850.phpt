@@ -1,5 +1,5 @@
 --TEST--
-Bug # 38850 (lookupNamespaceURI does not return default namespace)
+Bug #38850 (lookupNamespaceURI does not return default namespace)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
