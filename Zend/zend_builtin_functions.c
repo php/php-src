@@ -816,7 +816,7 @@ ZEND_FUNCTION(get_object_vars)
 	zstr key, prop_name, class_name;
 	uint key_len;
 	ulong num_index;
-	int instanceof;
+	zend_object *zobj;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &obj) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -835,7 +835,7 @@ ZEND_FUNCTION(get_object_vars)
 		RETURN_FALSE;
 	}
 
-	instanceof = EG(This) && instanceof_function(Z_OBJCE_P(EG(This)), Z_OBJCE_PP(obj) TSRMLS_CC);
+	zobj = zend_objects_get_address(*obj TSRMLS_CC);
 
 	array_init(return_value);
 
@@ -843,19 +843,11 @@ ZEND_FUNCTION(get_object_vars)
 
 	while (zend_hash_get_current_data_ex(properties, (void **) &value, &pos) == SUCCESS) {
 		if (zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos) == (UG(unicode)?HASH_KEY_IS_UNICODE:HASH_KEY_IS_STRING)) {
-			zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, key, key_len-1, &class_name, &prop_name);
-			if (class_name.v == NULL) {
+			if (zend_check_property_access(zobj, ZEND_STR_TYPE, key, key_len-1 TSRMLS_CC) == SUCCESS) {
+				zend_u_unmangle_property_name(ZEND_STR_TYPE, key, key_len-1, &class_name, &prop_name);
 				/* Not separating references */
 				(*value)->refcount++;
-				add_u_assoc_zval_ex(return_value, UG(unicode)?IS_UNICODE:IS_STRING, key, key_len, *value);
-			} else if (instanceof) {
-				if (class_name.s[0] == '*' ||
-				    (Z_OBJCE_P(EG(This)) == Z_OBJCE_PP(obj) &&
-				    UG(unicode)?!u_strcmp(Z_OBJCE_P(EG(This))->name.u, class_name.u):!strcmp(Z_OBJCE_P(EG(This))->name.s, class_name.s))) {
-					/* Not separating references */
-					(*value)->refcount++;
-					add_u_assoc_zval(return_value, UG(unicode)?IS_UNICODE:IS_STRING, prop_name, *value);
-				}
+				add_u_assoc_zval(return_value, ZEND_STR_TYPE, prop_name, *value);
 			}
 		}
 		zend_hash_move_forward_ex(properties, &pos);
