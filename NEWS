@@ -162,6 +162,8 @@ PHP                                                                        NEWS
   integer as sections). (Tony)
 - Fixed bug #41433 (DBA: configure fails to include correct db.h for db4).
   (Jani)
+- Fixed bug #41372 (Internal pointer of source array resets during array
+  copying). (Dmitry)
 - Fixed bug #41350 (my_thread_global_end() error during request shutdown
   on Windows). (Scott, Andrey)
 - Fixed bug #41127 (Memory leak in ldap_{first|next}_attribute functions).
@@ -172,6 +174,7 @@ PHP                                                                        NEWS
   apache child die). (isk at ecommerce dot com, Gopal, Tony)
 - Fixed bug #39291 (ldap_sasl_bind() misses the sasl_authc_id parameter).
   (diafour at gmail dot com, Jani)
+- Fixed bug #37715 (array pointers resetting on copy). (Dmitry)
 - Fixed bugs #36796, #36918, #41371 (stream_set_blocking() does not work).
   (Jani)
 - Fixed bug #35981 (pdo-pgsql should not use pkg-config when not present).
