@@ -117,117 +117,117 @@ int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode ab --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode at --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode w --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode wb --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode wt --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode x --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode xb --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode xt --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 
 -- Testing fread() with file having content of type text --
 -- File opened in mode a --
@@ -236,117 +236,117 @@ int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode ab --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode at --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode w --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode wb --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode wt --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode x --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode xb --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode xt --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 
 -- Testing fread() with file having content of type text_with_new_line --
 -- File opened in mode a --
@@ -355,475 +355,115 @@ int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode ab --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode at --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode w --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode wb --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode wt --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1137)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1137)
-bool(true)
+bool(false)
 -- File opened in mode x --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode xb --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1024)
-bool(true)
+bool(false)
 -- File opened in mode xt --
 -- Reading beyond filesize, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... OK
 int(0)
-bool(true)
+bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1137)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... OK
 int(1137)
-bool(true)
-Done
---UEXPECTF--
-*** Testing fread() : usage variations ***
-
--- Testing fread() with file having content of type numeric --
--- File opened in mode a --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
 bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode ab --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode at --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode w --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode wb --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode wt --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode x --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode xb --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode xt --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
-
--- Testing fread() with file having content of type text --
--- File opened in mode a --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode ab --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode at --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode w --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode wb --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode wt --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode x --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode xb --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode xt --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
-
--- Testing fread() with file having content of type text_with_new_line --
--- File opened in mode a --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode ab --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode at --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode w --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode wb --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode wt --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1137)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1137)
-bool(true)
--- File opened in mode x --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode xb --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1024)
-bool(true)
--- File opened in mode xt --
--- Reading beyond filesize, expeceted : 1024 bytes --
-int(0)
-bool(false)
-Reading 1030 bytes from file, expecting 0 bytes ... OK
-int(0)
-bool(true)
--- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
-int(1137)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
-int(1137)
-bool(true)
 Done
