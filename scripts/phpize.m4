@@ -31,14 +31,14 @@ PHP_RUNPATH_SWITCH
 PHP_SHLIB_SUFFIX_NAMES
 
 dnl Find php-config script
-PHP_ARG_WITH(config,,
+PHP_ARG_WITH(php-config,,
 [  --with-php-config=PATH  Path to php-config [php-config]], php-config, no)
 
-prefix=`$PHP_CONFIG --prefix 2>/dev/null`
-phpincludedir=`$PHP_CONFIG --include-dir 2>/dev/null`
-INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
-EXTENSION_DIR=`$PHP_CONFIG --extension-dir 2>/dev/null`
-PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
+prefix=`$PHP_PHP_CONFIG --prefix 2>/dev/null`
+phpincludedir=`$PHP_PHP_CONFIG --include-dir 2>/dev/null`
+INCLUDES=`$PHP_PHP_CONFIG --includes 2>/dev/null`
+EXTENSION_DIR=`$PHP_PHP_CONFIG --extension-dir 2>/dev/null`
+PHP_EXECUTABLE=`$PHP_PHP_CONFIG --php-binary 2>/dev/null`
  
 if test -z "$prefix"; then
   AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])
