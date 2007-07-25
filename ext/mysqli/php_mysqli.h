@@ -144,13 +144,10 @@ ZEND_FUNCTION(mysqli_result_construct);
 ZEND_FUNCTION(mysqli_driver_construct);
 ZEND_METHOD(mysqli_warning,__construct);
 
-
 #define phpext_mysqli_ptr &mysqli_module_entry
 extern zend_module_entry mysqli_module_entry;
 
 #endif	/* PHP_MYSQLI.H */
-
-#include "ext/mysqli/mysqlnd/php_mysqlnd.h"
 
 /*
  * Local variables:

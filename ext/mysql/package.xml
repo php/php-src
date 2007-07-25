@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
 <package>
- <name>mysqli</name>
+ <name>mysql</name>
  <summary>MySQL database access functions</summary>
  <maintainers>
   <maintainer>

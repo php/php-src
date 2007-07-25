@@ -36,12 +36,8 @@
 #define FALSE 0
 #endif
 
-#ifdef PHP_ATOM_INC
-#include "ext/mysqli/php_have_mysqlnd.h" /* HAVE_MYSQLND is defined here if enabled */
-#endif
-
-#if defined(HAVE_MYSQLND)
-#include "ext/mysqli/mysqlnd/mysqlnd.h"
+#ifdef HAVE_MYSQLND
+#include "ext/mysqlnd/mysqlnd.h"
 #include "ext/mysqli/mysqli_mysqlnd.h"
 #else
 #include <mysql.h>

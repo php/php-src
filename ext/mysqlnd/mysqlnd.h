@@ -47,7 +47,7 @@ extern zend_module_entry mysqlnd_module_entry;
 */
 #define MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND 1
 
-#include "portability.h"
+#include "mysqlnd_portability.h"
 
 #ifdef ZTS
 #include "TSRM.h"
