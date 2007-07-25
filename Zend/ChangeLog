@@ -1,3 +1,57 @@
+2007-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug40509.phpt
+      tests/bug40705.phpt:
+      Fixed bug #40705 (Iterating within function moves original array pointer)
+      Fixed bug #40509 (key() function changed behaviour if global array is used
+      within function)
+
+    * tests/bug40509.phpt
+      tests/bug40509.phpt
+      tests/bug40705.phpt
+      tests/bug40705.phpt:
+      
+      file bug40509.phpt was initially added on branch PHP_5_2.
+
+    * zend_hash.c
+      zend_hash.c
+      tests/bug37715.phpt
+      tests/bug41372.phpt:
+      Fixed bug #41372 (Internal pointer of source array resets during array
+      copying)
+      Fixed bug #37715 (array pointers resetting on copy)
+
+    * tests/bug37715.phpt
+      tests/bug37715.phpt
+      tests/bug41372.phpt
+      tests/bug41372.phpt:
+      
+      file bug37715.phpt was initially added on branch PHP_5_2.
+
+    * (BEFORE_REAL_IMPORT_OF_MYSQLND)
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug27798.phpt
+      tests/bug27798.phpt
+      tests/bug40757.phpt
+      tests/bug41929.phpt:
+      Fixed bug #40757 (get_object_vars get nothing in child class)
+      Fixed bug #41929 (Foreach on object does not iterate over all visible
+      properties)
+
+    * tests/bug40757.phpt
+      tests/bug40757.phpt
+      tests/bug41929.phpt
+      tests/bug41929.phpt:
+      
+      file bug40757.phpt was initially added on branch PHP_5_2.
+
 2007-07-23  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * (PHP_5_2)

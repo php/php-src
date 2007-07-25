@@ -1,3 +1,291 @@
+2007-07-24  Johannes Schlüter  <johannes@schlueters.de>
+
+    * NEWS:
+      - These functions where MFHd >1 year ago
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/026.phpt:
+      - MFB: New ReflectionExtension::info() function to print the phpinfo()
+      block
+        for an extension.
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/026.phpt
+      ext/reflection/tests/026.phpt:
+      - New ReflectionExtension::info() function to print the phpinfo() block
+        for an extension. [DOC]
+
+2007-07-24  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/json/json.c
+      ext/json/tests/bug42090.phpt:
+      MFH: Fixed bug#42090 (json_decode causes segmentation fault)
+
+    * ext/json/json.c
+      ext/json/tests/bug42090.phpt
+      ext/json/tests/bug42090.phpt:
+      Fixed bug#42090 (json_decode causes segmentation fault)
+
+2007-07-24  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pcre/php_pcre.c:
+      [DOC] MFH: add PCRE_VERSION constant to ext/pcre
+
+    * ext/pcre/php_pcre.c:
+      add PCRE_VERSION constant to ext/pcre
+
+    * main/main.c
+      main/main.c:
+      fix ZTS build
+
+    * ext/mysqli/config9.m4:
+      namespace protection
+      GD uses the same variable, too.
+
+2007-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/general_functions/debug_zval_dump_o.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_o.phpt:
+      Fixed test
+
+    * ZendEngine2/tests/bug40509.phpt
+      ZendEngine2/tests/bug40509.phpt
+      ZendEngine2/tests/bug40705.phpt
+      ZendEngine2/tests/bug40705.phpt:
+      
+      file bug40509.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug40509.phpt
+      ZendEngine2/tests/bug40705.phpt:
+      Fixed bug #40705 (Iterating within function moves original array pointer)
+      Fixed bug #40509 (key() function changed behaviour if global array is used
+      within function)
+
+2007-07-24  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/.cvsignore
+      ext/mysqli/.cvsignore:
+      ignor php_have_mysqlnd.h
+
+    * ext/mysqli/config9.m4
+      ext/mysqli/mysqlnd/portability.h:
+      Don't use AC_CHECK_TYPES, as autoconf 2.13 is buggy, use an workaround.
+
+2007-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug37715.phpt
+      ZendEngine2/tests/bug37715.phpt
+      ZendEngine2/tests/bug41372.phpt
+      ZendEngine2/tests/bug41372.phpt:
+      
+      file bug37715.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/tests/bug37715.phpt
+      ZendEngine2/tests/bug41372.phpt:
+      Fixed bug #41372 (Internal pointer of source array resets during array
+      copying)
+      Fixed bug #37715 (array pointers resetting on copy)
+
+2007-07-24  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/mysql_mysqlnd.h:
+      Add missing file
+
+    * ext/mysql/config.m4
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h
+      ext/mysqli/config.m4
+      ext/mysqli/config.w32
+      ext/mysqli/config9.m4
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_embedded.c
+      ext/mysqli/mysqli_exception.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_libmysql.h
+      ext/mysqli/mysqli_mysqlnd.h
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_repl.c
+      ext/mysqli/mysqli_report.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/mysqlnd/config-win.h
+      ext/mysqli/mysqlnd/mysqlnd.c
+      ext/mysqli/mysqlnd/mysqlnd.h
+      ext/mysqli/mysqlnd/mysqlnd_charset.c
+      ext/mysqli/mysqlnd/mysqlnd_charset.h
+      ext/mysqli/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqli/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqli/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqli/mysqlnd/mysqlnd_palloc.c
+      ext/mysqli/mysqlnd/mysqlnd_palloc.h
+      ext/mysqli/mysqlnd/mysqlnd_priv.h
+      ext/mysqli/mysqlnd/mysqlnd_ps.c
+      ext/mysqli/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqli/mysqlnd/mysqlnd_qcache.c
+      ext/mysqli/mysqlnd/mysqlnd_result.c
+      ext/mysqli/mysqlnd/mysqlnd_result.h
+      ext/mysqli/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqli/mysqlnd/mysqlnd_result_meta.h
+      ext/mysqli/mysqlnd/mysqlnd_statistics.c
+      ext/mysqli/mysqlnd/mysqlnd_statistics.h
+      ext/mysqli/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqli/mysqlnd/mysqlnd_wireprotocol.h
+      ext/mysqli/mysqlnd/php_mysqlnd.h
+      ext/mysqli/mysqlnd/portability.h:
+      Import of mysqlnd and ext/mysql + ext/mysqli patched to be built either
+      with libmysql or mysqld.
+      
+      Use --with-mysql=mysqlnd --with-mysqli=mysqlnd to build with mysqlnd.
+
+2007-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/xp_socket.c
+      main/streams/xp_socket.c:
+      Fixed bug #41984 (Hangs on large SoapClient requests)
+
+2007-07-24  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS
+      php.ini-dist
+      php.ini-recommended
+      main/main.c
+      main/php_globals.h:
+      MFH:- Changed "display_errors" php.ini option to accept "stderr" as value
+      which
+      MFH:  makes the error messages to be outputted to STDERR instead of STDOUT
+      with
+      MFH:  CGI and CLI SAPIs (FR #22839).
+
+    * (BEFORE_REAL_IMPORT_OF_MYSQLND)
+      php.ini-dist
+      php.ini-recommended
+      main/main.c
+      main/php_globals.h:
+      - Changed "display_errors" php.ini option to accept "stderr" as value which
+        makes the error messages to be outputted to STDERR instead of STDOUT
+      with
+        CGI and CLI SAPIs.
+
+2007-07-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/dom/tests/bug28721.phpt
+      ext/dom/tests/bug28817.phpt
+      ext/dom/tests/bug32615.phpt
+      ext/dom/tests/bug34276.phpt
+      ext/dom/tests/bug35342.phpt
+      ext/dom/tests/bug37277.phpt
+      ext/dom/tests/bug37456.phpt
+      ext/dom/tests/bug38850.phpt
+      ext/dom/tests/bug38949.phpt
+      ext/dom/tests/bug40836.phpt
+      ext/dom/tests/bug41257.phpt
+      ext/dom/tests/bug41374.phpt:
+      
+      Test name formatting fixes
+
+2007-07-24  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * main/main.c:
+      fix folding
+
+2007-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug27798.phpt
+      ZendEngine2/tests/bug27798.phpt
+      ZendEngine2/tests/bug40757.phpt
+      ZendEngine2/tests/bug40757.phpt
+      ZendEngine2/tests/bug40757.phpt
+      ZendEngine2/tests/bug41929.phpt
+      ZendEngine2/tests/bug41929.phpt
+      ZendEngine2/tests/bug41929.phpt
+      ext/pdo/tests/pdo_018.phpt
+      tests/classes/visibility_005.phpt
+      tests/classes/visibility_005.phpt:
+      Fixed bug #40757 (get_object_vars get nothing in child class)
+      Fixed bug #41929 (Foreach on object does not iterate over all visible
+      properties)
+
+2007-07-24  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS
+      ext/sockets/sockets.c:
+      MFH:- Added missing MSG_EOR and MSG_EOF constants
+
+    * (BEFORE_REAL_IMPORT_OF_MYSQLND)
+      ext/sockets/sockets.c:
+      - Added missing constants for MSG_EOR and MSG_EOF
+
+    * (BEFORE_REAL_IMPORT_OF_MYSQLND)
+      ext/sockets/package.xml
+      ext/sockets/sockets.php:
+      - Removed useless file
+
+2007-07-24  Andrey Hristov  <php@hristov.com>
+
+    * (BEFORE_REAL_IMPORT_OF_MYSQLND)
+      ext/mysqli/mysqli_api.c:
+      MFB
+
+2007-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_http.c
+      ext/soap/php_http.c:
+      Fixed bug #41983 (Error Fetching http headers terminated by '\n')
+
+2007-07-24  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      - fix NEWS
+
+2007-07-24  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli_api.c:
+      Fix build with latest 5.1 sources where gptr is no more.
+
+2007-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed bug #42027 is_file() / is_dir() matches file/dirnames with wildcard
+      char or trailing slash
+
 2007-07-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
