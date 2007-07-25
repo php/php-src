@@ -41,6 +41,8 @@ PHP                                                                        NEWS
 - Implemented FR #41884 (ReflectionClass::getDefaultProperties() does not handle 
   static attributes). (Tony)
 
+- Fixed EOF handling in case of reading from file opened in write only mode.
+  (Dmitry)
 - Fixed "Floating point exception" inside wordwrap(). (Mattias Bengtsson,
   Ilia)
 - Fixed crash in OpenSSL extension because of non-string passphrase. (Dmitry)

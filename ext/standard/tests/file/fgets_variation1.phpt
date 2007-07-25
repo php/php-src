@@ -84,7 +84,7 @@ int(0)
 bool(false)
 bool(false)
 int(0)
-bool(true)
+bool(false)
 -- File opened in mode : at --
 bool(true)
 int(0)
