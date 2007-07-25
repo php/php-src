@@ -19,6 +19,7 @@
 */
 
 /* $Id$ */
+
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_wireprotocol.h"

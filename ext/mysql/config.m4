@@ -140,7 +140,6 @@ Note that the MySQL client library is not bundled anymore!])
   PHP_ADD_LIBRARY_WITH_PATH($MYSQL_LIBNAME, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
   PHP_ADD_INCLUDE($MYSQL_INC_DIR)
 
-
   MYSQL_MODULE_TYPE=external
   MYSQL_LIBS="-L$MYSQL_LIB_DIR -l$MYSQL_LIBNAME $MYSQL_LIBS"
   MYSQL_INCLUDE=-I$MYSQL_INC_DIR
@@ -156,9 +155,7 @@ if test "$PHP_MYSQL" != "no"; then
   PHP_NEW_EXTENSION(mysql, php_mysql.c, $ext_shared)
   PHP_SUBST(MYSQL_SHARED_LIBADD)
 
-  dnl These 3 lines are neeeded to be able to build ext/mysql and/or ext/mysqli with/without mysqlnd.
-  dnl Need to do this here for the file to be always available.
-  $php_shtool mkdir -p ext/mysql/
-  echo > ext/mysql/php_have_mysqlnd.h
-  test "$PHP_MYSQL" = "mysqlnd" && PHP_DEFINE(HAVE_MYSQLND, 1, [ext/mysql])
+  if test "$PHP_MYSQLI" = "mysqlnd"; then
+    PHP_ADD_EXTENSION_DEP(mysqli, mysqlnd)
+  fi
 fi

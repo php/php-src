@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-
 /* $Id$ */
 
 #ifndef PHP_MYSQL_H
@@ -42,12 +41,8 @@
 #define FALSE 0
 #endif
 
-#ifdef PHP_ATOM_INC
-#include "ext/mysql/php_have_mysqlnd.h" /* HAVE_MYSQLND is defined here if enabled */
-#endif
-
 #if defined(HAVE_MYSQLND)
-#include "ext/mysqli/mysqlnd/mysqlnd.h"
+#include "ext/mysqlnd/mysqlnd.h"
 #include "ext/mysql/mysql_mysqlnd.h"
 #else
 #include <mysql.h>
@@ -151,9 +146,5 @@ ZEND_END_MODULE_GLOBALS(mysql)
 #endif
 
 #define phpext_mysql_ptr mysql_module_ptr
-
-
-#include "ext/mysqli/mysqlnd/php_mysqlnd.h"
-
 
 #endif /* PHP_MYSQL_H */

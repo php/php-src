@@ -1026,7 +1026,14 @@ dnl -------------------------------------------------------------------------
 dnl Checks for structures, typedefs, broken functions, etc.
 dnl -------------------------------------------------------------------------
 
-dnl Internal helper macro
+dnl Internal helper macros
+dnl
+dnl _PHP_DEF_HAVE_FILE(what, filename)
+AC_DEFUN([_PHP_DEF_HAVE_FILE], [
+  php_def_have_what=HAVE_[]`echo $1 | tr 'abcdefghijklmnopqrstuvwxyz-' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ_' `
+  echo "#define $php_def_have_what 1" >> $2
+])
+dnl
 dnl _PHP_CHECK_SIZEOF(type, cross-value, extra-headers [, found-action [, not-found-action]])
 dnl
 AC_DEFUN([_PHP_CHECK_SIZEOF], [
@@ -1082,6 +1089,21 @@ AC_DEFUN(PHP_CHECK_SIZEOF, [
     AC_DEFINE_UNQUOTED([HAVE_]translit($1,a-z,A-Z_), 1, [Whether $1 is available])
   ])
   AC_MSG_RESULT([[$][php_cv_sizeof_]translit($1, ,_)])
+])
+
+dnl
+dnl PHP_CHECK_TYPES(type-list, include-file [, extra-headers])
+dnl
+AC_DEFUN([PHP_CHECK_TYPES], [
+  for php_typename in $1; do
+    AC_MSG_CHECKING([whether $php_typename exists])
+    _PHP_CHECK_SIZEOF($php_typename, 0, $3, [
+      _PHP_DEF_HAVE_FILE($php_typename, $2)
+      AC_MSG_RESULT([yes])
+    ], [
+      AC_MSG_RESULT([no])
+    ])
+  done
 ])
 
 dnl
