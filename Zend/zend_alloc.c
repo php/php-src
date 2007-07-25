@@ -1591,6 +1591,15 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 			free(heap);
 		}
 	} else {
+#ifdef HAVE_MEM_WIN32
+		/* FIX for bug #41713 */
+		/* TODO: add new "compact" handler */
+		if (storage->handlers->dtor == zend_mm_mem_win32_dtor &&
+		    storage->handlers->init == zend_mm_mem_win32_init) {
+		    HeapDestroy((HANDLE)storage->data);
+		    storage->data = (void*)HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
+		}
+#endif
 		heap->segments_list = NULL;
 		zend_mm_init(heap);
 		heap->real_size = 0;
