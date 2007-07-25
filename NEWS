@@ -117,6 +117,7 @@ PHP                                                                        NEWS
 - Fixed bug #41711 (NULL temporary lobs not supported in OCI8). 
   (Chris Jones, Tony)
 - Fixed bug #41770 (SSL: fatal protocol error due to buffer issues). (Ilia)
+- Fixed bug #41713 (Persistent memory consumption on win32 since 5.2). (Dmitry)
 - Fixed bug #41709 (strtotime() does not handle 00.00.0000). (Derick)
 - Fixed bug #41698 (float parameters truncated to integer in prepared 
   statements). (Ilia)
