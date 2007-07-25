@@ -268,7 +268,8 @@ int mysqlnd_set_sock_no_delay(php_stream *stream)
 */
 size_t mysqlnd_stream_write_w_header(MYSQLND * const conn, char * const buf, size_t count TSRMLS_DC)
 {
-	zend_uchar safe_storage[MYSQLND_HEADER_SIZE];
+	zend_uchar safe_buf[((MYSQLND_HEADER_SIZE) + (sizeof(zend_uchar)) - 1) / (sizeof(zend_uchar))];
+	zend_uchar *safe_storage = (char *) &safe_buf;
 	MYSQLND_NET *net = &conn->net;
 	size_t old_chunk_size = net->stream->chunk_size;
 	size_t ret, left = count, packets_sent = 1;
@@ -315,7 +316,8 @@ static
 size_t mysqlnd_stream_write_w_command(MYSQLND * const conn, enum php_mysqlnd_server_command command,
 									  const char * const buf, size_t count TSRMLS_DC)
 {
-	zend_uchar safe_storage[MYSQLND_HEADER_SIZE + 1];
+	zend_uchar safe_buf[((MYSQLND_HEADER_SIZE) + (sizeof(zend_uchar)) - 1) / (sizeof(zend_uchar))];
+	zend_uchar *safe_storage = (char *) &safe_buf;
 	MYSQLND_NET *net = &conn->net;
 	size_t old_chunk_size = net->stream->chunk_size;
 	size_t ret, left = count, header_len = MYSQLND_HEADER_SIZE + 1, packets_sent = 1;

@@ -102,19 +102,19 @@ typedef uint32_t uint32;
 
 #elif SIZEOF_INT == 4
 
-#ifndef (SIZEOF_INT32 == 0)
+#if (SIZEOF_INT32 == 0)
 typedef signed int int32;
 #endif
-#ifndef (SIZEOF_UINT32 == 0)
+#if (SIZEOF_UINT32 == 0)
 typedef unsigned int uint32;
 #endif
 
 #elif SIZEOF_LONG == 4
 
-#ifndef (SIZEOF_INT32 == 0)
+#if (SIZEOF_INT32 == 0)
 typedef signed long int32;
 #endif
-#ifndef (SIZEOF_UINT32 == 0)
+#if (SIZEOF_UINT32 == 0)
 typedef unsigned long uint32;
 #endif
 
