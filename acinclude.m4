@@ -1026,21 +1026,17 @@ dnl -------------------------------------------------------------------------
 dnl Checks for structures, typedefs, broken functions, etc.
 dnl -------------------------------------------------------------------------
 
+dnl Internal helper macro
+dnl _PHP_CHECK_SIZEOF(type, cross-value, extra-headers [, found-action [, not-found-action]])
 dnl
-dnl PHP_CHECK_SIZEOF(TYPE [, CROSS-SIZE])
-dnl Enhanced version of AC_CHECK_SIZEOF for checking more types 
-dnl than just those defined in stdio.h
-dnl
-AC_DEFUN(PHP_CHECK_SIZEOF,
-[changequote(<<, >>)dnl
-dnl The name to #define.
-define(<<AC_TYPE_NAME>>, translit(sizeof_$1, [a-z *], [A-Z_P]))dnl
-dnl The cache variable name.
-define(<<AC_CV_NAME>>, translit(ac_cv_sizeof_$1, [ *], [_p]))dnl
-changequote([, ])dnl
-AC_MSG_CHECKING(size of $1)
-AC_CACHE_VAL(AC_CV_NAME,
-[AC_TRY_RUN([#include <stdio.h>
+AC_DEFUN([_PHP_CHECK_SIZEOF], [
+  php_cache_value=php_cv_sizeof_[]$1
+  AC_CACHE_VAL(php_cv_sizeof_[]$1, [
+    old_LIBS=$LIBS
+    LIBS=
+    old_LDFLAGS=$LDFLAGS
+    LDFLAGS=
+    AC_TRY_RUN([#include <stdio.h>
 #if STDC_HEADERS
 #include <stdlib.h>
 #include <stddef.h>
@@ -1051,17 +1047,41 @@ AC_CACHE_VAL(AC_CV_NAME,
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+$3
+
 int main()
 {
-	FILE *f=fopen("conftestval", "w");
-	if (!f) return(1);
-		fprintf(f, "%d\n", sizeof($1));
-		return(0);
-	}], AC_CV_NAME=`cat conftestval`, AC_CV_NAME=0, ifelse([$2], , , AC_CV_NAME=$2))])dnl
-AC_MSG_RESULT($AC_CV_NAME)
-AC_DEFINE_UNQUOTED(AC_TYPE_NAME, $AC_CV_NAME, [The number of bytes in a $1.])
-undefine([AC_TYPE_NAME])dnl
-undefine([AC_CV_NAME])dnl
+	FILE *fp = fopen("conftestval", "w");
+	if (!fp) return(1);
+	fprintf(fp, "%d\n", sizeof($1));
+	return(0);
+}
+  ], [
+    eval $php_cache_value=`cat conftestval`
+  ], [
+    eval $php_cache_value=0
+  ], [
+    ifelse([$2],,[eval $php_cache_value=0], [eval $php_cache_value=$2])
+])
+  LDFLAGS=$old_LDFLAGS
+  LIBS=$old_LIBS
+])
+  if eval test "\$$php_cache_value" != "0"; then
+ifelse([$4],[],:,[$4])
+ifelse([$5],[],,[else $5])
+  fi
+])
+
+dnl
+dnl PHP_CHECK_SIZEOF(type, cross-value, extra-headers)
+dnl
+AC_DEFUN(PHP_CHECK_SIZEOF, [
+  AC_MSG_CHECKING([size of $1])
+  _PHP_CHECK_SIZEOF($1, $2, $3, [
+    AC_DEFINE_UNQUOTED([SIZEOF_]translit($1,a-z,A-Z_), [$]php_cv_sizeof_[]$1, [Size of $1])
+    AC_DEFINE_UNQUOTED([HAVE_]translit($1,a-z,A-Z_), 1, [Whether $1 is available])
+  ])
+  AC_MSG_RESULT([[$][php_cv_sizeof_]translit($1, ,_)])
 ])
 
 dnl
