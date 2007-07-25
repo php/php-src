@@ -81,11 +81,6 @@ Oracle:
 
  - Support for array types and collections.
 
-Userspace PDO Driver:
-=====================
-
- - Will be hard.
-
 PDO Session module:
 ===================
 
