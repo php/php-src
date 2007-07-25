@@ -652,6 +652,7 @@ bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... OK
 int(0)
 bool(false)
+
 Done
 --UEXPECTF--
 *** Testing fread() : usage variations ***
@@ -1202,4 +1203,5 @@ bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... OK
 int(0)
 bool(false)
+
 Done
