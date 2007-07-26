@@ -548,7 +548,7 @@ function compare_self_stat( array $stat )
   foreach($string_keys as $str_key)
   {
     if($stat[$key] != $stat[$str_key]) {
-      echo "stat[$key] doesn't match with stat[$str_key]\n";
+      echo "Error: stat[$key] doesn't match with stat[$str_key]\n";
       $flag = false;
       $key++;
     }
@@ -556,6 +556,13 @@ function compare_self_stat( array $stat )
       $key++;
     }
   } // end of foreach
+
+  // if the $return_value is false, i.e all the element do not match then 
+  // dump the stat array so that its easy to figure out the error
+  if ($return_value == false ) {
+    echo "\n Dumping stat array ...\n";
+    var_dump($stat);
+  }
 
   return $return_value;
 }// end of compare_self_stat
@@ -570,7 +577,7 @@ Description:
   $stat2 = second stat array
   $op = type of the comparision to be perform between elements of stat1 and stat2
     "!=" compare for not equal
-    "==" comprae for equality
+    "==" compare for equality
     ">"  if each element of stat1 is > than stat2
     "<"  if each element of stat1 is < than stat2
   $fields = contains the key of the elements that needs to be compared. 
@@ -578,7 +585,10 @@ Description:
   $flag = specify true to dump the stat1 and stat2 
 */
 
-$all_stat_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, "dev", "ino", "mode", "nlink", "uid", "gid", "rdev", "size", "atime", "mtime", "ctime", "blksize", "blocks");
+$all_stat_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 
+                       "dev", "ino", "mode", "nlink", "uid", "gid",
+                       "rdev", "size", "atime", "mtime", "ctime",
+                       "blksize", "blocks");
 
 function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
   // dump the stat if requested
@@ -597,7 +607,7 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
        case "==":
          if ( $stat1[ $fields[$index] ] != $stat2[ $fields[$index] ] ) {
            $result = false;
-           echo "stat1 do not match with stat2 at key value: $fields[$index]\n";
+           echo "Error: stat1 do not match with stat2 at key value: $fields[$index]\n";
          }
          break;
 
@@ -606,25 +616,34 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
            // do nothing as its not equal, else will take care of if equal
          } else {
            $result = false;
-           echo "stat1 equals stat2 at key value: $fields[$index]\n";
+           echo "Error: stat1 equals stat2 at key value: $fields[$index]\n";
          }
          break;
 
        case ">":
          if ( $stat1[ $fields[$index] ] <= $stat2[ $fields[$index] ] ) {
            $result = false;
-           echo "stat1 is not greater than stat2 at key value: $fields[$index]\n";
+           echo "Error: stat1 is not greater than stat2 at key value: $fields[$index]\n";
          }
          break;
 
        case "<":
          if ( $stat1[ $fields[$index] ] >= $stat2[ $fields[$index] ] ) {
            $result = false;
-           echo "stat1 is not lesser than stat2 at key value: $fields[$index]\n";
+           echo "Error: stat1 is not lesser than stat2 at key value: $fields[$index]\n";
          }
          break;
     }
   }
+  // if the result is false(i.e values are not as expected), 
+  // dump the stat array so that easy to figure out the error
+  if ( $result == false ) {
+    echo "\n Dumping stat array 1...\n";
+    var_dump($stat1);
+    echo "\n Dumping stat array 2...\n";
+    var_dump($stat2);
+  }
+
   return $result;
 }
 
