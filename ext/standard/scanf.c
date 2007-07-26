@@ -649,6 +649,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 				return FAILURE;
 			}
 		}
+		varStart = 0; /* Array index starts from 0 */
 	}
 
 	baseString = string;

@@ -70,6 +70,7 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed Bug #42107 (sscanf broken when using %2$s format parameters). (Jani)
 - Fixed bug #42090 (json_decode causes segmentation fault). (Hannes)
 - Fixed bug #42072 (No warning message for clearstatcache() with arguments).
   (Ilia)
