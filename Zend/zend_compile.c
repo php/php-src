@@ -3110,6 +3110,11 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 		zend_error(E_COMPILE_ERROR, "Cannot use '%R' as class name as it is reserved", Z_TYPE(class_name->u.constant), Z_UNIVAL(class_name->u.constant));
 	}
 
+	if (CG(current_import) &&
+	    zend_u_hash_exists(CG(current_import), Z_TYPE(class_name->u.constant), lcname, lcname_len+1)) {
+		zend_error(E_COMPILE_ERROR, "Class name '%R' coflicts with import name", Z_TYPE(class_name->u.constant), Z_UNIVAL(class_name->u.constant));
+	}
+
 	if (CG(current_namespace)) {
 		znode tmp;
 
@@ -4945,6 +4950,10 @@ void zend_do_import(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 		zend_error(E_COMPILE_ERROR, "Cannot use '%R' as import name", Z_TYPE_P(name), Z_UNIVAL_P(name));
 	}
 	
+	if (zend_u_hash_exists(CG(class_table), Z_TYPE_P(name), lcname, lcname_len+1)) {
+		zend_error(E_COMPILE_ERROR, "Import name '%R' coflicts with defined class", Z_TYPE_P(name), Z_UNIVAL_P(name));
+	}
+
 	if (zend_u_hash_add(CG(current_import), Z_TYPE_P(name), lcname, lcname_len+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
 		zend_error(E_COMPILE_ERROR, "Cannot reuse import name");		
 	}
