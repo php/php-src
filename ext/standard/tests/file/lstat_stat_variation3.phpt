@@ -1,10 +1,9 @@
 --TEST--
-Test lstat() and stat() functions: usage variations - writing data in file & creating/deleting file/subdir
-
+Test lstat() and stat() functions: usage variations - effects of rename() on link
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. lstat() not available on Windows');
+    die('skip.. Not valid for Windows');
 }
 ?>
 --FILE--
@@ -16,68 +15,33 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
    Description: Gives information about a file
 */
 
-/* test the effects on the stats for writing to a file and
-   creating or deleting file/subdir from a dir
-*/
+/* test the effects of rename() on stats of link */
 
 $file_path = dirname(__FILE__);
 require "$file_path/file.inc";
 
-
-/* create temp file, link and directory */
-mkdir("$file_path/lstat_stat_variation3/");  // temp dir
-
-$file_name = "$file_path/lstat_stat_variation3.tmp";
-$fp = fopen($file_name, "w");  // temp file
+/* create temp file & link */
+$fp = fopen("$file_path/lstat_stat_variation3.tmp", "w");  // temp file
 fclose($fp);
 
-symlink("$file_path/lstat_stat_variation3.tmp", "$file_path/lstat_stat_variation3_link.tmp"); // temp link
+// temp link
+symlink("$file_path/lstat_stat_variation3.tmp", "$file_path/lstat_stat_variation_link3.tmp");
 
-// writing to an empty file
-echo "-- Testing stat() on file after data is written in it --\n";
-$fh = fopen($file_name,"w");
-$old_stat = stat($file_name);
+// renaming a link
+echo "*** Testing lstat() for link after being renamed ***\n";
+$old_linkname = "$file_path/lstat_stat_variation_link3.tmp";
+$new_linkname = "$file_path/lstat_stat_variation_link3a.tmp";
+$old_stat = lstat($old_linkname);
 clearstatcache();
-fwrite($fh, "Hello World");
-$new_stat = stat($file_name);
+var_dump( rename($old_linkname, $new_linkname) );
+$new_stat = lstat($new_linkname);
 
 // compare self stats
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
-// compare the stats
-$comp_arr = array(7, 12, 'size', 'blocks');
-var_dump(compare_stats($old_stat, $new_stat, $comp_arr, "<"));
-clearstatcache();
 
-// creating and deleting subdir and files in the dir
-echo "-- Testing stat() on dir after subdir and file is created in it --\n";
-$dirname = "$file_path/lstat_stat_variation3";
-$old_stat = stat($dirname);
-clearstatcache();
-sleep(2);
-mkdir("$dirname/lstat_stat_variation3_subdir");
-$file_handle = fopen("$dirname/lstat_stat_variation3a.tmp", "w");
-fclose($file_handle);
-$new_stat = stat($dirname);
-
-// compare self stats
-var_dump( compare_self_stat($old_stat) );
-var_dump( compare_self_stat($new_stat) );
-// compare the stats
-$affected_members = array(3, 9, 10, 'nlink', 'mtime', 'ctime');
-clearstatcache();
-var_dump(compare_stats($old_stat, $new_stat, $affected_members, "<"));
-unlink("$dirname/lstat_stat_variation3a.tmp");
-rmdir("$dirname/lstat_stat_variation3_subdir");
-
-// comparing stats after the deletion of subdir and file
-echo "-- Testing stat() for comparing stats after the deletion of subdir and file --\n";
-$new_stat1 = stat($dirname);
-// compare self stats
-var_dump( compare_self_stat($new_stat1) );
-// compare the stats
-$affected_members = array(3, 'nlink');
-var_dump(compare_stats($new_stat, $new_stat1, $affected_members, ">"));
+// compare the two stats
+var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys) );
 
 echo "\n--- Done ---";
 ?>
@@ -86,38 +50,21 @@ echo "\n--- Done ---";
 <?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation3.tmp");
-rmdir("$file_path/lstat_stat_variation3");
-unlink("$file_path/lstat_stat_variation3_link.tmp");
+unlink("$file_path/lstat_stat_variation_link3a.tmp");
 ?>
 --EXPECTF--
--- Testing stat() on file after data is written in it --
+*** Testing lstat() for link after being renamed ***
 bool(true)
 bool(true)
-bool(true)
--- Testing stat() on dir after subdir and file is created in it --
-bool(true)
-bool(true)
-bool(true)
--- Testing stat() for comparing stats after the deletion of subdir and file --
 bool(true)
 bool(true)
 
 --- Done ---
-
 --UEXPECTF--
--- Testing stat() on file after data is written in it --
-
-Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
+*** Testing lstat() for link after being renamed ***
 bool(true)
 bool(true)
-bool(true)
--- Testing stat() on dir after subdir and file is created in it --
-bool(true)
-bool(true)
-bool(true)
--- Testing stat() for comparing stats after the deletion of subdir and file --
 bool(true)
 bool(true)
 
 --- Done ---
-

@@ -548,7 +548,7 @@ function compare_self_stat( array $stat )
   foreach($string_keys as $str_key)
   {
     if($stat[$key] != $stat[$str_key]) {
-      echo "stat[$key] doesn't match with stat[$str_key]\n";
+      echo "Error: stat[$key] doesn't match with stat[$str_key]\n";
       $flag = false;
       $key++;
     }
@@ -556,6 +556,13 @@ function compare_self_stat( array $stat )
       $key++;
     }
   } // end of foreach
+
+  // if the $return_value is false, i.e all the element do not match then
+  // dump the stat array so that its easy to figure out the error
+  if ($return_value == false ) {
+    echo "\n Dumping stat array ...\n";
+    var_dump($stat);
+  }
 
   return $return_value;
 }// end of compare_self_stat
@@ -597,7 +604,7 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
        case "==":
          if ( $stat1[ $fields[$index] ] != $stat2[ $fields[$index] ] ) {
            $result = false;
-           echo "stat1 do not match with stat2 at key value: $fields[$index]\n";
+           echo "Error: stat1 do not match with stat2 at key value: $fields[$index]\n";
          }
          break;
 
@@ -606,25 +613,34 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
            // do nothing as its not equal, else will take care of if equal
          } else {
            $result = false;
-           echo "stat1 equals stat2 at key value: $fields[$index]\n";
+           echo "Error: stat1 equals stat2 at key value: $fields[$index]\n";
          }
          break;
 
        case ">":
          if ( $stat1[ $fields[$index] ] <= $stat2[ $fields[$index] ] ) {
            $result = false;
-           echo "stat1 is not greater than stat2 at key value: $fields[$index]\n";
+           echo "Error: stat1 is not greater than stat2 at key value: $fields[$index]\n";
          }
          break;
 
        case "<":
          if ( $stat1[ $fields[$index] ] >= $stat2[ $fields[$index] ] ) {
            $result = false;
-           echo "stat1 is not lesser than stat2 at key value: $fields[$index]\n";
+           echo "Error: stat1 is not lesser than stat2 at key value: $fields[$index]\n";
          }
          break;
     }
   }
+  // if the result is false(i.e values are not as expected),
+  // dump the stat array so that easy to figure out the error
+  if ( $result == false ) {
+    echo "\n Dumping stat array 1...\n";
+    var_dump($stat1);
+    echo "\n Dumping stat array 2...\n";
+    var_dump($stat2);
+  }
+
   return $result;
 }
 
