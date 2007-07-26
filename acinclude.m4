@@ -773,7 +773,7 @@ dnl PHP_BUILD_SHARED
 dnl
 AC_DEFUN([PHP_BUILD_SHARED],[
   PHP_BUILD_PROGRAM
-  OVERALL_TARGET=libphp5.la
+  OVERALL_TARGET=libphp[]$PHP_MAJOR_VERSION[.la]
   php_build_target=shared
   
   php_c_pre=$shared_c_pre
@@ -790,7 +790,7 @@ dnl PHP_BUILD_STATIC
 dnl
 AC_DEFUN([PHP_BUILD_STATIC],[
   PHP_BUILD_PROGRAM
-  OVERALL_TARGET=libphp5.la
+  OVERALL_TARGET=libphp[]$PHP_MAJOR_VERSION[.la]
   php_build_target=static
 ])
 
@@ -799,7 +799,7 @@ dnl PHP_BUILD_BUNDLE
 dnl
 AC_DEFUN([PHP_BUILD_BUNDLE],[
   PHP_BUILD_PROGRAM
-  OVERALL_TARGET=libs/libphp5.bundle
+  OVERALL_TARGET=libs/libphp[]$PHP_MAJOR_VERSION[.bundle]
   php_build_target=static
 ])
 
@@ -1026,7 +1026,14 @@ dnl -------------------------------------------------------------------------
 dnl Checks for structures, typedefs, broken functions, etc.
 dnl -------------------------------------------------------------------------
 
-dnl Internal helper macro
+dnl Internal helper macros
+dnl
+dnl _PHP_DEF_HAVE_FILE(what, filename)
+AC_DEFUN([_PHP_DEF_HAVE_FILE], [
+  php_def_have_what=HAVE_[]`echo $1 | tr 'abcdefghijklmnopqrstuvwxyz-' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ_' `
+  echo "#define $php_def_have_what 1" >> $2
+])
+dnl
 dnl _PHP_CHECK_SIZEOF(type, cross-value, extra-headers [, found-action [, not-found-action]])
 dnl
 AC_DEFUN([_PHP_CHECK_SIZEOF], [
@@ -1082,6 +1089,21 @@ AC_DEFUN(PHP_CHECK_SIZEOF, [
     AC_DEFINE_UNQUOTED([HAVE_]translit($1,a-z,A-Z_), 1, [Whether $1 is available])
   ])
   AC_MSG_RESULT([[$][php_cv_sizeof_]translit($1, ,_)])
+])
+
+dnl
+dnl PHP_CHECK_TYPES(type-list, include-file [, extra-headers])
+dnl
+AC_DEFUN([PHP_CHECK_TYPES], [
+  for php_typename in $1; do
+    AC_MSG_CHECKING([whether $php_typename exists])
+    _PHP_CHECK_SIZEOF($php_typename, 0, $3, [
+      _PHP_DEF_HAVE_FILE($php_typename, $2)
+      AC_MSG_RESULT([yes])
+    ], [
+      AC_MSG_RESULT([no])
+    ])
+  done
 ])
 
 dnl
@@ -2062,11 +2084,14 @@ dnl
 dnl Search for (f)lex and check it's version
 dnl
 AC_DEFUN([PHP_PROG_LEX], [
-  # we only support certain flex versions
+dnl we only support certain flex versions
   flex_version_list="2.5.4"
    
   AC_PROG_LEX
   if test "$LEX" = "flex"; then
+dnl AC_DECL_YYTEXT is obsolete since autoconf 2.50 and merged into AC_PROG_LEX
+dnl this is what causes that annoying "PHP_PROG_LEX is expanded from" warning with autoconf 2.50+
+dnl it should be removed once we drop support of autoconf 2.13 (if ever)
     AC_DECL_YYTEXT
     :
   fi
@@ -2120,17 +2145,17 @@ AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG(RE2C, re2c, re2c)
   if test -n "$RE2C"; then
     AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
-      re2c_vernum=`echo "" | re2c --vernum 2>/dev/null`
-      if test -z "$re2c_vernum" || test "$re2c_vernum" -lt "911"; then
+      re2c_vernum=`re2c --vernum 2>/dev/null`
+      if test -z "$re2c_vernum" || test "$re2c_vernum" -lt "1200"; then
         php_cv_re2c_version=invalid
       else
-        php_cv_re2c_version="`echo "" | re2c --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
+        php_cv_re2c_version="`re2c --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
       fi 
     ])
   fi
   case $php_cv_re2c_version in
     ""|invalid[)]
-      AC_MSG_WARN([You will need re2c 0.9.11 or later if you want to regenerate PHP parsers.])
+      AC_MSG_WARN([You will need re2c 0.12.0 or later if you want to regenerate PHP parsers.])
       RE2C="exit 0;"
       ;;
   esac
@@ -2140,6 +2165,57 @@ AC_DEFUN([PHP_PROG_RE2C],[
 dnl -------------------------------------------------------------------------
 dnl Common setup macros: PHP_SETUP_<what>
 dnl -------------------------------------------------------------------------
+
+dnl
+dnl PHP_SETUP_ICU([shared-add])
+dnl
+dnl Common setup macro for ICU
+dnl
+AC_DEFUN([PHP_SETUP_ICU],[
+  PHP_ARG_WITH(icu-dir,,
+  [  --with-icu-dir=DIR      Specify where ICU libraries and headers can be found], DEFAULT, no)
+
+  if test "$PHP_ICU_DIR" = "no"; then
+    PHP_ICU_DIR=DEFAULT
+  fi
+
+  if test "$PHP_ICU_DIR" = "DEFAULT"; then
+    dnl Try to find icu-config
+    AC_PATH_PROG(ICU_CONFIG, icu-config, no, [$PATH:/usr/local/bin])
+  else
+    ICU_CONFIG="$PHP_ICU_DIR/bin/icu-config"
+  fi
+
+  AC_MSG_CHECKING([for location of ICU headers and libraries])
+
+  dnl Trust icu-config to know better what the install prefix is..
+  icu_install_prefix=`$ICU_CONFIG --prefix 2> /dev/null`
+  if test "$?" != "0" || test -z "$icu_install_prefix"; then
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([Unable to detect ICU prefix or $ICU_CONFIG failed. Please verify ICU install prefix and make sure icu-config works.])
+  else
+    AC_MSG_RESULT([$icu_install_prefix])
+
+    dnl Check ICU version
+    AC_MSG_CHECKING([for ICU 3.4 or greater])
+    icu_version_full=`$ICU_CONFIG --version`
+    ac_IFS=$IFS
+    IFS="."
+    set $icu_version_full
+    IFS=$ac_IFS
+    icu_version=`expr [$]1 \* 1000 + [$]2`
+    AC_MSG_RESULT([found $icu_version_full])
+
+    if test "$icu_version" -lt "3004"; then
+      AC_MSG_ERROR([ICU version 3.4 or later is required])
+    fi
+
+    ICU_INCS=`$ICU_CONFIG --cppflags-searchpath`
+    ICU_LIBS=`$ICU_CONFIG --ldflags --ldflags-icuio`
+    PHP_EVAL_INCLINE($ICU_INCS)
+    PHP_EVAL_LIBLINE($ICU_LIBS, $1)
+  fi
+])
 
 dnl
 dnl PHP_SETUP_KERBEROS(shared-add [, action-found [, action-not-found]])
@@ -2620,11 +2696,17 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
       with-tsrm-pth | with-tsrm-st | with-tsrm-pthreads[)];;
 
       # Allow certain Zend options
-      with-zend-vm | enable-maintainer-zts | enable-inline-optimization | enable-zend-multibyte[)];;
+      with-zend-vm | enable-maintainer-zts | enable-inline-optimization[)];;
 
       # All the rest must be set using the PHP_ARG_* macros
       # PHP_ARG_* macros set php_enable_<arg_name> or php_with_<arg_name>
       *[)]
+        # Options that exist before PHP 6
+        if test "$PHP_MAJOR_VERSION" -lt "6"; then
+          case $arg_name in
+            enable-zend-multibyte[)] continue;;
+          esac 
+        fi
         is_arg_set=php_[]`echo [$]arg_name | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ-' 'abcdefghijklmnopqrstuvwxyz_'`
         if eval test -z "\$$is_arg_set"; then
           PHP_UNKNOWN_CONFIGURE_OPTIONS="$PHP_UNKNOWN_CONFIGURE_OPTIONS

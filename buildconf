@@ -1,8 +1,8 @@
 #!/bin/sh
 # $Id$
 
-eval `grep '^EXTRA_VERSION=' configure.in`
-case "$EXTRA_VERSION" in
+eval `grep '^PHP_EXTRA_VERSION=' configure.in`
+case "$PHP_EXTRA_VERSION" in
   *-dev)
     dev=1
     ;;

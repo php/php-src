@@ -401,12 +401,14 @@ if (isset($argc) && $argc > 1) {
 				case '--version':
 					echo '$Revision$'."\n";
 					exit(1);
+
+				case 'u':
+				case 'U':
+					// Allow using u or U for forward compatibility
+					break;
+					
 				default:
 					echo "Illegal switch '$switch' specified!\n";
-					if ($switch == 'u' || $switch == 'U') {
-						break;
-					}
-					// break
 				case 'h':
 				case '-help':
 				case '--help':
