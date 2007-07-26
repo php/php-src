@@ -19,12 +19,10 @@
 /* $Id$ */
 
 /*
-   scanf.c --
+	scanf.c --
  
 	This file contains the base code which implements sscanf and by extension
-	fscanf. Original code is from TCL8.3.0 and bears the following copyright
- 
- 
+	fscanf. Original code is from TCL8.3.0 and bears the following copyright:
  
 	This software is copyrighted by the Regents of the University of
 	California, Sun Microsystems, Inc., Scriptics Corporation,
@@ -65,8 +63,7 @@
 	authors grant the U.S. Government and others acting in its behalf
 	permission to use and distribute the software in accordance with the
 	terms specified in this license. 
- 
- */
+*/
  
 #include <stdio.h>
 #include <limits.h>
@@ -86,7 +83,6 @@
 /*
  * Flag values used internally by [f|s]canf.
  */
-
 #define SCAN_NOSKIP     0x1       /* Don't skip blanks. */
 #define SCAN_SUPPRESS	0x2	  /* Suppress assignment. */
 #define SCAN_UNSIGNED	0x4	  /* Read an unsigned value. */
@@ -101,13 +97,10 @@
 
 #define UCHAR(x)		(zend_uchar)(x)
 
-
-
 /*
  * The following structure contains the information associated with
  * a character set.
  */
-
 typedef struct CharSet {
 	int exclude;		/* 1 if this is an exclusion set. */
 	int nchars;
@@ -133,7 +126,6 @@ typedef struct u_CharSet {
 /*
  * Declarations for functions used only in this file.
  */
-
 static char *BuildCharSet(CharSet *cset, char *format);
 static int	CharInSet(CharSet *cset, int ch);
 static void	ReleaseCharSet(CharSet *cset);
@@ -173,12 +165,11 @@ static char * BuildCharSet(CharSet *cset, char *format)
 		cset->exclude = 1;
 		ch = ++format;
 	}
-	end = format + 1;        /* verify this - cc */
+	end = format + 1;	/* verify this - cc */
 
 	/*
 	 * Find the close bracket so we can overallocate the set.
 	 */
-
 	if (*ch == ']') {
 		ch = end++;
 	}
@@ -200,7 +191,6 @@ static char * BuildCharSet(CharSet *cset, char *format)
 	/*
 	 * Now build the character set.
 	 */
-
 	cset->nchars = cset->nranges = 0;
 	ch    = format++;
 	start = *ch;
@@ -214,7 +204,6 @@ static char * BuildCharSet(CharSet *cset, char *format)
 			 * This may be the first character of a range, so don't add
 			 * it yet.
 			 */
-
 			start = *ch;
 		} else if (*ch == '-') {
 			/*
@@ -222,7 +211,6 @@ static char * BuildCharSet(CharSet *cset, char *format)
 			 * case it is not a range and we should add the previous character
 			 * as well as the dash.
 			 */
-
 			if (*format == ']') {
 				cset->chars[cset->nchars++] = start;
 				cset->chars[cset->nchars++] = *ch;
@@ -232,7 +220,6 @@ static char * BuildCharSet(CharSet *cset, char *format)
 				/*
 				 * Check to see if the range is in reverse order.
 				 */
-
 				if (start < *ch) {
 					cset->ranges[cset->nranges].start = start;
 					cset->ranges[cset->nranges].end = *ch;
@@ -241,7 +228,7 @@ static char * BuildCharSet(CharSet *cset, char *format)
 					cset->ranges[cset->nranges].end = start;
 				}
 				cset->nranges++;
-		   }
+			}
 		} else {
 			cset->chars[cset->nchars++] = *ch;
 		}
@@ -281,12 +268,11 @@ static UChar * u_BuildCharSet(u_CharSet *cset, UChar *format)
 		cset->exclude = 1;
 		ch = ++format;
 	}
-	end = format + 1;        /* verify this - cc */
+	end = format + 1;	/* verify this - cc */
 
 	/*
 	 * Find the close bracket so we can overallocate the set.
 	 */
-
 	if (*ch == 0x5D /* ']' */) {
 		ch = end++;
 	}
@@ -308,7 +294,6 @@ static UChar * u_BuildCharSet(u_CharSet *cset, UChar *format)
 	/*
 	 * Now build the character set.
 	 */
-
 	cset->nchars = cset->nranges = 0;
 	ch    = format++;
 	start = *ch;
@@ -322,7 +307,6 @@ static UChar * u_BuildCharSet(u_CharSet *cset, UChar *format)
 			 * This may be the first character of a range, so don't add
 			 * it yet.
 			 */
-
 			start = *ch;
 		} else if (*ch == 0x2D /* '-' */) {
 			/*
@@ -330,7 +314,6 @@ static UChar * u_BuildCharSet(u_CharSet *cset, UChar *format)
 			 * case it is not a range and we should add the previous character
 			 * as well as the dash.
 			 */
-
 			if (*format == 0x5D /* ']' */) {
 				cset->chars[cset->nchars++] = start;
 				cset->chars[cset->nchars++] = *ch;
@@ -340,7 +323,6 @@ static UChar * u_BuildCharSet(u_CharSet *cset, UChar *format)
 				/*
 				 * Check to see if the range is in reverse order.
 				 */
-
 				if (start < *ch) {
 					cset->ranges[cset->nranges].start = start;
 					cset->ranges[cset->nranges].end = *ch;
@@ -349,7 +331,7 @@ static UChar * u_BuildCharSet(u_CharSet *cset, UChar *format)
 					cset->ranges[cset->nranges].end = start;
 				}
 				cset->nranges++;
-		   }
+			}
 		} else {
 			cset->chars[cset->nchars++] = *ch;
 		}
@@ -394,7 +376,7 @@ static int CharInSet(CharSet *cset, int c)
 			}
 		}
 	}
-	return (cset->exclude ? !match : match);    
+	return (cset->exclude ? !match : match);
 }
 /* }}} */
 
@@ -521,7 +503,6 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 	 * is assigned to by the format string.  We use this to detect if
 	 * a variable is multiply assigned or left unassigned.
 	 */
-
 	if (numVars > nspace) {
 		nassign = (int*)safe_emalloc(sizeof(int), numVars, 0);
 		nspace = numVars;
@@ -555,7 +536,6 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 			 * must not be a mixture of XPG3 specs and non-XPG3 specs
 			 * in the same format string.
 			 */
-
 			value = strtoul(format-1, &end, 10); 
 			if (*end != '$') {
 				goto notXpg;
@@ -590,19 +570,18 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 			goto xpgCheckDone;
 		}
 
-	notXpg:
+notXpg:
 		gotSequential = 1;
 		if (gotXpg) {
-			mixedXPG:
-			  php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
+mixedXPG:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "cannot mix \"\%\" and \"\%n$\" conversion specifiers");
 			goto error;
 		}
 
-	xpgCheckDone:
+xpgCheckDone:
 		/*
 		 * Parse any width specifier.
 		 */
-
 		if (isdigit(UCHAR(*ch))) { 
 			value = strtoul(format-1, &format, 10);
 			flags |= SCAN_WIDTH;
@@ -612,7 +591,6 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 		/*
 		 * Ignore size specifier.
 		 */
-
 		if ((*ch == 'l') || (*ch == 'L') || (*ch == 'h')) {
 			ch = format++;
 		}
@@ -624,7 +602,6 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 		/*
 		 * Handle the various field types.
 		 */
-
 		switch (*ch) {
 			case 'n':
 			case 'd':
@@ -639,7 +616,8 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 			case 'E':		
 			case 'g':
 			case 's':
-				  break;
+				break;
+
 			case 'c':
 				/* we differ here with the TCL implementation in allowing for */
 				/* a character width specification, to be more consistent with */
@@ -652,6 +630,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 				}
 				*/
 				break;
+
 			case '[':
 				if (*format == '\0') {
 					goto badSet;
@@ -676,15 +655,16 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 					ch = format++;
 				}
 				break;
-			badSet:
+badSet:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unmatched [ in format string");
 				goto error;
-			default:
-				{
+
+			default: {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad scan conversion character \"%c\"", *ch);
 				goto error;
-				}
+			}
 		}
+
 		if (!(flags & SCAN_SUPPRESS)) {
 			if (objIndex >= nspace) {
 				/*
@@ -713,12 +693,11 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 			nassign[objIndex]++;
 			objIndex++;
 		}
-	}  /* while (*format != '\0') */
+	} /* while (*format != '\0') */
 
 	/*
 	 * Verify that all of the variable were assigned exactly once.
 	 */
-
 	if (numVars == 0) {
 		if (xpgSize) {
 			numVars = xpgSize;
@@ -800,7 +779,6 @@ PHPAPI int u_ValidateFormat(UChar *format, int numVars, int *totalSubs)
 	 * is assigned to by the format string.  We use this to detect if
 	 * a variable is multiply assigned or left unassigned.
 	 */
-
 	if (numVars > nspace) {
 		nassign = (int*)safe_emalloc(sizeof(int), numVars, 0);
 		nspace = numVars;
@@ -834,7 +812,6 @@ PHPAPI int u_ValidateFormat(UChar *format, int numVars, int *totalSubs)
 			 * must not be a mixture of XPG3 specs and non-XPG3 specs
 			 * in the same format string.
 			 */
-
 			value = zend_u_strtoul(format-1, &end, 10); 
 			if (*end != '$') {
 				goto notXpg;
@@ -869,19 +846,18 @@ PHPAPI int u_ValidateFormat(UChar *format, int numVars, int *totalSubs)
 			goto xpgCheckDone;
 		}
 
-	notXpg:
+notXpg:
 		gotSequential = 1;
 		if (gotXpg) {
-			mixedXPG:
-			  php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
+mixedXPG:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "cannot mix \"\%\" and \"\%n$\" conversion specifiers");
 			goto error;
 		}
 
-	xpgCheckDone:
+xpgCheckDone:
 		/*
 		 * Parse any width specifier.
 		 */
-
 		if (u_isdigit(*ch)) { 
 			value = zend_u_strtoul(format-1, &format, 10);
 			flags |= SCAN_WIDTH;
@@ -891,7 +867,6 @@ PHPAPI int u_ValidateFormat(UChar *format, int numVars, int *totalSubs)
 		/*
 		 * Ignore size specifier.
 		 */
-
 		if ((*ch == 'l') || (*ch == 'L') || (*ch == 'h')) {
 			ch = format++;
 		}
@@ -903,7 +878,6 @@ PHPAPI int u_ValidateFormat(UChar *format, int numVars, int *totalSubs)
 		/*
 		 * Handle the various field types.
 		 */
-
 		switch (*ch) {
 			case 'n':
 			case 'd':
@@ -918,7 +892,8 @@ PHPAPI int u_ValidateFormat(UChar *format, int numVars, int *totalSubs)
 			case 'E':		
 			case 'g':
 			case 's':
-				  break;
+				break;
+
 			case 'c':
 				/* we differ here with the TCL implementation in allowing for */
 				/* a character width specification, to be more consistent with */
@@ -931,6 +906,7 @@ PHPAPI int u_ValidateFormat(UChar *format, int numVars, int *totalSubs)
 				}
 				*/
 				break;
+
 			case '[':
 				if (*format == '\0') {
 					goto badSet;
@@ -955,15 +931,16 @@ PHPAPI int u_ValidateFormat(UChar *format, int numVars, int *totalSubs)
 					ch = format++;
 				}
 				break;
-			badSet:
+badSet:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unmatched [ in format string");
 				goto error;
-			default:
-				{
+
+			default: {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad scan conversion character \"%c\"", *ch);
 				goto error;
-				}
+			}
 		}
+
 		if (!(flags & SCAN_SUPPRESS)) {
 			if (objIndex >= nspace) {
 				/*
@@ -992,12 +969,11 @@ PHPAPI int u_ValidateFormat(UChar *format, int numVars, int *totalSubs)
 			nassign[objIndex]++;
 			objIndex++;
 		}
-	}  /* while (*format != '\0') */
+	} /* while (*format != '\0') */
 
 	/*
 	 * Verify that all of the variable were assigned exactly once.
 	 */
-
 	if (numVars == 0) {
 		if (xpgSize) {
 			numVars = xpgSize;
@@ -1056,7 +1032,7 @@ error:
  *		return_value set with the results of the scan
  */
 
-PHPAPI int php_sscanf_internal(	char *string, char *format,
+PHPAPI int php_sscanf_internal( char *string, char *format,
 				int argCount, zval ***args,
 				int varStart, zval **return_value TSRMLS_DC)
 {
@@ -1072,10 +1048,8 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 	long (*fn)() = NULL;
 	char *ch, sch;
 	int  flags;
-	char buf[64];   	/* Temporary buffer to hold scanned
-			 * number strings before they are
-			 * passed to strtoul. */
-
+	char buf[64];	/* Temporary buffer to hold scanned number
+					 * strings before they are passed to strtoul() */
 	
 	/* do some sanity checking */
 	if ((varStart > argCount) || (varStart < 0)){
@@ -1113,12 +1087,10 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 		}
 	}
 	
-	
 	/*
 	 * Allocate space for the result objects. Only happens when no variables
 	 * are specified
 	 */
-
 	if (!numVars) {
 		zval *tmp;
 
@@ -1142,20 +1114,16 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 	 * we reach the end of input, the end of the format string, or there
 	 * is a mismatch.
 	 */
-
 	nconversions = 0;
 	/* note ! - we need to limit the loop for objIndex to keep it in bounds */
 
 	while (*format != '\0') {
-
 		ch    = format++;
-
 		flags = 0;
 
 		/*
 		 * If we see whitespace in the format, skip whitespace in the string.
 		 */
-
 		if ( isspace( (int)*ch ) ) {
 			sch = *string;
 			while ( isspace( (int)sch ) ) {
@@ -1169,7 +1137,7 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 		}
 		
 		if (*ch != '%') {
-		literal:
+literal:
 			if (*string == '\0') {
 				underflow = 1;
 				goto done;
@@ -1191,7 +1159,6 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 		 * Check for assignment suppression ('*') or an XPG3-style
 		 * assignment ('%n$').
 		 */
-
 		if (*ch == '*') {
 			flags |= SCAN_SUPPRESS;
 			ch = format++;
@@ -1207,7 +1174,6 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 		/*
 		 * Parse any width specifier.
 		 */
-
 		if ( isdigit(UCHAR(*ch))) { 
 			width = strtoul(format-1, &format, 10); 
 			ch = format++;
@@ -1218,7 +1184,6 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 		/*
 		 * Ignore size specifier.
 		 */
-
 		if ((*ch == 'l') || (*ch == 'L') || (*ch == 'h')) {
 			ch = format++;
 		}
@@ -1226,7 +1191,6 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 		/*
 		 * Handle the various field types.
 		 */
-
 		switch (*ch) {
 			case 'n':
 				if (!(flags & SCAN_SUPPRESS)) {
@@ -1307,7 +1271,6 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 		 * At this point, we will need additional characters from the
 		 * string to proceed.
 		 */
-
 		if (*string == '\0') {
 			underflow = 1;
 			goto done;
@@ -1317,7 +1280,6 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 		 * Skip any leading whitespace at the beginning of a field unless
 		 * the format suppresses this behavior.
 		 */
-
 		if (!(flags & SCAN_NOSKIP)) {
 			while (*string != '\0') {
 				sch = *string;
@@ -1335,14 +1297,12 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 		/*
 		 * Perform the requested scanning operation.
 		 */
-	
 		switch (op) {
 			case 'c':	
 			case 's':
-			/*
-			 * Scan a string up to width characters or whitespace.
-			 */
-
+				/*
+				 * Scan a string up to width characters or whitespace.
+				 */
 				if (width == 0) {
 					width = (size_t) ~0;
 				}
@@ -1398,9 +1358,9 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 				ReleaseCharSet(&cset);
 
 				if (string == end) {
-					 /*
-					* Nothing matched the range, stop processing
-					*/
+					/*
+					 * Nothing matched the range, stop processing
+					 */
 					goto done;
 				}
 				if (!(flags & SCAN_SUPPRESS)) {
@@ -1415,10 +1375,9 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 					}
 				}
 				string = end;
-			
 				break;
 			}
-			  /*
+/*
 			case 'c':
 			   / Scan a single character./
 
@@ -1437,15 +1396,14 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 					}
 				}
 				break;
-			*/
+*/
 			case 'i':
-			/*
-			 * Scan an unsigned or signed integer.
-			 */
-
-			/*-cc-*/
+				/*
+				 * Scan an unsigned or signed integer.
+				 */
+				/*-cc-*/
 				buf[0] = '\0';
-			/*-cc-*/
+				/*-cc-*/
 				if ((width == 0) || (width > sizeof(buf) - 1)) {
 					width = sizeof(buf) - 1;
 				}
@@ -1453,12 +1411,12 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 				flags |= SCAN_SIGNOK | SCAN_NODIGITS | SCAN_NOZERO;
 				for (end = buf; width > 0; width--) {
 					switch (*string) {
-					/*
-					 * The 0 digit has special meaning at the beginning of
-					 * a number.  If we are unsure of the base, it
-					 * indicates that we are in base 8 or base 16 (if it is
-					 * followed by an 'x').
-					 */
+						/*
+						 * The 0 digit has special meaning at the beginning of
+						 * a number.  If we are unsure of the base, it
+						 * indicates that we are in base 8 or base 16 (if it is
+						 * followed by an 'x').
+						 */
 						case '0':
 							/*-cc-*/
 							if (base == 16) {
@@ -1520,16 +1478,15 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 							break;
 					}
 
-				/*
-				 * We got an illegal character so we are done accumulating.
-				 */
-
+					/*
+					 * We got an illegal character so we are done accumulating.
+					 */
 					break;
 
-				addToInt:
-				/*
-				 * Add the character to the temporary buffer.
-				 */
+addToInt:
+					/*
+					 * Add the character to the temporary buffer.
+					 */
 					*end++ = *string++;
 					if (*string == '\0') {
 						break;
@@ -1540,7 +1497,6 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 				 * Check to see if we need to back up because we only got a
 				 * sign or a trailing x after a 0.
 				 */
-
 				if (flags & SCAN_NODIGITS) {
 					if (*string == '\0') {
 						underflow = 1;
@@ -1551,13 +1507,11 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 					string--;
 				}
 
-
 				/*
 				 * Scan the value from the temporary buffer.  If we are
 				 * returning a large unsigned value, we have to convert it back
 				 * to a string since PHP only supports signed values.
 				 */
-
 				if (!(flags & SCAN_SUPPRESS)) {
 					*end = '\0';
 					value = (int) (*fn)(buf, NULL, base);
@@ -1585,13 +1539,12 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 						}
 					}
 				}
-
 				break;
 
 			case 'f':
-			/*
-			 * Scan a floating point number
-			 */
+				/*
+				 * Scan a floating point number
+				 */
 				buf[0] = '\0';     /* call me pedantic */
 				if ((width == 0) || (width > sizeof(buf) - 1)) {
 					width = sizeof(buf) - 1;
@@ -1604,7 +1557,8 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 						case '8': case '9':
 							flags &= ~(SCAN_SIGNOK | SCAN_NODIGITS);
 							goto addToFloat;
-						case '+': case '-':
+						case '+':
+						case '-':
 							if (flags & SCAN_SIGNOK) {
 								flags &= ~SCAN_SIGNOK;
 								goto addToFloat;
@@ -1616,12 +1570,12 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 								goto addToFloat;
 							}
 							break;
-						case 'e': case 'E':
-						/*
-						 * An exponent is not allowed until there has
-						 * been at least one digit.
-						 */
-
+						case 'e':
+						case 'E':
+							/*
+							 * An exponent is not allowed until there has
+							 * been at least one digit.
+							 */
 							if ((flags & (SCAN_NODIGITS | SCAN_EXPOK)) == SCAN_EXPOK) {
 								flags = (flags & ~(SCAN_EXPOK|SCAN_PTOK))
 									| SCAN_SIGNOK | SCAN_NODIGITS;
@@ -1633,14 +1587,12 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 					/*
 					 * We got an illegal character so we are done accumulating.
 					 */
-
 					break;
 
-				addToFloat:
-				/*
-				 * Add the character to the temporary buffer.
-				 */
-
+addToFloat:
+					/*
+					 * Add the character to the temporary buffer.
+					 */
 					*end++ = *string++;
 					if (*string == '\0') {
 						break;
@@ -1651,7 +1603,6 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 				 * Check to see if we need to back up because we saw a
 				 * trailing 'e' or sign.
 				 */
-
 				if (flags & SCAN_NODIGITS) {
 					if (flags & SCAN_EXPOK) {
 						/*
@@ -1667,7 +1618,6 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 					/*
 					 * We got a bad exponent ('e' and maybe a sign).
 					 */
-
 					end--;
 					string--;
 					if (*end != 'e' && *end != 'E') {
@@ -1679,7 +1629,6 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 				/*
 				 * Scan the value from the temporary buffer.
 				 */
-
 				if (!(flags & SCAN_SUPPRESS)) {
 					double dvalue;
 					*end = '\0';
@@ -1695,9 +1644,9 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 					}
 				}
 				break;
-		}  /* switch (op)              */
+		} /* switch (op) */
 		nconversions++;
-	}      /*  while (*format != '\0') */
+	} /*  while (*format != '\0') */
 
 done:
 	result = SCAN_SUCCESS;
@@ -1709,10 +1658,8 @@ done:
 		convert_to_long( *return_value );
 		Z_LVAL_PP(return_value) = nconversions;
 	} else if (nconversions < totalVars) {
-		/* to do : not all elements converted. we need to prune the list - cc
-		 */		
+		/* TODO: not all elements converted. we need to prune the list - cc */
 	}
-
 	return result;
 }
 /* }}} */
@@ -1746,11 +1693,9 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 	long (*fn)() = NULL;
 	UChar *ch, sch;
 	int  flags;
-	UChar buf[64];   	/* Temporary buffer to hold scanned
-			 * number strings before they are
-			 * passed to strtoul. */
+	UChar buf[64];	/* Temporary buffer to hold scanned number
+					 * strings before they are passed to strtoul() */
 
-	
 	/* do some sanity checking */
 	if ((varStart > argCount) || (varStart < 0)){
 		varStart = SCAN_MAX_ARGS + 1;
@@ -1786,13 +1731,11 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 			}
 		}
 	}
-	
-	
+
 	/*
 	 * Allocate space for the result objects. Only happens when no variables
 	 * are specified
 	 */
-
 	if (!numVars) {
 		zval *tmp;
 
@@ -1816,20 +1759,16 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 	 * we reach the end of input, the end of the format string, or there
 	 * is a mismatch.
 	 */
-
 	nconversions = 0;
 	/* note ! - we need to limit the loop for objIndex to keep it in bounds */
 
 	while (*format != 0x00) {
-
 		ch    = format++;
-
 		flags = 0;
 
 		/*
 		 * If we see whitespace in the format, skip whitespace in the string.
 		 */
-
 		if ( u_isspace(*ch) ) {
 			sch = *string;
 			while ( u_isspace(sch) ) {
@@ -1843,7 +1782,7 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 		}
 		
 		if (*ch != 0x25 /* '%' */) {
-		literal:
+literal:
 			if (*string == 0x00) {
 				underflow = 1;
 				goto done;
@@ -1865,7 +1804,6 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 		 * Check for assignment suppression ('*') or an XPG3-style
 		 * assignment ('%n$').
 		 */
-
 		if (*ch == 0x2A /* '*' */) {
 			flags |= SCAN_SUPPRESS;
 			ch = format++;
@@ -1881,7 +1819,6 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 		/*
 		 * Parse any width specifier.
 		 */
-
 		if ( u_isdigit(*ch)) { 
 			width = zend_u_strtoul(format-1, &format, 10); 
 			ch = format++;
@@ -1892,7 +1829,6 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 		/*
 		 * Ignore size specifier.
 		 */
-
 		if ((*ch == 0x6C /* 'l' */) || (*ch == 0x4C /* 'L' */) || (*ch == 0x68 /* 'h' */)) {
 			ch = format++;
 		}
@@ -1900,7 +1836,6 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 		/*
 		 * Handle the various field types.
 		 */
-
 		switch (*ch) {
 			case 0x6E /* 'n' */:
 				if (!(flags & SCAN_SUPPRESS)) {
@@ -1981,7 +1916,6 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 		 * At this point, we will need additional characters from the
 		 * string to proceed.
 		 */
-
 		if (*string == 0x00) {
 			underflow = 1;
 			goto done;
@@ -1991,7 +1925,6 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 		 * Skip any leading whitespace at the beginning of a field unless
 		 * the format suppresses this behavior.
 		 */
-
 		if (!(flags & SCAN_NOSKIP)) {
 			while (*string != 0x00) {
 				sch = *string;
@@ -2009,14 +1942,12 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 		/*
 		 * Perform the requested scanning operation.
 		 */
-	
 		switch (op) {
 			case 'c':	
 			case 's':
-			/*
-			 * Scan a string up to width characters or whitespace.
-			 */
-
+				/*
+				 * Scan a string up to width characters or whitespace.
+				 */
 				if (width == 0) {
 					width = (size_t) ~0;
 				}
@@ -2072,9 +2003,9 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 				u_ReleaseCharSet(&cset);
 
 				if (string == end) {
-					 /*
-					* Nothing matched the range, stop processing
-					*/
+					/*
+					 * Nothing matched the range, stop processing
+					 */
 					goto done;
 				}
 				if (!(flags & SCAN_SUPPRESS)) {
@@ -2089,10 +2020,9 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 					}
 				}
 				string = end;
-			
 				break;
 			}
-			  /*
+/*
 			case 'c':
 			   / Scan a single character./
 
@@ -2111,15 +2041,14 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 					}
 				}
 				break;
-			*/
+*/
 			case 'i':
-			/*
-			 * Scan an unsigned or signed integer.
-			 */
-
-			/*-cc-*/
+				/*
+				 * Scan an unsigned or signed integer.
+				 */
+				/*-cc-*/
 				buf[0] = 0x00;
-			/*-cc-*/
+				/*-cc-*/
 				if ((width == 0) || (width > sizeof(buf) - 1)) {
 					width = sizeof(buf) - 1;
 				}
@@ -2127,12 +2056,12 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 				flags |= SCAN_SIGNOK | SCAN_NODIGITS | SCAN_NOZERO;
 				for (end = buf; width > 0; width--) {
 					switch (*string) {
-					/*
-					 * The 0 digit has special meaning at the beginning of
-					 * a number.  If we are unsure of the base, it
-					 * indicates that we are in base 8 or base 16 (if it is
-					 * followed by an 'x').
-					 */
+						/*
+						 * The 0 digit has special meaning at the beginning of
+						 * a number.  If we are unsure of the base, it
+						 * indicates that we are in base 8 or base 16 (if it is
+						 * followed by an 'x').
+						 */
 						case 0x30 /* '0' */:
 							/*-cc-*/
 							if (base == 16) {
@@ -2194,16 +2123,15 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 							break;
 					}
 
-				/*
-				 * We got an illegal character so we are done accumulating.
-				 */
-
+					/*
+					 * We got an illegal character so we are done accumulating.
+					 */
 					break;
 
-				addToInt:
-				/*
-				 * Add the character to the temporary buffer.
-				 */
+addToInt:
+					/*
+					 * Add the character to the temporary buffer.
+					 */
 					*end++ = *string++;
 					if (*string == 0x00) {
 						break;
@@ -2214,7 +2142,6 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 				 * Check to see if we need to back up because we only got a
 				 * sign or a trailing x after a 0.
 				 */
-
 				if (flags & SCAN_NODIGITS) {
 					if (*string == 0x00) {
 						underflow = 1;
@@ -2225,13 +2152,11 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 					string--;
 				}
 
-
 				/*
 				 * Scan the value from the temporary buffer.  If we are
 				 * returning a large unsigned value, we have to convert it back
 				 * to a string since PHP only supports signed values.
 				 */
-
 				if (!(flags & SCAN_SUPPRESS)) {
 					*end = 0x00;
 					value = (int) (*fn)(buf, NULL, base);
@@ -2259,13 +2184,12 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 						}
 					}
 				}
-
 				break;
 
 			case 'f':
-			/*
-			 * Scan a floating point number
-			 */
+				/*
+				 * Scan a floating point number
+				 */
 				buf[0] = 0x00;     /* call me pedantic */
 				if ((width == 0) || (width > sizeof(buf) - 1)) {
 					width = sizeof(buf) - 1;
@@ -2278,7 +2202,8 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 						case 0x38 /* '8' */: case 0x39 /* '9' */:
 							flags &= ~(SCAN_SIGNOK | SCAN_NODIGITS);
 							goto addToFloat;
-						case 0x2B /* '+' */: case 0x2D /* '-' */:
+						case 0x2B /* '+' */:
+						case 0x2D /* '-' */:
 							if (flags & SCAN_SIGNOK) {
 								flags &= ~SCAN_SIGNOK;
 								goto addToFloat;
@@ -2290,12 +2215,12 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 								goto addToFloat;
 							}
 							break;
-						case 0x65 /* 'e' */: case 0x45 /* 'E' */:
-						/*
-						 * An exponent is not allowed until there has
-						 * been at least one digit.
-						 */
-
+						case 0x65 /* 'e' */:
+						case 0x45 /* 'E' */:
+							/*
+							 * An exponent is not allowed until there has
+							 * been at least one digit.
+							 */
 							if ((flags & (SCAN_NODIGITS | SCAN_EXPOK)) == SCAN_EXPOK) {
 								flags = (flags & ~(SCAN_EXPOK|SCAN_PTOK))
 									| SCAN_SIGNOK | SCAN_NODIGITS;
@@ -2307,14 +2232,12 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 					/*
 					 * We got an illegal character so we are done accumulating.
 					 */
-
 					break;
 
-				addToFloat:
-				/*
-				 * Add the character to the temporary buffer.
-				 */
-
+addToFloat:
+					/*
+					 * Add the character to the temporary buffer.
+					 */
 					*end++ = *string++;
 					if (*string == 0x00) {
 						break;
@@ -2325,7 +2248,6 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 				 * Check to see if we need to back up because we saw a
 				 * trailing 'e' or sign.
 				 */
-
 				if (flags & SCAN_NODIGITS) {
 					if (flags & SCAN_EXPOK) {
 						/*
@@ -2341,7 +2263,6 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 					/*
 					 * We got a bad exponent ('e' and maybe a sign).
 					 */
-
 					end--;
 					string--;
 					if (*end != 0x65 /* 'e' */ && *end != 0x45 /* 'E' */) {
@@ -2353,7 +2274,6 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 				/*
 				 * Scan the value from the temporary buffer.
 				 */
-
 				if (!(flags & SCAN_SUPPRESS)) {
 					double dvalue;
 					*end = 0x00;
@@ -2369,9 +2289,9 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 					}
 				}
 				break;
-		}  /* switch (op)              */
+		} /* switch (op) */
 		nconversions++;
-	}      /*  while (*format != '\0') */
+	} /*  while (*format != '\0') */
 
 done:
 	result = SCAN_SUCCESS;
@@ -2383,10 +2303,8 @@ done:
 		convert_to_long( *return_value );
 		Z_LVAL_PP(return_value) = nconversions;
 	} else if (nconversions < totalVars) {
-		/* to do : not all elements converted. we need to prune the list - cc
-		 */		
+		/* TODO: not all elements converted. we need to prune the list - cc */		
 	}
-
 	return result;
 }
 /* }}} */
@@ -2398,8 +2316,7 @@ static inline void scan_set_error_return(int numVars, zval **return_value) /* {{
 		Z_TYPE_PP(return_value) = IS_LONG;
 		Z_LVAL_PP(return_value) = SCAN_ERROR_EOF;  /* EOF marker */
 	} else {	
-	  /* zval_dtor( *return_value ); */ 
-	  /* convert_to_null calls destructor */
+		/* convert_to_null calls destructor */
    		convert_to_null( *return_value );
 	}	
 }
