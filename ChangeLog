@@ -1,3 +1,105 @@
+2007-07-25  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * acinclude.m4
+      ext/mysql/.cvsignore
+      ext/mysql/config.m4
+      ext/mysql/config.w32
+      ext/mysql/mysql_mysqlnd.h
+      ext/mysql/package.xml
+      ext/mysql/php_mysql.h
+      ext/mysqli/.cvsignore
+      ext/mysqli/config.m4
+      ext/mysqli/config.w32
+      ext/mysqli/config9.m4
+      ext/mysqli/mysqli_mysqlnd.h
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/mysqlnd/config-win.h
+      ext/mysqli/mysqlnd/mysqlnd.c
+      ext/mysqli/mysqlnd/mysqlnd.h
+      ext/mysqli/mysqlnd/mysqlnd_charset.c
+      ext/mysqli/mysqlnd/mysqlnd_charset.h
+      ext/mysqli/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqli/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqli/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqli/mysqlnd/mysqlnd_palloc.c
+      ext/mysqli/mysqlnd/mysqlnd_palloc.h
+      ext/mysqli/mysqlnd/mysqlnd_priv.h
+      ext/mysqli/mysqlnd/mysqlnd_ps.c
+      ext/mysqli/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqli/mysqlnd/mysqlnd_qcache.c
+      ext/mysqli/mysqlnd/mysqlnd_result.c
+      ext/mysqli/mysqlnd/mysqlnd_result.h
+      ext/mysqli/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqli/mysqlnd/mysqlnd_result_meta.h
+      ext/mysqli/mysqlnd/mysqlnd_statistics.c
+      ext/mysqli/mysqlnd/mysqlnd_statistics.h
+      ext/mysqli/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqli/mysqlnd/mysqlnd_wireprotocol.h
+      ext/mysqli/mysqlnd/php_mysqlnd.h
+      ext/mysqli/mysqlnd/portability.h:
+      - Moved mysqnd to it's own directory: It is sort of an extension itself.
+        (Similar to what ext/libxml is..)
+
+    * (PHP_5_2)
+      acinclude.m4:
+      MFH: - Allow using extra headers in PHP_CHECK_SIZEOF
+
+2007-07-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pdo/TODO:
+      
+      Already exists in PECL
+
+2007-07-25  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * acinclude.m4:
+      - Allow using extra headers in PHP_CHECK_SIZEOF
+
+2007-07-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/tests/file/fgets_variation1.phpt
+      ext/standard/tests/file/fgets_variation1.phpt
+      ext/standard/tests/file/fread_variation2.phpt
+      ext/standard/tests/file/fread_variation4-win32.phpt
+      ext/standard/tests/file/fread_variation4-win32.phpt
+      ext/standard/tests/file/fread_variation4.phpt
+      ext/standard/tests/file/fread_variation4.phpt
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      Fixed EOF handling in case of reading from file opened in write only mode.
+
+2007-07-25  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqli/mysqlnd/portability.h:
+      Alignment fixes for 64bit and fixing macroses
+
+2007-07-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed bug #41713 (Persistent memory consumption on win32 since 5.2)
+
+2007-07-25  Antony Dovgal  <antony@zend.com>
+
+    * scripts/phpize.m4:
+      fix --with-php-config option
+
+2007-07-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/posix/posix.c:
+      MFH: Show "wrong parameter count" error messages
+
+    * ext/posix/posix.c:
+      Show "wrong parameter count" error messages
+
 2007-07-24  Johannes Schlüter  <johannes@schlueters.de>
 
     * NEWS:
