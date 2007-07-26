@@ -156,6 +156,6 @@ if test "$PHP_MYSQL" != "no"; then
   PHP_SUBST(MYSQL_SHARED_LIBADD)
 
   if test "$PHP_MYSQL" = "mysqlnd"; then
-    PHP_ADD_EXTENSION_DEP(mysqli, mysqlnd)
+    PHP_ADD_EXTENSION_DEP(mysql, mysqlnd)
   fi
 fi
