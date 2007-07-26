@@ -4910,6 +4910,7 @@ void zend_do_import(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 	unsigned int lcname_len;
 	zstr lcname;
 	zval *name, *ns, tmp;
+	zend_bool warn = 0;
 
 	if (!CG(current_import)) {
 		CG(current_import) = emalloc(sizeof(HashTable));
@@ -4929,6 +4930,7 @@ void zend_do_import(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 			} else {
 				*name = *ns;
 				zval_copy_ctor(name);
+				warn = 1;
 			}			
 		} else {
 			char *p = zend_memrchr(Z_STRVAL_P(ns), ':', Z_STRLEN_P(ns));
@@ -4937,6 +4939,7 @@ void zend_do_import(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 			} else {
 				*name = *ns;
 				zval_copy_ctor(name);
+				warn = 1;
 			}			
 		}
 	}
@@ -4955,7 +4958,10 @@ void zend_do_import(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 	}
 
 	if (zend_u_hash_add(CG(current_import), Z_TYPE_P(name), lcname, lcname_len+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
-		zend_error(E_COMPILE_ERROR, "Cannot reuse import name");		
+		zend_error(E_COMPILE_ERROR, "Cannot reuse import name");
+	}
+	if (warn) {
+		zend_error(E_WARNING, "The import statement with non-compound name '%R' has no effect", Z_TYPE_P(name), Z_UNIVAL_P(name));
 	}
 	efree(lcname.v);
 	zval_dtor(name);
