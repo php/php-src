@@ -62,7 +62,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 /* Typdefs for easyier portability */
 
 #ifndef HAVE_INT8
-#ifndef HAVE_INT8_T == 0)
+#ifndef HAVE_INT8_T
 typedef signed char int8;			/* Signed integer >= 8    bits */
 #else
 typedef int8_t int8;				/* Signed integer >= 8    bits */
@@ -496,7 +496,7 @@ typedef unsigned long long mynd_ulonglong;
 typedef uint64_t my_uint64;
 typedef uint64_t mynd_ulonglong;
 #endif
-#ifndef HAVE_INT64_T == 0)
+#ifndef HAVE_INT64_T
 typedef long long my_int64;
 typedef long long mynd_longlong;
 #else
