@@ -1105,6 +1105,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 				return FAILURE;
 			}
 		}
+		varStart = 0; /* Array index starts from 0 */
 	}
 
 	baseString = string;
@@ -1750,6 +1751,7 @@ PHPAPI int php_u_sscanf_internal(	UChar *string, UChar *format,
 				return FAILURE;
 			}
 		}
+		varStart = 0; /* Array index starts from 0 */
 	}
 
 	baseString = string;
