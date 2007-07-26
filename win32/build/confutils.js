@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.68 2007-07-21 11:24:36 derick Exp $
+// $Id: confutils.js,v 1.69 2007-07-26 22:45:22 jani Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -53,18 +53,18 @@ function get_version_numbers()
 {
 	var cin = file_get_contents("configure.in");
 	
-	if (cin.match(new RegExp("MAJOR_VERSION=(\\d+)"))) {
+	if (cin.match(new RegExp("PHP_MAJOR_VERSION=(\\d+)"))) {
 		PHP_VERSION = RegExp.$1;
 	}
-	if (cin.match(new RegExp("MINOR_VERSION=(\\d+)"))) {
+	if (cin.match(new RegExp("PHP_MINOR_VERSION=(\\d+)"))) {
 		PHP_MINOR_VERSION = RegExp.$1;
 	}
-	if (cin.match(new RegExp("RELEASE_VERSION=(\\d+)"))) {
+	if (cin.match(new RegExp("PHP_RELEASE_VERSION=(\\d+)"))) {
 		PHP_RELEASE_VERSION = RegExp.$1;
 	}
 	PHP_VERSION_STRING = PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION;
 
-	if (cin.match(new RegExp("EXTRA_VERSION=\"([^\"]+)\""))) {
+	if (cin.match(new RegExp("PHP_EXTRA_VERSION=\"([^\"]+)\""))) {
 		PHP_EXTRA_VERSION = RegExp.$1;
 		if (PHP_EXTRA_VERSION.length) {
 			PHP_VERSION_STRING += PHP_EXTRA_VERSION;

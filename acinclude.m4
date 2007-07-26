@@ -773,7 +773,7 @@ dnl PHP_BUILD_SHARED
 dnl
 AC_DEFUN([PHP_BUILD_SHARED],[
   PHP_BUILD_PROGRAM
-  OVERALL_TARGET=libphp6.la
+  OVERALL_TARGET=libphp[]$PHP_MAJOR_VERSION[.la]
   php_build_target=shared
   
   php_c_pre=$shared_c_pre
@@ -790,7 +790,7 @@ dnl PHP_BUILD_STATIC
 dnl
 AC_DEFUN([PHP_BUILD_STATIC],[
   PHP_BUILD_PROGRAM
-  OVERALL_TARGET=libphp6.la
+  OVERALL_TARGET=libphp[]$PHP_MAJOR_VERSION[.la]
   php_build_target=static
 ])
 
@@ -799,7 +799,7 @@ dnl PHP_BUILD_BUNDLE
 dnl
 AC_DEFUN([PHP_BUILD_BUNDLE],[
   PHP_BUILD_PROGRAM
-  OVERALL_TARGET=libs/libphp6.bundle
+  OVERALL_TARGET=libs/libphp[]$PHP_MAJOR_VERSION[.bundle]
   php_build_target=static
 ])
 
@@ -2701,6 +2701,12 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
       # All the rest must be set using the PHP_ARG_* macros
       # PHP_ARG_* macros set php_enable_<arg_name> or php_with_<arg_name>
       *[)]
+        # Options that exist before PHP 6
+        if test "$PHP_MAJOR_VERSION" -lt "6"; then
+          case $arg_name in
+            enable-zend-multibyte[)] continue;;
+          esac 
+        fi
         is_arg_set=php_[]`echo [$]arg_name | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ-' 'abcdefghijklmnopqrstuvwxyz_'`
         if eval test -z "\$$is_arg_set"; then
           PHP_UNKNOWN_CONFIGURE_OPTIONS="$PHP_UNKNOWN_CONFIGURE_OPTIONS
