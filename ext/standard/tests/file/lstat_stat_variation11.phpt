@@ -1,5 +1,5 @@
 --TEST--
-Test lstat() and stat() functions: usage variations - effects of rename() on dir
+Test lstat() and stat() functions: usage variations - effect of is_file()
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
@@ -15,30 +15,30 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
    Description: Gives information about a file
 */
 
-/* test the effects of rename() on stats of dir */
-
 $file_path = dirname(__FILE__);
-require("file.inc");
+require "$file_path/file.inc";
 
-/* create temp directory */
-mkdir("$file_path/lstat_stat_variation1/");  // temp dir
+/* test the effects of is_file() on stats of a file */
 
-// renaming a directory and check stat
-echo "*** Testing stat() for directory after being renamed ***\n";
-$old_dirname = "$file_path/lstat_stat_variation1";
-$new_dirname = "$file_path/lstat_stat_variation1a";
-$old_stat = stat($old_dirname);
+/* create temp file */
+$filename = "$file_path/lstat_stat_variation11.tmp";
+$fp = fopen($filename, "w");  // temp file
+fclose($fp);
+
+// is_file() on a file
+echo "*** Testing stat() on a file after using is_file() on it ***\n";
+$old_stat = stat($filename);
+// clear the stat
 clearstatcache();
-var_dump( rename($old_dirname, $new_dirname) );
-$new_stat = stat($new_dirname);
-
+sleep(2);
+var_dump( is_file($filename) );
+$new_stat = stat($filename);
 // compare self stats
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
-
-// compare the two stats
+// compare the stat
 var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys) );
-// clear the cache
+// clear the stat
 clearstatcache();
 
 echo "\n--- Done ---";
@@ -47,10 +47,10 @@ echo "\n--- Done ---";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-rmdir("$file_path/lstat_stat_variation1a");
+unlink("$file_path/lstat_stat_variation11.tmp");
 ?>
 --EXPECTF--
-*** Testing stat() for directory after being renamed ***
+*** Testing stat() on a file after using is_file() on it ***
 bool(true)
 bool(true)
 bool(true)
