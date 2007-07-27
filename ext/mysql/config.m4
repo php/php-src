@@ -40,8 +40,9 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
 
 
 PHP_ARG_WITH(mysql, for MySQL support,
-[  --with-mysql[=DIR]        Include MySQL support. DIR is the MySQL base directory.
-                            If mysqlnd is passed as DIR, the MySQL native driver will be used])
+[  --with-mysql[=DIR]      Include MySQL support.  DIR is the MySQL base
+                          directory.  If mysqlnd is passed as DIR, 
+                          the MySQL native driver will be used [/usr/local]])
 
 PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
 [  --with-mysql-sock[=DIR]   MySQL: Location of the MySQL unix socket pointer.
