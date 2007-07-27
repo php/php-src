@@ -3649,6 +3649,11 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 	switch (mode) {
 		case ZEND_CT:
 			if (constant_container) {
+				ulong fetch_type;
+
+			    if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_TYPE(constant_container->u.constant), Z_UNIVAL(constant_container->u.constant), Z_UNILEN(constant_container->u.constant))) {
+					zend_resolve_class_name(constant_container, &fetch_type TSRMLS_CC);
+				}
 				zend_do_fetch_class_name(NULL, constant_container, constant_name TSRMLS_CC);
 				*result = *constant_container;
 				result->u.constant.type = IS_CONSTANT;

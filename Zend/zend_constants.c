@@ -265,19 +265,19 @@ ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval
 	zstr lookup_name;
 	zstr colon;
 
-	if ((UG(unicode) && (colon.u = u_memchr(name.u, ':', name_len)) && colon.u[1] == ':') ||
-	    (!UG(unicode) && (colon.s = memchr(name.s, ':', name_len)) && colon.s[1] == ':')) {
+	if ((UG(unicode) && (colon.u = u_memrchr(name.u, ':', name_len)) && colon.u > name.u && *(colon.u-1) == ':') ||
+	    (!UG(unicode) && (colon.s = zend_memrchr(name.s, ':', name_len))&& colon.s > name.s && *(colon.s-1) == ':')) {
 		/* class constant */
 		zend_class_entry **ce = NULL;
-		int class_name_len = UG(unicode)?colon.u-name.u:colon.s-name.s;
+		int class_name_len = UG(unicode)?colon.u-name.u-1:colon.s-name.s-1;
 		int const_name_len = name_len - class_name_len - 2;
 		zstr constant_name, class_name;
 		zval **ret_constant;
 
 		if (UG(unicode)) {
-			constant_name.u = colon.u + 2;
+			constant_name.u = colon.u + 1;
 		} else {
-			constant_name.s = colon.s + 2;
+			constant_name.s = colon.s + 1;
 		}
 
 		if (!scope) {
@@ -314,6 +314,26 @@ ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval
 		} else {
 			if (zend_u_lookup_class(type, class_name, class_name_len, &ce TSRMLS_CC) != SUCCESS) {
 				retval = 0;
+				if ((UG(unicode) && (colon.u = u_memrchr(class_name.u, ':', class_name_len)) && colon.u > class_name.u && *(colon.u-1) == ':') ||
+				    (!UG(unicode) && (colon.s = zend_memrchr(class_name.s, ':', class_name_len))&& colon.s > class_name.s && *(colon.s-1) == ':')) {
+					zend_class_entry **pce;
+					zstr lcname;
+					unsigned int lcname_len;
+
+					if (UG(unicode)) {
+						colon.u++;
+						lcname_len = class_name_len - (colon.u - class_name.u);
+					} else {
+						colon.s++;
+						lcname_len = class_name_len - (colon.s - class_name.s);
+					}
+					lcname = zend_u_str_case_fold(type, colon, lcname_len, 0, &lcname_len);
+					if (zend_u_hash_find(CG(class_table), type, lcname, lcname_len+1, (void**)&ce) == SUCCESS &&
+					    (*ce)->type == ZEND_INTERNAL_CLASS) {
+						retval = 1;
+					}
+					efree(lcname.v);
+				}
 			}
 		}
 
