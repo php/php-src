@@ -6,6 +6,7 @@ namespace X;
 import X as Y;
 class X {
 	const C = "const ok\n";
+	static $var = "var ok\n";
 	function __construct() {
 		echo "class ok\n";
 	}
@@ -25,6 +26,10 @@ echo X::C;
 echo X::X::C;
 echo Y::X::C;
 echo ::X::X::C;
+echo X::$var;
+echo X::X::$var;
+echo Y::X::$var;
+echo ::X::X::$var;
 --EXPECT--
 class ok
 class ok
@@ -38,3 +43,7 @@ const ok
 const ok
 const ok
 const ok
+var ok
+var ok
+var ok
+var ok

@@ -4,8 +4,9 @@
 <?php
 namespace X;
 import X as Y;
-class Foo {
+class Foo {	
 	const C = "const ok\n";
+	static $var = "var ok\n";
 	function __construct() {
 		echo "class ok\n";
 	}
@@ -25,6 +26,10 @@ echo Foo::C;
 echo X::Foo::C;
 echo Y::Foo::C;
 echo ::X::Foo::C;
+echo Foo::$var;
+echo X::Foo::$var;
+echo Y::Foo::$var;
+echo ::X::Foo::$var;
 --EXPECT--
 class ok
 class ok
@@ -38,3 +43,7 @@ const ok
 const ok
 const ok
 const ok
+var ok
+var ok
+var ok
+var ok
