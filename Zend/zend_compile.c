@@ -1642,6 +1642,14 @@ void zend_resolve_class_name(znode *class_name, ulong *fetch_type TSRMLS_DC) /* 
 			zval_copy_ctor(&class_name->u.constant);
 		} else if (CG(current_namespace)) {
 			zend_class_entry **pce;
+			unsigned int ns_lcname_len;
+			zstr ns_lcname = zend_u_str_case_fold(Z_TYPE_P(CG(current_namespace)), Z_UNIVAL_P(CG(current_namespace)), Z_UNILEN_P(CG(current_namespace)), 0, &ns_lcname_len);
+
+			if (ns_lcname_len == lcname_len &&
+			    memcmp(lcname.v, ns_lcname.v, UG(unicode)?UBYTES(lcname_len):lcname_len) == 0) {
+				*fetch_type |= ZEND_FETCH_CLASS_RT_NS_NAME;
+			}
+			efree(ns_lcname.v);
 
 			if (zend_u_hash_find(CG(class_table), Z_TYPE(class_name->u.constant), lcname, lcname_len+1, (void**)&pce) == SUCCESS &&
 			    (*pce)->type == ZEND_INTERNAL_CLASS) {
@@ -1729,7 +1737,7 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 	znode class_node;
 	unsigned char *ptr = NULL;
 	zend_op *opline;
-	ulong fetch_type;
+	ulong fetch_type = 0;
 	
 	if (method_name->op_type == IS_CONST) {
 		zstr lcname;
@@ -1755,10 +1763,8 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 		fetch_type = ZEND_FETCH_CLASS_GLOBAL;
 		zend_resolve_class_name(class_name, &fetch_type TSRMLS_CC);
 		class_node = *class_name;
-		fetch_type |= ZEND_FETCH_CLASS_RT_NS_CHECK;
 	} else {
 		zend_do_fetch_class(&class_node, class_name TSRMLS_CC);
-		fetch_type = 0;
 	}
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;

@@ -1823,10 +1823,42 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 			EX(object) = NULL;
 			ZEND_VM_NEXT_OPCODE();
 		}
-		efree(lcname.v);
 
 		/* no function found. try a static method in class */		
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
+		
+		if (!ce) {
+			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) {
+				zstr ns;
+
+				if (UG(unicode) && (ns.u = u_memchr(lcname.u, ':', lcname_len)) && ns.u[1] == ':') {
+					ns.u += 2;
+					lcname_len -= (ns.u - lcname.u);
+					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+						efree(lcname.v);
+						EX(object) = NULL;
+						ZEND_VM_NEXT_OPCODE();
+					}
+		    	} else if (!UG(unicode) && (ns.s = memchr(lcname.s, ':', lcname_len)) && ns.s[1] == ':') {
+					ns.s += 2;
+					lcname_len -= (ns.s - lcname.s);
+					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
+						efree(lcname.v);
+						EX(object) = NULL;
+						ZEND_VM_NEXT_OPCODE();
+					}
+				}
+				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+				} else {
+					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+				}
+			} else {
+				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+			}
+		}
+
+		efree(lcname.v);
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
 	}
