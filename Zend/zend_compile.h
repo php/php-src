@@ -634,6 +634,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_CLASS_FLAGS        0xF0
 #define ZEND_FETCH_CLASS_NO_NORMALIZE 0x10
 #define ZEND_FETCH_CLASS_RT_NS_CHECK  0x20
+#define ZEND_FETCH_CLASS_RT_NS_NAME   0x40
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD  0x80
 
 /* variable parsing type (compile-time) */
