@@ -1,3 +1,22 @@
+2007-07-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      tests/ns_033.phpt:
+      Added warning for useless import statement
+
+    * zend_compile.c
+      tests/ns_022.inc
+      tests/ns_022.phpt
+      tests/ns_025.phpt
+      tests/ns_026.phpt
+      tests/ns_027.inc
+      tests/ns_027.phpt
+      tests/ns_028.inc
+      tests/ns_028.phpt
+      tests/ns_029.phpt
+      tests/ns_030.phpt:
+      Disabling declaration of class which name conflicts with import.
+
 2007-07-25  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_alloc.c

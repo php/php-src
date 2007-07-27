@@ -1,3 +1,155 @@
+2007-07-26  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      Makefile.global
+      acinclude.m4
+      buildconf
+      configure.in
+      run-tests.php
+      win32/build/confutils.js:
+      MFH: - Made build system less major version dependant to ease MFB/MFH
+
+    * Makefile.global
+      acinclude.m4
+      buildconf
+      configure.in
+      win32/build/confutils.js:
+      - Made build system less dependant for the PHP major version to also
+        ease MFB/MFH as acinclude.m4 and Makefile.global are identical in both
+        branches.
+
+    * ext/mysql/config.m4:
+      I must be blind..
+
+    * ext/mysql/config.m4:
+      - copy-paste typo
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/scanf.c
+      ext/standard/tests/strings/bug42107.phpt:
+      MFH: - Fixed bug #42107 (sscanf broken when using %2$s type format
+      parameters)
+
+    * ext/standard/scanf.c
+      ext/standard/tests/strings/bug42107.phpt
+      ext/standard/tests/strings/bug42107.phpt:
+      - Fixed bug #42107 (sscanf broken when using %2$s type format parameters)
+
+    * ext/mysqlnd/config9.m4:
+      - Check also if ulong is available
+
+2007-07-26  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd_portability.h:
+      Return to previous code
+
+2007-07-26  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/scanf.c:
+      - ws + cs fixes
+
+    * ext/mysqlnd/mysqlnd_portability.h:
+      fix typo
+
+2007-07-26  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/file.inc
+      ext/standard/tests/file/file.inc
+      ext/standard/tests/file/lstat_stat_variation1.phpt
+      ext/standard/tests/file/lstat_stat_variation1.phpt
+      ext/standard/tests/file/lstat_stat_variation10.phpt
+      ext/standard/tests/file/lstat_stat_variation11.phpt
+      ext/standard/tests/file/lstat_stat_variation12.phpt
+      ext/standard/tests/file/lstat_stat_variation13.phpt
+      ext/standard/tests/file/lstat_stat_variation14.phpt
+      ext/standard/tests/file/lstat_stat_variation15.phpt
+      ext/standard/tests/file/lstat_stat_variation16.phpt
+      ext/standard/tests/file/lstat_stat_variation17.phpt
+      ext/standard/tests/file/lstat_stat_variation18.phpt
+      ext/standard/tests/file/lstat_stat_variation19.phpt
+      ext/standard/tests/file/lstat_stat_variation2.phpt
+      ext/standard/tests/file/lstat_stat_variation20.phpt
+      ext/standard/tests/file/lstat_stat_variation21.phpt
+      ext/standard/tests/file/lstat_stat_variation3.phpt
+      ext/standard/tests/file/lstat_stat_variation4.phpt
+      ext/standard/tests/file/lstat_stat_variation5.phpt
+      ext/standard/tests/file/lstat_stat_variation6.phpt
+      ext/standard/tests/file/lstat_stat_variation7.phpt
+      ext/standard/tests/file/lstat_stat_variation8.phpt
+      ext/standard/tests/file/lstat_stat_variation9.phpt:
+      file.inc : Added dumping of stat array in functions (compare_self_stat() &
+      compare_stats() )
+      Smaller testcases for lstat_stat_variation[1-7].phpt files
+
+    * ext/standard/tests/file/lstat_stat_variation10.phpt
+      ext/standard/tests/file/lstat_stat_variation10.phpt
+      ext/standard/tests/file/lstat_stat_variation11.phpt
+      ext/standard/tests/file/lstat_stat_variation11.phpt
+      ext/standard/tests/file/lstat_stat_variation12.phpt
+      ext/standard/tests/file/lstat_stat_variation12.phpt
+      ext/standard/tests/file/lstat_stat_variation13.phpt
+      ext/standard/tests/file/lstat_stat_variation13.phpt
+      ext/standard/tests/file/lstat_stat_variation14.phpt
+      ext/standard/tests/file/lstat_stat_variation14.phpt
+      ext/standard/tests/file/lstat_stat_variation15.phpt
+      ext/standard/tests/file/lstat_stat_variation15.phpt
+      ext/standard/tests/file/lstat_stat_variation16.phpt
+      ext/standard/tests/file/lstat_stat_variation16.phpt
+      ext/standard/tests/file/lstat_stat_variation17.phpt
+      ext/standard/tests/file/lstat_stat_variation17.phpt
+      ext/standard/tests/file/lstat_stat_variation18.phpt
+      ext/standard/tests/file/lstat_stat_variation18.phpt
+      ext/standard/tests/file/lstat_stat_variation19.phpt
+      ext/standard/tests/file/lstat_stat_variation19.phpt
+      ext/standard/tests/file/lstat_stat_variation2.phpt
+      ext/standard/tests/file/lstat_stat_variation20.phpt
+      ext/standard/tests/file/lstat_stat_variation20.phpt
+      ext/standard/tests/file/lstat_stat_variation21.phpt
+      ext/standard/tests/file/lstat_stat_variation21.phpt
+      ext/standard/tests/file/lstat_stat_variation3.phpt
+      ext/standard/tests/file/lstat_stat_variation4.phpt
+      ext/standard/tests/file/lstat_stat_variation5.phpt
+      ext/standard/tests/file/lstat_stat_variation6.phpt
+      ext/standard/tests/file/lstat_stat_variation7.phpt
+      ext/standard/tests/file/lstat_stat_variation7.phpt
+      ext/standard/tests/file/lstat_stat_variation8.phpt
+      ext/standard/tests/file/lstat_stat_variation8.phpt
+      ext/standard/tests/file/lstat_stat_variation9.phpt
+      ext/standard/tests/file/lstat_stat_variation9.phpt:
+      
+      file lstat_stat_variation10.phpt was initially added on branch PHP_5_2.
+
+2007-07-26  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/xmlreader/php_xmlreader.c:
+      Add arginfo
+
+2007-07-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/ns_033.phpt:
+      Added warning for useless import statement
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/ns_022.inc
+      ZendEngine2/tests/ns_022.phpt
+      ZendEngine2/tests/ns_025.phpt
+      ZendEngine2/tests/ns_026.phpt
+      ZendEngine2/tests/ns_027.inc
+      ZendEngine2/tests/ns_027.phpt
+      ZendEngine2/tests/ns_028.inc
+      ZendEngine2/tests/ns_028.phpt
+      ZendEngine2/tests/ns_029.phpt
+      ZendEngine2/tests/ns_030.phpt:
+      Disabling declaration of class which name conflicts with import.
+
+2007-07-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
 2007-07-25  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * acinclude.m4
