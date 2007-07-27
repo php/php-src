@@ -724,7 +724,7 @@ static_scalar: /* compile-time evaluated scalars */
 ;
 
 static_class_constant:
-		T_STRING T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_CT TSRMLS_CC); }
+		fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_CT TSRMLS_CC); }
 ;
 
 scalar:
