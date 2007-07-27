@@ -271,7 +271,7 @@ ZEND_API int zend_get_constant_ex(char *name, uint name_len, zval *result, zend_
 		efree(class_name);
 
 		if (retval) {
-			zval_update_constant(ret_constant, (void*)1 TSRMLS_CC);
+			zval_update_constant_ex(ret_constant, (void*)1, *ce TSRMLS_CC);
 			*result = **ret_constant;
 			zval_copy_ctor(result);
 		}
