@@ -1,3 +1,58 @@
+2007-07-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/tests/bug41633_4.phpt:
+      Improved fix for bug #41633 (self:: doesn't work for constants) to support
+      function define()
+
+    * ZendEngine2/tests/bug41633_4.phpt
+      ZendEngine2/tests/bug41633_4.phpt:
+      
+      file bug41633_4.phpt was initially added on branch PHP_5_2.
+
+    * ZendEngine2/tests/ns_010.phpt
+      ZendEngine2/tests/ns_037.phpt:
+      Extended tests
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/ns_010.phpt
+      ZendEngine2/tests/ns_020.phpt
+      ZendEngine2/tests/ns_037.phpt:
+      Namespace support for name ambiguity between namespace and class name
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/ns_034.phpt
+      ZendEngine2/tests/ns_035.phpt
+      ZendEngine2/tests/ns_036.phpt:
+      Support for namespaces in compile-time constant reference
+
+2007-07-27  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/mysql/config.m4
+      ext/mysqli/config.m4:
+      - Align help texts and added note about embedded not being available when
+        the MySQL native driver is used.
+
+2007-07-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/dom/tests/bug28721.phpt
+      ext/dom/tests/bug28817.phpt
+      ext/dom/tests/bug32615.phpt
+      ext/dom/tests/bug34276.phpt
+      ext/dom/tests/bug35342.phpt
+      ext/dom/tests/bug38949.phpt
+      ext/dom/tests/bug41257.phpt
+      ext/dom/tests/bug41374.phpt:
+      WS
+
 2007-07-26  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * (PHP_5_2)

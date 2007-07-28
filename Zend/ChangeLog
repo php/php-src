@@ -1,3 +1,38 @@
+2007-07-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_constants.c
+      zend_constants.c
+      tests/bug41633_4.phpt:
+      Improved fix for bug #41633 (self:: doesn't work for constants) to support
+      function define()
+
+    * tests/bug41633_4.phpt
+      tests/bug41633_4.phpt:
+      
+      file bug41633_4.phpt was initially added on branch PHP_5_2.
+
+    * tests/ns_010.phpt
+      tests/ns_037.phpt:
+      Extended tests
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/ns_010.phpt
+      tests/ns_020.phpt
+      tests/ns_037.phpt:
+      Namespace support for name ambiguity between namespace and class name
+
+    * zend_compile.c
+      zend_constants.c
+      zend_language_parser.y
+      tests/ns_034.phpt
+      tests/ns_035.phpt
+      tests/ns_036.phpt:
+      Support for namespaces in compile-time constant reference
+
 2007-07-26  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
