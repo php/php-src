@@ -1,3 +1,27 @@
+2007-07-28  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/xsltprocessor.c:
+      allow user specified class to be returned from transformToDoc
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/libxml/libxml.c
+      ext/libxml/tests/bug42112.phpt:
+      MFB: Fixed Bug #42112 (deleting a node produces memory corruption)
+      add test
+
+    * ext/libxml/tests/bug42112.phpt
+      ext/libxml/tests/bug42112.phpt:
+      
+      file bug42112.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/libxml/libxml.c:
+      Fixed Bug #42112 (deleting a node produces memory corruption)
+      add test
+
 2007-07-27  Dmitry Stogov  <dmitry@zend.com>
 
     * ZendEngine2/zend_constants.c
