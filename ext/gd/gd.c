@@ -3825,7 +3825,8 @@ PHP_FUNCTION(imagepsloadfont)
 	f_ind = T1_AddFont(filename);
 
 	if (f_ind < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "T1Lib Error: %s", T1_StrError(f_ind));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "T1Lib Error (%i): %s", f_ind, T1_StrError(f_ind));
+		RETURN_FALSE;
 	}
 
 	if (T1_LoadFont(f_ind)) {
