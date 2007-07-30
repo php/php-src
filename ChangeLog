@@ -1,3 +1,11 @@
+2007-07-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/session/session.c:
+      
+      Fixed bug #42135 (Second call of session_start() causes creation of SID)
+
 2007-07-28  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/xsl/xsltprocessor.c:
