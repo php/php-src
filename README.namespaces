@@ -1,3 +1,6 @@
+Design
+======
+
 Main assumption of the model is that the problem that we are to solve is the
 problem of the very long class names in PHP libraries. We would not attempt
 to take autoloader's job or create packaging model - only make names
@@ -101,3 +104,20 @@ it tries to find class "A::B (__autoload() it if necessary) and call its
 static function foo() 
 7) qualified class names are interpreted as class from corresponding
 namespace. So "new A::B::C()" creates class "C" from namespace "A::B".
+
+
+TODO
+====
+
+* Rename namespaces to packages?
+
+* Extend the Reflection API
+
+  * Add ReflectionPackage class
+
+    + getName()
+    + getClasses()
+    + getFunctions()
+    + getFiles()
+
+  * Add getNamespace() methods to ReflectionClass and ReflectionFunction 
