@@ -1583,19 +1583,28 @@ PHP_FUNCTION(oci_error)
 				RETURN_FALSE;
 			}
 #endif
-		} else {
-			connection = (php_oci_connection *) zend_fetch_resource(&arg TSRMLS_CC, -1, NULL, NULL, 1, le_connection);
-			
-			if (connection) {
-				errh = connection->err;
-				error = connection->errcode;
-			}
+			goto go_out;
+		}
+
+		connection = (php_oci_connection *) zend_fetch_resource(&arg TSRMLS_CC, -1, NULL, NULL, 1, le_connection);
+		if (connection) {
+			errh = connection->err;
+			error = connection->errcode;
+			goto go_out;
+		}
+
+		connection = (php_oci_connection *) zend_fetch_resource(&arg TSRMLS_CC, -1, NULL, NULL, 1, le_pconnection);
+		if (connection) {
+			errh = connection->err;
+			error = connection->errcode;
+			goto go_out;
 		}
 	} else {
 		errh = OCI_G(err);
 		error = OCI_G(errcode);
 	}
 
+go_out:
 	if (error == OCI_SUCCESS) { /* no error set in the handle */
 		RETURN_FALSE;
 	}
