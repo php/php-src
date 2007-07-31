@@ -1,3 +1,39 @@
+2007-07-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c:
+      - MFB:
+       - fix gd bug #102, < 0 means that no load are loaded, return false
+       - add error code in the warning
+
+    * (PHP_5_2)
+      ext/gd/gd.c:
+      - fix gd bug #102, < 0 means that no load are loaded, return false
+      - add error code in the warning
+
+2007-07-30  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/xsl/xsltprocessor.c:
+      allow user specified class to be returned from transformToDoc
+
+2007-07-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * README.namespaces:
+      Start TODO for namespaces/packages.
+
+2007-07-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c:
+      
+      Fixed bug #42142 (substr_replace() returns FALSE when length > string
+      length).
+      
+      [doc] Adjust length validation check inside substr_replace() to be similar
+      to that inside substr() so that excessive length is truncated to string
+      length.
+
 2007-07-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
