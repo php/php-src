@@ -251,7 +251,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     ],[
       AC_MSG_ERROR([Problem with libmbfl. Please check config.log for more information.])
     ], [
-      -LPHP_LIBMBFL/$PHP_LIBDIR
+      -L$PHP_LIBMBFL/$PHP_LIBDIR
     ])
   fi
 ])
