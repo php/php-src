@@ -12,7 +12,7 @@ if test "$PHP_INTERBASE" != "no"; then
     IBASE_LIBDIR=/usr/interbase/lib
   else
     IBASE_INCDIR=$PHP_INTERBASE/include
-    IBASE_LIBDIR=$PHP_INTERBASE/lib
+    IBASE_LIBDIR=$PHP_INTERBASE/$PHP_LIBDIR
   fi
 
   PHP_CHECK_LIBRARY(fbclient, isc_detach_database,
