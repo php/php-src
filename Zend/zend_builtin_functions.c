@@ -24,6 +24,7 @@
 #include "zend_builtin_functions.h"
 #include "zend_constants.h"
 #include "zend_ini.h"
+#include "zend_extensions.h"
 
 #undef ZEND_TEST_EXCEPTIONS
 
@@ -1644,6 +1645,14 @@ static int add_extension_info(zend_module_entry *module, void *arg TSRMLS_DC) /*
 }
 /* }}} */
 
+static int add_zendext_info(zend_extension *ext, void *arg TSRMLS_DC) /* {{{ */
+{
+	zval *name_array = (zval *)arg;
+	add_next_index_ascii_string(name_array, ext->name, 1);
+	return 0;
+}
+/* }}} */
+
 static int add_constant_info(zend_constant *constant, void *arg TSRMLS_DC) /* {{{ */
 {
 	zval *name_array = (zval *)arg;
@@ -1658,16 +1667,34 @@ static int add_constant_info(zend_constant *constant, void *arg TSRMLS_DC) /* {{
 }
 /* }}} */
 
-/* {{{ proto array get_loaded_extensions(void) U
+/* {{{ proto array get_loaded_extensions([mixed categorize]) U
    Return an array containing names of loaded extensions */
 ZEND_FUNCTION(get_loaded_extensions)
 {
-	if (ZEND_NUM_ARGS() != 0) {
+	int argc = ZEND_NUM_ARGS();
+
+	if (argc != 0 && argc != 1) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) add_extension_info, return_value TSRMLS_CC);
+
+	if (argc) {
+		zval *modules;
+		zval *extensions;
+
+		MAKE_STD_ZVAL(modules);
+		array_init(modules);
+		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) add_extension_info, modules TSRMLS_CC);
+		add_ascii_assoc_zval_ex(return_value, "PHP Modules", sizeof("PHP Modules"), modules);
+
+		MAKE_STD_ZVAL(extensions);
+		array_init(extensions);
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) add_zendext_info, extensions TSRMLS_CC);
+		add_ascii_assoc_zval_ex(return_value, "Zend Extensions", sizeof("Zend Extensions"), extensions);
+	} else {
+		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) add_extension_info, return_value TSRMLS_CC);
+	}
 }
 /* }}} */
 
