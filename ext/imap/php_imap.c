@@ -3407,7 +3407,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
 		while (addr) {
-			if (strcmp(addr->host, ERRHOST) == 0) {
+			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;
 			} else {
 				bufferTo = safe_erealloc(bufferTo, bt_len, 1, strlen(addr->mailbox));
@@ -3436,7 +3436,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
 		while (addr) {
-			if (strcmp(addr->host, ERRHOST) == 0) {
+			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;
 			} else {
 				bufferCc = safe_erealloc(bufferCc, bt_len, 1, strlen(addr->mailbox));
@@ -3462,7 +3462,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
 		while (addr) {
-			if (strcmp(addr->host, ERRHOST) == 0) {
+			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;
 			} else {
 				bufferBcc = safe_erealloc(bufferBcc, bt_len, 1, strlen(addr->mailbox));
