@@ -55,7 +55,8 @@ php_oci_collection * php_oci_collection_create(php_oci_connection* connection, z
 
 	collection->connection = connection;
 	collection->collection = NULL;
-	
+	zend_list_addref(collection->connection->rsrc_id);
+
 	/* get type handle by name */
 	PHP_OCI_CALL_RETURN(connection->errcode, OCITypeByName,
 			(
@@ -761,3 +762,12 @@ void php_oci_collection_close(php_oci_collection *collection TSRMLS_DC)
 } /* }}} */
 
 #endif /* HAVE_OCI8 */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
