@@ -34,6 +34,10 @@ extern zend_module_entry tokenizer_module_entry;
 #include "TSRM.h"
 #endif
 
+void tokenizer_register_constants(INIT_FUNC_ARGS);
+char *get_token_type_name(int token_type);
+
+
 PHP_MINIT_FUNCTION(tokenizer);
 PHP_MINFO_FUNCTION(tokenizer);
 
