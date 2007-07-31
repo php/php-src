@@ -136,7 +136,7 @@ PHP_ARG_WITH(sapdb,,
       PHP_SAPDB=/usr/local
     fi
     PHP_ADD_INCLUDE($PHP_SAPDB/incl)
-    PHP_ADD_LIBPATH($PHP_SAPDB/lib)
+    PHP_ADD_LIBPATH($PHP_SAPDB/$PHP_LIBDIR)
     PHP_ADD_LIBRARY(sqlod)
     ODBC_TYPE=sapdb
     AC_DEFINE(HAVE_SAPDB,1,[ ])
@@ -373,7 +373,7 @@ PHP_ARG_WITH(iodbc,,
     if test "$PHP_IODBC" = "yes"; then
       PHP_IODBC=/usr/local
     fi
-    PHP_ADD_LIBRARY_WITH_PATH(iodbc, $PHP_IODBC/lib)
+    PHP_ADD_LIBRARY_WITH_PATH(iodbc, $PHP_IODBC/$PHP_LIBDIR)
     PHP_ADD_INCLUDE($PHP_IODBC/include, 1)
     ODBC_TYPE=iodbc
     ODBC_INCLUDE=-I$PHP_IODBC/include

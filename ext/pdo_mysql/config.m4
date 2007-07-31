@@ -78,10 +78,10 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     else
       PDO_MYSQL_INC_DIR=$PDO_MYSQL_DIR/include
     fi
-    if test -r $PDO_MYSQL_DIR/lib/mysql; then
-      PDO_MYSQL_LIB_DIR=$PDO_MYSQL_DIR/lib/mysql
+    if test -r $PDO_MYSQL_DIR/$PHP_LIBDIR/mysql; then
+      PDO_MYSQL_LIB_DIR=$PDO_MYSQL_DIR/$PHP_LIBDIR/mysql
     else
-      PDO_MYSQL_LIB_DIR=$PDO_MYSQL_DIR/lib
+      PDO_MYSQL_LIB_DIR=$PDO_MYSQL_DIR/$PHP_LIBDIR
     fi
 
     if test -r "$PDO_MYSQL_LIB_DIR"; then
