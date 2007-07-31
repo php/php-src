@@ -3258,7 +3258,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
 		while (addr) {
-			if (strcmp(addr->host, ERRHOST) == 0) {
+			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;
 			} else {
 				offset += sprintf(bufferTo + offset, "%s@%s,", addr->mailbox, addr->host);
@@ -3281,7 +3281,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
 		while (addr) {
-			if (strcmp(addr->host, ERRHOST) == 0) {
+			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;
 			} else {
 				offset += sprintf(bufferCc + offset, "%s@%s,", addr->mailbox, addr->host);
@@ -3301,7 +3301,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
 		while (addr) {
-			if (strcmp(addr->host, ERRHOST) == 0) {
+			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;
 			} else {
 				offset += sprintf(bufferBcc + offset, "%s@%s,", addr->mailbox, addr->host);
