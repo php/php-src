@@ -185,6 +185,8 @@ PHP                                                                        NEWS
   copying). (Dmitry)
 - Fixed bug #41350 (my_thread_global_end() error during request shutdown
   on Windows). (Scott, Andrey)
+- Fixed bug #41278 (get_loaded_extensions() should list Zend extensions).
+  (Johannes)
 - Fixed bug #41127 (Memory leak in ldap_{first|next}_attribute functions).
   (Jani)
 - Fixed bug #40757 (get_object_vars get nothing in child class). (Dmitry)
