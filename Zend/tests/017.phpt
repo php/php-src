@@ -10,9 +10,9 @@ var_dump(get_resource_type($fp));
 fclose($fp);
 var_dump(get_resource_type($fp));
 
-var_dump(get_loaded_extensions(true));
 var_dump(gettype(get_loaded_extensions()));
 var_dump(count(get_loaded_extensions()));
+var_dump(count(get_loaded_extensions(true)));
 
 define("USER_CONSTANT", "test");
 
@@ -50,11 +50,9 @@ Warning: Supplied argument is not a valid resource handle in %s on line %d
 bool(false)
 string(6) "stream"
 string(7) "Unknown"
-
-Warning: Wrong parameter count for get_loaded_extensions() in %s on line %d
-NULL
 string(5) "array"
 int(%d)
+int(2)
 
 Warning: Wrong parameter count for get_defined_constants() in %s on line %d
 NULL
@@ -88,11 +86,9 @@ Warning: Supplied argument is not a valid resource handle in %s on line %d
 bool(false)
 unicode(6) "stream"
 unicode(7) "Unknown"
-
-Warning: Wrong parameter count for get_loaded_extensions() in %s on line %d
-NULL
 unicode(5) "array"
 int(%d)
+int(2)
 
 Warning: Wrong parameter count for get_defined_constants() in %s on line %d
 NULL
