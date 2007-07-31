@@ -867,10 +867,10 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	zend_class_entry *ce = NULL, *old_ce = NULL;
 	zval grp_val, *grp, **pgrp, *retval, *old_ctor_args = NULL;
 
-	how = how & ~PDO_FETCH_FLAGS;
 	if (how == PDO_FETCH_USE_DEFAULT) {
 		how = stmt->default_fetch_type;
 	}
+	how = how & ~PDO_FETCH_FLAGS;
 
 	if (!do_fetch_common(stmt, ori, offset, do_bind TSRMLS_CC)) {
 		return 0;
