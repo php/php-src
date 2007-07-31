@@ -90,6 +90,8 @@ PHP                                                                        NEWS
 - Fixed bug #41989 (move_uploaded_file() & relative path in ZTS mode). (Tony)
 - Fixed bug #41984 (Hangs on large SoapClient requests). (Dmitry)
 - Fixed bug #41983 (Error Fetching http headers terminated by '\n'). (Dmitry)
+- Fixed bug #41971 (PDOStatement::fetch and PDOStatement::setFetchMode causes
+  unexpected behavior). (Ilia)
 - Fixed bug #41964 (strtotime returns a timestamp for non-time string of
   pattern '(A|a) .+'). (Derick)
 - Fixed bug #41961 (Ensure search for hidden private methods does not stray
