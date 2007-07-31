@@ -74,6 +74,8 @@ PHP                                                                        NEWS
   length). (Ilia) 
 - Fixed bug #42135 (Second call of session_start() causes creation of SID).
   (Ilia)
+- Fixed bug #42134 (oci_error() returns false after oci_new_collection() 
+  fails). (Tony)
 - Fixed Bug #42112 (deleting a node produces memory corruption). (Rob)
 - Fixed Bug #42107 (sscanf broken when using %2$s format parameters). (Jani)
 - Fixed bug #42090 (json_decode causes segmentation fault). (Hannes)
