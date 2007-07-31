@@ -272,7 +272,6 @@ typedef struct { /* php_oci_out_column {{{ */
 #define PHP_OCI_REGISTER_RESOURCE(resource, le_resource) \
 	do { \
 		resource->id = ZEND_REGISTER_RESOURCE(NULL, resource, le_resource); \
-		zend_list_addref(resource->connection->rsrc_id); \
 	} while (0)
 
 #define PHP_OCI_ZVAL_TO_CONNECTION(zval, connection) \
