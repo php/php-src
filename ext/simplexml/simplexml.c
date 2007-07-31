@@ -1637,7 +1637,9 @@ SXE_METHOD(addChild)
 			newnode->ns = NULL;
 			nsptr = xmlNewNs(newnode, (xmlChar *)nsuri, prefix);
 		} else {
-			nsptr = xmlSearchNsByHref(node->doc, node, (xmlChar *)nsuri);
+			if (node) {
+				nsptr = xmlSearchNsByHref(node->doc, node, (xmlChar *)nsuri);
+			}
 			if (nsptr == NULL) {
 				nsptr = xmlNewNs(newnode, (xmlChar *)nsuri, prefix);
 			}
