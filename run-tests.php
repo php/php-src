@@ -481,7 +481,18 @@ HELP;
 		}
 		if (!$is_switch) {
 			$testfile = realpath($argv[$i]);
-			if (is_dir($testfile)) {
+			if (!$testfile && strpos($argv[$i], '*') !== false && function_exists('glob')) {
+				if (preg_match("/\.phpt$/", $argv[$i])) {
+					$pattern_match = glob($argv[$i]);
+				} else if (preg_match("/\*$/", $argv[$i])) {
+					$pattern_match = glob($argv[$i] . '.phpt');
+				} else {
+					die("bogus test name " . $argv[$i] . "\n");
+				}
+				if (is_array($pattern_match)) {
+					$test_files = array_merge($test_files, $pattern_match);
+				}
+			} else if (is_dir($testfile)) {
 				find_files($testfile);
 			} else if (preg_match("/\.phpt$/", $testfile)) {
 				$test_files[] = $testfile;
