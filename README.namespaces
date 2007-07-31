@@ -121,3 +121,5 @@ TODO
     + getFiles()
 
   * Add getNamespace() methods to ReflectionClass and ReflectionFunction 
+
+* Make ext/tokenizer package-aware
