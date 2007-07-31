@@ -1625,6 +1625,11 @@ SXE_METHOD(addChild)
 
 	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 
+	if (node == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot add child. Parent is not a permanent member of the XML tree");
+		return;	
+	}
+
 	localname = xmlSplitQName2((xmlChar *)qname, &prefix);
 	if (localname == NULL) {
 		localname = xmlStrdup((xmlChar *)qname);
@@ -1637,9 +1642,7 @@ SXE_METHOD(addChild)
 			newnode->ns = NULL;
 			nsptr = xmlNewNs(newnode, (xmlChar *)nsuri, prefix);
 		} else {
-			if (node) {
-				nsptr = xmlSearchNsByHref(node->doc, node, (xmlChar *)nsuri);
-			}
+			nsptr = xmlSearchNsByHref(node->doc, node, (xmlChar *)nsuri);
 			if (nsptr == NULL) {
 				nsptr = xmlNewNs(newnode, (xmlChar *)nsuri, prefix);
 			}
