@@ -1849,7 +1849,16 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 					}
 				}
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					if (UG(unicode)) {
+						ns.u[lcname_len] = 0;
+					} else {
+						ns.s[lcname_len] = 0;
+					}
 					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					if (!ce) {
+						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+					}
 				} else {
 					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 				}
