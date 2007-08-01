@@ -1,3 +1,154 @@
+2007-07-31  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      ext/tokenizer/CREDITS
+      ext/tokenizer/config.m4
+      ext/tokenizer/php_tokenizer.h
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer_data.c
+      ext/tokenizer/tokenizer_data_gen.sh:
+      - MFH: Use a script to generate tokenizer data from zend_language_parser.h
+
+    * ext/tokenizer/CREDITS
+      ext/tokenizer/config.m4
+      ext/tokenizer/php_tokenizer.h
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer_data.c
+      ext/tokenizer/tokenizer_data.c
+      ext/tokenizer/tokenizer_data_gen.sh
+      ext/tokenizer/tokenizer_data_gen.sh:
+      - Use a script to generate tokenizer data from zend_language_parser.h
+
+2007-07-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c:
+      
+      Fixed bug #41971 (PDOStatement::fetch and PDOStatement::setFetchMode
+      causes
+      unexpected behavior).
+
+2007-07-31  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/017.phpt:
+      - MFH: Add additional param to get_loaded_extensions() for returning Zend
+        extensions (Fixes #41278) [DOC]
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/017.phpt:
+      - Add additional param to get_loaded_extensions() for returning Zend
+        extensions (Fixes #41278)
+
+2007-07-31  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      run-tests.php:
+      MFH:- Allow using * in test filenames to match pattern
+
+    * run-tests.php:
+      - Allow using * in test filenames to match pattern
+
+2007-07-31  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/tests/bug42134.phpt:
+      add test
+
+    * ext/oci8/tests/bug42134.phpt
+      ext/oci8/tests/bug42134.phpt:
+      
+      add test (thanks Chris!)
+
+    * (PHP_5_2)
+      ext/oci8/oci8_interface.c:
+      MFH: missing part of the fix for bug #42134
+
+    * ext/oci8/oci8_interface.c:
+      missing part of the fix for bug #42134
+
+    * (PHP_5_2)
+      NEWS
+      ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      MFH: fix #42134 (oci_error() returns false after oci_new_collection()
+      fails)
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      fix #42134 (oci_error() returns false after oci_new_collection() fails)
+
+2007-07-31  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * README.namespaces:
+      Add ext/tokenizer support to the TODO.
+
+2007-07-31  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c:
+      MFH: fix bug #41833 (addChild() on a non-existent node, no node created,
+      getName() segfaults)
+
+    * ext/simplexml/simplexml.c:
+      fix bug #41833 (addChild() on a non-existent node, no node created,
+      getName() segfaults)
+
+    * ext/simplexml/simplexml.c:
+      fix possible crash
+
+2007-07-31  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/interbase/config.m4
+      ext/odbc/config.m4
+      ext/pdo_firebird/config.m4
+      ext/pdo_pgsql/config.m4
+      ext/snmp/config.m4:
+      - Fix some lib vs. $PHP_LIBDIR issues.
+
+2007-07-31  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/mbstring/config.m4:
+      fix typo
+
+    * ext/mbstring/config.m4:
+      fix typo
+      it would be much better if Gentoo people send us this patch long ago
+      instead of using their private patches.
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/bug40754.phpt:
+      fix test
+
+2007-07-31  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      sometimes c-client returns non-null entry with null host
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      sometimes c-client lib returns non-null entry with null host
+
 2007-07-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/gd/gd.c:

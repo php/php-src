@@ -1,3 +1,16 @@
+2007-07-31  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      zend_builtin_functions.c
+      tests/017.phpt:
+      - MFH: Add additional param to get_loaded_extensions() for returning Zend
+        extensions (Fixes #41278) [DOC]
+
+    * zend_builtin_functions.c
+      tests/017.phpt:
+      - Add additional param to get_loaded_extensions() for returning Zend
+        extensions (Fixes #41278)
+
 2007-07-27  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_constants.c
