@@ -427,6 +427,8 @@ static PHP_INI_DISP(display_errors_mode)
 
 #if defined(PHP_PROG_SENDMAIL) && !defined(NETWARE)
 #	define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t -i "
+#elif defined(PHP_WIN32)
+#	define DEFAULT_SENDMAIL_PATH NULL
 #else
 #	define DEFAULT_SENDMAIL_PATH "/usr/sbin/sendmail -t -i" 
 #endif
