@@ -122,6 +122,8 @@ PHP                                                                        NEWS
   date_create or new DateTime). (Derick)
 - Fixed bug #41833 (addChild() on a non-existent node, no node created, 
   getName() segfaults). (Rob)
+- Fixed bug #41831 (pdo_sqlite prepared statements convert resources to
+  strings). (Ilia)
 - Fixed bug #41815 (Concurrent read/write fails when EOF is reached). (Sascha)
 - Fixed bug #41813 (segmentation fault when using string offset as an object).
   (judas dot iscariote at gmail dot com, Tony)
