@@ -70,6 +70,8 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #42151 (__destruct functions not called after catching a SoapFault
+  exception). (Dmitry)
 - Fixed bug #42142 (substr_replace() returns FALSE when length > string
   length). (Ilia) 
 - Fixed bug #42135 (Second call of session_start() causes creation of SID).
