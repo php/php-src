@@ -2601,7 +2601,16 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 					}
 				}
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					if (UG(unicode)) {
+						ns.u[lcname_len] = 0;
+					} else {
+						ns.s[lcname_len] = 0;
+					}
 					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					if (!ce) {
+						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+					}
 				} else {
 					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 				}
@@ -3097,7 +3106,16 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDL
 					}
 				}
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					if (UG(unicode)) {
+						ns.u[lcname_len] = 0;
+					} else {
+						ns.s[lcname_len] = 0;
+					}
 					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					if (!ce) {
+						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+					}
 				} else {
 					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 				}
@@ -3594,7 +3612,16 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDL
 					}
 				}
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					if (UG(unicode)) {
+						ns.u[lcname_len] = 0;
+					} else {
+						ns.s[lcname_len] = 0;
+					}
 					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					if (!ce) {
+						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+					}
 				} else {
 					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 				}
@@ -3857,7 +3884,16 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HA
 					}
 				}
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					if (UG(unicode)) {
+						ns.u[lcname_len] = 0;
+					} else {
+						ns.s[lcname_len] = 0;
+					}
 					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					if (!ce) {
+						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+					}
 				} else {
 					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 				}
@@ -4322,7 +4358,16 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLE
 					}
 				}
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					if (UG(unicode)) {
+						ns.u[lcname_len] = 0;
+					} else {
+						ns.s[lcname_len] = 0;
+					}
 					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					if (!ce) {
+						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+					}
 				} else {
 					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 				}
@@ -10219,7 +10264,16 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDL
 					}
 				}
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					if (UG(unicode)) {
+						ns.u[lcname_len] = 0;
+					} else {
+						ns.s[lcname_len] = 0;
+					}
 					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					if (!ce) {
+						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+					}
 				} else {
 					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 				}
@@ -11947,7 +12001,16 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER
 					}
 				}
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					if (UG(unicode)) {
+						ns.u[lcname_len] = 0;
+					} else {
+						ns.s[lcname_len] = 0;
+					}
 					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					if (!ce) {
+						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+					}
 				} else {
 					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 				}
@@ -13667,7 +13730,16 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER
 					}
 				}
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					if (UG(unicode)) {
+						ns.u[lcname_len] = 0;
+					} else {
+						ns.s[lcname_len] = 0;
+					}
 					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					if (!ce) {
+						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+					}
 				} else {
 					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 				}
@@ -14585,7 +14657,16 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 					}
 				}
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					if (UG(unicode)) {
+						ns.u[lcname_len] = 0;
+					} else {
+						ns.s[lcname_len] = 0;
+					}
 					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					if (!ce) {
+						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+					}
 				} else {
 					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 				}
@@ -15955,7 +16036,16 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_
 					}
 				}
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					if (UG(unicode)) {
+						ns.u[lcname_len] = 0;
+					} else {
+						ns.s[lcname_len] = 0;
+					}
 					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					if (!ce) {
+						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+					}
 				} else {
 					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 				}
