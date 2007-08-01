@@ -78,6 +78,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #42134 (oci_error() returns false after oci_new_collection() 
   fails). (Tony)
+- Fixed bug #42119 (array_push($arr,&$obj) doesn't work with
+  zend.ze1_compatibility_mode On). (Dmitry)
 - Fixed Bug #42112 (deleting a node produces memory corruption). (Rob)
 - Fixed Bug #42107 (sscanf broken when using %2$s format parameters). (Jani)
 - Fixed bug #42090 (json_decode causes segmentation fault). (Hannes)
