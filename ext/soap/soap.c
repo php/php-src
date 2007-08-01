@@ -2377,6 +2377,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 #ifdef va_copy
 			va_list argcopy;
 #endif
+			zend_object_store_bucket *old_objects;
 			int old = PG(display_errors);
 
 			INIT_ZVAL(outbuf);
@@ -2400,6 +2401,8 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			INIT_PZVAL(exception);
 			zend_throw_exception_object(exception TSRMLS_CC);
 
+			old_objects = EG(objects_store).object_buckets;
+			EG(objects_store).object_buckets = NULL;
 			PG(display_errors) = 0;
 			zend_try {
 				call_old_error_handler(error_num, error_filename, error_lineno, format, args);
@@ -2408,6 +2411,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				EG(in_execution) = _old_in_execution;
 				EG(current_execute_data) = _old_current_execute_data;
 			} zend_end_try();
+			EG(objects_store).object_buckets = old_objects;
 			PG(display_errors) = old;
 			zend_bailout();
 		} else {
