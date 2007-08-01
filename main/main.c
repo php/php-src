@@ -542,9 +542,6 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 			return;
 		}
 #endif
-		if (PG(open_basedir) && php_check_open_basedir_ex(PG(error_log), 0 TSRMLS_CC)) {
-			return;
-		}
 		fd = VCWD_OPEN_MODE(PG(error_log), O_CREAT | O_APPEND | O_WRONLY, 0644);
 		if (fd != -1) {
 			char *tmp;
