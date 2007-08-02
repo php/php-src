@@ -1,3 +1,77 @@
+2007-08-01  Stanislav Malyshev  <stas@zend.com>
+
+    * main/main.c
+      main/main.c
+      main/main.c:
+      revert wrong fix
+
+2007-08-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_sqlite/sqlite_statement.c:
+      
+      Fixed bug #41831 (pdo_sqlite prepared statements convert resources to
+      strings).
+
+2007-08-01  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/tests/parse_error.phpt
+      ext/oci8/tests/parse_error.phpt:
+      
+      New test for error handling
+
+2007-08-01  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/tokenizer/config.w32:
+      - fix win32 build
+
+2007-08-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      main/main.c:
+      - MFH: Fix #42164 Internal Sendmail Support is ALWAYS disabled
+
+    * main/main.c:
+      - Fix #42164 Internal Sendmail Support is ALWAYS disabled
+
+2007-08-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/ns_038.phpt:
+      Fixed namespace name and internal class name ambiguity
+
+2007-08-01  Antony Dovgal  <antony@zend.com>
+
+    * ext/libxml/libxml.c
+      ext/libxml/php_libxml.h:
+      an attempt to fix win32 build
+
+2007-08-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/tests/bug42119.phpt
+      ZendEngine2/tests/bug42119.phpt:
+      Fixed bug #42119 (array_push($arr,&$obj) doesn't work with
+      zend.ze1_compatibility_mode On)
+
+    * ext/soap/tests/bugs/bug42151.phpt
+      ext/soap/tests/bugs/bug42151.phpt:
+      
+      file bug42151.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug42151.phpt:
+      Fixed bug #42151 (__destruct functions not called after catching a
+      SoapFault exception)
+
 2007-07-31  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_2)
