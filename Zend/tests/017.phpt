@@ -57,7 +57,7 @@ int(%d)
 string(5) "array"
 int(0)
 
-Warning: get_loaded_extensions() expects at most 1 parameter, 2 given in /home/johannes/src/php/PHP_5_2/Zend/tests/017.php on line 14
+Warning: get_loaded_extensions() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 
 Warning: Wrong parameter count for get_defined_constants() in %s on line %d
