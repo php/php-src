@@ -25,6 +25,14 @@
 #include <fcntl.h>
 #endif
 
+#define HARDCODED_INI			\
+	"html_errors=0\n"			\
+	"register_argc_argv=1\n"	\
+	"implicit_flush=1\n"		\
+	"output_buffering=0\n"		\
+	"max_execution_time=0\n"	\
+	"max_input_time=-1\n"
+
 static char* php_embed_read_cookies(TSRMLS_D)
 {
 	return NULL;
@@ -153,6 +161,7 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
 	sapi_globals_struct *sapi_globals;
 	void ***tsrm_ls;
 #endif
+	int ini_entries_len = 0;
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -186,6 +195,12 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
 #endif
 
   php_embed_module.additional_functions = additional_functions;
+
+  ini_entries_len = strlen(HARDCODED_INI);
+  php_embed_module.ini_entries = malloc(ini_entries_len+2);
+  memcpy(php_embed_module.ini_entries, HARDCODED_INI, ini_entries_len+1);
+  php_embed_module.ini_entries[ini_entries_len+1] = 0;
+
   sapi_startup(&php_embed_module);
 
   if (php_embed_module.startup(&php_embed_module)==FAILURE) {
@@ -200,11 +215,12 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
 
   /* Set some Embedded PHP defaults */
   SG(options) |= SAPI_OPTION_NO_CHDIR;
-  zend_alter_ini_entry("register_argc_argv", 19, "1", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-  zend_alter_ini_entry("html_errors", 12, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-  zend_alter_ini_entry("implicit_flush", 15, "1", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-  zend_alter_ini_entry("max_execution_time", 19, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-
+#if 0
+//  zend_alter_ini_entry("register_argc_argv", 19, "1", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+//  zend_alter_ini_entry("html_errors", 12, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+//  zend_alter_ini_entry("implicit_flush", 15, "1", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+//  zend_alter_ini_entry("max_execution_time", 19, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+#endif
   SG(request_info).argc=argc;
   SG(request_info).argv=argv;
 
@@ -228,6 +244,10 @@ void php_embed_shutdown(TSRMLS_D)
 #ifdef ZTS
     tsrm_shutdown();
 #endif
+	if (php_embed_module.ini_entries) {
+		free(php_embed_module.ini_entries);
+		php_embed_module.ini_entries = NULL;
+	}
 }
 
 /*
