@@ -12,7 +12,9 @@ var_dump(get_resource_type($fp));
 
 var_dump(gettype(get_loaded_extensions()));
 var_dump(count(get_loaded_extensions()));
+var_dump(gettype(get_loaded_extensions(true)));
 var_dump(count(get_loaded_extensions(true)));
+var_dump(get_loaded_extensions(true, true));
 
 define("USER_CONSTANT", "test");
 
@@ -52,9 +54,13 @@ string(6) "stream"
 string(7) "Unknown"
 string(5) "array"
 int(%d)
-int(2)
+string(5) "array"
+int(%d)
 
-Warning: Wrong parameter count for get_defined_constants() in %s on line %d
+Warning: get_loaded_extensions() expects at most 1 parameter, 2 given in %s line %d
+NULL
+
+Warning: get_defined_constants() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 string(5) "array"
 string(5) "array"
@@ -88,9 +94,13 @@ unicode(6) "stream"
 unicode(7) "Unknown"
 unicode(5) "array"
 int(%d)
-int(2)
+unicode(5) "array"
+int(%d)
 
-Warning: Wrong parameter count for get_defined_constants() in %s on line %d
+Warning: get_loaded_extensions() expects at most 1 parameter, 2 given in %s on line %d
+NULL
+
+Warning: get_defined_constants() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 unicode(5) "array"
 unicode(5) "array"
