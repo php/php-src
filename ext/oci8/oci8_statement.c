@@ -643,6 +643,15 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 #ifdef SQLT_TIMESTAMP_TZ
 						|| (outcol->data_type == SQLT_TIMESTAMP_TZ)
 #endif
+#ifdef SQLT_TIMESTAMP_LTZ
+						|| (outcol->data_type == SQLT_TIMESTAMP_LTZ)
+#endif
+#ifdef SQLT_INTERVAL_YM
+						|| (outcol->data_type == SQLT_INTERVAL_YM)
+#endif
+#ifdef SQLT_INTERVAL_DS
+						|| (outcol->data_type == SQLT_INTERVAL_DS)
+#endif
 						) {
 						outcol->storage_size4 = 512; /* XXX this should fit "most" NLS date-formats and Numbers */
 #if defined(SQLT_IBFLOAT) && defined(SQLT_IBDOUBLE)
