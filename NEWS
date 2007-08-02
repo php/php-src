@@ -70,6 +70,7 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
+- Fixed bug #42173 (oci8 INTERVAL and TIMESTAMP type fixes). (Chris)
 - Fixed bug #42151 (__destruct functions not called after catching a SoapFault
   exception). (Dmitry)
 - Fixed bug #42142 (substr_replace() returns FALSE when length > string
@@ -80,8 +81,8 @@ PHP                                                                        NEWS
   fails). (Tony)
 - Fixed bug #42119 (array_push($arr,&$obj) doesn't work with
   zend.ze1_compatibility_mode On). (Dmitry)
-- Fixed Bug #42112 (deleting a node produces memory corruption). (Rob)
-- Fixed Bug #42107 (sscanf broken when using %2$s format parameters). (Jani)
+- Fixed bug #42112 (deleting a node produces memory corruption). (Rob)
+- Fixed bug #42107 (sscanf broken when using %2$s format parameters). (Jani)
 - Fixed bug #42090 (json_decode causes segmentation fault). (Hannes)
 - Fixed bug #42072 (No warning message for clearstatcache() with arguments).
   (Ilia)
