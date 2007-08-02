@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2007, PHP 5.2.4
+02 Aug 2007, PHP 5.2.4RC1
 - Removed --enable-versioning configure option. (Jani)
 
 - Upgraded PCRE to version 7.2 (Nuno)
