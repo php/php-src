@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 - Added PCRE_VERSION constant. (Tony)
 - Added ReflectionExtension::info() function to print the phpinfo() block for
   an extension. (Johannes)
+- Added possibility to call static class members using variables. (Etienne
+  Kneuss)
 
 - Implemented FR #41884 (ReflectionClass::getDefaultProperties() does not handle 
   static attributes). (Tony)
