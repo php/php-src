@@ -29,7 +29,7 @@ AC_DEFUN([AC_PDO_OCI_VERSION],[
 
 AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
   AC_CHECK_SIZEOF(long int, 4)
-  AC_MSG_CHECKING([checking if we're at 64-bit platform])
+  AC_MSG_CHECKING([if we're on a 64-bit platform])
   if test "$ac_cv_sizeof_long_int" = "4" ; then
     AC_MSG_RESULT([no])
     TMP_PDO_OCI_LIB_DIR="$PDO_OCI_DIR/lib32"
@@ -54,9 +54,9 @@ AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
 PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
 [  --with-pdo-oci[=DIR]      PDO: Oracle-OCI support. DIR defaults to \$ORACLE_HOME.
                             Use --with-pdo-oci=instantclient,prefix,version 
-                            for an Oracle InstantClient SDK. 
-                            For Linux with 10.1.0.3 rpms (for example) use:
-                            --with-pdo-oci=instantclient,/usr,10.1.0.3])
+                            for an Oracle Instant Client SDK. 
+                            For Linux with 10.2.0.3 RPMs (for example) use:
+                            --with-pdo-oci=instantclient,/usr,10.2.0.3])
 
 if test "$PHP_PDO_OCI" != "no"; then
   AC_MSG_CHECKING([Oracle Install-Dir])
@@ -89,7 +89,7 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
       PHP_ADD_INCLUDE($PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/include)
       AC_MSG_RESULT($PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/include)
     else
-      AC_MSG_ERROR([I'm too dumb to figure out where the include dir is in your instant client install])
+      AC_MSG_ERROR([I'm too dumb to figure out where the include dir is in your Instant Client install])
     fi
     PDO_OCI_LIB_DIR="$PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/lib"
     PDO_OCI_VERSION="`echo $PDO_OCI_IC_VERS | cut -d. -f1-2`"
