@@ -1667,50 +1667,39 @@ static int add_constant_info(zend_constant *constant, void *arg TSRMLS_DC) /* {{
 }
 /* }}} */
 
-/* {{{ proto array get_loaded_extensions([mixed categorize]) U
+/* {{{ proto array get_loaded_extensions([bool zend_extensions]) U
    Return an array containing names of loaded extensions */
 ZEND_FUNCTION(get_loaded_extensions)
 {
-	int argc = ZEND_NUM_ARGS();
+	int zendext = 0;
 
-	if (argc != 0 && argc != 1) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &zendext) == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);
 
-	if (argc) {
-		zval *modules;
-		zval *extensions;
-
-		MAKE_STD_ZVAL(modules);
-		array_init(modules);
-		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) add_extension_info, modules TSRMLS_CC);
-		add_ascii_assoc_zval_ex(return_value, "PHP Modules", sizeof("PHP Modules"), modules);
-
-		MAKE_STD_ZVAL(extensions);
-		array_init(extensions);
-		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) add_zendext_info, extensions TSRMLS_CC);
-		add_ascii_assoc_zval_ex(return_value, "Zend Extensions", sizeof("Zend Extensions"), extensions);
+	if (zendext) {
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) add_zendext_info, return_value TSRMLS_CC);
 	} else {
 		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) add_extension_info, return_value TSRMLS_CC);
 	}
 }
 /* }}} */
 
-/* {{{ proto array get_defined_constants([mixed categorize]) U
+/* {{{ proto array get_defined_constants([bool categorize]) U
    Return an array containing the names and values of all defined constants */
 ZEND_FUNCTION(get_defined_constants)
 {
-	int argc = ZEND_NUM_ARGS();
+	int categorize = 0;
 
-	if (argc != 0 && argc != 1) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &categorize) == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);
 
-	if (argc) {
+	if (categorize) {
 		HashPosition pos;
 		zend_constant *val;
 		int module_number;
