@@ -1012,6 +1012,16 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Privileged connect is disabled. Enable oci8.privileged_connect to be able to connect as SYSOPER or SYSDBA");
 				return NULL;
 			}
+			/*  Disable privileged connections in Safe Mode (N.b. safe mode has been removed in PHP 6 anyway) */
+			if (PG(safe_mode)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Privileged connect is disabled in Safe Mode");
+				return NULL;
+			}
+			/* Increase security by not caching privileged
+			 * oci_pconnect() connections. The connection becomes
+			 * equivalent to oci_connect() or oci_new_connect().
+			 */
+			persistent = 0;
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid session mode specified (%ld)", session_mode);
