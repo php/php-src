@@ -1671,7 +1671,7 @@ static int add_constant_info(zend_constant *constant, void *arg TSRMLS_DC) /* {{
    Return an array containing names of loaded extensions */
 ZEND_FUNCTION(get_loaded_extensions)
 {
-	int zendext = 0;
+	zend_bool zendext = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &zendext) == FAILURE) {
 		return;
