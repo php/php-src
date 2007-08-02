@@ -12,7 +12,9 @@ var_dump(get_resource_type($fp));
 
 var_dump(gettype(get_loaded_extensions()));
 var_dump(count(get_loaded_extensions()));
+var_dump(gettype(get_loaded_extensions(true)));
 var_dump(count(get_loaded_extensions(true)));
+var_dump(get_loaded_extensions(true, true));
 
 define("USER_CONSTANT", "test");
 
@@ -52,7 +54,11 @@ string(6) "stream"
 string(7) "Unknown"
 string(5) "array"
 int(%d)
-int(2)
+string(5) "array"
+int(0)
+
+Warning: get_loaded_extensions() expects at most 1 parameter, 2 given in /home/johannes/src/php/PHP_5_2/Zend/tests/017.php on line 14
+NULL
 
 Warning: Wrong parameter count for get_defined_constants() in %s on line %d
 NULL
