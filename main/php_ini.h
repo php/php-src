@@ -65,6 +65,7 @@ END_EXTERN_C()
 #define PHP_INI_STAGE_ACTIVATE		ZEND_INI_STAGE_ACTIVATE
 #define PHP_INI_STAGE_DEACTIVATE	ZEND_INI_STAGE_DEACTIVATE
 #define PHP_INI_STAGE_RUNTIME		ZEND_INI_STAGE_RUNTIME
+#define PHP_INI_STAGE_HTACCESS		ZEND_INI_STAGE_HTACCESS
 
 #define php_ini_boolean_displayer_cb	zend_ini_boolean_displayer_cb
 #define php_ini_color_displayer_cb		zend_ini_color_displayer_cb

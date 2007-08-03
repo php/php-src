@@ -51,6 +51,7 @@ typedef struct {
 	char *value;
 	size_t value_len;
 	char status;
+    char htaccess;
 } php_dir_entry;
 
 static const char *real_value_hnd(cmd_parms *cmd, void *dummy, const char *name, const char *value, int status)
@@ -67,7 +68,8 @@ static const char *real_value_hnd(cmd_parms *cmd, void *dummy, const char *name,
 	e.value = apr_pstrdup(cmd->pool, value);
 	e.value_len = strlen(value);
 	e.status = status;
-	
+	e.htaccess = ((cmd->override & (RSRC_CONF|ACCESS_CONF)) == 0);
+
 	zend_hash_update(&d->config, (char *) name, strlen(name) + 1, &e, sizeof(e), NULL);
 	return NULL;
 }
@@ -170,7 +172,7 @@ void apply_config(void *dummy)
 			zend_hash_move_forward(&d->config)) {
 		zend_hash_get_current_data(&d->config, (void **) &data);
 		phpapdebug((stderr, "APPLYING (%s)(%s)\n", str.s, data->value));
-		if (zend_alter_ini_entry(str.s, str_len, data->value, data->value_len, data->status, PHP_INI_STAGE_ACTIVATE) == FAILURE) {
+		if (zend_alter_ini_entry(str, str_len, data->value, data->value_len, data->status, data->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE) == FAILURE) {
 			phpapdebug((stderr, "..FAILED\n"));
 		}	
 	}
