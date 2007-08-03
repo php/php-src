@@ -1,5 +1,5 @@
 --TEST--
-Tests that array manipulation code is correctly dealing with copy on write and splitting on  reference.
+Tests that array manipulation code is correctly dealing with copy on write and splitting on reference
 --FILE--
 <?php
 	$a=array();
