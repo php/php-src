@@ -905,7 +905,7 @@ static MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res, fetch_field_direct)(const MYSQLND_RES * const result,
 												MYSQLND_FIELD_OFFSET fieldnr)
 {
-	return result->meta? &result->meta->fields[fieldnr]:NULL;
+	return result->meta? result->meta->m->fetch_field_direct(result->meta, fieldnr):NULL;
 }
 /* }}} */
 

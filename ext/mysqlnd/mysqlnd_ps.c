@@ -992,6 +992,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const stmt, unsigned
 		  Maybe we can make it automatic by checking what's the value of
 		  max_allowed_packet_size on the server and resending the data.
 		*/
+#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 #if HAVE_USLEEP && !defined(PHP_WIN32)
 		usleep(120000);
 #endif
@@ -1004,6 +1005,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const stmt, unsigned
 							"Server responded to COM_STMT_SEND_LONG_DATA.");
 			ret = FAIL;
 		}
+#endif
 	}
 
 	return ret;

@@ -67,31 +67,37 @@ const char * mysqlnd_out_of_sync = "Commands out of sync; you can't run this com
 MYSQLND_STATS *mysqlnd_global_stats = NULL;
 static zend_bool mysqlnd_library_initted = FALSE;
 
-
 /* {{{ mysqlnd_library_init */
-PHPAPI void mysqlnd_library_init()
+static
+void mysqlnd_library_init(zend_bool collect_statistics)
 {
 	if (mysqlnd_library_initted == FALSE) {
 		mysqlnd_library_initted = TRUE;
 		_mysqlnd_init_ps_subsystem();
-		mysqlnd_global_stats = calloc(1, sizeof(MYSQLND_STATS));
+		if (collect_statistics) {
+			mysqlnd_global_stats = calloc(1, sizeof(MYSQLND_STATS));
+		
 #ifdef ZTS
-		mysqlnd_global_stats->LOCK_access = tsrm_mutex_alloc();
+			mysqlnd_global_stats->LOCK_access = tsrm_mutex_alloc();
 #endif
+		}
 	}
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_library_end */
-PHPAPI void mysqlnd_library_end()
+static
+void mysqlnd_library_end()
 {
 	if (mysqlnd_library_initted == TRUE) {
+		if (mysqlnd_global_stats) {
 #ifdef ZTS
-		tsrm_mutex_free(mysqlnd_global_stats->LOCK_access);
+			tsrm_mutex_free(mysqlnd_global_stats->LOCK_access);
 #endif
-		free(mysqlnd_global_stats);
-		mysqlnd_global_stats = NULL;
+			free(mysqlnd_global_stats);
+			mysqlnd_global_stats = NULL;
+		}
 		mysqlnd_library_initted = FALSE;
 	}
 }
@@ -1554,26 +1560,6 @@ static zend_function_entry mysqlnd_functions[] = {
 /* }}} */
 
 
-/* {{{ PHP_MINIT_FUNCTION
- */
-PHP_MINIT_FUNCTION(mysqlnd)
-{
-	mysqlnd_library_init();
-	return SUCCESS;
-}
-/* }}} */
-
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
-PHP_MSHUTDOWN_FUNCTION(mysqlnd)
-{
-	mysqlnd_library_end();
-	return SUCCESS;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_minfo_print_hash */
 #if PHP_MAJOR_VERSION >= 6
 PHPAPI void mysqlnd_minfo_print_hash(zval *values)
@@ -1654,10 +1640,53 @@ PHP_MINFO_FUNCTION(mysqlnd)
 /* }}} */
 
 
+ZEND_DECLARE_MODULE_GLOBALS(mysqlnd)
+
+/* {{{ PHP_GINIT_FUNCTION
+ */
+static PHP_GINIT_FUNCTION(mysqlnd)
+{
+	mysqlnd_globals->collect_statistics = FALSE;
+}
+/* }}} */
+
+
+/* {{{ PHP_INI_BEGIN
+*/
+PHP_INI_BEGIN()
+	STD_PHP_INI_BOOLEAN("mysqlnd.collect_statistics", "1", PHP_INI_SYSTEM, OnUpdateBool, collect_statistics, zend_mysqlnd_globals, mysqlnd_globals)
+PHP_INI_END()
+/* }}} */
+
+
+/* {{{ PHP_MINIT_FUNCTION
+ */
+PHP_MINIT_FUNCTION(mysqlnd)
+{
+	REGISTER_INI_ENTRIES();
+
+	mysqlnd_library_init(MYSQLND_G(collect_statistics));
+	return SUCCESS;
+}
+/* }}} */
+
+
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+PHP_MSHUTDOWN_FUNCTION(mysqlnd)
+{
+	mysqlnd_library_end();
+
+	UNREGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_module_entry
  */
 zend_module_entry mysqlnd_module_entry = {
- 	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 	"mysqlnd",
 	mysqlnd_functions,
 	PHP_MINIT(mysqlnd),
@@ -1666,7 +1695,11 @@ zend_module_entry mysqlnd_module_entry = {
 	NULL,
 	PHP_MINFO(mysqlnd),
 	MYSQLND_VERSION,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(mysqlnd),
+	PHP_GINIT(mysqlnd),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 

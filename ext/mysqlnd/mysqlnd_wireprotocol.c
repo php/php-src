@@ -164,6 +164,7 @@ zend_uchar *php_mysqlnd_net_store_length(zend_uchar *packet, mynd_ulonglong leng
 
 
 /* {{{ php_mysqlnd_consume_uneaten_data */
+#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 size_t php_mysqlnd_consume_uneaten_data(MYSQLND * const conn, enum php_mysqlnd_server_command cmd TSRMLS_DC)
 {
 
@@ -202,8 +203,8 @@ size_t php_mysqlnd_consume_uneaten_data(MYSQLND * const conn, enum php_mysqlnd_s
 
 	return skipped_bytes;
 }
+#endif
 /* }}} */
-
 
 /* {{{ php_mysqlnd_read_error_from_line */
 static
@@ -826,7 +827,7 @@ size_t php_mysqlnd_cmd_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 	*/
 	net->packet_no = 0;
 
-#if MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
+#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 	php_mysqlnd_consume_uneaten_data(conn, packet->command TSRMLS_CC);
 #endif
 
@@ -1352,7 +1353,7 @@ void php_mysqlnd_rowp_read_text_protocol(php_mysql_packet_row *packet, MYSQLND *
 				*/
 				zend_uchar *start = bit_area;
 				ps_fetch_from_1_to_8_bytes(*current_field, &(packet->fields_metadata[i]),
-							   			   0, &p, as_unicode, len, TRUE TSRMLS_CC);
+							   			   0, &p, as_unicode, len TSRMLS_CC);
 				/*
 				  We have advanced in ps_fetch_from_1_to_8_bytes. We should go back because
 				  later in this function there will be an advancement.
