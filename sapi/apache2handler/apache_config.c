@@ -35,7 +35,7 @@
 #include "http_log.h"
 #include "http_main.h"
 #include "util_script.h"
-#include "http_core.h"                         
+#include "http_core.h"
 
 #ifdef PHP_AP_DEBUG
 #define phpapdebug(a) fprintf a
@@ -51,7 +51,7 @@ typedef struct {
 	char *value;
 	size_t value_len;
 	char status;
-    char htaccess;
+	char htaccess;
 } php_dir_entry;
 
 static const char *real_value_hnd(cmd_parms *cmd, void *dummy, const char *name, const char *value, int status)
