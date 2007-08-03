@@ -113,6 +113,8 @@
 
 #include "ext/standard/php_smart_str.h"
 
+/* {{{ macros */
+
 /*
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
  *
@@ -205,12 +207,12 @@ do { 												\
 		}											\
 } while (0)
 
-
+/* }}} */
 
 /*
  * Do format conversion placing the output in buffer
  */
-static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt, va_list ap)
+static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt, va_list ap) /* {{{ */
 {
 	register char *s = NULL;
 	register UChar *u = NULL;
@@ -837,12 +839,12 @@ skip_output:
 	}
 	return;
 }
-
+/* }}} */
 
 /*
  * This is the general purpose conversion function.
  */
-PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap)
+PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	smart_str xbuf = {0};
 
@@ -857,9 +859,9 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 	
 	return xbuf.len;
 }
+/* }}} */
 
-
-PHPAPI int spprintf(char **pbuf, size_t max_len, const char *format, ...)
+PHPAPI int spprintf(char **pbuf, size_t max_len, const char *format, ...) /* {{{ */
 {
 	int cc;
 	va_list ap;
@@ -869,8 +871,9 @@ PHPAPI int spprintf(char **pbuf, size_t max_len, const char *format, ...)
 	va_end(ap);
 	return (cc);
 }
+/* }}} */
 
-PHPAPI int vuspprintf(UChar **pbuf, size_t max_len, const char *format, va_list ap)
+PHPAPI int vuspprintf(UChar **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	smart_str xbuf = {0};
 
@@ -885,8 +888,9 @@ PHPAPI int vuspprintf(UChar **pbuf, size_t max_len, const char *format, va_list 
 	
 	return xbuf.len / sizeof(UChar);
 }
+/* }}} */
 
-PHPAPI int uspprintf(UChar **pbuf, size_t max_len, const char *format, ...)
+PHPAPI int uspprintf(UChar **pbuf, size_t max_len, const char *format, ...) /* {{{ */
 {
 	int cc;
 	va_list ap;
@@ -896,8 +900,9 @@ PHPAPI int uspprintf(UChar **pbuf, size_t max_len, const char *format, ...)
 	va_end(ap);
 	return (cc);
 }
+/* }}} */
 
-PHPAPI int vzspprintf(zend_uchar type, zstr *pbuf, size_t max_len, const char *format, va_list ap)
+PHPAPI int vzspprintf(zend_uchar type, zstr *pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	if (type == IS_UNICODE) {
 		return vuspprintf(&pbuf->u, max_len, format, ap);
@@ -905,8 +910,9 @@ PHPAPI int vzspprintf(zend_uchar type, zstr *pbuf, size_t max_len, const char *f
 		return vspprintf(&pbuf->s, max_len, format, ap);
 	}
 }
+/* }}} */
 
-PHPAPI int zspprintf( zend_uchar type, zstr *pbuf, size_t max_len, const char *format, ...)
+PHPAPI int zspprintf( zend_uchar type, zstr *pbuf, size_t max_len, const char *format, ...) /* {{{ */
 {
 	int cc;
 	va_list ap;
@@ -916,6 +922,7 @@ PHPAPI int zspprintf( zend_uchar type, zstr *pbuf, size_t max_len, const char *f
 	va_end(ap);
 	return (cc);
 }
+/* }}} */
 
 /*
  * Local variables:
