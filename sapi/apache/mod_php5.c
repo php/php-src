@@ -80,7 +80,7 @@ typedef struct _php_per_dir_entry {
 	uint key_length;
 	uint value_length;
 	int type;
-    char htaccess;
+	char htaccess;
 } php_per_dir_entry;
 
 /* some systems are missing these from their header files */
@@ -175,7 +175,7 @@ static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_head
 		efree(sapi_header->header);
 		return 0;
 	}
-      
+
 	header_name = sapi_header->header;
 
 	header_content = p = strchr(header_name, ':');
@@ -977,7 +977,7 @@ command_rec php_commands[] =
 	{"php_flag",		php_apache_flag_handler, NULL, OR_OPTIONS, TAKE2, "PHP Flag Modifier"},
 	{"php_admin_value",	php_apache_admin_value_handler, NULL, ACCESS_CONF|RSRC_CONF, TAKE2, "PHP Value Modifier (Admin)"},
 	{"php_admin_flag",	php_apache_admin_flag_handler, NULL, ACCESS_CONF|RSRC_CONF, TAKE2, "PHP Flag Modifier (Admin)"},
-	{"PHPINIDir",       php_apache_phpini_set, NULL, RSRC_CONF, TAKE1, "Directory containing the php.ini file"},
+	{"PHPINIDir",		php_apache_phpini_set, NULL, RSRC_CONF, TAKE1, "Directory containing the php.ini file"},
 	{NULL}
 };
 /* }}} */
@@ -1005,7 +1005,7 @@ module MODULE_VAR_EXPORT php5_module =
 	, NULL						/* header parser */
 #endif
 #if MODULE_MAGIC_NUMBER >= 19970719
-	, NULL             			/* child_init */
+	, NULL						/* child_init */
 #endif
 #if MODULE_MAGIC_NUMBER >= 19970728
 	, php_child_exit_handler		/* child_exit */
