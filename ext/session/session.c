@@ -151,7 +151,7 @@ static PHP_INI_MH(OnUpdateSerializer)
 static PHP_INI_MH(OnUpdateSaveDir)
 {
 	/* Only do the safemode/open_basedir check at runtime */
-	if (stage == PHP_INI_STAGE_RUNTIME) {
+	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
 		char *p;
 
 		if (memchr(new_value, '\0', new_value_length) != NULL) {
@@ -168,7 +168,7 @@ static PHP_INI_MH(OnUpdateSaveDir)
 			return FAILURE;
 		}
 
-		if (php_check_open_basedir(p TSRMLS_CC)) {
+		if (PG(open_basedir) && php_check_open_basedir(p TSRMLS_CC)) {
 			return FAILURE;
 		}
 	}
