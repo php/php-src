@@ -313,10 +313,6 @@ PS_OPEN_FUNC(files)
 	}
 	save_path = argv[argc - 1];
 
-	if (PG(open_basedir) && php_check_open_basedir(save_path TSRMLS_CC)) {
-		return FAILURE;
-	}
-
 	data = ecalloc(1, sizeof(*data));
 	
 	data->fd = -1;
