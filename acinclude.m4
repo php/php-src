@@ -2708,7 +2708,7 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
           esac 
         fi
         is_arg_set=php_[]`echo [$]arg_name | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ-' 'abcdefghijklmnopqrstuvwxyz_'`
-        if eval test -z "\$$is_arg_set"; then
+        if eval test "x\$$is_arg_set" = "x"; then
           PHP_UNKNOWN_CONFIGURE_OPTIONS="$PHP_UNKNOWN_CONFIGURE_OPTIONS
 [$]arg"
         fi
