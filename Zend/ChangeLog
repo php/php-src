@@ -1,3 +1,44 @@
+2007-08-02  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      zend_ini.h:
+      add stage for .htaccess
+
+    * (PHP_5_2)
+      zend_constants.h:
+      it's 4 either way, but it's customary to use 1<<
+
+2007-08-02  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/017.phpt:
+      fix test
+
+2007-08-02  Johannes Schlüter  <johannes@schlueters.de>
+
+    * zend_language_parser.y
+      zend_language_parser.y:
+      - Add possibility to call static class members using variables (Etienne
+      Kneuss)
+
+2007-08-02  Antony Dovgal  <antony@zend.com>
+
+    * zend_builtin_functions.c:
+      int -> zend_bool
+
+2007-08-02  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      zend_builtin_functions.c
+      tests/017.phpt:
+      - MFH: Respect value of the parameter for get_loaded_extensions() and only
+        print zend extensions if set to true
+
+    * zend_builtin_functions.c
+      tests/017.phpt:
+      - Respect value of the parameter for get_loaded_extensions() and
+        get_defined_cosntants()
+
 2007-08-01  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h

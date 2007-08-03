@@ -1,3 +1,131 @@
+2007-08-02  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.h
+      main/php_ini.h:
+      add stage for .htaccess
+
+    * (PHP_5_2)
+      ZendEngine2/zend_constants.h:
+      it's 4 either way, but it's customary to use 1<<
+
+    * sapi/embed/php_embed.c:
+      use hardcoded INI like CLI
+
+    * (PHP_5_2)
+      sapi/embed/php_embed.c:
+      use hardcoded ini like CLI
+
+2007-08-02  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/oci8.c:
+      Treat privileged oci_pconnect() as non-persistent
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c
+      ext/oci8/tests/oci8safemode.phpt
+      ext/oci8/tests/oci8safemode.phpt:
+      Test existing PHP 5 safe mode functionality and make consistent.  No MTH.
+
+2007-08-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+2007-08-02  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/017.phpt:
+      fix test
+
+2007-08-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.4RC1
+
+2007-08-02  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      tests/lang/041.phpt
+      tests/lang/042.phpt
+      tests/lang/043.phpt
+      tests/lang/044.phpt:
+      - Add possibility to call static class members using variables (Etienne
+      Kneuss)
+
+    * tests/lang/041.phpt
+      tests/lang/041.phpt
+      tests/lang/042.phpt
+      tests/lang/042.phpt
+      tests/lang/043.phpt
+      tests/lang/043.phpt
+      tests/lang/044.phpt
+      tests/lang/044.phpt:
+      
+      - Add possibility to call static class members using variables (Etienne
+      Kneuss)
+
+2007-08-02  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      int -> zend_bool
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+2007-08-02  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/pdo_oci/config.m4
+      ext/pdo_oci/config.m4:
+      Fix message grammar and capitalization
+
+    * (PHP_5_2)
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/tests/bug42173.phpt:
+      MFH: Bug #42173 (INTERVAL and TIMESTAMP type fixes)
+
+    * ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/tests/bug42173.phpt
+      ext/oci8/tests/bug42173.phpt:
+      Bug #42173 (INTERVAL and TIMESTAMP type fixes)
+
+2007-08-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * README.namespaces:
+      Done: Make ext/tokenizer package-aware. (Johannes)
+
+2007-08-02  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/017.phpt:
+      - MFH: Respect value of the parameter for get_loaded_extensions() and only
+        print zend extensions if set to true
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/017.phpt:
+      - Respect value of the parameter for get_loaded_extensions() and
+        get_defined_cosntants()
+
+2007-08-02  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/tokenizer/config.w32:
+      fix win32 build
+
 2007-08-01  Stanislav Malyshev  <stas@zend.com>
 
     * main/main.c
