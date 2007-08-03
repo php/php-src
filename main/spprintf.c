@@ -347,7 +347,16 @@ static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt,
 						modifier = LM_LONG_LONG;
 					} else
 #endif
-						modifier = LM_LONG;
+						if (*fmt == '3' && *(fmt+1) == '2') {
+							fmt += 2;
+							modifier = LM_LONG;
+						} else {
+#ifdef _WIN64
+							modifier = LM_LONG_LONG;
+#else
+							modifier = LM_LONG;
+#endif
+						}
 					break;
 				case 'l':
 					fmt++;

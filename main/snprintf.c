@@ -714,7 +714,16 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 						modifier = LM_LONG_LONG;
 					} else
 #endif
-						modifier = LM_LONG;
+						if (*fmt == '3' && *(fmt+1) == '2') {
+							fmt += 2;
+							modifier = LM_LONG;
+						} else {
+#ifdef _WIN64
+							modifier = LM_LONG_LONG;
+#else
+							modifier = LM_LONG;
+#endif
+						}
 					break;
 				case 'l':
 					fmt++;
