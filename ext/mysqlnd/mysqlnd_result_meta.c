@@ -358,7 +358,18 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta)
 }
 /* }}} */
 
-/* {{{ mysqlnd_res::field_tell */
+
+/* {{{ mysqlnd_res_meta::fetch_field_direct */
+static MYSQLND_FIELD *
+MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA * const meta,
+													 MYSQLND_FIELD_OFFSET fieldnr)
+{
+	return &meta->fields[fieldnr];
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_res_meta::field_tell */
 static MYSQLND_FIELD_OFFSET
 MYSQLND_METHOD(mysqlnd_res_meta, field_tell)(const MYSQLND_RES_METADATA * const meta)
 {
@@ -369,6 +380,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, field_tell)(const MYSQLND_RES_METADATA * const 
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_res_meta)
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_field),
+	MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct),
 	MYSQLND_METHOD(mysqlnd_res_meta, field_tell),
 	MYSQLND_METHOD(mysqlnd_res_meta, read_metadata),
 	MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata),

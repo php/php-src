@@ -153,11 +153,11 @@ typedef long  longlong;
 									(((uint32) (((uchar*) (A))[1])) << 16) +\
 									(((uint32) (((uchar*) (A))[0])) << 24)))
 
-#define bit_uint5korr(A)  ((ulonglong)(((uint32) ((uchar) (A)[0])) +\
-                                  (((uint32) ((uchar) (A)[1])) << 8) +\
+#define bit_uint5korr(A)  ((ulonglong)(((uint32) ((uchar) (A)[4])) +\
+                                  (((uint32) ((uchar) (A)[3])) << 8) +\
                                   (((uint32) ((uchar) (A)[2])) << 16) +\
-                                  (((uint32) ((uchar) (A)[3])) << 24)) +\
-                               (((ulonglong) ((uchar) (A)[4])) << 32))
+                                  (((uint32) ((uchar) (A)[1])) << 24)) +\
+                               (((ulonglong) ((uchar) (A)[0])) << 32))
 
 #define bit_uint6korr(A)	((ulonglong)(((uint32) (((uchar*) (A))[5])) +\
 									(((uint32) (((uchar*) (A))[4])) << 8) +\

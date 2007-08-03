@@ -45,7 +45,9 @@ extern zend_module_entry mysqlnd_module_entry;
   on production systems, if of course measured performance degradation is not
   minimal.
 */
+#if PHP_DEBUG
 #define MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND 1
+#endif
 
 #include "mysqlnd_portability.h"
 
@@ -400,6 +402,7 @@ struct st_mysqlnd_res_methods {
 
 struct st_mysqlnd_res_meta_methods {
 	MYSQLND_FIELD *			(*fetch_field)(MYSQLND_RES_METADATA * const meta);
+	MYSQLND_FIELD *			(*fetch_field_direct)(const MYSQLND_RES_METADATA * const meta, MYSQLND_FIELD_OFFSET fieldnr);
 	MYSQLND_FIELD_OFFSET	(*field_tell)(const MYSQLND_RES_METADATA * const meta);
 	enum_func_status		(*read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND *conn TSRMLS_DC);
 	MYSQLND_RES_METADATA *	(*clone_metadata)(const MYSQLND_RES_METADATA * const meta, zend_bool persistent);
@@ -510,7 +513,7 @@ struct st_mysqlnd_connection {
 	MYSQLND_THD_ZVAL_PCACHE	*zval_cache;
 
 	/* qcache */
-	MYSQLND_QCACHE		*qcache;
+	MYSQLND_QCACHE	*qcache;
 
 	/* stats */
 	MYSQLND_STATS	stats;
@@ -594,7 +597,6 @@ struct st_mysqlnd_res {
 
 	/* zval cache */
 	MYSQLND_THD_ZVAL_PCACHE		*zval_cache;
-
 };
 
 
@@ -647,8 +649,6 @@ struct st_mysqlnd_stmt {
 
 
 /* Library related */
-PHPAPI void mysqlnd_library_init();
-PHPAPI void mysqlnd_library_end();
 PHPAPI void mysqlnd_restart_psession(MYSQLND *conn);
 PHPAPI void mysqlnd_end_psession(MYSQLND *conn);
 PHPAPI void mysqlnd_minfo_print_hash(zval *values);
@@ -903,6 +903,19 @@ MYSQLND_RES * 		mysqlnd_qcache_get(MYSQLND_QCACHE * const cache, const char * qu
 									   size_t query_len);
 void				mysqlnd_qcache_put(MYSQLND_QCACHE * const cache, char * query, size_t query_len,
 									   MYSQLND_RES_BUFFERED * const result, MYSQLND_RES_METADATA * const meta);
+
+
+
+ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
+	zend_bool		collect_statistics;
+ZEND_END_MODULE_GLOBALS(mysqlnd)
+
+#ifdef ZTS
+#define MYSQLND_G(v) TSRMG(mysqlnd_globals_id, zend_mysqlnd_globals *, v)
+#else
+#define MYSQLND_G(v) (mysqlnd_globals.v)
+#endif
+
 
 #endif	/* MYSQLND_H */
 

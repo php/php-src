@@ -134,7 +134,7 @@
 	{ \
 		error_info.error_no = 0; \
 		error_info.error[0] = '\0'; \
-		strcpy(error_info.sqlstate, "00000"); \
+		strncpy(error_info.sqlstate, "00000", sizeof("00000") - 1); \
 	}
 
 #define SET_CLIENT_ERROR(error_info, a, b, c) \
@@ -176,7 +176,7 @@ void mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zen
 
 void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 								uint pack_len, zend_uchar **row, zend_bool as_unicode,
-								unsigned int byte_count, zend_bool is_bit TSRMLS_DC);
+								unsigned int byte_count TSRMLS_DC);
 
 
 

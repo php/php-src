@@ -67,10 +67,11 @@ struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 /* {{{ ps_fetch_from_1_to_8_bytes */
 void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 								uint pack_len, zend_uchar **row, zend_bool as_unicode,
-								unsigned int byte_count, zend_bool is_bit TSRMLS_DC)
+								unsigned int byte_count TSRMLS_DC)
 {
 	char tmp[22];
 	size_t tmp_len = 0;
+	zend_bool is_bit = field->type == MYSQL_TYPE_BIT;
 	if (field->flags & UNSIGNED_FLAG) {
 		my_uint64 uval = 0;
 
@@ -154,7 +155,7 @@ void ps_fetch_int8(zval *zv, const MYSQLND_FIELD * const field,
 				   uint pack_len, zend_uchar **row,
 				   zend_bool as_unicode TSRMLS_DC)
 {
-	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 1, FALSE TSRMLS_CC);
+	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 1 TSRMLS_CC);
 #if 0
 	if (field->flags & UNSIGNED_FLAG) {
 		ZVAL_LONG(zv, *(my_uint8*)*row);
@@ -173,7 +174,7 @@ void ps_fetch_int16(zval *zv, const MYSQLND_FIELD * const field,
 					uint pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
-	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 2, FALSE TSRMLS_CC);
+	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 2 TSRMLS_CC);
 #if 0
 	if (field->flags & UNSIGNED_FLAG) {
 		ZVAL_LONG(zv, (my_uint16) sint2korr(*row));
@@ -192,7 +193,7 @@ void ps_fetch_int32(zval *zv, const MYSQLND_FIELD * const field,
 					uint pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
-	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 4, FALSE TSRMLS_CC);
+	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 4 TSRMLS_CC);
 #if 0
 
 	if (field->flags & UNSIGNED_FLAG) {
@@ -241,7 +242,7 @@ void ps_fetch_int64(zval *zv, const MYSQLND_FIELD * const field,
 					uint pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
-	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 8, FALSE TSRMLS_CC);
+	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 8 TSRMLS_CC);
 #if 0
 
 	my_uint64 llval = (my_uint64) sint8korr(*row);
@@ -501,7 +502,7 @@ void ps_fetch_bit(zval *zv, const MYSQLND_FIELD * const field,
 				  zend_bool as_unicode TSRMLS_DC)
 {
 	unsigned long length= php_mysqlnd_net_field_length(row);
-	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, length, TRUE TSRMLS_CC);
+	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, length TSRMLS_CC);
 }
 /* }}} */
 
