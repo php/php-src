@@ -302,6 +302,16 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 					fmt++;
 					modifier = LM_LONG_DOUBLE;
 					break;
+				case 'I':
+					fmt++;
+#if SIZEOF_LONG_LONG
+					if (*fmt == '6' && *(fmt+1) == '4') {
+						fmt += 2;
+						modifier = LM_LONG_LONG;
+					} else
+#endif
+						modifier = LM_LONG;
+					break;
 				case 'l':
 					fmt++;
 #if SIZEOF_LONG_LONG
