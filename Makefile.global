@@ -69,8 +69,8 @@ install-headers:
 
 PHP_TEST_SETTINGS = -d 'open_basedir=' -d 'output_buffering=0' -d 'memory_limit=-1'
 PHP_TEST_SHARED_EXTENSIONS =  ` \
-	if test "$(PHP_MODULES)"; then \
-		for i in $(PHP_MODULES); do \
+	if test "x$(PHP_MODULES)" != "x"; then \
+		for i in $(PHP_MODULES)""; do \
 			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d extension=$$dlname"; \
 		done; \
 	fi`
