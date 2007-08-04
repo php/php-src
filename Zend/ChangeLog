@@ -1,3 +1,24 @@
+2007-08-03  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_constants.h:
+      MF5: it's custom to use 1<<
+
+2007-08-03  Antony Dovgal  <antony@zend.com>
+
+    * tests/array_append_COW.phpt
+      tests/array_unshift_COW.phpt:
+      MFB: adjust the test names a bit
+
+    * (PHP_5_2)
+      tests/array_append_COW.phpt
+      tests/array_unshift_COW.phpt:
+      fix test names
+
+2007-08-03  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_ini.h:
+      MF5: fix for access control with .htaccess
+
 2007-08-02  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)

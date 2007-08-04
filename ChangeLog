@@ -1,3 +1,133 @@
+2007-08-03  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_constants.h:
+      MF5: it's custom to use 1<<
+
+2007-08-03  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h:
+      Update CVS
+      - Fix BIT problem for BIT values represented with 5 bytes. Typo.
+      - Make it possible with an ini variable to switch off/on statistics
+        collection.
+      - Compile-out debug checking of uneaten data from the line, when the
+        build is release. According to callgrind this was eating some
+      percentage.
+
+2007-08-03  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      main/snprintf.c
+      main/spprintf.c:
+      'I32' and 'I' support
+
+    * main/snprintf.c
+      main/spprintf.c:
+      'I32' and 'I' support (per request by Marcus)
+
+2007-08-03  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * Makefile.global:
+      - Fix issue with broken shells
+
+2007-08-03  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/array_append_COW.phpt
+      ZendEngine2/tests/array_unshift_COW.phpt:
+      MFB: adjust the test names a bit
+
+    * (PHP_5_2)
+      ZendEngine2/tests/array_append_COW.phpt
+      ZendEngine2/tests/array_unshift_COW.phpt:
+      fix test names
+
+2007-08-03  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * acinclude.m4
+      sapi/apache2filter/apache_config.c
+      sapi/apache2handler/apache_config.c:
+      MFB
+
+    * (PHP_5_2)
+      acinclude.m4:
+      - Hopefully this fixes the "test: argument expected" error on solaris..
+
+2007-08-03  Antony Dovgal  <antony@zend.com>
+
+    * main/spprintf.c
+      main/spprintf.c:
+      fix folding
+
+    * main/spprintf.c:
+      add I64 support to spprintf() (snprintf() already has it)
+
+2007-08-03  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      sapi/apache2filter/apache_config.c:
+      - Sync with apache2handler
+
+    * (PHP_5_2)
+      sapi/apache2handler/apache_config.c:
+      ws
+
+    * (PHP_5_2)
+      sapi/apache/mod_php5.c:
+      - ws + sync apache2filter apache_config.c with the one from apache2handler
+
+2007-08-03  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/tests/password_2.phpt:
+      MFB: New oci8 test for oci_password_change()
+
+    * ext/oci8/tests/password_2.phpt
+      ext/oci8/tests/password_2.phpt:
+      
+      file password_2.phpt was initially added on branch PHP_5_2.
+
+2007-08-03  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_ini.h
+      ext/session/mod_files.c
+      ext/session/session.c
+      main/main.c
+      main/php_ini.h
+      sapi/apache/mod_php.c
+      sapi/apache2handler/apache_config.c:
+      MF5: fix for access control with .htaccess
+
+    * (PHP_5_2)
+      main/main.c:
+      check correct value
+
+    * (PHP_4_4)
+      ext/session/mod_files.c:
+      revert - not a correct fix
+
+    * (PHP_5_2)
+      ext/session/mod_files.c
+      ext/session/session.c:
+      correct fix for access control for save_path and .htaccess
+
+    * (PHP_5_2)
+      main/main.c:
+      make error_log setting access-controlled by safe_mode/open_basedir
+
+    * (PHP_5_2)
+      sapi/apache/mod_php5.c
+      sapi/apache2handler/apache_config.c:
+      implement separate .htaccess stage
+
 2007-08-02  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)
