@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2007, PHP 5.2.4
+- Fixed bug #36492 (Userfilters can leak buckets). (Sara)
 
 02 Aug 2007, PHP 5.2.4RC1
 - Removed --enable-versioning configure option. (Jani)

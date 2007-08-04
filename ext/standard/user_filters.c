@@ -232,8 +232,21 @@ php_stream_filter_status_t userfilter_filter(
 		*bytes_consumed = Z_LVAL_P(zconsumed);
 	}
 
-	if (retval)
+	if (retval) {
 		zval_ptr_dtor(&retval);
+	}
+
+	if (buckets_in->head) {
+		php_stream_bucket *bucket = buckets_in->head;
+
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
+		while ((bucket = buckets_in->head)) {
+			/* Remove unconsumed buckets from the brigade */
+			php_stream_bucket_unlink(bucket TSRMLS_CC);
+			php_stream_bucket_delref(bucket TSRMLS_CC);
+		}
+	}
+
 	zval_ptr_dtor(&zclosing);
 	zval_ptr_dtor(&zconsumed);
 	zval_ptr_dtor(&zout);
