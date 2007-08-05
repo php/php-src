@@ -2168,6 +2168,7 @@ PHP_FUNCTION(substr_replace)
 	}
 
 	if (argc > 3) {
+		SEPARATE_ZVAL(len);
 		if (Z_TYPE_PP(len) != IS_ARRAY) {
 			convert_to_long_ex(len);
 			l = Z_LVAL_PP(len);
