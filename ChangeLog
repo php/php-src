@@ -1,3 +1,13 @@
+2007-08-04  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/user_filters.c:
+      MFH(r-1.49)Bugfix#36492 Userfilters can leak buckets
+
+    * ext/standard/user_filters.c:
+      Bugfix#36492 Userfilters can leak buckets
+
 2007-08-03  Stanislav Malyshev  <stas@zend.com>
 
     * ZendEngine2/zend_constants.h:
