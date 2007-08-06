@@ -708,7 +708,7 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	/* There is a message */
 	if (packet->header.size > p - buf && (i = php_mysqlnd_net_field_length(&p))) {
-		packet->message = estrndup((char *)p, MIN(i, sizeof(buf) - (p - buf)));
+		packet->message = pestrndup((char *)p, MIN(i, sizeof(buf) - (p - buf)), conn->persistent);
 		packet->message_len = i;
 	} else {
 		packet->message = NULL;
@@ -906,7 +906,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			  Thus, the name is size - 1. And we add 1 for a trailing \0.
 			*/
 			len = packet->header.size - 1;
-			packet->info_or_local_file = emalloc(len + 1);
+			packet->info_or_local_file = pemalloc(len + 1, conn->persistent);
 			memcpy(packet->info_or_local_file, p, len);
 			packet->info_or_local_file[len] = '\0';
 			packet->info_or_local_file_len = len;
@@ -920,7 +920,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			p+=2;
 			/* Check for additional textual data */
 			if (packet->header.size  > (p - buf) && (len = php_mysqlnd_net_field_length(&p))) {
-				packet->info_or_local_file = emalloc(len + 1);
+				packet->info_or_local_file = pemalloc(len + 1, conn->persistent);
 				memcpy(packet->info_or_local_file, p, len);
 				packet->info_or_local_file[len] = '\0';
 				packet->info_or_local_file_len = len;
@@ -1574,7 +1574,7 @@ php_mysqlnd_stats_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "statistics");
 
-	packet->message = emalloc(packet->header.size + 1);
+	packet->message = pemalloc(packet->header.size + 1, conn->persistent);
 	memcpy(packet->message, buf, packet->header.size);
 	packet->message[packet->header.size] = '\0';
 	packet->message_len = packet->header.size;

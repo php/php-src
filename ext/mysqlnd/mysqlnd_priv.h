@@ -109,10 +109,10 @@
 #define SET_ERROR_AFF_ROWS(s)	(s)->upsert_status.affected_rows = (mynd_ulonglong) ~0
 
 /* Error handling */
-#define SET_NEW_MESSAGE(buf, buf_len, message, len) \
+#define SET_NEW_MESSAGE(buf, buf_len, message, len, persistent) \
 	{\
 		if ((buf)) { \
-			efree((buf)); \
+			pefree((buf), (persistent)); \
 		} \
 		(buf) = (message); \
 		(buf_len) = (len); \
@@ -120,10 +120,10 @@
 		(message) = NULL; \
 	}
 
-#define SET_EMPTY_MESSAGE(buf, buf_len) \
+#define SET_EMPTY_MESSAGE(buf, buf_len, persistent) \
 	{\
 		if ((buf)) { \
-			efree((buf)); \
+			pefree((buf), (persistent)); \
 			(buf) = NULL; \
 		} \
 		(buf_len) = 0; \

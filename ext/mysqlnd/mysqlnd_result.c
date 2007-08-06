@@ -269,7 +269,8 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				conn->upsert_status.affected_rows = rset_header.affected_rows;
 				conn->upsert_status.last_insert_id = rset_header.last_insert_id;
 				SET_NEW_MESSAGE(conn->last_message, conn->last_message_len,
-								rset_header.info_or_local_file, rset_header.info_or_local_file_len);
+								rset_header.info_or_local_file, rset_header.info_or_local_file_len,
+								conn->persistent);
 				/* Result set can follow UPSERT statement, check server_status */
 				if (conn->upsert_status.server_status & SERVER_MORE_RESULTS_EXISTS) {
 					conn->state = CONN_NEXT_RESULT_PENDING;
@@ -284,7 +285,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				MYSQLND_RES *result;
 				uint stat = -1;
 
-				SET_EMPTY_MESSAGE(conn->last_message, conn->last_message_len);
+				SET_EMPTY_MESSAGE(conn->last_message, conn->last_message_len, conn->persistent);
 
 				MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_RSET_QUERY);
 				memset(&conn->upsert_status, 0, sizeof(conn->upsert_status));
