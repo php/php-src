@@ -1,3 +1,25 @@
+2007-08-05  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/tests/strings/bug42208.phpt:
+      MFB: Test for bug #42208. Fix is not needed in HEAD, zend_parse_parameters
+      is used here
+
+2007-08-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/bug42208.phpt
+      ext/standard/tests/strings/bug42208.phpt:
+      
+      Fixed bug #42208 (substr_replace() crashes when the same array is passed
+      more than once)
+
+2007-08-05  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/session/session.c:
+      MFB (since Ilia is too lazy..): Fix bug #42135
+
 2007-08-04  Sara Golemon  <sara@golemon.com>
 
     * (PHP_5_2)
