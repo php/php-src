@@ -27,22 +27,25 @@ the Oracle Call Interface (OCI8).
   <email>andi@zend.com</email>
   <active>yes</active>
  </lead>
- <date>2007-01-25</date>
- <time>19:52:26</time>
+ <date>2007-08-08</date>
+ <time>19:00:00</time>
  <version>
-  <release>1.2.3</release>
-  <api>1.2.3</api>
+  <release>1.2.4</release>
+  <api>1.2.4</api>
  </version>
  <stability>
   <release>stable</release>
   <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
- <notes>Fixed possible segfault in ZTS mode when statements containing sub-statements are destroyed in wrong order.
-Fixed bug #40078 (ORA-01405 when fetching NULL values using oci_bind_array_by_name()).
-Fixed bug #39988 (type argument of oci_define_by_name() is ignored).
-Fixed bug #39732 (oci_bind_array_by_name doesn&apos;t work on Solaris 64bit).
-Fixed PECL bug #8816 (issue in php_oci_statement_fetch with more than one piecewise column).
+ <notes>Fixed PECL bug #10194 (crash in Oracle client when memory limit reached in the callback).
+Fixed bug #42173 (INTERVAL and TIMESTAMP type fixes).
+Fixed bug #42134 (oci_error() returns false after oci_new_collection() fails).
+Fixed bug #41711 (Null temporary lobs not supported).
+Fixed bug #41594 (Statement cache is flushed too frequently).
+Enable statement cache for non-persistent connections.
+Fixed segfault on rebindinging and rexecuting a statement with LOBs.
+Fixed compile failure in ZTS mode when collections support is missing.
 Various minor improvements.
  </notes>
  <contents>
@@ -62,23 +65,23 @@ Various minor improvements.
     <file name="array_bind_012.phpt" role="test" />
     <file name="array_bind_013.phpt" role="test" />
     <file name="array_bind_014.phpt" role="test" />
-    <file name="array_bind_date.phpt" role="test" />
     <file name="array_bind_date1.phpt" role="test" />
-    <file name="array_bind_float.phpt" role="test" />
+    <file name="array_bind_date.phpt" role="test" />
     <file name="array_bind_float1.phpt" role="test" />
-    <file name="array_bind_int.phpt" role="test" />
+    <file name="array_bind_float.phpt" role="test" />
     <file name="array_bind_int1.phpt" role="test" />
-    <file name="array_bind_str.phpt" role="test" />
+    <file name="array_bind_int.phpt" role="test" />
     <file name="array_bind_str1.phpt" role="test" />
+    <file name="array_bind_str.phpt" role="test" />
     <file name="bind_empty.phpt" role="test" />
     <file name="bind_long.phpt" role="test" />
     <file name="bind_long_raw.phpt" role="test" />
     <file name="bind_raw.phpt" role="test" />
     <file name="bug26133.phpt" role="test" />
-    <file name="bug27303.phpt" role="test" />
     <file name="bug27303_2.phpt" role="test" />
     <file name="bug27303_3.phpt" role="test" />
     <file name="bug27303_4.phpt" role="test" />
+    <file name="bug27303.phpt" role="test" />
     <file name="bug32325.phpt" role="test" />
     <file name="bug35973.phpt" role="test" />
     <file name="bug36010.phpt" role="test" />
@@ -87,89 +90,99 @@ Various minor improvements.
     <file name="bug38161.phpt" role="test" />
     <file name="bug38173.phpt" role="test" />
     <file name="bug40078.phpt" role="test" />
+    <file name="bug40415.phpt" role="test" />
+    <file name="bug42134.phpt" role="test" />
+    <file name="bug42173.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
-    <file name="coll_002.phpt" role="test" />
     <file name="coll_002_func.phpt" role="test" />
-    <file name="coll_003.phpt" role="test" />
+    <file name="coll_002.phpt" role="test" />
     <file name="coll_003_func.phpt" role="test" />
-    <file name="coll_004.phpt" role="test" />
+    <file name="coll_003.phpt" role="test" />
     <file name="coll_004_func.phpt" role="test" />
+    <file name="coll_004.phpt" role="test" />
     <file name="coll_005.phpt" role="test" />
-    <file name="coll_006.phpt" role="test" />
     <file name="coll_006_func.phpt" role="test" />
+    <file name="coll_006.phpt" role="test" />
     <file name="coll_007.phpt" role="test" />
     <file name="coll_008.phpt" role="test" />
-    <file name="coll_009.phpt" role="test" />
     <file name="coll_009_func.phpt" role="test" />
-    <file name="coll_010.phpt" role="test" />
+    <file name="coll_009.phpt" role="test" />
     <file name="coll_010_func.phpt" role="test" />
-    <file name="coll_011.phpt" role="test" />
+    <file name="coll_010.phpt" role="test" />
     <file name="coll_011_func.phpt" role="test" />
-    <file name="coll_012.phpt" role="test" />
+    <file name="coll_011.phpt" role="test" />
     <file name="coll_012_func.phpt" role="test" />
-    <file name="coll_013.phpt" role="test" />
+    <file name="coll_012.phpt" role="test" />
     <file name="coll_013_func.phpt" role="test" />
-    <file name="coll_014.phpt" role="test" />
+    <file name="coll_013.phpt" role="test" />
     <file name="coll_014_func.phpt" role="test" />
-    <file name="coll_015.phpt" role="test" />
+    <file name="coll_014.phpt" role="test" />
     <file name="coll_015_func.phpt" role="test" />
-    <file name="coll_016.phpt" role="test" />
+    <file name="coll_015.phpt" role="test" />
     <file name="coll_016_func.phpt" role="test" />
-    <file name="coll_017.phpt" role="test" />
+    <file name="coll_016.phpt" role="test" />
     <file name="coll_017_func.phpt" role="test" />
+    <file name="coll_017.phpt" role="test" />
     <file name="coll_018.phpt" role="test" />
     <file name="coll_019.phpt" role="test" />
-    <file name="commit.phpt" role="test" />
     <file name="commit_old.phpt" role="test" />
-    <file name="connect.inc" role="test" />
-    <file name="connect.phpt" role="test" />
-    <file name="connect_1.phpt" role="test" />
+    <file name="commit.phpt" role="test" />
     <file name="connect_1_old.phpt" role="test" />
+    <file name="connect_1.phpt" role="test" />
+    <file name="connect.inc" role="test" />
     <file name="connect_old.phpt" role="test" />
-    <file name="connect_without_oracle_home.phpt" role="test" />
-    <file name="connect_without_oracle_home_old.phpt" role="test" />
+    <file name="connect.phpt" role="test" />
+    <file name="connect_with_charset_001.diff" role="test" />
+    <file name="connect_with_charset_001.exp" role="test" />
+    <file name="connect_with_charset_001.log" role="test" />
+    <file name="connect_with_charset_001.out" role="test" />
+    <file name="connect_with_charset_001.php" role="test" />
     <file name="connect_with_charset_001.phpt" role="test" />
+    <file name="connect_without_oracle_home_old.phpt" role="test" />
+    <file name="connect_without_oracle_home.phpt" role="test" />
     <file name="create_table.inc" role="test" />
     <file name="create_type.inc" role="test" />
-    <file name="cursors.phpt" role="test" />
-    <file name="cursors_old.phpt" role="test" />
-    <file name="cursor_bind.phpt" role="test" />
     <file name="cursor_bind_err.phpt" role="test" />
+    <file name="cursor_bind.phpt" role="test" />
+    <file name="cursors_old.phpt" role="test" />
+    <file name="cursors.phpt" role="test" />
     <file name="debug.phpt" role="test" />
-    <file name="default_prefetch.phpt" role="test" />
     <file name="default_prefetch1.phpt" role="test" />
     <file name="default_prefetch2.phpt" role="test" />
-    <file name="define.phpt" role="test" />
+    <file name="default_prefetch.phpt" role="test" />
     <file name="define1.phpt" role="test" />
     <file name="define2.phpt" role="test" />
     <file name="define3.phpt" role="test" />
     <file name="define4.phpt" role="test" />
     <file name="define5.phpt" role="test" />
     <file name="define_old.phpt" role="test" />
+    <file name="define.phpt" role="test" />
     <file name="descriptors.phpt" role="test" />
     <file name="details.inc" role="test" />
     <file name="drop_table.inc" role="test" />
     <file name="drop_type.inc" role="test" />
-    <file name="error.phpt" role="test" />
     <file name="error1.phpt" role="test" />
     <file name="error2.phpt" role="test" />
     <file name="error_old.phpt" role="test" />
-    <file name="execute_mode.phpt" role="test" />
+    <file name="error.phpt" role="test" />
     <file name="exec_fetch.phpt" role="test" />
-    <file name="fetch.phpt" role="test" />
-    <file name="fetch_all.phpt" role="test" />
+    <file name="execute_mode.phpt" role="test" />
     <file name="fetch_all2.phpt" role="test" />
+    <file name="fetch_all3.phpt" role="test" />
+    <file name="fetch_all.phpt" role="test" />
     <file name="fetch_array.phpt" role="test" />
     <file name="fetch_assoc.phpt" role="test" />
-    <file name="fetch_into.phpt" role="test" />
     <file name="fetch_into1.phpt" role="test" />
     <file name="fetch_into2.phpt" role="test" />
+    <file name="fetch_into.phpt" role="test" />
     <file name="fetch_object.phpt" role="test" />
+    <file name="fetch.phpt" role="test" />
     <file name="fetch_row.phpt" role="test" />
-    <file name="field_funcs.phpt" role="test" />
     <file name="field_funcs1.phpt" role="test" />
+    <file name="field_funcs2.phpt" role="test" />
     <file name="field_funcs_old.phpt" role="test" />
+    <file name="field_funcs.phpt" role="test" />
     <file name="function_aliases.phpt" role="test" />
     <file name="lob_001.phpt" role="test" />
     <file name="lob_002.phpt" role="test" />
@@ -180,6 +193,7 @@ Various minor improvements.
     <file name="lob_007.phpt" role="test" />
     <file name="lob_008.phpt" role="test" />
     <file name="lob_009.phpt" role="test" />
+    <file name="lob_009.txt" role="test" />
     <file name="lob_010.phpt" role="test" />
     <file name="lob_011.phpt" role="test" />
     <file name="lob_012.phpt" role="test" />
@@ -207,28 +221,45 @@ Various minor improvements.
     <file name="lob_034.phpt" role="test" />
     <file name="lob_035.phpt" role="test" />
     <file name="lob_036.phpt" role="test" />
+    <file name="lob_037.phpt" role="test" />
+    <file name="lob_038.phpt" role="test" />
+    <file name="lob_039.diff" role="test" />
+    <file name="lob_039.exp" role="test" />
+    <file name="lob_039.log" role="test" />
+    <file name="lob_039.out" role="test" />
+    <file name="lob_039.php" role="test" />
+    <file name="lob_039.phpt" role="test" />
+    <file name="lob_040.phpt" role="test" />
     <file name="lob_aliases.phpt" role="test" />
-    <file name="lob_temp.phpt" role="test" />
+    <file name="lob_null.phpt" role="test" />
     <file name="lob_temp1.phpt" role="test" />
+    <file name="lob_temp.phpt" role="test" />
     <file name="num.phpt" role="test" />
+    <file name="oci8safemode.phpt" role="test" />
     <file name="oci_execute_segfault.phpt" role="test" />
-    <file name="old_oci_close.phpt" role="test" />
     <file name="old_oci_close1.phpt" role="test" />
-    <file name="password.phpt" role="test" />
+    <file name="old_oci_close.phpt" role="test" />
+    <file name="parse_error.phpt" role="test" />
+    <file name="password_2.phpt" role="test" />
     <file name="password_new.phpt" role="test" />
     <file name="password_old.phpt" role="test" />
+    <file name="password.phpt" role="test" />
+    <file name="pecl_bug10194_blob.phpt" role="test" />
+    <file name="pecl_bug10194.phpt" role="test" />
     <file name="pecl_bug8816.phpt" role="test" />
     <file name="persistent.phpt" role="test" />
-    <file name="prefetch.phpt" role="test" />
     <file name="prefetch_old.phpt" role="test" />
-    <file name="privileged_connect.phpt" role="test" />
+    <file name="prefetch.phpt" role="test" />
     <file name="privileged_connect1.phpt" role="test" />
+    <file name="privileged_connect.phpt" role="test" />
     <file name="select_null.phpt" role="test" />
     <file name="serverversion.phpt" role="test" />
     <file name="skipif.inc" role="test" />
     <file name="statement_cache.phpt" role="test" />
-    <file name="statement_type.phpt" role="test" />
     <file name="statement_type_old.phpt" role="test" />
+    <file name="statement_type.phpt" role="test" />
+    <file name="test.gif" role="test" />
+    <file name="test.txt" role="test" />
     <file name="uncommitted.phpt" role="test" />
    </dir> <!-- //tests -->
    <file name="config.m4" role="src" />
@@ -248,7 +279,7 @@ Various minor improvements.
  <dependencies>
   <required>
    <php>
-    <min>4.3.10</min>
+    <min>4.3.11</min>
     <max>6.0.0</max>
     <exclude>6.0.0</exclude>
    </php>
@@ -263,6 +294,23 @@ Various minor improvements.
  </extsrcrelease>
  <changelog>
   <release>
+   <version>
+    <release>1.2.3</release>
+    <api>1.2.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2007-01-25</date>
+   <license uri="http://www.php.net/license">PHP</license>
+   <notes>Fixed possible segfault in ZTS mode when statements containing sub-statements are destroyed in wrong order.
+Fixed bug #40078 (ORA-01405 when fetching NULL values using oci_bind_array_by_name()).
+Fixed bug #39988 (type argument of oci_define_by_name() is ignored).
+Fixed bug #39732 (oci_bind_array_by_name doesn&apos;t work on Solaris 64bit).
+Fixed PECL bug #8816 (issue in php_oci_statement_fetch with more than one piecewise column).
+Various minor improvements.
+   </notes>
    <version>
     <release>1.2.2</release>
     <api>1.2.2</api>
