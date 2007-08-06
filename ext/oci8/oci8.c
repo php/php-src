@@ -1203,6 +1203,9 @@ open:
 		/* -1 means "Off" */
 		connection->next_ping = 0;
 	}
+
+	/* mark password as unchanged by PHP during the duration of the database session */
+	connection->passwd_changed = 0;
 	
 	smart_str_free_ex(&hashed_details, 0);
 
@@ -1399,7 +1402,7 @@ open:
 	
 	/* mark it as open */
 	connection->is_open = 1;
-
+	
 	/* add to the appropriate hash */
 	if (connection->is_persistent) {
 		new_le.ptr = connection;
@@ -1571,6 +1574,7 @@ int php_oci_password_change(php_oci_connection *connection, char *user, int user
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
+	connection->passwd_changed = 1;
 	return 0;
 } /* }}} */
 
@@ -1790,7 +1794,7 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 
 		if (connection->used_this_request) {
 			if ((PG(connection_status) & PHP_CONNECTION_TIMEOUT) || OCI_G(in_call)) {
-				return 1;
+				return ZEND_HASH_APPLY_REMOVE;
 			}
 
 			if (connection->descriptors) {
@@ -1803,6 +1807,18 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 				php_oci_connection_rollback(connection TSRMLS_CC);
 			}
 			
+			/* If oci_password_change() changed the password of a
+			 * persistent connection, close the connection and remove
+			 * it from the persistent connection cache.  This means
+			 * subsequent scripts will be prevented from being able to
+			 * present the old (now invalid) password to a usable
+			 * connection to the database; they must use the new
+			 * password.
+			 */
+			if (connection->passwd_changed) {
+				return ZEND_HASH_APPLY_REMOVE;
+			}
+
 			if (OCI_G(persistent_timeout) > 0) {
 				connection->idle_expiry = timestamp + OCI_G(persistent_timeout);
 			}
@@ -1815,14 +1831,15 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 			}
 
 			connection->used_this_request = 0;
+
 		} else if (OCI_G(persistent_timeout) != -1) {
 			if (connection->idle_expiry < timestamp) {
 				/* connection has timed out */
-				return 1;
+				return ZEND_HASH_APPLY_REMOVE;
 			}
 		}
 	}
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 } /* }}} */
 
 #ifdef ZTS
