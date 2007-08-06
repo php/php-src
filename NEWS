@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2007, PHP 5.2.4
+- Fixed bug #42222 (possible buffer overflow in php_openssl_make_REQ). (Pierre)
 - Fixed bug #42208 (substr_replace() crashes when the same array is passed 
   more than once). (crrodriguez at suse dot de, Ilia)
 - Fixed bug #42195 (C++ compiler required always). (Jani)
@@ -79,7 +80,6 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory 
   already exists). (Pierre)
 
-- Fixed bug #42222 (possible buffer overflow in php_openssl_make_REQ) (Pierre)
 - Fixed bug #42173 (oci8 INTERVAL and TIMESTAMP type fixes). (Chris)
 - Fixed bug #42151 (__destruct functions not called after catching a SoapFault
   exception). (Dmitry)
