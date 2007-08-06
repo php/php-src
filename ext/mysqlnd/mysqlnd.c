@@ -27,6 +27,7 @@
 #include "mysqlnd_result.h"
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_charset.h"
+#include "php_ini.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/info.h"
@@ -263,7 +264,8 @@ mysqlnd_simple_command_handle_response(MYSQLND *conn, enum php_mysql_packet_type
 					SET_ERROR_AFF_ROWS(conn);
 				} else {
 					SET_NEW_MESSAGE(conn->last_message, conn->last_message_len,
-									ok_response.message, ok_response.message_len);
+									ok_response.message, ok_response.message_len,
+									conn->persistent);
 
 					conn->upsert_status.warning_count = ok_response.warning_count;
 					conn->upsert_status.server_status = ok_response.server_status;
@@ -389,6 +391,11 @@ MYSQLND_METHOD(mysqlnd_conn, set_server_option)(MYSQLND * const conn,
 PHPAPI void mysqlnd_restart_psession(MYSQLND *conn) 
 {
 	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_REUSED);
+	/* Free here what should not be seen by the next script */
+	if (conn->last_message) {
+		pefree(conn->last_message, conn->persistent);
+		conn->last_message = NULL;
+	}
 }
 /* }}} */
 
@@ -613,7 +620,8 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		conn->upsert_status.server_status = greet_packet.server_status;
 		conn->upsert_status.affected_rows = 0;
 		SET_NEW_MESSAGE(conn->last_message, conn->last_message_len,
-						ok_packet.message, ok_packet.message_len);
+						ok_packet.message, ok_packet.message_len,
+						conn->persistent);
 
 		SET_EMPTY_ERROR(conn->error_info);
 
@@ -1661,7 +1669,7 @@ PHP_INI_END()
 
 /* {{{ PHP_MINIT_FUNCTION
  */
-PHP_MINIT_FUNCTION(mysqlnd)
+static PHP_MINIT_FUNCTION(mysqlnd)
 {
 	REGISTER_INI_ENTRIES();
 
@@ -1673,7 +1681,7 @@ PHP_MINIT_FUNCTION(mysqlnd)
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION
  */
-PHP_MSHUTDOWN_FUNCTION(mysqlnd)
+static PHP_MSHUTDOWN_FUNCTION(mysqlnd)
 {
 	mysqlnd_library_end();
 
