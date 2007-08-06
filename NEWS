@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? Aug 2007, PHP 5.2.4
 - Fixed bug #42208 (substr_replace() crashes when the same array is passed 
   more than once). (crrodriguez at suse dot de, Ilia)
+- Fixed bug #42195 (C++ compiler required always). (Jani)
 - Fixed bug #36492 (Userfilters can leak buckets). (Sara)
 
 02 Aug 2007, PHP 5.2.4RC1
