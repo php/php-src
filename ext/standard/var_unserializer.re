@@ -116,7 +116,7 @@ static char *unserialize_str(const unsigned char **p, size_t *len, size_t maxlen
 	char *str = safe_emalloc(*len, 1, 1);
 	unsigned char *end = *(unsigned char **)p+maxlen;
 
-	if(end < *p) {
+	if (end < *p) {
 		efree(str);
 		return NULL;
 	}
@@ -366,7 +366,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	zstr buf;
 	size_t buf_len;
 
-	if(ce->unserialize == NULL) {
+	if (ce->unserialize == NULL) {
 		zend_error(E_WARNING, "Class %v has no unserializer", ce->name);
 		return 0;
 	}
@@ -390,8 +390,8 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 		return 0;
 	}
           
-	if(datalen < 0 || (*p) + datalen >= max) {
-		zend_error(E_WARNING, "Insufficient data for unserializing - %ld required, %d present", datalen, max - (*p));
+	if (datalen < 0 || (*p) + datalen >= max) {
+		zend_error(E_WARNING, "Insufficient data for unserializing - %ld required, %ld present", datalen, max - (*p));
 		return 0;
 	}
 
@@ -403,7 +403,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 		buf_len = datalen;
 		(*p) += datalen;
 	}
-	if(ce->unserialize(rval, ce, type, buf, buf_len, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
+	if (ce->unserialize(rval, ce, type, buf, buf_len, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
 		if (type == IS_UNICODE) {
 			efree(buf.v);
 		}
@@ -687,7 +687,7 @@ object ":" uiv ":" ["]	{
 	zval **args[1];
 	zval *arg_func_name;
 
-	if(*start == 'C') {
+	if (*start == 'C') {
 		custom_object = 1;
 	}
 	
@@ -770,7 +770,7 @@ object ":" uiv ":" ["]	{
 
 	*p = YYCURSOR;
 
-	if(custom_object) {
+	if (custom_object) {
 		efree(class_name.v);
 		return object_custom(UNSERIALIZE_PASSTHRU, ce);
 	}
