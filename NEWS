@@ -34,6 +34,10 @@ PHP                                                                        NEWS
 - Moved extensions to PECL:
   . ext/ncurses (Hartmut)
 
+- Improved ext/openssl (Dmitry)
+  . Added support for OpenSSL digest functions
+  . Added support for OpenSSL cipher functions
+  . Added access to internal values of DSA, RSA and DH keys
 - Improved and cleaned CGI code. FastCGI is now always enabled and can not be
   disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
 - Improved ext/zlib; re-implemented non-file related functionality. (Mike)
