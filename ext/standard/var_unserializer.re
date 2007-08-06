@@ -144,7 +144,7 @@ static char *unserialize_str(const unsigned char **p, size_t *len, size_t maxlen
 	char *str = safe_emalloc(*len, 1, 1);
 	unsigned char *end = *(unsigned char **)p+maxlen;
 
-	if(end < *p) {
+	if (end < *p) {
 		efree(str);
 		return NULL;
 	}
@@ -304,7 +304,7 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 		zval_dtor(key);
 		FREE_ZVAL(key);
 
-		if (elements && *(*p-1) != ';' &&  *(*p-1) != '}') {
+		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
 			return 0;
 		}
@@ -315,7 +315,7 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 
 static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
 {
-	if (*((*p)++) == '}') 
+	if (*((*p)++) == '}')
 		return 1;
 
 #if SOMETHING_NEW_MIGHT_LEAD_TO_CRASH_ENABLE_IF_YOU_ARE_BRAVE
@@ -328,7 +328,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 {
 	long datalen;
 
-	if(ce->unserialize == NULL) {
+	if (ce->unserialize == NULL) {
 		zend_error(E_WARNING, "Class %s has no unserializer", ce->name);
 		return 0;
 	}
@@ -337,12 +337,12 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	(*p) += 2;
 
-	if(datalen < 0 || (*p) + datalen >= max) {
+	if (datalen < 0 || (*p) + datalen >= max) {
 		zend_error(E_WARNING, "Insufficient data for unserializing - %ld required, %ld present", datalen, max - (*p));
 		return 0;
 	}
 
-	if(ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
+	if (ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
 		return 0;
 	}
 
@@ -373,7 +373,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 	}
 
 	if (Z_OBJCE_PP(rval) != PHP_IC_ENTRY &&
-	    zend_hash_exists(&Z_OBJCE_PP(rval)->function_table, "__wakeup", sizeof("__wakeup"))) {
+		zend_hash_exists(&Z_OBJCE_PP(rval)->function_table, "__wakeup", sizeof("__wakeup"))) {
 		INIT_PZVAL(&fname);
 		ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1, 0);
 		call_user_function_ex(CG(function_table), rval, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
@@ -592,7 +592,7 @@ object ":" uiv ":" ["]	{
 	zval **args[1];
 	zval *arg_func_name;
 
-	if(*start == 'C') {
+	if (*start == 'C') {
 		custom_object = 1;
 	}
 	
@@ -674,7 +674,7 @@ object ":" uiv ":" ["]	{
 
 	*p = YYCURSOR;
 
-	if(custom_object) {
+	if (custom_object) {
 		efree(class_name);
 		return object_custom(UNSERIALIZE_PASSTHRU, ce);
 	}
