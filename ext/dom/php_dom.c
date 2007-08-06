@@ -387,7 +387,20 @@ static int dom_property_exists(zval *object, zval *member, int check_empty TSRML
 		ret = zend_u_hash_find(obj->prop_handler, Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, (void **) &hnd);
 	}
 	if (ret == SUCCESS) {
-		retval = 1;
+		zval *tmp;
+
+		if (check_empty == 2) {
+			retval = 1;
+		} else if (hnd->read_func(obj, &tmp TSRMLS_CC) == SUCCESS) {
+			tmp->refcount = 1;
+			tmp->is_ref = 0;
+			if (check_empty == 1) {
+				retval = zend_is_true(tmp);
+			} else if (check_empty == 0) {
+				retval = (Z_TYPE_P(tmp) != IS_NULL);
+			}
+			zval_ptr_dtor(&tmp);
+		}
 	} else {
 		std_hnd = zend_get_std_object_handlers();
 		retval = std_hnd->has_property(object, member, check_empty TSRMLS_CC);
