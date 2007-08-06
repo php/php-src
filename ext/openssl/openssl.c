@@ -1814,7 +1814,9 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			if (strcmp("_default", type + len) != 0) {
 				continue;
 			}
-			
+			if (len > 200) {
+				len = 200;
+			}
 			memcpy(buffer, type, len);
 			buffer[len] = '\0';
 			type = buffer;
