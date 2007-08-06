@@ -157,7 +157,7 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **n
 {
 	long i;
 	var_entries *var_hash = var_hashx->first;
-	
+
 	while (var_hash) {
 		for (i = 0; i < var_hash->used_slots; i++) {
 			if (var_hash->data[i] == ozval) {
@@ -172,7 +172,7 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **n
 static int var_access(php_unserialize_data_t *var_hashx, long id, zval ***store)
 {
 	var_entries *var_hash = var_hashx->first;
-	
+
 	while (id >= VAR_ENTRIES_MAX && var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
 		var_hash = var_hash->next;
 		id -= VAR_ENTRIES_MAX;
@@ -192,7 +192,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	void *next;
 	long i;
 	var_entries *var_hash = var_hashx->first;
-	
+
 	while (var_hash) {
 		next = var_hash->next;
 		efree(var_hash);
@@ -200,7 +200,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	}
 
 	var_hash = var_hashx->first_dtor;
-	
+
 	while (var_hash) {
 		for (i = 0; i < var_hash->used_slots; i++) {
 			zval_ptr_dtor(&var_hash->data[i]);
@@ -244,7 +244,7 @@ static inline long parse_iv2(const unsigned char *p, const unsigned char **q)
 		case '+':
 			p++;
 	}
-	
+
 	while (1) {
 		cursor = (char)*p;
 		if (cursor >= '0' && cursor <= '9') {
@@ -273,7 +273,7 @@ static inline size_t parse_uiv(const unsigned char *p)
 	if (*p == '+') {
 		p++;
 	}
-	
+
 	while (1) {
 		cursor = *p;
 		if (cursor >= '0' && cursor <= '9') {
@@ -303,8 +303,9 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 		}
 
 		if (Z_TYPE_P(key) != IS_LONG &&
-		    Z_TYPE_P(key) != IS_STRING &&
-		    Z_TYPE_P(key) != IS_UNICODE) {
+			Z_TYPE_P(key) != IS_STRING &&
+			Z_TYPE_P(key) != IS_UNICODE
+		) {
 			zval_dtor(key);
 			FREE_ZVAL(key);
 			return 0;
@@ -335,11 +336,11 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 				zend_u_hash_update(ht, Z_TYPE_P(key), Z_UNIVAL_P(key), Z_UNILEN_P(key) + 1, &data, sizeof(data), NULL);
 				break;
 		}
-		
+
 		zval_dtor(key);
 		FREE_ZVAL(key);
 
-		if (elements && *(*p-1) != ';' &&  *(*p-1) != '}') {
+		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
 			return 0;
 		}
@@ -350,7 +351,7 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 
 static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
 {
-	if (*((*p)++) == '}') 
+	if (*((*p)++) == '}')
 		return 1;
 
 #if SOMETHING_NEW_MIGHT_LEAD_TO_CRASH_ENABLE_IF_YOU_ARE_BRAVE
@@ -389,7 +390,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 		zend_error(E_WARNING, "Illegal data for unserializing");
 		return 0;
 	}
-          
+
 	if (datalen < 0 || (*p) + datalen >= max) {
 		zend_error(E_WARNING, "Insufficient data for unserializing - %ld required, %ld present", datalen, max - (*p));
 		return 0;
@@ -419,11 +420,11 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 {
 	long elements;
-	
+
 	elements = parse_iv2((*p) + 2, p);
 
 	(*p) += 2;
-	
+
 	object_init_ex(*rval, ce);
 	return elements;
 }
@@ -438,7 +439,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 	}
 
 	if (Z_OBJCE_PP(rval) != PHP_IC_ENTRY &&
-	    zend_hash_exists(&Z_OBJCE_PP(rval)->function_table, "__wakeup", sizeof("__wakeup"))) {
+		zend_hash_exists(&Z_OBJCE_PP(rval)->function_table, "__wakeup", sizeof("__wakeup"))) {
 		INIT_PZVAL(&fname);
 		ZVAL_ASCII_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1, 1);
 		call_user_function_ex(CG(function_table), rval, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
@@ -458,15 +459,13 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	zval **rval_ref;
 
 	limit = cursor = *p;
-	
+
 	if (var_hash && cursor[0] != 'R') {
 		var_push(var_hash, rval);
 	}
 
 	start = cursor;
 
-	
-	
 /*!re2c
 
 "R:" iv ";"		{
@@ -486,7 +485,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	*rval = *rval_ref;
 	(*rval)->refcount++;
 	(*rval)->is_ref = 1;
-	
+
 	return 1;
 }
 
@@ -509,7 +508,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	*rval = *rval_ref;
 	(*rval)->refcount++;
 	(*rval)->is_ref = 0;
-	
+
 	return 1;
 }
 
@@ -667,7 +666,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 "o:" iv ":" ["] {
 
 	INIT_PZVAL(*rval);
-	
+
 	return object_common2(UNSERIALIZE_PASSTHRU,
 			object_common1(UNSERIALIZE_PASSTHRU, ZEND_STANDARD_CLASS_DEF_PTR));
 }
@@ -690,7 +689,7 @@ object ":" uiv ":" ["]	{
 	if (*start == 'C') {
 		custom_object = 1;
 	}
-	
+
 	INIT_PZVAL(*rval);
 	len2 = len = parse_uiv(start + 2);
 	maxlen = max - YYCURSOR;
@@ -728,14 +727,14 @@ object ":" uiv ":" ["]	{
 			ce = *pce;
 			break;
 		}
-		
+
 		/* Check for unserialize callback */
 		if ((PG(unserialize_callback_func) == NULL) || (PG(unserialize_callback_func)[0] == '\0')) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 			break;
 		}
-		
+
 		/* Call unserialize callback */
 		MAKE_STD_ZVAL(user_func);
 		ZVAL_STRING(user_func, PG(unserialize_callback_func), 1);
@@ -753,7 +752,7 @@ object ":" uiv ":" ["]	{
 		if (retval_ptr) {
 			zval_ptr_dtor(&retval_ptr);
 		}
-		
+
 		/* The callback function may have defined the class */
 		if (zend_u_lookup_class(UG(unicode)?IS_UNICODE:IS_STRING, class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
@@ -774,7 +773,7 @@ object ":" uiv ":" ["]	{
 		efree(class_name.v);
 		return object_custom(UNSERIALIZE_PASSTHRU, ce);
 	}
-	
+
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ce);
 
 	if (incomplete_class) {
