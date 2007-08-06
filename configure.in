@@ -1156,7 +1156,13 @@ PHP_HELP_SEPARATOR([Libtool:])
 PHP_CONFIGURE_PART(Configuring libtool)
 
 LDFLAGS="$LDFLAGS $PHP_AIX_LDFLAGS"
+
+dnl Only allow AC_PROG_CXX if it's explicitly called (by PHP_REQUIRE_CXX)
+dnl otherwise AC_PROG_LIBTOOL fails if there is no working C++ compiler
+AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [AC_PROG_CXX], [undefine([AC_PROG_CXX])
+AC_DEFUN([AC_PROG_CXX], [])])
 AC_PROG_LIBTOOL
+
 if test "$enable_debug" != "yes"; then
   PHP_SET_LIBTOOL_VARIABLE([--silent])
 fi
