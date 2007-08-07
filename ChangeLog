@@ -1,3 +1,160 @@
+2007-08-06  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/tests/oo_properties.phpt:
+      Fix test
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c
+      ext/zip/tests/oo_properties.phpt:
+      MFH: - Fix isset/empty($ZipArchive->property)
+      MFH: - Add test
+
+    * ext/zip/tests/oo_properties.phpt
+      ext/zip/tests/oo_properties.phpt:
+      
+      - Fix isset/empty($ZipArchive->property)
+      - Add test
+
+    * ext/zip/php_zip.c:
+      - Fix isset/empty($ZipArchive->property)
+      - Add test
+
+2007-08-06  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c
+      ext/oci8/php_oci8_int.h:
+      MFH: oci8: flush persistent connection after password change
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8_int.h:
+      flush persistent connection after password change
+
+2007-08-06  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/openssl/openssl.c:
+      - MFB: #42222, forgot this one (thanks mattias)
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      - #42222, forgot this one (thanks mattias)
+
+2007-08-06  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      - move entry to right place..
+
+2007-08-06  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - #42222 entry
+
+    * ext/openssl/openssl.c:
+      - MFB: #42222, truncate the _default to the buffer size (was 200 since day
+      #1, we don't need dynamic alloc here)
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      - #42222, truncate the _default to the buffer size (was 200 since day #1,
+      we don't need dynamic alloc here)
+
+2007-08-06  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c:
+      Touch generated file
+
+    * ext/standard/var_unserializer.re:
+      ws fix
+
+    * (PHP_5_2)
+      ext/standard/var_unserializer.re:
+      - fix ws
+
+    * ext/standard/var_unserializer.re:
+      MFB: fix compile warning (+ some ws fixes)
+
+    * sapi/apache2filter/apache_config.c:
+      Fix build
+
+2007-08-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/var_unserializer.re:
+      
+      Fixed compiler warning
+
+2007-08-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/dom/php_dom.c
+      ext/dom/tests/bug35342.phpt
+      ext/dom/tests/bug42082.phpt:
+      MFH: fix bug #42082 (NodeList length zero should be empty). (Hannes)
+      add and update tests
+
+    * ext/dom/tests/bug42082.phpt
+      ext/dom/tests/bug42082.phpt:
+      
+      fix bug #42082 (NodeList length zero should be empty). (Hannes)
+      add and update tests
+
+    * ext/dom/php_dom.c
+      ext/dom/tests/bug35342.phpt:
+      fix bug #42082 (NodeList length zero should be empty). (Hannes)
+      add and update tests
+
+2007-08-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/package2.xml:
+      update changelog & list of files
+
+2007-08-06  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      Fix crashes with pconn in ext/mysql
+
+2007-08-06  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      scripts/phpize.m4:
+      MFH:- Fixed bug #42195 (C++ compiler required always)
+
+    * configure.in
+      scripts/phpize.m4:
+      - Fixed bug #42195 (C++ compiler required always)
+
+2007-08-06  Antony Dovgal  <antony@zend.com>
+
+    * sapi/apache/mod_php.c
+      sapi/apache/mod_php5.c
+      sapi/apache2handler/apache_config.c:
+      fix build
+
+2007-08-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ext/openssl/openssl.c:
+      Improved ext/openssl
+        . Added support for OpenSSL digest functions
+        . Added support for OpenSSL cipher functions
+        . Added access to internal values of DSA, RSA and DH keys
+
 2007-08-05  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * ext/standard/tests/strings/bug42208.phpt:
