@@ -39,14 +39,16 @@ the Oracle Call Interface (OCI8).
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>Fixed PECL bug #10194 (crash in Oracle client when memory limit reached in the callback).
-Fixed bug #42173 (INTERVAL and TIMESTAMP type fixes).
+Fixed bug #42173 (oci_field_type fixes for INTERVAL and TIMESTAMP types).
 Fixed bug #42134 (oci_error() returns false after oci_new_collection() fails).
+Fixed bug #41917 (oci_field_precision and oci_field_scale datatypes fixed).
 Fixed bug #41711 (Null temporary lobs not supported).
 Fixed bug #41594 (Statement cache is flushed too frequently).
 Fixed segfault on rebindinging and rexecuting a statement with LOBs.
 Fixed compile failure in ZTS mode when collections support is missing.
-Enabled statement cache for non-persistent connections.
+Allowed statement cache size to be set for non-persistent connections.
 Improved oci_password_change() to close persistent connections on shutdown (to update hashed connection details).
+Changed oci_pconnect() to behave like oci_connect() when SYSDBA and SYSOPER privileges are used.
 Various minor improvements.
  </notes>
  <contents>
