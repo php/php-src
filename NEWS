@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2007, PHP 5.2.4
+- Fixed bug #42237 (stream_copy_to_stream returns invalid values for mmaped 
+  streams). (andrew dot minerd at sellingsource dot com, Ilia)
 - Fixed bug #42222 (possible buffer overflow in php_openssl_make_REQ). (Pierre)
 - Fixed bug #42208 (substr_replace() crashes when the same array is passed 
   more than once). (crrodriguez at suse dot de, Ilia)
