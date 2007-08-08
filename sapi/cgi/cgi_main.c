@@ -841,7 +841,7 @@ static void init_request_info(TSRMLS_D)
 							 */
 							env_script_name = pt + l;
 
-							/* PATH_TRANSATED = DOCUMENT_ROOT + PATH_INFO */
+							/* PATH_TRANSLATED = DOCUMENT_ROOT + PATH_INFO */
 							path_translated_len = l + (env_path_info ? strlen(env_path_info) : 0);
 							path_translated = (char *) emalloc(path_translated_len + 1);
 							memcpy(path_translated, env_document_root, l);
@@ -857,7 +857,7 @@ static void init_request_info(TSRMLS_D)
 						} else if (env_script_name && 
 								   strstr(pt, env_script_name)
 						) {
-							/* PATH_TRANSATED = PATH_TRANSATED - SCRIPT_NAME + PATH_INFO */
+							/* PATH_TRANSLATED = PATH_TRANSLATED - SCRIPT_NAME + PATH_INFO */
 							int ptlen = strlen(pt) - strlen(env_script_name);
 							int path_translated_len = ptlen + env_path_info ? strlen(env_path_info) : 0;
 							char *path_translated = NULL;
