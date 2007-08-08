@@ -55,7 +55,7 @@ string(7) "Unknown"
 string(5) "array"
 int(%d)
 string(5) "array"
-int(0)
+int(%d)
 
 Warning: get_loaded_extensions() expects at most 1 parameter, 2 given in %s on line %d
 NULL
