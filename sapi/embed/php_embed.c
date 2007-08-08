@@ -143,7 +143,6 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
 {
 	zend_llist global_vars;
 #ifdef ZTS
-	sapi_globals_struct *sapi_globals = NULL;
 	void ***tsrm_ls = NULL;
 #endif
 	int ini_entries_len = 0;
@@ -168,6 +167,8 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
 
 #ifdef ZTS
   tsrm_startup(1, 1, 0, NULL);
+  tsrm_ls = ts_resource(0);
+  *ptsrm_ls = tsrm_ls;
 #endif
 
   ini_entries_len = strlen(HARDCODED_INI);
@@ -185,12 +186,6 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
 	  return FAILURE;
   }
  
-#ifdef ZTS
-  sapi_globals = ts_resource(sapi_globals_id);
-  tsrm_ls = ts_resource(0);
-  *ptsrm_ls = tsrm_ls;
-#endif
-
   zend_llist_init(&global_vars, sizeof(char *), NULL, 0);  
 
   /* Set some Embedded PHP defaults */
