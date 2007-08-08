@@ -1,3 +1,15 @@
+2007-08-07  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_2)
+      ext/oci8/package2.xml:
+      Add bugs fixed
+
+2007-08-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/package2.xml:
+      update changelog
+
 2007-08-06  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_5_2)
