@@ -1117,10 +1117,6 @@ int main(int argc, char *argv[])
 
 /* end of temporary locals */
 #ifdef ZTS
-	zend_compiler_globals *compiler_globals;
-	zend_executor_globals *executor_globals;
-	php_core_globals *core_globals;
-	sapi_globals_struct *sapi_globals;
 	void ***tsrm_ls;
 #endif
 
@@ -1158,6 +1154,7 @@ int main(int argc, char *argv[])
 
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
+	tsrm_ls = ts_resource(0);
 #endif
 
 	sapi_startup(&cgi_sapi_module);
@@ -1240,11 +1237,6 @@ int main(int argc, char *argv[])
 	php_optarg = orig_optarg;
 
 #ifdef ZTS
-	compiler_globals = ts_resource(compiler_globals_id);
-	executor_globals = ts_resource(executor_globals_id);
-	core_globals = ts_resource(core_globals_id);
-	sapi_globals = ts_resource(sapi_globals_id);
-	tsrm_ls = ts_resource(0);
 	SG(request_info).path_translated = NULL;
 #endif
 
