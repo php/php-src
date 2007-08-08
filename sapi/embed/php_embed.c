@@ -137,11 +137,8 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
 {
 	zend_llist global_vars;
 #ifdef ZTS
-	zend_compiler_globals *compiler_globals;
-	zend_executor_globals *executor_globals;
-	php_core_globals *core_globals;
-	sapi_globals_struct *sapi_globals;
-	void ***tsrm_ls;
+	sapi_globals_struct *sapi_globals = NULL;
+	void ***tsrm_ls = NULL;
 #endif
 
 #ifdef HAVE_SIGNAL_H
@@ -166,24 +163,21 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
   tsrm_startup(1, 1, 0, NULL);
 #endif
 
-#ifdef ZTS
-  compiler_globals = ts_resource(compiler_globals_id);
-  executor_globals = ts_resource(executor_globals_id);
-  core_globals = ts_resource(core_globals_id);
-  sapi_globals = ts_resource(sapi_globals_id);
-  tsrm_ls = ts_resource(0);
-  *ptsrm_ls = tsrm_ls;
-#endif
-
   sapi_startup(&php_embed_module);
+
+  if (argv) {
+	php_embed_module.executable_location = argv[0];
+  }
 
   if (php_embed_module.startup(&php_embed_module)==FAILURE) {
 	  return FAILURE;
   }
  
-  if (argv) {
-	php_embed_module.executable_location = argv[0];
-  }
+#ifdef ZTS
+  sapi_globals = ts_resource(sapi_globals_id);
+  tsrm_ls = ts_resource(0);
+  *ptsrm_ls = tsrm_ls;
+#endif
 
   zend_llist_init(&global_vars, sizeof(char *), NULL, 0);  
 
