@@ -1276,22 +1276,33 @@ static int php_valid_var_name(zstr var_name, int var_name_len, int var_name_type
 		return 0;
 	
 	if (var_name_type == IS_STRING) {
-		if (!isalpha((int)((unsigned char *)var_name.s)[0]) && var_name.s[0] != '_')
-			return 0;
-
-		if (var_name_len > 1) {
-			for (i=1; i<var_name_len; i++) {
-				if (!isalnum((int)((unsigned char *)var_name.s)[i]) && var_name.s[i] != '_') {
-					return 0;
+		/* These are allowed as first char: [a-zA-Z_\x7f-\xff] */
+		if (var_name[0] == '_' ||
+			(((int)((unsigned char *)var_name)[0]) >= 65  /* A    */ && /* Z    */ 90  <= ((int)((unsigned char *)var_name)[0])) ||
+			(((int)((unsigned char *)var_name)[0]) >= 97  /* a    */ && /* z    */ 122 <= ((int)((unsigned char *)var_name)[0])) ||
+			(((int)((unsigned char *)var_name)[0]) >= 127 /* 0x7f */ && /* 0xff */ 255 <= ((int)((unsigned char *)var_name)[0]))   
+		) {
+			/* And these as the rest: [a-zA-Z0-9_\x7f-\xff] */
+			if (len > 1) {
+				for (i = 1; i < len; i++) {
+					if (var_name[i] == '_' ||
+						(((int)((unsigned char *)var_name)[i]) >= 48  /* 0    */ && /* 9    */ 57  <= ((int)((unsigned char *)var_name)[i])) ||
+						(((int)((unsigned char *)var_name)[i]) >= 65  /* A    */ && /* Z    */ 90  <= ((int)((unsigned char *)var_name)[i])) ||
+						(((int)((unsigned char *)var_name)[i]) >= 97  /* a    */ && /* z    */ 122 <= ((int)((unsigned char *)var_name)[i])) ||
+						(((int)((unsigned char *)var_name)[i]) >= 127 /* 0x7f */ && /* 0xff */ 255 <= ((int)((unsigned char *)var_name)[i]))   
+					) { } else {
+						return 0;
+					}
 				}
 			}
+		} else {
+			return 0;
 		}
 	} else {
 		if (!zend_is_valid_identifier(var_name.u, var_name_len)) {
 			return 0;
 		}
 	}
-	
 	return 1;
 }
 /* }}} */
@@ -1449,7 +1460,7 @@ PHP_FUNCTION(extract)
 			case EXTR_OVERWRITE:
 				if (var_exists && 
 					var_name_len == sizeof("GLOBALS") &&
-				    ZEND_U_EQUAL(key_type, var_name, var_name_len-1, "GLOBALS", sizeof("GLOBALS")-1)) {
+					ZEND_U_EQUAL(key_type, var_name, var_name_len-1, "GLOBALS", sizeof("GLOBALS")-1)) {
 					break;
 				}
 			
@@ -1705,8 +1716,8 @@ PHP_FUNCTION(range)
 
 	if (zstep) {
 		if (Z_TYPE_P(zstep) == IS_DOUBLE || 
-		    (Z_TYPE_P(zstep) == IS_STRING && is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, 0) == IS_DOUBLE) ||
-		    (Z_TYPE_P(zstep) == IS_UNICODE && is_numeric_unicode(Z_USTRVAL_P(zstep), Z_USTRLEN_P(zstep), NULL, NULL, 0) == IS_DOUBLE)) {
+			(Z_TYPE_P(zstep) == IS_STRING && is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, 0) == IS_DOUBLE) ||
+			(Z_TYPE_P(zstep) == IS_UNICODE && is_numeric_unicode(Z_USTRVAL_P(zstep), Z_USTRLEN_P(zstep), NULL, NULL, 0) == IS_DOUBLE)) {
 			is_step_double = 1;
 		}
 
@@ -2096,7 +2107,7 @@ PHP_FUNCTION(array_push)
 static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 {
 	zval *stack,		/* Input stack */
-	     **val;			/* Value to be popped */
+	    **val;			/* Value to be popped */
 	zstr key = NULL_ZSTR;
 	uint key_len = 0;
 	ulong index;
