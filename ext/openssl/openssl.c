@@ -1801,7 +1801,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 		/* Finally apply defaults from config file */
 		for(i = 0; i < sk_CONF_VALUE_num(dn_sk); i++) {
 			int len;
-			char buffer[200];
+			char buffer[200 + 1]; /* 200 + \n !*/
 			
 			v = sk_CONF_VALUE_value(dn_sk, i);
 			type = v->name;
@@ -1818,7 +1818,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 				len = 200;
 			}
 			memcpy(buffer, type, len);
-			buffer[len - 1] = '\0';
+			buffer[len] = '\0';
 
 			type = buffer;
 
