@@ -146,6 +146,7 @@ PHPAPI int php_le_stream_context(void)
 }
 
 /* }}} */
+
 /* {{{ Module-Stuff */
 
 static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
@@ -302,15 +303,14 @@ PHP_MINIT_FUNCTION(file)
 
 /* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(file)
+PHP_MSHUTDOWN_FUNCTION(file) /* {{{ */
 {
 #ifndef ZTS
 	file_globals_dtor(&file_globals TSRMLS_CC);
 #endif
 	return SUCCESS;
 }
-
-
+/* }}} */
 
 /* {{{ proto bool flock(resource fp, int operation [, int &wouldblock])
    Portable file locking */
@@ -1387,10 +1387,7 @@ PHPAPI PHP_FUNCTION(fseek)
 
 /* }}} */
 
-/* {{{ proto int mkdir(char *dir int mode)
-*/
-
-PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
+PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC) /* {{{ */
 {
 	int ret;
 
@@ -1741,10 +1738,11 @@ PHP_FUNCTION(copy)
 }
 /* }}} */
 
-PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
+PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC) /* {{{ */
 {
 	return php_copy_file_ex(src, dest, ENFORCE_SAFE_MODE TSRMLS_CC);
 }
+/* }}} */
 
 /* {{{ php_copy_file
  */
@@ -1859,7 +1857,7 @@ PHPAPI PHP_FUNCTION(fread)
 }
 /* }}} */
 
-static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len, const char delimiter TSRMLS_DC)
+static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len, const char delimiter TSRMLS_DC) /* {{{ */
 {
 	int inc_len;
 	unsigned char last_chars[2] = { 0, 0 };
@@ -1895,6 +1893,7 @@ quit_loop:
 	}
 	return ptr;
 }
+/* }}} */
 
 #define FPUTCSV_FLD_CHK(c) memchr(Z_STRVAL_PP(field), c, Z_STRLEN_PP(field))
 
@@ -2090,11 +2089,7 @@ PHP_FUNCTION(fgetcsv)
 }
 /* }}} */
 
-
-PHPAPI void php_fgetcsv(php_stream *stream, /* {{{ */
-		char delimiter, char enclosure, 
-		size_t buf_len, char *buf,
-		zval *return_value TSRMLS_DC)
+PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, size_t buf_len, char *buf, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	char *temp, *tptr, *bptr, *line_end, *limit;
 	const char escape_char = '\\';
