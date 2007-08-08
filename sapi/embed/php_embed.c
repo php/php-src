@@ -155,8 +155,8 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
 {
 	zend_llist global_vars;
 #ifdef ZTS
-	sapi_globals_struct *sapi_globals;
-	void ***tsrm_ls;
+	sapi_globals_struct *sapi_globals = NULL;
+	void ***tsrm_ls = NULL;
 #endif
 	int ini_entries_len = 0;
 
