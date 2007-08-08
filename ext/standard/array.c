@@ -1286,18 +1286,29 @@ static int php_valid_var_name(char *var_name, int len) /* {{{ */
 	
 	if (!var_name)
 		return 0;
-	
-	if (!isalpha((int)((unsigned char *)var_name)[0]) && var_name[0] != '_')
-		return 0;
-	
-	if (len > 1) {
-		for (i=1; i<len; i++) {
-			if (!isalnum((int)((unsigned char *)var_name)[i]) && var_name[i] != '_') {
-				return 0;
+
+	/* These are allowed as first char: [a-zA-Z_\x7f-\xff] */
+	if (var_name[0] == '_' ||
+		(((int)((unsigned char *)var_name)[0]) >= 65  /* A    */ && /* Z    */ 90  <= ((int)((unsigned char *)var_name)[0])) ||
+		(((int)((unsigned char *)var_name)[0]) >= 97  /* a    */ && /* z    */ 122 <= ((int)((unsigned char *)var_name)[0])) ||
+		(((int)((unsigned char *)var_name)[0]) >= 127 /* 0x7f */ && /* 0xff */ 255 <= ((int)((unsigned char *)var_name)[0]))
+	) {
+		/* And these as the rest: [a-zA-Z0-9_\x7f-\xff] */
+		if (len > 1) {
+			for (i = 1; i < len; i++) {
+				if (var_name[i] == '_' ||
+					(((int)((unsigned char *)var_name)[i]) >= 48  /* 0    */ && /* 9    */ 57  <= ((int)((unsigned char *)var_name)[i])) ||
+					(((int)((unsigned char *)var_name)[i]) >= 65  /* A    */ && /* Z    */ 90  <= ((int)((unsigned char *)var_name)[i])) ||
+					(((int)((unsigned char *)var_name)[i]) >= 97  /* a    */ && /* z    */ 122 <= ((int)((unsigned char *)var_name)[i])) ||
+					(((int)((unsigned char *)var_name)[i]) >= 127 /* 0x7f */ && /* 0xff */ 255 <= ((int)((unsigned char *)var_name)[i]))
+				) {	} else {
+					return 0;
+				}
 			}
 		}
+	} else {
+		return 0;
 	}
-	
 	return 1;
 }
 /* }}} */
