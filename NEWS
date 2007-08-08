@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   more than once). (crrodriguez at suse dot de, Ilia)
 - Fixed bug #42195 (C++ compiler required always). (Jani)
 - Fixed bug #42082 (NodeList length zero should be empty). (Hannes)
+- Fixed bug #41973 (./configure --with-ldap=shared fails with
+  LDFLAGS="-Wl,--as-needed"). (Nuno)
 - Fixed bug #36492 (Userfilters can leak buckets). (Sara)
 
 02 Aug 2007, PHP 5.2.4RC1
