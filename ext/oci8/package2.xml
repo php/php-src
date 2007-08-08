@@ -44,7 +44,8 @@ Fixed bug #42134 (oci_error() returns false after oci_new_collection() fails).
 Fixed bug #41917 (oci_field_precision and oci_field_scale datatypes fixed).
 Fixed bug #41711 (Null temporary lobs not supported).
 Fixed bug #41594 (Statement cache is flushed too frequently).
-Fixed segfault on rebindinging and rexecuting a statement with LOBs.
+Fixed bug #40415 (oci_fetch_all and nested cursors, allocate descriptors dynamically)
+Fixed segfault on rebinding and re-executing a statement with LOBs.
 Fixed compile failure in ZTS mode when collections support is missing.
 Allowed statement cache size to be set for non-persistent connections.
 Improved oci_password_change() to close persistent connections on shutdown (to update hashed connection details).
