@@ -1014,7 +1014,8 @@ ZEND_FUNCTION(property_exists)
 		}
 		zend_u_unmangle_property_name(Z_TYPE_PP(property), property_info->name, property_info->name_length, &class_name, &prop_name);
 		if (class_name.s[0] ==  '*') {
-			if (instanceof_function(EG(scope), ce TSRMLS_CC)) {
+			if (instanceof_function(EG(scope), ce TSRMLS_CC) ||
+				(EG(This) && instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC))) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
