@@ -96,7 +96,9 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 		return 0;
 	}
 
-	im = gdImageCreate(width, height);
+	if(!(im = gdImageCreate(width, height))) {
+		return 0;
+	}
 	gdImageColorAllocate(im, 255, 255, 255);
 	gdImageColorAllocate(im, 0, 0, 0);
 	h[2] = '\0';
