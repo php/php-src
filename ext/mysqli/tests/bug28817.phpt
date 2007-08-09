@@ -1,7 +1,10 @@
 --TEST--
 Bug #28817 (problems with properties declared in the class extending MySQLi)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
@@ -21,12 +24,12 @@ Bug #28817 (problems with properties declared in the class extending MySQLi)
 	var_dump($mysql->p_test);
 	@var_dump($mysql->errno);
 
-	$mysql->connect($host, $user, $passwd);
+	$mysql->connect($host, $user, $passwd, $db, $port, $socket);
 	$mysql->select_db("nonexistingdb");
 
 	var_dump($mysql->errno > 0);
 
-	$mysql->close();	
+	$mysql->close();
 ?>
 --EXPECTF--
 array(2) {

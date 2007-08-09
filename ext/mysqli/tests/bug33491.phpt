@@ -3,7 +3,10 @@ Bug #33491 (extended mysqli class crashes when result is not object)
 --INI--
 error_reporting=4095
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 
@@ -15,10 +18,10 @@ class DB extends mysqli
   }
 }
 
-require_once dirname(__FILE__)."/connect.inc";
+require_once("connect.inc");
 
 // Segfault when using the DB class which extends mysqli
-$DB = new DB($host, $user, $passwd, '');
+$DB = new DB($host, $user, $passwd, $db, $port, $socket);
 $DB->query_single('SELECT DATE()');
 
 ?>
