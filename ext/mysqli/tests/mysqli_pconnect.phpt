@@ -4,6 +4,7 @@ mysqli_pconnect()
 <?php
 require_once('skipif.inc');
 require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
 
 if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
 	die("skip: only available in mysqlnd");

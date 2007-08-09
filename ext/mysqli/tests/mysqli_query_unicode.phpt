@@ -4,6 +4,7 @@ mysqli_query() - unicode (cyrillic)
 <?php
 require_once('skipif.inc');
 require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 require_once('table.inc');
 if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'utf8'"))

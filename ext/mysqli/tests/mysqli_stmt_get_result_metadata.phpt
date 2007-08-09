@@ -4,6 +4,7 @@ mysqli_stmt_get_result() - meta data
 <?php
 require_once('skipif.inc');
 require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_stmt_get_result'))
 	die('skip mysqli_stmt_get_result not available');

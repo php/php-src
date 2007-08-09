@@ -1,8 +1,10 @@
 --TEST--
 mysqli_thread_safe()
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
+<?php
+require_once('skipif.inc');
+require_once('skipifemb.inc');
+?>
 --FILE--
 <?php
 	if (!is_bool($tmp = mysqli_thread_safe()))

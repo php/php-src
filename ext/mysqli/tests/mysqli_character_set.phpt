@@ -1,9 +1,12 @@
 --TEST--
 Fetching results from tables of different charsets.
 --SKIPIF--
-<?php require_once('skipifunicode.inc'); ?>
-<?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
+<?php
+require_once('skipifconnectfailure.inc');
+require_once('skipifunicode.inc');
+require_once('skipif.inc'); 
+require_once('skipifemb.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";

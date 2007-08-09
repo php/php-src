@@ -6,6 +6,8 @@ mysqli_rollback()
 <?PHP
 	require_once('skipif.inc');
 	require_once('skipifemb.inc');
+	require_once('skipifconnectfailure.inc');
+
 	require_once('connect.inc');
 
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {

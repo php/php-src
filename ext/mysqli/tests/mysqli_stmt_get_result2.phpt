@@ -1,9 +1,13 @@
 --TEST--
 mysqli_stmt_get_result()
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
-<?php if (!function_exists('mysqli_stmt_get_result')) die('skip mysqli_stmt_get_result not available')?>
+<?php
+require_once('skipif.inc');
+require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
+if (!function_exists('mysqli_stmt_get_result')) 
+	die('skip mysqli_stmt_get_result not available');
+?>
 --FILE--
 <?php
 	/*

@@ -1,9 +1,10 @@
 --TEST--
 mysqli_set_local_infile_handler() - random ASCII character including \0
 --SKIPIF--
-<?php
+<?php 
 require_once('skipif.inc');
-require_once('skipifemb.inc');
+require_once('skipifemb.inc'); 
+require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 
 if (!function_exists('mysqli_set_local_infile_handler'))

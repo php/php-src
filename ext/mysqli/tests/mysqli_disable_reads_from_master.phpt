@@ -4,6 +4,8 @@ mysqli_disable_reads_from_master()
 <?php
 require_once('skipif.inc');
 require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
+
 if (!function_exists('mysqli_disable_reads_from_master')) {
 	die("skip mysqli_disable_reads_from_master() not available");
 }

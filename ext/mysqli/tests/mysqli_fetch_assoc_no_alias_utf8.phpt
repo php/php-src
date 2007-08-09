@@ -4,6 +4,7 @@ mysqli_fetch_assoc() - utf8
 <?php
 	require_once('skipif.inc');
 	require_once('skipifemb.inc');
+	require_once('skipifconnectfailure.inc');
 	require('connect.inc');
 
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))

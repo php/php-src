@@ -1,9 +1,11 @@
 --TEST--
 mysqli->autocommit()
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
-<?PHP
+<?php
+	require_once('skipif.inc'); 
+	require_once('skipifemb.inc');
+	require_once('skipifconnectfailure.inc');
+
 	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket)) {
 		printf("skip Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);

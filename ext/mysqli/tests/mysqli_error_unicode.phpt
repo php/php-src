@@ -1,14 +1,17 @@
 --TEST--
 mysqli_error()
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
 
 	$tmp	= NULL; 
-	$link   = NULL;
+	$link	= NULL;
 
 	if (!is_null($tmp = @mysqli_error()))
 		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);

@@ -1,8 +1,10 @@
 --TEST--
 mysqli_debug()
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc');
+<?php
+require_once('skipif.inc');
+require_once('skipifemb.inc');
+
 if (!function_exists('mysqli_debug'))
  	die("skip: mysqli_debug() not available");
 ?>
