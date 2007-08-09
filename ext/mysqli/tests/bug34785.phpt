@@ -1,7 +1,10 @@
 --TEST--
 Bug #34785 (Can not properly subclass mysqli_stmt)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include ("connect.inc");
@@ -21,7 +24,7 @@ Bug #34785 (Can not properly subclass mysqli_stmt)
 	}
 
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 	mysqli_query($link, "SET sql_mode=''");
 
 	$stmt = new my_stmt($link, "SELECT 'foo' FROM DUAL");

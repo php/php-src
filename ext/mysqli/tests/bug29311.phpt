@@ -1,7 +1,10 @@
 --TEST--
 constructor test
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
@@ -9,8 +12,8 @@ constructor test
 	/* class 1 calls parent constructor */
 	class mysql1 extends mysqli {
 		function __construct() {
-			global $host, $user, $passwd;
-			parent::__construct($host, $user, $passwd, "test");
+			global $host, $user, $passwd, $db, $port, $socket;
+			parent::__construct($host, $user, $passwd, $db, $port, $socket);
 		}
 	}
 
@@ -18,8 +21,8 @@ constructor test
 	class mysql2 extends mysqli {
 		
 		function __construct() {
-			global $host, $user, $passwd;
-			$this->connect($host, $user, $passwd, "test");
+			global $host, $user, $passwd, $db, $port, $socket;
+			$this->connect($host, $user, $passwd, $db, $port, $socket);
 		}
 	}
 
@@ -30,7 +33,7 @@ constructor test
 
 	$foo[0] = new mysql1();	
 	$foo[1] = new mysql2();	
-	$foo[2] = new mysql3($host, $user, $passwd, "test");
+	$foo[2] = new mysql3($host, $user, $passwd, $db, $port, $socket);
 
 
 	for ($i=0; $i < 3; $i++) {
