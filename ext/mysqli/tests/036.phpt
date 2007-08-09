@@ -7,6 +7,7 @@ function test: mysqli_insert_id()
 		exit;
 	}
 	require_once('skipif.inc');
+	require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php

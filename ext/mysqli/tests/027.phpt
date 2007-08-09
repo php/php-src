@@ -1,7 +1,10 @@
 --TEST--
 function test: mysqli_stat
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
@@ -10,7 +13,6 @@ function test: mysqli_stat
 	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	$status = mysqli_stat($link);
-
 
 	var_dump(strlen($status) > 0);
 

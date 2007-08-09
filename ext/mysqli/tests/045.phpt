@@ -4,10 +4,10 @@ mysqli_bind_result (SHOW)
 <?php
 	require_once('skipif.inc');
 	require_once('skipifemb.inc');
-
+	require_once('skipifconnectfailure.inc');
+	
 	include "connect.inc";
 	$link = mysqli_connect($host, $user, $passwd);
-
 
 	$stmt = mysqli_prepare($link, "SHOW VARIABLES LIKE 'port'");
 	mysqli_execute($stmt);

@@ -3,6 +3,7 @@ mysqli autocommit/commit/rollback with innodb
 --SKIPIF--
 <?php
 	require_once('skipif.inc');
+	require_once('skipifconnectfailure.inc');
 	include "connect.inc";
 	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 	$result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'");

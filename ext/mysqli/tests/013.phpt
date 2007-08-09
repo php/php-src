@@ -1,7 +1,10 @@
 --TEST--
 mysqli fetch mixed / mysql_query (may fail when using 4.1 library with 5.x server)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
