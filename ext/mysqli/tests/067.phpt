@@ -3,22 +3,22 @@ function test: nested selects (cursors)
 --SKIPIF--
 <?php
 	require_once('skipif.inc');
+	require_once('skipifconnectfailure.inc');
 	include "connect.inc";
 
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		die("skip Cannot connect to check required version");
 
 	/* skip cursor test for versions < 50004 */
-	if ((!$IS_MYSQLND && mysqli_get_client_version() < 50009) ||
+	if ((!$IS_MYSQLND && (mysqli_get_client_version() < 50009)) ||
 			(mysqli_get_server_version($link) < 50009)) {
 			die(sprintf("skip Client library doesn't support cursors (%s/%s)",
-					mysqli_get_client_version(), mysqli_get_server_version($link));
+					mysqli_get_client_version(), mysqli_get_server_version($link)));
 	}
 	mysqli_close($link);
 ?>
 --FILE--
 <?php
-
 	function open_cursor($mysql, $query) {
 		if (!is_object($stmt = $mysql->prepare($query))) {
 			printf("[001] Cannot create statement object for '%s', [%d] %s\n",

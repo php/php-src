@@ -1,8 +1,11 @@
 --TEST--
 function test: mysqli_get_host_info
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";

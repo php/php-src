@@ -7,6 +7,7 @@ mysqli fetch bigint values (ok to fail with 4.1.x)
 		exit;
 	}
 	require_once('skipif.inc');
+	require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
