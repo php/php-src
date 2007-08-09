@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Fixed bug #42198 (SCRIPT_NAME and PHP_SELF truncated when inside a userdir
   and using PATH_INFO). (Dmitry)
 - Fixed bug #42195 (C++ compiler required always). (Jani)
+- Fixed bug #42117 (bzip2.compress loses data in internal buffer). (Philip,
+  Ilia)
 - Fixed bug #42082 (NodeList length zero should be empty). (Hannes)
 - Fixed bug #41973 (./configure --with-ldap=shared fails with
   LDFLAGS="-Wl,--as-needed"). (Nuno)
