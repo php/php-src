@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2007, PHP 5.2.4
+- Fixed bug #42247 (ldap_parse_result() not defined under win32). (Jani)
 - Fixed bug #42237 (stream_copy_to_stream returns invalid values for mmaped 
   streams). (andrew dot minerd at sellingsource dot com, Ilia)
 - Fixed bug #42233 (Problems with æøå in extract()). (Jani)
