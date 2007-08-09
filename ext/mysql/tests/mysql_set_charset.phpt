@@ -3,6 +3,7 @@ mysql_set_charset() - STUB, function usage not recommended
 --SKIPIF--
 <?php
 require_once('skipif.inc');
+require_once('skipifconnectfailure.inc');
 if (!function_exists('mysql_set_charset'))
 	die("skip Function not available");
 ?>
