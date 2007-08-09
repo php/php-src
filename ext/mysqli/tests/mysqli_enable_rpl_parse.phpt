@@ -1,11 +1,12 @@
 --TEST--
 mysqli_enable_rpl_parse()
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
-<?PHP
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_enable_rpl_parse'))
- 	die("skip mysqli_enable_rpl_parse() not available");
+	die("skip mysqli_enable_rpl_parse() not available");
 ?>
 --FILE--
 <?php

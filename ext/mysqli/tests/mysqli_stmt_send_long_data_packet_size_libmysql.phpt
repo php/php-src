@@ -1,9 +1,11 @@
 --TEST--
 mysqli_stmt_send_long_data() - exceed packet size, libmysql - bug #26824
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php
+require_once('skipif.inc');
 require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
+
 if (stristr(mysqli_get_client_info(), 'mysqlnd'))
 	die("skip: test for libmysql");
 ?>

@@ -129,7 +129,7 @@ new mysqli()
 	print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli::mysqli(): (%d/%d): Access denied for user '%sunknown_real'@'%s' (using password: %s) in %s on line %d
+Warning: mysqli::mysqli(): (%d/%d): Access denied for user '%sunknown%s'@'%s' (using password: %s) in %s on line %d
 
 Warning: mysqli::close(): Couldn't fetch mysqli in %s on line %d
 ... and now Exceptions

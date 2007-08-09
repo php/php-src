@@ -1,10 +1,11 @@
 --TEST--
 mysqli_set_opt() - MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE
 --SKIPIF--
-<?php
-
+<?php 
 require_once('skipif.inc');
-require_once('skipifemb.inc');
+require_once('skipifemb.inc'); 
+require_once('skipifconnectfailure.inc');
+
 if (!function_exists('unicode_semantics'))
 	die("skip needs PHP 6");
 if (!unicode_semantics())

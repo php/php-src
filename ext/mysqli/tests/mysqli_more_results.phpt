@@ -1,9 +1,10 @@
 --TEST--
 mysqli_more_results()
 --SKIPIF--
-<?php
+<?php 
 require_once('skipif.inc');
-require_once('skipifemb.inc');
+require_once('skipifemb.inc'); 
+require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php

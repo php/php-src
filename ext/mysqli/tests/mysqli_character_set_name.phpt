@@ -1,8 +1,11 @@
 --TEST--
 mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	/* NOTE: http://bugs.mysql.com/bug.php?id=7923 makes this test fail very likely on all 4.1.x - 5.0.x! */

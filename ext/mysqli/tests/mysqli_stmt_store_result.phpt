@@ -4,6 +4,7 @@ mysqli_stmt_store_result()
 <?php
 require_once('skipif.inc');
 require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php

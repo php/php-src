@@ -4,6 +4,7 @@ Fetching BIT column values using the PS API
 <?php
 	require_once('skipif.inc');
 	require_once('skipifemb.inc');
+	require_once('skipifconnectfailure.inc');
 	require_once('connect.inc');
 	require_once('table.inc');
 	if (mysqli_get_server_version($link) < 50003)

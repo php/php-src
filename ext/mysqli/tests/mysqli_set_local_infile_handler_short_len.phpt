@@ -1,9 +1,10 @@
 --TEST--
 mysqli_set_local_infile_handler() - report shorter buffer
 --SKIPIF--
-<?php
+<?php 
 require_once('skipif.inc');
-require_once('skipifemb.inc');
+require_once('skipifemb.inc'); 
+require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_set_local_infile_handler'))
 	die("skip - function not available.");
