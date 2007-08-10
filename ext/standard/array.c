@@ -1270,33 +1270,36 @@ PHP_FUNCTION(array_search)
 
 static int php_valid_var_name(zstr var_name, int var_name_len, int var_name_type) /* {{{ */
 {
-	int i;
-	
-	if (!var_name.v)
+	int i, ch;
+
+	if (!var_name.v) {
 		return 0;
-	
+	}
+
 	if (var_name_type == IS_STRING) {
 		/* These are allowed as first char: [a-zA-Z_\x7f-\xff] */
-		if (((unsigned char *)var_name.s)[0] == '_' ||
-			(((int)((unsigned char *)var_name.s)[0]) >= 65  /* A    */ && /* Z    */ 90  <= ((int)((unsigned char *)var_name.s)[0])) ||
-			(((int)((unsigned char *)var_name.s)[0]) >= 97  /* a    */ && /* z    */ 122 <= ((int)((unsigned char *)var_name.s)[0])) ||
-			(((int)((unsigned char *)var_name.s)[0]) >= 127 /* 0x7f */ && /* 0xff */ 255 <= ((int)((unsigned char *)var_name.s)[0]))
+		ch = (int)((unsigned char *)var_name.s)[0];
+		if (var_name.s[0] != '_' &&
+			(ch < 65  /* A    */ || /* Z    */ ch > 90)  &&
+			(ch < 97  /* a    */ || /* z    */ ch > 122) &&
+			(ch < 127 /* 0x7f */ || /* 0xff */ ch > 255)
 		) {
-			/* And these as the rest: [a-zA-Z0-9_\x7f-\xff] */
-			if (var_name_len > 1) {
-				for (i = 1; i < var_name_len; i++) {
-					if (((unsigned char*)var_name.s)[i] == '_' ||
-						(((int)((unsigned char *)var_name.s)[i]) >= 48  /* 0    */ && /* 9    */ 57  <= ((int)((unsigned char*)var_name.s)[i])) ||
-						(((int)((unsigned char *)var_name.s)[i]) >= 65  /* A    */ && /* Z    */ 90  <= ((int)((unsigned char*)var_name.s)[i])) ||
-						(((int)((unsigned char *)var_name.s)[i]) >= 97  /* a    */ && /* z    */ 122 <= ((int)((unsigned char*)var_name.s)[i])) ||
-						(((int)((unsigned char *)var_name.s)[i]) >= 127 /* 0x7f */ && /* 0xff */ 255 <= ((int)((unsigned char*)var_name.s)[i]))
-					) { } else {
-						return 0;
-					}
+			return 0;
+		}
+
+		/* And these as the rest: [a-zA-Z0-9_\x7f-\xff] */
+		if (var_name_len > 1) {
+			for (i = 1; i < var_name_len; i++) {
+				ch = (int)((unsigned char *)var_name.s)[i];
+				if (var_name.s[i] != '_' &&
+					(ch < 48  /* 0		*/ || /* 9		*/ ch > 57)  &&
+					(ch < 65  /* A		*/ || /* Z		*/ ch > 90)  &&
+					(ch < 97  /* a		*/ || /* z		*/ ch > 122) &&
+					(ch < 127 /* 0x7f */ || /* 0xff */ ch > 255)
+				) {
+					return 0;
 				}
 			}
-		} else {
-			return 0;
 		}
 	} else {
 		if (!zend_is_valid_identifier(var_name.u, var_name_len)) {
