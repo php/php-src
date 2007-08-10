@@ -157,6 +157,9 @@ int get_dbf_field(dbhead_t *dbh, dbfield_t *dbf)
 		dbf->db_flen = dbfield.dbf_flen[0];
 		dbf->db_fdc = dbfield.dbf_flen[1];
 		break;
+            case 'D':
+		dbf->db_flen = 8;
+		break;
 	    default:
 	    	dbf->db_flen = get_short(dbfield.dbf_flen);
 		break;
