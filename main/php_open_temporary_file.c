@@ -98,7 +98,8 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 {
 	char *trailing_slash;
 	char *opened_path;
-	int path_len = 0;
+	char cwd[MAXPATHLEN];
+	cwd_state new_state;
 	int fd = -1;
 #ifndef HAVE_MKSTEMP
 	int open_flags = O_CREAT | O_TRUNC | O_RDWR
@@ -108,25 +109,36 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		;
 #endif
 
-	if (!path) {
+	if (!path || !path[0]) {
 		return -1;
 	}
 
-	path_len = strlen(path);
+	if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
+		cwd[0] = '\0';
+	}
 
-	if (!path_len || IS_SLASH(path[path_len - 1])) {
+	new_state.cwd = strdup(cwd);
+	new_state.cwd_length = strlen(cwd);
+
+	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)) {
+		free(new_state.cwd);
+		return -1;
+	}
+
+	if (IS_SLASH(new_state.cwd[new_state.cwd_length - 1])) {
 		trailing_slash = "";
 	} else {
 		trailing_slash = "/";
 	}
 
-	if (spprintf(&opened_path, 0, "%s%s%sXXXXXX", path, trailing_slash, pfx) >= MAXPATHLEN) {
+	if (spprintf(&opened_path, 0, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, pfx) >= MAXPATHLEN) {
 		efree(opened_path);
+		free(new_state.cwd);
 		return -1;
 	}
 
 #ifdef PHP_WIN32
-	if (GetTempFileName(path, pfx, 0, opened_path)) {
+	if (GetTempFileName(new_state.cwd, pfx, 0, opened_path)) {
 		/* Some versions of windows set the temp file to be read-only,
 		 * which means that opening it will fail... */
 		VCWD_CHMOD(opened_path, 0600);
@@ -144,6 +156,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 	} else {
 		*opened_path_p = opened_path;
 	}
+	free(new_state.cwd);
 	return fd;
 }
 /* }}} */
