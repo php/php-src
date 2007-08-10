@@ -1,3 +1,465 @@
+2007-08-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/bz2/bz2_filter.c:
+      
+      Fixed bug #42117 (bzip2.compress loses data in internal buffer)
+
+2007-08-09  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/tokenizer/tokenizer_data_gen.sh:
+      - Write to the correct file...
+
+2007-08-09  Mattias Bengtsson  <mattias@secweb.se>
+
+    * ext/gd/libgd/gd_gd.c
+      ext/gd/tests/libgd00101.gd
+      ext/gd/tests/libgd00101.phpt:
+      -MFB: libgd #101, imagecreatefromgd can crash if gdImageCreate fails
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gd.c
+      ext/gd/tests/libgd00101.gd
+      ext/gd/tests/libgd00101.gd
+      ext/gd/tests/libgd00101.phpt
+      ext/gd/tests/libgd00101.phpt:
+      - libgd #101, imagecreatefromgd can crash if gdImageCreate fails
+
+    * ext/gd/libgd/xbm.c
+      ext/gd/tests/libgd00094.phpt
+      ext/gd/tests/libgd00094.xbm:
+      -MFB: libgd #94, imagecreatefromxbm can crash if gdImageCreate fails
+
+    * (PHP_5_2)
+      ext/gd/libgd/xbm.c
+      ext/gd/tests/libgd00094.phpt
+      ext/gd/tests/libgd00094.phpt
+      ext/gd/tests/libgd00094.xbm
+      ext/gd/tests/libgd00094.xbm:
+      - libgd #94, imagecreatefromxbm can crash if gdImageCreate fails
+
+2007-08-09  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysql/tests/mysql_fetch_array.phpt
+      ext/mysql/tests/mysql_fetch_assoc.phpt
+      ext/mysql/tests/mysql_fetch_field.phpt
+      ext/mysql/tests/mysql_fetch_lengths.phpt
+      ext/mysql/tests/mysql_fetch_object.phpt
+      ext/mysql/tests/mysql_fetch_row.phpt
+      ext/mysql/tests/mysql_field_flags.phpt
+      ext/mysql/tests/mysql_field_len.phpt
+      ext/mysql/tests/mysql_field_name.phpt
+      ext/mysql/tests/mysql_field_seek.phpt
+      ext/mysql/tests/mysql_field_table.phpt
+      ext/mysql/tests/mysql_field_type.phpt
+      ext/mysql/tests/mysql_free_result.phpt
+      ext/mysql/tests/mysql_get_host_info.phpt
+      ext/mysql/tests/mysql_get_proto_info.phpt
+      ext/mysql/tests/mysql_get_server_info.phpt
+      ext/mysql/tests/mysql_info.phpt
+      ext/mysql/tests/mysql_insert_id.phpt
+      ext/mysql/tests/mysql_list_dbs.phpt
+      ext/mysql/tests/mysql_list_fields.phpt
+      ext/mysql/tests/mysql_list_processes.phpt
+      ext/mysql/tests/mysql_list_tables.phpt
+      ext/mysql/tests/mysql_num_fields.phpt
+      ext/mysql/tests/mysql_num_rows.phpt
+      ext/mysql/tests/mysql_pconnect.phpt
+      ext/mysql/tests/mysql_phpinfo.phpt
+      ext/mysql/tests/mysql_ping.phpt
+      ext/mysql/tests/mysql_query.phpt
+      ext/mysql/tests/mysql_real_escape_string.phpt
+      ext/mysql/tests/mysql_result.phpt
+      ext/mysql/tests/mysql_select_db.phpt
+      ext/mysql/tests/mysql_set_charset.phpt
+      ext/mysql/tests/mysql_stat.phpt
+      ext/mysql/tests/mysql_tablename.phpt
+      ext/mysql/tests/mysql_thread_id.phpt
+      ext/mysql/tests/mysql_unbuffered_query.phpt
+      ext/mysql/tests/skipifconnectfailure.inc:
+      Same as for ext/mysqli tests: addition of a new environment variable
+      MYSQL_TEST_SKIP_CONNECT_FAILURE  which controls how to deal with
+      connection
+      problems. If MYSQL_TEST_SKIP_CONNECT_FAILURE = false (default) connection
+      problems will make a test fail. If you set MYSQL_TEST_SKIP_CONNECT_FAILURE
+      to any value that evaluates to true in PHP, a test which cannot connect to
+      the database will be skipped.
+
+    * ext/mysqli/tests/local_infile_tools.inc
+      ext/mysqli/tests/reflection_tools.inc:
+      I forgot those files when merging mysqlnd SVN and HEAD. Only required by
+      tests that test experimental features and are skipped by default that's
+      why
+      I missed them.
+
+    * ext/mysqli/tests/mysqli_connect_oo_warnings.phpt:
+      No need for an extra skip*.inc file, this check is done in just one place
+
+    * ext/mysqli/tests/mysqli_affected_rows.phpt
+      ext/mysqli/tests/mysqli_affected_rows_oo.phpt
+      ext/mysqli/tests/mysqli_autocommit.phpt
+      ext/mysqli/tests/mysqli_autocommit_oo.phpt
+      ext/mysqli/tests/mysqli_change_user.phpt
+      ext/mysqli/tests/mysqli_change_user_oo.phpt
+      ext/mysqli/tests/mysqli_character_set.phpt
+      ext/mysqli/tests/mysqli_character_set_name.phpt
+      ext/mysqli/tests/mysqli_character_set_name_oo.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_driver_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_result_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_result_reflection.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_stmt_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_warning.phpt
+      ext/mysqli/tests/mysqli_close.phpt
+      ext/mysqli/tests/mysqli_close_oo.phpt
+      ext/mysqli/tests/mysqli_commit.phpt
+      ext/mysqli/tests/mysqli_commit_oo.phpt
+      ext/mysqli/tests/mysqli_connect_errno.phpt
+      ext/mysqli/tests/mysqli_connect_error.phpt
+      ext/mysqli/tests/mysqli_connect_oo.phpt
+      ext/mysqli/tests/mysqli_connect_oo_warnings.phpt
+      ext/mysqli/tests/mysqli_connect_twice.phpt
+      ext/mysqli/tests/mysqli_constants.phpt
+      ext/mysqli/tests/mysqli_data_seek.phpt
+      ext/mysqli/tests/mysqli_data_seek_oo.phpt
+      ext/mysqli/tests/mysqli_debug.phpt
+      ext/mysqli/tests/mysqli_disable_reads_from_master.phpt
+      ext/mysqli/tests/mysqli_disable_rpl_parse.phpt
+      ext/mysqli/tests/mysqli_driver.phpt
+      ext/mysqli/tests/mysqli_dump_debug_info.phpt
+      ext/mysqli/tests/mysqli_dump_debug_info_oo.phpt
+      ext/mysqli/tests/mysqli_embedded_connect.phpt
+      ext/mysqli/tests/mysqli_enable_reads_from_master.phpt
+      ext/mysqli/tests/mysqli_enable_rpl_parse.phpt
+      ext/mysqli/tests/mysqli_errno.phpt
+      ext/mysqli/tests/mysqli_errno_oo.phpt
+      ext/mysqli/tests/mysqli_error.phpt
+      ext/mysqli/tests/mysqli_error_oo.phpt
+      ext/mysqli/tests/mysqli_error_unicode.phpt
+      ext/mysqli/tests/mysqli_explain_metadata.phpt
+      ext/mysqli/tests/mysqli_fetch_all.phpt
+      ext/mysqli/tests/mysqli_fetch_all_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_array.phpt
+      ext/mysqli/tests/mysqli_fetch_array_assoc.phpt
+      ext/mysqli/tests/mysqli_fetch_array_many_rows.phpt
+      ext/mysqli/tests/mysqli_fetch_array_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc_bit.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc_no_alias.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc_no_alias_utf8.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_field.phpt
+      ext/mysqli/tests/mysqli_fetch_field_direct.phpt
+      ext/mysqli/tests/mysqli_fetch_field_direct_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_field_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_fields.phpt
+      ext/mysqli/tests/mysqli_fetch_lengths.phpt
+      ext/mysqli/tests/mysqli_fetch_lengths_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_object.phpt
+      ext/mysqli/tests/mysqli_fetch_object_no_constructor.phpt
+      ext/mysqli/tests/mysqli_fetch_object_no_object.phpt
+      ext/mysqli/tests/mysqli_fetch_object_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_row.phpt
+      ext/mysqli/tests/mysqli_field_count.phpt
+      ext/mysqli/tests/mysqli_field_seek.phpt
+      ext/mysqli/tests/mysqli_field_tell.phpt
+      ext/mysqli/tests/mysqli_fork.phpt
+      ext/mysqli/tests/mysqli_free_result.phpt
+      ext/mysqli/tests/mysqli_get_cache_stats.phpt
+      ext/mysqli/tests/mysqli_get_cache_stats_free_buffered.phpt
+      ext/mysqli/tests/mysqli_get_charset.phpt
+      ext/mysqli/tests/mysqli_get_client_info.phpt
+      ext/mysqli/tests/mysqli_get_client_stats.phpt
+      ext/mysqli/tests/mysqli_get_client_version.phpt
+      ext/mysqli/tests/mysqli_get_connection_stats.phpt
+      ext/mysqli/tests/mysqli_get_host_info.phpt
+      ext/mysqli/tests/mysqli_get_proto_info.phpt
+      ext/mysqli/tests/mysqli_get_server_info.phpt
+      ext/mysqli/tests/mysqli_get_server_version.phpt
+      ext/mysqli/tests/mysqli_get_warnings.phpt
+      ext/mysqli/tests/mysqli_info.phpt
+      ext/mysqli/tests/mysqli_init.phpt
+      ext/mysqli/tests/mysqli_insert_id.phpt
+      ext/mysqli/tests/mysqli_kill.phpt
+      ext/mysqli/tests/mysqli_more_results.phpt
+      ext/mysqli/tests/mysqli_multi_query.phpt
+      ext/mysqli/tests/mysqli_mysqli_result_invalid_mode.phpt
+      ext/mysqli/tests/mysqli_next_result.phpt
+      ext/mysqli/tests/mysqli_num_fields.phpt
+      ext/mysqli/tests/mysqli_num_rows.phpt
+      ext/mysqli/tests/mysqli_options.phpt
+      ext/mysqli/tests/mysqli_options_init_command.phpt
+      ext/mysqli/tests/mysqli_pconnect.phpt
+      ext/mysqli/tests/mysqli_phpinfo.phpt
+      ext/mysqli/tests/mysqli_ping.phpt
+      ext/mysqli/tests/mysqli_prepare.phpt
+      ext/mysqli/tests/mysqli_prepare_no_object.phpt
+      ext/mysqli/tests/mysqli_query.phpt
+      ext/mysqli/tests/mysqli_query_unicode.phpt
+      ext/mysqli/tests/mysqli_real_connect.phpt
+      ext/mysqli/tests/mysqli_real_escape_string.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_unicode.phpt
+      ext/mysqli/tests/mysqli_real_query.phpt
+      ext/mysqli/tests/mysqli_report.phpt
+      ext/mysqli/tests/mysqli_report_wo_ps.phpt
+      ext/mysqli/tests/mysqli_result_references.phpt
+      ext/mysqli/tests/mysqli_result_references_mysqlnd.phpt
+      ext/mysqli/tests/mysqli_result_unclonable.phpt
+      ext/mysqli/tests/mysqli_rollback.phpt
+      ext/mysqli/tests/mysqli_select_db.phpt
+      ext/mysqli/tests/mysqli_set_charset.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_default.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_bad_character.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_buffer_overflow.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_close_link.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_closefile.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_kill_link.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_negative_len.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_nested_call.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_new_query.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_nofileop.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_replace_buffer.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_short_len.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_unregister.phpt
+      ext/mysqli/tests/mysqli_set_opt.phpt
+      ext/mysqli/tests/mysqli_set_opt_numeric_and_datetime_as_unicode.phpt
+      ext/mysqli/tests/mysqli_sqlstate.phpt
+      ext/mysqli/tests/mysqli_ssl_set.phpt
+      ext/mysqli/tests/mysqli_stat.phpt
+      ext/mysqli/tests/mysqli_stmt_affected_rows.phpt
+      ext/mysqli/tests/mysqli_stmt_attr_get.phpt
+      ext/mysqli/tests/mysqli_stmt_attr_get_prefetch.phpt
+      ext/mysqli/tests/mysqli_stmt_attr_set.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_param.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_param_references.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_param_type_juggling.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_result.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_result_bit.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_result_references.phpt
+      ext/mysqli/tests/mysqli_stmt_close.phpt
+      ext/mysqli/tests/mysqli_stmt_data_seek.phpt
+      ext/mysqli/tests/mysqli_stmt_errno.phpt
+      ext/mysqli/tests/mysqli_stmt_error.phpt
+      ext/mysqli/tests/mysqli_stmt_execute.phpt
+      ext/mysqli/tests/mysqli_stmt_fetch.phpt
+      ext/mysqli/tests/mysqli_stmt_fetch_bit.phpt
+      ext/mysqli/tests/mysqli_stmt_fetch_fields_win32_unicode.phpt
+      ext/mysqli/tests/mysqli_stmt_field_count.phpt
+      ext/mysqli/tests/mysqli_stmt_free_result.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result2.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result_bit.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result_field_count.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result_metadata.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result_metadata_fetch_field.phpt
+      ext/mysqli/tests/mysqli_stmt_get_result_seek.phpt
+      ext/mysqli/tests/mysqli_stmt_get_warnings.phpt
+      ext/mysqli/tests/mysqli_stmt_init.phpt
+      ext/mysqli/tests/mysqli_stmt_insert_id.phpt
+      ext/mysqli/tests/mysqli_stmt_num_rows.phpt
+      ext/mysqli/tests/mysqli_stmt_param_count.phpt
+      ext/mysqli/tests/mysqli_stmt_prepare.phpt
+      ext/mysqli/tests/mysqli_stmt_reset.phpt
+      ext/mysqli/tests/mysqli_stmt_result_metadata.phpt
+      ext/mysqli/tests/mysqli_stmt_result_metadata_sqltests.phpt
+      ext/mysqli/tests/mysqli_stmt_send_long_data.phpt
+      ext/mysqli/tests/mysqli_stmt_send_long_data_packet_size_libmysql.phpt
+      ext/mysqli/tests/mysqli_stmt_send_long_data_packet_size_mysqlnd.phpt
+      ext/mysqli/tests/mysqli_stmt_sqlstate.phpt
+      ext/mysqli/tests/mysqli_stmt_store_result.phpt
+      ext/mysqli/tests/mysqli_stmt_unclonable.phpt
+      ext/mysqli/tests/mysqli_store_result.phpt
+      ext/mysqli/tests/mysqli_thread_id.phpt
+      ext/mysqli/tests/mysqli_thread_safe.phpt
+      ext/mysqli/tests/mysqli_unclonable.phpt
+      ext/mysqli/tests/mysqli_use_result.phpt
+      ext/mysqli/tests/mysqli_warning_count.phpt
+      ext/mysqli/tests/mysqli_warning_unclonable.phpt:
+      More changes related to MYSQL_TEST_SKIP_CONNECT_FAILURE.
+
+    * ext/mysqli/tests/mysqli_master_query.phpt
+      ext/mysqli/tests/mysqli_rpl_parse_enabled.phpt
+      ext/mysqli/tests/mysqli_rpl_probe.phpt
+      ext/mysqli/tests/mysqli_rpl_query_type.phpt
+      ext/mysqli/tests/mysqli_send_query.phpt
+      ext/mysqli/tests/mysqli_slave_query.phpt:
+      New tests (stubs?) for a few experimental (to be removed?) functions.
+      The tests will only be run if you set MYSQL_TEST_EXPERIMENTAL = 1.
+
+    * ext/mysqli/tests/bug28817.phpt
+      ext/mysqli/tests/bug29311.phpt
+      ext/mysqli/tests/bug30967.phpt
+      ext/mysqli/tests/bug31668.phpt
+      ext/mysqli/tests/bug32405.phpt
+      ext/mysqli/tests/bug33090.phpt
+      ext/mysqli/tests/bug33263.phpt
+      ext/mysqli/tests/bug33491.phpt
+      ext/mysqli/tests/bug34785.phpt
+      ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/bug35103.phpt
+      ext/mysqli/tests/bug35517.phpt
+      ext/mysqli/tests/bug35759.phpt
+      ext/mysqli/tests/bug36420.phpt
+      ext/mysqli/tests/bug36745.phpt
+      ext/mysqli/tests/bug36949.phpt
+      ext/mysqli/tests/bug37090.phpt
+      ext/mysqli/tests/bug38710.phpt:
+      Next set of files which now feature the new environment variable
+      MYSQL_TEST_SKIP_CONNECT_FAILURE which controls how connection problems
+      are handled: failure (MYSQL_TEST_SKIP_CONNECT_FAILURE = false, default)
+      or skip (MYSQL_TEST_SKIP_CONNECT_FAILURE = true)
+      
+      Also, some minor tweaking of connection parameters in the tests.
+
+2007-08-09  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      bfn
+
+    * (PHP_5_2)
+      ext/ldap/config.w32:
+      MFH:- Fixed bug #42247 (ldap_parse_result() not defined under win32)
+
+    * ext/ldap/config.w32:
+      - Fixed bug #42247 (ldap_parse_result() not defined under win32)
+
+2007-08-09  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysqli/tests/001.phpt
+      ext/mysqli/tests/002.phpt
+      ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/004.phpt
+      ext/mysqli/tests/005.phpt
+      ext/mysqli/tests/006.phpt
+      ext/mysqli/tests/007.phpt
+      ext/mysqli/tests/008.phpt
+      ext/mysqli/tests/009.phpt
+      ext/mysqli/tests/010.phpt
+      ext/mysqli/tests/011.phpt
+      ext/mysqli/tests/012.phpt
+      ext/mysqli/tests/013.phpt
+      ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/015.phpt
+      ext/mysqli/tests/016.phpt
+      ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/018.phpt
+      ext/mysqli/tests/019.phpt
+      ext/mysqli/tests/020.phpt
+      ext/mysqli/tests/021.phpt
+      ext/mysqli/tests/022.phpt
+      ext/mysqli/tests/023.phpt
+      ext/mysqli/tests/024.phpt
+      ext/mysqli/tests/025.phpt
+      ext/mysqli/tests/026.phpt
+      ext/mysqli/tests/027.phpt
+      ext/mysqli/tests/028.phpt
+      ext/mysqli/tests/029.phpt
+      ext/mysqli/tests/030.phpt
+      ext/mysqli/tests/031.phpt
+      ext/mysqli/tests/032.phpt
+      ext/mysqli/tests/033.phpt
+      ext/mysqli/tests/034.phpt
+      ext/mysqli/tests/035.phpt
+      ext/mysqli/tests/036.phpt
+      ext/mysqli/tests/037.phpt
+      ext/mysqli/tests/038.phpt
+      ext/mysqli/tests/039.phpt
+      ext/mysqli/tests/040.phpt
+      ext/mysqli/tests/041.phpt
+      ext/mysqli/tests/042.phpt
+      ext/mysqli/tests/043.phpt
+      ext/mysqli/tests/044.phpt
+      ext/mysqli/tests/045.phpt
+      ext/mysqli/tests/046.phpt
+      ext/mysqli/tests/047.phpt
+      ext/mysqli/tests/048.phpt
+      ext/mysqli/tests/049.phpt
+      ext/mysqli/tests/050.phpt
+      ext/mysqli/tests/051.phpt
+      ext/mysqli/tests/052.phpt
+      ext/mysqli/tests/053.phpt
+      ext/mysqli/tests/054.phpt
+      ext/mysqli/tests/055.phpt
+      ext/mysqli/tests/056.phpt
+      ext/mysqli/tests/057.phpt
+      ext/mysqli/tests/058.phpt
+      ext/mysqli/tests/059.phpt
+      ext/mysqli/tests/060.phpt
+      ext/mysqli/tests/061.phpt
+      ext/mysqli/tests/062.phpt
+      ext/mysqli/tests/063.phpt
+      ext/mysqli/tests/064.phpt
+      ext/mysqli/tests/065.phpt
+      ext/mysqli/tests/066.phpt
+      ext/mysqli/tests/067.phpt
+      ext/mysqli/tests/069.phpt
+      ext/mysqli/tests/070.phpt
+      ext/mysqli/tests/071.phpt
+      ext/mysqli/tests/072.phpt
+      ext/mysqli/tests/074.phpt
+      ext/mysqli/tests/skipifconnectfailure.inc:
+      Introducing new environment variable:
+        MYSQL_TEST_SKIP_CONNECT_FAILURE = false
+      
+      Every test that needs a working MySQL connection now includes
+      skipifconnectfailure.inc. If MYSQL_TEST_SKIP_CONNECT_FAILURE evaluates
+      to true skipifconnectfailure.inc tries to establish a database
+      connection. If no connection can be opened, the test will be skipped.
+      In case of MYSQL_TEST_SKIP_CONNECT_FAILURE = false (default) an no
+      connection, a test who cannot establish a connection will fail.
+      
+      So, if you have a buggy configuration or a server that is sometimes
+      not available, you can now decide if you want the tests to ignore this
+      and skip the test or to fail (MYSQL_TEST_CONNECT_FAILURE = false,
+      default).
+      
+      Other, minor tweaks:
+        042.phpt - whitespace
+        067.phpt - parse error in SKIPIF section fixed
+
+2007-08-09  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/tempnam_variation1-win32.phpt
+      ext/standard/tests/file/tempnam_variation1.phpt
+      ext/standard/tests/file/tempnam_variation2-win32.phpt
+      ext/standard/tests/file/tempnam_variation2.phpt
+      ext/standard/tests/file/tempnam_variation3-win32.phpt
+      ext/standard/tests/file/tempnam_variation3.phpt
+      ext/standard/tests/file/tempnam_variation4.phpt
+      ext/standard/tests/file/tempnam_variation5.phpt
+      ext/standard/tests/file/tempnam_variation6.phpt
+      ext/standard/tests/file/tempnam_variation7-win32.phpt
+      ext/standard/tests/file/tempnam_variation7.phpt:
+      New testcases for tempnam() function
+
+    * ext/standard/tests/file/tempnam_variation1-win32.phpt
+      ext/standard/tests/file/tempnam_variation1-win32.phpt
+      ext/standard/tests/file/tempnam_variation1.phpt
+      ext/standard/tests/file/tempnam_variation1.phpt
+      ext/standard/tests/file/tempnam_variation2-win32.phpt
+      ext/standard/tests/file/tempnam_variation2-win32.phpt
+      ext/standard/tests/file/tempnam_variation2.phpt
+      ext/standard/tests/file/tempnam_variation2.phpt
+      ext/standard/tests/file/tempnam_variation3-win32.phpt
+      ext/standard/tests/file/tempnam_variation3-win32.phpt
+      ext/standard/tests/file/tempnam_variation3.phpt
+      ext/standard/tests/file/tempnam_variation3.phpt
+      ext/standard/tests/file/tempnam_variation4.phpt
+      ext/standard/tests/file/tempnam_variation4.phpt
+      ext/standard/tests/file/tempnam_variation5.phpt
+      ext/standard/tests/file/tempnam_variation5.phpt
+      ext/standard/tests/file/tempnam_variation6.phpt
+      ext/standard/tests/file/tempnam_variation6.phpt
+      ext/standard/tests/file/tempnam_variation7-win32.phpt
+      ext/standard/tests/file/tempnam_variation7-win32.phpt
+      ext/standard/tests/file/tempnam_variation7.phpt
+      ext/standard/tests/file/tempnam_variation7.phpt:
+      
+      file tempnam_variation1-win32.phpt was initially added on branch PHP_5_2.
+
 2007-08-08  Stanislav Malyshev  <stas@zend.com>
 
     * sapi/cgi/cgi_main.c
