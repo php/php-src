@@ -243,8 +243,8 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 
 	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
 		/* Spit it out! */
-		status = BZ_OUTBUFF_FULL;
-		while (status == BZ_OUTBUFF_FULL) {
+		status = BZ_FINISH_OK;
+		while (status == BZ_FINISH_OK) {
 			status = BZ2_bzCompress(&(data->strm), BZ_FINISH);
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
