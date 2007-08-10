@@ -7,6 +7,8 @@ AC_DEFUN([AC_PDO_OCI_VERSION],[
   if test -s "$PDO_OCI_DIR/orainst/unix.rgs"; then
     PDO_OCI_VERSION=`grep '"ocommon"' $PDO_OCI_DIR/orainst/unix.rgs | sed 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
     test -z "$PDO_OCI_VERSION" && PDO_OCI_VERSION=7.3
+  elif test -f $PDO_OCI_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
+    PDO_OCI_VERSION=11.1    
   elif test -f $PDO_OCI_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
     PDO_OCI_VERSION=10.1    
   elif test -f $PDO_OCI_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.9.0; then
@@ -88,10 +90,24 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
     elif test -f $PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/include/oci.h ; then
       PHP_ADD_INCLUDE($PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/include)
       AC_MSG_RESULT($PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/include)
+    elif test -f $PDO_OCI_IC_PREFIX/sdk/include/oci.h ; then
+      PHP_ADD_INCLUDE($PDO_OCI_IC_PREFIX/sdk/include)
+      AC_MSG_RESULT($PDO_OCI_IC_PREFIX/sdk/include)
+    elif test -f $PDO_OCI_IC_PREFIX/client/include/oci.h ; then
+      PHP_ADD_INCLUDE($PDO_OCI_IC_PREFIX/client/include)
+      AC_MSG_RESULT($PDO_OCI_IC_PREFIX/client/include)
     else
       AC_MSG_ERROR([I'm too dumb to figure out where the include dir is in your Instant Client install])
     fi
+    if test -f "$PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/lib/libclntsh.so" ; then
     PDO_OCI_LIB_DIR="$PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/lib"
+    elif test -f "$PDO_OCI_IC_PREFIX/client/lib/libclntsh.so" ; then
+      PDO_OCI_LIB_DIR="$PDO_OCI_IC_PREFIX/client/lib"
+    elif test -f "$PDO_OCI_IC_PREFIX/libclntsh.so" ; then
+      PDO_OCI_LIB_DIR="$PDO_OCI_IC_PREFIX"
+    else
+      AC_MSG_ERROR([I'm too dumb to figure out where the libraries are in your Instant Client install])
+    fi
     PDO_OCI_VERSION="`echo $PDO_OCI_IC_VERS | cut -d. -f1-2`"
   else
     if test -d "$PDO_OCI_DIR/rdbms/public"; then
@@ -138,11 +154,13 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
     9.0)
       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
       ;;
-      
     10.1)
       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
       ;;
     10.2)
+      PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
+      ;;
+    11.1)
       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
       ;;
     *)
@@ -229,7 +247,6 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
   [
     PHP_ADD_EXTENSION_DEP(pdo_oci, pdo)
   ])
-  
 fi
 
 fi
