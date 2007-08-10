@@ -1903,6 +1903,10 @@ PHPAPI int php_copy_file_ex(char *src, char *dest, int src_chk TSRMLS_DC)
 	if (php_stream_stat_path_ex(dest, PHP_STREAM_URL_STAT_QUIET, &dest_s, NULL) != 0) {
 		goto safe_to_copy;
 	}
+	if (S_ISDIR(src_s.sb.st_mode)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument to copy() function cannot be a directory");
+		return FAILURE;
+	}
 	if (!src_s.sb.st_ino || !dest_s.sb.st_ino) {
 		goto no_stat;
 	}
