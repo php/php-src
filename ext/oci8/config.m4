@@ -50,7 +50,16 @@ AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
 
 AC_DEFUN([AC_OCI8IC_VERSION],[
   AC_MSG_CHECKING([Oracle Instant Client version])
-  if test -f $PHP_OCI8_INSTANT_CLIENT/libnnz10.$SHLIB_SUFFIX_NAME; then
+  if test -f $PHP_OCI8_INSTANT_CLIENT/libnnz11.$SHLIB_SUFFIX_NAME; then
+    if test -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
+      if test ! -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME; then
+        AC_MSG_ERROR([Link from $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME to libclntsh.$SHLIB_SUFFIX_NAME.11.1 not found])
+      fi
+      OCI8_VERSION=11.1
+    else
+      AC_MSG_ERROR([Oracle Instant Client library version not supported])
+    fi
+  elif test -f $PHP_OCI8_INSTANT_CLIENT/libnnz10.$SHLIB_SUFFIX_NAME; then
     if test -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
       if test ! -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME; then
         AC_MSG_ERROR([Link from $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME to libclntsh.$SHLIB_SUFFIX_NAME.10.1 not found])
@@ -71,6 +80,8 @@ AC_DEFUN([AC_OCI8_VERSION],[
   if test -s "$OCI8_DIR/orainst/unix.rgs"; then
     OCI8_VERSION=`grep '"ocommon"' $OCI8_DIR/orainst/unix.rgs | $PHP_OCI8_SED 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
     test -z "$OCI8_VERSION" && OCI8_VERSION=7.3
+  elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
+    OCI8_VERSION=11.1    
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
     OCI8_VERSION=10.1    
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.9.0; then
@@ -277,7 +288,7 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
  
       ;;
       
-    10.1)
+    11.1|10.1)
       PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
       PHP_ADD_LIBPATH($OCI8_DIR/$OCI8_LIB_DIR, OCI8_SHARED_LIBADD)
       AC_DEFINE(HAVE_OCI8_ATTR_STATEMENT,1,[ ])
@@ -382,7 +393,7 @@ dnl Header directory for manual installation
 
   AC_OCI8IC_VERSION($PHP_OCI8_INSTANT_CLIENT)
   case $OCI8_VERSION in
-    10.1)
+    11.1|10.1)
       PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
       PHP_ADD_LIBPATH($PHP_OCI8_INSTANT_CLIENT, OCI8_SHARED_LIBADD)
       ;;
