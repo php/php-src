@@ -391,7 +391,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				passwd = Z_STRVAL_PP(yypasswd);
 				charset = Z_STRVAL_PP(yycharset);
 				appname = Z_STRVAL_PP(yyappname);
-				hashed_details_length = spprintf(hashed_details, 0, "sybase_%s_%s_%s_%s_%s", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd), Z_STRVAL_PP(yycharset), Z_STRVAL_PP(yyappname));
+				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s_%s_%s_%s_%s", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd), Z_STRVAL_PP(yycharset), Z_STRVAL_PP(yyappname));
 			}
 			break;
 		default:
@@ -839,16 +839,11 @@ PHP_FUNCTION(sybase_query)
 	while (retvalue!=FAIL && retvalue!=NO_MORE_ROWS) {
 		result->num_rows++;
 		if (result->num_rows > blocks_initialized*SYBASE_ROWS_BLOCK) {
-			result->data = (zval ***) erealloc(result->data,sizeof(zval **)*SYBASE_ROWS_BLOCK*(++blocks_initialized));
+			result->data = (zval ***) safe_erealloc(result->data, SYBASE_ROWS_BLOCK*(++blocks_initialized), sizeof(zval **), 0);
 		}
 		result->data[i] = (zval **) safe_emalloc(sizeof(zval *), num_fields, 0);
 		for (j=1; j<=num_fields; j++) {
 			php_sybase_get_column_content(sybase_ptr, j, &result->data[i][j-1], column_types[j-1]);
-			if (!php_sybase_module.compatability_mode) {
-				zval *cur_value = result->data[i][j-1];
-
-				convert_to_string(cur_value);
-			}
 		}
 		retvalue=dbnextrow(sybase_ptr->link);
 		dbclrbuf(sybase_ptr->link,DBLASTROW(sybase_ptr->link)-1); 

@@ -49,7 +49,7 @@ bool(true)
 resource(%d) of type (sybase-ct result)
 resource(%d) of type (Unknown)
 
-Warning: sybase_num_rows(): %d is not a valid Sybase result resource in %s/test_unbuffered_query.php on line %d
+Warning: sybase_num_rows(): %d is not a valid Sybase result resource in %stest_unbuffered_query.php on line %d
 bool(true)
 resource(%d) of type (sybase-ct result)
 int(%d)
