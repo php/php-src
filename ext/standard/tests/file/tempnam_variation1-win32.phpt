@@ -41,6 +41,7 @@ for($i=1; $i<=10; $i++) {
 }
 
 echo "*** Done ***\n";
+?>
 --EXPECTF--
 *** Testing tempnam() in creation of unique files ***
 -- Iteration 1 --

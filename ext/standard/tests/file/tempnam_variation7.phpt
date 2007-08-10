@@ -56,6 +56,7 @@ for( $i=1; $i<count($names_arr); $i++ ) {
 }
 
 echo "\n*** Done ***\n";
+?>
 --EXPECTF--
 *** Testing tempnam() with invalid/non-existing directory names ***
 -- Iteration 1 --
