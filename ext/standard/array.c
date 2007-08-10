@@ -1272,7 +1272,7 @@ static int php_valid_var_name(zstr var_name, int var_name_len, int var_name_type
 {
 	int i, ch;
 
-	if (!var_name.v) {
+	if (!var_name.v || !var_name_len) {
 		return 0;
 	}
 
@@ -1511,7 +1511,7 @@ PHP_FUNCTION(extract)
 			convert_to_string(&final_name);
 		}
 
-		if (Z_TYPE(final_name) != IS_NULL) {
+		if (Z_TYPE(final_name) != IS_NULL && php_valid_var_name(Z_UNIVAL(final_name), Z_UNILEN(final_name), Z_TYPE(final_name))) {
 			if (extract_refs) {
 				zval **orig_var;
 
