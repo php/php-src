@@ -17,7 +17,7 @@ Sybase-CT bug #22403 (crash when executing a stored procedure without parameters
 
   // Check if stored procedure already exists
   $sp_name= 'phpt_bug22403';
-  var_dump(sybase_select_db('tempdb', $db));
+  var_dump(sybase_select_db(TEMPDB, $db));
   if (!sybase_select_single($db, 'select object_id("'.$sp_name.'")')) {
     echo "Stored procedure {$sp_name} not found, creating\n";
     var_dump(sybase_query('
@@ -63,7 +63,7 @@ bool(false)
 <<< Return: boolean
 bool(false)
 >>> Query: exec does_not_exist
-*** Caught Sybase Server Message #2812 [Severity 16, state 4] at line 1
+*** Caught Sybase Server Message #2812 [Severity 16, state %d] at line 1
     %s
 <<< Return: boolean
 bool(false)
