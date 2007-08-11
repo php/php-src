@@ -1,3 +1,468 @@
+2007-08-10  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/fscanf_error.phpt
+      ext/standard/tests/file/fscanf_variation1.phpt
+      ext/standard/tests/file/fscanf_variation10.phpt
+      ext/standard/tests/file/fscanf_variation11.phpt
+      ext/standard/tests/file/fscanf_variation12.phpt
+      ext/standard/tests/file/fscanf_variation13.phpt
+      ext/standard/tests/file/fscanf_variation14.phpt
+      ext/standard/tests/file/fscanf_variation15.phpt
+      ext/standard/tests/file/fscanf_variation16.phpt
+      ext/standard/tests/file/fscanf_variation17.phpt
+      ext/standard/tests/file/fscanf_variation18.phpt
+      ext/standard/tests/file/fscanf_variation19.phpt
+      ext/standard/tests/file/fscanf_variation2.phpt
+      ext/standard/tests/file/fscanf_variation20.phpt
+      ext/standard/tests/file/fscanf_variation21.phpt
+      ext/standard/tests/file/fscanf_variation22.phpt
+      ext/standard/tests/file/fscanf_variation23.phpt
+      ext/standard/tests/file/fscanf_variation24.phpt
+      ext/standard/tests/file/fscanf_variation25.phpt
+      ext/standard/tests/file/fscanf_variation26.phpt
+      ext/standard/tests/file/fscanf_variation27.phpt
+      ext/standard/tests/file/fscanf_variation28.phpt
+      ext/standard/tests/file/fscanf_variation29.phpt
+      ext/standard/tests/file/fscanf_variation3.phpt
+      ext/standard/tests/file/fscanf_variation30.phpt
+      ext/standard/tests/file/fscanf_variation31.phpt
+      ext/standard/tests/file/fscanf_variation32.phpt
+      ext/standard/tests/file/fscanf_variation33.phpt
+      ext/standard/tests/file/fscanf_variation34.phpt
+      ext/standard/tests/file/fscanf_variation35.phpt
+      ext/standard/tests/file/fscanf_variation36.phpt
+      ext/standard/tests/file/fscanf_variation37.phpt
+      ext/standard/tests/file/fscanf_variation38.phpt
+      ext/standard/tests/file/fscanf_variation39.phpt
+      ext/standard/tests/file/fscanf_variation4.phpt
+      ext/standard/tests/file/fscanf_variation40.phpt
+      ext/standard/tests/file/fscanf_variation41.phpt
+      ext/standard/tests/file/fscanf_variation42.phpt
+      ext/standard/tests/file/fscanf_variation43.phpt
+      ext/standard/tests/file/fscanf_variation44.phpt
+      ext/standard/tests/file/fscanf_variation45.phpt
+      ext/standard/tests/file/fscanf_variation46.phpt
+      ext/standard/tests/file/fscanf_variation47.phpt
+      ext/standard/tests/file/fscanf_variation48.phpt
+      ext/standard/tests/file/fscanf_variation49.phpt
+      ext/standard/tests/file/fscanf_variation5.phpt
+      ext/standard/tests/file/fscanf_variation50.phpt
+      ext/standard/tests/file/fscanf_variation51.phpt
+      ext/standard/tests/file/fscanf_variation52.phpt
+      ext/standard/tests/file/fscanf_variation53.phpt
+      ext/standard/tests/file/fscanf_variation54.phpt
+      ext/standard/tests/file/fscanf_variation55.phpt
+      ext/standard/tests/file/fscanf_variation6.phpt
+      ext/standard/tests/file/fscanf_variation7.phpt
+      ext/standard/tests/file/fscanf_variation8.phpt
+      ext/standard/tests/file/fscanf_variation9.phpt:
+      New testcases for fscanf() function
+
+    * ext/standard/tests/file/fscanf_error.phpt
+      ext/standard/tests/file/fscanf_error.phpt
+      ext/standard/tests/file/fscanf_variation11.phpt
+      ext/standard/tests/file/fscanf_variation11.phpt
+      ext/standard/tests/file/fscanf_variation15.phpt
+      ext/standard/tests/file/fscanf_variation15.phpt
+      ext/standard/tests/file/fscanf_variation16.phpt
+      ext/standard/tests/file/fscanf_variation16.phpt
+      ext/standard/tests/file/fscanf_variation19.phpt
+      ext/standard/tests/file/fscanf_variation19.phpt
+      ext/standard/tests/file/fscanf_variation2.phpt
+      ext/standard/tests/file/fscanf_variation2.phpt
+      ext/standard/tests/file/fscanf_variation23.phpt
+      ext/standard/tests/file/fscanf_variation23.phpt
+      ext/standard/tests/file/fscanf_variation27.phpt
+      ext/standard/tests/file/fscanf_variation27.phpt
+      ext/standard/tests/file/fscanf_variation28.phpt
+      ext/standard/tests/file/fscanf_variation28.phpt
+      ext/standard/tests/file/fscanf_variation31.phpt
+      ext/standard/tests/file/fscanf_variation31.phpt
+      ext/standard/tests/file/fscanf_variation35.phpt
+      ext/standard/tests/file/fscanf_variation35.phpt
+      ext/standard/tests/file/fscanf_variation39.phpt
+      ext/standard/tests/file/fscanf_variation39.phpt
+      ext/standard/tests/file/fscanf_variation43.phpt
+      ext/standard/tests/file/fscanf_variation43.phpt
+      ext/standard/tests/file/fscanf_variation47.phpt
+      ext/standard/tests/file/fscanf_variation47.phpt
+      ext/standard/tests/file/fscanf_variation48.phpt
+      ext/standard/tests/file/fscanf_variation51.phpt
+      ext/standard/tests/file/fscanf_variation51.phpt
+      ext/standard/tests/file/fscanf_variation55.phpt
+      ext/standard/tests/file/fscanf_variation55.phpt
+      ext/standard/tests/file/fscanf_variation6.phpt
+      ext/standard/tests/file/fscanf_variation6.phpt:
+      
+      file fscanf_error.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/fscanf_variation1.phpt
+      ext/standard/tests/file/fscanf_variation1.phpt
+      ext/standard/tests/file/fscanf_variation10.phpt
+      ext/standard/tests/file/fscanf_variation10.phpt
+      ext/standard/tests/file/fscanf_variation12.phpt
+      ext/standard/tests/file/fscanf_variation12.phpt
+      ext/standard/tests/file/fscanf_variation13.phpt
+      ext/standard/tests/file/fscanf_variation13.phpt
+      ext/standard/tests/file/fscanf_variation14.phpt
+      ext/standard/tests/file/fscanf_variation14.phpt
+      ext/standard/tests/file/fscanf_variation17.phpt
+      ext/standard/tests/file/fscanf_variation17.phpt
+      ext/standard/tests/file/fscanf_variation18.phpt
+      ext/standard/tests/file/fscanf_variation18.phpt
+      ext/standard/tests/file/fscanf_variation20.phpt
+      ext/standard/tests/file/fscanf_variation20.phpt
+      ext/standard/tests/file/fscanf_variation21.phpt
+      ext/standard/tests/file/fscanf_variation21.phpt
+      ext/standard/tests/file/fscanf_variation22.phpt
+      ext/standard/tests/file/fscanf_variation22.phpt
+      ext/standard/tests/file/fscanf_variation24.phpt
+      ext/standard/tests/file/fscanf_variation24.phpt
+      ext/standard/tests/file/fscanf_variation25.phpt
+      ext/standard/tests/file/fscanf_variation25.phpt
+      ext/standard/tests/file/fscanf_variation26.phpt
+      ext/standard/tests/file/fscanf_variation26.phpt
+      ext/standard/tests/file/fscanf_variation29.phpt
+      ext/standard/tests/file/fscanf_variation29.phpt
+      ext/standard/tests/file/fscanf_variation3.phpt
+      ext/standard/tests/file/fscanf_variation3.phpt
+      ext/standard/tests/file/fscanf_variation30.phpt
+      ext/standard/tests/file/fscanf_variation30.phpt
+      ext/standard/tests/file/fscanf_variation32.phpt
+      ext/standard/tests/file/fscanf_variation32.phpt
+      ext/standard/tests/file/fscanf_variation33.phpt
+      ext/standard/tests/file/fscanf_variation33.phpt
+      ext/standard/tests/file/fscanf_variation34.phpt
+      ext/standard/tests/file/fscanf_variation34.phpt
+      ext/standard/tests/file/fscanf_variation36.phpt
+      ext/standard/tests/file/fscanf_variation36.phpt
+      ext/standard/tests/file/fscanf_variation37.phpt
+      ext/standard/tests/file/fscanf_variation37.phpt
+      ext/standard/tests/file/fscanf_variation38.phpt
+      ext/standard/tests/file/fscanf_variation38.phpt
+      ext/standard/tests/file/fscanf_variation4.phpt
+      ext/standard/tests/file/fscanf_variation4.phpt
+      ext/standard/tests/file/fscanf_variation40.phpt
+      ext/standard/tests/file/fscanf_variation40.phpt
+      ext/standard/tests/file/fscanf_variation41.phpt
+      ext/standard/tests/file/fscanf_variation41.phpt
+      ext/standard/tests/file/fscanf_variation42.phpt
+      ext/standard/tests/file/fscanf_variation42.phpt
+      ext/standard/tests/file/fscanf_variation44.phpt
+      ext/standard/tests/file/fscanf_variation44.phpt
+      ext/standard/tests/file/fscanf_variation45.phpt
+      ext/standard/tests/file/fscanf_variation45.phpt
+      ext/standard/tests/file/fscanf_variation46.phpt
+      ext/standard/tests/file/fscanf_variation46.phpt
+      ext/standard/tests/file/fscanf_variation48.phpt
+      ext/standard/tests/file/fscanf_variation49.phpt
+      ext/standard/tests/file/fscanf_variation49.phpt
+      ext/standard/tests/file/fscanf_variation5.phpt
+      ext/standard/tests/file/fscanf_variation5.phpt
+      ext/standard/tests/file/fscanf_variation50.phpt
+      ext/standard/tests/file/fscanf_variation50.phpt
+      ext/standard/tests/file/fscanf_variation52.phpt
+      ext/standard/tests/file/fscanf_variation52.phpt
+      ext/standard/tests/file/fscanf_variation53.phpt
+      ext/standard/tests/file/fscanf_variation53.phpt
+      ext/standard/tests/file/fscanf_variation54.phpt
+      ext/standard/tests/file/fscanf_variation54.phpt
+      ext/standard/tests/file/fscanf_variation7.phpt
+      ext/standard/tests/file/fscanf_variation7.phpt
+      ext/standard/tests/file/fscanf_variation8.phpt
+      ext/standard/tests/file/fscanf_variation8.phpt
+      ext/standard/tests/file/fscanf_variation9.phpt
+      ext/standard/tests/file/fscanf_variation9.phpt:
+      
+      file fscanf_variation1.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/htmlentities19.phpt
+      ext/standard/tests/file/htmlspecialchars.phpt:
+      New testcases for htmlentities() & htmlspecialchars()
+
+    * ext/standard/tests/file/htmlentities19.phpt
+      ext/standard/tests/file/htmlentities19.phpt
+      ext/standard/tests/file/htmlspecialchars.phpt
+      ext/standard/tests/file/htmlspecialchars.phpt:
+      
+      file htmlentities19.phpt was initially added on branch PHP_5_2.
+
+2007-08-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/array/extract.phpt
+      ext/standard/tests/array/extract_error.phpt
+      ext/standard/tests/array/extract_variation1.phpt
+      ext/standard/tests/array/extract_variation2.phpt
+      ext/standard/tests/array/extract_variation3.phpt
+      ext/standard/tests/array/extract_variation4.phpt
+      ext/standard/tests/array/extract_variation5.phpt
+      ext/standard/tests/array/extract_variation6.phpt
+      ext/standard/tests/array/extract_variation7.phpt
+      ext/standard/tests/array/extract_variation8.phpt
+      ext/standard/tests/array/extract_variation9.phpt:
+      split the test
+
+2007-08-10  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/sybase/config.m4
+      ext/sybase/php_sybase_db.c
+      ext/sybase/php_sybase_db.h
+      ext/sybase_ct/tests/bug22403.phpt
+      ext/sybase_ct/tests/bug26407.phpt
+      ext/sybase_ct/tests/bug27843.phpt
+      ext/sybase_ct/tests/bug28354.phpt
+      ext/sybase_ct/tests/bug30312.phpt
+      ext/sybase_ct/tests/test.inc
+      ext/sybase_ct/tests/test_fetch_object.phpt
+      ext/sybase_ct/tests/test_fields.phpt
+      ext/sybase_ct/tests/test_long.phpt
+      ext/sybase_ct/tests/test_msghandler.phpt
+      ext/sybase_ct/tests/test_msghandler_handled.phpt
+      ext/sybase_ct/tests/test_unbuffered_query.phpt:
+      MFB: sync
+
+    * (PHP_5_2)
+      ext/sybase/php_sybase_db.c:
+      No dots in error messages!
+
+2007-08-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/array.c:
+      empty/invalid names are not allowed (empty prefixes are)
+
+    * ext/standard/array.c:
+      allow empty prefix (restore 5_2 behavior)
+
+    * (PHP_5_2)
+      ext/standard/tests/array/extract.phpt:
+      .. and remove the original one
+
+    * ext/standard/tests/array/extract_error.phpt
+      ext/standard/tests/array/extract_error.phpt
+      ext/standard/tests/array/extract_variation1.phpt
+      ext/standard/tests/array/extract_variation1.phpt
+      ext/standard/tests/array/extract_variation2.phpt
+      ext/standard/tests/array/extract_variation2.phpt
+      ext/standard/tests/array/extract_variation3.phpt
+      ext/standard/tests/array/extract_variation3.phpt
+      ext/standard/tests/array/extract_variation4.phpt
+      ext/standard/tests/array/extract_variation4.phpt
+      ext/standard/tests/array/extract_variation5.phpt
+      ext/standard/tests/array/extract_variation5.phpt
+      ext/standard/tests/array/extract_variation6.phpt
+      ext/standard/tests/array/extract_variation6.phpt
+      ext/standard/tests/array/extract_variation7.phpt
+      ext/standard/tests/array/extract_variation7.phpt
+      ext/standard/tests/array/extract_variation8.phpt
+      ext/standard/tests/array/extract_variation8.phpt
+      ext/standard/tests/array/extract_variation9.phpt
+      ext/standard/tests/array/extract_variation9.phpt:
+      
+      file extract_error.phpt was initially added on branch PHP_5_2.
+
+2007-08-10  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug42233.phpt:
+      MFB: Fixed the fix for bug #42233 and added test for it.
+
+    * (PHP_5_2)
+      ext/standard/array.c
+      ext/standard/tests/array/bug42233.phpt
+      ext/standard/tests/array/bug42233.phpt:
+      - Fix the fix for bug #42233
+
+2007-08-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/file/tempnam_variation1-win32.phpt
+      ext/standard/tests/file/tempnam_variation1-win32.phpt
+      ext/standard/tests/file/tempnam_variation1.phpt
+      ext/standard/tests/file/tempnam_variation1.phpt
+      ext/standard/tests/file/tempnam_variation2-win32.phpt
+      ext/standard/tests/file/tempnam_variation2-win32.phpt
+      ext/standard/tests/file/tempnam_variation2.phpt
+      ext/standard/tests/file/tempnam_variation2.phpt
+      ext/standard/tests/file/tempnam_variation3-win32.phpt
+      ext/standard/tests/file/tempnam_variation3-win32.phpt
+      ext/standard/tests/file/tempnam_variation3.phpt
+      ext/standard/tests/file/tempnam_variation3.phpt
+      ext/standard/tests/file/tempnam_variation7-win32.phpt
+      ext/standard/tests/file/tempnam_variation7-win32.phpt
+      ext/standard/tests/file/tempnam_variation7.phpt
+      ext/standard/tests/file/tempnam_variation7.phpt:
+      fix tests
+
+2007-08-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/openssl/openssl.c:
+      Fixed generation on DH publick key for given private key
+
+2007-08-10  Antony Dovgal  <antony@zend.com>
+
+    * main/php_open_temporary_file.c:
+      resolve dir before calling mktemp/mkstemp
+      this is tested by ext/standard/tests/file/tempnam_variation2.phpt
+
+    * TSRM/tsrm_virtual_cwd.c:
+      fix ws/cs & folding
+
+    * ext/bz2/bz2_filter.c:
+      MFB: Fixed bug #42117 (bzip2.compress loses data in internal buffer)
+
+    * (PHP_5_2)
+      ext/standard/file.c:
+      nuke the dot
+
+    * ext/standard/file.c:
+      MFB: Fixed bug #42243 (copy() does not ouput an error when the first arg is
+      a dir)
+
+    * ext/dbase/dbf_head.c:
+      MFB: Fixed bug #42261 (header wrong for date field)
+
+2007-08-10  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_2)
+      ext/oci8/config.m4:
+      oci8: MFH with Ilia's OK: changes to build with Oracle Database 11g
+
+    * (PHP_5_2)
+      ext/pdo_oci/config.m4:
+      pdo_oci: MFH with Ilia's OK: changes to build with Oracle Database 11g
+
+    * ext/oci8/config.m4:
+      oci8: merge changes to build with Oracle Database 11g
+
+    * ext/pdo_oci/config.m4:
+      pdo_oci: merge changes to build with Oracle Database 11g
+
+2007-08-10  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/tempnam_error.phpt:
+      more new testcases for tempnam() function
+
+    * ext/standard/tests/file/tempnam_error.phpt
+      ext/standard/tests/file/tempnam_error.phpt:
+      
+      file tempnam_error.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/strtolower-win32.phpt
+      ext/standard/tests/strings/strtolower.phpt
+      ext/standard/tests/strings/strtoupper1-win32.phpt
+      ext/standard/tests/strings/strtoupper1.phpt:
+      New testcases for strtolower() and strtoupper() functions
+
+    * ext/standard/tests/strings/strtolower-win32.phpt
+      ext/standard/tests/strings/strtolower-win32.phpt
+      ext/standard/tests/strings/strtolower.phpt
+      ext/standard/tests/strings/strtolower.phpt
+      ext/standard/tests/strings/strtoupper1-win32.phpt
+      ext/standard/tests/strings/strtoupper1-win32.phpt
+      ext/standard/tests/strings/strtoupper1.phpt
+      ext/standard/tests/strings/strtoupper1.phpt:
+      
+      file strtolower-win32.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/copy_variation1.phpt
+      ext/standard/tests/file/copy_variation10.phpt
+      ext/standard/tests/file/copy_variation11.phpt
+      ext/standard/tests/file/copy_variation12-win32.phpt
+      ext/standard/tests/file/copy_variation12.phpt
+      ext/standard/tests/file/copy_variation13.phpt
+      ext/standard/tests/file/copy_variation14.phpt
+      ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation16-win32.phpt
+      ext/standard/tests/file/copy_variation16.phpt
+      ext/standard/tests/file/copy_variation17.phpt
+      ext/standard/tests/file/copy_variation18.phpt
+      ext/standard/tests/file/copy_variation2-win32.phpt
+      ext/standard/tests/file/copy_variation2.phpt
+      ext/standard/tests/file/copy_variation3-win32.phpt
+      ext/standard/tests/file/copy_variation3.phpt
+      ext/standard/tests/file/copy_variation4-win32.phpt
+      ext/standard/tests/file/copy_variation4.phpt
+      ext/standard/tests/file/copy_variation5-win32.phpt
+      ext/standard/tests/file/copy_variation5.phpt
+      ext/standard/tests/file/copy_variation6-win32.phpt
+      ext/standard/tests/file/copy_variation6.phpt
+      ext/standard/tests/file/copy_variation7.phpt
+      ext/standard/tests/file/copy_variation8.phpt
+      ext/standard/tests/file/copy_variation9.phpt:
+      More new testcases for copy() function
+
+    * ext/standard/tests/file/copy_variation1.phpt
+      ext/standard/tests/file/copy_variation1.phpt
+      ext/standard/tests/file/copy_variation10.phpt
+      ext/standard/tests/file/copy_variation10.phpt
+      ext/standard/tests/file/copy_variation11.phpt
+      ext/standard/tests/file/copy_variation11.phpt
+      ext/standard/tests/file/copy_variation12-win32.phpt
+      ext/standard/tests/file/copy_variation12-win32.phpt
+      ext/standard/tests/file/copy_variation12.phpt
+      ext/standard/tests/file/copy_variation12.phpt
+      ext/standard/tests/file/copy_variation13.phpt
+      ext/standard/tests/file/copy_variation13.phpt
+      ext/standard/tests/file/copy_variation14.phpt
+      ext/standard/tests/file/copy_variation14.phpt
+      ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation16-win32.phpt
+      ext/standard/tests/file/copy_variation16-win32.phpt
+      ext/standard/tests/file/copy_variation16.phpt
+      ext/standard/tests/file/copy_variation16.phpt
+      ext/standard/tests/file/copy_variation17.phpt
+      ext/standard/tests/file/copy_variation17.phpt
+      ext/standard/tests/file/copy_variation18.phpt
+      ext/standard/tests/file/copy_variation18.phpt
+      ext/standard/tests/file/copy_variation2-win32.phpt
+      ext/standard/tests/file/copy_variation2-win32.phpt
+      ext/standard/tests/file/copy_variation2.phpt
+      ext/standard/tests/file/copy_variation2.phpt
+      ext/standard/tests/file/copy_variation3-win32.phpt
+      ext/standard/tests/file/copy_variation3-win32.phpt
+      ext/standard/tests/file/copy_variation3.phpt
+      ext/standard/tests/file/copy_variation3.phpt
+      ext/standard/tests/file/copy_variation4-win32.phpt
+      ext/standard/tests/file/copy_variation4-win32.phpt
+      ext/standard/tests/file/copy_variation4.phpt
+      ext/standard/tests/file/copy_variation4.phpt
+      ext/standard/tests/file/copy_variation5-win32.phpt
+      ext/standard/tests/file/copy_variation5-win32.phpt
+      ext/standard/tests/file/copy_variation5.phpt
+      ext/standard/tests/file/copy_variation5.phpt
+      ext/standard/tests/file/copy_variation6-win32.phpt
+      ext/standard/tests/file/copy_variation6-win32.phpt
+      ext/standard/tests/file/copy_variation6.phpt
+      ext/standard/tests/file/copy_variation6.phpt
+      ext/standard/tests/file/copy_variation7.phpt
+      ext/standard/tests/file/copy_variation7.phpt
+      ext/standard/tests/file/copy_variation8.phpt
+      ext/standard/tests/file/copy_variation8.phpt
+      ext/standard/tests/file/copy_variation9.phpt
+      ext/standard/tests/file/copy_variation9.phpt:
+      
+      file copy_variation1.phpt was initially added on branch PHP_5_2.
+
+2007-08-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/sybase/php_sybase_db.c:
+      Fixed bug #42242 (sybase_connect() crashes)
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/file.c:
+      
+      Fixed bug #42243 (copy() does not ouput an error when the first arg is a
+      dir).
+
+    * (PHP_5_2)
+      NEWS
+      ext/dbase/dbf_head.c:
+      
+      Fixed bug #42261 (header wrong for date field).
+
 2007-08-09  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
