@@ -117,7 +117,7 @@ open_basedir=.
 		if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, 128))
 			printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-		$filename = sys_get_temp_dir() . DIRECTORY_SEPERATOR . 'mysqli_real_connect_phpt';
+		$filename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'mysqli_real_connect_phpt';
 		if (!$fp = fopen($filename, 'w'))
 			printf("[020] Cannot open temporary file %s\n", $filename);
 
