@@ -44,7 +44,7 @@ rmdir(dirname(__FILE__)."/copy_variation13");
 *** Test copy() function: Trying to copy dir to file ***
 *** Testing copy() in copying dir to file ***
 
-Warning: copy(%s): %s
+Warning: copy(): The first argument to copy() function cannot be a directory in %s/copy_variation13.php on line %d
 bool(false)
 bool(true)
 bool(true)
