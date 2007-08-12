@@ -1,3 +1,25 @@
+2007-08-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/file/fscanf_variation3.phpt:
+      more fixed tests
+
+    * ext/standard/tests/file/fscanf_variation33.phpt
+      ext/standard/tests/file/fscanf_variation34.phpt
+      ext/standard/tests/file/fscanf_variation40.phpt
+      ext/standard/tests/file/fscanf_variation9.phpt:
+      fix tests failing on 64bit
+
+2007-08-11  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/mysqli/tests/mysqli_real_connect.phpt:
+      fix typo in tmp file path
+
+2007-08-11  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/standard/file.c:
+      fixed compilation error: S_ISDIR is undefined.
+
 2007-08-10  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * ext/standard/tests/file/fscanf_error.phpt
