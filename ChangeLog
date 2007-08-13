@@ -1,3 +1,155 @@
+2007-08-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/file.c
+      ext/standard/tests/file/copy_variation12.phpt:
+      
+      Fixed copy test as well as the directory check inside copy() function
+
+    * (PHP_5_2)
+      ext/standard/tests/file/copy_variation13.phpt:
+      
+      Fixed test
+
+    * (PHP_5_2)
+      ext/standard/tests/assert/assert_basic2.phpt:
+      WS
+
+2007-08-12  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/fgetss_basic1.phpt
+      ext/standard/tests/file/fgetss_basic2-win32.phpt
+      ext/standard/tests/file/fgetss_basic2.phpt
+      ext/standard/tests/file/fgetss_error.phpt
+      ext/standard/tests/file/fgetss_variation1-win32.phpt
+      ext/standard/tests/file/fgetss_variation1.phpt
+      ext/standard/tests/file/fgetss_variation2.phpt
+      ext/standard/tests/file/fgetss_variation3-win32.phpt
+      ext/standard/tests/file/fgetss_variation3.phpt
+      ext/standard/tests/file/fgetss_variation4.phpt
+      ext/standard/tests/file/fgetss_variation5-win32.phpt
+      ext/standard/tests/file/fgetss_variation5.phpt:
+      New testcases for fgetss() function
+
+    * ext/standard/tests/file/fgetss_basic1.phpt
+      ext/standard/tests/file/fgetss_basic1.phpt
+      ext/standard/tests/file/fgetss_basic2-win32.phpt
+      ext/standard/tests/file/fgetss_basic2-win32.phpt
+      ext/standard/tests/file/fgetss_basic2.phpt
+      ext/standard/tests/file/fgetss_basic2.phpt
+      ext/standard/tests/file/fgetss_error.phpt
+      ext/standard/tests/file/fgetss_error.phpt
+      ext/standard/tests/file/fgetss_variation1-win32.phpt
+      ext/standard/tests/file/fgetss_variation1-win32.phpt
+      ext/standard/tests/file/fgetss_variation1.phpt
+      ext/standard/tests/file/fgetss_variation1.phpt
+      ext/standard/tests/file/fgetss_variation2.phpt
+      ext/standard/tests/file/fgetss_variation2.phpt
+      ext/standard/tests/file/fgetss_variation3-win32.phpt
+      ext/standard/tests/file/fgetss_variation3-win32.phpt
+      ext/standard/tests/file/fgetss_variation3.phpt
+      ext/standard/tests/file/fgetss_variation3.phpt
+      ext/standard/tests/file/fgetss_variation4.phpt
+      ext/standard/tests/file/fgetss_variation4.phpt
+      ext/standard/tests/file/fgetss_variation5-win32.phpt
+      ext/standard/tests/file/fgetss_variation5-win32.phpt
+      ext/standard/tests/file/fgetss_variation5.phpt
+      ext/standard/tests/file/fgetss_variation5.phpt:
+      
+      file fgetss_basic1.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/tests/file/007_variation1.phpt
+      ext/standard/tests/file/007_variation10.phpt
+      ext/standard/tests/file/007_variation11-win32.phpt
+      ext/standard/tests/file/007_variation11.phpt
+      ext/standard/tests/file/007_variation12-win32.phpt
+      ext/standard/tests/file/007_variation12.phpt
+      ext/standard/tests/file/007_variation13-win32.phpt
+      ext/standard/tests/file/007_variation13.phpt
+      ext/standard/tests/file/007_variation14.phpt
+      ext/standard/tests/file/007_variation15.phpt
+      ext/standard/tests/file/007_variation16.phpt
+      ext/standard/tests/file/007_variation17.phpt
+      ext/standard/tests/file/007_variation18.phpt
+      ext/standard/tests/file/007_variation19.phpt
+      ext/standard/tests/file/007_variation2.phpt
+      ext/standard/tests/file/007_variation20.phpt
+      ext/standard/tests/file/007_variation21.phpt
+      ext/standard/tests/file/007_variation22.phpt
+      ext/standard/tests/file/007_variation23.phpt
+      ext/standard/tests/file/007_variation24.phpt
+      ext/standard/tests/file/007_variation3.phpt
+      ext/standard/tests/file/007_variation4.phpt
+      ext/standard/tests/file/007_variation5.phpt
+      ext/standard/tests/file/007_variation6.phpt
+      ext/standard/tests/file/007_variation7.phpt
+      ext/standard/tests/file/007_variation8.phpt
+      ext/standard/tests/file/007_variation9.phpt:
+      More new testcases for fopen() & fclose() functions
+
+    * ext/standard/tests/file/007_variation1.phpt
+      ext/standard/tests/file/007_variation1.phpt
+      ext/standard/tests/file/007_variation10.phpt
+      ext/standard/tests/file/007_variation10.phpt
+      ext/standard/tests/file/007_variation11-win32.phpt
+      ext/standard/tests/file/007_variation11-win32.phpt
+      ext/standard/tests/file/007_variation11.phpt
+      ext/standard/tests/file/007_variation11.phpt
+      ext/standard/tests/file/007_variation12-win32.phpt
+      ext/standard/tests/file/007_variation12-win32.phpt
+      ext/standard/tests/file/007_variation12.phpt
+      ext/standard/tests/file/007_variation12.phpt
+      ext/standard/tests/file/007_variation13-win32.phpt
+      ext/standard/tests/file/007_variation13-win32.phpt
+      ext/standard/tests/file/007_variation13.phpt
+      ext/standard/tests/file/007_variation13.phpt
+      ext/standard/tests/file/007_variation14.phpt
+      ext/standard/tests/file/007_variation14.phpt
+      ext/standard/tests/file/007_variation15.phpt
+      ext/standard/tests/file/007_variation15.phpt
+      ext/standard/tests/file/007_variation16.phpt
+      ext/standard/tests/file/007_variation16.phpt
+      ext/standard/tests/file/007_variation17.phpt
+      ext/standard/tests/file/007_variation17.phpt
+      ext/standard/tests/file/007_variation18.phpt
+      ext/standard/tests/file/007_variation18.phpt
+      ext/standard/tests/file/007_variation19.phpt
+      ext/standard/tests/file/007_variation19.phpt
+      ext/standard/tests/file/007_variation2.phpt
+      ext/standard/tests/file/007_variation2.phpt
+      ext/standard/tests/file/007_variation20.phpt
+      ext/standard/tests/file/007_variation20.phpt
+      ext/standard/tests/file/007_variation21.phpt
+      ext/standard/tests/file/007_variation21.phpt
+      ext/standard/tests/file/007_variation22.phpt
+      ext/standard/tests/file/007_variation22.phpt
+      ext/standard/tests/file/007_variation23.phpt
+      ext/standard/tests/file/007_variation23.phpt
+      ext/standard/tests/file/007_variation24.phpt
+      ext/standard/tests/file/007_variation24.phpt
+      ext/standard/tests/file/007_variation3.phpt
+      ext/standard/tests/file/007_variation3.phpt
+      ext/standard/tests/file/007_variation4.phpt
+      ext/standard/tests/file/007_variation4.phpt
+      ext/standard/tests/file/007_variation5.phpt
+      ext/standard/tests/file/007_variation5.phpt
+      ext/standard/tests/file/007_variation6.phpt
+      ext/standard/tests/file/007_variation6.phpt
+      ext/standard/tests/file/007_variation7.phpt
+      ext/standard/tests/file/007_variation7.phpt
+      ext/standard/tests/file/007_variation8.phpt
+      ext/standard/tests/file/007_variation8.phpt
+      ext/standard/tests/file/007_variation9.phpt
+      ext/standard/tests/file/007_variation9.phpt:
+      
+      More new testcases for fopen() & fclose() functions
+
+2007-08-12  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/standard/file.c:
+      MF PHP_5_2
+
 2007-08-11  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/tests/file/fscanf_variation3.phpt:
