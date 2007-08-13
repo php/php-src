@@ -6,3 +6,4 @@
 #define PHP_EXTRA_VERSION "RC2-dev"
 #define PHP_VERSION "5.2.4RC2-dev"
 #define PHP_VERSION_ID 50204
+
