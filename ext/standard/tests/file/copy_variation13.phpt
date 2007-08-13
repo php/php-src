@@ -1,5 +1,5 @@
 --TEST--
-Test copy() function: usage variations - src as dir and dest as an existing file(Bug #42243)
+Test copy() function: usage variations - src as dir and dest as an existing file (Bug #42243)
 --FILE--
 <?php
 /* Prototype: bool copy ( string $source, string $dest );
@@ -44,7 +44,7 @@ rmdir(dirname(__FILE__)."/copy_variation13");
 *** Test copy() function: Trying to copy dir to file ***
 *** Testing copy() in copying dir to file ***
 
-Warning: copy(%s): %s
+Warning: copy(): The first argument to copy() function cannot be a directory in %s/copy_variation13.php on line %d
 bool(false)
 bool(true)
 bool(true)
@@ -59,7 +59,7 @@ int(%d)
 *** Test copy() function: Trying to copy dir to file ***
 *** Testing copy() in copying dir to file ***
 
-Warning: copy(%s): %s
+Warning: copy(): The first argument to copy() function cannot be a directory in %s/copy_variation13.php on line %d
 bool(false)
 bool(true)
 bool(true)
