@@ -1,5 +1,5 @@
 --TEST--
-assert() basic - correct call back values before and after assert.
+assert() - basic - correct call back values before and after assert.
 --INI--
 assert.active = 1
 assert.warning = 1
