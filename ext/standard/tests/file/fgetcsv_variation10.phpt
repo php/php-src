@@ -1,5 +1,5 @@
 --TEST--
-Test fgetcsv() : usage variations - file pointer pointing to EOF (Bug #42175)
+Test fgetcsv() : usage variations - file pointer pointing to EOF 
 --FILE--
 <?php
 /* 
@@ -90,12 +90,12 @@ foreach ($csv_lists as $csv_list) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fgetcsv() : with file pointer pointing to EOF ***
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -105,7 +105,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -115,7 +115,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -125,7 +125,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -135,7 +135,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -145,7 +145,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -155,7 +155,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -165,7 +165,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -175,7 +175,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -185,7 +185,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -195,7 +195,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -205,7 +205,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -215,7 +215,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -225,7 +225,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -235,7 +235,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -245,7 +245,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -255,7 +255,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -265,7 +265,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -275,7 +275,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -285,7 +285,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -295,7 +295,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -305,7 +305,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -315,7 +315,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -325,7 +325,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -335,7 +335,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -345,7 +345,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -355,7 +355,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -365,7 +365,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -375,7 +375,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -385,7 +385,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -395,7 +395,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -405,7 +405,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -415,7 +415,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -425,7 +425,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -435,7 +435,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -445,7 +445,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -455,7 +455,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -465,7 +465,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -475,7 +475,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -485,7 +485,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -495,7 +495,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -505,7 +505,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -515,7 +515,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -525,7 +525,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -535,7 +535,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -545,7 +545,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -555,7 +555,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -565,7 +565,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -575,7 +575,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -585,7 +585,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -595,7 +595,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -605,7 +605,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -615,7 +615,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -625,7 +625,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -635,7 +635,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -645,7 +645,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -655,7 +655,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -665,7 +665,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -675,7 +675,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -685,7 +685,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -695,7 +695,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -705,7 +705,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -715,7 +715,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -725,7 +725,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -735,7 +735,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -745,7 +745,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -755,7 +755,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -765,7 +765,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -775,7 +775,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -785,7 +785,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -795,7 +795,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -805,7 +805,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -815,7 +815,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -825,7 +825,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -835,7 +835,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -845,7 +845,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -855,7 +855,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -865,7 +865,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -875,7 +875,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -885,7 +885,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -895,7 +895,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -905,7 +905,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -915,7 +915,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -925,7 +925,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -935,7 +935,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -945,7 +945,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -955,7 +955,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -965,7 +965,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -975,7 +975,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -985,7 +985,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -995,7 +995,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -1005,7 +1005,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -1015,7 +1015,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1025,7 +1025,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -1035,7 +1035,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -1045,7 +1045,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1055,7 +1055,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -1065,7 +1065,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -1075,7 +1075,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1085,7 +1085,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -1095,7 +1095,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -1105,7 +1105,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1115,7 +1115,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -1125,7 +1125,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -1135,7 +1135,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1145,7 +1145,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -1155,7 +1155,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -1165,7 +1165,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1175,7 +1175,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -1185,7 +1185,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -1195,7 +1195,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1205,7 +1205,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -1215,7 +1215,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -1225,7 +1225,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1235,7 +1235,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -1245,7 +1245,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -1255,7 +1255,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1265,7 +1265,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -1275,7 +1275,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -1285,7 +1285,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1294,12 +1294,12 @@ int(%d)
 bool(true)
 Done
 
---UEXPECT--
+--UEXPECTF--
 *** Testing fgetcsv() : with file pointer pointing to EOF ***
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -1309,7 +1309,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -1319,7 +1319,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1329,7 +1329,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -1339,7 +1339,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -1349,7 +1349,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1359,7 +1359,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -1369,7 +1369,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -1379,7 +1379,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1389,7 +1389,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -1399,7 +1399,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -1409,7 +1409,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1419,7 +1419,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -1429,7 +1429,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(55)
 bool(true)
@@ -1439,7 +1439,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1449,7 +1449,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1459,7 +1459,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1469,7 +1469,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1479,7 +1479,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1489,7 +1489,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1499,7 +1499,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1509,7 +1509,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1519,7 +1519,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1529,7 +1529,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1539,7 +1539,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1549,7 +1549,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1559,7 +1559,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1569,7 +1569,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1579,7 +1579,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1589,7 +1589,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1599,7 +1599,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1609,7 +1609,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1619,7 +1619,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1629,7 +1629,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1639,7 +1639,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1649,7 +1649,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1659,7 +1659,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1669,7 +1669,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1679,7 +1679,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1689,7 +1689,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1699,7 +1699,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1709,7 +1709,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1719,7 +1719,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1729,7 +1729,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1739,7 +1739,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1749,7 +1749,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1759,7 +1759,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1769,7 +1769,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1779,7 +1779,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1789,7 +1789,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1799,7 +1799,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1809,7 +1809,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1819,7 +1819,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1829,7 +1829,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1839,7 +1839,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1849,7 +1849,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1859,7 +1859,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1869,7 +1869,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1879,7 +1879,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1889,7 +1889,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1899,7 +1899,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1909,7 +1909,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1919,7 +1919,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1929,7 +1929,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1939,7 +1939,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1949,7 +1949,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1959,7 +1959,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1969,7 +1969,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1979,7 +1979,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -1989,7 +1989,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -1999,7 +1999,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -2009,7 +2009,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2019,7 +2019,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -2029,7 +2029,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(57)
 bool(true)
@@ -2039,7 +2039,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2049,7 +2049,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -2059,7 +2059,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -2069,7 +2069,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2079,7 +2079,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -2089,7 +2089,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -2099,7 +2099,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2109,7 +2109,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -2119,7 +2119,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -2129,7 +2129,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2139,7 +2139,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -2149,7 +2149,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -2159,7 +2159,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2169,7 +2169,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -2179,7 +2179,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(59)
 bool(true)
@@ -2189,7 +2189,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2199,7 +2199,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -2209,7 +2209,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -2219,7 +2219,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2229,7 +2229,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -2239,7 +2239,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -2249,7 +2249,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2259,7 +2259,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -2269,7 +2269,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -2279,7 +2279,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2289,7 +2289,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -2299,7 +2299,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -2309,7 +2309,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2319,7 +2319,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -2329,7 +2329,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(63)
 bool(true)
@@ -2339,7 +2339,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2349,7 +2349,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -2359,7 +2359,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -2369,7 +2369,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2379,7 +2379,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -2389,7 +2389,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -2399,7 +2399,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2409,7 +2409,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -2419,7 +2419,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -2429,7 +2429,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2439,7 +2439,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -2449,7 +2449,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -2459,7 +2459,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
@@ -2469,7 +2469,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -2479,7 +2479,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(65)
 bool(true)
@@ -2489,7 +2489,7 @@ bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 int(0)
-bool(true)
+bool(false)
 bool(false)
 int(%d)
 bool(true)
