@@ -142,8 +142,7 @@ SPL_METHOD(SimpleXMLIterator, getChildren)
 	if (!sxe->iter.data || sxe->iter.type == SXE_ITER_ATTRLIST) {
 		return; /* return NULL */
 	}
-	return_value->type = IS_OBJECT;
-	return_value->value.obj = zend_objects_store_clone_obj(sxe->iter.data TSRMLS_CC);
+	RETURN_ZVAL(sxe->iter.data, 1, 0);
 }
 
 /* {{{ proto int SimpleXMLIterator::count() U
