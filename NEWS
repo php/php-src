@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2007, PHP 5.2.4
+- Changed oci8 and PDO_OCI to allow configuring with Oracle 11g client
+  libraries (Chris Jones).
 - Fixed bug #42261 (header wrong for date field). (roberto at spadim dot com
   dot br, Ilia)
 - Fixed bug #42247 (ldap_parse_result() not defined under win32). (Jani)
