@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Fixed bug #42292 ($PHP_CONFIG not set for phpized builds). (Jani)
 - Fixed bug #42261 (header wrong for date field). (roberto at spadim dot com
   dot br, Ilia)
+- Fixed bug #42259 (SimpleXMLIterator loses ancestry). (Rob)
 - Fixed bug #42247 (ldap_parse_result() not defined under win32). (Jani)
 - Fixed bug #42243 (copy() does not output an error when the first arg is a
   dir). (Ilia)
