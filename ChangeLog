@@ -1,3 +1,74 @@
+2007-08-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Fixed typo
+
+2007-08-13  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      tests/lang/041.phpt
+      tests/lang/042.phpt
+      tests/lang/043.phpt
+      tests/lang/044.phpt:
+      revert variable class support for 5.2
+
+    * (PHP_5_2)
+      ZendEngine2/zend_language_parser.y:
+      Revert variable class patch for 5.2
+
+2007-08-13  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      main/php_version.h:
+      touch try 2
+
+    * (PHP_5_2)
+      main/php_version.h:
+      touch
+
+    * (PHP_5_2)
+      configure.in:
+      - RC2 on the run
+
+2007-08-13  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      main/php_version.h:
+      Fix version
+
+2007-08-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/zip/tests/oo_properties.phpt:
+      make sure the temp file is closed before removing it
+
+2007-08-13  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/clearstatcache_error.phpt:
+      New testcase for clearstatcache() function
+
+    * ext/standard/tests/file/clearstatcache_error.phpt
+      ext/standard/tests/file/clearstatcache_error.phpt:
+      
+      file clearstatcache_error.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/parse_ini_file.phpt:
+      New testcase for parse_ini_file() function
+
+    * ext/standard/tests/file/parse_ini_file.phpt
+      ext/standard/tests/file/parse_ini_file.phpt:
+      
+      file parse_ini_file.phpt was initially added on branch PHP_5_2.
+
+2007-08-13  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/file.c
+      ext/standard/tests/assert/assert_basic2.phpt
+      ext/standard/tests/file/copy_variation12.phpt
+      ext/standard/tests/file/copy_variation13.phpt:
+      MFB: Fix tests + directory check inside copy() function
+
 2007-08-12  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
