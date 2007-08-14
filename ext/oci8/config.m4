@@ -36,11 +36,11 @@ AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
   fi
 
   AC_MSG_CHECKING([OCI8 libraries dir])
-  if test -d "$OCI8_DIR/lib" -a ! -d "$OCI8_DIR/lib32"; then
+  if test -d "$OCI8_DIR/lib" && test ! -d "$OCI8_DIR/lib32"; then
     OCI8_LIB_DIR=lib
-  elif ! test -d "$OCI8_DIR/lib" -a -d "$OCI8_DIR/lib32"; then
+  elif test ! -d "$OCI8_DIR/lib" && test -d "$OCI8_DIR/lib32"; then
     OCI8_LIB_DIR=lib32
-  elif test -d "$OCI8_DIR/lib" -a -d "$OCI8_DIR/lib32"; then
+  elif test -d "$OCI8_DIR/lib" && test -d "$OCI8_DIR/lib32"; then
     OCI8_LIB_DIR=$TMP_OCI8_LIB_DIR
   else
     AC_MSG_ERROR([Oracle (OCI8) required libraries not found])
