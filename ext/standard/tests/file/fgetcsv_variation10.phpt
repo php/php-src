@@ -1,5 +1,5 @@
 --TEST--
-Test fgetcsv() : usage variations - file pointer pointing to EOF (Bug #42175)
+Test fgetcsv() : usage variations - file pointer pointing to EOF 
 --FILE--
 <?php
 /* 
