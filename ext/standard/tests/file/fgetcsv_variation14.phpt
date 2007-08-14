@@ -1,5 +1,5 @@
 --TEST--
-Test fgetcsv() : usage variations - reading the blank line (Bug #42228)
+Test fgetcsv() : usage variations - reading the blank line 
 --FILE--
 <?php
 /* 
@@ -55,6 +55,11 @@ $loop_counter = 1;
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
+    // read again to struck EOF
+    var_dump( fgetcsv($file_handle, 1024) );
+    // check the file pointer position and if eof
+    var_dump( ftell($file_handle) );
+    var_dump( feof($file_handle) );
 
     // close the file
     fclose($file_handle);
@@ -73,6 +78,9 @@ array(1) {
   string(0) ""
 }
 int(1)
+bool(false)
+bool(false)
+int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
@@ -80,6 +88,9 @@ array(1) {
   [0]=>
   string(0) ""
 }
+int(1)
+bool(false)
+bool(false)
 int(1)
 bool(true)
 
@@ -89,6 +100,9 @@ array(1) {
   string(0) ""
 }
 int(1)
+bool(false)
+bool(false)
+int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
@@ -96,6 +110,9 @@ array(1) {
   [0]=>
   string(0) ""
 }
+int(1)
+bool(false)
+bool(false)
 int(1)
 bool(true)
 
@@ -105,6 +122,9 @@ array(1) {
   string(0) ""
 }
 int(1)
+bool(false)
+bool(false)
+int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
@@ -112,6 +132,9 @@ array(1) {
   [0]=>
   string(0) ""
 }
+int(1)
+bool(false)
+bool(false)
 int(1)
 bool(true)
 
@@ -121,6 +144,9 @@ array(1) {
   string(0) ""
 }
 int(1)
+bool(false)
+bool(false)
+int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
@@ -128,6 +154,9 @@ array(1) {
   [0]=>
   string(0) ""
 }
+int(1)
+bool(false)
+bool(false)
 int(1)
 bool(true)
 
@@ -137,6 +166,9 @@ array(1) {
   string(0) ""
 }
 int(1)
+bool(false)
+bool(false)
+int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
@@ -144,6 +176,9 @@ array(1) {
   [0]=>
   string(0) ""
 }
+int(1)
+bool(false)
+bool(false)
 int(1)
 bool(true)
 
@@ -153,6 +188,9 @@ array(1) {
   string(0) ""
 }
 int(1)
+bool(false)
+bool(false)
+int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
@@ -160,6 +198,9 @@ array(1) {
   [0]=>
   string(0) ""
 }
+int(1)
+bool(false)
+bool(false)
 int(1)
 bool(true)
 
@@ -169,6 +210,9 @@ array(1) {
   string(0) ""
 }
 int(1)
+bool(false)
+bool(false)
+int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
@@ -177,6 +221,9 @@ array(1) {
   string(0) ""
 }
 int(1)
+bool(false)
+bool(false)
+int(1)
 bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
@@ -184,6 +231,9 @@ array(1) {
   [0]=>
   string(0) ""
 }
+int(1)
+bool(false)
+bool(false)
 int(1)
 bool(true)
 Done
