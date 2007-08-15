@@ -1,3 +1,85 @@
+2007-08-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/tidy/TODO:
+      
+      Docs were added
+
+2007-08-14  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/fgetcsv_variation10.phpt
+      ext/standard/tests/file/fgetcsv_variation14.phpt
+      ext/standard/tests/file/fgetcsv_variation2.phpt
+      ext/standard/tests/file/fgetcsv_variation22.phpt
+      ext/standard/tests/file/fgetcsv_variation29.phpt
+      ext/standard/tests/file/fgetcsv_variation30.phpt
+      ext/standard/tests/file/fgetcsv_variation31.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      ext/standard/tests/file/fgetcsv_variation10.phpt
+      ext/standard/tests/file/fgetcsv_variation14.phpt
+      ext/standard/tests/file/fgetcsv_variation2.phpt
+      ext/standard/tests/file/fgetcsv_variation22.phpt
+      ext/standard/tests/file/fgetcsv_variation29.phpt
+      ext/standard/tests/file/fgetcsv_variation30.phpt
+      ext/standard/tests/file/fgetcsv_variation31.phpt:
+      Fix tests
+
+2007-08-14  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/config.m4
+      ext/pdo_oci/config.m4:
+      fix lib/lib32 checks to work with broken Solaris shell
+
+2007-08-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/spl/spl_sxe.c
+      ext/spl/tests/bug42259.phpt:
+      MFH: fix bug #42259 (SimpleXMLIterator loses ancestry)
+      add test
+
+    * ext/spl/spl_sxe.c
+      ext/spl/tests/bug42259.phpt
+      ext/spl/tests/bug42259.phpt:
+      fix bug #42259 (SimpleXMLIterator loses ancestry)
+      add test
+
+2007-08-14  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      bfn
+
+    * (PHP_5_2)
+      scripts/phpize.m4:
+      MFH:- Fixed bug #42292 ($PHP_CONFIG not set for phpized builds)
+
+    * scripts/phpize.m4:
+      - Fix bug #42292 ($PHP_CONFIG not set)
+
+    * (PHP_5_2)
+      NEWS:
+      fix is fix, change is something else
+
+2007-08-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Oracle news
+
+2007-08-14  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      variable class patch was reverted for 5.2.4
+
 2007-08-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
