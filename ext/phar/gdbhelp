@@ -1,4 +1,4 @@
-define pharglobals
+define ___pharglobals
 	if basic_functions_module.zts
 		set $tsrm_ls = ts_resource_ex(0, 0)
 		set $pharglobals = ((zend_executor_globals) (*((void ***) $tsrm_ls))[phar_globals_id-1])
@@ -35,14 +35,14 @@ end
 
 define print_phar
 	set $ind = 1
-	pharglobals
+	___pharglobals
 	printf "{"
 	____print_pharht $pharglobals.phar_fname_map 0
 	printf "}\n"
 end
 
 define print_pharfp
-	pharglobals
+	___pharglobals
 	set $ht = $pharglobals.phar_fname_map
 	set $p = $ht.pListHead
 	set $fpcount = 0
