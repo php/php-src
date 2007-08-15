@@ -41,6 +41,10 @@ define print_phar
 	printf "}\n"
 end
 
+document print_phar
+	dumps open phars and their aliases
+end
+
 define print_pharfp
 	___pharglobals
 	set $ht = $pharglobals.phar_fname_map
@@ -68,4 +72,8 @@ define print_pharfp
 		set $p = $p->pListNext
 	end
 	printf "Open file pointers: %d\n", $fpcount
+end
+
+document print_pharfp
+	displays all open file pointers in phar, and the phars plus entries that are open with reference counts
 end
