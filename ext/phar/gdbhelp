@@ -1,0 +1,42 @@
+define pharglobals
+	if basic_functions_module.zts
+		set $tsrm_ls = ts_resource_ex(0, 0)
+		set $pharglobals = ((zend_executor_globals) (*((void ***) $tsrm_ls))[phar_globals_id-1])
+	else
+		set $pharglobals = phar_globals
+	end
+end
+
+define ____print_pharht
+	set $ht = $arg0
+	set $p = $ht.pListHead
+
+	while $p != 0
+		set $i = $ind
+		while $i > 0
+			printf "  "
+			set $i = $i - 1
+		end
+
+		set $temp = *(phar_archive_data*)$p->pDataPtr
+		____print_str $temp.fname $temp.fname_len
+		printf " => "
+		
+		if $arg1 == 0
+			
+			printf "%i (alias ", $temp.refcount
+			____print_str $temp.alias $temp.alias_len
+			printf ")\n"
+		end
+
+		set $p = $p->pListNext
+	end
+end
+
+define print_phar
+	set $ind = 1
+	pharglobals
+	printf "{"
+	____print_pharht $pharglobals.phar_fname_map 0
+	printf "}\n"
+end
