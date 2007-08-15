@@ -40,3 +40,32 @@ define print_phar
 	____print_pharht $pharglobals.phar_fname_map 0
 	printf "}\n"
 end
+
+define print_pharfp
+	pharglobals
+	set $ht = $pharglobals.phar_fname_map
+	set $p = $ht.pListHead
+	set $fpcount = 0
+
+	while $p != 0
+		set $pharname = (*(phar_archive_data*)$p->pDataPtr).fname
+		set $pharrefcount = (*(phar_archive_data*)$p->pDataPtr).refcount
+		if (*(phar_archive_data*)$p->pDataPtr).fp != 0
+			set $fpcount = $fpcount + 1
+			printf "phar %s is open (%i)\n", $pharname, $pharrefcount
+		end
+		set $manifest = (*(phar_archive_data*)$p->pDataPtr).manifest
+		set $m = $manifest.pListHead
+		while $m != 0
+			if (*(phar_entry_info *)$m->pData).fp
+				set $fpcount = $fpcount + 1
+				set $a = (*(phar_entry_info *)$m->pData).fp_refcount
+				printf "phar %s file %s is open (%i)\n", $pharname, (*(phar_entry_info *)$m->pData).filename, $a
+			end
+			set $m = $m->pListNext
+		end
+
+		set $p = $p->pListNext
+	end
+	printf "Open file pointers: %d\n", $fpcount
+end
