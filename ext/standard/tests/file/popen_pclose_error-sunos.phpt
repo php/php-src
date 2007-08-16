@@ -2,7 +2,7 @@
 Test popen() and pclose function: error conditions
 --SKIPIF--
 <?php
-if( strtoupper( substr(PHP_OS, 0, 3) ) != 'SUN' )
+if(substr(PHP_OS, 0, 3) != 'Sun' )
   die("skip Only Valid for Sun Solaris");
 ?>
 
@@ -42,6 +42,7 @@ Warning: popen() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 resource(%d) of type (stream)
 sh: abc.txt: not found
+
 Warning: Wrong parameter count for pclose() in %s on line %d
 NULL
 
@@ -62,6 +63,7 @@ Warning: popen() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 resource(%d) of type (stream)
 sh: abc.txt: not found
+
 Warning: Wrong parameter count for pclose() in %s on line %d
 NULL
 
