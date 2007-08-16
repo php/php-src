@@ -1,3 +1,9 @@
+2007-08-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/ctype/README:
+      Extension is no longer experimental
+
 2007-08-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
