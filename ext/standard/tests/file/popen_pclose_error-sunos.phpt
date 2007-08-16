@@ -2,9 +2,10 @@
 Test popen() and pclose function: error conditions
 --SKIPIF--
 <?php
-if( strtoupper( substr(PHP_OS, 0, 3) ) != 'SUN' )
-  die("skip Only Valid for Sun Solaris");
+if( substr(PHP_OS, 0, 3) != 'Sun')
+  die("skip Only valid for Sun Solaris");
 ?>
+
 --FILE--
 <?php
 /*
@@ -41,6 +42,7 @@ Warning: Wrong parameter count for popen() in %s on line %d
 NULL
 resource(%d) of type (stream)
 sh: abc.txt: not found
+
 Warning: Wrong parameter count for pclose() in %s on line %d
 NULL
 
