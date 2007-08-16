@@ -50,7 +50,7 @@ string(14) "66.163.161.116"
 
 Warning: Wrong parameter count for ip2long() in %s on line %d
 NULL
-int(-1)
+bool(false)
 bool(false)
 int(1869573999)
 
