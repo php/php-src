@@ -77,3 +77,41 @@ end
 document print_pharfp
 	displays all open file pointers in phar, and the phars plus entries that are open with reference counts
 end
+
+define dump_entry
+	___pharglobals
+	set $ht = $pharglobals.phar_fname_map
+	set $p = $ht.pListHead
+	set $done = 0
+	while $p != 0
+		set $t = (*(phar_archive_data*)$p->pDataPtr)
+		if $t.fname[0] == $arg0[0] || $t.alias[0] == $arg0[0]
+			set $manifest = (*(phar_archive_data*)$p->pDataPtr).manifest
+			set $m = $manifest.pListHead
+			while $m != 0
+				if (*(phar_entry_info *)$m->pData).filename[0] == $arg1[0]
+					if $argc == 3
+						output *((phar_entry_info *)$m->pData)->fp
+					end
+					if $argc == 2
+						output *(phar_entry_info *)$m->pData
+					end
+					printf "\n"
+					set $done = 1
+					loop_break
+				end
+			end
+			set $m = $m->pListNext
+		end
+		if $done == 1
+			loop_break
+		end
+		set $p = $p->pListNext
+	end
+end
+
+document dump_entry
+	dump_entry "pharname"|"pharalias" "filename" [1]
+	display phar_entry_info for a file within a phar.  If the optional third param
+	is passed in, displays the php_stream that is the file's fp
+end
