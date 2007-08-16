@@ -443,7 +443,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filen
 }
 
 
-/* {{{ proto bool stream_wrapper_register(string protocol, string classname)
+/* {{{ proto bool stream_wrapper_register(string protocol, string classname[, integer flags])
    Registers a custom URL protocol handler class */
 PHP_FUNCTION(stream_wrapper_register)
 {
