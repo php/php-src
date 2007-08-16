@@ -4338,7 +4338,8 @@ PHP_FUNCTION(ip2long)
 		/* the only special case when we should return -1 ourselves,
 		 * because inet_addr() considers it wrong.
 		 */
-		if (!memcmp(Z_STRVAL_PP(str), "255.255.255.255", sizeof("255.255.255.255") - 1)) {
+		if (Z_STRLEN_PP(str) == sizeof("255.255.255.255") - 1 &&
+			!memcmp(Z_STRVAL_PP(str), "255.255.255.255", sizeof("255.255.255.255") - 1)) {
 			RETURN_LONG(-1);
 		}
 		
