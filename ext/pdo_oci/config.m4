@@ -78,8 +78,6 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
     AC_MSG_RESULT([yes])
   fi
 
-  AC_PDO_OCI_CHECK_LIB_DIR($PDO_OCI_DIR)
-
   if test "instantclient" = "`echo $PDO_OCI_DIR | cut -d, -f1`" ; then
     PDO_OCI_IC_PREFIX="`echo $PDO_OCI_DIR | cut -d, -f2`"
     PDO_OCI_IC_VERS="`echo $PDO_OCI_DIR | cut -d, -f3`"
@@ -110,6 +108,8 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
     fi
     PDO_OCI_VERSION="`echo $PDO_OCI_IC_VERS | cut -d. -f1-2`"
   else
+    AC_PDO_OCI_CHECK_LIB_DIR($PDO_OCI_DIR)
+
     if test -d "$PDO_OCI_DIR/rdbms/public"; then
       PHP_ADD_INCLUDE($PDO_OCI_DIR/rdbms/public)
       PDO_OCI_INCLUDES="$PDO_OCI_INCLUDES -I$PDO_OCI_DIR/rdbms/public"
@@ -154,15 +154,19 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
     9.0)
       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
       ;;
+
     10.1)
       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
       ;;
+
     10.2)
       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
       ;;
+
     11.1)
       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
       ;;
+
     *)
       AC_MSG_ERROR(Unsupported Oracle version! $PDO_OCI_VERSION)
       ;;
