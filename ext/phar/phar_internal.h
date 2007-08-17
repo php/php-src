@@ -147,6 +147,8 @@ typedef struct _phar_entry_info {
 	php_uint32               crc32;
 	php_uint32               flags;
 	/* remainder */
+	/* when changing compression, save old flags in case fp is NULL */
+	php_uint32               old_flags;
 	zval                     *metadata;
 	php_uint32               filename_len;
 	char                     *filename;

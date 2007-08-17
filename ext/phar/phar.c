@@ -372,6 +372,10 @@ typedef struct {
 /**
  * Retrieve a copy of the file information on a single file within a phar, or null.
  * This also transfers the open file pointer, if any, to the entry.
+ *
+ * If the file does not already exist, this will fail.  Pre-existing files can be
+ * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
+ * assumed that the file pointer, if present, is opened for reading
  */
 static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC) /* {{{ */
 {
@@ -459,6 +463,7 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 				return FAILURE;
 			}
 #endif
+			entry->old_flags = entry->flags;
 			entry->is_modified = 1;
 			phar->is_modified = 1;
 			/* reset file size */
@@ -481,6 +486,7 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 				return FAILURE;
 			}
 			(*ret)->fp = entry->fp;
+			entry->old_flags = entry->flags;
 			entry->is_modified = 1;
 			phar->is_modified = 1;
 			/* reset file size */
@@ -500,13 +506,15 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 {
 	int ret = 0;
 
-	if (--idata->internal_file->fp_refcount <= 0) {
-		idata->internal_file->fp_refcount = 0;
+	if (idata->internal_file) {
+		if (--idata->internal_file->fp_refcount <= 0) {
+			idata->internal_file->fp_refcount = 0;
+		}
+		if (idata->fp && idata->fp != idata->internal_file->fp) {
+			php_stream_close(idata->fp);
+		}
 	}
-	if (idata->fp && idata->fp != idata->internal_file->fp) {
-		php_stream_close(idata->fp);
-	}
-	phar_archive_delref(idata->internal_file->phar TSRMLS_CC);
+	phar_archive_delref(idata->phar TSRMLS_CC);
 	efree(idata);
 	return ret;
 }
@@ -517,9 +525,9 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC) /* {{{ */
  */
 void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 {
-	if (!idata->phar->donotflush) {
-		phar_flush(idata->internal_file->phar, 0, 0, error TSRMLS_CC);
-	}
+	phar_archive_data *phar;
+
+	phar = idata->phar;
 	if (idata->internal_file->fp_refcount < 2) {
 		if (idata->fp && idata->fp != idata->internal_file->fp) {
 			php_stream_close(idata->fp);
@@ -530,6 +538,9 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 	} else {
 		idata->internal_file->is_deleted = 1;
 		phar_entry_delref(idata TSRMLS_CC);
+	}
+	if (!phar->donotflush) {
+		phar_flush(phar, 0, 0, error TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -581,6 +592,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	etemp.offset_within_phar = -1;
 	etemp.is_crc_checked = 1;
 	etemp.flags = PHAR_ENT_PERM_DEF_FILE;
+	etemp.old_flags = PHAR_ENT_PERM_DEF_FILE;
 	etemp.phar = phar;
 	zend_hash_add(&phar->manifest, etemp.filename, path_len, (void*)&etemp, sizeof(phar_entry_info), NULL);
 	/* retrieve the phar manifest copy */
@@ -1630,7 +1642,14 @@ static char * phar_compress_filter(phar_entry_info * entry, int return_unknown) 
  */
 static char * phar_decompress_filter(phar_entry_info * entry, int return_unknown) /* {{{ */
 {
-	switch (entry->flags & PHAR_ENT_COMPRESSION_MASK) {
+	php_uint32 flags;
+
+	if (entry->is_modified) {
+		flags = entry->old_flags;
+	} else {
+		flags = entry->flags;
+	}
+	switch (flags & PHAR_ENT_COMPRESSION_MASK) {
 	case PHAR_ENT_COMPRESSED_GZ:
 		return "zlib.inflate";
 	case PHAR_ENT_COMPRESSED_BZ2:
@@ -1640,6 +1659,97 @@ static char * phar_decompress_filter(phar_entry_info * entry, int return_unknown
 	}
 }
 /* }}} */
+
+/**
+ * helper function to open an internal file's fp just-in-time
+ */
+static phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
+				      char **error TSRMLS_DC)
+{
+	php_uint32 offset, read, total, toread, flags;
+	php_stream_filter *filter/*,  *consumed */;
+	char tmpbuf[8];
+	char *filter_name;
+	char *buffer;
+
+	if (error) {
+		*error = NULL;
+	}
+	/* seek to start of internal file and read it */
+	offset = phar->internal_file_start + entry->offset_within_phar;
+	if (-1 == php_stream_seek(fp, offset, SEEK_SET)) {
+		spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (cannot seek to start of file \"%s\" at offset \"%d\")",
+			phar->fname, entry, offset);
+		return NULL;
+	}
+
+	if (entry->is_modified) {
+		flags = entry->old_flags;
+	} else {
+		flags = entry->flags;
+	}
+
+	if ((flags & PHAR_ENT_COMPRESSION_MASK) != 0) {
+		if ((filter_name = phar_decompress_filter(entry, 0)) != NULL) {
+			filter = php_stream_filter_create(phar_decompress_filter(entry, 0), NULL, php_stream_is_persistent(fp) TSRMLS_CC);
+		} else {
+			filter = NULL;
+		}
+		if (!filter) {
+			spprintf(error, 0, "phar error: unable to read phar \"%s\" (cannot create %s filter while decompressing file \"%s\")", phar->fname, phar_decompress_filter(entry, 1), entry);
+			return NULL;			
+		}
+		/* now we can safely use proper decompression */
+		entry->old_flags = entry->flags;
+		buffer = (char *) emalloc(8192);
+		read = 0;
+		total = 0;
+
+		entry->fp = php_stream_temp_new();
+		php_stream_filter_append(&entry->fp->writefilters, filter);
+		do {
+			if ((total + 8192) > entry->compressed_filesize) {
+				toread = entry->compressed_filesize - total;
+			} else {
+				toread = 8192;
+			}
+			read = php_stream_read(fp, buffer, toread);
+			if (read) {
+				total += read;
+				if (read != php_stream_write(entry->fp, buffer, read)) {
+					efree(buffer);
+					spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
+					php_stream_filter_remove(filter, 1 TSRMLS_CC);
+					return NULL;
+				}
+				if (total == entry->compressed_filesize) {
+					read = 0;
+				} 
+			}
+		} while (read);
+		efree(buffer);
+		php_stream_filter_flush(filter, 1);
+		php_stream_filter_remove(filter, 1 TSRMLS_CC);
+		if (php_stream_tell(fp) != (off_t)(offset + entry->compressed_filesize)) {
+			spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
+			return NULL;
+		}
+		if (php_stream_tell(entry->fp) != (off_t)entry->uncompressed_filesize) {
+			spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
+			return NULL;
+		}
+		php_stream_seek(fp, offset + entry->compressed_filesize, SEEK_SET);
+	} else { /* from here is for non-compressed */
+		buffer = &tmpbuf[0];
+		/* bypass to temp stream */
+		entry->fp = php_stream_temp_new();
+		if (php_stream_copy_to_stream(fp, entry->fp, entry->uncompressed_filesize) != entry->uncompressed_filesize) {
+			spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
+			return NULL;
+		}
+	}
+	return entry;
+}
 
 /**
  * used for fopen('phar://...') and company
@@ -1791,85 +1901,15 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		return NULL;
 	}
 
-	/* seek to start of internal file and read it */
-	offset = idata->phar->internal_file_start + idata->internal_file->offset_within_phar;
-	if (-1 == php_stream_seek(fp, offset, SEEK_SET)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (cannot seek to start of file \"%s\" at offset \"%d\")",
-			idata->phar->fname, internal_file, offset);
+	idata->internal_file = phar_open_jit(idata->phar, idata->internal_file, fp, &error TSRMLS_CC);
+	if (!idata->internal_file) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+		efree(error);
 		phar_entry_delref(idata TSRMLS_CC);
 		efree(internal_file);
 		return NULL;
 	}
-
-	if ((idata->internal_file->flags & PHAR_ENT_COMPRESSION_MASK) != 0) {
-		if ((filter_name = phar_decompress_filter(idata->internal_file, 0)) != NULL) {
-			filter = php_stream_filter_create(phar_decompress_filter(idata->internal_file, 0), NULL, php_stream_is_persistent(fp) TSRMLS_CC);
-		} else {
-			filter = NULL;
-		}
-		if (!filter) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: unable to read phar \"%s\" (cannot create %s filter while decompressing file \"%s\")", idata->phar->fname, phar_decompress_filter(idata->internal_file, 1), internal_file);
-			phar_entry_delref(idata TSRMLS_CC);
-			efree(internal_file);
-			return NULL;			
-		}
-		buffer = (char *) emalloc(8192);
-		read = 0;
-		total = 0;
-
-		idata->fp = php_stream_temp_new();
-		idata->internal_file->fp = idata->fp;
-		php_stream_filter_append(&idata->fp->writefilters, filter);
-		do {
-			if ((total + 8192) > idata->internal_file->compressed_filesize) {
-				toread = idata->internal_file->compressed_filesize - total;
-			} else {
-				toread = 8192;
-			}
-			read = php_stream_read(fp, buffer, toread);
-			if (read) {
-				total += read;
-				if (read != php_stream_write(idata->fp, buffer, read)) {
-					efree(buffer);
-					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
-					phar_entry_delref(idata TSRMLS_CC);
-					php_stream_filter_remove(filter, 1 TSRMLS_CC);
-					efree(internal_file);
-					return NULL;
-				}
-				if (total == idata->internal_file->compressed_filesize) {
-					read = 0;
-				} 
-			}
-		} while (read);
-		efree(buffer);
-		php_stream_filter_flush(filter, 1);
-		php_stream_filter_remove(filter, 1 TSRMLS_CC);
-		if (php_stream_tell(fp) != (off_t)(offset + idata->internal_file->compressed_filesize)) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
-			phar_entry_delref(idata TSRMLS_CC);
-			efree(internal_file);
-			return NULL;
-		}
-		if (php_stream_tell(idata->fp) != (off_t)idata->internal_file->uncompressed_filesize) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
-			phar_entry_delref(idata TSRMLS_CC);
-			efree(internal_file);
-			return NULL;
-		}
-		php_stream_seek(fp, offset + idata->internal_file->compressed_filesize, SEEK_SET);
-	} else { /* from here is for non-compressed */
-		buffer = &tmpbuf[0];
-		/* bypass to temp stream */
-		idata->fp = php_stream_temp_new();
-		idata->internal_file->fp = idata->fp;
-		if (php_stream_copy_to_stream(fp, idata->fp, idata->internal_file->uncompressed_filesize) != idata->internal_file->uncompressed_filesize) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
-			phar_entry_delref(idata TSRMLS_CC);
-			efree(internal_file);
-			return NULL;
-		}
-	}
+	idata->fp = idata->internal_file->fp;
 
 	/* check length, crc32 */
 	if (phar_postprocess_file(wrapper, options, idata, idata->internal_file->crc32 TSRMLS_CC) != SUCCESS) {
@@ -2041,7 +2081,8 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 	if (data->position > (off_t)data->internal_file->uncompressed_filesize) {
 		data->internal_file->uncompressed_filesize = data->position;
 	}
-	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize; 
+	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize;
+	data->internal_file->old_flags = data->internal_file->flags;
 	data->internal_file->is_modified = 1;
 	return count;
 }
@@ -2103,7 +2144,7 @@ static int phar_flush_clean_deleted_apply(void *data TSRMLS_DC) /* {{{ */
 int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC) /* {{{ */
 {
 	static const char newstub[] = "<?php __HALT_COMPILER(); ?>\r\n";
-	phar_entry_info *entry;
+	phar_entry_info *entry, *newentry;
 	int halt_offset, restore_alias_len, global_flags = 0, closeoldfile;
 	char *buf, *pos;
 	char manifest[18], entry_buffer[24];
@@ -2111,7 +2152,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	long offset;
 	size_t wrote;
 	php_uint32 manifest_len, mytime, loc, new_manifest_count;
-	php_uint32 newcrc32;
+	php_uint32 newcrc32, save;
 	php_stream *file, *oldfile, *newfile, *stubfile;
 	php_stream_filter *filter;
 	php_serialize_data_t metadata_hash;
@@ -2297,8 +2338,17 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			continue;
 		}
 		if (!entry->fp) {
-			/* this should never happen */
-			continue;
+			/* re-open internal file pointer just-in-time */
+			save = php_stream_tell(oldfile);
+			newentry = phar_open_jit(archive, entry, oldfile, error TSRMLS_CC);
+			php_stream_seek(oldfile, save, SEEK_SET);
+			if (!newentry) {
+				/* major problem re-opening, so we ignore this file and the error */
+				efree(*error);
+				*error = NULL;
+				continue;
+			}
+			entry = newentry;
 		}
 		file = entry->fp;
 		php_stream_rewind(file);
@@ -2357,6 +2407,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
 		/* generate crc on compressed file */
 		php_stream_rewind(entry->cfp);
+		entry->old_flags = entry->flags;
 		entry->is_modified = 1;
 		global_flags |= (entry->flags & PHAR_ENT_COMPRESSION_MASK);
 	}
@@ -2547,6 +2598,10 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		if (entry->cfp) {
 			php_stream_close(entry->cfp);
 			entry->cfp = 0;
+		}
+		if (entry->fp && entry->fp_refcount == 0) {
+			php_stream_close(entry->fp);
+			entry->fp = 0;
 		}
 	}
 
@@ -3306,8 +3361,18 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		phar_entry_delref(todata TSRMLS_CC);
 		return 0;
 	}
+	todata->internal_file->uncompressed_filesize = todata->internal_file->compressed_filesize = fromdata->internal_file->uncompressed_filesize;
 	phar_entry_delref(fromdata TSRMLS_CC);
 	phar_entry_delref(todata TSRMLS_CC);
+	if (error) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+		efree(error);
+		efree(from_file);
+		efree(to_file);
+		php_url_free(resource_from);
+		php_url_free(resource_to);
+		return 0;
+	}
 	efree(from_file);
 	efree(to_file);
 	php_url_free(resource_from);
