@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Aug 2007, PHP 5.2.4
+16 Aug 2007, PHP 5.2.4RC2
 - Fixed oci8 and PDO_OCI extensions to allow configuring with Oracle 11g client
   libraries. (Chris Jones)
 - Fixed bug #42292 ($PHP_CONFIG not set for phpized builds). (Jani)
