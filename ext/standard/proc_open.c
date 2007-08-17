@@ -95,6 +95,10 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	cnt = zend_hash_num_elements(Z_ARRVAL_P(environment));
 	
 	if (cnt < 1) {
+#ifndef PHP_WIN32
+		env.envarray = (char **) pecalloc(1, sizeof(char *), is_persistent);
+#endif
+		env.envp = (char *) pecalloc(4, 1, is_persistent);
 		return env;
 	}
 
