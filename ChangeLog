@@ -1,3 +1,29 @@
+2007-08-16  Stanislav Malyshev  <stas@zend.com>
+
+    * main/streams/userspace.c
+      main/streams/userspace.c:
+      fix proto
+
+2007-08-16  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      - Check the length too (just like in HEAD)
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c
+      ext/standard/tests/network/ip.phpt:
+      MFH:- Fix bug #41946 (ip2long("") should return FALSE)
+
+2007-08-16  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/popen_pclose_error-sunos.phpt:
+      fix test
+
+    * (PHP_5_2)
+      ext/standard/tests/file/popen_pclose_error-sunos.phpt:
+      fix tests
+
 2007-08-15  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
