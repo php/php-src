@@ -4,12 +4,12 @@ Design
 Main assumption of the model is that the problem that we are to solve is the
 problem of the very long class names in PHP libraries. We would not attempt
 to take autoloader's job or create packaging model - only make names
-manageable. 
+manageable.
 
-Namespaces are defined the following way: 
+Namespaces are defined the following way:
 
-Zend/DB/Connection.php: 
-<?php 
+Zend/DB/Connection.php:
+<?php
 namespace Zend::DB;
 
 class Connection {
@@ -19,15 +19,15 @@ function connect() {
 }
 ?>
 
-Namespace definition does the following: 
+Namespace definition does the following:
 All class and function names inside are automatically prefixed with
 namespace name. Inside namespace, local name always takes precedence over
-global name. It is possible to use the same namespace in several PHP files.
+global name. Several files may be included into the same namespace.
 The namespace declaration statement must be the very first statement in
-file.
+file. The only exception is "declare" statement that can be used before.
 
 Every class and function from namespace can be referred to by the full name
-- e.g. Zend::DB::Connection or Zend::DB::connect - at any time. 
+- e.g. Zend::DB::Connection or Zend::DB::connect - at any time.
 
 <?php
 require 'Zend/Db/Connection.php';
@@ -35,9 +35,9 @@ $x = new Zend::DB::Connection;
 Zend::DB::connect();
 ?>
 
-Namespace or class name can be imported: 
+Namespace or class name can be imported:
 
-<?php 
+<?php
 require 'Zend/Db/Connection.php';
 import Zend::DB;
 import Zend::DB::Connection as DbConnection;
@@ -96,20 +96,73 @@ using ::foo() you are able to call any function from global namespace.
 5) unqualified class names are resolved at run-time. E.q. "new Exception()"
 first tries to use (end even __autoload()) class from current namespace and
 in case of failure uses internal PHP class. Note that using "new A" in
-namespace you can call only create internal PHP class, however using "new
-::A" you are able to create any class from global namespace
+namespace you can call only create class from this namespace or
+internal PHP class, however using "new ::A" you are able to create any class
+from global namespace
 6) Calls to qualified functions are resolved at run-time. Call to
 "A::B::foo()" first tries to call function foo() from namespace "A::B", then
 it tries to find class "A::B (__autoload() it if necessary) and call its
-static function foo() 
+static method foo()
 7) qualified class names are interpreted as class from corresponding
 namespace. So "new A::B::C()" creates class "C" from namespace "A::B".
 
+Examples
+--------
+<?php
+namespace A;
+foo();   // first tries to call "foo" defined in namespace "A"
+         // then calls internal function "foo"
+::foo(); // calls function "foo" defined in global scope
+?>
+
+<?php
+namespace A;
+new B();   // first tries to create object of class "B" defined in namespace "A"
+           // then creates object of internal class "B"
+new ::B(); // creates object of class "B" defined in global scope
+?>
+
+<?php
+namespcae A;
+new A(); // first tries to create object of class "A" from namespace "A" (A::A)
+         // then creates object of internal class "A"
+?>
+
+<?php
+namespace A;
+B::foo();   // first tries to call function "foo" from namespace "A::B"
+            // then calls method "foo" of internal class "B"
+::B::foo(); // first tries to call function "foo" from namespace "B"
+            // then calls method "foo" of class "B" from global scope
+?>
+
+The worst case if class name conflicts with namespace name
+<?php
+namespace A;
+A::foo();   // first tries to call function "foo" from namespace "A::A"
+            // then tries to call method "foo" of class "A" from namespace "A"
+            // then tries to call function "foo" from namespace "A"
+            // then calls method "foo" of internal class "A"
+::A::foo(); // first tries to call function "foo" from namespace "A"
+            // then calls method "foo" of class "A" from global scope
+?>
 
 TODO
 ====
 
 * Rename namespaces to packages?
+
+* Support for namespace constants?
+
+* support for "import ns::*"?
+
+* performance problems
+
+  - calls to internal functions in namespaces are slower, because PHP first
+    lools for such function in current namespace
+
+  - calls to static methods are slower, because PHP first tries to look
+    for corresponding function in namespace
 
 * Extend the Reflection API
 
@@ -120,4 +173,4 @@ TODO
     + getFunctions()
     + getFiles()
 
-  * Add getNamespace() methods to ReflectionClass and ReflectionFunction 
+  * Add getNamespace() methods to ReflectionClass and ReflectionFunction
