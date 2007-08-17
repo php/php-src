@@ -2545,33 +2545,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 
 	if (IS_CONST == IS_CONST && IS_CONST == IS_CONST) {
 		/* try a function in namespace */
-		zstr fname, lcname;
-		unsigned int len, lcname_len;
+		zend_op *op_data = opline+1;
 
-		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
-		if (UG(unicode)) {
-			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
-            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
-			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
-				Z_USTRVAL(opline->op2.u.constant),
-				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
-			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
-		} else {
-			fname.s = emalloc(len + 1);
-			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
-            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
-			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRLEN(opline->op2.u.constant)+1);
-			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
-		}
-		efree(fname.v);
+		ZEND_VM_INC_OPCODE();
 
-		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-			efree(lcname.v);
+		if (zend_u_hash_quick_find(EG(function_table), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
 			EX(object) = NULL;
 			ZEND_VM_NEXT_OPCODE();
 		}
@@ -2580,34 +2558,24 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
 
 		if (!ce) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) {
-				zstr ns;
+			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
+			    op_data->op2.op_type == IS_CONST) {
 
-				if (UG(unicode) && (ns.u = u_memchr(lcname.u, ':', lcname_len)) && ns.u[1] == ':') {
-					ns.u += 2;
-					lcname_len -= (ns.u - lcname.u);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
-		    	} else if (!UG(unicode) && (ns.s = memchr(lcname.s, ':', lcname_len)) && ns.s[1] == ':') {
-					ns.s += 2;
-					lcname_len -= (ns.s - lcname.s);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
+				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
+					EX(object) = NULL;
+					ZEND_VM_NEXT_OPCODE();
 				}
+
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					zstr ce_name;
+					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
 					if (UG(unicode)) {
-						ns.u[lcname_len] = 0;
+						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
 					} else {
-						ns.s[lcname_len] = 0;
+						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
 					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					efree(ce_name.v);
 					if (!ce) {
 						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 					}
@@ -2618,8 +2586,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 			}
 		}
-
-		efree(lcname.v);
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
 	}
@@ -3050,33 +3016,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDL
 
 	if (IS_CONST == IS_CONST && IS_TMP_VAR == IS_CONST) {
 		/* try a function in namespace */
-		zstr fname, lcname;
-		unsigned int len, lcname_len;
+		zend_op *op_data = opline+1;
 
-		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
-		if (UG(unicode)) {
-			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
-            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
-			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
-				Z_USTRVAL(opline->op2.u.constant),
-				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
-			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
-		} else {
-			fname.s = emalloc(len + 1);
-			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
-            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
-			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRLEN(opline->op2.u.constant)+1);
-			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
-		}
-		efree(fname.v);
+		ZEND_VM_INC_OPCODE();
 
-		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-			efree(lcname.v);
+		if (zend_u_hash_quick_find(EG(function_table), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
 			EX(object) = NULL;
 			ZEND_VM_NEXT_OPCODE();
 		}
@@ -3085,34 +3029,24 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDL
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
 
 		if (!ce) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) {
-				zstr ns;
+			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
+			    op_data->op2.op_type == IS_CONST) {
 
-				if (UG(unicode) && (ns.u = u_memchr(lcname.u, ':', lcname_len)) && ns.u[1] == ':') {
-					ns.u += 2;
-					lcname_len -= (ns.u - lcname.u);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
-		    	} else if (!UG(unicode) && (ns.s = memchr(lcname.s, ':', lcname_len)) && ns.s[1] == ':') {
-					ns.s += 2;
-					lcname_len -= (ns.s - lcname.s);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
+				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
+					EX(object) = NULL;
+					ZEND_VM_NEXT_OPCODE();
 				}
+
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					zstr ce_name;
+					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
 					if (UG(unicode)) {
-						ns.u[lcname_len] = 0;
+						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
 					} else {
-						ns.s[lcname_len] = 0;
+						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
 					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					efree(ce_name.v);
 					if (!ce) {
 						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 					}
@@ -3123,8 +3057,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDL
 				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 			}
 		}
-
-		efree(lcname.v);
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
 	}
@@ -3556,33 +3488,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDL
 
 	if (IS_CONST == IS_CONST && IS_VAR == IS_CONST) {
 		/* try a function in namespace */
-		zstr fname, lcname;
-		unsigned int len, lcname_len;
+		zend_op *op_data = opline+1;
 
-		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
-		if (UG(unicode)) {
-			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
-            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
-			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
-				Z_USTRVAL(opline->op2.u.constant),
-				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
-			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
-		} else {
-			fname.s = emalloc(len + 1);
-			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
-            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
-			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRLEN(opline->op2.u.constant)+1);
-			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
-		}
-		efree(fname.v);
+		ZEND_VM_INC_OPCODE();
 
-		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-			efree(lcname.v);
+		if (zend_u_hash_quick_find(EG(function_table), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
 			EX(object) = NULL;
 			ZEND_VM_NEXT_OPCODE();
 		}
@@ -3591,34 +3501,24 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDL
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
 
 		if (!ce) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) {
-				zstr ns;
+			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
+			    op_data->op2.op_type == IS_CONST) {
 
-				if (UG(unicode) && (ns.u = u_memchr(lcname.u, ':', lcname_len)) && ns.u[1] == ':') {
-					ns.u += 2;
-					lcname_len -= (ns.u - lcname.u);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
-		    	} else if (!UG(unicode) && (ns.s = memchr(lcname.s, ':', lcname_len)) && ns.s[1] == ':') {
-					ns.s += 2;
-					lcname_len -= (ns.s - lcname.s);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
+				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
+					EX(object) = NULL;
+					ZEND_VM_NEXT_OPCODE();
 				}
+
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					zstr ce_name;
+					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
 					if (UG(unicode)) {
-						ns.u[lcname_len] = 0;
+						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
 					} else {
-						ns.s[lcname_len] = 0;
+						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
 					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					efree(ce_name.v);
 					if (!ce) {
 						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 					}
@@ -3629,8 +3529,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDL
 				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 			}
 		}
-
-		efree(lcname.v);
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
 	}
@@ -3828,33 +3726,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HA
 
 	if (IS_CONST == IS_CONST && IS_UNUSED == IS_CONST) {
 		/* try a function in namespace */
-		zstr fname, lcname;
-		unsigned int len, lcname_len;
+		zend_op *op_data = opline+1;
 
-		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
-		if (UG(unicode)) {
-			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
-            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
-			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
-				Z_USTRVAL(opline->op2.u.constant),
-				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
-			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
-		} else {
-			fname.s = emalloc(len + 1);
-			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
-            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
-			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRLEN(opline->op2.u.constant)+1);
-			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
-		}
-		efree(fname.v);
+		ZEND_VM_INC_OPCODE();
 
-		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-			efree(lcname.v);
+		if (zend_u_hash_quick_find(EG(function_table), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
 			EX(object) = NULL;
 			ZEND_VM_NEXT_OPCODE();
 		}
@@ -3863,34 +3739,24 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HA
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
 
 		if (!ce) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) {
-				zstr ns;
+			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
+			    op_data->op2.op_type == IS_CONST) {
 
-				if (UG(unicode) && (ns.u = u_memchr(lcname.u, ':', lcname_len)) && ns.u[1] == ':') {
-					ns.u += 2;
-					lcname_len -= (ns.u - lcname.u);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
-		    	} else if (!UG(unicode) && (ns.s = memchr(lcname.s, ':', lcname_len)) && ns.s[1] == ':') {
-					ns.s += 2;
-					lcname_len -= (ns.s - lcname.s);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
+				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
+					EX(object) = NULL;
+					ZEND_VM_NEXT_OPCODE();
 				}
+
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					zstr ce_name;
+					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
 					if (UG(unicode)) {
-						ns.u[lcname_len] = 0;
+						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
 					} else {
-						ns.s[lcname_len] = 0;
+						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
 					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					efree(ce_name.v);
 					if (!ce) {
 						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 					}
@@ -3901,8 +3767,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HA
 				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 			}
 		}
-
-		efree(lcname.v);
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
 	}
@@ -4302,33 +4166,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLE
 
 	if (IS_CONST == IS_CONST && IS_CV == IS_CONST) {
 		/* try a function in namespace */
-		zstr fname, lcname;
-		unsigned int len, lcname_len;
+		zend_op *op_data = opline+1;
 
-		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
-		if (UG(unicode)) {
-			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
-            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
-			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
-				Z_USTRVAL(opline->op2.u.constant),
-				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
-			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
-		} else {
-			fname.s = emalloc(len + 1);
-			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
-            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
-			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRLEN(opline->op2.u.constant)+1);
-			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
-		}
-		efree(fname.v);
+		ZEND_VM_INC_OPCODE();
 
-		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-			efree(lcname.v);
+		if (zend_u_hash_quick_find(EG(function_table), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
 			EX(object) = NULL;
 			ZEND_VM_NEXT_OPCODE();
 		}
@@ -4337,34 +4179,24 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLE
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
 
 		if (!ce) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) {
-				zstr ns;
+			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
+			    op_data->op2.op_type == IS_CONST) {
 
-				if (UG(unicode) && (ns.u = u_memchr(lcname.u, ':', lcname_len)) && ns.u[1] == ':') {
-					ns.u += 2;
-					lcname_len -= (ns.u - lcname.u);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
-		    	} else if (!UG(unicode) && (ns.s = memchr(lcname.s, ':', lcname_len)) && ns.s[1] == ':') {
-					ns.s += 2;
-					lcname_len -= (ns.s - lcname.s);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
+				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
+					EX(object) = NULL;
+					ZEND_VM_NEXT_OPCODE();
 				}
+
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					zstr ce_name;
+					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
 					if (UG(unicode)) {
-						ns.u[lcname_len] = 0;
+						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
 					} else {
-						ns.s[lcname_len] = 0;
+						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
 					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					efree(ce_name.v);
 					if (!ce) {
 						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 					}
@@ -4375,8 +4207,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLE
 				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 			}
 		}
-
-		efree(lcname.v);
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
 	}
@@ -10208,33 +10038,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 	if (IS_VAR == IS_CONST && IS_CONST == IS_CONST) {
 		/* try a function in namespace */
-		zstr fname, lcname;
-		unsigned int len, lcname_len;
+		zend_op *op_data = opline+1;
 
-		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
-		if (UG(unicode)) {
-			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
-            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
-			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
-				Z_USTRVAL(opline->op2.u.constant),
-				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
-			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
-		} else {
-			fname.s = emalloc(len + 1);
-			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
-            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
-			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRLEN(opline->op2.u.constant)+1);
-			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
-		}
-		efree(fname.v);
+		ZEND_VM_INC_OPCODE();
 
-		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-			efree(lcname.v);
+		if (zend_u_hash_quick_find(EG(function_table), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
 			EX(object) = NULL;
 			ZEND_VM_NEXT_OPCODE();
 		}
@@ -10243,34 +10051,24 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDL
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
 
 		if (!ce) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) {
-				zstr ns;
+			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
+			    op_data->op2.op_type == IS_CONST) {
 
-				if (UG(unicode) && (ns.u = u_memchr(lcname.u, ':', lcname_len)) && ns.u[1] == ':') {
-					ns.u += 2;
-					lcname_len -= (ns.u - lcname.u);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
-		    	} else if (!UG(unicode) && (ns.s = memchr(lcname.s, ':', lcname_len)) && ns.s[1] == ':') {
-					ns.s += 2;
-					lcname_len -= (ns.s - lcname.s);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
+				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
+					EX(object) = NULL;
+					ZEND_VM_NEXT_OPCODE();
 				}
+
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					zstr ce_name;
+					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
 					if (UG(unicode)) {
-						ns.u[lcname_len] = 0;
+						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
 					} else {
-						ns.s[lcname_len] = 0;
+						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
 					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					efree(ce_name.v);
 					if (!ce) {
 						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 					}
@@ -10281,8 +10079,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDL
 				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 			}
 		}
-
-		efree(lcname.v);
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
 	}
@@ -11945,33 +11741,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER
 
 	if (IS_VAR == IS_CONST && IS_TMP_VAR == IS_CONST) {
 		/* try a function in namespace */
-		zstr fname, lcname;
-		unsigned int len, lcname_len;
+		zend_op *op_data = opline+1;
 
-		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
-		if (UG(unicode)) {
-			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
-            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
-			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
-				Z_USTRVAL(opline->op2.u.constant),
-				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
-			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
-		} else {
-			fname.s = emalloc(len + 1);
-			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
-            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
-			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRLEN(opline->op2.u.constant)+1);
-			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
-		}
-		efree(fname.v);
+		ZEND_VM_INC_OPCODE();
 
-		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-			efree(lcname.v);
+		if (zend_u_hash_quick_find(EG(function_table), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
 			EX(object) = NULL;
 			ZEND_VM_NEXT_OPCODE();
 		}
@@ -11980,34 +11754,24 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
 
 		if (!ce) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) {
-				zstr ns;
+			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
+			    op_data->op2.op_type == IS_CONST) {
 
-				if (UG(unicode) && (ns.u = u_memchr(lcname.u, ':', lcname_len)) && ns.u[1] == ':') {
-					ns.u += 2;
-					lcname_len -= (ns.u - lcname.u);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
-		    	} else if (!UG(unicode) && (ns.s = memchr(lcname.s, ':', lcname_len)) && ns.s[1] == ':') {
-					ns.s += 2;
-					lcname_len -= (ns.s - lcname.s);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
+				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
+					EX(object) = NULL;
+					ZEND_VM_NEXT_OPCODE();
 				}
+
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					zstr ce_name;
+					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
 					if (UG(unicode)) {
-						ns.u[lcname_len] = 0;
+						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
 					} else {
-						ns.s[lcname_len] = 0;
+						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
 					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					efree(ce_name.v);
 					if (!ce) {
 						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 					}
@@ -12018,8 +11782,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER
 				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 			}
 		}
-
-		efree(lcname.v);
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
 	}
@@ -13674,33 +13436,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER
 
 	if (IS_VAR == IS_CONST && IS_VAR == IS_CONST) {
 		/* try a function in namespace */
-		zstr fname, lcname;
-		unsigned int len, lcname_len;
+		zend_op *op_data = opline+1;
 
-		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
-		if (UG(unicode)) {
-			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
-            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
-			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
-				Z_USTRVAL(opline->op2.u.constant),
-				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
-			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
-		} else {
-			fname.s = emalloc(len + 1);
-			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
-            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
-			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRLEN(opline->op2.u.constant)+1);
-			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
-		}
-		efree(fname.v);
+		ZEND_VM_INC_OPCODE();
 
-		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-			efree(lcname.v);
+		if (zend_u_hash_quick_find(EG(function_table), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
 			EX(object) = NULL;
 			ZEND_VM_NEXT_OPCODE();
 		}
@@ -13709,34 +13449,24 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
 
 		if (!ce) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) {
-				zstr ns;
+			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
+			    op_data->op2.op_type == IS_CONST) {
 
-				if (UG(unicode) && (ns.u = u_memchr(lcname.u, ':', lcname_len)) && ns.u[1] == ':') {
-					ns.u += 2;
-					lcname_len -= (ns.u - lcname.u);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
-		    	} else if (!UG(unicode) && (ns.s = memchr(lcname.s, ':', lcname_len)) && ns.s[1] == ':') {
-					ns.s += 2;
-					lcname_len -= (ns.s - lcname.s);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
+				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
+					EX(object) = NULL;
+					ZEND_VM_NEXT_OPCODE();
 				}
+
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					zstr ce_name;
+					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
 					if (UG(unicode)) {
-						ns.u[lcname_len] = 0;
+						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
 					} else {
-						ns.s[lcname_len] = 0;
+						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
 					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					efree(ce_name.v);
 					if (!ce) {
 						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 					}
@@ -13747,8 +13477,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER
 				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 			}
 		}
-
-		efree(lcname.v);
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
 	}
@@ -14601,33 +14329,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 	if (IS_VAR == IS_CONST && IS_UNUSED == IS_CONST) {
 		/* try a function in namespace */
-		zstr fname, lcname;
-		unsigned int len, lcname_len;
+		zend_op *op_data = opline+1;
 
-		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
-		if (UG(unicode)) {
-			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
-            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
-			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
-				Z_USTRVAL(opline->op2.u.constant),
-				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
-			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
-		} else {
-			fname.s = emalloc(len + 1);
-			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
-            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
-			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRLEN(opline->op2.u.constant)+1);
-			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
-		}
-		efree(fname.v);
+		ZEND_VM_INC_OPCODE();
 
-		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-			efree(lcname.v);
+		if (zend_u_hash_quick_find(EG(function_table), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
 			EX(object) = NULL;
 			ZEND_VM_NEXT_OPCODE();
 		}
@@ -14636,34 +14342,24 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
 
 		if (!ce) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) {
-				zstr ns;
+			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
+			    op_data->op2.op_type == IS_CONST) {
 
-				if (UG(unicode) && (ns.u = u_memchr(lcname.u, ':', lcname_len)) && ns.u[1] == ':') {
-					ns.u += 2;
-					lcname_len -= (ns.u - lcname.u);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
-		    	} else if (!UG(unicode) && (ns.s = memchr(lcname.s, ':', lcname_len)) && ns.s[1] == ':') {
-					ns.s += 2;
-					lcname_len -= (ns.s - lcname.s);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
+				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
+					EX(object) = NULL;
+					ZEND_VM_NEXT_OPCODE();
 				}
+
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					zstr ce_name;
+					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
 					if (UG(unicode)) {
-						ns.u[lcname_len] = 0;
+						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
 					} else {
-						ns.s[lcname_len] = 0;
+						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
 					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					efree(ce_name.v);
 					if (!ce) {
 						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 					}
@@ -14674,8 +14370,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 			}
 		}
-
-		efree(lcname.v);
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
 	}
@@ -15980,33 +15674,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 	if (IS_VAR == IS_CONST && IS_CV == IS_CONST) {
 		/* try a function in namespace */
-		zstr fname, lcname;
-		unsigned int len, lcname_len;
+		zend_op *op_data = opline+1;
 
-		len = Z_UNILEN(opline->op1.u.constant) + 2 + Z_UNILEN(opline->op2.u.constant);
-		if (UG(unicode)) {
-			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant)));
-            fname.u[Z_USTRLEN(opline->op1.u.constant)] = ':';
-			fname.u[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.u+Z_USTRLEN(opline->op1.u.constant)+2,
-				Z_USTRVAL(opline->op2.u.constant),
-				UBYTES(Z_USTRLEN(opline->op2.u.constant)+1));
-			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
-		} else {
-			fname.s = emalloc(len + 1);
-			memcpy(fname.s, Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant));
-            fname.s[Z_STRLEN(opline->op1.u.constant)] = ':';
-			fname.s[Z_STRLEN(opline->op1.u.constant)+1] = ':';
-			memcpy(fname.s+Z_STRLEN(opline->op1.u.constant)+2,
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRLEN(opline->op2.u.constant)+1);
-			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
-		}
-		efree(fname.v);
+		ZEND_VM_INC_OPCODE();
 
-		if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, lcname, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-			efree(lcname.v);
+		if (zend_u_hash_quick_find(EG(function_table), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
 			EX(object) = NULL;
 			ZEND_VM_NEXT_OPCODE();
 		}
@@ -16015,34 +15687,24 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
 
 		if (!ce) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) {
-				zstr ns;
+			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
+			    op_data->op2.op_type == IS_CONST) {
 
-				if (UG(unicode) && (ns.u = u_memchr(lcname.u, ':', lcname_len)) && ns.u[1] == ':') {
-					ns.u += 2;
-					lcname_len -= (ns.u - lcname.u);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
-		    	} else if (!UG(unicode) && (ns.s = memchr(lcname.s, ':', lcname_len)) && ns.s[1] == ':') {
-					ns.s += 2;
-					lcname_len -= (ns.s - lcname.s);
-					if (zend_u_hash_find(EG(function_table), ZEND_STR_TYPE, ns, lcname_len+1, (void **) &EX(fbc))==SUCCESS) {
-						efree(lcname.v);
-						EX(object) = NULL;
-						ZEND_VM_NEXT_OPCODE();
-					}
+				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
+					EX(object) = NULL;
+					ZEND_VM_NEXT_OPCODE();
 				}
+
 				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					lcname_len -= Z_UNILEN(opline->op2.u.constant) + 2;
+					zstr ce_name;
+					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
 					if (UG(unicode)) {
-						ns.u[lcname_len] = 0;
+						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
 					} else {
-						ns.s[lcname_len] = 0;
+						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
 					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ns, lcname_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
+					efree(ce_name.v);
 					if (!ce) {
 						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 					}
@@ -16053,8 +15715,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_
 				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 			}
 		}
-
-		efree(lcname.v);
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
 	}
