@@ -100,8 +100,8 @@ define dump_entry
 					set $done = 1
 					loop_break
 				end
+				set $m = $m->pListNext
 			end
-			set $m = $m->pListNext
 		end
 		if $done == 1
 			loop_break
