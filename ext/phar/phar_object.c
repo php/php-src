@@ -531,6 +531,7 @@ static int phar_set_compression(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 	if (entry->is_deleted) {
 		return ZEND_HASH_APPLY_KEEP;
 	}
+	entry->old_flags = entry->flags;
 	entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry->flags |= compress;
 	entry->is_modified = 1;
@@ -770,8 +771,8 @@ PHP_METHOD(Phar, offsetSet)
 			contents_len = php_stream_copy_to_stream(contents_file, data->fp, PHP_STREAM_COPY_ALL);
 		}
 		data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
-		phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
 		phar_entry_delref(data TSRMLS_CC);
+		phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 			efree(error);
@@ -1119,6 +1120,7 @@ PHP_METHOD(PharFileInfo, chmod)
 	entry_obj->ent.entry->flags &= ~PHAR_ENT_PERM_MASK;
 	perms &= 0777;
 	entry_obj->ent.entry->flags |= perms;
+	entry_obj->ent.entry->old_flags = entry_obj->ent.entry->flags;
 	entry_obj->ent.entry->phar->is_modified = 1;
 	entry_obj->ent.entry->is_modified = 1;
 	/* hackish cache in php_stat needs to be cleared */
@@ -1240,6 +1242,7 @@ PHP_METHOD(PharFileInfo, setCompressedGZ)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress deleted file");
 	}
+	entry_obj->ent.entry->old_flags = entry_obj->ent.entry->flags;
 	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry_obj->ent.entry->flags |= PHAR_ENT_COMPRESSED_GZ;
 	entry_obj->ent.entry->phar->is_modified = 1;
@@ -1279,6 +1282,7 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress deleted file");
 	}
+	entry_obj->ent.entry->old_flags = entry_obj->ent.entry->flags;
 	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry_obj->ent.entry->flags |= PHAR_ENT_COMPRESSED_BZ2;
 	entry_obj->ent.entry->phar->is_modified = 1;
@@ -1335,6 +1339,7 @@ PHP_METHOD(PharFileInfo, setUncompressed)
 		entry_obj->ent.entry->fp = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
 		efree(fname);
 	}
+	entry_obj->ent.entry->old_flags = entry_obj->ent.entry->flags;
 	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry_obj->ent.entry->phar->is_modified = 1;
 	entry_obj->ent.entry->is_modified = 1;
