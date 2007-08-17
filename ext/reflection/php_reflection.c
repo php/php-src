@@ -4817,7 +4817,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_property___construct, 0)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_property_getValue, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_property_getValue, 0, 0, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
