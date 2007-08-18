@@ -1,3 +1,10 @@
+2007-08-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Namespaces: improved run-time speed
+
 2007-08-13  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)

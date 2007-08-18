@@ -1,3 +1,65 @@
+2007-08-17  Stanislav Malyshev  <stas@zend.com>
+
+    * README.namespaces:
+      some rewording and typofixing
+
+2007-08-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * README.namespaces:
+      Added examples
+
+2007-08-17  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c:
+      - MFH: Mark the parameter for ReflectionProperty::GetValue as optional
+
+    * ext/reflection/php_reflection.c:
+      - Mark the parameter for ReflectionProperty::GetValue as optional
+
+2007-08-17  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/pdo_oci/config.m4:
+      MFH: PDO_OCI: fix Instant Client build broken by logic correction in
+      previous Solaris lib/lib32 fix
+
+    * (PHP_5_2)
+      ext/pdo_oci/config.m4:
+      PDO_OCI: fix Instant Client build broken by logic correction during
+      previous Solaris lib/lib32 fix
+
+2007-08-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Namespaces: improved run-time speed
+
+2007-08-17  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ext/standard/proc_open.c:
+      MFH:- Fixed bug #41904 (proc_open with empty env array)
+
+    * ext/standard/proc_open.c:
+      - Fixed bug #41904 (proc_open with empty env array)
+
+2007-08-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.4RC2
+
 2007-08-16  Stanislav Malyshev  <stas@zend.com>
 
     * main/streams/userspace.c
