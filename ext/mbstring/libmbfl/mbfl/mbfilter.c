@@ -858,7 +858,7 @@ mbfl_strpos(
     int offset,
     int reverse)
 {
-	int n, result;
+	int n, result, negative_offset = 0;
 	unsigned char *p;
 	mbfl_convert_filter *filter;
 	struct collector_strpos_data pc;
@@ -904,6 +904,12 @@ mbfl_strpos(
 		mbfl_wchar_device_clear(&pc.needle);
 		return -4;
 	}
+
+	if (offset < 0) {
+		negative_offset = -offset-1;
+		offset = 0;
+	}
+
 	pc.start = offset;
 	pc.output = 0;
 	pc.needle_pos = 0;
@@ -912,7 +918,7 @@ mbfl_strpos(
 
 	/* feed data */
 	p = haystack->val;
-	n = haystack->len;
+	n = haystack->len - negative_offset;
 	if (p != NULL) {
 		while (n > 0) {
 			if ((*filter->filter_function)(*p++, filter) < 0) {
