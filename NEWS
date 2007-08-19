@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2007, PHP 5.2.4
+- Fixed bug #41904 (proc_open(): empty env array should cause empty
+  environment to be passed to process). (Jani)
 
 16 Aug 2007, PHP 5.2.4RC2
 - Fixed oci8 and PDO_OCI extensions to allow configuring with Oracle 11g client
@@ -27,8 +29,8 @@ PHP                                                                        NEWS
 - Fixed bug #42117 (bzip2.compress loses data in internal buffer). (Philip,
   Ilia)
 - Fixed bug #42082 (NodeList length zero should be empty). (Hannes)
-- Fixed bug #41973 (./configure --with-ldap=shared fails with
-  LDFLAGS="-Wl,--as-needed"). (Nuno)
+- Fixed bug #41973 (--with-ldap=shared fails with LDFLAGS="-Wl,--as-needed").
+  (Nuno)
 - Fixed bug #36492 (Userfilters can leak buckets). (Sara)
 - Fixed bug #31892 (PHP_SELF incorrect without cgi.fix_pathinfo, but turning
   on screws up PATH_INFO). (Dmitry)
