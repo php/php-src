@@ -1,3 +1,20 @@
+2007-08-19  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+2007-08-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/mime_magic/TODO:
+      No longer relavent, extension is made absolete by fileinfo
+
+2007-08-19  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/libmbfl/mbfl/mbfilter.c:
+      added negative offset support in mbfl_strrpos (fixed #42085)
+
 2007-08-17  Stanislav Malyshev  <stas@zend.com>
 
     * README.namespaces:
