@@ -57,7 +57,7 @@ array(7) {
   ["name"]=>
   string(%d) %s
   ["passwd"]=>
-  string(1) "x"
+  string(%d) "%s"
   ["uid"]=>
   int(%d)
   ["gid"]=>
@@ -75,8 +75,8 @@ int(%d)
 int(%d)
 
 -- Testing with the standard file or directory --
-int(0)
-int(0)
-int(0)
+int(%d)
+int(%d)
+int(%d)
 
 *** Done ***
