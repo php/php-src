@@ -1,11 +1,11 @@
 --TEST--
 Test copy() function: usage variations - destination dir access perms
 --SKIPIF--
+--SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip Invalid for Windows");
+if( (substr(PHP_OS, 0, 3) == "WIN") || (stristr(PHP_OS, "Mac")) )
+  die("skip do not run on Win/MacOS");
 ?>
-
 --FILE--
 <?php
 /* Prototype: bool copy ( string $source, string $dest );
