@@ -801,7 +801,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					fci->size = 0;
 					fcc->initialized = 0;
 					break;
-				} 
+				}
 
 				if (zend_fcall_info_init(*arg, fci, fcc, NULL TSRMLS_CC) == SUCCESS) {
 					break;
@@ -1001,7 +1001,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 					break;
 			}
 		}
-		
+
 		if (T_arg_type == -1) {
 			T_arg_type = ZEND_STR_TYPE;
 		}
@@ -1070,7 +1070,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 				   get_active_function_name(TSRMLS_C), __num_args); \
         return FAILURE; \
     }\
-}    
+}
 
 ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *type_spec, ...) /* {{{ */
 {
@@ -2084,7 +2084,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 			if (UG(unicode)) {
 				zend_arg_info *args;
 				int n = ptr->num_args;
-				
+
 				args = internal_function->arg_info = malloc((n + 1) * sizeof(zend_arg_info));
 				memcpy(args, ptr->arg_info+1, (n + 1) * sizeof(zend_arg_info));
 				while (n > 0) {
@@ -2175,7 +2175,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 			 */
 			unsigned int lc_func_name_len;
 			zstr lc_func_name = zend_u_str_case_fold(ZEND_STR_TYPE, internal_function->function_name, fname_len, 0, &lc_func_name_len);
-			
+
 			if ((lc_func_name_len == lc_class_name_len) && !memcmp(lc_func_name.v, lc_class_name.v, UG(unicode)?UBYTES(lc_class_name_len):lc_class_name_len) && !ctor) {
 				ctor = reg_function;
 			} else if ((fname_len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME))) {
@@ -2368,7 +2368,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 		module->module_shutdown_func(module->type, module->module_number TSRMLS_CC);
 	}
 
-	
+
 	/* Deinitilaise module globals */
 	if (module->globals_size) {
 #ifdef ZTS
@@ -2498,7 +2498,7 @@ ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int
 		interface_entry = va_arg(interface_list, zend_class_entry *);
 		zend_do_implement_interface(class_entry, interface_entry TSRMLS_CC);
 	}
-	
+
 	va_end(interface_list);
 }
 /* }}} */
@@ -2607,6 +2607,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 	*fptr_ptr = NULL;
 
 	if (!ce_org) {
+		/* Skip leading :: */
 		if (Z_TYPE_P(callable) == IS_UNICODE &&
 		    Z_USTRVAL_P(callable)[0] == ':' &&
 		    Z_USTRVAL_P(callable)[1] == ':') {
@@ -2624,6 +2625,8 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		} else {
 			lmname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), Z_UNILEN_P(callable), 1, &mlen);
 		}
+		/* Check if function with given name exists.
+		   This may be a compound name that includes namespace name */
 		if (zend_u_hash_find(EG(function_table), Z_TYPE_P(callable), lmname, mlen+1, (void**)&fptr) == SUCCESS) {
 			*fptr_ptr = fptr;
 			efree(lmname.v);
@@ -2631,6 +2634,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		}
 		efree(lmname.v);
 	}
+	/* Split name into class/namespace and method/function names */
 	if (Z_TYPE_P(callable) == IS_UNICODE) {
 		if ((colon.u = u_strrstr(Z_USTRVAL_P(callable), u_doublecolon)) != NULL) {
 			mlen = u_strlen(colon.u+2);
@@ -2648,6 +2652,8 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		}
 	}
 	if (colon.v != NULL) {
+		/* This is a compound name.
+		   Try to fetch class and then find static method. */
 		*ce_ptr = zend_u_fetch_class(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		if (!*ce_ptr) {
 			return 0;
@@ -2657,14 +2663,14 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 			return 0;
 		}
 		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), mname, mlen, 1, &mlen);
-	} else {
+	} else if (ce_org) {
+		/* Try to fetch find static method of given class. */
 		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), Z_UNILEN_P(callable), 1, &mlen);
-		if (ce_org) {
-			ftable = &ce_org->function_table;
-			*ce_ptr = ce_org;
-		} else {
-			ftable = EG(function_table);
-		}
+		ftable = &ce_org->function_table;
+		*ce_ptr = ce_org;
+	} else {
+		/* We already checked for plain function before. */
+		return 0;
 	}
 
 	retval = zend_u_hash_find(ftable, Z_TYPE_P(callable), lmname, mlen+1, (void**)&fptr) == SUCCESS ? 1 : 0;
@@ -2968,7 +2974,7 @@ ZEND_API int zend_fcall_info_init(zval *callable, zend_fcall_info *fci, zend_fca
 	fci->symbol_table = NULL;
 
 	if (ZEND_U_CASE_EQUAL(ZEND_STR_TYPE, func->common.function_name, USTR_LEN(func->common.function_name), ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1) ||
-	    ZEND_U_CASE_EQUAL(ZEND_STR_TYPE, func->common.function_name, USTR_LEN(func->common.function_name), ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1)) { 
+	    ZEND_U_CASE_EQUAL(ZEND_STR_TYPE, func->common.function_name, USTR_LEN(func->common.function_name), ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1)) {
 		fcc->initialized = 0;
 		fcc->function_handler = NULL;
 		fcc->calling_scope = NULL;
@@ -3048,13 +3054,13 @@ ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /*
 ZEND_API int zend_fcall_info_argp(zend_fcall_info *fci TSRMLS_DC, int argc, zval ***argv) /* {{{ */
 {
 	int i;
-	
+
 	if (argc < 0) {
 		return FAILURE;
 	}
-	
+
 	zend_fcall_info_args_clear(fci, !argc);
-	
+
 	if (argc) {
 		fci->param_count = argc;
 		fci->params = (zval ***) erealloc(fci->params, fci->param_count * sizeof(zval **));
@@ -3064,7 +3070,7 @@ ZEND_API int zend_fcall_info_argp(zend_fcall_info *fci TSRMLS_DC, int argc, zval
 			fci->params[i] = argv[i];
 		}
 	}
-	
+
 	return SUCCESS;
 }
 /* }}} */
@@ -3073,24 +3079,24 @@ ZEND_API int zend_fcall_info_argv(zend_fcall_info *fci TSRMLS_DC, int argc, va_l
 {
 	int i;
 	zval **arg;
-	
+
 	if (argc < 0) {
 		return FAILURE;
 	}
-	
+
 	zend_fcall_info_args_clear(fci, !argc);
-	
+
 	if (argc) {
 		fci->param_count = argc;
 		fci->params = (zval ***) erealloc(fci->params, fci->param_count * sizeof(zval **));
-		
+
 		for (i = 0; i < argc; ++i) {
 			arg = va_arg(*argv, zval **);
 			ZVAL_ADDREF(*arg);
 			fci->params[i] = arg;
 		}
 	}
-	
+
 	return SUCCESS;
 }
 /* }}} */
@@ -3099,11 +3105,11 @@ ZEND_API int zend_fcall_info_argn(zend_fcall_info *fci TSRMLS_DC, int argc, ...)
 {
 	int ret;
 	va_list argv;
-	
+
 	va_start(argv, argc);
 	ret = zend_fcall_info_argv(fci TSRMLS_CC, argc, &argv);
 	va_end(argv);
-	
+
 	return ret;
 }
 /* }}} */
@@ -3119,7 +3125,7 @@ ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *f
 		zend_fcall_info_args(fci, args TSRMLS_CC);
 	}
 	result = zend_call_function(fci, fcc TSRMLS_CC);
-	
+
 	if (!retval_ptr_ptr && retval) {
 		zval_ptr_dtor(&retval);
 	}
@@ -3439,7 +3445,7 @@ ZEND_API int zend_declare_class_constant_stringl(zend_class_entry *ce, char *nam
 {
 	zval *constant;
 
-	if (ce->type & ZEND_INTERNAL_CLASS) {		
+	if (ce->type & ZEND_INTERNAL_CLASS) {
 		constant = malloc(sizeof(zval));
 		if (UG(unicode)) {
 			Z_TYPE_P(constant) = IS_UNICODE;
