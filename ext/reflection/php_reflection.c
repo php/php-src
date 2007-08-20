@@ -2778,7 +2778,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 /* }}} */
 
 /* {{{ proto public mixed ReflectionClass::getStaticPropertyValue(string name [, mixed default]) U
-   Returns the value of a tsstic property */
+   Returns the value of a static property */
 ZEND_METHOD(reflection_class, getStaticPropertyValue)
 {
 	reflection_object *intern;
