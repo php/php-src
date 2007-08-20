@@ -2,8 +2,8 @@
 Test copy() function: usage variations - destination file names(case sensitive)
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip do not run on Windows");
+if( (stristr(PHP_OS, "Mac")) || (substr(PHP_OS, 0, 3) == "WIN") )
+  die("skip do not run on Win/MacOS");
 ?>
 --FILE--
 <?php
