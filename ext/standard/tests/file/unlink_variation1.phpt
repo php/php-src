@@ -5,6 +5,16 @@ Test unlink() function : usage variations - unlinking file in a directory
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip only on Linux');
 }
+// Skip if being run by root (files are always readable, writeable and executable)
+$filename = dirname(__FILE__)."/unlink_root_check.tmp";
+$fp = fopen($filename, 'w');
+fclose($fp);
+if(fileowner($filename) == 0) {
+        unlink ($filename);
+        die('skip...cannot be run as root\n');
+}
+
+unlink($filename);
 ?>
 --FILE--
 <?php
