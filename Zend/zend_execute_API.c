@@ -1144,6 +1144,8 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 		lc_name = name;
 		lc_name_len = name_length;
 	}
+
+	/* Ignore leading "::" */
 	if (type == IS_UNICODE &&
 	    lc_name.u[0] == ':' &&
 	    lc_name.u[1] == ':') {
