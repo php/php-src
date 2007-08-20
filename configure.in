@@ -138,6 +138,10 @@ dnl Support systems with system libraries in e.g. /usr/lib64
 PHP_ARG_WITH(libdir, for system library directory,
 [  --with-libdir=NAME      Look for libraries in .../NAME rather than .../lib],lib,no)
 
+PHP_ARG_ENABLE(rpath, whether to enable runpaths,
+[  --disable-rpath         Disable passing additional runtime library
+                          search paths], yes, no)
+
 dnl check for -R, etc. switch
 PHP_RUNPATH_SWITCH
 
@@ -754,10 +758,6 @@ if test "$PHP_SIGCHILD" = "yes"; then
 else
   AC_DEFINE(PHP_SIGCHILD, 0, [ ])
 fi
-
-PHP_ARG_ENABLE(rpath, whether to enable runpaths,
-[  --disable-rpath         Disable passing additional runtime library
-                          search paths], yes, no)
 
 PHP_ARG_ENABLE(libgcc, whether to explicitly link against libgcc,
 [  --enable-libgcc         Enable explicitly linking against libgcc], no, no)
