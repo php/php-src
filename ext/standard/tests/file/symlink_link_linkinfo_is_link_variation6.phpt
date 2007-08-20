@@ -8,6 +8,17 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 if (substr(PHP_OS, 0, 3) == 'MAC') {
     die('skip not valid for MacOS');
 }
+// Skip if being run by root (files are always readable, writeable and executable)
+$filename = dirname(__FILE__)."/symlink_link_linkinfo_is_link6_check_root.tmp";
+$fp = fopen($filename, 'w');
+fclose($fp);
+if(fileowner($filename) == 0) {
+        unlink ($filename);
+        die('skip...cannot be run as root\n');
+}
+
+unlink($filename);
+
 ?>
 --FILE--
 <?php
