@@ -323,6 +323,9 @@ else
     ld_runpath_switch=-L
   fi
 fi
+if test "$PHP_RPATH" = "no"; then
+  ld_runpath_switch=
+fi
 ])
 
 dnl
@@ -447,7 +450,8 @@ AC_DEFUN([PHP_ADD_LIBPATH],[
       _PHP_ADD_LIBPATH_GLOBAL([$ai_p])
     ],[
       if test "$ext_shared" = "yes"; then
-        $2="$ld_runpath_switch$ai_p -L$ai_p [$]$2"
+        $2="-L$ai_p [$]$2"
+        test -n "$ld_runpath_switch" && $2="$ld_runpath_switch$ai_p [$]$2"
       else
         _PHP_ADD_LIBPATH_GLOBAL([$ai_p])
       fi
