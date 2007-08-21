@@ -1020,13 +1020,17 @@ SPL_METHOD(SplFileInfo, getRealPath)
 
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
+	if (intern->type == SPL_FS_DIR && !intern->file_name.v && intern->u.dir.entry.d_name[0]) {
+		spl_filesystem_object_get_file_name(intern TSRMLS_CC);
+	}
+
 	if (intern->file_name_type == IS_UNICODE) {
 		php_stream_path_encode(NULL, &filename, &filename_len, intern->file_name.u, intern->file_name_len, REPORT_ERRORS, FG(default_context));
 	} else {
 		filename = intern->file_name.s;
 	}
 
-	if (VCWD_REALPATH(filename, buff)) {
+	if (filename && VCWD_REALPATH(filename, buff)) {
 #ifdef ZTS
 		if (VCWD_ACCESS(buff, F_OK)) {
 			RETVAL_FALSE;
@@ -1044,6 +1048,11 @@ SPL_METHOD(SplFileInfo, getRealPath)
 	} else {
 		RETVAL_FALSE;
 	}
+
+	if (intern->file_name_type == IS_UNICODE && filename) {
+		efree(filename);
+	}
+
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
 /* }}} */
