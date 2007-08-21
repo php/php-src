@@ -1,3 +1,71 @@
+2007-08-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/EXPERIMENTAL:
+      
+      No longer experimental
+
+2007-08-20  Sara Golemon  <sara@golemon.com>
+
+    * ext/curl/interface.c:
+      Add support for CURLPROXY_SOCKS4
+
+2007-08-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/reflection/php_reflection.c:
+      - MFB: Fugbix typo.
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c:
+      - Fugbix typo.
+
+2007-08-20  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      acinclude.m4
+      configure.in:
+      MFH:- Part 1 of fixing problems with runpath switch (make --disable-rpath
+      work for real)
+
+    * acinclude.m4
+      configure.in:
+      - Part 1 of fixing problems with runpath switch (make --disable-rpath work
+      for real)
+
+2007-08-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y:
+      Added namespace related optimizations and comments
+
+2007-08-20  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/unlink_variation1.phpt:
+      fix test : skip if user is root
+
+    * ext/standard/tests/file/copy_variation12.phpt
+      ext/standard/tests/file/copy_variation12.phpt
+      ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation4.phpt
+      ext/standard/tests/file/copy_variation4.phpt
+      ext/standard/tests/file/copy_variation5.phpt
+      ext/standard/tests/file/copy_variation5.phpt
+      ext/standard/tests/file/copy_variation9.phpt
+      ext/standard/tests/file/copy_variation9.phpt
+      ext/standard/tests/file/fileowner_basic.phpt
+      ext/standard/tests/file/fileowner_basic.phpt:
+      fix tests
+
+    * ext/standard/tests/file/symlink_link_linkinfo_is_link_variation6.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation6.phpt
+      ext/standard/tests/file/unlink_variation1.phpt:
+      fix test: skip if user is root
+
 2007-08-19  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * (PHP_5_2)

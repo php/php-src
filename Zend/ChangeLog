@@ -1,3 +1,12 @@
+2007-08-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute_API.c
+      zend_language_parser.y:
+      Added namespace related optimizations and comments
+
 2007-08-17  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
