@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 16 Aug 2007, PHP 5.2.4RC2
 - Fixed oci8 and PDO_OCI extensions to allow configuring with Oracle 11g client
   libraries. (Chris Jones)
+- Fixed Bug #42364 (Crash when using getRealPath with DirectoryIterator).
+  (Johannes)
 - Fixed bug #42292 ($PHP_CONFIG not set for phpized builds). (Jani)
 - Fixed bug #42261 (header wrong for date field). (roberto at spadim dot com
   dot br, Ilia)
