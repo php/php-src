@@ -3545,11 +3545,20 @@ PHP_FUNCTION(pg_escape_string)
 	int from_len;
 	int id = -1;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &from, &from_len) == SUCCESS) {
-		pgsql_link = NULL;
-		id = PGG(default_link);
-	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &from, &from_len) == FAILURE) {
-		return;
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &from, &from_len) == FAILURE) {
+				return;
+			}
+			pgsql_link = NULL;
+			id = PGG(default_link);
+			break;
+
+		default:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &from, &from_len) == FAILURE) {
+				return;
+			}
+			break;
 	}
 
 	to = (char *) safe_emalloc(from_len, 2, 1);
@@ -3578,11 +3587,20 @@ PHP_FUNCTION(pg_escape_bytea)
 #endif
 	zval *pgsql_link;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &from, &from_len) == SUCCESS) {
-		pgsql_link = NULL;
-		id = PGG(default_link);
-	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &from, &from_len) == FAILURE) {
-		return;
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &from, &from_len) == FAILURE) {
+				return;
+			}
+			pgsql_link = NULL;
+			id = PGG(default_link);
+			break;
+
+		default:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &from, &from_len) == FAILURE) {
+				return;
+			}
+			break;
 	}
 
 #ifdef HAVE_PQESCAPE_BYTEA_CONN
