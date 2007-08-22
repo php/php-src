@@ -1655,7 +1655,6 @@ ZEND_API zend_class_entry *zend_u_fetch_class(zend_uchar type, zstr class_name, 
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD)  ? 0 : 1;
 	int do_normalize = (fetch_type & ZEND_FETCH_CLASS_NO_NORMALIZE) ? 0 : 1;
 	int rt_ns_check  = (fetch_type & ZEND_FETCH_CLASS_RT_NS_CHECK)  ? 1 : 0;
-	int rt_ns_name   = (fetch_type & ZEND_FETCH_CLASS_RT_NS_NAME)   ? 1 : 0;
 	zstr lcname = class_name;
 
 	fetch_type = fetch_type & ~ZEND_FETCH_CLASS_FLAGS;
@@ -1722,7 +1721,7 @@ check_fetch_type:
 				}
 			}
 		}
-		if (use_autoload && !rt_ns_name) {
+		if (use_autoload) {
 			if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
 				zend_error(E_ERROR, "Interface '%R' not found", type, class_name);
 			} else {
