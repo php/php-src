@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2007, PHP 5.2.4
+- Fixed bug #42009 (is_a() and is_subclass_of() should NOT call autoload,
+  in the same way as "instanceof" operator). (Dmitry)
 - Fixed bug #41904 (proc_open(): empty env array should cause empty
   environment to be passed to process). (Jani)
 
