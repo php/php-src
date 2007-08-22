@@ -1,3 +1,37 @@
+2007-08-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      Fixed bug #42368 (Incorrect error message displayed by pg_escape_string)
+
+2007-08-21  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended:
+      MFH:Fix typo in fastcgi.logging option example
+
+    * php.ini-dist
+      php.ini-recommended:
+      Fix typo in fastcgi.logging option example
+
+2007-08-21  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_directory.c
+      ext/spl/tests/bug42364.phpt:
+      - MFH: Fix Bug #42364 Crash when using getRealPath with DirectoryIterator
+
+    * ext/spl/spl_directory.c
+      ext/spl/tests/bug42364.phpt
+      ext/spl/tests/bug42364.phpt:
+      - Fixed Bug #42364 Crash when using getRealPath with DirectoryIterator
+
+2007-08-21  Sara Golemon  <sara@golemon.com>
+
+    * ext/curl/interface.c:
+      Bagder says I don't need these ifdefs
+
 2007-08-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
