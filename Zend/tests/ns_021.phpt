@@ -19,5 +19,5 @@ test::foo();
 test::test::foo();
 --EXPECT--
 test::foo
-test::Test::foo
+test::foo
 test::Test::foo

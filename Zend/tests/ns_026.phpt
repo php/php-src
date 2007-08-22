@@ -24,7 +24,7 @@ Foo::Foo::Bar();
 ::Foo::Bar();
 --EXPECT--
 Method - Foo::Foo::__construct
-Method - Foo::Foo::Bar
+Func   - Foo::Bar
 Method - Foo::Foo::__construct
 Method - Foo::Foo::Bar
 Func   - Foo::Bar

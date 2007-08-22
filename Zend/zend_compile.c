@@ -1785,7 +1785,7 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 	}
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
-	opline->extended_value = fetch_type;
+	opline->extended_value = fetch_type & ~ZEND_FETCH_CLASS_RT_NS_NAME;
 	opline->op1 = class_node;
 	opline->op2 = *method_name;
 
@@ -1793,21 +1793,33 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 		method_name->op_type == IS_CONST) {
 		/* Prebuild ns::func name to speedup run-time check.
 		   The additional names are stored in additional OP_DATA opcode. */
-		zstr fname, lcname;
-		unsigned int len, lcname_len;
+		zstr nsname, fname, lcname;
+		unsigned int nsname_len, len, lcname_len;
 
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_OP_DATA;
 		opline->op1.op_type = IS_CONST;
 		SET_UNUSED(opline->op2);
 
-		len = Z_UNILEN(class_node.u.constant) + 2 + Z_UNILEN(method_name->u.constant);
+		nsname = Z_UNIVAL(class_node.u.constant);
+		nsname_len = Z_UNILEN(class_node.u.constant);
+		if (fetch_type & ZEND_FETCH_CLASS_RT_NS_NAME) {
+			/* Remove namespace name */
+			if (UG(unicode)) {
+				nsname.u = u_memchr(nsname.u, ':', nsname_len) + 2;
+				nsname_len -= (nsname.u - Z_USTRVAL(class_node.u.constant));
+			} else {
+				nsname.s = memchr(nsname.s, ':', nsname_len) + 2;
+				nsname_len -= (nsname.s - Z_STRVAL(class_node.u.constant));
+		    }
+		}
+		len = nsname_len + 2 + Z_UNILEN(method_name->u.constant);
 		if (UG(unicode)) {
 			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, Z_USTRVAL(class_node.u.constant), UBYTES(Z_USTRLEN(class_node.u.constant)));
-            fname.u[Z_USTRLEN(class_node.u.constant)] = ':';
-			fname.u[Z_USTRLEN(class_node.u.constant)+1] = ':';
-			memcpy(fname.u+Z_USTRLEN(class_node.u.constant)+2,
+			memcpy(fname.u, nsname.u, UBYTES(nsname_len));
+            fname.u[nsname_len] = ':';
+			fname.u[nsname_len + 1] = ':';
+			memcpy(fname.u + nsname_len + 2,
 				Z_USTRVAL(method_name->u.constant),
 				UBYTES(Z_USTRLEN(method_name->u.constant)+1));
 			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
@@ -1815,10 +1827,10 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 			ZVAL_UNICODEL(&opline->op1.u.constant, lcname.u, lcname_len, 0);
 		} else {
 			fname.s = emalloc(len + 1);
-			memcpy(fname.s, Z_STRVAL(class_node.u.constant), Z_STRLEN(class_node.u.constant));
-            fname.s[Z_STRLEN(class_node.u.constant)] = ':';
-			fname.s[Z_STRLEN(class_node.u.constant)+1] = ':';
-			memcpy(fname.s+Z_STRLEN(class_node.u.constant)+2,
+			memcpy(fname.s, nsname.s, nsname_len);
+            fname.s[nsname_len] = ':';
+			fname.s[nsname_len + 1] = ':';
+			memcpy(fname.s + nsname_len + 2,
 				Z_STRVAL(method_name->u.constant),
 				Z_STRLEN(method_name->u.constant)+1);
 			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
@@ -1826,23 +1838,6 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 			ZVAL_STRINGL(&opline->op1.u.constant, lcname.s, lcname_len, 0);
 		}
 		efree(fname.v);
-
-		if (fetch_type & ZEND_FETCH_CLASS_RT_NS_NAME) {
-			/* Prebuild name without first part of compound name for cases
-			   when name is equal to current namespace name. This will speedup
-			   runtime check. */
-			zstr colon;
-
-			if (UG(unicode) && (colon.u = u_memchr(lcname.u, ':', lcname_len)) && colon.u[1] == ':') {
-				colon.u += 2;
-				opline->op2.op_type = IS_CONST;
-				ZVAL_UNICODEL(&opline->op2.u.constant, colon.u, lcname_len - (colon.u - lcname.u), 1);
-			} else if (!UG(unicode) && (colon.s = memchr(lcname.s, ':', lcname_len)) && colon.s[1] == ':') {
-				colon.s += 2;
-				opline->op2.op_type = IS_CONST;
-				ZVAL_STRINGL(&opline->op2.u.constant, colon.s, lcname_len - (colon.s - lcname.s), 1);
-			}
-		}
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));

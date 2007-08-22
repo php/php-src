@@ -2555,36 +2555,9 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 		}
 
 		/* no function found. try a static method in class */
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
-
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
-			    op_data->op2.op_type == IS_CONST) {
-
-				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
-					EX(object) = NULL;
-					ZEND_VM_NEXT_OPCODE();
-				}
-
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zstr ce_name;
-					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
-					if (UG(unicode)) {
-						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
-					} else {
-						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
-					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
-					efree(ce_name.v);
-					if (!ce) {
-						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-					}
-				} else {
-					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-				}
-			} else {
-				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-			}
+			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
@@ -3026,36 +2999,9 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDL
 		}
 
 		/* no function found. try a static method in class */
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
-
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
-			    op_data->op2.op_type == IS_CONST) {
-
-				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
-					EX(object) = NULL;
-					ZEND_VM_NEXT_OPCODE();
-				}
-
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zstr ce_name;
-					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
-					if (UG(unicode)) {
-						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
-					} else {
-						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
-					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
-					efree(ce_name.v);
-					if (!ce) {
-						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-					}
-				} else {
-					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-				}
-			} else {
-				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-			}
+			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
@@ -3498,36 +3444,9 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDL
 		}
 
 		/* no function found. try a static method in class */
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
-
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
-			    op_data->op2.op_type == IS_CONST) {
-
-				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
-					EX(object) = NULL;
-					ZEND_VM_NEXT_OPCODE();
-				}
-
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zstr ce_name;
-					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
-					if (UG(unicode)) {
-						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
-					} else {
-						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
-					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
-					efree(ce_name.v);
-					if (!ce) {
-						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-					}
-				} else {
-					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-				}
-			} else {
-				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-			}
+			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
@@ -3736,36 +3655,9 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HA
 		}
 
 		/* no function found. try a static method in class */
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
-
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
-			    op_data->op2.op_type == IS_CONST) {
-
-				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
-					EX(object) = NULL;
-					ZEND_VM_NEXT_OPCODE();
-				}
-
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zstr ce_name;
-					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
-					if (UG(unicode)) {
-						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
-					} else {
-						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
-					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
-					efree(ce_name.v);
-					if (!ce) {
-						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-					}
-				} else {
-					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-				}
-			} else {
-				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-			}
+			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
@@ -4176,36 +4068,9 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLE
 		}
 
 		/* no function found. try a static method in class */
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
-
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
-			    op_data->op2.op_type == IS_CONST) {
-
-				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
-					EX(object) = NULL;
-					ZEND_VM_NEXT_OPCODE();
-				}
-
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zstr ce_name;
-					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
-					if (UG(unicode)) {
-						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
-					} else {
-						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
-					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
-					efree(ce_name.v);
-					if (!ce) {
-						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-					}
-				} else {
-					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-				}
-			} else {
-				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-			}
+			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
@@ -10048,36 +9913,9 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDL
 		}
 
 		/* no function found. try a static method in class */
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
-
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
-			    op_data->op2.op_type == IS_CONST) {
-
-				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
-					EX(object) = NULL;
-					ZEND_VM_NEXT_OPCODE();
-				}
-
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zstr ce_name;
-					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
-					if (UG(unicode)) {
-						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
-					} else {
-						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
-					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
-					efree(ce_name.v);
-					if (!ce) {
-						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-					}
-				} else {
-					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-				}
-			} else {
-				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-			}
+			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
@@ -11751,36 +11589,9 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER
 		}
 
 		/* no function found. try a static method in class */
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
-
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
-			    op_data->op2.op_type == IS_CONST) {
-
-				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
-					EX(object) = NULL;
-					ZEND_VM_NEXT_OPCODE();
-				}
-
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zstr ce_name;
-					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
-					if (UG(unicode)) {
-						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
-					} else {
-						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
-					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
-					efree(ce_name.v);
-					if (!ce) {
-						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-					}
-				} else {
-					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-				}
-			} else {
-				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-			}
+			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
@@ -13446,36 +13257,9 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		}
 
 		/* no function found. try a static method in class */
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
-
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
-			    op_data->op2.op_type == IS_CONST) {
-
-				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
-					EX(object) = NULL;
-					ZEND_VM_NEXT_OPCODE();
-				}
-
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zstr ce_name;
-					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
-					if (UG(unicode)) {
-						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
-					} else {
-						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
-					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
-					efree(ce_name.v);
-					if (!ce) {
-						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-					}
-				} else {
-					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-				}
-			} else {
-				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-			}
+			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
@@ -14339,36 +14123,9 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		}
 
 		/* no function found. try a static method in class */
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
-
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
-			    op_data->op2.op_type == IS_CONST) {
-
-				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
-					EX(object) = NULL;
-					ZEND_VM_NEXT_OPCODE();
-				}
-
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zstr ce_name;
-					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
-					if (UG(unicode)) {
-						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
-					} else {
-						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
-					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
-					efree(ce_name.v);
-					if (!ce) {
-						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-					}
-				} else {
-					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-				}
-			} else {
-				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-			}
+			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
@@ -15684,36 +15441,9 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_
 		}
 
 		/* no function found. try a static method in class */
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) ? (opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK) : opline->extended_value TSRMLS_CC);
-
+		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			if ((opline->extended_value & ZEND_FETCH_CLASS_RT_NS_NAME) &&
-			    op_data->op2.op_type == IS_CONST) {
-
-				if (zend_u_hash_find(EG(function_table), Z_TYPE(op_data->op2.u.constant), Z_UNIVAL(op_data->op2.u.constant), Z_UNILEN(op_data->op2.u.constant) + 1, (void **) &EX(fbc))==SUCCESS) {
-					EX(object) = NULL;
-					ZEND_VM_NEXT_OPCODE();
-				}
-
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zstr ce_name;
-					unsigned ce_name_len = Z_UNILEN(op_data->op1.u.constant) - (Z_UNILEN(op_data->op2.u.constant) + 2);
-					if (UG(unicode)) {
-						ce_name.u = eustrndup(Z_USTRVAL(op_data->op1.u.constant), ce_name_len);
-					} else {
-						ce_name.s = estrndup(Z_STRVAL(op_data->op1.u.constant), ce_name_len);
-					}
-					ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), ce_name, ce_name_len, opline->extended_value & ~ZEND_FETCH_CLASS_RT_NS_CHECK TSRMLS_CC);
-					efree(ce_name.v);
-					if (!ce) {
-						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-					}
-				} else {
-					zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-				}
-			} else {
-				zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
-			}
+			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
