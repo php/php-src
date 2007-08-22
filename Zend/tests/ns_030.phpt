@@ -9,4 +9,4 @@ import A::B as Foo;
 
 new Foo();
 --EXPECTF--
-Fatal error: Import name 'Foo' coflicts with defined class in %sns_030.php on line 5
+Fatal error: Import name 'Foo' conflicts with defined class in %sns_030.php on line 5
