@@ -47,5 +47,4 @@ bool(false)
 bool(true)
 bool(false)
 AUTOLOAD 'X1'
-AUTOLOAD 'X2'
 bool(false)
