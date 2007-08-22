@@ -141,34 +141,56 @@ PHP_MINIT_FUNCTION(dir)
 	REGISTER_STRING_CONSTANT("PATH_SEPARATOR", pathsep_str, CONST_CS|CONST_PERSISTENT);
 
 #ifdef HAVE_GLOB
+
 #ifdef GLOB_BRACE
 	REGISTER_LONG_CONSTANT("GLOB_BRACE", GLOB_BRACE, CONST_CS | CONST_PERSISTENT);
+#else
+# define GLOB_BRACE 0
 #endif
+
 #ifdef GLOB_MARK
 	REGISTER_LONG_CONSTANT("GLOB_MARK", GLOB_MARK, CONST_CS | CONST_PERSISTENT);
+#else
+# define GLOB_MARK 0
 #endif
+
 #ifdef GLOB_NOSORT
 	REGISTER_LONG_CONSTANT("GLOB_NOSORT", GLOB_NOSORT, CONST_CS | CONST_PERSISTENT);
+#else 
+# define GLOB_NOSORT 0
 #endif
+
 #ifdef GLOB_NOCHECK
 	REGISTER_LONG_CONSTANT("GLOB_NOCHECK", GLOB_NOCHECK, CONST_CS | CONST_PERSISTENT);
+#else 
+# define GLOB_NOCHECK 0
 #endif
+
 #ifdef GLOB_NOESCAPE
 	REGISTER_LONG_CONSTANT("GLOB_NOESCAPE", GLOB_NOESCAPE, CONST_CS | CONST_PERSISTENT);
+#else 
+# define GLOB_NOESCAPE 0
 #endif
+
 #ifdef GLOB_ERR
 	REGISTER_LONG_CONSTANT("GLOB_ERR", GLOB_ERR, CONST_CS | CONST_PERSISTENT);
+#else 
+# define GLOB_ERR 0
 #endif
 
 #ifndef GLOB_ONLYDIR
-#define GLOB_ONLYDIR (1<<30)
-#define GLOB_EMULATE_ONLYDIR
-#define GLOB_FLAGMASK (~GLOB_ONLYDIR)
+# define GLOB_ONLYDIR (1<<30)
+# define GLOB_EMULATE_ONLYDIR
+# define GLOB_FLAGMASK (~GLOB_ONLYDIR)
 #else
-#define GLOB_FLAGMASK (~0)
+# define GLOB_FLAGMASK (~0)
 #endif
 
+/* This is used for checking validity of passed flags (passing invalid flags causes segfault in glob()!! */
+#define GLOB_AVAILABLE_FLAGS (0 | GLOB_BRACE | GLOB_MARK | GLOB_NOSORT | GLOB_NOCHECK | GLOB_NOESCAPE | GLOB_ERR | GLOB_ONLYDIR)
+
 	REGISTER_LONG_CONSTANT("GLOB_ONLYDIR", GLOB_ONLYDIR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_AVAILABLE_FLAGS", GLOB_AVAILABLE_FLAGS, CONST_CS | CONST_PERSISTENT);
 
 #endif /* HAVE_GLOB */
 
@@ -403,6 +425,11 @@ PHP_FUNCTION(glob)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|l", &pppattern, &flags) == FAILURE ||
 		php_stream_path_param_encode(pppattern, &pattern, &pattern_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 		return;
+	}
+
+	if ((GLOB_AVAILABLE_FLAGS & flags) != flags) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "At least one of the passed flags is invalid or not supported on this platform");
+		RETURN_FALSE;
 	}
 
 #ifdef ZTS 
