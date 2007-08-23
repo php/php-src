@@ -300,6 +300,38 @@ PHP_METHOD(Phar, getAlias)
 }
 /* }}} */
 
+/* {{{ proto bool Phar::setAlias(string alias)
+ * Set the alias for the PHAR
+ */
+PHP_METHOD(Phar, setAlias)
+{
+	char *alias, *error;
+	phar_archive_data *fd, **fd_ptr;
+	int alias_len;
+	PHAR_ARCHIVE_OBJECT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &alias, &alias_len) == SUCCESS) {
+		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), phar_obj->arc.archive->alias, phar_obj->arc.archive->alias_len, (void**)&fd_ptr)) {
+			zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len);
+			fd = *fd_ptr;
+			if (alias && alias_len) {
+				zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&fd,   sizeof(phar_archive_data*), NULL);
+			}
+		}
+
+		efree(phar_obj->arc.archive->alias);
+		phar_obj->arc.archive->alias = estrndup(alias, alias_len);
+		phar_obj->arc.archive->alias_len = alias_len;
+		phar_flush(phar_obj->arc.archive, NULL, 0, &error TSRMLS_CC);
+		if (error) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			efree(error);
+		}
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
+}
+
 /* {{{ proto string Phar::getVersion()
  * Return version info of Phar archive
  */
@@ -1418,6 +1450,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, getVersion,            NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isBuffering,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, hasMetadata,           NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setAlias,              arginfo_phar_mapPhar,       ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setMetadata,           arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setSignatureAlgorithm, arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)

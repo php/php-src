@@ -1,6 +1,9 @@
 <?php
 
 $notes = '
+ * add Phar::setAlias() [Greg]
+ * fix too many open file handles issue [Greg]
+ * fix rename [Greg]
  * add Phar::getAlias() [Marcus]
  * Made -a optional in pack subcommand of phar.phar [Marcus]
  * Fix issue with apache module and extracted archives [Marcus]

@@ -154,6 +154,7 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
     <file name="phar_oo_compressed_002b.phpt" role="test" />
     <file name="phar_oo_test.inc" role="test" />
     <file name="phar_oo_uncompressall.phpt" role="test" />
+    <file name="phar_setalias.phpt" role="test" />
     <file name="phar_setsignaturealgo1.phpt" role="test" />
     <file name="phar_setsignaturealgo2.phpt" role="test" />
     <file name="phar_stub.phpt" role="test" />
