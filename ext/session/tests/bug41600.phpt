@@ -1,5 +1,5 @@
 --TEST--
-Bug #41600 (url rewriter tags doesn't work with namespaced tags
+Bug #41600 (url rewriter tags doesn't work with namespaced tags)
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
