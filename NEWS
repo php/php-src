@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2007, PHP 5.2.4
+- Fixed version_compare() to support "rc" as well as "RC" for release
+  candidate version numbers.
 - Fixed bug #42368 (Incorrect error message displayed by pg_escape_string).
   (Ilia)
 - Fixed bug #42365 (glob() crashes and/or accepts way too many flags). (Jani)
