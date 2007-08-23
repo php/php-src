@@ -310,6 +310,15 @@ PHP_METHOD(Phar, setAlias)
 	int alias_len;
 	PHAR_ARCHIVE_OBJECT();
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &alias, &alias_len) == SUCCESS) {
+		if (alias_len == phar_obj->arc.archive->alias_len && memcmp(phar_obj->arc.archive->alias, alias, alias_len) == 0) {
+			RETURN_TRUE;
+		}
+		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void**)&fd_ptr)) {
+			spprintf(&error, 0, "alias \"%s\" is already used for archive \"%s\" and cannot be used for other archives", alias, (*fd_ptr)->fname);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			efree(error);
+			RETURN_FALSE;
+		}
 		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), phar_obj->arc.archive->alias, phar_obj->arc.archive->alias_len, (void**)&fd_ptr)) {
 			zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len);
 			fd = *fd_ptr;
