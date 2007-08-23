@@ -91,13 +91,14 @@ static int
 compare_special_version_forms(char *form1, char *form2)
 {
 	int found1 = -1, found2 = -1;
-	special_forms_t special_forms[10] = {
+	special_forms_t special_forms[11] = {
 		{"dev", 0},
 		{"alpha", 1},
 		{"a", 1},
 		{"beta", 2},
 		{"b", 2},
 		{"RC", 3},
+		{"rc", 3},
 		{"#", 4},
 		{"pl", 5},
 		{"p", 5},
