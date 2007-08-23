@@ -247,10 +247,6 @@ ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value,
 		return FAILURE;
 	}
 
-	if (stage == ZEND_INI_STAGE_ACTIVATE && modify_type == ZEND_INI_SYSTEM) {
-		ini_entry->modifiable = ZEND_INI_SYSTEM;
-	}
-
 	duplicate = estrndup(new_value, new_value_length);
 
 	if (!ini_entry->on_modify
