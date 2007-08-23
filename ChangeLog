@@ -1,3 +1,67 @@
+2007-08-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pgsql/pgsql.c:
+      
+      Fixed bug #42368 (Incorrect error message displayed by pg_escape_string).
+
+2007-08-22  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/dir.c:
+      MFH:- Fixed bug #42365 (glob() crashes with invalid flags)
+
+    * ext/standard/dir.c:
+      - Fixed bug #42365 (glob() crashes with invalid flags)
+
+2007-08-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug42183.phpt
+      ext/soap/tests/bugs/bug42183.phpt:
+      
+      file bug42183.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/bugs/bug42183.phpt:
+      Fixed bug #42183 (classmap cause crashr in non-wsdl mode)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/is_a.phpt
+      ZendEngine2/tests/is_a.phpt:
+      Fixed bug #42009 (is_a() and is_subclass_of() should NOT call autoload, in
+      the same way as "instanceof" operator).
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/ns_021.phpt
+      ZendEngine2/tests/ns_026.phpt:
+      Fixed name resolution
+        namespace A;
+          B::foo(); // 1. this is function "foo" from namespace "B"
+                    // 2. this is static method "foo" of class "B" from
+      namespace "A"
+                    // 3. this is static methos "boo" of internal class "B"
+        namespace A;
+          A::foo(); // 1. this is function "foo" from namespace "A"
+                    // 2. this is static method "foo" of class "A" from
+      namespace "A"
+                    // 3. this is static methos "foo" of internal class "A"
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/ns_029.phpt
+      ZendEngine2/tests/ns_030.phpt:
+      typo
+
 2007-08-21  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pgsql/pgsql.c:
