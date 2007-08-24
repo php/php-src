@@ -4,7 +4,7 @@ version_compare test
 <?php
 
 print "TESTING COMPARE\n";
-$special_forms = array("-dev", "a1", "b1", "RC1", "", "pl1");
+$special_forms = array("-dev", "a1", "b1", "RC1", "rc1", "", "pl1");
 $operators = array(
     "lt", "<",
     "le", "<=",
@@ -61,36 +61,49 @@ TESTING COMPARE
 1.0-dev < 1.0a1
 1.0-dev < 1.0b1
 1.0-dev < 1.0RC1
+1.0-dev < 1.0rc1
 1.0-dev < 1.0
 1.0-dev < 1.0pl1
 1.0a1 > 1.0-dev
 1.0a1 = 1.0a1
 1.0a1 < 1.0b1
 1.0a1 < 1.0RC1
+1.0a1 < 1.0rc1
 1.0a1 < 1.0
 1.0a1 < 1.0pl1
 1.0b1 > 1.0-dev
 1.0b1 > 1.0a1
 1.0b1 = 1.0b1
 1.0b1 < 1.0RC1
+1.0b1 < 1.0rc1
 1.0b1 < 1.0
 1.0b1 < 1.0pl1
 1.0RC1 > 1.0-dev
 1.0RC1 > 1.0a1
 1.0RC1 > 1.0b1
 1.0RC1 = 1.0RC1
+1.0RC1 = 1.0rc1
 1.0RC1 < 1.0
 1.0RC1 < 1.0pl1
+1.0rc1 > 1.0-dev
+1.0rc1 > 1.0a1
+1.0rc1 > 1.0b1
+1.0rc1 = 1.0RC1
+1.0rc1 = 1.0rc1
+1.0rc1 < 1.0
+1.0rc1 < 1.0pl1
 1.0 > 1.0-dev
 1.0 > 1.0a1
 1.0 > 1.0b1
 1.0 > 1.0RC1
+1.0 > 1.0rc1
 1.0 = 1.0
 1.0 < 1.0pl1
 1.0pl1 > 1.0-dev
 1.0pl1 > 1.0a1
 1.0pl1 > 1.0b1
 1.0pl1 > 1.0RC1
+1.0pl1 > 1.0rc1
 1.0pl1 > 1.0
 1.0pl1 = 1.0pl1
 TESTING OPERATORS
@@ -150,6 +163,20 @@ TESTING OPERATORS
 1.0-dev ne 1.0RC1  : true
 1.0-dev <> 1.0RC1  : true
 1.0-dev != 1.0RC1  : true
+1.0-dev lt 1.0rc1  : true
+1.0-dev  < 1.0rc1  : true
+1.0-dev le 1.0rc1  : true
+1.0-dev <= 1.0rc1  : true
+1.0-dev gt 1.0rc1  : false
+1.0-dev  > 1.0rc1  : false
+1.0-dev ge 1.0rc1  : false
+1.0-dev >= 1.0rc1  : false
+1.0-dev eq 1.0rc1  : false
+1.0-dev  = 1.0rc1  : false
+1.0-dev == 1.0rc1  : false
+1.0-dev ne 1.0rc1  : true
+1.0-dev <> 1.0rc1  : true
+1.0-dev != 1.0rc1  : true
 1.0-dev lt 1.0     : true
 1.0-dev  < 1.0     : true
 1.0-dev le 1.0     : true
@@ -234,6 +261,20 @@ TESTING OPERATORS
   1.0a1 ne 1.0RC1  : true
   1.0a1 <> 1.0RC1  : true
   1.0a1 != 1.0RC1  : true
+  1.0a1 lt 1.0rc1  : true
+  1.0a1  < 1.0rc1  : true
+  1.0a1 le 1.0rc1  : true
+  1.0a1 <= 1.0rc1  : true
+  1.0a1 gt 1.0rc1  : false
+  1.0a1  > 1.0rc1  : false
+  1.0a1 ge 1.0rc1  : false
+  1.0a1 >= 1.0rc1  : false
+  1.0a1 eq 1.0rc1  : false
+  1.0a1  = 1.0rc1  : false
+  1.0a1 == 1.0rc1  : false
+  1.0a1 ne 1.0rc1  : true
+  1.0a1 <> 1.0rc1  : true
+  1.0a1 != 1.0rc1  : true
   1.0a1 lt 1.0     : true
   1.0a1  < 1.0     : true
   1.0a1 le 1.0     : true
@@ -318,6 +359,20 @@ TESTING OPERATORS
   1.0b1 ne 1.0RC1  : true
   1.0b1 <> 1.0RC1  : true
   1.0b1 != 1.0RC1  : true
+  1.0b1 lt 1.0rc1  : true
+  1.0b1  < 1.0rc1  : true
+  1.0b1 le 1.0rc1  : true
+  1.0b1 <= 1.0rc1  : true
+  1.0b1 gt 1.0rc1  : false
+  1.0b1  > 1.0rc1  : false
+  1.0b1 ge 1.0rc1  : false
+  1.0b1 >= 1.0rc1  : false
+  1.0b1 eq 1.0rc1  : false
+  1.0b1  = 1.0rc1  : false
+  1.0b1 == 1.0rc1  : false
+  1.0b1 ne 1.0rc1  : true
+  1.0b1 <> 1.0rc1  : true
+  1.0b1 != 1.0rc1  : true
   1.0b1 lt 1.0     : true
   1.0b1  < 1.0     : true
   1.0b1 le 1.0     : true
@@ -402,6 +457,20 @@ TESTING OPERATORS
  1.0RC1 ne 1.0RC1  : false
  1.0RC1 <> 1.0RC1  : false
  1.0RC1 != 1.0RC1  : false
+ 1.0RC1 lt 1.0rc1  : false
+ 1.0RC1  < 1.0rc1  : false
+ 1.0RC1 le 1.0rc1  : true
+ 1.0RC1 <= 1.0rc1  : true
+ 1.0RC1 gt 1.0rc1  : false
+ 1.0RC1  > 1.0rc1  : false
+ 1.0RC1 ge 1.0rc1  : true
+ 1.0RC1 >= 1.0rc1  : true
+ 1.0RC1 eq 1.0rc1  : true
+ 1.0RC1  = 1.0rc1  : true
+ 1.0RC1 == 1.0rc1  : true
+ 1.0RC1 ne 1.0rc1  : false
+ 1.0RC1 <> 1.0rc1  : false
+ 1.0RC1 != 1.0rc1  : false
  1.0RC1 lt 1.0     : true
  1.0RC1  < 1.0     : true
  1.0RC1 le 1.0     : true
@@ -430,6 +499,104 @@ TESTING OPERATORS
  1.0RC1 ne 1.0pl1  : true
  1.0RC1 <> 1.0pl1  : true
  1.0RC1 != 1.0pl1  : true
+ 1.0rc1 lt 1.0-dev : false
+ 1.0rc1  < 1.0-dev : false
+ 1.0rc1 le 1.0-dev : false
+ 1.0rc1 <= 1.0-dev : false
+ 1.0rc1 gt 1.0-dev : true
+ 1.0rc1  > 1.0-dev : true
+ 1.0rc1 ge 1.0-dev : true
+ 1.0rc1 >= 1.0-dev : true
+ 1.0rc1 eq 1.0-dev : false
+ 1.0rc1  = 1.0-dev : false
+ 1.0rc1 == 1.0-dev : false
+ 1.0rc1 ne 1.0-dev : true
+ 1.0rc1 <> 1.0-dev : true
+ 1.0rc1 != 1.0-dev : true
+ 1.0rc1 lt 1.0a1   : false
+ 1.0rc1  < 1.0a1   : false
+ 1.0rc1 le 1.0a1   : false
+ 1.0rc1 <= 1.0a1   : false
+ 1.0rc1 gt 1.0a1   : true
+ 1.0rc1  > 1.0a1   : true
+ 1.0rc1 ge 1.0a1   : true
+ 1.0rc1 >= 1.0a1   : true
+ 1.0rc1 eq 1.0a1   : false
+ 1.0rc1  = 1.0a1   : false
+ 1.0rc1 == 1.0a1   : false
+ 1.0rc1 ne 1.0a1   : true
+ 1.0rc1 <> 1.0a1   : true
+ 1.0rc1 != 1.0a1   : true
+ 1.0rc1 lt 1.0b1   : false
+ 1.0rc1  < 1.0b1   : false
+ 1.0rc1 le 1.0b1   : false
+ 1.0rc1 <= 1.0b1   : false
+ 1.0rc1 gt 1.0b1   : true
+ 1.0rc1  > 1.0b1   : true
+ 1.0rc1 ge 1.0b1   : true
+ 1.0rc1 >= 1.0b1   : true
+ 1.0rc1 eq 1.0b1   : false
+ 1.0rc1  = 1.0b1   : false
+ 1.0rc1 == 1.0b1   : false
+ 1.0rc1 ne 1.0b1   : true
+ 1.0rc1 <> 1.0b1   : true
+ 1.0rc1 != 1.0b1   : true
+ 1.0rc1 lt 1.0RC1  : false
+ 1.0rc1  < 1.0RC1  : false
+ 1.0rc1 le 1.0RC1  : true
+ 1.0rc1 <= 1.0RC1  : true
+ 1.0rc1 gt 1.0RC1  : false
+ 1.0rc1  > 1.0RC1  : false
+ 1.0rc1 ge 1.0RC1  : true
+ 1.0rc1 >= 1.0RC1  : true
+ 1.0rc1 eq 1.0RC1  : true
+ 1.0rc1  = 1.0RC1  : true
+ 1.0rc1 == 1.0RC1  : true
+ 1.0rc1 ne 1.0RC1  : false
+ 1.0rc1 <> 1.0RC1  : false
+ 1.0rc1 != 1.0RC1  : false
+ 1.0rc1 lt 1.0rc1  : false
+ 1.0rc1  < 1.0rc1  : false
+ 1.0rc1 le 1.0rc1  : true
+ 1.0rc1 <= 1.0rc1  : true
+ 1.0rc1 gt 1.0rc1  : false
+ 1.0rc1  > 1.0rc1  : false
+ 1.0rc1 ge 1.0rc1  : true
+ 1.0rc1 >= 1.0rc1  : true
+ 1.0rc1 eq 1.0rc1  : true
+ 1.0rc1  = 1.0rc1  : true
+ 1.0rc1 == 1.0rc1  : true
+ 1.0rc1 ne 1.0rc1  : false
+ 1.0rc1 <> 1.0rc1  : false
+ 1.0rc1 != 1.0rc1  : false
+ 1.0rc1 lt 1.0     : true
+ 1.0rc1  < 1.0     : true
+ 1.0rc1 le 1.0     : true
+ 1.0rc1 <= 1.0     : true
+ 1.0rc1 gt 1.0     : false
+ 1.0rc1  > 1.0     : false
+ 1.0rc1 ge 1.0     : false
+ 1.0rc1 >= 1.0     : false
+ 1.0rc1 eq 1.0     : false
+ 1.0rc1  = 1.0     : false
+ 1.0rc1 == 1.0     : false
+ 1.0rc1 ne 1.0     : true
+ 1.0rc1 <> 1.0     : true
+ 1.0rc1 != 1.0     : true
+ 1.0rc1 lt 1.0pl1  : true
+ 1.0rc1  < 1.0pl1  : true
+ 1.0rc1 le 1.0pl1  : true
+ 1.0rc1 <= 1.0pl1  : true
+ 1.0rc1 gt 1.0pl1  : false
+ 1.0rc1  > 1.0pl1  : false
+ 1.0rc1 ge 1.0pl1  : false
+ 1.0rc1 >= 1.0pl1  : false
+ 1.0rc1 eq 1.0pl1  : false
+ 1.0rc1  = 1.0pl1  : false
+ 1.0rc1 == 1.0pl1  : false
+ 1.0rc1 ne 1.0pl1  : true
+ 1.0rc1 <> 1.0pl1  : true
+ 1.0rc1 != 1.0pl1  : true
     1.0 lt 1.0-dev : false
     1.0  < 1.0-dev : false
     1.0 le 1.0-dev : false
@@ -486,6 +653,20 @@ TESTING OPERATORS
     1.0 ne 1.0RC1  : true
     1.0 <> 1.0RC1  : true
     1.0 != 1.0RC1  : true
+    1.0 lt 1.0rc1  : false
+    1.0  < 1.0rc1  : false
+    1.0 le 1.0rc1  : false
+    1.0 <= 1.0rc1  : false
+    1.0 gt 1.0rc1  : true
+    1.0  > 1.0rc1  : true
+    1.0 ge 1.0rc1  : true
+    1.0 >= 1.0rc1  : true
+    1.0 eq 1.0rc1  : false
+    1.0  = 1.0rc1  : false
+    1.0 == 1.0rc1  : false
+    1.0 ne 1.0rc1  : true
+    1.0 <> 1.0rc1  : true
+    1.0 != 1.0rc1  : true
     1.0 lt 1.0     : false
     1.0  < 1.0     : false
     1.0 le 1.0     : true
@@ -570,6 +751,20 @@ TESTING OPERATORS
  1.0pl1 ne 1.0RC1  : true
  1.0pl1 <> 1.0RC1  : true
  1.0pl1 != 1.0RC1  : true
+ 1.0pl1 lt 1.0rc1  : false
+ 1.0pl1  < 1.0rc1  : false
+ 1.0pl1 le 1.0rc1  : false
+ 1.0pl1 <= 1.0rc1  : false
+ 1.0pl1 gt 1.0rc1  : true
+ 1.0pl1  > 1.0rc1  : true
+ 1.0pl1 ge 1.0rc1  : true
+ 1.0pl1 >= 1.0rc1  : true
+ 1.0pl1 eq 1.0rc1  : false
+ 1.0pl1  = 1.0rc1  : false
+ 1.0pl1 == 1.0rc1  : false
+ 1.0pl1 ne 1.0rc1  : true
+ 1.0pl1 <> 1.0rc1  : true
+ 1.0pl1 != 1.0rc1  : true
  1.0pl1 lt 1.0     : false
  1.0pl1  < 1.0     : false
  1.0pl1 le 1.0     : false
