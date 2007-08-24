@@ -696,7 +696,7 @@ static void zend_set_default_compile_time_values(TSRMLS_D) /* {{{ */
 
 static void zval_copy_persistent(zval *zv) /* {{{ */
 {
-	if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_CONSTANT) {
+	if (Z_TYPE_P(zv) == IS_STRING || (Z_TYPE_P(zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		UChar *ustr;
 
 		ustr = malloc(UBYTES(Z_STRLEN_P(zv)+1));
@@ -783,7 +783,7 @@ static void const_to_unicode(zend_constant *c) /* {{{ */
 		free(c->name.s);
 		c->name.u = uname;
 	}
-	if (Z_TYPE(c->value) == IS_STRING || Z_TYPE(c->value) == IS_CONSTANT) {
+	if (Z_TYPE(c->value) == IS_STRING || (Z_TYPE(c->value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		UChar *ustr;
 
 		ustr = malloc(UBYTES(Z_STRLEN(c->value)+1));

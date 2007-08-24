@@ -174,8 +174,13 @@ top_statement:
 	|	T_NAMESPACE namespace_name ';'	{ zend_do_namespace(&$2 TSRMLS_CC); }
 	|	T_IMPORT namespace_name ';'		{ zend_do_import(&$2, NULL TSRMLS_CC); }
 	|	T_IMPORT namespace_name T_AS T_STRING ';'	{ zend_do_import(&$2, &$4 TSRMLS_CC); }
+	|	constant_declaration ';'
 ;
 
+constant_declaration:
+		constant_declaration ',' T_STRING '=' static_scalar	{ zend_do_declare_constant(&$3, &$5 TSRMLS_CC); }
+	|	T_CONST T_STRING '=' static_scalar { zend_do_declare_constant(&$2, &$4 TSRMLS_CC); }
+;
 
 inner_statement_list:
 		inner_statement_list  { zend_do_extended_info(TSRMLS_C); } inner_statement { HANDLE_INTERACTIVE(); }
@@ -722,7 +727,8 @@ common_scalar:
 
 static_scalar: /* compile-time evaluated scalars */
 		common_scalar		{ $$ = $1; }
-	|	T_STRING 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT TSRMLS_CC); }
+	|	T_STRING 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT, 1 TSRMLS_CC); }
+	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, NULL, &$2, ZEND_CT, 0 TSRMLS_CC); }
 	|	'+' static_scalar	{ $$ = $2; }
 	|	'-' static_scalar	{ zval minus_one;  Z_TYPE(minus_one) = IS_LONG; Z_LVAL(minus_one) = -1;  mul_function(&$2.u.constant, &$2.u.constant, &minus_one TSRMLS_CC);  $$ = $2; }
 	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
@@ -730,11 +736,12 @@ static_scalar: /* compile-time evaluated scalars */
 ;
 
 static_class_constant:
-		fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_CT TSRMLS_CC); }
+		fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_CT, 0 TSRMLS_CC); }
 ;
 
 scalar:
-		T_STRING 				{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_RT TSRMLS_CC); }
+		T_STRING 				{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_RT, 1 TSRMLS_CC); }
+	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, NULL, &$2, ZEND_RT, 0 TSRMLS_CC); }
 	|	T_STRING_VARNAME		{ $$ = $1; }
 	|	class_constant	{ $$ = $1; }
 	|	common_scalar			{ $$ = $1; }
@@ -945,8 +952,8 @@ isset_variables:
 ;
 
 class_constant:
-		fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT TSRMLS_CC); }
-	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT TSRMLS_CC); }
+		fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT, 0 TSRMLS_CC); }
+	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT, 0 TSRMLS_CC); }
 ;
 
 %%

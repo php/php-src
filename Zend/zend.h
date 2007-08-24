@@ -467,7 +467,9 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_UNICODE  10
 
 /* Ugly hack to support constants as static array indices */
-#define IS_CONSTANT_INDEX	0x80
+#define IS_CONSTANT_TYPE_MASK	0x0f
+#define IS_CONSTANT_RT_NS_CHECK	0x10
+#define IS_CONSTANT_INDEX		0x80
 
 
 /* overloaded elements data types */

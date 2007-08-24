@@ -3691,7 +3691,7 @@ void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_lis
 }
 /* }}} */
 
-static int zend_constant_ct_subst(znode *result, zval *const_name TSRMLS_DC) /* {{{ */
+static zend_constant* zend_get_ct_const(zval *const_name TSRMLS_DC) /* {{{ */
 {
 	zend_constant *c = NULL;
 
@@ -3701,14 +3701,27 @@ static int zend_constant_ct_subst(znode *result, zval *const_name TSRMLS_DC) /* 
 
 		if (zend_u_hash_find(EG(zend_constants), Z_TYPE_P(const_name), lookup_name, lookup_name_len+1, (void **) &c)==SUCCESS) {
 			if ((c->flags & CONST_CS) && memcmp(c->name.v, Z_UNIVAL_P(const_name).v, UG(unicode)?UBYTES(Z_USTRLEN_P(const_name)):Z_STRLEN_P(const_name))!=0) {
-				c = NULL;
+				efree(lookup_name.v);
+				return NULL;
 			}
 		} else {
-			c = NULL;
+			efree(lookup_name.v);
+			return NULL;
 		}
 		efree(lookup_name.v);
 	}
-	if (c && (c->flags & CONST_CT_SUBST)) {
+	if (c->flags & CONST_CT_SUBST) {
+		return c;
+	}
+	return NULL;
+}
+/* }}} */
+
+static int zend_constant_ct_subst(znode *result, zval *const_name TSRMLS_DC) /* {{{ */
+{
+	zend_constant *c = zend_get_ct_const(const_name TSRMLS_CC);
+
+	if (c) {
 		zval_dtor(const_name);
 		result->op_type = IS_CONST;
 		result->u.constant = c->value;
@@ -3720,44 +3733,110 @@ static int zend_constant_ct_subst(znode *result, zval *const_name TSRMLS_DC) /* 
 }
 /* }}} */
 
-void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode TSRMLS_DC) /* {{{ */
+void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode, zend_bool check_namespace TSRMLS_DC) /* {{{ */
 {
+	ulong fetch_type = 0;
+	znode tmp;
+
 	switch (mode) {
 		case ZEND_CT:
 			if (constant_container) {
-				ulong fetch_type;
-
 			    if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_TYPE(constant_container->u.constant), Z_UNIVAL(constant_container->u.constant), Z_UNILEN(constant_container->u.constant))) {
 					zend_resolve_class_name(constant_container, &fetch_type, 1 TSRMLS_CC);
 				}
 				zend_do_fetch_class_name(NULL, constant_container, constant_name TSRMLS_CC);
 				*result = *constant_container;
-				result->u.constant.type = IS_CONSTANT;
+				result->u.constant.type = IS_CONSTANT | fetch_type;
 			} else if (!zend_constant_ct_subst(result, &constant_name->u.constant TSRMLS_CC)) {
+				if (check_namespace && CG(current_namespace)) {
+					/* We assume we use constant from the current namespace
+					   if it is not prefixed. */
+					tmp.op_type = IS_CONST;
+					tmp.u.constant = *CG(current_namespace);
+					zval_copy_ctor(&tmp.u.constant);
+					zend_do_build_namespace_name(&tmp, &tmp, constant_name TSRMLS_CC);
+					*constant_name = tmp;
+					fetch_type = IS_CONSTANT_RT_NS_CHECK;
+				}
 				*result = *constant_name;
-				result->u.constant.type = IS_CONSTANT;
+				result->u.constant.type = IS_CONSTANT | fetch_type;
 			}
 			break;
 		case ZEND_RT:
 			if (constant_container ||
 			    !zend_constant_ct_subst(result, &constant_name->u.constant TSRMLS_CC)) {
 				zend_op *opline;
-				znode class_node;
 
 				if (constant_container) {
-					zend_do_fetch_class(&class_node, constant_container TSRMLS_CC);
+				    if (constant_container->op_type == IS_CONST &&
+				        ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_TYPE(constant_container->u.constant), Z_UNIVAL(constant_container->u.constant), Z_UNILEN(constant_container->u.constant))) {
+						zend_resolve_class_name(constant_container, &fetch_type, 1 TSRMLS_CC);
+					} else {
+						zend_do_fetch_class(&tmp, constant_container TSRMLS_CC);
+						constant_container = &tmp;
+					}
+				} else if (check_namespace && CG(current_namespace)) {
+					/* We assume we use constant from the current namespace
+					   if it is not prefixed. */
+					tmp.op_type = IS_CONST;
+					tmp.u.constant = *CG(current_namespace);
+					zval_copy_ctor(&tmp.u.constant);
+					constant_container = &tmp;
+					fetch_type = IS_CONSTANT_RT_NS_CHECK;
 				}
 				opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 				opline->opcode = ZEND_FETCH_CONSTANT;
+				opline->extended_value = fetch_type  & ~ZEND_FETCH_CLASS_RT_NS_NAME;
 				opline->result.op_type = IS_TMP_VAR;
 				opline->result.u.var = get_temporary_variable(CG(active_op_array));
 				if (constant_container) {
-					opline->op1 = class_node;
+					opline->op1 = *constant_container;
 				} else {
 					SET_UNUSED(opline->op1);
 				}
 				opline->op2 = *constant_name;
 				*result = opline->result;
+
+				if (opline->op1.op_type == IS_CONST) {
+					/* Prebuild ns::func name to speedup run-time check.
+					   The additional names are stored in additional OP_DATA opcode. */
+					zstr nsname;
+					unsigned int nsname_len;
+
+					opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+					opline->opcode = ZEND_OP_DATA;
+					opline->op1.op_type = IS_CONST;
+					SET_UNUSED(opline->op2);
+
+					nsname = Z_UNIVAL(constant_container->u.constant);
+					nsname_len = Z_UNILEN(constant_container->u.constant);
+					if (fetch_type & ZEND_FETCH_CLASS_RT_NS_NAME) {
+						/* Remove namespace name */
+						if (Z_TYPE(constant_container->u.constant) == IS_UNICODE) {
+							nsname.u = u_memchr(nsname.u, ':', nsname_len) + 2;
+							nsname_len -= (nsname.u - Z_USTRVAL(constant_container->u.constant));
+						} else {
+							nsname.s = memchr(nsname.s, ':', nsname_len) + 2;
+							nsname_len -= (nsname.s - Z_STRVAL(constant_container->u.constant));
+					    }
+					}
+
+					Z_TYPE(opline->op1.u.constant) = Z_TYPE(constant_container->u.constant);
+					Z_UNIVAL(opline->op1.u.constant) = zend_u_str_case_fold(Z_TYPE(constant_container->u.constant), nsname, nsname_len, 0, &Z_UNILEN(opline->op1.u.constant));
+					if (UG(unicode)) {
+						Z_USTRVAL(opline->op1.u.constant) = erealloc(Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant) + 2 + Z_USTRLEN(constant_name->u.constant) + 1));
+						Z_USTRVAL(opline->op1.u.constant)[Z_USTRLEN(opline->op1.u.constant)] = ':';
+						Z_USTRVAL(opline->op1.u.constant)[Z_USTRLEN(opline->op1.u.constant)+1] = ':';
+						memcpy(Z_USTRVAL(opline->op1.u.constant)+Z_USTRLEN(opline->op1.u.constant)+2, Z_USTRVAL(constant_name->u.constant), UBYTES(Z_USTRLEN(constant_name->u.constant) + 1));
+					} else {
+						Z_STRVAL(opline->op1.u.constant) = erealloc(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant) + 2 + Z_STRLEN(constant_name->u.constant) + 1);
+						Z_STRVAL(opline->op1.u.constant)[Z_STRLEN(opline->op1.u.constant)] = ':';
+						Z_STRVAL(opline->op1.u.constant)[Z_STRLEN(opline->op1.u.constant)+1] = ':';
+						memcpy(Z_STRVAL(opline->op1.u.constant)+Z_STRLEN(opline->op1.u.constant)+2, Z_STRVAL(constant_name->u.constant), Z_STRLEN(constant_name->u.constant) + 1);
+					}
+					Z_UNILEN(opline->op1.u.constant) += 2 + Z_UNILEN(constant_name->u.constant);
+					opline->extended_value = zend_u_hash_func(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
+				}
 			}
 			break;
 	}
@@ -3846,7 +3925,7 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
 	if (offset) {
 		zend_uchar utype = Z_TYPE(offset->u.constant);
 
-		switch (Z_TYPE(offset->u.constant)) {
+		switch (Z_TYPE(offset->u.constant) & IS_CONSTANT_TYPE_MASK) {
 			case IS_CONSTANT:
 				/* Ugly hack to denote that this value has a constant index */
 				Z_TYPE_P(element) |= IS_CONSTANT_INDEX;
@@ -5048,6 +5127,37 @@ void zend_do_import(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 	}
 	efree(lcname.v);
 	zval_dtor(name);
+}
+/* }}} */
+
+void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
+{
+	zend_op *opline;
+
+	if (zend_get_ct_const(&name->u.constant TSRMLS_CC)) {
+		zend_error(E_COMPILE_ERROR, "Cannot redeclare constant '%R'", Z_TYPE(name->u.constant), Z_UNIVAL(name->u.constant));
+	}
+
+	if (CG(current_namespace)) {
+		/* Prefix constant name with name of current namespace */
+		znode tmp;
+		zstr lcname;
+		uint lcname_len;
+
+		tmp.op_type = IS_CONST;
+		tmp.u.constant = *CG(current_namespace);
+		lcname = zend_u_str_case_fold(Z_TYPE(tmp.u.constant), Z_UNIVAL(tmp.u.constant), Z_UNILEN(tmp.u.constant), 0, &lcname_len);
+		Z_UNIVAL(tmp.u.constant) = lcname;
+		Z_UNILEN(tmp.u.constant) = lcname_len;
+		zend_do_build_namespace_name(&tmp, &tmp, name TSRMLS_CC);
+		*name = tmp;
+	}
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->opcode = ZEND_DECLARE_CONST;
+	SET_UNUSED(opline->result);
+	opline->op1 = *name;
+	opline->op2 = *value;
 }
 /* }}} */
 
