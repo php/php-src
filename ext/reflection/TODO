@@ -1,3 +1,0 @@
-Reflection ToDo:
-
-- Drop ReflectionParameter::getClass() as soon as 5.2 comes out
