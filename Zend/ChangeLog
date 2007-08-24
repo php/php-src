@@ -1,3 +1,12 @@
+2007-08-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_ini.c:
+      MFH: revert the patch which breaks multithreaded servers
+
+    * zend_ini.c:
+      revert patch which breaks multithreaded servers
+
 2007-08-22  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_builtin_functions.c
