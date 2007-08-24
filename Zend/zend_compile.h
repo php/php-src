@@ -470,7 +470,7 @@ void zend_do_pop_object(znode *object TSRMLS_DC);
 void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC);
 void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_list TSRMLS_DC);
 
-void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode TSRMLS_DC);
+void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode, zend_bool check_namespace TSRMLS_DC);
 
 void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC);
 
@@ -519,6 +519,7 @@ void zend_do_ticks(TSRMLS_D);
 
 void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body TSRMLS_DC);
 
+void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC);
 void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRMLS_DC);
 void zend_do_namespace(znode *name TSRMLS_DC);
 void zend_do_import(znode *name, znode *new_name TSRMLS_DC);

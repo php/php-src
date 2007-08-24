@@ -28,7 +28,7 @@
 
 ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC) /* {{{ */
 {
-	switch (Z_TYPE_P(zvalue) & ~IS_CONSTANT_INDEX) {
+	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
 		case IS_CONSTANT: {
 			TSRMLS_FETCH();
 
@@ -81,7 +81,7 @@ dtor_unicode:
 
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC) /* {{{ */
 {
-	switch (Z_TYPE_P(zvalue) & ~IS_CONSTANT_INDEX) {
+	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
 		case IS_CONSTANT: {
 			TSRMLS_FETCH();
 
@@ -120,7 +120,7 @@ ZEND_API void zval_add_ref(zval **p) /* {{{ */
 
 ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) /* {{{ */
 {
-	switch (Z_TYPE_P(zvalue)) {
+	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
 		case IS_RESOURCE: {
 				TSRMLS_FETCH();
 

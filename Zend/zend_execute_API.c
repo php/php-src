@@ -485,10 +485,11 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 	zend_bool inline_change = (zend_bool) (zend_uintptr_t) arg;
 	zval const_value;
 	zstr colon;
+	int len;
 
 	if (IS_CONSTANT_VISITED(p)) {
 		zend_error(E_ERROR, "Cannot declare self-referencing constant '%v'", Z_UNIVAL_P(p));
-	} else if (Z_TYPE_P(p) == IS_CONSTANT) {
+	} else if ((Z_TYPE_P(p) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		int refcount;
 		zend_uchar is_ref;
 
@@ -500,10 +501,15 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		refcount = p->refcount;
 		is_ref = p->is_ref;
 
-		if (!zend_u_get_constant(ZEND_STR_TYPE, Z_UNIVAL_P(p), Z_UNILEN_P(p), &const_value, scope TSRMLS_CC)) {
-			if ((UG(unicode) && (colon.u = u_memchr(Z_USTRVAL_P(p), ':', Z_USTRLEN_P(p))) && colon.u[1] == ':') ||
-			    (!UG(unicode) && (colon.s = memchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p))) && colon.s[1] == ':')) {
-				zend_error(E_ERROR, "Undefined class constant '%v'", Z_UNIVAL_P(p));
+		if (!zend_u_get_constant_ex(ZEND_STR_TYPE, Z_UNIVAL_P(p), Z_UNILEN_P(p), &const_value, scope, Z_TYPE_P(p) TSRMLS_CC)) {
+			if ((UG(unicode) && (colon.u = u_memrchr(Z_USTRVAL_P(p), ':', Z_USTRLEN_P(p))) && colon.u > Z_USTRVAL_P(p) && *(colon.u-1) == ':') ||
+			    (!UG(unicode) && (colon.s = zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p))) && colon.s > Z_STRVAL_P(p) && *(colon.s-1) == ':')) {
+	    		if (UG(unicode)) {
+	    			colon.u++;
+	    		} else {
+	    			colon.s++;
+	    		}
+				zend_error(E_ERROR, "Undefined class constant '%v'", colon);
 			}
 			zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",
 				Z_UNIVAL_P(p),
@@ -543,7 +549,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!zend_u_get_constant(ZEND_STR_TYPE, str_index, str_index_len-1, &const_value, scope TSRMLS_CC)) {
+			if (!zend_u_get_constant_ex(ZEND_STR_TYPE, str_index, str_index_len-1, &const_value, scope, 0 TSRMLS_CC)) {
 				if ((UG(unicode) && (colon.u = u_memchr(str_index.u, ':', str_index_len-1)) && colon.u[1] == ':') ||
 				    (!UG(unicode) && (colon.s = memchr(str_index.s, ':', str_index_len-1)) && colon.s[1] == ':')) {
 					zend_error(E_ERROR, "Undefined class constant '%v'", str_index);
