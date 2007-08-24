@@ -26,9 +26,9 @@
   <email>mike@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-05-30</date>
+ <date>2007-08-24</date>
  <version>
-  <release>1.4</release>
+  <release>1.5</release>
   <api>1.0</api>
  </version>
  <stability>
@@ -36,12 +36,7 @@
   <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
- <notes><![CDATA[
-* Fix builds (PHP 4 only)
-* Added ripemd256, and ripemd320 to supported algorithms
-* Added function reflection information (PHP5+ only)
-]]>
- </notes>
+ <notes><![CDATA[Fix builds (PHP4&5)]]></notes>
  <contents>
   <dir name="/">
    <dir name="tests">
@@ -111,6 +106,24 @@
  <providesextension>hash</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.4</release>
+    <api>1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2007-05-30</date>
+   <license uri="http://www.php.net/license">PHP</license>
+   <notes><![CDATA[
+* Fix builds (PHP 4 only)
+* Added ripemd256, and ripemd320 to supported algorithms
+* Added function reflection information (PHP5+ only)
+]]>
+   </notes>
+  </release>
   <release>
    <version>
     <release>1.2</release>
