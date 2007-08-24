@@ -1034,6 +1034,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	/* Run the code */
 	if (zend_eval_string(code.c, &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
 		efree(compiled_string_description);
+		UG(runtime_encoding_conv) = orig_runtime_conv;
 		php_error_docref(NULL TSRMLS_CC,E_ERROR, "Failed evaluating code: %s%s", PHP_EOL, code.c);
 		/* zend_error() does not return in this case */
 	}
