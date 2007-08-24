@@ -38,7 +38,7 @@ else
 fi
 
 # Remove quotes
-configure_options="`echo $configure_options | $SED -e "s#'##g"`"
+configure_options=`echo $configure_options | $SED -e "s#'##g"`
 
 case "$1" in
 --prefix)
