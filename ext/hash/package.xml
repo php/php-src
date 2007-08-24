@@ -20,14 +20,11 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.4</version>
-  <date>2007-05-30</date>
+  <version>1.5</version>
+  <date>2007-08-24</date>
   <license>PHP</license>
   <state>stable</state>
-  <notes>* Fix builds (PHP 4 only)
-* Added ripemd256, and ripemd320 to supported algorithms
-* Added function reflection information (PHP5+ only)
-  </notes>
+  <notes><![CDATA[Fix builds (PHP4&5)]]></notes>
   <deps>
    <dep type="php" rel="ge" version="4.0.0"/>
   </deps>
