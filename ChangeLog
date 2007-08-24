@@ -1,3 +1,78 @@
+2007-08-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.4RC3
+
+2007-08-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      -BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c:
+      MFH: revert the patch which breaks multithreaded servers
+
+    * ZendEngine2/zend_ini.c:
+      revert patch which breaks multithreaded servers
+
+2007-08-23  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/versioning.c:
+      - MFH: Make version_compare() also understand the lower case variant of
+      "RC".
+
+2007-08-23  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/session/mod_files.c:
+      MFB: Fixed bug #37273 (Symlinks and mod_files session handler allow
+      open_basedir bypass)
+
+    * ext/session/mod_files.c:
+      MFB: -r1.100.2.3.2.5
+
+    * (PHP_5_2)
+      ext/session/mod_files.c:
+      MFH: ws + cs changes (sync to ease merging patches around!)
+
+    * ext/session/tests/bug41600.phpt:
+      missing )
+
+2007-08-23  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/versioning.c:
+      - Make version_compare() also understand the lower case variant of "RC".
+
+2007-08-23  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation9.phpt
+      ext/standard/tests/file/copy_variation9.phpt:
+      fix tests
+
+2007-08-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/session/mod_files.c:
+      
+      Fixed bug #37273 (Symlinks and mod_files session handler allow
+      open_basedir
+      bypass).
+
 2007-08-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
