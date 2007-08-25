@@ -331,6 +331,7 @@ PHP_METHOD(Phar, delete)
 		
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto int Phar::getAlias()
  * Returns the alias for the PHAR or NULL
