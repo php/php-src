@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.5.4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.6.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>phar</name>
  <channel>pecl.php.net</channel>
  <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
@@ -29,10 +29,10 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-05-18</date>
- <time>06:32:38</time>
+ <date>2007-08-24</date>
+ <time>20:06:43</time>
  <version>
-  <release>1.2.0</release>
+  <release>1.2.1</release>
   <api>1.1.0</api>
  </version>
  <stability>
@@ -42,13 +42,18 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
 
- * add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
- * add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
- * fix Phar::CanWrite() [Marcus]
- * add preliminary phar command (phar.php) [Marcus] 
- * add phar command (phar.phar) [Marcus]
- * list all available compression methods using Phar::getSupportedCompression() [Marcus]
- * remove RINIT [Marcus]
+ * add Phar::setAlias() [Greg]
+ * fix too many open file handles issue [Greg]
+ * fix rename [Greg]
+ * add Phar::getAlias() [Marcus]
+ * Made -a optional in pack subcommand of phar.phar [Marcus]
+ * Fix issue with apache module and extracted archives [Marcus]
+ * Send all error messages to stderr in phar.phar [Marcus]
+ * Added new subcommands add and delete to phar.phar [Marcus]
+ * Made Phar::loadPhar() and Phar::mapPhar() ignore extracted archives [Marcus]
+ * Fix issue with compressed entries and uncompressing entries [Marcus]
+ * Verify stubs before writing [Marcus]
+ * Always use longest stub end to avoid issues with length field [Marcus]
 
  </notes>
  <contents>
@@ -58,6 +63,7 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
     <file name="directorygraphiterator.inc" role="src" />
     <file name="directorytreeiterator.inc" role="src" />
     <file name="invertedregexiterator.inc" role="src" />
+    <file name="phar.inc" role="src" />
     <file name="phar.php" role="src" />
     <file name="pharcommand.inc" role="src" />
    </dir> <!-- /phar -->
@@ -161,17 +167,20 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
     <file name="phar_stub.phpt" role="test" />
     <file name="phar_stub_error.phpt" role="test" />
     <file name="phar_stub_write.phpt" role="test" />
+    <file name="phar_stub_write_file.phpt" role="test" />
     <file name="phar_test.inc" role="test" />
     <file name="refcount1.phpt" role="test" />
     <file name="rename.phpt" role="test" />
    </dir> <!-- /tests -->
+   <file name="build_precommand.php" role="php" />
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />
+   <file name="gdbhelp" role="data" />
    <file name="LICENSE" role="doc" />
    <file name="Makefile.frag" role="src" />
    <file name="phar.c" role="src" />
-   <file name="phar.php" role="php" />
+   <file name="phar.phar" role="data" />
    <file name="phar_internal.h" role="src" />
    <file name="phar_object.c" role="src" />
    <file name="phar_path_check.c" role="src" />
@@ -213,6 +222,34 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <changelog>
   <release>
    <version>
+    <release>1.2.1</release>
+    <api>1.1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2007-08-24</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+
+ * add Phar::setAlias() [Greg]
+ * fix too many open file handles issue [Greg]
+ * fix rename [Greg]
+ * add Phar::getAlias() [Marcus]
+ * Made -a optional in pack subcommand of phar.phar [Marcus]
+ * Fix issue with apache module and extracted archives [Marcus]
+ * Send all error messages to stderr in phar.phar [Marcus]
+ * Added new subcommands add and delete to phar.phar [Marcus]
+ * Made Phar::loadPhar() and Phar::mapPhar() ignore extracted archives [Marcus]
+ * Fix issue with compressed entries and uncompressing entries [Marcus]
+ * Verify stubs before writing [Marcus]
+ * Always use longest stub end to avoid issues with length field [Marcus]
+
+   </notes>
+  </release>
+  <release>
+   <version>
     <release>1.2.0</release>
     <api>1.1.0</api>
    </version>
@@ -222,17 +259,13 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
    </stability>
    <date>2007-05-18</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>
-
- * add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
- * add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
- * fix Phar::CanWrite() [Marcus]
- * add preliminary phar command (phar.php) [Marcus] 
- * add phar command (phar.phar) [Marcus]
- * list all available compression methods using Phar::getSupportedCompression() [Marcus]
- * remove RINIT [Marcus]
-
-   </notes>
+   <notes>* add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
+* add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
+* fix Phar::CanWrite() [Marcus]
+* add preliminary phar command (phar.php) [Marcus] 
+* add phar command (phar.phar) [Marcus]
+* list all available compression methods using Phar::getSupportedCompression() [Marcus]
+* remove RINIT [Marcus]</notes>
   </release>
   <release>
    <version>
