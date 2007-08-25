@@ -1,5 +1,7 @@
 --TEST--
 036: Name ambiguity in compile-time constant reference (ns name)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) die("skip SPL is no available"); ?>
 --FILE--
 <?php
 namespace A;
@@ -32,6 +34,7 @@ f2();
 f3();
 f4();
 f5();
+?>
 --EXPECT--
 int(2)
 int(1)

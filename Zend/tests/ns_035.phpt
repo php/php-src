@@ -1,5 +1,7 @@
 --TEST--
 035: Name ambiguity in compile-time constant reference (php name)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) die("skip SPL is no available"); ?>
 --FILE--
 <?php
 namespace A;
@@ -13,6 +15,8 @@ var_dump(ArrayObject::STD_PROP_LIST);
 var_dump(::ArrayObject::STD_PROP_LIST);
 f1();
 f2();
+
+?>
 --EXPECT--
 int(1)
 int(1)
