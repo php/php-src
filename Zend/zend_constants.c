@@ -409,7 +409,7 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 					nsname.u = u_memchr(nsname.u, ':', nsname_len) + 2;
 					nsname_len -= (nsname.u - lcname.u);
 				} else {
-					nsname.s = memchr(nsname.s, ':', nsname_len) + 2;
+					nsname.s = (char *)memchr(nsname.s, ':', nsname_len) + 2;
 					nsname_len -= (nsname.s - lcname.s);
 			    }
 			}

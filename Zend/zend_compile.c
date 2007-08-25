@@ -1809,7 +1809,7 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 				nsname.u = u_memchr(nsname.u, ':', nsname_len) + 2;
 				nsname_len -= (nsname.u - Z_USTRVAL(class_node.u.constant));
 			} else {
-				nsname.s = memchr(nsname.s, ':', nsname_len) + 2;
+				nsname.s = (char *)memchr(nsname.s, ':', nsname_len) + 2;
 				nsname_len -= (nsname.s - Z_STRVAL(class_node.u.constant));
 		    }
 		}
@@ -3816,7 +3816,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 							nsname.u = u_memchr(nsname.u, ':', nsname_len) + 2;
 							nsname_len -= (nsname.u - Z_USTRVAL(constant_container->u.constant));
 						} else {
-							nsname.s = memchr(nsname.s, ':', nsname_len) + 2;
+							nsname.s = (char *)memchr(nsname.s, ':', nsname_len) + 2;
 							nsname_len -= (nsname.s - Z_STRVAL(constant_container->u.constant));
 					    }
 					}
