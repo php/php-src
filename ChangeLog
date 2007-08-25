@@ -1,3 +1,71 @@
+2007-08-24  Sara Golemon  <sara@golemon.com>
+
+    * (RELEASE_1_5)
+      ext/hash/package.xml
+      ext/hash/package2.xml:
+      Prep for 1.5 release
+
+    * (RELEASE_1_5)
+      ext/hash/hash.c:
+      Fix hash_init() for PHP < 6
+
+2007-08-24  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/versioning/version_compare.phpt
+      ext/standard/tests/versioning/version_compare.phpt:
+      adding check for rc1 to version-compare test
+
+2007-08-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug41633_2.phpt
+      ZendEngine2/tests/ns_039.phpt
+      ZendEngine2/tests/ns_040.phpt
+      ZendEngine2/tests/ns_041.phpt
+      ZendEngine2/tests/ns_042.phpt
+      ZendEngine2/tests/ns_043.phpt
+      ZendEngine2/tests/ns_044.phpt
+      ZendEngine2/tests/ns_045.phpt
+      ZendEngine2/tests/ns_046.phpt
+      ZendEngine2/tests/ns_047.phpt
+      ZendEngine2/tests/ns_048.phpt
+      ZendEngine2/tests/ns_049.phpt
+      ZendEngine2/tests/ns_050.phpt
+      ZendEngine2/tests/ns_051.phpt
+      ZendEngine2/tests/ns_052.phpt
+      ZendEngine2/tests/ns_053.phpt
+      ext/standard/basic_functions.c:
+      Namespace constants
+
+2007-08-24  Antony Dovgal  <antony@zend.com>
+
+    * ext/pcre/php_pcre.c:
+      fix segfault on shutdown due to UG(utf8_conv) being destroyed twice
+
+    * ext/pcre/tests/bug21758.phpt:
+      fix test name
+
+2007-08-24  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      scripts/php-config.in:
+      MFH:- Fix problem with non-bash compliant shells
+
+    * scripts/php-config.in:
+      - Fix problem with non-bash compliant shells
+
 2007-08-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

@@ -1,3 +1,36 @@
+2007-08-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_constants.h
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_variables.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug41633_2.phpt
+      tests/ns_039.phpt
+      tests/ns_040.phpt
+      tests/ns_041.phpt
+      tests/ns_042.phpt
+      tests/ns_043.phpt
+      tests/ns_044.phpt
+      tests/ns_045.phpt
+      tests/ns_046.phpt
+      tests/ns_047.phpt
+      tests/ns_048.phpt
+      tests/ns_049.phpt
+      tests/ns_050.phpt
+      tests/ns_051.phpt
+      tests/ns_052.phpt
+      tests/ns_053.phpt:
+      Namespace constants
+
 2007-08-23  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
