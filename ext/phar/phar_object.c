@@ -309,6 +309,12 @@ PHP_METHOD(Phar, setAlias)
 	phar_archive_data *fd, **fd_ptr;
 	int alias_len;
 	PHAR_ARCHIVE_OBJECT();
+
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot write out phar archive, phar is read-only");
+	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &alias, &alias_len) == SUCCESS) {
 		if (alias_len == phar_obj->arc.archive->alias_len && memcmp(phar_obj->arc.archive->alias, alias, alias_len) == 0) {
 			RETURN_TRUE;
