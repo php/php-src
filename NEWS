@@ -1,5 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+- Fixed regression in imagerectangle for 1x1 rectangle (gd bug #106) (Pierre)
 23 Aug 2007, PHP 5.2.4RC3
 - Fixed version_compare() to support "rc" as well as "RC" for release
   candidate version numbers.
