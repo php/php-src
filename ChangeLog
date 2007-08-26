@@ -1,3 +1,15 @@
+2007-08-25  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_constants.c:
+      fixed compilation error on Visual C++ 2005
+
+2007-08-25  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/ns_035.phpt
+      ZendEngine2/tests/ns_036.phpt:
+      fix tests
+
 2007-08-24  Sara Golemon  <sara@golemon.com>
 
     * (RELEASE_1_5)
