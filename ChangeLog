@@ -1,3 +1,24 @@
+2007-08-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Fixed typo
+
+2007-08-27  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      Fix news
+
+2007-08-27  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/libgd/gd.c:
+      - revert fix for #106
+      - add news entry for pslib fix
+        NB: Please next time, inform us before a complete freeze is done for
+            a given branch. And a week for a RC is defitively too short.
+
 2007-08-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_2)
