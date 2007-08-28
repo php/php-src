@@ -1814,6 +1814,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	PG(error_handling) = EH_NORMAL;
 	PG(disable_functions) = NULL;
 	PG(disable_classes) = NULL;
+	PG(allow_url_fopen_list) = NULL;
+	PG(allow_url_include_list) = NULL;
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
