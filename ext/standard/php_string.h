@@ -148,6 +148,8 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length, char *needle,
 		int needle_len, char *str, int str_len, int *_new_length, int case_sensitivity, int *replace_count);
 PHPAPI char *php_str_to_str(char *haystack, int length, char *needle,
 		int needle_len, char *str, int str_len, int *_new_length);
+PHPAPI UChar *php_u_str_to_str_ex(UChar *haystack, int length,
+	UChar *needle, int needle_len, UChar *repl, int repl_len, int *_new_length, int *replace_count);
 PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zval *return_value, int mode TSRMLS_DC);
 PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, int allow_len TSRMLS_DC);
 PHPAPI size_t php_strip_tags(char *rbuf, int len, int *state, char *allow, int allow_len);
