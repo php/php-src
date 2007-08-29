@@ -1,3 +1,9 @@
+2007-08-28  Derick Rethans  <php@derickrethans.nl>
+
+    * main/main.c:
+      - Fixed allow_url_fopen_list/allow_url_include_list handling by making sure
+        the pointers are initialized. Thanks to Sara.
+
 2007-08-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * NEWS:
