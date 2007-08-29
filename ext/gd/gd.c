@@ -4353,12 +4353,22 @@ PHP_FUNCTION(imagepsloadfont)
 {
 	zval **file;
 	int f_ind, *font;
+#ifdef PHP_WIN32
+	struct stat st;
+#endif
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_string_ex(file);
+
+#ifdef PHP_WIN32
+	if (VCWD_STAT(Z_STRVAL_PP(file), &st) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Font file not found (%s)", Z_STRVAL_PP(file));
+		RETURN_FALSE;
+	}
+#endif
 
 	f_ind = T1_AddFont(Z_STRVAL_PP(file));
 
