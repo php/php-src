@@ -4,6 +4,9 @@ Test gettype() & settype() functions : usage variations
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
+if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'MAC' ) {
+    die('skip Do not run on MacOS');
+}
 --INI--
 precision=14
 --FILE--
