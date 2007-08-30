@@ -1,3 +1,48 @@
+2007-08-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.4
+
+2007-08-29  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/php_string.h:
+      - Put the PHPAPI php_u_str_to_str() function in the .h, just like the rest.
+
+2007-08-29  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/fnmatch_basic.phpt
+      ext/standard/tests/file/fnmatch_error.phpt
+      ext/standard/tests/file/fnmatch_variation.phpt:
+      fix tests: do not run on MACOS
+
+    * (PHP_5_2)
+      ext/standard/tests/file/fnmatch_basic.phpt
+      ext/standard/tests/file/fnmatch_error.phpt
+      ext/standard/tests/file/fnmatch_variation.phpt:
+      fix test: do not run on MACOS
+
+2007-08-29  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/gd.c:
+      - gd bug #102, alternative fix when an old library is used
+
+2007-08-29  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/general_functions/gettype_settype_variation2.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation2.phpt:
+      fix test, do not run on macos
+
+2007-08-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo_sqlite/EXPERIMENTAL:
+      
+      not exprimental
+
 2007-08-28  Derick Rethans  <php@derickrethans.nl>
 
     * main/main.c:
