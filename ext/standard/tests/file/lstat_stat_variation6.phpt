@@ -5,6 +5,14 @@ Test lstat() and stat() functions: usage variations - effects of touch() on link
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. lstat() not available on Windows');
 }
+
+// checking for atime update whether it is enabled or disabled
+exec("mount", $mount_output);
+foreach( $mount_output as $out )  {
+  if( stristr($out, "noatime") )
+     die('skip.. atime update is disabled, hence skip the test');
+}
+  
 ?>
 --FILE--
 <?php
