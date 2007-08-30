@@ -29,8 +29,8 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-08-24</date>
- <time>20:06:43</time>
+ <date>2007-08-29</date>
+ <time>22:34:12</time>
  <version>
   <release>1.2.1</release>
   <api>1.1.0</api>
@@ -42,6 +42,8 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
 
+ * improve speed of uncompressed phars used readonly by 2x [Greg]
+ * improve speed of phars with signatures 2x [Greg]
  * add Phar::setAlias() [Greg]
  * fix too many open file handles issue [Greg]
  * fix rename [Greg]
@@ -229,10 +231,12 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
     <release>stable</release>
     <api>stable</api>
    </stability>
-   <date>2007-08-24</date>
+   <date>2007-08-29</date>
    <license uri="http://www.php.net/license">PHP License</license>
    <notes>
 
+ * improve speed of uncompressed phars used readonly by 2x [Greg]
+ * improve speed of phars with signatures 2x [Greg]
  * add Phar::setAlias() [Greg]
  * fix too many open file handles issue [Greg]
  * fix rename [Greg]

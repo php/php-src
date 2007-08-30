@@ -1,6 +1,8 @@
 <?php
 
 $notes = '
+ * improve speed of uncompressed phars used readonly by 2x [Greg]
+ * improve speed of phars with signatures 2x [Greg]
  * add Phar::setAlias() [Greg]
  * fix too many open file handles issue [Greg]
  * fix rename [Greg]
