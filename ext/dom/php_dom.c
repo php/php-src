@@ -909,7 +909,6 @@ void node_list_unlink(xmlNodePtr node TSRMLS_DC)
 		} else {
 			if (node->type == XML_ENTITY_REF_NODE)
 				break;
-
 			node_list_unlink(node->children TSRMLS_CC);
 
 			switch (node->type) {
@@ -918,6 +917,7 @@ void node_list_unlink(xmlNodePtr node TSRMLS_DC)
 				case XML_DOCUMENT_TYPE_NODE:
 				case XML_ENTITY_DECL:
 				case XML_ATTRIBUTE_NODE:
+				case XML_TEXT_NODE:
 					break;
 				default:
 					node_list_unlink((xmlNodePtr) node->properties TSRMLS_CC);
