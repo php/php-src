@@ -134,7 +134,7 @@ typedef struct _zend_function_entry {
 	{															\
 		int _len = class_name_len;								\
 		if (UG(unicode)) {										\
-			class_container.name.u = malloc(UBYTES(_len+1));				\
+			class_container.name.u = (UChar *)malloc(UBYTES(_len+1));				\
 			u_charsToUChars(class_name, class_container.name.u, _len+1);	\
 		} else {															\
 			class_container.name.s = zend_strndup(class_name, _len);		\
