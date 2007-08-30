@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 5.2.5
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
 
+- Fixed bug #42462 (Segmentation when trying to set an attribute in a 
+  DOMElement). (Rob)
 - Fixed bug #42452 (PDO classes do not expose Reflection API information).
   (Hannes)
 
