@@ -2200,15 +2200,17 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 }
 /* }}} */
 
-/* {{{ proto array debug_backtrace(void) U
+/* {{{ proto array debug_backtrace([bool provide_object]) U
    Return backtrace as array */
 ZEND_FUNCTION(debug_backtrace)
 {
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	zend_bool provide_object = 1;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &provide_object) == FAILURE) {
+		return;
 	}
 
-	zend_fetch_debug_backtrace(return_value, 1, 1 TSRMLS_CC);
+	zend_fetch_debug_backtrace(return_value, 1, provide_object TSRMLS_CC);
 }
 /* }}} */
 
