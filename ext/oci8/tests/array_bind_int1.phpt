@@ -50,7 +50,7 @@ $statement = oci_parse($c, "BEGIN ARRAYBINDPKG1.iobind(:c1); END;");
 
 $array = Array(1,2,3,4,5);
 
-oci_bind_array_by_name($statement, ":c1", $array, 10, 5, SQLT_INT);
+oci_bind_array_by_name($statement, ":c1", $array, 10, 5, SQLT_NUM);
 
 oci_execute($statement);
 

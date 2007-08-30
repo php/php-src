@@ -58,7 +58,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 array(5) {
   [0]=>
   string(0) ""
@@ -70,19 +70,5 @@ array(5) {
   string(0) ""
   [4]=>
   string(0) ""
-}
-Done
---UEXPECTF--
-array(5) {
-  [0]=>
-  unicode(0) ""
-  [1]=>
-  unicode(0) ""
-  [2]=>
-  unicode(0) ""
-  [3]=>
-  unicode(0) ""
-  [4]=>
-  unicode(0) ""
 }
 Done

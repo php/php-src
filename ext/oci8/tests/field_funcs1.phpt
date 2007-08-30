@@ -34,7 +34,7 @@ if (!oci_execute($s)) {
 	die("oci_execute(select) failed!\n");
 }
 
-$row = oci_fetch_array($s, OCI_NUM + OCI_RETURN_NULLS + OCI_RETURN_LOBS);
+$row = oci_fetch_array($s, OCI_RETURN_NULLS + OCI_RETURN_LOBS);
 var_dump($row);
 
 var_dump(oci_field_is_null($s, -1));
@@ -82,107 +82,6 @@ array(5) {
   string(1) "1"
   [1]=>
   string(1) "1"
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  NULL
-}
-
-Warning: oci_field_is_null(): Invalid column index "-1" in %s on line %d
-bool(false)
-
-Warning: oci_field_name(): Invalid column index "-1" in %s on line %d
-bool(false)
-
-Warning: oci_field_type(): Invalid column index "-1" in %s on line %d
-bool(false)
-
-Warning: oci_field_type_raw(): Invalid column index "-1" in %s on line %d
-bool(false)
-
-Warning: oci_field_scale(): Invalid column index "-1" in %s on line %d
-bool(false)
-
-Warning: oci_field_precision(): Invalid column index "-1" in %s on line %d
-bool(false)
-
-Warning: oci_field_size(): Invalid column index "-1" in %s on line %d
-bool(false)
-
-Warning: oci_field_is_null(): Invalid column name "none" in %s on line %d
-bool(false)
-
-Warning: oci_field_name(): Invalid column name "none" in %s on line %d
-bool(false)
-
-Warning: oci_field_type(): Invalid column name "none" in %s on line %d
-bool(false)
-
-Warning: oci_field_type_raw(): Invalid column name "none" in %s on line %d
-bool(false)
-
-Warning: oci_field_scale(): Invalid column name "none" in %s on line %d
-bool(false)
-
-Warning: oci_field_precision(): Invalid column name "none" in %s on line %d
-bool(false)
-
-Warning: oci_field_size(): Invalid column name "none" in %s on line %d
-bool(false)
-
-Warning: oci_field_is_null(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_name(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_type(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_type_raw(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_scale(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_precision(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_size(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_is_null(): Invalid column index "0" in %s on line %d
-bool(false)
-
-Warning: oci_field_name(): Invalid column index "0" in %s on line %d
-bool(false)
-
-Warning: oci_field_type(): Invalid column index "0" in %s on line %d
-bool(false)
-
-Warning: oci_field_type_raw(): Invalid column index "0" in %s on line %d
-bool(false)
-
-Warning: oci_field_scale(): Invalid column index "0" in %s on line %d
-bool(false)
-
-Warning: oci_field_precision(): Invalid column index "0" in %s on line %d
-bool(false)
-
-Warning: oci_field_size(): Invalid column index "0" in %s on line %d
-bool(false)
-
-Warning: oci_field_size() expects exactly 2 parameters, 1 given in %s on line %d
-bool(false)
-Done
---UEXPECTF--
-array(5) {
-  [0]=>
-  unicode(1) "1"
-  [1]=>
-  unicode(1) "1"
   [2]=>
   NULL
   [3]=>

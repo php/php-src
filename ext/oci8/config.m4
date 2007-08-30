@@ -26,7 +26,7 @@ AC_DEFUN([PHP_OCI_IF_DEFINED],[
 
 AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
   AC_CHECK_SIZEOF(long int, 4)
-  AC_MSG_CHECKING([if we're on a 64-bit platform])
+  AC_MSG_CHECKING([checking if we're at 64-bit platform])
   if test "$ac_cv_sizeof_long_int" = "4" ; then
     AC_MSG_RESULT([no])
     TMP_OCI8_LIB_DIR=lib32 
@@ -36,11 +36,11 @@ AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
   fi
 
   AC_MSG_CHECKING([OCI8 libraries dir])
-  if test -d "$OCI8_DIR/lib" && test ! -d "$OCI8_DIR/lib32"; then
-    OCI8_LIB_DIR=lib
-  elif test ! -d "$OCI8_DIR/lib" && test -d "$OCI8_DIR/lib32"; then
-    OCI8_LIB_DIR=lib32
-  elif test -d "$OCI8_DIR/lib" && test -d "$OCI8_DIR/lib32"; then
+  if test -d "$OCI8_DIR/lib" -a ! -d "$OCI8_DIR/lib32"; then
+	OCI8_LIB_DIR=lib
+  elif ! test -d "$OCI8_DIR/lib" -a -d "$OCI8_DIR/lib32"; then
+	OCI8_LIB_DIR=lib32
+  elif test -d "$OCI8_DIR/lib" -a -d "$OCI8_DIR/lib32"; then
     OCI8_LIB_DIR=$TMP_OCI8_LIB_DIR
   else
     AC_MSG_ERROR([Oracle (OCI8) required libraries not found])
@@ -50,16 +50,7 @@ AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
 
 AC_DEFUN([AC_OCI8IC_VERSION],[
   AC_MSG_CHECKING([Oracle Instant Client version])
-  if test -f $PHP_OCI8_INSTANT_CLIENT/libnnz11.$SHLIB_SUFFIX_NAME; then
-    if test -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
-      if test ! -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME; then
-        AC_MSG_ERROR([Link from $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME to libclntsh.$SHLIB_SUFFIX_NAME.11.1 not found])
-      fi
-      OCI8_VERSION=11.1
-    else
-      AC_MSG_ERROR([Oracle Instant Client library version not supported])
-    fi
-  elif test -f $PHP_OCI8_INSTANT_CLIENT/libnnz10.$SHLIB_SUFFIX_NAME; then
+  if test -f $PHP_OCI8_INSTANT_CLIENT/libociei.$SHLIB_SUFFIX_NAME; then
     if test -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
       if test ! -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME; then
         AC_MSG_ERROR([Link from $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME to libclntsh.$SHLIB_SUFFIX_NAME.10.1 not found])
@@ -80,8 +71,6 @@ AC_DEFUN([AC_OCI8_VERSION],[
   if test -s "$OCI8_DIR/orainst/unix.rgs"; then
     OCI8_VERSION=`grep '"ocommon"' $OCI8_DIR/orainst/unix.rgs | $PHP_OCI8_SED 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
     test -z "$OCI8_VERSION" && OCI8_VERSION=7.3
-  elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
-    OCI8_VERSION=11.1    
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
     OCI8_VERSION=10.1    
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.9.0; then
@@ -107,60 +96,25 @@ dnl --with-oci8=shared,instantclient,/path/to/client/dir/lib
 dnl or
 dnl --with-oci8=shared,/path/to/oracle/home
 PHP_ARG_WITH(oci8, for Oracle (OCI8) support,
-[  --with-oci8[=DIR]       Include Oracle (OCI8) support. DIR defaults to \$ORACLE_HOME.
-                          Use --with-oci8=instantclient,/path/to/oic/lib 
-                          for an Oracle Instant Client installation])
-
-if test "$PHP_OCI8" != "no"; then 
-  AC_MSG_CHECKING([PHP version])
-
-  tmp_version=$PHP_VERSION
-  if test -z "$tmp_version"; then
-    if test -z "$PHP_CONFIG"; then
-      AC_MSG_ERROR([php-config not found])
-    fi
-    php_version=`$PHP_CONFIG --version 2>/dev/null|head -n 1|sed -e 's#\([0-9]\.[0-9]*\.[0-9]*\)\(.*\)#\1#'`
-  else
-    php_version=`echo "$tmp_version"|sed -e 's#\([0-9]\.[0-9]*\.[0-9]*\)\(.*\)#\1#'`
-  fi
-
-  if test -z "$php_version"; then
-    AC_MSG_ERROR([failed to detect PHP version, please report])
-  fi
-
-  ac_IFS=$IFS
-  IFS="."
-  set $php_version
-  IFS=$ac_IFS
-  oci8_php_version=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3`
-
-  if test "$oci8_php_version" -le "4003010"; then
-    AC_MSG_ERROR([You need at least PHP 4.3.10 to be able to use this version of OCI8. PHP $php_version found])
-  else
-    AC_MSG_RESULT([$php_version, ok])
-  fi
-fi
+[  --with-oci8[=DIR]       Include Oracle (OCI8) support. 
+                          The default DIR is ORACLE_HOME.
+                          Use --with-oci8=instantclient,/path/to/oic/lib
+                          to use Oracle Instant Client installation])
 
 PHP_OCI8_INSTANT_CLIENT="no"
 
 if test "`echo $PHP_OCI8 | cut -d, -f2`" = "instantclient"; then
-    PHP_OCI8_INSTANT_CLIENT="`echo $PHP_OCI8 | cut -d, -f3`"
+	PHP_OCI8_INSTANT_CLIENT="`echo $PHP_OCI8 | cut -d, -f3`"
     PHP_OCI8="`echo $PHP_OCI8 | cut -d, -f1,4`"
-    if test "$PHP_OCI8_INSTANT_CLIENT" = ""; then
-        PHP_OCI8_INSTANT_CLIENT="yes"
-    fi
-    if test -z "$PHP_OCI8"; then
-        PHP_OCI8=yes
-    fi
+	if test "$PHP_OCI8_INSTANT_CLIENT" = ""; then
+		PHP_OCI8_INSTANT_CLIENT="yes"
+	fi
 elif test "`echo $PHP_OCI8 | cut -d, -f1`" = "instantclient"; then
-    PHP_OCI8_INSTANT_CLIENT="`echo $PHP_OCI8 | cut -d, -f2`"
+	PHP_OCI8_INSTANT_CLIENT="`echo $PHP_OCI8 | cut -d, -f2`"
     PHP_OCI8="`echo $PHP_OCI8 | cut -d, -f3,4`"
-    if test "$PHP_OCI8_INSTANT_CLIENT" = ""; then
-        PHP_OCI8_INSTANT_CLIENT="yes"
-    fi
-    if test -z "$PHP_OCI8"; then
-        PHP_OCI8=yes
-    fi
+	if test "$PHP_OCI8_INSTANT_CLIENT" = ""; then
+		PHP_OCI8_INSTANT_CLIENT="yes"
+	fi
 fi
 
 if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
@@ -233,7 +187,7 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
         -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
       ])
 
-      PHP_CHECK_LIBRARY(clntsh, OCIStmtPrepare2,
+	  PHP_CHECK_LIBRARY(clntsh, OCIStmtPrepare2,
       [
         AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
       ], [], [
@@ -288,7 +242,7 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
  
       ;;
       
-    11.1|10.1)
+    10.1)
       PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
       PHP_ADD_LIBPATH($OCI8_DIR/$OCI8_LIB_DIR, OCI8_SHARED_LIBADD)
       AC_DEFINE(HAVE_OCI8_ATTR_STATEMENT,1,[ ])
@@ -362,13 +316,13 @@ dnl version in /usr/lib
   AC_MSG_CHECKING([Oracle Instant Client SDK header directory])
 
 dnl Header directory for Instant Client SDK RPM install
-  OCISDKRPMINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!^/usr/lib/oracle/\(.*\)/client/lib[/]*$!/usr/include/oracle/\1/client!'`
+  OCISDKRPMINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!^/usr/lib/oracle/\(.*\)/client/lib[[/]]*$!/usr/include/oracle/\1/client!'`
 
 dnl Header directory for Instant Client SDK zip file install
   OCISDKZIPINC=$PHP_OCI8_INSTANT_CLIENT/sdk/include
 
 dnl Header directory for manual installation
-  OCISDKMANINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!\(.*\)/lib[/]*$!\1/include!'`
+  OCISDKMANINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!\(.*\)/lib[[/]]*$!\1/include!'`
   
   if test -f "$OCISDKRPMINC/oci.h"; then
     AC_MSG_RESULT($OCISDKRPMINC)
@@ -393,7 +347,7 @@ dnl Header directory for manual installation
 
   AC_OCI8IC_VERSION($PHP_OCI8_INSTANT_CLIENT)
   case $OCI8_VERSION in
-    11.1|10.1)
+    10.1)
       PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
       PHP_ADD_LIBPATH($PHP_OCI8_INSTANT_CLIENT, OCI8_SHARED_LIBADD)
       ;;

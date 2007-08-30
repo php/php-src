@@ -1,5 +1,5 @@
 --TEST--
-Bug #32325 (Can't retrieve collection using OCI8)
+bug #32325 (Can't retrieve collection using OCI8)
 --SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
 --FILE--

@@ -25,8 +25,8 @@ oci_execute($statement, OCI_DEFAULT);
 
 $row = oci_fetch_assoc($statement);
 
-$row['LOB_1']->write(b"first");
-$row['LOB_2']->write(b"second");
+$row['LOB_1']->write("first");
+$row['LOB_2']->write("second");
 
 unset($row);
 
@@ -59,22 +59,6 @@ array(2) {
   ["LOB_2"]=>
   object(OCI-Lob)#%d (1) {
     ["descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-}
-string(5) "first"
-string(6) "second"
-Done
---UEXPECTF--
-array(2) {
-  [u"LOB_1"]=>
-  object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-  [u"LOB_2"]=>
-  object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }

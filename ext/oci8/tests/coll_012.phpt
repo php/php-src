@@ -39,8 +39,3 @@ bool(true)
 bool(true)
 string(9) "28-JUL-05"
 Done
---UEXPECT--
-bool(true)
-bool(true)
-unicode(9) "28-JUL-05"
-Done

@@ -9,11 +9,11 @@ require dirname(__FILE__)."/connect.inc";
 
 $pc = oci_pconnect($user, $password, $dbase);
 
-$stmt = oci_parse($pc, "select 1+3 from dual");
+$stmt = oci_parse($pc, "select 1+3 from dual", true);
 oci_execute($stmt);
 var_dump(oci_fetch_array($stmt));
 
-$stmt = oci_parse($pc, "select 1+3 from dual");
+$stmt = oci_parse($pc, "select 1+3 from dual", true);
 oci_execute($stmt);
 var_dump(oci_fetch_array($stmt));
 
@@ -31,19 +31,5 @@ array(2) {
   string(1) "4"
   ["1+3"]=>
   string(1) "4"
-}
-Done
---UEXPECTF--
-array(2) {
-  [0]=>
-  unicode(1) "4"
-  [u"1+3"]=>
-  unicode(1) "4"
-}
-array(2) {
-  [0]=>
-  unicode(1) "4"
-  [u"1+3"]=>
-  unicode(1) "4"
 }
 Done
