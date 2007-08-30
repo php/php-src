@@ -389,7 +389,7 @@ struct _zend_class_entry {
 	zend_object_value (*create_object)(zend_class_entry *class_type TSRMLS_DC);
 	zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 	int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type TSRMLS_DC); /* a class implements this interface */
-	union _zend_function *(*get_static_method)(zend_class_entry *ce, zstr method, int method_len TSRMLS_DC);
+	union _zend_function *(*get_static_method)(zend_class_entry *ce, zend_uchar type, zstr method, int method_len TSRMLS_DC);
 
 	/* serializer callbacks */
 	int (*serialize)(zval *object, int *type, zstr *buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);

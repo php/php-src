@@ -903,11 +903,9 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 /* }}} */
 
 
-ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zstr function_name_strval, int function_name_strlen TSRMLS_DC) /* {{{ */
+ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_uchar type, zstr function_name_strval, int function_name_strlen TSRMLS_DC) /* {{{ */
 {
 	zend_function *fbc;
-	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
 	if (zend_u_hash_find(&ce->function_table, type, function_name_strval, function_name_strlen + 1, (void **) &fbc)==FAILURE) {
 		if (ce->__callstatic) {

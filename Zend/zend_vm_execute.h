@@ -2567,10 +2567,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_CONST == IS_CONST);
 
-
+		zend_uchar function_name_type;
 		if (is_const) {
 			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
 			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+			function_name_type   = Z_TYPE(opline->op2.u.constant);
 		} else {
 			function_name = &opline->op2.u.constant;
 
@@ -2578,12 +2579,13 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
 			}
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+			function_name_type   = Z_TYPE_P(function_name);
 		}
 
 		if (ce->get_static_method) {
-			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		} else {
-			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		}
 
 		if (!is_const) {
@@ -3110,10 +3112,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDL
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_TMP_VAR == IS_CONST);
 		zend_free_op free_op2;
-
+		zend_uchar function_name_type;
 		if (is_const) {
 			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
 			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+			function_name_type   = Z_TYPE(opline->op2.u.constant);
 		} else {
 			function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -3121,12 +3124,13 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDL
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
 			}
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+			function_name_type   = Z_TYPE_P(function_name);
 		}
 
 		if (ce->get_static_method) {
-			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		} else {
-			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		}
 
 		if (!is_const) {
@@ -3555,10 +3559,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDL
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_VAR == IS_CONST);
 		zend_free_op free_op2;
-
+		zend_uchar function_name_type;
 		if (is_const) {
 			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
 			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+			function_name_type   = Z_TYPE(opline->op2.u.constant);
 		} else {
 			function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -3566,12 +3571,13 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDL
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
 			}
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+			function_name_type   = Z_TYPE_P(function_name);
 		}
 
 		if (ce->get_static_method) {
-			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		} else {
-			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		}
 
 		if (!is_const) {
@@ -3766,10 +3772,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HA
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_UNUSED == IS_CONST);
 
-
+		zend_uchar function_name_type;
 		if (is_const) {
 			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
 			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+			function_name_type   = Z_TYPE(opline->op2.u.constant);
 		} else {
 			function_name = NULL;
 
@@ -3777,12 +3784,13 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HA
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
 			}
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+			function_name_type   = Z_TYPE_P(function_name);
 		}
 
 		if (ce->get_static_method) {
-			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		} else {
-			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		}
 
 		if (!is_const) {
@@ -4179,10 +4187,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLE
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_CV == IS_CONST);
 
-
+		zend_uchar function_name_type;
 		if (is_const) {
 			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
 			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+			function_name_type   = Z_TYPE(opline->op2.u.constant);
 		} else {
 			function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
@@ -4190,12 +4199,13 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLE
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
 			}
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+			function_name_type   = Z_TYPE_P(function_name);
 		}
 
 		if (ce->get_static_method) {
-			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		} else {
-			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		}
 
 		if (!is_const) {
@@ -10024,10 +10034,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDL
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_CONST == IS_CONST);
 
-
+		zend_uchar function_name_type;
 		if (is_const) {
 			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
 			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+			function_name_type   = Z_TYPE(opline->op2.u.constant);
 		} else {
 			function_name = &opline->op2.u.constant;
 
@@ -10035,12 +10046,13 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDL
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
 			}
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+			function_name_type   = Z_TYPE_P(function_name);
 		}
 
 		if (ce->get_static_method) {
-			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		} else {
-			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		}
 
 		if (!is_const) {
@@ -11714,10 +11726,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_TMP_VAR == IS_CONST);
 		zend_free_op free_op2;
-
+		zend_uchar function_name_type;
 		if (is_const) {
 			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
 			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+			function_name_type   = Z_TYPE(opline->op2.u.constant);
 		} else {
 			function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -11725,12 +11738,13 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
 			}
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+			function_name_type   = Z_TYPE_P(function_name);
 		}
 
 		if (ce->get_static_method) {
-			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		} else {
-			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		}
 
 		if (!is_const) {
@@ -13382,10 +13396,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_VAR == IS_CONST);
 		zend_free_op free_op2;
-
+		zend_uchar function_name_type;
 		if (is_const) {
 			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
 			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+			function_name_type   = Z_TYPE(opline->op2.u.constant);
 		} else {
 			function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -13393,12 +13408,13 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
 			}
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+			function_name_type   = Z_TYPE_P(function_name);
 		}
 
 		if (ce->get_static_method) {
-			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		} else {
-			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		}
 
 		if (!is_const) {
@@ -14248,10 +14264,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_UNUSED == IS_CONST);
 
-
+		zend_uchar function_name_type;
 		if (is_const) {
 			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
 			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+			function_name_type   = Z_TYPE(opline->op2.u.constant);
 		} else {
 			function_name = NULL;
 
@@ -14259,12 +14276,13 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
 			}
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+			function_name_type   = Z_TYPE_P(function_name);
 		}
 
 		if (ce->get_static_method) {
-			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		} else {
-			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		}
 
 		if (!is_const) {
@@ -15566,10 +15584,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_CV == IS_CONST);
 
-
+		zend_uchar function_name_type;
 		if (is_const) {
 			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
 			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
+			function_name_type   = Z_TYPE(opline->op2.u.constant);
 		} else {
 			function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
@@ -15577,12 +15596,13 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
 			}
 			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
+			function_name_type   = Z_TYPE_P(function_name);
 		}
 
 		if (ce->get_static_method) {
-			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		} else {
-			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+			EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 		}
 
 		if (!is_const) {
