@@ -34,7 +34,7 @@ class PDOStatementX extends PDOStatement
     	echo __METHOD__ . "()\n";
     }
     
-    function execute()
+    function execute($params = array())
     {
     	echo __METHOD__ . "()\n";
 		parent::execute();    	
