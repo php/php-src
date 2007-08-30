@@ -197,6 +197,9 @@ typedef struct _phar_entry_data {
 	/* stream position proxy, allows multiple open streams referring to the same fp */
 	php_stream               *fp;
 	off_t                    position;
+	/* for copies of the phar fp, defines where 0 is */
+	off_t                    zero;
+	int                      for_write:1;
 	phar_entry_info          *internal_file;
 } phar_entry_data;
 
