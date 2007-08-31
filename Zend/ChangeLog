@@ -1,3 +1,30 @@
+2007-08-30  Johannes Schlüter  <johannes@schlueters.de>
+
+    * zend.h
+      zend_execute_API.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Allow binary strings as method name in $class::$method(), fixes
+        tests/lang/044.phpt (Etienne Kneuss)
+
+2007-08-30  Antony Dovgal  <antony@zend.com>
+
+    * zend_API.h:
+      fix C++ extensions build
+      C++ doesn't allow implicit casting of void* to Uchar*, we have to do it
+      explicitly
+
+2007-08-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_builtin_functions.c:
+      MFB: Add optional parameter  to debug_backtrace().
+
+    * (PHP_5_2)
+      zend_builtin_functions.c:
+      Add optional parameter  to debug_backtrace().
+
 2007-08-25  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * zend_compile.c
