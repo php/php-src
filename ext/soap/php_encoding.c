@@ -358,7 +358,7 @@ static zend_bool soap_check_xml_ref(zval **data, xmlNodePtr node TSRMLS_DC)
 	return 0;
 }
 
-xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr parent)
+static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xmlNodePtr parent, int use_class_map)
 {
 	xmlNodePtr node = NULL;
 	TSRMLS_FETCH();
@@ -445,7 +445,7 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 			xmlSetNs(node, nsp);
 		}
 	} else {
-		if (SOAP_GLOBAL(class_map) && data &&
+		if (use_class_map && SOAP_GLOBAL(class_map) && data &&
 		    Z_TYPE_P(data) == IS_OBJECT &&
 		    !Z_OBJPROP_P(data)->nApplyCount) {
 			zend_class_entry *ce = Z_OBJCE_P(data);
@@ -516,6 +516,11 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 		}
 	}
 	return node;
+}
+
+xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr parent)
+{
+	return master_to_xml_int(encode, data, style, parent, 1);
 }
 
 static zval *master_to_zval_int(encodePtr encode, xmlNodePtr data)
@@ -2662,7 +2667,7 @@ static xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style, x
 	} else {
 		enc = get_conversion(IS_NULL);
 	}
-	ret = master_to_xml(enc, data, style, parent);
+	ret = master_to_xml_int(enc, data, style, parent, 0);
 /*
 	if (style == SOAP_LITERAL && SOAP_GLOBAL(sdl)) {
 		set_ns_and_type(ret, &enc->details);
