@@ -47,6 +47,7 @@
 #ifdef HAVE_BIRDSTEP
 #include "php_birdstep.h"
 #include "ext/standard/info.h"
+#include "php_ini.h"
 
 zend_function_entry birdstep_functions[] = {
 	PHP_FE(birdstep_connect,        NULL)
