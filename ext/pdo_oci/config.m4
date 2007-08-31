@@ -24,7 +24,7 @@ AC_DEFUN([AC_PDO_OCI_VERSION],[
       PDO_OCI_VERSION=8.1
     fi
   else
-    AC_MSG_ERROR(Oracle-OCI needed libraries not found under $PDO_OCI_DIR)
+    AC_MSG_ERROR(Oracle OCI libraries not found under $PDO_OCI_DIR)
   fi
   AC_MSG_RESULT($PDO_OCI_VERSION)
 ])                                                                                                                                                                
@@ -54,7 +54,7 @@ AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
 ])
 
 PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
-[  --with-pdo-oci[=DIR]      PDO: Oracle-OCI support. DIR defaults to \$ORACLE_HOME.
+[  --with-pdo-oci[=DIR]      PDO: Oracle OCI support. DIR defaults to \$ORACLE_HOME.
                             Use --with-pdo-oci=instantclient,prefix,version 
                             for an Oracle Instant Client SDK. 
                             For Linux with 10.2.0.3 RPMs (for example) use:
@@ -67,12 +67,12 @@ if test "$PHP_PDO_OCI" != "no"; then
   else
     PDO_OCI_DIR=$PHP_PDO_OCI
   fi
-  AC_MSG_RESULT($PDO_OCI_DIR :$PHP_PDO_OCI:)
+  AC_MSG_RESULT($PHP_PDO_OCI)
 
   AC_MSG_CHECKING([if that is sane])
   if test -z "$PDO_OCI_DIR"; then
     AC_MSG_ERROR([
-You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
+You need to tell me where to find your Oracle Instant Client SDK, or set ORACLE_HOME.
 ])
   else
     AC_MSG_RESULT([yes])
@@ -251,6 +251,8 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
   [
     PHP_ADD_EXTENSION_DEP(pdo_oci, pdo)
   ])
+
+  AC_DEFINE_UNQUOTED(PHP_PDO_OCI_CLIENT_VERSION, "$PDO_OCI_VERSION", [ ])
 fi
 
 fi
