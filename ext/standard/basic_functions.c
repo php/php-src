@@ -6113,13 +6113,14 @@ PHP_FUNCTION(move_uploaded_file)
 }
 /* }}} */
 
-
+/* {{{ php_simple_ini_parser_cb
+ */
 static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, zval *arr)
 {
 	zval *element;
 
 	switch (callback_type) {
-	
+
 		case ZEND_INI_PARSER_ENTRY:
 			if (!arg2) {
 				/* bare string - nothing to do */
@@ -6129,7 +6130,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 			*element = *arg2;
 			zval_copy_ctor(element);
 			INIT_PZVAL(element);
-			zend_symtable_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &element, sizeof(zval *), NULL);
+			zend_symtable_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) + 1, &element, sizeof(zval *), NULL);
 			break;
 
 		case ZEND_INI_PARSER_POP_ENTRY:
@@ -6141,7 +6142,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 				break;
 			}
 
-			if (!(Z_STRLEN_P(arg1) > 1 && Z_STRVAL_P(arg1)[0]=='0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) == IS_LONG) {
+			if (!(Z_STRLEN_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) == IS_LONG) {
 				ulong key = (ulong) zend_atoi(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				if (zend_hash_index_find(Z_ARRVAL_P(arr), key, (void **) &find_hash) == FAILURE) {
 						ALLOC_ZVAL(hash);
@@ -6153,12 +6154,12 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 					hash = *find_hash;
 				}
 			} else {
-				if (zend_hash_find(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, (void **) &find_hash) == FAILURE) {
+				if (zend_hash_find(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) + 1, (void **) &find_hash) == FAILURE) {
 					ALLOC_ZVAL(hash);
 					INIT_PZVAL(hash);
 					array_init(hash);
 
-					zend_hash_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &hash, sizeof(zval *), NULL);
+					zend_hash_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) + 1, &hash, sizeof(zval *), NULL);
 				} else {
 					hash = *find_hash;
 				}
@@ -6174,7 +6175,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 			*element = *arg2;
 			zval_copy_ctor(element);
 			INIT_PZVAL(element);
-			add_next_index_zval(hash, element);			
+			add_next_index_zval(hash, element);
 		}
 		break;
 
@@ -6182,7 +6183,10 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 			break;
 	}
 }
+/* }}} */
 
+/* {{{ php_ini_parser_cb_with_sections
+ */
 static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback_type, zval *arr)
 {
 	TSRMLS_FETCH();
@@ -6190,7 +6194,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback
 	if (callback_type == ZEND_INI_PARSER_SECTION) {
 		MAKE_STD_ZVAL(BG(active_ini_file_section));
 		array_init(BG(active_ini_file_section));
-		zend_symtable_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &BG(active_ini_file_section), sizeof(zval *), NULL);
+		zend_symtable_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) + 1, &BG(active_ini_file_section), sizeof(zval *), NULL);
 	} else if (arg2) {
 		zval *active_arr;
 
@@ -6203,7 +6207,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback
 		php_simple_ini_parser_cb(arg1, arg2, callback_type, active_arr);
 	}
 }
-
+/* }}} */
 
 /* {{{ proto array parse_ini_file(string filename [, bool process_sections])
    Parse configuration file */
@@ -6226,9 +6230,9 @@ PHP_FUNCTION(parse_ini_file)
 			if (zend_get_parameters_ex(2, &filename, &process_sections) == FAILURE) {
 				RETURN_FALSE;
 			}
-	
+
 			convert_to_boolean_ex(process_sections);
-		
+
 			if (Z_BVAL_PP(process_sections)) {
 				BG(active_ini_file_section) = NULL;
 				ini_parser_cb = (zend_ini_parser_cb_t) php_ini_parser_cb_with_sections;
@@ -6236,7 +6240,7 @@ PHP_FUNCTION(parse_ini_file)
 				ini_parser_cb = (zend_ini_parser_cb_t) php_simple_ini_parser_cb;
 			}
 			break;
-	
+
 		default:
 			ZEND_WRONG_PARAM_COUNT();
 			break;
@@ -6247,7 +6251,7 @@ PHP_FUNCTION(parse_ini_file)
 	memset(&fh, 0, sizeof(fh));
 	fh.filename = Z_STRVAL_PP(filename);
 	Z_TYPE(fh) = ZEND_HANDLE_FILENAME;
-	
+
 	array_init(return_value);
 	zend_parse_ini_file(&fh, 0, ini_parser_cb, return_value);
 }
