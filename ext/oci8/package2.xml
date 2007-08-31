@@ -27,6 +27,12 @@ the Oracle Call Interface (OCI8).
   <email>andi@zend.com</email>
   <active>yes</active>
  </lead>
+ <lead>
+  <name>Christopher Jones</name>
+  <user>sixd</user>
+  <email>sixd@php.net</email>
+  <active>yes</active>
+ </lead>
  <date>2007-09-01</date>
  <time>15:00:00</time>
  <version>
