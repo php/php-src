@@ -107,9 +107,9 @@ typedef struct {
 	char *current_user;
 	int current_user_length;
 
-    /* this is necessary for CLI module */
-    int argc;
-    char **argv;
+	/* this is necessary for CLI module */
+	int argc;
+	char **argv;
 	int proto_num;
 } sapi_request_info;
 
