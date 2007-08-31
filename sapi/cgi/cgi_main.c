@@ -1410,9 +1410,9 @@ consult the installation file that came with this distribution, or visit \n\
 					php_output_tearup();
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
-					php_output_teardown();
-					exit(1);
-					break;
+					php_output_end_all(TSRMLS_C);
+					exit_status = 0;
+					goto out;
 			}
 		}
 		php_optind = orig_optind;
@@ -1438,8 +1438,9 @@ consult the installation file that came with this distribution, or visit \n\
 					php_output_tearup();
 					SG(headers_sent) = 1;
 					php_printf("You cannot use both -n and -c switch. Use -h for help.\n");
-					php_output_teardown();
-					exit(1);
+					php_output_end_all(TSRMLS_C);
+					exit_status = 1;
+					goto out;
 				}
 
 				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
@@ -1480,9 +1481,9 @@ consult the installation file that came with this distribution, or visit \n\
 								SG(request_info).no_headers = 1;
 							}
 							php_print_info(0xFFFFFFFF TSRMLS_CC);
-							php_output_teardown();
-							exit(0);
-							break;
+							php_request_shutdown((void *) 0);
+							exit_status = 0;
+							goto out;
 
 	  				case 'l': /* syntax check mode */
 							no_headers = 1;
@@ -1497,9 +1498,9 @@ consult the installation file that came with this distribution, or visit \n\
 							php_printf("\n[Zend Modules]\n");
 							print_extensions(TSRMLS_C);
 							php_printf("\n");
-							php_output_teardown();
-							exit(0);
-							break;
+							php_output_end_all(TSRMLS_C);
+							exit_status = 0;
+							goto out;
 
 #if 0 /* not yet operational, see also below ... */
 	  				case '': /* generate indented source mode*/
@@ -1527,9 +1528,9 @@ consult the installation file that came with this distribution, or visit \n\
 #else
 							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2007 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
-							php_output_teardown();
-							exit(0);
-							break;
+							php_request_shutdown((void *) 0);
+							exit_status = 0;
+							goto out;
 
 	  				case 'w':
 							behavior = PHP_MODE_STRIP;
@@ -1802,6 +1803,7 @@ fastcgi_request_done:
 		exit_status = 255;
 	} zend_end_try();
 
+out:
 	SG(server_context) = NULL;
 	php_module_shutdown(TSRMLS_C);
 	sapi_shutdown();
