@@ -23,6 +23,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "php_network.h"
+#include "php_ini.h"
 
 #include <stdio.h>
 #include <stdlib.h>
