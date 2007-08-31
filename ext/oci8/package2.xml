@@ -144,11 +144,6 @@ Various minor improvements.
     <file name="connect.inc" role="test" />
     <file name="connect_old.phpt" role="test" />
     <file name="connect.phpt" role="test" />
-    <file name="connect_with_charset_001.diff" role="test" />
-    <file name="connect_with_charset_001.exp" role="test" />
-    <file name="connect_with_charset_001.log" role="test" />
-    <file name="connect_with_charset_001.out" role="test" />
-    <file name="connect_with_charset_001.php" role="test" />
     <file name="connect_with_charset_001.phpt" role="test" />
     <file name="connect_without_oracle_home_old.phpt" role="test" />
     <file name="connect_without_oracle_home.phpt" role="test" />
@@ -234,11 +229,6 @@ Various minor improvements.
     <file name="lob_036.phpt" role="test" />
     <file name="lob_037.phpt" role="test" />
     <file name="lob_038.phpt" role="test" />
-    <file name="lob_039.diff" role="test" />
-    <file name="lob_039.exp" role="test" />
-    <file name="lob_039.log" role="test" />
-    <file name="lob_039.out" role="test" />
-    <file name="lob_039.php" role="test" />
     <file name="lob_039.phpt" role="test" />
     <file name="lob_040.phpt" role="test" />
     <file name="lob_aliases.phpt" role="test" />
