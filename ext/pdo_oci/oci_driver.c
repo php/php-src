@@ -31,6 +31,8 @@
 #include "php_pdo_oci_int.h"
 #include "Zend/zend_exceptions.h"
 
+static inline ub4 pdo_oci_sanitize_prefetch(long prefetch);
+
 static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
@@ -282,14 +284,14 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 
 	}
 
-	prefetch = 1024 * pdo_attr_lval(driver_options, PDO_ATTR_PREFETCH, 100 TSRMLS_CC);
+	prefetch = pdo_oci_sanitize_prefetch(pdo_attr_lval(driver_options, PDO_ATTR_PREFETCH, PDO_OCI_PREFETCH_DEFAULT TSRMLS_CC));
 	if (prefetch) {
 		H->last_err = OCIAttrSet(S->stmt, OCI_HTYPE_STMT, &prefetch, 0,
-			OCI_ATTR_PREFETCH_MEMORY, H->err);
+								 OCI_ATTR_PREFETCH_ROWS, H->err);
 		if (!H->last_err) {
-			prefetch /= 1024;
+			prefetch *= PDO_OCI_PREFETCH_ROWSIZE;
 			H->last_err = OCIAttrSet(S->stmt, OCI_HTYPE_STMT, &prefetch, 0,
-				OCI_ATTR_PREFETCH_ROWS, H->err);
+									 OCI_ATTR_PREFETCH_MEMORY, H->err);
 		}
 	}
 
@@ -448,6 +450,69 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_
 }
 /* }}} */
 
+static int oci_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value TSRMLS_DC)  /* {{{ */
+{
+	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
+
+	switch (attr) {
+		case PDO_ATTR_SERVER_VERSION:
+		case PDO_ATTR_SERVER_INFO:
+		{
+			text infostr[512];
+			char verstr[15];
+			ub4  vernum;
+			
+			if (OCIServerRelease(H->svc, H->err, infostr, (ub4)sizeof(infostr), (ub1)OCI_HTYPE_SVCCTX, &vernum))
+			{
+				ZVAL_STRING(return_value, "<<Unknown>>", 1);
+			} else {
+				if (attr == PDO_ATTR_SERVER_INFO) {
+					ZVAL_STRING(return_value, (char *)infostr, 1);
+				} else {
+					slprintf(verstr, sizeof(verstr), "%d.%d.%d.%d.%d", 
+							 (int)((vernum>>24) & 0xFF),  /* version number */
+							 (int)((vernum>>20) & 0x0F),  /* release number*/
+							 (int)((vernum>>12) & 0xFF),  /* update number */
+							 (int)((vernum>>8)  & 0x0F),  /* port release number */
+							 (int)((vernum>>0)  & 0xFF)); /* port update number */
+					
+					ZVAL_STRING(return_value, verstr, 1);
+				}
+			}
+			return TRUE;
+		}
+
+		case PDO_ATTR_CLIENT_VERSION:
+		{
+#if OCI_MAJOR_VERSION > 10 || (OCI_MAJOR_VERSION == 10 && OCI_MINOR_VERSION >= 2)
+			/* Run time client version */
+			sword major, minor, update, patch, port_update;
+			char verstr[15];
+
+			OCIClientVersion(&major, &minor, &update, &patch, &port_update);
+			slprintf(verstr, sizeof(verstr), "%d.%d.%d.%d.%d", major, minor, update, patch, port_update);
+			ZVAL_STRING(return_value, verstr, 1);
+#else
+			/* Compile time client version */
+			ZVAL_STRING(return_value, PHP_PDO_OCI_CLIENT_VERSION, 1);
+#endif /* Check for OCIClientVersion() support */
+
+			return TRUE;
+		}
+
+		case PDO_ATTR_AUTOCOMMIT:
+			ZVAL_BOOL(return_value, dbh->auto_commit);
+			return TRUE;
+
+		default:
+			return FALSE;
+
+	}
+	return FALSE;
+
+}
+/* }}} */
+
 static struct pdo_dbh_methods oci_methods = {
 	oci_handle_closer,
 	oci_handle_preparer,
@@ -459,7 +524,7 @@ static struct pdo_dbh_methods oci_methods = {
 	oci_handle_set_attribute,
 	NULL,
 	pdo_oci_fetch_error_func,
-	NULL,	/* get_attr */
+	oci_handle_get_attribute,
 	NULL,	/* check_liveness */
 	NULL	/* get_driver_methods */
 };
@@ -481,7 +546,7 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC
 	/* allocate an environment */
 #if HAVE_OCIENVNLSCREATE
 	if (vars[0].optval) {
-		H->charset = OCINlsCharSetNameToId(pdo_oci_Env, vars[0].optval);
+		H->charset = OCINlsCharSetNameToId(pdo_oci_Env, (const oratext *)vars[0].optval);
 		if (!H->charset) {
 			oci_init_error("OCINlsCharSetNameToId: unknown character set name");
 			goto cleanup;
@@ -595,6 +660,17 @@ pdo_driver_t pdo_oci_driver = {
 	PDO_DRIVER_HEADER(oci),
 	pdo_oci_handle_factory
 };
+
+static inline ub4 pdo_oci_sanitize_prefetch(long prefetch) /* {{{ */
+{
+	if (prefetch < 0) {
+		prefetch = 0;
+	} else if (prefetch > UB4MAXVAL / PDO_OCI_PREFETCH_ROWSIZE) {
+		prefetch = PDO_OCI_PREFETCH_DEFAULT;
+	}
+	return ((ub4)prefetch);
+}
+/* }}} */
 
 /*
  * Local variables:

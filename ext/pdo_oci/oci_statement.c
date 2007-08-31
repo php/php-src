@@ -395,7 +395,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 	col->precision = scale;
 	col->maxlen = data_size;
 	col->namelen = namelen;
-	col->name = estrndup(colname, namelen);
+	col->name = estrndup((char *)colname, namelen);
 
 	/* how much room do we need to store the field */
 	switch (dtype) {

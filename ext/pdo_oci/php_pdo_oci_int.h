@@ -31,9 +31,9 @@ typedef struct {
 typedef struct {
 	OCIServer	*server;
 	OCISession	*session;
-	OCIEnv 		*env;
+	OCIEnv		*env;
 	OCIError	*err;
-	OCISvcCtx 	*svc;
+	OCISvcCtx	*svc;
 	/* OCI9; 0 == use NLS_LANG */
 	ub2			charset;
 	sword		last_err;
@@ -67,7 +67,7 @@ typedef struct {
 } pdo_oci_stmt;
 
 typedef struct {
-	OCIBind 	*bind;	/* allocated by OCI */
+	OCIBind		*bind;	/* allocated by OCI */
 	sb2			oci_type;
 	sb2			indicator;
 	ub2			retcode;
@@ -90,3 +90,8 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 
 extern struct pdo_stmt_methods oci_stmt_methods;
 
+/* Default prefetch size in number of rows */
+#define PDO_OCI_PREFETCH_DEFAULT 100
+
+/* Arbitrary assumed row length for prefetch memory limit calcuation */
+#define PDO_OCI_PREFETCH_ROWSIZE 1024
