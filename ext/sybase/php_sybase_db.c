@@ -32,6 +32,7 @@
 #include "ext/standard/php_standard.h"
 #include "ext/standard/info.h"
 #include "php_globals.h"
+#include "php_ini.h"
 
 #if HAVE_SYBASE
 
