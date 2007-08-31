@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #42462 (Segmentation when trying to set an attribute in a 
   DOMElement). (Rob)
+- Fixed bug #42453 (CGI SAPI does not shut down cleanly with -i/-m/-v cmdline
+  options). (Dmitry)
 - Fixed bug #42452 (PDO classes do not expose Reflection API information).
   (Hannes)
 - Fixed bug #42359 (xsd:list type not parsed). (Dmitry)
