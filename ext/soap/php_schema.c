@@ -453,7 +453,14 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 		newType = emalloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
 
-		newType->name = estrdup("anonymous");
+		{
+			smart_str anonymous = {0};
+			
+			smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
+			smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
+			smart_str_0(&anonymous);
+			newType->name = anonymous.c;
+		}
 		newType->namens = estrdup((char*)tns->children->content);
 
 		if (cur_type->elements == NULL) {
@@ -463,6 +470,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 		zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 
 		schema_simpleType(sdl, tns, trav, newType);
+
 		trav = trav->next;
 	}
 	if (trav != NULL) {
@@ -541,7 +549,14 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 			newType = emalloc(sizeof(sdlType));
 			memset(newType, 0, sizeof(sdlType));
 
-			newType->name = estrdup("anonymous");
+			{
+				smart_str anonymous = {0};
+			
+				smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
+				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
+				smart_str_0(&anonymous);
+				newType->name = anonymous.c;
+			}
 			newType->namens = estrdup((char*)tns->children->content);
 
 			if (cur_type->elements == NULL) {
@@ -1879,7 +1894,14 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			}
 			dummy_type = emalloc(sizeof(sdlType));
 			memset(dummy_type, 0, sizeof(sdlType));
-			dummy_type->name = estrdup("anonymous");
+			{
+				smart_str anonymous = {0};
+			
+				smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
+				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
+				smart_str_0(&anonymous);
+				dummy_type->name = anonymous.c;
+			}
 			dummy_type->namens = estrdup((char*)tns->children->content);
 			schema_simpleType(sdl, tns, trav, dummy_type);
 			newAttr->encode = dummy_type->encode;
