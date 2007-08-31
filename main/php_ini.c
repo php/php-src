@@ -75,7 +75,7 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 				} else {
 					display_string = "no value";
 					display_string_length = sizeof("no value") - 1;
-				}	
+				}
 			}
 		} else if (ini_entry->value && ini_entry->value[0]) {
 			display_string = ini_entry->value;
@@ -88,7 +88,7 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 			} else {
 				display_string = "no value";
 				display_string_length = sizeof("no value") - 1;
-			}	
+			}
 		}
 
 		if (esc_html) {
@@ -123,7 +123,7 @@ static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number TSRMLS
 		PUTS(" => ");
 		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
 		PUTS("\n");
-	}	
+	}
 	return 0;
 }
 /* }}} */
@@ -137,7 +137,7 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 
 	if (module) {
 		module_number = module->module_number;
-	} else { 
+	} else {
 		module_number = 0;
 	}
 	php_info_print_table_start();
@@ -176,14 +176,14 @@ static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 				}
 				if (!strcasecmp(Z_STRVAL_P(arg1), "extension")) { /* load function module */
 					zval copy;
-					
+
 					copy = *arg2;
 					zval_copy_ctor(&copy);
 					copy.refcount = 0;
-					zend_llist_add_element(&extension_lists.functions, &copy); 
+					zend_llist_add_element(&extension_lists.functions, &copy);
 				} else if (!strcasecmp(Z_STRVAL_P(arg1), ZEND_EXTENSION_TOKEN)) { /* load Zend extension */
 					char *extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
-					
+
 					zend_llist_add_element(&extension_lists.engine, &extension_name);
 				} else {
 					zend_hash_update(&configuration_hash, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) + 1, arg2, sizeof(zval), (void **) &entry);
@@ -215,7 +215,7 @@ static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 				*element = *arg2;
 				zval_copy_ctor(element);
 				INIT_PZVAL(element);
-				add_next_index_zval(hash, element);			
+				add_next_index_zval(hash, element);
 			}
 			break;
 
@@ -247,7 +247,7 @@ static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 /* {{{ pvalue_config_destructor
  */
 static void pvalue_config_destructor(zval *pvalue)
-{   
+{
 	if (Z_TYPE_P(pvalue) == IS_STRING) {
 		free(Z_STRVAL_P(pvalue));
 	}
@@ -279,9 +279,9 @@ int php_init_config(TSRMLS_D)
 	}
 
 	zend_llist_init(&extension_lists.engine, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
-	zend_llist_init(&extension_lists.functions, sizeof(zval), (llist_dtor_func_t)  ZVAL_DESTRUCTOR, 1);
+	zend_llist_init(&extension_lists.functions, sizeof(zval), (llist_dtor_func_t) ZVAL_DESTRUCTOR, 1);
 	zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
-	
+
 	open_basedir = PG(open_basedir);
 
 	if (sapi_module.php_ini_path_override) {
@@ -378,7 +378,7 @@ int php_init_config(TSRMLS_D)
 				}
 			} else if (!VCWD_REALPATH(sapi_module.executable_location, binary_location) || VCWD_ACCESS(binary_location, X_OK)) {
 				efree(binary_location);
-				binary_location = NULL;			 
+				binary_location = NULL;
 			}
 		} else {
 			binary_location = NULL;
@@ -386,7 +386,7 @@ int php_init_config(TSRMLS_D)
 #endif
 		if (binary_location) {
 			char *separator_location = strrchr(binary_location, DEFAULT_SLASH);
-			
+
 			if (separator_location && separator_location != binary_location) {
 				*(separator_location) = 0;
 			}
@@ -400,7 +400,7 @@ int php_init_config(TSRMLS_D)
 		/* Add default location */
 #ifdef PHP_WIN32
 		default_location = (char *) emalloc(MAXPATHLEN + 1);
-	
+
 		if (0 < GetWindowsDirectory(default_location, MAXPATHLEN)) {
 			if (*php_ini_search_path) {
 				strlcat(php_ini_search_path, paths_separator, search_path_size);
@@ -450,7 +450,7 @@ int php_init_config(TSRMLS_D)
 	if (!sapi_module.php_ini_ignore) {
 		if (php_ini_file_name && php_ini_file_name[0]) {
 			struct stat statbuf;
-	
+
 			if (!VCWD_STAT(php_ini_file_name, &statbuf)) {
 				if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
 					fh.handle.fp = VCWD_FOPEN(php_ini_file_name, "r");
@@ -490,10 +490,10 @@ int php_init_config(TSRMLS_D)
 		fh.type = ZEND_HANDLE_FP;
 
 		zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, &extension_lists);
-	
+
 		{
 			zval tmp;
-		
+
 			Z_STRLEN(tmp) = strlen(fh.filename);
 			Z_STRVAL(tmp) = zend_strndup(fh.filename, Z_STRLEN(tmp));
 			Z_TYPE(tmp) = IS_STRING;
@@ -528,7 +528,7 @@ int php_init_config(TSRMLS_D)
 							/* Here, add it to the list of ini files read */
 							l = strlen(ini_file);
 							total_l += l + 2;
-							p = estrndup(ini_file, l); 
+							p = estrndup(ini_file, l);
 							zend_llist_add_element(&scanned_ini_list, &p);
 						}
 					}
@@ -537,7 +537,7 @@ int php_init_config(TSRMLS_D)
 			}
 			free(namelist);
 
-			/* 
+			/*
 			 * Don't need an extra byte for the \0 in this malloc as the last
 			 * element will not get a trailing , which gives us the byte for the \0
 			 */
@@ -547,7 +547,7 @@ int php_init_config(TSRMLS_D)
 				for (element = scanned_ini_list.head; element; element = element->next) {
 					strlcat(php_ini_scanned_files, *(char **)element->data, total_l);
 					strlcat(php_ini_scanned_files, element->next ? ",\n" : "\n", total_l);
-				}	
+				}
 			}
 			zend_llist_destroy(&scanned_ini_list);
 		}
@@ -556,7 +556,7 @@ int php_init_config(TSRMLS_D)
 	if (sapi_module.ini_entries) {
 		zend_parse_ini_string(sapi_module.ini_entries, 1, php_config_ini_parser_cb, &extension_lists);
 	}
-	
+
 	return SUCCESS;
 }
 /* }}} */
