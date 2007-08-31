@@ -3655,7 +3655,17 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 			}
 			trav = trav->next;
 		}
-		if (num_of_params > 0) {
+
+		if (num_of_params == 1 &&
+		    function &&
+		    function->binding &&
+		    function->binding->bindingType == BINDING_SOAP &&
+		    ((sdlSoapBindingFunctionPtr)function->bindingAttributes)->style == SOAP_DOCUMENT &&
+		    (function->requestParameters == NULL ||
+		     zend_hash_num_elements(function->requestParameters) == 0) &&
+		    strcmp(params->name, function->functionName) == 0) {
+			num_of_params = 0;
+		} else if (num_of_params > 0) {
 			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval *), 0);
 
 			trav = params;
@@ -3696,7 +3706,11 @@ static sdlFunctionPtr find_function(sdlPtr sdl, xmlNodePtr func, zval* function_
 	if (function && function->binding && function->binding->bindingType == BINDING_SOAP) {
 		sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
 		if (fnb->style == SOAP_DOCUMENT) {
-			function = NULL;
+			if (func->children != NULL ||
+			    (function->requestParameters != NULL &&
+			     zend_hash_num_elements(function->requestParameters) > 0)) {
+				function = NULL;
+			}
 		}
 	}
 	if (sdl != NULL && function == NULL) {
