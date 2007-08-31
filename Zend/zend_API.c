@@ -2012,23 +2012,47 @@ ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_
 	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)-1) && fptr->common.num_args != 0) {
 		zend_error(error_type, "Method %v::%s() cannot accept any arguments", ce->name, ZEND_CLONE_FUNC_NAME);
 	} else if (lcname_len == sizeof(ZEND_GET_FUNC_NAME) - 1 &&
-	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)-1) && fptr->common.num_args != 1) {
-		zend_error(error_type, "Method %v::%s() must take exactly 1 argument", ce->name, ZEND_GET_FUNC_NAME);
+	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)-1)) {
+		if (fptr->common.num_args != 1) {
+			zend_error(error_type, "Method %v::%s() must take exactly 1 argument", ce->name, ZEND_GET_FUNC_NAME);
+		} else if (ARG_SHOULD_BE_SENT_BY_REF(fptr, 1)) {
+			zend_error(error_type, "Method %v::%s() cannot take arguments by reference", ce->name, ZEND_GET_FUNC_NAME);
+		}
 	} else if (lcname_len == sizeof(ZEND_SET_FUNC_NAME) - 1 &&
-	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)-1) && fptr->common.num_args != 2) {
-		zend_error(error_type, "Method %v::%s() must take exactly 2 arguments", ce->name, ZEND_SET_FUNC_NAME);
+	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)-1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %v::%s() must take exactly 2 arguments", ce->name, ZEND_SET_FUNC_NAME);
+		} else if (ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %v::%s() cannot take arguments by reference", ce->name, ZEND_SET_FUNC_NAME);
+		}
 	} else if (lcname_len == sizeof(ZEND_UNSET_FUNC_NAME) - 1 &&
-	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_UNSET_FUNC_NAME, sizeof(ZEND_UNSET_FUNC_NAME)-1) && fptr->common.num_args != 1) {
-		zend_error(error_type, "Method %v::%s() must take exactly 1 argument", ce->name, ZEND_UNSET_FUNC_NAME);
+	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_UNSET_FUNC_NAME, sizeof(ZEND_UNSET_FUNC_NAME)-1)) {
+		if (fptr->common.num_args != 1) {
+			zend_error(error_type, "Method %v::%s() must take exactly 1 argument", ce->name, ZEND_UNSET_FUNC_NAME);
+		} else if (ARG_SHOULD_BE_SENT_BY_REF(fptr, 1)) {
+			zend_error(error_type, "Method %v::%s() cannot take arguments by reference", ce->name, ZEND_UNSET_FUNC_NAME);
+		}
 	} else if (lcname_len == sizeof(ZEND_ISSET_FUNC_NAME) - 1 &&
-	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_ISSET_FUNC_NAME, sizeof(ZEND_ISSET_FUNC_NAME)-1) && fptr->common.num_args != 1) {
-		zend_error(error_type, "Method %v::%s() must take exactly 1 argument", ce->name, ZEND_ISSET_FUNC_NAME);
+	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_ISSET_FUNC_NAME, sizeof(ZEND_ISSET_FUNC_NAME)-1)) {
+		if (fptr->common.num_args != 1) {
+			zend_error(error_type, "Method %v::%s() must take exactly 1 argument", ce->name, ZEND_ISSET_FUNC_NAME);
+		} else if (ARG_SHOULD_BE_SENT_BY_REF(fptr, 1)) {
+			zend_error(error_type, "Method %v::%s() cannot take arguments by reference", ce->name, ZEND_ISSET_FUNC_NAME);
+		}
 	} else if (lcname_len == sizeof(ZEND_CALL_FUNC_NAME) - 1 &&
-	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1) && fptr->common.num_args != 2) {
-		zend_error(error_type, "Method %v::%s() must take exactly 2 arguments", ce->name, ZEND_CALL_FUNC_NAME);
+	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %v::%s() must take exactly 2 arguments", ce->name, ZEND_CALL_FUNC_NAME);
+		} else if (ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %v::%s() cannot take arguments by reference", ce->name, ZEND_CALL_FUNC_NAME);
+		}
 	} else if (lcname_len == sizeof(ZEND_CALLSTATIC_FUNC_NAME) - 1 &&
-	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1) && fptr->common.num_args != 2) {
-		zend_error(error_type, "Method %v::%s() must take exactly 2 arguments", ce->name, ZEND_CALLSTATIC_FUNC_NAME);
+	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %v::%s() must take exactly 2 arguments", ce->name, ZEND_CALLSTATIC_FUNC_NAME);
+		} else if (ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %v::%s() cannot take arguments by reference", ce->name, ZEND_CALLSTATIC_FUNC_NAME);
+		}
 	} else if (lcname_len == sizeof(ZEND_TOSTRING_FUNC_NAME) - 1 &&
 	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && fptr->common.num_args != 0) {
 		zend_error(error_type, "Method %v::%s() cannot take arguments", ce->name, ZEND_TOSTRING_FUNC_NAME);
