@@ -27,8 +27,8 @@ the Oracle Call Interface (OCI8).
   <email>andi@zend.com</email>
   <active>yes</active>
  </lead>
- <date>2007-08-08</date>
- <time>19:00:00</time>
+ <date>2007-09-01</date>
+ <time>15:00:00</time>
  <version>
   <release>1.2.4</release>
   <api>1.2.4</api>
@@ -38,7 +38,8 @@ the Oracle Call Interface (OCI8).
   <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
- <notes>Fixed PECL bug #10194 (crash in Oracle client when memory limit reached in the callback).
+ <notes>Added Oracle 11g support.
+Fixed PECL bug #10194 (crash in Oracle client when memory limit reached in the callback).
 Fixed bug #42173 (oci_field_type fixes for INTERVAL and TIMESTAMP types).
 Fixed bug #42134 (oci_error() returns false after oci_new_collection() fails).
 Fixed bug #41917 (oci_field_precision and oci_field_scale datatypes fixed).
