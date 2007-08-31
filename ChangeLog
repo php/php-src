@@ -1,3 +1,83 @@
+2007-08-30  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/tests/rowid_bind.phpt
+      ext/oci8/tests/xmltype_01.phpt:
+      MFB New tests
+
+    * ext/oci8/tests/rowid_bind.phpt
+      ext/oci8/tests/rowid_bind.phpt
+      ext/oci8/tests/xmltype_01.phpt
+      ext/oci8/tests/xmltype_01.phpt:
+      
+      file rowid_bind.phpt was initially added on branch PHP_5_2.
+
+2007-08-30  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/dom/php_dom.c:
+      MFH: fix bug #42462 (Segmentation when trying to set an attribute in
+      DOMElement)
+
+    * ext/dom/php_dom.c:
+      fix bug #42462 (Segmentation when trying to set an attribute in DOMElement)
+
+2007-08-30  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Allow binary strings as method name in $class::$method(), fixes
+        tests/lang/044.phpt (Etienne Kneuss)
+
+2007-08-30  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo/tests/pdo_029.phpt
+      ext/pdo/tests/pdo_030.phpt:
+      - Fixed bug #42452 (PDO classes do not expose Reflection API information)
+      - Fixed tests
+
+2007-08-30  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_API.h:
+      fix C++ extensions build
+      C++ doesn't allow implicit casting of void* to Uchar*, we have to do it
+      explicitly
+
+2007-08-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      MFB: Add optional parameter  to debug_backtrace().
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c:
+      Add optional parameter  to debug_backtrace().
+
+    * (PHP_5_2)
+      configure.in
+      main/php_version.h:
+      Back to -dev.
+
+2007-08-30  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/lstat_stat_variation6.phpt:
+      fix test: do not run when noatime set
+
+    * ext/standard/tests/file/lstat_stat_variation6.phpt:
+      fix tests: do not run when noatime set
+
 2007-08-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
