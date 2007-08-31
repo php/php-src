@@ -37,6 +37,7 @@
 #include "php_sysvshm.h"
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_smart_str.h"
+#include "php_ini.h"
 
 /* {{{ sysvshm_functions[]
  */
