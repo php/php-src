@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   DOMElement). (Rob)
 - Fixed bug #42452 (PDO classes do not expose Reflection API information).
   (Hannes)
+- Fixed bug #42359 (xsd:list type not parsed). (Dmitry)
 - Fixed bug #42326 (SoapServer crash). (Dmitry)
 - Fixed bug #42086 (SoapServer return Procedure '' not present for WSIBasic
   compliant wsdl). (Dmitry)
