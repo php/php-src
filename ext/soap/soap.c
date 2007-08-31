@@ -3253,8 +3253,8 @@ PHP_METHOD(SoapClient, __getTypes)
 			while (zend_hash_get_current_data_ex(sdl->types, (void **)&type, &pos) != FAILURE) {
 				type_to_string((*type), &buf, 0);
 				add_next_index_rt_stringl(return_value, buf.c, buf.len, 1);
-				zend_hash_move_forward_ex(sdl->types, &pos);
 				smart_str_free(&buf);
+				zend_hash_move_forward_ex(sdl->types, &pos);
 			}
 		}
 	}
@@ -5016,8 +5016,6 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 
 	switch (type->kind) {
 		case XSD_TYPEKIND_SIMPLE:
-		case XSD_TYPEKIND_LIST:
-		case XSD_TYPEKIND_UNION:
 			if (type->encode) {
 				smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
 				smart_str_appendc(buf, ' ');
@@ -5025,6 +5023,40 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 				smart_str_appendl(buf, "anyType ", sizeof("anyType ")-1);
 			}
 			smart_str_appendl(buf, type->name, strlen(type->name));
+			break;
+		case XSD_TYPEKIND_LIST:
+			smart_str_appendl(buf, "list ", 5);
+			smart_str_appendl(buf, type->name, strlen(type->name));
+			if (type->elements) {
+				sdlTypePtr *item_type;
+
+				smart_str_appendl(buf, " {", 2);
+				zend_hash_internal_pointer_reset_ex(type->elements, &pos);
+				if (zend_hash_get_current_data_ex(type->elements, (void **)&item_type, &pos) != FAILURE) {
+					smart_str_appendl(buf, (*item_type)->name, strlen((*item_type)->name));
+				}
+				smart_str_appendc(buf, '}');
+			}
+			break;
+		case XSD_TYPEKIND_UNION:
+			smart_str_appendl(buf, "union ", 6);
+			smart_str_appendl(buf, type->name, strlen(type->name));
+			if (type->elements) {
+				sdlTypePtr *item_type;
+				int first = 0;
+
+				smart_str_appendl(buf, " {", 2);
+				zend_hash_internal_pointer_reset_ex(type->elements, &pos);
+				while (zend_hash_get_current_data_ex(type->elements, (void **)&item_type, &pos) != FAILURE) {
+					if (!first) {
+						smart_str_appendc(buf, ',');
+						first = 0;
+					}
+					smart_str_appendl(buf, (*item_type)->name, strlen((*item_type)->name));
+					zend_hash_move_forward_ex(type->elements, &pos);
+				}
+				smart_str_appendc(buf, '}');
+			}
 			break;
 		case XSD_TYPEKIND_COMPLEX:
 		case XSD_TYPEKIND_RESTRICTION:
