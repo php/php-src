@@ -166,6 +166,7 @@ Starting byte set: a b c d
 
 /(a|[^\dZ])/IS
 Capturing subpattern count = 1
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -402,6 +403,7 @@ Failed: missing terminating ] for character class at offset 4
 /[^aeiou ]{3,}/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -599,8 +601,8 @@ Need char = 'h' (caseless)
 
 /((?i)b)/IDZS
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
      01 Opt
      NC b
         Ket
@@ -703,6 +705,7 @@ Starting byte set: a b
 
 /(?<=foo\n)^bar/Im
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: multiline
 No first char
 Need char = 'r'
@@ -719,6 +722,7 @@ No match
 
 /^(?<=foo\n)bar/Im
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: multiline
 First char at start or follows newline
 Need char = 'r'
@@ -1105,13 +1109,14 @@ No need char
 )?)?)?)?)?)?)?)?)?otherword/I
 Capturing subpattern count = 8
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 First char = 'w'
 Need char = 'd'
 
 /.*X/IDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Any*
         X
         Ket
@@ -1125,7 +1130,7 @@ Need char = 'X'
 
 /.*X/IDZs
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Any*
         X
         Ket
@@ -1139,8 +1144,8 @@ Need char = 'X'
 
 /(.*X|^B)/IDZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         Any*
         X
         Alt
@@ -1158,8 +1163,8 @@ No need char
 
 /(.*X|^B)/IDZs
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         Any*
         X
         Alt
@@ -1177,8 +1182,8 @@ No need char
 
 /(?s)(.*X|^B)/IDZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         Any*
         X
         Alt
@@ -1196,8 +1201,8 @@ No need char
 
 /(?s:.*X|^B)/IDZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 0
+        Bra
+        Bra
      04 Opt
         Any*
         X
@@ -1347,6 +1352,7 @@ No need char
 
 /^ab\n/Ig+
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -1356,6 +1362,7 @@ No need char
 
 /^ab\n/Img+
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: multiline
 First char at start or follows newline
 Need char = 10
@@ -1433,6 +1440,7 @@ Need char = 'a'
 /"([^\\"]+|\\.)*"/I
 Capturing subpattern count = 1
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 First char = '"'
 Need char = '"'
@@ -1708,6 +1716,7 @@ Study returned NULL
   /Ix
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1737,6 +1746,7 @@ No match
 /\(  ( (?>[^()]+) | (?R) )* \) /Ixg
 Capturing subpattern count = 1
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1752,6 +1762,7 @@ Need char = ')'
 /\(  (?: (?>[^()]+) | (?R) ) \) /Ix
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1771,6 +1782,7 @@ No match
 /\(  (?: (?>[^()]+) | (?R) )? \) /Ix
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1782,6 +1794,7 @@ Need char = ')'
 /\(  ( (?>[^()]+) | (?R) )* \) /Ix
 Capturing subpattern count = 1
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1792,6 +1805,7 @@ Need char = ')'
 /\( ( ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 2
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1803,6 +1817,7 @@ Need char = ')'
 /\( (123)? ( ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1820,6 +1835,7 @@ Need char = ')'
 /\( ( (123)? ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1837,6 +1853,7 @@ Need char = ')'
 /\( (((((((((( ( (?>[^()]+) | (?R) )* )))))))))) \) /Ix
 Capturing subpattern count = 11
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1857,6 +1874,7 @@ Need char = ')'
 /\( ( ( (?>[^()<>]+) | ((?>[^()]+)) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1869,6 +1887,7 @@ Need char = ')'
 /\( ( ( (?>[^()]+) | ((?R)) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1885,7 +1904,7 @@ Need char = ')'
 
 /^[[:alnum:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [0-9A-Za-z]
         Ket
@@ -1898,20 +1917,21 @@ No need char
 
 /^[[:^alnum:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\x00-/:-@[-`{-\xff]
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
 
 /^[[:alpha:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [A-Za-z]
         Ket
@@ -1924,13 +1944,14 @@ No need char
 
 /^[[:^alpha:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\x00-@[-`{-\xff]
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -1945,20 +1966,21 @@ Starting byte set: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 
 /^[[:ascii:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\x00-\x7f]
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
 
 /^[[:^ascii:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\x80-\xff]
         Ket
@@ -1971,7 +1993,7 @@ No need char
 
 /^[[:blank:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\x09 ]
         Ket
@@ -1984,19 +2006,21 @@ No need char
 
 /^[[:^blank:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\x00-\x08\x0a-\x1f!-\xff]
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
 
 /[\n\x0b\x0c\x0d[:blank:]]/IS
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -2004,20 +2028,21 @@ Starting byte set: \x09 \x0a \x0b \x0c \x0d \x20
 
 /^[[:cntrl:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\x00-\x1f\x7f]
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
 
 /^[[:digit:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [0-9]
         Ket
@@ -2030,7 +2055,7 @@ No need char
 
 /^[[:graph:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [!-~]
         Ket
@@ -2043,7 +2068,7 @@ No need char
 
 /^[[:lower:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [a-z]
         Ket
@@ -2056,7 +2081,7 @@ No need char
 
 /^[[:print:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [ -~]
         Ket
@@ -2069,7 +2094,7 @@ No need char
 
 /^[[:punct:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [!-/:-@[-`{-~]
         Ket
@@ -2082,20 +2107,21 @@ No need char
 
 /^[[:space:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\x09-\x0d ]
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
 
 /^[[:upper:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [A-Z]
         Ket
@@ -2108,7 +2134,7 @@ No need char
 
 /^[[:xdigit:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [0-9A-Fa-f]
         Ket
@@ -2121,7 +2147,7 @@ No need char
 
 /^[[:word:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [0-9A-Z_a-z]
         Ket
@@ -2134,7 +2160,7 @@ No need char
 
 /^[[:^cntrl:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [ -~\x80-\xff]
         Ket
@@ -2147,33 +2173,35 @@ No need char
 
 /^[12[:^digit:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\x00-/12:-\xff]
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
 
 /^[[:^blank:]]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\x00-\x08\x0a-\x1f!-\xff]
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
 
 /[01[:alpha:]%]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [%01A-Za-z]
         Ket
         End
@@ -2694,7 +2722,7 @@ Need char = '-'
 
 /#/IxDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Ket
         End
 ------------------------------------------------------------------
@@ -2705,7 +2733,7 @@ No need char
 
 /a#/IxDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a
         Ket
         End
@@ -2717,7 +2745,7 @@ No need char
 
 /[\s]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x09\x0a\x0c\x0d ]
         Ket
         End
@@ -2729,7 +2757,7 @@ No need char
 
 /[\S]/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x00-\x08\x0b\x0e-\x1f!-\xff]
         Ket
         End
@@ -2741,7 +2769,7 @@ No need char
 
 /a(?i)b/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a
      01 Opt
      NC b
@@ -2763,8 +2791,8 @@ No match
 
 /(a(?i)b)/DZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         a
      01 Opt
      NC b
@@ -2790,7 +2818,7 @@ No match
 
 /   (?i)abc/IxDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
      NC abc
         Ket
         End
@@ -2803,7 +2831,7 @@ Need char = 'c' (caseless)
 /#this is a comment
   (?i)abc/IxDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
      NC abc
         Ket
         End
@@ -2815,7 +2843,7 @@ Need char = 'c' (caseless)
 
 /123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
         Ket
         End
@@ -2827,7 +2855,7 @@ Need char = '0'
 
 /\Q123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
         Ket
         End
@@ -2839,7 +2867,7 @@ Need char = '0'
 
 /\Q\E/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Ket
         End
 ------------------------------------------------------------------
@@ -2852,7 +2880,7 @@ No need char
 
 /\Q\Ex/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         x
         Ket
         End
@@ -2864,7 +2892,7 @@ No need char
 
 / \Q\E/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
          
         Ket
         End
@@ -2876,7 +2904,7 @@ No need char
 
 /a\Q\E/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a
         Ket
         End
@@ -2894,7 +2922,7 @@ No need char
 
 /a\Q\Eb/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ab
         Ket
         End
@@ -2908,7 +2936,7 @@ Need char = 'b'
 
 /\Q\Eabc/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         abc
         Ket
         End
@@ -2920,7 +2948,7 @@ Need char = 'c'
 
 /x*+\w/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         x*+
         \w
         Ket
@@ -2938,7 +2966,7 @@ No match
 
 /x?+/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         x?+
         Ket
         End
@@ -2950,7 +2978,7 @@ No need char
 
 /x++/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         x++
         Ket
         End
@@ -2963,7 +2991,7 @@ No need char
 
 /x{1,3}+/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Once
         x
         x{0,2}
@@ -2979,10 +3007,10 @@ No need char
 
 /(x)*+/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Once
         Brazero
-        Bra 1
+        CBra 1
         x
         KetRmax
         Ket
@@ -3055,6 +3083,7 @@ Need char = 'b'
 /([^()]++|\([^()]*\))+/I
 Capturing subpattern count = 1
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -3065,6 +3094,7 @@ No need char
 /\(([^()]++|\([^()]+\))+\)/I
 Capturing subpattern count = 1
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 First char = '('
 Need char = ')'
@@ -3081,18 +3111,18 @@ No match
 
 /(abc){1,3}+/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Once
-        Bra 1
+        CBra 1
         abc
         Ket
         Brazero
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         abc
         Ket
         Brazero
-        Bra 1
+        CBra 1
         abc
         Ket
         Ket
@@ -3119,7 +3149,7 @@ Failed: nothing to repeat at offset 7
 
 /x(?U)a++b/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         x
         a++
         b
@@ -3136,7 +3166,7 @@ Need char = 'b'
 
 /(?U)xa++b/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         x
         a++
         b
@@ -3153,19 +3183,19 @@ Need char = 'b'
 
 /^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
-        Bra 1
-        Bra 2
+        CBra 1
+        CBra 2
         a+
         Ket
-        Bra 3
+        CBra 3
         [ab]+?
         Ket
-        Bra 4
+        CBra 4
         [bc]+
         Ket
-        Bra 5
+        CBra 5
         \w*
         Ket
         Ket
@@ -3180,7 +3210,7 @@ No need char
 
 /^x(?U)a+b/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         x
         a++
@@ -3196,10 +3226,10 @@ Need char = 'b'
 
 /^x(?U)(a+)b/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         x
-        Bra 1
+        CBra 1
         a+?
         Ket
         b
@@ -3247,7 +3277,7 @@ Failed: missing terminating ] for character class at offset 10
 
 /[\s]/IDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x09\x0a\x0c\x0d ]
         Ket
         End
@@ -3259,24 +3289,26 @@ No need char
 
 /[[:space:]]/IDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x09-\x0d ]
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 No options
 No first char
 No need char
 
 /[[:space:]abcde]/IDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x09-\x0d a-e]
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -3284,6 +3316,7 @@ No need char
 /< (?: (?(R) \d++  | [^<>]*+) | (?R)) * >/Ix
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '<'
 Need char = '>'
@@ -3306,7 +3339,7 @@ No match
 
 |8J\$WE\<\.rX\+ix\[d1b\!H\#\?vV0vrK\:ZH1\=2M\>iV\;\?aPhFB\<\*vW\@QW\@sO9\}cfZA\-i\'w\%hKd6gt1UJP\,15_\#QY\$M\^Mss_U\/\]\&LK9\[5vQub\^w\[KDD\<EjmhUZ\?\.akp2dF\>qmj\;2\}YWFdYx\.Ap\]hjCPTP\(n28k\+3\;o\&WXqs\/gOXdr\$\:r\'do0\;b4c\(f_Gr\=\"\\4\)\[01T7ajQJvL\$W\~mL_sS\/4h\:x\*\[ZN\=KLs\&L5zX\/\/\>it\,o\:aU\(\;Z\>pW\&T7oP\'2K\^E\:x9\'c\[\%z\-\,64JQ5AeH_G\#KijUKghQw\^\\vea3a\?kka_G\$8\#\`\*kynsxzBLru\'\]k_\[7FrVx\}\^\=\$blx\>s\-N\%j\;D\*aZDnsw\:YKZ\%Q\.Kne9\#hP\?\+b3\(SOvL\,\^\;\&u5\@\?5C5Bhb\=m\-vEh_L15Jl\]U\)0RP6\{q\%L\^_z5E\'Dw6X\b|IDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         8J$WE<.rX+ix[d1b!H#?vV0vrK:ZH1=2M>iV;?aPhFB<*vW@QW@sO9}cfZA-i'w%hKd6gt1UJP,15_#QY$M^Mss_U/]&LK9[5vQub^w[KDD<EjmhUZ?.akp2dF>qmj;2}YWFdYx.Ap]hjCPTP(n28k+3;o&WXqs/gOXdr$:r'do0;b4c(f_Gr="\4)[01T7ajQJvL$W~mL_sS/4h:x*[ZN=KLs&L5zX//>it,o:aU(;Z>pW&T7oP'2K^E:x9'c[%z-,64JQ5AeH_G#KijUKghQw^\vea3a?kka_G$8#`*kynsxzBLru']k_[7FrVx}^=$blx>s-N%j;D*aZDnsw:YKZ%Q.Kne9#hP?+b3(SOvL,^;&u5@?5C5Bhb=m-vEh_L15Jl]U)0RP6{q%L^_z5E'Dw6X
         \b
         Ket
@@ -3319,7 +3352,7 @@ Need char = 'X'
 
 |\$\<\.X\+ix\[d1b\!H\#\?vV0vrK\:ZH1\=2M\>iV\;\?aPhFB\<\*vW\@QW\@sO9\}cfZA\-i\'w\%hKd6gt1UJP\,15_\#QY\$M\^Mss_U\/\]\&LK9\[5vQub\^w\[KDD\<EjmhUZ\?\.akp2dF\>qmj\;2\}YWFdYx\.Ap\]hjCPTP\(n28k\+3\;o\&WXqs\/gOXdr\$\:r\'do0\;b4c\(f_Gr\=\"\\4\)\[01T7ajQJvL\$W\~mL_sS\/4h\:x\*\[ZN\=KLs\&L5zX\/\/\>it\,o\:aU\(\;Z\>pW\&T7oP\'2K\^E\:x9\'c\[\%z\-\,64JQ5AeH_G\#KijUKghQw\^\\vea3a\?kka_G\$8\#\`\*kynsxzBLru\'\]k_\[7FrVx\}\^\=\$blx\>s\-N\%j\;D\*aZDnsw\:YKZ\%Q\.Kne9\#hP\?\+b3\(SOvL\,\^\;\&u5\@\?5C5Bhb\=m\-vEh_L15Jl\]U\)0RP6\{q\%L\^_z5E\'Dw6X\b|IDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         $<.X+ix[d1b!H#?vV0vrK:ZH1=2M>iV;?aPhFB<*vW@QW@sO9}cfZA-i'w%hKd6gt1UJP,15_#QY$M^Mss_U/]&LK9[5vQub^w[KDD<EjmhUZ?.akp2dF>qmj;2}YWFdYx.Ap]hjCPTP(n28k+3;o&WXqs/gOXdr$:r'do0;b4c(f_Gr="\4)[01T7ajQJvL$W~mL_sS/4h:x*[ZN=KLs&L5zX//>it,o:aU(;Z>pW&T7oP'2K^E:x9'c[%z-,64JQ5AeH_G#KijUKghQw^\vea3a?kka_G$8#`*kynsxzBLru']k_[7FrVx}^=$blx>s-N%j;D*aZDnsw:YKZ%Q.Kne9#hP?+b3(SOvL,^;&u5@?5C5Bhb=m-vEh_L15Jl]U)0RP6{q%L^_z5E'Dw6X
         \b
         Ket
@@ -3498,6 +3531,7 @@ Starting byte set: a b
 
 /[^a]/I
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -3957,6 +3991,7 @@ Failed: recursive call could loop indefinitely at offset 16
 
 /^([^()]|\((?1)*\))*$/I
 Capturing subpattern count = 1
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -3976,6 +4011,7 @@ No match
 
 /^>abc>([^()]|\((?1)*\))*<xyz<$/I
 Capturing subpattern count = 1
+Contains explicit CR or LF match
 Options: anchored
 No first char
 Need char = '<'
@@ -3991,8 +4027,8 @@ Need char = '<'
 
 /(a(?1)b)/DZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         a
         Once
         Recurse
@@ -4009,8 +4045,8 @@ Need char = 'b'
 
 /(a(?1)+b)/DZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         a
         Once
         Recurse
@@ -4103,6 +4139,7 @@ No match
 /((< (?: (?(R) \d++  | [^<>]*+) | (?2)) * >))/Ix
 Capturing subpattern count = 2
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '<'
 Need char = '>'
@@ -4185,15 +4222,15 @@ No need char
 
 /a(?P<name1>b|c)d(?P<longername2>e)/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a
-        Bra 1
+        CBra 1
         b
         Alt
         c
         Ket
         d
-        Bra 2
+        CBra 2
         e
         Ket
         Ket
@@ -4217,17 +4254,17 @@ Need char = 'e'
 
 /(?:a(?P<c>c(?P<d>d)))(?P<a>a)/DZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 0
+        Bra
+        Bra
         a
-        Bra 1
+        CBra 1
         c
-        Bra 2
+        CBra 2
         d
         Ket
         Ket
         Ket
-        Bra 3
+        CBra 3
         a
         Ket
         Ket
@@ -4244,8 +4281,8 @@ Need char = 'a'
 
 /(?P<a>a)...(?P=a)bbb(?P>a)d/DZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         a
         Ket
         Any
@@ -4407,11 +4444,11 @@ No need char
 
 /(a)(bc)/INDZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 0
+        Bra
+        Bra
         a
         Ket
-        Bra 0
+        Bra
         bc
         Ket
         Ket
@@ -4426,11 +4463,11 @@ Need char = 'c'
 
 /(?P<one>a)(bc)/INDZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         a
         Ket
-        Bra 0
+        Bra
         bc
         Ket
         Ket
@@ -4448,11 +4485,11 @@ Need char = 'c'
 
 /(a)(?P<named>bc)/INDZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 0
+        Bra
+        Bra
         a
         Ket
-        Bra 1
+        CBra 1
         bc
         Ket
         Ket
@@ -4541,10 +4578,10 @@ copy substring three failed -7
 
 /(?P<Tes>)(?P<Test>)/DZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         Ket
-        Bra 2
+        CBra 2
         Ket
         Ket
         End
@@ -4559,10 +4596,10 @@ No need char
 
 /(?P<Test>)(?P<Tes>)/DZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         Ket
-        Bra 2
+        CBra 2
         Ket
         Ket
         End
@@ -4636,11 +4673,11 @@ Need char = ']'
 
 /(a(b(?2)c))?/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Brazero
-        Bra 1
+        CBra 1
         a
-        Bra 2
+        CBra 2
         b
         Once
         Recurse
@@ -4658,11 +4695,11 @@ No need char
 
 /(a(b(?2)c))*/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Brazero
-        Bra 1
+        CBra 1
         a
-        Bra 2
+        CBra 2
         b
         Once
         Recurse
@@ -4680,12 +4717,12 @@ No need char
 
 /(a(b(?2)c)){0,2}/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Brazero
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         a
-        Bra 2
+        CBra 2
         b
         Once
         Recurse
@@ -4694,9 +4731,9 @@ No need char
         Ket
         Ket
         Brazero
-        Bra 1
+        CBra 1
         a
-        Bra 2
+        CBra 2
         b
         Once
         Recurse
@@ -4715,7 +4752,7 @@ No need char
 
 /[ab]{1}+/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Once
         [ab]{1,1}
         Ket
@@ -4750,7 +4787,7 @@ Study returned NULL
 
 /a*.*b/ISDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a*
         Any*
         b
@@ -4766,9 +4803,9 @@ Study returned NULL
 
 /(a|b)*.?c/ISDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Brazero
-        Bra 1
+        CBra 1
         a
         Alt
         b
@@ -4786,7 +4823,7 @@ Study returned NULL
 
 /abc(?C255)de(?C)f/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         abc
         Callout 255 10 1
         de
@@ -4802,7 +4839,7 @@ Need char = 'f'
 
 /abcde/ICDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Callout 255 0 1
         a
         Callout 255 1 1
@@ -4841,7 +4878,7 @@ No match
 
 /a*b/ICDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Callout 255 0 2
         a*+
         Callout 255 2 1
@@ -4886,7 +4923,7 @@ Need char = 'b'
 
 /a+b/ICDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Callout 255 0 2
         a++
         Callout 255 2 1
@@ -4926,9 +4963,9 @@ No match
 
 /(abc|def)x/ICDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Callout 255 0 9
-        Bra 1
+        CBra 1
         Callout 255 1 1
         a
         Callout 255 2 1
@@ -5080,9 +5117,9 @@ No need char
 
 /([ab]{,4}c|xy)/ICDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Callout 255 0 14
-        Bra 1
+        CBra 1
         Callout 255 1 4
         [ab]
         Callout 255 5 1
@@ -5255,9 +5292,9 @@ No match
 
 /([ab]{1,4}c|xy){4,5}?123/ICDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         Callout 255 0 21
-        Bra 1
+        CBra 1
         Callout 255 1 9
         [ab]{1,4}
         Callout 255 10 1
@@ -5270,7 +5307,7 @@ No match
         y
         Callout 255 14 0
         Ket
-        Bra 1
+        CBra 1
         Callout 255 1 9
         [ab]{1,4}
         Callout 255 10 1
@@ -5283,7 +5320,7 @@ No match
         y
         Callout 255 14 0
         Ket
-        Bra 1
+        CBra 1
         Callout 255 1 9
         [ab]{1,4}
         Callout 255 10 1
@@ -5296,7 +5333,7 @@ No match
         y
         Callout 255 14 0
         Ket
-        Bra 1
+        CBra 1
         Callout 255 1 9
         [ab]{1,4}
         Callout 255 10 1
@@ -5310,7 +5347,7 @@ No match
         Callout 255 14 0
         Ket
         Braminzero
-        Bra 1
+        CBra 1
         Callout 255 1 9
         [ab]{1,4}
         Callout 255 10 1
@@ -5631,6 +5668,7 @@ No need char
 
 /line\nbreak/I
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 No options
 First char = 'l'
 Need char = 'k'
@@ -5641,6 +5679,7 @@ Need char = 'k'
 
 /line\nbreak/If
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: firstline
 First char = 'l'
 Need char = 'k'
@@ -5653,6 +5692,7 @@ No match
 
 /line\nbreak/Imf
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: multiline firstline
 First char = 'l'
 Need char = 'k'
@@ -5918,6 +5958,7 @@ Matched, but too many substrings
 /[^()]*(?:\((?R)\)[^()]*)*/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -5931,6 +5972,7 @@ No need char
 /[^()]*(?:\((?>(?R))\)[^()]*)*/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -5942,6 +5984,7 @@ No need char
 /[^()]*(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -5953,6 +5996,7 @@ No need char
 /(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -5966,6 +6010,7 @@ No need char
 /(?:\((?R)\))|[^()]*/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -6664,7 +6709,7 @@ Starting byte set: a b c d
 
 /^a*b\d/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         a*+
         b
@@ -6680,7 +6725,7 @@ Need char = 'b'
 
 /^a*+b\d/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         a*+
         b
@@ -6696,7 +6741,7 @@ Need char = 'b'
 
 /^a*?b\d/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         a*+
         b
@@ -6712,7 +6757,7 @@ Need char = 'b'
 
 /^a+A\d/DZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         a++
         A
@@ -6734,7 +6779,7 @@ No match
 
 /^a*A\d/IiDZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         a*
      NC A
@@ -6816,7 +6861,7 @@ Matched, but too many substrings
 
 /a*\d/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a*+
         \d
         Ket
@@ -6825,7 +6870,7 @@ Matched, but too many substrings
 
 /a*\D/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a*
         \D
         Ket
@@ -6834,7 +6879,7 @@ Matched, but too many substrings
 
 /0*\d/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         0*
         \d
         Ket
@@ -6843,7 +6888,7 @@ Matched, but too many substrings
 
 /0*\D/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         0*+
         \D
         Ket
@@ -6852,7 +6897,7 @@ Matched, but too many substrings
 
 /a*\s/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a*+
         \s
         Ket
@@ -6861,7 +6906,7 @@ Matched, but too many substrings
 
 /a*\S/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a*
         \S
         Ket
@@ -6870,7 +6915,7 @@ Matched, but too many substrings
 
 / *\s/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
          *
         \s
         Ket
@@ -6879,7 +6924,7 @@ Matched, but too many substrings
 
 / *\S/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
          *+
         \S
         Ket
@@ -6888,7 +6933,7 @@ Matched, but too many substrings
 
 /a*\w/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a*
         \w
         Ket
@@ -6897,7 +6942,7 @@ Matched, but too many substrings
 
 /a*\W/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a*+
         \W
         Ket
@@ -6906,7 +6951,7 @@ Matched, but too many substrings
 
 /=*\w/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         =*+
         \w
         Ket
@@ -6915,7 +6960,7 @@ Matched, but too many substrings
 
 /=*\W/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         =*
         \W
         Ket
@@ -6924,7 +6969,7 @@ Matched, but too many substrings
 
 /\d*a/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \d*+
         a
         Ket
@@ -6933,7 +6978,7 @@ Matched, but too many substrings
 
 /\d*2/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \d*
         2
         Ket
@@ -6942,7 +6987,7 @@ Matched, but too many substrings
 
 /\d*\d/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \d*
         \d
         Ket
@@ -6951,7 +6996,7 @@ Matched, but too many substrings
 
 /\d*\D/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \d*+
         \D
         Ket
@@ -6960,7 +7005,7 @@ Matched, but too many substrings
 
 /\d*\s/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \d*+
         \s
         Ket
@@ -6969,7 +7014,7 @@ Matched, but too many substrings
 
 /\d*\S/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \d*
         \S
         Ket
@@ -6978,7 +7023,7 @@ Matched, but too many substrings
 
 /\d*\w/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \d*
         \w
         Ket
@@ -6987,7 +7032,7 @@ Matched, but too many substrings
 
 /\d*\W/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \d*+
         \W
         Ket
@@ -6996,7 +7041,7 @@ Matched, but too many substrings
 
 /\D*a/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \D*
         a
         Ket
@@ -7005,7 +7050,7 @@ Matched, but too many substrings
 
 /\D*2/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \D*+
         2
         Ket
@@ -7014,7 +7059,7 @@ Matched, but too many substrings
 
 /\D*\d/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \D*+
         \d
         Ket
@@ -7023,7 +7068,7 @@ Matched, but too many substrings
 
 /\D*\D/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \D*
         \D
         Ket
@@ -7032,7 +7077,7 @@ Matched, but too many substrings
 
 /\D*\s/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \D*
         \s
         Ket
@@ -7041,7 +7086,7 @@ Matched, but too many substrings
 
 /\D*\S/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \D*
         \S
         Ket
@@ -7050,7 +7095,7 @@ Matched, but too many substrings
 
 /\D*\w/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \D*
         \w
         Ket
@@ -7059,7 +7104,7 @@ Matched, but too many substrings
 
 /\D*\W/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \D*
         \W
         Ket
@@ -7068,7 +7113,7 @@ Matched, but too many substrings
 
 /\s*a/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \s*+
         a
         Ket
@@ -7077,7 +7122,7 @@ Matched, but too many substrings
 
 /\s*2/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \s*+
         2
         Ket
@@ -7086,7 +7131,7 @@ Matched, but too many substrings
 
 /\s*\d/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \s*+
         \d
         Ket
@@ -7095,7 +7140,7 @@ Matched, but too many substrings
 
 /\s*\D/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \s*
         \D
         Ket
@@ -7104,7 +7149,7 @@ Matched, but too many substrings
 
 /\s*\s/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \s*
         \s
         Ket
@@ -7113,7 +7158,7 @@ Matched, but too many substrings
 
 /\s*\S/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \s*+
         \S
         Ket
@@ -7122,7 +7167,7 @@ Matched, but too many substrings
 
 /\s*\w/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \s*+
         \w
         Ket
@@ -7131,7 +7176,7 @@ Matched, but too many substrings
 
 /\s*\W/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \s*
         \W
         Ket
@@ -7140,7 +7185,7 @@ Matched, but too many substrings
 
 /\S*a/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \S*
         a
         Ket
@@ -7149,7 +7194,7 @@ Matched, but too many substrings
 
 /\S*2/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \S*
         2
         Ket
@@ -7158,7 +7203,7 @@ Matched, but too many substrings
 
 /\S*\d/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \S*
         \d
         Ket
@@ -7167,7 +7212,7 @@ Matched, but too many substrings
 
 /\S*\D/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \S*
         \D
         Ket
@@ -7176,7 +7221,7 @@ Matched, but too many substrings
 
 /\S*\s/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \S*+
         \s
         Ket
@@ -7185,7 +7230,7 @@ Matched, but too many substrings
 
 /\S*\S/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \S*
         \S
         Ket
@@ -7194,7 +7239,7 @@ Matched, but too many substrings
 
 /\S*\w/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \S*
         \w
         Ket
@@ -7203,7 +7248,7 @@ Matched, but too many substrings
 
 /\S*\W/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \S*
         \W
         Ket
@@ -7212,7 +7257,7 @@ Matched, but too many substrings
 
 /\w*a/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \w*
         a
         Ket
@@ -7221,7 +7266,7 @@ Matched, but too many substrings
 
 /\w*2/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \w*
         2
         Ket
@@ -7230,7 +7275,7 @@ Matched, but too many substrings
 
 /\w*\d/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \w*
         \d
         Ket
@@ -7239,7 +7284,7 @@ Matched, but too many substrings
 
 /\w*\D/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \w*
         \D
         Ket
@@ -7248,7 +7293,7 @@ Matched, but too many substrings
 
 /\w*\s/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \w*+
         \s
         Ket
@@ -7257,7 +7302,7 @@ Matched, but too many substrings
 
 /\w*\S/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \w*
         \S
         Ket
@@ -7266,7 +7311,7 @@ Matched, but too many substrings
 
 /\w*\w/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \w*
         \w
         Ket
@@ -7275,7 +7320,7 @@ Matched, but too many substrings
 
 /\w*\W/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \w*+
         \W
         Ket
@@ -7284,7 +7329,7 @@ Matched, but too many substrings
 
 /\W*a/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \W*+
         a
         Ket
@@ -7293,7 +7338,7 @@ Matched, but too many substrings
 
 /\W*2/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \W*+
         2
         Ket
@@ -7302,7 +7347,7 @@ Matched, but too many substrings
 
 /\W*\d/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \W*+
         \d
         Ket
@@ -7311,7 +7356,7 @@ Matched, but too many substrings
 
 /\W*\D/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \W*
         \D
         Ket
@@ -7320,7 +7365,7 @@ Matched, but too many substrings
 
 /\W*\s/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \W*
         \s
         Ket
@@ -7329,7 +7374,7 @@ Matched, but too many substrings
 
 /\W*\S/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \W*
         \S
         Ket
@@ -7338,7 +7383,7 @@ Matched, but too many substrings
 
 /\W*\w/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \W*+
         \w
         Ket
@@ -7347,7 +7392,7 @@ Matched, but too many substrings
 
 /\W*\W/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \W*
         \W
         Ket
@@ -7356,7 +7401,7 @@ Matched, but too many substrings
 
 /[^a]+a/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [^a]++
         a
         Ket
@@ -7365,7 +7410,7 @@ Matched, but too many substrings
 
 /[^a]+a/BZi
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [^A]++
      NC a
         Ket
@@ -7374,7 +7419,7 @@ Matched, but too many substrings
 
 /[^a]+A/BZi
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [^A]++
      NC A
         Ket
@@ -7383,7 +7428,7 @@ Matched, but too many substrings
 
 /[^a]+b/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [^a]+
         b
         Ket
@@ -7392,7 +7437,7 @@ Matched, but too many substrings
 
 /[^a]+\d/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [^a]+
         \d
         Ket
@@ -7401,7 +7446,7 @@ Matched, but too many substrings
 
 /a*[^a]/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         a*
         [^a]
         Ket
@@ -7542,7 +7587,7 @@ No match
 
 /^[\E\Qa\E-\Qz\E]+/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [a-z]+
         Ket
@@ -7551,7 +7596,7 @@ No match
 
 /^[a\Q]bc\E]/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\]a-c]
         Ket
@@ -7560,7 +7605,7 @@ No match
 
 /^[a-\Q\E]/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         [\-a]
         Ket
@@ -7569,13 +7614,13 @@ No match
 
 /^(?P>abc)[()](?<abc>)/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         Once
         Recurse
         Ket
         [()]
-        Bra 1
+        CBra 1
         Ket
         Ket
         End
@@ -7583,15 +7628,15 @@ No match
 
 /^((?(abc)y)[()](?P<abc>x))+/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
-        Bra 1
+        CBra 1
         Cond
       2 Cond ref
         y
         Ket
         [()]
-        Bra 2
+        CBra 2
         x
         Ket
         KetRmax
@@ -7605,13 +7650,13 @@ No match
 
 /^(?P>abc)\Q()\E(?<abc>)/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         Once
         Recurse
         Ket
         ()
-        Bra 1
+        CBra 1
         Ket
         Ket
         End
@@ -7619,13 +7664,13 @@ No match
 
 /^(?P>abc)[a\Q(]\E(](?<abc>)/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         Once
         Recurse
         Ket
         [(\]a]
-        Bra 1
+        CBra 1
         Ket
         Ket
         End
@@ -7634,12 +7679,12 @@ No match
 /^(?P>abc) # this is (a comment)
   (?<abc>)/BZx
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         Once
         Recurse
         Ket
-        Bra 1
+        CBra 1
         Ket
         Ket
         End
@@ -8064,16 +8109,16 @@ No match
  2: b
 
 /^(a)\g-2/
-Failed: reference to non-existent subpattern at offset 4
+Failed: reference to non-existent subpattern at offset 7
 
 /^(a)\g/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 5
 
 /^(a)\g{0}/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 7
 
 /^(a)\g{3/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 8
 
 /^(a)\g{4a}/
 Failed: reference to non-existent subpattern at offset 9
@@ -8172,8 +8217,8 @@ No match
 
 /(ab|c)(?-1)/BZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         ab
         Alt
         c
@@ -8190,12 +8235,12 @@ No match
 
 /xy(?+1)(abc)/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         xy
         Once
         Recurse
         Ket
-        Bra 1
+        CBra 1
         abc
         Ket
         Ket
@@ -8223,10 +8268,10 @@ Failed: reference to non-existent subpattern at offset 5
 
 /^(abc)?(?(-1)X|Y)/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         Brazero
-        Bra 1
+        CBra 1
         abc
         Ket
         Cond
@@ -8250,16 +8295,16 @@ No match
     
 /^((?(+1)X|Y)(abc))+/BZ 
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
-        Bra 1
+        CBra 1
         Cond
       2 Cond ref
         X
         Alt
         Y
         Ket
-        Bra 2
+        CBra 2
         abc
         Ket
         KetRmax
@@ -8284,8 +8329,8 @@ Failed: reference to non-existent subpattern at offset 6
 
 /((?(-1)a))/BZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         Cond
       1 Cond ref
         a
@@ -8300,7 +8345,7 @@ Failed: reference to non-existent subpattern at offset 7
 
 /^(?(+1)X|Y)/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         ^
         Cond
       1 Cond ref
@@ -8359,13 +8404,13 @@ Failed: syntax error in subpattern name (missing terminator) at offset 4
 
 /(?|(abc)|(xyz))/BZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 0
-        Bra 1
+        Bra
+        Bra
+        CBra 1
         abc
         Ket
         Alt
-        Bra 1
+        CBra 1
         xyz
         Ket
         Ket
@@ -8381,20 +8426,20 @@ Failed: syntax error in subpattern name (missing terminator) at offset 4
 
 /(x)(?|(abc)|(xyz))(x)/BZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         x
         Ket
-        Bra 0
-        Bra 2
+        Bra
+        CBra 2
         abc
         Ket
         Alt
-        Bra 2
+        CBra 2
         xyz
         Ket
         Ket
-        Bra 3
+        CBra 3
         x
         Ket
         Ket
@@ -8413,23 +8458,23 @@ Failed: syntax error in subpattern name (missing terminator) at offset 4
 
 /(x)(?|(abc)(pqr)|(xyz))(x)/BZ
 ------------------------------------------------------------------
-        Bra 0
-        Bra 1
+        Bra
+        CBra 1
         x
         Ket
-        Bra 0
-        Bra 2
+        Bra
+        CBra 2
         abc
         Ket
-        Bra 3
+        CBra 3
         pqr
         Ket
         Alt
-        Bra 2
+        CBra 2
         xyz
         Ket
         Ket
-        Bra 4
+        CBra 4
         x
         Ket
         Ket
@@ -8526,7 +8571,7 @@ No match
 
 /[\h]/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x09 \xa0]
         Ket
         End
@@ -8536,7 +8581,7 @@ No match
 
 /[\h]+/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x09 \xa0]+
         Ket
         End
@@ -8546,7 +8591,7 @@ No match
 
 /[\v]/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x0a-\x0d\x85]
         Ket
         End
@@ -8554,7 +8599,7 @@ No match
 
 /[\H]/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff]
         Ket
         End
@@ -8562,7 +8607,7 @@ No match
 
 /[^\h]/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff] (neg)
         Ket
         End
@@ -8570,7 +8615,7 @@ No match
 
 /[\V]/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x00-\x09\x0e-\x84\x86-\xff]
         Ket
         End
@@ -8578,7 +8623,7 @@ No match
 
 /[\x0a\V]/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [\x00-\x0a\x0e-\x84\x86-\xff]
         Ket
         End
@@ -8586,7 +8631,7 @@ No match
 
 /\H++X/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \H++
         X
         Ket
@@ -8599,7 +8644,7 @@ No match
     
 /\H+\hY/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \H++
         \h
         Y
@@ -8611,7 +8656,7 @@ No match
 
 /\H+ Y/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \H++
          Y
         Ket
@@ -8620,7 +8665,7 @@ No match
 
 /\h+A/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \h++
         A
         Ket
@@ -8629,7 +8674,7 @@ No match
 
 /\v*B/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \v*+
         B
         Ket
@@ -8638,7 +8683,7 @@ No match
 
 /\V+\x0a/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \V++
         \x0a
         Ket
@@ -8647,7 +8692,7 @@ No match
 
 /A+\h/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         A++
         \h
         Ket
@@ -8656,7 +8701,7 @@ No match
 
 / *\H/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
          *+
         \H
         Ket
@@ -8665,7 +8710,7 @@ No match
 
 /A*\v/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         A*+
         \v
         Ket
@@ -8674,7 +8719,7 @@ No match
 
 /\x0b*\V/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \x0b*+
         \V
         Ket
@@ -8683,7 +8728,7 @@ No match
 
 /\d+\h/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \d++
         \h
         Ket
@@ -8692,7 +8737,7 @@ No match
 
 /\d*\v/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \d*+
         \v
         Ket
@@ -8701,7 +8746,7 @@ No match
 
 /S+\h\S+\v/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         S++
         \h
         \S++
@@ -8712,7 +8757,7 @@ No match
 
 /\w{3,}\h\w+\v/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \w{3}
         \w*+
         \h
@@ -8724,7 +8769,7 @@ No match
 
 /\h+\d\h+\w\h+\S\h+\H/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \h++
         \d
         \h++
@@ -8739,7 +8784,7 @@ No match
 
 /\v+\d\v+\w\v+\S\v+\V/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \v++
         \d
         \v++
@@ -8754,7 +8799,7 @@ No match
 
 /\H+\h\H+\d/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \H++
         \h
         \H+
@@ -8765,7 +8810,7 @@ No match
 
 /\V+\v\V+\w/BZ
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         \V++
         \v
         \V+
@@ -8773,5 +8818,354 @@ No match
         Ket
         End
 ------------------------------------------------------------------
+
+/\( (?: [^()]* | (?R) )* \)/x
+(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(00)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)
+ 0: (0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(00)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)
+
+/[\E]AAA/
+Failed: missing terminating ] for character class at offset 7
+
+/[\Q\E]AAA/
+Failed: missing terminating ] for character class at offset 9
+
+/[^\E]AAA/
+Failed: missing terminating ] for character class at offset 8
+
+/[^\Q\E]AAA/
+Failed: missing terminating ] for character class at offset 10
+
+/[\E^]AAA/
+Failed: missing terminating ] for character class at offset 8
+
+/[\Q\E^]AAA/
+Failed: missing terminating ] for character class at offset 10
+
+/A(*PRUNE)B(*SKIP)C(*THEN)D(*COMMIT)E(*F)F(*FAIL)G(?!)H(*ACCEPT)I/BZ
+------------------------------------------------------------------
+        Bra
+        A
+        *PRUNE
+        B
+        *SKIP
+        C
+        *THEN
+        D
+        *COMMIT
+        E
+        *FAIL
+        F
+        *FAIL
+        G
+        *FAIL
+        H
+        *ACCEPT
+        I
+        Ket
+        End
+------------------------------------------------------------------
+
+/^a+(*FAIL)/
+    aaaaaa
+No match
+    
+/a+b?c+(*FAIL)/
+    aaabccc
+No match
+
+/a+b?(*PRUNE)c+(*FAIL)/
+    aaabccc
+No match
+
+/a+b?(*COMMIT)c+(*FAIL)/
+    aaabccc
+No match
+    
+/a+b?(*SKIP)c+(*FAIL)/
+    aaabcccaaabccc
+No match
+
+/^(?:aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
+    aaaxxxxxx
+ 0: aaaxxxxxx
+    aaa++++++ 
+ 0: aaa
+    bbbxxxxx
+ 0: bbbxxxxx
+    bbb+++++ 
+ 0: bbb
+    cccxxxx
+ 0: cccxxxx
+    ccc++++ 
+ 0: ccc
+    dddddddd   
+ 0: ddd
+
+/^(aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
+    aaaxxxxxx
+ 0: aaaxxxxxx
+ 1: aaaxxxxxx
+    aaa++++++ 
+ 0: aaa
+ 1: aaa
+    bbbxxxxx
+ 0: bbbxxxxx
+ 1: bbbxxxxx
+    bbb+++++ 
+ 0: bbb
+ 1: bbb
+    cccxxxx
+ 0: cccxxxx
+ 1: cccxxxx
+    ccc++++ 
+ 0: ccc
+ 1: ccc
+    dddddddd   
+ 0: ddd
+ 1: ddd
+
+/a+b?(*THEN)c+(*FAIL)/
+    aaabccc
+No match
+
+/(A (A|B(*ACCEPT)|C) D)(E)/x
+    ABX
+ 0: AB
+    AADE
+ 0: AADE
+ 1: AAD
+ 2: A
+ 3: E
+    ACDE
+ 0: ACDE
+ 1: ACD
+ 2: C
+ 3: E
+    ** Failers
+No match
+    AD 
+No match
+        
+/^a+(*FAIL)/C
+    aaaaaa
+--->aaaaaa
+ +0 ^          ^
+ +1 ^          a+
+ +3 ^     ^    (*FAIL)
+ +3 ^    ^     (*FAIL)
+ +3 ^   ^      (*FAIL)
+ +3 ^  ^       (*FAIL)
+ +3 ^ ^        (*FAIL)
+ +3 ^^         (*FAIL)
+No match
+    
+/a+b?c+(*FAIL)/C
+    aaabccc
+--->aaabccc
+ +0 ^           a+
+ +2 ^  ^        b?
+ +4 ^   ^       c+
+ +6 ^      ^    (*FAIL)
+ +6 ^     ^     (*FAIL)
+ +6 ^    ^      (*FAIL)
+ +4 ^  ^        c+
+ +2 ^ ^         b?
+ +4 ^ ^         c+
+ +2 ^^          b?
+ +4 ^^          c+
+ +0  ^          a+
+ +2  ^ ^        b?
+ +4  ^  ^       c+
+ +6  ^     ^    (*FAIL)
+ +6  ^    ^     (*FAIL)
+ +6  ^   ^      (*FAIL)
+ +4  ^ ^        c+
+ +2  ^^         b?
+ +4  ^^         c+
+ +0   ^         a+
+ +2   ^^        b?
+ +4   ^ ^       c+
+ +6   ^    ^    (*FAIL)
+ +6   ^   ^     (*FAIL)
+ +6   ^  ^      (*FAIL)
+ +4   ^^        c+
+No match
+
+/a+b?(*PRUNE)c+(*FAIL)/C
+    aaabccc
+--->aaabccc
+ +0 ^           a+
+ +2 ^  ^        b?
+ +4 ^   ^       (*PRUNE)
++12 ^   ^       c+
++14 ^      ^    (*FAIL)
++14 ^     ^     (*FAIL)
++14 ^    ^      (*FAIL)
+ +0  ^          a+
+ +2  ^ ^        b?
+ +4  ^  ^       (*PRUNE)
++12  ^  ^       c+
++14  ^     ^    (*FAIL)
++14  ^    ^     (*FAIL)
++14  ^   ^      (*FAIL)
+ +0   ^         a+
+ +2   ^^        b?
+ +4   ^ ^       (*PRUNE)
++12   ^ ^       c+
++14   ^    ^    (*FAIL)
++14   ^   ^     (*FAIL)
++14   ^  ^      (*FAIL)
+No match
+
+/a+b?(*COMMIT)c+(*FAIL)/C
+    aaabccc
+--->aaabccc
+ +0 ^           a+
+ +2 ^  ^        b?
+ +4 ^   ^       (*COMMIT)
++13 ^   ^       c+
++15 ^      ^    (*FAIL)
++15 ^     ^     (*FAIL)
++15 ^    ^      (*FAIL)
+No match
+    
+/a+b?(*SKIP)c+(*FAIL)/C
+    aaabcccaaabccc
+--->aaabcccaaabccc
+ +0 ^                  a+
+ +2 ^  ^               b?
+ +4 ^   ^              (*SKIP)
++11 ^   ^              c+
++13 ^      ^           (*FAIL)
++13 ^     ^            (*FAIL)
++13 ^    ^             (*FAIL)
+ +0        ^           a+
+ +2        ^  ^        b?
+ +4        ^   ^       (*SKIP)
++11        ^   ^       c+
++13        ^      ^    (*FAIL)
++13        ^     ^     (*FAIL)
++13        ^    ^      (*FAIL)
+No match
+
+/a+b?(*THEN)c+(*FAIL)/C
+    aaabccc
+--->aaabccc
+ +0 ^           a+
+ +2 ^  ^        b?
+ +4 ^   ^       (*THEN)
++11 ^   ^       c+
++13 ^      ^    (*FAIL)
++13 ^     ^     (*FAIL)
++13 ^    ^      (*FAIL)
+ +0  ^          a+
+ +2  ^ ^        b?
+ +4  ^  ^       (*THEN)
++11  ^  ^       c+
++13  ^     ^    (*FAIL)
++13  ^    ^     (*FAIL)
++13  ^   ^      (*FAIL)
+ +0   ^         a+
+ +2   ^^        b?
+ +4   ^ ^       (*THEN)
++11   ^ ^       c+
++13   ^    ^    (*FAIL)
++13   ^   ^     (*FAIL)
++13   ^  ^      (*FAIL)
+No match
+    
+/a(*PRUNE:XXX)b/
+Failed: (*VERB) with an argument is not supported at offset 8
+
+/a(*MARK)b/ 
+Failed: (*VERB) not recognized at offset 7
+
+/(?i:A{1,}\6666666666)/
+Failed: number is too big at offset 19
+
+/\g6666666666/
+Failed: number is too big at offset 11
+
+/[\g6666666666]/
+Failed: number is too big at offset 12
+
+/(?1)\c[/
+Failed: reference to non-existent subpattern at offset 3
+
+/.+A/<crlf>
+    \r\nA
+No match
+    
+/\nA/<crlf>
+    \r\nA 
+ 0: \x0aA
+
+/[\r\n]A/<crlf>
+    \r\nA 
+ 0: \x0aA
+
+/(\r|\n)A/<crlf>
+    \r\nA 
+ 0: \x0aA
+ 1: \x0a
+
+/a(*CR)b/
+Failed: (*VERB) not recognized at offset 5
+
+/(*CR)a.b/
+    a\nb
+ 0: a\x0ab
+    ** Failers
+No match
+    a\rb  
+No match
+
+/(*CR)a.b/<lf>
+    a\nb
+ 0: a\x0ab
+    ** Failers
+No match
+    a\rb  
+No match
+
+/(*LF)a.b/<CRLF>
+    a\rb
+ 0: a\x0db
+    ** Failers
+No match
+    a\nb  
+No match
+
+/(*CRLF)a.b/
+    a\rb
+ 0: a\x0db
+    a\nb  
+ 0: a\x0ab
+    ** Failers
+No match
+    a\r\nb  
+No match
+
+/(*ANYCRLF)a.b/<CR>
+    ** Failers
+No match
+    a\rb
+No match
+    a\nb  
+No match
+    a\r\nb  
+No match
+
+/(*ANY)a.b/<cr>
+    ** Failers
+No match
+    a\rb
+No match
+    a\nb  
+No match
+    a\r\nb  
+No match
+    a\x85b 
+No match
 
 / End of testinput2 /

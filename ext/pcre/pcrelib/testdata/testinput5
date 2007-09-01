@@ -238,6 +238,10 @@ can't tell the difference.) --/
     \xf9\x87\x80\x80\x80  
     \xfc\x84\x80\x80\x80\x80
     \xfd\x83\x80\x80\x80\x80
+    \?\xf8\x88\x80\x80\x80  
+    \?\xf9\x87\x80\x80\x80  
+    \?\xfc\x84\x80\x80\x80\x80
+    \?\xfd\x83\x80\x80\x80\x80
 
 /\x{100}abc(xyz(?1))/8DZ
 
@@ -392,5 +396,25 @@ can't tell the difference.) --/
 /[\H]/8BZ
 
 /[\V]/8BZ
+
+/.*$/8<any>
+    \x{1ec5} 
+    
+/-- This tests the stricter UTF-8 check according to RFC 3629. --/ 
+    
+/X/8
+    \x{0}\x{d7ff}\x{e000}\x{10ffff}
+    \x{d800}
+    \x{d800}\?
+    \x{da00}
+    \x{da00}\?
+    \x{dfff}
+    \x{dfff}\?
+    \x{110000}    
+    \x{110000}\?    
+    \x{2000000} 
+    \x{2000000}\? 
+    \x{7fffffff} 
+    \x{7fffffff}\? 
 
 / End of testinput5 /

@@ -7072,4 +7072,20 @@ No match
     >\x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
  0: \x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
 
+/.+A/<crlf>
+    \r\nA
+No match
+    
+/\nA/<crlf>
+    \r\nA 
+ 0: \x0aA
+
+/[\r\n]A/<crlf>
+    \r\nA 
+ 0: \x0aA
+
+/(\r|\n)A/<crlf>
+    \r\nA 
+ 0: \x0aA
+
 / End of testinput7 /

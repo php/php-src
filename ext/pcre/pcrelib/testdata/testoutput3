@@ -148,7 +148,7 @@ No match
     
 /[[:alpha:]][[:lower:]][[:upper:]]/DZLfr_FR 
 ------------------------------------------------------------------
-        Bra 0
+        Bra
         [A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff]
         [a-z\xb5\xdf-\xf6\xf8-\xff]
         [A-Z\xc0-\xd6\xd8-\xde]

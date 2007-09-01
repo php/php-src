@@ -101,4 +101,24 @@ are all themselves checked in other tests. --/
 
 /[\x{105}-\x{109}]/8iBM
 
+/( ( (?(1)0|) )*   )/xBM
+
+/(  (?(1)0|)*   )/xBM
+
+/[a]/BM
+
+/[a]/8BM
+
+/[\xaa]/BM
+
+/[\xaa]/8BM
+
+/[^a]/BM
+
+/[^a]/8BM
+
+/[^\xaa]/BM
+
+/[^\xaa]/8BM
+
 / End of testinput10 /

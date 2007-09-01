@@ -918,4 +918,24 @@ No match
     a 
  0: a
 
+/\S\S/8g
+    A\x{a3}BC
+ 0: A\x{a3}
+ 0: BC
+    
+/\S{2}/8g
+    A\x{a3}BC
+ 0: A\x{a3}
+ 0: BC
+    
+/\W\W/8g
+    +\x{a3}== 
+ 0: +\x{a3}
+ 0: ==
+
+/\W{2}/8g
+    +\x{a3}== 
+ 0: +\x{a3}
+ 0: ==
+
 / End of testinput4 /
