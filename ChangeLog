@@ -1,3 +1,208 @@
+2007-08-31  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c:
+      1.2.4
+
+    * (PHP_5_2)
+      ext/oci8/package2.xml:
+      fix package2.xml
+
+    * (PHP_5_2)
+      ext/oci8/package2.xml:
+      add Chris to the maintainers
+
+2007-08-31  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/pdo_oci/tests/pdo_oci_attr_autocommit_1.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_autocommit_2.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_autocommit_3.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_case.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_client.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_drivername.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_nulls_1.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_prefetch_1.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_prefetch_2.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_server.phpt:
+      MFB New tests for getAttribute
+
+    * ext/pdo_oci/config.m4
+      ext/pdo_oci/oci_driver.c
+      ext/pdo_oci/oci_statement.c
+      ext/pdo_oci/php_pdo_oci_int.h:
+      MFB Add $dbh->getAttribute() support for ATTR_SERVER_VERSION,
+      ATTR_SERVER_INFO, ATTR_CLIENT_VERSION, ATTR_AUTOCOMMIT. Sync WS between
+      PHP 5 & 6 and add a couple of casts.
+
+    * ext/pdo_oci/tests/pdo_oci_attr_autocommit_1.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_autocommit_1.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_autocommit_2.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_autocommit_2.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_autocommit_3.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_autocommit_3.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_case.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_case.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_client.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_client.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_drivername.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_drivername.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_nulls_1.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_nulls_1.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_prefetch_1.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_prefetch_1.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_prefetch_2.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_prefetch_2.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_server.phpt
+      ext/pdo_oci/tests/pdo_oci_attr_server.phpt:
+      
+      file pdo_oci_attr_autocommit_1.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/pdo_oci/config.m4
+      ext/pdo_oci/oci_driver.c
+      ext/pdo_oci/oci_statement.c
+      ext/pdo_oci/php_pdo_oci_int.h:
+      Add $dbh->getAttribute() support for ATTR_SERVER_VERSION, ATTR_SERVER_INFO,
+      ATTR_CLIENT_VERSION, ATTR_AUTOCOMMIT. Sync WS between PHP 5 & 6 and add a
+      couple of casts.
+
+2007-08-31  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c
+      ZendEngine2/tests/magic_by_ref_001.phpt
+      ZendEngine2/tests/magic_by_ref_002.phpt
+      ZendEngine2/tests/magic_by_ref_003.phpt
+      ZendEngine2/tests/magic_by_ref_004.phpt
+      ZendEngine2/tests/magic_by_ref_005.phpt
+      ZendEngine2/tests/magic_by_ref_006.phpt
+      ZendEngine2/tests/magic_by_ref_007.phpt
+      ZendEngine2/tests/magic_by_ref_010.phpt:
+      MFH: prohibit arguments by ref in magic methods
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/tests/magic_by_ref_001.phpt
+      ZendEngine2/tests/magic_by_ref_001.phpt
+      ZendEngine2/tests/magic_by_ref_002.phpt
+      ZendEngine2/tests/magic_by_ref_002.phpt
+      ZendEngine2/tests/magic_by_ref_003.phpt
+      ZendEngine2/tests/magic_by_ref_003.phpt
+      ZendEngine2/tests/magic_by_ref_004.phpt
+      ZendEngine2/tests/magic_by_ref_004.phpt
+      ZendEngine2/tests/magic_by_ref_005.phpt
+      ZendEngine2/tests/magic_by_ref_005.phpt
+      ZendEngine2/tests/magic_by_ref_006.phpt
+      ZendEngine2/tests/magic_by_ref_006.phpt
+      ZendEngine2/tests/magic_by_ref_007.phpt
+      ZendEngine2/tests/magic_by_ref_007.phpt
+      ZendEngine2/tests/magic_by_ref_008.phpt
+      ZendEngine2/tests/magic_by_ref_009.phpt
+      ZendEngine2/tests/magic_by_ref_010.phpt
+      ZendEngine2/tests/magic_by_ref_010.phpt:
+      prohibit arguments by ref in magic methods
+
+2007-08-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed bug #42453 (CGI SAPI does not shut down cleanly with -i/-m/-v cmdline
+      options)
+
+2007-08-31  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/package2.xml:
+      update changelog, prepare for 1.2.4 release
+
+2007-08-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_schema.c
+      ext/soap/php_schema.c
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug42359.phpt
+      ext/soap/tests/bugs/bug42359.phpt
+      ext/soap/tests/bugs/bug42359.phpt
+      ext/soap/tests/bugs/bug42359.wsdl
+      ext/soap/tests/bugs/bug42359.wsdl
+      ext/soap/tests/bugs/bug42359.wsdl:
+      Fixed bug #42359 (xsd:list type not parsed)
+
+2007-08-31  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/basic_functions.c
+      main/SAPI.h
+      main/main.c:
+      ws
+
+2007-08-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug42086.phpt
+      ext/soap/tests/bugs/bug42086.phpt
+      ext/soap/tests/bugs/bug42086.wsdl
+      ext/soap/tests/bugs/bug42086.wsdl:
+      
+      file bug42086.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug42086.phpt
+      ext/soap/tests/bugs/bug42086.wsdl:
+      Fixed bug #42086 (SoapServer return Procedure '' not present for WSIBasic
+      compliant wsdl)
+
+2007-08-31  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * main/php_ini.c:
+      ws fixes
+
+    * main/php_ini.c:
+      ws + apify cfg_get_entry
+
+2007-08-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug42326.phpt
+      ext/soap/tests/bugs/bug42326.phpt
+      ext/soap/tests/bugs/bug42326.wsdl
+      ext/soap/tests/bugs/bug42326.wsdl:
+      
+      file bug42326.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/bugs/bug42326.phpt
+      ext/soap/tests/bugs/bug42326.wsdl:
+      Fixed bug #42326 (SoapServer crash)
+
+2007-08-31  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ZendEngine2/zend_ini.c:
+      - Revert the revert: this is not causing any problems (or we have lot
+      bigger issues), the bug is elsewhere
+
+    * (PHP_5_2)
+      main/php.h
+      main/php_ini.h:
+      MFH: Moved php.ini related protos where they belong
+
+    * main/php.h
+      main/php_ini.h:
+      - Moved the php.ini related function protos where they belong
+
+    * ext/odbc/birdstep.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/sybase/php_sybase_db.c
+      ext/sysvshm/sysvshm.c:
+      - Include php_ini.h (needed in future, does not break anything)
+
 2007-08-30  Christopher Jones  <christopher.jones@oracle.com>
 
     * ext/oci8/tests/rowid_bind.phpt

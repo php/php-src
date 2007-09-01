@@ -1,3 +1,44 @@
+2007-08-31  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_API.c
+      tests/magic_by_ref_001.phpt
+      tests/magic_by_ref_002.phpt
+      tests/magic_by_ref_003.phpt
+      tests/magic_by_ref_004.phpt
+      tests/magic_by_ref_005.phpt
+      tests/magic_by_ref_006.phpt
+      tests/magic_by_ref_007.phpt
+      tests/magic_by_ref_010.phpt:
+      MFH: prohibit arguments by ref in magic methods
+
+    * zend_API.c
+      tests/magic_by_ref_001.phpt
+      tests/magic_by_ref_001.phpt
+      tests/magic_by_ref_002.phpt
+      tests/magic_by_ref_002.phpt
+      tests/magic_by_ref_003.phpt
+      tests/magic_by_ref_003.phpt
+      tests/magic_by_ref_004.phpt
+      tests/magic_by_ref_004.phpt
+      tests/magic_by_ref_005.phpt
+      tests/magic_by_ref_005.phpt
+      tests/magic_by_ref_006.phpt
+      tests/magic_by_ref_006.phpt
+      tests/magic_by_ref_007.phpt
+      tests/magic_by_ref_007.phpt
+      tests/magic_by_ref_008.phpt
+      tests/magic_by_ref_009.phpt
+      tests/magic_by_ref_010.phpt
+      tests/magic_by_ref_010.phpt:
+      prohibit arguments by ref in magic methods
+
+2007-08-31  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * zend_ini.c:
+      - Revert the revert: this is not causing any problems (or we have lot
+      bigger issues), the bug is elsewhere
+
 2007-08-30  Johannes Schlüter  <johannes@schlueters.de>
 
     * zend.h
