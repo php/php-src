@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.2.5
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
+- Upgraded PCRE to version 7.3 (Nuno)
 
 - Fixed bug #42462 (Segmentation when trying to set an attribute in a 
   DOMElement). (Rob)

@@ -122,7 +122,7 @@ get_ucpname(int ptype, int pvalue)
 {
 #ifdef SUPPORT_UCP
 int i;
-for (i = _pcre_utt_size; i >= 0; i--)
+for (i = _pcre_utt_size - 1; i >= 0; i--)
   {
   if (ptype == _pcre_utt[i].type && pvalue == _pcre_utt[i].value) break;
   }

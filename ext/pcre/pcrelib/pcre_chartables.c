@@ -14,11 +14,15 @@ example ISO-8859-1. When dftables is run, it creates these tables in the
 current locale. If PCRE is configured with --enable-rebuild-chartables, this
 happens automatically.
 
-The following #include is present because without it gcc 4.x may remove the
+The following #includes are present because without the gcc 4.x may remove the
 array definition from the final binary if PCRE is built into a static library
 and dead code stripping is activated. This leads to link errors. Pulling in the
 header ensures that the array gets flagged as "someone outside this compilation
 unit might reference this" and so it will always be supplied to the linker. */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "pcre_internal.h"
 
