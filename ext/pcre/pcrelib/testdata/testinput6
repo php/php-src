@@ -61,7 +61,7 @@
     \x{09f} 
   
 /^\p{Cs}/8
-    \x{dfff}
+    \?\x{dfff}
     ** Failers
     \x{09f} 
   
@@ -69,7 +69,7 @@
     a
     ** Failers 
     Z
-    \x{dfff}  
+    \x{e000}  
   
 /^\p{Lm}/8
     \x{2b0}
@@ -777,5 +777,59 @@ was broken in all cases./
 /\p{L}{4}/
     123abcdefg
     123abc\xc4\xc5zz
+
+/\X{1,3}\d/
+  \x8aBCD
+  
+/\X?\d/
+  \x8aBCD 
+
+/\P{L}?\d/
+  \x8aBCD 
+
+/[\PPP\x8a]{1,}\x80/
+    A\x80
+
+/(?:[\PPa*]*){8,}/
+
+/[\P{Any}]/BZ
+
+/[\P{Any}\E]/BZ
+
+/(\P{Yi}+\277)/
+
+/(\P{Yi}+\277)?/
+
+/(?<=\P{Yi}{3}A)X/
+
+/\p{Yi}+(\P{Yi}+)(?1)/
+
+/(\P{Yi}{2}\277)?/
+
+/[\P{Yi}A]/
+
+/[\P{Yi}\P{Yi}\P{Yi}A]/
+
+/[^\P{Yi}A]/
+
+/[^\P{Yi}\P{Yi}\P{Yi}A]/
+
+/(\P{Yi}*\277)*/
+
+/(\P{Yi}*?\277)*/
+
+/(\p{Yi}*+\277)*/
+
+/(\P{Yi}?\277)*/
+
+/(\P{Yi}??\277)*/
+
+/(\p{Yi}?+\277)*/
+
+/(\P{Yi}{0,3}\277)*/
+
+/(\P{Yi}{0,3}?\277)*/
+
+/(\p{Yi}{0,3}+\277)*/
 
 / End of testinput6 /

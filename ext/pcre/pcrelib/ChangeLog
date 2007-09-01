@@ -1,7 +1,172 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.2 19-June-07
+Version 7.3 28-Aug-07
+---------------------
+
+ 1. In the rejigging of the build system that eventually resulted in 7.1, the
+    line "#include <pcre.h>" was included in pcre_internal.h. The use of angle
+    brackets there is not right, since it causes compilers to look for an
+    installed pcre.h, not the version that is in the source that is being
+    compiled (which of course may be different). I have changed it back to:
+
+      #include "pcre.h"
+
+    I have a vague recollection that the change was concerned with compiling in
+    different directories, but in the new build system, that is taken care of
+    by the VPATH setting the Makefile.
+
+ 2. The pattern .*$ when run in not-DOTALL UTF-8 mode with newline=any failed
+    when the subject happened to end in the byte 0x85 (e.g. if the last
+    character was \x{1ec5}). *Character* 0x85 is one of the "any" newline
+    characters but of course it shouldn't be taken as a newline when it is part
+    of another character. The bug was that, for an unlimited repeat of . in
+    not-DOTALL UTF-8 mode, PCRE was advancing by bytes rather than by
+    characters when looking for a newline.
+
+ 3. A small performance improvement in the DOTALL UTF-8 mode .* case.
+
+ 4. Debugging: adjusted the names of opcodes for different kinds of parentheses
+    in debug output.
+
+ 5. Arrange to use "%I64d" instead of "%lld" and "%I64u" instead of "%llu" for
+    long printing in the pcrecpp unittest when running under MinGW.
+
+ 6. ESC_K was left out of the EBCDIC table.
+
+ 7. Change 7.0/38 introduced a new limit on the number of nested non-capturing
+    parentheses; I made it 1000, which seemed large enough. Unfortunately, the
+    limit also applies to "virtual nesting" when a pattern is recursive, and in
+    this case 1000 isn't so big. I have been able to remove this limit at the
+    expense of backing off one optimization in certain circumstances. Normally,
+    when pcre_exec() would call its internal match() function recursively and
+    immediately return the result unconditionally, it uses a "tail recursion"
+    feature to save stack. However, when a subpattern that can match an empty
+    string has an unlimited repetition quantifier, it no longer makes this
+    optimization. That gives it a stack frame in which to save the data for
+    checking that an empty string has been matched. Previously this was taken
+    from the 1000-entry workspace that had been reserved. So now there is no
+    explicit limit, but more stack is used.
+
+ 8. Applied Daniel's patches to solve problems with the import/export magic
+    syntax that is required for Windows, and which was going wrong for the
+    pcreposix and pcrecpp parts of the library. These were overlooked when this
+    problem was solved for the main library.
+
+ 9. There were some crude static tests to avoid integer overflow when computing
+    the size of patterns that contain repeated groups with explicit upper
+    limits. As the maximum quantifier is 65535, the maximum group length was
+    set at 30,000 so that the product of these two numbers did not overflow a
+    32-bit integer. However, it turns out that people want to use groups that
+    are longer than 30,000 bytes (though not repeat them that many times).
+    Change 7.0/17 (the refactoring of the way the pattern size is computed) has
+    made it possible to implement the integer overflow checks in a much more
+    dynamic way, which I have now done. The artificial limitation on group
+    length has been removed - we now have only the limit on the total length of
+    the compiled pattern, which depends on the LINK_SIZE setting.
+
+10. Fixed a bug in the documentation for get/copy named substring when
+    duplicate names are permitted. If none of the named substrings are set, the
+    functions return PCRE_ERROR_NOSUBSTRING (7); the doc said they returned an
+    empty string.
+
+11. Because Perl interprets \Q...\E at a high level, and ignores orphan \E
+    instances, patterns such as [\Q\E] or [\E] or even [^\E] cause an error,
+    because the ] is interpreted as the first data character and the
+    terminating ] is not found. PCRE has been made compatible with Perl in this
+    regard. Previously, it interpreted [\Q\E] as an empty class, and [\E] could
+    cause memory overwriting.
+
+10. Like Perl, PCRE automatically breaks an unlimited repeat after an empty
+    string has been matched (to stop an infinite loop). It was not recognizing
+    a conditional subpattern that could match an empty string if that
+    subpattern was within another subpattern. For example, it looped when
+    trying to match  (((?(1)X|))*)  but it was OK with  ((?(1)X|)*)  where the
+    condition was not nested. This bug has been fixed.
+
+12. A pattern like \X?\d or \P{L}?\d in non-UTF-8 mode could cause a backtrack
+    past the start of the subject in the presence of bytes with the top bit
+    set, for example "\x8aBCD".
+
+13. Added Perl 5.10 experimental backtracking controls (*FAIL), (*F), (*PRUNE),
+    (*SKIP), (*THEN), (*COMMIT), and (*ACCEPT).
+
+14. Optimized (?!) to (*FAIL).
+
+15. Updated the test for a valid UTF-8 string to conform to the later RFC 3629.
+    This restricts code points to be within the range 0 to 0x10FFFF, excluding
+    the "low surrogate" sequence 0xD800 to 0xDFFF. Previously, PCRE allowed the
+    full range 0 to 0x7FFFFFFF, as defined by RFC 2279. Internally, it still
+    does: it's just the validity check that is more restrictive.
+
+16. Inserted checks for integer overflows during escape sequence (backslash)
+    processing, and also fixed erroneous offset values for syntax errors during
+    backslash processing.
+
+17. Fixed another case of looking too far back in non-UTF-8 mode (cf 12 above)
+    for patterns like [\PPP\x8a]{1,}\x80 with the subject "A\x80".
+
+18. An unterminated class in a pattern like (?1)\c[ with a "forward reference"
+    caused an overrun.
+
+19. A pattern like (?:[\PPa*]*){8,} which had an "extended class" (one with
+    something other than just ASCII characters) inside a group that had an
+    unlimited repeat caused a loop at compile time (while checking to see
+    whether the group could match an empty string).
+
+20. Debugging a pattern containing \p or \P could cause a crash. For example,
+    [\P{Any}] did so. (Error in the code for printing property names.)
+
+21. An orphan \E inside a character class could cause a crash.
+
+22. A repeated capturing bracket such as (A)? could cause a wild memory
+    reference during compilation.
+
+23. There are several functions in pcre_compile() that scan along a compiled
+    expression for various reasons (e.g. to see if it's fixed length for look
+    behind). There were bugs in these functions when a repeated \p or \P was
+    present in the pattern. These operators have additional parameters compared
+    with \d, etc, and these were not being taken into account when moving along
+    the compiled data. Specifically:
+
+    (a) A item such as \p{Yi}{3} in a lookbehind was not treated as fixed
+        length.
+
+    (b) An item such as \pL+ within a repeated group could cause crashes or
+        loops.
+
+    (c) A pattern such as \p{Yi}+(\P{Yi}+)(?1) could give an incorrect
+        "reference to non-existent subpattern" error.
+
+    (d) A pattern like (\P{Yi}{2}\277)? could loop at compile time.
+
+24. A repeated \S or \W in UTF-8 mode could give wrong answers when multibyte
+    characters were involved (for example /\S{2}/8g with "A\x{a3}BC").
+
+25. Using pcregrep in multiline, inverted mode (-Mv) caused it to loop.
+
+26. Patterns such as [\P{Yi}A] which include \p or \P and just one other
+    character were causing crashes (broken optimization).
+
+27. Patterns such as (\P{Yi}*\277)* (group with possible zero repeat containing
+    \p or \P) caused a compile-time loop.
+
+28. More problems have arisen in unanchored patterns when CRLF is a valid line
+    break. For example, the unstudied pattern [\r\n]A does not match the string
+    "\r\nA" because change 7.0/46 below moves the current point on by two
+    characters after failing to match at the start. However, the pattern \nA
+    *does* match, because it doesn't start till \n, and if [\r\n]A is studied,
+    the same is true. There doesn't seem any very clean way out of this, but
+    what I have chosen to do makes the common cases work: PCRE now takes note
+    of whether there can be an explicit match for \r or \n anywhere in the
+    pattern, and if so, 7.0/46 no longer applies. As part of this change,
+    there's a new PCRE_INFO_HASCRORLF option for finding out whether a compiled
+    pattern has explicit CR or LF references.
+
+29. Added (*CR) etc for changing newline setting at start of pattern.
+
+
+Version 7.2 19-Jun-07
 ---------------------
 
  1. If the fr_FR locale cannot be found for test 3, try the "french" locale,

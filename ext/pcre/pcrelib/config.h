@@ -178,13 +178,6 @@ them both to 0; an emulation function will be used. */
 /* This limit is parameterized just in case anybody ever wants to change it.
    Care must be taken if it is increased, because it guards against integer
    overflow caused by enormously large patterns. */
-#ifndef MAX_DUPLENGTH
-#define MAX_DUPLENGTH 30000
-#endif
-
-/* This limit is parameterized just in case anybody ever wants to change it.
-   Care must be taken if it is increased, because it guards against integer
-   overflow caused by enormously large patterns. */
 #ifndef MAX_NAME_COUNT
 #define MAX_NAME_COUNT 10000
 #endif
@@ -224,13 +217,13 @@ them both to 0; an emulation function will be used. */
 #define PACKAGE_NAME "PCRE"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE 7.2"
+#define PACKAGE_STRING "PCRE 7.3"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "7.2"
+#define PACKAGE_VERSION "7.3"
 
 
 /* If you are compiling for a system other than a Unix-like system or
@@ -272,7 +265,7 @@ them both to 0; an emulation function will be used. */
 
 /* Version number of package */
 #ifndef VERSION
-#define VERSION "7.2"
+#define VERSION "7.3"
 #endif
 
 /* Define to empty if `const' does not conform to ANSI C. */

@@ -107,13 +107,12 @@ typedef struct {
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE, the appropriate
-export settings are needed. */
+export settings are needed, and are set in pcreposix.c before including this
+file. */
 
-#ifdef _WIN32
-#  ifndef PCREPOSIX_STATIC
-#    define PCREPOSIX_EXP_DECL extern __declspec(dllimport)
-#    define PCREPOSIX_EXP_DEFN  __declspec(dllimport)
-#  endif
+#if defined(_WIN32) && !defined(PCRE_STATIC) && !defined(PCREPOSIX_EXP_DECL)
+#  define PCREPOSIX_EXP_DECL  extern __declspec(dllimport)
+#  define PCREPOSIX_EXP_DEFN  __declspec(dllimport)
 #endif
 
 /* By default, we use the standard "extern" declarations. */
