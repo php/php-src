@@ -2,6 +2,30 @@ News about PCRE releases
 ------------------------
 
 
+Release 7.3 28-Aug-07
+---------------------
+
+Most changes are bug fixes. Some that are not:
+
+1. There is some support for Perl 5.10's experimental "backtracking control
+   verbs" such as (*PRUNE).
+
+2. UTF-8 checking is now as per RFC 3629 instead of RFC 2279; this is more
+   restrictive in the strings it accepts.
+
+3. Checking for potential integer overflow has been made more dynamic, and as a
+   consequence there is no longer a hard limit on the size of a subpattern that
+   has a limited repeat count.
+
+4. When CRLF is a valid line-ending sequence, pcre_exec() and pcre_dfa_exec()
+   no longer advance by two characters instead of one when an unanchored match
+   fails at CRLF if there are explicit CR or LF matches within the pattern.
+   This gets rid of some anomalous effects that previously occurred.
+
+5. Some PCRE-specific settings for varying the newline options at the start of
+   a pattern have been added.
+
+
 Release 7.2 19-Jun-07
 ---------------------
 

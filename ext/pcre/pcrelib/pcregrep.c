@@ -38,7 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 #ifdef HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
 #include <ctype.h>
@@ -50,8 +50,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #ifdef HAVE_UNISTD_H
-#  include <unistd.h>
+#include <unistd.h>
 #endif
 
 #include <pcre.h>
@@ -855,7 +856,7 @@ while (ptr < endptr)
 
   t = end_of_line(t, endptr, &endlinelength);
   linelength = t - ptr - endlinelength;
-  length = multiline? endptr - ptr : linelength;
+  length = multiline? (size_t)(endptr - ptr) : linelength;
 
   /* Extra processing for Jeffrey Friedl's debugging. */
 
@@ -1063,18 +1064,23 @@ while (ptr < endptr)
 
       /* In multiline mode, we want to print to the end of the line in which
       the end of the matched string is found, so we adjust linelength and the
-      line number appropriately. Because the PCRE_FIRSTLINE option is set, the
-      start of the match will always be before the first newline sequence. */
+      line number appropriately, but only when there actually was a match
+      (invert not set). Because the PCRE_FIRSTLINE option is set, the start of
+      the match will always be before the first newline sequence. */
 
       if (multiline)
         {
         int ellength;
-        char *endmatch = ptr + offsets[1];
-        t = ptr;
-        while (t < endmatch)
+        char *endmatch = ptr;
+        if (!invert)
           {
-          t = end_of_line(t, endptr, &ellength);
-          if (t <= endmatch) linenumber++; else break;
+          endmatch += offsets[1];
+          t = ptr;
+          while (t < endmatch)
+            {
+            t = end_of_line(t, endptr, &ellength);
+            if (t <= endmatch) linenumber++; else break;
+            }
           }
         endmatch = end_of_line(endmatch, endptr, &ellength);
         linelength = endmatch - ptr - ellength;
@@ -1121,6 +1127,24 @@ while (ptr < endptr)
 
     lastmatchrestart = ptr + linelength + endlinelength;
     lastmatchnumber = linenumber + 1;
+    }
+
+  /* For a match in multiline inverted mode (which of course did not cause
+  anything to be printed), we have to move on to the end of the match before
+  proceeding. */
+
+  if (multiline && invert && match)
+    {
+    int ellength;
+    char *endmatch = ptr + offsets[1];
+    t = ptr;
+    while (t < endmatch)
+      {
+      t = end_of_line(t, endptr, &ellength);
+      if (t <= endmatch) linenumber++; else break;
+      }
+    endmatch = end_of_line(endmatch, endptr, &ellength);
+    linelength = endmatch - ptr - ellength;
     }
 
   /* Advance to after the newline and increment the line number. */
@@ -1625,7 +1649,7 @@ for (i = 1; i < argc; i++)
         else                 /* Special case xxx=data */
           {
           int oplen = equals - op->long_name;
-          int arglen = (argequals == NULL)? strlen(arg) : argequals - arg;
+          int arglen = (argequals == NULL)? (int)strlen(arg) : argequals - arg;
           if (oplen == arglen && strncmp(arg, op->long_name, oplen) == 0)
             {
             option_data = arg + arglen;

@@ -42,19 +42,25 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The current PCRE version information. */
 
 #define PCRE_MAJOR          7
-#define PCRE_MINOR          2
+#define PCRE_MINOR          3
 #define PCRE_PRERELEASE     
-#define PCRE_DATE           2007-06-19
+#define PCRE_DATE           2007-08-28
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE, the appropriate
 export setting is defined in pcre_internal.h, which includes this file. So we
-don't change an existing definition of PCRE_EXP_DECL. */
+don't change existing definitions of PCRE_EXP_DECL and PCRECPP_EXP_DECL. */
 
-#ifndef PCRE_EXP_DECL
-#  ifdef _WIN32
-#    ifndef PCRE_STATIC
-#      define PCRE_EXP_DECL extern __declspec(dllimport)
+#if defined(_WIN32) && !defined(PCRE_STATIC)
+#  ifndef PCRE_EXP_DECL
+#    define PCRE_EXP_DECL  extern __declspec(dllimport)
+#  endif
+#  ifdef __cplusplus
+#    ifndef PCRECPP_EXP_DECL
+#      define PCRECPP_EXP_DECL  extern __declspec(dllimport)
+#    endif
+#    ifndef PCRECPP_EXP_DEFN
+#      define PCRECPP_EXP_DEFN  __declspec(dllimport)
 #    endif
 #  endif
 #endif
@@ -63,9 +69,18 @@ don't change an existing definition of PCRE_EXP_DECL. */
 
 #ifndef PCRE_EXP_DECL
 #  ifdef __cplusplus
-#    define PCRE_EXP_DECL       extern "C"
+#    define PCRE_EXP_DECL  extern "C"
 #  else
-#    define PCRE_EXP_DECL       extern
+#    define PCRE_EXP_DECL  extern
+#  endif
+#endif
+
+#ifdef __cplusplus
+#  ifndef PCRECPP_EXP_DECL
+#    define PCRECPP_EXP_DECL  extern
+#  endif
+#  ifndef PCRECPP_EXP_DEFN
+#    define PCRECPP_EXP_DEFN
 #  endif
 #endif
 
@@ -132,7 +147,7 @@ extern "C" {
 #define PCRE_ERROR_DFA_WSSIZE     (-19)
 #define PCRE_ERROR_DFA_RECURSE    (-20)
 #define PCRE_ERROR_RECURSIONLIMIT (-21)
-#define PCRE_ERROR_NULLWSLIMIT    (-22)
+#define PCRE_ERROR_NOTUSED        (-22)
 #define PCRE_ERROR_BADNEWLINE     (-23)
 
 /* Request types for pcre_fullinfo() */
@@ -152,6 +167,7 @@ extern "C" {
 #define PCRE_INFO_DEFAULT_TABLES    11
 #define PCRE_INFO_OKPARTIAL         12
 #define PCRE_INFO_JCHANGED          13
+#define PCRE_INFO_HASCRORLF         14
 
 /* Request types for pcre_config(). Do not re-arrange, in order to remain
 compatible. */

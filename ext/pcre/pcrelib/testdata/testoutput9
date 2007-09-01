@@ -271,7 +271,7 @@ No match
 No match
   
 /^\p{Cs}/8
-    \x{dfff}
+    \?\x{dfff}
  0: \x{dfff}
     ** Failers
 No match
@@ -285,7 +285,7 @@ No match
 No match
     Z
 No match
-    \x{dfff}  
+    \x{e000}  
 No match
   
 /^\p{Lm}/8

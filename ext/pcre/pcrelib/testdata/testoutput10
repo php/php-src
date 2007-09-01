@@ -6,8 +6,8 @@ are all themselves checked in other tests. --/
 /((?i)b)/BM
 Memory allocation (code space): 21
 ------------------------------------------------------------------
-  0  17 Bra 0
-  3   9 Bra 1
+  0  17 Bra
+  3   9 CBra 1
   8  01 Opt
  10  NC b
  12   9 Ket
@@ -19,8 +19,8 @@ Memory allocation (code space): 21
 /(?s)(.*X|^B)/BM
 Memory allocation (code space): 25
 ------------------------------------------------------------------
-  0  21 Bra 0
-  3   9 Bra 1
+  0  21 Bra
+  3   9 CBra 1
   8     Any*
  10     X
  12   6 Alt
@@ -34,8 +34,8 @@ Memory allocation (code space): 25
 /(?s:.*X|^B)/BM
 Memory allocation (code space): 29
 ------------------------------------------------------------------
-  0  25 Bra 0
-  3   9 Bra 0
+  0  25 Bra
+  3   9 Bra
   6  04 Opt
   8     Any*
  10     X
@@ -52,7 +52,7 @@ Memory allocation (code space): 29
 /^[[:alnum:]]/BM
 Memory allocation (code space): 41
 ------------------------------------------------------------------
-  0  37 Bra 0
+  0  37 Bra
   3     ^
   4     [0-9A-Za-z]
  37  37 Ket
@@ -62,7 +62,7 @@ Memory allocation (code space): 41
 /#/IxMD
 Memory allocation (code space): 7
 ------------------------------------------------------------------
-  0   3 Bra 0
+  0   3 Bra
   3   3 Ket
   6     End
 ------------------------------------------------------------------
@@ -74,7 +74,7 @@ No need char
 /a#/IxMD
 Memory allocation (code space): 9
 ------------------------------------------------------------------
-  0   5 Bra 0
+  0   5 Bra
   3     a
   5   5 Ket
   8     End
@@ -87,7 +87,7 @@ No need char
 /x?+/BM
 Memory allocation (code space): 9
 ------------------------------------------------------------------
-  0   5 Bra 0
+  0   5 Bra
   3     x?+
   5   5 Ket
   8     End
@@ -96,7 +96,7 @@ Memory allocation (code space): 9
 /x++/BM
 Memory allocation (code space): 9
 ------------------------------------------------------------------
-  0   5 Bra 0
+  0   5 Bra
   3     x++
   5   5 Ket
   8     End
@@ -105,7 +105,7 @@ Memory allocation (code space): 9
 /x{1,3}+/BM 
 Memory allocation (code space): 19
 ------------------------------------------------------------------
-  0  15 Bra 0
+  0  15 Bra
   3   9 Once
   6     x
   8     x{0,2}
@@ -117,10 +117,10 @@ Memory allocation (code space): 19
 /(x)*+/BM
 Memory allocation (code space): 24
 ------------------------------------------------------------------
-  0  20 Bra 0
+  0  20 Bra
   3  14 Once
   6     Brazero
-  7   7 Bra 1
+  7   7 CBra 1
  12     x
  14   7 KetRmax
  17  14 Ket
@@ -131,19 +131,19 @@ Memory allocation (code space): 24
 /^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/BM
 Memory allocation (code space): 120
 ------------------------------------------------------------------
-  0 116 Bra 0
+  0 116 Bra
   3     ^
-  4 109 Bra 1
-  9   7 Bra 2
+  4 109 CBra 1
+  9   7 CBra 2
  14     a+
  16   7 Ket
- 19  39 Bra 3
+ 19  39 CBra 3
  24     [ab]+?
  58  39 Ket
- 61  39 Bra 4
+ 61  39 CBra 4
  66     [bc]+
 100  39 Ket
-103   7 Bra 5
+103   7 CBra 5
 108     \w*
 110   7 Ket
 113 109 Ket
@@ -154,7 +154,7 @@ Memory allocation (code space): 120
 |8J\$WE\<\.rX\+ix\[d1b\!H\#\?vV0vrK\:ZH1\=2M\>iV\;\?aPhFB\<\*vW\@QW\@sO9\}cfZA\-i\'w\%hKd6gt1UJP\,15_\#QY\$M\^Mss_U\/\]\&LK9\[5vQub\^w\[KDD\<EjmhUZ\?\.akp2dF\>qmj\;2\}YWFdYx\.Ap\]hjCPTP\(n28k\+3\;o\&WXqs\/gOXdr\$\:r\'do0\;b4c\(f_Gr\=\"\\4\)\[01T7ajQJvL\$W\~mL_sS\/4h\:x\*\[ZN\=KLs\&L5zX\/\/\>it\,o\:aU\(\;Z\>pW\&T7oP\'2K\^E\:x9\'c\[\%z\-\,64JQ5AeH_G\#KijUKghQw\^\\vea3a\?kka_G\$8\#\`\*kynsxzBLru\'\]k_\[7FrVx\}\^\=\$blx\>s\-N\%j\;D\*aZDnsw\:YKZ\%Q\.Kne9\#hP\?\+b3\(SOvL\,\^\;\&u5\@\?5C5Bhb\=m\-vEh_L15Jl\]U\)0RP6\{q\%L\^_z5E\'Dw6X\b|BM
 Memory allocation (code space): 826
 ------------------------------------------------------------------
-  0 822 Bra 0
+  0 822 Bra
   3     8J$WE<.rX+ix[d1b!H#?vV0vrK:ZH1=2M>iV;?aPhFB<*vW@QW@sO9}cfZA-i'w%hKd6gt1UJP,15_#QY$M^Mss_U/]&LK9[5vQub^w[KDD<EjmhUZ?.akp2dF>qmj;2}YWFdYx.Ap]hjCPTP(n28k+3;o&WXqs/gOXdr$:r'do0;b4c(f_Gr="\4)[01T7ajQJvL$W~mL_sS/4h:x*[ZN=KLs&L5zX//>it,o:aU(;Z>pW&T7oP'2K^E:x9'c[%z-,64JQ5AeH_G#KijUKghQw^\vea3a?kka_G$8#`*kynsxzBLru']k_[7FrVx}^=$blx>s-N%j;D*aZDnsw:YKZ%Q.Kne9#hP?+b3(SOvL,^;&u5@?5C5Bhb=m-vEh_L15Jl]U)0RP6{q%L^_z5E'Dw6X
 821     \b
 822 822 Ket
@@ -164,7 +164,7 @@ Memory allocation (code space): 826
 |\$\<\.X\+ix\[d1b\!H\#\?vV0vrK\:ZH1\=2M\>iV\;\?aPhFB\<\*vW\@QW\@sO9\}cfZA\-i\'w\%hKd6gt1UJP\,15_\#QY\$M\^Mss_U\/\]\&LK9\[5vQub\^w\[KDD\<EjmhUZ\?\.akp2dF\>qmj\;2\}YWFdYx\.Ap\]hjCPTP\(n28k\+3\;o\&WXqs\/gOXdr\$\:r\'do0\;b4c\(f_Gr\=\"\\4\)\[01T7ajQJvL\$W\~mL_sS\/4h\:x\*\[ZN\=KLs\&L5zX\/\/\>it\,o\:aU\(\;Z\>pW\&T7oP\'2K\^E\:x9\'c\[\%z\-\,64JQ5AeH_G\#KijUKghQw\^\\vea3a\?kka_G\$8\#\`\*kynsxzBLru\'\]k_\[7FrVx\}\^\=\$blx\>s\-N\%j\;D\*aZDnsw\:YKZ\%Q\.Kne9\#hP\?\+b3\(SOvL\,\^\;\&u5\@\?5C5Bhb\=m\-vEh_L15Jl\]U\)0RP6\{q\%L\^_z5E\'Dw6X\b|BM
 Memory allocation (code space): 816
 ------------------------------------------------------------------
-  0 812 Bra 0
+  0 812 Bra
   3     $<.X+ix[d1b!H#?vV0vrK:ZH1=2M>iV;?aPhFB<*vW@QW@sO9}cfZA-i'w%hKd6gt1UJP,15_#QY$M^Mss_U/]&LK9[5vQub^w[KDD<EjmhUZ?.akp2dF>qmj;2}YWFdYx.Ap]hjCPTP(n28k+3;o&WXqs/gOXdr$:r'do0;b4c(f_Gr="\4)[01T7ajQJvL$W~mL_sS/4h:x*[ZN=KLs&L5zX//>it,o:aU(;Z>pW&T7oP'2K^E:x9'c[%z-,64JQ5AeH_G#KijUKghQw^\vea3a?kka_G$8#`*kynsxzBLru']k_[7FrVx}^=$blx>s-N%j;D*aZDnsw:YKZ%Q.Kne9#hP?+b3(SOvL,^;&u5@?5C5Bhb=m-vEh_L15Jl]U)0RP6{q%L^_z5E'Dw6X
 811     \b
 812 812 Ket
@@ -174,8 +174,8 @@ Memory allocation (code space): 816
 /(a(?1)b)/BM
 Memory allocation (code space): 28
 ------------------------------------------------------------------
-  0  24 Bra 0
-  3  18 Bra 1
+  0  24 Bra
+  3  18 CBra 1
   8     a
  10   6 Once
  13   3 Recurse
@@ -189,8 +189,8 @@ Memory allocation (code space): 28
 /(a(?1)+b)/BM
 Memory allocation (code space): 28
 ------------------------------------------------------------------
-  0  24 Bra 0
-  3  18 Bra 1
+  0  24 Bra
+  3  18 CBra 1
   8     a
  10   6 Once
  13   3 Recurse
@@ -204,15 +204,15 @@ Memory allocation (code space): 28
 /a(?P<name1>b|c)d(?P<longername2>e)/BM
 Memory allocation (code space): 42
 ------------------------------------------------------------------
-  0  32 Bra 0
+  0  32 Bra
   3     a
-  5   7 Bra 1
+  5   7 CBra 1
  10     b
  12   5 Alt
  15     c
  17  12 Ket
  20     d
- 22   7 Bra 2
+ 22   7 CBra 2
  27     e
  29   7 Ket
  32  32 Ket
@@ -222,17 +222,17 @@ Memory allocation (code space): 42
 /(?:a(?P<c>c(?P<d>d)))(?P<a>a)/BM
 Memory allocation (code space): 54
 ------------------------------------------------------------------
-  0  41 Bra 0
-  3  25 Bra 0
+  0  41 Bra
+  3  25 Bra
   6     a
-  8  17 Bra 1
+  8  17 CBra 1
  13     c
- 15   7 Bra 2
+ 15   7 CBra 2
  20     d
  22   7 Ket
  25  17 Ket
  28  25 Ket
- 31   7 Bra 3
+ 31   7 CBra 3
  36     a
  38   7 Ket
  41  41 Ket
@@ -242,8 +242,8 @@ Memory allocation (code space): 54
 /(?P<a>a)...(?P=a)bbb(?P>a)d/BM
 Memory allocation (code space): 43
 ------------------------------------------------------------------
-  0  36 Bra 0
-  3   7 Bra 1
+  0  36 Bra
+  3   7 CBra 1
   8     a
  10   7 Ket
  13     Any
@@ -262,7 +262,7 @@ Memory allocation (code space): 43
 /abc(?C255)de(?C)f/BM
 Memory allocation (code space): 31
 ------------------------------------------------------------------
-  0  27 Bra 0
+  0  27 Bra
   3     abc
   9     Callout 255 10 1
  15     de
@@ -275,7 +275,7 @@ Memory allocation (code space): 31
 /abcde/CBM
 Memory allocation (code space): 53
 ------------------------------------------------------------------
-  0  49 Bra 0
+  0  49 Bra
   3     Callout 255 0 1
   9     a
  11     Callout 255 1 1
@@ -294,7 +294,7 @@ Memory allocation (code space): 53
 /\x{100}/8BM
 Memory allocation (code space): 10
 ------------------------------------------------------------------
-  0   6 Bra 0
+  0   6 Bra
   3     \x{100}
   6   6 Ket
   9     End
@@ -303,7 +303,7 @@ Memory allocation (code space): 10
 /\x{1000}/8BM
 Memory allocation (code space): 11
 ------------------------------------------------------------------
-  0   7 Bra 0
+  0   7 Bra
   3     \x{1000}
   7   7 Ket
  10     End
@@ -312,7 +312,7 @@ Memory allocation (code space): 11
 /\x{10000}/8BM
 Memory allocation (code space): 12
 ------------------------------------------------------------------
-  0   8 Bra 0
+  0   8 Bra
   3     \x{10000}
   8   8 Ket
  11     End
@@ -321,7 +321,7 @@ Memory allocation (code space): 12
 /\x{100000}/8BM
 Memory allocation (code space): 12
 ------------------------------------------------------------------
-  0   8 Bra 0
+  0   8 Bra
   3     \x{100000}
   8   8 Ket
  11     End
@@ -330,7 +330,7 @@ Memory allocation (code space): 12
 /\x{1000000}/8BM
 Memory allocation (code space): 13
 ------------------------------------------------------------------
-  0   9 Bra 0
+  0   9 Bra
   3     \x{1000000}
   9   9 Ket
  12     End
@@ -339,7 +339,7 @@ Memory allocation (code space): 13
 /\x{4000000}/8BM
 Memory allocation (code space): 14
 ------------------------------------------------------------------
-  0  10 Bra 0
+  0  10 Bra
   3     \x{4000000}
  10  10 Ket
  13     End
@@ -348,7 +348,7 @@ Memory allocation (code space): 14
 /\x{7fffFFFF}/8BM
 Memory allocation (code space): 14
 ------------------------------------------------------------------
-  0  10 Bra 0
+  0  10 Bra
   3     \x{7fffffff}
  10  10 Ket
  13     End
@@ -357,7 +357,7 @@ Memory allocation (code space): 14
 /[\x{ff}]/8BM
 Memory allocation (code space): 10
 ------------------------------------------------------------------
-  0   6 Bra 0
+  0   6 Bra
   3     \x{ff}
   6   6 Ket
   9     End
@@ -366,7 +366,7 @@ Memory allocation (code space): 10
 /[\x{100}]/8BM
 Memory allocation (code space): 15
 ------------------------------------------------------------------
-  0  11 Bra 0
+  0  11 Bra
   3     [\x{100}]
  11  11 Ket
  14     End
@@ -375,7 +375,7 @@ Memory allocation (code space): 15
 /\x80/8BM
 Memory allocation (code space): 10
 ------------------------------------------------------------------
-  0   6 Bra 0
+  0   6 Bra
   3     \x{80}
   6   6 Ket
   9     End
@@ -384,7 +384,7 @@ Memory allocation (code space): 10
 /\xff/8BM
 Memory allocation (code space): 10
 ------------------------------------------------------------------
-  0   6 Bra 0
+  0   6 Bra
   3     \x{ff}
   6   6 Ket
   9     End
@@ -393,7 +393,7 @@ Memory allocation (code space): 10
 /\x{0041}\x{2262}\x{0391}\x{002e}/D8M
 Memory allocation (code space): 18
 ------------------------------------------------------------------
-  0  14 Bra 0
+  0  14 Bra
   3     A\x{2262}\x{391}.
  14  14 Ket
  17     End
@@ -406,7 +406,7 @@ Need char = '.'
 /\x{D55c}\x{ad6d}\x{C5B4}/D8M 
 Memory allocation (code space): 19
 ------------------------------------------------------------------
-  0  15 Bra 0
+  0  15 Bra
   3     \x{d55c}\x{ad6d}\x{c5b4}
  15  15 Ket
  18     End
@@ -419,7 +419,7 @@ Need char = 180
 /\x{65e5}\x{672c}\x{8a9e}/D8M
 Memory allocation (code space): 19
 ------------------------------------------------------------------
-  0  15 Bra 0
+  0  15 Bra
   3     \x{65e5}\x{672c}\x{8a9e}
  15  15 Ket
  18     End
@@ -432,7 +432,7 @@ Need char = 158
 /[\x{100}]/8BM
 Memory allocation (code space): 15
 ------------------------------------------------------------------
-  0  11 Bra 0
+  0  11 Bra
   3     [\x{100}]
  11  11 Ket
  14     End
@@ -441,7 +441,7 @@ Memory allocation (code space): 15
 /[Z\x{100}]/8BM
 Memory allocation (code space): 47
 ------------------------------------------------------------------
-  0  43 Bra 0
+  0  43 Bra
   3     [Z\x{100}]
  43  43 Ket
  46     End
@@ -450,7 +450,7 @@ Memory allocation (code space): 47
 /^[\x{100}\E-\Q\E\x{150}]/B8M
 Memory allocation (code space): 18
 ------------------------------------------------------------------
-  0  14 Bra 0
+  0  14 Bra
   3     ^
   4     [\x{100}-\x{150}]
  14  14 Ket
@@ -460,7 +460,7 @@ Memory allocation (code space): 18
 /^[\QĀ\E-\QŐ\E]/B8M
 Memory allocation (code space): 18
 ------------------------------------------------------------------
-  0  14 Bra 0
+  0  14 Bra
   3     ^
   4     [\x{100}-\x{150}]
  14  14 Ket
@@ -473,7 +473,7 @@ Failed: missing terminating ] for character class at offset 15
 /[\p{L}]/BM
 Memory allocation (code space): 15
 ------------------------------------------------------------------
-  0  11 Bra 0
+  0  11 Bra
   3     [\p{L}]
  11  11 Ket
  14     End
@@ -482,7 +482,7 @@ Memory allocation (code space): 15
 /[\p{^L}]/BM
 Memory allocation (code space): 15
 ------------------------------------------------------------------
-  0  11 Bra 0
+  0  11 Bra
   3     [\P{L}]
  11  11 Ket
  14     End
@@ -491,7 +491,7 @@ Memory allocation (code space): 15
 /[\P{L}]/BM
 Memory allocation (code space): 15
 ------------------------------------------------------------------
-  0  11 Bra 0
+  0  11 Bra
   3     [\P{L}]
  11  11 Ket
  14     End
@@ -500,7 +500,7 @@ Memory allocation (code space): 15
 /[\P{^L}]/BM
 Memory allocation (code space): 15
 ------------------------------------------------------------------
-  0  11 Bra 0
+  0  11 Bra
   3     [\p{L}]
  11  11 Ket
  14     End
@@ -509,7 +509,7 @@ Memory allocation (code space): 15
 /[abc\p{L}\x{0660}]/8BM
 Memory allocation (code space): 50
 ------------------------------------------------------------------
-  0  46 Bra 0
+  0  46 Bra
   3     [a-c\p{L}\x{660}]
  46  46 Ket
  49     End
@@ -518,7 +518,7 @@ Memory allocation (code space): 50
 /[\p{Nd}]/8BM
 Memory allocation (code space): 15
 ------------------------------------------------------------------
-  0  11 Bra 0
+  0  11 Bra
   3     [\p{Nd}]
  11  11 Ket
  14     End
@@ -527,7 +527,7 @@ Memory allocation (code space): 15
 /[\p{Nd}+-]+/8BM
 Memory allocation (code space): 48
 ------------------------------------------------------------------
-  0  44 Bra 0
+  0  44 Bra
   3     [+\-\p{Nd}]+
  44  44 Ket
  47     End
@@ -536,7 +536,7 @@ Memory allocation (code space): 48
 /A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8iBM
 Memory allocation (code space): 25
 ------------------------------------------------------------------
-  0  21 Bra 0
+  0  21 Bra
   3  NC A\x{391}\x{10427}\x{ff3a}\x{1fb0}
  21  21 Ket
  24     End
@@ -545,7 +545,7 @@ Memory allocation (code space): 25
 /A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8BM
 Memory allocation (code space): 25
 ------------------------------------------------------------------
-  0  21 Bra 0
+  0  21 Bra
   3     A\x{391}\x{10427}\x{ff3a}\x{1fb0}
  21  21 Ket
  24     End
@@ -554,10 +554,116 @@ Memory allocation (code space): 25
 /[\x{105}-\x{109}]/8iBM
 Memory allocation (code space): 17
 ------------------------------------------------------------------
-  0  13 Bra 0
+  0  13 Bra
   3     [\x{104}-\x{109}]
  13  13 Ket
  16     End
+------------------------------------------------------------------
+
+/( ( (?(1)0|) )*   )/xBM
+Memory allocation (code space): 38
+------------------------------------------------------------------
+  0  34 Bra
+  3  28 CBra 1
+  8     Brazero
+  9  19 SCBra 2
+ 14   8 Cond
+ 17   1 Cond ref
+ 20     0
+ 22   3 Alt
+ 25  11 Ket
+ 28  19 KetRmax
+ 31  28 Ket
+ 34  34 Ket
+ 37     End
+------------------------------------------------------------------
+
+/(  (?(1)0|)*   )/xBM
+Memory allocation (code space): 30
+------------------------------------------------------------------
+  0  26 Bra
+  3  20 CBra 1
+  8     Brazero
+  9   8 SCond
+ 12   1 Cond ref
+ 15     0
+ 17   3 Alt
+ 20  11 KetRmax
+ 23  20 Ket
+ 26  26 Ket
+ 29     End
+------------------------------------------------------------------
+
+/[a]/BM
+Memory allocation (code space): 9
+------------------------------------------------------------------
+  0   5 Bra
+  3     a
+  5   5 Ket
+  8     End
+------------------------------------------------------------------
+
+/[a]/8BM
+Memory allocation (code space): 9
+------------------------------------------------------------------
+  0   5 Bra
+  3     a
+  5   5 Ket
+  8     End
+------------------------------------------------------------------
+
+/[\xaa]/BM
+Memory allocation (code space): 9
+------------------------------------------------------------------
+  0   5 Bra
+  3     \xaa
+  5   5 Ket
+  8     End
+------------------------------------------------------------------
+
+/[\xaa]/8BM
+Memory allocation (code space): 10
+------------------------------------------------------------------
+  0   6 Bra
+  3     \x{aa}
+  6   6 Ket
+  9     End
+------------------------------------------------------------------
+
+/[^a]/BM
+Memory allocation (code space): 9
+------------------------------------------------------------------
+  0   5 Bra
+  3     [^a]
+  5   5 Ket
+  8     End
+------------------------------------------------------------------
+
+/[^a]/8BM
+Memory allocation (code space): 9
+------------------------------------------------------------------
+  0   5 Bra
+  3     [^a]
+  5   5 Ket
+  8     End
+------------------------------------------------------------------
+
+/[^\xaa]/BM
+Memory allocation (code space): 9
+------------------------------------------------------------------
+  0   5 Bra
+  3     [^\xaa]
+  5   5 Ket
+  8     End
+------------------------------------------------------------------
+
+/[^\xaa]/8BM
+Memory allocation (code space): 40
+------------------------------------------------------------------
+  0  36 Bra
+  3     [\x00-\xa9\xab-\xff] (neg)
+ 36  36 Ket
+ 39     End
 ------------------------------------------------------------------
 
 / End of testinput10 /
