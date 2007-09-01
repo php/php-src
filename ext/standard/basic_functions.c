@@ -4284,7 +4284,7 @@ PHP_FUNCTION(ip2long)
 		 */
 		if (addr_len == sizeof("255.255.255.255") - 1 &&
 			!memcmp(addr, "255.255.255.255", sizeof("255.255.255.255") - 1)) {
-			RETURN_LONG(-1);
+			RETURN_LONG(0xFFFFFFFF);
 		}
 		
 		RETURN_FALSE;
