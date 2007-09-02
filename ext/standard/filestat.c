@@ -755,6 +755,10 @@ PHP_FUNCTION(touch)
    Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
 {
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+
 	if (BG(CurrentStatFile)) {
 		efree(BG(CurrentStatFile));
 		BG(CurrentStatFile) = NULL;
