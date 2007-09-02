@@ -1,3 +1,156 @@
+2007-09-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/tests/network/ip_x86_64.phpt:
+      - MFH: Fixed bug #42512 (ip2long('255.255.255.255') should return
+      4294967295 on
+        64-bit PHP).
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/network/ip_x86_64.phpt
+      ext/standard/tests/network/ip_x86_64.phpt:
+      - Fixed bug #42512 (ip2long('255.255.255.255') should return 4294967295 on
+        64-bit PHP).
+
+2007-09-01  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/php_pcre.c
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/HACKING
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_chartables.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcredemo.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/grepoutput
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput10
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput10
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput3
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput9
+      ext/pcre/tests/bug42298.phpt:
+      MFB: upgrade to PCRE 7.3
+
+    * (PHP_5_2)
+      ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/php_pcre.c:
+      adapt for PCRE 7.3
+      remove ability to include config.h from php_pcre.c, as it seems pretty
+      useless and produces a few warnings
+
+    * (PHP_5_2)
+      NEWS
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/HACKING
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_chartables.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcredemo.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/grepoutput
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput10
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput10
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput3
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput9:
+      upgrade to PCRE 7.3
+
+    * ext/pcre/tests/bug42298.phpt
+      ext/pcre/tests/bug42298.phpt:
+      
+      file bug42298.phpt was initially added on branch PHP_5_2.
+
+2007-09-01  Jan Lehnardt  <jan@jan.prima.de>
+
+    * ext/json/json.c:
+      spaces -> tabs
+
+2007-09-01  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/TODO:
+      also remove this file in HEAD
+
 2007-08-31  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
