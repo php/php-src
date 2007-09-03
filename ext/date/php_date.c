@@ -2315,7 +2315,11 @@ PHP_FUNCTION(timezone_transitions_get)
 		MAKE_STD_ZVAL(element);
 		array_init(element);
 		add_ascii_assoc_long(element, "ts",     tzobj->tz->trans[i]);
-		add_ascii_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, tzobj->tz->trans[i], 0 TSRMLS_CC), 0);
+		if (UG(unicode)) {
+			add_assoc_unicode(element, "time", (UChar*) php_format_date(DATE_FORMAT_ISO8601, 13, tzobj->tz->trans[i], 0 TSRMLS_CC), 0);
+		} else {
+			add_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, tzobj->tz->trans[i], 0 TSRMLS_CC), 0);
+		}
 		add_ascii_assoc_long(element, "offset", tzobj->tz->type[tzobj->tz->trans_idx[i]].offset);
 		add_ascii_assoc_bool(element, "isdst",  tzobj->tz->type[tzobj->tz->trans_idx[i]].isdst);
 		add_ascii_assoc_ascii_string(element, "abbr", &tzobj->tz->timezone_abbr[tzobj->tz->type[tzobj->tz->trans_idx[i]].abbr_idx], 1);
