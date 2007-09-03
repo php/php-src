@@ -1,8 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.2.5
-- Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
 - Upgraded PCRE to version 7.3 (Nuno)
+- Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
 
 - Fixed bug #42512 (ip2long('255.255.255.255') should return 4294967295 on
   64-bit PHP). (Derick)
@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   options). (Dmitry)
 - Fixed bug #42452 (PDO classes do not expose Reflection API information).
   (Hannes)
+- Fixed bug #42468 (Write lock on file_get_contents fails when using a 
+  compression stream). (Ilia)
 - Fixed bug #42359 (xsd:list type not parsed). (Dmitry)
 - Fixed bug #42326 (SoapServer crash). (Dmitry)
 - Fixed bug #42086 (SoapServer return Procedure '' not present for WSIBasic
