@@ -1,3 +1,15 @@
+2007-09-02  Derick Rethans  <php@derickrethans.nl>
+
+    * php.ini-dist
+      php.ini-recommended:
+      - Avoid confusion.
+
+2007-09-02  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/filestat.c:
+      MFB: Fixed bug #42072 (No warning message for clearstatcache() with
+      arguments).
+
 2007-09-01  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_2)
