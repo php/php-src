@@ -129,8 +129,8 @@ gdImagePtr gdImageCreate (int sx, int sy)
 		return NULL;
 	}
 
-	im = (gdImage *) gdMalloc(sizeof(gdImage));
-	memset(im, 0, sizeof(gdImage));
+	im = (gdImage *) gdCalloc(1, sizeof(gdImage));
+
 	/* Row-major ever since gd 1.3 */
 	im->pixels = (unsigned char **) gdMalloc(sizeof(unsigned char *) * sy);
 	im->AA_opacity = (unsigned char **) gdMalloc(sizeof(unsigned char *) * sy);
