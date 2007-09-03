@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #42512 (ip2long('255.255.255.255') should return 4294967295 on
   64-bit PHP). (Derick)
+- Fixed bug #42506 (php_pgsql_convert() timezone parse bug) (nonunnet at
+  gmail dot com, Ilia)
 - Fixed bug #42462 (Segmentation when trying to set an attribute in a 
   DOMElement). (Rob)
 - Fixed bug #42453 (CGI SAPI does not shut down cleanly with -i/-m/-v cmdline
