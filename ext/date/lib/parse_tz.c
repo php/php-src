@@ -33,6 +33,16 @@
 #endif
 #include "timezonedb.h"
 
+#if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
+# if defined(__LITTLE_ENDIAN__)
+#  undef WORDS_BIGENDIAN
+# else 
+#  if defined(__BIG_ENDIAN__)
+#   define WORDS_BIGENDIAN
+#  endif
+# endif
+#endif
+
 #ifdef WORDS_BIGENDIAN
 #define timelib_conv_int(l) (l)
 #else
