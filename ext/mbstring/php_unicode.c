@@ -176,8 +176,7 @@ MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_
 		l = _uccase_len[0];
 		r = (l + _uccase_len[1]) - 3;
 
-		if (MBSTRG(current_language) == mbfl_no_language_turkish && 
-			enc == mbfl_no_encoding_8859_9) {
+		if (enc == mbfl_no_encoding_8859_9) {
 			return php_turkish_toupper(code, l, r, field);
 		}
 
@@ -208,8 +207,7 @@ MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_
 		l = 0;
 		r = _uccase_len[0] - 3;
 
-		if (MBSTRG(current_language) == mbfl_no_language_turkish && 
-			enc == mbfl_no_encoding_8859_9) {
+		if (enc == mbfl_no_encoding_8859_9) {
 			return php_turkish_tolower(code, l, r, field);
 		}
 
