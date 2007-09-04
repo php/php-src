@@ -1,3 +1,39 @@
+2007-09-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pgsql/pgsql.c:
+      
+      Fixed bug #42506 (php_pgsql_convert() timezone parse bug)
+
+2007-09-03  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/gd/libgd/gd.c:
+      MFB: malloc+memset == calloc
+
+2007-09-03  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c:
+      - Ugh, fix this properly.
+
+    * ext/date/php_date.c:
+      - Fixed DateTimeZone::getTransitions().
+
+2007-09-03  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/file.c:
+      MFB: Fixed bug #42468 (Write lock on file_get_contents fails when using a
+      compression stream)
+
+2007-09-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/file.c:
+      
+      Fixed bug #42468 (Write lock on file_get_contents fails when using a
+      compression stream).
+
 2007-09-02  Derick Rethans  <php@derickrethans.nl>
 
     * php.ini-dist
