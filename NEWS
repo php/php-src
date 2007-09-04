@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.2.5
+- Fixed endianness detection on MacOS when building universal binary. 
+  (Uwe Schindler, Christian Speich, Tony)
 - Fixed possible buffer overflows inside the fnmatch() and glob() functions 
   reported by Laurent gaffie (Ilia)
 
