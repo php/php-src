@@ -597,7 +597,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
-	zend_bool free_s; /* free string if allocated here */
+	char *s_to_free;  /* tmp var to keep the string to be freed in */
 
 #ifdef HAVE_LOCALE_H
 	struct lconv *lconv = NULL;
@@ -630,7 +630,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			alternate_form = print_sign = print_blank = NO;
 			pad_char = ' ';
 			prefix_char = NUL;
-			free_s = 0;
+			s_to_free = NULL;
 			s_unicode = 0;
 
 			fmt++;
@@ -989,7 +989,7 @@ fmt_unicode:
 						return (cc);
 					}
 					s = res;
-					free_s = 1;
+					s_to_free = s;
 						
 					pad_char = ' ';
 					break;
@@ -1202,7 +1202,7 @@ fmt_error:
 				s++;
 			}
 
-			if (free_s) efree(s);
+			if (s_to_free) efree(s_to_free);
 
 			if (adjust_width && adjust == LEFT && min_width > s_len)
 				PAD(min_width, s_len, pad_char);
