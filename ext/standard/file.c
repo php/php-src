@@ -2518,6 +2518,11 @@ PHP_FUNCTION(fnmatch)
 		== FAILURE) 
 		return;
 	
+	if (filename_len >= MAXPATHLEN) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		RETURN_FALSE;
+	}
+
 	RETURN_BOOL( ! fnmatch( pattern, filename, flags ));
 }
 /* }}} */
