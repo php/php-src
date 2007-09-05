@@ -22,6 +22,8 @@ PHP                                                                        NEWS
   (Hannes)
 - Fixed bug #42468 (Write lock on file_get_contents fails when using a 
   compression stream). (Ilia)
+- Fixed bug #42488 (SoapServer reports an encoding error and the error itself
+  breaks). (Dmitry)
 - Fixed bug #42359 (xsd:list type not parsed). (Dmitry)
 - Fixed bug #42326 (SoapServer crash). (Dmitry)
 - Fixed bug #42086 (SoapServer return Procedure '' not present for WSIBasic
