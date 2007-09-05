@@ -82,6 +82,10 @@
 
 #define CHECK_DEFAULT_LINK(x) if ((x) == -1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "No PostgreSQL link opened yet"); }
 
+#ifndef HAVE_PQFREEMEM
+#define PGfreemem free
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(pgsql)
 static PHP_GINIT_FUNCTION(pgsql);
 
