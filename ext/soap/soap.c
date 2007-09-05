@@ -1382,6 +1382,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	}
 
 	service = (soap_server_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
+	service->send_errors = 1;
 
 	cache_wsdl = SOAP_GLOBAL(cache);
 
@@ -1456,6 +1457,11 @@ PHP_METHOD(SoapServer, SoapServer)
 		if (zend_ascii_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_LONG) {
 			cache_wsdl = Z_LVAL_PP(tmp);
+		}
+
+		if (zend_ascii_hash_find(ht, "send_errors", sizeof("send_errors"), (void**)&tmp) == SUCCESS &&
+		    (Z_TYPE_PP(tmp) == IS_BOOL || Z_TYPE_PP(tmp) == IS_LONG)) {
+			service->send_errors = Z_LVAL_PP(tmp);
 		}
 	}
 
@@ -2504,30 +2510,41 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		    error_num == E_PARSE) {
 
 			char* code = SOAP_GLOBAL(error_code);
+			soap_server_object *server;
 			char *buffer;
-			int buffer_len;
 			zval *outbuf = NULL;
-			zval outbuflen;
-
-			INIT_ZVAL(outbuflen);
-
-#ifdef va_copy
-			va_copy(argcopy, args);
-			buffer_len = vspprintf(&buffer, 0, format, argcopy);
-			va_end(argcopy);
-#else
-			buffer_len = vspprintf(&buffer, 0, format, args);
-#endif
 
 			if (code == NULL) {
 				code = "Server";
 			}
-			/* Get output buffer and send as fault detials */
-			if (php_output_get_length(&outbuflen TSRMLS_CC) != FAILURE && Z_LVAL(outbuflen) != 0) {
-				ALLOC_INIT_ZVAL(outbuf);
-				php_output_get_contents(outbuf TSRMLS_CC);
+
+			if (SOAP_GLOBAL(error_object) &&
+			    Z_TYPE_P(SOAP_GLOBAL(error_object)) == IS_OBJECT &&
+			    instanceof_function(Z_OBJCE_P(SOAP_GLOBAL(error_object)), soap_server_class_entry TSRMLS_CC) &&
+				(server = (soap_server_object*)zend_object_store_get_object(SOAP_GLOBAL(error_object) TSRMLS_CC)) &&
+				!server->send_errors) {
+				buffer = estrdup("Internal Error");
+			} else {
+				int buffer_len;
+				zval outbuflen;
+
+				INIT_ZVAL(outbuflen);
+
+#ifdef va_copy
+				va_copy(argcopy, args);
+				buffer_len = vspprintf(&buffer, 0, format, argcopy);
+				va_end(argcopy);
+#else
+				buffer_len = vspprintf(&buffer, 0, format, args);
+#endif
+
+				/* Get output buffer and send as fault detials */
+				if (php_output_get_length(&outbuflen TSRMLS_CC) != FAILURE && Z_LVAL(outbuflen) != 0) {
+					ALLOC_INIT_ZVAL(outbuf);
+					php_output_get_contents(outbuf TSRMLS_CC);
+				}
+				php_output_discard(TSRMLS_C);
 			}
-			php_output_discard(TSRMLS_C);
 
 			INIT_ZVAL(fault_obj);
 			set_soap_fault(&fault_obj, NULL, code, buffer, NULL, outbuf, NULL TSRMLS_CC);
