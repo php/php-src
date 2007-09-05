@@ -2894,6 +2894,11 @@ PHP_FUNCTION(fnmatch)
 		zend_unicode_to_string_ex(UG(utf8_conv), &filename_utf8, &filename_utf8_len, filename.u, filename_len, &status);
 		pattern.s = pattern_utf8;
 		filename.s = filename_utf8;
+		filename_len = filename_utf8_len;
+	}
+	if (filename_len >= MAXPATHLEN) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		RETURN_FALSE;
 	}
 
 	RETVAL_BOOL( ! fnmatch( pattern.s, filename.s, flags ));
