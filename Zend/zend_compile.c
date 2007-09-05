@@ -4478,7 +4478,15 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 		 * want to tell them to put declare() at the top.
 		 */
 		if (CG(active_op_array)->last > 0) {
-			zend_error(E_COMPILE_ERROR, "Encoding declaration pragma has to be the very first statement in the script");
+			/* ignore ZEND_EXT_STMT */
+			int num = CG(active_op_array)->last;
+			while (num > 0 &&
+			       CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT) {
+				--num;
+			}
+			if (num > 0) {
+				zend_error(E_COMPILE_ERROR, "Encoding declaration pragma has to be the very first statement in the script");
+			}
 		}
 		convert_to_string(&val->u.constant);
 		if (zend_prepare_scanner_converters(Z_STRVAL(val->u.constant), 1 TSRMLS_CC) == FAILURE) {
@@ -5046,7 +5054,15 @@ void zend_do_namespace(znode *name TSRMLS_DC) /* {{{ */
 	zstr lcname;
 
 	if (CG(active_op_array)->last > 0) {
-		zend_error(E_COMPILE_ERROR, "Namespace declaration statement has to be the very first statement in the script");
+		/* ignore ZEND_EXT_STMT */
+		int num = CG(active_op_array)->last;
+		while (num > 0 &&
+		       CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT) {
+			--num;
+		}
+		if (num > 0) {
+			zend_error(E_COMPILE_ERROR, "Namespace declaration statement has to be the very first statement in the script");
+		}
 	}
 	if (CG(current_namespace)) {
 		zend_error(E_COMPILE_ERROR, "Namespace cannot be declared twice");
