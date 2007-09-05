@@ -26,6 +26,7 @@ PHP                                                                        NEWS
   breaks). (Dmitry)
 - Fixed bug #42359 (xsd:list type not parsed). (Dmitry)
 - Fixed bug #42326 (SoapServer crash). (Dmitry)
+- Fixed bug #42214 (SoapServer sends clients internal PHP errors). (Dmitry)
 - Fixed bug #42086 (SoapServer return Procedure '' not present for WSIBasic
   compliant wsdl). (Dmitry)
 
