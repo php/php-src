@@ -1,3 +1,180 @@
+2007-09-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      bfn
+
+    * (PHP_5_2)
+      ZendEngine2/zend_strtod.c
+      ext/date/lib/parse_tz.c
+      ext/hash/hash_tiger.c:
+      MFH: detect endianness in compile time when using Apple's GCC (fixes
+      universal binary build)
+
+    * ZendEngine2/zend_strtod.c
+      ext/date/lib/parse_tz.c
+      ext/hash/hash_tiger.c:
+      detect endianness in compile time when using Apple's GCC (fixes universal
+      binary build)
+
+2007-09-04  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/php_unicode.c:
+      MFH: fixed bug #29955 invalid case conversion in iso-8859-9.
+
+    * ext/mbstring/php_unicode.c:
+      fixed bug #29955 invalid case conversion in iso-8859-9.
+
+2007-09-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/dir.c
+      ext/standard/file.c:
+      
+      Fixed possible buffer overflows inside the fnmatch() and glob() functions
+
+2007-09-04  Derick Rethans  <php@derickrethans.nl>
+
+    * main/snprintf.c:
+      - We have to store the original (allocated) pointer here as it was freed
+      after
+        the pointer itself was modified, otherwise we'll get an invalid free
+      error
+        here.
+
+2007-09-04  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/math/acos_basic.phpt
+      ext/standard/tests/math/acos_error.phpt
+      ext/standard/tests/math/acos_variation.phpt
+      ext/standard/tests/math/acosh_basic.phpt
+      ext/standard/tests/math/acosh_error.phpt
+      ext/standard/tests/math/acosh_variation.phpt
+      ext/standard/tests/math/allowed_rounding_error.inc
+      ext/standard/tests/math/asin_basic.phpt
+      ext/standard/tests/math/asin_error.phpt
+      ext/standard/tests/math/asin_variation.phpt
+      ext/standard/tests/math/asinh_basic.phpt
+      ext/standard/tests/math/asinh_error.phpt
+      ext/standard/tests/math/asinh_variation.phpt
+      ext/standard/tests/math/atan_basic.phpt
+      ext/standard/tests/math/atan_error.phpt
+      ext/standard/tests/math/atan_variation.phpt
+      ext/standard/tests/math/atanh_basic.phpt
+      ext/standard/tests/math/atanh_error.phpt
+      ext/standard/tests/math/atanh_variation.phpt
+      ext/standard/tests/math/cos_basic.phpt
+      ext/standard/tests/math/cos_error.phpt
+      ext/standard/tests/math/cos_variation.phpt
+      ext/standard/tests/math/cosh_basic.phpt
+      ext/standard/tests/math/cosh_error.phpt
+      ext/standard/tests/math/cosh_variation.phpt
+      ext/standard/tests/math/sin_basic.phpt
+      ext/standard/tests/math/sin_error.phpt
+      ext/standard/tests/math/sin_variation.phpt
+      ext/standard/tests/math/sinh_basic.phpt
+      ext/standard/tests/math/sinh_error.phpt
+      ext/standard/tests/math/sinh_variation.phpt
+      ext/standard/tests/math/tan_basic.phpt
+      ext/standard/tests/math/tan_error.phpt
+      ext/standard/tests/math/tan_variation.phpt
+      ext/standard/tests/math/tanh_basic.phpt
+      ext/standard/tests/math/tanh_error.phpt
+      ext/standard/tests/math/tanh_variation.phpt:
+      Test cases for sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh,
+      acosh, atanh.
+
+    * ext/standard/tests/math/acos_basic.phpt
+      ext/standard/tests/math/acos_basic.phpt
+      ext/standard/tests/math/acos_error.phpt
+      ext/standard/tests/math/acos_error.phpt
+      ext/standard/tests/math/acos_variation.phpt
+      ext/standard/tests/math/acos_variation.phpt
+      ext/standard/tests/math/acosh_basic.phpt
+      ext/standard/tests/math/acosh_basic.phpt
+      ext/standard/tests/math/acosh_error.phpt
+      ext/standard/tests/math/acosh_error.phpt
+      ext/standard/tests/math/acosh_variation.phpt
+      ext/standard/tests/math/acosh_variation.phpt
+      ext/standard/tests/math/allowed_rounding_error.inc
+      ext/standard/tests/math/allowed_rounding_error.inc
+      ext/standard/tests/math/asin_basic.phpt
+      ext/standard/tests/math/asin_basic.phpt
+      ext/standard/tests/math/asin_error.phpt
+      ext/standard/tests/math/asin_error.phpt
+      ext/standard/tests/math/asin_variation.phpt
+      ext/standard/tests/math/asin_variation.phpt
+      ext/standard/tests/math/asinh_basic.phpt
+      ext/standard/tests/math/asinh_basic.phpt
+      ext/standard/tests/math/asinh_error.phpt
+      ext/standard/tests/math/asinh_error.phpt
+      ext/standard/tests/math/asinh_variation.phpt
+      ext/standard/tests/math/asinh_variation.phpt
+      ext/standard/tests/math/atan_basic.phpt
+      ext/standard/tests/math/atan_basic.phpt
+      ext/standard/tests/math/atan_error.phpt
+      ext/standard/tests/math/atan_error.phpt
+      ext/standard/tests/math/atan_variation.phpt
+      ext/standard/tests/math/atan_variation.phpt
+      ext/standard/tests/math/atanh_basic.phpt
+      ext/standard/tests/math/atanh_basic.phpt
+      ext/standard/tests/math/atanh_error.phpt
+      ext/standard/tests/math/atanh_error.phpt
+      ext/standard/tests/math/atanh_variation.phpt
+      ext/standard/tests/math/atanh_variation.phpt
+      ext/standard/tests/math/cos_basic.phpt
+      ext/standard/tests/math/cos_basic.phpt
+      ext/standard/tests/math/cos_error.phpt
+      ext/standard/tests/math/cos_error.phpt
+      ext/standard/tests/math/cos_variation.phpt
+      ext/standard/tests/math/cos_variation.phpt
+      ext/standard/tests/math/cosh_basic.phpt
+      ext/standard/tests/math/cosh_basic.phpt
+      ext/standard/tests/math/cosh_error.phpt
+      ext/standard/tests/math/cosh_error.phpt
+      ext/standard/tests/math/cosh_variation.phpt
+      ext/standard/tests/math/cosh_variation.phpt
+      ext/standard/tests/math/sin_basic.phpt
+      ext/standard/tests/math/sin_basic.phpt
+      ext/standard/tests/math/sin_error.phpt
+      ext/standard/tests/math/sin_error.phpt
+      ext/standard/tests/math/sin_variation.phpt
+      ext/standard/tests/math/sin_variation.phpt
+      ext/standard/tests/math/sinh_basic.phpt
+      ext/standard/tests/math/sinh_basic.phpt
+      ext/standard/tests/math/sinh_error.phpt
+      ext/standard/tests/math/sinh_error.phpt
+      ext/standard/tests/math/sinh_variation.phpt
+      ext/standard/tests/math/sinh_variation.phpt
+      ext/standard/tests/math/tan_basic.phpt
+      ext/standard/tests/math/tan_basic.phpt
+      ext/standard/tests/math/tan_error.phpt
+      ext/standard/tests/math/tan_error.phpt
+      ext/standard/tests/math/tan_variation.phpt
+      ext/standard/tests/math/tan_variation.phpt
+      ext/standard/tests/math/tanh_basic.phpt
+      ext/standard/tests/math/tanh_basic.phpt
+      ext/standard/tests/math/tanh_error.phpt
+      ext/standard/tests/math/tanh_error.phpt
+      ext/standard/tests/math/tanh_variation.phpt
+      ext/standard/tests/math/tanh_variation.phpt:
+      
+      file acos_basic.phpt was initially added on branch PHP_5_2.
+
+2007-09-04  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation5.phpt
+      ext/standard/tests/file/copy_variation5.phpt
+      ext/standard/tests/file/copy_variation9.phpt
+      ext/standard/tests/file/copy_variation9.phpt
+      ext/standard/tests/file/fileowner_basic.phpt
+      ext/standard/tests/file/fileowner_basic.phpt:
+      fix tests
+
 2007-09-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
