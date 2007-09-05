@@ -343,13 +343,49 @@ char* soap_encode_string_ex(zend_uchar type, zstr data, int len TSRMLS_DC)
 			if (n >= 0) {
 				efree(str);
 				str = estrdup((char*)xmlBufferContent(out));
-			} else if (!php_libxml_xmlCheckUTF8(BAD_CAST(str))) {
-				soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", str);
 			}
 			xmlBufferFree(out);
 			xmlBufferFree(in);
-		} else if (!php_libxml_xmlCheckUTF8(BAD_CAST(str))) {
-			soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", str);
+		}
+		if (!php_libxml_xmlCheckUTF8(BAD_CAST(str))) {
+			char *err = emalloc(new_len + 8);
+			char c;
+			int i;
+		
+			memcpy(err, str, new_len+1);
+			for (i = 0; (c = err[i++]);) {
+				if ((c & 0x80) == 0) {
+				} else if ((c & 0xe0) == 0xc0) {
+					if ((err[i] & 0xc0) != 0x80) {
+						break;
+					}
+					i++;
+				} else if ((c & 0xf0) == 0xe0) {
+					if ((err[i] & 0xc0) != 0x80 || (err[i+1] & 0xc0) != 0x80) {
+						break;
+					}
+					i += 2;
+				} else if ((c & 0xf8) == 0xf0) {
+					if ((err[i] & 0xc0) != 0x80 || (err[i+1] & 0xc0) != 0x80 || (err[i+2] & 0xc0) != 0x80) {
+						break;
+					}
+					i += 3;
+				} else {
+					break;
+				}
+			}
+			if (c) {
+				err[i-1] = '\\';
+				err[i++] = 'x';
+				err[i++] = ((unsigned char)c >> 4) + ((((unsigned char)c >> 4) > 9) ? ('a' - 10) : '0');
+				err[i++] = (c & 15) + (((c & 15) > 9) ? ('a' - 10) : '0');
+				err[i++] = '.';
+				err[i++] = '.';
+				err[i++] = '.';
+				err[i++] = 0;
+			}
+
+			soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", err);
 		}
 	}
 	return str;
@@ -386,13 +422,49 @@ char* soap_encode_string(zval *data, int* len TSRMLS_DC)
 				efree(str);
 				str = estrdup((char*)xmlBufferContent(out));
 				new_len = n;
-			} else if (!php_libxml_xmlCheckUTF8(BAD_CAST(str))) {
-				soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", str);
 			}
 			xmlBufferFree(out);
 			xmlBufferFree(in);
-		} else if (!php_libxml_xmlCheckUTF8(BAD_CAST(str))) {
-			soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", str);
+		}
+		if (!php_libxml_xmlCheckUTF8(BAD_CAST(str))) {
+			char *err = emalloc(new_len + 8);
+			char c;
+			int i;
+		
+			memcpy(err, str, new_len+1);
+			for (i = 0; (c = err[i++]);) {
+				if ((c & 0x80) == 0) {
+				} else if ((c & 0xe0) == 0xc0) {
+					if ((err[i] & 0xc0) != 0x80) {
+						break;
+					}
+					i++;
+				} else if ((c & 0xf0) == 0xe0) {
+					if ((err[i] & 0xc0) != 0x80 || (err[i+1] & 0xc0) != 0x80) {
+						break;
+					}
+					i += 2;
+				} else if ((c & 0xf8) == 0xf0) {
+					if ((err[i] & 0xc0) != 0x80 || (err[i+1] & 0xc0) != 0x80 || (err[i+2] & 0xc0) != 0x80) {
+						break;
+					}
+					i += 3;
+				} else {
+					break;
+				}
+			}
+			if (c) {
+				err[i-1] = '\\';
+				err[i++] = 'x';
+				err[i++] = ((unsigned char)c >> 4) + ((((unsigned char)c >> 4) > 9) ? ('a' - 10) : '0');
+				err[i++] = (c & 15) + (((c & 15) > 9) ? ('a' - 10) : '0');
+				err[i++] = '.';
+				err[i++] = '.';
+				err[i++] = '.';
+				err[i++] = 0;
+			}
+
+			soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", err);
 		}
 	}
 	if (len) {
