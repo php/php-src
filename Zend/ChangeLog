@@ -1,3 +1,14 @@
+2007-09-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_strtod.c:
+      MFH: detect endianness in compile time when using Apple's GCC (fixes
+      universal binary build)
+
+    * zend_strtod.c:
+      detect endianness in compile time when using Apple's GCC (fixes universal
+      binary build)
+
 2007-08-31  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
