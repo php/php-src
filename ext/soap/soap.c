@@ -1035,6 +1035,7 @@ PHP_METHOD(SoapServer, SoapServer)
 
 	service = emalloc(sizeof(soapService));
 	memset(service, 0, sizeof(soapService));
+	service->send_errors = 1;
 
 	cache_wsdl = SOAP_GLOBAL(cache);
 
@@ -1097,6 +1098,11 @@ PHP_METHOD(SoapServer, SoapServer)
 		if (zend_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_LONG) {
 			cache_wsdl = Z_LVAL_PP(tmp);
+		}
+
+		if (zend_hash_find(ht, "send_errors", sizeof("send_errors"), (void**)&tmp) == SUCCESS &&
+		    (Z_TYPE_PP(tmp) == IS_BOOL || Z_TYPE_PP(tmp) == IS_LONG)) {
+			service->send_errors = Z_LVAL_PP(tmp);
 		}
 
 	} else if (wsdl == NULL) {
@@ -2129,34 +2135,46 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 
 			char* code = SOAP_GLOBAL(error_code);
 			char buffer[1024];
-			int buffer_len;
 			zval *outbuf = NULL;
-			zval outbuflen;
-
-			INIT_ZVAL(outbuflen);
-
-#ifdef va_copy
-			va_copy(argcopy, args);
-			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, argcopy);
-			va_end(argcopy);
-#else
-			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, args);
-#endif
-			buffer[sizeof(buffer)-1]=0;
-			if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
-				buffer_len = sizeof(buffer) - 1;
-			}
+			zval **tmp;
+			soapServicePtr service;
 
 			if (code == NULL) {
 				code = "Server";
 			}
-			/* Get output buffer and send as fault detials */
-			if (php_ob_get_length(&outbuflen TSRMLS_CC) != FAILURE && Z_LVAL(outbuflen) != 0) {
-				ALLOC_INIT_ZVAL(outbuf);
-		    php_ob_get_buffer(outbuf TSRMLS_CC);
-			}
-			php_end_ob_buffer(0, 0 TSRMLS_CC);
+			if (SOAP_GLOBAL(error_object) &&
+			    Z_TYPE_P(SOAP_GLOBAL(error_object)) == IS_OBJECT &&
+			    instanceof_function(Z_OBJCE_P(SOAP_GLOBAL(error_object)), soap_server_class_entry TSRMLS_CC) &&
+		        zend_hash_find(Z_OBJPROP_P(SOAP_GLOBAL(error_object)), "service", sizeof("service"), (void **)&tmp) != FAILURE &&
+				(service = (soapServicePtr)zend_fetch_resource(tmp TSRMLS_CC, -1, "service", NULL, 1, le_service)) &&
+				!service->send_errors) {
+				strcpy(buffer, "Internal Error");
+			} else {
+				int buffer_len;
+				zval outbuflen;
 
+				INIT_ZVAL(outbuflen);
+
+#ifdef va_copy
+				va_copy(argcopy, args);
+				buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, argcopy);
+				va_end(argcopy);
+#else
+				buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, args);
+#endif
+				buffer[sizeof(buffer)-1]=0;
+				if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
+					buffer_len = sizeof(buffer) - 1;
+				}
+
+				/* Get output buffer and send as fault detials */
+				if (php_ob_get_length(&outbuflen TSRMLS_CC) != FAILURE && Z_LVAL(outbuflen) != 0) {
+					ALLOC_INIT_ZVAL(outbuf);
+					php_ob_get_buffer(outbuf TSRMLS_CC);
+				}
+				php_end_ob_buffer(0, 0 TSRMLS_CC);
+
+			}
 			INIT_ZVAL(fault_obj);
 			set_soap_fault(&fault_obj, NULL, code, buffer, NULL, outbuf, NULL TSRMLS_CC);
 			fault = 1;

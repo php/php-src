@@ -106,6 +106,7 @@ struct _soapService {
 	HashTable *class_map;
 	int        features;
 	struct _soapHeader **soap_headers_ptr;
+	int send_errors;
 };
 
 #define SOAP_CLASS 1
