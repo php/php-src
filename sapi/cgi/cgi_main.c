@@ -778,6 +778,21 @@ static void init_request_info(TSRMLS_D)
 		char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL", sizeof("REDIRECT_URL")-1 TSRMLS_CC);
 		char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT")-1 TSRMLS_CC);
 
+		/* Hack for buggy IIS that sets incorrect PATH_INFO */
+		char *env_server_software = sapi_cgibin_getenv("SERVER_SOFTWARE", sizeof("SERVER_SOFTWARE")-1 TSRMLS_CC);
+		if (env_server_software &&
+		    env_script_name &&
+		    env_path_info &&
+		    strncmp(env_server_software, "Microsoft-IIS", sizeof("Microsoft-IIS")-1) == 0 &&
+		    strncmp(env_path_info, env_script_name, strlen(env_script_name)) == 0) {
+			env_path_info = _sapi_cgibin_putenv("ORIG_PATH_INFO", env_path_info TSRMLS_CC);
+		    env_path_info += strlen(env_script_name);
+		    if (*env_path_info == 0) {
+		    	env_path_info = NULL;
+		    }
+			env_path_info = _sapi_cgibin_putenv("PATH_INFO", env_path_info TSRMLS_CC);
+		}
+
 		if (CGIG(fix_pathinfo)) {
 			char *real_path = NULL;
 			char *orig_path_translated = env_path_translated;
