@@ -33,8 +33,8 @@
    Open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_connect)
 {
-	MY_MYSQL 			*mysql;
-	MYSQLI_RESOURCE 	*mysqli_resource;
+	MY_MYSQL 			*mysql = NULL;
+	MYSQLI_RESOURCE 	*mysqli_resource = NULL;
 	zval  				*object = getThis();
 	char 				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
 	unsigned int 		hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
@@ -67,7 +67,22 @@ PHP_FUNCTION(mysqli_connect)
 		}
 	}
 
-	mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
+	if (object && instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
+		mysqli_resource = ((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr;
+		if (mysqli_resource && mysqli_resource->ptr &&
+			mysqli_resource->status >= MYSQLI_STATUS_INITIALIZED)
+		{
+			mysql = (MY_MYSQL*)mysqli_resource->ptr;
+			php_clear_mysql(mysql);
+			if (mysql->mysql) {
+				mysql_close(mysql->mysql);
+				mysql->mysql = NULL;
+			}
+		}
+	}
+	if (!mysql) {
+		mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
+	}
 
 	if (!(mysql->mysql = mysql_init(NULL))) {
 		efree(mysql);
@@ -110,8 +125,10 @@ PHP_FUNCTION(mysqli_connect)
 	/* set our own local_infile handler */
 	php_set_local_infile_handler_default(mysql);
 
-	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
-	mysqli_resource->ptr = (void *)mysql;
+	if (!mysqli_resource) {
+		mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+		mysqli_resource->ptr = (void *)mysql;
+	}
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
 
 	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
