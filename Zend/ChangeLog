@@ -1,3 +1,9 @@
+2007-09-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c:
+      Bug #42541 (Check for namespace decl. on first line doesn't work when
+      extended info is on)
+
 2007-09-04  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
