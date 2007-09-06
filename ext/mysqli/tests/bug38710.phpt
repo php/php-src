@@ -1,7 +1,9 @@
 --TEST--
 Bug #38710 (data leakage because of nonexisting boundary checking in statements)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+?>
 --FILE--
 <?php
 include "connect.inc";
@@ -12,8 +14,10 @@ $qry->prepare("SELECT REPEAT('a',100000)");
 $qry->execute();
 $qry->bind_result($text);
 $qry->fetch();
-var_dump(strlen($text), md5($text));
+if ($text !== str_repeat('a', mysqli_get_server_version($db) > 50110? 100000:(mysqli_get_server_version($db)>=50000? 8193:8191))) {
+	var_dump(strlen($text));
+}
+echo "Done";
 ?>
 --EXPECTF--	
-int(100000)
-string(32) "1af6d6f2f682f76f80e606aeaaee1680"
+Done

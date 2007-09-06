@@ -458,6 +458,7 @@ PHP_FUNCTION(mysqli_close)
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
 
 	mysql_close(mysql->mysql);
+	mysql->mysql = NULL;
 	php_clear_mysql(mysql);
 	efree(mysql);
 	MYSQLI_CLEAR_RESOURCE(&mysql_link);	
