@@ -1,3 +1,68 @@
+2007-09-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      Fixed typo in function name
+
+    * ext/pgsql/pgsql.c:
+      
+      MFB: Fixed bug #41845 (pgsql extension does not compile with PostgreSQL
+      <7.4)
+
+    * ext/pgsql/pgsql.c:
+      
+      MFB: Fixed bug #42506 (php_pgsql_convert() timezone parse bug)
+
+    * ext/standard/dir.c
+      ext/standard/file.c:
+      
+      MFB: Fixed possible buffer overflows inside the fnmatch() and glob()
+      functions
+
+2007-09-05  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/bug38710.phpt:
+      Fixed bug #42378 (mysqli_stmt_bind_result memory exhaustion)
+      Fixed regression of bug 38710. Already fixed in HEAD.
+
+2007-09-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_soap.h
+      ext/soap/php_soap.h
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug42214.phpt
+      ext/soap/tests/bugs/bug42214.phpt
+      ext/soap/tests/bugs/bug42214.phpt:
+      Fixed bug #42214 (SoapServer sends clients internal PHP errors)
+
+    * ext/soap/tests/bugs/bug42488.phpt
+      ext/soap/tests/bugs/bug42488.phpt:
+      
+      file bug42488.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug42488.phpt:
+      Fixed bug #42488 (SoapServer reports an encoding error and the error itself
+      breaks).
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed bug #42523 (PHP_SELF duplicates path)
+
+    * ZendEngine2/zend_compile.c:
+      Bug #42541 (Check for namespace decl. on first line doesn't work when
+      extended info is on)
+
 2007-09-04  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
