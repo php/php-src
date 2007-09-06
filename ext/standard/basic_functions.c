@@ -4336,7 +4336,8 @@ PHP_FUNCTION(ip2long)
 
 	if (Z_STRLEN_PP(str) == 0 || (ip = inet_addr(Z_STRVAL_PP(str))) == INADDR_NONE) {
 		/* the only special case when we should return -1 ourselves,
-		 * because inet_addr() considers it wrong.
+		 * because inet_addr() considers it wrong. We return 0xFFFFFFFF and
+		 * not -1 or ~0 because of 32/64bit issues.
 		 */
 		if (Z_STRLEN_PP(str) == sizeof("255.255.255.255") - 1 &&
 			!memcmp(Z_STRVAL_PP(str), "255.255.255.255", sizeof("255.255.255.255") - 1)) {
