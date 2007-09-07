@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Upgraded PCRE to version 7.3 (Nuno)
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
 
+- Fixed bug #42579 (apache_reset_timeout() does not exist). (Jani)
 - Fixed bug #42523 (PHP_SELF duplicates path). (Dmitry)
 - Fixed bug #42512 (ip2long('255.255.255.255') should return 4294967295 on
   64-bit PHP). (Derick)
