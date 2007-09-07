@@ -659,7 +659,7 @@ PHP_FUNCTION(wordwrap)
 	}
 
 	if (linelength == 0 && docut) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't force cut when width is zero.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't force cut when width is zero");
 		RETURN_FALSE;
 	}
 
