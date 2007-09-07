@@ -95,7 +95,7 @@ ZEND_API void zend_ini_sort_entries(TSRMLS_D);
 ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number TSRMLS_DC);
 ZEND_API void zend_unregister_ini_entries(int module_number TSRMLS_DC);
 ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC);
-ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage);
+ZEND_API int zend_alter_ini_entry_ex(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage, int force_change);
 ZEND_API int zend_restore_ini_entry(char *name, uint name_length, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
@@ -104,6 +104,9 @@ ZEND_API double zend_ini_double(char *name, uint name_length, int orig);
 ZEND_API char *zend_ini_string(char *name, uint name_length, int orig);
 
 ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
+
+#define zend_alter_ini_entry(name, name_length, new_value, new_value_length, modify_type, stage) \
+	zend_alter_ini_entry_ex(name, name_length, new_value, new_value_length, modify_type, stage, 0)
 
 ZEND_API ZEND_INI_DISP(zend_ini_boolean_displayer_cb);
 ZEND_API ZEND_INI_DISP(zend_ini_color_displayer_cb);
