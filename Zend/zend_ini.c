@@ -233,7 +233,13 @@ ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC) /* {{{ */
 /* }}} */
 #endif
 
-ZEND_API int zend_alter_ini_entry_ex(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage, int force_change)
+ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage) /* {{{ */
+{
+	return zend_alter_ini_entry_ex(name, name_length, new_value, new_value_length, modify_type, stage, 0);
+}
+/* }}} */
+
+ZEND_API int zend_alter_ini_entry_ex(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage, int force_change) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	char *duplicate;
