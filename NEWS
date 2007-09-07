@@ -2,10 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.2.5
 - Fixed leaks with mulitple connects on one mysqli object. (Andrey)
-- Fixed endianness detection on MacOS when building universal binary. 
+'- Fixed endianness detection on MacOS when building universal binary. 
   (Uwe Schindler, Christian Speich, Tony)
-- Fixed possible buffer overflows inside the fnmatch() and glob() functions 
-  reported by Laurent gaffie (Ilia)
+- Fixed possible triggering of buffer overflows inside glibc
+  imlplementations of the fnmatch(), setlocale() and glob() functions reported 
+  by Laurent gaffie (Ilia)
 
 - Upgraded PCRE to version 7.3 (Nuno)
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)

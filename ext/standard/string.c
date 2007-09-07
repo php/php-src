@@ -4000,8 +4000,12 @@ PHP_FUNCTION(setlocale)
 			loc = NULL;
 		} else {
 			loc = Z_STRVAL_PP(plocale);
+			if (Z_STRLEN_PP(plocale) >= 255) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Specified locale name is too long");
+				break;
+			}
 		}
-		
+
 		retval = setlocale (cat, loc);
 		zend_update_current_locale();
 		if (retval) {
