@@ -1,3 +1,41 @@
+2007-09-06  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/basic_functions.c:
+      - Add a comment why not ~0 or -1.
+
+2007-09-06  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/tests/bug38710.phpt:
+      Fixed leaks with multiple connects using one mysqli object.
+      HEAD will be fixed during the next mysqlnd merge
+      
+      Fixed failing test for bug38710, 5.0 version is bad, 5.1 is ok.
+
+2007-09-06  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/addslashes_basic.phpt
+      ext/standard/tests/strings/addslashes_error.phpt
+      ext/standard/tests/strings/addslashes_variation1.phpt
+      ext/standard/tests/strings/addslashes_variation2.phpt:
+      New testcases for addslashes() function
+
+    * ext/standard/tests/strings/addslashes_basic.phpt
+      ext/standard/tests/strings/addslashes_basic.phpt
+      ext/standard/tests/strings/addslashes_error.phpt
+      ext/standard/tests/strings/addslashes_error.phpt
+      ext/standard/tests/strings/addslashes_variation1.phpt
+      ext/standard/tests/strings/addslashes_variation1.phpt
+      ext/standard/tests/strings/addslashes_variation2.phpt
+      ext/standard/tests/strings/addslashes_variation2.phpt
+      ext/standard/tests/strings/addslashes_variation3.phpt
+      ext/standard/tests/strings/addslashes_variation3.phpt:
+      
+      file addslashes_basic.phpt was initially added on branch PHP_5_2.
+
 2007-09-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pgsql/pgsql.c:
