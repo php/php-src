@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.2.5
 - Fixed leaks with mulitple connects on one mysqli object. (Andrey)
-'- Fixed endianness detection on MacOS when building universal binary. 
+- Fixed endianness detection on MacOS when building universal binary. 
   (Uwe Schindler, Christian Speich, Tony)
 - Fixed possible triggering of buffer overflows inside glibc
   imlplementations of the fnmatch(), setlocale() and glob() functions reported 
@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - Fixed bug #42214 (SoapServer sends clients internal PHP errors). (Dmitry)
 - Fixed bug #42086 (SoapServer return Procedure '' not present for WSIBasic
   compliant wsdl). (Dmitry)
+- Fixed bug #41561 (Values set with php_admin_* in httpd.conf can be overwritten
+  with ini_set()). (Stas, Jani)
 
 30 Aug 2007, PHP 5.2.4
 - Removed --enable-versioning configure option. (Jani)
