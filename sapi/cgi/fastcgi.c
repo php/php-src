@@ -620,7 +620,8 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			val_len |= (*p++ << 8);
 			val_len |= *p++;
 		}
-		if (p + name_len + val_len > end) {
+		if (name_len + val_len < 0 ||
+		    name_len + val_len > end - p) {
 			/* Malformated request */
 			ret = 0;
 			break;
@@ -676,6 +677,10 @@ static int fcgi_read_request(fcgi_request *req)
 		padding = hdr.paddingLength;
 	}
 
+	if (len + padding > FCGI_MAX_LENGTH) {
+		return 0;
+	}
+
 	req->id = (hdr.requestIdB1 << 8) + hdr.requestIdB0;
 
 	if (hdr.type == FCGI_BEGIN_REQUEST && len == sizeof(fcgi_begin_request)) {
@@ -712,6 +717,10 @@ static int fcgi_read_request(fcgi_request *req)
 		padding = hdr.paddingLength;
 
 		while (hdr.type == FCGI_PARAMS && len > 0) {
+			if (len + padding > FCGI_MAX_LENGTH) {
+				return 0;
+			}
+
 			if (safe_read(req, buf, len+padding) != len+padding) {
 				req->keep = 0;
 				return 0;
