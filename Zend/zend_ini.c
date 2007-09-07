@@ -233,7 +233,7 @@ ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC) /* {{{ */
 /* }}} */
 #endif
 
-ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage) /* {{{ */
+ZEND_API int zend_alter_ini_entry_ex(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage, int force_change)
 {
 	zend_ini_entry *ini_entry;
 	char *duplicate;
@@ -247,8 +247,10 @@ ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value,
 		ini_entry->modifiable = ZEND_INI_SYSTEM;
 	}
 
-	if (!(ini_entry->modifiable & modify_type)) {
-		return FAILURE;
+	if (!force_change) {
+		if (!(ini_entry->modifiable & modify_type)) {
+			return FAILURE;
+		}
 	}
 
 	duplicate = estrndup(new_value, new_value_length);

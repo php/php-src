@@ -452,7 +452,7 @@ static int ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (EG(error_reporting)) {
-		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), "0", 1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry_ex("error_reporting", sizeof("error_reporting"), "0", 1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME, 1);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -602,7 +602,7 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		Z_TYPE(restored_error_reporting) = IS_LONG;
 		Z_LVAL(restored_error_reporting) = Z_LVAL_P(EX(old_error_reporting));
 		convert_to_string(&restored_error_reporting);
-		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry_ex("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME, 1);
 		zendi_zval_dtor(restored_error_reporting);
 	}
 	EX(old_error_reporting) = NULL;
@@ -5370,7 +5370,7 @@ static int ZEND_END_SILENCE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		Z_TYPE(restored_error_reporting) = IS_LONG;
 		Z_LVAL(restored_error_reporting) = Z_LVAL(EX_T(opline->op1.u.var).tmp_var);
 		convert_to_string(&restored_error_reporting);
-		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry_ex("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME, 1);
 		zendi_zval_dtor(restored_error_reporting);
 	}
 	if (EX(old_error_reporting) == &EX_T(opline->op1.u.var).tmp_var) {
