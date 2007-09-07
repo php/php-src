@@ -620,7 +620,8 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			val_len |= (*p++ << 8);
 			val_len |= *p++;
 		}
-		if (p + name_len + val_len > end) {
+		if (name_len + val_len < 0 ||
+		    name_len + val_len > end - p) {
 			/* Malformated request */
 			ret = 0;
 			break;
@@ -674,6 +675,10 @@ static int fcgi_read_request(fcgi_request *req)
 
 		len = (hdr.contentLengthB1 << 8) | hdr.contentLengthB0;
 		padding = hdr.paddingLength;
+	}
+
+	if (len + padding > FCGI_MAX_LENGTH) {
+		return 0;
 	}
 
 	req->id = (hdr.requestIdB1 << 8) + hdr.requestIdB0;
