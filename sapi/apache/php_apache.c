@@ -64,8 +64,9 @@ zend_function_entry apache_functions[] = {
 	PHP_FE(apache_child_terminate,					NULL)
 	PHP_FE(apache_setenv,							NULL)
 	PHP_FE(apache_response_headers,					NULL)
-	PHP_FE(apache_get_version,					NULL)
-	PHP_FE(apache_get_modules,					NULL)
+	PHP_FE(apache_get_version,						NULL)
+	PHP_FE(apache_get_modules,						NULL)
+	PHP_FE(apache_reset_timeout,					NULL)
 	PHP_FALIAS(getallheaders, apache_request_headers, NULL)
 	{NULL, NULL, NULL}
 };
