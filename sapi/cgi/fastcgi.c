@@ -717,6 +717,10 @@ static int fcgi_read_request(fcgi_request *req)
 		padding = hdr.paddingLength;
 
 		while (hdr.type == FCGI_PARAMS && len > 0) {
+			if (len + padding > FCGI_MAX_LENGTH) {
+				return 0;
+			}
+
 			if (safe_read(req, buf, len+padding) != len+padding) {
 				req->keep = 0;
 				return 0;
