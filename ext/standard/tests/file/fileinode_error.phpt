@@ -26,16 +26,19 @@ echo "\n*** Done ***";
 
 --EXPECTF--
 *** Testing error conditions of fileinode() ***
-Warning: fileinode(): stat failed for /no/such/file/dir in %s on line %d
+Warning: fileinode(): stat failed for /no/such/file/dir in %s on line 10
 bool(false)
 
-Warning: fileinode(): stat failed for string in %s on line %d
+Warning: fileinode(): stat failed for string in %s on line 13
 bool(false)
 
-Warning: Wrong parameter count for fileinode() in %s on line %d
+Warning: fileinode(): stat failed for 100 in %s on line 14
+bool(false)
+
+Warning: Wrong parameter count for fileinode() in %s on line 17
 NULL
 
-Warning: Wrong parameter count for fileinode() in %s on line %d
+Warning: Wrong parameter count for fileinode() in %s on line 20
 NULL
 
 *** Done ***
