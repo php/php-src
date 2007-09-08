@@ -1,3 +1,179 @@
+2007-09-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      - #42592, remove ending dot in warning msg
+
+2007-09-07  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/ucwords_basic.phpt
+      ext/standard/tests/strings/ucwords_error.phpt
+      ext/standard/tests/strings/ucwords_variation1.phpt
+      ext/standard/tests/strings/ucwords_variation2.phpt
+      ext/standard/tests/strings/ucwords_variation3.phpt
+      ext/standard/tests/strings/ucwords_variation4.phpt:
+      New testcases for ucwords() function
+
+    * ext/standard/tests/strings/ucwords_basic.phpt
+      ext/standard/tests/strings/ucwords_basic.phpt
+      ext/standard/tests/strings/ucwords_error.phpt
+      ext/standard/tests/strings/ucwords_error.phpt
+      ext/standard/tests/strings/ucwords_variation1.phpt
+      ext/standard/tests/strings/ucwords_variation1.phpt
+      ext/standard/tests/strings/ucwords_variation2.phpt
+      ext/standard/tests/strings/ucwords_variation2.phpt
+      ext/standard/tests/strings/ucwords_variation3.phpt
+      ext/standard/tests/strings/ucwords_variation3.phpt
+      ext/standard/tests/strings/ucwords_variation4.phpt
+      ext/standard/tests/strings/ucwords_variation4.phpt:
+      
+      New testcases for ucwords() function
+
+    * ext/standard/tests/strings/strncmp_basic.phpt
+      ext/standard/tests/strings/strncmp_error.phpt
+      ext/standard/tests/strings/strncmp_variation1.phpt
+      ext/standard/tests/strings/strncmp_variation2.phpt
+      ext/standard/tests/strings/strncmp_variation3.phpt
+      ext/standard/tests/strings/strncmp_variation4.phpt
+      ext/standard/tests/strings/strncmp_variation5.phpt
+      ext/standard/tests/strings/strncmp_variation6.phpt
+      ext/standard/tests/strings/strncmp_variation7.phpt
+      ext/standard/tests/strings/strncmp_variation8.phpt
+      ext/standard/tests/strings/strncmp_variation9.phpt:
+      New testcases for strncmp() function
+
+    * ext/standard/tests/strings/strncmp_basic.phpt
+      ext/standard/tests/strings/strncmp_basic.phpt
+      ext/standard/tests/strings/strncmp_error.phpt
+      ext/standard/tests/strings/strncmp_error.phpt
+      ext/standard/tests/strings/strncmp_variation1.phpt
+      ext/standard/tests/strings/strncmp_variation1.phpt
+      ext/standard/tests/strings/strncmp_variation2.phpt
+      ext/standard/tests/strings/strncmp_variation2.phpt
+      ext/standard/tests/strings/strncmp_variation3.phpt
+      ext/standard/tests/strings/strncmp_variation3.phpt
+      ext/standard/tests/strings/strncmp_variation4.phpt
+      ext/standard/tests/strings/strncmp_variation4.phpt
+      ext/standard/tests/strings/strncmp_variation5.phpt
+      ext/standard/tests/strings/strncmp_variation5.phpt
+      ext/standard/tests/strings/strncmp_variation6.phpt
+      ext/standard/tests/strings/strncmp_variation6.phpt
+      ext/standard/tests/strings/strncmp_variation7.phpt
+      ext/standard/tests/strings/strncmp_variation7.phpt
+      ext/standard/tests/strings/strncmp_variation8.phpt
+      ext/standard/tests/strings/strncmp_variation8.phpt
+      ext/standard/tests/strings/strncmp_variation9.phpt
+      ext/standard/tests/strings/strncmp_variation9.phpt:
+      
+      file strncmp_basic.phpt was initially added on branch PHP_5_2.
+
+2007-09-07  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h:
+      - Make the macro into function (for the sake of idiotic ZEND_STRL() macro)
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c:
+      - Can not remove because of the idiotic ZEND_STR*() macros
+
+2007-09-07  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/stripslashes_basic.phpt
+      ext/standard/tests/strings/stripslashes_error.phpt
+      ext/standard/tests/strings/stripslashes_variation1.phpt
+      ext/standard/tests/strings/stripslashes_variation2.phpt
+      ext/standard/tests/strings/stripslashes_variation3.phpt
+      ext/standard/tests/strings/stripslashes_variation4.phpt:
+      New testcases for stripslashes() function
+
+    * ext/standard/tests/strings/stripslashes_basic.phpt
+      ext/standard/tests/strings/stripslashes_basic.phpt
+      ext/standard/tests/strings/stripslashes_error.phpt
+      ext/standard/tests/strings/stripslashes_error.phpt
+      ext/standard/tests/strings/stripslashes_variation1.phpt
+      ext/standard/tests/strings/stripslashes_variation1.phpt
+      ext/standard/tests/strings/stripslashes_variation2.phpt
+      ext/standard/tests/strings/stripslashes_variation2.phpt
+      ext/standard/tests/strings/stripslashes_variation3.phpt
+      ext/standard/tests/strings/stripslashes_variation3.phpt
+      ext/standard/tests/strings/stripslashes_variation4.phpt
+      ext/standard/tests/strings/stripslashes_variation4.phpt
+      ext/standard/tests/strings/stripslashes_variation5.phpt
+      ext/standard/tests/strings/stripslashes_variation5.phpt:
+      
+      file stripslashes_basic.phpt was initially added on branch PHP_5_2.
+
+2007-09-07  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/file/fileinode_error.phpt:
+      made equivalent (to php5 test) changes to the expected output. Although
+      this test did originally have the right EXP section
+
+    * (PHP_5_2)
+      ext/standard/tests/file/fileinode_error.phpt:
+      fixing error in expected output
+
+2007-09-07  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c:
+      - Added reminder for 5.3
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c:
+      - Missed this from previous commit to zend_ini.h
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.h:
+      - No need to break binary compatibility here
+
+    * (PHP_5_2)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      MFH: - Fixed the rest of bug #41561 ( @ operator not working )
+
+    * ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Fixed the rest of bug #41561 ( @ operator not working )
+
+    * (PHP_5_2)
+      sapi/apache/php_apache.c:
+      MFH:- Fixed bug #42579 (apache_reset_timeout() does not exist)
+
+    * sapi/apache/php_apache.c:
+      - Fixed bug #42579 (apache_reset_timeout() does not exist)
+
+2007-09-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c:
+      forgotten part
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Added checks for malformated FastCGI requests (Mattias Bengtsson)
+
+2007-09-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c:
+      
+      Added missing safety checks for 2nd parameter of setlocale() function
+
+    * ext/standard/string.c:
+      Added missing safety checks for 2nd parameter of setlocale() function
+
 2007-09-06  Derick Rethans  <php@derickrethans.nl>
 
     * ext/standard/basic_functions.c:
