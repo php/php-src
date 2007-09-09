@@ -1285,6 +1285,14 @@ static void zend_scan_binary_escape_string(zval *zendlval, char *str, int len, c
 					*t++ = '\t';
 					Z_STRLEN_P(zendlval)--;
 					break;
+				case 'f':
+					*t++ = '\f';
+					zendlval->value.str.len--;
+					break;
+				case 'v':
+					*t++ = '\v';
+					zendlval->value.str.len--;
+					break;
 				case '"':
 				case '`':
 					if (*s != quote_type) {
