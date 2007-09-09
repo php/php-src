@@ -447,9 +447,11 @@ ZEND_MODULE_STARTUP_D(mysql)
 	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_IGNORE_SPACE", CLIENT_IGNORE_SPACE, CONST_CS | CONST_PERSISTENT); 
 
 #ifndef HAVE_MYSQLND
+#if MYSQL_VERSION_ID >= 40000
 	if (mysql_server_init(0, NULL, NULL)) {
 		return FAILURE;
 	}
+#endif
 #else
 	mysql_mysqlnd_zval_cache = mysqlnd_palloc_init_cache(MySG(cache_size));
 	mysql_mysqlnd_qcache = mysqlnd_qcache_init_cache();
@@ -464,14 +466,16 @@ ZEND_MODULE_STARTUP_D(mysql)
 PHP_MSHUTDOWN_FUNCTION(mysql)
 {
 #ifndef HAVE_MYSQLND
+#if MYSQL_VERSION_ID >= 40000
 #ifdef PHP_WIN32
-	unsigned long client_ver = mysql_get_client_version;
+	unsigned long client_ver = mysql_get_client_version();
 	/* Can't call mysql_server_end() multiple times prior to 5.0.42 on Windows */
 	if ((client_ver > 50042 && client_ver < 50100) || client_ver > 50122) {
 		mysql_server_end();
 	}
 #else
 	mysql_server_end();
+#endif
 #endif
 #else
 	mysqlnd_palloc_free_cache(mysql_mysqlnd_zval_cache);
@@ -487,7 +491,7 @@ PHP_MSHUTDOWN_FUNCTION(mysql)
  */
 PHP_RINIT_FUNCTION(mysql)
 {
-#if !defined(HAVE_MYSQLND) && defined(ZTS)
+#if !defined(HAVE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
 	if (mysql_thread_init()) {
 		return FAILURE;
 	}
@@ -511,7 +515,7 @@ PHP_RINIT_FUNCTION(mysql)
  */
 PHP_RSHUTDOWN_FUNCTION(mysql)
 {
-#if !defined(HAVE_MYSQLND) && defined(ZTS)
+#if !defined(HAVE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
 	mysql_thread_end();
 #endif
 
