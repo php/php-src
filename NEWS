@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Fixed possible triggering of buffer overflows inside glibc
   imlplementations of the fnmatch(), setlocale() and glob() functions reported 
   by Laurent gaffie (Ilia)
+- Fixed imagerectangle regression with 1x1 rectangle (libgd #106). (Pierre)
 
 - Upgraded PCRE to version 7.3 (Nuno)
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
