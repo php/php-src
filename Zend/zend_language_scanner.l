@@ -1035,6 +1035,14 @@ static int zend_scan_unicode_escape_string(zval *zendlval, char *str, int len, U
 					*t++ = (UChar) 0x09; /*'\t'*/
 					Z_USTRLEN_P(zendlval)--;
 					break;
+				case 0x66:				 /*'f'*/
+					*t++ = (UChar) 0x0C; /*'\f'*/
+					zendlval->value.str.len--;
+					break;
+				case 0x76:				 /*'v'*/
+					*t++ = (UChar) 0x0B; /*'\v'*/
+					zendlval->value.str.len--;
+					break;
 				case 0x22:               /*'"'*/
 				case 0x60:               /*'`'*/
 					if (c != quote_type) {
