@@ -1,3 +1,14 @@
+2007-09-08  Antony Dovgal  <tony@daylessday.org>
+
+    * sapi/cgi/cgi_main.c:
+      output is started in php_module_startup(), no need to start it twice
+      fixes leaks in sapi/cgi/tests/005.phpt
+
+2007-09-08  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/bcmath/libbcmath/src/bcmath.h:
+      point to valid config header
+
 2007-09-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_2)
