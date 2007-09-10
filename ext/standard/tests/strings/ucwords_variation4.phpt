@@ -97,7 +97,7 @@ Ucwords Testing Ucwords"
 -- Iteration 15 --
 string(32) "Testing\rucwords Testing Ucwords"
 -- Iteration 16 --
-string(36) "Testing\fucwords \f Testing 
+string(34) "TestingUcwords  Testing 
 Ucwords"
 -- Iteration 17 --
 string(36) "Testing\fucwords \f Testing 
@@ -111,7 +111,7 @@ Ucwords
 -- Iteration 19 --
 string(39) "\ntesting\nucwords\n Testing \n Ucwords"
 -- Iteration 20 --
-string(20) "Using\vvertical\vtab"
+string(18) "UsingVerticalTab"
 -- Iteration 21 --
 string(20) "Using\vvertical\vtab"
 -- Iteration 22 --
