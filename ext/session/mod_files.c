@@ -310,7 +310,7 @@ PS_OPEN_FUNC(files)
 		argv[argc++] = last;
 		last = ++p;
 		p = strchr(p, ';');
-		if (argc > 1) break;
+		if (argc > 2) break;
 	}
 	argv[argc++] = last;
 
