@@ -1,3 +1,22 @@
+2007-09-09  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_language_scanner.l:
+      use macros
+
+    * zend_language_scanner.l:
+      unicode part of \v and \t patch
+
+2007-09-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_language_scanner.l:
+      
+      MFB: Fixed bug #42590 (Make the engine recornize \v and \f escape
+      sequences)
+
+    * (PHP_5_2)
+      zend_language_scanner.l:
+      Fixed bug #42590 (Make the engine recornize \v and \f escape sequences)
+
 2007-09-07  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * zend_ini.c

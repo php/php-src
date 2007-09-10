@@ -1,3 +1,72 @@
+2007-09-09  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/zend_language_scanner.l:
+      use macros
+
+    * ext/standard/tests/strings/addcslashes.phpt:
+      remove the original
+
+    * ext/standard/tests/strings/addcslashes_001.phpt
+      ext/standard/tests/strings/addcslashes_002.phpt
+      ext/standard/tests/strings/addcslashes_003.phpt
+      ext/standard/tests/strings/addcslashes_004.phpt:
+      MFB: split test
+
+    * ZendEngine2/zend_language_scanner.l:
+      unicode part of \v and \t patch
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/addcslashes.phpt
+      ext/standard/tests/strings/addcslashes_001.phpt
+      ext/standard/tests/strings/addcslashes_001.phpt
+      ext/standard/tests/strings/addcslashes_002.phpt
+      ext/standard/tests/strings/addcslashes_002.phpt
+      ext/standard/tests/strings/addcslashes_003.phpt
+      ext/standard/tests/strings/addcslashes_003.phpt
+      ext/standard/tests/strings/addcslashes_004.phpt
+      ext/standard/tests/strings/addcslashes_004.phpt:
+      split one more ten-in-one test
+      and fix \v\f stuff while we're here..
+
+2007-09-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_language_scanner.l:
+      
+      MFB: Fixed bug #42590 (Make the engine recornize \v and \f escape
+      sequences)
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_language_scanner.l:
+      Fixed bug #42590 (Make the engine recornize \v and \f escape sequences)
+
+2007-09-09  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/mysql/php_mysql.c:
+      MFH: Fixed bug 42549 (ext/mysql failed to compile with libmysql 3.23)
+
+    * ext/mysql/php_mysql.c:
+      Fixed bug 42549 (ext/mysql failed to compile with libmysql 3.23)
+
+2007-09-09  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - #106 entry
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c:
+      - re-add fix for libgd #106, imagerectangle draws 1x1 rectangles
+        as 1x3 rectangles
+
 2007-09-08  Antony Dovgal  <tony@daylessday.org>
 
     * sapi/cgi/cgi_main.c:
