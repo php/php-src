@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - Upgraded PCRE to version 7.3 (Nuno)
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
 
+- Fixed Bug #42596 (session.save_path MODE option does not work). (Ilia)
 - Fixed bug #42590 (Make the engine recornize \v and \f escape sequences). 
   (Ilia)
 - Fixed bug #42587 (behaviour change regarding symlinked .php files). (Dmitry)
