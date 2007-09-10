@@ -775,6 +775,7 @@ static void init_request_info(TSRMLS_D)
 			char *orig_path_info = env_path_info;
 			char *orig_script_name = env_script_name;
 			char *orig_script_filename = env_script_filename;
+			int script_path_translated_len;
 
 			if (!env_document_root && PG(doc_root)) {
 				env_document_root = _sapi_cgibin_putenv("DOCUMENT_ROOT", PG(doc_root) TSRMLS_CC);
@@ -805,9 +806,11 @@ static void init_request_info(TSRMLS_D)
 			 * this fixes url's like /info.php/test
 			 */
 			if (script_path_translated &&
-			    (real_path = tsrm_realpath(script_path_translated, NULL TSRMLS_CC)) == NULL) {
-				char *pt = estrdup(script_path_translated);
-				int len = strlen(pt);
+				(script_path_translated_len = strlen(script_path_translated)) > 0 &&
+				(script_path_translated[script_path_translated_len-1] == '/' ||
+			     (real_path = tsrm_realpath(script_path_translated, NULL TSRMLS_CC)) == NULL)) {
+				char *pt = estrndup(script_path_translated, script_path_translated_len);
+				int len = script_path_translated_len;
 				char *ptr;
 
 				while ((ptr = strrchr(pt, '/')) || (ptr = strrchr(pt, '\\'))) {
@@ -947,9 +950,6 @@ static void init_request_info(TSRMLS_D)
 					SG(request_info).path_translated = estrdup(script_path_translated);
 				}
 			} else {
-				if (real_path) {
-					script_path_translated = real_path;
-				}
 				/* make sure path_info/translated are empty */
 				if (!orig_script_filename ||
 					(script_path_translated != orig_script_filename &&
@@ -982,9 +982,7 @@ static void init_request_info(TSRMLS_D)
 				if (script_path_translated && !strstr(script_path_translated, "..")) {
 					SG(request_info).path_translated = estrdup(script_path_translated);
 				}
-				if (real_path) {
-					free(real_path);
-				}
+				free(real_path);
 			}
 		} else {
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
