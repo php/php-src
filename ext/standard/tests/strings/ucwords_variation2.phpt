@@ -80,11 +80,11 @@ string(52) "Testing Ucword() With
 Multiline String Using
 Heredoc"
 -- Iteration 4 --
-string(96) "Testing
+string(93) "Testing
 Ucword(str)	With
 Multiline   String		Using
 Heredoc
-String.with\vdifferent\fwhite\vspaces"
+String.withDifferentWhiteSpaces"
 -- Iteration 5 --
 string(53) "12sting 123string 4567
 String	123string
@@ -107,11 +107,11 @@ unicode(52) "Testing Ucword() With
 Multiline String Using
 Heredoc"
 -- Iteration 4 --
-unicode(96) "Testing
+unicode(93) "Testing
 Ucword(str)	With
 Multiline   String		Using
 Heredoc
-String.with\vdifferent\fwhite\vspaces"
+String.withDifferentWhiteSpaces"
 -- Iteration 5 --
 unicode(53) "12sting 123string 4567
 String	123string
