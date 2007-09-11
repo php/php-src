@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 
 - Upgraded PCRE to version 7.3 (Nuno)
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
+- Added alpha support for imagefilter's IMG_FILTER_COLORIZE
 
 - Fixed Bug #42596 (session.save_path MODE option does not work). (Ilia)
 - Fixed bug #42590 (Make the engine recornize \v and \f escape sequences). 
