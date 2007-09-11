@@ -15,7 +15,7 @@ Test addslashes() function : usage variations - with magic_quotes_sybase directi
 echo "*** Testing addslashes() : with php directive magic_quotes_sybase set ON ***\n";
 
 // setting ON the php directive magic_quotes_sybase
-var_dump( ini_set("magic_quotes_sybase", "1") );
+ini_set("magic_quotes_sybase", "1");
 
 // initialising a heredoc string
 $heredoc_string = <<<EOT
@@ -91,7 +91,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing addslashes() : with php directive magic_quotes_sybase set ON ***
-string(1) "0"
 
 -- Iteration 1 --
 string(11) "Hello world"
