@@ -2705,8 +2705,6 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|UNUSED|CONST, CONST)
 {
 	zend_op *opline = EX(opline);
-	zend_class_entry *ce = NULL;
-	zval **value;
 
 	if (OP1_TYPE == IS_UNUSED) {
 		if (!zend_u_get_constant(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
@@ -2717,50 +2715,58 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|UNUSED|CONST, CONST)
 			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 		}
 		ZEND_VM_NEXT_OPCODE();
-	} else if (OP1_TYPE == IS_CONST) {
-		zend_op *op_data = opline + 1;
-		zend_constant *c;
+	} else {
+		zend_class_entry *ce;
+		zval **value;
+	
+		if (OP1_TYPE == IS_CONST) {
+			zend_op *op_data = opline + 1;
+			zend_constant *c;
 
-		ZEND_VM_INC_OPCODE();
+			ZEND_VM_INC_OPCODE();
 
-		/* try a constant in namespace */
-		if (zend_u_hash_quick_find(EG(zend_constants), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &c)==SUCCESS) {
-			EX_T(opline->result.u.var).tmp_var = c->value;
-			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-			ZEND_VM_NEXT_OPCODE();
-		} else if ((opline->extended_value & IS_CONSTANT_RT_NS_CHECK) != 0) {
-			if (!zend_u_get_constant(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
-				zend_error(E_NOTICE, "Use of undefined constant %R - assumed '%R'",
-					Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant),
-					Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
-				EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+			/* try a constant in namespace */
+			if (zend_u_hash_quick_find(EG(zend_constants), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &c)==SUCCESS) {
+				EX_T(opline->result.u.var).tmp_var = c->value;
 				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
+				ZEND_VM_NEXT_OPCODE();
+			} else if ((opline->extended_value & IS_CONSTANT_RT_NS_CHECK) != 0) {
+				if (!zend_u_get_constant(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
+					zend_error(E_NOTICE, "Use of undefined constant %R - assumed '%R'",
+						Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant),
+						Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
+					EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+					zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
+				}
+				ZEND_VM_NEXT_OPCODE();
 			}
-			ZEND_VM_NEXT_OPCODE();
+	
+			/* no constant found. try a constant in class */		
+			ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);		
+			if (!ce) {
+				zend_error_noreturn(E_ERROR, "Undefined class constant '%R'", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
+			}
+		} else {
+			ce = EX_T(opline->op1.u.var).class_entry;
 		}
 
-		/* no constant found. try a constant in class */		
-		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);		
-		if (!ce) {
+		if (zend_u_hash_find(&ce->constants_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
+			if (Z_TYPE_PP(value) == IS_CONSTANT_ARRAY ||
+			    Z_TYPE_PP(value) == IS_CONSTANT) {
+				zend_class_entry *old_scope = EG(scope);
+
+				EG(scope) = ce;
+				zval_update_constant(value, (void *) 1 TSRMLS_CC);
+				EG(scope) = old_scope;
+			}
+			EX_T(opline->result.u.var).tmp_var = **value;
+			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
+		} else {
 			zend_error_noreturn(E_ERROR, "Undefined class constant '%R'", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
 		}
-	} else {
-		ce = EX_T(opline->op1.u.var).class_entry;
+
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	if (zend_u_hash_find(&ce->constants_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
-		zend_class_entry *old_scope = EG(scope);
-
-		EG(scope) = ce;
-		zval_update_constant(value, (void *) 1 TSRMLS_CC);
-		EG(scope) = old_scope;
-		EX_T(opline->result.u.var).tmp_var = **value;
-		zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-	} else {
-		zend_error_noreturn(E_ERROR, "Undefined class constant '%R'", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
-	}
-
-	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUSED|CV)

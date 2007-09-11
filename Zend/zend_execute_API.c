@@ -485,7 +485,6 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 	zend_bool inline_change = (zend_bool) (zend_uintptr_t) arg;
 	zval const_value;
 	zstr colon;
-	int len;
 
 	if (IS_CONSTANT_VISITED(p)) {
 		zend_error(E_ERROR, "Cannot declare self-referencing constant '%v'", Z_UNIVAL_P(p));
@@ -853,7 +852,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			} else if (calling_scope && clen == sizeof("parent") - 1 && 
 			    ZEND_U_EQUAL(Z_TYPE_P(fci->function_name), lcname, clen, "parent", sizeof("parent")-1)) {
 				ce_child = EG(active_op_array) && EG(active_op_array)->scope ? EG(scope)->parent : NULL;
-			} else if (zend_u_lookup_class_ex(Z_TYPE_P(fci->function_name), lcname, clen, 1, 0, &pce TSRMLS_CC) == SUCCESS) {
+			} else if (zend_u_lookup_class_ex(Z_TYPE_P(fci->function_name), lcname, clen, Z_UNIVAL_P(fci->function_name), 0, &pce TSRMLS_CC) == SUCCESS) {
 				ce_child = *pce;
 			}
 			efree(lcname.v);
@@ -1126,7 +1125,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 }
 /* }}} */
 
-ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length, int use_autoload, int do_normalize, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
+ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length, zstr autoload_name, int do_normalize, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
 {
 	zval **args[1];
 	zval autoload_function;
@@ -1174,7 +1173,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
 	 * (doesn't impact fuctionality of __autoload()
 	*/
-	if (!use_autoload || zend_is_compiling(TSRMLS_C)) {
+	if (!autoload_name.v || zend_is_compiling(TSRMLS_C)) {
 		if (do_normalize) {
 			efree(lc_free.v);
 		}
@@ -1197,7 +1196,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 
 	ALLOC_ZVAL(class_name_ptr);
 	INIT_PZVAL(class_name_ptr);
-	ZVAL_ZSTRL(class_name_ptr, type, name, name_length, 1);
+	ZVAL_ZSTR(class_name_ptr, type, autoload_name, 1);
 
 	args[0] = &class_name_ptr;
 
@@ -1261,13 +1260,13 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 
 ZEND_API int zend_u_lookup_class(zend_uchar type, zstr name, int name_length, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
 {
-	return zend_u_lookup_class_ex(type, name, name_length, 1, 1, ce TSRMLS_CC);
+	return zend_u_lookup_class_ex(type, name, name_length, name, 1, ce TSRMLS_CC);
 }
 /* }}} */
 
-ZEND_API int zend_lookup_class_ex(char *name, int name_length, int use_autoload, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
+ZEND_API int zend_lookup_class_ex(char *name, int name_length, char *autoload_name, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
 {
-	return zend_u_lookup_class_ex(IS_STRING, ZSTR(name), name_length, use_autoload, 1, ce TSRMLS_CC);
+	return zend_u_lookup_class_ex(IS_STRING, ZSTR(name), name_length, ZSTR(autoload_name), 1, ce TSRMLS_CC);
 }
 /* }}} */
 
@@ -1683,12 +1682,12 @@ check_fetch_type:
 		case ZEND_FETCH_CLASS_AUTO: {
 				if (do_normalize) {
 					lcname = zend_u_str_case_fold(type, class_name, class_name_len, 1, &class_name_len);
+					do_normalize = 0; /* we've normalized it already, don't do it twice */
 				}
 				fetch_type = zend_get_class_fetch_type(type, lcname, class_name_len);
 				if (fetch_type!=ZEND_FETCH_CLASS_DEFAULT) {
-					if (do_normalize) {
+					if (lcname.v != class_name.v) {
 						efree(lcname.v);
-						do_normalize = 0; /* we've normalized it already, don't do it twice */
 					}
 					goto check_fetch_type;
 				}
@@ -1696,38 +1695,46 @@ check_fetch_type:
 			break;
 	}
 
-	if (zend_u_lookup_class_ex(type, lcname, class_name_len, use_autoload, do_normalize, &pce TSRMLS_CC)==FAILURE) {
+	if (do_normalize) {
+		lcname = zend_u_str_case_fold(type, class_name, class_name_len, 1, &class_name_len);
+	}
+
+	if (zend_u_lookup_class_ex(type, lcname, class_name_len, ((!rt_ns_check && use_autoload) ? class_name : NULL_ZSTR), 0, &pce TSRMLS_CC)==FAILURE) {
 		if (rt_ns_check) {
 			/* Check if we have internal class with the same name */
-			zstr php_name;
+			zstr php_name = NULL_ZSTR;
+			uint php_name_len;
 			
 			if (type == IS_UNICODE) {
 				php_name.u = u_memrchr(lcname.u, ':', class_name_len);
 				if (php_name.u) {
 					php_name.u++;
-					if (zend_u_lookup_class_ex(type, php_name, class_name_len-(php_name.u-lcname.u), 0, do_normalize, &pce TSRMLS_CC)==SUCCESS &&
-					    (*pce)->type == ZEND_INTERNAL_CLASS) {
-						if (lcname.v != class_name.v) {
-							efree(lcname.v);
-						}
-						return *pce;
-					}
+					php_name_len = class_name_len-(php_name.u-lcname.u);
 				}
 			} else {
 				php_name.s = zend_memrchr(lcname.s, ':', class_name_len);
 				if (php_name.s) {
 					php_name.s++;
-					if (zend_u_lookup_class_ex(type, php_name, class_name_len-(php_name.s-lcname.s), 0, do_normalize, &pce TSRMLS_CC)==SUCCESS &&
-					    (*pce)->type == ZEND_INTERNAL_CLASS) {
-						if (lcname.v != class_name.v) {
-							efree(lcname.v);
-						}
-						return *pce;
-					}
+					php_name_len = class_name_len-(php_name.s-lcname.s);
 				}
+			}
+			if (php_name.v &&
+			    zend_u_hash_find(EG(class_table), type, php_name, php_name_len+1, (void **) &pce) == SUCCESS &&
+			    (*pce)->type == ZEND_INTERNAL_CLASS) {
+				if (lcname.v != class_name.v) {
+					efree(lcname.v);
+				}
+				return *pce;
 			}
 		}
 		if (use_autoload) {
+			if (rt_ns_check &&
+			    zend_u_lookup_class_ex(type, lcname, class_name_len, class_name, 0, &pce TSRMLS_CC)==SUCCESS) {
+				if (lcname.v != class_name.v) {
+					efree(lcname.v);
+				}
+				return *pce;
+			}
 			if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
 				zend_error(E_ERROR, "Interface '%R' not found", type, class_name);
 			} else {
