@@ -4601,8 +4601,9 @@ static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
 	zval *SIM;
 	gdImagePtr im_src;
 	long r,g,b,tmp;
+	long a = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &SIM, &tmp, &r, &g, &b) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll|l", &SIM, &tmp, &r, &g, &b, &a) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -4612,7 +4613,7 @@ static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	if (gdImageColor(im_src, (int) r, (int) g, (int) b) == 1) {
+	if (gdImageColor(im_src, (int) r, (int) g, (int) b, (int) a) == 1) {
 		RETURN_TRUE;
 	}
 
@@ -4721,7 +4722,7 @@ PHP_FUNCTION(imagefilter)
 		php_image_filter_smooth
 	};
 
-	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 5) {
+	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 6) {
 		WRONG_PARAM_COUNT;
 	} else if (zend_parse_parameters(2 TSRMLS_CC, "rl", &tmp, &filtertype) == FAILURE) {
 		return;
