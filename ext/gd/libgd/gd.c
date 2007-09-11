@@ -869,7 +869,9 @@ static void gdImageTileApply (gdImagePtr im, int x, int y)
 	srcy = y % gdImageSY(im->tile);
 	if (im->trueColor) {
 		p = gdImageGetTrueColorPixel(im->tile, srcx, srcy);
-		gdImageSetPixel(im, x, y, p);
+		if (p != gdImageGetTransparent (im->tile)) {
+			gdImageSetPixel(im, x, y, p);
+		}
 	} else {
 		p = gdImageGetPixel(im->tile, srcx, srcy);
 		/* Allow for transparency */
@@ -1668,10 +1670,9 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 	int fx = 0, fy = 0;
 
 
-	if (s == e) {
+    if ((s % 360)  == (e % 360)) {
 		s = 0; e = 360;	
 	} else {
-
 		if (s > 360) {
 			s = s % 360;
 		}
@@ -1848,14 +1849,14 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 	int lastBorder;
 	/* Seek left */
 	int leftLimit = -1, rightLimit;
-	int i, restoreAlphaBleding=0;
+	int i, restoreAlphaBlending = 0;
 
 	if (border < 0) {
 		/* Refuse to fill to a non-solid border */
 		return;
 	}
 
-	restoreAlphaBleding = im->alphaBlendingFlag;
+	restoreAlphaBlending = im->alphaBlendingFlag;
 	im->alphaBlendingFlag = 0;
 
 	if (x >= im->sx) {
@@ -1873,7 +1874,7 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 		leftLimit = i;
 	}
 	if (leftLimit == -1) {
-		im->alphaBlendingFlag = restoreAlphaBleding;
+		im->alphaBlendingFlag = restoreAlphaBlending;
 		return;
 	}
 	/* Seek right */
@@ -1918,7 +1919,7 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 			}
 		}
 	}
-	im->alphaBlendingFlag = restoreAlphaBleding;
+	im->alphaBlendingFlag = restoreAlphaBlending;
 }
 
 /*
@@ -1955,7 +1956,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 
 	/* stack of filled segments */
 	/* struct seg stack[FILL_MAX],*sp = stack;; */
-	struct seg *stack;
+	struct seg *stack = NULL;
 	struct seg *sp;
 
 	if (!im->trueColor && nc > (im->colorsTotal -1)) {
@@ -3461,7 +3462,7 @@ int gdImageCompare (gdImagePtr im1, gdImagePtr im2)
 }
 
 int
-gdAlphaBlend (int dst, int src)
+gdAlphaBlendOld (int dst, int src)
 {
 	/* 2.0.12: TBB: alpha in the destination should be a
 	 * component of the result. Thanks to Frank Warmerdam for
@@ -3481,6 +3482,51 @@ gdAlphaBlend (int dst, int src)
 	    gdTrueColorGetBlue (src) / gdAlphaMax) +
 	   (gdTrueColorGetAlpha (src) *
 	    gdTrueColorGetBlue (dst)) / gdAlphaMax));
+}
+
+int gdAlphaBlend (int dst, int src) {
+    int src_alpha = gdTrueColorGetAlpha(src);
+    int dst_alpha, alpha, red, green, blue;
+    int src_weight, dst_weight, tot_weight;
+
+/* -------------------------------------------------------------------- */
+/*      Simple cases we want to handle fast.                            */
+/* -------------------------------------------------------------------- */
+    if( src_alpha == gdAlphaOpaque )
+        return src;
+
+    dst_alpha = gdTrueColorGetAlpha(dst);
+    if( src_alpha == gdAlphaTransparent )
+        return dst;
+    if( dst_alpha == gdAlphaTransparent )
+        return src;
+
+/* -------------------------------------------------------------------- */
+/*      What will the source and destination alphas be?  Note that      */
+/*      the destination weighting is substantially reduced as the       */
+/*      overlay becomes quite opaque.                                   */
+/* -------------------------------------------------------------------- */
+    src_weight = gdAlphaTransparent - src_alpha;
+    dst_weight = (gdAlphaTransparent - dst_alpha) * src_alpha / gdAlphaMax;
+    tot_weight = src_weight + dst_weight;
+    
+/* -------------------------------------------------------------------- */
+/*      What red, green and blue result values will we use?             */
+/* -------------------------------------------------------------------- */
+    alpha = src_alpha * dst_alpha / gdAlphaMax;
+
+    red = (gdTrueColorGetRed(src) * src_weight
+           + gdTrueColorGetRed(dst) * dst_weight) / tot_weight;
+    green = (gdTrueColorGetGreen(src) * src_weight
+           + gdTrueColorGetGreen(dst) * dst_weight) / tot_weight;
+    blue = (gdTrueColorGetBlue(src) * src_weight
+           + gdTrueColorGetBlue(dst) * dst_weight) / tot_weight;
+
+/* -------------------------------------------------------------------- */
+/*      Return merged result.                                           */
+/* -------------------------------------------------------------------- */
+    return ((alpha << 24) + (red << 16) + (green << 8) + blue);
+
 }
 
 void gdImageAlphaBlending (gdImagePtr im, int alphaBlendingArg)
@@ -3754,15 +3800,14 @@ int gdImageContrast(gdImagePtr src, double contrast)
 }
 
 
-int gdImageColor(gdImagePtr src, int red, int green, int blue)
+int gdImageColor(gdImagePtr src, const int red, const int green, const int blue, const int alpha)
 {
 	int x, y;
-	int r,g,b,a;
 	int new_pxl, pxl;
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
 
-	if (src==NULL || (red<-255||red>255) || (green<-255||green>255) || (blue<-255||blue>255)) {
+	if (src == NULL) {
 		return 0;
 	}
 
@@ -3770,6 +3815,8 @@ int gdImageColor(gdImagePtr src, int red, int green, int blue)
 
 	for (y=0; y<src->sy; ++y) {
 		for (x=0; x<src->sx; ++x) {
+			int r,g,b,a;
+
 			pxl = f(src, x, y);
 			r = gdImageRed(src, pxl);
 			g = gdImageGreen(src, pxl);
@@ -3779,14 +3826,16 @@ int gdImageColor(gdImagePtr src, int red, int green, int blue)
 			r = r + red;
 			g = g + green;
 			b = b + blue;
+			a = a + alpha;
 
 			r = (r > 255)? 255 : ((r < 0)? 0:r);
 			g = (g > 255)? 255 : ((g < 0)? 0:g);
 			b = (b > 255)? 255 : ((b < 0)? 0:b);
+			a = (a > 127)? 127 : ((a < 0)? 0 : a);
 
-			new_pxl = gdImageColorAllocateAlpha(src, (int)r, (int)g, (int)b, a);
+			new_pxl = gdImageColorAllocateAlpha(src, r, g, b, a);
 			if (new_pxl == -1) {
-				new_pxl = gdImageColorClosestAlpha(src, (int)r, (int)g, (int)b, a);
+				new_pxl = gdImageColorClosestAlpha(src, r, g, b, a);
 			}
 			gdImageSetPixel (src, x, y, new_pxl);
 		}
