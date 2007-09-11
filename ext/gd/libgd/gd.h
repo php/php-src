@@ -643,7 +643,7 @@ int gdImageBrightness(gdImagePtr src, int brightness);
 int gdImageContrast(gdImagePtr src, double contrast);
 
 /* Simply adds or substracts respectively red, green or blue to a pixel */
-int gdImageColor(gdImagePtr src, int red, int green, int blue);
+int gdImageColor(gdImagePtr src, const int red, const int green, const int blue, const int alpha);
 
 /* Image convolution by a 3x3 custom matrix */
 int gdImageConvolution(gdImagePtr src, float ft[3][3], float filter_div, float offset);
