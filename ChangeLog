@@ -1,3 +1,33 @@
+2007-09-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/mod_files.c:
+      
+      MFB: Fixed Bug #42596 (session.save_path MODE option does not work).
+
+    * (PHP_5_2)
+      NEWS
+      ext/session/mod_files.c:
+      
+      Fixed Bug #42596 (session.save_path MODE option does not work).
+
+2007-09-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed bug #42587 (behaviour change regarding symlinked .php files)
+
+2007-09-10  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/strings/ucwords_basic.phpt
+      ext/standard/tests/strings/ucwords_basic.phpt
+      ext/standard/tests/strings/ucwords_variation2.phpt
+      ext/standard/tests/strings/ucwords_variation2.phpt
+      ext/standard/tests/strings/ucwords_variation4.phpt
+      ext/standard/tests/strings/ucwords_variation4.phpt:
+      fix tests
+
 2007-09-09  Antony Dovgal  <tony@daylessday.org>
 
     * ZendEngine2/zend_language_scanner.l:
