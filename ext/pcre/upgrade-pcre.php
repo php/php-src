@@ -33,10 +33,13 @@ function recurse($path)
 {
 	global $newpcre, $dirlen;
 
-	foreach(scandir($path) as $file) {
+	foreach (scandir($path) as $file) {
 
-		if ($file[0] === '.' || $file === 'CVS') continue;
-		if (substr_compare($file, '.lo', -3, 3) == 0 || substr_compare($file, '.o', -2, 2) == 0) continue;
+		if ($file[0] === '.' ||
+		$file === 'CVS' ||
+		substr_compare($file, '.lo', -3, 3) == 0 ||
+		substr_compare($file, '.loT', -4, 4) == 0 ||
+		substr_compare($file, '.o', -2, 2) == 0) continue;
 
 		$file = "$path/$file";
 
@@ -58,7 +61,19 @@ function recurse($path)
 			die("$newfile is not available any more\n");
 		}
 
-		copy($newfile, $file);
+		// maintain file mtimes so that cvs doesnt get crazy
+		if (file_get_contents($newfile) !== file_get_contents($file)) {
+			copy($newfile, $file);
+		}
+
+		// always include the config.h file
+		$content    = file_get_contents($newfile);
+		$newcontent = preg_replace('/#\s*ifdef HAVE_CONFIG_H\s*(.+)\s*#\s*endif/', '$1', $content);
+
+		if ($content !== $newcontent) {
+			file_put_contents($file, $newcontent);
+		}
+
 		echo "OK\n";
 	}
 
