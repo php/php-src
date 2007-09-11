@@ -3807,15 +3807,14 @@ int gdImageContrast(gdImagePtr src, double contrast)
 }
 
 
-int gdImageColor(gdImagePtr src, int red, int green, int blue)
+int gdImageColor(gdImagePtr src, const int red, const int green, const int blue, const int alpha)
 {
 	int x, y;
-	int r,g,b,a;
 	int new_pxl, pxl;
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
 
-	if (src==NULL || (red<-255||red>255) || (green<-255||green>255) || (blue<-255||blue>255)) {
+	if (src == NULL) {
 		return 0;
 	}
 
@@ -3823,6 +3822,8 @@ int gdImageColor(gdImagePtr src, int red, int green, int blue)
 
 	for (y=0; y<src->sy; ++y) {
 		for (x=0; x<src->sx; ++x) {
+			int r,g,b,a;
+
 			pxl = f(src, x, y);
 			r = gdImageRed(src, pxl);
 			g = gdImageGreen(src, pxl);
@@ -3832,14 +3833,16 @@ int gdImageColor(gdImagePtr src, int red, int green, int blue)
 			r = r + red;
 			g = g + green;
 			b = b + blue;
+			a = a + alpha;
 
-			r = (r > 255)? 255 : ((r < 0)? 0:r);
-			g = (g > 255)? 255 : ((g < 0)? 0:g);
-			b = (b > 255)? 255 : ((b < 0)? 0:b);
+			r = (r > 255)? 255 : ((r < 0)? 0 : r);
+			g = (g > 255)? 255 : ((g < 0)? 0 : g);
+			b = (b > 255)? 255 : ((b < 0)? 0 : b);
+			a = (a > 127)? 127 : ((a < 0)? 0 : a);
 
-			new_pxl = gdImageColorAllocateAlpha(src, (int)r, (int)g, (int)b, a);
+			new_pxl = gdImageColorAllocateAlpha(src, r, g, b, a);
 			if (new_pxl == -1) {
-				new_pxl = gdImageColorClosestAlpha(src, (int)r, (int)g, (int)b, a);
+				new_pxl = gdImageColorClosestAlpha(src, r, g, b, a);
 			}
 			gdImageSetPixel (src, x, y, new_pxl);
 		}
