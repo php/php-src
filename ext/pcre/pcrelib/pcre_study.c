@@ -42,9 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 supporting functions. */
 
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include "pcre_internal.h"
 
