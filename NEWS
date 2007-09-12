@@ -1,6 +1,10 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.2.5
+- Upgraded PCRE to version 7.3 (Nuno)
+- Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
+- Added alpha support for imagefilter() IMG_FILTER_COLORIZE. (Pierre)
+
 - Fixed missing brackets leading to build warning and error in the log.
   Win32 code). (Andrey)
 - Fixed leaks with mulitple connects on one mysqli object. (Andrey)
@@ -10,10 +14,6 @@
   imlplementations of the fnmatch(), setlocale() and glob() functions. 
   Reported by Laurent gaffie. (Ilia)
 - Fixed imagerectangle regression with 1x1 rectangle (libgd #106). (Pierre)
-
-- Upgraded PCRE to version 7.3 (Nuno)
-- Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
-- Added alpha support for imagefilter() IMG_FILTER_COLORIZE. (Pierre)
 
 - Fixed bug #42627 (bz2 extension fails to build with -fno-common).
   (dolecek at netbsd dot org)
