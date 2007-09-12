@@ -669,6 +669,12 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 				descriptors[ndesc].childend = dup_fd_as_handle(fd);
 				_close(fd);
+
+				/* simulate the append mode by fseeking to the end of the file
+				this introduces a potential race-condition, but it is the best we can do, though */
+				if (strchr(Z_STRVAL_PP(zmode), 'a')) {
+					SetFilePointer(descriptors[ndesc].childend, 0, NULL, FILE_END);
+				}
 #else
 				descriptors[ndesc].childend = fd;
 #endif
