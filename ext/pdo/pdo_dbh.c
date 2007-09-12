@@ -1453,12 +1453,6 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 		}
 	}
 
-	if (dbh->properties) {
-		zend_hash_destroy(dbh->properties);
-		efree(dbh->properties);
-		dbh->properties = NULL;
-	}
-
 	pefree(dbh, dbh->is_persistent);
 }
 
@@ -1477,6 +1471,12 @@ static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 	if (dbh->in_txn && dbh->methods && dbh->methods->rollback) {
 		dbh->methods->rollback(dbh TSRMLS_CC);
 		dbh->in_txn = 0;
+	}
+
+	if (dbh->properties) {
+		zend_hash_destroy(dbh->properties);
+		efree(dbh->properties);
+		dbh->properties = NULL;
 	}
 	
 	if (!dbh->is_persistent) {
