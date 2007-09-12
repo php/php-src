@@ -1,3 +1,125 @@
+2007-09-11  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd.h:
+      - MFB
+
+    * ext/gd/gd.c:
+      - MFB: alpha support for colorize filter
+
+    * ext/gd/libgd/gd.c:
+      - MFB:
+       - gdImageTileApply does not respect transparent color
+       - gdImageArc regression
+       - Alpha channel support for gdImageColor (IMG_FILTER_COLORIZE)
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/gd.c
+      ext/gd/libgd/gd.c:
+      - [DOC] add alpha support for imagefilter's IMG_FILTER_COLORIZE
+
+2007-09-11  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/upgrade-pcre.php
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/pcre_chartables.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c:
+      MFB: remove HAVE_CONFIG_H
+
+    * (PHP_5_2)
+      ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/upgrade-pcre.php
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/pcre_chartables.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c:
+      remove the -DHAVE_CONFIG_H switch again to fix things on windows
+      this means that the upgrade script strips the #ifdef automatically
+
+2007-09-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      typo
+
+    * ZendEngine2/zend_builtin_functions.c:
+      forgotten part
+
+2007-09-11  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/bcmath/libbcmath/src/bcmath.h:
+      revert config header change
+
+2007-09-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_constants.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - in case of ambiguity class name in namespace call  __autoload() only
+      after
+        checking for both (class from current namespace and internal class)
+      - improved class fetching performance
+      - fixed wrong (lowercase) name passed to __autoload() from
+      call_user_func()
+
+    * ext/reflection/php_reflection.c:
+      Simplify (the prototype of zend_u_get_constant_ex() is going to be changed)
+
+2007-09-11  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/addslashes_variation3.phpt
+      ext/standard/tests/strings/stripslashes_variation5.phpt:
+      - Fix tests (we are not interested what the old value was for the ini
+      option)
+
+2007-09-11  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/general_functions/is_callable.phpt
+      ext/standard/tests/general_functions/is_callable.phpt:
+      fix test
+
 2007-09-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/session/mod_files.c:
