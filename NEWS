@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.2.5
+- Fixed missing brackets leading to build warning and error in the log.
+  Win32 code). (Andrey)
 - Fixed leaks with mulitple connects on one mysqli object. (Andrey)
 - Fixed endianness detection on MacOS when building universal binary. 
   (Uwe Schindler, Christian Speich, Tony)
