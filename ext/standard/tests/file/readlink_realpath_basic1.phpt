@@ -1,5 +1,5 @@
 --TEST--
-Test readlink() and realpath functions: basic functionality - diff. path notation for links
+Test readlink() and realpath functions: basic functionality - diff. path notation for links(Bug #42038)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
