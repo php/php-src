@@ -241,9 +241,10 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_RETURN_LONG_LONG(__val) \
 { \
 	if ((__val) < LONG_MAX) {		\
-		RETURN_LONG((__val));		\
+		RETURN_LONG((long) (__val));		\
 	} else {				\
 		char *ret;			\
+		/* always used with my_ulonglong -> %llu */ \
 		int l = spprintf(&ret, 0, "%llu", (__val));	\
 		RETURN_STRINGL(ret, l, 0);		\
 	}					\
