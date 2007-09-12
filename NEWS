@@ -15,6 +15,7 @@
   Reported by Laurent gaffie. (Ilia)
 - Fixed imagerectangle regression with 1x1 rectangle (libgd #106). (Pierre)
 
+- Fixed bug #42643 (CLI segfaults if using ATTR_PERSISTENT). (Ilia)
 - Fixed bug #42627 (bz2 extension fails to build with -fno-common).
   (dolecek at netbsd dot org)
 - Fixed Bug #42596 (session.save_path MODE option does not work). (Ilia)
