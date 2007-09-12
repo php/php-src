@@ -7,13 +7,13 @@ PHP                                                                        NEWS
 - Fixed endianness detection on MacOS when building universal binary. 
   (Uwe Schindler, Christian Speich, Tony)
 - Fixed possible triggering of buffer overflows inside glibc
-  imlplementations of the fnmatch(), setlocale() and glob() functions reported 
-  by Laurent gaffie (Ilia)
+  imlplementations of the fnmatch(), setlocale() and glob() functions. 
+  Reported by Laurent gaffie. (Ilia)
 - Fixed imagerectangle regression with 1x1 rectangle (libgd #106). (Pierre)
 
 - Upgraded PCRE to version 7.3 (Nuno)
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
-- Added alpha support for imagefilter's IMG_FILTER_COLORIZE
+- Added alpha support for imagefilter() IMG_FILTER_COLORIZE. (Pierre)
 
 - Fixed Bug #42596 (session.save_path MODE option does not work). (Ilia)
 - Fixed bug #42590 (Make the engine recornize \v and \f escape sequences). 
