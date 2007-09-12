@@ -538,7 +538,11 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 					char *buf = NULL;
 					size_t len;
 					len = php_stream_copy_to_mem((php_stream*)value, &buf, PHP_STREAM_COPY_ALL, 0);
-					ZVAL_STRINGL(dest, buf, len, 0);
+					if(buf == NULL) {
+						ZVAL_EMPTY_STRING(dest);
+					} else {
+						ZVAL_STRINGL(dest, buf, len, 0);
+					}
 					php_stream_close((php_stream*)value);
 				} else {
 					php_stream_to_zval((php_stream*)value, dest);
