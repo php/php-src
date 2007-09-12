@@ -1,5 +1,5 @@
 --TEST--
-Test rename() function: usage variations-1
+Test rename() function: usage variations-1 (Bug#42638)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
