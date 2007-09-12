@@ -1,5 +1,5 @@
 --TEST--
-Test readlink() and realpath() functions: usage variation - linkname/filename stored in array
+Test readlink() and realpath() functions: usage variation - linkname/filename stored in array(Bug #42038)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
