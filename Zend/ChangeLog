@@ -1,3 +1,23 @@
+2007-09-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_builtin_functions.c:
+      typo
+
+    * zend_builtin_functions.c:
+      forgotten part
+
+    * zend_constants.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - in case of ambiguity class name in namespace call  __autoload() only
+      after
+        checking for both (class from current namespace and internal class)
+      - improved class fetching performance
+      - fixed wrong (lowercase) name passed to __autoload() from
+      call_user_func()
+
 2007-09-09  Antony Dovgal  <tony@daylessday.org>
 
     * zend_language_scanner.l:
