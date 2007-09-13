@@ -434,6 +434,18 @@ static PHP_INI_MH(OnUpdateErrorLog)
 }
 /* }}} */
 
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnChangeMailForceExtra)
+{
+	/* Don't allow changing it in htaccess */
+	if (stage == PHP_INI_STAGE_HTACCESS) {
+			return FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 /*
  * Need to be read from the environment (?):
  * PHP_AUTO_PREPEND_FILE
@@ -524,7 +536,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
-	PHP_INI_ENTRY("mail.force_extra_parameters",NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		NULL)
+	PHP_INI_ENTRY("mail.force_extra_parameters",NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnChangeMailForceExtra)
 	PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		NULL)
 	PHP_INI_ENTRY("disable_classes",			"",			PHP_INI_SYSTEM,		NULL)
 
