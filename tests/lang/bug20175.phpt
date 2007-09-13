@@ -139,6 +139,7 @@ $oop_tester = new oop_test; // repeated.
 print $oop_tester->oop_static()."\n";
 ?>
 --EXPECTF--
+Strict Standards: Assigning the return value of new by reference is deprecated in %s.php on line %d
 %s
 foo_static()
 foo_global()
