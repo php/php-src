@@ -115,6 +115,13 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 	if (extension_dir && extension_dir[0]){
 		int extension_dir_len = strlen(extension_dir);
 
+		if(type == MODULE_TEMPORARY) {
+			if(strchr(filename, '/') != NULL || strchr(filename, DEFAULT_SLASH) != NULL) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Temporary module name should contain only filename");
+				RETURN_FALSE;
+			}
+		}
+
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
 			spprintf(&libpath, 0, "%s%s", extension_dir, filename); /* SAFE */
 		} else {
