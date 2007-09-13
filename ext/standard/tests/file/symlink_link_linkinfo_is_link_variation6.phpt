@@ -18,7 +18,7 @@ $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
         unlink ($filename);
-        die('skip...cannot be run as root\n');
+        die('skip cannot be run as root');
 }
 
 unlink($filename);
