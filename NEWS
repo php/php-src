@@ -16,6 +16,8 @@
 - Fixed imagerectangle regression with 1x1 rectangle (libgd #106). (Pierre)
 - Fixed PDO crash when dirver returns empty LOB stream (Stas).
 - Fixed dl() to accept only filenames - reported by Laurent Gaffie. (Stas)
+- Disallowed setting mail.force_extra_parameters from .htaccess due
+  to the security implications - reported by SecurityReason (Stas)
 
 - Fixed bug #42643 (CLI segfaults if using ATTR_PERSISTENT). (Ilia)
 - Fixed bug #42627 (bz2 extension fails to build with -fno-common).
