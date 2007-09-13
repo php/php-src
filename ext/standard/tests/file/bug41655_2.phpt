@@ -11,6 +11,7 @@ open_basedir=/
 --EXPECTF--
 Array
 (
-    [%d] => %sbug41655_1.phpt
-    [%d] => %sbug41655_2.phpt
+    [0] => %sbug41655_1.phpt
+    [1] => %sbug41655_2.php
+    [2] => %sbug41655_2.phpt
 )
