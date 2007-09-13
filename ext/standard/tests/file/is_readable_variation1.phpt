@@ -3,7 +3,7 @@ Test is_readable() function: usage variations - diff. file notations
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. only for LINUX');
+    die('skip not for windows');
 }
 ?>
 --FILE--

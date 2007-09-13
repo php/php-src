@@ -3,7 +3,7 @@ Test is_executable() function: usage variations - file/dir with diff. perms
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. only for LINUX');
+    die('skip not for windows');
 }
 ?>
 --FILE--
