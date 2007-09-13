@@ -6,6 +6,7 @@ $result = (bool)setlocale(LC_CTYPE, "ja_JP.EUC-JP", "ja_JP.eucJP");
 if (!$result || preg_match('/EUC[^a-zA-Z]*JP/i', setlocale(LC_CTYPE, 0)) == 0) {
 	die("skip setlocale() failed\n");
 }
+echo "warn possibly braindead libc\n";
 ?>
 --INI--
 output_handler=

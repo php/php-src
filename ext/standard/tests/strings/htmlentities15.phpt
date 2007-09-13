@@ -10,6 +10,7 @@ $result = (bool)setlocale(LC_CTYPE, "ru_RU.koi8r", "ru_RU.KOI8-R");
 if (!$result || preg_match('/koi8/i', setlocale(LC_CTYPE, 0)) == 0) {
 	die("skip setlocale() failed\n");
 }
+echo "warn possibly braindead libc\n";
 ?>
 --FILE--
 <?php
