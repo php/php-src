@@ -1,3 +1,89 @@
+2007-09-12  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/pdo/pdo_stmt.c:
+      MFB: fix crash if stream is empty and reader function sets buffer as null
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c:
+      fix crash if stream is empty and reader function sets buffer as null
+
+2007-09-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c:
+      Fixed bug #42643 (CLI segfaults if using ATTR_PERSISTENT).
+
+2007-09-12  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/proc_open.c:
+      MFB: fix #39651
+
+2007-09-12  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      reorder
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+2007-09-12  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN #39651
+
+2007-09-12  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/bz2/php_bz2.h:
+      - Fixed bug #42627 (bz2 extension fails to build with -fno-common)
+
+2007-09-12  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/standard/proc_open.c:
+      fix bug #39651: proc_open() append mode doesnt work on windows
+
+2007-09-12  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/readlink_realpath_basic1.phpt
+      ext/standard/tests/file/readlink_realpath_basic1.phpt
+      ext/standard/tests/file/readlink_realpath_variation1.phpt
+      ext/standard/tests/file/readlink_realpath_variation1.phpt
+      ext/standard/tests/file/readlink_realpath_variation2.phpt
+      ext/standard/tests/file/readlink_realpath_variation2.phpt:
+      marked with Bug #42038
+
+2007-09-12  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      fix news
+
+2007-09-12  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/php_mysqli.h:
+      Fix stupid error, which happens only on Windows. And we thought this has
+      been fixed. Now my_thread_end() should be called and there should be no
+      warnings in the error logs of exiting thread, which hasn't deinited, and
+      leaks.
+
+2007-09-12  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/is_file_variation4.phpt
+      ext/standard/tests/file/rename_variation.phpt:
+      marked with bug#42638
+
+    * (PHP_5_2)
+      ext/standard/tests/file/is_file_variation4.phpt
+      ext/standard/tests/file/rename_variation.phpt:
+      marked with Bug# 42638
+
 2007-09-11  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/gd/libgd/gd.h:
