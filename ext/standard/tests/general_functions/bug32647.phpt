@@ -43,7 +43,11 @@ Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed 
 
 Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed in %s on line %d
 
+Warning: register_shutdown_function(): Invalid shutdown callback 'bar::foo' passed in %s on line %d
+
 Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed in %s on line %d
+
+Warning: register_shutdown_function(): Invalid shutdown callback 'bar' passed in %s on line %d
 
 Strict Standards: Non-static method bar::barfoo() cannot be called statically in %sbug32647.php on line %d
 
