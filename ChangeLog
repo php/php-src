@@ -1,3 +1,125 @@
+2007-09-13  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      register mail.force_extra_parameters change
+
+    * main/main.c:
+      MFB: disallow setting mail.force_extra_parameters from .htaccess
+
+    * (PHP_5_2)
+      main/main.c:
+      disallow setting mail.force_extra_parameters from .htaccess
+
+2007-09-13  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/date/tests/bug35885.phpt
+      ext/standard/tests/strings/strtolower.phpt
+      ext/standard/tests/strings/strtoupper1.phpt:
+      MFB
+
+    * (PHP_5_2)
+      ext/date/tests/bug35885.phpt:
+      fix test, particularly when running with valgrind, bacause it may take more
+      than one second to execute both instructions and thus get different dates
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/strtolower.phpt
+      ext/standard/tests/strings/strtoupper1.phpt:
+      attemp to set locale if it exists. fix skip condition
+
+    * (PHP_5_2)
+      tests/lang/bug20175.phpt:
+      fix expected output
+
+    * ext/standard/tests/file/bug41655_2.phpt
+      tests/lang/bug20175.phpt:
+      MFB: fix expected output
+
+    * (PHP_5_2)
+      ext/standard/tests/file/bug41655_2.phpt:
+      fix test expected output
+
+    * ext/standard/tests/file/006_basic.phpt
+      ext/standard/tests/file/006_error.phpt
+      ext/standard/tests/file/006_variation1.phpt
+      ext/standard/tests/file/006_variation2.phpt
+      ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation9.phpt
+      ext/standard/tests/file/is_executable_basic.phpt
+      ext/standard/tests/file/is_executable_variation1.phpt
+      ext/standard/tests/file/is_executable_variation2.phpt
+      ext/standard/tests/file/is_executable_variation3.phpt
+      ext/standard/tests/file/is_readable_basic.phpt
+      ext/standard/tests/file/is_readable_variation1.phpt
+      ext/standard/tests/file/is_readable_variation2.phpt
+      ext/standard/tests/file/is_readable_variation3.phpt
+      ext/standard/tests/file/is_writable_basic.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation1.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation6.phpt
+      ext/standard/tests/file/unlink_variation1.phpt:
+      MFB: fix skip reasons
+
+    * (PHP_5_2)
+      ext/standard/tests/file/006_basic.phpt
+      ext/standard/tests/file/006_error.phpt
+      ext/standard/tests/file/006_variation1.phpt
+      ext/standard/tests/file/006_variation2.phpt
+      ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation9.phpt
+      ext/standard/tests/file/is_executable_basic.phpt
+      ext/standard/tests/file/is_executable_variation1.phpt
+      ext/standard/tests/file/is_executable_variation2.phpt
+      ext/standard/tests/file/is_executable_variation3.phpt
+      ext/standard/tests/file/is_readable_basic.phpt
+      ext/standard/tests/file/is_readable_variation1.phpt
+      ext/standard/tests/file/is_readable_variation2.phpt
+      ext/standard/tests/file/is_readable_variation3.phpt
+      ext/standard/tests/file/is_writable_basic.phpt
+      ext/standard/tests/file/is_writable_variation1.phpt
+      ext/standard/tests/file/is_writable_variation2.phpt
+      ext/standard/tests/file/is_writable_variation3.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation1.phpt
+      ext/standard/tests/file/mkdir_rmdir_variation2.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_variation6.phpt
+      ext/standard/tests/file/unlink_variation1.phpt:
+      fix skip reasons. the word 'skip' should be followed by a single space and
+      doesnt need any \n at the end
+
+2007-09-13  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      List recent fixes
+
+2007-09-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/htmlentities04.phpt
+      ext/standard/tests/strings/htmlentities15.phpt:
+      
+      MFB: Added a note indicating that the tests may fail to due libc
+      implementation
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/htmlentities04.phpt
+      ext/standard/tests/strings/htmlentities15.phpt:
+      Added a note indicating that the tests may fail to due libc implementation
+
+2007-09-13  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/dl.c:
+      cs/ws fix
+
+2007-09-13  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/dl.c:
+      MFB: docs say dl() parameter can be filename only - enforce it
+
+    * (PHP_5_2)
+      ext/standard/dl.c:
+      docs say dl() parameter can be filename only - enforce it
+
 2007-09-12  Stanislav Malyshev  <stas@zend.com>
 
     * ext/pdo/pdo_stmt.c:
