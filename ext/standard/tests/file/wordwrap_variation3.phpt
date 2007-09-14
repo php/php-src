@@ -8,10 +8,9 @@ Test wordwrap() function : usage variations  - unexptected values for break argu
  * Source code: ext/standard/string.c
 */
 
-//
-// add comment here to indicate details of what this testcase is testing in particular
-//
-
+/*
+ * test wordwrap by passing different values for break argument 
+*/
 echo "*** Testing wordwrap() : usage variations ***\n";
 // initialize all required variables
 $str = 'testing wordwrap function';
