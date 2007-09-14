@@ -7,10 +7,6 @@ Test wordwrap() function : error conditions
  * Source code: ext/standard/string.c
 */
 
-//
-// add comment here to indicate details of what this testcase is testing in particular
-//
-
 echo "*** Testing wordwrap() : error conditions ***\n";
 
 // Zero argument
