@@ -2,8 +2,8 @@
 Test lstat() and stat() functions: usage variations - effects of touch() on link 
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. lstat() not available on Windows');
+if (!(stristr(PHP_OS, 'linux')))  {
+    die('skip.. test valid for linux only');
 }
 
 // checking for atime update whether it is enabled or disabled
@@ -40,10 +40,13 @@ symlink($file_name, $link_name);  // temp link
 // touch a link, check stat, there should be difference in atime
 echo "*** Testing lstat() for link after using touch() on the link ***\n";
 $old_stat = lstat($link_name);
+sleep(2);
+
 // clear the cache
 clearstatcache();
-sleep(2);
+
 var_dump( touch($link_name) );
+
 $new_stat = lstat($link_name);
 
 // compare self stats
