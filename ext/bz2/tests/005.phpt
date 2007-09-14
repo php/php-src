@@ -38,10 +38,10 @@ var_dump(bzdecompress($data2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: bzcompress() expects at least 1 parameter, 0 given in %s on line %d
 NULL
-string(%d) "BZ%s"
+string(%d) "BZ%a"
 int(-2)
 int(-2)
 int(-2)
@@ -73,7 +73,7 @@ Done
 --UEXPECTF--
 Warning: bzcompress() expects at least 1 parameter, 0 given in %s on line %d
 NULL
-unicode(%d) "BZ%s"
+unicode(%d) "BZ%a"
 int(-2)
 int(-2)
 int(-2)

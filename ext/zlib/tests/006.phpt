@@ -40,11 +40,11 @@ NULL
 
 Warning: gzdeflate(): compression level (1000) must be within -1..9 in %s on line %d
 bool(false)
-string(%d) "%s"
-string(%d) "%s"
-string(%d) "%s"
-string(%d) "%s"
-string(%d) "%s"
+string(%d) "%a"
+string(%d) "%a"
+string(%d) "%a"
+string(%d) "%a"
+string(%d) "%a"
 
 Warning: gzinflate() expects at least 1 parameter, 0 given in %s on line %d
 NULL

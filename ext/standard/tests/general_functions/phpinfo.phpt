@@ -24,6 +24,7 @@ Configure Command => %s
 Server API => Command Line Interface
 Virtual Directory Support => %s
 Configuration File (php.ini) Path => %s
+Loaded Configuration File => %s
 PHP API => %d
 PHP Extension => %d
 Zend Extension => %d
@@ -35,7 +36,7 @@ Registered PHP Streams => %s
 Registered Stream Socket Transports => %s
 Registered Stream Filters => %s
 
-%s
+%a
  _______________________________________________________________________
 
 
@@ -43,22 +44,22 @@ Configuration
 
 PHP Core
 
-%s
+%a
 
 Additional Modules
 
-%s
+%a
 
 Environment
 
-%s
+%a
 
 PHP Variables
 
-%s
+%a
 
 PHP License
-%s
+%a
 bool(true)
 --
 
@@ -71,5 +72,5 @@ bool(true)
 phpinfo()
 
 PHP License
-%s
+%a
 bool(true)

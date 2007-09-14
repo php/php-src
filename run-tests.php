@@ -1550,14 +1550,15 @@ COMMAND $cmd
 		if (isset($section_text['EXPECTF'])) {
 			$wanted_re = preg_quote($wanted_re, '/');
 			// Stick to basics
-			$wanted_re = str_replace("%e", '\\' . DIRECTORY_SEPARATOR, $wanted_re);
-			$wanted_re = str_replace("%s", ".+?", $wanted_re); //not greedy
-			$wanted_re = str_replace("%w", "\s*", $wanted_re);
-			$wanted_re = str_replace("%i", "[+\-]?[0-9]+", $wanted_re);
-			$wanted_re = str_replace("%d", "[0-9]+", $wanted_re);
-			$wanted_re = str_replace("%x", "[0-9a-fA-F]+", $wanted_re);
-			$wanted_re = str_replace("%f", "[+\-]?\.?[0-9]+\.?[0-9]*(E-?[0-9]+)?", $wanted_re);
-			$wanted_re = str_replace("%c", ".", $wanted_re);
+			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
+			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
+			$wanted_re = str_replace('%a', '.+', $wanted_re);
+			$wanted_re = str_replace('%w', '\s*', $wanted_re);
+			$wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
+			$wanted_re = str_replace('%d', '\d+', $wanted_re);
+			$wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
+			$wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:E-?\d+)?', $wanted_re);
+			$wanted_re = str_replace('%c', '.', $wanted_re);
 			// %f allows two points "-.0.0" but that is the best *simple* expression
 		}
 /* DEBUG YOUR REGEX HERE
