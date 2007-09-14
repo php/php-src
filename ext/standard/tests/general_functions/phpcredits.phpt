@@ -17,28 +17,28 @@ var_dump(phpcredits(CREDITS_GROUP));
 PHP Credits
 
 PHP Group
-%s
+%a
 
 Language Design & Concept
-%s
+%a
 
 %wPHP %d Authors%w
-%s
+%a
 
 %wSAPI Modules%w
-%s
+%a
 
 %wModule Authors%w
-%s
+%a
 
 %wPHP Documentation%w
-%s
+%a
 
 PHP Quality Assurance Team
-%s
+%a
 
 PHP Website Team
-%s
+%a
 bool(true)
 
 Warning: phpcredits() expects parameter 1 to be long, array given in %sphpcredits.php on line 4
@@ -50,5 +50,5 @@ bool(true)
 PHP Credits
 
 PHP Group
-%s
+%a
 bool(true)

@@ -33,18 +33,18 @@ var_dump(gzuncompress($data2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 
 Warning: gzcompress() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 Warning: gzcompress(): compression level (1000) must be within -1..9 in %s on line %d
 bool(false)
-string(%d) "%s"
-string(%d) "%s"
-string(%d) "%s"
-string(%d) "%s"
-string(%d) "%s"
+string(%d) "%a"
+string(%d) "%a"
+string(%d) "%a"
+string(%d) "%a"
+string(%d) "%a"
 
 Warning: gzuncompress() expects at least 1 parameter, 0 given in %s on line %d
 NULL
