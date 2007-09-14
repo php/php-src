@@ -20,14 +20,14 @@ var_dump(phpinfo(INFO_LICENSE));
 ?>
 --EXPECTF--
 <!DOCTYPE %s>
-%s</html>bool(true)
+%a</html>bool(true)
 --
 
 Warning: phpinfo() expects parameter 1 to be long, array given in %sphpinfo2.php on line 5
 NULL
 --
 <!DOCTYPE %s>
-%s</html>bool(true)
+%a</html>bool(true)
 --
 <!DOCTYPE %s>
-%s</html>bool(true)
+%a</html>bool(true)
