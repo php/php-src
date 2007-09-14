@@ -37,10 +37,10 @@ var_dump(bzdecompress($data2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: Wrong parameter count for bzcompress() in %s on line %d
 NULL
-string(%d) "BZ%s"
+string(%d) "BZ%a"
 int(-2)
 int(-2)
 int(-2)
