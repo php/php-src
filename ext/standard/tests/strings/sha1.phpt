@@ -44,8 +44,8 @@ bool(true)
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 bool(true)
-string(20) "%s"
-string(20) "%s"
+string(20) "%a"
+string(20) "%a"
 
 Warning: sha1_file(%ssha1.dat): failed to open stream: No such file or directory in %s on line %d
 Done
