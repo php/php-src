@@ -1,10 +1,15 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.2.5
 - Upgraded PCRE to version 7.3 (Nuno)
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
 - Added alpha support for imagefilter() IMG_FILTER_COLORIZE. (Pierre)
 
+- Fixed "mail.force_extra_parameters" php.ini directive not to be modifiable
+  in .htaccess due to the security implications - reported by SecurityReason.
+  (Stas)
+- Fixed PDO crash when driver returns empty LOB stream. (Stas)
+- Fixed dl() to only accept filenames - reported by Laurent Gaffie. (Stas)
 - Fixed missing brackets leading to build warning and error in the log.
   Win32 code). (Andrey)
 - Fixed leaks with mulitple connects on one mysqli object. (Andrey)
@@ -14,10 +19,6 @@
   imlplementations of the fnmatch(), setlocale() and glob() functions. 
   Reported by Laurent gaffie. (Ilia)
 - Fixed imagerectangle regression with 1x1 rectangle (libgd #106). (Pierre)
-- Fixed PDO crash when dirver returns empty LOB stream (Stas).
-- Fixed dl() to accept only filenames - reported by Laurent Gaffie. (Stas)
-- Disallowed setting mail.force_extra_parameters from .htaccess due
-  to the security implications - reported by SecurityReason (Stas)
 
 - Fixed bug #42643 (CLI segfaults if using ATTR_PERSISTENT). (Ilia)
 - Fixed bug #42627 (bz2 extension fails to build with -fno-common).
