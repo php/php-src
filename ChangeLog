@@ -1,3 +1,266 @@
+2007-09-14  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/strncasecmp_basic.phpt
+      ext/standard/tests/strings/strncasecmp_error.phpt
+      ext/standard/tests/strings/strncasecmp_variation1.phpt
+      ext/standard/tests/strings/strncasecmp_variation10.phpt
+      ext/standard/tests/strings/strncasecmp_variation11.phpt
+      ext/standard/tests/strings/strncasecmp_variation2.phpt
+      ext/standard/tests/strings/strncasecmp_variation3.phpt
+      ext/standard/tests/strings/strncasecmp_variation4.phpt
+      ext/standard/tests/strings/strncasecmp_variation5.phpt
+      ext/standard/tests/strings/strncasecmp_variation6.phpt
+      ext/standard/tests/strings/strncasecmp_variation7.phpt
+      ext/standard/tests/strings/strncasecmp_variation8.phpt
+      ext/standard/tests/strings/strncasecmp_variation9.phpt:
+      New testcase for strncasecmp()
+
+    * ext/standard/tests/strings/chop_basic.phpt
+      ext/standard/tests/strings/chop_basic.phpt
+      ext/standard/tests/strings/chop_error.phpt
+      ext/standard/tests/strings/chop_variation1.phpt
+      ext/standard/tests/strings/chop_variation2.phpt
+      ext/standard/tests/strings/chop_variation3.phpt
+      ext/standard/tests/strings/chop_variation4.phpt
+      ext/standard/tests/strings/chop_variation5.phpt:
+      New testcases for chop()
+
+    * ext/standard/tests/strings/stripos_basic.phpt
+      ext/standard/tests/strings/stripos_basic.phpt
+      ext/standard/tests/strings/strncasecmp_basic.phpt
+      ext/standard/tests/strings/strncasecmp_basic.phpt
+      ext/standard/tests/strings/strncasecmp_error.phpt
+      ext/standard/tests/strings/strncasecmp_error.phpt
+      ext/standard/tests/strings/strncasecmp_variation1.phpt
+      ext/standard/tests/strings/strncasecmp_variation1.phpt
+      ext/standard/tests/strings/strncasecmp_variation10.phpt
+      ext/standard/tests/strings/strncasecmp_variation10.phpt
+      ext/standard/tests/strings/strncasecmp_variation11.phpt
+      ext/standard/tests/strings/strncasecmp_variation11.phpt
+      ext/standard/tests/strings/strncasecmp_variation2.phpt
+      ext/standard/tests/strings/strncasecmp_variation2.phpt
+      ext/standard/tests/strings/strncasecmp_variation3.phpt
+      ext/standard/tests/strings/strncasecmp_variation3.phpt
+      ext/standard/tests/strings/strncasecmp_variation4.phpt
+      ext/standard/tests/strings/strncasecmp_variation4.phpt
+      ext/standard/tests/strings/strncasecmp_variation5.phpt
+      ext/standard/tests/strings/strncasecmp_variation5.phpt
+      ext/standard/tests/strings/strncasecmp_variation6.phpt
+      ext/standard/tests/strings/strncasecmp_variation6.phpt
+      ext/standard/tests/strings/strncasecmp_variation7.phpt
+      ext/standard/tests/strings/strncasecmp_variation7.phpt
+      ext/standard/tests/strings/strncasecmp_variation8.phpt
+      ext/standard/tests/strings/strncasecmp_variation8.phpt
+      ext/standard/tests/strings/strncasecmp_variation9.phpt
+      ext/standard/tests/strings/strncasecmp_variation9.phpt:
+      
+      file stripos_basic.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/tests/file/chop_basic.phpt
+      ext/standard/tests/file/chop_error.phpt
+      ext/standard/tests/file/chop_variation1.phpt
+      ext/standard/tests/file/chop_variation2.phpt
+      ext/standard/tests/file/chop_variation3.phpt
+      ext/standard/tests/file/chop_variation4.phpt
+      ext/standard/tests/file/chop_variation5.phpt
+      ext/standard/tests/file/strncasecmp_basic.phpt
+      ext/standard/tests/file/strncasecmp_error.phpt
+      ext/standard/tests/file/strncasecmp_variation1.phpt
+      ext/standard/tests/file/strncasecmp_variation10.phpt
+      ext/standard/tests/file/strncasecmp_variation11.phpt
+      ext/standard/tests/file/strncasecmp_variation2.phpt
+      ext/standard/tests/file/strncasecmp_variation3.phpt
+      ext/standard/tests/file/strncasecmp_variation4.phpt
+      ext/standard/tests/file/strncasecmp_variation5.phpt
+      ext/standard/tests/file/strncasecmp_variation6.phpt
+      ext/standard/tests/file/strncasecmp_variation7.phpt
+      ext/standard/tests/file/strncasecmp_variation8.phpt
+      ext/standard/tests/file/strncasecmp_variation9.phpt
+      ext/standard/tests/file/wordwrap_basic.phpt
+      ext/standard/tests/file/wordwrap_basic.phpt
+      ext/standard/tests/file/wordwrap_error.phpt
+      ext/standard/tests/file/wordwrap_error.phpt
+      ext/standard/tests/file/wordwrap_variation1.phpt
+      ext/standard/tests/file/wordwrap_variation1.phpt
+      ext/standard/tests/file/wordwrap_variation2.phpt
+      ext/standard/tests/file/wordwrap_variation2.phpt
+      ext/standard/tests/file/wordwrap_variation3.phpt
+      ext/standard/tests/file/wordwrap_variation3.phpt
+      ext/standard/tests/file/wordwrap_variation4.phpt
+      ext/standard/tests/file/wordwrap_variation4.phpt
+      ext/standard/tests/file/wordwrap_variation5.phpt
+      ext/standard/tests/file/wordwrap_variation5.phpt:
+      Removing from file dir as it was wrongly committed to this dir
+
+    * ext/standard/tests/strings/chop_error.phpt
+      ext/standard/tests/strings/chop_error.phpt
+      ext/standard/tests/strings/chop_variation1.phpt
+      ext/standard/tests/strings/chop_variation1.phpt
+      ext/standard/tests/strings/chop_variation2.phpt
+      ext/standard/tests/strings/chop_variation2.phpt
+      ext/standard/tests/strings/chop_variation3.phpt
+      ext/standard/tests/strings/chop_variation3.phpt
+      ext/standard/tests/strings/chop_variation4.phpt
+      ext/standard/tests/strings/chop_variation4.phpt
+      ext/standard/tests/strings/chop_variation5.phpt
+      ext/standard/tests/strings/chop_variation5.phpt:
+      
+      file chop_error.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/wordwrap_error.phpt
+      ext/standard/tests/strings/wordwrap_error.phpt
+      ext/standard/tests/strings/wordwrap_variation1.phpt
+      ext/standard/tests/strings/wordwrap_variation1.phpt
+      ext/standard/tests/strings/wordwrap_variation2.phpt
+      ext/standard/tests/strings/wordwrap_variation2.phpt
+      ext/standard/tests/strings/wordwrap_variation3.phpt
+      ext/standard/tests/strings/wordwrap_variation3.phpt
+      ext/standard/tests/strings/wordwrap_variation4.phpt
+      ext/standard/tests/strings/wordwrap_variation4.phpt
+      ext/standard/tests/strings/wordwrap_variation5.phpt
+      ext/standard/tests/strings/wordwrap_variation5.phpt:
+      
+      file wordwrap_error.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/strncasecmp_basic.phpt
+      ext/standard/tests/file/strncasecmp_basic.phpt
+      ext/standard/tests/file/strncasecmp_error.phpt
+      ext/standard/tests/file/strncasecmp_error.phpt
+      ext/standard/tests/file/strncasecmp_variation1.phpt
+      ext/standard/tests/file/strncasecmp_variation1.phpt
+      ext/standard/tests/file/strncasecmp_variation10.phpt
+      ext/standard/tests/file/strncasecmp_variation10.phpt
+      ext/standard/tests/file/strncasecmp_variation11.phpt
+      ext/standard/tests/file/strncasecmp_variation11.phpt
+      ext/standard/tests/file/strncasecmp_variation2.phpt
+      ext/standard/tests/file/strncasecmp_variation2.phpt
+      ext/standard/tests/file/strncasecmp_variation3.phpt
+      ext/standard/tests/file/strncasecmp_variation3.phpt
+      ext/standard/tests/file/strncasecmp_variation4.phpt
+      ext/standard/tests/file/strncasecmp_variation4.phpt
+      ext/standard/tests/file/strncasecmp_variation5.phpt
+      ext/standard/tests/file/strncasecmp_variation5.phpt
+      ext/standard/tests/file/strncasecmp_variation6.phpt
+      ext/standard/tests/file/strncasecmp_variation6.phpt
+      ext/standard/tests/file/strncasecmp_variation7.phpt
+      ext/standard/tests/file/strncasecmp_variation7.phpt
+      ext/standard/tests/file/strncasecmp_variation8.phpt
+      ext/standard/tests/file/strncasecmp_variation8.phpt
+      ext/standard/tests/file/strncasecmp_variation9.phpt
+      ext/standard/tests/file/strncasecmp_variation9.phpt:
+      
+      file strncasecmp_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/chop_basic.phpt
+      ext/standard/tests/file/chop_basic.phpt
+      ext/standard/tests/file/chop_error.phpt
+      ext/standard/tests/file/chop_error.phpt
+      ext/standard/tests/file/chop_variation1.phpt
+      ext/standard/tests/file/chop_variation1.phpt
+      ext/standard/tests/file/chop_variation2.phpt
+      ext/standard/tests/file/chop_variation2.phpt
+      ext/standard/tests/file/chop_variation3.phpt
+      ext/standard/tests/file/chop_variation3.phpt
+      ext/standard/tests/file/chop_variation4.phpt
+      ext/standard/tests/file/chop_variation4.phpt
+      ext/standard/tests/file/chop_variation5.phpt
+      ext/standard/tests/file/chop_variation5.phpt
+      ext/standard/tests/strings/chop_basic.phpt:
+      
+      file chop_basic.phpt was initially added on branch PHP_5_2.
+
+2007-09-14  Zoe Slattery  <zoe@uk.ibm.com>
+
+    * ext/standard/tests/general_functions/phpcredits2.phpt
+      ext/standard/tests/general_functions/phpcredits2.phpt
+      ext/standard/tests/general_functions/phpinfo2.phpt
+      ext/standard/tests/general_functions/phpinfo2.phpt:
+      Changing to use %a to match recent run-tests.php patch
+
+2007-09-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * run-tests.php
+      ext/bz2/tests/005.phpt
+      ext/standard/tests/general_functions/phpcredits.phpt
+      ext/standard/tests/general_functions/phpinfo.phpt
+      ext/standard/tests/strings/sha1.phpt
+      ext/zlib/tests/005.phpt
+      ext/zlib/tests/006.phpt:
+      MFB: change run-tests.php to add %a
+
+    * (PHP_5_2)
+      run-tests.php
+      ext/bz2/tests/005.phpt
+      ext/standard/tests/general_functions/phpcredits.phpt
+      ext/standard/tests/general_functions/phpinfo.phpt
+      ext/standard/tests/strings/sha1.phpt
+      ext/zlib/tests/005.phpt
+      ext/zlib/tests/006.phpt:
+      changes to run-tests.php:
+      - change %s to %a
+      - make %s = [^\r\n]+
+      - fix tests accordingly
+
+    * ext/standard/tests/general_functions/bug32647.phpt:
+      MFB: fix expected output
+
+    * (PHP_5_2)
+      ext/standard/tests/general_functions/bug32647.phpt:
+      fix expected output
+
+2007-09-14  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/wordwrap_error.phpt
+      ext/standard/tests/file/wordwrap_variation3.phpt
+      ext/standard/tests/file/wordwrap_variation3.phpt:
+      better comments
+
+    * ext/standard/tests/file/wordwrap_basic.phpt
+      ext/standard/tests/file/wordwrap_error.phpt
+      ext/standard/tests/file/wordwrap_variation1.phpt
+      ext/standard/tests/file/wordwrap_variation2.phpt
+      ext/standard/tests/file/wordwrap_variation3.phpt
+      ext/standard/tests/file/wordwrap_variation4.phpt
+      ext/standard/tests/file/wordwrap_variation5.phpt
+      ext/standard/tests/strings/wordwrap_basic.phpt
+      ext/standard/tests/strings/wordwrap_basic.phpt
+      ext/standard/tests/strings/wordwrap_error.phpt
+      ext/standard/tests/strings/wordwrap_variation1.phpt
+      ext/standard/tests/strings/wordwrap_variation2.phpt
+      ext/standard/tests/strings/wordwrap_variation3.phpt
+      ext/standard/tests/strings/wordwrap_variation4.phpt
+      ext/standard/tests/strings/wordwrap_variation5.phpt:
+      New testcases for wordwrap()
+
+    * ext/standard/tests/file/wordwrap_basic.phpt
+      ext/standard/tests/file/wordwrap_basic.phpt
+      ext/standard/tests/file/wordwrap_error.phpt
+      ext/standard/tests/file/wordwrap_error.phpt
+      ext/standard/tests/file/wordwrap_variation1.phpt
+      ext/standard/tests/file/wordwrap_variation1.phpt
+      ext/standard/tests/file/wordwrap_variation2.phpt
+      ext/standard/tests/file/wordwrap_variation2.phpt
+      ext/standard/tests/file/wordwrap_variation3.phpt
+      ext/standard/tests/file/wordwrap_variation3.phpt
+      ext/standard/tests/file/wordwrap_variation4.phpt
+      ext/standard/tests/file/wordwrap_variation4.phpt
+      ext/standard/tests/file/wordwrap_variation5.phpt
+      ext/standard/tests/file/wordwrap_variation5.phpt
+      ext/standard/tests/strings/wordwrap_basic.phpt:
+      
+      file wordwrap_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/lstat_stat_variation6.phpt
+      ext/standard/tests/file/lstat_stat_variation6.phpt:
+      fix test
+
+2007-09-14  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      fix news
+
 2007-09-13  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)
