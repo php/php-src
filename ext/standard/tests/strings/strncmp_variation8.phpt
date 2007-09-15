@@ -1,5 +1,5 @@
 --TEST--
-Test strncmp() function: usage variations - different inputs(single quoted strings)
+Test strncmp() function: usage variations - single quoted strings
 --FILE--
 <?php
 /* Prototype  : int strncmp ( string $str1, string $str2, int $len );
@@ -7,7 +7,7 @@ Test strncmp() function: usage variations - different inputs(single quoted strin
  * Source code: Zend/zend_builtin_functions.c
 */
 
-/* Test strncmp() function with different strings for 'str1', 'str2' and considering case sensitive */
+/* Test strncmp() function with single quoted strings for 'str1', 'str2' */
 
 echo "*** Test strncmp() function: with different input strings ***\n";
 $strings = array(
@@ -27,49 +27,49 @@ for($index1 = 0; $index1 < count($strings); $index1++) {
 }
 echo "*** Done ***\n";
 ?>
---EXPECTF--
-*** Test strncmp() function: with different input strings ***
--- Iteration 1 --
-int(0)
-int(-1)
-int(1)
-int(-1)
+--EXPECTREGEX--
+\*\*\* Test strncmp\(\) function: with different input strings \*\*\*
+-- Iteration [1-9][0-9]* --
+int\(0\)
+int\(-[1-9][0-9]*\)
+int\([1-9][0-9]*\)
+int\(-[1-9][0-9]*\)
 -- Iteration 2 --
-int(1)
-int(0)
-int(1)
-int(1)
+int\([1-9][0-9]*\)
+int\(0\)
+int\([1-9][0-9]*\)
+int\([1-9][0-9]*\)
 -- Iteration 3 --
-int(-1)
-int(-1)
-int(0)
-int(-1)
+int\(-[1-9][0-9]*\)
+int\(-[1-9][0-9]*\)
+int\(0\)
+int\(-[1-9][0-9]*\)
 -- Iteration 4 --
-int(2)
-int(-1)
-int(1)
-int(0)
-*** Done ***
---UEXPECTF--
-*** Test strncmp() function: with different input strings ***
--- Iteration 1 --
-int(0)
-int(-1)
-int(1)
-int(-1)
+int\(2\)
+int\(-[1-9][0-9]*\)
+int\([1-9][0-9]*\)
+int\(0\)
+\*\*\* Done \*\*\*
+--UEXPECTREGEX--
+\*\*\* Test strncmp\(\) function: with different input strings \*\*\*
+-- Iteration [1-9][0-9]* --
+int\(0\)
+int\(-[1-9][0-9]*\)
+int\([1-9][0-9]*\)
+int\(-[1-9][0-9]*\)
 -- Iteration 2 --
-int(1)
-int(0)
-int(1)
-int(1)
+int\([1-9][0-9]*\)
+int\(0\)
+int\([1-9][0-9]*\)
+int\([1-9][0-9]*\)
 -- Iteration 3 --
-int(-1)
-int(-1)
-int(0)
-int(-1)
+int\(-[1-9][0-9]*\)
+int\(-[1-9][0-9]*\)
+int\(0\)
+int\(-[1-9][0-9]*\)
 -- Iteration 4 --
-int(1)
-int(-1)
-int(1)
-int(0)
-*** Done ***
+int\([1-9][0-9]*\)
+int\(-[1-9][0-9]*\)
+int\([1-9][0-9]*\)
+int\(0\)
+\*\*\* Done \*\*\*
