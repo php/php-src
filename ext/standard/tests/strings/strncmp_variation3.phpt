@@ -7,7 +7,7 @@ Test strncmp() function: usage variations - different lengths
  * Source code: Zend/zend_builtin_functions.c
 */
 
-/* Test strncmp() with various nteger length values including zero and considering case sensitive */
+/* Test strncmp() with various lengths */
 
 echo "*** Test strncmp() function: with different lengths ***\n";
 /* definitions of required variables */
@@ -20,20 +20,20 @@ for($len = strlen($str1); $len >= 0; $len--) {
 }
 echo "*** Done ***\n";
 ?>
---EXPECTF--	
-*** Test strncmp() function: with different lengths ***
-int(-1)
-int(-1)
-int(-1)
-int(-1)
-int(-1)
-int(-1)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-*** Done ***
+--EXPECTREGEX--
+\*\*\* Test strncmp\(\) function: with different lengths \*\*\*
+int\(-[1-9][0-9]*\)
+int\(-[1-9][0-9]*\)
+int\(-[1-9][0-9]*\)
+int\(-[1-9][0-9]*\)
+int\(-[1-9][0-9]*\)
+int\(-[1-9][0-9]*\)
+int\(0\)
+int\(0\)
+int\(0\)
+int\(0\)
+int\(0\)
+int\(0\)
+int\(0\)
+int\(0\)
+\*\*\* Done \*\*\*
