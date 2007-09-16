@@ -1,3 +1,17 @@
+2007-09-15  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/strncmp_basic.phpt
+      ext/standard/tests/strings/strncmp_basic.phpt
+      ext/standard/tests/strings/strncmp_variation1.phpt
+      ext/standard/tests/strings/strncmp_variation1.phpt
+      ext/standard/tests/strings/strncmp_variation2.phpt
+      ext/standard/tests/strings/strncmp_variation2.phpt
+      ext/standard/tests/strings/strncmp_variation3.phpt
+      ext/standard/tests/strings/strncmp_variation3.phpt
+      ext/standard/tests/strings/strncmp_variation8.phpt
+      ext/standard/tests/strings/strncmp_variation8.phpt:
+      better output matching/fixes
+
 2007-09-14  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * ext/standard/tests/strings/strncasecmp_basic.phpt
