@@ -1,3 +1,9 @@
+2007-09-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed a typo
+
 2007-09-15  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * ext/standard/tests/strings/strncmp_basic.phpt
