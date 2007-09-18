@@ -73,6 +73,11 @@ PHP_FUNCTION(dl)
 		RETURN_FALSE;
 	}
 
+	if (Z_STRLEN_PP(file) >= MAXPATHLEN) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		RETURN_FALSE;
+	}
+
 	if ((strncmp(sapi_module.name, "cgi", 3)!=0) && 
 		(strcmp(sapi_module.name, "cli")!=0) &&
 		(strncmp(sapi_module.name, "embed", 5)!=0)) {
