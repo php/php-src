@@ -50,6 +50,8 @@ PHP                                                                        NEWS
 - Fixed bug #42359 (xsd:list type not parsed). (Dmitry)
 - Fixed bug #42326 (SoapServer crash). (Dmitry)
 - Fixed bug #42214 (SoapServer sends clients internal PHP errors). (Dmitry)
+- Fixed bug #42189 (xmlrpc_set_type() crashes php on invalid datetime
+  values). (Ilia)
 - Fixed bug #42086 (SoapServer return Procedure '' not present for WSIBasic
   compliant wsdl). (Dmitry)
 - Fixed bug #41561 (Values set with php_admin_* in httpd.conf can be overwritten
