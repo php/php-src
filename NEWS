@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   (Stas)
 - Fixed PDO crash when driver returns empty LOB stream. (Stas)
 - Fixed dl() to only accept filenames - reported by Laurent Gaffie. (Stas)
+- Fixed dl() to limit argument size to MAXPATHLEN (CVE-2007-4887).
+  (Christian Hoffmann)
 - Fixed missing brackets leading to build warning and error in the log.
   Win32 code). (Andrey)
 - Fixed leaks with multiple connects on one mysqli object. (Andrey)
