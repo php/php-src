@@ -245,7 +245,7 @@ void *zend_mh_bundle_load(char* bundle_path) /* {{{ */
 		return NULL;
 	}
 
-	bundle_handle = NSLinkModule(bundle_image, bundle_path, NSLINKMODULE_OPTION_PRIVATE);
+	bundle_handle = NSLinkModule(bundle_image, bundle_path, NSLINKMODULE_OPTION_NONE);
 	NSDestroyObjectFileImage(bundle_image);
 
 	/* call the init function of the bundle */
