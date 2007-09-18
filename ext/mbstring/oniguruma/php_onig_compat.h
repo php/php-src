@@ -5,4 +5,10 @@
 #define regex_t                     php_mb_regex_t
 #define re_registers                php_mb_re_registers
 
+#ifdef HAVE_STDARG_H
+#ifndef HAVE_STDARG_PROTOTYPES
+#define HAVE_STDARG_PROTOTYPES 1
+#endif
+#endif
+
 #endif /* _PHP_MBREGEX_COMPAT_H */
