@@ -1,3 +1,10 @@
+2007-09-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Fixed typos
+
 2007-09-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
