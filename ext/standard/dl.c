@@ -63,6 +63,11 @@ PHP_FUNCTION(dl)
 		return;
 	}
 
+	if (Z_STRLEN_PP(file) >= MAXPATHLEN) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		RETURN_FALSE;
+	}
+
 	php_dl(filename, MODULE_TEMPORARY, return_value, 0 TSRMLS_CC);
 	EG(full_tables_cleanup) = 1;
 }
