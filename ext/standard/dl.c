@@ -63,7 +63,7 @@ PHP_FUNCTION(dl)
 		return;
 	}
 
-	if (Z_STRLEN_PP(filename) >= MAXPATHLEN) {
+	if (Z_STRLEN_P(filename) >= MAXPATHLEN) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
 		RETURN_FALSE;
 	}
