@@ -1,5 +1,5 @@
 --TEST--
-Bug #40705 Iterating within function moves original array pointer 
+Bug #40705 (Iterating within function moves original array pointer)
 --FILE--
 <?php
 function doForeach($array)

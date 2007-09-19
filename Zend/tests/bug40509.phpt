@@ -1,5 +1,5 @@
 --TEST--
-Bug #40509 key() function changed behaviour if global array is used within function 
+Bug #40509 (key() function changed behaviour if global array is used within function)
 --FILE--
 <?php
 function foo()
