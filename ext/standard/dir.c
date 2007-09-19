@@ -396,6 +396,7 @@ PHP_FUNCTION(glob)
 	glob_t globbuf;
 	int n;
 	int ret;
+	zend_bool basedir_limit = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &pattern, &pattern_len, &flags) == FAILURE) {
 		return;
@@ -429,22 +430,7 @@ PHP_FUNCTION(glob)
 	} 
 #endif
 
-	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
-		int pattern_len = strlen(pattern);
-		char *basename = estrndup(pattern, pattern_len);
-		
-		php_dirname(basename, pattern_len);
-		if (PG(safe_mode) && (!php_checkuid(basename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			efree(basename);
-			RETURN_FALSE;
-		}
-		if (php_check_open_basedir(basename TSRMLS_CC)) {
-			efree(basename);
-			RETURN_FALSE;
-		}
-		efree(basename);
-	}
-
+	
 	memset(&globbuf, 0, sizeof(glob_t));
 	globbuf.gl_offs = 0;
 	if (0 != (ret = glob(pattern, flags & GLOB_FLAGMASK, NULL, &globbuf))) {
@@ -458,8 +444,7 @@ PHP_FUNCTION(glob)
 			   can be used for simple glob() calls without further error
 			   checking.
 			*/
-			array_init(return_value);
-			return;
+			goto no_results;
 		}
 #endif
 		RETURN_FALSE;
@@ -467,12 +452,29 @@ PHP_FUNCTION(glob)
 
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
+no_results:
+		if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+			struct stat s;
+
+			if (0 != VCWD_STAT(pattern, &s) || S_IFDIR != (s.st_mode & S_IFMT)) {
+				RETURN_FALSE;
+			}
+		}
 		array_init(return_value);
 		return;
 	}
 
 	array_init(return_value);
 	for (n = 0; n < globbuf.gl_pathc; n++) {
+		if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+			if (PG(safe_mode) && (!php_checkuid(globbuf.gl_pathv[n], NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+				basedir_limit = 1;
+				continue;
+			} else if (php_check_open_basedir_ex(globbuf.gl_pathv[n], 0 TSRMLS_CC)) {
+				basedir_limit = 1;
+				continue;
+			}
+		}
 		/* we need to do this everytime since GLOB_ONLYDIR does not guarantee that
 		 * all directories will be filtered. GNU libc documentation states the
 		 * following: 
@@ -496,6 +498,11 @@ PHP_FUNCTION(glob)
 	}
 
 	globfree(&globbuf);
+
+	if (basedir_limit && !zend_hash_num_elements(Z_ARRVAL_P(return_value))) {
+		zval_dtor(return_value);
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 #endif 
