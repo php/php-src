@@ -1,5 +1,5 @@
 --TEST--
-Bug #34304 ()
+Bug #34304 (date('w') returns wrong number for sunday, 'N' modifier is missing)
 --FILE--
 <?php
 date_default_timezone_set("UTC");
