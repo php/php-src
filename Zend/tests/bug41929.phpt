@@ -1,5 +1,5 @@
 --TEST--
-Bug #41929 Foreach on object does not iterate over all visible properties 
+Bug #41929 (Foreach on object does not iterate over all visible properties)
 --FILE--
 <?php
 class C {
