@@ -1,0 +1,14 @@
+--TEST--
+iconv_substr() charset parameter length checks (CVE-2007-4783)
+--SKIPIF--
+<?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
+--FILE--
+<?php
+$a = str_repeat('A', 99897);
+$b = str_repeat('/', 2798349);
+var_dump(iconv_substr($a, 0, 1, $b));
+?>
+--EXPECTF--
+
+Warning: iconv_substr(): Charset parameter exceeds the maximum allowed length of %d characters in %s on line %d
+bool(false)
