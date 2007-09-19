@@ -78,6 +78,10 @@ ZEND_END_MODULE_GLOBALS(iconv)
 #define ICONV_OUTPUT_ENCODING "ISO-8859-1"
 #define ICONV_INTERNAL_ENCODING "ISO-8859-1" 
 
+#ifndef ICONV_CSNMAXLEN
+#define ICONV_CSNMAXLEN 64
+#endif
+
 /* {{{ typedef enum php_iconv_err_t */
 typedef enum _php_iconv_err_t {
 	PHP_ICONV_ERR_SUCCESS           = SUCCESS,
