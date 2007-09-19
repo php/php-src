@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
 - Added alpha support for imagefilter() IMG_FILTER_COLORIZE. (Pierre)
 
+- Fixed regression in glob() when enforcing safe_mode/open_basedir checks on
+  paths containing '*'. (Ilia)
 - Fixed "mail.force_extra_parameters" php.ini directive not to be modifiable
   in .htaccess due to the security implications - reported by SecurityReason.
   (Stas)
