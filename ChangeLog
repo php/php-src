@@ -1,3 +1,62 @@
+2007-09-18  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/config.m4
+      ext/mbstring/oniguruma/php_onig_compat.h:
+      MFH: fixed bug #42502 va_* cannot detect.
+
+    * ext/mbstring/config.m4
+      ext/mbstring/oniguruma/php_onig_compat.h:
+      fixed bug #42502 va_* cannot detect.
+
+    * (PHP_5_2)
+      ext/mbstring/libmbfl/nls/nls_ru.c
+      ext/mbstring/libmbfl/nls/nls_ru.h:
+      modified line end CR -> CR+NL
+
+2007-09-18  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      add dl() limit patch
+
+    * ext/standard/dl.c
+      ext/standard/dl.c:
+      limit dl() argument length (patch by Christian Hoffmann)
+
+2007-09-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/xmlrpc/tests/bug42189.phpt:
+      
+      MFB: Fixed bug #42189 (xmlrpc_set_type() crashes php on invalid datetime
+      values).
+
+    * ext/xmlrpc/tests/bug42189.phpt
+      ext/xmlrpc/tests/bug42189.phpt:
+      
+      file bug42189.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.c:
+      
+      Fixed bug #42189 (xmlrpc_set_type() crashes php on invalid datetime
+        values).
+
+2007-09-18  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ZendEngine2/zend_extensions.c
+      ZendEngine2/zend_extensions.c:
+      - Fixed bug #42629 (Dynamically loaded PHP extensions need symbols exported
+      on MacOSX)
+
 2007-09-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

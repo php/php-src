@@ -1,3 +1,10 @@
+2007-09-18  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * zend_extensions.c
+      zend_extensions.c:
+      - Fixed bug #42629 (Dynamically loaded PHP extensions need symbols exported
+      on MacOSX)
+
 2007-09-11  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_builtin_functions.c:
