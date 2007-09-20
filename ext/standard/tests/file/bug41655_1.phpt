@@ -1,5 +1,5 @@
 --TEST--
-Bug #41655 (open_basedir bypass via glob())
+Bug #41655 (open_basedir bypass via glob()) 1/2
 --INI--
 open_basedir=/tmp
 --FILE--
