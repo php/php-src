@@ -870,34 +870,40 @@ static void *php_tidy_get_opt_val(PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionT
 	return NULL;
 }
 
-static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes node)
+static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes node_type)
 {
 	PHPTidyObj *newobj;
+	TidyNode node;
 	TIDY_FETCH_OBJECT;
 
-	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
-	newobj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
-	newobj->type = is_node;
-	newobj->ptdoc = obj->ptdoc;
-	newobj->ptdoc->ref_count++;
-
-	switch(node) {
+	switch (node_type) {
 		case is_root_node:
-			newobj->node = tidyGetRoot(newobj->ptdoc->doc);
+			node = tidyGetRoot(obj->ptdoc->doc);
 			break;
 
 		case is_html_node:
-			newobj->node = tidyGetHtml(newobj->ptdoc->doc);
+			node = tidyGetHtml(obj->ptdoc->doc);
 			break;
 
 		case is_head_node:
-			newobj->node = tidyGetHead(newobj->ptdoc->doc);
+			node = tidyGetHead(obj->ptdoc->doc);
 			break;
 
 		case is_body_node:
-			newobj->node = tidyGetBody(newobj->ptdoc->doc);
+			node = tidyGetBody(obj->ptdoc->doc);
 			break;
 	}
+
+	if (!node) {
+		RETURN_NULL();
+	}
+
+	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
+	newobj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	newobj->type  = is_node;
+	newobj->ptdoc = obj->ptdoc;
+	newobj->node  = node;
+	newobj->ptdoc->ref_count++;
 
 	tidy_add_default_properties(newobj, is_node TSRMLS_CC);
 }
