@@ -81,6 +81,7 @@
 #define INTERSECT_NORMAL		1
 #define INTERSECT_KEY			2
 #define INTERSECT_ASSOC			6
+#define INTERSECT_COMP_DATA_NONE    -1
 #define INTERSECT_COMP_DATA_INTERNAL 0
 #define INTERSECT_COMP_DATA_USER     1
 #define INTERSECT_COMP_KEY_INTERNAL  0
@@ -2919,6 +2920,132 @@ PHP_FUNCTION(array_unique)
 }
 /* }}} */
 
+static int zval_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
+{
+	zval result;
+	zval *first;
+	zval *second;
+ 
+	first = *((zval **) a);
+	second = *((zval **) b);
+
+	if (string_compare_function(&result, first, second TSRMLS_CC) == FAILURE) {
+		return 0;
+	} 
+
+	if (Z_TYPE(result) == IS_DOUBLE) {
+		if (Z_DVAL(result) < 0) {
+			return -1;
+		} else if (Z_DVAL(result) > 0) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	convert_to_long(&result);
+
+	if (Z_LVAL(result) < 0) {
+		return -1;
+	} else if (Z_LVAL(result) > 0) {
+		return 1;
+	} 
+
+	return 0;
+}
+/* }}} */
+
+static int zval_user_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
+{
+	zval **args[2];
+	zval *retval_ptr;
+
+	args[0] = (zval **) a;
+	args[1] = (zval **) b;
+
+	BG(user_compare_fci).param_count = 2;
+	BG(user_compare_fci).params = args;
+	BG(user_compare_fci).retval_ptr_ptr = &retval_ptr;
+	BG(user_compare_fci).no_separation = 0;
+	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC)== SUCCESS
+		&& retval_ptr) {
+		long retval;
+
+		convert_to_long_ex(&retval_ptr);
+		retval = Z_LVAL_P(retval_ptr);
+		zval_ptr_dtor(&retval_ptr);
+		return retval < 0 ? -1 : retval > 0 ? 1 : 0;;
+	} else {
+		return 0;
+	}
+}
+/* }}} */
+
+static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
+{
+	Bucket *p;
+	int argc, i;
+	zval ***args;
+	int (*intersect_data_compare_func)(zval **, zval ** TSRMLS_DC) = NULL;
+	zend_bool ok;
+	zval **data;
+
+	/* Get the argument count */
+	argc = ZEND_NUM_ARGS();
+	if (data_compare_type == INTERSECT_COMP_DATA_USER) {
+		if (argc < 3 ||
+		    zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+f", &args,
+		     &argc, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
+			return;
+		}
+		intersect_data_compare_func = zval_user_compare;
+	} else {
+		if (argc < 2 ||
+		    zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
+			return;
+		}
+		if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL) {
+			intersect_data_compare_func = zval_compare;
+		}
+	}
+
+	array_init(return_value);
+
+	for (p = Z_ARRVAL_PP(args[0])->pListHead; p != NULL; p = p->pListNext) {
+		if (p->nKeyLength == 0) {
+			ok = 1;
+			for (i = 1; i < argc; i++) {
+				if (zend_hash_index_find(Z_ARRVAL_PP(args[i]), p->h, (void**)&data) == FAILURE ||
+				    (intersect_data_compare_func &&
+				     intersect_data_compare_func((zval**)p->pData, data TSRMLS_CC) != 0)) {
+					ok = 0;
+					break;
+				}
+			}
+			if (ok) {
+				(*((zval**)p->pData))->refcount++;
+				zend_hash_index_update(Z_ARRVAL_P(return_value), p->h, p->pData, sizeof(zval*), NULL);
+			}
+		} else {
+			ok = 1;
+			for (i = 1; i < argc; i++) {
+				if (zend_u_hash_quick_find(Z_ARRVAL_PP(args[i]), p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->h, (void**)&data) == FAILURE ||
+				    (intersect_data_compare_func &&
+				     intersect_data_compare_func((zval**)p->pData, data TSRMLS_CC) != 0)) {
+					ok = 0;
+					break;
+				}
+			}
+			if (ok) {
+				(*((zval**)p->pData))->refcount++;
+				zend_u_hash_quick_update(Z_ARRVAL_P(return_value), p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->h, p->pData, sizeof(zval*), NULL);
+			}
+		}
+	}
+	efree(args);
+}
+/* }}} */
+
 /* {{{ php_array_intersect */
 static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type)
 {
@@ -3222,8 +3349,7 @@ out:
    Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). Equivalent of array_intersect_assoc() but does not do compare of the data. */
 PHP_FUNCTION(array_intersect_key)
 {
-	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_KEY,
-				INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_INTERNAL);
+	php_array_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_COMP_DATA_NONE);
 }
 /* }}} */
 
@@ -3258,8 +3384,7 @@ PHP_FUNCTION(array_uintersect)
    Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check */
 PHP_FUNCTION(array_intersect_assoc)
 {
-	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC,
-				INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_INTERNAL);
+	php_array_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_COMP_DATA_INTERNAL);
 }
 /* }}} */
 
@@ -3267,8 +3392,7 @@ PHP_FUNCTION(array_intersect_assoc)
    Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check and they are compared by using an user-supplied callback. */
 PHP_FUNCTION(array_intersect_uassoc)
 {
-	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC,
-				INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_USER);
+	php_array_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_COMP_DATA_USER);
 }
 /* }}} */
 
