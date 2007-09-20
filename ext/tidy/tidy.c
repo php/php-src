@@ -932,8 +932,9 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 
 	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
 	newobj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
-	newobj->type = is_node;
+	newobj->type  = is_node;
 	newobj->ptdoc = obj->ptdoc;
+	newobj->node  = node;
 	newobj->ptdoc->ref_count++;
 	newobj->converter = obj->converter;
 	if (obj->converter) obj->converter->ref_count++;
