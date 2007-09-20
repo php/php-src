@@ -1,3 +1,97 @@
+2007-09-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/dir.c:
+      
+      MFB: Fixed regression in glob() when enforcing safe_mode/open_basedir
+      checks
+      on paths containing '*'
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/dir.c:
+      
+      Fixed regression in glob() when enforcing safe_mode/open_basedir checks on
+      paths containing '*'
+
+2007-09-19  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/date/tests/bug34304.phpt:
+      fix test name
+
+    * ZendEngine2/tests/bug40509.phpt
+      ZendEngine2/tests/bug40705.phpt
+      ZendEngine2/tests/bug41929.phpt:
+      fix test names
+
+2007-09-19  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/standard/dl.c:
+      - Fix build (filename is a zval * here, not a zval** like in 5_2)
+
+2007-09-19  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/iconv/tests/ob_iconv_handler-charset-length-cve-2007-4840.phpt:
+      MFB one more test
+
+    * ext/iconv/tests/ob_iconv_handler-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/ob_iconv_handler-charset-length-cve-2007-4840.phpt:
+      
+      file ob_iconv_handler-charset-length-cve-2007-4840.phpt was initially
+      added on branch PHP_5_2.
+
+    * ext/iconv/tests/iconv-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_mime_decode-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_mime_decode_headers-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_set_encoding-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_strlen-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_strpos-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_strrpos-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_substr-charset-length-cve-2007-4783.phpt:
+      MFB length tests
+
+    * (PHP_5_2)
+      NEWS:
+      report iconv fix
+
+    * ext/xmlrpc/libxmlrpc/encodings.c:
+      MFB: limit iconv parameters here too
+
+    * ext/iconv/iconv.c
+      ext/iconv/php_iconv.h:
+      limit iconv parameter sizes - workaround for libc bug
+
+    * (PHP_5_2)
+      ext/xmlrpc/libxmlrpc/encodings.c:
+      limit iconv parameters here too
+
+    * (PHP_5_2)
+      ext/iconv/iconv.c
+      ext/iconv/php_iconv.h:
+      limit iconv parameter sizes - workaround for glibc bug
+
+    * ext/iconv/tests/iconv-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_mime_decode-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_mime_decode-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_mime_decode_headers-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_mime_decode_headers-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_set_encoding-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_set_encoding-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_strlen-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_strlen-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_strpos-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_strpos-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_strrpos-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_strrpos-charset-length-cve-2007-4840.phpt
+      ext/iconv/tests/iconv_substr-charset-length-cve-2007-4783.phpt
+      ext/iconv/tests/iconv_substr-charset-length-cve-2007-4783.phpt:
+      
+      file iconv-charset-length-cve-2007-4840.phpt was initially added on branch
+      PHP_5_2.
+
+    * ext/standard/dl.c:
+      use right variable name
+
 2007-09-18  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * (PHP_5_2)

@@ -1,3 +1,10 @@
+2007-09-19  Antony Dovgal  <tony@daylessday.org>
+
+    * tests/bug40509.phpt
+      tests/bug40705.phpt
+      tests/bug41929.phpt:
+      fix test names
+
 2007-09-18  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * zend_extensions.c
