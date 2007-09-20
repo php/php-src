@@ -1367,8 +1367,11 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 				efree(subject_value);
 				subject_value = result;
 				subject_len = *result_len;
+			} else {
+				efree(subject_value);
+				return NULL;
 			}
-			
+
 			zend_hash_move_forward(Z_ARRVAL_P(regex));
 		}
 
