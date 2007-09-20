@@ -765,7 +765,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 		}
 	}
 
-	if (offset >= total_len) {
+	if (offset >= total_len || len > total_len) {
 		return PHP_ICONV_ERR_SUCCESS;
 	}
 	
