@@ -5,6 +5,8 @@ open_basedir=/tmp
 --FILE--
 <?php
 	$a=glob("./*.jpeg");
+
+echo "Done\n";
 ?>
---EXPECTF--
-Warning: glob(): open_basedir restriction in effect. File%s.) is not within the allowed path(s): (/tmp) in %s on line %d
+--EXPECT--
+Done
