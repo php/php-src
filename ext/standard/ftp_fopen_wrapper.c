@@ -666,6 +666,8 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, cha
 	char ip[sizeof("123.123.123.123")];
 	unsigned short portno;
 
+	tmp_line[0] = '\0';
+
 	stream = php_ftp_fopen_connect(wrapper, path, mode, options, opened_path, context, &reuseid, &resource, &use_ssl, &use_ssl_on_data TSRMLS_CC);
 	if (!stream) {
 		goto opendir_errexit;	
@@ -731,8 +733,9 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, cha
 		php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE, tmp_line, result);
 		php_stream_close(stream);
 	}
-	if (tmp_line[0] != '\0')
+	if (tmp_line[0] != '\0') {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "FTP server reports %s", tmp_line);
+	}
 	return NULL;
 }
 /* }}} */
