@@ -348,11 +348,13 @@ static int php_get_display_errors_mode(char *value, int value_length)
 		mode = PHP_DISPLAY_ERRORS_STDERR;
 	} else if (value_length == 6 && !strcasecmp(value, "stdout")) {
 		mode = PHP_DISPLAY_ERRORS_STDOUT;
-	} else {
+	} else if (value ){
 		mode = atoi(value);
 		if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
 			mode = PHP_DISPLAY_ERRORS_STDOUT;
 		}
+	} else {
+		mode = PHP_DISPLAY_ERRORS_STDOUT;
 	}
 	return mode;
 }
