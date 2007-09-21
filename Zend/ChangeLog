@@ -1,3 +1,10 @@
+2007-09-20  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      zend_compile.c
+      tests/magic_by_ref_010.phpt:
+      - Fix test and tuned error message
+
 2007-09-19  Antony Dovgal  <tony@daylessday.org>
 
     * tests/bug40509.phpt

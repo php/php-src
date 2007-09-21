@@ -1,3 +1,114 @@
+2007-09-20  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/tidy.c:
+      oops.. thats what you get for commiting code without compiling nor
+      testing..
+
+2007-09-20  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/iconv/iconv.c
+      ext/iconv/iconv.c:
+      better fix for iconv_substr
+
+2007-09-20  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/tidy.c
+      ext/tidy/tests/029.phpt:
+      MFB: fix crash in tidy_get_body() and related functions when the node
+      doesnt exist
+
+    * ext/tidy/tests/029.phpt
+      ext/tidy/tests/029.phpt:
+      
+      file 029.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/tidy/tidy.c:
+      fix crash when fetching a node type that doesnt exist
+
+2007-09-20  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/iconv/iconv.c:
+      MFB length check fix (Mattias Bengtsson)
+
+    * (PHP_5_2)
+      ext/iconv/iconv.c:
+      fix potential overflow (Mattias Bengtsson)
+
+    * ext/standard/tests/general_functions/dl-cve-2007-4887.phpt:
+      add test for dl() with long name
+
+    * ext/standard/tests/general_functions/dl-cve-2007-4887.phpt
+      ext/standard/tests/general_functions/dl-cve-2007-4887.phpt:
+      
+      file dl-cve-2007-4887.phpt was initially added on branch PHP_5_2.
+
+2007-09-20  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/spl/tests/bug42259.phpt:
+      - Fixed skipif block
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/magic_by_ref_010.phpt:
+      - Fix test and tuned error message
+
+    * ext/standard/tests/file/bug41655_1.phpt
+      ext/standard/tests/file/bug41655_2.phpt:
+      - Fix test descriptions to be in sync
+
+2007-09-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/file/bug41655_1.phpt:
+      
+      MFB: Fixed test for glob() affected by previous patch
+
+    * (PHP_5_2)
+      ext/standard/tests/file/bug41655_1.phpt:
+      
+      Fixed test for glob() affected by previous patch
+
+2007-09-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlreader/tests/bug42139.phpt:
+      MFH: fix bug #42139 (XMLReader option constants are broken using XML())
+      add test
+
+    * ext/xmlreader/tests/bug42139.phpt
+      ext/xmlreader/tests/bug42139.phpt:
+      
+      fix bug #42139 (XMLReader option constants are broken using XML())
+      add test
+
+    * ext/xmlreader/php_xmlreader.c:
+      fix bug #42139 (XMLReader option constants are broken using XML())
+      add test
+
+2007-09-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c:
+      Improved speed of array_intersect_key(), array_intersect_assoc() and
+      array_uintersect_assoc(). (100 times faster on arrays with 100000
+      elements)
+
+2007-09-20  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/tests/006.phpt
+      ext/pcre/tests/006.phpt:
+      if one of regular expressions in the array fails, return NULL right away
+      this fixes "String is not zero-terminated" error and makes the behaviour
+      consistent with regexps passed as strings
+
 2007-09-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/dir.c:
