@@ -4477,6 +4477,8 @@ PHP_FUNCTION(array_map)
 				efree(args);
 				efree(array_pos);
 				zval_dtor(return_value);
+				zval_ptr_dtor(&null);
+				efree(params);
 				RETURN_NULL();
 			}
 		}
