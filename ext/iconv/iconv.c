@@ -913,6 +913,9 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 	cd = iconv_open(GENERIC_SUPERSET_NAME, enc);
 
 	if (cd == (iconv_t)(-1)) {
+		if (ndl_buf != NULL) {
+			efree(ndl_buf);
+		}
 #if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
 			return PHP_ICONV_ERR_WRONG_CHARSET;
