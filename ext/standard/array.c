@@ -78,6 +78,7 @@
 #define DIFF_NORMAL			1
 #define DIFF_KEY			2
 #define DIFF_ASSOC			6
+#define DIFF_COMP_DATA_NONE    -1
 #define DIFF_COMP_DATA_INTERNAL 0
 #define DIFF_COMP_DATA_USER     1
 #define DIFF_COMP_KEY_INTERNAL  0
@@ -3394,6 +3395,81 @@ PHP_FUNCTION(array_uintersect_uassoc)
 }
 /* }}} */
 
+static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
+{
+	Bucket *p;
+	int argc, i;
+	zval ***args;
+	int (*diff_data_compare_func)(zval **, zval ** TSRMLS_DC) = NULL;
+	zend_bool ok;
+	zval **data;
+
+	/* Get the argument count */
+	argc = ZEND_NUM_ARGS();
+	/* Allocate arguments array and get the arguments, checking for errors. */
+	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
+	if (argc < 2 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+	if (data_compare_type == DIFF_COMP_DATA_USER) {
+		char *callback_name;
+
+		if (argc < 3) {
+			efree(args);
+			WRONG_PARAM_COUNT;
+		}
+		argc--;
+		if (!zend_is_callable(*args[argc], 0, &callback_name)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
+			efree(callback_name);
+			efree(args);
+			return;
+		} 
+		efree(callback_name);
+		diff_data_compare_func = zval_user_compare;
+		BG(user_compare_func_name) = args[argc];
+	} else if (data_compare_type == DIFF_COMP_DATA_INTERNAL) {
+		diff_data_compare_func = zval_compare;
+	}
+
+	array_init(return_value);
+
+	for (p = Z_ARRVAL_PP(args[0])->pListHead; p != NULL; p = p->pListNext) {
+		if (p->nKeyLength == 0) {
+			ok = 1;
+			for (i = 1; i < argc; i++) {
+				if (zend_hash_index_find(Z_ARRVAL_PP(args[i]), p->h, (void**)&data) == SUCCESS &&
+				    (!diff_data_compare_func ||
+				     diff_data_compare_func((zval**)p->pData, data TSRMLS_CC) == 0)) {
+					ok = 0;
+					break;
+				}
+			}
+			if (ok) {
+				(*((zval**)p->pData))->refcount++;
+				zend_hash_index_update(Z_ARRVAL_P(return_value), p->h, p->pData, sizeof(zval*), NULL);
+			}
+		} else {
+			ok = 1;
+			for (i = 1; i < argc; i++) {
+				if (zend_hash_quick_find(Z_ARRVAL_PP(args[i]), p->arKey, p->nKeyLength, p->h, (void**)&data) == SUCCESS &&
+				    (!diff_data_compare_func ||
+				     diff_data_compare_func((zval**)p->pData, data TSRMLS_CC) == 0)) {
+					ok = 0;
+					break;
+				}
+			}
+			if (ok) {
+				(*((zval**)p->pData))->refcount++;
+				zend_hash_quick_update(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength, p->h, p->pData, sizeof(zval*), NULL);
+			}
+		}
+	}
+	efree(args);
+}
+/* }}} */
+
 static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type) /* {{{ */
 {
 	zval ***args = NULL;
@@ -3708,8 +3784,7 @@ out:
    Returns the entries of arr1 that have keys which are not present in any of the others arguments. This function is like array_diff() but works on the keys instead of the values. The associativity is preserved. */
 PHP_FUNCTION(array_diff_key)
 {
-	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_KEY,
-			 DIFF_COMP_DATA_INTERNAL, DIFF_COMP_KEY_INTERNAL);
+	php_array_diff_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_COMP_DATA_NONE);
 }
 /* }}} */
 
@@ -3744,8 +3819,7 @@ PHP_FUNCTION(array_udiff)
    Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal */
 PHP_FUNCTION(array_diff_assoc)
 {
-	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_ASSOC,
-			 DIFF_COMP_DATA_INTERNAL, DIFF_COMP_KEY_INTERNAL);
+	php_array_diff_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_COMP_DATA_INTERNAL);
 }
 /* }}} */
 
@@ -3762,8 +3836,7 @@ PHP_FUNCTION(array_diff_uassoc)
    Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function. */
 PHP_FUNCTION(array_udiff_assoc)
 {
-	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_ASSOC,
-			 DIFF_COMP_DATA_USER, DIFF_COMP_KEY_INTERNAL);
+	php_array_diff_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_COMP_DATA_USER);
 }
 /* }}} */
 
