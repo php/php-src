@@ -3634,6 +3634,8 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		hash = HASH_OF(*args[i]);
 		list = (Bucket **) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket *), hash->persistent);
 		if (!list) {
+			efree(ptrs);
+			efree(lists);
 			RETURN_FALSE;
 		}
 		lists[i] = list;
