@@ -1,3 +1,66 @@
+2007-09-21  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c:
+      MFH: add NULL check (coverity issue #385) and fix CS
+
+    * ZendEngine2/zend_ini.c:
+      add NULL check (coverity issue #385) and fix CS
+
+    * (PHP_5_2)
+      main/main.c:
+      MFH: check for NULL (coverity issue #386)
+
+    * main/main.c:
+      check for NULL (coverity issue #386)
+
+    * (PHP_5_2)
+      ext/standard/filestat.c:
+      MFH: check the return value of getgroups() for -1 (coverity issue #390)
+
+    * ext/standard/filestat.c:
+      check the return value of getgroups() for -1 (coverity issue #390)
+
+    * (PHP_5_2)
+      ext/standard/array.c
+      ext/standard/tests/array/array_map_001.phpt:
+      MFH: plug leak on error (coverity issue #405)
+
+    * ext/standard/array.c
+      ext/standard/tests/array/array_map_001.phpt
+      ext/standard/tests/array/array_map_001.phpt:
+      plug leak on error (coverity issue #405)
+
+    * ext/iconv/iconv.c:
+      plug leak on error (coverity issue #407)
+
+    * (PHP_5_2)
+      ext/iconv/iconv.c:
+      MFH: plug leak on error (coverity issue #407)
+
+2007-09-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c:
+      Improved speed of array_diff_key(), array_diff_assoc() and
+      array_udiff_assoc().
+
+2007-09-21  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      main/output.c:
+      initialize all fields of the struct (it's generally good idea even though
+      they should not be used)
+
+    * (PHP_5_2)
+      ext/standard/ftp_fopen_wrapper.c:
+      MFH: fix invalid read when opendir over FTP fails (coverity issue #462)
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      fix invalid read when opendir over FTP fails (coverity issue #462)
+
 2007-09-20  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/tidy/tidy.c:
