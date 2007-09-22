@@ -3156,10 +3156,12 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				intersect_data_compare_func = array_user_compare;
 				BG(user_compare_func_name) = args[arr_argc + 1];/* data - key */
 		} else {
+			efree(args);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug.", data_compare_type, key_compare_type);
 			return;
 		}		
 	} else {
+		efree(args);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "behavior is %d. This should never happen. Please report as a bug", behavior);
 		return;
 	}
@@ -3178,6 +3180,9 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		hash = HASH_OF(*args[i]);
 		list = (Bucket **) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket *), hash->persistent);
 		if (!list) {
+			efree(args);
+			efree(lists);
+			efree(ptrs);
 			RETURN_FALSE;
 		}
 		lists[i] = list;
@@ -3612,10 +3617,12 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			diff_data_compare_func = array_user_compare;
 			BG(user_compare_func_name) = args[arr_argc + 1];/* data - key*/
 		} else {
+			efree(args);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug", data_compare_type, key_compare_type);
 			return;	
 		}			
 	} else {
+		efree(args);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "behavior is %d. This should never happen. Please report as a bug", behavior);
 		return;	
 	}
@@ -3634,6 +3641,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		hash = HASH_OF(*args[i]);
 		list = (Bucket **) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket *), hash->persistent);
 		if (!list) {
+			efree(args);
 			efree(ptrs);
 			efree(lists);
 			RETURN_FALSE;
