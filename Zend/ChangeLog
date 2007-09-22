@@ -1,3 +1,12 @@
+2007-09-21  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      zend_ini.c:
+      MFH: add NULL check (coverity issue #385) and fix CS
+
+    * zend_ini.c:
+      add NULL check (coverity issue #385) and fix CS
+
 2007-09-20  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * (PHP_5_2)
