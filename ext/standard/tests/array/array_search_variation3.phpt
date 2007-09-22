@@ -1,69 +1,58 @@
 --TEST--
-Test array_search() and in_array() functions (variation-3)
+Test array_search() function : usage variations - haystack as sub-array/object
 --FILE--
 <?php
+/*
+ * Prototype  : mixed array_search ( mixed $needle, array $haystack [, bool $strict] )
+ * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise
+ * Source Code: ext/standard/array.c
+*/
 
-/* checking for Resources */
-echo "\n*** Testing resource type with in_array() ***\n";
-//file type resource
-$file_handle = fopen(__FILE__, "r");
+/* checking for sub-arrays with array_search() */
+echo "*** Testing sub-arrays with array_search() ***\n";
+$sub_array = array (
+  "one", 
+  array(1, 2 => "two", "three" => 3),
+  4 => "four",
+  "five" => 5,
+  array('', 'i')
+);
+var_dump( array_search("four", $sub_array) );
+//checking for element in a sub-array
+var_dump( array_search(3, $sub_array[1]) ); 
+var_dump( array_search(array('','i'), $sub_array) );
 
-//directory type resource
-$dir_handle = opendir( dirname(__FILE__) );
+/* checking for objects in array_search() */
+echo "\n*** Testing objects with array_search() ***\n";
+class array_search_check {
+  public $array_var = array(1=>"one", "two"=>2, 3=>3);
+  public function foo() {
+    echo "Public function\n";
+  }
+}
 
-//store resources in array for comparision.
-$resources = array($file_handle, $dir_handle);
-
-// search for resouce type in the resource array
-var_dump( in_array($file_handle, $resources, true) ); 
-//checking for (int) type resource
-var_dump( in_array((int)$dir_handle, $resources, true) ); 
-
-/* Miscellenous input check  */
-echo "\n*** Testing miscelleneos inputs with in_array() ***\n";
-//matching "Good" in array(0,"hello"), result:true in loose type check
-var_dump( in_array("Good", array(0,"hello")) ); 
-//false in strict mode 
-var_dump( in_array("Good", array(0,"hello"), TRUE) ); 
-
-//matching integer 0 in array("this"), result:true in loose type check
-var_dump( in_array(0, array("this")) );  
-// false in strict mode
-var_dump( in_array(0, array("this")),TRUE ); 
-
-//matching string "this" in array(0), result:true in loose type check
-var_dump( in_array("this", array(0)) );  
-// false in stric mode
-var_dump( in_array("this", array(0), TRUE) ); 
-
-//checking for type FALSE in multidimensional array with loose checking, result:false in loose type check
-var_dump( in_array(FALSE, 
-                   array("a"=> TRUE, "b"=> TRUE, 
-                         array("c"=> TRUE, "d"=>TRUE) 
-                        ) 
-                  ) 
-        ); 
-
-//matching string having integer in beginning, result:true in loose type check
-var_dump( in_array('123abc', array(123)) );  
-var_dump( in_array('123abc', array(123), TRUE) ); // false in strict mode 
+$array_search_obj = new array_search_check();  //creating new object
+//error: as wrong datatype for second argument
+var_dump( array_search("array_var", $array_search_obj) ); 
+//error: as wrong datatype for second argument
+var_dump( array_search("foo", $array_search_obj) ); 
+//element found as "one" exists in array $array_var
+var_dump( array_search("one", $array_search_obj->array_var) ); 
 
 echo "Done\n";
 ?>
 --EXPECTF--
-*** Testing resource type with in_array() ***
-bool(true)
+*** Testing sub-arrays with array_search() ***
+int(4)
+string(5) "three"
+int(5)
+
+*** Testing objects with array_search() ***
+
+Warning: array_search(): Wrong datatype for second argument in %s on line %d
 bool(false)
 
-*** Testing miscelleneos inputs with in_array() ***
-bool(true)
+Warning: array_search(): Wrong datatype for second argument in %s on line %d
 bool(false)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-bool(true)
-bool(false)
+int(1)
 Done

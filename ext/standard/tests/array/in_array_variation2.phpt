@@ -1,17 +1,17 @@
 --TEST--
-Test array_search() function : usage variations - different haystack values
+Test in_array() function : usage variations - different haystack values
 --FILE--
 <?php
 /*
- * Prototype  : mixed array_search ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise
+ * Prototype  : bool in_array ( mixed $needle, array $haystack [, bool $strict] )
+ * Description: Searches haystack for needle and returns TRUE  
+ *              if it is found in the array, FALSE otherwise.
  * Source Code: ext/standard/array.c
 */
 
-/* Test array_search() with different possible haystack values */
+/* Test in_array() with different possible haystack values */
 
-echo "*** Testing array_search() with different haystack values ***\n";
-
+echo "*** Testing in_array() with different haystack values ***\n";
 $misc_array = array (
   'a',
   'key' =>'d',
@@ -32,71 +32,71 @@ $misc_array = array (
 );
 $array_type = array(TRUE, FALSE, 1, 0, -1, "1", "0", "-1", NULL, array(), "PHP", "");
 /* loop to do loose and strict type check of elements in
-   $array_type on elements in $misc_array using array_search();
+   $array_type on elements in $misc_array using in_array();
    checking PHP type comparison tables
 */
 $counter = 1;
 foreach($array_type as $type) {
   echo "-- Iteration $counter --\n";
   //loose type checking
-  var_dump( array_search($type,$misc_array ) );  
+  var_dump( in_array($type,$misc_array ) );  
   //strict type checking
-  var_dump( array_search($type,$misc_array,true) );  
+  var_dump( in_array($type,$misc_array,true) );  
   //loose type checking
-  var_dump( array_search($type,$misc_array,false) );  
+  var_dump( in_array($type,$misc_array,false) );  
   $counter++;
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
-*** Testing array_search() with different haystack values ***
+*** Testing in_array() with different haystack values ***
 -- Iteration 1 --
-int(0)
-int(3)
-int(0)
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 2 --
-string(1) "y"
-int(4)
-string(1) "y"
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 3 --
-int(3)
+bool(true)
 bool(false)
-int(3)
+bool(true)
 -- Iteration 4 --
-string(3) "key"
-int(2)
-string(3) "key"
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 5 --
-int(3)
+bool(true)
 bool(false)
-int(3)
+bool(true)
 -- Iteration 6 --
-int(3)
+bool(true)
 bool(false)
-int(3)
+bool(true)
 -- Iteration 7 --
-int(2)
+bool(true)
 bool(false)
-int(2)
+bool(true)
 -- Iteration 8 --
-int(3)
+bool(true)
 bool(false)
-int(3)
+bool(true)
 -- Iteration 9 --
-string(1) "y"
-string(1) "y"
-string(1) "y"
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 10 --
-string(1) "y"
+bool(true)
 bool(false)
-string(1) "y"
+bool(true)
 -- Iteration 11 --
-int(2)
+bool(true)
 bool(false)
-int(2)
+bool(true)
 -- Iteration 12 --
-string(1) "y"
-string(0) ""
-string(1) "y"
+bool(true)
+bool(true)
+bool(true)
 Done
