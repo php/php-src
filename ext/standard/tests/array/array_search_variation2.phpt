@@ -1,53 +1,153 @@
 --TEST--
-Test array_search() and in_array() functions (variation-2)
+Test array_search() function : usage variations - different haystack values
 --FILE--
 <?php
+/*
+ * Prototype  : mixed array_search ( mixed $needle, array $haystack [, bool $strict] )
+ * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise
+ * Source Code: ext/standard/array.c
+*/
 
-/* checking for sub-arrays with in_array() */
-echo "\n*** Testing sub-arrays with in_array() ***\n";
-$sub_array = array (
-  "one", 
-  array(1, 2 => "two", "three" => 3),
-  4 => "four",
-  "five" => 5,
-  array('', 'i')
+/* Test array_search() with different possible haystack values */
+
+echo "*** Testing array_search() with different haystack values ***\n";
+
+$misc_array = array (
+  'a',
+  'key' =>'d',
+  3,
+  ".001" =>-67, 
+  "-.051" =>"k",
+  0.091 =>"-.08",
+  "e" =>"5", 
+  "y" =>NULL,
+  NULL =>"",
+  0,
+  TRUE,
+  FALSE,
+  -27.39999999999,
+  " ",
+  "abcd\x00abcd\x00\abcd\x00abcdefghij",
+  "abcd\nabcd\tabcd\rabcd\0abcd"
 );
-var_dump( in_array("four", $sub_array) );
-//checking for element in a sub-array
-var_dump( in_array(3, $sub_array[1]) ); 
-var_dump( in_array(array('','i'), $sub_array) );
-
-/* checking for objects in in_array() */
-echo "\n*** Testing objects with in_array() ***\n";
-class in_array_check {
-  public $array_var = array(1=>"one", "two"=>2, 3=>3);
-  public function foo() {
-    echo "Public function\n";
-  }
+$array_type = array(TRUE, FALSE, 1, 0, -1, "1", "0", "-1", NULL, array(), "PHP", "");
+/* loop to do loose and strict type check of elements in
+   $array_type on elements in $misc_array using array_search();
+   checking PHP type comparison tables
+*/
+$counter = 1;
+foreach($array_type as $type) {
+  echo "-- Iteration $counter --\n";
+  //loose type checking
+  var_dump( array_search($type,$misc_array ) );  
+  //strict type checking
+  var_dump( array_search($type,$misc_array,true) );  
+  //loose type checking
+  var_dump( array_search($type,$misc_array,false) );  
+  $counter++;
 }
-
-$in_array_obj = new in_array_check();  //creating new object
-//error: as wrong datatype for second argument
-var_dump( in_array("array_var", $in_array_obj) ); 
-//error: as wrong datatype for second argument
-var_dump( in_array("foo", $in_array_obj) ); 
-//element found as "one" exists in array $array_var
-var_dump( in_array("one", $in_array_obj->array_var) ); 
 
 echo "Done\n";
 ?>
 --EXPECTF--
-*** Testing sub-arrays with in_array() ***
-bool(true)
-bool(true)
-bool(true)
-
-*** Testing objects with in_array() ***
-
-Warning: in_array() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: in_array() expects parameter 2 to be array, object given in %s on line %d
-NULL
-bool(true)
+*** Testing array_search() with different haystack values ***
+-- Iteration 1 --
+int(0)
+int(3)
+int(0)
+-- Iteration 2 --
+string(1) "y"
+int(4)
+string(1) "y"
+-- Iteration 3 --
+int(3)
+bool(false)
+int(3)
+-- Iteration 4 --
+string(3) "key"
+int(2)
+string(3) "key"
+-- Iteration 5 --
+int(3)
+bool(false)
+int(3)
+-- Iteration 6 --
+int(3)
+bool(false)
+int(3)
+-- Iteration 7 --
+int(2)
+bool(false)
+int(2)
+-- Iteration 8 --
+int(3)
+bool(false)
+int(3)
+-- Iteration 9 --
+string(1) "y"
+string(1) "y"
+string(1) "y"
+-- Iteration 10 --
+string(1) "y"
+bool(false)
+string(1) "y"
+-- Iteration 11 --
+int(2)
+bool(false)
+int(2)
+-- Iteration 12 --
+string(1) "y"
+string(0) ""
+string(1) "y"
+Done
+--UEXPECTF--
+*** Testing array_search() with different haystack values ***
+-- Iteration 1 --
+int(0)
+int(3)
+int(0)
+-- Iteration 2 --
+unicode(1) "y"
+int(4)
+unicode(1) "y"
+-- Iteration 3 --
+int(3)
+bool(false)
+int(3)
+-- Iteration 4 --
+unicode(3) "key"
+int(2)
+unicode(3) "key"
+-- Iteration 5 --
+int(3)
+bool(false)
+int(3)
+-- Iteration 6 --
+int(3)
+bool(false)
+int(3)
+-- Iteration 7 --
+int(2)
+bool(false)
+int(2)
+-- Iteration 8 --
+int(3)
+bool(false)
+int(3)
+-- Iteration 9 --
+unicode(1) "y"
+unicode(1) "y"
+unicode(1) "y"
+-- Iteration 10 --
+unicode(1) "y"
+bool(false)
+unicode(1) "y"
+-- Iteration 11 --
+int(2)
+bool(false)
+int(2)
+-- Iteration 12 --
+unicode(1) "y"
+unicode(0) ""
+unicode(1) "y"
 Done
