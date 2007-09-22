@@ -1,16 +1,17 @@
 --TEST--
-Test array_search() function : usage variations - different needle values
+Test in_array() function : usage variations - different needdle values
 --FILE--
 <?php
 /*
- * Prototype  : mixed array_search ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise
+ * Prototype  : bool in_array ( mixed $needle, array $haystack [, bool $strict] )
+ * Description: Searches haystack for needle and returns TRUE  
+ *              if it is found in the array, FALSE otherwise.
  * Source Code: ext/standard/array.c
 */
 
-/* Test array_search() with different possible needle values */
+/* Test in_array() with different possible needle values */
 
-echo "*** Testing array_search() with different needle values ***\n";
+echo "*** Testing in_array() with different needle values ***\n";
 $arrays = array (
   array(0),
   array("a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL, "b", "ab", "abcd"),
@@ -43,17 +44,17 @@ $array_compare = array (
   "abcd\x00abcd\x00abcd"
 );
 /* loop to check if elements in $array_compare exist in $arrays
-   using array_search() */
+   using in_array() */
 $counter = 1;
 foreach($arrays as $array) {
   foreach($array_compare as $compare) {
     echo "-- Iteration $counter --\n";
     //strict option OFF
-    var_dump(array_search($compare,$array));  
+    var_dump(in_array($compare,$array));  
     //strict option ON
-    var_dump(array_search($compare,$array,TRUE));  
+    var_dump(in_array($compare,$array,TRUE));  
     //strict option OFF
-    var_dump(array_search($compare,$array,FALSE));  
+    var_dump(in_array($compare,$array,FALSE));  
     $counter++;
  }
 }
@@ -61,7 +62,7 @@ foreach($arrays as $array) {
 echo "Done\n";
 ?>
 --EXPECTF--
-*** Testing array_search() with different needle values ***
+*** Testing in_array() with different needle values ***
 -- Iteration 1 --
 bool(false)
 bool(false)
@@ -75,9 +76,9 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 4 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 5 --
 bool(false)
 bool(false)
@@ -99,57 +100,57 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 10 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 11 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 12 --
 bool(false)
 bool(false)
 bool(false)
 -- Iteration 13 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 14 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 15 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 16 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 17 --
-int(0)
-int(0)
-int(0)
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 18 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 19 --
-int(4)
-int(4)
-int(4)
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 20 --
-int(4)
+bool(true)
 bool(false)
-int(4)
+bool(true)
 -- Iteration 21 --
-int(4)
+bool(true)
 bool(false)
-int(4)
+bool(true)
 -- Iteration 22 --
-int(5)
-int(5)
-int(5)
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 23 --
 bool(false)
 bool(false)
@@ -175,57 +176,57 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 29 --
-string(0) ""
+bool(true)
 bool(false)
-string(0) ""
+bool(true)
 -- Iteration 30 --
-string(0) ""
+bool(true)
 bool(false)
-string(0) ""
+bool(true)
 -- Iteration 31 --
-string(0) ""
-string(0) ""
-string(0) ""
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 32 --
-int(6)
-int(6)
-int(6)
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 33 --
-int(7)
-int(7)
-int(7)
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 34 --
-string(1) "a"
+bool(true)
 bool(false)
-string(1) "a"
+bool(true)
 -- Iteration 35 --
-string(1) "a"
+bool(true)
 bool(false)
-string(1) "a"
+bool(true)
 -- Iteration 36 --
 bool(false)
 bool(false)
 bool(false)
 -- Iteration 37 --
-int(0)
-int(0)
-int(0)
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 38 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 39 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 40 --
 bool(false)
 bool(false)
 bool(false)
 -- Iteration 41 --
-int(5)
+bool(true)
 bool(false)
-int(5)
+bool(true)
 -- Iteration 42 --
 bool(false)
 bool(false)
@@ -299,21 +300,21 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 60 --
-int(1)
-int(1)
-int(1)
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 61 --
-int(1)
+bool(true)
 bool(false)
-int(1)
+bool(true)
 -- Iteration 62 --
 bool(false)
 bool(false)
 bool(false)
 -- Iteration 63 --
-string(3) "-.9"
+bool(true)
 bool(false)
-string(3) "-.9"
+bool(true)
 -- Iteration 64 --
 bool(false)
 bool(false)
@@ -339,89 +340,89 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 70 --
-int(2)
+bool(true)
 bool(false)
-int(2)
+bool(true)
 -- Iteration 71 --
-int(2)
+bool(true)
 bool(false)
-int(2)
+bool(true)
 -- Iteration 72 --
 bool(false)
 bool(false)
 bool(false)
 -- Iteration 73 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 74 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 75 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 76 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 77 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 78 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 79 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 80 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 81 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 82 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 83 --
-int(1)
+bool(true)
 bool(false)
-int(1)
+bool(true)
 -- Iteration 84 --
-int(1)
+bool(true)
 bool(false)
-int(1)
+bool(true)
 -- Iteration 85 --
-int(1)
+bool(true)
 bool(false)
-int(1)
+bool(true)
 -- Iteration 86 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 87 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 88 --
-int(1)
+bool(true)
 bool(false)
-int(1)
+bool(true)
 -- Iteration 89 --
-int(1)
+bool(true)
 bool(false)
-int(1)
+bool(true)
 -- Iteration 90 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 91 --
 bool(false)
 bool(false)
@@ -463,17 +464,17 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 101 --
-int(0)
-int(0)
-int(0)
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 102 --
-int(1)
-int(1)
-int(1)
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 103 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 104 --
 bool(false)
 bool(false)
@@ -483,13 +484,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 106 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 107 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 108 --
 bool(false)
 bool(false)
@@ -555,17 +556,17 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 124 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 125 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 126 --
-int(0)
-int(0)
-int(0)
+bool(true)
+bool(true)
+bool(true)
 -- Iteration 127 --
 bool(false)
 bool(false)
@@ -627,13 +628,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 142 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 143 --
-int(0)
+bool(true)
 bool(false)
-int(0)
+bool(true)
 -- Iteration 144 --
 bool(false)
 bool(false)
