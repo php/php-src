@@ -125,7 +125,7 @@ PHPAPI int php_checkuid_ex(const char *filename, const char *fopen_mode, int mod
 			/* root dir */
 			path[0] = DEFAULT_SLASH;
 			path[1] = '\0';
-		} else if (s) {
+		} else if (s && *(s + 1) != '\0') { /* make sure that the / is not the last character */
 			*s = '\0';
 			VCWD_REALPATH(filename, path);
 			*s = DEFAULT_SLASH;
