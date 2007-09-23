@@ -1,3 +1,190 @@
+2007-09-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/spl/spl_directory.c:
+      Improve check for filename (fixed coverity issue #355)
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      Fixed memory leak inside array_intersec (coverity issues #403,#404)
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      Fixed memory leak inside array_diff() (coverity issues #401,#402)
+
+    * ext/standard/pack.c:
+      
+      MFB: Fixed memory leak inside pack() (coverity issues #398,#399,#400)
+
+    * (PHP_5_2)
+      ext/standard/pack.c:
+      
+      Fixed memory leak inside pack() (coverity issues #398,#399,#400)
+
+2007-09-22  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/strspn_basic.phpt
+      ext/standard/tests/strings/strspn_error.phpt
+      ext/standard/tests/strings/strspn_variation1.phpt
+      ext/standard/tests/strings/strspn_variation10.phpt
+      ext/standard/tests/strings/strspn_variation11.phpt
+      ext/standard/tests/strings/strspn_variation12.phpt
+      ext/standard/tests/strings/strspn_variation2.phpt
+      ext/standard/tests/strings/strspn_variation3.phpt
+      ext/standard/tests/strings/strspn_variation4.phpt
+      ext/standard/tests/strings/strspn_variation5.phpt
+      ext/standard/tests/strings/strspn_variation6.phpt
+      ext/standard/tests/strings/strspn_variation7.phpt
+      ext/standard/tests/strings/strspn_variation8.phpt
+      ext/standard/tests/strings/strspn_variation9.phpt:
+      New testcases for strspn() function
+
+    * ext/standard/tests/strings/strspn_basic.phpt
+      ext/standard/tests/strings/strspn_basic.phpt
+      ext/standard/tests/strings/strspn_error.phpt
+      ext/standard/tests/strings/strspn_error.phpt
+      ext/standard/tests/strings/strspn_variation1.phpt
+      ext/standard/tests/strings/strspn_variation1.phpt
+      ext/standard/tests/strings/strspn_variation10.phpt
+      ext/standard/tests/strings/strspn_variation10.phpt
+      ext/standard/tests/strings/strspn_variation11.phpt
+      ext/standard/tests/strings/strspn_variation11.phpt
+      ext/standard/tests/strings/strspn_variation12.phpt
+      ext/standard/tests/strings/strspn_variation12.phpt
+      ext/standard/tests/strings/strspn_variation2.phpt
+      ext/standard/tests/strings/strspn_variation2.phpt
+      ext/standard/tests/strings/strspn_variation3.phpt
+      ext/standard/tests/strings/strspn_variation3.phpt
+      ext/standard/tests/strings/strspn_variation4.phpt
+      ext/standard/tests/strings/strspn_variation4.phpt
+      ext/standard/tests/strings/strspn_variation5.phpt
+      ext/standard/tests/strings/strspn_variation5.phpt
+      ext/standard/tests/strings/strspn_variation6.phpt
+      ext/standard/tests/strings/strspn_variation6.phpt
+      ext/standard/tests/strings/strspn_variation7.phpt
+      ext/standard/tests/strings/strspn_variation7.phpt
+      ext/standard/tests/strings/strspn_variation8.phpt
+      ext/standard/tests/strings/strspn_variation8.phpt
+      ext/standard/tests/strings/strspn_variation9.phpt
+      ext/standard/tests/strings/strspn_variation9.phpt:
+      
+      New testcases for strspn() function
+
+    * ext/standard/tests/strings/strcspn_basic.phpt
+      ext/standard/tests/strings/strcspn_error.phpt
+      ext/standard/tests/strings/strcspn_variation1.phpt
+      ext/standard/tests/strings/strcspn_variation10.phpt
+      ext/standard/tests/strings/strcspn_variation11.phpt
+      ext/standard/tests/strings/strcspn_variation12.phpt
+      ext/standard/tests/strings/strcspn_variation2.phpt
+      ext/standard/tests/strings/strcspn_variation3.phpt
+      ext/standard/tests/strings/strcspn_variation4.phpt
+      ext/standard/tests/strings/strcspn_variation5.phpt
+      ext/standard/tests/strings/strcspn_variation6.phpt
+      ext/standard/tests/strings/strcspn_variation7.phpt
+      ext/standard/tests/strings/strcspn_variation8.phpt
+      ext/standard/tests/strings/strcspn_variation9.phpt:
+      New testcases for strcspn() function
+
+    * ext/standard/tests/strings/strcspn_basic.phpt
+      ext/standard/tests/strings/strcspn_basic.phpt
+      ext/standard/tests/strings/strcspn_error.phpt
+      ext/standard/tests/strings/strcspn_error.phpt
+      ext/standard/tests/strings/strcspn_variation1.phpt
+      ext/standard/tests/strings/strcspn_variation1.phpt
+      ext/standard/tests/strings/strcspn_variation10.phpt
+      ext/standard/tests/strings/strcspn_variation10.phpt
+      ext/standard/tests/strings/strcspn_variation11.phpt
+      ext/standard/tests/strings/strcspn_variation11.phpt
+      ext/standard/tests/strings/strcspn_variation12.phpt
+      ext/standard/tests/strings/strcspn_variation12.phpt
+      ext/standard/tests/strings/strcspn_variation2.phpt
+      ext/standard/tests/strings/strcspn_variation2.phpt
+      ext/standard/tests/strings/strcspn_variation3.phpt
+      ext/standard/tests/strings/strcspn_variation3.phpt
+      ext/standard/tests/strings/strcspn_variation4.phpt
+      ext/standard/tests/strings/strcspn_variation4.phpt
+      ext/standard/tests/strings/strcspn_variation5.phpt
+      ext/standard/tests/strings/strcspn_variation5.phpt
+      ext/standard/tests/strings/strcspn_variation6.phpt
+      ext/standard/tests/strings/strcspn_variation6.phpt
+      ext/standard/tests/strings/strcspn_variation7.phpt
+      ext/standard/tests/strings/strcspn_variation7.phpt
+      ext/standard/tests/strings/strcspn_variation8.phpt
+      ext/standard/tests/strings/strcspn_variation8.phpt
+      ext/standard/tests/strings/strcspn_variation9.phpt
+      ext/standard/tests/strings/strcspn_variation9.phpt:
+      
+      file strcspn_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/strtok_basic.phpt
+      ext/standard/tests/strings/strtok_error.phpt
+      ext/standard/tests/strings/strtok_variation1.phpt
+      ext/standard/tests/strings/strtok_variation2.phpt
+      ext/standard/tests/strings/strtok_variation3.phpt
+      ext/standard/tests/strings/strtok_variation4.phpt
+      ext/standard/tests/strings/strtok_variation5.phpt
+      ext/standard/tests/strings/strtok_variation6.phpt
+      ext/standard/tests/strings/strtok_variation7.phpt:
+      New testcases for strtok() function
+
+    * ext/standard/tests/strings/strtok_basic.phpt
+      ext/standard/tests/strings/strtok_basic.phpt
+      ext/standard/tests/strings/strtok_error.phpt
+      ext/standard/tests/strings/strtok_error.phpt
+      ext/standard/tests/strings/strtok_variation1.phpt
+      ext/standard/tests/strings/strtok_variation1.phpt
+      ext/standard/tests/strings/strtok_variation2.phpt
+      ext/standard/tests/strings/strtok_variation2.phpt
+      ext/standard/tests/strings/strtok_variation3.phpt
+      ext/standard/tests/strings/strtok_variation3.phpt
+      ext/standard/tests/strings/strtok_variation4.phpt
+      ext/standard/tests/strings/strtok_variation4.phpt
+      ext/standard/tests/strings/strtok_variation5.phpt
+      ext/standard/tests/strings/strtok_variation5.phpt
+      ext/standard/tests/strings/strtok_variation6.phpt
+      ext/standard/tests/strings/strtok_variation6.phpt
+      ext/standard/tests/strings/strtok_variation7.phpt
+      ext/standard/tests/strings/strtok_variation7.phpt:
+      
+      file strtok_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/array/array_search_variation.phpt
+      ext/standard/tests/array/array_search_variation.phpt:
+      replaced by array_search_variation1.phpt, hence removed.
+
+    * ext/standard/tests/array/array_search_errors.phpt
+      ext/standard/tests/array/array_search_errors.phpt
+      ext/standard/tests/array/array_search_variation1.phpt
+      ext/standard/tests/array/array_search_variation1.phpt
+      ext/standard/tests/array/array_search_variation2.phpt
+      ext/standard/tests/array/array_search_variation2.phpt
+      ext/standard/tests/array/array_search_variation3.phpt
+      ext/standard/tests/array/array_search_variation3.phpt
+      ext/standard/tests/array/array_search_variation4.phpt
+      ext/standard/tests/array/in_array_errors.phpt
+      ext/standard/tests/array/in_array_variation1.phpt
+      ext/standard/tests/array/in_array_variation2.phpt
+      ext/standard/tests/array/in_array_variation3.phpt
+      ext/standard/tests/array/in_array_variation4.phpt:
+      update and split of testcases for functions array_search() and in_array()
+
+    * ext/standard/tests/array/array_search_variation4.phpt
+      ext/standard/tests/array/array_search_variation4.phpt
+      ext/standard/tests/array/in_array_errors.phpt
+      ext/standard/tests/array/in_array_errors.phpt
+      ext/standard/tests/array/in_array_variation1.phpt
+      ext/standard/tests/array/in_array_variation1.phpt
+      ext/standard/tests/array/in_array_variation2.phpt
+      ext/standard/tests/array/in_array_variation2.phpt
+      ext/standard/tests/array/in_array_variation3.phpt
+      ext/standard/tests/array/in_array_variation3.phpt
+      ext/standard/tests/array/in_array_variation4.phpt
+      ext/standard/tests/array/in_array_variation4.phpt:
+      
+      file array_search_variation4.phpt was initially added on branch PHP_5_2.
+
 2007-09-21  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_2)
