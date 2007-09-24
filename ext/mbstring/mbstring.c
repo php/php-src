@@ -716,6 +716,9 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 		} else if (strcasecmp("long", new_value) == 0) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
 			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
+		} else if (strcasecmp("entity", new_value) == 0) {
+			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
+			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 		} else {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
@@ -1328,6 +1331,8 @@ PHP_FUNCTION(mb_substitute_character)
 			RETVAL_STRING("none", 1);
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
 			RETVAL_STRING("long", 1);
+		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
+			RETVAL_STRING("entity", 1);
 		} else {
 			RETVAL_LONG(MBSTRG(current_filter_illegal_substchar));
 		}
@@ -1339,6 +1344,8 @@ PHP_FUNCTION(mb_substitute_character)
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
 			} else if (strcasecmp("long", Z_STRVAL_PP(arg1)) == 0) {
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
+			} else if (strcasecmp("entity", Z_STRVAL_PP(arg1)) == 0) {
+				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 			} else {
 				convert_to_long_ex(arg1);
 				if (Z_LVAL_PP(arg1)< 0xffff && Z_LVAL_PP(arg1)> 0x0) {
@@ -3905,6 +3912,8 @@ PHP_FUNCTION(mb_get_info)
 			add_assoc_string(return_value, "substitute_character", "none", 1);
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
 			add_assoc_string(return_value, "substitute_character", "long", 1);
+		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
+			add_assoc_string(return_value, "substitute_character", "entity", 1);
 		} else {
 			add_assoc_long(return_value, "substitute_character", MBSTRG(current_filter_illegal_substchar));
 		}
@@ -3999,6 +4008,8 @@ PHP_FUNCTION(mb_get_info)
 			RETVAL_STRING("none", 1);
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
 			RETVAL_STRING("long", 1);
+		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
+			RETVAL_STRING("entity", 1);
 		} else {
 			RETVAL_LONG(MBSTRG(current_filter_illegal_substchar));
 		}
