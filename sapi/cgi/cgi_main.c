@@ -498,29 +498,42 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 
 static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
-	char *script_name   = SG(request_info).request_uri;
-	unsigned int script_name_len = script_name ? strlen(script_name) : 0;
-	char *path_info     = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
-	unsigned int path_info_len = path_info ? strlen(path_info) : 0;
-	unsigned int php_self_len = script_name_len + path_info_len;
-	char *php_self = emalloc(php_self_len + 1);
-
-	if (script_name) {
-		memcpy(php_self, script_name, script_name_len + 1);
-	}
-	if (path_info) {
-		memcpy(php_self + script_name_len, path_info, path_info_len + 1);
-	}
+	unsigned int php_self_len;
+	char *php_self;
 
 	/* In CGI mode, we consider the environment to be a part of the server
 	 * variables
 	 */
 	php_import_environment_variables(track_vars_array TSRMLS_CC);
-	/* Build the special-case PHP_SELF variable for the CGI version */
-	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, php_self_len, &php_self_len TSRMLS_CC)) {
-		php_register_variable_safe("PHP_SELF", php_self, php_self_len, track_vars_array TSRMLS_CC);
+
+	if (CGIG(fix_pathinfo)) {
+		char *script_name   = SG(request_info).request_uri;
+		unsigned int script_name_len = script_name ? strlen(script_name) : 0;
+		char *path_info     = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
+		unsigned int path_info_len = path_info ? strlen(path_info) : 0;
+		
+		php_self_len = script_name_len + path_info_len;
+		php_self = emalloc(php_self_len + 1);
+
+		if (script_name) {
+			memcpy(php_self, script_name, script_name_len + 1);
+		}
+		if (path_info) {
+			memcpy(php_self + script_name_len, path_info, path_info_len + 1);
+		}
+
+		/* Build the special-case PHP_SELF variable for the CGI version */
+		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, php_self_len, &php_self_len TSRMLS_CC)) {
+			php_register_variable_safe("PHP_SELF", php_self, php_self_len, track_vars_array TSRMLS_CC);
+		}
+		efree(php_self);
+	} else {
+		php_self = SG(request_info).request_uri ? SG(request_info).request_uri : "";
+		php_self_len = strlen(php_self);
+		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, php_self_len, &php_self_len TSRMLS_CC)) {
+			php_register_variable_safe("PHP_SELF", php_self, php_self_len, track_vars_array TSRMLS_CC);
+		}
 	}
-	efree(php_self);
 }
 
 static void sapi_cgi_log_message(char *message)
