@@ -387,9 +387,14 @@ mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 		ret = (*filter->filter_function)(filter->illegal_substchar, filter);
 		break;
 	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG:
+	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY:
 		if (c >= 0) {
 			if (c < MBFL_WCSGROUP_UCS4MAX) {	/* unicode */
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"U+");
+			  if (mode_backup == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
+			    ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"U+");
+			  } else { /* entity */
+			    ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"&#");
+			  }
 			} else {
 				if (c < MBFL_WCSGROUP_WCHARMAX) {
 					m = c & ~MBFL_WCSPLANE_MASK;
@@ -432,6 +437,9 @@ mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 				}
 				if (m == 0 && ret >= 0) {
 					ret = (*filter->filter_function)(mbfl_hexchar_table[0], filter);
+				}
+				if (mode_backup == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
+				  ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)";");
 				}
 			}
 		}
