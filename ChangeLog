@@ -1,3 +1,12 @@
+2007-09-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      main/safe_mode.c:
+      
+      Fixed bug #42739 (mkdir() doesnt like a trailing slash when safe_mode is
+      enabled).
+
 2007-09-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
