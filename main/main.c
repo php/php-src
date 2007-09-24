@@ -1407,6 +1407,8 @@ int php_request_startup(TSRMLS_D)
 		retval = FAILURE;
 	} zend_end_try();
 
+	SG(sapi_started) = 1;
+
 	return retval;
 }
 # else
