@@ -41,7 +41,7 @@ PHP                                                                        NEWS
 - Fixed Bug #42596 (session.save_path MODE option does not work). (Ilia)
 - Fixed bug #42590 (Make the engine recognize \v and \f escape sequences). 
   (Ilia)
-- Fixed bug #42587 (behaviour change regarding symlinked .php files). (Dmitry)
+- Fixed bug #42587 (behavior change regarding symlinked .php files). (Dmitry)
 - Fixed bug #42579 (apache_reset_timeout() does not exist). (Jani)
 - Fixed bug #42549 (ext/mysql failed to compile with libmysql 3.23). (Scott)
 - Fixed bug #42523 (PHP_SELF duplicates path). (Dmitry)
