@@ -1,3 +1,39 @@
+2007-09-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Fixed typo
+
+2007-09-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/main.c
+      main/main.c:
+      Fixed crash on POST request after dl("mbstring.so")
+
+2007-09-24  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c
+      ext/mbstring/libmbfl/mbfl/mbfilter.h
+      ext/mbstring/libmbfl/mbfl/mbfl_convert.c:
+      MFH: added support "entity" as substitute_character settin accoding to bug
+      #39404
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/libmbfl/mbfl/mbfilter.h
+      ext/mbstring/libmbfl/mbfl/mbfl_convert.c:
+      added support "entity" as substitute_character settin accoding to bug
+      #39404
+
+2007-09-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed bug #42699 (PHP_SELF duplicates path)
+
 2007-09-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
