@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE package SYSTEM "../pear/package.dtd">
+<package>
+ <name>Fileinfo</name>
+ <summary>libmagic bindings</summary>
+ <maintainers>
+  <maintainer>
+   <user>iliaa</user>
+   <name>Ilia Alshanetsky</name>
+   <email>ilia@php.net</email>
+   <role>lead</role>
+  </maintainer>
+ </maintainers>
+ <description>
+This extension allows retrieval of information regarding vast majority of file. 
+This information may include dimensions, quality, length etc...
+
+Additionally it can also be used to retrieve the mime type for a particular 
+file and for text files proper language encoding.
+ </description>
+ <license>PHP</license>
+ <release>
+  <state>stable</state>
+  <version>1.0.4</version>
+  <date>2006-11-07</date>
+  <notes>
+	1) Fixed detection of magic files
+	2) Fixed build problems with older version of libmagic
+  </notes>
+  <filelist>
+   <file role="src" name="config.m4"/>
+   <file role="src" name="fileinfo.c"/>
+   <file role="src" name="php_fileinfo.h"/>
+   <file role="doc" name="CREDITS"/>
+   <file role="doc" name="EXPERIMENTAL"/>
+   <file role="doc" name="fileinfo.php"/>
+  </filelist>
+  <deps>
+  </deps>
+ </release>
+</package>
+<!--
+vim:et:ts=1:sw=1
+-->
