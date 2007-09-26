@@ -177,6 +177,19 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		}
 		token.type = 0;
 	}
+
+	/* handler for trailing comments, see bug #42767 */
+	if (LANG_SCNG(yy_leng) && LANG_SCNG(_yy_more_len)) {
+		if (last_color != syntax_highlighter_ini->highlight_comment) {
+			if (last_color != syntax_highlighter_ini->highlight_html) {
+				zend_printf("</span>");
+			}
+			if (syntax_highlighter_ini->highlight_comment != syntax_highlighter_ini->highlight_html) {
+				zend_printf("<span style=\"color: %s\">", syntax_highlighter_ini->highlight_comment);
+			}
+		}
+		zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(_yy_more_len) TSRMLS_CC);
+	}
 done:
 	if (last_color != syntax_highlighter_ini->highlight_html) {
 		zend_printf("</span>\n");
@@ -184,8 +197,6 @@ done:
 	zend_printf("</span>\n");
 	zend_printf("</code>");
 }
-
-
 
 ZEND_API void zend_strip(TSRMLS_D)
 {
