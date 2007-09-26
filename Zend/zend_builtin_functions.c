@@ -43,6 +43,7 @@ static ZEND_FUNCTION(error_reporting);
 static ZEND_FUNCTION(define);
 static ZEND_FUNCTION(defined);
 static ZEND_FUNCTION(get_class);
+static ZEND_FUNCTION(get_called_class);
 static ZEND_FUNCTION(get_parent_class);
 static ZEND_FUNCTION(method_exists);
 static ZEND_FUNCTION(property_exists);
@@ -103,6 +104,7 @@ static zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(define,				NULL)
 	ZEND_FE(defined,			NULL)
 	ZEND_FE(get_class,			NULL)
+	ZEND_FE(get_called_class,	NULL)
 	ZEND_FE(get_parent_class,	NULL)
 	ZEND_FE(method_exists,		NULL)
 	ZEND_FE(property_exists,	NULL)
@@ -613,6 +615,27 @@ ZEND_FUNCTION(get_class)
 	RETURN_TEXTL(name, name_len, dup);
 }
 /* }}} */
+
+/* {{{ proto string get_called_class()
+   Retrieves the class name */
+ZEND_FUNCTION(get_called_class)
+{
+	int dup;
+
+	if (!ZEND_NUM_ARGS()) {
+		if (EG(called_scope)) {
+			RETURN_TEXTL(EG(called_scope)->name, EG(called_scope)->name_length, 1);
+		} else {
+			zend_error(E_WARNING, "get_called_class() called from outside a class");
+			RETURN_FALSE;
+		}
+	} else {
+		ZEND_WRONG_PARAM_COUNT();
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 
 /* {{{ proto string get_parent_class([mixed object]) U
    Retrieves the parent class name for object or class or current scope. */
