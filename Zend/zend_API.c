@@ -2860,6 +2860,9 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 							lcname_len == sizeof("parent")-1 &&
 							ZEND_U_EQUAL(Z_TYPE_PP(obj), lcname, lcname_len, "parent", sizeof("parent")-1)) {
 							ce = EG(active_op_array)->scope->parent;
+						} else if (lcname_len == sizeof("static")-1 &&
+							ZEND_U_EQUAL(Z_TYPE_PP(obj), lcname, lcname_len, "static", sizeof("static")-1)) {
+							ce = EG(called_scope);
 						} else if (zend_u_lookup_class(Z_TYPE_PP(obj), Z_UNIVAL_PP(obj), Z_UNILEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
 							ce = *pce;
 						}

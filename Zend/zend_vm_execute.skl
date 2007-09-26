@@ -13,6 +13,7 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 
 	/* Initialize execute_data */
 	EX(fbc) = NULL;
+	EX(called_scope) = NULL;
 	EX(object) = NULL;
 	EX(old_error_reporting) = NULL;
 	if (op_array->T < TEMP_VAR_STACK_LIMIT) {
@@ -46,12 +47,6 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 
 	EX(function_state).function = (zend_function *) op_array;
 	EG(function_state_ptr) = &EX(function_state);
-#if ZEND_DEBUG
-	/* function_state.function_symbol_table is saved as-is to a stack,
-	 * which is an intentional UMR.  Shut it up if we're in DEBUG.
-	 */
-	EX(function_state).function_symbol_table = NULL;
-#endif
 
 	while (1) {
     {%ZEND_VM_CONTINUE_LABEL%}

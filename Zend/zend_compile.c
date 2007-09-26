@@ -1702,6 +1702,7 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 		switch (fetch_type) {
 			case ZEND_FETCH_CLASS_SELF:
 			case ZEND_FETCH_CLASS_PARENT:
+			case ZEND_FETCH_CLASS_STATIC:
 				SET_UNUSED(opline->op2);
 				opline->extended_value = fetch_type;
 				zval_dtor(&class_name->u.constant);
@@ -3220,6 +3221,9 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 			case ZEND_FETCH_CLASS_PARENT:
 				zend_error(E_COMPILE_ERROR, "Cannot use 'parent' as class name as it is reserved");
 				break;
+			case ZEND_FETCH_CLASS_STATIC:
+				zend_error(E_COMPILE_ERROR, "Cannot use 'static' as class name as it is reserved");
+				break;
 			default:
 				break;
 		}
@@ -3331,6 +3335,9 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 			break;
 		case ZEND_FETCH_CLASS_PARENT:
 			zend_error(E_COMPILE_ERROR, "Cannot use 'parent' as interface name as it is reserved");
+			break;
+		case ZEND_FETCH_CLASS_STATIC:
+			zend_error(E_COMPILE_ERROR, "Cannot use 'static' as interface name as it is reserved");
 			break;
 		default:
 			if (CG(active_op_array)->last > 0) {
@@ -4876,6 +4883,9 @@ int zend_get_class_fetch_type(zend_uchar type, zstr class_name, uint class_name_
 	} else if ((class_name_len == sizeof("parent")-1) &&
 	    ZEND_U_EQUAL(type, class_name, class_name_len, "parent", sizeof("parent")-1)) {
 		return ZEND_FETCH_CLASS_PARENT;
+	} else if ((class_name_len == sizeof("static")-1) &&
+	    ZEND_U_EQUAL(type, class_name, class_name_len, "static", sizeof("static")-1)) {
+		return ZEND_FETCH_CLASS_STATIC;
 	} else {
 		return ZEND_FETCH_CLASS_DEFAULT;
 	}

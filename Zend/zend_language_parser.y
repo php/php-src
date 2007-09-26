@@ -670,6 +670,7 @@ function_call:
 
 fully_qualified_class_name:
 		T_STRING { $$ = $1; }
+	|	T_STATIC { $$.op_type = IS_CONST; ZVAL_ASCII_STRINGL(&$$.u.constant, "static", sizeof("static")-1, 1);}
 	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_build_namespace_name(&$$, NULL, &$2 TSRMLS_CC); }
 	|	fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_build_namespace_name(&$$, &$1, &$3 TSRMLS_CC); }
 ;

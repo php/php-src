@@ -201,6 +201,7 @@ void init_executor(TSRMLS_D) /* {{{ */
 	EG(exception) = NULL;
 
 	EG(scope) = NULL;
+	EG(called_scope) = NULL;
 
 	EG(This) = NULL;
 	
@@ -676,6 +677,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_op_array *original_op_array;
 	zend_op **original_opline_ptr;
 	zend_class_entry *current_scope;
+	zend_class_entry *current_called_scope;
 	zend_class_entry *calling_scope = NULL;
 	zend_class_entry *check_scope_or_static = NULL;
 	zval *current_this;
@@ -784,6 +786,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					found = (*ce != NULL?SUCCESS:FAILURE);
 					fci->object_pp = EG(This)?&EG(This):NULL;
 					EX(object) = EG(This);
+				} else if (Z_UNILEN_PP(fci->object_pp) == sizeof("static")-1 &&
+				    ZEND_U_EQUAL(Z_TYPE_PP(fci->object_pp), Z_UNIVAL_PP(fci->object_pp), Z_UNILEN_PP(fci->object_pp), "static", sizeof("static")-1)) {
+					if (!EG(called_scope)) {
+						zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
+					}
+					ce = &(EG(called_scope));
+					found = (*ce != NULL?SUCCESS:FAILURE);
+					fci->object_pp = EG(This)?&EG(This):NULL;
+					EX(object) = EG(This);
 				} else {
 					zend_class_entry *scope;
 					scope = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
@@ -852,6 +863,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			} else if (calling_scope && clen == sizeof("parent") - 1 && 
 			    ZEND_U_EQUAL(Z_TYPE_P(fci->function_name), lcname, clen, "parent", sizeof("parent")-1)) {
 				ce_child = EG(active_op_array) && EG(active_op_array)->scope ? EG(scope)->parent : NULL;
+			} else if (clen == sizeof("static") - 1 && 
+			    ZEND_U_EQUAL(Z_TYPE_P(fci->function_name), lcname, clen, "static", sizeof("static")-1)) {
+				ce_child = EG(called_scope);
 			} else if (zend_u_lookup_class_ex(Z_TYPE_P(fci->function_name), lcname, clen, Z_UNIVAL_P(fci->function_name), 0, &pce TSRMLS_CC) == SUCCESS) {
 				ce_child = *pce;
 			}
@@ -1028,6 +1042,13 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 	current_this = EG(This);
 
+	current_called_scope = EG(called_scope);
+	if (calling_scope) {
+		EG(called_scope) = calling_scope;
+	} else if (EX(function_state).function->type != ZEND_INTERNAL_FUNCTION) {
+		EG(called_scope) = NULL;
+	}
+	    
 	if (fci->object_pp) {
 		if ((EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
 			EG(This) = NULL;
@@ -1109,6 +1130,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	if (EG(This)) {
 		zval_ptr_dtor(&EG(This));
 	}
+	EG(called_scope) = current_called_scope;
 	EG(scope) = current_scope;
 	EG(This) = current_this;
 	EG(current_execute_data) = EX(prev_execute_data);
@@ -1679,6 +1701,11 @@ check_fetch_type:
 				zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
 			}
 			return EG(scope)->parent;
+		case ZEND_FETCH_CLASS_STATIC:
+			if (!EG(called_scope)) {
+				zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
+			}
+			return EG(called_scope);
 		case ZEND_FETCH_CLASS_AUTO: {
 				if (do_normalize) {
 					lcname = zend_u_str_case_fold(type, class_name, class_name_len, 1, &class_name_len);

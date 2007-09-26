@@ -150,6 +150,17 @@ static inline void zend_pzval_unlock_free_func(zval *z) /* {{{ */
 #define CV_OF(i)     (EG(current_execute_data)->CVs[i])
 #define CV_DEF_OF(i) (EG(active_op_array)->vars[i])
 
+#define CTOR_CALL_BIT    0x1
+#define CTOR_USED_BIT    0x2
+
+#define IS_CTOR_CALL(ce) (((zend_uintptr_t)(ce)) & CTOR_CALL_BIT)
+#define IS_CTOR_USED(ce) (((zend_uintptr_t)(ce)) & CTOR_USED_BIT)
+
+#define ENCODE_CTOR(ce, used) \
+	((zend_class_entry*)(((zend_uintptr_t)(ce)) | CTOR_CALL_BIT | ((used) ? CTOR_USED_BIT : 0)))
+#define DECODE_CTOR(ce) \
+	((zend_class_entry*)(((zend_uintptr_t)(ce)) & ~(CTOR_CALL_BIT|CTOR_USED_BIT)))
+
 ZEND_API zval** zend_get_compiled_variable_value(zend_execute_data *execute_data_ptr, zend_uint var) /* {{{ */
 {
 	return execute_data_ptr->CVs[var];
