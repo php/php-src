@@ -1,0 +1,34 @@
+In PHP5.3 all additional configure options (except --enable-cgi) are removed:
+
+  --enable-fastcgi          CGI: If this is enabled, the cgi module will
+                            be built with support for fastcgi also
+
+                            Now fastcgi is always enabled
+
+  --disable-path-info-check CGI: If this is disabled, paths such as
+                            /info.php/test?a=b will fail to work
+
+                            Now it is enabled by default, but can be disabled
+                            with ini directive "cgi.fix_pathinfo=0"
+
+  --enable-force-cgi-redirect
+                            CGI: Enable the security check for internal server
+                            redirects.  You should use this if you are
+                            running the CGI version with Apache
+  							
+                            Now it is enabled by default, but can be disabled
+                            with ini directive "cgi.force_redirect=0"
+
+  --enable-discard-path     CGI: If this is enabled, the PHP CGI binary
+                            can safely be placed outside of the
+                            web tree and people will not be able
+                            to circumvent .htaccess security
+
+                            This option had effect only with
+                            --disable-path-info-check or "cgi.fix_pathinfo=0".
+                            Seems it needs only for CGI configuration that
+                            require each script start from "#! /usr/bin/php".
+
+                            Now it is disabled by default, but can be enabled
+                            with ini directive "cgi.discard_path=1".
+
