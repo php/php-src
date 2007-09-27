@@ -148,8 +148,8 @@ typedef struct _php_cgi_globals_struct {
 	zend_bool fix_pathinfo;
 	zend_bool force_redirect;
 	zend_bool discard_path;
-	char *redirect_status_env;
 	zend_bool fcgi_logging;
+	char *redirect_status_env;
 #ifdef PHP_WIN32
 	zend_bool impersonate;
 #endif
@@ -283,7 +283,7 @@ static void sapi_cgibin_flush(void *server_context)
 		fcgi_request *request = (fcgi_request*) server_context;
 		if (
 #ifndef PHP_WIN32
-		!parent && 
+		!parent &&
 #endif
 		request && !fcgi_flush(request, 0)) {
 			php_handle_aborted_connection();
@@ -420,7 +420,7 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 
 #if !HAVE_SETENV || !HAVE_UNSETENV
 	/*  if cgi, or fastcgi and not found in fcgi env
-		check the regular environment 
+		check the regular environment
 		this leaks, but it's only cgi anyway, we'll fix
 		it for 5.0
 	*/
@@ -457,19 +457,19 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	    Z_TYPE_P(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
 	    zend_hash_num_elements(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV])) > 0) {
 		zval_dtor(array_ptr);
-	    *array_ptr = *PG(http_globals)[TRACK_VARS_ENV];
-	    INIT_PZVAL(array_ptr);
-	    zval_copy_ctor(array_ptr);
-	    return;
+		*array_ptr = *PG(http_globals)[TRACK_VARS_ENV];
+		INIT_PZVAL(array_ptr);
+		zval_copy_ctor(array_ptr);
+		return;
 	} else if (PG(http_globals)[TRACK_VARS_SERVER] &&
-		array_ptr != PG(http_globals)[TRACK_VARS_SERVER] &&
-	    Z_TYPE_P(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
-	    zend_hash_num_elements(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER])) > 0) {
+	           array_ptr != PG(http_globals)[TRACK_VARS_SERVER] &&
+	           Z_TYPE_P(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
+	           zend_hash_num_elements(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER])) > 0) {
 		zval_dtor(array_ptr);
-	    *array_ptr = *PG(http_globals)[TRACK_VARS_SERVER];
-	    INIT_PZVAL(array_ptr);
-	    zval_copy_ctor(array_ptr);
-	    return;
+		*array_ptr = *PG(http_globals)[TRACK_VARS_SERVER];
+		INIT_PZVAL(array_ptr);
+		zval_copy_ctor(array_ptr);
+		return;
 	}
 
 	/* call php's original import as a catch-all */
@@ -511,7 +511,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 		unsigned int script_name_len = script_name ? strlen(script_name) : 0;
 		char *path_info     = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
 		unsigned int path_info_len = path_info ? strlen(path_info) : 0;
-		
+
 		php_self_len = script_name_len + path_info_len;
 		php_self = emalloc(php_self_len + 1);
 
@@ -542,9 +542,9 @@ static void sapi_cgi_log_message(char *message)
 
 	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
 		fcgi_request *request;
-		
+
 		request = (fcgi_request*) SG(server_context);
-		if (request) {			
+		if (request) {
 			int len = strlen(message);
 			char *buf = malloc(len+2);
 
@@ -565,7 +565,7 @@ static int sapi_cgi_deactivate(TSRMLS_D)
 {
 	/* flush only when SAPI was started. The reasons are:
 		1. SAPI Deactivate is called from two places: module init and request shutdown
-		2. When the first call occurs and the request is not set up, flush fails on 
+		2. When the first call occurs and the request is not set up, flush fails on
 			FastCGI.
 	*/
 	if (SG(sapi_started)) {
@@ -672,14 +672,14 @@ static void php_cgi_usage(char *argv0)
   for:
 
   PATH_INFO
-	derived from the portion of the URI path following 
+	derived from the portion of the URI path following
 	the script name but preceding any query data
 	may be empty
 
   PATH_TRANSLATED
-    derived by taking any path-info component of the 
-	request URI and performing any virtual-to-physical 
-	translation appropriate to map it onto the server's 
+    derived by taking any path-info component of the
+	request URI and performing any virtual-to-physical
+	translation appropriate to map it onto the server's
 	document repository structure
 
 	empty if PATH_INFO is empty
@@ -696,7 +696,7 @@ static void php_cgi_usage(char *argv0)
     uri section following the domain:port part of a URI
 
   SCRIPT_FILENAME
-    The virtual-to-physical translation of SCRIPT_NAME (as per 
+    The virtual-to-physical translation of SCRIPT_NAME (as per
 	PATH_TRANSLATED)
 
   These settings are documented at
@@ -704,29 +704,29 @@ static void php_cgi_usage(char *argv0)
 
 
   Based on the following URL request:
-  
-  http://localhost/info.php/test?a=b 
- 
+
+  http://localhost/info.php/test?a=b
+
   should produce, which btw is the same as if
   we were running under mod_cgi on apache (ie. not
   using ScriptAlias directives):
- 
+
   PATH_INFO=/test
   PATH_TRANSLATED=/docroot/test
   SCRIPT_NAME=/info.php
   REQUEST_URI=/info.php/test?a=b
   SCRIPT_FILENAME=/docroot/info.php
   QUERY_STRING=a=b
- 
+
   but what we get is (cgi/mod_fastcgi under apache):
-  
+
   PATH_INFO=/info.php/test
   PATH_TRANSLATED=/docroot/info.php/test
   SCRIPT_NAME=/php/php-cgi  (from the Action setting I suppose)
   REQUEST_URI=/info.php/test?a=b
   SCRIPT_FILENAME=/path/to/php/bin/php-cgi  (Action setting translated)
   QUERY_STRING=a=b
- 
+
   Comments in the code below refer to using the above URL in a request
 
  */
@@ -779,7 +779,7 @@ static void init_request_info(TSRMLS_D)
 			env_path_info = _sapi_cgibin_putenv("PATH_INFO", env_path_info TSRMLS_CC);
 		}
 
-		if (CGIG(fix_pathinfo)) {			
+		if (CGIG(fix_pathinfo)) {
 			struct stat st;
 			char *real_path = NULL;
 			char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL", sizeof("REDIRECT_URL")-1 TSRMLS_CC);
@@ -797,7 +797,7 @@ static void init_request_info(TSRMLS_D)
  			}
 
 			if (env_path_translated != NULL && env_redirect_url != NULL) {
-				/* 
+				/*
 				   pretty much apache specific.  If we have a redirect_url
 				   then our script_filename and script_name point to the
 				   php executable
@@ -812,7 +812,7 @@ static void init_request_info(TSRMLS_D)
 			__riscosify_control |= __RISCOSIFY_DONT_CHECK_DIR;
 			script_path_translated = __unixify(script_path_translated, 0, NULL, 1, 0);
 #endif
-			
+
 			/*
 			 * if the file doesn't exist, try to extract PATH_INFO out
 			 * of it by stat'ing back through the '/'
@@ -885,7 +885,7 @@ static void init_request_info(TSRMLS_D)
 							int l = strlen(env_document_root);
 							int path_translated_len = 0;
 							char *path_translated = NULL;
-							
+
 							if (l && env_document_root[l - 1] == '/') {
 								--l;
 							}
@@ -908,7 +908,7 @@ static void init_request_info(TSRMLS_D)
 						   	}
 							env_path_translated = _sapi_cgibin_putenv("PATH_TRANSLATED", path_translated TSRMLS_CC);
 							efree(path_translated);
-						} else if (env_script_name && 
+						} else if (env_script_name &&
 								   strstr(pt, env_script_name)
 						) {
 							/* PATH_TRANSLATED = PATH_TRANSLATED - SCRIPT_NAME + PATH_INFO */
@@ -1019,7 +1019,7 @@ static void init_request_info(TSRMLS_D)
 		SG(request_info).query_string = sapi_cgibin_getenv("QUERY_STRING", sizeof("QUERY_STRING")-1 TSRMLS_CC);
 		SG(request_info).content_type = (content_type ? content_type : "" );
 		SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
-		
+
 		/* The CGI RFC allows servers to pass on unvalidated Authorization data */
 		auth = sapi_cgibin_getenv("HTTP_AUTHORIZATION", sizeof("HTTP_AUTHORIZATION")-1 TSRMLS_CC);
 		php_handle_auth_data(auth TSRMLS_CC);
@@ -1113,12 +1113,12 @@ static PHP_MINFO_FUNCTION(cgi)
 static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"cgi-fcgi",
-	NULL, 
-	PHP_MINIT(cgi), 
-	PHP_MSHUTDOWN(cgi), 
-	NULL, 
-	NULL, 
-	PHP_MINFO(cgi), 
+	NULL,
+	PHP_MINIT(cgi),
+	PHP_MSHUTDOWN(cgi),
+	NULL,
+	NULL,
+	PHP_MINFO(cgi),
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
@@ -1218,7 +1218,7 @@ int main(int argc, char *argv[])
 			/* if we're started on command line, check to see if
 			   we are being started as an 'external' fastcgi
 			   server by accepting a bindpath parameter. */
-			case 'd': { 
+			case 'd': {
 				/* define ini entries on command line */
 				int len = strlen(php_optarg);
 				char *val;
@@ -1277,23 +1277,22 @@ int main(int argc, char *argv[])
 		return FAILURE;
 	}
 
-	if (cgi) {
-		/* check force_cgi after startup, so we have proper output */
-		if (CGIG(force_redirect)) {
-			/* Apache will generate REDIRECT_STATUS,
-			 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
-			 * redirect.so and installation instructions available from
-			 * http://www.koehntopp.de/php.
-			 *   -- kk@netuse.de
-			 */
-			if (!getenv("REDIRECT_STATUS")
-				&& !getenv ("HTTP_REDIRECT_STATUS")
-				/* this is to allow a different env var to be configured
-				   in case some server does something different than above */
-				&& (!CGIG(redirect_status_env) || !getenv(CGIG(redirect_status_env)))
-				) {
-				SG(sapi_headers).http_response_code = 400;
-				PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
+	/* check force_cgi after startup, so we have proper output */
+	if (cgi && CGIG(force_redirect)) {
+		/* Apache will generate REDIRECT_STATUS,
+		 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
+		 * redirect.so and installation instructions available from
+		 * http://www.koehntopp.de/php.
+		 *   -- kk@netuse.de
+		 */
+		if (!getenv("REDIRECT_STATUS")
+			&& !getenv ("HTTP_REDIRECT_STATUS")
+			/* this is to allow a different env var to be configured
+			   in case some server does something different than above */
+			&& (!CGIG(redirect_status_env) || !getenv(CGIG(redirect_status_env)))
+			) {
+			SG(sapi_headers).http_response_code = 400;
+			PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
 <p>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
 means that a page will only be served up if the REDIRECT_STATUS CGI variable is\n\
 set, e.g. via an Apache Action directive.</p>\n\
@@ -1304,16 +1303,15 @@ consult the installation file that came with this distribution, or visit \n\
 <a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
 
 #if defined(ZTS) && !defined(PHP_DEBUG)
-				/* XXX we're crashing here in msvc6 debug builds at
-				   php_message_handler_for_zend:839 because
-				   SG(request_info).path_translated is an invalid pointer.
-				   It still happens even though I set it to null, so something
-				   weird is going on.
-				*/
-				tsrm_shutdown();
+			/* XXX we're crashing here in msvc6 debug builds at
+			   php_message_handler_for_zend:839 because
+			   SG(request_info).path_translated is an invalid pointer.
+			   It still happens even though I set it to null, so something
+			   weird is going on.
+			*/
+			tsrm_shutdown();
 #endif
-				return FAILURE;
-			}
+			return FAILURE;
 		}
 	}
 
@@ -1470,7 +1468,7 @@ consult the installation file that came with this distribution, or visit \n\
 				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
 					switch (c) {
 
-	  				case 'a':	/* interactive mode */
+						case 'a':	/* interactive mode */
 							printf("Interactive mode enabled\n\n");
 							CG(interactive) = 1;
 							break;
@@ -1479,11 +1477,11 @@ consult the installation file that came with this distribution, or visit \n\
 							SG(options) |= SAPI_OPTION_NO_CHDIR;
 							break;
 
-	  				case 'e': /* enable extended info output */
+						case 'e': /* enable extended info output */
 							CG(extended_info) = 1;
 							break;
 
-  					case 'f': /* parse file */
+						case 'f': /* parse file */
 							if (script_file) {
 								efree(script_file);
 							}
@@ -1509,7 +1507,7 @@ consult the installation file that came with this distribution, or visit \n\
 							exit_status = 0;
 							goto out;
 
-	  				case 'l': /* syntax check mode */
+						case 'l': /* syntax check mode */
 							no_headers = 1;
 							behavior = PHP_MODE_LINT;
 							break;
@@ -1526,12 +1524,12 @@ consult the installation file that came with this distribution, or visit \n\
 							goto out;
 
 #if 0 /* not yet operational, see also below ... */
-	  				case '': /* generate indented source mode*/
+						case '': /* generate indented source mode*/
 							behavior=PHP_MODE_INDENT;
 							break;
 #endif
 
-	  				case 'q': /* do not generate HTTP headers */
+						case 'q': /* do not generate HTTP headers */
 							no_headers = 1;
 							break;
 
@@ -1555,7 +1553,7 @@ consult the installation file that came with this distribution, or visit \n\
 							exit_status = 0;
 							goto out;
 
-	  				case 'w':
+						case 'w':
 							behavior = PHP_MODE_STRIP;
 							break;
 
@@ -1621,10 +1619,10 @@ consult the installation file that came with this distribution, or visit \n\
 				}
 			} /* end !cgi && !fastcgi */
 
-			/* 
+			/*
 				we never take stdin if we're (f)cgi, always
 				rely on the web server giving us the info
-				we need in the environment. 
+				we need in the environment.
 			*/
 			if (SG(request_info).path_translated || cgi || fastcgi) {
 				file_handle.type = ZEND_HANDLE_FILENAME;
@@ -1654,7 +1652,7 @@ consult the installation file that came with this distribution, or visit \n\
 				SG(request_info).no_headers = 1;
 			}
 
-			/* 
+			/*
 				at this point path_translated will be set if:
 				1. we are running from shell and got filename was there
 				2. we are running as cgi or fastcgi
@@ -1665,7 +1663,7 @@ consult the installation file that came with this distribution, or visit \n\
 					retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
 				}
 			}
-			/* 
+			/*
 				if we are unable to open path_translated and we are not
 				running from shell (so fp == NULL), then fail.
 			*/
