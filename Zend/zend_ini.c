@@ -195,9 +195,9 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 		}
 		if ((zend_get_configuration_directive(p->name, p->name_length, &default_value)) == SUCCESS) {
 			if (!hashed_ini_entry->on_modify
-				|| hashed_ini_entry->on_modify(hashed_ini_entry, default_value.value.str.val, default_value.value.str.len, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3, ZEND_INI_STAGE_STARTUP TSRMLS_CC) == SUCCESS) {
-				hashed_ini_entry->value = default_value.value.str.val;
-				hashed_ini_entry->value_length = default_value.value.str.len;
+				|| hashed_ini_entry->on_modify(hashed_ini_entry, Z_STRVAL(default_value), Z_STRLEN(default_value), hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3, ZEND_INI_STAGE_STARTUP TSRMLS_CC) == SUCCESS) {
+				hashed_ini_entry->value = Z_STRVAL(default_value);
+				hashed_ini_entry->value_length = Z_STRLEN(default_value);
 				config_directive_success = 1;
 			}
 		}
