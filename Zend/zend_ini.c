@@ -394,10 +394,10 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
 			} else {
 				if (zend_uv.html_errors) {
 					display_string = NO_VALUE_HTML;
-					display_string_length = sizeof(NO_VALUE_HTML)-1;
+					display_string_length = sizeof(NO_VALUE_HTML) - 1;
 				} else {
 					display_string = NO_VALUE_PLAINTEXT;
-					display_string_length = sizeof(NO_VALUE_PLAINTEXT)-1;
+					display_string_length = sizeof(NO_VALUE_PLAINTEXT) - 1;
 				}
 			}
 		} else if (ini_entry->value && ini_entry->value[0]) {
@@ -406,10 +406,10 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
 		} else {
 			if (zend_uv.html_errors) {
 				display_string = NO_VALUE_HTML;
-				display_string_length = sizeof(NO_VALUE_HTML)-1;
+				display_string_length = sizeof(NO_VALUE_HTML) - 1;
 			} else {
 				display_string = NO_VALUE_PLAINTEXT;
-				display_string_length = sizeof(NO_VALUE_PLAINTEXT)-1;
+				display_string_length = sizeof(NO_VALUE_PLAINTEXT) - 1;
 			}
 		}
 		ZEND_WRITE(display_string, display_string_length);
