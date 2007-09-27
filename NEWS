@@ -9,8 +9,12 @@ PHP                                                                        NEWS
   . Added access to internal values of DSA, RSA and DH keys
 - Improved and cleaned CGI code. FastCGI is now always enabled and can not be
   disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
+
 - Added support for dynamic access of static members using $foo::myFunc().
   (Etienne Kneuss)
+
+- Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
+  (Jani)
 
 30 Aug 2007, PHP 5.2.4
 - Removed --enable-versioning configure option. (Jani)
