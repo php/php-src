@@ -67,7 +67,7 @@ ZEND_DECLARE_MODULE_GLOBALS(recode);
 static PHP_GINIT_FUNCTION(recode);
 
 /* {{{ module stuff */
-static zend_function_entry php_recode_functions[] = {
+static const zend_function_entry php_recode_functions[] = {
 	PHP_FE(recode_string, NULL)
 	PHP_FE(recode_file, NULL)
 	PHP_FALIAS(recode, recode_string, NULL)

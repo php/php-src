@@ -21,7 +21,7 @@
 #ifndef XSL_FE_H
 #define XSL_FE_H
 
-extern zend_function_entry php_xsl_xsltprocessor_class_functions[];
+extern const zend_function_entry php_xsl_xsltprocessor_class_functions[];
 extern zend_class_entry *xsl_xsltprocessor_class_entry;
 
 PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet);

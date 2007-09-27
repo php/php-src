@@ -34,7 +34,7 @@
 * Since: 
 */
 
-zend_function_entry php_dom_domimplementation_class_functions[] = {
+const zend_function_entry php_dom_domimplementation_class_functions[] = {
 	PHP_ME(domimplementation, getFeature, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	PHP_ME(domimplementation, hasFeature, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	PHP_ME(domimplementation, createDocumentType, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)

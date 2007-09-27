@@ -41,7 +41,7 @@ ZEND_DECLARE_MODULE_GLOBALS(sybase)
 static PHP_GINIT_FUNCTION(sybase);
 static PHP_GSHUTDOWN_FUNCTION(sybase);
 
-zend_function_entry sybase_functions[] = {
+const zend_function_entry sybase_functions[] = {
 	PHP_FE(sybase_connect, NULL)
 	PHP_FE(sybase_pconnect, NULL)
 	PHP_FE(sybase_close, NULL)

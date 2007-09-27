@@ -1020,7 +1020,7 @@ PHP_FUNCTION(phpversion)
 	if (argc == 0) {
 		RETURN_STRING(PHP_VERSION, 1);
 	} else if (argc == 1 && zend_get_parameters_ex(1, &arg) == SUCCESS) {
-		char *version;
+		const char *version;
 		convert_to_string_ex(arg);
 		version = zend_get_module_version(Z_STRVAL_PP(arg));
 		if (version == NULL) {

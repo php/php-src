@@ -4219,7 +4219,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 }
 
 
-int zend_get_class_fetch_type(char *class_name, uint class_name_len)
+int zend_get_class_fetch_type(const char *class_name, uint class_name_len)
 {
 	if ((class_name_len == sizeof("self")-1) &&
 		!memcmp(class_name, "self", sizeof("self"))) {

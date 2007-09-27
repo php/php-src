@@ -699,7 +699,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ hash_functions[]
  */
-zend_function_entry hash_functions[] = {
+const zend_function_entry hash_functions[] = {
 	PHP_FE(hash,									arginfo_hash)
 	PHP_FE(hash_file,								arginfo_hash_file)
 

@@ -445,7 +445,7 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 	}
 }
 
-static inline char * zend_verify_arg_class_kind(zend_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC)
+static inline char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, const char **class_name, zend_class_entry **pce TSRMLS_DC)
 {
 	*pce = zend_fetch_class(cur_arg_info->class_name, cur_arg_info->class_name_len, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD) TSRMLS_CC);
 
@@ -457,7 +457,7 @@ static inline char * zend_verify_arg_class_kind(zend_arg_info *cur_arg_info, cha
 	}
 }
 
-static inline int zend_verify_arg_error(zend_function *zf, zend_uint arg_num, zend_arg_info *cur_arg_info, char *need_msg, char *need_kind, char *given_msg, char *given_kind TSRMLS_DC)
+static inline int zend_verify_arg_error(zend_function *zf, zend_uint arg_num, const zend_arg_info *cur_arg_info, const char *need_msg, const char *need_kind, char *given_msg, char *given_kind TSRMLS_DC)
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	char *fname = zf->common.function_name;
@@ -494,7 +494,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 	cur_arg_info = &zf->common.arg_info[arg_num-1];
 
 	if (cur_arg_info->class_name) {
-		char *class_name;
+		const char *class_name;
 
 		if (!arg) {
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce TSRMLS_CC);

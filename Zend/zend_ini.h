@@ -92,7 +92,7 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D);
 
 ZEND_API void zend_ini_sort_entries(TSRMLS_D);
 
-ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number TSRMLS_DC);
+ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int module_number TSRMLS_DC);
 ZEND_API void zend_unregister_ini_entries(int module_number TSRMLS_DC);
 ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC);
 ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage);
@@ -111,7 +111,7 @@ ZEND_API ZEND_INI_DISP(zend_ini_color_displayer_cb);
 ZEND_API ZEND_INI_DISP(display_link_numbers);
 END_EXTERN_C()
 
-#define ZEND_INI_BEGIN()		static zend_ini_entry ini_entries[] = {
+#define ZEND_INI_BEGIN()		static const zend_ini_entry ini_entries[] = {
 #define ZEND_INI_END()		{ 0, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, 0, NULL } };
 
 #define ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, arg1, arg2, arg3, displayer) \

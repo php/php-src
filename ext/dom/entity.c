@@ -35,7 +35,7 @@
 * Since: 
 */
 
-zend_function_entry php_dom_entity_class_functions[] = {
+const zend_function_entry php_dom_entity_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 

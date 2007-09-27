@@ -79,7 +79,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 
 /* {{{ filter_functions[]
  */
-zend_function_entry filter_functions[] = {
+const zend_function_entry filter_functions[] = {
 	PHP_FE(filter_input,		NULL)
 	PHP_FE(filter_var,		NULL)
 	PHP_FE(filter_input_array,	NULL)

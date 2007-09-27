@@ -35,7 +35,7 @@
 * Since: 
 */
 
-zend_function_entry php_dom_element_class_functions[] = {
+const zend_function_entry php_dom_element_class_functions[] = {
 	PHP_FALIAS(getAttribute, dom_element_get_attribute, NULL)
 	PHP_FALIAS(setAttribute, dom_element_set_attribute, NULL)
 	PHP_FALIAS(removeAttribute, dom_element_remove_attribute, NULL)

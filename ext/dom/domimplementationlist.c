@@ -35,7 +35,7 @@
 * Since: DOM Level 3
 */
 
-zend_function_entry php_dom_domimplementationlist_class_functions[] = {
+const zend_function_entry php_dom_domimplementationlist_class_functions[] = {
 	PHP_FALIAS(item, dom_domimplementationlist_item, NULL)
 	{NULL, NULL, NULL}
 };

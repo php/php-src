@@ -100,7 +100,7 @@ static int le_link, le_result, le_result_entry;
 */
 /* {{{ ldap_functions[]
  */
-zend_function_entry ldap_functions[] = {
+const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_connect,								NULL)
 	PHP_FALIAS(ldap_close,		ldap_unbind,			NULL)
 	PHP_FE(ldap_bind,									NULL)

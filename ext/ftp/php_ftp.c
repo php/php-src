@@ -274,7 +274,7 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 
-zend_function_entry php_ftp_functions[] = {
+const zend_function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_connect,			arginfo_ftp_connect)
 #if HAVE_OPENSSL_EXT
 	PHP_FE(ftp_ssl_connect,		arginfo_ftp_ssl_connect)

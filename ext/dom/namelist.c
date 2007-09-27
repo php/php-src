@@ -35,7 +35,7 @@
 * Since: DOM Level 3
 */
 
-zend_function_entry php_dom_namelist_class_functions[] = {
+const zend_function_entry php_dom_namelist_class_functions[] = {
 	PHP_FALIAS(getName, dom_namelist_get_name, NULL)
 	PHP_FALIAS(getNamespaceURI, dom_namelist_get_namespace_uri, NULL)
 	{NULL, NULL, NULL}

@@ -94,7 +94,7 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 
 static int zend_hash_do_resize(HashTable *ht);
 
-ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
+ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength)
 {
 	return zend_inline_hash_func(arKey, nKeyLength);
 }
@@ -197,7 +197,7 @@ ZEND_API void zend_hash_set_apply_protection(HashTable *ht, zend_bool bApplyProt
 
 
 
-ZEND_API int _zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
 	ulong h;
 	uint nIndex;
@@ -267,7 +267,7 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLengt
 	return SUCCESS;
 }
 
-ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
 	uint nIndex;
 	Bucket *p;
@@ -336,7 +336,7 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKe
 }
 
 
-ZEND_API int zend_hash_add_empty_element(HashTable *ht, char *arKey, uint nKeyLength)
+ZEND_API int zend_hash_add_empty_element(HashTable *ht, const char *arKey, uint nKeyLength)
 {
 	void *dummy = (void *) 1;
 
@@ -452,7 +452,7 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 	return SUCCESS;
 }
 
-ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLength, ulong h, int flag)
+ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag)
 {
 	uint nIndex;
 	Bucket *p;
@@ -856,7 +856,7 @@ ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor
 }
 
 
-ZEND_API ulong zend_get_hash_value(char *arKey, uint nKeyLength)
+ZEND_API ulong zend_get_hash_value(const char *arKey, uint nKeyLength)
 {
 	return zend_inline_hash_func(arKey, nKeyLength);
 }
@@ -866,7 +866,7 @@ ZEND_API ulong zend_get_hash_value(char *arKey, uint nKeyLength)
  * data is returned in pData. The reason is that there's no reason
  * someone using the hash table might not want to have NULL data
  */
-ZEND_API int zend_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData)
+ZEND_API int zend_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData)
 {
 	ulong h;
 	uint nIndex;
@@ -891,7 +891,7 @@ ZEND_API int zend_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **
 }
 
 
-ZEND_API int zend_hash_quick_find(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void **pData)
+ZEND_API int zend_hash_quick_find(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void **pData)
 {
 	uint nIndex;
 	Bucket *p;
@@ -918,7 +918,7 @@ ZEND_API int zend_hash_quick_find(HashTable *ht, char *arKey, uint nKeyLength, u
 }
 
 
-ZEND_API int zend_hash_exists(HashTable *ht, char *arKey, uint nKeyLength)
+ZEND_API int zend_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength)
 {
 	ulong h;
 	uint nIndex;
@@ -942,7 +942,7 @@ ZEND_API int zend_hash_exists(HashTable *ht, char *arKey, uint nKeyLength)
 }
 
 
-ZEND_API int zend_hash_quick_exists(HashTable *ht, char *arKey, uint nKeyLength, ulong h)
+ZEND_API int zend_hash_quick_exists(HashTable *ht, const char *arKey, uint nKeyLength, ulong h)
 {
 	uint nIndex;
 	Bucket *p;
@@ -1170,7 +1170,7 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
 /* This function changes key of currevt element without changing elements'
  * order. If element with target key already exists, it will be deleted first.
  */
-ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, char *str_index, uint str_length, ulong num_index, HashPosition *pos)
+ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, HashPosition *pos)
 {
 	Bucket *p;
 

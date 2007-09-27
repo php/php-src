@@ -112,7 +112,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ extension definition structures */
-static zend_function_entry libxml_functions[] = {
+static const zend_function_entry libxml_functions[] = {
 	PHP_FE(libxml_set_streams_context, arginfo_libxml_set_streams_context)
 	PHP_FE(libxml_use_internal_errors, arginfo_libxml_use_internal_errors)
 	PHP_FE(libxml_get_last_error, arginfo_libxml_get_last_error)

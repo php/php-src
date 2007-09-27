@@ -478,7 +478,7 @@ PHP_MINFO_FUNCTION(apache)
 	}
 }
 
-static zend_function_entry apache_functions[] = {
+static const zend_function_entry apache_functions[] = {
 	PHP_FE(apache_lookup_uri, NULL)
 	PHP_FE(virtual, NULL) 
 	PHP_FE(apache_request_headers, NULL)

@@ -1160,7 +1160,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo_quote, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-zend_function_entry pdo_dbh_functions[] = {
+const zend_function_entry pdo_dbh_functions[] = {
 	ZEND_MALIAS(PDO, __construct, dbh_constructor,	arginfo_pdo___construct,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, prepare, 				arginfo_pdo_prepare,		ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, beginTransaction,		NULL,			ZEND_ACC_PUBLIC)
@@ -1183,7 +1183,7 @@ zend_function_entry pdo_dbh_functions[] = {
 /* {{{ overloaded object handlers for PDO class */
 int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 {
-	zend_function_entry *funcs;
+	const zend_function_entry *funcs;
 	zend_function func;
 	zend_internal_function *ifunc = (zend_internal_function*)&func;
 	int namelen;
@@ -1206,11 +1206,11 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	while (funcs->fname) {
 		ifunc->type = ZEND_INTERNAL_FUNCTION;
 		ifunc->handler = funcs->handler;
-		ifunc->function_name = funcs->fname;
+		ifunc->function_name = (char*)funcs->fname;
 		ifunc->scope = dbh->ce;
 		ifunc->prototype = NULL;
 		if (funcs->arg_info) {
-			ifunc->arg_info = funcs->arg_info + 1;
+			ifunc->arg_info = (zend_arg_info*)funcs->arg_info + 1;
 			ifunc->num_args = funcs->num_args;
 			if (funcs->arg_info[0].required_num_args == -1) {
 				ifunc->required_num_args = funcs->num_args;

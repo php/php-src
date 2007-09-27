@@ -74,7 +74,7 @@ static PHP_FUNCTION(pspell_config_save_repl);
 
 /* {{{ pspell_functions[]
  */
-static zend_function_entry pspell_functions[] = {
+static const zend_function_entry pspell_functions[] = {
 	PHP_FE(pspell_new,		NULL)
 	PHP_FE(pspell_new_personal,		NULL)
 	PHP_FE(pspell_new_config,		NULL)

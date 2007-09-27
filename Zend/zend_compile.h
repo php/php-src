@@ -158,9 +158,9 @@ typedef struct _zend_property_info {
 
 
 typedef struct _zend_arg_info {
-	char *name;
+	const char *name;
 	zend_uint name_len;
-	char *class_name;
+	const char *class_name;
 	zend_uint class_name_len;
 	zend_bool array_type_hint;
 	zend_bool allow_null;
@@ -547,7 +547,7 @@ void zend_do_mark_last_catch(znode *first_catch, znode *last_additional_catch TS
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC);
-int zend_get_class_fetch_type(char *class_name, uint class_name_len);
+int zend_get_class_fetch_type(const char *class_name, uint class_name_len);
 
 typedef zend_bool (*zend_auto_global_callback)(char *name, uint name_len TSRMLS_DC);
 typedef struct _zend_auto_global {

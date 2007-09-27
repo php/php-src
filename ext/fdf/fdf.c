@@ -276,7 +276,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ fdf_functions[]
  */
-zend_function_entry fdf_functions[] = {
+const zend_function_entry fdf_functions[] = {
 	PHP_FE(fdf_add_template,						arginfo_fdf_add_template)
 	PHP_FE(fdf_close,								arginfo_fdf_close)
 	PHP_FE(fdf_create,								arginfo_fdf_create)
