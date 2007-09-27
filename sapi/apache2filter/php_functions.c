@@ -359,7 +359,7 @@ PHP_MINFO_FUNCTION(apache)
 	php_info_print_table_end();
 }
 
-static zend_function_entry apache_functions[] = {
+static const zend_function_entry apache_functions[] = {
 	PHP_FE(apache_lookup_uri, NULL)
 	PHP_FE(virtual, NULL)
 	PHP_FE(apache_request_headers, NULL)

@@ -94,7 +94,7 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 
-static zend_function_entry bz2_functions[] = {
+static const zend_function_entry bz2_functions[] = {
 	PHP_FE(bzopen,       arginfo_bzopen)
 	PHP_FE(bzread,       arginfo_bzread)
 	PHP_FALIAS(bzwrite,   fwrite,		NULL)

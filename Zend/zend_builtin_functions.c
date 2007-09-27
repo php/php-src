@@ -89,7 +89,7 @@ static ZEND_FUNCTION(zend_thread_id);
 
 #include "zend_arg_defs.c"
 
-static zend_function_entry builtin_functions[] = { /* {{{ */
+static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(zend_version,		NULL)
 	ZEND_FE(func_num_args,		NULL)
 	ZEND_FE(func_get_arg,		NULL)
@@ -1728,7 +1728,7 @@ ZEND_FUNCTION(get_defined_constants)
 		zend_constant *val;
 		int module_number;
 		zval **modules;
-		char **module_names;
+		const char **module_names;
 		zend_module_entry *module;
 		int i = 1;
 
@@ -2282,7 +2282,7 @@ ZEND_FUNCTION(get_extension_funcs)
 	zend_uchar ext_type;
 	char *name;
 	zend_module_entry *module;
-	zend_function_entry *func;
+	const zend_function_entry *func;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &ext, &ext_len, &ext_type) == FAILURE) {
 		return;

@@ -21,7 +21,7 @@ Created from the snmputil sample in the Microsoft SDK for NT
 
 /* {{{ snmp_functions[]
  */
-zend_function_entry snmp_functions[] = {
+const zend_function_entry snmp_functions[] = {
     {"snmpget", php3_snmpget, NULL},
     {"snmpwalk", php3_snmpwalk, NULL},
     {NULL,NULL,NULL}

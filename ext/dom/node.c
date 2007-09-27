@@ -34,7 +34,7 @@
 * Since: 
 */
 
-zend_function_entry php_dom_node_class_functions[] = {
+const zend_function_entry php_dom_node_class_functions[] = {
 	PHP_FALIAS(insertBefore, dom_node_insert_before, NULL)
 	PHP_FALIAS(replaceChild, dom_node_replace_child, NULL)
 	PHP_FALIAS(removeChild, dom_node_remove_child, NULL)

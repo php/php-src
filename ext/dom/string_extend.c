@@ -35,7 +35,7 @@
 * Since: 
 */
 
-zend_function_entry php_dom_string_extend_class_functions[] = {
+const zend_function_entry php_dom_string_extend_class_functions[] = {
 	PHP_FALIAS(findOffset16, dom_string_extend_find_offset16, NULL)
 	PHP_FALIAS(findOffset32, dom_string_extend_find_offset32, NULL)
 	{NULL, NULL, NULL}

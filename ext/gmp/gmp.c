@@ -278,7 +278,7 @@ static ZEND_GINIT_FUNCTION(gmp);
 
 /* {{{ gmp_functions[]
  */
-zend_function_entry gmp_functions[] = {
+const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_init,	arginfo_gmp_init)
 	ZEND_FE(gmp_intval,	arginfo_gmp_intval)
 	ZEND_FE(gmp_strval,	arginfo_gmp_strval)

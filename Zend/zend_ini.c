@@ -165,9 +165,9 @@ ZEND_API void zend_ini_sort_entries(TSRMLS_D) /* {{{ */
 /*
  * Registration / unregistration
  */
-ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number TSRMLS_DC) /* {{{ */
+ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int module_number TSRMLS_DC) /* {{{ */
 {
-	zend_ini_entry *p = ini_entry;
+	const zend_ini_entry *p = ini_entry;
 	zend_ini_entry *hashed_ini_entry;
 	zval default_value;
 	HashTable *directives = registered_zend_ini_directives;
@@ -188,12 +188,12 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 #endif
 
 	while (p->name) {
-		p->module_number = module_number;
 		config_directive_success = 0;
-		if (zend_hash_add(directives, p->name, p->name_length, p, sizeof(zend_ini_entry), (void **) &hashed_ini_entry) == FAILURE) {
+		if (zend_hash_add(directives, p->name, p->name_length, (void*)p, sizeof(zend_ini_entry), (void **) &hashed_ini_entry) == FAILURE) {
 			zend_unregister_ini_entries(module_number TSRMLS_CC);
 			return FAILURE;
 		}
+		hashed_ini_entry->module_number = module_number;
 		if ((zend_get_configuration_directive(p->name, p->name_length, &default_value)) == SUCCESS) {
 			if (!hashed_ini_entry->on_modify
 				|| hashed_ini_entry->on_modify(hashed_ini_entry, Z_STRVAL(default_value), Z_STRLEN(default_value), hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3, ZEND_INI_STAGE_STARTUP TSRMLS_CC) == SUCCESS) {

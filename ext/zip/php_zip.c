@@ -272,7 +272,7 @@ static char * php_zipobj_get_zip_comment(struct zip *za, int *len TSRMLS_DC) /* 
 /* }}} */
 
 /* {{{ zend_function_entry */
-static zend_function_entry zip_functions[] = {
+static const zend_function_entry zip_functions[] = {
 	PHP_FE(zip_open,			NULL)
 	PHP_FE(zip_close,			NULL)
 	PHP_FE(zip_read,			NULL)
@@ -2065,7 +2065,7 @@ static ZIPARCHIVE_METHOD(getStream)
 /* }}} */
 
 /* {{{ ze_zip_object_class_functions */
-static zend_function_entry zip_class_functions[] = {
+static const zend_function_entry zip_class_functions[] = {
 	ZIPARCHIVE_ME(open,				NULL, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(close,				NULL, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(addEmptyDir,			NULL, ZEND_ACC_PUBLIC)

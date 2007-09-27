@@ -132,7 +132,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ exif_functions[]
  */
-zend_function_entry exif_functions[] = {
+const zend_function_entry exif_functions[] = {
 	PHP_FE(exif_read_data, arginfo_exif_read_data)
 	PHP_FALIAS(read_exif_data, exif_read_data, arginfo_exif_read_data)
 	PHP_FE(exif_tagname, arginfo_exif_tagname)

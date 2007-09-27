@@ -1466,7 +1466,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_uXsort, 0)
 	ZEND_ARG_INFO(0, cmp_function )
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_ArrayObject[] = {
+static const zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, __construct,      arginfo_array___construct,      ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetExists,     arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetGet,        arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
@@ -1491,7 +1491,7 @@ static zend_function_entry spl_funcs_ArrayObject[] = {
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry spl_funcs_ArrayIterator[] = {
+static const zend_function_entry spl_funcs_ArrayIterator[] = {
 	SPL_ME(Array, __construct,      arginfo_array___construct,      ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetExists,     arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetGet,        arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
@@ -1518,7 +1518,7 @@ static zend_function_entry spl_funcs_ArrayIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry spl_funcs_RecursiveArrayIterator[] = {
+static const zend_function_entry spl_funcs_RecursiveArrayIterator[] = {
 	SPL_ME(Array, hasChildren,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getChildren,   NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}

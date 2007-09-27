@@ -35,7 +35,7 @@
 * Since: DOM Level 3
 */
 
-zend_function_entry php_dom_domlocator_class_functions[] = {
+const zend_function_entry php_dom_domlocator_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 

@@ -480,7 +480,7 @@ zend_object_value dom_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	return retval;
 }
 
-static zend_function_entry dom_functions[] = {
+static const zend_function_entry dom_functions[] = {
 	PHP_FE(dom_import_simplexml, NULL)
 	{NULL, NULL, NULL}
 };
@@ -489,7 +489,7 @@ static zend_object_handlers* dom_get_obj_handlers(TSRMLS_D) {
 	return &dom_object_handlers;
 }
 
-static zend_module_dep dom_deps[] = {
+static const zend_module_dep dom_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_CONFLICTS("domxml")
 	{NULL, NULL, NULL}

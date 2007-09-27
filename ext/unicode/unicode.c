@@ -299,7 +299,7 @@ PHP_FUNCTION(unicode_restore_error_handler)
 /* }}} */
 
 /* {{{ unicode_functions[] */
-zend_function_entry unicode_functions[] = {
+const zend_function_entry unicode_functions[] = {
 	PHP_FE(locale_get_default, NULL)
 	PHP_FE(locale_set_default, NULL)
 	PHP_FE(unicode_decode, NULL)

@@ -1562,7 +1562,7 @@ PHPAPI MYSQLND *mysqlnd_init(zend_bool persistent)
  *
  * Every user visible function must have an entry in mysqlnd_functions[].
  */
-static zend_function_entry mysqlnd_functions[] = {
+static const zend_function_entry mysqlnd_functions[] = {
 	{NULL, NULL, NULL}	/* Must be the last line in mysqlnd_functions[] */
 };
 /* }}} */

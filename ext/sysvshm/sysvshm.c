@@ -41,7 +41,7 @@
 
 /* {{{ sysvshm_functions[]
  */
-zend_function_entry sysvshm_functions[] = {
+const zend_function_entry sysvshm_functions[] = {
 	PHP_FE(shm_attach, NULL)
 	PHP_FE(shm_remove, NULL)
 	PHP_FE(shm_detach, NULL)

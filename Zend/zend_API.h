@@ -33,9 +33,9 @@
 BEGIN_EXTERN_C()
 
 typedef struct _zend_function_entry {
-	char *fname;
+	const char *fname;
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
-	struct _zend_arg_info *arg_info;
+	const struct _zend_arg_info *arg_info;
 	zend_uint num_args;
 	zend_uint flags;
 } zend_function_entry;
@@ -68,7 +68,7 @@ typedef struct _zend_function_entry {
 #define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null) { {#name}, sizeof(#name)-1, {#classname}, sizeof(#classname)-1, 0, allow_null, pass_by_ref, 0, 0 },
 #define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null) { {#name}, sizeof(#name)-1, {NULL}, 0, 1, allow_null, pass_by_ref, 0, 0 },
 #define ZEND_BEGIN_ARG_INFO_EX(name, pass_rest_by_reference, return_reference, required_num_args)	\
-	zend_arg_info name[] = {																		\
+	const zend_arg_info name[] = {																		\
 		{ {NULL}, 0, {NULL}, 0, 0, 0, pass_rest_by_reference, return_reference, required_num_args },
 #define ZEND_BEGIN_ARG_INFO(name, pass_rest_by_reference)	\
 	ZEND_BEGIN_ARG_INFO_EX(name, pass_rest_by_reference, ZEND_RETURN_VALUE, -1)
@@ -208,8 +208,8 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, 
 
 /* End of parameter parsing API -- andrei */
 
-ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC);
-ZEND_API void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC);
+ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC);
+ZEND_API void zend_unregister_functions(const zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC);
 ZEND_API int zend_startup_module(zend_module_entry *module_entry);
 ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *module_entry TSRMLS_DC);
 ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TSRMLS_DC);
@@ -236,7 +236,7 @@ ZEND_API void zend_wrong_param_count(TSRMLS_D);
 ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *callable_name, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval ***zobj_ptr_ptr TSRMLS_DC);
 ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, zval *callable_name);
 ZEND_API zend_bool zend_make_callable(zval *callable, zval *callable_name TSRMLS_DC);
-ZEND_API char *zend_get_module_version(char *module_name);
+ZEND_API const char *zend_get_module_version(const char *module_name);
 ZEND_API int zend_get_module_started(char *module_name);
 ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type TSRMLS_DC);
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type, zstr doc_comment, int doc_comment_len TSRMLS_DC);
@@ -336,12 +336,12 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *ce, HashTa
 ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destroy_ht TSRMLS_DC);
 
 /* no longer supported */
-ZEND_API int add_assoc_function(zval *arg, char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
+ZEND_API int add_assoc_function(zval *arg, const char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
 
 #define ZSTR_DUPLICATE	(1<<0)
 #define ZSTR_AUTOFREE	(1<<1)
 
-ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
+ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value);
 
 #define add_assoc_null_ex(arg, key, key_len) do { \
 		zval *___tmp; \
@@ -485,7 +485,7 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 #define add_assoc_text(arg, key, str, duplicate) add_assoc_text_ex(arg, key, strlen(key)+1, str, duplicate)
 #define add_assoc_textl(arg, key, str, length, duplicate) add_assoc_textl_ex(arg, key, strlen(key)+1, str, length, duplicate)
 
-ZEND_API int add_ascii_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
+ZEND_API int add_ascii_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value);
 
 #define add_ascii_assoc_null_ex(arg, key, key_len) do { \
 		zval *___tmp; \
@@ -630,7 +630,7 @@ ZEND_API int add_ascii_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *v
 #define add_ascii_assoc_text(__arg, __key, __str, __duplicate) add_ascii_assoc_text_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_ascii_assoc_textl(__arg, __key, __str, __length, __duplicate) add_ascii_assoc_textl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 
-ZEND_API int add_rt_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
+ZEND_API int add_rt_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value);
 
 #define add_rt_assoc_null_ex(arg, key, key_len) do { \
 		zval *___tmp; \
@@ -775,7 +775,7 @@ ZEND_API int add_rt_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 #define add_rt_assoc_text(__arg, __key, __str, __duplicate) add_rt_assoc_text_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_rt_assoc_textl(__arg, __key, __str, __length, __duplicate) add_rt_assoc_textl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 
-ZEND_API int add_utf8_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
+ZEND_API int add_utf8_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value);
 
 #define add_utf8_assoc_null_ex(arg, key, key_len) do { \
 		zval *___tmp; \
@@ -1401,7 +1401,7 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
 			___u_str[___u_len] = 0; \
 			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
+				efree((char*)(str)); \
 			} \
 			add_next_index_unicodel(arg, ___u_str, ___u_len, 0); \
 		} else { \
@@ -1416,7 +1416,7 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 				add_next_index_unicodel(arg, ___u_str, ___u_len, 0); \
 			} \
 			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
+				efree((char*)(str)); \
 			} \
 		} else { \
 			add_next_index_stringl(arg, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
@@ -1430,7 +1430,7 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 				add_next_index_unicodel(arg, ___u_str, ___u_len, 0); \
 			} \
 			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
+				efree((char*)(str)); \
 			} \
 		} else { \
 			add_next_index_stringl(arg, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
@@ -1448,16 +1448,16 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 #define add_next_index_unset(__arg) add_next_index_null(__arg)
 #define add_property_unset(__arg, __key) add_property_null(__arg, __key)
 
-ZEND_API int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, void **dest, int duplicate);
-ZEND_API int add_get_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, void **dest, int duplicate);
+ZEND_API int add_get_assoc_string_ex(zval *arg, const char *key, uint key_len, const char *str, void **dest, int duplicate);
+ZEND_API int add_get_assoc_stringl_ex(zval *arg, const char *key, uint key_len, const char *str, uint length, void **dest, int duplicate);
 
 #define add_get_assoc_string(__arg, __key, __str, __dest, __duplicate) add_get_assoc_string_ex(__arg, __key, strlen(__key)+1, __str, __dest, __duplicate)
 #define add_get_assoc_stringl(__arg, __key, __str, __length, __dest, __duplicate) add_get_assoc_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __dest, __duplicate)
 
 ZEND_API int add_get_index_long(zval *arg, ulong idx, long l, void **dest);
 ZEND_API int add_get_index_double(zval *arg, ulong idx, double d, void **dest);
-ZEND_API int add_get_index_string(zval *arg, ulong idx, char *str, void **dest, int duplicate);
-ZEND_API int add_get_index_stringl(zval *arg, ulong idx, char *str, uint length, void **dest, int duplicate);
+ZEND_API int add_get_index_string(zval *arg, ulong idx, const char *str, void **dest, int duplicate);
+ZEND_API int add_get_index_stringl(zval *arg, ulong idx, const char *str, uint length, void **dest, int duplicate);
 ZEND_API int add_get_index_unicode(zval *arg, ulong idx, UChar *str, void **dest, int duplicate);
 ZEND_API int add_get_index_unicodel(zval *arg, ulong idx, UChar *str, uint length, void **dest, int duplicate);
 
@@ -1636,22 +1636,22 @@ END_EXTERN_C()
 	}
 
 #define ZVAL_STRING(z, s, duplicate) {	\
-		char *__s=(s);					\
+		const char *__s=(s);					\
 		Z_STRLEN_P(z) = strlen(__s);	\
-		Z_STRVAL_P(z) = (duplicate?estrndup(__s, Z_STRLEN_P(z)):__s);	\
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, Z_STRLEN_P(z)):(char*)__s);	\
 		Z_TYPE_P(z) = IS_STRING;        \
 	}
 
 #define ZVAL_STRINGL(z, s, l, duplicate) {	\
-		char *__s=(s); int __l=l;		\
+		const char *__s=(s); int __l=l;		\
 		Z_STRLEN_P(z) = __l;		    \
-		Z_STRVAL_P(z) = (duplicate?estrndup(__s, __l):__s);	\
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, __l):(char*)__s);	\
 		Z_TYPE_P(z) = IS_STRING;		    \
 	}
 
 #define ZVAL_ASCII_STRING(z, s, flags) { \
 		if (UG(unicode)) { \
-			char *__s = (s); \
+			char *__s = (char*)(s); \
 			int __s_len = strlen(__s); \
 			UChar *u_str = zend_ascii_to_unicode(__s, __s_len+1 ZEND_FILE_LINE_CC); \
 			u_str[__s_len] = 0; \
@@ -1660,16 +1660,16 @@ END_EXTERN_C()
 			} \
 			ZVAL_UNICODEL(z, u_str, __s_len, 0); \
 		} else { \
-			char *__s=(s);					\
+			const char *__s=(s);					\
 			Z_STRLEN_P(z) = strlen(__s);	\
-			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : __s);	\
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) :(char*) __s);	\
 			Z_TYPE_P(z) = IS_STRING;        \
 		} \
 	}
 
 #define ZVAL_ASCII_STRINGL(z, s, l, flags) { \
 		if (UG(unicode)) { \
-			char *__s = (s); \
+			char *__s = (char*)(s); \
 			int __s_len  = (l); \
 			UChar *u_str = zend_ascii_to_unicode((__s), (__s_len)+1 ZEND_FILE_LINE_CC); \
 			u_str[__s_len] = 0; \
@@ -1678,9 +1678,9 @@ END_EXTERN_C()
 			} \
 			ZVAL_UNICODEL(z, u_str, __s_len, 0); \
 		} else { \
-			char *__s=(s); int __l=l;	\
+			const char *__s=(s); int __l=l;	\
 			Z_STRLEN_P(z) = __l;	    \
-			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s);	\
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : (char*)__s);	\
 			Z_TYPE_P(z) = IS_STRING;    \
 		} \
 	}
@@ -1700,7 +1700,7 @@ END_EXTERN_C()
 		} else { \
 			char *__s=(char *)(s);					\
 			Z_STRLEN_P(z) = strlen(__s);	\
-			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : __s);	\
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : (char*)__s);	\
 			Z_TYPE_P(z) = IS_STRING;        \
 		} \
 	}

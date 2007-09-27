@@ -2412,14 +2412,14 @@ PHP_FUNCTION(simplexml_import_dom)
 }
 /* }}} */
 
-zend_function_entry simplexml_functions[] = {
+const zend_function_entry simplexml_functions[] = {
 	PHP_FE(simplexml_load_file, NULL)
 	PHP_FE(simplexml_load_string, NULL)
 	PHP_FE(simplexml_import_dom, NULL)
 	{NULL, NULL, NULL}
 };
 
-static zend_module_dep simplexml_deps[] = {
+static const zend_module_dep simplexml_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	{NULL, NULL, NULL}
 };
@@ -2444,7 +2444,7 @@ ZEND_GET_MODULE(simplexml)
 
 /* the method table */
 /* each method can have its own parameters and visibility */
-static zend_function_entry sxe_functions[] = {
+static const zend_function_entry sxe_functions[] = {
 	SXE_ME(__construct,            NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
 	SXE_ME(asXML,                  NULL, ZEND_ACC_PUBLIC)
 	SXE_MALIAS(saveXML, asXML,	   NULL, ZEND_ACC_PUBLIC)

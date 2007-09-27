@@ -31,14 +31,14 @@
 #include "php_pdo_odbc_int.h"
 
 /* {{{ pdo_odbc_functions[] */
-function_entry pdo_odbc_functions[] = {
+const function_entry pdo_odbc_functions[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */
 
 /* {{{ pdo_odbc_deps[] */
 #if ZEND_MODULE_API_NO >= 20050922
-static zend_module_dep pdo_odbc_deps[] = {
+static const zend_module_dep pdo_odbc_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	{NULL, NULL, NULL}
 };

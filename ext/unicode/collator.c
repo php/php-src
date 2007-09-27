@@ -24,7 +24,7 @@
 #include <unicode/ucol.h>
 
 
-zend_function_entry collator_funcs_collator[] = {
+const zend_function_entry collator_funcs_collator[] = {
 	ZEND_ME(collator, __construct, NULL, ZEND_ACC_PUBLIC)
 	ZEND_FENTRY(getDefault, 	ZEND_FN(collator_get_default), NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FENTRY(setDefault, 	ZEND_FN(collator_set_default), NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

@@ -75,7 +75,7 @@ static
 ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_onClose, 0)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry user_filter_class_funcs[] = {
+static const zend_function_entry user_filter_class_funcs[] = {
 	PHP_NAMED_FE(filter,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_filter)
 	PHP_NAMED_FE(onCreate,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_onCreate)
 	PHP_NAMED_FE(onClose,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_onClose)

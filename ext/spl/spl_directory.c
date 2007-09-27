@@ -1595,7 +1595,7 @@ ZEND_END_ARG_INFO()
 
 /* the method table */
 /* each method can have its own parameters and visibility */
-static zend_function_entry spl_SplFileInfo_functions[] = {
+static const zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       __construct,   arginfo_info___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPath,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getFilename,   NULL, ZEND_ACC_PUBLIC)
@@ -1637,7 +1637,7 @@ ZEND_END_ARG_INFO()
 
 /* the method table */
 /* each method can have its own parameters and visibility */
-static zend_function_entry spl_DirectoryIterator_functions[] = {
+static const zend_function_entry spl_DirectoryIterator_functions[] = {
 	SPL_ME(DirectoryIterator, __construct,   arginfo_dir___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, getFilename,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, getBasename,   arginfo_optinalSuffix, ZEND_ACC_PUBLIC)
@@ -1663,7 +1663,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_r_dir_hasChildren, 0, 0, 0)
 	ZEND_ARG_INFO(0, allow_links)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry spl_RecursiveDirectoryIterator_functions[] = {
+static const zend_function_entry spl_RecursiveDirectoryIterator_functions[] = {
 	SPL_ME(RecursiveDirectoryIterator, __construct,   arginfo_r_dir___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
@@ -2472,7 +2472,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_seek, 0, 0, 1)
 	ZEND_ARG_INFO(0, line_pos)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry spl_SplFileObject_functions[] = {
+static const zend_function_entry spl_SplFileObject_functions[] = {
 	SPL_ME(SplFileObject, __construct,    arginfo_file_object___construct,   ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, rewind,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, eof,            NULL, ZEND_ACC_PUBLIC)
@@ -2513,7 +2513,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_temp_file_object___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, max_memory)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry spl_SplTempFileObject_functions[] = {
+static const zend_function_entry spl_SplTempFileObject_functions[] = {
 	SPL_ME(SplTempFileObject, __construct, arginfo_temp_file_object___construct,  ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };

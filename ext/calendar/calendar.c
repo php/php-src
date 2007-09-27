@@ -147,7 +147,7 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 
-zend_function_entry calendar_functions[] = {
+const zend_function_entry calendar_functions[] = {
 	PHP_FE(jdtogregorian, arginfo_jdtogregorian)
 	PHP_FE(gregoriantojd, arginfo_gregoriantojd)
 	PHP_FE(jdtojulian, arginfo_jdtojulian)

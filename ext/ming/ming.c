@@ -45,7 +45,7 @@
 void destroySWFBlock(SWFBlock block);
 #endif
 
-static zend_function_entry ming_functions[] = {
+static const zend_function_entry ming_functions[] = {
 	PHP_FALIAS(ming_setcubicthreshold,  ming_setCubicThreshold,  NULL)
 	PHP_FALIAS(ming_setscale,           ming_setScale,           NULL)
 	PHP_FALIAS(ming_useswfversion,      ming_useSWFVersion,      NULL)
@@ -355,7 +355,7 @@ static SWFAction getAction(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-static zend_function_entry swfaction_functions[] = {
+static const zend_function_entry swfaction_functions[] = {
 	PHP_ME(swfaction, __construct,         NULL, 0)
 	{ NULL, NULL, NULL }
 };
@@ -461,7 +461,7 @@ PHP_METHOD(swfbitmap, getHeight)
 }
 /* }}} */
 
-static zend_function_entry swfbitmap_functions[] = {
+static const zend_function_entry swfbitmap_functions[] = {
 	PHP_ME(swfbitmap, __construct,         NULL, 0)
 	PHP_ME(swfbitmap, getWidth,            NULL, 0)
 	PHP_ME(swfbitmap, getHeight,           NULL, 0)
@@ -704,7 +704,7 @@ PHP_FUNCTION(ming_keypress)
 }
 /* }}} */
 
-static zend_function_entry swfbutton_functions[] = {
+static const zend_function_entry swfbutton_functions[] = {
 	PHP_ME(swfbutton, __construct,   NULL, 0)
 	PHP_ME(swfbutton, setHit,        NULL, 0)
 	PHP_ME(swfbutton, setOver,       NULL, 0)
@@ -1199,7 +1199,7 @@ PHP_METHOD(swfdisplayitem, getRot)
 /* }}} */
 #endif
 
-static zend_function_entry swfdisplayitem_functions[] = {
+static const zend_function_entry swfdisplayitem_functions[] = {
 	PHP_ME(swfdisplayitem, moveTo,      NULL, 0)
 	PHP_ME(swfdisplayitem, move,        NULL, 0)
 	PHP_ME(swfdisplayitem, scaleTo,     NULL, 0)
@@ -1347,7 +1347,7 @@ PHP_METHOD(swffill, skewYTo)
 	SWFFill_skewYTo(getFill(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
-static zend_function_entry swffill_functions[] = {
+static const zend_function_entry swffill_functions[] = {
 	PHP_ME(swffill, __construct, NULL, 0)
 	PHP_ME(swffill, moveTo,      NULL, 0)
 	PHP_ME(swffill, scaleTo,     NULL, 0)
@@ -1412,7 +1412,7 @@ PHP_METHOD(swffontchar, addUTF8Chars)
 }
 /* }}} */
 
-static zend_function_entry swffontchar_functions[] = {
+static const zend_function_entry swffontchar_functions[] = {
 	PHP_ME(swffontchar, addChars,   NULL, 0)
 	PHP_ME(swffontchar, addUTF8Chars,  NULL, 0)
 	{ NULL, NULL, NULL }
@@ -1614,7 +1614,7 @@ PHP_METHOD(swffont, getShape)
 
 #endif
 
-static zend_function_entry swffont_functions[] = {
+static const zend_function_entry swffont_functions[] = {
 	PHP_ME(swffont, __construct,       NULL, 0)
 	PHP_ME(swffont, getWidth,          NULL, 0)
 #ifdef HAVE_NEW_MING
@@ -1700,7 +1700,7 @@ PHP_METHOD(swfgradient, addEntry)
 }
 /* }}} */
 
-static zend_function_entry swfgradient_functions[] = {
+static const zend_function_entry swfgradient_functions[] = {
 	PHP_ME(swfgradient, __construct, NULL, 0)
 	PHP_ME(swfgradient, addEntry,    NULL, 0)
 	{ NULL, NULL, NULL }
@@ -1769,7 +1769,7 @@ PHP_METHOD(swfmorph, getShape2)
 }
 /* }}} */
 
-static zend_function_entry swfmorph_functions[] = {
+static const zend_function_entry swfmorph_functions[] = {
 	PHP_ME(swfmorph, __construct,     NULL, 0)
 	PHP_ME(swfmorph, getShape1,       NULL, 0)
 	PHP_ME(swfmorph, getShape2,       NULL, 0)
@@ -1849,7 +1849,7 @@ static void destroy_SWFSound_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 
 /* }}} */
 
-static zend_function_entry swfsound_functions[] = {
+static const zend_function_entry swfsound_functions[] = {
 	PHP_ME(swfsound, __construct,             NULL, 0)
 	{ NULL, NULL, NULL }
 };
@@ -1934,7 +1934,7 @@ PHP_METHOD(swfsoundinstance, loopCount)
 }
 /* }}} */
 
-static zend_function_entry swfsoundinstance_functions[] = {
+static const zend_function_entry swfsoundinstance_functions[] = {
 	PHP_ME(swfsoundinstance, noMultiple,    NULL, 0)
 	PHP_ME(swfsoundinstance, loopInPoint,   NULL, 0)
 	PHP_ME(swfsoundinstance, loopOutPoint,  NULL, 0)
@@ -2038,7 +2038,7 @@ PHP_METHOD(swfvideostream, getnumframes)
 /* }}} */
 		
 		
-static zend_function_entry swfvideostream_functions[] = {
+static const zend_function_entry swfvideostream_functions[] = {
 	PHP_ME(swfvideostream, 	__construct,	NULL, 0)
 	PHP_ME(swfvideostream, setdimension, NULL, 0)
 	PHP_ME(swfvideostream, getnumframes, NULL, 0)
@@ -2115,7 +2115,7 @@ static SWFPrebuiltClip getPrebuiltClip(zval *id TSRMLS_DC)
 }
 
 /* }}} */
-static zend_function_entry swfprebuiltclip_functions[] = {
+static const zend_function_entry swfprebuiltclip_functions[] = {
 	PHP_ME(swfprebuiltclip, __construct, NULL, 0)
 	{ NULL, NULL, NULL }
 };
@@ -2767,7 +2767,7 @@ PHP_METHOD(swfmovie, addFont)
 /* }}} */
 #endif
 
-static zend_function_entry swfmovie_functions[] = {
+static const zend_function_entry swfmovie_functions[] = {
 	PHP_ME(swfmovie, __construct,       NULL, 0)
 	PHP_ME(swfmovie, nextFrame,         NULL, 0)
 	PHP_ME(swfmovie, labelFrame,        NULL, 0)
@@ -3298,7 +3298,7 @@ PHP_METHOD(swfshape, drawCubicTo)
 }
 /* }}} */
 
-static zend_function_entry swfshape_functions[] = {
+static const zend_function_entry swfshape_functions[] = {
 	PHP_ME(swfshape, __construct,        NULL, 0)
 	PHP_ME(swfshape, setLine,            NULL, 0)
 	PHP_ME(swfshape, addFill,            NULL, 0)
@@ -3489,7 +3489,7 @@ PHP_METHOD(swfsprite, stopSound)
 /* }}} */
 #endif
 
-static zend_function_entry swfsprite_functions[] = {
+static const zend_function_entry swfsprite_functions[] = {
 	PHP_ME(swfsprite, __construct,  	NULL, 0)
 	PHP_ME(swfsprite, add,				NULL, 0)
 	PHP_ME(swfsprite, remove,			NULL, 0)
@@ -3775,7 +3775,7 @@ PHP_METHOD(swftext, getLeading)
 }
 /* }}} */
 
-static zend_function_entry swftext_functions[] = {
+static const zend_function_entry swftext_functions[] = {
 	PHP_ME(swftext, __construct,       NULL, 0)
 	PHP_ME(swftext, setFont,           NULL, 0)
 	PHP_ME(swftext, setHeight,         NULL, 0)
@@ -4086,7 +4086,7 @@ PHP_METHOD(swftextfield, addChars)
 /* }}} */
 #endif
 
-static zend_function_entry swftextfield_functions[] = {
+static const zend_function_entry swftextfield_functions[] = {
 	PHP_ME(swftextfield, __construct,     NULL, 0)
 	PHP_ME(swftextfield, setFont,         NULL, 0)
 	PHP_ME(swftextfield, setBounds,       NULL, 0)

@@ -191,7 +191,7 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 				  unsigned int zend_api;
 			};
 
-			char *name;
+			const char *name;
 			int zend_api;
 			unsigned char zend_debug, zts;
 

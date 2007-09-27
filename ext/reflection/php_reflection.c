@@ -926,7 +926,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 				  (module->version == NO_VERSION_YET) ? "<no_version>" : module->version);
 
 	if (module->deps) {
-		zend_module_dep* dep = module->deps;
+		const zend_module_dep* dep = module->deps;
 
 		string_printf(str, "\n  - Dependencies {\n");
 
@@ -988,7 +988,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 
 	if (module->functions && module->functions->fname) {
 		zend_function *fptr;
-		zend_function_entry *func = module->functions;
+		const zend_function_entry *func = module->functions;
 
 		string_printf(str, "\n  - Functions {\n");
 
@@ -1058,7 +1058,7 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSR
 /* }}} */
 
 /* {{{ reflection_extension_factory */
-static void reflection_extension_factory(zval *object, char *name_str TSRMLS_DC)
+static void reflection_extension_factory(zval *object, const char *name_str TSRMLS_DC)
 {
 	reflection_object *intern;
 	zval *name;
@@ -4322,7 +4322,7 @@ ZEND_METHOD(reflection_extension, getFunctions)
 	if (module->functions) {
 		zval *function;
 		zend_function *fptr;
-		zend_function_entry *func = module->functions;
+		const zend_function_entry *func = module->functions;
 
 		/* Is there a better way of doing this? */
 		while (func->fname) {
@@ -4466,7 +4466,7 @@ ZEND_METHOD(reflection_extension, getDependencies)
 {
 	reflection_object *intern;
 	zend_module_entry *module;
-	zend_module_dep *dep;
+	const zend_module_dep *dep;
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(module);
@@ -4527,7 +4527,7 @@ ZEND_METHOD(reflection_extension, info)
 /* }}} */
 
 /* {{{ method tables */
-static zend_function_entry reflection_exception_functions[] = {
+static const zend_function_entry reflection_exception_functions[] = {
 	{NULL, NULL, NULL}
 };
 
@@ -4543,13 +4543,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, return)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry reflection_functions[] = {
+static const zend_function_entry reflection_functions[] = {
 	ZEND_ME(reflection, getModifierNames, arginfo_reflection_getModifierNames, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(reflection, export, arginfo_reflection_export, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry reflector_functions[] = {
+static const zend_function_entry reflector_functions[] = {
 	ZEND_FENTRY(export, NULL, NULL, ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT|ZEND_ACC_PUBLIC)
 	ZEND_ABSTRACT_ME(reflector, __toString, NULL)
 	{NULL, NULL, NULL}
@@ -4576,7 +4576,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_function_invokeArgs, 0)
 	ZEND_ARG_ARRAY_INFO(0, args, 0)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry reflection_function_abstract_functions[] = {
+static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	PHP_ABSTRACT_ME(reflection_function, __toString, NULL)
 	ZEND_ME(reflection_function, isInternal, NULL, 0)
@@ -4597,7 +4597,7 @@ static zend_function_entry reflection_function_abstract_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry reflection_function_functions[] = {
+static const zend_function_entry reflection_function_functions[] = {
 	ZEND_ME(reflection_function, __construct, arginfo_reflection_function___construct, 0)
 	ZEND_ME(reflection_function, __toString, NULL, 0)
 	ZEND_ME(reflection_function, export, arginfo_reflection_function_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
@@ -4632,7 +4632,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_invokeArgs, 0)
 	ZEND_ARG_ARRAY_INFO(0, args, 0)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry reflection_method_functions[] = {
+static const zend_function_entry reflection_method_functions[] = {
 	ZEND_ME(reflection_method, export, arginfo_reflection_method_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_method, __construct, arginfo_reflection_method___construct, 0)
 	ZEND_ME(reflection_method, __toString, NULL, 0)
@@ -4741,7 +4741,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_implementsInterface, 0)
 	ZEND_ARG_INFO(0, interface)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry reflection_class_functions[] = {
+static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_class, export, arginfo_reflection_class_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_class, __construct, arginfo_reflection_class___construct, 0)
@@ -4798,7 +4798,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_object___construct, 0)
 	ZEND_ARG_INFO(0, argument)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry reflection_object_functions[] = {
+static const zend_function_entry reflection_object_functions[] = {
 	ZEND_ME(reflection_object, export, arginfo_reflection_object_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_object, __construct, arginfo_reflection_object___construct, 0)
 	{NULL, NULL, NULL}
@@ -4827,7 +4827,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_property_setValue, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry reflection_property_functions[] = {
+static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_property, export, arginfo_reflection_property_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_property, __construct, arginfo_reflection_property___construct, 0)
@@ -4860,7 +4860,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_parameter___construct, 0)
 	ZEND_ARG_INFO(0, parameter)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry reflection_parameter_functions[] = {
+static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_parameter, export, arginfo_reflection_parameter_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_parameter, __construct, arginfo_reflection_parameter___construct, 0)
@@ -4890,7 +4890,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_extension___construct, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry reflection_extension_functions[] = {
+static const zend_function_entry reflection_extension_functions[] = {
 	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_extension, export, arginfo_reflection_extension_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_extension, __construct, arginfo_reflection_extension___construct, 0)
@@ -4908,7 +4908,7 @@ static zend_function_entry reflection_extension_functions[] = {
 };
 /* }}} */
 
-zend_function_entry reflection_ext_functions[] = { /* {{{ */
+const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 	{NULL, NULL, NULL}
 }; /* }}} */
 

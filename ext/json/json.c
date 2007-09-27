@@ -36,7 +36,7 @@ static const char digits[] = "0123456789abcdef";
  *
  * Every user visible function must have an entry in json_functions[].
  */
-function_entry json_functions[] = {
+const function_entry json_functions[] = {
 	PHP_FE(json_encode, NULL)
 	PHP_FE(json_decode, NULL)
 	{NULL, NULL, NULL}  /* Must be the last line in json_functions[] */

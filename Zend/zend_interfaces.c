@@ -485,12 +485,12 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 /* }}}*/
 
 /* {{{ function tables */
-zend_function_entry zend_funcs_aggregate[] = {
+const zend_function_entry zend_funcs_aggregate[] = {
 	ZEND_ABSTRACT_ME(iterator, getIterator, NULL)
 	{NULL, NULL, NULL}
 };
 
-zend_function_entry zend_funcs_iterator[] = {
+const zend_function_entry zend_funcs_iterator[] = {
 	ZEND_ABSTRACT_ME(iterator, current,  NULL)
 	ZEND_ABSTRACT_ME(iterator, next,     NULL)
 	ZEND_ABSTRACT_ME(iterator, key,      NULL)
@@ -499,7 +499,7 @@ zend_function_entry zend_funcs_iterator[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_function_entry *zend_funcs_traversable    = NULL;
+const zend_function_entry *zend_funcs_traversable    = NULL;
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset, 0, 0, 1)
@@ -517,7 +517,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_value, 0, 0, 2)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-zend_function_entry zend_funcs_arrayaccess[] = {
+const zend_function_entry zend_funcs_arrayaccess[] = {
 	ZEND_ABSTRACT_ME(arrayaccess, offsetExists, arginfo_arrayaccess_offset)
 	ZEND_ABSTRACT_ME(arrayaccess, offsetGet,    arginfo_arrayaccess_offset_get)
 	ZEND_ABSTRACT_ME(arrayaccess, offsetSet,    arginfo_arrayaccess_offset_value)
@@ -530,7 +530,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_serializable_serialize, 0)
 	ZEND_ARG_INFO(0, serialized)
 ZEND_END_ARG_INFO()
 
-zend_function_entry zend_funcs_serializable[] = {
+const zend_function_entry zend_funcs_serializable[] = {
 	ZEND_ABSTRACT_ME(serializable, serialize,   NULL)
 	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)
 	{NULL, NULL, NULL}

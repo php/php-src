@@ -35,12 +35,12 @@ static zend_object_handlers xsl_object_handlers;
  *
  * Every user visible function must have an entry in xsl_functions[].
  */
-zend_function_entry xsl_functions[] = {
+const zend_function_entry xsl_functions[] = {
 	{NULL, NULL, NULL}  /* Must be the last line in xsl_functions[] */
 };
 /* }}} */
 
-static zend_module_dep xsl_deps[] = {
+static const zend_module_dep xsl_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	{NULL, NULL, NULL}
 };

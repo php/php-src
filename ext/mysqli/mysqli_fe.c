@@ -52,7 +52,7 @@ static
  *
  * Every user visible function must have an entry in mysqli_functions[].
  */
-zend_function_entry mysqli_functions[] = {
+const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_affected_rows,						NULL)
 	PHP_FE(mysqli_autocommit,							NULL)
 	PHP_FE(mysqli_change_user,							NULL)
@@ -195,7 +195,7 @@ zend_function_entry mysqli_functions[] = {
  *
  * Every user visible function must have an entry in mysqli_functions[].
  */
-zend_function_entry mysqli_link_methods[] = {
+const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(autocommit,mysqli_autocommit,NULL)
 	PHP_FALIAS(change_user,mysqli_change_user,NULL)
 	PHP_FALIAS(character_set_name, mysqli_character_set_name,NULL)
@@ -263,7 +263,7 @@ zend_function_entry mysqli_link_methods[] = {
  *
  * Every user visible function must have an entry in mysqli_result_functions[].
  */
-zend_function_entry mysqli_result_methods[] = {
+const zend_function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(__construct, mysqli_result_construct, NULL)
 	PHP_FALIAS(close,mysqli_free_result,NULL)
 	PHP_FALIAS(free,mysqli_free_result,NULL)
@@ -288,7 +288,7 @@ zend_function_entry mysqli_result_methods[] = {
  *
  * Every user visible function must have an entry in mysqli_stmt_functions[].
  */
-zend_function_entry mysqli_stmt_methods[] = {
+const zend_function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(__construct, mysqli_stmt_construct, NULL)
 	PHP_FALIAS(attr_get,mysqli_stmt_attr_get,NULL)
 	PHP_FALIAS(attr_set,mysqli_stmt_attr_set,NULL)
