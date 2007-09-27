@@ -1992,7 +1992,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 {
 	reflection_object *intern;
 	parameter_reference *param;
-	zend_class_entry **pce;
+	zend_class_entry **pce, *ce;
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(param);
@@ -2011,7 +2011,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 		 * lint-mode.
 		 */
 		if (0 == strncmp(param->arg_info->class_name, "self", sizeof("self")- 1)) {
-			zend_class_entry *ce= param->fptr->common.scope;
+			ce = param->fptr->common.scope;
 			if (!ce) {
 			   zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 				   "Parameter uses 'self' as type hint but function is not a class member!");
@@ -2019,7 +2019,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 			}
 			pce= &ce;
 		} else if (0 == strncmp(param->arg_info->class_name, "parent", sizeof("parent")- 1)) {
-			zend_class_entry *ce= param->fptr->common.scope;
+			ce = param->fptr->common.scope;
 			if (!ce) {
 			   zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 				   "Parameter uses 'parent' as type hint but function is not a class member!");
