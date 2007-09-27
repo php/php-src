@@ -1,3 +1,109 @@
+2007-09-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_highlight.c
+      ZendEngine2/tests/bug42767.phpt:
+      MFB: Fixed bug #42767 (highlight_string() truncates trailing comment).
+
+    * (PHP_5_2)
+      NEWS:
+      
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/tests/bug42767.phpt
+      ZendEngine2/tests/bug42767.phpt:
+      Fixed bug #42767 (highlight_string() truncates trailing comment)
+
+2007-09-26  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/strrev_basic.phpt
+      ext/standard/tests/strings/strrev_error.phpt
+      ext/standard/tests/strings/strrev_variation1.phpt
+      ext/standard/tests/strings/strrev_variation2.phpt
+      ext/standard/tests/strings/strrev_variation3.phpt
+      ext/standard/tests/strings/strrev_variation4.phpt:
+      new testcases for strrev() function
+
+    * ext/standard/tests/strings/strrev_basic.phpt
+      ext/standard/tests/strings/strrev_basic.phpt
+      ext/standard/tests/strings/strrev_error.phpt
+      ext/standard/tests/strings/strrev_error.phpt
+      ext/standard/tests/strings/strrev_variation1.phpt
+      ext/standard/tests/strings/strrev_variation1.phpt
+      ext/standard/tests/strings/strrev_variation2.phpt
+      ext/standard/tests/strings/strrev_variation2.phpt
+      ext/standard/tests/strings/strrev_variation3.phpt
+      ext/standard/tests/strings/strrev_variation3.phpt
+      ext/standard/tests/strings/strrev_variation4.phpt
+      ext/standard/tests/strings/strrev_variation4.phpt:
+      
+      file strrev_basic.phpt was initially added on branch PHP_5_2.
+
+2007-09-26  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/sockets/sockets.c:
+      fix proto
+
+2007-09-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/tests/lsb_001.phpt
+      ZendEngine2/tests/lsb_002.phpt
+      ZendEngine2/tests/lsb_003.phpt
+      ZendEngine2/tests/lsb_004.phpt
+      ZendEngine2/tests/lsb_005.phpt
+      ZendEngine2/tests/lsb_006.phpt
+      ZendEngine2/tests/lsb_007.phpt
+      ZendEngine2/tests/lsb_008.phpt
+      ZendEngine2/tests/lsb_009.phpt
+      ZendEngine2/tests/lsb_010.phpt
+      ZendEngine2/tests/lsb_011.phpt
+      ZendEngine2/tests/lsb_012.phpt
+      ZendEngine2/tests/lsb_013.phpt
+      ZendEngine2/tests/lsb_014.phpt
+      ZendEngine2/tests/lsb_015.phpt
+      ZendEngine2/tests/lsb_016.phpt
+      ZendEngine2/tests/lsb_017.phpt:
+      Late Static Binding (Dmitry, Etienne Kneuss)
+
+2007-09-26  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/crc32_basic.phpt
+      ext/standard/tests/strings/crc32_error.phpt
+      ext/standard/tests/strings/crc32_variation1.phpt
+      ext/standard/tests/strings/crc32_variation2.phpt
+      ext/standard/tests/strings/crc32_variation3.phpt
+      ext/standard/tests/strings/crc32_variation4.phpt:
+      New testcases for crc32() function
+
+    * ext/standard/tests/strings/crc32_basic.phpt
+      ext/standard/tests/strings/crc32_basic.phpt
+      ext/standard/tests/strings/crc32_error.phpt
+      ext/standard/tests/strings/crc32_error.phpt
+      ext/standard/tests/strings/crc32_variation1.phpt
+      ext/standard/tests/strings/crc32_variation1.phpt
+      ext/standard/tests/strings/crc32_variation2.phpt
+      ext/standard/tests/strings/crc32_variation2.phpt
+      ext/standard/tests/strings/crc32_variation3.phpt
+      ext/standard/tests/strings/crc32_variation3.phpt
+      ext/standard/tests/strings/crc32_variation4.phpt
+      ext/standard/tests/strings/crc32_variation4.phpt:
+      
+      file crc32_basic.phpt was initially added on branch PHP_5_2.
+
 2007-09-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
