@@ -19,9 +19,9 @@ function echoAnyElement($x) {
 	global $g;
 
 	$g = $x;
-	$struct = $x->inputAny->any;
+	$struct = $x->inputAny->any["SOAPComplexType"];
 	if ($struct instanceof SOAPComplexType) {
-		return array("return" => array("any" => new SoapVar($struct, SOAP_ENC_OBJECT, "SOAPComplexType", "http://soapinterop.org/xsd", "SOAPComplexType", "http://soapinterop.org/")));
+		return array("return" => array("any" => array("SOAPComplexType"=>new SoapVar($struct, SOAP_ENC_OBJECT, "SOAPComplexType", "http://soapinterop.org/xsd", "SOAPComplexType", "http://soapinterop.org/"))));
 	} else {
 		return "?";
 	}
@@ -59,13 +59,16 @@ object(stdClass)#5 (1) {
   ["inputAny"]=>
   object(stdClass)#6 (1) {
     ["any"]=>
-    object(SOAPComplexType)#7 (3) {
-      ["varInt"]=>
-      int(34)
-      ["varString"]=>
-      string(3) "arg"
-      ["varFloat"]=>
-      float(325.325)
+    array(1) {
+      ["SOAPComplexType"]=>
+      object(SOAPComplexType)#7 (3) {
+        ["varInt"]=>
+        int(34)
+        ["varString"]=>
+        string(3) "arg"
+        ["varFloat"]=>
+        float(325.325)
+      }
     }
   }
 }
@@ -73,13 +76,16 @@ object(stdClass)#8 (1) {
   ["return"]=>
   object(stdClass)#9 (1) {
     ["any"]=>
-    object(SOAPComplexType)#10 (3) {
-      ["varInt"]=>
-      int(34)
-      ["varString"]=>
-      string(3) "arg"
-      ["varFloat"]=>
-      float(325.325)
+    array(1) {
+      ["SOAPComplexType"]=>
+      object(SOAPComplexType)#10 (3) {
+        ["varInt"]=>
+        int(34)
+        ["varString"]=>
+        string(3) "arg"
+        ["varFloat"]=>
+        float(325.325)
+      }
     }
   }
 }
