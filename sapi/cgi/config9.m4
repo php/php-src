@@ -5,23 +5,6 @@ dnl
 PHP_ARG_ENABLE(cgi,,
 [  --disable-cgi           Disable building CGI version of PHP], yes, no)
 
-PHP_ARG_ENABLE(fastcgi,,
-[  --enable-fastcgi          CGI: Enable FastCGI support in the CGI binary], no, no)
-
-PHP_ARG_ENABLE(force-cgi-redirect,,
-[  --enable-force-cgi-redirect
-                            CGI: Enable security check for internal server
-                            redirects. Use this if you run the PHP CGI with Apache], no, no)
-
-PHP_ARG_ENABLE(discard-path,,
-[  --enable-discard-path     CGI: When this is enabled the PHP CGI binary can 
-                            safely be placed outside of the web tree and people
-                            will not be able to circumvent .htaccess security], no, no)
-
-PHP_ARG_ENABLE(path-info-check,,
-[  --disable-path-info-check CGI: If this is disabled, paths such as
-                            /info.php/test?a=b will fail to work], yes, no)
-
 dnl
 dnl CGI setup
 dnl
@@ -29,6 +12,33 @@ if test "$PHP_SAPI" = "default"; then
   AC_MSG_CHECKING(whether to build CGI binary)
   if test "$PHP_CGI" != "no"; then
     AC_MSG_RESULT(yes)
+
+    AC_MSG_CHECKING([for socklen_t in sys/socket.h])
+    AC_EGREP_HEADER([socklen_t], [sys/socket.h],
+      [AC_MSG_RESULT([yes])
+       AC_DEFINE([HAVE_SOCKLEN_T], [1],
+        [Define if the socklen_t typedef is in sys/socket.h])],
+      AC_MSG_RESULT([no]))
+
+    AC_MSG_CHECKING([for sun_len in sys/un.h])
+    AC_EGREP_HEADER([sun_len], [sys/un.h],
+      [AC_MSG_RESULT([yes])
+       AC_DEFINE([HAVE_SOCKADDR_UN_SUN_LEN], [1],
+        [Define if sockaddr_un in sys/un.h contains a sun_len component])],
+      AC_MSG_RESULT([no]))
+
+    AC_MSG_CHECKING([whether cross-process locking is required by accept()])
+    case "`uname -sr`" in
+      IRIX\ 5.* | SunOS\ 5.* | UNIX_System_V\ 4.0)	
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([USE_LOCKING], [1], 
+          [Define if cross-process locking is required by accept()])
+      ;;
+      *)
+        AC_MSG_RESULT([no])
+      ;;
+    esac
+
     PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cgi/Makefile.frag)
 
     dnl Set filename
@@ -42,51 +52,9 @@ if test "$PHP_SAPI" = "default"; then
     esac
     PHP_SUBST(SAPI_CGI_PATH)
 
-    dnl --enable-fastcgi
-    AC_MSG_CHECKING(whether to enable fastcgi support)
-    if test "$PHP_FASTCGI" = "yes"; then
-      PHP_ENABLE_FASTCGI=1
-      PHP_FCGI_FILES="fastcgi.c"
-    else
-      PHP_ENABLE_FASTCGI=0
-      PHP_FCGI_FILES=
-    fi
-    AC_DEFINE_UNQUOTED(PHP_FASTCGI, $PHP_ENABLE_FASTCGI, [ ])
-    AC_MSG_RESULT($PHP_FASTCGI)
-
-    dnl --enable-force-cgi-redirect
-    AC_MSG_CHECKING(whether to force Apache CGI redirect)
-    if test "$PHP_FORCE_CGI_REDIRECT" = "yes"; then
-      CGI_REDIRECT=1
-    else
-      CGI_REDIRECT=0
-    fi
-    AC_DEFINE_UNQUOTED(FORCE_CGI_REDIRECT, $CGI_REDIRECT, [ ])
-    AC_MSG_RESULT($PHP_FORCE_CGI_REDIRECT)
-
-    dnl --enable-discard-path
-    AC_MSG_CHECKING(whether to discard path_info + path_translated)
-    if test "$PHP_DISCARD_PATH" = "yes"; then
-      DISCARD_PATH=1
-    else
-      DISCARD_PATH=0
-    fi
-    AC_DEFINE_UNQUOTED(DISCARD_PATH, $DISCARD_PATH, [ ])
-    AC_MSG_RESULT($PHP_DISCARD_PATH)
-
-    dnl --enable-path-info-check
-    AC_MSG_CHECKING(whether to enable path info checking)
-    if test "$PHP_PATH_INFO_CHECK" = "yes"; then
-      ENABLE_PATHINFO_CHECK=1
-    else
-      ENABLE_PATHINFO_CHECK=0
-    fi
-    AC_DEFINE_UNQUOTED(ENABLE_PATHINFO_CHECK, $ENABLE_PATHINFO_CHECK, [ ])
-    AC_MSG_RESULT($PHP_PATH_INFO_CHECK)
-
     dnl Set install target and select SAPI
     INSTALL_IT="@echo \"Installing PHP CGI binary: \$(INSTALL_ROOT)\$(bindir)/\"; \$(INSTALL) -m 0755 \$(SAPI_CGI_PATH) \$(INSTALL_ROOT)\$(bindir)/\$(program_prefix)php-cgi\$(program_suffix)\$(EXEEXT)"
-    PHP_SELECT_SAPI(cgi, program, $PHP_FCGI_FILES cgi_main.c getopt.c,, '$(SAPI_CGI_PATH)')
+    PHP_SELECT_SAPI(cgi, program, cgi_main.c getopt.c fastcgi.c,, '$(SAPI_CGI_PATH)')
 
     case $host_alias in
       *aix*)
