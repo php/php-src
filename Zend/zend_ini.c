@@ -387,7 +387,7 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
 		char *display_string;
 		uint display_string_length;
 
-		if (type==ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
+		if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 			if (ini_entry->orig_value) {
 				display_string = ini_entry->orig_value;
 				display_string_length = ini_entry->orig_value_length;
