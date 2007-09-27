@@ -1364,7 +1364,7 @@ PHP_METHOD(TextIterator, getAll)
 /* }}} */
 
 /* {{{ TextIterator function entry table */
-static zend_function_entry text_iterator_funcs[] = {
+static const zend_function_entry text_iterator_funcs[] = {
 
 	PHP_ME(TextIterator, __construct, NULL, ZEND_ACC_PUBLIC)
 

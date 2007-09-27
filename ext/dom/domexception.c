@@ -37,7 +37,7 @@
 
 extern zend_class_entry *dom_domexception_class_entry;
 
-zend_function_entry php_dom_domexception_class_functions[] = {
+const zend_function_entry php_dom_domexception_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 

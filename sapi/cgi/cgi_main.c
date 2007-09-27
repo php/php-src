@@ -623,7 +623,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-static zend_function_entry additional_functions[] = {
+static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
 	{NULL, NULL, NULL}
 };

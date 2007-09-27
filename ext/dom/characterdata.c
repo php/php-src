@@ -35,7 +35,7 @@
 * Since: 
 */
 
-zend_function_entry php_dom_characterdata_class_functions[] = {
+const zend_function_entry php_dom_characterdata_class_functions[] = {
 	PHP_FALIAS(substringData, dom_characterdata_substring_data, NULL)
 	PHP_FALIAS(appendData, dom_characterdata_append_data, NULL)
 	PHP_FALIAS(insertData, dom_characterdata_insert_data, NULL)

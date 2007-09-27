@@ -156,7 +156,7 @@ SPL_METHOD(SimpleXMLIterator, count)
 	RETURN_LONG(count);
 }
 
-static zend_function_entry spl_funcs_SimpleXMLIterator[] = {
+static const zend_function_entry spl_funcs_SimpleXMLIterator[] = {
 	SPL_ME(SimpleXMLIterator, rewind,                 NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, valid,                  NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, current,                NULL, ZEND_ACC_PUBLIC)

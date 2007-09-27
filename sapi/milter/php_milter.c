@@ -770,7 +770,7 @@ PHP_MINFO_FUNCTION(milter)
 
 /* {{{ milter_functions[]
 */
-static zend_function_entry milter_functions[] = {
+static const zend_function_entry milter_functions[] = {
 	PHP_FE(smfi_setflags, NULL)
 	PHP_FE(smfi_settimeout, NULL)
 	PHP_FE(smfi_getsymval, NULL)

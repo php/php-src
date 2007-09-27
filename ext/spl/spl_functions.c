@@ -36,7 +36,7 @@ void spl_destroy_class(zend_class_entry ** ppce)
 /* }}} */
 
 /* {{{ spl_register_interface */
-void spl_register_interface(zend_class_entry ** ppce, char * class_name, zend_function_entry * functions TSRMLS_DC)
+void spl_register_interface(zend_class_entry ** ppce, char * class_name, const zend_function_entry * functions TSRMLS_DC)
 {
 	zend_class_entry ce;
 	
@@ -46,7 +46,7 @@ void spl_register_interface(zend_class_entry ** ppce, char * class_name, zend_fu
 /* }}} */
 
 /* {{{ spl_register_std_class */
-PHPAPI void spl_register_std_class(zend_class_entry ** ppce, char * class_name, void * obj_ctor, zend_function_entry * function_list TSRMLS_DC)
+PHPAPI void spl_register_std_class(zend_class_entry ** ppce, char * class_name, void * obj_ctor, const zend_function_entry * function_list TSRMLS_DC)
 {
 	zend_class_entry ce;
 	
@@ -61,7 +61,7 @@ PHPAPI void spl_register_std_class(zend_class_entry ** ppce, char * class_name, 
 /* }}} */
 
 /* {{{ spl_register_sub_class */
-PHPAPI void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * parent_ce, char * class_name, void *obj_ctor, zend_function_entry * function_list TSRMLS_DC)
+PHPAPI void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * parent_ce, char * class_name, void *obj_ctor, const zend_function_entry * function_list TSRMLS_DC)
 {
 	zend_class_entry ce;
 	
@@ -85,7 +85,7 @@ void spl_register_parent_ce(zend_class_entry * class_entry, zend_class_entry * p
 /* }}} */
 
 /* {{{ spl_register_functions */
-void spl_register_functions(zend_class_entry * class_entry, zend_function_entry * function_list TSRMLS_DC)
+void spl_register_functions(zend_class_entry * class_entry, const zend_function_entry * function_list TSRMLS_DC)
 {
 	zend_register_functions(class_entry, function_list, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
 }

@@ -678,7 +678,7 @@ CPH_METHOD(__construct)
 
 
 
-static zend_function_entry com_persist_helper_methods[] = {
+static const zend_function_entry com_persist_helper_methods[] = {
 	CPH_ME(__construct, NULL)
 	CPH_ME(GetCurFileName, NULL)
 	CPH_ME(SaveToFile, NULL)

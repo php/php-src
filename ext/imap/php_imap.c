@@ -92,7 +92,7 @@ static PHP_GINIT_FUNCTION(imap);
 
 /* {{{ imap_functions[]
  */
-zend_function_entry imap_functions[] = {
+const zend_function_entry imap_functions[] = {
 	PHP_FE(imap_open,								NULL)
 	PHP_FE(imap_reopen,								NULL)
 	PHP_FE(imap_close,								NULL)
@@ -173,7 +173,7 @@ zend_function_entry imap_functions[] = {
 /* }}} */
 
 /* {{{ imap dependencies */
-static zend_module_dep imap_deps[] = {
+static const zend_module_dep imap_deps[] = {
 	ZEND_MOD_REQUIRED("standard")
 	{NULL, NULL, NULL}
 };

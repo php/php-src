@@ -47,7 +47,7 @@ ZEND_DECLARE_MODULE_GLOBALS(ibase)
 static PHP_GINIT_FUNCTION(ibase);
 
 /* {{{ extension definition structures */
-zend_function_entry ibase_functions[] = {
+const zend_function_entry ibase_functions[] = {
 	PHP_FE(ibase_connect, NULL)
 	PHP_FE(ibase_pconnect, NULL)
 	PHP_FE(ibase_close, NULL)

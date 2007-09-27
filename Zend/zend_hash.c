@@ -126,7 +126,7 @@ ZEND_API ulong zend_u_hash_func(zend_uchar type, zstr arKey, uint nKeyLength) /*
 }
 /* }}} */
 
-ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength) /* {{{ */
 {
 	return zend_u_hash_func(IS_STRING, ZSTR(arKey), nKeyLength);
 }
@@ -323,13 +323,13 @@ ZEND_API int _zend_u_hash_add_or_update(HashTable *ht, zend_uchar type, zstr arK
 }
 /* }}} */
 
-ZEND_API int _zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
+ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
 {
 	return _zend_u_hash_add_or_update(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
 }
 /* }}} */
 
-ZEND_API int _zend_ascii_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
+ZEND_API int _zend_ascii_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -347,7 +347,7 @@ ZEND_API int _zend_ascii_hash_add_or_update(HashTable *ht, char *arKey, uint nKe
 }
 /* }}} */
 
-ZEND_API int _zend_rt_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
+ZEND_API int _zend_rt_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -373,7 +373,7 @@ string_key:
 }
 /* }}} */
 
-ZEND_API int _zend_utf8_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
+ZEND_API int _zend_utf8_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -483,7 +483,7 @@ ZEND_API int _zend_u_hash_quick_add_or_update(HashTable *ht, zend_uchar type, zs
 }
 /* }}} */
 
-ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
+ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
 {
 	return _zend_u_hash_quick_add_or_update(ht, IS_STRING, ZSTR(arKey), nKeyLength, h, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
 }
@@ -497,7 +497,7 @@ ZEND_API int zend_u_hash_add_empty_element(HashTable *ht, zend_uchar type, zstr 
 }
 /* }}} */
 
-ZEND_API int zend_hash_add_empty_element(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_hash_add_empty_element(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	void *dummy = (void *) 1;
 
@@ -682,13 +682,13 @@ ZEND_API int zend_u_hash_del_key_or_index(HashTable *ht, zend_uchar type, zstr a
 }
 /* }}} */
 
-ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLength, ulong h, int flag) /* {{{ */
+ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag) /* {{{ */
 {
 	return zend_u_hash_del_key_or_index(ht, IS_STRING, ZSTR(arKey), nKeyLength, h, flag);
 }
 /* }}} */
 
-ZEND_API int zend_ascii_hash_del(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_ascii_hash_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -706,7 +706,7 @@ ZEND_API int zend_ascii_hash_del(HashTable *ht, char *arKey, uint nKeyLength) /*
 }
 /* }}} */
 
-ZEND_API int zend_rt_hash_del(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_rt_hash_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -731,7 +731,7 @@ string_key:
 }
 /* }}} */
 
-ZEND_API int zend_utf8_hash_del(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_utf8_hash_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1117,7 +1117,7 @@ ZEND_API ulong zend_u_get_hash_value(zend_uchar type, zstr arKey, uint nKeyLengt
 }
 /* }}} */
 
-ZEND_API ulong zend_get_hash_value(char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API ulong zend_get_hash_value(const char *arKey, uint nKeyLength) /* {{{ */
 {
 	return zend_u_get_hash_value(IS_STRING, ZSTR(arKey), nKeyLength);
 }
@@ -1160,13 +1160,13 @@ ZEND_API int zend_u_hash_find(HashTable *ht, zend_uchar type, zstr arKey, uint n
 }
 /* }}} */
 
-ZEND_API int zend_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	return zend_u_hash_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData);
 }
 /* }}} */
 
-ZEND_API int zend_ascii_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_ascii_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1184,7 +1184,7 @@ ZEND_API int zend_ascii_hash_find(HashTable *ht, char *arKey, uint nKeyLength, v
 }
 /* }}} */
 
-ZEND_API int zend_rt_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_rt_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1209,7 +1209,7 @@ string_key:
 }
 /* }}} */
 
-ZEND_API int zend_utf8_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_utf8_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1272,7 +1272,7 @@ ZEND_API int zend_u_hash_quick_find(HashTable *ht, zend_uchar type, zstr arKey, 
 }
 /* }}} */
 
-ZEND_API int zend_hash_quick_find(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void **pData) /* {{{ */
+ZEND_API int zend_hash_quick_find(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void **pData) /* {{{ */
 {
 	return zend_u_hash_quick_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, h, pData);
 }
@@ -1310,13 +1310,13 @@ ZEND_API int zend_u_hash_exists(HashTable *ht, zend_uchar type, zstr arKey, uint
 }
 /* }}} */
 
-ZEND_API int zend_hash_exists(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	return zend_u_hash_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength);
 }
 /* }}} */
 
-ZEND_API int zend_ascii_hash_exists(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_ascii_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1334,7 +1334,7 @@ ZEND_API int zend_ascii_hash_exists(HashTable *ht, char *arKey, uint nKeyLength)
 }
 /* }}} */
 
-ZEND_API int zend_rt_hash_exists(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_rt_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1359,7 +1359,7 @@ string_key:
 }
 /* }}} */
 
-ZEND_API int zend_utf8_hash_exists(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_utf8_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1421,7 +1421,7 @@ ZEND_API int zend_u_hash_quick_exists(HashTable *ht, zend_uchar type, zstr arKey
 }
 /* }}} */
 
-ZEND_API int zend_hash_quick_exists(HashTable *ht, char *arKey, uint nKeyLength, ulong h) /* {{{ */
+ZEND_API int zend_hash_quick_exists(HashTable *ht, const char *arKey, uint nKeyLength, ulong h) /* {{{ */
 {
 	return zend_u_hash_quick_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength, h);
 }
@@ -1937,13 +1937,13 @@ ZEND_API ulong zend_hash_next_free_element(HashTable *ht) /* {{{ */
 
 /* {{{ HANDLE_*_NUMERIC macros */
 #define HANDLE_NUMERIC(key, length, func) {												\
-	register char *tmp=key;																\
+	register const char *tmp=key;														\
 																						\
 	if (*tmp=='-') {																	\
 		tmp++;																			\
 	}																					\
 	if ((*tmp>='0' && *tmp<='9')) do { /* possibly a numeric index */					\
-		char *end=key+length-1;															\
+		const char *end=key+length-1;															\
 		long idx;																		\
 																						\
 		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */	\
@@ -2066,119 +2066,119 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 }
 /* }}} */
 
-ZEND_API int zend_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
+ZEND_API int zend_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
 	return zend_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
 }
 /* }}} */
 
-ZEND_API int zend_symtable_del(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
 	return zend_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
 
-ZEND_API int zend_symtable_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
 	return zend_hash_find(ht, arKey, nKeyLength, pData);
 }
 /* }}} */
 
-ZEND_API int zend_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
 	return zend_hash_exists(ht, arKey, nKeyLength);
 }
 /* }}} */
 
-ZEND_API int zend_symtable_update_current_key(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_symtable_update_current_key(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
 	return zend_hash_update_current_key(ht, HASH_KEY_IS_STRING, ZSTR(arKey), nKeyLength, 0);
 }
 /* }}} */
 
-ZEND_API int zend_ascii_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
+ZEND_API int zend_ascii_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
 	return zend_ascii_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
 }
 /* }}} */
 
-ZEND_API int zend_ascii_symtable_del(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_ascii_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
 	return zend_ascii_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
 
-ZEND_API int zend_ascii_symtable_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_ascii_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
 	return zend_ascii_hash_find(ht, arKey, nKeyLength, pData);
 }
 /* }}} */
 
-ZEND_API int zend_ascii_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_ascii_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
 	return zend_ascii_hash_exists(ht, arKey, nKeyLength);
 }
 /* }}} */
 
-ZEND_API int zend_rt_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
+ZEND_API int zend_rt_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
 	return zend_rt_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
 }
 /* }}} */
 
-ZEND_API int zend_rt_symtable_del(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_rt_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
 	return zend_rt_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
 
-ZEND_API int zend_rt_symtable_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_rt_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
 	return zend_rt_hash_find(ht, arKey, nKeyLength, pData);
 }
 /* }}} */
 
-ZEND_API int zend_rt_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_rt_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
 	return zend_rt_hash_exists(ht, arKey, nKeyLength);
 }
 /* }}} */
 
-ZEND_API int zend_utf8_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
+ZEND_API int zend_utf8_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
 	return zend_utf8_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
 }
 /* }}} */
 
-ZEND_API int zend_utf8_symtable_del(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_utf8_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
 	return zend_utf8_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
 
-ZEND_API int zend_utf8_symtable_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_utf8_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
 	return zend_utf8_hash_find(ht, arKey, nKeyLength, pData);
 }
 /* }}} */
 
-ZEND_API int zend_utf8_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_utf8_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
 	return zend_utf8_hash_exists(ht, arKey, nKeyLength);

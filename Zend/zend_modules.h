@@ -32,12 +32,12 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module TSRMLS_DC
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module TSRMLS_CC
 
-extern struct _zend_arg_info first_arg_force_ref[2];
-extern struct _zend_arg_info second_arg_force_ref[3];
-extern struct _zend_arg_info third_arg_force_ref[4];
-extern struct _zend_arg_info fourth_arg_force_ref[5];
-extern struct _zend_arg_info fifth_arg_force_ref[6];
-extern struct _zend_arg_info all_args_by_ref[1];
+extern const struct _zend_arg_info first_arg_force_ref[2];
+extern const struct _zend_arg_info second_arg_force_ref[3];
+extern const struct _zend_arg_info third_arg_force_ref[4];
+extern const struct _zend_arg_info fourth_arg_force_ref[5];
+extern const struct _zend_arg_info fifth_arg_force_ref[6];
+extern const struct _zend_arg_info all_args_by_ref[1];
 
 #define ZEND_MODULE_API_NO 20060613
 #ifdef ZTS
@@ -79,10 +79,10 @@ struct _zend_module_entry {
 	unsigned int zend_api;
 	unsigned char zend_debug;
 	unsigned char zts;
-	struct _zend_ini_entry *ini_entry;
-	struct _zend_module_dep *deps;
-	char *name;
-	struct _zend_function_entry *functions;
+	const struct _zend_ini_entry *ini_entry;
+	const struct _zend_module_dep *deps;
+	const char *name;
+	const struct _zend_function_entry *functions;
 	int (*module_startup_func)(INIT_FUNC_ARGS);
 	int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	int (*request_startup_func)(INIT_FUNC_ARGS);

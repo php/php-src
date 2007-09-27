@@ -1342,32 +1342,32 @@ ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_assoc_function(zval *arg, char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS)) /* {{{ */
+ZEND_API int add_assoc_function(zval *arg, const char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS)) /* {{{ */
 {
 	zend_error(E_WARNING, "add_assoc_function() is no longer supported");
 	return FAILURE;
 }
 /* }}} */
 
-ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value) /* {{{ */
+ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value) /* {{{ */
 {
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &value, sizeof(zval *), NULL);
 }
 /* }}} */
 
-ZEND_API int add_ascii_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value) /* {{{ */
+ZEND_API int add_ascii_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value) /* {{{ */
 {
 	return zend_ascii_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void*)&value, sizeof(zval*), NULL);
 }
 /* }}} */
 
-ZEND_API int add_rt_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value) /* {{{ */
+ZEND_API int add_rt_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value) /* {{{ */
 {
 	return zend_rt_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void*)&value, sizeof(zval*), NULL);
 }
 /* }}} */
 
-ZEND_API int add_utf8_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value) /* {{{ */
+ZEND_API int add_utf8_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value) /* {{{ */
 {
 	return zend_utf8_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void*)&value, sizeof(zval*), NULL);
 }
@@ -1391,7 +1391,7 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, void **dest, int duplicate) /* {{{ */
+ZEND_API int add_get_assoc_string_ex(zval *arg, const char *key, uint key_len, const char *str, void **dest, int duplicate) /* {{{ */
 {
 	zval *tmp;
 
@@ -1402,7 +1402,7 @@ ZEND_API int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, char *s
 }
 /* }}} */
 
-ZEND_API int add_get_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, void **dest, int duplicate) /* {{{ */
+ZEND_API int add_get_assoc_stringl_ex(zval *arg, const char *key, uint key_len, const char *str, uint length, void **dest, int duplicate) /* {{{ */
 {
 	zval *tmp;
 
@@ -1435,7 +1435,7 @@ ZEND_API int add_get_index_double(zval *arg, ulong index, double d, void **dest)
 }
 /* }}} */
 
-ZEND_API int add_get_index_string(zval *arg, ulong index, char *str, void **dest, int duplicate) /* {{{ */
+ZEND_API int add_get_index_string(zval *arg, ulong index, const char *str, void **dest, int duplicate) /* {{{ */
 {
 	zval *tmp;
 
@@ -1446,7 +1446,7 @@ ZEND_API int add_get_index_string(zval *arg, ulong index, char *str, void **dest
 }
 /* }}} */
 
-ZEND_API int add_get_index_stringl(zval *arg, ulong index, char *str, uint length, void **dest, int duplicate) /* {{{ */
+ZEND_API int add_get_index_stringl(zval *arg, ulong index, const char *str, uint length, void **dest, int duplicate) /* {{{ */
 {
 	zval *tmp;
 
@@ -1833,7 +1833,7 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC) /* {{{ 
 
 	/* Check module dependencies */
 	if (module->deps) {
-		zend_module_dep *dep = module->deps;
+		const zend_module_dep *dep = module->deps;
 
 		while (dep->name) {
 			if (dep->type == MODULE_DEP_REQUIRED) {
@@ -1892,7 +1892,7 @@ static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func
 try_again:
 		m = (zend_module_entry*)(*b1)->pData;
 		if (!m->module_started && m->deps) {
-			zend_module_dep *dep = m->deps;
+			const zend_module_dep *dep = m->deps;
 			while (dep->name) {
 				if (dep->type == MODULE_DEP_REQUIRED || dep->type == MODULE_DEP_OPTIONAL) {
 					b2 = b1 + 1;
@@ -1939,7 +1939,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TS
 
 	/* Check module dependencies */
 	if (module->deps) {
-		zend_module_dep *dep = module->deps;
+		const zend_module_dep *dep = module->deps;
 
 		while (dep->name) {
 			if (dep->type == MODULE_DEP_CONFLICTS) {
@@ -2062,9 +2062,9 @@ ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_
 /* }}} */
 
 /* registers all functions in *library_functions in the function hash */
-ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC) /* {{{ */
+ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC) /* {{{ */
 {
-	zend_function_entry *ptr = functions;
+	const zend_function_entry *ptr = functions;
 	zend_function function, *reg_function;
 	zend_internal_function *internal_function = (zend_internal_function *)&function;
 	int count=0, unload=0;
@@ -2100,7 +2100,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 			internal_function->function_name.u = malloc(UBYTES(len));
 			u_charsToUChars(ptr->fname, internal_function->function_name.u, len);
 		} else {
-			internal_function->function_name.s = ptr->fname;
+			internal_function->function_name.s = (char*)ptr->fname;
 		}
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
@@ -2125,7 +2125,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 					}
 				}
 			} else {
-				internal_function->arg_info = ptr->arg_info+1;
+				internal_function->arg_info = (zend_arg_info*)ptr->arg_info+1;
 			}
 			internal_function->num_args = ptr->num_args;
 			/* Currently you cannot denote that the function can accept less arguments than num_args */
@@ -2333,9 +2333,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 /* count=-1 means erase all functions, otherwise,
  * erase the first count functions
  */
-ZEND_API void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC) /* {{{ */
+ZEND_API void zend_unregister_functions(const zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC) /* {{{ */
 {
-	zend_function_entry *ptr = functions;
+	const zend_function_entry *ptr = functions;
 	int i=0;
 	HashTable *target_function_table = function_table;
 
@@ -2599,7 +2599,7 @@ static zend_object_value display_disabled_class(zend_class_entry *class_type TSR
 }
 /* }}} */
 
-static zend_function_entry disabled_class_new[] =  {
+static const zend_function_entry disabled_class_new[] =  {
 	{ NULL, NULL, NULL }
 };
 
@@ -3163,7 +3163,7 @@ ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *f
 }
 /* }}} */
 
-ZEND_API char *zend_get_module_version(char *module_name) /* {{{ */
+ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 {
 	char *lname;
 	int name_len = strlen(module_name);

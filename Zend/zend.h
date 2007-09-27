@@ -247,7 +247,7 @@ typedef union _zstr {
 #endif
 
 #ifdef __GNUC__
-#	define ZSTR(x)    ((zstr)(x))
+#	define ZSTR(x)    ((zstr)((void*)(x)))
 #	define NULL_ZSTR  ZSTR((void*)NULL)
 #	define EMPTY_ZSTR ZSTR("\0\0")
 #else
@@ -368,7 +368,7 @@ struct _zend_class_entry {
 	HashTable default_static_members;
 	HashTable *static_members;
 	HashTable constants_table;
-	struct _zend_function_entry *builtin_functions;
+	const struct _zend_function_entry *builtin_functions;
 
 	union _zend_function *constructor;
 	union _zend_function *destructor;

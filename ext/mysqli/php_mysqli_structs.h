@@ -165,13 +165,13 @@ typedef long long my_longlong;
 
 #define PHP_MYSQLI_EXPORT(__type) PHP_MYSQLI_API __type
 
-extern zend_function_entry mysqli_functions[];
-extern zend_function_entry mysqli_link_methods[];
-extern zend_function_entry mysqli_stmt_methods[];
-extern zend_function_entry mysqli_result_methods[];
-extern zend_function_entry mysqli_driver_methods[];
-extern zend_function_entry mysqli_warning_methods[];
-extern zend_function_entry mysqli_exception_methods[];
+extern const zend_function_entry mysqli_functions[];
+extern const zend_function_entry mysqli_link_methods[];
+extern const zend_function_entry mysqli_stmt_methods[];
+extern const zend_function_entry mysqli_result_methods[];
+extern const zend_function_entry mysqli_driver_methods[];
+extern const zend_function_entry mysqli_warning_methods[];
+extern const zend_function_entry mysqli_exception_methods[];
 
 extern mysqli_property_entry mysqli_link_property_entries[];
 extern mysqli_property_entry mysqli_result_property_entries[];

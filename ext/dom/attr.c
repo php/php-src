@@ -37,7 +37,7 @@
 * Since: 
 */
 
-zend_function_entry php_dom_attr_class_functions[] = {
+const zend_function_entry php_dom_attr_class_functions[] = {
 	PHP_FALIAS(isId, dom_attr_is_id, NULL)
 	PHP_ME(domattr, __construct, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}

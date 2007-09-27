@@ -76,7 +76,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ Function table */
-zend_function_entry ereg_functions[] = {
+const zend_function_entry ereg_functions[] = {
 	PHP_FE(ereg,						arginfo_ereg)  
 	PHP_FE(ereg_replace,				arginfo_ereg_replace)
 	PHP_FE(eregi,						arginfo_eregi)

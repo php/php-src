@@ -803,7 +803,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ dbase_functions[]
  */
-zend_function_entry dbase_functions[] = {
+const zend_function_entry dbase_functions[] = {
 	PHP_FE(dbase_open,								arginfo_dbase_open)
 	PHP_FE(dbase_create,							arginfo_dbase_create)
 	PHP_FE(dbase_close,								arginfo_dbase_close)

@@ -597,7 +597,7 @@ static PHP_INI_MH(OnUpdateHashFunc)
 
 #if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 {
-	php_hash_ops *ops = php_hash_fetch_ops(new_value, new_value_length);
+	php_hash_ops *ops = (php_hash_ops*)php_hash_fetch_ops(new_value, new_value_length);
 
 	if (ops) {
 		PS(hash_func) = PS_HASH_FUNC_OTHER;
@@ -1774,7 +1774,7 @@ static PHP_FUNCTION(session_write_close)
 
 /* {{{ session_functions[]
  */
-static zend_function_entry session_functions[] = {
+static const zend_function_entry session_functions[] = {
 	PHP_FE(session_name,              NULL)
 	PHP_FE(session_module_name,       NULL)
 	PHP_FE(session_save_path,         NULL)

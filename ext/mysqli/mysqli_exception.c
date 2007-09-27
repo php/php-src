@@ -32,7 +32,7 @@
 
 /* {{{ mysqli_exception_methods[]
  */
-zend_function_entry mysqli_exception_methods[] = {
+const zend_function_entry mysqli_exception_methods[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */

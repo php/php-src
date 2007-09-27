@@ -59,7 +59,7 @@ PHPAPI zend_class_entry *spl_ce_RegexIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
 PHPAPI zend_class_entry *spl_ce_Countable;
 
-zend_function_entry spl_funcs_RecursiveIterator[] = {
+const zend_function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  NULL)
 	SPL_ABSTRACT_ME(RecursiveIterator, getChildren,  NULL)
 	{NULL, NULL, NULL}
@@ -774,7 +774,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_it_setMaxDepth, 0, 0, 0)
 	ZEND_ARG_INFO(0, max_depth)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
+static const zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
 	SPL_ME(RecursiveIteratorIterator, __construct,       arginfo_recursive_it___construct,    ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, rewind,            NULL,                                ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, valid,             NULL,                                ZEND_ACC_PUBLIC)
@@ -1642,7 +1642,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_filter_it___construct, 0)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_FilterIterator[] = {
+static const zend_function_entry spl_funcs_FilterIterator[] = {
 	SPL_ME(FilterIterator,  __construct,      arginfo_filter_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(FilterIterator,  rewind,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,         valid,            NULL, ZEND_ACC_PUBLIC)
@@ -1659,14 +1659,14 @@ ZEND_BEGIN_ARG_INFO(arginfo_parent_it___construct, 0)
 	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_RecursiveFilterIterator[] = {
+static const zend_function_entry spl_funcs_RecursiveFilterIterator[] = {
 	SPL_ME(RecursiveFilterIterator,  __construct,      arginfo_parent_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveFilterIterator,  hasChildren,      NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveFilterIterator,  getChildren,      NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry spl_funcs_ParentIterator[] = {
+static const zend_function_entry spl_funcs_ParentIterator[] = {
 	SPL_ME(ParentIterator,  __construct,      arginfo_parent_it___construct, ZEND_ACC_PUBLIC)
 	SPL_MA(ParentIterator,  accept,           RecursiveFilterIterator, hasChildren, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
@@ -1697,7 +1697,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it_set_preg_flags, 0, 0, 1)
 	ZEND_ARG_INFO(0, preg_flags)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_RegexIterator[] = {
+static const zend_function_entry spl_funcs_RegexIterator[] = {
 	SPL_ME(RegexIterator,   __construct,      arginfo_regex_it___construct,    ZEND_ACC_PUBLIC)
 	SPL_ME(RegexIterator,   accept,           NULL,                            ZEND_ACC_PUBLIC)
 	SPL_ME(RegexIterator,   getMode,          NULL,                            ZEND_ACC_PUBLIC)
@@ -1718,7 +1718,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_rec_regex_it___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, preg_flags)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_RecursiveRegexIterator[] = {
+static const zend_function_entry spl_funcs_RecursiveRegexIterator[] = {
 	SPL_ME(RecursiveRegexIterator,  __construct,      arginfo_rec_regex_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveFilterIterator, hasChildren,      NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveRegexIterator,  getChildren,      NULL, ZEND_ACC_PUBLIC)
@@ -1850,7 +1850,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_seekable_it_seek, 0)
 	ZEND_ARG_INFO(0, position)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_SeekableIterator[] = {
+static const zend_function_entry spl_funcs_SeekableIterator[] = {
 	SPL_ABSTRACT_ME(SeekableIterator, seek, arginfo_seekable_it_seek)
 	{NULL, NULL, NULL}
 };
@@ -1867,7 +1867,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_limit_it_seek, 0)
 	ZEND_ARG_INFO(0, position)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_LimitIterator[] = {
+static const zend_function_entry spl_funcs_LimitIterator[] = {
 	SPL_ME(LimitIterator,   __construct,      arginfo_limit_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(LimitIterator,   rewind,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(LimitIterator,   valid,            NULL, ZEND_ACC_PUBLIC)
@@ -2277,7 +2277,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_caching_it_offsetSet, 0)
 	ZEND_ARG_INFO(0, newval)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_CachingIterator[] = {
+static const zend_function_entry spl_funcs_CachingIterator[] = {
 	SPL_ME(CachingIterator, __construct,      arginfo_caching_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, valid,            NULL, ZEND_ACC_PUBLIC)
@@ -2337,7 +2337,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_rec_it___construct, 0, ZEND_RETURN_VALUE,
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_RecursiveCachingIterator[] = {
+static const zend_function_entry spl_funcs_RecursiveCachingIterator[] = {
 	SPL_ME(RecursiveCachingIterator, __construct,   arginfo_caching_rec_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveCachingIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveCachingIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
@@ -2356,7 +2356,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_iterator_it___construct, 0)
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_IteratorIterator[] = {
+static const zend_function_entry spl_funcs_IteratorIterator[] = {
 	SPL_ME(IteratorIterator, __construct,      arginfo_iterator_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,          rewind,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,          valid,            NULL, ZEND_ACC_PUBLIC)
@@ -2448,7 +2448,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_norewind_it___construct, 0)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_NoRewindIterator[] = {
+static const zend_function_entry spl_funcs_NoRewindIterator[] = {
 	SPL_ME(NoRewindIterator, __construct,      arginfo_norewind_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(NoRewindIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(NoRewindIterator, valid,            NULL, ZEND_ACC_PUBLIC)
@@ -2485,7 +2485,7 @@ SPL_METHOD(InfiniteIterator, next)
 	}
 } /* }}} */
 
-static zend_function_entry spl_funcs_InfiniteIterator[] = {
+static const zend_function_entry spl_funcs_InfiniteIterator[] = {
 	SPL_ME(InfiniteIterator, __construct,      arginfo_norewind_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(InfiniteIterator, next,             NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
@@ -2524,7 +2524,7 @@ SPL_METHOD(EmptyIterator, next)
 {
 } /* }}} */
 
-static zend_function_entry spl_funcs_EmptyIterator[] = {
+static const zend_function_entry spl_funcs_EmptyIterator[] = {
 	SPL_ME(EmptyIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(EmptyIterator, valid,            NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(EmptyIterator, key,              NULL, ZEND_ACC_PUBLIC)
@@ -2681,7 +2681,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_append_it_append, 0)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_AppendIterator[] = {
+static const zend_function_entry spl_funcs_AppendIterator[] = {
 	SPL_ME(AppendIterator, __construct,      NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(AppendIterator, append,           arginfo_append_it_append, ZEND_ACC_PUBLIC)
 	SPL_ME(AppendIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
@@ -2876,12 +2876,12 @@ PHP_FUNCTION(iterator_apply)
 }
 /* }}} */
 
-static zend_function_entry spl_funcs_OuterIterator[] = {
+static const zend_function_entry spl_funcs_OuterIterator[] = {
 	SPL_ABSTRACT_ME(OuterIterator, getInnerIterator,   NULL)
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry spl_funcs_Countable[] = {
+static const zend_function_entry spl_funcs_Countable[] = {
 	SPL_ABSTRACT_ME(Countable, count,   NULL)
 	{NULL, NULL, NULL}
 };

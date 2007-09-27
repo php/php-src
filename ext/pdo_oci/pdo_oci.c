@@ -31,7 +31,7 @@
 #include "php_pdo_oci_int.h"
 
 /* {{{ pdo_oci_functions[] */
-zend_function_entry pdo_oci_functions[] = {
+const zend_function_entry pdo_oci_functions[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -39,7 +39,7 @@ zend_function_entry pdo_oci_functions[] = {
 /* {{{ pdo_oci_module_entry */
 
 #if ZEND_MODULE_API_NO >= 20050922
-static zend_module_dep pdo_oci_deps[] = {
+static const zend_module_dep pdo_oci_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	{NULL, NULL, NULL}
 };

@@ -2006,7 +2006,7 @@ PHP_FUNCTION(preg_last_error)
 
 /* {{{ module definition structures */
 
-zend_function_entry pcre_functions[] = {
+const zend_function_entry pcre_functions[] = {
 	PHP_FE(preg_match,				third_arg_force_ref)
 	PHP_FE(preg_match_all,			third_arg_force_ref)
 	PHP_FE(preg_replace,			fifth_arg_force_ref)

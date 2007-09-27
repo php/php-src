@@ -91,7 +91,7 @@ static PHP_GINIT_FUNCTION(pgsql);
 
 /* {{{ pgsql_functions[]
  */
-zend_function_entry pgsql_functions[] = {
+const zend_function_entry pgsql_functions[] = {
 	/* connection functions */
 	PHP_FE(pg_connect,		NULL)
 	PHP_FE(pg_pconnect,		NULL)

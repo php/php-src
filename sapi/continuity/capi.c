@@ -80,7 +80,7 @@ PHP_FUNCTION(continuity_virtual);
 PHP_FUNCTION(continuity_request_headers);
 PHP_FUNCTION(continuity_response_headers);
 
-zend_function_entry continuity_functions[] = {
+const zend_function_entry continuity_functions[] = {
         {NULL, NULL, NULL}
 };
 

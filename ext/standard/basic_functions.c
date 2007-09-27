@@ -3089,7 +3089,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 /* }}} */
 
-zend_function_entry basic_functions[] = { /* {{{ */
+const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(constant,														arginfo_constant)
 	PHP_FE(bin2hex,															arginfo_bin2hex)
 	PHP_FE(sleep,															arginfo_sleep)
@@ -3774,7 +3774,7 @@ zend_function_entry basic_functions[] = { /* {{{ */
 };
 /* }}} */
 
-static zend_module_dep standard_deps[] = { /* {{{ */
+static const zend_module_dep standard_deps[] = { /* {{{ */
 	ZEND_MOD_OPTIONAL("session")
 	{NULL, NULL, NULL}
 };

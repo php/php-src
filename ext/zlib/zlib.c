@@ -608,7 +608,7 @@ ZEND_GET_MODULE(php_zlib)
 #endif
 
 /* {{{ php_zlib_functions[] */
-zend_function_entry php_zlib_functions[] = {
+const zend_function_entry php_zlib_functions[] = {
 	PHP_FE(readgzfile,						NULL)
 	PHP_FALIAS(gzrewind,	rewind,			NULL)
 	PHP_FALIAS(gzclose,		fclose,			NULL)

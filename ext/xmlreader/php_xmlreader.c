@@ -320,7 +320,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, int source_len, int ty
 #endif
 
 #if ZEND_MODULE_API_NO >= 20050922
-static zend_module_dep xmlreader_deps[] = {
+static const zend_module_dep xmlreader_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	{NULL, NULL, NULL}
 };
@@ -1337,7 +1337,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_expand, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-static zend_function_entry xmlreader_functions[] = {
+static const zend_function_entry xmlreader_functions[] = {
 	PHP_ME(xmlreader, close, arginfo_xmlreader_close, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, getAttribute, arginfo_xmlreader_getAttribute, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, getAttributeNo, arginfo_xmlreader_getAttributeNo, ZEND_ACC_PUBLIC)

@@ -47,7 +47,7 @@ ZEND_DECLARE_MODULE_GLOBALS(spl)
 
 /* {{{ spl_functions_none
  */
-zend_function_entry spl_functions_none[] = {
+const zend_function_entry spl_functions_none[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -718,7 +718,7 @@ ZEND_END_ARG_INFO();
 
 /* {{{ spl_functions
  */
-zend_function_entry spl_functions[] = {
+const zend_function_entry spl_functions[] = {
 	PHP_FE(spl_classes,             NULL)
 	PHP_FE(spl_autoload,            NULL)
 	PHP_FE(spl_autoload_extensions, NULL)
@@ -777,7 +777,7 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 } /* }}} */
 
 #ifdef HAVE_SIMPLEXML
-static zend_module_dep spl_deps[] = {
+static const zend_module_dep spl_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_REQUIRED("simplexml")
 	{NULL, NULL, NULL}

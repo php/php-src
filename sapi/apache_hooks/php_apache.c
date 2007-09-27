@@ -60,7 +60,7 @@ PHP_FUNCTION(apache_get_modules);
 PHP_MINFO_FUNCTION(apache);
 
 
-zend_function_entry apache_functions[] = {
+const zend_function_entry apache_functions[] = {
 	PHP_FE(virtual,									NULL)
 	PHP_FE(apache_request_headers,					NULL)
 	PHP_FE(apache_note,								NULL)
@@ -1286,7 +1286,7 @@ PHP_FUNCTION(apache_request_send_header_field)
 
 /* {{{ php_apache_request_class_functions
  */
-static zend_function_entry php_apache_request_class_functions[] = {
+static const zend_function_entry php_apache_request_class_functions[] = {
 	/* string slots */
 	PHP_FALIAS(args,						apache_request_args,				NULL)
 	PHP_FALIAS(boundary,					apache_request_boundary,			NULL)

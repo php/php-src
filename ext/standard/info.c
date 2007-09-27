@@ -967,7 +967,7 @@ PHP_FUNCTION(phpversion)
 	if (!ext_name) {
 		RETURN_ASCII_STRING(PHP_VERSION, 1);
 	} else {
-		char *version;
+		const char *version;
 		version = zend_get_module_version(ext_name);
 		if (version == NULL) {
 			RETURN_FALSE;
