@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
+- Improved ext/soap to support element names in context of XMLShema's <any>.
+  (Dmitry)
 - Improved ext/openssl (Dmitry)
   . Added support for OpenSSL digest functions
   . Added support for OpenSSL cipher functions
