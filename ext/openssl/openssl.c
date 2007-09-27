@@ -101,7 +101,7 @@ PHP_FUNCTION(openssl_dh_compute_key);
 
 /* {{{ openssl_functions[]
  */
-zend_function_entry openssl_functions[] = {
+const zend_function_entry openssl_functions[] = {
 /* public/private key functions */
 	PHP_FE(openssl_pkey_free,			NULL)
 	PHP_FE(openssl_pkey_new,			NULL)

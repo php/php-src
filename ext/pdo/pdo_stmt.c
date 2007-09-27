@@ -2147,7 +2147,7 @@ static PHP_METHOD(PDOStatement, __sleep)
 }
 /* }}} */
 
-zend_function_entry pdo_dbstmt_functions[] = {
+const zend_function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, execute,		arginfo_pdostatement_execute,		ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetch,			arginfo_pdostatement_fetch,			ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, bindParam,		arginfo_pdostatement_bindparam,		ZEND_ACC_PUBLIC)
@@ -2520,7 +2520,7 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 
 /* {{{ overloaded handlers for PDORow class (used by PDO_FETCH_LAZY) */
 
-zend_function_entry pdo_row_functions[] = {
+const zend_function_entry pdo_row_functions[] = {
 	{NULL, NULL, NULL}
 };
 

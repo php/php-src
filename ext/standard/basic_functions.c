@@ -3097,7 +3097,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 /* }}} */
 
-zend_function_entry basic_functions[] = {
+const zend_function_entry basic_functions[] = {
 	PHP_FE(constant,														arginfo_constant)
 	PHP_FE(bin2hex,															arginfo_bin2hex)
 	PHP_FE(sleep,															arginfo_sleep)
@@ -3821,7 +3821,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("safe_mode_allowed_env_vars",   SAFE_MODE_ALLOWED_ENV_VARS,   PHP_INI_SYSTEM, OnUpdateSafeModeAllowedEnvVars,   NULL)
 PHP_INI_END()
 
-static zend_module_dep standard_deps[] = {
+static const zend_module_dep standard_deps[] = {
 	ZEND_MOD_OPTIONAL("session")
 	{NULL, NULL, NULL}
 };

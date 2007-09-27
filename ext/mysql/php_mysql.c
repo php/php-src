@@ -130,7 +130,7 @@ typedef struct _php_mysql_conn {
 
 /* {{{ mysql_functions[]
  */
-zend_function_entry mysql_functions[] = {
+const zend_function_entry mysql_functions[] = {
 	PHP_FE(mysql_connect,								NULL)
 	PHP_FE(mysql_pconnect,								NULL)
 	PHP_FE(mysql_close,									NULL)

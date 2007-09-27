@@ -35,7 +35,7 @@
 * Since: 
 */
 
-zend_function_entry php_dom_namednodemap_class_functions[] = {
+const zend_function_entry php_dom_namednodemap_class_functions[] = {
 	PHP_FALIAS(getNamedItem, dom_namednodemap_get_named_item, NULL)
 	PHP_FALIAS(setNamedItem, dom_namednodemap_set_named_item, NULL)
 	PHP_FALIAS(removeNamedItem, dom_namednodemap_remove_named_item, NULL)

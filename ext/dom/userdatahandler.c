@@ -35,7 +35,7 @@
 * Since: DOM Level 3
 */
 
-zend_function_entry php_dom_userdatahandler_class_functions[] = {
+const zend_function_entry php_dom_userdatahandler_class_functions[] = {
 	PHP_FALIAS(handle, dom_userdatahandler_handle, NULL)
 	{NULL, NULL, NULL}
 };

@@ -281,13 +281,13 @@ PHP_METHOD(SoapHeader, SoapHeader);
 
 #define SOAP_CTOR(class_name, func_name, arginfo, flags) PHP_ME(class_name, func_name, arginfo, flags)
 
-static zend_function_entry soap_functions[] = {
+static const zend_function_entry soap_functions[] = {
 	PHP_FE(use_soap_error_handler, NULL)
 	PHP_FE(is_soap_fault, NULL)
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry soap_fault_functions[] = {
+static const zend_function_entry soap_fault_functions[] = {
 	SOAP_CTOR(SoapFault, SoapFault, NULL, 0)
 #ifdef ZEND_ENGINE_2
 	PHP_ME(SoapFault, __toString, NULL, 0)
@@ -295,7 +295,7 @@ static zend_function_entry soap_fault_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry soap_server_functions[] = {
+static const zend_function_entry soap_server_functions[] = {
 	SOAP_CTOR(SoapServer, SoapServer, NULL, 0)
 	PHP_ME(SoapServer, setPersistence, NULL, 0)
 	PHP_ME(SoapServer, setClass, NULL, 0)
@@ -325,7 +325,7 @@ unsigned char __call_args[] = { 2, BYREF_NONE, BYREF_NONE };
 unsigned char __soap_call_args[] = { 5, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 #endif
 
-static zend_function_entry soap_client_functions[] = {
+static const zend_function_entry soap_client_functions[] = {
 	SOAP_CTOR(SoapClient, SoapClient, NULL, 0)
 	PHP_ME(SoapClient, __call, __call_args, 0)
 	ZEND_NAMED_ME(__soapCall, ZEND_MN(SoapClient___call), __soap_call_args, 0)
@@ -342,17 +342,17 @@ static zend_function_entry soap_client_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry soap_var_functions[] = {
+static const zend_function_entry soap_var_functions[] = {
 	SOAP_CTOR(SoapVar, SoapVar, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry soap_param_functions[] = {
+static const zend_function_entry soap_param_functions[] = {
 	SOAP_CTOR(SoapParam, SoapParam, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry soap_header_functions[] = {
+static const zend_function_entry soap_header_functions[] = {
 	SOAP_CTOR(SoapHeader, SoapHeader, NULL, 0)
 	{NULL, NULL, NULL}
 };

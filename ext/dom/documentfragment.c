@@ -35,7 +35,7 @@
 * Since: 
 */
 
-zend_function_entry php_dom_documentfragment_class_functions[] = {
+const zend_function_entry php_dom_documentfragment_class_functions[] = {
 	PHP_ME(domdocumentfragment, __construct, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(domdocumentfragment, appendXML, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}

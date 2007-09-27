@@ -97,7 +97,7 @@ struct yy_buffer_state
  *
  * Every user visible function must have an entry in tokenizer_functions[].
  */
-zend_function_entry tokenizer_functions[] = {
+const zend_function_entry tokenizer_functions[] = {
 	PHP_FE(token_get_all,	NULL)
 	PHP_FE(token_name,	NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in tokenizer_functions[] */

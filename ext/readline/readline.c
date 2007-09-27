@@ -69,7 +69,7 @@ PHP_RSHUTDOWN_FUNCTION(readline);
 /* }}} */
 /* {{{ module stuff */
 
-static zend_function_entry php_readline_functions[] = {
+static const zend_function_entry php_readline_functions[] = {
 	PHP_FE(readline,	   		        NULL)
 	PHP_FE(readline_info,  	            NULL)
 	PHP_FE(readline_add_history, 		NULL)

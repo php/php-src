@@ -53,7 +53,7 @@ static PHP_MINFO_FUNCTION(posix);
 
 /* {{{ posix_functions[]
  */
-zend_function_entry posix_functions[] = {
+const zend_function_entry posix_functions[] = {
     /* POSIX.1, 3.3 */
 	PHP_FE(posix_kill,		NULL)
 

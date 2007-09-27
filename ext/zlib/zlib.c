@@ -103,7 +103,7 @@ static PHP_FUNCTION(zlib_get_coding_type);
 
 /* {{{ php_zlib_functions[]
  */
-static zend_function_entry php_zlib_functions[] = {
+static const zend_function_entry php_zlib_functions[] = {
 	PHP_FE(readgzfile,						NULL)
 	PHP_FALIAS(gzrewind,	rewind,			NULL)
 	PHP_FALIAS(gzclose,		fclose,			NULL)

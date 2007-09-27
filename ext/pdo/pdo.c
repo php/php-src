@@ -114,7 +114,7 @@ PHP_FUNCTION(pdo_drivers)
 /* }}} */
 
 /* {{{ pdo_functions[] */
-zend_function_entry pdo_functions[] = {
+const zend_function_entry pdo_functions[] = {
 	PHP_FE(pdo_drivers,             NULL)
 	{NULL, NULL, NULL}
 };
@@ -122,7 +122,7 @@ zend_function_entry pdo_functions[] = {
 
 /* {{{ pdo_functions[] */
 #if ZEND_MODULE_API_NO >= 20050922
-static zend_module_dep pdo_deps[] = {
+static const zend_module_dep pdo_deps[] = {
 #ifdef HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
 #endif

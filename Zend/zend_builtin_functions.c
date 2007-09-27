@@ -88,7 +88,7 @@ static ZEND_FUNCTION(zend_thread_id);
 #include "zend_arg_defs.c"
 
 
-static zend_function_entry builtin_functions[] = {
+static const zend_function_entry builtin_functions[] = {
 	ZEND_FE(zend_version,		NULL)
 	ZEND_FE(func_num_args,		NULL)
 	ZEND_FE(func_get_arg,		NULL)
@@ -1609,7 +1609,7 @@ ZEND_FUNCTION(get_defined_constants)
 		zend_constant *val;
 		int module_number;
 		zval **modules;
-		char **module_names;
+		const char **module_names;
 		zend_module_entry *module;
 		int i = 1;
 
@@ -2136,7 +2136,7 @@ ZEND_FUNCTION(get_extension_funcs)
 {
 	zval **extension_name;
 	zend_module_entry *module;
-	zend_function_entry *func;
+	const zend_function_entry *func;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &extension_name)) {
 		ZEND_WRONG_PARAM_COUNT();

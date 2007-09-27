@@ -1025,7 +1025,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 }
 
 
-ZEND_API int zend_lookup_class_ex(char *name, int name_length, int use_autoload, zend_class_entry ***ce TSRMLS_DC)
+ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_autoload, zend_class_entry ***ce TSRMLS_DC)
 {
 	zval **args[1];
 	zval autoload_function;
@@ -1123,7 +1123,7 @@ ZEND_API int zend_lookup_class_ex(char *name, int name_length, int use_autoload,
 	return retval;
 }
 
-ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
+ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
 {
 	return zend_lookup_class_ex(name, name_length, 1, ce TSRMLS_CC);
 }
@@ -1471,7 +1471,7 @@ void zend_unset_timeout(TSRMLS_D)
 }
 
 
-zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fetch_type TSRMLS_DC)
+zend_class_entry *zend_fetch_class(const char *class_name, uint class_name_len, int fetch_type TSRMLS_DC)
 {
 	zend_class_entry **pce;
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;

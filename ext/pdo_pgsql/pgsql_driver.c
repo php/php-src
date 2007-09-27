@@ -627,14 +627,14 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 /* }}} */
 
 
-static zend_function_entry dbh_methods[] = {
+static const zend_function_entry dbh_methods[] = {
 	PHP_ME(PDO, pgsqlLOBCreate, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, pgsqlLOBOpen, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, pgsqlLOBUnlink, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
+static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 {
 	switch (kind) {
 		case PDO_DBH_DRIVER_METHOD_KIND_DBH:

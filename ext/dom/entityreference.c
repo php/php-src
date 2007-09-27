@@ -35,7 +35,7 @@
 * Since: 
 */
 
-zend_function_entry php_dom_entityreference_class_functions[] = {
+const zend_function_entry php_dom_entityreference_class_functions[] = {
 	PHP_ME(domentityreference, __construct, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };

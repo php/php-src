@@ -57,7 +57,7 @@
 
 /* {{{ session_functions[]
  */
-zend_function_entry session_functions[] = {
+const zend_function_entry session_functions[] = {
 	PHP_FE(session_name,              NULL)
 	PHP_FE(session_module_name,       NULL)
 	PHP_FE(session_save_path,         NULL)

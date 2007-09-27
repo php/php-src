@@ -68,7 +68,7 @@ static int le_result, le_conn, le_pconn;
 
 /* {{{ odbc_functions[]
  */
-zend_function_entry odbc_functions[] = {
+const zend_function_entry odbc_functions[] = {
 	PHP_FE(odbc_autocommit, NULL)
 	PHP_FE(odbc_binmode, NULL)
 	PHP_FE(odbc_close, NULL)

@@ -31,14 +31,14 @@
 #include "php_pdo_mysql_int.h"
 
 /* {{{ pdo_mysql_functions[] */
-zend_function_entry pdo_mysql_functions[] = {
+const zend_function_entry pdo_mysql_functions[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */
 
 /* {{{ pdo_mysql_functions[] */
 #if ZEND_MODULE_API_NO >= 20050922
-static zend_module_dep pdo_mysql_deps[] = {
+static const zend_module_dep pdo_mysql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	{NULL, NULL, NULL}
 };
