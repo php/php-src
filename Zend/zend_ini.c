@@ -549,6 +549,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 	*p = zend_atoi(new_value, new_value_length);
 	return SUCCESS;
 }
+/* }}} */
 
 ZEND_API ZEND_INI_MH(OnUpdateLongGEZero)
 {
