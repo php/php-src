@@ -2143,19 +2143,40 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 	*ce_ptr = NULL;
 	*fptr_ptr = NULL;
 
-	if ((colon = strstr(Z_STRVAL_P(callable), "::")) != NULL) {
+
+	if (!ce_org) {
+		/* Skip leading :: */
+		if (Z_STRVAL_P(callable)[0] == ':' &&
+		    Z_STRVAL_P(callable)[1] == ':') {
+			mlen = Z_STRLEN_P(callable) - 2;
+			lmname = zend_str_tolower_dup(Z_STRVAL_P(callable) + 2, mlen);
+		} else {
+			mlen = Z_STRLEN_P(callable);
+			lmname = zend_str_tolower_dup(Z_STRVAL_P(callable), mlen);
+		}
+		/* Check if function with given name exists.
+		   This may be a compound name that includes namespace name */
+		if (zend_hash_find(EG(function_table), lmname, mlen+1, (void**)&fptr) == SUCCESS) {
+			*fptr_ptr = fptr;
+			efree(lmname);
+			return 1;
+		}
+		efree(lmname);
+	}
+
+	/* Split name into class/namespace and method/function names */
+	if ((colon = zend_memrchr(Z_STRVAL_P(callable), ':', Z_STRLEN_P(callable))) != NULL &&
+	     colon > Z_STRVAL_P(callable) &&
+	     *(colon-1) == ':') {
+		colon--;
 		clen = colon - Z_STRVAL_P(callable);
 		mlen = Z_STRLEN_P(callable) - clen - 2;
-		lcname = zend_str_tolower_dup(Z_STRVAL_P(callable), clen);
-		/* caution: lcname is not '\0' terminated */
-		if (clen == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self") - 1) == 0) {
-			*ce_ptr = EG(scope);
-		} else if (clen == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
-			*ce_ptr = EG(scope) ? EG(scope)->parent : NULL;
-		} else if (zend_lookup_class(Z_STRVAL_P(callable), clen, &pce TSRMLS_CC) == SUCCESS) {
-			*ce_ptr = *pce;
-		}
-		efree(lcname);
+		lmname = colon + 2;
+	}
+ 	if (colon != NULL) {
+		/* This is a compound name.
+		   Try to fetch class and then find static method. */
+ 		*ce_ptr = zend_fetch_class(Z_STRVAL_P(callable), clen, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		if (!*ce_ptr) {
 			return 0;
 		}
@@ -2164,15 +2185,15 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 			return 0;
 		}
 		lmname = zend_str_tolower_dup(Z_STRVAL_P(callable) + clen + 2, mlen);
-	} else {
+	} else if (ce_org) {
+		/* Try to fetch find static method of given class. */
 		mlen = Z_STRLEN_P(callable);
-		lmname = zend_str_tolower_dup(Z_STRVAL_P(callable), mlen);
-		if (ce_org) {
-			ftable = &ce_org->function_table;
-			*ce_ptr = ce_org;
-		} else {
-			ftable = EG(function_table);
-		}
+ 		lmname = zend_str_tolower_dup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
+		ftable = &ce_org->function_table;
+		*ce_ptr = ce_org;
+	} else {
+		/* We already checked for plain function before. */
+		return 0;
 	}
 
 	retval = zend_hash_find(ftable, lmname, mlen+1, (void**)&fptr) == SUCCESS ? 1 : 0;

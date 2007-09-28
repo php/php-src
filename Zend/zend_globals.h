@@ -130,6 +130,9 @@ struct _zend_compiler_globals {
 	char *doc_comment;
 	zend_uint doc_comment_len;
 
+	zval      *current_namespace;
+	HashTable *current_import;
+
 #ifdef ZEND_MULTIBYTE
 	zend_encoding **script_encoding_list;
 	int script_encoding_list_size;
