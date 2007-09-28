@@ -1730,7 +1730,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
+ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUSED|CV)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
@@ -1738,7 +1738,25 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
-	ce = EX_T(opline->op1.u.var).class_entry;
+	if (OP1_TYPE == IS_CONST && OP2_TYPE == IS_CONST) {
+		/* try a function in namespace */
+		zend_op *op_data = opline+1;
+
+		ZEND_VM_INC_OPCODE();
+
+		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
+			EX(object) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
+
+		/* no function found. try a static method in class */		
+		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+		if (!ce) {
+			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
+		}
+	} else {
+		ce = EX_T(opline->op1.u.var).class_entry;
+	}
 	if(OP2_TYPE != IS_UNUSED) {
 		char *function_name_strval;
 		int function_name_strlen;
@@ -1818,10 +1836,29 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 		function_name_strlen = function_name->value.str.len;
 	}
 
-	lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
+	if (OP2_TYPE != IS_CONST && 
+	    function_name_strval[0] == ':' &&
+	    function_name_strval[1] == ':') {
+
+	    function_name_strlen -= 2;
+		lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
+	} else {
+		lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
+	}
 	if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE) {
 		efree(lcname);
-		zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+
+		if (OP2_TYPE == IS_CONST && opline->op1.op_type == IS_CONST) {
+			function_name_strlen -= Z_LVAL(opline->op1.u.constant);
+			lcname = zend_str_tolower_dup(function_name_strval + Z_LVAL(opline->op1.u.constant), function_name_strlen);
+			if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE ||
+			    function->type != ZEND_INTERNAL_FUNCTION) {
+				efree(lcname);
+				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+			}
+		} else {
+			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+		}
 	}
 
 	efree(lcname);
@@ -2366,7 +2403,7 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 	zend_free_op free_res;
 
 	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
-		if (Z_TYPE(opline->op2.u.constant) == IS_CONSTANT || Z_TYPE(opline->op2.u.constant)==IS_CONSTANT_ARRAY) {
+		if ((Z_TYPE(opline->op2.u.constant) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT || Z_TYPE(opline->op2.u.constant)==IS_CONSTANT_ARRAY) {
 			zval *default_value;
 
 			ALLOC_ZVAL(default_value);
@@ -2582,49 +2619,71 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, CONST|UNUSED, CONST)
+ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 {
 	zend_op *opline = EX(opline);
-	zend_class_entry *ce = NULL;
-	zval **value;
 
 	if (OP1_TYPE == IS_UNUSED) {
-/* This seems to be a reminant of namespaces
-		if (EG(scope)) {
-			ce = EG(scope);
-			if (zend_hash_find(&ce->constants_table, Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
-				zval_update_constant(value, (void *) 1 TSRMLS_CC);
-				EX_T(opline->result.u.var).tmp_var = **value;
-				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-				ZEND_VM_NEXT_OPCODE();
-			}
-		}
-*/
-		if (!zend_get_constant(opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len, &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
+		if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-						opline->op2.u.constant.value.str.val,
-						opline->op2.u.constant.value.str.val);
+				Z_STRVAL(opline->op2.u.constant),
+				Z_STRVAL(opline->op2.u.constant));
 			EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
 			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 		}
 		ZEND_VM_NEXT_OPCODE();
-	}
-
-	ce = EX_T(opline->op1.u.var).class_entry;
-
-	if (zend_hash_find(&ce->constants_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
-		zend_class_entry *old_scope = EG(scope);
-
-		EG(scope) = ce;
-		zval_update_constant(value, (void *) 1 TSRMLS_CC);
-		EG(scope) = old_scope;
-		EX_T(opline->result.u.var).tmp_var = **value;
-		zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 	} else {
-		zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", opline->op2.u.constant.value.str.val);
-	}
+		zend_class_entry *ce;
+		zval **value;
+	
+		if (OP1_TYPE == IS_CONST) {
+			zend_op *op_data = opline + 1;
+			zend_constant *c;
 
-	ZEND_VM_NEXT_OPCODE();
+			ZEND_VM_INC_OPCODE();
+
+			/* try a constant in namespace */
+			if (zend_hash_quick_find(EG(zend_constants), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &c)==SUCCESS) {
+				EX_T(opline->result.u.var).tmp_var = c->value;
+				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
+				ZEND_VM_NEXT_OPCODE();
+			} else if ((opline->extended_value & IS_CONSTANT_RT_NS_CHECK) != 0) {
+				if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
+					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+						Z_STRVAL(opline->op2.u.constant),
+						Z_STRVAL(opline->op2.u.constant));
+					EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+					zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
+				}
+				ZEND_VM_NEXT_OPCODE();
+			}
+	
+			/* no constant found. try a constant in class */		
+			ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);		
+			if (!ce) {
+				zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL(opline->op2.u.constant));
+			}
+		} else {
+			ce = EX_T(opline->op1.u.var).class_entry;
+		}
+
+		if (zend_hash_find(&ce->constants_table, Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
+			if (Z_TYPE_PP(value) == IS_CONSTANT_ARRAY ||
+			    Z_TYPE_PP(value) == IS_CONSTANT) {
+				zend_class_entry *old_scope = EG(scope);
+
+				EG(scope) = ce;
+				zval_update_constant(value, (void *) 1 TSRMLS_CC);
+				EG(scope) = old_scope;
+			}
+			EX_T(opline->result.u.var).tmp_var = **value;
+			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
+		} else {
+			zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL(opline->op2.u.constant));
+		}
+
+		ZEND_VM_NEXT_OPCODE();
+	}
 }
 
 ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUSED|CV)
@@ -3844,6 +3903,41 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 		default:
 			ZEND_VM_DISPATCH(ret & 0xff, EX(opline));
 	}
+}
+
+ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
+{
+	zend_op *opline = EX(opline);
+	zend_free_op free_op1, free_op2;
+	zval *name  = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	zval *val   = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	zend_constant c;
+
+	if ((Z_TYPE_P(val) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT || Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
+		zval tmp = *val;
+		zval *tmp_ptr = &tmp;
+
+		if (Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
+			zval_copy_ctor(&tmp);			
+		}
+		INIT_PZVAL(&tmp);
+		zval_update_constant(&tmp_ptr, NULL TSRMLS_CC);
+		c.value = *tmp_ptr;
+	} else {
+		c.value = *val;
+		zval_copy_ctor(&c.value);
+	}
+	c.flags = CONST_CS; /* non persistent, case sensetive */
+	c.name = zend_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	c.name_len = Z_STRLEN_P(name)+1;
+	c.module_number = PHP_USER_CONSTANT;
+
+	if (zend_register_constant(&c TSRMLS_CC) == FAILURE) {
+	}
+
+	FREE_OP1();
+	FREE_OP2();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)

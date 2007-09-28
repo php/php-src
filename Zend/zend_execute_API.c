@@ -461,7 +461,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 
 	if (IS_CONSTANT_VISITED(p)) {
 		zend_error(E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
-	} else if (Z_TYPE_P(p) == IS_CONSTANT) {
+	} else if ((Z_TYPE_P(p) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		int refcount;
 		zend_uchar is_ref;
 
@@ -473,7 +473,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		refcount = p->refcount;
 		is_ref = p->is_ref;
 
-		if (!zend_get_constant_ex(p->value.str.val, p->value.str.len, &const_value, scope TSRMLS_CC)) {
+		if (!zend_get_constant_ex(p->value.str.val, p->value.str.len, &const_value, scope, Z_TYPE_P(p) TSRMLS_CC)) {
 			if ((colon = memchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p))) && colon[1] == ':') {
 				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
 			}
@@ -515,7 +515,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!zend_get_constant_ex(str_index, str_index_len-1, &const_value, scope TSRMLS_CC)) {
+			if (!zend_get_constant_ex(str_index, str_index_len-1, &const_value, scope, 0 TSRMLS_CC)) {
 				if ((colon = memchr(str_index, ':', str_index_len-1)) && colon[1] == ':') {
 					zend_error(E_ERROR, "Undefined class constant '%s'", str_index);
 				}
@@ -636,6 +636,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	int call_via_handler = 0;
 	char *fname, *colon;
 	int fname_len;
+	char *lcname;
 
 	*fci->retval_ptr_ptr = NULL;
 
@@ -766,68 +767,76 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 		fname = Z_STRVAL_P(fci->function_name);
 		fname_len = Z_STRLEN_P(fci->function_name);
-		if ((colon = strstr(fname, "::")) != NULL) {
-			int clen = colon - fname;
-			int mlen = fname_len - clen - 2;
-			zend_class_entry **pce, *ce_child = NULL;
-			if (zend_lookup_class(fname, clen, &pce TSRMLS_CC) == SUCCESS) {
-				ce_child = *pce;
-			} else {
-				char *lcname = zend_str_tolower_dup(fname, clen);
-				/* caution: lcname is not '\0' terminated */
-				if (calling_scope) {
-					if (clen == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self") - 1) == 0) {
-						ce_child = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
-					} else if (clen == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
-						ce_child = EG(active_op_array) && EG(active_op_array)->scope ? EG(scope)->parent : NULL;
-					}
-				}
-				efree(lcname);
-			}
-			if (!ce_child) {
-				zend_error(E_ERROR, "Cannot call method %s() or method does not exist", fname);
-				return FAILURE;
-			}
-			check_scope_or_static = calling_scope;
-			fci->function_table = &ce_child->function_table;
-			calling_scope = ce_child;
-			fname = fname + clen + 2;
-			fname_len = mlen;
+		if (fname[0] == ':' && fname[1] == ':') {
+			fname += 2;
+			fname_len -=2;
 		}
-
-		if (fci->object_pp) {
-			if (Z_OBJ_HT_PP(fci->object_pp)->get_method == NULL) {
-				zend_error(E_ERROR, "Object does not support method calls");
-			}
-			EX(function_state).function = 
-			  Z_OBJ_HT_PP(fci->object_pp)->get_method(fci->object_pp, fname, fname_len TSRMLS_CC);
-			if (EX(function_state).function && calling_scope != EX(function_state).function->common.scope) {
-				char *function_name_lc = zend_str_tolower_dup(fname, fname_len);
-				if (zend_hash_find(&calling_scope->function_table, function_name_lc, fname_len+1, (void **) &EX(function_state).function)==FAILURE) {
-					efree(function_name_lc);
-					zend_error(E_ERROR, "Cannot call method %s::%s() or method does not exist", calling_scope->name, fname);
-				}
-				efree(function_name_lc);
-			}
-		} else if (calling_scope) {
-			char *function_name_lc = zend_str_tolower_dup(fname, fname_len);
-
-			EX(function_state).function = 
-				zend_std_get_static_method(calling_scope, function_name_lc, fname_len TSRMLS_CC);
-			efree(function_name_lc);
-			if (check_scope_or_static && EX(function_state).function
-			&& !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)
-			&& !instanceof_function(check_scope_or_static, calling_scope TSRMLS_CC)) {
-				zend_error(E_ERROR, "Cannot call method %s() of class %s which is not a derived from %s", fname, calling_scope->name, check_scope_or_static->name);
-				return FAILURE;
-			}
+		lcname = zend_str_tolower_dup(fname, fname_len);
+		EX(function_state).function = NULL;
+		if (!fci->object_pp &&
+		    zend_hash_find(fci->function_table, lcname, fname_len+1, (void**)&EX(function_state).function) == SUCCESS) {
+			efree(lcname);
 		} else {
-			char *function_name_lc = zend_str_tolower_dup(fname, fname_len);
+			efree(lcname);
+			if ((colon = zend_memrchr(fname, ':', fname_len)) != NULL &&
+			    colon > fname &&
+			    *(colon-1) == ':') {
+				int clen = colon - fname - 1;
+				int mlen = fname_len - clen - 2;
 
-			if (zend_hash_find(fci->function_table, function_name_lc, fname_len+1, (void **) &EX(function_state).function)==FAILURE) {
-			  EX(function_state).function = NULL;
+				zend_class_entry **pce, *ce_child = NULL;
+				if (zend_lookup_class(fname, clen, &pce TSRMLS_CC) == SUCCESS) {
+					ce_child = *pce;
+				} else {
+					char *lcname = zend_str_tolower_dup(fname, clen);
+					/* caution: lcname is not '\0' terminated */
+					if (calling_scope) {
+						if (clen == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self") - 1) == 0) {
+							ce_child = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
+						} else if (clen == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
+							ce_child = EG(active_op_array) && EG(active_op_array)->scope ? EG(scope)->parent : NULL;
+						}
+					}
+					efree(lcname);
+				}
+				if (!ce_child) {
+					zend_error(E_ERROR, "Cannot call method %s() or method does not exist", fname);
+					return FAILURE;
+				}
+				check_scope_or_static = calling_scope;
+				fci->function_table = &ce_child->function_table;
+				calling_scope = ce_child;
+				fname = fname + clen + 2;
+				fname_len = mlen;
 			}
-			efree(function_name_lc);
+
+			if (fci->object_pp) {
+				if (Z_OBJ_HT_PP(fci->object_pp)->get_method == NULL) {
+					zend_error(E_ERROR, "Object does not support method calls");
+				}
+				EX(function_state).function = 
+				  Z_OBJ_HT_PP(fci->object_pp)->get_method(fci->object_pp, fname, fname_len TSRMLS_CC);
+				if (EX(function_state).function && calling_scope != EX(function_state).function->common.scope) {
+					char *function_name_lc = zend_str_tolower_dup(fname, fname_len);
+					if (zend_hash_find(&calling_scope->function_table, function_name_lc, fname_len+1, (void **) &EX(function_state).function)==FAILURE) {
+						efree(function_name_lc);
+						zend_error(E_ERROR, "Cannot call method %s::%s() or method does not exist", calling_scope->name, fname);
+					}
+					efree(function_name_lc);
+				}
+			} else if (calling_scope) {
+				char *function_name_lc = zend_str_tolower_dup(fname, fname_len);
+
+				EX(function_state).function = 
+					zend_std_get_static_method(calling_scope, function_name_lc, fname_len TSRMLS_CC);
+				efree(function_name_lc);
+				if (check_scope_or_static && EX(function_state).function
+				&& !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)
+				&& !instanceof_function(check_scope_or_static, calling_scope TSRMLS_CC)) {
+					zend_error(E_ERROR, "Cannot call method %s() of class %s which is not a derived from %s", fname, calling_scope->name, check_scope_or_static->name);
+					return FAILURE;
+				}
+			}
 		}
 
 		if (EX(function_state).function == NULL) {			  
@@ -1033,6 +1042,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	zval *retval_ptr = NULL;
 	int retval;
 	char *lc_name;
+	char *lc_free;
 	zval *exception;
 	char dummy = 1;
 	zend_fcall_info fcall_info;
@@ -1042,11 +1052,16 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 		return FAILURE;
 	}
 	
-	lc_name = do_alloca(name_length + 1);
+	lc_free = lc_name = do_alloca(name_length + 1);
 	zend_str_tolower_copy(lc_name, name, name_length);
 
+	if (lc_name[0] == ':' && lc_name[1] == ':') {
+		lc_name += 2;
+		name_length -= 2;
+	}
+
 	if (zend_hash_find(EG(class_table), lc_name, name_length+1, (void **) ce) == SUCCESS) {
-		free_alloca(lc_name);
+		free_alloca(lc_free);
 		return SUCCESS;
 	}
 
@@ -1054,7 +1069,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	 * (doesn't impact fuctionality of __autoload()
 	*/
 	if (!use_autoload || zend_is_compiling(TSRMLS_C)) {
-		free_alloca(lc_name);
+		free_alloca(lc_free);
 		return FAILURE;
 	}
 
@@ -1064,7 +1079,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	}
 	
 	if (zend_hash_add(EG(in_autoload), lc_name, name_length+1, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
-		free_alloca(lc_name);
+		free_alloca(lc_free);
 		return FAILURE;
 	}
 
@@ -1102,12 +1117,12 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 
 	if (retval == FAILURE) {
 		EG(exception) = exception;
-		free_alloca(lc_name);
+		free_alloca(lc_free);
 		return FAILURE;
 	}
 
 	if (EG(exception) && exception) {
-		free_alloca(lc_name);
+		free_alloca(lc_free);
 		zend_error(E_ERROR, "Function %s(%s) threw an exception of type '%s'", ZEND_AUTOLOAD_FUNC_NAME, name, Z_OBJCE_P(EG(exception))->name);
 		return FAILURE;
 	}
@@ -1119,7 +1134,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	}
 
 	retval = zend_hash_find(EG(class_table), lc_name, name_length + 1, (void **) ce);
-	free_alloca(lc_name);
+	free_alloca(lc_free);
 	return retval;
 }
 
@@ -1475,6 +1490,7 @@ zend_class_entry *zend_fetch_class(const char *class_name, uint class_name_len, 
 {
 	zend_class_entry **pce;
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
+	int rt_ns_check  = (fetch_type & ZEND_FETCH_CLASS_RT_NS_CHECK)  ? 1 : 0;
 
 	fetch_type = fetch_type & ~ZEND_FETCH_CLASS_NO_AUTOLOAD;
 check_fetch_type:
@@ -1501,8 +1517,30 @@ check_fetch_type:
 			break;
 	}
 
-	if (zend_lookup_class_ex(class_name, class_name_len, use_autoload, &pce TSRMLS_CC)==FAILURE) {
+	if (zend_lookup_class_ex(class_name, class_name_len, (!rt_ns_check & use_autoload), &pce TSRMLS_CC)==FAILURE) {
+		if (rt_ns_check) {
+			/* Check if we have internal class with the same name */
+			char *php_name;
+			uint php_name_len;
+			
+			php_name = zend_memrchr(class_name, ':', class_name_len);
+			if (php_name) {
+				php_name++;
+				php_name_len = class_name_len-(php_name-class_name);
+				php_name = zend_str_tolower_dup(php_name, php_name_len);
+				if (zend_hash_find(EG(class_table), php_name, php_name_len+1, (void **) &pce) == SUCCESS &&
+				    (*pce)->type == ZEND_INTERNAL_CLASS) {
+				    efree(php_name);
+					return *pce;
+				}
+			    efree(php_name);
+			}
+		}
 		if (use_autoload) {
+			if (rt_ns_check &&
+			    zend_lookup_class_ex(class_name, class_name_len, 1, &pce TSRMLS_CC)==SUCCESS) {
+				return *pce;
+			}
 			if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
 				zend_error(E_ERROR, "Interface '%s' not found", class_name);
 			} else {

@@ -543,7 +543,7 @@ ZEND_FUNCTION(defined)
 	}
 	
 	convert_to_string_ex(var);
-	if (zend_get_constant(Z_STRVAL_PP(var), Z_STRLEN_PP(var), &c TSRMLS_CC)) {
+	if (zend_get_constant_ex(Z_STRVAL_PP(var), Z_STRLEN_PP(var), &c, NULL, 0 TSRMLS_CC)) {
 		zval_dtor(&c);
 		RETURN_TRUE;
 	} else {
@@ -744,7 +744,7 @@ static void add_class_vars(zend_class_entry *ce, HashTable *properties, zval *re
 
 			/* this is necessary to make it able to work with default array 
 			* properties, returned to user */
-			if (Z_TYPE_P(prop_copy) == IS_CONSTANT_ARRAY || Z_TYPE_P(prop_copy) == IS_CONSTANT) {
+			if (Z_TYPE_P(prop_copy) == IS_CONSTANT_ARRAY || (Z_TYPE_P(prop_copy) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 				zval_update_constant(&prop_copy, 0 TSRMLS_CC);
 			}
 

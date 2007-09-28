@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
+- Added support for namespaces. (Dmitry, Stas)
 - Added support for dynamic access of static members using $foo::myFunc().
   (Etienne Kneuss)
 
