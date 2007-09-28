@@ -2040,7 +2040,7 @@ PHP_FUNCTION(imagegrabscreen)
 	}
 }
 /* }}} */
-#endif PHP_WIN32
+#endif /* PHP_WIN32 */
 
 #ifdef HAVE_GD_BUNDLED
 /* {{{ proto resource imagerotate(resource src_im, float angle, int bgdcolor [, int ignoretransparent]) U
