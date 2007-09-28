@@ -161,6 +161,9 @@ struct _php_core_globals {
 #endif
 	long max_input_nesting_level;
 	zend_bool in_user_include;
+
+	char *user_ini_filename;
+	long user_ini_cache_ttl;
 };
 
 

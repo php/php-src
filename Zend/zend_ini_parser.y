@@ -13,13 +13,15 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Author: Zeev Suraski <zeev@zend.com>                                 |
+   | Authors: Zeev Suraski <zeev@zend.com>                                |
+   |          Jani Taskinen <jani@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
 #define DEBUG_CFG_PARSER 0
+
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_ini.h"
@@ -27,32 +29,23 @@
 #include "zend_ini_scanner.h"
 #include "zend_extensions.h"
 
+#define YYERROR_VERBOSE
 #define YYSTYPE zval
 
 #ifdef ZTS
 #define YYPARSE_PARAM tsrm_ls
 #define YYLEX_PARAM tsrm_ls
-#endif
-
-#define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
-#define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
-
-int ini_lex(zval *ini_lval TSRMLS_DC);
-#ifdef ZTS
 int ini_parse(void *arg);
 #else
 int ini_parse(void);
 #endif
 
-zval yylval;
+#define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
+#define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
 
-#ifndef ZTS
-extern int ini_lex(zval *ini_lval TSRMLS_DC);
-extern FILE *ini_in;
-extern void init_cfg_scanner(void);
-#endif
-
-void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
+/* {{{ zend_ini_do_op()
+*/
+static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 {
 	int i_result;
 	int i_op1, i_op2;
@@ -91,16 +84,22 @@ void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 	Z_STRVAL_P(result)[Z_STRLEN_P(result)] = 0;
 	Z_TYPE_P(result) = IS_STRING;
 }
+/* }}} */
 
-void zend_ini_init_string(zval *result)
+/* {{{ zend_ini_init_string()
+*/
+static void zend_ini_init_string(zval *result)
 {
 	Z_STRVAL_P(result) = malloc(1);
 	Z_STRVAL_P(result)[0] = 0;
 	Z_STRLEN_P(result) = 0;
 	Z_TYPE_P(result) = IS_STRING;
 }
+/* }}} */
 
-void zend_ini_add_string(zval *result, zval *op1, zval *op2)
+/* {{{ zend_ini_add_string()
+*/
+static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 {
 	int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
 
@@ -110,12 +109,15 @@ void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 	Z_STRLEN_P(result) = length;
 	Z_TYPE_P(result) = IS_STRING;
 }
+/* }}} */
 
-void zend_ini_get_constant(zval *result, zval *name)
+/* {{{ zend_ini_get_constant()
+*/
+static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 {
 	zval z_constant;
-	TSRMLS_FETCH();
 
+	/* If name contains ':' it is not a constant. Bug #26893. */
 	if (!memchr(Z_STRVAL_P(name), ':', Z_STRLEN_P(name))
 		   	&& zend_get_constant(Z_STRVAL_P(name), Z_STRLEN_P(name), &z_constant TSRMLS_CC)) {
 		/* z_constant is emalloc()'d */
@@ -129,16 +131,20 @@ void zend_ini_get_constant(zval *result, zval *name)
 		*result = *name;
 	}
 }
+/* }}} */
 
-void zend_ini_get_var(zval *result, zval *name)
+/* {{{ zend_ini_get_var()
+*/
+static void zend_ini_get_var(zval *result, zval *name TSRMLS_DC)
 {
 	zval curval;
 	char *envvar;
-	TSRMLS_FETCH();
 
+	/* Fetch configuration option value */
 	if (zend_get_configuration_directive(Z_STRVAL_P(name), Z_STRLEN_P(name)+1, &curval) == SUCCESS) {
 		Z_STRVAL_P(result) = zend_strndup(Z_STRVAL(curval), Z_STRLEN(curval));
 		Z_STRLEN_P(result) = Z_STRLEN(curval);
+	/* ..or if not found, try ENV */
 	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name) TSRMLS_CC)) != NULL ||
 			   (envvar = getenv(Z_STRVAL_P(name))) != NULL) {
 		Z_STRVAL_P(result) = strdup(envvar);
@@ -147,9 +153,11 @@ void zend_ini_get_var(zval *result, zval *name)
 		zend_ini_init_string(result);
 	}
 }
+/* }}} */
 
-
-static void ini_error(char *str)
+/* {{{ ini_error()
+*/
+static void ini_error(char *msg)
 {
 	char *error_buf;
 	int error_buf_len;
@@ -158,10 +166,10 @@ static void ini_error(char *str)
 
 	currently_parsed_filename = zend_ini_scanner_get_filename(TSRMLS_C);
 	if (currently_parsed_filename) {
-		error_buf_len = 128+strlen(currently_parsed_filename); /* should be more than enough */
+		error_buf_len = 128 + strlen(msg) + strlen(currently_parsed_filename); /* should be more than enough */
 		error_buf = (char *) emalloc(error_buf_len);
 
-		sprintf(error_buf, "Error parsing %s on line %d\n", currently_parsed_filename, zend_ini_scanner_get_lineno(TSRMLS_C));
+		sprintf(error_buf, "%s in %s on line %d\n", msg, currently_parsed_filename, zend_ini_scanner_get_lineno(TSRMLS_C));
 	} else {
 		error_buf = estrdup("Invalid configuration directive\n");
 	}
@@ -177,70 +185,86 @@ static void ini_error(char *str)
 	}
 	efree(error_buf);
 }
+/* }}} */
 
-
-ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+/* {{{ zend_parse_ini_file()
+*/
+ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg TSRMLS_DC)
 {
 	int retval;
 	zend_ini_parser_param ini_parser_param;
-	TSRMLS_FETCH();
 
 	ini_parser_param.ini_parser_cb = ini_parser_cb;
 	ini_parser_param.arg = arg;
-
 	CG(ini_parser_param) = &ini_parser_param;
-	if (zend_ini_open_file_for_scanning(fh TSRMLS_CC)==FAILURE) {
+
+	if (zend_ini_open_file_for_scanning(fh, scanner_mode TSRMLS_CC) == FAILURE) {
+		return FAILURE;
+	}
+
+	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
+	retval = ini_parse(TSRMLS_C);
+	zend_ini_close_file(fh TSRMLS_CC);
+
+	shutdown_ini_scanner(TSRMLS_C);
+	
+	if (retval == 0) {
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+/* }}} */
+
+/* {{{ zend_parse_ini_string()
+*/
+ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg TSRMLS_DC)
+{
+	int retval;
+	zend_ini_parser_param ini_parser_param;
+
+	ini_parser_param.ini_parser_cb = ini_parser_cb;
+	ini_parser_param.arg = arg;
+	CG(ini_parser_param) = &ini_parser_param;
+
+	if (zend_ini_prepare_string_for_scanning(str, scanner_mode TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 
 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
 	retval = ini_parse(TSRMLS_C);
 
-	zend_ini_close_file(fh TSRMLS_CC);
+	shutdown_ini_scanner(TSRMLS_C);
 
-	if (retval==0) {
+	if (retval == 0) {
 		return SUCCESS;
 	} else {
 		return FAILURE;
 	}
 }
-
-
-ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, zend_ini_parser_cb_t ini_parser_cb, void *arg)
-{
-	zend_ini_parser_param ini_parser_param;
-	TSRMLS_FETCH();
-
-	ini_parser_param.ini_parser_cb = ini_parser_cb;
-	ini_parser_param.arg = arg;
-
-	CG(ini_parser_param) = &ini_parser_param;
-	if (zend_ini_prepare_string_for_scanning(str TSRMLS_CC)==FAILURE) {
-		return FAILURE;
-	}
-
-	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
-
-	if (ini_parse(TSRMLS_C)) {
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
-}
-
+/* }}} */
 
 %}
 
+%expect 1
 %pure_parser
+
+%token TC_SECTION
+%token TC_RAW
+%token TC_NUMBER
 %token TC_STRING
-%token TC_ENCAPSULATED_STRING
-%token BRACK
-%token SECTION
-%token CFG_TRUE
-%token CFG_FALSE
+%token TC_OFFSET
 %token TC_DOLLAR_CURLY
+%token TC_VARNAME
+%token TC_QUOTED_STRING
+%token BOOL_TRUE
+%token BOOL_FALSE
+%token END_OF_LINE
+%token '=' ':' ',' '.' '"' '\'' '^' '+' '-' '/' '*' '%' '$' '~' '<' '>' '?' '@'
 %left '|' '&'
 %right '~' '!'
+
+%destructor { free(Z_STRVAL($$)); } TC_RAW TC_NUMBER TC_STRING TC_OFFSET TC_VARNAME TC_QUOTED_STRING BOOL_TRUE BOOL_FALSE 
 
 %%
 
@@ -250,61 +274,94 @@ statement_list:
 ;
 
 statement:
-		TC_STRING '=' string_or_value {
+		TC_SECTION section_string_or_value ']' {
 #if DEBUG_CFG_PARSER
-			printf("'%s' = '%s'\n", Z_STRVAL($1), Z_STRVAL($3));
+			printf("SECTION: [%s]\n", Z_STRVAL($2));
 #endif
-			ZEND_INI_PARSER_CB(&$1, &$3, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG);
+			ZEND_INI_PARSER_CB(&$2, NULL, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG TSRMLS_CC);
+			free(Z_STRVAL($2));
+		}
+	|	TC_STRING '=' string_or_value {
+#if DEBUG_CFG_PARSER
+			printf("NORMAL: '%s' = '%s'\n", Z_STRVAL($1), Z_STRVAL($3));
+#endif
+			ZEND_INI_PARSER_CB(&$1, &$3, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
 			free(Z_STRVAL($1));
 			free(Z_STRVAL($3));
 		}
-	|	TC_STRING BRACK '=' string_or_value {
+	|	TC_OFFSET option_offset ']' '=' string_or_value {
 #if DEBUG_CFG_PARSER
-			printf("'%s'[ ] = '%s'\n", Z_STRVAL($1), Z_STRVAL($4));
+			printf("OFFSET: '%s'[%s] = '%s'\n", Z_STRVAL($1), Z_STRVAL($2), Z_STRVAL($5));
 #endif
-			ZEND_INI_PARSER_CB(&$1, &$4, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG);
+			ZEND_INI_PARSER_CB(&$1, &$5, &$2, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
 			free(Z_STRVAL($1));
-			free(Z_STRVAL($4));
+			free(Z_STRVAL($2));
+			free(Z_STRVAL($5));
 		}
-	|	TC_STRING { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG); free(Z_STRVAL($1)); }
-	|	SECTION { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG); free(Z_STRVAL($1)); }
-	|	'\n'
+	|	TC_STRING	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); free(Z_STRVAL($1)); }
+	|	END_OF_LINE
 ;
 
+section_string_or_value:
+		TC_RAW							{ $$ = $1; }
+	|	section_var_list				{ $$ = $1; }
+	|	'"' encapsed_list '"'			{ $$ = $2; }
+	|	/* empty */						{ zend_ini_init_string(&$$); }
+;
 
 string_or_value:
-		expr { $$ = $1; }
-	|	CFG_TRUE { $$ = $1; }
-	|	CFG_FALSE { $$ = $1; }
-	|	'\n' { zend_ini_init_string(&$$); }
-	|	/* empty */ { zend_ini_init_string(&$$); }
+		expr							{ $$ = $1; }
+	|	TC_RAW							{ $$ = $1; }
+	|	TC_NUMBER						{ $$ = $1; }
+	|	BOOL_TRUE						{ $$ = $1; }
+	|	BOOL_FALSE						{ $$ = $1; }
+	|	'"' encapsed_list '"'			{ $$ = $2; }
+	|	END_OF_LINE						{ zend_ini_init_string(&$$); }
 ;
 
+option_offset:
+		TC_NUMBER						{ $$ = $1; }
+	|	TC_RAW							{ $$ = $1; }
+	|	var_string_list					{ $$ = $1; }
+	|	'"' encapsed_list '"'			{ $$ = $2; }
+	|	/* empty */						{ zend_ini_init_string(&$$); }
+;
+
+encapsed_list:
+		encapsed_list cfg_var_ref		{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
+	|	encapsed_list TC_QUOTED_STRING	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
+	|	/* empty */						{ zend_ini_init_string(&$$); }
+;
+
+section_var_list:
+		cfg_var_ref						{ $$ = $1; }
+	|	TC_STRING						{ $$ = $1; }
+	|	section_var_list cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
+	|	section_var_list TC_STRING 		{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
+;
 
 var_string_list:
-		cfg_var_ref { $$ = $1; }
-	|	TC_ENCAPSULATED_STRING { $$ = $1; }
-	|	constant_string { $$ = $1; }
-	|	var_string_list cfg_var_ref { zend_ini_add_string(&$$, &$1, &$2); free($2.value.str.val); }
-	|	var_string_list TC_ENCAPSULATED_STRING { zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	var_string_list constant_string { zend_ini_add_string(&$$, &$1, &$2); free($2.value.str.val); }
-;
-
-cfg_var_ref:
-		TC_DOLLAR_CURLY TC_STRING '}' { zend_ini_get_var(&$$, &$2); free($2.value.str.val); }
+		cfg_var_ref						{ $$ = $1; }
+	|	constant_string					{ $$ = $1; }
+	|	var_string_list cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
+	|	var_string_list constant_string	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
 ;
 
 expr:
-		var_string_list			{ $$ = $1; }
-	|	expr '|' expr			{ zend_ini_do_op('|', &$$, &$1, &$3); }
-	|	expr '&' expr			{ zend_ini_do_op('&', &$$, &$1, &$3); }
-	|	'~' expr				{ zend_ini_do_op('~', &$$, &$2, NULL); }
-	|	'!'	expr				{ zend_ini_do_op('!', &$$, &$2, NULL); }
-	|	'(' expr ')'			{ $$ = $2; }
+		var_string_list					{ $$ = $1; }
+	|	expr '|' expr					{ zend_ini_do_op('|', &$$, &$1, &$3); }
+	|	expr '&' expr					{ zend_ini_do_op('&', &$$, &$1, &$3); }
+	|	'~' expr						{ zend_ini_do_op('~', &$$, &$2, NULL); }
+	|	'!'	expr						{ zend_ini_do_op('!', &$$, &$2, NULL); }
+	|	'(' expr ')'					{ $$ = $2; }
+;
+
+cfg_var_ref:
+		TC_DOLLAR_CURLY TC_VARNAME '}'	{ zend_ini_get_var(&$$, &$2 TSRMLS_CC); free(Z_STRVAL($2)); }
 ;
 
 constant_string:
-		TC_STRING { zend_ini_get_constant(&$$, &$1); }
+		TC_STRING						{ zend_ini_get_constant(&$$, &$1 TSRMLS_CC); }
 ;
 
 /*
