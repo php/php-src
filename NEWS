@@ -1,21 +1,35 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
+- Added support for dynamic access of static members using $foo::myFunc().
+  (Etienne Kneuss)
+
+- Improved php.ini handling: (Jani)
+  . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI
+  . Added support for special [PATH=/opt/httpd/www.example.com/] sections.
+    All directives set in these sections will not be able to be overridden
+    in user-defined ini-files or during runtime in the specified path
+  . Added better error reporting for php.ini syntax errors
+  . Allowed "ini-variables" to be used almost everywhere ini php.ini files
+  . Allowed using alphanumeric/variable indexes in "array" ini options
+  . Fixed get_cfg_var() to be able to return "array" ini options
+
 - Improved memory usage by moving constants to read only memory.
-  (Dmitry,Pierre)
+  (Dmitry, Pierre)
 - Improved ext/soap to support element names in context of XMLShema's <any>.
   (Dmitry)
-- Improved ext/openssl (Dmitry)
+- Improved ext/openssl: (Dmitry)
   . Added support for OpenSSL digest functions
   . Added support for OpenSSL cipher functions
   . Added access to internal values of DSA, RSA and DH keys
 - Improved and cleaned CGI code. FastCGI is now always enabled and can not be
   disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
 
-- Added support for dynamic access of static members using $foo::myFunc().
-  (Etienne Kneuss)
-
 - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
+  (Jani)
+- Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
+  characters). (Jani)
+- Fixed bug #27372 (parse error loading browscap.ini at apache startup).
   (Jani)
 
 30 Aug 2007, PHP 5.2.4
