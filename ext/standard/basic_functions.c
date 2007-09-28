@@ -4803,7 +4803,6 @@ PHP_FUNCTION(get_cfg_var)
 {
 	char *varname;
 	int varname_len;
-	char *value;
 	zval *retval;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &varname, &varname_len, UG(utf8_conv)) == FAILURE) {
