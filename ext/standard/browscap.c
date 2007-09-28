@@ -29,7 +29,7 @@
 
 static HashTable browser_hash;
 static zval *current_section;
-static zval *current_section_name;
+static char *current_section_name;
 
 #define DEFAULT_SECTION_NAME "Default Browser Capability Settings"
 
