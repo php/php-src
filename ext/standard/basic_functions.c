@@ -3308,7 +3308,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(cosh,															arginfo_cosh)
 	PHP_FE(tanh,															arginfo_tanh)
 
-#ifdef HAVE_ASINH 
+#ifdef HAVE_ASINH
 	PHP_FE(asinh,															arginfo_asinh)
 #endif
 #ifdef HAVE_ACOSH
@@ -3362,6 +3362,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 #ifdef HAVE_GETOPT
 	PHP_FE(getopt,															arginfo_getopt)
 #endif
+
 #ifdef HAVE_GETLOADAVG
 	PHP_FE(sys_getloadavg,													arginfo_sys_getloadavg)
 #endif
@@ -3432,7 +3433,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(parse_ini_file,													arginfo_parse_ini_file)
 #if ZEND_DEBUG
 	PHP_FE(dump_config_hash,												arginfo_dump_config_hash)
-#endif 
+#endif
 	PHP_FE(is_uploaded_file,												arginfo_is_uploaded_file)
 	PHP_FE(move_uploaded_file,												arginfo_move_uploaded_file)
 
@@ -3456,7 +3457,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	/* functions from type.c */
 	PHP_FE(intval,															arginfo_intval)
 	PHP_FE(floatval,														arginfo_floatval)
-	PHP_FALIAS(doubleval,          floatval,				                arginfo_floatval)
+	PHP_FALIAS(doubleval,          floatval,								arginfo_floatval)
 	PHP_FE(strval,															arginfo_strval)
 	PHP_FE(gettype,															arginfo_gettype)
 	PHP_FE(settype,															arginfo_settype)
@@ -3509,7 +3510,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(file,															arginfo_file)
 	PHP_FE(file_get_contents,												arginfo_file_get_contents)
 	PHP_FE(file_put_contents,												arginfo_file_put_contents)
-	PHP_FE(stream_select,					  								arginfo_stream_select)
+	PHP_FE(stream_select,													arginfo_stream_select)
 	PHP_FE(stream_context_create,											arginfo_stream_context_create)
 	PHP_FE(stream_context_set_params,										arginfo_stream_context_set_params)
 	PHP_FE(stream_context_set_option,										arginfo_stream_context_set_option)
@@ -3519,9 +3520,9 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_filter_append,											arginfo_stream_filter_append)
 	PHP_FE(stream_filter_remove,											arginfo_stream_filter_remove)
 	PHP_FE(stream_encoding,													arginfo_stream_encoding)
-	PHP_FE(stream_socket_client,				 							arginfo_stream_socket_client)
-	PHP_FE(stream_socket_server,				 							arginfo_stream_socket_server)
-	PHP_FE(stream_socket_accept,				 		   					arginfo_stream_socket_accept)
+	PHP_FE(stream_socket_client,											arginfo_stream_socket_client)
+	PHP_FE(stream_socket_server,											arginfo_stream_socket_server)
+	PHP_FE(stream_socket_accept,											arginfo_stream_socket_accept)
 	PHP_FE(stream_socket_get_name,											arginfo_stream_socket_get_name)
 	PHP_FE(stream_socket_recvfrom,											arginfo_stream_socket_recvfrom)
 	PHP_FE(stream_socket_sendto,											arginfo_stream_socket_sendto)
@@ -3537,7 +3538,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_resolve_include_path,										arginfo_stream_resolve_include_path)
 	PHP_FE(fgetcsv,															arginfo_fgetcsv)
 	PHP_FE(fputcsv,															arginfo_fputcsv)
-	PHP_FE(flock,											 				arginfo_flock)
+	PHP_FE(flock,															arginfo_flock)
 	PHP_FE(get_meta_tags,													arginfo_get_meta_tags)
 	PHP_FE(stream_set_write_buffer,											arginfo_stream_set_write_buffer)
 	PHP_FALIAS(set_file_buffer, stream_set_write_buffer,					arginfo_stream_set_write_buffer)
@@ -3569,7 +3570,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 #endif
 
 #ifdef HAVE_FNMATCH
-	PHP_FE(fnmatch,														    arginfo_fnmatch)
+	PHP_FE(fnmatch,															arginfo_fnmatch)
 #endif
 
 	/* functions from fsock.c */
@@ -3638,7 +3639,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(chmod,															arginfo_chmod)
 #if HAVE_UTIME
 	PHP_FE(touch,															arginfo_touch)
-#endif	
+#endif
 	PHP_FE(clearstatcache,													arginfo_clearstatcache)
 	PHP_FE(disk_total_space,												arginfo_disk_total_space)
 	PHP_FE(disk_free_space,													arginfo_disk_free_space)
@@ -3752,7 +3753,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(array_key_exists,												arginfo_array_key_exists)
 
 	/* aliases from array.c */
-	PHP_FALIAS(pos, 				current, 				 				arginfo_current)
+	PHP_FALIAS(pos,					current,								arginfo_current)
 	PHP_FALIAS(sizeof, 				count, 									arginfo_count)
 	PHP_FALIAS(key_exists,			array_key_exists,						arginfo_array_key_exists)
 
@@ -3760,8 +3761,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(assert,															arginfo_assert)
 	PHP_FE(assert_options,													arginfo_assert_options)
 
-    /* functions from versioning.c */
-    PHP_FE(version_compare,													arginfo_version_compare)
+	/* functions from versioning.c */
+	PHP_FE(version_compare,													arginfo_version_compare)
 
 	/* functions from ftok.c*/
 #if HAVE_FTOK
@@ -3792,7 +3793,7 @@ static const zend_module_dep standard_deps[] = { /* {{{ */
 /* }}} */
 
 zend_module_entry basic_functions_module = { /* {{{ */
-    STANDARD_MODULE_HEADER_EX,
+	STANDARD_MODULE_HEADER_EX,
 	NULL,
 	standard_deps,
 	"standard",					/* extension name */
@@ -3802,7 +3803,7 @@ zend_module_entry basic_functions_module = { /* {{{ */
 	PHP_RINIT(basic),			/* request startup */
 	PHP_RSHUTDOWN(basic),		/* request shutdown */
 	PHP_MINFO(basic),			/* extension info */
-    PHP_VERSION,				/* extension version */
+	PHP_VERSION,				/* extension version */
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -3845,7 +3846,7 @@ static void php_putenv_destructor(putenv_entry *pe) /* {{{ */
 		tzset();
 	}
 #endif
-		
+
 	efree(pe->putenv_string);
 	efree(pe->key);
 }
@@ -3857,7 +3858,6 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC) /* 
 	BG(rand_is_seeded) = 0;
 	BG(mt_rand_is_seeded) = 0;
 	BG(umask) = -1;
-	
 	BG(next) = NULL;
 	BG(left) = -1;
 	BG(user_tick_functions) = NULL;
@@ -3867,7 +3867,7 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC) /* 
 
 	memset(&BG(url_adapt_state), 0, sizeof(BG(url_adapt_state)));
 	memset(&BG(url_adapt_state_ex), 0, sizeof(BG(url_adapt_state_ex)));
-	
+
 #if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
 #endif
@@ -4141,7 +4141,7 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	}
 
 	/* Check if locale was changed and change it back
-	   to the value in startup environment */
+	 * to the value in startup environment */
 	if (BG(locale_string) != NULL) {
 		setlocale(LC_ALL, "C");
 		setlocale(LC_CTYPE, "");
@@ -4150,11 +4150,9 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	STR_FREE(BG(locale_string));
 	BG(locale_string) = NULL;
 
-	/*
-	 FG(stream_wrappers) and FG(stream_filters) are destroyed
-	 during php_request_shutdown()
-	 */
-	
+	/* FG(stream_wrappers) and FG(stream_filters) are destroyed
+	 * during php_request_shutdown() */
+
 	PHP_RSHUTDOWN(filestat)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #ifdef HAVE_SYSLOG_H
 #ifdef PHP_WIN32
@@ -4175,7 +4173,7 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	}
 
 	PHP_RSHUTDOWN(user_filters)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
-	
+
 	return SUCCESS;
 }
 /* }}} */
@@ -4261,7 +4259,7 @@ PHP_NAMED_FUNCTION(php_inet_pton)
 #ifdef HAVE_IPV6
 	if (strchr(address, ':')) {
 		af = AF_INET6;
-	} else 
+	} else
 #endif
 	if (!strchr(address, '.')) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized address %s", address);
@@ -4293,18 +4291,16 @@ PHP_FUNCTION(ip2long)
 	}
 
 	if (addr_len == 0 || (ip = inet_addr(addr)) == INADDR_NONE) {
-		/* the only special case when we should return -1 ourselves,
+		/* The only special case when we should return -1 ourselves,
 		 * because inet_addr() considers it wrong. We return 0xFFFFFFFF and
-		 * not -1 or ~0 because of 32/64bit issues.
-		 */
+		 * not -1 or ~0 because of 32/64bit issues. */
 		if (addr_len == sizeof("255.255.255.255") - 1 &&
-			!memcmp(addr, "255.255.255.255", sizeof("255.255.255.255") - 1)) {
+			!memcmp(addr, "255.255.255.255", sizeof("255.255.255.255") - 1)
+		) {
 			RETURN_LONG(0xFFFFFFFF);
 		}
-		
 		RETURN_FALSE;
 	}
-
 	RETURN_LONG(ntohl(ip));
 }
 /* }}} */
@@ -4322,7 +4318,7 @@ PHP_FUNCTION(long2ip)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &ip, &ip_len) == FAILURE) {
 		return;
 	}
-	
+
 	n = strtoul(ip, NULL, 0);
 
 	myaddr.s_addr = htonl(n);
@@ -4437,7 +4433,7 @@ PHP_FUNCTION(putenv)
 #endif
 
 #ifdef HAVE_GETOPT
-/* {{{ free_argv
+/* {{{ free_argv()
    Free the memory allocated to an argv array. */
 static void free_argv(char **argv, int argc)
 {
@@ -4455,17 +4451,17 @@ static void free_argv(char **argv, int argc)
 /* }}} */
 
 #ifdef HARTMUT_0
-/* {{{ free_longopts
+/* {{{ free_longopts()
    Free the memory allocated to an longopt array. */
 static void free_longopts(struct option *longopts)
 {
 	struct option *p;
 
-	if(longopts) {
-		for(p=longopts; p->name; p++) {
+	if (longopts) {
+		for (p = longopts; p->name; p++) {
 			efree((char *)(p->name));
 		}
-		
+
 		efree(longopts);
 	}
 }
@@ -4487,50 +4483,43 @@ PHP_FUNCTION(getopt)
 	int longindex = 0;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a",
-							  &options, &options_len, &p_longopts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a", &options, &options_len, &p_longopts) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	/*
-	 * Get argv from the global symbol table.  We calculate argc ourselves
+	/* Get argv from the global symbol table. We calculate argc ourselves
 	 * in order to be on the safe side, even though it is also available
-	 * from the symbol table.
-	 */
+	 * from the symbol table. */
 	if (zend_ascii_hash_find(HASH_OF(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), (void **) &args) != FAILURE ||
-		zend_ascii_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void **) &args) != FAILURE) {
+		zend_ascii_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void **) &args) != FAILURE
+	) {
 		int pos = 0;
 		zval **arg;
 
 		argc = zend_hash_num_elements(Z_ARRVAL_PP(args));
 
-		/* 
-		 * Attempt to allocate enough memory to hold all of the arguments
-		 * and a trailing NULL 
-		 */
+		/* Attempt to allocate enough memory to hold all of the arguments
+		 * and a trailing NULL */
 		argv = (char **) safe_emalloc(sizeof(char *), (argc + 1), 0);
 
 		/* Reset the array indexes. */
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(args));
 
 		/* Iterate over the hash to construct the argv array. */
-		while (zend_hash_get_current_data(Z_ARRVAL_PP(args),
-										  (void **)&arg) == SUCCESS) {
+		while (zend_hash_get_current_data(Z_ARRVAL_PP(args), (void **)&arg) == SUCCESS) {
 			argv[pos++] = estrdup(Z_STRVAL_PP(arg));
 			zend_hash_move_forward(Z_ARRVAL_PP(args));
 		}
 
-		/* 
-		 * The C Standard requires argv[argc] to be NULL - this might
-		 * keep some getopt implementations happy. 
-		 */
+		/* The C Standard requires argv[argc] to be NULL - this might
+		 * keep some getopt implementations happy. */
 		argv[argc] = NULL;
 	} else {
 		/* Return false if we can't find argv. */
 		RETURN_FALSE;
 	}
 
-	if(p_longopts) {
+	if (p_longopts) {
 #ifdef HARTMUT_0
 		int len, c = zend_hash_num_elements(Z_ARRVAL_P(p_longopts));
 		struct option *p;
@@ -4539,29 +4528,30 @@ PHP_FUNCTION(getopt)
 
 		longopts = (struct option *)ecalloc(c+1, sizeof(struct option));
 
-		if(!longopts) RETURN_FALSE;
+		if (!longopts) {
+			RETURN_FALSE;
+		}
 
 		/* Reset the array indexes. */
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p_longopts));
 		p = longopts;
 
 		/* Iterate over the hash to construct the argv array. */
-		while (zend_hash_get_current_data(Z_ARRVAL_P(p_longopts),
-										  (void **)&arg) == SUCCESS) {
+		while (zend_hash_get_current_data(Z_ARRVAL_P(p_longopts), (void **)&arg) == SUCCESS) {
 
 			p->has_arg = 0;
 			name = estrdup(Z_STRVAL_PP(arg));
 			len = strlen(name);
-			if((len > 0) && (name[len-1] == ':')) {
+			if ((len > 0) && (name[len-1] == ':')) {
 				p->has_arg++;
 				name[len-1] = '\0';
-				if((len > 1) && (name[len-2] == ':')) {
+				if ((len > 1) && (name[len-2] == ':')) {
 					p->has_arg++;
 					name[len-2] = '\0';
 				}
 			}
-				
-			p->name = name; 
+
+			p->name = name;
 			p->flag = NULL;
 			p->val = 0;
 
@@ -4570,7 +4560,7 @@ PHP_FUNCTION(getopt)
 		}
 #else
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No support for long options in this build");
-#endif	
+#endif
 	}
 
 	/* Initialize the return value as an array. */
@@ -4594,15 +4584,17 @@ PHP_FUNCTION(getopt)
 		}
 
 		/* Prepare the option character and the argument string. */
-		if(o == 0) {
+		if (o == 0) {
 #ifdef HARTMUT_0
 			optname = (char *)longopts[longindex].name;
-#else                      
+#else
 			/* o == 0 shall never happen so this only fixes a compiler warning */
 			optname = NULL;
 #endif
-		} else {		
-			if(o == 1) o = '-';
+		} else {
+			if (o == 1) {
+				o = '-';
+			}
 			opt[0] = o;
 			optname = opt;
 		}
@@ -4620,8 +4612,8 @@ PHP_FUNCTION(getopt)
 		if (!(optname_len > 1 && optname[0] == '0') && is_numeric_string(optname, optname_len, NULL, NULL, 0) == IS_LONG) {
 			/* numeric string */
 			int optname_int = atoi(optname);
-			if(zend_hash_index_find(HASH_OF(return_value), optname_int, (void **)&args) != FAILURE) {
-				if(Z_TYPE_PP(args) != IS_ARRAY) {
+			if (zend_hash_index_find(HASH_OF(return_value), optname_int, (void **)&args) != FAILURE) {
+				if (Z_TYPE_PP(args) != IS_ARRAY) {
 					convert_to_array_ex(args);
 				}
 				zend_hash_next_index_insert(HASH_OF(*args),  (void *)&val, sizeof(zval *), NULL);
@@ -4630,8 +4622,8 @@ PHP_FUNCTION(getopt)
 			}
 		} else {
 			/* other strings */
-			if(zend_hash_find(HASH_OF(return_value), optname, strlen(optname)+1, (void **)&args) != FAILURE) {
-				if(Z_TYPE_PP(args) != IS_ARRAY) {
+			if (zend_hash_find(HASH_OF(return_value), optname, strlen(optname)+1, (void **)&args) != FAILURE) {
+				if (Z_TYPE_PP(args) != IS_ARRAY) {
 					convert_to_array_ex(args);
 				}
 				zend_hash_next_index_insert(HASH_OF(*args),  (void *)&val, sizeof(zval *), NULL);
@@ -4705,7 +4697,7 @@ PHP_FUNCTION(time_nanosleep)
 {
 	long tv_sec, tv_nsec;
 	struct timespec php_req, php_rem;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &tv_sec, &tv_nsec) == FAILURE) {
 		return;
 	}
@@ -4734,7 +4726,7 @@ PHP_FUNCTION(time_sleep_until)
 	double d_ts, c_ts;
 	struct timeval tm;
 	struct timespec php_req, php_rem;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &d_ts) == FAILURE) {
 		return;
 	}
@@ -4813,7 +4805,7 @@ PHP_FUNCTION(get_cfg_var)
 	int varname_len;
 	char *value;
 	zval *retval;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &varname, &varname_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
@@ -4841,7 +4833,7 @@ PHP_FUNCTION(get_cfg_var)
 	4th arg = used for additional headers if email
 
 error options:
-    0 = send to php_error_log (uses syslog or file depending on ini setting)
+	0 = send to php_error_log (uses syslog or file depending on ini setting)
 	1 = send via email to 3rd parameter 4th option = additional headers
 	2 = send via tcp/ip to 3rd parameter (name or ip:port)
 	3 = save to file in 3rd parameter
@@ -4871,7 +4863,7 @@ PHP_FUNCTION(error_log)
 			convert_to_long_ex(erropt);
 			opt_err = Z_LVAL_PP(erropt);
 			break;
-	
+
 		case 3:
 			if (zend_get_parameters_ex(3, &string, &erropt, &option) == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments");
@@ -4882,14 +4874,14 @@ PHP_FUNCTION(error_log)
 			convert_to_string_ex(option);
 			opt = Z_STRVAL_PP(option);
 			break;
-		
+
 		case 4:
 			if (zend_get_parameters_ex (4, &string, &erropt, &option, &emailhead) == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments");
 				RETURN_FALSE;
 			}
 			break;
-	
+
 		default:
 			WRONG_PARAM_COUNT;
 	}
@@ -4915,7 +4907,7 @@ PHP_FUNCTION(error_log)
 	if (_php_error_log(opt_err, message, opt, headers TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
-	
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -4983,8 +4975,8 @@ PHPAPI char *php_get_current_user(void) /* {{{ */
 		name[len] = '\0';
 		SG(request_info).current_user_length = len;
 		SG(request_info).current_user = estrndup(name, len);
-		return SG(request_info).current_user;		
-#else	
+		return SG(request_info).current_user;
+#else
 		struct passwd *pwd;
 
 		if ((pwd=getpwuid(pstat->st_uid))==NULL) {
@@ -4995,7 +4987,7 @@ PHPAPI char *php_get_current_user(void) /* {{{ */
 		return SG(request_info).current_user;
 #endif
 	}
-}	
+}
 /* }}} */
 
 /* {{{ proto array error_get_last() U
@@ -5077,8 +5069,9 @@ PHP_FUNCTION(call_user_method)
 	}
 
 	if (Z_TYPE_P(object) != IS_OBJECT &&
-	    Z_TYPE_P(object) != IS_STRING &&
-	    Z_TYPE_P(object) != IS_UNICODE) {
+		Z_TYPE_P(object) != IS_STRING &&
+		Z_TYPE_P(object) != IS_UNICODE
+	) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument is not an object or class name");
 		efree(params);
 		RETURN_FALSE;
@@ -5110,8 +5103,9 @@ PHP_FUNCTION(call_user_method_array)
 	}
 
 	if (Z_TYPE_P(object) != IS_OBJECT &&
-	    Z_TYPE_P(object) != IS_STRING &&
-	    Z_TYPE_P(object) != IS_UNICODE) {
+		Z_TYPE_P(object) != IS_STRING &&
+		Z_TYPE_P(object) != IS_UNICODE
+	) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument is not an object or class name");
 		RETURN_FALSE;
 	}
@@ -5123,12 +5117,12 @@ PHP_FUNCTION(call_user_method_array)
 	method_args = (zval ***) safe_emalloc(sizeof(zval **), num_elems, 0);
 
 	for (zend_hash_internal_pointer_reset(params_ar);
-		 zend_hash_get_current_data(params_ar, (void **) &(method_args[element])) == SUCCESS;
-		 zend_hash_move_forward(params_ar)
-		) {
+		zend_hash_get_current_data(params_ar, (void **) &(method_args[element])) == SUCCESS;
+		zend_hash_move_forward(params_ar)
+	) {
 		element++;
 	}
-	
+
 	if (call_user_function_ex(EG(function_table), &object, callback, &retval_ptr, num_elems, method_args, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
@@ -5170,18 +5164,18 @@ static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_fun
 		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %R() - function does not exist", Z_TYPE(function_name), Z_UNIVAL(function_name));
 		zval_dtor(&function_name);
 		return 0;
-	} 
+	}
 	zval_dtor(&function_name);
-	
+
 	if (call_user_function(EG(function_table), NULL,
 				shutdown_function_entry->arguments[0],
-				&retval, 
+				&retval,
 				shutdown_function_entry->arg_count - 1,
-				shutdown_function_entry->arguments + 1 
+				shutdown_function_entry->arguments + 1
 				TSRMLS_CC ) == SUCCESS)
 	{
 		zval_dtor(&retval);
-	} 
+	}
 	return 0;
 }
 /* }}} */
@@ -5190,13 +5184,13 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe TSRMLS_DC)
 {
 	zval retval;
 	zval *function = tick_fe->arguments[0];
-	
+
 	/* Prevent reentrant calls to the same user ticks function */
 	if (! tick_fe->calling) {
 		tick_fe->calling = 1;
 
-		if (call_user_function(	EG(function_table), NULL, 
-								function, 
+		if (call_user_function(	EG(function_table), NULL,
+								function,
 								&retval,
 								tick_fe->arg_count - 1,
 								tick_fe->arguments+1
@@ -5208,7 +5202,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe TSRMLS_DC)
 
 			if (Z_TYPE_P(function) == IS_STRING || Z_TYPE_P(function) == IS_UNICODE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R() - function does not exist", Z_TYPE_P(function), Z_UNIVAL_P(function));
-			} else if (	Z_TYPE_P(function) == IS_ARRAY 
+			} else if (	Z_TYPE_P(function) == IS_ARRAY
 						&& zend_hash_index_find(Z_ARRVAL_P(function), 0, (void **) &obj) == SUCCESS
 						&& zend_hash_index_find(Z_ARRVAL_P(function), 1, (void **) &method) == SUCCESS
 						&& Z_TYPE_PP(obj) == IS_OBJECT
@@ -5218,7 +5212,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe TSRMLS_DC)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call tick function");
 			}
 		}
-	
+
 		tick_fe->calling = 0;
 	}
 }
@@ -5303,7 +5297,7 @@ PHP_FUNCTION(register_shutdown_function)
 		efree(shutdown_function_entry.arguments);
 		RETURN_FALSE;
 	}
-	
+
 	/* Prevent entering of anything but valid callback (syntax check only!) */
 	if (!zend_is_callable(shutdown_function_entry.arguments[0], 0, &function_name)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%R' passed", Z_TYPE(function_name), Z_UNIVAL(function_name));
@@ -5424,14 +5418,13 @@ PHP_FUNCTION(php_strip_whitespace)
 	}
 
 	zend_strip(TSRMLS_C);
-	
+
 	zend_destroy_file_handle(&file_handle TSRMLS_CC);
 	if (filename_type == IS_UNICODE) {
 		/* Note to next person looking at this function.
 		 * Don't try to be clever by saying:
 		 * file_handle.free_filename = (filename_type == IS_UNICODE)
-		 * It won't work the way you think --Sara
-		 */
+		 * It won't work the way you think --Sara */
 		efree(filename);
 	}
 
@@ -5477,7 +5470,7 @@ PHP_FUNCTION(highlight_string)
 		efree(hicompiled_string_description);
 		EG(error_reporting) = old_error_reporting;
 		if (i) {
-			php_output_end(TSRMLS_C); 
+			php_output_end(TSRMLS_C);
 		}
 		RETURN_FALSE;
 	}
@@ -5526,10 +5519,10 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 		return 0;
 	}
 
-	if (hash_key->nKeyLength == 0 || 
-	    hash_key->type != IS_STRING ||
-	    hash_key->arKey.s[0] != 0) {
-
+	if (hash_key->nKeyLength == 0 ||
+		hash_key->type != IS_STRING ||
+		hash_key->arKey.s[0] != 0
+	) {
 		MAKE_STD_ZVAL(option);
 		array_init(option);
 
@@ -5562,7 +5555,7 @@ PHP_FUNCTION(ini_get_all)
 	char *extname = NULL;
 	int extname_len = 0, extnumber = 0;
 	zend_module_entry *module;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &extname, &extname_len, UG(ascii_conv)) == FAILURE) {
 		return;
 	}
@@ -5587,7 +5580,7 @@ static int php_ini_check_path(char *option_name, int option_len, char *new_optio
 	if ( option_len != (new_option_len-1) ) {
 		return 0;
 	}
-	
+
 	return !strncmp(option_name, new_option_name, option_len);
 }
 /* }}} */
@@ -5602,9 +5595,7 @@ PHP_FUNCTION(ini_set)
 	zend_uchar type;
 	char *old_value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&t",
-							  &varname, &varname_len, UG(utf8_conv),
-							  &new_value, &new_value_len, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&t", &varname, &varname_len, UG(utf8_conv), &new_value, &new_value_len, &type) == FAILURE) {
 		return;
 	}
 
@@ -5618,8 +5609,8 @@ PHP_FUNCTION(ini_set)
 	}
 
 #define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, var_len, ini, sizeof(ini))
-	
-	/* basedir check */
+
+	/* open_basedir check */
 	if (PG(open_basedir)) {
 		char *path = NULL;
 		int path_len;
@@ -5629,7 +5620,7 @@ PHP_FUNCTION(ini_set)
 			_CHECK_PATH(varname, varname_len, "java.home") ||
 			_CHECK_PATH(varname, varname_len, "java.library.path") ||
 			_CHECK_PATH(varname, varname_len, "vpopmail.directory")) {
-			
+
 			/* convert to filesystem encoding to check against open_basedir */
 			if (type == IS_UNICODE) {
 				if (FAILURE == php_stream_path_encode(NULL, &path, &path_len, new_value.u, new_value_len, REPORT_ERRORS, FG(default_context))) {
@@ -5650,7 +5641,7 @@ PHP_FUNCTION(ini_set)
 				efree(path);
 			}
 		}
-	}	
+	}
 
 	/* now convert to UTF-8 for the INI system */
 	if (type == IS_UNICODE) {
@@ -5711,12 +5702,10 @@ PHP_FUNCTION(set_include_path)
 		RETVAL_FALSE;
 	}
 
-	/*
-	 * We always want to convert IS_UNICODE to UTF-8 and pass to INI subsystem.
+	/* We always want to convert IS_UNICODE to UTF-8 and pass to INI subsystem.
 	 * For binary strings, however, we want to convert only if UG(unicode) is
 	 * on, in which case we check whether filesystem encoding is already UTF-8,
-	 * and if it's not, we convert from that to UTF-8.
-	 */
+	 * and if it's not, we convert from that to UTF-8. */
 	if (type == IS_UNICODE) {
 		zend_unicode_to_string(UG(utf8_conv), &temp, &temp_len, new_value.u, new_value_len TSRMLS_CC);
 		new_value.s = temp;
@@ -5726,8 +5715,7 @@ PHP_FUNCTION(set_include_path)
 		UErrorCode status = U_ZERO_ERROR;
 
 		if (ucnv_getType(ZEND_U_CONVERTER(UG(filesystem_encoding_conv))) != UCNV_UTF8) {
-			zend_convert_encodings(UG(utf8_conv), ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
-								   &temp, &temp_len, new_value.s, new_value_len, &status);
+			zend_convert_encodings(UG(utf8_conv), ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &temp, &temp_len, new_value.s, new_value_len, &status);
 			if (U_FAILURE(status)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not convert path parameter from filesystem encoding to UTF-8");
 				zval_dtor(return_value);
@@ -5754,15 +5742,18 @@ PHP_FUNCTION(set_include_path)
    Get the current include_path configuration option */
 PHP_FUNCTION(get_include_path)
 {
-    char *str;
+	char *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
+	
 	str = zend_ini_string("include_path", sizeof("include_path"), 0);
+	
 	if (str == NULL) {
 		RETURN_FALSE;
 	}
+
 	RETURN_UTF8_STRING(str, ZSTR_DUPLICATE);
 }
 /* }}} */
@@ -5788,7 +5779,7 @@ PHP_FUNCTION(print_r)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &var, &do_return) == FAILURE) {
 		RETURN_FALSE;
 	}
-	
+
 	if (do_return) {
 		php_output_start_default(TSRMLS_C);
 	}
@@ -5828,11 +5819,11 @@ PHP_FUNCTION(ignore_user_abort)
 	int arg_len;
 	int old_setting;
 
-	old_setting = PG(ignore_user_abort);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &arg, &arg_len,
-							  UG(ascii_conv)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &arg, &arg_len, UG(ascii_conv)) == FAILURE) {
 		return;
 	}
+
+	old_setting = PG(ignore_user_abort);
 
 	if (arg) {
 		zend_alter_ini_entry_ex("ignore_user_abort", sizeof("ignore_user_abort"), arg, arg_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
@@ -5851,8 +5842,7 @@ PHP_FUNCTION(getservbyname)
 	int name_len, proto_len;
 	struct servent *serv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &name, &name_len,
-							  UG(ascii_conv), &proto, &proto_len, UG(ascii_conv)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &name, &name_len, UG(ascii_conv), &proto, &proto_len, UG(ascii_conv)) == FAILURE) {
 		return;
 	}
 
@@ -5861,7 +5851,7 @@ PHP_FUNCTION(getservbyname)
 	if (serv == NULL) {
 		RETURN_FALSE;
 	}
-	
+
 	RETURN_LONG(ntohs(serv->s_port));
 }
 /* }}} */
@@ -5877,8 +5867,7 @@ PHP_FUNCTION(getservbyport)
 	long port;
 	struct servent *serv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls&", &port, &proto,
-							  &proto_len, UG(ascii_conv)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls&", &port, &proto, &proto_len, UG(ascii_conv)) == FAILURE) {
 		return;
 	}
 
@@ -5887,7 +5876,7 @@ PHP_FUNCTION(getservbyport)
 	if (serv == NULL) {
 		RETURN_FALSE;
 	}
-	
+
 	RETURN_ASCII_STRING(serv->s_name, 1);
 }
 /* }}} */
@@ -5902,8 +5891,7 @@ PHP_FUNCTION(getprotobyname)
 	int name_len;
 	struct protoent *ent;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &name, &name_len,
-							  UG(ascii_conv)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &name, &name_len, UG(ascii_conv)) == FAILURE) {
 		return;
 	}
 
@@ -5998,11 +5986,11 @@ PHP_FUNCTION(unregister_tick_function)
 	if (!BG(user_tick_functions)) {
 		return;
 	}
-	
+
 	if (Z_TYPE_P(function) != IS_ARRAY) {
 		convert_to_text(function);
 	}
-	
+
 	tick_fe.arguments = (zval **) emalloc(sizeof(zval *));
 	tick_fe.arguments[0] = function;
 	tick_fe.arg_count = 1;
@@ -6027,10 +6015,8 @@ PHP_FUNCTION(is_uploaded_file)
 		return;
 	}
 
-	/*
-	 * The filenames are stored as IS_UNICODE or IS_STRING in the hash, not
-	 * using filesytem_encoding.
-	 */
+	/* The filenames are stored as IS_UNICODE or IS_STRING in the hash, not
+	 * using filesytem_encoding. */
 	if (zend_u_hash_exists(SG(rfc1867_uploaded_files), type, path, path_len+1)) {
 		RETURN_TRUE;
 	} else {
@@ -6265,7 +6251,7 @@ PHP_FUNCTION(parse_ini_file)
 	} else {
 		ini_parser_cb = (zend_ini_parser_cb_t) php_simple_ini_parser_cb;
 	}
-	
+
 	/* Setup filehandle */
 	memset(&fh, 0, sizeof(fh));
 	fh.filename = filename;
@@ -6306,7 +6292,7 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 	if (!prefix_len && !hash_key->nKeyLength) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric key detected - possible security hazard");
 		return 0;
-	} 
+	}
 
 	if (hash_key->nKeyLength) {
 		php_prefix_varname(&new_key, prefix, hash_key->arKey, hash_key->nKeyLength-1, hash_key->type, 0 TSRMLS_CC);
@@ -6357,12 +6343,12 @@ PHP_FUNCTION(import_request_variables)
 
 	for (p = types; p && *p; p++) {
 		switch (*p) {
-	
+
 			case 'g':
 			case 'G':
 				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (apply_func_args_t) copy_request_variable, 1, prefix);
 				break;
-	
+
 			case 'p':
 			case 'P':
 				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (apply_func_args_t) copy_request_variable, 1, prefix);
@@ -6400,7 +6386,6 @@ PHP_FUNCTION(sys_getloadavg)
 }
 /* }}} */
 #endif
-
 
 /*
  * Local variables:
