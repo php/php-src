@@ -1,3 +1,134 @@
+2007-09-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend.h
+      zend_API.c
+      zend_API.c
+      zend_API.h
+      zend_API.h
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_exceptions.c
+      zend_exceptions.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_hash.c
+      zend_hash.c
+      zend_hash.h
+      zend_hash.h
+      zend_ini.c
+      zend_ini.c
+      zend_ini.h
+      zend_ini.h
+      zend_interfaces.c
+      zend_interfaces.c
+      zend_modules.h
+      zend_modules.h
+      zend_opcode.c:
+      Improved memory usage by movig constants to read only memory. (Dmitry,
+      Pierre)
+
+2007-09-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini.c
+      zend_ini.c:
+      
+      MFB: Fixed coverity issue #470 Unitialized integer value used inside
+      zend_ini_boolean_displayer_cb
+
+    * (PHP_5_3)
+      zend_ini.c:
+      Fixed coverity issue #470 Unitialized integer value used inside
+      zend_ini_boolean_displayer_cb
+
+2007-09-27  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      zend_ini.c:
+      MFH:- Fixed bug #42657 (ini_get() returns incorrect value when default is
+      NULL)
+
+    * zend_ini.c:
+      - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL)
+
+    * zend_ini.c:
+      BC
+
+    * (PHP_5_3)
+      zend_ini.c
+      zend_ini.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      MFH: Nuked unnecessary TSRMLS_FETCH() call
+
+    * zend_ini.c
+      zend_ini.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Nuked unnecessary TSRMLS_FETCH().
+
+    * zend_ini.c:
+      MFB52:
+      ---8<---
+      revision 1.39.2.2.2.10
+      date: 2007/06/17 14:31:12;  author: iliaa;  state: Exp;  lines: +22 -15
+      
+      Fixed zend_alter_ini_entry() memory_limit interruption vulnerability.
+      ---8<---
+      
+      Last part of the missing fix only committed to PHP_5_2 branch.
+
+    * (PHP_5_3)
+      zend_ini.c:
+      MFH: missing folding tag + use Z_STR* macros
+
+    * (PHP_5_2)
+      zend_ini.c:
+      missing folding tag
+
+    * zend_ini.c:
+      MFB: Missing part of some fix (by Ilia)
+
+    * (PHP_5_3)
+      zend_ini.c:
+      last ws
+
+    * (PHP_5_3)
+      zend_ini.c:
+      ws
+
+    * (PHP_5_2)
+      zend_ini.c:
+      MFH: ws + cs (to keep in sync with HEAD/PHP_5_3 only!)
+
+    * zend_ini.c:
+      ws + cs (more to follow)
+
+2007-09-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_3)
+      zend.h:
+      Bump version.
+
+2007-09-27  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      zend_language_parser.y:
+      - Readd support for ynamic access of static members (Etienne)
+
+2007-06-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_ini.c:
+      
+      Fixed zend_alter_ini_entry() memory_limit interruption vulnerability.
+      ---8<---
+      
+      Last part of the missing fix only committed to PHP_5_2 branch.
+
 2007-09-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_highlight.c
