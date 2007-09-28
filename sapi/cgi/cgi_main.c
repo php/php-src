@@ -152,7 +152,29 @@ typedef struct _php_cgi_globals_struct {
 #ifdef PHP_WIN32
 	zend_bool impersonate;
 #endif
+	HashTable user_config_cache;
 } php_cgi_globals_struct;
+
+/* {{{ user_config_cache
+ *
+ * Key for each cache entry is dirname(PATH_TRANSLATED).
+ * 
+ * NOTE: Each cache entry config_hash contains the combination from all user ini files found in
+ *       the path starting from doc_root throught to dirname(PATH_TRANSLATED).  There is no point
+ *       storing per-file entries as it would not be possible to detect added / deleted entries
+ *       between separate files.
+ */
+typedef struct _user_config_cache_entry {
+	time_t expires;
+	HashTable *user_config;
+} user_config_cache_entry;
+
+static void user_config_cache_entry_dtor(user_config_cache_entry *entry) /* {{{ */
+{
+	zend_hash_destroy(entry->user_config);
+	free(entry->user_config);
+}
+/* }}} */
 
 #ifdef ZTS
 static int php_cgi_globals_id;
@@ -563,12 +585,96 @@ static void sapi_cgi_log_message(char *message)
 	}
 }
 
+/* {{{ php_cgi_ini_activate_user_config
+ */
+static void php_cgi_ini_activate_user_config(char *path, int path_len, int start TSRMLS_DC)
+{
+	char *ptr;
+	user_config_cache_entry *new_entry, *entry;
+	time_t request_time = sapi_get_request_time(TSRMLS_C);
+
+	/* Find cached config entry: If not found, create one */
+	if (zend_hash_find(&CGIG(user_config_cache), path, path_len + 1, (void **) &entry) == FAILURE) {
+		new_entry = pemalloc(sizeof(user_config_cache_entry), 1);
+		new_entry->expires = 0;
+		new_entry->user_config = (HashTable *) pemalloc(sizeof(HashTable), 1);
+		zend_hash_init(new_entry->user_config, 0, NULL, (dtor_func_t) config_zval_dtor, 1);
+		zend_hash_update(&CGIG(user_config_cache), path, path_len + 1, new_entry, sizeof(user_config_cache_entry), (void **) &entry);
+		free(new_entry);
+	}
+
+	/* Check whether cache entry has expired and rescan if it is */
+	if (request_time > entry->expires) {
+
+		/* Clear the expired config */
+		zend_hash_clean(entry->user_config);
+
+		/* Walk through each directory and apply entries to user_config hash */
+		ptr = path + start; /* start is the point where doc_root ends! */
+		while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
+			*ptr = 0;
+			php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config TSRMLS_CC);
+			*ptr = '/';
+			ptr++;
+		}
+		entry->expires = request_time + PG(user_ini_cache_ttl);
+	}
+
+	/* Activate ini entries with values from the user config hash */
+	php_ini_activate_config(entry->user_config, PHP_INI_PERDIR, PHP_INI_STAGE_HTACCESS TSRMLS_CC);
+}
+/* }}} */
+
+static int sapi_cgi_activate(TSRMLS_D)
+{
+	char *path, *doc_root;
+	uint path_len, doc_root_len;
+
+	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
+	if (!SG(request_info).path_translated) {
+		return FAILURE;
+	}
+
+	doc_root = sapi_cgibin_getenv("DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT") - 1 TSRMLS_CC);
+
+	/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
+	if (!doc_root) {
+		return FAILURE;
+	}
+	doc_root_len = strlen(doc_root);
+	if (doc_root[doc_root_len - 1] == '/') {
+		--doc_root_len;
+	}
+
+	/* Prepare search path */
+	path_len = strlen(SG(request_info).path_translated);
+	path = zend_strndup(SG(request_info).path_translated, path_len);
+	php_dirname(path, path_len);
+	path_len = strlen(path);
+
+	/* Make sure we have trailing slash! */
+	if (!IS_SLASH(path[path_len])) {
+		path[path_len++] = DEFAULT_SLASH;
+	}
+	path[path_len] = 0;
+
+	/* Activate per-dir-system-configuration defined in php.ini and stored into configuration_hash during startup */
+	php_ini_activate_per_dir_config(path, path_len TSRMLS_CC); /* Note: for global settings sake we check from root to path */
+
+	/* Load and activate user ini files in path starting from DOCUMENT_ROOT */
+	if (strlen(PG(user_ini_filename))) {
+		php_cgi_ini_activate_user_config(path, path_len, doc_root_len - 1 TSRMLS_CC);
+	}
+
+	free(path);
+	return SUCCESS;
+}
+
 static int sapi_cgi_deactivate(TSRMLS_D)
 {
 	/* flush only when SAPI was started. The reasons are:
 		1. SAPI Deactivate is called from two places: module init and request shutdown
-		2. When the first call occurs and the request is not set up, flush fails on
-			FastCGI.
+		2. When the first call occurs and the request is not set up, flush fails on FastCGI.
 	*/
 	if (SG(sapi_started)) {
 		sapi_cgibin_flush(SG(server_context));
@@ -584,7 +690,6 @@ static int php_cgi_startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
-
 /* {{{ sapi_module_struct cgi_sapi_module
  */
 static sapi_module_struct cgi_sapi_module = {
@@ -594,7 +699,7 @@ static sapi_module_struct cgi_sapi_module = {
 	php_cgi_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
-	NULL,							/* activate */
+	sapi_cgi_activate,				/* activate */
 	sapi_cgi_deactivate,			/* deactivate */
 
 	sapi_cgibin_ub_write,			/* unbuffered write */
@@ -1081,6 +1186,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals TSRMLS_
 #ifdef PHP_WIN32
 	php_cgi_globals->impersonate = 0;
 #endif
+	zend_hash_init(&php_cgi_globals->user_config_cache, 0, NULL, (dtor_func_t) user_config_cache_entry_dtor, 1);
 }
 /* }}} */
 
@@ -1102,6 +1208,8 @@ static PHP_MINIT_FUNCTION(cgi)
  */
 static PHP_MSHUTDOWN_FUNCTION(cgi)
 {
+	zend_hash_destroy(&CGIG(user_config_cache));
+
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }

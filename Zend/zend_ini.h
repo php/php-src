@@ -164,7 +164,6 @@ END_EXTERN_C()
 #define INI_ORIG_STR(name)	zend_ini_string((name), sizeof(name), 1)
 #define INI_ORIG_BOOL(name) ((zend_bool) INI_ORIG_INT(name))
 
-
 #define REGISTER_INI_ENTRIES() zend_register_ini_entries(ini_entries, module_number TSRMLS_CC)
 #define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries(module_number TSRMLS_CC)
 #define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
@@ -194,15 +193,16 @@ END_EXTERN_C()
 #define ZEND_INI_STAGE_HTACCESS		(1<<5)
 
 /* INI parsing engine */
-typedef void (*zend_ini_parser_cb_t)(zval *arg1, zval *arg2, int callback_type, void *arg);
+typedef void (*zend_ini_parser_cb_t)(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg TSRMLS_DC);
 BEGIN_EXTERN_C()
-ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_ini_parser_cb_t ini_parser_cb, void *arg);
-ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, zend_ini_parser_cb_t ini_parser_cb, void *arg);
+ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg TSRMLS_DC);
+ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg TSRMLS_DC);
 END_EXTERN_C()
 
-#define ZEND_INI_PARSER_ENTRY	1
-#define ZEND_INI_PARSER_SECTION	2
-#define ZEND_INI_PARSER_POP_ENTRY	3
+/* INI entries */
+#define ZEND_INI_PARSER_ENTRY     1 /* Normal entry: foo = bar */
+#define ZEND_INI_PARSER_SECTION	  2 /* Section: [foobar] */
+#define ZEND_INI_PARSER_POP_ENTRY 3 /* Offset entry: foo[] = bar */
 
 typedef struct _zend_ini_parser_param {
 	zend_ini_parser_cb_t ini_parser_cb;

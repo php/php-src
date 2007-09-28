@@ -24,10 +24,12 @@
 #include "php_string.h"
 #include "ext/ereg/php_regex.h"
 
+#include "zend_ini_scanner.h"
 #include "zend_globals.h"
 
 static HashTable browser_hash;
 static zval *current_section;
+static zval *current_section_name;
 
 #define DEFAULT_SECTION_NAME "Default Browser Capability Settings"
 
@@ -85,7 +87,7 @@ static void convert_browscap_pattern(zval *pattern) /* {{{ */
 }
 /* }}} */
 
-static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, void *arg) /* {{{ */
+static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg TSRMLS_DC) /* {{{ */
 {
 	if (!arg1) {
 		return;
@@ -97,12 +99,37 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 				zval *new_property;
 				char *new_key;
 
+				/* parent entry can not be same as current section -> causes infinite loop! */
+				if (!strcasecmp(Z_STRVAL_P(arg1), "parent") &&
+					!strcasecmp(current_section_name, Z_STRVAL_P(arg2))
+				) {
+					zend_error(E_CORE_ERROR, "Invalid browscap ini file: 'Parent' value can not be same as the section name: %s (in file %s)", current_section_name, INI_STR("browscap"));
+					return;
+				}
+
 				new_property = (zval *) pemalloc(sizeof(zval), 1);
 				INIT_PZVAL(new_property);
-				Z_STRVAL_P(new_property) = zend_strndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
-				Z_STRLEN_P(new_property) = Z_STRLEN_P(arg2);
 				Z_TYPE_P(new_property) = IS_STRING;
 
+				/* Set proper value for true/false settings */
+				if ((Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "on", sizeof("on") - 1)) ||
+					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
+					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
+				) {
+					Z_STRVAL_P(new_property) = zend_strndup("1", 1);
+					Z_STRLEN_P(new_property) = 1;
+				} else if (
+					(Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
+					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
+					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "none", sizeof("none") - 1)) ||
+					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
+				) {
+					Z_STRVAL_P(new_property) = zend_strndup("", 0);
+					Z_STRLEN_P(new_property) = 0;
+				} else { /* Other than true/false setting */
+					Z_STRVAL_P(new_property) = zend_strndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
+					Z_STRLEN_P(new_property) = Z_STRLEN_P(arg2);
+				}
 				new_key = zend_strndup(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				zend_str_tolower(new_key, Z_STRLEN_P(arg1));
 				zend_hash_update(Z_ARRVAL_P(current_section), new_key, Z_STRLEN_P(arg1)+1, &new_property, sizeof(zval *), NULL);
@@ -124,8 +151,10 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 
 				section_properties = (HashTable *) pemalloc(sizeof(HashTable), 1);
 				zend_hash_init(section_properties, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1);
-				current_section->value.ht = section_properties;
-				current_section->type = IS_ARRAY;
+				Z_ARRVAL_P(current_section) = section_properties;
+				Z_TYPE_P(current_section) = IS_ARRAY;
+				current_section_name = zend_strndup(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
+				
 				zend_hash_update(&browser_hash, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, (void *) &current_section, sizeof(zval *), NULL);
 
 				Z_STRVAL_P(processed) = Z_STRVAL_P(arg1);
@@ -166,7 +195,7 @@ PHP_MINIT_FUNCTION(browscap) /* {{{ */
 		}
 		fh.filename = browscap;
 		Z_TYPE(fh) = ZEND_HANDLE_FP;
-		zend_parse_ini_file(&fh, 1, (zend_ini_parser_cb_t) php_browscap_parser_cb, &browser_hash);
+		zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_RAW, (zend_ini_parser_cb_t) php_browscap_parser_cb, &browser_hash TSRMLS_CC);
 	}
 
 	return SUCCESS;

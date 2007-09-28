@@ -1,0 +1,106 @@
+[basic]
+basicval = bar
+longval  = 12345
+with.dot = fooobar
+boolon = on
+booltrue = true
+boolyes = yes
+booloff = off
+boolfalse = false
+boolnone = none
+boolno = no
+string = asdadfsdjkslkj ¡@£$$ { }[ ]/%#¤
+sqstring = 'adsasdadasdasd'
+dqstring = "asdadfsdjkslkj ¡@£$$ { } !^~|¥¥{[()/)&/% ¤ # #"
+php_constant = E_ALL
+
+[basic with whitespace]
+basicval = 	 	 bar	 	 	 	
+longval  = 	 	 	12345 	 		 	
+with.dot = 	 	 	fooobar	 	 	
+boolon = 	  	on	 	 		 
+booltrue = 	 	 true	 		 	 
+boolyes =		 	  yes	 	 	 
+booloff =	 	  off	 	 		 
+boolfalse =  	 	 false	 		 
+boolnone = 	 	 none	 		 
+boolno =	 	  no	 		 
+sqstring = 	 	 'adsasdadasdasd'	 	 
+dqstring = 	 	 		 "asdadfsdjkslkj ¡@£$$€¥¥{[()/)&/%#¤"	 	 	
+php_constant =  	 	 E_ALL	 		 
+
+[comments]
+; some comment
+  	; some comment with whitespace  	 
+somecomment = comment follows;aaa@bbb ; comment here
+;
+
+[variables]
+var1 = ${basicval}
+var2 = ${basicval}/foo
+var3 = foo/${basicval}
+var4 = foo/${basicval}/foo
+quoted_var1 = "${basicqval}"
+quoted_var2 = "${basicqval}/foo"
+quoted_var3 = "foo/${basicqval}"
+quoted_var4 = "foo/${basicqval}/foo"
+
+[offset values]
+foo1[] = "basic offset 1"
+foo1[ 	] = "basic offset 2"
+foo2[123] = "long offset"
+foo3[abc] = "string offset"
+foo4[""] = "quoted offset 1"
+foo4[" "] = "quoted offset 2"
+foo4["sqfoobar"] = "quoted string offset"
+foo4['dqfoobar'] = "single quoted offset"
+foo6[${basicval}] = "variable"
+foo6[${basicval}/foo] = "variable with string 1"
+foo6[foo/${basicval}] = "variable with string 2"
+foo6[foo/${basicval}/foo] = "variable with string 3"
+foo7["${basicqval}"] = "quoted variable 1"
+foo7["${basicqval}/foo"] = "quoted variable 2"
+foo7["foo/${basicqval}"] = "quoted variable 3"
+foo7[ "foo/${basicqval}/foo" ] = "quoted variable 4"
+
+[non value]
+novalue_option1	 	  =   		
+novalue_option2= 	 	 	
+novalue_option3		  =
+novalue_option4=
+novalue_option4[] 		 =
+novalue_option4[]= 	 	 
+novalue_option4[]=
+
+["Quoted strings and variables in sections"]
+
+[${basicval}]
+[${basicval}/foo]
+[foo/${basicval}]
+[foo/${basicval}/foo]
+
+["${basicqval}"]
+["${basicqval}/foo"]
+["foo/${basicqval}"]
+["foo/${basicqval}/foo"]
+
+[PATH=${basicval}/no/quotes]
+; Invalid!
+;[PATH="${basicval}/path/quoted"]
+["PATH=${basicval}/all/quoted"]
+
+; The rest is from bug #29306
+[01]
+e=e
+f=f
+[02]
+g=g
+h=h
+[1]
+a=a
+b=b
+[2]
+c=c
+d=d
+[0815]
+bla=bla
