@@ -101,6 +101,18 @@
 ;     since short tags may not be supported on the target server.
 
 ;;;;;;;;;;;;;;;;;;;;
+; php.ini Options  ;
+;;;;;;;;;;;;;;;;;;;;
+; Name for user-defined php.ini (.htaccess) files. Default is ".user.ini"
+;user_ini.filename = ".user.ini"
+
+; To disable this feature set this option to empty value
+;user_ini.filename =
+
+; TTL for user-defined php.ini files (time-to-live) in seconds. Default is 300 seconds (5 minutes)
+;user_ini.cache_ttl = 300
+
+;;;;;;;;;;;;;;;;;;;;
 ; Language Options ;
 ;;;;;;;;;;;;;;;;;;;;
 

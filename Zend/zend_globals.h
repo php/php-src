@@ -268,6 +268,9 @@ struct _zend_scanner_globals {
 	zend_bool encoding_checked;
 	char* rest_str;
 	int rest_len;
+
+	/* For ini scanner. Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW */
+	int scanner_mode;
 };
 
 struct _zend_unicode_globals {

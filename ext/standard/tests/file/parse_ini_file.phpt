@@ -50,98 +50,98 @@ Hex_Value2 = 0x103
 
 [Non-alphanumerics_as_values]
 ;Non-alpha numeric chars without quotes
-Non-alpha1 = ;
-Non-alpha2 = +
-Non-alpha3 = *
-Non-alpha4 = %
-Non-alpha5 = <>
-Non-alpha6 = @
-Non-alpha7 = #
-Non-alpha8 = ^
-non-alpha9 = -
-Non-alpha10 = :
-Non-alpha11 = ?
-Non-alpha12 = /
-Non-alpha13 = \
+Non_alpha1 = ;
+Non_alpha2 = +
+Non_alpha3 = *
+Non_alpha4 = %
+Non_alpha5 = <>
+Non_alpha6 = @
+Non_alpha7 = #
+Non_alpha8 = ^
+Non_alpha9 = -
+Non_alpha10 = :
+Non_alpha11 = ?
+Non_alpha12 = /
+Non_alpha13 = \
 ;These chars have a special meaning when used in the value,
 ;  hence parser throws an error
-;Non-alpha14 = & 
-;Non-alpha15 = {}
-;Non-alpha16 = |
-;Non-alpha17 = ~
-;Non-alpha18 = !
-;Non-alpha19 = $
-;Non-alpha20 = () 
+;Non_alpha14 = & 
+;Non_alpha15 = {}
+;Non_alpha16 = |
+;Non_alpha17 = ~
+;Non_alpha18 = !
+;Non_alpha19 = $
+;Non_alpha20 = () 
 
-Non-alpha1_quotes = ";"
-Non-alpha2_quotes = "+"
-Non-alpha3_quotes = "*"
-Non-alpha4_quotes = "%"
-Non-alpha5_quotes = "<>"
-Non-alpha6_quotes = "@"
-Non-alpha7_quotes = "#"
-Non-alpha8_quotes = "^"
-Non-alpha9_quotes = "-"
-Non-alpha10_quotes = "="
-Non-alpha11_quotes = ":"
-Non-alpha12_quotes = "?"
-Non-alpha13_quotes = "/"
-Non-alpha14_quotes = "\"
-Non-alpha15_quotes = "&"
-Non-alpha16_quotes = "{}"
-Non-alpha17_quotes = "|"
-Non-alpha18_quotes = "~"
-Non-alpha19_quotes = "!"
-non-alpha20_quotes = "$"
-non-alpha21_quotes = "()"
+Non_alpha1_quotes = ";"
+Non_alpha2_quotes = "+"
+Non_alpha3_quotes = "*"
+Non_alpha4_quotes = "%"
+Non_alpha5_quotes = "<>"
+Non_alpha6_quotes = "@"
+Non_alpha7_quotes = "#"
+Non_alpha8_quotes = "^"
+Non_alpha9_quotes = "-"
+Non_alpha10_quotes = "="
+Non_alpha11_quotes = ":"
+Non_alpha12_quotes = "?"
+Non_alpha13_quotes = "/"
+;Non_alpha14_quotes = "\"
+Non_alpha15_quotes = "&"
+Non_alpha16_quotes = "{}"
+Non_alpha17_quotes = "|"
+Non_alpha18_quotes = "~"
+Non_alpha19_quotes = "!"
+;Non_alpha20_quotes = "$"
+Non_alpha21_quotes = "()"
 
 [Non-alpha numerics in strings]
 ;expected error, as the non-alphanumeric chars not enclosed in double quotes("")
-Non-alpha_string1 = Hello@world
-;Non-alpha_string2 = Hello!world
-;Non-alpha_string3 = Hello#world
-;Non-alpha_string4 = Hello%world
-;Non-alpha_string5 = Hello&world
-;Non-alpha_string6 = Hello*world
-;Non-alpha_string7 = Hello+world
-;Non-alpha_string8 = Hello-world
-;Non-alpha_string9 = Hello'world
-;Non-alpha_string10 = Hello:world
-;Non-alpha_string11 = Hello;world
-;Non-alpha_string12 = Hello<world
-;Non-alpha_string13 = Hello>world
-;Non-alpha_string14 = Hello>world
-;Non-alpha_string15 = Hello?world
-;Non-alpha_string16 = Hello\world
-;Non-alpha_string17 = Hello^world
-;Non-alpha_string18 = Hello_world
-;Non-alpha_string19 = Hello|world
-;Non-alpha_string20 = Hello~world
-;Non-alpha_string21 = Hello`world
-;Non-alpha_string22 = Hello(world)
+Non_alpha_string1 = Hello@world
+;Non_alpha_string2 = Hello!world
+;Non_alpha_string3 = Hello#world
+;Non_alpha_string4 = Hello%world
+;Non_alpha_string5 = Hello&world
+;Non_alpha_string6 = Hello*world
+;Non_alpha_string7 = Hello+world
+;Non_alpha_string8 = Hello-world
+;Non_alpha_string9 = Hello'world
+;Non_alpha_string10 = Hello:world
+;Non_alpha_string11 = Hello;world
+;Non_alpha_string12 = Hello<world
+;Non_alpha_string13 = Hello>world
+;Non_alpha_string14 = Hello>world
+;Non_alpha_string15 = Hello?world
+;Non_alpha_string16 = Hello\world
+;Non_alpha_string17 = Hello^world
+;Non_alpha_string18 = Hello_world
+;Non_alpha_string19 = Hello|world
+;Non_alpha_string20 = Hello~world
+;Non_alpha_string21 = Hello`world
+;Non_alpha_string22 = Hello(world)
 
 [Non-alpha numerics in strings -with quotes]
-Non-alpha_string1_quotes = "Hello@world"
-Non-alpha_string2_quotes = "Hello!world"
-Non-alpha_string3_quotes = "Hello#world"
-Non-alpha_string4_quotes = "Hello&world"
-Non-alpha_string5_quotes = "Hello*world"
-Non-alpha_string6_quotes = "Hello+world"
-Non-alpha_string7_quotes = "Hello-world"
-Non-alpha_string8_quotes = "Hello'world"
-Non-alpha_string9_quotes = "Hello:world"
-Non-alpha_string10_quotes = "Hello;world"
-Non-alpha_string11_quotes = "Hello<world"
-Non-alpha_string12_quotes = "Hello>world"
-Non-alpha_string13_quotes = "Hello>world"
-Non-alpha_string14_quotes = "Hello?world"
-Non-alpha_string15_quotes = "Hello\world"
-Non-alpha_string16_quotes = "Hello^world"
-Non-alpha_string17_quotes = "Hello_world"
-Non-alpha_string18_quotes = "Hello|world"
-Non-alpha_string19_quotes = "Hello~world"
-Non-alpha_string20_quotes = "Hello`world"
-Non-alpha_string21_quotes = "Hello(world)"
+Non_alpha_string1_quotes = "Hello@world"
+Non_alpha_string2_quotes = "Hello!world"
+Non_alpha_string3_quotes = "Hello#world"
+Non_alpha_string4_quotes = "Hello&world"
+Non_alpha_string5_quotes = "Hello*world"
+Non_alpha_string6_quotes = "Hello+world"
+Non_alpha_string7_quotes = "Hello-world"
+Non_alpha_string8_quotes = "Hello'world"
+Non_alpha_string9_quotes = "Hello:world"
+Non_alpha_string10_quotes = "Hello;world"
+Non_alpha_string11_quotes = "Hello<world"
+Non_alpha_string12_quotes = "Hello>world"
+Non_alpha_string13_quotes = "Hello>world"
+Non_alpha_string14_quotes = "Hello?world"
+Non_alpha_string15_quotes = "Hello\world"
+Non_alpha_string16_quotes = "Hello^world"
+Non_alpha_string17_quotes = "Hello_world"
+Non_alpha_string18_quotes = "Hello|world"
+Non_alpha_string19_quotes = "Hello~world"
+Non_alpha_string20_quotes = "Hello`world"
+Non_alpha_string21_quotes = "Hello(world)"
 
 [Newlines_in_Values]
 String1 = "Hello, world\nGood Morning"
@@ -150,7 +150,7 @@ String2 = "\nHello, world
 String3 = 'Hello, world\tGood Morning'
 String4 = "\n"
 String5 = "\n\n"
-String3 = Hello, world\tGood Morning
+String6 = Hello, world\tGood Morning
 
 [ReservedKeys_as_Values]
 Key1 = YES
@@ -242,74 +242,73 @@ Array
     [Octal_value] => 0100
     [Hex_value1] => 0x101
     [Hex_Value2] => 0x103
-    [Non-alpha1] => 
-    [Non-alpha2] => +
-    [Non-alpha3] => *
-    [Non-alpha4] => %
-    [Non-alpha5] => <>
-    [Non-alpha6] => @
-    [Non-alpha7] => #
-    [Non-alpha8] => ^
-    [non-alpha9] => -
-    [Non-alpha10] => :
-    [Non-alpha11] => ?
-    [Non-alpha12] => /
-    [Non-alpha13] => \
-    [Non-alpha1_quotes] => ;
-    [Non-alpha2_quotes] => +
-    [Non-alpha3_quotes] => *
-    [Non-alpha4_quotes] => %
-    [Non-alpha5_quotes] => <>
-    [Non-alpha6_quotes] => @
-    [Non-alpha7_quotes] => #
-    [Non-alpha8_quotes] => ^
-    [Non-alpha9_quotes] => -
-    [Non-alpha10_quotes] => =
-    [Non-alpha11_quotes] => :
-    [Non-alpha12_quotes] => ?
-    [Non-alpha13_quotes] => /
-    [Non-alpha14_quotes] => \
-    [Non-alpha15_quotes] => &
-    [Non-alpha16_quotes] => {}
-    [Non-alpha17_quotes] => |
-    [Non-alpha18_quotes] => ~
-    [Non-alpha19_quotes] => !
-    [non-alpha20_quotes] => $
-    [non-alpha21_quotes] => ()
-    [Non-alpha_string1] => Hello@world
-    [Non-alpha_string1_quotes] => Hello@world
-    [Non-alpha_string2_quotes] => Hello!world
-    [Non-alpha_string3_quotes] => Hello#world
-    [Non-alpha_string4_quotes] => Hello&world
-    [Non-alpha_string5_quotes] => Hello*world
-    [Non-alpha_string6_quotes] => Hello+world
-    [Non-alpha_string7_quotes] => Hello-world
-    [Non-alpha_string8_quotes] => Hello'world
-    [Non-alpha_string9_quotes] => Hello:world
-    [Non-alpha_string10_quotes] => Hello;world
-    [Non-alpha_string11_quotes] => Hello<world
-    [Non-alpha_string12_quotes] => Hello>world
-    [Non-alpha_string13_quotes] => Hello>world
-    [Non-alpha_string14_quotes] => Hello?world
-    [Non-alpha_string15_quotes] => Hello\world
-    [Non-alpha_string16_quotes] => Hello^world
-    [Non-alpha_string17_quotes] => Hello_world
-    [Non-alpha_string18_quotes] => Hello|world
-    [Non-alpha_string19_quotes] => Hello~world
-    [Non-alpha_string20_quotes] => Hello`world
-    [Non-alpha_string21_quotes] => Hello(world)
+    [Non_alpha1] => 
+    [Non_alpha2] => +
+    [Non_alpha3] => *
+    [Non_alpha4] => %
+    [Non_alpha5] => <>
+    [Non_alpha6] => @
+    [Non_alpha7] => #
+    [Non_alpha8] => ^
+    [Non_alpha9] => -
+    [Non_alpha10] => :
+    [Non_alpha11] => ?
+    [Non_alpha12] => /
+    [Non_alpha13] => \
+    [Non_alpha1_quotes] => ;
+    [Non_alpha2_quotes] => +
+    [Non_alpha3_quotes] => *
+    [Non_alpha4_quotes] => %
+    [Non_alpha5_quotes] => <>
+    [Non_alpha6_quotes] => @
+    [Non_alpha7_quotes] => #
+    [Non_alpha8_quotes] => ^
+    [Non_alpha9_quotes] => -
+    [Non_alpha10_quotes] => =
+    [Non_alpha11_quotes] => :
+    [Non_alpha12_quotes] => ?
+    [Non_alpha13_quotes] => /
+    [Non_alpha15_quotes] => &
+    [Non_alpha16_quotes] => {}
+    [Non_alpha17_quotes] => |
+    [Non_alpha18_quotes] => ~
+    [Non_alpha19_quotes] => !
+    [Non_alpha21_quotes] => ()
+    [Non_alpha_string1] => Hello@world
+    [Non_alpha_string1_quotes] => Hello@world
+    [Non_alpha_string2_quotes] => Hello!world
+    [Non_alpha_string3_quotes] => Hello#world
+    [Non_alpha_string4_quotes] => Hello&world
+    [Non_alpha_string5_quotes] => Hello*world
+    [Non_alpha_string6_quotes] => Hello+world
+    [Non_alpha_string7_quotes] => Hello-world
+    [Non_alpha_string8_quotes] => Hello'world
+    [Non_alpha_string9_quotes] => Hello:world
+    [Non_alpha_string10_quotes] => Hello;world
+    [Non_alpha_string11_quotes] => Hello<world
+    [Non_alpha_string12_quotes] => Hello>world
+    [Non_alpha_string13_quotes] => Hello>world
+    [Non_alpha_string14_quotes] => Hello?world
+    [Non_alpha_string15_quotes] => Hello\world
+    [Non_alpha_string16_quotes] => Hello^world
+    [Non_alpha_string17_quotes] => Hello_world
+    [Non_alpha_string18_quotes] => Hello|world
+    [Non_alpha_string19_quotes] => Hello~world
+    [Non_alpha_string20_quotes] => Hello`world
+    [Non_alpha_string21_quotes] => Hello(world)
     [String1] => Hello, world
 Good Morning
     [String2] => 
 Hello, world
              Good Morning
 
-    [String3] => Hello, worldGood Morning
+    [String3] => Hello, world	Good Morning
     [String4] => 
 
     [String5] => 
 
 
+    [String6] => Hello, world	Good Morning
     [Key1] => 1
     [Key2] => 1
     [Key3] => 1
@@ -379,70 +378,68 @@ Array
 
     [Non-alphanumerics_as_values] => Array
         (
-            [Non-alpha1] => 
-            [Non-alpha2] => +
-            [Non-alpha3] => *
-            [Non-alpha4] => %
-            [Non-alpha5] => <>
-            [Non-alpha6] => @
-            [Non-alpha7] => #
-            [Non-alpha8] => ^
-            [non-alpha9] => -
-            [Non-alpha10] => :
-            [Non-alpha11] => ?
-            [Non-alpha12] => /
-            [Non-alpha13] => \
-            [Non-alpha1_quotes] => ;
-            [Non-alpha2_quotes] => +
-            [Non-alpha3_quotes] => *
-            [Non-alpha4_quotes] => %
-            [Non-alpha5_quotes] => <>
-            [Non-alpha6_quotes] => @
-            [Non-alpha7_quotes] => #
-            [Non-alpha8_quotes] => ^
-            [Non-alpha9_quotes] => -
-            [Non-alpha10_quotes] => =
-            [Non-alpha11_quotes] => :
-            [Non-alpha12_quotes] => ?
-            [Non-alpha13_quotes] => /
-            [Non-alpha14_quotes] => \
-            [Non-alpha15_quotes] => &
-            [Non-alpha16_quotes] => {}
-            [Non-alpha17_quotes] => |
-            [Non-alpha18_quotes] => ~
-            [Non-alpha19_quotes] => !
-            [non-alpha20_quotes] => $
-            [non-alpha21_quotes] => ()
+            [Non_alpha1] => 
+            [Non_alpha2] => +
+            [Non_alpha3] => *
+            [Non_alpha4] => %
+            [Non_alpha5] => <>
+            [Non_alpha6] => @
+            [Non_alpha7] => #
+            [Non_alpha8] => ^
+            [Non_alpha9] => -
+            [Non_alpha10] => :
+            [Non_alpha11] => ?
+            [Non_alpha12] => /
+            [Non_alpha13] => \
+            [Non_alpha1_quotes] => ;
+            [Non_alpha2_quotes] => +
+            [Non_alpha3_quotes] => *
+            [Non_alpha4_quotes] => %
+            [Non_alpha5_quotes] => <>
+            [Non_alpha6_quotes] => @
+            [Non_alpha7_quotes] => #
+            [Non_alpha8_quotes] => ^
+            [Non_alpha9_quotes] => -
+            [Non_alpha10_quotes] => =
+            [Non_alpha11_quotes] => :
+            [Non_alpha12_quotes] => ?
+            [Non_alpha13_quotes] => /
+            [Non_alpha15_quotes] => &
+            [Non_alpha16_quotes] => {}
+            [Non_alpha17_quotes] => |
+            [Non_alpha18_quotes] => ~
+            [Non_alpha19_quotes] => !
+            [Non_alpha21_quotes] => ()
         )
 
     [Non-alpha numerics in strings] => Array
         (
-            [Non-alpha_string1] => Hello@world
+            [Non_alpha_string1] => Hello@world
         )
 
     [Non-alpha numerics in strings -with quotes] => Array
         (
-            [Non-alpha_string1_quotes] => Hello@world
-            [Non-alpha_string2_quotes] => Hello!world
-            [Non-alpha_string3_quotes] => Hello#world
-            [Non-alpha_string4_quotes] => Hello&world
-            [Non-alpha_string5_quotes] => Hello*world
-            [Non-alpha_string6_quotes] => Hello+world
-            [Non-alpha_string7_quotes] => Hello-world
-            [Non-alpha_string8_quotes] => Hello'world
-            [Non-alpha_string9_quotes] => Hello:world
-            [Non-alpha_string10_quotes] => Hello;world
-            [Non-alpha_string11_quotes] => Hello<world
-            [Non-alpha_string12_quotes] => Hello>world
-            [Non-alpha_string13_quotes] => Hello>world
-            [Non-alpha_string14_quotes] => Hello?world
-            [Non-alpha_string15_quotes] => Hello\world
-            [Non-alpha_string16_quotes] => Hello^world
-            [Non-alpha_string17_quotes] => Hello_world
-            [Non-alpha_string18_quotes] => Hello|world
-            [Non-alpha_string19_quotes] => Hello~world
-            [Non-alpha_string20_quotes] => Hello`world
-            [Non-alpha_string21_quotes] => Hello(world)
+            [Non_alpha_string1_quotes] => Hello@world
+            [Non_alpha_string2_quotes] => Hello!world
+            [Non_alpha_string3_quotes] => Hello#world
+            [Non_alpha_string4_quotes] => Hello&world
+            [Non_alpha_string5_quotes] => Hello*world
+            [Non_alpha_string6_quotes] => Hello+world
+            [Non_alpha_string7_quotes] => Hello-world
+            [Non_alpha_string8_quotes] => Hello'world
+            [Non_alpha_string9_quotes] => Hello:world
+            [Non_alpha_string10_quotes] => Hello;world
+            [Non_alpha_string11_quotes] => Hello<world
+            [Non_alpha_string12_quotes] => Hello>world
+            [Non_alpha_string13_quotes] => Hello>world
+            [Non_alpha_string14_quotes] => Hello?world
+            [Non_alpha_string15_quotes] => Hello\world
+            [Non_alpha_string16_quotes] => Hello^world
+            [Non_alpha_string17_quotes] => Hello_world
+            [Non_alpha_string18_quotes] => Hello|world
+            [Non_alpha_string19_quotes] => Hello~world
+            [Non_alpha_string20_quotes] => Hello`world
+            [Non_alpha_string21_quotes] => Hello(world)
         )
 
     [Newlines_in_Values] => Array
@@ -453,285 +450,13 @@ Good Morning
 Hello, world
              Good Morning
 
-            [String3] => Hello, worldGood Morning
+            [String3] => Hello, world	Good Morning
             [String4] => 
 
             [String5] => 
 
 
-        )
-
-    [ReservedKeys_as_Values] => Array
-        (
-            [Key1] => 1
-            [Key2] => 1
-            [Key3] => 1
-            [Key4] => 
-            [Key5] => 
-            [Key6] => 
-            [Key7] => 1
-            [Key8] => 1
-            [Key9] => 1
-            [Key10] => 1
-            [Key11] => 
-            [Key12] => 
-            [Key13] => 
-            [Key14] => 
-            [Key15] => 
-            [Key16] => 
-            [Key17] => 
-            [Key18] => 
-        )
-
-    [ReservedKeys_as_Keys] => Array
-        (
-        )
-
-)
-*** Done **
---UEXPECTF--
-Notice: fwrite(): 4121 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
-*** Test parse_ini_file() function:  with various keys and values given in parse.ini file ***
--- ini file without process_sections optional arg --
-Array
-(
-    [one] => 1
-    [five] => 5
-    [animal] => Humming bird
-    [Language] => PHP
-    [PHP_CONSTANT] => 1.2345678
-    [10] => Ten
-    [HELLO] => HELLO
-    [date] => 
-    [time] => 
-    [path] => /usr/local/bin
-    [URL] => http://www.php.net
-    [Decimal_value1] => 100
-    [Decimal_value2] => -100
-    [Decimal_value3] => -2147483647
-    [Decimal_value4] => 2147483647
-    [Decimal_value5] => -2147483648
-    [Decimal_value6] => 2147483648
-    [Octal_value] => 0100
-    [Hex_value1] => 0x101
-    [Hex_Value2] => 0x103
-    [Non-alpha1] => 
-    [Non-alpha2] => +
-    [Non-alpha3] => *
-    [Non-alpha4] => %
-    [Non-alpha5] => <>
-    [Non-alpha6] => @
-    [Non-alpha7] => #
-    [Non-alpha8] => ^
-    [non-alpha9] => -
-    [Non-alpha10] => :
-    [Non-alpha11] => ?
-    [Non-alpha12] => /
-    [Non-alpha13] => \
-    [Non-alpha1_quotes] => ;
-    [Non-alpha2_quotes] => +
-    [Non-alpha3_quotes] => *
-    [Non-alpha4_quotes] => %
-    [Non-alpha5_quotes] => <>
-    [Non-alpha6_quotes] => @
-    [Non-alpha7_quotes] => #
-    [Non-alpha8_quotes] => ^
-    [Non-alpha9_quotes] => -
-    [Non-alpha10_quotes] => =
-    [Non-alpha11_quotes] => :
-    [Non-alpha12_quotes] => ?
-    [Non-alpha13_quotes] => /
-    [Non-alpha14_quotes] => \
-    [Non-alpha15_quotes] => &
-    [Non-alpha16_quotes] => {}
-    [Non-alpha17_quotes] => |
-    [Non-alpha18_quotes] => ~
-    [Non-alpha19_quotes] => !
-    [non-alpha20_quotes] => $
-    [non-alpha21_quotes] => ()
-    [Non-alpha_string1] => Hello@world
-    [Non-alpha_string1_quotes] => Hello@world
-    [Non-alpha_string2_quotes] => Hello!world
-    [Non-alpha_string3_quotes] => Hello#world
-    [Non-alpha_string4_quotes] => Hello&world
-    [Non-alpha_string5_quotes] => Hello*world
-    [Non-alpha_string6_quotes] => Hello+world
-    [Non-alpha_string7_quotes] => Hello-world
-    [Non-alpha_string8_quotes] => Hello'world
-    [Non-alpha_string9_quotes] => Hello:world
-    [Non-alpha_string10_quotes] => Hello;world
-    [Non-alpha_string11_quotes] => Hello<world
-    [Non-alpha_string12_quotes] => Hello>world
-    [Non-alpha_string13_quotes] => Hello>world
-    [Non-alpha_string14_quotes] => Hello?world
-    [Non-alpha_string15_quotes] => Hello\world
-    [Non-alpha_string16_quotes] => Hello^world
-    [Non-alpha_string17_quotes] => Hello_world
-    [Non-alpha_string18_quotes] => Hello|world
-    [Non-alpha_string19_quotes] => Hello~world
-    [Non-alpha_string20_quotes] => Hello`world
-    [Non-alpha_string21_quotes] => Hello(world)
-    [String1] => Hello, world
-Good Morning
-    [String2] => 
-Hello, world
-             Good Morning
-
-    [String3] => Hello, worldGood Morning
-    [String4] => 
-
-    [String5] => 
-
-
-    [Key1] => 1
-    [Key2] => 1
-    [Key3] => 1
-    [Key4] => 
-    [Key5] => 
-    [Key6] => 
-    [Key7] => 1
-    [Key8] => 1
-    [Key9] => 1
-    [Key10] => 1
-    [Key11] => 
-    [Key12] => 
-    [Key13] => 
-    [Key14] => 
-    [Key15] => 
-    [Key16] => 
-    [Key17] => 
-    [Key18] => 
-)
-
--- ini file with process_sections as TRUE --
-Array
-(
-    [Constans] => Array
-        (
-            [one] => 1
-            [five] => 5
-            [animal] => Humming bird
-            [Language] => PHP
-            [PHP_CONSTANT] => 1.2345678
-            [10] => Ten
-            [HELLO] => HELLO
-        )
-
-    [date] => Array
-        (
-            [date] => 
-            [time] => 
-        )
-
-    [paths] => Array
-        (
-            [path] => /usr/local/bin
-            [URL] => http://www.php.net
-        )
-
-    [Decimal] => Array
-        (
-            [Decimal_value1] => 100
-            [Decimal_value2] => -100
-            [Decimal_value3] => -2147483647
-            [Decimal_value4] => 2147483647
-            [Decimal_value5] => -2147483648
-            [Decimal_value6] => 2147483648
-        )
-
-    [Octal] => Array
-        (
-            [Octal_value] => 0100
-        )
-
-    [Hex] => Array
-        (
-            [Hex_value1] => 0x101
-            [Hex_Value2] => 0x103
-        )
-
-    [Non-alphanumerics_as_values] => Array
-        (
-            [Non-alpha1] => 
-            [Non-alpha2] => +
-            [Non-alpha3] => *
-            [Non-alpha4] => %
-            [Non-alpha5] => <>
-            [Non-alpha6] => @
-            [Non-alpha7] => #
-            [Non-alpha8] => ^
-            [non-alpha9] => -
-            [Non-alpha10] => :
-            [Non-alpha11] => ?
-            [Non-alpha12] => /
-            [Non-alpha13] => \
-            [Non-alpha1_quotes] => ;
-            [Non-alpha2_quotes] => +
-            [Non-alpha3_quotes] => *
-            [Non-alpha4_quotes] => %
-            [Non-alpha5_quotes] => <>
-            [Non-alpha6_quotes] => @
-            [Non-alpha7_quotes] => #
-            [Non-alpha8_quotes] => ^
-            [Non-alpha9_quotes] => -
-            [Non-alpha10_quotes] => =
-            [Non-alpha11_quotes] => :
-            [Non-alpha12_quotes] => ?
-            [Non-alpha13_quotes] => /
-            [Non-alpha14_quotes] => \
-            [Non-alpha15_quotes] => &
-            [Non-alpha16_quotes] => {}
-            [Non-alpha17_quotes] => |
-            [Non-alpha18_quotes] => ~
-            [Non-alpha19_quotes] => !
-            [non-alpha20_quotes] => $
-            [non-alpha21_quotes] => ()
-        )
-
-    [Non-alpha numerics in strings] => Array
-        (
-            [Non-alpha_string1] => Hello@world
-        )
-
-    [Non-alpha numerics in strings -with quotes] => Array
-        (
-            [Non-alpha_string1_quotes] => Hello@world
-            [Non-alpha_string2_quotes] => Hello!world
-            [Non-alpha_string3_quotes] => Hello#world
-            [Non-alpha_string4_quotes] => Hello&world
-            [Non-alpha_string5_quotes] => Hello*world
-            [Non-alpha_string6_quotes] => Hello+world
-            [Non-alpha_string7_quotes] => Hello-world
-            [Non-alpha_string8_quotes] => Hello'world
-            [Non-alpha_string9_quotes] => Hello:world
-            [Non-alpha_string10_quotes] => Hello;world
-            [Non-alpha_string11_quotes] => Hello<world
-            [Non-alpha_string12_quotes] => Hello>world
-            [Non-alpha_string13_quotes] => Hello>world
-            [Non-alpha_string14_quotes] => Hello?world
-            [Non-alpha_string15_quotes] => Hello\world
-            [Non-alpha_string16_quotes] => Hello^world
-            [Non-alpha_string17_quotes] => Hello_world
-            [Non-alpha_string18_quotes] => Hello|world
-            [Non-alpha_string19_quotes] => Hello~world
-            [Non-alpha_string20_quotes] => Hello`world
-            [Non-alpha_string21_quotes] => Hello(world)
-        )
-
-    [Newlines_in_Values] => Array
-        (
-            [String1] => Hello, world
-Good Morning
-            [String2] => 
-Hello, world
-             Good Morning
-
-            [String3] => Hello, worldGood Morning
-            [String4] => 
-
-            [String5] => 
-
-
+            [String6] => Hello, world	Good Morning
         )
 
     [ReservedKeys_as_Values] => Array
