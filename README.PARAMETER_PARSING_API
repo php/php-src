@@ -70,7 +70,7 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsz",
 /* Gets an object of class specified by my_ce, and an optional double. */
 zval *obj;
 double d = 0.5;
-zend_class_entry my_ce;
+zend_class_entry *my_ce;
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|d",
 						  &obj, my_ce, &d) == FAILURE) {
 	return;
