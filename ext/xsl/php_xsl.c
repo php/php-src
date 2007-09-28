@@ -27,7 +27,6 @@
 #include "ext/standard/info.h"
 #include "php_xsl.h"
 
-
 zend_class_entry *xsl_xsltprocessor_class_entry;
 static zend_object_handlers xsl_object_handlers;
 
@@ -107,6 +106,7 @@ void xsl_objects_free_storage(void *object TSRMLS_DC)
 	efree(object);
 }
 /* }}} */
+
 /* {{{ xsl_objects_new */
 zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 {
@@ -241,9 +241,6 @@ zval *php_xsl_create_object(xsltStylesheetPtr obj, int *found, zval *wrapper_in,
 }
 /* }}} */
 
-
-
-
 /* {{{ PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(xsl)
@@ -305,7 +302,6 @@ PHP_MINFO_FUNCTION(xsl)
 	php_info_print_table_end();
 }
 /* }}} */
-
 
 /*
  * Local variables:
