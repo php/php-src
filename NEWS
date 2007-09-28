@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Added better error reporting for php.ini syntax errors
   . Allowed "ini-variables" to be used almost everywhere ini php.ini files
   . Allowed using alphanumeric/variable indexes in "array" ini options
+  . Added 3rd optional parameter to parse_ini_file() to specify the scanning
+    mode of INI_SCANNER_NORMAL or INI_SCANNER_RAW. In raw mode option values
+    and section values are treated as-is.
   . Fixed get_cfg_var() to be able to return "array" ini options
 
 - Improved memory usage by moving constants to read only memory.
