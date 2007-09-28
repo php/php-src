@@ -265,6 +265,9 @@ struct _zend_scanner_globals {
 	int yy_start_stack_depth;
 	int *yy_start_stack;
 
+	/* For ini scanner. Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW */
+	int scanner_mode;
+
 #ifdef ZEND_MULTIBYTE
 	/* original (unfiltered) script */
 	char *script_org;

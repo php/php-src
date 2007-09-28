@@ -24,6 +24,7 @@
 #include "zend_ini.h"
 
 BEGIN_EXTERN_C()
+void config_zval_dtor(zval *zvalue);
 int php_init_config(TSRMLS_D);
 int php_shutdown_config(void);
 void php_ini_register_extensions(TSRMLS_D);
@@ -31,6 +32,12 @@ PHPAPI zval *cfg_get_entry(char *name, uint name_length);
 PHPAPI int cfg_get_long(char *varname, long *result);
 PHPAPI int cfg_get_double(char *varname, double *result);
 PHPAPI int cfg_get_string(char *varname, char **result);
+PHPAPI int php_parse_user_ini_file(char *dirname, char *ini_filename, HashTable *target_hash TSRMLS_DC);
+PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int stage TSRMLS_DC);
+PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC);
+#if ZEND_DEBUG
+PHPAPI HashTable get_configuration_hash(void);
+#endif
 END_EXTERN_C()
 
 #define PHP_INI_USER	ZEND_INI_USER
