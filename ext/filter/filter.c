@@ -637,7 +637,7 @@ static void php_filter_call(zval **filtered, long filter, zval **filter_args, co
 
 static void php_filter_array_handler(zval *input, zval **op, zval *return_value TSRMLS_DC) /* {{{ */
 {
-	char *arg_key;
+	zstr arg_key;
 	uint arg_key_len;
 	ulong index;
 	HashPosition pos;
@@ -673,8 +673,8 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value 
 				zval_dtor(return_value);
 				RETURN_FALSE;
 			}
-			if (zend_hash_find(Z_ARRVAL_P(input), arg_key, arg_key_len, (void **)&tmp) != SUCCESS) {
-				add_assoc_null_ex(return_value, arg_key, arg_key_len);
+			if (zend_hash_find(Z_ARRVAL_P(input), arg_key.s, arg_key_len, (void **)&tmp) != SUCCESS) {
+				add_assoc_null_ex(return_value, arg_key.s, arg_key_len);
 			} else {
 				zval *nval;
 
@@ -684,7 +684,7 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value 
 				INIT_PZVAL(nval);
 
 				php_filter_call(&nval, -1, arg_elm, 0, FILTER_REQUIRE_SCALAR TSRMLS_CC);
-				add_assoc_zval_ex(return_value, arg_key, arg_key_len, nval);
+				add_assoc_zval_ex(return_value, arg_key.s, arg_key_len, nval);
 			}
 		}
 	} else {
