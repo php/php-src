@@ -1,3 +1,506 @@
+2007-09-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_3)
+      NEWS:
+      Fugbix typo.
+
+2007-09-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_opcode.c
+      ext/bcmath/bcmath.c
+      ext/bcmath/bcmath.c
+      ext/bz2/bz2.c
+      ext/bz2/bz2.c
+      ext/calendar/calendar.c
+      ext/calendar/calendar.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_persist.c
+      ext/com_dotnet/com_persist.c
+      ext/ctype/ctype.c
+      ext/ctype/ctype.c
+      ext/curl/interface.c
+      ext/curl/interface.c
+      ext/date/php_date.c
+      ext/date/php_date.c
+      ext/dba/dba.c
+      ext/dba/dba.c
+      ext/dbase/dbase.c
+      ext/dbase/dbase.c
+      ext/dom/attr.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/documentfragment.c
+      ext/dom/documenttype.c
+      ext/dom/documenttype.c
+      ext/dom/dom_fe.h
+      ext/dom/dom_fe.h
+      ext/dom/domconfiguration.c
+      ext/dom/domconfiguration.c
+      ext/dom/domerror.c
+      ext/dom/domerror.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domexception.c
+      ext/dom/domexception.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domlocator.c
+      ext/dom/domlocator.c
+      ext/dom/domstringlist.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/element.c
+      ext/dom/entity.c
+      ext/dom/entity.c
+      ext/dom/entityreference.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/namelist.c
+      ext/dom/node.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/nodelist.c
+      ext/dom/notation.c
+      ext/dom/notation.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/string_extend.c
+      ext/dom/text.c
+      ext/dom/text.c
+      ext/dom/typeinfo.c
+      ext/dom/typeinfo.c
+      ext/dom/userdatahandler.c
+      ext/dom/userdatahandler.c
+      ext/dom/xpath.c
+      ext/dom/xpath.c
+      ext/ereg/ereg.c
+      ext/exif/exif.c
+      ext/exif/exif.c
+      ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.c
+      ext/fdf/fdf.c
+      ext/fdf/fdf.c
+      ext/filter/filter.c
+      ext/filter/filter.c
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/gd/gd.c
+      ext/gettext/gettext.c
+      ext/gettext/gettext.c
+      ext/gmp/gmp.c
+      ext/gmp/gmp.c
+      ext/hash/hash.c
+      ext/hash/hash.c
+      ext/iconv/iconv.c
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c
+      ext/interbase/interbase.c
+      ext/json/json.c
+      ext/json/json.c
+      ext/ldap/ldap.c
+      ext/ldap/ldap.c
+      ext/libxml/libxml.c
+      ext/libxml/libxml.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/mcrypt.c
+      ext/mhash/mhash.c
+      ext/mhash/mhash.c
+      ext/mime_magic/mime_magic.c
+      ext/mime_magic/mime_magic.c
+      ext/ming/ming.c
+      ext/ming/ming.c
+      ext/msql/php_msql.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_exception.c
+      ext/mysqli/mysqli_exception.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqlnd/mysqlnd.c
+      ext/oci8/oci8.c
+      ext/oci8/oci8.c
+      ext/odbc/birdstep.c
+      ext/odbc/birdstep.c
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/openssl/openssl.c
+      ext/pcntl/pcntl.c
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c
+      ext/pdo/pdo.c
+      ext/pdo/pdo.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo/php_pdo_driver.h
+      ext/pdo/php_pdo_driver.h
+      ext/pdo/php_pdo_int.h
+      ext/pdo/php_pdo_int.h
+      ext/pdo_dblib/pdo_dblib.c
+      ext/pdo_dblib/pdo_dblib.c
+      ext/pdo_firebird/pdo_firebird.c
+      ext/pdo_firebird/pdo_firebird.c
+      ext/pdo_mysql/pdo_mysql.c
+      ext/pdo_mysql/pdo_mysql.c
+      ext/pdo_oci/pdo_oci.c
+      ext/pdo_oci/pdo_oci.c
+      ext/pdo_odbc/pdo_odbc.c
+      ext/pdo_odbc/pdo_odbc.c
+      ext/pdo_pgsql/pdo_pgsql.c
+      ext/pdo_pgsql/pdo_pgsql.c
+      ext/pdo_pgsql/pgsql_driver.c
+      ext/pdo_sqlite/pdo_sqlite.c
+      ext/pdo_sqlite/pdo_sqlite.c
+      ext/pdo_sqlite/sqlite_driver.c
+      ext/pdo_sqlite/sqlite_driver.c
+      ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/pspell/pspell.c
+      ext/readline/readline.c
+      ext/readline/readline.c
+      ext/recode/recode.c
+      ext/recode/recode.c
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/session/session.c
+      ext/session/session.c
+      ext/shmop/shmop.c
+      ext/shmop/shmop.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c
+      ext/skeleton/skeleton.c
+      ext/skeleton/skeleton.c
+      ext/snmp/snmp.c
+      ext/snmp/snmp.c
+      ext/snmp/winsnmp.c
+      ext/snmp/winsnmp.c
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/sockets/sockets.c
+      ext/sockets/sockets.c
+      ext/spl/php_spl.c
+      ext/spl/php_spl.c
+      ext/spl/spl_array.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_functions.c
+      ext/spl/spl_functions.c
+      ext/spl/spl_functions.h
+      ext/spl/spl_functions.h
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/spl/spl_observer.c
+      ext/spl/spl_sxe.c
+      ext/spl/spl_sxe.c
+      ext/sqlite/pdo_sqlite2.c
+      ext/sqlite/pdo_sqlite2.c
+      ext/sqlite/sqlite.c
+      ext/sqlite/sqlite.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      ext/standard/dir.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/dl.c
+      ext/standard/info.c
+      ext/standard/info.c
+      ext/standard/user_filters.c
+      ext/standard/user_filters.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/sysvshm/sysvshm.c
+      ext/tidy/tidy.c
+      ext/tidy/tidy.c
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer.c
+      ext/unicode/collator.c
+      ext/unicode/unicode.c
+      ext/unicode/unicode_iterators.c
+      ext/wddx/wddx.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/xml/xml.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.c
+      ext/xsl/xsl_fe.h
+      ext/xsl/xsl_fe.h
+      ext/xsl/xsltprocessor.c
+      ext/xsl/xsltprocessor.c
+      ext/zip/php_zip.c
+      ext/zip/php_zip.c
+      ext/zlib/zlib.c
+      ext/zlib/zlib.c
+      main/SAPI.h
+      sapi/aolserver/aolserver.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/php_apache.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/php_apache.c
+      sapi/apache_hooks/php_apache.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/continuity/capi.c
+      sapi/continuity/capi.c
+      sapi/embed/php_embed.c
+      sapi/milter/php_milter.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      Improved memory usage by movig constants to read only memory. (Dmitry,
+      Pierre)
+
+2007-09-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.c:
+      
+      MFB: Fixed coverity issue #470 Unitialized integer value used inside
+      zend_ini_boolean_displayer_cb
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini.c:
+      Fixed coverity issue #470 Unitialized integer value used inside
+      zend_ini_boolean_displayer_cb
+
+2007-09-27  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini.c:
+      MFH:- Fixed bug #42657 (ini_get() returns incorrect value when default is
+      NULL)
+
+    * ZendEngine2/zend_ini.c:
+      - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL)
+
+    * ZendEngine2/zend_ini.c:
+      BC
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      MFH: Nuked unnecessary TSRMLS_FETCH() call
+
+    * ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Nuked unnecessary TSRMLS_FETCH().
+
+    * ZendEngine2/zend_ini.c:
+      MFB52:
+      ---8<---
+      revision 1.39.2.2.2.10
+      date: 2007/06/17 14:31:12;  author: iliaa;  state: Exp;  lines: +22 -15
+      
+      Fixed zend_alter_ini_entry() memory_limit interruption vulnerability.
+      ---8<---
+      
+      Last part of the missing fix only committed to PHP_5_2 branch.
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini.c:
+      MFH: missing folding tag + use Z_STR* macros
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c:
+      missing folding tag
+
+    * ZendEngine2/zend_ini.c:
+      MFB: Missing part of some fix (by Ilia)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini.c:
+      last ws
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini.c:
+      ws
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c:
+      MFH: ws + cs (to keep in sync with HEAD/PHP_5_3 only!)
+
+    * ZendEngine2/zend_ini.c:
+      ws + cs (more to follow)
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      MFB52: cs+ws (and synced the folding wrap style!)
+
+    * (PHP_5_3)
+      ext/standard/ftp_fopen_wrapper.c:
+      MFB52: ws+cs
+
+    * (PHP_5_2)
+      ext/standard/ftp_fopen_wrapper.c
+      sapi/cgi/cgi_main.c:
+      ws + cs fixes
+
+2007-09-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/any.phpt
+      ext/soap/tests/any.phpt:
+      Improved ext/soap to support element names in context of XMLShema's <any>
+
+2007-09-27  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/iconv/iconv.c:
+      fix coverity issue #412
+
+    * ext/reflection/php_reflection.c:
+      fix coverity issue #411
+
+2007-09-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/openssl/openssl.c:
+      MFH: Improved ext/openssl
+      . Added support for OpenSSL digest functions
+      . Added support for OpenSSL cipher functions
+      . Added access to internal values of DSA, RSA and DH keys
+
+    * ext/openssl/openssl.c:
+      Revert ws-breaking patch
+
+    * (PHP_5_3)
+      NEWS
+      sapi/cgi/CHANGES
+      sapi/cgi/cgi_main.c
+      sapi/cgi/config.w32
+      sapi/cgi/config9.m4:
+      MFH: Improved and cleaned CGI code. FastCGI is now always enabled and can
+      not be disabled. See sapi/cgi/CHANGES for more details.
+
+    * sapi/cgi/cgi_main.c:
+      ws
+
+2007-09-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_3)
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      Bump version.
+
+2007-09-27  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_language_parser.y
+      tests/lang/041.phpt
+      tests/lang/042.phpt
+      tests/lang/043.phpt
+      tests/lang/044.phpt:
+      - Readd support for ynamic access of static members (Etienne)
+
+2007-06-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c:
+      
+      Fixed zend_alter_ini_entry() memory_limit interruption vulnerability.
+      ---8<---
+      
+      Last part of the missing fix only committed to PHP_5_2 branch.
+
 2007-09-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ZendEngine2/zend_highlight.c
