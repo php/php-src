@@ -142,6 +142,10 @@ static void zend_mm_mem_dummy_dtor(zend_mm_storage *storage)
 	free(storage);
 }
 
+static void zend_mm_mem_dummy_compact(zend_mm_storage *storage)
+{
+}
+
 #if defined(HAVE_MEM_MMAP_ANON) || defined(HAVE_MEM_MMAP_ZERO)
 
 static zend_mm_segment* zend_mm_mem_mmap_realloc(zend_mm_storage *storage, zend_mm_segment* segment, size_t size)
@@ -180,7 +184,7 @@ static zend_mm_segment* zend_mm_mem_mmap_anon_alloc(zend_mm_storage *storage, si
 	return ret;
 }
 
-# define ZEND_MM_MEM_MMAP_ANON_DSC {"mmap_anon", zend_mm_mem_dummy_init, zend_mm_mem_dummy_dtor, zend_mm_mem_mmap_anon_alloc, zend_mm_mem_mmap_realloc, zend_mm_mem_mmap_free}
+# define ZEND_MM_MEM_MMAP_ANON_DSC {"mmap_anon", zend_mm_mem_dummy_init, zend_mm_mem_dummy_dtor, zend_mm_mem_dummy_compact, zend_mm_mem_mmap_anon_alloc, zend_mm_mem_mmap_realloc, zend_mm_mem_mmap_free}
 
 #endif
 
@@ -215,7 +219,7 @@ static zend_mm_segment* zend_mm_mem_mmap_zero_alloc(zend_mm_storage *storage, si
 	return ret;
 }
 
-# define ZEND_MM_MEM_MMAP_ZERO_DSC {"mmap_zero", zend_mm_mem_mmap_zero_init, zend_mm_mem_mmap_zero_dtor, zend_mm_mem_mmap_zero_alloc, zend_mm_mem_mmap_realloc, zend_mm_mem_mmap_free}
+# define ZEND_MM_MEM_MMAP_ZERO_DSC {"mmap_zero", zend_mm_mem_mmap_zero_init, zend_mm_mem_mmap_zero_dtor, zend_mm_mem_dummy_compact, zend_mm_mem_mmap_zero_alloc, zend_mm_mem_mmap_realloc, zend_mm_mem_mmap_free}
 
 #endif
 
@@ -240,6 +244,12 @@ static void zend_mm_mem_win32_dtor(zend_mm_storage *storage)
 	free(storage);
 }
 
+static void zend_mm_mem_win32_compact(zend_mm_storage *storage)
+{
+    HeapDestroy((HANDLE)storage->data);
+    storage->data = (void*)HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
+}
+
 static zend_mm_segment* zend_mm_mem_win32_alloc(zend_mm_storage *storage, size_t size)
 {
 	return (zend_mm_segment*) HeapAlloc((HANDLE)storage->data, HEAP_NO_SERIALIZE, size);
@@ -255,7 +265,7 @@ static zend_mm_segment* zend_mm_mem_win32_realloc(zend_mm_storage *storage, zend
 	return (zend_mm_segment*) HeapReAlloc((HANDLE)storage->data, HEAP_NO_SERIALIZE, segment, size);
 }
 
-# define ZEND_MM_MEM_WIN32_DSC {"win32", zend_mm_mem_win32_init, zend_mm_mem_win32_dtor, zend_mm_mem_win32_alloc, zend_mm_mem_win32_realloc, zend_mm_mem_win32_free}
+# define ZEND_MM_MEM_WIN32_DSC {"win32", zend_mm_mem_win32_init, zend_mm_mem_win32_dtor, zend_mm_mem_win32_compact, zend_mm_mem_win32_alloc, zend_mm_mem_win32_realloc, zend_mm_mem_win32_free}
 
 #endif
 
@@ -276,7 +286,7 @@ static void zend_mm_mem_malloc_free(zend_mm_storage *storage, zend_mm_segment *p
 	free(ptr);
 }
 
-# define ZEND_MM_MEM_MALLOC_DSC {"malloc", zend_mm_mem_dummy_init, zend_mm_mem_dummy_dtor, zend_mm_mem_malloc_alloc, zend_mm_mem_malloc_realloc, zend_mm_mem_malloc_free}
+# define ZEND_MM_MEM_MALLOC_DSC {"malloc", zend_mm_mem_dummy_init, zend_mm_mem_dummy_dtor, zend_mm_mem_dummy_compact, zend_mm_mem_malloc_alloc, zend_mm_mem_malloc_realloc, zend_mm_mem_malloc_free}
 
 #endif
 
@@ -1560,15 +1570,7 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 			free(heap);
 		}
 	} else {
-#ifdef HAVE_MEM_WIN32
-		/* FIX for bug #41713 */
-		/* TODO: add new "compact" handler */
-		if (storage->handlers->dtor == zend_mm_mem_win32_dtor &&
-		    storage->handlers->init == zend_mm_mem_win32_init) {
-		    HeapDestroy((HANDLE)storage->data);
-		    storage->data = (void*)HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
-		}
-#endif
+		storage->handlers->compact(storage);
 		heap->segments_list = NULL;
 		zend_mm_init(heap);
 		heap->real_size = 0;
