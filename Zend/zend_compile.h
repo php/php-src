@@ -270,9 +270,7 @@ typedef union _zend_function {
 
 
 typedef struct _zend_function_state {
-	HashTable *function_symbol_table;
 	zend_function *function;
-	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 } zend_function_state;
 
 
@@ -295,6 +293,7 @@ struct _zend_execute_data {
 	struct _zend_op *opline;
 	zend_function_state function_state;
 	zend_function *fbc; /* Function Being Called */
+	zend_class_entry *called_scope;
 	zend_op_array *op_array;
 	zval *object;
 	union _temp_variable *Ts;
@@ -597,6 +596,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_CLASS_GLOBAL		4
 #define ZEND_FETCH_CLASS_AUTO		5
 #define ZEND_FETCH_CLASS_INTERFACE	6
+#define ZEND_FETCH_CLASS_STATIC		7
 #define ZEND_FETCH_CLASS_RT_NS_CHECK 0x20
 #define ZEND_FETCH_CLASS_RT_NS_NAME  0x40
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
