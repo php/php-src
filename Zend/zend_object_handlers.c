@@ -824,19 +824,74 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 	return fbc;
 }
 
+ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+{
+	zend_internal_function *func = (zend_internal_function *)EG(function_state_ptr)->function;
+	zval *method_name_ptr, *method_args_ptr;
+	zval *method_result_ptr = NULL;
+	zend_class_entry *ce = EG(scope);
+ 
+	ALLOC_ZVAL(method_args_ptr);
+	INIT_PZVAL(method_args_ptr);
+	array_init(method_args_ptr);
+
+	if (zend_copy_parameters_array(ZEND_NUM_ARGS(), method_args_ptr TSRMLS_CC) == FAILURE) {
+		zval_dtor(method_args_ptr);
+		zend_error(E_ERROR, "Cannot get arguments for " ZEND_CALLSTATIC_FUNC_NAME);
+		RETURN_FALSE;
+	}
+
+	ALLOC_ZVAL(method_name_ptr);
+	INIT_PZVAL(method_name_ptr);
+	ZVAL_STRING(method_name_ptr, func->function_name, 0); /* no dup - it's a copy */
+
+	/* __callStatic handler is called with two arguments:
+	   method name
+	   array of method parameters
+	*/
+	zend_call_method_with_2_params(NULL, ce, &ce->__callstatic, ZEND_CALLSTATIC_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
+
+	if (method_result_ptr) {
+		if (method_result_ptr->is_ref || method_result_ptr->refcount > 1) {
+			RETVAL_ZVAL(method_result_ptr, 1, 1);
+		} else {
+			RETVAL_ZVAL(method_result_ptr, 0, 1);
+		}
+	}
+
+	/* now destruct all auxiliaries */
+	zval_ptr_dtor(&method_args_ptr);
+	zval_ptr_dtor(&method_name_ptr);
+
+	/* destruct the function also, then - we have allocated it in get_method */
+	efree(func);
+}
+/* }}} */
 
 /* This is not (yet?) in the API, but it belongs in the built-in objects callbacks */
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
 {
 	zend_function *fbc;
 
-	if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &fbc)==FAILURE) {
-		char *class_name = ce->name;
+	if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen + 1, (void **) &fbc)==FAILURE) {
+		if (ce->__callstatic) {
+			zend_internal_function *callstatic_user_call = emalloc(sizeof(zend_internal_function));
 
-		if (!class_name) {
-			class_name = "";
+			callstatic_user_call->type     = ZEND_INTERNAL_FUNCTION;
+			callstatic_user_call->module   = ce->module;
+			callstatic_user_call->handler  = zend_std_callstatic_user_call;
+			callstatic_user_call->arg_info = NULL;
+			callstatic_user_call->num_args = 0;
+			callstatic_user_call->scope    = ce;
+			callstatic_user_call->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC; 
+			callstatic_user_call->function_name = estrndup(function_name_strval, function_name_strlen);
+			callstatic_user_call->pass_rest_by_reference = 0;
+			callstatic_user_call->return_reference       = ZEND_RETURN_VALUE;
+
+			return (zend_function *)callstatic_user_call;
+		} else {
+			zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name ? ce->name : "", function_name_strval);
 		}
-		zend_error(E_ERROR, "Call to undefined method %s::%s()", class_name, function_name_strval);
 	}
 	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
 		/* No further checks necessary, most common case */
