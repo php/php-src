@@ -170,7 +170,6 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	zend_ptr_stack_2_push(&EG(argument_stack), (void *)(zend_uintptr_t)opline->extended_value, NULL);
 
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
-//	EX_T(opline->result.u.var).var.fcall_returned_reference = 0;
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
 		ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
@@ -2431,7 +2430,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval);
@@ -2975,7 +2978,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDL
 			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval);
@@ -3419,7 +3426,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDL
 			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval);
@@ -3629,7 +3640,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HA
 			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval);
@@ -4041,7 +4056,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLE
 			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval);
@@ -9619,7 +9638,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDL
 			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval);
@@ -11260,7 +11283,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER
 			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval);
@@ -12873,7 +12900,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER
 			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval);
@@ -13687,7 +13718,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval);
@@ -15001,7 +15036,11 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_
 			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval);

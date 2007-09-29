@@ -1778,7 +1778,11 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (ce->get_static_method) {
+			EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		} else {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
 			efree(function_name_strval);
