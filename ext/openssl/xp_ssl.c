@@ -490,8 +490,8 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 										zend_list_insert(mycert,
 											php_openssl_get_x509_list_id()));
 								add_next_index_zval(arr, zcert);
-							}
 								efree(zcert);
+							}
 
 						} else {
 							ZVAL_NULL(arr);
