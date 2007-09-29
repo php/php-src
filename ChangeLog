@@ -1,3 +1,228 @@
+2007-09-28  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/browscap.c:
+      - Fix copy and paste typo
+
+2007-09-28  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/tests/general_functions/phpinfo.phpt:
+      fix expected output
+
+2007-09-28  Johannes Schlüter  <johannes@schlueters.de>
+
+    * README.PARAMETER_PARSING_API:
+      - Fix type in example
+
+    * (PHP_5_3)
+      README.namespaces
+      ext/tokenizer/tokenizer_data.c:
+      - Merge minor namespace related stuff (README and tokenizer)
+
+2007-09-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      Support for namespaces
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/ns_001.phpt
+      ZendEngine2/tests/ns_002.phpt
+      ZendEngine2/tests/ns_003.phpt
+      ZendEngine2/tests/ns_004.phpt
+      ZendEngine2/tests/ns_005.phpt
+      ZendEngine2/tests/ns_006.phpt
+      ZendEngine2/tests/ns_007.phpt
+      ZendEngine2/tests/ns_008.phpt
+      ZendEngine2/tests/ns_009.phpt
+      ZendEngine2/tests/ns_010.phpt
+      ZendEngine2/tests/ns_011.phpt
+      ZendEngine2/tests/ns_012.phpt
+      ZendEngine2/tests/ns_013.phpt
+      ZendEngine2/tests/ns_014.phpt
+      ZendEngine2/tests/ns_015.phpt
+      ZendEngine2/tests/ns_016.phpt
+      ZendEngine2/tests/ns_017.phpt
+      ZendEngine2/tests/ns_018.phpt
+      ZendEngine2/tests/ns_019.phpt
+      ZendEngine2/tests/ns_020.phpt
+      ZendEngine2/tests/ns_021.phpt
+      ZendEngine2/tests/ns_022.inc
+      ZendEngine2/tests/ns_022.phpt
+      ZendEngine2/tests/ns_023.phpt
+      ZendEngine2/tests/ns_024.phpt
+      ZendEngine2/tests/ns_025.phpt
+      ZendEngine2/tests/ns_026.phpt
+      ZendEngine2/tests/ns_027.inc
+      ZendEngine2/tests/ns_027.phpt
+      ZendEngine2/tests/ns_028.inc
+      ZendEngine2/tests/ns_028.phpt
+      ZendEngine2/tests/ns_029.phpt
+      ZendEngine2/tests/ns_030.phpt
+      ZendEngine2/tests/ns_031.phpt
+      ZendEngine2/tests/ns_032.phpt
+      ZendEngine2/tests/ns_033.phpt
+      ZendEngine2/tests/ns_034.phpt
+      ZendEngine2/tests/ns_035.phpt
+      ZendEngine2/tests/ns_036.phpt
+      ZendEngine2/tests/ns_037.phpt
+      ZendEngine2/tests/ns_038.phpt
+      ZendEngine2/tests/ns_039.phpt
+      ZendEngine2/tests/ns_040.phpt
+      ZendEngine2/tests/ns_041.phpt
+      ZendEngine2/tests/ns_042.phpt
+      ZendEngine2/tests/ns_043.phpt
+      ZendEngine2/tests/ns_044.phpt
+      ZendEngine2/tests/ns_045.phpt
+      ZendEngine2/tests/ns_046.phpt
+      ZendEngine2/tests/ns_047.phpt
+      ZendEngine2/tests/ns_048.phpt
+      ZendEngine2/tests/ns_049.phpt
+      ZendEngine2/tests/ns_050.phpt
+      ZendEngine2/tests/ns_051.phpt
+      ZendEngine2/tests/ns_052.phpt
+      ZendEngine2/tests/ns_053.phpt:
+      Namespaces
+
+    * ZendEngine2/zend_execute_API.c:
+      Support for namespaces in dynamic calls
+
+2007-09-28  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/basic_functions.c:
+      nuke unsued variable
+
+    * ext/filter/filter.c:
+      - Fix compiler warnings
+
+    * ext/gd/gd.c:
+      - Fix compiler warning
+
+    * ext/standard/basic_functions.c:
+      ws + cs
+
+    * main/php_ini.c
+      main/php_ini.h:
+      - Fix win32 build.
+
+2007-09-28  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.c:
+      ws
+
+    * ext/xsl/xsl_fe.h:
+      fix build
+
+2007-09-28  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      One more thing..
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * (PHP_5_3)
+      php.ini-dist
+      php.ini-recommended
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.h
+      ZendEngine2/zend_ini_scanner.l
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/browscap.c
+      ext/standard/tests/file/parse_ini_file.phpt
+      ext/standard/tests/general_functions/parse_ini_basic.data
+      ext/standard/tests/general_functions/parse_ini_basic.phpt
+      ext/standard/tests/general_functions/parse_ini_booleans.data
+      ext/standard/tests/general_functions/parse_ini_booleans.phpt
+      ext/standard/tests/general_functions/parse_ini_file.phpt
+      main/main.c
+      main/php_globals.h
+      main/php_ini.c
+      main/php_ini.h
+      sapi/cgi/cgi_main.c:
+      MFH:
+      
+      - Added ".htaccess" style user-defined php.ini files support for
+        CGI/FastCGI.
+      - Added support for special [PATH=/opt/httpd/www.example.com/] sections
+        in php.ini. All directives set in these sections will not be able to be
+        overridden in user-defined ini-files or during runtime in the specified
+        path.
+      
+      - Improved php.ini handling:
+        . Added better error reporting for syntax errors in php.ini files
+        . Allowed "ini-variables" to be used almost everywhere ini php.ini files
+        . Allowed using alphanumeric/variable indexes in "array" ini options
+        . Fixed get_cfg_var() to be able to return "array" ini options
+      
+      - Fixed bug #27372 (parse error loading browscap.ini at apache startup)
+      - Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
+        characters)
+
+    * php.ini-dist
+      php.ini-recommended
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.h
+      ZendEngine2/zend_ini_scanner.l
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/browscap.c
+      ext/standard/tests/file/parse_ini_file.phpt
+      ext/standard/tests/general_functions/parse_ini_basic.data
+      ext/standard/tests/general_functions/parse_ini_basic.data
+      ext/standard/tests/general_functions/parse_ini_basic.phpt
+      ext/standard/tests/general_functions/parse_ini_basic.phpt
+      ext/standard/tests/general_functions/parse_ini_booleans.data
+      ext/standard/tests/general_functions/parse_ini_booleans.data
+      ext/standard/tests/general_functions/parse_ini_booleans.phpt
+      ext/standard/tests/general_functions/parse_ini_booleans.phpt
+      ext/standard/tests/general_functions/parse_ini_file.phpt
+      main/main.c
+      main/php_globals.h
+      main/php_ini.c
+      main/php_ini.h
+      sapi/cgi/cgi_main.c:
+      - Added ".htaccess" style user-defined php.ini files support for
+        CGI/FastCGI.
+      - Added support for special [PATH=/opt/httpd/www.example.com/] sections
+        in php.ini. All directives set in these sections will not be able to be
+        overridden in user-defined ini-files or during runtime in the specified
+        path.
+      
+      - Improved php.ini handling:
+        . Added better error reporting for syntax errors in php.ini files
+        . Allowed "ini-variables" to be used almost everywhere ini php.ini files
+        . Allowed using alphanumeric/variable indexes in "array" ini options
+        . Fixed get_cfg_var() to be able to return "array" ini options
+      
+      - Fixed bug #27372 (parse error loading browscap.ini at apache startup)
+      - Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
+        characters)
+      
+
 2007-09-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * (PHP_5_3)

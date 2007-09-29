@@ -1,3 +1,132 @@
+2007-09-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      zend.h
+      zend_API.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_constants.h
+      zend_execute_API.c
+      zend_globals.h
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_variables.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/ns_001.phpt
+      tests/ns_002.phpt
+      tests/ns_003.phpt
+      tests/ns_004.phpt
+      tests/ns_005.phpt
+      tests/ns_006.phpt
+      tests/ns_007.phpt
+      tests/ns_008.phpt
+      tests/ns_009.phpt
+      tests/ns_010.phpt
+      tests/ns_011.phpt
+      tests/ns_012.phpt
+      tests/ns_013.phpt
+      tests/ns_014.phpt
+      tests/ns_015.phpt
+      tests/ns_016.phpt
+      tests/ns_017.phpt
+      tests/ns_018.phpt
+      tests/ns_019.phpt
+      tests/ns_020.phpt
+      tests/ns_021.phpt
+      tests/ns_022.inc
+      tests/ns_022.phpt
+      tests/ns_023.phpt
+      tests/ns_024.phpt
+      tests/ns_025.phpt
+      tests/ns_026.phpt
+      tests/ns_027.inc
+      tests/ns_027.phpt
+      tests/ns_028.inc
+      tests/ns_028.phpt
+      tests/ns_029.phpt
+      tests/ns_030.phpt
+      tests/ns_031.phpt
+      tests/ns_032.phpt
+      tests/ns_033.phpt
+      tests/ns_034.phpt
+      tests/ns_035.phpt
+      tests/ns_036.phpt
+      tests/ns_037.phpt
+      tests/ns_038.phpt
+      tests/ns_039.phpt
+      tests/ns_040.phpt
+      tests/ns_041.phpt
+      tests/ns_042.phpt
+      tests/ns_043.phpt
+      tests/ns_044.phpt
+      tests/ns_045.phpt
+      tests/ns_046.phpt
+      tests/ns_047.phpt
+      tests/ns_048.phpt
+      tests/ns_049.phpt
+      tests/ns_050.phpt
+      tests/ns_051.phpt
+      tests/ns_052.phpt
+      tests/ns_053.phpt:
+      Namespaces
+
+    * zend_execute_API.c:
+      Support for namespaces in dynamic calls
+
+2007-09-28  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      zend_globals.h
+      zend_ini.h
+      zend_ini_parser.y
+      zend_ini_scanner.h
+      zend_ini_scanner.l:
+      MFH:
+      
+      - Added ".htaccess" style user-defined php.ini files support for
+        CGI/FastCGI.
+      - Added support for special [PATH=/opt/httpd/www.example.com/] sections
+        in php.ini. All directives set in these sections will not be able to be
+        overridden in user-defined ini-files or during runtime in the specified
+        path.
+      
+      - Improved php.ini handling:
+        . Added better error reporting for syntax errors in php.ini files
+        . Allowed "ini-variables" to be used almost everywhere ini php.ini files
+        . Allowed using alphanumeric/variable indexes in "array" ini options
+        . Fixed get_cfg_var() to be able to return "array" ini options
+      
+      - Fixed bug #27372 (parse error loading browscap.ini at apache startup)
+      - Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
+        characters)
+
+    * zend_globals.h
+      zend_ini.h
+      zend_ini_parser.y
+      zend_ini_scanner.h
+      zend_ini_scanner.l:
+      - Added ".htaccess" style user-defined php.ini files support for
+        CGI/FastCGI.
+      - Added support for special [PATH=/opt/httpd/www.example.com/] sections
+        in php.ini. All directives set in these sections will not be able to be
+        overridden in user-defined ini-files or during runtime in the specified
+        path.
+      
+      - Improved php.ini handling:
+        . Added better error reporting for syntax errors in php.ini files
+        . Allowed "ini-variables" to be used almost everywhere ini php.ini files
+        . Allowed using alphanumeric/variable indexes in "array" ini options
+        . Fixed get_cfg_var() to be able to return "array" ini options
+      
+      - Fixed bug #27372 (parse error loading browscap.ini at apache startup)
+      - Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
+        characters)
+      
+
 2007-09-27  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.h
