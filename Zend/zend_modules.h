@@ -39,7 +39,7 @@ extern const struct _zend_arg_info fourth_arg_force_ref[5];
 extern const struct _zend_arg_info fifth_arg_force_ref[6];
 extern const struct _zend_arg_info all_args_by_ref[1];
 
-#define ZEND_MODULE_API_NO 20060613
+#define ZEND_MODULE_API_NO 20070729
 #ifdef ZTS
 #define USING_ZTS 1
 #else
