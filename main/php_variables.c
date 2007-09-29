@@ -130,11 +130,12 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 
 				if (track_vars_array) {
 					ht = Z_ARRVAL_P(track_vars_array);
+					zend_hash_del(ht, var, var_len + 1);
 				} else if (PG(register_globals)) {
 					ht = EG(active_symbol_table);
+					zend_hash_del(ht, var, var_len + 1);
 				}
 
-				zend_hash_del(ht, var, var_len + 1);
 				zval_dtor(val);
 
 				/* do not output the error message to the screen,
