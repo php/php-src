@@ -317,6 +317,14 @@ ZEND_API int zend_get_constant_ex(char *name, uint name_len, zval *result, zend_
 				ce = scope->parent;
 			}
 			efree(lcname);
+		} else if (class_name_len == sizeof("static")-1 &&
+		           !memcmp(lcname, "static", sizeof("static")-1)) {
+			if (EG(called_scope)) {
+				ce = EG(called_scope);
+			} else {
+				zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
+			}
+			efree(lcname);
 		} else {
 			/* Check for namespace constant */
 			char *nsname;
