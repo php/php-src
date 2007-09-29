@@ -211,6 +211,7 @@ typedef struct _zend_mm_mem_handlers {
 	const char *name;
 	zend_mm_storage* (*init)(void *params);
 	void (*dtor)(zend_mm_storage *storage);
+	void (*compact)(zend_mm_storage *storage);
 	zend_mm_segment* (*_alloc)(zend_mm_storage *storage, size_t size);
 	zend_mm_segment* (*_realloc)(zend_mm_storage *storage, zend_mm_segment *ptr, size_t size);
 	void (*_free)(zend_mm_storage *storage, zend_mm_segment *ptr);
