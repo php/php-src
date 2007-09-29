@@ -620,8 +620,6 @@ ZEND_FUNCTION(get_class)
    Retrieves the class name */
 ZEND_FUNCTION(get_called_class)
 {
-	int dup;
-
 	if (!ZEND_NUM_ARGS()) {
 		if (EG(called_scope)) {
 			RETURN_TEXTL(EG(called_scope)->name, EG(called_scope)->name_length, 1);
