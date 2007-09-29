@@ -464,7 +464,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 								"ssl", "peer_certificate",
 								zcert);
 						peer_cert = NULL;
-						efree(zcert);
+						FREE_ZVAL(zcert);
 					}
 
 					if (SUCCESS == php_stream_context_get_option(
@@ -490,8 +490,8 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 										zend_list_insert(mycert,
 											php_openssl_get_x509_list_id()));
 								add_next_index_zval(arr, zcert);
+								FREE_ZVAL(zcert);
 							}
-							efree(zcert);
 						} else {
 							ZVAL_NULL(arr);
 						}

@@ -423,7 +423,7 @@ TODO:
 
 - future: respect scope ("php > function foo() { $[tab]" should only expand to local variables...)
 */
-	char *retval;
+	char *retval = NULL;
 	int textlen = strlen(text);
 	TSRMLS_FETCH();
 
