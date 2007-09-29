@@ -2703,8 +2703,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		if (*zobj_ptr_ptr && *ce_ptr && (*ce_ptr)->__call != 0) {
 			retval = (*ce_ptr)->__call != NULL;
 			*fptr_ptr = (*ce_ptr)->__call;
-		}
-		if (!*zobj_ptr_ptr && *ce_ptr && (*ce_ptr)->__callstatic) {
+		} else if (!*zobj_ptr_ptr && *ce_ptr && (*ce_ptr)->__callstatic) {
 			retval = 1;
 			*fptr_ptr = (*ce_ptr)->__callstatic;
 		}
