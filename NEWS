@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Added support for __callstatic() magic method. (Sara)
 - Added support for dynamic access of static members using $foo::myFunc().
   (Etienne Kneuss)
+- Added "compact" handler for Zend MM storage. (Dmitry)
 
 - Improved php.ini handling: (Jani)
   . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI
