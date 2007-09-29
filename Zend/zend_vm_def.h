@@ -1932,7 +1932,6 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	zend_ptr_stack_2_push(&EG(argument_stack), (void *)(zend_uintptr_t)opline->extended_value, NULL);
 
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
-//	EX_T(opline->result.u.var).var.fcall_returned_reference = 0;
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
 		ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
