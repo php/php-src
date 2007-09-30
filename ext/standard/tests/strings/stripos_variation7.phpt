@@ -27,7 +27,7 @@ echo "*** Done ***";
 -- With empty heredoc string --
 bool(false)
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 bool(false)
 bool(false)
