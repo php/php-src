@@ -88,29 +88,29 @@ echo "Done\n";
 *** Testing explode() for basic operations ***
 -- Iteration 1 --
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 2 --
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 3 --
 array(1) {
@@ -214,16 +214,16 @@ array(2) {
 }
 -- Iteration 7 --
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 
-Warning: explode(): Empty delimiter. in %s on line %d
+Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 8 --
 array(2) {
