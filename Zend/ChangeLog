@@ -1,3 +1,81 @@
+2007-09-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_extensions.h
+      zend_extensions.h
+      zend_modules.h
+      zend_modules.h:
+      Updated API version numbers
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_alloc.h
+      zend_alloc.h:
+      Added "compact" handler for Zend MM storage.
+
+    * (PHP_5_3)
+      zend.h
+      zend_API.h
+      zend_compile.c
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Added support for __callstatic() magic method (missing part). (Sara)
+
+    * (PHP_5_3)
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_object_handlers.c
+      tests/call_static.phpt
+      tests/object_handlers.phpt:
+      Added support for __callstatic() magic method. (Sara)
+
+    * zend_API.c:
+      optimization
+
+    * (PHP_5_3)
+      zend_vm_def.h:
+      Removed commented code
+
+    * (PHP_5_3)
+      zend_API.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_globals.h
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      tests/lsb_001.phpt
+      tests/lsb_002.phpt
+      tests/lsb_003.phpt
+      tests/lsb_004.phpt
+      tests/lsb_005.phpt
+      tests/lsb_006.phpt
+      tests/lsb_007.phpt
+      tests/lsb_008.phpt
+      tests/lsb_009.phpt
+      tests/lsb_010.phpt
+      tests/lsb_011.phpt
+      tests/lsb_012.phpt
+      tests/lsb_013.phpt
+      tests/lsb_014.phpt
+      tests/lsb_015.phpt
+      tests/lsb_016.phpt
+      tests/lsb_017.phpt:
+      Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
+
+2007-09-29  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * zend_builtin_functions.c:
+      - Nuked unused variable
+
 2007-09-28  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_3)

@@ -1,3 +1,795 @@
+2007-09-29  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/stripos_basic.phpt:
+      smaller tests already exist
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/stripos_basic.phpt:
+      smaller tests already exists
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/strrchr_basic.phpt
+      ext/standard/tests/strings/strrchr_error.phpt
+      ext/standard/tests/strings/strrchr_variation1.phpt
+      ext/standard/tests/strings/strrchr_variation10.phpt
+      ext/standard/tests/strings/strrchr_variation11.phpt
+      ext/standard/tests/strings/strrchr_variation12.phpt
+      ext/standard/tests/strings/strrchr_variation2.phpt
+      ext/standard/tests/strings/strrchr_variation3.phpt
+      ext/standard/tests/strings/strrchr_variation4.phpt
+      ext/standard/tests/strings/strrchr_variation5.phpt
+      ext/standard/tests/strings/strrchr_variation6.phpt
+      ext/standard/tests/strings/strrchr_variation7.phpt
+      ext/standard/tests/strings/strrchr_variation8.phpt
+      ext/standard/tests/strings/strrchr_variation9.phpt:
+      New testcases for strrchr() function
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/stripos_basic1.phpt
+      ext/standard/tests/strings/stripos_basic2.phpt
+      ext/standard/tests/strings/stripos_error.phpt
+      ext/standard/tests/strings/stripos_variation1.phpt
+      ext/standard/tests/strings/stripos_variation10.phpt
+      ext/standard/tests/strings/stripos_variation11.phpt
+      ext/standard/tests/strings/stripos_variation12.phpt
+      ext/standard/tests/strings/stripos_variation13.phpt
+      ext/standard/tests/strings/stripos_variation14.phpt
+      ext/standard/tests/strings/stripos_variation15.phpt
+      ext/standard/tests/strings/stripos_variation2.phpt
+      ext/standard/tests/strings/stripos_variation3.phpt
+      ext/standard/tests/strings/stripos_variation4.phpt
+      ext/standard/tests/strings/stripos_variation5.phpt
+      ext/standard/tests/strings/stripos_variation6.phpt
+      ext/standard/tests/strings/stripos_variation7.phpt
+      ext/standard/tests/strings/stripos_variation8.phpt
+      ext/standard/tests/strings/stripos_variation9.phpt:
+      New testcases for stripos() function
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/sprintf_basic1.phpt
+      ext/standard/tests/strings/sprintf_basic2.phpt
+      ext/standard/tests/strings/sprintf_basic3.phpt
+      ext/standard/tests/strings/sprintf_basic4.phpt
+      ext/standard/tests/strings/sprintf_basic5.phpt
+      ext/standard/tests/strings/sprintf_basic6.phpt
+      ext/standard/tests/strings/sprintf_basic7.phpt
+      ext/standard/tests/strings/sprintf_basic8.phpt
+      ext/standard/tests/strings/sprintf_basic9.phpt
+      ext/standard/tests/strings/sprintf_error.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation10.phpt
+      ext/standard/tests/strings/sprintf_variation11.phpt
+      ext/standard/tests/strings/sprintf_variation12.phpt
+      ext/standard/tests/strings/sprintf_variation13.phpt
+      ext/standard/tests/strings/sprintf_variation14.phpt
+      ext/standard/tests/strings/sprintf_variation15.phpt
+      ext/standard/tests/strings/sprintf_variation16.phpt
+      ext/standard/tests/strings/sprintf_variation17.phpt
+      ext/standard/tests/strings/sprintf_variation18.phpt
+      ext/standard/tests/strings/sprintf_variation19.phpt
+      ext/standard/tests/strings/sprintf_variation2.phpt
+      ext/standard/tests/strings/sprintf_variation20.phpt
+      ext/standard/tests/strings/sprintf_variation21.phpt
+      ext/standard/tests/strings/sprintf_variation22.phpt
+      ext/standard/tests/strings/sprintf_variation23.phpt
+      ext/standard/tests/strings/sprintf_variation24.phpt
+      ext/standard/tests/strings/sprintf_variation25.phpt
+      ext/standard/tests/strings/sprintf_variation26.phpt
+      ext/standard/tests/strings/sprintf_variation27.phpt
+      ext/standard/tests/strings/sprintf_variation28.phpt
+      ext/standard/tests/strings/sprintf_variation29.phpt
+      ext/standard/tests/strings/sprintf_variation3.phpt
+      ext/standard/tests/strings/sprintf_variation30.phpt
+      ext/standard/tests/strings/sprintf_variation31.phpt
+      ext/standard/tests/strings/sprintf_variation32.phpt
+      ext/standard/tests/strings/sprintf_variation33.phpt
+      ext/standard/tests/strings/sprintf_variation34.phpt
+      ext/standard/tests/strings/sprintf_variation35.phpt
+      ext/standard/tests/strings/sprintf_variation36.phpt
+      ext/standard/tests/strings/sprintf_variation37.phpt
+      ext/standard/tests/strings/sprintf_variation38.phpt
+      ext/standard/tests/strings/sprintf_variation39.phpt
+      ext/standard/tests/strings/sprintf_variation4.phpt
+      ext/standard/tests/strings/sprintf_variation40.phpt
+      ext/standard/tests/strings/sprintf_variation41.phpt
+      ext/standard/tests/strings/sprintf_variation42.phpt
+      ext/standard/tests/strings/sprintf_variation43.phpt
+      ext/standard/tests/strings/sprintf_variation44.phpt
+      ext/standard/tests/strings/sprintf_variation45.phpt
+      ext/standard/tests/strings/sprintf_variation46.phpt
+      ext/standard/tests/strings/sprintf_variation47.phpt
+      ext/standard/tests/strings/sprintf_variation48.phpt
+      ext/standard/tests/strings/sprintf_variation49.phpt
+      ext/standard/tests/strings/sprintf_variation5.phpt
+      ext/standard/tests/strings/sprintf_variation50.phpt
+      ext/standard/tests/strings/sprintf_variation51.phpt
+      ext/standard/tests/strings/sprintf_variation52.phpt
+      ext/standard/tests/strings/sprintf_variation53.phpt:
+      New testcases for sprintf() function
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/join_basic.phpt
+      ext/standard/tests/strings/join_basic.phpt
+      ext/standard/tests/strings/join_error.phpt
+      ext/standard/tests/strings/join_error.phpt
+      ext/standard/tests/strings/join_variation1.phpt
+      ext/standard/tests/strings/join_variation1.phpt
+      ext/standard/tests/strings/join_variation2.phpt
+      ext/standard/tests/strings/join_variation2.phpt
+      ext/standard/tests/strings/join_variation3.phpt
+      ext/standard/tests/strings/join_variation3.phpt
+      ext/standard/tests/strings/join_variation4.phpt
+      ext/standard/tests/strings/join_variation4.phpt
+      ext/standard/tests/strings/join_variation5.phpt
+      ext/standard/tests/strings/join_variation5.phpt
+      ext/standard/tests/strings/join_variation6.phpt
+      ext/standard/tests/strings/join_variation6.phpt:
+      New testcases for join() function
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/htmlspecialchars_decode_basic.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_error.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation1.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation2.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation3.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation4.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation5.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation6.phpt:
+      New testcases for htmlspecialchars_decode() function
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/chunk_split_basic.phpt
+      ext/standard/tests/strings/chunk_split_error.phpt
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation10.phpt
+      ext/standard/tests/strings/chunk_split_variation11.phpt
+      ext/standard/tests/strings/chunk_split_variation12.phpt
+      ext/standard/tests/strings/chunk_split_variation13.phpt
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/chunk_split_variation4.phpt
+      ext/standard/tests/strings/chunk_split_variation5.phpt
+      ext/standard/tests/strings/chunk_split_variation6.phpt
+      ext/standard/tests/strings/chunk_split_variation7.phpt
+      ext/standard/tests/strings/chunk_split_variation8.phpt
+      ext/standard/tests/strings/chunk_split_variation9.phpt:
+      New testcases for chunk_split() function
+
+    * ext/standard/tests/strings/sprintf_basic1.phpt
+      ext/standard/tests/strings/sprintf_basic1.phpt
+      ext/standard/tests/strings/sprintf_basic2.phpt
+      ext/standard/tests/strings/sprintf_basic2.phpt
+      ext/standard/tests/strings/sprintf_basic3.phpt
+      ext/standard/tests/strings/sprintf_basic3.phpt
+      ext/standard/tests/strings/sprintf_basic4.phpt
+      ext/standard/tests/strings/sprintf_basic4.phpt
+      ext/standard/tests/strings/sprintf_basic5.phpt
+      ext/standard/tests/strings/sprintf_basic5.phpt
+      ext/standard/tests/strings/sprintf_basic6.phpt
+      ext/standard/tests/strings/sprintf_basic6.phpt
+      ext/standard/tests/strings/sprintf_basic7.phpt
+      ext/standard/tests/strings/sprintf_basic7.phpt
+      ext/standard/tests/strings/sprintf_basic8.phpt
+      ext/standard/tests/strings/sprintf_basic8.phpt
+      ext/standard/tests/strings/sprintf_basic9.phpt
+      ext/standard/tests/strings/sprintf_basic9.phpt
+      ext/standard/tests/strings/sprintf_error.phpt
+      ext/standard/tests/strings/sprintf_error.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation10.phpt
+      ext/standard/tests/strings/sprintf_variation10.phpt
+      ext/standard/tests/strings/sprintf_variation11.phpt
+      ext/standard/tests/strings/sprintf_variation11.phpt
+      ext/standard/tests/strings/sprintf_variation12.phpt
+      ext/standard/tests/strings/sprintf_variation12.phpt
+      ext/standard/tests/strings/sprintf_variation13.phpt
+      ext/standard/tests/strings/sprintf_variation13.phpt
+      ext/standard/tests/strings/sprintf_variation14.phpt
+      ext/standard/tests/strings/sprintf_variation14.phpt
+      ext/standard/tests/strings/sprintf_variation15.phpt
+      ext/standard/tests/strings/sprintf_variation15.phpt
+      ext/standard/tests/strings/sprintf_variation16.phpt
+      ext/standard/tests/strings/sprintf_variation16.phpt
+      ext/standard/tests/strings/sprintf_variation17.phpt
+      ext/standard/tests/strings/sprintf_variation17.phpt
+      ext/standard/tests/strings/sprintf_variation18.phpt
+      ext/standard/tests/strings/sprintf_variation18.phpt
+      ext/standard/tests/strings/sprintf_variation19.phpt
+      ext/standard/tests/strings/sprintf_variation19.phpt
+      ext/standard/tests/strings/sprintf_variation2.phpt
+      ext/standard/tests/strings/sprintf_variation2.phpt
+      ext/standard/tests/strings/sprintf_variation20.phpt
+      ext/standard/tests/strings/sprintf_variation20.phpt
+      ext/standard/tests/strings/sprintf_variation21.phpt
+      ext/standard/tests/strings/sprintf_variation21.phpt
+      ext/standard/tests/strings/sprintf_variation22.phpt
+      ext/standard/tests/strings/sprintf_variation22.phpt
+      ext/standard/tests/strings/sprintf_variation23.phpt
+      ext/standard/tests/strings/sprintf_variation23.phpt
+      ext/standard/tests/strings/sprintf_variation24.phpt
+      ext/standard/tests/strings/sprintf_variation24.phpt
+      ext/standard/tests/strings/sprintf_variation25.phpt
+      ext/standard/tests/strings/sprintf_variation25.phpt
+      ext/standard/tests/strings/sprintf_variation26.phpt
+      ext/standard/tests/strings/sprintf_variation26.phpt
+      ext/standard/tests/strings/sprintf_variation27.phpt
+      ext/standard/tests/strings/sprintf_variation27.phpt
+      ext/standard/tests/strings/sprintf_variation28.phpt
+      ext/standard/tests/strings/sprintf_variation28.phpt
+      ext/standard/tests/strings/sprintf_variation29.phpt
+      ext/standard/tests/strings/sprintf_variation29.phpt
+      ext/standard/tests/strings/sprintf_variation3.phpt
+      ext/standard/tests/strings/sprintf_variation3.phpt
+      ext/standard/tests/strings/sprintf_variation30.phpt
+      ext/standard/tests/strings/sprintf_variation30.phpt
+      ext/standard/tests/strings/sprintf_variation31.phpt
+      ext/standard/tests/strings/sprintf_variation31.phpt
+      ext/standard/tests/strings/sprintf_variation32.phpt
+      ext/standard/tests/strings/sprintf_variation32.phpt
+      ext/standard/tests/strings/sprintf_variation33.phpt
+      ext/standard/tests/strings/sprintf_variation33.phpt
+      ext/standard/tests/strings/sprintf_variation34.phpt
+      ext/standard/tests/strings/sprintf_variation34.phpt
+      ext/standard/tests/strings/sprintf_variation35.phpt
+      ext/standard/tests/strings/sprintf_variation35.phpt
+      ext/standard/tests/strings/sprintf_variation36.phpt
+      ext/standard/tests/strings/sprintf_variation36.phpt
+      ext/standard/tests/strings/sprintf_variation37.phpt
+      ext/standard/tests/strings/sprintf_variation37.phpt
+      ext/standard/tests/strings/sprintf_variation38.phpt
+      ext/standard/tests/strings/sprintf_variation38.phpt
+      ext/standard/tests/strings/sprintf_variation39.phpt
+      ext/standard/tests/strings/sprintf_variation39.phpt
+      ext/standard/tests/strings/sprintf_variation4.phpt
+      ext/standard/tests/strings/sprintf_variation4.phpt
+      ext/standard/tests/strings/sprintf_variation40.phpt
+      ext/standard/tests/strings/sprintf_variation40.phpt
+      ext/standard/tests/strings/sprintf_variation41.phpt
+      ext/standard/tests/strings/sprintf_variation41.phpt
+      ext/standard/tests/strings/sprintf_variation42.phpt
+      ext/standard/tests/strings/sprintf_variation42.phpt
+      ext/standard/tests/strings/sprintf_variation43.phpt
+      ext/standard/tests/strings/sprintf_variation43.phpt
+      ext/standard/tests/strings/sprintf_variation44.phpt
+      ext/standard/tests/strings/sprintf_variation44.phpt
+      ext/standard/tests/strings/sprintf_variation45.phpt
+      ext/standard/tests/strings/sprintf_variation45.phpt
+      ext/standard/tests/strings/sprintf_variation46.phpt
+      ext/standard/tests/strings/sprintf_variation46.phpt
+      ext/standard/tests/strings/sprintf_variation47.phpt
+      ext/standard/tests/strings/sprintf_variation47.phpt
+      ext/standard/tests/strings/sprintf_variation48.phpt
+      ext/standard/tests/strings/sprintf_variation48.phpt
+      ext/standard/tests/strings/sprintf_variation49.phpt
+      ext/standard/tests/strings/sprintf_variation49.phpt
+      ext/standard/tests/strings/sprintf_variation5.phpt
+      ext/standard/tests/strings/sprintf_variation5.phpt
+      ext/standard/tests/strings/sprintf_variation50.phpt
+      ext/standard/tests/strings/sprintf_variation50.phpt
+      ext/standard/tests/strings/sprintf_variation51.phpt
+      ext/standard/tests/strings/sprintf_variation51.phpt
+      ext/standard/tests/strings/sprintf_variation52.phpt
+      ext/standard/tests/strings/sprintf_variation52.phpt
+      ext/standard/tests/strings/sprintf_variation53.phpt
+      ext/standard/tests/strings/sprintf_variation53.phpt
+      ext/standard/tests/strings/sprintf_variation6.phpt
+      ext/standard/tests/strings/sprintf_variation7.phpt
+      ext/standard/tests/strings/sprintf_variation8.phpt
+      ext/standard/tests/strings/sprintf_variation9.phpt:
+      
+      New testcases for sprintf() function
+
+    * ext/standard/tests/strings/sprintf_basic1.phpt
+      ext/standard/tests/strings/sprintf_basic1.phpt
+      ext/standard/tests/strings/sprintf_basic2.phpt
+      ext/standard/tests/strings/sprintf_basic2.phpt
+      ext/standard/tests/strings/sprintf_basic3.phpt
+      ext/standard/tests/strings/sprintf_basic3.phpt
+      ext/standard/tests/strings/sprintf_basic4.phpt
+      ext/standard/tests/strings/sprintf_basic4.phpt
+      ext/standard/tests/strings/sprintf_basic5.phpt
+      ext/standard/tests/strings/sprintf_basic5.phpt
+      ext/standard/tests/strings/sprintf_basic6.phpt
+      ext/standard/tests/strings/sprintf_basic6.phpt
+      ext/standard/tests/strings/sprintf_basic7.phpt
+      ext/standard/tests/strings/sprintf_basic7.phpt
+      ext/standard/tests/strings/sprintf_basic8.phpt
+      ext/standard/tests/strings/sprintf_basic8.phpt
+      ext/standard/tests/strings/sprintf_basic9.phpt
+      ext/standard/tests/strings/sprintf_basic9.phpt
+      ext/standard/tests/strings/sprintf_error.phpt
+      ext/standard/tests/strings/sprintf_error.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation10.phpt
+      ext/standard/tests/strings/sprintf_variation10.phpt
+      ext/standard/tests/strings/sprintf_variation11.phpt
+      ext/standard/tests/strings/sprintf_variation11.phpt
+      ext/standard/tests/strings/sprintf_variation12.phpt
+      ext/standard/tests/strings/sprintf_variation12.phpt
+      ext/standard/tests/strings/sprintf_variation13.phpt
+      ext/standard/tests/strings/sprintf_variation13.phpt
+      ext/standard/tests/strings/sprintf_variation14.phpt
+      ext/standard/tests/strings/sprintf_variation14.phpt
+      ext/standard/tests/strings/sprintf_variation15.phpt
+      ext/standard/tests/strings/sprintf_variation15.phpt
+      ext/standard/tests/strings/sprintf_variation16.phpt
+      ext/standard/tests/strings/sprintf_variation16.phpt
+      ext/standard/tests/strings/sprintf_variation17.phpt
+      ext/standard/tests/strings/sprintf_variation17.phpt
+      ext/standard/tests/strings/sprintf_variation18.phpt
+      ext/standard/tests/strings/sprintf_variation18.phpt
+      ext/standard/tests/strings/sprintf_variation19.phpt
+      ext/standard/tests/strings/sprintf_variation19.phpt
+      ext/standard/tests/strings/sprintf_variation2.phpt
+      ext/standard/tests/strings/sprintf_variation2.phpt
+      ext/standard/tests/strings/sprintf_variation20.phpt
+      ext/standard/tests/strings/sprintf_variation20.phpt
+      ext/standard/tests/strings/sprintf_variation21.phpt
+      ext/standard/tests/strings/sprintf_variation21.phpt
+      ext/standard/tests/strings/sprintf_variation22.phpt
+      ext/standard/tests/strings/sprintf_variation22.phpt
+      ext/standard/tests/strings/sprintf_variation23.phpt
+      ext/standard/tests/strings/sprintf_variation23.phpt
+      ext/standard/tests/strings/sprintf_variation24.phpt
+      ext/standard/tests/strings/sprintf_variation24.phpt
+      ext/standard/tests/strings/sprintf_variation25.phpt
+      ext/standard/tests/strings/sprintf_variation25.phpt
+      ext/standard/tests/strings/sprintf_variation26.phpt
+      ext/standard/tests/strings/sprintf_variation26.phpt
+      ext/standard/tests/strings/sprintf_variation27.phpt
+      ext/standard/tests/strings/sprintf_variation27.phpt
+      ext/standard/tests/strings/sprintf_variation28.phpt
+      ext/standard/tests/strings/sprintf_variation28.phpt
+      ext/standard/tests/strings/sprintf_variation29.phpt
+      ext/standard/tests/strings/sprintf_variation29.phpt
+      ext/standard/tests/strings/sprintf_variation3.phpt
+      ext/standard/tests/strings/sprintf_variation3.phpt
+      ext/standard/tests/strings/sprintf_variation30.phpt
+      ext/standard/tests/strings/sprintf_variation30.phpt
+      ext/standard/tests/strings/sprintf_variation31.phpt
+      ext/standard/tests/strings/sprintf_variation31.phpt
+      ext/standard/tests/strings/sprintf_variation32.phpt
+      ext/standard/tests/strings/sprintf_variation32.phpt
+      ext/standard/tests/strings/sprintf_variation33.phpt
+      ext/standard/tests/strings/sprintf_variation33.phpt
+      ext/standard/tests/strings/sprintf_variation34.phpt
+      ext/standard/tests/strings/sprintf_variation34.phpt
+      ext/standard/tests/strings/sprintf_variation35.phpt
+      ext/standard/tests/strings/sprintf_variation35.phpt
+      ext/standard/tests/strings/sprintf_variation36.phpt
+      ext/standard/tests/strings/sprintf_variation36.phpt
+      ext/standard/tests/strings/sprintf_variation37.phpt
+      ext/standard/tests/strings/sprintf_variation37.phpt
+      ext/standard/tests/strings/sprintf_variation38.phpt
+      ext/standard/tests/strings/sprintf_variation38.phpt
+      ext/standard/tests/strings/sprintf_variation39.phpt
+      ext/standard/tests/strings/sprintf_variation39.phpt
+      ext/standard/tests/strings/sprintf_variation4.phpt
+      ext/standard/tests/strings/sprintf_variation4.phpt
+      ext/standard/tests/strings/sprintf_variation40.phpt
+      ext/standard/tests/strings/sprintf_variation40.phpt
+      ext/standard/tests/strings/sprintf_variation41.phpt
+      ext/standard/tests/strings/sprintf_variation41.phpt
+      ext/standard/tests/strings/sprintf_variation42.phpt
+      ext/standard/tests/strings/sprintf_variation42.phpt
+      ext/standard/tests/strings/sprintf_variation43.phpt
+      ext/standard/tests/strings/sprintf_variation43.phpt
+      ext/standard/tests/strings/sprintf_variation44.phpt
+      ext/standard/tests/strings/sprintf_variation44.phpt
+      ext/standard/tests/strings/sprintf_variation45.phpt
+      ext/standard/tests/strings/sprintf_variation45.phpt
+      ext/standard/tests/strings/sprintf_variation46.phpt
+      ext/standard/tests/strings/sprintf_variation46.phpt
+      ext/standard/tests/strings/sprintf_variation47.phpt
+      ext/standard/tests/strings/sprintf_variation47.phpt
+      ext/standard/tests/strings/sprintf_variation48.phpt
+      ext/standard/tests/strings/sprintf_variation48.phpt
+      ext/standard/tests/strings/sprintf_variation49.phpt
+      ext/standard/tests/strings/sprintf_variation49.phpt
+      ext/standard/tests/strings/sprintf_variation5.phpt
+      ext/standard/tests/strings/sprintf_variation5.phpt
+      ext/standard/tests/strings/sprintf_variation50.phpt
+      ext/standard/tests/strings/sprintf_variation50.phpt
+      ext/standard/tests/strings/sprintf_variation51.phpt
+      ext/standard/tests/strings/sprintf_variation51.phpt
+      ext/standard/tests/strings/sprintf_variation52.phpt
+      ext/standard/tests/strings/sprintf_variation52.phpt
+      ext/standard/tests/strings/sprintf_variation53.phpt
+      ext/standard/tests/strings/sprintf_variation53.phpt
+      ext/standard/tests/strings/sprintf_variation6.phpt
+      ext/standard/tests/strings/sprintf_variation6.phpt
+      ext/standard/tests/strings/sprintf_variation7.phpt
+      ext/standard/tests/strings/sprintf_variation7.phpt
+      ext/standard/tests/strings/sprintf_variation8.phpt
+      ext/standard/tests/strings/sprintf_variation8.phpt
+      ext/standard/tests/strings/sprintf_variation9.phpt
+      ext/standard/tests/strings/sprintf_variation9.phpt:
+      
+      file sprintf_basic1.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/chunk_split_basic.phpt
+      ext/standard/tests/strings/chunk_split_basic.phpt
+      ext/standard/tests/strings/chunk_split_error.phpt
+      ext/standard/tests/strings/chunk_split_error.phpt
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation10.phpt
+      ext/standard/tests/strings/chunk_split_variation10.phpt
+      ext/standard/tests/strings/chunk_split_variation11.phpt
+      ext/standard/tests/strings/chunk_split_variation11.phpt
+      ext/standard/tests/strings/chunk_split_variation12.phpt
+      ext/standard/tests/strings/chunk_split_variation12.phpt
+      ext/standard/tests/strings/chunk_split_variation13.phpt
+      ext/standard/tests/strings/chunk_split_variation13.phpt
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/chunk_split_variation4.phpt
+      ext/standard/tests/strings/chunk_split_variation4.phpt
+      ext/standard/tests/strings/chunk_split_variation5.phpt
+      ext/standard/tests/strings/chunk_split_variation5.phpt
+      ext/standard/tests/strings/chunk_split_variation6.phpt
+      ext/standard/tests/strings/chunk_split_variation6.phpt
+      ext/standard/tests/strings/chunk_split_variation7.phpt
+      ext/standard/tests/strings/chunk_split_variation7.phpt
+      ext/standard/tests/strings/chunk_split_variation8.phpt
+      ext/standard/tests/strings/chunk_split_variation8.phpt
+      ext/standard/tests/strings/chunk_split_variation9.phpt
+      ext/standard/tests/strings/chunk_split_variation9.phpt:
+      
+      New testcases for chunk_split() function
+
+    * ext/standard/tests/strings/chunk_split_basic.phpt
+      ext/standard/tests/strings/chunk_split_basic.phpt
+      ext/standard/tests/strings/chunk_split_error.phpt
+      ext/standard/tests/strings/chunk_split_error.phpt
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation10.phpt
+      ext/standard/tests/strings/chunk_split_variation10.phpt
+      ext/standard/tests/strings/chunk_split_variation11.phpt
+      ext/standard/tests/strings/chunk_split_variation11.phpt
+      ext/standard/tests/strings/chunk_split_variation12.phpt
+      ext/standard/tests/strings/chunk_split_variation12.phpt
+      ext/standard/tests/strings/chunk_split_variation13.phpt
+      ext/standard/tests/strings/chunk_split_variation13.phpt
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/chunk_split_variation4.phpt
+      ext/standard/tests/strings/chunk_split_variation4.phpt
+      ext/standard/tests/strings/chunk_split_variation5.phpt
+      ext/standard/tests/strings/chunk_split_variation5.phpt
+      ext/standard/tests/strings/chunk_split_variation6.phpt
+      ext/standard/tests/strings/chunk_split_variation6.phpt
+      ext/standard/tests/strings/chunk_split_variation7.phpt
+      ext/standard/tests/strings/chunk_split_variation7.phpt
+      ext/standard/tests/strings/chunk_split_variation8.phpt
+      ext/standard/tests/strings/chunk_split_variation8.phpt
+      ext/standard/tests/strings/chunk_split_variation9.phpt
+      ext/standard/tests/strings/chunk_split_variation9.phpt:
+      
+      file chunk_split_basic.phpt was initially added on branch PHP_5_2.
+
+2007-09-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_modules.h:
+      Updated API version numbers
+
+2007-09-29  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/openssl/xp_ssl.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      sapi/cli/php_cli_readline.c:
+      MFB: fix compiler warnings
+
+    * (PHP_5_3)
+      ext/openssl/xp_ssl.c:
+      use FREE_ZVAL() instead of free() to free a zval
+
+    * (PHP_5_3)
+      ext/openssl/xp_ssl.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      main/php_variables.c
+      sapi/cli/php_cli_readline.c:
+      fix a few compiler warnings (mostly use of unitialized values)
+
+2007-09-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_alloc.h:
+      Added "compact" handler for Zend MM storage.
+
+    * (PHP_5_3)
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Added support for __callstatic() magic method (missing part). (Sara)
+
+2007-09-29  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/strrchr_basic.phpt
+      ext/standard/tests/strings/strrchr_basic.phpt
+      ext/standard/tests/strings/strrchr_error.phpt
+      ext/standard/tests/strings/strrchr_error.phpt
+      ext/standard/tests/strings/strrchr_variation1.phpt
+      ext/standard/tests/strings/strrchr_variation1.phpt
+      ext/standard/tests/strings/strrchr_variation10.phpt
+      ext/standard/tests/strings/strrchr_variation10.phpt
+      ext/standard/tests/strings/strrchr_variation11.phpt
+      ext/standard/tests/strings/strrchr_variation11.phpt
+      ext/standard/tests/strings/strrchr_variation12.phpt
+      ext/standard/tests/strings/strrchr_variation12.phpt
+      ext/standard/tests/strings/strrchr_variation2.phpt
+      ext/standard/tests/strings/strrchr_variation2.phpt
+      ext/standard/tests/strings/strrchr_variation3.phpt
+      ext/standard/tests/strings/strrchr_variation3.phpt
+      ext/standard/tests/strings/strrchr_variation4.phpt
+      ext/standard/tests/strings/strrchr_variation4.phpt
+      ext/standard/tests/strings/strrchr_variation5.phpt
+      ext/standard/tests/strings/strrchr_variation5.phpt
+      ext/standard/tests/strings/strrchr_variation6.phpt
+      ext/standard/tests/strings/strrchr_variation6.phpt
+      ext/standard/tests/strings/strrchr_variation7.phpt
+      ext/standard/tests/strings/strrchr_variation7.phpt
+      ext/standard/tests/strings/strrchr_variation8.phpt
+      ext/standard/tests/strings/strrchr_variation8.phpt
+      ext/standard/tests/strings/strrchr_variation9.phpt
+      ext/standard/tests/strings/strrchr_variation9.phpt:
+      
+      New testcases for strrchr() function
+
+    * ext/standard/tests/strings/stripos_basic1.phpt
+      ext/standard/tests/strings/stripos_basic1.phpt
+      ext/standard/tests/strings/stripos_basic2.phpt
+      ext/standard/tests/strings/stripos_basic2.phpt
+      ext/standard/tests/strings/stripos_error.phpt
+      ext/standard/tests/strings/stripos_error.phpt
+      ext/standard/tests/strings/stripos_variation1.phpt
+      ext/standard/tests/strings/stripos_variation1.phpt
+      ext/standard/tests/strings/stripos_variation10.phpt
+      ext/standard/tests/strings/stripos_variation10.phpt
+      ext/standard/tests/strings/stripos_variation11.phpt
+      ext/standard/tests/strings/stripos_variation11.phpt
+      ext/standard/tests/strings/stripos_variation12.phpt
+      ext/standard/tests/strings/stripos_variation12.phpt
+      ext/standard/tests/strings/stripos_variation13.phpt
+      ext/standard/tests/strings/stripos_variation13.phpt
+      ext/standard/tests/strings/stripos_variation14.phpt
+      ext/standard/tests/strings/stripos_variation14.phpt
+      ext/standard/tests/strings/stripos_variation15.phpt
+      ext/standard/tests/strings/stripos_variation15.phpt
+      ext/standard/tests/strings/stripos_variation2.phpt
+      ext/standard/tests/strings/stripos_variation2.phpt
+      ext/standard/tests/strings/stripos_variation3.phpt
+      ext/standard/tests/strings/stripos_variation3.phpt
+      ext/standard/tests/strings/stripos_variation4.phpt
+      ext/standard/tests/strings/stripos_variation4.phpt
+      ext/standard/tests/strings/stripos_variation5.phpt
+      ext/standard/tests/strings/stripos_variation5.phpt
+      ext/standard/tests/strings/stripos_variation6.phpt
+      ext/standard/tests/strings/stripos_variation6.phpt
+      ext/standard/tests/strings/stripos_variation7.phpt
+      ext/standard/tests/strings/stripos_variation7.phpt
+      ext/standard/tests/strings/stripos_variation8.phpt
+      ext/standard/tests/strings/stripos_variation8.phpt
+      ext/standard/tests/strings/stripos_variation9.phpt
+      ext/standard/tests/strings/stripos_variation9.phpt:
+      
+      New testcases for stripos() function
+
+    * ext/standard/tests/strings/stripos_basic1.phpt
+      ext/standard/tests/strings/stripos_basic1.phpt
+      ext/standard/tests/strings/stripos_basic2.phpt
+      ext/standard/tests/strings/stripos_basic2.phpt
+      ext/standard/tests/strings/stripos_error.phpt
+      ext/standard/tests/strings/stripos_error.phpt
+      ext/standard/tests/strings/stripos_variation1.phpt
+      ext/standard/tests/strings/stripos_variation1.phpt
+      ext/standard/tests/strings/stripos_variation10.phpt
+      ext/standard/tests/strings/stripos_variation10.phpt
+      ext/standard/tests/strings/stripos_variation11.phpt
+      ext/standard/tests/strings/stripos_variation11.phpt
+      ext/standard/tests/strings/stripos_variation12.phpt
+      ext/standard/tests/strings/stripos_variation12.phpt
+      ext/standard/tests/strings/stripos_variation13.phpt
+      ext/standard/tests/strings/stripos_variation13.phpt
+      ext/standard/tests/strings/stripos_variation14.phpt
+      ext/standard/tests/strings/stripos_variation14.phpt
+      ext/standard/tests/strings/stripos_variation15.phpt
+      ext/standard/tests/strings/stripos_variation15.phpt
+      ext/standard/tests/strings/stripos_variation2.phpt
+      ext/standard/tests/strings/stripos_variation2.phpt
+      ext/standard/tests/strings/stripos_variation3.phpt
+      ext/standard/tests/strings/stripos_variation3.phpt
+      ext/standard/tests/strings/stripos_variation4.phpt
+      ext/standard/tests/strings/stripos_variation4.phpt
+      ext/standard/tests/strings/stripos_variation5.phpt
+      ext/standard/tests/strings/stripos_variation5.phpt
+      ext/standard/tests/strings/stripos_variation6.phpt
+      ext/standard/tests/strings/stripos_variation6.phpt
+      ext/standard/tests/strings/stripos_variation7.phpt
+      ext/standard/tests/strings/stripos_variation7.phpt
+      ext/standard/tests/strings/stripos_variation8.phpt
+      ext/standard/tests/strings/stripos_variation8.phpt
+      ext/standard/tests/strings/stripos_variation9.phpt
+      ext/standard/tests/strings/stripos_variation9.phpt:
+      
+      file stripos_basic1.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/strrchr_basic.phpt
+      ext/standard/tests/strings/strrchr_basic.phpt
+      ext/standard/tests/strings/strrchr_error.phpt
+      ext/standard/tests/strings/strrchr_error.phpt
+      ext/standard/tests/strings/strrchr_variation1.phpt
+      ext/standard/tests/strings/strrchr_variation1.phpt
+      ext/standard/tests/strings/strrchr_variation10.phpt
+      ext/standard/tests/strings/strrchr_variation10.phpt
+      ext/standard/tests/strings/strrchr_variation11.phpt
+      ext/standard/tests/strings/strrchr_variation11.phpt
+      ext/standard/tests/strings/strrchr_variation12.phpt
+      ext/standard/tests/strings/strrchr_variation12.phpt
+      ext/standard/tests/strings/strrchr_variation2.phpt
+      ext/standard/tests/strings/strrchr_variation2.phpt
+      ext/standard/tests/strings/strrchr_variation3.phpt
+      ext/standard/tests/strings/strrchr_variation3.phpt
+      ext/standard/tests/strings/strrchr_variation4.phpt
+      ext/standard/tests/strings/strrchr_variation4.phpt
+      ext/standard/tests/strings/strrchr_variation5.phpt
+      ext/standard/tests/strings/strrchr_variation5.phpt
+      ext/standard/tests/strings/strrchr_variation6.phpt
+      ext/standard/tests/strings/strrchr_variation6.phpt
+      ext/standard/tests/strings/strrchr_variation7.phpt
+      ext/standard/tests/strings/strrchr_variation7.phpt
+      ext/standard/tests/strings/strrchr_variation8.phpt
+      ext/standard/tests/strings/strrchr_variation8.phpt
+      ext/standard/tests/strings/strrchr_variation9.phpt
+      ext/standard/tests/strings/strrchr_variation9.phpt:
+      
+      file strrchr_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/join_basic.phpt
+      ext/standard/tests/strings/join_basic.phpt
+      ext/standard/tests/strings/join_basic.phpt
+      ext/standard/tests/strings/join_error.phpt
+      ext/standard/tests/strings/join_error.phpt
+      ext/standard/tests/strings/join_error.phpt
+      ext/standard/tests/strings/join_variation1.phpt
+      ext/standard/tests/strings/join_variation1.phpt
+      ext/standard/tests/strings/join_variation1.phpt
+      ext/standard/tests/strings/join_variation2.phpt
+      ext/standard/tests/strings/join_variation2.phpt
+      ext/standard/tests/strings/join_variation2.phpt
+      ext/standard/tests/strings/join_variation3.phpt
+      ext/standard/tests/strings/join_variation3.phpt
+      ext/standard/tests/strings/join_variation3.phpt
+      ext/standard/tests/strings/join_variation4.phpt
+      ext/standard/tests/strings/join_variation4.phpt
+      ext/standard/tests/strings/join_variation4.phpt
+      ext/standard/tests/strings/join_variation5.phpt
+      ext/standard/tests/strings/join_variation5.phpt
+      ext/standard/tests/strings/join_variation5.phpt
+      ext/standard/tests/strings/join_variation6.phpt
+      ext/standard/tests/strings/join_variation6.phpt
+      ext/standard/tests/strings/join_variation6.phpt:
+        1.1.4;
+      New testcases for join() function
+
+    * ext/standard/tests/strings/htmlspecialchars_decode_basic.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_basic.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_error.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_error.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation1.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation1.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation2.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation2.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation3.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation3.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation4.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation4.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation5.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation5.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation6.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation6.phpt:
+      
+      New testcases for htmlspecialchars_decode() function
+
+    * ext/standard/tests/strings/htmlspecialchars_decode_basic.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_basic.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_error.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_error.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation1.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation1.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation2.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation2.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation3.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation3.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation4.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation4.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation5.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation5.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation6.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation6.phpt:
+      
+      file htmlspecialchars_decode_basic.phpt was initially added on branch
+      PHP_5_2.
+
+2007-09-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/call_static.phpt
+      ZendEngine2/tests/object_handlers.phpt:
+      Added support for __callstatic() magic method. (Sara)
+
+    * ZendEngine2/zend_API.c:
+      optimization
+
+    * (PHP_5_3)
+      ZendEngine2/zend_vm_def.h:
+      Removed commented code
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/tests/lsb_001.phpt
+      ZendEngine2/tests/lsb_002.phpt
+      ZendEngine2/tests/lsb_003.phpt
+      ZendEngine2/tests/lsb_004.phpt
+      ZendEngine2/tests/lsb_005.phpt
+      ZendEngine2/tests/lsb_006.phpt
+      ZendEngine2/tests/lsb_007.phpt
+      ZendEngine2/tests/lsb_008.phpt
+      ZendEngine2/tests/lsb_009.phpt
+      ZendEngine2/tests/lsb_010.phpt
+      ZendEngine2/tests/lsb_011.phpt
+      ZendEngine2/tests/lsb_012.phpt
+      ZendEngine2/tests/lsb_013.phpt
+      ZendEngine2/tests/lsb_014.phpt
+      ZendEngine2/tests/lsb_015.phpt
+      ZendEngine2/tests/lsb_016.phpt
+      ZendEngine2/tests/lsb_017.phpt:
+      Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
+
+2007-09-29  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Nuked unused variable
+
 2007-09-28  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * ext/standard/browscap.c:
