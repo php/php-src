@@ -40,26 +40,26 @@ NULL
 
 Notice: Undefined variable: str in %s on line %d
 
-Warning: substr_count(): Offset should be greater than or equal to 0. in %s on line %d
+Warning: substr_count(): Offset should be greater than or equal to 0 in %s on line %d
 bool(false)
 
 Notice: Undefined variable: str in %s on line %d
 
-Warning: substr_count(): Offset value 25 exceeds string length. in %s on line %d
+Warning: substr_count(): Offset value 25 exceeds string length in %s on line %d
 bool(false)
 
 Notice: Undefined variable: str in %s on line %d
 
-Warning: substr_count(): Offset value 5 exceeds string length. in %s on line %d
+Warning: substr_count(): Offset value 5 exceeds string length in %s on line %d
 bool(false)
 
 Notice: Undefined variable: str in %s on line %d
 
-Warning: substr_count(): Length should be greater than 0. in %s on line %d
+Warning: substr_count(): Length should be greater than 0 in %s on line %d
 bool(false)
 
 Notice: Undefined variable: str in %s on line %d
 
-Warning: substr_count(): Length should be greater than 0. in %s on line %d
+Warning: substr_count(): Length should be greater than 0 in %s on line %d
 bool(false)
 Done
