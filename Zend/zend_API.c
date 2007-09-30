@@ -2153,10 +2153,9 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, zend_class_entry *ce_org, zval *callable, zend_class_entry **ce_ptr, zend_function **fptr_ptr TSRMLS_DC)
 {
 	int retval;
-	char *lcname, *lmname, *colon;
+	char *lmname, *colon;
 	int clen, mlen;
 	zend_function *fptr;
-	zend_class_entry **pce;
 	HashTable *ftable;
 
 	*ce_ptr = NULL;
