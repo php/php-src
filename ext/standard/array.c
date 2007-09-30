@@ -1398,8 +1398,7 @@ PHP_FUNCTION(extract)
 	int extract_refs = 0;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|lz/", &var_array,
-							  &extract_type, &prefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
 		return;
 	}
 
@@ -1411,8 +1410,7 @@ PHP_FUNCTION(extract)
 		return;
 	}
 	
-	if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS
-		&& ZEND_NUM_ARGS() < 3) {
+	if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS && ZEND_NUM_ARGS() < 3) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "specified extract type requires the prefix parameter");
 		return;
 	}
@@ -1435,7 +1433,8 @@ PHP_FUNCTION(extract)
 		var_exists = 0;
 
 		if (key_type == HASH_KEY_IS_STRING ||
-			key_type == HASH_KEY_IS_UNICODE) {
+			key_type == HASH_KEY_IS_UNICODE
+		) {
 			if (key_type == HASH_KEY_IS_STRING) {
 				key_type = IS_STRING;
 			} else {
@@ -1443,9 +1442,10 @@ PHP_FUNCTION(extract)
 			}
 			var_name_len--;
 			var_exists = zend_u_hash_exists(EG(active_symbol_table), key_type, var_name, var_name_len + 1);
-		} else if (key_type == HASH_KEY_IS_LONG &&
-				   (extract_type == EXTR_PREFIX_ALL ||
-					extract_type == EXTR_PREFIX_INVALID)) {
+		} else if (	key_type == HASH_KEY_IS_LONG &&
+					(extract_type == EXTR_PREFIX_ALL ||
+					 extract_type == EXTR_PREFIX_INVALID)
+		) {
 			zval num;
 
 			ZVAL_LONG(&num, num_key);
@@ -1463,12 +1463,13 @@ PHP_FUNCTION(extract)
 				/* break omitted intentionally */
 
 			case EXTR_OVERWRITE:
+				/* GLOBALS protection */
 				if (var_exists && 
 					var_name_len == sizeof("GLOBALS") &&
-					ZEND_U_EQUAL(key_type, var_name, var_name_len-1, "GLOBALS", sizeof("GLOBALS")-1)) {
+					ZEND_U_EQUAL(key_type, var_name, var_name_len-1, "GLOBALS", sizeof("GLOBALS")-1)
+				) {
 					break;
 				}
-			
 				ZVAL_ZSTRL(&final_name, key_type, var_name, var_name_len, 1);
 				break;
 
@@ -1540,7 +1541,6 @@ PHP_FUNCTION(extract)
 
 				ZEND_U_SET_SYMBOL_WITH_LENGTH(EG(active_symbol_table), Z_TYPE(final_name), Z_UNIVAL(final_name), Z_UNILEN(final_name)+1, data, 1, 0);
 			}
-
 			count++;
 		}
 		zval_dtor(&final_name);
@@ -1552,8 +1552,7 @@ PHP_FUNCTION(extract)
 }
 /* }}} */
 
-/* {{{ php_compact_var */
-static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry)
+static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry) /* {{{ */
 {
 	zstr key;
 	int key_len;
