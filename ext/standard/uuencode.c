@@ -215,7 +215,7 @@ PHP_FUNCTION(convert_uudecode)
 
 	dst_len = php_uudecode(src, src_len, &dst);
 	if (dst_len < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The given parameter is not a valid uuencoded string.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The given parameter is not a valid uuencoded string");
 		RETURN_FALSE;
 	}
 

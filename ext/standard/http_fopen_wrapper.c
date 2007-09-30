@@ -137,7 +137,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		/* Normal http request (possibly with proxy) */
 	
 		if (strpbrk(mode, "awx+")) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP wrapper does not support writeable connections.");
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP wrapper does not support writeable connections");
 			php_url_free(resource);
 			return NULL;
 		}
