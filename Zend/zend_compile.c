@@ -34,6 +34,7 @@
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
 
+void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_name TSRMLS_DC);
 
 #ifndef ZTS
 ZEND_API zend_compiler_globals compiler_globals;
@@ -1318,6 +1319,7 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	if (class_type->op_type != IS_UNUSED) {
 		cur_arg_info->allow_null = 0;
 		if (class_type->u.constant.type == IS_STRING) {
+			zend_resolve_class_name(class_type, &opline->extended_value, 1 TSRMLS_CC);
 			cur_arg_info->class_name = class_type->u.constant.value.str.val;
 			cur_arg_info->class_name_len = class_type->u.constant.value.str.len;
 			if (op == ZEND_RECV_INIT) {
