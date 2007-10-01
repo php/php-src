@@ -497,9 +497,9 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static inline char * zend_verify_arg_class_kind(zend_arg_info *cur_arg_info, zstr *class_name, zend_class_entry **pce TSRMLS_DC) /* {{{ */
+static inline char * zend_verify_arg_class_kind(zend_arg_info *cur_arg_info, ulong fetch_type, zstr *class_name, zend_class_entry **pce TSRMLS_DC) /* {{{ */
 {
-	*pce = zend_u_fetch_class(UG(unicode) ? IS_UNICODE : IS_STRING, cur_arg_info->class_name, cur_arg_info->class_name_len, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD) TSRMLS_CC);
+	*pce = zend_u_fetch_class(UG(unicode) ? IS_UNICODE : IS_STRING, cur_arg_info->class_name, cur_arg_info->class_name_len, (fetch_type | ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD) TSRMLS_CC);
 
 	*class_name = (*pce) ? (*pce)->name: cur_arg_info->class_name;
 	if (*pce && (*pce)->ce_flags & ZEND_ACC_INTERFACE) {
@@ -534,7 +534,7 @@ static inline int zend_verify_arg_error(zend_function *zf, zend_uint arg_num, ze
 }
 /* }}} */
 
-static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zval *arg TSRMLS_DC) /* {{{ */
+static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zval *arg, ulong fetch_type TSRMLS_DC) /* {{{ */
 {
 	zend_arg_info *cur_arg_info;
 	char *need_msg;
@@ -550,16 +550,16 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
         zstr class_name;
 
         if (!arg) {
-            need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce TSRMLS_CC);
+            need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
             return zend_verify_arg_error(zf, arg_num, cur_arg_info, need_msg, class_name, "none", EMPTY_ZSTR TSRMLS_CC);
         }
         if (Z_TYPE_P(arg) == IS_OBJECT) {
-            need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce TSRMLS_CC);
+            need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
             if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
                 return zend_verify_arg_error(zf, arg_num, cur_arg_info, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name TSRMLS_CC);
             }
         } else if (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null) {
-            need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce TSRMLS_CC);
+            need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
             return zend_verify_arg_error(zf, arg_num, cur_arg_info, need_msg, class_name, zend_zval_type_name(arg), EMPTY_ZSTR TSRMLS_CC);
         }
 	} else if (cur_arg_info->array_type_hint) {
