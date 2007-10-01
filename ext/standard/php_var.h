@@ -69,21 +69,21 @@ PHPAPI zend_class_entry *php_create_empty_class(char *class_name, int len);
 
 static inline int php_varname_check(char *name, int name_len, zend_bool silent TSRMLS_DC) /* {{{ */
 {
-    if (name_len == sizeof("GLOBALS") && !memcmp(name, "GLOBALS", sizeof("GLOBALS"))) {
+    if (name_len == sizeof("GLOBALS") - 1 && !memcmp(name, "GLOBALS", sizeof("GLOBALS") - 1)) {
 		if (!silent) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted GLOBALS variable overwrite");
 		}
         return FAILURE;
     } else if (name[0] == '_' &&
             (
-             (name_len == sizeof("_GET") && !memcmp(name, "_GET", sizeof("_GET"))) ||
-             (name_len == sizeof("_POST") && !memcmp(name, "_POST", sizeof("_POST"))) ||
-             (name_len == sizeof("_COOKIE") && !memcmp(name, "_COOKIE", sizeof("_COOKIE"))) ||
-             (name_len == sizeof("_ENV") && !memcmp(name, "_ENV", sizeof("_ENV"))) ||
-             (name_len == sizeof("_SERVER") && !memcmp(name, "_SERVER", sizeof("_SERVER"))) ||
-             (name_len == sizeof("_SESSION") && !memcmp(name, "_SESSION", sizeof("_SESSION"))) ||
-             (name_len == sizeof("_FILES") && !memcmp(name, "_FILES", sizeof("_FILES"))) ||
-             (name_len == sizeof("_REQUEST") && !memcmp(name, "_REQUEST", sizeof("_REQUEST")))
+             (name_len == sizeof("_GET") - 1 && !memcmp(name, "_GET", sizeof("_GET") - 1)) ||
+             (name_len == sizeof("_POST") - 1 && !memcmp(name, "_POST", sizeof("_POST") - 1)) ||
+             (name_len == sizeof("_COOKIE") - 1 && !memcmp(name, "_COOKIE", sizeof("_COOKIE") - 1)) ||
+             (name_len == sizeof("_ENV") - 1 && !memcmp(name, "_ENV", sizeof("_ENV") - 1)) ||
+             (name_len == sizeof("_SERVER") - 1 && !memcmp(name, "_SERVER", sizeof("_SERVER") - 1)) ||
+             (name_len == sizeof("_SESSION") - 1 && !memcmp(name, "_SESSION", sizeof("_SESSION") - 1)) ||
+             (name_len == sizeof("_FILES") - 1  && !memcmp(name, "_FILES", sizeof("_FILES") - 1)) ||
+             (name_len == sizeof("_REQUEST") -1 && !memcmp(name, "_REQUEST", sizeof("_REQUEST") - 1))
             )
             ) {
 		if (!silent) {
@@ -92,14 +92,14 @@ static inline int php_varname_check(char *name, int name_len, zend_bool silent T
         return FAILURE;
     } else if (name[0] == 'H' &&
             (
-             (name_len == sizeof("HTTP_POST_VARS") && !memcmp(name, "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"))) ||
-             (name_len == sizeof("HTTP_GET_VARS") && !memcmp(name, "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"))) ||
-             (name_len == sizeof("HTTP_COOKIE_VARS") && !memcmp(name, "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"))) ||
-             (name_len == sizeof("HTTP_ENV_VARS") && !memcmp(name, "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"))) ||
-             (name_len == sizeof("HTTP_SERVER_VARS") && !memcmp(name, "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"))) ||
-             (name_len == sizeof("HTTP_SESSION_VARS") && !memcmp(name, "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"))) ||
-             (name_len == sizeof("HTTP_RAW_POST_DATA") && !memcmp(name, "HTTP_RAW_POST_DATA", sizeof("HTTP_RAW_POST_DATA"))) ||
-             (name_len == sizeof("HTTP_POST_FILES") && !memcmp(name, "HTTP_POST_FILES", sizeof("HTTP_POST_FILES")))
+             (name_len == sizeof("HTTP_POST_VARS") - 1 && !memcmp(name, "HTTP_POST_VARS", sizeof("HTTP_POST_VARS") - 1)) ||
+             (name_len == sizeof("HTTP_GET_VARS") - 1 && !memcmp(name, "HTTP_GET_VARS", sizeof("HTTP_GET_VARS") - 1)) ||
+             (name_len == sizeof("HTTP_COOKIE_VARS") - 1 && !memcmp(name, "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS") - 1)) ||
+             (name_len == sizeof("HTTP_ENV_VARS") - 1 && !memcmp(name, "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS") - 1)) ||
+             (name_len == sizeof("HTTP_SERVER_VARS") - 1 && !memcmp(name, "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS") - 1)) ||
+             (name_len == sizeof("HTTP_SESSION_VARS") - 1 && !memcmp(name, "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS") - 1)) ||
+             (name_len == sizeof("HTTP_RAW_POST_DATA") - 1 && !memcmp(name, "HTTP_RAW_POST_DATA", sizeof("HTTP_RAW_POST_DATA") - 1)) ||
+             (name_len == sizeof("HTTP_POST_FILES") - 1 && !memcmp(name, "HTTP_POST_FILES", sizeof("HTTP_POST_FILES") - 1))
             )
             ) {
 		if (!silent) {

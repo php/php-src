@@ -618,7 +618,7 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 /* check if comparison function is valid */
 #define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
 	if (!zend_is_callable(*func_name, 0, NULL)) {	\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid comparison function.");	\
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid comparison function");	\
         BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 		BG(user_compare_func_name) = old_compare_func;	\
 		RETURN_FALSE;	\
@@ -1317,82 +1317,86 @@ static int php_valid_var_name(char *var_name, int len) /* {{{ */
 }
 /* }}} */
 
+PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, int var_name_len, zend_bool add_underscore TSRMLS_DC) /* {{{ */
+{
+	Z_STRLEN_P(result) = Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0) + var_name_len;
+	Z_TYPE_P(result) = IS_STRING;
+	Z_STRVAL_P(result) = emalloc(Z_STRLEN_P(result) + 1);
+	memcpy(Z_STRVAL_P(result), Z_STRVAL_P(prefix), Z_STRLEN_P(prefix));
+
+	if (add_underscore) {
+		Z_STRVAL_P(result)[Z_STRLEN_P(prefix)] = '_';
+	}
+
+	memcpy(Z_STRVAL_P(result) + Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0), var_name, var_name_len + 1);
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ proto int extract(array var_array [, int extract_type [, string prefix]])
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
-	zval **var_array, **z_extract_type, **prefix;
+	zval *var_array, *prefix = NULL;
+	long extract_type = EXTR_OVERWRITE;
 	zval **entry, *data;
 	char *var_name;
-	smart_str final_name = {0};
 	ulong num_key;
 	uint var_name_len;
-	int var_exists, extract_type, key_type, count = 0;
+	int var_exists, key_type, count = 0;
 	int extract_refs = 0;
 	HashPosition pos;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &var_array) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			extract_type = EXTR_OVERWRITE;
-			break;
-
-		case 2:
-			if (zend_get_parameters_ex(2, &var_array, &z_extract_type) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long_ex(z_extract_type);
-			extract_type = Z_LVAL_PP(z_extract_type);
-			extract_refs = (extract_type & EXTR_REFS);
-			extract_type &= 0xff;
-			if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Prefix expected to be specified");
-				return;
-			}
-			break;
-			
-		case 3:
-			if (zend_get_parameters_ex(3, &var_array, &z_extract_type, &prefix) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long_ex(z_extract_type);
-			extract_type = Z_LVAL_PP(z_extract_type);
-			extract_refs = (extract_type & EXTR_REFS);
-			extract_type &= 0xff;
-			convert_to_string_ex(prefix);
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
+		return;
 	}
-	
+
+	extract_refs = (extract_type & EXTR_REFS);
+	extract_type &= 0xff;
+
 	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_IF_EXISTS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown extract type");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid extract type");
 		return;
 	}
-	
-	if (Z_TYPE_PP(var_array) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument should be an array");
+
+	if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS && ZEND_NUM_ARGS() < 3) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "specified extract type requires the prefix parameter");
 		return;
 	}
-		
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(var_array), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(var_array), (void **)&entry, &pos) == SUCCESS) {
-		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(var_array), &var_name, &var_name_len, &num_key, 0, &pos);
+
+	if (prefix) {
+		convert_to_string(prefix);
+		if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), Z_STRLEN_P(prefix))) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid identifier");
+			return;
+		}
+	}
+
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(var_array), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(var_array), (void **)&entry, &pos) == SUCCESS) {
+		zval final_name;
+
+		ZVAL_NULL(&final_name);
+
+		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(var_array), &var_name, &var_name_len, &num_key, 0, &pos);
 		var_exists = 0;
 
 		if (key_type == HASH_KEY_IS_STRING) {
 			var_name_len--;
 			var_exists = zend_hash_exists(EG(active_symbol_table), var_name, var_name_len + 1);
-		} else if (extract_type == EXTR_PREFIX_ALL || extract_type == EXTR_PREFIX_INVALID) {
-			smart_str_appendl(&final_name, Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
-			smart_str_appendc(&final_name, '_');
-			smart_str_append_long(&final_name, num_key);
+		} else if (key_type == HASH_KEY_IS_LONG &&
+				(extract_type == EXTR_PREFIX_ALL ||
+				 extract_type == EXTR_PREFIX_INVALID)
+		) {
+			zval num;
+
+			ZVAL_LONG(&num, num_key);
+			convert_to_string(&num);
+			php_prefix_varname(&final_name, prefix, Z_STRVAL(num), Z_STRLEN(num), 1 TSRMLS_CC);
+			zval_dtor(&num);
 		} else {
-			zend_hash_move_forward_ex(Z_ARRVAL_PP(var_array), &pos);
+			zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos);
 			continue;
 		}
 			
@@ -1403,89 +1407,83 @@ PHP_FUNCTION(extract)
 
 			case EXTR_OVERWRITE:
 				/* GLOBALS protection */
-				if (var_exists && !strcmp(var_name, "GLOBALS")) {
+				if (var_exists && 
+					var_name_len == sizeof("GLOBALS") &&
+					!strcmp(var_name, "GLOBALS")
+				) {
 					break;
 				}
-				smart_str_appendl(&final_name, var_name, var_name_len);
+				ZVAL_STRINGL(&final_name, var_name, var_name_len, 1);
 				break;
 
 			case EXTR_PREFIX_IF_EXISTS:
 				if (var_exists) {
-					smart_str_appendl(&final_name, Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
-					smart_str_appendc(&final_name, '_');
-					smart_str_appendl(&final_name, var_name, var_name_len);
+					php_prefix_varname(&final_name, prefix, var_name, var_name_len, 1 TSRMLS_CC);
 				}
 				break;
 
 			case EXTR_PREFIX_SAME:
-				if (!var_exists)
-					smart_str_appendl(&final_name, var_name, var_name_len);
+				if (!var_exists && var_name_len != 0) {
+					ZVAL_STRINGL(&final_name, var_name, var_name_len, 1);
+				}
 				/* break omitted intentionally */
 
 			case EXTR_PREFIX_ALL:
-				if (final_name.len == 0 && var_name_len != 0) {
-					smart_str_appendl(&final_name, Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
-					smart_str_appendc(&final_name, '_');
-					smart_str_appendl(&final_name, var_name, var_name_len);
+				if (Z_TYPE(final_name) == IS_NULL && var_name_len != 0) {
+					php_prefix_varname(&final_name, prefix, var_name, var_name_len, 1 TSRMLS_CC);
 				}
 				break;
 
 			case EXTR_PREFIX_INVALID:
-				if (final_name.len == 0) {
+				if (Z_TYPE(final_name) == IS_NULL) {
 					if (!php_valid_var_name(var_name, var_name_len)) {
-						smart_str_appendl(&final_name, Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
-						smart_str_appendc(&final_name, '_');
-						smart_str_appendl(&final_name, var_name, var_name_len);
-					} else
-						smart_str_appendl(&final_name, var_name, var_name_len);
+						php_prefix_varname(&final_name, prefix, var_name, var_name_len, 1 TSRMLS_CC);
+					} else {
+						ZVAL_STRINGL(&final_name, var_name, var_name_len, 1);
+					}
 				}
 				break;
 
 			default:
-				if (!var_exists)
-					smart_str_appendl(&final_name, var_name, var_name_len);
+				if (!var_exists) {
+					ZVAL_STRINGL(&final_name, var_name, var_name_len, 1);
+				}
 				break;
 		}
 
-		if (final_name.len) {
-			smart_str_0(&final_name);
-			if (php_valid_var_name(final_name.c, final_name.len)) {
-				if (extract_refs) {
-					zval **orig_var;
+		if (Z_TYPE(final_name) != IS_NULL && php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+			if (extract_refs) {
+				zval **orig_var;
 
-					if (zend_hash_find(EG(active_symbol_table), final_name.c, final_name.len+1, (void **) &orig_var) == SUCCESS) {
-						SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
-						zval_add_ref(entry);
+				if (zend_hash_find(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, (void **) &orig_var) == SUCCESS) {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
+					zval_add_ref(entry);
 						
-						zval_ptr_dtor(orig_var);
+					zval_ptr_dtor(orig_var);
 
-						*orig_var = *entry;
-					} else {
-						if ((*var_array)->refcount > 1 || *entry == EG(uninitialized_zval_ptr)) {
-							SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
-						} else {
-							(*entry)->is_ref = 1;
-						}
-						zval_add_ref(entry);
-						zend_hash_update(EG(active_symbol_table), final_name.c, final_name.len+1, (void **) entry, sizeof(zval *), NULL);
-					}
+					*orig_var = *entry;
 				} else {
-					MAKE_STD_ZVAL(data);
-					*data = **entry;
-					zval_copy_ctor(data);
-
-					ZEND_SET_SYMBOL_WITH_LENGTH(EG(active_symbol_table), final_name.c, final_name.len+1, data, 1, 0);
+					if (var_array->refcount > 1 || *entry == EG(uninitialized_zval_ptr)) {
+						SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
+					} else {
+						(*entry)->is_ref = 1;
+					}
+					zval_add_ref(entry);
+					zend_hash_update(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, (void **) entry, sizeof(zval *), NULL);
 				}
+			} else {
+				MAKE_STD_ZVAL(data);
+				*data = **entry;
+				zval_copy_ctor(data);
 
-				count++;
+				ZEND_SET_SYMBOL_WITH_LENGTH(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, data, 1, 0);
 			}
-			final_name.len = 0;
+			count++;
 		}
+		zval_dtor(&final_name);
 
-		zend_hash_move_forward_ex(Z_ARRVAL_PP(var_array), &pos);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos);
 	}
-
-	smart_str_free(&final_name);
 
 	RETURN_LONG(count);
 }
@@ -3157,7 +3155,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				BG(user_compare_func_name) = args[arr_argc + 1];/* data - key */
 		} else {
 			efree(args);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug.", data_compare_type, key_compare_type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug", data_compare_type, key_compare_type);
 			return;
 		}		
 	} else {
