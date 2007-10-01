@@ -2181,8 +2181,7 @@ PHP_FUNCTION(substr_replace)
 
 	if (Z_TYPE_PP(str) == IS_STRING) {
 		if (
-			(argc == 3 && Z_TYPE_PP(from) == IS_ARRAY) 
-			|| 
+			(argc == 3 && Z_TYPE_PP(from) == IS_ARRAY) || 
 			(argc == 4 && Z_TYPE_PP(from) != Z_TYPE_PP(len))
 		) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'from' and 'len' should be of same type - numerical or array ");
@@ -2195,7 +2194,6 @@ PHP_FUNCTION(substr_replace)
 			}
 		}
 	}
-
 	
 	if (Z_TYPE_PP(str) != IS_ARRAY) {
 		if (Z_TYPE_PP(from) != IS_ARRAY) {
@@ -5127,12 +5125,12 @@ PHP_FUNCTION(substr_compare)
 		offset = (offset < 0) ? 0 : offset;
 	}
 
-	if(offset > s1_len) {
+	if (offset > s1_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The start position cannot exceed initial string length");
 		RETURN_FALSE;
 	}
 
-	if(len > s1_len - offset) {
+	if (len > s1_len - offset) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length cannot exceed initial string length");
 		RETURN_FALSE;
 	}
