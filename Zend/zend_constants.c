@@ -355,8 +355,10 @@ ZEND_API int zend_get_constant_ex(char *name, uint name_len, zval *result, zend_
 			}
 			efree(lcname);
 
-			/* Check for class */
-			ce = zend_fetch_class(class_name, class_name_len, flags TSRMLS_CC);
+			if ((flags & IS_CONSTANT_RT_NS_CHECK) == 0) {
+				/* Check for class */
+				ce = zend_fetch_class(class_name, class_name_len, flags TSRMLS_CC);
+			}
 		}
 
 		if (retval && ce) {
