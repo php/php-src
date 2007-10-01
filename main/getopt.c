@@ -23,12 +23,12 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "php_getopt.h"
+
 #define OPTERRCOLON (1)
 #define OPTERRNF (2)
 #define OPTERRARG (3)
 
-
-static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int err, int show_err)
+static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int err, int show_err) /* {{{ */
 {
 	if (show_err)
 	{
@@ -51,14 +51,16 @@ static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int
 	}
 	return('?');
 }
+/* }}} */
 
-int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **optarg, int *optind, int show_err)
+PHPAPI int php_optidx = -1;
+
+PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **optarg, int *optind, int show_err, int arg_start) /* {{{ */
 {
 	static int optchr = 0;
 	static int dash = 0; /* have already seen the - */
-	int arg_start = 2;
 
-	int opts_idx = -1;
+	php_optidx = -1;
 
 	if (*optind >= argc) {
 		return(EOF);
@@ -85,17 +87,17 @@ int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **opta
 		}
 
 		while (1) {
-			opts_idx++;
-			if (opts[opts_idx].opt_char == '-') {
+			php_optidx++;
+			if (opts[php_optidx].opt_char == '-') {
 				(*optind)++;
 				return(php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err));
-			} else if (opts[opts_idx].opt_name && !strcmp(&argv[*optind][2], opts[opts_idx].opt_name)) {
+			} else if (opts[php_optidx].opt_name && !strcmp(&argv[*optind][2], opts[php_optidx].opt_name)) {
 				break;
 			}
 		}
 		optchr = 0;
 		dash = 0;
-		arg_start = 2 + strlen(opts[opts_idx].opt_name);
+		arg_start = 2 + strlen(opts[php_optidx].opt_name);
 	} else {
 		if (!dash) {
 			dash = 1;
@@ -109,13 +111,13 @@ int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **opta
 		}
 		arg_start = 1 + optchr;
 	}
-	if (opts_idx < 0) {
+	if (php_optidx < 0) {
 		while (1) {
-			opts_idx++;
-			if (opts[opts_idx].opt_char == '-') {
+			php_optidx++;
+			if (opts[php_optidx].opt_char == '-') {
 				int errind = *optind;
 				int errchr = optchr;
-		
+
 				if (!argv[*optind][optchr+1]) {
 					dash = 0;
 					(*optind)++;
@@ -124,16 +126,16 @@ int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **opta
 					arg_start++;
 				}
 				return(php_opt_error(argc, argv, errind, errchr, OPTERRNF, show_err));
-			} else if (argv[*optind][optchr] == opts[opts_idx].opt_char) {
+			} else if (argv[*optind][optchr] == opts[php_optidx].opt_char) {
 				break;
 			}
 		}
 	}
-	if (opts[opts_idx].need_param) {
+	if (opts[php_optidx].need_param) {
 		/* Check for cases where the value of the argument
 		is in the form -<arg> <val> or in the form -<arg><val> */
 		dash = 0;
-		if(!argv[*optind][arg_start]) {
+		if (!argv[*optind][arg_start]) {
 			(*optind)++;
 			if (*optind == argc) {
 				return(php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err));
@@ -143,7 +145,7 @@ int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **opta
 			*optarg = &argv[*optind][arg_start];
 			(*optind)++;
 		}
-		return opts[opts_idx].opt_char;
+		return opts[php_optidx].opt_char;
 	} else {
 		/* multiple options specified as one (exclude long opts) */
 		if (arg_start >= 2 && !((argv[*optind][0] == '-') && (argv[*optind][1] == '-'))) {
@@ -157,8 +159,18 @@ int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **opta
 		} else {
 			(*optind)++;
 		}
-		return opts[opts_idx].opt_char;
+		return opts[php_optidx].opt_char;
 	}
 	assert(0);
 	return(0);	/* never reached */
 }
+/* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

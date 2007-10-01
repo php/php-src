@@ -1319,7 +1319,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
+	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (c) {
 			case 'c':
 				if (cgi_sapi_module.php_ini_path_override) {
@@ -1541,7 +1541,7 @@ consult the installation file that came with this distribution, or visit \n\
 	}
 
 	zend_first_try {
-		while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1)) != -1) {
+		while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1, 2)) != -1) {
 			switch (c) {
 				case 'h':
 				case '?':
@@ -1581,7 +1581,7 @@ consult the installation file that came with this distribution, or visit \n\
 					goto out;
 				}
 
-				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
+				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 					switch (c) {
 
 						case 'a':	/* interactive mode */
