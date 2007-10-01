@@ -1265,8 +1265,8 @@ PHP_FUNCTION(implode)
 
 	if (argc == 1) {
 		if (Z_TYPE_PP(arg1) != IS_ARRAY) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument to implode must be an array");
-			RETURN_FALSE;
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument must be an array");
+			return;
 		} else {
 			SEPARATE_ZVAL(arg1);
 			arr = *arg1;
@@ -1293,8 +1293,8 @@ PHP_FUNCTION(implode)
 			}
 			delim = *arg1;
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad arguments");
-			RETURN_FALSE;
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments passed");
+			return;
 		}
 	}
 
