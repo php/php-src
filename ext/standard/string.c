@@ -3317,7 +3317,7 @@ static int php_adjust_limits(zval **str, int *f, int *l)
 	if (*f > str_codepts || (*f < 0 && -(*f) > str_codepts)) {
 		ret = 0;
 	} else if (*l > str_codepts || (*l < 0 && -(*l) > str_codepts)) {
-		ret = 0;
+		*l = str_codepts;
 	}
 	if (((unsigned)(*f) + (unsigned)(*l)) > str_codepts) {
 		*l = str_codepts - *f;
@@ -3414,6 +3414,7 @@ PHP_FUNCTION(substr_replace)
 		f = Z_LVAL_PP(from);
 	}
 	if (argc > 3) {
+		SEPARATE_ZVAL(len);
 		if (Z_TYPE_PP(len) != IS_ARRAY) {
 			convert_to_long_ex(len);
 			l = Z_LVAL_PP(len);
@@ -3425,8 +3426,10 @@ PHP_FUNCTION(substr_replace)
 	}
 
 	if (Z_TYPE_PP(str) != IS_ARRAY) {
-		if ( (argc == 3 && Z_TYPE_PP(from) == IS_ARRAY) ||
-			 (argc == 4 && Z_TYPE_PP(from) != Z_TYPE_PP(len)) ) {
+		if (
+			(argc == 3 && Z_TYPE_PP(from) == IS_ARRAY) ||
+			(argc == 4 && Z_TYPE_PP(from) != Z_TYPE_PP(len))
+		) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'from' and 'len' should be of same type - numerical or array");
 			RETURN_ZVAL(*str, 1, 0);
 		}
@@ -3437,7 +3440,6 @@ PHP_FUNCTION(substr_replace)
 			}
 		}
 	}
-
 
 	if (Z_TYPE_PP(str) != IS_ARRAY) {
 		if (Z_TYPE_PP(from) != IS_ARRAY ) {
@@ -7919,12 +7921,12 @@ PHP_FUNCTION(substr_compare)
 			offset = (offset < 0) ? 0 : offset;
 		}
 
-		if(offset > s1_len) {
+		if (offset > s1_len) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The start position cannot exceed initial string length");
 			RETURN_FALSE;
 		}
 
-		if(len > s1_len - offset) {
+		if (len > s1_len - offset) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The specified segment exceeds string length");
 			RETURN_FALSE;
 		}
