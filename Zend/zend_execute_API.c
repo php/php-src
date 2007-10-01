@@ -451,6 +451,7 @@ ZEND_API int zend_is_true(zval *op)
 
 #define IS_VISITED_CONSTANT       IS_CONSTANT_INDEX
 #define IS_CONSTANT_VISITED(p)    (Z_TYPE_P(p) & IS_VISITED_CONSTANT)
+#define Z_REAL_TYPE_P(p)          (Z_TYPE_P(p) & ~IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)  Z_TYPE_P(p) |= IS_VISITED_CONSTANT
 
 ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC)
@@ -474,7 +475,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		refcount = p->refcount;
 		is_ref = p->is_ref;
 
-		if (!zend_get_constant_ex(p->value.str.val, p->value.str.len, &const_value, scope, Z_TYPE_P(p) TSRMLS_CC)) {
+		if (!zend_get_constant_ex(p->value.str.val, p->value.str.len, &const_value, scope, Z_REAL_TYPE_P(p) TSRMLS_CC)) {
 			if ((colon = memchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p))) && colon[1] == ':') {
 				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
 			}
