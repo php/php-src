@@ -45,6 +45,6 @@ NULL
 
 -- Testing join() with less than expected no. of arguments --
 
-Warning: join(): Argument to join must be an array in %s on line %d
+Warning: join(): Argument to implode must be an array. in %s on line %d
 NULL
 Done
