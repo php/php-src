@@ -1,5 +1,5 @@
 --TEST--
-Test join() function : error conditions(Bug#42789) 
+Test join() function: error conditions
 --FILE--
 <?php
 /* Prototype  : string join( string $glue, array $pieces )
@@ -45,8 +45,8 @@ NULL
 
 -- Testing join() with less than expected no. of arguments --
 
-Warning: join(): Argument to join must be an array in %s on line %d
-bool(false)
+Warning: join(): Argument must be an array in %s on line %d
+NULL
 Done
 --UEXPECTF--
 *** Testing join() : error conditions ***
@@ -63,6 +63,6 @@ NULL
 
 -- Testing join() with less than expected no. of arguments --
 
-Warning: join(): Argument to join must be an array in %s on line %d
-bool(false)
+Warning: join(): Argument must be an array in %s on line %d
+NULL
 Done
