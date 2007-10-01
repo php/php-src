@@ -28,7 +28,7 @@ var_dump(substr("abcde", $v, $v));
 ?>
 --EXPECTF--	
 string(4) "bcde"
-bool(false)
+string(6) "abcdex"
 bool(false)
 bool(false)
 
@@ -63,7 +63,7 @@ string(8) "abcdeabc"
 bool(false)
 --UEXPECTF--	
 unicode(4) "bcde"
-bool(false)
+unicode(6) "abcdex"
 bool(false)
 bool(false)
 
