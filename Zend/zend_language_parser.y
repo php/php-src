@@ -455,9 +455,9 @@ non_empty_parameter_list:
 
 
 optional_class_type:
-		/* empty */		{ $$.op_type = IS_UNUSED; }
-	|	T_STRING		{ $$ = $1; }
-	|	T_ARRAY		{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_NULL;}
+		/* empty */					{ $$.op_type = IS_UNUSED; }
+	|	fully_qualified_class_name	{ $$ = $1; }
+	|	T_ARRAY						{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_NULL;}
 ;
 
 

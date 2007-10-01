@@ -2025,7 +2025,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			arg_count = (ulong)(zend_uintptr_t) *p;
 
 			while (arg_count>0) {
-				zend_verify_arg_type(EX(function_state).function, ++i, *(p-arg_count) TSRMLS_CC);
+				zend_verify_arg_type(EX(function_state).function, ++i, *(p-arg_count), 0 TSRMLS_CC);
 				arg_count--;
 			}
 		}
@@ -2440,7 +2440,7 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 		zstr class_name = get_active_class_name(&space TSRMLS_CC);
 		zend_execute_data *ptr = EX(prev_execute_data);
 
-		if (zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL TSRMLS_CC)) {
+		if (zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL, opline->extended_value TSRMLS_CC)) {
 			if(ptr && ptr->op_array) {
 				zend_error(E_WARNING, "Missing argument %ld for %v%s%v(), called in %s on line %d and defined", Z_LVAL(opline->op1.u.constant), class_name, space, get_active_function_name(TSRMLS_C), ptr->op_array->filename, ptr->opline->lineno);
 			} else {
@@ -2454,7 +2454,7 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 		zend_free_op free_res;
 		zval **var_ptr;
 
-		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, *param TSRMLS_CC);
+		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, *param, opline->extended_value TSRMLS_CC);
 		var_ptr = get_zval_ptr_ptr(&opline->result, EX(Ts), &free_res, BP_VAR_W);
 		if (PZVAL_IS_REF(*param)) {
 			zend_assign_to_variable_reference(var_ptr, param TSRMLS_CC);
@@ -2492,13 +2492,13 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 			param = NULL;
 			assignment_value = &opline->op2.u.constant;
 		}
-		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value TSRMLS_CC);
+		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value, opline->extended_value TSRMLS_CC);
 		zend_assign_to_variable(NULL, &opline->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
 	} else {
 		zval **var_ptr = get_zval_ptr_ptr(&opline->result, EX(Ts), &free_res, BP_VAR_W);
 
 		assignment_value = *param;
-		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value TSRMLS_CC);
+		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value, opline->extended_value TSRMLS_CC);
 		if (PZVAL_IS_REF(assignment_value)) {
 			zend_assign_to_variable_reference(var_ptr, param TSRMLS_CC);
 		} else {
