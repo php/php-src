@@ -441,7 +441,7 @@ ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 			value = 1;
 		} else if (tmp_value_len == 2 && strcasecmp(tmp_value, "on") == 0) {
 			value = 1;
-		} else (tmp_value) {
+		} else {
 			value = atoi(tmp_value);
 		}
 	} else {
