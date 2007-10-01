@@ -478,6 +478,7 @@ ZEND_API int zend_is_true(zval *op) /* {{{ */
 
 #define IS_VISITED_CONSTANT       IS_CONSTANT_INDEX
 #define IS_CONSTANT_VISITED(p)    (Z_TYPE_P(p) & IS_VISITED_CONSTANT)
+#define Z_REAL_TYPE_P(p)          (Z_TYPE_P(p) & ~IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)  Z_TYPE_P(p) |= IS_VISITED_CONSTANT
 
 ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC) /* {{{ */
@@ -501,7 +502,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		refcount = p->refcount;
 		is_ref = p->is_ref;
 
-		if (!zend_u_get_constant_ex(ZEND_STR_TYPE, Z_UNIVAL_P(p), Z_UNILEN_P(p), &const_value, scope, Z_TYPE_P(p) TSRMLS_CC)) {
+		if (!zend_u_get_constant_ex(ZEND_STR_TYPE, Z_UNIVAL_P(p), Z_UNILEN_P(p), &const_value, scope, Z_REAL_TYPE_P(p) TSRMLS_CC)) {
 			if ((UG(unicode) && (colon.u = u_memrchr(Z_USTRVAL_P(p), ':', Z_USTRLEN_P(p))) && colon.u > Z_USTRVAL_P(p) && *(colon.u-1) == ':') ||
 			    (!UG(unicode) && (colon.s = zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p))) && colon.s > Z_STRVAL_P(p) && *(colon.s-1) == ':')) {
 	    		if (UG(unicode)) {
