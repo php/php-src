@@ -3751,7 +3751,11 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 	switch (mode) {
 		case ZEND_CT:
 			if (constant_container) {
-			    if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_TYPE(constant_container->u.constant), Z_UNIVAL(constant_container->u.constant), Z_UNILEN(constant_container->u.constant))) {
+				int type = zend_get_class_fetch_type(Z_TYPE(constant_container->u.constant), Z_UNIVAL(constant_container->u.constant), Z_UNILEN(constant_container->u.constant));
+				
+				if (ZEND_FETCH_CLASS_STATIC == type) {
+					zend_error(E_ERROR, "\"static::\" is not allowed in compile-time constants");
+				} else if (ZEND_FETCH_CLASS_DEFAULT == type) {
 					zend_resolve_class_name(constant_container, &fetch_type, 1 TSRMLS_CC);
 				}
 				zend_do_fetch_class_name(NULL, constant_container, constant_name TSRMLS_CC);
