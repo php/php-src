@@ -34,24 +34,26 @@ echo "Done\n";
 --EXPECTF--
 *** Testing Error Conditions ***
 
-Warning: Wrong parameter count for extract() in %s on line %d
+Warning: extract() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: extract(): Unknown extract type in %s on line %d
+Notice: A non well formed numeric value encountered in %s on line %d
+
+Warning: extract(): Invalid extract type in %s on line %d
 NULL
 
-Warning: extract(): Unknown extract type in %s on line %d
+Warning: extract(): Invalid extract type in %s on line %d
 NULL
 
-Warning: extract(): First argument should be an array in %s on line %d
+Warning: extract() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: extract(): First argument should be an array in %s on line %d
+Warning: extract() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for extract() in %s on line %d
+Warning: extract() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
-Warning: extract(): Prefix expected to be specified in %s on line %d
+Warning: extract(): specified extract type requires the prefix parameter in %s on line %d
 NULL
 Done

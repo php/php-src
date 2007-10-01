@@ -44,14 +44,14 @@ echo "Done\n";
 --EXPECTF--	
 string(1) "."
 
-Warning: Wrong parameter count for get_include_path() in %s on line %d
+Warning: get_include_path() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 NULL
 
-Warning: Wrong parameter count for restore_include_path() in %s on line %d
+Warning: restore_include_path() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for set_include_path() in %s on line %d
+Warning: set_include_path() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 string(1) "."
 string(1) "."
@@ -67,9 +67,9 @@ string(1) "."
 NULL
 string(1) "."
 
-Notice: Array to string conversion in %s on line %d
+Warning: set_include_path() expects parameter 1 to be string, array given in %s on line %d
+NULL
 string(1) "."
-string(5) "Array"
 NULL
 string(1) "."
 Done

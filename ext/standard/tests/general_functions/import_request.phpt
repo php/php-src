@@ -26,10 +26,8 @@ var_dump($r_a, $r_b, $r_c, $r_ap);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for import_request_variables() in %s on line %d
+Warning: import_request_variables() expects at least 1 parameter, 0 given in %s on line %d
 NULL
-
-Notice: import_request_variables(): No prefix specified - possible security hazard in %s on line %d
 NULL
 
 Notice: import_request_variables(): No prefix specified - possible security hazard in %s on line %d
@@ -39,7 +37,7 @@ Notice: import_request_variables(): No prefix specified - possible security haza
 
 Warning: import_request_variables(): Attempted GLOBALS variable overwrite in %s on line %d
 
-Warning: import_request_variables(): Numeric key detected - possible security hazard. in %s on line %d
+Warning: import_request_variables(): Numeric key detected - possible security hazard in %s on line %d
 NULL
 
 Notice: Undefined variable: ap in %s on line %d

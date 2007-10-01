@@ -18,6 +18,9 @@
 
 /* $Id$ */
 
+#ifndef PHP_GETOPT_H
+#define PHP_GETOPT_H
+
 #include "php.h"
 
 #ifdef NETWARE
@@ -27,13 +30,28 @@ As NetWare LibC has optind and optarg macros defined in unistd.h our local varia
 #undef optarg
 #undef optind
 #endif
+
 /* Define structure for one recognized option (both single char and long name).
- * If short_open is '-' this is the last option.
- */
+ * If short_open is '-' this is the last option. */
 typedef struct _opt_struct {
-	const char opt_char;
-	const int  need_param;
-	const char * opt_name;
+	char opt_char;
+	int  need_param;
+	char * opt_name;
 } opt_struct;
 
-int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **optarg, int *optind, int show_err);
+BEGIN_EXTERN_C()
+/* holds the index of the latest fetched element from the opts array */
+PHPAPI int php_optidx;
+PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **optarg, int *optind, int show_err, int arg_start);
+END_EXTERN_C()
+
+#endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

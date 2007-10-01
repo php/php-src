@@ -18,18 +18,16 @@ var_dump(constant("TEST_CONST2"));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for constant() in %s on line %d
+Warning: constant() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for constant() in %s on line %d
+Warning: constant() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 Warning: constant(): Couldn't find constant  in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: constant(): Couldn't find constant Array in %s on line %d
+Warning: constant() expects parameter 1 to be string, array given in %s on line %d
 NULL
 int(1)
 string(4) "test"
