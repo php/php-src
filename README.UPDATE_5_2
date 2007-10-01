@@ -172,6 +172,21 @@ Items from the NEWS file explained
   from your error handler in order to populate $php_errormsg. This allows
   you to fine-grain the levels of the messages stored.
 
+==============================
+Regressions introduced/fixed
+==============================
+
+- In version 5.2.4 a security fix caused a regression for patterns of
+  the form "/foo/*/bar/*". Since version 5.2.5 instead of raising a warning the
+  glob() function will return false when openbase_dir restrictions are violated.
+
+  #See http://bugs.php.net/bug.php?id=41655
+
+  The warning that used to be raised looked like something as follows:
+  Warning: glob() [function.glob]: Unable to access /foo/*/bar/* in /foo.php on line xxx
+  #See http://cvs.php.net/viewvc.cgi/php-src/ext/standard/dir.c?r1=1.169&r2=1.170
+
+  The patch can safely be applied to PHP 5.2.4 as well.
 
 ==============================
 Backwards incompatible changes
