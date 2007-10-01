@@ -51,7 +51,7 @@ echo "Done"
 *** Testing chunk_split() : different 'chunklen' with heredoc 'str' ***
 -- Iteration 1 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero. in %s on line %d
 bool(false)
 -- Iteration 2 --
 string(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t:::r:::i:::n:::g::: :::w:::i:::t:::h::: :::	::: :::a:::n:::d::: :::
@@ -60,7 +60,7 @@ string(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t::
 :::c:::h:::u:::n:::k:::_:::s:::p:::l:::i:::t:::(:::):::"
 -- Iteration 3 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero. in %s on line %d
 bool(false)
 -- Iteration 4 --
 string(129) "This's heredoc string with 	 and 
@@ -79,10 +79,10 @@ It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero. in %s on line %d
 bool(false)
 -- Iteration 8 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero. in %s on line %d
 bool(false)
 Done
