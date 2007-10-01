@@ -1,3 +1,82 @@
+2007-09-30  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/bug40754.phpt
+      ext/standard/tests/strings/explode1.phpt
+      ext/standard/tests/strings/implode1.phpt:
+      - Fix tests (too many dots in error messages :)
+
+2007-09-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      Nuke unused vars
+
+2007-09-30  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/dl-cve-2007-4887.phpt:
+      fix test
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/join_error.phpt
+      ext/standard/tests/strings/sprintf_basic7.phpt
+      ext/standard/tests/strings/sprintf_basic8.phpt
+      ext/standard/tests/strings/sprintf_variation28.phpt
+      ext/standard/tests/strings/sprintf_variation29.phpt
+      ext/standard/tests/strings/sprintf_variation34.phpt
+      ext/standard/tests/strings/sprintf_variation35.phpt
+      ext/standard/tests/strings/sprintf_variation4.phpt
+      ext/standard/tests/strings/sprintf_variation40.phpt
+      ext/standard/tests/strings/sprintf_variation41.phpt
+      ext/standard/tests/strings/sprintf_variation44.phpt
+      ext/standard/tests/strings/str_pad.phpt
+      ext/standard/tests/strings/str_repeat.phpt
+      ext/standard/tests/strings/stripos_variation1.phpt
+      ext/standard/tests/strings/stripos_variation10.phpt
+      ext/standard/tests/strings/stripos_variation11.phpt
+      ext/standard/tests/strings/stripos_variation14.phpt
+      ext/standard/tests/strings/stripos_variation15.phpt
+      ext/standard/tests/strings/stripos_variation2.phpt
+      ext/standard/tests/strings/stripos_variation7.phpt
+      ext/standard/tests/strings/stristr.phpt
+      ext/standard/tests/strings/strpos.phpt
+      ext/standard/tests/strings/strstr.phpt
+      ext/standard/tests/strings/substr_count_error.phpt
+      ext/standard/tests/strings/uuencode.phpt:
+      fix tests
+
+2007-09-30  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      ext/standard/browscap.c
+      ext/standard/exec.c
+      ext/standard/filters.c
+      ext/standard/formatted_print.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      ext/standard/mail.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/streamsfuncs.c
+      ext/standard/uniqid.c
+      ext/standard/url.c
+      ext/standard/uuencode.c:
+      MFH: Nuked ending dots from error messages
+
+    * ext/standard/formatted_print.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c:
+      - Nuked ending dots in error messages
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      - Nuked ending dots from error messages
+
+    * ext/standard/array.c:
+      - ws+cs (prepare syncing some parts to PHP_5_3)
+
 2007-09-29  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * (PHP_5_2)

@@ -1,3 +1,9 @@
+2007-09-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      zend_API.c:
+      Nuke unused vars
+
 2007-09-29  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_extensions.h
