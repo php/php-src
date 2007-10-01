@@ -434,14 +434,16 @@ ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 		tmp_value_len = 0;
 	}
 
-	if (tmp_value_len == 4 && strcasecmp(tmp_value, "true") == 0) {
-		value = 1;
-	} else if (tmp_value_len == 3 && strcasecmp(tmp_value, "yes") == 0) {
-		value = 1;
-	} else if (tmp_value_len == 2 && strcasecmp(tmp_value, "on") == 0) {
-		value = 1;
-	} else if (tmp_value) {
-		value = atoi(tmp_value);
+	if (tmp_value) {
+		if (tmp_value_len == 4 && strcasecmp(tmp_value, "true") == 0) {
+			value = 1;
+		} else if (tmp_value_len == 3 && strcasecmp(tmp_value, "yes") == 0) {
+			value = 1;
+		} else if (tmp_value_len == 2 && strcasecmp(tmp_value, "on") == 0) {
+			value = 1;
+		} else (tmp_value) {
+			value = atoi(tmp_value);
+		}
 	} else {
 		value = 0;
 	}
