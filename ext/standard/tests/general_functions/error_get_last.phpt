@@ -24,7 +24,7 @@ array(4) {
   ["message"]=>
   string(54) "error_get_last() expects exactly 0 parameters, 1 given"
   ["file"]=>
-  string(78) "%s"
+  string(%i) "%s"
   ["line"]=>
   int(4)
 }
@@ -36,7 +36,7 @@ array(4) {
   ["message"]=>
   string(21) "Undefined variable: b"
   ["file"]=>
-  string(78) "%s"
+  string(%i) "%s"
   ["line"]=>
   int(7)
 }
