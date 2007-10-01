@@ -1146,7 +1146,7 @@ esac
 if test "$PHP_CLI" != "no"; then
   PHP_CLI_TARGET="\$(SAPI_CLI_PATH)"
   PHP_INSTALL_CLI_TARGET="install-cli"
-  PHP_ADD_SOURCES(sapi/cli, php_cli.c php_cli_readline.c getopt.c,, cli)
+  PHP_ADD_SOURCES(sapi/cli, php_cli.c php_cli_readline.c,, cli)
   PHP_INSTALLED_SAPIS="cli $PHP_SAPI"
 else
   PHP_INSTALLED_SAPIS="$PHP_SAPI"
@@ -1296,7 +1296,7 @@ PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/ regex/])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c)
 
-PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
+PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c getopt.c php_sprintf.c \
        safe_mode.c fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \

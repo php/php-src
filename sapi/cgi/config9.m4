@@ -54,7 +54,7 @@ if test "$PHP_SAPI" = "default"; then
 
     dnl Set install target and select SAPI
     INSTALL_IT="@echo \"Installing PHP CGI binary: \$(INSTALL_ROOT)\$(bindir)/\"; \$(INSTALL) -m 0755 \$(SAPI_CGI_PATH) \$(INSTALL_ROOT)\$(bindir)/\$(program_prefix)php-cgi\$(program_suffix)\$(EXEEXT)"
-    PHP_SELECT_SAPI(cgi, program, cgi_main.c getopt.c fastcgi.c,, '$(SAPI_CGI_PATH)')
+    PHP_SELECT_SAPI(cgi, program, cgi_main.c fastcgi.c,, '$(SAPI_CGI_PATH)')
 
     case $host_alias in
       *aix*)

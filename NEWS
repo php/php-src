@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
+- Added long-option feature to getopt() and made getopt() available also on 
+  win32 systems by adding a common getopt implementation to core.
+  (Jani, David Soria Parra)
 - Added support for namespaces. (Dmitry, Stas)
 - Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
 - Added support for __callstatic() magic method. (Sara)
@@ -10,7 +13,7 @@ PHP                                                                        NEWS
 
 - Improved php.ini handling: (Jani)
   . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI
-  . Added support for special [PATH=/opt/httpd/www.example.com/] sections.
+  . Added support for special [PATH=/opt/httpd/www.example.com/] sections
     All directives set in these sections will not be able to be overridden
     in user-defined ini-files or during runtime in the specified path
   . Added better error reporting for php.ini syntax errors
@@ -18,9 +21,8 @@ PHP                                                                        NEWS
   . Allowed using alphanumeric/variable indexes in "array" ini options
   . Added 3rd optional parameter to parse_ini_file() to specify the scanning
     mode of INI_SCANNER_NORMAL or INI_SCANNER_RAW. In raw mode option values
-    and section values are treated as-is.
+    and section values are treated as-is
   . Fixed get_cfg_var() to be able to return "array" ini options
-
 - Improved memory usage by moving constants to read only memory.
   (Dmitry, Pierre)
 - Improved ext/soap to support element names in context of XMLShema's <any>.

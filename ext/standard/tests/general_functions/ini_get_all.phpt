@@ -47,5 +47,5 @@ array(2) {
 }
 
 Warning: ini_get_all() expects at most 1 parameter, 2 given in %s on line %d
-bool(false)
+NULL
 Done
