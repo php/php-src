@@ -721,7 +721,7 @@ PHPAPI int php_parse_user_ini_file(char *dirname, char *ini_filename, HashTable 
  */
 PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int stage TSRMLS_DC)
 {
-	char *str;
+	zstr str;
 	zval *data;
 	uint str_len;
 	ulong num_index;
@@ -732,7 +732,7 @@ PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int
 		zend_hash_move_forward(source_hash)
 	) {
 		zend_hash_get_current_data(source_hash, (void **) &data);
-		zend_alter_ini_entry_ex(str, str_len, Z_STRVAL_P(data), Z_STRLEN_P(data), modify_type, stage, 0 TSRMLS_CC);
+		zend_alter_ini_entry_ex(str.s, str_len, Z_STRVAL_P(data), Z_STRLEN_P(data), modify_type, stage, 0 TSRMLS_CC);
 	}
 }
 /* }}} */
