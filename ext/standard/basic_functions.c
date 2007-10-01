@@ -28,6 +28,7 @@
 #include "php_math.h"
 #include "php_http.h"
 #include "php_incomplete_class.h"
+#include "php_getopt.h"
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 #include "zend_operators.h"
@@ -83,10 +84,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 # include <sys/loadavg.h>
 #endif
 
-#ifdef HARTMUT_0
-#include <getopt.h>
-#endif
-
 #ifdef PHP_WIN32
 # include "win32/unistd.h"
 #endif
@@ -99,7 +96,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include "php_globals.h"
 #include "SAPI.h"
 #include "php_ticks.h"
-
 
 #ifdef ZTS
 PHPAPI int basic_globals_id;
@@ -725,13 +721,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_putenv, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#ifdef HAVE_GETOPT
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_getopt, 0, 0, 1)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, opts) /* ARRAY_INFO(0, opts, 1) */
 ZEND_END_ARG_INFO()
-#endif
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_flush, 0)
@@ -3128,7 +3122,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(iptcembed,														arginfo_iptcembed)
 	PHP_FE(getimagesize,													arginfo_getimagesize)
 	PHP_FE(image_type_to_mime_type,											arginfo_image_type_to_mime_type)
-	PHP_FE(image_type_to_extension, 										arginfo_image_type_to_extension)
+	PHP_FE(image_type_to_extension,											arginfo_image_type_to_extension)
 
 	PHP_FE(phpinfo,															arginfo_phpinfo)
 	PHP_FE(phpversion,														arginfo_phpversion)
@@ -3178,7 +3172,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 #endif
 
 #ifdef HAVE_STRFMON
-	PHP_FE(money_format,                                                    arginfo_money_format)
+	PHP_FE(money_format,													arginfo_money_format)
 #endif
 
 	PHP_FE(substr,															arginfo_substr)
@@ -3359,9 +3353,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(putenv,															arginfo_putenv)
 #endif
 
-#ifdef HAVE_GETOPT
 	PHP_FE(getopt,															arginfo_getopt)
-#endif
 
 #ifdef HAVE_GETLOADAVG
 	PHP_FE(sys_getloadavg,													arginfo_sys_getloadavg)
@@ -3408,7 +3400,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(unregister_tick_function,										arginfo_unregister_tick_function)
 
 	PHP_FE(highlight_file,													arginfo_highlight_file)
-	PHP_FALIAS(show_source, 		highlight_file,							arginfo_highlight_file)
+	PHP_FALIAS(show_source,			highlight_file,							arginfo_highlight_file)
 	PHP_FE(highlight_string,												arginfo_highlight_string)
 	PHP_FE(php_strip_whitespace,											arginfo_php_strip_whitespace)
 
@@ -3424,7 +3416,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(setcookie,														arginfo_setcookie)
 	PHP_FE(setrawcookie,													arginfo_setrawcookie)
 	PHP_FE(header,															arginfo_header)
-	PHP_FE(headers_sent,  													arginfo_headers_sent)
+	PHP_FE(headers_sent,													arginfo_headers_sent)
 	PHP_FE(headers_list,													arginfo_headers_list)
 
 	PHP_FE(connection_aborted,												arginfo_connection_aborted)
@@ -3447,7 +3439,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FALIAS(checkdnsrr,			dns_check_record,						arginfo_dns_check_record)
 # if HAVE_DN_SKIPNAME && HAVE_DN_EXPAND
 	PHP_FE(dns_get_mx,														arginfo_dns_get_mx)
-	PHP_FALIAS(getmxrr, 			dns_get_mx, 							arginfo_dns_get_mx)
+	PHP_FALIAS(getmxrr,				dns_get_mx,								arginfo_dns_get_mx)
 # endif
 # if HAVE_DNS_FUNCS
 	PHP_FE(dns_get_record,													arginfo_dns_get_record)
@@ -3457,7 +3449,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	/* functions from type.c */
 	PHP_FE(intval,															arginfo_intval)
 	PHP_FE(floatval,														arginfo_floatval)
-	PHP_FALIAS(doubleval,          floatval,								arginfo_floatval)
+	PHP_FALIAS(doubleval,			floatval,								arginfo_floatval)
 	PHP_FE(strval,															arginfo_strval)
 	PHP_FE(gettype,															arginfo_gettype)
 	PHP_FE(settype,															arginfo_settype)
@@ -3754,7 +3746,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	/* aliases from array.c */
 	PHP_FALIAS(pos,					current,								arginfo_current)
-	PHP_FALIAS(sizeof, 				count, 									arginfo_count)
+	PHP_FALIAS(sizeof,				count,									arginfo_count)
 	PHP_FALIAS(key_exists,			array_key_exists,						arginfo_array_key_exists)
 
 	/* functions from assert.c */
@@ -3769,9 +3761,9 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(ftok,															arginfo_ftok)
 #endif
 
-	PHP_FE(str_rot13, 														arginfo_str_rot13)
-	PHP_FE(stream_get_filters, 												arginfo_stream_get_filters)
-	PHP_FE(stream_filter_register, 											arginfo_stream_filter_register)
+	PHP_FE(str_rot13,														arginfo_str_rot13)
+	PHP_FE(stream_get_filters,												arginfo_stream_get_filters)
+	PHP_FE(stream_filter_register,											arginfo_stream_filter_register)
 	PHP_FE(stream_bucket_make_writeable,									arginfo_stream_bucket_make_writeable)
 	PHP_FE(stream_bucket_prepend,											arginfo_stream_bucket_prepend)
 	PHP_FE(stream_bucket_append,											arginfo_stream_bucket_append)
@@ -4432,7 +4424,6 @@ PHP_FUNCTION(putenv)
 /* }}} */
 #endif
 
-#ifdef HAVE_GETOPT
 /* {{{ free_argv()
    Free the memory allocated to an argv array. */
 static void free_argv(char **argv, int argc)
@@ -4450,23 +4441,54 @@ static void free_argv(char **argv, int argc)
 }
 /* }}} */
 
-#ifdef HARTMUT_0
 /* {{{ free_longopts()
    Free the memory allocated to an longopt array. */
-static void free_longopts(struct option *longopts)
+static void free_longopts(opt_struct *longopts)
 {
-	struct option *p;
+	opt_struct *p;
 
 	if (longopts) {
-		for (p = longopts; p->name; p++) {
-			efree((char *)(p->name));
+		for (p = longopts; p && p->opt_char != '-'; p++) {
+			if (p->opt_name != NULL) {
+				efree((char *)(p->opt_name));
+			}
 		}
-
-		efree(longopts);
 	}
 }
 /* }}} */
-#endif
+
+/* {{{ parse_opts()
+   Convert the typical getopt input characters to the php_getopt struct array */
+static int parse_opts(char * opts, opt_struct ** result)
+{
+	opt_struct * paras = NULL;
+	int i, count = 0;
+
+	for (i = 0; i < strlen(opts); i++) {
+		if ((opts[i] >= 65 && opts[i] <= 90) ||
+			(opts[i] >= 97 && opts[i] <= 122)
+		) {
+			count++;
+		}
+	}
+
+	paras = safe_emalloc(sizeof(opt_struct), count, 0);
+	memset(paras, 0, sizeof(opt_struct) * count);
+	*result = paras;
+	while ( (*opts >= 65 && *opts <= 90) ||
+			(*opts >= 97 && *opts <= 122)
+	) {
+		paras->opt_char = *opts;
+		paras->need_param = (*(++opts) == ':') ? 1 : 0;
+		paras->opt_name = NULL;
+		if (paras->need_param == 1) {
+			opts++;
+		}
+		paras++;
+	}
+	return count;
+}
+/* }}} */
 
 /* {{{ proto array getopt(string options [, array longopts]) U
    Get options from the command line argument list */
@@ -4475,13 +4497,12 @@ PHP_FUNCTION(getopt)
 	char *options = NULL, **argv = NULL;
 	char opt[2] = { '\0' };
 	char *optname;
-	int argc = 0, options_len = 0, o;
+	int argc = 0, options_len = 0, len, o;
+	char *php_optarg = NULL;
+	int php_optind = 1;
 	zval *val, **args = NULL, *p_longopts = NULL;
 	int optname_len = 0;
-#ifdef HARTMUT_0
-	struct option *longopts = NULL;
-	int longindex = 0;
-#endif
+	opt_struct *opts, *orig_opts;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a", &options, &options_len, &p_longopts) == FAILURE) {
 		RETURN_FALSE;
@@ -4519,65 +4540,64 @@ PHP_FUNCTION(getopt)
 		RETURN_FALSE;
 	}
 
+	len = parse_opts(options, &opts);
+
 	if (p_longopts) {
-#ifdef HARTMUT_0
-		int len, c = zend_hash_num_elements(Z_ARRVAL_P(p_longopts));
-		struct option *p;
+		int count;
 		zval **arg;
-		char *name;
 
-		longopts = (struct option *)ecalloc(c+1, sizeof(struct option));
+		count = zend_hash_num_elements(Z_ARRVAL_P(p_longopts));
+		
+		/* the first <len> slots are filled by the one short ops
+		 * we now extend our array and jump to the new added structs */
+		opts = (opt_struct *) erealloc(opts, sizeof(opt_struct) * (len + count + 1));
+        orig_opts = opts;
+        opts += len;
 
-		if (!longopts) {
+        memset(opts, 0, count * sizeof(opt_struct));
+
+		if (!opts) {
 			RETURN_FALSE;
 		}
 
 		/* Reset the array indexes. */
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p_longopts));
-		p = longopts;
 
 		/* Iterate over the hash to construct the argv array. */
 		while (zend_hash_get_current_data(Z_ARRVAL_P(p_longopts), (void **)&arg) == SUCCESS) {
-
-			p->has_arg = 0;
-			name = estrdup(Z_STRVAL_PP(arg));
-			len = strlen(name);
-			if ((len > 0) && (name[len-1] == ':')) {
-				p->has_arg++;
-				name[len-1] = '\0';
-				if ((len > 1) && (name[len-2] == ':')) {
-					p->has_arg++;
-					name[len-2] = '\0';
+			opts->need_param = 0;
+			opts->opt_name = estrdup(Z_STRVAL_PP(arg));
+			len = strlen(opts->opt_name);
+			if ((len > 0) && (opts->opt_name[len-1] == ':')) {
+				opts->need_param++;
+				opts->opt_name[len-1] = '\0';
+				if ((len > 1) && (opts->opt_name[len-2] == ':')) {
+					opts->need_param++;
+					opts->opt_name[len-2] = '\0';
 				}
 			}
-
-			p->name = name;
-			p->flag = NULL;
-			p->val = 0;
-
+			opts->opt_char = 0;
+			opts++;
 			zend_hash_move_forward(Z_ARRVAL_P(p_longopts));
-			p++;
 		}
-#else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No support for long options in this build");
-#endif
+	} else {
+		opts = (opt_struct*) erealloc(opts, sizeof(opt_struct) * (len + 1));
+		orig_opts = opts;
+		opts += len;
 	}
+
+	/* php_getopt want to identify the last param */
+	opts->opt_char   = '-';
+	opts->need_param = 0;
+	opts->opt_name   = NULL;
 
 	/* Initialize the return value as an array. */
 	array_init(return_value);
 
-	/* Disable getopt()'s error messages. */
-	opterr = 0;
+	/* after our pointer arithmetic jump back to the first element */
+	opts = orig_opts;
 
-	/* Force reinitialization of getopt() (via optind reset) on every call. */
-	optind = 1;
-
-	/* Invoke getopt(3) on the argument array. */
-#ifdef HARTMUT_0
-	while ((o = getopt_long(argc, argv, options, longopts, &longindex)) != -1) {
-#else
-	while ((o = getopt(argc, argv, options)) != -1) {
-#endif
+	while ((o = php_getopt(argc, argv, opts, &php_optarg, &php_optind, 0, 1)) != -1) {
 		/* Skip unknown arguments. */
 		if (o == '?') {
 			continue;
@@ -4585,12 +4605,7 @@ PHP_FUNCTION(getopt)
 
 		/* Prepare the option character and the argument string. */
 		if (o == 0) {
-#ifdef HARTMUT_0
-			optname = (char *)longopts[longindex].name;
-#else
-			/* o == 0 shall never happen so this only fixes a compiler warning */
-			optname = NULL;
-#endif
+			optname = opts[php_optidx].opt_name;
 		} else {
 			if (o == 1) {
 				o = '-';
@@ -4600,9 +4615,9 @@ PHP_FUNCTION(getopt)
 		}
 
 		MAKE_STD_ZVAL(val);
-		if (optarg != NULL) {
+		if (php_optarg != NULL) {
 			/* keep the arg as binary, since the encoding is not known */
-			ZVAL_STRING(val, optarg, 1);
+			ZVAL_STRING(val, php_optarg, 1);
 		} else {
 			ZVAL_FALSE(val);
 		}
@@ -4631,15 +4646,15 @@ PHP_FUNCTION(getopt)
 				zend_hash_add(HASH_OF(return_value), optname, strlen(optname)+1, (void *)&val, sizeof(zval *), NULL);
 			}
 		}
+
+		php_optarg = NULL;
 	}
 
+	free_longopts(orig_opts);
+	efree(orig_opts);
 	free_argv(argv, argc);
-#ifdef HARTMUT_0
-	free_longopts(longopts);
-#endif
 }
 /* }}} */
-#endif
 
 /* {{{ proto void flush(void) U
    Flush the output buffer */
@@ -5746,9 +5761,9 @@ PHP_FUNCTION(get_include_path)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
-	
+
 	str = zend_ini_string("include_path", sizeof("include_path"), 0);
-	
+
 	if (str == NULL) {
 		RETURN_FALSE;
 	}
@@ -6294,7 +6309,7 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 	}
 
 	if (hash_key->nKeyLength) {
-		php_prefix_varname(&new_key, prefix, hash_key->arKey, hash_key->nKeyLength-1, hash_key->type, 0 TSRMLS_CC);
+		php_prefix_varname(&new_key, prefix, hash_key->arKey, hash_key->nKeyLength - 1, hash_key->type, 0 TSRMLS_CC);
 	} else {
 		zval num;
 		ZVAL_LONG(&num, hash_key->h);

@@ -251,12 +251,6 @@ else
   AC_MSG_RESULT(no)
 fi
 
-dnl getopt long options disabled for now
-dnl as we can't be sure that we get the right getopt.h here
-dnl using the standard AC_CHECK macros
-dnl AC_CHECK_HEADERS(getopt.h)
-dnl AC_CHECK_FUNCS(getopt_long getopt_long_only)
-
 if test "$PHP_SAPI" = "cgi" || test "$PHP_SAPI" = "cli" || test "$PHP_SAPI" = "embed"; then
   AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
 fi
