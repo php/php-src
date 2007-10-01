@@ -30,6 +30,8 @@ PHP                                                                        NEWS
   Reported by Laurent gaffie. (Ilia)
 - Fixed imagerectangle regression with 1x1 rectangle (libgd #106). (Pierre)
 
+- Fixed bug #42785 (json_encode() formats doubles according to locale rather  
+  then following standard syntax). (Ilia)
 - Fixed bug #42767 (highlight_string() truncates trailing comment). (Ilia)
 - Fixed bug #42739 (mkdir() doesn't like a trailing slash when safe_mode is 
   enabled). (Ilia)
