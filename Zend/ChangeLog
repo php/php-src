@@ -1,3 +1,75 @@
+2007-10-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini.c:
+      MFB: MFB: Fixed typo in previous patch
+
+    * (PHP_5_2)
+      zend_ini.c:
+      
+      MFB: Fixed typo in previous patch
+
+    * (PHP_5_3)
+      zend_ini.c:
+      Fixed typo in the previous patch
+
+    * zend_ini.c
+      zend_ini.c:
+      MFB: Refactor code to make fixes for coverity issues #385 and #386 a bit
+      more obvious
+
+    * (PHP_5_3)
+      zend_ini.c:
+      Refactor code to make fixes for coverity issues #385 and #386 a bit more
+      obvious
+
+2007-10-01  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      tests/018.phpt:
+      MFH:- Added common getopt implementation to core.
+      MFH:- Added long-option feature to getopt().
+      MFH:- Made getopt() available on win32 systems.
+      MFH:  Patch by: David Soria Parra <dsp@php.net>
+      [DOC]: These changes will be available from 5.3+
+      
+
+2007-10-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      Late Static Binding make no sense in compile-time constants.
+
+    * zend_compile.c
+      zend_compile.c
+      zend_execute.c
+      zend_execute.c
+      zend_language_parser.y
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug42802.phpt:
+      Fixed bug #42802 (Namespace not supported in typehints)
+
+    * tests/bug42802.phpt
+      tests/bug42802.phpt:
+      
+      file bug42802.phpt was initially added on branch PHP_5_3.
+
+    * zend_constants.c
+      zend_constants.c
+      zend_execute_API.c
+      zend_execute_API.c
+      tests/bug42798.phpt:
+      Fixed bug #42798 (__autoload() not triggered for classes used in method
+      signature).
+
+    * tests/bug42798.phpt
+      tests/bug42798.phpt:
+      
+      file bug42798.phpt was initially added on branch PHP_5_3.
+
 2007-09-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
