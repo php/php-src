@@ -144,10 +144,18 @@ static php_stream_filter_status_t php_unicode_from_string_filter(
 			UErrorCode errCode = U_ZERO_ERROR;
 			php_stream_bucket *new_bucket;
 
+			if ((destlen & 1) != 0) {
+				destlen++;
+			}
+
 			destp = destbuf = (UChar *)pemalloc(destlen, data->is_persistent);
 
 			ucnv_toUnicode(data->conv, &destp, (UChar*)((char*)destbuf + destlen), (const char**)&src, src + remaining, NULL, FALSE, &errCode);
-			/* UTODO: Error catching */
+
+			if (errCode != U_ZERO_ERROR) {
+				pefree(destp, data->is_persistent);
+				break;
+			}
 
 			new_bucket = php_stream_bucket_new_unicode(stream, destbuf, destp - destbuf, 1, data->is_persistent TSRMLS_CC);
 			php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
@@ -245,7 +253,6 @@ php_stream_filter_ops php_unicode_tidy_filter_ops = {
 	PSFO_FLAG_ACCEPTS_ANY | PSFO_FLAG_OUTPUTS_ANY
 };
 /* }}} */
-
 
 /* {{{ unicode.* factory */
 
