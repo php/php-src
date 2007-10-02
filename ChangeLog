@@ -1,3 +1,238 @@
+2007-10-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      - pass the adress not the value
+
+2007-10-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/json/tests/bug42785.phpt
+      ext/json/tests/bug42785.phpt:
+      
+      MFB: Added test for bug #42785
+
+    * ext/json/tests/bug42785.phpt
+      ext/json/tests/bug42785.phpt
+      ext/json/tests/bug42785.phpt:
+        1.1.4;
+      file bug42785.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_2)
+      NEWS
+      ext/json/json.c
+      ext/json/json.c
+      main/snprintf.c
+      main/snprintf.c
+      main/spprintf.c
+      main/spprintf.c:
+      
+      MFB: Fixed bug #42785 (json_encode() formats doubles according to locale
+      rather then following standard syntax).
+
+    * (PHP_5_3)
+      ext/json/json.c
+      main/snprintf.c
+      main/spprintf.c:
+      
+      Fixed bug #42785 (json_encode() formats doubles according to locale rather
+      then following standard syntax).
+
+2007-10-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/error_get_last.phpt:
+      - Fix test
+
+2007-10-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_ini.c:
+      MFB: MFB: Fixed typo in previous patch
+
+    * (PHP_5_2)
+      ZendEngine2/zend_ini.c:
+      
+      MFB: Fixed typo in previous patch
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini.c:
+      Fixed typo in the previous patch
+
+    * ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.c
+      main/main.c
+      main/main.c:
+      MFB: Refactor code to make fixes for coverity issues #385 and #386 a bit
+      more obvious
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini.c
+      main/main.c:
+      Refactor code to make fixes for coverity issues #385 and #386 a bit more
+      obvious
+
+2007-10-01  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/tests/strings/bug40754.phpt:
+      MFB: fix test
+
+    * ext/standard/string.c:
+      MFB: fix bug #42142 and cs+ws
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      - ws + cs + sync HEAD
+
+    * (PHP_5_3)
+      NEWS
+      configure.in
+      ZendEngine2/tests/018.phpt
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/config.m4
+      ext/standard/tests/array/extract_error.phpt
+      ext/standard/tests/general_functions/error_get_last.phpt
+      ext/standard/tests/general_functions/import_request.phpt
+      ext/standard/tests/general_functions/include_path.phpt
+      ext/standard/tests/general_functions/ini_get_all.phpt
+      ext/standard/tests/network/ip.phpt
+      main/getopt.c
+      main/php_getopt.h
+      sapi/cgi/cgi_main.c
+      sapi/cgi/config.w32
+      sapi/cgi/config9.m4
+      sapi/cgi/getopt.c
+      sapi/cgi/php_getopt.h
+      sapi/cli/config.w32
+      sapi/cli/getopt.c
+      sapi/cli/php_cli.c
+      sapi/cli/php_getopt.h
+      win32/build/config.w32:
+      MFH:- Added common getopt implementation to core.
+      MFH:- Added long-option feature to getopt().
+      MFH:- Made getopt() available on win32 systems.
+      MFH:  Patch by: David Soria Parra <dsp@php.net>
+      [DOC]: These changes will be available from 5.3+
+      
+
+    * (PHP_5_3)
+      ext/standard/array.c
+      ext/standard/php_var.h:
+      MFH: sync (adds php_prefix_varname() API function)
+
+    * configure.in
+      ext/standard/basic_functions.c
+      ext/standard/config.m4
+      main/getopt.c
+      main/getopt.c
+      main/php_getopt.h
+      main/php_getopt.h
+      sapi/cgi/cgi_main.c
+      sapi/cgi/config.w32
+      sapi/cgi/config9.m4
+      sapi/cgi/getopt.c
+      sapi/cgi/php_getopt.h
+      sapi/cli/config.w32
+      sapi/cli/getopt.c
+      sapi/cli/php_cli.c
+      sapi/cli/php_getopt.h
+      win32/build/config.w32:
+      - Added common getopt implementation to core.
+      - Added long-option feature to getopt().
+      - Made getopt() available on win32 systems.
+      Patch by: David Soria Parra <dsp@php.net>
+      [DOC]: These changes will be available from 5.3+
+
+    * main/php_ini.c:
+      - Fix warning
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/implode1.phpt
+      ext/standard/tests/strings/join_error.phpt
+      ext/standard/tests/strings/join_variation2.phpt:
+      - Fixed bug #42789 (join() warning messages are not proper & different
+        return value on php5/6)
+
+    * ext/standard/tests/strings/moneyformat.phpt:
+      - Added unicode result
+
+2007-10-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Late Static Binding make no sense in compile-time constants.
+
+2007-10-01  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/join_variation2.phpt:
+      fix test
+
+2007-10-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug42802.phpt
+      ZendEngine2/tests/bug42802.phpt:
+      
+      file bug42802.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug42802.phpt:
+      Fixed bug #42802 (Namespace not supported in typehints)
+
+2007-10-01  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/join_error.phpt
+      ext/standard/tests/strings/sprintf_basic7.phpt
+      ext/standard/tests/strings/sprintf_basic8.phpt
+      ext/standard/tests/strings/sprintf_variation28.phpt
+      ext/standard/tests/strings/sprintf_variation29.phpt
+      ext/standard/tests/strings/sprintf_variation34.phpt
+      ext/standard/tests/strings/sprintf_variation35.phpt
+      ext/standard/tests/strings/sprintf_variation4.phpt
+      ext/standard/tests/strings/sprintf_variation40.phpt
+      ext/standard/tests/strings/sprintf_variation41.phpt
+      ext/standard/tests/strings/sprintf_variation44.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation5.phpt
+      ext/standard/tests/strings/chunk_split_variation8.phpt:
+      these dots exist since PHP3
+      even though Jani removed them in 5_3, I can't see how they can cause any
+      BUGS
+
+2007-10-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug42798.phpt
+      ZendEngine2/tests/bug42798.phpt
+      ZendEngine2/tests/bug42798.phpt:
+      Fixed bug #42798 (__autoload() not triggered for classes used in method
+      signature).
+
+2007-10-01  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      - add notice about glob regression (Lukas)
+
 2007-09-30  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * (PHP_5_3)
