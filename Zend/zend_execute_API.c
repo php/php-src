@@ -517,7 +517,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!zend_get_constant_ex(str_index, str_index_len-1, &const_value, scope, 0 TSRMLS_CC)) {
+			if (!zend_get_constant_ex(str_index, str_index_len-1, &const_value, scope, (*element)->idx_type TSRMLS_CC)) {
 				if ((colon = memchr(str_index, ':', str_index_len-1)) && colon[1] == ':') {
 					zend_error(E_ERROR, "Undefined class constant '%s'", str_index);
 				}

@@ -3640,6 +3640,7 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
 			case IS_CONSTANT:
 				/* Ugly hack to denote that this value has a constant index */
 				Z_TYPE_P(element) |= IS_CONSTANT_INDEX;
+				element->idx_type = Z_TYPE(offset->u.constant);
 				/* break missing intentionally */
 			case IS_STRING:
 				zend_symtable_update(result->u.constant.value.ht, offset->u.constant.value.str.val, offset->u.constant.value.str.len+1, &element, sizeof(zval *), NULL);
