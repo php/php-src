@@ -336,6 +336,7 @@ struct _zval_struct {
 	zend_uint refcount;
 	zend_uchar type;	/* active type */
 	zend_uchar is_ref;
+	zend_uchar idx_type;	/* type of element's index in constant array */
 };
 
 

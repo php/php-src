@@ -3943,6 +3943,7 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
 			case IS_CONSTANT:
 				/* Ugly hack to denote that this value has a constant index */
 				Z_TYPE_P(element) |= IS_CONSTANT_INDEX;
+				element->idx_type = Z_TYPE(offset->u.constant);
 				/* break missing intentionally */
 				utype = UG(unicode)?IS_UNICODE:IS_STRING;
 			case IS_STRING:

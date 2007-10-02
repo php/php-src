@@ -2703,7 +2703,7 @@ static int ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 		if (zend_u_hash_find(&ce->constants_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
 			if (Z_TYPE_PP(value) == IS_CONSTANT_ARRAY ||
-			    Z_TYPE_PP(value) == IS_CONSTANT) {
+			    (Z_TYPE_PP(value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 				zend_class_entry *old_scope = EG(scope);
 
 				EG(scope) = ce;
@@ -10201,7 +10201,7 @@ static int ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		if (zend_u_hash_find(&ce->constants_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
 			if (Z_TYPE_PP(value) == IS_CONSTANT_ARRAY ||
-			    Z_TYPE_PP(value) == IS_CONSTANT) {
+			    (Z_TYPE_PP(value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 				zend_class_entry *old_scope = EG(scope);
 
 				EG(scope) = ce;
@@ -16957,7 +16957,7 @@ static int ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 		if (zend_u_hash_find(&ce->constants_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
 			if (Z_TYPE_PP(value) == IS_CONSTANT_ARRAY ||
-			    Z_TYPE_PP(value) == IS_CONSTANT) {
+			    (Z_TYPE_PP(value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 				zend_class_entry *old_scope = EG(scope);
 
 				EG(scope) = ce;

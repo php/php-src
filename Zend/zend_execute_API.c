@@ -550,7 +550,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!zend_u_get_constant_ex(ZEND_STR_TYPE, str_index, str_index_len-1, &const_value, scope, 0 TSRMLS_CC)) {
+			if (!zend_u_get_constant_ex(ZEND_STR_TYPE, str_index, str_index_len-1, &const_value, scope, (*element)->idx_type TSRMLS_CC)) {
 				if ((UG(unicode) && (colon.u = u_memchr(str_index.u, ':', str_index_len-1)) && colon.u[1] == ':') ||
 				    (!UG(unicode) && (colon.s = memchr(str_index.s, ':', str_index_len-1)) && colon.s[1] == ':')) {
 					zend_error(E_ERROR, "Undefined class constant '%v'", str_index);
