@@ -2306,7 +2306,11 @@ PHPAPI int php_u_strcspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end)
 
 	for (i = 0, codepts = 0 ; i < len1 ; ) {
 		U16_NEXT(s1, i, len1, ch);
-		if (!len2 || u_memchr32(s2, ch, len2)) {
+		if (len2) {
+			if (u_memchr32(s2, ch, len2)) {
+				break;
+			}
+		} else if (ch == (UChar32)0x00){
 			break;
 		}
 		codepts++;
