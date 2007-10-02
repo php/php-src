@@ -41,6 +41,7 @@ if (PHP_MYSQLI != "no") {
     mysqlnd_source = 
         "mysqlnd.c " +
 //        "mysqlnd_alloc.c " +
+        "mysqlnd_debug.c " +
         "mysqlnd_charset.c " +
         "mysqlnd_loaddata.c " +
         "mysqlnd_palloc.c " +
@@ -51,14 +52,15 @@ if (PHP_MYSQLI != "no") {
         "mysqlnd_result_meta.c " +
         "mysqlnd_statistics.c " +
         "mysqlnd_wireprotocol.c";
-
-    EXTENSION("mysqli", mysqli_source);
-    // Specify that add "mysqlnd" sources, but use same object file
-    // directory as the "mysqli" sources
-    // FIXME the hard coded "ext/mysqli/mysqlnd" prevents pointing
-    // out sources in another directory? Like above: PHP_MYSQLI + "\\include;"
-    ADD_SOURCES("ext/mysqli/mysqlnd", mysqlnd_source, "mysqli");
-    AC_DEFINE('HAVE_MYSQLILIB', 1, 'Have MySQLi library');
-    AC_DEFINE('HAVE_MYSQLND'  , 1, 'MySQL native driver support enabled');
+	if (CHECK_LIB("ws2_32.lib", "mysqlnd")) {
+	    EXTENSION("mysqli", mysqli_source);
+	    // Specify that add "mysqlnd" sources, but use same object file
+	    // directory as the "mysqli" sources
+	    // FIXME the hard coded "ext/mysqli/mysqlnd" prevents pointing
+	    // out sources in another directory? Like above: PHP_MYSQLI + "\\include;"
+	    ADD_SOURCES("ext/mysqli/mysqlnd", mysqlnd_source, "mysqli");
+	    AC_DEFINE('HAVE_MYSQLILIB', 1, 'Have MySQLi library');
+	    AC_DEFINE('HAVE_MYSQLND'  , 1, 'MySQL native driver support enabled');
+	}
   }
 }

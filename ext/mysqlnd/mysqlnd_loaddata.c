@@ -23,6 +23,7 @@
 #include "mysqlnd.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
+#include "mysqlnd_debug.h"
 
 enum_func_status mysqlnd_simple_command_handle_response(MYSQLND *conn,
 										enum php_mysql_packet_type ok_packet,
@@ -34,7 +35,7 @@ enum_func_status mysqlnd_simple_command_handle_response(MYSQLND *conn,
 if (c) {\
 	a = (zval ***)safe_emalloc(c, sizeof(zval **), 0);\
 	for (i = b; i < c; i++) {\
-		a[i] = emalloc(sizeof(zval *));\
+		a[i] = mnd_emalloc(sizeof(zval *));\
 		MAKE_STD_ZVAL(*a[i]);\
 	}\
 }
@@ -43,9 +44,9 @@ if (c) {\
 if (a) {\
 	for (i=b; i < c; i++) {\
 		zval_ptr_dtor(a[i]);\
-		efree(a[i]);\
+		mnd_efree(a[i]);\
 	}\
-	efree(a);\
+	mnd_efree(a);\
 }
 
 /* {{{ mysqlnd_local_infile_init */
@@ -55,14 +56,16 @@ int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS
 	MYSQLND_INFILE_INFO		*info;
 	php_stream_context 		*context = NULL;
 
-	*ptr= info= ((MYSQLND_INFILE_INFO *)ecalloc(1, sizeof(MYSQLND_INFILE_INFO)));
+	DBG_ENTER("mysqlnd_local_infile_init");
+
+	*ptr= info= ((MYSQLND_INFILE_INFO *)mnd_ecalloc(1, sizeof(MYSQLND_INFILE_INFO)));
 
 	/* check open_basedir */
 	if (PG(open_basedir)) {
 		if (php_check_open_basedir_ex(filename, 0 TSRMLS_CC) == -1) {
 			strcpy(info->error_msg, "open_basedir restriction in effect. Unable to open file");
 			info->error_no = CR_UNKNOWN_ERROR;
-			return 1;
+			DBG_RETURN(1);
 		}
 	}
 
@@ -72,10 +75,10 @@ int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS
 	if (info->fd == NULL) {
 		snprintf((char *)info->error_msg, sizeof(info->error_msg), "Can't find file '%-.64s'.", filename);
 		info->error_no = MYSQLND_EE_FILENOTFOUND; 
-		return 1;
+		DBG_RETURN(1);
 	}
 
-	return 0;
+	DBG_RETURN(0);
 }
 /* }}} */
 
@@ -87,81 +90,16 @@ int mysqlnd_local_infile_read(void *ptr, char *buf, uint buf_len TSRMLS_DC)
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
 	int			count;
 
-	/* default processing */
-	if (!info->callback) {
-		count = (int)php_stream_read(info->fd, buf, buf_len);
+    DBG_ENTER("mysqlnd_local_infile_read");
 
-		if (count < 0) {
-			strcpy(info->error_msg, "Error reading file");
-			info->error_no = MYSQLND_EE_READ;
-		}
+	count = (int)php_stream_read(info->fd, buf, buf_len);
 
-		return count;
-	} else {
-		zval	***callback_args;
-		zval	*retval;
-		zval	*fp;
-		int		argc = 4;
-		int		i;
-		long	rc;
-
-		ALLOC_CALLBACK_ARGS(callback_args, 1, argc);
-	
-		/* set parameters: filepointer, buffer, buffer_len, errormsg */
-
-		MAKE_STD_ZVAL(fp);
-		php_stream_to_zval(info->fd, fp);
-		callback_args[0] = &fp;
-		ZVAL_STRING(*callback_args[1], "", 1);	
-		ZVAL_LONG(*callback_args[2], buf_len);	
-		ZVAL_STRING(*callback_args[3], "", 1);	
-	
-		if (call_user_function_ex(EG(function_table), 
-						NULL,
-						info->callback,
-						&retval,
-						argc,	 	
-						callback_args,
-						0,
-						NULL TSRMLS_CC) == SUCCESS) {
-
-			rc = Z_LVAL_P(retval);
-			zval_ptr_dtor(&retval);
-
-			if (rc > 0) {
-				const char * msg = NULL;
-				if (rc >= 0 && rc != Z_STRLEN_P(*callback_args[1])) {
-					msg = "Mismatch between the return value of the callback and the content "
-						  "length of the buffer.";
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, msg);
-					rc = -1;
-				} else if (Z_STRLEN_P(*callback_args[1]) > buf_len) {
-					/* check buffer overflow */
-					msg = "Too much data returned";
-					rc = -1;
-				} else {
-					memcpy(buf, Z_STRVAL_P(*callback_args[1]), MIN(rc, Z_STRLEN_P(*callback_args[1])));
-				}
-				if (rc == -1) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, msg);
-					strcpy(info->error_msg, msg);
-					info->error_no = MYSQLND_EE_READ;
-				}
-			} else if (rc < 0) {
-				strncpy(info->error_msg, Z_STRVAL_P(*callback_args[3]), MYSQLND_ERRMSG_SIZE); 
-				info->error_no = MYSQLND_EE_READ;
-			}
-		} else {
-			strcpy(info->error_msg, "Can't execute load data local init callback function");
-			info->error_no = MYSQLND_EE_READ;
-			rc = -1;
-		}
-
-		efree(fp);	
-		FREE_CALLBACK_ARGS(callback_args, 1, argc);
-		return rc;
-
+	if (count < 0) {
+		strcpy(info->error_msg, "Error reading file");
+		info->error_no = CR_UNKNOWN_ERROR;
 	}
+
+	DBG_RETURN(count);
 }
 /* }}} */
 
@@ -172,14 +110,17 @@ int	mysqlnd_local_infile_error(void *ptr, char *error_buf, uint error_buf_len TS
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
 
+	DBG_ENTER("mysqlnd_local_infile_error");
+
 	if (info) {
 		strncpy(error_buf, info->error_msg, error_buf_len);
-
-		return info->error_no;
+		DBG_INF_FMT("have info, %d", info->error_no);
+		DBG_RETURN(info->error_no);
 	}
 
 	strncpy(error_buf, "Unknown error", error_buf_len);
-	return CR_UNKNOWN_ERROR;
+	DBG_INF_FMT("no info, %d", CR_UNKNOWN_ERROR);
+	DBG_RETURN(CR_UNKNOWN_ERROR);
 }
 /* }}} */
 
@@ -194,25 +135,21 @@ void mysqlnd_local_infile_end(void *ptr TSRMLS_DC)
 		/* php_stream_close segfaults on NULL */
 		if (info->fd) {
 			php_stream_close(info->fd);
+			info->fd = NULL;
 		}
-		efree(info);
+		mnd_efree(info);
 	}
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_local_infile_default */
-PHPAPI void mysqlnd_local_infile_default(MYSQLND *conn, zend_bool free_callback)
+PHPAPI void mysqlnd_local_infile_default(MYSQLND *conn)
 {
 	conn->infile.local_infile_init = mysqlnd_local_infile_init;
 	conn->infile.local_infile_read = mysqlnd_local_infile_read;
 	conn->infile.local_infile_error = mysqlnd_local_infile_error;
 	conn->infile.local_infile_end = mysqlnd_local_infile_end;
-	conn->infile.userdata = NULL;
-	if (free_callback == TRUE && conn->infile.callback) {
-		zval_ptr_dtor(&conn->infile.callback);
-		conn->infile.callback = NULL;	
-	}
 }
 /* }}} */
 
@@ -245,6 +182,8 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 	size_t				ret;
 	MYSQLND_INFILE		infile;
 
+	DBG_ENTER("mysqlnd_handle_local_infile");
+
 	if (!(conn->options.flags & CLIENT_LOCAL_FILES)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "LOAD DATA LOCAL INFILE forbidden");
 		/* write empty packet to server */
@@ -253,15 +192,9 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 		goto infile_error;
 	}
 
-	/* check if we have valid functions */
-	if (!conn->infile.local_infile_init || !conn->infile.local_infile_read ||
-		!conn->infile.local_infile_error || !conn->infile.local_infile_end) {
-		mysqlnd_local_infile_default(conn, FALSE);
-	}
-
 	infile = conn->infile;
 	/* allocate buffer for reading data */
-	buf = (char *)ecalloc(1, buflen);
+	buf = (char *)mnd_ecalloc(1, buflen);
 	
 	*is_warning = FALSE;
 
@@ -278,17 +211,11 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 		goto infile_error;
 	}
 
-	/* pass callback handler */
-	if (infile.callback) {
-		MYSQLND_INFILE_INFO	*ptr = (MYSQLND_INFILE_INFO *)info;
-		ptr->callback = infile.callback;
-	}
-		
-
 	/* read data */
 	while ((bufsize = infile.local_infile_read (info, buf + MYSQLND_HEADER_SIZE,
 												buflen - MYSQLND_HEADER_SIZE TSRMLS_CC)) > 0) {
 		if ((ret = mysqlnd_stream_write_w_header(conn, buf, bufsize TSRMLS_CC)) < 0) {
+			DBG_ERR_FMT("Error during read : %d %s %s", CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			goto infile_error;
 		}
@@ -303,6 +230,7 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 	/* error during read occured */
 	if (bufsize < 0) {
 		*is_warning = TRUE;
+		DBG_ERR_FMT("Bufsize < 0, warning,  %d %s %s", CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 		strcpy(conn->error_info.sqlstate, UNKNOWN_SQLSTATE);
 		conn->error_info.error_no = infile.local_infile_error(info, conn->error_info.error,
 															 sizeof(conn->error_info.error) TSRMLS_CC);
@@ -319,8 +247,9 @@ infile_error:
 	}
 
 	(*conn->infile.local_infile_end)(info TSRMLS_CC);
-	efree(buf);
-	return result;
+	mnd_efree(buf);
+	DBG_INF_FMT("%s", result == PASS? "PASS":"FAIL");
+	DBG_RETURN(result);
 }
 /* }}} */
 

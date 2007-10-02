@@ -19,8 +19,8 @@
 
 */
 
-#ifndef MYSQL_MYSQLND_H
-#define MYSQL_MYSQLND_H
+#ifndef MYSQLI_MYSQLND_H
+#define MYSQLI_MYSQLND_H
 
 #include "ext/mysqlnd/mysqlnd_libmysql_compat.h"
 

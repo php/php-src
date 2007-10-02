@@ -38,17 +38,18 @@
    Open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_connect)
 {
-	MY_MYSQL 			*mysql;
-	MYSQLI_RESOURCE 	*mysqli_resource;
-	zval  				*object = getThis();
-	char 				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
-	unsigned int 		hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
+	MY_MYSQL			*mysql = NULL;
+	MYSQLI_RESOURCE		*mysqli_resource = NULL;
+	zval				*object = getThis();
+	char				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
+	unsigned int		hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
 	zend_bool			persistent = FALSE;
-	long				port=0;
+	long				port = 0;
 	uint				hash_len;
 	char				*hash_key = NULL;
 	zend_bool			new_connection = FALSE;
 	zend_rsrc_list_entry	*le;
+	mysqli_plist_entry *plist = NULL;
 
 	if (getThis() && !ZEND_NUM_ARGS()) {
 		RETURN_NULL();
@@ -77,48 +78,115 @@ PHP_FUNCTION(mysqli_connect)
 		hostname = MyG(default_host);
 	}
 
-	mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
+
+	if (object && instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
+		mysqli_resource = ((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr;
+		if (mysqli_resource && mysqli_resource->ptr &&
+			mysqli_resource->status >= MYSQLI_STATUS_INITIALIZED)
+		{
+			mysql = (MY_MYSQL*)mysqli_resource->ptr;
+			php_clear_mysql(mysql);
+			if (mysql->mysql) {
+				mysqli_close(mysql->mysql, MYSQLI_CLOSE_EXPLICIT);
+				mysql->mysql = NULL;
+			}
+		}
+	}
+	if (!mysql) {
+		mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
+	}
 
 	if (strlen(SAFE_STR(hostname)) > 2 && !strncasecmp(hostname, "p:", 2)) {
-		mysql->persistent = persistent = TRUE;
 		hostname += 2;
+		if (!MyG(allow_persistent)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Persistent connections are disabled. Downgrading to normal");			
+		} else {
+			mysql->persistent = persistent = TRUE;
 
-		if (!strlen(hostname)) {
-			hostname = MyG(default_host);
-		}
+			if (!strlen(hostname)) {
+				hostname = MyG(default_host);
+			}
 
-		/* caclulate hash length: mysqli_ + Hostname + 5 (Port) + username + dbname + pw */
-		hash_len = 7 + strlen(SAFE_STR(hostname)) + 5 + strlen(SAFE_STR(username))
-					 + strlen(SAFE_STR(dbname)) + strlen(SAFE_STR(passwd)) + 1;
+			hash_len = spprintf(&hash_key, 0, "mysqli_%s%ld%s%s%s", SAFE_STR(hostname), 
+								port, SAFE_STR(username), SAFE_STR(dbname), 
+								SAFE_STR(passwd));
 
-		hash_key = emalloc(hash_len);
-		hash_len = snprintf(hash_key, hash_len, "mysqli_%s%ld%s%s%s", SAFE_STR(hostname), 
-							port, SAFE_STR(username), SAFE_STR(dbname), 
-							SAFE_STR(passwd));
+			/* check if we can reuse exisiting connection ... */
+			if (zend_hash_find(&EG(persistent_list), hash_key, hash_len + 1, (void **)&le) == SUCCESS) {
+				if (Z_TYPE_P(le) == php_le_pmysqli()) {
+					plist = (mysqli_plist_entry *) le->ptr;
 
-		/* check if we can reuse exisiting connection ... */
-		if (zend_hash_find(&EG(persistent_list), hash_key, hash_len + 1, (void **)&le) == SUCCESS) {
-			if (Z_TYPE_P(le) == php_le_pmysqli()) {
-				mysql->mysql = (MYSQL *)le->ptr;
+					do {
+						if (zend_hash_num_elements(&plist->free_links)) {
+							HashPosition pos;
+							MYSQL **free_mysql;
+							ulong idx;
+							dtor_func_t pDestructor = plist->free_links.pDestructor;
 
-				/* reset variables */
-				/* todo: option for ping or change_user */
+							zend_hash_internal_pointer_reset_ex(&plist->free_links, &pos);
+							if (SUCCESS != zend_hash_get_current_data_ex(&plist->free_links,
+																		(void **)&free_mysql, &pos)) {
+								break;
+							}
+							if (HASH_KEY_IS_LONG != zend_hash_get_current_key_ex(&plist->free_links, NULL,
+																				 NULL, &idx, FALSE, &pos)) {
+								break;
+							}
+							mysql->mysql = *free_mysql;
+							plist->free_links.pDestructor = NULL; /* Don't call pDestructor now */
+							if (SUCCESS != zend_hash_index_del(&plist->free_links, idx)) {
+								plist->used_links.pDestructor = pDestructor;  /* Restore the destructor */
+								break;
+							}
+							plist->used_links.pDestructor = pDestructor;  /* Restore the destructor */
+							MyG(num_inactive_persistent)--;
+							MyG(num_active_persistent)++;
+
+							/* reset variables */
+							/* todo: option for ping or change_user */
 #if G0
-				if (!mysql_change_user(mysql->mysql, username, passwd, dbname)) {
+							if (!mysql_change_user(mysql->mysql, username, passwd, dbname)) {
+#else
+							if (!mysql_ping(mysql->mysql)) {
 #endif
-				if (!mysql_ping(mysql->mysql)) {
 #ifdef HAVE_MYSQLND
-					mysqlnd_restart_psession(mysql->mysql);
+								mysqlnd_restart_psession(mysql->mysql);
 #endif
-					goto end; 
+								idx = zend_hash_next_free_element(&plist->used_links);
+								if (SUCCESS != zend_hash_next_index_insert(&plist->used_links, &free_mysql,
+																		   sizeof(MYSQL *), NULL)) {
+									php_mysqli_dtor_p_elements(free_mysql);
+									break;
+								}
+								mysql->hash_index = idx;
+								mysql->hash_key = hash_key;
+								goto end; 
+							}
+						}
+					} while (0);
 				}
-				/*
-				  Here we fall if the connection is not ok.
-				  When we update EG(persistent_list) with a new connection, this one will
-				  get destructed. No need to do it explicitly.
-				*/
-			}	
+			} else {
+				zend_rsrc_list_entry le;
+				le.type = php_le_pmysqli();
+				le.ptr = plist = calloc(1, sizeof(mysqli_plist_entry));
+
+				zend_hash_init(&plist->free_links, MAX(10, MyG(max_persistent)), NULL, php_mysqli_dtor_p_elements, 1);
+				zend_hash_init(&plist->used_links, MAX(10, MyG(max_persistent)), NULL, php_mysqli_dtor_p_elements, 1);
+				zend_hash_update(&EG(persistent_list), hash_key, hash_len + 1, (void *)&le, sizeof(le), NULL);
+			}
 		}
+	}
+
+	if (MyG(max_links) != -1 && MyG(num_links) >= MyG(max_links)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MyG(num_links));
+		goto err;
+	}
+	if (persistent && MyG(max_persistent) != -1 &&
+		(MyG(num_active_persistent) + MyG(num_inactive_persistent))>= MyG(max_persistent))
+	{
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%ld)",
+							MyG(num_active_persistent) + MyG(num_inactive_persistent));
+		goto err;
 	}
 
 #if !defined(HAVE_MYSQLND)
@@ -126,18 +194,13 @@ PHP_FUNCTION(mysqli_connect)
 #else
 	if (!(mysql->mysql = mysqlnd_init(persistent))) {
 #endif
-		efree(mysql);
-		if (persistent) {
-			efree(hash_key);
-		}
-		RETURN_FALSE;
+		goto err;
 	}
 	new_connection = TRUE;
 
 	if (UG(unicode)) {
 		mysql_options(mysql->mysql, MYSQL_SET_CHARSET_NAME, "utf8");
 	}
-
 
 #ifdef HAVE_EMBEDDED_MYSQLI
 	if (hostname_len) {
@@ -162,11 +225,7 @@ PHP_FUNCTION(mysqli_connect)
 
 		/* free mysql structure */
 		mysqli_close(mysql->mysql, MYSQLI_CLOSE_DISCONNECTED);
-		efree(mysql);
-		if (persistent) {
-			efree(hash_key);
-		}
-		RETURN_FALSE;
+		goto err;
 	}
 
 	/* when PHP runs in unicode, set default character set to utf8 */
@@ -187,26 +246,27 @@ PHP_FUNCTION(mysqli_connect)
 	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&MyG(allow_local_infile));
 
 end:
-	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
-	mysqli_resource->ptr = (void *)mysql;
+	if (!mysqli_resource) {
+		mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+		mysqli_resource->ptr = (void *)mysql;
+	}
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
 
 	/* store persistent connection */
 	if (persistent && new_connection) {
-		zend_rsrc_list_entry	le;
-
-		le.type = php_le_pmysqli();
-		le.ptr = mysql->mysql;
-
+		ulong hash_index = zend_hash_next_free_element(&plist->used_links);
 		/* save persistent connection */
-		if (zend_hash_update(&EG(persistent_list), hash_key, hash_len + 1, (void *)&le, 
-							 sizeof(le), NULL) == FAILURE) {
+		if (SUCCESS != zend_hash_next_index_insert(&plist->used_links, &mysql->mysql,
+												   sizeof(MYSQL *), NULL)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't store persistent connection");
-		} 
+		} else {
+			mysql->hash_index = hash_index;
+		}
+		MyG(num_active_persistent)++;
 	}
-	if (persistent) {
-		efree(hash_key);
-	}
+
+	mysql->hash_key = hash_key;
+	MyG(num_links)++;
 
 #if !defined(HAVE_MYSQLND)
 	mysql->multi_query = 0;
@@ -214,11 +274,20 @@ end:
 	mysql->multi_query = 1;
 #endif
 
+
 	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
 		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
 	} else {
 		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr = mysqli_resource;
 	}
+	return;
+
+err:
+	efree(mysql);
+	if (persistent) {
+		efree(hash_key);
+	}
+	RETVAL_FALSE;
 }
 /* }}} */
 

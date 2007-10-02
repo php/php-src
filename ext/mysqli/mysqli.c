@@ -72,15 +72,53 @@ typedef struct _mysqli_prop_handler {
 
 static int le_pmysqli;
 
-/* Destructor for Persistent Connections */
+
+static int php_mysqli_persistent_on_rshut(zend_rsrc_list_entry *le TSRMLS_DC)
+{
+	if (le->type == le_pmysqli) {
+		mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
+		HashPosition pos;
+		MYSQL **mysql;
+		ulong idx;
+		dtor_func_t pDestructor = plist->used_links.pDestructor;
+		plist->used_links.pDestructor = NULL; /* Don't call pDestructor now */
+
+		zend_hash_internal_pointer_reset_ex(&plist->used_links, &pos);
+		while (SUCCESS == zend_hash_get_current_data_ex(&plist->used_links, (void **)&mysql, &pos)) {
+			zend_hash_get_current_key_ex(&plist->used_links, NULL, NULL, &idx, FALSE, &pos);
+			/* Make it free */
+			zend_hash_next_index_insert(&plist->free_links, mysql, sizeof(MYSQL *), NULL);
+			/* First move forward */			
+			zend_hash_move_forward_ex(&plist->used_links, &pos);
+			/* The delete, because del will free memory, but we need it's ->nextItem */
+			zend_hash_index_del(&plist->used_links, idx);
+		}
+
+		/* restore pDestructor, which should be php_mysqli_dtor_p_elements() */
+		plist->used_links.pDestructor = pDestructor;
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+/* Destructor for mysqli entries in free_links/used_links */
+void php_mysqli_dtor_p_elements(void *data)
+{
+	MYSQL **mysql = (MYSQL **) data;
+	TSRMLS_FETCH();
+#if defined(HAVE_MYSQLND)
+	mysqlnd_end_psession(*mysql);
+#endif
+	mysqli_close(*mysql, MYSQLI_CLOSE_IMPLICIT);
+}
+
+
 ZEND_RSRC_DTOR_FUNC(php_mysqli_dtor)
 {
 	if (rsrc->ptr) {
-		MYSQL *mysql = (MYSQL *)rsrc->ptr;
-#if defined(HAVE_MYSQLND)
-		mysqlnd_end_psession(mysql);
-#endif
-		mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT);
+		mysqli_plist_entry *plist = (mysqli_plist_entry *) rsrc->ptr;
+		zend_hash_destroy(&plist->free_links);
+		zend_hash_destroy(&plist->used_links);
+		free(plist);
 	}
 }
 
@@ -162,6 +200,10 @@ void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC)
 
 /* {{{ php_clear_mysql */
 void php_clear_mysql(MY_MYSQL *mysql) {
+	if (mysql->hash_key) {
+		efree(mysql->hash_key);
+		mysql->hash_key = NULL;
+	}
 	if (mysql->li_read) {
 		efree(Z_STRVAL_P(mysql->li_read));
 		FREE_ZVAL(mysql->li_read);
@@ -508,6 +550,8 @@ ZEND_GET_MODULE(mysqli)
 */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mysqli.max_links",			"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_links,			zend_mysqli_globals,		mysqli_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mysqli.max_persistent",		"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_persistent,		zend_mysqli_globals,		mysqli_globals,	display_link_numbers)
+	STD_PHP_INI_BOOLEAN("mysqli.allow_persistent",		"1",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_persistent,	zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_host",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_host,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_user",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_user,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_pw",				NULL,	PHP_INI_ALL,		OnUpdateString,		default_pw,			zend_mysqli_globals,		mysqli_globals)
@@ -527,7 +571,11 @@ PHP_INI_END()
 static PHP_GINIT_FUNCTION(mysqli)
 {
 	mysqli_globals->num_links = 0;
+	mysqli_globals->num_active_persistent = 0;
+	mysqli_globals->num_inactive_persistent = 0;
 	mysqli_globals->max_links = -1;
+	mysqli_globals->max_persistent = -1;
+	mysqli_globals->allow_persistent = 1;
 	mysqli_globals->default_port = 0;
 	mysqli_globals->default_host = NULL;
 	mysqli_globals->default_user = NULL;
@@ -559,9 +607,11 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_INI_ENTRIES();
 
 #ifndef HAVE_MYSQLND
+#if MYSQL_VERSION_ID >= 40000
 	if (mysql_server_init(0, NULL, NULL)) {
 		return FAILURE;
 	}
+#endif
 #else
 	mysqli_mysqlnd_zval_cache = mysqlnd_palloc_init_cache(MyG(cache_size));
 	mysqli_mysqlnd_qcache = mysqlnd_qcache_init_cache();
@@ -631,6 +681,8 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_INIT_COMMAND", MYSQL_INIT_COMMAND, CONST_CS | CONST_PERSISTENT);
 #if defined(HAVE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE", MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_CMD_BUFFER_SIZE", MYSQLND_OPT_NET_CMD_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_INT_AND_YEAR_AS_INT", MYSQLND_OPT_INT_AND_YEAR_AS_INT, CONST_CS | CONST_PERSISTENT);
@@ -746,14 +798,19 @@ PHP_MINIT_FUNCTION(mysqli)
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
 #ifndef HAVE_MYSQLND
+#if MYSQL_VERSION_ID >= 40000
 #ifdef PHP_WIN32
-	unsigned long client_ver = mysql_get_client_version;
-	/* Can't call mysql_server_end() multiple times prior to 5.0.42 on Windows */
-	if ((client_ver > 50042 && client_ver < 50100) || client_ver > 50122) {
+	unsigned long client_ver = mysql_get_client_version();
+	/*
+	  Can't call mysql_server_end() multiple times prior to 5.0.42 on Windows.
+	  PHP bug#41350 MySQL bug#25621
+	*/
+	if ((client_ver >= 50042 && client_ver < 50100) || client_ver > 50122) {
 		mysql_server_end();
 	}
 #else
 	mysql_server_end();
+#endif
 #endif
 #else
 	mysqlnd_palloc_free_cache(mysqli_mysqlnd_zval_cache);
@@ -776,7 +833,7 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
-#if !defined(HAVE_MYSQLND) && defined(ZTS)
+#if !defined(HAVE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
 	if (mysql_thread_init()) {
 		return FAILURE;
 	}
@@ -795,7 +852,10 @@ PHP_RINIT_FUNCTION(mysqli)
  */
 PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
-#if !defined(HAVE_MYSQLND) && defined(ZTS)
+	/* check persistent connections, move used to free */
+	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_mysqli_persistent_on_rshut TSRMLS_CC);
+
+#if !defined(HAVE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
 	mysql_thread_end();
 #endif
 	if (MyG(error_msg)) {
@@ -813,6 +873,10 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_MINFO_FUNCTION(mysqli)
 {
+#if defined(HAVE_MYSQLND)
+	char buf[32];
+#endif
+
 	php_info_print_table_start();
 	php_info_print_table_header(2, "MysqlI Support", "enabled");
 	php_info_print_table_row(2, "Client API library version", mysql_get_client_info());
@@ -820,6 +884,12 @@ PHP_MINFO_FUNCTION(mysqli)
 	php_info_print_table_row(2, "Client API header version", MYSQL_SERVER_VERSION);
 	php_info_print_table_row(2, "MYSQLI_SOCKET", MYSQL_UNIX_ADDR);
 #else
+	snprintf(buf, sizeof(buf), "%ld", MyG(num_active_persistent));
+	php_info_print_table_row(2, "Active Persistent Links", buf);
+	snprintf(buf, sizeof(buf), "%ld", MyG(num_inactive_persistent));
+	php_info_print_table_row(2, "Inactive Persistent Links", buf);
+	snprintf(buf, sizeof(buf), "%ld", MyG(num_links));
+	php_info_print_table_row(2, "Active Links", buf);
 	{
 		zval values;
 
@@ -1151,6 +1221,9 @@ PHP_MYSQLI_API void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRML
 }
 /* }}} */
 
+#if !defined(HAVE_MYSQLND)
+
+
 #define ALLOC_CALLBACK_ARGS(a, b, c)\
 if (c) {\
 	a = (zval ***)safe_emalloc(c, sizeof(zval **), 0);\
@@ -1171,27 +1244,23 @@ if (a) {\
 
 #define LOCAL_INFILE_ERROR_MSG(source,dest)\
 memset(source, 0, LOCAL_INFILE_ERROR_LEN);\
-memcpy(source, dest, LOCAL_INFILE_ERROR_LEN-1);\
+memcpy(source, dest, MIN(strlen(dest), LOCAL_INFILE_ERROR_LEN-1));\
 php_error_docref(NULL TSRMLS_CC, E_WARNING, dest);
+
 
 /* {{{ void php_set_local_infile_handler_default 
 */
 void php_set_local_infile_handler_default(MY_MYSQL *mysql) {
 	/* register internal callback functions */
-#if !defined(HAVE_MYSQLND)
 	mysql_set_local_infile_handler(mysql->mysql, &php_local_infile_init, &php_local_infile_read,
 				&php_local_infile_end, &php_local_infile_error, (void *)mysql);
 	if (mysql->li_read) {
 		zval_ptr_dtor(&mysql->li_read);
 		mysql->li_read = NULL;
 	}
-#else
-	mysqlnd_local_infile_default(mysql->mysql, TRUE);
-#endif
 }
 /* }}} */
 
-#if !defined(HAVE_MYSQLND)
 /* {{{ php_local_infile_init
  */
 int php_local_infile_init(void **ptr, const char *filename, void *userdata)
@@ -1304,6 +1373,16 @@ int php_local_infile_read(void *ptr, char *buf, uint buf_len)
 		LOCAL_INFILE_ERROR_MSG(data->error_msg, "Can't execute load data local init callback function");
 		rc = -1;
 	}
+	/*
+	  If the (ab)user has closed the file handle we should
+	  not try to use it anymore or even close it
+	*/
+	if (!zend_rsrc_list_get_rsrc_type(Z_LVAL_P(fp) TSRMLS_CC)) {
+		LOCAL_INFILE_ERROR_MSG(data->error_msg, "File handle closed");
+		rc = -1;
+		/* Thus the end handler won't try to free already freed memory */
+		mysql->li_stream = NULL;
+	}
 
 	FREE_CALLBACK_ARGS(callback_args, 1, argc);
 	efree(fp);
@@ -1343,8 +1422,9 @@ void php_local_infile_end(void *ptr)
 		}
 		return;
 	}
-
-	php_stream_close(mysql->li_stream);
+	if (mysql->li_stream) {
+		php_stream_close(mysql->li_stream);
+	}
 	free(data);
 	return;
 }

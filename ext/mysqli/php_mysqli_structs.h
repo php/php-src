@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 6                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2007 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -98,9 +98,11 @@ typedef struct {
 
 typedef struct {
 	MYSQL			*mysql;
+	char			*hash_key;
 	zval			*li_read;
 	php_stream		*li_stream;
 	zend_bool		persistent;
+	unsigned long   hash_index; /* Used when persistent, hold the index in plist->used_links */
 	unsigned int 	multi_query;
 	UConverter		*conv;
 } MY_MYSQL;
@@ -145,6 +147,11 @@ typedef struct {
 } mysqli_local_infile;
 #endif
 
+typedef struct {
+	HashTable free_links;
+	HashTable used_links;
+} mysqli_plist_entry;
+
 #ifdef PHP_WIN32
 #define PHP_MYSQLI_API __declspec(dllexport)
 #define MYSQLI_LLU_SPEC "%I64u"
@@ -173,11 +180,11 @@ extern const zend_function_entry mysqli_driver_methods[];
 extern const zend_function_entry mysqli_warning_methods[];
 extern const zend_function_entry mysqli_exception_methods[];
 
-extern mysqli_property_entry mysqli_link_property_entries[];
-extern mysqli_property_entry mysqli_result_property_entries[];
-extern mysqli_property_entry mysqli_stmt_property_entries[];
-extern mysqli_property_entry mysqli_driver_property_entries[];
-extern mysqli_property_entry mysqli_warning_property_entries[];
+extern const mysqli_property_entry mysqli_link_property_entries[];
+extern const mysqli_property_entry mysqli_result_property_entries[];
+extern const mysqli_property_entry mysqli_stmt_property_entries[];
+extern const mysqli_property_entry mysqli_driver_property_entries[];
+extern const mysqli_property_entry mysqli_warning_property_entries[];
 
 #ifdef HAVE_MYSQLND
 extern MYSQLND_ZVAL_PCACHE	*mysqli_mysqlnd_zval_cache;
@@ -205,6 +212,7 @@ extern zend_class_entry *mysqli_driver_class_entry;
 extern zend_class_entry *mysqli_warning_class_entry;
 extern zend_class_entry *mysqli_exception_class_entry;
 extern int php_le_pmysqli(void);
+extern void php_mysqli_dtor_p_elements(void *data);
 
 #ifdef HAVE_SPL
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
@@ -279,9 +287,10 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_RETURN_LONG_LONG(__val) \
 { \
 	if ((__val) < LONG_MAX) {		\
-		RETURN_LONG((__val));		\
+		RETURN_LONG((long) (__val));		\
 	} else {				\
 		char *ret;			\
+		/* always used with my_ulonglong -> %llu */ \
 		int l = spprintf(&ret, 0, "%llu", (__val));	\
 		RETURN_STRINGL(ret, l, 0);		\
 	}					\
@@ -347,6 +356,10 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	long			default_link;
 	long			num_links;
 	long			max_links;
+	long 			num_active_persistent;
+	long 			num_inactive_persistent;
+	long			max_persistent;
+	long			allow_persistent;
 	long			cache_size;
 	unsigned long	default_port;
 	char			*default_host;

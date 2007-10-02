@@ -98,8 +98,7 @@
 #define CR_INVALID_PARAMETER_NO	2034
 #define CR_INVALID_BUFFER_USE	2035
 
-#define MYSQLND_EE_READ			 2
-#define MYSQLND_EE_FILENOTFOUND	29
+#define MYSQLND_EE_FILENOTFOUND	 7890
 
 #define UNKNOWN_SQLSTATE		"HY000"
 
@@ -164,15 +163,13 @@ struct st_mysqlnd_perm_bind {
 extern struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 
 extern const char * mysqlnd_out_of_sync;
+extern const char * mysqlnd_server_gone;
 
 
 enum_func_status mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_warning TSRMLS_DC);
 
 
 void _mysqlnd_init_ps_subsystem();/* This one is private, mysqlnd_library_init() will call it */
-
-void mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uchar **p,
-										size_t *buf_len, unsigned int null_byte_offset);
 
 void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 								uint pack_len, zend_uchar **row, zend_bool as_unicode,

@@ -22,6 +22,11 @@
 #ifndef MYSQLND_PALLOC_H
 #define MYSQLND_PALLOC_H
 
+/* Used in mysqlnd_debug.c */
+extern char * mysqlnd_palloc_zval_ptr_dtor_name;
+extern char * mysqlnd_palloc_get_zval_name;
+
+
 /* Session caching allocator */
 struct st_mysqlnd_zval_list {
 	zval 	**ptr_line;

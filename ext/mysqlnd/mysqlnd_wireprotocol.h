@@ -31,6 +31,10 @@ typedef zend_uchar	mysqlnd_1b;
 typedef zend_ushort mysqlnd_2b;
 typedef zend_uint	mysqlnd_4b;
 
+/* Used in mysqlnd_debug.c */
+extern char * mysqlnd_read_header_name;
+extern char * mysqlnd_read_body_name;
+
 
 /* Packet handling */
 #define PACKET_INIT(packet, enum_type, c_type)  \
@@ -42,7 +46,7 @@ typedef zend_uint	mysqlnd_4b;
 #define PACKET_READ(packet, conn)	((packet)->header.m->read_from_net((packet), (conn) TSRMLS_CC))
 #define PACKET_FREE(packet) \
 	do { \
-		((packet)->header.m->free_mem((packet), FALSE)); \
+		((packet)->header.m->free_mem((packet), FALSE TSRMLS_CC)); \
 	} while (0);
 
 #define PACKET_INIT_ALLOCA(packet, enum_type)  \
@@ -52,7 +56,7 @@ typedef zend_uint	mysqlnd_4b;
 	}
 #define PACKET_WRITE_ALLOCA(packet, conn)	PACKET_WRITE(&(packet), (conn))
 #define PACKET_READ_ALLOCA(packet, conn)	PACKET_READ(&(packet), (conn))
-#define PACKET_FREE_ALLOCA(packet)			(packet.header.m->free_mem(&(packet), TRUE))
+#define PACKET_FREE_ALLOCA(packet)			(packet.header.m->free_mem(&(packet), TRUE TSRMLS_CC))
 
 /* Enums */
 enum php_mysql_packet_type
@@ -114,7 +118,7 @@ typedef struct st_mysqlnd_packet_methods {
 	size_t				struct_size;
 	enum_func_status	(*read_from_net)(void *packet, MYSQLND *conn TSRMLS_DC);
 	size_t				(*write_to_net)(void *packet, MYSQLND *conn TSRMLS_DC);
-	void				(*free_mem)(void *packet, zend_bool alloca);
+	void				(*free_mem)(void *packet, zend_bool alloca TSRMLS_DC);
 } mysqlnd_packet_methods;
 
 extern mysqlnd_packet_methods packet_methods[];
@@ -237,6 +241,7 @@ typedef struct st_php_mysql_packet_res_field {
 	MYSQLND_FIELD			*metadata;
 	/* For table definitions, empty for result sets */
 	zend_bool				skip_parsing;
+	zend_bool				stupid_list_fields_eof;
 } php_mysql_packet_res_field;
 
 
