@@ -174,6 +174,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
 		ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(opline->result.u.var).var.ptr));
+        EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
 
 		if (EX(function_state).function->common.arg_info) {
 			zend_uint i=0;
@@ -206,8 +207,6 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 */
 		if (!return_value_used) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
-		} else {
-			EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
 		}
 	} else if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		HashTable *function_symbol_table;
