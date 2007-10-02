@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 6                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2007 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -132,7 +132,7 @@ static MYSQLND_QCACHE		*mysql_mysqlnd_qcache;
 
 /* {{{ mysql_functions[]
  */
-const zend_function_entry mysql_functions[] = {
+static const zend_function_entry mysql_functions[] = {
 	PHP_FE(mysql_connect,								NULL)
 	PHP_FE(mysql_pconnect,								NULL)
 	PHP_FE(mysql_close,									NULL)
@@ -469,8 +469,11 @@ PHP_MSHUTDOWN_FUNCTION(mysql)
 #if MYSQL_VERSION_ID >= 40000
 #ifdef PHP_WIN32
 	unsigned long client_ver = mysql_get_client_version();
-	/* Can't call mysql_server_end() multiple times prior to 5.0.42 on Windows */
-	if ((client_ver > 50042 && client_ver < 50100) || client_ver > 50122) {
+	/*
+	  Can't call mysql_server_end() multiple times prior to 5.0.42 on Windows.
+	  PHP bug#41350 MySQL bug#25621
+	*/
+	if ((client_ver >= 50042 && client_ver < 50100) || client_ver > 50122) {
 		mysql_server_end();
 	}
 #else
@@ -1764,6 +1767,9 @@ PHP_FUNCTION(mysql_escape_string)
 	/* Now we kind of realloc() by returning a zval pointing to a buffer with enough size */
 	RETVAL_UTF8_STRINGL(new_str, new_str_len, ZSTR_DUPLICATE);
 	efree(new_str);
+	if (MySG(trace_mode)){
+		php_error_docref("function.mysql-real-escape-string" TSRMLS_CC, E_WARNING, "This function is deprecated; use mysql_real_escape_string() instead.");
+	}
 }
 /* }}} */
 

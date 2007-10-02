@@ -313,7 +313,7 @@ MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_error_read, mysql_stmt_error, MYSQLI_GET_ST
 MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_sqlstate_read, mysql_stmt_sqlstate, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED));
 
 /* }}} */
-mysqli_property_entry mysqli_link_property_entries[] = {
+const mysqli_property_entry mysqli_link_property_entries[] = {
 	{"affected_rows", link_affected_rows_read, NULL},
 	{"client_info", link_client_info_read, NULL},
 	{"client_version", link_client_version_read, NULL},
@@ -334,7 +334,7 @@ mysqli_property_entry mysqli_link_property_entries[] = {
 	{NULL, NULL, NULL}	
 };
 
-mysqli_property_entry mysqli_result_property_entries[] = {
+const mysqli_property_entry mysqli_result_property_entries[] = {
 	{"current_field", result_current_field_read, NULL},
 	{"field_count", result_field_count_read, NULL},
 	{"lengths", result_lengths_read, NULL},
@@ -343,7 +343,7 @@ mysqli_property_entry mysqli_result_property_entries[] = {
 	{NULL, NULL, NULL}
 };
 
-mysqli_property_entry mysqli_stmt_property_entries[] = {
+const mysqli_property_entry mysqli_stmt_property_entries[] = {
 	{"affected_rows", stmt_affected_rows_read, NULL},
 	{"insert_id", stmt_insert_id_read, NULL},
 	{"num_rows", stmt_num_rows_read, NULL},

@@ -47,6 +47,7 @@ package.xml added to support installation using pear installer
    <file role="src" name="mysql.mak"/>
    <file role="src" name="php_mysql.c"/>
    <file role="src" name="php_mysql.h"/>
+   <file role="src" name="mysql_mysqlnd.h"/>
    <file role="test" name="tests/001.phpt"/>
    <file role="test" name="tests/002.phpt"/>
    <file role="test" name="tests/003.phpt"/>

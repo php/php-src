@@ -142,7 +142,7 @@ ZEND_FUNCTION(mysqli_driver_construct)
 	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
 }
 
-mysqli_property_entry mysqli_driver_property_entries[] = {
+const mysqli_property_entry mysqli_driver_property_entries[] = {
 	{"client_info", driver_client_info_read, NULL},
 	{"client_version", driver_client_version_read, NULL},
 	{"driver_version", driver_driver_version_read, NULL},

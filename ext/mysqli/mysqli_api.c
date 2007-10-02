@@ -28,6 +28,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
 
@@ -518,6 +519,11 @@ PHP_FUNCTION(mysqli_change_user)
 		RETURN_FALSE;
 	}
 
+	/* Change user resets the charset in the server, change it back */
+	if (UG(unicode)) {
+		mysql_set_character_set(mysql->mysql, "utf8");
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -552,11 +558,30 @@ PHP_FUNCTION(mysqli_close)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
 
-	php_clear_mysql(mysql);
 
 	if (!mysql->persistent) {
 		mysqli_close(mysql->mysql, MYSQLI_CLOSE_EXPLICIT);
+		mysql->mysql = NULL;
+	} else {
+		zend_rsrc_list_entry *le;
+		if (zend_hash_find(&EG(persistent_list), mysql->hash_key, strlen(mysql->hash_key) + 1, (void **)&le) == SUCCESS) {
+			if (Z_TYPE_P(le) == php_le_pmysqli()) {
+				mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
+				dtor_func_t pDestructor = plist->used_links.pDestructor;
+
+				plist->used_links.pDestructor = NULL; /* Don't call pDestructor now */
+				zend_hash_index_del(&plist->used_links, mysql->hash_index);
+				plist->used_links.pDestructor = pDestructor; /* Restore the destructor */
+
+				zend_hash_next_index_insert(&plist->free_links, &mysql->mysql, sizeof(MYSQL *), NULL);
+				MyG(num_links)--;
+				MyG(num_active_persistent)--;
+				MyG(num_inactive_persistent)++;
+			}
+		}
 	}
+
+	php_clear_mysql(mysql);
 
 	MYSQLI_CLEAR_RESOURCE(&mysql_link);	
 	efree(mysql);
@@ -1365,6 +1390,7 @@ PHP_FUNCTION(mysqli_kill)
 
 /* {{{ proto void mysqli_set_local_infile_default(object link) U
    unsets user defined handler for load local infile command */
+#if !defined(HAVE_MYSQLND)
 PHP_FUNCTION(mysqli_set_local_infile_default)
 {
 	MY_MYSQL	*mysql;
@@ -1376,15 +1402,10 @@ PHP_FUNCTION(mysqli_set_local_infile_default)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-#if !defined(HAVE_MYSQLND)
 	if (mysql->li_read) {
-		efree(Z_STRVAL_P(mysql->li_read));
 		zval_dtor(mysql->li_read);
 		mysql->li_read = NULL;
 	}
-#else
-	mysqlnd_local_infile_default(mysql->mysql, TRUE);
-#endif
 }
 /* }}} */
 
@@ -1417,19 +1438,16 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 	zval_dtor(&callback_name);
 
 	/* save callback function */
-#if !defined(HAVE_MYSQLND)
 	if (!mysql->li_read) {
 		MAKE_STD_ZVAL(mysql->li_read);
 	} else {
 		zval_dtor(mysql->li_read);
 	}
 	ZVAL_STRINGL(mysql->li_read, Z_STRVAL_P(callback_func), Z_STRLEN_P(callback_func), 1);
-#else
-	mysqlnd_set_local_infile_handler(mysql->mysql, callback_func->value.str.val);
-#endif
 
 	RETURN_TRUE;
 }
+#endif
 /* }}} */
 
 /* {{{ proto bool mysqli_more_results(object link) U
@@ -1778,7 +1796,7 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	newstr_len = mysql_real_escape_string(mysql->mysql, newstr, escapestr, escapestr_len);
 	newstr = erealloc(newstr, newstr_len + 1);
 
-	RETURN_UTF8_STRING(newstr, ZSTR_AUTOFREE);
+	RETURN_UTF8_STRINGL(newstr, newstr_len, ZSTR_AUTOFREE);
 }
 /* }}} */
 
@@ -2290,7 +2308,10 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 		int	i = 0;
 
 		for (i = mysql_stmt_field_count(stmt->stmt) - 1; i >=0; --i) {
-			if (stmt->stmt->fields && stmt->stmt->fields[i].type == MYSQL_TYPE_BLOB) {
+			if (stmt->stmt->fields && (stmt->stmt->fields[i].type == MYSQL_TYPE_BLOB ||
+				stmt->stmt->fields[i].type == MYSQL_TYPE_MEDIUM_BLOB ||
+				stmt->stmt->fields[i].type == MYSQL_TYPE_LONG_BLOB))
+			{
 				my_bool	tmp=1;
 				mysql_stmt_attr_set(stmt->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &tmp);
 				break;

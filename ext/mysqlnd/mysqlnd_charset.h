@@ -19,10 +19,10 @@
 */
 
 PHPAPI ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const charset, char *newstr,
-										const char *escapestr, int escapestr_len);
+										const char *escapestr, int escapestr_len TSRMLS_DC);
 
 PHPAPI ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, char *newstr,
-										 const char *escapestr, int escapestr_len);
+										 const char *escapestr, int escapestr_len TSRMLS_DC);
 
 
 /*

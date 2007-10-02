@@ -321,7 +321,7 @@ const zend_function_entry mysqli_warning_methods[] = {
 /* }}} */
 
 /* {{{ mysqli_warning_property_entries */
-mysqli_property_entry mysqli_warning_property_entries[] = {
+const mysqli_property_entry mysqli_warning_property_entries[] = {
 	{"message", mysqli_warning_message, NULL},
 	{"sqlstate", mysqli_warning_sqlstate, NULL},
 	{"errno", mysqli_warning_errno, NULL},

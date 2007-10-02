@@ -21,10 +21,11 @@
 #include "php_globals.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
+#include "mysqlnd_debug.h"
 
 /* {{{ utf8 functions */
 
-static uint check_mb_utf8(const char *start, const char *end)
+static uint check_mb_utf8_sequence(const char *start, const char *end)
 {
 	zend_uchar	c;
 
@@ -62,6 +63,11 @@ static uint check_mb_utf8(const char *start, const char *end)
 	return 0;
 }
 
+static uint check_mb_utf8_valid(const char *start, const char *end)
+{
+	uint len = check_mb_utf8_sequence(start, end);
+	return (len > 1)? len:0;
+}
 
 static uint mysqlnd_mbcharlen_utf8(uint utf8)
 {
@@ -93,7 +99,7 @@ static uint mysqlnd_mbcharlen_utf8(uint utf8)
 
 static uint check_mb_big5(const char *start, const char *end)
 {
-	return ((end - start) > 1 && valid_big5head(*(start)) && valid_big5tail(*(start + 1)) ? 2 : 0);
+	return (valid_big5head(*(start)) && (end - start) > 1 && valid_big5tail(*(start + 1)) ? 2 : 0);
 }
 
 
@@ -111,14 +117,14 @@ static uint mysqlnd_mbcharlen_big5(uint big5)
 
 static uint check_mb_cp932(const char *start, const char *end)
 {
-	return (((end > start) + 1) && valid_cp932head((uint)start[0]) &&
-			valid_cp932tail((uint)start[1])) ? 2 : 0;
+	return (valid_cp932head((zend_uchar)start[0]) && (end - start >  1) &&
+			valid_cp932tail((zend_uchar)start[1])) ? 2 : 0;
 }
 
 
 static uint mysqlnd_mbcharlen_cp932(uint cp932)
 {
-	return (valid_cp932head(cp932)) ? 2 : 1;
+	return (valid_cp932head((zend_uchar)cp932)) ? 2 : 1;
 }
 /* }}} */
 
@@ -156,7 +162,7 @@ static uint mysqlnd_mbcharlen_euckr(uint kr)
 
 static uint check_mb_eucjpms(const char *start, const char *end)
 {
-	if (*((uint *)start) < 0x80) {
+	if (*((zend_uchar *)start) < 0x80) {
 		return 0;	/* invalid eucjpms character */
 	}
 	if (valid_eucjpms(start[0]) && (end - start) > 1 && valid_eucjpms(start[1])) {
@@ -187,13 +193,13 @@ static uint mysqlnd_mbcharlen_eucjpms(uint jpms)
 
 
 /* {{{ gb2312 functions */
-#define valid_gb2312_head(c)	(0xA1 <= (c) && (c) <= 0xF7)
-#define valid_gb2312_tail(c)	(0xA1 <= (c) && (c) <= 0xFE)
+#define valid_gb2312_head(c)	(0xA1 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0xF7)
+#define valid_gb2312_tail(c)	(0xA1 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0xFE)
 
 
 static uint check_mb_gb2312(const char *start, const char *end)
 {
-	return (end - start > 1 || valid_gb2312_head((uint)start[0]) || 
+	return (valid_gb2312_head((uint)start[0]) && end - start > 1 && 
 			valid_gb2312_tail((uint)start[1])) ? 2 : 0;
 }
 
@@ -206,15 +212,12 @@ static uint mysqlnd_mbcharlen_gb2312(uint gb)
 
 
 /* {{{ gbk functions */
-#define valid_gbk_head(c)	((uint)(c) >> 8)	
-#define valid_gbk_tail(c)	((uint)(c) & 0xFF)
+#define valid_gbk_head(c)	(0x81<=(zend_uchar)(c) && (zend_uchar)(c)<=0xFE)
+#define valid_gbk_tail(c)	((0x40<=(zend_uchar)(c) && (zend_uchar)(c)<=0x7E) || (0x80<=(zend_uchar)(c) && (zend_uchar)(c)<=0xFE))
 
 static uint check_mb_gbk(const char *start, const char *end)
 {
-	if (end - start <= 1) {
-		return 0;	/* invalid length */
-	}
-	return (valid_gbk_head(start[0]) && valid_gbk_tail(start[1])) ? 2 : 0;
+	return (valid_gbk_head(start[0]) && (end) - (start) > 1 && valid_gbk_tail(start[1])) ? 2 : 0;
 }
 
 static uint mysqlnd_mbcharlen_gbk(uint gbk)
@@ -222,6 +225,7 @@ static uint mysqlnd_mbcharlen_gbk(uint gbk)
 	return (valid_gbk_head(gbk) ? 2 : 1);
 }
 /* }}} */
+
 
 /* {{{ sjis functions */
 #define valid_sjis_head(c)	((0x81 <= (c) && (c) <= 0x9F) && \
@@ -232,16 +236,13 @@ static uint mysqlnd_mbcharlen_gbk(uint gbk)
 
 static uint check_mb_sjis(const char *start, const char *end)
 {
-	if (end - start <= 1) {
-		return 0;
-	}
-	return (valid_sjis_head((uint)start[0]) && valid_sjis_tail((uint)start[1])) ? 2 : 0;
+	return (valid_sjis_head((zend_uchar)start[0]) && (end - start) > 1 && valid_sjis_tail((zend_uchar)start[1])) ? 2 : 0;
 }
 
 
 static uint mysqlnd_mbcharlen_sjis(uint sjis)
 {
-	return (valid_sjis_head((uint)sjis)) ? 2 : 1;
+	return (valid_sjis_head((zend_uchar)sjis)) ? 2 : 1;
 }
 /* }}} */
 
@@ -267,7 +268,7 @@ static uint mysqlnd_mbcharlen_ucs2(uint ucs2 __attribute((unused)))
 
 static uint check_mb_ujis(const char *start, const char *end)
 {
-	if ((uint)start[0] < 0x80) {
+	if (*(uchar*)start < 0x80) {
 		return 0;	/* invalid ujis character */
 	}
 	if (valid_ujis(*(start)) && valid_ujis(*((start)+1))) {
@@ -276,8 +277,7 @@ static uint check_mb_ujis(const char *start, const char *end)
 	if (valid_ujis_ss2(*(start)) && valid_ujis_kata(*((start)+1))) {
 		return 2;
 	}
-	if (valid_ujis_ss3(*(start)) && (end-start) > 2 && valid_ujis(*((start)+1))
-			&& valid_ujis(*((start)+2))) {
+	if (valid_ujis_ss3(*(start)) && (end-start) > 2 && valid_ujis(*((start)+1)) && valid_ujis(*((start)+2))) {
 		return 3;
 	}
 	return 0;
@@ -286,14 +286,7 @@ static uint check_mb_ujis(const char *start, const char *end)
 
 static uint mysqlnd_mbcharlen_ujis(uint ujis)
 {
-	if (((ujis & 0xFF) >= 0xA1 && (ujis & 0xFF) <= 0xFE) ||
-		((ujis & 0xFF) == 0x8E)) {
-		return 2;
-	}
-	if ((ujis & 0xFF) == 0x8F) {
-		return 3;
-	}
-	return 1;
+	return (valid_ujis(ujis)? 2: valid_ujis_ss2(ujis)? 2: valid_ujis_ss3(ujis)? 3: 1);
 }
 /* }}} */
 
@@ -315,7 +308,7 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{  13, "sjis", "sjis_japanese_ci", 1, 2, 0, mysqlnd_mbcharlen_sjis, check_mb_sjis},
 	{  16, "hebrew", "hebrew_general_ci", 1, 1, 0, NULL, NULL},
 	{  18, "tis620", "tis620_thai_ci", 1, 1, 0, NULL, NULL},
-	{  19, "euckr", "euckr_korean_ci", 1, 2, 0, mysqlnd_mbcharlen_euckr, check_mb_eucjpms},
+	{  19, "euckr", "euckr_korean_ci", 1, 2, 0, mysqlnd_mbcharlen_euckr, check_mb_euckr},
 	{  22, "koi8u", "koi8u_general_ci", 1, 1, 0, NULL, NULL},
 	{  24, "gb2312", "gb2312_chinese_ci", 1, 2, 0, mysqlnd_mbcharlen_gb2312, check_mb_gb2312},
 	{  25, "greek", "greek_general_ci", 1, 1, 0, NULL, NULL},	
@@ -323,7 +316,7 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{  28, "gbk", "gbk_chinese_ci", 1, 2, 0, mysqlnd_mbcharlen_gbk, check_mb_gbk},
 	{  30, "latin5", "latin5_turkish_ci", 1, 1, 0, NULL, NULL},
 	{  32, "armscii8", "armscii8_general_ci", 1, 1, 0, NULL, NULL},
-	{  33, "utf8", "utf8_general_ci", 1, 2, 0, mysqlnd_mbcharlen_utf8,  check_mb_utf8},
+	{  33, "utf8", "utf8_general_ci", 1, 2, 0, mysqlnd_mbcharlen_utf8,  check_mb_utf8_valid},
 	{  35, "ucs2", "ucs2_general_ci", 2, 2, 0, mysqlnd_mbcharlen_ucs2, check_mb_ucs2},
 	{  36, "cp866", "cp866_general_ci", 1, 1, 0, NULL, NULL},
 	{  37, "keybcs2", "keybcs2_general_ci", 1, 1, 0, NULL, NULL},
@@ -337,7 +330,7 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{  63, "binary", "binary", 1, 1, 0, NULL, NULL},
 	{  92, "geostd8", "geostd8_general_ci", 1, 1, 0, NULL, NULL},
 	{  95, "cp932", "cp932_japanese_ci", 1, 2, 1, mysqlnd_mbcharlen_cp932, check_mb_cp932},
-	{  97, "eucjpms", "eucjpms_japanese_ci", 1, 3, 0, mysqlnd_mbcharlen_eucjpms, },
+	{  97, "eucjpms", "eucjpms_japanese_ci", 1, 3, 0, mysqlnd_mbcharlen_eucjpms, check_mb_eucjpms},
 	{   2, "latin2", "latin2_czech_cs", 1, 1, 0, NULL, NULL},
 	{   5, "latin1", "latin1_german_ci", 1, 1, 0, NULL, NULL},
 	{  14, "cp1251", "cp1251_bulgarian_ci", 1, 1, 0, NULL, NULL},
@@ -379,7 +372,7 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{  81, "cp852", "cp852_bin", 1, 1, 0, NULL, NULL},
 	{  82, "swe7", "swe7_bin", 1, 1, 0, NULL, NULL},
 	{  93, "geostd8", "geostd8_bin", 1, 1, 0, NULL, NULL},
-	{  83, "utf8", "utf8_bin", 1, 2, 0, mysqlnd_mbcharlen_utf8,  check_mb_utf8},
+	{  83, "utf8", "utf8_bin", 1, 2, 0, mysqlnd_mbcharlen_utf8,  check_mb_utf8_valid},
 	{  84, "big5", "big5_bin", 1, 2, 0, mysqlnd_mbcharlen_big5, check_mb_big5},
 	{  85, "euckr", "euckr_bin", 1, 2, 0, mysqlnd_mbcharlen_euckr, check_mb_euckr},
 	{  86, "gb2312", "gb2312_bin", 1, 2, 0, mysqlnd_mbcharlen_gb2312, check_mb_gb2312},
@@ -411,26 +404,26 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{ 144, "ucs2", "ucs2_persian_ci", 2, 2, 0, mysqlnd_mbcharlen_ucs2, check_mb_ucs2},
 	{ 145, "ucs2", "ucs2_esperanto_ci", 2, 2, 0, mysqlnd_mbcharlen_ucs2, check_mb_ucs2},
 	{ 146, "ucs2", "ucs2_hungarian_ci", 2, 2, 0, mysqlnd_mbcharlen_ucs2, check_mb_ucs2},
-	{ 192, "utf8", "utf8_general_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 193, "utf8", "utf8_icelandic_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 194, "utf8", "utf8_latvian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8,  check_mb_utf8},
-	{ 195, "utf8", "utf8_romanian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 196, "utf8", "utf8_slovenian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 197, "utf8", "utf8_polish_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 198, "utf8", "utf8_estonian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 119, "utf8", "utf8_spanish_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 200, "utf8", "utf8_swedish_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 201, "utf8", "utf8_turkish_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 202, "utf8", "utf8_czech_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 203, "utf8", "utf8_danish_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8 },
-	{ 204, "utf8", "utf8_lithunian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8 },
-	{ 205, "utf8", "utf8_slovak_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 206, "utf8", "utf8_spanish2_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 207, "utf8", "utf8_roman_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 208, "utf8", "utf8_persian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 209, "utf8", "utf8_esperanto_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 210, "utf8", "utf8_hungarian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8},
-	{ 254, "utf8", "utf8_general_cs", 1, 2, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8 },
+	{ 192, "utf8", "utf8_general_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 193, "utf8", "utf8_icelandic_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 194, "utf8", "utf8_latvian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8,  check_mb_utf8_valid},
+	{ 195, "utf8", "utf8_romanian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 196, "utf8", "utf8_slovenian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 197, "utf8", "utf8_polish_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 198, "utf8", "utf8_estonian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 119, "utf8", "utf8_spanish_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 200, "utf8", "utf8_swedish_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 201, "utf8", "utf8_turkish_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 202, "utf8", "utf8_czech_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 203, "utf8", "utf8_danish_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid },
+	{ 204, "utf8", "utf8_lithunian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid },
+	{ 205, "utf8", "utf8_slovak_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 206, "utf8", "utf8_spanish2_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 207, "utf8", "utf8_roman_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 208, "utf8", "utf8_persian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 209, "utf8", "utf8_esperanto_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 210, "utf8", "utf8_hungarian_ci", 1, 3, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 254, "utf8", "utf8_general_cs", 1, 2, 0, mysqlnd_mbcharlen_utf8, check_mb_utf8_valid },
 	{   0, NULL, NULL, 0, 0, 0, NULL, NULL}
 };
 /* }}} */
@@ -469,19 +462,21 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const name
 
 
 /* {{{ mysqlnd_cset_escape_quotes */
-PHPAPI ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char *newstr, const char *escapestr, int escapestr_len)
+PHPAPI ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char *newstr,
+										const char *escapestr, int escapestr_len TSRMLS_DC)
 {
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;
 	const char 	*end = escapestr + escapestr_len;
 	zend_bool	escape_overflow = FALSE;
 
+	DBG_ENTER("mysqlnd_cset_escape_quotes");
+
 	for (;escapestr < end; escapestr++) {
 		uint len = 0;
 		/* check unicode characters */
 		
-		if (cset->char_maxlen > 1 && cset->mb_charlen(*escapestr) > 1 &&
-			(len = cset->mb_valid(escapestr, end))) {
+		if (cset->char_maxlen > 1 && (len = cset->mb_valid(escapestr, end))) {
 
 			/* check possible overflow */
 			if ((newstr + len) > newstr_e) {
@@ -495,7 +490,7 @@ PHPAPI ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char
 			escapestr--;
 			continue;
 		}
-		if (*newstr == '\'') {
+		if (*escapestr == '\'') {
 			if (newstr + 2 > newstr_e) {
 				escape_overflow = TRUE;
 				break;
@@ -507,35 +502,36 @@ PHPAPI ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char
 				escape_overflow = TRUE;
 				break;
 			}
-			*newstr++= *escapestr;
+			*newstr++ = *escapestr;
 		}
 	}
 	*newstr = '\0';
 
 	if (escape_overflow) {
-		return (ulong)~0;
+		DBG_RETURN((ulong)~0);
 	}
-	return (ulong)(newstr - newstr_s);
+	DBG_RETURN((ulong)(newstr - newstr_s));
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_cset_escape_slashes */
-PHPAPI ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, char *newstr, const char *escapestr, int escapestr_len)
+PHPAPI ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, char *newstr,
+										 const char *escapestr, int escapestr_len TSRMLS_DC)
 {
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;
 	const char 	*end = escapestr + escapestr_len;
 	zend_bool	escape_overflow = FALSE;
+
+	DBG_ENTER("mysqlnd_cset_escape_slashes");
 	
 	for (;escapestr < end; escapestr++) {
 		char esc = '\0';
 		uint len = 0;
 
 		/* check unicode characters */
-		if (cset->char_maxlen > 1 && cset->mb_charlen(*escapestr) > 1 &&
-			(len = cset->mb_valid(escapestr, end))) {
-
+		if (cset->char_maxlen > 1 && (len = cset->mb_valid(escapestr, end))) {
 			/* check possible overflow */
 			if ((newstr + len) > newstr_e) {
 				escape_overflow = TRUE;
@@ -548,8 +544,7 @@ PHPAPI ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, cha
 			escapestr--;
 			continue;
 		}
-		if (cset->char_maxlen > 1 && cset->mb_charlen(*escapestr) > 1 &&
-			(len = cset->mb_valid(escapestr, end))) {
+		if (cset->char_maxlen > 1 && cset->mb_charlen(*escapestr) > 1) {
 			esc = *escapestr;
 		} else {
 			switch (*escapestr) {
@@ -592,9 +587,9 @@ PHPAPI ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, cha
 	*newstr = '\0';
 
 	if (escape_overflow) {
-		return (ulong)~0;
+		DBG_RETURN((ulong)~0);
 	}
-	return (ulong)(newstr - newstr_s);
+	DBG_RETURN((ulong)(newstr - newstr_s));
 }
 /* }}} */
 

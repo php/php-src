@@ -26,50 +26,93 @@
 
 extern MYSQLND_STATS *mysqlnd_global_stats;
 
+typedef struct st_mysqlnd_string
+{
+	char	*s;
+	size_t	l;
+} MYSQLND_STRING;
+
+extern const MYSQLND_STRING mysqlnd_stats_values_names[];
+
 #ifdef ZTS
+
+#define MYSQLND_INC_GLOBAL_STATISTIC(statistic) \
+ { \
+ 	if (MYSQLND_G(collect_statistics)) { \
+		DBG_INF_FMT("Global stat increase [%s]", mysqlnd_stats_values_names[statistic]); \
+ 		tsrm_mutex_lock(mysqlnd_global_stats->LOCK_access); \
+		mysqlnd_global_stats->values[(statistic)]++; \
+		tsrm_mutex_unlock(mysqlnd_global_stats->LOCK_access); \
+	}\
+ }
+
+#define MYSQLND_INC_GLOBAL_STATISTIC2_W_VALUE(statistic1, value1, statistic2, value2) \
+ { \
+ 	if (MYSQLND_G(collect_statistics)) { \
+		DBG_INF_FMT("Global stats increase w value [%s] [%s]", mysqlnd_stats_values_names[statistic1], mysqlnd_stats_values_names[statistic2]); \
+ 		tsrm_mutex_lock(mysqlnd_global_stats->LOCK_access); \
+		mysqlnd_global_stats->values[(statistic1)] += (value1); \
+		mysqlnd_global_stats->values[(statistic2)] += (value2); \
+		tsrm_mutex_unlock(mysqlnd_global_stats->LOCK_access); \
+	}\
+ }
+
+#define MYSQLND_DEC_CONN_STATISTIC(conn_stats, statistic) \
+ { \
+ 	if (MYSQLND_G(collect_statistics)) { \
+		DBG_INF_FMT("Global&conn stat decrease [%s]", mysqlnd_stats_values_names[statistic]); \
+ 		tsrm_mutex_lock(mysqlnd_global_stats->LOCK_access); \
+		mysqlnd_global_stats->values[(statistic)]--; \
+		tsrm_mutex_unlock(mysqlnd_global_stats->LOCK_access); \
+		if ((conn_stats)) { \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic)]--; \
+		} \
+	}\
+ }
 
 #define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic) \
  { \
- 	if (mysqlnd_global_stats) { \
+ 	if (MYSQLND_G(collect_statistics)) { \
+		DBG_INF_FMT("Global&Conn stat increase [%s]", mysqlnd_stats_values_names[statistic]); \
  		tsrm_mutex_lock(mysqlnd_global_stats->LOCK_access); \
-		mysqlnd_global_stats->values[statistic]++; \
+		mysqlnd_global_stats->values[(statistic)]++; \
 		tsrm_mutex_unlock(mysqlnd_global_stats->LOCK_access); \
 		if ((conn_stats)) { \
-			((MYSQLND_STATS *) conn_stats)->values[statistic]++; \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic)]++; \
 		} \
 	}\
  }
 
 #define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value) \
  { \
-	if (mysqlnd_global_stats) {\
-		my_uint64 v = (value); \
-									\
+ 	if (MYSQLND_G(collect_statistics)) { \
+		my_uint64 v = (my_uint64) (value); \
+		DBG_INF_FMT("Global&Conn stat increase w value [%s]", mysqlnd_stats_values_names[statistic]); \
 		tsrm_mutex_lock(mysqlnd_global_stats->LOCK_access); \
-		mysqlnd_global_stats->values[statistic] += v; \
+		mysqlnd_global_stats->values[(statistic)] += v; \
 		tsrm_mutex_unlock(mysqlnd_global_stats->LOCK_access); \
 		if ((conn_stats)) { \
-			((MYSQLND_STATS *) conn_stats)->values[statistic]+= v; \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic)]+= v; \
 		} \
 	}\
  }
 
 #define MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats, statistic1, value1, statistic2, value2, statistic3, value3) \
  { \
- 	if (mysqlnd_global_stats) { \
-		my_uint64 v1 = (value1); \
-		my_uint64 v2 = (value2); \
-		my_uint64 v3 = (value3); \
+ 	if (MYSQLND_G(collect_statistics)) { \
+		my_uint64 v1 = (my_uint64) (value1); \
+		my_uint64 v2 = (my_uint64) (value2); \
+		my_uint64 v3 = (my_uint64) (value3); \
 								 \
 		tsrm_mutex_lock(mysqlnd_global_stats->LOCK_access); \
-		mysqlnd_global_stats->values[statistic1]+= v1; \
-		mysqlnd_global_stats->values[statistic2]+= v2; \
-		mysqlnd_global_stats->values[statistic3]+= v3; \
+		mysqlnd_global_stats->values[(statistic1)]+= v1; \
+		mysqlnd_global_stats->values[(statistic2)]+= v2; \
+		mysqlnd_global_stats->values[(statistic3)]+= v3; \
 		tsrm_mutex_unlock(mysqlnd_global_stats->LOCK_access); \
 		if ((conn_stats)) { \
-			((MYSQLND_STATS *) conn_stats)->values[statistic1]+= v1; \
-			((MYSQLND_STATS *) conn_stats)->values[statistic2]+= v2; \
-			((MYSQLND_STATS *) conn_stats)->values[statistic3]+= v3; \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic1)]+= v1; \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic2)]+= v2; \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic3)]+= v3; \
 		} \
 	} \
  }
@@ -77,42 +120,73 @@ extern MYSQLND_STATS *mysqlnd_global_stats;
 
 #else /* NON-ZTS */
 
+#define MYSQLND_INC_GLOBAL_STATISTIC(statistic) \
+ { \
+ 	if (MYSQLND_G(collect_statistics)) { \
+		DBG_INF_FMT("Global stat increase [%s]", mysqlnd_stats_values_names[statistic]); \
+		mysqlnd_global_stats->values[(statistic)]++; \
+	} \
+ }
+
+#define MYSQLND_INC_GLOBAL_STATISTIC2_W_VALUE(statistic1, value1, statistic2, value2) \
+ { \
+ 	if (MYSQLND_G(collect_statistics)) { \
+		DBG_INF_FMT("Global stats increase w value [%s] [%s]", \
+			mysqlnd_stats_values_names[statistic1], mysqlnd_stats_values_names[statistic2]); \
+		mysqlnd_global_stats->values[(statistic1)] += (value1); \
+		mysqlnd_global_stats->values[(statistic2)] += (value2); \
+	}\
+ }
+
+
+#define MYSQLND_DEC_CONN_STATISTIC(conn_stats, statistic) \
+ { \
+ 	if (MYSQLND_G(collect_statistics)) { \
+		DBG_INF_FMT("Global&Conn stat decrease [%s]", mysqlnd_stats_values_names[statistic]); \
+		mysqlnd_global_stats->values[(statistic)]--; \
+		if ((conn_stats)) { \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic)]--; \
+		} \
+	} \
+ }
+
 #define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic) \
  { \
-	if (mysqlnd_global_stats) { \
-		mysqlnd_global_stats->values[statistic]++; \
+ 	if (MYSQLND_G(collect_statistics)) { \
+		DBG_INF_FMT("Global&Conn stat increase [%s]", mysqlnd_stats_values_names[statistic]); \
+		mysqlnd_global_stats->values[(statistic)]++; \
 		if ((conn_stats)) { \
-			((MYSQLND_STATS *) conn_stats)->values[statistic]++; \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic)]++; \
 		} \
 	} \
  }
 
 #define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value) \
  { \
-	my_uint64 v = (value); \
-							\
-	if (mysqlnd_global_stats) { \
-		mysqlnd_global_stats->values[statistic]+= v; \
+	my_uint64 v = (my_uint64) (value); \
+	DBG_INF_FMT("Global&Conn stats increase w value [%s]", mysqlnd_stats_values_names[statistic]); \
+ 	if (MYSQLND_G(collect_statistics)) { \
+		mysqlnd_global_stats->values[(statistic)] += v; \
 		if ((conn_stats)) { \
-			((MYSQLND_STATS *) conn_stats)->values[statistic]+= v; \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic)] += v; \
 		} \
 	} \
  } 
 
 #define MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats, statistic1, value1, statistic2, value2, statistic3, value3) \
  { \
- 	if (mysqlnd_global_stats) { \
-		my_uint64 v1 = (value1); \
-		my_uint64 v2 = (value2); \
-		my_uint64 v3 = (value3); \
+ 	if (MYSQLND_G(collect_statistics)) { \
+		my_uint64 v1 = (my_uint64) (value1); \
+		my_uint64 v2 = (my_uint64) (value2); \
+		my_uint64 v3 = (my_uint64) (value3); \
 								\
-		mysqlnd_global_stats->values[statistic1]+= v1; \
-		mysqlnd_global_stats->values[statistic2]+= v2; \
-		mysqlnd_global_stats->values[statistic3]+= v3; \
+		mysqlnd_global_stats->values[(statistic1)]+= v1; \
+		mysqlnd_global_stats->values[(statistic2)]+= v2; \
+		mysqlnd_global_stats->values[(statistic3)]+= v3; \
 		if ((conn_stats)) { \
-			((MYSQLND_STATS *) conn_stats)->values[statistic1]+= v1; \
-			((MYSQLND_STATS *) conn_stats)->values[statistic2]+= v2; \
-			((MYSQLND_STATS *) conn_stats)->values[statistic3]+= v3; \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic1)]+= v1; \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic2)]+= v2; \
+			((MYSQLND_STATS *) conn_stats)->values[(statistic3)]+= v3; \
 		} \
 	} \
  }

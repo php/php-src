@@ -23,7 +23,7 @@
 #ifndef MYSQLND_RESULT_H
 #define MYSQLND_RESULT_H
 
-MYSQLND_RES *mysqlnd_result_init(unsigned int field_count, MYSQLND_THD_ZVAL_PCACHE *cache);
+MYSQLND_RES *mysqlnd_result_init(unsigned int field_count, MYSQLND_THD_ZVAL_PCACHE *cache TSRMLS_DC);
 
 void mysqlnd_unbuffered_free_last_data(MYSQLND_RES *result TSRMLS_DC);
 

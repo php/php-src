@@ -23,8 +23,11 @@
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_palloc.h"
+#include "mysqlnd_debug.h"
 
-#define MYSQLND_SILENT
+/* Used in mysqlnd_debug.c */
+char * mysqlnd_palloc_zval_ptr_dtor_name = "mysqlnd_palloc_zval_ptr_dtor";
+char * mysqlnd_palloc_get_zval_name = "mysqlnd_palloc_get_zval";
 
 
 #ifdef ZTS
@@ -43,14 +46,14 @@
 #endif
 
 
-/* {{{ mysqlnd_palloc_init_cache */
-PHPAPI MYSQLND_ZVAL_PCACHE* mysqlnd_palloc_init_cache(unsigned int cache_size)
+/* {{{ _mysqlnd_palloc_init_cache */
+PHPAPI MYSQLND_ZVAL_PCACHE* _mysqlnd_palloc_init_cache(unsigned int cache_size TSRMLS_DC)
 {
 	MYSQLND_ZVAL_PCACHE *ret = calloc(1, sizeof(MYSQLND_ZVAL_PCACHE));
 	unsigned int i;
-#ifndef MYSQLND_SILENT
-	php_printf("[mysqlnd_palloc_init_cache %p]\n", ret);
-#endif
+
+	DBG_ENTER("_mysqlnd_palloc_init_cache");
+	DBG_INF_FMT("cache=%p size=%u", ret, cache_size);
 
 #ifdef ZTS
 	ret->LOCK_access = tsrm_mutex_alloc();
@@ -77,9 +80,8 @@ PHPAPI MYSQLND_ZVAL_PCACHE* mysqlnd_palloc_init_cache(unsigned int cache_size)
 		/* 2. Add to the free list  */
 		*(--ret->free_list.last_added) = &(ret->block[i]);
 	}
-	
 
-	return ret;
+	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -105,31 +107,32 @@ MYSQLND_ZVAL_PCACHE* mysqlnd_palloc_get_cache_reference(MYSQLND_ZVAL_PCACHE * co
   to the free list after usage. We ZVAL_NULL() them when we allocate them in the 
   constructor of the cache.
 */
-void mysqlnd_palloc_free_cache(MYSQLND_ZVAL_PCACHE *cache)
+void _mysqlnd_palloc_free_cache(MYSQLND_ZVAL_PCACHE *cache TSRMLS_DC)
 {
-#ifndef MYSQLND_SILENT
-	php_printf("[mysqlnd_palloc_free_cache %p]\n", cache);
-#endif
+	DBG_ENTER("_mysqlnd_palloc_free_cache");
+	DBG_INF_FMT("cache=%p", cache);
 
 #ifdef ZTS
 	tsrm_mutex_free(cache->LOCK_access);
 #endif
 
 	/* Data in pointed by 'block' was cleaned in RSHUTDOWN */
-	free(cache->block);
-	free(cache->free_list.ptr_line);
-	free(cache);
+	mnd_free(cache->block);
+	mnd_free(cache->free_list.ptr_line);
+	mnd_free(cache);
+
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
 
-/* {{{ mysqlnd_palloc_init_thd_cache */
-PHPAPI MYSQLND_THD_ZVAL_PCACHE* mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCACHE * const cache)
+/* {{{ _mysqlnd_palloc_init_thd_cache */
+PHPAPI MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCACHE * const cache TSRMLS_DC)
 {
 	MYSQLND_THD_ZVAL_PCACHE *ret = calloc(1, sizeof(MYSQLND_THD_ZVAL_PCACHE));
-#ifndef MYSQLND_SILENT
-	php_printf("[mysqlnd_palloc_init_thd_cache %p]\n", ret);
-#endif
+	DBG_ENTER("_mysqlnd_palloc_init_thd_cache");
+	DBG_INF_FMT("ret = %p", ret);
+
 	ret->parent = mysqlnd_palloc_get_cache_reference(cache);
 
 #ifdef ZTS
@@ -143,7 +146,7 @@ PHPAPI MYSQLND_THD_ZVAL_PCACHE* mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCACH
 	/* Backward and forward looping is possible */
 	ret->gc_list.last_added = ret->gc_list.ptr_line;
 
-	return ret;
+	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -169,32 +172,33 @@ MYSQLND_THD_ZVAL_PCACHE* mysqlnd_palloc_get_thd_cache_reference(MYSQLND_THD_ZVAL
   constructor of the cache.
 */
 static
-void mysqlnd_palloc_free_thd_cache(MYSQLND_THD_ZVAL_PCACHE *cache)
+void mysqlnd_palloc_free_thd_cache(MYSQLND_THD_ZVAL_PCACHE *cache TSRMLS_DC)
 {
-#ifndef MYSQLND_SILENT
-	php_printf("[mysqlnd_palloc_free_thd_cache %p]\n", cache);
-#endif
+	DBG_ENTER("mysqlnd_palloc_free_thd_cache");
+	DBG_INF_FMT("cache=%p", cache);
 
-	free(cache->gc_list.ptr_line);
-	free(cache);
+	mnd_free(cache->gc_list.ptr_line);
+	mnd_free(cache);
+
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
 
-/* {{{ mysqlnd_palloc_free_thd_cache_reference */
-PHPAPI void mysqlnd_palloc_free_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE **cache)
+/* {{{ _mysqlnd_palloc_free_thd_cache_reference */
+PHPAPI void _mysqlnd_palloc_free_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE **cache TSRMLS_DC)
 {
+	DBG_ENTER("_mysqlnd_palloc_free_thd_cache_reference");
 	if (*cache) {
-#ifndef MYSQLND_SILENT
-		php_printf("[mysqlnd_palloc_free_thd_cache_reference %p] refs=%d\n", *cache, (*cache)->references);
-#endif
+		DBG_INF_FMT("cache=%p refs=%d", *cache, (*cache)->references);
 		--(*cache)->parent->references;
 
 		if (--(*cache)->references == 0) {
-			mysqlnd_palloc_free_thd_cache(*cache);
+			mysqlnd_palloc_free_thd_cache(*cache TSRMLS_CC);
 		}
 		*cache = NULL;
 	}
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -285,15 +289,14 @@ PHPAPI void mysqlnd_palloc_free_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE **ca
 
 
 /* {{{ mysqlnd_palloc_get_zval */
-void *mysqlnd_palloc_get_zval(MYSQLND_THD_ZVAL_PCACHE * const thd_cache, zend_bool *allocated)
+void *mysqlnd_palloc_get_zval(MYSQLND_THD_ZVAL_PCACHE * const thd_cache, zend_bool *allocated TSRMLS_DC)
 {
 	void *ret = NULL;
 
-#ifndef MYSQLND_SILENT
-	php_printf("[mysqlnd_palloc_get_zval %p] *last_added=%p free_items=%d\n",
+	DBG_ENTER("mysqlnd_palloc_get_zval");
+	DBG_INF_FMT("cache=%p *last_added=%p free_items=%d",
 				thd_cache, thd_cache? thd_cache->parent->free_list.last_added:NULL,
 				thd_cache->parent->free_items);
-#endif
 
 	if (thd_cache) {
 		MYSQLND_ZVAL_PCACHE *cache = thd_cache->parent;
@@ -328,7 +331,8 @@ void *mysqlnd_palloc_get_zval(MYSQLND_THD_ZVAL_PCACHE * const thd_cache, zend_bo
 		ZVAL_ADDREF(&(((mysqlnd_zval *)ret)->zv));
 	}
 
-	return ret;
+	DBG_INF_FMT("allocated=%d ret=%p", *allocated, ret);
+	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -338,13 +342,12 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 								  enum_mysqlnd_res_type type, zend_bool *copy_ctor_called TSRMLS_DC)
 {
 	MYSQLND_ZVAL_PCACHE *cache;
-#ifndef MYSQLND_SILENT
-	php_printf("[mysqlnd_palloc_zval_ptr_dtor %p] parent_block=%p last_in_block=%p *zv=%p type=%d refc=%d\n",
+	DBG_ENTER("mysqlnd_palloc_zval_ptr_dtor");
+	DBG_INF_FMT("cache=%p parent_block=%p last_in_block=%p *zv=%p refc=%d type=%d ",
 				thd_cache,
 				thd_cache->parent? thd_cache->parent->block:NULL,
 				thd_cache->parent? thd_cache->parent->last_in_block:NULL,
-				*zv, type, ZVAL_REFCOUNT(*zv));
-#endif
+				*zv, ZVAL_REFCOUNT(*zv), type);
 	*copy_ctor_called = FALSE;
 	/* Check whether cache is used and the zval is from the cache */
 	if (!thd_cache || !(cache = thd_cache->parent) || ((char *)*zv < (char *)thd_cache->parent->block ||
@@ -381,7 +384,7 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 			}
 		}
 		zval_ptr_dtor(zv);
-		return;
+		DBG_VOID_RETURN;
 	}
 
 	/* The zval is from our cache */
@@ -441,26 +444,28 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 
 		UNLOCK_PCACHE(cache);
 	}
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
 
-/* {{{ mysqlnd_palloc_rinit */
-PHPAPI MYSQLND_THD_ZVAL_PCACHE * mysqlnd_palloc_rinit(MYSQLND_ZVAL_PCACHE * cache)
+/* {{{ _mysqlnd_palloc_rinit */
+PHPAPI MYSQLND_THD_ZVAL_PCACHE * _mysqlnd_palloc_rinit(MYSQLND_ZVAL_PCACHE * cache TSRMLS_DC)
 {
 	return mysqlnd_palloc_init_thd_cache(cache);
 }
 /* }}} */
 
 
-/* {{{ mysqlnd_palloc_rshutdown */
-PHPAPI void mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * thd_cache)
+/* {{{ _mysqlnd_palloc_rshutdown */
+PHPAPI void _mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * thd_cache TSRMLS_DC)
 {
 	MYSQLND_ZVAL_PCACHE *cache;
 	mysqlnd_zval **p;
-#ifndef MYSQLND_SILENT
-	php_printf("[mysqlnd_palloc_rshutdown %p]\n", thd_cache);
-#endif
+
+	DBG_ENTER("_mysqlnd_palloc_rshutdown");
+	DBG_INF_FMT("cache=%p", thd_cache);
+
 	if (!thd_cache || !(cache = thd_cache->parent)) {
 		return;
 	}
@@ -490,6 +495,8 @@ PHPAPI void mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * thd_cache)
 	UNLOCK_PCACHE(cache);
 
 	mysqlnd_palloc_free_thd_cache_reference(&thd_cache);
+
+	DBG_VOID_RETURN;
 }
 /* }}} */
 

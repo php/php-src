@@ -23,7 +23,7 @@
 #include "mysqlnd.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
-
+#include "mysqlnd_debug.h"
 
 #define MYSQLND_SILENT
 
@@ -205,7 +205,7 @@ void ps_fetch_int32(zval *zv, const MYSQLND_FIELD * const field,
 		if (uval > INT_MAX) {
 			char *tmp, *p;
 			int j=10;
-			tmp= emalloc(11);
+			tmp= mnd_emalloc(11);
 			p= &tmp[9];
 			do { 
 				*p-- = (uval % 10) + 48;
@@ -354,7 +354,7 @@ void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, to, length, 1);
-		efree(to);
+		mnd_efree(to);
 #if PHP_MAJOR_VERSION >= 6
 	} else {
 		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);	
@@ -402,7 +402,7 @@ void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, to, length, 1);
-		efree(to);
+		mnd_efree(to);
 #if PHP_MAJOR_VERSION >= 6
 	} else {
 		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);	
@@ -458,7 +458,7 @@ void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, to, length, 1);
-		efree(to);
+		mnd_efree(to);
 #if PHP_MAJOR_VERSION >= 6
 	} else {
 		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);	
@@ -653,7 +653,7 @@ void _mysqlnd_init_ps_subsystem()
 /* {{{ mysqlnd_stmt_execute_store_params */
 void
 mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uchar **p,
-								  size_t *buf_len, unsigned int null_byte_offset)
+								  size_t *buf_len, unsigned int null_byte_offset TSRMLS_DC)
 {
 	unsigned int i = 0;
 	unsigned left = (*buf_len - (*p - *buf));
@@ -667,7 +667,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 			unsigned int offset = *p - *buf;
 			zend_uchar *tmp_buf;
 			*buf_len = offset + stmt->param_count * 2 + 20;
-			tmp_buf = emalloc(*buf_len);
+			tmp_buf = mnd_emalloc(*buf_len);
 			memcpy(tmp_buf, *buf, offset);
 			*buf = tmp_buf;
 			
@@ -734,7 +734,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 		unsigned int offset = *p - *buf;
 		zend_uchar *tmp_buf;
 		*buf_len = offset + data_size + 10; /* Allocate + 10 for safety */
-		tmp_buf = emalloc(*buf_len);
+		tmp_buf = mnd_emalloc(*buf_len);
 		memcpy(tmp_buf, *buf, offset);
 		*buf = tmp_buf;
 		/* Update our pos pointer */
@@ -805,7 +805,8 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 
 
 /* {{{ mysqlnd_stmt_execute_generate_request */
-zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT *stmt, size_t *request_len, zend_bool *free_buffer)
+zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT *stmt, size_t *request_len,
+												  zend_bool *free_buffer TSRMLS_DC)
 {
 	zend_uchar	*p = stmt->cmd_buffer.buffer,
 				*cmd_buffer = stmt->cmd_buffer.buffer;
@@ -835,7 +836,7 @@ zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT *stmt, size_t *re
 	int1store(p, stmt->send_types_to_server); 
 	p++;
 
-	mysqlnd_stmt_execute_store_params(stmt, &cmd_buffer, &p, &cmd_buffer_length, null_byte_offset);
+	mysqlnd_stmt_execute_store_params(stmt, &cmd_buffer, &p, &cmd_buffer_length, null_byte_offset TSRMLS_CC);
 
 	*free_buffer = (cmd_buffer != stmt->cmd_buffer.buffer);
 	*request_len = (p - cmd_buffer);
