@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 5.3.0
 - Added xsl->setProfiling() for profiling stylesheets. (Christian)
 - Added long-option feature to getopt() and made getopt() available also on 
-  win32 systems by adding a common getopt implementation to core.
+  win32 systems by adding a common getopt implementation into core.
   (Jani, David Soria Parra)
 - Added support for namespaces. (Dmitry, Stas)
 - Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
@@ -35,8 +35,6 @@ PHP                                                                        NEWS
 - Improved and cleaned CGI code. FastCGI is now always enabled and can not be
   disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
 
-- Fixed bug #42819 (namespaces in indexes of constant arrays). (Dmitry)
-- Fixed bug #42802 (Namespace not supported in typehints). (Dmitry)
 - Fixed bug #42798 (__autoload() not triggered for classes used in method
   signature). (Dmitry)
 - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
