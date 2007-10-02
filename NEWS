@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 - Improved and cleaned CGI code. FastCGI is now always enabled and can not be
   disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
 
+- Fixed bug #42819 (namespaces in indexes of constant arrays). (Dmitry)
 - Fixed bug #42802 (Namespace not supported in typehints). (Dmitry)
 - Fixed bug #42798 (__autoload() not triggered for classes used in method
   signature). (Dmitry)
