@@ -123,6 +123,7 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->registered_phpfunctions = NULL;
 	intern->node_list = NULL;
 	intern->doc = NULL;
+	intern->profiling = NULL;
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
