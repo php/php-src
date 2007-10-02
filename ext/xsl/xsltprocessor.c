@@ -44,6 +44,7 @@ const zend_function_entry php_xsl_xsltprocessor_class_functions[] = {
 	PHP_FALIAS(removeParameter, xsl_xsltprocessor_remove_parameter, NULL)
 	PHP_FALIAS(hasExsltSupport, xsl_xsltprocessor_has_exslt_support, NULL)
 	PHP_FALIAS(registerPHPFunctions, xsl_xsltprocessor_register_php_functions, NULL)
+	PHP_FALIAS(setProfiling, xsl_xsltprocessor_set_profiling, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -425,6 +426,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	int clone;
 	zval *doXInclude, *member;
 	zend_object_handlers *std_hnd;
+	FILE *f;
 
 	node = php_libxml_import_node(docp TSRMLS_CC);
 	
@@ -440,6 +442,17 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No stylesheet associated to this object");
 		return NULL;
 	}
+	
+	if (intern->profiling) {
+		if (php_check_open_basedir(intern->profiling TSRMLS_CC)) {
+			f = NULL;
+		} else {
+			f = VCWD_FOPEN(intern->profiling, "w");
+		}
+	} else {
+		f = NULL;
+	}
+	
 	if (intern->parameter) {
 		params = php_xsl_xslt_make_params(intern->parameter, 0 TSRMLS_CC);
 	}
@@ -470,8 +483,10 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	}
 	efree(member);
 
-	newdocp = xsltApplyStylesheetUser(style, doc, (const char**) params, NULL, NULL, ctxt);
-
+	newdocp = xsltApplyStylesheetUser(style, doc, (const char**) params,  NULL, f, ctxt);
+	if (f) {
+		fclose(f);
+	}
 	xsltFreeTransformContext(ctxt);
 
 	if (intern->node_list != NULL) {
@@ -484,6 +499,9 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	efree(intern->doc);
 	intern->doc = NULL;
 	
+	if (intern->profiling) {
+		efree(intern->profiling);
+	}
 
 	if (params) {
 		clone = 0;
@@ -803,6 +821,31 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 	
 }
 /* }}} end xsl_xsltprocessor_register_php_functions(); */
+
+/* {{{ proto bool xsl_xsltprocessor_set_profiling(string filename) */
+PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
+{
+ 
+	zval *id;
+	zval *array_value, **entry, *new_string;
+	xsl_object *intern;
+	char *filename;
+	int filename_len;
+	DOM_GET_THIS(id);
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == SUCCESS) {
+		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
+		
+		intern->profiling = estrndup(filename,filename_len);
+		
+		RETURN_TRUE;
+	
+	} else {
+		WRONG_PARAM_COUNT;
+	}
+	
+}
+/* }}} end xsl_xsltprocessor_set_profiling */
 
 /* {{{ proto bool xsl_xsltprocessor_has_exslt_support() U
 */
