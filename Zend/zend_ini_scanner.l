@@ -88,9 +88,9 @@
 #define YY_DECL int ini_lex(zval *ini_lval TSRMLS_DC)
 
 #define YY_INPUT(buf, result, max_size)                                    \
-if ( ((result = zend_unicode_yyinput(yyin, buf, max_size TSRMLS_CC)) == 0) \
-	&& zend_stream_ferror( yyin TSRMLS_CC) )                               \
-	YY_FATAL_ERROR( "input in flex scanner failed" );
+	if ( ((result = zend_stream_read(yyin, buf, max_size TSRMLS_CC)) == 0) \
+		&& zend_stream_ferror( yyin TSRMLS_CC) )                           \
+		YY_FATAL_ERROR( "input in flex scanner failed" );
 
 /* Globals Macros */
 #define SCNG	INI_SCNG
