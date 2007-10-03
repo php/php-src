@@ -93,6 +93,7 @@ struct _spl_filesystem_object {
 			zend_function      *func_getCurr;
 			char               delimiter;
 			char               enclosure;
+			char               escape;
 		} file;
 	} u;
 	spl_filesystem_iterator    it;
