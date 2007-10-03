@@ -545,7 +545,7 @@ ZEND_FUNCTION(defined)
 	}
 	
 	convert_to_string_ex(var);
-	if (zend_get_constant_ex(Z_STRVAL_PP(var), Z_STRLEN_PP(var), &c, NULL, 0 TSRMLS_CC)) {
+	if (zend_get_constant_ex(Z_STRVAL_PP(var), Z_STRLEN_PP(var), &c, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC)) {
 		zval_dtor(&c);
 		RETURN_TRUE;
 	} else {

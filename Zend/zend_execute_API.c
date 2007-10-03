@@ -1513,8 +1513,9 @@ zend_class_entry *zend_fetch_class(const char *class_name, uint class_name_len, 
 	zend_class_entry **pce;
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
 	int rt_ns_check  = (fetch_type & ZEND_FETCH_CLASS_RT_NS_CHECK)  ? 1 : 0;
+	int silent       = (fetch_type & ZEND_FETCH_CLASS_SILENT) != 0;
 
-	fetch_type = fetch_type & ~ZEND_FETCH_CLASS_NO_AUTOLOAD;
+	fetch_type &= ZEND_FETCH_CLASS_MASK;
 check_fetch_type:
 	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
@@ -1568,10 +1569,12 @@ check_fetch_type:
 			    zend_lookup_class_ex(class_name, class_name_len, 1, &pce TSRMLS_CC)==SUCCESS) {
 				return *pce;
 			}
-			if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
-				zend_error(E_ERROR, "Interface '%s' not found", class_name);
-			} else {
-				zend_error(E_ERROR, "Class '%s' not found", class_name);
+			if (!silent) {
+				if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
+					zend_error(E_ERROR, "Interface '%s' not found", class_name);
+				} else {
+					zend_error(E_ERROR, "Class '%s' not found", class_name);
+				}
 			}
 		}
 		return NULL;
