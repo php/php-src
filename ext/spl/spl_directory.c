@@ -1589,7 +1589,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	spl_filesystem_file_call(intern, func_ptr, pass_num_args, return_value, arg2 TSRMLS_CC); \
 }
 
-static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, zval *return_value TSRMLS_DC) /* {{{ */
+static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, char escape, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	int ret = SUCCESS;
 	
@@ -1606,7 +1606,7 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 		}
 		ALLOC_INIT_ZVAL(intern->u.file.current_zval);
 
-		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, buf_len, buf, intern->u.file.current_zval TSRMLS_CC);
+		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf, intern->u.file.current_zval TSRMLS_CC);
 		if (return_value) {
 			if (Z_TYPE_P(return_value) != IS_NULL) {
 				zval_dtor(return_value);
@@ -1632,7 +1632,7 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 			return FAILURE;
 		}
 		if (intern->flags & SPL_FILE_OBJECT_READ_CSV) {
-			return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, NULL TSRMLS_CC);
+			return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL TSRMLS_CC);
 		} else {
 			zend_call_method_with_0_params(&this_ptr, Z_OBJCE_P(getThis()), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
 		}
@@ -1943,18 +1943,25 @@ SPL_METHOD(SplFileObject, func_name) \
 }
 /* }}} */
 
-/* {{{ proto array SplFileObject::fgetcsv([string delimiter [, string enclosure]])
+/* {{{ proto array SplFileObject::fgetcsv([string delimiter [, string enclosure [, escape = '\\']]])
    Return current line as csv */
 SPL_METHOD(SplFileObject, fgetcsv)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure;
-	char *delim, *enclo;
-	int d_len, e_len;
+	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
+	char *delim, *enclo, *esc;
+	int d_len, e_len, esc_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &delim, &d_len, &enclo, &e_len) == SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
 		switch(ZEND_NUM_ARGS())
 		{
+  		    case 3:
+				if (esc_len != 1) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
+					RETURN_FALSE;
+				}
+				escape = esc[0];
+                /* no break */
 			case 2:
 				if (e_len != 1) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
@@ -1972,23 +1979,30 @@ SPL_METHOD(SplFileObject, fgetcsv)
 			case 0:
 				break;
 		}
-		spl_filesystem_file_read_csv(intern, delimiter, enclosure, return_value TSRMLS_CC);
+		spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value TSRMLS_CC);
 	}
 }
 /* }}} */
 
-/* {{{ proto void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"']])
+/* {{{ proto void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"' [, string escape = '\\']]])
    Set the delimiter and enclosure character used in fgetcsv */
 SPL_METHOD(SplFileObject, setCsvControl)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	char delimiter = ',', enclosure = '"';
-	char *delim, *enclo;
-	int d_len, e_len;
+	char delimiter = ',', enclosure = '"', escape='\\';
+	char *delim, *enclo, *esc;
+	int d_len, e_len, esc_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &delim, &d_len, &enclo, &e_len) == SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
 		switch(ZEND_NUM_ARGS())
 		{
+		     case 3:
+				if (esc_len != 1) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
+					RETURN_FALSE;
+				}
+				escape = esc[0];
+                /* no break */
 			case 2:
 				if (e_len != 1) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
@@ -2008,6 +2022,7 @@ SPL_METHOD(SplFileObject, setCsvControl)
 		}
 		intern->u.file.delimiter = delimiter;
 		intern->u.file.enclosure = enclosure;
+		intern->u.file.escape    = escape;
 	}
 }
 /* }}} */
