@@ -2260,12 +2260,12 @@ cleanup:
 /* }}} */
 
 PHPAPI void php_fgetcsv(php_stream *stream, /* {{{ */
-		char delimiter, char enclosure, 
-		size_t buf_len, char *buf,
-		zval *return_value TSRMLS_DC)
+						char delimiter, char enclosure, char escape,
+						size_t buf_len, char *buf,
+						zval *return_value TSRMLS_DC)
 {
-	char *delim = &delimiter, *enc = &enclosure, *buffer = buf;
-	int delim_len = 1, enc_len = 1, buffer_len = buf_len;
+	char *delim = &delimiter, *enc = &enclosure, *buffer = buf, *esc;
+	int delim_len = 1, enc_len = 1, esc_len = 1, buffer_len = buf_len;
 	zend_uchar type = IS_STRING;
 
 	if (stream) {
@@ -2285,22 +2285,30 @@ PHPAPI void php_fgetcsv(php_stream *stream, /* {{{ */
 			INIT_PZVAL(return_value);
 			return;
 		}
-		if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&buffer, &buffer_len, buf, buf_len TSRMLS_CC)) {
+		if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&esc, &esc_len, &escape, 1 TSRMLS_CC)) {
 			efree(delim);
 			efree(enc);
 			INIT_PZVAL(return_value);
 			return;
 		}
+		if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&buffer, &buffer_len, buf, buf_len TSRMLS_CC)) {
+			efree(delim);
+			efree(enc);
+			efree(esc);
+			INIT_PZVAL(return_value);
+			return;
+		}
 
-		php_u_fgetcsv(stream, (UChar*)delim, delim_len, (UChar*)enc, enc_len, &esc, 1,
+		php_u_fgetcsv(stream, (UChar*)delim, delim_len, (UChar*)enc, enc_len, (UChar*)esc, esc_len,
 				(UChar*)buffer, buffer_len, return_value TSRMLS_CC);
 
 		/* Types converted, free storage */
 		efree(delim);
 		efree(enc);
+		efree(esc);
 	} else {
 		/* Binary stream with binary delimiter/enclosures/prefetch */
-		php_fgetcsv_ex(stream, delim, delim_len, enc, enc_len, "\\", 1, buffer, buffer_len, return_value TSRMLS_CC);
+		php_fgetcsv_ex(stream, delim, delim_len, enc, enc_len, esc, esc_len, buffer, buffer_len, return_value TSRMLS_CC);
 	}
 }
 
@@ -2365,8 +2373,12 @@ ready_state:
 				}
 
 				/* Is it an escape character? */
-				if (PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len)) {
-					/* Skip escape sequence and let next char be treated as literal */
+				if ((PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len) && escape != enclosure)
+					|| (PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len) 
+						&& PHP_FGETCSV_BIN_CHECK(p+1, e, escape, escape_len) && escape == enclosure)) {
+					/* Skip escape sequence and let next char be treated as literal 
+					   If enclosure is the same character as esacpe, it is considered as esacped
+					   if it appears twice */
 					p += escape_len;
 					/* FALL THROUGH */
 				}
@@ -2569,8 +2581,12 @@ ready_state:
 				}
 
 				/* Is it an escape character? */
-				if (PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len)) {
-					/* Skip escape sequence and let next char be treated as literal */
+				if ((PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len) && escape != enclosure)
+					|| (PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len) 
+						&& PHP_FGETCSV_UNI_CHECK(p+1, e, escape, escape_len) && escape == enclosure)) {
+					/* Skip escape sequence and let next char be treated as literal 
+					   If enclosure is the same character as esacpe, it is considered as esacped
+					   if it appears twice */
 					p += escape_len;
 					/* FALL THROUGH */
 				}

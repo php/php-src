@@ -36,7 +36,7 @@ $invalid_args = array (
 for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
   echo "-- Iteration $loop_counter --\n";
   var_dump( fgetcsv($invalid_args[$loop_counter - 1]) ); // with default args
-  var_dump( fgetcsv($invalid_args[$loop_counter - 1], $len, $delim, $enclosure) ); // all args specified
+  var_dump( fgetcsv($invalid_args[$loop_counter - 1], $len, $delim, $enclosure, $escape) ); // all args specified
 }
 
 echo "Done\n";
