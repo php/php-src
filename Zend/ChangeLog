@@ -1,3 +1,35 @@
+2007-10-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * zend_ini_scanner.l:
+      - Use non-unicode input method (other one crashes for some reason in ZTS
+      mode)
+
+2007-10-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Fixed access to freed memory in tests/classes/__call_001.phpt
+
+    * zend.h
+      zend.h
+      zend_compile.c
+      zend_compile.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug42819.phpt:
+      Fixed bug #42819 (namespaces in indexes of constant arrays)
+
+    * tests/bug42819.phpt
+      tests/bug42819.phpt:
+      
+      file bug42819.phpt was initially added on branch PHP_5_3.
+
 2007-10-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_ini.c:

@@ -1,3 +1,139 @@
+2007-10-02  Antony Dovgal  <tony@daylessday.org>
+
+    * main/streams/unicode_filter.c:
+      ucnv_toUnicode() in ICU 3.8 requires target buffer size to be even,
+      otherwise it bails out with U_ILLEGAL_ARGUMENT_ERROR
+      this commit fixes endless loop (due to the absence of error catching) and
+      also fixes the cause of the error
+
+2007-10-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ZendEngine2/zend_ini_scanner.l:
+      - Use non-unicode input method (other one crashes for some reason in ZTS
+      mode)
+
+2007-10-02  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/strings/strcspn_variation10.phpt
+      ext/standard/tests/strings/strcspn_variation2.phpt:
+      fix tests
+
+    * ext/standard/string.c:
+      make strcspn() behave the same way in both Unicode and native mode (bug
+      #42731)
+
+    * (PHP_5_3)
+      ext/standard/tests/network/ip_x86_64.phpt:
+      fix test
+
+2007-10-02  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/package.xml
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_mysqlnd.h
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqlnd/config.w32
+      ext/mysqlnd/config9.m4
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_charset.h
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_palloc.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_qcache.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.h
+      ext/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqlnd/mysqlnd_result_meta.h
+      ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h
+      ext/mysqlnd/php_mysqlnd.h:
+      Update mysqlnd in HEAD
+      Updated ext/mysql and ext/mysqli in HEAD
+
+2007-10-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      - There really is no point in mentioned fixed bugs in something that has
+      never been in any release..
+
+    * NEWS:
+      fix news (stuff added in 5.3 wont be needed to mentioned here)
+
+2007-10-02  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/array.c
+      ext/standard/array.c:
+      MF5_2: improved recursion detection in array_walk()
+      fixes #42752, though the leaks are still there
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      improved recursion detection in array_walk()
+      fixes #42752, though the leaks are still there
+
+2007-10-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed access to freed memory in tests/classes/__call_001.phpt
+
+    * ZendEngine2/tests/bug42819.phpt
+      ZendEngine2/tests/bug42819.phpt:
+      
+      file bug42819.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug42819.phpt:
+      Fixed bug #42819 (namespaces in indexes of constant arrays)
+
+2007-10-02  Christian Stocker  <chregu@bitflux.ch>
+
+    * ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsl_fe.h
+      ext/xsl/xsltprocessor.c:
+      - Added xsl->setProfiling() for profiling stylesheets. (MFB)
+
+    * (PHP_5_3)
+      NEWS
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsl_fe.h
+      ext/xsl/xsltprocessor.c:
+      - Added xsl->setProfiling() for profiling stylesheets.
+
 2007-10-01  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_3)
