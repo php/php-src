@@ -1895,9 +1895,11 @@ static int ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *expr = &opline->op1.u.constant;
 	zval *result = &EX_T(opline->result.u.var).tmp_var;
 
-	*result = *expr;
-	if (!0) {
-		zendi_zval_copy_ctor(*result);
+	if (opline->extended_value != IS_STRING) {
+		*result = *expr;
+		if (!0) {
+			zendi_zval_copy_ctor(*result);
+		}
 	}
 	switch (opline->extended_value) {
 		case IS_NULL:
@@ -1916,10 +1918,17 @@ static int ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval var_copy;
 			int use_copy;
 
-			zend_make_printable_zval(result, &var_copy, &use_copy);
+			zend_make_printable_zval(expr, &var_copy, &use_copy);
 			if (use_copy) {
-				zval_dtor(result);
 				*result = var_copy;
+				if (0) {
+
+				}
+			} else {
+				*result = *expr;
+				if (!0) {
+					zendi_zval_copy_ctor(*result);
+				}
 			}
 			break;
 		}
@@ -4461,9 +4470,11 @@ static int ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *expr = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zval *result = &EX_T(opline->result.u.var).tmp_var;
 
-	*result = *expr;
-	if (!1) {
-		zendi_zval_copy_ctor(*result);
+	if (opline->extended_value != IS_STRING) {
+		*result = *expr;
+		if (!1) {
+			zendi_zval_copy_ctor(*result);
+		}
 	}
 	switch (opline->extended_value) {
 		case IS_NULL:
@@ -4482,10 +4493,17 @@ static int ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval var_copy;
 			int use_copy;
 
-			zend_make_printable_zval(result, &var_copy, &use_copy);
+			zend_make_printable_zval(expr, &var_copy, &use_copy);
 			if (use_copy) {
-				zval_dtor(result);
 				*result = var_copy;
+				if (1) {
+					zval_dtor(free_op1.var);
+				}
+			} else {
+				*result = *expr;
+				if (!1) {
+					zendi_zval_copy_ctor(*result);
+				}
 			}
 			break;
 		}
@@ -7599,9 +7617,11 @@ static int ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *expr = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zval *result = &EX_T(opline->result.u.var).tmp_var;
 
-	*result = *expr;
-	if (!0) {
-		zendi_zval_copy_ctor(*result);
+	if (opline->extended_value != IS_STRING) {
+		*result = *expr;
+		if (!0) {
+			zendi_zval_copy_ctor(*result);
+		}
 	}
 	switch (opline->extended_value) {
 		case IS_NULL:
@@ -7620,10 +7640,17 @@ static int ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval var_copy;
 			int use_copy;
 
-			zend_make_printable_zval(result, &var_copy, &use_copy);
+			zend_make_printable_zval(expr, &var_copy, &use_copy);
 			if (use_copy) {
-				zval_dtor(result);
 				*result = var_copy;
+				if (0) {
+					if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+				}
+			} else {
+				*result = *expr;
+				if (!0) {
+					zendi_zval_copy_ctor(*result);
+				}
 			}
 			break;
 		}
@@ -19662,9 +19689,11 @@ static int ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *expr = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zval *result = &EX_T(opline->result.u.var).tmp_var;
 
-	*result = *expr;
-	if (!0) {
-		zendi_zval_copy_ctor(*result);
+	if (opline->extended_value != IS_STRING) {
+		*result = *expr;
+		if (!0) {
+			zendi_zval_copy_ctor(*result);
+		}
 	}
 	switch (opline->extended_value) {
 		case IS_NULL:
@@ -19683,10 +19712,17 @@ static int ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval var_copy;
 			int use_copy;
 
-			zend_make_printable_zval(result, &var_copy, &use_copy);
+			zend_make_printable_zval(expr, &var_copy, &use_copy);
 			if (use_copy) {
-				zval_dtor(result);
 				*result = var_copy;
+				if (0) {
+
+				}
+			} else {
+				*result = *expr;
+				if (!0) {
+					zendi_zval_copy_ctor(*result);
+				}
 			}
 			break;
 		}
