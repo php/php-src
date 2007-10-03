@@ -35,6 +35,8 @@ PHP                                                                        NEWS
 - Fixed bug #42818 ($foo = clone(array()); leaks memory). (Dmitry)
 - Fixed bug #42785 (json_encode() formats doubles according to locale rather  
   then following standard syntax). (Ilia)
+- Fixed bug #42783 (pg_insert() does not accept an empty list for
+  insertion). (Ilia)
 - Fixed bug #42772 (Storing $this in a static var fails while handling a cast
   to string). (Dmitry)
 - Fixed bug #42767 (highlight_string() truncates trailing comment). (Ilia)
