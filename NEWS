@@ -29,6 +29,8 @@ PHP                                                                        NEWS
   implementations of the fnmatch(), setlocale() and glob() functions. 
   Reported by Laurent gaffie. (Ilia)
 - Fixed imagerectangle regression with 1x1 rectangle (libgd #106). (Pierre)
+- Fixed htmlentities/htmlspecialchars not to accept partial multibyte
+  sequences. (Stas)
 
 - Fixed bug #42785 (json_encode() formats doubles according to locale rather  
   then following standard syntax). (Ilia)
