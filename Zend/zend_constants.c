@@ -274,7 +274,7 @@ ZEND_API int zend_get_constant_ex(char *name, uint name_len, zval *result, zend_
 	if (name[0] == ':' && name[1] == ':') {
 		name += 2;
 		name_len -= 2;
-		flags = 0;
+		flags &= ZEND_FETCH_CLASS_SILENT;
 	}
 
 	
@@ -374,7 +374,9 @@ ZEND_API int zend_get_constant_ex(char *name, uint name_len, zval *result, zend_
 					retval = 1;
 					return zend_get_constant(name, name_len, result TSRMLS_CC);
 				}
-				zend_error(E_ERROR, "Class '%s' not found", class_name);
+				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
+					zend_error(E_ERROR, "Class '%s' not found", class_name);
+				}
 			}
 			retval = 0;
 		}
