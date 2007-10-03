@@ -3,7 +3,7 @@ Test fgetcsv() function : error conditions
 --FILE--
 <?php
 /*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
+ Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure [, string $escape]]]] );
  Description: Gets line from file pointer and parse for CSV fields
 */
 
@@ -18,7 +18,8 @@ $fp = fopen(__FILE__, "r");
 $len = 1024;
 $delim = ";";
 $enclosure ="\"";
-var_dump( fgetcsv($fp, $len, $delim, $enclosure, $fp) );
+$escape = '"';
+var_dump( fgetcsv($fp, $len, $delim, $enclosure, $escape, $fp) );
 fclose($fp);
 
 // test invalid arguments : non-resources
@@ -35,7 +36,7 @@ $invalid_args = array (
 for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
   echo "-- Iteration $loop_counter --\n";
   var_dump( fgetcsv($invalid_args[$loop_counter - 1]) ); // with default args
-  var_dump( fgetcsv($invalid_args[$loop_counter - 1], $len, $delim, $enclosure) ); // all args specified
+  var_dump( fgetcsv($invalid_args[$loop_counter - 1], $len, $delim, $enclosure, $escape) ); // all args specified
 }
 
 echo "Done\n";
@@ -47,7 +48,7 @@ Warning: fgetcsv() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 -- Testing fgetcsv() with more than expected number of arguments --
 
-Warning: fgetcsv() expects at most 4 parameters, 5 given in %s on line %d
+Warning: fgetcsv() expects at most 5 parameters, 6 given in %s on line %d
 NULL
 -- Testing fgetcsv() with invalid arguments --
 -- Iteration 1 --

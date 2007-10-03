@@ -2013,12 +2013,14 @@ PHP_FUNCTION(fputcsv)
 }
 /* }}} */
 
-/* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure]]])
+/* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure [, string escape]]]])
    Get line from file pointer and parse for CSV fields */
 PHP_FUNCTION(fgetcsv)
 {
 	char delimiter = ',';	/* allow this to be set as parameter */
 	char enclosure = '"';	/* allow this to be set as parameter */
+	char escape = '\\';
+
 	/* first section exactly as php_fgetss */
 
 	long len = 0;
@@ -2032,10 +2034,13 @@ PHP_FUNCTION(fgetcsv)
 		int delimiter_str_len = 0;
 		char *enclosure_str = NULL;
 		int enclosure_str_len = 0;
+		char *escape_str = NULL;
+		int escape_str_len = 0;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|Zss",
-					&fd, &len_zv, &delimiter_str, &delimiter_str_len,
-					&enclosure_str, &enclosure_str_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|Zsss",
+								  &fd, &len_zv, &delimiter_str, &delimiter_str_len,
+								  &enclosure_str, &enclosure_str_len, 
+								  &escape_str, &escape_str_len) == FAILURE) {
 			return;
 		}	
 
@@ -2062,6 +2067,17 @@ PHP_FUNCTION(fgetcsv)
 
 			/* use first character from string */
 			enclosure = enclosure_str[0];
+		}
+
+		if (escape_str != NULL) {
+			if (escape_str_len < 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be character");
+				RETURN_FALSE;
+			} else if (escape_str_len > 1) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "escape must be a single character");
+			}
+
+			escape = escape_str[0];
 		}
 
 		if (len_zv != NULL && Z_TYPE_PP(len_zv) != IS_NULL) {
@@ -2092,14 +2108,13 @@ PHP_FUNCTION(fgetcsv)
 		}
 	}
 
-	php_fgetcsv(stream, delimiter, enclosure, buf_len, buf, return_value TSRMLS_CC);
+	php_fgetcsv(stream, delimiter, enclosure, escape, buf_len, buf, return_value TSRMLS_CC);
 }
 /* }}} */
 
-PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, size_t buf_len, char *buf, zval *return_value TSRMLS_DC) /* {{{ */
+PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	char *temp, *tptr, *bptr, *line_end, *limit;
-	const char escape_char = '\\';
 
 	size_t temp_len, line_end_len;
 	int inc_len;
@@ -2250,7 +2265,8 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, size
 								state = 0;
 								break;
 							default:
-								if (*bptr == escape_char) {
+								if ((escape_char == enclosure && *bptr == escape_char && *(bptr+1) == escape_char) 
+									|| (escape_char != enclosure && *bptr == escape_char)) {
 									state = 1;
 								} else if (*bptr == enclosure) {
 									state = 2;
