@@ -264,8 +264,6 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 %left '|' '&'
 %right '~' '!'
 
-%destructor { free(Z_STRVAL($$)); } TC_RAW TC_NUMBER TC_STRING TC_OFFSET TC_VARNAME TC_QUOTED_STRING BOOL_TRUE BOOL_FALSE 
-
 %%
 
 statement_list:
