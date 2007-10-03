@@ -489,18 +489,29 @@ struct basic_entities_dec {
 			}                        \
 			mbseq[mbpos++] = (mbchar); }
 
+#define CHECK_LEN(pos, chars_need)			\
+	if((str_len - (pos)) < chars_need) {	\
+		*status = FAILURE;					\
+		return 0;							\
+	}
+
 /* {{{ get_next_char
  */
 inline static unsigned short get_next_char(enum entity_charset charset,
 		unsigned char * str,
+		int str_len,
 		int * newpos,
 		unsigned char * mbseq,
-		int * mbseqlen)
+		int * mbseqlen, 
+		int *status)
 {
 	int pos = *newpos;
 	int mbpos = 0;
 	int mbspace = *mbseqlen;
 	unsigned short this_char = str[pos++];
+	unsigned char next_char;
+
+	*status = SUCCESS;
 	
 	if (mbspace <= 0) {
 		*mbseqlen = 0;
@@ -560,6 +571,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 								break;
 							default:
 								/* invalid */
+								*status = FAILURE;
 								more = 0;
 						}
 					}
@@ -567,21 +579,27 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					else if (this_char < 0xe0) {
 						stat = 0x10;	/* 2 byte */
 						utf = (this_char & 0x1f) << 6;
+						CHECK_LEN(pos, 1);
 					} else if (this_char < 0xf0) {
 						stat = 0x20;	/* 3 byte */
 						utf = (this_char & 0xf) << 12;
+						CHECK_LEN(pos, 2);
 					} else if (this_char < 0xf8) {
 						stat = 0x30;	/* 4 byte */
 						utf = (this_char & 0x7) << 18;
+						CHECK_LEN(pos, 3);
 					} else if (this_char < 0xfc) {
 						stat = 0x40;	/* 5 byte */
 						utf = (this_char & 0x3) << 24;
+						CHECK_LEN(pos, 4);
 					} else if (this_char < 0xfe) {
 						stat = 0x50;	/* 6 byte */
 						utf = (this_char & 0x1) << 30;
+						CHECK_LEN(pos, 5);
 					} else {
 						/* invalid; bail */
 						more = 0;
+						*status = FAILURE;
 						break;
 					}
 
@@ -599,7 +617,8 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 				/* check if this is the first of a 2-byte sequence */
 				if (this_char >= 0xa1 && this_char <= 0xfe) {
 					/* peek at the next char */
-					unsigned char next_char = str[pos];
+					CHECK_LEN(pos, 1);
+					next_char = str[pos];
 					if ((next_char >= 0x40 && next_char <= 0x7e) ||
 							(next_char >= 0xa1 && next_char <= 0xfe)) {
 						/* yes, this a wide char */
@@ -619,7 +638,8 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					 (this_char >= 0xe0 && this_char <= 0xef)
 					) {
 					/* peek at the next char */
-					unsigned char next_char = str[pos];
+					CHECK_LEN(pos, 1);
+					next_char = str[pos];
 					if ((next_char >= 0x40 && next_char <= 0x7e) ||
 						(next_char >= 0x80 && next_char <= 0xfc))
 					{
@@ -638,7 +658,8 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 				/* check if this is the first of a multi-byte sequence */
 				if (this_char >= 0xa1 && this_char <= 0xfe) {
 					/* peek at the next char */
-					unsigned char next_char = str[pos];
+					CHECK_LEN(pos, 1);
+					next_char = str[pos];
 					if (next_char >= 0xa1 && next_char <= 0xfe) {
 						/* yes, this a jis kanji char */
 						this_char <<= 8;
@@ -649,7 +670,8 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					
 				} else if (this_char == 0x8e) {
 					/* peek at the next char */
-					unsigned char next_char = str[pos];
+					CHECK_LEN(pos, 1);
+					next_char = str[pos];
 					if (next_char >= 0xa1 && next_char <= 0xdf) {
 						/* JIS X 0201 kana */
 						this_char <<= 8;
@@ -660,8 +682,10 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					
 				} else if (this_char == 0x8f) {
 					/* peek at the next two char */
-					unsigned char next_char = str[pos];
-					unsigned char next2_char = str[pos+1];
+					unsigned char next2_char;
+					CHECK_LEN(pos, 2);
+					next_char = str[pos];
+					next2_char = str[pos+1];
 					if ((next_char >= 0xa1 && next_char <= 0xfe) &&
 						(next2_char >= 0xa1 && next2_char <= 0xfe)) {
 						/* JIS X 0212 hojo-kanji */
@@ -1100,13 +1124,23 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, int oldlen, int *ne
 		maxlen = 128;
 	replaced = emalloc (maxlen);
 	len = 0;
-
+	//Sleep(10*1000);
 	i = 0;
 	while (i < oldlen) {
 		unsigned char mbsequence[16];	/* allow up to 15 characters in a multibyte sequence */
 		int mbseqlen = sizeof(mbsequence);
-		unsigned short this_char = get_next_char(charset, old, &i, mbsequence, &mbseqlen);
+		int status = SUCCESS;
+		unsigned short this_char = get_next_char(charset, old, oldlen, &i, mbsequence, &mbseqlen, &status);
 
+		if(status == FAILURE) {
+			/* invalid MB sequence */
+			efree(replaced);
+			if(!PG(display_errors)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid multibyte sequence in argument");
+			}
+			*newlen = 0;
+			return STR_EMPTY_ALLOC();
+		}
 		matches_map = 0;
 
 		if (len + 16 > maxlen)
