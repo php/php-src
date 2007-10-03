@@ -2534,7 +2534,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 		zend_error(E_WARNING, "__clone method called on non-object");
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
-		FREE_OP1_IF_VAR();
+		FREE_OP1();
 		ZEND_VM_NEXT_OPCODE();
 	}
 

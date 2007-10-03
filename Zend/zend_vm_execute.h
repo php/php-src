@@ -4415,7 +4415,7 @@ static int ZEND_CLONE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_error(E_WARNING, "__clone method called on non-object");
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
-
+		zval_dtor(free_op1.var);
 		ZEND_VM_NEXT_OPCODE();
 	}
 

@@ -32,6 +32,7 @@ PHP                                                                        NEWS
 - Fixed htmlentities/htmlspecialchars not to accept partial multibyte
   sequences. (Stas)
 
+- Fixed bug #42818 ($foo = clone(array()); leaks memory). (Dmitry)
 - Fixed bug #42785 (json_encode() formats doubles according to locale rather  
   then following standard syntax). (Ilia)
 - Fixed bug #42772 (Storing $this in a static var fails while handling a cast
