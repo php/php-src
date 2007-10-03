@@ -2876,9 +2876,12 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 	zval *expr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	zval *result = &EX_T(opline->result.u.var).tmp_var;
 
-	*result = *expr;
-	if (!IS_OP1_TMP_FREE()) {
-		zendi_zval_copy_ctor(*result);
+	if (opline->extended_value != IS_STRING &&
+	    opline->extended_value != IS_UNICODE) {
+		*result = *expr;
+		if (!IS_OP1_TMP_FREE()) {
+			zendi_zval_copy_ctor(*result);
+		}
 	}
 	switch (opline->extended_value) {
 		case IS_NULL:
@@ -2897,10 +2900,17 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 			zval var_copy;
 			int use_copy;
 
-			zend_make_string_zval(result, &var_copy, &use_copy);
+			zend_make_string_zval(expr, &var_copy, &use_copy);
 			if (use_copy) {
-				zval_dtor(result);
 				*result = var_copy;
+				if (IS_OP1_TMP_FREE()) {
+					FREE_OP1();
+				}
+			} else {
+				*result = *expr;
+				if (!IS_OP1_TMP_FREE()) {
+					zendi_zval_copy_ctor(*result);
+				}
 			}
 			break;
 		}
@@ -2908,10 +2918,17 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 			zval var_copy;
 			int use_copy;
 
-			zend_make_unicode_zval(result, &var_copy, &use_copy);
+			zend_make_unicode_zval(expr, &var_copy, &use_copy);
 			if (use_copy) {
-				zval_dtor(result);
 				*result = var_copy;
+				if (IS_OP1_TMP_FREE()) {
+					FREE_OP1();
+				}
+			} else {
+				*result = *expr;
+				if (!IS_OP1_TMP_FREE()) {
+					zendi_zval_copy_ctor(*result);
+				}
 			}
 			break;
 		}
