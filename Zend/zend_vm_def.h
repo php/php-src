@@ -1391,7 +1391,7 @@ ZEND_VM_HANDLER(98, ZEND_FETCH_DIM_TMP_VAR, VAR|CV|CONST|TMP, CONST)
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	zval *container;
-	
+
 	if (OP1_TYPE == IS_VAR && EX_T(opline->op1.u.var).var.ptr == NULL) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
@@ -1804,7 +1804,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 			ZEND_VM_NEXT_OPCODE();
 		}
 
-		/* no function found. try a static method in class */		
+		/* no function found. try a static method in class */
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
@@ -1852,7 +1852,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 		EX(fbc) = ce->constructor;
 	}
 
-	EX(called_scope) = ce;	
+	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
@@ -1898,7 +1898,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
 
-	if (OP2_TYPE != IS_CONST && 
+	if (OP2_TYPE != IS_CONST &&
 	    ((Z_TYPE_P(function_name) == IS_UNICODE &&
 	      Z_USTRVAL_P(function_name)[0] == ':' &&
 	      Z_USTRVAL_P(function_name)[1] == ':') ||
@@ -1984,7 +1984,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	if (EX(function_state).function->common.scope &&
 		!(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC) &&
 		!EX(object)) {
-			
+
 		if (EX(function_state).function->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 			/* FIXME: output identifiers properly */
 			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
@@ -2015,7 +2015,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
 		ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(opline->result.u.var).var.ptr));
-        EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
+		EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
 
 		if (EX(function_state).function->common.arg_info) {
 			zend_uint i=0;
@@ -2724,7 +2724,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|UNUSED|CONST, CONST)
 	} else {
 		zend_class_entry *ce;
 		zval **value;
-	
+
 		if (OP1_TYPE == IS_CONST) {
 			zend_op *op_data = opline + 1;
 			zend_constant *c;
@@ -2746,9 +2746,9 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|UNUSED|CONST, CONST)
 				}
 				ZEND_VM_NEXT_OPCODE();
 			}
-	
-			/* no constant found. try a constant in class */		
-			ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);		
+
+			/* no constant found. try a constant in class */
+			ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 			if (!ce) {
 				zend_error_noreturn(E_ERROR, "Undefined class constant '%R'", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
 			}
@@ -2808,7 +2808,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 			SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 			expr_ptr = *expr_ptr_ptr;
 			expr_ptr->refcount++;
-		} else 
+		} else
 #endif
 		if (PZVAL_IS_REF(expr_ptr)) {
 			zval *new_expr;
@@ -2970,7 +2970,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 
 				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
 					cwd_state state;
-	
+
 					state.cwd_length = 0;
 					state.cwd = malloc(1);
 					state.cwd[0] = 0;
@@ -4157,7 +4157,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 		zval *tmp_ptr = &tmp;
 
 		if (Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
-			zval_copy_ctor(&tmp);			
+			zval_copy_ctor(&tmp);
 		}
 		INIT_PZVAL(&tmp);
 		zval_update_constant(&tmp_ptr, NULL TSRMLS_CC);
