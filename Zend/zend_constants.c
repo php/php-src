@@ -321,13 +321,13 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 	    name.u[1] == ':') {
 		name.u += 2;
 		name_len -= 2;
-		flags = 0;
+		flags &= ZEND_FETCH_CLASS_SILENT;
 	} else if (type == IS_STRING &&
 	           name.s[0] == ':' &&
 	           name.s[1] == ':') {
 		name.s += 2;
 		name_len -= 2;
-		flags = 0;
+		flags &= ZEND_FETCH_CLASS_SILENT;
 	}
 
 	if ((UG(unicode) && (colon.u = u_memrchr(name.u, ':', name_len)) && colon.u > name.u && *(colon.u-1) == ':') ||
@@ -453,7 +453,9 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 					retval = 1;
 					return zend_u_get_constant(type, name, name_len, result TSRMLS_CC);
 				}
-				zend_error(E_ERROR, "Class '%R' not found", type, class_name);
+				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
+					zend_error(E_ERROR, "Class '%R' not found", type, class_name);
+				}
 			}
 			retval = 0;
 		}
