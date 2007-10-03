@@ -5344,7 +5344,11 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 	assert(Z_TYPE_P(var_array) == IS_ARRAY);
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(var_array)) == 0) {
-		return FAILURE;
+		smart_str_appends(&querystr, "INSERT INTO ");
+		smart_str_appends(&querystr, table);
+		smart_str_appends(&querystr, " DEFAULT VALUES");
+
+		goto no_values;
 	}
 
 	/* convert input array if needed */
@@ -5402,6 +5406,9 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 	/* Remove the trailing "," */
 	querystr.len--;
 	smart_str_appends(&querystr, ");");
+
+no_values:
+
 	smart_str_0(&querystr);
 
 	if ((opt & (PGSQL_DML_EXEC|PGSQL_DML_ASYNC)) &&
@@ -5413,7 +5420,7 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 	}
 	
 cleanup:
-	if (!(opt & PGSQL_DML_NO_CONV)) {
+	if (!(opt & PGSQL_DML_NO_CONV) && converted) {
 		zval_dtor(converted);			
 		FREE_ZVAL(converted);
 	}
