@@ -460,11 +460,6 @@ PHP interprets the contents of strings as follows:
   - a new escape sequence allows specifying a character by its full
     Unicode name, e.g. \C{THAI CHARACTER PHO SAMPHAO} => U+0E20
 
-The single-quoted string is more restrictive than the other two types. So far
-the only escape sequence allowed inside of it was \', which specifies a literal
-single quote. However, single quoted strings now support the new Unicode
-character escape sequences as well.
-
 PHP allows variable interpolation inside the double-quoted and heredoc strings.
 However, the parser separates the string into literal and variable chunks during
 compilation, e.g. "abc $var def" -> "abc" . $var . "def". This means that PHP

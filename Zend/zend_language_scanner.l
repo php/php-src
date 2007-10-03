@@ -1187,64 +1187,6 @@ static int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 					*t++ = *s;
 					Z_USTRLEN_P(zendlval)--;
 					break;
-				case 0x43: /*'C'*/
-					{
-						UChar *p = s+1;
-						if (p < end && zend_parse_charname_sequence(&p, end, &codepoint TSRMLS_CC)) {
-							Z_USTRLEN_P(zendlval) -= p - s + 1;
-							s = p;
-							if (U_IS_BMP(codepoint)) {
-								*t++ = (UChar) codepoint;
-							} else {
-								*t++ = (UChar) U16_LEAD(codepoint);
-								*t++ = (UChar) U16_TRAIL(codepoint);
-								Z_USTRLEN_P(zendlval)++;
-							}
-						} else {
-							zend_error(E_COMPILE_WARNING, "Invalid \\C{..} sequence");
-							efree(Z_USTRVAL_P(zendlval));
-							return 0;
-						}
-						break;
-					}
-				case 0x75 /*'u'*/:
-					{
-						codepoint = 0;
-						if (zend_udigits_to_codepoint(s+1, end, &codepoint, 4)) {
-							*t++ = (UChar) codepoint;
-							s += 4;
-							Z_USTRLEN_P(zendlval) -= 5;
-						} else {
-							zend_error(E_COMPILE_WARNING,"\\u escape sequence requires exactly 4 hexadecimal digits");
-							efree(Z_USTRVAL_P(zendlval));
-							return 0;
-						}
-						break;
-					}
-				case 0x55 /*'U'*/:
-					{
-						codepoint = 0;
-						if (zend_udigits_to_codepoint(s+1, end, &codepoint, 6)) {
-							if (U_IS_BMP(codepoint)) {
-								*t++ = (UChar) codepoint;
-								Z_USTRLEN_P(zendlval) -= 7;
-							} else if (codepoint <= 0x10FFFF) {
-								*t++ = (UChar) U16_LEAD(codepoint);
-								*t++ = (UChar) U16_TRAIL(codepoint);
-								Z_USTRLEN_P(zendlval) -= 6;
-							} else {
-								zend_error(E_COMPILE_WARNING,"\\U%06x is above the highest valid codepoint 0x10FFFF", codepoint);
-								efree(Z_USTRVAL_P(zendlval));
-								return 0;
-							}
-							s += 6;
-						} else {
-							zend_error(E_COMPILE_WARNING,"\\U escape sequence requires exactly 6 hexadecimal digits");
-							efree(Z_USTRVAL_P(zendlval));
-							return 0;
-						}
-						break;
-					}
 				default:
 					*t++ = 0x5C; /*'\\'*/
 					*t++ = *s;
