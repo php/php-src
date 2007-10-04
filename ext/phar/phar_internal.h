@@ -159,6 +159,8 @@ typedef struct _phar_entry_info {
 	int                      is_crc_checked:1;
 	int                      is_modified:1;
 	int                      is_deleted:1;
+	/* used when iterating */
+	int                      is_dir:1;
 	phar_archive_data        *phar;
 	smart_str                metadata_str;
 } phar_entry_info;
@@ -271,6 +273,7 @@ int phar_archive_delref(phar_archive_data *phar TSRMLS_DC);
 int phar_entry_delref(phar_entry_data *idata TSRMLS_DC);
 
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len, char **error TSRMLS_DC);
+phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, int path_len, char dir, char **error TSRMLS_DC);
 phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC);
 int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
 int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ext_str, int *ext_len);
