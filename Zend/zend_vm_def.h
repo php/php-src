@@ -2531,10 +2531,10 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 	zend_object_clone_obj_t clone_call;
 
 	if (!obj || Z_TYPE_P(obj) != IS_OBJECT) {
-		zend_error(E_WARNING, "__clone method called on non-object");
+		zend_error_noreturn(E_ERROR, "__clone method called on non-object");
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
-		FREE_OP1();
+		FREE_OP1_IF_VAR();
 		ZEND_VM_NEXT_OPCODE();
 	}
 

@@ -1837,7 +1837,7 @@ static int ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_object_clone_obj_t clone_call;
 
 	if (!obj || Z_TYPE_P(obj) != IS_OBJECT) {
-		zend_error(E_WARNING, "__clone method called on non-object");
+		zend_error_noreturn(E_ERROR, "__clone method called on non-object");
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
 
@@ -4412,10 +4412,10 @@ static int ZEND_CLONE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_object_clone_obj_t clone_call;
 
 	if (!obj || Z_TYPE_P(obj) != IS_OBJECT) {
-		zend_error(E_WARNING, "__clone method called on non-object");
+		zend_error_noreturn(E_ERROR, "__clone method called on non-object");
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
-		zval_dtor(free_op1.var);
+
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -7559,7 +7559,7 @@ static int ZEND_CLONE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_object_clone_obj_t clone_call;
 
 	if (!obj || Z_TYPE_P(obj) != IS_OBJECT) {
-		zend_error(E_WARNING, "__clone method called on non-object");
+		zend_error_noreturn(E_ERROR, "__clone method called on non-object");
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
 		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -14719,7 +14719,7 @@ static int ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_object_clone_obj_t clone_call;
 
 	if (!obj || Z_TYPE_P(obj) != IS_OBJECT) {
-		zend_error(E_WARNING, "__clone method called on non-object");
+		zend_error_noreturn(E_ERROR, "__clone method called on non-object");
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
 
@@ -19631,7 +19631,7 @@ static int ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_object_clone_obj_t clone_call;
 
 	if (!obj || Z_TYPE_P(obj) != IS_OBJECT) {
-		zend_error(E_WARNING, "__clone method called on non-object");
+		zend_error_noreturn(E_ERROR, "__clone method called on non-object");
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
 
