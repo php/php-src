@@ -158,7 +158,7 @@ bool(false)
 -- Iteration 16 --
 bool(false)
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 17 --
 bool(false)
@@ -166,34 +166,34 @@ bool(false)
 -- Iteration 18 --
 bool(false)
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 19 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 20 --
 bool(false)
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 21 --
 bool(false)
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 22 --
 bool(false)
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 23 --
 bool(false)
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 24 --
 
@@ -205,11 +205,11 @@ NULL
 -- Iteration 25 --
 bool(false)
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 26 --
 bool(false)
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 *** Done ***

@@ -90,11 +90,11 @@ echo "*** Done ***";
 int(6)
 -- Iteration 2 --
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 3 --
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 4 --
 int(6)

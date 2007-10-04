@@ -94,23 +94,23 @@ bool(false)
 bool(false)
 -- Iteration 3 --
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 4 --
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 5 --
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 7 --
 
-Warning: stripos(): Offset not contained in string. in %s on line %d
+Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 8 --
 bool(false)

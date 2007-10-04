@@ -39,7 +39,7 @@ Notice: import_request_variables(): No prefix specified - possible security haza
 
 Warning: import_request_variables(): Attempted GLOBALS variable overwrite in %s on line %d
 
-Warning: import_request_variables(): Numeric key detected - possible security hazard. in %s on line %d
+Warning: import_request_variables(): Numeric key detected - possible security hazard in %s on line %d
 NULL
 
 Notice: Undefined variable: ap in %s on line %d

@@ -618,7 +618,7 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 /* check if comparison function is valid */
 #define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
 	if (!zend_is_callable(*func_name, 0, NULL)) {	\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid comparison function.");	\
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid comparison function");	\
         BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 		BG(user_compare_func_name) = old_compare_func;	\
 		RETURN_FALSE;	\
@@ -3159,7 +3159,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				BG(user_compare_func_name) = args[arr_argc + 1];/* data - key */
 		} else {
 			efree(args);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug.", data_compare_type, key_compare_type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug", data_compare_type, key_compare_type);
 			return;
 		}		
 	} else {

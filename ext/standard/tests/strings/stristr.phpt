@@ -24,7 +24,7 @@ NULL
 
 Notice: Array to string conversion in %s on line %d
 
-Warning: stristr(): Empty delimiter. in %s on line %d
+Warning: stristr(): Empty delimiter in %s on line %d
 bool(false)
 bool(false)
 

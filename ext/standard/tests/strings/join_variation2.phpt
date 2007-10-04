@@ -105,94 +105,94 @@ echo "Done\n";
 --- Testing join() by supplying different values for 'pieces' argument ---
 -- Iteration 1 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 2 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 3 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 4 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 5 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 6 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 7 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 8 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 9 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 15 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 16 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 21 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 22 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 -- Iteration 23 --
 
-Warning: join(): Bad arguments. in %s on line %d
+Warning: join(): Invalid arguments passed in %s on line %d
 NULL
 Done

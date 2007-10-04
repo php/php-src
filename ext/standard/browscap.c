@@ -290,7 +290,7 @@ PHP_FUNCTION(get_browser)
 	char *browscap = INI_STR("browscap");
 
 	if (!browscap || !browscap[0]) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "browscap ini directive not set.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "browscap ini directive not set");
 		RETURN_FALSE;
 	}
 

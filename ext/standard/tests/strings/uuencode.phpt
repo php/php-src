@@ -35,6 +35,6 @@ string(36) "6;F]T('9E<GD@<V]P:&ES=&EC871E9```
 "
 string(22) "not very sophisticated"
 
-Warning: convert_uudecode(): The given parameter is not a valid uuencoded string. in %s on line %d
+Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s on line %d
 bool(false)
 Done

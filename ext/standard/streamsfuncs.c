@@ -357,7 +357,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	}
 
 	if (to_read <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 	
@@ -406,7 +406,7 @@ PHP_FUNCTION(stream_get_contents)
 	php_stream_from_zval(stream, &zsrc);
 
 	if (pos > 0 && php_stream_seek(stream, pos, SEEK_SET) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream.", pos);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream", pos);
 		RETURN_FALSE;
 	}
 
@@ -442,7 +442,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 	php_stream_from_zval(dest, &zdest);
 
 	if (pos > 0 && php_stream_seek(src, pos, SEEK_SET) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream.", pos);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream", pos);
 		RETURN_FALSE;
 	}
 
@@ -757,10 +757,10 @@ PHP_FUNCTION(stream_select)
 		convert_to_long_ex(sec);
 
 		if (Z_LVAL_PP(sec) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The seconds parameter must be greater than 0.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The seconds parameter must be greater than 0");
 			RETURN_FALSE;
 		} else if (usec < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The microseconds parameter must be greater than 0.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The microseconds parameter must be greater than 0");
 			RETURN_FALSE;
 		}
 
@@ -945,7 +945,7 @@ PHP_FUNCTION(stream_context_get_options)
 	}
 	context = decode_context_param(zcontext TSRMLS_CC);
 	if (!context) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter");
 		RETURN_FALSE;
 	}
 
@@ -975,7 +975,7 @@ PHP_FUNCTION(stream_context_set_option)
 	/* figure out where the context is coming from exactly */
 	context = decode_context_param(zcontext TSRMLS_CC);
 	if (!context) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter");
 		RETURN_FALSE;
 	}
 
@@ -1002,7 +1002,7 @@ PHP_FUNCTION(stream_context_set_params)
 
 	context = decode_context_param(zcontext TSRMLS_CC);
 	if (!context) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter");
 		RETURN_FALSE;
 	}
 
@@ -1186,7 +1186,7 @@ PHP_FUNCTION(stream_get_line)
 	}
 
 	if (max_length < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The maximum allowed length must be greater than or equal to zero.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The maximum allowed length must be greater than or equal to zero");
 		RETURN_FALSE;
 	}
 	if (!max_length) {

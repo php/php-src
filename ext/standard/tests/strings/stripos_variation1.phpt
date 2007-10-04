@@ -118,17 +118,17 @@ int(8)
 bool(false)
 -- Iteration 12 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 13 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 14 --
 int(8)

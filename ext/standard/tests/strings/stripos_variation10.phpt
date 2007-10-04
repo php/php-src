@@ -123,27 +123,27 @@ bool(false)
 
 -- Iteration 10 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 11 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 12 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 13 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 14 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 15 --
@@ -160,7 +160,7 @@ bool(false)
 
 -- Iteration 19 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 20 --
@@ -171,26 +171,26 @@ bool(false)
 
 -- Iteration 22 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 23 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 24 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 25 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 26 --
 
-Warning: stripos(): needle is not a string or an integer. in %s on line %d
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 *** Done ***
