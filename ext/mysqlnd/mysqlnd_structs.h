@@ -62,8 +62,8 @@ typedef struct st_mysqlnd_upsert_result
 {
 	unsigned int		warning_count;
 	unsigned int		server_status;
-	unsigned long long	affected_rows;
-	unsigned long long	last_insert_id;
+	mynd_ulonglong		affected_rows;
+	mynd_ulonglong		last_insert_id;
 } mysqlnd_upsert_status;
 
 
@@ -344,7 +344,7 @@ struct st_mysqlnd_connection
 	char			*passwd;
 	unsigned int	*passwd_len;
 	char			*scheme;
-	unsigned long long	thread_id;
+	mynd_ulonglong	thread_id;
 	char			*server_version;
 	char			*host_info;
 	unsigned char	*scramble;

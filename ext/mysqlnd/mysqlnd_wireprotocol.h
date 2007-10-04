@@ -225,8 +225,8 @@ typedef struct st_php_mysql_packet_rset_header {
 	*/
 	mysqlnd_2b			warning_count;
 	mysqlnd_2b			server_status;
-	unsigned long long	affected_rows;
-	unsigned long long	last_insert_id;
+	mynd_ulonglong		affected_rows;
+	mynd_ulonglong		last_insert_id;
 	/* This is for both LOAD DATA or info, when no result set */
 	char				*info_or_local_file;
 	size_t				info_or_local_file_len;
