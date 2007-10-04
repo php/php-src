@@ -1,3 +1,77 @@
+2007-10-03  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_language_scanner.l:
+      remove \u, \U and \C support in single quotes, as they are meant to contain
+      binary data only and no escape sequences except \'
+      fixes bug #42746
+
+2007-10-03  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      zend_ini_parser.y:
+      MFH:- Removed the %destructor declaration (requires bison 1.875 or above)
+
+    * zend_ini_parser.y:
+      - Removed the %destructor declaration (requires bison 1.875 or above)
+
+2007-10-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_compile.h
+      zend_compile.h
+      zend_constants.c
+      zend_constants.c
+      zend_execute_API.c
+      zend_execute_API.c
+      tests/bug42820.phpt:
+      Fixed bug #42820 (defined() on constant with namespace prefixes tries to
+      load class).
+
+    * tests/bug42820.phpt
+      tests/bug42820.phpt:
+      
+      file bug42820.phpt was initially added on branch PHP_5_3.
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug42818.phpt
+      tests/bug42818.phpt:
+      Fixed bug #42818 ($foo = clone(array()); leaks memory)
+
+    * tests/bug42818.phpt
+      tests/bug42818.phpt
+      tests/bug42818.phpt:
+        1.1.4;
+      file bug42818.phpt was initially added on branch PHP_5_2.
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug42772.phpt
+      tests/bug42772.phpt:
+      Fixed bug #42772 (Storing $this in a static var fails while handling a cast
+      to string)
+
+    * tests/bug42772.phpt
+      tests/bug42772.phpt
+      tests/bug42772.phpt:
+        1.1.4;
+      file bug42772.phpt was initially added on branch PHP_5_2.
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      ws
+
 2007-10-02  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * zend_ini_scanner.l:

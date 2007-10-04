@@ -1,3 +1,173 @@
+2007-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c
+      ext/pgsql/tests/80_bug42783.phpt:
+      
+      MFB: Fixed bug #42783 (pg_insert() does not accept an empty list for
+      insertion)
+
+    * ext/pgsql/tests/80_bug42783.phpt
+      ext/pgsql/tests/80_bug42783.phpt:
+      
+      
+      MFB: Fixed bug #42783 (pg_insert() does not accept an empty list for
+      insertion)
+
+    * (PHP_5_3)
+      ext/pgsql/pgsql.c
+      ext/pgsql/tests/80_bug42783.phpt
+      ext/pgsql/tests/80_bug42783.phpt:
+      
+      Fixed bug #42783 (pg_insert() does not accept an empty list for insertion)
+
+2007-10-03  Michael Wallner  <mike@iworks.at>
+
+    * ext/curl/interface.c:
+      - fix CURLOPT_TIMEOUT_MS support (available since 7.16.2)
+
+2007-10-03  Antony Dovgal  <tony@daylessday.org>
+
+    * README.UNICODE
+      ZendEngine2/zend_language_scanner.l:
+      remove \u, \U and \C support in single quotes, as they are meant to contain
+      binary data only and no escape sequences except \'
+      fixes bug #42746
+
+2007-10-03  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini_parser.y:
+      MFH:- Removed the %destructor declaration (requires bison 1.875 or above)
+
+    * ZendEngine2/zend_ini_parser.y:
+      - Removed the %destructor declaration (requires bison 1.875 or above)
+
+2007-10-03  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.h
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/tests/file/bug40501.csv
+      ext/standard/tests/file/bug40501.phpt
+      ext/standard/tests/file/fgetcsv_error.phpt:
+      MFH: Add an escape parameter to fgetcsv to satisfy rfc4180 and bug #40501.
+      [DOC] 5th parameter available since PHP 5.3+
+
+2007-10-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug42820.phpt
+      ZendEngine2/tests/bug42820.phpt:
+      
+      file bug42820.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug42820.phpt:
+      Fixed bug #42820 (defined() on constant with namespace prefixes tries to
+      load class).
+
+2007-10-03  David Soria Parra  <dsoria@gmx.net>
+
+    * ext/standard/tests/file/bug40501.csv
+      ext/standard/tests/file/bug40501.csv
+      ext/standard/tests/file/bug40501.phpt
+      ext/standard/tests/file/bug40501.phpt
+      ext/standard/tests/file/fgetcsv_error.phpt:
+      
+      - Add an escape parameter to fgetcsv to satisfy rfc4180 and bug #40501.
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h
+      ext/standard/file.c
+      ext/standard/file.h:
+      - Add an escape parameter to fgetcsv to satisfy rfc4180 and bug #40501.
+
+2007-10-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug42818.phpt
+      ZendEngine2/tests/bug42818.phpt
+      ZendEngine2/tests/bug42818.phpt:
+        1.1.4;
+      file bug42818.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug42818.phpt
+      ZendEngine2/tests/bug42818.phpt:
+      Fixed bug #42818 ($foo = clone(array()); leaks memory)
+
+    * ZendEngine2/tests/bug42772.phpt
+      ZendEngine2/tests/bug42772.phpt
+      ZendEngine2/tests/bug42772.phpt:
+        1.1.4;
+      file bug42772.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug42772.phpt
+      ZendEngine2/tests/bug42772.phpt:
+      Fixed bug #42772 (Storing $this in a static var fails while handling a cast
+      to string)
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      ws
+
+2007-10-03  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/tests/strings/htmlentities-utf.phpt:
+      MFB unicode test
+
+    * ext/standard/html.c
+      ext/standard/html.c:
+      MFB do not accept partial multibyte sequences in html* functions
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/htmlentities-utf.phpt:
+      MFB utf test
+
+    * (PHP_5_2)
+      NEWS:
+      add html* utf fix
+
+    * ext/standard/tests/strings/htmlentities-utf.phpt
+      ext/standard/tests/strings/htmlentities-utf.phpt
+      ext/standard/tests/strings/htmlentities-utf.phpt:
+        1.1.4;
+      file htmlentities-utf.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/html.c:
+      do not accept partial multibyte sequences in html* functions
+
 2007-10-02  Antony Dovgal  <tony@daylessday.org>
 
     * main/streams/unicode_filter.c:
