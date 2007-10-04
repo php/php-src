@@ -1083,10 +1083,10 @@ PHP_METHOD(PharFileInfo, __construct)
 		return;
 	}
 
-	if ((entry_info = phar_get_entry_info(phar_data, entry, entry_len, &error TSRMLS_CC)) == NULL) {
-		efree(arch);
+	if ((entry_info = phar_get_entry_info_dir(phar_data, entry, entry_len, 1, &error TSRMLS_CC)) == NULL) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot access phar file entry '%s' in archive '%s'%s%s", entry, arch, error?", ":"", error?error:"");
+		efree(arch);
 		efree(entry);
 		return;
 	}
@@ -1112,13 +1112,31 @@ PHP_METHOD(PharFileInfo, __construct)
 		return; \
 	}
 
+/* {{{ proto void PharFileInfo::__destruct()
+ * clean up directory-based entry objects
+ */
+PHP_METHOD(PharFileInfo, __destruct)
+{
+	PHAR_ENTRY_OBJECT();
+
+	if (entry_obj->ent.entry->is_dir) {
+		if (entry_obj->ent.entry->filename) {
+			efree(entry_obj->ent.entry->filename);
+			entry_obj->ent.entry->filename = NULL;
+		}
+		efree(entry_obj->ent.entry);
+		entry_obj->ent.entry = NULL;
+	}
+}
+/* }}} */
+
 /* {{{ proto int PharFileInfo::getCompressedSize()
  * Returns the compressed size
  */
 PHP_METHOD(PharFileInfo, getCompressedSize)
 {
 	PHAR_ENTRY_OBJECT();
-	
+
 	RETURN_LONG(entry_obj->ent.entry->compressed_filesize);
 }
 /* }}} */
@@ -1163,6 +1181,10 @@ PHP_METHOD(PharFileInfo, getCRC32)
 {
 	PHAR_ENTRY_OBJECT();
 
+	if (entry_obj->ent.entry->is_dir) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
+			"Phar entry is a directory, does not have a CRC"); \
+	}
 	if (entry_obj->ent.entry->is_crc_checked) {
 		RETURN_LONG(entry_obj->ent.entry->crc32);
 	} else {
@@ -1203,6 +1225,10 @@ PHP_METHOD(PharFileInfo, chmod)
 	long perms;
 	PHAR_ENTRY_OBJECT();
 
+	if (entry_obj->ent.entry->is_dir) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
+			"Phar entry is a directory, cannot chmod"); \
+	}
 	if (PHAR_G(readonly)) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Cannot modify permissions for file \"%s\" write operations are prohibited", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
 	}
@@ -1268,6 +1294,10 @@ PHP_METHOD(PharFileInfo, setMetadata)
 	zval *metadata;
 	PHAR_ENTRY_OBJECT();
 
+	if (entry_obj->ent.entry->is_dir) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
+			"Phar entry is a directory, cannot set metadata"); \
+	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &metadata) == FAILURE) {
 		return;
 	}
@@ -1296,6 +1326,10 @@ PHP_METHOD(PharFileInfo, delMetadata)
 	char *error;
 	PHAR_ENTRY_OBJECT();
 
+	if (entry_obj->ent.entry->is_dir) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
+			"Phar entry is a directory, cannot delete metadata"); \
+	}
 	if (entry_obj->ent.entry->metadata) {
 		zval_ptr_dtor(&entry_obj->ent.entry->metadata);
 		entry_obj->ent.entry->metadata = NULL;
@@ -1323,6 +1357,10 @@ PHP_METHOD(PharFileInfo, setCompressedGZ)
 	char *error;
 	PHAR_ENTRY_OBJECT();
 
+	if (entry_obj->ent.entry->is_dir) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
+			"Phar entry is a directory, cannot set compression"); \
+	}
 	if (entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_GZ) {
 		RETURN_TRUE;
 		return;
@@ -1363,6 +1401,10 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 	char *error;
 	PHAR_ENTRY_OBJECT();
 
+	if (entry_obj->ent.entry->is_dir) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
+			"Phar entry is a directory, cannot set compression"); \
+	}
 	if (entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
 		RETURN_TRUE;
 		return;
@@ -1403,6 +1445,10 @@ PHP_METHOD(PharFileInfo, setUncompressed)
 	int fname_len;
 	PHAR_ENTRY_OBJECT();
 
+	if (entry_obj->ent.entry->is_dir) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
+			"Phar entry is a directory, cannot set compression"); \
+	}
 	if ((entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSION_MASK) == 0) {
 		RETURN_TRUE;
 		return;
@@ -1544,6 +1590,7 @@ ZEND_END_ARG_INFO();
 
 zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, __construct,        arginfo_entry___construct,  0)
+	PHP_ME(PharFileInfo, __destruct,         NULL,                       0)
 	PHP_ME(PharFileInfo, getCompressedSize,  NULL,                       0)
 	PHP_ME(PharFileInfo, isCompressed,       NULL,                       0)
 	PHP_ME(PharFileInfo, isCompressedGZ,     NULL,                       0)

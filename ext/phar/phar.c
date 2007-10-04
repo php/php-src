@@ -332,6 +332,14 @@ static int phar_get_archive(phar_archive_data **archive, char *fname, int fname_
  */
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len, char **error TSRMLS_DC) /* {{{ */
 {
+	return phar_get_entry_info_dir(phar, path, path_len, 0, error TSRMLS_CC);
+}
+/* }}} */
+/**
+ * retrieve information on a file or directory contained within a phar, or null if none found
+ */
+phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, int path_len, char dir, char **error TSRMLS_DC) /* {{{ */
+{
 	const char *pcr_error;
 	phar_entry_info *entry;
 
@@ -355,6 +363,41 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int pa
 			return NULL;
 		}
 		return entry;
+	}
+	if (dir) {
+		/* try to find a directory */
+		HashTable *manifest;
+		char *key;
+		uint keylen;
+		ulong unused;
+
+		manifest = &phar->manifest;
+		zend_hash_internal_pointer_reset(manifest);
+		while (FAILURE != zend_hash_has_more_elements(manifest)) {
+			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
+				break;
+			}
+			if (0 != memcmp(key, path, path_len)) {
+				/* entry in directory not found */
+				if (SUCCESS != zend_hash_move_forward(manifest)) {
+					break;
+				}
+				continue;
+			} else {
+				if (key[path_len] != '/') {
+					if (SUCCESS != zend_hash_move_forward(manifest)) {
+						break;
+					}
+					continue;
+				}
+				/* found a file in this path */
+				entry = (phar_entry_info *) ecalloc(1, sizeof(phar_entry_info));
+				entry->is_dir = 1;
+				entry->filename = (char *) estrndup(path, path_len + 1);
+				entry->filename_len = path_len;
+				return entry;
+			}
+		}
 	}
 	return NULL;
 }
@@ -1707,7 +1750,7 @@ static phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info 
 	offset = phar->internal_file_start + entry->offset_within_phar;
 	if (-1 == php_stream_seek(fp, offset, SEEK_SET)) {
 		spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (cannot seek to start of file \"%s\" at offset \"%d\")",
-			phar->fname, entry, offset);
+			phar->fname, entry->filename, offset);
 		return NULL;
 	}
 
@@ -1724,7 +1767,7 @@ static phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info 
 			filter = NULL;
 		}
 		if (!filter) {
-			spprintf(error, 0, "phar error: unable to read phar \"%s\" (cannot create %s filter while decompressing file \"%s\")", phar->fname, phar_decompress_filter(entry, 1), entry);
+			spprintf(error, 0, "phar error: unable to read phar \"%s\" (cannot create %s filter while decompressing file \"%s\")", phar->fname, phar_decompress_filter(entry, 1), entry->filename);
 			return NULL;			
 		}
 		/* now we can safely use proper decompression */
@@ -1791,16 +1834,11 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 {
 	phar_entry_data *idata;
 	char *internal_file;
-	char *buffer;
 	char *error;
-	char *filter_name;
 	char *plain_map;
-	char tmpbuf[8];
 	HashTable *pharcontext;
 	php_url *resource = NULL;
 	php_stream *fp, *fpf;
-	php_stream_filter *filter/*,  *consumed */;
-	php_uint32 offset, read, total, toread;
 	zval **pzoption, *metadata;
 	uint host_len;
 
@@ -2220,7 +2258,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	long offset;
 	size_t wrote;
 	php_uint32 manifest_len, mytime, loc, new_manifest_count;
-	php_uint32 newcrc32, save;
+	php_uint32 newcrc32;
 	php_stream *file, *oldfile, *newfile, *stubfile;
 	php_stream_filter *filter;
 	php_serialize_data_t metadata_hash;
