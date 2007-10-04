@@ -33,6 +33,8 @@ PHP                                                                        NEWS
   sequences. (Stas)
 
 - Fixed bug #42818 ($foo = clone(array()); leaks memory). (Dmitry)
+- Fixed bug #42817 (clone() on a non-object does not result in a fatal
+  error). (Ilia)
 - Fixed bug #42785 (json_encode() formats doubles according to locale rather  
   then following standard syntax). (Ilia)
 - Fixed bug #42783 (pg_insert() does not accept an empty list for
