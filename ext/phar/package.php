@@ -1,20 +1,10 @@
 <?php
 
 $notes = '
- * improve speed of uncompressed phars used readonly by 2x [Greg]
- * improve speed of phars with signatures 2x [Greg]
- * add Phar::setAlias() [Greg]
- * fix too many open file handles issue [Greg]
- * fix rename [Greg]
- * add Phar::getAlias() [Marcus]
- * Made -a optional in pack subcommand of phar.phar [Marcus]
- * Fix issue with apache module and extracted archives [Marcus]
- * Send all error messages to stderr in phar.phar [Marcus]
- * Added new subcommands add and delete to phar.phar [Marcus]
- * Made Phar::loadPhar() and Phar::mapPhar() ignore extracted archives [Marcus]
- * Fix issue with compressed entries and uncompressing entries [Marcus]
- * Verify stubs before writing [Marcus]
- * Always use longest stub end to avoid issues with length field [Marcus]
+ * fix to work with PHP 5.3
+ * fix Bug #12124: Phar object cannot be iterated over
+ * remove unused variables
+ * fix jit file open sprintf calls
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {

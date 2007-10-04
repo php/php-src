@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.6.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.7.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>phar</name>
  <channel>pecl.php.net</channel>
  <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
@@ -29,10 +29,10 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-08-29</date>
- <time>22:34:12</time>
+ <date>2007-10-03</date>
+ <time>22:48:03</time>
  <version>
-  <release>1.2.1</release>
+  <release>1.2.2</release>
   <api>1.1.0</api>
  </version>
  <stability>
@@ -42,20 +42,10 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
 
- * improve speed of uncompressed phars used readonly by 2x [Greg]
- * improve speed of phars with signatures 2x [Greg]
- * add Phar::setAlias() [Greg]
- * fix too many open file handles issue [Greg]
- * fix rename [Greg]
- * add Phar::getAlias() [Marcus]
- * Made -a optional in pack subcommand of phar.phar [Marcus]
- * Fix issue with apache module and extracted archives [Marcus]
- * Send all error messages to stderr in phar.phar [Marcus]
- * Added new subcommands add and delete to phar.phar [Marcus]
- * Made Phar::loadPhar() and Phar::mapPhar() ignore extracted archives [Marcus]
- * Fix issue with compressed entries and uncompressing entries [Marcus]
- * Verify stubs before writing [Marcus]
- * Always use longest stub end to avoid issues with length field [Marcus]
+ * fix to work with PHP 5.3
+ * fix Bug #12124: Phar object cannot be iterated over
+ * remove unused variables
+ * fix jit file open sprintf calls
 
  </notes>
  <contents>
@@ -224,6 +214,26 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <changelog>
   <release>
    <version>
+    <release>1.2.2</release>
+    <api>1.1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2007-10-03</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+
+ * fix to work with PHP 5.3
+ * fix Bug #12124: Phar object cannot be iterated over
+ * remove unused variables
+ * fix jit file open sprintf calls
+
+   </notes>
+  </release>
+  <release>
+   <version>
     <release>1.2.1</release>
     <api>1.1.0</api>
    </version>
@@ -233,24 +243,20 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
    </stability>
    <date>2007-08-29</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>
-
- * improve speed of uncompressed phars used readonly by 2x [Greg]
- * improve speed of phars with signatures 2x [Greg]
- * add Phar::setAlias() [Greg]
- * fix too many open file handles issue [Greg]
- * fix rename [Greg]
- * add Phar::getAlias() [Marcus]
- * Made -a optional in pack subcommand of phar.phar [Marcus]
- * Fix issue with apache module and extracted archives [Marcus]
- * Send all error messages to stderr in phar.phar [Marcus]
- * Added new subcommands add and delete to phar.phar [Marcus]
- * Made Phar::loadPhar() and Phar::mapPhar() ignore extracted archives [Marcus]
- * Fix issue with compressed entries and uncompressing entries [Marcus]
- * Verify stubs before writing [Marcus]
- * Always use longest stub end to avoid issues with length field [Marcus]
-
-   </notes>
+   <notes>* improve speed of uncompressed phars used readonly by 2x [Greg]
+* improve speed of phars with signatures 2x [Greg]
+* add Phar::setAlias() [Greg]
+* fix too many open file handles issue [Greg]
+* fix rename [Greg]
+* add Phar::getAlias() [Marcus]
+* Made -a optional in pack subcommand of phar.phar [Marcus]
+* Fix issue with apache module and extracted archives [Marcus]
+* Send all error messages to stderr in phar.phar [Marcus]
+* Added new subcommands add and delete to phar.phar [Marcus]
+* Made Phar::loadPhar() and Phar::mapPhar() ignore extracted archives [Marcus]
+* Fix issue with compressed entries and uncompressing entries [Marcus]
+* Verify stubs before writing [Marcus]
+* Always use longest stub end to avoid issues with length field [Marcus]</notes>
   </release>
   <release>
    <version>
