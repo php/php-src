@@ -1,3 +1,96 @@
+2007-10-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      BFN
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug36071.phpt
+      ZendEngine2/tests/bug36071.phpt
+      ZendEngine2/tests/bug42817.phpt
+      ZendEngine2/tests/bug42817.phpt
+      ZendEngine2/tests/bug42818.phpt
+      ZendEngine2/tests/bug42818.phpt:
+      MFB: Fixed bug #42817 (clone() on a non-object does not result in a fatal
+      error)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_vm_execute.h:
+      Generated files that are part of the previous patch
+
+    * (PHP_5_3)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/tests/bug36071.phpt
+      ZendEngine2/tests/bug42817.phpt
+      ZendEngine2/tests/bug42817.phpt
+      ZendEngine2/tests/bug42817.phpt
+      ZendEngine2/tests/bug42818.phpt:
+      
+      Fixed bug #42817 (clone() on a non-object does not result in a fatal
+      error)
+
+2007-10-04  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/exec.c
+      ext/standard/filters.c
+      ext/standard/formatted_print.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      ext/standard/mail.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/uniqid.c
+      ext/standard/url.c
+      ext/standard/uuencode.c
+      ext/standard/var.c
+      ext/standard/tests/general_functions/import_request.phpt
+      ext/standard/tests/strings/bug40754.phpt
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation5.phpt
+      ext/standard/tests/strings/chunk_split_variation8.phpt
+      ext/standard/tests/strings/explode1.phpt
+      ext/standard/tests/strings/implode1.phpt
+      ext/standard/tests/strings/join_error.phpt
+      ext/standard/tests/strings/join_variation2.phpt
+      ext/standard/tests/strings/str_pad.phpt
+      ext/standard/tests/strings/str_repeat.phpt
+      ext/standard/tests/strings/stripos_variation1.phpt
+      ext/standard/tests/strings/stripos_variation10.phpt
+      ext/standard/tests/strings/stripos_variation11.phpt
+      ext/standard/tests/strings/stripos_variation14.phpt
+      ext/standard/tests/strings/stripos_variation15.phpt
+      ext/standard/tests/strings/stripos_variation2.phpt
+      ext/standard/tests/strings/stripos_variation7.phpt
+      ext/standard/tests/strings/stristr.phpt
+      ext/standard/tests/strings/strpos.phpt
+      ext/standard/tests/strings/strstr.phpt
+      ext/standard/tests/strings/substr_count_error.phpt
+      ext/standard/tests/strings/uuencode.phpt:
+      MFH: Removed ending dots from error messages
+
+2007-10-04  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/config.w32:
+      Fix error
+
+    * ext/mysqlnd/config.w32:
+      Try to fix the windows build of mysqlnd
+
+    * ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.h:
+      Fix problems in Windows build
+
 2007-10-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
