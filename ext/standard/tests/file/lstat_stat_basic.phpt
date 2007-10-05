@@ -24,6 +24,7 @@ echo "*** Testing lstat() & stat() : basic functionality ***\n";
 
 // creating dir
 $dirname = "$file_path/lstat_stat_basic";
+@rmdir($dirname);
 mkdir($dirname);
 // stat of the dir created
 $dir_stat = stat($dirname);
