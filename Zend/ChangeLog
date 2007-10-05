@@ -1,3 +1,33 @@
+2007-10-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug36071.phpt
+      tests/bug36071.phpt
+      tests/bug42817.phpt
+      tests/bug42817.phpt
+      tests/bug42818.phpt
+      tests/bug42818.phpt:
+      MFB: Fixed bug #42817 (clone() on a non-object does not result in a fatal
+      error)
+
+    * (PHP_5_3)
+      zend_vm_execute.h:
+      Generated files that are part of the previous patch
+
+    * (PHP_5_3)
+      zend_vm_def.h
+      tests/bug36071.phpt
+      tests/bug42817.phpt
+      tests/bug42817.phpt
+      tests/bug42817.phpt
+      tests/bug42818.phpt:
+      
+      Fixed bug #42817 (clone() on a non-object does not result in a fatal
+      error)
+
 2007-10-03  Antony Dovgal  <tony@daylessday.org>
 
     * zend_language_scanner.l:
