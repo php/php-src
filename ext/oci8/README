@@ -6,58 +6,79 @@ Installing OCI8
 3. Installing as statically compiled extension.
 4. Installing from PECL.
 5. Testing OCI8
+6. DRCP and FAN Support
 
 1. Common requirements
 ----------------------
-In case if you use Oracle Instant Client, you don't have to set ORACLE_HOME and
-most of the other environment variables to build PHP with OCI8 support.
-The only variables you may have to set are:
-LD_LIBRARY_PATH - it must include Instant Client libraries dir
-NLS_LANG - in case if you want to change the default encoding used during
-interaction with Oracle servers
 
-If you use common Oracle Client installation that comes along with the Oracle
-server installation, you MUST set at least ORACLE_HOME environment variable
-and make it visible for your web-server BEFORE it starts. Most appropriate
-places to add ORACLE_HOME definition are:
-- /etc/profile
-- /etc/profile.local
-- /etc/profile.d
-and others.
+If you use a common Oracle Client installation that comes with the
+Oracle server installation, you MUST set at least the ORACLE_HOME
+environment variable and make it visible for your web-server BEFORE it
+starts.
+
+If you use Oracle Instant Client, you don't have to set ORACLE_HOME
+and many of the other environment variables to build PHP with OCI8
+support.  The only variables you may have to set are:
+
+  LD_LIBRARY_PATH - it must include the Instant Client library directory 
+
+  NLS_LANG - if you want to change the default encoding used during
+  interaction with Oracle servers
+
+The most appropriate places to add the environment variables are:
+
+  /etc/profile
+  /etc/profile.local
+  /etc/profile.d
 
 2. Installing as shared extension
 ---------------------------------
-To install OCI8 as shared extension (i.e. the one you should put into
-your php.ini) use the following configure lines to configure PHP:
-a) if you use common Oracle Client installation:
-./configure --with-oci8=shared,$ORACLE_HOME
+
+To install OCI8 as a shared extension (i.e. the one you should put
+into your php.ini) use the following configure lines to configure PHP:
+
+a) if you use a common Oracle or Oracle Client installation: 
+
+  ./configure --with-oci8=shared,$ORACLE_HOME
 
 b) with Oracle Instant Client:
-./configure --with-oci8=shared,instantclient,/path/to/instant/client/lib
-If you use rpm-based installation of Oracle Instant Client, your configure
-line will look like this:
-./configure --with-oci8=shared,instantclient,/usr/lib/oracle/<OIC version>/client/lib
 
-Follow the usual building procedure after that and you'll get OCI8 shared
-extension (i.e. oci8.so). Add it into the php.ini file like this:
-extension=oci8.so
+  ./configure --with-oci8=shared,instantclient,/path/to/instant/client/lib
+
+If you use an RPM-based installation of Oracle Instant Client, your configure
+line will look like this:
+
+  ./configure --with-oci8=shared,instantclient,/usr/lib/oracle/<OIC version>/client/lib
+
+Follow the usual building procedure after that and you'll get an OCI8
+shared extension (i.e. oci8.so). Add it into the php.ini file like
+this:
+
+  extension=oci8.so
+
 and don't forget to specify the right extension_dir for PHP to be able
 to find shared extensions correctly.
 
 3. Installing as statically compiled extension
 ----------------------------------------------
-To install OCI8 as statically compiled module use the following configure lines:
-a) with common Oracle Client installation
-./configure --with-oci8=$ORACLE_HOME
+
+To install OCI8 as statically compiled module use the following
+configure lines:
+
+a) with a common Oracle or Oracle Client installation
+
+  ./configure --with-oci8=$ORACLE_HOME
 
 b) with Oracle Instant Client
-./configure --with-oci8=instantclient,/path/to/instant/client/lib
 
-After successful compile, you don't have to add oci8.so to the php.ini, the module will
-be usable without any additional actions.
+  ./configure --with-oci8=instantclient,/path/to/instant/client/lib
+
+After successful compile, you don't have to add oci8.so to the
+php.ini.  The module will be usable without any additional actions.
 
 4. Installing from PECL
 -----------------------
+
 TBD
 
 5. Testing OCI8
@@ -134,3 +155,160 @@ directory will contain logs of any failures.
     SQL> startup force
 
 5.2.5. Rerun the tests
+
+
+6. DRCP and FAN Support
+-----------------------
+
+Th PHP OCI8 1.3.0 Beta extension has support for the Oracle Database
+Resident Connection Pool (DRCP) and Fast Application Notification
+(FAN).
+
+OCI8 1.3.0 Beta is for Beta testing only.  Questions and issues can be
+raised on the Oracle OTN forum (free registration required)
+http://www.oracle.com/technology/forums/php.html
+
+
+6.1. Oracle Version Compatibility
+
+The OCI8 extension will compile with Oracle libraries from version
+9iR2 onwards.  However, full functionality (e.g. DRCP support) is only
+available when Oracle 11g is used.
+
+For other, general database functionality, the version of the Oracle
+libraries used by PHP does not necessarily have to match the version
+of the database.
+
+
+6.2. Database Resident Connection Pooling (DRCP)
+
+DRCP allows more efficient use of database machine memory and provides
+high scalability.
+
+For DRCP to be available in OCI8, Oracle client libraries used by PHP
+and the version of the Oracle Database must both be 11g.
+
+Documentation on DRCP is found in several Oracle manuals. For example,
+see "Configuring Database Resident Connection Pooling" in the Oracle
+Database Administrator's Guide 11g Release 1 (11.1)
+http://download.oracle.com/docs/cd/B28359_01/server.111/b28310/manproc004.htm#CHDGIDBA
+for usage information.  A whitepaper
+http://www.oracle.com/technology/tech/oci/pdf/oracledrcp11g.pdf
+contains background information on DRCP.
+
+After building PHP with the OCI8 extension and 11g libraries, follow
+these steps:
+
+6.2.1. As a privileged database administrator, use a program like
+       SQL*Plus to start the connection pool in the database:
+
+        SQL> execute dbms_connection_pool.start_pool;
+
+     Optional settings control the size and characteristics of the
+     pool.
+
+6.2.2. For PHP applications that currently connect using a Network Alias
+       like:
+
+          $c = oci_pconnect("myuser", "mypassword", "MYDB");
+
+       Modify your tnsnames.ora file and add the "(SERVER=POOLED)"
+       clause, for example:
+
+	  MYDB = (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp) (HOST=myhost.dom.com)
+		 (PORT=1521))(CONNECT_DATA=(SERVICE_NAME=sales)
+		 (SERVER=POOLED)))
+
+     Alternatively, modify the Easy Connect syntax in PHP and add
+     ":POOLED" after the service name:
+
+          $c = oci_pconnect("myuser", "mypassword", 
+	                    "myhost.dom.com:1521/sales:POOLED");
+
+6.2.3. Edit php.ini and choose a connection class name.  This name
+       indicates a logical division of the connection pool and can be
+       used to isolate pooling for separate applications.  Any PHP
+       instance with the same connection class value will share
+       connections in the pool.
+
+          oci8.connection_class = "MY_APPLICATION_NAME"
+
+6.2.4. Run your application, connecting to the 11g database.
+
+
+6.3. Fast Application Notification (FAN) Support
+
+FAN support gives fast connection failover, a high availability
+feature.  This allows PHP OCI8 scripts to be notified when a database
+machine or database instance becomes unavailable.  Without FAN, OCI8
+can hang until a TCP timeout occurs and an error is returned, which
+might be several minutes.  Enabling FAN in OCI8 can allow your
+applications to detect errors and re-connect to an available database
+instance without the web user being aware of an outage.
+
+FAN support is available when the Oracle client libraries that PHP
+links with and the Oracle Database are either version 10gR2 or 11g.
+
+FAN benefits users of Oracle's clustering technology (RAC) because
+connections to surviving database instances can be immediately made.
+Users of Oracle's Data Guard with a broker will see the FAN events
+generated when the standby database goes online.  Standalone databases
+will send FAN events when the database restarts.
+
+For active connections, when a machine or database instance becomes
+unavailable, a connection failure error will be returned by the OCI8
+extension function currently being called.  On a subsequent PHP script
+re-connect, a connection to a surviving database instance will be
+established.  The OCI8 extension also transparently cleans up any idle
+connections affected by a database machine or instance failure so PHP
+connect calls will establish a fresh connection without the script
+being aware of any service disruption.
+
+When oci8.events is On, it is suggested to set oci8.ping_interval to
+-1 to disable pinging, since enabling FAN events provide pro-active
+connection management of idle connections made invalid by a service
+disruption.
+
+To enable FAN support in PHP, after building PHP with Oracle 10gR2 or
+11g libraries follow these steps:
+
+6.3.1. As a privileged database administrator, use a program like
+       SQL*Plus to enable the database service to post FAN events, for
+       example:
+
+	  SQL> execute dbms_service.modify_service(
+		 SERVICE_NAME        => 'sales',
+		 AQ_HA_NOTIFICATIONS => TRUE);
+
+6.3.2. Edit php.ini and add
+
+          oci8.events = On
+
+6.3.3. If your application does not already handle OCI8 error
+       conditions, modify it to detect failures and take appropriate
+       action.  This may include re-connecting and re-executing
+       statements.
+
+6.3.4. Run your application, connecting to a 10gR2 or 11g database.
+
+
+6.4. Changes and Known Issues in OCI8 1.3.0 Beta
+
+6.4.1. Oci8.max_persistent
+
+The parameter oci8.max_persistent is no longer used.  DRCP users
+should modify the connection pool settings of the database to control
+resource usage.  Non-DRCP users should consider setting
+oci8.persistent_timeout to a non -1 value to close idle connections.
+
+6.4.2. Password changing
+
+When oci_password_change() is successfully performed in a PHP script,
+subsequent connections with the new password from this PHP instance
+will fail with "ORA-1017 invalid username/password".  Subsequent
+connections in a new PHP instance (e.g. CLI process, or restarted web
+server) will connect successfully.
+
+6.4.3 Statement Caching
+
+Statement caching is currently disabled in this release, OCI8 1.3.0 Beta.

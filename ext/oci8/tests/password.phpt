@@ -1,7 +1,9 @@
 --TEST--
 oci_password_change()
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
+die ("skip password test in OCI8 1.3.0 Beta"); 
+ ?>
 --FILE--
 <?php
 

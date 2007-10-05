@@ -103,6 +103,7 @@ typedef struct { /* php_oci_connection {{{ */
 	OCIServer *server;	/* private server handle */
 	OCISvcCtx *svc;		/* private service context handle */
 	OCISession *session; /* private session handle */
+	OCIAuthInfo *authinfo;  /* Cached authinfo handle for OCISessionGet */
 	OCIError *err;		/* private error handle */
 	sword errcode;		/* last errcode */
 
@@ -113,6 +114,8 @@ typedef struct { /* php_oci_connection {{{ */
 	unsigned used_this_request:1; /* helps to determine if we should reset connection's next ping time and check its timeout */
 	unsigned needs_commit:1;	/* helps to determine if we should rollback this connection on close/shutdown */
 	unsigned passwd_changed:1;	/* helps determine if a persistent connection hash should be invalidated after a password change */
+	unsigned is_stub:1;		/* flag to keep track whether the connection structure has a real OCI connection associated */
+	unsigned using_spool:1;			/* Is this connection from session pool? */
 	int rsrc_id;				/* resource ID */
 	time_t idle_expiry;			/* time when the connection will be considered as expired */
 	time_t next_ping;			/* time of the next ping */
@@ -222,6 +225,15 @@ typedef struct { /* php_oci_out_column {{{ */
 	ub2 charset_id;					/* charset ID */
 } php_oci_out_column; /* }}} */
 
+typedef struct { /* php_oci_spool {{{ */
+	OCIEnv* env;			/*env of this session pool */
+	OCIError* err;			/* pool's error handle  */
+	OCISPool *poolh;		/* pool handle */
+	void* poolname;			/* session pool name */ 
+	unsigned int poolnamelen;	/* length of session pool name */
+	char *spool_hash_key;		/* Hash key for session pool in plist */
+} php_oci_spool; /* }}} */
+
 /* {{{ macros */
 
 #define PHP_OCI_CALL(func, params) \
@@ -321,6 +333,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 int php_oci_connection_rollback(php_oci_connection * TSRMLS_DC);
 int php_oci_connection_commit(php_oci_connection * TSRMLS_DC);
+int php_oci_connection_release(php_oci_connection *connection TSRMLS_DC);
 
 int php_oci_password_change(php_oci_connection *, char *, int, char *, int, char *, int TSRMLS_DC);
 int php_oci_server_get_version(php_oci_connection *, char ** TSRMLS_DC); 
@@ -435,7 +448,8 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ */
 	OCIEnv *env;				/* global environment handle */
 
 	zend_bool in_call;
-
+	char *connection_class;
+	zend_bool events;
 ZEND_END_MODULE_GLOBALS(oci) /* }}} */ 
 
 #ifdef ZTS

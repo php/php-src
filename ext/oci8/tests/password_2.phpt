@@ -5,6 +5,7 @@ oci_password_change() for persistent connections
 if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
 require(dirname(__FILE__)."/details.inc");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user"); 
+die ("skip password test in OCI8 1.3.0 Beta"); 
 ?>
 --FILE--
 <?php

@@ -1522,8 +1522,17 @@ PHP_FUNCTION(oci_free_statement)
    Disconnect from database */
 PHP_FUNCTION(oci_close)
 {
+	/* oci_close for pconnect (if old_oci_close_semantics not set) would 
+	 * release the connection back to the client-side session pool (and to the 
+	 * server-side pool if Database Resident Connection Pool is being used).
+	 * Subsequent pconnects in the same script are not guaranteed to get the
+	 * same database session. When a persistent connection goes out-of-scope, 
+	 * the connection is not released to the session pool and is kept in the Plist
+	 */
+
 	zval *z_connection;
 	php_oci_connection *connection;
+	int dummy_type = -1;
 
 	if (OCI_G(old_oci_close_semantics)) {
 		/* do nothing to keep BC */
@@ -1536,6 +1545,17 @@ PHP_FUNCTION(oci_close)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 	zend_list_delete(connection->rsrc_id);
+
+	/* If refcount has fallen to zero(resource id removed from the list), 
+	 * Release the OCI session associated with this connection structure back 
+	 * to the underlying pool. The connection would be cached in the plist as a 
+	 * stub 
+	 */
+	if(connection->is_persistent && connection->using_spool && !zend_list_find(connection->rsrc_id, &dummy_type)) {
+
+		php_oci_connection_release(connection TSRMLS_CC);
+	}
+
 	ZVAL_NULL(z_connection);
 	
 	RETURN_TRUE;

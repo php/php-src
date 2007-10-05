@@ -33,31 +33,18 @@ the Oracle Call Interface (OCI8).
   <email>sixd@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-09-01</date>
- <time>15:00:00</time>
+ <date>2007-10-05</date>
+ <time>10:00:00</time>
  <version>
-  <release>1.2.4</release>
-  <api>1.2.4</api>
+  <release>1.3.0</release>
+  <api>1.3.0</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
- <notes>Added Oracle 11g support.
-Fixed PECL bug #10194 (crash in Oracle client when memory limit reached in the callback).
-Fixed bug #42173 (oci_field_type fixes for INTERVAL and TIMESTAMP types).
-Fixed bug #42134 (oci_error() returns false after oci_new_collection() fails).
-Fixed bug #41917 (oci_field_precision and oci_field_scale datatypes fixed).
-Fixed bug #41711 (Null temporary lobs not supported).
-Fixed bug #41594 (Statement cache is flushed too frequently).
-Fixed bug #40415 (oci_fetch_all and nested cursors, allocate descriptors dynamically)
-Fixed segfault on rebinding and re-executing a statement with LOBs.
-Fixed compile failure in ZTS mode when collections support is missing.
-Allowed statement cache size to be set for non-persistent connections.
-Improved oci_password_change() to close persistent connections on shutdown (to update hashed connection details).
-Changed oci_pconnect() to behave like oci_connect() when SYSDBA and SYSOPER privileges are used.
-Various minor improvements.
+ <notes>Added DRCP and FAN support.
  </notes>
  <contents>
   <dir name="/">
@@ -294,6 +281,31 @@ Various minor improvements.
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to ORACLE_HOME dir. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling against Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+ <release>
+ <version>
+  <release>1.2.4</release>
+  <api>1.2.4</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>Fixed PECL bug #10194 (crash in Oracle client when memory limit reached in the callback).
+Fixed bug #42173 (oci_field_type fixes for INTERVAL and TIMESTAMP types).
+Fixed bug #42134 (oci_error() returns false after oci_new_collection() fails).
+Fixed bug #41917 (oci_field_precision and oci_field_scale datatypes fixed).
+Fixed bug #41711 (Null temporary lobs not supported).
+Fixed bug #41594 (Statement cache is flushed too frequently).
+Fixed bug #40415 (oci_fetch_all and nested cursors, allocate descriptors dynamically)
+Fixed segfault on rebinding and re-executing a statement with LOBs.
+Fixed compile failure in ZTS mode when collections support is missing.
+Allowed statement cache size to be set for non-persistent connections.
+Improved oci_password_change() to close persistent connections on shutdown (to update hashed connection details).
+Changed oci_pconnect() to behave like oci_connect() when SYSDBA and SYSOPER privileges are used.
+Various minor improvements.
+ </notes>
+  </release>
   <release>
    <version>
     <release>1.2.3</release>
@@ -312,6 +324,8 @@ Fixed bug #39732 (oci_bind_array_by_name doesn&apos;t work on Solaris 64bit).
 Fixed PECL bug #8816 (issue in php_oci_statement_fetch with more than one piecewise column).
 Various minor improvements.
    </notes>
+  </release>
+  <release>
    <version>
     <release>1.2.2</release>
     <api>1.2.2</api>
