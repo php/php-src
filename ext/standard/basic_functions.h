@@ -230,7 +230,7 @@ typedef struct _php_basic_globals {
 PHPAPI extern int basic_globals_id;
 #else
 #define BG(v) (basic_globals.v)
-extern php_basic_globals basic_globals;
+PHPAPI extern php_basic_globals basic_globals;
 #endif
 
 #if HAVE_PUTENV
