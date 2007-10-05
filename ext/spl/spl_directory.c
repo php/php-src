@@ -323,8 +323,7 @@ static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_
 	if (!file_path || !file_path_len) {
 #if defined(PHP_WIN32)
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot create SplFileInfo for empty path");
-		if (file_path && !use_copy)
-		{
+		if (file_path && !use_copy)	{
 			efree(file_path);
 		}
 		return NULL;
@@ -1955,29 +1954,29 @@ SPL_METHOD(SplFileObject, fgetcsv)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
 		switch(ZEND_NUM_ARGS())
 		{
-  		    case 3:
-				if (esc_len != 1) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
-					RETURN_FALSE;
-				}
-				escape = esc[0];
-                /* no break */
-			case 2:
-				if (e_len != 1) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
-					RETURN_FALSE;
-				}
-				enclosure = enclo[0];
-				/* no break */
-			case 1:
-				if (d_len != 1) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
-					RETURN_FALSE;
-				}
-				delimiter = delim[0];
-				/* no break */
-			case 0:
-				break;
+		case 3:
+			if (esc_len != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
+				RETURN_FALSE;
+			}
+			escape = esc[0];
+			/* no break */
+		case 2:
+			if (e_len != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
+				RETURN_FALSE;
+			}
+			enclosure = enclo[0];
+			/* no break */
+		case 1:
+			if (d_len != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
+				RETURN_FALSE;
+			}
+			delimiter = delim[0];
+			/* no break */
+		case 0:
+			break;
 		}
 		spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value TSRMLS_CC);
 	}
@@ -1996,29 +1995,29 @@ SPL_METHOD(SplFileObject, setCsvControl)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
 		switch(ZEND_NUM_ARGS())
 		{
-		     case 3:
-				if (esc_len != 1) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
-					RETURN_FALSE;
-				}
-				escape = esc[0];
-                /* no break */
-			case 2:
-				if (e_len != 1) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
-					RETURN_FALSE;
-				}
-				enclosure = enclo[0];
-				/* no break */
-			case 1:
-				if (d_len != 1) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
-					RETURN_FALSE;
-				}
-				delimiter = delim[0];
-				/* no break */
-			case 0:
-				break;
+		case 3:
+			if (esc_len != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
+				RETURN_FALSE;
+			}
+			escape = esc[0];
+			/* no break */
+		case 2:
+			if (e_len != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
+				RETURN_FALSE;
+			}
+			enclosure = enclo[0];
+			/* no break */
+		case 1:
+			if (d_len != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
+				RETURN_FALSE;
+			}
+			delimiter = delim[0];
+			/* no break */
+		case 0:
+			break;
 		}
 		intern->u.file.delimiter = delimiter;
 		intern->u.file.enclosure = enclosure;
