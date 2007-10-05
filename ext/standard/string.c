@@ -24,7 +24,6 @@
 
 #include <stdio.h>
 #include "php.h"
-#include "reg.h"
 #include "php_rand.h"
 #include "php_string.h"
 #include "php_variables.h"
