@@ -12,7 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Georg Richter <georg@php.net>                                |
+  | Authors: Georg Richter <georg@php.net>                               |
+  |          Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 
   $Id$ 
@@ -27,45 +29,53 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "php_mysqli.h"
+#include "php_mysqli_structs.h"
+
+#define SAFE_STR(a) ((a)?a:"")
+
 
 /* {{{ proto object mysqli_connect([string hostname [,string username [,string passwd [,string dbname [,int port [,string socket]]]]]])
    Open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_connect)
 {
-	MY_MYSQL 			*mysql = NULL;
-	MYSQLI_RESOURCE 	*mysqli_resource = NULL;
-	zval  				*object = getThis();
-	char 				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
-	unsigned int 		hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
-	long				port=0;
+	MY_MYSQL			*mysql = NULL;
+	MYSQLI_RESOURCE		*mysqli_resource = NULL;
+	zval				*object = getThis();
+	char				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
+	unsigned int		hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
+	zend_bool			persistent = FALSE;
+	long				port = 0;
+	uint				hash_len;
+	char				*hash_key = NULL;
+	zend_bool			new_connection = FALSE;
+	zend_rsrc_list_entry	*le;
+	mysqli_plist_entry *plist = NULL;
 
 	if (getThis() && !ZEND_NUM_ARGS()) {
 		RETURN_NULL();
 	}
+	hostname = username = dbname = passwd = socket = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssssls", &hostname, &hostname_len, &username, &username_len, 
 		&passwd, &passwd_len, &dbname, &dbname_len, &port, &socket, &socket_len) == FAILURE) {
 		return;
 	}
 
-	if (!socket_len) {
-		socket = NULL;
+	if (!socket_len || !socket) {
+		socket = MyG(default_socket);
 	}
-    
-	/* TODO: safe mode handling */
-	if (PG(sql_safe_mode)){
-	} else {
-		if (!passwd) {
-			passwd = MyG(default_pw);
-			if (!username){
-				username = MyG(default_user);
-				if (!hostname) {
-					hostname = MyG(default_host);
-				}
-			}
-		}
+
+	if (!passwd) {
+		passwd = MyG(default_pw);
+		passwd_len = strlen(SAFE_STR(passwd));
 	}
+	if (!username){
+		username = MyG(default_user);
+	}
+	if (!hostname || !hostname_len) {
+		hostname = MyG(default_host);
+	}
+
 
 	if (object && instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
 		mysqli_resource = ((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr;
@@ -75,7 +85,7 @@ PHP_FUNCTION(mysqli_connect)
 			mysql = (MY_MYSQL*)mysqli_resource->ptr;
 			php_clear_mysql(mysql);
 			if (mysql->mysql) {
-				mysql_close(mysql->mysql);
+				mysqli_close(mysql->mysql, MYSQLI_CLOSE_EXPLICIT);
 				mysql->mysql = NULL;
 			}
 		}
@@ -84,60 +94,193 @@ PHP_FUNCTION(mysqli_connect)
 		mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
 	}
 
-	if (!(mysql->mysql = mysql_init(NULL))) {
-		efree(mysql);
-		RETURN_FALSE;
+	if (strlen(SAFE_STR(hostname)) > 2 && !strncasecmp(hostname, "p:", 2)) {
+		hostname += 2;
+		if (!MyG(allow_persistent)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Persistent connections are disabled. Downgrading to normal");			
+		} else {
+			mysql->persistent = persistent = TRUE;
+
+			if (!strlen(hostname)) {
+				hostname = MyG(default_host);
+			}
+
+			hash_len = spprintf(&hash_key, 0, "mysqli_%s%ld%s%s%s", SAFE_STR(hostname), 
+								port, SAFE_STR(username), SAFE_STR(dbname), 
+								SAFE_STR(passwd));
+
+			/* check if we can reuse exisiting connection ... */
+			if (zend_hash_find(&EG(persistent_list), hash_key, hash_len + 1, (void **)&le) == SUCCESS) {
+				if (Z_TYPE_P(le) == php_le_pmysqli()) {
+					plist = (mysqli_plist_entry *) le->ptr;
+
+					do {
+						if (zend_hash_num_elements(&plist->free_links)) {
+							HashPosition pos;
+							MYSQL **free_mysql;
+							ulong idx;
+							dtor_func_t pDestructor = plist->free_links.pDestructor;
+
+							zend_hash_internal_pointer_reset_ex(&plist->free_links, &pos);
+							if (SUCCESS != zend_hash_get_current_data_ex(&plist->free_links,
+																		(void **)&free_mysql, &pos)) {
+								break;
+							}
+							if (HASH_KEY_IS_LONG != zend_hash_get_current_key_ex(&plist->free_links, NULL,
+																				 NULL, &idx, FALSE, &pos)) {
+								break;
+							}
+							plist->free_links.pDestructor = NULL; /* Don't call pDestructor now */
+							if (SUCCESS != zend_hash_index_del(&plist->free_links, idx)) {
+								plist->used_links.pDestructor = pDestructor;  /* Restore the destructor */
+								break;
+							}
+							plist->free_links.pDestructor = pDestructor;  /* Restore the destructor */
+							mysql->mysql = *free_mysql;
+
+							MyG(num_inactive_persistent)--;
+							MyG(num_active_persistent)++;
+							/* reset variables */
+							/* todo: option for ping or change_user */
+#if G0
+							if (!mysql_change_user(mysql->mysql, username, passwd, dbname)) {
+#else
+							if (!mysql_ping(mysql->mysql)) {
+#endif
+#ifdef HAVE_MYSQLND
+								mysqlnd_restart_psession(mysql->mysql);
+#endif
+								idx = zend_hash_next_free_element(&plist->used_links);
+								if (SUCCESS != zend_hash_next_index_insert(&plist->used_links, &free_mysql,
+																		   sizeof(MYSQL *), NULL)) {
+									php_mysqli_dtor_p_elements(free_mysql);
+									MyG(num_links)--;
+									break;
+								}
+								mysql->hash_index = idx;
+								mysql->hash_key = hash_key;
+								goto end;
+							}
+						}
+					} while (0);
+				}
+			} else {
+				zend_rsrc_list_entry le;
+				le.type = php_le_pmysqli();
+				le.ptr = plist = calloc(1, sizeof(mysqli_plist_entry));
+
+				zend_hash_init(&plist->free_links, MAX(2, MyG(max_persistent)), NULL, php_mysqli_dtor_p_elements, 1);
+				zend_hash_init(&plist->used_links, MAX(2, MyG(max_persistent)), NULL, php_mysqli_dtor_p_elements, 1);
+				zend_hash_update(&EG(persistent_list), hash_key, hash_len + 1, (void *)&le, sizeof(le), NULL);
+			}
+		}
 	}
 
+	if (MyG(max_links) != -1 && MyG(num_links) >= MyG(max_links)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MyG(num_links));
+		goto err;
+	}
+	if (persistent && MyG(max_persistent) != -1 &&
+		(MyG(num_active_persistent) + MyG(num_inactive_persistent))>= MyG(max_persistent))
+	{
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%ld)",
+								MyG(num_active_persistent) + MyG(num_inactive_persistent));
+		goto err;
+	}
+
+#if !defined(HAVE_MYSQLND)
+	if (!(mysql->mysql = mysql_init(NULL))) {
+#else
+	if (!(mysql->mysql = mysqlnd_init(persistent))) {
+#endif
+		goto err;
+	}
+	new_connection = TRUE;
+
 #ifdef HAVE_EMBEDDED_MYSQLI
-	if (strcmp(hostname, ":embedded")) {
+	if (hostname_len) {
 		unsigned int external=1;
 		mysql_options(mysql->mysql, MYSQL_OPT_USE_REMOTE_CONNECTION, (char *)&external);
 	} else {
-		hostname[0] = '\0';
 		mysql_options(mysql->mysql, MYSQL_OPT_USE_EMBEDDED_CONNECTION, 0);
 	}
 #endif
 
-	if (!socket) {
-		socket = MyG(default_socket);
-	}
-
-	if (mysql_real_connect(mysql->mysql,hostname,username,passwd,dbname,port,socket,CLIENT_MULTI_RESULTS) == NULL) {
+#if !defined(HAVE_MYSQLND)
+	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, CLIENT_MULTI_RESULTS) == NULL)
+#else
+	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
+						port, socket, CLIENT_MULTI_RESULTS, MyG(mysqlnd_thd_zval_cache) TSRMLS_CC) == NULL)
+#endif
+	{
 		/* Save error messages */
-
-		php_mysqli_throw_sql_exception( mysql->mysql->net.sqlstate, mysql->mysql->net.last_errno TSRMLS_CC,
-										"%s", mysql->mysql->net.last_error);
-
 		php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
+		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql) TSRMLS_CC,
+										"%s", mysql_error(mysql->mysql));
 
 		/* free mysql structure */
-		mysql_close(mysql->mysql);
-		efree(mysql);
-		RETURN_FALSE;
+		mysqli_close(mysql->mysql, MYSQLI_CLOSE_DISCONNECTED);
+		goto err;
 	}
 
 	/* clear error */
 	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
 
+#if !defined(HAVE_MYSQLND)
 	mysql->mysql->reconnect = MyG(reconnect);
 
 	/* set our own local_infile handler */
 	php_set_local_infile_handler_default(mysql);
+#endif
 
+	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&MyG(allow_local_infile));
+
+end:
 	if (!mysqli_resource) {
 		mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 		mysqli_resource->ptr = (void *)mysql;
 	}
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
 
+	/* store persistent connection */
+	if (persistent && new_connection) {
+		/* save persistent connection */
+		ulong hash_index = zend_hash_next_free_element(&plist->used_links);
+		if (SUCCESS != zend_hash_next_index_insert(&plist->used_links, &mysql->mysql,
+												   sizeof(MYSQL *), NULL)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't store persistent connection");
+		} else {
+			mysql->hash_index = hash_index;
+		}
+		MyG(num_active_persistent)++;
+	}
+
+	mysql->hash_key = hash_key;
+	MyG(num_links)++;
+
+#if !defined(HAVE_MYSQLND)
+	mysql->multi_query = 0;
+#else
+	mysql->multi_query = 1;
+#endif
+
+
 	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
 		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
 	} else {
 		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr = mysqli_resource;
 	}
+	return;
+
+err:
+	efree(mysql);
+	if (persistent) {
+		efree(hash_key);
+	}
+	RETVAL_FALSE;
 }
 /* }}} */
+
 
 /* {{{ proto int mysqli_connect_errno(void)
    Returns the numerical value of the error message from last connect command */
@@ -159,11 +302,30 @@ PHP_FUNCTION(mysqli_connect_error)
 }
 /* }}} */
 
+
 /* {{{ proto mixed mysqli_fetch_array (object result [,int resulttype])
    Fetch a result row as an associative array, a numeric array, or both */
 PHP_FUNCTION(mysqli_fetch_array) 
 {
+#if !defined(HAVE_MYSQLND)
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
+#else
+	MYSQL_RES		*result;
+	zval			*mysql_result;
+	long			mode = MYSQLND_FETCH_BOTH;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &mode) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+
+	if (mode < MYSQLI_ASSOC || mode > MYSQLI_BOTH) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH");
+		RETURN_FALSE;
+	}
+
+	mysqlnd_fetch_into(result, mode, return_value, MYSQLND_MYSQLI);
+#endif
 }
 /* }}} */
 
@@ -171,20 +333,102 @@ PHP_FUNCTION(mysqli_fetch_array)
    Fetch a result row as an associative array */
 PHP_FUNCTION(mysqli_fetch_assoc) 
 {
+#if !defined(HAVE_MYSQLND)
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC, 0);
+#else
+	MYSQL_RES		*result;
+	zval			*mysql_result;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	mysqlnd_fetch_into(result, MYSQLND_FETCH_ASSOC, return_value, MYSQLND_MYSQLI);
+	
+#endif
 }
 /* }}} */
+
+
+/* {{{ proto mixed mysqli_fetch_all (object result [,int resulttype]) 
+   Fetches all result rows as an associative array, a numeric array, or both */
+#if defined(HAVE_MYSQLND)
+PHP_FUNCTION(mysqli_fetch_all) 
+{
+	MYSQL_RES		*result;
+	zval			*mysql_result;
+	long			mode = MYSQLND_FETCH_NUM;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &mode) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+
+	if (!mode || (mode & ~MYSQLND_FETCH_BOTH)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Mode can be only MYSQLI_FETCH_NUM, "
+		                 "MYSQLI_FETCH_ASSOC or MYSQLI_FETCH_BOTH");
+		RETURN_FALSE;
+	}
+
+	mysqlnd_fetch_all(result, mode, return_value);
+}
+/* }}} */
+
+
+/* {{{ proto array mysqli_cache_stats(void) U
+   Returns statistics about the zval cache */
+PHP_FUNCTION(mysqli_get_cache_stats) 
+{
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+	mysqlnd_palloc_stats(mysqli_mysqlnd_zval_cache, return_value);
+}
+/* }}} */
+
+
+/* {{{ proto array mysqli_get_client_stats(void)
+   Returns statistics about the zval cache */
+PHP_FUNCTION(mysqli_get_client_stats) 
+{
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+	mysqlnd_get_client_stats(return_value);
+}
+/* }}} */
+
+
+/* {{{ proto array mysqli_get_connection_stats(void)
+   Returns statistics about the zval cache */
+PHP_FUNCTION(mysqli_get_connection_stats) 
+{
+	MY_MYSQL	*mysql;
+	zval		*mysql_link;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+									 &mysql_link, mysqli_link_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
+
+	mysqlnd_get_connection_stats(mysql->mysql, return_value);
+}
+#endif
+/* }}} */
+
 
 /* {{{ proto mixed mysqli_fetch_object (object result [, string class_name [, NULL|array ctor_params]])
    Fetch a result row as an object */
 PHP_FUNCTION(mysqli_fetch_object) 
 {
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC, 1);	
+/* todo: mysqlnd support */
 }
 /* }}} */
 
 /* {{{ proto bool mysqli_multi_query(object link, string query)
-   Binary-safe version of mysql_query() */
+   allows to execute multiple queries  */
 PHP_FUNCTION(mysqli_multi_query)
 {
 	MY_MYSQL		*mysql;
@@ -199,25 +443,30 @@ PHP_FUNCTION(mysqli_multi_query)
 
 	MYSQLI_ENABLE_MQ;	
 	if (mysql_real_query(mysql->mysql, query, query_len)) {
+#ifndef HAVE_MYSQLND
 		char s_error[MYSQL_ERRMSG_SIZE], s_sqlstate[SQLSTATE_LENGTH+1];
 		unsigned int s_errno;
-		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
-
 		/* we have to save error information, cause 
 		MYSQLI_DISABLE_MQ will reset error information */
 		strcpy(s_error, mysql_error(mysql->mysql));
 		strcpy(s_sqlstate, mysql_sqlstate(mysql->mysql));
 		s_errno = mysql_errno(mysql->mysql);
-
+#else
+		mysqlnd_error_info error_info = mysql->mysql->error_info;
+#endif
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		MYSQLI_DISABLE_MQ;
 
+#ifndef HAVE_MYSQLND
 		/* restore error information */
 		strcpy(mysql->mysql->net.last_error, s_error);
 		strcpy(mysql->mysql->net.sqlstate, s_sqlstate);
 		mysql->mysql->net.last_errno = s_errno;	
-
+#else
+		mysql->mysql->error_info = error_info;
+#endif
 		RETURN_FALSE;
-	}	
+	}
 	RETURN_TRUE;
 }
 /* }}} */
@@ -258,7 +507,7 @@ PHP_FUNCTION(mysqli_query)
 	if (!mysql_field_count(mysql->mysql)) {
 		/* no result set - not a SELECT */
 		if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-			php_mysqli_report_index(query, mysql->mysql->server_status TSRMLS_CC);
+			php_mysqli_report_index(query, mysqli_server_status(mysql->mysql) TSRMLS_CC);
 		}
 		RETURN_TRUE;
 	}
@@ -266,13 +515,13 @@ PHP_FUNCTION(mysqli_query)
 	result = (resultmode == MYSQLI_USE_RESULT) ? mysql_use_result(mysql->mysql) : mysql_store_result(mysql->mysql);
 
 	if (!result) {
-		php_mysqli_throw_sql_exception(mysql->mysql->net.sqlstate, mysql->mysql->net.last_errno TSRMLS_CC,
-										"%s", mysql->mysql->net.last_error); 
+		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql) TSRMLS_CC,
+										"%s", mysql_error(mysql->mysql)); 
 		RETURN_FALSE;
 	}
 
 	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-		php_mysqli_report_index(query, mysql->mysql->server_status TSRMLS_CC);
+		php_mysqli_report_index(query, mysqli_server_status(mysql->mysql) TSRMLS_CC);
 	}
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
@@ -281,6 +530,36 @@ PHP_FUNCTION(mysqli_query)
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */
+
+
+#if defined(HAVE_MYSQLND)
+/* {{{ proto object mysqli_stmt_get_result(object link) U
+   Buffer result set on client */
+PHP_FUNCTION(mysqli_stmt_get_result)
+{
+	MYSQL_RES 		*result;
+	MYSQLI_RESOURCE	*mysqli_resource;
+	MY_STMT			*stmt;
+	zval 			*mysql_stmt;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_VALID);
+
+	if (!(result = mysqlnd_stmt_get_result(stmt->stmt))) {
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+		RETURN_FALSE;
+	}
+
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = (void *)result;
+	mysqli_resource->status = MYSQLI_STATUS_VALID;
+	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);	
+}
+/* }}} */
+#endif
+
 
 /* {{{ proto object mysqli_get_warnings(object link) */
 PHP_FUNCTION(mysqli_get_warnings)
@@ -296,12 +575,13 @@ PHP_FUNCTION(mysqli_get_warnings)
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL*, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	if (mysql_warning_count(mysql->mysql)) {
-		w = php_get_warnings(mysql->mysql); 
+		w = php_get_warnings(mysql->mysql TSRMLS_CC); 
 	} else {
 		RETURN_FALSE;
 	}
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
+	mysqli_resource->status = MYSQLI_STATUS_VALID;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);	
 }
 /* }}} */
@@ -317,15 +597,16 @@ PHP_FUNCTION(mysqli_stmt_get_warnings)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &stmt_link, mysqli_stmt_class_entry) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT*, &stmt_link, "mysqli_stmt", 1);
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT*, &stmt_link, "mysqli_stmt", MYSQLI_STATUS_VALID);
 
-	if (mysql_warning_count(stmt->stmt->mysql)) {
-		w = php_get_warnings(stmt->stmt->mysql); 
+	if (mysqli_stmt_warning_count(stmt->stmt)) {
+		w = php_get_warnings(mysqli_stmt_get_connection(stmt->stmt) TSRMLS_CC); 
 	} else {
 		RETURN_FALSE;
 	}
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
+	mysqli_resource->status = MYSQLI_STATUS_VALID;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);	
 }
 /* }}} */
@@ -354,13 +635,19 @@ PHP_FUNCTION(mysqli_set_charset)
 #endif
 
 #ifdef HAVE_MYSQLI_GET_CHARSET 
-/* {{{ proto object mysqli_get_charset(object link) 
+/* {{{ proto object mysqli_get_charset(object link) U
    returns a character set object */
 PHP_FUNCTION(mysqli_get_charset)
 {
 	MY_MYSQL				*mysql;
 	zval					*mysql_link;
+	char 					*name = NULL, *collation = NULL, *dir = NULL;
+	uint					minlength, maxlength, number, state;
+#if !defined(HAVE_MYSQLND)
 	MY_CHARSET_INFO			cs;
+#else
+	const MYSQLND_CHARSET	*cs;
+#endif
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
@@ -369,16 +656,32 @@ PHP_FUNCTION(mysqli_get_charset)
 
 	object_init(return_value);
 
+#if !defined(HAVE_MYSQLND)
 	mysql_get_character_set_info(mysql->mysql, &cs);
+	name = (char *)cs.csname;
+	collation = (char *)cs.name;
+	dir = (char *)cs.dir;
+	minlength = cs.mbminlen;
+	maxlength = cs.mbmaxlen;
+	number = cs.number;
+	state = cs.state;
+#else
+	cs = mysql->mysql->charset;
+	name = cs->name;	
+	collation = cs->collation;	
+	minlength = cs->char_minlen;
+	maxlength = cs->char_maxlen;
+	number = cs->nr;
+	state = 1;	/* all charsets are compiled in */
+#endif
 
-	add_property_string(return_value, "charset", (cs.name) ? (char *)cs.csname : "", 1);
-	add_property_string(return_value, "collation",(cs.name) ? (char *)cs.name : "", 1);
-	add_property_string(return_value, "comment", (cs.comment) ? (char *)cs.comment : "", 1);
-	add_property_string(return_value, "dir", (cs.dir) ? (char *)cs.dir : "", 1);
-	add_property_long(return_value, "min_length", cs.mbminlen);
-	add_property_long(return_value, "max_length", cs.mbmaxlen);
-	add_property_long(return_value, "number", cs.number);
-	add_property_long(return_value, "state", cs.state);
+	add_property_string(return_value, "charset", (name) ? (char *)name : "", 1);
+	add_property_string(return_value, "collation",(collation) ? (char *)collation : "", 1);
+	add_property_string(return_value, "dir", (dir) ? (char *)dir : "", 1);
+	add_property_long(return_value, "min_length", minlength);
+	add_property_long(return_value, "max_length", maxlength);
+	add_property_long(return_value, "number", number);
+	add_property_long(return_value, "state", state);
 }
 /* }}} */
 #endif

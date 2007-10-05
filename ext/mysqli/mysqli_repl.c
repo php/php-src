@@ -27,7 +27,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "php_mysqli.h"
+#include "php_mysqli_structs.h"
 
 /* {{{ proto void mysqli_disable_reads_from_master(object link)
 */
