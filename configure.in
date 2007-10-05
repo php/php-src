@@ -1296,12 +1296,12 @@ PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/ regex/])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c)
 
-PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c getopt.c php_sprintf.c \
+PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
        safe_mode.c fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c php_logos.c \
-       output.c )
+       output.c getopt.c)
 
 PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
        plain_wrapper.c userspace.c transports.c xp_socket.c mmap.c)
@@ -1434,21 +1434,6 @@ dnl  fi
     echo "| Please go read http://www.php.net/faq.build#faq.build.apxs         |"
     echo "| and make the changes described there and try again.                |"
   fi
-
-  # Warn about CGI version with no extra security options.
-  if test "$PHP_SAPI" = "cgi"; then
-    if test "$PHP_FORCE_CGI_REDIRECT" = "no" && test "$PHP_DISCARD_PATH" = "no"; then
-      echo "+--------------------------------------------------------------------+"
-      echo "|                        *** WARNING ***                             |"
-      echo "|                                                                    |"
-      echo "| You will be compiling the CGI version of PHP without any           |"
-      echo "| redirection checking.  By putting this cgi binary somewhere in     |"
-      echo "| your web space, users may be able to circumvent existing .htaccess |"
-      echo "| security by loading files directly through the parser.  See        |"
-      echo "| http://www.php.net/manual/security.php for more details.           |"
-    fi
-  fi
-
 
   if test -n "$DEBUG_LOG"; then
     rm -f config.cache
