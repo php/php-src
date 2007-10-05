@@ -19,10 +19,15 @@
 
 /* $Id$ */
 
-#ifndef REG_H
-#define REG_H
+#ifndef EREG_H
+#define EREG_H
 
-PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended);
+#include "php_regex.h"
+
+extern zend_module_entry ereg_module_entry;
+#define phpext_ereg_ptr &ereg_module_entry
+
+PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended);
 
 PHP_FUNCTION(ereg);
 PHP_FUNCTION(eregi);
@@ -32,19 +37,19 @@ PHP_FUNCTION(split);
 PHP_FUNCTION(spliti);
 PHPAPI PHP_FUNCTION(sql_regcase);
 
-ZEND_BEGIN_MODULE_GLOBALS(reg)
+ZEND_BEGIN_MODULE_GLOBALS(ereg)
 	HashTable ht_rc;
-ZEND_END_MODULE_GLOBALS(reg)
+ZEND_END_MODULE_GLOBALS(ereg)
 
-PHP_MINIT_FUNCTION(regex);
-PHP_MSHUTDOWN_FUNCTION(regex);
-PHP_MINFO_FUNCTION(regex);
-
+/* Module functions */
+PHP_MINIT_FUNCTION(ereg);
+PHP_MSHUTDOWN_FUNCTION(ereg);
+PHP_MINFO_FUNCTION(ereg);
 
 #ifdef ZTS
-#define REG(v) TSRMG(reg_globals_id, zend_reg_globals *, v)
+#define EREG(v) TSRMG(ereg_globals_id, zend_ereg_globals *, v)
 #else
-#define REG(v) (reg_globals.v)
+#define EREG(v) (ereg_globals.v)
 #endif
 
 #endif /* REG_H */
