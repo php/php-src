@@ -25,7 +25,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "php_mysqli.h"
+#include "php_mysqli_structs.h"
 
 /* {{{ proto bool mysqli_embedded_server_start(bool start, array arguments, array groups)
    initialize and start embedded server */

@@ -25,7 +25,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "php_mysqli.h"
+#include "php_mysqli_structs.h"
 #include "zend_exceptions.h"
 
 
@@ -110,7 +110,7 @@ static int driver_client_version_read(mysqli_object *obj, zval **retval TSRMLS_D
 static int driver_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, MYSQL_SERVER_VERSION, 1);
+	ZVAL_STRING(*retval, (char *)mysql_get_client_info(), 1);
 	return SUCCESS;
 }
 /* }}} */
@@ -130,9 +130,17 @@ MAP_PROPERTY_MYG_LONG_READ(driver_report_read, report_mode);
 
 ZEND_FUNCTION(mysqli_driver_construct)
 {
+#if G0
+	MYSQLI_RESOURCE 	*mysqli_resource;
+
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = 1;
+	mysqli_resource->status = (ZEND_NUM_ARGS() == 1) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
+	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
+#endif
 }
 
-mysqli_property_entry mysqli_driver_property_entries[] = {
+const mysqli_property_entry mysqli_driver_property_entries[] = {
 	{"client_info", driver_client_info_read, NULL},
 	{"client_version", driver_client_version_read, NULL},
 	{"driver_version", driver_driver_version_read, NULL},
@@ -145,8 +153,10 @@ mysqli_property_entry mysqli_driver_property_entries[] = {
 /* {{{ mysqli_driver_methods[]
  */
 const zend_function_entry mysqli_driver_methods[] = {
+#if defined(HAVE_EMBEDDED_MYSQLI)
 	PHP_FALIAS(embedded_server_start, mysqli_embedded_server_start, NULL)
 	PHP_FALIAS(embedded_server_end, mysqli_embedded_server_end, NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 /* }}} */
