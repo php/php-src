@@ -47,7 +47,6 @@ zend_function_entry php_xsl_xsltprocessor_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ attribute protos, not implemented yet */
 /* {{{ php_xsl_xslt_string_to_xpathexpr()
    Translates a string to a XPath Expression */
 static char *php_xsl_xslt_string_to_xpathexpr(const char *str TSRMLS_DC)
@@ -72,7 +71,7 @@ static char *php_xsl_xslt_string_to_xpathexpr(const char *str TSRMLS_DC)
 	}
 	return (char *) value;
 }
-
+/* }}} */
 
 /* {{{ php_xsl_xslt_make_params()
    Translates a PHP array to a libxslt parameters array */
@@ -122,8 +121,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 }
 /* }}} */
 
-
-static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type)
+static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type) /* {{{ */
 {
 	xsltTransformContextPtr tctxt;
 	zval **args;
@@ -313,17 +311,19 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 		efree(fci.params);
 	}
 }
+/* }}} */
 
-void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs)
+void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
 {
 	xsl_ext_function_php(ctxt, nargs, 1);
 }
+/* }}} */
 
-void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs)
+void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
 {
 	xsl_ext_function_php(ctxt, nargs, 2);
 }
-
+/* }}} */
 
 /* {{{ proto void xsl_xsltprocessor_import_stylesheet(domdocument doc);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
@@ -412,8 +412,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 }
 /* }}} end xsl_xsltprocessor_import_stylesheet */
 
-
-static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStylesheetPtr style, zval *docp TSRMLS_DC)
+static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStylesheetPtr style, zval *docp TSRMLS_DC) /* {{{ */
 {
 	xmlDocPtr newdocp;
 	xmlDocPtr doc = NULL;
@@ -495,6 +494,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	return newdocp;
 
 }
+/* }}} */
 
 /* {{{ proto domdocument xsl_xsltprocessor_transform_to_doc(domnode doc);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
@@ -555,7 +555,6 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 }
 /* }}} end xsl_xsltprocessor_transform_to_doc */
 
-
 /* {{{ proto int xsl_xsltprocessor_transform_to_uri(domdocument doc, string uri);
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
@@ -586,7 +585,6 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	RETVAL_LONG(ret);
 }
 /* }}} end xsl_xsltprocessor_transform_to_uri */
-
 
 /* {{{ proto string xsl_xsltprocessor_transform_to_xml(domdocument doc);
 */
@@ -625,7 +623,6 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	}
 }
 /* }}} end xsl_xsltprocessor_transform_to_xml */
-
 
 /* {{{ proto bool xsl_xsltprocessor_set_parameter(string namespace, mixed name [, string value]);
 */
@@ -784,3 +781,11 @@ PHP_FUNCTION(xsl_xsltprocessor_has_exslt_support)
 }
 /* }}} end xsl_xsltprocessor_has_exslt_support(); */
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
