@@ -35,3 +35,12 @@ PHP_FUNCTION(xsl_xsltprocessor_has_exslt_support);
 PHP_FUNCTION(xsl_xsltprocessor_register_php_functions);
 PHP_FUNCTION(xsl_xsltprocessor_set_profiling);
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
