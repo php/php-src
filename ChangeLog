@@ -1,3 +1,585 @@
+2007-10-05  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd_alloc.c
+      ext/mysqlnd/mysqlnd_alloc.c
+      ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_charset.h
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_palloc.h
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_qcache.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.h
+      ext/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqlnd/mysqlnd_result_meta.h
+      ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h
+      ext/mysqlnd/php_mysqlnd.h:
+      
+      file mysqlnd_alloc.c was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/mysql/config.m4
+      ext/mysql/config.w32
+      ext/mysql/mysql_mysqlnd.h
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h
+      ext/mysqli/config.m4
+      ext/mysqli/config.w32
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_embedded.c
+      ext/mysqli/mysqli_exception.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_libmysql.h
+      ext/mysqli/mysqli_mysqlnd.h
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_repl.c
+      ext/mysqli/mysqli_report.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqlnd/.cvsignore
+      ext/mysqlnd/CREDITS
+      ext/mysqlnd/config-win.h
+      ext/mysqlnd/config.w32
+      ext/mysqlnd/config9.m4
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h:
+      Import mysqlnd
+      Patch ext/mysql and ext/mysqli to support mysqlnd
+
+2007-10-05  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/setlocale_basic1.phpt
+      ext/standard/tests/strings/setlocale_basic1.phpt
+      ext/standard/tests/strings/setlocale_basic2.phpt
+      ext/standard/tests/strings/setlocale_basic2.phpt
+      ext/standard/tests/strings/setlocale_basic3.phpt
+      ext/standard/tests/strings/setlocale_basic3.phpt
+      ext/standard/tests/strings/setlocale_error.phpt
+      ext/standard/tests/strings/setlocale_error.phpt
+      ext/standard/tests/strings/setlocale_variation1.phpt
+      ext/standard/tests/strings/setlocale_variation1.phpt
+      ext/standard/tests/strings/setlocale_variation2.phpt
+      ext/standard/tests/strings/setlocale_variation2.phpt
+      ext/standard/tests/strings/setlocale_variation3.phpt
+      ext/standard/tests/strings/setlocale_variation3.phpt
+      ext/standard/tests/strings/setlocale_variation4.phpt
+      ext/standard/tests/strings/setlocale_variation4.phpt
+      ext/standard/tests/strings/setlocale_variation5.phpt
+      ext/standard/tests/strings/setlocale_variation5.phpt:
+      New testcases for setlocale() function
+
+    * ext/standard/tests/strings/setlocale_basic1.phpt
+      ext/standard/tests/strings/setlocale_basic1.phpt
+      ext/standard/tests/strings/setlocale_basic1.phpt
+      ext/standard/tests/strings/setlocale_basic2.phpt
+      ext/standard/tests/strings/setlocale_basic2.phpt
+      ext/standard/tests/strings/setlocale_basic2.phpt
+      ext/standard/tests/strings/setlocale_basic3.phpt
+      ext/standard/tests/strings/setlocale_basic3.phpt
+      ext/standard/tests/strings/setlocale_basic3.phpt
+      ext/standard/tests/strings/setlocale_error.phpt
+      ext/standard/tests/strings/setlocale_error.phpt
+      ext/standard/tests/strings/setlocale_error.phpt
+      ext/standard/tests/strings/setlocale_variation1.phpt
+      ext/standard/tests/strings/setlocale_variation1.phpt
+      ext/standard/tests/strings/setlocale_variation1.phpt
+      ext/standard/tests/strings/setlocale_variation2.phpt
+      ext/standard/tests/strings/setlocale_variation2.phpt
+      ext/standard/tests/strings/setlocale_variation2.phpt
+      ext/standard/tests/strings/setlocale_variation3.phpt
+      ext/standard/tests/strings/setlocale_variation3.phpt
+      ext/standard/tests/strings/setlocale_variation3.phpt
+      ext/standard/tests/strings/setlocale_variation4.phpt
+      ext/standard/tests/strings/setlocale_variation4.phpt
+      ext/standard/tests/strings/setlocale_variation4.phpt
+      ext/standard/tests/strings/setlocale_variation5.phpt
+      ext/standard/tests/strings/setlocale_variation5.phpt
+      ext/standard/tests/strings/setlocale_variation5.phpt:
+        1.1.4;
+      file setlocale_basic1.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/nl2br_error.phpt
+      ext/standard/tests/strings/nl2br_error.phpt
+      ext/standard/tests/strings/nl2br_variation1.phpt
+      ext/standard/tests/strings/nl2br_variation1.phpt
+      ext/standard/tests/strings/nl2br_variation2.phpt
+      ext/standard/tests/strings/nl2br_variation2.phpt
+      ext/standard/tests/strings/nl2br_variation3.phpt
+      ext/standard/tests/strings/nl2br_variation3.phpt
+      ext/standard/tests/strings/nl2br_variation4.phpt
+      ext/standard/tests/strings/nl2br_variation4.phpt
+      ext/standard/tests/strings/nl2br_variation5.phpt
+      ext/standard/tests/strings/nl2br_variation5.phpt:
+      New testcases for nl2br() function
+
+    * ext/standard/tests/strings/nl2br_error.phpt
+      ext/standard/tests/strings/nl2br_error.phpt
+      ext/standard/tests/strings/nl2br_error.phpt
+      ext/standard/tests/strings/nl2br_variation1.phpt
+      ext/standard/tests/strings/nl2br_variation1.phpt
+      ext/standard/tests/strings/nl2br_variation1.phpt
+      ext/standard/tests/strings/nl2br_variation2.phpt
+      ext/standard/tests/strings/nl2br_variation2.phpt
+      ext/standard/tests/strings/nl2br_variation2.phpt
+      ext/standard/tests/strings/nl2br_variation3.phpt
+      ext/standard/tests/strings/nl2br_variation3.phpt
+      ext/standard/tests/strings/nl2br_variation3.phpt
+      ext/standard/tests/strings/nl2br_variation4.phpt
+      ext/standard/tests/strings/nl2br_variation4.phpt
+      ext/standard/tests/strings/nl2br_variation4.phpt
+      ext/standard/tests/strings/nl2br_variation5.phpt
+      ext/standard/tests/strings/nl2br_variation5.phpt
+      ext/standard/tests/strings/nl2br_variation5.phpt:
+        1.1.4;
+      file nl2br_error.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/strrpos_basic1.phpt
+      ext/standard/tests/strings/strrpos_basic1.phpt
+      ext/standard/tests/strings/strrpos_basic2.phpt
+      ext/standard/tests/strings/strrpos_basic2.phpt
+      ext/standard/tests/strings/strrpos_error.phpt
+      ext/standard/tests/strings/strrpos_error.phpt
+      ext/standard/tests/strings/strrpos_variation1.phpt
+      ext/standard/tests/strings/strrpos_variation1.phpt
+      ext/standard/tests/strings/strrpos_variation10.phpt
+      ext/standard/tests/strings/strrpos_variation10.phpt
+      ext/standard/tests/strings/strrpos_variation11.phpt
+      ext/standard/tests/strings/strrpos_variation11.phpt
+      ext/standard/tests/strings/strrpos_variation12.phpt
+      ext/standard/tests/strings/strrpos_variation12.phpt
+      ext/standard/tests/strings/strrpos_variation13.phpt
+      ext/standard/tests/strings/strrpos_variation13.phpt
+      ext/standard/tests/strings/strrpos_variation14.phpt
+      ext/standard/tests/strings/strrpos_variation14.phpt
+      ext/standard/tests/strings/strrpos_variation15.phpt
+      ext/standard/tests/strings/strrpos_variation15.phpt
+      ext/standard/tests/strings/strrpos_variation2.phpt
+      ext/standard/tests/strings/strrpos_variation2.phpt
+      ext/standard/tests/strings/strrpos_variation3.phpt
+      ext/standard/tests/strings/strrpos_variation3.phpt
+      ext/standard/tests/strings/strrpos_variation4.phpt
+      ext/standard/tests/strings/strrpos_variation4.phpt
+      ext/standard/tests/strings/strrpos_variation5.phpt
+      ext/standard/tests/strings/strrpos_variation5.phpt
+      ext/standard/tests/strings/strrpos_variation6.phpt
+      ext/standard/tests/strings/strrpos_variation6.phpt
+      ext/standard/tests/strings/strrpos_variation7.phpt
+      ext/standard/tests/strings/strrpos_variation7.phpt
+      ext/standard/tests/strings/strrpos_variation8.phpt
+      ext/standard/tests/strings/strrpos_variation8.phpt
+      ext/standard/tests/strings/strrpos_variation9.phpt
+      ext/standard/tests/strings/strrpos_variation9.phpt:
+      New testcases for strrpos() function
+
+    * ext/standard/tests/strings/strrpos_basic1.phpt
+      ext/standard/tests/strings/strrpos_basic1.phpt
+      ext/standard/tests/strings/strrpos_basic1.phpt
+      ext/standard/tests/strings/strrpos_basic2.phpt
+      ext/standard/tests/strings/strrpos_basic2.phpt
+      ext/standard/tests/strings/strrpos_basic2.phpt
+      ext/standard/tests/strings/strrpos_error.phpt
+      ext/standard/tests/strings/strrpos_error.phpt
+      ext/standard/tests/strings/strrpos_error.phpt
+      ext/standard/tests/strings/strrpos_variation1.phpt
+      ext/standard/tests/strings/strrpos_variation1.phpt
+      ext/standard/tests/strings/strrpos_variation1.phpt
+      ext/standard/tests/strings/strrpos_variation10.phpt
+      ext/standard/tests/strings/strrpos_variation10.phpt
+      ext/standard/tests/strings/strrpos_variation10.phpt
+      ext/standard/tests/strings/strrpos_variation11.phpt
+      ext/standard/tests/strings/strrpos_variation11.phpt
+      ext/standard/tests/strings/strrpos_variation11.phpt
+      ext/standard/tests/strings/strrpos_variation12.phpt
+      ext/standard/tests/strings/strrpos_variation12.phpt
+      ext/standard/tests/strings/strrpos_variation12.phpt
+      ext/standard/tests/strings/strrpos_variation13.phpt
+      ext/standard/tests/strings/strrpos_variation13.phpt
+      ext/standard/tests/strings/strrpos_variation13.phpt
+      ext/standard/tests/strings/strrpos_variation14.phpt
+      ext/standard/tests/strings/strrpos_variation14.phpt
+      ext/standard/tests/strings/strrpos_variation14.phpt
+      ext/standard/tests/strings/strrpos_variation15.phpt
+      ext/standard/tests/strings/strrpos_variation15.phpt
+      ext/standard/tests/strings/strrpos_variation15.phpt
+      ext/standard/tests/strings/strrpos_variation2.phpt
+      ext/standard/tests/strings/strrpos_variation2.phpt
+      ext/standard/tests/strings/strrpos_variation2.phpt
+      ext/standard/tests/strings/strrpos_variation3.phpt
+      ext/standard/tests/strings/strrpos_variation3.phpt
+      ext/standard/tests/strings/strrpos_variation3.phpt
+      ext/standard/tests/strings/strrpos_variation4.phpt
+      ext/standard/tests/strings/strrpos_variation4.phpt
+      ext/standard/tests/strings/strrpos_variation4.phpt
+      ext/standard/tests/strings/strrpos_variation5.phpt
+      ext/standard/tests/strings/strrpos_variation5.phpt
+      ext/standard/tests/strings/strrpos_variation5.phpt
+      ext/standard/tests/strings/strrpos_variation6.phpt
+      ext/standard/tests/strings/strrpos_variation6.phpt
+      ext/standard/tests/strings/strrpos_variation6.phpt
+      ext/standard/tests/strings/strrpos_variation7.phpt
+      ext/standard/tests/strings/strrpos_variation7.phpt
+      ext/standard/tests/strings/strrpos_variation7.phpt
+      ext/standard/tests/strings/strrpos_variation8.phpt
+      ext/standard/tests/strings/strrpos_variation8.phpt
+      ext/standard/tests/strings/strrpos_variation8.phpt
+      ext/standard/tests/strings/strrpos_variation9.phpt
+      ext/standard/tests/strings/strrpos_variation9.phpt
+      ext/standard/tests/strings/strrpos_variation9.phpt:
+        1.1.4;
+      file strrpos_basic1.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/str_split_basic.phpt
+      ext/standard/tests/strings/str_split_basic.phpt
+      ext/standard/tests/strings/str_split_error.phpt
+      ext/standard/tests/strings/str_split_error.phpt
+      ext/standard/tests/strings/str_split_variation1.phpt
+      ext/standard/tests/strings/str_split_variation1.phpt
+      ext/standard/tests/strings/str_split_variation2.phpt
+      ext/standard/tests/strings/str_split_variation2.phpt
+      ext/standard/tests/strings/str_split_variation3.phpt
+      ext/standard/tests/strings/str_split_variation3.phpt
+      ext/standard/tests/strings/str_split_variation4.phpt
+      ext/standard/tests/strings/str_split_variation4.phpt
+      ext/standard/tests/strings/str_split_variation5.phpt
+      ext/standard/tests/strings/str_split_variation5.phpt
+      ext/standard/tests/strings/str_split_variation6.phpt
+      ext/standard/tests/strings/str_split_variation6.phpt
+      ext/standard/tests/strings/str_split_variation7.phpt
+      ext/standard/tests/strings/str_split_variation7.phpt:
+      New testcases for str_split() function
+
+    * ext/standard/tests/strings/str_split_basic.phpt
+      ext/standard/tests/strings/str_split_basic.phpt
+      ext/standard/tests/strings/str_split_basic.phpt
+      ext/standard/tests/strings/str_split_error.phpt
+      ext/standard/tests/strings/str_split_error.phpt
+      ext/standard/tests/strings/str_split_error.phpt
+      ext/standard/tests/strings/str_split_variation1.phpt
+      ext/standard/tests/strings/str_split_variation1.phpt
+      ext/standard/tests/strings/str_split_variation1.phpt
+      ext/standard/tests/strings/str_split_variation2.phpt
+      ext/standard/tests/strings/str_split_variation2.phpt
+      ext/standard/tests/strings/str_split_variation2.phpt
+      ext/standard/tests/strings/str_split_variation3.phpt
+      ext/standard/tests/strings/str_split_variation3.phpt
+      ext/standard/tests/strings/str_split_variation3.phpt
+      ext/standard/tests/strings/str_split_variation4.phpt
+      ext/standard/tests/strings/str_split_variation4.phpt
+      ext/standard/tests/strings/str_split_variation4.phpt
+      ext/standard/tests/strings/str_split_variation5.phpt
+      ext/standard/tests/strings/str_split_variation5.phpt
+      ext/standard/tests/strings/str_split_variation5.phpt
+      ext/standard/tests/strings/str_split_variation6.phpt
+      ext/standard/tests/strings/str_split_variation6.phpt
+      ext/standard/tests/strings/str_split_variation6.phpt
+      ext/standard/tests/strings/str_split_variation7.phpt
+      ext/standard/tests/strings/str_split_variation7.phpt
+      ext/standard/tests/strings/str_split_variation7.phpt:
+        1.1.4;
+      file str_split_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/vsprintf_basic1.phpt
+      ext/standard/tests/strings/vsprintf_basic1.phpt
+      ext/standard/tests/strings/vsprintf_basic2.phpt
+      ext/standard/tests/strings/vsprintf_basic2.phpt
+      ext/standard/tests/strings/vsprintf_basic3.phpt
+      ext/standard/tests/strings/vsprintf_basic3.phpt
+      ext/standard/tests/strings/vsprintf_basic4.phpt
+      ext/standard/tests/strings/vsprintf_basic4.phpt
+      ext/standard/tests/strings/vsprintf_basic5.phpt
+      ext/standard/tests/strings/vsprintf_basic5.phpt
+      ext/standard/tests/strings/vsprintf_basic6.phpt
+      ext/standard/tests/strings/vsprintf_basic6.phpt
+      ext/standard/tests/strings/vsprintf_basic7.phpt
+      ext/standard/tests/strings/vsprintf_basic7.phpt
+      ext/standard/tests/strings/vsprintf_basic8.phpt
+      ext/standard/tests/strings/vsprintf_basic8.phpt
+      ext/standard/tests/strings/vsprintf_basic9.phpt
+      ext/standard/tests/strings/vsprintf_basic9.phpt
+      ext/standard/tests/strings/vsprintf_error.phpt
+      ext/standard/tests/strings/vsprintf_error.phpt
+      ext/standard/tests/strings/vsprintf_variation1.phpt
+      ext/standard/tests/strings/vsprintf_variation1.phpt
+      ext/standard/tests/strings/vsprintf_variation10.phpt
+      ext/standard/tests/strings/vsprintf_variation10.phpt
+      ext/standard/tests/strings/vsprintf_variation11.phpt
+      ext/standard/tests/strings/vsprintf_variation11.phpt
+      ext/standard/tests/strings/vsprintf_variation12.phpt
+      ext/standard/tests/strings/vsprintf_variation12.phpt
+      ext/standard/tests/strings/vsprintf_variation13.phpt
+      ext/standard/tests/strings/vsprintf_variation13.phpt
+      ext/standard/tests/strings/vsprintf_variation14.phpt
+      ext/standard/tests/strings/vsprintf_variation14.phpt
+      ext/standard/tests/strings/vsprintf_variation15.phpt
+      ext/standard/tests/strings/vsprintf_variation15.phpt
+      ext/standard/tests/strings/vsprintf_variation16.phpt
+      ext/standard/tests/strings/vsprintf_variation16.phpt
+      ext/standard/tests/strings/vsprintf_variation17.phpt
+      ext/standard/tests/strings/vsprintf_variation17.phpt
+      ext/standard/tests/strings/vsprintf_variation18.phpt
+      ext/standard/tests/strings/vsprintf_variation18.phpt
+      ext/standard/tests/strings/vsprintf_variation19.phpt
+      ext/standard/tests/strings/vsprintf_variation19.phpt
+      ext/standard/tests/strings/vsprintf_variation2.phpt
+      ext/standard/tests/strings/vsprintf_variation2.phpt
+      ext/standard/tests/strings/vsprintf_variation3.phpt
+      ext/standard/tests/strings/vsprintf_variation3.phpt
+      ext/standard/tests/strings/vsprintf_variation4.phpt
+      ext/standard/tests/strings/vsprintf_variation4.phpt
+      ext/standard/tests/strings/vsprintf_variation5.phpt
+      ext/standard/tests/strings/vsprintf_variation5.phpt
+      ext/standard/tests/strings/vsprintf_variation6.phpt
+      ext/standard/tests/strings/vsprintf_variation6.phpt
+      ext/standard/tests/strings/vsprintf_variation7.phpt
+      ext/standard/tests/strings/vsprintf_variation7.phpt
+      ext/standard/tests/strings/vsprintf_variation8.phpt
+      ext/standard/tests/strings/vsprintf_variation8.phpt
+      ext/standard/tests/strings/vsprintf_variation9.phpt
+      ext/standard/tests/strings/vsprintf_variation9.phpt:
+      New testcases for vsprintf() function
+
+    * ext/standard/tests/strings/vsprintf_basic1.phpt
+      ext/standard/tests/strings/vsprintf_basic1.phpt
+      ext/standard/tests/strings/vsprintf_basic1.phpt
+      ext/standard/tests/strings/vsprintf_basic2.phpt
+      ext/standard/tests/strings/vsprintf_basic2.phpt
+      ext/standard/tests/strings/vsprintf_basic2.phpt
+      ext/standard/tests/strings/vsprintf_basic3.phpt
+      ext/standard/tests/strings/vsprintf_basic3.phpt
+      ext/standard/tests/strings/vsprintf_basic3.phpt
+      ext/standard/tests/strings/vsprintf_basic4.phpt
+      ext/standard/tests/strings/vsprintf_basic4.phpt
+      ext/standard/tests/strings/vsprintf_basic4.phpt
+      ext/standard/tests/strings/vsprintf_basic5.phpt
+      ext/standard/tests/strings/vsprintf_basic5.phpt
+      ext/standard/tests/strings/vsprintf_basic5.phpt
+      ext/standard/tests/strings/vsprintf_basic6.phpt
+      ext/standard/tests/strings/vsprintf_basic6.phpt
+      ext/standard/tests/strings/vsprintf_basic6.phpt
+      ext/standard/tests/strings/vsprintf_basic7.phpt
+      ext/standard/tests/strings/vsprintf_basic7.phpt
+      ext/standard/tests/strings/vsprintf_basic7.phpt
+      ext/standard/tests/strings/vsprintf_basic8.phpt
+      ext/standard/tests/strings/vsprintf_basic8.phpt
+      ext/standard/tests/strings/vsprintf_basic8.phpt
+      ext/standard/tests/strings/vsprintf_basic9.phpt
+      ext/standard/tests/strings/vsprintf_basic9.phpt
+      ext/standard/tests/strings/vsprintf_basic9.phpt
+      ext/standard/tests/strings/vsprintf_error.phpt
+      ext/standard/tests/strings/vsprintf_error.phpt
+      ext/standard/tests/strings/vsprintf_error.phpt
+      ext/standard/tests/strings/vsprintf_variation1.phpt
+      ext/standard/tests/strings/vsprintf_variation1.phpt
+      ext/standard/tests/strings/vsprintf_variation1.phpt
+      ext/standard/tests/strings/vsprintf_variation10.phpt
+      ext/standard/tests/strings/vsprintf_variation10.phpt
+      ext/standard/tests/strings/vsprintf_variation10.phpt
+      ext/standard/tests/strings/vsprintf_variation11.phpt
+      ext/standard/tests/strings/vsprintf_variation11.phpt
+      ext/standard/tests/strings/vsprintf_variation11.phpt
+      ext/standard/tests/strings/vsprintf_variation12.phpt
+      ext/standard/tests/strings/vsprintf_variation12.phpt
+      ext/standard/tests/strings/vsprintf_variation12.phpt
+      ext/standard/tests/strings/vsprintf_variation13.phpt
+      ext/standard/tests/strings/vsprintf_variation13.phpt
+      ext/standard/tests/strings/vsprintf_variation13.phpt
+      ext/standard/tests/strings/vsprintf_variation14.phpt
+      ext/standard/tests/strings/vsprintf_variation14.phpt
+      ext/standard/tests/strings/vsprintf_variation14.phpt
+      ext/standard/tests/strings/vsprintf_variation15.phpt
+      ext/standard/tests/strings/vsprintf_variation15.phpt
+      ext/standard/tests/strings/vsprintf_variation15.phpt
+      ext/standard/tests/strings/vsprintf_variation16.phpt
+      ext/standard/tests/strings/vsprintf_variation16.phpt
+      ext/standard/tests/strings/vsprintf_variation16.phpt
+      ext/standard/tests/strings/vsprintf_variation17.phpt
+      ext/standard/tests/strings/vsprintf_variation17.phpt
+      ext/standard/tests/strings/vsprintf_variation17.phpt
+      ext/standard/tests/strings/vsprintf_variation18.phpt
+      ext/standard/tests/strings/vsprintf_variation18.phpt
+      ext/standard/tests/strings/vsprintf_variation18.phpt
+      ext/standard/tests/strings/vsprintf_variation19.phpt
+      ext/standard/tests/strings/vsprintf_variation19.phpt
+      ext/standard/tests/strings/vsprintf_variation19.phpt
+      ext/standard/tests/strings/vsprintf_variation2.phpt
+      ext/standard/tests/strings/vsprintf_variation2.phpt
+      ext/standard/tests/strings/vsprintf_variation2.phpt
+      ext/standard/tests/strings/vsprintf_variation3.phpt
+      ext/standard/tests/strings/vsprintf_variation3.phpt
+      ext/standard/tests/strings/vsprintf_variation3.phpt
+      ext/standard/tests/strings/vsprintf_variation4.phpt
+      ext/standard/tests/strings/vsprintf_variation4.phpt
+      ext/standard/tests/strings/vsprintf_variation4.phpt
+      ext/standard/tests/strings/vsprintf_variation5.phpt
+      ext/standard/tests/strings/vsprintf_variation5.phpt
+      ext/standard/tests/strings/vsprintf_variation5.phpt
+      ext/standard/tests/strings/vsprintf_variation6.phpt
+      ext/standard/tests/strings/vsprintf_variation6.phpt
+      ext/standard/tests/strings/vsprintf_variation6.phpt
+      ext/standard/tests/strings/vsprintf_variation7.phpt
+      ext/standard/tests/strings/vsprintf_variation7.phpt
+      ext/standard/tests/strings/vsprintf_variation7.phpt
+      ext/standard/tests/strings/vsprintf_variation8.phpt
+      ext/standard/tests/strings/vsprintf_variation8.phpt
+      ext/standard/tests/strings/vsprintf_variation8.phpt
+      ext/standard/tests/strings/vsprintf_variation9.phpt
+      ext/standard/tests/strings/vsprintf_variation9.phpt
+      ext/standard/tests/strings/vsprintf_variation9.phpt:
+        1.1.4;
+      file vsprintf_basic1.phpt was initially added on branch PHP_5_2.
+
+2007-10-05  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_2_WITH_DRCP)
+      ext/oci8/README
+      ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/package2.xml
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/debug.phpt
+      ext/oci8/tests/password.phpt
+      ext/oci8/tests/password_2.phpt
+      ext/oci8/tests/password_new.phpt
+      ext/oci8/tests/password_old.phpt:
+      Add DRCP & FAN
+
+2007-10-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * sapi/cgi/config.w32
+      sapi/cli/config.w32:
+      fix win build
+
+2007-10-05  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      MFB:-r1.139.2.2 Export symbols that will allow building WDDX as shared
+      object
+
+    * (PHP_5_3)
+      configure.in
+      ext/ereg/.cvsignore
+      ext/ereg/CREDITS
+      ext/ereg/config.w32
+      ext/ereg/config0.m4
+      ext/ereg/ereg.c
+      ext/ereg/php_ereg.h
+      ext/ereg/php_regex.h
+      ext/ereg/regex/.cvsignore
+      ext/ereg/regex/COPYRIGHT
+      ext/ereg/regex/README
+      ext/ereg/regex/WHATSNEW
+      ext/ereg/regex/cclass.h
+      ext/ereg/regex/cname.h
+      ext/ereg/regex/debug.c
+      ext/ereg/regex/debug.ih
+      ext/ereg/regex/engine.c
+      ext/ereg/regex/engine.ih
+      ext/ereg/regex/main.c
+      ext/ereg/regex/main.ih
+      ext/ereg/regex/mkh
+      ext/ereg/regex/regcomp.c
+      ext/ereg/regex/regcomp.ih
+      ext/ereg/regex/regerror.c
+      ext/ereg/regex/regerror.ih
+      ext/ereg/regex/regex.3
+      ext/ereg/regex/regex.7
+      ext/ereg/regex/regex.dsp
+      ext/ereg/regex/regex.dsw
+      ext/ereg/regex/regex.h
+      ext/ereg/regex/regex.mak
+      ext/ereg/regex/regex2.h
+      ext/ereg/regex/regexec.c
+      ext/ereg/regex/regfree.c
+      ext/ereg/regex/split.c
+      ext/ereg/regex/tests
+      ext/ereg/regex/utils.h
+      ext/ereg/tests/.cvsignore
+      ext/ereg/tests/001.phpt
+      ext/ereg/tests/002.phpt
+      ext/ereg/tests/003.phpt
+      ext/ereg/tests/004.phpt
+      ext/ereg/tests/005.phpt
+      ext/ereg/tests/006.phpt
+      ext/ereg/tests/007.phpt
+      ext/ereg/tests/008.phpt
+      ext/ereg/tests/009.phpt
+      ext/ereg/tests/010.phpt
+      ext/ereg/tests/011.phpt
+      ext/ereg/tests/012.phpt
+      ext/ereg/tests/013.phpt
+      ext/ereg/tests/014.phpt
+      ext/ereg/tests/015.phpt
+      ext/ereg/tests/016.phpt
+      ext/pgsql/pgsql.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/config.m4
+      ext/standard/config.w32
+      ext/standard/html.c
+      ext/standard/php_standard.h
+      ext/standard/reg.c
+      ext/standard/reg.h
+      ext/standard/string.c
+      main/php.h
+      main/php_regex.h
+      sapi/apache/php_apache_http.h
+      sapi/apache_hooks/php_apache_http.h
+      win32/build/config.w32:
+      MFH:- Moved the old regex functions to own extension: ereg
+
+    * ext/standard/tests/file/lstat_stat_basic.phpt:
+      fix test
+
+2007-10-05  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      configure.in:
+      allow lcov 1.6
+
+    * configure.in:
+      MFB: allow lcov 1.6
+
+    * (PHP_5_3)
+      configure.in:
+      lcov 1.6 also works correctly
+
+2007-10-05  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      configure.in:
+      - Sync with configure.in from HEAD (the CGI stuff is as ini options
+      nowadays)
+
+2007-10-05  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c:
+      WS fix. Space instead of tab.
+
+    * ext/spl/spl_directory.c:
+      WS/Indent fix.
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c:
+      WS/Indent fix
+
 2007-10-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
