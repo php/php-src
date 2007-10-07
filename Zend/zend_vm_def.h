@@ -348,13 +348,13 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
-					if (z->refcount == 0) {
+					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
 					z = value;
 				}
-				z->refcount++;
+				Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(&z);
 				binary_op(z, z, value TSRMLS_CC);
 				switch (opline->extended_value) {
@@ -409,7 +409,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 				zval **object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W);
 
 				if (object_ptr && OP1_TYPE != IS_CV && !OP1_FREE) {
-					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
+					Z_ADDREF_PP(object_ptr);  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
 				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
@@ -456,7 +456,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 	   && Z_OBJ_HANDLER_PP(var_ptr, set)) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_PP(var_ptr, get)(*var_ptr TSRMLS_CC);
-		objval->refcount++;
+		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_PP(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(&objval);
@@ -586,13 +586,13 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
-				if (z->refcount == 0) {
+				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
 				z = value;
 			}
-			z->refcount++;
+			Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(&z);
 			incdec_op(z);
 			*retval = z;
@@ -676,7 +676,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
-				if (z->refcount == 0) {
+				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -689,7 +689,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 			zendi_zval_copy_ctor(*z_copy);
 			INIT_PZVAL(z_copy);
 			incdec_op(z_copy);
-			z->refcount++;
+			Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
@@ -743,7 +743,7 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 	   && Z_OBJ_HANDLER_PP(var_ptr, set)) {
 		/* proxy object */
 		zval *val = Z_OBJ_HANDLER_PP(var_ptr, get)(*var_ptr TSRMLS_CC);
-		val->refcount++;
+		Z_ADDREF_P(val);
 		increment_function(val);
 		Z_OBJ_HANDLER_PP(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(&val);
@@ -786,7 +786,7 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 	   && Z_OBJ_HANDLER_PP(var_ptr, set)) {
 		/* proxy object */
 		zval *val = Z_OBJ_HANDLER_PP(var_ptr, get)(*var_ptr TSRMLS_CC);
-		val->refcount++;
+		Z_ADDREF_P(val);
 		decrement_function(val);
 		Z_OBJ_HANDLER_PP(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(&val);
@@ -830,7 +830,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 	   && Z_OBJ_HANDLER_PP(var_ptr, set)) {
 		/* proxy object */
 		zval *val = Z_OBJ_HANDLER_PP(var_ptr, get)(*var_ptr TSRMLS_CC);
-		val->refcount++;
+		Z_ADDREF_P(val);
 		increment_function(val);
 		Z_OBJ_HANDLER_PP(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(&val);
@@ -868,7 +868,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 	   && Z_OBJ_HANDLER_PP(var_ptr, set)) {
 		/* proxy object */
 		zval *val = Z_OBJ_HANDLER_PP(var_ptr, get)(*var_ptr TSRMLS_CC);
-		val->refcount++;
+		Z_ADDREF_P(val);
 		decrement_function(val);
 		Z_OBJ_HANDLER_PP(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(&val);
@@ -977,7 +977,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, ANY, int type
 				case BP_VAR_W: {
 						zval *new_zval = &EG(uninitialized_zval);
 
-						new_zval->refcount++;
+						Z_ADDREF_P(new_zval);
 						zend_u_hash_update(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, &new_zval, sizeof(zval *), (void **) &retval);
 					}
 					break;
@@ -1237,7 +1237,7 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 		/* here we are sure we are dealing with an object */
 		*retval = Z_OBJ_HT_P(container)->read_property(container, offset, type TSRMLS_CC);
 
-		if (RETURN_VALUE_UNUSED(&opline->result) && ((*retval)->refcount == 0)) {
+		if (RETURN_VALUE_UNUSED(&opline->result) && (Z_REFCOUNT_PP(retval) == 0)) {
 			zval_dtor(*retval);
 			FREE_ZVAL(*retval);
 		} else {
@@ -1483,7 +1483,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 
 	if (OP2_TYPE == IS_VAR &&
 	    value_ptr_ptr &&
-	    !(*value_ptr_ptr)->is_ref &&
+	    !Z_ISREF_PP(value_ptr_ptr) &&
 	    opline->extended_value == ZEND_RETURNS_FUNCTION &&
 	    !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
 		if (free_op2.var == NULL) {
@@ -1631,8 +1631,8 @@ ZEND_VM_HANDLER(53, ZEND_INIT_STRING, ANY, ANY)
 		Z_STRLEN_P(tmp) = 0;
 		Z_TYPE_P(tmp) = IS_STRING;
 	}
-	tmp->refcount = 1;
-	tmp->is_ref = 0;
+	Z_SET_REFCOUNT_P(tmp, 1);
+	Z_UNSET_ISREF_P(tmp);
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -1769,7 +1769,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
-			EX(object)->refcount++; /* For $this pointer */
+			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
 			zval *this_ptr;
 			ALLOC_ZVAL(this_ptr);
@@ -1867,7 +1867,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 
 		}
 		if ((EX(object) = EG(This))) {
-			EX(object)->refcount++;
+			Z_ADDREF_P(EX(object));
 			EX(called_scope) = Z_OBJCE_P(EX(object));
 		}
 	}
@@ -2042,8 +2042,8 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 /*	We shouldn't fix bad extensions here,
     because it can break proper ones (Bug #34045)
 		if (!EX(function_state).function->common.return_reference) {
-			EX_T(opline->result.u.var).var.ptr->is_ref = 0;
-			EX_T(opline->result.u.var).var.ptr->refcount = 1;
+			Z_UNSET_ISREF_P(EX_T(opline->result.u.var).var.ptr);
+			Z_SET_REFCOUNT_P(EX_T(opline->result.u.var).var.ptr, 1);
 		}
 */
 		if (!return_value_used) {
@@ -2110,8 +2110,8 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		if (!return_value_used) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		} else {
-			EX_T(opline->result.u.var).var.ptr->is_ref = 0;
-			EX_T(opline->result.u.var).var.ptr->refcount = 1;
+			Z_UNSET_ISREF_P(EX_T(opline->result.u.var).var.ptr);
+			Z_SET_REFCOUNT_P(EX_T(opline->result.u.var).var.ptr, 1);
 			EX_T(opline->result.u.var).var.fcall_returned_reference = 0;
 		}
 	}
@@ -2119,9 +2119,9 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	if (EG(This)) {
 		if (EG(exception) && IS_CTOR_CALL(EX(called_scope))) {
 			if (IS_CTOR_USED(EX(called_scope))) {
-				EG(This)->refcount--;
+				Z_DELREF_P(EG(This));
 			}
-			if (EG(This)->refcount == 1) {
+			if (Z_REFCOUNT_P(EG(This)) == 1) {
 				zend_object_store_ctor_failed(EG(This) TSRMLS_CC);
 			}
 		}
@@ -2199,7 +2199,7 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 			zend_error_noreturn(E_ERROR, "Cannot return string offsets by reference");
 		}
 
-		if (OP1_TYPE == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
+		if (OP1_TYPE == IS_VAR && !Z_ISREF_PP(retval_ptr_ptr)) {
 			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			    EX_T(opline->op1.u.var).var.fcall_returned_reference) {
 			} else if (opline->extended_value == ZEND_RETURNS_NEW) {
@@ -2213,7 +2213,7 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 		}
 
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
-		(*retval_ptr_ptr)->refcount++;
+		Z_ADDREF_PP(retval_ptr_ptr);
 
 		(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
 	} else {
@@ -2223,7 +2223,7 @@ ZEND_VM_C_LABEL(return_by_value):
 
 		if (!IS_OP1_TMP_FREE()) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
-			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
+			    (PZVAL_IS_REF(retval_ptr) && Z_REFCOUNT_P(retval_ptr) > 0)) {
 				zval *ret;
 
 				ALLOC_ZVAL(ret);
@@ -2232,7 +2232,7 @@ ZEND_VM_C_LABEL(return_by_value):
 				*EG(return_value_ptr_ptr) = ret;
 			} else {
 				*EG(return_value_ptr_ptr) = retval_ptr;
-				retval_ptr->refcount++;
+				Z_ADDREF_P(retval_ptr);
 			}
 		} else {
 			zval *ret;
@@ -2333,17 +2333,17 @@ ZEND_VM_HELPER(zend_send_by_var_helper, VAR|CV, ANY)
 	if (varptr == &EG(uninitialized_zval)) {
 		ALLOC_ZVAL(varptr);
 		INIT_ZVAL(*varptr);
-		varptr->refcount = 0;
+		Z_SET_REFCOUNT_P(varptr, 0);
 	} else if (PZVAL_IS_REF(varptr)) {
 		zval *original_var = varptr;
 
 		ALLOC_ZVAL(varptr);
 		*varptr = *original_var;
-		varptr->is_ref = 0;
-		varptr->refcount = 0;
+		Z_UNSET_ISREF_P(varptr);
+		Z_SET_REFCOUNT_P(varptr, 0);
 		zval_copy_ctor(varptr);
 	}
-	varptr->refcount++;
+	Z_ADDREF_P(varptr);
 	zend_ptr_stack_push(&EG(argument_stack), varptr);
 	FREE_OP1();  /* for string offsets */
 
@@ -2377,9 +2377,9 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	     EX_T(opline->op1.u.var).var.fcall_returned_reference) &&
 	    varptr != &EG(uninitialized_zval) &&
 	    (PZVAL_IS_REF(varptr) ||
-	     (varptr->refcount == 1 && (OP1_TYPE == IS_CV || free_op1.var)))) {
-		varptr->is_ref = 1;
-		varptr->refcount++;
+	     (Z_REFCOUNT_P(varptr) == 1 && (OP1_TYPE == IS_CV || free_op1.var)))) {
+		Z_SET_ISREF_P(varptr);
+		Z_ADDREF_P(varptr);
 		zend_ptr_stack_push(&EG(argument_stack), varptr);
 	} else {
 		zval *valptr;
@@ -2410,7 +2410,7 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 
 	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr_ptr);
 	varptr = *varptr_ptr;
-	varptr->refcount++;
+	Z_ADDREF_P(varptr);
 	zend_ptr_stack_push(&EG(argument_stack), varptr);
 
 	FREE_OP1_VAR_PTR();
@@ -2481,10 +2481,10 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 			if (Z_TYPE(opline->op2.u.constant)==IS_CONSTANT_ARRAY) {
 				zval_copy_ctor(default_value);
 			}
-			default_value->refcount=1;
+			Z_SET_REFCOUNT_P(default_value, 1);
 			zval_update_constant(&default_value, 0 TSRMLS_CC);
-			default_value->refcount=0;
-			default_value->is_ref=0;
+			Z_SET_REFCOUNT_P(default_value, 0);
+			Z_UNSET_ISREF_P(default_value);
 			param = &default_value;
 			assignment_value = default_value;
 		} else {
@@ -2574,7 +2574,7 @@ ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 			PZVAL_LOCK(EX_T(opline->op1.u.var).var.ptr);
 		} else {
 			switch_expr_is_overloaded = 1;
-			EX_T(opline->op1.u.var).str_offset.str->refcount++;
+			Z_ADDREF_P(EX_T(opline->op1.u.var).str_offset.str);
 		}
 	}
 	is_equal_function(&EX_T(opline->result.u.var).tmp_var,
@@ -2659,7 +2659,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 	if (!obj || Z_TYPE_P(obj) != IS_OBJECT) {
 		zend_error_noreturn(E_ERROR, "__clone method called on non-object");
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
-		EX_T(opline->result.u.var).var.ptr->refcount++;
+		Z_ADDREF_P(EX_T(opline->result.u.var).var.ptr);
 		FREE_OP1_IF_VAR();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -2674,7 +2674,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
 		}
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
-		EX_T(opline->result.u.var).var.ptr->refcount++;
+		Z_ADDREF_P(EX_T(opline->result.u.var).var.ptr);
 	}
 
 	if (ce && clone) {
@@ -2698,8 +2698,8 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 		ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 		Z_OBJVAL_P(EX_T(opline->result.u.var).var.ptr) = clone_call(obj TSRMLS_CC);
 		Z_TYPE_P(EX_T(opline->result.u.var).var.ptr) = IS_OBJECT;
-		EX_T(opline->result.u.var).var.ptr->refcount=1;
-		EX_T(opline->result.u.var).var.ptr->is_ref=1;
+		Z_SET_REFCOUNT_P(EX_T(opline->result.u.var).var.ptr, 1);
+		Z_SET_ISREF_P(EX_T(opline->result.u.var).var.ptr);
 		if (!RETURN_VALUE_USED(opline) || EG(exception)) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
@@ -2807,7 +2807,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 		if (opline->extended_value) {
 			SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 			expr_ptr = *expr_ptr_ptr;
-			expr_ptr->refcount++;
+			Z_ADDREF_P(expr_ptr);
 		} else
 #endif
 		if (PZVAL_IS_REF(expr_ptr)) {
@@ -2818,7 +2818,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 			expr_ptr = new_expr;
 			zendi_zval_copy_ctor(*expr_ptr);
 		} else {
-			expr_ptr->refcount++;
+			Z_ADDREF_P(expr_ptr);
 		}
 	}
 	if (offset) {
@@ -3108,7 +3108,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 		convert_to_text(&tmp);
 		varname = &tmp;
 	} else if (OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) {
-		varname->refcount++;
+		Z_ADDREF_P(varname);
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
@@ -3197,7 +3197,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 								free_offset = 1;
 							}
 						} else if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
-							offset->refcount++;
+							Z_ADDREF_P(offset);
 						}
 
 						if (zend_u_symtable_del(ht, Z_TYPE_P(offset), offset_key, offset_len+1) == SUCCESS &&
@@ -3322,18 +3322,18 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			ce = Z_OBJCE_PP(array_ptr_ptr);
 			if (!ce || ce->get_iterator == NULL) {
 				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
-				(*array_ptr_ptr)->refcount++;
+				Z_ADDREF_PP(array_ptr_ptr);
 			}
 			array_ptr = *array_ptr_ptr;
 		} else {
 			if (Z_TYPE_PP(array_ptr_ptr) == IS_ARRAY) {
 				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
 				if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
-					(*array_ptr_ptr)->is_ref = 1;
+					Z_SET_ISREF_PP(array_ptr_ptr);
 				}
 			}
 			array_ptr = *array_ptr_ptr;
-			array_ptr->refcount++;
+			Z_ADDREF_P(array_ptr);
 		}
 	} else {
 		array_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -3346,12 +3346,12 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || !ce->get_iterator) {
-				array_ptr->refcount++;
+				Z_ADDREF_P(array_ptr);
 			}
 		} else {
 			if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) &&
-			    !array_ptr->is_ref &&
-			    array_ptr->refcount > 1) {
+			    !Z_ISREF_P(array_ptr) &&
+			    Z_REFCOUNT_P(array_ptr) > 1) {
 				zval *tmp;
 
 				ALLOC_ZVAL(tmp);
@@ -3359,7 +3359,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 				zval_copy_ctor(tmp);
 				array_ptr = tmp;
 			} else {
-				array_ptr->refcount++;
+				Z_ADDREF_P(array_ptr);
 			}
 		}
 	}
@@ -3392,7 +3392,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter TSRMLS_CC);
 			if (EG(exception)) {
-				array_ptr->refcount--;
+				Z_DELREF_P(array_ptr);
 				zval_ptr_dtor(&array_ptr);
 				if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 					FREE_OP1_VAR_PTR();
@@ -3404,7 +3404,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		}
 		is_empty = iter->funcs->valid(iter TSRMLS_CC) != SUCCESS;
 		if (EG(exception)) {
-			array_ptr->refcount--;
+			Z_DELREF_P(array_ptr);
 			zval_ptr_dtor(&array_ptr);
 			if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 				FREE_OP1_VAR_PTR();
@@ -3527,7 +3527,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				 * In case that ever happens we need an additional flag. */
 				iter->funcs->move_forward(iter TSRMLS_CC);
 				if (EG(exception)) {
-					array->refcount--;
+					Z_DELREF_P(array);
 					zval_ptr_dtor(&array);
 					ZEND_VM_NEXT_OPCODE();
 				}
@@ -3536,7 +3536,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			if (!iter || (iter->index > 0 && iter->funcs->valid(iter TSRMLS_CC) == FAILURE)) {
 				/* reached end of iteration */
 				if (EG(exception)) {
-					array->refcount--;
+					Z_DELREF_P(array);
 					zval_ptr_dtor(&array);
 					ZEND_VM_NEXT_OPCODE();
 				}
@@ -3544,7 +3544,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			}
 			iter->funcs->get_current_data(iter, &value TSRMLS_CC);
 			if (EG(exception)) {
-				array->refcount--;
+				Z_DELREF_P(array);
 				zval_ptr_dtor(&array);
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -3556,7 +3556,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				if (iter->funcs->get_current_key) {
 					key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
 					if (EG(exception)) {
-						array->refcount--;
+						Z_DELREF_P(array);
 						zval_ptr_dtor(&array);
 						ZEND_VM_NEXT_OPCODE();
 					}
@@ -3570,9 +3570,9 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 
 	if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 		SEPARATE_ZVAL_IF_NOT_REF(value);
-		(*value)->is_ref = 1;
+		Z_SET_ISREF_PP(value);
 		EX_T(opline->result.u.var).var.ptr_ptr = value;
-		(*value)->refcount++;
+		Z_ADDREF_PP(value);
 	} else {
 		EX_T(opline->result.u.var).var.ptr_ptr = value;
 		PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr);
@@ -4056,7 +4056,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		EX(called_scope) = (zend_class_entry*)zend_ptr_stack_pop(&EG(arg_types_stack));
 		if (EX(object)) {
 			if (IS_CTOR_USED(EX(called_scope))) {
-				EX(object)->refcount--;
+				Z_DELREF_P(EX(object));
 			}
 			zval_ptr_dtor(&EX(object));
 		}

@@ -470,7 +470,7 @@ PHP_FUNCTION(spl_autoload_register)
 			memcpy(lc_name.s + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(zend_object_handle));
 			func_name_len += sizeof(zend_object_handle);
 			alfi.obj = *obj_ptr;
-			alfi.obj->refcount++;
+			Z_ADDREF_P(alfi.obj);
 			if (Z_TYPE(zfunc_name) == IS_UNICODE) {
 				func_name_len /= sizeof(UChar);
 				Z_STRLEN(zfunc_name) = func_name_len;

@@ -757,8 +757,8 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 	retval_znode.op_type = IS_CONST;
 	Z_TYPE(retval_znode.u.constant) = IS_LONG;
 	Z_LVAL(retval_znode.u.constant) = 1;
-	retval_znode.u.constant.is_ref = 0;
-	retval_znode.u.constant.refcount = 1;
+	Z_UNSET_ISREF(retval_znode.u.constant);
+	Z_SET_REFCOUNT(retval_znode.u.constant, 1);
 
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 

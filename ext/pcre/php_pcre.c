@@ -845,13 +845,13 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 					zend_string_to_unicode_ex(UG(utf8_conv), &u, &u_len, subpat_names[i], strlen(subpat_names[i]), &status);
 					zend_u_hash_update(Z_ARRVAL_P(subpats), IS_UNICODE, ZSTR(u),
 									   u_len+1, &match_sets[i], sizeof(zval *), NULL);
-					ZVAL_ADDREF(match_sets[i]);
+					Z_ADDREF_P(match_sets[i]);
 					efree(u);
 					status = U_ZERO_ERROR;
 				} else {
 					zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i],
 									 strlen(subpat_names[i])+1, &match_sets[i], sizeof(zval *), NULL);
-					ZVAL_ADDREF(match_sets[i]);
+					Z_ADDREF_P(match_sets[i]);
 				}
 			}
 			zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &match_sets[i], sizeof(zval *), NULL);
@@ -1961,7 +1961,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		/* If the entry fits our requirements */
 		if ((count > 0 && !invert) ||
 			(count == PCRE_ERROR_NOMATCH && invert)) {
-			(*entry)->refcount++;
+			Z_ADDREF_PP(entry);
 
 			/* Add to return array */
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 0, NULL))

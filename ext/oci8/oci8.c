@@ -1812,7 +1812,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 			}
 			if (fetch_mode & PHP_OCI_ASSOC) {
 				if (fetch_mode & PHP_OCI_NUM) {
-					ZVAL_ADDREF(element);
+					Z_ADDREF_P(element);
 				}
 				add_u_assoc_zval(return_value, (UG(unicode) ? IS_UNICODE : IS_STRING), column->name, element);
 			}

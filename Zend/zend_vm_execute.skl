@@ -37,9 +37,9 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (op_array->uses_this && EG(This)) {
-		EG(This)->refcount++; /* For $this pointer */
+		Z_ADDREF_P(EG(This)); /* For $this pointer */
 		if (zend_ascii_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL)==FAILURE) {
-			EG(This)->refcount--;
+			Z_DELREF_P(EG(This));
 		}
 	}
 

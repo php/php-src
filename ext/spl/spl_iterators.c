@@ -392,7 +392,7 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 	iterator = emalloc(sizeof(spl_recursive_it_iterator));
 	object   = (spl_recursive_it_object*)zend_object_store_get_object(zobject TSRMLS_CC);
 
-	zobject->refcount++;
+	Z_ADDREF_P(zobject);
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = ce->iterator_funcs.funcs;
 	iterator->zobject = zobject;
@@ -479,7 +479,7 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	ce_iterator = Z_OBJCE_P(iterator); /* respect inheritance, don't use spl_ce_RecursiveIterator */
 	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator, 0 TSRMLS_CC);
 	if (inc_refcount) {
-		iterator->refcount++;
+		Z_ADDREF_P(iterator);
 	}
 	intern->iterators[0].zobject = iterator;
 	intern->iterators[0].ce = ce_iterator;
@@ -1045,7 +1045,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 	php_set_error_handling(EH_THROW, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
 
 	if (inc_refcount) {
-		zobject->refcount++;
+		Z_ADDREF_P(zobject);
 	}
 	intern->inner.zobject = zobject;
 	intern->inner.ce = dit_type == DIT_IteratorIterator ? ce : Z_OBJCE_P(zobject);
@@ -1136,7 +1136,7 @@ static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more T
 	if (!check_more || spl_dual_it_valid(intern TSRMLS_CC) == SUCCESS) {
 		intern->inner.iterator->funcs->get_current_data(intern->inner.iterator, &data TSRMLS_CC);
 		intern->current.data = *data;
-		intern->current.data->refcount++;
+		Z_ADDREF_P(intern->current.data);
 		if (intern->inner.iterator->funcs->get_current_key) {
 			intern->current.key_type = intern->inner.iterator->funcs->get_current_key(intern->inner.iterator, &intern->current.str_key, &intern->current.str_key_len, &intern->current.int_key TSRMLS_CC);
 		} else {
@@ -2093,7 +2093,7 @@ SPL_METHOD(CachingIterator, offsetSet)
 		return;
 	}
 
-	value->refcount++;
+	Z_ADDREF_P(value);
 	zend_u_symtable_update(HASH_OF(intern->u.caching.zcache), type, arKey, nKeyLength+1, &value, sizeof(value), NULL);
 }
 /* }}} */
@@ -2551,7 +2551,7 @@ int spl_append_it_next_iterator(spl_dual_it_object *intern TSRMLS_DC) /* {{{*/
 		zval **it;
 
 		intern->u.append.iterator->funcs->get_current_data(intern->u.append.iterator, &it TSRMLS_CC);
-		(*it)->refcount++;
+		Z_ADDREF_PP(it);
 		intern->inner.zobject = *it;
 		intern->inner.ce = Z_OBJCE_PP(it);
 		intern->inner.object = zend_object_store_get_object(*it TSRMLS_CC);
@@ -2749,7 +2749,7 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser T
 		if (EG(exception)) {
 			return ZEND_HASH_APPLY_STOP;
 		}
-		(*data)->refcount++;
+		Z_ADDREF_PP(data);
 		switch(key_type) {
 			case HASH_KEY_IS_STRING:
 				add_assoc_zval_ex(return_value, str_key.s, str_key_len, *data);
@@ -2764,7 +2764,7 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser T
 				break;
 		}
 	} else {
-		(*data)->refcount++;
+		Z_ADDREF_PP(data);
 		add_next_index_zval(return_value, *data);
 	}
 	return ZEND_HASH_APPLY_KEEP;
@@ -2779,7 +2779,7 @@ static int spl_iterator_to_values_apply(zend_object_iterator *iter, void *puser 
 	if (EG(exception)) {
 		return ZEND_HASH_APPLY_STOP;
 	}
-	(*data)->refcount++;
+	Z_ADDREF_PP(data);
 	add_next_index_zval(return_value, *data);
 	return ZEND_HASH_APPLY_KEEP;
 }

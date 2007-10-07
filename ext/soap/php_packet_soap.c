@@ -228,7 +228,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		}
 		add_soap_fault(this_ptr, faultcode, faultstring, faultactor, details TSRMLS_CC);
 		if (details) {
-			details->refcount--;
+			Z_DELREF_P(details);
 		}
 		xmlFreeDoc(response);
 		return FALSE;
@@ -402,7 +402,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(return_value));
 			zend_hash_get_current_data(Z_ARRVAL_P(return_value), (void**)&tmp);
 			tmp = *(zval**)tmp;
-			tmp->refcount++;
+			Z_ADDREF_P(tmp);
 			zval_dtor(return_value);
 			*return_value = *tmp;
 			FREE_ZVAL(tmp);

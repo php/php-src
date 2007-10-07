@@ -430,8 +430,8 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 
 	Z_TYPE_P(object) = IS_OBJECT;
 	object_init_ex(object, dbstmt_ce);
-	object->refcount = 1;
-	object->is_ref = 1;
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_SET_ISREF_P(object);
 	
 	return object;
 } /* }}} */
@@ -785,7 +785,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_D
 					PDO_HANDLE_DBH_ERR();
 					return FAILURE;
 				}
-				(*item)->refcount++;
+				Z_ADDREF_PP(item);
 				dbh->def_stmt_ctor_args = *item;
 			}
 			return SUCCESS;
@@ -872,7 +872,7 @@ static PHP_METHOD(PDO, getAttribute)
 			array_init(return_value);
 			add_next_index_text(return_value, dbh->def_stmt_ce->name, 1);
 			if (dbh->def_stmt_ctor_args) {
-				dbh->def_stmt_ctor_args->refcount++;
+				Z_ADDREF_P(dbh->def_stmt_ctor_args);
 				add_next_index_zval(return_value, dbh->def_stmt_ctor_args);
 			}
 			return;

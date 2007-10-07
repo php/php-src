@@ -419,18 +419,18 @@ ZEND_FUNCTION(each)
 	entry = *entry_ptr;
 
 	/* add value elements */
-	if (entry->is_ref) {
+	if (Z_ISREF_P(entry)) {
 		ALLOC_ZVAL(tmp);
 		*tmp = *entry;
 		zval_copy_ctor(tmp);
-		tmp->is_ref=0;
-		tmp->refcount=0;
+		Z_UNSET_ISREF_P(tmp);
+		Z_SET_REFCOUNT_P(tmp, 0);
 		entry=tmp;
 	}
 	zend_hash_index_update(Z_ARRVAL_P(return_value), 1, &entry, sizeof(zval *), NULL);
-	entry->refcount++;
+	Z_ADDREF_P(entry);
 	zend_ascii_hash_update(Z_ARRVAL_P(return_value), "value", sizeof("value"), &entry, sizeof(zval *), NULL);
-	entry->refcount++;
+	Z_ADDREF_P(entry);
 
 	/* add the key elements */
 	switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_key_len, &num_key, 1, NULL)) {
@@ -445,7 +445,7 @@ ZEND_FUNCTION(each)
 			break;
 	}
 	zend_ascii_hash_update(Z_ARRVAL_P(return_value), "key", sizeof("key"), inserted_pointer, sizeof(zval *), NULL);
-	(*inserted_pointer)->refcount++;
+	Z_ADDREF_PP(inserted_pointer);
 	zend_hash_move_forward(target_hash);
 }
 /* }}} */
@@ -868,7 +868,7 @@ ZEND_FUNCTION(get_object_vars)
 			if (zend_check_property_access(zobj, ZEND_STR_TYPE, key, key_len-1 TSRMLS_CC) == SUCCESS) {
 				zend_u_unmangle_property_name(ZEND_STR_TYPE, key, key_len-1, &class_name, &prop_name);
 				/* Not separating references */
-				(*value)->refcount++;
+				Z_ADDREF_PP(value);
 				add_u_assoc_zval(return_value, ZEND_STR_TYPE, prop_name, *value);
 			}
 		}
@@ -1796,7 +1796,7 @@ static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC) /* {{{ */
 			if (Z_TYPE_PP(arg) != IS_OBJECT) {
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
 			}
-			(*arg)->refcount++;
+			Z_ADDREF_PP(arg);
 			add_next_index_zval(arg_array, *arg);
 		} else {
 			add_next_index_null(arg_array);
@@ -2146,7 +2146,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				}
 				if (provide_object) {
 					add_ascii_assoc_zval_ex(stack_frame, "object", sizeof("object"), ptr->object);
-					ptr->object->refcount++;
+					Z_ADDREF_P(ptr->object);
 				}
 
 				add_ascii_assoc_ascii_string_ex(stack_frame, "type", sizeof("type"), "->", 1);

@@ -1795,7 +1795,7 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int numerics)
 		zval_copy_ctor(tmp);
 		if (numerics) {
 			zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *) &tmp, sizeof(zval *), NULL);
-			tmp->refcount++;
+			Z_ADDREF_P(tmp);
 		}
 		
 		if (zend_hash_exists(Z_ARRVAL_P(return_value), result->fields[i].name, strlen(result->fields[i].name)+1)) {

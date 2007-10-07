@@ -433,7 +433,7 @@ static zval* php_zip_read_property(zval *object, zval *member, int type TSRMLS_D
 		ret = php_zip_property_reader(obj, hnd, &retval, 1 TSRMLS_CC);
 		if (ret == SUCCESS) {
 			/* ensure we're creating a temporary variable */
-			retval->refcount = 0;
+			Z_SET_REFCOUNT_P(retval, 0);
 		} else {
 			retval = EG(uninitialized_zval_ptr);
 		}
@@ -477,8 +477,8 @@ static int php_zip_has_property(zval *object, zval *member, int type TSRMLS_DC) 
 		if (type == 2) {
 			retval = 1;
 		} else if (php_zip_property_reader(obj, hnd, &tmp, 1 TSRMLS_CC) == SUCCESS) {
-			tmp->refcount = 1;
-			tmp->is_ref = 0;
+			Z_SET_REFCOUNT_P(tmp, 1);
+			Z_UNSET_ISREF_P(tmp);
 			if (type == 1) {
 				retval = zend_is_true(tmp);
 			} else if (type == 0) {

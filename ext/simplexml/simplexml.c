@@ -366,8 +366,8 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 		}
 	}
 
-	return_value->refcount = 0;
-	return_value->is_ref = 0;
+	Z_SET_REFCOUNT_P(return_value, 0);
+	Z_UNSET_ISREF_P(return_value);
 
 	if (member == &tmp_zv) {
 		zval_dtor(&tmp_zv);
@@ -416,7 +416,7 @@ static void change_node_zval(xmlNodePtr node, zval *value TSRMLS_DC)
 		case IS_DOUBLE:
 		case IS_NULL:
 		case IS_UNICODE:
-			if (value->refcount > 1) {
+			if (Z_REFCOUNT_P(value) > 1) {
 				value_copy = *value;
 				zval_copy_ctor(&value_copy);
 				value = &value_copy;
@@ -537,7 +537,7 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 			case IS_DOUBLE:
 			case IS_NULL:
 			case IS_UNICODE:
-				if (value->refcount > 1) {
+				if (Z_REFCOUNT_P(value) > 1) {
 					value_copy = *value;
 					zval_copy_ctor(&value_copy);
 					value = &value_copy;
@@ -722,7 +722,7 @@ static zval** sxe_property_get_adr(zval *object, zval *member TSRMLS_DC) /* {{{ 
 		zval_ptr_dtor(&sxe->tmp);
 	}
 	sxe->tmp = return_value;
-	return_value->is_ref  = 1;
+	Z_SET_ISREF_P(return_value);
 
 	return &sxe->tmp;
 }
@@ -1745,8 +1745,8 @@ static int cast_object(zval *object, int type, char *contents, void *extra TSRML
 	} else {
 		ZVAL_NULL(object);
 	}
-	object->refcount = 1;
-	object->is_ref = 0;
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_UNSET_ISREF_P(object);
 
 	switch (type) {
 		case IS_STRING:
@@ -1861,7 +1861,7 @@ static zval *sxe_get_value(zval *z TSRMLS_DC)
 		/* FIXME: Should not be fatal */
 	}
 
-	retval->refcount = 0;
+	Z_SET_REFCOUNT_P(retval, 0);
 	return retval;
 }
 
@@ -2255,7 +2255,7 @@ zend_object_iterator *php_sxe_get_iterator(zend_class_entry *ce, zval *object, i
 	}
 	iterator = emalloc(sizeof(php_sxe_iterator));
 
-	object->refcount++;
+	Z_ADDREF_P(object);
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &php_sxe_iterator_funcs;
 	iterator->sxe = php_sxe_fetch_object(object TSRMLS_CC);

@@ -333,11 +333,79 @@ typedef union _zvalue_value {
 struct _zval_struct {
 	/* Variable information */
 	zvalue_value value;		/* value */
-	zend_uint refcount;
+	zend_uint refcount__gc;
 	zend_uchar type;	/* active type */
-	zend_uchar is_ref;
+	zend_uchar is_ref__gc;
 	zend_uchar idx_type;	/* type of element's index in constant array */
 };
+
+#define Z_REFCOUNT_PP(ppz)		Z_REFCOUNT_P(*(ppz))
+#define Z_SET_REFCOUNT_PP(ppz, rc)	Z_SET_REFCOUNT_P(*(ppz), rc)
+#define Z_ADDREF_PP(ppz)		Z_ADDREF_P(*(ppz))
+#define Z_DELREF_PP(ppz)		Z_DELREF_P(*(ppz))
+#define Z_ISREF_PP(ppz)			Z_ISREF_P(*(ppz))
+#define Z_SET_ISREF_PP(ppz)		Z_SET_ISREF_P(*(ppz))
+#define Z_UNSET_ISREF_PP(ppz)		Z_UNSET_ISREF_P(*(ppz))
+#define Z_SET_ISREF_TO_PP(ppz, isref)	Z_SET_ISREF_TO_P(*(ppz), isref)
+
+#define Z_REFCOUNT_P(pz)		zval_refcount_p(pz)
+#define Z_SET_REFCOUNT_P(pz, rc)	zval_set_refcount_p(pz, rc)
+#define Z_ADDREF_P(pz)			zval_addref_p(pz)
+#define Z_DELREF_P(pz)			zval_delref_p(pz)
+#define Z_ISREF_P(pz)			zval_isref_p(pz)
+#define Z_SET_ISREF_P(pz)		zval_set_isref_p(pz)
+#define Z_UNSET_ISREF_P(pz)		zval_unset_isref_p(pz)
+#define Z_SET_ISREF_TO_P(pz, isref)	zval_set_isref_to_p(pz, isref)
+
+#define Z_REFCOUNT(z)			Z_REFCOUNT_P(&(z))
+#define Z_SET_REFCOUNT(z, rc)		Z_SET_REFCOUNT_P(&(z), rc)
+#define Z_ADDREF(z)			Z_ADDREF_P(&(z))
+#define Z_DELREF(z)			Z_DELREF_P(&(z))
+#define Z_ISREF(z)			Z_ISREF_P(&(z))
+#define Z_SET_ISREF(z)			Z_SET_ISREF_P(&(z))
+#define Z_UNSET_ISREF(z)		Z_UNSET_ISREF_P(&(z))
+#define Z_SET_ISREF_TO(z, isref)	Z_SET_ISREF_TO_P(&(z), isref)
+
+#if defined(__GNUC__)
+#define always_inline inline __attribute__((always_inline))
+#elif defined(_MSC_VER)
+#define always_inline __forceinline
+#else
+#define always_inline inline
+#endif
+
+static always_inline zend_uint zval_refcount_p(zval* pz) {
+	return pz->refcount__gc;
+}
+
+static always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) {
+	return pz->refcount__gc = rc;
+}
+
+static always_inline zend_uint zval_addref_p(zval* pz) {
+	return ++pz->refcount__gc;
+}
+
+static always_inline zend_uint zval_delref_p(zval* pz) {
+	return --pz->refcount__gc;
+}
+
+static always_inline zend_bool zval_isref_p(zval* pz) {
+	return pz->is_ref__gc;
+}
+
+static always_inline zend_bool zval_set_isref_p(zval* pz) {
+	return pz->is_ref__gc = 1;
+}
+
+static always_inline zend_bool zval_unset_isref_p(zval* pz) {
+	return pz->is_ref__gc = 0;
+}
+
+static always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
+
+	return pz->is_ref__gc = isref;
+}
 
 
 /* excpt.h on Digital Unix 4.0 defines function_table */
@@ -611,13 +679,9 @@ END_EXTERN_C()
 #define ZMSG_MEMORY_LEAKS_GRAND_TOTAL	7L
 
 
-#define ZVAL_ADDREF(pz)		(++(pz)->refcount)
-#define ZVAL_DELREF(pz)		(--(pz)->refcount)
-#define ZVAL_REFCOUNT(pz)	((pz)->refcount)
-
 #define INIT_PZVAL(z)		\
-	(z)->refcount = 1;		\
-	(z)->is_ref = 0;
+	(z)->refcount__gc = 1;	\
+	(z)->is_ref__gc = 0;
 
 #define INIT_ZVAL(z) z = zval_used_for_init;
 
@@ -629,19 +693,19 @@ END_EXTERN_C()
 	ALLOC_ZVAL(zv); \
 	INIT_PZVAL(zv);
 
-#define PZVAL_IS_REF(z)		((z)->is_ref)
+#define PZVAL_IS_REF(z)		Z_ISREF_P(z)
 
 #define SEPARATE_ZVAL(ppzv)									\
 	{														\
 		zval *orig_ptr = *(ppzv);							\
 															\
-		if (orig_ptr->refcount>1) {							\
-			orig_ptr->refcount--;							\
+		if (Z_REFCOUNT_P(orig_ptr) > 1) {							\
+			Z_DELREF_P(orig_ptr);							\
 			ALLOC_ZVAL(*(ppzv));							\
 			**(ppzv) = *orig_ptr;							\
 			zval_copy_ctor(*(ppzv));						\
-			(*(ppzv))->refcount=1;							\
-			(*(ppzv))->is_ref = 0;							\
+			Z_SET_REFCOUNT_PP(ppzv, 1);							\
+			Z_UNSET_ISREF_PP((ppzv));							\
 		}													\
 	}
 
@@ -653,14 +717,14 @@ END_EXTERN_C()
 #define SEPARATE_ZVAL_TO_MAKE_IS_REF(ppzv)	\
 	if (!PZVAL_IS_REF(*ppzv)) {				\
 		SEPARATE_ZVAL(ppzv);				\
-		(*(ppzv))->is_ref = 1;				\
+		Z_SET_ISREF_PP((ppzv));				\
 	}
 
 #define COPY_PZVAL_TO_ZVAL(zv, pzv)			\
 	(zv) = *(pzv);							\
-	if ((pzv)->refcount>1) {				\
+	if (Z_REFCOUNT_P(pzv)>1) {				\
 		zval_copy_ctor(&(zv));				\
-		(pzv)->refcount--;					\
+		Z_DELREF_P((pzv));					\
 	} else {								\
 		FREE_ZVAL(pzv);						\
 	}										\
@@ -670,15 +734,15 @@ END_EXTERN_C()
 	int is_ref, refcount;						\
 												\
 	SEPARATE_ZVAL_IF_NOT_REF(ppzv_dest);		\
-	is_ref = (*ppzv_dest)->is_ref;				\
-	refcount = (*ppzv_dest)->refcount;			\
+	is_ref = Z_ISREF_PP(ppzv_dest);				\
+	refcount = Z_REFCOUNT_PP(ppzv_dest);			\
 	zval_dtor(*ppzv_dest);						\
 	**ppzv_dest = *pzv_src;						\
 	if (copy) {                                 \
 		zval_copy_ctor(*ppzv_dest);				\
     }		                                    \
-	(*ppzv_dest)->is_ref = is_ref;				\
-	(*ppzv_dest)->refcount = refcount;			\
+	Z_SET_ISREF_TO_PP(ppzv_dest, is_ref);				\
+	Z_SET_REFCOUNT_PP(ppzv_dest, refcount);			\
 }
 
 #define SEPARATE_ARG_IF_REF(varptr) \
@@ -687,15 +751,15 @@ END_EXTERN_C()
 		ALLOC_ZVAL(varptr); \
 		varptr->value = original_var->value; \
 		Z_TYPE_P(varptr) = Z_TYPE_P(original_var); \
-		varptr->is_ref = 0; \
-		varptr->refcount = 1; \
+		Z_UNSET_ISREF_P(varptr); \
+		Z_SET_REFCOUNT_P(varptr, 1); \
 		zval_copy_ctor(varptr); \
 	} else { \
-		varptr->refcount++; \
+		Z_ADDREF_P(varptr); \
 	}
 
 #define READY_TO_DESTROY(zv) \
-	((zv)->refcount == 1 && \
+	(Z_REFCOUNT_P(zv) == 1 && \
 	 (Z_TYPE_P(zv) != IS_OBJECT || \
 	  zend_objects_store_get_refcount(zv TSRMLS_CC) == 1))
 

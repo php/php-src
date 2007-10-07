@@ -172,7 +172,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		ret = xmlreader_property_reader(obj, hnd, &retval TSRMLS_CC);
 		if (ret == SUCCESS) {
 			/* ensure we're creating a temporary variable */
-			retval->refcount = 0;
+			Z_SET_REFCOUNT_P(retval, 0);
 		} else {
 			retval = EG(uninitialized_zval_ptr);
 		}

@@ -38,8 +38,8 @@ PHPAPI void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRM
 		ALLOC_ZVAL(*object);
 	}
 	object_init_ex(*object, pce);
-	(*object)->refcount = 1;
-	(*object)->is_ref = 1; /* check if this can be hold always */
+	Z_SET_REFCOUNT_P((*object), 1);
+	Z_SET_ISREF_PP(object); /* check if this can be hold always */
 }
 /* }}} */
 

@@ -175,7 +175,7 @@ void spl_object_storage_attach(spl_SplObjectStorage *intern, zval *obj TSRMLS_DC
 	}
 #endif
 
-	obj->refcount++;
+	Z_ADDREF_P(obj);
 } /* }}} */
 
 /* {{{ proto void SplObjectStorage::attach($obj) U

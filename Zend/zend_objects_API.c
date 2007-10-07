@@ -180,9 +180,9 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC) /* {{{ */
 
 	handle = Z_OBJ_HANDLE_P(zobject);
 
-	zobject->refcount++;
+	Z_ADDREF_P(zobject);
 	zend_objects_store_del_ref_by_handle(handle TSRMLS_CC);
-	zobject->refcount--;
+	Z_DELREF_P(zobject);
 }
 /* }}} */
 
@@ -233,7 +233,7 @@ ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSR
 	obj->refcount--;
 
 #if ZEND_DEBUG_OBJECTS
-	if (obj->refcount == 0) {
+	if (Z_REFCOUNT_P(obj) == 0) {
 		fprintf(stderr, "Deallocated object id #%d\n", handle);
 	} else {
 		fprintf(stderr, "Decreased refcount of object id #%d\n", handle);

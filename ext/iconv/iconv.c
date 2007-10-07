@@ -2345,7 +2345,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 					MAKE_STD_ZVAL(new_elem);
 					array_init(new_elem);
 
-					ZVAL_ADDREF(*elem);
+					Z_ADDREF_P(*elem);
 					add_next_index_zval(new_elem, *elem);
 
 					zend_hash_update(Z_ARRVAL_P(return_value), header_name, header_name_len, (void *)&new_elem, sizeof(new_elem), NULL);

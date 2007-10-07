@@ -1045,7 +1045,7 @@ PHP_FUNCTION(sybase_fetch_row)
 	
 	array_init(return_value);
 	for (i=0; i<result->num_fields; i++) {
-		ZVAL_ADDREF(result->data[result->cur_row][i]);
+		Z_ADDREF_P(result->data[result->cur_row][i]);
 		zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *) &result->data[result->cur_row][i], sizeof(zval *), NULL);
 	}
 	result->cur_row++;
@@ -1079,9 +1079,9 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 	array_init(return_value);
 	
 	for (i=0; i<result->num_fields; i++) {
-		ZVAL_ADDREF(result->data[result->cur_row][i]);
+		Z_ADDREF_P(result->data[result->cur_row][i]);
 		zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *) &result->data[result->cur_row][i], sizeof(zval *), NULL);
-		ZVAL_ADDREF(result->data[result->cur_row][i]);
+		Z_ADDREF_P(result->data[result->cur_row][i]);
 		zend_hash_update(Z_ARRVAL_P(return_value), result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &result->data[result->cur_row][i], sizeof(zval  *), NULL);
 	}
 	result->cur_row++;

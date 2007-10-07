@@ -82,7 +82,7 @@ static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC) /* {{{ *
 	zval_ptr_dtor(&member);
 
 	if (retval) {
-		retval->refcount--;
+		Z_DELREF_P(retval);
 	}
 
 	return retval;
@@ -96,7 +96,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	zend_class_entry *ce = Z_OBJCE_P(object);
 
 	SEPARATE_ARG_IF_REF(member);
-	value->refcount++;
+	Z_ADDREF_P(value);
 
 	/* __set handler is called with two arguments:
 	     property name
@@ -358,16 +358,16 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC) /* 
 
 			if (rv) {
 				retval = &rv;
-				if (!rv->is_ref &&
+				if (!Z_ISREF_P(rv) &&
 				    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
-					if (rv->refcount > 0) {
+					if (Z_REFCOUNT_P(rv) > 0) {
 						zval *tmp = rv;
 
 						ALLOC_ZVAL(rv);
 						*rv = *tmp;
 						zval_copy_ctor(rv);
-						rv->is_ref = 0;
-						rv->refcount = 0;
+						Z_UNSET_ISREF_P(rv);
+						Z_SET_REFCOUNT_P(rv, 0);
 					}
 					if (Z_TYPE_P(rv) != IS_OBJECT) {
 						zend_error(E_NOTICE, "Indirect modification of overloaded property %v::$%R has no effect", zobj->ce->name, Z_TYPE_P(member), Z_UNIVAL_P(member));
@@ -384,9 +384,9 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC) /* 
 		}
 	}
 	if (tmp_member) {
-		(*retval)->refcount++;
+		Z_ADDREF_PP(retval);
 		zval_ptr_dtor(&tmp_member);
-		(*retval)->refcount--;
+		Z_DELREF_PP(retval);
 	}
 	return *retval;
 }
@@ -423,7 +423,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 				/* To check: can't *variable_ptr be some system variable like error_zval here? */
 				Z_TYPE_PP(variable_ptr) = Z_TYPE_P(value);
 				(*variable_ptr)->value = value->value;
-				if (value->refcount>0) {
+				if (Z_REFCOUNT_P(value) > 0) {
 					zval_copy_ctor(*variable_ptr);
 				}
 				zval_dtor(&garbage);
@@ -431,7 +431,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 				zval *garbage = *variable_ptr;
 
 				/* if we assign referenced variable, we should separate it */
-				value->refcount++;
+				Z_ADDREF_P(value);
 				if (PZVAL_IS_REF(value)) {
 					SEPARATE_ZVAL(&value);
 				}
@@ -457,7 +457,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 			zval **foo;
 
 			/* if we assign referenced variable, we should separate it */
-			value->refcount++;
+			Z_ADDREF_P(value);
 			if (PZVAL_IS_REF(value)) {
 				SEPARATE_ZVAL(&value);
 			}
@@ -495,7 +495,7 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /*
 		}
 
 		/* Undo PZVAL_LOCK() */
-		retval->refcount--;
+		Z_DELREF_P(retval);
 
 		return retval;
 	} else {
@@ -587,7 +587,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 			new_zval = &EG(uninitialized_zval);
 
 /* 			zend_error(E_NOTICE, "Undefined property: %R", Z_TYPE_P(member), Z_STRVAL_P(member)); */
-			new_zval->refcount++;
+			Z_ADDREF_P(new_zval);
 			zend_u_hash_quick_update(zobj->properties, Z_TYPE_P(member), property_info->name, property_info->name_length+1, property_info->h, &new_zval, sizeof(zval *), (void **) &retval);
 		} else {
 			/* we do have getter - fail and let it try again with usual get/set */
@@ -682,7 +682,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 	zend_call_method_with_2_params(&this_ptr, ce, &ce->__call, ZEND_CALL_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
 	if (method_result_ptr) {
-		if (method_result_ptr->is_ref || method_result_ptr->refcount > 1) {
+		if (Z_ISREF_P(method_result_ptr) || Z_REFCOUNT_P(method_result_ptr) > 1) {
 			RETVAL_ZVAL(method_result_ptr, 1, 1);
 		} else {
 			RETVAL_ZVAL(method_result_ptr, 0, 1);
@@ -886,7 +886,7 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 	zend_call_method_with_2_params(NULL, ce, &ce->__callstatic, ZEND_CALLSTATIC_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
 	if (method_result_ptr) {
-		if (method_result_ptr->is_ref || method_result_ptr->refcount > 1) {
+		if (Z_ISREF_P(method_result_ptr) || Z_REFCOUNT_P(method_result_ptr) > 1) {
 			RETVAL_ZVAL(method_result_ptr, 1, 1);
 		} else {
 			RETVAL_ZVAL(method_result_ptr, 0, 1);
@@ -1118,7 +1118,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 					rv = zend_std_call_getter(object, member TSRMLS_CC);
 					guard->in_get = 0;
 					if (rv) {
-						rv->refcount++;
+						Z_ADDREF_P(rv);
 						result = i_zend_is_true(rv);
 						zval_ptr_dtor(&rv);
 					}

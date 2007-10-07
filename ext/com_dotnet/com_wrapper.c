@@ -547,11 +547,11 @@ static php_dispatchex *disp_constructor(zval *object TSRMLS_DC)
 
 	disp->engine_thread = GetCurrentThreadId();
 	disp->lpVtbl = &php_dispatch_vtbl;
-	disp->refcount = 1;
+	Z_SET_REFCOUNT_P(disp, 1);
 
 
 	if (object)
-		ZVAL_ADDREF(object);
+		Z_ADDREF_P(object);
 	disp->object = object;
 
 	disp->id = zend_list_insert(disp, le_dispatch);
@@ -572,7 +572,7 @@ static void disp_destructor(php_dispatchex *disp)
 			
 	disp->id = 0;
 	
-	if (disp->refcount > 0)
+	if (Z_REFCOUNT_P(disp) > 0)
 		CoDisconnectObject((IUnknown*)disp, 0);
 
 	zend_hash_destroy(disp->dispid_to_name);

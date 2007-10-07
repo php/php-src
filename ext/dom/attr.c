@@ -179,7 +179,7 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 	}
 
 	if (newval->type != IS_STRING) {
-		if(newval->refcount > 1) {
+		if(Z_REFCOUNT_P(newval) > 1) {
 			value_copy = *newval;
 			zval_copy_ctor(&value_copy);
 			newval = &value_copy;
