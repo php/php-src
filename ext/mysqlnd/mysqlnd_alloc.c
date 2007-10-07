@@ -174,7 +174,7 @@ void mysqlnd_alloc_cache_prealloc(MYSQLND_ZVAL_CACHE * const cache, unsigned int
 
 void mysqlnd_alloc_zval_ptr_dtor(zval **zv, MYSQLND_ZVAL_CACHE * const cache)
 {
-	if (!cache || ZVAL_REFCOUNT(*zv) > 1 || cache->max_items == cache->free_items) {
+	if (!cache || Z_REFCOUNT_PP(zv) > 1 || cache->max_items == cache->free_items) {
 #ifndef MYSQLND_SILENT
 		php_printf("[mysqlnd_alloc_zval_ptr_dtor %p]1 last_added-1=%p *zv=%p\n", cache->free_list->last_added, *zv);
 #endif
