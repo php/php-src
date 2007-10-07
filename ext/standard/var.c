@@ -35,8 +35,7 @@
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
 
-#define COMMON ((*struc)->is_ref ? "&" : "")
-#define Z_REFCOUNT_PP(a) ((*a)->refcount)
+#define COMMON (Z_ISREF_PP(struc) ? "&" : "")
 
 /* }}} */
 
@@ -269,7 +268,8 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
 		php_printf("%slong(%ld) refcount(%u)\n", COMMON, Z_LVAL_PP(struc), Z_REFCOUNT_PP(struc));
 		break;
 	case IS_DOUBLE:
-		php_printf("%sdouble(%.*G) refcount(%u)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc), Z_REFCOUNT_PP(struc));
+		php_printf("%sdouble(%.*G) refcount(%u)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc), 
+Z_REFCOUNT_PP(struc));
 		break;
 	case IS_STRING:
 		php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_PP(struc));
@@ -500,7 +500,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	}
 
 	if (var_old && zend_hash_find(var_hash, p, len, var_old) == SUCCESS) {
-		if (!var->is_ref) {
+		if (!Z_ISREF_P(var)) {
 			/* we still need to bump up the counter, since non-refs will
 			   be counted separately by unserializer */
 			var_no = -1;
@@ -648,7 +648,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 
 	if (var_hash 
 	    && php_add_var_hash(var_hash, struc, (void *) &var_already TSRMLS_CC) == FAILURE) {
-		if(struc->is_ref) {
+		if(Z_ISREF_P(struc)) {
 			smart_str_appendl(buf, "R:", 2);
 			smart_str_append_long(buf, *var_already);
 			smart_str_appendc(buf, ';');

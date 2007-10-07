@@ -994,7 +994,7 @@ try_again:
 			if (digest != NULL) {
 				php_url *new_url  = emalloc(sizeof(php_url));
 
-				digest->refcount--;
+				Z_DELREF_P(digest);
 				add_property_zval_ex(this_ptr, "_digest", sizeof("_digest"), digest TSRMLS_CC);
 
 				*new_url = *phpurl;

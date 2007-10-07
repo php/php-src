@@ -346,8 +346,8 @@ static zend_bool soap_check_xml_ref(zval **data, xmlNodePtr node TSRMLS_DC)
 			if (*data != *data_ptr) {
 				zval_ptr_dtor(data);
 				*data = *data_ptr;
-				(*data)->is_ref = 1;
-				(*data)->refcount++;
+				Z_SET_ISREF_PP(data);
+				Z_ADDREF_PP(data);
 				return 1;
 			}
 		} else {
@@ -1195,7 +1195,7 @@ static void set_zval_property(zval* object, char* name, zval* val TSRMLS_DC)
 	old_scope = EG(scope);
 	EG(scope) = Z_OBJCE_P(object);
 #ifdef ZEND_ENGINE_2
-	val->refcount--;
+	Z_DELREF_P(val);
 #endif
 	add_property_zval(object, name, val);
 	EG(scope) = old_scope;
@@ -1621,7 +1621,7 @@ static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_e
 
 						MAKE_STD_ZVAL(arr);
 						array_init(arr);
-						prop->refcount++;
+						Z_ADDREF_P(prop);
 						add_next_index_zval(arr, prop);
 						set_zval_property(ret, (char*)trav->name, arr TSRMLS_CC);
 						prop = arr;
@@ -2843,7 +2843,7 @@ static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data)
 		object_init_ex(soapvar, soap_var_class_entry);
 		add_property_long(soapvar, "enc_type", enc->details.type);
 #ifdef ZEND_ENGINE_2
-		ret->refcount--;
+		Z_DELREF_P(ret);
 #endif
 		add_property_zval(soapvar, "enc_value", ret);
 		parse_namespace(type_name, &cptype, &ns);

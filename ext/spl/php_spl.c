@@ -468,7 +468,7 @@ PHP_FUNCTION(spl_autoload_register)
 			func_name_len += sizeof(zend_object_handle);
 			lc_name[func_name_len] = '\0';
 			alfi.obj = *obj_ptr;
-			alfi.obj->refcount++;
+			Z_ADDREF_P(alfi.obj);
 		} else {
 			alfi.obj = NULL;
 		}

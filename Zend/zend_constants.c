@@ -257,8 +257,8 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 	if (retval) {
 		*result = c->value;
 		zval_copy_ctor(result);
-		result->refcount = 1;
-		result->is_ref = 0;
+		Z_SET_REFCOUNT_P(result, 1);
+		Z_UNSET_ISREF_P(result);
 	}
 
 	return retval;
@@ -349,8 +349,8 @@ ZEND_API int zend_get_constant_ex(char *name, uint name_len, zval *result, zend_
 				*result = c->value;
 				zval_update_constant_ex(&result, (void*)1, NULL TSRMLS_CC);
 				zval_copy_ctor(result);
-				result->refcount = 1;
-				result->is_ref = 0;
+				Z_SET_REFCOUNT_P(result, 1);
+				Z_UNSET_ISREF_P(result);
 				return 1;
 			}
 			efree(lcname);

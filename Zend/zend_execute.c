@@ -66,22 +66,22 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 
 static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, int unref)
 {
-	if (!--z->refcount) {
-		z->refcount = 1;
-		z->is_ref = 0;
+	if (!Z_DELREF_P(z)) {
+		Z_SET_REFCOUNT_P(z, 1);
+		Z_UNSET_ISREF_P(z);
 		should_free->var = z;
 /*		should_free->is_var = 1; */
 	} else {
 		should_free->var = 0;
-		if (unref && z->is_ref && z->refcount == 1) {
-			z->is_ref = 0;
+		if (unref && Z_ISREF_P(z) && Z_REFCOUNT_P(z) == 1) {
+			Z_UNSET_ISREF_P(z);
 		}
 	}
 }
 
 static inline void zend_pzval_unlock_free_func(zval *z)
 {
-	if (!--z->refcount) {
+	if (!Z_DELREF_P(z)) {
 		zval_dtor(z);
 		safe_free_zval_ptr(z);
 	}
@@ -90,7 +90,7 @@ static inline void zend_pzval_unlock_free_func(zval *z)
 #define PZVAL_UNLOCK(z, f) zend_pzval_unlock_func(z, f, 1)
 #define PZVAL_UNLOCK_EX(z, f, u) zend_pzval_unlock_func(z, f, u)
 #define PZVAL_UNLOCK_FREE(z) zend_pzval_unlock_free_func(z)
-#define PZVAL_LOCK(z) (z)->refcount++
+#define PZVAL_LOCK(z) Z_ADDREF_P((z))
 #define RETURN_VALUE_UNUSED(pzn)	(((pzn)->u.EA.type & EXT_TYPE_UNUSED))
 #define SELECTIVE_PZVAL_LOCK(pzv, pzn)	if (!RETURN_VALUE_UNUSED(pzn)) { PZVAL_LOCK(pzv); }
 
@@ -128,8 +128,8 @@ static inline void zend_pzval_unlock_free_func(zval *z)
 #define INIT_PZVAL_COPY(z,v) \
 	(z)->value = (v)->value; \
 	Z_TYPE_P(z) = Z_TYPE_P(v); \
-	(z)->refcount = 1; \
-	(z)->is_ref = 0;
+	Z_SET_REFCOUNT_P(z, 1); \
+	Z_UNSET_ISREF_P(z);
 
 #define MAKE_REAL_ZVAL_PTR(val) \
 	do { \
@@ -137,8 +137,8 @@ static inline void zend_pzval_unlock_free_func(zval *z)
 		ALLOC_ZVAL(_tmp); \
 		_tmp->value = (val)->value; \
 		Z_TYPE_P(_tmp) = Z_TYPE_P(val); \
-		_tmp->refcount = 1; \
-		_tmp->is_ref = 0; \
+		Z_SET_REFCOUNT_P(_tmp, 1); \
+		Z_UNSET_ISREF_P(_tmp); \
 		val = _tmp; \
 	} while (0)
 
@@ -167,7 +167,7 @@ static inline void zend_get_cv_address(zend_compiled_variable *cv, zval ***ptr, 
 {
 	zval *new_zval = &EG(uninitialized_zval);
 
-	new_zval->refcount++;
+	Z_ADDREF_P(new_zval);
 	zend_hash_quick_update(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, &new_zval, sizeof(zval *), (void **)ptr);
 }
 
@@ -204,8 +204,8 @@ static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_
 			ptr->value.str.len = 1;
 		}
 		PZVAL_UNLOCK_FREE(str);
-		ptr->refcount=1;
-		ptr->is_ref=1;
+		Z_SET_REFCOUNT_P(ptr, 1);
+		Z_SET_ISREF_P(ptr);
 		ptr->type = IS_STRING;
 		return ptr;
 	}
@@ -409,35 +409,35 @@ static void zend_assign_to_variable_reference(zval **variable_ptr_ptr, zval **va
 	} else if (variable_ptr != value_ptr) {
 		if (!PZVAL_IS_REF(value_ptr)) {
 			/* break it away */
-			value_ptr->refcount--;
-			if (value_ptr->refcount>0) {
+			Z_DELREF_P(value_ptr);
+			if (Z_REFCOUNT_P(value_ptr)>0) {
 				ALLOC_ZVAL(*value_ptr_ptr);
 				**value_ptr_ptr = *value_ptr;
 				value_ptr = *value_ptr_ptr;
 				zendi_zval_copy_ctor(*value_ptr);
 			}
-			value_ptr->refcount = 1;
-			value_ptr->is_ref = 1;
+			Z_SET_REFCOUNT_P(value_ptr, 1);
+			Z_SET_ISREF_P(value_ptr);
 		}
 
 		*variable_ptr_ptr = value_ptr;
-		value_ptr->refcount++;
+		Z_ADDREF_P(value_ptr);
 
 		zval_ptr_dtor(&variable_ptr);
-	} else if (!variable_ptr->is_ref) {
+	} else if (!Z_ISREF_P(variable_ptr)) {
 		if (variable_ptr_ptr == value_ptr_ptr) {
 			SEPARATE_ZVAL(variable_ptr_ptr);
 		} else if (variable_ptr==EG(uninitialized_zval_ptr)
-			|| variable_ptr->refcount>2) {
+			|| Z_REFCOUNT_P(variable_ptr)>2) {
 			/* we need to separate */
-			variable_ptr->refcount -= 2;
+			Z_SET_REFCOUNT_P(variable_ptr, Z_REFCOUNT_P(variable_ptr) - 2);
 			ALLOC_ZVAL(*variable_ptr_ptr);
 			**variable_ptr_ptr = *variable_ptr;
 			zval_copy_ctor(*variable_ptr_ptr);
 			*value_ptr_ptr = *variable_ptr_ptr;
-			(*variable_ptr_ptr)->refcount = 2;
+			Z_SET_REFCOUNT_PP(variable_ptr_ptr, 2);
 		}
-		(*variable_ptr_ptr)->is_ref = 1;
+		Z_SET_ISREF_PP(variable_ptr_ptr);
 	}
 }
 
@@ -579,8 +579,8 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		
 		ALLOC_ZVAL(value);
 		*value = *orig_value;
-	 	value->is_ref = 0;
-		value->refcount = 0;
+	 	Z_UNSET_ISREF_P(value);
+		Z_SET_REFCOUNT_P(value, 0);
 		dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
 		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
@@ -595,20 +595,20 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 
 		ALLOC_ZVAL(value);
 		*value = *orig_value;
-		value->is_ref = 0;
-		value->refcount = 0;
+		Z_UNSET_ISREF_P(value);
+		Z_SET_REFCOUNT_P(value, 0);
 	} else if (value_op->op_type == IS_CONST) {
 		zval *orig_value = value;
 
 		ALLOC_ZVAL(value);
 		*value = *orig_value;
-		value->is_ref = 0;
-		value->refcount = 0;
+		Z_UNSET_ISREF_P(value);
+		Z_SET_REFCOUNT_P(value, 0);
 		zval_copy_ctor(value);
 	}
 
 
-	value->refcount++;
+	Z_ADDREF_P(value);
 	if (opcode == ZEND_ASSIGN_OBJ) {
 		if (IS_TMP_FREE(free_op2)) {
 			MAKE_REAL_ZVAL_PTR(property_name);
@@ -744,28 +744,28 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
  			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
  		} else if (PZVAL_IS_REF(variable_ptr)) {
  			if (variable_ptr != value) {
- 				zend_uint refcount = variable_ptr->refcount;
+ 				zend_uint refcount = Z_REFCOUNT_P(variable_ptr);
  				zval garbage;
  
  				if (type != IS_TMP_VAR) {
- 					value->refcount++;
+ 					Z_ADDREF_P(value);
  				}
  				garbage = *variable_ptr;
  				*variable_ptr = *value;
- 				variable_ptr->refcount = refcount;
- 				variable_ptr->is_ref = 1;
+ 				Z_SET_REFCOUNT_P(variable_ptr, refcount);
+ 				Z_SET_ISREF_P(variable_ptr);
  				zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
  				variable_ptr->value.obj = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
  				if (type != IS_TMP_VAR) {
- 					value->refcount--;
+ 					Z_DELREF_P(value);
  				}
  				zendi_zval_dtor(garbage);
  			}
  		} else {
  			if (variable_ptr != value) {
- 				value->refcount++;
- 				variable_ptr->refcount--;
- 				if (variable_ptr->refcount == 0) {
+ 				Z_ADDREF_P(value);
+ 				Z_DELREF_P(variable_ptr);
+ 				if (Z_REFCOUNT_P(variable_ptr) == 0) {
  					zendi_zval_dtor(*variable_ptr);
  				} else {
  					ALLOC_ZVAL(variable_ptr);
@@ -783,42 +783,42 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
  		}
  	} else if (PZVAL_IS_REF(variable_ptr)) {
 		if (variable_ptr!=value) {
-			zend_uint refcount = variable_ptr->refcount;
+			zend_uint refcount = Z_REFCOUNT_P(variable_ptr);
 			zval garbage;
 
 			if (type!=IS_TMP_VAR) {
-				value->refcount++;
+				Z_ADDREF_P(value);
 			}
 			garbage = *variable_ptr;
 			*variable_ptr = *value;
-			variable_ptr->refcount = refcount;
-			variable_ptr->is_ref = 1;
+			Z_SET_REFCOUNT_P(variable_ptr, refcount);
+			Z_SET_ISREF_P(variable_ptr);
 			if (type!=IS_TMP_VAR) {
 				zendi_zval_copy_ctor(*variable_ptr);
-				value->refcount--;
+				Z_DELREF_P(value);
 			}
 			zendi_zval_dtor(garbage);
 		}
 	} else {
-		variable_ptr->refcount--;
-		if (variable_ptr->refcount==0) {
+		Z_DELREF_P(variable_ptr);
+		if (Z_REFCOUNT_P(variable_ptr)==0) {
 			switch (type) {
 				case IS_CV:
 				case IS_VAR:
 					/* break missing intentionally */
 				case IS_CONST:
 					if (variable_ptr==value) {
-						variable_ptr->refcount++;
+						Z_ADDREF_P(variable_ptr);
 					} else if (PZVAL_IS_REF(value)) {
 						zval tmp;
 
 						tmp = *value;
 						zval_copy_ctor(&tmp);
-						tmp.refcount=1;
+						Z_SET_REFCOUNT(tmp, 1);
 						zendi_zval_dtor(*variable_ptr);
 						*variable_ptr = tmp;
 					} else {
-						value->refcount++;
+						Z_ADDREF_P(value);
 						zendi_zval_dtor(*variable_ptr);
 						safe_free_zval_ptr(variable_ptr);
 						*variable_ptr_ptr = value;
@@ -826,7 +826,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					break;
 				case IS_TMP_VAR:
 					zendi_zval_dtor(*variable_ptr);
-					value->refcount=1;
+					Z_SET_REFCOUNT_P(value, 1);
 					*variable_ptr = *value;
 					break;
 					EMPTY_SWITCH_DEFAULT_CASE()
@@ -837,26 +837,26 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				case IS_VAR:
 					/* break missing intentionally */
 				case IS_CONST:
-					if (PZVAL_IS_REF(value) && value->refcount > 0) {
+					if (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0) {
 						ALLOC_ZVAL(variable_ptr);
 						*variable_ptr_ptr = variable_ptr;
 						*variable_ptr = *value;
 						zval_copy_ctor(variable_ptr);
-						variable_ptr->refcount=1;
+						Z_SET_REFCOUNT_P(variable_ptr, 1);
 						break;
 					}
 					*variable_ptr_ptr = value;
-					value->refcount++;
+					Z_ADDREF_P(value);
 					break;
 				case IS_TMP_VAR:
 					ALLOC_ZVAL(*variable_ptr_ptr);
-					value->refcount=1;
+					Z_SET_REFCOUNT_P(value, 1);
 					**variable_ptr_ptr = *value;
 					break;
 					EMPTY_SWITCH_DEFAULT_CASE()
 						}
 		}
-		(*variable_ptr_ptr)->is_ref=0;
+		Z_UNSET_ISREF_PP(variable_ptr_ptr);
 	}
 
 done_setting_var:
@@ -883,7 +883,7 @@ static inline void zend_receive(zval **variable_ptr_ptr, zval *value TSRMLS_DC)
   		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
  			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
  		} else {
- 			variable_ptr->refcount--;
+ 			Z_DELREF_P(variable_ptr);
  			ALLOC_ZVAL(variable_ptr);
  			*variable_ptr_ptr = variable_ptr;
  			*variable_ptr = *value;
@@ -895,9 +895,9 @@ static inline void zend_receive(zval **variable_ptr_ptr, zval *value TSRMLS_DC)
  			efree(class_name);
  		}
  	} else {
- 		variable_ptr->refcount--;
+ 		Z_DELREF_P(variable_ptr);
  		*variable_ptr_ptr = value;
- 		value->refcount++;
+ 		Z_ADDREF_P(value);
  	}
 }
 
@@ -981,7 +981,7 @@ fetch_string_dim:
 					case BP_VAR_W: {
 							zval *new_zval = &EG(uninitialized_zval);
 
-							new_zval->refcount++;
+							Z_ADDREF_P(new_zval);
 							zend_symtable_update(ht, offset_key, offset_key_length+1, &new_zval, sizeof(zval *), (void **) &retval);
 						}
 						break;
@@ -1016,7 +1016,7 @@ fetch_string_dim:
 						case BP_VAR_W: {
 							zval *new_zval = &EG(uninitialized_zval);
 
-							new_zval->refcount++;
+							Z_ADDREF_P(new_zval);
 							zend_hash_index_update(ht, index, &new_zval, sizeof(zval *), (void **) &retval);
 						}
 						break;
@@ -1082,18 +1082,18 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 		zval **retval;
 
 		case IS_ARRAY:
-			if ((type==BP_VAR_W || type==BP_VAR_RW) && container->refcount>1 && !PZVAL_IS_REF(container)) {
+			if ((type==BP_VAR_W || type==BP_VAR_RW) && Z_REFCOUNT_P(container)>1 && !PZVAL_IS_REF(container)) {
 				SEPARATE_ZVAL(container_ptr);
 				container = *container_ptr;
 			}
 			if (dim == NULL) {
 				zval *new_zval = &EG(uninitialized_zval);
 
-				new_zval->refcount++;
+				Z_ADDREF_P(new_zval);
 				if (zend_hash_next_index_insert(Z_ARRVAL_P(container), &new_zval, sizeof(zval *), (void **) &retval) == FAILURE) {
 					zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
 					retval = &EG(error_zval_ptr);
-					new_zval->refcount--;
+					Z_DELREF_P(new_zval);
 				}
 			} else {
 				retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, type TSRMLS_CC);
@@ -1177,16 +1177,16 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
 
 				if (overloaded_result) {
-					if (!overloaded_result->is_ref &&
+					if (!Z_ISREF_P(overloaded_result) &&
 					    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
-						if (overloaded_result->refcount > 0) {
+						if (Z_REFCOUNT_P(overloaded_result) > 0) {
 							zval *tmp = overloaded_result;
 
 							ALLOC_ZVAL(overloaded_result);
 							*overloaded_result = *tmp;
 							zval_copy_ctor(overloaded_result);
-							overloaded_result->is_ref = 0;
-							overloaded_result->refcount = 0;
+							Z_UNSET_ISREF_P(overloaded_result);
+							Z_SET_REFCOUNT_P(overloaded_result, 0);
 						}
 						if (Z_TYPE_P(overloaded_result) != IS_OBJECT) {
 							zend_class_entry *ce = Z_OBJCE_P(container);
@@ -1201,9 +1201,9 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 					result->var.ptr_ptr = retval;
 					AI_USE_PTR(result->var);
 					PZVAL_LOCK(*result->var.ptr_ptr);
-				} else if ((*retval)->refcount == 0) {
+				} else if (Z_REFCOUNT_PP(retval) == 0) {
 					/* Destroy unused result from offsetGet() magic method */
-					(*retval)->refcount = 1;
+					Z_SET_REFCOUNT_PP(retval, 1);
 					zval_ptr_dtor(retval);
 				}
 				if (dim_is_tmp_var) {

@@ -97,7 +97,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 
 ZEND_API void zval_add_ref(zval **p)
 {
-	(*p)->refcount++;
+	Z_ADDREF_PP(p);
 }
 
 

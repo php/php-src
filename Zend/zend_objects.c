@@ -156,7 +156,7 @@ static void zval_add_ref_or_clone(zval **p)
 			(*p)->value.obj = Z_OBJ_HT_PP(p)->clone_obj(orig TSRMLS_CC);
 		}
 	} else {
-		(*p)->refcount++;
+		Z_ADDREF_PP(p);
 	}
 }
 

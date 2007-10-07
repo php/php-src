@@ -76,7 +76,7 @@ static inline void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 			prev->next = var_hash;
 	}
 
-	(*rval)->refcount++;
+	Z_ADDREF_PP(rval);
 	var_hash->data[var_hash->used_slots++] = *rval;
 }
 
@@ -1096,8 +1096,8 @@ yy91:
 		zval_ptr_dtor(rval);
 	}
 	*rval = *rval_ref;
-	(*rval)->refcount++;
-	(*rval)->is_ref = 0;
+	Z_ADDREF_PP(rval);
+	Z_UNSET_ISREF_PP(rval);
 	
 	return 1;
 }
@@ -1140,8 +1140,8 @@ yy97:
 		zval_ptr_dtor(rval);
 	}
 	*rval = *rval_ref;
-	(*rval)->refcount++;
-	(*rval)->is_ref = 1;
+	Z_ADDREF_PP(rval);
+	Z_SET_ISREF_PP(rval);
 	
 	return 1;
 }

@@ -339,7 +339,7 @@ PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC)
 			zval *empty_var;
 
 			ALLOC_INIT_ZVAL(empty_var); /* this sets refcount to 1 */
-			empty_var->refcount = 0; /* our module does not maintain a ref */
+			Z_SET_REFCOUNT_P(empty_var, 0); /* our module does not maintain a ref */
 			/* The next call will increase refcount by NR_OF_SYM_TABLES==2 */
 			zend_set_hash_symbol(empty_var, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
 		} else if (sym_global == NULL) {
@@ -869,7 +869,7 @@ static int migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
 						(void **) &val) == SUCCESS 
 					&& val && Z_TYPE_PP(val) != IS_NULL) {
 				ZEND_SET_SYMBOL_WITH_LENGTH(ht, str, str_len, *val, 
-						(*val)->refcount + 1 , 1);
+						Z_REFCOUNT_PP(val) + 1 , 1);
 				ret = 1;
 			}
 			break;
@@ -1512,7 +1512,7 @@ PHP_FUNCTION(session_set_save_handler)
 	mdata = emalloc(sizeof(*mdata));
 	
 	for (i = 0; i < 6; i++) {
-		ZVAL_ADDREF(*args[i]);
+		Z_ADDREF_PP(args[i]);
 		mdata->names[i] = *args[i];
 	}
 

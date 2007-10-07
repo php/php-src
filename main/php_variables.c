@@ -517,14 +517,14 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 	Z_TYPE_P(argc) = IS_LONG;
 
 	if (PG(register_globals) || SG(request_info).argc) {
-		arr->refcount++;
-		argc->refcount++;
+		Z_ADDREF_P(arr);
+		Z_ADDREF_P(argc);
 		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
 		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	} 
 	if (track_vars_array) {
-		arr->refcount++;
-		argc->refcount++;
+		Z_ADDREF_P(arr);
+		Z_ADDREF_P(argc);
 		zend_hash_update(Z_ARRVAL_P(track_vars_array), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
 		zend_hash_update(Z_ARRVAL_P(track_vars_array), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	}
@@ -613,13 +613,13 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 			|| (key_type == HASH_KEY_IS_LONG && zend_hash_index_find(dest, num_key, (void **)&dest_entry) != SUCCESS)
 			|| Z_TYPE_PP(dest_entry) != IS_ARRAY
         ) {
-			(*src_entry)->refcount++;
+			Z_ADDREF_PP(src_entry);
 			if (key_type == HASH_KEY_IS_STRING) {
 				/* if register_globals is on and working with main symbol table, prevent overwriting of GLOBALS */
 				if (!globals_check || string_key_len != sizeof("GLOBALS") || memcmp(string_key, "GLOBALS", sizeof("GLOBALS") - 1)) {
 					zend_hash_update(dest, string_key, string_key_len, src_entry, sizeof(zval *), NULL);
 				} else {
-					(*src_entry)->refcount--;
+					Z_DELREF_PP(src_entry);
 				}
 			} else {
 				zend_hash_index_update(dest, num_key, src_entry, sizeof(zval *), NULL);
@@ -738,11 +738,11 @@ int php_hash_environment(TSRMLS_D)
 			INIT_PZVAL(PG(http_globals)[i]);
 		}
 
-		PG(http_globals)[i]->refcount++;
+		Z_ADDREF_P(PG(http_globals)[i]);
 		zend_hash_update(&EG(symbol_table), auto_global_records[i].name, auto_global_records[i].name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
 		if (PG(register_long_arrays)) {
 			zend_hash_update(&EG(symbol_table), auto_global_records[i].long_name, auto_global_records[i].long_name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
-			PG(http_globals)[i]->refcount++;
+			Z_ADDREF_P(PG(http_globals)[i]);
 		}
 	}
 
@@ -767,8 +767,8 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 	
 				if (zend_hash_find(&EG(symbol_table), "argc", sizeof("argc"), (void**)&argc) == SUCCESS &&
 				    zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void**)&argv) == SUCCESS) {
-				(*argc)->refcount++;
-					(*argv)->refcount++;
+					Z_ADDREF_PP(argc);
+					Z_ADDREF_PP(argv);
 					zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), argv, sizeof(zval *), NULL);
 					zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argc", sizeof("argc"), argc, sizeof(zval *), NULL);
 				}
@@ -789,11 +789,11 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 	}
 
 	zend_hash_update(&EG(symbol_table), name, name_len + 1, &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
-	PG(http_globals)[TRACK_VARS_SERVER]->refcount++;
+	Z_ADDREF_P(PG(http_globals)[TRACK_VARS_SERVER]);
 
 	if (PG(register_long_arrays)) {
 		zend_hash_update(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
-		PG(http_globals)[TRACK_VARS_SERVER]->refcount++;
+		Z_ADDREF_P(PG(http_globals)[TRACK_VARS_SERVER]);
 	}
 	
 	return 0; /* don't rearm */
@@ -815,11 +815,11 @@ static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC
 	}
 
 	zend_hash_update(&EG(symbol_table), name, name_len + 1, &PG(http_globals)[TRACK_VARS_ENV], sizeof(zval *), NULL);
-	PG(http_globals)[TRACK_VARS_ENV]->refcount++;
+	Z_ADDREF_P(PG(http_globals)[TRACK_VARS_ENV]);
 
 	if (PG(register_long_arrays)) {
 		zend_hash_update(&EG(symbol_table), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), &PG(http_globals)[TRACK_VARS_ENV], sizeof(zval *), NULL);
-		PG(http_globals)[TRACK_VARS_ENV]->refcount++;
+		Z_ADDREF_P(PG(http_globals)[TRACK_VARS_ENV]);
 	}
 
 	return 0; /* don't rearm */
