@@ -969,8 +969,8 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 					} else if (Z_TYPE_P(ent2->data) == IS_OBJECT) {
 						zend_class_entry *old_scope = EG(scope);
 	
-		    				EG(scope) = Z_OBJCE_P(ent2->data);
-						ent1->data->refcount--;
+						EG(scope) = Z_OBJCE_P(ent2->data);
+						Z_DELREF_P(ent1->data);
 						add_property_zval(ent2->data, ent1->varname, ent1->data);
 						EG(scope) = old_scope;
 					} else {
