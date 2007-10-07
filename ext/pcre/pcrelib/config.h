@@ -20,12 +20,23 @@ it to run on SunOS4 and other "close to standard" systems.
 
 If you are going to build PCRE "by hand" on a system without "configure" you
 should copy the distributed config.h.generic to config.h, and then set up the
-macros the way you need them. Alternatively, you can avoid editing by using -D
-on the compiler command line to set the macro values.
+macro definitions the way you need them. You must then add -DHAVE_CONFIG_H to
+all of your compile commands, so that config.h is included at the start of
+every source.
+
+Alternatively, you can avoid editing by using -D on the compiler command line
+to set the macro values. In this case, you do not have to set -DHAVE_CONFIG_H.
 
 PCRE uses memmove() if HAVE_MEMMOVE is set to 1; otherwise it uses bcopy() if
 HAVE_BCOPY is set to 1. If your system has neither bcopy() nor memmove(), set
 them both to 0; an emulation function will be used. */
+
+/* By default, the \R escape sequence matches any Unicode line ending
+   character or sequence of characters. If BSR_ANYCRLF is defined, this is
+   changed so that backslash-R matches only CR, LF, or CRLF. The build- time
+   default can be overridden by the user of PCRE at runtime. On systems that
+   support it, "configure" can be used to override the default. */
+/* #undef BSR_ANYCRLF */
 
 /* If you are compiling for a system that uses EBCDIC instead of ASCII
    character codes, define this macro as 1. On systems that can use
@@ -141,6 +152,9 @@ them both to 0; an emulation function will be used. */
 /* Define to 1 if you have the <windows.h> header file. */
 /* #undef HAVE_WINDOWS_H */
 
+/* Define to 1 if you have the `_strtoi64' function. */
+/* #undef HAVE__STRTOI64 */
+
 /* The value of LINK_SIZE determines the number of bytes used to store links
    as offsets within the compiled regex. The default is 2, which allows for
    compiled patterns up to 64K long. This covers the vast majority of cases.
@@ -189,10 +203,10 @@ them both to 0; an emulation function will be used. */
 #define MAX_NAME_SIZE 32
 #endif
 
-/* The value of NEWLINE determines the newline character sequence. On
-   Unix-like systems, "configure" can be used to override the default, which
-   is 10. The possible values are 10 (LF), 13 (CR), 3338 (CRLF), -1 (ANY), or
-   -2 (ANYCRLF). */
+/* The value of NEWLINE determines the newline character sequence. On systems
+   that support it, "configure" can be used to override the default, which is
+   10. The possible values are 10 (LF), 13 (CR), 3338 (CRLF), -1 (ANY), or -2
+   (ANYCRLF). */
 #ifndef NEWLINE
 #define NEWLINE 10
 #endif
@@ -217,13 +231,13 @@ them both to 0; an emulation function will be used. */
 #define PACKAGE_NAME "PCRE"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE 7.3"
+#define PACKAGE_STRING "PCRE 7.4"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "7.3"
+#define PACKAGE_VERSION "7.4"
 
 
 /* If you are compiling for a system other than a Unix-like system or
@@ -265,7 +279,7 @@ them both to 0; an emulation function will be used. */
 
 /* Version number of package */
 #ifndef VERSION
-#define VERSION "7.3"
+#define VERSION "7.4"
 #endif
 
 /* Define to empty if `const' does not conform to ANSI C. */

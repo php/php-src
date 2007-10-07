@@ -543,7 +543,7 @@
 /abc.$/mgx8<any>
     abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x{0085} abc7\x{2028} abc8\x{2029} abc9
 
-/^a\Rb/8
+/^a\Rb/8<bsr_unicode>
     a\nb
     a\rb
     a\r\nb
@@ -555,7 +555,7 @@
     ** Failers
     a\n\rb    
 
-/^a\R*b/8
+/^a\R*b/8<bsr_unicode>
     ab
     a\nb
     a\rb
@@ -566,7 +566,7 @@
     a\n\rb    
     a\n\r\x{85}\x0cb 
 
-/^a\R+b/8
+/^a\R+b/8<bsr_unicode>
     a\nb
     a\rb
     a\r\nb
@@ -578,7 +578,7 @@
     ** Failers
     ab  
 
-/^a\R{1,3}b/8
+/^a\R{1,3}b/8<bsr_unicode>
     a\nb
     a\n\rb
     a\n\r\x{85}b
@@ -628,4 +628,40 @@
     ** Failers 
     \x09\x{200a}\x{a0}\x{2028}\x0b
      
+/a\Rb/I8<bsr_anycrlf>
+    a\rb
+    a\nb
+    a\r\nb
+    ** Failers
+    a\x{85}b
+    a\x0bb     
+
+/a\Rb/I8<bsr_unicode>
+    a\rb
+    a\nb
+    a\r\nb
+    a\x{85}b
+    a\x0bb     
+    ** Failers 
+    a\x{85}b\<bsr_anycrlf>
+    a\x0bb\<bsr_anycrlf>
+    
+/a\R?b/I8<bsr_anycrlf>
+    a\rb
+    a\nb
+    a\r\nb
+    ** Failers
+    a\x{85}b
+    a\x0bb     
+
+/a\R?b/I8<bsr_unicode>
+    a\rb
+    a\nb
+    a\r\nb
+    a\x{85}b
+    a\x0bb     
+    ** Failers 
+    a\x{85}b\<bsr_anycrlf>
+    a\x0bb\<bsr_anycrlf>
+ 
 / End of testinput 8 / 

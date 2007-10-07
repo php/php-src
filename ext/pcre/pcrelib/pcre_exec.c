@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 pattern matching using an NFA algorithm, trying to mimic Perl as closely as
 possible. There are also some static supporting functions. */
 
-#include <config.h>
+#include "config.h"
 
 #define NLBLOCK md             /* Block containing newline information */
 #define PSSTART start_subject  /* Field containing processed string start */
@@ -1524,12 +1524,16 @@ for (;;)
       case 0x000d:
       if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
       break;
+
       case 0x000a:
+      break;
+
       case 0x000b:
       case 0x000c:
       case 0x0085:
       case 0x2028:
       case 0x2029:
+      if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
       break;
       }
     ecode++;
@@ -2952,12 +2956,16 @@ for (;;)
             case 0x000d:
             if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
             break;
+
             case 0x000a:
+            break;
+
             case 0x000b:
             case 0x000c:
             case 0x0085:
             case 0x2028:
             case 0x2029:
+            if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
             break;
             }
           }
@@ -3170,9 +3178,12 @@ for (;;)
             if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
             break;
             case 0x000a:
+            break;
+
             case 0x000b:
             case 0x000c:
             case 0x0085:
+            if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
             break;
             }
           }
@@ -3424,11 +3435,14 @@ for (;;)
               if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
               break;
               case 0x000a:
+              break;
+
               case 0x000b:
               case 0x000c:
               case 0x0085:
               case 0x2028:
               case 0x2029:
+              if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
               break;
               }
             break;
@@ -3580,10 +3594,14 @@ for (;;)
               case 0x000d:
               if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
               break;
+
               case 0x000a:
+              break;
+
               case 0x000b:
               case 0x000c:
               case 0x0085:
+              if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
               break;
               }
             break;
@@ -3881,8 +3899,10 @@ for (;;)
               }
             else
               {
-              if (c != 0x000a && c != 0x000b && c != 0x000c &&
-                  c != 0x0085 && c != 0x2028 && c != 0x2029)
+              if (c != 0x000a &&
+                  (md->bsr_anycrlf ||
+                   (c != 0x000b && c != 0x000c &&
+                    c != 0x0085 && c != 0x2028 && c != 0x2029)))
                 break;
               eptr += len;
               }
@@ -4072,7 +4092,9 @@ for (;;)
               }
             else
               {
-              if (c != 0x000a && c != 0x000b && c != 0x000c && c != 0x0085)
+              if (c != 0x000a &&
+                  (md->bsr_anycrlf ||
+                    (c != 0x000b && c != 0x000c && c != 0x0085)))
                 break;
               eptr++;
               }
@@ -4222,12 +4244,17 @@ HEAP_RETURN:
 switch (frame->Xwhere)
   {
   LBL( 1) LBL( 2) LBL( 3) LBL( 4) LBL( 5) LBL( 6) LBL( 7) LBL( 8)
-  LBL( 9) LBL(10) LBL(11) LBL(12) LBL(13) LBL(14) LBL(15) LBL(16)
-  LBL(17) LBL(18) LBL(19) LBL(20) LBL(21) LBL(22) LBL(23) LBL(24)
-  LBL(25) LBL(26) LBL(27) LBL(28) LBL(29) LBL(30) LBL(31) LBL(32)
-  LBL(33) LBL(34) LBL(35) LBL(36) LBL(37) LBL(38) LBL(39) LBL(40)
-  LBL(41) LBL(42) LBL(43) LBL(44) LBL(45) LBL(46) LBL(47) LBL(48)
-  LBL(49) LBL(50) LBL(51) LBL(52) LBL(53) LBL(54)
+  LBL( 9) LBL(10) LBL(11) LBL(12) LBL(13) LBL(14) LBL(15) LBL(17)
+  LBL(19) LBL(24) LBL(25) LBL(26) LBL(27) LBL(29) LBL(31) LBL(33)
+  LBL(35) LBL(43) LBL(47) LBL(48) LBL(49) LBL(50) LBL(51) LBL(52)
+  LBL(53) LBL(54)
+#ifdef SUPPORT_UTF8
+  LBL(16) LBL(18) LBL(20) LBL(21) LBL(22) LBL(23) LBL(28) LBL(30)
+  LBL(32) LBL(34) LBL(42) LBL(46)
+#ifdef SUPPORT_UCP
+  LBL(36) LBL(37) LBL(38) LBL(39) LBL(40) LBL(41) LBL(44) LBL(45)
+#endif  /* SUPPORT_UCP */
+#endif  /* SUPPORT_UTF8 */
   default:
   DPRINTF(("jump error in pcre match: label %d non-existent\n", frame->Xwhere));
   return PCRE_ERROR_INTERNAL;
@@ -4406,7 +4433,7 @@ if (re->magic_number != MAGIC_NUMBER)
 /* Set up other data */
 
 anchored = ((re->options | options) & PCRE_ANCHORED) != 0;
-startline = (re->options & PCRE_STARTLINE) != 0;
+startline = (re->flags & PCRE_STARTLINE) != 0;
 firstline = (re->options & PCRE_FIRSTLINE) != 0;
 
 /* The code starts after the real_pcre block and the capture name table. */
@@ -4433,11 +4460,37 @@ md->recursive = NULL;                   /* No recursion at top level */
 md->lcc = tables + lcc_offset;
 md->ctypes = tables + ctypes_offset;
 
+/* Handle different \R options. */
+
+switch (options & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE))
+  {
+  case 0:
+  if ((re->options & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)) != 0)
+    md->bsr_anycrlf = (re->options & PCRE_BSR_ANYCRLF) != 0;
+  else
+#ifdef BSR_ANYCRLF
+  md->bsr_anycrlf = TRUE;
+#else
+  md->bsr_anycrlf = FALSE;
+#endif
+  break;
+
+  case PCRE_BSR_ANYCRLF:
+  md->bsr_anycrlf = TRUE;
+  break;
+
+  case PCRE_BSR_UNICODE:
+  md->bsr_anycrlf = FALSE;
+  break;
+
+  default: return PCRE_ERROR_BADNEWLINE;
+  }
+
 /* Handle different types of newline. The three bits give eight cases. If
 nothing is set at run time, whatever was used at compile time applies. */
 
-switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options : (pcre_uint32)options) &
-       PCRE_NEWLINE_BITS)
+switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options :
+        (pcre_uint32)options) & PCRE_NEWLINE_BITS)
   {
   case 0: newline = NEWLINE; break;   /* Compile-time default */
   case PCRE_NEWLINE_CR: newline = '\r'; break;
@@ -4476,7 +4529,7 @@ else
 /* Partial matching is supported only for a restricted set of regexes at the
 moment. */
 
-if (md->partial && (re->options & PCRE_NOPARTIAL) != 0)
+if (md->partial && (re->flags & PCRE_NOPARTIAL) != 0)
   return PCRE_ERROR_BADPARTIAL;
 
 /* Check a UTF-8 string if required. Unfortunately there's no way of passing
@@ -4553,7 +4606,7 @@ studied, there may be a bitmap of possible first characters. */
 
 if (!anchored)
   {
-  if ((re->options & PCRE_FIRSTSET) != 0)
+  if ((re->flags & PCRE_FIRSTSET) != 0)
     {
     first_byte = re->first_byte & 255;
     if ((first_byte_caseless = ((re->first_byte & REQ_CASELESS) != 0)) == TRUE)
@@ -4568,7 +4621,7 @@ if (!anchored)
 /* For anchored or unanchored matches, there may be a "last known required
 character" set. */
 
-if ((re->options & PCRE_REQCHSET) != 0)
+if ((re->flags & PCRE_REQCHSET) != 0)
   {
   req_byte = re->req_byte & 255;
   req_byte_caseless = (re->req_byte & REQ_CASELESS) != 0;
@@ -4790,7 +4843,7 @@ for(;;)
   if (start_match[-1] == '\r' &&
       start_match < end_subject &&
       *start_match == '\n' &&
-      (re->options & PCRE_HASCRORLF) == 0 &&
+      (re->flags & PCRE_HASCRORLF) == 0 &&
         (md->nltype == NLTYPE_ANY ||
          md->nltype == NLTYPE_ANYCRLF ||
          md->nllen == 2))

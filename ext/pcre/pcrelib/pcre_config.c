@@ -41,7 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 /* This module contains the external function pcre_config(). */
 
 
-#include <config.h>
+#include "config.h"
 
 #include "pcre_internal.h"
 
@@ -83,6 +83,14 @@ switch (what)
 
   case PCRE_CONFIG_NEWLINE:
   *((int *)where) = NEWLINE;
+  break;
+
+  case PCRE_CONFIG_BSR:
+#ifdef BSR_ANYCRLF
+  *((int *)where) = 1;
+#else
+  *((int *)where) = 0;
+#endif
   break;
 
   case PCRE_CONFIG_LINK_SIZE:

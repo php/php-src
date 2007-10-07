@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 functions. */
 
 
-#include <config.h>
+#include "config.h"
 
 
 /* Ensure that the PCREPOSIX_EXP_xxx macros are set appropriately for
@@ -55,10 +55,9 @@ previously been set. */
 #  define PCREPOSIX_EXP_DEFN __declspec(dllexport)
 #endif
 
-#include <pcre.h>
+#include "pcre.h"
 #include "pcre_internal.h"
 #include "pcreposix.h"
-
 
 
 /* Table to translate PCRE compile time error codes into POSIX error codes. */

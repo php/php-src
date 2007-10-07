@@ -103,7 +103,9 @@ Building PCRE on non-Unix systems
 
 For a non-Unix system, please read the comments in the file NON-UNIX-USE,
 though if your system supports the use of "configure" and "make" you may be
-able to build PCRE in the same way as for Unix-like systems.
+able to build PCRE in the same way as for Unix-like systems. PCRE can also be
+configured in many platform environments using the GUI facility of CMake's
+CMakeSetup. It creates Makefiles, solution files, etc.
 
 PCRE has been compiled on many different operating systems. It should be
 straightforward to build PCRE on any system that has a Standard C compiler and
@@ -183,6 +185,12 @@ library. You can read more about them in the pcrebuild man page.
   to be some failures. With --enable-newline-is-anycrlf or
   --enable-newline-is-any, many tests should succeed, but there may be some
   failures.
+
+. By default, the sequence \R in a pattern matches any Unicode line ending
+  sequence. This is independent of the option specifying what PCRE considers to
+  be the end of a line (see above). However, the caller of PCRE can restrict \R
+  to match only CR, LF, or CRLF. You can make this the default by adding
+  --enable-bsr-anycrlf to the "configure" command (bsr = "backslash R").
 
 . When called via the POSIX interface, PCRE uses malloc() to get additional
   storage for processing capturing parentheses if there are more than 10 of
@@ -500,7 +508,10 @@ in the comparison output, it means that locale is not available on your system,
 despite being listed by "locale". This does not mean that PCRE is broken.
 
 [If you are trying to run this test on Windows, you may be able to get it to
-work by changing "fr_FR" to "french" everywhere it occurs.]
+work by changing "fr_FR" to "french" everywhere it occurs. Alternatively, use
+RunTest.bat. The version of RunTest.bat included with PCRE 7.4 and above uses
+Windows versions of test 2. More info on using RunTest.bat is included in the
+document entitled NON-UNIX-USE.]
 
 The fourth test checks the UTF-8 support. It is not run automatically unless
 PCRE is built with UTF-8 support. To do this you must set --enable-utf8 when
@@ -714,4 +725,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 24 April 2007
+Last updated: 21 September 2007

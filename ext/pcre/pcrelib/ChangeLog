@@ -1,6 +1,81 @@
 ChangeLog for PCRE
 ------------------
 
+Version 7.4 21-Sep-07
+---------------------
+
+1.  Change 7.3/28 was implemented for classes by looking at the bitmap. This
+    means that a class such as [\s] counted as "explicit reference to CR or
+    LF". That isn't really right - the whole point of the change was to try to
+    help when there was an actual mention of one of the two characters. So now
+    the change happens only if \r or \n (or a literal CR or LF) character is
+    encountered.
+
+2.  The 32-bit options word was also used for 6 internal flags, but the numbers
+    of both had grown to the point where there were only 3 bits left.
+    Fortunately, there was spare space in the data structure, and so I have
+    moved the internal flags into a new 16-bit field to free up more option
+    bits.
+
+3.  The appearance of (?J) at the start of a pattern set the DUPNAMES option,
+    but did not set the internal JCHANGED flag - either of these is enough to
+    control the way the "get" function works - but the PCRE_INFO_JCHANGED
+    facility is supposed to tell if (?J) was ever used, so now (?J) at the
+    start sets both bits.
+
+4.  Added options (at build time, compile time, exec time) to change \R from
+    matching any Unicode line ending sequence to just matching CR, LF, or CRLF.
+
+5.  doc/pcresyntax.html was missing from the distribution.
+
+6.  Put back the definition of PCRE_ERROR_NULLWSLIMIT, for backward
+    compatibility, even though it is no longer used.
+
+7.  Added macro for snprintf to pcrecpp_unittest.cc and also for strtoll and
+    strtoull to pcrecpp.cc to select the available functions in WIN32 when the
+    windows.h file is present (where different names are used). [This was
+    reversed later after testing - see 16 below.]
+
+8.  Changed all #include <config.h> to #include "config.h". There were also
+    some further <pcre.h> cases that I changed to "pcre.h".
+
+9.  When pcregrep was used with the --colour option, it missed the line ending
+    sequence off the lines that it output.
+
+10. It was pointed out to me that arrays of string pointers cause lots of
+    relocations when a shared library is dynamically loaded. A technique of
+    using a single long string with a table of offsets can drastically reduce
+    these. I have refactored PCRE in four places to do this. The result is
+    dramatic:
+
+      Originally:                          290
+      After changing UCP table:            187
+      After changing error message table:   43
+      After changing table of "verbs"       36
+      After changing table of Posix names   22
+
+    Thanks to the folks working on Gregex for glib for this insight.
+
+11. --disable-stack-for-recursion caused compiling to fail unless -enable-
+    unicode-properties was also set.
+
+12. Updated the tests so that they work when \R is defaulted to ANYCRLF.
+
+13. Added checks for ANY and ANYCRLF to pcrecpp.cc where it previously
+    checked only for CRLF.
+
+14. Added casts to pcretest.c to avoid compiler warnings.
+
+15. Added Craig's patch to various pcrecpp modules to avoid compiler warnings.
+
+16. Added Craig's patch to remove the WINDOWS_H tests, that were not working,
+    and instead check for _strtoi64 explicitly, and avoid the use of snprintf()
+    entirely. This removes changes made in 7 above.
+
+17. The CMake files have been updated, and there is now more information about
+    building with CMake in the NON-UNIX-USE document.
+
+
 Version 7.3 28-Aug-07
 ---------------------
 
