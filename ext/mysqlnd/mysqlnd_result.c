@@ -1138,7 +1138,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES *result, unsigned int 
 
 	*return_value = **entry;
 	zval_copy_ctor(return_value);
-	Z_REFCOUNT_P(return_value) = 1;
+	Z_SET_REFCOUNT_P(return_value, 1);
 	zval_dtor(&row);
 
 	DBG_VOID_RETURN;
