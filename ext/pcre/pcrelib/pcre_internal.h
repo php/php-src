@@ -481,18 +481,16 @@ Standard C system should have one. */
 
 #define PCRE_IMS (PCRE_CASELESS|PCRE_MULTILINE|PCRE_DOTALL)
 
-/* Private options flags start at the most significant end of the four bytes.
-The public options defined in pcre.h start at the least significant end. Make
-sure they don't overlap! The bits are getting a bit scarce now -- when we run
-out, there is a dummy word in the structure that could be used for the private
-bits. */
+/* Private flags containing information about the compiled regex. They used to
+live at the top end of the options word, but that got almost full, so now they
+are in a 16-bit flags word. */
 
-#define PCRE_NOPARTIAL     0x80000000  /* can't use partial with this regex */
-#define PCRE_FIRSTSET      0x40000000  /* first_byte is set */
-#define PCRE_REQCHSET      0x20000000  /* req_byte is set */
-#define PCRE_STARTLINE     0x10000000  /* start after \n for multiline */
-#define PCRE_JCHANGED      0x08000000  /* j option changes within regex */
-#define PCRE_HASCRORLF     0x04000000  /* explicit \r or \n in pattern */
+#define PCRE_NOPARTIAL     0x0001  /* can't use partial with this regex */
+#define PCRE_FIRSTSET      0x0002  /* first_byte is set */
+#define PCRE_REQCHSET      0x0004  /* req_byte is set */
+#define PCRE_STARTLINE     0x0008  /* start after \n for multiline */
+#define PCRE_JCHANGED      0x0010  /* j option used in regex */
+#define PCRE_HASCRORLF     0x0020  /* explicit \r or \n in pattern */
 
 /* Options for the "extra" block produced by pcre_study(). */
 
@@ -508,15 +506,16 @@ time, run time, or study time, respectively. */
   (PCRE_CASELESS|PCRE_EXTENDED|PCRE_ANCHORED|PCRE_MULTILINE| \
    PCRE_DOTALL|PCRE_DOLLAR_ENDONLY|PCRE_EXTRA|PCRE_UNGREEDY|PCRE_UTF8| \
    PCRE_NO_AUTO_CAPTURE|PCRE_NO_UTF8_CHECK|PCRE_AUTO_CALLOUT|PCRE_FIRSTLINE| \
-   PCRE_DUPNAMES|PCRE_NEWLINE_BITS)
+   PCRE_DUPNAMES|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)
 
 #define PUBLIC_EXEC_OPTIONS \
   (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NO_UTF8_CHECK| \
-   PCRE_PARTIAL|PCRE_NEWLINE_BITS)
+   PCRE_PARTIAL|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)
 
 #define PUBLIC_DFA_EXEC_OPTIONS \
   (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NO_UTF8_CHECK| \
-   PCRE_PARTIAL|PCRE_DFA_SHORTEST|PCRE_DFA_RESTART|PCRE_NEWLINE_BITS)
+   PCRE_PARTIAL|PCRE_DFA_SHORTEST|PCRE_DFA_RESTART|PCRE_NEWLINE_BITS| \
+   PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)
 
 #define PUBLIC_STUDY_OPTIONS 0   /* None defined */
 
@@ -894,9 +893,9 @@ NOTE NOTE NOTE:
 typedef struct real_pcre {
   pcre_uint32 magic_number;
   pcre_uint32 size;               /* Total that was malloced */
-  pcre_uint32 options;
-  pcre_uint32 dummy1;             /* For future use, maybe */
-
+  pcre_uint32 options;            /* Public options */
+  pcre_uint16 flags;              /* Private flags */
+  pcre_uint16 dummy1;             /* For future use */
   pcre_uint16 top_bracket;
   pcre_uint16 top_backref;
   pcre_uint16 first_byte;
@@ -939,8 +938,8 @@ typedef struct compile_data {
   int  top_backref;             /* Maximum back reference */
   unsigned int backref_map;     /* Bitmap of low back refs */
   int  external_options;        /* External (initial) options */
+  int  external_flags;          /* External flag bits to be set */
   int  req_varyopt;             /* "After variable item" flag for reqbyte */
-  BOOL nopartial;               /* Set TRUE if partial won't work */
   BOOL had_accept;              /* (*ACCEPT) encountered */
   int  nltype;                  /* Newline type */
   int  nllen;                   /* Newline string length */
@@ -1000,6 +999,7 @@ typedef struct match_data {
   BOOL   notempty;              /* Empty string match not wanted */
   BOOL   partial;               /* PARTIAL flag */
   BOOL   hitend;                /* Hit the end of the subject at some point */
+  BOOL   bsr_anycrlf;           /* \R is just any CRLF, not full Unicode */
   const uschar *start_code;     /* For use when recursing */
   USPTR  start_subject;         /* Start of the subject string */
   USPTR  end_subject;           /* End of the subject string */
@@ -1064,10 +1064,12 @@ total length. */
 #define tables_length (ctypes_offset + 256)
 
 /* Layout of the UCP type table that translates property names into types and
-codes. */
+codes. Each entry used to point directly to a name, but to reduce the number of
+relocations in shared libraries, it now has an offset into a single string
+instead. */
 
 typedef struct {
-  const char *name;
+  pcre_uint16 name_offset;
   pcre_uint16 type;
   pcre_uint16 value;
 } ucp_type_table;
@@ -1085,6 +1087,7 @@ extern const uschar _pcre_utf8_table4[];
 
 extern const int    _pcre_utf8_table1_size;
 
+extern const char   _pcre_utt_names[];
 extern const ucp_type_table _pcre_utt[];
 extern const int _pcre_utt_size;
 

@@ -42,9 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The current PCRE version information. */
 
 #define PCRE_MAJOR          7
-#define PCRE_MINOR          3
+#define PCRE_MINOR          4
 #define PCRE_PRERELEASE     
-#define PCRE_DATE           2007-08-28
+#define PCRE_DATE           2007-09-21
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE, the appropriate
@@ -122,6 +122,8 @@ extern "C" {
 #define PCRE_NEWLINE_CRLF       0x00300000
 #define PCRE_NEWLINE_ANY        0x00400000
 #define PCRE_NEWLINE_ANYCRLF    0x00500000
+#define PCRE_BSR_ANYCRLF        0x00800000
+#define PCRE_BSR_UNICODE        0x01000000
 
 /* Exec-time and get/set-time error codes */
 
@@ -147,7 +149,7 @@ extern "C" {
 #define PCRE_ERROR_DFA_WSSIZE     (-19)
 #define PCRE_ERROR_DFA_RECURSE    (-20)
 #define PCRE_ERROR_RECURSIONLIMIT (-21)
-#define PCRE_ERROR_NOTUSED        (-22)
+#define PCRE_ERROR_NULLWSLIMIT    (-22)  /* No longer actually used */
 #define PCRE_ERROR_BADNEWLINE     (-23)
 
 /* Request types for pcre_fullinfo() */
@@ -180,6 +182,7 @@ compatible. */
 #define PCRE_CONFIG_STACKRECURSE            5
 #define PCRE_CONFIG_UNICODE_PROPERTIES      6
 #define PCRE_CONFIG_MATCH_LIMIT_RECURSION   7
+#define PCRE_CONFIG_BSR                     8
 
 /* Bit flags for the pcre_extra structure. Do not re-arrange or redefine
 these bits, just add new ones on the end, in order to remain compatible. */

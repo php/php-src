@@ -126,7 +126,7 @@ for (i = _pcre_utt_size - 1; i >= 0; i--)
   {
   if (ptype == _pcre_utt[i].type && pvalue == _pcre_utt[i].value) break;
   }
-return (i >= 0)? _pcre_utt[i].name : "??";
+return (i >= 0)? _pcre_utt_names + _pcre_utt[i].name_offset : "??";
 #else
 /* It gets harder and harder to shut off unwanted compiler warnings. */
 ptype = ptype * pvalue;
