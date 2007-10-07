@@ -187,10 +187,11 @@ static int pcre_clean_cache(void *data, void *arg TSRMLS_DC)
 /* }}} */
 
 /* {{{ static make_subpats_table */
-static char **make_subpats_table(int num_subpats, int rc, pcre_cache_entry *pce)
+static char **make_subpats_table(int num_subpats, pcre_cache_entry *pce)
 {
 	pcre_extra *extra = pce->extra;
 	int name_cnt = 0, name_size, ni = 0;
+	int rc;
 	char *name_table;
 	unsigned short name_idx;
 	char **subpat_names = (char **)ecalloc(num_subpats, sizeof(char *));
@@ -672,7 +673,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 	 * allocate the table, even though there may be no named subpatterns. This
 	 * avoids somewhat more complicated logic in the inner loops.
 	 */
-	subpat_names = make_subpats_table(num_subpats, rc, pce);
+	subpat_names = make_subpats_table(num_subpats, pce);
 	if (!subpat_names) {
 		RETURN_FALSE;
 	}
@@ -1147,7 +1148,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, zend_uchar utype, char
 	 * allocate the table, even though there may be no named subpatterns. This
 	 * avoids somewhat more complicated logic in the inner loops.
 	 */
-	subpat_names = make_subpats_table(num_subpats, rc, pce);
+	subpat_names = make_subpats_table(num_subpats, pce);
 	if (!subpat_names) {
 		return NULL;
 	}
