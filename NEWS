@@ -43,6 +43,7 @@ PHP                                                                        NEWS
   class). (Dmitry)
 - Fixed bug #42798 (__autoload() not triggered for classes used in method
   signature). (Dmitry)
+- Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines). (Nuno)
 - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
   (Jani)
 - Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric

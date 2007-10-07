@@ -1528,7 +1528,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 					if (re_bump == NULL) {
 						int dummy;
 
-						if ((re_bump = pcre_get_compiled_regex("/./u", &extra_bump, &dummy TSRMLS_CC)) == NULL) {
+						if ((re_bump = pcre_get_compiled_regex("/./us", &extra_bump, &dummy TSRMLS_CC)) == NULL) {
 							RETURN_FALSE;
 						}
 					}
