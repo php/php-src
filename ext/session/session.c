@@ -1502,7 +1502,7 @@ static PHP_FUNCTION(session_set_save_handler)
 	mdata = emalloc(sizeof(*mdata));
 	
 	for (i = 0; i < 6; i++) {
-		ZVAL_ADDREF(*args[i]);
+		Z_ADDREF_P(*args[i]);
 		mdata->names[i] = *args[i];
 	}
 

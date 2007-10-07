@@ -539,10 +539,10 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 				}
 
 				/* Forbid ZE to free it, we will clean it */
-				ZVAL_ADDREF(data);
+				Z_ADDREF_P(data);
 
 				if ((flags & MYSQLND_FETCH_BOTH) == MYSQLND_FETCH_BOTH) {
-					ZVAL_ADDREF(data);
+					Z_ADDREF_P(data);
 				}
 				if (flags & MYSQLND_FETCH_NUM) {
 					zend_hash_next_index_insert(row_ht, &data, sizeof(zval *), NULL);
@@ -671,10 +671,10 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 			  Let us later know what to do with this zval. If ref_count > 1, we will just
 			  decrease it, otherwise free it. zval_ptr_dtor() make this very easy job.
 			*/
-			ZVAL_ADDREF(data);
+			Z_ADDREF_P(data);
 			
 			if ((flags & MYSQLND_FETCH_BOTH) == MYSQLND_FETCH_BOTH) {
-				ZVAL_ADDREF(data);
+				Z_ADDREF_P(data);
 			}
 			if (flags & MYSQLND_FETCH_NUM) {
 				zend_hash_next_index_insert(Z_ARRVAL_P(row), &data, sizeof(zval *), NULL);
@@ -1138,7 +1138,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES *result, unsigned int 
 
 	*return_value = **entry;
 	zval_copy_ctor(return_value);
-	ZVAL_REFCOUNT(return_value) = 1;
+	Z_REFCOUNT_P(return_value) = 1;
 	zval_dtor(&row);
 
 	DBG_VOID_RETURN;

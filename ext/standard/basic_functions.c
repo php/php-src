@@ -5324,7 +5324,7 @@ PHP_FUNCTION(register_shutdown_function)
 		}
 
 		for (i = 0; i < shutdown_function_entry.arg_count; i++) {
-			shutdown_function_entry.arguments[i]->refcount++;
+			Z_ADDREF_P(shutdown_function_entry.arguments[i]);
 		}
 		zend_hash_next_index_insert(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL);
 	}
@@ -5977,7 +5977,7 @@ PHP_FUNCTION(register_tick_function)
 	}
 
 	for (i = 0; i < tick_fe.arg_count; i++) {
-		tick_fe.arguments[i]->refcount++;
+		Z_ADDREF_P(tick_fe.arguments[i]);
 	}
 
 	zend_llist_add_element(BG(user_tick_functions), &tick_fe);
@@ -6324,7 +6324,7 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 	}
 
 	zend_u_delete_global_variable(Z_TYPE(new_key), Z_UNIVAL(new_key), Z_UNILEN(new_key) TSRMLS_CC);
-	ZEND_U_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), Z_TYPE(new_key), Z_UNIVAL(new_key), Z_UNILEN(new_key) + 1, *var, (*var)->refcount+1, 0);
+	ZEND_U_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), Z_TYPE(new_key), Z_UNIVAL(new_key), Z_UNILEN(new_key) + 1, *var, Z_REFCOUNT_PP(var)+1, 0);
 
 	zval_dtor(&new_key);
 	return 0;

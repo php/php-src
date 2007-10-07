@@ -427,12 +427,12 @@ int pass_two(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	end = opline + op_array->last;
 	while (opline < end) {
 		if (opline->op1.op_type == IS_CONST) {
-			opline->op1.u.constant.is_ref = 1;
-			opline->op1.u.constant.refcount = 2; /* Make sure is_ref won't be reset */
+			Z_SET_ISREF(opline->op1.u.constant);
+			Z_SET_REFCOUNT(opline->op1.u.constant, 2); /* Make sure is_ref won't be reset */
 		}
 		if (opline->op2.op_type == IS_CONST) {
-			opline->op2.u.constant.is_ref = 1;
-			opline->op2.u.constant.refcount = 2;
+			Z_SET_ISREF(opline->op2.u.constant);
+			Z_SET_REFCOUNT(opline->op2.u.constant, 2);
 		}
 		switch (opline->opcode) {
 			case ZEND_GOTO:

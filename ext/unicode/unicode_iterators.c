@@ -928,7 +928,7 @@ static zend_object_iterator* text_iter_get_iterator(zend_class_entry *ce, zval *
 	}
 	iter_object = (text_iter_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
-	ZVAL_ADDREF(object);
+	Z_ADDREF_P(object);
 	iter_object->iter.data  = (void *) object;
 	iter_object->iter.funcs = &text_iter_funcs;
 

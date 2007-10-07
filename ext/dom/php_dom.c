@@ -312,8 +312,8 @@ zval *dom_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		ret = hnd->read_func(obj, &retval TSRMLS_CC);
 		if (ret == SUCCESS) {
 			/* ensure we're creating a temporary variable */
-			retval->refcount = 0;
-			retval->is_ref = 0;
+			Z_SET_REFCOUNT_P(retval, 0);
+			Z_UNSET_ISREF_P(retval);
 		} else {
 			retval = EG(uninitialized_zval_ptr);
 		}
@@ -392,8 +392,8 @@ static int dom_property_exists(zval *object, zval *member, int check_empty TSRML
 		if (check_empty == 2) {
 			retval = 1;
 		} else if (hnd->read_func(obj, &tmp TSRMLS_CC) == SUCCESS) {
-			tmp->refcount = 1;
-			tmp->is_ref = 0;
+			Z_SET_REFCOUNT_P(tmp, 1);
+			Z_UNSET_ISREF_P(tmp);
 			if (check_empty == 1) {
 				retval = zend_is_true(tmp);
 			} else if (check_empty == 0) {
@@ -988,7 +988,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 	if (basenode) {
 		MAKE_STD_ZVAL(baseobj);
 		baseobj->type = IS_OBJECT;
-		baseobj->is_ref = 1;
+		Z_SET_ISREF_P(baseobj);
 		baseobj->value.obj.handle = basenode->handle;
 		baseobj->value.obj.handlers = dom_get_obj_handlers(TSRMLS_C);
 		zval_copy_ctor(baseobj);
@@ -1194,7 +1194,7 @@ PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wra
 
 	if ((intern = (dom_object *) php_dom_object_get_data((void *) obj))) {
 		return_value->type = IS_OBJECT;
-		return_value->is_ref = 1;
+		Z_SET_ISREF_P(return_value);
 		return_value->value.obj.handle = intern->handle;
 		return_value->value.obj.handlers = dom_get_obj_handlers(TSRMLS_C);
 		zval_copy_ctor(return_value);

@@ -967,7 +967,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		context->notifier = php_stream_notification_alloc();
 		context->notifier->func = user_space_stream_notifier;
 		context->notifier->ptr = *tmp;
-		ZVAL_ADDREF(*tmp);
+		Z_ADDREF_P(*tmp);
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
 	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {

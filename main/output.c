@@ -539,7 +539,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 			MAKE_STD_ZVAL(handler_name);
 			if (SUCCESS == zend_fcall_info_init(output_handler, &user->fci, &user->fcc, handler_name TSRMLS_CC)) {
 				handler = php_output_handler_init(handler_name, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_USER);
-				ZVAL_ADDREF(output_handler);
+				Z_ADDREF_P(output_handler);
 				user->zoh = output_handler;
 				handler->func.user = user;
 			} else {
@@ -889,7 +889,7 @@ static inline php_output_handler *php_output_handler_init_ex(zval *name, size_t 
 	php_output_handler *handler;
 	
 	handler = ecalloc(1, sizeof(php_output_handler));
-	ZVAL_ADDREF(name);
+	Z_ADDREF_P(name);
 	handler->name = name;
 	handler->size = chunk_size;
 	handler->flags = flags;
@@ -1188,7 +1188,7 @@ static int php_output_stack_apply_list(void *h, void *z)
 	php_output_handler *handler = *(php_output_handler **) h;
 	zval *array = (zval *) z;
 	
-	ZVAL_ADDREF(handler->name);
+	Z_ADDREF_P(handler->name);
 	add_next_index_zval(array, handler->name);
 	return 0;
 }
@@ -1216,7 +1216,7 @@ static inline zval *php_output_handler_status(php_output_handler *handler, zval 
 		array_init(entry);
 	}
 	
-	ZVAL_ADDREF(handler->name);
+	Z_ADDREF_P(handler->name);
 	add_ascii_assoc_zval(entry, "name", handler->name);
 	add_ascii_assoc_long(entry, "type", (long) (handler->flags & 0xf));
 	add_ascii_assoc_long(entry, "flags", (long) handler->flags);

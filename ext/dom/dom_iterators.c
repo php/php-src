@@ -209,7 +209,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 				zend_hash_move_forward(nodeht);
 				if (zend_hash_get_current_data(nodeht, (void **) &entry)==SUCCESS) {
 					curattr = *entry;
-					curattr->refcount++;
+					Z_ADDREF_P(curattr);
 				}
 			} else {
 				curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
@@ -274,7 +274,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 
 	iterator = emalloc(sizeof(php_dom_iterator));
 
-	object->refcount++;
+	Z_ADDREF_P(object);
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &php_dom_iterator_funcs;
 
@@ -288,7 +288,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 				zend_hash_internal_pointer_reset(nodeht);
 				if (zend_hash_get_current_data(nodeht, (void **) &entry)==SUCCESS) {
 					curattr = *entry;
-					curattr->refcount++;
+					Z_ADDREF_P(curattr);
 				}
 			} else {
 				nodep = (xmlNode *)dom_object_get_node(objmap->baseobj);

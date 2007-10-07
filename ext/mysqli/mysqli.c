@@ -354,7 +354,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		ret = hnd->read_func(obj, &retval TSRMLS_CC);
 		if (ret == SUCCESS) {
 			/* ensure we're creating a temporary variable */
-			retval->refcount = 0;
+			Z_SET_REFCOUNT_P(retval, 0);
 		} else {
 			retval = EG(uninitialized_zval_ptr);
 		}
@@ -394,8 +394,8 @@ void mysqli_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 	}
 	if (ret == SUCCESS) {
 		hnd->write_func(obj, value TSRMLS_CC);
-		if (! PZVAL_IS_REF(value) && value->refcount == 0) {
-			value->refcount++;
+		if (! PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) == 0) {
+			Z_ADDREF_P(value);
 			zval_ptr_dtor(&value);
 		}
 	} else {
@@ -1108,7 +1108,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			}
 			if (fetchtype & MYSQLI_ASSOC) {
 				if (fetchtype & MYSQLI_NUM) {
-					ZVAL_ADDREF(res);
+					Z_ADDREF_P(res);
 				}
 				if (UG(unicode)) {
 					UChar *ustr;

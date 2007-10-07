@@ -152,11 +152,11 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 				zend_hash_copy(HASH_OF(intern->array), HASH_OF(other->array), (copy_ctor_func_t) zval_add_ref, &tmp, sizeof(zval*));
 			}
 			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayIterator) {
-				ZVAL_ADDREF(other->array);
+				Z_ADDREF_P(other->array);
 			}
 		} else {
 			intern->array = orig;
-			ZVAL_ADDREF(intern->array);
+			Z_ADDREF_P(intern->array);
 			intern->ar_flags |= SPL_ARRAY_IS_REF | SPL_ARRAY_USE_OTHER;
 		}
 	} else {
@@ -321,22 +321,22 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 	/* When in a write context,
 	 * ZE has to be fooled into thinking this is in a reference set
 	 * by separating (if necessary) and returning as an is_ref=1 zval (even if refcount == 1) */
-	if ((type == BP_VAR_W || type == BP_VAR_RW) && !(*ret)->is_ref) {
-		if ((*ret)->refcount > 1) {
+	if ((type == BP_VAR_W || type == BP_VAR_RW) && !Z_ISREF_PP(ret)) {
+		if (Z_REFCOUNT_PP(ret) > 1) {
 			zval *newval;
 
 			/* Separate */
 			MAKE_STD_ZVAL(newval);
 			*newval = **ret;
 			zval_copy_ctor(newval);
-			newval->refcount = 1;
+			Z_SET_REFCOUNT_P(newval, 1);
 
 			/* Replace */
-			(*ret)->refcount--;
+			Z_DELREF_PP(ret);
 			*ret = newval;
 		}
 
-		(*ret)->is_ref = 1;
+		Z_SET_ISREF_PP(ret);
 	}
 
 	return *ret;
@@ -364,7 +364,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	}
 	
 	if (!offset) {
-		value->refcount++;
+		Z_ADDREF_P(value);
 		zend_hash_next_index_insert(spl_array_get_hash_table(intern, 0 TSRMLS_CC), (void**)&value, sizeof(void*), NULL);
 		return;
 	}
@@ -376,7 +376,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 			zend_throw_exception(spl_ce_InvalidArgumentException, "An offset must not begin with \\0 or be empty", 0 TSRMLS_CC);
 			return;
 		}
-		value->refcount++;
+		Z_ADDREF_P(value);
 		zend_u_symtable_update(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
 		return;
 	case IS_DOUBLE:
@@ -388,11 +388,11 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 		} else {
 			index = Z_LVAL_P(offset);
 		}
-		value->refcount++;
+		Z_ADDREF_P(value);
 		zend_hash_index_update(spl_array_get_hash_table(intern, 0 TSRMLS_CC), index, (void**)&value, sizeof(void*), NULL);
 		return;
 	case IS_NULL:
-		value->refcount++;
+		Z_ADDREF_P(value);
 		zend_hash_next_index_insert(spl_array_get_hash_table(intern, 0 TSRMLS_CC), (void**)&value, sizeof(void*), NULL);
 		return;
 	default:
@@ -913,7 +913,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 
 	iterator     = emalloc(sizeof(spl_array_it));
 
-	object->refcount++;
+	Z_ADDREF_P(object);
 	iterator->intern.it.data = (void*)object;
 	iterator->intern.it.funcs = &spl_array_it_funcs;
 	iterator->intern.ce = ce;
@@ -982,7 +982,7 @@ SPL_METHOD(Array, __construct)
 		intern->ar_flags &= ~SPL_ARRAY_IS_SELF;
 	}
 	intern->ar_flags |= ar_flags;
-	ZVAL_ADDREF(intern->array);
+	Z_ADDREF_P(intern->array);
 	if (Z_TYPE_PP(array) == IS_OBJECT) {
 		zend_object_get_properties_t handler = Z_OBJ_HANDLER_PP(array, get_properties);
 		if ((handler != std_object_handlers.get_properties && handler != spl_array_get_properties)
@@ -1089,7 +1089,7 @@ SPL_METHOD(Array, exchangeArray)
 	} else {
 		intern->ar_flags &= ~SPL_ARRAY_IS_SELF;
 	}
-	ZVAL_ADDREF(intern->array);
+	Z_ADDREF_P(intern->array);
 
 	spl_array_rewind(intern TSRMLS_CC);
 }
@@ -1111,8 +1111,8 @@ SPL_METHOD(Array, getIterator)
 
 	return_value->type = IS_OBJECT;
 	return_value->value.obj = spl_array_object_new_ex(intern->ce_get_iterator, &iterator, object, 0 TSRMLS_CC);
-	return_value->refcount = 1;
-	return_value->is_ref = 1;
+	Z_SET_REFCOUNT_P(return_value, 1);
+	Z_SET_ISREF_P(return_value);
 }
 /* }}} */
 

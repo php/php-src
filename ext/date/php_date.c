@@ -1757,8 +1757,8 @@ static zval * date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 
 	Z_TYPE_P(object) = IS_OBJECT;
 	object_init_ex(object, pce);
-	object->refcount = 1;
-	object->is_ref = 0;
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_UNSET_ISREF_P(object);
 	return object;
 }
 

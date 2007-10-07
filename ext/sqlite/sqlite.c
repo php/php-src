@@ -703,7 +703,7 @@ static void php_sqlite_agg_step_function_callback(sqlite_func *func, int argc, c
 
 	if (*context_p == NULL) {
 		MAKE_STD_ZVAL(*context_p);
-		(*context_p)->is_ref = 1;
+		Z_SET_ISREF_PP(context_p);
 		Z_TYPE_PP(context_p) = IS_NULL;
 	}
 
@@ -981,8 +981,8 @@ static zval * sqlite_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
 	}
 	Z_TYPE_P(object) = IS_OBJECT;
 	object_init_ex(object, pce);
-	object->refcount = 1;
-	object->is_ref = 0;
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_UNSET_ISREF_P(object);
 	return object;
 }
 
@@ -1100,7 +1100,7 @@ zend_object_iterator *sqlite_get_iterator(zend_class_entry *ce, zval *object, in
 
 	iterator = emalloc(sizeof(sqlite_object_iterator));
 
-	object->refcount++;
+	Z_ADDREF_P(object);
 	iterator->it.data = (void*)object;
 	iterator->it.funcs = ce->iterator_funcs.funcs;
 	iterator->res = obj->u.res;
@@ -1841,10 +1841,10 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 
 		MAKE_STD_ZVAL(coltype);
 		ZVAL_U_STRING(SQLITE2_CONV, coltype, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", ZSTR_DUPLICATE);
-		coltype->refcount = 0;
+		Z_SET_REFCOUNT_P(coltype, 0);
 
 		if (result_type == PHPSQLITE_NUM) {
-			ZVAL_ADDREF(coltype);
+			Z_ADDREF_P(coltype);
 			add_index_zval(return_value, i, coltype);
 		}
 
@@ -1887,14 +1887,14 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 				}
 			}
 
-			ZVAL_ADDREF(coltype);
+			Z_ADDREF_P(coltype);
 			add_u_assoc_zval_ex(return_value, colname_type, colname, colname_len + 1, coltype);
 			efree(colname.v);
 		}
 
-		if (coltype->refcount <= 0) {
+		if (Z_REFCOUNT_P(coltype) <= 0) {
 			/* Shouldn't happen (and probably can't) */
-			coltype->refcount = 1;
+			Z_SET_REFCOUNT_P(coltype, 1);
 			zval_ptr_dtor(&coltype);
 		}
 	}
@@ -2049,17 +2049,17 @@ static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend
 				rowdata[j] = NULL;
 			}
 		}
-		decoded->refcount = 0;
+		Z_SET_REFCOUNT_P(decoded, 0);
 
 		if (mode & PHPSQLITE_NUM) {
-			ZVAL_ADDREF(decoded);
+			Z_ADDREF_P(decoded);
 			add_index_zval(return_value, j, decoded);
 		}
 		if ((mode & PHPSQLITE_ASSOC) || (!(mode & PHPSQLITE_NUM))) {
 			UChar *colname;
 			int colname_len;
 
-			ZVAL_ADDREF(decoded);
+			Z_ADDREF_P(decoded);
 
 			if (UG(unicode) &&
 				SUCCESS == zend_string_to_unicode(SQLITE2_CONV, &colname, &colname_len, (char*)colnames[j], strlen((char*)colnames[j]) TSRMLS_CC)) {

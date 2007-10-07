@@ -276,8 +276,8 @@ static zval * reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_
 	}
 	Z_TYPE_P(object) = IS_OBJECT;
 	object_init_ex(object, pce);
-	object->refcount = 1;
-	object->is_ref = 1;
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_SET_ISREF_P(object);
 	return object;
 }
 /* }}} */
@@ -2836,13 +2836,13 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 				"Class %v does not have a property named %R", ce->name, name_type, name);
 		return;
 	}	
-	refcount = (*variable_ptr)->refcount;
-	is_ref = (*variable_ptr)->is_ref;
+	refcount = Z_REFCOUNT_PP(variable_ptr);
+	is_ref = Z_ISREF_PP(variable_ptr);
 	zval_dtor(*variable_ptr);
 	**variable_ptr = *value;
 	zval_copy_ctor(*variable_ptr);
-	(*variable_ptr)->refcount = refcount;
-	(*variable_ptr)->is_ref = is_ref;
+	Z_SET_REFCOUNT_PP(variable_ptr, refcount);
+	Z_SET_ISREF_TO_PP(variable_ptr, is_ref);
 
 }
 /* }}} */
@@ -4150,7 +4150,7 @@ ZEND_METHOD(reflection_property, setValue)
 			zval_dtor(*variable_ptr);
 			(*variable_ptr)->type = value->type;
 			(*variable_ptr)->value = value->value;
-			if (value->refcount > 0) {
+			if (Z_REFCOUNT_P(value) > 0) {
 				zval_copy_ctor(*variable_ptr);
 			}
 			setter_done = 1;
@@ -4159,7 +4159,7 @@ ZEND_METHOD(reflection_property, setValue)
 	if (!setter_done) {
 		zval **foo;
 
-		value->refcount++;
+		Z_ADDREF_P(value);
 		if (PZVAL_IS_REF(value)) {
 			SEPARATE_ZVAL(&value);
 		}

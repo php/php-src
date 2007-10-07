@@ -3223,7 +3223,7 @@ PHP_METHOD(SoapClient, __call)
 	    soap_headers = emalloc(sizeof(HashTable));
 		zend_hash_init(soap_headers, 0, NULL, ZVAL_PTR_DTOR, 0);
 		zend_hash_next_index_insert(soap_headers, &headers, sizeof(zval*), NULL);
-		ZVAL_ADDREF(headers);
+		Z_ADDREF_P(headers);
 		free_soap_headers = 1;
 	} else{
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
@@ -3243,7 +3243,7 @@ PHP_METHOD(SoapClient, __call)
 			}
 			zend_hash_internal_pointer_reset(default_headers);
 			while (zend_hash_get_current_data(default_headers, (void**)&tmp) == SUCCESS) {
-				ZVAL_ADDREF(*tmp);
+				Z_ADDREF_P(*tmp);
 				zend_hash_next_index_insert(soap_headers, tmp, sizeof(zval *), NULL);
 				zend_hash_move_forward(default_headers);
 			}
@@ -3559,7 +3559,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 	           instanceof_function(Z_OBJCE_P(headers), soap_header_class_entry TSRMLS_CC)) {
 		ALLOC_INIT_ZVAL(client->default_headers);
 		array_init(client->default_headers);
-		headers->refcount++;
+		Z_ADDREF_P(headers);
 		add_next_index_zval(client->default_headers, headers);
 	} else{
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
@@ -3631,7 +3631,7 @@ static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, cha
 	if (fault_string != NULL) {
 		MAKE_STD_ZVAL(tmp);
 		soap_decode_string(tmp, fault_string TSRMLS_CC);
-		tmp->refcount--;
+		Z_DELREF_P(tmp);
 		add_property_zval(obj, "faultstring", tmp);
 		zend_update_property(zend_exception_get_default(TSRMLS_C), obj, "message", sizeof("message")-1, tmp TSRMLS_CC);
 	}
@@ -3641,11 +3641,11 @@ static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, cha
 		if (fault_code_ns) {
 			MAKE_STD_ZVAL(tmp);
 			soap_decode_string(tmp, fault_code TSRMLS_CC);
-			tmp->refcount--;
+			Z_DELREF_P(tmp);
 			add_property_zval(obj, "faultcode", tmp);
 			MAKE_STD_ZVAL(tmp);
 			soap_decode_string(tmp, fault_code_ns TSRMLS_CC);
-			tmp->refcount--;
+			Z_DELREF_P(tmp);
 			add_property_zval(obj, "faultcodens", tmp);
 		} else {
 			if (soap_version == SOAP_1_1) {
@@ -3671,7 +3671,7 @@ static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, cha
 					}
 					MAKE_STD_ZVAL(tmp);
 					soap_decode_string(tmp, fault_code TSRMLS_CC);
-					tmp->refcount--;
+					Z_DELREF_P(tmp);
 					add_property_zval(obj, "faultcode", tmp);
 				}
 			}
@@ -3680,7 +3680,7 @@ static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, cha
 	if (fault_actor != NULL) {
 		MAKE_STD_ZVAL(tmp);
 		soap_decode_string(tmp, fault_actor TSRMLS_CC);
-		tmp->refcount--;
+		Z_DELREF_P(tmp);
 		add_property_zval(obj, "faultactor", tmp);
 	}
 	if (fault_detail != NULL) {

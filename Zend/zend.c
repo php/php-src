@@ -325,7 +325,7 @@ ZEND_API void zend_make_string_zval(zval *expr, zval *expr_copy, int *use_copy) 
 				if (Z_OBJ_HANDLER_P(expr, get)) {
 					zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
 
-					z->refcount++;
+					Z_ADDREF_P(z);
 					if(Z_TYPE_P(z) != IS_OBJECT) {
 						zend_make_string_zval(z, expr_copy, use_copy);
 						if (*use_copy) {
@@ -395,7 +395,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			if (Z_OBJ_HANDLER_P(expr, get)) {
 				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
 				
-				z->refcount++;
+				Z_ADDREF_P(z);
 				if(Z_TYPE_P(z) != IS_OBJECT) {
 					zend_make_printable_zval(z, expr_copy, use_copy);
 					if (*use_copy) {
@@ -447,7 +447,7 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 			if (Z_OBJ_HANDLER_P(expr, get)) {
 				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
 
-				z->refcount++;
+				Z_ADDREF_P(z);
 				if(Z_TYPE_P(z) != IS_OBJECT) {
 					zend_make_unicode_zval(z, expr_copy, use_copy);
 					if (*use_copy) {
@@ -1081,8 +1081,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 
 	/* This zval can be used to initialize allocate zval's to an uninit'ed value */
-	zval_used_for_init.is_ref = 0;
-	zval_used_for_init.refcount = 1;
+	zval_used_for_init.is_ref__gc = 0;
+	zval_used_for_init.refcount__gc = 1;
 	Z_TYPE(zval_used_for_init) = IS_NULL;
 
 #ifdef ZTS

@@ -347,8 +347,8 @@ static zend_bool soap_check_xml_ref(zval **data, xmlNodePtr node TSRMLS_DC)
 			if (*data != *data_ptr) {
 				zval_ptr_dtor(data);
 				*data = *data_ptr;
-				(*data)->is_ref = 1;
-				(*data)->refcount++;
+				Z_SET_ISREF_PP(data);
+				Z_ADDREF_PP(data);
 				return 1;
 			}
 		} else {
@@ -1123,7 +1123,7 @@ static void set_zval_property(zval* object, char* name, zval* val TSRMLS_DC)
 
 	old_scope = EG(scope);
 	EG(scope) = Z_OBJCE_P(object);
-	val->refcount--;
+	Z_DELREF_P(val);
 	add_property_zval(object, name, val);
 	EG(scope) = old_scope;
 }
@@ -1554,7 +1554,7 @@ static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_e
 
 						MAKE_STD_ZVAL(arr);
 						array_init(arr);
-						prop->refcount++;
+						Z_ADDREF_P(prop);
 						add_next_index_zval(arr, prop);
 						set_zval_property(ret, (char*)trav->name, arr TSRMLS_CC);
 						prop = arr;
@@ -2785,18 +2785,18 @@ static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data)
 		MAKE_STD_ZVAL(soapvar);
 		object_init_ex(soapvar, soap_var_class_entry);
 		add_property_long(soapvar, "enc_type", enc->details.type);
-		ret->refcount--;
+		Z_DELREF_P(ret);
 		add_property_zval(soapvar, "enc_value", ret);
 		parse_namespace(type_name, &cptype, &ns);
 		nsptr = xmlSearchNs(data->doc, data, BAD_CAST(ns));	
 		MAKE_STD_ZVAL(tmp);
 		soap_decode_string(tmp, cptype TSRMLS_CC);
-		tmp->refcount--;
+		Z_DELREF_P(tmp);
 		add_property_zval(soapvar, "enc_stype", tmp);
 		if (nsptr) {
 			MAKE_STD_ZVAL(tmp);
 			soap_decode_string(tmp, (char*)nsptr->href TSRMLS_CC);
-			tmp->refcount--;
+			Z_DELREF_P(tmp);
 			add_property_zval(soapvar, "enc_ns", tmp);
 		}
 		efree(cptype);
@@ -3528,7 +3528,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type TS
 				zend_unicode_to_string_ex(UG(utf8_conv), &Z_STRVAL_P(tmp), &Z_STRLEN_P(tmp), Z_USTRVAL_P(cur_stype), Z_USTRLEN_P(cur_stype), &status);
 				cur_stype = tmp;
 			} else {
-				cur_stype->refcount++;
+				Z_ADDREF_P(cur_stype);
 			}
 		}
 		if (cur_ns) {
@@ -3541,7 +3541,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type TS
 				zend_unicode_to_string_ex(UG(utf8_conv), &Z_STRVAL_P(tmp), &Z_STRLEN_P(tmp), Z_USTRVAL_P(cur_ns), Z_USTRLEN_P(cur_ns), &status);
 				cur_ns = tmp;
 			} else {
-				cur_ns->refcount++;
+				Z_ADDREF_P(cur_ns);
 			}
 		}
 

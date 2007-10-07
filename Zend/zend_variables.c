@@ -114,7 +114,7 @@ dtor_unicode:
 
 ZEND_API void zval_add_ref(zval **p) /* {{{ */
 {
-	(*p)->refcount++;
+	Z_ADDREF_PP(p);
 }
 /* }}} */
 

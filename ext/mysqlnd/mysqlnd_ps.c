@@ -1149,7 +1149,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_param)(MYSQLND_STMT * const stmt,
 			DBG_INF_FMT("%d is of type %d", i, stmt->param_bind[i].type);
 			if (stmt->param_bind[i].type != MYSQL_TYPE_LONG_BLOB) {
 				/* Prevent from freeing */
-				ZVAL_ADDREF(stmt->param_bind[i].zv);
+				Z_ADDREF_P(stmt->param_bind[i].zv);
 				/* Don't update is_ref, or we will leak during conversion */
 			} else {
 				stmt->param_bind[i].zv = NULL;
@@ -1197,7 +1197,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const stmt,
 		stmt->result_bind = result_bind;
 		for (i = 0; i < stmt->field_count; i++) {
 			/* Prevent from freeing */
-			ZVAL_ADDREF(stmt->result_bind[i].zv);		
+			Z_ADDREF_P(stmt->result_bind[i].zv);		
 			/*
 			  Don't update is_ref !!! it's not our job
 			  Otherwise either 009.phpt or mysqli_stmt_bind_result.phpt
@@ -1499,7 +1499,7 @@ void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_DC)
 			  We have to separate the actual zval value of the bound
 			  variable from our allocated zvals or we will face double-free
 			*/
-			if (ZVAL_REFCOUNT(stmt->result_bind[i].zv) > 1) {
+			if (Z_REFCOUNT_P(stmt->result_bind[i].zv) > 1) {
 #ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
 				zval_copy_ctor(stmt->result_bind[i].zv);
 #endif

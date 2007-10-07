@@ -5666,7 +5666,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 				php_str_replace_in_subject(search, replace, subject_entry, result, case_sensitivity, (argc > 3) ? &count : NULL TSRMLS_CC);
 			} else {
 				ALLOC_ZVAL(result);
-				ZVAL_ADDREF(*subject_entry);
+				Z_ADDREF_P(*subject_entry);
 				COPY_PZVAL_TO_ZVAL(*result, *subject_entry);
 			}
 			/* Add to return array */

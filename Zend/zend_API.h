@@ -1793,8 +1793,8 @@ END_EXTERN_C()
 
 #define ZVAL_ZVAL(z, zv, copy, dtor) {  \
 		int is_ref, refcount;           \
-		is_ref = (z)->is_ref;           \
-		refcount = (z)->refcount;       \
+		is_ref = Z_ISREF_P(z);           \
+		refcount = Z_REFCOUNT_P(z);       \
 		*(z) = *(zv);                   \
 		if (copy) {                     \
 			zval_copy_ctor(z);          \
@@ -1805,8 +1805,8 @@ END_EXTERN_C()
 			}                           \
 			zval_ptr_dtor(&zv);         \
 	    }                               \
-		(z)->is_ref = is_ref;           \
-		(z)->refcount = refcount;       \
+		Z_SET_ISREF_TO_P(z, is_ref);           \
+		Z_SET_REFCOUNT_P(z, refcount);       \
 	}
 
 #define ZVAL_TEXT(z, t, duplicate)					\
@@ -1998,19 +1998,19 @@ END_EXTERN_C()
 																										\
 		if (zend_u_hash_find(symtable, (type), (name), (name_length), (void **) &orig_var)==SUCCESS				\
 			&& PZVAL_IS_REF(*orig_var)) {																\
-			(var)->refcount = (*orig_var)->refcount;													\
-			(var)->is_ref = 1;																			\
+			Z_SET_REFCOUNT_P(var, Z_REFCOUNT_PP(orig_var));													\
+			Z_SET_ISREF_P(var);																			\
 																										\
 			if (_refcount) {																			\
-				(var)->refcount += _refcount-1;															\
+				Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(var) + _refcount - 1);															\
 			}																							\
 			zval_dtor(*orig_var);																		\
 			**orig_var = *(var);																		\
 			FREE_ZVAL(var);																					\
 		} else {																						\
-			(var)->is_ref = _is_ref;																	\
+			Z_SET_ISREF_TO_P(var, _is_ref);																	\
 			if (_refcount) {																			\
-				(var)->refcount = _refcount;															\
+				Z_SET_REFCOUNT_P(var, _refcount);															\
 			}																							\
 			zend_u_hash_update(symtable, (type), (name), (name_length), &(var), sizeof(zval *), NULL);			\
 		}																								\
@@ -2022,19 +2022,19 @@ END_EXTERN_C()
 																										\
 		if (zend_rt_hash_find(symtable, (name), (name_length), (void **) &orig_var)==SUCCESS				\
 			&& PZVAL_IS_REF(*orig_var)) {																\
-			(var)->refcount = (*orig_var)->refcount;													\
-			(var)->is_ref = 1;																			\
+			Z_SET_REFCOUNT_P(var, Z_REFCOUNT_PP(orig_var));													\
+			Z_SET_ISREF_P(var);																			\
 																										\
 			if (_refcount) {																			\
-				(var)->refcount += _refcount-1;															\
+				Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(var) + _refcount - 1);															\
 			}																							\
 			zval_dtor(*orig_var);																		\
 			**orig_var = *(var);																		\
 			FREE_ZVAL(var);																					\
 		} else {																						\
-			(var)->is_ref = _is_ref;																	\
+			Z_SET_ISREF_TO_P(var, _is_ref);																	\
 			if (_refcount) {																			\
-				(var)->refcount = _refcount;															\
+				Z_SET_REFCOUNT_P(var, _refcount);															\
 			}																							\
 			zend_rt_hash_update(symtable, (name), (name_length), &(var), sizeof(zval *), NULL);			\
 		}																								\

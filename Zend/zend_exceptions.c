@@ -88,8 +88,8 @@ static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_t
 	zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	ALLOC_ZVAL(trace);
-	trace->is_ref = 0;
-	trace->refcount = 0;
+	Z_UNSET_ISREF_P(trace);
+	Z_SET_REFCOUNT_P(trace, 0);
 	zend_fetch_debug_backtrace(trace, skip_top_traces, 0 TSRMLS_CC);
 
 	zend_update_property_rt_string(default_exception_ce, &obj, "file", sizeof("file")-1, zend_get_executed_filename(TSRMLS_C) TSRMLS_CC);
