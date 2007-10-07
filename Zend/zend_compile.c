@@ -94,7 +94,7 @@ static void build_runtime_defined_function_key(zval *result, char *name, int nam
 	zend_spprintf(&result->value.str.val, 0, "%c%s%s%s", '\0', name, filename, char_pos_buf);
 #endif /* ZEND_MULTIBYTE */
 	result->type = IS_STRING;
-	result->refcount = 1;
+	Z_SET_REFCOUNT_P(result, 1);
 }
 
 
@@ -1197,7 +1197,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		opline->op2.u.constant.type = IS_STRING;
 		opline->op2.u.constant.value.str.val = lcname;
 		opline->op2.u.constant.value.str.len = name_len;
-		opline->op2.u.constant.refcount = 1;
+		Z_SET_REFCOUNT(opline->op2.u.constant, 1);
 		opline->extended_value = ZEND_DECLARE_FUNCTION;
 		zend_hash_update(CG(function_table), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 	}
@@ -2316,7 +2316,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 				zval **pvalue;
 	
 				if (zend_hash_quick_find(&parent_ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, (void **) &pvalue) == SUCCESS) {
-					(*pvalue)->refcount++;
+					Z_ADDREF_PP(pvalue);
 					zend_hash_del(&ce->default_properties, child_info->name, child_info->name_length+1);
 					zend_hash_quick_update(&ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, pvalue, sizeof(zval *), NULL);
 				}
@@ -2350,7 +2350,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 								parent_ce->name, prop_name, ce->name);
 						}
 					}
-					(*prop)->refcount++;
+					Z_ADDREF_PP(prop);
 					zend_hash_update(&ce->default_static_members, child_info->name, child_info->name_length+1, (void**)prop, sizeof(zval*), NULL);
 					zend_hash_del(&ce->default_static_members, prot_name, prot_name_length+1);
 				}
@@ -2421,7 +2421,7 @@ static int inherit_static_prop(zval **p, int num_args, va_list args, zend_hash_k
 	if (!zend_hash_quick_exists(target, key->arKey, key->nKeyLength, key->h)) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
 		if (zend_hash_quick_add(target, key->arKey, key->nKeyLength, key->h, p, sizeof(zval*), NULL) == SUCCESS) {
-			(*p)->refcount++;
+			Z_ADDREF_PP(p);
 		}
 	}
 	return ZEND_HASH_APPLY_KEEP;
@@ -3031,7 +3031,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	
 	opline->op2.op_type = IS_CONST;
 	opline->op2.u.constant.type = IS_STRING;
-	opline->op2.u.constant.refcount = 1;
+	Z_SET_REFCOUNT(opline->op2.u.constant, 1);
 
 	if (doing_inheritance) {
 		opline->extended_value = parent_class_name->u.var;

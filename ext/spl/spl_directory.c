@@ -231,7 +231,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 
 	/* avoid reference counting in debug mode, thus do it manually */
 	ZVAL_RESOURCE(&intern->u.file.zresource, php_stream_get_resource_id(intern->u.file.stream));
-	intern->u.file.zresource.refcount = 1;
+	Z_SET_REFCOUNT(intern->u.file.zresource, 1);
 	
 	intern->u.file.delimiter = ',';
 	intern->u.file.enclosure = '"';
@@ -1140,7 +1140,7 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 	iterator   = emalloc(sizeof(spl_filesystem_dir_it));
 	dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	object->refcount += 2;;
+	Z_SET_REFCOUNT_P(object, Z_REFCOUNT_P(object) + 2);
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
 	iterator->current = object;
@@ -1351,7 +1351,7 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 	iterator   = emalloc(sizeof(spl_filesystem_dir_it));
 	dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	object->refcount++;
+	Z_ADDREF_P(object);
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
 	iterator->current = NULL;

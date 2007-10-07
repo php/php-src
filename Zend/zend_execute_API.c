@@ -123,7 +123,7 @@ void init_executor(TSRMLS_D)
 {
 	INIT_ZVAL(EG(uninitialized_zval));
 	/* trick to make uninitialized_zval never be modified, passed by ref, etc.  */
-	EG(uninitialized_zval).refcount++;
+	Z_ADDREF(EG(uninitialized_zval));
 	INIT_ZVAL(EG(error_zval));
 	EG(uninitialized_zval_ptr)=&EG(uninitialized_zval);
 	EG(error_zval_ptr)=&EG(error_zval);
@@ -153,8 +153,8 @@ void init_executor(TSRMLS_D)
 		zval *globals;
 
 		ALLOC_ZVAL(globals);
-		globals->refcount=1;
-		globals->is_ref=1;
+		Z_SET_REFCOUNT_P(globals, 1);
+		Z_SET_ISREF_P(globals);
 		Z_TYPE_P(globals) = IS_ARRAY;
 		Z_ARRVAL_P(globals) = &EG(symbol_table);
 		zend_hash_update(&EG(symbol_table), "GLOBALS", sizeof("GLOBALS"), &globals, sizeof(zval *), NULL);
@@ -197,7 +197,7 @@ void init_executor(TSRMLS_D)
 
 static int zval_call_destructor(zval **zv TSRMLS_DC)
 {
-	if (Z_TYPE_PP(zv) == IS_OBJECT && (*zv)->refcount == 1) {
+	if (Z_TYPE_PP(zv) == IS_OBJECT && Z_REFCOUNT_PP(zv) == 1) {
 		return ZEND_HASH_APPLY_REMOVE;
 	} else {
 		return ZEND_HASH_APPLY_KEEP;
@@ -408,13 +408,13 @@ ZEND_API zend_bool zend_is_executing(TSRMLS_D)
 ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 {
 #if DEBUG_ZEND>=2
-	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, (*zval_ptr)->refcount, (*zval_ptr)->refcount-1);
+	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, Z_REFCOUNT_PP(zval_ptr), Z_REFCOUNT_PP(zval_ptr)-1);
 #endif
-	(*zval_ptr)->refcount--;
-	if ((*zval_ptr)->refcount==0) {
+	Z_DELREF_PP(zval_ptr);
+	if (Z_REFCOUNT_PP(zval_ptr)==0) {
 		zval_dtor(*zval_ptr);
 		safe_free_zval_ptr_rel(*zval_ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC);
-	} else if ((*zval_ptr)->refcount == 1) {
+	} else if (Z_REFCOUNT_PP(zval_ptr) == 1) {
 		if ((*zval_ptr)->type == IS_OBJECT) {
 			TSRMLS_FETCH();
 
@@ -422,7 +422,7 @@ ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 				return;
 			}
 		}
-		(*zval_ptr)->is_ref = 0;
+		Z_UNSET_ISREF_PP(zval_ptr);
 	}
 }
 
@@ -430,14 +430,14 @@ ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 ZEND_API void _zval_internal_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 {
 #if DEBUG_ZEND>=2
-	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, (*zval_ptr)->refcount, (*zval_ptr)->refcount-1);
+	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, Z_REFCOUNT_PP(zval_ptr), Z_REFCOUNT_PP(zval_ptr)-1);
 #endif
-	(*zval_ptr)->refcount--;
-	if ((*zval_ptr)->refcount==0) {
+	Z_DELREF_PP(zval_ptr);
+	if (Z_REFCOUNT_PP(zval_ptr)==0) {
 		zval_internal_dtor(*zval_ptr);
 		free(*zval_ptr);
-	} else if ((*zval_ptr)->refcount == 1) {
-		(*zval_ptr)->is_ref = 0;
+	} else if (Z_REFCOUNT_PP(zval_ptr) == 1) {
+		Z_UNSET_ISREF_PP(zval_ptr);
 	}
 }
 
@@ -472,8 +472,8 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 
 		MARK_CONSTANT_VISITED(p);
 
-		refcount = p->refcount;
-		is_ref = p->is_ref;
+		refcount = Z_REFCOUNT_P(p);
+		is_ref = Z_ISREF_P(p);
 
 		if (!zend_get_constant_ex(p->value.str.val, p->value.str.len, &const_value, scope, Z_REAL_TYPE_P(p) TSRMLS_CC)) {
 			if ((colon = memchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p))) && colon[1] == ':') {
@@ -493,8 +493,8 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 			*p = const_value;
 		}
 
-		p->refcount = refcount;
-		p->is_ref = is_ref;
+		Z_SET_REFCOUNT_P(p, refcount);
+		Z_SET_ISREF_TO_P(p, is_ref);
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_ARRAY) {
 		zval **element, *new_val;
 		char *str_index;
@@ -537,8 +537,8 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 			ALLOC_ZVAL(new_val);
 			*new_val = **element;
 			zval_copy_ctor(new_val);
-			new_val->refcount = 1;
-			new_val->is_ref = 0;
+			Z_SET_REFCOUNT_P(new_val, 1);
+			Z_UNSET_ISREF_P(new_val);
 
 			/* preserve this bit for inheritance */
 			Z_TYPE_PP(element) |= IS_CONSTANT_INDEX;
@@ -686,7 +686,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			fci->function_name = *tmp_real_function_name;
 			SEPARATE_ZVAL_IF_NOT_REF(tmp_object_ptr);
 			fci->object_pp = tmp_object_ptr;
-			(*fci->object_pp)->is_ref = 1;
+			Z_SET_ISREF_PP(fci->object_pp);
 		}
 
 		if (fci->object_pp && !*fci->object_pp) {
@@ -904,7 +904,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 		if (ARG_SHOULD_BE_SENT_BY_REF(EX(function_state).function, i+1)
 			&& !PZVAL_IS_REF(*fci->params[i])) {
-			if ((*fci->params[i])->refcount>1) {
+			if (Z_REFCOUNT_PP(fci->params[i])>1) {
 				zval *new_zval;
 
 				if (fci->no_separation) {
@@ -923,15 +923,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				ALLOC_ZVAL(new_zval);
 				*new_zval = **fci->params[i];
 				zval_copy_ctor(new_zval);
-				new_zval->refcount = 1;
-				(*fci->params[i])->refcount--;
+				Z_SET_REFCOUNT_P(new_zval, 1);
+				Z_DELREF_PP(fci->params[i]);
 				*fci->params[i] = new_zval;
 			}
-			(*fci->params[i])->refcount++;
-			(*fci->params[i])->is_ref = 1;
+			Z_ADDREF_PP(fci->params[i]);
+			Z_SET_ISREF_PP(fci->params[i]);
 			param = *fci->params[i];
 		} else if (*fci->params[i] != &EG(uninitialized_zval)) {
-			(*fci->params[i])->refcount++;
+			Z_ADDREF_PP(fci->params[i]);
 			param = *fci->params[i];
 		} else {
 			ALLOC_ZVAL(param);
@@ -975,7 +975,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			EG(This) = *fci->object_pp;
 
 			if (!PZVAL_IS_REF(EG(This))) {
-				EG(This)->refcount++; /* For $this pointer */
+				Z_ADDREF_P(EG(This)); /* For $this pointer */
 			} else {
 				zval *this_ptr;
 
@@ -1278,12 +1278,12 @@ void execute_new_code(TSRMLS_D)
 
 	while (opline<end) {
 		if (opline->op1.op_type==IS_CONST) {
-			opline->op1.u.constant.is_ref = 1;
-			opline->op1.u.constant.refcount = 2; /* Make sure is_ref won't be reset */
+			Z_SET_ISREF(opline->op1.u.constant);
+			Z_SET_REFCOUNT(opline->op1.u.constant, 2); /* Make sure is_ref won't be reset */
 		}
 		if (opline->op2.op_type==IS_CONST) {
-			opline->op2.u.constant.is_ref = 1;
-			opline->op2.u.constant.refcount = 2;
+			Z_SET_ISREF(opline->op2.u.constant);
+			Z_SET_REFCOUNT(opline->op2.u.constant, 2);
 		}
 		switch (opline->opcode) {
 			case ZEND_JMP:

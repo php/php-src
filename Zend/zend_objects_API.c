@@ -164,9 +164,9 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 
 	handle = Z_OBJ_HANDLE_P(zobject);
 
-	zobject->refcount++;
+	Z_ADDREF_P(zobject);
 	zend_objects_store_del_ref_by_handle(handle TSRMLS_CC);
-	zobject->refcount--;
+	Z_DELREF_P(zobject);
 }
 
 /*

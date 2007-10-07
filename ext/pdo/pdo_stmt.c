@@ -321,7 +321,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	param->is_param = is_param;
 
 	if (param->driver_params) {
-		ZVAL_ADDREF(param->driver_params);
+		Z_ADDREF_P(param->driver_params);
 	}
 
 	if (!is_param && param->name && stmt->columns) {
@@ -1088,7 +1088,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 				case PDO_FETCH_USE_DEFAULT:
 				case PDO_FETCH_BOTH:
 					add_assoc_zval(return_value, stmt->columns[i].name, val);
-					ZVAL_ADDREF(val);
+					Z_ADDREF_P(val);
 					add_next_index_zval(return_value, val);
 					break;
 
@@ -1621,7 +1621,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 		return 0;
 	}
 
-	ZVAL_ADDREF(param.parameter);
+	Z_ADDREF_P(param.parameter);
 	if (!really_register_bound_param(&param, stmt, is_param TSRMLS_CC)) {
 		if (param.parameter) {
 			zval_ptr_dtor(&(param.parameter));
@@ -1657,7 +1657,7 @@ static PHP_METHOD(PDOStatement, bindValue)
 		RETURN_FALSE;
 	}
 	
-	ZVAL_ADDREF(param.parameter);
+	Z_ADDREF_P(param.parameter);
 	if (!really_register_bound_param(&param, stmt, TRUE TSRMLS_CC)) {
 		if (param.parameter) {
 			zval_ptr_dtor(&(param.parameter));
@@ -1877,7 +1877,7 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 	switch (stmt->default_fetch_type) {
 		case PDO_FETCH_INTO:
 			if (stmt->fetch.into) {
-				ZVAL_DELREF(stmt->fetch.into);
+				Z_DELREF_P(stmt->fetch.into);
 				stmt->fetch.into = NULL;
 			}
 			break;
@@ -2548,8 +2548,8 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 		}
 	}
 
-	return_value->refcount = 0;
-	return_value->is_ref = 0;
+	Z_SET_REFCOUNT_P(return_value, 0);
+	Z_UNSET_ISREF_P(return_value);
 	
 	return return_value;
 }

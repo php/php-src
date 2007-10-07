@@ -335,8 +335,8 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	/* create the object */
 	ALLOC_ZVAL(obj);
 	object_init_ex(obj, fdat->ce);
-	ZVAL_REFCOUNT(obj) = 1;
-	PZVAL_IS_REF(obj) = 1;
+	Z_SET_REFCOUNT_P(obj, 1);
+	Z_SET_ISREF_P(obj);
 
 	/* filtername */
 	add_property_string(obj, "filtername", (char*)filtername, 1);

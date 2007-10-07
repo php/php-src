@@ -242,8 +242,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	/* create an instance of our class */
 	ALLOC_ZVAL(us->object);
 	object_init_ex(us->object, uwrap->ce);
-	ZVAL_REFCOUNT(us->object) = 1;
-	PZVAL_IS_REF(us->object) = 1;
+	Z_SET_REFCOUNT_P(us->object, 1);
+	Z_SET_ISREF_P(us->object);
 	
 	if (uwrap->ce->constructor) {
 		zend_fcall_info fci;
@@ -305,8 +305,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	args[2] = &zoptions;
 
 	MAKE_STD_ZVAL(zopened);
-	ZVAL_REFCOUNT(zopened) = 1;
-	PZVAL_IS_REF(zopened) = 1;
+	Z_SET_REFCOUNT_P(zopened, 1);
+	Z_SET_ISREF_P(zopened);
 	ZVAL_NULL(zopened);
 	args[3] = &zopened;
 
@@ -380,8 +380,8 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filen
 	/* create an instance of our class */
 	ALLOC_ZVAL(us->object);
 	object_init_ex(us->object, uwrap->ce);
-	ZVAL_REFCOUNT(us->object) = 1;
-	PZVAL_IS_REF(us->object) = 1;
+	Z_SET_REFCOUNT_P(us->object, 1);
+	Z_SET_ISREF_P(us->object);
 
 	if (context) {
 		MAKE_STD_ZVAL(zcontext);
@@ -961,8 +961,8 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	/* create an instance of our class */
 	ALLOC_ZVAL(object);
 	object_init_ex(object, uwrap->ce);
-	ZVAL_REFCOUNT(object) = 1;
-	PZVAL_IS_REF(object) = 1;
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_SET_ISREF_P(object);
 
 	if (context) {
 		MAKE_STD_ZVAL(zcontext);
@@ -1019,8 +1019,8 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	/* create an instance of our class */
 	ALLOC_ZVAL(object);
 	object_init_ex(object, uwrap->ce);
-	ZVAL_REFCOUNT(object) = 1;
-	PZVAL_IS_REF(object) = 1;
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_SET_ISREF_P(object);
 
 	if (context) {
 		MAKE_STD_ZVAL(zcontext);
@@ -1082,8 +1082,8 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, 
 	/* create an instance of our class */
 	ALLOC_ZVAL(object);
 	object_init_ex(object, uwrap->ce);
-	ZVAL_REFCOUNT(object) = 1;
-	PZVAL_IS_REF(object) = 1;
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_SET_ISREF_P(object);
 
 	if (context) {
 		MAKE_STD_ZVAL(zcontext);
@@ -1151,8 +1151,8 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int option
 	/* create an instance of our class */
 	ALLOC_ZVAL(object);
 	object_init_ex(object, uwrap->ce);
-	ZVAL_REFCOUNT(object) = 1;
-	PZVAL_IS_REF(object) = 1;
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_SET_ISREF_P(object);
 
 	if (context) {
 		MAKE_STD_ZVAL(zcontext);
@@ -1215,8 +1215,8 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int fla
 	/* create an instance of our class */
 	ALLOC_ZVAL(object);
 	object_init_ex(object, uwrap->ce);
-	ZVAL_REFCOUNT(object) = 1;
-	PZVAL_IS_REF(object) = 1;
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_SET_ISREF_P(object);
 
 	if (context) {
 		MAKE_STD_ZVAL(zcontext);

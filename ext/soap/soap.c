@@ -2379,7 +2379,7 @@ PHP_METHOD(SoapClient, SoapClient)
 			INIT_PZVAL(class_map);
 			zval_copy_ctor(class_map);
 #ifdef ZEND_ENGINE_2
-			class_map->refcount--;
+			Z_DELREF_P(class_map);
 #endif
 			add_property_zval(this_ptr, "_classmap", class_map);
 		}
@@ -2795,7 +2795,7 @@ PHP_METHOD(SoapClient, __call)
 	    soap_headers = emalloc(sizeof(HashTable));
 		zend_hash_init(soap_headers, 0, NULL, ZVAL_PTR_DTOR, 0);
 		zend_hash_next_index_insert(soap_headers, &headers, sizeof(zval*), NULL);
-		ZVAL_ADDREF(headers);
+		Z_ADDREF_P(headers);
 		free_soap_headers = 1;
 	} else{
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
@@ -2814,7 +2814,7 @@ PHP_METHOD(SoapClient, __call)
 			}
 			zend_hash_internal_pointer_reset(default_headers);
 			while (zend_hash_get_current_data(default_headers, (void**)&tmp) == SUCCESS) {
-				ZVAL_ADDREF(*tmp);
+				Z_ADDREF_PP(tmp);
 				zend_hash_next_index_insert(soap_headers, tmp, sizeof(zval *), NULL);
 				zend_hash_move_forward(default_headers);
 			}
@@ -3060,9 +3060,9 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 		zval *default_headers;
 		ALLOC_INIT_ZVAL(default_headers);
 		array_init(default_headers);
-		headers->refcount++;
+		Z_ADDREF_P(headers);
 		add_next_index_zval(default_headers, headers);
-		default_headers->refcount--;
+		Z_DELREF_P(default_headers);
 		add_property_zval(this_ptr, "__default_headers", default_headers);
 	} else{
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
@@ -3152,7 +3152,7 @@ zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *faul
 	ALLOC_INIT_ZVAL(fault);
 	set_soap_fault(fault, NULL, fault_code, fault_string, fault_actor, fault_detail, NULL TSRMLS_CC);
 #ifdef ZEND_ENGINE_2
-	fault->refcount--;
+	Z_DELREF_P(fault);
 #endif
 	add_property_zval(obj, "__soap_fault", fault);
 	return fault;
