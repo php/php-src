@@ -1,3 +1,38 @@
+2007-10-06  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/xsl/xsl_fe.h
+      ext/xsl/xsltprocessor.c:
+      fix ws & folding, nuke unused vars
+
+    * ext/standard/file.c:
+      fix ws and avoid freeing integer vars
+
+2007-10-06  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      ext/ldap/ldap.c:
+      MFH:- Add support for LDAP_X_OPT_CONNECT_TIMEOUT (Netscape LDAP SDK
+      equivalent for LDAP_OPT_NETWORK_TIMEOUT)
+
+    * ext/ldap/ldap.c:
+      - Add support for LDAP_X_OPT_CONNECT_TIMEOUT (Netscape LDAP SDK equivalent
+      for LDAP_OPT_NETWORK_TIMEOUT)
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+      [DOC] Note: ldap_[get|set]_option() manual pages needs an entry for
+      [DOC] LDAP_OPT_NETWORK_TIMEOUT
+
+    * (PHP_5_3)
+      ext/ldap/ldap.c:
+      MFH: - Added LDAP_OPT_NETWORK_TIMEOUT option for ldap_set_option() to allow
+      setting network timeout (FR#42837)
+
+    * ext/ldap/ldap.c:
+      - Added LDAP_OPT_NETWORK_TIMEOUT option for ldap_set_option() to allow
+      setting network timeout
+
 2007-10-05  Andrey Hristov  <php@hristov.com>
 
     * ext/mysqlnd/mysqlnd_alloc.c
