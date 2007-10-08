@@ -845,7 +845,7 @@ static int do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs TSRMLS_DC) /
 		stmt->fetch.cls.fci.param_count = 0;
 	}
 	if (stmt->fetch.func.values) {
-		FREE_ZVAL(stmt->fetch.func.values);
+		efree(stmt->fetch.func.values);
 		stmt->fetch.func.values = NULL;
 	}
 	return 1;
