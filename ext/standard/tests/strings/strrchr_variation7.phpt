@@ -35,27 +35,21 @@ echo "*** Done ***";
 ?>
 --EXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
-string(1) "
-"
 bool(false)
 bool(false)
-string(1) "
-"
 bool(false)
 bool(false)
-string(1) "
-"
+bool(false)
+bool(false)
+bool(false)
 *** Done ***
 --UEXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
-string(1) "
-"
 bool(false)
 bool(false)
-string(1) "
-"
 bool(false)
 bool(false)
-string(1) "
-"
+bool(false)
+bool(false)
+bool(false)
 *** Done ***
