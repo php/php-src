@@ -7,7 +7,7 @@ if test "$PHP_PDO" != "no"; then
 define([PDO_ODBC_HELP_TEXT],[[
                             include and lib dirs are looked for under 'dir'.
                             
-                            'flavour' can be one of:  ibm-db2, unixODBC, generic
+                            'flavour' can be one of:  ibm-db2, iODBC, unixODBC, generic
                             If ',dir' part is omitted, default for the flavour 
                             you have selected will used. e.g.:
                             
@@ -70,6 +70,12 @@ if test "$PHP_PDO_ODBC" != "no"; then
         pdo_odbc_def_libdir=/home/db2inst1/sqllib/lib
         pdo_odbc_def_incdir=/home/db2inst1/sqllib/include
         pdo_odbc_def_lib=db2
+        ;;
+
+    iODBC|iodbc)
+        pdo_odbc_def_libdir=/usr/local/$PHP_LIBDIR
+        pdo_odbc_def_incdir=/usr/local/include
+        pdo_odbc_def_lib=iodbc
         ;;
 
     unixODBC|unixodbc)
@@ -149,7 +155,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
     [], [
       AC_MSG_ERROR([
 Your ODBC library does not appear to be ODBC 3 compatible.
-You should consider using unixODBC instead, and loading your
+You should consider using iODBC or unixODBC instead, and loading your
 libraries as a driver in that environment; it will emulate the
 functions required for PDO support.
 ])], $PDO_ODBC_LDFLAGS)
