@@ -66,7 +66,7 @@
 
 #include <mysql.h>
 #include "php_ini.h"
-#include "php_mysql.h"
+#include "php_mysql_structs.h"
 
 /* True globals, no need for thread safety */
 static int le_result, le_link, le_plink;
