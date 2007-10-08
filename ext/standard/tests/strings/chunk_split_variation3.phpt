@@ -154,5 +154,5 @@ string(22) "This is simple string."
 -- Iteration 25 --
 string(22) "This is simple string."
 -- Iteration 26 --
-string(106) "ThisResource id #5 is Resource id #5simpResource id #5le sResource id #5trinResource id #5g.Resource id #5"
+string(106) "ThisResource id #%d is Resource id #%dsimpResource id #%dle sResource id #%dtrinResource id #%dg.Resource id #%d"
 Done
