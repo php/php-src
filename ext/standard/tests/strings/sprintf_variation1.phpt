@@ -264,7 +264,7 @@ string(0) ""
 string(0) ""
 
 -- Iteration 26 --
-string(14) "Resource id #5"
-string(14) "Resource id #5"
-string(14) "Resource id #5"
+string(14) "Resource id #%d"
+string(14) "Resource id #%d"
+string(14) "Resource id #%d"
 Done
