@@ -140,7 +140,7 @@ string(1) "1"
 -- Iteration 20 --
 string(0) ""
 -- Iteration 21 --
-string(14) "Resource id #5"
+string(14) "Resource id #%d"
 -- Iteration 22 --
 string(9) "My String"
 -- Iteration 23 --
