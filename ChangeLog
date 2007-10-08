@@ -1,3 +1,294 @@
+2007-10-07  Yiduo (David) Wang  <planetbeing@gmail.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd_alloc.c
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_result.c:
+      Fix build for mysqlnd
+
+2007-10-07  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/tests/bug42737.phpt:
+      add test for bug #42737.
+      HEAD didnt have this bug, as it uses a smarter way to iterate over utf-8
+      chars
+
+    * ext/pcre/tests/bug42737.phpt
+      ext/pcre/tests/bug42737.phpt:
+      
+      file bug42737.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ext/pcre/php_pcre.c:
+      Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines)
+
+2007-10-07  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/mysqlnd/mysqlnd_portability.h:
+      silence the warning
+
+    * ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_result.c:
+      fix typos
+
+2007-10-07  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/php_pcre.c:
+      MFB: fix ZTS build
+
+    * (PHP_5_3)
+      ext/pcre/php_pcre.c:
+      now fix the thread-safe build..
+
+    * ext/pcre/php_pcre.c:
+      MFB
+
+    * (PHP_5_3)
+      ext/pcre/php_pcre.c:
+      fix the previous patch: the rc var doesnt need to be passed to the
+      make_subpats_table()
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/tests/bug37911.phpt:
+      MFB: fix #37911
+
+    * (PHP_5_3)
+      NEWS:
+      BFN: #37911
+
+    * (PHP_5_3)
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/bug37911.phpt
+      ext/pcre/tests/bug37911.phpt:
+      fix bug #37911:  preg_replace_callback ignores named groups
+
+    * (PHP_5_3)
+      NEWS
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_chartables.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/testdata/grepoutput
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput8
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput8:
+      upgrade pcre to version 7.4
+
+2007-10-07  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/wddx/wddx.c:
+      one more fix
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_api.c:
+      fix build
+
+2007-10-07  Yiduo (David) Wang  <planetbeing@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/com_wrapper.c
+      ext/date/php_date.c
+      ext/dom/attr.c
+      ext/dom/characterdata.c
+      ext/dom/document.c
+      ext/dom/dom_iterators.c
+      ext/dom/node.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/iconv/iconv.c
+      ext/json/JSON_parser.c
+      ext/libxml/libxml.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/oci8/oci8.c
+      ext/pcre/php_pcre.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/reflection/php_reflection.c
+      ext/session/session.c
+      ext/simplexml/simplexml.c
+      ext/soap/php_encoding.c
+      ext/soap/php_http.c
+      ext/soap/php_packet_soap.c
+      ext/soap/soap.c
+      ext/spl/php_spl.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_engine.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/sqlite/sqlite.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_filestat.h
+      ext/standard/scanf.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/user_filters.c
+      ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/sybase/php_sybase_db.c
+      ext/tidy/tidy.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xsl/xsltprocessor.c
+      ext/zip/php_zip.c
+      main/output.c
+      main/php_ini.c
+      main/php_variables.c
+      main/streams/userspace.c:
+      MFH: Added macros for managing zval refcounts and is_ref statuses
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_persist.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/com_wrapper.c
+      ext/date/php_date.c
+      ext/dom/attr.c
+      ext/dom/characterdata.c
+      ext/dom/document.c
+      ext/dom/dom_iterators.c
+      ext/dom/node.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/iconv/iconv.c
+      ext/json/JSON_parser.c
+      ext/libxml/libxml.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/pcre/php_pcre.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/reflection/php_reflection.c
+      ext/session/session.c
+      ext/simplexml/simplexml.c
+      ext/soap/php_encoding.c
+      ext/soap/php_packet_soap.c
+      ext/soap/soap.c
+      ext/spl/php_spl.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_engine.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/sqlite/sqlite.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_filestat.h
+      ext/standard/scanf.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/user_filters.c
+      ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/tidy/tidy.c
+      ext/unicode/unicode_iterators.c
+      ext/wddx/wddx.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xsl/xsltprocessor.c
+      ext/zip/php_zip.c
+      main/output.c
+      main/php_ini.c
+      main/php_streams.h
+      main/php_variables.c
+      main/streams/php_stream_filter_api.h
+      main/streams/userspace.c
+      win32/registry.c:
+      Added macros for managing zval refcounts and is_ref statuses
+
 2007-10-06  Antony Dovgal  <tony@daylessday.org>
 
     * ext/xsl/xsl_fe.h
