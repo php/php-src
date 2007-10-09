@@ -1,3 +1,218 @@
+2007-10-08  Robert Thompson  <ab5602@wayne.edu>
+
+    * (PHP_5_3)
+      main/fopen_wrappers.c:
+      
+      Fix for bug 41822.  expand_filepath() will now return a relative path
+      under the specific situation where getcwd() returns NULL and the file is
+      still readable.  As far as I have been able to tell, this fix only applies
+      to the Solaris OS where files in directories with (--x) cannot getcwd().
+
+2007-10-08  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_2)
+      NEWS:
+      News entry
+
+    * (PHP_5_2)
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h
+      ext/mysql/php_mysql_structs.h:
+      Fix for bug #42890  Constant "LIST" defined by mysqlclient and c-client
+
+2007-10-08  Wez Furlong  <wez.php.net@netevil.org>
+
+    * (PHP_5_3)
+      ext/pdo_odbc/config.m4:
+      add iODBC support to pdo_odbc
+
+2007-10-08  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h
+      ext/mysql/php_mysql_structs.h
+      ext/mysql/php_mysql_structs.h
+      ext/mysql/php_mysql_structs.h:
+      Move non-public code to non-public header file. This should also solve
+
+2007-10-08  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/nl2br_variation5.phpt
+      ext/standard/tests/strings/nl2br_variation5.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/strrchr_variation7.phpt
+      ext/standard/tests/strings/strrchr_variation7.phpt:
+      fix test
+
+2007-10-08  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/php_mysqli.h
+      ext/mysqli/php_mysqli_structs.h:
+      MFB: Move declarations from the public header file.
+
+    * (PHP_5_3)
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/php_mysqli_structs.h:
+      Move declarations from the public header file.
+
+2007-10-08  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/strrchr_variation7.phpt:
+      fix tests
+
+    * ext/standard/tests/strings/strtr_basic.phpt
+      ext/standard/tests/strings/strtr_basic.phpt
+      ext/standard/tests/strings/strtr_error.phpt
+      ext/standard/tests/strings/strtr_error.phpt
+      ext/standard/tests/strings/strtr_variation1.phpt
+      ext/standard/tests/strings/strtr_variation1.phpt
+      ext/standard/tests/strings/strtr_variation2.phpt
+      ext/standard/tests/strings/strtr_variation2.phpt
+      ext/standard/tests/strings/strtr_variation3.phpt
+      ext/standard/tests/strings/strtr_variation3.phpt
+      ext/standard/tests/strings/strtr_variation4.phpt
+      ext/standard/tests/strings/strtr_variation4.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation6.phpt
+      ext/standard/tests/strings/strtr_variation6.phpt
+      ext/standard/tests/strings/strtr_variation7.phpt
+      ext/standard/tests/strings/strtr_variation7.phpt
+      ext/standard/tests/strings/strtr_variation8.phpt
+      ext/standard/tests/strings/strtr_variation8.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt:
+      New testcases for strtr() function
+
+    * ext/standard/tests/strings/get_html_translation_table_basic1-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic1-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic1.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic1.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic2-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic2-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic2.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic2.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic3-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic3-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic3.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic3.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic4-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic4.phpt
+      ext/standard/tests/strings/get_html_translation_table_error.phpt
+      ext/standard/tests/strings/get_html_translation_table_error.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation1-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation1-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation1.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation1.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation2-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation2-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation2.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation2.phpt:
+      New testcases for get_html_translation_table() function
+
+    * ext/standard/tests/strings/strtr_basic.phpt
+      ext/standard/tests/strings/strtr_basic.phpt
+      ext/standard/tests/strings/strtr_basic.phpt
+      ext/standard/tests/strings/strtr_error.phpt
+      ext/standard/tests/strings/strtr_error.phpt
+      ext/standard/tests/strings/strtr_error.phpt
+      ext/standard/tests/strings/strtr_variation1.phpt
+      ext/standard/tests/strings/strtr_variation1.phpt
+      ext/standard/tests/strings/strtr_variation1.phpt
+      ext/standard/tests/strings/strtr_variation2.phpt
+      ext/standard/tests/strings/strtr_variation2.phpt
+      ext/standard/tests/strings/strtr_variation2.phpt
+      ext/standard/tests/strings/strtr_variation3.phpt
+      ext/standard/tests/strings/strtr_variation3.phpt
+      ext/standard/tests/strings/strtr_variation3.phpt
+      ext/standard/tests/strings/strtr_variation4.phpt
+      ext/standard/tests/strings/strtr_variation4.phpt
+      ext/standard/tests/strings/strtr_variation4.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation6.phpt
+      ext/standard/tests/strings/strtr_variation6.phpt
+      ext/standard/tests/strings/strtr_variation6.phpt
+      ext/standard/tests/strings/strtr_variation7.phpt
+      ext/standard/tests/strings/strtr_variation7.phpt
+      ext/standard/tests/strings/strtr_variation7.phpt
+      ext/standard/tests/strings/strtr_variation8.phpt
+      ext/standard/tests/strings/strtr_variation8.phpt
+      ext/standard/tests/strings/strtr_variation8.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt:
+        1.1.4;
+      file strtr_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/strings/get_html_translation_table_basic1-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic1-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic1-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic1.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic1.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic1.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic2-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic2-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic2-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic2.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic2.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic2.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic3-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic3-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic3-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic3.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic3.phpt
+      ext/standard/tests/strings/get_html_translation_table_basic3.phpt
+      ext/standard/tests/strings/get_html_translation_table_error.phpt
+      ext/standard/tests/strings/get_html_translation_table_error.phpt
+      ext/standard/tests/strings/get_html_translation_table_error.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation1-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation1-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation1-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation1.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation1.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation1.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation2-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation2-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation2-win32.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation2.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation2.phpt
+      ext/standard/tests/strings/get_html_translation_table_variation2.phpt:
+        1.1.4;
+      file get_html_translation_table_basic1-win32.phpt was initially added on
+      branch PHP_5_2.
+
+2007-10-08  Yiduo (David) Wang  <planetbeing@gmail.com>
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c:
+      MFH: stmt->fetch.func.values is not a zval and should not be freed with
+      FREE_ZVAL
+
+    * ext/pdo/pdo_stmt.c:
+      stmt->fetch.func.values is not a zval and should not be freed with
+      FREE_ZVAL
+
+2007-10-08  Robert Thompson  <ab5602@wayne.edu>
+
+    * (PHP_5_2)
+      main/fopen_wrappers.c:
+      
+      Fix for bug 41822 and 41899.  expand_filepath() will now return a relative
+      path under the specific situation where getcwd() returns NULL and the file
+      is
+      still readable.  As far as I have been able to tell, this fix only applies
+      to the Solaris OS where files in directories with (--x) cannot getcwd().
+
 2007-10-07  Yiduo (David) Wang  <planetbeing@gmail.com>
 
     * (PHP_5_3)
