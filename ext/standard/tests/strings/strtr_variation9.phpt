@@ -383,7 +383,7 @@ Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 19 --
-unicode(14) "Resource id #5"
+unicode(14) "Resource id #%d"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)

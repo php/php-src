@@ -234,7 +234,7 @@ unicode(0) ""
 -- Iteration 23 --
 unicode(6) "obj'ct"
 -- Iteration 24 --
-unicode(14) "Resource id #5"
+unicode(14) "Resource id #%d"
 -- Iteration 25 --
 unicode(0) ""
 -- Iteration 26 --
