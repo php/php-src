@@ -205,6 +205,6 @@ string(0) ""
 string(16) " @#$%Object @#$%"
 string(11) " @#$%Object"
 -- Iteration 26 --
-string(14) "Resource id #%d"
+string(%d) "Resource id #%d"
 string(11) "Resource id"
 Done
