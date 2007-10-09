@@ -170,7 +170,7 @@ string(0) ""
 string(6) "tcejbo"
 
 -- Iterator 24 --
-string(14) "%d# di ecruoseR"
+string(%d) "%d# di ecruoseR"
 
 -- Iterator 25 --
 string(0) ""

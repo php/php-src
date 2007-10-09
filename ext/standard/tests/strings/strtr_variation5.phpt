@@ -129,7 +129,7 @@ string(0) ""
 -- Iteration 16 --
 string(13) "s02ple objec1"
 -- Iteration 17 --
-string(14) "Resource id #%d"
+string(%d) "Resource id #%d"
 -- Iteration 18 --
 string(0) ""
 -- Iteration 19 --

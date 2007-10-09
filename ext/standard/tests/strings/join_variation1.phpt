@@ -159,7 +159,7 @@ string(16) "element1element2"
 -- Iteration 23 --
 string(16) "element1element2"
 -- Iteration 24 --
-string(30) "element1Resource id #%delement2"
+string(%d) "element1Resource id #%delement2"
 -- Iteration 25 --
 string(16) "element1element2"
 -- Iteration 26 --
