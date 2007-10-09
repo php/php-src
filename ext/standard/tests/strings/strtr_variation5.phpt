@@ -176,7 +176,7 @@ unicode(0) ""
 -- Iteration 16 --
 unicode(13) "s02ple objec1"
 -- Iteration 17 --
-unicode(14) "Resource id #5"
+unicode(14) "Resource id #%d"
 -- Iteration 18 --
 unicode(0) ""
 -- Iteration 19 --

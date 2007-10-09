@@ -429,7 +429,7 @@ unicode(0) ""
 unicode(0) ""
 
 -- Iteration 26 --
-unicode(14) "Resource id #5"
-unicode(14) "Resource id #5"
-unicode(14) "Resource id #5"
+unicode(14) "Resource id #%d"
+unicode(14) "Resource id #%d"
+unicode(14) "Resource id #%d"
 Done
