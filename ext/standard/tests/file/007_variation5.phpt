@@ -48,7 +48,7 @@ unlink(dirname(__FILE__)."/007_variation5.tmp");
 ?>
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'a' mode ***
-resource(8) of type (stream)
+resource(%d) of type (stream)
 string(6) "stream"
 int(37)
 bool(false)
@@ -60,7 +60,7 @@ bool(true)
 *** Done ***
 --UEXPECTF--
 *** Test fopen() & fclose() functions:  with 'a' mode ***
-resource(8) of type (stream)
+resource(%d) of type (stream)
 unicode(6) "stream"
 
 Notice: fwrite(): 37 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
