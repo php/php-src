@@ -195,5 +195,5 @@ string(0) ""
 -- Iteration 35 --
 string(0) ""
 -- Iteration 36 --
-string(14) "Resource Id #5"
+string(14) "Resource Id #%d"
 Done
