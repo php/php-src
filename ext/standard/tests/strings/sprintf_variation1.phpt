@@ -264,9 +264,9 @@ string(0) ""
 string(0) ""
 
 -- Iteration 26 --
-string(14) "Resource id #5"
-string(14) "Resource id #5"
-string(14) "Resource id #5"
+string(%d) "Resource id #5"
+string(%d) "Resource id #5"
+string(%d) "Resource id #5"
 Done
 
 --UEXPECTF--
@@ -429,7 +429,7 @@ unicode(0) ""
 unicode(0) ""
 
 -- Iteration 26 --
-unicode(14) "Resource id #%d"
-unicode(14) "Resource id #%d"
-unicode(14) "Resource id #%d"
+unicode(%d) "Resource id #%d"
+unicode(%d) "Resource id #%d"
+unicode(%d) "Resource id #%d"
 Done

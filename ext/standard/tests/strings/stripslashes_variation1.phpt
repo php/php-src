@@ -162,7 +162,7 @@ string(0) ""
 -- Iteration 23 --
 string(6) "obj'ct"
 -- Iteration 24 --
-string(14) "Resource id #%d"
+string(%d) "Resource id #%d"
 -- Iteration 25 --
 string(0) ""
 -- Iteration 26 --
@@ -234,7 +234,7 @@ unicode(0) ""
 -- Iteration 23 --
 unicode(6) "obj'ct"
 -- Iteration 24 --
-unicode(14) "Resource id #%d"
+unicode(%d) "Resource id #%d"
 -- Iteration 25 --
 unicode(0) ""
 -- Iteration 26 --
