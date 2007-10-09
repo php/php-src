@@ -129,7 +129,7 @@ string(0) ""
 -- Iteration 16 --
 string(13) "s02ple objec1"
 -- Iteration 17 --
-string(14) "Resource id #5"
+string(%d) "Resource id #5"
 -- Iteration 18 --
 string(0) ""
 -- Iteration 19 --
@@ -176,7 +176,7 @@ unicode(0) ""
 -- Iteration 16 --
 unicode(13) "s02ple objec1"
 -- Iteration 17 --
-unicode(14) "Resource id #%d"
+unicode(%d) "Resource id #%d"
 -- Iteration 18 --
 unicode(0) ""
 -- Iteration 19 --

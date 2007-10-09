@@ -188,7 +188,7 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-string(14) "Resource id #5"
+string(%d) "Resource id #5"
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
@@ -253,7 +253,7 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-unicode(14) "Resource id #5"
+unicode(%d) "Resource id #5"
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

@@ -159,7 +159,7 @@ string(16) "element1element2"
 -- Iteration 23 --
 string(16) "element1element2"
 -- Iteration 24 --
-string(30) "element1Resource id #%delement2"
+string(%d) "element1Resource id #%delement2"
 -- Iteration 25 --
 string(16) "element1element2"
 -- Iteration 26 --
@@ -226,7 +226,7 @@ unicode(16) "element1element2"
 -- Iteration 23 --
 unicode(16) "element1element2"
 -- Iteration 24 --
-unicode(30) "element1Resource id #%delement2"
+unicode(%d) "element1Resource id #%delement2"
 -- Iteration 25 --
 unicode(16) "element1element2"
 -- Iteration 26 --

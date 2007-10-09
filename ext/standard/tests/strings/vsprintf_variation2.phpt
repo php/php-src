@@ -173,7 +173,7 @@ Warning: vsprintf(): Too few arguments in %s on line %d
 bool(false)
 
 -- Iteration 23 --
-string(14) "Resource id #%d"
+string(%d) "Resource id #%d"
 Done
 
 --UEXPECTF--
