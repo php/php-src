@@ -163,5 +163,5 @@ string(1) " "
 -- Iteration 27 --
 string(1) " "
 -- Iteration 28 --
-string(21) "Re so ur ce  i d  #%d "
+string(%d) "Re so ur ce  i d  #%d "
 Done
