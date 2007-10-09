@@ -44,7 +44,7 @@ unlink(dirname(__FILE__)."/007_variation10.tmp");
 ?>
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'r+t' mode ***
-resource(8) of type (stream)
+resource(%d) of type (stream)
 string(6) "stream"
 int(0)
 string(20) "line
@@ -58,7 +58,7 @@ string(7) "Unknown"
 *** Done ***
 --UEXPECTF--
 *** Test fopen() & fclose() functions:  with 'r+t' mode ***
-resource(8) of type (stream)
+resource(%d) of type (stream)
 unicode(6) "stream"
 int(0)
 unicode(20) "line
