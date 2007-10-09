@@ -224,7 +224,7 @@ Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 19 --
-string(14) "Resource id #5"
+string(14) "Resource id #%d"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
