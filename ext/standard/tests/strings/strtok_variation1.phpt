@@ -168,5 +168,5 @@ bool(false)
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
-string(14) "Resource id #%d"
+string(%s) "Resource id #%d"
 Done

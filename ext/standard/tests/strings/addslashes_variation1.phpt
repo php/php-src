@@ -162,7 +162,7 @@ string(0) ""
 -- Iteration 23 --
 string(7) "obj\'ct"
 -- Iteration 24 --
-string(14) "Resource id #%d"
+string(%d) "Resource id #%d"
 -- Iteration 25 --
 string(0) ""
 -- Iteration 26 --
