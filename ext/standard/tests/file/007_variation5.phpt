@@ -48,7 +48,7 @@ unlink(dirname(__FILE__)."/007_variation5.tmp");
 ?>
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'a' mode ***
-resource(8) of type (stream)
+resource(%d) of type (stream)
 string(6) "stream"
 int(37)
 string(0) ""
