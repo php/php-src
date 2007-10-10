@@ -1,8 +1,8 @@
 --TEST--
 mysql_fetch_object()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -50,7 +50,16 @@ var_dump(mysql_fetch_object($res, 'mysql_fetch_object_construct', null));
 var_dump(mysql_fetch_object($res, 'mysql_fetch_object_construct', array('a')));
 var_dump(mysql_fetch_object($res, 'mysql_fetch_object_construct', array('a', 'b')));
 var_dump(mysql_fetch_object($res, 'mysql_fetch_object_construct', array('a', 'b', 'c')));
+var_dump(mysql_fetch_object($res, 'mysql_fetch_object_construct', "no array and not null"));
 var_dump(mysql_fetch_object($res));
+var_dump(mysql_fetch_object($res, 'mysql_fetch_object_construct', array('a', 'b')));
+
+class mysql_fetch_object_private_construct {
+	private function __construct($a, $b) {
+		var_dump($a);
+	}
+}
+var_dump(mysql_fetch_object($res, 'mysql_fetch_object_private_construct', array('a', 'b')));
 
 mysql_free_result($res);
 
@@ -129,6 +138,9 @@ object(mysql_fetch_object_construct)#%d (4) {
 }
 bool(false)
 bool(false)
+bool(false)
+bool(false)
+bool(false)
 
 Warning: mysql_fetch_object(): %d is not a valid MySQL result resource in %s on line %d
 bool(false)
@@ -193,6 +205,9 @@ object(mysql_fetch_object_construct)#%d (4) {
   [u"label"]=>
   unicode(1) "e"
 }
+bool(false)
+bool(false)
+bool(false)
 bool(false)
 bool(false)
 

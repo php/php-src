@@ -1,13 +1,13 @@
 --TEST--
 mysql_result()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-include "connect.inc";
+require_once("connect.inc");
 
 $tmp    = NULL;
 $link   = NULL;
@@ -20,8 +20,8 @@ if (!is_null($tmp = @mysql_result()))
 if (!is_null($tmp = @mysql_result($link)))
 	printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-require('table.inc');
-if (!$res = mysql_query("SELECT id, label, id AS _id, CONCAT(label, 'a') _label, NULL as _foo FROM test _test ORDER BY id LIMIT 1", $link)) {
+require_once('table.inc');
+if (!$res = mysql_query("SELECT id, label, id AS _id, CONCAT(label, 'a') _label, NULL as _foo FROM test _test ORDER BY id ASC LIMIT 1", $link)) {
 	printf("[003] [%d] %s\n", mysql_errno($link), mysql_error($link));
 }
 
@@ -50,6 +50,8 @@ print "_label\n";
 var_dump(mysql_result($res, 0, '_label'));
 print "_foo\n";
 var_dump(mysql_result($res, 0, '_foo'));
+var_dump(mysql_result($res, 0, 'test.id'));
+var_dump(mysql_result($res, 0, 'test.label'));
 
 mysql_free_result($res);
 
@@ -97,6 +99,12 @@ string(2) "aa"
 _foo
 NULL
 
+Warning: mysql_result(): test.id not found in MySQL result index %d in %s on line %d
+bool(false)
+
+Warning: mysql_result(): test.label not found in MySQL result index %d in %s on line %d
+bool(false)
+
 Warning: mysql_result(): %d is not a valid MySQL result resource in %s on line %d
 bool(false)
 done!
@@ -135,9 +143,15 @@ bool(false)
 _id
 unicode(1) "1"
 _label
-unicode(2) "aa"
+string(2) "aa"
 _foo
 NULL
+
+Warning: mysql_result(): test.id not found in MySQL result index %d in %s on line %d
+bool(false)
+
+Warning: mysql_result(): test.label not found in MySQL result index %d in %s on line %d
+bool(false)
 
 Warning: mysql_result(): %d is not a valid MySQL result resource in %s on line %d
 bool(false)
