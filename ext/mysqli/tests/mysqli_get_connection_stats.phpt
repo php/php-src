@@ -27,6 +27,17 @@ if (!function_exists('mysqli_get_connection_stats')) {
 	if (!is_array($info2 = mysqli_get_client_stats()) || empty($info2))
 		printf("[004] Expecting array/any_non_empty, got %s/%s\n", gettype($info2), $info2);
 
+	foreach ($info as $k => &$v) {
+		if (strpos($k, "mem_") === 0) {
+			$v = 0;
+		}
+	}
+	foreach ($info2 as $k => &$v) {
+		if (strpos($k, "mem_") === 0) {
+			$v = 0;
+		}
+	}
+
 	if ($info !== $info2) {
 		printf("[005] The hashes should be identical\n");
 		var_dump($info);

@@ -28,25 +28,39 @@ require_once('skipifconnectfailure.inc');
 	require('table.inc');
 
 	$valid_attr = array(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
-	if (mysqli_get_client_version() > 50003)
+	if ((mysqli_get_client_version() > 50003) || $IS_MYSQLND) {
 		$valid_attr[] = MYSQLI_STMT_ATTR_CURSOR_TYPE;
+		$valid_attr[] =	MYSQLI_CURSOR_TYPE_NO_CURSOR;
+		$valid_attr[] =	MYSQLI_CURSOR_TYPE_READ_ONLY;
+		$valid_attr[] =	MYSQLI_CURSOR_TYPE_FOR_UPDATE;
+		$valid_attr[] =	MYSQLI_CURSOR_TYPE_SCROLLABLE;
+	}
 
-/* prefetch isn't supported
-		if (mysqli_get_client_version() > 50007)
-				$valid_attr[] = MYSQLI_STMT_ATTR_PREFETCH_ROWS;
-*/
-	do {
-		$invalid_attr = mt_rand(-10000, 10000);
-	} while (in_array($invalid_attr, $valid_attr));
+	if ((mysqli_get_client_version() > 50007) || $IS_MYSQLND)
+		$valid_attr[] = MYSQLI_STMT_ATTR_PREFETCH_ROWS;
+
 
 	$stmt = mysqli_stmt_init($link);
 	if (!is_null($tmp = @mysqli_stmt_attr_set($stmt, 0, 0)))
 		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	$stmt->prepare("SELECT * FROM test");
-	if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0)))
-		printf("[006] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+	mt_srand(microtime(true));
+	for ($i = -100; $i < 1000; $i++) {
+		if (in_array($i, $valid_attr))
+			continue;
+		$invalid_attr = $i;
+		if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0)))
+			printf("[006a] Expecting boolean/false for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
+	}
 
+	for ($i = 0; $i < 10; $i++) {
+		do {
+			$invalid_attr = mt_rand(-1 * PHP_INT_MAX + 1, PHP_INT_MAX);
+		} while (in_array($invalid_attr, $valid_attr));
+		if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0)))
+			printf("[006b] Expecting boolean/false for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
+	}
 	$stmt->close();
 
 	//

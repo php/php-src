@@ -82,11 +82,14 @@ require_once('skipifconnectfailure.inc');
 	);
 
 	/* depends on the build - experimental */
-	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_YEARS_AS_INT'))
+	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_YEARS_AS_INT')) {
 		$expected_constants['MYSQLI_OPT_INT_AND_YEARS_AS_INT'] = true;
+	}
 
 	if ($IS_MYSQLND) {
 		$version = 50007 + 1;
+		$expected_constants['MYSQLI_OPT_NET_CMD_BUFFER_SIZE'] = true;
+		$expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
 	} else {
 		$version = mysqli_get_client_version();
 	}

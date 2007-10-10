@@ -1,18 +1,18 @@
 --TEST--
 mysqli_set_local_infile_default()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_set_local_infile_handler'))
 	die("skip - function not available.");
 
 require_once('connect.inc');
-if (!$TEST_EXPERIMENTAL)
-	die("skip - experimental (= unsupported) feature");
 ?>
+--INI--
+mysqli.allow_local_infile=1
 --FILE--
 <?php
 	require_once('connect.inc');
@@ -24,6 +24,10 @@ if (!$TEST_EXPERIMENTAL)
 
 	if (!is_null($tmp = @mysqli_set_local_infile_default($link)))
 		printf("[002] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
+
+	$link = new mysqli();
+	if (!is_null($tmp = @mysqli_set_local_infile_default($link)))
+		printf("[002a] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
 
 	include("table.inc");
 

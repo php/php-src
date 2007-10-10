@@ -1,9 +1,9 @@
 --TEST--
 phpinfo() mysqli section
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -59,7 +59,8 @@ require_once('skipifconnectfailure.inc');
 			'implicit_free_result', 'explicit_stmt_close', 'implicit_stmt_close',
 			'put_hits', 'put_misses', 'get_hits', 'get_misses',
 			'size', 'free_items', 'references', 'mysqli.cache_size',
-			'mysql.allow_local_infile'
+			'mysqli.allow_local_infile',
+			'mysqli.allow_persistent', 'mysqli.max_persistent'
 		);
 		foreach ($expected as $k => $entry)
 			if (!stristr($phpinfo, $entry))
