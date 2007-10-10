@@ -1,25 +1,28 @@
 --TEST--
 mysqli bind_param/bind_prepare fetch long values
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
-	
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
 
-	mysqli_select_db($link, "test");
+	/*** test mysqli_connect 127.0.0.1 ***/
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+
+	mysqli_select_db($link, $db);
 	mysqli_query($link, "SET sql_mode=''");
 
-  	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch");
-  	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 int unsigned,
-                                                     c2 int unsigned,
-                                                     c3 int,
-                                                     c4 int,
-                                                     c5 int,
-                                                     c6 int unsigned,
-                                                     c7 int)");
+	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch");
+	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 int unsigned,
+		c2 int unsigned,
+		c3 int,
+		c4 int,
+		c5 int,
+		c6 int unsigned,
+		c7 int)");
 
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_fetch VALUES (?,?,?,?,?,?,?)");
 	mysqli_bind_param($stmt, "iiiiiii", $c1,$c2,$c3,$c4,$c5,$c6,$c7);
@@ -45,6 +48,8 @@ mysqli bind_param/bind_prepare fetch long values
 
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
+
+	print "done!";
 ?>
 --EXPECT--
 array(7) {
@@ -63,3 +68,4 @@ array(7) {
   [6]=>
   int(0)
 }
+done!

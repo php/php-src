@@ -1,16 +1,19 @@
 --TEST--
 function test: mysqli_field_count()
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 
 	include "connect.inc";
-	
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
 
-	mysqli_select_db($link, "test");
+	/*** test mysqli_connect 127.0.0.1 ***/
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+
+	mysqli_select_db($link, $db);
 
 	mysqli_query($link, "DROP TABLE IF EXISTS test_result");
 
@@ -21,11 +24,12 @@ function test: mysqli_field_count()
 
 	mysqli_real_query($link, "SELECT * FROM test_result");
 	$ir[] = mysqli_field_count($link);
-	
-	
+
+
 	var_dump($ir);
 
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECT--
 array(2) {
@@ -34,3 +38,4 @@ array(2) {
   [1]=>
   int(2)
 }
+done!
