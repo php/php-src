@@ -1,8 +1,8 @@
 --TEST--
 mysql_fetch_assoc()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -46,6 +46,16 @@ if (false !== ($tmp = mysql_fetch_assoc($res)))
 
 mysql_close($link);
 
+include('table.inc');
+if (!$res = mysql_query("SELECT id, label, id AS _id, CONCAT(label, 'a') _label, NULL as _foo FROM test _test ORDER BY id ASC LIMIT 1", $link)) {
+	printf("[009] [%d] %s\n", mysql_errno($link), $mysql_error($link));
+}
+print "[010]\n";
+var_dump(mysql_fetch_assoc($res));
+mysql_free_result($res);
+
+mysql_close($link);
+
 print "done!";
 ?>
 --EXPECTF--
@@ -73,6 +83,19 @@ array(5) {
 }
 
 Warning: mysql_fetch_assoc(): %d is not a valid MySQL result resource in %s on line %d
+[010]
+array(5) {
+  ["id"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "a"
+  ["_id"]=>
+  string(1) "1"
+  ["_label"]=>
+  string(2) "aa"
+  ["_foo"]=>
+  NULL
+}
 done!
 --UEXPECTF--
 [005]
@@ -99,4 +122,17 @@ array(5) {
 }
 
 Warning: mysql_fetch_assoc(): %d is not a valid MySQL result resource in %s on line %d
+[010]
+array(5) {
+  [u"id"]=>
+  unicode(1) "1"
+  [u"label"]=>
+  unicode(1) "a"
+  [u"_id"]=>
+  unicode(1) "1"
+  [u"_label"]=>
+  unicode(2) "aa"
+  [u"_foo"]=>
+  NULL
+}
 done!

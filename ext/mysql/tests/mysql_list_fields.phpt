@@ -12,10 +12,12 @@ include_once "connect.inc";
 $tmp    = NULL;
 $link   = NULL;
 
-if (false !== ($tmp = @mysql_list_fields($link, $link)))
-	printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+// This will implicitly try to connect, and we don't want it
+//if (false !== ($tmp = mysql_list_fields($link, $link)))
+//	printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 require('table.inc');
+
 if (!$res = mysql_list_fields($db, 'test', $link))
 	printf("[003] [%d] %s\n", mysql_errno($link), mysql_error($link));
 

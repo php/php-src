@@ -1,8 +1,8 @@
 --TEST--
 mysql_fetch_field()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -20,7 +20,6 @@ require_once('skipifconnectfailure.inc');
 		printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
-
 
 	$version = mysql_get_server_info($link);
 	if (!preg_match('@(\d+)\.(\d+)\.(\d+)@ism', $version, $matches))
@@ -105,6 +104,32 @@ require_once('skipifconnectfailure.inc');
 		mysql_free_result($res);
 	}
 
+	if (!mysql_query("DROP TABLE IF EXISTS test", $link))
+		printf("[013] [%d] %s\n", mysql_errno($link), mysql_error($link));
+
+	if (!mysql_query("CREATE TABLE test(id INT DEFAULT 1)"))
+		printf("[014] [%d] %s\n", mysql_errno($link), mysql_error($link));
+
+	if (!mysql_query("INSERT INTO test(id) VALUES (2)"))
+		printf("[015] [%d] %s\n", mysql_errno($link), mysql_error($link));
+
+	if (!$res = mysql_query("SELECT id FROM test", $link)) {
+		printf("[016] [%d] %s\n", mysql_errno($link), mysql_error($link));
+	}
+
+	var_dump(mysql_fetch_field($res));
+	mysql_free_result($res);
+
+	if (!$res = mysql_query("SELECT id FROM test", $link)) {
+		printf("[017] [%d] %s\n", mysql_errno($link), mysql_error($link));
+	}
+	$res = mysql_list_fields($db, 'test');
+	while ($tmp = mysql_fetch_field($res))
+		if ($tmp->name == 'id')
+			var_dump($tmp);
+
+	mysql_free_result($res);
+
 	mysql_close($link);
 	print "done!";
 ?>
@@ -170,6 +195,62 @@ bool(false)
 Warning: mysql_fetch_field(): Bad field offset in %s on line %d
 
 Warning: mysql_fetch_field(): %d is not a valid MySQL result resource in %s on line %d
+object(stdClass)#%d (13) {
+  ["name"]=>
+  string(2) "id"
+  ["table"]=>
+  string(4) "test"
+  ["def"]=>
+  string(0) ""
+  ["max_length"]=>
+  int(1)
+  ["not_null"]=>
+  int(0)
+  ["primary_key"]=>
+  int(0)
+  ["multiple_key"]=>
+  int(0)
+  ["unique_key"]=>
+  int(0)
+  ["numeric"]=>
+  int(1)
+  ["blob"]=>
+  int(0)
+  ["type"]=>
+  string(3) "int"
+  ["unsigned"]=>
+  int(0)
+  ["zerofill"]=>
+  int(0)
+}
+object(stdClass)#%d (13) {
+  ["name"]=>
+  string(2) "id"
+  ["table"]=>
+  string(4) "test"
+  ["def"]=>
+  string(1) "1"
+  ["max_length"]=>
+  int(0)
+  ["not_null"]=>
+  int(0)
+  ["primary_key"]=>
+  int(0)
+  ["multiple_key"]=>
+  int(0)
+  ["unique_key"]=>
+  int(0)
+  ["numeric"]=>
+  int(1)
+  ["blob"]=>
+  int(0)
+  ["type"]=>
+  string(3) "int"
+  ["unsigned"]=>
+  int(0)
+  ["zerofill"]=>
+  int(0)
+}
 done!
 --UEXPECTF--
 object(stdClass)#%d (13) {
@@ -233,4 +314,60 @@ bool(false)
 Warning: mysql_fetch_field(): Bad field offset in %s on line %d
 
 Warning: mysql_fetch_field(): %d is not a valid MySQL result resource in %s on line %d
+object(stdClass)#%d (13) {
+  [u"name"]=>
+  unicode(2) "id"
+  [u"table"]=>
+  unicode(4) "test"
+  [u"def"]=>
+  unicode(0) ""
+  [u"max_length"]=>
+  int(1)
+  [u"not_null"]=>
+  int(0)
+  [u"primary_key"]=>
+  int(0)
+  [u"multiple_key"]=>
+  int(0)
+  [u"unique_key"]=>
+  int(0)
+  [u"numeric"]=>
+  int(1)
+  [u"blob"]=>
+  int(0)
+  [u"type"]=>
+  unicode(3) "int"
+  [u"unsigned"]=>
+  int(0)
+  [u"zerofill"]=>
+  int(0)
+}
+object(stdClass)#%d (13) {
+  [u"name"]=>
+  unicode(2) "id"
+  [u"table"]=>
+  unicode(4) "test"
+  [u"def"]=>
+  unicode(1) "1"
+  [u"max_length"]=>
+  int(0)
+  [u"not_null"]=>
+  int(0)
+  [u"primary_key"]=>
+  int(0)
+  [u"multiple_key"]=>
+  int(0)
+  [u"unique_key"]=>
+  int(0)
+  [u"numeric"]=>
+  int(1)
+  [u"blob"]=>
+  int(0)
+  [u"type"]=>
+  unicode(3) "int"
+  [u"unsigned"]=>
+  int(0)
+  [u"zerofill"]=>
+  int(0)
+}
 done!
