@@ -1,8 +1,11 @@
 --TEST--
-Bug #33263 (mysqli_real_connect in __construct) 
+Bug #33263 (mysqli_real_connect in __construct)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
+<?php
+require_once('skipif.inc');
+require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 
@@ -10,23 +13,26 @@ Bug #33263 (mysqli_real_connect in __construct)
 
 	class test extends mysqli
 	{
-		public function __construct($host, $user, $passwd, $db) {
+		public function __construct($host, $user, $passwd, $db, $port, $socket) {
 			parent::init();
-			parent::real_connect($host, $user, $passwd, $db);
+			parent::real_connect($host, $user, $passwd, $db, $port, $socket);
 		}
 	}
 
-	$mysql = new test($host, $user, $passwd, "test");
+	$mysql = new test($host, $user, $passwd, $db, $port, $socket);
 
 	$stmt = $mysql->prepare("SELECT DATABASE()");
 	$stmt->execute();
-	$stmt->bind_result($db);
+	$stmt->bind_result($database);
 	$stmt->fetch();
 	$stmt->close();
 
-	var_dump($db);
+	if ($database != $db)
+		printf("[001] Expecting '%s' got %s/'%s'.\n",
+			gettype($database), $database);
 
-	$mysql->close();	
+	$mysql->close();
+	print "done!";
 ?>
---EXPECT--
-string(4) "test"
+--EXPECTF--
+done!

@@ -1,13 +1,16 @@
 --TEST--
 Bug #32405 (mysqli->fetch() is returning bad data)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include ("connect.inc");
 
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 	mysqli_select_db($link, "test");
 	mysqli_query($link, "SET sql_mode=''");
 	
@@ -28,12 +31,12 @@ Bug #32405 (mysqli->fetch() is returning bad data)
 	mysqli_query($link,"DROP TABLE test_users");
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
-string(5) "user1"
+%s(5) "user1"
 int(2)
-string(5) "user2"
+%s(5) "user2"
 int(3)
-string(5) "user3"
+%s(5) "user3"
 int(4)
-string(5) "user4"
+%s(5) "user4"

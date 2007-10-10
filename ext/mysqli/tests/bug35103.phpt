@@ -1,7 +1,10 @@
 --TEST--
 Bug #35103 (Bad handling of unsigned bigint)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 
@@ -11,7 +14,7 @@ DROP TABLE test_buint;
 EOSQL;
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd, "test");
+	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 	$mysql->query("DROP TABLE IF EXISTS test_bint");
 	$mysql->query("CREATE TABLE test_bint (a bigint(20) default NULL) ENGINE=MYISAM");
 	$mysql->query("INSERT INTO test_bint VALUES (9223372036854775807),(-9223372036854775808),(-2147483648),(-2147483649),(-2147483647),(2147483647),(2147483648),(2147483649)");
