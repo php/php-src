@@ -34,6 +34,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #42890 (Constant "LIST" defined by mysqlclient and c-client).
   (Andrey)
+- Fixed bug #42869 (automatic session id insertion adds sessions id to
+  non-local forms). (Ilia)
 - Fixed bug #42818 ($foo = clone(array()); leaks memory). (Dmitry)
 - Fixed bug #42817 (clone() on a non-object does not result in a fatal
   error). (Ilia)
