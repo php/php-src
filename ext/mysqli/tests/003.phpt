@@ -1,35 +1,44 @@
 --TEST--
 mysqli connect
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd, "test");
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	mysqli_query($link, "SET sql_mode=''");
 		
-	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_result");
-  	mysqli_query($link,"CREATE TABLE test_bind_result(c1 date, c2 time, 
-                                                        c3 timestamp(14), 
-                                                        c4 year, 
-                                                        c5 datetime, 
-                                                        c6 timestamp(4), 
-                                                        c7 timestamp(6))");
+	if (!mysqli_query($link,"DROP TABLE IF EXISTS test_bind_result"))
+		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-  	mysqli_query($link,"INSERT INTO test_bind_result VALUES('2002-01-02',
-                                                              '12:49:00',
-                                                              '2002-01-02 17:46:59', 
-                                                              2010,
-                                                              '2010-07-10', 
-                                                              '2020','1999-12-29')");
+	$rc = mysqli_query($link,"CREATE TABLE test_bind_result(c1 date, c2 time, 
+														c3 timestamp(14), 
+														c4 year, 
+														c5 datetime, 
+														c6 timestamp(4), 
+														c7 timestamp(6)) ENGINE=" . $engine);
 
+	if (!$rc)
+		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	$rc = mysqli_query($link, "INSERT INTO test_bind_result VALUES('2002-01-02',
+															'12:49:00',
+															'2002-01-02 17:46:59', 
+															2010,
+															'2010-07-10', 
+															'2020','1999-12-29')");
+	if (!$rc)
+		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_result");
-  	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);
- 	mysqli_execute($stmt);
+	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);
+	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
 
 	$test = array($c1,$c2,$c3,$c4,$c5,$c6,$c7);
@@ -38,8 +47,9 @@ mysqli connect
 
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
+	print "done!";
 ?>
---EXPECT--
+--EXPECTF--
 array(7) {
   [0]=>
   string(10) "2002-01-02"
@@ -56,3 +66,22 @@ array(7) {
   [6]=>
   string(19) "1999-12-29 00:00:00"
 }
+done!
+--UEXPECTF--
+array(7) {
+  [0]=>
+  unicode(10) "2002-01-02"
+  [1]=>
+  unicode(8) "12:49:00"
+  [2]=>
+  unicode(19) "2002-01-02 17:46:59"
+  [3]=>
+  int(2010)
+  [4]=>
+  unicode(19) "2010-07-10 00:00:00"
+  [5]=>
+  unicode(19) "0000-00-00 00:00:00"
+  [6]=>
+  unicode(19) "1999-12-29 00:00:00"
+}
+done!
