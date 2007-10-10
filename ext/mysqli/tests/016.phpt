@@ -1,19 +1,23 @@
 --TEST--
 mysqli fetch user variable 
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
-	mysqli_select_db($link, "test");
+	if (!mysqli_query($link, "SET @dummy='foobar'"))
+		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_query($link, "SET @dummy='foobar'");
-
-	$stmt = mysqli_prepare($link, "SELECT @dummy");
+	if (!$stmt = mysqli_prepare($link, "SELECT @dummy"))
+		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		
 	mysqli_bind_result($stmt, $dummy);
 	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
@@ -22,6 +26,11 @@ mysqli fetch user variable
 
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
+	print "done!";
 ?>
---EXPECT--
+--EXPECTF--
 string(6) "foobar"
+done!
+--UEXPECTF--
+unicode(6) "foobar"
+done!
