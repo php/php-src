@@ -102,7 +102,7 @@ object(stdClass)#%d (11) {
   ["max_length"]=>
   int(0)
   ["length"]=>
-  int(17)
+  int(%d)
   ["charsetnr"]=>
   int(63)
   ["flags"]=>
@@ -200,7 +200,7 @@ object(stdClass)#%d (11) {
   [u"max_length"]=>
   int(0)
   [u"length"]=>
-  int(17)
+  int(%d)
   [u"charsetnr"]=>
   int(63)
   [u"flags"]=>
