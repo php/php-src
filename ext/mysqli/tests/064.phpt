@@ -1,12 +1,15 @@
 --TEST--
 NULL binding 
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd);
+	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	$stmt = new mysqli_stmt($mysql, "SELECT NULL FROM DUAL");
 	$stmt->execute();

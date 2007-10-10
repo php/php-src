@@ -1,5 +1,5 @@
 --TEST--
-resultset constructor 
+mysqli ping
 --SKIPIF--
 <?php 
 require_once('skipif.inc'); 
@@ -10,17 +10,10 @@ require_once('skipifconnectfailure.inc');
 	include "connect.inc";
 
 	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
-
-	$stmt = new mysqli_stmt($mysql, "SELECT 'foo' FROM DUAL");
-	$stmt->execute();
-	$stmt->bind_result($foo);
-	$stmt->fetch();
-	$stmt->close();
+	var_dump($mysql->ping());
 	$mysql->close();
-
-	var_dump($foo);
+	print "done!";
 ?>
 --EXPECT--
-string(3) "foo"
---UEXPECT--
-unicode(3) "foo"
+bool(true)
+done!
