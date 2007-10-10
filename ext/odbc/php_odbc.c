@@ -1573,8 +1573,7 @@ PHP_FUNCTION(odbc_fetch_into)
 		result->fetched++;
 
 	for(i = 0; i < result->numcols; i++) {
-		ALLOC_ZVAL(tmp);
-		tmp->refcount = 1;
+		MAKE_STD_ZVAL(tmp);
 		Z_TYPE_P(tmp) = IS_STRING;
 		Z_STRLEN_P(tmp) = 0;
 		sql_c_type = SQL_C_CHAR;
