@@ -1,15 +1,18 @@
 --TEST--
 mysqli_get_metadata
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
-	
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
 
-	mysqli_select_db($link, "test");
+	/*** test mysqli_connect 127.0.0.1 ***/
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+
+	mysqli_select_db($link, $db);
 
 	mysqli_query($link, "DROP TABLE IF EXISTS test_affected");
 	mysqli_query($link, "CREATE TABLE test_affected (foo int, bar varchar(10) character set latin1)");
@@ -31,14 +34,15 @@ mysqli_get_metadata
 	while ($field = mysqli_fetch_field($result)) {
 		var_dump($field);
 	}
-    
+
 	print_r(mysqli_fetch_lengths($result));
-    
+
 	mysqli_free_result($result);
 
 
-	mysqli_stmt_close($stmt);	
+	mysqli_stmt_close($stmt);
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECTF--
 === fetch_fields ===
@@ -194,3 +198,159 @@ object(stdClass)#5 (11) {
   ["decimals"]=>
   int(0)
 }
+done!
+--UEXPECTF--
+=== fetch_fields ===
+array(2) {
+  [0]=>
+  object(stdClass)#5 (11) {
+    [u"name"]=>
+    unicode(3) "foo"
+    [u"orgname"]=>
+    unicode(3) "foo"
+    [u"table"]=>
+    unicode(13) "test_affected"
+    [u"orgtable"]=>
+    unicode(13) "test_affected"
+    [u"def"]=>
+    unicode(0) ""
+    [u"max_length"]=>
+    int(0)
+    [u"length"]=>
+    int(11)
+    [u"charsetnr"]=>
+    int(63)
+    [u"flags"]=>
+    int(32768)
+    [u"type"]=>
+    int(3)
+    [u"decimals"]=>
+    int(0)
+  }
+  [1]=>
+  object(stdClass)#6 (11) {
+    [u"name"]=>
+    unicode(3) "bar"
+    [u"orgname"]=>
+    unicode(3) "bar"
+    [u"table"]=>
+    unicode(13) "test_affected"
+    [u"orgtable"]=>
+    unicode(13) "test_affected"
+    [u"def"]=>
+    unicode(0) ""
+    [u"max_length"]=>
+    int(0)
+    [u"length"]=>
+    int(%d)
+    [u"charsetnr"]=>
+    int(%d)
+    [u"flags"]=>
+    int(0)
+    [u"type"]=>
+    int(253)
+    [u"decimals"]=>
+    int(0)
+  }
+}
+
+=== fetch_field_direct ===
+object(stdClass)#6 (11) {
+  [u"name"]=>
+  unicode(3) "foo"
+  [u"orgname"]=>
+  unicode(3) "foo"
+  [u"table"]=>
+  unicode(13) "test_affected"
+  [u"orgtable"]=>
+  unicode(13) "test_affected"
+  [u"def"]=>
+  unicode(0) ""
+  [u"max_length"]=>
+  int(0)
+  [u"length"]=>
+  int(%d)
+  [u"charsetnr"]=>
+  int(%d)
+  [u"flags"]=>
+  int(32768)
+  [u"type"]=>
+  int(3)
+  [u"decimals"]=>
+  int(0)
+}
+object(stdClass)#6 (11) {
+  [u"name"]=>
+  unicode(3) "bar"
+  [u"orgname"]=>
+  unicode(3) "bar"
+  [u"table"]=>
+  unicode(13) "test_affected"
+  [u"orgtable"]=>
+  unicode(13) "test_affected"
+  [u"def"]=>
+  unicode(0) ""
+  [u"max_length"]=>
+  int(0)
+  [u"length"]=>
+  int(%d)
+  [u"charsetnr"]=>
+  int(%d)
+  [u"flags"]=>
+  int(0)
+  [u"type"]=>
+  int(253)
+  [u"decimals"]=>
+  int(0)
+}
+
+=== fetch_field ===
+object(stdClass)#6 (11) {
+  [u"name"]=>
+  unicode(3) "foo"
+  [u"orgname"]=>
+  unicode(3) "foo"
+  [u"table"]=>
+  unicode(13) "test_affected"
+  [u"orgtable"]=>
+  unicode(13) "test_affected"
+  [u"def"]=>
+  unicode(0) ""
+  [u"max_length"]=>
+  int(0)
+  [u"length"]=>
+  int(%d)
+  [u"charsetnr"]=>
+  int(%d)
+  [u"flags"]=>
+  int(32768)
+  [u"type"]=>
+  int(3)
+  [u"decimals"]=>
+  int(0)
+}
+object(stdClass)#5 (11) {
+  [u"name"]=>
+  unicode(3) "bar"
+  [u"orgname"]=>
+  unicode(3) "bar"
+  [u"table"]=>
+  unicode(13) "test_affected"
+  [u"orgtable"]=>
+  unicode(13) "test_affected"
+  [u"def"]=>
+  unicode(0) ""
+  [u"max_length"]=>
+  int(0)
+  [u"length"]=>
+  int(%d)
+  [u"charsetnr"]=>
+  int(%d)
+  [u"flags"]=>
+  int(0)
+  [u"type"]=>
+  int(253)
+  [u"decimals"]=>
+  int(0)
+}
+done!
