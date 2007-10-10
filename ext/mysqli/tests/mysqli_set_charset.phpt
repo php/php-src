@@ -1,15 +1,50 @@
 --TEST--
 mysqli_set_charset()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_set_charset'))
  	die("skip Function not available");
 if (ini_get("unicode.semantics"))
 	die("skip: mysqli_set_charset() is disabled in unicode");
+
+require_once('connect.inc');
+if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+
+if (!($res = mysqli_query($link, 'SELECT version() AS server_version')) ||
+		!($tmp = mysqli_fetch_assoc($res))) {
+	mysqli_close($link);
+	die(sprintf("skip Cannot check server version, [%d] %s\n",
+	mysqli_errno($link), mysqli_error($link)));
+}
+mysqli_free_result($res);
+$version = explode('.', $tmp['server_version']);
+if (empty($version)) {
+	mysqli_close($link);
+	die(sprintf("skip Cannot check server version, based on '%s'",
+		$tmp['server_version']));
+}
+
+if ($version[0] <= 4 && $version[1] < 1) {
+	mysqli_close($link);
+	die(sprintf("skip Requires MySQL Server 4.1+\n"));
+}
+
+if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STORE_RESULT)) &&
+		(mysqli_num_rows($res) == 1)) ||
+		(($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin2"', MYSQLI_STORE_RESULT)) &&
+		(mysqli_num_rows($res) == 1))
+		) {
+	// ok, required latin1 or latin2 are available
+	mysqli_close($link);
+} else {
+	die(sprintf("skip Requires character set latin1 or latin2\n"));
+	mysqli_close($link);
+}
 ?>
 --FILE--
 <?php
@@ -28,17 +63,6 @@ if (ini_get("unicode.semantics"))
 		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
-
-	if (!$res = mysqli_query($link, 'SELECT version() AS server_version'))
-		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	$tmp = mysqli_fetch_assoc($res);
-	mysqli_free_result($res);
-	$version = explode('.', $tmp['server_version']);
-	if (empty($version))
-		printf("[005] Cannot determine server version, need MySQL Server 4.1+ for the test!\n");
-
-	if ($version[0] <= 4 && $version[1] < 1)
-		printf("[006] Need MySQL Server 4.1+ for the test!\n");
 
 	if (!$res = mysqli_query($link, 'SELECT @@character_set_connection AS charset, @@collation_connection AS collation'))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

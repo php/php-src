@@ -1,19 +1,33 @@
 --TEST--
 mysqli_set_local_infile_handler()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
 
 if (!function_exists('mysqli_set_local_infile_handler'))
 	die("skip - function not available.");
 
 require_once('connect.inc');
-if (!$TEST_EXPERIMENTAL)
-	die("skip - experimental (= unsupported) feature");
+if (!$link = mysqli_connect($host, $user, $passwb, $db, $port, $socket))
+	die("skip Cannot connect to MySQL");
+
+if (!$res = mysqli_query($link, 'SHOW VARIABLES LIKE "local_infile"')) {
+	mysqli_close($link);
+	die("skip Cannot check if Server variable 'local_infile' is set to 'ON'");
+}
+
+$row = mysqli_fetch_assoc($res);
+mysqli_free_result($res);
+mysqli_close($link);
+
+if ('ON' != $row['Value'])
+	die(sprintf("skip Server variable 'local_infile' seems not set to 'ON', found '%s'",
+		$row['Value']));
 ?>
+--INI--
+mysqli.allow_local_infile=1
 --FILE--
 <?php
 	require_once('connect.inc');
@@ -133,6 +147,9 @@ if (!$TEST_EXPERIMENTAL)
 	$expected = array();
 	try_handler(20, $link, $file, 'callback_fclose', $expected);
 
+	// FIXME - TODO - KLUDGE -
+  // IMHO this is wrong. ext/mysqli should bail as the function signature
+  // is not complete. That's a BC break, OK, but it makes perfectly sense.
 	$expected = array();
 	try_handler(30, $link, $file, 'callback_invalid_args', $expected);
 
@@ -153,11 +170,63 @@ Callback: 0
 Callback: 1
 Callback set to 'callback_fclose'
 Callback: 0
+[022] LOAD DATA failed, [2000] File handle closed in handler
 Callback set to 'callback_invalid_args'
-Should bail!
+Callback: 0
+Callback: 1
+[037] More results than expected!
+array(2) {
+  ["id"]=>
+  string(2) "97"
+  ["label"]=>
+  string(1) "x"
+}
+array(2) {
+  ["id"]=>
+  string(2) "98"
+  ["label"]=>
+  string(1) "y"
+}
+array(2) {
+  ["id"]=>
+  string(2) "99"
+  ["label"]=>
+  string(1) "z"
+}
 Callback set to 'callback_error'
 Callback: 0
-
-Warning: mysqli_query(): How to access this error? in %s on line %d
+[042] LOAD DATA failed, [2000] How to access this error?
+done!
+--UEXPECTF--
+Callback set to 'callback_simple'
+Callback: 0
+Callback: 1
+Callback set to 'callback_fclose'
+Callback: 0
+[022] LOAD DATA failed, [2000] File handle closed in handler
+Callback set to 'callback_invalid_args'
+Callback: 0
+Callback: 1
+[037] More results than expected!
+array(2) {
+  [u"id"]=>
+  unicode(2) "97"
+  [u"label"]=>
+  unicode(1) "x"
+}
+array(2) {
+  [u"id"]=>
+  unicode(2) "98"
+  [u"label"]=>
+  unicode(1) "y"
+}
+array(2) {
+  [u"id"]=>
+  unicode(2) "99"
+  [u"label"]=>
+  unicode(1) "z"
+}
+Callback set to 'callback_error'
+Callback: 0
 [042] LOAD DATA failed, [2000] How to access this error?
 done!

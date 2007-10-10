@@ -126,6 +126,4 @@ require_once('skipifconnectfailure.inc');
 Warning: mysqli_stmt_send_long_data(): Invalid parameter number in %s on line %d
 
 Warning: mysqli_stmt_send_long_data(): Invalid parameter number in %s on line %d
-
-Warning: mysqli_stmt_send_long_data(): Invalid parameter number in %s on line %d
 done!

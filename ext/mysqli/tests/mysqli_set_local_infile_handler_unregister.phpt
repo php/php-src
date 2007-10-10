@@ -1,18 +1,33 @@
 --TEST--
 mysqli_set_local_infile_handler() - do not use the file pointer
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_set_local_infile_handler'))
 	die("skip - function not available.");
 
 require_once('connect.inc');
-if (!$TEST_EXPERIMENTAL)
-	die("skip - experimental (= unsupported) feature");
+if (!$link = mysqli_connect($host, $user, $passwb, $db, $port, $socket))
+	die("skip Cannot connect to MySQL");
+
+if (!$res = mysqli_query($link, 'SHOW VARIABLES LIKE "local_infile"')) {
+	mysqli_close($link);
+	die("skip Cannot check if Server variable 'local_infile' is set to 'ON'");
+}
+
+$row = mysqli_fetch_assoc($res);
+mysqli_free_result($res);
+mysqli_close($link);
+
+if ('ON' != $row['Value'])
+	die(sprintf("skip Server variable 'local_infile' seems not set to 'ON', found '%s'",
+		$row['Value']));
 ?>
+--INI--
+mysqli.allow_local_infile=1
 --FILE--
 <?php
 	require_once('connect.inc');
@@ -45,5 +60,8 @@ if (!$TEST_EXPERIMENTAL)
 --EXPECTF--
 Callback set to 'callback_unregister'
 Callback: 0
-[022] LOAD DATA failed, [2000] Can't execute load data local init callback function
+
+Warning: mysqli_query(): File handle closed in %s on line %d
+[022] LOAD DATA failed, [2000] File handle closed
+[024/0] [0] ''
 done!

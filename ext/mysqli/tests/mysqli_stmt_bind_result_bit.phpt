@@ -100,8 +100,7 @@ require_once('skipifconnectfailure.inc');
 				printf("[008 - %d] [%d] %s\n", $bits, mysqli_stmt_errno($stmt_ins), mysqli_stmt_error($stmt_ins));
 				break;
 			}
-
-			$sql = sprintf("SELECT id, BIN(bit_value) AS _bin, bit_value, bit_value + 0 AS _bit_value0, bit_null FROM test WHERE id = %d", $value);
+			$sql = sprintf("SELECT id, BIN(bit_value) AS _bin, bit_value, bit_value + 0 AS _bit_value0, bit_null FROM test WHERE id = %s", $value);
 			if ((!mysqli_stmt_prepare($stmt_sel, $sql)) ||
 				(!mysqli_stmt_execute($stmt_sel))) {
 				printf("[009 - %d] [%d] %s\n", $bits, mysqli_stmt_errno($stmt_sel), mysqli_stmt_error($stmt_sel));
@@ -114,13 +113,18 @@ require_once('skipifconnectfailure.inc');
 				break;
 			}
 
-			if (!mysqli_stmt_fetch($stmt_sel)) {
-				printf("[011 - %d] [%d] %s\n", $bits, mysqli_stmt_errno($stmt_sel), mysqli_stmt_error($stmt_sel));
+			if (!($ret = mysqli_stmt_fetch($stmt_sel))) {
+				printf("[011 - %d] mysqli_stmt_fetch() has failed for %d bits - ret = %s/%s, [%d] %s, [%d] %s\n",
+					$bits, $bits,
+					gettype($ret), $ret,
+					mysqli_stmt_errno($stmt_sel), mysqli_stmt_error($stmt_sel),
+					mysqli_errno($link_sel), mysqli_errno($link_sel)
+				);
 				break;
 			}
 
 			if (($value != $row['id']) || (($bin != $row['_bin']) && ($bin2 != $row['_bin']))) {
-debug_zval_dump($row);
+				debug_zval_dump($row);
 				printf("[012 - %d] Insert of %s in BIT(%d) column might have failed. id = %s, bin = %s (%s/%s)\n",
 					$bits, $value, $bits, $row['id'], $row['_bin'], $bin, $bin2);
 				break;

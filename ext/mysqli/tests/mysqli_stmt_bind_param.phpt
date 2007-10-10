@@ -44,6 +44,9 @@ require_once('skipifconnectfailure.inc');
 	libmysql gives a less descriptive error message but mysqlnd,
 	we did not unify the error messages but ignore this slight difference silently
 	*/
+	if (!false === ($tmp = @mysqli_stmt_bind_param($stmt, " ", $tmp)))
+		printf("[003d] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+
 	if (!false === ($tmp = @mysqli_stmt_bind_param($stmt, "", $id, $label)))
 		printf("[003a] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
@@ -346,6 +349,30 @@ require_once('skipifconnectfailure.inc');
 		var_dump($row);
 	}
 	mysqli_free_result($res);
+
+	$value_list = array(array('id' => 101, 'label' => 'a'), array('id' => 102, 'label' => 'b'));
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (?, ?)"))
+		printf("[2010] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+        foreach ($value_list as $k => $values) {
+		if (!mysqli_stmt_bind_param($stmt, 'is', $values['id'], $values['label'])) {
+			printf("[2011] bind_param() failed for id = %d, [%d] %s\n",
+				$values['id'], mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+			continue;
+		}
+		if (!$stmt->execute())
+			printf("[2012] [%d] execute() failed for id = %d, [%d] %s\n",
+				$values['id'], mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+		if (!$res = mysqli_query($link, sprintf("SELECT label FROM test WHERE id = %d", $values['id'])))
+			printf("[2013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		if (!$row = mysqli_fetch_assoc($res))
+			printf("[2014] Cannot find row id = %d\n", $values['id']);
+		else if (isset($row['label']) && ($values['label'] != $row['label']))
+			printf("[2015] Expecting label = %s, got label = %s\n", $values['label'], $row['label']);
+			
+		mysqli_free_result($res);
+	}
 
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);

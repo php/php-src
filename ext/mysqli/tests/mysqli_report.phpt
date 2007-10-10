@@ -1,9 +1,9 @@
 --TEST--
 mysqli_report()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -188,11 +188,14 @@ require_once('skipifconnectfailure.inc');
 	*/
 	$log_slow_queries = false;
 	$log_queries_not_using_indexes = false;
+	mysqli_report(MYSQLI_REPORT_OFF);
+	mysqli_report(MYSQLI_REPORT_INDEX);
 
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[017] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-	if (!$res = mysqli_query($link, "SHOW VARIABLES LIKE 'log_slow_queries'"))
+	// this might cause a warning - no index used
+	if (!$res = @mysqli_query($link, "SHOW VARIABLES LIKE 'log_slow_queries'"))
 		printf("[018] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!$row = mysqli_fetch_assoc($res))
@@ -201,7 +204,8 @@ require_once('skipifconnectfailure.inc');
 	$log_slow_query = ('ON' == $row['Value']);
 
 	if (mysqli_get_server_version($link) >= 51011) {
-		if (!$res = mysqli_query($link, "SHOW VARIABLES LIKE 'log_queries_not_using_indexes'"))
+		// this might cause a warning - no index used
+		if (!$res = @mysqli_query($link, "SHOW VARIABLES LIKE 'log_queries_not_using_indexes'"))
 			printf("[020] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 		if (!$row = mysqli_fetch_assoc($res))
@@ -216,16 +220,64 @@ require_once('skipifconnectfailure.inc');
 					printf("[022 - %d] [%d] %s\n", $i - 99, mysqli_errno($link), mysqli_error($link));
 			}
 
+			// this might cause a warning - no index used
 			if (!$res = @mysqli_query($link, "SELECT id, label FROM test WHERE id = 1323"))
 				printf("[023] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 			mysqli_free_result($res);
-
-			mysqli_report(MYSQLI_REPORT_OFF);
-			mysqli_report(MYSQLI_REPORT_INDEX);
 		}
 	}
 
+	// Maybe we've provoked an index message, maybe not.
+	// All we can do is make a few dummy calls to ensure that all codes gets executed which
+	// checks the flag. Functions to check: mysqli_query() - done above,
+	// mysqli_stmt_execute(), mysqli_prepare(), mysqli_real_query(), mysqli_store_result()
+	// mysqli_use_result(), mysqli_thread_safe(), mysqli_thread_id()
+	mysqli_report(MYSQLI_REPORT_OFF);
+	mysqli_close($link);
+	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+		printf("[024] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+
+	if (!$stmt = mysqli_stmt_init($link))
+		printf("[025] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test'))
+		printf("[026] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	if (!mysqli_stmt_execute($stmt))
+		printf("[027] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	mysqli_stmt_close($stmt);
+
+	if (!mysqli_real_query($link, 'SELECT label, id FROM test'))
+		printf("[028] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!$res = mysqli_use_result($link))
+		printf("[029] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	mysqli_free_result($res);
+
+	if (!mysqli_real_query($link, 'SELECT label, id FROM test'))
+		printf("[030]  [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!$res = mysqli_store_result($link))
+		printf("[031]  [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	mysqli_free_result($res);
+
+	if (!$stmt = mysqli_prepare($link, 'SELECT id * 3 FROM test'))
+		printf("[032] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+	else
+		mysqli_stmt_close($stmt);
+
+	if (!mysqli_query($link, 'INSERT INTO test(id, label) VALUES (100, "z")', MYSQLI_USE_RESULT) ||
+			!mysqli_query($link, 'DELETE FROM test WHERE id > 50', MYSQLI_USE_RESULT))
+		printf("[033] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	$tmp = mysqli_thread_safe($link);
+	$tmp = mysqli_thread_id($link);
+
+	mysqli_close($link);
 	print "done!";
 ?>
 --EXPECTF--

@@ -49,4 +49,6 @@ Warning: mysqli_stmt_close(): invalid object or resource mysqli_stmt
  in %s on line %d
 
 Warning: mysqli_stmt_init() expects parameter 1 to be mysqli, object given in %s on line %d
+
+Warning: mysqli_stmt_init(): Couldn't fetch mysqli in %s on line %d
 done!

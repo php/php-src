@@ -1,16 +1,14 @@
 --TEST--
 mysqli_real_connect()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
---INI--
-open_basedir=.
 --FILE--
 <?php
-	include "connect.inc";
+	include("connect.inc");
 
 	$tmp    = NULL;
 	$link   = NULL;
@@ -104,8 +102,14 @@ open_basedir=.
 	if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, 65536))
 		printf("[016] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (mysqli_query($link, "SELECT 1 AS a; SELECT 2 AS b"))
+	if ($res = mysqli_query($link, "SELECT 1 AS a; SELECT 2 AS b")) {
 		printf("[017] Should have failed. CLIENT_MULTI_STATEMENT should have been disabled.\n");
+		var_dump($res->num_rows);
+		mysqli_next_result($link);
+		$res = mysqli_store_result($link);
+		var_dump($res->num_rows);
+	}
+
 
 	mysqli_close($link);
 	if (!$link = mysqli_init())
@@ -133,8 +137,34 @@ open_basedir=.
 
 	mysqli_close($link);
 
+	if ($IS_MYSQLND) {
+		ini_set('mysqli.default_host', 'p:' . $host);
+		$link = mysqli_init();
+		if (!@mysqli_real_connect($link)) {
+			printf("[022] Usage of mysqli.default_host=p:%s (persistent) failed\n", $host) ;
+		} else {
+			if (!$res = mysqli_query($link, "SELECT 'mysqli.default_host (persistent)' AS 'testing'"))
+				printf("[023] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+			$tmp = mysqli_fetch_assoc($res);
+			if ($tmp['testing'] !== 'mysqli.default_host (persistent)') {
+				printf("[024] Result looks strange - check manually, [%d] %s\n",
+					mysqli_errno($link), mysqli_error($link));
+				var_dump($tmp);
+			}
+			mysqli_free_result($res);
+			mysqli_close($link);
+		}
+
+		ini_set('mysqli.default_host', 'p:');
+		$link = mysqli_init();
+		if (@mysqli_real_sconnect($link)) {
+			printf("[025] Usage of mysqli.default_host=p: did not fail\n") ;
+			mysqli_close($link);
+		}
+	}
+
 	if (NULL !== ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
-		printf("[022] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[026] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

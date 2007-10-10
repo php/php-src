@@ -16,6 +16,10 @@ require_once('skipifconnectfailure.inc');
 		MYSQLI_OPT_LOCAL_INFILE, MYSQLI_INIT_COMMAND,
 		MYSQLI_SET_CHARSET_NAME);
 
+	if ($IS_MYSQLND && defined('MYSQLI_OPT_NET_CMD_BUFFER_SIZE'))
+		$valid_options[] = constant('MYSQLI_OPT_NET_CMD_BUFFER_SIZE');
+	if ($IS_MYSQLND && defined('MYSQLI_OPT_NET_READ_BUFFER_SIZE'))
+		$valid_options[] = constant('MYSQLI_OPT_NET_READ_BUFFER_SIZE');
 	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_YEARS_AS_INT'))
 		$valid_options[] = constant('MYSQLI_OPT_INT_AND_YEARS_AS_INT');
 	if (defined('MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE'))

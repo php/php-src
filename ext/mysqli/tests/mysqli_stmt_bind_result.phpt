@@ -61,6 +61,7 @@ require_once('skipifconnectfailure.inc');
 	}
 	mysqli_stmt_close($stmt);
 
+
 	function func_mysqli_stmt_bind_result($link, $engine, $bind_type, $sql_type, $bind_value, $offset, $type_hint = null) {
 
 		if (!mysqli_query($link, "DROP TABLE IF EXISTS test")) {
@@ -293,6 +294,16 @@ require_once('skipifconnectfailure.inc');
 	but we have not announce the removal so far, therefore we need to check for it */
 	if (!is_null($tmp = @mysqli_bind_result()))
 		printf("[3000] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+
+	$stmt = mysqli_stmt_init($link);
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (1000, 'z')"))
+		printf("[3001] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	$id = null;
+	if (false !== @mysqli_stmt_bind_result($stmt, $id))
+		printf("[3002] Bind result should not be allowed");
+
+	mysqli_stmt_close($stmt);
 
 	mysqli_close($link);
 	print "done!";
