@@ -1,16 +1,21 @@
 --TEST--
 Bug #37090 (mysqli_set_charset return code)
 --SKIPIF--
-<?php require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
+require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_set_charset')) {
 	die('skip mysqli_set_charset() not available');
+}
+if (ini_get('unicode.semantics')) {
+	die("skip Functionality not available in unicode mode");
 }
 ?>
 --FILE--
 <?php
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd);
+	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	$cs = array();
 	$cs[] = $mysql->set_charset("latin5");
@@ -23,6 +28,7 @@ if (!function_exists('mysqli_set_charset')) {
 	$cs[] = $mysql->character_set_name();
 
 	var_dump($cs);
+	print "done!";
 ?>
 --EXPECT--
 array(6) {
@@ -39,3 +45,4 @@ array(6) {
   [5]=>
   string(4) "utf8"
 }
+done!
