@@ -1,3 +1,271 @@
+2007-10-09  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * (PHP_5_3)
+      main/network.c
+      main/php_network.h:
+      Fix build on MSVC 2008 - channeling Wez
+
+2007-10-09  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli.c:
+      MFH: Add constant to allow setting of character set with mysqli_options
+      prior to connection.
+
+2007-10-09  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/strip_tags_basic1.phpt
+      ext/standard/tests/strings/strip_tags_basic1.phpt
+      ext/standard/tests/strings/strip_tags_basic2.phpt
+      ext/standard/tests/strings/strip_tags_basic2.phpt
+      ext/standard/tests/strings/strip_tags_error.phpt
+      ext/standard/tests/strings/strip_tags_error.phpt
+      ext/standard/tests/strings/strip_tags_variation1.phpt
+      ext/standard/tests/strings/strip_tags_variation1.phpt
+      ext/standard/tests/strings/strip_tags_variation10.phpt
+      ext/standard/tests/strings/strip_tags_variation10.phpt
+      ext/standard/tests/strings/strip_tags_variation2.phpt
+      ext/standard/tests/strings/strip_tags_variation2.phpt
+      ext/standard/tests/strings/strip_tags_variation3.phpt
+      ext/standard/tests/strings/strip_tags_variation3.phpt
+      ext/standard/tests/strings/strip_tags_variation4.phpt
+      ext/standard/tests/strings/strip_tags_variation4.phpt
+      ext/standard/tests/strings/strip_tags_variation5.phpt
+      ext/standard/tests/strings/strip_tags_variation5.phpt
+      ext/standard/tests/strings/strip_tags_variation6.phpt
+      ext/standard/tests/strings/strip_tags_variation6.phpt
+      ext/standard/tests/strings/strip_tags_variation7.phpt
+      ext/standard/tests/strings/strip_tags_variation7.phpt
+      ext/standard/tests/strings/strip_tags_variation8.phpt
+      ext/standard/tests/strings/strip_tags_variation8.phpt
+      ext/standard/tests/strings/strip_tags_variation9.phpt
+      ext/standard/tests/strings/strip_tags_variation9.phpt:
+      New testcases for strip_tags() function
+
+    * ext/standard/tests/strings/strip_tags_basic1.phpt
+      ext/standard/tests/strings/strip_tags_basic1.phpt
+      ext/standard/tests/strings/strip_tags_basic1.phpt
+      ext/standard/tests/strings/strip_tags_basic2.phpt
+      ext/standard/tests/strings/strip_tags_basic2.phpt
+      ext/standard/tests/strings/strip_tags_basic2.phpt
+      ext/standard/tests/strings/strip_tags_error.phpt
+      ext/standard/tests/strings/strip_tags_error.phpt
+      ext/standard/tests/strings/strip_tags_error.phpt
+      ext/standard/tests/strings/strip_tags_variation1.phpt
+      ext/standard/tests/strings/strip_tags_variation1.phpt
+      ext/standard/tests/strings/strip_tags_variation1.phpt
+      ext/standard/tests/strings/strip_tags_variation10.phpt
+      ext/standard/tests/strings/strip_tags_variation10.phpt
+      ext/standard/tests/strings/strip_tags_variation10.phpt
+      ext/standard/tests/strings/strip_tags_variation2.phpt
+      ext/standard/tests/strings/strip_tags_variation2.phpt
+      ext/standard/tests/strings/strip_tags_variation2.phpt
+      ext/standard/tests/strings/strip_tags_variation3.phpt
+      ext/standard/tests/strings/strip_tags_variation3.phpt
+      ext/standard/tests/strings/strip_tags_variation3.phpt
+      ext/standard/tests/strings/strip_tags_variation4.phpt
+      ext/standard/tests/strings/strip_tags_variation4.phpt
+      ext/standard/tests/strings/strip_tags_variation4.phpt
+      ext/standard/tests/strings/strip_tags_variation5.phpt
+      ext/standard/tests/strings/strip_tags_variation5.phpt
+      ext/standard/tests/strings/strip_tags_variation5.phpt
+      ext/standard/tests/strings/strip_tags_variation6.phpt
+      ext/standard/tests/strings/strip_tags_variation6.phpt
+      ext/standard/tests/strings/strip_tags_variation6.phpt
+      ext/standard/tests/strings/strip_tags_variation7.phpt
+      ext/standard/tests/strings/strip_tags_variation7.phpt
+      ext/standard/tests/strings/strip_tags_variation7.phpt
+      ext/standard/tests/strings/strip_tags_variation8.phpt
+      ext/standard/tests/strings/strip_tags_variation8.phpt
+      ext/standard/tests/strings/strip_tags_variation8.phpt
+      ext/standard/tests/strings/strip_tags_variation9.phpt
+      ext/standard/tests/strings/strip_tags_variation9.phpt
+      ext/standard/tests/strings/strip_tags_variation9.phpt:
+        1.1.4;
+      New testcases for strip_tags() function
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/implode1.phpt:
+      fix test
+
+    * ext/standard/tests/strings/strcspn_basic.phpt
+      ext/standard/tests/strings/wordwrap_variation3.phpt:
+      added unicode output
+
+2007-10-09  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      main/fopen_wrappers.c:
+      MFH: Fix expand_filepath when including relative files, ideally you should
+      test your code...
+
+    * (PHP_5_3)
+      main/fopen_wrappers.c:
+      MFH: Fix expand_filepath when including relative files, ideally you should
+      test you code...
+
+    * main/fopen_wrappers.c:
+      Fix expand_filepath when including relative files, ideally you should test
+      you code...
+
+2007-10-09  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * main/fopen_wrappers.c:
+      ws + cs
+
+2007-10-09  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/fseek_ftell_rewind_variation2-win32.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_variation2-win32.phpt:
+      more tests for fseek(), ftell() & rewind() for win32
+
+    * ext/standard/tests/file/007_variation1.phpt
+      ext/standard/tests/file/007_variation1.phpt
+      ext/standard/tests/file/007_variation1.phpt
+      ext/standard/tests/file/007_variation10.phpt
+      ext/standard/tests/file/007_variation10.phpt
+      ext/standard/tests/file/007_variation10.phpt
+      ext/standard/tests/file/007_variation11-win32.phpt
+      ext/standard/tests/file/007_variation11-win32.phpt
+      ext/standard/tests/file/007_variation11-win32.phpt
+      ext/standard/tests/file/007_variation11.phpt
+      ext/standard/tests/file/007_variation11.phpt
+      ext/standard/tests/file/007_variation11.phpt
+      ext/standard/tests/file/007_variation12-win32.phpt
+      ext/standard/tests/file/007_variation12-win32.phpt
+      ext/standard/tests/file/007_variation12-win32.phpt
+      ext/standard/tests/file/007_variation12.phpt
+      ext/standard/tests/file/007_variation12.phpt
+      ext/standard/tests/file/007_variation12.phpt
+      ext/standard/tests/file/007_variation13-win32.phpt
+      ext/standard/tests/file/007_variation13-win32.phpt
+      ext/standard/tests/file/007_variation13-win32.phpt
+      ext/standard/tests/file/007_variation13.phpt
+      ext/standard/tests/file/007_variation13.phpt
+      ext/standard/tests/file/007_variation13.phpt
+      ext/standard/tests/file/007_variation14.phpt
+      ext/standard/tests/file/007_variation14.phpt
+      ext/standard/tests/file/007_variation14.phpt
+      ext/standard/tests/file/007_variation15.phpt
+      ext/standard/tests/file/007_variation15.phpt
+      ext/standard/tests/file/007_variation15.phpt
+      ext/standard/tests/file/007_variation16.phpt
+      ext/standard/tests/file/007_variation16.phpt
+      ext/standard/tests/file/007_variation16.phpt
+      ext/standard/tests/file/007_variation17.phpt
+      ext/standard/tests/file/007_variation17.phpt
+      ext/standard/tests/file/007_variation17.phpt
+      ext/standard/tests/file/007_variation18.phpt
+      ext/standard/tests/file/007_variation18.phpt
+      ext/standard/tests/file/007_variation18.phpt
+      ext/standard/tests/file/007_variation19.phpt
+      ext/standard/tests/file/007_variation19.phpt
+      ext/standard/tests/file/007_variation19.phpt
+      ext/standard/tests/file/007_variation2.phpt
+      ext/standard/tests/file/007_variation2.phpt
+      ext/standard/tests/file/007_variation2.phpt
+      ext/standard/tests/file/007_variation20.phpt
+      ext/standard/tests/file/007_variation20.phpt
+      ext/standard/tests/file/007_variation20.phpt
+      ext/standard/tests/file/007_variation21.phpt
+      ext/standard/tests/file/007_variation21.phpt
+      ext/standard/tests/file/007_variation21.phpt
+      ext/standard/tests/file/007_variation22.phpt
+      ext/standard/tests/file/007_variation22.phpt
+      ext/standard/tests/file/007_variation22.phpt
+      ext/standard/tests/file/007_variation23.phpt
+      ext/standard/tests/file/007_variation23.phpt
+      ext/standard/tests/file/007_variation23.phpt
+      ext/standard/tests/file/007_variation24.phpt
+      ext/standard/tests/file/007_variation24.phpt
+      ext/standard/tests/file/007_variation24.phpt
+      ext/standard/tests/file/007_variation3.phpt
+      ext/standard/tests/file/007_variation3.phpt
+      ext/standard/tests/file/007_variation3.phpt
+      ext/standard/tests/file/007_variation4.phpt
+      ext/standard/tests/file/007_variation4.phpt
+      ext/standard/tests/file/007_variation4.phpt
+      ext/standard/tests/file/007_variation5.phpt
+      ext/standard/tests/file/007_variation5.phpt
+      ext/standard/tests/file/007_variation5.phpt
+      ext/standard/tests/file/007_variation6.phpt
+      ext/standard/tests/file/007_variation6.phpt
+      ext/standard/tests/file/007_variation6.phpt
+      ext/standard/tests/file/007_variation7.phpt
+      ext/standard/tests/file/007_variation7.phpt
+      ext/standard/tests/file/007_variation7.phpt
+      ext/standard/tests/file/007_variation8.phpt
+      ext/standard/tests/file/007_variation8.phpt
+      ext/standard/tests/file/007_variation8.phpt
+      ext/standard/tests/file/007_variation9.phpt
+      ext/standard/tests/file/007_variation9.phpt
+      ext/standard/tests/file/007_variation9.phpt
+      ext/standard/tests/strings/addslashes_variation1.phpt
+      ext/standard/tests/strings/addslashes_variation1.phpt
+      ext/standard/tests/strings/addslashes_variation1.phpt
+      ext/standard/tests/strings/chop_variation1.phpt
+      ext/standard/tests/strings/chop_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/implode1.phpt
+      ext/standard/tests/strings/implode1.phpt
+      ext/standard/tests/strings/join_variation1.phpt
+      ext/standard/tests/strings/join_variation1.phpt
+      ext/standard/tests/strings/join_variation1.phpt
+      ext/standard/tests/strings/nl2br_variation5.phpt
+      ext/standard/tests/strings/nl2br_variation5.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation2.phpt
+      ext/standard/tests/strings/sprintf_variation2.phpt
+      ext/standard/tests/strings/sprintf_variation2.phpt
+      ext/standard/tests/strings/stripslashes_variation1.phpt
+      ext/standard/tests/strings/stripslashes_variation1.phpt
+      ext/standard/tests/strings/stripslashes_variation1.phpt
+      ext/standard/tests/strings/stripslashes_variation1.phpt
+      ext/standard/tests/strings/strrchr_variation9.phpt
+      ext/standard/tests/strings/strrev_variation4.phpt
+      ext/standard/tests/strings/strrev_variation4.phpt
+      ext/standard/tests/strings/strtok_variation1.phpt
+      ext/standard/tests/strings/strtok_variation1.phpt
+      ext/standard/tests/strings/strtok_variation1.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt
+      ext/standard/tests/strings/ucwords_variation1.phpt
+      ext/standard/tests/strings/ucwords_variation1.phpt
+      ext/standard/tests/strings/ucwords_variation1.phpt
+      ext/standard/tests/strings/ucwords_variation1.phpt
+      ext/standard/tests/strings/vsprintf_variation2.phpt
+      ext/standard/tests/strings/vsprintf_variation2.phpt
+      ext/standard/tests/strings/vsprintf_variation2.phpt:
+      fix tests
+
+2007-10-09  Robert Thompson  <ab5602@wayne.edu>
+
+    * main/fopen_wrappers.c:
+      
+      
+      Fix for bug 41822.  expand_filepath() will now return a relative path
+      under the specific situation where getcwd() returns NULL and the file is
+      still readable.  As far as I have been able to tell, this fix only applies
+      to the Solaris OS where files in directories with (--x) cannot getcwd().
+
 2007-10-08  Robert Thompson  <ab5602@wayne.edu>
 
     * (PHP_5_3)
