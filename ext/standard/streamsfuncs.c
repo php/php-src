@@ -574,6 +574,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 	zval **elem;
 	php_stream *stream;
 	php_socket_t this_fd;
+	int cnt = 0;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
@@ -598,9 +599,10 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 			if (this_fd > *max_fd) {
 				*max_fd = this_fd;
 			}
+			cnt++;
 		}
 	}
-	return 1;
+	return cnt ? 1 : 0;
 }
 
 static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
@@ -608,7 +610,8 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 	zval **elem, **dest_elem;
 	php_stream *stream;
 	HashTable *new_hash;
-	php_socket_t this_fd, ret = 0;
+	php_socket_t this_fd;
+	int ret = 0;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
