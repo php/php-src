@@ -1,22 +1,23 @@
 --TEST--
 function test: mysqli_insert_id()
 --SKIPIF--
-<?php 
+<?php
 	if (PHP_INT_SIZE == 8) {
 		echo 'skip test valid only for 32bit systems';
 		exit;
 	}
 	require_once('skipif.inc');
+	require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
 
 	include "connect.inc";
-	
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
 
-	mysqli_select_db($link, "test");
+	/*** test mysqli_connect 127.0.0.1 ***/
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+
+	mysqli_select_db($link, $db);
 
 	mysqli_query($link, "DROP TABLE IF EXISTS t036");
 
@@ -28,19 +29,20 @@ function test: mysqli_insert_id()
 
 	/* we have to insert more values, cause lexer sets auto_increment to max_int
 	   see mysql bug #54. So we don't check for the value, only for type (which must
-	   be type string) 
-	*/	
-	   
+	   be type string)
+	*/
+
 	mysqli_query($link, "ALTER TABLE t036 AUTO_INCREMENT=9999999999999998");
 	mysqli_query($link, "INSERT INTO t036 (b) VALUES ('foo2')");
 	mysqli_query($link, "INSERT INTO t036 (b) VALUES ('foo3')");
 	mysqli_query($link, "INSERT INTO t036 (b) VALUES ('foo4')");
 	$x = mysqli_insert_id($link);
 	$test[] = is_string($x);
-	
+
 	var_dump($test);
 
 	mysqli_close($link);
+	print "done!";
 ?>
 --EXPECT--
 array(2) {
@@ -49,3 +51,4 @@ array(2) {
   [1]=>
   bool(true)
 }
+done!
