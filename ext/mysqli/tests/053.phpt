@@ -1,7 +1,10 @@
 --TEST--
 not freed resultset 
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
@@ -9,7 +12,7 @@ not freed resultset
 	/************************
 	 * non freed resultset 
 	 ************************/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	$result = mysqli_query($link, "SELECT CURRENT_USER()");
 	mysqli_close($link);
