@@ -9,6 +9,9 @@ if (!function_exists('mysqli_get_client_stats')) {
 	die("skip only available with mysqlnd");
 }
 ?>
+--INI--
+mysqlnd.collect_statistics=1
+mysqlnd.collect_memory_statistics=1
 --FILE--
 <?php
 	/*
@@ -101,7 +104,7 @@ if (!function_exists('mysqli_get_client_stats')) {
 		printf("[005] Expecting the same number of entries in the arrays\n");
 		var_dump($info);
 		var_dump($new_info);
-		}
+	}
 
 	$test_counter = 6;
 	mysqli_get_client_stats_assert_gt('bytes_sent', $new_info, $info, $test_counter);
@@ -121,9 +124,8 @@ if (!function_exists('mysqli_get_client_stats')) {
 	mysqli_get_client_stats_assert_eq('unbuffered_sets', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('ps_buffered_sets', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('ps_unbuffered_sets', $new_info, $info, $test_counter);
-	mysqli_get_client_stats_assert_eq('rows_fetched_from_server', $new_info, $info, $test_counter);
-	mysqli_get_client_stats_assert_eq('rows_fetched_from_client', $new_info, $info, $test_counter);
-	mysqli_get_client_stats_assert_eq('rows_skipped', $new_info, $info, $test_counter);
+
+	mysqli_get_client_stats_assert_eq('rows_skipped_ps', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('copy_on_write_saved', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('copy_on_write_performed', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('command_buffer_too_small', $new_info, $info, $test_counter);
@@ -138,9 +140,362 @@ if (!function_exists('mysqli_get_client_stats')) {
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
 
+	// fetch stats
+	$expected = $info;
+
+	// buffered normal
+	print "Testing buffered normal...\n";
+	if (!$res = mysqli_query($link, 'SELECT COUNT(*) AS _num FROM test', MYSQLI_STORE_RESULT))
+		printf("[%03d] SELECT COUNT() FROM test failed, [%d] %s\n",
+			++$test_counter, mysqli_errno($link), mysqli_error($link));
+
+	$expected['rows_fetched_from_server_normal'] = (string)($expected['rows_fetched_from_server_normal'] + 1);
+	$expected['buffered_sets'] = (string)($expected['buffered_sets'] + 1);
+	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
+	$expected['rows_buffered_from_client_normal'] = (string)($expected['rows_buffered_from_client_normal'] + 1);
+
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_buffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('buffered_sets', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_buffered_from_client_normal', $info, $expected, $test_counter);
+
+	/* no change to rows_fetched_from_client_normal_buffered! */
+	if (!$row = mysqli_fetch_assoc($res))
+		printf("[%03d] fetch_assoc - SELECT COUNT() FROM test failed, [%d] %s\n",
+			++$test_counter, mysqli_errno($link), mysqli_error($link));
+
+	$expected['rows_fetched_from_client_normal_buffered'] = (string)($expected['rows_fetched_from_client_normal_buffered'] + 1);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_buffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_buffered_from_client_normal', $info, $expected, $test_counter);
+
+	$num_rows = $row['_num'];
+	mysqli_free_result($res);
+
+	print "Testing buffered normal... - SELECT id, label FROM test\n";
+	if (!$res = mysqli_query($link, 'SELECT id, label FROM test', MYSQLI_STORE_RESULT))
+		printf("[%03d] SELECT id, label FROM test failed, [%d] %s\n",
+			++$test_counter, mysqli_errno($link), mysqli_error($link));
+
+	assert(mysqli_num_rows($res) == $num_rows);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	$expected['rows_fetched_from_server_normal'] = (string)($expected['rows_fetched_from_server_normal'] + $num_rows);
+	$expected['rows_buffered_from_client_normal'] = (string)($expected['rows_buffered_from_client_normal'] + $num_rows);
+	$expected['buffered_sets'] = (string)($expected['buffered_sets'] + 1);
+	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_buffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('buffered_sets', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_buffered_from_client_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_buffered_from_client_normal', $info, $expected, $test_counter);
+
+	/* fetching none, but stats should not be affected - current implementation */
+	mysqli_free_result($res);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_buffered', $info, $expected, $test_counter);
+
+	print "Testing unbuffered normal...\n";
+	if (!$res = mysqli_query($link, 'SELECT id, label FROM test', MYSQLI_USE_RESULT))
+		printf("[%03d] SELECT id, label FROM test failed, [%d] %s\n",
+			++$test_counter, mysqli_errno($link), mysqli_error($link));
+
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_unbuffered', $info, $expected, $test_counter);
+
+	while ($row = mysqli_fetch_assoc($res))
+		;
+	mysqli_free_result($res);
+
+	$expected['rows_fetched_from_server_normal'] = (string)($expected['rows_fetched_from_server_normal'] + $num_rows);
+	$expected['rows_fetched_from_client_normal_unbuffered'] = (string)($expected['rows_fetched_from_client_normal_unbuffered'] + $num_rows);
+	$expected['unbuffered_sets'] = (string)($expected['unbuffered_sets'] + 1);
+	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_unbuffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('unbuffered_sets', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
+
+	print "Testing unbuffered normal... - SELECT id, label FROM test, not all fetched\n";
+	if (!$res = mysqli_query($link, 'SELECT id, label FROM test', MYSQLI_USE_RESULT))
+		printf("[%03d] SELECT id, label FROM test failed, [%d] %s\n",
+			++$test_counter, mysqli_errno($link), mysqli_error($link));
+
+	for ($i = 0; $i < $num_rows - 1; $i++)
+		$row = mysqli_fetch_assoc($res);
+
+	$expected['rows_fetched_from_server_normal'] = (string)($expected['rows_fetched_from_server_normal'] + $num_rows - 1);
+	$expected['rows_fetched_from_client_normal_unbuffered'] = (string)($expected['rows_fetched_from_client_normal_unbuffered'] + $num_rows - 1);
+	$expected['unbuffered_sets'] = (string)($expected['unbuffered_sets'] + 1);
+	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_unbuffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('unbuffered_sets', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
+
+	print "Testing if implicit fetching and cleaning happens...\n";
+	mysqli_free_result($res);
+
+	/* last row has been implicitly cleaned from the wire by freeing the result set */
+	$expected['rows_fetched_from_server_normal'] = (string)($expected['rows_fetched_from_server_normal'] + 1);
+	$expected['rows_fetched_from_client_normal_unbuffered'] = (string)($expected['rows_fetched_from_client_normal_unbuffered'] + 1);
+	$expected['rows_skipped_normal'] = (string)($info['rows_skipped_normal'] + 1);
+	$expected['flushed_normal_sets'] = (string)($expected['flushed_normal_sets'] + 1);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_unbuffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_skipped_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('flushed_normal_sets', $info, $expected, $test_counter);
+
+	print "Testing buffered Prepared Statements...\n";
+	if (!$stmt = mysqli_stmt_init($link))
+		printf("[%03d] stmt_init() failed, [%d] %s\n",
+			++$test_counter, mysqli_errno($link), mysqli_error($link));
+
+	if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test') ||
+			!mysqli_stmt_execute($stmt))
+		printf("[%03d] prepare/execute failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	/* by default PS is unbuffered - no change */
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_ps', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_ps_buffered', $info, $expected, $test_counter);
+
+	if (!mysqli_stmt_store_result($stmt))
+		printf("[%03d] store_result failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+	mysqli_stmt_free_result($stmt);
+
+	$expected['rows_fetched_from_server_ps'] = (string)($expected['rows_fetched_from_server_ps'] + $num_rows);
+	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
+	$expected['ps_buffered_sets'] = (string)($expected['ps_buffered_sets'] + 1);
+	$expected['rows_buffered_from_client_ps'] = (string)($expected['rows_buffered_from_client_ps'] + $num_rows);
+
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_ps', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_ps_buffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('ps_buffered_sets', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_buffered_from_client_ps', $info, $expected, $test_counter);
+
+	print "Testing buffered Prepared Statements... - fetching all\n";
+
+	if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test') ||
+			!mysqli_stmt_execute($stmt))
+		printf("[%03d] prepare/execute failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	$id = $label = null;
+	if (!mysqli_stmt_bind_result($stmt, $id, $label))
+		printf("[%03d] bind_result failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	if (!mysqli_stmt_store_result($stmt))
+		printf("[%03d] store_result failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	while (mysqli_stmt_fetch($stmt))
+		;
+
+	$expected['rows_fetched_from_server_ps'] = (string)($expected['rows_fetched_from_server_ps'] + $num_rows);
+	$expected['rows_fetched_from_client_ps_buffered'] = (string)($expected['rows_fetched_from_client_ps_buffered'] + $num_rows);
+	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
+	$expected['ps_buffered_sets'] = (string)($expected['ps_buffered_sets'] + 1);
+	$expected['rows_buffered_from_client_ps'] = (string)($expected['rows_buffered_from_client_ps'] + $num_rows);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_ps', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_ps_buffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('ps_buffered_sets', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_buffered_from_client_ps', $info, $expected, $test_counter);
+
+	mysqli_stmt_free_result($stmt);
+
+	print "Testing buffered Prepared Statements... - fetching all but one\n";
+
+	if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test') ||
+			!mysqli_stmt_execute($stmt))
+		printf("[%03d] prepare/execute failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	$id = $label = null;
+	if (!mysqli_stmt_bind_result($stmt, $id, $label))
+		printf("[%03d] bind_result failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	if (!mysqli_stmt_store_result($stmt))
+		printf("[%03d] store_result failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	for ($i = 0; $i < $num_rows - 1; $i++)
+		mysqli_stmt_fetch($stmt);
+
+	$expected['rows_fetched_from_server_ps'] = (string)($expected['rows_fetched_from_server_ps'] + $num_rows);
+	$expected['rows_fetched_from_client_ps_buffered'] = (string)($expected['rows_fetched_from_client_ps_buffered'] + $num_rows - 1);
+	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
+	$expected['ps_buffered_sets'] = (string)($expected['ps_buffered_sets'] + 1);
+	$expected['rows_buffered_from_client_ps'] = (string)($expected['rows_buffered_from_client_ps'] + $num_rows);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_ps', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_ps_buffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('ps_buffered_sets', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_buffered_from_client_ps', $info, $expected, $test_counter);
+
+	$expected['rows_skipped_ps'] = $info['rows_skipped_ps'];
+	mysqli_stmt_free_result($stmt);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	/* buffered result set - no skipping possible! */
+	mysqli_get_client_stats_assert_eq('rows_skipped_ps', $info, $expected, $test_counter);
+
+	print "Testing unbuffered Prepared Statements... - fetching all\n";
+
+	if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test') ||
+			!mysqli_stmt_execute($stmt))
+		printf("[%03d] prepare/execute failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	$id = $label = null;
+	if (!mysqli_stmt_bind_result($stmt, $id, $label))
+		printf("[%03d] bind_result failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	$i = 0;
+	while (mysqli_stmt_fetch($stmt))
+		$i++;
+	assert($num_rows = $i);
+
+	$expected['rows_fetched_from_server_ps'] = (string)($expected['rows_fetched_from_server_ps'] + $num_rows);
+	$expected['rows_fetched_from_client_ps_unbuffered'] = (string)($expected['rows_fetched_from_client_ps_unbuffered'] + $num_rows);
+	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
+	$expected['ps_unbuffered_sets'] = (string)($expected['ps_unbuffered_sets'] + 1);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_ps', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_ps_unbuffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('ps_unbuffered_sets', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_buffered_from_client_ps', $info, $expected, $test_counter);
+
+	mysqli_stmt_free_result($stmt);
+
+	print "Testing unbuffered Prepared Statements... - fetching all but one\n";
+
+	if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test') ||
+			!mysqli_stmt_execute($stmt))
+		printf("[%03d] prepare/execute failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	$id = $label = null;
+	if (!mysqli_stmt_bind_result($stmt, $id, $label))
+		printf("[%03d] bind_result failed, [%d] %s\n",
+			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	for ($i = 0; $i < $num_rows - 1; $i++)
+		mysqli_stmt_fetch($stmt);
+
+	$expected['rows_fetched_from_server_ps'] = (string)($expected['rows_fetched_from_server_ps'] + $num_rows - 1);
+	$expected['rows_fetched_from_client_ps_unbuffered'] = (string)($expected['rows_fetched_from_client_ps_unbuffered'] + $num_rows - 1);
+	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
+	$expected['ps_unbuffered_sets'] = (string)($expected['ps_unbuffered_sets'] + 1);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_ps', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_ps_unbuffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('ps_unbuffered_sets', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_buffered_from_client_ps', $info, $expected, $test_counter);
+
+	mysqli_stmt_free_result($stmt);
+	$expected['rows_skipped_ps'] = (string)($expected['rows_skipped_ps'] + 1);
+	$expected['flushed_ps_sets'] = (string)($expected['flushed_ps_sets'] + 1);
+	$expected['rows_fetched_from_server_ps'] = (string)($expected['rows_fetched_from_server_ps'] + 1);
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('rows_skipped_ps', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('flushed_ps_sets', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_ps', $info, $expected, $test_counter);
+
+	/*
+	print "Checking for normal buffered side effects...\n";
+	foreach ($info as $k => $v)
+		if ($info[$k] != $expected[$k])
+			printf("$k - $v != %s\n", $expected[$k]);
+	*/
+	print "... done with fetch statistics\n";
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
+
 	//
 	// result_set_queries statistics
 	//
+
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
 
 	if (!$res = mysqli_query($link, "SELECT id, label FROM test"))
 		printf("[%03d] SELECT failed, [%d] %s\n", ++$test_counter,
@@ -504,7 +859,7 @@ if (!function_exists('mysqli_get_client_stats')) {
 	print "done!";
 ?>
 --EXPECTF--
-array(33) {
+array(61) {
   ["bytes_sent"]=>
   string(1) "0"
   ["bytes_received"]=>
@@ -537,11 +892,31 @@ array(33) {
   string(1) "0"
   ["flushed_ps_sets"]=>
   string(1) "0"
-  ["rows_fetched_from_server"]=>
+  ["ps_prepared_never_executed"]=>
   string(1) "0"
-  ["rows_fetched_from_client"]=>
+  ["ps_prepared_once_executed"]=>
   string(1) "0"
-  ["rows_skipped"]=>
+  ["rows_fetched_from_server_normal"]=>
+  string(1) "0"
+  ["rows_fetched_from_server_ps"]=>
+  string(1) "0"
+  ["rows_buffered_from_client_normal"]=>
+  string(1) "0"
+  ["rows_buffered_from_client_ps"]=>
+  string(1) "0"
+  ["rows_fetched_from_client_normal_buffered"]=>
+  string(1) "0"
+  ["rows_fetched_from_client_normal_unbuffered"]=>
+  string(1) "0"
+  ["rows_fetched_from_client_ps_buffered"]=>
+  string(1) "0"
+  ["rows_fetched_from_client_ps_unbuffered"]=>
+  string(1) "0"
+  ["rows_fetched_from_client_ps_cursor"]=>
+  string(1) "0"
+  ["rows_skipped_normal"]=>
+  string(1) "0"
+  ["rows_skipped_ps"]=>
   string(1) "0"
   ["copy_on_write_saved"]=>
   string(1) "0"
@@ -554,6 +929,14 @@ array(33) {
   ["connect_failure"]=>
   string(1) "0"
   ["connection_reused"]=>
+  string(1) "0"
+  ["reconnect"]=>
+  string(1) "0"
+  ["pconnect_success"]=>
+  string(1) "0"
+  ["active_connections"]=>
+  string(1) "0"
+  ["active_persistent_connections"]=>
   string(1) "0"
   ["explicit_close"]=>
   string(1) "0"
@@ -571,10 +954,49 @@ array(33) {
   string(1) "0"
   ["implicit_stmt_close"]=>
   string(1) "0"
+  ["mem_emalloc_count"]=>
+  string(1) "0"
+  ["mem_emalloc_ammount"]=>
+  string(1) "0"
+  ["mem_ecalloc_count"]=>
+  string(1) "0"
+  ["mem_ecalloc_ammount"]=>
+  string(1) "0"
+  ["mem_erealloc_count"]=>
+  string(1) "0"
+  ["mem_erealloc_ammount"]=>
+  string(1) "0"
+  ["mem_efree_count"]=>
+  string(1) "0"
+  ["mem_malloc_count"]=>
+  string(1) "0"
+  ["mem_malloc_ammount"]=>
+  string(1) "0"
+  ["mem_calloc_count"]=>
+  string(1) "0"
+  ["mem_calloc_ammount"]=>
+  string(1) "0"
+  ["mem_realloc_calloc"]=>
+  string(1) "0"
+  ["mem_realloc_ammount"]=>
+  string(1) "0"
+  ["mem_free_count"]=>
+  string(1) "0"
 }
+Testing buffered normal...
+Testing buffered normal... - SELECT id, label FROM test
+Testing unbuffered normal...
+Testing unbuffered normal... - SELECT id, label FROM test, not all fetched
+Testing if implicit fetching and cleaning happens...
+Testing buffered Prepared Statements...
+Testing buffered Prepared Statements... - fetching all
+Testing buffered Prepared Statements... - fetching all but one
+Testing unbuffered Prepared Statements... - fetching all
+Testing unbuffered Prepared Statements... - fetching all but one
+... done with fetch statistics
 done!
 --UEXPECTF--
-array(33) {
+array(61) {
   [u"bytes_sent"]=>
   unicode(1) "0"
   [u"bytes_received"]=>
@@ -607,11 +1029,31 @@ array(33) {
   unicode(1) "0"
   [u"flushed_ps_sets"]=>
   unicode(1) "0"
-  [u"rows_fetched_from_server"]=>
+  [u"ps_prepared_never_executed"]=>
   unicode(1) "0"
-  [u"rows_fetched_from_client"]=>
+  [u"ps_prepared_once_executed"]=>
   unicode(1) "0"
-  [u"rows_skipped"]=>
+  [u"rows_fetched_from_server_normal"]=>
+  unicode(1) "0"
+  [u"rows_fetched_from_server_ps"]=>
+  unicode(1) "0"
+  [u"rows_buffered_from_client_normal"]=>
+  unicode(1) "0"
+  [u"rows_buffered_from_client_ps"]=>
+  unicode(1) "0"
+  [u"rows_fetched_from_client_normal_buffered"]=>
+  unicode(1) "0"
+  [u"rows_fetched_from_client_normal_unbuffered"]=>
+  unicode(1) "0"
+  [u"rows_fetched_from_client_ps_buffered"]=>
+  unicode(1) "0"
+  [u"rows_fetched_from_client_ps_unbuffered"]=>
+  unicode(1) "0"
+  [u"rows_fetched_from_client_ps_cursor"]=>
+  unicode(1) "0"
+  [u"rows_skipped_normal"]=>
+  unicode(1) "0"
+  [u"rows_skipped_ps"]=>
   unicode(1) "0"
   [u"copy_on_write_saved"]=>
   unicode(1) "0"
@@ -624,6 +1066,14 @@ array(33) {
   [u"connect_failure"]=>
   unicode(1) "0"
   [u"connection_reused"]=>
+  unicode(1) "0"
+  [u"reconnect"]=>
+  unicode(1) "0"
+  [u"pconnect_success"]=>
+  unicode(1) "0"
+  [u"active_connections"]=>
+  unicode(1) "0"
+  [u"active_persistent_connections"]=>
   unicode(1) "0"
   [u"explicit_close"]=>
   unicode(1) "0"
@@ -641,5 +1091,44 @@ array(33) {
   unicode(1) "0"
   [u"implicit_stmt_close"]=>
   unicode(1) "0"
+  [u"mem_emalloc_count"]=>
+  unicode(1) "0"
+  [u"mem_emalloc_ammount"]=>
+  unicode(1) "0"
+  [u"mem_ecalloc_count"]=>
+  unicode(1) "0"
+  [u"mem_ecalloc_ammount"]=>
+  unicode(1) "0"
+  [u"mem_erealloc_count"]=>
+  unicode(1) "0"
+  [u"mem_erealloc_ammount"]=>
+  unicode(1) "0"
+  [u"mem_efree_count"]=>
+  unicode(1) "0"
+  [u"mem_malloc_count"]=>
+  unicode(1) "0"
+  [u"mem_malloc_ammount"]=>
+  unicode(1) "0"
+  [u"mem_calloc_count"]=>
+  unicode(1) "0"
+  [u"mem_calloc_ammount"]=>
+  unicode(1) "0"
+  [u"mem_realloc_calloc"]=>
+  unicode(1) "0"
+  [u"mem_realloc_ammount"]=>
+  unicode(1) "0"
+  [u"mem_free_count"]=>
+  unicode(1) "0"
 }
+Testing buffered normal...
+Testing buffered normal... - SELECT id, label FROM test
+Testing unbuffered normal...
+Testing unbuffered normal... - SELECT id, label FROM test, not all fetched
+Testing if implicit fetching and cleaning happens...
+Testing buffered Prepared Statements...
+Testing buffered Prepared Statements... - fetching all
+Testing buffered Prepared Statements... - fetching all but one
+Testing unbuffered Prepared Statements... - fetching all
+Testing unbuffered Prepared Statements... - fetching all but one
+... done with fetch statistics
 done!
