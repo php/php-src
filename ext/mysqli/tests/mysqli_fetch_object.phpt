@@ -96,9 +96,12 @@ require_once('skipifconnectfailure.inc');
 	I'm using the procedural interface, this should not throw an exception.
 	Also, I did not ask to get exceptions using the mysqli_options()
 	*/
-	if ($TEST_EXPERIMENTAL)
+	try {
 		if (false !== ($obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', 'a')))
 			printf("[011] Should have failed\n");
+	} catch (Exception $e) {
+		printf("%s\n", $e->getMessage());
+	}
 
 	mysqli_free_result($res);
 
@@ -145,5 +148,6 @@ NULL
 
 Warning: mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
 NULL
+Parameter ctor_params must be an array
 
 Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d

@@ -214,12 +214,12 @@ if (!function_exists('mysqli_fetch_all'))
 	func_mysqli_fetch_all_oo($link, $engine, "DECIMAL(10,2)", NULL, NULL, 400);
 
 	// don't care about date() strict TZ warnings...
-	$date = date('Y-m-d');
+	$date = @date('Y-m-d');
 	func_mysqli_fetch_all_oo($link, $engine, "DATE", $date, $date, 410);
 	func_mysqli_fetch_all_oo($link, $engine, "DATE NOT NULL", $date, $date, 420);
 	func_mysqli_fetch_all_oo($link, $engine, "DATE", NULL, NULL, 430);
 
-	$datetime = date('Y-m-d H:i:s');
+	$datetime = @date('Y-m-d H:i:s');
 	func_mysqli_fetch_all_oo($link, $engine, "DATETIME", $datetime, $datetime, 440);
 	func_mysqli_fetch_all_oo($link, $engine, "DATETIME NOT NULL", $datetime, $datetime, 450);
 	func_mysqli_fetch_all_oo($link, $engine, "DATETIME", NULL, NULL, 460);

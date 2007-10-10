@@ -135,6 +135,12 @@ mysqli_connect()
 			mysqli_free_result($res);
 			mysqli_close($link);
 		}
+
+		ini_set('mysqli.default_host', 'p:');
+		if (is_object($link = @mysqli_connect())) {
+			printf("[024] Usage of mysqli.default_host=p: did not fail\n") ;
+			mysqli_close($link);
+		}
 	}
 
 	print "done!";

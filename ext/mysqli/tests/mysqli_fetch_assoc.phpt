@@ -34,7 +34,25 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	if (!$res = mysqli_query($link, "SELECT 1 AS a, 2 AS a, 3 AS c, 4 AS C, NULL AS d, true AS e")) {
+	if (!$res = mysqli_query($link, "SELECT
+		1 AS a,
+		2 AS a,
+		3 AS c,
+		4 AS C,
+		NULL AS d,
+		true AS e,
+		5 AS '-1',
+		6 AS '-10',
+		7 AS '-100',
+		8 AS '-1000',
+		9 AS '10000',
+		'a' AS '100000',
+		'b' AS '1000000',
+		'c' AS '9',
+		'd' AS '9',
+		'e' AS '01',
+		'f' AS '-02'
+	")) {
 		printf("[007] Cannot run query, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 	print "[008]\n";
@@ -60,7 +78,7 @@ array(2) {
 [006]
 NULL
 [008]
-array(5) {
+array(15) {
   ["a"]=>
   string(1) "2"
   ["c"]=>
@@ -71,6 +89,26 @@ array(5) {
   NULL
   ["e"]=>
   string(1) "1"
+  [-1]=>
+  string(1) "5"
+  [-10]=>
+  string(1) "6"
+  [-100]=>
+  string(1) "7"
+  [-1000]=>
+  string(1) "8"
+  [10000]=>
+  string(1) "9"
+  [100000]=>
+  string(1) "a"
+  [1000000]=>
+  string(1) "b"
+  [9]=>
+  string(1) "d"
+  ["01"]=>
+  string(1) "e"
+  ["-02"]=>
+  string(1) "f"
 }
 
 Warning: mysqli_fetch_assoc(): Couldn't fetch mysqli_result in %s on line %d
@@ -86,7 +124,7 @@ array(2) {
 [006]
 NULL
 [008]
-array(5) {
+array(15) {
   [u"a"]=>
   unicode(1) "2"
   [u"c"]=>
@@ -97,6 +135,26 @@ array(5) {
   NULL
   [u"e"]=>
   unicode(1) "1"
+  [-1]=>
+  unicode(1) "5"
+  [-10]=>
+  unicode(1) "6"
+  [-100]=>
+  unicode(1) "7"
+  [-1000]=>
+  unicode(1) "8"
+  [10000]=>
+  unicode(1) "9"
+  [100000]=>
+  unicode(1) "a"
+  [1000000]=>
+  unicode(1) "b"
+  [9]=>
+  unicode(1) "d"
+  [u"01"]=>
+  unicode(1) "e"
+  [u"-02"]=>
+  unicode(1) "f"
 }
 
 Warning: mysqli_fetch_assoc(): Couldn't fetch mysqli_result in %s on line %d

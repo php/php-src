@@ -1,8 +1,8 @@
 --TEST--
-Bug #33263 (mysqli_real_connect in __construct) 
+Bug #33263 (mysqli_real_connect in __construct)
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
@@ -23,13 +23,16 @@ require_once('skipifconnectfailure.inc');
 
 	$stmt = $mysql->prepare("SELECT DATABASE()");
 	$stmt->execute();
-	$stmt->bind_result($db);
+	$stmt->bind_result($database);
 	$stmt->fetch();
 	$stmt->close();
 
-	var_dump($db);
+	if ($database != $db)
+		printf("[001] Expecting '%s' got %s/'%s'.\n",
+			gettype($database), $database);
 
 	$mysql->close();
+	print "done!";
 ?>
 --EXPECTF--
-%s(4) "test"
+done!

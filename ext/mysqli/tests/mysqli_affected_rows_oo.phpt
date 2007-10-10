@@ -1,7 +1,7 @@
 --TEST--
 mysqli->affected_rows
 --SKIPIF--
-<?php 
+<?php
 	require_once('skipif.inc');
 	require_once('skipifemb.inc');
 	require_once('skipifconnectfailure.inc');
@@ -10,13 +10,17 @@ mysqli->affected_rows
 <?php
 	include "connect.inc";
 
+	$mysqli = new mysqli();
+	if (NULL !== ($tmp = @$mysqli->affected_rows))
+		printf("[000a] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+
 	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 	}
 
 	if (0 !== ($tmp = $mysqli->affected_rows))
-		printf("[002] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
+  	printf("[002] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!$mysqli->query('DROP TABLE IF EXISTS test'))
 		printf("[003] [%d] %s\n", $mysqli->errno, $mysqli->error);

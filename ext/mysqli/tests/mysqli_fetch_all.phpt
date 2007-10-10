@@ -93,67 +93,67 @@ if (!function_exists('mysqli_fetch_all'))
 
 	function func_mysqli_fetch_all($link, $engine, $sql_type, $sql_value, $php_value, $offset, $regexp_comparison = NULL) {
 
-			if (!mysqli_query($link, "DROP TABLE IF EXISTS test")) {
-					printf("[%04d] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
-					return false;
-			}
+		if (!mysqli_query($link, "DROP TABLE IF EXISTS test")) {
+				printf("[%04d] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
+				return false;
+		}
 
-			if (!mysqli_query($link, $sql = sprintf("CREATE TABLE test(id INT NOT NULL, label %s, PRIMARY KEY(id)) ENGINE = %s", $sql_type, $engine))) {
-					print $sql;
-					// don't bail, engine might not support the datatype
-					return false;
-			}
+		if (!mysqli_query($link, $sql = sprintf("CREATE TABLE test(id INT NOT NULL, label %s, PRIMARY KEY(id)) ENGINE = %s", $sql_type, $engine))) {
+				print $sql;
+				// don't bail, engine might not support the datatype
+				return false;
+		}
 
-			if (is_null($php_value) && !mysqli_query($link, $sql = sprintf("INSERT INTO test(id, label) VALUES (1, NULL)"))) {
-					printf("[%04d] [%d] %s\n", $offset + 1, mysqli_errno($link), mysqli_error($link));
-					return false;
-			}
+		if (is_null($php_value) && !mysqli_query($link, $sql = sprintf("INSERT INTO test(id, label) VALUES (1, NULL)"))) {
+				printf("[%04d] [%d] %s\n", $offset + 1, mysqli_errno($link), mysqli_error($link));
+				return false;
+		}
 
-			if (!is_null($php_value)) {
-					if (is_int($sql_value) && !mysqli_query($link, sprintf("INSERT INTO test(id, label) VALUES (1, '%d')", $sql_value))) {
-							printf("[%04d] [%d] %s\n", $offset + 1, mysqli_errno($link), mysqli_error($link));
-							return false;
-					} else if (!is_int($sql_value) && !mysqli_query($link, sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $sql_value))) {
-							printf("[%04d] [%d] %s\n", $offset + 1, mysqli_errno($link), mysqli_error($link));
-							return false;
-					}
-			}
-
-			if (!$res = mysqli_query($link, "SELECT id, label FROM test")) {
-					printf("[%04d] [%d] %s\n", $offset + 2, mysqli_errno($link), mysqli_error($link));
-					return false;
-			}
-
-			if (!$tmp = mysqli_fetch_all($res, MYSQLI_BOTH)) {
-					printf("[%04d] [%d] %s\n", $offset + 3, mysqli_errno($link), mysqli_error($link));
-					return false;
-			}
-			$row = $tmp[0];
-
-	$fields = mysqli_fetch_fields($res);
-
-	if (!(gettype($php_value)=="unicode" && ($fields[1]->flags & 128))) {
-
-		if ($regexp_comparison && !$skip) {
-						if (!preg_match($regexp_comparison, (string)$row['label']) || !preg_match($regexp_comparison, (string)$row[1])) {
-								printf("[%04d] Expecting %s/%s [reg exp = %s], got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
-									gettype($php_value), $php_value, $regexp_comparison,
-									gettype($row[1]), $row[1],
-									gettype($row['label']), $row['label'], mysqli_errno($link), mysqli_error($link));
-								return false;
-						}
-				} else {
-						if (($row['label'] !== $php_value) || ($row[1] != $php_value)) {
-								printf("[%04d] Expecting %s/%s, got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
-									gettype($php_value), $php_value,
-									gettype($row[1]), $row[1],
-									gettype($row['label']), $row['label'], mysqli_errno($link), mysqli_error($link));
-								return false;
-						}
+		if (!is_null($php_value)) {
+				if (is_int($sql_value) && !mysqli_query($link, sprintf("INSERT INTO test(id, label) VALUES (1, '%d')", $sql_value))) {
+						printf("[%04d] [%d] %s\n", $offset + 1, mysqli_errno($link), mysqli_error($link));
+						return false;
+				} else if (!is_int($sql_value) && !mysqli_query($link, sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $sql_value))) {
+						printf("[%04d] [%d] %s\n", $offset + 1, mysqli_errno($link), mysqli_error($link));
+						return false;
 				}
-	}
+		}
 
-			return true;
+		if (!$res = mysqli_query($link, "SELECT id, label FROM test")) {
+				printf("[%04d] [%d] %s\n", $offset + 2, mysqli_errno($link), mysqli_error($link));
+				return false;
+		}
+
+		if (!$tmp = mysqli_fetch_all($res, MYSQLI_BOTH)) {
+				printf("[%04d] [%d] %s\n", $offset + 3, mysqli_errno($link), mysqli_error($link));
+				return false;
+		}
+		$row = $tmp[0];
+
+		$fields = mysqli_fetch_fields($res);
+
+		if (!(gettype($php_value)=="unicode" && ($fields[1]->flags & 128))) {
+
+		if ($regexp_comparison) {
+				if (!preg_match($regexp_comparison, (string)$row['label']) || !preg_match($regexp_comparison, (string)$row[1])) {
+						printf("[%04d] Expecting %s/%s [reg exp = %s], got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
+							gettype($php_value), $php_value, $regexp_comparison,
+							gettype($row[1]), $row[1],
+							gettype($row['label']), $row['label'], mysqli_errno($link), mysqli_error($link));
+						return false;
+				}
+			} else {
+				if (($row['label'] !== $php_value) || ($row[1] != $php_value)) {
+						printf("[%04d] Expecting %s/%s, got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
+							gettype($php_value), $php_value,
+							gettype($row[1]), $row[1],
+							gettype($row['label']), $row['label'], mysqli_errno($link), mysqli_error($link));
+						return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	function func_mysqli_fetch_array_make_string($len) {

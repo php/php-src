@@ -2,28 +2,26 @@
 mysqli_autocommit()
 --SKIPIF--
 <?php
-	require_once('skipif.inc'); 
+	require_once('connect.inc');
+	require_once('skipif.inc');
 	require_once('skipifemb.inc');
 	require_once('skipifconnectfailure.inc');
 
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-		printf("skip Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-			$host, $user, $db, $port, $socket);
-		exit(1);
+		die(sprintf("skip Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+			$host, $user, $db, $port, $socket));
 	}
 
-	if (!$res = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'")) {
-		printf("skip Cannot fetch have_innodb variable\n");
-		exit(1);
+	if (!$result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'")) {
+		die("skip Cannot check for required InnoDB suppot");
 	}
+	if (!$row = mysqli_fetch_row($result))
+		die("skip Cannot check for required InnoDB suppot");
 
-	$row = mysqli_fetch_row($res);
-	mysqli_free_result($res);
+	mysqli_free_result($result);
 	mysqli_close($link);
-
 	if ($row[1] == "DISABLED" || $row[1] == "NO") {
-		printf ("skip Innodb support is not installed or enabled.");
-		exit(1);
+		die(sprintf ("skip innodb support is not installed or enabled."));
 	}
 ?>
 --FILE--

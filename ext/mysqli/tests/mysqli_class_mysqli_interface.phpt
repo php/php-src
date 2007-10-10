@@ -48,8 +48,6 @@ require_once('skipifconnectfailure.inc');
 		'rollback'			=> true,
 		'select_db'			=> true,
 		'set_charset'			=> true,
-		'set_local_infile_default'	=> true,
-		'set_local_infile_handler'	=> true,
 		'set_opt'			=> true,
 		'stat'				=> true,
 		'stmt_init'			=> true,
@@ -93,6 +91,8 @@ require_once('skipifconnectfailure.inc');
 
 		if (function_exists('mysqli_ssl_set'))
 			$expected_methods['ssl_set'] = true;
+		$expected_methods['set_local_infile_default']	= true;
+		$expected_methods['set_local_infile_handler']	= true;
 	}
 
 	/* we should add ruled when to expect them */
