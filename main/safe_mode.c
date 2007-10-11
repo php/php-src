@@ -86,14 +86,16 @@ PHPAPI int php_checkuid_ex(const char *filename, const char *fopen_mode, int mod
 	 * If that fails, passthrough and check directory...
 	 */
 	if (mode != CHECKUID_ALLOW_ONLY_DIR) {
+#if HAVE_BROKEN_GETCWD
+		char ftest[MAXPATHLEN];
 
-                char ftest[MAXPATHLEN];
-                strcpy(ftest,filename);
-                if (VCWD_GETCWD(ftest, sizeof(ftest)) == NULL) {
-                        strcpy(path,filename);
-                } else {
-                        expand_filepath(filename, path TSRMLS_CC);
-                        }
+		strcpy(ftest,filename);
+		if (VCWD_GETCWD(ftest, sizeof(ftest)) == NULL) {
+			strcpy(path,filename);
+		} else {
+			expand_filepath(filename, path TSRMLS_CC);
+		}
+#endif
 
 		ret = VCWD_STAT(path, &sb);
 		if (ret < 0) {
