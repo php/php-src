@@ -1260,7 +1260,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 }
 /* }}} */
 
-static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS_DC) /* {{{ */
+static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, long mode, int fetch_all TSRMLS_DC) /* {{{ */
 {
 	int flags = mode & PDO_FETCH_FLAGS;
 
@@ -1549,7 +1549,9 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	if (!error)	{
 		PDO_STMT_CLEAR_ERR();
 		MAKE_STD_ZVAL(data);
-		if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR) {
+		if (	(how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR || 
+			(how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)
+		) {
 			array_init(return_value);
 			return_all = return_value;
 		} else {
@@ -1565,7 +1567,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 			do {
 				MAKE_STD_ZVAL(data);
 			} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
-		} else if (how == PDO_FETCH_KEY_PAIR) {
+		} else if (how == PDO_FETCH_KEY_PAIR || (how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
 			while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
 		} else {
 			array_init(return_value);
@@ -1916,6 +1918,7 @@ fail_out:
 		case PDO_FETCH_OBJ:
 		case PDO_FETCH_BOUND:
 		case PDO_FETCH_NAMED:
+		case PDO_FETCH_KEY_PAIR:
 			break;
 
 		case PDO_FETCH_COLUMN:
