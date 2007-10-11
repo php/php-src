@@ -98,6 +98,7 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 	char *class_name;
 	zend_uint class_name_len;
 	int (*php_element_dump_func)(zval**, int, va_list, zend_hash_key*);
+	int is_temp;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -129,9 +130,10 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 		}
 		php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
 		php_element_dump_func = php_array_element_dump;
+		is_temp = 0;
 		goto head_done;
 	case IS_OBJECT:
-		myht = Z_OBJPROP_PP(struc);
+		myht = Z_OBJDEBUG_PP(struc, is_temp);
 		if (myht && myht->nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
 			return;
@@ -144,6 +146,10 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 head_done:
 		if (myht) {
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_element_dump_func, 1, level);
+			if (is_temp) {
+				zend_hash_destroy(myht);
+				efree(myht);
+			}
 		}
 		if (level > 1) {
 			php_printf("%*c", level-1, ' ');

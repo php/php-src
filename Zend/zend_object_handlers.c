@@ -42,14 +42,14 @@
   set, we call __set handler. If it fails, we do not change the array.
 
   for both handlers above, when we are inside __get/__set, no further calls for
-  __get/__set for this property of this object will be made, to prevent endless 
+  __get/__set for this property of this object will be made, to prevent endless
   recursion and enable accessors to change properties array.
 
   if we have __call and method which is not part of the class function table is
   called, we cal __call handler.
 */
 
-static HashTable *zend_std_get_properties(zval *object TSRMLS_DC)
+ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC)
 {
 	zend_object *zobj;
 	zobj = Z_OBJ_P(object);
@@ -316,7 +316,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Read object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
-#endif			
+#endif
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
 	property_info = zend_get_property_info(zobj->ce, member, (zobj->ce->__get != NULL) TSRMLS_CC);
@@ -758,11 +758,11 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 	zend_function *fbc;
 	char *lc_method_name;
 	zval *object = *object_ptr;
-	
+
 	lc_method_name = do_alloca(method_len+1);
 	/* Create a zend_copy_str_tolower(dest, src, src_length); */
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
-		
+
 	zobj = Z_OBJ_P(object);
 	if (zend_hash_find(&zobj->ce->function_table, lc_method_name, method_len+1, (void **)&fbc) == FAILURE) {
 		free_alloca(lc_method_name);
@@ -830,7 +830,7 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 	zval *method_name_ptr, *method_args_ptr;
 	zval *method_result_ptr = NULL;
 	zend_class_entry *ce = EG(scope);
- 
+
 	ALLOC_ZVAL(method_args_ptr);
 	INIT_PZVAL(method_args_ptr);
 	array_init(method_args_ptr);
@@ -883,7 +883,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 			callstatic_user_call->arg_info = NULL;
 			callstatic_user_call->num_args = 0;
 			callstatic_user_call->scope    = ce;
-			callstatic_user_call->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC; 
+			callstatic_user_call->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC;
 			callstatic_user_call->function_name = estrndup(function_name_strval, function_name_strlen);
 			callstatic_user_call->pass_rest_by_reference = 0;
 			callstatic_user_call->return_reference       = ZEND_RETURN_VALUE;
@@ -1202,6 +1202,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_compare_objects,				/* compare_objects */
 	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */
+	NULL,                                   /* get_debug_info */
 };
 
 /*
