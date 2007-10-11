@@ -317,7 +317,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC)
 			HashTable *properties = NULL;
 			char *class_name = NULL;
 			zend_uint clen;
-			
+
 			if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
 				Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 			}
@@ -367,10 +367,11 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 			break;
 		case IS_OBJECT:
 			{
-				HashTable *properties = NULL;
+				HashTable *properties;
 				char *class_name = NULL;
 				zend_uint clen;
-				
+				int is_temp;
+
 				if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
 					Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 				}
@@ -383,17 +384,19 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				if (class_name) {
 					efree(class_name);
 				}
-				if (Z_OBJ_HANDLER_P(expr, get_properties)) {
-					properties = Z_OBJPROP_P(expr);
+				if ((properties = Z_OBJDEBUG_P(expr, is_temp)) == NULL) {
+					break;
 				}
-				if (properties) {
-					if (++properties->nApplyCount>1) {
-						ZEND_PUTS_EX(" *RECURSION*");
-						properties->nApplyCount--;
-						return;
-					}
-					print_hash(write_func, properties, indent, 1 TSRMLS_CC);
+				if (++properties->nApplyCount>1) {
+					ZEND_PUTS_EX(" *RECURSION*");
 					properties->nApplyCount--;
+					return;
+				}
+				print_hash(write_func, properties, indent, 1 TSRMLS_CC);
+				properties->nApplyCount--;
+				if (is_temp) {
+					zend_hash_destroy(properties);
+					efree(properties);
 				}
 				break;
 			}
@@ -711,7 +714,7 @@ void zend_post_startup(TSRMLS_D)
 	short_tags_default = CG(short_tags);
 	ct_pass_ref_default = CG(allow_call_time_pass_reference);
 	extended_info_default = CG(extended_info);
-	
+
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	free(compiler_globals->function_table);
 	free(compiler_globals->class_table);
@@ -839,7 +842,7 @@ void zend_deactivate_modules(TSRMLS_D)
 	} zend_end_try();
 }
 
-void zend_call_destructors(TSRMLS_D) 
+void zend_call_destructors(TSRMLS_D)
 {
 	zend_try {
 		shutdown_destructors(TSRMLS_C);
@@ -1026,11 +1029,11 @@ ZEND_API void zend_error(int type, const char *format, ...)
 
 			orig_user_error_handler = EG(user_error_handler);
 			EG(user_error_handler) = NULL;
-	                
+
 			/* User error handler may include() additinal PHP files.
 			 * If an error was generated during comilation PHP will compile
-			 * such scripts recursivly, but some CG() variables may be 
-			 * inconsistent. */ 
+			 * such scripts recursivly, but some CG() variables may be
+			 * inconsistent. */
 
 			in_compilation = zend_is_compiling(TSRMLS_C);
 			if (in_compilation) {
@@ -1056,7 +1059,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 
 			if (!EG(user_error_handler)) {
 				EG(user_error_handler) = orig_user_error_handler;
-			} 
+			}
 			else {
 				zval_ptr_dtor(&orig_user_error_handler);
 			}
