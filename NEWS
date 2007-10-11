@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 - Fixed htmlentities/htmlspecialchars not to accept partial multibyte
   sequences. (Stas)
 
+- Fixed bug #42917 (PDO::FETCH_KEY_PAIR doesn't work with setFetchMode).
+  (Ilia)
 - Fixed bug #42890 (Constant "LIST" defined by mysqlclient and c-client).
   (Andrey)
 - Fixed bug #42869 (automatic session id insertion adds sessions id to
