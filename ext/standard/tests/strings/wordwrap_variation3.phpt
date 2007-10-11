@@ -301,7 +301,6 @@ Warning: wordwrap(): Break string cannot be empty in %s on line %d
 bool(false)
 Done
 --UEXPECTF--
---UEXPECTF--
 *** Testing wordwrap() : usage variations ***
 
 --- Testing wordwrap() by supplying different values for 'break' argument ---
