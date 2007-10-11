@@ -89,13 +89,12 @@ PHPAPI int php_checkuid_ex(const char *filename, const char *fopen_mode, int mod
 #if HAVE_BROKEN_GETCWD
 		char ftest[MAXPATHLEN];
 
-		strcpy(ftest,filename);
+		strcpy(ftest, filename);
 		if (VCWD_GETCWD(ftest, sizeof(ftest)) == NULL) {
-			strcpy(path,filename);
-		} else {
-			expand_filepath(filename, path TSRMLS_CC);
-		}
+			strcpy(path, filename);
+		} else
 #endif
+		expand_filepath(filename, path TSRMLS_CC);
 
 		ret = VCWD_STAT(path, &sb);
 		if (ret < 0) {
