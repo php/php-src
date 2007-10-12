@@ -102,7 +102,7 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 					     zend_hash_get_current_key_ex(parent_ht, &index, &index_len, &num, 0, &pos) == HASH_KEY_IS_STRING;
 					     zend_hash_move_forward_ex(parent_ht, &pos)) {
 						if (zend_hash_add(ht, index, index_len, data, sizeof(zval*), NULL) == SUCCESS) {
-						    (*data)->refcount++;
+						    Z_ADDREF_PP(data);
 						}
 					}
 				}
