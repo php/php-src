@@ -1,10 +1,12 @@
 --TEST--
 Bug #31668 (multi_query works exactly every other time (multi_query was global, now per connection))
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
+--INI--
+error_reporting = E_ALL & ~E_STRICT
 --FILE--
 <?php
 	include "connect.inc";
