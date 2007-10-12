@@ -1,3 +1,55 @@
+2007-10-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/tests/bug_42917.phpt:
+      MFB: Fixed bug #42917 (PDO::FETCH_KEY_PAIR doesn't work with setFetchMode)
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c
+      ext/pdo/tests/bug_42917.phpt
+      ext/pdo/tests/bug_42917.phpt
+      ext/pdo/tests/bug_42917.phpt:
+      Fixed bug #42917 (PDO::FETCH_KEY_PAIR doesn't work with setFetchMode)
+
+2007-10-11  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2007.8
+
+2007-10-11  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/fgetc_basic.phpt
+      ext/standard/tests/file/fgetc_basic.phpt
+      ext/standard/tests/file/fgetc_basic.phpt:
+      fix test (temp. file name)
+
+2007-10-11  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      main/safe_mode.c:
+      MFB53
+
+    * (PHP_5_3)
+      main/safe_mode.c:
+      - fix typo
+
+    * (PHP_5_2)
+      main/safe_mode.c:
+      MF53
+
+    * (PHP_5_3)
+      main/safe_mode.c:
+      - Fix ws/cs and wrap the stuff within #if HAVE_BROKEN_GETCWD
+
+2007-10-11  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/wordwrap_variation3.phpt:
+      fix test
+
 2007-10-10  Robert Thompson  <ab5602@wayne.edu>
 
     * (PHP_5_2)
