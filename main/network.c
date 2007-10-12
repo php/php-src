@@ -91,7 +91,7 @@ int inet_aton(const char *, struct in_addr *);
 # define SOCK_CONN_ERR SOCKET_ERROR
 # define PHP_TIMEOUT_ERROR_VALUE		WSAETIMEDOUT
 
-struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
+const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 
 #else
 # define SOCK_ERR -1
