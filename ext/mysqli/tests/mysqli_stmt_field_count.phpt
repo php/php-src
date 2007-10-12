@@ -88,6 +88,8 @@ Warning: mysqli_stmt_field_count(): invalid object or resource mysqli_stmt
 Warning: mysqli_stmt_field_count(): invalid object or resource mysqli_stmt
  in %s on line %d
 
+Warning: mysqli_stmt_bind_param(): Number of variables doesn't match number of parameters in prepared statement in %s on line %d
+
 Warning: mysqli_stmt_prepare(): Couldn't fetch mysqli_stmt in %s on line %d
 
 Warning: mysqli_stmt_field_count(): Couldn't fetch mysqli_stmt in %s on line %d
