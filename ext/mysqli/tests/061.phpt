@@ -1,9 +1,11 @@
 --TEST--
 local infile handler
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
+if (!function_exists('mysqli_set_local_infile_handler'))
+	die("skip - function not available.");
 ?>
 --FILE--
 <?php
