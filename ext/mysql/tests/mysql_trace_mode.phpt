@@ -1,7 +1,10 @@
 --TEST--
 mysql.trace_mode=1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+require_once('skipif.inc');
+require_once('skipifconnectfailure.inc');
+?>
 --INI--
 mysql.trace_mode=1
 error_reporting=E_ALL | E_NOTICE | E_STRICT
