@@ -3,6 +3,7 @@ mysql_[p]connect() - max_links/max_persistent
 --SKIPIF--
 <?php
 require_once('skipif.inc');
+require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 
 $link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket);
