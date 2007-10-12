@@ -1989,7 +1989,7 @@ PHP_FUNCTION(mysql_num_fields)
 #else
 #define IS_BINARY_DATA(f) (((f)->type == MYSQL_TYPE_TINY_BLOB || (f)->type == MYSQL_TYPE_BLOB || \
 	(f)->type == MYSQL_TYPE_MEDIUM_BLOB || (f)->type == MYSQL_TYPE_LONG_BLOB || \
-	(f)->type == MYSQL_TYPE_VAR_STRING || \ (f)->type == MYSQL_TYPE_VARCHAR || \
+	(f)->type == MYSQL_TYPE_VAR_STRING || (f)->type == MYSQL_TYPE_VARCHAR || \
 	(f)->type == MYSQL_TYPE_STRING)&& (f)->charsetnr == MYSQL_BINARY_CHARSET_NR)
 
 #endif
