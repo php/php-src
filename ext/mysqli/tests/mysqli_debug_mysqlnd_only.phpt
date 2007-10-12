@@ -4,6 +4,7 @@ mysqli_debug() - mysqlnd only control strings
 <?php
 require_once('skipif.inc');
 require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 
 if (!function_exists('mysqli_debug'))
