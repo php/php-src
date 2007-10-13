@@ -1,3 +1,104 @@
+2007-10-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * (PHP_5_3)
+      ext/mysqli/tests/mysqli_real_escape_string_gbk.phpt:
+      Same as for HEAD: make it skip and not fail if it can't connect to DB
+
+    * ext/mysqli/tests/mysqli_real_escape_string_gbk.phpt:
+      Now HEAD should be fine: skip test (by default), if DB connect fails.
+
+    * ext/mysql/tests/002.phpt
+      ext/mysql/tests/003.phpt
+      ext/mysql/tests/connect.inc
+      ext/mysql/tests/mysql_affected_rows.phpt
+      ext/mysql/tests/mysql_client_encoding.phpt
+      ext/mysql/tests/mysql_close.phpt
+      ext/mysql/tests/mysql_constants.phpt
+      ext/mysql/tests/mysql_data_seek.phpt
+      ext/mysql/tests/mysql_db_name.phpt
+      ext/mysql/tests/mysql_db_query.phpt
+      ext/mysql/tests/mysql_errno.phpt
+      ext/mysql/tests/mysql_error.phpt
+      ext/mysql/tests/mysql_max_persistent.phpt
+      ext/mysql/tests/mysql_trace_mode.phpt
+      ext/mysql/tests/skipifconnectfailure.inc:
+      Same as for PHP_5_3: Trying to skip tests if they can't connect to the
+      DB server. Note the environment variable MYSQL_TEST_SKIP_CONNECT_FAILURE
+      to control if you want tests that can't connect to fail or to be skipped.
+
+    * (PHP_5_3)
+      ext/mysqli/tests/connect.inc
+      ext/mysqli/tests/mysqli_debug.phpt
+      ext/mysqli/tests/mysqli_debug_append.phpt
+      ext/mysqli/tests/mysqli_debug_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_only.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_big5.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_eucjpms.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_euckr.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_gb2312.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_sjis.phpt
+      ext/mysqli/tests/skipifconnectfailure.inc:
+      Same as for HEAD: Trying to skip tests if they can't connect to the
+      DB server. Note the environment variable MYSQL_TEST_SKIP_CONNECT_FAILURE
+      to control if you want tests that can't connect to fail or to be skipped.
+
+    * (PHP_5_3)
+      ext/mysql/tests/002.phpt
+      ext/mysql/tests/003.phpt
+      ext/mysql/tests/connect.inc
+      ext/mysql/tests/mysql_affected_rows.phpt
+      ext/mysql/tests/mysql_client_encoding.phpt
+      ext/mysql/tests/mysql_close.phpt
+      ext/mysql/tests/mysql_constants.phpt
+      ext/mysql/tests/mysql_data_seek.phpt
+      ext/mysql/tests/mysql_db_name.phpt
+      ext/mysql/tests/mysql_db_query.phpt
+      ext/mysql/tests/mysql_errno.phpt
+      ext/mysql/tests/mysql_error.phpt
+      ext/mysql/tests/mysql_max_persistent.phpt
+      ext/mysql/tests/mysql_trace_mode.phpt
+      ext/mysql/tests/skipifconnectfailure.inc:
+      Trying to skip tests if they can't connect to the DB server.
+      Currently they have failed by default. Note also the environment
+      variable MYSQL_TEST_SKIP_CONNECT_FAILURE to control the default (skip or
+      fail)
+
+    * ext/mysqli/tests/mysqli_stmt_field_count.phpt:
+      Fixing test.
+
+    * ext/mysqli/tests/connect.inc
+      ext/mysqli/tests/mysqli_debug.phpt
+      ext/mysqli/tests/mysqli_debug_append.phpt
+      ext/mysqli/tests/mysqli_debug_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_only.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_big5.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_eucjpms.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_euckr.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_gb2312.phpt
+      ext/mysqli/tests/mysqli_real_escape_string_sjis.phpt
+      ext/mysqli/tests/skipifconnectfailure.inc:
+      Trying to make them not fail but skip if they cannot connect to the DB.
+
+    * ext/mysqli/tests/061.phpt
+      ext/mysqli/tests/bug31668.phpt:
+      Fixing tests.
+
+2007-10-12  Edin Kadribasic  <edin@krug.dk>
+
+    * main/network.c:
+      MFB: Fix build
+
+    * (PHP_5_3)
+      main/network.c:
+      Fix build
+
+2007-10-12  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/mysql/php_mysql.c:
+      fix typo
+
 2007-10-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
