@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
+- Added icon format support to getimagesize(). (Scott)
 - Added LDAP_OPT_NETWORK_TIMEOUT option for ldap_set_option() to allow
   setting network timeout (FR #42837). (Jani)
 - Added optional escape character parameter to fgetcsv(). (David Soria Parra)
