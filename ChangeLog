@@ -1,3 +1,33 @@
+2007-10-13  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+      [DOC] Note: getimagesize() needs a note about icon support and that
+      information is about the icon with the highest bitrate.
+
+    * ext/standard/image.c
+      ext/standard/php_image.h:
+      MFB: Added icon file format support to getimagesize
+
+    * (PHP_5_3)
+      ext/standard/image.c
+      ext/standard/php_image.h:
+      Added icon file format support to getimagesize
+
+2007-10-13  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ZendEngine2/tests/bug42819.phpt:
+      Add skipif
+
+    * (PHP_5_2)
+      ext/curl/interface.c:
+      MFH: fix typo and remove dots in error message
+
+    * (PHP_5_3)
+      ext/curl/interface.c:
+      MFH: Fix typo and remove dots in error messages
+
 2007-10-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
 
     * (PHP_5_3)

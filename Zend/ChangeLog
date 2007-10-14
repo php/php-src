@@ -1,3 +1,8 @@
+2007-10-13  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * tests/bug42819.phpt:
+      Add skipif
+
 2007-10-07  Yiduo (David) Wang  <planetbeing@gmail.com>
 
     * (PHP_5_3)
