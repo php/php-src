@@ -1,3 +1,9 @@
+2007-10-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_3)
+      .gdbinit:
+      Fix macros after GC patch.
+
 2007-10-13  Scott MacVicar  <scott@macvicar.net>
 
     * (PHP_5_3)
