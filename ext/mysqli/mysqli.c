@@ -205,8 +205,7 @@ void php_clear_mysql(MY_MYSQL *mysql) {
 		mysql->hash_key = NULL;
 	}
 	if (mysql->li_read) {
-		efree(Z_STRVAL_P(mysql->li_read));
-		FREE_ZVAL(mysql->li_read);
+		zval_dtor(mysql->li_read);
 		mysql->li_read = NULL;
 	}
 }
