@@ -1,3 +1,103 @@
+2007-10-15  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_flip_basic.phpt
+      ext/standard/tests/array/array_flip_error.phpt
+      ext/standard/tests/array/array_flip_variation1.phpt
+      ext/standard/tests/array/array_flip_variation2.phpt
+      ext/standard/tests/array/array_flip_variation3.phpt
+      ext/standard/tests/array/array_flip_variation4.phpt
+      ext/standard/tests/array/array_flip_variation5.phpt:
+      New testcases for array_flip() function
+
+    * ext/standard/tests/array/array_flip_basic.phpt
+      ext/standard/tests/array/array_flip_basic.phpt
+      ext/standard/tests/array/array_flip_error.phpt
+      ext/standard/tests/array/array_flip_error.phpt
+      ext/standard/tests/array/array_flip_variation1.phpt
+      ext/standard/tests/array/array_flip_variation1.phpt
+      ext/standard/tests/array/array_flip_variation2.phpt
+      ext/standard/tests/array/array_flip_variation2.phpt
+      ext/standard/tests/array/array_flip_variation3.phpt
+      ext/standard/tests/array/array_flip_variation3.phpt
+      ext/standard/tests/array/array_flip_variation4.phpt
+      ext/standard/tests/array/array_flip_variation4.phpt
+      ext/standard/tests/array/array_flip_variation5.phpt
+      ext/standard/tests/array/array_flip_variation5.phpt:
+      
+      New testcases for array_flip() function
+
+    * ext/standard/tests/array/array_flip_basic.phpt
+      ext/standard/tests/array/array_flip_basic.phpt
+      ext/standard/tests/array/array_flip_error.phpt
+      ext/standard/tests/array/array_flip_error.phpt
+      ext/standard/tests/array/array_flip_variation1.phpt
+      ext/standard/tests/array/array_flip_variation1.phpt
+      ext/standard/tests/array/array_flip_variation2.phpt
+      ext/standard/tests/array/array_flip_variation2.phpt
+      ext/standard/tests/array/array_flip_variation3.phpt
+      ext/standard/tests/array/array_flip_variation3.phpt
+      ext/standard/tests/array/array_flip_variation4.phpt
+      ext/standard/tests/array/array_flip_variation4.phpt
+      ext/standard/tests/array/array_flip_variation5.phpt
+      ext/standard/tests/array/array_flip_variation5.phpt:
+      
+      file array_flip_basic.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_reverse_basic1.phpt
+      ext/standard/tests/array/array_reverse_basic2.phpt
+      ext/standard/tests/array/array_reverse_error.phpt
+      ext/standard/tests/array/array_reverse_variation1.phpt
+      ext/standard/tests/array/array_reverse_variation2.phpt
+      ext/standard/tests/array/array_reverse_variation3.phpt
+      ext/standard/tests/array/array_reverse_variation4.phpt
+      ext/standard/tests/array/array_reverse_variation5.phpt
+      ext/standard/tests/array/array_reverse_variation6.phpt:
+      New testcases for array_reverse() function
+
+    * ext/standard/tests/array/array_reverse_basic1.phpt
+      ext/standard/tests/array/array_reverse_basic1.phpt
+      ext/standard/tests/array/array_reverse_basic2.phpt
+      ext/standard/tests/array/array_reverse_basic2.phpt
+      ext/standard/tests/array/array_reverse_error.phpt
+      ext/standard/tests/array/array_reverse_error.phpt
+      ext/standard/tests/array/array_reverse_variation1.phpt
+      ext/standard/tests/array/array_reverse_variation1.phpt
+      ext/standard/tests/array/array_reverse_variation2.phpt
+      ext/standard/tests/array/array_reverse_variation2.phpt
+      ext/standard/tests/array/array_reverse_variation3.phpt
+      ext/standard/tests/array/array_reverse_variation3.phpt
+      ext/standard/tests/array/array_reverse_variation4.phpt
+      ext/standard/tests/array/array_reverse_variation4.phpt
+      ext/standard/tests/array/array_reverse_variation5.phpt
+      ext/standard/tests/array/array_reverse_variation5.phpt
+      ext/standard/tests/array/array_reverse_variation6.phpt
+      ext/standard/tests/array/array_reverse_variation6.phpt:
+      
+      New testcases for array_reverse() function
+
+    * ext/standard/tests/array/array_reverse_basic1.phpt
+      ext/standard/tests/array/array_reverse_basic1.phpt
+      ext/standard/tests/array/array_reverse_basic2.phpt
+      ext/standard/tests/array/array_reverse_basic2.phpt
+      ext/standard/tests/array/array_reverse_error.phpt
+      ext/standard/tests/array/array_reverse_error.phpt
+      ext/standard/tests/array/array_reverse_variation1.phpt
+      ext/standard/tests/array/array_reverse_variation1.phpt
+      ext/standard/tests/array/array_reverse_variation2.phpt
+      ext/standard/tests/array/array_reverse_variation2.phpt
+      ext/standard/tests/array/array_reverse_variation3.phpt
+      ext/standard/tests/array/array_reverse_variation3.phpt
+      ext/standard/tests/array/array_reverse_variation4.phpt
+      ext/standard/tests/array/array_reverse_variation4.phpt
+      ext/standard/tests/array/array_reverse_variation5.phpt
+      ext/standard/tests/array/array_reverse_variation5.phpt
+      ext/standard/tests/array/array_reverse_variation6.phpt
+      ext/standard/tests/array/array_reverse_variation6.phpt:
+      
+      file array_reverse_basic1.phpt was initially added on branch PHP_5_2.
+
 2007-10-14  Andrei Zmievski  <andrei@gravitonic.com>
 
     * (PHP_5_3)
