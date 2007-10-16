@@ -23,6 +23,16 @@
 #ifndef MYSQLND_PRIV_H
 #define MYSQLND_PRIV_H
 
+#ifndef Z_ADDREF_P
+/* PHP 5.2, old GC */
+#define Z_ADDREF_P(pz)				(++(pz)->refcount)
+#define Z_DELREF_P(pz)				(--(pz)->refcount)
+#define Z_REFCOUNT_P(pz)			((pz)->refcount)
+#define Z_SET_REFCOUNT_P(pz, rc)	((pz)->refcount = rc)
+#define Z_REFCOUNT_PP(ppz)			Z_REFCOUNT_P(*(ppz))
+#define Z_DELREF_PP(ppz)			Z_DELREF_P(*(ppz))
+#endif
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif

@@ -315,6 +315,14 @@ static int mysqli_write_na(mysqli_object *obj, zval *newval TSRMLS_DC)
 }
 /* }}} */
 
+#ifndef Z_ADDREF_P
+/* PHP 5.2, old GC */
+#define Z_ADDREF_P(pz)				(++(pz)->refcount)
+#define Z_REFCOUNT_P(pz)			((pz)->refcount)
+#define Z_SET_REFCOUNT_P(pz, rc)	((pz)->refcount = rc)
+#endif
+
+
 /* {{{ mysqli_read_property */
 zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 {
