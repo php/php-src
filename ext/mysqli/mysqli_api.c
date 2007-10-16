@@ -1170,7 +1170,6 @@ PHP_FUNCTION(mysqli_set_local_infile_default)
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	if (mysql->li_read) {
-		efree(Z_STRVAL_P(mysql->li_read));
 		zval_dtor(mysql->li_read);
 		mysql->li_read = NULL;
 	}

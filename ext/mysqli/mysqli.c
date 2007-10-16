@@ -125,8 +125,7 @@ void php_clear_stmt_bind(MY_STMT *stmt)
 /* {{{ php_clear_mysql */
 void php_clear_mysql(MY_MYSQL *mysql) {
 	if (mysql->li_read) {
-		efree(Z_STRVAL_P(mysql->li_read));
-		FREE_ZVAL(mysql->li_read);
+		zval_dtor(mysql->li_read);
 		mysql->li_read = NULL;
 	}
 }
