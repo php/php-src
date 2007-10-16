@@ -86,14 +86,14 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 								   unsigned int level, const char * type, const char * message)
 {
 	char pipe_buffer[512];
-	MYSQLND_ZTS(self);
 	enum_func_status ret;
 	int i;
 	char * message_line;
-	size_t message_line_len;
+	uint message_line_len;
 	unsigned int flags = self->flags;
 	char pid_buffer[10], time_buffer[30], file_buffer[200],
 		 line_buffer[6], level_buffer[7];
+	MYSQLND_ZTS(self);
 
 	if (!self->stream) {
 		if (FAIL == self->m->open(self, FALSE)) {
@@ -185,15 +185,15 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 									  const char *format, ...)
 {
 	char pipe_buffer[512];
-	MYSQLND_ZTS(self);
 	int i;
 	enum_func_status ret;
 	char * message_line, *buffer;
-	size_t message_line_len;
+	uint message_line_len;
 	va_list args;
 	unsigned int flags = self->flags;
 	char pid_buffer[10], time_buffer[30], file_buffer[200],
 		 line_buffer[6], level_buffer[7];
+	MYSQLND_ZTS(self);
 
 	if (!self->stream) {
 		if (FAIL == self->m->open(self, FALSE)) {
@@ -289,7 +289,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 static zend_bool
 MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 										  unsigned int line, const char * const file,
-										  char * func_name, size_t func_name_len)
+										  char * func_name, uint func_name_len)
 {
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return FALSE;
@@ -396,7 +396,7 @@ enum mysqlnd_debug_parser_state
 static void
 MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const mode)
 {
-	size_t mode_len = strlen(mode), i;
+	uint mode_len = strlen(mode), i;
 	enum mysqlnd_debug_parser_state state = PARSER_WAIT_MODIFIER;
 
 	self->flags = 0;
@@ -460,7 +460,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 						if (mode[j] == ',' || mode[j] == ':') {
 							if (j > i + 2) {
 								char func_name[1024];
-								size_t func_name_len = MIN(sizeof(func_name) - 1, j - i - 1);
+								uint func_name_len = MIN(sizeof(func_name) - 1, j - i - 1);
 								memcpy(func_name, mode + i + 1, func_name_len);
 								func_name[func_name_len] = '\0'; 
 
@@ -628,6 +628,13 @@ void _mysqlnd_debug(const char *mode TSRMLS_DC)
 #endif
 }
 /* }}} */
+
+
+#if ZEND_DEBUG
+#else
+#define __zend_filename "/unknown/unknown"
+#define __zend_lineno   0
+#endif
 
 
 /* {{{ _mysqlnd_emalloc */

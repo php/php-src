@@ -359,7 +359,7 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 		*/
 		if (type == MYSQLND_RES_PS_BUF || type == MYSQLND_RES_PS_UNBUF) {
 			; /* do nothing, zval_ptr_dtor will do the job*/
-		} else if (Z_REFCOUNT_P(*zv) > 1) {
+		} else if (Z_REFCOUNT_PP(zv) > 1) {
 			/*
 			  Not a prepared statement, then we have to
 			  call copy_ctor and then zval_ptr_dtor()
@@ -389,7 +389,7 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 
 	/* The zval is from our cache */
 	/* refcount is always > 1, because we call Z_ADDREF_P(). Thus test refcount > 2 */
-	if (Z_REFCOUNT_P(*zv) > 2) {
+	if (Z_REFCOUNT_PP(zv) > 2) {
 		/*
 		  Because the zval is first element in mysqlnd_zval structure, then we can
 		  do upcasting from zval to mysqlnd_zval here. Because we know that this
@@ -435,7 +435,7 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 		++cache->put_hits;
 		++cache->free_items;
 		((mysqlnd_zval *)*zv)->point_type = MYSQLND_POINTS_FREE;
-		Z_DELREF_P(*zv);	/* Make it 1 */
+		Z_DELREF_PP(zv);	/* Make it 1 */
 		ZVAL_NULL(*zv);
 #ifdef ZTS
 		memset(&((mysqlnd_zval *)*zv)->thread_id, 0, sizeof(THREAD_T));

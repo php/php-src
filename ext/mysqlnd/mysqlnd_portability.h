@@ -280,7 +280,6 @@ typedef union {
                                (((uint32) ((uchar) (A)[1])) << 8) +\
                                (((uint32) ((uchar) (A)[2])) << 16) +\
                                (((uint32) ((uchar) (A)[3])) << 24))
-#undef bit_uint5korr
 #define bit_uint5korr(A)  ((ulonglong)(((uint32) ((uchar) (A)[0])) +\
                                   (((uint32) ((uchar) (A)[1])) << 8) +\
                                   (((uint32) ((uchar) (A)[2])) << 16) +\
