@@ -36,7 +36,7 @@ struct st_mysqlnd_debug_methods
 	enum_func_status (*log_va)(MYSQLND_DEBUG *self, unsigned int line, const char * const file,
 							   unsigned int level, const char * type, const char *format, ...);
 	zend_bool (*func_enter)(MYSQLND_DEBUG *self, unsigned int line, const char * const file,
-							char * func_name, size_t func_name_len);
+							char * func_name, uint func_name_len);
 	enum_func_status (*func_leave)(MYSQLND_DEBUG *self, unsigned int line, const char * const file);
 	enum_func_status (*close)(MYSQLND_DEBUG *self);
 	enum_func_status (*free)(MYSQLND_DEBUG *self);
@@ -91,15 +91,13 @@ char *	mysqlnd_get_backtrace(TSRMLS_D);
 
 
 #else
-#define DBG_INF(msg)
-#define DBG_ERR(msg)
-#define DBG_INF_FMT(...)
-#define DBG_ERR_FMT(...)
-
-#define DBG_ENTER(func_name)
+static inline void DBG_INF(char *msg) {}
+static inline void DBG_ERR(char *msg) {}
+static inline void DBG_INF_FMT(char *format, ...) {}
+static inline void DBG_ERR_FMT(char *format, ...) {}
+static inline void DBG_ENTER(char *func_name) {}
 #define DBG_RETURN(value)	return (value)
 #define DBG_VOID_RETURN		return;
-
 #endif
 
 
