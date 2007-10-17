@@ -1135,6 +1135,7 @@ static zval* get_zval_property(zval* object, char* name TSRMLS_DC)
 		zval *data;
 		zend_class_entry *old_scope;
 
+		INIT_PZVAL(&member);
 		ZVAL_STRING(&member, name, 0);
 		old_scope = EG(scope);
 		EG(scope) = Z_OBJCE_P(object);
@@ -1169,6 +1170,7 @@ static void unset_zval_property(zval* object, char* name TSRMLS_DC)
 		zval member;
 		zend_class_entry *old_scope;
 
+		INIT_PZVAL(&member);
 		ZVAL_STRING(&member, name, 0);
 		old_scope = EG(scope);
 		EG(scope) = Z_OBJCE_P(object);
