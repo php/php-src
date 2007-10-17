@@ -1403,7 +1403,7 @@ PHP_FUNCTION(mysqli_set_local_infile_default)
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	if (mysql->li_read) {
-		zval_dtor(mysql->li_read);
+		zval_ptr_dtor(&(mysql->li_read));
 		mysql->li_read = NULL;
 	}
 }
@@ -1415,7 +1415,7 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
-	zval		callback_name;
+	zval		callback_name, *p_callback_name;
 	zval		*callback_func;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz", &mysql_link, mysqli_link_class_entry,
@@ -1435,7 +1435,6 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 		zval_dtor(&callback_name);
 		RETURN_FALSE;
 	}
-	zval_dtor(&callback_name);
 
 	/* save callback function */
 	if (!mysql->li_read) {
@@ -1443,7 +1442,7 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 	} else {
 		zval_dtor(mysql->li_read);
 	}
-	ZVAL_STRINGL(mysql->li_read, Z_STRVAL_P(callback_func), Z_STRLEN_P(callback_func), 1);
+	ZVAL_ZVAL(mysql->li_read, callback_name, 0, 0);
 
 	RETURN_TRUE;
 }
