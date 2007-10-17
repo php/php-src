@@ -1442,7 +1442,8 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 	} else {
 		zval_dtor(mysql->li_read);
 	}
-	ZVAL_ZVAL(mysql->li_read, callback_name, 0, 0);
+	p_callback_name = &callback_name;
+	ZVAL_ZVAL(mysql->li_read, p_callback_name, 0, 0);
 
 	RETURN_TRUE;
 }
