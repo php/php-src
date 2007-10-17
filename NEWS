@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   array_uintersect_assoc(), array_diff_key(), array_diff_assoc() and
   array_udiff_assoc(). (Dmitry)
 
+- Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 - Fixed regression in glob() when enforcing safe_mode/open_basedir checks on
   paths containing '*'. (Ilia)
 - Fixed "mail.force_extra_parameters" php.ini directive not to be modifiable

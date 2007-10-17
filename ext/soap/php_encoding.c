@@ -1208,9 +1208,10 @@ static zval* get_zval_property(zval* object, char* name TSRMLS_DC)
 		zval *data;
 		zend_class_entry *old_scope;
 
+		INIT_PZVAL(&member);
 		ZVAL_STRING(&member, name, 0);
 		old_scope = EG(scope);
-	  EG(scope) = Z_OBJCE_P(object);
+		EG(scope) = Z_OBJCE_P(object);
 		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS TSRMLS_CC);
 		if (data == EG(uninitialized_zval_ptr)) {
 			/* Hack for bug #32455 */
@@ -1241,9 +1242,10 @@ static void unset_zval_property(zval* object, char* name TSRMLS_DC)
 		zval member;
 		zend_class_entry *old_scope;
 
+		INIT_PZVAL(&member);
 		ZVAL_STRING(&member, name, 0);
 		old_scope = EG(scope);
-	  EG(scope) = Z_OBJCE_P(object);
+		EG(scope) = Z_OBJCE_P(object);
 		Z_OBJ_HT_P(object)->unset_property(object, &member TSRMLS_CC);
 		EG(scope) = old_scope;
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
