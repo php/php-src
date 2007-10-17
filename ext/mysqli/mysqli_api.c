@@ -1371,7 +1371,7 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 	} else {
 		zval_dtor(mysql->li_read);
 	}
-	ZVAL_STRINGL(mysql->li_read, callback_name, 0);
+	ZVAL_STRING(mysql->li_read, callback_name, 0);
 
 	RETURN_TRUE;
 }
