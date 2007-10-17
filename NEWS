@@ -42,13 +42,6 @@ PHP                                                                        NEWS
 
 - Fixed possible crash in ext/soap because of uninitialized value (Zdash Urf)
 
-- Fixed bug #42919 (Unserializing of namespaced class object fails). (Dmitry)
-- Fixed bug #42859 (import always conflicts with internal classes).
-  (cellog@php.net, Dmitry)
-- Fixed bug #42820 (defined() on constant with namespace prefixes tries to load
-  class). (Dmitry)
-- Fixed bug #42798 (__autoload() not triggered for classes used in method
-  signature). (Dmitry)
 - Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines). (Nuno)
 - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
   (Jani)
