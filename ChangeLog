@@ -1,3 +1,50 @@
+2007-10-16  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h
+      ext/mysql/php_mysql_structs.h
+      ext/mysqlnd/config.w32
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_priv.h:
+      Sync mysqlnd with HEAD. Same sources as in 5_3
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c
+      ext/mysqlnd/mysqlnd_priv.h:
+      Sync mysqlnd. Should still compile with 5_2 for those who want to use the
+      current stable branch. mysqli from 5_3 patched for mysqlnd should be also
+      compilable with 5_2.
+
+2007-10-16  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_api.c:
+      avoid double free and use zval_dtor() where neccessary
+
+    * ext/mysqli/mysqli.c:
+      use zval_dtor() instead of efree() + FREE_ZVAL()
+
+2007-10-16  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli_prop.c:
+      MFB5_3 : Shadowing of params bring undefined results.
+
+    * ext/mysqli/mysqli_prop.c:
+      MFB: Fix bug due to shadowing of variables. This one is pretty-pretty rare,
+      caught by source code inspection.
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_prop.c:
+      Fix bug due to shadowing of variables. This one is pretty-pretty rare,
+      caught by source code inspection.
+
 2007-10-15  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * (PHP_5_3)
