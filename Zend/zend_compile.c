@@ -4632,7 +4632,19 @@ void zend_do_import(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as import name", Z_STRVAL_P(name));
 	}
 
-	if (zend_hash_exists(CG(class_table), lcname, Z_STRLEN_P(name)+1)) {
+	if (CG(current_namespace)) {
+		/* Prefix import name with current namespace name to avoid conflicts with classes */
+		char *ns_name = emalloc(Z_STRLEN_P(CG(current_namespace)) + 2 + Z_STRLEN_P(name) + 1);
+
+		zend_str_tolower_copy(ns_name, Z_STRVAL_P(CG(current_namespace)), Z_STRLEN_P(CG(current_namespace)));
+		ns_name[Z_STRLEN_P(CG(current_namespace))] = ':';
+		ns_name[Z_STRLEN_P(CG(current_namespace))+1] = ':';
+		memcpy(ns_name+Z_STRLEN_P(CG(current_namespace))+2, lcname, Z_STRLEN_P(name)+1);
+		if (zend_hash_exists(CG(class_table), ns_name, Z_STRLEN_P(CG(current_namespace)) + 2 + Z_STRLEN_P(name)+1)) {
+			zend_error(E_COMPILE_ERROR, "Import name '%s' conflicts with defined class", Z_STRVAL_P(name));
+		}
+		efree(ns_name);
+	} else if (zend_hash_exists(CG(class_table), lcname, Z_STRLEN_P(name)+1)) {
 		zend_error(E_COMPILE_ERROR, "Import name '%s' conflicts with defined class", Z_STRVAL_P(name));
 	}
 

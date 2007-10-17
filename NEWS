@@ -40,6 +40,8 @@ PHP                                                                        NEWS
 - Improved and cleaned CGI code. FastCGI is now always enabled and can not be
   disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
 
+- Fixed bug #42859 (import always conflicts with internal classes).
+  (cellog@php.net, Dmitry)
 - Fixed bug #42820 (defined() on constant with namespace prefixes tries to load
   class). (Dmitry)
 - Fixed bug #42798 (__autoload() not triggered for classes used in method
