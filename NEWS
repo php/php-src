@@ -52,6 +52,7 @@ PHP                                                                        NEWS
   enabled). (Ilia)
 - Fixed bug #42699 (PHP_SELF duplicates path). (Dmitry)
 - Fixed bug #42643 (CLI segfaults if using ATTR_PERSISTENT). (Ilia)
+- Fixed bug #42637 (SoapFault : Only http and https are allowed). (Bill Moran)
 - Fixed bug #42629 (Dynamically loaded PHP extensions need symbols exported
   on MacOSX). (jdolecek at NetBSD dot org)
 - Fixed bug #42627 (bz2 extension fails to build with -fno-common).
