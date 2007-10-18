@@ -244,7 +244,8 @@ static void destroy_phar_data(void *pDest) /* {{{ */
 	TSRMLS_FETCH();
 
 	if (PHAR_GLOBALS->request_ends) {
-		return destroy_phar_data_only(pDest);
+		destroy_phar_data_only(pDest);
+		return;
 	}
 	zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_alias_map), phar_unalias_apply, phar_data TSRMLS_CC);
 	if (--phar_data->refcount < 0) {
@@ -507,7 +508,7 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 		if (for_trunc) {
 			if (entry->fp == phar->fp) {
 				/* duplicate entry if we are writing and are recycling the phar fp */
-				if (FAILURE == phar_open_entry_file(phar, entry, error)) {
+				if (FAILURE == phar_open_entry_file(phar, entry, error TSRMLS_CC)) {
 					return FAILURE;
 				}
 				(*ret)->fp = entry->fp;
@@ -559,7 +560,7 @@ static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len
 	} else {
 		(*ret)->fp = 0;
 		if (for_write) {
-			if (FAILURE == phar_open_entry_file(phar, entry, error)) {
+			if (FAILURE == phar_open_entry_file(phar, entry, error TSRMLS_CC)) {
 				return FAILURE;
 			}
 			(*ret)->fp = entry->fp;
@@ -2531,9 +2532,9 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			php_stream_rewind(file);
 		}
 		php_stream_filter_append(&file->readfilters, filter);
-		entry->compressed_filesize = php_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize+8192 TSRMLS_CC);
+		entry->compressed_filesize = (php_uint32) php_stream_copy_to_stream(file, entry->cfp, (size_t) entry->uncompressed_filesize+8192 TSRMLS_CC);
 		php_stream_filter_flush(filter, 1 TSRMLS_CC);
-		entry->compressed_filesize += php_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize+8192 TSRMLS_CC);
+		entry->compressed_filesize += (php_uint32) php_stream_copy_to_stream(file, entry->cfp, (size_t) entry->uncompressed_filesize+8192 TSRMLS_CC);
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
 		/* generate crc on compressed file */
 		php_stream_rewind(entry->cfp);
