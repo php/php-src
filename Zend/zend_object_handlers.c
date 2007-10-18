@@ -1130,14 +1130,14 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 		case IS_STRING:
 			ce = Z_OBJCE_P(readobj);
 			if (ce->__tostring &&
-                (zend_call_method_with_0_params(&readobj, ce, &ce->__tostring, "__tostring", &retval) || EG(exception))) {
-                if (EG(exception)) {
-                	if (retval) {
-	                	zval_ptr_dtor(&retval);
-	                }
+				(zend_call_method_with_0_params(&readobj, ce, &ce->__tostring, "__tostring", &retval) || EG(exception))) {
+				if (EG(exception)) {
+					if (retval) {
+						zval_ptr_dtor(&retval);
+					}
 					zend_error(E_ERROR, "Method %s::__toString() must not throw an exception", ce->name);
-                	return FAILURE;
-                }
+					return FAILURE;
+				}
 				if (Z_TYPE_P(retval) == IS_STRING) {
 					INIT_PZVAL(writeobj);
 					ZVAL_ZVAL(writeobj, retval, 1, 1);
