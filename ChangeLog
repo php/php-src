@@ -1,3 +1,88 @@
+2007-10-17  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS:
+      - There's no need to mention these bugs, they all belong to "Added
+      namespaces"
+
+2007-10-17  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_4_4)
+      Zend/zend_operators.h:
+      fix constant value (somebody forgot to MFH?)
+
+2007-10-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/classmap004.phpt
+      ext/soap/tests/classmap004.phpt
+      ext/soap/tests/classmap004.phpt:
+        1.1.4;
+      file classmap004.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/classmap004.phpt
+      ext/soap/tests/classmap004.phpt:
+      Fixed possible crash because of uninitialized value (Zdash Urf)
+
+    * (PHP_5_3)
+      NEWS
+      ext/soap/php_http.c
+      ext/soap/php_http.c:
+      Fixed bug #42637 (SoapFault : Only http and https are allowed). (Bill
+      Moran)
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_http.c:
+      Fixed bug #42637 (SoapFault : Only http and https are allowed)
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.re
+      ext/standard/tests/serialize/bug42919.phpt
+      ext/standard/tests/serialize/bug42919.phpt
+      ext/standard/tests/serialize/bug42919.phpt:
+      Fixed bug #42919 (Unserializing of namespaced class object fails)
+
+    * ZendEngine2/tests/bug42859.phpt
+      ZendEngine2/tests/bug42859.phpt:
+      
+      file bug42859.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug42859.phpt:
+      Fixed bug #42859 (import always conflicts with internal classes).
+      (cellog@php.net, Dmitry)
+
+2007-10-17  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/mysqli/mysqli_api.c:
+      commit lost part of the patch
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_api.c:
+      ..and correct macro
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c:
+      MFH: use correct dtro and variable for the callback
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c:
+      use correct dtor and variable for the callback
+
 2007-10-16  Andrey Hristov  <php@hristov.com>
 
     * ext/mysql/php_mysql.c
