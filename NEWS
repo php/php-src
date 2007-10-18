@@ -51,7 +51,11 @@ PHP                                                                        NEWS
 - Fixed bug #42767 (highlight_string() truncates trailing comment). (Ilia)
 - Fixed bug #42739 (mkdir() doesn't like a trailing slash when safe_mode is 
   enabled). (Ilia)
+- Fixed bug #42703 (Exception raised in an iterator::current() causes segfault
+  in FilterIterator) (Marcus)
 - Fixed bug #42699 (PHP_SELF duplicates path). (Dmitry)
+- Fixed bug #42654 (RecursiveIteratorIterator modifies only part of leaves)
+  (Marcus)
 - Fixed bug #42643 (CLI segfaults if using ATTR_PERSISTENT). (Ilia)
 - Fixed bug #42637 (SoapFault : Only http and https are allowed). (Bill Moran)
 - Fixed bug #42629 (Dynamically loaded PHP extensions need symbols exported
