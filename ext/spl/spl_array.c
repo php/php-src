@@ -1365,7 +1365,7 @@ SPL_METHOD(Array, hasChildren)
    Create a sub iterator for the current element (same class as $this) */
 SPL_METHOD(Array, getChildren)
 {
-	zval *object = getThis(), **entry;
+	zval *object = getThis(), **entry, *flags;
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 
@@ -1387,7 +1387,10 @@ SPL_METHOD(Array, getChildren)
 		RETURN_ZVAL(*entry, 0, 0);
 	}
 
-	spl_instantiate_arg_ex1(Z_OBJCE_P(getThis()), &return_value, 0, *entry TSRMLS_CC);
+  MAKE_STD_ZVAL(flags);
+  ZVAL_LONG(flags, SPL_ARRAY_USE_OTHER);
+	spl_instantiate_arg_ex2(intern->std.ce, &return_value, 0, *entry, flags TSRMLS_CC);
+	zval_ptr_dtor(&flags);
 }
 /* }}} */
 

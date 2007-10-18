@@ -1124,15 +1124,17 @@ static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more T
 	spl_dual_it_free(intern TSRMLS_CC);
 	if (!check_more || spl_dual_it_valid(intern TSRMLS_CC) == SUCCESS) {
 		intern->inner.iterator->funcs->get_current_data(intern->inner.iterator, &data TSRMLS_CC);
-		intern->current.data = *data;
-		intern->current.data->refcount++;
+		if (data && *data) {
+		  intern->current.data = *data;
+		  intern->current.data->refcount++;
+		}
 		if (intern->inner.iterator->funcs->get_current_key) {
 			intern->current.key_type = intern->inner.iterator->funcs->get_current_key(intern->inner.iterator, &intern->current.str_key, &intern->current.str_key_len, &intern->current.int_key TSRMLS_CC);
 		} else {
 			intern->current.key_type = HASH_KEY_IS_LONG;
 			intern->current.int_key = intern->current.pos;
 		}
-		return SUCCESS;
+		return EG(exception) ? FAILURE : SUCCESS;
 	}
 	return FAILURE;
 }
