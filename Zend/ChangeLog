@@ -1,3 +1,16 @@
+2007-10-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug42859.phpt:
+      Fixed bug #42859 (import always conflicts with internal classes).
+      (cellog@php.net, Dmitry)
+
+    * tests/bug42859.phpt
+      tests/bug42859.phpt:
+      
+      file bug42859.phpt was initially added on branch PHP_5_3.
+
 2007-10-13  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * tests/bug42819.phpt:
