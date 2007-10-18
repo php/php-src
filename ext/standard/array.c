@@ -1844,7 +1844,7 @@ PHP_FUNCTION(shuffle)
 {
 	zval *array;
 
-	if (zend_parse_parameters(1 TSRMLS_CC, "a", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
 		RETURN_FALSE;
 	}
 
