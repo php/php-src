@@ -973,7 +973,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		case E_USER_ERROR:
 			EG(exit_status) = 255;
 			if (module_initialized) {
-				if (!SG(headers_sent) &&
+				if (!PG(display_errors) &&
+				    !SG(headers_sent) &&
 					SG(sapi_headers).http_response_code == 200
 				) {
 					sapi_header_line ctr = {0};
