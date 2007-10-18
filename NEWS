@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 5.2.5
+18 Oct 2007, PHP 5.2.5RC1
 - Upgraded PCRE to version 7.3 (Nuno)
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
 - Added alpha support for imagefilter() IMG_FILTER_COLORIZE. (Pierre)
