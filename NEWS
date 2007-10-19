@@ -96,6 +96,8 @@ PHP                                                                        NEWS
 - Fixed bug #42139 (XMLReader option constants are broken using XML()). (Rob)
 - Fixed bug #42086 (SoapServer return Procedure '' not present for WSIBasic
   compliant wsdl). (Dmitry)
+- Fixed bug #41822 (Relative includes broken when getcwd() fails). (Ab5602, 
+Jani)
 - Fixed bug #41561 (Values set with php_admin_* in httpd.conf can be overwritten
   with ini_set()). (Stas, Jani)
 - Fixed bug #39651 (proc_open() append mode doesn't work on windows). (Nuno)
