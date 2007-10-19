@@ -1,3 +1,93 @@
+2007-10-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.5RC1
+
+2007-10-18  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_object_handlers.c:
+      ws
+
+2007-10-18  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c:
+      MFB53: Fixed bug #43020 (Warning message is missing with shuffle() and more
+      than one argument)
+
+    * (PHP_5_3)
+      ext/standard/array.c:
+      Fixed bug #43020 (Warning message is missing with shuffle() and more than
+      one argument)
+
+2007-10-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/main.c
+      main/main.c
+      main/main.c:
+      Fixed bug #42722 (display_errors setting ignored for E_PARSE and HTTP 500
+      page)
+
+2007-10-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+    * (PHP_5_2)
+      ext/spl/spl_array.c
+      ext/spl/spl_iterators.c
+      ext/spl/tests/bug41692.phpt
+      ext/spl/tests/bug42654.phpt:
+      - MF53 Fix for #41692, #42703
+
+    * ext/spl/spl_array.c:
+      - Missing piece
+
+    * ext/spl/tests/bug42654.phpt
+      ext/spl/tests/bug42703.phpt:
+      - Commit new tests to correct brnach (funny broken checkout)
+
+    * (PHP_5_2)
+      ext/spl/tests/bug41692.phpt:
+      - Fix test expectation
+
+    * ext/spl/spl_array.c
+      ext/spl/spl_iterators.c
+      ext/spl/tests/bug42654.phpt
+      ext/spl/tests/bug42703.phpt:
+      - MFB #42654, #42704
+
+    * (PHP_5_3)
+      ext/spl/spl_iterators.c
+      ext/spl/tests/bug42703.phpt
+      ext/spl/tests/bug42703.phpt
+      ext/spl/tests/bug42703.phpt:
+      - Fix #42703
+
+    * ext/spl/tests/bug42654.phpt
+      ext/spl/tests/bug42654.phpt
+      ext/spl/tests/bug42654.phpt:
+        1.1.4;
+      file bug42654.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c:
+      - Fix #42654 (maybe also a bunch of others)
+
 2007-10-17  Johannes Schl�ter  <johannes@schlueters.de>
 
     * (PHP_5_3)
