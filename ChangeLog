@@ -1,3 +1,229 @@
+2007-10-19  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_rand_basic1.phpt
+      ext/standard/tests/array/array_rand_basic2.phpt
+      ext/standard/tests/array/array_rand_error.phpt
+      ext/standard/tests/array/array_rand_variation1.phpt
+      ext/standard/tests/array/array_rand_variation2.phpt
+      ext/standard/tests/array/array_rand_variation3.phpt
+      ext/standard/tests/array/array_rand_variation4.phpt
+      ext/standard/tests/array/array_rand_variation5.phpt
+      ext/standard/tests/array/array_rand_variation6.phpt:
+      New testcases for array_rand() function
+
+    * ext/standard/tests/array/array_rand_basic1.phpt
+      ext/standard/tests/array/array_rand_basic1.phpt
+      ext/standard/tests/array/array_rand_basic1.phpt
+      ext/standard/tests/array/array_rand_basic2.phpt
+      ext/standard/tests/array/array_rand_basic2.phpt
+      ext/standard/tests/array/array_rand_basic2.phpt
+      ext/standard/tests/array/array_rand_error.phpt
+      ext/standard/tests/array/array_rand_error.phpt
+      ext/standard/tests/array/array_rand_error.phpt
+      ext/standard/tests/array/array_rand_variation1.phpt
+      ext/standard/tests/array/array_rand_variation1.phpt
+      ext/standard/tests/array/array_rand_variation1.phpt
+      ext/standard/tests/array/array_rand_variation2.phpt
+      ext/standard/tests/array/array_rand_variation2.phpt
+      ext/standard/tests/array/array_rand_variation2.phpt
+      ext/standard/tests/array/array_rand_variation3.phpt
+      ext/standard/tests/array/array_rand_variation3.phpt
+      ext/standard/tests/array/array_rand_variation3.phpt
+      ext/standard/tests/array/array_rand_variation4.phpt
+      ext/standard/tests/array/array_rand_variation4.phpt
+      ext/standard/tests/array/array_rand_variation4.phpt
+      ext/standard/tests/array/array_rand_variation5.phpt
+      ext/standard/tests/array/array_rand_variation5.phpt
+      ext/standard/tests/array/array_rand_variation5.phpt
+      ext/standard/tests/array/array_rand_variation6.phpt
+      ext/standard/tests/array/array_rand_variation6.phpt
+      ext/standard/tests/array/array_rand_variation6.phpt:
+        1.1.4;
+      file array_rand_basic1.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_fill_basic.phpt
+      ext/standard/tests/array/array_fill_basic.phpt
+      ext/standard/tests/array/array_fill_error.phpt
+      ext/standard/tests/array/array_fill_error.phpt
+      ext/standard/tests/array/array_fill_object.phpt
+      ext/standard/tests/array/array_fill_object.phpt
+      ext/standard/tests/array/array_fill_variation1.phpt
+      ext/standard/tests/array/array_fill_variation1.phpt
+      ext/standard/tests/array/array_fill_variation2.phpt
+      ext/standard/tests/array/array_fill_variation2.phpt
+      ext/standard/tests/array/array_fill_variation3.phpt
+      ext/standard/tests/array/array_fill_variation3.phpt
+      ext/standard/tests/array/array_fill_variation4.phpt
+      ext/standard/tests/array/array_fill_variation4.phpt
+      ext/standard/tests/array/array_fill_variation5.phpt
+      ext/standard/tests/array/array_fill_variation5.phpt:
+      New testcases for array_fill() function
+
+    * ext/standard/tests/array/array_fill_basic.phpt
+      ext/standard/tests/array/array_fill_basic.phpt
+      ext/standard/tests/array/array_fill_basic.phpt
+      ext/standard/tests/array/array_fill_error.phpt
+      ext/standard/tests/array/array_fill_error.phpt
+      ext/standard/tests/array/array_fill_error.phpt
+      ext/standard/tests/array/array_fill_object.phpt
+      ext/standard/tests/array/array_fill_object.phpt
+      ext/standard/tests/array/array_fill_object.phpt
+      ext/standard/tests/array/array_fill_variation1.phpt
+      ext/standard/tests/array/array_fill_variation1.phpt
+      ext/standard/tests/array/array_fill_variation1.phpt
+      ext/standard/tests/array/array_fill_variation2.phpt
+      ext/standard/tests/array/array_fill_variation2.phpt
+      ext/standard/tests/array/array_fill_variation2.phpt
+      ext/standard/tests/array/array_fill_variation3.phpt
+      ext/standard/tests/array/array_fill_variation3.phpt
+      ext/standard/tests/array/array_fill_variation3.phpt
+      ext/standard/tests/array/array_fill_variation4.phpt
+      ext/standard/tests/array/array_fill_variation4.phpt
+      ext/standard/tests/array/array_fill_variation4.phpt
+      ext/standard/tests/array/array_fill_variation5.phpt
+      ext/standard/tests/array/array_fill_variation5.phpt
+      ext/standard/tests/array/array_fill_variation5.phpt:
+        1.1.4;
+      New testcases for array_fill() function
+
+    * ext/standard/tests/array/array_filter_basic.phpt
+      ext/standard/tests/array/array_filter_basic.phpt
+      ext/standard/tests/array/array_filter_error.phpt
+      ext/standard/tests/array/array_filter_error.phpt
+      ext/standard/tests/array/array_filter_variation1.phpt
+      ext/standard/tests/array/array_filter_variation1.phpt
+      ext/standard/tests/array/array_filter_variation2.phpt
+      ext/standard/tests/array/array_filter_variation2.phpt
+      ext/standard/tests/array/array_filter_variation3.phpt
+      ext/standard/tests/array/array_filter_variation3.phpt
+      ext/standard/tests/array/array_filter_variation4.phpt
+      ext/standard/tests/array/array_filter_variation4.phpt
+      ext/standard/tests/array/array_filter_variation5.phpt
+      ext/standard/tests/array/array_filter_variation5.phpt
+      ext/standard/tests/array/array_filter_variation6.phpt
+      ext/standard/tests/array/array_filter_variation6.phpt
+      ext/standard/tests/array/array_filter_variation7.phpt
+      ext/standard/tests/array/array_filter_variation7.phpt
+      ext/standard/tests/array/array_filter_variation8.phpt
+      ext/standard/tests/array/array_filter_variation8.phpt
+      ext/standard/tests/array/array_filter_variation9.phpt
+      ext/standard/tests/array/array_filter_variation9.phpt:
+      New testcases for array_filter() function
+
+    * ext/standard/tests/array/array_filter_basic.phpt
+      ext/standard/tests/array/array_filter_basic.phpt
+      ext/standard/tests/array/array_filter_basic.phpt
+      ext/standard/tests/array/array_filter_error.phpt
+      ext/standard/tests/array/array_filter_error.phpt
+      ext/standard/tests/array/array_filter_error.phpt
+      ext/standard/tests/array/array_filter_variation1.phpt
+      ext/standard/tests/array/array_filter_variation1.phpt
+      ext/standard/tests/array/array_filter_variation1.phpt
+      ext/standard/tests/array/array_filter_variation2.phpt
+      ext/standard/tests/array/array_filter_variation2.phpt
+      ext/standard/tests/array/array_filter_variation2.phpt
+      ext/standard/tests/array/array_filter_variation3.phpt
+      ext/standard/tests/array/array_filter_variation3.phpt
+      ext/standard/tests/array/array_filter_variation3.phpt
+      ext/standard/tests/array/array_filter_variation4.phpt
+      ext/standard/tests/array/array_filter_variation4.phpt
+      ext/standard/tests/array/array_filter_variation4.phpt
+      ext/standard/tests/array/array_filter_variation5.phpt
+      ext/standard/tests/array/array_filter_variation5.phpt
+      ext/standard/tests/array/array_filter_variation5.phpt
+      ext/standard/tests/array/array_filter_variation6.phpt
+      ext/standard/tests/array/array_filter_variation6.phpt
+      ext/standard/tests/array/array_filter_variation6.phpt
+      ext/standard/tests/array/array_filter_variation7.phpt
+      ext/standard/tests/array/array_filter_variation7.phpt
+      ext/standard/tests/array/array_filter_variation7.phpt
+      ext/standard/tests/array/array_filter_variation8.phpt
+      ext/standard/tests/array/array_filter_variation8.phpt
+      ext/standard/tests/array/array_filter_variation8.phpt
+      ext/standard/tests/array/array_filter_variation9.phpt
+      ext/standard/tests/array/array_filter_variation9.phpt
+      ext/standard/tests/array/array_filter_variation9.phpt:
+        1.1.4;
+      file array_filter_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/array/array_unshift_basic1.phpt
+      ext/standard/tests/array/array_unshift_basic1.phpt
+      ext/standard/tests/array/array_unshift_basic2.phpt
+      ext/standard/tests/array/array_unshift_error.phpt
+      ext/standard/tests/array/array_unshift_error.phpt
+      ext/standard/tests/array/array_unshift_variation1.phpt
+      ext/standard/tests/array/array_unshift_variation1.phpt
+      ext/standard/tests/array/array_unshift_variation2.phpt
+      ext/standard/tests/array/array_unshift_variation2.phpt
+      ext/standard/tests/array/array_unshift_variation3.phpt
+      ext/standard/tests/array/array_unshift_variation3.phpt
+      ext/standard/tests/array/array_unshift_variation4.phpt
+      ext/standard/tests/array/array_unshift_variation4.phpt
+      ext/standard/tests/array/array_unshift_variation5.phpt
+      ext/standard/tests/array/array_unshift_variation5.phpt
+      ext/standard/tests/array/array_unshift_variation6.phpt
+      ext/standard/tests/array/array_unshift_variation6.phpt
+      ext/standard/tests/array/array_unshift_variation7.phpt
+      ext/standard/tests/array/array_unshift_variation7.phpt
+      ext/standard/tests/array/array_unshift_variation8.phpt
+      ext/standard/tests/array/array_unshift_variation8.phpt
+      ext/standard/tests/array/array_unshift_variation9.phpt
+      ext/standard/tests/array/array_unshift_variation9.phpt:
+      New testcases for array_unshift() function
+
+    * ext/standard/tests/array/array_unshift_basic1.phpt
+      ext/standard/tests/array/array_unshift_basic1.phpt
+      ext/standard/tests/array/array_unshift_basic1.phpt
+      ext/standard/tests/array/array_unshift_basic2.phpt
+      ext/standard/tests/array/array_unshift_basic2.phpt
+      ext/standard/tests/array/array_unshift_basic2.phpt
+      ext/standard/tests/array/array_unshift_error.phpt
+      ext/standard/tests/array/array_unshift_error.phpt
+      ext/standard/tests/array/array_unshift_error.phpt
+      ext/standard/tests/array/array_unshift_variation1.phpt
+      ext/standard/tests/array/array_unshift_variation1.phpt
+      ext/standard/tests/array/array_unshift_variation1.phpt
+      ext/standard/tests/array/array_unshift_variation2.phpt
+      ext/standard/tests/array/array_unshift_variation2.phpt
+      ext/standard/tests/array/array_unshift_variation2.phpt
+      ext/standard/tests/array/array_unshift_variation3.phpt
+      ext/standard/tests/array/array_unshift_variation3.phpt
+      ext/standard/tests/array/array_unshift_variation3.phpt
+      ext/standard/tests/array/array_unshift_variation4.phpt
+      ext/standard/tests/array/array_unshift_variation4.phpt
+      ext/standard/tests/array/array_unshift_variation4.phpt
+      ext/standard/tests/array/array_unshift_variation5.phpt
+      ext/standard/tests/array/array_unshift_variation5.phpt
+      ext/standard/tests/array/array_unshift_variation5.phpt
+      ext/standard/tests/array/array_unshift_variation6.phpt
+      ext/standard/tests/array/array_unshift_variation6.phpt
+      ext/standard/tests/array/array_unshift_variation6.phpt
+      ext/standard/tests/array/array_unshift_variation7.phpt
+      ext/standard/tests/array/array_unshift_variation7.phpt
+      ext/standard/tests/array/array_unshift_variation7.phpt
+      ext/standard/tests/array/array_unshift_variation8.phpt
+      ext/standard/tests/array/array_unshift_variation8.phpt
+      ext/standard/tests/array/array_unshift_variation8.phpt
+      ext/standard/tests/array/array_unshift_variation9.phpt
+      ext/standard/tests/array/array_unshift_variation9.phpt
+      ext/standard/tests/array/array_unshift_variation9.phpt:
+        1.1.4;
+      file array_unshift_basic1.phpt was initially added on branch PHP_5_2.
+
+2007-10-19  Robert Thompson  <ab5602@wayne.edu>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      formatting
+
+    * (PHP_5_2)
+      NEWS:
+      
+      News for getcwd() failure fix.
+
 2007-10-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
