@@ -14,6 +14,8 @@ PHP 4                                                                      NEWS
   open_basedir or safe_mode is active (Stas)
 - Fixed session.save_path and error_log values to be checked against
   open_basedir and safe_mode (CVE-2007-3378) (Stas, Maksymilian Arciemowicz)
+- Fixed bug #43010 (Fixed regression in imagearc with two equivelent angles)
+  (Pierre)
 - Fixed bug #41765 (Recode crashes/does not work on amd64) 
   (nexus at smoula dot net, Stas)
 - Fixed bug #41630 (segfault when an invalid color index is present in
