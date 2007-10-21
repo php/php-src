@@ -1,3 +1,23 @@
+2007-10-20  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/gd/libgd/gd.c:
+      - #43010, Fixed regression in imagearc with two equivelent angles
+
+2007-10-20  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/array/array_rand_basic1.phpt
+      ext/standard/tests/array/array_rand_basic2.phpt
+      ext/standard/tests/array/array_rand_error.phpt
+      ext/standard/tests/array/array_rand_variation1.phpt
+      ext/standard/tests/array/array_rand_variation2.phpt
+      ext/standard/tests/array/array_rand_variation3.phpt
+      ext/standard/tests/array/array_rand_variation4.phpt
+      ext/standard/tests/array/array_rand_variation5.phpt
+      ext/standard/tests/array/array_rand_variation6.phpt:
+      New testcases for array_rand() function
+
 2007-10-19  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * (PHP_5_3)
