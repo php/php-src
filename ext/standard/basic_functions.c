@@ -52,6 +52,11 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include <time.h>
 #include <stdio.h>
 
+#ifndef PHP_WIN32 
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
+
 #ifdef NETWARE
 #include <netinet/in.h>
 #endif
@@ -6050,6 +6055,10 @@ PHP_FUNCTION(move_uploaded_file)
 	zval **pp_new_path;
 	zend_bool successful = 0;
 
+#ifndef PHP_WIN32
+	int oldmask; int ret;
+#endif
+
 	if (!SG(rfc1867_uploaded_files)) {
 		RETURN_FALSE;
 	}
@@ -6079,6 +6088,16 @@ PHP_FUNCTION(move_uploaded_file)
 	VCWD_UNLINK(new_path);
 	if (VCWD_RENAME(old_path, new_path) == 0) {
 		successful = 1;
+#ifndef PHP_WIN32
+		oldmask = umask(077);
+		umask(oldmask);
+
+		ret = VCWD_CHMOD(new_path, 0666 & ~oldmask);
+
+		if (ret == -1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		}
+#endif
 	} else if (php_copy_file_ex(old_path, new_path, STREAM_DISABLE_OPEN_BASEDIR TSRMLS_CC) == SUCCESS) {
 		VCWD_UNLINK(old_path);
 		successful = 1;
