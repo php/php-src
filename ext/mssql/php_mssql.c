@@ -345,9 +345,7 @@ PHP_RINIT_FUNCTION(mssql)
 	MS_SQL_G(min_error_severity) = MS_SQL_G(cfg_min_error_severity);
 	MS_SQL_G(min_message_severity) = MS_SQL_G(cfg_min_message_severity);
 	if (MS_SQL_G(connect_timeout) < 1) MS_SQL_G(connect_timeout) = 1;
-	dbsetlogintime(MS_SQL_G(connect_timeout));
 	if (MS_SQL_G(timeout) < 0) MS_SQL_G(timeout) = 60;
-	dbsettime(MS_SQL_G(timeout));
 	if (MS_SQL_G(max_procs) != -1) {
 		dbsetmaxprocs((TDS_SHORT)MS_SQL_G(max_procs));
 	}
@@ -467,6 +465,9 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Out of memory");
 		RETURN_FALSE;
 	}
+
+	dbsetlogintime(MS_SQL_G(connect_timeout));
+	dbsettime(MS_SQL_G(timeout));
 
 	/* set a DBLOGIN record */	
 	if ((mssql.login = dblogin()) == NULL) {
