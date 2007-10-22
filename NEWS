@@ -39,6 +39,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #43020 (Warning message is missing with shuffle() and more
   than one argument). (Scott)
+- Fixed bug #4294 (Move *timeout initialization from RINIT to connect time).
+  (Ilia)
 - Fixed bug #42917 (PDO::FETCH_KEY_PAIR doesn't work with setFetchMode).
   (Ilia)
 - Fixed bug #42890 (Constant "LIST" defined by mysqlclient and c-client).
