@@ -1,3 +1,23 @@
+2007-10-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/file/006_error.phpt:
+      MFB: Fixed bug #42944 (test failing due to expectation that /etc/passwd has
+      0644 permissions).
+
+    * (PHP_5_2)
+      ext/standard/tests/file/006_error.phpt:
+      
+      MFB: Fixed bug #42944 (test failing due to expectation that /etc/passwd
+      has
+      0644 permissions).
+
+    * (PHP_5_3)
+      ext/standard/tests/file/006_error.phpt:
+      
+      Fixed bug #42944 (test failing due to expectation that /etc/passwd has
+      0644
+      permissions).
+
 2007-10-20  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_4_4)
