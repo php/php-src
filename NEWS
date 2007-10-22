@@ -11,7 +11,7 @@ PHP                                                                        NEWS
   array_uintersect_assoc(), array_diff_key(), array_diff_assoc() and
   array_udiff_assoc(). (Dmitry)
 
-- Fixed move_uploaded_file() to set file permissions of resulting file
+- Fixed move_uploaded_file() to always set file permissions of resulting file
   according to UMASK (Andrew Sitnikov)
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 - Fixed regression in glob() when enforcing safe_mode/open_basedir checks on
