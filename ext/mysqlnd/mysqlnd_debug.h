@@ -39,7 +39,7 @@ struct st_mysqlnd_debug_methods
 							char * func_name, uint func_name_len);
 	enum_func_status (*func_leave)(MYSQLND_DEBUG *self, unsigned int line, const char * const file);
 	enum_func_status (*close)(MYSQLND_DEBUG *self);
-	enum_func_status (*free)(MYSQLND_DEBUG *self);
+	enum_func_status (*free_handle)(MYSQLND_DEBUG *self);
 };
 
 struct st_mysqlnd_debug
