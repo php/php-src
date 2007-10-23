@@ -9219,6 +9219,14 @@ static int ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+
+	/* We are going to assign the result by reference */
+	if (opline->extended_value) {
+		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
+		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -10862,6 +10870,14 @@ static int ZEND_FETCH_DIM_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+
+	/* We are going to assign the result by reference */
+	if (opline->extended_value) {
+		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
+		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -12441,6 +12457,14 @@ static int ZEND_FETCH_DIM_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+
+	/* We are going to assign the result by reference */
+	if (opline->extended_value) {
+		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
+		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -13623,6 +13647,14 @@ static int ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+
+	/* We are going to assign the result by reference */
+	if (opline->extended_value) {
+		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
+		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -14581,6 +14613,14 @@ static int ZEND_FETCH_DIM_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+
+	/* We are going to assign the result by reference */
+	if (opline->extended_value) {
+		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
+		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -21692,6 +21732,13 @@ static int ZEND_FETCH_DIM_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
 	}
 
+	/* We are going to assign the result by reference */
+	if (opline->extended_value) {
+		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
+		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -23169,6 +23216,13 @@ static int ZEND_FETCH_DIM_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	    READY_TO_DESTROY(free_op1.var) &&
 	    !RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+	}
+
+	/* We are going to assign the result by reference */
+	if (opline->extended_value) {
+		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
+		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -24653,6 +24707,13 @@ static int ZEND_FETCH_DIM_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
 	}
 
+	/* We are going to assign the result by reference */
+	if (opline->extended_value) {
+		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
+		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -25737,6 +25798,13 @@ static int ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
 	}
 
+	/* We are going to assign the result by reference */
+	if (opline->extended_value) {
+		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
+		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -26603,6 +26671,13 @@ static int ZEND_FETCH_DIM_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	    READY_TO_DESTROY(free_op1.var) &&
 	    !RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+	}
+
+	/* We are going to assign the result by reference */
+	if (opline->extended_value) {
+		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
+		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
