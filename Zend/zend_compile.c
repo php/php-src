@@ -988,6 +988,9 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC) /* {{{ */
 			if (le == NULL) break;
 			opline_ptr = (zend_op *)le->data;
 		}
+		if (opline->opcode == ZEND_FETCH_DIM_W) {
+			opline->extended_value = arg_offset;
+		}
 	}
 	zend_llist_destroy(fetch_list_ptr);
 	zend_stack_del_top(&CG(bp_stack));
