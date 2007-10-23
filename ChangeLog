@@ -1,3 +1,49 @@
+2007-10-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      
+      MFB: Fixed bug #4294 (Move *timeout initialization from RINIT to connect
+      time)
+
+    * (PHP_5_3)
+      ext/mssql/php_mssql.c:
+      Fixed bug #4294 (Move *timeout initialization from RINIT to connect time)
+
+2007-10-22  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/array/array_filter_object.phpt
+      ext/standard/tests/array/array_filter_object.phpt:
+      more testcases for array_filter() function
+
+    * ext/standard/tests/array/array_filter_object.phpt
+      ext/standard/tests/array/array_filter_object.phpt
+      ext/standard/tests/array/array_filter_object.phpt:
+        1.1.4;
+      file array_filter_object.phpt was initially added on branch PHP_5_2.
+
+2007-10-22  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli.c:
+      Make it compile with libmysql 3.23
+
+2007-10-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      forgotten description
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      Fixed move_uploaded_file() to always set file permissions of resulting file
+      according to UMASK (Andrew Sitnikov)
+
 2007-10-21  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/tests/file/006_error.phpt:
