@@ -2032,7 +2032,7 @@ static PHP_RSHUTDOWN_FUNCTION(mysqlnd)
 	DBG_ENTER("RSHUTDOWN");
 	if (dbg) {
 		dbg->m->close(dbg);
-		dbg->m->free(dbg);
+		dbg->m->free_handle(dbg);
 		MYSQLND_G(dbg) = NULL;
 	}
 #endif
