@@ -1014,6 +1014,9 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, ANY, int type
 		zval_dtor(varname);
 	}
 	if (!RETURN_VALUE_UNUSED(&opline->result)) {
+		if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
+		}
 		EX_T(opline->result.u.var).var.ptr_ptr = retval;
 		PZVAL_LOCK(*retval);
 		switch (type) {
@@ -1104,7 +1107,7 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	FREE_OP1_VAR_PTR();
 	
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {		
+	if (opline->extended_value) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
@@ -1275,7 +1278,7 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	zend_free_op free_op1, free_op2;
 	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (opline->extended_value == ZEND_FETCH_ADD_LOCK && OP1_TYPE != IS_CV) {
+	if ((opline->extended_value & ZEND_FETCH_ADD_LOCK) && OP1_TYPE != IS_CV) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 		EX_T(opline->op1.u.var).var.ptr = *EX_T(opline->op1.u.var).var.ptr_ptr;
 	}
@@ -1295,6 +1298,14 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
 	}
 	FREE_OP1_VAR_PTR();
+
+	/* We are going to assign the result by reference */
+	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
+		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
+		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
+	}
+	
 	ZEND_VM_NEXT_OPCODE();
 }
 

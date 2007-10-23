@@ -692,7 +692,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_HANDLE_STREAM			5
 
 #define ZEND_FETCH_STANDARD		0
-#define ZEND_FETCH_ADD_LOCK		1
+#define ZEND_FETCH_ADD_LOCK		(1<<0)
+#define ZEND_FETCH_MAKE_REF		(1<<1)
 
 #define ZEND_FE_FETCH_BYREF	1
 #define ZEND_FE_FETCH_WITH_KEY	2
