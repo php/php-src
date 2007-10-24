@@ -1,3 +1,40 @@
+2007-10-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug35163_2.phpt
+      tests/bug35163_3.phpt:
+      Fixed variations of bug #35163
+
+    * tests/bug35163_2.phpt
+      tests/bug35163_2.phpt
+      tests/bug35163_3.phpt
+      tests/bug35163_3.phpt:
+      
+      file bug35163_2.phpt was initially added on branch PHP_5_3.
+
+    * zend_compile.c
+      zend_compile.c
+      zend_language_parser.y
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug35163.phpt:
+      Fixed bug #35163 (Array elements can lose references)
+
+    * tests/bug35163.phpt
+      tests/bug35163.phpt:
+      
+      file bug35163.phpt was initially added on branch PHP_5_3.
+
 2007-10-18  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_3)
