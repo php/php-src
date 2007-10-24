@@ -1,3 +1,82 @@
+2007-10-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      Fixed bug #43074 (attempt to increment refcount outside of the macro)
+
+2007-10-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug35163_2.phpt
+      ZendEngine2/tests/bug35163_3.phpt:
+      Fixed variations of bug #35163
+
+    * ZendEngine2/tests/bug35163_2.phpt
+      ZendEngine2/tests/bug35163_2.phpt
+      ZendEngine2/tests/bug35163_3.phpt
+      ZendEngine2/tests/bug35163_3.phpt:
+      
+      file bug35163_2.phpt was initially added on branch PHP_5_3.
+
+2007-10-23  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/config.w32
+      ext/mysqli/config.w32:
+      Fix the build, the w32 files should look like in 5_3
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_debug.h:
+      MFB: Fix compile failure on windows
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_debug.h:
+      Fix build failure on Windows. Seems "free" can't be used even as method
+      name of a structure. The MS compiler (the preprocessor most probably)
+      changes it to _free_dbg
+
+2007-10-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug35163.phpt
+      ZendEngine2/tests/bug35163.phpt:
+      
+      file bug35163.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug35163.phpt:
+      Fixed bug #35163 (Array elements can lose references)
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed realpath cache for existent file with CWD_FILEPATH flag on win32
+
+2007-10-23  Mattias Bengtsson  <mattias@secweb.se>
+
+    * ext/gd/libgd/gd_security.c
+      ext/gd/libgd/gd_security.c:
+      -MFB, Be paranoid and dont allow multiplication with zero
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_security.c:
+      - Be paranoid and dont allow multiplication with zero
+
 2007-10-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
