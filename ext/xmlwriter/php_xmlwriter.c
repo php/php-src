@@ -464,6 +464,9 @@ static void php_xmlwriter_end(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_read_int_t
 	
 	if (this) {
 		XMLWRITER_FROM_OBJECT(intern, this);
+		if (ZEND_NUM_ARGS()) {
+			WRONG_PARAM_COUNT;
+		}
 	} else 
 #endif
 	{

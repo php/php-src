@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 - Fixed htmlentities/htmlspecialchars not to accept partial multibyte
   sequences. (Stas)
 
+- Fixed bug #43099 (XMLWriter::endElement() does not check # of params).
+  (Ilia)
 - Fixed bug #43020 (Warning message is missing with shuffle() and more
   than one argument). (Scott)
 - Fixed bug #4294 (Move *timeout initialization from RINIT to connect time).
