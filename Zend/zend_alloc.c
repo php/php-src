@@ -426,6 +426,7 @@ struct _zend_mm_heap {
 	size_t              free_bitmap;
 	size_t              large_free_bitmap;
 	size_t              block_size;
+	size_t              compact_size;
 	zend_mm_segment    *segments_list;
 	zend_mm_storage    *storage;
 	size_t				real_size;
@@ -1065,6 +1066,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 
 	heap->storage = storage;
 	heap->block_size = block_size;
+	heap->compact_size = 0;
 	heap->segments_list = NULL;
 	zend_mm_init(heap);
 # if ZEND_MM_CACHE_STAT
@@ -1116,6 +1118,7 @@ ZEND_API zend_mm_heap *zend_mm_startup(void) /* {{{ */
 	char *mem_type = getenv("ZEND_MM_MEM_TYPE");
 	char *tmp;
 	const zend_mm_mem_handlers *handlers;
+	zend_mm_heap *heap;
 
 	if (mem_type == NULL) {
 		i = 0;
@@ -1147,7 +1150,16 @@ ZEND_API zend_mm_heap *zend_mm_startup(void) /* {{{ */
 		seg_size = ZEND_MM_SEG_SIZE;
 	}
 
-	return zend_mm_startup_ex(handlers, seg_size, ZEND_MM_RESERVE_SIZE, 0, NULL);
+	heap = zend_mm_startup_ex(handlers, seg_size, ZEND_MM_RESERVE_SIZE, 0, NULL);
+	if (heap) {
+		tmp = getenv("ZEND_MM_COMPACT");
+		if (tmp) {
+			heap->compact_size = zend_atoi(tmp, 0);
+		} else {
+			heap->compact_size = 2 * 1024 * 1024;
+		}
+	}
+	return heap;
 }
 /* }}} */
 
@@ -1603,7 +1615,10 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 			free(heap);
 		}
 	} else {
-		storage->handlers->compact(storage);
+		if (heap->compact_size &&
+		    heap->real_peak > heap->compact_size) {
+			storage->handlers->compact(storage);
+		}
 		heap->segments_list = NULL;
 		zend_mm_init(heap);
 		heap->real_size = 0;
