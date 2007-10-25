@@ -1,3 +1,16 @@
+2007-10-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/php_xmlwriter.c:
+      
+      MFB: Fixed bug #43099 (XMLWriter::endElement() does not check # of params)
+
+    * (PHP_5_3)
+      ext/xmlwriter/php_xmlwriter.c:
+      Fixed bug #43099 (XMLWriter::endElement() does not check # of params)
+
 2007-10-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
