@@ -17,6 +17,7 @@ $xml->writeElement('foo3');
 $xml->startElement('bar');
 $xml->endElement('bar');
 $xml->endElement();
+$xml->endElement();
 print $xml->flush(true);
 
 print "\n";
