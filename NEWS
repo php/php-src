@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2007, PHP 5.2.5RC2
+- Added ability to control memory consumption between request using
+  ZEND_MM_COMPACT environment variable. (Dmitry)
 
 18 Oct 2007, PHP 5.2.5RC1
 - Upgraded PCRE to version 7.3 (Nuno)
