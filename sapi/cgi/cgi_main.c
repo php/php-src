@@ -137,6 +137,7 @@ static const opt_struct OPTIONS[] = {
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
+ 	{'T', 1, "timing"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -767,7 +768,8 @@ static void php_cgi_usage(char *argv0)
 				"  -s               Display colour syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Display source with stripped comments and whitespace.\n"
-				"  -z <file>        Load Zend extension <file>.\n",
+				"  -z <file>        Load Zend extension <file>.\n"
+			   "  -T <count>       Measure execution time of script repeated <count> times.\n",
 				prog, prog);
 }
 /* }}} */
@@ -1266,6 +1268,9 @@ int main(int argc, char *argv[])
 	char *bindpath = NULL;
 	int fcgi_fd = 0;
 	fcgi_request request;
+	int repeats = 1;
+	int benchmark = 0;
+	struct timeval start, end;
 #ifndef PHP_WIN32
 	int status = 0;
 #endif
@@ -1543,6 +1548,11 @@ consult the installation file that came with this distribution, or visit \n\
 	zend_first_try {
 		while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1, 2)) != -1) {
 			switch (c) {
+				case 'T':
+			        benchmark = 1;
+					repeats = atoi(php_optarg);
+					gettimeofday(&start, NULL);
+					break;
 				case 'h':
 				case '?':
 					fcgi_shutdown();
@@ -1912,8 +1922,18 @@ fastcgi_request_done:
 				}
 			}
 
-			if (!fastcgi)
+			if (!fastcgi) {
+				if (benchmark) {
+					repeats--;
+					if (repeats > 0) {
+						script_file = NULL;
+						php_optind = orig_optind;
+						php_optarg = orig_optarg;
+						continue;
+					}
+				}
 				break;
+			}
 
 			/* only fastcgi will get here */
 			requests++;
@@ -1943,6 +1963,21 @@ fastcgi_request_done:
 	} zend_end_try();
 
 out:
+	if (benchmark) {
+		int sec;
+		int usec;
+
+		gettimeofday(&end, NULL);
+		sec = (int)(end.tv_sec - start.tv_sec);
+		if (end.tv_usec >= start.tv_usec) {
+			usec = (int)(end.tv_usec - start.tv_usec);
+		} else {
+			sec -= 1;
+			usec = (int)(end.tv_usec + 1000000 - start.tv_usec);
+		}
+		fprintf(stderr, "\nElapsed time: %d.%06d sec\n", sec, usec);
+	}
+
 	SG(server_context) = NULL;
 	php_module_shutdown(TSRMLS_C);
 	sapi_shutdown();
