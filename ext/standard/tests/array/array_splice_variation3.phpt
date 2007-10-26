@@ -1,7 +1,5 @@
 --TEST--
 Test array_splice() function : usage variations - lengths and offsets
-
---INI--
 --FILE--
 <?php
 /* 
