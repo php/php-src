@@ -1,3 +1,11 @@
+2007-10-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_alloc.c:
+      Added ability to control memory consumption between request using
+      ZEND_MM_COMPACT environment variable
+
 2007-10-23  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c

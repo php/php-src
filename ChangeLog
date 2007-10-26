@@ -1,3 +1,33 @@
+2007-10-25  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/xmlwriter/tests/bug41326.phpt:
+      that endElement() call was required
+
+    * ext/xmlwriter/tests/bug41326.phpt:
+      fix test
+
+2007-10-25  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * sapi/cgi/cgi_main.c:
+      ws
+
+2007-10-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Added ability to control memory consumption between request using
+      ZEND_MM_COMPACT environment variable
+
+    * (PHP_5_3)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Added CGI SAPI -T option, to measure execution time of script repeated
+      several times.
+
 2007-10-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
