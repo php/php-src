@@ -26,15 +26,16 @@ PHP                                                                        NEWS
 - Fixed dl() to limit argument size to MAXPATHLEN (CVE-2007-4887).
   (Christian Hoffmann)
 - Fixed iconv_*() functions to limit argument sizes as workaround to libc 
-  bug (CVE-2007-4783, CVE-2007-4840). (Christian Hoffmann, Stas)
+  bug (CVE-2007-4783, CVE-2007-4840 by Laurent Gaffie). 
+  (Christian Hoffmann, Stas)
 - Fixed missing brackets leading to build warning and error in the log.
-  Win32 code). (Andrey)
+  Win32 code. (Andrey)
 - Fixed leaks with multiple connects on one mysqli object. (Andrey)
 - Fixed endianness detection on MacOS when building universal binary. 
   (Uwe Schindler, Christian Speich, Tony)
 - Fixed possible triggering of buffer overflows inside glibc
   implementations of the fnmatch(), setlocale() and glob() functions. 
-  Reported by Laurent gaffie. (Ilia)
+  Reported by Laurent Gaffie. (Ilia)
 - Fixed imagerectangle regression with 1x1 rectangle (libgd #106). (Pierre)
 - Fixed htmlentities/htmlspecialchars not to accept partial multibyte
   sequences. (Stas)
