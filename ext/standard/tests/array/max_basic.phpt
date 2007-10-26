@@ -1,6 +1,5 @@
 --TEST--
 Test return type and value for expected input max()
---INI--
 --FILE--
 <?php
 /* 

@@ -1,6 +1,5 @@
 --TEST--
 Test variations in usage of min()
---INI--
 --FILE--
 <?php
 /* 

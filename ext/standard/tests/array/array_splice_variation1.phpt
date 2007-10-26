@@ -1,7 +1,5 @@
 --TEST--
 Test array_splice() function : usage variations - references
-
---INI--
 --FILE--
 <?php
 /* 
