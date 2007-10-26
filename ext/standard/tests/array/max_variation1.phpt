@@ -1,6 +1,5 @@
 --TEST--
 Test variations in usage of max()
---INI--
 --FILE--
 <?php
 /* 

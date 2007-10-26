@@ -1,6 +1,5 @@
 --TEST--
 Test array_splice(): basic functionality
---INI--
 --FILE--
 <?php
 /* 
