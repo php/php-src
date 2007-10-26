@@ -1270,7 +1270,11 @@ int main(int argc, char *argv[])
 	fcgi_request request;
 	int repeats = 1;
 	int benchmark = 0;
+#if HAVE_GETTIMEOFDAY
 	struct timeval start, end;
+#else
+	time_t start, end;
+#endif
 #ifndef PHP_WIN32
 	int status = 0;
 #endif
@@ -1551,7 +1555,11 @@ consult the installation file that came with this distribution, or visit \n\
 				case 'T':
 					benchmark = 1;
 					repeats = atoi(php_optarg);
+#ifdef HAVE_GETTIMEOFDAY
 					gettimeofday(&start, NULL);
+#else
+					time(&start);
+#endif
 					break;
 				case 'h':
 				case '?':
@@ -1965,6 +1973,7 @@ fastcgi_request_done:
 out:
 	if (benchmark) {
 		int sec;
+#ifdef HAVE_GETTIMEOFDAY
 		int usec;
 
 		gettimeofday(&end, NULL);
@@ -1976,6 +1985,11 @@ out:
 			usec = (int)(end.tv_usec + 1000000 - start.tv_usec);
 		}
 		fprintf(stderr, "\nElapsed time: %d.%06d sec\n", sec, usec);
+#else
+		time(&end);
+		sec = (int)(end - start);
+		fprintf(stderr, "\nElapsed time: %d sec\n", sec);
+#endif
 	}
 
 	SG(server_context) = NULL;
