@@ -14,7 +14,7 @@ PHP                                                                        NEWS
   array_udiff_assoc(). (Dmitry)
 
 - Fixed move_uploaded_file() to always set file permissions of resulting file
-  according to UMASK (Andrew Sitnikov)
+  according to UMASK. (Andrew Sitnikov)
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 - Fixed regression in glob() when enforcing safe_mode/open_basedir checks on
   paths containing '*'. (Ilia)
@@ -43,8 +43,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #43020 (Warning message is missing with shuffle() and more
   than one argument). (Scott)
-- Fixed bug #4294 (Move *timeout initialization from RINIT to connect time).
-  (Ilia)
+- Fixed bug #42943 (ext/mssql: Move *timeout initialization from RINIT
+  to connect time). (Ilia)
 - Fixed bug #42917 (PDO::FETCH_KEY_PAIR doesn't work with setFetchMode).
   (Ilia)
 - Fixed bug #42890 (Constant "LIST" defined by mysqlclient and c-client).
