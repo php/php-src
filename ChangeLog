@@ -1,3 +1,169 @@
+2007-10-26  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      add attribution
+
+2007-10-26  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * ext/standard/tests/array/array_splice_basic.phpt
+      ext/standard/tests/array/array_splice_basic.phpt
+      ext/standard/tests/array/array_splice_basic.phpt
+      ext/standard/tests/array/array_splice_errors.phpt
+      ext/standard/tests/array/array_splice_errors.phpt
+      ext/standard/tests/array/array_splice_errors.phpt
+      ext/standard/tests/array/array_splice_variation1.phpt
+      ext/standard/tests/array/array_splice_variation1.phpt
+      ext/standard/tests/array/array_splice_variation1.phpt
+      ext/standard/tests/array/array_splice_variation2.phpt
+      ext/standard/tests/array/array_splice_variation2.phpt
+      ext/standard/tests/array/array_splice_variation2.phpt
+      ext/standard/tests/array/array_splice_variation3.phpt
+      ext/standard/tests/array/array_splice_variation3.phpt
+      ext/standard/tests/array/array_splice_variation3.phpt
+      ext/standard/tests/array/array_splice_variation4.phpt
+      ext/standard/tests/array/array_splice_variation4.phpt
+      ext/standard/tests/array/array_splice_variation4.phpt
+      ext/standard/tests/array/max_basic.phpt
+      ext/standard/tests/array/max_basic.phpt
+      ext/standard/tests/array/max_basic.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation2.phpt
+      ext/standard/tests/array/max_variation2.phpt
+      ext/standard/tests/array/max_variation2.phpt
+      ext/standard/tests/array/min_basic.phpt
+      ext/standard/tests/array/min_basic.phpt
+      ext/standard/tests/array/min_basic.phpt
+      ext/standard/tests/array/min_error.phpt
+      ext/standard/tests/array/min_error.phpt
+      ext/standard/tests/array/min_error.phpt
+      ext/standard/tests/array/min_variation1.phpt
+      ext/standard/tests/array/min_variation1.phpt
+      ext/standard/tests/array/min_variation1.phpt
+      ext/standard/tests/array/min_variation2.phpt
+      ext/standard/tests/array/min_variation2.phpt
+      ext/standard/tests/array/min_variation2.phpt:
+      Remove unneeded INI sections
+
+2007-10-26  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/array/array_unshift_object.phpt
+      ext/standard/tests/array/array_unshift_object.phpt:
+      more testcases for array_unshift() function
+
+    * ext/standard/tests/array/array_unshift_object.phpt
+      ext/standard/tests/array/array_unshift_object.phpt
+      ext/standard/tests/array/array_unshift_object.phpt:
+        1.1.4;
+      file array_unshift_object.phpt was initially added on branch PHP_5_2.
+
+2007-10-26  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_splice_basic.phpt
+      ext/standard/tests/array/array_splice_basic.phpt
+      ext/standard/tests/array/array_splice_errors.phpt
+      ext/standard/tests/array/array_splice_errors.phpt
+      ext/standard/tests/array/array_splice_variation1.phpt
+      ext/standard/tests/array/array_splice_variation1.phpt
+      ext/standard/tests/array/array_splice_variation2.phpt
+      ext/standard/tests/array/array_splice_variation2.phpt
+      ext/standard/tests/array/array_splice_variation3.phpt
+      ext/standard/tests/array/array_splice_variation3.phpt
+      ext/standard/tests/array/array_splice_variation4.phpt
+      ext/standard/tests/array/array_splice_variation4.phpt:
+      new testcases for array_splice
+
+    * ext/standard/tests/array/array_splice_basic.phpt
+      ext/standard/tests/array/array_splice_basic.phpt
+      ext/standard/tests/array/array_splice_basic.phpt
+      ext/standard/tests/array/array_splice_errors.phpt
+      ext/standard/tests/array/array_splice_errors.phpt
+      ext/standard/tests/array/array_splice_errors.phpt
+      ext/standard/tests/array/array_splice_variation1.phpt
+      ext/standard/tests/array/array_splice_variation1.phpt
+      ext/standard/tests/array/array_splice_variation1.phpt
+      ext/standard/tests/array/array_splice_variation2.phpt
+      ext/standard/tests/array/array_splice_variation2.phpt
+      ext/standard/tests/array/array_splice_variation2.phpt
+      ext/standard/tests/array/array_splice_variation3.phpt
+      ext/standard/tests/array/array_splice_variation3.phpt
+      ext/standard/tests/array/array_splice_variation3.phpt
+      ext/standard/tests/array/array_splice_variation4.phpt
+      ext/standard/tests/array/array_splice_variation4.phpt
+      ext/standard/tests/array/array_splice_variation4.phpt:
+        1.1.4;
+      new testcases for array_splice
+
+    * (PHP_5_2)
+      ext/standard/tests/array/max_basic.phpt
+      ext/standard/tests/array/max_basic.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation2.phpt
+      ext/standard/tests/array/max_variation2.phpt
+      ext/standard/tests/array/min_basic.phpt
+      ext/standard/tests/array/min_basic.phpt
+      ext/standard/tests/array/min_error.phpt
+      ext/standard/tests/array/min_error.phpt
+      ext/standard/tests/array/min_variation1.phpt
+      ext/standard/tests/array/min_variation1.phpt
+      ext/standard/tests/array/min_variation2.phpt
+      ext/standard/tests/array/min_variation2.phpt:
+      new testcases for max and min
+
+    * ext/standard/tests/array/max_basic.phpt
+      ext/standard/tests/array/max_basic.phpt
+      ext/standard/tests/array/max_basic.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation2.phpt
+      ext/standard/tests/array/max_variation2.phpt
+      ext/standard/tests/array/max_variation2.phpt
+      ext/standard/tests/array/min_basic.phpt
+      ext/standard/tests/array/min_basic.phpt
+      ext/standard/tests/array/min_basic.phpt
+      ext/standard/tests/array/min_error.phpt
+      ext/standard/tests/array/min_error.phpt
+      ext/standard/tests/array/min_error.phpt
+      ext/standard/tests/array/min_variation1.phpt
+      ext/standard/tests/array/min_variation1.phpt
+      ext/standard/tests/array/min_variation1.phpt
+      ext/standard/tests/array/min_variation2.phpt
+      ext/standard/tests/array/min_variation2.phpt
+      ext/standard/tests/array/min_variation2.phpt:
+        1.1.4;
+      new testcases for max and min
+
+2007-10-26  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      fix news
+
+2007-10-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Added check for HAVE_GETTIMEOFDAY
+
+2007-10-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/gd/tests/bug38212.phpt:
+      Fixed a typo
+
 2007-10-25  Antony Dovgal  <tony@daylessday.org>
 
     * ext/xmlwriter/tests/bug41326.phpt:
