@@ -1,3 +1,120 @@
+2007-10-27  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/shuffle_basic1.phpt
+      ext/standard/tests/array/shuffle_basic1.phpt
+      ext/standard/tests/array/shuffle_basic2.phpt
+      ext/standard/tests/array/shuffle_basic2.phpt
+      ext/standard/tests/array/shuffle_error.phpt
+      ext/standard/tests/array/shuffle_error.phpt
+      ext/standard/tests/array/shuffle_variation1.phpt
+      ext/standard/tests/array/shuffle_variation1.phpt
+      ext/standard/tests/array/shuffle_variation2.phpt
+      ext/standard/tests/array/shuffle_variation2.phpt
+      ext/standard/tests/array/shuffle_variation3.phpt
+      ext/standard/tests/array/shuffle_variation3.phpt
+      ext/standard/tests/array/shuffle_variation4.phpt
+      ext/standard/tests/array/shuffle_variation4.phpt
+      ext/standard/tests/array/shuffle_variation5.phpt
+      ext/standard/tests/array/shuffle_variation5.phpt:
+      New testcases for shuffle() function
+
+    * ext/standard/tests/array/shuffle_basic1.phpt
+      ext/standard/tests/array/shuffle_basic1.phpt
+      ext/standard/tests/array/shuffle_basic1.phpt
+      ext/standard/tests/array/shuffle_basic2.phpt
+      ext/standard/tests/array/shuffle_basic2.phpt
+      ext/standard/tests/array/shuffle_basic2.phpt
+      ext/standard/tests/array/shuffle_error.phpt
+      ext/standard/tests/array/shuffle_error.phpt
+      ext/standard/tests/array/shuffle_error.phpt
+      ext/standard/tests/array/shuffle_variation1.phpt
+      ext/standard/tests/array/shuffle_variation1.phpt
+      ext/standard/tests/array/shuffle_variation1.phpt
+      ext/standard/tests/array/shuffle_variation2.phpt
+      ext/standard/tests/array/shuffle_variation2.phpt
+      ext/standard/tests/array/shuffle_variation2.phpt
+      ext/standard/tests/array/shuffle_variation3.phpt
+      ext/standard/tests/array/shuffle_variation3.phpt
+      ext/standard/tests/array/shuffle_variation3.phpt
+      ext/standard/tests/array/shuffle_variation4.phpt
+      ext/standard/tests/array/shuffle_variation4.phpt
+      ext/standard/tests/array/shuffle_variation4.phpt
+      ext/standard/tests/array/shuffle_variation5.phpt
+      ext/standard/tests/array/shuffle_variation5.phpt
+      ext/standard/tests/array/shuffle_variation5.phpt:
+        1.1.4;
+      New testcases for shuffle() function
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_intersect_basic.phpt
+      ext/standard/tests/array/array_intersect_basic.phpt
+      ext/standard/tests/array/array_intersect_error.phpt
+      ext/standard/tests/array/array_intersect_error.phpt
+      ext/standard/tests/array/array_intersect_variation1.phpt
+      ext/standard/tests/array/array_intersect_variation1.phpt
+      ext/standard/tests/array/array_intersect_variation10.phpt
+      ext/standard/tests/array/array_intersect_variation10.phpt
+      ext/standard/tests/array/array_intersect_variation2.phpt
+      ext/standard/tests/array/array_intersect_variation2.phpt
+      ext/standard/tests/array/array_intersect_variation3.phpt
+      ext/standard/tests/array/array_intersect_variation3.phpt
+      ext/standard/tests/array/array_intersect_variation4.phpt
+      ext/standard/tests/array/array_intersect_variation5.phpt
+      ext/standard/tests/array/array_intersect_variation6.phpt
+      ext/standard/tests/array/array_intersect_variation7.phpt
+      ext/standard/tests/array/array_intersect_variation8.phpt
+      ext/standard/tests/array/array_intersect_variation8.phpt
+      ext/standard/tests/array/array_intersect_variation9.phpt
+      ext/standard/tests/array/array_intersect_variation9.phpt:
+      New testcases for array_intersect() function
+
+    * ext/standard/tests/array/array_intersect_variation4.phpt
+      ext/standard/tests/array/array_intersect_variation4.phpt
+      ext/standard/tests/array/array_intersect_variation4.phpt
+      ext/standard/tests/array/array_intersect_variation5.phpt
+      ext/standard/tests/array/array_intersect_variation6.phpt
+      ext/standard/tests/array/array_intersect_variation7.phpt:
+        1.1.4;
+      file array_intersect_variation4.phpt was initially added on branch
+      PHP_5_3.
+
+    * ext/standard/tests/array/array_intersect_basic.phpt
+      ext/standard/tests/array/array_intersect_basic.phpt
+      ext/standard/tests/array/array_intersect_basic.phpt
+      ext/standard/tests/array/array_intersect_error.phpt
+      ext/standard/tests/array/array_intersect_error.phpt
+      ext/standard/tests/array/array_intersect_error.phpt
+      ext/standard/tests/array/array_intersect_variation1.phpt
+      ext/standard/tests/array/array_intersect_variation1.phpt
+      ext/standard/tests/array/array_intersect_variation1.phpt
+      ext/standard/tests/array/array_intersect_variation10.phpt
+      ext/standard/tests/array/array_intersect_variation10.phpt
+      ext/standard/tests/array/array_intersect_variation10.phpt
+      ext/standard/tests/array/array_intersect_variation2.phpt
+      ext/standard/tests/array/array_intersect_variation2.phpt
+      ext/standard/tests/array/array_intersect_variation2.phpt
+      ext/standard/tests/array/array_intersect_variation3.phpt
+      ext/standard/tests/array/array_intersect_variation3.phpt
+      ext/standard/tests/array/array_intersect_variation3.phpt
+      ext/standard/tests/array/array_intersect_variation5.phpt
+      ext/standard/tests/array/array_intersect_variation5.phpt
+      ext/standard/tests/array/array_intersect_variation5.phpt
+      ext/standard/tests/array/array_intersect_variation6.phpt
+      ext/standard/tests/array/array_intersect_variation6.phpt
+      ext/standard/tests/array/array_intersect_variation6.phpt
+      ext/standard/tests/array/array_intersect_variation7.phpt
+      ext/standard/tests/array/array_intersect_variation7.phpt
+      ext/standard/tests/array/array_intersect_variation7.phpt
+      ext/standard/tests/array/array_intersect_variation8.phpt
+      ext/standard/tests/array/array_intersect_variation8.phpt
+      ext/standard/tests/array/array_intersect_variation8.phpt
+      ext/standard/tests/array/array_intersect_variation9.phpt
+      ext/standard/tests/array/array_intersect_variation9.phpt
+      ext/standard/tests/array/array_intersect_variation9.phpt:
+        1.1.4;
+      New testcases for array_intersect() function
+
 2007-10-26  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)
