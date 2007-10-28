@@ -3484,7 +3484,7 @@ ZEND_METHOD(reflection_class, isInstance)
    Returns an instance of this class */
 ZEND_METHOD(reflection_class, newInstance)
 {
-	zval *retval_ptr;
+	zval *retval_ptr = NULL;
 	reflection_object *intern;
 	zend_class_entry *ce;
 	int argc = ZEND_NUM_ARGS();
@@ -3528,7 +3528,9 @@ ZEND_METHOD(reflection_class, newInstance)
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			efree(params);
-			zval_ptr_dtor(&retval_ptr);
+			if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+			}
 			zend_error(E_WARNING, "Invocation of %v's constructor failed", ce->name);
 			RETURN_NULL();
 		}
@@ -3548,7 +3550,7 @@ ZEND_METHOD(reflection_class, newInstance)
    Returns an instance of this class */
 ZEND_METHOD(reflection_class, newInstanceArgs)
 {
-	zval *retval_ptr;
+	zval *retval_ptr = NULL;
 	reflection_object *intern;
 	zend_class_entry *ce;
 	int argc = 0;
@@ -3603,7 +3605,9 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 			if (params) {
 				efree(params);
 			}
-			zval_ptr_dtor(&retval_ptr);
+			if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+			}
 			zend_error(E_WARNING, "Invocation of %v's constructor failed", ce->name);
 			RETURN_NULL();
 		}
