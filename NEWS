@@ -44,6 +44,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #43020 (Warning message is missing with shuffle() and more
   than one argument). (Scott)
+- Fixed bug #42976 (Crash when constructor for newInstance() or 
+  newInstanceArgs() fails) (Ilia)
 - Fixed bug #42943 (ext/mssql: Move *timeout initialization from RINIT
   to connect time). (Ilia)
 - Fixed bug #42917 (PDO::FETCH_KEY_PAIR doesn't work with setFetchMode).
