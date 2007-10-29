@@ -18,7 +18,7 @@ local infile handler
 	mysqli_real_connect($link, $host, $user, $passwd, "test");
 
 	/* create temporary file */
-	$filename = dirname(__FILE__) . "061.csv";
+	$filename = dirname(__FILE__) . "/061.csv";
 	$fp = fopen($filename, "w");
 	fwrite($fp, "foo;bar");
 	fclose($fp);
