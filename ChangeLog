@@ -1,3 +1,28 @@
+2007-10-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug42976.phpt:
+      
+      MFB: Fixed bug #42976 (Crash when constructor for newInstance() or
+      newInstanceArgs() fails)
+
+    * ext/reflection/tests/bug42976.phpt
+      ext/reflection/tests/bug42976.phpt:
+      
+      
+      MFB: Fixed bug #42976 (Crash when constructor for newInstance() or
+      newInstanceArgs() fails)
+
+    * (PHP_5_3)
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug42976.phpt
+      ext/reflection/tests/bug42976.phpt:
+      Fixed bug #42976 (Crash when constructor for newInstance() or
+      newInstanceArgs() fails)
+
 2007-10-27  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * (PHP_5_2)
