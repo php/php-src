@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 - Added support for dynamic access of static members using $foo::myFunc().
   (Etienne Kneuss)
 - Added "compact" handler for Zend MM storage. (Dmitry)
+- Added '+' and '*' specifiers to zend_parse_parameters(). (Andrei)
 - Upgraded PCRE to version 7.4 (Nuno)
 
 - Improved php.ini handling: (Jani)
