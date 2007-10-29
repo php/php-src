@@ -1858,21 +1858,19 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_
 
 static inline void zend_free_obj_get_result(zval *op) /* {{{ */
 {
-	if (op) {
-		if (Z_REFCOUNT_P(op) == 0) {
-			zval_dtor(op);
-			FREE_ZVAL(op);
-		} else {
-			zval_ptr_dtor(&op);
-		}
+	if (Z_REFCOUNT_P(op) == 0) {
+		zval_dtor(op);
+		FREE_ZVAL(op);
+	} else {
+		zval_ptr_dtor(&op);
 	}
 }
 /* }}} */
 
 #define COMPARE_RETURN_AND_FREE(retval) \
-			zend_free_obj_get_result(op1_free); \
-			zend_free_obj_get_result(op2_free); \
-			return retval;
+	if (op1_free) {zend_free_obj_get_result(op1_free);} \
+	if (op2_free) {zend_free_obj_get_result(op2_free);} \
+	return retval;
 
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
