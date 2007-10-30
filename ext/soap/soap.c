@@ -1749,7 +1749,7 @@ PHP_METHOD(SoapServer, handle)
 	sdlPtr old_sdl = NULL;
 	soap_server_object *service;
 	xmlDocPtr doc_request=NULL, doc_return;
-	zval function_name, **params, **raw_post, *soap_obj, retval;
+	zval function_name, **params, **raw_post, *soap_obj, *retval;
 	char *fn_name, cont_len[30];
 	int num_params = 0, size, i, call_status = 0;
 	xmlChar *buf;
@@ -1770,7 +1770,6 @@ PHP_METHOD(SoapServer, handle)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|t", &arg, &arg_len, &arg_type) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
-	INIT_ZVAL(retval);
 
 	if (SG(request_info).request_method &&
 	    strcmp(SG(request_info).request_method, "GET") == 0 &&
@@ -1819,6 +1818,8 @@ PHP_METHOD(SoapServer, handle)
 			return;
 		}
 	}
+
+	ALLOC_INIT_ZVAL(retval);
 
 	if (php_output_start_default(TSRMLS_C) != SUCCESS) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR,"ob_start failed");
@@ -2119,7 +2120,7 @@ PHP_METHOD(SoapServer, handle)
 	    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
 	     zend_hash_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
 		if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
-			call_status = call_user_function(NULL, &soap_obj, &function_name, &retval, num_params, params TSRMLS_CC);
+			call_status = call_user_function(NULL, &soap_obj, &function_name, retval, num_params, params TSRMLS_CC);
 			if (service->type == SOAP_CLASS) {
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 				if (service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
@@ -2132,7 +2133,7 @@ PHP_METHOD(SoapServer, handle)
 #endif
 			}
 		} else {
-			call_status = call_user_function(EG(function_table), NULL, &function_name, &retval, num_params, params TSRMLS_CC);
+			call_status = call_user_function(EG(function_table), NULL, &function_name, retval, num_params, params TSRMLS_CC);
 		}
 	} else {
 		php_error(E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
@@ -2159,10 +2160,10 @@ PHP_METHOD(SoapServer, handle)
 	if (call_status == SUCCESS) {
 		char *response_name;
 
-		if (Z_TYPE(retval) == IS_OBJECT &&
-		    instanceof_function(Z_OBJCE(retval), soap_fault_class_entry TSRMLS_CC)) {
+		if (Z_TYPE_P(retval) == IS_OBJECT &&
+		    instanceof_function(Z_OBJCE_P(retval), soap_fault_class_entry TSRMLS_CC)) {
 			php_output_discard(TSRMLS_C);
-			soap_server_fault_ex(function, &retval, NULL TSRMLS_CC);
+			soap_server_fault_ex(function, retval, NULL TSRMLS_CC);
 			goto fail;
 		}
 
@@ -2173,7 +2174,7 @@ PHP_METHOD(SoapServer, handle)
 			memcpy(response_name,Z_STRVAL(function_name),Z_STRLEN(function_name));
 			memcpy(response_name+Z_STRLEN(function_name),"Response",sizeof("Response"));
 		}
-		doc_return = serialize_response_call(function, response_name, service->uri, &retval, soap_headers, soap_version TSRMLS_CC);
+		doc_return = serialize_response_call(function, response_name, service->uri, retval, soap_headers, soap_version TSRMLS_CC);
 		efree(response_name);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Function '%s' call failed", Z_STRVAL(function_name));
@@ -2249,7 +2250,7 @@ fail:
 	SOAP_GLOBAL(features) = old_features;
 
 	/* Free soap headers */
-	zval_dtor(&retval);
+	zval_ptr_dtor(&retval);
 	while (soap_headers != NULL) {
 		soapHeader *h = soap_headers;
 		int i;
