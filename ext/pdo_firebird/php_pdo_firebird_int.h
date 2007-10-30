@@ -31,6 +31,10 @@
 
 #define PDO_FB_DIALECT 3
 
+#define PDO_FB_DEF_DATE_FMT "%Y-%m-%d"
+#define PDO_FB_DEF_TIME_FMT "%H:%M:%S"
+#define PDO_FB_DEF_TIMESTAMP_FMT PDO_FB_DEF_DATE_FMT " " PDO_FB_DEF_TIME_FMT
+
 #define SHORT_MAX (1 << (8*sizeof(short)-1))
 
 #if SIZEOF_LONG == 8
@@ -73,6 +77,11 @@ typedef struct {
 	/* the last error that didn't come from the API */
 	char const *last_app_error;
 	
+	/* date and time format strings, can be set by the set_attribute method */
+	char *date_format;
+	char *time_format;
+	char *timestamp_format;
+	
 } pdo_firebird_db_handle;
 
 
@@ -114,6 +123,12 @@ extern pdo_driver_t pdo_firebird_driver;
 extern struct pdo_stmt_methods firebird_stmt_methods;
 
 void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, long line TSRMLS_DC);
+
+enum {
+	PDO_FB_ATTR_DATE_FORMAT = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_FB_ATTR_TIME_FORMAT,
+	PDO_FB_ATTR_TIMESTAMP_FORMAT,
+};
 
 #endif	/* PHP_PDO_FIREBIRD_INT_H */
 
