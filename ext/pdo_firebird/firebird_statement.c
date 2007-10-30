@@ -170,43 +170,11 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ 
 	col->maxlen = var->sqllen;
 	col->namelen = var->aliasname_length;
 	col->name = estrndup(var->aliasname,var->aliasname_length);
-	
+	col->param_type = PDO_PARAM_STR;
+
 	return 1;
 }
 /* }}} */
-
-#if abies_0
-/* internal function to override return types of parameters */
-static void set_param_type(enum pdo_param_type *param_type, XSQLVAR const *var) /* {{{ */
-{
-	/* set the param type after the field type */
-	switch (var->sqltype & ~1) {
-		case SQL_INT64:
-#if SIZEOF_LONG < 8
-			if (0) /* always a string if its size exceeds native long */
-#endif
-		case SQL_SHORT:
-		case SQL_LONG:
-			if (var->sqlscale == 0) {
-				*param_type = PDO_PARAM_INT;
-				break;
-			}
-		case SQL_TEXT:
-		case SQL_VARYING:
-		case SQL_TYPE_DATE:
-		case SQL_TYPE_TIME:
-		case SQL_TIMESTAMP:
-		case SQL_BLOB:
-			*param_type = PDO_PARAM_STR;
-			break;
-		case SQL_FLOAT:
-		case SQL_DOUBLE:
-			*param_type = PDO_PARAM_DBL;
-			break;
-	}
-}
-/* }}} */
-#endif
 
 #define FETCH_BUF(buf,type,len,lenvar) ((buf) = (buf) ? (buf) : \
 	emalloc((len) ? (len * sizeof(type)) : ((*(unsigned long*)lenvar) = sizeof(type))))
@@ -302,15 +270,24 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 		*ptr = NULL;
 		*len = 0;
 	} else {
-		/* override the column param type */
-		/* set_param_type(&stmt->columns[colno].param_type,var); */
-		stmt->columns[colno].param_type = PDO_PARAM_STR;
-		
 		if (var->sqlscale < 0) {
-			static ISC_INT64 const scales[] = { 1, 10, 100, 1000, 10000, 100000, 1000000,
-				100000000, 1000000000, 1000000000, LL_LIT(10000000000),LL_LIT(100000000000),
-				LL_LIT(10000000000000), LL_LIT(100000000000000),LL_LIT(1000000000000000),
-				LL_LIT(1000000000000000),LL_LIT(1000000000000000000) };
+			static ISC_INT64 const scales[] = { 1, 10, 100, 1000, 
+				10000, 
+				100000, 
+				1000000, 
+				10000000,
+				100000000, 
+				1000000000, 
+				LL_LIT(10000000000), 
+				LL_LIT(100000000000),
+				LL_LIT(1000000000000), 
+				LL_LIT(10000000000000), 
+				LL_LIT(100000000000000),
+				LL_LIT(1000000000000000),
+				LL_LIT(10000000000000000), 
+				LL_LIT(100000000000000000), 
+				LL_LIT(1000000000000000000)
+			};
 			ISC_INT64 n, f = scales[-var->sqlscale];
 
 			switch (var->sqltype & ~1) {
@@ -327,24 +304,19 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 			*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 			
 			if (n >= 0) {
-				*len = snprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d", 
+				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d", 
 					n / f, -var->sqlscale, n % f);
 			} else if (n < -f) {
-				*len = snprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d",
+				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d",
 					n / f, -var->sqlscale, -n % f);				
 			 } else {
-				*len = snprintf(*ptr, CHAR_BUF_LEN, "-0.%0*" LL_MASK "d", -var->sqlscale, -n % f);
+				*len = slprintf(*ptr, CHAR_BUF_LEN, "-0.%0*" LL_MASK "d", -var->sqlscale, -n % f);
 			}
 		} else {
 			switch (var->sqltype & ~1) {
 				struct tm t;
 				char *fmt;				
 
-/**
-* For the time being, this code has been changed to convert every returned value to a string
-* before passing it back up to the PDO driver.
-*/
-				
 				case SQL_VARYING:
 					*ptr = &var->sqldata[2];
 					*len = *(short*)var->sqldata;
@@ -353,70 +325,37 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*ptr = var->sqldata;
 					*len = var->sqllen;
 					break;
-/* --- cut here --- */
 				case SQL_SHORT:
 				    *ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN"%d", *(short*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%d", *(short*)var->sqldata);
 					break;
 				case SQL_LONG:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN"%ld", *(ISC_LONG*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%ld", *(ISC_LONG*)var->sqldata);
 					break;
 				case SQL_INT64:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN"%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
 					break;
 				case SQL_FLOAT:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN"%f", *(float*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%F", *(float*)var->sqldata);
 					break;
 				case SQL_DOUBLE:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN"%f" , *(double*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%F" , *(double*)var->sqldata);
 					break;
-/* --- cut here --- */
-#if abies_0
-				case SQL_SHORT:
-					*ptr = FETCH_BUF(S->fetch_buf[colno], long, 0, *len);
-					*(long*)*ptr = *(short*)var->sqldata;
-					break;
-				case SQL_LONG:
-#if SIZEOF_LONG == 8
-					*ptr = FETCH_BUF(S->fetch_buf[colno], long, 0, *len);
-					*(long*)*ptr = *(ISC_LONG*)var->sqldata;
-#else
-					*ptr = var->sqldata;
-#endif
-					break;
-				case SQL_INT64:
-					*len = sizeof(long);
-#if SIZEOF_LONG == 8
-					*ptr = var->sqldata;
-#else
-					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = snprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
-#endif
-					break;
-				case SQL_FLOAT:
-					*ptr = FETCH_BUF(S->fetch_buf[colno], double, 0, *len);
-					*(double*)*ptr = *(float*)var->sqldata;
-					break;
-				case SQL_DOUBLE:
-					*ptr = var->sqldata;
-					*len = sizeof(double);
-					break;
-#endif
 				case SQL_TYPE_DATE:
 					isc_decode_sql_date((ISC_DATE*)var->sqldata, &t);
-					fmt = INI_STR("ibase.dateformat");
+					fmt = S->H->date_format ? S->H->date_format : PDO_FB_DEF_DATE_FMT;
 					if (0) {
 				case SQL_TYPE_TIME:
 						isc_decode_sql_time((ISC_TIME*)var->sqldata, &t);
-						fmt = INI_STR("ibase.timeformat");
+						fmt = S->H->time_format ? S->H->time_format : PDO_FB_DEF_TIME_FMT;
 					} else if (0) {
 				case SQL_TIMESTAMP:
 						isc_decode_timestamp((ISC_TIMESTAMP*)var->sqldata, &t);
-						fmt = INI_STR("ibase.timestampformat");
+						fmt = S->H->timestamp_format ? S->H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT;
 					}
 
 					/* convert the timestamp into a string */
@@ -618,13 +557,6 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 							ZVAL_LONG(param->parameter, *(long*)value);
 							break;
 						}
-#if abies_0
-					case PDO_PARAM_DBL:
-						if (value) {
-							ZVAL_DOUBLE(param->parameter, *(double*)value);
-							break;
-						}
-#endif
 					default:
 						ZVAL_NULL(param->parameter);
 				}
