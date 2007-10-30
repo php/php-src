@@ -114,6 +114,16 @@ static int firebird_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 		RECORD_ERROR(dbh);
 	}
 
+	if (H->date_format) {
+		efree(H->date_format);
+	}
+	if (H->time_format) {
+		efree(H->time_format);
+	}
+	if (H->timestamp_format) {
+		efree(H->timestamp_format);
+	}
+	
 	pefree(H, dbh->is_persistent);
 
 	return 0;
@@ -482,6 +492,30 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 				dbh->auto_commit = Z_BVAL_P(val);
 			}
 			return 1;
+
+		case PDO_FB_ATTR_DATE_FORMAT:
+			convert_to_string(val);
+			if (H->date_format) {
+				efree(H->date_format);
+			}
+			spprintf(&H->date_format, 0, "%s", Z_STRVAL_P(val)); 
+			return 1;
+
+		case PDO_FB_ATTR_TIME_FORMAT:
+			convert_to_string(val);
+			if (H->time_format) {
+				efree(H->time_format);
+			}
+			spprintf(&H->time_format, 0, "%s", Z_STRVAL_P(val)); 
+			return 1;
+
+		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
+			convert_to_string(val);
+			if (H->timestamp_format) {
+				efree(H->timestamp_format);
+			}
+			spprintf(&H->timestamp_format, 0, "%s", Z_STRVAL_P(val)); 
+			return 1;
 	}
 	return 0;
 }
@@ -500,7 +534,7 @@ static void firebird_info_cb(void *arg, char const *s) /* {{{ */
 /* }}} */
 
 /* called by PDO to get a driver-specific dbh attribute */
-static int firebird_handle_get_attribute(pdo_dbh_t const *dbh, long attr, zval *val TSRMLS_DC) /* {{{ */
+static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -615,11 +649,11 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 		char dpb_buffer[256] = { isc_dpb_version1 }, *dpb;
 		
 		dpb = dpb_buffer + 1; 
-		
+
 		/* loop through all the provided arguments and set dpb fields accordingly */
 		for (i = 0; i < sizeof(dpb_flags); ++i) {
 			if (dpb_values[i] && buf_len > 0) {
-				dpb_len = snprintf(dpb, buf_len, "%c%c%s", dpb_flags[i], (unsigned char)strlen(dpb_values[i]),
+				dpb_len = slprintf(dpb, buf_len, "%c%c%s", dpb_flags[i], (unsigned char)strlen(dpb_values[i]),
 					dpb_values[i]);
 				dpb += dpb_len;
 				buf_len -= dpb_len;
@@ -627,8 +661,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 		}
 		
 		/* fire it up baby! */
-		if (isc_attach_database(H->isc_status, 0, vars[0].optval, &H->db,(short)(dpb-dpb_buffer),
-				dpb_buffer)) {
+		if (isc_attach_database(H->isc_status, 0, vars[0].optval, &H->db,(short)(dpb-dpb_buffer), dpb_buffer)) {
 			break;
 		}
 		
@@ -646,6 +679,14 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 		}
 	}
 
+	if (!dbh->methods) {
+		char errmsg[512];
+		ISC_STATUS *s = H->isc_status;
+		isc_interprete(errmsg, &s);
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
+				"HY000", H->isc_status[1], errmsg);
+	}
+
 	if (!ret) {
 		firebird_handle_closer(dbh TSRMLS_CC);
 	}
@@ -653,6 +694,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 	return ret;
 }
 /* }}} */
+
 
 pdo_driver_t pdo_firebird_driver = { /* {{{ */
 	PDO_DRIVER_HEADER(firebird),
