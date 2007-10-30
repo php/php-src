@@ -1,3 +1,54 @@
+2007-10-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo/tests/bug_43130.phpt
+      ext/pdo/tests/bug_43130.phpt:
+      
+      MFB: Fixed bug #43130 (Bound parameters cannot have - in their name)
+
+    * (PHP_5_3)
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo/tests/bug_43130.phpt
+      ext/pdo/tests/bug_43130.phpt
+      ext/pdo/tests/bug_43130.phpt:
+      Fixed bug #43130 (Bound parameters cannot have - in their name)
+
+2007-10-29  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Note addition of +/* specifiers
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      Backport +/* vararg specifiers from PHP6
+
+2007-10-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.c:
+      optimization
+
+2007-10-29  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_api.c:
+      MFH:- Fixed invalid handling of float value passed to an integer field on
+      64bit machine
+
+    * ext/mysqli/mysqli_api.c:
+      - Fixed invalid handling of float value passed to an integer field on 64bit
+      machine
+
+    * ext/mysqli/tests/061.phpt:
+      fix test
+
 2007-10-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
