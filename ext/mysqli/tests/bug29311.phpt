@@ -1,5 +1,5 @@
 --TEST--
-constructor test
+Bug #29311 (Cannot override mysqli constructor)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
