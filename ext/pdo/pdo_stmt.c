@@ -1546,6 +1546,10 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		}
 	}
 
+	if ((how & ~PDO_FETCH_FLAGS) == PDO_FETCH_USE_DEFAULT) {
+		how |= stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
+	}
+
 	if (!error)	{
 		PDO_STMT_CLEAR_ERR();
 		MAKE_STD_ZVAL(data);
