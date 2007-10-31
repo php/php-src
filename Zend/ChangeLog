@@ -1,3 +1,10 @@
+2007-10-30  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_API.c:
+      backport zero args checks from HEAD
+      (fixes error message when passing parameters to a function accepting none)
+
 2007-10-29  Sara Golemon  <sara@golemon.com>
 
     * (PHP_5_3)
