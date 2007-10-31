@@ -1,5 +1,5 @@
 --TEST--
-Test fileatime(),filemtime(),filectime() & touch() functions : basic functionality
+Test fileatime(), filemtime(), filectime() & touch() functions : basic functionality
 --FILE--
 <?php
 /*
