@@ -46,6 +46,9 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 
+/* Common */
+#include <time.h>
+
 #define DEFAULT_KEY_LENGTH	512
 #define MIN_KEY_LENGTH		384
 
