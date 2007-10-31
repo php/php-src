@@ -964,7 +964,7 @@ PHP_FUNCTION(min)
 	zval **result;
 
 	if (argc<=0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Atleast one value should be passed");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "At least one value should be passed");
 		RETURN_NULL();
 	}
 	set_compare_func(SORT_REGULAR TSRMLS_CC);
@@ -977,7 +977,7 @@ PHP_FUNCTION(min)
 		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 0, (void **) &result TSRMLS_CC) == SUCCESS) {
 			RETVAL_ZVAL(*result, 1, 0);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain atleast one element");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain at least one element");
 			RETURN_FALSE;
 		}
 	} else {
@@ -1014,7 +1014,7 @@ PHP_FUNCTION(max)
 	zval **result;
 
 	if (argc<=0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Atleast one value should be passed");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "At least one value should be passed");
 		RETURN_NULL();
 	}
 	set_compare_func(SORT_REGULAR TSRMLS_CC);
@@ -1027,7 +1027,7 @@ PHP_FUNCTION(max)
 		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 1, (void **) &result TSRMLS_CC) == SUCCESS) {
 			RETVAL_ZVAL(*result, 1, 0);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain atleast one element");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain at least one element");
 			RETURN_FALSE;
 		}
 	} else {
