@@ -1,3 +1,75 @@
+2007-10-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/tests/bug_43130.phpt:
+      MFB: Test not relavent for sqlite that uses built-in bound syntax
+
+    * (PHP_5_2)
+      ext/pdo/tests/bug_43130.phpt:
+      
+      MFB: Test not relavent for sqlite that uses built-in bound syntax
+
+    * (PHP_5_3)
+      ext/pdo/tests/bug_43130.phpt:
+      Test not relavent for sqlite that uses built-in bound syntax
+
+2007-10-30  Lars Westermann  <lars.westermann@privat.dk>
+
+    * ext/pdo_firebird/firebird_driver.c
+      ext/pdo_firebird/firebird_driver.c:
+      - Added 3 firebird specific attributes to firebird_handle_set_attribute()
+      - function. They control formatting of date/timestamp columns.
+      - pdo_firebird_handle_factory() now throwing an execption if unable to
+      attach
+      - database (bug reports 39822 and 41522)
+      - Fixed bug #39822 (new PDO() doesn't work with firebird)
+      - Fixed bug #41522 (PDO firebird driver returns null if it fails to
+      connect)
+
+    * ext/pdo_firebird/firebird_statement.c
+      ext/pdo_firebird/firebird_statement.c:
+      - Fixed bug #35386 (firebird: first row is null)
+      - Fixed bug #36128 (Interbase PDO - timestamp columns return NULL)
+      - Fixed bug #39700 (NUMERIC error when result precision are 7,8 or 12-14 )
+
+    * ext/pdo_firebird/pdo_firebird.c
+      ext/pdo_firebird/pdo_firebird.c:
+      [DOC] Added 3 firebird specific attributes that can be set via
+      PDO::setAttribute() to control formatting of date/timestamp columns:
+      PDO::FB_ATTR_DATE_FORMAT, PDO::FB_ATTR_TIME_FORMAT and
+      PDO::FB_ATTR_TIMESTAMP_FORMAT.  These attributes are strftime
+      format strings, and operate in the same way as the ibase.dateformat,
+      ibase.timeformat and ibase.timestampformat ini options.
+      (related to bug #36128, Interbase PDO)
+
+    * ext/pdo_firebird/php_pdo_firebird_int.h
+      ext/pdo_firebird/php_pdo_firebird_int.h:
+      - Added default timestamp format definitions (ISO 8601) (related to bug
+      #36128, Interbase PDO)
+
+2007-10-30  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/mysqli/tests/bug29311.phpt
+      ext/mysqli/tests/bug42378.phpt:
+      Fix bug headers
+
+    * (PHP_5_3)
+      ext/mysqli/tests/bug29311.phpt
+      ext/mysqli/tests/bug42378.phpt:
+      - Fix bug headers
+
+2007-10-30  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      backport zero args checks from HEAD
+      (fixes error message when passing parameters to a function accepting none)
+
+2007-10-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c
+      ext/soap/soap.c:
+      Use heap-allocated return value
+
 2007-10-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
