@@ -698,14 +698,10 @@ PHP_FUNCTION(touch)
 /* }}} */
 #endif
 
-/* {{{ proto void clearstatcache(void)
-   Clear file stat cache */
-PHP_FUNCTION(clearstatcache)
+/* {{{ php_clear_stat_cache()
+*/
+PHPAPI void php_clear_stat_cache(TSRMLS_D)
 {
-	if (ZEND_NUM_ARGS()) {
-		WRONG_PARAM_COUNT;
-	}
-
 	if (BG(CurrentStatFile)) {
 		efree(BG(CurrentStatFile));
 		BG(CurrentStatFile) = NULL;
@@ -715,6 +711,17 @@ PHP_FUNCTION(clearstatcache)
 		BG(CurrentLStatFile) = NULL;
 	}
 	realpath_cache_clean(TSRMLS_C);
+}
+/* }}} */
+
+/* {{{ proto void clearstatcache(void)
+   Clear file stat cache */
+PHP_FUNCTION(clearstatcache)
+{
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+	php_clear_stat_cache(TSRMLS_C);
 }
 /* }}} */
 
