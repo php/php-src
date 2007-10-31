@@ -141,6 +141,9 @@ static const opt_struct OPTIONS[] = {
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
+#if PHP_FASTCGI
+ 	{'T', 1, "timing"},
+#endif
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -682,7 +685,11 @@ static void php_cgi_usage(char *argv0)
 			   "  -s               Display colour syntax highlighted source.\n"
 			   "  -v               Version number\n"
 			   "  -w               Display source with stripped comments and whitespace.\n"
-			   "  -z <file>        Load Zend extension <file>.\n",
+			   "  -z <file>        Load Zend extension <file>.\n"
+#if PHP_FASTCGI
+			   "  -T <count>       Measure execution time of script repeated <count> times.\n"
+#endif
+			   ,
 			   prog, prog);
 }
 /* }}} */
@@ -1199,6 +1206,13 @@ int main(int argc, char *argv[])
 	char *bindpath = NULL;
 	int fcgi_fd = 0;
 	fcgi_request request;
+	int repeats = 1;
+	int benchmark = 0;
+#if HAVE_GETTIMEOFDAY
+	struct timeval start, end;
+#else
+	time_t start, end;
+#endif
 #ifndef PHP_WIN32
 	int status = 0;
 #endif
@@ -1488,6 +1502,17 @@ consult the installation file that came with this distribution, or visit \n\
 	zend_first_try {
 		while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1)) != -1) {
 			switch (c) {
+#if PHP_FASTCGI
+				case 'T':
+			        benchmark = 1;
+					repeats = atoi(php_optarg);
+#ifdef HAVE_GETTIMEOFDAY
+					gettimeofday(&start, NULL);
+#else
+					time(&start);
+#endif
+					break;
+#endif
 				case 'h':
 				case '?':
 #if PHP_FASTCGI
@@ -1890,7 +1915,19 @@ fastcgi_request_done:
 		}
 
 #if PHP_FASTCGI
-			if (!fastcgi) break;
+			if (!fastcgi) {
+				if (benchmark) {
+					repeats--;
+					if (repeats > 0) {
+						script_file = NULL;
+						php_optind = orig_optind;
+						php_optarg = orig_optarg;
+						continue;
+					}
+				}
+				break;
+			}
+
 			/* only fastcgi will get here */
 			requests++;
 			if (max_requests && (requests == max_requests)) {
@@ -1920,6 +1957,29 @@ fastcgi_request_done:
 	} zend_end_try();
 
 out:
+#if PHP_FASTCGI
+	if (benchmark) {
+		int sec;
+#ifdef HAVE_GETTIMEOFDAY
+		int usec;
+
+		gettimeofday(&end, NULL);
+		sec = (int)(end.tv_sec - start.tv_sec);
+		if (end.tv_usec >= start.tv_usec) {
+			usec = (int)(end.tv_usec - start.tv_usec);
+		} else {
+			sec -= 1;
+			usec = (int)(end.tv_usec + 1000000 - start.tv_usec);
+		}
+		fprintf(stderr, "\nElapsed time: %d.%06d sec\n", sec, usec);
+#else
+		time(&end);
+		sec = (int)(end - start);
+		fprintf(stderr, "\nElapsed time: %d sec\n", sec);
+#endif
+	}
+#endif
+
 	SG(server_context) = NULL;
 	php_module_shutdown(TSRMLS_C);
 	sapi_shutdown();
