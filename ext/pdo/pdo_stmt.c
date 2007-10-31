@@ -1236,7 +1236,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 }
 /* }}} */
 
-static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS_DC) /* {{{ */
+static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, long mode, int fetch_all TSRMLS_DC) /* {{{ */
 {
 	int flags = mode & PDO_FETCH_FLAGS;
 
@@ -1520,6 +1520,10 @@ static PHP_METHOD(PDOStatement, fetchAll)
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Extraneous additional parameters" TSRMLS_CC);
 			error = 1;
 		}
+	}
+
+	if ((how & ~PDO_FETCH_FLAGS) == PDO_FETCH_USE_DEFAULT) {
+		how |= stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
 	}
 
 	if (!error)	{
@@ -1890,6 +1894,7 @@ fail_out:
 		case PDO_FETCH_OBJ:
 		case PDO_FETCH_BOUND:
 		case PDO_FETCH_NAMED:
+		case PDO_FETCH_KEY_PAIR:
 			break;
 
 		case PDO_FETCH_COLUMN:
