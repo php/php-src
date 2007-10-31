@@ -1,5 +1,5 @@
 --TEST--
-Test fileatime(), filemtime(), filectime() & touch() functions: error conditions 
+Test fileatime(), filemtime(), filectime() & touch() functions : error conditions 
 --FILE--
 <?php
 /*

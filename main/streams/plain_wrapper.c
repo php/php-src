@@ -24,6 +24,7 @@
 #include "php_open_temporary_file.h"
 #include "ext/standard/file.h"
 #include "ext/standard/flock_compat.h"
+#include "ext/standard/php_filestat.h"
 #include <stddef.h>
 #include <fcntl.h>
 #if HAVE_SYS_WAIT_H
@@ -1025,13 +1026,10 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 		}
 		return 0;
 	}
+
 	/* Clear stat cache */
-	ZVAL_ASCII_STRINGL(&funcname, "clearstatcache", sizeof("clearstatcache")-1, 1);
-	call_user_function_ex(CG(function_table), NULL, &funcname, &retval, 0, NULL, 0, NULL TSRMLS_CC);
-	zval_dtor(&funcname);
-	if (retval) {
-		zval_ptr_dtor(&retval);
-	}
+	php_clear_stat_cache(TSRMLS_C);
+
 	return 1;
 }
 
@@ -1095,6 +1093,9 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 		php_error_docref2(NULL TSRMLS_CC, url_from, url_to, E_WARNING, "%s", strerror(errno));
         return 0;
 	}
+
+	/* Clear stat cache */
+	php_clear_stat_cache(TSRMLS_C);
 
 	return 1;
 }
@@ -1202,6 +1203,9 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int opt
 		php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "%s", strerror(errno));
 		return 0;
 	}
+
+	/* Clear stat cache */
+	php_clear_stat_cache(TSRMLS_C);
 
 	return 1;
 }
@@ -1358,9 +1362,6 @@ stream_skip:
 
 }
 /* }}} */
-
-
-
 
 /*
  * Local variables:
