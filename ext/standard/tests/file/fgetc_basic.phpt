@@ -40,7 +40,7 @@ for($outerloop_counter = 0; $outerloop_counter < count($file_content_types); $ou
       exit();
     }
 
-    // perform the read file atleast 6 char and check 
+    // perform the read file at least 6 char and check 
     for( $counter = 1; $counter <= 6; $counter++ ) {
       // read data from the file and check, file pointer position, feof etc
       var_dump( fgetc($file_handle) ); // read a char

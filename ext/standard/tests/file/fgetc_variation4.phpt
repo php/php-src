@@ -34,7 +34,7 @@ foreach ($file_modes as $file_mode ) {
   var_dump( ftell($file_handle) ); 
   var_dump( feof($file_handle) );
 
-  // read from file, atleast 7 chars
+  // read from file, at least 7 chars
   for($counter =0; $counter < 7; $counter ++) {
     var_dump( fgetc($file_handle) ); // expected : 1 char
     var_dump( ftell($file_handle) );
