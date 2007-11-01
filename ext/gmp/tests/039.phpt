@@ -1,40 +1,60 @@
 --TEST--
-gmp_init() basic tests
+gmp_testbit() basic tests
 --SKIPIF--
 <?php if (!extension_loaded("gmp")) print "skip"; ?>
 --FILE--
 <?php
 
-var_dump(gmp_init("98765678"));
-var_dump(gmp_strval(gmp_init("98765678")));
-var_dump(gmp_strval(gmp_init()));
-var_dump(gmp_init());
-var_dump(gmp_init(1,2,3,4));
-var_dump(gmp_init(1,-1));
-var_dump(gmp_init("",36));
-var_dump(gmp_init("foo",3));
-var_dump(gmp_strval(gmp_init("993247326237679187178",3)));
+$n = gmp_init(0);
+var_dump(gmp_testbit($n, -10));
+var_dump(gmp_testbit($n, 0));
+var_dump(gmp_testbit($n, 1));
+var_dump(gmp_testbit($n, 100));
+
+$n = gmp_init(-1);
+var_dump(gmp_testbit($n, 1));
+var_dump(gmp_testbit($n, -1));
+
+$n = gmp_init("1000000");
+var_dump(gmp_testbit($n, 1));
+gmp_setbit($n, 1);
+var_dump(gmp_testbit($n, 1));
+var_dump(gmp_strval($n));
+
+gmp_setbit($n, 5);
+var_dump(gmp_testbit($n, 5));
+var_dump(gmp_strval($n));
+
+$n = gmp_init("238462734628347239571823641234");
+var_dump(gmp_testbit($n, 5));
+gmp_setbit($n, 5);
+var_dump(gmp_testbit($n, 5));
+var_dump(gmp_strval($n));
+
+gmp_clrbit($n, 5);
+var_dump(gmp_testbit($n, 5));
+var_dump(gmp_strval($n));
 
 echo "Done\n";
 ?>
 --EXPECTF--	
-resource(%d) of type (GMP integer)
-string(8) "98765678"
-
-Warning: gmp_init() expects at least 1 parameter, 0 given in %s on line %d
-
-Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_init() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: gmp_init() expects at most 2 parameters, 4 given in %s on line %d
-NULL
-
-Warning: gmp_init(): Bad base for conversion: -1 (should be between 2 and 36) in %s on line %d
+Warning: gmp_testbit(): Index must be greater than or equal to zero in %s on line %d
 bool(false)
 bool(false)
 bool(false)
-string(1) "0"
+bool(false)
+bool(true)
+
+Warning: gmp_testbit(): Index must be greater than or equal to zero in %s on line %d
+bool(false)
+bool(false)
+bool(true)
+string(7) "1000002"
+bool(true)
+string(7) "1000034"
+bool(false)
+bool(true)
+string(30) "238462734628347239571823641266"
+bool(false)
+string(30) "238462734628347239571823641234"
 Done
