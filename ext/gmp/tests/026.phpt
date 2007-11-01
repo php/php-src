@@ -31,7 +31,7 @@ int(-1)
 int(0)
 int(1)
 int(-1)
-int(-2)
+int(-1)
 int(0)
 
 Warning: gmp_cmp() expects exactly 2 parameters, 3 given in %s on line %d
