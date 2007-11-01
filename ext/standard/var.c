@@ -20,8 +20,6 @@
 
 /* $Id$ */
 
-
-
 /* {{{ includes 
 */
 
@@ -258,6 +256,7 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
 	zend_uint class_name_len;
 	zend_class_entry *ce;
 	int (*zval_element_dump_func)(zval**, int, va_list, zend_hash_key*);
+	int is_temp = 0;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -274,8 +273,7 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
 		php_printf("%slong(%ld) refcount(%u)\n", COMMON, Z_LVAL_PP(struc), Z_REFCOUNT_PP(struc));
 		break;
 	case IS_DOUBLE:
-		php_printf("%sdouble(%.*G) refcount(%u)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc), 
-Z_REFCOUNT_PP(struc));
+		php_printf("%sdouble(%.*G) refcount(%u)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc), Z_REFCOUNT_PP(struc));
 		break;
 	case IS_STRING:
 		php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_PP(struc));
@@ -292,19 +290,23 @@ Z_REFCOUNT_PP(struc));
 		zval_element_dump_func = zval_array_element_dump;
 		goto head_done;
 	case IS_OBJECT:
-		myht = Z_OBJPROP_PP(struc);
+		myht = Z_OBJDEBUG_PP(struc, is_temp);
 		if (myht && myht->nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
 			return;
 		}
-		ce = Z_OBJCE(**struc);
-		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
+		ce = Z_OBJCE_PP(struc);
+		Z_OBJ_HANDLER_PP(struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_PP(struc));
 		efree(class_name);
 		zval_element_dump_func = zval_object_property_dump;
 head_done:
 		if (myht) {
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) zval_element_dump_func, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
+			if (is_temp) {
+				zend_hash_destroy(myht);
+				efree(myht);
+			}
 		}
 		if (level > 1) {
 			php_printf("%*c", level-1, ' ');
