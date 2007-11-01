@@ -55,6 +55,9 @@ bool(false)
 Warning: gmp_jacobi(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
+Warning: gmp_jacobi(): Unable to convert variable to GMP - wrong type in %s on line %d
+bool(false)
+
 Warning: gmp_jacobi() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
