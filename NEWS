@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
+- Added gmp_testbit() function from HEAD. (Stas)
 - Added CGI SAPI -T option, to measure execution time of script repeated
   several times. (Dmitry)
 - Added icon format support to getimagesize(). (Scott)
@@ -18,6 +19,7 @@ PHP                                                                        NEWS
   (Etienne Kneuss)
 - Added "compact" handler for Zend MM storage. (Dmitry)
 - Added '+' and '*' specifiers to zend_parse_parameters(). (Andrei)
+
 - Upgraded PCRE to version 7.4 (Nuno)
 
 - Improved php.ini handling: (Jani)
@@ -42,7 +44,6 @@ PHP                                                                        NEWS
   . Added access to internal values of DSA, RSA and DH keys
 - Improved and cleaned CGI code. FastCGI is now always enabled and can not be
   disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
-- Added gmp_testbit() function from HEAD. (Stas)
 
 - Fixed possible crash in ext/soap because of uninitialized value (Zdash Urf)
 
