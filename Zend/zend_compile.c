@@ -4496,10 +4496,11 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 		 * want to tell them to put declare() at the top.
 		 */
 		if (CG(active_op_array)->last > 0) {
-			/* ignore ZEND_EXT_STMT */
+			/* ignore ZEND_EXT_STMT and ZEND_TICKS */
 			int num = CG(active_op_array)->last;
 			while (num > 0 &&
-			       CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT) {
+			       (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
+			        CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
 				--num;
 			}
 			if (num > 0) {
@@ -5075,10 +5076,11 @@ void zend_do_namespace(znode *name TSRMLS_DC) /* {{{ */
 	zstr lcname;
 
 	if (CG(active_op_array)->last > 0) {
-		/* ignore ZEND_EXT_STMT */
+		/* ignore ZEND_EXT_STMT and ZEND_TICKS */
 		int num = CG(active_op_array)->last;
 		while (num > 0 &&
-		       CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT) {
+		       (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
+		        CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
 			--num;
 		}
 		if (num > 0) {
