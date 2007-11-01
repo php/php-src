@@ -1523,7 +1523,7 @@ ZEND_FUNCTION(gmp_clrbit)
 ZEND_FUNCTION(gmp_testbit)
 {
 	zval **a_arg;
-	int index;
+	long index;
 	mpz_t *gmpnum_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl", &a_arg, &index) == FAILURE){
