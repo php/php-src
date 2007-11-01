@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Nov 2007 , PHP 5.2.5
+
 01 Nov 2007, PHP 5.2.5RC2
 - Added ability to control memory consumption between request using
   ZEND_MM_COMPACT environment variable. (Dmitry)
