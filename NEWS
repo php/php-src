@@ -45,6 +45,7 @@ PHP                                                                        NEWS
 
 - Fixed possible crash in ext/soap because of uninitialized value (Zdash Urf)
 
+- Fixed bug #42848 (Status: header incorrect under FastCGI). (Dmitry)
 - Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines). (Nuno)
 - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
   (Jani)
