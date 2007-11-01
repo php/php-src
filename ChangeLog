@@ -1,3 +1,71 @@
+2007-10-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      Added CGI SAPI -T option, to measure execution time of script repeated
+      several times.
+
+2007-10-31  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/array.c
+      ext/standard/tests/array/max.phpt
+      ext/standard/tests/array/min.phpt
+      ext/standard/tests/file/fgetc_basic.phpt
+      ext/standard/tests/file/fgetc_variation4.phpt:
+      - Fix typo (bug #43125)
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/openssl.c
+      ext/standard/filestat.c
+      ext/standard/php_filestat.h
+      ext/standard/tests/file/005_basic.phpt
+      ext/standard/tests/file/005_error.phpt
+      ext/standard/tests/file/bug43137.phpt
+      main/streams/plain_wrapper.c:
+      MFH: - Fixed Bug #43137 (rmdir() and rename() do not clear statcache)
+
+    * (PHP_5_3)
+      ext/openssl/openssl.c
+      ext/standard/filestat.c
+      ext/standard/php_filestat.h
+      ext/standard/tests/file/005_basic.phpt
+      ext/standard/tests/file/005_error.phpt
+      ext/standard/tests/file/bug43137.phpt
+      main/streams/plain_wrapper.c:
+      MFH: - Fixed bug #43137 (rmdir() and rename() do not clear statcache)
+
+    * ext/standard/filestat.c
+      ext/standard/php_filestat.h
+      ext/standard/tests/file/005_basic.phpt
+      ext/standard/tests/file/005_error.phpt
+      ext/standard/tests/file/bug43137.phpt
+      ext/standard/tests/file/bug43137.phpt
+      ext/standard/tests/file/bug43137.phpt
+      main/streams/plain_wrapper.c:
+      - Fixed bug #43137 (rmdir() and rename() do not clear statcache)
+
+2007-10-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo/tests/bug_43139.phpt
+      ext/pdo/tests/bug_43139.phpt:
+      
+      MFB: Fixed bug #43139 PDO ignores ATTR_DEFAULT_FETCH_MODE in some cases
+      with
+      fetchAll()
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c
+      ext/pdo/tests/bug_43139.phpt
+      ext/pdo/tests/bug_43139.phpt
+      ext/pdo/tests/bug_43139.phpt:
+      Fixed bug #43139 PDO ignores ATTR_DEFAULT_FETCH_MODE in some cases with
+      fetchAll()
+
 2007-10-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pdo/tests/bug_43130.phpt:
