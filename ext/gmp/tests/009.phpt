@@ -36,10 +36,10 @@ var_dump(gmp_div_q(array(), array()));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for gmp_div_q() in %s on line %d
+Warning: gmp_div_q() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_div_q() in %s on line %d
+Warning: gmp_div_q() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 resource(%d) of type (GMP integer)
 string(1) "0"

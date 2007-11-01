@@ -39,10 +39,10 @@ var_dump(gmp_strval($r));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for gmp_divexact() in %s on line %d
+Warning: gmp_divexact() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_divexact() in %s on line %d
+Warning: gmp_divexact() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 string(1) "0"
 
