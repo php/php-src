@@ -2039,13 +2039,14 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 
 static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
-	zend_bool _old_in_compilation, _old_in_execution;
+	zend_bool _old_in_compilation, _old_in_execution, _old_headers_sent;
 	zend_execute_data *_old_current_execute_data;
 	TSRMLS_FETCH();
 
 	_old_in_compilation = CG(in_compilation);
 	_old_in_execution = EG(in_execution);
 	_old_current_execute_data = EG(current_execute_data);
+	_old_headers_sent = SG(headers_sent);
 
 	if (!SOAP_GLOBAL(use_soap_error_handler)) {
 		call_old_error_handler(error_num, error_filename, error_lineno, format, args);
@@ -2103,12 +2104,14 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			old_objects = EG(objects_store).object_buckets;
 			EG(objects_store).object_buckets = NULL;
 			PG(display_errors) = 0;
+			SG(headers_sent) = 1;
 			zend_try {
 				call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 			} zend_catch {
 				CG(in_compilation) = _old_in_compilation;
 				EG(in_execution) = _old_in_execution;
 				EG(current_execute_data) = _old_current_execute_data;
+				SG(headers_sent) = _old_headers_sent;
 			} zend_end_try();
 			EG(objects_store).object_buckets = old_objects;
 			PG(display_errors) = old;
@@ -2181,12 +2184,14 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		}
 
 		PG(display_errors) = 0;
+		SG(headers_sent) = 1;
 		zend_try {
 			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 		} zend_catch {
 			CG(in_compilation) = _old_in_compilation;
 			EG(in_execution) = _old_in_execution;
 			EG(current_execute_data) = _old_current_execute_data;
+			SG(headers_sent) = _old_headers_sent;
 		} zend_end_try();
 		PG(display_errors) = old;
 

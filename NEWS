@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Added ability to control memory consumption between request using
   ZEND_MM_COMPACT environment variable. (Dmitry)
 - Fixed bug #43137 (rmdir() and rename() do not clear statcache). (Jani)
+- Fixed bug #42773 (WSDL error causes HTTP 500 Response). (Dmitry)
 
 18 Oct 2007, PHP 5.2.5RC1
 - Upgraded PCRE to version 7.3 (Nuno)
