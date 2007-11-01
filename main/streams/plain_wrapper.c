@@ -1009,8 +1009,6 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 {
 	char *p;
 	int ret;
-	zval funcname;
-	zval *retval = NULL;
 
 	if ((p = strstr(url, "://")) != NULL) {
 		url = p + 3;
