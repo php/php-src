@@ -1872,8 +1872,10 @@ PHP_METHOD(SoapServer, handle)
 
 			INIT_ZVAL(result);
 			ZVAL_STRINGL(&nm_ob_gzhandler, "ob_gzhandler", sizeof("ob_gzhandler") - 1, 0);
+			INIT_PZVAL(&str);
 			ZVAL_STRINGL(&str, (char*)buf, size, 0);
 			params[0] = &str;
+			INIT_PZVAL(&mode);
 			ZVAL_LONG(&mode, PHP_OUTPUT_HANDLER_START | PHP_OUTPUT_HANDLER_END);
 			params[1] = &mode;
 			if (call_user_function(CG(function_table), NULL, &nm_ob_gzhandler, &result, 2, params TSRMLS_CC) != FAILURE &&
@@ -2011,17 +2013,47 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 	   our fault code with their own handling... Figure this out later
 	*/
 	sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error")-1, 1);
-	snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", size);
-	sapi_add_header(cont_len, strlen(cont_len), 1);
 	if (soap_version == SOAP_1_2) {
 		sapi_add_header("Content-Type: application/soap+xml; charset=utf-8", sizeof("Content-Type: application/soap+xml; charset=utf-8")-1, 1);
 	} else {
 		sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
 	}
-	php_write(buf, size TSRMLS_CC);
+
+	if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0) &&				
+	    zend_hash_exists(EG(function_table), "ob_gzhandler", sizeof("ob_gzhandler"))) {
+		zval nm_ob_gzhandler;
+		zval str;
+		zval mode;
+		zval result;
+		zval *params[2];
+
+		INIT_ZVAL(result);
+		ZVAL_STRINGL(&nm_ob_gzhandler, "ob_gzhandler", sizeof("ob_gzhandler") - 1, 0);
+		INIT_PZVAL(&str);
+		ZVAL_STRINGL(&str, (char*)buf, size, 0);
+		params[0] = &str;
+		INIT_PZVAL(&mode);
+		ZVAL_LONG(&mode, PHP_OUTPUT_HANDLER_START | PHP_OUTPUT_HANDLER_END);
+		params[1] = &mode;
+		if (call_user_function(CG(function_table), NULL, &nm_ob_gzhandler, &result, 2, params TSRMLS_CC) != FAILURE &&
+		    Z_TYPE(result) == IS_STRING &&
+			zend_alter_ini_entry("zlib.output_compression", sizeof("zlib.output_compression"), "0", sizeof("0")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == SUCCESS) {
+			xmlFree(buf);
+			buf = NULL;
+			snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", Z_STRLEN(result));
+			sapi_add_header(cont_len, strlen(cont_len), 1);
+			php_write(Z_STRVAL(result), Z_STRLEN(result) TSRMLS_CC);
+		}
+		zval_dtor(&result);
+	}
+	if (buf) {
+		snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", size);
+		sapi_add_header(cont_len, strlen(cont_len), 1);
+		php_write(buf, size TSRMLS_CC);
+		xmlFree(buf);
+	}
 
 	xmlFreeDoc(doc_return);
-	xmlFree(buf);
 	zend_clear_exception(TSRMLS_C);
 }
 
