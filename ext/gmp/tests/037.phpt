@@ -32,9 +32,9 @@ int(13)
 Warning: gmp_scan0(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_scan0() in %s on line %d
+Warning: gmp_scan0() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_scan0() in %s on line %d
+Warning: gmp_scan0() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 Done

@@ -35,20 +35,19 @@ string(1) "0"
 string(2) "-1"
 string(1) "0"
 string(1) "0"
+string(2) "-1"
 string(1) "0"
 string(1) "0"
+string(2) "-1"
 string(1) "0"
 string(1) "0"
+string(2) "-1"
+string(2) "-1"
 string(1) "0"
 string(1) "0"
+string(2) "-1"
 string(1) "0"
-string(1) "0"
-string(1) "0"
-string(1) "0"
-string(1) "0"
-string(1) "0"
-string(1) "0"
-int(0)
+string(2) "-1"
 
 Warning: gmp_legendre(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
@@ -56,12 +55,12 @@ bool(false)
 Warning: gmp_legendre(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_legendre() in %s on line %d
+Warning: gmp_legendre() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_legendre() in %s on line %d
+Warning: gmp_legendre() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_legendre() in %s on line %d
+Warning: gmp_legendre() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 Done

@@ -95,6 +95,6 @@ string(1) "1"
 Warning: gmp_sqrtrem(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_sqrtrem() in %s on line %d
+Warning: gmp_sqrtrem() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 Done

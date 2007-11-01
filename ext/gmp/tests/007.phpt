@@ -45,10 +45,10 @@ var_dump(gmp_div_qr(array(), array()));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for gmp_div_qr() in %s on line %d
+Warning: gmp_div_qr() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_div_qr() in %s on line %d
+Warning: gmp_div_qr() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 array(2) {
   [0]=>

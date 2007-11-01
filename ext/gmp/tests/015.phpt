@@ -48,13 +48,13 @@ string(1) "0"
 string(14) "10240000000000"
 string(14) "10240000000000"
 
-Warning: Wrong parameter count for gmp_pow() in %s on line %d
+Warning: gmp_pow() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_pow() in %s on line %d
+Warning: gmp_pow() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_pow() in %s on line %d
+Warning: gmp_pow() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
 Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s on line %d

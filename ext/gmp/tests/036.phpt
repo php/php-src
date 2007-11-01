@@ -33,7 +33,7 @@ int(43)
 int(0)
 int(26)
 
-Warning: Wrong parameter count for gmp_hamdist() in %s on line %d
+Warning: gmp_hamdist() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
 Warning: gmp_hamdist(): Unable to convert variable to GMP - wrong type in %s on line %d
@@ -45,6 +45,6 @@ bool(false)
 Warning: gmp_hamdist(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_hamdist() in %s on line %d
+Warning: gmp_hamdist() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 Done
