@@ -48,7 +48,7 @@ Content-type: text/html
 <?php
  class test { public $var = "test"; private $pri; function foo() { } } ?>
 "
-string(%d) "Status: 404
+string(%d) "Status: 404 Not Found
 X-Powered-By: PHP/%s
 Content-type: text/html
 
