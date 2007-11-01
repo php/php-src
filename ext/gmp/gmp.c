@@ -1064,8 +1064,8 @@ ZEND_FUNCTION(gmp_pow)
 		mpz_ui_pow_ui(*gmpnum_result, Z_LVAL_PP(base_arg), exp);
 	} else {
 		mpz_pow_ui(*gmpnum_result, *gmpnum_base, exp);
+		FREE_GMP_TEMP(temp_base);
 	}
-	FREE_GMP_TEMP(temp_base);
 	ZEND_REGISTER_RESOURCE(return_value, gmpnum_result, le_gmp);
 }
 /* }}} */
@@ -1098,7 +1098,9 @@ ZEND_FUNCTION(gmp_powm)
 
 	if (!mpz_cmp_ui(*gmpnum_mod, 0)) {
 		FREE_GMP_TEMP(temp_base);
-		FREE_GMP_TEMP(temp_exp);
+		if (use_ui) {
+			FREE_GMP_TEMP(temp_exp);
+		}
 		FREE_GMP_TEMP(temp_mod);
 		RETURN_FALSE;
 	}
@@ -1108,10 +1110,10 @@ ZEND_FUNCTION(gmp_powm)
 		mpz_powm_ui(*gmpnum_result, *gmpnum_base, (unsigned long)Z_LVAL_PP(exp_arg), *gmpnum_mod);
 	} else {
 		mpz_powm(*gmpnum_result, *gmpnum_base, *gmpnum_exp, *gmpnum_mod);
+		FREE_GMP_TEMP(temp_exp);
 	}
 
 	FREE_GMP_TEMP(temp_base);
-	FREE_GMP_TEMP(temp_exp);
 	FREE_GMP_TEMP(temp_mod);
 
 	ZEND_REGISTER_RESOURCE(return_value, gmpnum_result, le_gmp);
