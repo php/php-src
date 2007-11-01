@@ -195,6 +195,7 @@ PHP                                                                        NEWS
 - Fixed PECL bug #11216 (crash in ZipArchive::addEmptyDir when a directory
   already exists). (Pierre)
 
+- Fixed bug #42848 (Status: header incorrect under FastCGI). (Dmitry)
 - Fixed bug #42368 (Incorrect error message displayed by pg_escape_string).
   (Ilia)
 - Fixed bug #42365 (glob() crashes and/or accepts way too many flags).

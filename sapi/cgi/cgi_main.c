@@ -311,6 +311,52 @@ static void sapi_cgibin_flush(void *server_context)
 
 #define SAPI_CGI_MAX_HEADER_LENGTH 1024
 
+typedef struct _http_error {
+  int code;
+  const char* msg;
+} http_error;
+
+static const http_error http_error_codes[] = {
+	{100, "Continue"},
+	{101, "Switching Protocols"},
+	{200, "OK"},
+	{201, "Created"},
+	{202, "Accepted"},
+	{203, "Non-Authoritative Information"},
+	{204, "No Content"},
+	{205, "Reset Content"},
+	{206, "Partial Content"},
+	{300, "Multiple Choices"},
+	{301, "Moved Permanently"},
+	{302, "Moved Temporarily"},
+	{303, "See Other"},
+	{304, "Not Modified"},
+	{305, "Use Proxy"},
+	{400, "Bad Request"},
+	{401, "Unauthorized"},
+	{402, "Payment Required"},
+	{403, "Forbidden"},
+	{404, "Not Found"},
+	{405, "Method Not Allowed"},
+	{406, "Not Acceptable"},
+	{407, "Proxy Authentication Required"},
+	{408, "Request Time-out"},
+	{409, "Conflict"},
+	{410, "Gone"},
+	{411, "Length Required"},
+	{412, "Precondition Failed"},
+	{413, "Request Entity Too Large"},
+	{414, "Request-URI Too Large"},
+	{415, "Unsupported Media Type"},
+	{500, "Internal Server Error"},
+	{501, "Not Implemented"},
+	{502, "Bad Gateway"},
+	{503, "Service Unavailable"},
+	{504, "Gateway Time-out"},
+	{505, "HTTP Version not supported"},
+	{0,   NULL}
+};
+
 static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char buf[SAPI_CGI_MAX_HEADER_LENGTH];
@@ -324,6 +370,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	if (CGIG(nph) || SG(sapi_headers).http_response_code != 200)
 	{
 		int len;
+		zend_bool has_status = 0;
 
 		if (CGIG(rfc2616_headers) && SG(sapi_headers).http_status_line) {
 			len = slprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH,
@@ -342,11 +389,35 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 			    strncasecmp(SG(sapi_headers).http_status_line, "HTTP/", 5) == 0) {
 				len = slprintf(buf, sizeof(buf), "Status:%s\r\n", s);
 			} else {
-				len = slprintf(buf, sizeof(buf), "Status: %d\r\n", SG(sapi_headers).http_response_code);
+				h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
+				while (h) {
+					if (h->header_len > sizeof("Status:")-1 &&
+					    strncasecmp(h->header, "Status:", sizeof("Status:")-1) == 0) {
+						has_status = 1;
+						break;
+					}
+					h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
+				}
+				if (!has_status) {
+					http_error *err = (http_error*)http_error_codes;
+
+					while (err->code != 0) {
+					    if (err->code == SG(sapi_headers).http_response_code) {
+							break;
+						}
+						err++;
+					}
+					if (err->msg) {
+						len = slprintf(buf, sizeof(buf), "Status: %d %s\r\n", SG(sapi_headers).http_response_code, err->msg);
+					} else {
+						len = slprintf(buf, sizeof(buf), "Status: %d\r\n", SG(sapi_headers).http_response_code);
+					}
+				}
 			}
 		}
-
-		PHPWRITE_H(buf, len);
+		if (!has_status) {
+			PHPWRITE_H(buf, len);
+		}
 	}
 
 	h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
