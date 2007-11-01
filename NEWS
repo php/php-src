@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2007, PHP 5.2.5RC2
+01 Nov 2007, PHP 5.2.5RC2
 - Added ability to control memory consumption between request using
   ZEND_MM_COMPACT environment variable. (Dmitry)
 - Fixed bug #43137 (rmdir() and rename() do not clear statcache). (Jani)
