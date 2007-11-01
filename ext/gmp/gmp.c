@@ -1239,7 +1239,7 @@ ZEND_FUNCTION(gmp_gcd)
 		return;
 	}
 
-	gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_gcd, (gmp_binary_ui_op_t)mpz_gcd_ui, 1, 0 TSRMLS_CC);
+	gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_gcd, (gmp_binary_ui_op_t)mpz_gcd_ui, 0, 0 TSRMLS_CC);
 }
 /* }}} */
 
