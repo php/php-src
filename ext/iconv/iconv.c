@@ -2167,9 +2167,9 @@ PHP_FUNCTION(iconv_mime_encode)
 PHP_FUNCTION(iconv_mime_decode)
 {
 	char *encoded_str;
-	int encoded_str_len = 0;
+	int encoded_str_len;
 	char *charset;
-	int charset_len;
+	int charset_len = 0;
 	long mode = 0;
 	
 	smart_str retval = {0};
