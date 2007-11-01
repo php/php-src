@@ -1,5 +1,5 @@
 --TEST--
-Test array_fill() function : usage variations  - unexpected values for 'start_key' argument(Bug#43017)
+Test array_fill() function : usage variations  - unexpected values for 'start_key' argument
 --FILE--
 <?php
 /* Prototype  : proto array array_fill(int start_key, int num, mixed val)
@@ -204,20 +204,12 @@ array(2) {
 }
 -- Iteration 17 --
 
-array(2) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(100)
-}
+Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
+NULL
 -- Iteration 18 --
 
-array(2) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(100)
-}
+Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
+NULL
 -- Iteration 19 --
 
 Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
@@ -351,20 +343,12 @@ array(2) {
 }
 -- Iteration 17 --
 
-array(2) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(100)
-}
+Warning: array_fill() expects parameter 1 to be long, Unicode string given in %s on line %d
+NULL
 -- Iteration 18 --
 
-array(2) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(100)
-}
+Warning: array_fill() expects parameter 1 to be long, Unicode string given in %s on line %d
+NULL
 -- Iteration 19 --
 
 Warning: array_fill() expects parameter 1 to be long, Unicode string given in %s on line %d
