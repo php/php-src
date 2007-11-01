@@ -20,13 +20,13 @@ var_dump(min(new stdclass));
 
 *** Testing Error Conditions ***
 
-Warning: min(): At%seast one %s on line %d
+Warning: min(): At least one %s on line %d
 NULL
 
 Warning: Wrong parameter count for min() in %s on line %d
 NULL
 
-Warning: min(): Array must contain at%seast one element in %s on line %d
+Warning: min(): Array must contain at least one element in %s on line %d
 bool(false)
 
 Warning: Wrong parameter count for min() in %s on line %d
