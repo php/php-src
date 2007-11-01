@@ -1581,8 +1581,7 @@ ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *f
 
 ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC);
 
-ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
-                                  zend_bool is_ref, int num_symbol_tables, ...);
+ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length, zend_bool is_ref, int num_symbol_tables, ...);
 
 ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC);
 ZEND_API int zend_u_delete_global_variable(zend_uchar type, zstr name, int name_len TSRMLS_DC);
@@ -1636,17 +1635,17 @@ END_EXTERN_C()
 	}
 
 #define ZVAL_STRING(z, s, duplicate) {	\
-		const char *__s=(s);					\
+		const char *__s=(s);			\
 		Z_STRLEN_P(z) = strlen(__s);	\
-		Z_STRVAL_P(z) = (duplicate?estrndup(__s, Z_STRLEN_P(z)):(char*)__s);	\
-		Z_TYPE_P(z) = IS_STRING;        \
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, Z_STRLEN_P(z)):(char*)__s);\
+		Z_TYPE_P(z) = IS_STRING;		\
 	}
 
 #define ZVAL_STRINGL(z, s, l, duplicate) {	\
 		const char *__s=(s); int __l=l;		\
-		Z_STRLEN_P(z) = __l;		    \
-		Z_STRVAL_P(z) = (duplicate?estrndup(__s, __l):(char*)__s);	\
-		Z_TYPE_P(z) = IS_STRING;		    \
+		Z_STRLEN_P(z) = __l;				\
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, __l):(char*)__s);\
+		Z_TYPE_P(z) = IS_STRING;			\
 	}
 
 #define ZVAL_ASCII_STRING(z, s, flags) { \
@@ -1698,10 +1697,10 @@ END_EXTERN_C()
 				efree(__s); \
 			} \
 		} else { \
-			char *__s=(char *)(s);					\
-			Z_STRLEN_P(z) = strlen(__s);	\
-			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : (char*)__s);	\
-			Z_TYPE_P(z) = IS_STRING;        \
+			char *__s=(char *)(s); \
+			Z_STRLEN_P(z) = strlen(__s); \
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : (char*)__s); \
+			Z_TYPE_P(z) = IS_STRING; \
 		} \
 	}
 
@@ -1718,10 +1717,10 @@ END_EXTERN_C()
 				efree(__s); \
 			} \
 		} else { \
-			char *__s=(char *)(s); int __l=l;	\
-			Z_STRLEN_P(z) = __l;	    \
-			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s);	\
-			Z_TYPE_P(z) = IS_STRING;    \
+			char *__s=(char *)(s); int __l=l; \
+			Z_STRLEN_P(z) = __l; \
+			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s); \
+			Z_TYPE_P(z) = IS_STRING; \
 		} \
 	}
 
@@ -1791,22 +1790,22 @@ END_EXTERN_C()
 		Z_TYPE_P(z) = IS_UNICODE;		\
 	}
 
-#define ZVAL_ZVAL(z, zv, copy, dtor) {  \
-		int is_ref, refcount;           \
-		is_ref = Z_ISREF_P(z);           \
-		refcount = Z_REFCOUNT_P(z);       \
-		*(z) = *(zv);                   \
-		if (copy) {                     \
-			zval_copy_ctor(z);          \
-	    }                               \
-		if (dtor) {                     \
-			if (!copy) {                \
-				ZVAL_NULL(zv);          \
-			}                           \
-			zval_ptr_dtor(&zv);         \
-	    }                               \
-		Z_SET_ISREF_TO_P(z, is_ref);           \
-		Z_SET_REFCOUNT_P(z, refcount);       \
+#define ZVAL_ZVAL(z, zv, copy, dtor) {	\
+		int is_ref, refcount;			\
+		is_ref = Z_ISREF_P(z);			\
+		refcount = Z_REFCOUNT_P(z);		\
+		*(z) = *(zv);					\
+		if (copy) {						\
+			zval_copy_ctor(z);			\
+	    }								\
+		if (dtor) {						\
+			if (!copy) {				\
+				ZVAL_NULL(zv);			\
+			}							\
+			zval_ptr_dtor(&zv);			\
+	    }								\
+		Z_SET_ISREF_TO_P(z, is_ref);	\
+		Z_SET_REFCOUNT_P(z, refcount);	\
 	}
 
 #define ZVAL_TEXT(z, t, duplicate)					\
@@ -1992,27 +1991,27 @@ END_EXTERN_C()
 		ZEND_SET_SYMBOL_WITH_LENGTH(symtable, _name, strlen(_name)+1, var, 1, 0);	\
 	}
 
-#define ZEND_U_SET_SYMBOL_WITH_LENGTH(symtable, type, name, name_length, var, _refcount, _is_ref)				\
+#define ZEND_U_SET_SYMBOL_WITH_LENGTH(symtable, type, name, name_length, var, _refcount, _is_ref)		\
 	{																									\
 		zval **orig_var;																				\
 																										\
-		if (zend_u_hash_find(symtable, (type), (name), (name_length), (void **) &orig_var)==SUCCESS				\
+		if (zend_u_hash_find(symtable, (type), (name), (name_length), (void **) &orig_var)==SUCCESS		\
 			&& PZVAL_IS_REF(*orig_var)) {																\
-			Z_SET_REFCOUNT_P(var, Z_REFCOUNT_PP(orig_var));													\
+			Z_SET_REFCOUNT_P(var, Z_REFCOUNT_PP(orig_var));												\
 			Z_SET_ISREF_P(var);																			\
 																										\
 			if (_refcount) {																			\
-				Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(var) + _refcount - 1);															\
+				Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(var) + _refcount - 1);								\
 			}																							\
 			zval_dtor(*orig_var);																		\
 			**orig_var = *(var);																		\
-			FREE_ZVAL(var);																					\
+			FREE_ZVAL(var);																				\
 		} else {																						\
-			Z_SET_ISREF_TO_P(var, _is_ref);																	\
+			Z_SET_ISREF_TO_P(var, _is_ref);																\
 			if (_refcount) {																			\
-				Z_SET_REFCOUNT_P(var, _refcount);															\
+				Z_SET_REFCOUNT_P(var, _refcount);														\
 			}																							\
-			zend_u_hash_update(symtable, (type), (name), (name_length), &(var), sizeof(zval *), NULL);			\
+			zend_u_hash_update(symtable, (type), (name), (name_length), &(var), sizeof(zval *), NULL);	\
 		}																								\
 	}
 
@@ -2020,21 +2019,21 @@ END_EXTERN_C()
 	{																									\
 		zval **orig_var;																				\
 																										\
-		if (zend_rt_hash_find(symtable, (name), (name_length), (void **) &orig_var)==SUCCESS				\
+		if (zend_rt_hash_find(symtable, (name), (name_length), (void **) &orig_var)==SUCCESS			\
 			&& PZVAL_IS_REF(*orig_var)) {																\
-			Z_SET_REFCOUNT_P(var, Z_REFCOUNT_PP(orig_var));													\
+			Z_SET_REFCOUNT_P(var, Z_REFCOUNT_PP(orig_var));												\
 			Z_SET_ISREF_P(var);																			\
 																										\
 			if (_refcount) {																			\
-				Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(var) + _refcount - 1);															\
+				Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(var) + _refcount - 1);								\
 			}																							\
 			zval_dtor(*orig_var);																		\
 			**orig_var = *(var);																		\
-			FREE_ZVAL(var);																					\
+			FREE_ZVAL(var);																				\
 		} else {																						\
-			Z_SET_ISREF_TO_P(var, _is_ref);																	\
+			Z_SET_ISREF_TO_P(var, _is_ref);																\
 			if (_refcount) {																			\
-				Z_SET_REFCOUNT_P(var, _refcount);															\
+				Z_SET_REFCOUNT_P(var, _refcount);														\
 			}																							\
 			zend_rt_hash_update(symtable, (name), (name_length), &(var), sizeof(zval *), NULL);			\
 		}																								\
@@ -2043,10 +2042,10 @@ END_EXTERN_C()
 #define ZEND_SET_GLOBAL_VAR(name, var)				\
 	ZEND_SET_SYMBOL(&EG(symbol_table), name, var)
 
-#define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var, _refcount, _is_ref)		\
+#define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var, _refcount, _is_ref)	\
 	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), name, name_length, var, _refcount, _is_ref)
 
-#define ZEND_DEFINE_PROPERTY(class_ptr, name, value, mask)								\
+#define ZEND_DEFINE_PROPERTY(class_ptr, name, value, mask)							\
 {																					\
 	char *_name = (name);															\
 	int namelen = strlen(_name);													\
