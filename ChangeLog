@@ -1,3 +1,248 @@
+2007-11-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.5RC2
+
+2007-11-01  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/spl/php_spl.c:
+      - CPP macros are supposed to start at column 1 (# at least)
+
+    * (PHP_5_3)
+      NEWS:
+      fix news
+
+2007-11-01  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      NEWS:
+      add gmp_testbit()
+
+    * (PHP_5_3)
+      NEWS:
+      add gmp fixes
+
+    * ext/gmp/gmp.c:
+      MFB gmp fixes
+
+    * (PHP_5_3)
+      ext/gmp/gmp.c:
+      fix 64-bit
+
+2007-11-01  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/iconv/iconv.c:
+      initialize correct variable
+
+2007-11-01  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ext/gmp/tests/039.phpt
+      ext/gmp/tests/040.phpt:
+      add tests for testbit, sync with HEAD
+
+    * (PHP_5_3)
+      ext/gmp/gmp.c:
+      fix gcd - can return larger than long with long arg
+
+    * (PHP_5_3)
+      ext/gmp/php_gmp.h:
+      add testbit()
+
+    * (PHP_5_3)
+      ext/gmp/tests/006.phpt:
+      generalize resource names
+
+    * (PHP_5_3)
+      ext/gmp/gmp.c:
+      merge gmp_testbit()
+
+2007-11-01  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * main/streams/plain_wrapper.c:
+      - Nuke unused variables
+
+2007-11-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/soap.c:
+      Another fix for bug #42773
+
+    * (PHP_5_2)
+      NEWS
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/tests/003.phpt
+      sapi/cgi/tests/008.phpt:
+      Fixed bug #42848 (Status: header incorrect under FastCGI)
+
+2007-11-01  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ZendEngine2/zend_API.h:
+      ws + cs
+
+2007-11-01  Antony Dovgal  <tony@daylessday.org>
+
+    * sapi/cgi/tests/003.phpt
+      sapi/cgi/tests/008.phpt:
+      MF53: fix tests
+
+2007-11-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      NEWS
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/soap.c:
+      Fixed bug #42773 (WSDL error causes HTTP 500 Response)
+
+2007-11-01  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ZendEngine2/zend_API.c:
+      cs + ws
+
+2007-11-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/soap.c:
+      Fixed bug #41635 (SoapServer and zlib.output_compression with FastCGI
+      result in major slowdown)
+
+2007-11-01  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      sapi/cgi/tests/003.phpt
+      sapi/cgi/tests/008.phpt:
+      fix tests
+
+2007-11-01  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/tests/array/array_fill_variation1.phpt:
+      fix test
+
+2007-11-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug43027.phpt:
+      Fixed bug #43027 (Declare cause fatal error)
+
+    * ZendEngine2/tests/bug43027.phpt
+      ZendEngine2/tests/bug43027.phpt:
+      
+      file bug43027.phpt was initially added on branch PHP_5_3.
+
+    * sapi/cgi/cgi_main.c:
+      use slprintf()
+
+2007-11-01  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * ext/standard/tests/.project
+      ext/standard/tests/.project:
+      delete .project file
+
+2007-11-01  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/gmp/gmp.c:
+      fix reading uninitialized values
+
+2007-11-01  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      ext/standard/tests/.project:
+      - Nuke crap
+
+2007-11-01  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/gmp/gmp.c
+      ext/gmp/tests/015.phpt
+      ext/gmp/tests/021.phpt
+      ext/gmp/tests/024.phpt
+      ext/gmp/tests/025.phpt
+      ext/gmp/tests/026.phpt:
+      fix 64bit issues & tests
+
+2007-11-01  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * ext/standard/tests/.project
+      ext/standard/tests/.project
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/min_error.phpt
+      ext/standard/tests/array/min_error.phpt:
+      update min_error and max_error testcases to take into account bug fix for
+      bug#43125
+
+    * ext/standard/tests/.project
+      ext/standard/tests/.project
+      ext/standard/tests/.project
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/min_error.phpt:
+        1.1.4;
+      file .project was initially added on branch PHP_5_2.
+
+2007-11-01  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ext/gmp/gmp.c
+      ext/gmp/tests/004.phpt
+      ext/gmp/tests/005.phpt
+      ext/gmp/tests/006.phpt
+      ext/gmp/tests/007.phpt
+      ext/gmp/tests/008.phpt
+      ext/gmp/tests/009.phpt
+      ext/gmp/tests/010.phpt
+      ext/gmp/tests/011.phpt
+      ext/gmp/tests/012.phpt
+      ext/gmp/tests/013.phpt
+      ext/gmp/tests/014.phpt
+      ext/gmp/tests/015.phpt
+      ext/gmp/tests/016.phpt
+      ext/gmp/tests/017.phpt
+      ext/gmp/tests/018.phpt
+      ext/gmp/tests/019.phpt
+      ext/gmp/tests/020.phpt
+      ext/gmp/tests/021.phpt
+      ext/gmp/tests/022.phpt
+      ext/gmp/tests/023.phpt
+      ext/gmp/tests/024.phpt
+      ext/gmp/tests/025.phpt
+      ext/gmp/tests/026.phpt
+      ext/gmp/tests/027.phpt
+      ext/gmp/tests/028.phpt
+      ext/gmp/tests/029.phpt
+      ext/gmp/tests/030.phpt
+      ext/gmp/tests/031.phpt
+      ext/gmp/tests/032.phpt
+      ext/gmp/tests/033.phpt
+      ext/gmp/tests/034.phpt
+      ext/gmp/tests/035.phpt
+      ext/gmp/tests/036.phpt
+      ext/gmp/tests/037.phpt
+      ext/gmp/tests/038.phpt
+      ext/gmp/tests/039.phpt:
+      - Fix memory leaks (bug #42509)
+      - Fix _gmp_binary_opl
+      - Use modern parameter parsing
+
 2007-10-31  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_2)
