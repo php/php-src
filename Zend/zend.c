@@ -31,15 +31,15 @@
 #include "zend_unicode.h"
 
 #ifdef ZTS
-#   define GLOBAL_FUNCTION_TABLE    global_function_table
-#   define GLOBAL_CLASS_TABLE       global_class_table
-#   define GLOBAL_CONSTANTS_TABLE   global_constants_table
-#   define GLOBAL_AUTO_GLOBALS_TABLE    global_auto_globals_table
+# define GLOBAL_FUNCTION_TABLE		global_function_table
+# define GLOBAL_CLASS_TABLE			global_class_table
+# define GLOBAL_CONSTANTS_TABLE		global_constants_table
+# define GLOBAL_AUTO_GLOBALS_TABLE	global_auto_globals_table
 #else
-#   define GLOBAL_FUNCTION_TABLE    CG(function_table)
-#   define GLOBAL_CLASS_TABLE       CG(class_table)
-#   define GLOBAL_AUTO_GLOBALS_TABLE    CG(auto_globals)
-#   define GLOBAL_CONSTANTS_TABLE   EG(zend_constants)
+# define GLOBAL_FUNCTION_TABLE		CG(function_table)
+# define GLOBAL_CLASS_TABLE			CG(class_table)
+# define GLOBAL_AUTO_GLOBALS_TABLE	CG(auto_globals)
+# define GLOBAL_CONSTANTS_TABLE		EG(zend_constants)
 #endif
 
 #ifndef __GNUC__
@@ -101,7 +101,7 @@ static ZEND_INI_MH(OnUpdateEncoding) /* {{{ */
 
 	if (new_value) {
 		if (zend_set_converter_encoding(converter, new_value) == FAILURE) {
-			zend_error(E_CORE_ERROR, "Unrecognized encoding '%s' used for %s", new_value ?  new_value : "null", entry->name);
+			zend_error(E_CORE_ERROR, "Unrecognized encoding '%s' used for %s", new_value ? new_value : "null", entry->name);
 			return FAILURE;
 		}
 	} else {
@@ -176,17 +176,17 @@ ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",			NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
 
 	/* Unicode .ini entries */
-	STD_ZEND_INI_BOOLEAN("unicode.semantics", "0", ZEND_INI_SYSTEM, OnUpdateBool, unicode, zend_unicode_globals, unicode_globals)
-	STD_ZEND_INI_ENTRY("unicode.fallback_encoding", NULL, ZEND_INI_ALL, OnUpdateEncoding,   fallback_encoding_conv, zend_unicode_globals, unicode_globals)
-	STD_ZEND_INI_ENTRY("unicode.runtime_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   runtime_encoding_conv, zend_unicode_globals, unicode_globals)
-	STD_ZEND_INI_ENTRY("unicode.script_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   script_encoding_conv, zend_unicode_globals, unicode_globals)
-	STD_ZEND_INI_ENTRY("unicode.http_input_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   http_input_encoding_conv, zend_unicode_globals, unicode_globals)
-	STD_ZEND_INI_ENTRY("unicode.filesystem_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   filesystem_encoding_conv, zend_unicode_globals, unicode_globals)
+	STD_ZEND_INI_BOOLEAN("unicode.semantics",			"0",	ZEND_INI_SYSTEM, OnUpdateBool, unicode, zend_unicode_globals, unicode_globals)
+	STD_ZEND_INI_ENTRY("unicode.fallback_encoding",		NULL,	ZEND_INI_ALL, OnUpdateEncoding, fallback_encoding_conv, zend_unicode_globals, unicode_globals)
+	STD_ZEND_INI_ENTRY("unicode.runtime_encoding",		NULL,	ZEND_INI_ALL, OnUpdateEncoding, runtime_encoding_conv, zend_unicode_globals, unicode_globals)
+	STD_ZEND_INI_ENTRY("unicode.script_encoding",		NULL,	ZEND_INI_ALL, OnUpdateEncoding, script_encoding_conv, zend_unicode_globals, unicode_globals)
+	STD_ZEND_INI_ENTRY("unicode.http_input_encoding",	NULL,	ZEND_INI_ALL, OnUpdateEncoding, http_input_encoding_conv, zend_unicode_globals, unicode_globals)
+	STD_ZEND_INI_ENTRY("unicode.filesystem_encoding",	NULL,	ZEND_INI_ALL, OnUpdateEncoding, filesystem_encoding_conv, zend_unicode_globals, unicode_globals)
 	/*
 	 * This is used as a default for the stream contexts. It's not an actual
 	 * UConverter because each stream needs its own.
 	 */
-	STD_ZEND_INI_ENTRY("unicode.stream_encoding",  "UTF-8", ZEND_INI_ALL, OnUpdateStringUnempty,   stream_encoding, zend_unicode_globals, unicode_globals)
+	STD_ZEND_INI_ENTRY("unicode.stream_encoding", "UTF-8", ZEND_INI_ALL, OnUpdateStringUnempty, stream_encoding, zend_unicode_globals, unicode_globals)
 ZEND_INI_END()
 
 
@@ -220,7 +220,7 @@ static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 	int i;
 	zend_uchar ztype;
 
-	for (i=0; i<indent; i++) {
+	for (i = 0; i < indent; i++) {
 		ZEND_PUTS(" ");
 	}
 	ZEND_PUTS("(\n");
@@ -229,7 +229,7 @@ static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 	while (zend_hash_get_current_data_ex(ht, (void **) &tmp, &iterator) == SUCCESS) {
 		zend_uchar key_type;
 
-		for (i=0; i<indent; i++) {
+		for (i = 0; i < indent; i++) {
 			ZEND_PUTS(" ");
 		}
 		ZEND_PUTS("[");
@@ -268,7 +268,7 @@ str_type:
 		zend_hash_move_forward_ex(ht, &iterator);
 	}
 	indent -= PRINT_ZVAL_INDENT;
-	for (i=0; i<indent; i++) {
+	for (i = 0; i < indent; i++) {
 		ZEND_PUTS(" ");
 	}
 	ZEND_PUTS(")\n");
@@ -319,14 +319,14 @@ ZEND_API void zend_make_string_zval(zval *expr, zval *expr_copy, int *use_copy) 
 			{
 				TSRMLS_FETCH();
 
-				if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, NULL TSRMLS_CC) == SUCCESS) {
+				if (Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, NULL TSRMLS_CC) == SUCCESS) {
 					break;
 				}
 				if (Z_OBJ_HANDLER_P(expr, get)) {
 					zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
 
 					Z_ADDREF_P(z);
-					if(Z_TYPE_P(z) != IS_OBJECT) {
+					if (Z_TYPE_P(z) != IS_OBJECT) {
 						zend_make_string_zval(z, expr_copy, use_copy);
 						if (*use_copy) {
 							zval_ptr_dtor(&z);
@@ -359,10 +359,10 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 	TSRMLS_FETCH();
 
 	if (
-	  /* UTODO: clean this up */
-	    (Z_TYPE_P(expr) == IS_STRING &&
-	    (!strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &temp),
-				 ucnv_getName(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp))))) {
+		/* UTODO: clean this up */
+		(Z_TYPE_P(expr) == IS_STRING &&
+		(!strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &temp), ucnv_getName(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp))))
+	) {
 		*use_copy = 0;
 		return;
 	}
@@ -381,22 +381,22 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			}
 			break;
 		case IS_RESOURCE:
-			Z_STRVAL_P(expr_copy) = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
+			Z_STRVAL_P(expr_copy) = (char *) emalloc(sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG);
 			Z_STRLEN_P(expr_copy) = sprintf(Z_STRVAL_P(expr_copy), "Resource id #%ld", Z_LVAL_P(expr));
 			break;
 		case IS_ARRAY:
-			Z_STRLEN_P(expr_copy) = sizeof("Array")-1;
+			Z_STRLEN_P(expr_copy) = sizeof("Array") - 1;
 			Z_STRVAL_P(expr_copy) = estrndup("Array", Z_STRLEN_P(expr_copy));
 			break;
 		case IS_OBJECT:
-			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
+			if (Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
 				break;
 			}
 			if (Z_OBJ_HANDLER_P(expr, get)) {
 				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
-				
+
 				Z_ADDREF_P(z);
-				if(Z_TYPE_P(z) != IS_OBJECT) {
+				if (Z_TYPE_P(z) != IS_OBJECT) {
 					zend_make_printable_zval(z, expr_copy, use_copy);
 					if (*use_copy) {
 						zval_ptr_dtor(&z);
@@ -441,14 +441,14 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 	}
 	switch (Z_TYPE_P(expr)) {
 		case IS_OBJECT:
-			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_UNICODE, NULL TSRMLS_CC) == SUCCESS) {
+			if (Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_UNICODE, NULL TSRMLS_CC) == SUCCESS) {
 				break;
 			}
 			if (Z_OBJ_HANDLER_P(expr, get)) {
 				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
 
 				Z_ADDREF_P(z);
-				if(Z_TYPE_P(z) != IS_OBJECT) {
+				if (Z_TYPE_P(z) != IS_OBJECT) {
 					zend_make_unicode_zval(z, expr_copy, use_copy);
 					if (*use_copy) {
 						zval_ptr_dtor(&z);
@@ -489,7 +489,7 @@ ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int in
 	if (use_copy) {
 		expr = &expr_copy;
 	}
-	if (Z_STRLEN_P(expr)==0) { /* optimize away empty strings */
+	if (Z_STRLEN_P(expr) == 0) { /* optimize away empty strings */
 		if (use_copy) {
 			zval_dtor(expr);
 		}
@@ -673,13 +673,13 @@ static void register_standard_class(TSRMLS_D) /* {{{ */
 /* }}} */
 
 #ifdef ZTS
-static zend_bool asp_tags_default      = 0;
-static zend_bool short_tags_default    = 1;
-static zend_bool extended_info_default = 0;
+static zend_bool asp_tags_default		= 0;
+static zend_bool short_tags_default		= 1;
+static zend_bool extended_info_default	= 0;
 #else
-# define asp_tags_default      0
-# define short_tags_default    1
-# define extended_info_default 0
+# define asp_tags_default		0
+# define short_tags_default		1
+# define extended_info_default	0
 #endif
 
 static void zend_set_default_compile_time_values(TSRMLS_D) /* {{{ */
@@ -699,8 +699,8 @@ static void zval_copy_persistent(zval *zv) /* {{{ */
 	if (Z_TYPE_P(zv) == IS_STRING || (Z_TYPE_P(zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		UChar *ustr;
 
-		ustr = malloc(UBYTES(Z_STRLEN_P(zv)+1));
-		u_charsToUChars(Z_STRVAL_P(zv), ustr, Z_STRLEN_P(zv)+1);
+		ustr = malloc(UBYTES(Z_STRLEN_P(zv) + 1));
+		u_charsToUChars(Z_STRVAL_P(zv), ustr, Z_STRLEN_P(zv) + 1);
 		free(Z_STRVAL_P(zv));
 		Z_USTRVAL_P(zv) = ustr;
 		if (Z_TYPE_P(zv) == IS_STRING) Z_TYPE_P(zv) = IS_UNICODE;
@@ -723,7 +723,7 @@ static void function_to_unicode(zend_function *func TSRMLS_DC) /* {{{ */
 {
 	if (func->common.function_name.s) {
 		UChar *uname;
-		int   len = strlen(func->common.function_name.s)+1;
+		int len = strlen(func->common.function_name.s) + 1;
 
 		uname = malloc(UBYTES(len));
 		u_charsToUChars(func->common.function_name.s, uname, len);
@@ -739,12 +739,12 @@ static void function_to_unicode(zend_function *func TSRMLS_DC) /* {{{ */
 			--n;
 			if (args[n].name.s) {
 				UChar *uname = malloc(UBYTES(args[n].name_len + 1));
-				u_charsToUChars(args[n].name.s, uname, args[n].name_len+1);
+				u_charsToUChars(args[n].name.s, uname, args[n].name_len + 1);
 				args[n].name.u = uname;
 			}
 			if (args[n].class_name.s) {
 				UChar *uname = malloc(UBYTES(args[n].class_name_len + 1));
-				u_charsToUChars(args[n].class_name.s, uname, args[n].class_name_len+1);
+				u_charsToUChars(args[n].class_name.s, uname, args[n].class_name_len + 1);
 				args[n].class_name.u = uname;
 			}
 		}
@@ -758,11 +758,11 @@ static void property_info_to_unicode(zend_property_info *info TSRMLS_DC) /* {{{ 
 	if (info->name.s) {
 		UChar *uname;
 
-		uname = malloc(UBYTES(info->name_length+1));
-		u_charsToUChars(info->name.s, uname, info->name_length+1);
+		uname = malloc(UBYTES(info->name_length + 1));
+		u_charsToUChars(info->name.s, uname, info->name_length + 1);
 		free(info->name.s);
 		info->name.u = uname;
-		info->h = zend_u_get_hash_value(IS_UNICODE, info->name, info->name_length+1);
+		info->h = zend_u_get_hash_value(IS_UNICODE, info->name, info->name_length + 1);
 	}
 }
 /* }}} */
@@ -786,8 +786,8 @@ static void const_to_unicode(zend_constant *c) /* {{{ */
 	if (Z_TYPE(c->value) == IS_STRING || (Z_TYPE(c->value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		UChar *ustr;
 
-		ustr = malloc(UBYTES(Z_STRLEN(c->value)+1));
-		u_charsToUChars(Z_STRVAL(c->value), ustr, Z_STRLEN(c->value)+1);
+		ustr = malloc(UBYTES(Z_STRLEN(c->value) + 1));
+		u_charsToUChars(Z_STRVAL(c->value), ustr, Z_STRLEN(c->value) + 1);
 		Z_USTRVAL(c->value) = ustr;
 		if (Z_TYPE(c->value) == IS_STRING) Z_TYPE(c->value) = IS_UNICODE;
 	}
@@ -798,9 +798,9 @@ static void class_to_unicode(zend_class_entry **ce TSRMLS_DC) /* {{{ */
 {
 	/* Convert name to unicode */
 	if ((*ce)->name.s) {
-		UChar *uname = malloc(UBYTES((*ce)->name_length+1));
+		UChar *uname = malloc(UBYTES((*ce)->name_length + 1));
 
-		u_charsToUChars((*ce)->name.s, uname, (*ce)->name_length+1);
+		u_charsToUChars((*ce)->name.s, uname, (*ce)->name_length + 1);
 		free((*ce)->name.s);
 		(*ce)->name.u = uname;
 	}
@@ -874,7 +874,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	zend_startup_constants(TSRMLS_C);
 	zend_copy_constants(EG(zend_constants), GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist(TSRMLS_C);
-	EG(lambda_count)=0;
+	EG(lambda_count) = 0;
 	EG(user_error_handler) = NULL;
 	EG(user_exception_handler) = NULL;
 	EG(in_execution) = 0;
@@ -1064,7 +1064,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 	/* set up version */
 	zend_version_info = strdup(ZEND_CORE_VERSION_INFO);
-	zend_version_info_length = sizeof(ZEND_CORE_VERSION_INFO)-1;
+	zend_version_info_length = sizeof(ZEND_CORE_VERSION_INFO) - 1;
 
 	GLOBAL_FUNCTION_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	GLOBAL_CLASS_TABLE = (HashTable *) malloc(sizeof(HashTable));
@@ -1079,10 +1079,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_hash_init_ex(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1, 0);
 	zend_init_rsrc_list_dtors();
 
-
 	/* This zval can be used to initialize allocate zval's to an uninit'ed value */
-	zval_used_for_init.is_ref__gc = 0;
-	zval_used_for_init.refcount__gc = 1;
+	Z_UNSET_ISREF(zval_used_for_init);
+	Z_SET_REFCOUNT(zval_used_for_init, 1);
 	Z_TYPE(zval_used_for_init) = IS_NULL;
 
 #ifdef ZTS
@@ -1116,7 +1115,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 #endif
 	register_standard_class(TSRMLS_C);
 	zend_register_standard_constants(TSRMLS_C);
- 	zend_register_auto_global("GLOBALS", sizeof("GLOBALS")-1, NULL TSRMLS_CC);
+	zend_register_auto_global("GLOBALS", sizeof("GLOBALS") - 1, NULL TSRMLS_CC);
 
 #ifndef ZTS
 	zend_init_rsrc_plist(TSRMLS_C);
@@ -1274,11 +1273,11 @@ void zend_append_version_info(zend_extension *extension) /* {{{ */
 						+ strlen(extension->copyright)
 						+ strlen(extension->author);
 
-	new_info = (char *) malloc(new_info_length+1);
+	new_info = (char *) malloc(new_info_length + 1);
 
 	sprintf(new_info, "    with %s v%s, %s, by %s\n", extension->name, extension->version, extension->copyright, extension->author);
 
-	zend_version_info = (char *) realloc(zend_version_info, zend_version_info_length+new_info_length+1);
+	zend_version_info = (char *) realloc(zend_version_info, zend_version_info_length+new_info_length + 1);
 	strcat(zend_version_info, new_info);
 	zend_version_info_length += new_info_length;
 	free(new_info);
@@ -1547,8 +1546,8 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 
 			/* User error handler may include() additinal PHP files.
 			 * If an error was generated during comilation PHP will compile
-			 * such scripts recursivly, but some CG() variables may be 
-			 * inconsistent. */ 
+			 * such scripts recursivly, but some CG() variables may be
+			 * inconsistent. */
 
 			in_compilation = zend_is_compiling(TSRMLS_C);
 			if (in_compilation) {
@@ -1556,7 +1555,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				CG(active_class_entry) = NULL;
 			}
 
-			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC)==SUCCESS) {
+			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC) == SUCCESS) {
 				if (retval) {
 					if (Z_TYPE_P(retval) == IS_BOOL && Z_LVAL_P(retval) == 0) {
 						zend_error_cb(type, error_filename, error_lineno, format, args);
@@ -1634,18 +1633,18 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 	zend_file_handle *file_handle;
 	zend_op_array *orig_op_array = EG(active_op_array);
 	zval **orig_retval_ptr_ptr = EG(return_value_ptr_ptr);
-	zval *local_retval=NULL;
+	zval *local_retval = NULL;
 
 	va_start(files, file_count);
-	for (i=0; i<file_count; i++) {
+	for (i = 0; i < file_count; i++) {
 		file_handle = va_arg(files, zend_file_handle *);
 		if (!file_handle) {
 			continue;
 		}
 		EG(active_op_array) = zend_compile_file(file_handle, type TSRMLS_CC);
-		if(file_handle->opened_path) {
-			int dummy=1;
-			zend_hash_add(&EG(included_files), file_handle->opened_path, strlen(file_handle->opened_path)+1, (void *)&dummy, sizeof(int), NULL);
+		if (file_handle->opened_path) {
+			int dummy = 1;
+			zend_hash_add(&EG(included_files), file_handle->opened_path, strlen(file_handle->opened_path) + 1, (void *)&dummy, sizeof(int), NULL);
 		}
 		zend_destroy_file_handle(file_handle TSRMLS_CC);
 		if (EG(active_op_array)) {
