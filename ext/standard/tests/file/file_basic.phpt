@@ -13,17 +13,17 @@ echo "*** Testing file() with basic files ***\n";
 $filetypes = array("numeric", "text", "empty", "text_with_new_line");
 
 foreach( $filetypes as $type ) {
-  create_files($file_path, 1, $type, 0755, 100, "w", "file", 1, "byte");
-  print_r( file($file_path."/file1.tmp") );
-  delete_files($file_path, 1);
+  create_files($file_path, 1, $type, 0755, 100, "w", "file_basic", 1, "byte");
+  print_r( file($file_path."/file_basic1.tmp") );
+  delete_files($file_path, 1, "file_basic");
 }
 
 echo "*** Testing for return type of file function ***\n";
 foreach( $filetypes as $type ) {
-  create_files($file_path, 1, $type);
-  $ret_arr =  file($file_path."/file1.tmp");
+  create_files($file_path, 1, $type, 0755, 1, "w", "file_basic");
+  $ret_arr =  file($file_path."/file_basic1.tmp");
   var_dump( is_array($ret_arr) );
-  delete_files($file_path, 1);
+  delete_files($file_path, 1, "file_basic");
 }
 
 echo "\n--- Done ---";
