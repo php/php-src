@@ -23,8 +23,7 @@ foreach ($tests as $v) {
 }
 ?>
 --EXPECTF--	
-
-Warning: array_product(): The argument should be an array in %s on line %d
+Warning: array_product() expects parameter 1 to be array, string given in %s on line %d
 NULL
 int(0)
 int(0)

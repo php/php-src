@@ -10,7 +10,5 @@ array_walk($array, array($nonesuchvar,'show'));
 --EXPECTF--
 Notice: Undefined variable: nonesuchvar in %s on line %d
 
-Notice: Non-callable array passed to zend_call_function() in %s on line %d
-
-Warning: array_walk(): Unable to call Array() - function does not exist in %s on line %d
+Warning: array_walk() expects parameter 2 to be valid callback, array given in %s on line %d
 ===DONE===

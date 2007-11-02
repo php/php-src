@@ -106,7 +106,7 @@ class check_array_map {
 /* call static member function */
 var_dump( array_map( array('check_array_map', 'Square'), array(1,2,3)) );
 
-/* call non static member function - notice should be issues*/
+/* call non static member function - warning should be issues*/
 var_dump( array_map( array('check_array_map', 'Message'), array(1)) );  
 
 /* call function using object */
@@ -369,31 +369,31 @@ NULL
 Warning: array_map(): Argument #2 should be an array in %s on line %d
 NULL
 
-Warning: Wrong parameter count for array_map() %s on line %d
+Warning: array_map() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: array_map(): The first argument, 'echo', should be either NULL or a valid callback in %s on line %d
+Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d
 NULL
 
-Warning: array_map(): The first argument, 'array', should be either NULL or a valid callback in %s on line %d
+Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d
 NULL
 
-Warning: array_map(): The first argument, 'empty', should be either NULL or a valid callback in %s on line %d
+Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d
 NULL
 
-Warning: array_map(): The first argument, 'eval', should be either NULL or a valid callback in %s on line %d
+Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d
 NULL
 
-Warning: array_map(): The first argument, 'exit', should be either NULL or a valid callback in %s on line %d
+Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d
 NULL
 
-Warning: array_map(): The first argument, 'isset', should be either NULL or a valid callback in %s on line %d
+Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d
 NULL
 
-Warning: array_map(): The first argument, 'list', should be either NULL or a valid callback in %s on line %d
+Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d
 NULL
 
-Warning: array_map(): The first argument, 'print', should be either NULL or a valid callback in %s on line %d
+Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d
 NULL
 
 *** Testing operation on objects ***
@@ -406,15 +406,10 @@ array(3) {
   int(9)
 }
 
-Strict Standards: Non-static method check_array_map::Message() cannot be called statically in %s on line %d
+Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d
+NULL
 
-Strict Standards: Non-static method check_array_map::Message() cannot be called statically in %s on line %d
-array(1) {
-  [0]=>
-  int(1)
-}
-
-Warning: Wrong parameter count for array_map() in %s on line %d
+Warning: array_map() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 array(1) {
   [0]=>

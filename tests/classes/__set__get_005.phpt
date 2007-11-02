@@ -56,7 +56,7 @@ AutoGen::__get
 Test::__set
 AutoGen::__get
 object(Test)#%d (1) {
-  ["x:protected"]=>
+  ["x":protected]=>
   array(1) {
     ["baz"]=>
     string(5) "Check"

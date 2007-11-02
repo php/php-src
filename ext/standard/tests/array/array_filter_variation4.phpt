@@ -9,9 +9,9 @@ Test array_filter() function : usage variations - Different types of 'callback' 
 
 /*
 * Passing different types of callback functions to array_filter()
-* with parameter and return
-* with paramter and without return
+* with parameters and return
 * without parameter and with return
+* with parameter and without return
 * without parameter and without return
 */
 

@@ -8,7 +8,7 @@ Test array_filter() function : usage variations - anonymous callback functions
 */
 
 /*
-* Passing different anonymous callback functions with passed by value and reference arguments,
+* Passing different anonymous callback functions with passed by value and reference arguments
 */
 
 echo "*** Testing array_filter() : usage variations - Anonymous callback functions ***\n";

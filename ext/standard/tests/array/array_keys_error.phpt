@@ -15,19 +15,19 @@ echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing error conditions ***
-Warning: array_keys(): The first argument should be an array in %s on line %d
+Warning: array_keys() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: array_keys(): The first argument should be an array in %s on line %d
+Warning: array_keys() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_keys(): The first argument should be an array in %s on line %d
+Warning: array_keys() expects parameter 1 to be array, object given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for array_keys() in %s on line %d
+Warning: array_keys() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for array_keys() in %s on line %d
+Warning: array_keys() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
 Warning: Illegal offset type in %s on line %d

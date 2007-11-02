@@ -28,7 +28,7 @@ class SXETest extends SimpleXMLIterator
 	}
 }
 
-$sxe = new SXETest($xml);
+$sxe = new SXETest((binary)$xml);
 
 var_dump(count($sxe));
 var_dump(count($sxe->elem1));

@@ -76,7 +76,7 @@ class SXETest extends SimpleXMLIterator
 	}
 }
 
-$sxe = new SXETest($xml);
+$sxe = new SXETest((binary)$xml);
 $rit = new RecursiveIteratorIterator($sxe, RecursiveIteratorIterator::SELF_FIRST);
 
 foreach($rit as $data) {

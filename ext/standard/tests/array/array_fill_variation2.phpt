@@ -2,7 +2,7 @@
 Test array_fill() function : usage variations  - unexpected values for 'num' argument 
 --FILE--
 <?php
-/* Prototype  : array array_fill(int $start_key, int $num, mixed $val)
+/* Prototype  : proto array array_fill(int start_key, int num, mixed val)
  * Description: Create an array containing num elements starting with index start_key each initialized to val 
  * Source code: ext/standard/array.c
  */
@@ -13,7 +13,7 @@ Test array_fill() function : usage variations  - unexpected values for 'num' arg
 
 echo "*** Testing array_fill() : usage variations ***\n";
 
-// Initialise function arguments not being substituted (if any)
+// Initialise function arguments not being substituted 
 $start_key = 0;
 $val = 100;
 
@@ -74,7 +74,7 @@ $values = array(
             @$undefined_var,
 
             // unset variable
-  /* 23 */  @$unset_var,
+  /* 24 */  @$unset_var,
 
 );
 
@@ -87,7 +87,7 @@ for($index = 0; $index < count($values); $index ++)
   echo "-- Iteration $counter --\n";
   $num = $values[$index];
 
-  var_dump( array_fill($start_key, $num, $val) );
+  var_dump( array_fill($start_key,$num,$val) );
  
   $counter ++;
 }
@@ -131,28 +131,24 @@ Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 2 to be long, array given in %s on line %d
+NULL
 -- Iteration 7 --
-array(1) {
-  [0]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 2 to be long, array given in %s on line %d
+NULL
 -- Iteration 8 --
-array(1) {
-  [0]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 2 to be long, array given in %s on line %d
+NULL
 -- Iteration 9 --
-array(1) {
-  [0]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 2 to be long, array given in %s on line %d
+NULL
 -- Iteration 10 --
-array(1) {
-  [0]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 2 to be long, array given in %s on line %d
+NULL
 -- Iteration 11 --
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d
@@ -181,27 +177,24 @@ Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 -- Iteration 17 --
 
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 2 to be long, string given in %s on line %d
+NULL
 -- Iteration 18 --
 
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 2 to be long, string given in %s on line %d
+NULL
 -- Iteration 19 --
 
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 2 to be long, string given in %s on line %d
+NULL
 -- Iteration 20 --
 
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 2 to be long, string given in %s on line %d
+NULL
 -- Iteration 21 --
 
-Notice: Object of class test could not be converted to int in %s on line %d
-array(1) {
-  [0]=>
-  int(100)
-}
+Warning: array_fill() expects parameter 2 to be long, object given in %s on line %d
+NULL
 -- Iteration 22 --
 
 Warning: array_fill(): Number of elements must be positive in %s on line %d

@@ -114,89 +114,6 @@ var_dump( reset($int_var) );
 var_dump( reset($float_var) );
 var_dump( reset($string) );
 
-echo "\n*** Testing operation on Objects ***\n";
-// class having members of different scope
-class test_class
-{
-   private    $private_var = "private_var";
-   public     $public_var = "public_var";
-   protected  $protected_var = "protected_var";
-   private    $var1 = 10;
-   public     $var2 = 30;
-   protected  $var3 = 40;
-   var        $integer = 3092;
-
-   private function private_fun() {
-     echo "private_fun() called\n";
-   }
-
-   protected function protected_fun() {
-     echo "protected_fun() called\n";
-   }
-
-   public function public_fun() {
-     echo "public_fun() called\n";
-   }
-}
-// class with no member variables 
-class zero_member_var_class
-{
-  public function fun() {
-     echo "fun() called\n";
-  }
-}
-// class with no members 
-class zero_member_class
-{
-  // no members 
-}
-
-//create object of all classes defined above
-$test_class_obj = new test_class();
-$zero_member_var_class_obj = new zero_member_var_class();
-$zero_member_class_obj = new zero_member_class();
-
-$object_array = array (
-  $test_class_obj,
-  $zero_member_var_class_obj,
-  $zero_member_class_obj
-);
-
-/* loop to use function key(), current(), next() and reset() 
-   on different class objects */
-$loop_count = 1;
-foreach( $object_array as $object ) {
-  echo "--- Outerloop Iteration $loop_count ---\n";
-   
-  /* dump the object before performing operation on it */
-  echo "Object before performing operations ...\n";
-  var_dump($object) ;
-
-  /* loop to feach all the key/value pair from the object*/
-  $inner_loop_count = 1;
-  do {
-    echo "-- Innerloop iteration $inner_loop_count of Outerloop Iteration $loop_count --\n"; 
-    $inner_loop_count ++;
-
-    // print the key/value pair of the current value
-    echo "current => "; var_dump( current($object) ); // key & value pair
-    echo "key => "; var_dump( key($object) );     // key
-
-    $next_pair = next($object);
-    echo "next => "; var_dump($next_pair);
-
-  } while( FALSE != $next_pair );
-
-  $loop_count++;
-
-  /* reset the object */
-  echo "reset => "; var_dump( reset($object) );
-  echo "current => "; var_dump( current($object) ); // first variable in object
-
-  echo "\nObject after performing operations ...\n";
-  var_dump($object) ; // no change expected
-}
-
 echo "Done\n";
 ?>
 --EXPECTF--	
@@ -542,173 +459,77 @@ array(5) {
 
 -- Testing variation: when array is unset --
 
-Warning: current(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: current() expects parameter 1 to be array, null given in %s on line %d
+NULL
 
-Warning: key(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: key() expects parameter 1 to be array, null given in %s on line %d
+NULL
 
-Warning: next(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: next() expects parameter 1 to be array, null given in %s on line %d
+NULL
 
-Warning: reset(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: reset() expects parameter 1 to be array, null given in %s on line %d
+NULL
 
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for key() in %s on line %d
+Warning: key() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for current() in %s on line %d
+Warning: current() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for reset() in %s on line %d
+Warning: reset() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for next() in %s on line %d
+Warning: next() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for key() in %s on line %d
+Warning: key() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for current() in %s on line %d
+Warning: current() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for reset() in %s on line %d
+Warning: reset() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for next() in %s on line %d
+Warning: next() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: key(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: key() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 
-Warning: key(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: key() expects parameter 1 to be array, double given in %s on line %d
+NULL
 
-Warning: key(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: key() expects parameter 1 to be array, string given in %s on line %d
+NULL
 
-Warning: current(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: current() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 
-Warning: current(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: current() expects parameter 1 to be array, double given in %s on line %d
+NULL
 
-Warning: current(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: current() expects parameter 1 to be array, string given in %s on line %d
+NULL
 
-Warning: next(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: next() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 
-Warning: next(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: next() expects parameter 1 to be array, double given in %s on line %d
+NULL
 
-Warning: next(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: next() expects parameter 1 to be array, string given in %s on line %d
+NULL
 
-Warning: reset(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: reset() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 
-Warning: reset(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: reset() expects parameter 1 to be array, double given in %s on line %d
+NULL
 
-Warning: reset(): Passed variable is not an array or object in %s on line %d
-bool(false)
-
-*** Testing operation on Objects ***
---- Outerloop Iteration 1 ---
-Object before performing operations ...
-object(test_class)#1 (7) {
-  ["private_var:private"]=>
-  string(11) "private_var"
-  ["public_var"]=>
-  string(10) "public_var"
-  ["protected_var:protected"]=>
-  string(13) "protected_var"
-  ["var1:private"]=>
-  int(10)
-  ["var2"]=>
-  int(30)
-  ["var3:protected"]=>
-  int(40)
-  ["integer"]=>
-  int(3092)
-}
--- Innerloop iteration 1 of Outerloop Iteration 1 --
-current => string(11) "private_var"
-key => string(23) " test_class private_var"
-next => string(10) "public_var"
--- Innerloop iteration 2 of Outerloop Iteration 1 --
-current => string(10) "public_var"
-key => string(10) "public_var"
-next => string(13) "protected_var"
--- Innerloop iteration 3 of Outerloop Iteration 1 --
-current => string(13) "protected_var"
-key => string(16) " * protected_var"
-next => int(10)
--- Innerloop iteration 4 of Outerloop Iteration 1 --
-current => int(10)
-key => string(16) " test_class var1"
-next => int(30)
--- Innerloop iteration 5 of Outerloop Iteration 1 --
-current => int(30)
-key => string(4) "var2"
-next => int(40)
--- Innerloop iteration 6 of Outerloop Iteration 1 --
-current => int(40)
-key => string(7) " * var3"
-next => int(3092)
--- Innerloop iteration 7 of Outerloop Iteration 1 --
-current => int(3092)
-key => string(7) "integer"
-next => bool(false)
-reset => string(11) "private_var"
-current => string(11) "private_var"
-
-Object after performing operations ...
-object(test_class)#1 (7) {
-  ["private_var:private"]=>
-  string(11) "private_var"
-  ["public_var"]=>
-  string(10) "public_var"
-  ["protected_var:protected"]=>
-  string(13) "protected_var"
-  ["var1:private"]=>
-  int(10)
-  ["var2"]=>
-  int(30)
-  ["var3:protected"]=>
-  int(40)
-  ["integer"]=>
-  int(3092)
-}
---- Outerloop Iteration 2 ---
-Object before performing operations ...
-object(zero_member_var_class)#2 (0) {
-}
--- Innerloop iteration 1 of Outerloop Iteration 2 --
-current => bool(false)
-key => NULL
-next => bool(false)
-reset => bool(false)
-current => bool(false)
-
-Object after performing operations ...
-object(zero_member_var_class)#2 (0) {
-}
---- Outerloop Iteration 3 ---
-Object before performing operations ...
-object(zero_member_class)#3 (0) {
-}
--- Innerloop iteration 1 of Outerloop Iteration 3 --
-current => bool(false)
-key => NULL
-next => bool(false)
-reset => bool(false)
-current => bool(false)
-
-Object after performing operations ...
-object(zero_member_class)#3 (0) {
-}
+Warning: reset() expects parameter 1 to be array, string given in %s on line %d
+NULL
 Done

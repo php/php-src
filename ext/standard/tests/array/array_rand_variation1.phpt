@@ -1,5 +1,5 @@
 --TEST--
-Test array_rand() function : usage variations  - unexpected values for 'input' parameter
+Test array_rand() function : usage variations - unexpected values for 'input' parameter
 --FILE--
 <?php
 /* Prototype  : mixed array_rand(array input [, int num_req])
@@ -101,116 +101,117 @@ echo "Done";
 
 -- Iteration 1 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
 -- Iteration 2 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
 -- Iteration 3 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
 -- Iteration 4 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
 -- Iteration 5 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
 -- Iteration 6 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
 -- Iteration 10 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, null given in %s on line %d
 NULL
 
 -- Iteration 11 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, null given in %s on line %d
 NULL
 
 -- Iteration 12 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, boolean given in %s on line %d
 NULL
 
 -- Iteration 13 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, boolean given in %s on line %d
 NULL
 
 -- Iteration 14 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, boolean given in %s on line %d
 NULL
 
 -- Iteration 15 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, boolean given in %s on line %d
 NULL
 
 -- Iteration 16 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, object given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, resource given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, null given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: array_rand(): First argument has to be an array in %s on line %d
+Warning: array_rand() expects parameter 1 to be array, null given in %s on line %d
 NULL
 Done
+

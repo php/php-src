@@ -37,7 +37,7 @@ $xml =<<<EOF
 </sxe>
 EOF;
 
-$sxe = simplexml_load_string($xml, 'SimpleXMLIterator');
+$sxe = simplexml_load_string((binary)$xml, 'SimpleXMLIterator');
 
 foreach(new RecursiveIteratorIterator($sxe, 1) as $name => $data) {
 	var_dump($name);

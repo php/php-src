@@ -2,7 +2,7 @@
 Test array_fill() function : basic functionality 
 --FILE--
 <?php
-/* Prototype  : array array_fill(int $start_key, int $num, mixed $val)
+/* Prototype  : proto array array_fill(int start_key, int num, mixed val)
  * Description: Create an array containing num elements starting with index start_key each initialized to val 
  * Source code: ext/standard/array.c
  */
@@ -10,7 +10,6 @@ Test array_fill() function : basic functionality
 echo "*** Testing array_fill() : basic functionality ***\n";
 
 // calling the array_fill with all possible valid values for 'val' argument
-
 $start_key = 0 ;
 $num = 2;
 $heredoc = <<<HERE_DOC
@@ -36,7 +35,7 @@ for($i = 0; $i < count($values); $i ++)
   echo "-- Iteration $counter --\n";
   $val = $values[$i];
 
-  var_dump( array_fill($start_key, $num, $val) );
+  var_dump( array_fill($start_key,$num,$val) );
 
   $counter++;
 }  

@@ -49,10 +49,10 @@ int(5)
 
 *** Testing objects with array_search() ***
 
-Warning: array_search(): Wrong datatype for second argument in %s on line %d
-bool(false)
+Warning: array_search() expects parameter 2 to be array, object given in %s on line %d
+NULL
 
-Warning: array_search(): Wrong datatype for second argument in %s on line %d
-bool(false)
+Warning: array_search() expects parameter 2 to be array, object given in %s on line %d
+NULL
 int(1)
 Done

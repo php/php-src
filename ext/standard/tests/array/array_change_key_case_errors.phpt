@@ -14,15 +14,15 @@ var_dump( array_change_key_case($item, $item["one"], "CASE_UPPER") ); // more th
 echo "end\n";
 ?>
 --EXPECTF--
-Warning: array_change_key_case(): The argument should be an array in %s on line %d
-bool(false)
-
-Warning: array_change_key_case(): The argument should be an array in %s on line %d
-bool(false)
-
-Warning: Wrong parameter count for array_change_key_case() in %s on line %d
+Warning: array_change_key_case() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for array_change_key_case() in %s on line %d
+Warning: array_change_key_case() expects parameter 1 to be array, integer given in %s on line %d
+NULL
+
+Warning: array_change_key_case() expects at least 1 parameter, 0 given in %s on line %d
+NULL
+
+Warning: array_change_key_case() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 end

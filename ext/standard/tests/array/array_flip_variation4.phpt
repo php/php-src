@@ -30,8 +30,8 @@ $input = array(
   // float values
   'float_value1' => 1.2,
   'float_value2' => 0.5,
-  'float_value3' => 3.4E3,
-  'float_value4' => 5.6E-6,
+  'flaot_value3' => 3.4E3,
+  'flaot_value4' => 5.6E-6,
 
   // bool values
   'bool_value1' => true,

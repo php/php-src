@@ -45,7 +45,7 @@ for($i = 0; $i < count($values); $i++)
   echo "-- Iteration $counter --\n";
   $val = $values[$i];
   
-  var_dump( array_fill($start_key, $num, $val) );
+  var_dump( array_fill($start_key , $num , $val) );
 
   $counter++;
 }

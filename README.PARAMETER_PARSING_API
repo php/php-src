@@ -31,28 +31,38 @@ resources cannot be auto-converted.
 
 Type specifiers
 ---------------
- a	- array
- b	- boolean, stored in zend_bool
- d	- double
- f	- function or array containing php method call info (returned as 
-	  zend_fcall_info* and zend_fcall_info_cache*)
- h	- array (returned as HashTable*)
- l	- long
- o	- object (of any type)
- O	- object (of specific type, specified by class entry)
- r	- resource (stored in zval)
- s	- string (with possible null bytes) and its length
- z	- the actual zval
+ The following list shows the type specifier, its meaning and the parameter 
+ types that need to be passed by address. All passed paramaters are set
+ if the PHP parameter is non optional and untouched if optional and the 
+ parameter is not present. The only exception is O where the zend_class_entry*
+ has to be provided on input and is used to verify the PHP parameter is an 
+ instance of that class.
+
+ a  - array (zval*)
+ b  - boolean (zend_bool)
+ C  - class (zend_class_entry*)
+ d  - double (double)
+ f  - function or array containing php method call info (returned as 
+      zend_fcall_info and zend_fcall_info_cache)
+ h  - array (returned as HashTable*)
+ l  - long (long)
+ o  - object of any type (zval*)
+ O  - object of specific type given by class entry (zval*, zend_class_entry)
+ r  - resource (zval*)
+ s  - string (with possible null bytes) and its length (char*, int)
+ z  - the actual zval (zval*)
+ Z  - the actual zval (zval**)
+ *  - variable arguments list
 
  The following characters also have a meaning in the specifier string:
-	| - indicates that the remaining parameters are optional, they
-	    should be initialized to default values by the extension since they
-	    will not be touched by the parsing function if they are not
-	    passed to it.
-	/ - use SEPARATE_ZVAL_IF_NOT_REF() on the parameter it follows
-	! - the parameter it follows can be of specified type or NULL (only applies
-		to 's', 'a', 'o', 'O', 'r', 'h', 'C', 'z', and 'Z'). If NULL is passed,
-	 	the results pointer is set to NULL as well.
+    | - indicates that the remaining parameters are optional, they
+        should be initialized to default values by the extension since they
+        will not be touched by the parsing function if they are not
+        passed to it.
+    / - use SEPARATE_ZVAL_IF_NOT_REF() on the parameter it follows
+    ! - the parameter it follows can be of specified type or NULL (applies
+		to all specifiers except for 'b', 'l', and 'd'). If NULL is passed, the
+		results pointer is set to NULL as well.
 
 Examples
 --------
@@ -62,8 +72,8 @@ char *s;
 int s_len;
 zval *param;
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsz",
-						  &l, &s, &s_len, &param) == FAILURE) {
-	return;
+                          &l, &s, &s_len, &param) == FAILURE) {
+    return;
 }
 
 
@@ -72,8 +82,8 @@ zval *obj;
 double d = 0.5;
 zend_class_entry *my_ce;
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|d",
-						  &obj, my_ce, &d) == FAILURE) {
-	return;
+                          &obj, my_ce, &d) == FAILURE) {
+    return;
 }
 
 
@@ -82,28 +92,17 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|d",
 zval *obj;
 zval *arr;
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o!a",
-						  &obj, &arr) == FAILURE) {
-	return;
+                          &obj, &arr) == FAILURE) {
+    return;
 }
 
 
 /* Gets a separated array which can also be null. */
 zval *arr;
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/!",
-						  &arr) == FAILURE) {
-	return;
+                          &arr) == FAILURE) {
+    return;
 }
-
-
-/* Get only the first three parameters (useful for varargs functions). */
-zval *z;
-zend_bool b;
-zval *r;
-if (zend_parse_parameters(3 TSRMLS_CC, "zbr!",
-						  &z, &b, &r) == FAILURE) {
-	return;
-}
-
 
 /* Get either a set of 3 longs or a string. */
 long l1, l2, l3;
@@ -118,13 +117,72 @@ char *s;
 int length;
 
 if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-							 "lll", &l1, &l2, &l3) == SUCCESS) {
-	/* manipulate longs */
+                             "lll", &l1, &l2, &l3) == SUCCESS) {
+    /* manipulate longs */
 } else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-									"s", &s, &length) == SUCCESS) {
-	/* manipulate string */
+                                    "s", &s, &length) == SUCCESS) {
+    /* manipulate string */
 } else {
-	/* output error */
+    /* output error */
 
-	return;
+    return;
 }
+
+
+/* Function that accepts only varargs (0 or more) */
+
+int i, num_varargs;
+zval ***varargs = NULL;
+
+
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &varargs, &num_varargs) == FAILURE) {
+    return;
+}
+
+for (i = 0; i < num_varargs; i++) {
+    /* do something with varargs[i] */
+}
+
+if (varargs) {
+    efree(varargs);
+}
+
+
+/* Function that accepts a string, followed by varargs (1 or more) */
+
+char *str;
+int str_len;
+int i, num_varargs;
+zval ***varargs = NULL;
+
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s+", &str, &str_len, &varargs, &num_varargs) == FAILURE) {
+    return;
+}
+
+for (i = 0; i < num_varargs; i++) {
+    /* do something with varargs[i] */
+}
+
+if (varargs) {
+    efree(varargs);
+}
+
+
+/* Function that takes an array, followed by varargs, and ending with a long */
+long num;
+zval *array;
+int i, num_varargs;
+zval ***varargs = NULL;
+
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a*l", &array, &varargs, &num_varargs, &num) == FAILURE) {
+    return;
+}
+
+for (i = 0; i < num_varargs; i++) {
+    /* do something with varargs[i] */
+}
+
+if (varargs) {
+    efree(varargs);
+}
+

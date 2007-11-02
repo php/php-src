@@ -1,8 +1,8 @@
 --TEST--
-Test array_fill() function : usage variations  - unexpected values for 'start_key' argument(Bug#43017)
+Test array_fill() function : usage variations  - unexpected values for 'start_key' argument
 --FILE--
 <?php
-/* Prototype  : array array_fill(int $start_key, int $num, mixed $val)
+/* Prototype  : proto array array_fill(int start_key, int num, mixed val)
  * Description: Create an array containing num elements starting with index start_key each initialized to val 
  * Source code: ext/standard/array.c
  */
@@ -42,7 +42,7 @@ $values = array(
   /* 1  */  10.5,
             -10.5,
             12.3456789000e10,
-            12.3456789000E-10,
+            12.34567890006E-10,
             .5,
 
             // array values
@@ -142,26 +142,25 @@ array(2) {
 }
 -- Iteration 6 --
 
-Warning: array_fill(): Wrong data type for start key in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 1 to be long, array given in %s on line %d
+NULL
 -- Iteration 7 --
 
-Warning: array_fill(): Wrong data type for start key in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 1 to be long, array given in %s on line %d
+NULL
 -- Iteration 8 --
 
-Warning: array_fill(): Wrong data type for start key in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 1 to be long, array given in %s on line %d
+NULL
 -- Iteration 9 --
 
-Warning: array_fill(): Wrong data type for start key in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 1 to be long, array given in %s on line %d
+NULL
 -- Iteration 10 --
 
-Warning: array_fill(): Wrong data type for start key in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 1 to be long, array given in %s on line %d
+NULL
 -- Iteration 11 --
-
 array(2) {
   [0]=>
   int(100)
@@ -169,7 +168,6 @@ array(2) {
   int(100)
 }
 -- Iteration 12 --
-
 array(2) {
   [0]=>
   int(100)
@@ -177,7 +175,6 @@ array(2) {
   int(100)
 }
 -- Iteration 13 --
-
 array(2) {
   [1]=>
   int(100)
@@ -185,7 +182,6 @@ array(2) {
   int(100)
 }
 -- Iteration 14 --
-
 array(2) {
   [0]=>
   int(100)
@@ -193,7 +189,6 @@ array(2) {
   int(100)
 }
 -- Iteration 15 --
-
 array(2) {
   [1]=>
   int(100)
@@ -201,7 +196,6 @@ array(2) {
   int(100)
 }
 -- Iteration 16 --
-
 array(2) {
   [0]=>
   int(100)
@@ -209,47 +203,41 @@ array(2) {
   int(100)
 }
 -- Iteration 17 --
-array(2) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
+NULL
 -- Iteration 18 --
-array(2) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
+NULL
 -- Iteration 19 --
-array(2) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
+NULL
 -- Iteration 20 --
-array(2) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
+NULL
 -- Iteration 21 --
 
-Warning: array_fill(): Wrong data type for start key in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 1 to be long, object given in %s on line %d
+NULL
 -- Iteration 22 --
-
-Warning: array_fill(): Wrong data type for start key in %s on line %d
-bool(false)
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+}
 -- Iteration 23 --
-
-Warning: array_fill(): Wrong data type for start key in %s on line %d
-bool(false)
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+}
 -- Iteration 24 --
 
-Warning: array_fill(): Wrong data type for start key in %s on line %d
-bool(false)
+Warning: array_fill() expects parameter 1 to be long, resource given in %s on line %d
+NULL
 Done

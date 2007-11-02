@@ -39,12 +39,12 @@ echo "Done"
 --EXPECTF--
 *** Testing array_filter() : error conditions ***
 -- Testing array_filter() function with Zero arguments --
-Warning: Wrong parameter count for array_filter() in %s on line %d
+Warning: array_filter() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 -- Testing array_filter() function with more than expected no. of arguments --
-Warning: Wrong parameter count for array_filter() in %s on line %d
+Warning: array_filter() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 -- Testing array_filter() function with incorrect callback --
-Warning: array_filter(): The second argument, 'even', should be a valid callback in %s on line %d
+Warning: array_filter() expects parameter 2 to be valid callback, string given in %s on line %d
 NULL
 Done

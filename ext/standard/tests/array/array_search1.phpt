@@ -19,11 +19,11 @@ var_dump(array_search(-1,$a, true));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for array_search() in %s on line %d
+Warning: array_search() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: array_search(): Wrong datatype for second argument in %s on line %d
-bool(false)
+Warning: array_search() expects parameter 2 to be array, integer given in %s on line %d
+NULL
 int(1)
 bool(false)
 int(1)

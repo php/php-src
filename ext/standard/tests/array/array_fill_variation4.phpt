@@ -1,8 +1,8 @@
 --TEST--
-Test array_fill() function : usage variations - using return value of array_fill as 'val' arugment  
+Test array_fill() function : usage variations - using return value of array_fill for 'val' argument 
 --FILE--
 <?php
-/* Prototype  : array array_fill(int $start_key, int $num, mixed $val)
+/* Prototype  : proto array array_fill(int start_key, int num, mixed val)
  * Description: Create an array containing num elements starting with index start_key each initialized to val 
  * Source code: ext/standard/array.c
  */
@@ -36,7 +36,7 @@ for($i =0; $i < count($values); $i ++)
   echo "-- Iteration $counter --\n";
   $val = $values[$i];
  
-  var_dump( array_fill($start_key, $num, array_fill($start_key, $num, $val)) );
+  var_dump( array_fill($start_key,$num,array_fill($start_key,$num,$val)) );
   
   $counter++;
 }  

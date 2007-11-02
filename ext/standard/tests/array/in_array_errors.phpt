@@ -28,18 +28,18 @@ echo "Done\n";
 --EXPECTF--
 *** Testing error conditions of in_array() ***
 
-Warning: Wrong parameter count for in_array() in %s on line %d
+Warning: in_array() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for in_array() in %s on line %d
+Warning: in_array() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for in_array() in %s on line %d
+Warning: in_array() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: in_array(): Wrong datatype for second argument in %s on line %d
-bool(false)
+Warning: in_array() expects parameter 2 to be array, string given in %s on line %d
+NULL
 
-Warning: in_array(): Wrong datatype for second argument in %s on line %d
-bool(false)
+Warning: in_array() expects parameter 2 to be array, integer given in %s on line %d
+NULL
 Done

@@ -1,5 +1,5 @@
 --TEST--
-Test shuffle() function : usage variation - arrays with diff. types of values
+Test shuffle() function : usage variation - arrays with diff types of values
 --FILE--
 <?php
 /* Prototype  : bool shuffle(array $array_arg)
@@ -230,3 +230,4 @@ array(3) {
   int(-%d)
 }
 Done
+

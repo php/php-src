@@ -119,9 +119,9 @@ echo "Done\n";
 object(object_class)#%d (6) refcount(5){
   ["value1"]=>
   long(5) refcount(1)
-  ["value2:private"]=>
+  ["value2":"object_class":private]=>
   long(10) refcount(5)
-  ["value3:protected"]=>
+  ["value3":protected]=>
   long(20) refcount(5)
   ["value4"]=>
   long(30) refcount(7)
@@ -136,9 +136,9 @@ object(object_class)#%d (6) refcount(5){
   object(object_class)#%d (6) refcount(5){
     ["value1"]=>
     long(5) refcount(1)
-    ["value2:private"]=>
+    ["value2":"object_class":private]=>
     long(10) refcount(5)
-    ["value3:protected"]=>
+    ["value3":protected]=>
     long(20) refcount(5)
     ["value4"]=>
     long(30) refcount(7)
@@ -160,17 +160,17 @@ object(no_member_class)#%d (0) refcount(4){
 object(contains_object_class)#%d (9) refcount(4){
   ["p"]=>
   long(30) refcount(2)
-  ["p1:protected"]=>
+  ["p1":protected]=>
   long(40) refcount(2)
-  ["p2:private"]=>
+  ["p2":"contains_object_class":private]=>
   long(50) refcount(2)
   ["class_object1"]=>
   object(object_class)#%d (6) refcount(7){
     ["value1"]=>
     long(5) refcount(1)
-    ["value2:private"]=>
+    ["value2":"object_class":private]=>
     long(10) refcount(5)
-    ["value3:protected"]=>
+    ["value3":protected]=>
     long(20) refcount(5)
     ["value4"]=>
     long(30) refcount(7)
@@ -185,9 +185,9 @@ object(contains_object_class)#%d (9) refcount(4){
     object(object_class)#%d (6) refcount(7){
       ["value1"]=>
       long(5) refcount(1)
-      ["value2:private"]=>
+      ["value2":"object_class":private]=>
       long(10) refcount(5)
-      ["value3:protected"]=>
+      ["value3":protected]=>
       long(20) refcount(5)
       ["value4"]=>
       long(30) refcount(7)
@@ -206,9 +206,9 @@ object(contains_object_class)#%d (9) refcount(4){
   object(object_class)#%d (6) refcount(7){
     ["value1"]=>
     long(5) refcount(1)
-    ["value2:private"]=>
+    ["value2":"object_class":private]=>
     long(10) refcount(5)
-    ["value3:protected"]=>
+    ["value3":protected]=>
     long(20) refcount(5)
     ["value4"]=>
     long(30) refcount(7)
@@ -223,9 +223,9 @@ object(contains_object_class)#%d (9) refcount(4){
     object(object_class)#%d (6) refcount(7){
       ["value1"]=>
       long(5) refcount(1)
-      ["value2:private"]=>
+      ["value2":"object_class":private]=>
       long(10) refcount(5)
-      ["value3:protected"]=>
+      ["value3":protected]=>
       long(20) refcount(5)
       ["value4"]=>
       long(30) refcount(7)
@@ -240,13 +240,13 @@ object(contains_object_class)#%d (9) refcount(4){
       *RECURSION*
     }
   }
-  ["class_object3:private"]=>
+  ["class_object3":"contains_object_class":private]=>
   object(object_class)#%d (6) refcount(7){
     ["value1"]=>
     long(5) refcount(1)
-    ["value2:private"]=>
+    ["value2":"object_class":private]=>
     long(10) refcount(5)
-    ["value3:protected"]=>
+    ["value3":protected]=>
     long(20) refcount(5)
     ["value4"]=>
     long(30) refcount(7)
@@ -261,9 +261,9 @@ object(contains_object_class)#%d (9) refcount(4){
     object(object_class)#%d (6) refcount(7){
       ["value1"]=>
       long(5) refcount(1)
-      ["value2:private"]=>
+      ["value2":"object_class":private]=>
       long(10) refcount(5)
-      ["value3:protected"]=>
+      ["value3":protected]=>
       long(20) refcount(5)
       ["value4"]=>
       long(30) refcount(7)
@@ -278,13 +278,13 @@ object(contains_object_class)#%d (9) refcount(4){
       *RECURSION*
     }
   }
-  ["class_object4:protected"]=>
+  ["class_object4":protected]=>
   object(object_class)#%d (6) refcount(7){
     ["value1"]=>
     long(5) refcount(1)
-    ["value2:private"]=>
+    ["value2":"object_class":private]=>
     long(10) refcount(5)
-    ["value3:protected"]=>
+    ["value3":protected]=>
     long(20) refcount(5)
     ["value4"]=>
     long(30) refcount(7)
@@ -299,9 +299,9 @@ object(contains_object_class)#%d (9) refcount(4){
     object(object_class)#%d (6) refcount(7){
       ["value1"]=>
       long(5) refcount(1)
-      ["value2:private"]=>
+      ["value2":"object_class":private]=>
       long(10) refcount(5)
-      ["value3:protected"]=>
+      ["value3":protected]=>
       long(20) refcount(5)
       ["value4"]=>
       long(30) refcount(7)
@@ -323,17 +323,17 @@ object(contains_object_class)#%d (9) refcount(4){
   object(contains_object_class)#%d (9) refcount(1){
     ["p"]=>
     long(30) refcount(2)
-    ["p1:protected"]=>
+    ["p1":protected]=>
     long(40) refcount(2)
-    ["p2:private"]=>
+    ["p2":"contains_object_class":private]=>
     long(50) refcount(2)
     ["class_object1"]=>
     object(object_class)#%d (6) refcount(7){
       ["value1"]=>
       long(5) refcount(1)
-      ["value2:private"]=>
+      ["value2":"object_class":private]=>
       long(10) refcount(5)
-      ["value3:protected"]=>
+      ["value3":protected]=>
       long(20) refcount(5)
       ["value4"]=>
       long(30) refcount(7)
@@ -348,9 +348,9 @@ object(contains_object_class)#%d (9) refcount(4){
       object(object_class)#%d (6) refcount(7){
         ["value1"]=>
         long(5) refcount(1)
-        ["value2:private"]=>
+        ["value2":"object_class":private]=>
         long(10) refcount(5)
-        ["value3:protected"]=>
+        ["value3":protected]=>
         long(20) refcount(5)
         ["value4"]=>
         long(30) refcount(7)
@@ -369,9 +369,9 @@ object(contains_object_class)#%d (9) refcount(4){
     object(object_class)#%d (6) refcount(7){
       ["value1"]=>
       long(5) refcount(1)
-      ["value2:private"]=>
+      ["value2":"object_class":private]=>
       long(10) refcount(5)
-      ["value3:protected"]=>
+      ["value3":protected]=>
       long(20) refcount(5)
       ["value4"]=>
       long(30) refcount(7)
@@ -386,9 +386,9 @@ object(contains_object_class)#%d (9) refcount(4){
       object(object_class)#%d (6) refcount(7){
         ["value1"]=>
         long(5) refcount(1)
-        ["value2:private"]=>
+        ["value2":"object_class":private]=>
         long(10) refcount(5)
-        ["value3:protected"]=>
+        ["value3":protected]=>
         long(20) refcount(5)
         ["value4"]=>
         long(30) refcount(7)
@@ -403,13 +403,13 @@ object(contains_object_class)#%d (9) refcount(4){
         *RECURSION*
       }
     }
-    ["class_object3:private"]=>
+    ["class_object3":"contains_object_class":private]=>
     object(object_class)#%d (6) refcount(7){
       ["value1"]=>
       long(5) refcount(1)
-      ["value2:private"]=>
+      ["value2":"object_class":private]=>
       long(10) refcount(5)
-      ["value3:protected"]=>
+      ["value3":protected]=>
       long(20) refcount(5)
       ["value4"]=>
       long(30) refcount(7)
@@ -424,9 +424,9 @@ object(contains_object_class)#%d (9) refcount(4){
       object(object_class)#%d (6) refcount(7){
         ["value1"]=>
         long(5) refcount(1)
-        ["value2:private"]=>
+        ["value2":"object_class":private]=>
         long(10) refcount(5)
-        ["value3:protected"]=>
+        ["value3":protected]=>
         long(20) refcount(5)
         ["value4"]=>
         long(30) refcount(7)
@@ -441,13 +441,13 @@ object(contains_object_class)#%d (9) refcount(4){
         *RECURSION*
       }
     }
-    ["class_object4:protected"]=>
+    ["class_object4":protected]=>
     object(object_class)#%d (6) refcount(7){
       ["value1"]=>
       long(5) refcount(1)
-      ["value2:private"]=>
+      ["value2":"object_class":private]=>
       long(10) refcount(5)
-      ["value3:protected"]=>
+      ["value3":protected]=>
       long(20) refcount(5)
       ["value4"]=>
       long(30) refcount(7)
@@ -462,9 +462,9 @@ object(contains_object_class)#%d (9) refcount(4){
       object(object_class)#%d (6) refcount(7){
         ["value1"]=>
         long(5) refcount(1)
-        ["value2:private"]=>
+        ["value2":"object_class":private]=>
         long(10) refcount(5)
-        ["value3:protected"]=>
+        ["value3":protected]=>
         long(20) refcount(5)
         ["value4"]=>
         long(30) refcount(7)
@@ -490,9 +490,9 @@ object(contains_object_class)#%d (9) refcount(4){
 object(object_class)#%d (6) refcount(9){
   ["value1"]=>
   long(5) refcount(1)
-  ["value2:private"]=>
+  ["value2":"object_class":private]=>
   long(10) refcount(5)
-  ["value3:protected"]=>
+  ["value3":protected]=>
   long(20) refcount(5)
   ["value4"]=>
   long(30) refcount(7)
@@ -507,9 +507,9 @@ object(object_class)#%d (6) refcount(9){
   object(object_class)#%d (6) refcount(9){
     ["value1"]=>
     long(5) refcount(1)
-    ["value2:private"]=>
+    ["value2":"object_class":private]=>
     long(10) refcount(5)
-    ["value3:protected"]=>
+    ["value3":protected]=>
     long(20) refcount(5)
     ["value4"]=>
     long(30) refcount(7)
@@ -528,9 +528,9 @@ object(object_class)#%d (6) refcount(9){
 object(object_class)#%d (6) refcount(9){
   ["value1"]=>
   long(5) refcount(1)
-  ["value2:private"]=>
+  ["value2":"object_class":private]=>
   long(10) refcount(5)
-  ["value3:protected"]=>
+  ["value3":protected]=>
   long(20) refcount(5)
   ["value4"]=>
   long(30) refcount(7)
@@ -545,9 +545,9 @@ object(object_class)#%d (6) refcount(9){
   object(object_class)#%d (6) refcount(9){
     ["value1"]=>
     long(5) refcount(1)
-    ["value2:private"]=>
+    ["value2":"object_class":private]=>
     long(10) refcount(5)
-    ["value3:protected"]=>
+    ["value3":protected]=>
     long(20) refcount(5)
     ["value4"]=>
     long(30) refcount(7)
@@ -571,9 +571,9 @@ NULL refcount(1)
 object(object_class)#%d (6) refcount(9){
   ["value1"]=>
   long(5) refcount(1)
-  ["value2:private"]=>
+  ["value2":"object_class":private]=>
   long(10) refcount(5)
-  ["value3:protected"]=>
+  ["value3":protected]=>
   long(20) refcount(5)
   ["value4"]=>
   long(30) refcount(7)
@@ -588,9 +588,9 @@ object(object_class)#%d (6) refcount(9){
   object(object_class)#%d (6) refcount(9){
     ["value1"]=>
     long(5) refcount(1)
-    ["value2:private"]=>
+    ["value2":"object_class":private]=>
     long(10) refcount(5)
-    ["value3:protected"]=>
+    ["value3":protected]=>
     long(20) refcount(5)
     ["value4"]=>
     long(30) refcount(7)
@@ -609,9 +609,9 @@ object(object_class)#%d (6) refcount(9){
 object(object_class)#%d (6) refcount(9){
   ["value1"]=>
   long(5) refcount(1)
-  ["value2:private"]=>
+  ["value2":"object_class":private]=>
   long(10) refcount(5)
-  ["value3:protected"]=>
+  ["value3":protected]=>
   long(20) refcount(5)
   ["value4"]=>
   long(30) refcount(7)
@@ -626,9 +626,9 @@ object(object_class)#%d (6) refcount(9){
   object(object_class)#%d (6) refcount(9){
     ["value1"]=>
     long(5) refcount(1)
-    ["value2:private"]=>
+    ["value2":"object_class":private]=>
     long(10) refcount(5)
-    ["value3:protected"]=>
+    ["value3":protected]=>
     long(20) refcount(5)
     ["value4"]=>
     long(30) refcount(7)
@@ -658,9 +658,9 @@ long(500) refcount(1)
 object(object_class)#%d (7) refcount(1){
   ["value1"]=>
   long(5) refcount(1)
-  ["value2:private"]=>
+  ["value2":"object_class":private]=>
   long(10) refcount(7)
-  ["value3:protected"]=>
+  ["value3":protected]=>
   long(20) refcount(7)
   ["value4"]=>
   long(30) refcount(8)
@@ -675,9 +675,9 @@ object(object_class)#%d (7) refcount(1){
   object(object_class)#%d (7) refcount(1){
     ["value1"]=>
     long(5) refcount(1)
-    ["value2:private"]=>
+    ["value2":"object_class":private]=>
     long(10) refcount(7)
-    ["value3:protected"]=>
+    ["value3":protected]=>
     long(20) refcount(7)
     ["value4"]=>
     long(30) refcount(8)
@@ -694,9 +694,9 @@ object(object_class)#%d (7) refcount(1){
     &object(object_class)#%d (7) refcount(2){
       ["value1"]=>
       long(5) refcount(1)
-      ["value2:private"]=>
+      ["value2":"object_class":private]=>
       long(10) refcount(7)
-      ["value3:protected"]=>
+      ["value3":protected]=>
       long(20) refcount(7)
       ["value4"]=>
       long(30) refcount(8)
@@ -711,9 +711,9 @@ object(object_class)#%d (7) refcount(1){
       object(object_class)#%d (7) refcount(1){
         ["value1"]=>
         long(5) refcount(1)
-        ["value2:private"]=>
+        ["value2":"object_class":private]=>
         long(10) refcount(7)
-        ["value3:protected"]=>
+        ["value3":protected]=>
         long(20) refcount(7)
         ["value4"]=>
         long(30) refcount(8)
@@ -737,9 +737,9 @@ object(object_class)#%d (7) refcount(1){
   &object(object_class)#%d (7) refcount(2){
     ["value1"]=>
     long(5) refcount(1)
-    ["value2:private"]=>
+    ["value2":"object_class":private]=>
     long(10) refcount(7)
-    ["value3:protected"]=>
+    ["value3":protected]=>
     long(20) refcount(7)
     ["value4"]=>
     long(30) refcount(8)
@@ -754,9 +754,9 @@ object(object_class)#%d (7) refcount(1){
     object(object_class)#%d (7) refcount(1){
       ["value1"]=>
       long(5) refcount(1)
-      ["value2:private"]=>
+      ["value2":"object_class":private]=>
       long(10) refcount(7)
-      ["value3:protected"]=>
+      ["value3":protected]=>
       long(20) refcount(7)
       ["value4"]=>
       long(30) refcount(8)
@@ -773,9 +773,9 @@ object(object_class)#%d (7) refcount(1){
       &object(object_class)#%d (7) refcount(2){
         ["value1"]=>
         long(5) refcount(1)
-        ["value2:private"]=>
+        ["value2":"object_class":private]=>
         long(10) refcount(7)
-        ["value3:protected"]=>
+        ["value3":protected]=>
         long(20) refcount(7)
         ["value4"]=>
         long(30) refcount(8)
@@ -796,9 +796,9 @@ object(object_class)#%d (7) refcount(1){
     &object(object_class)#%d (7) refcount(2){
       ["value1"]=>
       long(5) refcount(1)
-      ["value2:private"]=>
+      ["value2":"object_class":private]=>
       long(10) refcount(7)
-      ["value3:protected"]=>
+      ["value3":protected]=>
       long(20) refcount(7)
       ["value4"]=>
       long(30) refcount(8)
@@ -815,9 +815,9 @@ object(object_class)#%d (7) refcount(1){
       &object(object_class)#%d (7) refcount(2){
         ["value1"]=>
         long(5) refcount(1)
-        ["value2:private"]=>
+        ["value2":"object_class":private]=>
         long(10) refcount(7)
-        ["value3:protected"]=>
+        ["value3":protected]=>
         long(20) refcount(7)
         ["value4"]=>
         long(30) refcount(8)

@@ -1,5 +1,5 @@
 --TEST--
-Bug #34982 (array_walk_recursive() modifies elements outside function scope) 
+Bug #34982 (array_walk_recursive() modifies elements outside function scope)
 --FILE--
 <?php
 $ar = array(

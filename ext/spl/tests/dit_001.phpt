@@ -12,7 +12,9 @@ var_dump(is_string($d));
 ?>
 ===DONE===
 --EXPECTF--
-object(DirectoryIterator)#%d (0) {
+object(DirectoryIterator)#%d (1) {
+  %s"pathName"%s"SplFileInfo":private]=>
+  %s(1) "."
 }
 bool(false)
 bool(false)
