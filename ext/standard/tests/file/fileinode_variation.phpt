@@ -13,45 +13,52 @@ Prototype: int fileinode ( string $filename );
 Description: Returns the inode number of the file, or FALSE in case of an error.
 */
 
-include "file.inc";
-
 echo "*** Testing fileinode() with files, links and directories ***\n";
+$file_path = dirname(__FILE__);
+$file1 = $file_path."/fileinode1_variation.tmp";
+$file2 = $file_path."/fileinode2_variation.tmp";
+$link1 = $file_path."/fileinode1_variation_link.tmp";
+$link2 = $file_path."/fileinode2_variation_link.tmp";
+
 
 echo "-- Testing with files --\n";
-create_files( dirname(__FILE__), 2);
+//creating the files
+fclose( fopen( $file1, "w" ) );
+fclose( fopen( $file2, "w" ) );
 
-print( fileinode( dirname(__FILE__)."/file1.tmp") )."\n";
-print( fileinode( dirname(__FILE__)."/file2.tmp") )."\n";
+print( fileinode( $file1) )."\n";
+print( fileinode( $file2) )."\n";
 clearstatcache();
 
 echo "-- Testing with links: hard link --\n";
-link( dirname(__FILE__)."/file1.tmp", dirname(__FILE__)."/link1.tmp");  // Creating an hard link
-print( fileinode( dirname(__FILE__)."/file1.tmp") )."\n";
+link( $file1, $link1);  // Creating an hard link
+print( fileinode( $file1) )."\n";
 clearstatcache();
-print( fileinode( dirname(__FILE__)."/link1.tmp") )."\n";
+print( fileinode( $link1) )."\n";
 clearstatcache();
 
 echo "-- Testing with links: soft link --\n";
-symlink( dirname(__FILE__)."/file2.tmp", dirname(__FILE__)."/link2.tmp");  // Creating a soft link
-print( fileinode( dirname(__FILE__)."/file2.tmp") )."\n";
+symlink( $file2, $link2);  // Creating a soft link
+print( fileinode( $file2) )."\n";
 clearstatcache();
-print( fileinode( dirname(__FILE__)."/link2.tmp") )."\n";
+print( fileinode( $link2) )."\n";
 
-delete_files( dirname(__FILE__), 2, "link");
+unlink( $link1 );
+unlink( $link2 );
 
 echo "-- Testing after copying a file --\n";
-copy( dirname(__FILE__)."/file1.tmp", dirname(__FILE__)."/file1_new.tmp");
-print( fileinode( dirname(__FILE__)."/file1.tmp") )."\n";
+copy( $file1, $file_path."/fileinode1_variation_new.tmp");
+print( fileinode( $file1) )."\n";
 clearstatcache();
-print( fileinode( dirname(__FILE__)."/file1_new.tmp") )."\n";
+print( fileinode( $file_path."/fileinode1_variation_new.tmp") )."\n";
 
-unlink( dirname(__FILE__)."/file1_new.tmp");
+unlink( $file_path."/fileinode1_variation_new.tmp");
+unlink( $file1);
+unlink( $file2);
 
-delete_files( dirname(__FILE__), 2);
 
 echo "-- Testing after renaming the file --\n";
-$file_path = dirname(__FILE__);
-fopen("$file_path/old.txt", "w");
+fclose( fopen("$file_path/old.txt", "w") );
 print( fileinode("$file_path/old.txt") )."\n";
 clearstatcache();
 
@@ -70,16 +77,15 @@ print( fileinode("$file_path/dir/subdir") )."\n";
 clearstatcache();
 
 echo "-- Testing with binary input --\n";
-print( fileinode("$file_path/dir") )."\n";
+print( fileinode(b"$file_path/dir") )."\n";
 clearstatcache();
-print( fileinode("$file_path/dir/subdir") );
-
+print( fileinode(b"$file_path/dir/subdir") );
 
 rmdir("$file_path/dir/subdir");
 rmdir("$file_path/dir");
 
 echo "\n*** Done ***";
-?>
+
 --EXPECTF--
 *** Testing fileinode() with files, links and directories ***
 -- Testing with files --
