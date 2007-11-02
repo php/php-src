@@ -517,33 +517,26 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!zend_get_constant_ex(str_index, str_index_len-1, &const_value, scope, (*element)->idx_type TSRMLS_CC)) {
-				if ((colon = memchr(str_index, ':', str_index_len-1)) && colon[1] == ':') {
+			if (!zend_get_constant_ex(str_index, str_index_len-3, &const_value, scope, str_index[str_index_len-2] TSRMLS_CC)) {
+				if ((colon = memchr(str_index, ':', str_index_len-3)) && colon[1] == ':') {
 					zend_error(E_ERROR, "Undefined class constant '%s'", str_index);
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str_index, str_index);
-				zend_hash_move_forward(Z_ARRVAL_P(p));
-				continue;
+				ZVAL_STRINGL(&const_value, str_index, str_index_len-3, 1);
 			}
 
-			if (const_value.type == IS_STRING && const_value.value.str.len == (int)str_index_len-1 &&
-			   !strncmp(const_value.value.str.val, str_index, str_index_len)) {
-				/* constant value is the same as its name */
-				zval_dtor(&const_value);
-				zend_hash_move_forward(p->value.ht);
-				continue;
+			if (Z_REFCOUNT_PP(element) > 1) {
+				ALLOC_ZVAL(new_val);
+				*new_val = **element;
+				zval_copy_ctor(new_val);
+				Z_SET_REFCOUNT_P(new_val, 1);
+				Z_UNSET_ISREF_P(new_val);
+
+				/* preserve this bit for inheritance */
+				Z_TYPE_PP(element) |= IS_CONSTANT_INDEX;
+				zval_ptr_dtor(element);
+				*element = new_val;
 			}
-
-			ALLOC_ZVAL(new_val);
-			*new_val = **element;
-			zval_copy_ctor(new_val);
-			Z_SET_REFCOUNT_P(new_val, 1);
-			Z_UNSET_ISREF_P(new_val);
-
-			/* preserve this bit for inheritance */
-			Z_TYPE_PP(element) |= IS_CONSTANT_INDEX;
-			zval_ptr_dtor(element);
-			*element = new_val;
 
 			switch (Z_TYPE(const_value)) {
 				case IS_STRING:

@@ -3643,8 +3643,12 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
 			case IS_CONSTANT:
 				/* Ugly hack to denote that this value has a constant index */
 				Z_TYPE_P(element) |= IS_CONSTANT_INDEX;
-				element->idx_type = Z_TYPE(offset->u.constant);
-				/* break missing intentionally */
+				Z_STRVAL(offset->u.constant) = erealloc(Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+3);
+				Z_STRVAL(offset->u.constant)[Z_STRLEN(offset->u.constant)+1] = Z_TYPE(offset->u.constant);
+				Z_STRVAL(offset->u.constant)[Z_STRLEN(offset->u.constant)+2] = 0;
+				zend_symtable_update(result->u.constant.value.ht, Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+3, &element, sizeof(zval *), NULL);
+				zval_dtor(&offset->u.constant);
+				break;
 			case IS_STRING:
 				zend_symtable_update(result->u.constant.value.ht, offset->u.constant.value.str.val, offset->u.constant.value.str.len+1, &element, sizeof(zval *), NULL);
 				zval_dtor(&offset->u.constant);
