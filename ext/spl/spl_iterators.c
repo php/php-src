@@ -517,10 +517,16 @@ SPL_METHOD(RecursiveIteratorIterator, key)
 		char *str_key;
 		uint str_key_len;
 		ulong int_key;
-		if (iterator->funcs->get_current_key(iterator, &str_key, &str_key_len, &int_key TSRMLS_CC) == HASH_KEY_IS_LONG) {
-			RETURN_LONG(int_key);
-		} else {
-			RETURN_STRINGL(str_key, str_key_len-1, 0);
+
+		switch (iterator->funcs->get_current_key(iterator, &str_key, &str_key_len, &int_key TSRMLS_CC)) {
+			case HASH_KEY_IS_LONG:
+				RETURN_LONG(int_key);
+				break;
+			case HASH_KEY_IS_STRING:
+				RETURN_STRINGL(str_key, str_key_len-1, 0);
+				break;
+			default:
+				RETURN_NULL();
 		}
 	} else {
 		RETURN_NULL();
@@ -1126,7 +1132,7 @@ static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more T
 		intern->inner.iterator->funcs->get_current_data(intern->inner.iterator, &data TSRMLS_CC);
 		if (data && *data) {
 			intern->current.data = *data;
-  		Z_ADDREF_P(intern->current.data);
+			Z_ADDREF_P(intern->current.data);
 		}
 		if (intern->inner.iterator->funcs->get_current_key) {
 			intern->current.key_type = intern->inner.iterator->funcs->get_current_key(intern->inner.iterator, &intern->current.str_key, &intern->current.str_key_len, &intern->current.int_key TSRMLS_CC);
@@ -2364,10 +2370,15 @@ SPL_METHOD(NoRewindIterator, key)
 		char *str_key;
 		uint str_key_len;
 		ulong int_key;
-		if (intern->inner.iterator->funcs->get_current_key(intern->inner.iterator, &str_key, &str_key_len, &int_key TSRMLS_CC) == HASH_KEY_IS_LONG) {
-			RETURN_LONG(int_key);
-		} else {
-			RETURN_STRINGL(str_key, str_key_len-1, 0);
+		switch (intern->inner.iterator->funcs->get_current_key(intern->inner.iterator, &str_key, &str_key_len, &int_key TSRMLS_CC)) {
+			case HASH_KEY_IS_LONG:
+				RETURN_LONG(int_key);
+				break;
+			case HASH_KEY_IS_STRING:
+				RETURN_STRINGL(str_key, str_key_len-1, 0);
+				break;
+			default:
+				RETURN_NULL();
 		}
 	} else {
 		RETURN_NULL();

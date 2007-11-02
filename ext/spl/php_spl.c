@@ -19,7 +19,7 @@
 /* $Id$ */
 
 #ifdef HAVE_CONFIG_H
-	#include "config.h"
+#include "config.h"
 #endif
 
 #include "php.h"
@@ -153,7 +153,7 @@ PHP_FUNCTION(class_implements)
 /* }}} */
 
 #define SPL_ADD_CLASS(class_name, z_list, sub, allow, ce_flags) \
-	spl_add_classes(&spl_ce_ ## class_name, z_list, sub, allow, ce_flags TSRMLS_CC)
+	spl_add_classes(spl_ce_ ## class_name, z_list, sub, allow, ce_flags TSRMLS_CC)
 
 #define SPL_LIST_CLASSES(z_list, sub, allow, ce_flags) \
 	SPL_ADD_CLASS(AppendIterator, z_list, sub, allow, ce_flags); \
@@ -607,26 +607,36 @@ PHP_FUNCTION(spl_autoload_functions)
 PHP_FUNCTION(spl_object_hash)
 {
 	zval *obj;
-	int len;
-	char *hash;
-	char md5str[33];
-	PHP_MD5_CTX context;
-	unsigned char digest[16];
+	char* md5str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
 		return;
 	}
+	
+	md5str = emalloc(33);
+	php_spl_object_hash(obj, md5str TSRMLS_CC);
+	
+	RETVAL_STRING(md5str, 0);
+}
+/* }}} */
+
+PHPAPI void php_spl_object_hash(zval *obj, char *md5str TSRMLS_DC) /* {{{*/
+{
+	int len;
+	char *hash;
+	PHP_MD5_CTX context;
+	unsigned char digest[16];
 
 	len = spprintf(&hash, 0, "%p:%d", Z_OBJ_HT_P(obj), Z_OBJ_HANDLE_P(obj));
-	
+
 	md5str[0] = '\0';
 	PHP_MD5Init(&context);
 	PHP_MD5Update(&context, (unsigned char*)hash, len);
 	PHP_MD5Final(digest, &context);
 	make_digest(md5str, digest);
-	RETVAL_STRING(md5str, 1);
 	efree(hash);
 }
+/* }}} */
 
 int spl_build_class_list_string(zval **entry, char **list TSRMLS_DC) /* {{{ */
 {
