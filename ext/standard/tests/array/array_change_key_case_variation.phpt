@@ -21,16 +21,8 @@ var_dump( array_change_key_case( array("ONE" => 1, "one" => 1, "One" => 2), 5 ) 
 echo "end\n";
 ?>
 --EXPECTF--
-array(4) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  ["three"]=>
-  int(3)
-  ["four"]=>
-  string(4) "four"
-}
+Warning: array_change_key_case() expects parameter 2 to be long, string given in %s on line %d
+NULL
 array(4) {
   ["ONE"]=>
   int(1)
@@ -45,10 +37,9 @@ array(1) {
   ["one"]=>
   int(4)
 }
-array(1) {
-  ["one"]=>
-  int(5)
-}
+
+Warning: array_change_key_case() expects parameter 2 to be long, string given in %s on line %d
+NULL
 array(1) {
   ["ONE"]=>
   int(3)

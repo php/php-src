@@ -28,14 +28,6 @@ class EmptyClass
 {
 }
 
-// class with only one method and no variable
-class FuncClass
-{
-  function fun() {
-    echo "No variables here";
-  }
-}
-
 // abstract class
 abstract class AbstractClass
 {
@@ -77,7 +69,6 @@ $array = array('f' => "first", "s" => 'second', 1, 2.222);
 $vars = array(
   new SimpleClass(),
   new EmptyClass(),
-  new FuncClass(),
   new ChildClass(),
   new FinalClass(),
   new StaticClass()
@@ -89,15 +80,19 @@ foreach($vars as $var) {
   echo "-- Iteration $iterator --\n";
 
   /* with default argument */
+  // returns element count in the resulting array after arguments are pushed to
+  // beginning of the given array
   $temp_array = $array;
-  var_dump( array_unshift($temp_array, $var) );  // pushes $var to $temp_array, return sizeof($temp_array)
+  var_dump( array_unshift($temp_array, $var) );
 
   // dump the resulting array
   var_dump($temp_array);
 
-  /* with more data values to be pushed  */
+  /* with optional arguments */
+  // returns element count in the resulting array after arguments are pushed to
+  // beginning of the given array
   $temp_array = $array;
-  var_dump( array_unshift($temp_array, $var, "hello", 'world') );  // pushes 3 more data to $temp_array, return sizeof($temp_array)
+  var_dump( array_unshift($temp_array, $var, "hello", 'world') );
 
   // dump the resulting array
   var_dump($temp_array);
@@ -182,7 +177,11 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  object(FuncClass)#%d (0) {
+  object(ChildClass)#%d (2) {
+    ["var3":"ChildClass":private]=>
+    NULL
+    ["var2":protected]=>
+    int(5)
   }
   ["f"]=>
   string(5) "first"
@@ -196,7 +195,11 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  object(FuncClass)#%d (0) {
+  object(ChildClass)#%d (2) {
+    ["var3":"ChildClass":private]=>
+    NULL
+    ["var2":protected]=>
+    int(5)
   }
   [1]=>
   string(5) "hello"
@@ -215,11 +218,9 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  object(ChildClass)#%d (2) {
-    ["var3:private"]=>
+  object(FinalClass)#%d (1) {
+    ["var4":"FinalClass":private]=>
     NULL
-    ["var2:protected"]=>
-    int(5)
   }
   ["f"]=>
   string(5) "first"
@@ -233,11 +234,9 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  object(ChildClass)#%d (2) {
-    ["var3:private"]=>
+  object(FinalClass)#%d (1) {
+    ["var4":"FinalClass":private]=>
     NULL
-    ["var2:protected"]=>
-    int(5)
   }
   [1]=>
   string(5) "hello"
@@ -253,43 +252,6 @@ array(7) {
   float(2.222)
 }
 -- Iteration 5 --
-int(5)
-array(5) {
-  [0]=>
-  object(FinalClass)#%d (1) {
-    ["var4:private"]=>
-    NULL
-  }
-  ["f"]=>
-  string(5) "first"
-  ["s"]=>
-  string(6) "second"
-  [1]=>
-  int(1)
-  [2]=>
-  float(2.222)
-}
-int(7)
-array(7) {
-  [0]=>
-  object(FinalClass)#%d (1) {
-    ["var4:private"]=>
-    NULL
-  }
-  [1]=>
-  string(5) "hello"
-  [2]=>
-  string(5) "world"
-  ["f"]=>
-  string(5) "first"
-  ["s"]=>
-  string(6) "second"
-  [3]=>
-  int(1)
-  [4]=>
-  float(2.222)
-}
--- Iteration 6 --
 int(5)
 array(5) {
   [0]=>

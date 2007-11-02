@@ -1,5 +1,5 @@
 --TEST--
-Test array_intersect() function : usage variations - two dimensional arrays for $arr1 and $arr2 arguments 
+Test array_intersect() function : usage variations - two dimensional arrays for $arr1 and $arr2 arguments(Bug#43109)
 --FILE--
 <?php
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])

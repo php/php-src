@@ -61,10 +61,6 @@ class cr {
 		if ($a->priv_member === $b->priv_member) return 0;
 		return ($a->priv_member > $b->priv_member)? 1:-1;
 	}
-
-	function __toString() {
-		return "Object";
-	}
 }
 
 function comp_func($a, $b) {
@@ -110,12 +106,6 @@ echo '$a='.var_export($a,TRUE).";\n";
 echo '$b='.var_export($b,TRUE).";\n";
 echo 'var_dump(array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));'."\n";
 var_dump(array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
-
-
-echo '$a='.var_export($a,TRUE).";\n";
-echo '$b='.var_export($b,TRUE).";\n";
-echo 'var_dump(array_diff_assoc($a, $b));'."\n";
-var_dump(@array_diff_assoc($a, $b));
 
 
 echo '$a='.var_export($a,TRUE).";\n";
@@ -314,21 +304,21 @@ var_dump(array_udiff_uassoc($a, $b, "comp_func_cr", "comp_func"));
 array(3) {
   ["0.1"]=>
   object(cr)#%d (2) {
-    ["priv_member:private"]=>
+    ["priv_member":"cr":private]=>
     int(9)
     ["public_member"]=>
     int(9)
   }
   ["0.5"]=>
   object(cr)#%d (2) {
-    ["priv_member:private"]=>
+    ["priv_member":"cr":private]=>
     int(12)
     ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#%d (2) {
-    ["priv_member:private"]=>
+    ["priv_member":"cr":private]=>
     int(23)
     ["public_member"]=>
     int(23)
@@ -392,88 +382,24 @@ var_dump(array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
 array(3) {
   ["0.1"]=>
   object(cr)#%d (2) {
-    ["priv_member:private"]=>
+    ["priv_member":"cr":private]=>
     int(9)
     ["public_member"]=>
     int(9)
   }
   ["0.5"]=>
   object(cr)#%d (2) {
-    ["priv_member:private"]=>
+    ["priv_member":"cr":private]=>
     int(12)
     ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#%d (2) {
-    ["priv_member:private"]=>
+    ["priv_member":"cr":private]=>
     int(23)
     ["public_member"]=>
     int(23)
-  }
-}
-$a=array (
-  '0.1' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 12,
-     'public_member' => 12,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 23,
-     'public_member' => 23,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-$b=array (
-  '0.2' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 22,
-     'public_member' => 22,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 3,
-     'public_member' => 3,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-var_dump(array_diff_assoc($a, $b));
-array(1) {
-  ["0.1"]=>
-  object(cr)#%d (2) {
-    ["priv_member:private"]=>
-    int(9)
-    ["public_member"]=>
-    int(9)
   }
 }
 $a=array (
@@ -534,14 +460,14 @@ var_dump(array_udiff($a, $b, "comp_func_cr"));
 array(2) {
   ["0.5"]=>
   object(cr)#%d (2) {
-    ["priv_member:private"]=>
+    ["priv_member":"cr":private]=>
     int(12)
     ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#%d (2) {
-    ["priv_member:private"]=>
+    ["priv_member":"cr":private]=>
     int(23)
     ["public_member"]=>
     int(23)
@@ -605,21 +531,21 @@ var_dump(array_udiff_assoc($a, $b, "comp_func_cr"));
 array(3) {
   ["0.1"]=>
   object(cr)#%d (2) {
-    ["priv_member:private"]=>
+    ["priv_member":"cr":private]=>
     int(9)
     ["public_member"]=>
     int(9)
   }
   ["0.5"]=>
   object(cr)#%d (2) {
-    ["priv_member:private"]=>
+    ["priv_member":"cr":private]=>
     int(12)
     ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#%d (2) {
-    ["priv_member:private"]=>
+    ["priv_member":"cr":private]=>
     int(23)
     ["public_member"]=>
     int(23)

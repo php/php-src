@@ -34,9 +34,15 @@ var_dump($foo);
 ===DONE===
 --EXPECTF--
 string(44) "An offset must not begin with \0 or be empty"
-object(ArrayObject)#%d (0) {
+object(ArrayObject)#%d (1) {
+  ["storage":"ArrayObject":private]=>
+  array(0) {
+  }
 }
 string(44) "An offset must not begin with \0 or be empty"
-object(ArrayObject)#%d (0) {
+object(ArrayObject)#%d (1) {
+  ["storage":"ArrayObject":private]=>
+  array(0) {
+  }
 }
 ===DONE===

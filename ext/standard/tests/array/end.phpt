@@ -223,16 +223,16 @@ resource(%d) of type (stream)
 
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for end() in %s on line %d
+Warning: end() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for end() in %s on line %d
+Warning: end() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: end(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: end() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 
-Warning: end(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: end() expects parameter 1 to be array, string given in %s on line %d
+NULL
 bool(false)
 Done

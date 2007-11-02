@@ -45,14 +45,22 @@ test(dirname(__FILE__),       substr(dirname(__FILE__),-1), 'l');
 <?php exit(0); ?>
 --EXPECTF--
 ===0===
-object(SplFileInfo)#%d (0) {
+object(SplFileInfo)#%d (2) {
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "%sfileobject_001a.txt"
 }
-object(SplFileInfo)#%d (0) {
+object(SplFileInfo)#%d (2) {
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "%sfileobject_001a.txt"
 }
 bool(false)
 bool(true)
 bool(true)
-string(%d) "%sfileobject_001a.txt"
+%s(%d) "%sfileobject_001a.txt"
 string(%d) "%sfileobject_001a.txt"
 bool(true)
 string(19) "fileobject_001a.txt"
@@ -63,14 +71,22 @@ string(%d) "%sfileobject_001a.txt"
 string(19) "fileobject_001a.txt"
 string(%d) "%stests"
 ===1===
-object(SplFileInfo)#%d (0) {
+object(SplFileInfo)#%d (2) {
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "%s"
 }
-object(SplFileInfo)#%d (0) {
+object(SplFileInfo)#%d (2) {
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "%s"
 }
 bool(false)
 bool(true)
 bool(true)
-string(%d) "%stests/"
+%s(%d) "%stests/"
 string(%d) "%stests"
 bool(true)
 string(5) "tests"
@@ -81,14 +97,22 @@ string(%d) "%stests"
 string(%d) "%stests"
 string(%d) "%stests"
 ===2===
-object(SplFileInfo)#1 (0) {
+object(SplFileInfo)#%d (2) {
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "%s"
 }
-object(SplFileInfo)#2 (0) {
+object(SplFileInfo)#%d (2) {
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "%s"
 }
 bool(false)
 bool(true)
 bool(true)
-string(%d) "%stests"
+%s(%d) "%stests"
 string(%d) "%stests"
 bool(true)
 string(%d) "tests"

@@ -234,80 +234,25 @@ array(6) {
   string(5) "green"
 }
 -- Iteration 10 --
-array(6) {
-  [0]=>
-  string(4) "pink"
-  [1]=>
-  string(6) "orange"
-  [2]=>
-  string(3) "red"
-  [3]=>
-  string(4) "blue"
-  [4]=>
-  string(3) "red"
-  ["a"]=>
-  string(5) "green"
-}
+
+Warning: array_reverse() expects parameter 2 to be boolean, array given in %s on line %d
+NULL
 -- Iteration 11 --
-array(6) {
-  [4]=>
-  string(4) "pink"
-  [3]=>
-  string(6) "orange"
-  [2]=>
-  string(3) "red"
-  [1]=>
-  string(4) "blue"
-  [0]=>
-  string(3) "red"
-  ["a"]=>
-  string(5) "green"
-}
+
+Warning: array_reverse() expects parameter 2 to be boolean, array given in %s on line %d
+NULL
 -- Iteration 12 --
-array(6) {
-  [4]=>
-  string(4) "pink"
-  [3]=>
-  string(6) "orange"
-  [2]=>
-  string(3) "red"
-  [1]=>
-  string(4) "blue"
-  [0]=>
-  string(3) "red"
-  ["a"]=>
-  string(5) "green"
-}
+
+Warning: array_reverse() expects parameter 2 to be boolean, array given in %s on line %d
+NULL
 -- Iteration 13 --
-array(6) {
-  [4]=>
-  string(4) "pink"
-  [3]=>
-  string(6) "orange"
-  [2]=>
-  string(3) "red"
-  [1]=>
-  string(4) "blue"
-  [0]=>
-  string(3) "red"
-  ["a"]=>
-  string(5) "green"
-}
+
+Warning: array_reverse() expects parameter 2 to be boolean, array given in %s on line %d
+NULL
 -- Iteration 14 --
-array(6) {
-  [4]=>
-  string(4) "pink"
-  [3]=>
-  string(6) "orange"
-  [2]=>
-  string(3) "red"
-  [1]=>
-  string(4) "blue"
-  [0]=>
-  string(3) "red"
-  ["a"]=>
-  string(5) "green"
-}
+
+Warning: array_reverse() expects parameter 2 to be boolean, array given in %s on line %d
+NULL
 -- Iteration 15 --
 array(6) {
   [0]=>
@@ -429,20 +374,9 @@ array(6) {
   string(5) "green"
 }
 -- Iteration 23 --
-array(6) {
-  [4]=>
-  string(4) "pink"
-  [3]=>
-  string(6) "orange"
-  [2]=>
-  string(3) "red"
-  [1]=>
-  string(4) "blue"
-  [0]=>
-  string(3) "red"
-  ["a"]=>
-  string(5) "green"
-}
+
+Warning: array_reverse() expects parameter 2 to be boolean, object given in %s on line %d
+NULL
 -- Iteration 24 --
 array(6) {
   [0]=>
@@ -474,18 +408,7 @@ array(6) {
   string(5) "green"
 }
 -- Iteration 26 --
-array(6) {
-  [4]=>
-  string(4) "pink"
-  [3]=>
-  string(6) "orange"
-  [2]=>
-  string(3) "red"
-  [1]=>
-  string(4) "blue"
-  [0]=>
-  string(3) "red"
-  ["a"]=>
-  string(5) "green"
-}
+
+Warning: array_reverse() expects parameter 2 to be boolean, resource given in %s on line %d
+NULL
 Done

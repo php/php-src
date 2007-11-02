@@ -32,15 +32,15 @@ try {
 ?>
 --EXPECTF--
 object(DOMException)#%d (6) {
-  ["message:protected"]=>
+  ["message":protected]=>
   string(20) "Wrong Document Error"
-  ["string:private"]=>
+  ["string":"Exception":private]=>
   string(0) ""
-  ["file:protected"]=>
+  ["file":protected]=>
   string(%d) "%sdom_set_attr_node.php"
-  ["line:protected"]=>
+  ["line":protected]=>
   int(%d)
-  ["trace:private"]=>
+  ["trace":"Exception":private]=>
   array(1) {
     [0]=>
     array(6) {

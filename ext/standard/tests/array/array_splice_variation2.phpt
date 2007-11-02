@@ -14,7 +14,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 
-Warning: Wrong parameter count for array_splice() in %s on line %d
+Warning: array_splice() expects at most 4 parameters, 10 given in %s on line %d
 NULL
 array(3) {
   [0]=>

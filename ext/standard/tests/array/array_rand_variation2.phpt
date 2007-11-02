@@ -1,5 +1,5 @@
 --TEST--
-Test array_rand() function : usage variations  - unexpected values for 'num_req' parameter
+Test array_rand() function : usage variations - unexpected values for 'num_req' parameter
 --FILE--
 <?php
 /* Prototype  : mixed array_rand(array input [, int num_req])
@@ -179,28 +179,28 @@ NULL
 
 -- Iteration 16 --
 
-Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
+Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
+Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
+Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
+Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Notice: Object of class test could not be converted to int in %s on line %d
-int(%d)
+Warning: array_rand() expects parameter 2 to be long, object given in %s on line %d
+NULL
 
 -- Iteration 21 --
 
@@ -212,3 +212,4 @@ NULL
 Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
 NULL
 Done
+

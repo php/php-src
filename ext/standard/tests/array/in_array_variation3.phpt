@@ -52,10 +52,10 @@ bool(true)
 
 *** Testing objects with in_array() ***
 
-Warning: in_array(): Wrong datatype for second argument in %s on line %d
-bool(false)
+Warning: in_array() expects parameter 2 to be array, object given in %s on line %d
+NULL
 
-Warning: in_array(): Wrong datatype for second argument in %s on line %d
-bool(false)
+Warning: in_array() expects parameter 2 to be array, object given in %s on line %d
+NULL
 bool(true)
 Done

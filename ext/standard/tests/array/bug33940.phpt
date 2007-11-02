@@ -2,7 +2,6 @@
 Bug #33940 (array_map() fails to pass by reference when called recursively)
 --INI--
 error_reporting=4095
-allow_call_time_pass_reference=1
 --FILE--
 <?php
 function ref_map(&$item) {
@@ -24,7 +23,7 @@ $ret = array_map('ref_map', &$a);
 echo 'Array: '; print_r($a);
 echo 'Return: '; print_r($ret);
 ?>
---EXPECT--
+--EXPECTF--
 Array: Array
 (
     [0] => Array

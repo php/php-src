@@ -20,7 +20,7 @@ foreach($it as $k=>$v)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECT--
+--EXPECTF--
 0=>1
 hasNext: yes
 1=>2

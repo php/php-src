@@ -3,7 +3,7 @@ SPL: ArrayIterator and foreach reference
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --INI--
-allow_call_time_pass_reference=1
+error_reporting=2047
 --FILE--
 <?php
 

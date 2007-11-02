@@ -20,13 +20,15 @@ $types_arr = array(
 );
 $values = array(TRUE, FALSE, 1, 0, -1, "1", "0", "-1",  NULL, array(), "php", "");
 foreach ($values as $value){
-  var_dump(array_keys($types_arr, $value)); 
+	var_dump($value);
+	var_dump(array_keys($types_arr, $value)); 
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing array_keys() on all the types other than arrays ***
+bool(true)
 array(3) {
   [0]=>
   int(1)
@@ -35,6 +37,7 @@ array(3) {
   [2]=>
   string(3) "php"
 }
+bool(false)
 array(4) {
   [0]=>
   int(0)
@@ -45,10 +48,12 @@ array(4) {
   [3]=>
   string(0) ""
 }
+int(1)
 array(1) {
   [0]=>
   int(1)
 }
+int(0)
 array(4) {
   [0]=>
   int(0)
@@ -59,22 +64,27 @@ array(4) {
   [3]=>
   string(0) ""
 }
+int(-1)
 array(1) {
   [0]=>
   int(-1)
 }
+string(1) "1"
 array(1) {
   [0]=>
   int(1)
 }
+string(1) "0"
 array(1) {
   [0]=>
   int(0)
 }
+string(2) "-1"
 array(1) {
   [0]=>
   int(-1)
 }
+NULL
 array(3) {
   [0]=>
   int(2)
@@ -82,6 +92,8 @@ array(3) {
   int(3)
   [2]=>
   string(0) ""
+}
+array(0) {
 }
 array(2) {
   [0]=>
@@ -89,10 +101,12 @@ array(2) {
   [1]=>
   int(3)
 }
+string(3) "php"
 array(1) {
   [0]=>
   string(3) "php"
 }
+string(0) ""
 array(2) {
   [0]=>
   int(2)

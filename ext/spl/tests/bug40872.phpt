@@ -1,5 +1,7 @@
 --TEST--
 Bug #40872 (inconsistency in offsetSet, offsetExists treatment of string enclosed integers)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) die("skip"); ?>
 --FILE--
 <?php
 	class Project {

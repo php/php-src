@@ -14,8 +14,11 @@ var_dump($ar->getArrayCopy());
 <?php exit(0); ?>
 --EXPECTF--
 object(ArrayIterator)#%d (1) {
-  [""]=>
-  NULL
+  ["storage":"ArrayIterator":private]=>
+  array(1) {
+    [""]=>
+    NULL
+  }
 }
 array(1) {
   [""]=>

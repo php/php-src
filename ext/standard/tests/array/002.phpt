@@ -29,7 +29,7 @@ foreach (array ('arsort', 'asort', 'krsort', 'ksort', 'rsort', 'sort') as $test_
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 Unsorted data:
 array(8) {
   [0]=>

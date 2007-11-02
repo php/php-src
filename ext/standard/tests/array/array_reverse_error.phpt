@@ -27,14 +27,14 @@ echo "Done";
 
 -- Testing array_reverse() function with Zero arguments --
 
-Warning: Wrong parameter count for array_reverse() in %s on line %d
+Warning: array_reverse() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 -- Testing array_diff() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for array_reverse() in %s on line %d
+Warning: array_reverse() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for array_reverse() in %s on line %d
+Warning: array_reverse() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 Done

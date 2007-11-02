@@ -21,13 +21,13 @@ var_dump(array_pad("", 2000000, 0));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for array_pad() in %s on line %d
+Warning: array_pad() expects exactly 3 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for array_pad() in %s on line %d
+Warning: array_pad() expects exactly 3 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for array_pad() in %s on line %d
+Warning: array_pad() expects exactly 3 parameters, 2 given in %s on line %d
 NULL
 array(1) {
   [0]=>
@@ -96,6 +96,6 @@ array(4) {
 Warning: array_pad(): You may only pad up to 1048576 elements at a time in %s on line %d
 bool(false)
 
-Warning: array_pad(): The argument should be an array in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 Done

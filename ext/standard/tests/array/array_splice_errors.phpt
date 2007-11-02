@@ -24,18 +24,18 @@ echo "Done\n";
 
 *** Testing error conditions of array_splice() ***
 
-Warning: Wrong parameter count for array_splice() in %s on line %d
+Warning: array_splice() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for array_splice() in %s on line %d
+Warning: array_splice() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for array_splice() in %s on line %d
+Warning: array_splice() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: array_splice(): The first argument should be an array in %s on line %d
+Warning: array_splice() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: array_splice(): The first argument should be an array in %s on line %d
+Warning: array_splice() expects parameter 1 to be array, object given in %s on line %d
 NULL
 Done

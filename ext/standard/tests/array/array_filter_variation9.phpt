@@ -64,9 +64,9 @@ array(8) {
   NULL
 }
 
-Warning: array_filter(): The second argument, 'echo', should be a valid callback in %s on line %d
+Warning: array_filter() expects parameter 2 to be valid callback, string given in %s on line %d
 NULL
 
-Warning: array_filter(): The second argument, 'exit', should be a valid callback in %s on line %d
+Warning: array_filter() expects parameter 2 to be valid callback, string given in %s on line %d
 NULL
 Done

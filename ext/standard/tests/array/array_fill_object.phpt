@@ -22,7 +22,7 @@ class Test
 {
 }
 
-//class with public, static, constant members and consturctor to initialize the public member 
+//class with public member, static member , constant and consturctor to initialize the public member 
 class Test1
 {
   const test1_constant = "test1";
@@ -31,7 +31,7 @@ class Test1
   var $var1 = 30;
   var $var2;
 
-  function __construct($value1, $value2)
+  function __construct($value1 , $value2)
   {
     $this->member1 = $value1;
     $this->var2 = $value2;
@@ -43,14 +43,14 @@ class Child_test1 extends Test1
 {
   public $member2;
 
-  function __construct($value1, $value2, $value3)
+  function __construct($value1 , $value2 , $value3)
   {
-    parent::__construct($value1, $value2);
+    parent::__construct($value1 , $value2);
     $this->member2 = $value3;
   }
 }
 
-//class with private, static, constant members and constructor to initialize the private member
+//class with private member, static member, constant and constructor to initialize the private member
 class Test2
 {
   const test2_constant = "test2";
@@ -59,7 +59,7 @@ class Test2
   var $var1 = 30;
   var $var2;
 
-  function __construct($value1,$value2)
+  function __construct($value1 , $value2)
   {
     $this->member1 = $value1;
     $this->var2 = $value2;
@@ -71,14 +71,14 @@ class Child_test2 extends Test2
 {
   private $member1;
 
-  function __construct($value1, $value2, $value3)
+  function __construct($value1 , $value2 , $value3)
   {
-    parent::__construct($value1, $value2);
+    parent::__construct($value1 , $value2);
     $this->member1 = $value3;
   }
 }
 
-// class with protected, static, constant members and consturctor to initialize the protected member 
+// class with protected member, static member, constant and consturctor to initialize the protected member 
 class Test3
 {
   const test3_constant = "test3";
@@ -87,7 +87,7 @@ class Test3
   var $var1 = 30;
   var $var2; 
 
-  function __construct($value1, $value2)
+  function __construct($value1 , $value2)
   {
      $this->member1 = $value1;
      $this->var2 = $value2;
@@ -99,9 +99,9 @@ class Child_test3 extends Test3
 {
   protected $member1;
 
-  function __construct($value1, $value2, $value3)
+  function __construct($value1 , $value2 , $value3)
   {
-    parent::__construct($value1, $value2);
+    parent::__construct($value1 , $value2);
     $this->member1 = $value3;
   }
 }
@@ -115,7 +115,7 @@ class Test4
   private $member2;
   protected $member3;
 
-  function __construct($value1, $value2, $value3)
+  function __construct($value1 , $value2 , $value3)
   {
     $this->member1 = $value1;
     $this->member2 = $value2;
@@ -128,9 +128,9 @@ class Child_test4 extends Test4
 {
   var $var1;
   
-  function __construct($value1, $value2, $value3, $value4)
+  function __construct($value1 , $value2 , $value3 , $value4)
   {
-    parent::__construct($value1, $value2, $value3);
+    parent::__construct($value1 , $value2 , $value3);
     $this->var1 = $value4;
   }
 }
@@ -196,7 +196,7 @@ for($index = 0; $index < count($objects); $index ++)
   echo "-- Iteration $counter --\n";
   $val = $objects[$index];
 
-  var_dump( array_fill($start_key, $num, $val) );
+  var_dump( array_fill($start_key,$num,$val) );
 
   $counter++;
 }
@@ -265,7 +265,7 @@ array(2) {
 array(2) {
   [0]=>
   object(Test2)#%d (3) {
-    ["member1:private"]=>
+    ["member1":"Test2":private]=>
     int(100)
     ["var1"]=>
     int(30)
@@ -274,7 +274,7 @@ array(2) {
   }
   [1]=>
   object(Test2)#%d (3) {
-    ["member1:private"]=>
+    ["member1":"Test2":private]=>
     int(100)
     ["var1"]=>
     int(30)
@@ -286,9 +286,9 @@ array(2) {
 array(2) {
   [0]=>
   object(Child_test2)#%d (4) {
-    ["member1:private"]=>
+    ["member1":"Child_test2":private]=>
     int(102)
-    ["member1:private"]=>
+    ["member1":"Test2":private]=>
     int(100)
     ["var1"]=>
     int(30)
@@ -297,9 +297,9 @@ array(2) {
   }
   [1]=>
   object(Child_test2)#%d (4) {
-    ["member1:private"]=>
+    ["member1":"Child_test2":private]=>
     int(102)
-    ["member1:private"]=>
+    ["member1":"Test2":private]=>
     int(100)
     ["var1"]=>
     int(30)
@@ -311,7 +311,7 @@ array(2) {
 array(2) {
   [0]=>
   object(Test3)#%d (3) {
-    ["member1:protected"]=>
+    ["member1":protected]=>
     int(100)
     ["var1"]=>
     int(30)
@@ -320,7 +320,7 @@ array(2) {
   }
   [1]=>
   object(Test3)#%d (3) {
-    ["member1:protected"]=>
+    ["member1":protected]=>
     int(100)
     ["var1"]=>
     int(30)
@@ -332,7 +332,7 @@ array(2) {
 array(2) {
   [0]=>
   object(Child_test3)#%d (3) {
-    ["member1:protected"]=>
+    ["member1":protected]=>
     int(102)
     ["var1"]=>
     int(30)
@@ -341,7 +341,7 @@ array(2) {
   }
   [1]=>
   object(Child_test3)#%d (3) {
-    ["member1:protected"]=>
+    ["member1":protected]=>
     int(102)
     ["var1"]=>
     int(30)
@@ -355,18 +355,18 @@ array(2) {
   object(Test4)#%d (3) {
     ["member1"]=>
     int(100)
-    ["member2:private"]=>
+    ["member2":"Test4":private]=>
     int(101)
-    ["member3:protected"]=>
+    ["member3":protected]=>
     int(102)
   }
   [1]=>
   object(Test4)#%d (3) {
     ["member1"]=>
     int(100)
-    ["member2:private"]=>
+    ["member2":"Test4":private]=>
     int(101)
-    ["member3:protected"]=>
+    ["member3":protected]=>
     int(102)
   }
 }
@@ -378,9 +378,9 @@ array(2) {
     int(103)
     ["member1"]=>
     int(100)
-    ["member2:private"]=>
+    ["member2":"Test4":private]=>
     int(101)
-    ["member3:protected"]=>
+    ["member3":protected]=>
     int(102)
   }
   [1]=>
@@ -389,9 +389,9 @@ array(2) {
     int(103)
     ["member1"]=>
     int(100)
-    ["member2:private"]=>
+    ["member2":"Test4":private]=>
     int(101)
-    ["member3:protected"]=>
+    ["member3":protected]=>
     int(102)
   }
 }
@@ -401,9 +401,9 @@ array(2) {
   object(ConcreteClass1)#%d (4) {
     ["member1"]=>
     NULL
-    ["member2:private"]=>
+    ["member2":"AbstractClass":private]=>
     NULL
-    ["member3:protected"]=>
+    ["member3":protected]=>
     NULL
     ["var1"]=>
     int(30)
@@ -412,9 +412,9 @@ array(2) {
   object(ConcreteClass1)#%d (4) {
     ["member1"]=>
     NULL
-    ["member2:private"]=>
+    ["member2":"AbstractClass":private]=>
     NULL
-    ["member3:protected"]=>
+    ["member3":protected]=>
     NULL
     ["var1"]=>
     int(30)

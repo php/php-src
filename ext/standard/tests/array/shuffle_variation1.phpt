@@ -1,5 +1,5 @@
 --TEST--
-Test shuffle() function : usage variations - unexpected values for 'array_arg' argument
+Test shuffle() function : usage variations  - unexpected values for 'array_arg' argument
 --FILE--
 <?php
 /* Prototype  : bool shuffle(array $array_arg)
@@ -13,6 +13,7 @@ Test shuffle() function : usage variations - unexpected values for 'array_arg' a
 */
 
 echo "*** Testing shuffle() : with unexpected values for 'array_arg' argument ***\n";
+
 
 //get an unset variable
 $unset_var = 10;
@@ -210,3 +211,4 @@ bool(false)
 Warning: shuffle() expects parameter 1 to be array, resource given in %s on line %d
 bool(false)
 Done
+

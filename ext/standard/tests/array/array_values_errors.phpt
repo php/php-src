@@ -19,18 +19,18 @@ echo "Done\n";
 --EXPECTF--	
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for array_values() in %s on line %d
+Warning: array_values() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for array_values() in %s on line %d
+Warning: array_values() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: array_values(): The argument should be an array in %s on line %d
+Warning: array_values() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_values(): The argument should be an array in %s on line %d
+Warning: array_values() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: array_values(): The argument should be an array in %s on line %d
+Warning: array_values() expects parameter 1 to be array, object given in %s on line %d
 NULL
 Done
