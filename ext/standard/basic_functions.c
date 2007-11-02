@@ -52,7 +52,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include <time.h>
 #include <stdio.h>
 
-#ifndef PHP_WIN32 
+#ifndef PHP_WIN32
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
@@ -4405,9 +4405,9 @@ PHP_FUNCTION(putenv)
 		if (!p) { /* no '=' means we want to unset it */
 			unsetenv(pe.putenv_string);
 		}
-		if (!p || putenv(pe.putenv_string) == 0) {  /* success */
+		if (!p || putenv(pe.putenv_string) == 0) { /* success */
 #else
-		if (putenv(pe.putenv_string) == 0) {    /* success */
+		if (putenv(pe.putenv_string) == 0) { /* success */
 #endif
 			zend_hash_add(&BG(putenv_ht), pe.key, pe.key_len+1, (void **) &pe, sizeof(putenv_entry), NULL);
 #ifdef HAVE_TZSET
@@ -4480,7 +4480,7 @@ static int parse_opts(char * opts, opt_struct ** result)
 	paras = safe_emalloc(sizeof(opt_struct), count, 0);
 	memset(paras, 0, sizeof(opt_struct) * count);
 	*result = paras;
-	while ( (*opts >= 65 && *opts <= 90) ||
+	while (	(*opts >= 65 && *opts <= 90) ||
 			(*opts >= 97 && *opts <= 122)
 	) {
 		paras->opt_char = *opts;
@@ -4552,14 +4552,14 @@ PHP_FUNCTION(getopt)
 		zval **arg;
 
 		count = zend_hash_num_elements(Z_ARRVAL_P(p_longopts));
-		
+
 		/* the first <len> slots are filled by the one short ops
 		 * we now extend our array and jump to the new added structs */
 		opts = (opt_struct *) erealloc(opts, sizeof(opt_struct) * (len + count + 1));
-        orig_opts = opts;
-        opts += len;
+		orig_opts = opts;
+		opts += len;
 
-        memset(opts, 0, count * sizeof(opt_struct));
+		memset(opts, 0, count * sizeof(opt_struct));
 
 		if (!opts) {
 			RETURN_FALSE;
@@ -4573,12 +4573,12 @@ PHP_FUNCTION(getopt)
 			opts->need_param = 0;
 			opts->opt_name = estrdup(Z_STRVAL_PP(arg));
 			len = strlen(opts->opt_name);
-			if ((len > 0) && (opts->opt_name[len-1] == ':')) {
+			if ((len > 0) && (opts->opt_name[len - 1] == ':')) {
 				opts->need_param++;
-				opts->opt_name[len-1] = '\0';
-				if ((len > 1) && (opts->opt_name[len-2] == ':')) {
+				opts->opt_name[len - 1] = '\0';
+				if ((len > 1) && (opts->opt_name[len - 2] == ':')) {
 					opts->need_param++;
-					opts->opt_name[len-2] = '\0';
+					opts->opt_name[len - 2] = '\0';
 				}
 			}
 			opts->opt_char = 0;
@@ -4636,7 +4636,7 @@ PHP_FUNCTION(getopt)
 				if (Z_TYPE_PP(args) != IS_ARRAY) {
 					convert_to_array_ex(args);
 				}
-				zend_hash_next_index_insert(HASH_OF(*args),  (void *)&val, sizeof(zval *), NULL);
+				zend_hash_next_index_insert(HASH_OF(*args), (void *)&val, sizeof(zval *), NULL);
 			} else {
 				zend_hash_index_update(HASH_OF(return_value), optname_int, &val, sizeof(zval *), NULL);
 			}
@@ -4646,7 +4646,7 @@ PHP_FUNCTION(getopt)
 				if (Z_TYPE_PP(args) != IS_ARRAY) {
 					convert_to_array_ex(args);
 				}
-				zend_hash_next_index_insert(HASH_OF(*args),  (void *)&val, sizeof(zval *), NULL);
+				zend_hash_next_index_insert(HASH_OF(*args), (void *)&val, sizeof(zval *), NULL);
 			} else {
 				zend_hash_add(HASH_OF(return_value), optname, strlen(optname)+1, (void *)&val, sizeof(zval *), NULL);
 			}
@@ -4986,7 +4986,7 @@ PHPAPI char *php_get_current_user(void) /* {{{ */
 	} else {
 #ifdef PHP_WIN32
 		char name[256];
-		DWORD len = sizeof(name)-1;
+		DWORD len = sizeof(name) - 1;
 
 		if (!GetUserName(name, &len)) {
 			return "";
@@ -5116,7 +5116,6 @@ PHP_FUNCTION(call_user_method_array)
 	HashTable *params_ar;
 	int num_elems, element = 0;
 
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/za/", &callback, &object, &params) == FAILURE) {
 		return;
 	}
@@ -5212,7 +5211,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe TSRMLS_DC)
 								function,
 								&retval,
 								tick_fe->arg_count - 1,
-								tick_fe->arguments+1
+								tick_fe->arguments + 1
 								TSRMLS_CC) == SUCCESS) {
 			zval_dtor(&retval);
 
@@ -5352,7 +5351,7 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
 PHP_FUNCTION(highlight_file)
 {
 	char *filename;
-	int  filename_len, ret;
+	int filename_len, ret;
 	zend_uchar filename_type;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	zend_bool i = 0;
@@ -5428,7 +5427,7 @@ PHP_FUNCTION(php_strip_whitespace)
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
-	if (open_file_for_scanning(&file_handle TSRMLS_CC)==FAILURE) {
+	if (open_file_for_scanning(&file_handle TSRMLS_CC) == FAILURE) {
 		php_output_end(TSRMLS_C);
 		if (filename_type == IS_UNICODE) {
 			efree(filename);
@@ -5467,7 +5466,7 @@ PHP_FUNCTION(highlight_string)
 	zval **expr;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	char *hicompiled_string_description;
-	zend_bool  i = 0;
+	zend_bool i = 0;
 	int old_error_reporting = EG(error_reporting);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|b", &expr, &i) == FAILURE) {
@@ -5596,7 +5595,7 @@ PHP_FUNCTION(ini_get_all)
 
 static int php_ini_check_path(char *option_name, int option_len, char *new_option_name, int new_option_len) /* {{{ */
 {
-	if ( option_len != (new_option_len-1) ) {
+	if (option_len != (new_option_len - 1)) {
 		return 0;
 	}
 
