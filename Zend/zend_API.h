@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2007 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -124,12 +124,17 @@ typedef struct _zend_function_entry {
 
 #endif
 
-#define INIT_CLASS_ENTRY(class_container, class_name, functions) INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, NULL, NULL, NULL)
+#define INIT_CLASS_ENTRY(class_container, class_name, functions) \
+	INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, NULL, NULL, NULL)
 
-#define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
+#define INIT_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions) \
+	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, NULL, NULL, NULL, NULL, NULL)
+
+#define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	{															\
-		class_container.name = strdup(class_name);				\
-		class_container.name_length = sizeof(class_name) - 1;	\
+		int _len = class_name_len;								\
+		class_container.name = zend_strndup(class_name, _len);	\
+		class_container.name_length = _len;						\
 		class_container.builtin_functions = functions;			\
 		class_container.constructor = NULL;						\
 		class_container.destructor = NULL;						\
@@ -140,7 +145,7 @@ typedef struct _zend_function_entry {
 		class_container.interface_gets_implemented = NULL;		\
 		class_container.get_static_method = NULL;				\
 		class_container.__call = handle_fcall;					\
-		class_container.__callstatic = handle_fcall;			\
+		class_container.__callstatic = NULL;					\
 		class_container.__tostring = NULL;						\
 		class_container.__get = handle_propget;					\
 		class_container.__set = handle_propset;					\
@@ -159,13 +164,15 @@ typedef struct _zend_function_entry {
 	}
 
 #define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
-	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset, NULL, NULL)
+	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, sizeof(class_name)-1, functions, handle_fcall, handle_propget, handle_propset, NULL, NULL)
 
 #ifdef ZTS
 #	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members:CG(static_members)[(zend_intptr_t)(ce)->static_members])
 #else
 #	define CE_STATIC_MEMBERS(ce) ((ce)->static_members)
 #endif
+
+#define ZEND_FCI_INITIALIZED(fci) ((fci).size != 0)
 
 int zend_next_free_module(void);
 
@@ -391,6 +398,7 @@ typedef struct _zend_fcall_info_cache {
 } zend_fcall_info_cache;
 
 BEGIN_EXTERN_C()
+ZEND_API extern zend_fcall_info empty_fcall_info;
 ZEND_API extern zend_fcall_info_cache empty_fcall_info_cache;
 
 /** Build zend_call_info/cache from a zval*
@@ -400,13 +408,46 @@ ZEND_API extern zend_fcall_info_cache empty_fcall_info_cache;
  * In order to pass parameters the following members need to be set:
  * fci->param_count = 0;
  * fci->params = NULL;
+ * The callable_name argument may be NULL.
  */
-ZEND_API int zend_fcall_info_init(zval *callable, zend_fcall_info *fci, zend_fcall_info_cache *fcc TSRMLS_DC);
+ZEND_API int zend_fcall_info_init(zval *callable, zend_fcall_info *fci, zend_fcall_info_cache *fcc, char **callable_name TSRMLS_DC);
+
+/** Clear argumens connected with zend_fcall_info *fci
+ * If free_mem is not zero then the params array gets free'd as well
+ */
+ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem);
+
+/** Save current arguments from zend_fcall_info *fci
+ * params array will be set to NULL
+ */
+ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, int *param_count, zval ****params);
+
+/** Free arguments connected with zend_fcall_info *fci andset back saved ones.
+ */
+ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count, zval ***params);
 
 /** Set or clear the arguments in the zend_call_info struct taking care of
  * refcount. If args is NULL and arguments are set then those are cleared.
  */
 ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC);
+
+/** Set arguments in the zend_fcall_info struct taking care of refcount.
+ * If argc is 0 the arguments which are set will be cleared, else pass
+ * a variable amount of zval** arguments.
+ */
+ZEND_API int zend_fcall_info_argp(zend_fcall_info *fci TSRMLS_DC, int argc, zval ***argv);
+
+/** Set arguments in the zend_fcall_info struct taking care of refcount.
+ * If argc is 0 the arguments which are set will be cleared, else pass
+ * a variable amount of zval** arguments.
+ */
+ZEND_API int zend_fcall_info_argv(zend_fcall_info *fci TSRMLS_DC, int argc, va_list *argv);
+
+/** Set arguments in the zend_fcall_info struct taking care of refcount.
+ * If argc is 0 the arguments which are set will be cleared, else pass
+ * a variable amount of zval** arguments.
+ */
+ZEND_API int zend_fcall_info_argn(zend_fcall_info *fci TSRMLS_DC, int argc, ...);
 
 /** Call a function using information created by zend_fcall_info_init()/args().
  * If args is given then those replace the arguement info in fci is temporarily.
@@ -415,9 +456,7 @@ ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *f
 
 ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC);
 
-
-ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
-                                  zend_bool is_ref, int num_symbol_tables, ...);
+ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length, zend_bool is_ref, int num_symbol_tables, ...);
 
 ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC);
 
@@ -431,9 +470,9 @@ END_EXTERN_C()
 
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(z) \
-	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s)", (z)->value.str.val); }
+	if (Z_STRVAL_P(z)[ Z_STRLEN_P(z) ] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s)", Z_STRVAL_P(z)); }
 #define CHECK_ZVAL_STRING_REL(z) \
-	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s) (source: %s:%d)", (z)->value.str.val ZEND_FILE_LINE_RELAY_CC); }
+	if (Z_STRVAL_P(z)[ Z_STRLEN_P(z) ] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s) (source: %s:%d)", Z_STRVAL_P(z) ZEND_FILE_LINE_RELAY_CC); }
 #else
 #define CHECK_ZVAL_STRING(z)
 #define CHECK_ZVAL_STRING_REL(z)
@@ -464,41 +503,41 @@ END_EXTERN_C()
 	}
 
 #define ZVAL_STRING(z, s, duplicate) {	\
-		const char *__s=(s);				\
-		(z)->value.str.len = strlen(__s);	\
-		(z)->value.str.val = (duplicate?estrndup(__s, (z)->value.str.len):(char*)__s);	\
-		(z)->type = IS_STRING;	        \
+		const char *__s=(s);			\
+		Z_STRLEN_P(z) = strlen(__s);	\
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, Z_STRLEN_P(z)):(char*)__s);\
+		Z_TYPE_P(z) = IS_STRING;		\
 	}
 
 #define ZVAL_STRINGL(z, s, l, duplicate) {	\
-		const char *__s=(s); int __l=l;\
-		(z)->value.str.len = __l;	    \
-		(z)->value.str.val = (duplicate?estrndup(__s, __l):(char*)__s);	\
-		(z)->type = IS_STRING;		    \
+		const char *__s=(s); int __l=l;		\
+		Z_STRLEN_P(z) = __l;				\
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, __l):(char*)__s);\
+		Z_TYPE_P(z) = IS_STRING;			\
 	}
 
-#define ZVAL_EMPTY_STRING(z) {	        \
-		(z)->value.str.len = 0;  	    \
-		(z)->value.str.val = STR_EMPTY_ALLOC(); \
-		(z)->type = IS_STRING;		    \
+#define ZVAL_EMPTY_STRING(z) {		\
+		Z_STRLEN_P(z) = 0;			\
+		Z_STRVAL_P(z) = STR_EMPTY_ALLOC();\
+		Z_TYPE_P(z) = IS_STRING;	\
 	}
 
-#define ZVAL_ZVAL(z, zv, copy, dtor) {  \
-		int is_ref, refcount;           \
-		is_ref = Z_ISREF_P(z);           \
-		refcount = Z_REFCOUNT_P(z);       \
-		*(z) = *(zv);                   \
-		if (copy) {                     \
-			zval_copy_ctor(z);          \
-	    }                               \
-		if (dtor) {                     \
-			if (!copy) {                \
-				ZVAL_NULL(zv);          \
-			}                           \
-			zval_ptr_dtor(&zv);         \
-	    }                               \
-		Z_SET_ISREF_TO_P(z, is_ref);           \
-		Z_SET_REFCOUNT_P(z, refcount);       \
+#define ZVAL_ZVAL(z, zv, copy, dtor) {	\
+		int is_ref, refcount;			\
+		is_ref = Z_ISREF_P(z);			\
+		refcount = Z_REFCOUNT_P(z);		\
+		*(z) = *(zv);					\
+		if (copy) {						\
+			zval_copy_ctor(z);			\
+	    }								\
+		if (dtor) {						\
+			if (!copy) {				\
+				ZVAL_NULL(zv);			\
+			}							\
+			zval_ptr_dtor(&zv);			\
+	    }								\
+		Z_SET_ISREF_TO_P(z, is_ref);	\
+		Z_SET_REFCOUNT_P(z, refcount);	\
 	}
 
 #define ZVAL_FALSE(z)  					ZVAL_BOOL(z, 0)
@@ -578,19 +617,19 @@ END_EXTERN_C()
 																										\
 		if (zend_hash_find(symtable, (name), (name_length), (void **) &orig_var)==SUCCESS				\
 			&& PZVAL_IS_REF(*orig_var)) {																\
-			Z_SET_REFCOUNT_P(var, Z_REFCOUNT_PP(orig_var));													\
-			Z_SET_ISREF_P(var);																				\
+			Z_SET_REFCOUNT_P(var, Z_REFCOUNT_PP(orig_var));												\
+			Z_SET_ISREF_P(var);																			\
 																										\
 			if (_refcount) {																			\
-				Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(var) + _refcount-1);															\
+				Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(var) + _refcount - 1);								\
 			}																							\
 			zval_dtor(*orig_var);																		\
 			**orig_var = *(var);																		\
-			FREE_ZVAL(var);																					\
+			FREE_ZVAL(var);																				\
 		} else {																						\
-			Z_SET_ISREF_TO_P(var, _is_ref);																	\
+			Z_SET_ISREF_TO_P(var, _is_ref);																\
 			if (_refcount) {																			\
-				Z_SET_REFCOUNT_P(var, _refcount);															\
+				Z_SET_REFCOUNT_P(var, _refcount);														\
 			}																							\
 			zend_hash_update(symtable, (name), (name_length), &(var), sizeof(zval *), NULL);			\
 		}																								\
@@ -600,10 +639,10 @@ END_EXTERN_C()
 #define ZEND_SET_GLOBAL_VAR(name, var)				\
 	ZEND_SET_SYMBOL(&EG(symbol_table), name, var)
 
-#define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var, _refcount, _is_ref)		\
+#define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var, _refcount, _is_ref)	\
 	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), name, name_length, var, _refcount, _is_ref)
 
-#define ZEND_DEFINE_PROPERTY(class_ptr, name, value, mask)								\
+#define ZEND_DEFINE_PROPERTY(class_ptr, name, value, mask)							\
 {																					\
 	char *_name = (name);															\
 	int namelen = strlen(_name);													\

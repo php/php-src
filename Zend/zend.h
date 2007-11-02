@@ -54,7 +54,6 @@
 # define ZEND_PATHS_SEPARATOR		':'
 #endif
 
-
 #ifdef ZEND_WIN32
 /* Only use this macro if you know for sure that all of the switches values
    are covered by its case statements */
@@ -177,7 +176,6 @@ char *alloca ();
 # define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first)
 #endif
 
-
 #if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32)) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
 # define do_alloca(p) alloca(p)
 # define free_alloca(p)
@@ -242,7 +240,6 @@ char *alloca ();
 #define SUCCESS 0
 #define FAILURE -1				/* this MUST stay a negative number, or it may affect functions! */
 
-
 #include "zend_hash.h"
 #include "zend_ts_hash.h"
 #include "zend_llist.h"
@@ -290,7 +287,6 @@ typedef union _zvalue_value {
 	HashTable *ht;				/* hash table value */
 	zend_object_value obj;
 } zvalue_value;
-
 
 struct _zval_struct {
 	/* Variable information */
@@ -362,6 +358,7 @@ static always_inline zend_bool zval_set_isref_p(zval* pz) {
 static always_inline zend_bool zval_unset_isref_p(zval* pz) {
 	return pz->is_ref__gc = 0;
 }
+
 static always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
 	return pz->is_ref__gc = isref;
 }
@@ -451,16 +448,13 @@ typedef struct _zend_utility_functions {
 	char *(*getenv_function)(char *name, size_t name_len TSRMLS_DC);
 } zend_utility_functions;
 
-
 typedef struct _zend_utility_values {
 	char *import_use_extension;
 	uint import_use_extension_length;
 	zend_bool html_errors;
 } zend_utility_values;
 
-
 typedef int (*zend_write_func_t)(const char *str, uint str_length);
-
 
 #undef MIN
 #undef MAX
@@ -472,8 +466,6 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 	((n) ? (((n)>0) ? 1 : -1) : 0)
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
 #define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
-
-
 
 /* data types */
 /* All data types <= IS_BOOL have their constructor/destructors skipped */
@@ -493,20 +485,15 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_CONSTANT_RT_NS_CHECK	0x10
 #define IS_CONSTANT_INDEX		0x80
 
-
 /* overloaded elements data types */
-#define OE_IS_ARRAY	(1<<0)
+#define OE_IS_ARRAY		(1<<0)
 #define OE_IS_OBJECT	(1<<1)
 #define OE_IS_METHOD	(1<<2)
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions);
 void zend_shutdown(TSRMLS_D);
 void zend_register_standard_ini_entries(TSRMLS_D);
-
-#ifdef ZTS
 void zend_post_startup(TSRMLS_D);
-#endif
-
 void zend_set_utility_values(zend_utility_values *utility_values);
 
 BEGIN_EXTERN_C()
@@ -529,7 +516,7 @@ END_EXTERN_C()
 		}														\
 		EG(bailout) = __orig_bailout;							\
 	}
-#define zend_first_try		EG(bailout)=NULL; zend_try
+#define zend_first_try		EG(bailout)=NULL;	zend_try
 
 BEGIN_EXTERN_C()
 ZEND_API char *get_zend_version(void);
@@ -571,11 +558,8 @@ END_EXTERN_C()
 
 /* output support */
 #define ZEND_WRITE(str, str_len)		zend_write((str), (str_len))
-#define ZEND_WRITE_EX(str, str_len)		write_func((str), (str_len))
 #define ZEND_PUTS(str)					zend_write((str), strlen((str)))
-#define ZEND_PUTS_EX(str)				write_func((str), strlen((str)))
 #define ZEND_PUTC(c)					zend_write(&(c), 1), (c)
-
 
 BEGIN_EXTERN_C()
 extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
@@ -589,7 +573,6 @@ extern void (*zend_on_timeout)(int seconds TSRMLS_DC);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 extern int (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
-
 
 ZEND_API void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
@@ -605,7 +588,6 @@ END_EXTERN_C()
 
 #define ZEND_UV(name) (zend_uv.name)
 
-
 #define HANDLE_BLOCK_INTERRUPTIONS()		if (zend_block_interruptions) { zend_block_interruptions(); }
 #define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
 
@@ -614,7 +596,6 @@ ZEND_API void zend_message_dispatcher(long message, void *data);
 
 ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval *contents);
 END_EXTERN_C()
-
 
 /* Messages for applications of Zend */
 #define ZMSG_FAILED_INCLUDE_FOPEN		1L
@@ -626,7 +607,7 @@ END_EXTERN_C()
 #define ZMSG_MEMORY_LEAKS_GRAND_TOTAL	7L
 
 #define INIT_PZVAL(z)		\
-	(z)->refcount__gc = 1;		\
+	(z)->refcount__gc = 1;	\
 	(z)->is_ref__gc = 0;
 
 #define INIT_ZVAL(z) z = zval_used_for_init;
@@ -645,13 +626,13 @@ END_EXTERN_C()
 	{														\
 		zval *orig_ptr = *(ppzv);							\
 															\
-		if (Z_REFCOUNT_P(orig_ptr)>1) {							\
+		if (Z_REFCOUNT_P(orig_ptr) > 1) {					\
 			Z_DELREF_P(orig_ptr);							\
 			ALLOC_ZVAL(*(ppzv));							\
 			**(ppzv) = *orig_ptr;							\
 			zval_copy_ctor(*(ppzv));						\
-			Z_SET_REFCOUNT_PP(ppzv, 1);							\
-			Z_UNSET_ISREF_PP(ppzv);							\
+			Z_SET_REFCOUNT_PP(ppzv, 1);						\
+			Z_UNSET_ISREF_PP((ppzv));						\
 		}													\
 	}
 
@@ -663,14 +644,14 @@ END_EXTERN_C()
 #define SEPARATE_ZVAL_TO_MAKE_IS_REF(ppzv)	\
 	if (!PZVAL_IS_REF(*ppzv)) {				\
 		SEPARATE_ZVAL(ppzv);				\
-		Z_SET_ISREF_PP(ppzv);				\
+		Z_SET_ISREF_PP((ppzv));				\
 	}
 
 #define COPY_PZVAL_TO_ZVAL(zv, pzv)			\
 	(zv) = *(pzv);							\
 	if (Z_REFCOUNT_P(pzv)>1) {				\
 		zval_copy_ctor(&(zv));				\
-		Z_DELREF_P(pzv);					\
+		Z_DELREF_P((pzv));					\
 	} else {								\
 		FREE_ZVAL(pzv);						\
 	}										\
@@ -681,14 +662,14 @@ END_EXTERN_C()
 												\
 	SEPARATE_ZVAL_IF_NOT_REF(ppzv_dest);		\
 	is_ref = Z_ISREF_PP(ppzv_dest);				\
-	refcount = Z_REFCOUNT_PP(ppzv_dest);			\
+	refcount = Z_REFCOUNT_PP(ppzv_dest);		\
 	zval_dtor(*ppzv_dest);						\
 	**ppzv_dest = *pzv_src;						\
 	if (copy) {                                 \
 		zval_copy_ctor(*ppzv_dest);				\
     }		                                    \
-	Z_SET_ISREF_TO_PP(ppzv_dest, is_ref);				\
-	Z_SET_REFCOUNT_PP(ppzv_dest, refcount);			\
+	Z_SET_ISREF_TO_PP(ppzv_dest, is_ref);		\
+	Z_SET_REFCOUNT_PP(ppzv_dest, refcount);		\
 }
 
 #define SEPARATE_ARG_IF_REF(varptr) \
@@ -696,7 +677,7 @@ END_EXTERN_C()
 		zval *original_var = varptr; \
 		ALLOC_ZVAL(varptr); \
 		varptr->value = original_var->value; \
-		varptr->type = original_var->type; \
+		Z_TYPE_P(varptr) = Z_TYPE_P(original_var); \
 		Z_UNSET_ISREF_P(varptr); \
 		Z_SET_REFCOUNT_P(varptr, 1); \
 		zval_copy_ctor(varptr); \
@@ -708,7 +689,6 @@ END_EXTERN_C()
 	(Z_REFCOUNT_P(zv) == 1 && \
 	 (Z_TYPE_P(zv) != IS_OBJECT || \
 	  zend_objects_store_get_refcount(zv TSRMLS_CC) == 1))
-
 
 #define ZEND_MAX_RESERVED_RESOURCES	4
 

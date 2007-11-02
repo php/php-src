@@ -166,8 +166,9 @@ typedef struct _php_basic_globals {
 	char strtok_table[256];
 	ulong strtok_len;
 	char str_ebuf[40];
-	zval **array_walk_func_name;
-	zval **user_compare_func_name;
+	zend_fcall_info array_walk_fci;
+	zend_fcall_info_cache array_walk_fci_cache;
+	zend_fcall_info user_compare_fci;
 	zend_fcall_info_cache user_compare_fci_cache;
 	zend_llist *user_tick_functions;
 
@@ -180,7 +181,7 @@ typedef struct _php_basic_globals {
 	long page_uid;
 	long page_gid;
 	long page_inode;
-	long page_mtime;
+	time_t page_mtime;
 
 	/* filestat.c && main/streams/streams.c */
 	char *CurrentStatFile, *CurrentLStatFile;

@@ -614,6 +614,39 @@ static HashTable *spl_array_get_properties(zval *object TSRMLS_DC) /* {{{ */
 	return spl_array_get_hash_table(intern, 1 TSRMLS_CC);
 } /* }}} */
 
+static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{ */
+{
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(obj TSRMLS_CC);
+	HashTable *rv;
+	zval *tmp, *storage;
+	int name_len;
+	char *zname;
+	zend_class_entry *base;
+
+	if (HASH_OF(intern->array) == intern->std.properties) {
+		*is_temp = 0;
+		return intern->std.properties;
+	} else {
+		*is_temp = 1;
+
+		ALLOC_HASHTABLE(rv);
+		ZEND_INIT_SYMTABLE_EX(rv, zend_hash_num_elements(intern->std.properties) + 1, 0);
+
+		zend_hash_copy(rv, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+		storage = intern->array;
+		zval_add_ref(&storage);
+
+		base = (Z_OBJ_HT_P(obj) == &spl_handler_ArrayIterator) ? spl_ce_ArrayIterator : spl_ce_ArrayObject;
+		zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1, &name_len TSRMLS_CC);
+		zend_symtable_update(rv, zname, name_len+1, &storage, sizeof(zval *), NULL);
+		efree(zname);
+
+		return rv;
+	}
+}
+/* }}} */
+
 static zval *spl_array_read_property(zval *object, zval *member, int type TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -1514,6 +1547,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.count_elements = spl_array_object_count_elements;
 
 	spl_handler_ArrayObject.get_properties = spl_array_get_properties;
+	spl_handler_ArrayObject.get_debug_info = spl_array_get_debug_info;
 	spl_handler_ArrayObject.read_property = spl_array_read_property;
 	spl_handler_ArrayObject.write_property = spl_array_write_property;
 	spl_handler_ArrayObject.get_property_ptr_ptr = spl_array_get_property_ptr_ptr;
