@@ -116,7 +116,7 @@ static zend_object_value spl_object_storage_new_ex(zend_class_entry *class_type,
 }
 /* }}} */
 
-static HashTable* spl_object_storage_debug_infos(zval *obj, int *is_temp TSRMLS_DC) /* {{{ */
+static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{ */
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(obj TSRMLS_CC);
 	HashTable *rv, *props;
@@ -474,7 +474,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 
 	REGISTER_SPL_STD_CLASS_EX(SplObjectStorage, spl_SplObjectStorage_new, spl_funcs_SplObjectStorage);
 	memcpy(&spl_handler_SplObjectStorage, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	spl_handler_SplObjectStorage.get_debug_info = spl_object_storage_debug_infos;
+	spl_handler_SplObjectStorage.get_debug_info = spl_object_storage_debug_info;
 
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Countable);
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Iterator);
