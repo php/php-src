@@ -20,7 +20,7 @@
 
 /* $Id$ */
 
-/* {{{ includes 
+/* {{{ includes
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -252,18 +252,18 @@ PHP_FUNCTION(var_dump)
 	zval ***args;
 	int argc;
 	int	i;
-	
+
 	argc = ZEND_NUM_ARGS();
-	
+
 	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
-	
-	for (i=0; i<argc; i++)
+
+	for (i = 0; i < argc; i++) {
 		php_var_dump(args[i], 1, 0 TSRMLS_CC);
-	
+	}
 	efree(args);
 }
 /* }}} */
@@ -275,18 +275,18 @@ PHP_FUNCTION(var_inspect)
 	zval ***args;
 	int argc;
 	int	i;
-	
+
 	argc = ZEND_NUM_ARGS();
-	
+
 	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
-	
-	for (i=0; i<argc; i++)
+
+	for (i = 0; i < argc; i++) {
 		php_var_dump(args[i], 1, 1 TSRMLS_CC);
-	
+	}
 	efree(args);
 }
 /* }}} */
@@ -301,13 +301,13 @@ static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_h
 	if (hash_key->nKeyLength == 0) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		/* XXX: perphaps when we are inside the class we should permit access to 
+		/* XXX: perphaps when we are inside the class we should permit access to
 		 * private & protected values
 		 */
-		if (va_arg(args, int) && 
+		if (va_arg(args, int) &&
 			((hash_key->type == IS_STRING && hash_key->arKey.s[0] == 0) ||
 			(hash_key->type == IS_UNICODE && hash_key->arKey.u[0] == 0))
-		) { 
+		) {
 			return 0;
 		}
 		php_printf("%*c[", level + 1, ' ');
@@ -450,16 +450,16 @@ PHP_FUNCTION(debug_zval_dump)
 	zval ***args;
 	int argc;
 	int	i;
-	
+
 	argc = ZEND_NUM_ARGS();
-	
+
 	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
-	
-	for (i = 0; i<argc; i++) {
+
+	for (i = 0; i < argc; i++) {
 		php_debug_zval_dump(args[i], 1, 1 TSRMLS_CC);
 	}
 	efree(args);
@@ -473,7 +473,7 @@ static int php_array_element_export(zval **zv, int num_args, va_list args, zend_
 
 	level = va_arg(args, int);
 
-	if (hash_key->nKeyLength==0) { /* numeric key */
+	if (hash_key->nKeyLength == 0) { /* numeric key */
 		php_printf("%*c%ld => ", level + 1, ' ', hash_key->h);
 	} else { /* string key */
 		php_printf("%*c'", level + 1, ' ');
@@ -622,7 +622,6 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
 		break;
 	}
 }
-
 /* }}} */
 
 /* {{{ proto mixed var_export(mixed var [, bool return]) U
@@ -631,15 +630,15 @@ PHP_FUNCTION(var_export)
 {
 	zval *var;
 	zend_bool return_output = 0;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &var, &return_output) == FAILURE) {
 		return;
 	}
-	
+
 	if (return_output) {
 		php_output_start_default(TSRMLS_C);
 	}
-	
+
 	/* UTODO
 	 * We need to escape non-ASCII chars with \uXXXX format. php_var_export()
 	 * currently uses output_encoding to export Unicode strings. Suppose it's
@@ -687,7 +686,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 		}
 		return FAILURE;
 	}
-	
+
 	/* +1 because otherwise hash will think we are trying to store NULL pointer */
 	var_no = zend_hash_num_elements(var_hash) + 1;
 	zend_hash_add(var_hash, p, len, &var_no, sizeof(var_no), NULL);
@@ -809,14 +808,14 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		nvalp = &nval;
 
 		zend_hash_internal_pointer_reset_ex(HASH_OF(retval_ptr), &pos);
-	
+
 		for (;; zend_hash_move_forward_ex(HASH_OF(retval_ptr), &pos)) {
 			i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, &key_len, &index, 0, &pos);
-			
+
 			if (i == HASH_KEY_NON_EXISTANT) {
 				break;
 			}
-			
+
 			if (incomplete_class &&
 				key_len == sizeof(MAGIC_MEMBER) &&
 				ZEND_U_EQUAL(i, key, key_len-1, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)
@@ -845,7 +844,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 				if (ce) {
 					zstr prot_name, priv_name;
 					int prop_name_length;
-					
+
 					do {
 						zend_u_mangle_property_name(&priv_name, &prop_name_length, Z_TYPE_PP(name), ce->name, ce->name_length, Z_UNIVAL_PP(name), Z_UNILEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
 						if (zend_u_hash_find(Z_OBJPROP_P(struc), Z_TYPE_PP(name), priv_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
@@ -957,7 +956,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 
 				if (Z_OBJ_HT_P(struc)->get_class_entry) {
 					ce = Z_OBJCE_P(struc);
-				} 
+				}
 
 				if (ce && ce->serialize != NULL) {
 					/* has custom handler */
@@ -978,7 +977,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 						}
 
 						smart_str_appendl(buf, "\":", 2);
-					
+
 						smart_str_append_long(buf, serialized_length);
 						if (serialized_type == IS_UNICODE) {
 							smart_str_appendl(buf, ":U:{", 4);
@@ -989,7 +988,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 						} else {
 							smart_str_appendc(buf, 'N');
 						}
-						smart_str_appendc(buf, '}'); 
+						smart_str_appendc(buf, '}');
 					} else {
 						smart_str_appendl(buf, "N;", 2);
 					}
@@ -998,7 +997,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 					}
 					return;
 				}
-				
+
 				if (ce && ce != PHP_IC_ENTRY && zend_hash_exists(&ce->function_table, "__sleep", sizeof("__sleep"))) {
 					INIT_PZVAL(&fname);
 					ZVAL_ASCII_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 1);
@@ -1016,10 +1015,10 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 							}
 							zval_ptr_dtor(&retval_ptr);
 						}
-						return;	
+						return;
 					}
 				}
-				
+
 				if (retval_ptr) {
 					zval_ptr_dtor(&retval_ptr);
 				}
@@ -1048,21 +1047,21 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 				ulong index;
 				uint key_len;
 				HashPosition pos;
-				
+
 				zend_hash_internal_pointer_reset_ex(myht, &pos);
 				for (;; zend_hash_move_forward_ex(myht, &pos)) {
 					i = zend_hash_get_current_key_ex(myht, &key, &key_len, &index, 0, &pos);
 					if (i == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
-					
+
 					if (incomplete_class &&
 						key_len == sizeof(MAGIC_MEMBER) &&
 						ZEND_U_EQUAL(i, key, key_len - 1, MAGIC_MEMBER, sizeof(MAGIC_MEMBER) - 1)
 					) {
 						continue;
-					}		
-					
+					}
+
 					switch (i) {
 						case HASH_KEY_IS_LONG:
 							php_var_serialize_long(buf, index);
@@ -1077,8 +1076,8 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 
 					/* we should still add element even if it's not OK,
 					 * since we already wrote the length of the array before */
-					if (zend_hash_get_current_data_ex(myht, (void **) &data, &pos) != SUCCESS 
-						|| !data 
+					if (zend_hash_get_current_data_ex(myht, (void **) &data, &pos) != SUCCESS
+						|| !data
 						|| data == &struc
 						|| (Z_TYPE_PP(data) == IS_ARRAY && Z_ARRVAL_PP(data)->nApplyCount > 1)
 					) {
@@ -1100,7 +1099,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 		default:
 			smart_str_appendl(buf, "i:0;", 4);
 			return;
-	} 
+	}
 }
 /* }}} */
 
@@ -1110,7 +1109,7 @@ PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash 
 	smart_str_0(buf);
 }
 /* }}} */
-	
+
 /* {{{ proto string serialize(mixed variable) U
    Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
@@ -1149,9 +1148,8 @@ PHP_FUNCTION(unserialize)
 	char *buf = NULL;
 	int buf_len;
 	const unsigned char *p;
-
 	php_unserialize_data_t var_hash;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &buf, &buf_len, UG(ascii_conv)) == FAILURE) {
 		RETURN_FALSE;
 	}
