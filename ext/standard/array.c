@@ -2304,13 +2304,13 @@ PHP_FUNCTION(array_slice)
 	zend_bool preserve_keys = 0; /* Whether to preserve keys while copying to the new array or not */
 	int		 num_in,		/* Number of elements in the input array */
 		     pos;			/* Current position in the array */
+	zval	*lenght_param;
 	zstr string_key;
 	int string_key_len;
 	ulong num_key;
 	HashPosition hpos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|l!b", &input,
-							  &offset, &length, &preserve_keys) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|zb", &input, &offset, &length_param, &preserve_keys) == FAILURE) {
 		return;
 	}
 	
@@ -2318,7 +2318,9 @@ PHP_FUNCTION(array_slice)
 	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
 	
 	/* We want all entries from offset to the end if length is not passed or length is null */
-	if (ZEND_NUM_ARGS() < 3 || length == NULL) {
+	if (ZEND_NUM_ARGS() >= 3 && Z_TYPE_P(length_param) != IS_NULL) {
+		length = Z_LVAL_P(length_param);
+	} else {
 		length = num_in;
 	}
 
