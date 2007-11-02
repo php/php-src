@@ -41,8 +41,8 @@ $values =  array (
   // float values
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.1234567e10,
+  10.7654321E-10,
   .5,
 
   // array values
@@ -65,7 +65,7 @@ $values =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
 
@@ -165,7 +165,7 @@ string(17) "hello world12345 "
 -- Iteration 23 --
 string(17) "hello world12345 "
 -- Iteration 24 --
-string(15) "hello world1234"
+string(%d) "%s"
 -- Iteration 25 --
 string(17) "hello world12345 "
 -- Iteration 26 --
