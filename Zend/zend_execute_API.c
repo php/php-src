@@ -549,49 +549,28 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!zend_u_get_constant_ex(ZEND_STR_TYPE, str_index, str_index_len - 1, &const_value, scope, (*element)->idx_type TSRMLS_CC)) {
-				if ((UG(unicode) && (colon.u = u_memchr(str_index.u, ':', str_index_len - 1)) && colon.u[1] == ':') ||
-					(!UG(unicode) && (colon.s = memchr(str_index.s, ':', str_index_len - 1)) && colon.s[1] == ':')
+			if (!zend_u_get_constant_ex(ZEND_STR_TYPE, str_index, str_index_len - 3, &const_value, scope, (UG(unicode) ? str_index.u[str_index_len-2] : str_index.s[str_index_len-2]) TSRMLS_CC)) {
+				if ((UG(unicode) && (colon.u = u_memchr(str_index.u, ':', str_index_len - 3)) && colon.u[1] == ':') ||
+					(!UG(unicode) && (colon.s = memchr(str_index.s, ':', str_index_len - 3)) && colon.s[1] == ':')
 				) {
 					zend_error(E_ERROR, "Undefined class constant '%v'", str_index);
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",	str_index, str_index);
-				zend_hash_move_forward(Z_ARRVAL_P(p));
-				continue;
+				ZVAL_TEXTL(&const_value, str_index, str_index_len-3, 1);
 			}
 
-			if (UG(unicode)) {
-				if (Z_TYPE(const_value) == IS_UNICODE &&
-					Z_USTRLEN(const_value) == str_index_len - 1 &&
-					!u_strncmp(Z_USTRVAL(const_value), str_index.u, str_index_len)
-				) {
-					/* constant value is the same as its name */
-					zval_dtor(&const_value);
-					zend_hash_move_forward(Z_ARRVAL_P(p));
-					continue;
-				}
-			} else {
-				if (Z_TYPE(const_value) == IS_STRING &&
-					Z_STRLEN(const_value) == str_index_len - 1 &&
-					!strncmp(Z_STRVAL(const_value), str_index.s, str_index_len)
-				) {
-					/* constant value is the same as its name */
-					zval_dtor(&const_value);
-					zend_hash_move_forward(Z_ARRVAL_P(p));
-					continue;
-				}
+			if (Z_REFCOUNT_PP(element) > 1) {
+				ALLOC_ZVAL(new_val);
+				*new_val = **element;
+				zval_copy_ctor(new_val);
+				Z_SET_REFCOUNT_P(new_val, 1);
+				Z_UNSET_ISREF_P(new_val);
+
+				/* preserve this bit for inheritance */
+				Z_TYPE_PP(element) |= IS_CONSTANT_INDEX;
+				zval_ptr_dtor(element);
+				*element = new_val;
 			}
-
-			ALLOC_ZVAL(new_val);
-			*new_val = **element;
-			zval_copy_ctor(new_val);
-			Z_SET_REFCOUNT_P(new_val, 1);
-			Z_UNSET_ISREF_P(new_val);
-
-			/* preserve this bit for inheritance */
-			Z_TYPE_PP(element) |= IS_CONSTANT_INDEX;
-			zval_ptr_dtor(element);
-			*element = new_val;
 
 			switch (Z_TYPE(const_value)) {
 				case IS_STRING:
