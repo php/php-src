@@ -10,7 +10,7 @@ Test file() function : usage variations
 
 $file_path = dirname(__FILE__);
 require($file_path."/file.inc");
-$filename = $file_path."/file.tmp";
+$filename = $file_path."/file_variation.tmp";
 
 $data_array = array( "Garbage data", "Gar\nba\nge d\nata", "Gar\n\nbage \n\n data" );
 
@@ -27,18 +27,18 @@ foreach( $data_array as $data ) {
 }
 
 echo "*** Testing with variation in use_include_path argument ***\n";
-$dir = "/file";
+$dir = "/file_variation";
 $file_path = dirname(__FILE__).$dir;
 
 mkdir($file_path);
 ini_set( 'include_path', $file_path );
-$filename = $file_path."/file1.tmp";
+$filename = $file_path."/file1_variation.tmp";
 
 $buffer_types = array("text", "numeric", "alphanumeric", "text_with_new_line");
 foreach( $buffer_types as $type) {
   fill_buffer($buffer, $type, 100);
   file_put_contents($filename, $buffer );
-  var_dump( file("file1.tmp", FILE_USE_INCLUDE_PATH) );
+  var_dump( file("file1_variation.tmp", FILE_USE_INCLUDE_PATH) );
   var_dump( file($filename, FILE_IGNORE_NEW_LINES) );
   var_dump( file($filename, FILE_SKIP_EMPTY_LINES) );
    
@@ -52,11 +52,11 @@ echo "\n--- Done ---";
 // Removing the temporary files and directory
 
 $file_path = dirname(__FILE__);
-unlink($file_path."/file.tmp");
+unlink($file_path."/file_variation.tmp");
 
-$dir = "/file";
+$dir = "/file_variation";
 $file_path = dirname(__FILE__).$dir;
-unlink($file_path."/file1.tmp");
+unlink($file_path."/file1_variation.tmp");
 rmdir($file_path);
 
 ?>
