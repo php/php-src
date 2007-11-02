@@ -1,5 +1,7 @@
 --TEST--
 Bug #32290 (calling call_user_func_array() ends in infinite loop within child class)
+--INI--
+error_reporting=8191
 --FILE--
 <?php
 
