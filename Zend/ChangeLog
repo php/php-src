@@ -1,3 +1,23 @@
+2007-11-01  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * zend_API.h:
+      ws + cs
+
+    * zend_API.c:
+      cs + ws
+
+2007-11-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug43027.phpt:
+      Fixed bug #43027 (Declare cause fatal error)
+
+    * tests/bug43027.phpt
+      tests/bug43027.phpt:
+      
+      file bug43027.phpt was initially added on branch PHP_5_3.
+
 2007-10-30  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_3)
