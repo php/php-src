@@ -59,7 +59,7 @@ static void php_var_dump_unicode(UChar *ustr, int length, int verbose, char *quo
 	ZEND_PUTS(quote);
 	if (escape) {
 		char *str;
-		int   str_len;
+		int str_len;
 
 		str = php_addcslashes(out, clen, &str_len, 0, "'\\", 2 TSRMLS_CC);
 		PHPWRITE(str, str_len);
@@ -305,8 +305,9 @@ static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_h
 		 * private & protected values
 		 */
 		if (va_arg(args, int) && 
-		    ((hash_key->type == IS_STRING && hash_key->arKey.s[0] == 0) ||
-		     (hash_key->type == IS_UNICODE && hash_key->arKey.u[0] == 0))) { 
+			((hash_key->type == IS_STRING && hash_key->arKey.s[0] == 0) ||
+			(hash_key->type == IS_UNICODE && hash_key->arKey.u[0] == 0))
+		) { 
 			return 0;
 		}
 		php_printf("%*c[", level + 1, ' ');
@@ -558,9 +559,9 @@ static void php_unicode_export(UChar *ustr, int ustr_len TSRMLS_DC) /* {{{ */
 PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht;
-	char*     tmp_str;
-	int       tmp_len;
-	zstr      class_name;
+	char* tmp_str;
+	int tmp_len;
+	zstr class_name;
 	zend_uint class_name_len;
 
 	switch (Z_TYPE_PP(struc)) {
@@ -663,8 +664,8 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	register int len;
 
 	/* relies on "(long)" being a perfect hash function for data pointers,
-	   however the actual identity of an object has had to be determined
-	   by its object handle and the class entry since 5.0. */
+	 * however the actual identity of an object has had to be determined
+	 * by its object handle and the class entry since 5.0. */
 	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
 		p = smart_str_print_long(id + sizeof(id) - 1,
 				(((size_t)Z_OBJCE_P(var) << 5)
@@ -680,7 +681,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	if (var_old && zend_hash_find(var_hash, p, len, var_old) == SUCCESS) {
 		if (!Z_ISREF_P(var)) {
 			/* we still need to bump up the counter, since non-refs will
-			   be counted separately by unserializer */
+			 * be counted separately by unserializer */
 			var_no = -1;
 			zend_hash_next_index_insert(var_hash, &var_no, sizeof(var_no), NULL);
 		}
@@ -780,14 +781,14 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, HashTable *var_hash TSRMLS_DC) /* {{{ */
 {
 	int count;
-	zend_bool  incomplete_class;
+	zend_bool incomplete_class;
 	zstr star;
 
 	star.s = "*";
 
 	incomplete_class = php_var_serialize_class_name(buf, struc TSRMLS_CC);
 	/* count after serializing name, since php_var_serialize_class_name
-	   changes the count if the variable is incomplete class */
+	 * changes the count if the variable is incomplete class */
 	count = zend_hash_num_elements(HASH_OF(retval_ptr));
 	if (incomplete_class) {
 		--count;
@@ -817,8 +818,8 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 			}
 			
 			if (incomplete_class &&
-			    key_len == sizeof(MAGIC_MEMBER) &&
-			    ZEND_U_EQUAL(i, key, key_len-1, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)
+				key_len == sizeof(MAGIC_MEMBER) &&
+				ZEND_U_EQUAL(i, key, key_len-1, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)
 			) {
 				continue;
 			}
@@ -858,7 +859,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 							break;
 						}
 						efree(priv_name.v);
-						zend_u_mangle_property_name(&prot_name, &prop_name_length,  Z_TYPE_PP(name), star, 1, Z_UNIVAL_PP(name), Z_UNILEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
+						zend_u_mangle_property_name(&prot_name, &prop_name_length, Z_TYPE_PP(name), star, 1, Z_UNIVAL_PP(name), Z_UNILEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
 						if (zend_u_hash_find(Z_OBJPROP_P(struc), Z_TYPE_PP(name), prot_name, prop_name_length+1, (void *) &d) == SUCCESS) {
 							if (Z_TYPE_PP(name) == IS_UNICODE) {
 								php_var_serialize_unicode(buf, prot_name.u, prop_name_length);
@@ -899,8 +900,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 	ulong *var_already;
 	HashTable *myht;
 
-	if (var_hash 
-	    && php_add_var_hash(var_hash, struc, (void *) &var_already TSRMLS_CC) == FAILURE) {
+	if (var_hash && php_add_var_hash(var_hash, struc, (void *) &var_already TSRMLS_CC) == FAILURE) {
 		if (Z_ISREF_P(struc)) {
 			smart_str_appendl(buf, "R:", 2);
 			smart_str_append_long(buf, *var_already);
@@ -999,8 +999,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 					return;
 				}
 				
-				if (ce && ce != PHP_IC_ENTRY &&
-				    zend_hash_exists(&ce->function_table, "__sleep", sizeof("__sleep"))) {
+				if (ce && ce != PHP_IC_ENTRY && zend_hash_exists(&ce->function_table, "__sleep", sizeof("__sleep"))) {
 					INIT_PZVAL(&fname);
 					ZVAL_ASCII_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 1);
 					res = call_user_function_ex(CG(function_table), &struc, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
@@ -1012,7 +1011,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 							} else {
 								php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize");
 								/* we should still add element even if it's not OK,
-				   				 * since we already wrote the length of the array before */
+								 * since we already wrote the length of the array before */
 								smart_str_appendl(buf,"N;", 2);
 							}
 							zval_ptr_dtor(&retval_ptr);
@@ -1036,7 +1035,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 				myht = Z_OBJPROP_P(struc);
 			}
 			/* count after serializing name, since php_var_serialize_class_name
-			   changes the count if the variable is incomplete class */
+			 * changes the count if the variable is incomplete class */
 			i = myht ? zend_hash_num_elements(myht) : 0;
 			if (i > 0 && incomplete_class) {
 				--i;
@@ -1058,8 +1057,8 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 					}
 					
 					if (incomplete_class &&
-					    key_len == sizeof(MAGIC_MEMBER) &&
-					    ZEND_U_EQUAL(i, key, key_len - 1, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)
+						key_len == sizeof(MAGIC_MEMBER) &&
+						ZEND_U_EQUAL(i, key, key_len - 1, MAGIC_MEMBER, sizeof(MAGIC_MEMBER) - 1)
 					) {
 						continue;
 					}		
@@ -1163,7 +1162,7 @@ PHP_FUNCTION(unserialize)
 
 	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if (!php_var_unserialize(&return_value, &p, p + buf_len,  &var_hash TSRMLS_CC)) {
+	if (!php_var_unserialize(&return_value, &p, p + buf_len, &var_hash TSRMLS_CC)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		zval_dtor(return_value);
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
