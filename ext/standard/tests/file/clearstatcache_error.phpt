@@ -1,5 +1,5 @@
 --TEST--
-Test clearstatcache() function: error conditions(bug#42072)
+Test clearstatcache() function: error conditions
 --FILE--
 <?php
 /*
@@ -13,11 +13,13 @@ echo "*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing clearstatcache() function: error conditions ***
-Warning: clearstatcache() expects 0 parameter, 1 given in %s on line %d
+
+Warning: Wrong parameter count for clearstatcache() in %s on line %d
 NULL
 *** Done ***
 --UEXPECTF--
 *** Testing clearstatcache() function: error conditions ***
-Warning: clearstatcache() expects 0 parameter, 1 given in %s on line %d
+
+Warning: Wrong parameter count for clearstatcache() in %s on line %d
 NULL
 *** Done ***
