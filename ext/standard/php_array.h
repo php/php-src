@@ -100,17 +100,18 @@ PHP_FUNCTION(array_key_exists);
 PHP_FUNCTION(array_chunk);
 PHP_FUNCTION(array_combine);
 
-HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
+PHPAPI HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
 PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC);
-int multisort_compare(const void *a, const void *b TSRMLS_DC);
+PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC);
 PHPAPI int php_array_data_compare(const void *a, const void *b TSRMLS_DC);
 PHPAPI void php_set_compare_func(int sort_type TSRMLS_DC);
 
-#define SORT_REGULAR			0
-#define SORT_NUMERIC			1
-#define	SORT_STRING				2
-#define	SORT_LOCALE_STRING      5
-
+#define PHP_SORT_REGULAR            0
+#define PHP_SORT_NUMERIC            1
+#define PHP_SORT_STRING             2
+#define PHP_SORT_DESC               3
+#define PHP_SORT_ASC                4
+#define PHP_SORT_LOCALE_STRING      5
 
 ZEND_BEGIN_MODULE_GLOBALS(array) 
 	int *multisort_flags[2];
