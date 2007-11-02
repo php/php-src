@@ -336,7 +336,6 @@ struct _zval_struct {
 	zend_uint refcount__gc;
 	zend_uchar type;	/* active type */
 	zend_uchar is_ref__gc;
-	zend_uchar idx_type;	/* type of element's index in constant array */
 };
 
 #define Z_REFCOUNT_PP(ppz)		Z_REFCOUNT_P(*(ppz))

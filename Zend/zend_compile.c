@@ -3946,9 +3946,18 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
 			case IS_CONSTANT:
 				/* Ugly hack to denote that this value has a constant index */
 				Z_TYPE_P(element) |= IS_CONSTANT_INDEX;
-				element->idx_type = Z_TYPE(offset->u.constant);
-				/* break missing intentionally */
-				utype = UG(unicode)?IS_UNICODE:IS_STRING;
+				if (UG(unicode)) {
+					Z_USTRVAL(offset->u.constant) = eurealloc(Z_USTRVAL(offset->u.constant), Z_USTRLEN(offset->u.constant)+3);
+					Z_USTRVAL(offset->u.constant)[Z_USTRLEN(offset->u.constant)+1] = Z_TYPE(offset->u.constant);
+					Z_USTRVAL(offset->u.constant)[Z_USTRLEN(offset->u.constant)+2] = 0;
+				} else {
+					Z_STRVAL(offset->u.constant) = erealloc(Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+3);
+					Z_STRVAL(offset->u.constant)[Z_STRLEN(offset->u.constant)+1] = Z_TYPE(offset->u.constant);
+					Z_STRVAL(offset->u.constant)[Z_STRLEN(offset->u.constant)+2] = 0;
+				}
+				zend_u_symtable_update(result->u.constant.value.ht, ZEND_STR_TYPE, Z_UNIVAL(offset->u.constant), Z_UNILEN(offset->u.constant)+3, &element, sizeof(zval *), NULL);
+				zval_dtor(&offset->u.constant);
+				break;
 			case IS_STRING:
 			case IS_UNICODE:
 				zend_u_symtable_update(Z_ARRVAL(result->u.constant), utype, Z_UNIVAL(offset->u.constant), Z_UNILEN(offset->u.constant)+1, &element, sizeof(zval *), NULL);
