@@ -2309,7 +2309,7 @@ PHP_FUNCTION(array_slice)
 	ulong num_key;
 	HashPosition hpos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|lb", &input,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|l!b", &input,
 							  &offset, &length, &preserve_keys) == FAILURE) {
 		return;
 	}
@@ -2317,8 +2317,8 @@ PHP_FUNCTION(array_slice)
 	/* Get number of entries in the input hash */
 	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
 	
-	/* We want all entries from offset to the end if length is not passed */
-	if (ZEND_NUM_ARGS() < 3) {
+	/* We want all entries from offset to the end if length is not passed or length is null */
+	if (ZEND_NUM_ARGS() < 3 || length == NULL) {
 		length = num_in;
 	}
 
