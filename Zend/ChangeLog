@@ -1,3 +1,65 @@
+2007-11-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      tests/bug31720.phpt
+      tests/bug32290.phpt
+      tests/bug36214.phpt
+      tests/bug37212.phpt
+      tests/bug37667.phpt:
+      - Fix tests
+      - Update README.PARAMETER_PARSING_API
+
+    * (PHP_5_3)
+      zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_execute_API.c
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      - MFH from HEAD:
+        . Folding tags
+        . Parameter parsing
+        . SPL debug info
+        . array function improvements (not all yet)
+        . Improvements to function calling with call_user_* functions
+        . Improvements to debugging info in var_dump/print_r
+
+2007-11-02  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      fix bug37251.phpt failure (two error messages instead of one)
+      should I merge this to 5_2?
+
+2007-11-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      tests/bug37251.phpt:
+      - Missing test. (NOTE: Fails due to unexpected double output for me, OKOK)
+
+    * zend.c
+      zend.h:
+      - WS + CS + use Z macros where possible
+
+2007-11-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend.h
+      zend_compile.c
+      zend_compile.c
+      zend_execute_API.c
+      zend_execute_API.c:
+      Reimplemented support for namespaces in indexes id constant arrays (removed
+      zval.idx_type)
+
+2007-11-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * zend_execute_API.c
+      tests/bug32290.phpt:
+      ws + cs + fix test
+
 2007-11-01  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * zend_API.h:
