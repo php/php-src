@@ -1,3 +1,323 @@
+2007-11-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/bug41970.phpt
+      ext/standard/tests/general_functions/call_user_func_return.phpt:
+      - Add missing tests from HEAD
+
+    * (PHP_5_3)
+      README.PARAMETER_PARSING_API
+      ZendEngine2/tests/bug31720.phpt
+      ZendEngine2/tests/bug32290.phpt
+      ZendEngine2/tests/bug36214.phpt
+      ZendEngine2/tests/bug37212.phpt
+      ZendEngine2/tests/bug37667.phpt
+      ext/dom/tests/dom003.phpt
+      ext/dom/tests/dom_set_attr_node.phpt
+      ext/spl/tests/array_001.phpt
+      ext/spl/tests/array_002.phpt
+      ext/spl/tests/array_003.phpt
+      ext/spl/tests/array_004.phpt
+      ext/spl/tests/array_006.phpt
+      ext/spl/tests/array_007.phpt
+      ext/spl/tests/array_008.phpt
+      ext/spl/tests/array_015.phpt
+      ext/spl/tests/array_017.phpt
+      ext/spl/tests/array_018.phpt
+      ext/spl/tests/array_022.phpt
+      ext/spl/tests/bug31185.phpt
+      ext/spl/tests/bug33136.phpt
+      ext/spl/tests/bug36258.phpt
+      ext/spl/tests/bug36287.phpt
+      ext/spl/tests/bug40872.phpt
+      ext/spl/tests/bug41692.phpt
+      ext/spl/tests/bug42364.phpt
+      ext/spl/tests/bug42654.phpt
+      ext/spl/tests/dit_001.phpt
+      ext/spl/tests/fileobject_003.phpt
+      ext/spl/tests/iterator_006.phpt
+      ext/spl/tests/iterator_026.phpt
+      ext/spl/tests/iterator_042.phpt
+      ext/spl/tests/iterator_047.phpt
+      ext/spl/tests/iterator_049.phpt
+      ext/spl/tests/iterator_049b.phpt
+      ext/spl/tests/iterator_050.phpt
+      ext/spl/tests/iterator_051.phpt
+      ext/spl/tests/iterator_052.phpt
+      ext/spl/tests/iterator_053.phpt
+      ext/spl/tests/iterator_054.phpt
+      ext/spl/tests/iterator_055.phpt
+      ext/spl/tests/observer_004.phpt
+      ext/spl/tests/observer_005.phpt
+      ext/spl/tests/spl_003.phpt
+      ext/spl/tests/spl_004.phpt
+      ext/spl/tests/spl_autoload_002.phpt
+      ext/spl/tests/sxe_001.phpt
+      ext/spl/tests/sxe_002.phpt
+      ext/spl/tests/sxe_003.phpt
+      ext/spl/tests/sxe_004.phpt
+      ext/spl/tests/sxe_005.phpt
+      ext/standard/tests/array/002.phpt
+      ext/standard/tests/array/004.phpt
+      ext/standard/tests/array/005.phpt
+      ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/009.phpt
+      ext/standard/tests/array/array_change_key_case_errors.phpt
+      ext/standard/tests/array/array_change_key_case_variation.phpt
+      ext/standard/tests/array/array_count_values.phpt
+      ext/standard/tests/array/array_fill_basic.phpt
+      ext/standard/tests/array/array_fill_error.phpt
+      ext/standard/tests/array/array_fill_object.phpt
+      ext/standard/tests/array/array_fill_variation1.phpt
+      ext/standard/tests/array/array_fill_variation2.phpt
+      ext/standard/tests/array/array_fill_variation3.phpt
+      ext/standard/tests/array/array_fill_variation4.phpt
+      ext/standard/tests/array/array_fill_variation5.phpt
+      ext/standard/tests/array/array_filter.phpt
+      ext/standard/tests/array/array_filter_error.phpt
+      ext/standard/tests/array/array_filter_object.phpt
+      ext/standard/tests/array/array_filter_variation1.phpt
+      ext/standard/tests/array/array_filter_variation2.phpt
+      ext/standard/tests/array/array_filter_variation4.phpt
+      ext/standard/tests/array/array_filter_variation7.phpt
+      ext/standard/tests/array/array_filter_variation9.phpt
+      ext/standard/tests/array/array_flip.phpt
+      ext/standard/tests/array/array_flip_error.phpt
+      ext/standard/tests/array/array_flip_variation1.phpt
+      ext/standard/tests/array/array_flip_variation2.phpt
+      ext/standard/tests/array/array_flip_variation3.phpt
+      ext/standard/tests/array/array_flip_variation4.phpt
+      ext/standard/tests/array/array_intersect_1.phpt
+      ext/standard/tests/array/array_intersect_error.phpt
+      ext/standard/tests/array/array_intersect_variation9.phpt
+      ext/standard/tests/array/array_key_exists.phpt
+      ext/standard/tests/array/array_keys_basic.phpt
+      ext/standard/tests/array/array_keys_error.phpt
+      ext/standard/tests/array/array_keys_variation_003.phpt
+      ext/standard/tests/array/array_map.phpt
+      ext/standard/tests/array/array_merge.phpt
+      ext/standard/tests/array/array_pad.phpt
+      ext/standard/tests/array/array_pop_errors.phpt
+      ext/standard/tests/array/array_push.phpt
+      ext/standard/tests/array/array_rand.phpt
+      ext/standard/tests/array/array_rand_basic1.phpt
+      ext/standard/tests/array/array_rand_basic2.phpt
+      ext/standard/tests/array/array_rand_error.phpt
+      ext/standard/tests/array/array_rand_variation1.phpt
+      ext/standard/tests/array/array_rand_variation2.phpt
+      ext/standard/tests/array/array_rand_variation3.phpt
+      ext/standard/tests/array/array_rand_variation4.phpt
+      ext/standard/tests/array/array_rand_variation5.phpt
+      ext/standard/tests/array/array_rand_variation6.phpt
+      ext/standard/tests/array/array_reverse_error.phpt
+      ext/standard/tests/array/array_reverse_variation1.phpt
+      ext/standard/tests/array/array_reverse_variation2.phpt
+      ext/standard/tests/array/array_search1.phpt
+      ext/standard/tests/array/array_search_errors.phpt
+      ext/standard/tests/array/array_search_variation1.phpt
+      ext/standard/tests/array/array_search_variation3.phpt
+      ext/standard/tests/array/array_search_variation4.phpt
+      ext/standard/tests/array/array_slice.phpt
+      ext/standard/tests/array/array_splice_errors.phpt
+      ext/standard/tests/array/array_splice_variation1.phpt
+      ext/standard/tests/array/array_splice_variation2.phpt
+      ext/standard/tests/array/array_splice_variation3.phpt
+      ext/standard/tests/array/array_splice_variation4.phpt
+      ext/standard/tests/array/array_unshift_basic1.phpt
+      ext/standard/tests/array/array_unshift_object.phpt
+      ext/standard/tests/array/array_unshift_variation7.phpt
+      ext/standard/tests/array/array_unshift_variation8.phpt
+      ext/standard/tests/array/array_values_errors.phpt
+      ext/standard/tests/array/array_walk.phpt
+      ext/standard/tests/array/array_walk_recursive1.phpt
+      ext/standard/tests/array/bug14580.phpt
+      ext/standard/tests/array/bug28739.phpt
+      ext/standard/tests/array/bug29253.phpt
+      ext/standard/tests/array/bug33940.phpt
+      ext/standard/tests/array/bug34982.phpt
+      ext/standard/tests/array/bug35014.phpt
+      ext/standard/tests/array/bug35014_64bit.phpt
+      ext/standard/tests/array/bug35821.phpt
+      ext/standard/tests/array/compact.phpt
+      ext/standard/tests/array/count_recursive.phpt
+      ext/standard/tests/array/end.phpt
+      ext/standard/tests/array/extract_variation6.phpt
+      ext/standard/tests/array/in_array_errors.phpt
+      ext/standard/tests/array/in_array_variation3.phpt
+      ext/standard/tests/array/locale_sort.phpt
+      ext/standard/tests/array/max_basic.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation2.phpt
+      ext/standard/tests/array/min_basic.phpt
+      ext/standard/tests/array/min_error.phpt
+      ext/standard/tests/array/min_variation1.phpt
+      ext/standard/tests/array/min_variation2.phpt
+      ext/standard/tests/array/shuffle_basic1.phpt
+      ext/standard/tests/array/shuffle_basic2.phpt
+      ext/standard/tests/array/shuffle_error.phpt
+      ext/standard/tests/array/shuffle_variation1.phpt
+      ext/standard/tests/array/shuffle_variation2.phpt
+      ext/standard/tests/array/shuffle_variation3.phpt
+      ext/standard/tests/array/shuffle_variation4.phpt
+      ext/standard/tests/array/shuffle_variation5.phpt
+      ext/standard/tests/general_functions/bug40398.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_b.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_b_64bit.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_o.phpt
+      ext/standard/tests/general_functions/print_r.phpt
+      ext/standard/tests/general_functions/print_r_64bit.phpt
+      ext/standard/tests/general_functions/var_dump.phpt
+      ext/standard/tests/general_functions/var_dump_64bit.phpt
+      tests/classes/__set__get_005.phpt
+      tests/classes/array_access_009.phpt
+      tests/classes/array_access_010.phpt
+      tests/classes/array_access_011.phpt
+      tests/classes/bug27504.phpt
+      tests/classes/clone_003.phpt
+      tests/classes/private_members.phpt:
+      - Fix tests
+      - Update README.PARAMETER_PARSING_API
+
+    * (PHP_5_3)
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ext/spl/php_spl.c
+      ext/spl/php_spl.h
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_functions.c
+      ext/spl/spl_functions.h
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/php_array.h
+      ext/standard/var.c:
+      - MFH from HEAD:
+        . Folding tags
+        . Parameter parsing
+        . SPL debug info
+        . array function improvements (not all yet)
+        . Improvements to function calling with call_user_* functions
+        . Improvements to debugging info in var_dump/print_r
+
+2007-11-02  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      fix bug37251.phpt failure (two error messages instead of one)
+      should I merge this to 5_2?
+
+2007-11-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/bug37251.phpt:
+      - Missing test. (NOTE: Fails due to unexpected double output for me, OKOK)
+
+2007-11-02  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/mysqlnd/config.w32:
+      fix build (temp fix pending Andrey's review)
+
+2007-11-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/unicode/collator.c:
+      Fix build
+
+    * ext/standard/array.c
+      ext/standard/php_array.h:
+      - WS + CS and namespace protection
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h:
+      - WS + CS + use Z macros where possible
+
+    * ext/spl/spl_observer.c:
+      - nuke extra s
+
+    * ext/standard/tests/file/clearstatcache_error.phpt:
+      fix test
+
+2007-11-02  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/array.c:
+      fix typo and silence compile warning
+
+2007-11-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/array.c:
+      - Fix the fix for bug #41686
+
+    * ext/standard/basic_functions.c:
+      ws + cs
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug41686.phpt:
+      MFB52: Fixed bug #41686
+
+2007-11-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      Reimplemented support for namespaces in indexes id constant arrays (removed
+      zval.idx_type)
+
+2007-11-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/var.c:
+      more ws
+
+    * ext/standard/var.c:
+      ws
+
+    * ext/standard/var.c:
+      ws + cs + missing folding tags
+
+2007-11-02  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/file/file_basic.phpt
+      ext/standard/tests/file/file_basic.phpt
+      ext/standard/tests/file/file_basic.phpt
+      ext/standard/tests/file/file_variation.phpt
+      ext/standard/tests/file/file_variation.phpt
+      ext/standard/tests/file/file_variation.phpt
+      ext/standard/tests/file/fileinode_variation.phpt
+      ext/standard/tests/file/fileinode_variation.phpt
+      ext/standard/tests/file/fileinode_variation.phpt
+      ext/standard/tests/file/filetype_variation.phpt
+      ext/standard/tests/file/filetype_variation.phpt
+      ext/standard/tests/file/filetype_variation.phpt:
+      fix tests: proper temp file names
+
+    * ext/standard/tests/strings/chop_variation1.phpt
+      ext/standard/tests/strings/chop_variation1.phpt
+      ext/standard/tests/strings/chop_variation2.phpt
+      ext/standard/tests/strings/chop_variation2.phpt:
+      fix tests: better float values
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/chop_variation1.phpt
+      ext/standard/tests/strings/chop_variation2.phpt:
+      Fix test: better float values
+
+2007-11-02  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug32290.phpt:
+      ws + cs + fix test
+
 2007-11-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
