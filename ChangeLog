@@ -1,3 +1,29 @@
+2007-11-04  Mattias Bengtsson  <mattias@secweb.se>
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.c
+      ext/gd/tests/bug43121.gif
+      ext/gd/tests/bug43121.gif
+      ext/gd/tests/bug43121.phpt
+      ext/gd/tests/bug43121.phpt:
+      -MFB, Fixed Bug #43121 (gdImageFill with IMG_COLOR_TILED crashes httpd)
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c
+      ext/gd/tests/bug43121.gif
+      ext/gd/tests/bug43121.gif
+      ext/gd/tests/bug43121.gif
+      ext/gd/tests/bug43121.phpt
+      ext/gd/tests/bug43121.phpt
+      ext/gd/tests/bug43121.phpt:
+      - Fixed Bug #43121 (gdImageFill with IMG_COLOR_TILED crashes httpd)
+
+2007-11-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/pdo/tests/pdo_005.phpt:
+      Fixed test
+
 2007-11-02  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * (PHP_5_3)
