@@ -187,7 +187,7 @@ _cyr_mac = {
 };
 /* }}} */
 
-/* {{{ php_convert_cyr_string
+/* {{{ static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to TSRMLS_DC)
 * This is the function that performs real in-place conversion of the string 
 * between charsets. 
 * Parameters:
@@ -271,20 +271,17 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
    Convert from one Cyrillic character set to another */
 PHP_FUNCTION(convert_cyr_string)
 {
-    zval **str_arg, **fr_cs, **to_cs;
+	char *input, *fr_cs, *to_cs;
+	int input_len, fr_cs_len, to_cs_len;
 	unsigned char *str;
 
-    if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3,&str_arg,&fr_cs, &to_cs)==FAILURE)
-    {
-        WRONG_PARAM_COUNT;
-    }
-    convert_to_string_ex(str_arg);
-    convert_to_string_ex(fr_cs);
-    convert_to_string_ex(to_cs);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
+		return;
+	}
 
-	str = (unsigned char*) estrndup(Z_STRVAL_PP(str_arg), Z_STRLEN_PP(str_arg));
-	
-	php_convert_cyr_string(str, Z_STRLEN_PP(str_arg), Z_STRVAL_PP(fr_cs)[0], Z_STRVAL_PP(to_cs)[0] TSRMLS_CC);
+	str = (unsigned char*) estrndup(input, input_len);
+
+	php_convert_cyr_string(str, input_len, fr_cs[0], to_cs[0] TSRMLS_CC);
 	RETVAL_STRING((char *)str, 0)
 }
 /* }}} */
