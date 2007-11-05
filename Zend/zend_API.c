@@ -2466,11 +2466,17 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 						}
 
 						lcname = zend_str_tolower_dup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
-						if (Z_STRLEN_PP(obj) == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self")-1) == 0 && EG(active_op_array)) {
+
+						if (EG(active_op_array) &&
+							Z_STRLEN_PP(obj) == sizeof("self") - 1 &&
+							!memcmp(lcname, "self", sizeof("self") - 1)) {
 							ce = EG(active_op_array)->scope;
-						} else if (Z_STRLEN_PP(obj) == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent")-1) == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
+						} else if (EG(active_op_array) && EG(active_op_array)->scope &&
+							Z_STRLEN_PP(obj) == sizeof("parent") - 1 && 
+							!memcmp(lcname, "parent", sizeof("parent") - 1)) {
 							ce = EG(active_op_array)->scope->parent;
-						} else if (Z_STRLEN_PP(obj) == sizeof("static")-1 && !memcmp(lcname, "static", sizeof("static")-1)) {
+						} else if (Z_STRLEN_PP(obj) == sizeof("static") - 1 &&
+							!memcmp(lcname, "static", sizeof("static") - 1)) {
 							ce = EG(called_scope);
 						} else if (zend_lookup_class(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
 							ce = *pce;
