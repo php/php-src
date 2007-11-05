@@ -22,6 +22,7 @@ PHP                                                                        NEWS
   (Etienne Kneuss)
 - Added "compact" handler for Zend MM storage. (Dmitry)
 - Added '+' and '*' specifiers to zend_parse_parameters(). (Andrei)
+- Added 'ignore_errors' option to http fopen wrapper. (David Zulke, Sara)
 
 - Upgraded PCRE to version 7.4 (Nuno)
 
