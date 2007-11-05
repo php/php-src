@@ -57,7 +57,7 @@
  *
  * Unicode command strings are encoding using filesystem_encoding, returned data is not decoded back to unicode
  */
-int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
+PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 {
 	FILE *fp;
 	char *buf;
@@ -92,7 +92,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 
 	if (type != 3) {
 		b = buf;
-		
+
 		while (php_stream_get_line(stream, ZSTR(b), EXEC_INPUT_BUF, &bufl)) {
 			/* no new line found, let's read some more */
 			if (b[bufl - 1] != '\n' && !php_stream_eof(stream)) {
@@ -113,7 +113,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 				PHPWRITE(buf, bufl);
 				sapi_flush(TSRMLS_C);
 			} else if (type == 2) {
-				/* strip trailing whitespaces */	
+				/* strip trailing whitespaces */
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
 				if (l != (bufl - 1)) {
@@ -125,7 +125,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 			b = buf;
 		}
 		if (bufl) {
-			/* strip trailing whitespaces if we have not done so already */	
+			/* strip trailing whitespaces if we have not done so already */
 			if (type != 2) {
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
@@ -146,7 +146,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 		}
 	}
 
-	pclose_return = php_stream_close(stream); 
+	pclose_return = php_stream_close(stream);
 	efree(buf);
 
 done:
@@ -219,7 +219,6 @@ PHP_FUNCTION(exec)
 {
 	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-
 /* }}} */
 
 /* {{{ proto int system(string command [, int &return_value]) U
@@ -247,14 +246,15 @@ PHP_FUNCTION(passthru)
 
    *NOT* safe for binary strings
 */
-char *php_escape_shell_cmd(char *str) {
+PHPAPI char *php_escape_shell_cmd(char *str)
+{
 	register int x, y, l = strlen(str);
 	char *cmd;
 	char *p = NULL;
 	size_t estimate = (2 * l) + 1;
 
 	cmd = safe_emalloc(2, l, 1);
-	
+
 	for (x = 0, y = 0; x < l; x++) {
 		switch (str[x]) {
 			case '"':
@@ -318,13 +318,14 @@ char *php_escape_shell_cmd(char *str) {
 
 /* {{{ php_escape_shell_arg
  */
-char *php_escape_shell_arg(char *str) {
+PHPAPI char *php_escape_shell_arg(char *str)
+{
 	int x, y = 0, l = strlen(str);
 	char *cmd;
 	size_t estimate = (4 * l) + 3;
 
 	cmd = safe_emalloc(4, l, 3); /* worst case */
-	
+
 #ifdef PHP_WIN32
 	cmd[y++] = '"';
 #else
@@ -415,7 +416,7 @@ PHP_FUNCTION(escapeshellarg)
 			RETURN_FALSE;
 		}
 	}
-	
+
 	if (argument) {
 		cmd = php_escape_shell_arg(argument);
 		RETVAL_STRING(cmd, 0);
@@ -460,8 +461,8 @@ PHP_FUNCTION(shell_exec)
 
 	stream = php_stream_fopen_from_pipe(in, "rb");
 	total_readbytes = php_stream_copy_to_mem(stream, &ret, PHP_STREAM_COPY_ALL, 0);
-	php_stream_close(stream); 
-	
+	php_stream_close(stream);
+
 	if (total_readbytes > 0) {
 		RETVAL_STRINGL(ret, total_readbytes, 0);
 	}
@@ -489,7 +490,7 @@ PHP_FUNCTION(proc_nice)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only a super user may attempt to increase the priority of a process");
 		RETURN_FALSE;
 	}
-	
+
 	RETURN_TRUE;
 }
 /* }}} */
