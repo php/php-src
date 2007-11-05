@@ -227,7 +227,7 @@ static int php_disk_total_space(char *path, double *space TSRMLS_DC) /* {{{ */
 #endif
 /* }}} */
 /* }}} */
-	
+
 /* {{{ proto float disk_total_space(string path) U
    Get total disk space for filesystem that path is on */
 PHP_FUNCTION(disk_total_space)
@@ -434,13 +434,17 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	if (Z_TYPE_P(group) == IS_LONG) {
 		gid = (gid_t)Z_LVAL_P(group);
 	} else {
-#if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX) 
+#if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 		struct group gr;
 		struct group *retgrptr;
-		int grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
-		char *grbuf = emalloc(grbuflen);
+		long grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+		char *grbuf;
+		
+		if (grbuflen < 1) {
+			RETURN_FALSE;
+		}
 
-		convert_to_string(group);
+		grbuf = emalloc(grbuflen);
 		if (getgrnam_r(Z_STRVAL_P(group), &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
 			efree(grbuf);
@@ -449,9 +453,9 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		efree(grbuf);
 		gid = gr.gr_gid;
 #else
-		struct group *gr;
-		convert_to_string(group);
-		if (!(gr = getgrnam(Z_STRVAL_P(group)))) {
+		struct group *gr = getgrnam(Z_STRVAL_P(group));
+
+		if (!gr) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
 			RETURN_FALSE;
 		}
@@ -539,13 +543,17 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	if (Z_TYPE_P(user) == IS_LONG) {
 		uid = (uid_t)Z_LVAL_P(user);
 	} else {
-#if defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
+#if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 		struct passwd pw;
 		struct passwd *retpwptr = NULL;
-		int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-		char *pwbuf = emalloc(pwbuflen);
+		long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+		char *pwbuf;
 
-		convert_to_string(user);
+		if (pwbuflen < 1) {
+			RETURN_FALSE;
+		}
+
+		pwbuf = emalloc(pwbuflen);
 		if (getpwnam_r(Z_STRVAL_P(user), &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
 			efree(pwbuf);
@@ -554,10 +562,9 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		efree(pwbuf);
 		uid = pw.pw_uid;
 #else
-		struct passwd *pw;
+		struct passwd *pw = getpwnam(Z_STRVAL_P(user));
 
-		convert_to_string(user);
-		if (!(pw = getpwnam(Z_STRVAL_P(user)))) {
+		if (!pw) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
 			RETURN_FALSE;
 		}
@@ -804,12 +811,14 @@ PHPAPI void php_u_stat(zend_uchar filename_type, const zstr filename, php_stat_l
 PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int type, zval *return_value TSRMLS_DC)
 {
 	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
-	 	*stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
+		 *stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
 	struct stat *stat_sb;
 	php_stream_statbuf ssb;
 	int flags = 0, rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
-	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
-			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
+	char *stat_sb_names[13] = {
+		"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
+		"size", "atime", "mtime", "ctime", "blksize", "blocks"
+	};
 	char *local;
 	php_stream_wrapper *wrapper;
 
@@ -903,7 +912,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 #ifndef NETWARE
 	if (IS_ABLE_CHECK(type) && getuid() == 0) {
-		/* root has special perms on plain_wrapper 
+		/* root has special perms on plain_wrapper
 		   But we don't know about root under Netware */
 		if (wrapper == &php_plain_files_wrapper) {
 			if (type == FS_IS_X) {
@@ -986,9 +995,9 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		MAKE_LONG_ZVAL_INCREF(stat_uid, stat_sb->st_uid);
 		MAKE_LONG_ZVAL_INCREF(stat_gid, stat_sb->st_gid);
 #ifdef HAVE_ST_RDEV
-		MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_sb->st_rdev); 
+		MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_sb->st_rdev);
 #else
-		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1); 
+		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
 #endif
 		MAKE_LONG_ZVAL_INCREF(stat_size, stat_sb->st_size);
 #ifdef NETWARE
@@ -1001,7 +1010,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_sb->st_ctime);
 #endif
 #ifdef HAVE_ST_BLKSIZE
-		MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_sb->st_blksize); 
+		MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_sb->st_blksize);
 #else
 		MAKE_LONG_ZVAL_INCREF(stat_blksize,-1);
 #endif
@@ -1017,7 +1026,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_nlink, sizeof(zval *), NULL);
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_uid, sizeof(zval *), NULL);
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_gid, sizeof(zval *), NULL);
-        
+
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_rdev, sizeof(zval *), NULL);
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_size, sizeof(zval *), NULL);
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_atime, sizeof(zval *), NULL);
