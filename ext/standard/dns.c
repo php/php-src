@@ -678,7 +678,7 @@ PHP_FUNCTION(dns_get_record)
 	}
 
 	if (type_param & ~PHP_DNS_ALL && type_param != PHP_DNS_ANY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%d' not supported", type_param);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%ld' not supported", type_param);
 		RETURN_FALSE;
 	}
 
