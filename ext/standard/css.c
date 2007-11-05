@@ -21,10 +21,7 @@
 #include "php.h"
 #include "info.h"
 
-
-/* {{{ php_info_print_css
- */
-PHPAPI void php_info_print_css(TSRMLS_D)
+PHPAPI void php_info_print_css(TSRMLS_D) /* {{{ */
 {
 	PUTS("body {background-color: #ffffff; color: #000000;}\n");
 	PUTS("body, td, th, h1, h2 {font-family: sans-serif;}\n");
