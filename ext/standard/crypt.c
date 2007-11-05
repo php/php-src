@@ -16,8 +16,10 @@
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Rasmus Lerdorf <rasmus@php.net>                             |
    +----------------------------------------------------------------------+
- */
+*/
+
 /* $Id$ */
+
 #include <stdlib.h>
 
 #include "php.h"
@@ -53,12 +55,11 @@ extern char *crypt(char *__key, char *__salt);
 #include "php_crypt.h"
 #include "php_rand.h"
 
-/* 
-   The capabilities of the crypt() function is determined by the test programs
-   run by configure from aclocal.m4.  They will set PHP_STD_DES_CRYPT,
-   PHP_EXT_DES_CRYPT, PHP_MD5_CRYPT and PHP_BLOWFISH_CRYPT as appropriate 
-   for the target platform
-*/
+/* The capabilities of the crypt() function is determined by the test programs
+ * run by configure from aclocal.m4.  They will set PHP_STD_DES_CRYPT,
+ * PHP_EXT_DES_CRYPT, PHP_MD5_CRYPT and PHP_BLOWFISH_CRYPT as appropriate
+ * for the target platform. */
+
 #if PHP_STD_DES_CRYPT
 #define PHP_MAX_SALT_LEN 2
 #endif
@@ -78,17 +79,14 @@ extern char *crypt(char *__key, char *__salt);
 #define PHP_MAX_SALT_LEN 60
 #endif
 
- /*
-  * If the configure-time checks fail, we provide DES.
-  * XXX: This is a hack. Fix the real problem
-  */
+/* If the configure-time checks fail, we provide DES.
+ * XXX: This is a hack. Fix the real problem! */
 
 #ifndef PHP_MAX_SALT_LEN
 #define PHP_MAX_SALT_LEN 2
 #undef PHP_STD_DES_CRYPT
 #define PHP_STD_DES_CRYPT 1
 #endif
-
 
 #define PHP_CRYPT_RAND php_rand(TSRMLS_C)
 
@@ -109,27 +107,27 @@ static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi
 static void php_to64(char *s, long v, int n) /* {{{ */
 {
 	while (--n >= 0) {
-		*s++ = itoa64[v&0x3f]; 		
+		*s++ = itoa64[v&0x3f];
 		v >>= 6;
-	} 
-} 
+	}
+}
 /* }}} */
 
 /* {{{ proto string crypt(string str [, string salt]) U
    Hash a string */
 PHP_FUNCTION(crypt)
 {
-	char salt[PHP_MAX_SALT_LEN+1];
+	char salt[PHP_MAX_SALT_LEN + 1];
 	char *str, *salt_in = NULL;
 	int str_len, salt_in_len;
 
-	salt[0]=salt[PHP_MAX_SALT_LEN]='\0';
-	/* This will produce suitable results if people depend on DES-encryption
-	   available (passing always 2-character salt). At least for glibc6.1 */
-	memset(&salt[1], '$', PHP_MAX_SALT_LEN-1);
+	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &str, &str_len,
-							  &salt_in, &salt_in_len) == FAILURE) {
+	/* This will produce suitable results if people depend on DES-encryption
+	 * available (passing always 2-character salt). At least for glibc6.1 */
+	memset(&salt[1], '$', PHP_MAX_SALT_LEN - 1);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &str, &str_len, &salt_in, &salt_in_len) == FAILURE) {
 		return;
 	}
 
@@ -138,7 +136,7 @@ PHP_FUNCTION(crypt)
 	}
 
 	/* The automatic salt generation only covers standard DES and md5-crypt */
-	if(!*salt) {
+	if (!*salt) {
 #if PHP_MD5_CRYPT
 		strcpy(salt, "$1$");
 		php_to64(&salt[3], PHP_CRYPT_RAND, 4);
@@ -156,7 +154,7 @@ PHP_FUNCTION(crypt)
 		memset(&buffer, 0, sizeof(buffer));
 #elif defined(CRYPT_R_CRYPTD)
 		CRYPTD buffer;
-#else 
+#else
 #error Data struct used by crypt_r() is unknown. Please report.
 #endif
 
