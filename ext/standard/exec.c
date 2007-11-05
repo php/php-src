@@ -57,7 +57,7 @@
  * If type==3, output will be printed binary, no lines will be saved or returned (passthru)
  *
  */
-int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
+PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 {
 	FILE *fp;
 	char *buf, *tmp=NULL;
@@ -111,7 +111,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 
 	if (type != 3) {
 		b = buf;
-		
+
 		while (php_stream_get_line(stream, b, EXEC_INPUT_BUF, &bufl)) {
 			/* no new line found, let's read some more */
 			if (b[bufl - 1] != '\n' && !php_stream_eof(stream)) {
@@ -132,7 +132,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 				PHPWRITE(buf, bufl);
 				sapi_flush(TSRMLS_C);
 			} else if (type == 2) {
-				/* strip trailing whitespaces */	
+				/* strip trailing whitespaces */
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
 				if (l != (int)(bufl - 1)) {
@@ -144,7 +144,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 			b = buf;
 		}
 		if (bufl) {
-			/* strip trailing whitespaces if we have not done so already */	
+			/* strip trailing whitespaces if we have not done so already */
 			if (type != 2) {
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
@@ -157,7 +157,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 			/* Return last line from the shell command */
 			if (PG(magic_quotes_runtime)) {
 				int len;
-	
+
 				tmp = php_addslashes(buf, bufl, &len, 0 TSRMLS_CC);
 				RETVAL_STRINGL(tmp, len, 0);
 			} else {
@@ -172,7 +172,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 		}
 	}
 
-	pclose_return = php_stream_close(stream); 
+	pclose_return = php_stream_close(stream);
 	efree(buf);
 
 done:
@@ -191,7 +191,7 @@ err:
 }
 /* }}} */
 
-static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode)
+static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	char *cmd;
 	int cmd_len;
@@ -226,6 +226,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		ZVAL_LONG(ret_code, ret);
 	}
 }
+/* }}} */
 
 /* {{{ proto string exec(string command [, array &output [, int &return_value]])
    Execute an external program */
@@ -233,7 +234,6 @@ PHP_FUNCTION(exec)
 {
 	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-
 /* }}} */
 
 /* {{{ proto int system(string command [, int &return_value])
@@ -261,14 +261,15 @@ PHP_FUNCTION(passthru)
 
    *NOT* safe for binary strings
 */
-char *php_escape_shell_cmd(char *str) {
-	register int x, y, l;
+PHPAPI char *php_escape_shell_cmd(char *str)
+{
+	register int x, y, l = strlen(str);
 	char *cmd;
 	char *p = NULL;
+	size_t estimate = (2 * l) + 1;
 
-	l = strlen(str);
 	cmd = safe_emalloc(2, l, 1);
-	
+
 	for (x = 0, y = 0; x < l; x++) {
 		switch (str[x]) {
 			case '"':
@@ -319,21 +320,27 @@ char *php_escape_shell_cmd(char *str) {
 		}
 	}
 	cmd[y] = '\0';
+
+	if ((estimate - y) > 4096) {
+		/* realloc if the estimate was way overill
+		 * Arbitrary cutoff point of 4096 */
+		cmd = erealloc(cmd, y + 1);
+	}
+
 	return cmd;
 }
 /* }}} */
 
 /* {{{ php_escape_shell_arg
  */
-char *php_escape_shell_arg(char *str) {
-	int x, y, l;
+PHPAPI char *php_escape_shell_arg(char *str)
+{
+	int x, y = 0, l = strlen(str);
 	char *cmd;
+	size_t estimate = (4 * l) + 3;
 
-	y = 0;
-	l = strlen(str);
-	
 	cmd = safe_emalloc(4, l, 3); /* worst case */
-	
+
 #ifdef PHP_WIN32
 	cmd[y++] = '"';
 #else
@@ -364,6 +371,12 @@ char *php_escape_shell_arg(char *str) {
 	cmd[y++] = '\'';
 #endif
 	cmd[y] = '\0';
+
+	if ((estimate - y) > 4096) {
+		/* realloc if the estimate was way overill
+		 * Arbitrary cutoff point of 4096 */
+		cmd = erealloc(cmd, y + 1);
+	}
 	return cmd;
 }
 /* }}} */
@@ -372,18 +385,19 @@ char *php_escape_shell_arg(char *str) {
    Escape shell metacharacters */
 PHP_FUNCTION(escapeshellcmd)
 {
-	zval **arg1;
+	char *command;
+	int command_len;
 	char *cmd = NULL;
 
-	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
+		return;
 	}
-	
-	convert_to_string_ex(arg1);
-	if (Z_STRLEN_PP(arg1)) {
-		cmd = php_escape_shell_cmd(Z_STRVAL_PP(arg1));
-		RETVAL_STRING(cmd, 1);
-		efree(cmd);
+
+	if (command_len) {
+		cmd = php_escape_shell_cmd(command);
+		RETVAL_STRING(cmd, 0);
+	} else {
+		RETVAL_EMPTY_STRING();
 	}
 }
 /* }}} */
@@ -392,18 +406,17 @@ PHP_FUNCTION(escapeshellcmd)
    Quote and escape an argument for use in a shell command */
 PHP_FUNCTION(escapeshellarg)
 {
-	zval **arg1;
+	char *argument;
+	int argument_len;
 	char *cmd = NULL;
 
-	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &argument, &argument_len) == FAILURE) {
+		return;
 	}
-	
-	convert_to_string_ex(arg1);
-	if (Z_STRLEN_PP(arg1)) {
-		cmd = php_escape_shell_arg(Z_STRVAL_PP(arg1));
-		RETVAL_STRING(cmd, 1);
-		efree(cmd);
+
+	if (argument) {
+		cmd = php_escape_shell_arg(argument);
+		RETVAL_STRING(cmd, 0);
 	}
 }
 /* }}} */
@@ -414,37 +427,35 @@ PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
 	size_t total_readbytes;
-	zval **cmd;
+	char *command;
+	int command_len;
 	char *ret;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &cmd)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
+		return;
 	}
-	
+
 	if (PG(safe_mode)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute using backquotes in Safe Mode");
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(cmd);
 #ifdef PHP_WIN32
-	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd), "rt"))==NULL) {
+	if ((in=VCWD_POPEN(command, "rt"))==NULL) {
 #else
-	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd), "r"))==NULL) {
+	if ((in=VCWD_POPEN(command, "r"))==NULL) {
 #endif
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to execute '%s'", Z_STRVAL_PP(cmd));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to execute '%s'", command);
 		RETURN_FALSE;
 	}
 
 	stream = php_stream_fopen_from_pipe(in, "rb");
 	total_readbytes = php_stream_copy_to_mem(stream, &ret, PHP_STREAM_COPY_ALL, 0);
-	php_stream_close(stream); 
-	
+	php_stream_close(stream);
+
 	if (total_readbytes > 0) {
-		RETURN_STRINGL(ret, total_readbytes, 0);
-	} else {
-		RETURN_NULL();	
+		RETVAL_STRINGL(ret, total_readbytes, 0);
 	}
 }
 /* }}} */
@@ -466,7 +477,7 @@ PHP_FUNCTION(proc_nice)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only a super user may attempt to increase the priority of a process");
 		RETURN_FALSE;
 	}
-	
+
 	RETURN_TRUE;
 }
 /* }}} */
