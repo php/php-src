@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
@@ -79,7 +79,7 @@ PHPAPI char *php_std_date(time_t t TSRMLS_DC)
 				((tm1->tm_year) % 100),
 				tm1->tm_hour, tm1->tm_min, tm1->tm_sec);
 	}
-	
+
 	str[79] = 0;
 	return (str);
 }
@@ -102,8 +102,7 @@ PHP_FUNCTION(strptime)
 	char      *unparsed_part;
 	zend_uchar type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", 
-		&ts, &ts_length, &type, &format, &format_length, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT",  &ts, &ts_length, &type, &format, &format_length, &type) == FAILURE) {
 		return;
 	}
 
