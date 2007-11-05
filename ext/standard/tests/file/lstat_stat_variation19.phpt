@@ -22,7 +22,8 @@ require "$file_path/file.inc";
 
 
 /* create temp file, link and directory */
-mkdir("$file_path/lstat_stat_variation19/");  // temp dir
+@rmdir("$file_path/lstat_stat_variation19");  // ensure that dir doesn't exists
+mkdir("$file_path/lstat_stat_variation19");  // temp dir
 
 $fp = fopen("$file_path/lstat_stat_variation19.tmp", "w");  // temp file
 fclose($fp);

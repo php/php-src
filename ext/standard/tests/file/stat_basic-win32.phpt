@@ -3,7 +3,7 @@ Test stat() function: basic functionality
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
-    die('skip.. stat() only for windows');
+    die('skip.. valid only for Windows');
 }
 ?>
 --FILE--
@@ -189,3 +189,4 @@ bool(true)
 bool(true)
 
 ---Done---
+

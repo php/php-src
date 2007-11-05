@@ -15,7 +15,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
    Description: Gives information about a file
 */
 
-/* test the effects of is_link() on stats of link */
+/* test the effects of is_link() on stats of hard link */
 
 $file_path = dirname(__FILE__);
 require "$file_path/file.inc";

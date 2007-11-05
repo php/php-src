@@ -54,7 +54,7 @@ var_dump( filemtime(__FILE__, 100) );
 var_dump( filectime(__FILE__, TRUE) );
 var_dump( touch(__FILE__, 10, 100, 123) );
 
-echo "\n*** Done ***\n";
+echo "\nDone";
 ?>
 --EXPECTF--	
 *** Testing error conditions ***
@@ -72,54 +72,55 @@ bool(false)
 Warning: touch(): Unable to create file /no/such/file/or/dir because No such file or directory in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for fileatime() in %s on line %d
+Warning: fileatime() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for filemtime() in %s on line %d
+Warning: filemtime() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for filectime() in %s on line %d
+Warning: filectime() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for touch() in %s on line %d
+Warning: touch() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
 -- Testing No.of arguments less than expected --
-Warning: Wrong parameter count for fileatime() in %s on line %d
+Warning: fileatime() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for filemtime() in %s on line %d
+Warning: filemtime() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for filectime() in %s on line %d
+Warning: filectime() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for touch() in %s on line %d
+Warning: touch() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 -- Testing No.of arguments greater than expected --
-Warning: Wrong parameter count for fileatime() in %s on line %d
+Warning: fileatime() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for filemtime() in %s on line %d
+Warning: filemtime() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for filectime() in %s on line %d
+Warning: filectime() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for touch() in %s on line %d
+Warning: touch() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for fileatime() in %s on line %d
+Warning: fileatime() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for filemtime() in %s on line %d
+Warning: filemtime() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for filectime() in %s on line %d
+Warning: filectime() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for touch() in %s on line %d
+Warning: touch() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
-*** Done ***
+Done
+

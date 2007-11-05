@@ -9,11 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 var_dump(dns_check_record(''));
-var_dump(dns_check_record('', ''));
 ?>
 --EXPECTF--
 Warning: dns_check_record(): Host cannot be empty in %s on line %d
-bool(false)
-
-Warning: dns_check_record(): Host and type cannot be empty in %s on line %d
 bool(false)

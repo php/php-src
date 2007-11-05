@@ -41,7 +41,7 @@ for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
   echo "-- Iteration $loop_counter --\n";
   var_dump( fflush($invalid_args[$loop_counter - 1]) );
 }
-echo "Done\n";
+echo "\n*** Done ***";
 ?>
 
 --CLEAN--
@@ -85,4 +85,6 @@ bool(false)
 
 Warning: fflush(): supplied argument is not a valid stream resource in %s on line %d
 bool(false)
-Done
+
+*** Done ***
+

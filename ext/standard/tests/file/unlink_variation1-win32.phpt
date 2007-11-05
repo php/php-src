@@ -24,7 +24,7 @@ $dirname = "$file_path/unlink_variation1";
 // temp filename used here
 $filename = "$dirname/unlink_variation1-win32.tmp";
 
-echo "*** Testing unlink() on file inside a directory ***\n";
+echo "\n*** Testing unlink() on file inside a directory ***\n";
 // create temp dir
 mkdir($dirname);
 // create temp file inside $dirname

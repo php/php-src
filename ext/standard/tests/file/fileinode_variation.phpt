@@ -73,7 +73,13 @@ print( fileinode("$file_path/dir") )."\n";
 clearstatcache();
 
 mkdir("$file_path/dir/subdir");
-print( fileinode("$file_path/dir/subdir") );
+print( fileinode("$file_path/dir/subdir") )."\n";
+clearstatcache();
+
+echo "-- Testing with binary input --\n";
+print( fileinode(b"$file_path/dir") )."\n";
+clearstatcache();
+print( fileinode(b"$file_path/dir/subdir") );
 
 rmdir("$file_path/dir/subdir");
 rmdir("$file_path/dir");
@@ -98,6 +104,9 @@ echo "\n*** Done ***";
 %d
 %d
 -- Testing with directories --
+%d
+%d
+-- Testing with binary input --
 %d
 %d
 *** Done ***

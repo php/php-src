@@ -16,43 +16,36 @@ require dirname(__FILE__).'/file.inc';
 
 /* creating directory */
 $file_path = dirname(__FILE__);
-mkdir("$file_path/rename_variation");
+mkdir("$file_path/rename_variation/");
 
-/* rename files across directories */
-echo "*** Testing rename() : rename files across directories ***\n";
-$src_filenames = array(
+/* Testing rename() function on files */
+echo "*** Testing variations of rename() on files ***\n";
+$files_arr = array(
   "$file_path/rename_variation/rename_variation.tmp",
-
-  /* Testing a file trailing slash */
-  "$file_path/rename_variation/rename_variation.tmp/",
 
   /* Testing file with double slashes */
   "$file_path/rename_variation//rename_variation.tmp",
-  "$file_path//rename_variation//rename_variation.tmp",
+  "$file_path/rename_variation/r*.tmp",
+
+  /* Testing Binary safe */
+  "$file_path/rename_variation/rename_variationx000.tmp"
 );
 $counter = 1;
 /* loop through each $file and rename it to rename_variation2.tmp */
-foreach($src_filenames as $src_filename) {
-  echo "-- Iteration $counter --\n";
+foreach($files_arr as $file) {
   $fp = fopen("$file_path/rename_variation/rename_variation.tmp", "w");
   fclose($fp);
-  $dest_filename = "$file_path/rename_variation2.tmp";
-  var_dump( rename($src_filename, $dest_filename) );
-  // ensure that file got renamed to new name 
-  var_dump( file_exists($src_filename) );  // expecting false
-  var_dump( file_exists($dest_filename) );  // expecting true
+  echo "-- Iteration $counter --\n";
+  var_dump( rename($file, "$file_path/rename_variation2.tmp") );
   $counter++;
- 
-  // unlink the file  
-  unlink($dest_filename);
+  unlink("$file_path/rename_variation2.tmp");
 }
+unlink("$file_path/rename_variation/rename_variation.tmp");
+rmdir("$file_path/rename_variation/");  // deleting temp directory
 
-// clean the temp dir and file
-rmdir("$file_path/rename_variation"); 
-
-// rename dirs across directories
-echo "\n*** Testing rename() : renaming directory across directories ***\n";
-$src_dirs = array (
+/* Testing rename() function on directories */
+echo "\n*** Testing variations of rename() on directories ***\n";
+$directories = array (
   /* Testing simple directory tree */
   "$file_path/rename_variation/",
 
@@ -60,126 +53,149 @@ $src_dirs = array (
   "$file_path/rename_variation/",
 
   /* Testing dir with double trailing slashes */
-  "$file_path//rename_variation//",
+  "$file_path/rename_variation//",
+
+  /* Testing Binary safe */
+  "$file_path/rename_variationx000/",
+
+  /* Testing current directory */
+  ".",
+
+  /* Dir name as empty string */
+  "",
+  '',
+
+  /* Dir name as string with a space */
+  " ",
+  ' '
 );
-
-$dest_dir = "$file_path/rename_variation_dir";
-// create the $dest_dir
-mkdir($dest_dir);
-
 $counter = 1;
-/* loop through each $src_dirs and rename it to  $dest_dir */
-foreach($src_dirs as $src_dir) {
-  echo "-- Iteration $counter --\n";
-
-  // create the src dir
+/* loop through each $dir and rename it to rename_variation1 */
+foreach($directories as $dir) {
   mkdir("$file_path/rename_variation/");
-  // rename the src dir to a new dir in dest dir
-  var_dump( rename($src_dir, $dest_dir."/new_dir") );
-  // ensure that dir was renamed 
-  var_dump( file_exists($src_dir) );  // expecting false
-  var_dump( file_exists($dest_dir."/new_dir") ); // expecting true
-
-  // remove the new dir
-  rmdir($dest_dir."/new_dir");
+  echo "-- Iteration $counter --\n";
+  var_dump( rename($dir, "$file_path/rename_variation1/") );
   $counter++;
+  rmdir("$file_path/rename_variation1/");
 }
+
+/* Testing rename() on non-existing file and directory as first argument */
+echo "\n*** Testing rename() with non-existing file and directory ***\n";
+// renaming a non-existing file to existing file
+var_dump( rename(dirname(__FILE__)."/rename_variation123.tmp", __FILE__) );
+// renaming a non-existing directory to existing directory
+var_dump( rename(dirname(__FILE__)."/rename_variation123/", dirname(__FILE__)) );
 
 /* Renaming a file and directory to numeric name */
 echo "\n*** Testing rename() by renaming a file and directory to numeric name ***\n";
-$fp = fopen($file_path."/rename_variation.tmp", "w");
+$fp = fopen(dirname(__FILE__)."/rename_variation.tmp", "w");
 fclose($fp);
 // renaming existing file to numeric name
-var_dump( rename($file_path."/rename_variation.tmp", $file_path."/12345") );
-// ensure that rename worked fine
-var_dump( file_exists($file_path."/rename_variation.tmp" ) );  // expecting false
-var_dump( file_exists($file_path."/12345" ) );  // expecting true
-// remove the file
-unlink($file_path."/12345");
+var_dump( rename(dirname(__FILE__)."/rename_variation.tmp", dirname(__FILE__)."/12345.tmp") );
+unlink(dirname(__FILE__)."/12345.tmp");
+// renaming existing directory to numeric name
+var_dump( rename(dirname(__FILE__)."/rename_variation/", dirname(__FILE__)."/12345/") );
 
-// renaming a directory to numeric name
-var_dump( rename($file_path."/rename_variation_dir/", $file_path."/12345") );
-// ensure that rename worked fine
-var_dump( file_exists($file_path."/rename_variation_dir" ) );  // expecting false
-var_dump( file_exists($file_path."/12345" ) );  // expecting true
-
-// delete the file and dir
-rmdir($file_path."/12345");
-
-/* test rename() by trying to rename an existing file/dir to the same name
-  and one another */
-// create a dir 
+echo "\n*** Testing rename() with miscelleneous input ***\n";
 $file_path = dirname(__FILE__);
-$dirname = "$file_path/rename_variation_dir"; 
-mkdir($dirname);
-//create a file
-$filename = "$file_path/rename_variation.tmp"; 
-$fp = fopen($filename, "w");
+mkdir("$file_path/rename_variation");
+$fp = fopen("$file_path/rename_variation.tmp", "w");
 fclose($fp);
 
 echo "\n-- Renaming file to same file name --\n";
-var_dump( rename($filename, $filename) );
+var_dump( rename("$file_path/rename_variation.tmp", "$file_path/rename_variation.tmp") );
 
 echo "\n-- Renaming directory to same directory name --\n";
-var_dump( rename($dirname, $dirname) );
+var_dump( rename("$file_path/rename_variation/", "$file_path/rename_variation/") );
 
-echo "\n-- Renaming existing file to existing directory name --\n";
-var_dump( rename($filename, $dirname) );
+echo "\n-- Renaming existing file to directory name --\n";
+var_dump( rename("$file_path/rename_variation.tmp", "$file_path/rename_variation/") );
 
-echo "\n-- Renaming existing directory to existing file name --\n";
-$fp = fopen($filename, "w");
-fclose($fp);
-var_dump( rename($dirname, $filename) );
+echo "\n-- Renaming existing directory to file name --\n";
+var_dump( rename("$file_path/rename_variation", "$file_path/rename_variation.tmp") );
 
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
-unlink($file_path."/rename_variation_link.tmp");
-unlink($file_path."/rename_variation.tmp");
-rmdir($file_path."/rename_variation_dir");
+unlink(dirname(__FILE__)."/12345.tmp");
+unlink(dirname(__FILE__)."/rename_variation.tmp");
+rmdir(dirname(__FILE__)."/rename_variation.tmp/");
+rmdir(dirname(__FILE__)."/rename_variation/");
+rmdir(dirname(__FILE__)."/12345/");
 ?>
 --EXPECTF--
-*** Testing rename() : rename files across directories ***
+*** Testing variations of rename() on files ***
 -- Iteration 1 --
-bool(true)
-bool(false)
 bool(true)
 -- Iteration 2 --
 bool(true)
-bool(false)
-bool(true)
 -- Iteration 3 --
-bool(true)
-bool(false)
 bool(true)
 -- Iteration 4 --
-bool(true)
-bool(false)
-bool(true)
 
-*** Testing rename() : renaming directory across directories ***
--- Iteration 1 --
-bool(true)
+Warning: rename(%s,%s): No such file or directory in %s on line %d
 bool(false)
+
+Warning: unlink(%s): No such file or directory in %s on line %d
+
+*** Testing variations of rename() on directories ***
+-- Iteration 1 --
 bool(true)
 -- Iteration 2 --
 bool(true)
-bool(false)
-bool(true)
 -- Iteration 3 --
 bool(true)
+-- Iteration 4 --
+
+Warning: rename(%s,%s): No such file or directory in %s on line %d
 bool(false)
-bool(true)
+
+Warning: rmdir(%s): No such file or directory in %s on line %d
+-- Iteration 5 --
+
+Warning: rename(.,%s): Permission denied in %s on line %d
+bool(false)
+
+Warning: rmdir(%s): No such file or directory in %s on line %d
+-- Iteration 6 --
+
+Warning: rename(,%s): Permission denied in %s on line %d
+bool(false)
+
+Warning: rmdir(%s): No such file or directory in %s on line %d
+-- Iteration 7 --
+
+Warning: rename(,%s): Permission denied in %s on line %d
+bool(false)
+
+Warning: rmdir(%s): No such file or directory in %s on line %d
+-- Iteration 8 --
+
+Warning: rename( ,%s): File exists in %s on line %d
+bool(false)
+
+Warning: rmdir(%s): No such file or directory in %s on line %d
+-- Iteration 9 --
+
+Warning: rename( ,%s): File exists in %s on line %d
+bool(false)
+
+Warning: rmdir(%s): No such file or directory in %s on line %d
+
+*** Testing rename() with non-existing file and directory ***
+
+Warning: rename(%s,%s): No such file or directory in %s on line %d
+bool(false)
+
+Warning: rename(%s,%s): No such file or directory in %s on line %d
+bool(false)
 
 *** Testing rename() by renaming a file and directory to numeric name ***
 bool(true)
-bool(false)
 bool(true)
-bool(true)
-bool(false)
-bool(true)
+
+*** Testing rename() with miscelleneous input ***
 
 -- Renaming file to same file name --
 bool(true)
@@ -187,12 +203,12 @@ bool(true)
 -- Renaming directory to same directory name --
 bool(true)
 
--- Renaming existing file to existing directory name --
+-- Renaming existing file to directory name --
 
 Warning: rename(%s,%s): File exists in %s on line %d
 bool(false)
 
--- Renaming existing directory to existing file name --
+-- Renaming existing directory to file name --
 
 Warning: rename(%s,%s): File exists in %s on line %d
 bool(false)

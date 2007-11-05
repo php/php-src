@@ -5,7 +5,7 @@ Test realpath() function: usage variation
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip only on Windows');
 }
-?>/
+?>
 --FILE--
 <?php
 /* Prototype: string realpath ( string $path );

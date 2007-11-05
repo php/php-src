@@ -73,7 +73,7 @@ var_dump( filesize($filename) );  //0 bytes
 clearstatcache();
 
 echo "-- with empty file --\n";
-$filename= dirname(__FILE__)."/filesize_variation4_empty.tmp";
+$filename = dirname(__FILE__)."/filesize_variation4_empty.tmp";
 fclose( fopen($filename, "w") );
 var_dump( filesize($filename) );  //0 bytes
 

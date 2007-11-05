@@ -31,10 +31,11 @@ bool(false)
 Warning: filesize(): stat failed for /no/such/dir in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for filesize() in %s on line %d
+Warning: filesize() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for filesize() in %s on line %d
+Warning: filesize() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 *** Done ***
+

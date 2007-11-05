@@ -20,7 +20,7 @@ echo "*** Test copy() function: destination file names containing special charac
 $file_path = dirname(__FILE__);
 $src_file_name = $file_path."/copy_variation2.tmp"; 
 $file_handle = fopen($src_file_name, "w");
-fwrite( $file_handle, str_repeat("Hello2World...\n", 100) );
+fwrite( $file_handle, str_repeat(b"Hello2World...\n", 100) );
 fclose($file_handle);
 
 /* array of destination file names */
@@ -31,7 +31,6 @@ $dest_files = array(
   "@copy_variation2.tmp",
   "#copy_variation2.tmp",
   "+copy_variation2.tmp",
-  "*copy_variation2.tmp",
   "?copy_variation2.tmp",
   ">copy_variation2.tmp",
   "!copy_variation2.tmp",
@@ -136,87 +135,81 @@ bool(false)
 Existence of destination file => bool(false)
 
 -- Iteration 7 --
-Copy operation => 
-Warning: copy(%s): %s
-bool(false)
-Existence of destination file => bool(false)
-
--- Iteration 8 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
 Destination file name => %s/!copy_variation2.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
--- Iteration 9 --
+-- Iteration 8 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
 Destination file name => %s/&copy_variation2.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
--- Iteration 10 --
+-- Iteration 9 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
 Destination file name => %s/(copy_variation2.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
--- Iteration 11 --
+-- Iteration 10 --
 Copy operation => 
 Warning: copy(%s): %s
 bool(false)
 Existence of destination file => bool(false)
 
--- Iteration 12 --
+-- Iteration 11 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
 Destination file name => %s/;copy_variation2.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
--- Iteration 13 --
+-- Iteration 12 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
 Destination file name => %s/=copy_variation2.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
--- Iteration 14 --
+-- Iteration 13 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
 Destination file name => %s/[copy_variation2.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
--- Iteration 15 --
+-- Iteration 14 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
 Destination file name => %s/^copy_variation2.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
--- Iteration 16 --
+-- Iteration 15 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
 Destination file name => %s/{copy_variation2.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
--- Iteration 17 --
+-- Iteration 16 --
 Copy operation => 
 Warning: copy(%s): %s
 bool(false)
 Existence of destination file => bool(false)
 
--- Iteration 18 --
+-- Iteration 17 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
 Destination file name => %s/~copy_variation2.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
--- Iteration 19 --
+-- Iteration 18 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
 Destination file name => %s/$copy_variation2.tmp

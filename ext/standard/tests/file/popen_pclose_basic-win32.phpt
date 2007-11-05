@@ -31,8 +31,8 @@ $arr = array("ggg", "ddd", "aaa", "sss");
 $file_handle = popen("sort", "w");
 $newline = "\n";
 foreach($arr as $str) {
-  fwrite($file_handle, $str);
-  fwrite($file_handle, $newline);
+  fwrite($file_handle, (binary)$str);
+  fwrite($file_handle, (binary)(binary)(binary)(binary)(binary)(binary)(binary)(binary)(binary)$newline);
 }
 pclose($file_handle);
 

@@ -13,16 +13,14 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    (and generates an error of level E_WARNING) in case of an error.
 */
 
-/* Testing filesize() with data written using different file modes and by creating holes in file */
-
 $file_path = dirname(__FILE__);
+require($file_path."/file.inc");
 
-echo "*** Testing filesize(): usage variations ***\n";
+echo "*** Testing filesize(): usage variations ***\n"; 
 echo "\n*** Testing filesize() with data written using different file modes and by creating holes in file ***\n";
 
 $filename = $file_path."/filesize_variation4.tmp";
 $string = "Test 2 test the filesize() fn, with data containing all the types like !@@##$%^&*():<>?|~+!;',.\][{}(special) chars, 12345(numeric) chars, and \n(newline char), \t(tab), \0, \r and so on........\0";
-
 echo "-- opening the file in 'w' mode and get the size --\n";
 $file_handle = fopen($filename, "w");
 var_dump( strlen($string) );  //strlen of the string
@@ -36,7 +34,6 @@ $file_handle = fopen($filename, "wt");
 var_dump( strlen($string) );  //strlen of the string = 191 bytes
 fwrite($file_handle, $string);
 fclose($file_handle);
-/* '\n' treated as '\r\n' i.e two chars in 'wt' mode */
 var_dump( filesize($filename) );  //size of the file = 192 bytes != strlen of string
 clearstatcache();
 
@@ -44,7 +41,6 @@ echo "-- opening the file in 'a' mode, adding data and checking the file --\n";
 $file_handle = fopen($filename, "a");
 fwrite($file_handle, "Hello, world");
 fclose($file_handle);
-/* '\n' treated as '\r\n' i.e two chars in 'wt' mode */
 var_dump( filesize($filename) );  //204 bytes
 clearstatcache();
 
@@ -52,7 +48,6 @@ echo "-- opening the file in 'at' mode, adding data and checking the file --\n";
 $file_handle = fopen($filename, "at");
 fwrite($file_handle, "Hello, world\n");
 fclose($file_handle);
-/* '\n' treated as '\r\n' i.e two chars in 'wt' mode */
 var_dump( filesize($filename) );  //218 bytes
 clearstatcache();
 

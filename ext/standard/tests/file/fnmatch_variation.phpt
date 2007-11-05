@@ -2,7 +2,7 @@
 Test fnmatch() function: Variations
 --SKIPIF--
 <?php
-if( (stristr(PHP_OS, "Mac")) || (stristr(PHP_OS, "Win")) ) 
+if( (stristr(PHP_OS, "Mac")) || (stristr(PHP_OS, "Win")) )
   die("skip do not run on MacOS/Windows");
 ?>
 --FILE--
@@ -49,7 +49,14 @@ $pattern_arr = array(
 28 => chr(109).chr(97).chr(116).chr(99).chr(104).".".chr(116).chr(120).chr(116),
 29 => "MATCH.TMP",
 30 => "MATCH*",
-31 => $file_name 
+31 => $file_name,
+
+/* binary inputs */
+32 => b"match*",
+33 => b"*.tmp",
+34 => b"mat*",
+35 => b"mat*tmp",
+36 => b"m*t",
 );
 
 for( $i = 0; $i<count($pattern_arr); $i++ ) {
@@ -88,7 +95,10 @@ $str_arr = array(
   "string\0",
   'string',
   "str\0ing",
-  "stringstring"
+  "stringstring",
+
+  /* binary input */
+  b"string"
 );
 match($str_arr, $str_arr);
 
@@ -185,6 +195,16 @@ bool(false)
 bool(false)
 -- Iteration 31 --
 bool(true)
+-- Iteration 32 --
+bool(false)
+-- Iteration 33 --
+bool(true)
+-- Iteration 34 --
+bool(false)
+-- Iteration 35 --
+bool(false)
+-- Iteration 36 --
+bool(false)
 
 *** Testing fnmatch() with other types other than files ***
 --- With Integers ---
@@ -238,27 +258,39 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
+bool(true)
 -- Iteration 1 --
 bool(true)
 bool(true)
 bool(true)
 bool(false)
 bool(false)
+bool(true)
 -- Iteration 2 --
 bool(true)
 bool(true)
 bool(true)
 bool(false)
 bool(false)
+bool(true)
 -- Iteration 3 --
 bool(false)
 bool(false)
 bool(false)
 bool(true)
 bool(false)
+bool(false)
 -- Iteration 4 --
 bool(false)
 bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+-- Iteration 5 --
+bool(true)
+bool(true)
+bool(true)
 bool(false)
 bool(false)
 bool(true)

@@ -41,7 +41,7 @@ $float_values = array (
 );
 
 $octal_formats = array( "%o",
-                        "%ho", "%lo", "%Lo",
+                        "%ho", "%lo", "%Lo", 
                         " %o", "%o ", "% o",
                         "\t%o", "\n%o", "%4o",
                         "%30o", "%[0-7]", "%*o"

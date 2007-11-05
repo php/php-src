@@ -45,8 +45,8 @@ $counter = 1;
 
 // writing to the file
 foreach($valid_data as $data) {
-  fprintf($file_handle, $data);
-  fprintf($file_handle, "\n");
+  @fprintf($file_handle, $data);
+  @fprintf($file_handle, "\n");
 }
 // closing the file
 fclose($file_handle);
@@ -1682,3 +1682,4 @@ int(68)
 bool(false)
 
 *** Done ***
+

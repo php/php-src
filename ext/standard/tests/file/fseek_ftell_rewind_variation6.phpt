@@ -2,9 +2,8 @@
 Test fseek(), ftell() & rewind() functions : usage variations - all w & x modes, SEEK_CUR
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip Not valid for Windows');
-}
+if( substr(PHP_OS, 0, 3) == "WIN" )
+  die("skip.. Not valid for Windows");
 ?>
 --FILE--
 <?php
@@ -48,7 +47,7 @@ foreach($file_content_types as $file_content_type){
     $data_to_be_written="";
     fill_buffer($data_to_be_written, $file_content_type, 512); //get the data of size 512
     $data_to_be_written = $data_to_be_written;
-    fwrite($file_handle,$data_to_be_written);
+    fwrite($file_handle,(binary)$data_to_be_written);
     rewind($file_handle);
 
     foreach($offset as $count){

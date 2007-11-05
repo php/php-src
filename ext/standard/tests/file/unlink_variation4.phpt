@@ -6,13 +6,13 @@ Test unlink() function : usage variations - unlink deleted file
    Description : Deletes filename
 */
 
+/* Try deleting a file which is already deleted */
+
 $file_path = dirname(__FILE__);
 
 // temp file used
 $filename = "$file_path/unlink_variation4.tmp";
 
-/* Try deleting a file which is already deleted */
- 
 echo "*** Testing unlink() on deleted file ***\n";
 // create temp file
 $fp = fopen($filename, "w");

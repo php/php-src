@@ -16,7 +16,7 @@ require($file_path."/file.inc");
 echo "*** Test copy() function: stat of file before and after copy ***\n";
 $src_file_name = $file_path."/copy_variation18.tmp";
 $file_handle =  fopen($src_file_name, "w");
-fwrite($file_handle, str_repeat("Hello2world...\n", 100));
+fwrite($file_handle, str_repeat(b"Hello2world...\n", 100));
 fclose($file_handle);
 
 $dest_file_name = $file_path."/copy_copy_variation18.tmp";
@@ -43,7 +43,6 @@ echo "*** Done ***\n";
 unlink(dirname(__FILE__)."/copy_copy_variation18.tmp");
 unlink(dirname(__FILE__)."/copy_variation18.tmp");
 ?>
-
 --EXPECTF--
 *** Test copy() function: stat of file before and after copy ***
 Copy operation => bool(true)

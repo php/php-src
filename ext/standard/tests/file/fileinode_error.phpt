@@ -35,10 +35,10 @@ bool(false)
 Warning: fileinode(): stat failed for 100 in %s on line 14
 bool(false)
 
-Warning: Wrong parameter count for fileinode() in %s on line 17
+Warning: fileinode() expects exactly 1 parameter, 0 given in %s on line 17
 NULL
 
-Warning: Wrong parameter count for fileinode() in %s on line 20
+Warning: fileinode() expects exactly 1 parameter, 2 given in %s on line 20
 NULL
 
 *** Done ***

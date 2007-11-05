@@ -7,7 +7,7 @@ Test is_dir() function: error conditions
  *               Returns TRUE if the filename exists and is a regular file
  */
 
-echo "\n*** Testing is_dir() error conditions ***";
+echo "*** Testing is_dir() error conditions ***";
 var_dump( is_dir() );  // Zero No. of args
 
 $dir_name = dirname(__FILE__)."/is_dir_error";
@@ -26,10 +26,10 @@ rmdir(dirname(__FILE__)."/is_dir_error");
 ?>
 --EXPECTF--
 *** Testing is_dir() error conditions ***
-Warning: Wrong parameter count for is_dir() in %s on line %d
+Warning: is_dir() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for is_dir() in %s on line %d
+Warning: is_dir() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 bool(false)
 *** Done ***

@@ -12,7 +12,7 @@ foreach( $mount_output as $out )  {
   if( stristr($out, "noatime") )
      die('skip.. atime update is disabled, hence skip the test');
 }
-  
+
 ?>
 --FILE--
 <?php

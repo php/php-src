@@ -58,7 +58,7 @@ var_dump( compare_stats($old_stat, $new_stat, $affected_members, '!=') );
 // clear the stat
 clearstatcache();  // clear previous size value in cache
 
-echo "Done\n";
+echo "\n*** Done ***";
 ?>
 
 --CLEAN--
@@ -72,4 +72,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-Done
+
+*** Done ***
+

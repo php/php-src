@@ -20,27 +20,29 @@ var_dump( tempnam("") );  //Empty string
 var_dump( tempnam(NULL) );  //NULL as arg
 var_dump( tempnam() );  //Zero args
 
+echo "*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing tempnam() error conditions ***
 
-Warning: Wrong parameter count for tempnam() in %s on line %d
+Warning: tempnam() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for tempnam() in %s on line %d
+Warning: tempnam() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for tempnam() in %s on line %d
+Warning: tempnam() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for tempnam() in %s on line %d
+Warning: tempnam() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for tempnam() in %s on line %d
+Warning: tempnam() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for tempnam() in %s on line %d
+Warning: tempnam() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for tempnam() in %s on line %d
+Warning: tempnam() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
+*** Done ***
