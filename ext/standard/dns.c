@@ -33,7 +33,7 @@
 #define WINNT 1
 #endif
 /* located in www.php.net/extra/bindlib.zip */
-#if HAVE_ARPA_INET_H 
+#if HAVE_ARPA_INET_H
 #include "arpa/inet.h"
 #endif
 #include "netdb.h"
@@ -125,12 +125,12 @@ PHP_FUNCTION(gethostbyaddr)
 {
 	char *addr;
 	int addr_len;
-	char *hostname;	
+	char *hostname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &addr, &addr_len) == FAILURE) {
 		return;
 	}
-	
+
 	hostname = php_gethostbyaddr(addr);
 
 	if (hostname == NULL) {
@@ -258,13 +258,12 @@ PHP_FUNCTION(dns_check_record)
 	char *hostname, *rectype = NULL;
 	int hostname_len, rectype_len = 0;
 	int type = T_MX, i;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &hostname, &hostname_len, &rectype, &rectype_len) == FAILURE) {
 		return;
 	}
 
-	if (hostname_len == 0)
-	{
+	if (hostname_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Host cannot be empty");
 		RETURN_FALSE;
 	}
@@ -272,7 +271,7 @@ PHP_FUNCTION(dns_check_record)
 	if (rectype) {
 		     if (!strcasecmp("A",     rectype)) type = T_A;
 		else if (!strcasecmp("NS",    rectype)) type = DNS_T_NS;
-		else if (!strcasecmp("MX",    rectype)) type = DNS_T_MX;				
+		else if (!strcasecmp("MX",    rectype)) type = DNS_T_MX;
 		else if (!strcasecmp("PTR",   rectype)) type = DNS_T_PTR;
 		else if (!strcasecmp("ANY",   rectype)) type = DNS_T_ANY;
 		else if (!strcasecmp("SOA",   rectype)) type = DNS_T_SOA;
@@ -312,7 +311,7 @@ PHP_FUNCTION(dns_check_record)
 #define PHP_DNS_TXT    0x00008000
 #define PHP_DNS_A6     0x01000000
 #define PHP_DNS_SRV    0x02000000
-#define PHP_DNS_NAPTR  0x04000000    
+#define PHP_DNS_NAPTR  0x04000000
 #define PHP_DNS_AAAA   0x08000000
 #define PHP_DNS_ANY    0x10000000
 #define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
@@ -355,10 +354,10 @@ typedef union {
 	u_char qb2[65536];
 } querybuf;
 
-/* just a hack to free resources allocated by glibc in __res_nsend() 
- * See also: 
- *   res_thread_freeres() in glibc/resolv/res_init.c 
- *   __libc_res_nsend()   in resolv/res_send.c 
+/* just a hack to free resources allocated by glibc in __res_nsend()
+ * See also:
+ *   res_thread_freeres() in glibc/resolv/res_init.c
+ *   __libc_res_nsend()   in resolv/res_send.c
  * */
 
 #ifdef __GLIBC__
@@ -394,7 +393,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 		return NULL;
 	}
 	cp += n;
-	
+
 	GETSHORT(type, cp);
 	GETSHORT(class, cp);
 	GETLONG(ttl, cp);
@@ -524,7 +523,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			tp[0] = '\0';
 			add_ascii_assoc_rt_string(*subarray, "type", "AAAA", ZSTR_DUPLICATE);
 			add_ascii_assoc_rt_string(*subarray, "ipv6", name, ZSTR_DUPLICATE);
-			break; 
+			break;
 		case DNS_T_A6:
 			p = cp;
 			add_ascii_assoc_rt_string(*subarray, "type", "A6", ZSTR_DUPLICATE);
@@ -562,7 +561,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				}
 				cp++;
 			}
-			for(i = (n+8)/16; i < 8; i++) {
+			for (i = (n + 8) / 16; i < 8; i++) {
 				GETSHORT(s, cp);
 				if (s != 0) {
 					if (tp > (u_char *)name) {
@@ -692,32 +691,34 @@ PHP_FUNCTION(dns_get_record)
 	 *   NUMTYPES+1 when results were already fetched.
 	 * - In case of PHP_DNS_ANY we use the directly fetch DNS_T_ANY. (step NUMTYPES+1 )
 	 */
-	for(type = (type_param==PHP_DNS_ANY ? (PHP_DNS_NUM_TYPES + 1) : 0); type < (addtl_recs ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query; type++)
-	{
+	for (type = (type_param == PHP_DNS_ANY ? (PHP_DNS_NUM_TYPES + 1) : 0);
+		type < (addtl_recs ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query;
+		type++
+	) {
 		first_query = 0;
 		switch (type) {
-			case 0: 
+			case 0:
 				type_to_fetch = type_param&PHP_DNS_A     ? DNS_T_A     : 0;
 				break;
-			case 1: 
+			case 1:
 				type_to_fetch = type_param&PHP_DNS_NS    ? DNS_T_NS    : 0;
 				break;
-			case 2: 
+			case 2:
 				type_to_fetch = type_param&PHP_DNS_CNAME ? DNS_T_CNAME : 0;
 				break;
-			case 3: 
+			case 3:
 				type_to_fetch = type_param&PHP_DNS_SOA   ? DNS_T_SOA   : 0;
 				break;
-			case 4: 
+			case 4:
 				type_to_fetch = type_param&PHP_DNS_PTR   ? DNS_T_PTR   : 0;
 				break;
-			case 5: 
+			case 5:
 				type_to_fetch = type_param&PHP_DNS_HINFO ? DNS_T_HINFO : 0;
 				break;
-			case 6: 
+			case 6:
 				type_to_fetch = type_param&PHP_DNS_MX    ? DNS_T_MX    : 0;
 				break;
-			case 7: 
+			case 7:
 				type_to_fetch = type_param&PHP_DNS_TXT   ? DNS_T_TXT   : 0;
 				break;
 			case 8:
@@ -745,7 +746,7 @@ PHP_FUNCTION(dns_get_record)
 			res_ninit(&res);
 			res.retrans = 5;
 			res.options &= ~RES_DEFNAMES;
-		
+
 			n = res_nmkquery(&res, QUERY, hostname, C_IN, type_to_fetch, NULL, 0, NULL, buf.qb2, sizeof buf);
 			if (n<0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "res_nmkquery() failed");
@@ -762,7 +763,7 @@ PHP_FUNCTION(dns_get_record)
 				php_dns_free_res(res);
 				RETURN_FALSE;
 			}
-		
+
 			cp = answer.qb2 + HFIXEDSZ;
 			end = answer.qb2 + n;
 			hp = (HEADER *)&answer;
@@ -770,7 +771,7 @@ PHP_FUNCTION(dns_get_record)
 			an = ntohs(hp->ancount);
 			ns = ntohs(hp->nscount);
 			ar = ntohs(hp->arcount);
-	
+
 			/* Skip QD entries, they're only used by dn_expand later on */
 			while (qd-- > 0) {
 				n = dn_skipname(cp, end);
@@ -783,7 +784,7 @@ PHP_FUNCTION(dns_get_record)
 				}
 				cp += n + QFIXEDSZ;
 			}
-		
+
 			/* YAY! Our real answers! */
 			while (an-- && cp && cp < end) {
 				zval *retval;
