@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
@@ -49,7 +49,7 @@ char *day_short_names[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-/* {{{ php_std_date
+/* {{{ PHPAPI char *php_std_date(time_t t TSRMLS_DC)
    Return date string in standard format for http headers */
 PHPAPI char *php_std_date(time_t t TSRMLS_DC)
 {
@@ -79,12 +79,11 @@ PHPAPI char *php_std_date(time_t t TSRMLS_DC)
 				((tm1->tm_year) % 100),
 				tm1->tm_hour, tm1->tm_min, tm1->tm_sec);
 	}
-	
+
 	str[79] = 0;
 	return (str);
 }
 /* }}} */
-
 
 #if HAVE_STRPTIME
 #ifndef HAVE_STRPTIME_DECL_FAILS
@@ -102,8 +101,7 @@ PHP_FUNCTION(strptime)
 	struct tm  parsed_time;
 	char      *unparsed_part;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", 
-		&ts, &ts_length, &format, &format_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &ts, &ts_length, &format, &format_length) == FAILURE) {
 		return;
 	}
 
@@ -126,6 +124,7 @@ PHP_FUNCTION(strptime)
 	add_assoc_string(return_value, "unparsed", unparsed_part, 1);
 }
 /* }}} */
+
 #endif
 
 /*
