@@ -36,10 +36,10 @@ unlink($file_path."/popen.tmp");
 --EXPECTF--
 *** Testing for error conditions ***
 
-Warning: Wrong parameter count for popen() in %s on line %d
+Warning: popen() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for popen() in %s on line %d
+Warning: popen() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 resource(%d) of type (stream)
 'abc.txt' is not recognized as an internal or external command,

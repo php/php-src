@@ -27,12 +27,13 @@ echo "*** Done ***\n";
 Warning: copy(/no/file): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for copy() in %s on line %d
+Warning: copy() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for copy() in %s on line %d
+Warning: copy() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for copy() in %s on line %d
+Warning: copy() expects parameter 3 to be resource, string given in %s on line %d
 NULL
 *** Done ***
+

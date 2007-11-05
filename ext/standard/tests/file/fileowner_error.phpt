@@ -34,10 +34,11 @@ bool(false)
 Warning: fileowner(): stat failed for 100 in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for fileowner() in %s on line %d
+Warning: fileowner() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for fileowner() in %s on line %d
+Warning: fileowner() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 *** Done ***
+

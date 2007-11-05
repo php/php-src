@@ -22,7 +22,3 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 Done
---UEXPECTF--
-Done
-
-Notice: Unknown: 0 character unicode buffer downcoded for binary stream runtime_encoding in Unknown on line 0

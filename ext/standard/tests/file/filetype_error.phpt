@@ -8,7 +8,7 @@ Description: Returns the type of the file. Possible values are fifo, char,
              dir, block, link, file, and unknown. 
 */
 
-echo "\n*** Testing error conditions ***";
+echo "*** Testing error conditions ***";
 /* non-existing file or dir */
 print( filetype("/no/such/file/dir") );
 
@@ -32,8 +32,8 @@ Warning: filetype(): Lstat failed for string in %s on line %d
 
 Warning: filetype(): Lstat failed for 100 in %s on line %d
 
-Warning: Wrong parameter count for filetype() in %s on line %d
+Warning: filetype() expects exactly 1 parameter, 0 given in %s on line %d
 
-Warning: Wrong parameter count for filetype() in %s on line %d
+Warning: filetype() expects exactly 1 parameter, 2 given in %s on line %d
 
 *** Done ***

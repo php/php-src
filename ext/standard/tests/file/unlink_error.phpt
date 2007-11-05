@@ -28,7 +28,7 @@ echo "-- Testing unlink() on unexpected no. of arguments --\n";
 var_dump( unlink() );
 // args > expected
 var_dump( unlink($filename, $context, true) );
-var_dump( file_exists($filename) ); 
+var_dump( file_exists($filename) ); // expected true
 
 echo "\n-- Testing unlink() on invalid arguments --\n";
 // invalid arguments
@@ -56,11 +56,13 @@ $dirname = "$file_path/unlink_error";
 mkdir($dirname);
 // unlinking directory
 var_dump( unlink($dirname) );  // expected: false as unlink() does not work on dir
-rmdir($dirname);
 
-// delete temp file
-unlink($filename);
 echo "Done\n";
+?>
+--CLEAN--
+<?php
+unlink(dirname(__FILE__)."/unlink_error.tmp");
+rmdir(dirname(__FILE__)."/unlink_error");
 ?>
 --EXPECTF--
 *** Testing unlink() : error conditions ***
@@ -98,7 +100,7 @@ bool(false)
 
 -- Testing unlink() on non-existent file --
 
-Warning: unlink(%s/non_existent_file.tmp): %s in %s on line %d
+Warning: unlink(%s/non_existent_file.tmp): No such file or directory in %s on line %d
 bool(false)
 
 -- Testing unlink() on directory --

@@ -8,6 +8,12 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip.. only on Windows');
+}
+?>
+--FILE--
+<?php
 /* Prototype : bool unlink ( string $filename [, resource $context] );
    Description : Deletes filename
 */
@@ -28,7 +34,7 @@ echo "-- Testing unlink() on unexpected no. of arguments --\n";
 var_dump( unlink() );
 // args > expected
 var_dump( unlink($filename, $context, true) );
-var_dump( file_exists($filename) );
+var_dump( file_exists($filename) ); // expected: true
 
 echo "\n-- Testing unlink() on invalid arguments --\n";
 // invalid arguments
@@ -58,7 +64,6 @@ mkdir($dirname);
 var_dump( unlink($dirname) );  // expected: false as unlink() does not work on dir
 
 echo "Done\n";
-
 ?>
 --CLEAN--
 <?php

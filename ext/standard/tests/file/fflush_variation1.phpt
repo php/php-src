@@ -35,11 +35,14 @@ foreach( $file_types as $type ) {
     // creating the file except for x mode
     if( substr($mode, 0, 1) != "x" ) {
       $file_handle = fopen($file_name, "w");
-      if($file_handle == false)
-        exit("Error:failed to open file $file_name");
-      if( substr($mode, 0, 1) == "a") 
-        fill_file($file_handle, $type, 10);
-      fclose($file_handle);
+    if($file_handle == false)
+      exit("Error:failed to open file $file_name");
+
+    // filling the file with some data if mode is append mode
+    if( substr($mode, 0, 1) == "a") 
+      fill_file($file_handle, $type, 10);
+    fclose($file_handle);
+
     } 
   
     // opening the file in different modes 
@@ -59,7 +62,7 @@ foreach( $file_types as $type ) {
   $count++;
 }
 
-
+echo "\n*** Done ***";
 ?>
 --EXPECTF--
 *** Testing fflush(): with various types of files ***
@@ -524,3 +527,6 @@ ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 int(50)
 bool(true)
 bool(true)
 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 int(50)
+
+*** Done ***
+

@@ -65,7 +65,7 @@ var_dump( compare_stats($old_stat, $new_stat, $affected_members, "=") );
 clearstatcache();  // clear statement cache
 
 
-echo "Done\n";
+echo "\n*** Done ***";
 ?>
 
 --CLEAN--
@@ -87,4 +87,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-Done
+
+*** Done ***
+

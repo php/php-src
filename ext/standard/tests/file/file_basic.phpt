@@ -9,7 +9,7 @@ Test file() function : basic functionality
  */
 require(dirname(__FILE__) . '/file.inc');
 $file_path = dirname(__FILE__);
-echo "*** Testing file() with basic files ***\n";
+echo "*** Testing file() with basic types of files ***\n";
 $filetypes = array("numeric", "text", "empty", "text_with_new_line");
 
 foreach( $filetypes as $type ) {
@@ -18,7 +18,7 @@ foreach( $filetypes as $type ) {
   delete_files($file_path, 1, "file_basic");
 }
 
-echo "*** Testing for return type of file function ***\n";
+echo "*** Testing for return type of file() function ***\n";
 foreach( $filetypes as $type ) {
   create_files($file_path, 1, $type, 0755, 1, "w", "file_basic");
   $ret_arr =  file($file_path."/file_basic1.tmp");
@@ -29,7 +29,7 @@ foreach( $filetypes as $type ) {
 echo "\n--- Done ---";
 ?>
 --EXPECTF--
-*** Testing file() with basic files ***
+*** Testing file() with basic types of files ***
 Array
 (
     [0] => 2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
@@ -67,10 +67,11 @@ Array
 
     [11] => line 
 )
-*** Testing for return type of file function ***
+*** Testing for return type of file() function ***
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 
 --- Done ---
+

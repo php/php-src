@@ -36,7 +36,7 @@ class names {
 }
 
 // directory name stored in an object
-$dir_name = new names("$file_path/lstat_stat_variation18/");
+$dir_name = new names("$file_path/lstat_stat_variation18");
 
 // file name stored in an object 
 $file_name = new names("$file_path/lstat_stat_variation18.tmp");

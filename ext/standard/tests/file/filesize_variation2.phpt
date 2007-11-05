@@ -25,12 +25,12 @@ var_dump( filesize( $file_path."/filesize_variation2"));
 clearstatcache();
 
 echo "-- Creating a file inside base dir, and checking dir & file size --\n"; 
-create_files($file_path."/filesize_variation2", 1, "numeric", 0755, 1, "w", "filesize_variation", 2);
+create_files($file_path."/filesize_variation2", 1, "numeric", 0755, 1, "w", "filesize_variation");
 var_dump( filesize( $file_path."/filesize_variation2"));
 clearstatcache();
-var_dump( filesize( $file_path."/filesize_variation2/filesize_variation2.tmp"));
+var_dump( filesize( $file_path."/filesize_variation2/filesize_variation1.tmp"));
 clearstatcache();
-delete_files($file_path."/filesize_variation2", 1, "filesize_variation", 2);
+delete_files($file_path."/filesize_variation2", 1, "filesize_variation");
 
 echo "-- Creating an empty sub-dir in base-dir, and checking size of base and sub dir --\n";
 mkdir( $file_path."/filesize_variation2/filesize_variation2_sub");

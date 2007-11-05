@@ -2,7 +2,7 @@
 Test fnmatch() function: Error conditions
 --SKIPIF--
 <?php
-if( (stristr(PHP_OS, "Mac")) || (stristr(PHP_OS, "Win")) ) 
+if( (stristr(PHP_OS, "Mac")) || (stristr(PHP_OS, "Win")) )
   die("skip do not run on MacOS/Windows");
 ?>
 --FILE--
@@ -36,22 +36,22 @@ echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing error conditions for fnmatch() ***
-Warning: fnmatch() expects parameter 1 to be string, array given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be string, array given in %s on line %d%d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be string, resource given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be string, resource given in %s on line %d%d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be string, object given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be string, object given in %s on line %d%d
 NULL
 
-Warning: fnmatch() expects at least 2 parameters, 1 given in %s on line %d
+Warning: fnmatch() expects at least 2 parameters, 1 given in %s on line %d%d
 NULL
 
-Warning: fnmatch() expects at least 2 parameters, 1 given in %s on line %d
+Warning: fnmatch() expects at least 2 parameters, 1 given in %s on line %d%d
 NULL
 
-Warning: fnmatch() expects at most 3 parameters, 4 given in %s on line %d
+Warning: fnmatch() expects at most 3 parameters, 4 given in %s on line %d%d
 NULL
 
 *** Done ***

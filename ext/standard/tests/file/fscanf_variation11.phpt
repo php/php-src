@@ -47,8 +47,8 @@ $counter = 1;
 
 // writing to the file
 foreach($array_types as $value) {
-  fprintf($file_handle, $value);
-  fprintf($file_handle, "\n");
+  @fprintf($file_handle, $value);
+  @fprintf($file_handle, "\n");
 }
 // closing the file
 fclose($file_handle);
@@ -81,30 +81,6 @@ unlink($filename);
 ?>
 --EXPECTF--
 *** Test fscanf(): different float format types with arrays ***
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 
 -- iteration 1 --
 array(1) {
@@ -734,3 +710,4 @@ array(0) {
 bool(false)
 
 *** Done ***
+

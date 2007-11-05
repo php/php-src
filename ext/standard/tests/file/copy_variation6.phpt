@@ -3,7 +3,7 @@ Test copy() function: usage variations - copy empty file across dirs
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip do not run on Windows");
+  die("skip Do not run on Windows");
 ?>
 --FILE--
 <?php

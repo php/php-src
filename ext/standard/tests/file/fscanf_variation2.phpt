@@ -48,8 +48,8 @@ $counter = 1;
 
 // writing to the file
 foreach($valid_ints as $int_value) {
-  fprintf($file_handle, $int_value);
-  fprintf($file_handle, "\n");
+  @fprintf($file_handle, $int_value);
+  @fprintf($file_handle, "\n");
 }
 // closing the file
 fclose($file_handle);
@@ -1005,3 +1005,4 @@ array(0) {
 bool(false)
 
 *** Done ***
+

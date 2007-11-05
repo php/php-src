@@ -47,7 +47,7 @@ var_dump( compare_stats($old_stat, $new_stat, $affected_members, "=") );
 clearstatcache();
 
 
-echo "Done\n";
+echo "\n*** Done ***";
 ?>
 
 --CLEAN--
@@ -61,4 +61,6 @@ unlink("$file_path/stat_variation5.tmp");
 bool(true)
 bool(true)
 bool(true)
-Done
+
+*** Done ***
+

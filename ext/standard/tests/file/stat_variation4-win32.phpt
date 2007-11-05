@@ -66,7 +66,7 @@ var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys, "=") );
 // clear the stat
 clearstatcache();
 
-echo "Done\n";
+echo "\n*** Done ***";
 ?>
 
 --CLEAN--
@@ -88,4 +88,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-Done
+
+*** Done ***
+

@@ -5,6 +5,7 @@ Test popen() and pclose function: error conditions
 if(substr(PHP_OS, 0, 3) == 'WIN' || strtoupper( substr(PHP_OS, 0, 3) ) == 'SUN')
   die("skip Not Valid for Windows & Sun Solaris");
 ?>
+
 --FILE--
 <?php
 /*
@@ -34,10 +35,10 @@ unlink($file_path."/popen.tmp");
 --EXPECTF--
 *** Testing for error conditions ***
 
-Warning: Wrong parameter count for popen() in %s on line %d
+Warning: popen() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for popen() in %s on line %d
+Warning: popen() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
 Warning: popen(abc.txt,rw): %s on line %d

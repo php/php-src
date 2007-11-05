@@ -26,7 +26,6 @@ echo "\n*** Done ***";
 <?php
 unlink (dirname(__FILE__)."/inode.tmp");
 ?>
-
 --EXPECTF--
 *** Testing fileinode() with file, directory ***
 %d

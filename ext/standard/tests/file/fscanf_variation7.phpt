@@ -34,8 +34,8 @@ $counter = 1;
 
 // writing to the file
 foreach($bool_types as $value) {
-  fprintf($file_handle, $value);
-  fprintf($file_handle, "\n");
+  @fprintf($file_handle, $value);
+  @fprintf($file_handle, "\n");
 }
 // closing the file
 fclose($file_handle);
@@ -243,3 +243,4 @@ NULL
 bool(false)
 
 *** Done ***
+

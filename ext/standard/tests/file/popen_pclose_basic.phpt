@@ -47,8 +47,8 @@ $file_handle = popen("sort", "w");
 $counter = 0;
 $newline = "\n";
 foreach($arr as $str) {
-  fwrite($file_handle, $str);
-  fwrite($file_handle, $newline);
+  fwrite($file_handle, (binary)$str);
+  fwrite($file_handle, (binary)$newline);
 }
 pclose($file_handle);
 
@@ -73,35 +73,6 @@ rmdir($dirpath);
 ?>
 
 --EXPECTF--
-*** Testing popen() and pclose() with different processes ***
--- Testing popen(): reading from the pipe --
-popen_basic.tmp
--- Testing popen(): reading from a file using 'cat' command --
-line
-line of text
-line
-line of text
-line
-line of text
-line
-line of text
-line
-line of text
-line
-line 
-int(100)
-*** Testing popen(): writing to the pipe ***
-aaa
-ddd
-ggg
-sss
-*** Testing for return type of popen() and pclose() functions ***
-bool(true)
-Test String
-bool(true)
-
---- Done ---
---UEXPECTF--
 *** Testing popen() and pclose() with different processes ***
 -- Testing popen(): reading from the pipe --
 popen_basic.tmp

@@ -148,23 +148,39 @@ bool(true)
 bool(true)
 43567
 -- Iteration 12 --
-bool(true)
-100000
-bool(true)
-40000
+
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+NULL
+103567
+
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+NULL
+43567
 -- Iteration 13 --
-bool(true)
-100000
-bool(true)
-40000
+
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+NULL
+103567
+
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+NULL
+43567
 -- Iteration 14 --
-bool(true)
-100000
-bool(true)
-40000
+
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+NULL
+103567
+
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+NULL
+43567
 -- Iteration 15 --
-bool(true)
-100000
-bool(true)
-40000
+
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+NULL
+103567
+
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+NULL
+43567
 *** Done ***

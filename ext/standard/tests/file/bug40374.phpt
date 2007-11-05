@@ -5,7 +5,7 @@ Bug #40374 (php_shutdown_temporary_directory() tries to free local value)
 
 $file = tempnam(sys_get_temp_dir(), "test_");
 var_dump($file);
-$fp = fopen($file, "w");
+$fp = fopen($file, "wt");
 fwrite($fp, "test");
 fclose($fp);
 unlink($file);

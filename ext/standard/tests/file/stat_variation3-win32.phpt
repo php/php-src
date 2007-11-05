@@ -57,7 +57,7 @@ var_dump( compare_self_stat($new_stat1) );
 var_dump(compare_stats($new_stat, $new_stat1, $all_stat_keys, "="));
 clearstatcache();
 
-echo "Done\n";
+echo "\n*** Done ***";
 ?>
 
 --CLEAN--
@@ -75,4 +75,6 @@ bool(true)
 -- Testing stat() for comparing stats after the deletion of subdir and file --
 bool(true)
 bool(true)
-Done
+
+*** Done ***
+

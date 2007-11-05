@@ -18,11 +18,10 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 $file_path = dirname(__FILE__);
 require "$file_path/file.inc";
 
-/* test the effects on stats dir by  creating file/subdir in a dir 
+/* test the effects on stats with creating file/subdir in a dir 
 */
 
 /* create temp file */
-@rmdir("$file_path/lstat_stat_variation8/");  //ensure that dir doesn't exists 
 mkdir("$file_path/lstat_stat_variation8/");  // temp dir
 
 // creating and deleting subdir and files in the dir
@@ -31,7 +30,6 @@ $dirname = "$file_path/lstat_stat_variation8";
 $old_stat = stat($dirname);
 clearstatcache();
 sleep(2);
-@rmdir("$dirname/lstat_stat_variation8_subdir"); // ensure that dir doesn't exists
 mkdir("$dirname/lstat_stat_variation8_subdir");
 $file_handle = fopen("$dirname/lstat_stat_variation8a.tmp", "w");
 fclose($file_handle);

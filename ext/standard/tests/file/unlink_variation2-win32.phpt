@@ -18,7 +18,7 @@ $file_path = dirname(__FILE__);
 
 echo "*** Testing unlink() on a file when file handle is open ***\n";
 // temp file name used here
-$filename = "$file_path/unlink_variation2.tmp";
+$filename = "$file_path/unlink_variation2-win32.tmp";
 
 // create file
 $fp = fopen($filename, "w");

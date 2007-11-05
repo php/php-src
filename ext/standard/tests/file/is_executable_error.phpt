@@ -18,10 +18,10 @@ echo "Done\n";
 --EXPECTF--
 *** Testing is_executable(): error conditions ***
 
-Warning: Wrong parameter count for is_executable() in %s on line %d
+Warning: is_executable() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for is_executable() in %s on line %d
+Warning: is_executable() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 *** Testing is_exceutable() on non-existent directory ***

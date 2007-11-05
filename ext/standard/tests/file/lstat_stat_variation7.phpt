@@ -29,7 +29,7 @@ echo "*** Testing stat() on file after data is written in it ***\n";
 $fh = fopen($file_name,"w");
 $old_stat = stat($file_name);
 clearstatcache();
-fwrite($fh, "Hello World");
+fwrite($fh, (binary)"Hello World");
 $new_stat = stat($file_name);
 
 // compare self stats

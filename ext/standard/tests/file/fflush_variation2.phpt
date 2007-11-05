@@ -63,7 +63,7 @@ foreach( $file_types as $type ) {
   $count++;
 }
 
-echo "\n--- Done ---";
+echo "\n*** Done ***";
 ?>
 --EXPECTF--
 *** Testing fflush(): with soft links to files opened in diff modes ***
@@ -439,4 +439,5 @@ bool(true)
 bool(true)
 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 int(60)
 
---- Done ---
+*** Done ***
+

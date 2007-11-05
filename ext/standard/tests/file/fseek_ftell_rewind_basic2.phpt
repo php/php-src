@@ -2,9 +2,8 @@
 Test fseek(), ftell() & rewind() functions : basic functionality - all w and x modes
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip Not valid for Windows');
-}
+if( substr(PHP_OS, 0, 3) == "WIN" )
+  die("skip.. Not valid for Windows");
 ?>
 --FILE--
 <?php
@@ -49,7 +48,7 @@ foreach($file_content_types as $file_content_type){
     $data_to_be_written="";
     fill_buffer($data_to_be_written, $file_content_type, 512); //get the data of size 512
     $data_to_be_written = $data_to_be_written;
-    fwrite($file_handle,$data_to_be_written);
+    fwrite($file_handle,(binary)$data_to_be_written);
 
     // set file pointer to 0
     var_dump( rewind($file_handle) ); // set to begining of file 
