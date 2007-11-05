@@ -132,7 +132,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				}
 				new_key = zend_strndup(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				zend_str_tolower(new_key, Z_STRLEN_P(arg1));
-				zend_hash_update(Z_ARRVAL_P(current_section), new_key, Z_STRLEN_P(arg1)+1, &new_property, sizeof(zval *), NULL);
+				zend_hash_update(Z_ARRVAL_P(current_section), new_key, Z_STRLEN_P(arg1) + 1, &new_property, sizeof(zval *), NULL);
 				free(new_key);
 			}
 			break;
@@ -141,7 +141,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				zval *unprocessed;
 				HashTable *section_properties;
 
-				/*printf("'%s' (%d)\n",$1.value.str.val,$1.value.str.len+1);*/
+				/*printf("'%s' (%d)\n",$1.value.str.val,$1.value.str.len + 1);*/
 				current_section = (zval *) pemalloc(sizeof(zval), 1);
 				INIT_PZVAL(current_section);
 				processed = (zval *) pemalloc(sizeof(zval), 1);
@@ -154,8 +154,8 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				Z_ARRVAL_P(current_section) = section_properties;
 				Z_TYPE_P(current_section) = IS_ARRAY;
 				current_section_name = zend_strndup(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
-				
-				zend_hash_update(&browser_hash, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, (void *) &current_section, sizeof(zval *), NULL);
+
+				zend_hash_update(&browser_hash, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) + 1, (void *) &current_section, sizeof(zval *), NULL);
 
 				Z_STRVAL_P(processed) = Z_STRVAL_P(arg1);
 				Z_STRLEN_P(processed) = Z_STRLEN_P(arg1);
@@ -182,7 +182,7 @@ PHP_MINIT_FUNCTION(browscap) /* {{{ */
 		zend_file_handle fh;
 		memset(&fh, 0, sizeof(fh));
 
-		if (zend_hash_init_ex(&browser_hash, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1, 0)==FAILURE) {
+		if (zend_hash_init_ex(&browser_hash, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1, 0) == FAILURE) {
 			return FAILURE;
 		}
 
@@ -229,15 +229,14 @@ static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_
 		}
 	}
 
-
 	if (zend_hash_find(Z_ARRVAL_PP(browser), "browser_name_regex", sizeof("browser_name_regex"), (void **) &browser_regex) == FAILURE) {
 		return 0;
 	}
 
-	if (regcomp(&r, Z_STRVAL_PP(browser_regex), REG_NOSUB)!=0) {
+	if (regcomp(&r, Z_STRVAL_PP(browser_regex), REG_NOSUB) != 0) {
 		return 0;
 	}
-	if (regexec(&r, lookup_browser_name, 0, NULL, 0)==0) {
+	if (regexec(&r, lookup_browser_name, 0, NULL, 0) == 0) {
 		/* If we've found a possible browser, we need to do a comparison of the
 		   number of characters changed in the user agent being checked versus
 		   the previous match found and the current match. */
@@ -276,7 +275,6 @@ static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_
 				}
 			}
 
-
 			/* Pick which browser pattern replaces the least amount of
 			   characters when compared to the original user agent string... */
 			if (ua_len - prev_len > ua_len - curr_len) {
@@ -297,9 +295,7 @@ static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_
 /* }}} */
 
 /* {{{ proto mixed get_browser([string browser_name [, bool return_array]]) U
-   Get information about the capabilities of a browser. If browser_name is omitted
-   or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array
-   is true, returns an array. */
+   Get information about the capabilities of a browser. If browser_name is omitted or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array is true, returns an array. */
 PHP_FUNCTION(get_browser)
 {
 	char *agent_name = NULL;
@@ -315,15 +311,14 @@ PHP_FUNCTION(get_browser)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&!b", &agent_name,
-							  &agent_name_len, UG(ascii_conv), &return_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&!b", &agent_name, &agent_name_len, UG(ascii_conv), &return_array) == FAILURE) {
 		return;
 	}
 
 	if (agent_name == NULL) {
-		zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
+		zend_is_auto_global("_SERVER", sizeof("_SERVER") - 1 TSRMLS_CC);
 		if (!PG(http_globals)[TRACK_VARS_SERVER]
-			|| zend_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name)==FAILURE) {
+			|| zend_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "HTTP_USER_AGENT variable is not set, cannot determine user agent name");
 			RETURN_FALSE;
 		}
@@ -332,13 +327,13 @@ PHP_FUNCTION(get_browser)
 	lookup_browser_name = estrndup(agent_name, agent_name_len);
 	php_strtolower(lookup_browser_name, agent_name_len);
 
-	if (zend_hash_find(&browser_hash, lookup_browser_name, agent_name_len+1, (void **) &agent)==FAILURE) {
+	if (zend_hash_find(&browser_hash, lookup_browser_name, agent_name_len + 1, (void **) &agent) == FAILURE) {
 		found_browser_entry = NULL;
 		zend_hash_apply_with_arguments(&browser_hash, (apply_func_args_t) browser_reg_compare, 2, lookup_browser_name, &found_browser_entry);
 
 		if (found_browser_entry) {
 			agent = &found_browser_entry;
-		} else if (zend_hash_find(&browser_hash, DEFAULT_SECTION_NAME, sizeof(DEFAULT_SECTION_NAME), (void **) &agent)==FAILURE) {
+		} else if (zend_hash_find(&browser_hash, DEFAULT_SECTION_NAME, sizeof(DEFAULT_SECTION_NAME), (void **) &agent) == FAILURE) {
 			efree(lookup_browser_name);
 			RETURN_FALSE;
 		}
@@ -353,8 +348,8 @@ PHP_FUNCTION(get_browser)
 		zend_hash_copy(Z_OBJPROP_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
 	}
 
-	while (zend_hash_find(Z_ARRVAL_PP(agent), "parent", sizeof("parent"), (void **) &agent_name)==SUCCESS) {
-		if (zend_hash_find(&browser_hash, agent_name, agent_name_len+1, (void **)&agent)==FAILURE) {
+	while (zend_hash_find(Z_ARRVAL_PP(agent), "parent", sizeof("parent"), (void **) &agent_name) == SUCCESS) {
+		if (zend_hash_find(&browser_hash, agent_name, agent_name_len + 1, (void **)&agent) == FAILURE) {
 			break;
 		}
 
