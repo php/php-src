@@ -1081,7 +1081,6 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 		efree(filename); \
 	} \
 }
-
 /* }}} */
 
 /* {{{ proto int fileperms(string filename) U
