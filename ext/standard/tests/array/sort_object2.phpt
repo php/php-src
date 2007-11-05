@@ -1,5 +1,5 @@
 --TEST--
-Test sort() function : object functionality - sorting objects with diff. accessiblity of member vars
+Test sort() function : object functionality - sorting objects with diff. accessibility of member vars
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
