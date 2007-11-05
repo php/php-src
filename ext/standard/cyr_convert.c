@@ -275,13 +275,12 @@ PHP_FUNCTION(convert_cyr_string)
 	int input_len, fr_cs_len, to_cs_len;
 	unsigned char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sss", &input,
-							  &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
 		return;
 	}
 
 	str = (unsigned char*) estrndup(input, input_len);
-	
+
 	php_convert_cyr_string(str, input_len, fr_cs[0], to_cs[0] TSRMLS_CC);
 	RETVAL_STRING((char *)str, 0)
 }
