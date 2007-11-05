@@ -25,9 +25,7 @@
 
 #define CREDIT_LINE(module, authors) php_info_print_table_row(2, module, authors)
 
-/* {{{ php_print_credits
- */
-PHPAPI void php_print_credits(int flag TSRMLS_DC)
+PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text && flag & PHP_CREDITS_FULLPAGE) {
 		php_print_info_htmlhead(TSRMLS_C);
@@ -61,7 +59,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC)
 
 		/* PHP Language */
 		php_info_print_table_start();
-		php_info_print_table_colspan_header(2, "PHP 5 Authors");
+		php_info_print_table_colspan_header(2, "PHP Authors");
 		php_info_print_table_header(2, "Contribution", "Authors");
 		CREDIT_LINE("Zend Scripting Language Engine", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("Extension Module API", "Andi Gutmans, Zeev Suraski, Andrei Zmievski");
