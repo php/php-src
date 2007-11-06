@@ -403,6 +403,9 @@ typedef struct _zend_mm_free_block {
 
 struct _zend_mm_heap {
 	int                 use_zend_alloc;
+	void               *(*malloc)(size_t);
+	void                (*free)(void*);
+	void               *(*realloc)(void*, size_t);
 	size_t              free_bitmap;
 	size_t              large_free_bitmap;
 	size_t              block_size;
@@ -2264,7 +2267,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	TSRMLS_FETCH();
 
 	if (UNEXPECTED(!AG(mm_heap)->use_zend_alloc)) {
-		return malloc(size);
+		return AG(mm_heap)->malloc(size);
 	}
 	return _zend_mm_alloc_int(AG(mm_heap), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
@@ -2274,7 +2277,7 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	TSRMLS_FETCH();
 
 	if (UNEXPECTED(!AG(mm_heap)->use_zend_alloc)) {
-		free(ptr);
+		AG(mm_heap)->free(ptr);
 		return;
 	}
 	_zend_mm_free_int(AG(mm_heap), ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -2285,7 +2288,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	TSRMLS_FETCH();
 
 	if (UNEXPECTED(!AG(mm_heap)->use_zend_alloc)) {
-		return realloc(ptr, size);
+		return AG(mm_heap)->realloc(ptr, size);
 	}
 	return _zend_mm_realloc_int(AG(mm_heap), ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
@@ -2452,6 +2455,11 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals TSRMLS_DC)
 	tmp = getenv("USE_ZEND_ALLOC");
 	if (tmp) {
 		alloc_globals->mm_heap->use_zend_alloc = zend_atoi(tmp, 0);
+		if (!alloc_globals->mm_heap->use_zend_alloc) {
+			alloc_globals->mm_heap->malloc = malloc;
+			alloc_globals->mm_heap->free = free;
+			alloc_globals->mm_heap->realloc = realloc;
+		}
 	}
 }
 
@@ -2483,6 +2491,17 @@ ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap TSRMLS_DC)
 ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap)
 {
 	return heap->storage;
+}
+
+ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
+                                          void* (*malloc)(size_t),
+                                          void  (*free)(void*),
+                                          void* (realloc)(void*, size_t))
+{
+	heap->use_zend_alloc = 0;
+	heap->malloc = malloc;
+	heap->free = free;
+	heap->realloc = realloc;
 }
 
 #if ZEND_DEBUG
