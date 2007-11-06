@@ -21,8 +21,9 @@ PHP                                                                        NEWS
 - Added support for dynamic access of static members using $foo::myFunc().
   (Etienne Kneuss)
 - Added "compact" handler for Zend MM storage. (Dmitry)
-- Added '+' and '*' specifiers to zend_parse_parameters(). (Andrei)
-- Added 'ignore_errors' option to http fopen wrapper. (David Zulke, Sara)
+- Added "+" and "*" specifiers to zend_parse_parameters(). (Andrei)
+- Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
+- Added context parameter for copy() function. (Sara)
 
 - Upgraded PCRE to version 7.4 (Nuno)
 
