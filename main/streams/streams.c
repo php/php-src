@@ -240,6 +240,11 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 	ret->is_persistent = persistent_id ? 1 : 0;
 	ret->chunk_size = FG(def_chunk_size);
 
+#if ZEND_DEBUG
+	ret->open_filename = __zend_orig_filename ? __zend_orig_filename : __zend_filename;
+	ret->open_lineno = __zend_orig_lineno ? __zend_orig_lineno : __zend_lineno;
+#endif
+
 	if (FG(auto_detect_line_endings)) {
 		ret->flags |= PHP_STREAM_FLAG_DETECT_EOL;
 	}
@@ -490,11 +495,10 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 						}
 						memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
 						stream->writepos += bucket->buflen;
-						
+
 						php_stream_bucket_unlink(bucket TSRMLS_CC);
 						php_stream_bucket_delref(bucket TSRMLS_CC);
 					}
-
 					break;
 
 				case PSFS_FEED_ME:
@@ -1324,8 +1328,9 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	while(1) {
 		readchunk = sizeof(buf);
 
-		if (maxlen && (maxlen - haveread) < readchunk)
+		if (maxlen && (maxlen - haveread) < readchunk) {
 			readchunk = maxlen - haveread;
+		}
 
 		didread = php_stream_read(src, buf, readchunk);
 
@@ -1355,8 +1360,8 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 			break;
 		}
 	}
-	return haveread;
 
+	return haveread;
 }
 /* }}} */
 
@@ -1522,7 +1527,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		/* BC with older php scripts and zlib wrapper */
 		protocol = "compress.zlib";
 		n = 13;
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"compress.zlib://\" instead.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"compress.zlib://\" instead");
 	}
 
 	if (protocol) {
@@ -1547,6 +1552,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 	}
 	/* TODO: curl based streams probably support file:// properly */
 	if (!protocol || !strncasecmp(protocol, "file", n))	{
+		/* fall back on regular file access */
+		php_stream_wrapper *plain_files_wrapper = &php_plain_files_wrapper;
+
 		if (protocol) {
 			int localhost = 0;
 
@@ -1597,13 +1605,12 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 			}
 
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Plainfiles wrapper disabled");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "file:// wrapper is disabled in the server configuration");
 			}
 			return NULL;
 		}
-
-		/* fall back on regular file access */		
-		return &php_plain_files_wrapper;
+		
+		return plain_files_wrapper;
 	}
 
 	if (wrapperpp && (*wrapperpp)->is_url && 	    
@@ -1612,7 +1619,10 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 	     (((options & STREAM_OPEN_FOR_INCLUDE) ||
 	       PG(in_user_include)) && !PG(allow_url_include)))) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL file-access is disabled in the server configuration");
+			/* protocol[n] probably isn't '\0' */
+			char *protocol_dup = estrndup(protocol, n);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s:// wrapper is disabled in the server configuration", protocol_dup);
+			efree(protocol_dup);
 		}
 		return NULL;
 	}
@@ -1768,7 +1778,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 
 	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options TSRMLS_CC);
 	if (options & STREAM_USE_URL && (!wrapper || !wrapper->is_url)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function may only be used against URLs.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function may only be used against URLs");
 		return NULL;
 	}
 
@@ -1802,6 +1812,10 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		}
 		copy_of_path = pestrdup(path, persistent);
 		stream->orig_path = copy_of_path;
+#if ZEND_DEBUG
+		stream->open_filename = __zend_orig_filename ? __zend_orig_filename : __zend_filename;
+		stream->open_lineno = __zend_orig_lineno ? __zend_orig_lineno : __zend_lineno;
+#endif
 	}
 
 	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
