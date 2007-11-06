@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip no symlinks on Windows');
 }
 if (substr(PHP_OS, 0, 3) == 'SUN') {
-    die('skip Not valid for Sun Solaris');
+  die('skip Not valid for Sun Solaris');
 }
 if (PHP_INT_SIZE != 4) {
   die("skip this test is for 32bit platform only");
@@ -72,10 +72,10 @@ unlink(dirname(__FILE__)."/symlink_link_linkinfo_is_link_error1.tmp");
 --EXPECTF--
 *** Testing symlink() for error conditions ***
 
-Warning: Wrong parameter count for symlink() in %s on line %d
+Warning: symlink() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for symlink() in %s on line %d
+Warning: symlink() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
 Warning: symlink(): %s in %s on line %d
@@ -98,10 +98,10 @@ bool(false)
 
 *** Testing linkinfo() for error conditions ***
 
-Warning: Wrong parameter count for linkinfo() in %s on line %d
+Warning: linkinfo() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for linkinfo() in %s on line %d
+Warning: linkinfo() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 Warning: linkinfo(): %s in %s on line %d

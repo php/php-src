@@ -5,7 +5,7 @@ Test symlink(), linkinfo(), link() and is_link() functions : error conditions - 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip no symlinks on Windows');
 }
-if (PHP_INT_SIZE != 4) {
+if (PHP_INT_SIZE != 4 ) {
   die("skip this test is for 32bit platform only");
 }
 ?>
@@ -69,10 +69,10 @@ unlink(dirname(__FILE__)."/symlink_link_linkinfo_is_link_error2.tmp");
 --EXPECTF--
 *** Testing link() for error conditions ***
 
-Warning: Wrong parameter count for link() in %s on line %d
+Warning: link() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for link() in %s on line %d
+Warning: link() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
 Warning: link(): %s in %s on line %d

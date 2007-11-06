@@ -2358,16 +2358,15 @@ out:
    Return the resolved path */
 PHP_FUNCTION(realpath)
 {
-	zval **path;
+	char *filename;
+	int filename_len;
 	char resolved_path_buff[MAXPATHLEN];
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &path) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(path);
-
-	if (VCWD_REALPATH(Z_STRVAL_PP(path), resolved_path_buff)) {
+	if (VCWD_REALPATH(filename, resolved_path_buff)) {
 		if (PG(safe_mode) && (!php_checkuid(resolved_path_buff, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 			RETURN_FALSE;
 		}
