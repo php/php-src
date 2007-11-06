@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
    | Author:  Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
- */
-
+*/
 
 /* $Id$ */
 
@@ -30,7 +29,6 @@
 		"you are trying to operate on was loaded _before_ " \
 		"unserialize() gets called or provide a __autoload() function " \
 		"to load the class definition "
-
 
 static zend_object_handlers php_incomplete_object_handlers;
 
@@ -60,7 +58,8 @@ static void incomplete_class_message(zval *object, int error_type TSRMLS_DC)
 static zval *incomplete_class_get_property(zval *object, zval *member, int type TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
-	if(type == BP_VAR_W || type == BP_VAR_RW) {
+	
+	if (type == BP_VAR_W || type == BP_VAR_RW) {
 		return EG(error_zval_ptr);
 	} else {
 		return EG(uninitialized_zval_ptr);
@@ -103,7 +102,8 @@ static union _zend_function *incomplete_class_get_method(zval **object, zstr met
 
 /* {{{ php_create_incomplete_class
  */
-static zend_object_value php_create_incomplete_object(zend_class_entry *class_type TSRMLS_DC) {
+static zend_object_value php_create_incomplete_object(zend_class_entry *class_type TSRMLS_DC)
+{
 	zend_object *object;
 	zend_object_value value;
 	
@@ -115,7 +115,7 @@ static zend_object_value php_create_incomplete_object(zend_class_entry *class_ty
 	return value;
 }
 
-zend_class_entry *php_create_incomplete_class(TSRMLS_D)
+PHPAPI zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 {
 	zend_class_entry incomplete_class;
 
@@ -152,8 +152,9 @@ PHPAPI zstr php_lookup_class_name(zval *object, zend_uint *nlen)
 			retval.s = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
 		}
 
-		if (nlen)
+		if (nlen) {
 			*nlen = Z_UNILEN_PP(val);
+		}
 	}
 
 	return retval;
