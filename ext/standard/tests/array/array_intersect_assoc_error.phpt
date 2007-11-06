@@ -26,11 +26,11 @@ echo "Done";
 
 -- Testing array_intersect_assoc() function with Zero arguments --
 
-Warning: Wrong parameter count for array_intersect_assoc() in %s on line %d
+Warning: array_intersect_assoc(): at least 2 parameters are required, 0 given in %s on line %d
 NULL
 
 -- Testing array_intersect_assoc() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for array_intersect_assoc() in %s on line %d
+Warning: array_intersect_assoc(): at least 2 parameters are required, 1 given in %s on line %d
 NULL
 Done
