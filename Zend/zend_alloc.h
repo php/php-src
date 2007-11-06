@@ -227,9 +227,9 @@ ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap TSRMLS_DC);
 ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap);
 
 ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
-                                          void* (*malloc)(size_t),
-                                          void  (*free)(void*),
-                                          void* (realloc)(void*, size_t));
+                                          void* (*_malloc)(size_t),
+                                          void  (*_free)(void*),
+                                          void* (*_realloc)(void*, size_t));
 
 #endif
 
