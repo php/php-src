@@ -1,13 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
-- Added glob stream. (Marcus)
 - Added 3 Firebird specific attributes that can be set via PDO::setAttribute()
   to control formatting of date/timestamp columns: PDO::FB_ATTR_DATE_FORMAT,
   PDO::FB_ATTR_TIME_FORMAT and PDO::FB_ATTR_TIMESTAMP_FORMAT. 
 - Added gmp_testbit() function from HEAD. (Stas)
-- Added CGI SAPI -T option, to measure execution time of script repeated
-  several times. (Dmitry)
 - Added icon format support to getimagesize(). (Scott)
 - Added LDAP_OPT_NETWORK_TIMEOUT option for ldap_set_option() to allow
   setting network timeout (FR #42837). (Jani)
@@ -15,7 +12,7 @@ PHP                                                                        NEWS
 - Added xsl->setProfiling() for profiling stylesheets. (Christian)
 - Added long-option feature to getopt() and made getopt() available also on 
   win32 systems by adding a common getopt implementation into core.
-  (Jani, David Soria Parra)
+  (David Soria Parra, Jani)
 - Added support for namespaces. (Dmitry, Stas)
 - Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
 - Added support for __callstatic() magic method. (Sara)
@@ -23,8 +20,6 @@ PHP                                                                        NEWS
   (Etienne Kneuss)
 - Added "compact" handler for Zend MM storage. (Dmitry)
 - Added "+" and "*" specifiers to zend_parse_parameters(). (Andrei)
-- Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
-- Added context parameter for copy() function. (Sara)
 
 - Upgraded PCRE to version 7.4 (Nuno)
 
@@ -40,18 +35,25 @@ PHP                                                                        NEWS
     mode of INI_SCANNER_NORMAL or INI_SCANNER_RAW. In raw mode option values
     and section values are treated as-is
   . Fixed get_cfg_var() to be able to return "array" ini options
-- Improved memory usage by moving constants to read only memory.
-  (Dmitry, Pierre)
+- Improved and cleaned CGI code:
+  . FastCGI is now always enabled and can not be disabled. 
+    See sapi/cgi/CHANGES for more details. (Dmitry)
+  . Added CGI SAPI -T option which can be used to measure execution
+    time of script repeated several times. (Dmitry)
+- Improved streams:
+  . Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
+  . Added context parameter for copy() function. (Sara)
+  . Added "glob" stream wrapper. (Marcus)
 - Improved ext/soap to support element names in context of XMLShema's <any>.
   (Dmitry)
 - Improved ext/openssl: (Dmitry)
   . Added support for OpenSSL digest functions
   . Added support for OpenSSL cipher functions
   . Added access to internal values of DSA, RSA and DH keys
-- Improved and cleaned CGI code. FastCGI is now always enabled and can not be
-  disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
+- Improved memory usage by moving constants to read only memory.
+  (Dmitry, Pierre)
 
-- Fixed possible crash in ext/soap because of uninitialized value (Zdash Urf)
+- Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 
 - Fixed bug #42848 (Status: header incorrect under FastCGI). (Dmitry)
 - Fixed bug #42773 (WSDL error causes HTTP 500 Response). (Dmitry)
