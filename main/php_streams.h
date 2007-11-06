@@ -220,7 +220,12 @@ struct _php_stream  {
 
 	int eof;
 
+#if ZEND_DEBUG
+	char *open_filename;
+	uint open_lineno;
+#endif
 }; /* php_stream */
+
 /* state definitions when closing down; these are private to streams.c */
 #define PHP_STREAM_FCLOSE_NONE 0
 #define PHP_STREAM_FCLOSE_FDOPEN	1
@@ -232,7 +237,6 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
 		const char *persistent_id, const char *mode STREAMS_DC TSRMLS_DC);
 END_EXTERN_C()
 #define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC TSRMLS_CC)
-
 
 #define php_stream_get_resource_id(stream)		(stream)->rsrc_id
 #if ZEND_DEBUG
@@ -430,6 +434,7 @@ END_EXTERN_C()
 
 #include "streams/php_stream_transport.h"
 #include "streams/php_stream_plain_wrapper.h"
+#include "streams/php_stream_glob_wrapper.h"
 #include "streams/php_stream_userspace.h"
 #include "streams/php_stream_mmap.h"
 
@@ -464,14 +469,15 @@ END_EXTERN_C()
 
 /* Wrappers support */
 
-#define IGNORE_PATH			0
-#define USE_PATH			1
-#define IGNORE_URL			2
-#define ENFORCE_SAFE_MODE 	4
-#define REPORT_ERRORS		8
+#define IGNORE_PATH                     0x00000000
+#define USE_PATH                        0x00000001
+#define IGNORE_URL                      0x00000002
+#define ENFORCE_SAFE_MODE               0x00000004
+#define REPORT_ERRORS                   0x00000008
+
 /* If you don't need to write to the stream, but really need to
  * be able to seek, use this flag in your options. */
-#define STREAM_MUST_SEEK	16
+#define STREAM_MUST_SEEK                0x00000010
 /* If you are going to end up casting the stream into a FILE* or
  * a socket, pass this flag and the streams/wrappers will not use
  * buffering mechanisms while reading the headers, so that HTTP
@@ -479,25 +485,28 @@ END_EXTERN_C()
  * If you omit this flag, streams will use buffering and should end 
  * up working more optimally.
  * */
-#define STREAM_WILL_CAST	32
+#define STREAM_WILL_CAST                0x00000020
 
 /* this flag applies to php_stream_locate_url_wrapper */
-#define STREAM_LOCATE_WRAPPERS_ONLY	64
+#define STREAM_LOCATE_WRAPPERS_ONLY     0x00000040
 
 /* this flag is only used by include/require functions */
-#define STREAM_OPEN_FOR_INCLUDE		128
+#define STREAM_OPEN_FOR_INCLUDE         0x00000080
 
 /* this flag tells streams to ONLY open urls */
-#define STREAM_USE_URL			256
+#define STREAM_USE_URL                  0x00000100
 
 /* this flag is used when only the headers from HTTP request are to be fetched */
-#define STREAM_ONLY_GET_HEADERS		512
+#define STREAM_ONLY_GET_HEADERS         0x00000200
 
 /* don't apply open_basedir checks */
-#define STREAM_DISABLE_OPEN_BASEDIR	1024
+#define STREAM_DISABLE_OPEN_BASEDIR     0x00000400
 
 /* get (or create) a persistent version of the stream */
-#define STREAM_OPEN_PERSISTENT	2048
+#define STREAM_OPEN_PERSISTENT          0x00000800
+
+/* use glob stream for directory open in plain files stream */
+#define STREAM_USE_GLOB_DIR_OPEN        0x00001000
 
 /* don't check allow_url_fopen and allow_url_include */
 #define STREAM_DISABLE_URL_PROTECTION   0x00002000
@@ -550,12 +559,12 @@ PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void);
 PHPAPI HashTable *_php_get_stream_filters_hash(TSRMLS_D);
 #define php_get_stream_filters_hash()	_php_get_stream_filters_hash(TSRMLS_C)
 PHPAPI HashTable *php_get_stream_filters_hash_global(void);
+extern php_stream_wrapper_ops *php_stream_user_wrapper_ops;
 END_EXTERN_C()
 #endif
 
 /* Definitions for user streams */
 #define PHP_STREAM_IS_URL		1
-
 /*
  * Local variables:
  * tab-width: 4

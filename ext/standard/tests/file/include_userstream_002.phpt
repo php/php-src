@@ -97,7 +97,7 @@ include "test2://hello";
 <?php echo "Hello World\n";?>
 <?php echo "Hello World\n";?>
 
-Warning: fopen(): URL file-access is disabled in the server configuration in %sinclude_userstream_002.php on line 10
+Warning: fopen(): test1:// wrapper is disabled in the server configuration in %sinclude_userstream_002.php on line 10
 
 Warning: fopen(test1://hello): failed to open stream: no suitable wrapper could be found in %sinclude_userstream_002.php on line 10
 
