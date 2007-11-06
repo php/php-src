@@ -283,6 +283,9 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
+	EX(function_state).function = (zend_function *) EX(op_array);
+	EG(function_state_ptr) = &EX(function_state);
+
 	if (EG(This)) {
 		if (EG(exception) && IS_CTOR_CALL(EX(called_scope))) {
 			if (IS_CTOR_USED(EX(called_scope))) {
@@ -306,8 +309,6 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		EG(called_scope) = current_called_scope;
 	}
 
-	EX(function_state).function = (zend_function *) EX(op_array);
-	EG(function_state_ptr) = &EX(function_state);
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
 
 	if (EG(exception)) {
