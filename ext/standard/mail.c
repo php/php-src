@@ -45,22 +45,21 @@
 #define EX_TEMPFAIL     75      /* temp failure; user is invited to retry */
 #endif
 
-#define SKIP_LONG_HEADER_SEP(str, pos)										\
+#define SKIP_LONG_HEADER_SEP(str, pos)																	\
 	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
-		pos += 2;											\
-		while (str[pos + 1] == ' ' || str[pos + 1] == '\t') {							\
-			pos++;											\
-		}												\
-		continue;											\
-	}													\
+		pos += 2;																						\
+		while (str[pos + 1] == ' ' || str[pos + 1] == '\t') {											\
+			pos++;																						\
+		}																								\
+		continue;																						\
+	}																									\
 
-#define MAIL_ASCIIZ_CHECK(str, len)			\
-	p = str;					\
-	e = p + len;					\
+#define MAIL_ASCIIZ_CHECK(str, len)				\
+	p = str;									\
+	e = p + len;								\
 	while ((p = memchr(p, '\0', (e - p)))) {	\
-		*p = ' ';				\
-	}						\
-
+		*p = ' ';								\
+	}											\
 
 /* {{{ proto int ezmlm_hash(string addr)
    Calculate EZMLM list hash value. */
@@ -69,18 +68,17 @@ PHP_FUNCTION(ezmlm_hash)
 	char *str = NULL;
 	unsigned long h = 5381L;
 	int j, str_len;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-							  &str, &str_len) == FAILURE) {
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
 	for (j = 0; j < str_len; j++) {
 		h = (h + (h << 5)) ^ (unsigned long) (unsigned char) tolower(str[j]);
 	}
-	
+
 	h = (h % 53);
-	
+
 	RETURN_LONG((int) h);
 }
 /* }}} */
@@ -100,15 +98,11 @@ PHP_FUNCTION(mail)
 	if (PG(safe_mode) && (ZEND_NUM_ARGS() == 5)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The fifth parameter is disabled in SAFE MODE");
 		RETURN_FALSE;
-	}	
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",
-							  &to, &to_len,
-							  &subject, &subject_len,
-							  &message, &message_len,
-							  &headers, &headers_len,
-							  &extra_cmd, &extra_cmd_len
-							  ) == FAILURE) {
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",	&to, &to_len, &subject, &subject_len, &message, &message_len,
+																	&headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE
+	) {
 		return;
 	}
 
@@ -136,15 +130,14 @@ PHP_FUNCTION(mail)
 				/* According to RFC 822, section 3.1.1 long headers may be separated into
 				 * parts using CRLF followed at least one linear-white-space character ('\t' or ' ').
 				 * To prevent these separators from being replaced with a space, we use the
-				 * SKIP_LONG_HEADER_SEP to skip over them.
-				 */
+				 * SKIP_LONG_HEADER_SEP to skip over them. */
 				SKIP_LONG_HEADER_SEP(to_r, i);
 				to_r[i] = ' ';
 			}
 		}
 	} else {
 		to_r = to;
-  	}
+	}
 
 	if (subject_len > 0) {
 		subject_r = estrndup(subject, subject_len);
@@ -154,7 +147,7 @@ PHP_FUNCTION(mail)
 			}
 			subject_r[subject_len - 1] = '\0';
 		}
-		for(i = 0; subject_r[i]; i++) {
+		for (i = 0; subject_r[i]; i++) {
 			if (iscntrl((unsigned char) subject_r[i])) {
 				SKIP_LONG_HEADER_SEP(subject_r, i);
 				subject_r[i] = ' ';
@@ -233,8 +226,9 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	errno = 0;
 	sendmail = popen(sendmail_cmd, "w");
 #endif
-	if (extra_cmd != NULL)
+	if (extra_cmd != NULL) {
 		efree (sendmail_cmd);
+	}
 
 	if (sendmail) {
 #ifndef PHP_WIN32
@@ -251,6 +245,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		}
 		fprintf(sendmail, "\n%s\n", message);
 		ret = pclose(sendmail);
+
 #ifdef PHP_WIN32
 		if (ret == -1)
 #else
