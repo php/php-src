@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2007 , PHP 5.2.5
+- Fixed bug #43196 (array_intersect_assoc() crashes with non-array input).
+  (Jani)
 
 01 Nov 2007, PHP 5.2.5RC2
 - Added ability to control memory consumption between request using
