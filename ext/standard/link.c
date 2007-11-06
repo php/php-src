@@ -54,24 +54,24 @@
    Return the target of a symbolic link */
 PHP_FUNCTION(readlink)
 {
-	zval **filename;
+	char *link;
+	int link_len;
 	char buff[MAXPATHLEN];
 	int ret;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &link, &link_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
 
-	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(filename), NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+	if (PG(safe_mode) && !php_checkuid(link, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
+	if (php_check_open_basedir(link TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	ret = readlink(Z_STRVAL_PP(filename), buff, MAXPATHLEN-1);
+	ret = readlink(link, buff, MAXPATHLEN-1);
 
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
@@ -88,16 +88,16 @@ PHP_FUNCTION(readlink)
    Returns the st_dev field of the UNIX C stat structure describing the link */
 PHP_FUNCTION(linkinfo)
 {
-	zval **filename;
+	char *link;
+	int link_len;
 	struct stat sb;
 	int ret;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &link, &link_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
 
-	ret = VCWD_LSTAT(Z_STRVAL_PP(filename), &sb);
+	ret = VCWD_LSTAT(link, &sb);
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_LONG(-1L);
@@ -111,18 +111,17 @@ PHP_FUNCTION(linkinfo)
    Create a symbolic link */
 PHP_FUNCTION(symlink)
 {
-	zval **topath, **frompath;
+	char *topath, *frompath;
+	int topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &topath, &frompath) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(topath);
-	convert_to_string_ex(frompath);
 
-	if (!expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC) || !expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC)) {
+	if (!expand_filepath(frompath, source_p TSRMLS_CC) || !expand_filepath(topath, dest_p TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
@@ -151,7 +150,7 @@ PHP_FUNCTION(symlink)
 	}
 
 #ifndef ZTS
-	ret = symlink(Z_STRVAL_PP(topath), Z_STRVAL_PP(frompath));
+	ret = symlink(topath, frompath);
 #else 
 	ret = symlink(dest_p, source_p);
 #endif	
@@ -168,18 +167,17 @@ PHP_FUNCTION(symlink)
    Create a hard link */
 PHP_FUNCTION(link)
 {
-	zval **topath, **frompath;
+	char *topath, *frompath;
+	int topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &topath, &frompath) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(topath);
-	convert_to_string_ex(frompath);
 
-	if (!expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC) || !expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC)) {
+	if (!expand_filepath(frompath, source_p TSRMLS_CC) || !expand_filepath(topath, dest_p TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
@@ -208,7 +206,7 @@ PHP_FUNCTION(link)
 	}
 
 #ifndef ZTS
-	ret = link(Z_STRVAL_PP(topath), Z_STRVAL_PP(frompath));
+	ret = link(topath, frompath);
 #else 
 	ret = link(dest_p, source_p);	
 #endif	

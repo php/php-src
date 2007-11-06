@@ -40,10 +40,10 @@ echo "Done\n";
 --EXPECTF--
 *** Testing readlink(): error conditions ***
 
-Warning: Wrong parameter count for readlink() in %s on line %d
+Warning: readlink() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for readlink() in %s on line %d
+Warning: readlink() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 *** Testing readlink() on a non-existent link ***
@@ -62,10 +62,10 @@ Warning: readlink(): Invalid argument in %s on line %d
 bool(false)
 *** Testing realpath(): error conditions ***
 
-Warning: Wrong parameter count for realpath() in %s on line %d
+Warning: realpath() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for realpath() in %s on line %d
+Warning: realpath() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 *** Testing realpath() on a non-existent file ***
