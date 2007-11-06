@@ -1450,12 +1450,13 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 				break;
 			case SEEK_SET:
 				if (offset > stream->position &&
-					offset < stream->position + stream->writepos - stream->readpos) {
+						offset < stream->position + stream->writepos - stream->readpos) {
 					stream->readpos += offset - stream->position;
 					stream->position = offset;
 					stream->eof = 0;
 					return 0;
 				}
+				break;
 		}
 	}
 
@@ -2078,7 +2079,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"compress.zlib://\" instead");
 	}
 
-	if (protocol)	{
+	if (protocol) {
 		char *tmp = estrndup(protocol, n);
 		if (FAILURE == zend_hash_find(wrapper_hash, (char*)tmp, n + 1, (void**)&wrapperpp)) {
 			php_strtolower(tmp, n);
