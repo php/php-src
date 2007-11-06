@@ -2987,13 +2987,24 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 		}
 	}
 
+	if (Z_TYPE_PP(args[0]) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #1 is not an array");
+		RETVAL_NULL();
+		goto out;
+	}
+
 	array_init(return_value);
 
 	for (p = Z_ARRVAL_PP(args[0])->pListHead; p != NULL; p = p->pListNext) {
 		if (p->nKeyLength == 0) {
 			ok = 1;
 			for (i = 1; i < argc; i++) {
-				if (zend_hash_index_find(Z_ARRVAL_PP(args[i]), p->h, (void**)&data) == FAILURE ||
+				if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
+					zval_dtor(return_value);
+					RETVAL_NULL();
+					goto out;
+				} else if (zend_hash_index_find(Z_ARRVAL_PP(args[i]), p->h, (void**)&data) == FAILURE ||
 					(intersect_data_compare_func &&
 					intersect_data_compare_func((zval**)p->pData, data TSRMLS_CC) != 0)
 				) {
@@ -3008,7 +3019,12 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 		} else {
 			ok = 1;
 			for (i = 1; i < argc; i++) {
-				if (zend_u_hash_quick_find(Z_ARRVAL_PP(args[i]), p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->h, (void**)&data) == FAILURE ||
+				if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
+					zval_dtor(return_value);
+					RETVAL_NULL();
+					goto out;
+				} else if (zend_u_hash_quick_find(Z_ARRVAL_PP(args[i]), p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->h, (void**)&data) == FAILURE ||
 					(intersect_data_compare_func &&
 					intersect_data_compare_func((zval**)p->pData, data TSRMLS_CC) != 0)
 				) {
@@ -3022,6 +3038,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 			}
 		}
 	}
+out:
 	efree(args);
 }
 /* }}} */
@@ -3388,13 +3405,24 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 		}
 	}
 
+	if (Z_TYPE_PP(args[0]) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #1 is not an array");
+		RETVAL_NULL();
+		goto out;
+	}
+
 	array_init(return_value);
 
 	for (p = Z_ARRVAL_PP(args[0])->pListHead; p != NULL; p = p->pListNext) {
 		if (p->nKeyLength == 0) {
 			ok = 1;
 			for (i = 1; i < argc; i++) {
-				if (zend_hash_index_find(Z_ARRVAL_PP(args[i]), p->h, (void**)&data) == SUCCESS &&
+				if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
+					zval_dtor(return_value);
+					RETVAL_NULL();
+					goto out;
+				} else if (zend_hash_index_find(Z_ARRVAL_PP(args[i]), p->h, (void**)&data) == SUCCESS &&
 					(!diff_data_compare_func ||
 					diff_data_compare_func((zval**)p->pData, data TSRMLS_CC) == 0)
 				) {
@@ -3409,7 +3437,12 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 		} else {
 			ok = 1;
 			for (i = 1; i < argc; i++) {
-				if (zend_u_hash_quick_find(Z_ARRVAL_PP(args[i]), p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->h, (void**)&data) == SUCCESS &&
+				if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
+					zval_dtor(return_value);
+					RETVAL_NULL();
+					goto out;
+				} else if (zend_u_hash_quick_find(Z_ARRVAL_PP(args[i]), p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->h, (void**)&data) == SUCCESS &&
 					(!diff_data_compare_func ||
 					diff_data_compare_func((zval**)p->pData, data TSRMLS_CC) == 0)
 				) {
@@ -3423,6 +3456,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 			}
 		}
 	}
+out:
 	efree(args);
 }
 /* }}} */
