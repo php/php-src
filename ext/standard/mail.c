@@ -44,14 +44,21 @@
 #define EX_TEMPFAIL     75      /* temp failure; user is invited to retry */
 #endif
 
-#define SKIP_LONG_HEADER_SEP(str, pos)										\
+#define SKIP_LONG_HEADER_SEP(str, pos)																	\
 	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
-		pos += 2;											\
-		while (str[pos + 1] == ' ' || str[pos + 1] == '\t') {							\
-			pos++;											\
-		}												\
-		continue;											\
-	}													\
+		pos += 2;																						\
+		while (str[pos + 1] == ' ' || str[pos + 1] == '\t') {											\
+			pos++;																						\
+		}																								\
+		continue;																						\
+	}																									\
+
+#define MAIL_ASCIIZ_CHECK(str, len)				\
+	p = str;									\
+	e = p + len;								\
+	while ((p = memchr(p, '\0', (e - p)))) {	\
+		*p = ' ';								\
+	}											\
 
 /* {{{ proto int ezmlm_hash(string addr) U
    Calculate EZMLM list hash value. */
@@ -60,7 +67,7 @@ PHP_FUNCTION(ezmlm_hash)
 	char *str = NULL;
 	unsigned long h = 5381L;
 	int j, str_len;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &str, &str_len, UG(ascii_conv)) == FAILURE) {
 		return;
 	}
@@ -68,9 +75,9 @@ PHP_FUNCTION(ezmlm_hash)
 	for (j = 0; j < str_len; j++) {
 		h = (h + (h << 5)) ^ (unsigned long) (unsigned char) tolower(str[j]);
 	}
-	
+
 	h = (h % 53);
-	
+
 	RETURN_LONG((int) h);
 }
 /* }}} */
@@ -86,14 +93,21 @@ PHP_FUNCTION(mail)
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",
-							  &to, &to_len,
-							  &subject, &subject_len,
-							  &message, &message_len,
-							  &headers, &headers_len,
-							  &extra_cmd, &extra_cmd_len
-							  ) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",	&to, &to_len, &subject, &subject_len, &message, &message_len,
+																	&headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE
+	) {
 		return;
+	}
+
+	/* ASCIIZ check */
+	MAIL_ASCIIZ_CHECK(to, to_len);
+	MAIL_ASCIIZ_CHECK(subject, subject_len);
+	MAIL_ASCIIZ_CHECK(message, message_len);
+	if (headers) {
+		MAIL_ASCIIZ_CHECK(headers, headers_len);
+	}
+	if (extra_cmd) {
+		MAIL_ASCIIZ_CHECK(extra_cmd, extra_cmd_len);
 	}
 
 	if (to_len > 0) {
@@ -109,15 +123,14 @@ PHP_FUNCTION(mail)
 				/* According to RFC 822, section 3.1.1 long headers may be separated into
 				 * parts using CRLF followed at least one linear-white-space character ('\t' or ' ').
 				 * To prevent these separators from being replaced with a space, we use the
-				 * SKIP_LONG_HEADER_SEP to skip over them.
-				 */
+				 * SKIP_LONG_HEADER_SEP to skip over them. */
 				SKIP_LONG_HEADER_SEP(to_r, i);
 				to_r[i] = ' ';
 			}
 		}
 	} else {
 		to_r = to;
-  	}
+	}
 
 	if (subject_len > 0) {
 		subject_r = estrndup(subject, subject_len);
@@ -127,7 +140,7 @@ PHP_FUNCTION(mail)
 			}
 			subject_r[subject_len - 1] = '\0';
 		}
-		for(i = 0; subject_r[i]; i++) {
+		for (i = 0; subject_r[i]; i++) {
 			if (iscntrl((unsigned char) subject_r[i])) {
 				SKIP_LONG_HEADER_SEP(subject_r, i);
 				subject_r[i] = ' ';
@@ -142,7 +155,7 @@ PHP_FUNCTION(mail)
 	} else if (extra_cmd) {
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
-	
+
 	if (php_mail(to_r, subject_r, message, headers, extra_cmd TSRMLS_CC)) {
 		RETVAL_TRUE;
 	} else {
@@ -192,10 +205,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 #endif
 	}
 	if (extra_cmd != NULL) {
-		sendmail_cmd = emalloc (strlen (sendmail_path) + strlen (extra_cmd) + 2);
-		strcpy (sendmail_cmd, sendmail_path);
-		strcat (sendmail_cmd, " ");
-		strcat (sendmail_cmd, extra_cmd);
+		spprintf(&sendmail_cmd, 0, "%s %s", sendmail_path, extra_cmd);
 	} else {
 		sendmail_cmd = sendmail_path;
 	}
@@ -209,8 +219,9 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	errno = 0;
 	sendmail = popen(sendmail_cmd, "w");
 #endif
-	if (extra_cmd != NULL)
+	if (extra_cmd != NULL) {
 		efree (sendmail_cmd);
+	}
 
 	if (sendmail) {
 #ifndef PHP_WIN32
@@ -227,6 +238,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		}
 		fprintf(sendmail, "\n%s\n", message);
 		ret = pclose(sendmail);
+
 #ifdef PHP_WIN32
 		if (ret == -1)
 #else
