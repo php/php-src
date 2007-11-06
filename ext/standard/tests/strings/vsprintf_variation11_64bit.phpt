@@ -2,7 +2,7 @@
 Test vsprintf() function : usage variations - octal formats with octal values
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -63,16 +63,16 @@ echo "Done";
 string(1) "0"
 
 -- Iteration 2 --
-string(14) "37777777777 1 "
+string(25) "1777777777777777777777 1 "
 
 -- Iteration 3 --
-string(38) "20000000000 o, 17777777777 20000000001"
+string(60) "1777777777760000000000 o, 17777777777 1777777777760000000001"
 
 -- Iteration 4 --
-string(38) "                      37776543211 0000"
+string(49) "                      1777777777777776543211 0000"
 
 -- Iteration 5 --
-string(32) "111 2222 37777444445 37733333334"
+string(54) "111 2222 1777777777777777444445 1777777777777733333334"
 
 -- Iteration 6 --
 string(17) "11073 7653 123 12"

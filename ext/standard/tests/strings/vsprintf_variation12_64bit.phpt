@@ -2,7 +2,7 @@
 Test vsprintf() function : usage variations - octal formats with non-octal values
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -82,22 +82,22 @@ echo "Done";
 *** Testing vsprintf() : octal formats and non-octal values ***
 
 -- Iteration 1 --
-string(116) "2 0 12 
-   361100 o 37777775456 2322
+string(149) "2 0 12 
+   361100 o 1777777777777777775456 2322
                           
-   30071 14 37777777764 37777416700
+   30071 14 1777777777777777777764 1777777777777777416700
    12 361100 2 0"
 
 -- Iteration 2 --
-string(146) "2 37777777776 2 
-   361100 o 37720715133 57062645
+string(201) "2 1777777777777777777776 2 
+   361100 o 1777777777777720715133 57062645
                           
-   57060664 4475347 37721631371 37720717336
-   2 361100 2 37777777776"
+   57060664 4475347 1777777777777721631371 1777777777777720717336
+   2 361100 2 1777777777777777777776"
 
 -- Iteration 3 --
-string(88) "0 0 0 
-   173 o 37777777605 173 
+string(99) "0 0 0 
+   173 o 1777777777777777777605 173 
                           
    2322 0 $0 _0
    0 173 0 0"

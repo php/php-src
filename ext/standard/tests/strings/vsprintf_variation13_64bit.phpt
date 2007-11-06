@@ -2,7 +2,7 @@
 Test vsprintf() function : usage variations - hexa formats with hexa values
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -63,16 +63,16 @@ echo "Done";
 string(1) "0"
 
 -- Iteration 2 --
-string(13) "ffffffff 1 22"
+string(21) "ffffffffffffffff 1 22"
 
 -- Iteration 3 --
-string(28) "7fffffff x, 7000000 80000000"
+string(36) "7fffffff x, 7000000 ffffffff80000000"
 
 -- Iteration 4 --
-string(35) "                      ffed2979 0000"
+string(43) "                      ffffffffffed2979 0000"
 
 -- Iteration 5 --
-string(22) "#1 2222 1b6db bbbbbbbc"
+string(30) "#1 2222 1b6db ffffffffbbbbbbbc"
 
 -- Iteration 6 --
 string(12) "123b fab 0 a"

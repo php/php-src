@@ -1,5 +1,9 @@
 --TEST--
 Test vsprintf() function : usage variations - hexa formats with non-hexa values
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)

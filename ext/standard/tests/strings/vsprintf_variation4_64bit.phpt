@@ -2,7 +2,7 @@
 Test vsprintf() function : usage variations - int formats with non-integer values
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -77,7 +77,7 @@ echo "Done";
 -- Iteration 1 --
 string(112) "2 +0 10 
    123456 d -1234 1234
-   -1474836480 200000     4000 22000000
+   20000000000 200000     4000 22000000
    12345 12 -12 -123456
    10 123456 2 0"
 

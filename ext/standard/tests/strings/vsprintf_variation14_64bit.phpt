@@ -1,8 +1,8 @@
 --TEST--
-Test vsprintf() function : usage variations - octal formats with non-octal values
+Test vsprintf() function : usage variations - hexa formats with non-hexa values
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -12,22 +12,22 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 */
 
 /*
- * Test vsprintf() when different octal formats and non-octal values are passed to
+ * Test vsprintf() when different hexa formats and non-hexa values are passed to
  * the '$format' and '$args' arguments of the function
 */
 
-echo "*** Testing vsprintf() : octal formats and non-octal values ***\n";
+echo "*** Testing vsprintf() : hexa formats and non-hexa values ***\n";
 
-// defining array of octal formats
+// defining array of different hexa formats
 $formats = 
-  '%o %+o %-o 
-   %lo %Lo %4o %-4o
-   %10.4o %-10.4o %.4o 
-   %\'#2o %\'2o %\'$2o %\'_2o
-   %3$o %4$o %1$o %2$o';
+  '%x %+x %-x 
+   %lx %Lx %4x %-4x
+   %10.4x %-10.4x %.4x 
+   %\'#2x %\'2x %\'$2x %\'_2x
+   %3$x %4$x %1$x %2$x';
 
-// Arrays of non octal values for the format defined in $format.
-// Each sub array contains non octal values which correspond to each format in $format
+// Arrays of non hexa values for the format defined in $format.
+// Each sub array contains non hexa values which correspond to each format in $format
 $args_array = array(
 
   // array of float values
@@ -54,21 +54,22 @@ $args_array = array(
   // different arrays
   array( array(0), array(1, 2), array(-1, -1),
          array("123"), array('123'), array('-123'), array("-123"),
-         array(true), array(false), array(FALSE),
+         array(true), array(TRUE), array(FALSE),
          array("123hello"), array("1", "2"), array('123hello'), array(12=>"12twelve"),
          array("3"), array("4"), array("1"), array("2") ),
 
   // array of boolean data
   array( true, TRUE, false,
          TRUE, 0, FALSE, 1,
-         true, false, TRUE,
+         true, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
   
 );
+
+// looping to test vsprintf() with different hexa formats from the above $format array
+// and with non-hexa values from the above $args_array array
  
-// looping to test vsprintf() with different octal formats from the above $format array
-// and with non-octal values from the above $args_array array
 $counter = 1;
 foreach($args_array as $args) {
   echo "\n-- Iteration $counter --\n";
@@ -79,39 +80,39 @@ foreach($args_array as $args) {
 echo "Done";
 ?>
 --EXPECTF--
-*** Testing vsprintf() : octal formats and non-octal values ***
+*** Testing vsprintf() : hexa formats and non-hexa values ***
 
 -- Iteration 1 --
-string(116) "2 0 12 
-   361100 o 37777775456 2322
+string(125) "2 0 a 
+   1e240 x fffffffffffffb2e 4d2 
                           
-   30071 14 37777777764 37777416700
-   12 361100 2 0"
+   3039 c fffffffffffffff4 fffffffffffe1dc0
+   a 1e240 2 0"
 
 -- Iteration 2 --
-string(146) "2 37777777776 2 
-   361100 o 37720715133 57062645
+string(164) "2 fffffffffffffffe 2 
+   1e240 x ffffffffff439a5b bc65a5
                           
-   57060664 4475347 37721631371 37720717336
-   2 361100 2 37777777776"
+   bc61b4 127ae7 ffffffffff4732f9 ffffffffff439ede
+   2 1e240 2 fffffffffffffffe"
 
 -- Iteration 3 --
-string(88) "0 0 0 
-   173 o 37777777605 173 
+string(90) "0 0 0 
+   7b x ffffffffffffff85 7b  
                           
-   2322 0 $0 _0
-   0 173 0 0"
+   4d2 0 $0 _0
+   0 7b 0 0"
 
 -- Iteration 4 --
 string(75) "1 1 1 
-   1 o    1 1   
+   1 x    1 1   
                           
    #1 1 $1 _1
    1 1 1 1"
 
 -- Iteration 5 --
 string(75) "1 1 0 
-   1 o    0 1   
+   1 x    0 1   
                           
    #0 1 $1 _0
    0 1 1 1"
