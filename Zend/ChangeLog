@@ -1,3 +1,9 @@
+2007-11-05  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      zend_API.c:
+      - Fix confusing logic (sync with HEAD)
+
 2007-11-02  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * (PHP_5_3)
