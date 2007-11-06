@@ -38,10 +38,10 @@ string(1) "0"
 string(22) "3498273496234234523441"
 string(1) "1"
 
-Warning: Wrong parameter count for gmp_invert() in %s on line %d
+Warning: gmp_invert() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_invert() in %s on line %d
+Warning: gmp_invert() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
 Warning: gmp_invert(): Unable to convert variable to GMP - wrong type in %s on line %d
@@ -64,10 +64,10 @@ unicode(1) "0"
 unicode(22) "3498273496234234523441"
 unicode(1) "1"
 
-Warning: Wrong parameter count for gmp_invert() in %s on line %d
+Warning: gmp_invert() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_invert() in %s on line %d
+Warning: gmp_invert() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
 Warning: gmp_invert(): Unable to convert variable to GMP - wrong type in %s on line %d

@@ -74,13 +74,13 @@ bool(false)
 Warning: gmp_gcdext(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_gcdext() in %s on line %d
+Warning: gmp_gcdext() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_gcdext() in %s on line %d
+Warning: gmp_gcdext() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_gcdext() in %s on line %d
+Warning: gmp_gcdext() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 Done
 --UEXPECTF--
@@ -121,12 +121,12 @@ bool(false)
 Warning: gmp_gcdext(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_gcdext() in %s on line %d
+Warning: gmp_gcdext() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_gcdext() in %s on line %d
+Warning: gmp_gcdext() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_gcdext() in %s on line %d
+Warning: gmp_gcdext() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 Done

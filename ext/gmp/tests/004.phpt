@@ -25,7 +25,7 @@ var_dump(gmp_intval($g));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for gmp_intval() in %s on line %d
+Warning: gmp_intval() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 int(0)
 int(1)

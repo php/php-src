@@ -28,6 +28,6 @@ int(20)
 Warning: gmp_popcount(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_popcount() in %s on line %d
+Warning: gmp_popcount() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 Done

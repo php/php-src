@@ -58,13 +58,13 @@ bool(false)
 Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_powm() in %s on line %d
+Warning: gmp_powm() expects exactly 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_powm() in %s on line %d
+Warning: gmp_powm() expects exactly 3 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_powm() in %s on line %d
+Warning: gmp_powm() expects exactly 3 parameters, 0 given in %s on line %d
 NULL
 
 Warning: gmp_powm(): Second parameter cannot be less than 0 in %s on line %d
@@ -94,16 +94,16 @@ bool(false)
 Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_powm() in %s on line %d
+Warning: gmp_powm() expects exactly 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_powm() in %s on line %d
+Warning: gmp_powm() expects exactly 3 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_powm() in %s on line %d
+Warning: gmp_powm() expects exactly 3 parameters, 0 given in %s on line %d
 NULL
 
 Warning: gmp_powm(): Second parameter cannot be less than 0 in %s on line %d
 bool(false)
-resource(%d) of type (GMP integer)
+resource(35) of type (GMP integer)
 Done

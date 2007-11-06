@@ -48,11 +48,11 @@ string(30) "238462734628347239571822592658"
 
 Warning: gmp_clrbit(): supplied argument is not a valid GMP integer resource in %s on line %d
 
-Warning: Wrong parameter count for gmp_clrbit() in %s on line %d
+Warning: gmp_clrbit() expects exactly 2 parameters, 3 given in %s on line %d
 
-Warning: Wrong parameter count for gmp_clrbit() in %s on line %d
+Warning: gmp_clrbit() expects exactly 2 parameters, 1 given in %s on line %d
 
-Warning: Wrong parameter count for gmp_clrbit() in %s on line %d
+Warning: gmp_clrbit() expects exactly 2 parameters, 0 given in %s on line %d
 Done
 --UEXPECTF--
 unicode(1) "0"
@@ -67,9 +67,9 @@ unicode(30) "238462734628347239571822592658"
 
 Warning: gmp_clrbit(): supplied argument is not a valid GMP integer resource in %s on line %d
 
-Warning: Wrong parameter count for gmp_clrbit() in %s on line %d
+Warning: gmp_clrbit() expects exactly 2 parameters, 3 given in %s on line %d
 
-Warning: Wrong parameter count for gmp_clrbit() in %s on line %d
+Warning: gmp_clrbit() expects exactly 2 parameters, 1 given in %s on line %d
 
-Warning: Wrong parameter count for gmp_clrbit() in %s on line %d
+Warning: gmp_clrbit() expects exactly 2 parameters, 0 given in %s on line %d
 Done
