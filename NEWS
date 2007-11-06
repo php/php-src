@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
+- Added glob stream. (Marcus)
 - Added 3 Firebird specific attributes that can be set via PDO::setAttribute()
   to control formatting of date/timestamp columns: PDO::FB_ATTR_DATE_FORMAT,
   PDO::FB_ATTR_TIME_FORMAT and PDO::FB_ATTR_TIMESTAMP_FORMAT. 
