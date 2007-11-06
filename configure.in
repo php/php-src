@@ -11,7 +11,7 @@ dnl ## Diversion 2 is the initial checking of OS features, programs,
 dnl ## libraries and so on.
 
 dnl ## In diversion 3 we check for compile-time options to the PHP
-dnl ## core and how to deal with different system dependencies.
+dnl ## core and how to deal with different system dependencies. 
 dnl ## This includes whether debugging or short tags are enabled
 dnl ## and the default behaviour of php.ini options.
 dnl ## This is also where an SAPI interface is selected (choosing between
@@ -270,7 +270,7 @@ fi
 divert(3)
 
 dnl ## In diversion 3 we check for compile-time options to the PHP
-dnl ## core and how to deal with different system dependencies.
+dnl ## core and how to deal with different system dependencies. 
 dnl ## This includes whether debugging or short tags are enabled
 dnl ## and the default behaviour of php.ini options.
 
@@ -1302,7 +1302,8 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
        output.c getopt.c)
 
 PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
-       plain_wrapper.c userspace.c transports.c xp_socket.c mmap.c)
+       plain_wrapper.c userspace.c transports.c xp_socket.c mmap.c \
+       glob_wrapper.c)
 
 PHP_ADD_SOURCES(/main, internal_functions.c,, sapi)
 
