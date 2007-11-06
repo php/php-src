@@ -3,11 +3,13 @@ dnl $Id$
 dnl config.m4 for extension mysqli
 
 PHP_ARG_WITH(mysqli, for MySQLi support,
-[  --with-mysqli[=FILE]    Include MySQLi support. FILE is the optional pathname to mysql_config [mysql_config].
-                          If mysqlnd is passed as FILE, the MySQL native driver will be used])
+[  --with-mysqli[=FILE]    Include MySQLi support.  FILE is the path
+                          to mysql_config.  If mysqlnd is passed as FILE,
+                          the MySQL native driver will be used [mysql_config]])
 
 PHP_ARG_ENABLE(embedded_mysqli, whether to enable embedded MySQLi support,
-[  --enable-embedded-mysqli  MYSQLi: Enable embedded support], no, no)
+[  --enable-embedded-mysqli  MYSQLi: Enable embedded support
+                            Note: Does not work with MySQL native driver!], no, no)
 
 if test "$PHP_MYSQLI" = "mysqlnd"; then
   dnl This needs to be set in any extension which wishes to use mysqlnd
