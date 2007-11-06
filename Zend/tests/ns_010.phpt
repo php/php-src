@@ -3,7 +3,7 @@
 --FILE--
 <?php
 namespace X;
-import X as Y;
+use X as Y;
 class Foo {	
 	const C = "const ok\n";
 	static $var = "var ok\n";

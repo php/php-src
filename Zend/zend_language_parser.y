@@ -147,7 +147,6 @@
 %token T_BINARY_DOUBLE
 %token T_BINARY_HEREDOC
 %token T_NAMESPACE
-%token T_IMPORT
 %token T_NS_C
 
 %% /* Rules */
@@ -172,8 +171,8 @@ top_statement:
 	|	class_declaration_statement		{ zend_do_early_binding(TSRMLS_C); }
 	|	T_HALT_COMPILER '(' ')' ';'		{ zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
 	|	T_NAMESPACE namespace_name ';'	{ zend_do_namespace(&$2 TSRMLS_CC); }
-	|	T_IMPORT namespace_name ';'		{ zend_do_import(&$2, NULL TSRMLS_CC); }
-	|	T_IMPORT namespace_name T_AS T_STRING ';'	{ zend_do_import(&$2, &$4 TSRMLS_CC); }
+	|	T_USE namespace_name ';'		{ zend_do_use(&$2, NULL TSRMLS_CC); }
+	|	T_USE namespace_name T_AS T_STRING ';'	{ zend_do_use(&$2, &$4 TSRMLS_CC); }
 	|	constant_declaration ';'
 ;
 
@@ -229,7 +228,6 @@ unticked_statement:
 	|	T_ECHO echo_expr_list ';'
 	|	T_INLINE_HTML			{ zend_do_echo(&$1, 1 TSRMLS_CC); }
 	|	expr ';'				{ zend_do_free(&$1 TSRMLS_CC); }
-	|	T_USE use_filename ';'		{ zend_error(E_COMPILE_ERROR,"use: Not yet supported. Please use include_once() or require_once()");  zval_dtor(&$2.u.constant); }
 	|	T_UNSET '(' unset_variables ')' ';'
 	|	T_FOREACH '(' variable T_AS
 		{ zend_do_foreach_begin(&$1, &$2, &$3, &$4, 1 TSRMLS_CC); }
@@ -276,12 +274,6 @@ unset_variables:
 unset_variable:
 		variable	{ zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1 TSRMLS_CC); }
 ;
-
-use_filename:
-		T_CONSTANT_ENCAPSED_STRING			{ $$ = $1; }
-	|	'(' T_CONSTANT_ENCAPSED_STRING ')'	{ $$ = $2; }
-;
-
 
 function_declaration_statement:
 		unticked_function_declaration_statement	{ zend_do_ticks(TSRMLS_C); }

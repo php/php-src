@@ -3,7 +3,7 @@
 --FILE--
 <?php
 namespace X;
-import X as Y;
+use X as Y;
 function foo() {
 	echo __FUNCTION__,"\n";
 }
