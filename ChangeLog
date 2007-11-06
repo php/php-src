@@ -1,3 +1,354 @@
+2007-11-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c:
+      MFB: Fixed bug #43197 (array_intersect_assoc() does not emit warning
+      messages for error inputs)
+
+    * (PHP_5_3)
+      ext/standard/array.c:
+      Fixed bug #43197 (array_intersect_assoc() does not emit warning messages
+      for
+      error inputs)
+
+2007-11-05  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      ext/standard/file.c:
+      MFH: Sync
+      [DOC]: note
+      [DOC] -/* {{{ proto bool copy(string source_file, string destination_file)
+      [DOC] +/* {{{ proto bool copy(string source_file, string destination_file
+      [, resource context])
+      [DOC]
+      [DOC] Apparently this was undocumented so far anyway..
+
+    * ext/standard/tests/file/tempnam_variation7.phpt:
+      - Fix another wrong expected result (this is a bug!)
+
+    * ext/standard/tests/file/tempnam_variation3.phpt:
+      - Fix another wrong expected result
+
+    * ext/standard/tests/file/flock_error.phpt:
+      - Fix expected result. This has hidden an obvious bug..
+
+2007-11-05  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/asort_basic.phpt
+      ext/standard/tests/array/asort_basic.phpt
+      ext/standard/tests/array/asort_error.phpt
+      ext/standard/tests/array/asort_error.phpt
+      ext/standard/tests/array/asort_object1.phpt
+      ext/standard/tests/array/asort_object1.phpt
+      ext/standard/tests/array/asort_object2.phpt
+      ext/standard/tests/array/asort_object2.phpt
+      ext/standard/tests/array/asort_variation1.phpt
+      ext/standard/tests/array/asort_variation1.phpt
+      ext/standard/tests/array/asort_variation10.phpt
+      ext/standard/tests/array/asort_variation10.phpt
+      ext/standard/tests/array/asort_variation11.phpt
+      ext/standard/tests/array/asort_variation11.phpt
+      ext/standard/tests/array/asort_variation2.phpt
+      ext/standard/tests/array/asort_variation2.phpt
+      ext/standard/tests/array/asort_variation3.phpt
+      ext/standard/tests/array/asort_variation3.phpt
+      ext/standard/tests/array/asort_variation4.phpt
+      ext/standard/tests/array/asort_variation4.phpt
+      ext/standard/tests/array/asort_variation5.phpt
+      ext/standard/tests/array/asort_variation5.phpt
+      ext/standard/tests/array/asort_variation6.phpt
+      ext/standard/tests/array/asort_variation6.phpt
+      ext/standard/tests/array/asort_variation7.phpt
+      ext/standard/tests/array/asort_variation7.phpt
+      ext/standard/tests/array/asort_variation8.phpt
+      ext/standard/tests/array/asort_variation8.phpt
+      ext/standard/tests/array/asort_variation9.phpt
+      ext/standard/tests/array/asort_variation9.phpt:
+      New testcases for asort() function
+
+    * ext/standard/tests/array/asort_basic.phpt
+      ext/standard/tests/array/asort_basic.phpt
+      ext/standard/tests/array/asort_basic.phpt
+      ext/standard/tests/array/asort_error.phpt
+      ext/standard/tests/array/asort_error.phpt
+      ext/standard/tests/array/asort_error.phpt
+      ext/standard/tests/array/asort_object1.phpt
+      ext/standard/tests/array/asort_object1.phpt
+      ext/standard/tests/array/asort_object1.phpt
+      ext/standard/tests/array/asort_object2.phpt
+      ext/standard/tests/array/asort_object2.phpt
+      ext/standard/tests/array/asort_object2.phpt
+      ext/standard/tests/array/asort_variation1.phpt
+      ext/standard/tests/array/asort_variation1.phpt
+      ext/standard/tests/array/asort_variation1.phpt
+      ext/standard/tests/array/asort_variation10.phpt
+      ext/standard/tests/array/asort_variation10.phpt
+      ext/standard/tests/array/asort_variation10.phpt
+      ext/standard/tests/array/asort_variation11.phpt
+      ext/standard/tests/array/asort_variation11.phpt
+      ext/standard/tests/array/asort_variation11.phpt
+      ext/standard/tests/array/asort_variation2.phpt
+      ext/standard/tests/array/asort_variation2.phpt
+      ext/standard/tests/array/asort_variation2.phpt
+      ext/standard/tests/array/asort_variation3.phpt
+      ext/standard/tests/array/asort_variation3.phpt
+      ext/standard/tests/array/asort_variation3.phpt
+      ext/standard/tests/array/asort_variation4.phpt
+      ext/standard/tests/array/asort_variation4.phpt
+      ext/standard/tests/array/asort_variation4.phpt
+      ext/standard/tests/array/asort_variation5.phpt
+      ext/standard/tests/array/asort_variation5.phpt
+      ext/standard/tests/array/asort_variation5.phpt
+      ext/standard/tests/array/asort_variation6.phpt
+      ext/standard/tests/array/asort_variation6.phpt
+      ext/standard/tests/array/asort_variation6.phpt
+      ext/standard/tests/array/asort_variation7.phpt
+      ext/standard/tests/array/asort_variation7.phpt
+      ext/standard/tests/array/asort_variation7.phpt
+      ext/standard/tests/array/asort_variation8.phpt
+      ext/standard/tests/array/asort_variation8.phpt
+      ext/standard/tests/array/asort_variation8.phpt
+      ext/standard/tests/array/asort_variation9.phpt
+      ext/standard/tests/array/asort_variation9.phpt
+      ext/standard/tests/array/asort_variation9.phpt:
+        1.1.4;
+      New testcases for asort() function
+
+    * (PHP_5_2)
+      ext/standard/tests/array/sort_object2.phpt:
+      better test title
+
+    * (PHP_5_3)
+      ext/standard/tests/array/sort_object2.phpt:
+      fix typo in title
+
+    * ext/standard/tests/array/sort_object2.phpt:
+      Fix test title
+
+2007-11-05  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/filestat.c:
+      ws + cs + sync some fixes from PHP_5_3 branch
+
+2007-11-05  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/sort_basic.phpt
+      ext/standard/tests/array/sort_basic.phpt
+      ext/standard/tests/array/sort_error.phpt
+      ext/standard/tests/array/sort_error.phpt
+      ext/standard/tests/array/sort_object1.phpt
+      ext/standard/tests/array/sort_object1.phpt
+      ext/standard/tests/array/sort_object2.phpt
+      ext/standard/tests/array/sort_object2.phpt
+      ext/standard/tests/array/sort_variation1.phpt
+      ext/standard/tests/array/sort_variation1.phpt
+      ext/standard/tests/array/sort_variation10.phpt
+      ext/standard/tests/array/sort_variation10.phpt
+      ext/standard/tests/array/sort_variation11.phpt
+      ext/standard/tests/array/sort_variation11.phpt
+      ext/standard/tests/array/sort_variation2.phpt
+      ext/standard/tests/array/sort_variation2.phpt
+      ext/standard/tests/array/sort_variation3.phpt
+      ext/standard/tests/array/sort_variation3.phpt
+      ext/standard/tests/array/sort_variation4.phpt
+      ext/standard/tests/array/sort_variation4.phpt
+      ext/standard/tests/array/sort_variation5.phpt
+      ext/standard/tests/array/sort_variation5.phpt
+      ext/standard/tests/array/sort_variation6.phpt
+      ext/standard/tests/array/sort_variation6.phpt
+      ext/standard/tests/array/sort_variation7.phpt
+      ext/standard/tests/array/sort_variation7.phpt
+      ext/standard/tests/array/sort_variation8.phpt
+      ext/standard/tests/array/sort_variation8.phpt
+      ext/standard/tests/array/sort_variation9.phpt
+      ext/standard/tests/array/sort_variation9.phpt:
+      New testcases for sort() function
+
+    * ext/standard/tests/array/sort_basic.phpt
+      ext/standard/tests/array/sort_basic.phpt
+      ext/standard/tests/array/sort_basic.phpt
+      ext/standard/tests/array/sort_error.phpt
+      ext/standard/tests/array/sort_error.phpt
+      ext/standard/tests/array/sort_error.phpt
+      ext/standard/tests/array/sort_object1.phpt
+      ext/standard/tests/array/sort_object1.phpt
+      ext/standard/tests/array/sort_object1.phpt
+      ext/standard/tests/array/sort_object2.phpt
+      ext/standard/tests/array/sort_object2.phpt
+      ext/standard/tests/array/sort_object2.phpt
+      ext/standard/tests/array/sort_variation1.phpt
+      ext/standard/tests/array/sort_variation1.phpt
+      ext/standard/tests/array/sort_variation1.phpt
+      ext/standard/tests/array/sort_variation10.phpt
+      ext/standard/tests/array/sort_variation10.phpt
+      ext/standard/tests/array/sort_variation10.phpt
+      ext/standard/tests/array/sort_variation11.phpt
+      ext/standard/tests/array/sort_variation11.phpt
+      ext/standard/tests/array/sort_variation11.phpt
+      ext/standard/tests/array/sort_variation2.phpt
+      ext/standard/tests/array/sort_variation2.phpt
+      ext/standard/tests/array/sort_variation2.phpt
+      ext/standard/tests/array/sort_variation3.phpt
+      ext/standard/tests/array/sort_variation3.phpt
+      ext/standard/tests/array/sort_variation3.phpt
+      ext/standard/tests/array/sort_variation4.phpt
+      ext/standard/tests/array/sort_variation4.phpt
+      ext/standard/tests/array/sort_variation4.phpt
+      ext/standard/tests/array/sort_variation5.phpt
+      ext/standard/tests/array/sort_variation5.phpt
+      ext/standard/tests/array/sort_variation5.phpt
+      ext/standard/tests/array/sort_variation6.phpt
+      ext/standard/tests/array/sort_variation6.phpt
+      ext/standard/tests/array/sort_variation6.phpt
+      ext/standard/tests/array/sort_variation7.phpt
+      ext/standard/tests/array/sort_variation7.phpt
+      ext/standard/tests/array/sort_variation7.phpt
+      ext/standard/tests/array/sort_variation8.phpt
+      ext/standard/tests/array/sort_variation8.phpt
+      ext/standard/tests/array/sort_variation8.phpt
+      ext/standard/tests/array/sort_variation9.phpt
+      ext/standard/tests/array/sort_variation9.phpt
+      ext/standard/tests/array/sort_variation9.phpt:
+        1.1.4;
+      New testcases for sort() function
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_intersect_assoc_basic.phpt
+      ext/standard/tests/array/array_intersect_assoc_basic.phpt
+      ext/standard/tests/array/array_intersect_assoc_error.phpt
+      ext/standard/tests/array/array_intersect_assoc_error.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation10.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation10.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation2.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation2.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation3.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation3.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation4.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation4.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation5.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation5.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation6.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation6.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation7.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation7.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation8.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation8.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation9.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation9.phpt:
+      New testcases for array_intersect_assoc() function
+
+2007-11-05  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/exec.c
+      ext/standard/exec.h:
+      ws + cs + missing PHPAPIs
+
+2007-11-05  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/array/array_intersect_assoc_basic.phpt
+      ext/standard/tests/array/array_intersect_assoc_basic.phpt
+      ext/standard/tests/array/array_intersect_assoc_basic.phpt
+      ext/standard/tests/array/array_intersect_assoc_error.phpt
+      ext/standard/tests/array/array_intersect_assoc_error.phpt
+      ext/standard/tests/array/array_intersect_assoc_error.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation10.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation10.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation10.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation2.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation2.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation2.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation3.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation3.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation3.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation4.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation4.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation4.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation5.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation5.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation5.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation6.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation6.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation6.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation7.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation7.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation7.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation8.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation8.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation8.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation9.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation9.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation9.phpt:
+        1.1.4;
+      New testcases for array_intersect_assoc() function
+
+2007-11-05  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/dns.c:
+      nuke compile warning
+
+    * ext/standard/dns.c
+      ext/standard/filestat.c
+      ext/standard/filestat.c:
+      ws
+
+    * ext/standard/datetime.c:
+      - ws
+
+    * (PHP_5_3)
+      ext/recode/CREDITS
+      ext/standard/credits_ext.h:
+      - fix oumlaut :)
+
+    * (PHP_5_3)
+      ext/standard/credits_ext.h:
+      update credits
+
+    * ext/standard/credits_ext.h:
+      Update credits
+
+    * ext/standard/base64.c:
+      - ws + cs + nuke a warning
+
+    * ext/standard/assert.c
+      ext/standard/browscap.c
+      ext/standard/crypt.c
+      ext/standard/cyr_convert.c
+      ext/standard/file.c:
+      ws + cs
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      - Fix confusing logic (sync with HEAD)
+
+2007-11-05  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2007.9
+
+2007-11-05  Mattias Bengtsson  <mattias@secweb.se>
+
+    * ext/gd/tests/bug43121.phpt
+      ext/gd/tests/bug43121.phpt:
+      -MFB, Right filename
+
+    * (PHP_5_2)
+      ext/gd/tests/bug43121.phpt:
+      - Right filename
+
+2007-11-05  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/http_fopen_wrapper.c:
+      Allow http fopen wrapper to fetch content on 'error' condition (David
+      Zulke)
+
 2007-11-04  Mattias Bengtsson  <mattias@secweb.se>
 
     * ext/gd/libgd/gd.c
