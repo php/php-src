@@ -73,7 +73,7 @@ int(0)
 int(0)
 int(0)
 
-Warning: Wrong parameter count for gmp_prob_prime() in %s on line %d
+Warning: gmp_prob_prime() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 Warning: gmp_prob_prime(): Unable to convert variable to GMP - wrong type in %s on line %d

@@ -48,10 +48,10 @@ string(11) "87178291200"
 Warning: gmp_fact(): Number has to be greater than or equal to 0 in %s on line %d
 string(1) "0"
 
-Warning: Wrong parameter count for gmp_fact() in %s on line %d
+Warning: gmp_fact() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_fact() in %s on line %d
+Warning: gmp_fact() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 resource(%d) of type (GMP integer)
 string(1) "1"
@@ -76,10 +76,10 @@ unicode(11) "87178291200"
 Warning: gmp_fact(): Number has to be greater than or equal to 0 in %s on line %d
 unicode(1) "0"
 
-Warning: Wrong parameter count for gmp_fact() in %s on line %d
+Warning: gmp_fact() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_fact() in %s on line %d
+Warning: gmp_fact() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 resource(%d) of type (GMP integer)
 unicode(1) "1"

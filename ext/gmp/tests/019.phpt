@@ -39,7 +39,7 @@ bool(false)
 bool(true)
 bool(false)
 
-Warning: Wrong parameter count for gmp_perfect_square() in %s on line %d
+Warning: gmp_perfect_square() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
 Warning: gmp_perfect_square(): Unable to convert variable to GMP - wrong type in %s on line %d

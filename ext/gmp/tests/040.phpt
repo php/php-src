@@ -21,15 +21,15 @@ echo "Done\n";
 resource(%d) of type (GMP integer)
 string(8) "98765678"
 
-Warning: Wrong parameter count for gmp_init() in %s on line %d
+Warning: gmp_init() expects at least 1 parameter, 0 given in %s on line %d
 
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_init() in %s on line %d
+Warning: gmp_init() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_init() in %s on line %d
+Warning: gmp_init() expects at most 2 parameters, 4 given in %s on line %d
 NULL
 
 Warning: gmp_init(): Bad base for conversion: -1 (should be between 2 and 36) in %s on line %d
@@ -42,15 +42,15 @@ Done
 resource(%d) of type (GMP integer)
 unicode(8) "98765678"
 
-Warning: Wrong parameter count for gmp_init() in %s on line %d
+Warning: gmp_init() expects at least 1 parameter, 0 given in %s on line %d
 
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_init() in %s on line %d
+Warning: gmp_init() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_init() in %s on line %d
+Warning: gmp_init() expects at most 2 parameters, 4 given in %s on line %d
 NULL
 
 Warning: gmp_init(): Bad base for conversion: -1 (should be between 2 and 36) in %s on line %d

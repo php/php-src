@@ -37,7 +37,7 @@ string(12) "-98765463338"
 Warning: gmp_com(): Unable to convert variable to GMP - wrong type in %s on line %d
 string(1) "0"
 
-Warning: Wrong parameter count for gmp_com() in %s on line %d
+Warning: gmp_com() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
@@ -56,7 +56,7 @@ unicode(12) "-98765463338"
 Warning: gmp_com(): Unable to convert variable to GMP - wrong type in %s on line %d
 unicode(1) "0"
 
-Warning: Wrong parameter count for gmp_com() in %s on line %d
+Warning: gmp_com() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)

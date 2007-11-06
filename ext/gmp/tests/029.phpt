@@ -35,10 +35,10 @@ string(1) "0"
 string(4) "1536"
 string(15) "424703623692768"
 
-Warning: Wrong parameter count for gmp_and() in %s on line %d
+Warning: gmp_and() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_and() in %s on line %d
+Warning: gmp_and() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
 Warning: gmp_and(): Unable to convert variable to GMP - wrong type in %s on line %d
@@ -60,10 +60,10 @@ unicode(1) "0"
 unicode(4) "1536"
 unicode(15) "424703623692768"
 
-Warning: Wrong parameter count for gmp_and() in %s on line %d
+Warning: gmp_and() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_and() in %s on line %d
+Warning: gmp_and() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
 Warning: gmp_and(): Unable to convert variable to GMP - wrong type in %s on line %d

@@ -48,18 +48,20 @@ string(1) "0"
 string(14) "10240000000000"
 string(14) "10240000000000"
 
-Warning: Wrong parameter count for gmp_pow() in %s on line %d
+Warning: gmp_pow() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_pow() in %s on line %d
+Warning: gmp_pow() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_pow() in %s on line %d
+Warning: gmp_pow() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-resource(%d) of type (GMP integer)
+Warning: gmp_pow() expects parameter 2 to be long, array given in %s on line %d
+NULL
+
+Warning: gmp_pow() expects parameter 2 to be long, array given in %s on line %d
+NULL
 
 Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
@@ -82,18 +84,20 @@ unicode(1) "0"
 unicode(14) "10240000000000"
 unicode(14) "10240000000000"
 
-Warning: Wrong parameter count for gmp_pow() in %s on line %d
+Warning: gmp_pow() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_pow() in %s on line %d
+Warning: gmp_pow() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_pow() in %s on line %d
+Warning: gmp_pow() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-resource(%d) of type (GMP integer)
+Warning: gmp_pow() expects parameter 2 to be long, array given in %s on line %d
+NULL
+
+Warning: gmp_pow() expects parameter 2 to be long, array given in %s on line %d
+NULL
 
 Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)

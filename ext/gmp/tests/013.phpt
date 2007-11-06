@@ -34,10 +34,10 @@ string(1) "0"
 string(1) "0"
 string(1) "0"
 
-Warning: Wrong parameter count for gmp_abs() in %s on line %d
+Warning: gmp_abs() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_abs() in %s on line %d
+Warning: gmp_abs() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 Warning: gmp_abs(): Unable to convert variable to GMP - wrong type in %s on line %d
@@ -56,10 +56,10 @@ unicode(1) "0"
 unicode(1) "0"
 unicode(1) "0"
 
-Warning: Wrong parameter count for gmp_abs() in %s on line %d
+Warning: gmp_abs() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_abs() in %s on line %d
+Warning: gmp_abs() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 Warning: gmp_abs(): Unable to convert variable to GMP - wrong type in %s on line %d

@@ -35,10 +35,10 @@ string(1) "0"
 string(15) "987657876576252"
 string(21) "987658441719689394144"
 
-Warning: Wrong parameter count for gmp_or() in %s on line %d
+Warning: gmp_or() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_or() in %s on line %d
+Warning: gmp_or() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
 Warning: gmp_or(): Unable to convert variable to GMP - wrong type in %s on line %d
@@ -60,10 +60,10 @@ unicode(1) "0"
 unicode(15) "987657876576252"
 unicode(21) "987658441719689394144"
 
-Warning: Wrong parameter count for gmp_or() in %s on line %d
+Warning: gmp_or() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gmp_or() in %s on line %d
+Warning: gmp_or() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
 Warning: gmp_or(): Unable to convert variable to GMP - wrong type in %s on line %d

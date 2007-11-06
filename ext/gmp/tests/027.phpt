@@ -28,12 +28,12 @@ int(-1)
 bool(false)
 int(0)
 
-Warning: Wrong parameter count for gmp_sign() in %s on line %d
+Warning: gmp_sign() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 Warning: gmp_sign(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for gmp_sign() in %s on line %d
+Warning: gmp_sign() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 Done
