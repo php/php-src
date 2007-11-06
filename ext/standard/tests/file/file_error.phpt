@@ -27,8 +27,7 @@ echo "\n--- Done ---";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-unlink($file_path."tmp.tmp");
-
+unlink($file_path."file.tmp");
 ?>
 --EXPECTF--
 *** Testing error conditions ***
