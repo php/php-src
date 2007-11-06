@@ -37,8 +37,6 @@ PHP                                                                        NEWS
   . Added support for OpenSSL digest functions
   . Added support for OpenSSL cipher functions
   . Added access to internal values of DSA, RSA and DH keys
-- Improved and cleaned CGI code. FastCGI is now always enabled and can not be
-  disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
 - Improved ext/zlib; re-implemented non-file related functionality. (Mike)
 - Improved output layer; see README.NEW-OUTPUT-API for internals. (Mike)
 - Improved ext/mhash: (Mike)
@@ -53,7 +51,6 @@ PHP                                                                        NEWS
 - Added an optional parameter to strstr() and stristr() for retrieval of either
   the part of haystack before or after first occurrence of needle. (Johannes)
 - Added streams features:
-  . Context parameter for copy() function. (Sara)
   . Second optional parameter to stream_context_create() to
     set params during context creation. (Sara)
   . "context" and "binary_pipes" params in "other_options" arg. (Sara)
