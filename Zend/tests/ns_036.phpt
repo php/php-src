@@ -5,7 +5,7 @@
 --FILE--
 <?php
 namespace A;
-import A as B;
+use A as B;
 class ArrayObject {
 	const STD_PROP_LIST = 2;
 }

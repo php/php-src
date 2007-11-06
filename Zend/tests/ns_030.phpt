@@ -5,7 +5,7 @@
 class Foo {
 }
 
-import A::B as Foo;
+use A::B as Foo;
 
 new Foo();
 --EXPECTF--

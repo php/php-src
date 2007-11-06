@@ -3,7 +3,7 @@
 --FILE--
 <?php
 namespace X;
-import X as Y;
+use X as Y;
 const A = "ok\n";
 const B = A;
 const C = array(A);
