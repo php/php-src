@@ -2,7 +2,7 @@
 Test vsprintf() function : usage variations - hexa formats with non-hexa values
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -83,22 +83,22 @@ echo "Done";
 *** Testing vsprintf() : hexa formats and non-hexa values ***
 
 -- Iteration 1 --
-string(101) "2 0 a 
-   1e240 x fffffb2e 4d2 
+string(125) "2 0 a 
+   1e240 x fffffffffffffb2e 4d2 
                           
-   3039 c fffffff4 fffe1dc0
+   3039 c fffffffffffffff4 fffffffffffe1dc0
    a 1e240 2 0"
 
 -- Iteration 2 --
-string(124) "2 fffffffe 2 
-   1e240 x ff439a5b bc65a5
+string(164) "2 fffffffffffffffe 2 
+   1e240 x ffffffffff439a5b bc65a5
                           
-   bc61b4 127ae7 ff4732f9 ff439ede
-   2 1e240 2 fffffffe"
+   bc61b4 127ae7 ffffffffff4732f9 ffffffffff439ede
+   2 1e240 2 fffffffffffffffe"
 
 -- Iteration 3 --
-string(82) "0 0 0 
-   7b x ffffff85 7b  
+string(90) "0 0 0 
+   7b x ffffffffffffff85 7b  
                           
    4d2 0 $0 _0
    0 7b 0 0"
@@ -117,27 +117,26 @@ string(75) "1 1 0
    #0 1 $1 _0
    0 1 1 1"
 Done
-
 --UEXPECTF--
 *** Testing vsprintf() : hexa formats and non-hexa values ***
 
 -- Iteration 1 --
-unicode(101) "2 0 a 
-   1e240 x fffffb2e 4d2 
+unicode(125) "2 0 a 
+   1e240 x fffffffffffffb2e 4d2 
                           
-   3039 c fffffff4 fffe1dc0
+   3039 c fffffffffffffff4 fffffffffffe1dc0
    a 1e240 2 0"
 
 -- Iteration 2 --
-unicode(124) "2 fffffffe 2 
-   1e240 x ff439a5b bc65a5
+unicode(164) "2 fffffffffffffffe 2 
+   1e240 x ffffffffff439a5b bc65a5
                           
-   bc61b4 127ae7 ff4732f9 ff439ede
-   2 1e240 2 fffffffe"
+   bc61b4 127ae7 ffffffffff4732f9 ffffffffff439ede
+   2 1e240 2 fffffffffffffffe"
 
 -- Iteration 3 --
-unicode(82) "0 0 0 
-   7b x ffffff85 7b  
+unicode(90) "0 0 0 
+   7b x ffffffffffffff85 7b  
                           
    4d2 0 $0 _0
    0 7b 0 0"
