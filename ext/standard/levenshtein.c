@@ -38,45 +38,61 @@ static int reference_levdist(void *s1, int l1, void *s2, int l2, zend_uchar str_
 		cp1 = u_countChar32((UChar *)s1, l1);
 		cp2 = u_countChar32((UChar *)s2, l2);
 
-		if (cp1 == 0) return cp2*cost_ins;
-		if (cp2 == 0) return cp1*cost_del;
-		if ((cp1>LEVENSHTEIN_MAX_LENGTH)||(cp2>LEVENSHTEIN_MAX_LENGTH)) {
+		if (cp1 == 0) {
+			return cp2 * cost_ins;
+		}
+		if (cp2 == 0) {
+			return cp1 * cost_del;
+		}
+		if ((cp1 > LEVENSHTEIN_MAX_LENGTH) || (cp2 > LEVENSHTEIN_MAX_LENGTH)) {
 			return -1;
 		}
 
-		p1 = safe_emalloc((cp2+1), sizeof(int), 0);
-		p2 = safe_emalloc((cp2+1), sizeof(int), 0);
+		p1 = safe_emalloc((cp2 + 1), sizeof(int), 0);
+		p2 = safe_emalloc((cp2 + 1), sizeof(int), 0);
 	} else {
-		if (l1 == 0) return l2*cost_ins;
-		if (l2 == 0) return l1*cost_del;
-		if ((l1>LEVENSHTEIN_MAX_LENGTH)||(l2>LEVENSHTEIN_MAX_LENGTH)) {
+		if (l1 == 0) {
+			return l2 * cost_ins;
+		}
+		if (l2 == 0) {
+			return l1 * cost_del;
+		}
+		if ((l1 > LEVENSHTEIN_MAX_LENGTH) || (l2 > LEVENSHTEIN_MAX_LENGTH)) {
 			return -1;
 		}
 
-		p1 = safe_emalloc((l2+1), sizeof(int), 0);
-		p2 = safe_emalloc((l2+1), sizeof(int), 0);
+		p1 = safe_emalloc((l2 + 1), sizeof(int), 0);
+		p2 = safe_emalloc((l2 + 1), sizeof(int), 0);
 	}
 
-	for (i2 = 0 ; i2 <= l2 ; i2++)
-		p1[i2] = i2*cost_ins;
-
-	for (i1 = 0, j1 = 0 ; i1 < l1 ; i1++) {
+	for (i2 = 0; i2 <= l2; i2++) {
+		p1[i2] = i2 * cost_ins;
+	}
+	for (i1 = 0, j1 = 0; i1 < l1; i1++) {
 		p2[0] = p1[0] + cost_del;
 		if (str_type == IS_UNICODE) {
 			U16_NEXT((UChar *)s1, j1, l1, ch1);
 		}
-		for (i2 = 0, j2 = 0 ; i2 < l2 ; i2++) {
+		for (i2 = 0, j2 = 0; i2 < l2; i2++) {
 			if (str_type == IS_UNICODE) {
 				U16_NEXT((UChar *)s2, j2, l2, ch2);
-				c0 = p1[i2] + ((ch1==ch2) ? 0 : cost_rep);
+				c0 = p1[i2] + ((ch1 == ch2) ? 0 : cost_rep);
 			} else {
-				c0 = p1[i2] + ((*((char *)s1+i1)==*((char *)s2+i2)) ? 0 : cost_rep);
+				c0 = p1[i2] + ((*((char *)s1 + i1) == *((char *)s2 + i2)) ? 0 : cost_rep);
 			}
-			c1 = p1[i2+1] + cost_del; if (c1 < c0) c0 = c1;
-			c2 = p2[i2] + cost_ins; if (c2 < c0) c0 = c2;				
-			p2[i2+1] = c0;
+			c1 = p1[i2 + 1] + cost_del;
+			if (c1 < c0) {
+				c0 = c1;
+			}
+			c2 = p2[i2] + cost_ins;
+			if (c2 < c0) {
+				c0 = c2;
+			}
+			p2[i2 + 1] = c0;
 		}
-		tmp=p1; p1=p2; p2=tmp;
+		tmp = p1;
+		p1 = p2;
+		p2 = tmp;
 	}
 	c0 = p1[l2];
 
@@ -89,7 +105,7 @@ static int reference_levdist(void *s1, int l1, void *s2, int l2, zend_uchar str_
 
 /* {{{ custom_levdist
  */
-static int custom_levdist(void *str1, void *str2, char *callback_name TSRMLS_DC) 
+static int custom_levdist(void *str1, void *str2, char *callback_name TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "The general Levenshtein support is not there yet");
 	/* not there yet */
@@ -102,54 +118,44 @@ static int custom_levdist(void *str1, void *str2, char *callback_name TSRMLS_DC)
    Calculate Levenshtein distance between two strings */
 PHP_FUNCTION(levenshtein)
 {
-	int	argc = ZEND_NUM_ARGS();
+	int argc = ZEND_NUM_ARGS();
 	void *str1, *str2;
+	char *callback_name;
 	int str1_len, str2_len, callback_len;
 	zend_uchar str1_type, str2_type;
 	long cost_ins, cost_rep, cost_del;
-	char *callback_name;
 	int distance = -1;
 
 	switch (argc) {
-	case 2: /* just two string: use maximum performance version  */
-		if (zend_parse_parameters(2 TSRMLS_CC, "TT",
-								  &str1, &str1_len, &str1_type,
-								  &str2, &str2_len, &str2_type) == FAILURE) {
-			return;
-		}
+		case 2: /* just two strings: use maximum performance version */
+			if (zend_parse_parameters(2 TSRMLS_CC, "TT", &str1, &str1_len, &str1_type, &str2, &str2_len, &str2_type) == FAILURE) {
+				return;
+			}
+			distance = reference_levdist(str1, str1_len, str2, str2_len, str1_type, 1, 1, 1);
+			break;
 
-		distance = reference_levdist(str1, str1_len, str2, str2_len, str1_type, 1, 1, 1);
-		break;
+		case 5: /* more general version: calc cost by ins/rep/del weights */
+			if (zend_parse_parameters(5 TSRMLS_CC, "TTlll", &str1, &str1_len, &str1_type, &str2, &str2_len, &str2_type, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
+				return;
+			}
+			distance = reference_levdist(str1, str1_len, str2, str2_len, str1_type, cost_ins, cost_rep, cost_del);
+			break;
 
-	case 5: /* more general version: calc cost by ins/rep/del weights */
-		if (zend_parse_parameters(5 TSRMLS_CC, "TTlll",
-								  &str1, &str1_len, &str1_type,
-								  &str2, &str2_len, &str2_type,
-								  &cost_ins, &cost_rep, &cost_del) == FAILURE) {
-			return;
-		}
+		case 3: /* most general version: calc cost by user-supplied function */
+			if (zend_parse_parameters(3 TSRMLS_CC, "TTs", &str1, &str1_len, &str1_type, &str2, &str2_len, &str2_type, &callback_name, &callback_len) == FAILURE) {
+				return;
+			}
+			distance = custom_levdist(str1, str2, callback_name TSRMLS_CC);
+			break;
 
-		distance = reference_levdist(str1, str1_len, str2, str2_len, str1_type, cost_ins, cost_rep, cost_del);
-		break;
-
-	case 3: /* most general version: calc cost by user-supplied function */
-		if (zend_parse_parameters(3 TSRMLS_CC, "TTs",
-								  &str1, &str1_len, &str1_type,
-								  &str2, &str2_len, &str2_type,
-								  &callback_name, &callback_len) == FAILURE) {
-			return;
-		}
-		distance = custom_levdist(str1, str2, callback_name TSRMLS_CC);
-		break;
-
-	default: 
-		WRONG_PARAM_COUNT;
-	}	
+		default:
+			WRONG_PARAM_COUNT;
+	}
 
 	if (distance < 0 && /* TODO */ ZEND_NUM_ARGS() != 3) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument string(s) too long");
 	}
-	
+
 	RETURN_LONG(distance);
 }
 /* }}} */
