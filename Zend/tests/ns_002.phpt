@@ -10,9 +10,9 @@ class Foo {
   }
 }
 
-import test::ns1::Foo as Bar;
-import test::ns1 as ns2;
-import test::ns1;
+use test::ns1::Foo as Bar;
+use test::ns1 as ns2;
+use test::ns1;
 
 Foo::bar();
 test::ns1::Foo::bar();
