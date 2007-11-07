@@ -39,8 +39,8 @@ Namespace or class name can be imported:
 
 <?php
 require 'Zend/Db/Connection.php';
-import Zend::DB;
-import Zend::DB::Connection as DbConnection;
+use Zend::DB;
+use Zend::DB::Connection as DbConnection;
 
 $x = new Zend::DB::Connection();
 $y = new DB::connection();
@@ -48,13 +48,13 @@ $z = new DbConnection();
 DB::connect();
 ?>
 
-import statement only defines name aliasing. It may create name alias for
-namespace or class. The simple form of statement "import A::B::C::D;" is
-equivalent to "import A::B::C::D as D;". Import statement can be used at any
+The use statement only defines name aliasing. It may create name alias for
+namespace or class. The simple form of statement "use A::B::C::D;" is
+equivalent to "use A::B::C::D as D;". The use statement can be used at any
 time in the global scope (not inside function/class) and takes effect from 
 the point of definition down to the end of file. It is recommended however to
-place imports at the beginning of the file. Import statements have effect
-only on the file where they appear.
+place the use statements at the beginning of the file. The use statements have
+effect only on the file where they appear.
 
 The special "empty" namespace (:: prefix) is useful as explicit global
 namespace qualification. All class and function names started from ::
@@ -83,10 +83,10 @@ In global namespace __NAMESPACE__ constant has the value of empty string.
 Names inside namespace are resolved according to the following rules:
 
 1) all qualified names are translated during compilation according to
-current import rules. So if we have "import A::B::C" and then "C::D::e()"
+current import rules. So if we have "use A::B::C" and then "C::D::e()"
 it is translated to "A::B::C::D::e()".
 2) unqualified class names translated during compilation according to
-current import rules. So if we have "import A::B::C" and then "new C()" it
+current import rules. So if we have "use A::B::C" and then "new C()" it
 is translated to "new A::B::C()".
 3) inside namespace, calls to unqualified functions that are defined in 
 current namespace (and are known at the time the call is parsed) are 

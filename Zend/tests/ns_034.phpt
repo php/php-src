@@ -3,7 +3,7 @@
 --FILE--
 <?php
 namespace A;
-import A as B;
+use A as B;
 class Foo {
 	const C = "ok\n";
 }

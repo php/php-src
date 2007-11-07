@@ -6,8 +6,8 @@ namespace test::ns1;
 
 const FOO = "ok\n";
 
-import test::ns1 as ns2;
-import test as ns3;
+use test::ns1 as ns2;
+use test as ns3;
 
 echo FOO;
 echo test::ns1::FOO;

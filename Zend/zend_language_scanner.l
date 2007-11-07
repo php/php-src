@@ -1202,10 +1202,6 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 	return T_NAMESPACE;
 }
 
-<ST_IN_SCRIPTING>"import" {
-	return T_IMPORT;
-}
-
 <ST_IN_SCRIPTING>"use" {
 	return T_USE;
 }

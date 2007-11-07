@@ -8,8 +8,8 @@ function foo() {
   echo __FUNCTION__,"\n";
 }
 
-import test::ns1 as ns2;
-import test as ns3;
+use test::ns1 as ns2;
+use test as ns3;
 
 foo();
 bar();

@@ -4,7 +4,7 @@
 <?php
 namespace a::b::c;
 
-import a::b::c as test;
+use a::b::c as test;
 
 require "ns_022.inc";
 

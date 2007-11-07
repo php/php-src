@@ -4600,7 +4600,7 @@ void zend_do_namespace(znode *name TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_do_import(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
+void zend_do_use(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 {
 	char *lcname;
 	zval *name, *ns, tmp;
@@ -4618,7 +4618,7 @@ void zend_do_import(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 	} else {
 		char *p;
 
-		/* The form "import A::B" is eqivalent to "import A::B as B".
+		/* The form "use A::B" is eqivalent to "use A::B as B".
 		   So we extract the last part of compound name ti use as a new_name */
 		name = &tmp;
 		p = zend_memrchr(Z_STRVAL_P(ns), ':', Z_STRLEN_P(ns));
@@ -4660,7 +4660,7 @@ void zend_do_import(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 		zend_error(E_COMPILE_ERROR, "Cannot reuse import name");
 	}
 	if (warn) {
-		zend_error(E_WARNING, "The import statement with non-compound name '%s' has no effect", Z_STRVAL_P(name));
+		zend_error(E_WARNING, "The use statement with non-compound name '%s' has no effect", Z_STRVAL_P(name));
 	}
 	efree(lcname);
 	zval_dtor(name);
