@@ -25,8 +25,8 @@ echo "\nDone\n";
 
 *** Testing boundary conditions ***
 int(2147483646)
-float(2147483648)
-float(2147483648)
+%s(2147483648)
+%s(2147483648)
 int(-2147483646)
 int(-2147483647)
 int(-2147483647)
