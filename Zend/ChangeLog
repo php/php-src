@@ -1,3 +1,62 @@
+2007-11-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug43175.phpt:
+      Fixed bug #43175 (__destruct() throwing an exception with __call() causes
+      segfault)
+
+    * tests/bug43175.phpt
+      tests/bug43175.phpt:
+      
+      file bug43175.phpt was initially added on branch PHP_5_3.
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug43201.phpt:
+      Fixed bug #43201 (Crash on using unitialized vals and __get/__set)
+
+    * tests/bug43201.phpt
+      tests/bug43201.phpt:
+      
+      file bug43201.phpt was initially added on branch PHP_5_3.
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_alloc.h
+      zend_alloc.h:
+      Fixed windows build (Rob)
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_alloc.h
+      zend_alloc.h:
+      Allow user defined malloc/realloc/free
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y
+      zend_language_scanner.l
+      tests/bug42859.phpt
+      tests/ns_002.phpt
+      tests/ns_010.phpt
+      tests/ns_012.phpt
+      tests/ns_020.phpt
+      tests/ns_022.phpt
+      tests/ns_029.phpt
+      tests/ns_030.phpt
+      tests/ns_033.phpt
+      tests/ns_034.phpt
+      tests/ns_036.phpt
+      tests/ns_037.phpt
+      tests/ns_040.phpt
+      tests/ns_042.phpt:
+      T_IMPORT -> T_USE
+
 2007-11-05  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * (PHP_5_3)

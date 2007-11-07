@@ -1,3 +1,253 @@
+2007-11-06  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/mail.c:
+      Ws + cs + missing fix for MOPB-33-2007:PHP mail() Message ASCIIZ Byte
+      Truncation
+
+2007-11-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/tests/bug38325.phpt
+      ext/spl/tests/bug40091.phpt
+      ext/spl/tests/bug40442.phpt:
+      - MFB Add tests
+
+2007-11-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug43175.phpt:
+      Fixed bug #43175 (__destruct() throwing an exception with __call() causes
+      segfault)
+
+    * ZendEngine2/tests/bug43175.phpt
+      ZendEngine2/tests/bug43175.phpt:
+      
+      file bug43175.phpt was initially added on branch PHP_5_3.
+
+2007-11-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_3)
+      run-tests.php:
+      - Add hash bang line
+
+2007-11-06  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/gmp/tests/004.phpt
+      ext/gmp/tests/005.phpt
+      ext/gmp/tests/006.phpt
+      ext/gmp/tests/007.phpt
+      ext/gmp/tests/008.phpt
+      ext/gmp/tests/009.phpt
+      ext/gmp/tests/010.phpt
+      ext/gmp/tests/011.phpt
+      ext/gmp/tests/012.phpt
+      ext/gmp/tests/013.phpt
+      ext/gmp/tests/014.phpt
+      ext/gmp/tests/015.phpt
+      ext/gmp/tests/016.phpt
+      ext/gmp/tests/017.phpt
+      ext/gmp/tests/018.phpt
+      ext/gmp/tests/019.phpt
+      ext/gmp/tests/020.phpt
+      ext/gmp/tests/021.phpt
+      ext/gmp/tests/022.phpt
+      ext/gmp/tests/023.phpt
+      ext/gmp/tests/024.phpt
+      ext/gmp/tests/025.phpt
+      ext/gmp/tests/026.phpt
+      ext/gmp/tests/027.phpt
+      ext/gmp/tests/028.phpt
+      ext/gmp/tests/029.phpt
+      ext/gmp/tests/030.phpt
+      ext/gmp/tests/031.phpt
+      ext/gmp/tests/032.phpt
+      ext/gmp/tests/033.phpt
+      ext/gmp/tests/034.phpt
+      ext/gmp/tests/035.phpt
+      ext/gmp/tests/036.phpt
+      ext/gmp/tests/037.phpt
+      ext/gmp/tests/038.phpt
+      ext/gmp/tests/040.phpt:
+      fix tests
+
+2007-11-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug43201.phpt:
+      Fixed bug #43201 (Crash on using unitialized vals and __get/__set)
+
+    * ZendEngine2/tests/bug43201.phpt
+      ZendEngine2/tests/bug43201.phpt:
+      
+      file bug43201.phpt was initially added on branch PHP_5_3.
+
+2007-11-06  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/tests/file/file_error.phpt:
+      fix: #2
+
+    * (PHP_5_3)
+      ext/standard/tests/file/file_error.phpt:
+      try #2
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/array_intersect_assoc_error.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation2.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation2.phpt:
+      MFH: - Fixed bug #43196 (array_intersect_assoc() crashes with non-array
+      input)
+
+    * ext/standard/array.c
+      ext/standard/tests/array/array_intersect_assoc_error.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation2.phpt:
+      - Fixed bug #43196 (array_intersect_assoc() crashes with non-array input)
+
+    * ext/standard/tests/file/file_error.phpt
+      ext/standard/tests/file/file_error.phpt:
+      fix cleanup
+
+2007-11-06  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/strings/vsprintf_basic7.phpt
+      ext/standard/tests/strings/vsprintf_basic7_64bit.phpt
+      ext/standard/tests/strings/vsprintf_basic7_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation11.phpt
+      ext/standard/tests/strings/vsprintf_variation11_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation11_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation12.phpt
+      ext/standard/tests/strings/vsprintf_variation12_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation12_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation13.phpt
+      ext/standard/tests/strings/vsprintf_variation13_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation13_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation14.phpt
+      ext/standard/tests/strings/vsprintf_variation14_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation14_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation15.phpt
+      ext/standard/tests/strings/vsprintf_variation15_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation15_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation16.phpt
+      ext/standard/tests/strings/vsprintf_variation16_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation16_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation19.phpt
+      ext/standard/tests/strings/vsprintf_variation19_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation19_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation4.phpt
+      ext/standard/tests/strings/vsprintf_variation4_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation4_64bit.phpt:
+      fix tests, add 64bit versions
+
+2007-11-06  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      fix NEWS
+
+2007-11-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/basic_functions.c
+      main/streams/plain_wrapper.c:
+      - MFH Add glob stream wrapper
+      [DOC] The glob stream wrapper allows stuff like this:
+      php -r '$it = new DirectoryIterator("glob://ext/spl/*.c");
+              foreach($it as $f) var_dump($f);'
+
+2007-11-06  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/tests/array/array_intersect_assoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_assoc_variation2.phpt:
+      - nuke extra UEXPECTF
+
+2007-11-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_alloc.h:
+      Fixed windows build (Rob)
+
+2007-11-06  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/levenshtein.c:
+      ws + cs
+
+    * ext/standard/lcg.c:
+      ws
+
+2007-11-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * main/network.c:
+      fix non ipv6 enabled win build
+
+2007-11-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams/streams.c:
+      - MFB ws
+
+2007-11-06  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/incomplete_class.c
+      ext/standard/php_incomplete_class.h:
+      - ws + cs
+
+2007-11-06  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/tokenizer/tokenizer_data.c:
+      T_IMPORT is gone
+
+2007-11-06  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * README.PARAMETER_PARSING_API:
+      - Clarify the difference with * and + args
+
+    * (PHP_5_3)
+      NEWS:
+      add news
+
+    * NEWS:
+      - Move some entries to 5.3
+
+2007-11-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_alloc.h:
+      Allow user defined malloc/realloc/free
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/tests/bug42859.phpt
+      ZendEngine2/tests/ns_002.phpt
+      ZendEngine2/tests/ns_010.phpt
+      ZendEngine2/tests/ns_012.phpt
+      ZendEngine2/tests/ns_020.phpt
+      ZendEngine2/tests/ns_022.phpt
+      ZendEngine2/tests/ns_029.phpt
+      ZendEngine2/tests/ns_030.phpt
+      ZendEngine2/tests/ns_033.phpt
+      ZendEngine2/tests/ns_034.phpt
+      ZendEngine2/tests/ns_036.phpt
+      ZendEngine2/tests/ns_037.phpt
+      ZendEngine2/tests/ns_040.phpt
+      ZendEngine2/tests/ns_042.phpt:
+      T_IMPORT -> T_USE
+
 2007-11-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/array.c:
