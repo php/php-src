@@ -2,7 +2,7 @@
 Test vsprintf() function : basic functionality - unsigned format
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -30,7 +30,7 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing vsprintf() : basic functionality - using unsigned format ***
-string(10) "4294966185"
-string(21) "4294966185 4293732729"
-string(32) "4294966185 4293732729 4292621864"
+string(20) "18446744073709550505"
+string(41) "18446744073709550505 18446744073708317049"
+string(62) "18446744073709550505 18446744073708317049 18446744073707206184"
 Done

@@ -2,7 +2,7 @@
 Test vsprintf() function : usage variations - unsigned formats with signed and other types of values
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -75,15 +75,15 @@ echo "Done";
 *** Testing vsprintf() : unsigned formats and signed & other types of values ***
 
 -- Iteration 1 --
-string(115) "2 0 10 
-   123456 u 1234 2820130816
-   2840207360 1177509888 12345 
-   12 4294967284 4294843840 _3
+string(143) "2 0 10 
+   123456 u 1234 20000000000
+   2000000000000 22000000000000 12345 
+   12 18446744073709551604 18446744073709428160 _3
    10 123456 2 0"
 
 -- Iteration 2 --
-string(88) "0 0 0 
-   123 u 4294967173 123 
+string(98) "0 0 0 
+   123 u 18446744073709551493 123 
             0 0          0 
    1234 0 $0 _0
    0 123 0 0"

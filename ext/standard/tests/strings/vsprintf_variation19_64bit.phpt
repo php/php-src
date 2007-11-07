@@ -2,7 +2,7 @@
 Test vsprintf() function : usage variations - with whitespaces in format strings
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -75,16 +75,16 @@ string(7) "A  B  C"
 string(38) "2.000000e+1  2.000000e-1  -2.000000e+1"
 
 -- Iteration 7 --
-string(18) "4294967285  22  33"
+string(28) "18446744073709551605  22  33"
 
 -- Iteration 8 --
-string(19) "12  37777777755  23"
+string(30) "12  1777777777777777777755  23"
 
 -- Iteration 9 --
-string(16) "11  ffffffde  33"
+string(24) "11  ffffffffffffffde  33"
 
 -- Iteration 10 --
-string(16) "11  FFFFFFDE  33"
+string(24) "11  FFFFFFFFFFFFFFDE  33"
 
 -- Iteration 11 --
 string(38) "2.000000E+1  2.000000E-1  -2.000000E+1"
