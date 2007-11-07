@@ -55,9 +55,9 @@ object(stdClass)#%d (3) {
 object(foo)#%d (3) {
   ["a"]=>
   string(1) "a"
-  ["b:private"]=>
+  ["b":"foo":private]=>
   string(1) "b"
-  ["c:protected"]=>
+  ["c":protected]=>
   string(1) "c"
 }
 ok
