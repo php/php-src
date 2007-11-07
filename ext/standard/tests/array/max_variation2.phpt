@@ -28,7 +28,7 @@ var_dump(max(array(-2147483649, -2147483647)));
 echo "\nDone\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 
 *** Testing arrays  ***
 int(2)
@@ -46,8 +46,8 @@ array(2) {
   int(3)
 }
 int(2147483646)
-float(2147483648)
-float(2147483648)
+%s(2147483648)
+%s(2147483648)
 int(-2147483646)
 int(-2147483647)
 int(-2147483647)
