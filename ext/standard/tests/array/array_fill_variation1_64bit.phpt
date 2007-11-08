@@ -2,7 +2,7 @@
 Test array_fill() function : usage variations  - unexpected values for 'start_key' argument
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -125,9 +125,9 @@ array(2) {
 }
 -- Iteration 3 --
 array(2) {
-  [-1097262584]=>
+  [123456789000]=>
   int(100)
-  [0]=>
+  [123456789001]=>
   int(100)
 }
 -- Iteration 4 --
