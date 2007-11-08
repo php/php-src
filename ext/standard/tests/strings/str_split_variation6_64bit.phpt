@@ -1,8 +1,8 @@
 --TEST--
-Test str_split() function : usage variations - different integer values for 'split_length' with heredoc 'str'
+Test str_split() function : usage variations - different integer values for 'split_length' argument
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -15,14 +15,12 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 */
 
 /*
-* passing different integer values for 'split_length' and heredoc string as 'str' argument to str_split()
+* passing different integer values for 'split_length' argument to str_split()
 */
 
-echo "*** Testing str_split() : different intger values for 'split_length' with heredoc 'str' ***\n";
+echo "*** Testing str_split() : different intger values for 'split_length' ***\n";
 //Initialise variables
-$str = <<<EOT
-string with 123,escape char \t.
-EOT;
+$str = 'This is a string with 123 & escape char \t';
 
 //different values for 'split_length' 
 $values = array (
@@ -44,73 +42,97 @@ for($count = 0; $count < count($values); $count++) {
 echo "Done"
 ?>
 --EXPECTF--
-*** Testing str_split() : different intger values for 'split_length' with heredoc 'str' ***
+*** Testing str_split() : different intger values for 'split_length' ***
 -- Iteration 1 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
 bool(false)
 -- Iteration 2 --
-array(30) {
+array(42) {
   [0]=>
-  string(1) "s"
+  string(1) "T"
   [1]=>
-  string(1) "t"
+  string(1) "h"
   [2]=>
-  string(1) "r"
+  string(1) "i"
   [3]=>
-  string(1) "i"
-  [4]=>
-  string(1) "n"
-  [5]=>
-  string(1) "g"
-  [6]=>
-  string(1) " "
-  [7]=>
-  string(1) "w"
-  [8]=>
-  string(1) "i"
-  [9]=>
-  string(1) "t"
-  [10]=>
-  string(1) "h"
-  [11]=>
-  string(1) " "
-  [12]=>
-  string(1) "1"
-  [13]=>
-  string(1) "2"
-  [14]=>
-  string(1) "3"
-  [15]=>
-  string(1) ","
-  [16]=>
-  string(1) "e"
-  [17]=>
   string(1) "s"
-  [18]=>
-  string(1) "c"
-  [19]=>
-  string(1) "a"
-  [20]=>
-  string(1) "p"
-  [21]=>
-  string(1) "e"
-  [22]=>
+  [4]=>
   string(1) " "
-  [23]=>
-  string(1) "c"
-  [24]=>
-  string(1) "h"
-  [25]=>
+  [5]=>
+  string(1) "i"
+  [6]=>
+  string(1) "s"
+  [7]=>
+  string(1) " "
+  [8]=>
   string(1) "a"
-  [26]=>
+  [9]=>
+  string(1) " "
+  [10]=>
+  string(1) "s"
+  [11]=>
+  string(1) "t"
+  [12]=>
   string(1) "r"
+  [13]=>
+  string(1) "i"
+  [14]=>
+  string(1) "n"
+  [15]=>
+  string(1) "g"
+  [16]=>
+  string(1) " "
+  [17]=>
+  string(1) "w"
+  [18]=>
+  string(1) "i"
+  [19]=>
+  string(1) "t"
+  [20]=>
+  string(1) "h"
+  [21]=>
+  string(1) " "
+  [22]=>
+  string(1) "1"
+  [23]=>
+  string(1) "2"
+  [24]=>
+  string(1) "3"
+  [25]=>
+  string(1) " "
+  [26]=>
+  string(1) "&"
   [27]=>
   string(1) " "
   [28]=>
-  string(1) "	"
+  string(1) "e"
   [29]=>
-  string(1) "."
+  string(1) "s"
+  [30]=>
+  string(1) "c"
+  [31]=>
+  string(1) "a"
+  [32]=>
+  string(1) "p"
+  [33]=>
+  string(1) "e"
+  [34]=>
+  string(1) " "
+  [35]=>
+  string(1) "c"
+  [36]=>
+  string(1) "h"
+  [37]=>
+  string(1) "a"
+  [38]=>
+  string(1) "r"
+  [39]=>
+  string(1) " "
+  [40]=>
+  string(1) "\"
+  [41]=>
+  string(1) "t"
 }
 -- Iteration 3 --
 
@@ -119,24 +141,25 @@ bool(false)
 -- Iteration 4 --
 array(1) {
   [0]=>
-  string(30) "string with 123,escape char 	."
+  string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 5 --
 array(2) {
   [0]=>
-  string(26) "string with 123,escape cha"
+  string(26) "This is a string with 123 "
   [1]=>
-  string(4) "r 	."
+  string(16) "& escape char \t"
 }
 -- Iteration 6 --
 array(1) {
   [0]=>
-  string(30) "string with 123,escape char 	."
+  string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 7 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+array(1) {
+  [0]=>
+  string(42) "This is a string with 123 & escape char \t"
+}
 -- Iteration 8 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
