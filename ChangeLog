@@ -1,3 +1,65 @@
+2007-11-07  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      win32/build/config.w32:
+      add glob wrapper
+
+2007-11-07  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/array/asort_variation3.phpt
+      ext/standard/tests/array/asort_variation3.phpt
+      ext/standard/tests/array/asort_variation3.phpt
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation2.phpt
+      ext/standard/tests/array/max_variation2.phpt
+      ext/standard/tests/array/sort_variation3.phpt
+      ext/standard/tests/array/sort_variation3.phpt
+      ext/standard/tests/array/sort_variation3.phpt:
+      fix tests
+
+    * (PHP_5_3)
+      ext/tokenizer/tokenizer_data.c:
+      T_IMPORT nuked
+
+2007-11-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * README.namespaces
+      README.namespaces
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/tests/bug42859.phpt
+      ZendEngine2/tests/ns_002.phpt
+      ZendEngine2/tests/ns_010.phpt
+      ZendEngine2/tests/ns_012.phpt
+      ZendEngine2/tests/ns_020.phpt
+      ZendEngine2/tests/ns_022.phpt
+      ZendEngine2/tests/ns_029.phpt
+      ZendEngine2/tests/ns_030.phpt
+      ZendEngine2/tests/ns_033.phpt
+      ZendEngine2/tests/ns_034.phpt
+      ZendEngine2/tests/ns_036.phpt
+      ZendEngine2/tests/ns_037.phpt
+      ZendEngine2/tests/ns_040.phpt
+      ZendEngine2/tests/ns_042.phpt:
+      T_IMPORT -> T_USE
+
+    * (PHP_5_3)
+      ext/soap/tests/bugs/bug30928.phpt:
+      Fixed test
+
+    * ext/standard/mail.c:
+      Fixed compilation
+
+2007-11-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation2.phpt:
+      Fixed tests on 64bit machines
+
 2007-11-06  Jani Taskinen  <jani.taskinen@iki.fi>
 
     * ext/standard/mail.c:
