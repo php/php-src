@@ -1,19 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Nov 2007 , PHP 5.2.5
-- Fixed bug #43196 (array_intersect_assoc() crashes with non-array input).
-  (Jani)
-
-01 Nov 2007, PHP 5.2.5RC2
-- Added ability to control memory consumption between request using
-  ZEND_MM_COMPACT environment variable. (Dmitry)
-- Fixed bug #43137 (rmdir() and rename() do not clear statcache). (Jani)
-- Fixed bug #42773 (WSDL error causes HTTP 500 Response). (Dmitry)
-
-18 Oct 2007, PHP 5.2.5RC1
+08 Nov 2007 , PHP 5.2.5
 - Upgraded PCRE to version 7.3 (Nuno)
 - Added optional parameter $provide_object to debug_backtrace(). (Sebastian)
 - Added alpha support for imagefilter() IMG_FILTER_COLORIZE. (Pierre)
+- Added ability to control memory consumption between request using
+  ZEND_MM_COMPACT environment variable. (Dmitry)
 
 - Improved speed of array_intersect_key(), array_intersect_assoc(),
   array_uintersect_assoc(), array_diff_key(), array_diff_assoc() and
@@ -46,8 +38,11 @@ PHP                                                                        NEWS
 - Fixed htmlentities/htmlspecialchars not to accept partial multibyte
   sequences. (Stas)
 
+- Fixed bug #43196 (array_intersect_assoc() crashes with non-array input).
+  (Jani)
 - Fixed bug #43139 (PDO ignores ATTR_DEFAULT_FETCH_MODE in some cases with
   fetchAll()). (Ilia)
+- Fixed bug #43137 (rmdir() and rename() do not clear statcache). (Jani)
 - Fixed bug #43130 (Bound parameters cannot have - in their name). (Ilia)
 - Fixed bug #43099 (XMLWriter::endElement() does not check # of params).
   (Ilia)
@@ -70,6 +65,7 @@ PHP                                                                        NEWS
   then following standard syntax). (Ilia)
 - Fixed bug #42783 (pg_insert() does not accept an empty list for
   insertion). (Ilia)
+- Fixed bug #42773 (WSDL error causes HTTP 500 Response). (Dmitry)
 - Fixed bug #42772 (Storing $this in a static var fails while handling a cast
   to string). (Dmitry)
 - Fixed bug #42767 (highlight_string() truncates trailing comment). (Ilia)
