@@ -1,8 +1,8 @@
 --TEST--
-Test str_split() function : usage variations - different integer values for 'split_length' with heredoc 'str'(Bug#42866)
+Test str_split() function : usage variations - different integer values for 'split_length' with heredoc 'str'
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -134,9 +134,10 @@ array(1) {
   string(30) "string with 123,escape char 	."
 }
 -- Iteration 7 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+array(1) {
+  [0]=>
+  string(30) "string with 123,escape char 	."
+}
 -- Iteration 8 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
@@ -225,7 +226,7 @@ array(2) {
   [0]=>
   unicode(26) "string with 123,escape cha"
   [1]=>
-  unicode(4) "r 	."
+  unicode(4) "r  ."
 }
 -- Iteration 6 --
 array(1) {
@@ -233,9 +234,10 @@ array(1) {
   unicode(30) "string with 123,escape char 	."
 }
 -- Iteration 7 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+array(1) {
+  [0]=>
+  unicode(30) "string with 123,escape char 	."
+}
 -- Iteration 8 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
