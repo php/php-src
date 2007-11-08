@@ -21,7 +21,7 @@ var_dump(max(0, 1 , 2, 3, 4, 5, 6, 7, 8, 9, 0, 10, 11, 12, 13, 14, 15, 16, 17, 1
 
 echo "\nDone\n";
 ?>
---EXPECT--
+--EXPECTF--
 
 *** Testing boundary conditions ***
 int(2147483646)
