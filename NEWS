@@ -62,6 +62,7 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #42637 (SoapFault : Only http and https are allowed). (Bill Moran)
 - Fixed bug #42509 (gmp leaks memory when gmp_init() not used). (Stas)
+- Fixed bug #42284 (duplicate of #39700). (Lars W)
 - Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
   characters). (Jani)
 - Fixed bug #41522 (PDO firebird driver returns null if it fails to connect). 
@@ -69,10 +70,17 @@ PHP                                                                        NEWS
 - Fixed bug #39822 (new PDO() doesn't work with firebird). (Lars W)
 - Fixed bug #39700 (NUMERIC error when result precision are 7,8 or 12-14 ). 
   (Lars W)
+- Fixed bug #39397 (invalid statement handle in Unknown on line 0). (Lars W)
+- Fixed bug #39056 (Interbase NUMERIC data type error). (Lars W)
 - Fixed bug #37911 (preg_replace_callback() ignores named groups). (Nuno)
 - Fixed bug #36128 (Interbase PDO - timestamp columns return NULL). (Lars W)
 - Fixed bug #35386 (firebird: first row is null). (Lars W)
 - Fixed bug #35163 (Array elements can lose references). (Dmitry)
+- Fixed bug #32143 (ibase_query() causing IBserver 7 crash with NULL param as
+  link-id). (Lars W)
+- Fixed bug #30907 (ibase_query() crashes (same bug as #32143). (Lars W)
+- Fixed bug #30690 (Resource handle from ibase_execute becomes invalid after 
+  return). (Lars W)
 - Fixed bug #27372 (parse error loading browscap.ini at apache startup).
   (Jani)
 
