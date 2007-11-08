@@ -206,33 +206,33 @@ string(1) "b"
 int(-4)
 
 *** Testing end() on objects ***
-object(foo1)#2 (0) {
+object(foo1)#%d (0) {
 }
 array(2) {
   [0]=>
-  &object(foo)#1 (0) {
+  &object(foo)#%d (0) {
   }
   [1]=>
-  &object(foo1)#2 (0) {
+  &object(foo1)#%d (0) {
   }
 }
 
 *** Testing end() on resource type ***
-resource(6) of type (stream)
-resource(6) of type (stream)
+resource(%d) of type (stream)
+resource(%d) of type (stream)
 
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for end() in %s on line %d
+Warning: end() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for end() in %s on line %d
+Warning: end() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: end(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: end() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 
-Warning: end(): Passed variable is not an array or object in %s on line %d
-bool(false)
+Warning: end() expects parameter 1 to be array, string given in %s on line %d
+NULL
 bool(false)
 Done

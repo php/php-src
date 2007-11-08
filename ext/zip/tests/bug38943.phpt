@@ -28,11 +28,11 @@ array(1) {
   int(1)
 }
 object(myZip)#1 (%d) {
-  ["test:private"]=>
+  ["test":"myZip":private]=>
   int(0)
   ["testp"]=>
   string(6) "foobar"
-  ["testarray:private"]=>
+  ["testarray":"myZip":private]=>
   array(1) {
     [0]=>
     int(1)
