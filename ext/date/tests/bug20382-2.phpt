@@ -90,7 +90,7 @@ result = Monday 1970-01-05 00:00:00 WAT
 wanted = Monday            00:00:00
 
 Antarctica/McMurdo
-ts     = Monday 2037-09-28 17:17:17 NZST
+ts     = Monday 2037-09-28 17:17:17 NZDT
 result = Monday 2037-10-05 00:00:00 NZDT
 wanted = Monday            00:00:00
 
