@@ -1,8 +1,8 @@
 --TEST--
-Test str_split() function : usage variations - different integer values for 'split_length' argument(Bug#42866) 
+Test str_split() function : usage variations - different integer values for 'split_length' argument
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -156,9 +156,10 @@ array(1) {
   string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 7 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+array(1) {
+  [0]=>
+  string(42) "This is a string with 123 & escape char \t"
+}
 -- Iteration 8 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
@@ -279,9 +280,10 @@ array(1) {
   unicode(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 7 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+array(1) {
+  [0]=>
+  unicode(42) "This is a string with 123 & escape char \t"
+}
 -- Iteration 8 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
