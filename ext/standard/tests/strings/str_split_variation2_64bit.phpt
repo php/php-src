@@ -2,7 +2,7 @@
 Test str_split() function : usage variations - unexpected values for 'split_length' argument
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -110,9 +110,10 @@ array(3) {
 Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
 bool(false)
 --Iteration 3 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+array(1) {
+  [0]=>
+  string(23) "variation2:split_length"
+}
 --Iteration 4 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
