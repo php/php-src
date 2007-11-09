@@ -700,7 +700,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, int start
 
 static int sapi_cgi_activate(TSRMLS_D)
 {
-	char *path, *doc_root;
+	char *path, *doc_root, *server_name;
 	uint path_len, doc_root_len;
 
 	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
@@ -709,9 +709,10 @@ static int sapi_cgi_activate(TSRMLS_D)
 	}
 
 	doc_root = sapi_cgibin_getenv("DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT") - 1 TSRMLS_CC);
+	server_name = sapi_cgibin_getenv("SERVER_NAME", sizeof("SERVER_NAME") - 1 TSRMLS_CC);
 
-	/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
-	if (!doc_root) {
+	/* DOCUMENT_ROOT and SERVER_NAME should also be defined at this stage..but better check it anyway */
+	if (!doc_root || !server_name) {
 		return FAILURE;
 	}
 	doc_root_len = strlen(doc_root);
@@ -733,6 +734,9 @@ static int sapi_cgi_activate(TSRMLS_D)
 
 	/* Activate per-dir-system-configuration defined in php.ini and stored into configuration_hash during startup */
 	php_ini_activate_per_dir_config(path, path_len TSRMLS_CC); /* Note: for global settings sake we check from root to path */
+
+	/* Activate per-host-system-configuration defined in php.ini and stored into configuration_hash during startup */
+	php_ini_activate_per_host_config(server_name, strlen(server_name) + 1 TSRMLS_CC);
 
 	/* Load and activate user ini files in path starting from DOCUMENT_ROOT */
 	if (strlen(PG(user_ini_filename))) {
