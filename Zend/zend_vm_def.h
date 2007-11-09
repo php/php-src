@@ -1064,6 +1064,10 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	    READY_TO_DESTROY(free_op1.var) &&
 	    !RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		if (!PZVAL_IS_REF(*EX_T(opline->result.u.var).var.ptr_ptr) &&
+		    ZVAL_REFCOUNT(*EX_T(opline->result.u.var).var.ptr_ptr) > 2) {
+			SEPARATE_ZVAL(EX_T(opline->result.u.var).var.ptr_ptr);
+		}
 	}
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
@@ -1081,6 +1085,10 @@ ZEND_VM_HANDLER(87, ZEND_FETCH_DIM_RW, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	    READY_TO_DESTROY(free_op1.var) &&
 	    !RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		if (!PZVAL_IS_REF(*EX_T(opline->result.u.var).var.ptr_ptr) &&
+		    ZVAL_REFCOUNT(*EX_T(opline->result.u.var).var.ptr_ptr) > 2) {
+			SEPARATE_ZVAL(EX_T(opline->result.u.var).var.ptr_ptr);
+		}
 	}
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
@@ -1115,6 +1123,10 @@ ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	    READY_TO_DESTROY(free_op1.var) &&
 	    !RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		if (!PZVAL_IS_REF(*EX_T(opline->result.u.var).var.ptr_ptr) &&
+		    ZVAL_REFCOUNT(*EX_T(opline->result.u.var).var.ptr_ptr) > 2) {
+			SEPARATE_ZVAL(EX_T(opline->result.u.var).var.ptr_ptr);
+		}
 	}
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
@@ -1143,6 +1155,10 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMP|VAR|CV)
 	    READY_TO_DESTROY(free_op1.var) &&
 	    !RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		if (!PZVAL_IS_REF(*EX_T(opline->result.u.var).var.ptr_ptr) &&
+		    ZVAL_REFCOUNT(*EX_T(opline->result.u.var).var.ptr_ptr) > 2) {
+			SEPARATE_ZVAL(EX_T(opline->result.u.var).var.ptr_ptr);
+		}
 	}
 	FREE_OP1_VAR_PTR();
 	if (EX_T(opline->result.u.var).var.ptr_ptr == NULL) {
@@ -1249,6 +1265,10 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	    READY_TO_DESTROY(free_op1.var) &&
 	    !RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		if (!PZVAL_IS_REF(*EX_T(opline->result.u.var).var.ptr_ptr) &&
+		    ZVAL_REFCOUNT(*EX_T(opline->result.u.var).var.ptr_ptr) > 2) {
+			SEPARATE_ZVAL(EX_T(opline->result.u.var).var.ptr_ptr);
+		}
 	}
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
@@ -1273,6 +1293,10 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	    READY_TO_DESTROY(free_op1.var) &&
 	    !RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		if (!PZVAL_IS_REF(*EX_T(opline->result.u.var).var.ptr_ptr) &&
+		    ZVAL_REFCOUNT(*EX_T(opline->result.u.var).var.ptr_ptr) > 2) {
+			SEPARATE_ZVAL(EX_T(opline->result.u.var).var.ptr_ptr);
+		}
 	}
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
@@ -1305,6 +1329,10 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		    READY_TO_DESTROY(free_op1.var) &&
 		    !RETURN_VALUE_UNUSED(&opline->result)) {
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
+			if (!PZVAL_IS_REF(*EX_T(opline->result.u.var).var.ptr_ptr) &&
+			    ZVAL_REFCOUNT(*EX_T(opline->result.u.var).var.ptr_ptr) > 2) {
+				SEPARATE_ZVAL(EX_T(opline->result.u.var).var.ptr_ptr);
+			}
 		}
 		FREE_OP1_VAR_PTR();
 		ZEND_VM_NEXT_OPCODE();
@@ -1338,6 +1366,10 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	    READY_TO_DESTROY(free_op1.var) &&
 	    !RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		if (!PZVAL_IS_REF(*EX_T(opline->result.u.var).var.ptr_ptr) &&
+		    ZVAL_REFCOUNT(*EX_T(opline->result.u.var).var.ptr_ptr) > 2) {
+			SEPARATE_ZVAL(EX_T(opline->result.u.var).var.ptr_ptr);
+		}
 	}
 	FREE_OP1_VAR_PTR();
 
