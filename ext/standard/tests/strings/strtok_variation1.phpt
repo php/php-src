@@ -41,8 +41,8 @@ $values =  array (
   // float values
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.1234567e10,
+  10.7654321E-10,
   .5,
 
   // array values
@@ -120,9 +120,9 @@ string(4) "10.5"
 -- Iteration 6 --
 string(4) "10.5"
 -- Iteration 7 --
-string(12) "105000000000"
+string(12) "101234567000"
 -- Iteration 8 --
-string(5) "1.06E"
+string(11) "1.07654321E"
 -- Iteration 9 --
 string(3) "0.5"
 -- Iteration 10 --
@@ -172,7 +172,6 @@ bool(false)
 Warning: strtok() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
 NULL
 Done
-
 --UEXPECTF--
 *** Testing strtok() : with first argument as non-string ***
 
@@ -194,9 +193,9 @@ unicode(4) "10.5"
 -- Iteration 6 --
 unicode(4) "10.5"
 -- Iteration 7 --
-unicode(12) "105000000000"
+unicode(12) "101234567000"
 -- Iteration 8 --
-unicode(5) "1.06E"
+unicode(11) "1.07654321E"
 -- Iteration 9 --
 unicode(3) "0.5"
 -- Iteration 10 --

@@ -3,7 +3,7 @@ Test chunk_split() function : usage variations - with unexpected values for 'str
 --FILE--
 <?php
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line %d%d%d%d
+ * Description: Returns split line 
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -33,58 +33,58 @@ $fp = fopen(__FILE__, 'r');
 //different values for 'str'
 $values = array(
 
-      // int data
-      0,
-      1,
-      12345,
-      -2345,
+  // int data
+  0,
+  1,
+  12345,
+  -2345,
 
-      // float data
-      10.5,
-      -10.5,
-      10.5e10,
-      10.6E-10,
-      .5,
+  // float data
+  10.5,
+  -10.5,
+  10.1234567e10,
+  10.7654321E-10,
+  .5,
 
-      // array data
-      array(),
-      array(0),
-      array(1),
-      array(1, 2),
-      array('color' => 'red', 'item' => 'pen'),
+  // array data
+  array(),
+  array(0),
+  array(1),
+  array(1, 2),
+  array('color' => 'red', 'item' => 'pen'),
 
-      // null data
-      NULL,
-      null,
+  // null data
+  NULL,
+  null,
 
-      // boolean data
-      true,
-      false,
-      TRUE,
-      FALSE,
+  // boolean data
+  true,
+  false,
+  TRUE,
+  FALSE,
 
-      // empty data
-      "",
-      '',
+  // empty data
+  "",
+  '',
 
-      // string data
-      "string",
-      'string',
+  // string data
+  "string",
+  'string',
 
-      // object data
-      new MyClass(),
+  // object data
+  new MyClass(),
 
-      // undefined data
-      @$undefined_var,
+  // undefined data
+  @$undefined_var,
 
-      // unset data
-      @$unset_var,
+  // unset data
+  @$unset_var,
 
-      // resource data
-      $fp	
+  // resource data
+  $fp	
 );
 
-// loop through each element of the array for str
+// loop through each element of the array for 'str'
 for($count = 0; $count < count($values); $count++) {
   echo "-- Iteration ".($count+1)." --\n";
   var_dump( chunk_split($values[$count], $chunklen, $ending) );
@@ -111,30 +111,30 @@ string(6) "10 .5 "
 -- Iteration 6 --
 string(8) "-1 0. 5 "
 -- Iteration 7 --
-string(18) "10 50 00 00 00 00 "
+string(18) "10 12 34 56 70 00 "
 -- Iteration 8 --
-string(11) "1. 06 E- 9 "
+string(20) "1. 07 65 43 21 E- 9 "
 -- Iteration 9 --
 string(5) "0. 5 "
 -- Iteration 10 --
 
-Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d%d
+Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d%d
+Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d%d
+Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d%d
+Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d%d
+Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(1) " "
@@ -164,10 +164,9 @@ string(1) " "
 string(1) " "
 -- Iteration 28 --
 
-Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d%d
+Warning: chunk_split() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
 NULL
 Done
-
 --UEXPECTF--
 *** Testing chunk_split() : with unexpected values for 'str' argument ***
 -- Iteration 1 --
@@ -183,9 +182,9 @@ unicode(6) "10 .5 "
 -- Iteration 6 --
 unicode(8) "-1 0. 5 "
 -- Iteration 7 --
-unicode(18) "10 50 00 00 00 00 "
+unicode(18) "10 12 34 56 70 00 "
 -- Iteration 8 --
-unicode(11) "1. 06 E- 9 "
+unicode(20) "1. 07 65 43 21 E- 9 "
 -- Iteration 9 --
 unicode(5) "0. 5 "
 -- Iteration 10 --

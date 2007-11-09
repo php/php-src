@@ -24,7 +24,7 @@ $fp = fopen(__FILE__,'r');
 //Class to get object variable
 class MyClass
 {
-  public function __tostring()
+  public function __toString()
   {
     return "object";
   }
@@ -42,8 +42,8 @@ $values = array(
   // float data
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.123456e10,
+  10.7654321E-10,
   .5,
 
   // array data
@@ -106,30 +106,30 @@ string(46) "This10.5 is 10.5simp10.5le s10.5trin10.5g.10.5"
 -- Iteration 6 --
 string(52) "This-10.5 is -10.5simp-10.5le s-10.5trin-10.5g.-10.5"
 -- Iteration 7 --
-string(94) "This105000000000 is 105000000000simp105000000000le s105000000000trin105000000000g.105000000000"
+string(94) "This101234560000 is 101234560000simp101234560000le s101234560000trin101234560000g.101234560000"
 -- Iteration 8 --
-string(64) "This1.06E-9 is 1.06E-9simp1.06E-9le s1.06E-9trin1.06E-9g.1.06E-9"
+string(100) "This1.07654321E-9 is 1.07654321E-9simp1.07654321E-9le s1.07654321E-9trin1.07654321E-9g.1.07654321E-9"
 -- Iteration 9 --
 string(40) "This0.5 is 0.5simp0.5le s0.5trin0.5g.0.5"
 -- Iteration 10 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d%d
+Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d%d
+Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d%d
+Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d%d
+Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d%d
+Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(22) "This is simple string."
@@ -155,10 +155,9 @@ string(22) "This is simple string."
 string(22) "This is simple string."
 -- Iteration 26 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), resource given in %s on line %d%d
+Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), resource given in %s on line %d
 NULL
 Done
-
 --UEXPECTF--
 *** Testing chunk_split() : unexpected values for 'ending' ***
 -- Iteration 1 --
@@ -174,9 +173,9 @@ unicode(46) "This10.5 is 10.5simp10.5le s10.5trin10.5g.10.5"
 -- Iteration 6 --
 unicode(52) "This-10.5 is -10.5simp-10.5le s-10.5trin-10.5g.-10.5"
 -- Iteration 7 --
-unicode(94) "This105000000000 is 105000000000simp105000000000le s105000000000trin105000000000g.105000000000"
+unicode(94) "This101234560000 is 101234560000simp101234560000le s101234560000trin101234560000g.101234560000"
 -- Iteration 8 --
-unicode(64) "This1.06E-9 is 1.06E-9simp1.06E-9le s1.06E-9trin1.06E-9g.1.06E-9"
+unicode(100) "This1.07654321E-9 is 1.07654321E-9simp1.07654321E-9le s1.07654321E-9trin1.07654321E-9g.1.07654321E-9"
 -- Iteration 9 --
 unicode(40) "This0.5 is 0.5simp0.5le s0.5trin0.5g.0.5"
 -- Iteration 10 --

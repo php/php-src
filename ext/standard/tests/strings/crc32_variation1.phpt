@@ -46,8 +46,8 @@ $values = array(
       // float data
       10.5,
       -10.5,
-      10.5e10,
-      10.6E-10,
+      10.1234567e10,
+      10.7654321E-10,
       .5,
 
       // array data
@@ -89,7 +89,8 @@ $values = array(
 $count = 1;
 foreach($values as $value) {
       echo "\n-- Iteration $count --\n";
-      var_dump( crc32((binary)$value) );
+      var_dump( crc32($value) );
+      $count++;
 };
 
 // closing the resource
@@ -107,92 +108,101 @@ Notice: Undefined variable: unset_var in %s on line %d
 -- Iteration 1 --
 int(-186917087)
 
--- Iteration 1 --
+-- Iteration 2 --
 int(-2082672713)
 
--- Iteration 1 --
+-- Iteration 3 --
 int(-873121252)
 
--- Iteration 1 --
+-- Iteration 4 --
 int(1860518047)
 
--- Iteration 1 --
+-- Iteration 5 --
 int(269248583)
 
--- Iteration 1 --
+-- Iteration 6 --
 int(-834950157)
 
--- Iteration 1 --
-int(-638440228)
+-- Iteration 7 --
+int(-965354630)
 
--- Iteration 1 --
-int(-742287383)
+-- Iteration 8 --
+int(1376932222)
 
--- Iteration 1 --
+-- Iteration 9 --
 int(-2036403827)
 
--- Iteration 1 --
+-- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-int(1624097203)
+Warning: crc32() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
--- Iteration 1 --
+-- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-int(1624097203)
+Warning: crc32() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
--- Iteration 1 --
+-- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-int(1624097203)
+Warning: crc32() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
--- Iteration 1 --
+-- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-int(1624097203)
+Warning: crc32() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
--- Iteration 1 --
+-- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-int(1624097203)
+Warning: crc32() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
--- Iteration 1 --
-int(0)
+-- Iteration 15 --
 
--- Iteration 1 --
-int(0)
+Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
+NULL
 
--- Iteration 1 --
+-- Iteration 16 --
+
+Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
+NULL
+
+-- Iteration 17 --
 int(-2082672713)
 
--- Iteration 1 --
+-- Iteration 18 --
 int(0)
 
--- Iteration 1 --
+-- Iteration 19 --
 int(-2082672713)
 
--- Iteration 1 --
+-- Iteration 20 --
 int(0)
 
--- Iteration 1 --
+-- Iteration 21 --
 int(0)
 
--- Iteration 1 --
+-- Iteration 22 --
 int(0)
 
--- Iteration 1 --
+-- Iteration 23 --
 int(-1465013268)
 
--- Iteration 1 --
-int(0)
+-- Iteration 24 --
 
--- Iteration 1 --
-int(0)
+Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
+NULL
 
--- Iteration 1 --
-int(716753449)
+-- Iteration 25 --
+
+Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
+NULL
+
+-- Iteration 26 --
+
+Warning: crc32() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 Done
-
 --UEXPECTF--
 *** Testing crc32() : with unexpected values for str argument ***
 
@@ -203,88 +213,102 @@ Notice: Undefined variable: unset_var in %s on line %d
 -- Iteration 1 --
 int(-186917087)
 
--- Iteration 1 --
+-- Iteration 2 --
 int(-2082672713)
 
--- Iteration 1 --
+-- Iteration 3 --
 int(-873121252)
 
--- Iteration 1 --
+-- Iteration 4 --
 int(1860518047)
 
--- Iteration 1 --
+-- Iteration 5 --
 int(269248583)
 
--- Iteration 1 --
+-- Iteration 6 --
 int(-834950157)
 
--- Iteration 1 --
-int(-638440228)
+-- Iteration 7 --
+int(-965354630)
 
--- Iteration 1 --
-int(-742287383)
+-- Iteration 8 --
+int(1376932222)
 
--- Iteration 1 --
+-- Iteration 9 --
 int(-2036403827)
 
--- Iteration 1 --
+-- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-int(1624097203)
+Warning: crc32() expects parameter 1 to be binary string, array given in %s on line %d
+NULL
 
--- Iteration 1 --
+-- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-int(1624097203)
+Warning: crc32() expects parameter 1 to be binary string, array given in %s on line %d
+NULL
 
--- Iteration 1 --
+-- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-int(1624097203)
+Warning: crc32() expects parameter 1 to be binary string, array given in %s on line %d
+NULL
 
--- Iteration 1 --
+-- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-int(1624097203)
+Warning: crc32() expects parameter 1 to be binary string, array given in %s on line %d
+NULL
 
--- Iteration 1 --
+-- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-int(1624097203)
+Warning: crc32() expects parameter 1 to be binary string, array given in %s on line %d
+NULL
 
--- Iteration 1 --
-int(0)
+-- Iteration 15 --
 
--- Iteration 1 --
-int(0)
+Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
+NULL
 
--- Iteration 1 --
+-- Iteration 16 --
+
+Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
+NULL
+
+-- Iteration 17 --
 int(-2082672713)
 
--- Iteration 1 --
+-- Iteration 18 --
 int(0)
 
--- Iteration 1 --
+-- Iteration 19 --
 int(-2082672713)
 
--- Iteration 1 --
+-- Iteration 20 --
 int(0)
 
--- Iteration 1 --
-int(0)
+-- Iteration 21 --
 
--- Iteration 1 --
-int(0)
+Warning: crc32() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
+NULL
 
--- Iteration 1 --
+-- Iteration 22 --
+
+Warning: crc32() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
+NULL
+
+-- Iteration 23 --
 int(-1465013268)
 
--- Iteration 1 --
-int(0)
+-- Iteration 24 --
 
--- Iteration 1 --
-int(0)
+Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
+NULL
 
--- Iteration 1 --
-int(716753449)
+-- Iteration 25 --
+
+Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
+NULL
+
+-- Iteration 26 --
+
+Warning: crc32() expects parameter 1 to be binary string, resource given in %s on line %d
+NULL
 Done
