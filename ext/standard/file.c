@@ -2244,11 +2244,10 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 								state = 0;
 								break;
 							default:
-								if ((escape_char == enclosure && *bptr == escape_char && *(bptr+1) == escape_char)
-									|| (escape_char != enclosure && *bptr == escape_char)) {
-									state = 1;
-								} else if (*bptr == enclosure) {
+								if (*bptr == enclosure) {
 									state = 2;
+								} else if (*bptr == escape_char) {
+									state = 1;
 								}
 								bptr++;
 								break;
