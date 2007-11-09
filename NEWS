@@ -25,10 +25,11 @@ PHP                                                                        NEWS
 
 - Improved php.ini handling: (Jani)
   . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI
-  . Added support for special [PATH=/opt/httpd/www.example.com/] sections
-    All directives set in these sections will not be able to be overridden
-    in user-defined ini-files or during runtime in the specified path
+  . Added support for special [PATH=/opt/httpd/www.example.com/] and 
+    [HOST=www.example.com] sections. Directives set in these sections can
+    not be overridden by user-defined ini-files or during runtime.
   . Added better error reporting for php.ini syntax errors
+  . Allowed using full path to load modules using "extension" directive
   . Allowed "ini-variables" to be used almost everywhere ini php.ini files
   . Allowed using alphanumeric/variable indexes in "array" ini options
   . Added 3rd optional parameter to parse_ini_file() to specify the scanning

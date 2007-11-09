@@ -77,10 +77,10 @@ PHP_FUNCTION(dl)
 		(strncmp(sapi_module.name, "embed", 5) != 0)
 	) {
 #ifdef ZTS
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in multithreaded Web servers - use extension=%s in your php.ini", Z_STRVAL_PP(file));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in multithreaded Web servers - use extension=%s in your php.ini", Z_STRVAL_P(filename));
 		RETURN_FALSE;
 #else
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, "dl() is deprecated - use extension=%s in your php.ini", Z_STRVAL_PP(file));
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, "dl() is deprecated - use extension=%s in your php.ini", Z_STRVAL_P(filename));
 #endif
 	}
 
@@ -97,9 +97,7 @@ PHP_FUNCTION(dl)
 #define USING_ZTS 0
 #endif
 
-/* {{{ php_dl
- */
-void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
+PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC) /* {{{ */
 {
 	void *handle;
 	char *libpath;
@@ -107,8 +105,6 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 	zend_module_entry *(*get_module)(void);
 	int error_type;
 	char *extension_dir;
-	char *filename;
-	int filename_len;
 
 	if (type == MODULE_PERSISTENT) {
 		extension_dir = INI_STR("extension_dir");
@@ -122,18 +118,16 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 		error_type = E_CORE_WARNING;
 	}
 
-	filename = Z_STRVAL_P(file);
-	filename_len = Z_STRLEN_P(file);
-
-	if (extension_dir && extension_dir[0]){
-		int extension_dir_len = strlen(extension_dir);
-
+	/* Check if passed filename contains directory separators */
+	if (strchr(filename, '/') != NULL || strchr(filename, DEFAULT_SLASH) != NULL) {
+		/* Passing modules with full path is not supported for dynamically loaded extensions */
 		if (type == MODULE_TEMPORARY) {
-			if (strchr(filename, '/') != NULL || strchr(filename, DEFAULT_SLASH) != NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Temporary module name should contain only filename");
-				RETURN_FALSE;
-			}
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Temporary module name should contain only filename");
+			return FAILURE;
 		}
+		libpath = estrdup(filename);
+	} else if (extension_dir && extension_dir[0]) {
+		int extension_dir_len = strlen(extension_dir);
 
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
 			spprintf(&libpath, 0, "%s%s", extension_dir, filename); /* SAFE */
@@ -141,7 +135,7 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 		}
 	} else {
-		libpath = estrndup(filename, filename_len);
+		return FAILURE; /* Not full path given or extension_dir is not set */
 	}
 
 	/* load dynamic symbol */
@@ -150,9 +144,8 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, error_type, "Unable to load dynamic library '%s' - %s", libpath, GET_DL_ERROR());
 		GET_DL_ERROR(); /* free the buffer storing the error */
 		efree(libpath);
-		RETURN_FALSE;
+		return FAILURE;
 	}
-
 	efree(libpath);
 
 	get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");
@@ -167,8 +160,8 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 
 	if (!get_module) {
 		DL_UNLOAD(handle);
-		php_error_docref(NULL TSRMLS_CC, error_type, "Invalid library (maybe not a PHP library) '%s' ", filename);
-		RETURN_FALSE;
+		php_error_docref(NULL TSRMLS_CC, error_type, "Invalid library (maybe not a PHP library) '%s'", filename);
+		return FAILURE;
 	}
 	module_entry = get_module();
 	if ((module_entry->zend_debug != ZEND_DEBUG) ||
@@ -222,7 +215,7 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 					name, zend_api, zend_debug, zts,
 					ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS);
 			DL_UNLOAD(handle);
-			RETURN_FALSE;
+			return FAILURE;
 	}
 	module_entry->type = type;
 	module_entry->module_number = zend_next_free_module();
@@ -230,22 +223,39 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 
 	if ((module_entry = zend_register_module_ex(module_entry TSRMLS_CC)) == NULL) {
 		DL_UNLOAD(handle);
-		RETURN_FALSE;
+		return FAILURE;
 	}
 
 	if ((type == MODULE_TEMPORARY || start_now) && zend_startup_module_ex(module_entry TSRMLS_CC) == FAILURE) {
 		DL_UNLOAD(handle);
-		RETURN_FALSE;
+		return FAILURE;
 	}
 
 	if ((type == MODULE_TEMPORARY || start_now) && module_entry->request_startup_func) {
 		if (module_entry->request_startup_func(type, module_entry->module_number TSRMLS_CC) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, error_type, "Unable to initialize module '%s'", module_entry->name);
 			DL_UNLOAD(handle);
-			RETURN_FALSE;
+			return FAILURE;
 		}
 	}
-	RETURN_TRUE;
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ php_dl
+ */
+PHPAPI void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
+{
+	char *filename;
+
+	filename = Z_STRVAL_P(file);
+
+	/* Load extension */
+	if (php_load_extension(filename, type, start_now TSRMLS_CC) == FAILURE) {
+		RETVAL_FALSE;
+	} else {
+		RETVAL_TRUE;
+	}
 }
 /* }}} */
 
@@ -256,7 +266,7 @@ PHP_MINFO_FUNCTION(dl)
 
 #else
 
-void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
+PHPAPI void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", Z_STRVAL_P(file));
 	RETURN_FALSE;
