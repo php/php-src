@@ -1,3 +1,128 @@
+2007-11-08  Lars Westermann  <lars.westermann@privat.dk>
+
+    * (PHP_5_3)
+      NEWS:
+      - ibase_query.c bugfixes
+
+    * ext/interbase/ibase_query.c:
+      MFB
+      - Fixed bug #30690: (Resource handle from ibase_execute becomes invalid
+      after return)
+      - Fixed bug #30907: (ibase_query() crashes (in fact the same bug as
+      #32143)
+      - Fixed bug #32143: (ibase_query() causing IBserver 7 crash with NULL
+      param as link-id)
+      - Fixed bug #39056: (Interbase NUMERIC data type error)
+      - Fixed bug #39397: (invalid statement handle in Unknown on line 0)
+      - Fixed bug #39700: (NUMERIC error when result precision are 7,8 or 12-14)
+      - Fixed bug #42284: (duplicate of #39700)
+      - snprintf -> slprintf
+
+2007-11-08  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.c:
+      Fix segfault in debug build
+
+2007-11-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.5
+
+2007-11-08  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/file/bug43216.phpt:
+      fix open tag
+
+2007-11-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/file/bug43216.phpt:
+      Fixed bug #43216 (stream_is_local() returns false on "file://")
+
+    * ext/standard/tests/file/bug43216.phpt
+      ext/standard/tests/file/bug43216.phpt:
+      
+      file bug43216.phpt was initially added on branch PHP_5_3.
+
+2007-11-08  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/mysql/php_mysql.c:
+      plug memory leak on invalid result type
+
+    * ext/date/tests/bug20382-2.phpt
+      ext/pdo/tests/pdo_018.phpt
+      ext/standard/tests/array/array_fill_variation1.phpt
+      ext/standard/tests/array/end_64bit.phpt
+      ext/standard/tests/strings/str_split_variation2.phpt
+      ext/standard/tests/strings/str_split_variation2.phpt
+      ext/standard/tests/strings/str_split_variation2.phpt
+      ext/standard/tests/strings/str_split_variation2_64bit.phpt
+      ext/standard/tests/strings/str_split_variation2_64bit.phpt
+      ext/zip/tests/bug38943.phpt:
+      fix test
+
+    * ext/standard/tests/strings/str_split_variation6_64bit.phpt
+      ext/standard/tests/strings/str_split_variation6_64bit.phpt
+      ext/standard/tests/strings/str_split_variation6_64bit.phpt
+      ext/standard/tests/strings/str_split_variation7.phpt
+      ext/standard/tests/strings/str_split_variation7_64bit.phpt
+      ext/standard/tests/strings/str_split_variation7_64bit.phpt
+      ext/standard/tests/strings/str_split_variation7_64bit.phpt:
+        1.1.4;
+      fix tests
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/str_split_variation2_64bit.phpt
+      ext/standard/tests/strings/str_split_variation2_64bit.phpt:
+      file str_split_variation2_64bit.phpt was added on branch PHP_5_2 on
+      2007-11-08 10:30:08 +0000
+
+    * ext/standard/tests/file/tempnam_variation3.phpt:
+      this error message may vary
+
+    * ext/standard/tests/array/array_fill_variation1_64bit.phpt
+      ext/standard/tests/array/array_fill_variation1_64bit.phpt
+      ext/standard/tests/array/array_fill_variation1_64bit.phpt
+      ext/standard/tests/strings/str_split_variation2_64bit.phpt:
+        1.1.4;
+      fix test
+
+    * ext/standard/tests/array/end_64bit.phpt:
+      add missing 64bit version of the test
+
+    * ext/standard/tests/array/min_variation1.phpt
+      ext/standard/tests/array/min_variation2.phpt
+      ext/standard/tests/strings/str_split_variation6.phpt
+      ext/standard/tests/strings/str_split_variation6.phpt
+      ext/standard/tests/strings/str_split_variation6.phpt
+      ext/standard/tests/strings/str_split_variation6_64bit.phpt
+      ext/standard/tests/strings/str_split_variation6_64bit.phpt
+      ext/standard/tests/strings/str_split_variation7.phpt
+      ext/standard/tests/strings/str_split_variation7.phpt
+      ext/standard/tests/strings/str_split_variation7_64bit.phpt
+      ext/standard/tests/strings/str_split_variation7_64bit.phpt:
+      fix tests
+
+2007-11-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/max_variation1.phpt
+      ext/standard/tests/array/max_variation2.phpt:
+      Fixed tests
+
 2007-11-07  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_3)
