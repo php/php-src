@@ -2176,7 +2176,18 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_fu
 		}
 		if (fe->common.arg_info[i].class_name
 			&& strcmp(fe->common.arg_info[i].class_name, proto->common.arg_info[i].class_name)!=0) {
-			return 0;
+			char *colon;
+
+			if (fe->common.type == ZEND_USER_FUNCTION &&
+			    strchr(proto->common.arg_info[i].class_name, ':') == NULL &&
+			    (colon = zend_memrchr(fe->common.arg_info[i].class_name, ':', fe->common.arg_info[i].class_name_len)) != NULL &&
+			    strcmp(colon+1, proto->common.arg_info[i].class_name) == 0) {
+				efree((char*)fe->common.arg_info[i].class_name);
+				fe->common.arg_info[i].class_name = estrndup(proto->common.arg_info[i].class_name, proto->common.arg_info[i].class_name_len);
+				fe->common.arg_info[i].class_name_len = proto->common.arg_info[i].class_name_len;
+			} else {
+				return 0;
+			}
 		}
 		if (fe->common.arg_info[i].array_type_hint != proto->common.arg_info[i].array_type_hint) {
 			/* Only one has an array type hint and the other one doesn't */
