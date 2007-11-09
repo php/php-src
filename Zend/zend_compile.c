@@ -3349,7 +3349,7 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 			if (CG(active_op_array)->last > 0) {
 				opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 				if (opline->opcode == ZEND_FETCH_CLASS) {
-					opline->extended_value = ZEND_FETCH_CLASS_INTERFACE;
+					opline->extended_value = (opline->extended_value & ~ZEND_FETCH_CLASS_MASK) | ZEND_FETCH_CLASS_INTERFACE;
 				}
 			}
 			break;
