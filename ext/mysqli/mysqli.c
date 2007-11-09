@@ -73,42 +73,16 @@ typedef struct _mysqli_prop_handler {
 static int le_pmysqli;
 
 
-static int php_mysqli_persistent_on_rshut(zend_rsrc_list_entry *le TSRMLS_DC)
-{
-	if (le->type == le_pmysqli) {
-		mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
-		HashPosition pos;
-		MYSQL **mysql;
-		ulong idx;
-		dtor_func_t pDestructor = plist->used_links.pDestructor;
-		plist->used_links.pDestructor = NULL; /* Don't call pDestructor now */
-
-		zend_hash_internal_pointer_reset_ex(&plist->used_links, &pos);
-		while (SUCCESS == zend_hash_get_current_data_ex(&plist->used_links, (void **)&mysql, &pos)) {
-			zend_hash_get_current_key_ex(&plist->used_links, NULL, NULL, &idx, FALSE, &pos);
-			/* Make it free */
-			zend_hash_next_index_insert(&plist->free_links, mysql, sizeof(MYSQL *), NULL);
-			/* First move forward */			
-			zend_hash_move_forward_ex(&plist->used_links, &pos);
-			/* The delete, because del will free memory, but we need it's ->nextItem */
-			zend_hash_index_del(&plist->used_links, idx);
-		}
-
-		/* restore pDestructor, which should be php_mysqli_dtor_p_elements() */
-		plist->used_links.pDestructor = pDestructor;
-	}
-	return ZEND_HASH_APPLY_KEEP;
-}
 
 /* Destructor for mysqli entries in free_links/used_links */
 void php_mysqli_dtor_p_elements(void *data)
 {
-	MYSQL **mysql = (MYSQL **) data;
+	MYSQL *mysql = (MYSQL *) data;
 	TSRMLS_FETCH();
 #if defined(HAVE_MYSQLND)
-	mysqlnd_end_psession(*mysql);
+	mysqlnd_end_psession(mysql);
 #endif
-	mysqli_close(*mysql, MYSQLI_CLOSE_IMPLICIT);
+	mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT);
 }
 
 
@@ -116,8 +90,8 @@ ZEND_RSRC_DTOR_FUNC(php_mysqli_dtor)
 {
 	if (rsrc->ptr) {
 		mysqli_plist_entry *plist = (mysqli_plist_entry *) rsrc->ptr;
-		zend_hash_destroy(&plist->free_links);
-		zend_hash_destroy(&plist->used_links);
+		zend_ptr_stack_clean(&plist->free_links, php_mysqli_dtor_p_elements, 0);
+		zend_ptr_stack_destroy(&plist->free_links);
 		free(plist);
 	}
 }
@@ -225,6 +199,8 @@ static void mysqli_objects_free_storage(void *object TSRMLS_DC)
 }
 /* }}} */
 
+/* mysqli_link_free_storage partly doubles the work of PHP_FUNCTION(mysqli_close) */
+
 /* {{{ mysqli_link_free_storage
  */
 static void mysqli_link_free_storage(void *object TSRMLS_DC)
@@ -238,6 +214,19 @@ static void mysqli_link_free_storage(void *object TSRMLS_DC)
 		if (mysql->mysql) {
 			if (!mysql->persistent) {
 				mysqli_close(mysql->mysql, MYSQLI_CLOSE_IMPLICIT);
+			} else {
+				zend_rsrc_list_entry *le;
+				if (zend_hash_find(&EG(persistent_list), mysql->hash_key, strlen(mysql->hash_key) + 1, (void **)&le) == SUCCESS) {
+					if (Z_TYPE_P(le) == php_le_pmysqli()) {
+						mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
+					
+						zend_ptr_stack_push(&plist->free_links, mysql->mysql);
+
+						MyG(num_links)--;
+						MyG(num_active_persistent)--;
+						MyG(num_inactive_persistent)++;
+					}
+				}
 			}
 		}
 		php_clear_mysql(mysql);
@@ -851,9 +840,6 @@ PHP_RINIT_FUNCTION(mysqli)
  */
 PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
-	/* check persistent connections, move used to free */
-	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_mysqli_persistent_on_rshut TSRMLS_CC);
-
 #if !defined(HAVE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
 	mysql_thread_end();
 #endif
