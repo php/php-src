@@ -571,13 +571,8 @@ PHP_FUNCTION(mysqli_close)
 		if (zend_hash_find(&EG(persistent_list), mysql->hash_key, strlen(mysql->hash_key) + 1, (void **)&le) == SUCCESS) {
 			if (Z_TYPE_P(le) == php_le_pmysqli()) {
 				mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
-				dtor_func_t pDestructor = plist->used_links.pDestructor;
+				zend_ptr_stack_push(&plist->free_links, mysql->mysql);
 
-				plist->used_links.pDestructor = NULL; /* Don't call pDestructor now */
-				zend_hash_index_del(&plist->used_links, mysql->hash_index);
-				plist->used_links.pDestructor = pDestructor; /* Restore the destructor */
-
-				zend_hash_next_index_insert(&plist->free_links, &mysql->mysql, sizeof(MYSQL *), NULL);
 				MyG(num_links)--;
 				MyG(num_active_persistent)--;
 				MyG(num_inactive_persistent)++;

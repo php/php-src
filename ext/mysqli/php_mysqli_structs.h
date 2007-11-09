@@ -102,7 +102,6 @@ typedef struct {
 	zval			*li_read;
 	php_stream		*li_stream;
 	zend_bool		persistent;
-	unsigned long   hash_index; /* Used when persistent, hold the index in plist->used_links */
 	unsigned int 	multi_query;
 	UConverter		*conv;
 } MY_MYSQL;
@@ -148,8 +147,7 @@ typedef struct {
 #endif
 
 typedef struct {
-	HashTable free_links;
-	HashTable used_links;
+	zend_ptr_stack free_links;
 } mysqli_plist_entry;
 
 #ifdef PHP_WIN32
