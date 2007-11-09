@@ -44,8 +44,8 @@ $values =  array (
   // float values
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.1234567e10,
+  10.7654321E-10,
   .5,
 
   // array values
@@ -115,9 +115,9 @@ string(20) "element110.5element2"
 -- Iteration 6 --
 string(21) "element1-10.5element2"
 -- Iteration 7 --
-string(28) "element1105000000000element2"
+string(28) "element1101234567000element2"
 -- Iteration 8 --
-string(23) "element11.06E-9element2"
+string(29) "element11.07654321E-9element2"
 -- Iteration 9 --
 string(19) "element10.5element2"
 -- Iteration 10 --
