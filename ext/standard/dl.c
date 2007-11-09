@@ -31,7 +31,6 @@
 #if defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H
 #include <stdlib.h>
 #include <stdio.h>
-
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -48,22 +47,17 @@
 #include <sys/param.h>
 #define GET_DL_ERROR()	DL_ERROR()
 #endif
-
 #endif /* defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H */
-
 
 /* {{{ proto int dl(string extension_filename)
    Load a PHP extension at runtime */
 PHP_FUNCTION(dl)
 {
-	zval **file;
+	zval *filename;
 
-	/* obtain arguments */
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &filename) == FAILURE) {
+		return;
 	}
-
-	convert_to_string_ex(file);
 
 	if (!PG(enable_dl)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't enabled");
@@ -73,14 +67,15 @@ PHP_FUNCTION(dl)
 		RETURN_FALSE;
 	}
 
-	if (Z_STRLEN_PP(file) >= MAXPATHLEN) {
+	if (Z_STRLEN_P(filename) >= MAXPATHLEN) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
 		RETURN_FALSE;
 	}
 
-	if ((strncmp(sapi_module.name, "cgi", 3)!=0) && 
-		(strcmp(sapi_module.name, "cli")!=0) &&
-		(strncmp(sapi_module.name, "embed", 5)!=0)) {
+	if ((strncmp(sapi_module.name, "cgi", 3) != 0) &&
+		(strcmp(sapi_module.name, "cli") != 0) &&
+		(strncmp(sapi_module.name, "embed", 5) != 0)
+	) {
 #ifdef ZTS
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in multithreaded Web servers - use extension=%s in your php.ini", Z_STRVAL_PP(file));
 		RETURN_FALSE;
@@ -89,12 +84,10 @@ PHP_FUNCTION(dl)
 #endif
 	}
 
-	php_dl(*file, MODULE_TEMPORARY, return_value, 0 TSRMLS_CC);
+	php_dl(filename, MODULE_TEMPORARY, return_value, 0 TSRMLS_CC);
 	EG(full_tables_cleanup) = 1;
 }
-
 /* }}} */
-
 
 #if defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H
 
@@ -114,6 +107,8 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 	zend_module_entry *(*get_module)(void);
 	int error_type;
 	char *extension_dir;
+	char *filename;
+	int filename_len;
 
 	if (type == MODULE_PERSISTENT) {
 		extension_dir = INI_STR("extension_dir");
@@ -127,23 +122,26 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 		error_type = E_CORE_WARNING;
 	}
 
+	filename = Z_STRVAL_P(file);
+	filename_len = Z_STRLEN_P(file);
+
 	if (extension_dir && extension_dir[0]){
 		int extension_dir_len = strlen(extension_dir);
 
 		if (type == MODULE_TEMPORARY) {
-			if (strchr(Z_STRVAL_P(file), '/') != NULL || strchr(Z_STRVAL_P(file), DEFAULT_SLASH) != NULL) {
+			if (strchr(filename, '/') != NULL || strchr(filename, DEFAULT_SLASH) != NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Temporary module name should contain only filename");
 				RETURN_FALSE;
 			}
 		}
 
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
-			spprintf(&libpath, 0, "%s%s", extension_dir, Z_STRVAL_P(file));
+			spprintf(&libpath, 0, "%s%s", extension_dir, filename); /* SAFE */
 		} else {
-			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, Z_STRVAL_P(file));
+			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 		}
 	} else {
-		libpath = estrndup(Z_STRVAL_P(file), Z_STRLEN_P(file));
+		libpath = estrndup(filename, filename_len);
 	}
 
 	/* load dynamic symbol */
@@ -159,42 +157,43 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 
 	get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");
 
-	/*
-	 * some OS prepend _ to symbol names while their dynamic linker
+	/* Some OS prepend _ to symbol names while their dynamic linker
 	 * does not do that automatically. Thus we check manually for
-	 * _get_module.
-	 */
+	 * _get_module. */
 
-	if (!get_module)
+	if (!get_module) {
 		get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "_get_module");
+	}
 
 	if (!get_module) {
 		DL_UNLOAD(handle);
-		php_error_docref(NULL TSRMLS_CC, error_type, "Invalid library (maybe not a PHP library) '%s' ", Z_STRVAL_P(file));
+		php_error_docref(NULL TSRMLS_CC, error_type, "Invalid library (maybe not a PHP library) '%s' ", filename);
 		RETURN_FALSE;
 	}
 	module_entry = get_module();
-	if ((module_entry->zend_debug != ZEND_DEBUG) || (module_entry->zts != USING_ZTS)
-		|| (module_entry->zend_api != ZEND_MODULE_API_NO)) {
+	if ((module_entry->zend_debug != ZEND_DEBUG) ||
+		(module_entry->zts != USING_ZTS) ||
+		(module_entry->zend_api != ZEND_MODULE_API_NO)
+	) {
 		/* Check for pre-4.1.0 module which has a slightly different module_entry structure :( */
 			struct pre_4_1_0_module_entry {
-				  char *name;
-				  zend_function_entry *functions;
-				  int (*module_startup_func)(INIT_FUNC_ARGS);
-				  int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
-				  int (*request_startup_func)(INIT_FUNC_ARGS);
-				  int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
-				  void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
-				  int (*global_startup_func)(void);
-				  int (*global_shutdown_func)(void);
-				  int globals_id;
-				  int module_started;
-				  unsigned char type;
-				  void *handle;
-				  int module_number;
-				  unsigned char zend_debug;
-				  unsigned char zts;
-				  unsigned int zend_api;
+				char *name;
+				zend_function_entry *functions;
+				int (*module_startup_func)(INIT_FUNC_ARGS);
+				int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+				int (*request_startup_func)(INIT_FUNC_ARGS);
+				int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+				void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
+				int (*global_startup_func)(void);
+				int (*global_shutdown_func)(void);
+				int globals_id;
+				int module_started;
+				unsigned char type;
+				void *handle;
+				int module_number;
+				unsigned char zend_debug;
+				unsigned char zts;
+				unsigned int zend_api;
 			};
 
 			const char *name;
@@ -204,24 +203,24 @@ void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
 			if ((((struct pre_4_1_0_module_entry *)module_entry)->zend_api > 20000000) &&
 				(((struct pre_4_1_0_module_entry *)module_entry)->zend_api < 20010901)
 			) {
-				name       = ((struct pre_4_1_0_module_entry *)module_entry)->name;
-				zend_api   = ((struct pre_4_1_0_module_entry *)module_entry)->zend_api;
-				zend_debug = ((struct pre_4_1_0_module_entry *)module_entry)->zend_debug;
-				zts        = ((struct pre_4_1_0_module_entry *)module_entry)->zts; 
-			} else {			
-				name       = module_entry->name;
-				zend_api   = module_entry->zend_api;
-				zend_debug = module_entry->zend_debug;
-				zts        = module_entry->zts; 
+				name		= ((struct pre_4_1_0_module_entry *)module_entry)->name;
+				zend_api	= ((struct pre_4_1_0_module_entry *)module_entry)->zend_api;
+				zend_debug	= ((struct pre_4_1_0_module_entry *)module_entry)->zend_debug;
+				zts			= ((struct pre_4_1_0_module_entry *)module_entry)->zts;
+			} else {
+				name		= module_entry->name;
+				zend_api	= module_entry->zend_api;
+				zend_debug	= module_entry->zend_debug;
+				zts			= module_entry->zts;
 			}
 
 			php_error_docref(NULL TSRMLS_CC, error_type,
-					  "%s: Unable to initialize module\n"
-					  "Module compiled with module API=%d, debug=%d, thread-safety=%d\n"
-					  "PHP    compiled with module API=%d, debug=%d, thread-safety=%d\n"
-					  "These options need to match\n",
-					  name, zend_api, zend_debug, zts,
-					  ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS);
+					"%s: Unable to initialize module\n"
+					"Module compiled with module API=%d, debug=%d, thread-safety=%d\n"
+					"PHP    compiled with module API=%d, debug=%d, thread-safety=%d\n"
+					"These options need to match\n",
+					name, zend_api, zend_debug, zts,
+					ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS);
 			DL_UNLOAD(handle);
 			RETURN_FALSE;
 	}
