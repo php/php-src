@@ -47,6 +47,7 @@ typedef struct _php_extension_lists {
 } php_extension_lists;
 
 /* True globals */
+static int is_special_section = 0;
 static HashTable *active_ini_hash;
 static HashTable configuration_hash;
 PHPAPI char *php_ini_opened_path=NULL;
@@ -148,6 +149,7 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 /* }}} */
 
 /* php.ini support */
+#define PHP_EXTENSION_TOKEN		"extension"
 #ifdef ZTS
 # if (ZEND_DEBUG)
 # define ZEND_EXTENSION_TOKEN	"zend_extension_debug_ts"
@@ -185,6 +187,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 {
 	zval *entry;
 	HashTable *active_hash;
+	char *extension_name;
 
 	if (active_ini_hash) {
 		active_hash = active_ini_hash;
@@ -199,19 +202,12 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 					break;
 				}
 
-/* FIXME: Should the extension loading be disabled for PATH sections? */
-
 				/* PHP and Zend extensions are not added into configuration hash! */
-				if (!strcasecmp(Z_STRVAL_P(arg1), "extension")) { /* load function module */
-					zval copy;
-
-					copy = *arg2;
-					zval_copy_ctor(&copy);
-					Z_SET_REFCOUNT(copy, 0);
-					zend_llist_add_element(&extension_lists.functions, &copy);
-				} else if (!strcasecmp(Z_STRVAL_P(arg1), ZEND_EXTENSION_TOKEN)) { /* load Zend extension */
-					char *extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
-
+				if (!is_special_section && !strcasecmp(Z_STRVAL_P(arg1), "extension")) { /* load function module */
+					extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
+					zend_llist_add_element(&extension_lists.functions, &extension_name);
+				} else if (!is_special_section && !strcasecmp(Z_STRVAL_P(arg1), ZEND_EXTENSION_TOKEN)) { /* load Zend extension */
+					extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
 					zend_llist_add_element(&extension_lists.engine, &extension_name);
 
 				/* All other entries are added into either configuration_hash or active ini section array */
@@ -262,18 +258,21 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 				char *key = NULL;
 				uint key_len;
 
-				/* Only PATH sections are handled here! */
+				/* PATH sections */
 				if (!strncasecmp(Z_STRVAL_P(arg1), "PATH", sizeof("PATH") - 1)) {
 					key = Z_STRVAL_P(arg1);
 					key = key + sizeof("PATH") - 1;
 					key_len = Z_STRLEN_P(arg1) - sizeof("PATH") + 1;
+					is_special_section = 1;
 
-#if 0 /* Disable HOST sections for now. If someone can come up with some good usage case, then I can reconsider :) */
+				/* HOST sections */
 				} else if (!strncasecmp(Z_STRVAL_P(arg1), "HOST", sizeof("HOST") - 1)) {
 					key = Z_STRVAL_P(arg1);
 					key = key + sizeof("HOST") - 1;
 					key_len = Z_STRLEN_P(arg1) - sizeof("HOST") + 1;
-#endif
+					is_special_section = 1;
+				} else {
+					is_special_section = 0;
 				}
 
 				if (key && key_len > 0) {
@@ -313,14 +312,11 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 }
 /* }}} */
 
-/* {{{ php_load_function_extension_cb
+/* {{{ php_load_php_extension_cb
  */
-static void php_load_function_extension_cb(void *arg TSRMLS_DC)
+static void php_load_php_extension_cb(void *arg TSRMLS_DC)
 {
-	zval *extension = (zval *) arg;
-	zval zval;
-
-	php_dl(extension, MODULE_PERSISTENT, &zval, 0 TSRMLS_CC);
+	php_load_extension(*((char **) arg), MODULE_PERSISTENT, 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -351,7 +347,7 @@ int php_init_config(TSRMLS_D)
 	}
 
 	zend_llist_init(&extension_lists.engine, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
-	zend_llist_init(&extension_lists.functions, sizeof(zval), (llist_dtor_func_t) ZVAL_DESTRUCTOR, 1);
+	zend_llist_init(&extension_lists.functions, sizeof(zval), (llist_dtor_func_t) free_estring, 1);
 
 	open_basedir = PG(open_basedir);
 
@@ -678,7 +674,7 @@ int php_shutdown_config(void)
 void php_ini_register_extensions(TSRMLS_D)
 {
 	zend_llist_apply(&extension_lists.engine, php_load_zend_extension_cb TSRMLS_CC);
-	zend_llist_apply(&extension_lists.functions, php_load_function_extension_cb TSRMLS_CC);
+	zend_llist_apply(&extension_lists.functions, php_load_php_extension_cb TSRMLS_CC);
 
 	zend_llist_destroy(&extension_lists.engine);
 	zend_llist_destroy(&extension_lists.functions);

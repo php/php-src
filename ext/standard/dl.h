@@ -23,7 +23,8 @@
 #ifndef DL_H
 #define DL_H
 
-void php_dl(zval *file,int type, zval *return_value, int start_now TSRMLS_DC);
+PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC);
+PHPAPI void php_dl(zval *file,int type, zval *return_value, int start_now TSRMLS_DC);
 
 /* dynamic loading functions */
 PHPAPI PHP_FUNCTION(dl);
