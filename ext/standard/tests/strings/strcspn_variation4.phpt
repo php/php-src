@@ -9,6 +9,8 @@ Test strcspn() function : usage variations - unexpected values of len argument
  * Alias to functions: none
 */
 
+error_reporting(E_ALL & ~E_NOTICE);
+
 /*
 * Testing strcspn() : with unexpected values of len argument
 */
@@ -41,8 +43,8 @@ $values = array(
       // float data
       10.5,
       -10.5,
-      10.5e10,
-      10.6E-10,
+      10.1234567e10,
+      10.7654321E-10,
       .5,
 
       // array data
@@ -98,20 +100,16 @@ echo "Done"
 --EXPECTF--
 *** Testing strcspn() : with unexpected values of len argument ***
 
-Notice: Undefined variable: undefined_var in %s on line %d
-
-Notice: Undefined variable: unset_var in %s on line %d
-
 -- Iteration with len value as "10.5" --
 int(0)
 
 -- Iteration with len value as "-10.5" --
 int(0)
 
--- Iteration with len value as "105000000000" --
+-- Iteration with len value as "101234567000" --
 int(0)
 
--- Iteration with len value as "1.06E-9" --
+-- Iteration with len value as "1.07654321E-9" --
 int(0)
 
 -- Iteration with len value as "0.5" --

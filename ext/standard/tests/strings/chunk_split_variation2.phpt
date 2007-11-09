@@ -35,8 +35,8 @@ $values = array(
   // float data
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.1234567e10,
+  10.7654321E-10,
   .5,
 
   // array data
@@ -98,7 +98,9 @@ string(28) "This is ch*uklen vari*ation*"
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
 bool(false)
 -- Iteration 3 --
-string(26) "This is chuklen variation*"
+
+Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+bool(false)
 -- Iteration 4 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
@@ -168,5 +170,5 @@ bool(false)
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
 bool(false)
 -- Iteration 24 --
-string(30) "This *is ch*uklen* vari*ation*"
+string(%d) "%s"
 Done

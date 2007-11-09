@@ -49,8 +49,8 @@ $values =  array (
   // float values
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.1234567e10,
+  10.7654321E-10,
   .5,
 
   // array values
@@ -139,9 +139,9 @@ string(4) "10.5"
 -- Iteration 12 --
 string(5) "-10.5"
 -- Iteration 13 --
-string(12) "105000000000"
+string(12) "101234567000"
 -- Iteration 14 --
-string(7) "1.06E-9"
+string(13) "1.07654321E-9"
 -- Iteration 15 --
 string(3) "0.5"
 -- Iteration 16 --
@@ -162,7 +162,7 @@ Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 20 --
 
-Notice: Array to string conversion in %s on line %d
+Notice: Array to string conversion in %s on line 101
 string(5) "Array"
 -- Iteration 21 --
 string(1) "1"
