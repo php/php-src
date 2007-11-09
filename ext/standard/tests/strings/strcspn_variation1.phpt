@@ -9,6 +9,7 @@ Test strcspn() function : usage variations - unexpected values for str argument
  * Alias to functions: none
 */
 
+error_reporting(E_ALL & ~E_NOTICE);
 
 /*
 * Testing strspn() : with different unexpected values for str argument
@@ -49,8 +50,8 @@ $values = array(
       // float data
       10.5,
       -10.5,
-      10.5e10,
-      10.6E-10,
+      10.1234567e10,
+      10.7654321E-10,
       .5,
 
       // array data
@@ -90,7 +91,7 @@ $values = array(
 // loop through each element of the array for str
 
 foreach($values as $value) {
-      echo "\n-- Iteration with str value as \"$value\" \n";
+      echo "\n-- Iteration with str value as \"$value\"\n";
       var_dump( strcspn($value,$mask) ); // with default args
       var_dump( strcspn($value,$mask,$start) );  // with default len value
       var_dump( strcspn($value,$mask,$start,$len) );  //  with all args
@@ -104,56 +105,52 @@ echo "Done"
 --EXPECTF--
 *** Testing strcspn() : with unexpected values for str argument ***
 
-Notice: Undefined variable: undefined_var in %s on line %d
-
-Notice: Undefined variable: unset_var in %s on line %d
-
--- Iteration with str value as "0" 
+-- Iteration with str value as "0"
 int(0)
 int(0)
 int(0)
 
--- Iteration with str value as "1" 
+-- Iteration with str value as "1"
 int(0)
 int(0)
 int(0)
 
--- Iteration with str value as "12345" 
+-- Iteration with str value as "12345"
 int(0)
 int(0)
 int(0)
 
--- Iteration with str value as "-2345" 
+-- Iteration with str value as "-2345"
 int(1)
 int(0)
 int(0)
 
--- Iteration with str value as "10.5" 
+-- Iteration with str value as "10.5"
 int(0)
 int(0)
 int(0)
 
--- Iteration with str value as "-10.5" 
+-- Iteration with str value as "-10.5"
 int(1)
 int(0)
 int(0)
 
--- Iteration with str value as "105000000000" 
+-- Iteration with str value as "101234567000"
 int(0)
 int(0)
 int(0)
 
--- Iteration with str value as "1.06E-9" 
-int(0)
-int(1)
-int(1)
-
--- Iteration with str value as "0.5" 
+-- Iteration with str value as "1.07654321E-9"
 int(0)
 int(1)
 int(1)
 
--- Iteration with str value as "Array" 
+-- Iteration with str value as "0.5"
+int(0)
+int(1)
+int(1)
+
+-- Iteration with str value as "Array"
 
 Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
@@ -164,7 +161,7 @@ NULL
 Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
--- Iteration with str value as "Array" 
+-- Iteration with str value as "Array"
 
 Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
@@ -175,7 +172,7 @@ NULL
 Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
--- Iteration with str value as "Array" 
+-- Iteration with str value as "Array"
 
 Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
@@ -186,7 +183,7 @@ NULL
 Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
--- Iteration with str value as "Array" 
+-- Iteration with str value as "Array"
 
 Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
@@ -197,7 +194,7 @@ NULL
 Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
--- Iteration with str value as "Array" 
+-- Iteration with str value as "Array"
 
 Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
@@ -208,62 +205,62 @@ NULL
 Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
--- Iteration with str value as "" 
+-- Iteration with str value as ""
 int(0)
 bool(false)
 bool(false)
 
--- Iteration with str value as "" 
+-- Iteration with str value as ""
 int(0)
 bool(false)
 bool(false)
 
--- Iteration with str value as "1" 
+-- Iteration with str value as "1"
 int(0)
 int(0)
 int(0)
 
--- Iteration with str value as "" 
+-- Iteration with str value as ""
 int(0)
 bool(false)
 bool(false)
 
--- Iteration with str value as "1" 
+-- Iteration with str value as "1"
 int(0)
 int(0)
 int(0)
 
--- Iteration with str value as "" 
+-- Iteration with str value as ""
 int(0)
 bool(false)
 bool(false)
 
--- Iteration with str value as "" 
+-- Iteration with str value as ""
 int(0)
 bool(false)
 bool(false)
 
--- Iteration with str value as "" 
+-- Iteration with str value as ""
 int(0)
 bool(false)
 bool(false)
 
--- Iteration with str value as "object" 
+-- Iteration with str value as "object"
 int(0)
 int(0)
 int(0)
 
--- Iteration with str value as "" 
+-- Iteration with str value as ""
 int(0)
 bool(false)
 bool(false)
 
--- Iteration with str value as "" 
+-- Iteration with str value as ""
 int(0)
 bool(false)
 bool(false)
 
--- Iteration with str value as "Resource id #%d" 
+-- Iteration with str value as "Resource id #%d"
 
 Warning: strcspn() expects parameter 1 to be string, resource given in %s on line %d
 NULL

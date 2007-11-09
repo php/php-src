@@ -42,8 +42,8 @@ $values = array(
   // float data
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.1234567e10,
+  10.7654321E-10,
   .5,
 
   // array data
@@ -111,30 +111,30 @@ string(6) "10 .5 "
 -- Iteration 6 --
 string(8) "-1 0. 5 "
 -- Iteration 7 --
-string(18) "10 50 00 00 00 00 "
+string(18) "10 12 34 56 70 00 "
 -- Iteration 8 --
-string(11) "1. 06 E- 9 "
+string(20) "1. 07 65 43 21 E- 9 "
 -- Iteration 9 --
 string(5) "0. 5 "
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
+Notice: Array to string conversion in %s on line 87
 string(8) "Ar ra y "
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
+Notice: Array to string conversion in %s on line 87
 string(8) "Ar ra y "
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
+Notice: Array to string conversion in %s on line 87
 string(8) "Ar ra y "
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
+Notice: Array to string conversion in %s on line 87
 string(8) "Ar ra y "
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
+Notice: Array to string conversion in %s on line 87
 string(8) "Ar ra y "
 -- Iteration 15 --
 string(1) " "
@@ -163,5 +163,5 @@ string(1) " "
 -- Iteration 27 --
 string(1) " "
 -- Iteration 28 --
-string(%d) "Re so ur ce  i d  #%d "
+string(%d) "Re so ur ce  i d  #%s "
 Done
