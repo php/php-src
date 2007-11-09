@@ -26,6 +26,7 @@ typedef struct _zend_ptr_stack {
 	int top, max;
 	void **elements;
 	void **top_element;
+	zend_bool persistent;
 } zend_ptr_stack;
 
 
@@ -33,6 +34,7 @@ typedef struct _zend_ptr_stack {
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack);
+ZEND_API void zend_ptr_stack_init_ex(zend_ptr_stack *stack, zend_bool persistent);
 ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...);
 ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...);
 ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack);
@@ -46,7 +48,7 @@ END_EXTERN_C()
 		/* we need to allocate more memory */				\
 		stack->max *= 2;									\
 		stack->max += count;								\
-		stack->elements = (void **) erealloc(stack->elements, (sizeof(void *) * (stack->max)));	\
+		stack->elements = (void **) perealloc(stack->elements, (sizeof(void *) * (stack->max)), stack->persistent);	\
 		stack->top_element = stack->elements+stack->top;	\
 	}
 
