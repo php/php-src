@@ -760,6 +760,21 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ php_ini_activate_per_host_config
+ */
+PHPAPI void php_ini_activate_per_host_config(char *host, uint host_len TSRMLS_DC)
+{
+	zval *tmp;
+
+	if (host && host_len) {
+		/* Search for source array matching the host from configuration_hash */
+		if (zend_hash_find(&configuration_hash, host, host_len, (void **) &tmp) == SUCCESS) {
+			php_ini_activate_config(Z_ARRVAL_P(tmp), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE TSRMLS_CC);
+		}
+	}
+}
+/* }}} */
+
 /* {{{ cfg_get_entry
  */
 PHPAPI zval *cfg_get_entry(char *name, uint name_length)
