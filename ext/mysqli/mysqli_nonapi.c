@@ -148,7 +148,7 @@ PHP_FUNCTION(mysqli_connect)
 				le.type = php_le_pmysqli();
 				le.ptr = plist = calloc(1, sizeof(mysqli_plist_entry));
 
-				zend_ptr_stack_init(&plist->free_links, 1);
+				zend_ptr_stack_init_ex(&plist->free_links, 1);
 				zend_hash_update(&EG(persistent_list), hash_key, hash_len + 1, (void *)&le, sizeof(le), NULL);
 			}
 		}
