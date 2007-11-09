@@ -27,8 +27,10 @@ var_dump( str_replace("long string here", "", "", $count) );
 var_dump( $count );
 
 $fp = fopen( __FILE__, "r" );
-var_dump( str_replace($fp, $fp, $fp, $fp) );
-var_dump( $fp );
+$fp_copy = $fp; 
+var_dump( str_replace($fp_copy, $fp_copy, $fp_copy, $fp_copy) );
+var_dump( $fp_copy );
+fclose($fp);
 
 echo "\n*** Testing str_replace() with various search values ***";
 $search_arr = array( TRUE, FALSE, 1, 0, -1, "1", "0", "-1",  NULL, 
@@ -230,12 +232,9 @@ var_dump( str_replace(NULL) );
 var_dump( str_replace(1, 2) );
 var_dump( str_replace(1,2,3,$var,5) );
 
-echo "Done\n";
-
---CLEAN--
-fclose($fp);
 fclose($resource1);
 closedir($resource2);
+echo "Done\n";
 
 ?>
 --EXPECTF--	
@@ -248,7 +247,7 @@ string(1) "q"
 int(1)
 string(0) ""
 int(0)
-string(14) "Resource id #5"
+string(%d) "Resource id #%d"
 int(1)
 
 *** Testing str_replace() with various search values ***
@@ -910,9 +909,9 @@ array(2) {
 int(1)
 
 -- Testing Resources --
-string(14) "Resource id #6"
+string(%d) "Resource id #%d"
 int(0)
-string(14) "Resource id #7"
+string(%d) "Resource id #%d"
 int(0)
 
 -- Testing a longer and heredoc string --
