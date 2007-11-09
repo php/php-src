@@ -165,7 +165,7 @@ bool(false)
 bool(false)
 
 -- Iteration 24 --
-bool(false)
+%s
 
 -- Iteration 25 --
 bool(false)
@@ -254,7 +254,7 @@ bool(false)
 bool(false)
 
 -- Iteration 24 --
-bool(false)
+%s
 
 -- Iteration 25 --
 bool(false)

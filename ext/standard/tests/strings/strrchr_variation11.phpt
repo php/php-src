@@ -80,8 +80,6 @@ $values =  array (
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
-  $haystack = $values[$index];
-
   var_dump( strrchr($values[$index], $values[$index]) );
   $counter ++;
 }
@@ -151,7 +149,7 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-bool(false)
+%s
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
@@ -224,7 +222,7 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-bool(false)
+%s
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
