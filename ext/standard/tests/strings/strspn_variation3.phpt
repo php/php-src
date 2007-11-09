@@ -2,12 +2,14 @@
 Test strspn() function : usage variations - unexpected values of start argument
 --FILE--
 <?php
-/* Prototype  : int strspn(string str, string mask [, int start [, int len]])
+/* Prototype  : proto int strspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters found in mask.
                 If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) 
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
+
+error_reporting(E_ALL & ~E_NOTICE);
 
 /*
 * Testing strspn() : with unexpected values of start argument
@@ -41,8 +43,8 @@ $values = array(
       // float data
       10.5,
       -10.5,
-      10.5e10,
-      10.6E-10,
+      10.1234567e10,
+      10.7654321E-10,
       .5,
 
       // array data
@@ -99,10 +101,6 @@ echo "Done"
 --EXPECTF--
 *** Testing strspn() : with unexpected values of start argument ***
 
-Notice: Undefined variable: undefined_var in %s on line %d
-
-Notice: Undefined variable: unset_var in %s on line %d
-
 -- Iteration with start value as "10.5" --
 int(0)
 int(0)
@@ -111,11 +109,11 @@ int(0)
 int(2)
 int(2)
 
--- Iteration with start value as "105000000000" --
-bool(false)
-bool(false)
+-- Iteration with start value as "101234567000" --
+int(2)
+int(2)
 
--- Iteration with start value as "1.06E-9" --
+-- Iteration with start value as "1.07654321E-9" --
 int(2)
 int(2)
 
@@ -123,7 +121,13 @@ int(2)
 int(2)
 int(2)
 
-Notice: Array to string conversion in %s on line %d
+-- Iteration with start value as "Array" --
+
+Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
+NULL
 
 -- Iteration with start value as "Array" --
 
@@ -133,8 +137,6 @@ NULL
 Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
 -- Iteration with start value as "Array" --
 
 Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
@@ -143,8 +145,6 @@ NULL
 Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
 -- Iteration with start value as "Array" --
 
 Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
@@ -152,18 +152,6 @@ NULL
 
 Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
 NULL
-
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with start value as "Array" --
-
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
-NULL
-
-Notice: Array to string conversion in %s on line %d
 
 -- Iteration with start value as "Array" --
 
@@ -253,13 +241,8 @@ NULL
 Warning: strspn() expects parameter 3 to be long, resource given in %s on line %d
 NULL
 Done
-
 --UEXPECTF--
 *** Testing strspn() : with unexpected values of start argument ***
-
-Notice: Undefined variable: undefined_var in %s on line %d
-
-Notice: Undefined variable: unset_var in %s on line %d
 
 -- Iteration with start value as "10.5" --
 int(0)
@@ -269,11 +252,11 @@ int(0)
 int(2)
 int(2)
 
--- Iteration with start value as "105000000000" --
-bool(false)
-bool(false)
+-- Iteration with start value as "101234567000" --
+int(2)
+int(2)
 
--- Iteration with start value as "1.06E-9" --
+-- Iteration with start value as "1.07654321E-9" --
 int(2)
 int(2)
 
@@ -281,7 +264,13 @@ int(2)
 int(2)
 int(2)
 
-Notice: Array to string conversion in %s on line %d
+-- Iteration with start value as "Array" --
+
+Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
+NULL
 
 -- Iteration with start value as "Array" --
 
@@ -291,8 +280,6 @@ NULL
 Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
 -- Iteration with start value as "Array" --
 
 Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
@@ -301,8 +288,6 @@ NULL
 Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
 -- Iteration with start value as "Array" --
 
 Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
@@ -310,18 +295,6 @@ NULL
 
 Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
 NULL
-
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with start value as "Array" --
-
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
-NULL
-
-Notice: Array to string conversion in %s on line %d
 
 -- Iteration with start value as "Array" --
 
@@ -403,7 +376,7 @@ int(2)
 int(2)
 int(2)
 
--- Iteration with start value as "Resource id #%d" --
+-- Iteration with start value as "Resource id #5" --
 
 Warning: strspn() expects parameter 3 to be long, resource given in %s on line %d
 NULL

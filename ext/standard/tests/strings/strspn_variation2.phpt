@@ -2,12 +2,14 @@
 Test strspn() function : usage variations - unexpected values for mask argument
 --FILE--
 <?php
-/* Prototype  : int strspn(string str, string mask [, int start [, int len]])
+/* Prototype  : proto int strspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters found in mask.
 		If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) 
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
+
+error_reporting(E_ALL & ~E_NOTICE);
 
 /*
 * Testing strspn() : with different unexpected values for mask argument
@@ -47,8 +49,8 @@ $values = array(
       // float data
       10.5,
       -10.5,
-      10.5e10,
-      10.6E-10,
+      10.1234567e10,
+      10.7654321E-10,
       .5,
 
       // array data
@@ -88,7 +90,7 @@ $values = array(
 // loop through each element of the array for mask
 
 foreach($values as $value) {
-      echo "\n-- Iteration with mask value as \"$value\" -- \n";
+      echo "\n-- Iteration with mask value as \"$value\" --\n";
       var_dump( strspn($str,$value) );  // with defalut args
       var_dump( strspn($str,$value,$start) );  // with default len value
       var_dump( strspn($str,$value,$start,$len) );  // with all args
@@ -102,58 +104,52 @@ echo "Done"
 --EXPECTF--
 *** Testing strspn() : with diferent unexpected values of mask argument ***
 
-Notice: Undefined variable: undefined_var in %s on line %d
-
-Notice: Undefined variable: unset_var in %s on line %d
-
--- Iteration with mask value as "0" -- 
+-- Iteration with mask value as "0" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "1" -- 
+-- Iteration with mask value as "1" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "12345" -- 
+-- Iteration with mask value as "12345" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "-2345" -- 
+-- Iteration with mask value as "-2345" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "10.5" -- 
+-- Iteration with mask value as "10.5" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "-10.5" -- 
+-- Iteration with mask value as "-10.5" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "105000000000" -- 
+-- Iteration with mask value as "101234567000" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "1.06E-9" -- 
+-- Iteration with mask value as "1.07654321E-9" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "0.5" -- 
+-- Iteration with mask value as "0.5" --
 int(0)
 int(0)
 int(0)
 
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with mask value as "Array" -- 
+-- Iteration with mask value as "Array" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
@@ -164,9 +160,7 @@ NULL
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with mask value as "Array" -- 
+-- Iteration with mask value as "Array" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
@@ -177,9 +171,7 @@ NULL
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with mask value as "Array" -- 
+-- Iteration with mask value as "Array" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
@@ -190,9 +182,7 @@ NULL
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with mask value as "Array" -- 
+-- Iteration with mask value as "Array" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
@@ -203,9 +193,7 @@ NULL
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with mask value as "Array" -- 
+-- Iteration with mask value as "Array" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
@@ -216,62 +204,62 @@ NULL
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "1" -- 
+-- Iteration with mask value as "1" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "1" -- 
+-- Iteration with mask value as "1" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "object" -- 
+-- Iteration with mask value as "object" --
 int(0)
 int(1)
 int(1)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "Resource id #%d" -- 
+-- Iteration with mask value as "Resource id #%d" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
 NULL
@@ -282,62 +270,55 @@ NULL
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
 NULL
 Done
-
 --UEXPECTF--
 *** Testing strspn() : with diferent unexpected values of mask argument ***
 
-Notice: Undefined variable: undefined_var in %s on line %d
-
-Notice: Undefined variable: unset_var in %s on line %d
-
--- Iteration with mask value as "0" -- 
+-- Iteration with mask value as "0" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "1" -- 
+-- Iteration with mask value as "1" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "12345" -- 
+-- Iteration with mask value as "12345" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "-2345" -- 
+-- Iteration with mask value as "-2345" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "10.5" -- 
+-- Iteration with mask value as "10.5" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "-10.5" -- 
+-- Iteration with mask value as "-10.5" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "105000000000" -- 
+-- Iteration with mask value as "101234567000" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "1.06E-9" -- 
+-- Iteration with mask value as "1.07654321E-9" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "0.5" -- 
+-- Iteration with mask value as "0.5" --
 int(0)
 int(0)
 int(0)
 
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with mask value as "Array" -- 
+-- Iteration with mask value as "Array" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
@@ -348,9 +329,7 @@ NULL
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with mask value as "Array" -- 
+-- Iteration with mask value as "Array" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
@@ -361,9 +340,7 @@ NULL
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with mask value as "Array" -- 
+-- Iteration with mask value as "Array" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
@@ -374,9 +351,7 @@ NULL
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with mask value as "Array" -- 
+-- Iteration with mask value as "Array" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
@@ -387,9 +362,7 @@ NULL
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
--- Iteration with mask value as "Array" -- 
+-- Iteration with mask value as "Array" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
@@ -400,62 +373,62 @@ NULL
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "1" -- 
+-- Iteration with mask value as "1" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "1" -- 
+-- Iteration with mask value as "1" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "object" -- 
+-- Iteration with mask value as "object" --
 int(0)
 int(1)
 int(1)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "" -- 
+-- Iteration with mask value as "" --
 int(0)
 int(0)
 int(0)
 
--- Iteration with mask value as "Resource id #%d" -- 
+-- Iteration with mask value as "Resource id #%d" --
 
 Warning: strspn() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
 NULL
