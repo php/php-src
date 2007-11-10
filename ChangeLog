@@ -1,3 +1,212 @@
+2007-11-09  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/dl.c
+      ext/standard/dl.h
+      main/php_ini.c
+      main/php_ini.h
+      sapi/cgi/cgi_main.c:
+      MFH:- Added support for [HOST=www.example.com] special sections
+      MFH:- Allowed using full path to load modules using "extension" directive
+
+    * ext/standard/dl.c
+      ext/standard/dl.h
+      main/php_ini.c:
+      - Allow using full path to load modules using "extension" directive
+
+    * main/php_ini.c
+      main/php_ini.h
+      sapi/cgi/cgi_main.c:
+      - Added support for [HOST=www.example.com] sections
+
+    * ext/standard/dl.c:
+      ws + cs
+
+2007-11-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/ns_055.phpt
+      ZendEngine2/tests/ns_056.phpt:
+      Fixed type-hint compatibility check in namespaces
+
+    * ZendEngine2/tests/ns_055.phpt
+      ZendEngine2/tests/ns_055.phpt:
+      
+      file ns_055.phpt was initially added on branch PHP_5_3.
+
+    * ZendEngine2/tests/ns_056.phpt
+      ZendEngine2/tests/ns_056.phpt:
+      
+      file ns_056.phpt was initially added on branch PHP_5_3.
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/ns_054.phpt:
+      Fixed implementation of internal interfaces in namespaces
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/ns_054.phpt
+      ZendEngine2/tests/ns_054.phpt:
+      Fixed implementation of internal interfaces in namesapces
+
+2007-11-09  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli_structs.h:
+      Fix crashes with pconn (merge from 5_3)
+
+2007-11-09  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/str_replace.phpt
+      ext/standard/tests/strings/str_replace.phpt
+      ext/standard/tests/strings/str_replace.phpt
+      ext/standard/tests/strings/stripos_variation10.phpt
+      ext/standard/tests/strings/stripos_variation10.phpt
+      ext/standard/tests/strings/stripos_variation10.phpt
+      ext/standard/tests/strings/strpos.phpt
+      ext/standard/tests/strings/strpos.phpt
+      ext/standard/tests/strings/strrchr_variation10.phpt
+      ext/standard/tests/strings/strrchr_variation10.phpt
+      ext/standard/tests/strings/strrchr_variation10.phpt
+      ext/standard/tests/strings/strrchr_variation11.phpt
+      ext/standard/tests/strings/strrchr_variation11.phpt
+      ext/standard/tests/strings/strrchr_variation11.phpt
+      ext/standard/tests/strings/strrpos_variation10.phpt
+      ext/standard/tests/strings/strrpos_variation10.phpt
+      ext/standard/tests/strings/strrpos_variation10.phpt
+      ext/standard/tests/strings/strstr.phpt
+      ext/standard/tests/strings/strstr.phpt:
+      fix tests
+
+2007-11-09  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * ZendEngine2/zend_ptr_stack.c:
+      - That line got lost while merging around...
+
+2007-11-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/standard/file.c:
+      Conditions optimization
+
+2007-11-09  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_nonapi.c:
+      Fix build
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli_structs.h:
+      Fix crash with pconnect
+
+2007-11-09  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ptr_stack.c
+      ZendEngine2/zend_ptr_stack.h:
+      - MFH: Allow persistent zent_ptr_stacks (patch by Andrey Hristov)
+
+    * ZendEngine2/zend_ptr_stack.c
+      ZendEngine2/zend_ptr_stack.h:
+      - Allow persistent zent_ptr_stacks (patch by Andrey Hristov)
+
+2007-11-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/file/bug43216.phpt:
+      Fixed bug #43216 (stream_is_local() returns false on "file://")
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug43201.phpt:
+      Fixed bug #43201 (Crash on using unitialized vals and __get/__set)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug43175.phpt:
+      Fixed bug #43175 (__destruct() throwing an exception with __call() causes
+      segfault)
+
+2007-11-09  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/join_variation1.phpt:
+      fix test: better float values
+
+    * ext/standard/tests/strings/join_variation1.phpt
+      ext/standard/tests/strings/join_variation1.phpt:
+      fix test : better float values
+
+    * ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/chunk_split_variation3.phpt
+      ext/standard/tests/strings/crc32_variation1.phpt
+      ext/standard/tests/strings/crc32_variation1.phpt
+      ext/standard/tests/strings/crc32_variation1.phpt
+      ext/standard/tests/strings/strcspn_variation1.phpt
+      ext/standard/tests/strings/strcspn_variation1.phpt
+      ext/standard/tests/strings/strcspn_variation1.phpt
+      ext/standard/tests/strings/strcspn_variation2.phpt
+      ext/standard/tests/strings/strcspn_variation2.phpt
+      ext/standard/tests/strings/strcspn_variation2.phpt
+      ext/standard/tests/strings/strcspn_variation3.phpt
+      ext/standard/tests/strings/strcspn_variation3.phpt
+      ext/standard/tests/strings/strcspn_variation3.phpt
+      ext/standard/tests/strings/strcspn_variation4.phpt
+      ext/standard/tests/strings/strcspn_variation4.phpt
+      ext/standard/tests/strings/strcspn_variation4.phpt
+      ext/standard/tests/strings/strspn_variation1.phpt
+      ext/standard/tests/strings/strspn_variation1.phpt
+      ext/standard/tests/strings/strspn_variation1.phpt
+      ext/standard/tests/strings/strspn_variation2.phpt
+      ext/standard/tests/strings/strspn_variation2.phpt
+      ext/standard/tests/strings/strspn_variation2.phpt
+      ext/standard/tests/strings/strspn_variation3.phpt
+      ext/standard/tests/strings/strspn_variation3.phpt
+      ext/standard/tests/strings/strspn_variation3.phpt
+      ext/standard/tests/strings/strspn_variation4.phpt
+      ext/standard/tests/strings/strspn_variation4.phpt
+      ext/standard/tests/strings/strspn_variation4.phpt
+      ext/standard/tests/strings/strtok_variation1.phpt
+      ext/standard/tests/strings/strtok_variation1.phpt
+      ext/standard/tests/strings/strtok_variation1.phpt
+      ext/standard/tests/strings/ucwords_variation1.phpt
+      ext/standard/tests/strings/ucwords_variation1.phpt
+      ext/standard/tests/strings/ucwords_variation1.phpt:
+      fix tests: better float values
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/sprintf_variation6.phpt
+      ext/standard/tests/strings/sprintf_variation7.phpt
+      ext/standard/tests/strings/sprintf_variation8.phpt
+      ext/standard/tests/strings/sprintf_variation9.phpt:
+      missing testcases - sprintf() function
+
+2007-11-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pdo_oci/oci_driver.c:
+      Fixed win32 build
+
 2007-11-08  Lars Westermann  <lars.westermann@privat.dk>
 
     * (PHP_5_3)
