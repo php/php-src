@@ -693,7 +693,7 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
-#ifdef ZTS && MYSQL_VERSION_ID >= 40000
+#if defined(ZTS) && MYSQL_VERSION_ID >= 40000
 	if (mysql_thread_init()) {
 		return FAILURE;
 	}
@@ -709,7 +709,7 @@ PHP_RINIT_FUNCTION(mysqli)
  */
 PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
-#ifdef ZTS && MYSQL_VERSION_ID >= 40000
+#if defined(ZTS) && MYSQL_VERSION_ID >= 40000
 	mysql_thread_end();
 #endif
 	if (MyG(error_msg)) {
