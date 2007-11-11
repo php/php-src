@@ -181,9 +181,9 @@ Syntax and indentation
     of PHP or one of its standard modules, please maintain the K&R
     style.  This applies to just about everything, starting with
     indentation and comment styles and up to function declaration
-    syntax. Also see Identstyle_.
+    syntax. Also see Indentstyle_.
 
-.. _Identstyle: http://www.catb.org/~esr/jargon/html/I/indent-style.html
+.. _Indentstyle: http://www.catb.org/~esr/jargon/html/I/indent-style.html
 
 3.  Be generous with whitespace and braces.  Keep one empty line between the
     variable declaration section and the statements in a block, as well as
