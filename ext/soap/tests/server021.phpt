@@ -9,7 +9,7 @@ class Foo {
     if ($name == "test") {
       return "Hello World";
     } else {
-      return SoapFault("Server","Function $name doesn't exist");
+      return new SoapFault("Server","Function $name doesn't exist");
     }
   }
 }
