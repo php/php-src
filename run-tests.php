@@ -1493,7 +1493,7 @@ COMMAND $cmd
 			$wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
 			$wanted_re = str_replace('%d', '\d+', $wanted_re);
 			$wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
-			$wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:E-?\d+)?', $wanted_re);
+			$wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:E[+-]?\d+)?', $wanted_re);
 			$wanted_re = str_replace('%c', '.', $wanted_re);
 			// %f allows two points "-.0.0" but that is the best *simple* expression
 		}
