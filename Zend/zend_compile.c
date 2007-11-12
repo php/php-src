@@ -2981,6 +2981,8 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	int doing_inheritance = 0;
 	zend_class_entry *new_class_entry;
 	char *lcname;
+	int error = 0;
+	zval **ns_name;
 
 	if (CG(active_class_entry)) {
 		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
@@ -2996,8 +2998,8 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 	/* Class name must not conflict with import names */
 	if (CG(current_import) &&
-	    zend_hash_exists(CG(current_import), lcname, Z_STRLEN(class_name->u.constant)+1)) {
-		zend_error(E_COMPILE_ERROR, "Class name '%s' conflicts with import name", Z_STRVAL(class_name->u.constant));
+	    zend_hash_find(CG(current_import), lcname, Z_STRLEN(class_name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
+		error = 1;
 	}
 
 	if (CG(current_namespace)) {
@@ -3010,6 +3012,16 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 		class_name = &tmp;
 		efree(lcname);
 		lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
+	}
+
+	if (error) {
+		char *tmp = zend_str_tolower_dup(Z_STRVAL_PP(ns_name), Z_STRLEN_PP(ns_name));
+
+		if (Z_STRLEN_PP(ns_name) != Z_STRLEN(class_name->u.constant) ||
+			memcmp(tmp, lcname, Z_STRLEN(class_name->u.constant))) {
+			zend_error(E_COMPILE_ERROR, "Class name '%s' conflicts with import name", Z_STRVAL(class_name->u.constant));
+		}
+		efree(tmp);
 	}
 
 	new_class_entry = emalloc(sizeof(zend_class_entry));
@@ -4660,11 +4672,23 @@ void zend_do_use(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 		ns_name[Z_STRLEN_P(CG(current_namespace))+1] = ':';
 		memcpy(ns_name+Z_STRLEN_P(CG(current_namespace))+2, lcname, Z_STRLEN_P(name)+1);
 		if (zend_hash_exists(CG(class_table), ns_name, Z_STRLEN_P(CG(current_namespace)) + 2 + Z_STRLEN_P(name)+1)) {
-			zend_error(E_COMPILE_ERROR, "Import name '%s' conflicts with defined class", Z_STRVAL_P(name));
+			char *tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+
+			if (Z_STRLEN_P(ns) != Z_STRLEN_P(CG(current_namespace)) + 2 + Z_STRLEN_P(name) ||
+				memcmp(tmp, ns_name, Z_STRLEN_P(ns))) {
+				zend_error(E_COMPILE_ERROR, "Import name '%s' conflicts with defined class", Z_STRVAL_P(name));
+			}
+			efree(tmp);
 		}
 		efree(ns_name);
 	} else if (zend_hash_exists(CG(class_table), lcname, Z_STRLEN_P(name)+1)) {
-		zend_error(E_COMPILE_ERROR, "Import name '%s' conflicts with defined class", Z_STRVAL_P(name));
+		char *tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+
+		if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
+			memcmp(tmp, lcname, Z_STRLEN_P(ns))) {
+			zend_error(E_COMPILE_ERROR, "Import name '%s' conflicts with defined class", Z_STRVAL_P(name));
+		}
+		efree(tmp);
 	}
 
 	if (zend_hash_add(CG(current_import), lcname, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
