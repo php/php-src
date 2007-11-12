@@ -3019,7 +3019,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 		if (Z_STRLEN_PP(ns_name) != Z_STRLEN(class_name->u.constant) ||
 			memcmp(tmp, lcname, Z_STRLEN(class_name->u.constant))) {
-			zend_error(E_COMPILE_ERROR, "Class name '%s' conflicts with import name", Z_STRVAL(class_name->u.constant));
+			zend_error(E_COMPILE_ERROR, "Cannot declare class %s because the name is already in use", Z_STRVAL(class_name->u.constant));
 		}
 		efree(tmp);
 	}
@@ -4660,7 +4660,7 @@ void zend_do_use(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
           !memcmp(lcname, "self", sizeof("self")-1)) ||
 	    ((Z_STRLEN_P(name) == sizeof("parent")-1) &&
           !memcmp(lcname, "parent", sizeof("parent")-1))) {
-		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as import name", Z_STRVAL_P(name));
+		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' is a special class name", Z_STRVAL_P(ns), Z_STRVAL_P(name), Z_STRVAL_P(name));
 	}
 
 	if (CG(current_namespace)) {
@@ -4676,7 +4676,7 @@ void zend_do_use(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 
 			if (Z_STRLEN_P(ns) != Z_STRLEN_P(CG(current_namespace)) + 2 + Z_STRLEN_P(name) ||
 				memcmp(tmp, ns_name, Z_STRLEN_P(ns))) {
-				zend_error(E_COMPILE_ERROR, "Import name '%s' conflicts with defined class", Z_STRVAL_P(name));
+				zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 			}
 			efree(tmp);
 		}
@@ -4686,13 +4686,13 @@ void zend_do_use(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 
 		if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
 			memcmp(tmp, lcname, Z_STRLEN_P(ns))) {
-			zend_error(E_COMPILE_ERROR, "Import name '%s' conflicts with defined class", Z_STRVAL_P(name));
+			zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 		}
 		efree(tmp);
 	}
 
 	if (zend_hash_add(CG(current_import), lcname, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
-		zend_error(E_COMPILE_ERROR, "Cannot reuse import name");
+		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 	}
 	if (warn) {
 		zend_error(E_WARNING, "The use statement with non-compound name '%s' has no effect", Z_STRVAL_P(name));
