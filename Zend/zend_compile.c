@@ -3537,7 +3537,7 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 	}
 
 	if (access_type & ZEND_ACC_FINAL) {
-		zend_error(E_COMPILE_ERROR, "Cannot declare property %v::$%R final, the final modifier is allowed only for methods",
+		zend_error(E_COMPILE_ERROR, "Cannot declare property %v::$%R final, the final modifier is allowed only for methods and classes",
 			CG(active_class_entry)->name, Z_TYPE(var_name->u.constant), Z_UNIVAL(var_name->u.constant));
 	}
 
