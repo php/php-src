@@ -1635,6 +1635,13 @@ SXE_METHOD(addAttribute)
 
 	localname = xmlSplitQName2((xmlChar *)qname, &prefix);
 	if (localname == NULL) {
+		if (nsuri_len > 0) {
+			if (prefix != NULL) {
+				xmlFree(prefix);
+			}
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute requires prefix for namespace");
+			return;
+		}
 		localname = xmlStrdup((xmlChar *)qname);
 	}
 
