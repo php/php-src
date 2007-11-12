@@ -1,3 +1,37 @@
+2007-11-11  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/lsb_006.phpt
+      ZendEngine2/tests/lsb_007.phpt:
+      - MFH: static can't be used as type hint, fixes #43126 (Etienne Kneuss)
+
+    * ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/lsb_006.phpt
+      ZendEngine2/tests/lsb_007.phpt:
+      - static can't be used as type hint, fixes #43126 (Etienne Kneuss)
+
+2007-11-11  Jon Parise  <jon+php@csh.rit.edu>
+
+    * CODING_STANDARDS:
+      s/Ident/Indent
+
+2007-11-11  Lukas Smith  <smith@pooteeweet.org>
+
+    * CODING_STANDARDS:
+      - migrate syntax to rEST to allow html/docbook rendering
+
+2007-11-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/soap/tests/server021.phpt
+      ext/soap/tests/server021.phpt:
+      
+      MFB: Fixed parse error described in bug #43228
+
+    * (PHP_5_3)
+      ext/soap/tests/server021.phpt:
+      Fixed parse error described in bug #43228
+
 2007-11-10  Johannes Schl�ter  <johannes@schlueters.de>
 
     * (PHP_5_2)

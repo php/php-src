@@ -1,3 +1,16 @@
+2007-11-11  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      zend_language_parser.y
+      tests/lsb_006.phpt
+      tests/lsb_007.phpt:
+      - MFH: static can't be used as type hint, fixes #43126 (Etienne Kneuss)
+
+    * zend_language_parser.y
+      tests/lsb_006.phpt
+      tests/lsb_007.phpt:
+      - static can't be used as type hint, fixes #43126 (Etienne Kneuss)
+
 2007-11-09  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
