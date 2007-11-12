@@ -831,12 +831,32 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 	zend_function *fbc;
 
 	if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &fbc)==FAILURE) {
-		char *class_name = ce->name;
+		if (ce->__call &&
+		    EG(This) &&
+		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+			zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
 
-		if (!class_name) {
-			class_name = "";
+			call_user_call->type = ZEND_INTERNAL_FUNCTION;
+			call_user_call->module = ce->module;
+			call_user_call->handler = zend_std_call_user_call;
+			call_user_call->arg_info = NULL;
+			call_user_call->num_args = 0;
+			call_user_call->scope = ce;
+			call_user_call->fn_flags = 0;
+			call_user_call->function_name = estrndup(function_name_strval, function_name_strlen);
+			call_user_call->pass_rest_by_reference = 0;
+			call_user_call->return_reference = ZEND_RETURN_VALUE;
+
+			return (union _zend_function *)call_user_call;
+		} else {
+			char *class_name = ce->name;
+
+			if (!class_name) {
+				class_name = "";
+			}
+			zend_error(E_ERROR, "Call to undefined method %s::%s()", class_name, function_name_strval);
 		}
-		zend_error(E_ERROR, "Call to undefined method %s::%s()", class_name, function_name_strval);
 	}
 	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
 		/* No further checks necessary, most common case */

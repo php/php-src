@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Fixed bug #43201 (Crash on using unitialized vals and __get/__set). (Dmitry)
 - Fixed bug #43175 (__destruct() throwing an exception with __call() causes
   segfault). (Dmitry)
+- Fixed bug #42937 (__call() method not invoked when methods are called on
+  parent from child class). (Dmitry)
 
 08 Nov 2007, PHP 5.2.5
 - Upgraded PCRE to version 7.3 (Nuno)
