@@ -3241,7 +3241,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 		if (tmp_len != lcname_len ||
 			memcmp(tmp.v, lcname.v, UG(unicode)?UBYTES(lcname_len):lcname_len)) {
-			zend_error(E_COMPILE_ERROR, "Class name '%R' conflicts with import name", Z_TYPE(class_name->u.constant), Z_UNIVAL(class_name->u.constant));
+			zend_error(E_COMPILE_ERROR, "Cannot declare class %R because the name is already in use", Z_TYPE(class_name->u.constant), Z_UNIVAL(class_name->u.constant));
 		}
 		efree(tmp.v);
 	}
@@ -5197,7 +5197,7 @@ void zend_do_use(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
           ZEND_U_EQUAL(Z_TYPE_P(name), lcname, lcname_len, "self", sizeof("self")-1)) ||
 	    ((lcname_len == sizeof("parent")-1) &&
           ZEND_U_EQUAL(Z_TYPE_P(name), lcname, lcname_len, "parent", sizeof("parent")-1))) {
-		zend_error(E_COMPILE_ERROR, "Cannot use '%R' as import name", Z_TYPE_P(name), Z_UNIVAL_P(name));
+		zend_error(E_COMPILE_ERROR, "Cannot use %R as %R because '%R' is a special class name", Z_TYPE_P(ns), Z_UNIVAL_P(ns), Z_TYPE_P(name), Z_UNIVAL_P(name), Z_TYPE_P(name), Z_UNIVAL_P(name));
 	}
 
 	if (CG(current_namespace)) {
@@ -5222,7 +5222,7 @@ void zend_do_use(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 
 			if (tmp_len != ns_name_len + 2 + lcname_len ||
 				memcmp(tmp.v, ns_name.v, UG(unicode)?UBYTES(tmp_len):tmp_len)) {
-				zend_error(E_COMPILE_ERROR, "Import name '%R' conflicts with defined class", Z_TYPE_P(name), Z_STRVAL_P(name));
+				zend_error(E_COMPILE_ERROR, "Cannot use %R as %R because the name is already in use", Z_TYPE_P(ns), Z_UNIVAL_P(ns), Z_TYPE_P(name), Z_UNIVAL_P(name));
 			}
 			efree(tmp.v);
 		}
@@ -5233,13 +5233,13 @@ void zend_do_use(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 
 		if (tmp_len != lcname_len ||
 			memcmp(tmp.v, lcname.v, UG(unicode)?UBYTES(tmp_len):tmp_len)) {
-			zend_error(E_COMPILE_ERROR, "Import name '%R' conflicts with defined class", Z_TYPE_P(name), Z_UNIVAL_P(name));
+			zend_error(E_COMPILE_ERROR, "Cannot use %R as %R because the name is already in use", Z_TYPE_P(ns), Z_UNIVAL_P(ns), Z_TYPE_P(name), Z_UNIVAL_P(name));
 		}
 		efree(tmp.v);
 	}
 
 	if (zend_u_hash_add(CG(current_import), Z_TYPE_P(name), lcname, lcname_len+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
-		zend_error(E_COMPILE_ERROR, "Cannot reuse import name");
+		zend_error(E_COMPILE_ERROR, "Cannot use %R as %R because the name is already in use", Z_TYPE_P(ns), Z_UNIVAL_P(ns), Z_TYPE_P(name), Z_UNIVAL_P(name));
 	}
 	if (warn) {
 		zend_error(E_WARNING, "The use statement with non-compound name '%R' has no effect", Z_TYPE_P(name), Z_UNIVAL_P(name));
