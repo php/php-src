@@ -874,10 +874,9 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
 
    pData->php_executed = 1;
 
-	zval_dtor(xmlrpc_params);
-	FREE_ZVAL(xmlrpc_params);
+   zval_ptr_dtor(&xmlrpc_params);
 
-	return NULL;
+   return NULL;
 }
 
 /* called by the C server when it first receives an introspection request.  We pass this on to
