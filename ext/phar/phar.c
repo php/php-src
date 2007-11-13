@@ -1482,6 +1482,13 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 		filename_len -= 7;
 	}
 
+#ifdef PHP_WIN32
+	if (filename_len > 3 && *filename == '/' && *(filename + 2) == ':' && *(filename + 3) == '/') {
+		filename++;
+		filename_len--;
+	}
+#endif
+
 	if (phar_detect_phar_fname_ext(filename, 0, &ext_str, &ext_len) == FAILURE) {
 		return FAILURE;
 	}
