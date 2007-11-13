@@ -202,48 +202,11 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
 
   case $OCI8_VERSION in
     8.0)
-      PHP_ADD_LIBRARY_WITH_PATH(nlsrtl3, "", OCI8_SHARED_LIBADD)
-      PHP_ADD_LIBRARY_WITH_PATH(core4, "", OCI8_SHARED_LIBADD)
-      PHP_ADD_LIBRARY_WITH_PATH(psa, "", OCI8_SHARED_LIBADD)
-      PHP_ADD_LIBRARY_WITH_PATH(clntsh, $OCI8_DIR/$OCI8_LIB_DIR, OCI8_SHARED_LIBADD)
-
-      PHP_CHECK_LIBRARY(clntsh, OCIEnvCreate,
-      [
-        AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
-      ], [], [
-        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-      ])
-
-      PHP_CHECK_LIBRARY(clntsh, OCIStmtPrepare2,
-      [
-        AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
-      ], [], [
-        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-      ])
+      AC_MSG_ERROR([Oracle client libraries < 9.0 are not supported any more. Please consider upgrading.])
       ;;
 
     8.1)
-      PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
-      PHP_ADD_LIBPATH($OCI8_DIR/$OCI8_LIB_DIR, OCI8_SHARED_LIBADD)
-
-      PHP_CHECK_LIBRARY(clntsh, OCIEnvCreate,
-      [
-        AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
-      ], [], [
-        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-      ])
-
-      PHP_CHECK_LIBRARY(clntsh, OCIStmtPrepare2,
-      [
-        AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
-      ], [], [
-        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-      ])
- 
-      dnl 
-      dnl OCI_ATTR_STATEMENT is not available in all 8.1.x versions
-      dnl 
-      PHP_OCI_IF_DEFINED(OCI_ATTR_STATEMENT, [AC_DEFINE(HAVE_OCI8_ATTR_STATEMENT,1,[ ])], $OCI8_INCLUDES)
+      AC_MSG_ERROR([Oracle client libraries < 9.0 are not supported any more. Please consider upgrading.])
       ;;
 
     9.0)
@@ -300,7 +263,7 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
       AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
       ;;
     *)
-      AC_MSG_ERROR([Unsupported Oracle version!])
+      AC_MSG_ERROR([Oracle version $OCI8_VERSION is not supported])
       ;;
   esac
 
@@ -399,7 +362,7 @@ dnl Header directory for manual installation
       ;;
 
     *)
-      AC_MSG_ERROR([Unsupported Oracle Instant Client version])
+      AC_MSG_ERROR([Oracle Instant CLient version $PHP_OCI8_INSTANT_CLIENT is not supported])
       ;;
   esac
 
