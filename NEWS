@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - Fixed bug #42937 (__call() method not invoked when methods are called on
   parent from child class). (Dmitry)
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
+- Fixed bug #42692 (Procedure 'int1' not present with doc/lit SoapServer).
+  (Dmitry)
+
 
 08 Nov 2007, PHP 5.2.5
 - Upgraded PCRE to version 7.3 (Nuno)
