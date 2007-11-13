@@ -5000,6 +5000,7 @@ static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr params)
 								break;
 							}
 							zend_hash_move_forward((*tmp)->requestParameters);
+							node = node->next;
 						}
 						if (ok /*&& node == NULL*/) {
 							return (*tmp);
