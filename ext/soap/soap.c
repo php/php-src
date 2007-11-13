@@ -2671,7 +2671,7 @@ PHP_METHOD(SoapClient, SoapClient)
 					client->uri = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
 				}
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is requred in nonWSDL mode");
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is required in nonWSDL mode");
 				return;
 			}
 
@@ -2701,7 +2701,7 @@ PHP_METHOD(SoapClient, SoapClient)
 				client->location = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
 			}
 		} else if (wsdl == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' option is requred in nonWSDL mode");
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' option is required in nonWSDL mode");
 			return;
 		}
 
@@ -2854,7 +2854,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		}
 
 	} else if (wsdl == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are requred in nonWSDL mode");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are required in nonWSDL mode");
 		return;
 	}
 
