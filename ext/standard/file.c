@@ -622,7 +622,7 @@ PHP_FUNCTION(file_put_contents)
 		RETURN_FALSE;
 	}
 
-	if (mode[0] = 'c') {
+	if (mode[0] == 'c') {
 		php_stream_truncate_set_size(stream, 0);
 	}
 
