@@ -1,3 +1,279 @@
+2007-11-12  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_2)
+      run-tests.php
+      run-tests.php:
+      MFH: Changing the regex for %f so the it will match E-, E+ and E.
+
+2007-11-12  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug43221.phpt
+      ext/simplexml/tests/bug43221.phpt:
+      MFH: fix bug #43221 (SimpleXML adding default namespace in addAttribute)
+      add test
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug43221.phpt
+      ext/simplexml/tests/bug43221.phpt
+      ext/simplexml/tests/bug43221.phpt:
+      fix bug #43221 (SimpleXML adding default namespace in addAttribute)
+      add test
+
+2007-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/file.c
+      main/streams/plain_wrapper.c:
+      
+      Fixed bug #43182 (file_put_contents() LOCK_EX does not work properly on
+      file
+
+    * (PHP_5_3)
+      ext/standard/file.c
+      main/streams/plain_wrapper.c:
+      Fixed bug #43182 (file_put_contents() LOCK_EX does not work properly on
+      file
+      truncation).
+
+2007-11-12  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * run-tests.php:
+      Changing the regex for %f so the it will match E-, E+ and E.
+
+2007-11-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug42859.phpt
+      ZendEngine2/tests/bug42859.phpt
+      ZendEngine2/tests/ns_029.phpt
+      ZendEngine2/tests/ns_029.phpt
+      ZendEngine2/tests/ns_030.phpt
+      ZendEngine2/tests/ns_030.phpt:
+      better error messages
+
+2007-11-12  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/errmsg_038.phpt
+      ZendEngine2/tests/errmsg_038.phpt:
+      MFH: fix error message (reported by Felipe Nascimento)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/errmsg_038.phpt:
+      fix error message (reported by Felipe Nascimento)
+
+2007-11-12  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/ksort_basic.phpt
+      ext/standard/tests/array/ksort_basic.phpt
+      ext/standard/tests/array/ksort_error.phpt
+      ext/standard/tests/array/ksort_error.phpt
+      ext/standard/tests/array/ksort_object.phpt
+      ext/standard/tests/array/ksort_object.phpt
+      ext/standard/tests/array/ksort_variation1.phpt
+      ext/standard/tests/array/ksort_variation1.phpt
+      ext/standard/tests/array/ksort_variation10.phpt
+      ext/standard/tests/array/ksort_variation10.phpt
+      ext/standard/tests/array/ksort_variation11.phpt
+      ext/standard/tests/array/ksort_variation11.phpt
+      ext/standard/tests/array/ksort_variation2.phpt
+      ext/standard/tests/array/ksort_variation2.phpt
+      ext/standard/tests/array/ksort_variation3.phpt
+      ext/standard/tests/array/ksort_variation3.phpt
+      ext/standard/tests/array/ksort_variation4.phpt
+      ext/standard/tests/array/ksort_variation4.phpt
+      ext/standard/tests/array/ksort_variation5.phpt
+      ext/standard/tests/array/ksort_variation5.phpt
+      ext/standard/tests/array/ksort_variation6.phpt
+      ext/standard/tests/array/ksort_variation6.phpt
+      ext/standard/tests/array/ksort_variation7.phpt
+      ext/standard/tests/array/ksort_variation7.phpt
+      ext/standard/tests/array/ksort_variation8.phpt
+      ext/standard/tests/array/ksort_variation8.phpt
+      ext/standard/tests/array/ksort_variation9.phpt
+      ext/standard/tests/array/ksort_variation9.phpt:
+      New testcases for ksort() function
+
+    * (PHP_5_2)
+      ext/standard/tests/array/krsort_basic.phpt
+      ext/standard/tests/array/krsort_basic.phpt
+      ext/standard/tests/array/krsort_error.phpt
+      ext/standard/tests/array/krsort_error.phpt
+      ext/standard/tests/array/krsort_object.phpt
+      ext/standard/tests/array/krsort_object.phpt
+      ext/standard/tests/array/krsort_variation1.phpt
+      ext/standard/tests/array/krsort_variation1.phpt
+      ext/standard/tests/array/krsort_variation10.phpt
+      ext/standard/tests/array/krsort_variation10.phpt
+      ext/standard/tests/array/krsort_variation11.phpt
+      ext/standard/tests/array/krsort_variation11.phpt
+      ext/standard/tests/array/krsort_variation2.phpt
+      ext/standard/tests/array/krsort_variation2.phpt
+      ext/standard/tests/array/krsort_variation3.phpt
+      ext/standard/tests/array/krsort_variation3.phpt
+      ext/standard/tests/array/krsort_variation4.phpt
+      ext/standard/tests/array/krsort_variation4.phpt
+      ext/standard/tests/array/krsort_variation5.phpt
+      ext/standard/tests/array/krsort_variation5.phpt
+      ext/standard/tests/array/krsort_variation6.phpt
+      ext/standard/tests/array/krsort_variation6.phpt
+      ext/standard/tests/array/krsort_variation7.phpt
+      ext/standard/tests/array/krsort_variation7.phpt
+      ext/standard/tests/array/krsort_variation8.phpt
+      ext/standard/tests/array/krsort_variation8.phpt
+      ext/standard/tests/array/krsort_variation9.phpt
+      ext/standard/tests/array/krsort_variation9.phpt:
+      New testcases for krsort() function
+
+2007-11-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug43183.phpt
+      ZendEngine2/tests/bug43183.phpt
+      ZendEngine2/tests/bug43183.phpt:
+      Fixed bug #43183 ("use" of the same class in difference scripts results in
+      a fatal error)
+
+2007-11-12  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/array/ksort_basic.phpt
+      ext/standard/tests/array/ksort_basic.phpt
+      ext/standard/tests/array/ksort_basic.phpt
+      ext/standard/tests/array/ksort_error.phpt
+      ext/standard/tests/array/ksort_error.phpt
+      ext/standard/tests/array/ksort_error.phpt
+      ext/standard/tests/array/ksort_object.phpt
+      ext/standard/tests/array/ksort_object.phpt
+      ext/standard/tests/array/ksort_object.phpt
+      ext/standard/tests/array/ksort_variation1.phpt
+      ext/standard/tests/array/ksort_variation1.phpt
+      ext/standard/tests/array/ksort_variation1.phpt
+      ext/standard/tests/array/ksort_variation10.phpt
+      ext/standard/tests/array/ksort_variation10.phpt
+      ext/standard/tests/array/ksort_variation10.phpt
+      ext/standard/tests/array/ksort_variation11.phpt
+      ext/standard/tests/array/ksort_variation11.phpt
+      ext/standard/tests/array/ksort_variation11.phpt
+      ext/standard/tests/array/ksort_variation2.phpt
+      ext/standard/tests/array/ksort_variation2.phpt
+      ext/standard/tests/array/ksort_variation2.phpt
+      ext/standard/tests/array/ksort_variation3.phpt
+      ext/standard/tests/array/ksort_variation3.phpt
+      ext/standard/tests/array/ksort_variation3.phpt
+      ext/standard/tests/array/ksort_variation4.phpt
+      ext/standard/tests/array/ksort_variation4.phpt
+      ext/standard/tests/array/ksort_variation4.phpt
+      ext/standard/tests/array/ksort_variation5.phpt
+      ext/standard/tests/array/ksort_variation5.phpt
+      ext/standard/tests/array/ksort_variation5.phpt
+      ext/standard/tests/array/ksort_variation6.phpt
+      ext/standard/tests/array/ksort_variation6.phpt
+      ext/standard/tests/array/ksort_variation6.phpt
+      ext/standard/tests/array/ksort_variation7.phpt
+      ext/standard/tests/array/ksort_variation7.phpt
+      ext/standard/tests/array/ksort_variation7.phpt
+      ext/standard/tests/array/ksort_variation8.phpt
+      ext/standard/tests/array/ksort_variation8.phpt
+      ext/standard/tests/array/ksort_variation8.phpt
+      ext/standard/tests/array/ksort_variation9.phpt
+      ext/standard/tests/array/ksort_variation9.phpt
+      ext/standard/tests/array/ksort_variation9.phpt:
+        1.1.4;
+      New testcases for ksort() function
+
+    * ext/standard/tests/array/krsort_basic.phpt
+      ext/standard/tests/array/krsort_basic.phpt
+      ext/standard/tests/array/krsort_basic.phpt
+      ext/standard/tests/array/krsort_error.phpt
+      ext/standard/tests/array/krsort_error.phpt
+      ext/standard/tests/array/krsort_error.phpt
+      ext/standard/tests/array/krsort_object.phpt
+      ext/standard/tests/array/krsort_object.phpt
+      ext/standard/tests/array/krsort_object.phpt
+      ext/standard/tests/array/krsort_variation1.phpt
+      ext/standard/tests/array/krsort_variation1.phpt
+      ext/standard/tests/array/krsort_variation1.phpt
+      ext/standard/tests/array/krsort_variation10.phpt
+      ext/standard/tests/array/krsort_variation10.phpt
+      ext/standard/tests/array/krsort_variation10.phpt
+      ext/standard/tests/array/krsort_variation11.phpt
+      ext/standard/tests/array/krsort_variation11.phpt
+      ext/standard/tests/array/krsort_variation11.phpt
+      ext/standard/tests/array/krsort_variation2.phpt
+      ext/standard/tests/array/krsort_variation2.phpt
+      ext/standard/tests/array/krsort_variation2.phpt
+      ext/standard/tests/array/krsort_variation3.phpt
+      ext/standard/tests/array/krsort_variation3.phpt
+      ext/standard/tests/array/krsort_variation3.phpt
+      ext/standard/tests/array/krsort_variation4.phpt
+      ext/standard/tests/array/krsort_variation4.phpt
+      ext/standard/tests/array/krsort_variation4.phpt
+      ext/standard/tests/array/krsort_variation5.phpt
+      ext/standard/tests/array/krsort_variation5.phpt
+      ext/standard/tests/array/krsort_variation5.phpt
+      ext/standard/tests/array/krsort_variation6.phpt
+      ext/standard/tests/array/krsort_variation6.phpt
+      ext/standard/tests/array/krsort_variation6.phpt
+      ext/standard/tests/array/krsort_variation7.phpt
+      ext/standard/tests/array/krsort_variation7.phpt
+      ext/standard/tests/array/krsort_variation7.phpt
+      ext/standard/tests/array/krsort_variation8.phpt
+      ext/standard/tests/array/krsort_variation8.phpt
+      ext/standard/tests/array/krsort_variation8.phpt
+      ext/standard/tests/array/krsort_variation9.phpt
+      ext/standard/tests/array/krsort_variation9.phpt
+      ext/standard/tests/array/krsort_variation9.phpt:
+        1.1.4;
+      new testcases for krsort() function
+
+2007-11-12  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      NEWS
+      NEWS
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/tests/bug42736.phpt
+      ext/xmlrpc/tests/bug42736.phpt:
+      MFH: fix #42736 (xmlrpc_server_call_method() crashes)
+
+    * ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/tests/bug42736.phpt
+      ext/xmlrpc/tests/bug42736.phpt
+      ext/xmlrpc/tests/bug42736.phpt:
+      fix #42736 (xmlrpc_server_call_method() crashes)
+
+2007-11-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug42937.phpt
+      ZendEngine2/tests/bug42937.phpt
+      ZendEngine2/tests/bug42937.phpt:
+        1.1.4;
+      file bug42937.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug42937.phpt
+      ZendEngine2/tests/bug42937.phpt:
+      Fixed bug #42937 (__call() method not invoked when methods are called on
+      parent from child class).
+
 2007-11-11  Johannes Schl�ter  <johannes@schlueters.de>
 
     * (PHP_5_3)
