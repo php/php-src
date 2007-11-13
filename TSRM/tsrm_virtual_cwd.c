@@ -712,22 +712,24 @@ no_realpath:
 			}
 			ptr = tsrm_strtok_r(NULL, TOKENIZER_STRING, &tok);
 		}
-#if defined(TSRM_WIN32) || defined(NETWARE)
-		if (path[path_length-1] == '\\' || path[path_length-1] == '/') {
-#else 
-		if (path[path_length-1] == '/') {
-#endif
-			state->cwd = (char*)realloc(state->cwd, state->cwd_length + 2);
-			state->cwd[state->cwd_length++] = DEFAULT_SLASH;
-			state->cwd[state->cwd_length] = 0;
-		}
-
 		free(free_path);
 
-		if ((use_realpath == CWD_REALPATH) && ret) {
-			CWD_STATE_FREE(state);
-			*state = old_state;					
-			return 1;
+		if (use_realpath == CWD_REALPATH) {
+			if (ret) {
+				CWD_STATE_FREE(state);
+				*state = old_state;					
+				return 1;
+			}
+		} else {
+#if defined(TSRM_WIN32) || defined(NETWARE)
+			if (path[path_length-1] == '\\' || path[path_length-1] == '/') {
+#else 
+			if (path[path_length-1] == '/') {
+#endif
+				state->cwd = (char*)realloc(state->cwd, state->cwd_length + 2);
+				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
+				state->cwd[state->cwd_length] = 0;
+			}
 		}
 
 		if (state->cwd_length == COPY_WHEN_ABSOLUTE(state->cwd)) {
