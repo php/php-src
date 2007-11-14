@@ -4568,10 +4568,11 @@ PHP_FUNCTION(getopt)
 	 * in order to be on the safe side, even though it is also available
 	 * from the symbol table.
 	 */
-	if (zend_hash_find(HASH_OF(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), (void **) &args) != FAILURE ||
-		zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void **) &args) != FAILURE) {
+	if ((zend_hash_find(HASH_OF(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), (void **) &args) != FAILURE ||
+		zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void **) &args) != FAILURE) && Z_TYPE_PP(args) == IS_ARRAY
+	) {
 		int pos = 0;
-		zval **arg;
+		zval **entry;
 
 		argc = zend_hash_num_elements(Z_ARRVAL_PP(args));
 
@@ -4586,8 +4587,22 @@ PHP_FUNCTION(getopt)
 
 		/* Iterate over the hash to construct the argv array. */
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(args),
-										  (void **)&arg) == SUCCESS) {
-			argv[pos++] = estrdup(Z_STRVAL_PP(arg));
+										  (void **)&entry) == SUCCESS) {
+			zval arg, *arg_ptr = *entry;
+
+			if (Z_TYPE_PP(entry) != IS_STRING) {
+				arg = **entry;
+				zval_copy_ctor(&arg);
+				convert_to_string(&arg);
+				arg_ptr = &arg;
+			}
+
+			argv[pos++] = estrdup(Z_STRVAL_P(arg_ptr));
+
+			if (arg_ptr != *entry) {
+				zval_dtor(&arg);
+			}
+
 			zend_hash_move_forward(Z_ARRVAL_PP(args));
 		}
 
@@ -4605,7 +4620,7 @@ PHP_FUNCTION(getopt)
 #ifdef HARTMUT_0
 		int len, c = zend_hash_num_elements(Z_ARRVAL_P(p_longopts));
 		struct option *p;
-		zval **arg;
+		zval **entry;
 		char *name;
 
 		longopts = (struct option *)ecalloc(c+1, sizeof(struct option));
@@ -4618,10 +4633,19 @@ PHP_FUNCTION(getopt)
 
 		/* Iterate over the hash to construct the argv array. */
 		while (zend_hash_get_current_data(Z_ARRVAL_P(p_longopts),
-										  (void **)&arg) == SUCCESS) {
+										  (void **)&entry) == SUCCESS) {
+			zval arg, *arg_ptr = *entry;
+
+			if (Z_TYPE_PP(entry) != IS_STRING) {
+				arg = **entry;
+				zval_copy_ctor(&arg);
+				convert_to_string(&arg);
+				arg_ptr = &arg;
+			}
+
 
 			p->has_arg = 0;
-			name = estrdup(Z_STRVAL_PP(arg));
+			name = estrdup(Z_STRVAL_P(arg_ptr));
 			len = strlen(name);
 			if((len > 0) && (name[len-1] == ':')) {
 				p->has_arg++;
@@ -4635,6 +4659,10 @@ PHP_FUNCTION(getopt)
 			p->name = name; 
 			p->flag = NULL;
 			p->val = 0;
+
+			if (arg_ptr != *entry) {
+				zval_dtor(&arg);
+			}
 
 			zend_hash_move_forward(Z_ARRVAL_P(p_longopts));
 			p++;

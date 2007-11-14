@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.6
+- Fixed bug #43293 (Multiple segfaults in getopt()). (Hannes)
 - Fixed bug #43279 (pg_send_query_params() converts all elements in 'params' 
   to strings). (Ilia)
 - Fixed bug #43248 (backward compatibility break in realpath()). (Dmitry)
