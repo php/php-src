@@ -4516,11 +4516,11 @@ PHP_FUNCTION(getopt)
 	/* Get argv from the global symbol table. We calculate argc ourselves
 	 * in order to be on the safe side, even though it is also available
 	 * from the symbol table. */
-	if (zend_ascii_hash_find(HASH_OF(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), (void **) &args) != FAILURE ||
-		zend_ascii_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void **) &args) != FAILURE
+	if ((zend_ascii_hash_find(HASH_OF(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), (void **) &args) != FAILURE ||
+		zend_ascii_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void **) &args) != FAILURE) && Z_TYPE_PP(args) == IS_ARRAY
 	) {
 		int pos = 0;
-		zval **arg;
+		zval **entry;
 
 		argc = zend_hash_num_elements(Z_ARRVAL_PP(args));
 
@@ -4532,8 +4532,22 @@ PHP_FUNCTION(getopt)
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(args));
 
 		/* Iterate over the hash to construct the argv array. */
-		while (zend_hash_get_current_data(Z_ARRVAL_PP(args), (void **)&arg) == SUCCESS) {
-			argv[pos++] = estrdup(Z_STRVAL_PP(arg));
+		while (zend_hash_get_current_data(Z_ARRVAL_PP(args), (void **)&entry) == SUCCESS) {
+			zval arg, *arg_ptr = *entry;
+
+			if (Z_TYPE_PP(entry) != IS_STRING) {
+				arg = **entry;
+				zval_copy_ctor(&arg);
+				convert_to_string(&arg);
+				arg_ptr = &arg;
+			}
+
+			argv[pos++] = estrdup(Z_STRVAL_P(arg_ptr));
+
+			if (arg_ptr != *entry) {
+				zval_dtor(&arg);
+			}
+
 			zend_hash_move_forward(Z_ARRVAL_PP(args));
 		}
 
@@ -4549,7 +4563,7 @@ PHP_FUNCTION(getopt)
 
 	if (p_longopts) {
 		int count;
-		zval **arg;
+		zval **entry;
 
 		count = zend_hash_num_elements(Z_ARRVAL_P(p_longopts));
 
@@ -4569,9 +4583,18 @@ PHP_FUNCTION(getopt)
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p_longopts));
 
 		/* Iterate over the hash to construct the argv array. */
-		while (zend_hash_get_current_data(Z_ARRVAL_P(p_longopts), (void **)&arg) == SUCCESS) {
+		while (zend_hash_get_current_data(Z_ARRVAL_P(p_longopts), (void **)&entry) == SUCCESS) {
+			zval arg, *arg_ptr = *entry;
+
+			if (Z_TYPE_PP(entry) != IS_STRING) {
+				arg = **entry;
+				zval_copy_ctor(&arg);
+				convert_to_string(&arg);
+				arg_ptr = &arg;
+			}
+
 			opts->need_param = 0;
-			opts->opt_name = estrdup(Z_STRVAL_PP(arg));
+			opts->opt_name = estrdup(Z_STRVAL_P(arg_ptr));
 			len = strlen(opts->opt_name);
 			if ((len > 0) && (opts->opt_name[len - 1] == ':')) {
 				opts->need_param++;
@@ -4583,6 +4606,11 @@ PHP_FUNCTION(getopt)
 			}
 			opts->opt_char = 0;
 			opts++;
+
+			if (arg_ptr != *entry) {
+				zval_dtor(&arg);
+			}
+
 			zend_hash_move_forward(Z_ARRVAL_P(p_longopts));
 		}
 	} else {
