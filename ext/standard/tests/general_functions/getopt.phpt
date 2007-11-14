@@ -5,12 +5,6 @@ getopt
 --INI--
 register_argc_argv=On
 variables_order=GPS
---SKIPIF--
-<?php
-	if (substr(PHP_OS, 0, 3) == 'WIN') {
-		die('skip getopt() is currently not available on Windows');
-	}
-?>
 --FILE--
 <?php
 	var_dump(getopt("d:m:j:vht"));
