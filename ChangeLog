@@ -1,3 +1,115 @@
+2007-11-13  Etienne Kneuss  <php@colder.ch>
+
+    * ext/soap/soap.c:
+      Fix typos
+
+2007-11-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      MFB: Fixed bug #43279 (pg_send_query_params() converts all elements in
+      'params'
+      to strings)
+
+    * (PHP_5_2)
+      NEWS
+      ext/pgsql/pgsql.c:
+      
+      MFB: Fixed bug #43279 (pg_send_query_params() converts all elements in
+      'params' to strings)
+
+    * (PHP_5_3)
+      ext/pgsql/pgsql.c:
+      Fixed bug #43279 (pg_send_query_params() converts all elements in 'params'
+      to strings)
+
+2007-11-13  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/access_modifiers_001.phpt
+      ZendEngine2/tests/access_modifiers_002.phpt
+      ZendEngine2/tests/access_modifiers_003.phpt
+      ZendEngine2/tests/access_modifiers_004.phpt
+      ZendEngine2/tests/access_modifiers_005.phpt
+      ZendEngine2/tests/access_modifiers_006.phpt
+      ZendEngine2/tests/access_modifiers_007.phpt:
+      MFH: disallow multiple access modifiers and 'abstract abstract' methods
+      (patch by Etienne Kneuss)
+      add tests
+
+    * ZendEngine2/tests/access_modifiers_001.phpt
+      ZendEngine2/tests/access_modifiers_001.phpt
+      ZendEngine2/tests/access_modifiers_002.phpt
+      ZendEngine2/tests/access_modifiers_002.phpt
+      ZendEngine2/tests/access_modifiers_003.phpt
+      ZendEngine2/tests/access_modifiers_003.phpt
+      ZendEngine2/tests/access_modifiers_004.phpt
+      ZendEngine2/tests/access_modifiers_004.phpt
+      ZendEngine2/tests/access_modifiers_005.phpt
+      ZendEngine2/tests/access_modifiers_005.phpt
+      ZendEngine2/tests/access_modifiers_006.phpt
+      ZendEngine2/tests/access_modifiers_006.phpt
+      ZendEngine2/tests/access_modifiers_007.phpt
+      ZendEngine2/tests/access_modifiers_007.phpt:
+      
+      disallow multiple access modifiers and 'abstract abstract' methods
+      add tests
+
+    * ZendEngine2/zend_compile.c:
+      disallow multiple access modifiers and 'abstract abstract' methods
+      add tests
+
+2007-11-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug42692.phpt
+      ext/soap/tests/bugs/bug42692.phpt
+      ext/soap/tests/bugs/bug42692.phpt
+      ext/soap/tests/bugs/bug42692.wsdl
+      ext/soap/tests/bugs/bug42692.wsdl
+      ext/soap/tests/bugs/bug42692.wsdl:
+        1.1.4;
+      file bug42692.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug42692.phpt
+      ext/soap/tests/bugs/bug42692.phpt
+      ext/soap/tests/bugs/bug42692.wsdl
+      ext/soap/tests/bugs/bug42692.wsdl:
+      Fixed bug #42692 (Procedure 'int1' not present with doc/lit SoapServer)
+
+2007-11-13  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/oci8/config.m4:
+      remove Oracle8 support (it should have been done long ago..)
+
+    * (PHP_5_2)
+      ext/standard/file.c:
+      fix typo
+
+    * (PHP_5_3)
+      ext/standard/file.c:
+      fix typo (nice catch, Nuno!)
+
+2007-11-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      ext/standard/tests/file/bug43248.phpt
+      ext/standard/tests/file/bug43248.phpt:
+      Fixed bug #43248 (backward compatibility break in realpath())
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      ext/standard/tests/file/bug43248.phpt
+      ext/standard/tests/file/bug43248.phpt
+      ext/standard/tests/file/bug43248.phpt:
+      Fixed Bug #43248 (backward compatibility break in realpath())
+
 2007-11-12  Zoe Slattery  <zoe.slattery@googlemail.com>
 
     * (PHP_5_2)
