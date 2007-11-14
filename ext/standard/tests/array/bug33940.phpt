@@ -1,6 +1,7 @@
 --TEST--
 Bug #33940 (array_map() fails to pass by reference when called recursively)
 --INI--
+allow_call_time_pass_reference=1
 error_reporting=4095
 --FILE--
 <?php
