@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8 2007-07-26 22:45:59 jani Exp $
+// $Id: confutils.js,v 1.60.2.1.2.9 2007-11-14 19:48:57 auroraeosrose Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -429,7 +429,7 @@ can be built that way. \
 
 	STDOUT.WriteLine("Saving configure options to config.nice.bat");
 	var nicefile = FSO.CreateTextFile("config.nice.bat", true);
-	nicefile.WriteLine(nice);
+	nicefile.WriteLine(nice +  " %*");
 	nicefile.Close();
 
 	AC_DEFINE('CONFIGURE_COMMAND', nice);
