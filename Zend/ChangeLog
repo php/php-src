@@ -1,3 +1,40 @@
+2007-11-13  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_compile.c
+      tests/access_modifiers_001.phpt
+      tests/access_modifiers_002.phpt
+      tests/access_modifiers_003.phpt
+      tests/access_modifiers_004.phpt
+      tests/access_modifiers_005.phpt
+      tests/access_modifiers_006.phpt
+      tests/access_modifiers_007.phpt:
+      MFH: disallow multiple access modifiers and 'abstract abstract' methods
+      (patch by Etienne Kneuss)
+      add tests
+
+    * tests/access_modifiers_001.phpt
+      tests/access_modifiers_001.phpt
+      tests/access_modifiers_002.phpt
+      tests/access_modifiers_002.phpt
+      tests/access_modifiers_003.phpt
+      tests/access_modifiers_003.phpt
+      tests/access_modifiers_004.phpt
+      tests/access_modifiers_004.phpt
+      tests/access_modifiers_005.phpt
+      tests/access_modifiers_005.phpt
+      tests/access_modifiers_006.phpt
+      tests/access_modifiers_006.phpt
+      tests/access_modifiers_007.phpt
+      tests/access_modifiers_007.phpt:
+      
+      disallow multiple access modifiers and 'abstract abstract' methods
+      add tests
+
+    * zend_compile.c:
+      disallow multiple access modifiers and 'abstract abstract' methods
+      add tests
+
 2007-11-12  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
