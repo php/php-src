@@ -622,6 +622,7 @@ static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		RECORD_ERROR(stmt);
 		return 0;
 	}
+	*S->name = 0;
 	return 1;
 }
 /* }}} */
