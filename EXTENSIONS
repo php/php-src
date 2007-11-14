@@ -182,8 +182,8 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pdo_firebird
-PRIMARY MAINTAINER:  Unknown
-MAINTENANCE:         Odd fixes
+PRIMARY MAINTAINER:  Lars Westermann <lwe@php.net>
+MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
