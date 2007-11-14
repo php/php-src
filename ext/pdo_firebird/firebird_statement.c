@@ -92,11 +92,11 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	pdo_firebird_db_handle *H = S->H;
 
 	do {
-		/* named cursors should be closed first */
-		if (*S->name && isc_dsql_free_statement(H->isc_status, &S->stmt, DSQL_close)) {
+		/* named or open cursors should be closed first */
+		if ((*S->name || S->cursor_open) && isc_dsql_free_statement(H->isc_status, &S->stmt, DSQL_close)) {
 			break;
 		}
-		
+		S->cursor_open = 0;
 		/* assume all params have been bound */
 	
 		if ((S->statement_type == isc_info_sql_stmt_exec_procedure &&
@@ -113,6 +113,7 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		}
 	
 		*S->name = 0;
+		S->cursor_open = 1;
 		S->exhausted = 0;
 		
 		return 1;
@@ -612,6 +613,20 @@ static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, long attr, zval *val TS
 }
 /* }}} */
 
+static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+{
+	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
+	
+	/* close the statement handle */
+	if (isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_close)) {
+		RECORD_ERROR(stmt);
+		return 0;
+	}
+	return 1;
+}
+/* }}} */
+
+
 struct pdo_stmt_methods firebird_stmt_methods = { /* {{{ */
 	firebird_stmt_dtor,
 	firebird_stmt_execute,
@@ -620,7 +635,10 @@ struct pdo_stmt_methods firebird_stmt_methods = { /* {{{ */
 	firebird_stmt_get_col,
 	firebird_stmt_param_hook,
 	firebird_stmt_set_attribute,
-	firebird_stmt_get_attribute
+	firebird_stmt_get_attribute,
+	NULL, /* get_column_meta_func */
+	NULL, /* next_rowset_func */
+	firebird_stmt_cursor_closer
 };
 /* }}} */
 
