@@ -102,7 +102,10 @@ typedef struct {
 	/* whether EOF was reached for this statement */
 	unsigned exhausted:1;
 
-	unsigned _reserved:23;
+	/* successful isc_dsql_execute opens a cursor */
+	unsigned cursor_open:1;
+
+	unsigned _reserved:22;
 
 	/* the named params that were converted to ?'s by the driver */
 	HashTable *named_params;
