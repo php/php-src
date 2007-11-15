@@ -5,13 +5,11 @@ open_basedir=/
 --FILE--
 <?php
 	$dir = dirname(__FILE__);
-	$a=glob($dir . "/bug41655*.*");
+	$a=glob($dir . "/test.*");
 	print_r($a);
 ?>
 --EXPECTF--
 Array
 (
-    [0] => %sbug41655_1.phpt
-    [1] => %sbug41655_2.php
-    [2] => %sbug41655_2.phpt
+    [0] => %stest.csv
 )
