@@ -630,7 +630,7 @@ static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	
 	/* close the statement handle */
-	if (isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_close)) {
+	if ((*S->name || S->cursor_open) && isc_dsql_free_statement(H->isc_status, &S->stmt, DSQL_close)) {
 		RECORD_ERROR(stmt);
 		return 0;
 	}
