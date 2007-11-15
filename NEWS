@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed bug #43293 (Multiple segfaults in getopt()). (Hannes)
 - Fixed bug #43279 (pg_send_query_params() converts all elements in 'params' 
   to strings). (Ilia)
+- Fixed bug #43276 (Incomplete fix for bug #42739, mkdir() under safe_mode).
+  (Ilia)
 - Fixed bug #43248 (backward compatibility break in realpath()). (Dmitry)
 - Fixed bug #43221 (SimpleXML adding default namespace in addAttribute). (Rob)
 - Fixed bug #43216 (stream_is_local() returns false on "file://"). (Dmitry)
