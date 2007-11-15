@@ -1,3 +1,220 @@
+2007-11-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/dir.c:
+      
+      MFB: Don't show file names being examined
+
+    * (PHP_5_3)
+      ext/standard/dir.c:
+      Don't show file names being examined
+
+2007-11-14  Lars Westermann  <lars.westermann@privat.dk>
+
+    * (PHP_5_3)
+      ext/pdo_firebird/firebird_statement.c:
+      
+
+2007-11-14  Antony Dovgal  <tony@daylessday.org>
+
+    * EXTENSIONS:
+      update pdo_firebird status
+
+2007-11-14  Lars Westermann  <lars.westermann@privat.dk>
+
+    * (PHP_5_3)
+      ext/pdo_firebird/firebird_statement.c:
+      - Clearing cursor-name when closing it.
+
+    * (PHP_5_3)
+      ext/pdo_firebird/firebird_statement.c
+      ext/pdo_firebird/php_pdo_firebird_int.h:
+      - Fixed bug #43271 (pdo_firebird: closeCursor not implemented)
+
+2007-11-14  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * win32/build/confutils.js
+      win32/build/confutils.js:
+      MFB
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      Allow passing additional configuration parameters to config.nice.bat
+
+2007-11-14  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/array/uasort_basic1.phpt
+      ext/standard/tests/array/uasort_basic1.phpt
+      ext/standard/tests/array/uasort_basic2.phpt
+      ext/standard/tests/array/uasort_basic2.phpt
+      ext/standard/tests/array/uasort_error.phpt
+      ext/standard/tests/array/uasort_error.phpt
+      ext/standard/tests/array/uasort_object1.phpt
+      ext/standard/tests/array/uasort_object1.phpt
+      ext/standard/tests/array/uasort_object2.phpt
+      ext/standard/tests/array/uasort_object2.phpt
+      ext/standard/tests/array/uasort_variation1.phpt
+      ext/standard/tests/array/uasort_variation1.phpt
+      ext/standard/tests/array/uasort_variation10.phpt
+      ext/standard/tests/array/uasort_variation10.phpt
+      ext/standard/tests/array/uasort_variation11.phpt
+      ext/standard/tests/array/uasort_variation11.phpt
+      ext/standard/tests/array/uasort_variation2.phpt
+      ext/standard/tests/array/uasort_variation2.phpt
+      ext/standard/tests/array/uasort_variation3.phpt
+      ext/standard/tests/array/uasort_variation3.phpt
+      ext/standard/tests/array/uasort_variation4.phpt
+      ext/standard/tests/array/uasort_variation4.phpt
+      ext/standard/tests/array/uasort_variation5.phpt
+      ext/standard/tests/array/uasort_variation5.phpt
+      ext/standard/tests/array/uasort_variation6.phpt
+      ext/standard/tests/array/uasort_variation6.phpt
+      ext/standard/tests/array/uasort_variation7.phpt
+      ext/standard/tests/array/uasort_variation7.phpt
+      ext/standard/tests/array/uasort_variation8.phpt
+      ext/standard/tests/array/uasort_variation8.phpt
+      ext/standard/tests/array/uasort_variation9.phpt
+      ext/standard/tests/array/uasort_variation9.phpt:
+      New testcases for uasort() function
+
+    * ext/standard/tests/array/uasort_basic1.phpt
+      ext/standard/tests/array/uasort_basic1.phpt
+      ext/standard/tests/array/uasort_basic1.phpt
+      ext/standard/tests/array/uasort_basic2.phpt
+      ext/standard/tests/array/uasort_basic2.phpt
+      ext/standard/tests/array/uasort_basic2.phpt
+      ext/standard/tests/array/uasort_error.phpt
+      ext/standard/tests/array/uasort_error.phpt
+      ext/standard/tests/array/uasort_error.phpt
+      ext/standard/tests/array/uasort_object1.phpt
+      ext/standard/tests/array/uasort_object1.phpt
+      ext/standard/tests/array/uasort_object1.phpt
+      ext/standard/tests/array/uasort_object2.phpt
+      ext/standard/tests/array/uasort_object2.phpt
+      ext/standard/tests/array/uasort_object2.phpt
+      ext/standard/tests/array/uasort_variation1.phpt
+      ext/standard/tests/array/uasort_variation1.phpt
+      ext/standard/tests/array/uasort_variation1.phpt
+      ext/standard/tests/array/uasort_variation10.phpt
+      ext/standard/tests/array/uasort_variation10.phpt
+      ext/standard/tests/array/uasort_variation10.phpt
+      ext/standard/tests/array/uasort_variation11.phpt
+      ext/standard/tests/array/uasort_variation11.phpt
+      ext/standard/tests/array/uasort_variation11.phpt
+      ext/standard/tests/array/uasort_variation2.phpt
+      ext/standard/tests/array/uasort_variation2.phpt
+      ext/standard/tests/array/uasort_variation2.phpt
+      ext/standard/tests/array/uasort_variation3.phpt
+      ext/standard/tests/array/uasort_variation3.phpt
+      ext/standard/tests/array/uasort_variation3.phpt
+      ext/standard/tests/array/uasort_variation4.phpt
+      ext/standard/tests/array/uasort_variation4.phpt
+      ext/standard/tests/array/uasort_variation4.phpt
+      ext/standard/tests/array/uasort_variation5.phpt
+      ext/standard/tests/array/uasort_variation5.phpt
+      ext/standard/tests/array/uasort_variation5.phpt
+      ext/standard/tests/array/uasort_variation6.phpt
+      ext/standard/tests/array/uasort_variation6.phpt
+      ext/standard/tests/array/uasort_variation6.phpt
+      ext/standard/tests/array/uasort_variation7.phpt
+      ext/standard/tests/array/uasort_variation7.phpt
+      ext/standard/tests/array/uasort_variation7.phpt
+      ext/standard/tests/array/uasort_variation8.phpt
+      ext/standard/tests/array/uasort_variation8.phpt
+      ext/standard/tests/array/uasort_variation8.phpt
+      ext/standard/tests/array/uasort_variation9.phpt
+      ext/standard/tests/array/uasort_variation9.phpt
+      ext/standard/tests/array/uasort_variation9.phpt:
+        1.1.4;
+      file uasort_basic1.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/strcspn_variation3.phpt
+      ext/standard/tests/strings/strcspn_variation3.phpt
+      ext/standard/tests/strings/strspn_variation3.phpt
+      ext/standard/tests/strings/strspn_variation3.phpt
+      ext/standard/tests/strings/strspn_variation4.phpt
+      ext/standard/tests/strings/strspn_variation4.phpt:
+      fix test for linux64 - choosing smaller float values
+
+2007-11-14  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/chgrp.phpt:
+      - MFH: Add a testcase for chgrp() with a NULL as group name, which crashes
+      ATM.
+
+    * ext/standard/tests/file/chgrp.phpt
+      ext/standard/tests/file/chgrp.phpt:
+      
+      - Add a testcase for chgrp() with a NULL as group name, which crashes ATM.
+
+2007-11-14  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/tests/general_functions/getopt.phpt:
+      MFB; Fix test
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/getopt.phpt:
+      Fix test (getopt() works on windows now)
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug43293_1.phpt
+      ext/standard/tests/general_functions/bug43293_2.phpt
+      ext/standard/tests/general_functions/bug43293_3.phpt:
+       MFB5.3: Fixed bug#43293 (Multiple segfaults in getopt())
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug43293_1.phpt
+      ext/standard/tests/general_functions/bug43293_1.phpt
+      ext/standard/tests/general_functions/bug43293_2.phpt
+      ext/standard/tests/general_functions/bug43293_2.phpt
+      ext/standard/tests/general_functions/bug43293_3.phpt
+      ext/standard/tests/general_functions/bug43293_3.phpt:
+      MFB5.3:  Fixed bug#43293 (Multiple segfaults in getopt())
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug43293_1.phpt
+      ext/standard/tests/general_functions/bug43293_1.phpt
+      ext/standard/tests/general_functions/bug43293_2.phpt
+      ext/standard/tests/general_functions/bug43293_2.phpt
+      ext/standard/tests/general_functions/bug43293_3.phpt
+      ext/standard/tests/general_functions/bug43293_3.phpt:
+      Fixed bug#43293 (Multiple segfaults in getopt())
+
+2007-11-14  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/bug33940.phpt:
+      fix test
+
+    * (PHP_5_3)
+      ext/spl/tests/array_004.phpt
+      ext/spl/tests/array_008.phpt:
+      - Fix tests
+
+2007-11-14  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/bug43216.phpt:
+      Fix test
+
+2007-11-14  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      buildconf.bat:
+      - MFH: pass parameters to buildconf.bat over to buildconf.js (#43281)
+
+    * buildconf.bat:
+      - pass parameters to buildconf.bat over to buildconf.js (#43281)
+      [DOC] install.windows.building.php currently reads like "e.g. cscript
+      /nologo
+        win32/build/buildconf.js --add-modules-dir=../php-gtk2 [...]"  that
+        might be changed to "buildconf.bat --add-modules-dir=../php-gtk2 [...]"
+
 2007-11-13  Etienne Kneuss  <php@colder.ch>
 
     * ext/soap/soap.c:
