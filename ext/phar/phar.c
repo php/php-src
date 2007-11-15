@@ -70,6 +70,21 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 }
 /* }}}*/
 
+#ifdef PHP_WIN32
+static inline void phar_unixify_path_separators(char *path, int path_len) /* {{{ */
+{
+	char *s;
+
+	/* unixify win paths */
+	for (s = path; s - path < path_len; s++) {
+		if (*s == '\\') {
+			*s = '/';
+		}
+	}
+}
+/* }}} */
+#endif
+
 static void phar_split_extract_list(TSRMLS_D)
 {
 	char *tmp = estrdup(PHAR_GLOBALS->extract_list);
@@ -291,6 +306,8 @@ static void destroy_phar_manifest(void *pDest) /* {{{ */
 static int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, char *alias, int alias_len, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *fd, **fd_ptr;
+	char *my_realpath, *save;
+	int save_len;
 
 	phar_request_initialize(TSRMLS_C);
 
@@ -310,18 +327,38 @@ static int phar_get_archive(phar_archive_data **archive, char *fname, int fname_
 			return SUCCESS;
 		}
 	}
+	my_realpath = NULL;
+	save = fname;
+	save_len = fname_len;
 	if (fname && fname_len) {
+		my_realpath = expand_filepath(fname, my_realpath TSRMLS_CC);
+		if (my_realpath) {
+			fname_len = strlen(my_realpath);
+			fname = my_realpath;
+		}
+#ifdef PHP_WIN32
+		phar_unixify_path_separators(fname, fname_len);
+#endif
 		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void**)&fd_ptr)) {
 			*archive = *fd_ptr;
 			fd = *fd_ptr;
 			if (alias && alias_len) {
 				zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&fd,   sizeof(phar_archive_data*), NULL);
 			}
+			if (my_realpath) {
+				efree(my_realpath);
+			}
 			return SUCCESS;
 		}
-		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), fname, fname_len, (void**)&fd_ptr)) {
+		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), save, save_len, (void**)&fd_ptr)) {
+			if (my_realpath) {
+				efree(my_realpath);
+			}
 			*archive = *fd_ptr;
 			return SUCCESS;
+		}
+		if (my_realpath) {
+			efree(my_realpath);
 		}
 	}
 	return FAILURE;
@@ -822,6 +859,9 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	long offset;
 	int register_alias, sig_len;
 	char *signature = NULL;
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(fname, fname_len);
+#endif
 
 	if (pphar) {
 		*pphar = NULL;
@@ -1255,6 +1295,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *mydata;
+	char *my_realpath;
 	int register_alias;
 	php_stream *fp;
 
@@ -1307,7 +1348,18 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 	}
 	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest, 0);
-	mydata->fname = estrndup(fname, fname_len);
+	my_realpath = NULL;
+	my_realpath = expand_filepath(fname, my_realpath TSRMLS_CC);
+	if (my_realpath) {
+		fname_len = strlen(my_realpath);
+#ifdef PHP_WIN32
+		phar_unixify_path_separators(my_realpath, fname_len);
+#endif
+		fname = my_realpath;
+		mydata->fname = my_realpath;
+	} else {
+		mydata->fname = estrndup(fname, fname_len);
+	}
 	mydata->fname_len = fname_len;
 	mydata->alias = alias ? estrndup(alias, alias_len) : mydata->fname;
 	mydata->alias_len = alias ? alias_len : fname_len;
@@ -1483,6 +1535,7 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 	}
 
 #ifdef PHP_WIN32
+	phar_unixify_path_separators(filename, filename_len);
 	if (filename_len > 3 && *filename == '/' && *(filename + 2) == ':' && *(filename + 3) == '/') {
 		filename++;
 		filename_len--;
@@ -1849,6 +1902,9 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	php_stream *fp, *fpf;
 	zval **pzoption, *metadata;
 	uint host_len;
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(path, strlen(path));
+#endif
 
 	resource = php_url_parse(path);
 
@@ -3549,6 +3605,9 @@ static php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path
 	phar_archive_data *phar;
 	phar_entry_info *entry;
 	uint host_len;
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(path, strlen(path));
+#endif
 
 	resource = php_url_parse(path);
 
