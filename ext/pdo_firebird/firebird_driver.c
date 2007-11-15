@@ -493,6 +493,11 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 			}
 			return 1;
 
+		case PDO_ATTR_FETCH_TABLE_NAMES:
+			convert_to_boolean(val);
+			H->fetch_table_names = Z_BVAL_P(val);
+			return 1;
+
 		case PDO_FB_ATTR_DATE_FORMAT:
 			convert_to_string(val);
 			if (H->date_format) {
