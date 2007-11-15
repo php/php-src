@@ -162,15 +162,27 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ 
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	struct pdo_column_data *col = &stmt->columns[colno];
 	XSQLVAR *var = &S->out_sqlda.sqlvar[colno];
+	int colname_len;
+	char *cp;
 	
 	/* allocate storage for the column */
 	var->sqlind = (void*)emalloc(var->sqllen + 2*sizeof(short));
 	var->sqldata = &((char*)var->sqlind)[sizeof(short)];
 
+	colname_len = (S->H->fetch_table_names && var->relname_length)
+					? (var->aliasname_length + var->relname_length + 1)
+					: (var->aliasname_length);
 	col->precision = -var->sqlscale;
 	col->maxlen = var->sqllen;
-	col->namelen = var->aliasname_length;
-	col->name = estrndup(var->aliasname,var->aliasname_length);
+	col->namelen = colname_len;
+	col->name = cp = emalloc(colname_len + 1);
+	if (colname_len > var->aliasname_length) {
+		memmove(cp, var->relname, var->relname_length);
+		cp += var->relname_length;
+		*cp++ = '.';
+	}
+	memmove(cp, var->aliasname, var->aliasname_length);
+	*(cp+var->aliasname_length) = '\0';
 	col->param_type = PDO_PARAM_STR;
 
 	return 1;

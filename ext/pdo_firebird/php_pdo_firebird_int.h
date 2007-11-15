@@ -82,6 +82,11 @@ typedef struct {
 	char *time_format;
 	char *timestamp_format;
 	
+	/* prepend table names on column names in fetch */
+	unsigned fetch_table_names:1;
+	
+	unsigned _reserved:31;
+	
 } pdo_firebird_db_handle;
 
 
