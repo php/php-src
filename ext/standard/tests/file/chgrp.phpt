@@ -5,5 +5,6 @@ chgrp() with NULL as group name
 chgrp("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", NULL);
 echo "ALIVE\n";
 ?>
---EXPECT--
+--EXPECTF--
+Warning: chgrp(): parameter 2 should be string or integer, null given in %schgrp.php on line 2
 ALIVE
