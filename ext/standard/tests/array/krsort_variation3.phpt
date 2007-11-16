@@ -27,10 +27,7 @@ $various_arrays = array(
 
   // mixed value array with different types of keys
   array(1 => .0001, 2 => .0021, -3 => -.01, 4 => -1, 5 => 0, 6 => .09, 7 => 2, -8 => -.9, 9 => 10.6E-2,
-        -10 => -10.6E-2, 11 => 33),
- 
-  // array keys contains minimum and maximum ranges
-  array( 2147483647 => 1 , 2147483648 => 2, -2147483647 => 3, -2147483648 => 4, -0 => 5) 
+        -10 => -10.6E-2, 11 => 33)
 );
 
 // set of possible flag values
@@ -261,43 +258,5 @@ array(11) {
   float(-0.9)
   [-10]=>
   float(-0.106)
-}
-
--- Iteration 4 --
-- With defualt sort flag -
-bool(true)
-array(4) {
-  [2147483647]=>
-  int(1)
-  [0]=>
-  int(5)
-  [-2147483647]=>
-  int(3)
-  [-2147483648]=>
-  int(4)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(4) {
-  [2147483647]=>
-  int(1)
-  [0]=>
-  int(5)
-  [-2147483647]=>
-  int(3)
-  [-2147483648]=>
-  int(4)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(4) {
-  [2147483647]=>
-  int(1)
-  [0]=>
-  int(5)
-  [-2147483647]=>
-  int(3)
-  [-2147483648]=>
-  int(4)
 }
 Done
