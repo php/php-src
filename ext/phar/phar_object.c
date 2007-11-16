@@ -160,7 +160,7 @@ PHP_METHOD(Phar, canWrite)
 /* }}} */
 
 /* {{{ proto bool Phar::isValidPharFilename(string filename)
- * Returns whether the given filename is a vaild phar filename */
+ * Returns whether the given filename is a valid phar filename */
 PHP_METHOD(Phar, isValidPharFilename)
 {
 	char *fname, *ext_str;
