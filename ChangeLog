@@ -1,3 +1,45 @@
+2007-11-15  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/file/bug41655_2.phpt:
+      fix test (thanks to Felipe Pena for noticing)
+
+2007-11-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      main/safe_mode.c:
+      
+      MFB: Fixed bug #43276 (Incomplete fix for bug #42739, mkdir() under
+      safe_mode).
+
+    * (PHP_5_3)
+      main/safe_mode.c:
+      Completed fix for bug #42739 (fixes bug #43276)
+
+2007-11-15  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/getopt_002.phpt
+      ext/standard/tests/general_functions/getopt_002.phpt
+      ext/standard/tests/general_functions/getopt_002.phpt
+      ext/standard/tests/general_functions/getopt_003.phpt
+      ext/standard/tests/general_functions/getopt_003.phpt:
+      - Allow numeric options
+      - Add tests
+
+2007-11-15  Lars Westermann  <lars.westermann@privat.dk>
+
+    * (PHP_5_3)
+      ext/pdo_firebird/firebird_statement.c:
+      - Fixed bug #43244 (firebird: closeCursor w/o returned data kills process)
+
+    * (PHP_5_3)
+      ext/pdo_firebird/firebird_driver.c
+      ext/pdo_firebird/firebird_statement.c
+      ext/pdo_firebird/php_pdo_firebird_int.h:
+      - Fixed bug #43296 (Feature req: pdo_firebird: ATTR_FETCH_TABLE_NAMES
+      support)
+
 2007-11-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
