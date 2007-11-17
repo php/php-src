@@ -1,3 +1,140 @@
+2007-11-16  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/sizeof_basic1.phpt
+      ext/standard/tests/array/sizeof_basic1.phpt
+      ext/standard/tests/array/sizeof_basic2.phpt
+      ext/standard/tests/array/sizeof_basic2.phpt
+      ext/standard/tests/array/sizeof_error.phpt
+      ext/standard/tests/array/sizeof_error.phpt
+      ext/standard/tests/array/sizeof_object1.phpt
+      ext/standard/tests/array/sizeof_object1.phpt
+      ext/standard/tests/array/sizeof_object2.phpt
+      ext/standard/tests/array/sizeof_object2.phpt
+      ext/standard/tests/array/sizeof_variation1.phpt
+      ext/standard/tests/array/sizeof_variation1.phpt
+      ext/standard/tests/array/sizeof_variation2.phpt
+      ext/standard/tests/array/sizeof_variation2.phpt
+      ext/standard/tests/array/sizeof_variation3.phpt
+      ext/standard/tests/array/sizeof_variation3.phpt
+      ext/standard/tests/array/sizeof_variation4.phpt
+      ext/standard/tests/array/sizeof_variation4.phpt
+      ext/standard/tests/array/sizeof_variation5.phpt
+      ext/standard/tests/array/sizeof_variation5.phpt:
+      New testcases for sizeof() function
+
+    * ext/standard/tests/array/sizeof_basic1.phpt
+      ext/standard/tests/array/sizeof_basic1.phpt
+      ext/standard/tests/array/sizeof_basic1.phpt
+      ext/standard/tests/array/sizeof_basic2.phpt
+      ext/standard/tests/array/sizeof_basic2.phpt
+      ext/standard/tests/array/sizeof_basic2.phpt
+      ext/standard/tests/array/sizeof_error.phpt
+      ext/standard/tests/array/sizeof_error.phpt
+      ext/standard/tests/array/sizeof_error.phpt
+      ext/standard/tests/array/sizeof_object1.phpt
+      ext/standard/tests/array/sizeof_object1.phpt
+      ext/standard/tests/array/sizeof_object1.phpt
+      ext/standard/tests/array/sizeof_object2.phpt
+      ext/standard/tests/array/sizeof_object2.phpt
+      ext/standard/tests/array/sizeof_object2.phpt
+      ext/standard/tests/array/sizeof_variation1.phpt
+      ext/standard/tests/array/sizeof_variation1.phpt
+      ext/standard/tests/array/sizeof_variation1.phpt
+      ext/standard/tests/array/sizeof_variation2.phpt
+      ext/standard/tests/array/sizeof_variation2.phpt
+      ext/standard/tests/array/sizeof_variation2.phpt
+      ext/standard/tests/array/sizeof_variation3.phpt
+      ext/standard/tests/array/sizeof_variation3.phpt
+      ext/standard/tests/array/sizeof_variation3.phpt
+      ext/standard/tests/array/sizeof_variation4.phpt
+      ext/standard/tests/array/sizeof_variation4.phpt
+      ext/standard/tests/array/sizeof_variation4.phpt
+      ext/standard/tests/array/sizeof_variation5.phpt
+      ext/standard/tests/array/sizeof_variation5.phpt
+      ext/standard/tests/array/sizeof_variation5.phpt:
+        1.1.4;
+      New testcases for sizeof() function
+
+    * ext/standard/tests/strings/strcspn_variation3.phpt
+      ext/standard/tests/strings/strspn_variation3.phpt
+      ext/standard/tests/strings/strspn_variation4.phpt:
+      fix test for linux64 - choosing smaller float values
+
+    * ext/standard/tests/array/krsort_variation3.phpt
+      ext/standard/tests/array/krsort_variation3.phpt
+      ext/standard/tests/array/krsort_variation3.phpt
+      ext/standard/tests/array/ksort_variation3.phpt
+      ext/standard/tests/array/ksort_variation3.phpt
+      ext/standard/tests/array/ksort_variation3.phpt:
+      fix tests: removed values that generate diff. output on Linux64
+
+2007-11-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/standard/filestat.c
+      ext/standard/tests/file/chgrp.phpt:
+      Fixed crash (Serg)
+
+2007-11-16  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/interface.c
+      ext/curl/interface.c:
+      MFH: - Fixed bug #43092 (curl_copy_handle() crashes with > 32 chars long
+      URL)
+
+    * ext/curl/interface.c:
+      - Fixed bug #43092 (curl_copy_handle() crashes with > 32 chars long URL)
+
+    * ext/mbstring/tests/bug43301.phpt:
+      fix bug number
+
+    * (PHP_5_3)
+      ext/mbstring/tests/bug43301.phpt:
+      - fix bug number
+
+    * (PHP_5_2)
+      NEWS
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/tests/bug43301.phpt:
+      MFH:- Fixed bug #43301 (mb_ereg*_replace() crashes when replacement string
+      is
+      invalid PHP expression and 'e' option is used)
+
+2007-11-16  Lars Westermann  <lars.westermann@privat.dk>
+
+    * (PHP_5_3)
+      ext/pdo_firebird/firebird_statement.c:
+      - Fixed bug (again) #43271 (pdo_firebird: closeCursor not implemented)
+
+2007-11-16  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_3)
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/tests/bug43301.phpt:
+      MFH:- Fixed bug #31911 (mb_ereg*_replace() crashes when replacement string
+      is invalid
+            PHP expression and 'e' option is used)
+
+    * ext/mbstring/tests/bug43301.phpt
+      ext/mbstring/tests/bug43301.phpt
+      ext/mbstring/tests/bug43301.phpt:
+        1.1.4;
+      - Fixed bug #31911 (mb_ereg*_replace() crashes when replacement string
+        is invalid PHP expression and 'e' option is used)
+
+    * ext/mbstring/php_mbregex.c:
+      - Fixed bug #31911 (mb_ereg*_replace() crashes when replacement string
+        is invalid PHP expression and 'e' option is used)
+
+2007-11-16  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pdo_firebird/.cvsignore
+      ext/pdo_firebird/.cvsignore:
+      ignore gcov files
+
 2007-11-15  Antony Dovgal  <tony@daylessday.org>
 
     * ext/standard/tests/file/bug41655_2.phpt:
