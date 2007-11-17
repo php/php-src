@@ -378,7 +378,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC) /* 
 			}
 		} else {
 			if (!silent) {
-				zend_error(E_NOTICE,"Undefined property:  %v::$%R", zobj->ce->name, Z_TYPE_P(member), Z_STRVAL_P(member));
+				zend_error(E_NOTICE,"Undefined property: %v::$%R", zobj->ce->name, Z_TYPE_P(member), Z_STRVAL_P(member));
 			}
 			retval = &EG(uninitialized_zval_ptr);
 		}
@@ -1026,7 +1026,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 		if (silent) {
 			return NULL;
 		} else {
-			zend_error(E_ERROR, "Access to undeclared static property:  %v::$%R", ce->name, type, property_name);
+			zend_error(E_ERROR, "Access to undeclared static property: %v::$%R", ce->name, type, property_name);
 		}
 	}
 
