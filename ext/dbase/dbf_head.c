@@ -160,6 +160,9 @@ int get_dbf_field(dbhead_t *dbh, dbfield_t *dbf)
             case 'D':
 		dbf->db_flen = 8;
 		break;
+	    case 'L':
+		dbf->db_flen = 1;
+		break;
 	    default:
 	    	dbf->db_flen = get_short(dbfield.dbf_flen);
 		break;
@@ -194,6 +197,12 @@ int put_dbf_field(dbhead_t *dbh, dbfield_t *dbf)
 	    case 'N':		
 		dbfield.dbf_flen[0] = dbf->db_flen;
 		dbfield.dbf_flen[1] = dbf->db_fdc;
+		break;
+	    case 'D':
+		dbf->db_flen = 8;
+		break;
+	    case 'L':
+		dbf->db_flen = 1;
 		break;
 	    default:
 	    	put_short(dbfield.dbf_flen, dbf->db_flen);
