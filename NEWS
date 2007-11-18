@@ -23,7 +23,8 @@ PHP                                                                        NEWS
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
 - Fixed bug #42692 (Procedure 'int1' not present with doc/lit SoapServer).
   (Dmitry)
-
+- Fixed bug #42261 (Incorrect lengths for date and boolean data types).
+  (Ilia)
 
 08 Nov 2007, PHP 5.2.5
 - Upgraded PCRE to version 7.3 (Nuno)
