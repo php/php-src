@@ -1,3 +1,13 @@
+2007-11-17  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c:
+      MFH(r-1.192) Remove extraneous space in error/notice messages (felipe)
+
+    * ZendEngine2/zend_object_handlers.c:
+      Remove extraneous space in error/notice messages (felipe)
+
 2007-11-16  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * (PHP_5_2)
