@@ -428,12 +428,16 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tz/", &filename, &filename_len, &filename_type, &group) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	if (Z_TYPE_P(group) == IS_LONG) {
 		gid = (gid_t)Z_LVAL_P(group);
-	} else {
+	} else if (Z_TYPE_P(group) == IS_STRING ||
+		   Z_TYPE_P(group) == IS_UNICODE) {
+		if (Z_TYPE_P(group) == IS_UNICODE) {
+			zval_unicode_to_string(group TSRMLS_CC);
+		}
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 		struct group gr;
 		struct group *retgrptr;
@@ -461,6 +465,9 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		}
 		gid = gr->gr_gid;
 #endif
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given",zend_zval_type_name(group));
+		RETURN_FALSE;
 	}
 
 	if (filename_type == IS_UNICODE) {
