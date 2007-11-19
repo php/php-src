@@ -1,3 +1,32 @@
+2007-11-18  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      Zend/zend_opcode.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_opcode.c:
+      - MFH: Initialize the reserved resource bits so that they can be reliably
+      used.
+
+    * ZendEngine2/zend_opcode.c:
+      - Initialize the reserved resource bits so that they can be reliably used.
+
+2007-11-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dbase/dbf_head.c:
+      Removed duplicate case. (Thanks Hannes)
+
+    * (PHP_5_2)
+      NEWS
+      ext/dbase/dbf_head.c
+      ext/dbase/dbf_head.c:
+      
+      MFB: Fixed bug #42261 (Incorrect lengths for date and boolean data types)
+
+    * (PHP_5_3)
+      ext/dbase/dbf_head.c:
+      
+      Fixed bug #42261 (Incorrect lengths for date and boolean data types)
+
 2007-11-17  Sara Golemon  <sara@golemon.com>
 
     * (PHP_5_2)

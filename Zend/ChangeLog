@@ -1,3 +1,14 @@
+2007-11-18  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      zend_opcode.c
+      zend_opcode.c:
+      - MFH: Initialize the reserved resource bits so that they can be reliably
+      used.
+
+    * zend_opcode.c:
+      - Initialize the reserved resource bits so that they can be reliably used.
+
 2007-11-17  Sara Golemon  <sara@golemon.com>
 
     * (PHP_5_2)
