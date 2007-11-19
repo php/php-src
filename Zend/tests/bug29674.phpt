@@ -33,7 +33,7 @@ $obj->printVars();
 ===BASE===
 string(4) "Base"
 
-Notice: Undefined property:  BaseClass::$private_child in %sbug29674.php on line %d
+Notice: Undefined property: BaseClass::$private_child in %sbug29674.php on line %d
 NULL
 ===CHILD===
 string(4) "Base"
