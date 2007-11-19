@@ -31,5 +31,5 @@ child
 
 Warning: Couldn't fetch DOMElement. Node no longer exists in %sbug36756.php on line %d
 
-Notice: Undefined property:  DOMElement::$nodeType in %sbug36756.php on line %d
+Notice: Undefined property: DOMElement::$nodeType in %sbug36756.php on line %d
 nodeType:
