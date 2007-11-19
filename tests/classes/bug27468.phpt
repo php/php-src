@@ -11,7 +11,7 @@ new foo();
 echo 'OK';
 ?>
 --EXPECTF--
-Notice: Undefined property:  foo::$x in %sbug27468.php on line 4
+Notice: Undefined property: foo::$x in %sbug27468.php on line 4
 
 Warning: Invalid argument supplied for foreach() in %sbug27468.php on line 4
 OK
