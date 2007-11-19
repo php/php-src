@@ -99,11 +99,7 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		S->cursor_open = 0;
 		/* assume all params have been bound */
 	
-		if ((S->statement_type == isc_info_sql_stmt_exec_procedure &&
-				isc_dsql_execute2(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION,
-					S->in_sqlda, &S->out_sqlda))
-				|| isc_dsql_execute(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION,
-					S->in_sqlda)) {
+		if (isc_dsql_execute(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION, S->in_sqlda)) {
 			break;
 		}
 		
@@ -113,8 +109,8 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		}
 	
 		*S->name = 0;
-		S->cursor_open = 1;
-		S->exhausted = 0;
+		S->cursor_open = (S->out_sqlda.sqln > 0);	/* A cursor is opened, when more than zero columns returned */
+		S->exhausted = !S->cursor_open;
 		
 		return 1;
 	} while (0);
@@ -136,20 +132,16 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
 		strcpy(stmt->error_code, "HY000");
 		H->last_app_error = "Cannot fetch from a closed cursor";
 	} else if (!S->exhausted) {
-
-		/* an EXECUTE PROCEDURE statement can be fetched from once, without calling the API, because
-		 * the result was returned in the execute call */
-		if (S->statement_type == isc_info_sql_stmt_exec_procedure) {
-			S->exhausted = 1;
-		} else {
-			if (isc_dsql_fetch(H->isc_status, &S->stmt, PDO_FB_SQLDA_VERSION, &S->out_sqlda)) {
-				if (H->isc_status[0] && H->isc_status[1]) {
-					RECORD_ERROR(stmt);
-				}
-				S->exhausted = 1;
-				return 0;
+		if (isc_dsql_fetch(H->isc_status, &S->stmt, PDO_FB_SQLDA_VERSION, &S->out_sqlda)) {
+			if (H->isc_status[0] && H->isc_status[1]) {
+				RECORD_ERROR(stmt);
 			}
+			S->exhausted = 1;
+			return 0;
 		}
+ 		if (S->statement_type == isc_info_sql_stmt_exec_procedure) {
+ 			S->exhausted = 1;
+ 		}
 		return 1;
 	}
 	return 0;
