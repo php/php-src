@@ -28,6 +28,21 @@ static zend_class_entry *phar_ce_PharException;
 static zend_class_entry *phar_ce_entry;
 #endif
 
+#ifdef PHP_WIN32
+static inline void phar_unixify_path_separators(char *path, int path_len) /* {{{ */
+{
+	char *s;
+
+	/* unixify win paths */
+	for (s = path; s - path < path_len; s++) {
+		if (*s == '\\') {
+			*s = '/';
+		}
+	}
+}
+/* }}} */
+#endif
+
 static int phar_get_extract_list(void *pDest, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zval *return_value = va_arg(args, zval*);
@@ -245,16 +260,10 @@ PHP_METHOD(Phar, __construct)
 	phar_obj->spl.oth_handler = &phar_spl_foreign_handler;
 
 #ifdef PHP_WIN32
-	/* check for drive filenames like C:/ and prepend / */
-	if (fname_len > 2 && *(fname + 1) == ':' && *(fname + 2) == '/') {
-		fname_len = spprintf(&fname, 0, "phar:///%s", fname);
-	} else {
-		fname_len = spprintf(&fname, 0, "phar://%s", fname);
-	}
-#else
-	fname_len = spprintf(&fname, 0, "phar://%s", fname);
+	phar_unixify_path_separators(fname, fname_len);
 #endif
 
+	fname_len = spprintf(&fname, 0, "phar://%s", fname);
 	INIT_PZVAL(&arg1);
 	ZVAL_STRINGL(&arg1, fname, fname_len, 0);
 

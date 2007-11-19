@@ -331,10 +331,26 @@ static int phar_get_archive(phar_archive_data **archive, char *fname, int fname_
 	save = fname;
 	save_len = fname_len;
 	if (fname && fname_len) {
+		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void**)&fd_ptr)) {
+			*archive = *fd_ptr;
+			fd = *fd_ptr;
+			if (alias && alias_len) {
+				zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&fd,   sizeof(phar_archive_data*), NULL);
+			}
+			return SUCCESS;
+		}
+		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), save, save_len, (void**)&fd_ptr)) {
+			*archive = *fd_ptr;
+			return SUCCESS;
+		}
+
+		/* not found, try converting \ to / */
 		my_realpath = expand_filepath(fname, my_realpath TSRMLS_CC);
 		if (my_realpath) {
 			fname_len = strlen(my_realpath);
 			fname = my_realpath;
+		} else {
+			return FAILURE;
 		}
 #ifdef PHP_WIN32
 		phar_unixify_path_separators(fname, fname_len);
@@ -345,21 +361,10 @@ static int phar_get_archive(phar_archive_data **archive, char *fname, int fname_
 			if (alias && alias_len) {
 				zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&fd,   sizeof(phar_archive_data*), NULL);
 			}
-			if (my_realpath) {
-				efree(my_realpath);
-			}
-			return SUCCESS;
-		}
-		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), save, save_len, (void**)&fd_ptr)) {
-			if (my_realpath) {
-				efree(my_realpath);
-			}
-			*archive = *fd_ptr;
-			return SUCCESS;
-		}
-		if (my_realpath) {
 			efree(my_realpath);
+			return SUCCESS;
 		}
+		efree(my_realpath);
 	}
 	return FAILURE;
 }
@@ -859,9 +864,6 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	long offset;
 	int register_alias, sig_len;
 	char *signature = NULL;
-#ifdef PHP_WIN32
-	phar_unixify_path_separators(fname, fname_len);
-#endif
 
 	if (pphar) {
 		*pphar = NULL;
@@ -1265,6 +1267,9 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	mydata->flags = manifest_flags;
 	mydata->fp = fp;
 	mydata->fname = estrndup(fname, fname_len);
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(mydata->fname, fname_len);
+#endif
 	mydata->fname_len = fname_len;
 	mydata->alias = alias ? estrndup(alias, alias_len) : mydata->fname;
 	mydata->alias_len = alias ? alias_len : fname_len;
@@ -1272,7 +1277,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	mydata->sig_len = sig_len;
 	mydata->signature = signature;
 	phar_request_initialize(TSRMLS_C);
-	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
+	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
 	if (register_alias) {
 		mydata->is_explicit_alias = 1;
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
@@ -1359,6 +1364,9 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 		mydata->fname = my_realpath;
 	} else {
 		mydata->fname = estrndup(fname, fname_len);
+#ifdef PHP_WIN32
+		phar_unixify_path_separators(mydata->fname, fname_len);
+#endif
 	}
 	mydata->fname_len = fname_len;
 	mydata->alias = alias ? estrndup(alias, alias_len) : mydata->fname;
@@ -1378,7 +1386,7 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 		register_alias = 1;
 	}
 	phar_request_initialize(TSRMLS_C);
-	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
+	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
 	if (register_alias) {
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 	}
@@ -1534,23 +1542,21 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 		filename_len -= 7;
 	}
 
-#ifdef PHP_WIN32
-	phar_unixify_path_separators(filename, filename_len);
-	if (filename_len > 3 && *filename == '/' && *(filename + 2) == ':' && *(filename + 3) == '/') {
-		filename++;
-		filename_len--;
-	}
-#endif
-
 	if (phar_detect_phar_fname_ext(filename, 0, &ext_str, &ext_len) == FAILURE) {
 		return FAILURE;
 	}
 
 	*arch_len = ext_str - filename + ext_len;
 	*arch = estrndup(filename, *arch_len);
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(*arch, *arch_len);
+#endif
 	if (ext_str[ext_len]) {
 		*entry_len = filename_len - *arch_len;
 		*entry = estrndup(ext_str+ext_len, *entry_len);
+#ifdef PHP_WIN32
+		phar_unixify_path_separators(*entry, *entry_len);
+#endif
 	} else {
 		*entry_len = 1;
 		*entry = estrndup("/", 1);
@@ -1586,6 +1592,7 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 		resource = ecalloc(1, sizeof(php_url));
 		resource->scheme = estrndup("phar", 4);
 		resource->host = arch;
+
 		resource->path = entry;
 #if MBO_0
 		if (resource) {
@@ -1902,13 +1909,8 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	php_stream *fp, *fpf;
 	zval **pzoption, *metadata;
 	uint host_len;
-#ifdef PHP_WIN32
-	phar_unixify_path_separators(path, strlen(path));
-#endif
 
-	resource = php_url_parse(path);
-
-	if (!resource && (resource = phar_open_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
+	if ((resource = phar_open_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
 		return NULL;
 	}
 
@@ -3096,9 +3098,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	uint host_len;
 	int retval;
 
-	resource = php_url_parse(url);
-
-	if (!resource && (resource = phar_open_url(wrapper, url, "r", 0 TSRMLS_CC)) == NULL) {
+	if ((resource = phar_open_url(wrapper, url, "r", 0 TSRMLS_CC)) == NULL) {
 		return -1;
 	}
 
@@ -3349,9 +3349,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	uint host_len;
 	int retval;
 
-	resource = php_url_parse(url);
-
-	if (!resource && (resource = phar_open_url(wrapper, url, "rb", options TSRMLS_CC)) == NULL) {
+	if ((resource = phar_open_url(wrapper, url, "rb", options TSRMLS_CC)) == NULL) {
 		return 0;
 	}
 
@@ -3439,14 +3437,11 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		return 0;
 	}
 
-	resource_from = php_url_parse(url_from);
-	resource_to = php_url_parse(url_from);
-
-	if (!resource_from && (resource_from = phar_open_url(wrapper, url_from, "r+b", options TSRMLS_CC)) == NULL) {
+	if ((resource_from = phar_open_url(wrapper, url_from, "r+b", options TSRMLS_CC)) == NULL) {
 		return 0;
 	}
 	
-	if (!resource_to && (resource_to = phar_open_url(wrapper, url_to, "wb", options TSRMLS_CC)) == NULL) {
+	if ((resource_to = phar_open_url(wrapper, url_to, "wb", options TSRMLS_CC)) == NULL) {
 		php_url_free(resource_from);
 		return 0;
 	}
@@ -3605,13 +3600,8 @@ static php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path
 	phar_archive_data *phar;
 	phar_entry_info *entry;
 	uint host_len;
-#ifdef PHP_WIN32
-	phar_unixify_path_separators(path, strlen(path));
-#endif
 
-	resource = php_url_parse(path);
-
-	if (!resource && (resource = phar_open_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
+	if ((resource = phar_open_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
 		return NULL;
 	}
 
