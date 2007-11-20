@@ -255,7 +255,7 @@ static void function_dtor(void *pDest)
 static PHP_FUNCTION(com_method_handler)
 {
 	Z_OBJ_HANDLER_P(getThis(), call_method)(
-			((zend_internal_function*)EG(function_state_ptr)->function)->function_name,
+			((zend_internal_function*)EG(current_execute_data)->function_state.function)->function_name,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
