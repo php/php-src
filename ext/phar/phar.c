@@ -772,14 +772,23 @@ static int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_l
 		*error = NULL;
 	}
 	if (SUCCESS == phar_get_archive(&phar, fname, fname_len, alias, alias_len, error TSRMLS_CC)
-		&& fname_len == phar->fname_len
-		&& !strncmp(fname, phar->fname, fname_len)
+		&& ((alias && fname_len == phar->fname_len
+		&& !strncmp(fname, phar->fname, fname_len)) || !alias)
 	) {
+		/* logic above is as follows:
+		   If an explicit alias was requested, ensure the filename passed in
+		   matches the phar's filename.
+		   If no alias was passed in, then it can match either and be valid
+		 */
 		if (pphar) {
 			*pphar = phar;
 		}
 		return SUCCESS;
 	} else {
+		if (phar) {
+			printf("new %s\n", phar->fname);
+			printf("old %s\n", fname);
+		}
 		if (pphar) {
 			*pphar = NULL;
 		}
@@ -1507,6 +1516,9 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ex
 		*ext_str = pos_p;
 		*ext_len = 5;
 	} else {
+		/* We have an alias with no extension, so locate the first / and fail */
+		*ext_str = strstr(filename, "/");
+		*ext_len = -1;
 		return FAILURE;
 	}
 	if (check_length && (*ext_str)[*ext_len] != '\0') {
@@ -1542,8 +1554,13 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 		filename_len -= 7;
 	}
 
+	ext_len = 0;
 	if (phar_detect_phar_fname_ext(filename, 0, &ext_str, &ext_len) == FAILURE) {
-		return FAILURE;
+		if (ext_len != -1) {
+			return FAILURE;
+		}
+		ext_len = 0;
+		/* no extension detected - instead we are dealing with an alias */
 	}
 
 	*arch_len = ext_str - filename + ext_len;
