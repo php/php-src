@@ -1,3 +1,51 @@
+2007-11-19  Lars Westermann  <lars.westermann@privat.dk>
+
+    * (PHP_5_3)
+      ext/pdo_firebird/firebird_statement.c:
+      - Fixed bug #43246 (firebird: INSERT ... RETURNING ... throws exception)
+      Thanks to Hans-Peter Oeri for providing this patch
+
+2007-11-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/filestat.c
+      ext/standard/tests/file/chgrp.phpt:
+      fixed SIGSEGV in chgrp()
+
+2007-11-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dbase/dbf_head.c:
+      
+      MFB 'L' size support
+
+2007-11-19  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/zip/tests/oo_properties.phpt
+      ext/zip/tests/oo_properties.phpt:
+      fix test
+
+    * ext/zip/tests/oo_properties.phpt:
+      fix test broken by Sara's commit
+
+2007-11-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug29674.phpt
+      ZendEngine2/tests/bug29674.phpt
+      ZendEngine2/tests/bug29674.phpt
+      ZendEngine2/tests/bug29689.phpt
+      ZendEngine2/tests/bug29689.phpt
+      ZendEngine2/tests/bug29689.phpt
+      ext/dom/tests/bug36756.phpt
+      ext/dom/tests/bug36756.phpt
+      ext/dom/tests/bug36756.phpt
+      tests/classes/bug27468.phpt
+      tests/classes/bug27468.phpt
+      tests/classes/bug27468.phpt
+      tests/lang/bug27439.phpt
+      tests/lang/bug27439.phpt
+      tests/lang/bug27439.phpt:
+      Fixed tests
+
 2007-11-18  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_4_4)
