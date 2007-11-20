@@ -123,9 +123,11 @@ static void _php_ibase_free_stmt_handle(ibase_db_link *link, isc_stmt_handle stm
 	if (stmt) {
 		IBDEBUG("Dropping statement handle (free_stmt_handle)...");
 		/* Only free statement if db-connection is still open */
-		char db_items[] = {isc_info_page_size}, res_buf[40];
+		static char info[] = { isc_info_base_level, isc_info_end };
+		char res_buf[8];
+
 		if (SUCCESS == isc_database_info(IB_STATUS, &link->handle, 
-							sizeof(db_items), db_items, sizeof(res_buf), res_buf)) {
+							sizeof(info), info, sizeof(res_buf), res_buf)) {
 			if (isc_dsql_free_statement(IB_STATUS, &stmt, DSQL_drop)) {
 				_php_ibase_error(TSRMLS_C);
 			}
