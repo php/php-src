@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   truncation). (Ilia)
 - Fixed bug #43175 (__destruct() throwing an exception with __call() causes
   segfault). (Dmitry)
+- Fixed bug #42978 (mismatch between number of bound params and values causes
+  a crash in pdo_pgsql). (Ilia)
 - Fixed bug #42937 (__call() method not invoked when methods are called on
   parent from child class). (Dmitry)
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
