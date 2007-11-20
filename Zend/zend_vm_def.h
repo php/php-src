@@ -2011,11 +2011,9 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 {
 	zend_op *opline = EX(opline);
-	zval **original_return_value;
 	zend_class_entry *current_scope;
 	zend_class_entry *current_called_scope;
 	zval *current_this;
-	int return_value_used = RETURN_VALUE_USED(opline);
 	zend_bool should_change_scope;
 	zval *ex_object;
 
@@ -2064,8 +2062,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
-		ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
-		INIT_ZVAL(*(EX_T(opline->result.u.var).var.ptr));
+		ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
 		EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
 
 		if (EX(function_state).function->common.arg_info) {
@@ -2083,9 +2080,9 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		}
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
-			((zend_internal_function *) EX(function_state).function)->handler(opline->extended_value, EX_T(opline->result.u.var).var.ptr, &EX_T(opline->result.u.var).var.ptr, EX(object), return_value_used TSRMLS_CC);
+			((zend_internal_function *) EX(function_state).function)->handler(opline->extended_value, EX_T(opline->result.u.var).var.ptr, &EX_T(opline->result.u.var).var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
 		} else {
-			zend_execute_internal(EXECUTE_DATA, return_value_used TSRMLS_CC);
+			zend_execute_internal(EXECUTE_DATA, RETURN_VALUE_USED(opline) TSRMLS_CC);
 		}
 
 /*	We shouldn't fix bad extensions here,
@@ -2095,35 +2092,33 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			Z_SET_REFCOUNT_P(EX_T(opline->result.u.var).var.ptr, 1);
 		}
 */
-		if (!return_value_used) {
+		if (!RETURN_VALUE_USED(opline)) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
 	} else if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
-		HashTable *function_symbol_table;
+		zval **original_return_value = EG(return_value_ptr_ptr);
 
 		EX_T(opline->result.u.var).var.ptr = NULL;
 		if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
 			/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
-			function_symbol_table = *(EG(symtable_cache_ptr)--);
+			EG(active_symbol_table) = *(EG(symtable_cache_ptr)--);
 		} else {
-			ALLOC_HASHTABLE(function_symbol_table);
-			zend_u_hash_init(function_symbol_table, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
-			/*printf("Cache miss!  Initialized %x\n", function_symbol_table);*/
+			ALLOC_HASHTABLE(EG(active_symbol_table));
+			zend_u_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+			/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 		}
-		EG(active_symbol_table) = function_symbol_table;
-		original_return_value = EG(return_value_ptr_ptr);
+		EG(active_symbol_table) = EG(active_symbol_table);
 		EG(return_value_ptr_ptr) = &EX_T(opline->result.u.var).var.ptr;
 		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 
 		zend_execute(EG(active_op_array) TSRMLS_CC);
 		EX_T(opline->result.u.var).var.fcall_returned_reference = EG(active_op_array)->return_reference;
 
-		if (return_value_used && !EX_T(opline->result.u.var).var.ptr) {
-			if (!EG(exception)) {
-				ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
-				INIT_ZVAL(*EX_T(opline->result.u.var).var.ptr);
+		if (RETURN_VALUE_USED(opline)) {
+			if (!EG(exception) && !EX_T(opline->result.u.var).var.ptr) {
+				ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
 			}
-		} else if (!return_value_used && EX_T(opline->result.u.var).var.ptr) {
+		} else if (EX_T(opline->result.u.var).var.ptr) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
 
@@ -2131,22 +2126,21 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		EG(active_op_array) = EX(op_array);
 		EG(return_value_ptr_ptr)=original_return_value;
 		if (EG(symtable_cache_ptr)>=EG(symtable_cache_limit)) {
-			zend_hash_destroy(function_symbol_table);
-			FREE_HASHTABLE(function_symbol_table);
+			zend_hash_destroy(EG(active_symbol_table));
+			FREE_HASHTABLE(EG(active_symbol_table));
 		} else {
 			/* clean before putting into the cache, since clean
 			   could call dtors, which could use cached hash */
-			zend_hash_clean(function_symbol_table);
-			*(++EG(symtable_cache_ptr)) = function_symbol_table;
+			zend_hash_clean(EG(active_symbol_table));
+			*(++EG(symtable_cache_ptr)) = EG(active_symbol_table);
 		}
 		EG(active_symbol_table) = EX(symbol_table);
 	} else { /* ZEND_OVERLOADED_FUNCTION */
-		ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
-		INIT_ZVAL(*(EX_T(opline->result.u.var).var.ptr));
+		ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
 
 			/* Not sure what should be done here if it's a static method */
 		if (EX(object)) {
-			Z_OBJ_HT_P(EX(object))->call_method(EX(function_state).function->common.function_name, opline->extended_value, EX_T(opline->result.u.var).var.ptr, &EX_T(opline->result.u.var).var.ptr, EX(object), return_value_used TSRMLS_CC);
+			Z_OBJ_HT_P(EX(object))->call_method(EX(function_state).function->common.function_name, opline->extended_value, EX_T(opline->result.u.var).var.ptr, &EX_T(opline->result.u.var).var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
 		} else {
 			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
 		}
@@ -2156,7 +2150,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		}
 		efree(EX(function_state).function);
 
-		if (!return_value_used) {
+		if (!RETURN_VALUE_USED(opline)) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		} else {
 			Z_UNSET_ISREF_P(EX_T(opline->result.u.var).var.ptr);
@@ -2194,7 +2188,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 	if (EG(exception)) {
 		zend_throw_exception_internal(NULL TSRMLS_CC);
-		if (return_value_used && EX_T(opline->result.u.var).var.ptr) {
+		if (RETURN_VALUE_USED(opline) && EX_T(opline->result.u.var).var.ptr) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
 	}
