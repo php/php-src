@@ -66,6 +66,7 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
     <file name="phar.inc" role="src" />
     <file name="phar.php" role="src" />
     <file name="pharcommand.inc" role="src" />
+    <file name="phar.phar" role="php" />
    </dir> <!-- /phar -->
    <dir name="tests">
     <file name="001.phpt" role="test" />
