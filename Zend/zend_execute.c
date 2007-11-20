@@ -1070,6 +1070,7 @@ fetch_string_dim:
 static void zend_fetch_dimension_address(temp_variable *result, zval **container_ptr, zval *dim, int dim_is_tmp_var, int type TSRMLS_DC) /* {{{ */
 {
 	zval *container;
+	zval **retval;
 
 	if (!container_ptr) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -1077,42 +1078,14 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 
 	container = *container_ptr;
 
-	if (container == EG(error_zval_ptr)) {
-		if (result) {
-			result->var.ptr_ptr = &EG(error_zval_ptr);
-			PZVAL_LOCK(*result->var.ptr_ptr);
-			if (type == BP_VAR_R || type == BP_VAR_IS) {
-				AI_USE_PTR(result->var);
-			}
-		}
-		return;
-	}
-
-	if (Z_TYPE_P(container)==IS_NULL
-		|| (Z_TYPE_P(container)==IS_BOOL && Z_LVAL_P(container)==0)
-		|| (Z_TYPE_P(container)==IS_STRING && Z_STRLEN_P(container)==0)
-		|| (Z_TYPE_P(container)==IS_UNICODE && Z_USTRLEN_P(container)==0)) {
-		switch (type) {
-			case BP_VAR_RW:
-			case BP_VAR_W:
-				if (!PZVAL_IS_REF(container)) {
-					SEPARATE_ZVAL(container_ptr);
-					container = *container_ptr;
-				}
-				zval_dtor(container);
-				array_init(container);
-				break;
-		}
-	}
-
 	switch (Z_TYPE_P(container)) {
-		zval **retval;
 
 		case IS_ARRAY:
 			if ((type==BP_VAR_W || type==BP_VAR_RW) && Z_REFCOUNT_P(container) > 1 && !PZVAL_IS_REF(container)) {
 				SEPARATE_ZVAL(container_ptr);
 				container = *container_ptr;
 			}
+fetch_from_array:
 			if (dim == NULL) {
 				zval *new_zval = &EG(uninitialized_zval);
 
@@ -1127,24 +1100,50 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 			}
 			if (result) {
 				result->var.ptr_ptr = retval;
-			  PZVAL_LOCK(*result->var.ptr_ptr);
+				PZVAL_LOCK(*retval);
+				if (type == BP_VAR_R || type == BP_VAR_IS) {
+					AI_USE_PTR(result->var);
+				}
 			}
+			return;
 			break;
-		case IS_NULL: {
-			/* for read-mode only */
-			if (result) {
+
+		case IS_NULL:
+			if (container == EG(error_zval_ptr)) {
+				if (result) {
+					result->var.ptr_ptr = &EG(error_zval_ptr);
+					PZVAL_LOCK(EG(error_zval_ptr));
+					if (type == BP_VAR_R || type == BP_VAR_IS) {
+						AI_USE_PTR(result->var);
+					}
+				}
+			} else if (type == BP_VAR_RW || type == BP_VAR_W) {
+convert_to_array:
+				if (!PZVAL_IS_REF(container)) {
+					SEPARATE_ZVAL(container_ptr);
+					container = *container_ptr;
+				}
+				zval_dtor(container);
+				array_init(container);
+				goto fetch_from_array;
+			} else if (result) {
+				/* for read-mode only */
 				result->var.ptr_ptr = &EG(uninitialized_zval_ptr);
-				PZVAL_LOCK(*result->var.ptr_ptr);
+				PZVAL_LOCK(EG(uninitialized_zval_ptr));
+				if (type == BP_VAR_R || type == BP_VAR_IS) {
+					AI_USE_PTR(result->var);
+				}
 			}
-			if (type==BP_VAR_W || type==BP_VAR_RW) {
-				zend_error(E_WARNING, "Cannot use a NULL value as an array");
-			}
+			return;
 			break;
-		}
+
 		case IS_UNICODE:
 		case IS_STRING: {
 				zval tmp;
 
+				if ((type == BP_VAR_RW || type == BP_VAR_W)  && Z_UNILEN_P(container)==0) {
+					goto convert_to_array;
+				}
 				if (dim == NULL) {
 					zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
 				}
@@ -1192,6 +1191,7 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 				return;
 			}
 			break;
+
 		case IS_OBJECT:
 			if (!Z_OBJ_HT_P(container)->read_dimension) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
@@ -1240,32 +1240,42 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 				}
 				return;
 			}
+			return;
 			break;
-		default: {
-				switch (type) {
-					case BP_VAR_UNSET:
-						zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
-						/* break missing intentionally */
-					case BP_VAR_R:
-					case BP_VAR_IS:
-						retval = &EG(uninitialized_zval_ptr);
-						break;
-					default:
-						retval = &EG(error_zval_ptr);
-						break;
-				}
-				if (result) {
-					result->var.ptr_ptr = retval;
-					PZVAL_LOCK(*result->var.ptr_ptr);
-				}
-				if (type==BP_VAR_W || type==BP_VAR_RW) {
+
+		case IS_BOOL:
+			if ((type == BP_VAR_RW || type == BP_VAR_W)  && Z_LVAL_P(container)==0) {
+				goto convert_to_array;
+			}
+			/* break missing intentionally */
+
+		default:
+			switch (type) {
+				case BP_VAR_UNSET:
+					zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
+					/* break missing intentionally */
+				case BP_VAR_R:
+				case BP_VAR_IS:
+					if (result) {
+						result->var.ptr_ptr = &EG(uninitialized_zval_ptr);
+						PZVAL_LOCK(EG(uninitialized_zval_ptr));
+						AI_USE_PTR(result->var);
+					}
+					return;
+					break;
+				case BP_VAR_W:
+				case BP_VAR_RW:
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
-				}
+					/* break missing intentionally */
+				default:
+					if (result) {
+						result->var.ptr_ptr = &EG(error_zval_ptr);
+						PZVAL_LOCK(EG(error_zval_ptr));
+					}
+					return;
+					break;
 			}
 			break;
-	}
-	if (result && (type == BP_VAR_R || type == BP_VAR_IS)) {
-		AI_USE_PTR(result->var);
 	}
 }
 /* }}} */
