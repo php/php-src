@@ -158,6 +158,12 @@ void zend_register_standard_constants(TSRMLS_D) /* {{{ */
 		Z_LVAL(c.value) = ZTS_V;
 		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
+
+		c.name.s = zend_strndup(ZEND_STRL("ZEND_DEBUG_BUILD"));
+		c.name_len = sizeof("ZEND_DEBUG_BUILD");
+		Z_LVAL(c.value) = ZEND_DEBUG;
+		z_TYPE(c.value) = IS_BOOL;
+		zend_register_constant(&c TSRMLS_CC);
 	}
 }
 /* }}} */
