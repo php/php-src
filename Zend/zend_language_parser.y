@@ -643,9 +643,9 @@ function_call:
 	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING '(' { $3.u.opline_num = zend_do_begin_function_call(&$2, 0 TSRMLS_CC); }
 			function_call_parameter_list
 			')' { zend_do_end_function_call(&$2, &$$, &$5, 0, $3.u.opline_num TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
-	|	class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING '(' { zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); }
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING '(' { $4.u.opline_num = zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); }
 			function_call_parameter_list
-			')' { zend_do_end_function_call(NULL, &$$, &$6, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
+			')' { zend_do_end_function_call($4.u.opline_num?NULL:&$3, &$$, &$6, $4.u.opline_num, $4.u.opline_num TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING '(' { zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); }
 			function_call_parameter_list
 			')' { zend_do_end_function_call(NULL, &$$, &$6, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
@@ -663,12 +663,14 @@ function_call:
 class_name:
 		T_STRING { $$ = $1; }
 	|	T_STATIC { $$.op_type = IS_CONST; ZVAL_ASCII_STRINGL(&$$.u.constant, "static", sizeof("static")-1, 1);}
+	|	T_NAMESPACE {if (CG(current_namespace)) { $1.op_type = IS_CONST; $1.u.constant = *CG(current_namespace); zval_copy_ctor(&$1.u.constant); zend_do_build_namespace_name(&$$, NULL, &$1 TSRMLS_CC); } else { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant); } }
 	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_build_namespace_name(&$$, NULL, &$2 TSRMLS_CC); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_build_namespace_name(&$$, &$1, &$3 TSRMLS_CC); }
 ;
 
 fully_qualified_class_name:
 		T_STRING { $$ = $1; }
+	|	T_NAMESPACE {if (CG(current_namespace)) { $1.op_type = IS_CONST; $1.u.constant = *CG(current_namespace); zval_copy_ctor(&$1.u.constant); zend_do_build_namespace_name(&$$, NULL, &$1 TSRMLS_CC); } else { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant); } }
 	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_build_namespace_name(&$$, NULL, &$2 TSRMLS_CC); }
 	|	fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_build_namespace_name(&$$, &$1, &$3 TSRMLS_CC); }
 ;
