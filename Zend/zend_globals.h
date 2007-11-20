@@ -157,7 +157,6 @@ struct _zend_executor_globals {
 	zval error_zval;
 	zval *error_zval_ptr;
 
-	zend_function_state *function_state_ptr;
 	zend_ptr_stack arg_types_stack;
 
 	/* symbol table cache */

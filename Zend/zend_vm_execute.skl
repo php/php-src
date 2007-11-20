@@ -46,7 +46,6 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 	EG(opline_ptr) = &EX(opline);
 
 	EX(function_state).function = (zend_function *) op_array;
-	EG(function_state_ptr) = &EX(function_state);
 
 	while (1) {
     {%ZEND_VM_CONTINUE_LABEL%}
@@ -57,7 +56,7 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 #endif
 
 		{%ZEND_VM_DISPATCH%} {
-      {%INTERNAL_EXECUTOR%}
+			{%INTERNAL_EXECUTOR%}
 		}
 
 	}

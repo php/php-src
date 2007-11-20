@@ -655,7 +655,7 @@ static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC) /* {{
 
 ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	zend_internal_function *func = (zend_internal_function *)EG(function_state_ptr)->function;
+	zend_internal_function *func = (zend_internal_function *)EG(current_execute_data)->function_state.function;
 	zval *method_name_ptr, *method_args_ptr;
 	zval *method_result_ptr = NULL;
 	zend_class_entry *ce = Z_OBJCE_P(this_ptr);
@@ -860,7 +860,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, zstr method_
 
 ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	zend_internal_function *func = (zend_internal_function *)EG(function_state_ptr)->function;
+	zend_internal_function *func = (zend_internal_function *)EG(current_execute_data)->function_state.function;
 	zval *method_name_ptr, *method_args_ptr;
 	zval *method_result_ptr = NULL;
 	zend_class_entry *ce = EG(scope);
