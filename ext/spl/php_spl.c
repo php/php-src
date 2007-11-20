@@ -267,7 +267,6 @@ PHP_FUNCTION(spl_autoload)
 	zval **original_return_value = EG(return_value_ptr_ptr);
 	zend_op **original_opline_ptr = EG(opline_ptr);
 	zend_op_array *original_active_op_array = EG(active_op_array);
-	zend_function_state *original_function_state_ptr = EG(function_state_ptr);
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &class_name, &class_name_len, &file_exts, &file_exts_len) == FAILURE) {
 		RETURN_FALSE;
@@ -283,7 +282,6 @@ PHP_FUNCTION(spl_autoload)
 		EG(return_value_ptr_ptr) = original_return_value;
 		EG(opline_ptr) = original_opline_ptr;
 		EG(active_op_array) = original_active_op_array;
-		EG(function_state_ptr) = original_function_state_ptr;
 		pos2 = strchr(pos1, ',');
 		if (pos2) *pos2 = '\0';
 		if (spl_autoload(class_name, lc_name, class_name_len, pos1 TSRMLS_CC)) {
@@ -300,7 +298,6 @@ PHP_FUNCTION(spl_autoload)
 	EG(return_value_ptr_ptr) = original_return_value;
 	EG(opline_ptr) = original_opline_ptr;
 	EG(active_op_array) = original_active_op_array;
-	EG(function_state_ptr) = original_function_state_ptr;
 
 	if (!found && !SPL_G(autoload_running)) {
 		/* For internal errors, we generate E_ERROR, for direct calls an exception is thrown.

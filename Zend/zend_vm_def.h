@@ -2013,8 +2013,6 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			zend_execute_internal(EXECUTE_DATA, return_value_used TSRMLS_CC);
 		}
 
-		EG(current_execute_data) = EXECUTE_DATA;
-
 /*	We shouldn't fix bad extensions here,
     because it can break proper ones (Bug #34045)
 		if (!EX(function_state).function->common.return_reference) {
@@ -2093,7 +2091,6 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	}
 
 	EX(function_state).function = (zend_function *) EX(op_array);
-	EG(function_state_ptr) = &EX(function_state);
 
 	if (EG(This)) {
 		if (EG(exception) && IS_CTOR_CALL(EX(called_scope))) {
@@ -3011,7 +3008,6 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 
 		EG(opline_ptr) = &EX(opline);
 		EG(active_op_array) = EX(op_array);
-		EG(function_state_ptr) = &EX(function_state);
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		if (EG(exception)) {

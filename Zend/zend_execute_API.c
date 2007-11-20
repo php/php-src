@@ -340,11 +340,11 @@ ZEND_API char *get_active_class_name(char **space TSRMLS_DC) /* {{{ */
 		}
 		return "";
 	}
-	switch (EG(function_state_ptr)->function->type) {
+	switch (EG(current_execute_data)->function_state.function->type) {
 		case ZEND_USER_FUNCTION:
 		case ZEND_INTERNAL_FUNCTION:
 		{
-			zend_class_entry *ce = EG(function_state_ptr)->function->common.scope;
+			zend_class_entry *ce = EG(current_execute_data)->function_state.function->common.scope;
 
 			if (space) {
 				*space = ce ? "::" : "";
@@ -365,9 +365,9 @@ ZEND_API char *get_active_function_name(TSRMLS_D) /* {{{ */
 	if (!zend_is_executing(TSRMLS_C)) {
 		return NULL;
 	}
-	switch (EG(function_state_ptr)->function->type) {
+	switch (EG(current_execute_data)->function_state.function->type) {
 		case ZEND_USER_FUNCTION: {
-				char *function_name = ((zend_op_array *) EG(function_state_ptr)->function)->function_name;
+				char *function_name = ((zend_op_array *) EG(current_execute_data)->function_state.function)->function_name;
 
 				if (function_name) {
 					return function_name;
@@ -377,7 +377,7 @@ ZEND_API char *get_active_function_name(TSRMLS_D) /* {{{ */
 			}
 			break;
 		case ZEND_INTERNAL_FUNCTION:
-			return ((zend_internal_function *) EG(function_state_ptr)->function)->function_name;
+			return ((zend_internal_function *) EG(current_execute_data)->function_state.function)->function_name;
 			break;
 		default:
 			return NULL;
@@ -625,7 +625,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_uint i;
 	zval **original_return_value;
 	HashTable *calling_symbol_table;
-	zend_function_state *original_function_state_ptr;
 	zend_op_array *original_op_array;
 	zend_op **original_opline_ptr;
 	zend_class_entry *current_scope;
@@ -969,9 +968,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 	zend_ptr_stack_2_push(&EG(argument_stack), (void *) (zend_uintptr_t) fci->param_count, NULL);
 
-	original_function_state_ptr = EG(function_state_ptr);
-	EG(function_state_ptr) = &EX(function_state);
-
 	current_scope = EG(scope);
 	EG(scope) = calling_scope;
 
@@ -1060,7 +1056,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		zval_ptr_dtor(&method_name);
 		zval_ptr_dtor(&params_array);
 	}
-	EG(function_state_ptr) = original_function_state_ptr;
 
 	if (EG(This)) {
 		zval_ptr_dtor(&EG(This));
@@ -1193,7 +1188,6 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 	zval pv;
 	zend_op_array *new_op_array;
 	zend_op_array *original_active_op_array = EG(active_op_array);
-	zend_function_state *original_function_state_ptr = EG(function_state_ptr);
 	zend_uchar original_handle_op_arrays;
 	int retval;
 
@@ -1245,7 +1239,6 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 		EG(no_extensions)=0;
 		EG(opline_ptr) = original_opline_ptr;
 		EG(active_op_array) = original_active_op_array;
-		EG(function_state_ptr) = original_function_state_ptr;
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;

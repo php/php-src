@@ -689,7 +689,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			case '+':
 				if (have_varargs) {
 					if (!quiet) {
-						zend_function *active_function = EG(function_state_ptr)->function;
+						zend_function *active_function = EG(current_execute_data)->function_state.function;
 						char *class_name = active_function->common.scope ? active_function->common.scope->name : "";
 						zend_error(E_WARNING, "%s%s%s(): only one varargs specifier (* or +) is permitted",
 								class_name,
@@ -709,7 +709,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 			default:
 				if (!quiet) {
-					zend_function *active_function = EG(function_state_ptr)->function;
+					zend_function *active_function = EG(current_execute_data)->function_state.function;
 					char *class_name = active_function->common.scope ? active_function->common.scope->name : "";
 					zend_error(E_WARNING, "%s%s%s(): bad type specifier while parsing parameters",
 							class_name,
@@ -732,7 +732,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 	if (num_args < min_num_args || (num_args > max_num_args && max_num_args > 0)) {
 		if (!quiet) {
-			zend_function *active_function = EG(function_state_ptr)->function;
+			zend_function *active_function = EG(current_execute_data)->function_state.function;
 			char *class_name = active_function->common.scope ? active_function->common.scope->name : "";
 			zend_error(E_WARNING, "%s%s%s() expects %s %d parameter%s, %d given",
 					class_name,
