@@ -1,3 +1,13 @@
+2007-11-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug29674.phpt
+      tests/bug29674.phpt
+      tests/bug29674.phpt
+      tests/bug29689.phpt
+      tests/bug29689.phpt
+      tests/bug29689.phpt:
+      Fixed tests
+
 2007-11-18  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_2)
