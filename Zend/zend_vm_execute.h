@@ -222,7 +222,6 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			zend_u_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 			/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 		}
-		EG(active_symbol_table) = EG(active_symbol_table);
 		EG(return_value_ptr_ptr) = &EX_T(opline->result.u.var).var.ptr;
 		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 
