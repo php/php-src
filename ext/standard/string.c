@@ -646,6 +646,11 @@ PHP_FUNCTION(wordwrap)
 		RETURN_EMPTY_STRING();
 	}
 
+	if (breakcharlen == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Break string cannot be empty");
+		RETURN_FALSE;
+	}
+
 	if (linelength == 0 && docut) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't force cut when width is zero.");
 		RETURN_FALSE;
