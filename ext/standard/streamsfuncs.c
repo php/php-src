@@ -1677,6 +1677,26 @@ PHP_FUNCTION(stream_is_local)
 }
 /* }}} */
 
+/* {{{ proto bool stream_supports_lock(resource stream)
+   Tells wether the stream supports locking through flock(). */
+PHP_FUNCTION(stream_supports_lock)
+{
+	php_stream *stream;
+	zval *zsrc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zsrc) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	php_stream_from_zval(stream, &zsrc);
+
+	if (!php_stream_supports_lock(stream)) {
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+
 #ifdef HAVE_SHUTDOWN
 /* {{{ proto int stream_socket_shutdown(resource stream, int how) U
 	causes all or part of a full-duplex connection on the socket associated

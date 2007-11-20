@@ -2310,6 +2310,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_stream_is_local, 0)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_supports_lock, 0, 0, 1)
+    ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_select, 0, 0, 4)
 	ZEND_ARG_INFO(1, read_streams) /* ARRAY_INFO(1, read_streams, 1) */
 	ZEND_ARG_INFO(1, write_streams) /* ARRAY_INFO(1, write_streams, 1) */
@@ -3532,6 +3537,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 #endif
 	PHP_FE(stream_copy_to_stream,											arginfo_stream_copy_to_stream)
 	PHP_FE(stream_get_contents,												arginfo_stream_get_contents)
+	PHP_FE(stream_supports_lock,											arginfo_stream_supports_lock)
 	PHP_FE(stream_resolve_include_path,										arginfo_stream_resolve_include_path)
 	PHP_FE(fgetcsv,															arginfo_fgetcsv)
 	PHP_FE(fputcsv,															arginfo_fputcsv)
