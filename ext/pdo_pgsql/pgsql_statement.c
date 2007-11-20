@@ -265,6 +265,11 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 							sizeof(Oid));
 				}
 				if (param->paramno >= 0) {
+					if (param->paramno > zend_hash_num_elements(stmt->bound_param_map)) {
+						pdo_pgsql_error_stmt(stmt, PGRES_FATAL_ERROR, "HY105");
+						return 0;
+					}
+
 					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB &&
 							Z_TYPE_P(param->parameter) == IS_RESOURCE) {
 						php_stream *stm;
