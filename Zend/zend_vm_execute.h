@@ -75,7 +75,6 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	EG(opline_ptr) = &EX(opline);
 
 	EX(function_state).function = (zend_function *) op_array;
-	EG(function_state_ptr) = &EX(function_state);
 
 	while (1) {
 #ifdef ZEND_WIN32
@@ -85,7 +84,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 #endif
 
 		if (EX(opline)->handler(&execute_data TSRMLS_CC) > 0) {
-      return;
+			return;
 		}
 
 	}
@@ -204,8 +203,6 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			zend_execute_internal(execute_data, return_value_used TSRMLS_CC);
 		}
 
-		EG(current_execute_data) = execute_data;
-
 /*	We shouldn't fix bad extensions here,
     because it can break proper ones (Bug #34045)
 		if (!EX(function_state).function->common.return_reference) {
@@ -284,7 +281,6 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	EX(function_state).function = (zend_function *) EX(op_array);
-	EG(function_state_ptr) = &EX(function_state);
 
 	if (EG(This)) {
 		if (EG(exception) && IS_CTOR_CALL(EX(called_scope))) {
@@ -1907,7 +1903,6 @@ skip_compile:
 
 		EG(opline_ptr) = &EX(opline);
 		EG(active_op_array) = EX(op_array);
-		EG(function_state_ptr) = &EX(function_state);
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		if (EG(exception)) {
@@ -5115,7 +5110,6 @@ skip_compile:
 
 		EG(opline_ptr) = &EX(opline);
 		EG(active_op_array) = EX(op_array);
-		EG(function_state_ptr) = &EX(function_state);
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		if (EG(exception)) {
@@ -8411,7 +8405,6 @@ skip_compile:
 
 		EG(opline_ptr) = &EX(opline);
 		EG(active_op_array) = EX(op_array);
-		EG(function_state_ptr) = &EX(function_state);
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		if (EG(exception)) {
@@ -21935,7 +21928,6 @@ skip_compile:
 
 		EG(opline_ptr) = &EX(opline);
 		EG(active_op_array) = EX(op_array);
-		EG(function_state_ptr) = &EX(function_state);
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		if (EG(exception)) {
