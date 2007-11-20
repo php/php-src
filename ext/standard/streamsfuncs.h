@@ -56,6 +56,7 @@ PHP_FUNCTION(stream_socket_enable_crypto);
 PHP_FUNCTION(stream_socket_shutdown);
 PHP_FUNCTION(stream_socket_pair);
 PHP_FUNCTION(stream_is_local);
+PHP_FUNCTION(stream_supports_lock);
 
 /*
  * Local variables:
