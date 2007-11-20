@@ -278,10 +278,8 @@ static inline zstr _to_zstr(void *v) {
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, return_value_ptr, this_ptr, return_value_used TSRMLS_CC
 
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
-#  define ZEND_VM_ALWAYS_INLINE  __attribute__ ((always_inline))
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
 #else
-#  define ZEND_VM_ALWAYS_INLINE
 #  define zend_error_noreturn zend_error
 #endif
 
@@ -362,42 +360,42 @@ struct _zval_struct {
 #define Z_SET_ISREF_TO(z, isref)	Z_SET_ISREF_TO_P(&(z), isref)
 
 #if defined(__GNUC__)
-#define always_inline inline __attribute__((always_inline))
+#define zend_always_inline inline __attribute__((always_inline))
 #elif defined(_MSC_VER)
-#define always_inline __forceinline
+#define zend_always_inline __forceinline
 #else
-#define always_inline inline
+#define zend_always_inline inline
 #endif
 
-static always_inline zend_uint zval_refcount_p(zval* pz) {
+static zend_always_inline zend_uint zval_refcount_p(zval* pz) {
 	return pz->refcount__gc;
 }
 
-static always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) {
+static zend_always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) {
 	return pz->refcount__gc = rc;
 }
 
-static always_inline zend_uint zval_addref_p(zval* pz) {
+static zend_always_inline zend_uint zval_addref_p(zval* pz) {
 	return ++pz->refcount__gc;
 }
 
-static always_inline zend_uint zval_delref_p(zval* pz) {
+static zend_always_inline zend_uint zval_delref_p(zval* pz) {
 	return --pz->refcount__gc;
 }
 
-static always_inline zend_bool zval_isref_p(zval* pz) {
+static zend_always_inline zend_bool zval_isref_p(zval* pz) {
 	return pz->is_ref__gc;
 }
 
-static always_inline zend_bool zval_set_isref_p(zval* pz) {
+static zend_always_inline zend_bool zval_set_isref_p(zval* pz) {
 	return pz->is_ref__gc = 1;
 }
 
-static always_inline zend_bool zval_unset_isref_p(zval* pz) {
+static zend_always_inline zend_bool zval_unset_isref_p(zval* pz) {
 	return pz->is_ref__gc = 0;
 }
 
-static always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
+static zend_always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
 	return pz->is_ref__gc = isref;
 }
 
