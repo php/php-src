@@ -1394,6 +1394,14 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	zend_op *opline;
 	zend_arg_info *cur_arg_info;
 
+	if (class_type->op_type == IS_CONST &&
+	    Z_UNILEN(class_type->u.constant) == 0) {
+		/* Usage of namespace as class name not in namespace */
+		zval_dtor(&class_type->u.constant);
+		zend_error(E_COMPILE_ERROR, "Cannot use 'namespace' as a class name");
+		return;
+	}
+
 	if (CG(active_op_array)->scope &&
 		((CG(active_op_array)->fn_flags & ZEND_ACC_STATIC) == 0) &&
 	    (Z_TYPE(varname->u.constant) == IS_STRING || Z_TYPE(varname->u.constant) == IS_UNICODE) &&
@@ -1705,6 +1713,14 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 	long fetch_class_op_number;
 	zend_op *opline;
 
+	if (class_name->op_type == IS_CONST &&
+	    Z_UNILEN(class_name->u.constant) == 0) {
+		/* Usage of namespace as class name not in namespace */
+		zval_dtor(&class_name->u.constant);
+		zend_error(E_COMPILE_ERROR, "Cannot use 'namespace' as a class name");
+		return;
+	}
+	
 	fetch_class_op_number = get_next_op_number(CG(active_op_array));
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -1767,12 +1783,19 @@ void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *cla
 }
 /* }}} */
 
-void zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC) /* {{{ */
+int zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC) /* {{{ */
 {
 	znode class_node;
 	unsigned char *ptr = NULL;
 	zend_op *opline;
 	ulong fetch_type = 0;
+
+	if (class_name->op_type == IS_CONST &&
+	    Z_UNILEN(class_name->u.constant) == 0) {
+		/* namespace::func() not in namespace */
+		zval_dtor(&class_name->u.constant);
+		return zend_do_begin_function_call(method_name, 0 TSRMLS_CC);
+	}
 
 	if (method_name->op_type == IS_CONST) {
 		zstr lcname;
@@ -1860,6 +1883,7 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 	zend_do_extended_fcall_begin(TSRMLS_C);
+	return 1; /* Dynamic */
 }
 /* }}} */
 
@@ -3828,6 +3852,15 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 			}
 			break;
 		case ZEND_RT:
+			if (constant_container &&
+			    constant_container->op_type == IS_CONST &&
+			    Z_UNILEN(constant_container->u.constant) == 0) {
+				/* Usage of namespace as class name not in namespace */
+				zval_dtor(&constant_container->u.constant);
+				constant_container = NULL;
+				check_namespace = 0;
+			}
+
 			if (constant_container ||
 			    !zend_constant_ct_subst(result, &constant_name->u.constant TSRMLS_CC)) {
 				zend_op *opline;
