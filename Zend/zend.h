@@ -367,6 +367,14 @@ struct _zval_struct {
 #define zend_always_inline inline
 #endif
 
+#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
+# define EXPECTED(condition)   __builtin_expect(condition, 1)
+# define UNEXPECTED(condition) __builtin_expect(condition, 0)
+#else
+# define EXPECTED(condition)   (condition)
+# define UNEXPECTED(condition) (condition)
+#endif
+
 static zend_always_inline zend_uint zval_refcount_p(zval* pz) {
 	return pz->refcount__gc;
 }
