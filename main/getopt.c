@@ -80,24 +80,36 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 		}
 	}
 	if ((argv[*optind][0] == '-') && (argv[*optind][1] == '-')) {
+		char *pos;
+		int arg_end = strlen(argv[*optind])-1;
+
 		/* '--' indicates end of args if not followed by a known long option name */
 		if (argv[*optind][2] == '\0') {
 			(*optind)++;
 			return(EOF);
 		}
 
+		arg_start = 2;
+
+		/* Check for <arg>=<val> */
+		if ((pos = php_memnstr(&argv[*optind][arg_start], "=", 1, argv[*optind]+arg_end)) != NULL) {
+			arg_end = pos-&argv[*optind][arg_start];
+			arg_start++;
+		}
+ 
+
 		while (1) {
 			php_optidx++;
 			if (opts[php_optidx].opt_char == '-') {
 				(*optind)++;
 				return(php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err));
-			} else if (opts[php_optidx].opt_name && !strcmp(&argv[*optind][2], opts[php_optidx].opt_name)) {
+			} else if (opts[php_optidx].opt_name && !strncmp(&argv[*optind][2], opts[php_optidx].opt_name, arg_end)) {
 				break;
 			}
 		}
 		optchr = 0;
 		dash = 0;
-		arg_start = 2 + strlen(opts[php_optidx].opt_name);
+		arg_start += strlen(opts[php_optidx].opt_name);
 	} else {
 		if (!dash) {
 			dash = 1;
@@ -133,14 +145,23 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 	}
 	if (opts[php_optidx].need_param) {
 		/* Check for cases where the value of the argument
-		is in the form -<arg> <val> or in the form -<arg><val> */
+		is in the form -<arg> <val>, -<arg>=<varl> or -<arg><val> */
 		dash = 0;
 		if (!argv[*optind][arg_start]) {
 			(*optind)++;
 			if (*optind == argc) {
-				return(php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err));
-			}
-			*optarg = argv[(*optind)++];
+				/* Was the value required or is it optional? */
+				if (opts[php_optidx].need_param == 1) {
+					return(php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err));
+				}
+			/* Optional value is not supported with -<arg> <val> style */
+			} else if (opts[php_optidx].need_param == 1) {
+				*optarg = argv[(*optind)++];
+ 			}
+		} else if (argv[*optind][arg_start] == '=') {
+			arg_start++;
+			*optarg = &argv[*optind][arg_start];
+			(*optind)++;
 		} else {
 			*optarg = &argv[*optind][arg_start];
 			(*optind)++;
