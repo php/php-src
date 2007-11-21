@@ -16,6 +16,12 @@ var_dump($a ?: $b);
 var_dump($c ?: $d);
 
 var_dump(1 ?: print(2));
+
+$e = array();
+
+$e['e'] = 'e';
+$e['e'] = $e['e'] ?: 'e';
+print_r($e);
 ?>
 --EXPECT--
 bool(true)
@@ -25,6 +31,10 @@ string(3) "bar"
 int(23)
 float(23.5)
 int(1)
+Array
+(
+    [e] => e
+)
 --UEXPECT--
 bool(true)
 bool(true)
@@ -33,3 +43,7 @@ unicode(3) "bar"
 int(23)
 float(23.5)
 int(1)
+Array
+(
+    [e] => e
+)
