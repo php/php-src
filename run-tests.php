@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 /*
    +----------------------------------------------------------------------+
@@ -173,6 +174,7 @@ $ini_overwrites = array(
 		'auto_prepend_file=',
 		'auto_append_file=',
 		'magic_quotes_runtime=0',
+		'ignore_repeated_errors=0',
 	);
 
 function write_information($show_html)
