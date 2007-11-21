@@ -1,3 +1,195 @@
+2007-11-20  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * ZendEngine2/tests/021.phpt
+      ZendEngine2/tests/021.phpt:
+      
+      - Add test
+
+2007-11-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_stmt.c:
+      
+      revert previous pdo patch
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c
+      ext/pdo_pgsql/pgsql_statement.c:
+      
+      MFB: Adjusted fix for bug #42978
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c
+      ext/pdo_pgsql/pgsql_statement.c:
+      
+      Adjusted fix for bug #42978
+
+2007-11-20  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/getopt_004.phpt
+      ext/standard/tests/general_functions/getopt_005.phpt
+      main/getopt.c:
+      - Add support for optional values
+      - Add support for = as seperator
+
+2007-11-20  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h
+      ext/standard/tests/file/stream_supports_lock.phpt:
+      MFH: Add stream_supports_lock() function (Benjamin Schulz)
+
+    * ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h
+      ext/standard/tests/file/stream_supports_lock.phpt
+      ext/standard/tests/file/stream_supports_lock.phpt:
+      Add stream_supports_lock() function (Benjamin Schulz)
+
+    * ZendEngine2/zend_constants.c:
+      - Fix build
+
+2007-11-20  Lars Westermann  <lars.westermann@privat.dk>
+
+    * (PHP_5_3)
+      ext/interbase/ibase_query.c:
+      Win32 still fails to build ...
+
+2007-11-20  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/sysvmsg/php_sysvmsg.h
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvmsg/tests/003.phpt:
+      MFH: Add msg_queue_exists() function (Benjamin Schulz) [DOC]
+
+    * ext/sysvmsg/tests/003.phpt
+      ext/sysvmsg/tests/003.phpt:
+      
+      Add msg_queue_exists() function (Benjamin Schulz)
+
+    * ext/sysvmsg/php_sysvmsg.h
+      ext/sysvmsg/sysvmsg.c:
+      Add msg_queue_exists() function (Benjamin Schulz)
+
+2007-11-20  Lars Westermann  <lars.westermann@privat.dk>
+
+    * (PHP_5_3)
+      ext/interbase/ibase_query.c:
+      Win32 fails to build
+
+2007-11-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      dead code
+
+2007-11-20  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ZendEngine2/zend_constants.c:
+      - Added ZEND_DEBUG_BUILD constant
+
+2007-11-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c:
+      
+      MFB: Fixed bug #42978 (mismatch between number of bound params and values
+      causes a crash in pdo_pgsql)
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c:
+      Fixed bug #42978 (mismatch between number of bound params and values causes
+      a crash in pdo_pgsql)
+
+2007-11-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Optimization of zend_do_fcall_common_helper()
+
+    * (PHP_5_3)
+      ZendEngine2/zend_operators.c:
+      MFH: math and comparison optimization + use macroses
+
+    * ZendEngine2/zend_operators.c:
+      math and comparison optimization
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      ZEND_FETCH_DIM optimization
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend.h:
+      Fixed compilation on some systems (Wez)
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_execute.skl
+      ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_handlers.c
+      ext/spl/php_spl.c
+      ext/spl/php_spl.c:
+      Fixed bug #43136 (possible crash on script execution timeout. The
+      EG(function_state_ptr) is completely removed,
+      EG(current_execute_data)->function_state must be used instead)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/lsb_006.phpt
+      ZendEngine2/tests/lsb_006.phpt
+      ZendEngine2/tests/lsb_007.phpt
+      ZendEngine2/tests/lsb_007.phpt
+      ZendEngine2/tests/ns_057.phpt
+      ZendEngine2/tests/ns_058.phpt:
+      Added support for "namespace::" prefix that is resolved to current
+      namespace name.
+
+    * ZendEngine2/tests/ns_057.phpt
+      ZendEngine2/tests/ns_057.phpt
+      ZendEngine2/tests/ns_058.phpt
+      ZendEngine2/tests/ns_058.phpt:
+      
+      file ns_057.phpt was initially added on branch PHP_5_3.
+
+2007-11-20  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_4)
+      main/output.c:
+      fix crash with bad parameters
+
+    * (PHP_4_4)
+      ext/standard/string.c:
+      merge wordwrap fix
+
 2007-11-19  Lars Westermann  <lars.westermann@privat.dk>
 
     * (PHP_5_3)
