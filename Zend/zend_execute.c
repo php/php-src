@@ -1446,7 +1446,7 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_v
 		EX(opline)++; \
 	}
 
-#define ZEND_VM_RETURN_FROM_EXECUTE_LOOP() \
+#define ZEND_VM_EXIT_FROM_EXECUTE_LOOP() \
 	free_alloca(EX(CVs)); \
 	if (EX(op_array)->T < TEMP_VAR_STACK_LIMIT) { \
 		free_alloca(EX(Ts)); \
@@ -1455,7 +1455,10 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_v
 	} \
 	EG(in_execution) = EX(original_in_execution); \
 	EG(current_execute_data) = EX(prev_execute_data); \
-	EG(opline_ptr) = NULL; \
+	EG(opline_ptr) = NULL;
+
+#define ZEND_VM_RETURN_FROM_EXECUTE_LOOP() \
+	ZEND_VM_EXIT_FROM_EXECUTE_LOOP(); \
 	ZEND_VM_RETURN()
 
 #include "zend_vm_execute.h"
