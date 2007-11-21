@@ -148,3 +148,4 @@
 #define ZEND_ISSET_ISEMPTY_PROP_OBJ  148
 #define ZEND_HANDLE_EXCEPTION        149
 #define ZEND_USER_OPCODE             150
+#define ZEND_JMP_SET                 152
