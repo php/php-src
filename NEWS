@@ -6,7 +6,7 @@ PHP                                                                        NEWS
 - Added msg_queue_exists() function. (Benjamin Schulz)
 - Added 3 Firebird specific attributes that can be set via PDO::setAttribute()
   to control formatting of date/timestamp columns: PDO::FB_ATTR_DATE_FORMAT,
-  PDO::FB_ATTR_TIME_FORMAT and PDO::FB_ATTR_TIMESTAMP_FORMAT. 
+  PDO::FB_ATTR_TIME_FORMAT and PDO::FB_ATTR_TIMESTAMP_FORMAT. (Lars W)
 - Added gmp_testbit() function from HEAD. (Stas)
 - Added icon format support to getimagesize(). (Scott)
 - Added LDAP_OPT_NETWORK_TIMEOUT option for ldap_set_option() to allow
