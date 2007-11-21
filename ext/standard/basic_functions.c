@@ -4532,6 +4532,10 @@ static int parse_opts(char * opts, opt_struct ** result)
 		paras->opt_name = NULL;
 		if (paras->need_param == 1) {
 			opts++;
+			if (*opts == ':') {
+				paras->need_param++;
+				opts++;
+			}
 		}
 		paras++;
 	}
