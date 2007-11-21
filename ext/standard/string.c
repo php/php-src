@@ -7802,7 +7802,7 @@ PHP_FUNCTION(str_split)
 	}
 
 	if (p != (str.s + str_len * charsize)) {
-		add_next_index_zstrl(return_value, str_type, ZSTR(p), (str.s + str_len * charsize - p), 1);
+		add_next_index_zstrl(return_value, str_type, ZSTR(p), (str.s + str_len * charsize - p)/charsize, 1);
 	}
 }
 /* }}} */
