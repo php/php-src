@@ -1,3 +1,89 @@
+2007-11-20  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * tests/021.phpt
+      tests/021.phpt:
+      
+      - Add test
+
+    * zend_constants.c:
+      - Fix build
+
+2007-11-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      dead code
+
+2007-11-20  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * zend_constants.c:
+      - Added ZEND_DEBUG_BUILD constant
+
+2007-11-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Optimization of zend_do_fcall_common_helper()
+
+    * (PHP_5_3)
+      zend_operators.c:
+      MFH: math and comparison optimization + use macroses
+
+    * zend_operators.c:
+      math and comparison optimization
+
+    * zend_execute.c
+      zend_execute.c:
+      ZEND_FETCH_DIM optimization
+
+    * zend.h
+      zend.h:
+      Fixed compilation on some systems (Wez)
+
+    * (PHP_5_3)
+      zend_API.c
+      zend_execute.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_globals.h
+      zend_globals.h
+      zend_object_handlers.c
+      zend_object_handlers.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      zend_vm_execute.skl:
+      Fixed bug #43136 (possible crash on script execution timeout. The
+      EG(function_state_ptr) is completely removed,
+      EG(current_execute_data)->function_state must be used instead)
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_language_parser.y
+      zend_language_parser.y
+      tests/lsb_006.phpt
+      tests/lsb_006.phpt
+      tests/lsb_007.phpt
+      tests/lsb_007.phpt
+      tests/ns_057.phpt
+      tests/ns_058.phpt:
+      Added support for "namespace::" prefix that is resolved to current
+      namespace name.
+
+    * tests/ns_057.phpt
+      tests/ns_057.phpt
+      tests/ns_058.phpt
+      tests/ns_058.phpt:
+      
+      file ns_057.phpt was initially added on branch PHP_5_3.
+
 2007-11-19  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/bug29674.phpt
