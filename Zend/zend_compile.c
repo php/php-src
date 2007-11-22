@@ -1446,8 +1446,16 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2 = *left_bracket;
-		opline->extended_value = 0;
-		SET_UNUSED(opline->op1);
+		if (opline->op2.op_type == IS_CONST) {
+			opline->op1.op_type = IS_CONST;
+			Z_TYPE(opline->op1.u.constant) = IS_STRING;
+			Z_STRVAL(opline->op1.u.constant) = zend_str_tolower_dup(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant));
+			Z_STRLEN(opline->op1.u.constant) = Z_STRLEN(opline->op2.u.constant);
+			opline->extended_value = zend_hash_func(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant) + 1);
+		} else {
+			opline->extended_value = 0;
+			SET_UNUSED(opline->op1);
+		}
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
@@ -1474,18 +1482,41 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int prefix_len TS
 	zend_op *opline;
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-	opline->op2 = *function_name;
-	opline->extended_value = 0;
 
 	if (prefix_len) {
 		/* In run-time PHP will check for function with full name and
 		   internal function with short name */
+		opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
+		opline->op2 = *function_name;
+		opline->extended_value = 0;
 		opline->op1.op_type = IS_CONST;
-		ZVAL_LONG(&opline->op1.u.constant, prefix_len);
+		Z_TYPE(opline->op1.u.constant) = IS_STRING;
+		Z_STRVAL(opline->op1.u.constant) = zend_str_tolower_dup(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant));
+		Z_STRLEN(opline->op1.u.constant) = Z_STRLEN(opline->op2.u.constant);
+		opline->extended_value = zend_hash_func(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant) + 1);
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_OP_DATA;
+		opline->op1.op_type = IS_CONST;
+		Z_TYPE(opline->op1.u.constant) = IS_STRING;
+		Z_STRLEN(opline->op1.u.constant) = Z_STRLEN(function_name->u.constant) - prefix_len;
+		Z_STRVAL(opline->op1.u.constant) = zend_str_tolower_dup(Z_STRVAL(function_name->u.constant) + prefix_len, Z_STRLEN(opline->op1.u.constant));
+		opline->extended_value = zend_hash_func(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant) + 1);
 	} else {
-		SET_UNUSED(opline->op1);
+		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+		opline->op2 = *function_name;
+		if (opline->op2.op_type == IS_CONST) {
+			opline->op1.op_type = IS_CONST;
+			Z_TYPE(opline->op1.u.constant) = IS_STRING;
+			Z_STRVAL(opline->op1.u.constant) = zend_str_tolower_dup(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant));
+			Z_STRLEN(opline->op1.u.constant) = Z_STRLEN(opline->op2.u.constant);
+			opline->extended_value = zend_hash_func(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant) + 1);
+		} else {
+			opline->extended_value = 0;
+			SET_UNUSED(opline->op1);
+		}
 	}
+
+
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 	zend_do_extended_fcall_begin(TSRMLS_C);
@@ -1731,6 +1762,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 		if (!is_method && !is_dynamic_fcall && function_name->op_type==IS_CONST) {
 			opline->opcode = ZEND_DO_FCALL;
 			opline->op1 = *function_name;
+			ZVAL_LONG(&opline->op2.u.constant, zend_hash_func(Z_STRVAL(function_name->u.constant), Z_STRLEN(function_name->u.constant) + 1));
 		} else {
 			opline->opcode = ZEND_DO_FCALL_BY_NAME;
 			SET_UNUSED(opline->op1);
@@ -3654,6 +3686,7 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC)
 	opline->op1.op_type = IS_CONST;
 	opline->extended_value = 1;
 	SET_UNUSED(opline->op2);
+	ZVAL_LONG(&opline->op2.u.constant, zend_hash_func("shell_exec", sizeof("shell_exec")));
 	*result = opline->result;
 }
 

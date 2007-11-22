@@ -648,60 +648,65 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	zend_function *function;
 	char *function_name_strval, *lcname;
 	int function_name_strlen;
 
+	int ret;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_CONST == IS_CONST) {
-		function_name_strval = opline->op2.u.constant.value.str.val;
-		function_name_strlen = opline->op2.u.constant.value.str.len;
+		function_name_strval = Z_STRVAL(opline->op2.u.constant);
+		ret = zend_hash_quick_find(EG(function_table), Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant)+1, opline->extended_value, (void **) &EX(fbc));
 	} else {
 		function_name = &opline->op2.u.constant;
 
 		if (Z_TYPE_P(function_name) != IS_STRING) {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
 		}
-		function_name_strval = function_name->value.str.val;
-		function_name_strlen = function_name->value.str.len;
-	}
+		function_name_strval = Z_STRVAL_P(function_name);
+		function_name_strlen = Z_STRLEN_P(function_name);
+		if (function_name_strval[0] == ':' &&
+		    function_name_strval[1] == ':') {
 
-	if (IS_CONST != IS_CONST &&
-	    function_name_strval[0] == ':' &&
-	    function_name_strval[1] == ':') {
-
-	    function_name_strlen -= 2;
-		lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
-	} else {
-		lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
-	}
-	if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE) {
-		efree(lcname);
-
-		if (IS_CONST == IS_CONST && opline->op1.op_type == IS_CONST) {
-			function_name_strlen -= Z_LVAL(opline->op1.u.constant);
-			lcname = zend_str_tolower_dup(function_name_strval + Z_LVAL(opline->op1.u.constant), function_name_strlen);
-			if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE ||
-			    function->type != ZEND_INTERNAL_FUNCTION) {
-				efree(lcname);
-				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
-			}
+		    function_name_strlen -= 2;
+			lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
 		} else {
-			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+			lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 		}
+		ret = zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &EX(fbc));
+		efree(lcname);
 	}
 
-	efree(lcname);
+	if (ret == FAILURE) {
+		zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+	}
+
 	if (IS_CONST != IS_CONST) {
 
 	}
 
 	EX(object) = NULL;
+	ZEND_VM_NEXT_OPCODE();
+}
 
-	EX(fbc) = function;
 
+static int ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zend_op *op_data = opline + 1;
+
+	ZEND_VM_INC_OPCODE();
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
+
+	if (zend_hash_quick_find(EG(function_table), Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant)+1, opline->extended_value, (void **) &EX(fbc))==FAILURE) {
+		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==FAILURE ||
+		    EX(fbc)->type != ZEND_INTERNAL_FUNCTION) {
+			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL(opline->op2.u.constant));
+		}
+	}
+
+	EX(object) = NULL;
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -807,60 +812,45 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	zend_function *function;
 	char *function_name_strval, *lcname;
 	int function_name_strlen;
 	zend_free_op free_op2;
+	int ret;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_TMP_VAR == IS_CONST) {
-		function_name_strval = opline->op2.u.constant.value.str.val;
-		function_name_strlen = opline->op2.u.constant.value.str.len;
+		function_name_strval = Z_STRVAL(opline->op2.u.constant);
+		ret = zend_hash_quick_find(EG(function_table), Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant)+1, opline->extended_value, (void **) &EX(fbc));
 	} else {
 		function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 		if (Z_TYPE_P(function_name) != IS_STRING) {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
 		}
-		function_name_strval = function_name->value.str.val;
-		function_name_strlen = function_name->value.str.len;
-	}
+		function_name_strval = Z_STRVAL_P(function_name);
+		function_name_strlen = Z_STRLEN_P(function_name);
+		if (function_name_strval[0] == ':' &&
+		    function_name_strval[1] == ':') {
 
-	if (IS_TMP_VAR != IS_CONST &&
-	    function_name_strval[0] == ':' &&
-	    function_name_strval[1] == ':') {
-
-	    function_name_strlen -= 2;
-		lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
-	} else {
-		lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
-	}
-	if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE) {
-		efree(lcname);
-
-		if (IS_TMP_VAR == IS_CONST && opline->op1.op_type == IS_CONST) {
-			function_name_strlen -= Z_LVAL(opline->op1.u.constant);
-			lcname = zend_str_tolower_dup(function_name_strval + Z_LVAL(opline->op1.u.constant), function_name_strlen);
-			if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE ||
-			    function->type != ZEND_INTERNAL_FUNCTION) {
-				efree(lcname);
-				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
-			}
+		    function_name_strlen -= 2;
+			lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
 		} else {
-			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+			lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 		}
+		ret = zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &EX(fbc));
+		efree(lcname);
 	}
 
-	efree(lcname);
+	if (ret == FAILURE) {
+		zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+	}
+
 	if (IS_TMP_VAR != IS_CONST) {
 		zval_dtor(free_op2.var);
 	}
 
 	EX(object) = NULL;
-
-	EX(fbc) = function;
-
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -923,60 +913,45 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	zend_function *function;
 	char *function_name_strval, *lcname;
 	int function_name_strlen;
 	zend_free_op free_op2;
+	int ret;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_VAR == IS_CONST) {
-		function_name_strval = opline->op2.u.constant.value.str.val;
-		function_name_strlen = opline->op2.u.constant.value.str.len;
+		function_name_strval = Z_STRVAL(opline->op2.u.constant);
+		ret = zend_hash_quick_find(EG(function_table), Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant)+1, opline->extended_value, (void **) &EX(fbc));
 	} else {
 		function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 		if (Z_TYPE_P(function_name) != IS_STRING) {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
 		}
-		function_name_strval = function_name->value.str.val;
-		function_name_strlen = function_name->value.str.len;
-	}
+		function_name_strval = Z_STRVAL_P(function_name);
+		function_name_strlen = Z_STRLEN_P(function_name);
+		if (function_name_strval[0] == ':' &&
+		    function_name_strval[1] == ':') {
 
-	if (IS_VAR != IS_CONST &&
-	    function_name_strval[0] == ':' &&
-	    function_name_strval[1] == ':') {
-
-	    function_name_strlen -= 2;
-		lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
-	} else {
-		lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
-	}
-	if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE) {
-		efree(lcname);
-
-		if (IS_VAR == IS_CONST && opline->op1.op_type == IS_CONST) {
-			function_name_strlen -= Z_LVAL(opline->op1.u.constant);
-			lcname = zend_str_tolower_dup(function_name_strval + Z_LVAL(opline->op1.u.constant), function_name_strlen);
-			if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE ||
-			    function->type != ZEND_INTERNAL_FUNCTION) {
-				efree(lcname);
-				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
-			}
+		    function_name_strlen -= 2;
+			lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
 		} else {
-			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+			lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 		}
+		ret = zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &EX(fbc));
+		efree(lcname);
 	}
 
-	efree(lcname);
+	if (ret == FAILURE) {
+		zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+	}
+
 	if (IS_VAR != IS_CONST) {
 		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	}
 
 	EX(object) = NULL;
-
-	EX(fbc) = function;
-
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -1067,60 +1042,45 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	zend_function *function;
 	char *function_name_strval, *lcname;
 	int function_name_strlen;
 
+	int ret;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_CV == IS_CONST) {
-		function_name_strval = opline->op2.u.constant.value.str.val;
-		function_name_strlen = opline->op2.u.constant.value.str.len;
+		function_name_strval = Z_STRVAL(opline->op2.u.constant);
+		ret = zend_hash_quick_find(EG(function_table), Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant)+1, opline->extended_value, (void **) &EX(fbc));
 	} else {
 		function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
 		if (Z_TYPE_P(function_name) != IS_STRING) {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
 		}
-		function_name_strval = function_name->value.str.val;
-		function_name_strlen = function_name->value.str.len;
-	}
+		function_name_strval = Z_STRVAL_P(function_name);
+		function_name_strlen = Z_STRLEN_P(function_name);
+		if (function_name_strval[0] == ':' &&
+		    function_name_strval[1] == ':') {
 
-	if (IS_CV != IS_CONST &&
-	    function_name_strval[0] == ':' &&
-	    function_name_strval[1] == ':') {
-
-	    function_name_strlen -= 2;
-		lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
-	} else {
-		lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
-	}
-	if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE) {
-		efree(lcname);
-
-		if (IS_CV == IS_CONST && opline->op1.op_type == IS_CONST) {
-			function_name_strlen -= Z_LVAL(opline->op1.u.constant);
-			lcname = zend_str_tolower_dup(function_name_strval + Z_LVAL(opline->op1.u.constant), function_name_strlen);
-			if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE ||
-			    function->type != ZEND_INTERNAL_FUNCTION) {
-				efree(lcname);
-				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
-			}
+		    function_name_strlen -= 2;
+			lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
 		} else {
-			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+			lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 		}
+		ret = zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &EX(fbc));
+		efree(lcname);
 	}
 
-	efree(lcname);
+	if (ret == FAILURE) {
+		zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+	}
+
 	if (IS_CV != IS_CONST) {
 
 	}
 
 	EX(object) = NULL;
-
-	EX(fbc) = function;
-
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -1420,7 +1380,7 @@ static int ZEND_DO_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
-	if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+	if (zend_hash_quick_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, Z_LVAL(opline->op2.u.constant), (void **) &EX(function_state).function)==FAILURE) {
 		zend_error_noreturn(E_ERROR, "Call to undefined function %s()", fname->value.str.val);
 	}
 	EX(object) = NULL;
@@ -29742,27 +29702,27 @@ void zend_init_opcodes_handlers(void)
   	ZEND_NEW_SPEC_HANDLER,
   	ZEND_NEW_SPEC_HANDLER,
   	ZEND_NEW_SPEC_HANDLER,
+  	ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
