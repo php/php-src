@@ -39,6 +39,7 @@ $options = array(
          'Makefile.frag'      => 'src',
          'phar_path_check.re' => 'src',
          'TODO'               => 'doc',
+         'phar.phar'          => 'script',
     ),
 );
 

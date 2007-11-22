@@ -172,7 +172,7 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
    <file name="LICENSE" role="doc" />
    <file name="Makefile.frag" role="src" />
    <file name="phar.c" role="src" />
-   <file name="phar.phar" role="data" />
+   <file name="phar.phar" role="script" />
    <file name="phar_internal.h" role="src" />
    <file name="phar_object.c" role="src" />
    <file name="phar_path_check.c" role="src" />

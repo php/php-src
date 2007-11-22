@@ -1192,11 +1192,13 @@ class PharCommand extends CLICommand
 
         if (isset($entry)) {
             if (!$phar[$entry]->hasMetadata()) {
+                echo 'No Metadata';
                 exit(1);
             }
             echo serialize($phar[$entry]->getMetadata());
         } else {
             if (!$phar->hasMetadata()) {
+                echo 'No Metadata';
                 exit(1);
             }
             $meta = $phar->getMetadata();
@@ -1208,6 +1210,7 @@ class PharCommand extends CLICommand
                     echo $meta[$index];
                     exit(0);
                 } else {
+                    echo 'No Metadata';
                     exit(1);
                 }
             } else {
