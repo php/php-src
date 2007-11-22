@@ -1518,7 +1518,9 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ex
 	} else {
 		/* We have an alias with no extension, so locate the first / and fail */
 		*ext_str = strstr(filename, "/");
-		*ext_len = -1;
+		if (*ext_str) {
+			*ext_len = -1;
+		}
 		return FAILURE;
 	}
 	if (check_length && (*ext_str)[*ext_len] != '\0') {
@@ -1557,6 +1559,10 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 	ext_len = 0;
 	if (phar_detect_phar_fname_ext(filename, 0, &ext_str, &ext_len) == FAILURE) {
 		if (ext_len != -1) {
+			if (!ext_str) {
+				/* no / detected, restore arch for error message */
+				*arch = filename;
+			}
 			return FAILURE;
 		}
 		ext_len = 0;
@@ -1597,7 +1603,12 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 			return NULL;			
 		}		
 		if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz/.phar.bz2)", filename);
+			if (arch && !entry) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", filename, arch);
+				arch = NULL;
+			} else {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz/.phar.bz2)", filename);
+			}
 			if (arch) {
 				efree(arch);
 			}
@@ -1624,6 +1635,9 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 /*			fprintf(stderr, "Fragment:  %s\n", resource->fragment);*/
 		}
 #endif
+		if (PHAR_GLOBALS->phar_plain_map.arBuckets && zend_hash_exists(&(PHAR_GLOBALS->phar_plain_map), arch, arch_len+1)) {
+			return resource;
+		}
 		if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 			if (PHAR_G(readonly)) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
