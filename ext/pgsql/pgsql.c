@@ -1986,8 +1986,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 	pgsql_result_handle *pg_result;
 	int             i, num_fields, pgsql_row, use_row;
 	long            row = -1;
-	char            *element, *field_name;
-	uint            element_len;
+	char            *field_name;
 	zval            *ctor_params = NULL;
 	zend_class_entry *ce = NULL;
 
@@ -2058,12 +2057,12 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 				add_assoc_null(return_value, field_name);
 			}
 		} else {
-			element = PQgetvalue(pgsql_result, pgsql_row, i);
-			element_len = (element ? strlen(element) : 0);
+			char *element = PQgetvalue(pgsql_result, pgsql_row, i);
 			if (element) {
 				char *data;
 				int data_len;
 				int should_copy=0;
+				const uint element_len = strlen(element);
 
 				data = safe_estrndup(element, element_len);
 				data_len = element_len;
@@ -5720,8 +5719,8 @@ PHP_FUNCTION(pg_delete)
 PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC) 
 {
 	zval *row;
-	char *field_name, *element, *data;
-	size_t num_fields, element_len, data_len;
+	char *field_name;
+	size_t num_fields;
 	int pg_numrows, pg_row;
 	uint i;
 	assert(Z_TYPE_P(ret_array) == IS_ARRAY);
@@ -5738,11 +5737,10 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TS
 				field_name = PQfname(pg_result, i);
 				add_assoc_null(row, field_name);
 			} else {
-				element = PQgetvalue(pg_result, pg_row, i);
-				element_len = (element ? strlen(element) : 0);
+				char *element = PQgetvalue(pg_result, pg_row, i);
 				if (element) {
-					data = safe_estrndup(element, element_len);
-					data_len = element_len;
+					data_len = strlen(element);
+					data = safe_estrndup(element, data_len);
 
 					field_name = PQfname(pg_result, i);
 					add_assoc_stringl(row, field_name, data, data_len, 0);
