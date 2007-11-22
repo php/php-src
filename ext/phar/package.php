@@ -7,6 +7,7 @@ $notes = '
    windows path separators (on windows only)
  * fix Bug #11950: make pharcmd use installed phar.so, not build one [remicollet]
  * fix Bug #12492: filenew incorrectly creates file path [urkle]
+ * fix Bug #12493: extract throws an error and won\'t open the file [urkle]
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {

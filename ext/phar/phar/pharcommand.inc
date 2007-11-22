@@ -746,7 +746,7 @@ class PharCommand extends CLICommand
             }
         }
         
-        $phar = $args['f']['val'];
+        $phar = $this->args['f']['val'];
         $base = $phar->getPathname();
         $bend = strpos($base, '.phar');
         $bend = strpos($base, '/', $bend);
