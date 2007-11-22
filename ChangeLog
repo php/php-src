@@ -1,3 +1,255 @@
+2007-11-21  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * ext/pcre/tests/preg_grep_basic.phpt
+      ext/pcre/tests/preg_grep_basic.phpt
+      ext/pcre/tests/preg_grep_error.phpt
+      ext/pcre/tests/preg_grep_error.phpt
+      ext/pcre/tests/preg_grep_error1.phpt
+      ext/pcre/tests/preg_grep_error1.phpt
+      ext/pcre/tests/preg_grep_error2.phpt
+      ext/pcre/tests/preg_grep_error2.phpt
+      ext/pcre/tests/preg_match_all_basic.phpt
+      ext/pcre/tests/preg_match_all_basic.phpt
+      ext/pcre/tests/preg_match_all_error.phpt
+      ext/pcre/tests/preg_match_all_error1.phpt
+      ext/pcre/tests/preg_match_all_error2.phpt
+      ext/pcre/tests/preg_match_all_error3.phpt
+      ext/pcre/tests/preg_match_basic.phpt
+      ext/pcre/tests/preg_match_error.phpt
+      ext/pcre/tests/preg_match_error1.phpt
+      ext/pcre/tests/preg_match_error2.phpt
+      ext/pcre/tests/preg_quote_basic.phpt
+      ext/pcre/tests/preg_quote_error.phpt
+      ext/pcre/tests/preg_quote_error1.phpt
+      ext/pcre/tests/preg_replace_basic.phpt
+      ext/pcre/tests/preg_replace_callback_basic.phpt
+      ext/pcre/tests/preg_replace_callback_error.phpt
+      ext/pcre/tests/preg_replace_error.phpt
+      ext/pcre/tests/preg_replace_error1.phpt
+      ext/pcre/tests/preg_replace_error2.phpt
+      ext/pcre/tests/preg_replace_variation1.phpt
+      ext/pcre/tests/preg_split_basic.phpt
+      ext/pcre/tests/preg_split_error.phpt
+      ext/pcre/tests/preg_split_error1.phpt
+      ext/pcre/tests/preg_split_error2.phpt:
+      Add some more pcre tests
+
+    * ext/pcre/tests/preg_match_all_edit_basic.phpt
+      ext/pcre/tests/preg_match_all_edit_basic.phpt
+      ext/pcre/tests/preg_match_all_error.phpt
+      ext/pcre/tests/preg_match_all_error1.phpt
+      ext/pcre/tests/preg_match_all_error2.phpt
+      ext/pcre/tests/preg_match_all_error3.phpt
+      ext/pcre/tests/preg_match_basic.phpt
+      ext/pcre/tests/preg_match_basic_edit.phpt
+      ext/pcre/tests/preg_match_basic_edit.phpt
+      ext/pcre/tests/preg_match_error.phpt
+      ext/pcre/tests/preg_match_error1.phpt
+      ext/pcre/tests/preg_match_error2.phpt
+      ext/pcre/tests/preg_quote_basic.phpt
+      ext/pcre/tests/preg_quote_error.phpt
+      ext/pcre/tests/preg_quote_error1.phpt
+      ext/pcre/tests/preg_replace_basic.phpt
+      ext/pcre/tests/preg_replace_callback_basic.phpt
+      ext/pcre/tests/preg_replace_callback_error.phpt
+      ext/pcre/tests/preg_replace_edit_basic.phpt
+      ext/pcre/tests/preg_replace_edit_basic.phpt
+      ext/pcre/tests/preg_replace_error.phpt
+      ext/pcre/tests/preg_replace_error1.phpt
+      ext/pcre/tests/preg_replace_error2.phpt
+      ext/pcre/tests/preg_replace_variation1.phpt
+      ext/pcre/tests/preg_split_basic.phpt
+      ext/pcre/tests/preg_split_error.phpt
+      ext/pcre/tests/preg_split_error1.phpt
+      ext/pcre/tests/preg_split_error2.phpt:
+      
+      file preg_match_all_edit_basic.phpt was initially added on branch PHP_5_3.
+
+    * ext/pcre/tests/preg_grep_basic.phpt
+      ext/pcre/tests/preg_grep_basic.phpt
+      ext/pcre/tests/preg_grep_basic.phpt
+      ext/pcre/tests/preg_grep_error.phpt
+      ext/pcre/tests/preg_grep_error.phpt
+      ext/pcre/tests/preg_grep_error.phpt
+      ext/pcre/tests/preg_grep_error1.phpt
+      ext/pcre/tests/preg_grep_error1.phpt
+      ext/pcre/tests/preg_grep_error1.phpt
+      ext/pcre/tests/preg_grep_error2.phpt
+      ext/pcre/tests/preg_grep_error2.phpt
+      ext/pcre/tests/preg_grep_error2.phpt
+      ext/pcre/tests/preg_match_all_basic.phpt
+      ext/pcre/tests/preg_match_all_basic.phpt
+      ext/pcre/tests/preg_match_all_basic.phpt
+      ext/pcre/tests/preg_match_all_error.phpt
+      ext/pcre/tests/preg_match_all_error.phpt
+      ext/pcre/tests/preg_match_all_error.phpt
+      ext/pcre/tests/preg_match_all_error1.phpt
+      ext/pcre/tests/preg_match_all_error1.phpt
+      ext/pcre/tests/preg_match_all_error1.phpt
+      ext/pcre/tests/preg_match_all_error2.phpt
+      ext/pcre/tests/preg_match_all_error2.phpt
+      ext/pcre/tests/preg_match_all_error2.phpt
+      ext/pcre/tests/preg_match_all_error3.phpt
+      ext/pcre/tests/preg_match_all_error3.phpt
+      ext/pcre/tests/preg_match_all_error3.phpt
+      ext/pcre/tests/preg_match_basic.phpt
+      ext/pcre/tests/preg_match_basic.phpt
+      ext/pcre/tests/preg_match_basic.phpt
+      ext/pcre/tests/preg_match_error.phpt
+      ext/pcre/tests/preg_match_error.phpt
+      ext/pcre/tests/preg_match_error.phpt
+      ext/pcre/tests/preg_match_error1.phpt
+      ext/pcre/tests/preg_match_error1.phpt
+      ext/pcre/tests/preg_match_error1.phpt
+      ext/pcre/tests/preg_match_error2.phpt
+      ext/pcre/tests/preg_match_error2.phpt
+      ext/pcre/tests/preg_match_error2.phpt
+      ext/pcre/tests/preg_quote_basic.phpt
+      ext/pcre/tests/preg_quote_basic.phpt
+      ext/pcre/tests/preg_quote_basic.phpt
+      ext/pcre/tests/preg_quote_error.phpt
+      ext/pcre/tests/preg_quote_error.phpt
+      ext/pcre/tests/preg_quote_error.phpt
+      ext/pcre/tests/preg_quote_error1.phpt
+      ext/pcre/tests/preg_quote_error1.phpt
+      ext/pcre/tests/preg_quote_error1.phpt
+      ext/pcre/tests/preg_replace_basic.phpt
+      ext/pcre/tests/preg_replace_basic.phpt
+      ext/pcre/tests/preg_replace_basic.phpt
+      ext/pcre/tests/preg_replace_callback_basic.phpt
+      ext/pcre/tests/preg_replace_callback_basic.phpt
+      ext/pcre/tests/preg_replace_callback_basic.phpt
+      ext/pcre/tests/preg_replace_callback_error.phpt
+      ext/pcre/tests/preg_replace_callback_error.phpt
+      ext/pcre/tests/preg_replace_callback_error.phpt
+      ext/pcre/tests/preg_replace_error.phpt
+      ext/pcre/tests/preg_replace_error.phpt
+      ext/pcre/tests/preg_replace_error.phpt
+      ext/pcre/tests/preg_replace_error1.phpt
+      ext/pcre/tests/preg_replace_error1.phpt
+      ext/pcre/tests/preg_replace_error1.phpt
+      ext/pcre/tests/preg_replace_error2.phpt
+      ext/pcre/tests/preg_replace_error2.phpt
+      ext/pcre/tests/preg_replace_error2.phpt
+      ext/pcre/tests/preg_replace_variation1.phpt
+      ext/pcre/tests/preg_replace_variation1.phpt
+      ext/pcre/tests/preg_replace_variation1.phpt
+      ext/pcre/tests/preg_split_basic.phpt
+      ext/pcre/tests/preg_split_basic.phpt
+      ext/pcre/tests/preg_split_basic.phpt
+      ext/pcre/tests/preg_split_error.phpt
+      ext/pcre/tests/preg_split_error.phpt
+      ext/pcre/tests/preg_split_error.phpt
+      ext/pcre/tests/preg_split_error1.phpt
+      ext/pcre/tests/preg_split_error1.phpt
+      ext/pcre/tests/preg_split_error1.phpt
+      ext/pcre/tests/preg_split_error2.phpt
+      ext/pcre/tests/preg_split_error2.phpt
+      ext/pcre/tests/preg_split_error2.phpt:
+        1.1.4;
+      file preg_grep_basic.phpt was initially added on branch PHP_5_2.
+
+2007-11-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Macro definitions are moved to zend.h
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Safe exit from executor()
+
+2007-11-21  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * ext/standard/tests/file/chown.phpt
+      ext/standard/tests/file/chown.phpt:
+      
+      - Added test for chown bug
+
+    * (PHP_5_3)
+      ext/standard/filestat.c:
+      MFH: fix crash bug in chown when 2nd parameter != string or int
+
+    * ext/standard/filestat.c:
+      - Fix crash when chown() 2nd parameter is something else than integer or
+      string
+
+2007-11-21  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/getopt_004.phpt
+      ext/standard/tests/general_functions/getopt_005.phpt
+      main/getopt.c:
+      MFH: - Add support for optional values
+      MFH: - Add support for = as seperator
+
+2007-11-21  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/021.phpt:
+      - MFH Improved version of ternary shortcut (Marcus)
+
+    * ZendEngine2/tests/021.phpt:
+      - Improve test
+
+2007-11-21  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * (PHP_5_2)
+      run-tests.php
+      run-tests.php:
+      MFH:- Fixed bug #43035: ignore_repeated_errors=On causes lot of tests to
+      fail
+
+    * run-tests.php:
+      - Fixed bug #43035: ignore_repeated_errors=On causes lot of tests to fail
+
+    * (PHP_5_3)
+      NEWS:
+      Missing bla...credit :)
+
+2007-11-21  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/string.c:
+      fix #42866, from Claudio Cherubino
+
+    * ext/standard/tests/strings/bug42866.phpt:
+      test for 42866
+
+2007-11-21  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS:
+      Fix NEWS file
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/021.phpt:
+      - MFH ?: operator (Marcus)
+        [DOC] "expr1 ?: expr1" is a shortcut for: "expr1 ? expr1 : expr2" as
+              exists in gcc and discussed some time back. Note that this is not
+              an implementation ifsetor($var, default). While ifsetor would not
+              generate any message for non existing variables or array indices
+              the ternary shortcut does. Also the ternary shortcut does a
+      boolean
+              evaluation rather then checking for isset(). That way ther ternary
+              shortcut can work on any expression while ifsetor can only work on
+              variables. Also to be silent one has do do: "@$expr1 ?: $expr2".
+
 2007-11-20  Johannes Schl�ter  <johannes@schlueters.de>
 
     * ZendEngine2/tests/021.phpt
