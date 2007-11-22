@@ -299,6 +299,7 @@ struct _zend_execute_data {
 	union _temp_variable *Ts;
 	zval ***CVs;
 	zend_bool original_in_execution;
+	ALLOCA_FLAG(use_heap)
 	HashTable *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 	zval *old_error_reporting;

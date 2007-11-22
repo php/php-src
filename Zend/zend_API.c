@@ -1863,11 +1863,10 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 		}
 		fname_len = strlen(ptr->fname);
-		lowercase_name = do_alloca(fname_len+1);
-		zend_str_tolower_copy(lowercase_name, ptr->fname, fname_len);
+		lowercase_name = zend_str_tolower_dup(ptr->fname, fname_len);
 		if (zend_hash_add(target_function_table, lowercase_name, fname_len+1, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
 			unload=1;
-			free_alloca(lowercase_name);
+			efree(lowercase_name);
 			break;
 		}
 		if (scope) {
@@ -1909,7 +1908,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 		ptr++;
 		count++;
-		free_alloca(lowercase_name);
+		efree(lowercase_name);
 	}
 	if (unload) { /* before unloading, display all remaining bad function in the module */
 		if (scope) {
