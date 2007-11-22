@@ -1836,6 +1836,7 @@ PHP_FUNCTION(ibase_execute)
 	zval *query, ***args = NULL;
 	ibase_query *ib_query;
 	ibase_result *result = NULL;
+	ALLOCA_FLAG(use_heap)
 
 	RESET_ERRMSG;
 	
@@ -1859,7 +1860,7 @@ PHP_FUNCTION(ibase_execute)
 			}
 
 		} else if (bind_n > 0) { /* have variables to bind */
-			args = (zval ***) do_alloca(ZEND_NUM_ARGS() * sizeof(zval **));
+			args = (zval ***) do_alloca(ZEND_NUM_ARGS() * sizeof(zval **), use_heap);
 	
 			if (FAILURE == zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args)) {
 				break;
@@ -1900,7 +1901,7 @@ PHP_FUNCTION(ibase_execute)
 	} while (0);
 
 	if (args) {
-		free_alloca(args);
+		free_alloca(args, use_heap);
 	}
 }
 /* }}} */

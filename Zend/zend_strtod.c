@@ -2603,6 +2603,7 @@ ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 	const UChar *u = nptr, *nstart;
 	UChar c = *u;
 	int any = 0;
+	ALLOCA_FLAG(use_heap)
 
 	while (u_isspace(c)) {
 		c = *++u;
@@ -2653,7 +2654,7 @@ ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 		if (length < sizeof(buf)) {
 			numbuf = buf;
 		} else {
-			numbuf = (char *) do_alloca(length + 1);
+			numbuf = (char *) do_alloca(length + 1, use_heap);
 		}
 
 		bufpos = numbuf;
@@ -2666,7 +2667,7 @@ ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 		value = zend_strtod(numbuf, NULL);
 
 		if (numbuf != buf) {
-			free_alloca(numbuf);
+			free_alloca(numbuf, use_heap);
 		}
 
 		if (endptr != NULL) {
