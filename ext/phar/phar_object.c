@@ -28,6 +28,21 @@ static zend_class_entry *phar_ce_PharException;
 static zend_class_entry *phar_ce_entry;
 #endif
 
+#ifdef PHP_WIN32
+static inline void phar_unixify_path_separators(char *path, int path_len) /* {{{ */
+{
+	char *s;
+
+	/* unixify win paths */
+	for (s = path; s - path < path_len; s++) {
+		if (*s == '\\') {
+			*s = '/';
+		}
+	}
+}
+/* }}} */
+#endif
+
 static int phar_get_extract_list(void *pDest, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zval *return_value = va_arg(args, zval*);
@@ -160,7 +175,7 @@ PHP_METHOD(Phar, canWrite)
 /* }}} */
 
 /* {{{ proto bool Phar::isValidPharFilename(string filename)
- * Returns whether the given filename is a vaild phar filename */
+ * Returns whether the given filename is a valid phar filename */
 PHP_METHOD(Phar, isValidPharFilename)
 {
 	char *fname, *ext_str;
@@ -244,8 +259,11 @@ PHP_METHOD(Phar, __construct)
 	phar_obj->arc.archive = phar_data;
 	phar_obj->spl.oth_handler = &phar_spl_foreign_handler;
 
-	fname_len = spprintf(&fname, 0, "phar://%s", fname);
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(fname, fname_len);
+#endif
 
+	fname_len = spprintf(&fname, 0, "phar://%s", fname);
 	INIT_PZVAL(&arg1);
 	ZVAL_STRINGL(&arg1, fname, fname_len, 0);
 
@@ -1065,6 +1083,7 @@ PHP_METHOD(PharFileInfo, __construct)
 			"Cannot call method on an uninitialized PharFileInfo object"); \
 		return; \
 	}
+
 /* {{{ proto void PharFileInfo::__destruct()
  * clean up directory-based entry objects
  */
@@ -1089,7 +1108,7 @@ PHP_METHOD(PharFileInfo, __destruct)
 PHP_METHOD(PharFileInfo, getCompressedSize)
 {
 	PHAR_ENTRY_OBJECT();
-	
+
 	RETURN_LONG(entry_obj->ent.entry->compressed_filesize);
 }
 /* }}} */

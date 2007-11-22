@@ -1,10 +1,10 @@
 <?php
 
 $notes = '
- * fix to work with PHP 5.3
- * fix Bug #12124: Phar object cannot be iterated over
- * remove unused variables
- * fix jit file open sprintf calls
+ * fix creation of Phar object with relative path:
+   $a = new Phar(\'blah.phar\');
+ * fix creation and read of Phar objects on Windows, manage
+   windows path separators (on windows only)
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
