@@ -1,3 +1,50 @@
+2007-11-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend.h
+      zend_alloc.c
+      zend_alloc.c:
+      Macro definitions are moved to zend.h
+
+    * zend_execute.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Safe exit from executor()
+
+2007-11-21  Johannes Schl�ter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_compile.h
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_opcode.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/021.phpt:
+      - MFH Improved version of ternary shortcut (Marcus)
+
+    * tests/021.phpt:
+      - Improve test
+
+    * (PHP_5_3)
+      zend_language_parser.y
+      tests/021.phpt:
+      - MFH ?: operator (Marcus)
+        [DOC] "expr1 ?: expr1" is a shortcut for: "expr1 ? expr1 : expr2" as
+              exists in gcc and discussed some time back. Note that this is not
+              an implementation ifsetor($var, default). While ifsetor would not
+              generate any message for non existing variables or array indices
+              the ternary shortcut does. Also the ternary shortcut does a
+      boolean
+              evaluation rather then checking for isset(). That way ther ternary
+              shortcut can work on any expression while ifsetor can only work on
+              variables. Also to be silent one has do do: "@$expr1 ?: $expr2".
+
 2007-11-20  Johannes Schl�ter  <johannes@schlueters.de>
 
     * tests/021.phpt
