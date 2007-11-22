@@ -215,6 +215,9 @@ abstract class CLICommand
     {
         $d = dirname($arg);
         $f = realpath($d);
+        if ($d === '.') {
+            $d = '';
+        }
         
         if ($f === false) {
             self::error("Path for file '$arg' does not exist.\n");
