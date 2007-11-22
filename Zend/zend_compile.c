@@ -1528,6 +1528,7 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 {
 	zend_op *last_op;
 	int last_op_number;
+	unsigned int len;
 	unsigned char *ptr = NULL;
 
 	zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC);
@@ -1558,8 +1559,16 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2 = *left_bracket;
-		opline->extended_value = 0;
-		SET_UNUSED(opline->op1);
+		if (opline->op2.op_type == IS_CONST) {
+			opline->op1.op_type = IS_CONST;
+			Z_TYPE(opline->op1.u.constant) = Z_TYPE(opline->op2.u.constant);
+			Z_UNIVAL(opline->op1.u.constant) = zend_u_str_case_fold(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), 0, &len);
+			Z_UNILEN(opline->op1.u.constant) = len;
+			opline->extended_value = zend_u_hash_func(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
+		} else {
+			opline->extended_value = 0;
+			SET_UNUSED(opline->op1);
+		}
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
@@ -1583,20 +1592,48 @@ void zend_do_clone(znode *result, znode *expr TSRMLS_DC) /* {{{ */
 void zend_do_begin_dynamic_function_call(znode *function_name, int prefix_len TSRMLS_DC) /* {{{ */
 {
 	unsigned char *ptr = NULL;
+	unsigned int len;
 	zend_op *opline;
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-	opline->op2 = *function_name;
-	opline->extended_value = 0;
 
 	if (prefix_len) {
 		/* In run-time PHP will check for function with full name and
 		   internal function with short name */
+		opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
+		opline->op2 = *function_name;
+		opline->extended_value = 0;
 		opline->op1.op_type = IS_CONST;
-		ZVAL_LONG(&opline->op1.u.constant, prefix_len);
+		Z_TYPE(opline->op1.u.constant) = Z_TYPE(opline->op2.u.constant);
+		Z_UNIVAL(opline->op1.u.constant) = zend_u_str_case_fold(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), 0, &len);
+		Z_UNILEN(opline->op1.u.constant) = len;
+		opline->extended_value = zend_u_hash_func(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_OP_DATA;
+		opline->op1.op_type = IS_CONST;
+		if (Z_TYPE(function_name->u.constant) == IS_UNICODE) {
+			Z_TYPE(opline->op1.u.constant) = IS_UNICODE;
+			Z_UNIVAL(opline->op1.u.constant) = zend_u_str_case_fold(IS_UNICODE, ZSTR(Z_USTRVAL(function_name->u.constant) + prefix_len), Z_USTRLEN(function_name->u.constant) - prefix_len, 0, &len);
+			Z_UNILEN(opline->op1.u.constant) = len;
+		} else {
+			Z_TYPE(opline->op1.u.constant) = IS_STRING;
+			Z_STRLEN(opline->op1.u.constant) = Z_STRLEN(function_name->u.constant) - prefix_len;
+			Z_STRVAL(opline->op1.u.constant) = zend_str_tolower_dup(Z_STRVAL(function_name->u.constant) + prefix_len, Z_STRLEN(opline->op1.u.constant));
+		}
+		opline->extended_value = zend_u_hash_func(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
 	} else {
-		SET_UNUSED(opline->op1);
+		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+		opline->op2 = *function_name;
+		if (opline->op2.op_type == IS_CONST) {
+			opline->op1.op_type = IS_CONST;
+			Z_TYPE(opline->op1.u.constant) = Z_TYPE(opline->op2.u.constant);
+			Z_UNIVAL(opline->op1.u.constant) = zend_u_str_case_fold(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), 0, &len);
+			Z_UNILEN(opline->op1.u.constant) = len;
+			opline->extended_value = zend_u_hash_func(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
+		} else {
+			opline->extended_value = 0;
+			SET_UNUSED(opline->op1);
+		}
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
@@ -1902,6 +1939,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 		if (!is_method && !is_dynamic_fcall && function_name->op_type==IS_CONST) {
 			opline->opcode = ZEND_DO_FCALL;
 			opline->op1 = *function_name;
+			ZVAL_LONG(&opline->op2.u.constant, zend_u_hash_func(Z_TYPE(function_name->u.constant), Z_UNIVAL(function_name->u.constant), Z_UNILEN(function_name->u.constant) + 1));
 		} else {
 			opline->opcode = ZEND_DO_FCALL_BY_NAME;
 			SET_UNUSED(opline->op1);
@@ -3900,6 +3938,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 					   The additional names are stored in additional OP_DATA opcode. */
 					zstr nsname;
 					unsigned int nsname_len;
+					unsigned int len;
 
 					opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 					opline->opcode = ZEND_OP_DATA;
@@ -3920,7 +3959,8 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 					}
 
 					Z_TYPE(opline->op1.u.constant) = Z_TYPE(constant_container->u.constant);
-					Z_UNIVAL(opline->op1.u.constant) = zend_u_str_case_fold(Z_TYPE(constant_container->u.constant), nsname, nsname_len, 0, &Z_UNILEN(opline->op1.u.constant));
+					Z_UNIVAL(opline->op1.u.constant) = zend_u_str_case_fold(Z_TYPE(constant_container->u.constant), nsname, nsname_len, 0, &len);
+					Z_UNILEN(opline->op1.u.constant) = len;
 					if (UG(unicode)) {
 						Z_USTRVAL(opline->op1.u.constant) = erealloc(Z_USTRVAL(opline->op1.u.constant), UBYTES(Z_USTRLEN(opline->op1.u.constant) + 2 + Z_USTRLEN(constant_name->u.constant) + 1));
 						Z_USTRVAL(opline->op1.u.constant)[Z_USTRLEN(opline->op1.u.constant)] = ':';
@@ -3970,6 +4010,7 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC) /* {{{ */
 	opline->op1.op_type = IS_CONST;
 	opline->extended_value = 1;
 	SET_UNUSED(opline->op2);
+	ZVAL_LONG(&opline->op2.u.constant, zend_u_hash_func(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant)+1));
 	*result = opline->result;
 }
 /* }}} */
