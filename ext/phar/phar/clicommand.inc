@@ -215,14 +215,11 @@ abstract class CLICommand
     {
         $d = dirname($arg);
         $f = realpath($d);
-        if ($d === '.') {
-            $d = '';
-        }
         
         if ($f === false) {
             self::error("Path for file '$arg' does not exist.\n");
         }
-        return $f . substr($arg, strlen($d));;
+        return $f . basename($arg);
     }
 
     static function cli_arg_typ_filecont($arg, $cfg, $key)

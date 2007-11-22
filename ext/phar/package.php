@@ -6,7 +6,7 @@ $notes = '
  * fix creation and read of Phar objects on Windows, manage
    windows path separators (on windows only)
  * fix Bug #11950: make pharcmd use installed phar.so, not build one [remicollet]
- * fix Bug #12491: filenew incorrectly creates file path [cellog]
+ * fix Bug #12492: filenew incorrectly creates file path [urkle]
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
