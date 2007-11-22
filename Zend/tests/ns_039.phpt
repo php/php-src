@@ -2,22 +2,24 @@
 039: Constant declaration
 --FILE--
 <?php
+function foo($a = A) {
+	echo "$a\n";
+}
+function bar($a = array(A => B)) {
+	foreach ($a as $key => $val) {
+		echo "$key\n";
+		echo "$val\n";
+	}
+}
 const A = "ok";
 const B = A;
-const C = array("ok");
-const D = array(B);
 echo A . "\n";
 echo B . "\n";
-print_r(C);
-print_r(D);
+foo();
+bar();
 --EXPECT--
 ok
 ok
-Array
-(
-    [0] => ok
-)
-Array
-(
-    [0] => ok
-)
+ok
+ok
+ok
