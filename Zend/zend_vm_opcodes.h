@@ -87,7 +87,7 @@
 #define ZEND_SEND_VAR                 66
 #define ZEND_SEND_REF                 67
 #define ZEND_NEW                      68
-#define ZEND_GOTO                     69
+#define ZEND_INIT_NS_FCALL_BY_NAME    69
 #define ZEND_FREE                     70
 #define ZEND_INIT_ARRAY               71
 #define ZEND_ADD_ARRAY_ELEMENT        72
@@ -118,6 +118,7 @@
 #define ZEND_FETCH_OBJ_UNSET          97
 #define ZEND_FETCH_DIM_TMP_VAR        98
 #define ZEND_FETCH_CONSTANT           99
+#define ZEND_GOTO                    100
 #define ZEND_EXT_STMT                101
 #define ZEND_EXT_FCALL_BEGIN         102
 #define ZEND_EXT_FCALL_END           103
