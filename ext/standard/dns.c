@@ -836,7 +836,6 @@ PHP_FUNCTION(dns_get_mx)
 	char *hostname;
 	int hostname_len;
 	zval *mx_list, *weight_list = NULL;
-	int need_weight = 0;
 	int count, qdc;
 	u_short type, weight;
 	u_char ans[MAXPACKET];
@@ -891,7 +890,7 @@ PHP_FUNCTION(dns_get_mx)
 		}
 		cp += i;
 		add_next_index_string(mx_list, buf, 1);
-		if (need_weight) {
+		if (weight_list) {
 			add_next_index_long(weight_list, weight);
 		}
 	}
