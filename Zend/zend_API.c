@@ -2195,11 +2195,10 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 		}
 		fname_len = strlen(ptr->fname);
-		lowercase_name = do_alloca(fname_len+1);
-		zend_str_tolower_copy(lowercase_name, ptr->fname, fname_len);
+		lowercase_name = zend_str_tolower_dup(ptr->fname, fname_len);
 		if (zend_ascii_hash_add(target_function_table, lowercase_name, fname_len+1, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
 			unload=1;
-			free_alloca(lowercase_name);
+			efree(lowercase_name);
 			break;
 		}
 		if (scope) {
@@ -2245,7 +2244,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 		ptr++;
 		count++;
-		free_alloca(lowercase_name);
+		efree(lowercase_name);
 	}
 	if (unload) { /* before unloading, display all remaining bad function in the module */
 		if (scope) {
@@ -3270,11 +3269,12 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, char *name, int name
 	if (UG(unicode)) {
 		zstr uname;
 		int ret;
+		ALLOCA_FLAG(use_heap)
 
-		uname.u = do_alloca(UBYTES(name_length+1));
+		uname.u = do_alloca(UBYTES(name_length+1), use_heap);
 		u_charsToUChars(name, uname.u, name_length+1);
 		ret = zend_u_declare_property_ex(ce, IS_UNICODE, uname, name_length, property, access_type, doc_comment, doc_comment_len TSRMLS_CC);
-		free_alloca(uname.u);
+		free_alloca(uname.u, use_heap);
 		return ret;
 	} else {
 		return zend_u_declare_property_ex(ce, IS_STRING, ZSTR(name), name_length, property, access_type, doc_comment, doc_comment_len TSRMLS_CC);
@@ -3293,11 +3293,12 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 	if (UG(unicode)) {
 		zstr uname;
 		int ret;
+		ALLOCA_FLAG(use_heap)
 
-		uname.u = do_alloca(UBYTES(name_length+1));
+		uname.u = do_alloca(UBYTES(name_length+1), use_heap);
 		u_charsToUChars(name, uname.u, name_length+1);
 		ret = zend_u_declare_property_ex(ce, IS_UNICODE, uname, name_length, property, access_type, NULL_ZSTR, 0 TSRMLS_CC);
-		free_alloca(uname.u);
+		free_alloca(uname.u, use_heap);
 		return ret;
 	} else {
 		return zend_u_declare_property_ex(ce, IS_STRING, ZSTR(name), name_length, property, access_type, NULL_ZSTR, 0 TSRMLS_CC);
