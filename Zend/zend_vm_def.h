@@ -1876,60 +1876,65 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	zend_function *function;
 	char *function_name_strval, *lcname;
 	int function_name_strlen;
 	zend_free_op free_op2;
+	int ret;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (OP2_TYPE == IS_CONST) {
-		function_name_strval = opline->op2.u.constant.value.str.val;
-		function_name_strlen = opline->op2.u.constant.value.str.len;
+		function_name_strval = Z_STRVAL(opline->op2.u.constant);
+		ret = zend_hash_quick_find(EG(function_table), Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant)+1, opline->extended_value, (void **) &EX(fbc));
 	} else {
 		function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 		if (Z_TYPE_P(function_name) != IS_STRING) {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
 		}
-		function_name_strval = function_name->value.str.val;
-		function_name_strlen = function_name->value.str.len;
-	}
+		function_name_strval = Z_STRVAL_P(function_name);
+		function_name_strlen = Z_STRLEN_P(function_name);
+		if (function_name_strval[0] == ':' &&
+		    function_name_strval[1] == ':') {
 
-	if (OP2_TYPE != IS_CONST &&
-	    function_name_strval[0] == ':' &&
-	    function_name_strval[1] == ':') {
-
-	    function_name_strlen -= 2;
-		lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
-	} else {
-		lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
-	}
-	if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE) {
-		efree(lcname);
-
-		if (OP2_TYPE == IS_CONST && opline->op1.op_type == IS_CONST) {
-			function_name_strlen -= Z_LVAL(opline->op1.u.constant);
-			lcname = zend_str_tolower_dup(function_name_strval + Z_LVAL(opline->op1.u.constant), function_name_strlen);
-			if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE ||
-			    function->type != ZEND_INTERNAL_FUNCTION) {
-				efree(lcname);
-				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
-			}
+		    function_name_strlen -= 2;
+			lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
 		} else {
-			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+			lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 		}
+		ret = zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &EX(fbc));
+		efree(lcname);
 	}
 
-	efree(lcname);
+	if (ret == FAILURE) {
+		zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+	}
+
 	if (OP2_TYPE != IS_CONST) {
 		FREE_OP2();
 	}
 
 	EX(object) = NULL;
+	ZEND_VM_NEXT_OPCODE();
+}
 
-	EX(fbc) = function;
 
+ZEND_VM_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST)
+{
+	zend_op *opline = EX(opline);
+	zend_op *op_data = opline + 1;
+
+	ZEND_VM_INC_OPCODE();
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
+
+	if (zend_hash_quick_find(EG(function_table), Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant)+1, opline->extended_value, (void **) &EX(fbc))==FAILURE) {
+		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==FAILURE ||
+		    EX(fbc)->type != ZEND_INTERNAL_FUNCTION) {
+			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL(opline->op2.u.constant));
+		}
+	}
+
+	EX(object) = NULL;
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -2134,7 +2139,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, CONST, ANY)
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
-	if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+	if (zend_hash_quick_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, Z_LVAL(opline->op2.u.constant), (void **) &EX(function_state).function)==FAILURE) {
 		zend_error_noreturn(E_ERROR, "Call to undefined function %s()", fname->value.str.val);
 	}
 	EX(object) = NULL;
