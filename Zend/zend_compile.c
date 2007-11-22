@@ -4820,6 +4820,10 @@ void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
+	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
+		zend_error(E_COMPILE_ERROR, "Arrays are not allowed as constants");
+	}
+
 	if (zend_get_ct_const(&name->u.constant TSRMLS_CC)) {
 		zend_error(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", Z_STRVAL(name->u.constant));
 	}
