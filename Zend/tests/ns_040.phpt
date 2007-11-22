@@ -6,9 +6,6 @@ namespace X;
 use X as Y;
 const A = "ok\n";
 const B = A;
-const C = array(A);
-const D = array("aaa"=>A);
-const E = array(A=>"aaa\n");
 function f1($x=A) {
 	echo $x;
 }
@@ -42,9 +39,6 @@ f2();
 f3();
 f4();
 echo B;
-$x = C; echo $x[0];
-$x = D; echo $x["aaa"];
-$x = E; echo $x["ok\n"];
 f5();
 f6();
 f7();
@@ -59,9 +53,6 @@ ok
 ok
 ok
 ok
-ok
-ok
-aaa
 ok
 ok
 ok
