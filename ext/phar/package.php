@@ -5,6 +5,7 @@ $notes = '
    $a = new Phar(\'blah.phar\');
  * fix creation and read of Phar objects on Windows, manage
    windows path separators (on windows only)
+ * fix Bug #11950: make pharcmd use installed phar.so, not build one [remicollet]
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
