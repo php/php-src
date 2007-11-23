@@ -188,8 +188,8 @@ char *alloca ();
 	do { if (UNEXPECTED(use_heap)) efree(p); } while (0)
 #else
 # define ALLOCA_FLAG(name)
-# define do_alloca(p)		emalloc(p)
-# define free_alloca(p)	efree(p)
+# define do_alloca(p, use_heap)		emalloc(p)
+# define free_alloca(p, use_heap)	efree(p)
 #endif
 
 #if ZEND_DEBUG
