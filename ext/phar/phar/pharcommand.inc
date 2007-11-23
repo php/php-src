@@ -205,12 +205,12 @@ class PharCommand extends CLICommand
                 }
             }
             if (!isset($found)) {
-            	$msg = "Pear package PHP_Archive or Archive.php class file not found.\n";
-            	if ($arg == '0') {
-            		self::notice($msg);
-            	} else {
-            		self::error($msg);
-            	}
+                $msg = "Pear package PHP_Archive or Archive.php class file not found.\n";
+                if ($arg == '0') {
+                    self::notice($msg);
+                } else {
+                    self::error($msg);
+                }
             }
             $arg = $found;
         }
@@ -390,12 +390,12 @@ class PharCommand extends CLICommand
                     $s .= substr($c, 0, strpos($c, "\n") + 1);
                 }
 
-				$s .= "<?php if (!class_exists('PHP_Archive')) {\n?>";
-				$s .= file_get_contents($loader);
+                $s .= "<?php if (!class_exists('PHP_Archive')) {\n?>";
+                $s .= file_get_contents($loader);
                 $s .= "<?php\n";
                 $s .= "}\n";
                 $s .= "if (!in_array('phar', stream_get_wrappers())) {\n\tstream_wrapper_register('phar', 'PHP_Archive');\n}\n";
-				$s .= "if (!class_exists('Phar',0)) {\n";
+                $s .= "if (!class_exists('Phar',0)) {\n";
                 $s .= "\tinclude 'phar://'.__FILE__.'/phar.inc';\n";
                 $s .= "}\n";
                 $s .= '?>';
@@ -420,11 +420,11 @@ class PharCommand extends CLICommand
     public function phar_set_stub_end(Phar $phar, $stub, $loader = NULL)
     {
         if (isset($stub) && isset($loader)) {
-        	if (substr(__FILE__, -15) == 'pharcommand.inc') {
-	            self::phar_add_file($phar, 0, 'phar.inc', 'phar://'.__FILE__.'/phar.inc', NULL);
-	        } else {
-	            self::phar_add_file($phar, 0, 'phar.inc', dirname(__FILE__).'/phar/phar.inc', NULL);
-	        }
+            if (substr(__FILE__, -15) == 'pharcommand.inc') {
+                self::phar_add_file($phar, 0, 'phar.inc', 'phar://'.__FILE__.'/phar.inc', NULL);
+            } else {
+                self::phar_add_file($phar, 0, 'phar.inc', dirname(__FILE__).'/phar/phar.inc', NULL);
+            }
         }
     }
     // }}}
@@ -460,7 +460,7 @@ class PharCommand extends CLICommand
 
         $phar->startBuffering();
 
-		$stub = $this->phar_set_stub_begin($phar, $stub, $loader);
+        $stub = $this->phar_set_stub_begin($phar, $stub, $loader);
 
         if (!is_array($input)) {
             $this->phar_add($phar, $level, $input, $regex, $invregex, $stub, NULL, isset($loader));
@@ -470,7 +470,7 @@ class PharCommand extends CLICommand
             }
         }
 
-		$this->phar_set_stub_end($phar, $stub, $loader);
+        $this->phar_set_stub_end($phar, $stub, $loader);
 
         switch($this->args['c']['val']) {
             case 'gz':
@@ -556,9 +556,9 @@ class PharCommand extends CLICommand
             $entry = substr($entry, $p+1);
         }
 
-		if ($noloader && $entry == 'phar.inc') {
-			return;
-		}
+    if ($noloader && $entry == 'phar.inc') {
+        return;
+    }
 
         echo "$entry\n";
 
@@ -933,8 +933,8 @@ class PharCommand extends CLICommand
         $stub   = $this->args['s']['val'];
         $loader = $this->args['p']['val'];
 
-		$this->phar_set_stub_begin($phar, $stub, $loader);
-		$this->phar_set_stub_end($phar, $stub, $loader);
+        $this->phar_set_stub_begin($phar, $stub, $loader);
+        $this->phar_set_stub_end($phar, $stub, $loader);
     }
     // }}}
     // {{{ public function cli_cmd_inf_stub_get
