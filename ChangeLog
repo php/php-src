@@ -1,3 +1,124 @@
+2007-11-22  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.CVS-RULES:
+      - adapted to reST format
+      - added 5_3 branch
+      - added note about getting confirmation from RM on significant changes
+
+2007-11-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/bug43128.phpt:
+      Fixed test
+
+    * ZendEngine2/tests/bug43128.phpt
+      ZendEngine2/tests/bug43128.phpt:
+      
+      file bug43128.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      TSRM/tsrm_config_common.h
+      TSRM/tsrm_config_common.h
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/tests/bug43128.phpt
+      ext/interbase/ibase_query.c
+      ext/interbase/ibase_query.c
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/spl/php_spl.c
+      main/main.c
+      main/main.c:
+      Fixed bug #43128 (Very long class name causes segfault)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/ns_039.phpt
+      ZendEngine2/tests/ns_039.phpt
+      ZendEngine2/tests/ns_040.phpt
+      ZendEngine2/tests/ns_040.phpt
+      ZendEngine2/tests/ns_059.phpt:
+      Fixed bug #43318
+      The "const" statement is still allowed outside of namespaces but arrays
+      are disabled.
+
+    * ZendEngine2/tests/ns_059.phpt
+      ZendEngine2/tests/ns_059.phpt:
+      
+      file ns_059.phpt was initially added on branch PHP_5_3.
+
+2007-11-22  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/standard/dns.c
+      ext/standard/tests/network/getmxrr.phpt:
+      - MFH: Fixed weights array, which was broken with:
+        http://cvs.php.net/viewvc.cgi/php-src/ext/standard/dns.c?r1=1.80&r2=1.81
+        and merged to head with:
+       
+      http://cvs.php.net/viewvc.cgi/php-src/ext/standard/dns.c?r1=1.70.2.7.2.5&r2=1.70.2.7.2.5.2.1
+
+    * ext/standard/dns.c
+      ext/standard/tests/network/getmxrr.phpt
+      ext/standard/tests/network/getmxrr.phpt:
+      - Fixed weights array, which was broken with:
+        http://cvs.php.net/viewvc.cgi/php-src/ext/standard/dns.c?r1=1.80&r2=1.81
+
+2007-11-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Speed-up of ZEND_DO_FCALL and ZEND_INIT_FCALL_BY_NAME by lowercasing and
+      calculating hash values at compile time.
+
+2007-11-22  Lukas Smith  <smith@pooteeweet.org>
+
+    * (PHP_5_3)
+      README.RELEASE_PROCESS:
+      - port from todo wiki to reST (http://wiki.pooteeweet.org/ReleaseChecklist)
+
+    * README.RELEASE_PROCESS
+      README.RELEASE_PROCESS:
+      
+      - port from todo wiki to reST
+      (http://wiki.pooteeweet.org/ReleaseChecklist)
+
+2007-11-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      
+      MFB: Fixed bug #43041 (micro-optimizations in pgsql data retrieval)
+
+    * (PHP_5_3)
+      ext/pgsql/pgsql.c:
+      Fixed bug #43041 (micro-optimizations in pgsql data retrieval) Initial
+      patch
+      by andy at petdance dot com
+
 2007-11-21  Robert Nicholson  <rob_nicholson@uk.ibm.com>
 
     * ext/pcre/tests/preg_grep_basic.phpt

@@ -1,3 +1,61 @@
+2007-11-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend.h
+      zend_API.c
+      zend_API.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_execute.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_object_handlers.c
+      zend_strtod.c
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      zend_vm_execute.skl
+      tests/bug43128.phpt:
+      Fixed bug #43128 (Very long class name causes segfault)
+
+    * (PHP_5_3)
+      tests/bug43128.phpt:
+      Fixed test
+
+    * tests/bug43128.phpt
+      tests/bug43128.phpt:
+      
+      file bug43128.phpt was initially added on branch PHP_5_3.
+
+    * zend_compile.c
+      zend_compile.c
+      tests/ns_039.phpt
+      tests/ns_039.phpt
+      tests/ns_040.phpt
+      tests/ns_040.phpt
+      tests/ns_059.phpt:
+      Fixed bug #43318
+      The "const" statement is still allowed outside of namespaces but arrays
+      are disabled.
+
+    * tests/ns_059.phpt
+      tests/ns_059.phpt:
+      
+      file ns_059.phpt was initially added on branch PHP_5_3.
+
+    * zend_compile.c
+      zend_compile.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h:
+      Speed-up of ZEND_DO_FCALL and ZEND_INIT_FCALL_BY_NAME by lowercasing and
+      calculating hash values at compile time.
+
 2007-11-21  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.h
