@@ -389,7 +389,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 }
 /* }}} */
 
-/* {{{ proto long stream_get_contents(resource source [, long maxlen [, long offset]])
+/* {{{ proto string stream_get_contents(resource source [, long maxlen [, long offset]])
    Reads all remaining bytes (or up to maxlen bytes) from a stream and returns them as a string. */
 PHP_FUNCTION(stream_get_contents)
 {
