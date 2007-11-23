@@ -48,7 +48,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	if (EXPECTED(op_array->T < TEMP_VAR_STACK_LIMIT && op_array->last_var < TEMP_VAR_STACK_LIMIT)) {
 		EX(CVs) = (zval***)do_alloca(sizeof(zval**) * op_array->last_var + sizeof(temp_variable) * op_array->T, EX(use_heap));
 	} else {
-		EX(use_heap) = 1;
+		SET_ALLOCA_FLAG(EX(use_heap));
 		EX(CVs) = (zval***)safe_emalloc(sizeof(temp_variable), op_array->T, sizeof(zval**) * op_array->last_var);
 	}
 	EX(Ts) = (temp_variable *)(EX(CVs) + op_array->last_var);
