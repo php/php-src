@@ -63,8 +63,8 @@ char *alloca ();
 	do { if (use_heap) free(p); } while (0)
 #else
 # define TSRM_ALLOCA_FLAG(name)
-# define tsrm_do_alloca(p)   malloc(p)
-# define tsrm_free_alloca(p) free(p)
+# define tsrm_do_alloca(p, use_heap)	malloc(p)
+# define tsrm_free_alloca(p, use_heap)	free(p)
 #endif
 
 #endif /* TSRM_CONFIG_COMMON_H */
