@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.6
+- Fixed bug #43377 (PHP crashes with invalid argument for DateTimeZone). (Ilia)
 - Fixed bug #43092 (curl_copy_handle() crashes with > 32 chars long URL).
   (Jani)
 - Fixed bug #43301 (mb_ereg*_replace() crashes when replacement string is

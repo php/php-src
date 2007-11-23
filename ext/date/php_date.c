@@ -2066,6 +2066,8 @@ PHP_METHOD(DateTimeZone, __construct)
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &tz, &tz_len)) {
 		if (SUCCESS == timezone_initialize(&tzi, tz TSRMLS_CC)) {
 			((php_timezone_obj *) zend_object_store_get_object(getThis() TSRMLS_CC))->tz = tzi;
+		} else {
+			ZVAL_NULL(getThis());
 		}
 	}
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
