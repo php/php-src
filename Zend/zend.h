@@ -180,6 +180,8 @@ char *alloca ();
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
 	zend_bool name;
+# define SET_ALLOCA_FLAG(name) \
+	name = 1
 # define do_alloca_ex(size, limit, use_heap) \
 	((use_heap = (UNEXPECTED((size) > (limit)))) ? emalloc(size) : alloca(size))
 # define do_alloca(size, use_heap) \
@@ -188,6 +190,7 @@ char *alloca ();
 	do { if (UNEXPECTED(use_heap)) efree(p); } while (0)
 #else
 # define ALLOCA_FLAG(name)
+# define SET_ALLOCA_FLAG(name)
 # define do_alloca(p, use_heap)		emalloc(p)
 # define free_alloca(p, use_heap)	efree(p)
 #endif
