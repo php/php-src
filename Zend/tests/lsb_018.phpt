@@ -1,4 +1,4 @@
-﻿--TEST--
+--TEST--
 ZE2 Late Static Binding and Singleton
 --FILE--
 <?php
