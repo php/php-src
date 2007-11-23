@@ -5,6 +5,8 @@ $notes = '
    $a = new Phar(\'blah.phar\');
  * fix creation and read of Phar objects on Windows, manage
    windows path separators (on windows only)
+ * phar.phar is now installed as a script, and can be run as "phar.phar"
+ * phar.phar looks for PHP in /usr/local/bin/php by default
  * fix Bug #12492: filenew incorrectly creates file path [urkle]
  * fix Bug #12493: extract throws an error and won\'t open the file [urkle]
 ';

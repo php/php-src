@@ -30,7 +30,7 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <active>yes</active>
  </lead>
  <date>2007-11-22</date>
- <time>22:37:06</time>
+ <time>22:56:05</time>
  <version>
   <release>1.2.3</release>
   <api>1.1.0</api>
@@ -46,6 +46,8 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
    $a = new Phar(&apos;blah.phar&apos;);
  * fix creation and read of Phar objects on Windows, manage
    windows path separators (on windows only)
+ * phar.phar is now installed as a script, and can be run as &quot;phar.phar&quot;
+ * phar.phar looks for PHP in /usr/local/bin/php by default
  * fix Bug #12492: filenew incorrectly creates file path [urkle]
  * fix Bug #12493: extract throws an error and won&apos;t open the file [urkle]
 
@@ -232,6 +234,8 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
    $a = new Phar(&apos;blah.phar&apos;);
  * fix creation and read of Phar objects on Windows, manage
    windows path separators (on windows only)
+ * phar.phar is now installed as a script, and can be run as &quot;phar.phar&quot;
+ * phar.phar looks for PHP in /usr/local/bin/php by default
  * fix Bug #12492: filenew incorrectly creates file path [urkle]
  * fix Bug #12493: extract throws an error and won&apos;t open the file [urkle]
 
