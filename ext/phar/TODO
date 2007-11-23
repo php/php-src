@@ -1,0 +1,77 @@
+Version 1.0.0
+
+ X make permissions in the lowest bits of flags to simplify using them [Greg]
+ X implement ini handler for phar.readonly and phar.require_hash that allows 
+   enabling it on PHP_INI_ALL if it is disabled in the system, but does not 
+   allow disabling it if it is enabled in the system [Greg]
+ X implement reading in metadata in manifest as <len32><metadata...> [Marcus]
+ X implement writing out of metadata to new manifest [Marcus]
+ X if SPL is disabled, enable only static methods of class Phar and disable 
+   class PharFileInfo completely [Marcus]
+ X implement in-phar locking, so that a file that is opened for reading can't 
+   have a handle opened for writing [Marcus/Greg]
+ X docs on file format/manifest description [Greg]
+ X docs on uses [Greg]
+ X stream context for specifying compression of a file [Marcus]
+ X stream context for specifying meta-data [Greg]
+ X Phar->begin()/Phar->commit() for specifying a new stub to the phar,
+   and deferring flush until all modifications are complete [Greg]
+ X Phar->getStub() for retrieving the stub of the phar [Marcus]
+ X add setUncompressed(), setCompressedGZ() and setCompressedBZ2() to 
+   PharFileInfo class [Greg]
+ X add uncompressAllFiles(), compressAllFilesGZ() and compressAllFilesBZ2() 
+   to Phar class [Greg]
+ X add PharFileInfo::setMetaData($metadata) [Marcus]
+ X add PharFileInfo::getMetaData() [Marcus]
+ X always throw exceptions from the Phar object, and E_RECOVERABLE_ERROR from 
+   streams interface [Greg]
+ X Phar archive metadata Phar::setMetaData($metadata) Phar::getMetaData() [Greg]
+ X support rename() in stream wrapper [Greg]
+ X update docs to reflect changes in error handling [Greg]
+ X fix 011.phpt, 029.phpt for uncaught exceptions causing bad cleanup [Marcus/Greg]
+ 
+Version 1.1.0
+
+ X Ability connect a phar file 'phar://whatever' to a directory. That way all
+   access to that phar archive are directed to the extracted directory. This
+   allows to have the installed files and the archieve keep the same includes.
+   [Marcus]
+ X add SHA-2 (256, 512) support [Marcus]
+ X setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
+   choose the kind of signature to use (PGP falls back to SHA1) [Greg]
+
+ 
+Version 1.2.0
+
+ X add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
+ X add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
+ X fix Phar::CanWrite() [Marcus]
+ X add preliminary phar command (phar.php) [Marcus] 
+ X add phar command (phar.phar) [Marcus]
+ X list all available compression methods using Phar::getSupportedCompression() [Marcus]
+ X Remove RINIT [Marcus]
+
+Version 1.2.1
+
+ X Add Phar::getAlias() [Marcus]
+ X Add Phar::setAlias() [Greg]
+ X Make -a optional in pack subcommand of phar.phar [Marcus]
+ X Make Phar::loadPhar() and Phar::mapPhar() ignore extracted archives
+
+Version 1.3.0
+
+ * Provide an additional header that allows better compatibility with PHP 4
+   __HALT_COMPILER();function __HALT_COMPILER(){}$a=<<<PHARDATABEGIN\n
+ * ability to have Phar object return file class as offsetGet() result
+ * ability to store empty directories
+ * [optional] Phar->rollback() to abort a write transaction
+ * implement PPG signing
+ * ability to match files containing a metadata key opendir('phar://a.phar/?mime-type=image/jpeg')
+   or foreach ($p->match('mime-type', 'image/jpeg') as $file)
+ * Phar::copy($from, $to);
+ * Phar::delete($what)
+ * Phar::buildFromIterator($filename, Iterator $it, array $addinfo = null);
+   $addinfo = array('alias','flags','metadata','stub'...)
+ * Layout: Option to compress all content rather than single files.
+   That excludes stub and manifest haeder.
+ * stream context option for cleaning crap paths like phar://blah.phar/file//to\\here.php
