@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/local/bin/php
 <?php
 
 /** @file phar.php
