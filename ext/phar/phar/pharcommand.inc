@@ -612,9 +612,12 @@ class PharCommand extends CLICommand
             $dir = new InvertedRegexIterator($dir, $invregex);
         }
 
+        $any = false;
         foreach($dir as $pn => $f) {
+            $any = true;
             call_user_func($func, $pn, $f, $args);
         }
+        return $any;
     }
     // {{{ static function cli_cmd_inf_list
     /**
@@ -687,11 +690,14 @@ class PharCommand extends CLICommand
      */
     public function cli_cmd_run_tree()
     {
-        $this->phar_dir_operation(
+        $a = $this->phar_dir_operation(
             new DirectoryGraphIterator(
                 $this->args['f']['val']), 
                 array($this, 'phar_dir_echo')
             );
+        if (!$a) {
+            echo "|-<root directory>\n";
+        }
     }
     // }}}
     // {{{ cli_cmd_inf_extract
@@ -1192,13 +1198,13 @@ class PharCommand extends CLICommand
 
         if (isset($entry)) {
             if (!$phar[$entry]->hasMetadata()) {
-                echo 'No Metadata';
+                echo "No Metadata\n";
                 exit(1);
             }
             echo serialize($phar[$entry]->getMetadata());
         } else {
             if (!$phar->hasMetadata()) {
-                echo 'No Metadata';
+                echo "No Metadata\n";
                 exit(1);
             }
             $meta = $phar->getMetadata();
@@ -1210,7 +1216,7 @@ class PharCommand extends CLICommand
                     echo $meta[$index];
                     exit(0);
                 } else {
-                    echo 'No Metadata';
+                    echo "No Metadata\n";
                     exit(1);
                 }
             } else {

@@ -29,10 +29,10 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-10-03</date>
- <time>22:48:03</time>
+ <date>2007-11-22</date>
+ <time>22:37:06</time>
  <version>
-  <release>1.2.2</release>
+  <release>1.2.3</release>
   <api>1.1.0</api>
  </version>
  <stability>
@@ -42,10 +42,12 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
 
- * fix to work with PHP 5.3
- * fix Bug #12124: Phar object cannot be iterated over
- * remove unused variables
- * fix jit file open sprintf calls
+ * fix creation of Phar object with relative path:
+   $a = new Phar(&apos;blah.phar&apos;);
+ * fix creation and read of Phar objects on Windows, manage
+   windows path separators (on windows only)
+ * fix Bug #12492: filenew incorrectly creates file path [urkle]
+ * fix Bug #12493: extract throws an error and won&apos;t open the file [urkle]
 
  </notes>
  <contents>
@@ -162,6 +164,7 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
     <file name="phar_stub_write_file.phpt" role="test" />
     <file name="phar_test.inc" role="test" />
     <file name="refcount1.phpt" role="test" />
+    <file name="refcount1_5_2.phpt" role="test" />
     <file name="rename.phpt" role="test" />
    </dir> <!-- /tests -->
    <file name="build_precommand.php" role="php" />
@@ -214,6 +217,28 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <changelog>
   <release>
    <version>
+    <release>1.2.3</release>
+    <api>1.1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2007-11-22</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+
+ * fix creation of Phar object with relative path:
+   $a = new Phar(&apos;blah.phar&apos;);
+ * fix creation and read of Phar objects on Windows, manage
+   windows path separators (on windows only)
+ * fix Bug #12492: filenew incorrectly creates file path [urkle]
+ * fix Bug #12493: extract throws an error and won&apos;t open the file [urkle]
+
+   </notes>
+  </release>
+  <release>
+   <version>
     <release>1.2.2</release>
     <api>1.1.0</api>
    </version>
@@ -223,14 +248,10 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
    </stability>
    <date>2007-10-03</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>
-
- * fix to work with PHP 5.3
- * fix Bug #12124: Phar object cannot be iterated over
- * remove unused variables
- * fix jit file open sprintf calls
-
-   </notes>
+   <notes>* fix to work with PHP 5.3
+* fix Bug #12124: Phar object cannot be iterated over
+* remove unused variables
+* fix jit file open sprintf calls</notes>
   </release>
   <release>
    <version>
