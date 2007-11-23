@@ -62,6 +62,12 @@ class PharCommand extends CLICommand
                 'val' => NULL,
                 'inf' => '<alias>  Provide an alias name for the phar file.'
             ),
+            'b' => array(
+                'typ' => 'any',
+                'val' => NULL,
+                'inf' => '<bang>   Hash-bang line to start the archieve (e.g. #!/usr/bin/php). The hash '
+                         .'         mark itself \'#!\' and the newline character are optional.'
+            ),
             'c' => array(
                 'typ' => 'compalg',
                 'val' => NULL,
@@ -362,7 +368,7 @@ class PharCommand extends CLICommand
      */
     static function cli_cmd_arg_pack()
     {
-        $args = self::phar_args('acFhilpsx', 'pharnew');
+        $args = self::phar_args('abcFhilpsx', 'pharnew');
         
         $args[''] = array(
             'typ'     => 'any',     
@@ -379,34 +385,51 @@ class PharCommand extends CLICommand
     /**
      * Set the stub
      */
-    public function phar_set_stub_begin(Phar $phar, $stub, $loader = NULL)
+    public function phar_set_stub_begin(Phar $phar, $stub, $loader = NULL, $hashbang = NULL)
     {
         if (isset($stub)) {
-            if (isset($loader)) {
-                $c = file_get_contents($stub);
-                $s = '';
+            $c = file_get_contents($stub);
 
-                if (substr($c, 0, 2) == '#!') {
-                    $s .= substr($c, 0, strpos($c, "\n") + 1);
+            if (substr($c, 0, 2) == '#!') {
+                if (strpos($c, "\n") !== false) {
+                    if (!isset($hashbang)) {
+                        $hashbang = substr($c, 0, strpos($c, "\n") + 1);
+                    }
+                    $c = substr($c, strpos($c, "\n") + 1);
+                } else {
+                    if (!isset($hashbang)) {
+                        $hashbang = $c;
+                    }
+                    $c = NULL;
                 }
+            }
 
-                $s .= "<?php if (!class_exists('PHP_Archive')) {\n?>";
+            if (isset($hashbang)) {
+                if (substr($hashbang, 0, 2) != '#!') {
+                    $hashbang = '#!' . $hashbang;
+                }
+                if (substr($hashbang, -1) != "\n") {
+                    $hashbang .= "\n";
+                }
+            }
+
+            if (isset($loader)) {
+                $s = "<?php if (!class_exists('PHP_Archive')) {\n?>";
                 $s .= file_get_contents($loader);
                 $s .= "<?php\n";
                 $s .= "}\n";
-                $s .= "if (!in_array('phar', stream_get_wrappers())) {\n\tstream_wrapper_register('phar', 'PHP_Archive');\n}\n";
+                $s .= "if (!in_array('phar', stream_get_wrappers())) {\n";
+                $s .= "\tstream_wrapper_register('phar', 'PHP_Archive');\n";
+                $s .= "}\n";
                 $s .= "if (!class_exists('Phar',0)) {\n";
                 $s .= "\tinclude 'phar://'.__FILE__.'/phar.inc';\n";
                 $s .= "}\n";
                 $s .= '?>';
+                $s .= $c;
 
-                if (substr($c,0,1) == '#') {
-                    $s.= substr($c,strpos($c, "\n")+1);
-                }
-
-                $phar->setStub($s);
+                $phar->setStub($hasbang . $s);
             } else {
-                $phar->setStub(file_get_contents($stub));
+                $phar->setStub($hasbang . $c);
             }
             return new SplFileInfo($stub);
         }
@@ -447,6 +470,7 @@ class PharCommand extends CLICommand
         }
 
         $alias    = $this->args['a']['val'];
+        $hashbang = $this->args['b']['val'];
         $archive  = $this->args['f']['val'];
         $hash     = $this->args['h']['val'];
         $regex    = $this->args['i']['val'];
@@ -460,7 +484,7 @@ class PharCommand extends CLICommand
 
         $phar->startBuffering();
 
-        $stub = $this->phar_set_stub_begin($phar, $stub, $loader);
+        $stub = $this->phar_set_stub_begin($phar, $stub, $loader, $hashbang);
 
         if (!is_array($input)) {
             $this->phar_add($phar, $level, $input, $regex, $invregex, $stub, NULL, isset($loader));
@@ -916,7 +940,7 @@ class PharCommand extends CLICommand
      */
     public function cli_cmd_arg_stub_set()
     {
-        $args = self::phar_args('Fps', 'phar');
+        $args = self::phar_args('bFps', 'phar');
         $args['s']['val'] = 'php://stdin';
         return $args;
     }
@@ -929,11 +953,12 @@ class PharCommand extends CLICommand
      */
     public function cli_cmd_run_stub_set()
     {
-        $phar   = $this->args['f']['val'];
-        $stub   = $this->args['s']['val'];
-        $loader = $this->args['p']['val'];
+        $hashbang = $this->args['b']['val'];
+        $phar     = $this->args['f']['val'];
+        $stub     = $this->args['s']['val'];
+        $loader   = $this->args['p']['val'];
 
-        $this->phar_set_stub_begin($phar, $stub, $loader);
+        $this->phar_set_stub_begin($phar, $stub, $loader, $hashbang);
         $this->phar_set_stub_end($phar, $stub, $loader);
     }
     // }}}
