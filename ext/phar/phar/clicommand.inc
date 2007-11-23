@@ -219,7 +219,7 @@ abstract class CLICommand
         if ($f === false) {
             self::error("Path for file '$arg' does not exist.\n");
         }
-        return $f . basename($arg);
+        return $f . '/' . basename($arg);
     }
 
     static function cli_arg_typ_filecont($arg, $cfg, $key)
