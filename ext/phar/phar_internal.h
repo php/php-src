@@ -49,6 +49,9 @@
 #include "ext/spl/spl_exceptions.h"
 #include "ext/spl/spl_iterators.h"
 #endif
+#if HAVE_GNUPGLIB
+#include "ext/gnupg/php_gnupg.h"
+#endif
 #include "php_phar.h"
 #ifdef HAVE_STDINT_H
 #include <stdint.h>

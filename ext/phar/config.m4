@@ -9,5 +9,6 @@ if test "$PHP_PHAR" != "no"; then
   PHP_ADD_EXTENSION_DEP(phar, zlib, true)
   PHP_ADD_EXTENSION_DEP(phar, bz2, false)
   PHP_ADD_EXTENSION_DEP(phar, spl, false)
+  PHP_ADD_EXTENSION_DEP(phar, gnupg, false)
   PHP_ADD_MAKEFILE_FRAGMENT
 fi
