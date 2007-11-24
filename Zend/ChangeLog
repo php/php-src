@@ -1,3 +1,31 @@
+2007-11-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      zend_vm_execute.skl:
+      Fixed compilation on Windows
+
+    * zend.h
+      zend.h:
+      Fixed definitions
+
+2007-11-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lsb_018.phpt
+      tests/lsb_018.phpt:
+      
+
+    * tests/lsb_018.phpt:
+      - Add another LSB test
+
+    * tests/lsb_018.phpt
+      tests/lsb_018.phpt:
+      
+      file lsb_018.phpt was initially added on branch PHP_5_3.
+
 2007-11-22  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.h

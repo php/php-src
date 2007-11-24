@@ -1,3 +1,85 @@
+2007-11-23  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ext/standard/streamsfuncs.c:
+      fix proto
+
+2007-11-23  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * tests/classes/assign_op_property_001.phpt
+      tests/classes/assign_op_property_001.phpt
+      tests/classes/assign_op_property_001.phpt
+      tests/classes/incdec_property_001.phpt
+      tests/classes/incdec_property_001.phpt
+      tests/classes/incdec_property_001.phpt
+      tests/classes/incdec_property_002.phpt
+      tests/classes/incdec_property_002.phpt
+      tests/classes/incdec_property_002.phpt
+      tests/classes/incdec_property_003.phpt
+      tests/classes/incdec_property_003.phpt
+      tests/classes/incdec_property_003.phpt
+      tests/classes/incdec_property_004.phpt
+      tests/classes/incdec_property_004.phpt
+      tests/classes/incdec_property_004.phpt:
+      Fix incorrect use of assignment in where equality was intended - class
+      tests.
+
+2007-11-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_execute.skl:
+      Fixed compilation on Windows
+
+    * TSRM/tsrm_config_common.h
+      TSRM/tsrm_config_common.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h:
+      Fixed definitions
+
+2007-11-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/lsb_018.phpt
+      ZendEngine2/tests/lsb_018.phpt:
+      
+
+    * ZendEngine2/tests/lsb_018.phpt:
+      - Add another LSB test
+
+    * ZendEngine2/tests/lsb_018.phpt
+      ZendEngine2/tests/lsb_018.phpt:
+      
+      file lsb_018.phpt was initially added on branch PHP_5_3.
+
+2007-11-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS:
+      -** empty log message ***
+
+    * ext/soap/php_sdl.c
+      ext/soap/php_sdl.c:
+      Fixed bug #42952 (soap cache file is created with insecure permissions)
+
+2007-11-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/php_date.c:
+      
+      MFB: Fixed bug #43377 (PHP crashes with invalid argument for DateTimeZone)
+
+    * ext/date/php_date.c:
+      MFB: Fixed bug #43377 (PHP crashes with invalid argument for DateTimeZone)
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      
+      Fixed bug #43377 (PHP crashes with invalid argument for DateTimeZone)
+
 2007-11-22  Lukas Smith  <smith@pooteeweet.org>
 
     * README.CVS-RULES:
