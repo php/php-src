@@ -48,9 +48,8 @@ Currently we have the following branches in use::
   PHP_5_3  Is used to release the PHP 5.3.x series. It still allows for
            larger enhancements.
 
-  PHP_5_2  Is used to release the PHP 5.2.x series. Only minor feature
-           enhancements may go in here, but please keep that as infrequent as
-           possible.
+  PHP_5_2  Is used to release the PHP 5.2.x series. Only bugfixes are permitted
+           on this branch (Consult the releasemaster prior to commit).
 
   PHP_5_1  This branch is closed.
 
@@ -95,7 +94,7 @@ If a line begins with #, it is taken to be a comment and will not appear
 in the ChangeLog. Everything else goes into the ChangeLog.
 
 It is important to note that if your comment or news logline spans multiple
-lines, you have to put # at the beginning of _every_ such line.
+lines, you have to put # at the beginning of **every** such line.
 
 Example. Say you modified two files, datetime.c and string.c. In datetime.c you
 added a new format option for the date() function, and in string.c you fixed a
