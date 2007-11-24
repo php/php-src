@@ -1250,6 +1250,10 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 			}
 			efree(entry.filename);
 			MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
+#else
+		        if (!zend_hash_exists(&module_registry, "bz2", sizeof("bz2"))) {
+				MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
+			}
 #endif
 			break;
 		default:
@@ -3801,10 +3805,16 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 #else
 		"disabled");
 #endif
-	php_info_print_table_row(2, "bzip2 compression", 
 #if HAVE_BZ2
-		"enabled");
+        if (!zend_hash_exists(&module_registry, "bz2", sizeof("bz2"))) {
+		php_info_print_table_row(2, "bzip2 compression", 
+			"disabled");
+	} else {
+		php_info_print_table_row(2, "bzip2 compression", 
+			"enabled");
+	}
 #else
+	php_info_print_table_row(2, "bzip2 compression", 
 		"disabled");
 #endif
 	php_info_print_table_end();
@@ -3826,7 +3836,7 @@ static zend_module_dep phar_deps[] = {
 	ZEND_MOD_REQUIRED("zlib")
 #endif
 #if HAVE_BZ2
-	ZEND_MOD_REQUIRED("bz2")
+	ZEND_MOD_OPTIONAL("bz2")
 #endif
 #if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
