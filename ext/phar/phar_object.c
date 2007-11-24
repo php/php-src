@@ -151,7 +151,7 @@ PHP_METHOD(Phar, canCompress)
 
 	case PHAR_ENT_COMPRESSED_BZ2:
 #if HAVE_BZ2
-        if (zend_hash_exists(&module_registry, "bz2", sizeof("bz2"))) {
+	if (zend_hash_exists(&module_registry, "bz2", sizeof("bz2"))) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -596,7 +596,7 @@ PHP_METHOD(Phar, getSupportedCompression)
 	add_next_index_stringl(return_value, "GZ", 2, 1);
 #endif
 #if !HAVE_BZ2
-        if (zend_hash_exists(&module_registry, "bz2", sizeof("bz2"))) {
+	if (zend_hash_exists(&module_registry, "bz2", sizeof("bz2"))) {
 		add_next_index_stringl(return_value, "BZIP2", 5, 1);
 	}
 #endif
@@ -668,7 +668,7 @@ static int phar_test_compression(void *pDest, void *argument TSRMLS_DC) /* {{{ *
 		return ZEND_HASH_APPLY_KEEP;
 	}
 #if !HAVE_BZ2
-        if (zend_hash_exists(&module_registry, "bz2", sizeof("bz2"))) {
+	if (zend_hash_exists(&module_registry, "bz2", sizeof("bz2"))) {
 		if (entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
 			*(int *) argument = 0;
 		}
