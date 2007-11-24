@@ -3817,6 +3817,18 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	php_info_print_table_row(2, "bzip2 compression", 
 		"disabled");
 #endif
+#if HAVE_GNUPGLIB
+        if (zend_hash_exists(&module_registry, "gnupg", sizeof("gnupg"))) {
+		php_info_print_table_row(2, "GPG signature", 
+			"enabled");
+	} else {
+		php_info_print_table_row(2, "GPG signature", 
+			"disabled (install pecl/gnupg)");
+	}
+#else
+	php_info_print_table_row(2, "GPG signature", 
+		"disabled");
+#endif
 	php_info_print_table_end();
 
 	php_info_print_box_start(0);
@@ -3837,6 +3849,9 @@ static zend_module_dep phar_deps[] = {
 #endif
 #if HAVE_BZ2
 	ZEND_MOD_OPTIONAL("bz2")
+#endif
+#if HAVE_GNUPG
+	ZEND_MOD_OPTIONAL("gnupg")
 #endif
 #if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
