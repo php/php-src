@@ -23,8 +23,17 @@ foreach($files as $name => $cont) {
 }
 
 $phar = new Phar($fname);
+var_dump($phar->hasMetaData());
+var_dump($phar->getMetaData());
+var_dump($phar->delMetaData());
+var_dump($phar->getMetaData());
+var_dump($phar->delMetaData());
 var_dump($phar->getMetaData());
 foreach($files as $name => $cont) {
+	echo "  meta $name\n";
+	var_dump($phar[$name]->hasMetadata());
+	var_dump($phar[$name]->getMetadata());
+	var_dump($phar[$name]->delMetadata());
 	var_dump($phar[$name]->getMetadata());
 }
 
@@ -42,21 +51,42 @@ string(1) "a"
 string(1) "b"
 string(1) "c"
 string(1) "d"
+bool(true)
 string(8) "hi there"
+bool(true)
 NULL
+bool(true)
 NULL
+  meta a
+bool(false)
+NULL
+bool(true)
+NULL
+  meta b
+bool(false)
+NULL
+bool(true)
+NULL
+  meta c
+bool(true)
 array(2) {
   [0]=>
   string(2) "hi"
   [1]=>
   string(5) "there"
 }
+bool(true)
+NULL
+  meta d
+bool(true)
 array(2) {
   ["hi"]=>
   string(5) "there"
   ["foo"]=>
   string(3) "bar"
 }
+bool(true)
+NULL
 string(1) "a"
 string(1) "b"
 string(1) "c"
