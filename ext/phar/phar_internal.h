@@ -114,6 +114,9 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         require_hash;
 	int         request_done;
 	int         request_ends;
+	int         has_bz2:1;
+	int         has_gnupg:1;
+	int         has_zlib:1;
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)

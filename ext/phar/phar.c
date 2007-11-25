@@ -1241,6 +1241,14 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 			}
 			efree(entry.filename);
 			MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
+#else
+			if (!PHAR_G(has_zlib)) {
+				if (entry.metadata) {
+					zval_ptr_dtor(&entry.metadata);
+				}
+				efree(entry.filename);
+				MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
+			}
 #endif
 			break;
 		case PHAR_ENT_COMPRESSED_BZ2:
@@ -1251,7 +1259,11 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 			efree(entry.filename);
 			MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
 #else
-		        if (!zend_hash_exists(&module_registry, "bz2", sizeof("bz2"))) {
+			if (!PHAR_G(has_bz2)) {
+				if (entry.metadata) {
+					zval_ptr_dtor(&entry.metadata);
+				}
+				efree(entry.filename);
 				MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
 			}
 #endif
@@ -3750,6 +3762,9 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
 	REGISTER_INI_ENTRIES();
 
+	PHAR_G(has_gnupg) = zend_hash_exists(&module_registry, "gnupg", sizeof("gnupg"));
+	PHAR_G(has_bz2) = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
+	PHAR_G(has_zlib) = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
 	phar_object_init(TSRMLS_C);
 
 	return php_register_url_stream_wrapper("phar", &php_stream_phar_wrapper TSRMLS_CC);
@@ -3799,14 +3814,20 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	php_info_print_table_row(2, "Phar EXT version", PHAR_EXT_VERSION_STR);
 	php_info_print_table_row(2, "Phar API version", PHAR_API_VERSION_STR);
 	php_info_print_table_row(2, "CVS revision", "$Revision$");
-	php_info_print_table_row(2, "gzip compression", 
 #if HAVE_ZLIB
-		"enabled");
+	if (PHAR_G(has_zlib)) {
+		php_info_print_table_row(2, "gzip compression", 
+			"enabled");
+	} else {
+		php_info_print_table_row(2, "gzip compression", 
+			"disabled");
+	}
 #else
+	php_info_print_table_row(2, "gzip compression", 
 		"disabled");
 #endif
 #if HAVE_BZ2
-        if (!zend_hash_exists(&module_registry, "bz2", sizeof("bz2"))) {
+	if (PHAR_G(has_bz2)) {
 		php_info_print_table_row(2, "bzip2 compression", 
 			"disabled");
 	} else {
@@ -3818,7 +3839,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 		"disabled");
 #endif
 #if HAVE_GNUPGLIB
-        if (zend_hash_exists(&module_registry, "gnupg", sizeof("gnupg"))) {
+        if (PHAR_G(has_gnupg)) {
 		php_info_print_table_row(2, "GPG signature", 
 			"enabled");
 	} else {
@@ -3845,12 +3866,12 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
  */
 static zend_module_dep phar_deps[] = {
 #if HAVE_ZLIB
-	ZEND_MOD_REQUIRED("zlib")
+	ZEND_MOD_OPTIONAL("zlib")
 #endif
 #if HAVE_BZ2
 	ZEND_MOD_OPTIONAL("bz2")
 #endif
-#if HAVE_GNUPG
+#if HAVE_GNUPGLIB
 	ZEND_MOD_OPTIONAL("gnupg")
 #endif
 #if HAVE_SPL
