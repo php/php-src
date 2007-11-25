@@ -1,3 +1,12 @@
+2007-11-24  Lukas Smith  <smith@pooteeweet.org>
+
+    * CODING_STANDARDS:
+      - fixed unexpected emphasis in reST parsing due to use of *
+
+    * README.CVS-RULES:
+      - 5.2 is only for bug fixes
+      - emphasis should be made with enclosing with ** and not with _
+
 2007-11-23  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_3)
