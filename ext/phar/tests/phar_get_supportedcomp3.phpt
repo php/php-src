@@ -13,8 +13,8 @@ var_dump(Phar::getSupportedCompression());
 ?>
 ===DONE===
 --EXPECT--
-array(2) {
+array(1) {
   [0]=>
-  string(5) "GZ"
+  string(2) "GZ"
 }
 ===DONE===
