@@ -1,3 +1,19 @@
+2007-11-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c:
+      
+      MFB : Fixed bug #43386 (array_globals not reset to 0 properly on init)
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c:
+      
+      MFB: Fixed bug #43386 (array_globals not reset to 0 properly on init)
+
+    * (PHP_5_3)
+      ext/standard/array.c:
+      Fixed bug #43386 (array_globals not reset to 0 properly on init)
+
 2007-11-24  Lukas Smith  <smith@pooteeweet.org>
 
     * CODING_STANDARDS:
