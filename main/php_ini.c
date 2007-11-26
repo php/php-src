@@ -348,7 +348,7 @@ int php_init_config(TSRMLS_D)
 	}
 
 	zend_llist_init(&extension_lists.engine, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
-	zend_llist_init(&extension_lists.functions, sizeof(zval), (llist_dtor_func_t) free_estring, 1);
+	zend_llist_init(&extension_lists.functions, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
 
 	safe_mode_state = PG(safe_mode);
 	open_basedir = PG(open_basedir);
