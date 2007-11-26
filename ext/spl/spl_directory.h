@@ -35,7 +35,7 @@ PHP_MINIT_FUNCTION(spl_directory);
 typedef enum {
 	SPL_FS_INFO, /* must be 0 */
 	SPL_FS_DIR,
-	SPL_FS_FILE,
+	SPL_FS_FILE
 } SPL_FS_OBJ_TYPE;
 
 typedef struct _spl_filesystem_object  spl_filesystem_object;

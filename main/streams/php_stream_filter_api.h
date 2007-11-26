@@ -62,7 +62,7 @@ struct _php_stream_bucket_brigade {
 typedef enum {
 	PSFS_ERR_FATAL,	/* error in data stream */
 	PSFS_FEED_ME,	/* filter needs more data; stop processing chain until more is available */
-	PSFS_PASS_ON,	/* filter generated output buckets; pass them on to next in chain */
+	PSFS_PASS_ON	/* filter generated output buckets; pass them on to next in chain */
 } php_stream_filter_status_t;
 
 /* Buckets API. */
