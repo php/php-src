@@ -67,7 +67,7 @@ enum pdo_param_type {
 	PDO_PARAM_STMT, /* hierarchical result set */
 
 	/* get_col ptr should point to a zend_bool */
-	PDO_PARAM_BOOL,
+	PDO_PARAM_BOOL
 };
 
 /* magic flag to denote a parameter as being input/output */
