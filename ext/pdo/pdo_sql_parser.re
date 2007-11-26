@@ -46,7 +46,7 @@ static int scan(Scanner *s)
 
 	s->tok = cursor;
 	/*!re2c
-	BINDCHR		= [:][a-zA-Z0-9_-]+;
+	BINDCHR		= [:][a-zA-Z0-9_]+;
 	QUESTION	= [?];
 	SPECIALS	= [:?"'];
 	MULTICHAR	= [:?];
