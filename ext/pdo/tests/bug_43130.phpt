@@ -31,3 +31,4 @@ var_dump($stmt->fetch(PDO::FETCH_COLUMN));
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: parameter was not defined in %s on line %d
 
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number in %s on line %d
+bool(false)
