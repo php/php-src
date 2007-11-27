@@ -225,7 +225,7 @@ PHP_FUNCTION(pcntl_fork)
 
 	id = fork();
 	if (id == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error %d", errno);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d", errno);
 	}
 	
 	RETURN_LONG((long) id);
