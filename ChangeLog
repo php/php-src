@@ -1,3 +1,42 @@
+2007-11-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo/pdo_sql_parser.re:
+      
+      MFB: Revert addition of - char support for bound param names
+
+    * (PHP_5_3)
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      Revert addition of - char support for bound param names
+
+2007-11-26  Jani Taskinen  <jani.taskinen@iki.fi>
+
+    * main/php_ini.c:
+      - No zval is stored here
+
+    * (PHP_5_2)
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c
+      ext/pdo/php_pdo_driver.h
+      ext/pdo/php_pdo_driver.h
+      ext/spl/spl_directory.h
+      ext/spl/spl_directory.h
+      ext/spl/spl_iterators.h
+      ext/spl/spl_iterators.h
+      main/streams/php_stream_filter_api.h
+      main/streams/php_stream_filter_api.h:
+      MFH:- Fixed bug #43365 (Several enums have trailing commas)
+
+    * ext/pcre/php_pcre.c
+      ext/pdo/php_pdo_driver.h
+      ext/spl/spl_directory.h
+      ext/spl/spl_iterators.h
+      main/streams/php_stream_filter_api.h:
+       - Fixed bug #43365 (Several enums have trailing commas)
+
 2007-11-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/array.c:
