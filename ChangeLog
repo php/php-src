@@ -1,3 +1,133 @@
+2007-11-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pcntl/pcntl.c
+      ext/pcntl/pcntl.c:
+      
+      MFB: Fixed bug #43373 (pcntl_fork() should not raise E_ERROR on error)
+
+    * (PHP_5_3)
+      ext/pcntl/pcntl.c:
+      Fixed bug #43373 (pcntl_fork() should not raise E_ERROR on error)
+
+2007-11-27  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_combine_basic.phpt
+      ext/standard/tests/array/array_combine_basic.phpt
+      ext/standard/tests/array/array_combine_error1.phpt
+      ext/standard/tests/array/array_combine_error1.phpt
+      ext/standard/tests/array/array_combine_error2.phpt
+      ext/standard/tests/array/array_combine_error2.phpt
+      ext/standard/tests/array/array_combine_variation1.phpt
+      ext/standard/tests/array/array_combine_variation1.phpt
+      ext/standard/tests/array/array_combine_variation2.phpt
+      ext/standard/tests/array/array_combine_variation2.phpt
+      ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt
+      ext/standard/tests/array/array_combine_variation6.phpt
+      ext/standard/tests/array/array_combine_variation6.phpt:
+      New testcases for array_combine() function
+
+    * ext/standard/tests/array/array_combine_basic.phpt
+      ext/standard/tests/array/array_combine_basic.phpt
+      ext/standard/tests/array/array_combine_basic.phpt
+      ext/standard/tests/array/array_combine_error1.phpt
+      ext/standard/tests/array/array_combine_error1.phpt
+      ext/standard/tests/array/array_combine_error1.phpt
+      ext/standard/tests/array/array_combine_error2.phpt
+      ext/standard/tests/array/array_combine_error2.phpt
+      ext/standard/tests/array/array_combine_error2.phpt
+      ext/standard/tests/array/array_combine_variation1.phpt
+      ext/standard/tests/array/array_combine_variation1.phpt
+      ext/standard/tests/array/array_combine_variation1.phpt
+      ext/standard/tests/array/array_combine_variation2.phpt
+      ext/standard/tests/array/array_combine_variation2.phpt
+      ext/standard/tests/array/array_combine_variation2.phpt
+      ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt
+      ext/standard/tests/array/array_combine_variation6.phpt
+      ext/standard/tests/array/array_combine_variation6.phpt
+      ext/standard/tests/array/array_combine_variation6.phpt:
+        1.1.4;
+      New testcases for array_combine() function
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_sum_basic.phpt
+      ext/standard/tests/array/array_sum_basic.phpt
+      ext/standard/tests/array/array_sum_error.phpt
+      ext/standard/tests/array/array_sum_error.phpt
+      ext/standard/tests/array/array_sum_variation1.phpt
+      ext/standard/tests/array/array_sum_variation1.phpt
+      ext/standard/tests/array/array_sum_variation2.phpt
+      ext/standard/tests/array/array_sum_variation2.phpt
+      ext/standard/tests/array/array_sum_variation3.phpt
+      ext/standard/tests/array/array_sum_variation3.phpt
+      ext/standard/tests/array/array_sum_variation4.phpt
+      ext/standard/tests/array/array_sum_variation4.phpt
+      ext/standard/tests/array/array_sum_variation5.phpt
+      ext/standard/tests/array/array_sum_variation5.phpt
+      ext/standard/tests/array/array_sum_variation6.phpt
+      ext/standard/tests/array/array_sum_variation6.phpt
+      ext/standard/tests/array/array_sum_variation7.phpt
+      ext/standard/tests/array/array_sum_variation7.phpt:
+      New testcases for array_sum() function
+
+    * ext/standard/tests/array/array_sum_basic.phpt
+      ext/standard/tests/array/array_sum_basic.phpt
+      ext/standard/tests/array/array_sum_basic.phpt
+      ext/standard/tests/array/array_sum_error.phpt
+      ext/standard/tests/array/array_sum_error.phpt
+      ext/standard/tests/array/array_sum_error.phpt
+      ext/standard/tests/array/array_sum_variation1.phpt
+      ext/standard/tests/array/array_sum_variation2.phpt
+      ext/standard/tests/array/array_sum_variation2.phpt
+      ext/standard/tests/array/array_sum_variation2.phpt
+      ext/standard/tests/array/array_sum_variation3.phpt
+      ext/standard/tests/array/array_sum_variation3.phpt
+      ext/standard/tests/array/array_sum_variation3.phpt
+      ext/standard/tests/array/array_sum_variation4.phpt
+      ext/standard/tests/array/array_sum_variation4.phpt
+      ext/standard/tests/array/array_sum_variation4.phpt
+      ext/standard/tests/array/array_sum_variation5.phpt
+      ext/standard/tests/array/array_sum_variation5.phpt
+      ext/standard/tests/array/array_sum_variation5.phpt
+      ext/standard/tests/array/array_sum_variation6.phpt
+      ext/standard/tests/array/array_sum_variation6.phpt
+      ext/standard/tests/array/array_sum_variation6.phpt
+      ext/standard/tests/array/array_sum_variation7.phpt
+      ext/standard/tests/array/array_sum_variation7.phpt
+      ext/standard/tests/array/array_sum_variation7.phpt:
+        1.1.4;
+      New testcases for array_sum() function
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_sum_variation1.phpt
+      ext/standard/tests/array/array_sum_variation1.phpt:
+      file array_sum_variation1.phpt was added on branch PHP_5_2 on 2007-11-27
+      15:00:55 +0000
+
+2007-11-27  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/pdo/tests/bug_43130.phpt
+      ext/pdo/tests/bug_43130.phpt
+      ext/pdo/tests/bug_43130.phpt
+      ext/pdo/tests/bug_43130.phpt:
+      fix test
+
 2007-11-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pdo/pdo_sql_parser.c
