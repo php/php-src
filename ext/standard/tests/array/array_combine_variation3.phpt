@@ -95,9 +95,9 @@ array(2) {
 }
 -- Iteration 2 --
 array(2) {
-  [1]=>
+  ["1.1"]=>
   float(1.1)
-  [2]=>
+  ["2.2"]=>
   float(2.2)
 }
 -- Iteration 3 --

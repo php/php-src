@@ -146,7 +146,7 @@ array(4) {
   int(111)
   ["color"]=>
   string(5) "color"
-  [2]=>
+  ["2.2"]=>
   float(2.2)
   [33]=>
   int(33)
@@ -157,7 +157,7 @@ array(4) {
   int(111)
   ["color"]=>
   string(5) "color"
-  [2]=>
+  ["2.2"]=>
   float(2.2)
   [33]=>
   int(33)
@@ -178,7 +178,7 @@ array(1) {
 array(6) {
   [1]=>
   int(1)
-  [2]=>
+  ["2.2"]=>
   float(2.2)
   ["int"]=>
   string(3) "int"
