@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed bug #43386 (array_globals not reset to 0 properly on init). (Ilia)
 - Fixed bug #43377 (PHP crashes with invalid argument for DateTimeZone). (Ilia)
 - Fixed bug #43373 (pcntl_fork() should not raise E_ERROR on error). (Ilia)
+- Fixed bug #43364 (recursive xincludes don't remove internal xml nodes 
+  properly). (Rob, patch from ddb@bitxtender.de)
 - Fixed bug #43092 (curl_copy_handle() crashes with > 32 chars long URL).
   (Jani)
 - Fixed bug #43301 (mb_ereg*_replace() crashes when replacement string is
