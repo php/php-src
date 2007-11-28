@@ -1,5 +1,5 @@
 --TEST--
-Test array_combine() function : usage variations - different arrays
+Test array_combine() function : usage variations - different arrays(Bug#43424)
 --FILE--
 <?php
 /* Prototype  : array array_combine(array $keys, array $values)
