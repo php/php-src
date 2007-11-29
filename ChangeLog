@@ -1,3 +1,58 @@
+2007-11-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt:
+      
+      MFB: Fixed tests
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt:
+      
+      Fixed tests
+
+2007-11-28  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/dom/document.c
+      ext/dom/document.c
+      ext/dom/tests/bug43364.phpt
+      ext/dom/tests/bug43364.phpt:
+      MFH: Fix bug #43364 (recursive xincludes don't remove internal nodes
+      properly)
+      add test
+
+    * ext/dom/tests/bug43364.phpt
+      ext/dom/tests/bug43364.phpt
+      ext/dom/tests/bug43364.phpt:
+        1.1.4;
+      Fix bug #43364 (recursive xincludes don't remove internal nodes properly)
+
+    * ext/dom/document.c:
+      Fix bug #43364 (recursive xincludes don't remove internal nodes properly)
+
+2007-11-28  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt:
+      Marked with defect
+
 2007-11-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
