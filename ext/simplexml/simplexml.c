@@ -43,10 +43,11 @@
 
 zend_class_entry *sxe_class_entry = NULL;
 
-ZEND_API zend_class_entry *sxe_get_element_class_entry(TSRMLS_D)
+ZEND_API zend_class_entry *sxe_get_element_class_entry(TSRMLS_D) /* {{{ */
 {
 	return sxe_class_entry;
 }
+/* }}} */
 
 #define SXE_ME(func, arg_info, flags) PHP_ME(simplexml_element, func, arg_info, flags)
 #define SXE_MALIAS(func, alias, arg_info, flags) PHP_MALIAS(simplexml_element, func, alias, arg_info, flags)
@@ -58,6 +59,13 @@ static zend_object_value php_sxe_register_object(php_sxe_object * TSRMLS_DC);
 static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data TSRMLS_DC);
 static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data TSRMLS_DC);
 static zval *sxe_get_value(zval *z TSRMLS_DC);
+
+static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC);
+static int php_sxe_iterator_valid(zend_object_iterator *iter TSRMLS_DC);
+static void php_sxe_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
+static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
+static void php_sxe_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC);
+static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC);
 
 /* {{{ _node_as_zval()
  */
@@ -104,7 +112,8 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 	} \
 }
 
-static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node TSRMLS_DC) {
+static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node TSRMLS_DC) /* {{{ */
+{
 	php_sxe_object *intern;
 	xmlNodePtr retnode = NULL;
 
@@ -119,6 +128,7 @@ static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node TS
 		return node;
 	}
 }
+/* }}} */
 
 static inline int match_ns(php_sxe_object *sxe, xmlNodePtr node, xmlChar *name, int prefix) /* {{{ */
 {
@@ -1014,7 +1024,7 @@ static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval 
 }
 /* }}} */
 
-static void sxe_properties_add(HashTable *rv, char *name, int namelen, zval *value TSRMLS_DC)
+static void sxe_properties_add(HashTable *rv, char *name, int namelen, zval *value TSRMLS_DC) /* {{{ */
 {
 	zval  **data_ptr;
 	zval  *newptr;
@@ -1037,6 +1047,7 @@ static void sxe_properties_add(HashTable *rv, char *name, int namelen, zval *val
 		zend_hash_quick_update(rv, name, namelen, h, &value, sizeof(zval *), NULL);
 	}
 }
+/* }}} */
 
 static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{{ */
 {
@@ -1399,7 +1410,7 @@ SXE_METHOD(asXML)
 
 #define SXE_NS_PREFIX(ns) (ns->prefix ? (char*)ns->prefix : "")
 
-static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns TSRMLS_DC)
+static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns TSRMLS_DC) /* {{{ */
 {
 	uint prefix_len;
 	char *prefix = SXE_NS_PREFIX(ns);
@@ -1422,6 +1433,7 @@ static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns TSRMLS
 		}
 	}
 }
+/* }}} */
 
 static void sxe_add_namespaces(php_sxe_object *sxe, xmlNodePtr node, zend_bool recursive, zval *return_value TSRMLS_DC) /* {{{ */
 {
@@ -1857,7 +1869,7 @@ static int sxe_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static zval *sxe_get_value(zval *z TSRMLS_DC)
+static zval *sxe_get_value(zval *z TSRMLS_DC) /* {{{ */
 {
 	zval *retval;
 
@@ -1871,9 +1883,9 @@ static zval *sxe_get_value(zval *z TSRMLS_DC)
 	Z_SET_REFCOUNT_P(retval, 0);
 	return retval;
 }
+/* }}} */
 
-
-static zend_object_handlers sxe_object_handlers = {
+static zend_object_handlers sxe_object_handlers = { /* {{{ */
 	ZEND_OBJECTS_STORE_HANDLERS,
 	sxe_property_read,
 	sxe_property_write,
@@ -1897,6 +1909,7 @@ static zend_object_handlers sxe_object_handlers = {
 	sxe_count_elements,
 	sxe_get_debug_info
 };
+/* }}} */
 
 /* {{{ sxe_object_clone()
  */
@@ -2128,7 +2141,6 @@ PHP_FUNCTION(simplexml_load_string)
 }
 /* }}} */
 
-
 /* {{{ proto SimpleXMLElement::__construct(string data [, int options [, bool data_is_url [, string ns [, bool is_prefix]]]]) U
    SimpleXMLElement constructor */
 SXE_METHOD(__construct)
@@ -2180,15 +2192,7 @@ SXE_METHOD(__construct)
 }
 /* }}} */
 
-
-static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC);
-static int php_sxe_iterator_valid(zend_object_iterator *iter TSRMLS_DC);
-static void php_sxe_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
-static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
-static void php_sxe_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC);
-static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC);
-
-zend_object_iterator_funcs php_sxe_iterator_funcs = {
+zend_object_iterator_funcs php_sxe_iterator_funcs = { /* {{{ */
 	php_sxe_iterator_dtor,
 	php_sxe_iterator_valid,
 	php_sxe_iterator_current_data,
@@ -2196,8 +2200,9 @@ zend_object_iterator_funcs php_sxe_iterator_funcs = {
 	php_sxe_iterator_move_forward,
 	php_sxe_iterator_rewind,
 };
+/* }}} */
 
-static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data TSRMLS_DC)
+static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data TSRMLS_DC) /* {{{ */
 {
 	xmlChar *prefix  = sxe->iter.nsprefix;
 	int isprefix  = sxe->iter.isprefix;
@@ -2226,8 +2231,9 @@ next_iter:
 
 	return node;
 }
+/* }}} */
 
-static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data TSRMLS_DC)
+static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data TSRMLS_DC) /* {{{ */
 {
 	xmlNodePtr node;
 
@@ -2252,8 +2258,9 @@ static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data TSRML
 	}
 	return NULL;
 }
+/* }}} */
 
-zend_object_iterator *php_sxe_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
+zend_object_iterator *php_sxe_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
 {
 	php_sxe_iterator *iterator;
 
@@ -2269,8 +2276,9 @@ zend_object_iterator *php_sxe_get_iterator(zend_class_entry *ce, zval *object, i
 
 	return (zend_object_iterator*)iterator;
 }
+/* }}} */
 
-static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
+static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 
@@ -2281,22 +2289,25 @@ static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 
 	efree(iterator);
 }
+/* }}} */
 
-static int php_sxe_iterator_valid(zend_object_iterator *iter TSRMLS_DC)
+static int php_sxe_iterator_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 
 	return iterator->sxe->iter.data ? SUCCESS : FAILURE;
 }
+/* }}} */
 
-static void php_sxe_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
+static void php_sxe_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC) /* {{{ */
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 
 	*data = &iterator->sxe->iter.data;
 }
+/* }}} */
 
-static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
 {
 	zval *curobj;
 	xmlNodePtr curnode = NULL;
@@ -2329,8 +2340,9 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_ke
 		return HASH_KEY_IS_STRING;
 	}
 }
+/* }}} */
 
-ZEND_API void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC)
+ZEND_API void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC) /* {{{ */
 {
 	xmlNodePtr      node = NULL;
 	php_sxe_object  *intern;
@@ -2346,14 +2358,16 @@ ZEND_API void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC)
 		php_sxe_iterator_fetch(sxe, node->next, 1 TSRMLS_CC);
 	}
 }
+/* }}} */
 
-static void php_sxe_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
+static void php_sxe_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 	php_sxe_move_forward_iterator(iterator->sxe TSRMLS_CC);
 }
+/* }}} */
 
-static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC)
+static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
 	php_sxe_object	*sxe;
 
@@ -2362,8 +2376,9 @@ static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC)
 
 	php_sxe_reset_iterator(sxe, 1 TSRMLS_CC);
 }
+/* }}} */
 
-void *simplexml_export_node(zval *object TSRMLS_DC)
+void *simplexml_export_node(zval *object TSRMLS_DC) /* {{{ */
 {
 	php_sxe_object *sxe;
 	xmlNodePtr node;
@@ -2372,6 +2387,7 @@ void *simplexml_export_node(zval *object TSRMLS_DC)
 	GET_NODE(sxe, node);
 	return php_sxe_get_first_node(sxe, node TSRMLS_CC);	
 }
+/* }}} */
 
 /* {{{ proto simplemxml_element simplexml_import_dom(domNode node [, string class_name]) U
    Get a simplexml_element object from dom to allow for processing */
@@ -2419,19 +2435,21 @@ PHP_FUNCTION(simplexml_import_dom)
 }
 /* }}} */
 
-const zend_function_entry simplexml_functions[] = {
+const zend_function_entry simplexml_functions[] = { /* {{{ */
 	PHP_FE(simplexml_load_file, NULL)
 	PHP_FE(simplexml_load_string, NULL)
 	PHP_FE(simplexml_import_dom, NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
-static const zend_module_dep simplexml_deps[] = {
+static const zend_module_dep simplexml_deps[] = { /* {{{ */
 	ZEND_MOD_REQUIRED("libxml")
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
-zend_module_entry simplexml_module_entry = {
+zend_module_entry simplexml_module_entry = { /* {{{ */
 	STANDARD_MODULE_HEADER_EX, NULL,
 	simplexml_deps,
 	"SimpleXML",
@@ -2444,6 +2462,7 @@ zend_module_entry simplexml_module_entry = {
 	"0.1",
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_SIMPLEXML
 ZEND_GET_MODULE(simplexml)
@@ -2451,7 +2470,7 @@ ZEND_GET_MODULE(simplexml)
 
 /* the method table */
 /* each method can have its own parameters and visibility */
-static const zend_function_entry sxe_functions[] = {
+static const zend_function_entry sxe_functions[] = { /* {{{ */
 	SXE_ME(__construct,            NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
 	SXE_ME(asXML,                  NULL, ZEND_ACC_PUBLIC)
 	SXE_MALIAS(saveXML, asXML,	   NULL, ZEND_ACC_PUBLIC)
@@ -2466,6 +2485,7 @@ static const zend_function_entry sxe_functions[] = {
 	SXE_ME(addAttribute,           NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION(simplexml)
  */
@@ -2504,6 +2524,7 @@ PHP_MSHUTDOWN_FUNCTION(simplexml)
 	return SUCCESS;
 }
 /* }}} */
+
 /* {{{ PHP_MINFO_FUNCTION(simplexml)
  */
 PHP_MINFO_FUNCTION(simplexml)
