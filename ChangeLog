@@ -1,3 +1,20 @@
+2007-11-29  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/pgsql/pgsql.c:
+      fix build
+
+2007-11-29  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/tests/network/http-stream.phpt:
+      - MFH: Fixed a segfault when reading from an HTTP stream.
+
+    * ext/standard/http_fopen_wrapper.c
+      ext/standard/tests/network/http-stream.phpt
+      ext/standard/tests/network/http-stream.phpt:
+      - Fixed a segfault when reading from an HTTP stream.
+
 2007-11-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/tests/array/array_combine_variation3.phpt
