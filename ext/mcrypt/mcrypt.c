@@ -1030,7 +1030,7 @@ int php_mcrypt_func(php_mcrypt_op op, char *cipher, char *mode, char *key_str, i
 {
 	MCRYPT td;
 	char *cipher_dir_string, *module_dir_string, *key_copy, *iv_copy;
-	int i, status = SUCCESS, count, *key_sizes, key_size, iv_size, block_size;
+	int i, status = SUCCESS, count, *key_sizes, key_size, iv_size, block_size, iv_req;
 	
 	MCRYPT_GET_INI
 	
@@ -1068,6 +1068,7 @@ int php_mcrypt_func(php_mcrypt_op op, char *cipher, char *mode, char *key_str, i
 	mcrypt_free(key_sizes);
 	
 	iv_size = mcrypt_enc_get_iv_size(td);
+	iv_req = mcrypt_enc_mode_has_iv(td);
 	if (iv_len) {
 		if (iv_len == iv_size) {
 			iv_copy = estrndup(iv_str, iv_len);
@@ -1077,7 +1078,9 @@ int php_mcrypt_func(php_mcrypt_op op, char *cipher, char *mode, char *key_str, i
 			memcpy(iv_copy, iv_str, MIN(iv_len, iv_size));
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempt to use an empty IV, which is NOT recommended");
+		if (iv_req) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempt to use an empty IV, which is NOT recommended");
+		}
 		iv_copy = ecalloc(1, iv_size);
 	}
 	
