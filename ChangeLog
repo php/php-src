@@ -1,3 +1,15 @@
+2007-11-30  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/simplexml/simplexml.c:
+      fix folding, move protos to the top of the sources
+
+2007-11-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Fixed a typo
+
 2007-11-29  Antony Dovgal  <tony@daylessday.org>
 
     * ext/pgsql/pgsql.c:
