@@ -993,7 +993,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 {
 	char *cipher_dir_string;
 	char *module_dir_string;
-	int block_size, max_key_length, use_key_length, i, count, iv_size;
+	int block_size, max_key_length, use_key_length, i, count, iv_size, req_iv;
 	unsigned long int data_size;
 	int *key_length_sizes;
 	char *key_s = NULL, *iv_s;
@@ -1041,6 +1041,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	/* Check IV */
 	iv_s = NULL;
 	iv_size = mcrypt_enc_get_iv_size (td);
+	req_iv = mcrypt_enc_mode_has_iv(td);
 	if (argc == 5) {
 		if (iv_size != Z_STRLEN_PP(iv)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_IV_WRONG_SIZE);
@@ -1049,7 +1050,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 			memcpy(iv_s, Z_STRVAL_PP(iv), iv_size);
 		}
 	} else if (argc == 4) {
-		if (iv_size != 0) {
+		if (req_iv == 1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempt to use an empty IV, which is NOT recommend");
 			iv_s = emalloc(iv_size + 1);
 			memset(iv_s, 0, iv_size + 1);

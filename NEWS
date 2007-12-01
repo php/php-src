@@ -59,6 +59,7 @@ PHP                                                                        NEWS
 
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 
+- Fixed bug #43143 (Warning about empty IV with MCRYPT_MODE_ECB). (Derick)
 - Fixed bug #43136 (possible crash on script execution timeout.
   The EG(function_state_ptr) is completely removed,
   EG(current_execute_data)->function_state must be used instead). (Dmitry)
