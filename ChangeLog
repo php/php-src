@@ -1,3 +1,19 @@
+2007-12-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/bug43143.phpt:
+      - MFH: Fixed bug #43143 (Warning about empty IV with MCRYPT_MODE_ECB).
+
+    * ext/mcrypt/tests/bug43143.phpt
+      ext/mcrypt/tests/bug43143.phpt:
+      
+      - Fixed bug #43143 (Warning about empty IV with MCRYPT_MODE_ECB).
+
+    * ext/mcrypt/mcrypt.c:
+      - Fixed bug #43143 (Warning about empty IV with MCRYPT_MODE_ECB).
+
 2007-11-30  Antony Dovgal  <tony@daylessday.org>
 
     * ext/simplexml/simplexml.c:
