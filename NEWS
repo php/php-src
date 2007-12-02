@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.6
+- Fixed bug #43457 (Prepared statement with incorrect parms doens't
+  throw exception with pdo_pgsql driver). (Ilia)
 - Fixed bug #43386 (array_globals not reset to 0 properly on init). (Ilia)
 - Fixed bug #43377 (PHP crashes with invalid argument for DateTimeZone). (Ilia)
 - Fixed bug #43373 (pcntl_fork() should not raise E_ERROR on error). (Ilia)

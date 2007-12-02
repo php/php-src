@@ -238,7 +238,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 								param->name, param->namelen + 1, (void**)&nameptr)) {
 							param->paramno = atoi(nameptr + 1) - 1;
 						} else {
-							pdo_pgsql_error_stmt(stmt, PGRES_FATAL_ERROR, "HY093");
+							pdo_raise_impl_error(stmt->dbh, stmt, "HY093", param->name TSRMLS_CC);
 							return 0;
 						}
 					}
