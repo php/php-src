@@ -36,8 +36,8 @@ $values =  array (
   // float values
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.1234567e10,
+  10.7654321E-10,
   .5,
 
   // array values
@@ -143,17 +143,17 @@ string(5) "-10.5"
 string(5) "-10.5"
 string(13) "-10<br />\n.5"
 -- Iteration 7 --
-string(12) "105000000000"
-string(12) "105000000000"
-string(12) "105000000000"
-string(12) "105000000000"
-string(36) "105<br />\n000<br />\n000<br />\n000"
+string(12) "101234567000"
+string(12) "101234567000"
+string(12) "101234567000"
+string(12) "101234567000"
+string(36) "101<br />\n234<br />\n567<br />\n000"
 -- Iteration 8 --
-string(7) "1.06E-9"
-string(7) "1.06E-9"
-string(7) "1.06E-9"
-string(7) "1.06E-9"
-string(23) "1.0<br />\n6E-<br />\n9"
+string(13) "1.07654321E-9"
+string(13) "1.07654321E-9"
+string(13) "1.07654321E-9"
+string(13) "1.07654321E-9"
+string(45) "1.0<br />\n765<br />\n432<br />\n1E-<br />\n9"
 -- Iteration 9 --
 string(3) "0.5"
 string(3) "0.5"
