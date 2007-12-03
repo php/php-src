@@ -1342,7 +1342,9 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	if (class_type->op_type != IS_UNUSED) {
 		cur_arg_info->allow_null = 0;
 		if (class_type->u.constant.type == IS_STRING) {
-			zend_resolve_class_name(class_type, &opline->extended_value, 1 TSRMLS_CC);
+			if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant))) {
+				zend_resolve_class_name(class_type, &opline->extended_value, 1 TSRMLS_CC);
+			}
 			cur_arg_info->class_name = class_type->u.constant.value.str.val;
 			cur_arg_info->class_name_len = class_type->u.constant.value.str.len;
 			if (op == ZEND_RECV_INIT) {
@@ -1542,6 +1544,10 @@ void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_
 			Z_STRVAL(class_name->u.constant) = erealloc(
 				Z_STRVAL(class_name->u.constant),
 				Z_STRLEN(class_name->u.constant) + 1);
+
+			if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
+				zend_error(E_COMPILE_ERROR, "'::%s' is a wrong class name", Z_STRVAL(class_name->u.constant));
+			}
 		} else if (CG(current_import)) {
 			len = compound - Z_STRVAL(class_name->u.constant);
 			lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), len);
