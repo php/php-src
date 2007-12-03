@@ -37,8 +37,8 @@ $values =  array (
   // float values
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.1234567e10,
+  10.7654321E-10,
   .5,
 
   // array values
@@ -130,13 +130,13 @@ string(33) "testing-10.5wordwrap-10.5function"
 string(33) "testing-10.5wordwrap-10.5function"
 string(33) "testing-10.5wordwrap-10.5function"
 -- Iteration 7 --
-string(47) "testing105000000000wordwrap105000000000function"
-string(47) "testing105000000000wordwrap105000000000function"
-string(47) "testing105000000000wordwrap105000000000function"
+string(47) "testing101234567000wordwrap101234567000function"
+string(47) "testing101234567000wordwrap101234567000function"
+string(47) "testing101234567000wordwrap101234567000function"
 -- Iteration 8 --
-string(37) "testing1.06E-9wordwrap1.06E-9function"
-string(37) "testing1.06E-9wordwrap1.06E-9function"
-string(37) "testing1.06E-9wordwrap1.06E-9function"
+string(49) "testing1.07654321E-9wordwrap1.07654321E-9function"
+string(49) "testing1.07654321E-9wordwrap1.07654321E-9function"
+string(49) "testing1.07654321E-9wordwrap1.07654321E-9function"
 -- Iteration 9 --
 string(29) "testing0.5wordwrap0.5function"
 string(29) "testing0.5wordwrap0.5function"
