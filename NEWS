@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.6
+- Fixed bug #43482 (array_pad() does not warn on very small pad numbers).
+  (Ilia)
 - Fixed bug #43457 (Prepared statement with incorrect parms doens't
   throw exception with pdo_pgsql driver). (Ilia)
 - Fixed bug #43386 (array_globals not reset to 0 properly on init). (Ilia)

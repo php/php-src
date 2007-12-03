@@ -2655,6 +2655,11 @@ PHP_FUNCTION(array_pad)
 	/* Do some initial calculations */
 	input_size = zend_hash_num_elements(Z_ARRVAL_PP(input));
 	pad_size_abs = abs(Z_LVAL_PP(pad_size));
+	if (pad_size_abs < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may only pad up to 1048576 elements at a time");
+		zval_dtor(return_value);
+		RETURN_FALSE;
+	}
 	do_pad = (input_size >= pad_size_abs) ? 0 : 1;
 	
 	/* Copy the original array */
