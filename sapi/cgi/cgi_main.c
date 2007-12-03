@@ -1690,12 +1690,12 @@ consult the installation file that came with this distribution, or visit \n\
 							}
 							script_file = estrdup(php_optarg);
 							no_headers = 1;
-							/* arguments after the file are considered script args */
-							SG(request_info).argc = argc - (php_optind - 1);
-							SG(request_info).argv = &argv[php_optind - 1];
 							break;
 
 						case 'i': /* php info & quit */
+							if (script_file) {
+								efree(script_file);
+							}
 							if (php_request_startup(TSRMLS_C) == FAILURE) {
 								SG(server_context) = NULL;
 								php_module_shutdown(TSRMLS_C);
@@ -1716,6 +1716,9 @@ consult the installation file that came with this distribution, or visit \n\
 							break;
 
 						case 'm': /* list compiled in modules */
+							if (script_file) {
+								efree(script_file);
+							}
 							php_output_startup();
 							php_output_activate(TSRMLS_C);
 							SG(headers_sent) = 1;
@@ -1739,6 +1742,9 @@ consult the installation file that came with this distribution, or visit \n\
 							break;
 
 						case 'v': /* show php version & quit */
+							if (script_file) {
+								efree(script_file);
+							}
 							no_headers = 1;
 							if (php_request_startup(TSRMLS_C) == FAILURE) {
 								SG(server_context) = NULL;
@@ -1775,19 +1781,23 @@ consult the installation file that came with this distribution, or visit \n\
 					/* override path_translated if -f on command line */
 					STR_FREE(SG(request_info).path_translated);
 					SG(request_info).path_translated = script_file;
+					/* before registering argv to module exchange the *new* argv[0] */
+					/* we can achieve this without allocating more memory */
+					SG(request_info).argc = argc - (php_optind - 1);
+					SG(request_info).argv = &argv[php_optind - 1];
+					SG(request_info).argv[0] = script_file;
+				} else if (argc > php_optind) {
+					/* file is on command line, but not in -f opt */
+					STR_FREE(SG(request_info).path_translated);
+					SG(request_info).path_translated = estrdup(argv[php_optind++]);
+					/* arguments after the file are considered script args */
+					SG(request_info).argc = argc - php_optind;
+					SG(request_info).argv = &argv[php_optind];
 				}
 
 				if (no_headers) {
 					SG(headers_sent) = 1;
 					SG(request_info).no_headers = 1;
-				}
-
-				if (!SG(request_info).path_translated && argc > php_optind) {
-					/* arguments after the file are considered script args */
-					SG(request_info).argc = argc - php_optind;
-					SG(request_info).argv = &argv[php_optind];
-					/* file is on command line, but not in -f opt */
-					SG(request_info).path_translated = estrdup(argv[php_optind++]);
 				}
 
 				/* all remaining arguments are part of the query string
