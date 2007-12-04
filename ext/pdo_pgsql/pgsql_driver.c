@@ -493,14 +493,14 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	/* support both full connection string & connection string + login and/or password */
-	if (!dbh->username || !dbh->password) {
-		conn_str = (char *) dbh->data_source;
-	} else if (dbh->username && dbh->password) {
+	if (dbh->username && dbh->password) {
 		spprintf(&conn_str, 0, "%s user=%s password=%s", dbh->data_source, dbh->username, dbh->password);
 	} else if (dbh->username) {
 		spprintf(&conn_str, 0, "%s user=%s", dbh->data_source, dbh->username);
-	} else {
+	} else if (dbh->password) {
 		spprintf(&conn_str, 0, "%s password=%s", dbh->data_source, dbh->password);
+	} else {
+		conn_str = (char *) dbh->data_source;
 	}
 
 	H->server = PQconnectdb(conn_str);
