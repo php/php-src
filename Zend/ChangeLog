@@ -1,3 +1,18 @@
+2007-12-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug43332_1.phpt
+      tests/bug43332_2.phpt:
+      Fixed bug #43332 (self and parent as type hint in namespace)
+
+    * tests/bug43332_1.phpt
+      tests/bug43332_1.phpt
+      tests/bug43332_2.phpt
+      tests/bug43332_2.phpt:
+      
+      file bug43332_1.phpt was initially added on branch PHP_5_3.
+
 2007-11-23  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.h

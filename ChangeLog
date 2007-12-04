@@ -1,3 +1,194 @@
+2007-12-03  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      NEWS:
+      fix typos
+      use the earliest bug report in the description
+
+2007-12-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      bug numbers
+
+    * (PHP_5_2)
+      NEWS
+      main/SAPI.c
+      main/SAPI.c
+      main/SAPI.c:
+      Fixed crash because of uninitialized SG(sapi_headers).mimetype
+
+2007-12-03  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2007.10
+
+2007-12-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      Fixed weired behavior in CGI parameter parsing
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug43332_1.phpt
+      ZendEngine2/tests/bug43332_2.phpt:
+      Fixed bug #43332 (self and parent as type hint in namespace)
+
+    * ZendEngine2/tests/bug43332_1.phpt
+      ZendEngine2/tests/bug43332_1.phpt
+      ZendEngine2/tests/bug43332_2.phpt
+      ZendEngine2/tests/bug43332_2.phpt:
+      
+      file bug43332_1.phpt was initially added on branch PHP_5_3.
+
+2007-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c
+      ext/standard/array.c:
+      
+      MFB:  Fixed bug #43482 (array_pad() does not warn on very small pad
+      numbers).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c:
+      
+      Fixed bug #43482 (array_pad() does not warn on very small pad numbers).
+
+2007-12-03  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/wordwrap_variation1.phpt
+      ext/standard/tests/strings/wordwrap_variation1.phpt
+      ext/standard/tests/strings/wordwrap_variation1.phpt
+      ext/standard/tests/strings/wordwrap_variation3.phpt
+      ext/standard/tests/strings/wordwrap_variation3.phpt
+      ext/standard/tests/strings/wordwrap_variation3.phpt:
+      fix tests : better float values
+
+    * ext/standard/tests/strings/vsprintf_variation1.phpt
+      ext/standard/tests/strings/vsprintf_variation1.phpt
+      ext/standard/tests/strings/vsprintf_variation1.phpt
+      ext/standard/tests/strings/vsprintf_variation2.phpt
+      ext/standard/tests/strings/vsprintf_variation2.phpt
+      ext/standard/tests/strings/vsprintf_variation2.phpt:
+      fix tests: better float values
+
+    * ext/standard/tests/array/array_pad_basic.phpt
+      ext/standard/tests/array/array_pad_error.phpt
+      ext/standard/tests/array/array_pad_error.phpt
+      ext/standard/tests/array/array_pad_error.phpt
+      ext/standard/tests/array/array_pad_variation1.phpt
+      ext/standard/tests/array/array_pad_variation1.phpt
+      ext/standard/tests/array/array_pad_variation1.phpt
+      ext/standard/tests/array/array_pad_variation2.phpt
+      ext/standard/tests/array/array_pad_variation2.phpt
+      ext/standard/tests/array/array_pad_variation2.phpt
+      ext/standard/tests/array/array_pad_variation3.phpt
+      ext/standard/tests/array/array_pad_variation3.phpt
+      ext/standard/tests/array/array_pad_variation3.phpt
+      ext/standard/tests/array/array_pad_variation4.phpt
+      ext/standard/tests/array/array_pad_variation4.phpt
+      ext/standard/tests/array/array_pad_variation4.phpt
+      ext/standard/tests/array/array_pad_variation5.phpt
+      ext/standard/tests/array/array_pad_variation5.phpt
+      ext/standard/tests/array/array_pad_variation5.phpt
+      ext/standard/tests/array/array_pad_variation6.phpt
+      ext/standard/tests/array/array_pad_variation6.phpt
+      ext/standard/tests/array/array_pad_variation6.phpt
+      ext/standard/tests/array/array_pad_variation7.phpt
+      ext/standard/tests/array/array_pad_variation7.phpt
+      ext/standard/tests/array/array_pad_variation7.phpt:
+      New testcases for array_pad() function
+
+    * ext/standard/tests/array/array_pad_basic.phpt
+      ext/standard/tests/array/array_pad_basic.phpt
+      ext/standard/tests/array/array_pad_error.phpt
+      ext/standard/tests/array/array_pad_error.phpt
+      ext/standard/tests/array/array_pad_variation1.phpt
+      ext/standard/tests/array/array_pad_variation1.phpt
+      ext/standard/tests/array/array_pad_variation2.phpt
+      ext/standard/tests/array/array_pad_variation2.phpt
+      ext/standard/tests/array/array_pad_variation3.phpt
+      ext/standard/tests/array/array_pad_variation3.phpt
+      ext/standard/tests/array/array_pad_variation4.phpt
+      ext/standard/tests/array/array_pad_variation4.phpt
+      ext/standard/tests/array/array_pad_variation5.phpt
+      ext/standard/tests/array/array_pad_variation5.phpt
+      ext/standard/tests/array/array_pad_variation6.phpt
+      ext/standard/tests/array/array_pad_variation6.phpt
+      ext/standard/tests/array/array_pad_variation7.phpt
+      ext/standard/tests/array/array_pad_variation7.phpt:
+      
+      file array_pad_basic.phpt was initially added on branch PHP_5_2.
+
+2007-12-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      The -f option is fixed to work in the same way as in CLI sapi
+
+2007-12-03  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_chunk_basic1.phpt
+      ext/standard/tests/array/array_chunk_basic1.phpt
+      ext/standard/tests/array/array_chunk_basic2.phpt
+      ext/standard/tests/array/array_chunk_basic2.phpt
+      ext/standard/tests/array/array_chunk_error.phpt
+      ext/standard/tests/array/array_chunk_error.phpt
+      ext/standard/tests/array/array_chunk_variation1.phpt
+      ext/standard/tests/array/array_chunk_variation1.phpt
+      ext/standard/tests/array/array_chunk_variation2.phpt
+      ext/standard/tests/array/array_chunk_variation2.phpt
+      ext/standard/tests/array/array_chunk_variation3.phpt
+      ext/standard/tests/array/array_chunk_variation3.phpt
+      ext/standard/tests/array/array_chunk_variation4.phpt
+      ext/standard/tests/array/array_chunk_variation4.phpt
+      ext/standard/tests/array/array_chunk_variation5.phpt
+      ext/standard/tests/array/array_chunk_variation5.phpt
+      ext/standard/tests/array/array_chunk_variation6.phpt
+      ext/standard/tests/array/array_chunk_variation6.phpt
+      ext/standard/tests/array/array_chunk_variation7.phpt
+      ext/standard/tests/array/array_chunk_variation7.phpt:
+      New testcases for array_chunk() function
+
+    * ext/standard/tests/array/array_chunk_basic1.phpt
+      ext/standard/tests/array/array_chunk_basic1.phpt
+      ext/standard/tests/array/array_chunk_basic1.phpt
+      ext/standard/tests/array/array_chunk_basic2.phpt
+      ext/standard/tests/array/array_chunk_basic2.phpt
+      ext/standard/tests/array/array_chunk_basic2.phpt
+      ext/standard/tests/array/array_chunk_error.phpt
+      ext/standard/tests/array/array_chunk_error.phpt
+      ext/standard/tests/array/array_chunk_error.phpt
+      ext/standard/tests/array/array_chunk_variation1.phpt
+      ext/standard/tests/array/array_chunk_variation1.phpt
+      ext/standard/tests/array/array_chunk_variation1.phpt
+      ext/standard/tests/array/array_chunk_variation2.phpt
+      ext/standard/tests/array/array_chunk_variation2.phpt
+      ext/standard/tests/array/array_chunk_variation2.phpt
+      ext/standard/tests/array/array_chunk_variation3.phpt
+      ext/standard/tests/array/array_chunk_variation3.phpt
+      ext/standard/tests/array/array_chunk_variation3.phpt
+      ext/standard/tests/array/array_chunk_variation4.phpt
+      ext/standard/tests/array/array_chunk_variation4.phpt
+      ext/standard/tests/array/array_chunk_variation4.phpt
+      ext/standard/tests/array/array_chunk_variation5.phpt
+      ext/standard/tests/array/array_chunk_variation5.phpt
+      ext/standard/tests/array/array_chunk_variation5.phpt
+      ext/standard/tests/array/array_chunk_variation6.phpt
+      ext/standard/tests/array/array_chunk_variation6.phpt
+      ext/standard/tests/array/array_chunk_variation6.phpt
+      ext/standard/tests/array/array_chunk_variation7.phpt
+      ext/standard/tests/array/array_chunk_variation7.phpt
+      ext/standard/tests/array/array_chunk_variation7.phpt:
+        1.1.4;
+      New testcases for array_chunk() function
+
 2007-12-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
