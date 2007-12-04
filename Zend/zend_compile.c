@@ -1338,6 +1338,8 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	cur_arg_info->array_type_hint = 0;
 	cur_arg_info->allow_null = 1;
 	cur_arg_info->pass_by_reference = pass_by_reference;
+	cur_arg_info->class_name = NULL;
+	cur_arg_info->class_name_len = 0;
 
 	if (class_type->op_type != IS_UNUSED) {
 		cur_arg_info->allow_null = 0;
@@ -1366,9 +1368,6 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 				}
 			}
 		}
-	} else {
-		cur_arg_info->class_name = NULL;
-		cur_arg_info->class_name_len = 0;
 	}
 	opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 }
