@@ -1040,7 +1040,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 		goto out;
 	}
 
-	cd_pl = iconv_open("ASCII", enc);
+	cd_pl = iconv_open(ICONV_ASCII_ENCODING, enc);
 	if (cd_pl == (iconv_t)(-1)) {
 #if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
@@ -1351,7 +1351,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 		*next_pos = NULL;
 	}
 
-	cd_pl = iconv_open(enc, "ASCII");
+	cd_pl = iconv_open(enc, ICONV_ASCII_ENCODING);
 
 	if (cd_pl == (iconv_t)(-1)) {
 #if ICONV_SUPPORTS_ERRNO
