@@ -79,9 +79,24 @@ int main() {
       ])
     fi
 
+    if test -z "$iconv_impl_name"; then
+      AC_MSG_CHECKING([if using IBM iconv])
+      php_iconv_old_ld="$LDFLAGS"
+      LDFLAGS="-liconv $LDFLAGS"
+      AC_TRY_LINK([#include <iconv.h>],[cstoccsid("");],
+      [
+        AC_MSG_RESULT(yes)
+        iconv_impl_name="ibm"
+      ],[
+        AC_MSG_RESULT(no)
+        LDFLAGS="$php_iconv_old_ld"
+      ])
+    fi
+
     echo > ext/iconv/php_have_bsd_iconv.h
     echo > ext/iconv/php_have_glibc_iconv.h
     echo > ext/iconv/php_have_libiconv.h
+    echo > ext/iconv/php_have_ibm_iconv.h
 
     case "$iconv_impl_name" in
       gnu_libiconv [)]
@@ -103,6 +118,12 @@ int main() {
         AC_DEFINE([HAVE_GLIBC_ICONV],1,[glibc's iconv implementation])
         PHP_DEFINE([PHP_ICONV_IMPL],[\"glibc\"],[ext/iconv])
         AC_DEFINE([PHP_ICONV_IMPL],["glibc"],[Which iconv implementation to use])
+        ;;
+      ibm [)]
+        PHP_DEFINE([HAVE_IBM_ICONV],1,[ext/iconv])
+        AC_DEFINE([HAVE_IBM_ICONV],1,[IBM iconv implementation])
+        PHP_DEFINE([PHP_ICONV_IMPL],[\"IBM iconv\"],[ext/iconv])
+        AC_DEFINE([PHP_ICONV_IMPL],["IBM iconv"],[Which iconv implementation to use])
         ;;
     esac
 
