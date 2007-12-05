@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2008, PHP 5.2.6
 - Fixed weired behavior in CGI parameter parsing. (Dmitry, Hannes Magnusson)
 
+- Fixed bug #43495 (array_merge_recursive() crashes with recursive arrays).
+  (Ilia)
 - Fixed bug #43493 (pdo_pgsql does not send username on connect when password
   is not available). (Ilia)
 - Fixed bug #43482 (array_pad() does not warn on very small pad numbers).
