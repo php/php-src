@@ -1,3 +1,64 @@
+2007-12-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      ext/libxml/config.w32:
+      MFH: starting with 2.6.30, standard libxml2 build can be used
+
+    * ext/libxml/config.w32:
+      starting with 2.6.30, standard libxml2 build can be used
+
+2007-12-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo_pgsql/tests/bug36727.phpt
+      ext/pdo_pgsql/tests/bug36727.phpt:
+      
+      MFB: fixed test
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_pgsql/pgsql_driver.c
+      ext/pdo_pgsql/pgsql_driver.c:
+      
+      MFB: Fixed bug #43493 (pdo_pgsql does not send username on connect when
+      password is not available)
+
+    * (PHP_5_3)
+      ext/pdo_pgsql/tests/bug36727.phpt:
+      
+      Fixed test
+
+    * (PHP_5_3)
+      ext/pdo_pgsql/pgsql_driver.c:
+      
+      Fixed bug #43493 (pdo_pgsql does not send username on connect when
+      password
+      is not available)
+
+2007-12-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Fixed uninitialized value
+
+2007-12-04  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/iconv/.cvsignore
+      ext/iconv/config.m4
+      ext/iconv/iconv.c
+      ext/iconv/php_iconv.h:
+      MFH: detect IBM iconv implementation and use correct encoding names
+
+    * ext/iconv/.cvsignore
+      ext/iconv/config.m4
+      ext/iconv/iconv.c
+      ext/iconv/php_iconv.h:
+      detect IBM iconv implementation and use correct encoding names
+
+    * ext/curl/interface.c
+      ext/curl/multi.c:
+      fix folding
+
 2007-12-03  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_2)

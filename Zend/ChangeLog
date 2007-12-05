@@ -1,3 +1,9 @@
+2007-12-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      Fixed uninitialized value
+
 2007-12-03  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
