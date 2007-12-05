@@ -44,6 +44,7 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 
 #define SPL_ARRAY_STD_PROP_LIST      0x00000001
 #define SPL_ARRAY_ARRAY_AS_PROPS     0x00000002
+#define SPL_ARRAY_CHILD_ARRAYS_ONLY  0x00000004
 #define SPL_ARRAY_OVERLOADED_REWIND  0x00010000
 #define SPL_ARRAY_OVERLOADED_VALID   0x00020000
 #define SPL_ARRAY_OVERLOADED_KEY     0x00040000
@@ -53,7 +54,7 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 #define SPL_ARRAY_IS_SELF            0x02000000
 #define SPL_ARRAY_USE_OTHER          0x04000000
 #define SPL_ARRAY_INT_MASK           0xFFFF0000
-#define SPL_ARRAY_CLONE_MASK         0x03000007
+#define SPL_ARRAY_CLONE_MASK         0x030000FF
 
 typedef struct _spl_array_object {
 	zend_object       std;
@@ -119,7 +120,7 @@ static void spl_array_object_free_storage(void *object TSRMLS_DC)
 
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 
-/* {{{ spl_array_object_new */
+/* {{{ spl_array_object_new_ex */
 static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, spl_array_object **obj, zval *orig, int clone_orig TSRMLS_DC)
 {
 	zend_object_value retval;
@@ -944,6 +945,9 @@ SPL_METHOD(Array, __construct)
 
 	if (Z_TYPE_PP(array) == IS_ARRAY) {
 		SEPARATE_ZVAL_IF_NOT_REF(array);
+		if (ZEND_NUM_ARGS() < 2) {
+			ar_flags |= SPL_ARRAY_CHILD_ARRAYS_ONLY;
+		}
 	}
 
 	if (ZEND_NUM_ARGS() > 2) {
@@ -997,7 +1001,7 @@ SPL_METHOD(Array, __construct)
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
-/* }}} */
+ /* }}} */
 
 /* {{{ proto void ArrayObject::setIteratorClass(string iterator_class)
    Set the class used in getIterator. */
@@ -1238,32 +1242,32 @@ SPL_METHOD(cname, fname) \
 /* {{{ proto int ArrayObject::asort()
        proto int ArrayIterator::asort()
  Sort the entries by values. */
-SPL_ARRAY_METHOD(Array, asort, 0)
+SPL_ARRAY_METHOD(Array, asort, 0) /* }}} */
 
 /* {{{ proto int ArrayObject::ksort()
        proto int ArrayIterator::ksort()
  Sort the entries by key. */
-SPL_ARRAY_METHOD(Array, ksort, 0)
+SPL_ARRAY_METHOD(Array, ksort, 0) /* }}} */
 
 /* {{{ proto int ArrayObject::uasort(callback cmp_function)
        proto int ArrayIterator::uasort(callback cmp_function)
  Sort the entries by values user defined function. */
-SPL_ARRAY_METHOD(Array, uasort, 1)
+SPL_ARRAY_METHOD(Array, uasort, 1) /* }}} */
 
 /* {{{ proto int ArrayObject::uksort(callback cmp_function)
        proto int ArrayIterator::uksort(callback cmp_function)
  Sort the entries by key using user defined function. */
-SPL_ARRAY_METHOD(Array, uksort, 1)
+SPL_ARRAY_METHOD(Array, uksort, 1) /* }}} */
 
 /* {{{ proto int ArrayObject::natsort()
        proto int ArrayIterator::natsort()
  Sort the entries by values using "natural order" algorithm. */
-SPL_ARRAY_METHOD(Array, natsort, 0)
+SPL_ARRAY_METHOD(Array, natsort, 0) /* }}} */
 
 /* {{{ proto int ArrayObject::natcasesort()
        proto int ArrayIterator::natcasesort()
  Sort the entries by key using case insensitive "natural order" algorithm. */
-SPL_ARRAY_METHOD(Array, natcasesort, 0)
+SPL_ARRAY_METHOD(Array, natcasesort, 0) /* }}} /
 
 /* {{{ proto mixed|NULL ArrayIterator::current()
    Return current array entry */
@@ -1296,7 +1300,7 @@ SPL_METHOD(Array, current)
 SPL_METHOD(Array, key)
 {
 	spl_array_iterator_key(getThis(), return_value TSRMLS_CC);
-}
+} /* }}} */
 
 void spl_array_iterator_key(zval *object, zval *return_value TSRMLS_DC) /* {{{ */
 {
@@ -1390,7 +1394,7 @@ SPL_METHOD(Array, hasChildren)
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(Z_TYPE_PP(entry) == IS_ARRAY || Z_TYPE_PP(entry) == IS_OBJECT);
+	RETURN_BOOL(Z_TYPE_PP(entry) == IS_ARRAY || (Z_TYPE_PP(entry) == IS_OBJECT && (intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) == 0));
 }
 /* }}} */
 
@@ -1416,17 +1420,23 @@ SPL_METHOD(Array, getChildren)
 		return;
 	}
 
-	if (Z_TYPE_PP(entry) == IS_OBJECT && instanceof_function(Z_OBJCE_PP(entry), Z_OBJCE_P(getThis()) TSRMLS_CC)) {
-		RETURN_ZVAL(*entry, 0, 0);
+	if (Z_TYPE_PP(entry) == IS_OBJECT) {
+		if ((intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) != 0) {
+			return;
+		}
+		if (instanceof_function(Z_OBJCE_PP(entry), Z_OBJCE_P(getThis()) TSRMLS_CC)) {
+			RETURN_ZVAL(*entry, 0, 0);
+		}
 	}
 
-  MAKE_STD_ZVAL(flags);
-  ZVAL_LONG(flags, SPL_ARRAY_USE_OTHER);
+	MAKE_STD_ZVAL(flags);
+	ZVAL_LONG(flags, SPL_ARRAY_USE_OTHER | intern->ar_flags);
 	spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), &return_value, 0, *entry, flags TSRMLS_CC);
 	zval_ptr_dtor(&flags);
 }
 /* }}} */
 
+/* {{{ arginfo and function tbale */
 static
 ZEND_BEGIN_ARG_INFO(arginfo_array___construct, 0)
 	ZEND_ARG_INFO(0, array)
@@ -1530,6 +1540,7 @@ static const zend_function_entry spl_funcs_RecursiveArrayIterator[] = {
 	SPL_ME(Array, getChildren,   NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION(spl_array) */
 PHP_MINIT_FUNCTION(spl_array)
@@ -1570,9 +1581,11 @@ PHP_MINIT_FUNCTION(spl_array)
 
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
+	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "CHILD_ARRAYS_ONLY",SPL_ARRAY_CHILD_ARRAYS_ONLY);
 
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
+	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "CHILD_ARRAYS_ONLY",SPL_ARRAY_CHILD_ARRAYS_ONLY);
 	return SUCCESS;
 }
 /* }}} */
