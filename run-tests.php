@@ -260,7 +260,7 @@ $conf_passed = null;
 $no_clean = false;
 
 $cfgtypes = array('show', 'keep');
-$cfgfiles = array('skip', 'php', 'clean');
+$cfgfiles = array('skip', 'php', 'clean', 'out', 'diff', 'exp');
 $cfg = array();
 foreach($cfgtypes as $type) {
 	$cfg[$type] = array();
@@ -285,11 +285,28 @@ if (isset($argc) && $argc > 1) {
 		$switch = substr($argv[$i],1,1);
 		$repeat = substr($argv[$i],0,1) == '-';
 		while ($repeat) {
-			$repeat = false;
 			if (!$is_switch) {
 				$switch = substr($argv[$i],1,1);
 			}
 			$is_switch = true;
+			if ($repeat) {
+				foreach($cfgtypes as $type) {
+					if (strpos($switch, '--'.$type) === 0) {
+						foreach($cfgfiles as $file) {
+							if ($switch == '--'.$type.'-'.$file) {
+								$cfg[$type][$file] = true;
+								$is_switch = false;
+								break;
+							}
+						}
+					}
+				}
+			}
+			if (!$is_switch) {
+				$is_switch = true;
+				break;
+			}
+			$repeat = false;
 			switch($switch) {
 				case 'r':
 				case 'l':
@@ -327,15 +344,6 @@ if (isset($argc) && $argc > 1) {
 						$cfg['keep'][$file] = true;
 					}
 					break;
-				case '--keep-skip':
-					$cfg['keep']['skip'] = true;
-					break;
-				case '--keep-php':
-					$cfg['keep']['php'] = true;
-					break;
-				case '--keep-clean':
-					$cfg['keep']['clean'] = true;
-					break;
 				//case 'l'
 				case 'm':
 					$leak_check = true;
@@ -368,15 +376,6 @@ if (isset($argc) && $argc > 1) {
 					foreach($cfgfiles as $file) {
 						$cfg['show'][$file] = true;
 					}
-					break;
-				case '--show-skip':
-					$cfg['show']['skip'] = true;
-					break;
-				case '--show-php':
-					$cfg['show']['php'] = true;
-					break;
-				case '--show-clean':
-					$cfg['show']['clean'] = true;
 					break;
 				case '--temp-source':
 					$temp_source = $argv[++$i];
@@ -425,8 +424,8 @@ Synopsis:
     php run-tests.php [options] [files] [directories]
 
 Options:
-    -l <file>   Read the testfiles to be executed from <file>. After the test 
-                has finished all failed tests are written to the same <file>. 
+    -l <file>   Read the testfiles to be executed from <file>. After the test
+                has finished all failed tests are written to the same <file>.
                 If the list is empty and no further test is specified then
                 all tests are executed (same as: -r <file> -w <file>).
 
@@ -444,12 +443,14 @@ Options:
                 with value 'bar').
 
     -m          Test for memory leaks with Valgrind.
-    
+
     -N          Always set (Test with unicode_semantics set off in PHP 6).
-    
-    -s <file>   Write output to <file>.
+
+    -p <php>    Specify PHP executable to run.
 
     -q          Quiet, no user interaction (same as environment NO_INTERACTION).
+
+    -s <file>   Write output to <file>.
 
     --verbose
     -v          Verbose mode.
@@ -458,21 +459,25 @@ Options:
     -h          This Help.
 
     --html <file> Generate HTML output.
-	
+
     --temp-source <sdir>  --temp-target <tdir> [--temp-urlbase <url>]
-                Write temporary files to <tdir> by replacing <sdir> from the 
-                filenames to generate with <tdir>. If --html is being used and 
+                Write temporary files to <tdir> by replacing <sdir> from the
+                filenames to generate with <tdir>. If --html is being used and
                 <url> given then the generated links are relative and prefixed
                 with the given url. In general you want to make <sdir> the path
-                to your source files and <tdir> some pach in your web page 
+                to your source files and <tdir> some pach in your web page
                 hierarchy with <url> pointing to <tdir>.
 
     --keep-[all|php|skip|clean]
-                Do not delete 'all' files, 'php' test file, 'skip' or 'clean' 
+                Do not delete 'all' files, 'php' test file, 'skip' or 'clean'
                 file.
 
-    --show-[all|php|skip|clean]
-                Show 'all' files, 'php' test file, 'skip' or 'clean' file.
+    --show-[all|php|skip|clean|exp|diff|out]
+                Show 'all' files, 'php' test file, 'skip' or 'clean' file. You
+                can also use this to show the output 'out', the expected result
+                'exp' or the difference between them 'exp'. The result types
+                get written independent of the log format, however 'diff' only
+                exists when a test fails.
 
     --no-clean  Do not execute clean section if any.
 
@@ -949,6 +954,23 @@ function run_all_tests($test_files, $env, $redir_tested = NULL)
 }
 
 //
+//  Show file or result block
+//
+function show_file_block($file, $block, $section=NULL)
+{
+	global $cfg;
+
+	if ($cfg['show'][$file]) {
+		if (is_null($section)) {
+			$section = strtoupper($file);
+		}
+		echo "\n========".$section."========\n";
+		echo rtrim($block);
+		echo "\n========DONE========\n";
+	}
+}
+
+//
 //  Run an individual test case.
 //
 function run_test($php, $file, $env)
@@ -1128,7 +1150,7 @@ TEST $file
 		}
 		$temp_filenames = array(
 			'file' => $copy_file,
-			'diff' => $diff_filename, 
+			'diff' => $diff_filename,
 			'log'  => $log_filename,
 			'exp'  => $exp_filename,
 			'out'  => $output_filename,
@@ -1144,7 +1166,7 @@ TEST $file
 		$section_text['FILE'] = "# original source file: $shortname\n" . $section_text['FILE'];
 	}
 
-	// unlink old test results	
+	// unlink old test results
 	@unlink($diff_filename);
 	@unlink($log_filename);
 	@unlink($exp_filename);
@@ -1196,11 +1218,7 @@ TEST $file
 	$warn = false;
 	if (array_key_exists('SKIPIF', $section_text)) {
 		if (trim($section_text['SKIPIF'])) {
-			if ($cfg['show']['skip']) {
-				echo "\n========SKIP========\n";
-				echo $section_text['SKIPIF'];
-				echo "========DONE========\n";
-			}
+			show_file_block('skip', $section_text['SKIPIF']);
 			save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
@@ -1307,11 +1325,7 @@ TEST $file
 	}
 	
 	// We've satisfied the preconditions - run the test!
-	if ($cfg['show']['php']) {
-		echo "\n========TEST========\n";
-		echo $section_text['FILE'];
-		echo "========DONE========\n";
-	}
+	show_file_block('php', $section_text['FILE'], 'TEST');
 	save_text($test_file, $section_text['FILE'], $temp_file);
 	if (array_key_exists('GET', $section_text)) {
 		$query_string = trim($section_text['GET']);
@@ -1406,11 +1420,7 @@ COMMAND $cmd
 
 	if (array_key_exists('CLEAN', $section_text) && (!$no_clean || $cfg['keep']['clean'])) {
 		if (trim($section_text['CLEAN'])) {
-			if ($cfg['show']['clean']) {
-				echo "\n========CLEAN=======\n";
-				echo $section_text['CLEAN'];
-				echo "========DONE========\n";
-			}
+			show_file_block('clean', $section_text['CLEAN']);
 			save_text($test_clean, trim($section_text['CLEAN']), $temp_clean);
 			if (!$no_clean) {
 				$clean_params = array();
@@ -1485,12 +1495,14 @@ COMMAND $cmd
 		$output_headers = join("\n", $output_headers);
 	}
 
+	show_file_block('out', $output);
 	if (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) {
 		if (isset($section_text['EXPECTF'])) {
 			$wanted = trim($section_text['EXPECTF']);
 		} else {
 			$wanted = trim($section_text['EXPECTREGEX']);
 		}
+		show_file_block('exp', $wanted);
 		$wanted_re = preg_replace('/\r\n/',"\n",$wanted);
 		if (isset($section_text['EXPECTF'])) {
 			$wanted_re = preg_quote($wanted_re, '/');
@@ -1527,6 +1539,7 @@ COMMAND $cmd
 	} else {
 		$wanted = trim($section_text['EXPECT']);
 		$wanted = preg_replace('/\r\n/',"\n",$wanted);
+		show_file_block('exp', $wanted);
 		// compare and leave on success
 		if (!strcmp($output, $wanted)) {
 			$passed = true;
@@ -1569,17 +1582,19 @@ COMMAND $cmd
 		if (strpos($log_format,'E') !== FALSE && file_put_contents($exp_filename, $wanted) === FALSE) {
 			error("Cannot create expected test output - $exp_filename");
 		}
-	
+
 		// write .out
 		if (strpos($log_format,'O') !== FALSE && file_put_contents($output_filename, $output) === FALSE) {
 			error("Cannot create test output - $output_filename");
 		}
-	
+
 		// write .diff
-		if (strpos($log_format,'D') !== FALSE && file_put_contents($diff_filename, generate_diff($wanted,$wanted_re,$output)) === FALSE) {
+		$diff = generate_diff($wanted,$wanted_re,$output);
+		show_file_block('diff', $diff);
+		if (strpos($log_format,'D') !== FALSE && file_put_contents($diff_filename, $diff) === FALSE) {
 			error("Cannot create test diff - $diff_filename");
 		}
-	
+
 		// write .log
 		if (strpos($log_format,'L') !== FALSE && file_put_contents($log_filename, "
 ---- EXPECTED OUTPUT
