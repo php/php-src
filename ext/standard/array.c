@@ -2191,7 +2191,9 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 		switch (zend_hash_get_current_key_ex(src, &string_key, &string_key_len, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_STRING:
 				if (recursive && zend_hash_find(dest, string_key, string_key_len, (void **)&dest_entry) == SUCCESS) {
-					if (*src_entry == *dest_entry && (Z_REFCOUNT_PP(dest_entry) % 2)) {
+					HashTable *thash = HASH_OF(*dest_entry);
+
+					if ((thash && thash->nApplyCount > 1) || (*src_entry == *dest_entry && (Z_REFCOUNT_PP(dest_entry) % 2))) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 						return 0;
 					}
@@ -2200,8 +2202,17 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 
 					convert_to_array_ex(dest_entry);
 					convert_to_array_ex(src_entry);
+					if (thash) {
+						thash->nApplyCount++;
+					}
 					if (!php_array_merge(Z_ARRVAL_PP(dest_entry), Z_ARRVAL_PP(src_entry), recursive TSRMLS_CC)) {
+						if (thash) {
+							thash->nApplyCount--;
+						}
 						return 0;
+					}
+					if (thash) {
+						thash->nApplyCount--;
 					}
 				} else {
 					Z_ADDREF_PP(src_entry);
