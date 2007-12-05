@@ -122,8 +122,10 @@ if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
 	$environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
 }
 
-if ($argc !=2 || ($argv[1] != '-h' && $argv[1] != '-help' && $argv != '--help'))
+function verify_config()
 {
+	global $php;
+
 	if (empty($php) || !file_exists($php)) {
 		error("environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!");
 	}
@@ -350,6 +352,10 @@ if (isset($argc) && $argc > 1) {
 				case '--no-clean':
 					$no_clean = true;
 					break;
+				case 'p':
+					$php = $argv[++$i];
+					putenv("TEST_PHP_EXECUTABLE=$php");
+					break;
 				case 'q':
 					putenv('NO_INTERACTION=1');
 					break;
@@ -541,6 +547,7 @@ HELP;
 	}
 }
 
+verify_config();
 write_information($html_output);
 
 // Compile a list of all test files (*.phpt).
