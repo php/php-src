@@ -1,3 +1,52 @@
+2007-12-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/bug43495.phpt:
+      MFB:  Fixed bug #43495 (array_merge_recursive() crashes with recursive
+      arrays)
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug43495.phpt
+      ext/standard/tests/array/bug43495.phpt:
+      
+      MFB: Fixed bug #43495 (array_merge_recursive() crashes with recursive
+      arrays)
+
+    * (PHP_5_3)
+      ext/standard/array.c
+      ext/standard/tests/array/bug43495.phpt
+      ext/standard/tests/array/bug43495.phpt:
+      Fixed bug #43495 (array_merge_recursive() crashes with recursive arrays)
+
+2007-12-05  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/tests/bug38618.phpt
+      ext/spl/tests/bug38618.phpt:
+      
+      file bug38618.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c:
+      - Fixing #38618 by:
+      - [DOC] ArrayIterator::CHILD_ARRAYS_ONLY, ArrayObject::CHILD_ARRAYS_ONLY
+        Passing this flag in the ctor prevents ArrayIterator from following
+        objects in ArrayObject::getIterator(), ArrayIterator::hasChildren(),
+        ArrayIterator::getChildren().
+        The exact behavior might change:
+          - should the flag be set by default
+          - should the flag be changed to have a negative effect
+
+    * (PHP_5_3)
+      run-tests.php:
+      - - Allow to check the out,exp and diff results on console while executing
+      the tests
+
+    * (PHP_5_3)
+      run-tests.php:
+      - Allow to specify php executable on commandline
+
 2007-12-04  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_3)
