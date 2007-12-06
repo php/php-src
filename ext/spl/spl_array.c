@@ -25,6 +25,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_var.h"
+#include "ext/standard/php_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
@@ -54,7 +56,7 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 #define SPL_ARRAY_IS_SELF            0x02000000
 #define SPL_ARRAY_USE_OTHER          0x04000000
 #define SPL_ARRAY_INT_MASK           0xFFFF0000
-#define SPL_ARRAY_CLONE_MASK         0x030000FF
+#define SPL_ARRAY_CLONE_MASK         0x0300FFFF
 
 typedef struct _spl_array_object {
 	zend_object       std;
@@ -70,7 +72,7 @@ typedef struct _spl_array_object {
 	zend_class_entry* ce_get_iterator;
 } spl_array_object;
 
-static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int check_std_props TSRMLS_DC) {
+static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int check_std_props TSRMLS_DC) { /* {{{ */
 	if ((intern->ar_flags & SPL_ARRAY_IS_SELF) != 0) {
 		return intern->std.properties;
 	} else if ((intern->ar_flags & SPL_ARRAY_USE_OTHER) && (check_std_props == 0 || (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) == 0) && Z_TYPE_P(intern->array) == IS_OBJECT) {
@@ -81,7 +83,7 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int 
 	} else {
 		return HASH_OF(intern->array);
 	}
-}
+} /* }}} */
 
 SPL_API int spl_hash_verify_pos(spl_array_object * intern TSRMLS_DC) /* {{{ */
 {
@@ -1348,7 +1350,7 @@ SPL_METHOD(Array, next)
 
 	spl_array_next(intern TSRMLS_CC);
 }
-/* }}} */
+/* }}} */ 
 
 /* {{{ proto bool ArrayIterator::valid()
    Check whether array contains more entries */
@@ -1436,6 +1438,152 @@ SPL_METHOD(Array, getChildren)
 }
 /* }}} */
 
+/* {{{ proto string ArrayObject::serialize()
+ * serialize the object
+ */
+SPL_METHOD(Array, serialize)
+{
+	zval *object = getThis();
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
+	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+
+	if (!aht) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and is no longer an array");
+		return;
+	}
+
+	zval **entry, members, *pmembers;
+	HashPosition      pos;
+	php_serialize_data_t var_hash;
+	smart_str buf = {0};
+
+	PHP_VAR_SERIALIZE_INIT(var_hash);
+
+	/* storage */
+	smart_str_appendl(&buf, "x:i:", 4);
+	smart_str_append_long(&buf, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
+	smart_str_appendc(&buf, ';');
+
+	if (!(intern->ar_flags & SPL_ARRAY_IS_SELF)) {
+		php_var_serialize(&buf, &intern->array, &var_hash TSRMLS_CC);
+		smart_str_appendc(&buf, ';');
+	}
+
+	/* members */
+	smart_str_appendl(&buf, "m:", 2);
+	INIT_PZVAL(&members);
+	Z_ARRVAL(members) = intern->std.properties;
+	Z_TYPE(members) = IS_ARRAY;
+	pmembers = &members;
+	php_var_serialize(&buf, &pmembers, &var_hash TSRMLS_CC); /* finishes the string */
+
+	/* done */
+	PHP_VAR_SERIALIZE_DESTROY(var_hash);
+
+	if (buf.c) {
+		RETURN_STRINGL(buf.c, buf.len, 0);
+	} else {
+		RETURN_NULL();
+	}
+	
+} /* }}} */
+
+/* {{{ proto void ArrayObject::unserialize(string serialized)
+ * unserialize the object
+ */
+SPL_METHOD(Array, unserialize)
+{
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	char *buf;
+	int buf_len;
+	const unsigned char *p, *s;
+	php_unserialize_data_t var_hash;
+	zval *pentry, *pmembers, *pflags = NULL;
+	long flags;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
+		return;
+	}
+
+	if (buf_len == 0) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Empty serialized string cannot be empty");
+		return;
+	}
+
+	/* storage */
+	s = p = (const unsigned char*)buf;
+	PHP_VAR_UNSERIALIZE_INIT(var_hash);
+
+	if (*p!= 'x' || *++p != ':') {
+		goto outexcept;
+	}
+	++p;
+
+	ALLOC_INIT_ZVAL(pflags);
+	if (!php_var_unserialize(&pflags, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(pflags) != IS_LONG) {
+		zval_ptr_dtor(&pflags);
+		goto outexcept;
+	}
+
+	--p; /* for ';' */
+	flags = Z_LVAL_P(pflags);
+	zval_ptr_dtor(&pflags);
+	/* flags needs to be verified and we also need to verify whether the next
+	 * thing we get is ';'. After that we require an 'm' or somethign else
+	 * where 'm' stands for members and anything else should be an array. If
+	 * neither 'a' or 'm' follows we have an error. */
+
+	if (*p != ';') {
+		goto outexcept;
+	}
+	++p;
+
+	if (*p!='m') {
+		if (*p!='a') {
+			goto outexcept;
+		}
+		intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;
+		intern->ar_flags |= flags & SPL_ARRAY_CLONE_MASK;
+		zval_ptr_dtor(&intern->array);
+		ALLOC_INIT_ZVAL(intern->array);
+		if (!php_var_unserialize(&intern->array, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+			goto outexcept;
+		}
+	}
+	if (*p != ';') {
+		goto outexcept;
+	}
+	++p;
+
+	/* members */
+	if (*p!= 'm' || *++p != ':') {
+		goto outexcept;
+	}
+	++p;
+
+	ALLOC_INIT_ZVAL(pmembers);
+	if (!php_var_unserialize(&pmembers, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+		zval_ptr_dtor(&pmembers);
+		goto outexcept;
+	}
+
+	/* copy members */
+	zend_hash_copy(intern->std.properties, Z_ARRVAL_P(pmembers), (copy_ctor_func_t) zval_add_ref, (void *) NULL, sizeof(zval *));
+	zval_ptr_dtor(&pmembers);
+
+	/* done reading $serialized */
+
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	return;
+
+outexcept:
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+	return;
+
+} /* }}} */
+
 /* {{{ arginfo and function tbale */
 static
 ZEND_BEGIN_ARG_INFO(arginfo_array___construct, 0)
@@ -1480,7 +1628,12 @@ ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_array_uXsort, 0)
-	ZEND_ARG_INFO(0, cmp_function )
+	ZEND_ARG_INFO(0, cmp_function)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_array_unserialize, 0)
+	ZEND_ARG_INFO(0, serialized)
 ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_ArrayObject[] = {
@@ -1500,6 +1653,8 @@ static const zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, uksort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, natsort,          NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, natcasesort,      NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, unserialize,      arginfo_array_unserialize,      ZEND_ACC_PUBLIC)
+	SPL_ME(Array, serialize,        NULL,                           ZEND_ACC_PUBLIC)
 	/* ArrayObject specific */
 	SPL_ME(Array, getIterator,      NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, exchangeArray,    arginfo_array_exchangeArray,    ZEND_ACC_PUBLIC)
@@ -1525,6 +1680,8 @@ static const zend_function_entry spl_funcs_ArrayIterator[] = {
 	SPL_ME(Array, uksort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, natsort,          NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, natcasesort,      NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, unserialize,      arginfo_array_unserialize,      ZEND_ACC_PUBLIC)
+	SPL_ME(Array, serialize,        NULL,                           ZEND_ACC_PUBLIC)
 	/* ArrayIterator specific */
 	SPL_ME(Array, rewind,           NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, current,          NULL,                           ZEND_ACC_PUBLIC)
@@ -1548,6 +1705,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_STD_CLASS_EX(ArrayObject, spl_array_object_new, spl_funcs_ArrayObject);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Aggregate);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, ArrayAccess);
+	REGISTER_SPL_IMPLEMENTS(ArrayObject, Serializable);
 	memcpy(&spl_handler_ArrayObject, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
 	spl_handler_ArrayObject.clone_obj = spl_array_object_clone;
@@ -1569,6 +1727,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Iterator);
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, ArrayAccess);
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, SeekableIterator);
+	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Serializable);
 	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
 	
