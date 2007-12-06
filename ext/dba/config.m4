@@ -274,10 +274,15 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
 # DB4
 if test "$PHP_DB4" != "no"; then
   PHP_DBA_STD_BEGIN
-  for i in $PHP_DB4 /usr/local/BerkeleyDB.4.2 /usr/local/BerkeleyDB.4.1 /usr/local/BerkeleyDB.4.0 /usr/local /usr; do
+  dbdp="/usr/local/BerkeleyDB.4."
+  for i in $PHP_DB4 ${dbdp}6 ${dbdp}5 ${dbdp}4 ${dbdp}3  ${dbdp}2 ${dbdp}1 ${dbdp}0 /usr/local /usr; do
     if test -f "$i/db4/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/db4/db.h
+      break
+    elif test -f "$i/include/db4.6/db.h"; then
+      THIS_PREFIX=$i
+      THIS_INCLUDE=$i/include/db4.6/db.h
       break
     elif test -f "$i/include/db4.5/db.h"; then
       THIS_PREFIX=$i
