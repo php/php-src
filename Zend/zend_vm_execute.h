@@ -2492,6 +2492,9 @@ static int ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	if (IS_CONST == IS_UNUSED) {
 		if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
+			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+				zend_error_noreturn(E_ERROR, "Undefined constant '%s'", Z_STRVAL(opline->op2.u.constant));
+			}
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 				Z_STRVAL(opline->op2.u.constant),
 				Z_STRVAL(opline->op2.u.constant));
@@ -2515,7 +2518,9 @@ static int ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 				ZEND_VM_NEXT_OPCODE();
 			} else if ((opline->extended_value & IS_CONSTANT_RT_NS_CHECK) != 0) {
-				if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
+				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					zend_error_noreturn(E_ERROR, "Undefined constant '%s::%s'", Z_STRVAL(opline->op1.u.constant), Z_STRVAL(opline->op2.u.constant));
+				} else if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 						Z_STRVAL(opline->op2.u.constant),
 						Z_STRVAL(opline->op2.u.constant));
@@ -9812,6 +9817,9 @@ static int ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (IS_VAR == IS_UNUSED) {
 		if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
+			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+				zend_error_noreturn(E_ERROR, "Undefined constant '%s'", Z_STRVAL(opline->op2.u.constant));
+			}
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 				Z_STRVAL(opline->op2.u.constant),
 				Z_STRVAL(opline->op2.u.constant));
@@ -9835,7 +9843,9 @@ static int ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 				ZEND_VM_NEXT_OPCODE();
 			} else if ((opline->extended_value & IS_CONSTANT_RT_NS_CHECK) != 0) {
-				if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
+				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					zend_error_noreturn(E_ERROR, "Undefined constant '%s::%s'", Z_STRVAL(opline->op1.u.constant), Z_STRVAL(opline->op2.u.constant));
+				} else if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 						Z_STRVAL(opline->op2.u.constant),
 						Z_STRVAL(opline->op2.u.constant));
@@ -16526,6 +16536,9 @@ static int ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	if (IS_UNUSED == IS_UNUSED) {
 		if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
+			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+				zend_error_noreturn(E_ERROR, "Undefined constant '%s'", Z_STRVAL(opline->op2.u.constant));
+			}
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 				Z_STRVAL(opline->op2.u.constant),
 				Z_STRVAL(opline->op2.u.constant));
@@ -16549,7 +16562,9 @@ static int ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 				ZEND_VM_NEXT_OPCODE();
 			} else if ((opline->extended_value & IS_CONSTANT_RT_NS_CHECK) != 0) {
-				if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
+				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					zend_error_noreturn(E_ERROR, "Undefined constant '%s::%s'", Z_STRVAL(opline->op1.u.constant), Z_STRVAL(opline->op2.u.constant));
+				} else if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 						Z_STRVAL(opline->op2.u.constant),
 						Z_STRVAL(opline->op2.u.constant));

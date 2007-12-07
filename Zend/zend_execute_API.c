@@ -483,8 +483,24 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		is_ref = Z_ISREF_P(p);
 
 		if (!zend_get_constant_ex(p->value.str.val, p->value.str.len, &const_value, scope, Z_REAL_TYPE_P(p) TSRMLS_CC)) {
-			if ((colon = memchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p))) && colon[1] == ':') {
-				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
+			if ((colon = zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p))) &&
+			    colon > Z_STRVAL_P(p) &&
+			    *(colon-1) == ':') {
+				if ((Z_TYPE_P(p) & IS_CONSTANT_RT_NS_CHECK) == 0) {
+					zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
+				} else if (Z_TYPE_P(p) & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					zend_error(E_ERROR, "Undefined constant '%s'", Z_STRVAL_P(p));
+				}
+				Z_STRLEN_P(p) -= ((colon - Z_STRVAL_P(p)) + 1);
+				if (inline_change) {
+					colon = estrndup(colon + 1, Z_STRLEN_P(p));
+					efree(Z_STRVAL_P(p));
+					Z_STRVAL_P(p) = colon;
+				} else {
+					Z_STRVAL_P(p) = colon + 1;
+				}
+			} else if (Z_TYPE_P(p) & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+				zend_error(E_ERROR, "Undefined constant '%s'", Z_STRVAL_P(p));
 			}
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  Z_STRVAL_P(p),  Z_STRVAL_P(p));
 			p->type = IS_STRING;
@@ -523,9 +539,19 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				continue;
 			}
 			if (!zend_get_constant_ex(str_index, str_index_len - 3, &const_value, scope, str_index[str_index_len - 2] TSRMLS_CC)) {
-				if ((colon = memchr(str_index, ':', str_index_len - 3)) && colon[1] == ':') {
-					zend_error(E_ERROR, "Undefined class constant '%s'", str_index);
-				}
+				if ((colon = zend_memrchr(str_index, ':', str_index_len - 3)) &&
+				    colon > str_index &&
+				    *(colon-1) == ':') {
+					if ((str_index[str_index_len - 2] & IS_CONSTANT_RT_NS_CHECK) == 0) {
+						zend_error(E_ERROR, "Undefined class constant '%s'", str_index);
+					} else if (str_index[str_index_len - 2] & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+						zend_error(E_ERROR, "Undefined constant '%s'", str_index);
+					}
+					str_index_len -= ((colon - str_index) + 1);
+					str_index = colon + 1;
+				} else if (str_index[str_index_len - 2] & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					zend_error(E_ERROR, "Undefined constant '%s'", str_index);
+				} 
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str_index, str_index);
 				ZVAL_STRINGL(&const_value, str_index, str_index_len-3, 1);
 			}
