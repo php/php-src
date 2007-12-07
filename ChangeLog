@@ -1,3 +1,37 @@
+2007-12-06  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c:
+      - Fix for #41528 (Classes extending ArrayObject do not serialize correctly)
+
+2007-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/general_functions/bug43293_1.phpt
+      ext/standard/tests/general_functions/bug43293_2.phpt
+      ext/standard/tests/general_functions/bug43293_3.phpt:
+      
+      MFB: WS
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/bug43293_1.phpt
+      ext/standard/tests/general_functions/bug43293_2.phpt
+      ext/standard/tests/general_functions/bug43293_3.phpt:
+      
+      WS
+
+2007-12-06  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/dba/config.m4:
+      - MFB: DB 4.6 detection
+
+    * (PHP_5_3)
+      ext/dba/config.m4:
+      - More about 4.6
+
+    * (PHP_5_3)
+      ext/dba/config.m4:
+       Add db 4.6 to detect list
+
 2007-12-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
