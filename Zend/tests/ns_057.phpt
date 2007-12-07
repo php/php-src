@@ -2,7 +2,7 @@
 057: Usage of 'namespace' in compound names (inside namespase)
 --FILE--
 <?php
-namespace test::ns1;
+namespace Test::ns1;
 
 const C = "const ok\n";
 
