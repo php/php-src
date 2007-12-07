@@ -1446,16 +1446,15 @@ SPL_METHOD(Array, serialize)
 	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+	zval **entry, members, *pmembers;
+	HashPosition      pos;
+	php_serialize_data_t var_hash;
+	smart_str buf = {0};
 
 	if (!aht) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and is no longer an array");
 		return;
 	}
-
-	zval **entry, members, *pmembers;
-	HashPosition      pos;
-	php_serialize_data_t var_hash;
-	smart_str buf = {0};
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
