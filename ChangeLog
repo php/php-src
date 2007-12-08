@@ -1,3 +1,71 @@
+2007-12-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug43343.phpt
+      ZendEngine2/tests/bug43344_1.phpt
+      ZendEngine2/tests/bug43344_10.phpt
+      ZendEngine2/tests/bug43344_11.phpt
+      ZendEngine2/tests/bug43344_12.phpt
+      ZendEngine2/tests/bug43344_13.phpt
+      ZendEngine2/tests/bug43344_2.phpt
+      ZendEngine2/tests/bug43344_3.phpt
+      ZendEngine2/tests/bug43344_4.phpt
+      ZendEngine2/tests/bug43344_5.phpt
+      ZendEngine2/tests/bug43344_6.phpt
+      ZendEngine2/tests/bug43344_7.phpt
+      ZendEngine2/tests/bug43344_8.phpt
+      ZendEngine2/tests/bug43344_9.phpt
+      ZendEngine2/tests/lsb_018.phpt
+      ZendEngine2/tests/ns_057.phpt:
+      Fixed bug #43344 (Wrong error message for undefined namespace constant)
+
+    * ZendEngine2/tests/bug43343.phpt
+      ZendEngine2/tests/bug43343.phpt
+      ZendEngine2/tests/bug43344_1.phpt
+      ZendEngine2/tests/bug43344_1.phpt
+      ZendEngine2/tests/bug43344_10.phpt
+      ZendEngine2/tests/bug43344_10.phpt
+      ZendEngine2/tests/bug43344_11.phpt
+      ZendEngine2/tests/bug43344_11.phpt
+      ZendEngine2/tests/bug43344_12.phpt
+      ZendEngine2/tests/bug43344_12.phpt
+      ZendEngine2/tests/bug43344_13.phpt
+      ZendEngine2/tests/bug43344_13.phpt
+      ZendEngine2/tests/bug43344_2.phpt
+      ZendEngine2/tests/bug43344_2.phpt
+      ZendEngine2/tests/bug43344_3.phpt
+      ZendEngine2/tests/bug43344_3.phpt
+      ZendEngine2/tests/bug43344_4.phpt
+      ZendEngine2/tests/bug43344_4.phpt
+      ZendEngine2/tests/bug43344_5.phpt
+      ZendEngine2/tests/bug43344_5.phpt
+      ZendEngine2/tests/bug43344_6.phpt
+      ZendEngine2/tests/bug43344_6.phpt
+      ZendEngine2/tests/bug43344_7.phpt
+      ZendEngine2/tests/bug43344_7.phpt
+      ZendEngine2/tests/bug43344_8.phpt
+      ZendEngine2/tests/bug43344_8.phpt
+      ZendEngine2/tests/bug43344_9.phpt
+      ZendEngine2/tests/bug43344_9.phpt
+      ZendEngine2/tests/ns_057.phpt:
+      
+      file bug43343.phpt was initially added on branch PHP_5_3.
+
+2007-12-07  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c:
+      fix win build
+
 2007-12-06  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
