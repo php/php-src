@@ -1,3 +1,65 @@
+2007-12-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug43343.phpt
+      tests/bug43344_1.phpt
+      tests/bug43344_10.phpt
+      tests/bug43344_11.phpt
+      tests/bug43344_12.phpt
+      tests/bug43344_13.phpt
+      tests/bug43344_2.phpt
+      tests/bug43344_3.phpt
+      tests/bug43344_4.phpt
+      tests/bug43344_5.phpt
+      tests/bug43344_6.phpt
+      tests/bug43344_7.phpt
+      tests/bug43344_8.phpt
+      tests/bug43344_9.phpt
+      tests/lsb_018.phpt
+      tests/ns_057.phpt:
+      Fixed bug #43344 (Wrong error message for undefined namespace constant)
+
+    * tests/bug43343.phpt
+      tests/bug43343.phpt
+      tests/bug43344_1.phpt
+      tests/bug43344_1.phpt
+      tests/bug43344_10.phpt
+      tests/bug43344_10.phpt
+      tests/bug43344_11.phpt
+      tests/bug43344_11.phpt
+      tests/bug43344_12.phpt
+      tests/bug43344_12.phpt
+      tests/bug43344_13.phpt
+      tests/bug43344_13.phpt
+      tests/bug43344_2.phpt
+      tests/bug43344_2.phpt
+      tests/bug43344_3.phpt
+      tests/bug43344_3.phpt
+      tests/bug43344_4.phpt
+      tests/bug43344_4.phpt
+      tests/bug43344_5.phpt
+      tests/bug43344_5.phpt
+      tests/bug43344_6.phpt
+      tests/bug43344_6.phpt
+      tests/bug43344_7.phpt
+      tests/bug43344_7.phpt
+      tests/bug43344_8.phpt
+      tests/bug43344_8.phpt
+      tests/bug43344_9.phpt
+      tests/bug43344_9.phpt
+      tests/ns_057.phpt:
+      
+      file bug43343.phpt was initially added on branch PHP_5_3.
+
 2007-12-04  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
