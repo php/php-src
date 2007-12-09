@@ -6,4 +6,4 @@ $func = create_function('$a', 'return $a;');
 var_export($func);
 ?>
 --EXPECT--	
-'\000lambda_1'
+'' . "\0" . 'lambda_1'
