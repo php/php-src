@@ -1,4 +1,0 @@
-// $Id$
-// vim:ft=javascript
-
-EXTENSION("unicode", "unicode.c unicode_iterators.c collator.c locale.c property.c constants.c transform.c", false);
