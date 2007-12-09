@@ -1,3 +1,10 @@
+2007-12-08  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      tests/lang/bug35239.phpt:
+      - Removed testcase because this is something that won't be ported back
+        from PHP 5.
+
 2007-12-07  Dmitry Stogov  <dmitry@zend.com>
 
     * ZendEngine2/zend_compile.c
