@@ -389,8 +389,8 @@ static int php_object_element_export(zval **zv, int num_args, va_list args, zend
 PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht;
-	char*     tmp_str;
-	int       tmp_len;
+ 	char *tmp_str, *tmp_str2;
+ 	int tmp_len, tmp_len2;
 	char *class_name;
 	zend_uint class_name_len;
 
@@ -408,11 +408,13 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 		php_printf("%.*H", (int) EG(precision), Z_DVAL_PP(struc));
 		break;
 	case IS_STRING:
-		tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\\0", 3 TSRMLS_CC);
+		tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\", 2 TSRMLS_CC);
+		tmp_str2 = php_str_to_str_ex(tmp_str, tmp_len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len2, 0, NULL);
 		PUTS ("'");
-		PHPWRITE(tmp_str, tmp_len);
+		PHPWRITE(tmp_str2, tmp_len2);
 		PUTS ("'");
-		efree (tmp_str);
+		efree(tmp_str2);
+		efree(tmp_str);
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
