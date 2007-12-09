@@ -392,18 +392,17 @@ PHP_FUNCTION(escapeshellcmd)
    Quote and escape an argument for use in a shell command */
 PHP_FUNCTION(escapeshellarg)
 {
-	zval **arg1;
+	char *argument;
+	int argument_len;
 	char *cmd = NULL;
 
-	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &argument, &argument_len) == FAILURE) {
+		return;
 	}
-	
-	convert_to_string_ex(arg1);
-	if (Z_STRLEN_PP(arg1)) {
-		cmd = php_escape_shell_arg(Z_STRVAL_PP(arg1));
-		RETVAL_STRING(cmd, 1);
-		efree(cmd);
+
+	if (argument) {
+		cmd = php_escape_shell_arg(argument);
+		RETVAL_STRING(cmd, 0);
 	}
 }
 /* }}} */
