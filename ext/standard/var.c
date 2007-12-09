@@ -520,6 +520,7 @@ static void php_unicode_export(UChar *ustr, int ustr_len TSRMLS_DC) /* {{{ */
 	int i = 0;
 	char buf[10];
 	int buf_len;
+	int state = 0; /* 0 = in single quotes, 1 = in double quotes */
 
 	/*
 	 * We export all codepoints > 128 in escaped form to avoid encoding issues
@@ -529,10 +530,18 @@ static void php_unicode_export(UChar *ustr, int ustr_len TSRMLS_DC) /* {{{ */
 		U16_NEXT(ustr, i, ustr_len, cp);
 		switch (cp) {
 			case 0x0: /* '\0' */
-				PHPWRITE("\\000", 4);
+				if (state == 0) {
+					PHPWRITE("' . \"", 5);
+					state = 1;
+				}
+				PHPWRITE("\\0", 2);
 				break;
 
 			case 0x27: /* '\'' */
+				if (state == 1) {
+					PHPWRITE("\" . '", 5);
+					state = 0;
+				}
 				PHPWRITE("\\'", 2);
 				break;
 
@@ -542,16 +551,31 @@ static void php_unicode_export(UChar *ustr, int ustr_len TSRMLS_DC) /* {{{ */
 
 			default:
 				if ((uint32_t)cp < 128) {
+					if (state == 1) {
+						PHPWRITE("\" . '", 5);
+						state = 0;
+					}
 					buf[0] = (char) (short) cp;
 					buf_len = 1;
 				} else if (U_IS_BMP(cp)) {
+					if (state == 0) {
+						PHPWRITE("' . \"", 5);
+						state = 1;
+					}
 					buf_len = snprintf(buf, sizeof(buf), "\\u%04X", cp);
 				} else {
+					if (state == 0) {
+						PHPWRITE("' . \"", 5);
+						state = 1;
+					}
 					buf_len = snprintf(buf, sizeof(buf), "\\u%06X", cp);
 				}
 				PHPWRITE(buf, buf_len);
 				break;
 		}
+	}
+	if (state == 1) { // if we are in double quotes, go back to single */
+		PHPWRITE("\" . '", 5);
 	}
 }
 /* }}} */
@@ -559,8 +583,8 @@ static void php_unicode_export(UChar *ustr, int ustr_len TSRMLS_DC) /* {{{ */
 PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht;
-	char* tmp_str;
-	int tmp_len;
+ 	char *tmp_str, *tmp_str2;
+ 	int tmp_len, tmp_len2;
 	zstr class_name;
 	zend_uint class_name_len;
 
@@ -578,11 +602,13 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
 		php_printf("%.*H", (int) EG(precision), Z_DVAL_PP(struc));
 		break;
 	case IS_STRING:
-		tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\\0", 3 TSRMLS_CC);
+		tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\", 2 TSRMLS_CC);
+		tmp_str2 = php_str_to_str_ex(tmp_str, tmp_len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len2, 0, NULL);
 		PUTS ("'");
-		PHPWRITE(tmp_str, tmp_len);
+		PHPWRITE(tmp_str2, tmp_len2);
 		PUTS ("'");
-		efree (tmp_str);
+		efree(tmp_str2);
+		efree(tmp_str);
 		break;
 	case IS_UNICODE:
 		PUTS ("'");

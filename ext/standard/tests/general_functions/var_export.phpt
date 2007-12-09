@@ -124,7 +124,8 @@ $valid_strings = array(
             "\0",
             '\0',
             '\060',
-            "\070"
+            "\070",
+            "\0hello\0this is an test, to work with ' and \0 and \n and foreign chars too: blåbærøl"
           );
 $counter = 1;
 /* Loop to check for above strings with var_export() */
@@ -568,9 +569,9 @@ string(3) "''"
 
 
 Iteration 12
-'\000'
-'\000'
-string(6) "'\000'"
+'' . "\0" . ''
+'' . "\0" . ''
+string(14) "'' . "\0" . ''"
 
 
 Iteration 13
@@ -589,6 +590,15 @@ Iteration 15
 '8'
 '8'
 string(3) "'8'"
+
+
+Iteration 16
+'' . "\0" . 'hello' . "\0" . 'this is an test, to work with \' and ' . "\0" . ' and 
+ and foreign chars too: blåbærøl'
+'' . "\0" . 'hello' . "\0" . 'this is an test, to work with \' and ' . "\0" . ' and 
+ and foreign chars too: blåbærøl'
+string(121) "'' . "\0" . 'hello' . "\0" . 'this is an test, to work with \' and ' . "\0" . ' and 
+ and foreign chars too: blåbærøl'"
 
 *** Testing var_export() with valid arrays ***
 
@@ -1320,9 +1330,9 @@ string(3) "''"
 
 
 Iteration 12
-'\000'
-'\000'
-string(6) "'\000'"
+'' . "\0" . ''
+'' . "\0" . ''
+string(14) "'' . "\0" . ''"
 
 
 Iteration 13
@@ -1341,6 +1351,15 @@ Iteration 15
 '8'
 '8'
 string(3) "'8'"
+
+
+Iteration 16
+'' . "\0" . 'hello' . "\0" . 'this is an test, to work with \' and ' . "\0" . ' and 
+ and foreign chars too: bl' . "\u00E5" . 'b' . "\u00E6" . 'r' . "\u00F8" . 'l'
+'' . "\0" . 'hello' . "\0" . 'this is an test, to work with \' and ' . "\0" . ' and 
+ and foreign chars too: bl' . "\u00E5" . 'b' . "\u00E6" . 'r' . "\u00F8" . 'l'
+string(163) "'' . "\0" . 'hello' . "\0" . 'this is an test, to work with \' and ' . "\0" . ' and 
+ and foreign chars too: bl' . "\u00E5" . 'b' . "\u00E6" . 'r' . "\u00F8" . 'l'"
 
 *** Testing var_export() with valid arrays ***
 
