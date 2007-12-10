@@ -30,6 +30,7 @@
 #include "zend_execute.h"
 #include "zend_exceptions.h"
 #include "zend_hash.h"
+#include "ext/phar/phar2_openhash.h"
 #include "zend_interfaces.h"
 #include "zend_operators.h"
 #include "zend_qsort.h"
@@ -65,12 +66,12 @@
 #define E_RECOVERABLE_ERROR E_ERROR
 #endif
 
-#define PHAR_EXT_VERSION_STR      "1.3.0"
-#define PHAR_API_VERSION_STR      "1.1.0"
+#define PHAR_EXT_VERSION_STR      "2.0.0"
+#define PHAR_API_VERSION_STR      "2.0.0"
 /* x.y.z maps to 0xyz0 */
-#define PHAR_API_VERSION          0x1100
+#define PHAR_API_VERSION          0x2000
 #define PHAR_API_MIN_READ         0x1000
-#define PHAR_API_MAJORVERSION     0x1000
+#define PHAR_API_MAJORVERSION     0x2000
 #define PHAR_API_MAJORVER_MASK    0xF000
 #define PHAR_API_VER_MASK         0xFFF0
 
@@ -106,6 +107,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_fname_map;
 	HashTable   phar_alias_map;
 	HashTable   phar_plain_map;
+	phar2_openhash *fast_fname_map;
 	char*       extract_list;
 	int         readonly;
 	zend_bool   readonly_orig;

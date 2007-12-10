@@ -21,6 +21,7 @@
 
 #define PHAR_MAIN
 #include "phar_internal.h"
+#include "phar2.h"
 #include "SAPI.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
@@ -946,6 +947,10 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 			spprintf(error, 0, "phar \"%s\" is API version %1.u.%1.u.%1.u, and cannot be processed", fname, manifest_ver >> 12, (manifest_ver >> 8) & 0xF, (manifest_ver >> 4) & 0x0F);
 		}
 		return FAILURE;
+	}
+	if ((manifest_ver & PHAR_API_MAJORVERSION) == PHAR_API_MAJORVERSION) {
+		/* this is a phar in tar format */
+		return phar2_open_file(fp, fname, fname_len, alias, alias_len, halt_offset, pphar, savebuf, error TSRMLS_CC);
 	}
 
 	PHAR_GET_32(buffer, manifest_flags);
