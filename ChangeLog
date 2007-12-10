@@ -1,3 +1,97 @@
+2007-12-09  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/var.c
+      ext/standard/var.c
+      ext/standard/tests/general_functions/bug42272.phpt
+      ext/standard/tests/general_functions/bug42272.phpt
+      ext/standard/tests/general_functions/var_export-locale.phpt
+      ext/standard/tests/general_functions/var_export-locale.phpt
+      ext/standard/tests/general_functions/var_export.phpt
+      ext/standard/tests/general_functions/var_export.phpt
+      ext/standard/tests/strings/bug37262.phpt
+      ext/standard/tests/strings/bug37262.phpt:
+      - MFH: Fixed Bug #42272 (var_export() incorrectly escapes char(0)).
+
+    * ext/standard/var.c
+      ext/standard/tests/general_functions/bug42272.phpt
+      ext/standard/tests/general_functions/bug42272.phpt
+      ext/standard/tests/general_functions/bug42272.phpt
+      ext/standard/tests/general_functions/var_export-locale.phpt
+      ext/standard/tests/general_functions/var_export.phpt
+      ext/standard/tests/strings/bug37262.phpt:
+      - Fixed Bug #42272 (var_export() incorrectly escapes char(0)).
+      - Also fixed var_export() in unicode mode, as the function would actually
+        generate non-parsable strings which defeats the purpose of var_export().
+
+2007-12-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/exec.c:
+      
+      Fixed bug #43533 (escapeshellarg('') returns null).
+      
+
+2007-12-09  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_unique_basic.phpt
+      ext/standard/tests/array/array_unique_basic.phpt
+      ext/standard/tests/array/array_unique_error.phpt
+      ext/standard/tests/array/array_unique_error.phpt
+      ext/standard/tests/array/array_unique_variation1.phpt
+      ext/standard/tests/array/array_unique_variation1.phpt
+      ext/standard/tests/array/array_unique_variation2.phpt
+      ext/standard/tests/array/array_unique_variation2.phpt
+      ext/standard/tests/array/array_unique_variation3.phpt
+      ext/standard/tests/array/array_unique_variation3.phpt
+      ext/standard/tests/array/array_unique_variation4.phpt
+      ext/standard/tests/array/array_unique_variation4.phpt
+      ext/standard/tests/array/array_unique_variation5.phpt
+      ext/standard/tests/array/array_unique_variation5.phpt
+      ext/standard/tests/array/array_unique_variation6.phpt
+      ext/standard/tests/array/array_unique_variation6.phpt
+      ext/standard/tests/array/array_unique_variation7.phpt
+      ext/standard/tests/array/array_unique_variation7.phpt
+      ext/standard/tests/array/array_unique_variation8.phpt
+      ext/standard/tests/array/array_unique_variation8.phpt:
+      new testcases for array_unique() function
+
+    * ext/standard/tests/array/array_unique_basic.phpt
+      ext/standard/tests/array/array_unique_basic.phpt
+      ext/standard/tests/array/array_unique_basic.phpt
+      ext/standard/tests/array/array_unique_error.phpt
+      ext/standard/tests/array/array_unique_error.phpt
+      ext/standard/tests/array/array_unique_error.phpt
+      ext/standard/tests/array/array_unique_variation1.phpt
+      ext/standard/tests/array/array_unique_variation1.phpt
+      ext/standard/tests/array/array_unique_variation1.phpt
+      ext/standard/tests/array/array_unique_variation2.phpt
+      ext/standard/tests/array/array_unique_variation2.phpt
+      ext/standard/tests/array/array_unique_variation2.phpt
+      ext/standard/tests/array/array_unique_variation3.phpt
+      ext/standard/tests/array/array_unique_variation3.phpt
+      ext/standard/tests/array/array_unique_variation3.phpt
+      ext/standard/tests/array/array_unique_variation4.phpt
+      ext/standard/tests/array/array_unique_variation4.phpt
+      ext/standard/tests/array/array_unique_variation4.phpt
+      ext/standard/tests/array/array_unique_variation5.phpt
+      ext/standard/tests/array/array_unique_variation5.phpt
+      ext/standard/tests/array/array_unique_variation5.phpt
+      ext/standard/tests/array/array_unique_variation6.phpt
+      ext/standard/tests/array/array_unique_variation6.phpt
+      ext/standard/tests/array/array_unique_variation6.phpt
+      ext/standard/tests/array/array_unique_variation7.phpt
+      ext/standard/tests/array/array_unique_variation7.phpt
+      ext/standard/tests/array/array_unique_variation7.phpt
+      ext/standard/tests/array/array_unique_variation8.phpt
+      ext/standard/tests/array/array_unique_variation8.phpt
+      ext/standard/tests/array/array_unique_variation8.phpt:
+        1.1.4;
+      new testcases for array_unique() function
+
 2007-12-08  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_4_4)
