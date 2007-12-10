@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed weired behavior in CGI parameter parsing. (Dmitry, Hannes Magnusson)
 
 - Fixed bug #43533 (escapeshellarg('') returns null). (Ilia)
+- Fixed bug #43522 (stream_get_line() eats additional characters). (Felipe,
+  Ilia)
 - Fixed bug #43495 (array_merge_recursive() crashes with recursive arrays).
   (Ilia)
 - Fixed bug #43493 (pdo_pgsql does not send username on connect when password
