@@ -1105,9 +1105,9 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		toread = maxlen;
 	} else {
 		if (delim_len == 1) {
-			e = memchr(stream->readbuf.s + stream->readpos, *delim, stream->writepos - stream->readpos);
+			e = memchr(stream->readbuf.s + stream->readpos, *delim, maxlen);
 		} else {
-			e = php_memnstr(stream->readbuf.s + stream->readpos, delim, delim_len, (stream->readbuf.s + stream->writepos));
+			e = php_memnstr(stream->readbuf.s + stream->readpos, delim, delim_len, (stream->readbuf.s + stream->readpos + maxlen));
 		}
 
 		if (!e) {
