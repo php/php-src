@@ -1132,7 +1132,9 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, int oldlen, int *ne
 		if(status == FAILURE) {
 			/* invalid MB sequence */
 			efree(replaced);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid multibyte sequence in argument");
+			if(!PG(display_errors)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid multibyte sequence in argument");
+			}
 			*newlen = 0;
 			return STR_EMPTY_ALLOC();
 		}
