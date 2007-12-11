@@ -1852,7 +1852,7 @@ static char * phar_decompress_filter(phar_entry_info * entry, int return_unknown
 static phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
 				      char **error, int for_write TSRMLS_DC)
 {
-	php_uint32 offset, read, total, toread, flags;
+	php_uint32 offset, flags;
 	php_stream_filter *filter/*,  *consumed */;
 	char tmpbuf[8];
 	char *filter_name;
@@ -1888,31 +1888,15 @@ static phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info 
 		/* now we can safely use proper decompression */
 		entry->old_flags = entry->flags;
 		buffer = (char *) emalloc(8192);
-		read = 0;
-		total = 0;
 
 		entry->fp = php_stream_temp_new();
 		php_stream_filter_append(&entry->fp->writefilters, filter);
-		do {
-			if ((total + 8192) > entry->compressed_filesize) {
-				toread = entry->compressed_filesize - total;
-			} else {
-				toread = 8192;
-			}
-			read = php_stream_read(fp, buffer, toread);
-			if (read) {
-				total += read;
-				if (read != php_stream_write(entry->fp, buffer, read)) {
-					efree(buffer);
-					spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
-					php_stream_filter_remove(filter, 1 TSRMLS_CC);
-					return NULL;
-				}
-				if (total == entry->compressed_filesize) {
-					read = 0;
-				} 
-			}
-		} while (read);
+		if (php_stream_copy_to_stream(fp, entry->fp, entry->compressed_filesize) != entry->compressed_filesize && php_stream_tell(fp) != entry->uncompressed_filesize) {
+			efree(buffer);
+			spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
+			php_stream_filter_remove(filter, 1 TSRMLS_CC);
+			return NULL;
+		}
 		efree(buffer);
 		php_stream_filter_flush(filter, 1);
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
