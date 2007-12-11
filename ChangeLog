@@ -1,3 +1,21 @@
+2007-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/tests/file/bug43522.phpt
+      ext/standard/tests/file/bug43522.phpt
+      main/streams/streams.c
+      main/streams/streams.c:
+      
+      MFB: Fixed bug #43522 (stream_get_line() eats additional characters)
+
+    * ext/standard/tests/file/bug43522.phpt
+      ext/standard/tests/file/bug43522.phpt
+      ext/standard/tests/file/bug43522.phpt
+      main/streams/streams.c:
+        1.1.4;
+      file bug43522.phpt was initially added on branch PHP_5_3.
+
 2007-12-09  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_2)
