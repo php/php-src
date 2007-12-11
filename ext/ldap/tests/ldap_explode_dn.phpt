@@ -1,5 +1,7 @@
 --TEST--
 ldap_explode_dn() test
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
