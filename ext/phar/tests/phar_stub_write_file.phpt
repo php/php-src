@@ -5,6 +5,7 @@ Phar::setStub()/getStub() from file
 --INI--
 phar.require_hash=0
 phar.readonly=0
+allow_url_fopen=1
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
