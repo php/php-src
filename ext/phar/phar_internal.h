@@ -117,6 +117,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         has_bz2:1;
 	int         has_gnupg:1;
 	int         has_zlib:1;
+	zend_op_array *(*orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)
