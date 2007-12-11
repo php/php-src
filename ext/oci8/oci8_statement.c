@@ -376,7 +376,6 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 				if (!descr) {
 					return OCI_ERROR;
 				}
-				zend_list_addref(outcol->statement->id);
 				outcol->descid = descr->id;
 				descr->charset_form = outcol->charset_form;
 				
