@@ -3741,15 +3741,15 @@ static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
 }
 /* }}} */
 
-static zend_op_array *(*orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
-
 static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC) /* {{{ */
 {
 	zend_op_array *res;
 	char *fname = NULL;
 	int fname_len;
+	zend_op_array *(*save)(zend_file_handle *file_handle, int type TSRMLS_DC);
 
-	zend_compile_file = orig_compile_file;
+	save = zend_compile_file; /* restore current handler or we cause trouble */
+	zend_compile_file = PHAR_G(orig_compile_file);
 	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
 		char *arch, *entry;
 		int arch_len, entry_len;
@@ -3780,8 +3780,8 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 		}
 	}
 skip_phar:
-	res = orig_compile_file(file_handle, type TSRMLS_CC);
-	zend_compile_file = phar_compile_file;
+	res = zend_compile_file(file_handle, type TSRMLS_CC);
+	zend_compile_file = save;
 	return res;
 }
 /* }}} */
@@ -3794,7 +3794,7 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 	PHAR_G(has_gnupg) = zend_hash_exists(&module_registry, "gnupg", sizeof("gnupg"));
 	PHAR_G(has_bz2) = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
 	PHAR_G(has_zlib) = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
-	orig_compile_file = zend_compile_file;
+	PHAR_G(orig_compile_file) = zend_compile_file;
 	zend_compile_file = phar_compile_file;
 	phar_object_init(TSRMLS_C);
 
@@ -3805,7 +3805,9 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
 	return php_unregister_url_stream_wrapper("phar" TSRMLS_CC);
-	zend_compile_file = orig_compile_file;
+	if (zend_compile_file == phar_compile_file) {
+		zend_compile_file = PHAR_G(orig_compile_file);
+	}
 }
 /* }}} */
 
