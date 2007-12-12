@@ -1481,9 +1481,9 @@ SPL_METHOD(Array, serialize)
 
 	if (buf.c) {
 		RETURN_STRINGL(buf.c, buf.len, 0);
-	} else {
-		RETURN_NULL();
 	}
+
+	RETURN_NULL();
 	
 } /* }}} */
 
