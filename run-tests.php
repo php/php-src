@@ -76,6 +76,8 @@ putenv('SSH_CONNECTION=deleted');
 $cwd = getcwd();
 set_time_limit(0);
 
+$valgrind_version = 0;
+
 // delete as much output buffers as possible
 while(@ob_end_clean());
 if (ob_get_level()) echo "Not all buffers were deleted.\n";
@@ -979,6 +981,7 @@ function run_test($php, $file, $env)
 	global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
 	global $leak_check, $temp_source, $temp_target, $cfg, $environment;
 	global $no_clean;
+	global $valgrind_version;
 
 	$temp_filenames = null;
 	$org_file = $file;
@@ -1399,7 +1402,26 @@ TEST $file
 
 	if ($leak_check) {
 		$env['USE_ZEND_ALLOC'] = '0';
-		$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file-exactly=$memcheck_filename $cmd";
+		if (!$valgrind_version) {
+			$valgrind_cmd = "valgrind --version";
+			$out = system_with_timeout($valgrind_cmd);
+			$replace_count = 0;
+
+			if (!$out) {
+				error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
+			} else {
+				$valgrind_version = preg_replace("/valgrind-([0-9])\.([0-9])\.([0-9]+)(\s+)/", '$1$2$3', $out, 1, $replace_count);
+				if ($replace_count != 1 || !is_numeric($valgrind_version)) {
+					error("Valgrind returned invalid version info (\"$out\"), cannot proceed.");
+				}
+			}
+		}
+		if ($valgrind_version >= 330) {
+			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
+			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file=$memcheck_filename $cmd";
+		} else {
+			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file-exactly=$memcheck_filename $cmd";
+		}
 	} else {
 		$env['USE_ZEND_ALLOC'] = '1';
 	}
