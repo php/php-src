@@ -1,6 +1,7 @@
 <?php
 
 $notes = '
+ * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
  * add mapping of include/require from within a phar to location within phar [Greg]
    solves the include_path issue without code munging
  * add Phar::delete() [Greg]

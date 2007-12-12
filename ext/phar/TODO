@@ -70,8 +70,7 @@ Version 1.3.0
    or foreach ($p->match('mime-type', 'image/jpeg') as $file)
  * Phar::copy($from, $to);
  X Phar::delete($what) [Greg]
- * Phar::buildFromIterator($filename, Iterator $it, array $addinfo = null);
-   $addinfo = array('alias','flags','metadata','stub'...)
+ X Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
  * Layout: Option to compress all content rather than single files.
    That excludes stub and manifest haeder.
  * stream context option for cleaning crap paths like phar://blah.phar/file//to\\here.php

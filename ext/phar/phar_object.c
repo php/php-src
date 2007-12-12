@@ -306,6 +306,156 @@ PHP_METHOD(Phar, __construct)
 		return; \
 	}
 
+/* {{{ proto Phar::buildFromIterator(Iterator iter[, string base_directory])
+ * Construct a phar archive from an iterator.  The iterator must return a series of strings
+ * that are full paths to files that should be added to the phar.  The iterator key should
+ * be the path that the file will have within the phar archive.
+ *
+ * If base directory is specified, then the key will be ignored, and instead the portion of
+ * the current value minus the base directory will be used
+ */
+PHP_METHOD(Phar, buildFromIterator)
+{
+	zend_object_iterator *iter = NULL;
+	zval *obj, **value;
+	char *str_key, *base, *error;
+	uint str_key_len, base_len = 0;
+	zend_uchar key_type;
+	ulong int_key;
+	zend_class_entry *ce;
+	PHAR_ARCHIVE_OBJECT();
+
+
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot write out phar archive, phar is read-only");
+		return;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|s", &obj, zend_ce_traversable, &base, &base_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ce = Z_OBJCE_P(obj);
+
+	iter = ce->get_iterator(ce, obj, 0 TSRMLS_CC);
+	if (iter && !EG(exception)) {
+		obj = zend_iterator_wrap(iter TSRMLS_CC);
+	} else {
+		if (!EG(exception)) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
+		}
+		return;
+	}
+
+	if (iter) {
+		iter->index = 0;
+		if (iter->funcs->rewind) {
+			iter->funcs->rewind(iter TSRMLS_CC);
+		}
+		if (FAILURE == iter->funcs->valid(iter TSRMLS_CC)) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned no values", ce->name);
+			return;
+		}
+		do {
+			phar_entry_data *data;
+			php_stream *fp;
+			long contents_len;
+			char *fname;
+			iter->funcs->get_current_data(iter, &value TSRMLS_CC);
+			if (EG(exception)) {
+				break;
+			}
+			if (!value) {
+				/* failure in get_current_data */
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned no value", ce->name);
+			}
+			if (Z_TYPE_PP(value) != IS_STRING) {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid value (must return a string)", ce->name);
+				break;
+			}
+			if (!base_len && iter->funcs->get_current_key) {
+				key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+				if (EG(exception)) {
+					break;
+				}
+				if (key_type == HASH_KEY_IS_LONG) {
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
+					break;
+				}
+				if (str_key[str_key_len - 1] == '\0') str_key_len--;
+			} else {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
+				break;
+			}
+
+			fname = Z_STRVAL_PP(value);
+			if (base_len) {
+				if (strstr(fname, base)) {
+					str_key_len = Z_STRLEN_PP(value) - base_len;
+					if (str_key_len <= 0) {
+						continue;
+					}
+					str_key = fname + base_len;
+				} else {
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that is not in the base directory \"%s\"", ce->name, fname, base);
+					break;
+				}
+			}
+#if PHP_MAJOR_VERSION < 6
+			if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that safe mode prevents opening", ce->name, fname);
+				break;
+			}
+#endif
+
+			if (php_check_open_basedir(fname TSRMLS_CC)) {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that open_basedir prevents opening", ce->name, fname);
+				break;
+			}
+
+			/* try to open source file, then create internal phar file and copy contents */
+			fp = php_stream_open_wrapper(fname, "rb", STREAM_MUST_SEEK|0, NULL);
+			if (!fp) {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a file that could not be opened \"%s\"", ce->name, fname);
+				break;
+			}
+
+			if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, str_key, str_key_len, "w+b", &error TSRMLS_CC))) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s cannot be created: %s", str_key, error);
+				efree(error);
+				break;
+			} else {
+				if (error) {
+					efree(error);
+				}
+				contents_len = php_stream_copy_to_stream(fp, data->fp, PHP_STREAM_COPY_ALL);
+			}
+			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
+			phar_entry_delref(data TSRMLS_CC);
+			/* This could cause an endless loop if index becomes zero again.
+			 * In case that ever happens we need an additional flag. */
+			iter->funcs->move_forward(iter TSRMLS_CC);
+			if (EG(exception)) {
+				break;
+			}
+			if (iter->funcs->valid(iter TSRMLS_CC) == FAILURE) {
+				/* reached end of iteration */
+				break;
+			}
+		} while (1);
+		if (!EG(exception)) {
+			phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+			if (error) {
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+				efree(error);
+			}
+		}
+	}
+
+}
+/* }}} */
+
 /* {{{ proto int Phar::count()
  * Returns the number of entries in the Phar archive
  */
@@ -1603,6 +1753,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_offsetSet, 0, 0, 2)
 	ZEND_ARG_INFO(0, entry)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_build, 0, 0, 1)
+	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_INFO(0, base_directory)
+ZEND_END_ARG_INFO();
 #endif
 
 static
@@ -1639,6 +1795,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetUnset,           arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, uncompressAllFiles,    NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, buildFromIterator,     arginfo_phar_build,        ZEND_ACC_PUBLIC)
 #endif
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,            NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
