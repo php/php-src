@@ -338,23 +338,9 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid value (must return a string)", ce->name);
 		return ZEND_HASH_APPLY_STOP;
 	}
-	if (!base_len && iter->funcs->get_current_key) {
-		key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
-		if (EG(exception)) {
-			return ZEND_HASH_APPLY_STOP;
-		}
-		if (key_type == HASH_KEY_IS_LONG) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
-			return ZEND_HASH_APPLY_STOP;
-		}
-		save = str_key;
-		if (str_key[str_key_len - 1] == '\0') str_key_len--;
-	} else {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
-		return ZEND_HASH_APPLY_STOP;
-	}
 
 	fname = Z_STRVAL_PP(value);
+
 	if (base_len) {
 		if (strstr(fname, base)) {
 			str_key_len = Z_STRLEN_PP(value) - base_len;
@@ -366,6 +352,22 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 		} else {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that is not in the base directory \"%s\"", ce->name, fname, base);
 			efree(save);
+			return ZEND_HASH_APPLY_STOP;
+		}
+	} else  {
+		if (iter->funcs->get_current_key) {
+			key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+			if (EG(exception)) {
+				return ZEND_HASH_APPLY_STOP;
+			}
+			if (key_type == HASH_KEY_IS_LONG) {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
+				return ZEND_HASH_APPLY_STOP;
+			}
+			save = str_key;
+			if (str_key[str_key_len - 1] == '\0') str_key_len--;
+		} else {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
 			return ZEND_HASH_APPLY_STOP;
 		}
 	}
