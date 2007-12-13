@@ -5276,7 +5276,7 @@ void zend_do_namespace(znode *name TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_do_use(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
+void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{{ */
 {
 	unsigned int lcname_len;
 	zstr lcname;
@@ -5303,7 +5303,7 @@ void zend_do_use(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 			} else {
 				*name = *ns;
 				zval_copy_ctor(name);
-				warn = 1;
+				warn = !is_global;
 			}
 		} else {
 			char *p = zend_memrchr(Z_STRVAL_P(ns), ':', Z_STRLEN_P(ns));
@@ -5312,7 +5312,7 @@ void zend_do_use(znode *ns_name, znode *new_name TSRMLS_DC) /* {{{ */
 			} else {
 				*name = *ns;
 				zval_copy_ctor(name);
-				warn = 1;
+				warn = !is_global;
 			}
 		}
 	}
