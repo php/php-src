@@ -398,7 +398,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 	}
 	php_stream_close(fp);
 
-	add_assoc_string(p_obj->ret, str_key, opened, 1);
+	add_assoc_string(p_obj->ret, str_key, opened, 0);
 
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 	phar_entry_delref(data TSRMLS_CC);
