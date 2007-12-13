@@ -58,7 +58,7 @@ key
 next
 valid
 array (1) {
-  ["a"] =>
+  ["a"]=>
   string(%d) "%sphar_buildfromiterator4.phpt"
 }
 ===DONE===
