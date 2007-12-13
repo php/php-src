@@ -310,6 +310,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 {
 	zval **value;
 	zend_uchar key_type;
+	zend_bool is_splfileinfo = 0;
 	ulong int_key;
 	struct _t {
 		phar_archive_object *p;
@@ -318,11 +319,11 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 		uint l;
 		zval *ret;
 	} *p_obj = (struct _t*) puser;
-	uint str_key_len, base_len = p_obj->l;
+	uint str_key_len, base_len = p_obj->l, fname_len;
 	phar_entry_data *data;
 	php_stream *fp;
 	long contents_len;
-	char *fname, *error, *str_key, *base = p_obj->b, *opened, *save;
+	char *fname, *error, *str_key, *base = p_obj->b, *opened, *save = NULL;
 	zend_class_entry *ce = p_obj->c;
 	phar_archive_object *phar_obj = p_obj->p;
 
@@ -334,27 +335,70 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 		/* failure in get_current_data */
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned no value", ce->name);
 	}
-	if (Z_TYPE_PP(value) != IS_STRING) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid value (must return a string)", ce->name);
-		return ZEND_HASH_APPLY_STOP;
+	switch (Z_TYPE_PP(value)) {
+		case IS_STRING :
+			break;
+		case IS_OBJECT :
+			if (instanceof_function(Z_OBJCE_PP(value), spl_ce_SplFileInfo)) {
+				char *test;
+				zval dummy;
+				spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(*value TSRMLS_CC);
+
+				if (!base_len) {
+					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Iterator %s returns an SplFileInfo object, so base directory must be specified", ce->name);
+					return ZEND_HASH_APPLY_STOP;
+				}
+				switch (intern->type) {
+					case SPL_FS_DIR:
+						fname_len = spprintf(&fname, 0, "%s%c%s", intern->path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
+						php_stat(fname, fname_len, FS_IS_DIR, &dummy TSRMLS_CC);
+						if (Z_BVAL(dummy)) {
+							/* ignore directories */
+							efree(fname);
+							return ZEND_HASH_APPLY_KEEP;
+						}
+						test = expand_filepath(fname, test TSRMLS_CC);
+						if (test) {
+							efree(fname);
+							fname = test;
+							fname_len = strlen(fname);
+						}
+						save = fname;
+						is_splfileinfo = 1;
+						goto phar_spl_fileinfo;
+					case SPL_FS_INFO:
+					case SPL_FS_FILE:
+						return ZEND_HASH_APPLY_KEEP;
+				}
+			}
+			/* fall-through */
+		default :
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid value (must return a string)", ce->name);
+			return ZEND_HASH_APPLY_STOP;
 	}
 
 	fname = Z_STRVAL_PP(value);
+	fname_len = Z_STRLEN_PP(value);
 
+phar_spl_fileinfo:
 	if (base_len) {
 		if (strstr(fname, base)) {
-			str_key_len = Z_STRLEN_PP(value) - base_len;
+			str_key_len = fname_len - base_len;
 			if (str_key_len <= 0) {
-				efree(save);
+				if (save) {
+					efree(save);
+				}
 				return ZEND_HASH_APPLY_KEEP;
 			}
 			str_key = fname + base_len;
 		} else {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that is not in the base directory \"%s\"", ce->name, fname, base);
-			efree(save);
+			if (save) {
+				efree(save);
+			}
 			return ZEND_HASH_APPLY_STOP;
 		}
-	} else  {
+	} else {
 		if (iter->funcs->get_current_key) {
 			key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
 			if (EG(exception)) {
@@ -374,14 +418,18 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 #if PHP_MAJOR_VERSION < 6
 	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that safe mode prevents opening", ce->name, fname);
-		efree(save);
+		if (save) {
+			efree(save);
+		}
 		return ZEND_HASH_APPLY_STOP;
 	}
 #endif
 
 	if (php_check_open_basedir(fname TSRMLS_CC)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that open_basedir prevents opening", ce->name, fname);
-		efree(save);
+		if (save) {
+			efree(save);
+		}
 		return ZEND_HASH_APPLY_STOP;
 	}
 
@@ -389,14 +437,18 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 	fp = php_stream_open_wrapper(fname, "rb", STREAM_MUST_SEEK|0, &opened);
 	if (!fp) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a file that could not be opened \"%s\"", ce->name, fname);
-		efree(save);
+		if (save) {
+			efree(save);
+		}
 		return ZEND_HASH_APPLY_STOP;
 	}
 
 	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, str_key, str_key_len, "w+b", &error TSRMLS_CC))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
-		efree(save);
+		if (save) {
+			efree(save);
+		}
 		php_stream_close(fp);
 		return ZEND_HASH_APPLY_STOP;
 	} else {
@@ -408,7 +460,9 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 	php_stream_close(fp);
 
 	add_assoc_string(p_obj->ret, str_key, opened, 0);
-	efree(save);
+	if (save) {
+		efree(save);
+	}
 
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 	phar_entry_delref(data TSRMLS_CC);
