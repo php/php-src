@@ -4749,12 +4749,9 @@ void zend_do_namespace(znode *name TSRMLS_DC) /* {{{ */
 		        CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
 			--num;
 		}
-		if (num > 0) {
+		if (!CG(current_namespace) && num > 0) {
 			zend_error(E_COMPILE_ERROR, "Namespace declaration statement has to be the very first statement in the script");
 		}
-	}
-	if (CG(current_namespace)) {
-		zend_error(E_COMPILE_ERROR, "Namespace cannot be declared twice");
 	}
 	lcname = zend_str_tolower_dup(Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant));
 	if (((Z_STRLEN(name->u.constant) == sizeof("self")-1) &&
@@ -4765,7 +4762,17 @@ void zend_do_namespace(znode *name TSRMLS_DC) /* {{{ */
 	}
 	efree(lcname);
 
-	ALLOC_ZVAL(CG(current_namespace));
+	if (CG(current_namespace)) {
+		zval_dtor(CG(current_namespace));
+	} else {
+		ALLOC_ZVAL(CG(current_namespace));
+	}
+	if (CG(current_import)) {
+		zend_hash_destroy(CG(current_import));
+		efree(CG(current_import));
+		CG(current_import) = NULL;
+	}
+
 	*CG(current_namespace) = name->u.constant;
 }
 /* }}} */
@@ -4884,7 +4891,7 @@ void zend_do_end_compilation(TSRMLS_D) /* {{{ */
 {
 	if (CG(current_namespace)) {
 		zval_dtor(CG(current_namespace));
-		efree(CG(current_namespace));
+		FREE_ZVAL(CG(current_namespace));
 		CG(current_namespace) = NULL;
 	}
 	if (CG(current_import)) {
