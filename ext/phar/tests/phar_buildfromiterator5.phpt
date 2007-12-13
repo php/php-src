@@ -1,5 +1,5 @@
 --TEST--
-Phar::buildFromIterator() iterator, 1 file passed in
+Phar::buildFromIterator() iterator, iterator returns non-string
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --INI--
@@ -38,7 +38,7 @@ class myIterator implements Iterator
 try {
 	chdir(dirname(__FILE__));
 	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar');
-	var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . 'phpt'))));
+	var_dump($phar->buildFromIterator(new myIterator(array('a' => new stdClass))));
 } catch (Exception $e) {
 	var_dump(get_class($e));
 	echo $e->getMessage() . "\n";
@@ -54,11 +54,6 @@ __HALT_COMPILER();
 rewind
 valid
 current
-key
-next
-valid
-array(1) {
-  ["a"]=>
-  string(%d) "%sphar_buildfromiterator4.phpt"
-}
+string(24) "UnexpectedValueException"
+Iterator myIterator returned an invalid value (must return a string)
 ===DONE===
