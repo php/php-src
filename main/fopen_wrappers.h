@@ -34,7 +34,6 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 
 PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const char *path, char **opened_path TSRMLS_DC);
 
-PHPAPI int php_is_url(char *path);
 PHPAPI char *php_strip_url_passwd(char *path);
 
 PHPAPI ZEND_INI_MH(OnUpdateBaseDir);
