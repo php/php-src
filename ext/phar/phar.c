@@ -1887,7 +1887,7 @@ static phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info 
 
 		entry->fp = php_stream_temp_new();
 		php_stream_filter_append(&entry->fp->writefilters, filter);
-		if (php_stream_copy_to_stream(fp, entry->fp, entry->compressed_filesize) != entry->compressed_filesize && php_stream_tell(fp) != (off_t) entry->uncompressed_filesize) {
+		if (php_stream_copy_to_stream(fp, entry->fp, entry->compressed_filesize) != entry->compressed_filesize || php_stream_tell(entry->fp) != (off_t) entry->uncompressed_filesize) {
 			efree(buffer);
 			spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
@@ -1896,14 +1896,6 @@ static phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info 
 		efree(buffer);
 		php_stream_filter_flush(filter, 1);
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
-		if (php_stream_tell(fp) != (off_t)(offset + entry->compressed_filesize)) {
-			spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
-			return NULL;
-		}
-		if (php_stream_tell(entry->fp) != (off_t)entry->uncompressed_filesize) {
-			spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
-			return NULL;
-		}
 		php_stream_seek(fp, offset + entry->compressed_filesize, SEEK_SET);
 	} else { /* from here is for non-compressed */
 		if (!for_write && !entry->is_modified) {
