@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   (Etienne Kneuss)
 - Added "compact" handler for Zend MM storage. (Dmitry)
 - Added "+" and "*" specifiers to zend_parse_parameters(). (Andrei)
+- Added DateTime::createFromTimestamp() to set a unix timestamp without
+  invoking the date parser. (Scott)
 
 - Upgraded PCRE to version 7.4 (Nuno)
 

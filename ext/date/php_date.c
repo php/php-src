@@ -178,6 +178,7 @@ const zend_function_entry date_functions[] = {
 	PHP_FE(date_time_set, NULL)
 	PHP_FE(date_date_set, NULL)
 	PHP_FE(date_isodate_set, NULL)
+	PHP_FE(date_timestamp_set, NULL)
 
 	PHP_FE(timezone_open, NULL)
 	PHP_FE(timezone_name_get, NULL)
@@ -208,6 +209,7 @@ const zend_function_entry date_funcs_date[] = {
 	PHP_ME_MAPPING(setTime,		date_time_set,		NULL, 0)
 	PHP_ME_MAPPING(setDate,		date_date_set,		NULL, 0)
 	PHP_ME_MAPPING(setISODate,	date_isodate_set,	NULL, 0)
+	PHP_ME_MAPPING(createFromTimestamp,	date_timestamp_set, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -2010,6 +2012,25 @@ PHP_FUNCTION(date_isodate_set)
 	dateobj->time->relative.d = timelib_daynr_from_weeknr(y, w, d);
 	dateobj->time->have_relative = 1;
 	
+	timelib_update_ts(dateobj->time, NULL);
+}
+/* }}} */
+
+/* {{{ proto void date_timestamp_set(DateTime object, long unixTimestamp)
+   Sets the date and time based on an Unix timestamp.
+*/
+PHP_FUNCTION(date_timestamp_set)
+{
+	zval         *object;
+	php_date_obj *dateobj;
+	long          timestamp;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &object, date_ce_date, &timestamp) == FAILURE) {
+		RETURN_FALSE;
+	}
+	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
+	timelib_unixtime2gmt(dateobj->time, (timelib_sll)timestamp);
 	timelib_update_ts(dateobj->time, NULL);
 }
 /* }}} */
