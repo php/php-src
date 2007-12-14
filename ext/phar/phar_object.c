@@ -340,7 +340,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 			break;
 		case IS_OBJECT :
 			if (instanceof_function(Z_OBJCE_PP(value), spl_ce_SplFileInfo TSRMLS_CC)) {
-				char *test;
+				char *test = NULL;
 				zval dummy;
 				spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(*value TSRMLS_CC);
 
@@ -357,7 +357,6 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 							efree(fname);
 							return ZEND_HASH_APPLY_KEEP;
 						}
-						test = NULL;
 						test = expand_filepath(fname, test TSRMLS_CC);
 						if (test) {
 							efree(fname);
