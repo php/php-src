@@ -29,7 +29,7 @@ array(1) {
   ["phar_test.phar"]=>
   string(%d) "%s"
 }
-string(29) "<?php var_dump(__FILE__); ?>
+string(%d) "<?php var_dump(__FILE__); ?>
 "
 string(%d) "%sextracted.inc"
 ===DONE===
