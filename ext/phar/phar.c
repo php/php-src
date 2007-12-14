@@ -785,10 +785,6 @@ static int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_l
 		}
 		return SUCCESS;
 	} else {
-		if (phar) {
-			printf("new %s\n", phar->fname);
-			printf("old %s\n", fname);
-		}
 		if (pphar) {
 			*pphar = NULL;
 		}
