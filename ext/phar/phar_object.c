@@ -339,7 +339,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 		case IS_STRING :
 			break;
 		case IS_OBJECT :
-			if (instanceof_function(Z_OBJCE_PP(value), spl_ce_SplFileInfo)) {
+			if (instanceof_function(Z_OBJCE_PP(value), spl_ce_SplFileInfo TSRMLS_CC)) {
 				char *test;
 				zval dummy;
 				spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(*value TSRMLS_CC);
@@ -357,6 +357,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 							efree(fname);
 							return ZEND_HASH_APPLY_KEEP;
 						}
+						test = NULL;
 						test = expand_filepath(fname, test TSRMLS_CC);
 						if (test) {
 							efree(fname);
@@ -512,7 +513,7 @@ PHP_METHOD(Phar, buildFromIterator)
 	pass.l = base_len;
 	pass.ret = return_value;
 
-	if (SUCCESS == spl_iterator_apply(obj, (spl_iterator_apply_func_t) phar_build, (void *) &pass)) {
+	if (SUCCESS == spl_iterator_apply(obj, (spl_iterator_apply_func_t) phar_build, (void *) &pass TSRMLS_CC)) {
 		phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
