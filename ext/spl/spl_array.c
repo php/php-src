@@ -1232,31 +1232,37 @@ SPL_METHOD(cname, fname) \
        proto int ArrayIterator::asort() U
  Sort the entries by values. */
 SPL_ARRAY_METHOD(Array, asort, 0)
+/* }}} */
 
 /* {{{ proto int ArrayObject::ksort() U
        proto int ArrayIterator::ksort() U
  Sort the entries by key. */
 SPL_ARRAY_METHOD(Array, ksort, 0)
+/* }}} */
 
 /* {{{ proto int ArrayObject::uasort(callback cmp_function) U
        proto int ArrayIterator::uasort(callback cmp_function) U
  Sort the entries by values user defined function. */
 SPL_ARRAY_METHOD(Array, uasort, 1)
+/* }}} */
 
 /* {{{ proto int ArrayObject::uksort(callback cmp_function) U
        proto int ArrayIterator::uksort(callback cmp_function) U
  Sort the entries by key using user defined function. */
 SPL_ARRAY_METHOD(Array, uksort, 1)
+/* }}} */
 
 /* {{{ proto int ArrayObject::natsort() U
        proto int ArrayIterator::natsort() U
  Sort the entries by values using "natural order" algorithm. */
 SPL_ARRAY_METHOD(Array, natsort, 0)
+/* }}} */
 
 /* {{{ proto int ArrayObject::natcasesort() U
        proto int ArrayIterator::natcasesort() U
  Sort the entries by key using case insensitive "natural order" algorithm. */
 SPL_ARRAY_METHOD(Array, natcasesort, 0)
+/* }}} */
 
 /* {{{ proto mixed|NULL ArrayIterator::current() U
    Return current array entry */
@@ -1324,6 +1330,7 @@ SPL_METHOD(Array, key)
 {
 	spl_array_iterator_key(getThis(), return_value TSRMLS_CC);
 }
+/* }}} */
 
 /* {{{ proto void ArrayIterator::next() U
    Move to next entry */
