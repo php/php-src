@@ -105,6 +105,10 @@ static inline void zend_pzval_unlock_free_func(zval *z) /* {{{ */
 		(ai).ptr = NULL; \
 	}
 
+#define AI_SET_PTR(ai, val)		\
+	(ai).ptr = (val);			\
+	(ai).ptr_ptr = &((ai).ptr);
+
 #define FREE_OP(should_free) \
 	if (should_free.var) { \
 		if ((zend_uintptr_t)should_free.var & 1L) { \
@@ -205,9 +209,7 @@ static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_
 				Z_STRVAL_P(ptr) = STR_EMPTY_ALLOC();
 				Z_STRLEN_P(ptr) = 0;
 			} else {
-				char c = Z_STRVAL_P(str)[T->str_offset.offset];
-
-				Z_STRVAL_P(ptr) = estrndup(&c, 1);
+				Z_STRVAL_P(ptr) = estrndup( Z_STRVAL_P(str) + T->str_offset.offset, 1);
 				Z_STRLEN_P(ptr) = 1;
 			}
 			Z_TYPE_P(ptr) = IS_STRING;
@@ -405,27 +407,22 @@ static inline zval *_get_obj_zval_ptr(znode *op, temp_variable *Ts, zend_free_op
 }
 /* }}} */
 
-static inline void zend_switch_free(zend_op *opline, temp_variable *Ts TSRMLS_DC) /* {{{ */
+static inline void zend_switch_free(temp_variable *T, int type, int extended_value TSRMLS_DC) /* {{{ */
 {
-	switch (opline->op1.op_type) {
-		case IS_VAR:
-			if (!T(opline->op1.u.var).var.ptr_ptr) {
-				temp_variable *T = &T(opline->op1.u.var);
-				/* perform the equivalent of equivalent of a
-				 * quick & silent get_zval_ptr, and FREE_OP
-				 */
-				PZVAL_UNLOCK_FREE(T->str_offset.str);
-			} else if (T(opline->op1.u.var).var.ptr) {
-				zval_ptr_dtor(&T(opline->op1.u.var).var.ptr);
-				if (opline->extended_value & ZEND_FE_RESET_VARIABLE) { /* foreach() free */
-					zval_ptr_dtor(&T(opline->op1.u.var).var.ptr);
-				}
+	if (type == IS_VAR) {
+		if (T->var.ptr) {
+			if (extended_value & ZEND_FE_RESET_VARIABLE) { /* foreach() free */
+				Z_DELREF_P(T->var.ptr);
 			}
-			break;
-		case IS_TMP_VAR:
-			zendi_zval_dtor(T(opline->op1.u.var).tmp_var);
-			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+			zval_ptr_dtor(&T->var.ptr);
+		} else if (!T->var.ptr_ptr) {
+			/* perform the equivalent of equivalent of a
+			 * quick & silent get_zval_ptr, and FREE_OP
+			 */
+			PZVAL_UNLOCK_FREE(T->str_offset.str);
+		}
+	} else { /* IS_TMP_VAR */
+		zendi_zval_dtor(T->tmp_var);
 	}
 }
 /* }}} */
@@ -575,11 +572,10 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 }
 /* }}} */
 
-static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode *op2, znode *value_op, temp_variable *Ts, int opcode TSRMLS_DC) /* {{{ */
+static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval *property_name, znode *value_op, temp_variable *Ts, int opcode TSRMLS_DC) /* {{{ */
 {
 	zval *object;
-	zend_free_op free_op2, free_value;
-	zval *property_name = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
+	zend_free_op free_value;
 	zval *value = get_zval_ptr(value_op, Ts, &free_value, BP_VAR_R);
 	zval **retval = &T(result->u.var).var.ptr;
 
@@ -587,31 +583,36 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
 
-	if (*object_ptr == EG(error_zval_ptr)) {
-		FREE_OP(free_op2);
-		if (!RETURN_VALUE_UNUSED(result)) {
-			*retval = EG(uninitialized_zval_ptr);
-			PZVAL_LOCK(*retval);
+	if (Z_TYPE_P(*object_ptr) != IS_OBJECT) {
+		if (*object_ptr == EG(error_zval_ptr)) {
+			if (!RETURN_VALUE_UNUSED(result)) {
+				*retval = EG(uninitialized_zval_ptr);
+				PZVAL_LOCK(*retval);
+			}
+			FREE_OP(free_value);
+			return;
 		}
-		FREE_OP(free_value);
-		return;
+		if (Z_TYPE_PP(object_ptr) == IS_NULL ||
+		    (Z_TYPE_PP(object_ptr) == IS_BOOL && Z_LVAL_PP(object_ptr) == 0) ||
+		    (Z_TYPE_PP(object_ptr) == IS_STRING && Z_STRLEN_PP(object_ptr) == 0) ||
+		    (Z_TYPE_PP(object_ptr) == IS_UNICODE && Z_USTRLEN_PP(object_ptr) == 0)) {
+			zend_error(E_STRICT, "Creating default object from empty value");
+			SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
+			zval_dtor(*object_ptr);
+			object_init(*object_ptr);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+			if (!RETURN_VALUE_UNUSED(result)) {
+				*retval = EG(uninitialized_zval_ptr);
+				PZVAL_LOCK(*retval);
+			}
+			FREE_OP(free_value);
+			return;
+		}
 	}
 
-	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
-	object = *object_ptr;
-
-	if (Z_TYPE_P(object) != IS_OBJECT || (opcode == ZEND_ASSIGN_OBJ && !Z_OBJ_HT_P(object)->write_property)) {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
-		FREE_OP(free_op2);
-		if (!RETURN_VALUE_UNUSED(result)) {
-			*retval = EG(uninitialized_zval_ptr);
-			PZVAL_LOCK(*retval);
-		}
-		FREE_OP(free_value);
-		return;
-	}
-
-	/* here we are sure we are dealing with an object */
+ 	/* here we are sure we are dealing with an object */
+ 	object = *object_ptr;
 
 	/* separate our value if necessary */
 	if (value_op->op_type == IS_TMP_VAR) {
@@ -634,8 +635,14 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 
 	Z_ADDREF_P(value);
 	if (opcode == ZEND_ASSIGN_OBJ) {
-		if (IS_TMP_FREE(free_op2)) {
-			MAKE_REAL_ZVAL_PTR(property_name);
+		if (!Z_OBJ_HT_P(object)->write_property) {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+			if (!RETURN_VALUE_UNUSED(result)) {
+				*retval = EG(uninitialized_zval_ptr);
+				PZVAL_LOCK(*retval);
+			}
+			FREE_OP(free_value);
+			return;
 		}
 		Z_OBJ_HT_P(object)->write_property(object, property_name, value TSRMLS_CC);
 	} else {
@@ -643,169 +650,132 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		if (!Z_OBJ_HT_P(object)->write_dimension) {
 			zend_error_noreturn(E_ERROR, "Cannot use object as array");
 		}
-		if (IS_TMP_FREE(free_op2)) {
-			MAKE_REAL_ZVAL_PTR(property_name);
-		}
 		Z_OBJ_HT_P(object)->write_dimension(object, property_name, value TSRMLS_CC);
 	}
 
-	if (result && !RETURN_VALUE_UNUSED(result) && !EG(exception)) {
-		T(result->u.var).var.ptr = value;
-		T(result->u.var).var.ptr_ptr = &T(result->u.var).var.ptr; /* this is so that we could use it in FETCH_DIM_R, etc. - see bug #27876 */
+	if (!RETURN_VALUE_UNUSED(result) && !EG(exception)) {
+		AI_SET_PTR(T(result->u.var).var, value);
 		PZVAL_LOCK(value);
-	}
-	if (IS_TMP_FREE(free_op2)) {
-		zval_ptr_dtor(&property_name);
-	} else {
-		FREE_OP(free_op2);
 	}
 	zval_ptr_dtor(&value);
 	FREE_OP_IF_VAR(free_value);
 }
 /* }}} */
 
-static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2, zval *value, int type, temp_variable *Ts TSRMLS_DC) /* {{{ */
+static inline void zend_assign_to_string_offset(temp_variable *T, zval *value, int value_type TSRMLS_DC) /* {{{ */
 {
-	zend_free_op free_op1;
-	zval **variable_ptr_ptr = get_zval_ptr_ptr(op1, Ts, &free_op1, BP_VAR_W);
-	zval *variable_ptr;
-
-	if (!variable_ptr_ptr) {
-		temp_variable *T = &T(op1->u.var);
-
-		if (UG(unicode) && Z_TYPE_P(T->str_offset.str) == IS_STRING && Z_TYPE_P(value) != IS_STRING) {
-			convert_to_unicode(T->str_offset.str);
-		}
-
-		if (Z_TYPE_P(T->str_offset.str) == IS_STRING)
-		do {
-			zval tmp;
-			zval *final_value = value;
-
-			if (((int)T->str_offset.offset < 0)) {
-				zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
-				break;
-			}
-			if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
-				zend_uint i;
-
-				if (Z_STRLEN_P(T->str_offset.str)==0) {
-					STR_FREE(Z_STRVAL_P(T->str_offset.str));
-					Z_STRVAL_P(T->str_offset.str) = (char *) emalloc(T->str_offset.offset+1+1);
-				} else {
-					Z_STRVAL_P(T->str_offset.str) = (char *) erealloc(Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
-				}
-				for (i=Z_STRLEN_P(T->str_offset.str); i<T->str_offset.offset; i++) {
-					Z_STRVAL_P(T->str_offset.str)[i] = ' ';
-				}
-				Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset+1] = 0;
-				Z_STRLEN_P(T->str_offset.str) = T->str_offset.offset+1;
-			}
-
-			if (Z_TYPE_P(value)!=IS_STRING) {
-				tmp = *value;
-				if (op2->op_type & (IS_VAR|IS_CV|IS_CONST)) {
-					zval_copy_ctor(&tmp);
-				}
-				convert_to_string(&tmp);
-				final_value = &tmp;
-			}
-
-			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL_P(final_value)[0];
-
-			if (op2->op_type == IS_TMP_VAR) {
-				if (final_value == &T(op2->u.var).tmp_var) {
-					/* we can safely free final_value here
-					 * because separation is done only
-					 * in case op2->op_type == IS_VAR */
-					STR_FREE(Z_STRVAL_P(final_value));
-				}
-			}
-			if (final_value == &tmp) {
-				zval_dtor(final_value);
-			}
-			/*
-			 * the value of an assignment to a string offset is undefined
-			T(result->u.var).var = &T->str_offset.str;
-			*/
-		} while (0);
-		else if (Z_TYPE_P(T->str_offset.str) == IS_UNICODE) do {
-			zval tmp;
-			zval *final_value = value;
-
-			if (((int)T->str_offset.offset < 0)) {
-				zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
-				break;
-			}
-			if (T->str_offset.offset >= Z_USTRLEN_P(T->str_offset.str)) {
-				zend_uint i;
-
-				if (Z_USTRLEN_P(T->str_offset.str)==0) {
-					USTR_FREE(Z_USTRVAL_P(T->str_offset.str));
-					Z_USTRVAL_P(T->str_offset.str) = eumalloc(T->str_offset.offset+1+1);
-				} else {
-					Z_USTRVAL_P(T->str_offset.str) = eurealloc(Z_USTRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
-				}
-				for (i=Z_USTRLEN_P(T->str_offset.str); i<T->str_offset.offset; i++) {
-					Z_USTRVAL_P(T->str_offset.str)[i] = 0x20; /* ' ' */
-				}
-				Z_USTRVAL_P(T->str_offset.str)[T->str_offset.offset+1] = 0;
-				Z_USTRLEN_P(T->str_offset.str) = T->str_offset.offset+1;
-			}
-
-			if (Z_TYPE_P(value)!=IS_UNICODE) {
-				tmp = *value;
-				if (op2->op_type & (IS_VAR|IS_CV|IS_CONST)) {
-					zval_copy_ctor(&tmp);
-				}
-				convert_to_unicode(&tmp);
-				final_value = &tmp;
-			}
-
-			Z_USTRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_USTRVAL_P(final_value)[0];
-
-			if (op2->op_type == IS_TMP_VAR) {
-				if (final_value == &T(op2->u.var).tmp_var) {
-					/* we can safely free final_value here
-					 * because separation is done only
-					 * in case op2->op_type == IS_VAR */
-					USTR_FREE(Z_USTRVAL_P(final_value));
-				}
-			}
-			if (final_value == &tmp) {
-				zval_dtor(final_value);
-			}
-		} while (0);
-		/* zval_ptr_dtor(&T->str_offset.str); Nuke this line if it doesn't cause a leak */
-
-/*		T(result->u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr); */
-		if (!RETURN_VALUE_UNUSED(result)) {
-			T(result->u.var).var.ptr_ptr = &value;
-			PZVAL_LOCK(*T(result->u.var).var.ptr_ptr);
-			AI_USE_PTR(T(result->u.var).var);
-		}
-		FREE_OP_VAR_PTR(free_op1);
-		return;
+	if (UG(unicode) && Z_TYPE_P(T->str_offset.str) == IS_STRING && Z_TYPE_P(value) != IS_STRING) {
+		convert_to_unicode(T->str_offset.str);
 	}
 
-	variable_ptr = *variable_ptr_ptr;
+	if (Z_TYPE_P(T->str_offset.str) == IS_STRING) {
+		zval tmp;
+		zval *final_value = value;
+
+		if (((int)T->str_offset.offset < 0)) {
+			zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
+			return;
+		}
+		if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
+			zend_uint i;
+
+			if (Z_STRLEN_P(T->str_offset.str)==0) {
+				STR_FREE(Z_STRVAL_P(T->str_offset.str));
+				Z_STRVAL_P(T->str_offset.str) = (char *) emalloc(T->str_offset.offset+1+1);
+			} else {
+				Z_STRVAL_P(T->str_offset.str) = (char *) erealloc(Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
+			}
+			for (i=Z_STRLEN_P(T->str_offset.str); i<T->str_offset.offset; i++) {
+				Z_STRVAL_P(T->str_offset.str)[i] = ' ';
+			}
+			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset+1] = 0;
+			Z_STRLEN_P(T->str_offset.str) = T->str_offset.offset+1;
+		}
+
+		if (Z_TYPE_P(value)!=IS_STRING) {
+			tmp = *value;
+			if (value_type & (IS_VAR|IS_CV|IS_CONST)) {
+				zval_copy_ctor(&tmp);
+			}
+			convert_to_string(&tmp);
+			final_value = &tmp;
+		}
+
+		Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL_P(final_value)[0];
+
+		if (final_value == &tmp) {
+			zval_dtor(final_value);
+		} else if (value_type == IS_TMP_VAR) {
+			/* we can safely free final_value here
+			 * because separation is done only
+			 * in case value_type == IS_VAR */
+			STR_FREE(Z_STRVAL_P(final_value));
+		}
+		/*
+		 * the value of an assignment to a string offset is undefined
+		T(result->u.var).var = &T->str_offset.str;
+		*/
+	} else if (Z_TYPE_P(T->str_offset.str) == IS_UNICODE) {
+		zval tmp;
+		zval *final_value = value;
+
+		if (((int)T->str_offset.offset < 0)) {
+			zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
+			return;
+		}
+		if (T->str_offset.offset >= Z_USTRLEN_P(T->str_offset.str)) {
+			zend_uint i;
+
+			if (Z_USTRLEN_P(T->str_offset.str)==0) {
+				USTR_FREE(Z_USTRVAL_P(T->str_offset.str));
+				Z_USTRVAL_P(T->str_offset.str) = eumalloc(T->str_offset.offset+1+1);
+			} else {
+				Z_USTRVAL_P(T->str_offset.str) = eurealloc(Z_USTRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
+			}
+			for (i=Z_USTRLEN_P(T->str_offset.str); i<T->str_offset.offset; i++) {
+				Z_USTRVAL_P(T->str_offset.str)[i] = 0x20; /* ' ' */
+			}
+			Z_USTRVAL_P(T->str_offset.str)[T->str_offset.offset+1] = 0;
+			Z_USTRLEN_P(T->str_offset.str) = T->str_offset.offset+1;
+		}
+
+		if (Z_TYPE_P(value)!=IS_UNICODE) {
+			tmp = *value;
+			if (value_type & (IS_VAR|IS_CV|IS_CONST)) {
+				zval_copy_ctor(&tmp);
+			}
+			convert_to_unicode(&tmp);
+			final_value = &tmp;
+		}
+
+		Z_USTRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_USTRVAL_P(final_value)[0];
+
+		if (final_value == &tmp) {
+			zval_dtor(final_value);
+		} else if (value_type == IS_TMP_VAR) {
+			/* we can safely free final_value here
+			 * because separation is done only
+			 * in case value_type == IS_VAR */
+			USTR_FREE(Z_USTRVAL_P(final_value));
+		}
+	}
+}
+/* }}} */
+
+static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value, int is_tmp_var TSRMLS_DC) /* {{{ */
+{
+	zval *variable_ptr = *variable_ptr_ptr;
 
 	if (variable_ptr == EG(error_zval_ptr)) {
-		if (result && !RETURN_VALUE_UNUSED(result)) {
-			T(result->u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
-			PZVAL_LOCK(*T(result->u.var).var.ptr_ptr);
-			AI_USE_PTR(T(result->u.var).var);
-		}
-		if (type==IS_TMP_VAR) {
+		if (is_tmp_var) {
 			zval_dtor(value);
 		}
-		FREE_OP_VAR_PTR(free_op1);
-		return;
+		return EG(uninitialized_zval_ptr);
 	}
 
 	if (Z_TYPE_P(variable_ptr) == IS_OBJECT && Z_OBJ_HANDLER_P(variable_ptr, set)) {
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr_ptr, value TSRMLS_CC);
-		goto done_setting_var;
+		return value;
 	}
 
 	if (PZVAL_IS_REF(variable_ptr)) {
@@ -813,86 +783,65 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			zend_uint refcount = Z_REFCOUNT_P(variable_ptr);
 			zval garbage;
 
-			if (type!=IS_TMP_VAR) {
+			if (!is_tmp_var) {
 				Z_ADDREF_P(value);
 			}
 			garbage = *variable_ptr;
 			*variable_ptr = *value;
 			Z_SET_REFCOUNT_P(variable_ptr, refcount);
 			Z_SET_ISREF_P(variable_ptr);
-			if (type!=IS_TMP_VAR) {
+			if (!is_tmp_var) {
 				zendi_zval_copy_ctor(*variable_ptr);
 				Z_DELREF_P(value);
 			}
 			zendi_zval_dtor(garbage);
 		}
 	} else {
-		Z_DELREF_P(variable_ptr);
-		if (Z_REFCOUNT_P(variable_ptr) == 0) {
-			switch (type) {
-				case IS_CV:
-				case IS_VAR:
-					/* break missing intentionally */
-				case IS_CONST:
-					if (variable_ptr==value) {
-						Z_ADDREF_P(variable_ptr);
-					} else if (PZVAL_IS_REF(value)) {
-						zval tmp;
+		if (Z_DELREF_P(variable_ptr) == 0) {
+			if (!is_tmp_var) {
+				if (variable_ptr==value) {
+					Z_ADDREF_P(variable_ptr);
+				} else if (PZVAL_IS_REF(value)) {
+					zval tmp;
 
-						tmp = *value;
-						zval_copy_ctor(&tmp);
-						Z_SET_REFCOUNT(tmp, 1);
-						zendi_zval_dtor(*variable_ptr);
-						*variable_ptr = tmp;
-					} else {
-						Z_ADDREF_P(value);
-						zendi_zval_dtor(*variable_ptr);
-						safe_free_zval_ptr(variable_ptr);
-						*variable_ptr_ptr = value;
-					}
-					break;
-				case IS_TMP_VAR:
+					tmp = *value;
+					zval_copy_ctor(&tmp);
+					Z_SET_REFCOUNT(tmp, 1);
 					zendi_zval_dtor(*variable_ptr);
-					Z_SET_REFCOUNT_P(value, 1);
-					*variable_ptr = *value;
-					break;
-					EMPTY_SWITCH_DEFAULT_CASE()
-						}
+					*variable_ptr = tmp;
+				} else {
+					Z_ADDREF_P(value);
+					zendi_zval_dtor(*variable_ptr);
+					safe_free_zval_ptr(variable_ptr);
+					*variable_ptr_ptr = value;
+				}
+			} else {
+				zendi_zval_dtor(*variable_ptr);
+				Z_SET_REFCOUNT_P(value, 1);
+				*variable_ptr = *value;
+			}
 		} else { /* we need to split */
-			switch (type) {
-				case IS_CV:
-				case IS_VAR:
-					/* break missing intentionally */
-				case IS_CONST:
-					if (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0) {
-						ALLOC_ZVAL(variable_ptr);
-						*variable_ptr_ptr = variable_ptr;
-						*variable_ptr = *value;
-						zval_copy_ctor(variable_ptr);
-						Z_SET_REFCOUNT_P(variable_ptr, 1);
-						break;
-					}
+			if (!is_tmp_var) {
+				if (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0) {
+					ALLOC_ZVAL(variable_ptr);
+					*variable_ptr_ptr = variable_ptr;
+					*variable_ptr = *value;
+					zval_copy_ctor(variable_ptr);
+					Z_SET_REFCOUNT_P(variable_ptr, 1);
+				} else {
 					*variable_ptr_ptr = value;
 					Z_ADDREF_P(value);
-					break;
-				case IS_TMP_VAR:
-					ALLOC_ZVAL(*variable_ptr_ptr);
-					Z_SET_REFCOUNT_P(value, 1);
-					**variable_ptr_ptr = *value;
-					break;
-					EMPTY_SWITCH_DEFAULT_CASE()
-						}
+				}
+			} else {
+				ALLOC_ZVAL(*variable_ptr_ptr);
+				Z_SET_REFCOUNT_P(value, 1);
+				**variable_ptr_ptr = *value;
+			}
 		}
 		Z_UNSET_ISREF_PP(variable_ptr_ptr);
 	}
 
-done_setting_var:
-	if (result && !RETURN_VALUE_UNUSED(result)) {
-		T(result->u.var).var.ptr_ptr = variable_ptr_ptr;
-		PZVAL_LOCK(*variable_ptr_ptr);
-		AI_USE_PTR(T(result->u.var).var);
-	}
-	FREE_OP_VAR_PTR(free_op1);
+	return *variable_ptr_ptr;
 }
 /* }}} */
 
@@ -1081,7 +1030,7 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 	switch (Z_TYPE_P(container)) {
 
 		case IS_ARRAY:
-			if ((type==BP_VAR_W || type==BP_VAR_RW) && Z_REFCOUNT_P(container) > 1 && !PZVAL_IS_REF(container)) {
+			if (type != BP_VAR_UNSET && Z_REFCOUNT_P(container) > 1 && !PZVAL_IS_REF(container)) {
 				SEPARATE_ZVAL(container_ptr);
 				container = *container_ptr;
 			}
@@ -1101,9 +1050,6 @@ fetch_from_array:
 			if (result) {
 				result->var.ptr_ptr = retval;
 				PZVAL_LOCK(*retval);
-				if (type == BP_VAR_R || type == BP_VAR_IS) {
-					AI_USE_PTR(result->var);
-				}
 			}
 			return;
 			break;
@@ -1113,11 +1059,8 @@ fetch_from_array:
 				if (result) {
 					result->var.ptr_ptr = &EG(error_zval_ptr);
 					PZVAL_LOCK(EG(error_zval_ptr));
-					if (type == BP_VAR_R || type == BP_VAR_IS) {
-						AI_USE_PTR(result->var);
-					}
 				}
-			} else if (type == BP_VAR_RW || type == BP_VAR_W) {
+			} else if (type != BP_VAR_UNSET) {
 convert_to_array:
 				if (!PZVAL_IS_REF(container)) {
 					SEPARATE_ZVAL(container_ptr);
@@ -1130,9 +1073,6 @@ convert_to_array:
 				/* for read-mode only */
 				result->var.ptr_ptr = &EG(uninitialized_zval_ptr);
 				PZVAL_LOCK(EG(uninitialized_zval_ptr));
-				if (type == BP_VAR_R || type == BP_VAR_IS) {
-					AI_USE_PTR(result->var);
-				}
 			}
 			return;
 			break;
@@ -1141,7 +1081,7 @@ convert_to_array:
 		case IS_STRING: {
 				zval tmp;
 
-				if ((type == BP_VAR_RW || type == BP_VAR_W)  && Z_UNILEN_P(container)==0) {
+				if (type != BP_VAR_UNSET && Z_UNILEN_P(container)==0) {
 					goto convert_to_array;
 				}
 				if (dim == NULL) {
@@ -1168,15 +1108,8 @@ convert_to_array:
 					convert_to_long(&tmp);
 					dim = &tmp;
 				}
-				switch (type) {
-					case BP_VAR_R:
-					case BP_VAR_IS:
-					case BP_VAR_UNSET:
-						/* do nothing... */
-						break;
-					default:
-						SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
-						break;
+				if (type != BP_VAR_UNSET) {
+					SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
 				}
 				if (result) {
 					container = *container_ptr;
@@ -1184,9 +1117,7 @@ convert_to_array:
 					PZVAL_LOCK(container);
 					result->str_offset.offset = Z_LVAL_P(dim);
 					result->var.ptr_ptr = NULL;
-					if (type == BP_VAR_R || type == BP_VAR_IS) {
-						AI_USE_PTR(result->var);
-					}
+					result->var.ptr = NULL;
 				}
 				return;
 			}
@@ -1206,8 +1137,7 @@ convert_to_array:
 				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
 
 				if (overloaded_result) {
-					if (!Z_ISREF_P(overloaded_result) &&
-					    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
+					if (!Z_ISREF_P(overloaded_result)) {
 						if (Z_REFCOUNT_P(overloaded_result) > 0) {
 							zval *tmp = overloaded_result;
 
@@ -1227,9 +1157,8 @@ convert_to_array:
 					retval = &EG(error_zval_ptr);
 				}
 				if (result) {
-					result->var.ptr_ptr = retval;
-					AI_USE_PTR(result->var);
-					PZVAL_LOCK(*result->var.ptr_ptr);
+					AI_SET_PTR(result->var, *retval);
+					PZVAL_LOCK(*retval);
 				} else if (Z_REFCOUNT_PP(retval) == 0) {
 					/* Destroy unused result from offsetGet() magic method */
 					Z_SET_REFCOUNT_P((*retval), 1);
@@ -1244,37 +1173,157 @@ convert_to_array:
 			break;
 
 		case IS_BOOL:
-			if ((type == BP_VAR_RW || type == BP_VAR_W)  && Z_LVAL_P(container)==0) {
+			if (type != BP_VAR_UNSET && Z_LVAL_P(container)==0) {
 				goto convert_to_array;
 			}
 			/* break missing intentionally */
 
 		default:
-			switch (type) {
-				case BP_VAR_UNSET:
-					zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
-					/* break missing intentionally */
-				case BP_VAR_R:
-				case BP_VAR_IS:
-					if (result) {
-						result->var.ptr_ptr = &EG(uninitialized_zval_ptr);
-						PZVAL_LOCK(EG(uninitialized_zval_ptr));
-						AI_USE_PTR(result->var);
-					}
-					return;
-					break;
-				case BP_VAR_W:
-				case BP_VAR_RW:
-					zend_error(E_WARNING, "Cannot use a scalar value as an array");
-					/* break missing intentionally */
-				default:
-					if (result) {
-						result->var.ptr_ptr = &EG(error_zval_ptr);
-						PZVAL_LOCK(EG(error_zval_ptr));
-					}
-					return;
-					break;
+			if (type == BP_VAR_UNSET) {
+				zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
+				if (result) {
+					AI_SET_PTR(result->var, EG(uninitialized_zval_ptr));
+					PZVAL_LOCK(EG(uninitialized_zval_ptr));
+				}
+			} else {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				if (result) {
+					result->var.ptr_ptr = &EG(error_zval_ptr);
+					PZVAL_LOCK(EG(error_zval_ptr));
+				}
 			}
+			break;
+	}
+}
+/* }}} */
+
+static void zend_fetch_dimension_address_read(temp_variable *result, zval **container_ptr, zval *dim, int dim_is_tmp_var, int type TSRMLS_DC) /* {{{ */
+{
+	zval *container;
+	zval **retval;
+
+	if (!container_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+
+	container = *container_ptr;
+
+	switch (Z_TYPE_P(container)) {
+
+		case IS_ARRAY:
+			if (dim == NULL) {
+				zval *new_zval = &EG(uninitialized_zval);
+
+				Z_ADDREF_P(new_zval);
+				if (zend_hash_next_index_insert(Z_ARRVAL_P(container), &new_zval, sizeof(zval *), (void **) &retval) == FAILURE) {
+					zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+					retval = &EG(error_zval_ptr);
+					Z_DELREF_P(new_zval);
+				}
+			} else {
+				retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, type TSRMLS_CC);
+			}
+			if (result) {
+				AI_SET_PTR(result->var, *retval);
+				PZVAL_LOCK(*retval);
+			}
+			return;
+			break;
+
+		case IS_NULL:
+			if (container == EG(error_zval_ptr)) {
+				if (result) {
+					AI_SET_PTR(result->var, EG(error_zval_ptr));
+					PZVAL_LOCK(EG(error_zval_ptr));
+				}
+			} else if (result) {
+				/* for read-mode only */
+				AI_SET_PTR(result->var, EG(uninitialized_zval_ptr));
+				PZVAL_LOCK(EG(uninitialized_zval_ptr));
+			}
+			return;
+			break;
+
+		case IS_UNICODE:
+		case IS_STRING: {
+				zval tmp;
+
+				if (dim == NULL) {
+					zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+				}
+
+				if (Z_TYPE_P(dim) != IS_LONG) {
+					switch(Z_TYPE_P(dim)) {
+						/* case IS_LONG: */
+						case IS_STRING:
+						case IS_UNICODE:
+						case IS_DOUBLE:
+						case IS_NULL:
+						case IS_BOOL:
+							/* do nothing */
+							break;
+						default:
+							zend_error(E_WARNING, "Illegal offset type");
+							break;
+					}
+
+					tmp = *dim;
+					zval_copy_ctor(&tmp);
+					convert_to_long(&tmp);
+					dim = &tmp;
+				}
+				if (result) {
+					container = *container_ptr;
+					result->str_offset.str = container;
+					PZVAL_LOCK(container);
+					result->str_offset.offset = Z_LVAL_P(dim);
+					result->var.ptr_ptr = NULL;
+					result->var.ptr = NULL;
+				}
+				return;
+			}
+			break;
+
+		case IS_OBJECT:
+			if (!Z_OBJ_HT_P(container)->read_dimension) {
+				zend_error_noreturn(E_ERROR, "Cannot use object as array");
+			} else {
+				zval *overloaded_result;
+
+				if (dim_is_tmp_var) {
+					zval *orig = dim;
+					MAKE_REAL_ZVAL_PTR(dim);
+					ZVAL_NULL(orig);
+				}
+				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
+
+				if (overloaded_result) {
+					if (result) {
+						AI_SET_PTR(result->var, overloaded_result);
+						PZVAL_LOCK(overloaded_result);
+					} else if (Z_REFCOUNT_P(overloaded_result) == 0) {
+						/* Destroy unused result from offsetGet() magic method */
+						Z_SET_REFCOUNT_P(overloaded_result, 1);
+						zval_ptr_dtor(&overloaded_result);
+					}
+				} else if (result) {
+					AI_SET_PTR(result->var, EG(error_zval_ptr));
+					PZVAL_LOCK(EG(error_zval_ptr));
+				}
+				if (dim_is_tmp_var) {
+					zval_ptr_dtor(&dim);
+				}
+				return;
+			}
+			return;
+			break;
+
+		default:
+			if (result) {
+				AI_SET_PTR(result->var, EG(uninitialized_zval_ptr));
+				PZVAL_LOCK(EG(uninitialized_zval_ptr));
+			}
+			return;
 			break;
 	}
 }
@@ -1289,40 +1338,33 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 	}
 
 	container = *container_ptr;
-	if (container == EG(error_zval_ptr)) {
-		if (result) {
-			result->var.ptr_ptr = &EG(error_zval_ptr);
-			PZVAL_LOCK(*result->var.ptr_ptr);
-		}
-		return;
-	}
-	/* this should modify object only if it's empty */
-	if (Z_TYPE_P(container) == IS_NULL
-		|| (Z_TYPE_P(container) == IS_BOOL && Z_LVAL_P(container)==0)
-		|| (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0)
-		|| (Z_TYPE_P(container) == IS_UNICODE && Z_USTRLEN_P(container)==0)) {
-		switch (type) {
-			case BP_VAR_RW:
-			case BP_VAR_W:
-				if (!PZVAL_IS_REF(container)) {
-					SEPARATE_ZVAL(container_ptr);
-					container = *container_ptr;
-				}
-				object_init(container);
-				break;
-		}
-	}
-
 	if (Z_TYPE_P(container) != IS_OBJECT) {
-		if (result) {
-			if (type == BP_VAR_R || type == BP_VAR_IS) {
-				result->var.ptr_ptr = &EG(uninitialized_zval_ptr);
-			} else {
+		if (container == EG(error_zval_ptr)) {
+			if (result) {
 				result->var.ptr_ptr = &EG(error_zval_ptr);
+				PZVAL_LOCK(*result->var.ptr_ptr);
 			}
-			PZVAL_LOCK(*result->var.ptr_ptr);
+			return;
 		}
-		return;
+	
+		/* this should modify object only if it's empty */
+		if (type != BP_VAR_UNSET &&
+		    (Z_TYPE_P(container) == IS_NULL ||
+		     (Z_TYPE_P(container) == IS_BOOL && Z_LVAL_P(container)==0) ||
+		     (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0) ||
+		     (Z_TYPE_P(container) == IS_UNICODE && Z_USTRLEN_P(container)==0))) {
+			if (!PZVAL_IS_REF(container)) {
+				SEPARATE_ZVAL(container_ptr);
+				container = *container_ptr;
+			}
+			object_init(container);
+		} else {
+			if (result) {
+ 				result->var.ptr_ptr = &EG(error_zval_ptr);
+				PZVAL_LOCK(EG(error_zval_ptr));
+			}
+ 			return;
+		}
 	}
 
 	if (Z_OBJ_HT_P(container)->get_property_ptr_ptr) {
@@ -1333,29 +1375,29 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 			if (Z_OBJ_HT_P(container)->read_property &&
 				(ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type TSRMLS_CC)) != NULL) {
 				if (result) {
-					result->var.ptr = ptr;
-					result->var.ptr_ptr = &result->var.ptr;
+					AI_SET_PTR(result->var, ptr);
+					PZVAL_LOCK(ptr);
 				}
 			} else {
 				zend_error(E_ERROR, "Cannot access undefined property for object with overloaded property access");
 			}
 		} else if (result) {
 			result->var.ptr_ptr = ptr_ptr;
+			PZVAL_LOCK(*ptr_ptr);
 		}
 	} else if (Z_OBJ_HT_P(container)->read_property) {
+		zval *ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type TSRMLS_CC);
+
 		if (result) {
-			result->var.ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type TSRMLS_CC);
-			result->var.ptr_ptr = &result->var.ptr;
+			AI_SET_PTR(result->var, ptr);
+			PZVAL_LOCK(ptr);
 		}
 	} else {
 		zend_error(E_WARNING, "This object doesn't support property references");
 		if (result) {
 			result->var.ptr_ptr = &EG(error_zval_ptr);
+			PZVAL_LOCK(EG(error_zval_ptr));
 		}
-	}
-
-	if (result) {
-		PZVAL_LOCK(*result->var.ptr_ptr);
 	}
 }
 /* }}} */
@@ -1376,7 +1418,7 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 
 			switch (brk_opline->opcode) {
 				case ZEND_SWITCH_FREE:
-					zend_switch_free(brk_opline, Ts TSRMLS_CC);
+					zend_switch_free(&T(brk_opline->op1.u.var), brk_opline->op1.op_type, brk_opline->extended_value TSRMLS_CC);
 					break;
 				case ZEND_FREE:
 					zendi_zval_dtor(T(brk_opline->op1.u.var).tmp_var);
