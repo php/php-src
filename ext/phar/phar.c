@@ -1489,7 +1489,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 	memset(buffer, 32, sizeof(token));
 	halt_offset = 0;
 	while(!php_stream_eof(fp)) {
-		if ((got = php_stream_read(fp, buffer+tokenlen, readsize)) < tokenlen) {
+		if ((got = php_stream_read(fp, buffer+tokenlen, readsize)) < (size_t) tokenlen) {
 			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated entry)")
 		}
 		if ((pos = strstr(buffer, token)) != NULL) {
@@ -1887,7 +1887,7 @@ static phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info 
 
 		entry->fp = php_stream_temp_new();
 		php_stream_filter_append(&entry->fp->writefilters, filter);
-		if (php_stream_copy_to_stream(fp, entry->fp, entry->compressed_filesize) != entry->compressed_filesize && php_stream_tell(fp) != entry->uncompressed_filesize) {
+		if (php_stream_copy_to_stream(fp, entry->fp, entry->compressed_filesize) != entry->compressed_filesize && php_stream_tell(fp) != (off_t) entry->uncompressed_filesize) {
 			efree(buffer);
 			spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
@@ -2180,7 +2180,7 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 	} else {
 		got = php_stream_read(data->fp, buf, MIN(count, data->internal_file->uncompressed_filesize - data->position));
 		data->position = php_stream_tell(data->fp) - data->zero;
-		stream->eof = (data->position == data->internal_file->uncompressed_filesize);
+		stream->eof = (data->position == (off_t) data->internal_file->uncompressed_filesize);
 	}
 
 
@@ -2239,7 +2239,7 @@ static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t 
 				temp = data->zero + offset;
 				break;
 		}
-		if (temp > data->zero + data->internal_file->uncompressed_filesize) {
+		if (temp > data->zero + (off_t) data->internal_file->uncompressed_filesize) {
 			*newoffset = -1;
 			return -1;
 		}
@@ -2623,10 +2623,10 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		} else {
 			php_stream_rewind(file);
 		}
-		php_stream_filter_append(&file->readfilters, filter);
-		entry->compressed_filesize = (php_uint32) php_stream_copy_to_stream(file, entry->cfp, (size_t) entry->uncompressed_filesize+8192 TSRMLS_CC);
-		php_stream_filter_flush(filter, 1 TSRMLS_CC);
-		entry->compressed_filesize += (php_uint32) php_stream_copy_to_stream(file, entry->cfp, (size_t) entry->uncompressed_filesize+8192 TSRMLS_CC);
+		php_stream_filter_append((&file->readfilters), filter);
+		entry->compressed_filesize = (php_uint32) php_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize+8192 TSRMLS_CC);
+		php_stream_filter_flush(filter, 1);
+		entry->compressed_filesize += (php_uint32) php_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize+8192 TSRMLS_CC);
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
 		/* generate crc on compressed file */
 		php_stream_rewind(entry->cfp);
