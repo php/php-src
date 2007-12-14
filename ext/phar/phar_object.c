@@ -310,7 +310,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 {
 	zval **value;
 	zend_uchar key_type;
-	zend_bool is_splfileinfo = 0;
+	zend_bool is_splfileinfo = 0, close_fp = 1;
 	ulong int_key;
 	struct _t {
 		phar_archive_object *p;
@@ -326,6 +326,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 	char *fname, *error, *str_key, *base = p_obj->b, *opened, *save = NULL;
 	zend_class_entry *ce = p_obj->c;
 	phar_archive_object *phar_obj = p_obj->p;
+	char *str = "[stream]";
 
 	iter->funcs->get_current_data(iter, &value TSRMLS_CC);
 	if (EG(exception)) {
@@ -338,6 +339,30 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 	switch (Z_TYPE_PP(value)) {
 		case IS_STRING :
 			break;
+		case IS_RESOURCE :
+			php_stream_from_zval_no_verify(fp, value);
+			if (!fp) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Iterator %s returned an invalid stream handle", ce->name);
+				return ZEND_HASH_APPLY_STOP;
+			}
+			if (iter->funcs->get_current_key) {
+				key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+				if (EG(exception)) {
+					return ZEND_HASH_APPLY_STOP;
+				}
+				if (key_type == HASH_KEY_IS_LONG) {
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
+					return ZEND_HASH_APPLY_STOP;
+				}
+				save = str_key;
+				if (str_key[str_key_len - 1] == '\0') str_key_len--;
+			} else {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
+				return ZEND_HASH_APPLY_STOP;
+			}
+			close_fp = 0;
+			opened = (char *) estrndup(str, sizeof("[stream]") + 1);
+			goto after_open_fp;
 		case IS_OBJECT :
 			if (instanceof_function(Z_OBJCE_PP(value), spl_ce_SplFileInfo TSRMLS_CC)) {
 				char *test = NULL;
@@ -443,13 +468,16 @@ phar_spl_fileinfo:
 		return ZEND_HASH_APPLY_STOP;
 	}
 
+after_open_fp:
 	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, str_key, str_key_len, "w+b", &error TSRMLS_CC))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
 		if (save) {
 			efree(save);
 		}
-		php_stream_close(fp);
+		if (close_fp) {
+			php_stream_close(fp);
+		}
 		return ZEND_HASH_APPLY_STOP;
 	} else {
 		if (error) {
@@ -457,7 +485,9 @@ phar_spl_fileinfo:
 		}
 		contents_len = php_stream_copy_to_stream(fp, data->fp, PHP_STREAM_COPY_ALL);
 	}
-	php_stream_close(fp);
+	if (close_fp) {
+		php_stream_close(fp);
+	}
 
 	add_assoc_string(p_obj->ret, str_key, opened, 0);
 	if (save) {
