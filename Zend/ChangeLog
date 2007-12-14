@@ -1,3 +1,50 @@
+2007-12-13  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      tests/constructor_args.phpt
+      tests/inter_01.phpt
+      tests/inter_02.phpt:
+      MFH: add new tests written by Felipe Pena
+
+    * tests/constructor_args.phpt
+      tests/constructor_args.phpt
+      tests/inter_01.phpt
+      tests/inter_01.phpt
+      tests/inter_02.phpt
+      tests/inter_02.phpt
+      tests/jump11.phpt
+      tests/jump12.phpt
+      tests/jump13.phpt:
+      
+      add new tests written by Felipe Pena
+
+2007-12-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      Allowed import of global classes "use ::GlobalClassName;" (Gregory)
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_compile.h
+      zend_language_parser.y
+      tests/ns_061.phpt
+      tests/ns_061.phpt
+      tests/ns_062.phpt
+      tests/ns_062.phpt:
+      Allowed import of global classes "use ::GlobalClassName;"
+
+    * zend_compile.c
+      zend_compile.c
+      tests/ns_060.phpt:
+      Allowed multiple namespaces per file (Gregory)
+
+    * tests/ns_060.phpt
+      tests/ns_060.phpt:
+      
+      file ns_060.phpt was initially added on branch PHP_5_3.
+
 2007-12-07  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
