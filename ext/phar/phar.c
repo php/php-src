@@ -2624,9 +2624,9 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			php_stream_rewind(file);
 		}
 		php_stream_filter_append((&file->readfilters), filter);
-		entry->compressed_filesize = (php_uint32) php_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize+8192 TSRMLS_CC);
+		entry->compressed_filesize = (php_uint32) php_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize+8192);
 		php_stream_filter_flush(filter, 1);
-		entry->compressed_filesize += (php_uint32) php_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize+8192 TSRMLS_CC);
+		entry->compressed_filesize += (php_uint32) php_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize+8192);
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
 		/* generate crc on compressed file */
 		php_stream_rewind(entry->cfp);
