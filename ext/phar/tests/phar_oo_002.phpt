@@ -36,7 +36,7 @@ $phar = new Phar($fname);
 foreach(new RecursiveIteratorIterator($phar) as $name => $ent)
 {
 	var_dump(str_replace(dirname(__FILE__), '*', $name));
-	var_dump($ent->getFilename());
+	var_dump(str_replace('\\', '/', $ent->getFilename()));
 	var_dump($ent->getCompressedSize());
 	var_dump($ent->isCRCChecked());
 	var_dump($ent->isCRCChecked() ? $ent->getCRC32() : NULL);

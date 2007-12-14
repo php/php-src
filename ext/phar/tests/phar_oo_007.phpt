@@ -14,7 +14,7 @@ class MyFile extends SplFileObject
 {
 	function __construct($name)
 	{
-		echo __METHOD__ . "(" . str_replace(dirname(__FILE__), '*', $name) . ")\n";
+		echo __METHOD__ . "(" . str_replace(str_replace('\\', '/', dirname(__FILE__)), '*', $name) . ")\n";
 		parent::__construct($name);
 	}
 }

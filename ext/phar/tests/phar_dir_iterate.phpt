@@ -25,7 +25,7 @@ unlink(dirname(__FILE__) . '/test.phar');
 __halt_compiler();
 ?>
 --EXPECTF--
-string(%d) "phar://%stest.phar/another.file.txt"
-string(%d) "phar://%stest.phar/sub/top.txt"
-string(%d) "phar://%stest.phar/top.txt"
+string(%d) "phar://%stest.phar%canother.file.txt"
+string(%d) "phar://%stest.phar%csub%ctop.txt"
+string(%d) "phar://%stest.phar%ctop.txt"
 ===DONE===

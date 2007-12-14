@@ -15,8 +15,8 @@ $it = new RecursiveIteratorIterator($it);
 
 foreach($it as $name => $ent)
 {
-	var_dump(str_replace($fname, '*', $name));
-	var_dump(str_replace($fname, '*', $ent->getPathname()));
+	var_dump(str_replace(array('\\', $fname), array('/', '*'), $name));
+	var_dump(str_replace(array('\\', $fname), array('/', '*'), $ent->getPathname()));
 	var_dump($it->getSubPath());
 	var_dump($it->getSubPathName());
 	$sub = $it->getPathInfo();
