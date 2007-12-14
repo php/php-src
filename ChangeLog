@@ -1,3 +1,99 @@
+2007-12-13  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/string.c:
+      add workaround for glibc issue
+
+2007-12-13  Douglas Goldstein  <cardoe@gentoo.org>
+
+    * ext/ldap/tests/ldap_dn2ufn.phpt
+      ext/ldap/tests/ldap_dn2ufn.phpt:
+      add tests for ldap_dn2ufn()
+
+    * ext/ldap/tests/ldap_dn2ufn.phpt
+      ext/ldap/tests/ldap_dn2ufn.phpt
+      ext/ldap/tests/ldap_dn2ufn.phpt:
+        1.1.4;
+      file ldap_dn2ufn.phpt was initially added on branch PHP_5_2.
+
+    * ext/ldap/tests/ldap_explode_dn.phpt
+      ext/ldap/tests/ldap_explode_dn.phpt
+      ext/ldap/tests/ldap_explode_dn.phpt:
+      expand ldap_explode_dn() tests.
+
+2007-12-13  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/constructor_args.phpt
+      ZendEngine2/tests/inter_01.phpt
+      ZendEngine2/tests/inter_02.phpt:
+      MFH: add new tests written by Felipe Pena
+
+    * ZendEngine2/tests/constructor_args.phpt
+      ZendEngine2/tests/constructor_args.phpt
+      ZendEngine2/tests/inter_01.phpt
+      ZendEngine2/tests/inter_01.phpt
+      ZendEngine2/tests/inter_02.phpt
+      ZendEngine2/tests/inter_02.phpt
+      ZendEngine2/tests/jump11.phpt
+      ZendEngine2/tests/jump12.phpt
+      ZendEngine2/tests/jump13.phpt:
+      
+      add new tests written by Felipe Pena
+
+2007-12-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y:
+      Allowed import of global classes "use ::GlobalClassName;" (Gregory)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/ns_061.phpt
+      ZendEngine2/tests/ns_061.phpt
+      ZendEngine2/tests/ns_062.phpt
+      ZendEngine2/tests/ns_062.phpt:
+      Allowed import of global classes "use ::GlobalClassName;"
+
+    * ZendEngine2/tests/ns_060.phpt
+      ZendEngine2/tests/ns_060.phpt:
+      
+      file ns_060.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/ns_060.phpt:
+      Allowed multiple namespaces per file (Gregory)
+
+    * ext/standard/tests/array/bug43495.phpt
+      ext/standard/tests/array/bug43495.phpt
+      ext/standard/tests/array/bug43495.phpt:
+      Fixed test
+
+2007-12-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      main/fopen_wrappers.h:
+      
+      MFB Fixed bug #43580 (removed bogus declaration of a non-existent
+      php_is_url()
+      function)
+
+    * main/fopen_wrappers.h:
+      
+      MFB: Fixed bug #43580 (removed bogus declaration of a non-existent
+      php_is_url() function)
+
+    * (PHP_5_3)
+      main/fopen_wrappers.h:
+      Fixed bug #43580 (removed bogus declaration of a non-existent php_is_url()
+      function)
+
 2007-12-12  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_3)
