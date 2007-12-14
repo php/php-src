@@ -212,7 +212,7 @@ const zend_function_entry date_funcs_date[] = {
 	PHP_ME_MAPPING(setTime,     date_time_set,     NULL, 0)
 	PHP_ME_MAPPING(setDate,     date_date_set,     NULL, 0)
 	PHP_ME_MAPPING(setISODate,  date_isodate_set,  NULL, 0)
-	PHP_ME_MAPPING(createFromTimestamp,	date_timestamp_set, NULL, 0)
+	PHP_ME_MAPPING(setTimestamp,date_timestamp_set, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
