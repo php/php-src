@@ -939,7 +939,7 @@ static PHP_FUNCTION(zip_entry_compressionmethod)
 }
 /* }}} */
 
-/* {{{ proto mixed open(string source [, int flags])
+/* {{{ proto mixed ZipArchive::open(string source [, int flags])
 Create new zip using source uri for output, return TRUE on success or the error code */
 static ZIPARCHIVE_METHOD(open)
 {
@@ -997,7 +997,7 @@ static ZIPARCHIVE_METHOD(open)
 }
 /* }}} */
 
-/* {{{ proto bool close()
+/* {{{ proto bool ZipArchive::close()
 close the zip archive */
 static ZIPARCHIVE_METHOD(close)
 {
@@ -1026,7 +1026,7 @@ static ZIPARCHIVE_METHOD(close)
 }
 /* }}} */
 
-/* {{{ proto bool createEmptyDir(string dirname) U
+/* {{{ proto bool ZipArchive::createEmptyDir(string dirname)
 Returns the index of the entry named filename in the archive */
 static ZIPARCHIVE_METHOD(addEmptyDir)
 {
@@ -1085,7 +1085,7 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 }
 /* }}} */
 
-/* {{{ proto bool addFile(string filepath[, string entryname[, int start [, int length]]])
+/* {{{ proto bool ZipArchive::addFile(string filepath[, string entryname[, int start [, int length]]])
 Add a file in a Zip archive using its path and the name to use. */
 static ZIPARCHIVE_METHOD(addFile)
 {
@@ -1157,7 +1157,7 @@ static ZIPARCHIVE_METHOD(addFile)
 }
 /* }}} */
 
-/* {{{ proto bool addFromString(string name, string content)
+/* {{{ proto bool ZipArchive::addFromString(string name, string content)
 Add a file using content and the entry name */
 static ZIPARCHIVE_METHOD(addFromString)
 {
@@ -1222,7 +1222,7 @@ static ZIPARCHIVE_METHOD(addFromString)
 }
 /* }}} */
 
-/* {{{ proto array statName(string filename[, int flags])
+/* {{{ proto array ZipArchive::statName(string filename[, int flags])
 Returns the information about a the zip entry filename */
 static ZIPARCHIVE_METHOD(statName)
 {
@@ -1250,7 +1250,7 @@ static ZIPARCHIVE_METHOD(statName)
 }
 /* }}} */
 
-/* {{{ proto resource statIndex(int index[, int flags])
+/* {{{ proto resource ZipArchive::statIndex(int index[, int flags])
 Returns the zip entry informations using its index */
 static ZIPARCHIVE_METHOD(statIndex)
 {
@@ -1278,7 +1278,7 @@ static ZIPARCHIVE_METHOD(statIndex)
 }
 /* }}} */
 
-/* {{{ proto int locateName(string filename[, int flags])
+/* {{{ proto int ZipArchive::locateName(string filename[, int flags])
 Returns the index of the entry named filename in the archive */
 static ZIPARCHIVE_METHOD(locateName)
 {
@@ -1318,7 +1318,7 @@ static ZIPARCHIVE_METHOD(locateName)
 }
 /* }}} */
 
-/* {{{ proto string getNameIndex(int index [, int flags])
+/* {{{ proto string ZipArchive::getNameIndex(int index [, int flags])
 Returns the name of the file at position index */
 static ZIPARCHIVE_METHOD(getNameIndex)
 {
@@ -1348,7 +1348,7 @@ static ZIPARCHIVE_METHOD(getNameIndex)
 }
 /* }}} */
 
-/* {{{ proto bool setArchiveComment(string name, string comment)
+/* {{{ proto bool ZipArchive::setArchiveComment(string name, string comment)
 Set or remove (NULL/'') the comment of the archive */
 static ZIPARCHIVE_METHOD(setArchiveComment)
 {
@@ -1374,7 +1374,7 @@ static ZIPARCHIVE_METHOD(setArchiveComment)
 }
 /* }}} */
 
-/* {{{ proto string getArchiveComment()
+/* {{{ proto string ZipArchive::getArchiveComment()
 Returns the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(getArchiveComment)
 {
@@ -1399,7 +1399,7 @@ static ZIPARCHIVE_METHOD(getArchiveComment)
 }
 /* }}} */
 
-/* {{{ proto bool setCommentName(string name, string comment)
+/* {{{ proto bool ZipArchive::setCommentName(string name, string comment)
 Set or remove (NULL/'') the comment of an entry using its Name */
 static ZIPARCHIVE_METHOD(setCommentName)
 {
@@ -1432,7 +1432,7 @@ static ZIPARCHIVE_METHOD(setCommentName)
 }
 /* }}} */
 
-/* {{{ proto bool setCommentIndex(int index, string comment)
+/* {{{ proto bool ZipArchive::setCommentIndex(int index, string comment)
 Set or remove (NULL/'') the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(setCommentIndex)
 {
@@ -1459,7 +1459,7 @@ static ZIPARCHIVE_METHOD(setCommentIndex)
 }
 /* }}} */
 
-/* {{{ proto string getCommentName(string name)
+/* {{{ proto string ZipArchive::getCommentName(string name)
 Returns the comment of an entry using its name */
 static ZIPARCHIVE_METHOD(getCommentName)
 {
@@ -1496,7 +1496,7 @@ static ZIPARCHIVE_METHOD(getCommentName)
 }
 /* }}} */
 
-/* {{{ proto string getCommentIndex(int index)
+/* {{{ proto string ZipArchive::getCommentIndex(int index)
 Returns the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(getCommentIndex)
 {
@@ -1524,7 +1524,7 @@ static ZIPARCHIVE_METHOD(getCommentIndex)
 }
 /* }}} */
 
-/* {{{ proto bool deleteIndex(int index)
+/* {{{ proto bool ZipArchive::deleteIndex(int index)
 Delete a file using its index */
 static ZIPARCHIVE_METHOD(deleteIndex)
 {
@@ -1554,7 +1554,7 @@ static ZIPARCHIVE_METHOD(deleteIndex)
 }
 /* }}} */
 
-/* {{{ proto bool deleteName(string name)
+/* {{{ proto bool ZipArchive::deleteName(string name)
 Delete a file using its index */
 static ZIPARCHIVE_METHOD(deleteName)
 {
@@ -1585,7 +1585,7 @@ static ZIPARCHIVE_METHOD(deleteName)
 }
 /* }}} */
 
-/* {{{ proto bool renameIndex(int index, string new_name)
+/* {{{ proto bool ZipArchive::renameIndex(int index, string new_name)
 Rename an entry selected by its index to new_name */
 static ZIPARCHIVE_METHOD(renameIndex)
 {
@@ -1621,7 +1621,7 @@ static ZIPARCHIVE_METHOD(renameIndex)
 }
 /* }}} */
 
-/* {{{ proto bool renameName(string name, string new_name)
+/* {{{ proto bool ZipArchive::renameName(string name, string new_name)
 Rename an entry selected by its name to new_name */
 static ZIPARCHIVE_METHOD(renameName)
 {
@@ -1655,7 +1655,7 @@ static ZIPARCHIVE_METHOD(renameName)
 }
 /* }}} */
 
-/* {{{ proto bool unchangeIndex(int index)
+/* {{{ proto bool ZipArchive::unchangeIndex(int index)
 Changes to the file at position index are reverted */
 static ZIPARCHIVE_METHOD(unchangeIndex)
 {
@@ -1685,7 +1685,7 @@ static ZIPARCHIVE_METHOD(unchangeIndex)
 }
 /* }}} */
 
-/* {{{ proto bool unchangeName(string name)
+/* {{{ proto bool ZipArchive::unchangeName(string name)
 Changes to the file named 'name' are reverted */
 static ZIPARCHIVE_METHOD(unchangeName)
 {
@@ -1719,7 +1719,7 @@ static ZIPARCHIVE_METHOD(unchangeName)
 }
 /* }}} */
 
-/* {{{ proto bool unchangeAll()
+/* {{{ proto bool ZipArchive::unchangeAll()
 All changes to files and global information in archive are reverted */
 static ZIPARCHIVE_METHOD(unchangeAll)
 {
@@ -1740,7 +1740,7 @@ static ZIPARCHIVE_METHOD(unchangeAll)
 }
 /* }}} */
 
-/* {{{ proto bool unchangeAll()
+/* {{{ proto bool ZipArchive::unchangeAll()
 Revert all global changes to the archive archive.  For now, this only reverts archive comment changes. */
 static ZIPARCHIVE_METHOD(unchangeArchive)
 {
@@ -1761,7 +1761,7 @@ static ZIPARCHIVE_METHOD(unchangeArchive)
 }
 /* }}} */
 
-/* {{{ array bool extractTo(string pathto[, mixed files])
+/* {{{ proto bool ZipArchive::extractTo(string pathto[, mixed files])
 Extract one or more file from a zip archive */
 /* TODO:
  * - allow index or array of indeces
@@ -1918,7 +1918,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto string getFromName(string entryname[, int len [, int flags]])
+/* {{{ proto string ZipArchive::getFromName(string entryname[, int len [, int flags]])
 get the contents of an entry using its name */
 static ZIPARCHIVE_METHOD(getFromName)
 {
@@ -1926,7 +1926,7 @@ static ZIPARCHIVE_METHOD(getFromName)
 }
 /* }}} */
 
-/* {{{ proto string getFromIndex(string entryname[, int len [, int flags]])
+/* {{{ proto string ZipArchive::getFromIndex(string entryname[, int len [, int flags]])
 get the contents of an entry using its index */
 static ZIPARCHIVE_METHOD(getFromIndex)
 {
@@ -1934,7 +1934,7 @@ static ZIPARCHIVE_METHOD(getFromIndex)
 }
 /* }}} */
 
-/* {{{ proto resource getStream(string entryname)
+/* {{{ proto resource ZipArchive::getStream(string entryname)
 get a stream for an entry using its name */
 static ZIPARCHIVE_METHOD(getStream)
 {
