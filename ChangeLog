@@ -1,3 +1,167 @@
+2007-12-14  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_array.c:
+      Fix folding
+
+2007-12-14  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/tokenizer/tests/token_get_all_basic.phpt
+      ext/tokenizer/tests/token_get_all_basic.phpt
+      ext/tokenizer/tests/token_get_all_error.phpt
+      ext/tokenizer/tests/token_get_all_error.phpt
+      ext/tokenizer/tests/token_get_all_variation1.phpt
+      ext/tokenizer/tests/token_get_all_variation1.phpt
+      ext/tokenizer/tests/token_get_all_variation10.phpt
+      ext/tokenizer/tests/token_get_all_variation10.phpt
+      ext/tokenizer/tests/token_get_all_variation11.phpt
+      ext/tokenizer/tests/token_get_all_variation11.phpt
+      ext/tokenizer/tests/token_get_all_variation12.phpt
+      ext/tokenizer/tests/token_get_all_variation12.phpt
+      ext/tokenizer/tests/token_get_all_variation13.phpt
+      ext/tokenizer/tests/token_get_all_variation13.phpt
+      ext/tokenizer/tests/token_get_all_variation14.phpt
+      ext/tokenizer/tests/token_get_all_variation14.phpt
+      ext/tokenizer/tests/token_get_all_variation15.phpt
+      ext/tokenizer/tests/token_get_all_variation15.phpt
+      ext/tokenizer/tests/token_get_all_variation16.phpt
+      ext/tokenizer/tests/token_get_all_variation16.phpt
+      ext/tokenizer/tests/token_get_all_variation17.phpt
+      ext/tokenizer/tests/token_get_all_variation17.phpt
+      ext/tokenizer/tests/token_get_all_variation18.phpt
+      ext/tokenizer/tests/token_get_all_variation18.phpt
+      ext/tokenizer/tests/token_get_all_variation2.phpt
+      ext/tokenizer/tests/token_get_all_variation2.phpt
+      ext/tokenizer/tests/token_get_all_variation3.phpt
+      ext/tokenizer/tests/token_get_all_variation3.phpt
+      ext/tokenizer/tests/token_get_all_variation4.phpt
+      ext/tokenizer/tests/token_get_all_variation4.phpt
+      ext/tokenizer/tests/token_get_all_variation5.phpt
+      ext/tokenizer/tests/token_get_all_variation5.phpt
+      ext/tokenizer/tests/token_get_all_variation6.phpt
+      ext/tokenizer/tests/token_get_all_variation6.phpt
+      ext/tokenizer/tests/token_get_all_variation7.phpt
+      ext/tokenizer/tests/token_get_all_variation7.phpt
+      ext/tokenizer/tests/token_get_all_variation8.phpt
+      ext/tokenizer/tests/token_get_all_variation8.phpt
+      ext/tokenizer/tests/token_get_all_variation9.phpt
+      ext/tokenizer/tests/token_get_all_variation9.phpt:
+      New testcases for token_get_all() function
+
+    * ext/tokenizer/tests/token_get_all_basic.phpt
+      ext/tokenizer/tests/token_get_all_basic.phpt
+      ext/tokenizer/tests/token_get_all_basic.phpt
+      ext/tokenizer/tests/token_get_all_error.phpt
+      ext/tokenizer/tests/token_get_all_error.phpt
+      ext/tokenizer/tests/token_get_all_error.phpt
+      ext/tokenizer/tests/token_get_all_variation1.phpt
+      ext/tokenizer/tests/token_get_all_variation1.phpt
+      ext/tokenizer/tests/token_get_all_variation1.phpt
+      ext/tokenizer/tests/token_get_all_variation10.phpt
+      ext/tokenizer/tests/token_get_all_variation10.phpt
+      ext/tokenizer/tests/token_get_all_variation10.phpt
+      ext/tokenizer/tests/token_get_all_variation11.phpt
+      ext/tokenizer/tests/token_get_all_variation11.phpt
+      ext/tokenizer/tests/token_get_all_variation11.phpt
+      ext/tokenizer/tests/token_get_all_variation12.phpt
+      ext/tokenizer/tests/token_get_all_variation12.phpt
+      ext/tokenizer/tests/token_get_all_variation12.phpt
+      ext/tokenizer/tests/token_get_all_variation13.phpt
+      ext/tokenizer/tests/token_get_all_variation13.phpt
+      ext/tokenizer/tests/token_get_all_variation13.phpt
+      ext/tokenizer/tests/token_get_all_variation14.phpt
+      ext/tokenizer/tests/token_get_all_variation14.phpt
+      ext/tokenizer/tests/token_get_all_variation14.phpt
+      ext/tokenizer/tests/token_get_all_variation15.phpt
+      ext/tokenizer/tests/token_get_all_variation15.phpt
+      ext/tokenizer/tests/token_get_all_variation15.phpt
+      ext/tokenizer/tests/token_get_all_variation16.phpt
+      ext/tokenizer/tests/token_get_all_variation16.phpt
+      ext/tokenizer/tests/token_get_all_variation16.phpt
+      ext/tokenizer/tests/token_get_all_variation17.phpt
+      ext/tokenizer/tests/token_get_all_variation17.phpt
+      ext/tokenizer/tests/token_get_all_variation17.phpt
+      ext/tokenizer/tests/token_get_all_variation18.phpt
+      ext/tokenizer/tests/token_get_all_variation18.phpt
+      ext/tokenizer/tests/token_get_all_variation18.phpt
+      ext/tokenizer/tests/token_get_all_variation2.phpt
+      ext/tokenizer/tests/token_get_all_variation2.phpt
+      ext/tokenizer/tests/token_get_all_variation2.phpt
+      ext/tokenizer/tests/token_get_all_variation3.phpt
+      ext/tokenizer/tests/token_get_all_variation3.phpt
+      ext/tokenizer/tests/token_get_all_variation3.phpt
+      ext/tokenizer/tests/token_get_all_variation4.phpt
+      ext/tokenizer/tests/token_get_all_variation4.phpt
+      ext/tokenizer/tests/token_get_all_variation4.phpt
+      ext/tokenizer/tests/token_get_all_variation5.phpt
+      ext/tokenizer/tests/token_get_all_variation5.phpt
+      ext/tokenizer/tests/token_get_all_variation5.phpt
+      ext/tokenizer/tests/token_get_all_variation6.phpt
+      ext/tokenizer/tests/token_get_all_variation6.phpt
+      ext/tokenizer/tests/token_get_all_variation6.phpt
+      ext/tokenizer/tests/token_get_all_variation7.phpt
+      ext/tokenizer/tests/token_get_all_variation7.phpt
+      ext/tokenizer/tests/token_get_all_variation7.phpt
+      ext/tokenizer/tests/token_get_all_variation8.phpt
+      ext/tokenizer/tests/token_get_all_variation8.phpt
+      ext/tokenizer/tests/token_get_all_variation8.phpt
+      ext/tokenizer/tests/token_get_all_variation9.phpt
+      ext/tokenizer/tests/token_get_all_variation9.phpt
+      ext/tokenizer/tests/token_get_all_variation9.phpt:
+        1.1.4;
+      New testcases for token_get_all() function
+
+2007-12-14  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/date/php_date.c:
+      MFB: Change createFromTimestamp to setTimestamp
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c:
+      Change createFromTimestamp to setTimestamp
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/php_date.h:
+      MFH: Add Datetime::createFromTimestamp to allow setting of a unix timestamp
+      without invoking the date parser.
+
+    * ext/date/php_date.c
+      ext/date/php_date.h:
+      - Add Datetime::createFromTimestamp to allow setting of a unix timestamp
+      without invoking the date parser.
+
+2007-12-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      executor optimization
+
+2007-12-14  David Coallier  <david.coallier@gmail.com>
+
+    * ext/spl/tests/array_023.phpt:
+      - Added other test with some unicode words (Sorry if this chinese word
+        turns out to be offensive I have no clue what it means, just copied it)
+
+    * ext/spl/tests/array_023.phpt
+      ext/spl/tests/bug41528.phpt:
+      - MFB: Merged bug41528.phpt test from 5_3
+      - Added a very similar test but this one just makes sure we keep
+        all the properties of the class members that we just serialized
+
+2007-12-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/sqlite/TODO:
+      
+      update todo
+
 2007-12-13  Antony Dovgal  <tony@daylessday.org>
 
     * ext/standard/string.c:

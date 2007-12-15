@@ -1,3 +1,13 @@
+2007-12-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      executor optimization
+
 2007-12-13  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_3)
