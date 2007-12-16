@@ -1106,35 +1106,35 @@ PHP_METHOD(Phar, copy)
 		RETURN_FALSE;
 	}
 
-	if (!zend_hash_exists(&phar_obj->arc.archive->manifest, oldfile, (uint) oldfile_len)) {
-		if (SUCCESS != zend_hash_find(&phar_obj->arc.archive->manifest, oldfile, (uint) oldfile_len, (void**)&oldentry) || oldentry->is_deleted) {
+	if (!zend_hash_exists(&phar_obj->arc.archive->manifest, oldfile, (uint) oldfile_len) || SUCCESS != zend_hash_find(&phar_obj->arc.archive->manifest, oldfile, (uint) oldfile_len, (void**)&oldentry) || oldentry->is_deleted) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"file \"%s\" cannot be copied to file \"%s\", file does not exist in %s", oldfile, newfile, phar_obj->arc.archive->fname);
+		RETURN_FALSE;
+	}
+
+	fp = oldentry->fp;
+	if (fp && fp != phar_obj->arc.archive->fp) {
+		/* new file */
+		newentry.fp = php_stream_temp_new();
+		fp = newentry.fp;
+		php_stream_seek(fp, 0, SEEK_SET);
+		if (oldentry->compressed_filesize != php_stream_copy_to_stream(oldentry->fp, fp, oldentry->compressed_filesize)) {
+			php_stream_close(fp);
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-				"file \"%s\" cannot be copied to file \"%s\", file does not exist in %s", oldfile, newfile, phar_obj->arc.archive->fname);
-			RETURN_FALSE;
+				"file \"%s\" could not be copied to file \"%s\" in %s, copy failed", oldfile, newfile, phar_obj->arc.archive->fname);
 		}
 	}
 
-	if (oldentry->fp && oldentry->fp != phar_obj->arc.archive->fp) {
-		/* new file */
-		fp = oldentry->fp;
-		php_stream_seek(fp, 0, SEEK_SET);
-	} else {
-		fp = phar_obj->arc.archive->fp;
-		php_stream_seek(fp, phar_obj->arc.archive->internal_file_start + oldentry->offset_within_phar, SEEK_SET);
-	}
-	newentry.fp = php_stream_temp_new();
-	if (oldentry->compressed_filesize != php_stream_copy_to_stream(fp, newentry.fp, oldentry->compressed_filesize)) {
-		php_stream_close(newentry.fp);
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"file \"%s\" could not be copied to file \"%s\" in %s, copy failed", oldfile, newfile, phar_obj->arc.archive->fname);
-	}
-
-	fp = newentry.fp;
 	memcpy((void *) &newentry, oldentry, sizeof(phar_entry_info));
 	if (newentry.metadata) {
 		SEPARATE_ZVAL(&(newentry.metadata));
+		newentry.metadata_str.c = NULL;
+		newentry.metadata_str.len = 0;
 	}
 	newentry.fp = fp;
+	newentry.filename = estrndup(newfile, newfile_len);
+	newentry.filename_len = newfile_len;
+	phar_obj->arc.archive->is_modified = 1;
 	zend_hash_add(&phar_obj->arc.archive->manifest, newfile, newfile_len, (void*)&newentry, sizeof(phar_entry_info), NULL);
 
 	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
