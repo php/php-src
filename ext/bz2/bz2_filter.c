@@ -132,6 +132,8 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
+			} else if (status == BZ_OK) {
+				break;
 			}
 		}
 	}
