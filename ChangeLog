@@ -1,3 +1,32 @@
+2007-12-15  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/zip/php_zip.c:
+      MFB: Fix protos
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c:
+      MFB5.2: Fix protos
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      Fix protos
+
+2007-12-15  Antony Dovgal  <tony@daylessday.org>
+
+    * sapi/cli/tests/006.phpt
+      sapi/cli/tests/006.phpt:
+      fix test
+
+2007-12-15  David Coallier  <david.coallier@gmail.com>
+
+    * ext/spl/spl_array.c:
+      - MFB: Bug #41528
+      - Added possibility to serialize and unserialize classes that extend to
+      ArrayObject
+      - See ext/spl/tests/array_023.phpt and ext/spl/tests/bug41528.php for
+      references
+      - Put a folding for all SPL_ARRAY_METHOD() def
+
 2007-12-14  Etienne Kneuss  <php@colder.ch>
 
     * ext/spl/spl_array.c:
