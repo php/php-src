@@ -241,12 +241,21 @@ PHP_MSHUTDOWN_FUNCTION(exif)
 }
 /* }}} */
 
+/* {{{ exif dependencies */
+static const zend_module_dep exif_module_deps[] = {
+	ZEND_MOD_REQUIRED("standard")
+	#if EXIF_USE_MBSTRING
+	ZEND_MOD_REQUIRED("mbstring")
+	#endif
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
 /* {{{ exif_module_entry
  */
 zend_module_entry exif_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
-	STANDARD_MODULE_HEADER,
-#endif
+	STANDARD_MODULE_HEADER_EX, NULL,
+	exif_module_deps,
 	"exif",
 	exif_functions,
 	PHP_MINIT(exif), 

@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2008, PHP 5.2.6
 - Fixed weired behavior in CGI parameter parsing. (Dmitry, Hannes Magnusson)
 
+- Fixed bug #43606 (define missing depencies of the exif extension)
+  (crrodriguez at suse dot de)
 - Fixed bug #43580 (removed bogus declaration of a non-existent php_is_url()  
   function). (Ilia)
 - Fixed bug #43533 (escapeshellarg('') returns null). (Ilia)
