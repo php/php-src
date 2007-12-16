@@ -1,5 +1,7 @@
 --TEST--
 Test token_get_all() function : usage variations - heredoc string for 'source' 
+--INI--
+short_open_tag=On
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
