@@ -1269,7 +1269,7 @@ SPL_ARRAY_METHOD(Array, natsort, 0) /* }}} */
 /* {{{ proto int ArrayObject::natcasesort()
        proto int ArrayIterator::natcasesort()
  Sort the entries by key using case insensitive "natural order" algorithm. */
-SPL_ARRAY_METHOD(Array, natcasesort, 0) /* }}} /
+SPL_ARRAY_METHOD(Array, natcasesort, 0) /* }}} */
 
 /* {{{ proto mixed|NULL ArrayIterator::current()
    Return current array entry */
