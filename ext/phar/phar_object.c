@@ -1064,6 +1064,88 @@ PHP_METHOD(Phar, uncompressAllFiles)
 }
 /* }}} */
 
+/* {{{ proto bool Phar::copy(string oldfile, string newfile)
+ * copy a file internal to the phar archive to another new file within the phar
+ */
+PHP_METHOD(Phar, copy)
+{
+	char *oldfile, *newfile, *error;
+	const char *pcr_error;
+	int oldfile_len, newfile_len;
+	phar_entry_info *oldentry, newentry = {0}, *temp;
+	php_stream *fp;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &oldfile, &oldfile_len, &newfile, &newfile_len) == FAILURE) {
+		return;
+	}
+
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot copy \"%s\" to \"%s\", phar is read-only", oldfile, newfile);
+		RETURN_FALSE;
+	}
+
+	if (!zend_hash_exists(&phar_obj->arc.archive->manifest, oldfile, (uint) oldfile_len)) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"file \"%s\" does not exist in phar %s", oldfile, phar_obj->arc.archive->fname);
+		RETURN_FALSE;
+	}
+
+	if (zend_hash_exists(&phar_obj->arc.archive->manifest, newfile, (uint) newfile_len)) {
+		if (SUCCESS == zend_hash_find(&phar_obj->arc.archive->manifest, newfile, (uint) newfile_len, (void**)&temp) || !temp->is_deleted) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"file \"%s\" cannot be copied to file \"%s\", file must not already exist %s", oldfile, newfile, phar_obj->arc.archive->fname);
+			RETURN_FALSE;
+		}
+	}
+
+	if (phar_path_check(&newfile, &newfile_len, &pcr_error) > pcr_is_ok) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"file \"%s\" contains invalid characters %s, cannot be copied from \"%s\" in phar %s", newfile, pcr_error, oldfile, phar_obj->arc.archive->fname);
+		RETURN_FALSE;
+	}
+
+	if (!zend_hash_exists(&phar_obj->arc.archive->manifest, oldfile, (uint) oldfile_len)) {
+		if (SUCCESS != zend_hash_find(&phar_obj->arc.archive->manifest, oldfile, (uint) oldfile_len, (void**)&oldentry) || oldentry->is_deleted) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"file \"%s\" cannot be copied to file \"%s\", file does not exist in %s", oldfile, newfile, phar_obj->arc.archive->fname);
+			RETURN_FALSE;
+		}
+	}
+
+	if (oldentry->fp && oldentry->fp != phar_obj->arc.archive->fp) {
+		/* new file */
+		fp = oldentry->fp;
+		php_stream_seek(fp, 0, SEEK_SET);
+	} else {
+		fp = phar_obj->arc.archive->fp;
+		php_stream_seek(fp, phar_obj->arc.archive->internal_file_start + oldentry->offset_within_phar, SEEK_SET);
+	}
+	newentry.fp = php_stream_temp_new();
+	if (oldentry->compressed_filesize != php_stream_copy_to_stream(fp, newentry.fp, oldentry->compressed_filesize)) {
+		php_stream_close(newentry.fp);
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"file \"%s\" could not be copied to file \"%s\" in %s, copy failed", oldfile, newfile, phar_obj->arc.archive->fname);
+	}
+
+	fp = newentry.fp;
+	memcpy((void *) &newentry, oldentry, sizeof(phar_entry_info));
+	if (newentry.metadata) {
+		SEPARATE_ZVAL(&(newentry.metadata));
+	}
+	newentry.fp = fp;
+	zend_hash_add(&phar_obj->arc.archive->manifest, newfile, newfile_len, (void*)&newentry, sizeof(phar_entry_info), NULL);
+
+	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+	if (error) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		efree(error);
+	}
+	
+	RETURN_TRUE;
+}
+
 /* {{{ proto int Phar::offsetExists(string offset)
  * determines whether a file exists in the phar
  */
@@ -1856,6 +1938,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_build, 0, 0, 1)
 	ZEND_ARG_INFO(0, iterator)
 	ZEND_ARG_INFO(0, base_directory)
 ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_copy, 0, 0, 2)
+	ZEND_ARG_INFO(0, newfile)
+	ZEND_ARG_INFO(0, oldfile)
+ZEND_END_ARG_INFO();
 #endif
 
 static
@@ -1872,6 +1960,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, stopBuffering,         NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressAllFilesBZIP2, NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, copy,                  arginfo_phar_copy,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, count,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, delete,                arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, delMetadata,           NULL,                      ZEND_ACC_PUBLIC)
@@ -1883,7 +1972,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, getVersion,            NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isBuffering,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, hasMetadata,           NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setAlias,              arginfo_phar_mapPhar,       ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setAlias,              arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setMetadata,           arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setSignatureAlgorithm, arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)
