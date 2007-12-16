@@ -13,7 +13,7 @@
  * @brief   Object storage
  * @author  Marcus Boerger
  * @version 1.0
- * @since PHP 6.0
+ * @since PHP 5.1.2
  *
  * This container allows to store objects uniquly without the need to compare
  * them one by one. This is only possible internally. The code represenation
