@@ -519,6 +519,7 @@ HELP;
 	// Run selected tests.
 	$test_cnt = count($test_files);
 	if ($test_cnt) {
+		verify_config();
 		write_information($html_output);
 		usort($test_files, "test_sort");
 		$start_time = time();
