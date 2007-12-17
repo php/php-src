@@ -1,5 +1,5 @@
 --TEST--
-Test array_walk_recursive() function : usage variations - buit-in function as callback(Bug#43558)
+Test array_walk_recursive() function : usage variations - buit-in function as callback
 --FILE--
 <?php
 /* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
@@ -38,5 +38,5 @@ bool(true)
 -- With 'echo' language construct --
 
 Warning: array_walk_recursive() expects parameter 2 to be valid callback, string given in %s on line %d
-bool(false)
+NULL
 Done
