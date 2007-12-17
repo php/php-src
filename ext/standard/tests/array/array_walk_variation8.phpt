@@ -1,5 +1,5 @@
 --TEST--
-Test array_walk() function : usage variations - buit-in function as callback(Bug#43558)
+Test array_walk() function : usage variations - buit-in function as callback
 --FILE--
 <?php
 /* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
@@ -38,7 +38,7 @@ bool(true)
 -- With 'echo' language construct --
 
 Warning: array_walk() expects parameter 2 to be valid callback, string given in %s on line %d
-bool(false)
+NULL
 Done
 --UEXPECTF--
 *** Testing array_walk() : built-in function as callback ***
@@ -49,5 +49,5 @@ bool(true)
 -- With 'echo' language construct --
 
 Warning: array_walk() expects parameter 2 to be valid callback, Unicode string given in %s on line %d
-bool(false)
+NULL
 Done
