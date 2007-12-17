@@ -56,7 +56,7 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 #define SPL_ARRAY_IS_SELF            0x02000000
 #define SPL_ARRAY_USE_OTHER          0x04000000
 #define SPL_ARRAY_INT_MASK           0xFFFF0000
-#define SPL_ARRAY_CLONE_MASK         0x030FFFFF
+#define SPL_ARRAY_CLONE_MASK         0x0300FFFF
 
 typedef struct _spl_array_object {
 	zend_object       std;
@@ -777,7 +777,7 @@ static void spl_array_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 	efree(iterator);
 }
 /* }}} */
-	
+
 static int spl_array_it_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
 	spl_array_it       *iterator = (spl_array_it *)iter;
@@ -1230,38 +1230,37 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 SPL_METHOD(cname, fname) \
 { \
 	spl_array_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, #fname, sizeof(#fname)-1, use_arg); \
-}
+} /* }}} */
 
-/*  proto int ArrayObject::asort() U
+/* {{{ proto int ArrayObject::asort() U
        proto int ArrayIterator::asort() U
  Sort the entries by values. */
-SPL_ARRAY_METHOD(Array, asort, 0)
+SPL_ARRAY_METHOD(Array, asort, 0) /* }}} */
 
-/*  proto int ArrayObject::ksort() U
+/* {{{ proto int ArrayObject::ksort() U
        proto int ArrayIterator::ksort() U
  Sort the entries by key. */
-SPL_ARRAY_METHOD(Array, ksort, 0)
+SPL_ARRAY_METHOD(Array, ksort, 0) /* }}} */
 
-/*  proto int ArrayObject::uasort(callback cmp_function) U
+/* {{{ proto int ArrayObject::uasort(callback cmp_function) U
        proto int ArrayIterator::uasort(callback cmp_function) U
  Sort the entries by values user defined function. */
-SPL_ARRAY_METHOD(Array, uasort, 1)
+SPL_ARRAY_METHOD(Array, uasort, 1) /* }}} */
 
-/*  proto int ArrayObject::uksort(callback cmp_function) U
+/* {{{ proto int ArrayObject::uksort(callback cmp_function) U
        proto int ArrayIterator::uksort(callback cmp_function) U
  Sort the entries by key using user defined function. */
-SPL_ARRAY_METHOD(Array, uksort, 1)
+SPL_ARRAY_METHOD(Array, uksort, 1) /* }}} */
 
-/*  proto int ArrayObject::natsort() U
+/* {{{ proto int ArrayObject::natsort() U
        proto int ArrayIterator::natsort() U
  Sort the entries by values using "natural order" algorithm. */
-SPL_ARRAY_METHOD(Array, natsort, 0)
+SPL_ARRAY_METHOD(Array, natsort, 0) /* }}} */
 
-/*  proto int ArrayObject::natcasesort() U
+/* {{{ proto int ArrayObject::natcasesort() U
        proto int ArrayIterator::natcasesort() U
  Sort the entries by key using case insensitive "natural order" algorithm. */
-SPL_ARRAY_METHOD(Array, natcasesort, 0)
-/* }}} */
+SPL_ARRAY_METHOD(Array, natcasesort, 0) /* }}} */
 
 /* {{{ proto mixed|NULL ArrayIterator::current() U
    Return current array entry */
