@@ -598,7 +598,7 @@ SPL_METHOD(Array, offsetUnset)
 	spl_array_unset_dimension_ex(0, getThis(), index TSRMLS_CC);
 } /* }}} */
 
-/* {{ proto array ArrayObject::getArrayCopy()
+/* {{{ proto array ArrayObject::getArrayCopy()
       proto array ArrayIterator::getArrayCopy()
  Return a copy of the contained array */
 SPL_METHOD(Array, getArrayCopy)
