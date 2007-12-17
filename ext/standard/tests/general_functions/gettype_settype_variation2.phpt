@@ -187,7 +187,7 @@ foreach ($types as $type) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 8: Undefined variable: unset_var
 8: Undefined variable: undef_var
 
@@ -447,7 +447,7 @@ string(7) "integer"
 -- Iteration 51 --
 string(6) "double"
 bool(true)
-int(-508130303)
+int(2147483647)
 string(7) "integer"
 -- Iteration 52 --
 string(7) "integer"
@@ -457,7 +457,7 @@ string(7) "integer"
 -- Iteration 53 --
 string(6) "double"
 bool(true)
-int(1952002105)
+int(2147483647)
 string(7) "integer"
 -- Iteration 54 --
 string(7) "integer"
@@ -477,7 +477,7 @@ string(7) "integer"
 -- Iteration 57 --
 string(6) "double"
 bool(true)
-int(343000682)
+int(2147483647)
 string(7) "integer"
 -- Iteration 58 --
 string(6) "double"
@@ -852,7 +852,7 @@ string(7) "integer"
 -- Iteration 51 --
 string(6) "double"
 bool(true)
-int(-508130303)
+int(2147483647)
 string(7) "integer"
 -- Iteration 52 --
 string(7) "integer"
@@ -862,7 +862,7 @@ string(7) "integer"
 -- Iteration 53 --
 string(6) "double"
 bool(true)
-int(1952002105)
+int(2147483647)
 string(7) "integer"
 -- Iteration 54 --
 string(7) "integer"
@@ -882,7 +882,7 @@ string(7) "integer"
 -- Iteration 57 --
 string(6) "double"
 bool(true)
-int(343000682)
+int(2147483647)
 string(7) "integer"
 -- Iteration 58 --
 string(6) "double"

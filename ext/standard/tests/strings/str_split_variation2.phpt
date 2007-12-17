@@ -107,47 +107,48 @@ array(3) {
 }
 --Iteration 2 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 3 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+array(1) {
+  [0]=>
+  string(23) "variation2:split_length"
+}
 --Iteration 4 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 5 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 6 --
 
-Warning: str_split() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, array given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 7 --
 
-Warning: str_split() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, array given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 8 --
 
-Warning: str_split() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, array given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 9 --
 
-Warning: str_split() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, array given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 10 --
 
-Warning: str_split() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, array given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 11 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 12 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 13 --
 array(23) {
@@ -200,7 +201,7 @@ array(23) {
 }
 --Iteration 14 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 15 --
 array(23) {
@@ -253,38 +254,38 @@ array(23) {
 }
 --Iteration 16 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 17 --
 
-Warning: str_split() expects parameter 2 to be long, string given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 18 --
 
-Warning: str_split() expects parameter 2 to be long, string given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 19 --
 
-Warning: str_split() expects parameter 2 to be long, string given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 20 --
 
-Warning: str_split() expects parameter 2 to be long, string given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 21 --
 
-Warning: str_split() expects parameter 2 to be long, object given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, object given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 22 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 23 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 24 --
 
-Warning: str_split() expects parameter 2 to be long, resource given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, resource given in %sstr_split_variation2.php on line %d
 NULL
 Done

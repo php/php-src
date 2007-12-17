@@ -68,6 +68,8 @@ PHP                                                                        NEWS
 - Fixed bug #43128 (Very long class name causes segfault). (Dmitry)
 - Fixed bug #42952 (soap cache file is created with insecure permissions).
   (Dmitry)
+- Fixed bug #42868 (Floats cast to integer produce unpredicatable results).
+  (Zoe Slattery)
 - Fixed bug #42848 (Status: header incorrect under FastCGI). (Dmitry)
 - Fixed bug #42773 (WSDL error causes HTTP 500 Response). (Dmitry)
 - Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines). (Nuno)

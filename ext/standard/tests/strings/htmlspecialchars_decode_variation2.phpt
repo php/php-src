@@ -102,7 +102,7 @@ string(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 =
 string(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. " double quote string "</html>"
 
 -- Iteration 3 --
-string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(94) "<html>Roy's height > Sam's height. 13 < 15. 1111 & 0000 = 0000. " double quote string "</html>"
 
 -- Iteration 4 --
 string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
@@ -112,27 +112,27 @@ string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 =
 
 -- Iteration 6 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 10 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 11 --
@@ -155,27 +155,27 @@ string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 =
 
 -- Iteration 17 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, object given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, object given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 22 --
@@ -186,6 +186,6 @@ string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 =
 
 -- Iteration 24 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, resource given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, resource given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 Done
