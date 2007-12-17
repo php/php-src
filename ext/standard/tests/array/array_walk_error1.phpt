@@ -1,5 +1,5 @@
 --TEST--
-Test array_walk() function : error conditions(Bug#43558)
+Test array_walk() function : error conditions
 --FILE--
 <?php
 /* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
@@ -44,5 +44,5 @@ NULL
 -- Testing array_walk() function with non existent callback function  --
 
 Warning: array_walk() expects parameter 2 to be valid callback, string given in %s on line %d
-bool(false)
+NULL
 Done

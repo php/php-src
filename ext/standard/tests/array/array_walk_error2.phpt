@@ -1,5 +1,5 @@
 --TEST--
-Test array_walk() function : error conditions - callback parameters(Bug#43558)
+Test array_walk() function : error conditions - callback parameters
 --FILE--
 <?php
 /* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
@@ -40,12 +40,12 @@ echo "Done";
 Warning: Missing argument 3 for callback1() in %s on line %d
 
 callback1() invoked 
-bool(false)
+bool(true)
 
 Warning: Missing argument 4 for callback2() in %s on line %d
 
 callback2() invoked 
-bool(false)
+bool(true)
 
 callback1() invoked 
 bool(true)
