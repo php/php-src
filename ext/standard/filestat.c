@@ -458,6 +458,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		efree(grbuf);
 		gid = gr.gr_gid;
 #else
+{
 		struct group *gr = getgrnam(Z_STRVAL_P(group));
 
 		if (!gr) {
@@ -465,6 +466,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 			RETURN_FALSE;
 		}
 		gid = gr->gr_gid;
+}
 #endif
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(group));
@@ -575,6 +577,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		efree(pwbuf);
 		uid = pw.pw_uid;
 #else
+{
 		struct passwd *pw = getpwnam(Z_STRVAL_P(user));
 
 		if (!pw) {
@@ -582,6 +585,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 			RETURN_FALSE;
 		}
 		uid = pw->pw_uid;
+}
 #endif
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(user));
