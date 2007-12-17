@@ -75,9 +75,9 @@ echo "Done";
 *** Testing vsprintf() : int formats and non-integer values ***
 
 -- Iteration 1 --
-string(112) "2 +0 10 
+string(111) "2 +0 10 
    123456 d -1234 1234
-   -1474836480 200000     4000 22000000
+   2147483647 200000     4000 22000000
    12345 12 -12 -123456
    10 123456 2 0"
 
@@ -102,14 +102,13 @@ string(81) "1 +1 0
    #0 1 $1 _0
    0 1 1 1"
 Done
-
 --UEXPECTF--
 *** Testing vsprintf() : int formats and non-integer values ***
 
 -- Iteration 1 --
-unicode(112) "2 +0 10 
+unicode(111) "2 +0 10 
    123456 d -1234 1234
-   -1474836480 200000     4000 22000000
+   2147483647 200000     4000 22000000
    12345 12 -12 -123456
    10 123456 2 0"
 
@@ -134,3 +133,4 @@ unicode(81) "1 +1 0
    #0 1 $1 _0
    0 1 1 1"
 Done
+

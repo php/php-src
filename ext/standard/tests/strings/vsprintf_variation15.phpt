@@ -55,10 +55,10 @@ echo "Done";
 string(16) "1234567 342391 0"
 
 -- Iteration 2 --
-string(23) "3755744308 u 1234 12345"
+string(23) "2147483647 u 1234 12345"
 
 -- Iteration 3 --
-string(25) "   1234000 0          120"
+string(25) "   1234000 2147483647 120"
 
 -- Iteration 4 --
 string(10) "#1 0 $0 10"
@@ -66,7 +66,6 @@ string(10) "#1 0 $0 10"
 -- Iteration 5 --
 string(7) "1 2 3 4"
 Done
-
 --UEXPECTF--
 *** Testing vsprintf() : unsigned formats and unsigned values ***
 
@@ -74,10 +73,10 @@ Done
 unicode(16) "1234567 342391 0"
 
 -- Iteration 2 --
-unicode(23) "3755744308 u 1234 12345"
+unicode(23) "2147483647 u 1234 12345"
 
 -- Iteration 3 --
-unicode(25) "   1234000 0          120"
+unicode(25) "   1234000 2147483647 120"
 
 -- Iteration 4 --
 unicode(10) "#1 0 $0 10"
