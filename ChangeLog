@@ -1,3 +1,60 @@
+2007-12-16  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ext/spl/internal/splobjectstorage.inc
+      ext/spl/internal/splobjectstorage.inc:
+      - MFH: Fix #43611 SplObjectStorage is available since 5.1.2
+
+    * ext/spl/internal/splobjectstorage.inc:
+      - Fix #43611 SplObjectStorage is available since 5.1.2
+
+2007-12-16  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/tokenizer/tests/token_get_all_variation15.phpt
+      ext/tokenizer/tests/token_get_all_variation15.phpt:
+      MFB5.3: Fix test
+
+    * (PHP_5_3)
+      ext/tokenizer/tests/token_get_all_variation15.phpt:
+      Fix test
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c:
+      Fix typo
+
+2007-12-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/bug42272.phpt:
+      
+      WS
+
+    * (PHP_5_2)
+      NEWS
+      ext/bz2/bz2_filter.c:
+      MFB: Fixed bug #43589 (a possible infinite loop in bz2_filter.c)
+
+    * (PHP_5_3)
+      ext/bz2/bz2_filter.c:
+      
+      MFB: Fixed bug #43589 (a possible infinite loop in bz2_filter.c)
+
+    * ext/bz2/bz2_filter.c:
+      
+      Fixed bug #43589 (a possible infinite loop in bz2_filter.c)
+      
+
+    * (PHP_5_2)
+      NEWS
+      ext/exif/exif.c
+      ext/exif/exif.c:
+      
+      MFB: Fixed bug #43606 (define missing depencies of the exif extension)
+
+    * (PHP_5_3)
+      ext/exif/exif.c:
+      Fixed bug #43606 (define missing depencies of the exif extension)
+
 2007-12-15  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * ext/zip/php_zip.c:
