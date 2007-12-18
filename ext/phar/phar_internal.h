@@ -34,6 +34,7 @@
 #include "zend_operators.h"
 #include "zend_qsort.h"
 #include "main/php_streams.h"
+#include "main/streams/php_stream_plain_wrapper.h"
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/url.h"
@@ -114,13 +115,16 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         require_hash;
 	int         request_done;
 	int         request_ends;
-	int         has_bz2:1;
-	int         has_gnupg:1;
-	int         has_zlib:1;
-	zend_op_array *(*orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
+	void        (*orig_fopen)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_getcwd)(INTERNAL_FUNCTION_PARAMETERS);
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)
+
+int phar_has_bz2;
+int phar_has_gnupg;
+int phar_has_zlib;
+zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 
 #ifdef ZTS
 #	include "TSRM.h"
@@ -246,8 +250,12 @@ int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, i
 int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC);
 
-#ifdef PHAR_MAIN
+static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS);
+static void phar_cwd(INTERNAL_FUNCTION_PARAMETERS);
 
+#ifdef PHAR_MAIN
+static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS);
+static void phar_getcwd(INTERNAL_FUNCTION_PARAMETERS);
 static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 
 static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC);

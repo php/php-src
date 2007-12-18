@@ -144,7 +144,7 @@ PHP_METHOD(Phar, canCompress)
 	switch (method) {
 	case PHAR_ENT_COMPRESSED_GZ:
 #if HAVE_ZLIB
-		if (PHAR_G(has_zlib)) {
+		if (phar_has_zlib) {
 			RETURN_TRUE;
 		} else {
 			RETURN_FALSE;
@@ -155,7 +155,7 @@ PHP_METHOD(Phar, canCompress)
 
 	case PHAR_ENT_COMPRESSED_BZ2:
 #if HAVE_BZ2
-		if (PHAR_G(has_bz2)) {
+		if (phar_has_bz2) {
 			RETURN_TRUE;
 		} else {
 			RETURN_FALSE;
@@ -166,7 +166,7 @@ PHP_METHOD(Phar, canCompress)
 
 	default:
 #if HAVE_ZLIB || HAVE_BZ2
-	if (PHAR_G(has_zlib) || PHAR_G(has_bz2)) {
+	if (phar_has_zlib || phar_has_bz2) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -293,6 +293,42 @@ PHP_METHOD(Phar, __construct)
 
 	efree(fname);
 #endif /* HAVE_SPL */
+}
+/* }}} */
+
+/* {{{ proto array Phar::getSupportedSignatures()
+ * Return array of supported signature types
+ */
+PHP_METHOD(Phar, getSupportedSignatures)
+{
+	array_init(return_value);
+
+	add_next_index_stringl(return_value, "MD5", 3, 1);
+	add_next_index_stringl(return_value, "SHA-1", 5, 1);
+#if HAVE_HASH_EXT
+	add_next_index_stringl(return_value, "SHA-256", 7, 1);
+	add_next_index_stringl(return_value, "SHA-512", 7, 1);
+#endif
+}
+/* }}} */
+
+/* {{{ proto array Phar::getSupportedCompression()
+ * Return array of supported comparession algorithms
+ */
+PHP_METHOD(Phar, getSupportedCompression)
+{
+	array_init(return_value);
+
+#if HAVE_ZLIB
+	if (phar_has_zlib) {
+		add_next_index_stringl(return_value, "GZ", 2, 1);
+	}
+#endif
+#if HAVE_BZ2
+	if (phar_has_bz2) {
+		add_next_index_stringl(return_value, "BZIP2", 5, 1);
+	}
+#endif
 }
 /* }}} */
 
@@ -820,42 +856,6 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 }
 /* }}} */
 
-/* {{{ proto array Phar::getSupportedSignatures()
- * Return array of supported signature types
- */
-PHP_METHOD(Phar, getSupportedSignatures)
-{
-	array_init(return_value);
-
-	add_next_index_stringl(return_value, "MD5", 3, 1);
-	add_next_index_stringl(return_value, "SHA-1", 5, 1);
-#if HAVE_HASH_EXT
-	add_next_index_stringl(return_value, "SHA-256", 7, 1);
-	add_next_index_stringl(return_value, "SHA-512", 7, 1);
-#endif
-}
-/* }}} */
-
-/* {{{ proto array Phar::getSupportedCompression()
- * Return array of supported comparession algorithms
- */
-PHP_METHOD(Phar, getSupportedCompression)
-{
-	array_init(return_value);
-
-#if HAVE_ZLIB
-	if (PHAR_G(has_zlib)) {
-		add_next_index_stringl(return_value, "GZ", 2, 1);
-	}
-#endif
-#if HAVE_BZ2
-	if (PHAR_G(has_bz2)) {
-		add_next_index_stringl(return_value, "BZIP2", 5, 1);
-	}
-#endif
-}
-/* }}} */
-
 /* {{{ proto array|false Phar::getSignature()
  * Return signature or false
  */
@@ -925,7 +925,7 @@ static int phar_test_compression(void *pDest, void *argument TSRMLS_DC) /* {{{ *
 		*(int *) argument = 0;
 	}
 #else
-	if (!PHAR_G(has_bz2)) {
+	if (!phar_has_bz2) {
 		if (entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
 			*(int *) argument = 0;
 		}
@@ -936,7 +936,7 @@ static int phar_test_compression(void *pDest, void *argument TSRMLS_DC) /* {{{ *
 		*(int *) argument = 0;
 	}
 #else
-	if (!PHAR_G(has_zlib)) {
+	if (!phar_has_zlib) {
 		if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
 			*(int *) argument = 0;
 		}
@@ -976,7 +976,7 @@ PHP_METHOD(Phar, compressAllFilesGZ)
 			"Phar is readonly, cannot change compression");
 	}
 #if HAVE_ZLIB
-	if (!PHAR_G(has_zlib)) {
+	if (!phar_has_zlib) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress with Gzip compression, zlib extension is not enabled");
 	}
@@ -1014,7 +1014,7 @@ PHP_METHOD(Phar, compressAllFilesBZIP2)
 			"Phar is readonly, cannot change compression");
 	}
 #if HAVE_BZ2
-	if (!PHAR_G(has_bz2)) {
+	if (!phar_has_bz2) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress with Bzip2 compression, bz2 extension is not enabled");
 	}
@@ -1756,7 +1756,7 @@ PHP_METHOD(PharFileInfo, setCompressedGZ)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress deleted file");
 	}
-	if (!PHAR_G(has_zlib)) {
+	if (!phar_has_zlib) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress with Gzip compression, zlib extension is not enabled");
 	}
@@ -1788,7 +1788,7 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 	char *error;
 	PHAR_ENTRY_OBJECT();
 
-	if (!PHAR_G(has_bz2)) {
+	if (!phar_has_bz2) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress with Bzip2 compression, bz2 extension is not enabled");
 	}
@@ -1858,7 +1858,7 @@ PHP_METHOD(PharFileInfo, setUncompressed)
 			"Cannot uncompress Gzip-compressed file, zlib extension is not enabled");
 	}
 #else
-	if (!PHAR_G(has_zlib)) {
+	if (!phar_has_zlib) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot uncompress Gzip-compressed file, zlib extension is not enabled");
 	}
@@ -1869,7 +1869,7 @@ PHP_METHOD(PharFileInfo, setUncompressed)
 			"Cannot uncompress Bzip2-compressed file, bzip2 extension is not enabled");
 	}
 #else
-	if (!PHAR_G(has_bz2)) {
+	if (!phar_has_bz2) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot uncompress Bzip2-compressed file, bzip2 extension is not enabled");
 	}
