@@ -1,3 +1,116 @@
+2007-12-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c:
+      Kill unused vars
+
+2007-12-17  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/spl_array.c:
+      - Fix folding (again)
+      - Fix clone mask
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c:
+      - Fix folding
+
+2007-12-17  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/array/array_walk_error1.phpt
+      ext/standard/tests/array/array_walk_error1.phpt
+      ext/standard/tests/array/array_walk_error2.phpt
+      ext/standard/tests/array/array_walk_error2.phpt
+      ext/standard/tests/array/array_walk_recursive_error1.phpt
+      ext/standard/tests/array/array_walk_recursive_error1.phpt
+      ext/standard/tests/array/array_walk_recursive_error2.phpt
+      ext/standard/tests/array/array_walk_recursive_error2.phpt
+      ext/standard/tests/array/array_walk_recursive_variation2.phpt
+      ext/standard/tests/array/array_walk_recursive_variation2.phpt
+      ext/standard/tests/array/array_walk_recursive_variation8.phpt
+      ext/standard/tests/array/array_walk_recursive_variation8.phpt
+      ext/standard/tests/array/array_walk_variation2.phpt
+      ext/standard/tests/array/array_walk_variation2.phpt
+      ext/standard/tests/array/array_walk_variation8.phpt
+      ext/standard/tests/array/array_walk_variation8.phpt:
+      fix tests
+
+2007-12-17  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * run-tests.php:
+      MFB5.3: - Allow to specify php executable on commandline
+      MFB5.3: - Allow to check the out,exp and diff results on console while
+      executing the tests
+
+2007-12-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_operators.c
+      ext/standard/tests/array/array_fill_variation1.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation2.phpt
+      ext/standard/tests/strings/pack.phpt
+      ext/standard/tests/strings/sprintf_variation35.phpt
+      ext/standard/tests/strings/sprintf_variation4.phpt
+      ext/standard/tests/strings/sprintf_variation41.phpt
+      ext/standard/tests/strings/vsprintf_variation15.phpt
+      ext/standard/tests/strings/vsprintf_variation15_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation16.phpt
+      ext/standard/tests/strings/vsprintf_variation4.phpt:
+      Fixed bug #42868 (Floats cast to integer droduce unpredicatable results).
+      (Zoe Slattery)
+
+2007-12-17  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      run-tests.php:
+      Check if we know which php executable we should use
+
+2007-12-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/bug41919.phpt:
+      Fixed test
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_operators.c
+      ext/standard/tests/array/array_fill_variation1.phpt
+      ext/standard/tests/general_functions/gettype_settype_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation2.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation2.phpt
+      ext/standard/tests/strings/pack.phpt
+      ext/standard/tests/strings/sprintf_variation35.phpt
+      ext/standard/tests/strings/sprintf_variation4.phpt
+      ext/standard/tests/strings/sprintf_variation41.phpt
+      ext/standard/tests/strings/str_split_variation2.phpt
+      ext/standard/tests/strings/vsprintf_variation15.phpt
+      ext/standard/tests/strings/vsprintf_variation15_64bit.phpt
+      ext/standard/tests/strings/vsprintf_variation16.phpt
+      ext/standard/tests/strings/vsprintf_variation4.phpt:
+      Fixed bug #42868 (Floats cast to integer produce unpredicatable results).
+      (Zoe Slattery)
+
+2007-12-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/exif/exif.c
+      ext/exif/exif.c:
+      - Fix indent of macros
+
+2007-12-17  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_3)
+      ext/json/json.c
+      ext/json/tests/006.phpt:
+      MFH (json.c r-1.32) Add support for encoding options
+
+    * ext/json/json.c
+      ext/json/tests/006.phpt
+      ext/json/tests/006.phpt:
+      Add support for encoding options
+
+    * ext/standard/filestat.c:
+      Add scoping braces for variable declaration
+
 2007-12-16  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_3)
