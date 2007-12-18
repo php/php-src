@@ -1,3 +1,18 @@
+2007-12-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_operators.c:
+      Fixed bug #42868 (Floats cast to integer droduce unpredicatable results).
+      (Zoe Slattery)
+
+    * (PHP_5_3)
+      tests/bug41919.phpt:
+      Fixed test
+
+    * (PHP_5_3)
+      zend_operators.c:
+      Fixed bug #42868 (Floats cast to integer produce unpredicatable results).
+      (Zoe Slattery)
+
 2007-12-14  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c
