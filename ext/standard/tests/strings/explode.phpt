@@ -6,6 +6,7 @@ error_reporting=2047
 <?php
 /* From http://bugs.php.net/19865 */
 $s = (binary) var_export(explode(b"\1", (binary)"a". chr(1). "b". chr(0). "d" . chr(1) . "f" . chr(1). "1" . chr(1) . "d"), TRUE);
+echo $s;
 echo md5($s);
 echo "\n";
 var_dump(@explode("", ""));
@@ -30,7 +31,13 @@ var_dump(explode(":^:","a lazy dog:^:jumps::over:^:",-1));
 var_dump(explode(":^:","a lazy dog:^:jumps::over:^:",-2));
 ?>
 --EXPECTF--
-6e5d59d5afd6693547a733219d079658
+array (
+  0 => 'a',
+  1 => 'b' . "\0" . 'd',
+  2 => 'f',
+  3 => '1',
+  4 => 'd',
+)d6bee42a771449205344c0938ad4f035
 bool(false)
 bool(false)
 bool(false)
@@ -154,7 +161,13 @@ array(1) {
   string(10) "a lazy dog"
 }
 --UEXPECTF--
-6e5d59d5afd6693547a733219d079658
+array (
+  0 => 'a',
+  1 => 'b' . "\0" . 'd',
+  2 => 'f',
+  3 => '1',
+  4 => 'd',
+)d6bee42a771449205344c0938ad4f035
 bool(false)
 bool(false)
 bool(false)
