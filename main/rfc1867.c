@@ -1332,7 +1332,7 @@ var_done:
 			}
 
 			/* The \ check should technically be needed for win32 systems only where
-			 * it is a valid path separator. However, IE in all it's wisdom always sends
+			 * it is a valid path separator. However, IE in all its wisdom always sends
 			 * the full path of the file on the user's filesystem, which means that unless
 			 * the user does basename() they get a bogus file name. Until IE's user base drops 
 			 * to nill or problem is fixed this code must remain enabled for all systems.
