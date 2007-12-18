@@ -353,13 +353,15 @@ static int php_array_element_export(zval **zv, int num_args, va_list args, zend_
 	if (hash_key->nKeyLength == 0) { /* numeric key */
 		php_printf("%*c%ld => ", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		char *key;
-		int key_len;
+		char *key, *tmp_str;
+		int key_len, tmp_len;
 		key = php_addcslashes(hash_key->arKey, hash_key->nKeyLength - 1, &key_len, 0, "'\\", 2 TSRMLS_CC);
+		tmp_str = php_str_to_str_ex(key, key_len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len, 0, NULL);
 		php_printf("%*c'", level + 1, ' ');
-		PHPWRITE(key, key_len);
+		PHPWRITE(tmp_str, tmp_len);
 		php_printf("' => ");
 		efree(key);
+		efree(tmp_str);
 	}
 	php_var_export(zv, level + 2 TSRMLS_CC);
 	PUTS (",\n");
