@@ -3811,6 +3811,7 @@ static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS)
 	{
 		char *arch, *entry, *fname;
 		int arch_len, entry_len, fname_len;
+		php_stream_context *context = NULL;
 		fname = zend_get_executed_filename(TSRMLS_C);
 		if (strncasecmp(fname, "phar://", 7)) {
 			goto skip_phar;
@@ -3821,7 +3822,7 @@ static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS)
 
 			efree(entry);
 			entry = filename;
-			/* include within phar, if :// is not in the url, then prepend phar://<archive>/ */
+			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 			for (s = entry; s < (entry + entry_len - 4); s++) {
 				if (*s == ':' && *(s + 1) == '/' && *(s + 2) == '/') {
@@ -3832,10 +3833,10 @@ static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS)
 			/* auto-convert to phar:// */
 			spprintf(&name, 4096, "phar://%s/%s", arch, entry);
 			efree(arch);
-			stream = php_stream_open_wrapper(name, mode, 0, NULL);
+			context = php_stream_context_from_zval(zcontext, 0);
+			stream = php_stream_open_wrapper_ex(name, mode, 0 | REPORT_ERRORS, NULL, context);
 			efree(name);
 			php_stream_to_zval(stream, return_value);
-			return_value_used = 1;
 			return;
 		}
 	}
@@ -3856,8 +3857,8 @@ static void phar_getcwd(INTERNAL_FUNCTION_PARAMETERS)
 		goto skip_phar;
 	}
 	s = (char *) strrchr ((void *) fname, '/');
-	fname_len = s-fname + 1;
-	fname = estrndup(s, fname_len);
+	fname_len = s-fname;
+	fname = estrndup(fname, fname_len + 1);
 	fname[fname_len] = '\0';
 	RETURN_STRINGL(fname, fname_len, 0);
 skip_phar:
@@ -3905,11 +3906,11 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 		zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
 		zend_hash_init(&(PHAR_GLOBALS->phar_plain_map), sizeof(const char *),       zend_get_hash_value, NULL, 0);
 		phar_split_extract_list(TSRMLS_C);
-		if (SUCCESS == zend_hash_find(CG(function_table), "fopen", 5, (void **)&orig)) {
+		if (SUCCESS == zend_hash_find(CG(function_table), "fopen", 6, (void **)&orig)) {
 			PHAR_G(orig_fopen) = orig->internal_function.handler;
 			orig->internal_function.handler = phar_fopen;
 		}
-		if (SUCCESS == zend_hash_find(CG(function_table), "getcwd", 5, (void **)&orig)) {
+		if (SUCCESS == zend_hash_find(CG(function_table), "getcwd", 7, (void **)&orig)) {
 			PHAR_G(orig_getcwd) = orig->internal_function.handler;
 			orig->internal_function.handler = phar_getcwd;
 		}
@@ -3923,10 +3924,10 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 	if (PHAR_GLOBALS->request_init)
 	{
 		zend_function *orig;
-		if (PHAR_G(orig_fopen) && SUCCESS == zend_hash_find(CG(function_table), "fopen", 5, (void **)&orig)) {
+		if (PHAR_G(orig_fopen) && SUCCESS == zend_hash_find(CG(function_table), "fopen", 6, (void **)&orig)) {
 			orig->internal_function.handler = PHAR_G(orig_fopen);
 		}
-		if (PHAR_G(orig_getcwd) && SUCCESS == zend_hash_find(CG(function_table), "getcwd", 5, (void **)&orig)) {
+		if (PHAR_G(orig_getcwd) && SUCCESS == zend_hash_find(CG(function_table), "getcwd", 7, (void **)&orig)) {
 			orig->internal_function.handler = PHAR_G(orig_getcwd);
 		}
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
