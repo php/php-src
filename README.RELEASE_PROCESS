@@ -134,7 +134,7 @@ Getting the Release out there
 
 5. ``cvs add releases/4_4_1.php``
 
-6. Update the releases/*.php file with relevant data. The release announcement file  should list in detail:
+6. Update the ``releases/*.php`` file with relevant data. The release announcement file should list in detail:
 
  a. security fixes,
 
