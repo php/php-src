@@ -1,3 +1,117 @@
+2007-12-18  Steve Seear  <steve.seear@uk.ibm.com>
+
+    * ext/reflection/tests/reflectionProperty_basic1.phpt
+      ext/reflection/tests/reflectionProperty_basic2.phpt
+      ext/reflection/tests/reflectionProperty_constructor_error.phpt
+      ext/reflection/tests/reflectionProperty_error.phpt
+      ext/reflection/tests/reflectionProperty_export_basic.phpt
+      ext/reflection/tests/reflectionProperty_export_error.phpt
+      ext/reflection/tests/reflectionProperty_getDeclaringClass_variation1.phpt
+      ext/reflection/tests/reflectionProperty_getDocComment_basic.phpt
+      ext/reflection/tests/reflectionProperty_getDocComment_error.phpt
+      ext/reflection/tests/reflectionProperty_getModifiers_basic.phpt
+      ext/reflection/tests/reflectionProperty_getValue_error.phpt
+      ext/reflection/tests/reflectionProperty_isDefault_basic.phpt
+      ext/reflection/tests/reflectionProperty_setValue_error.phpt:
+      Adding PHPT tests for the ReflectionProperty class.
+      reflectionProperty_getValue_error.phpt and
+      reflectionProperty_setValue_error.phpt are failing with behaviour that is
+      inconsistent with PHP5_3.
+
+    * (PHP_5_3)
+      ext/reflection/tests/reflectionProperty_basic1.phpt
+      ext/reflection/tests/reflectionProperty_basic2.phpt
+      ext/reflection/tests/reflectionProperty_constructor_error.phpt
+      ext/reflection/tests/reflectionProperty_error.phpt
+      ext/reflection/tests/reflectionProperty_export_basic.phpt
+      ext/reflection/tests/reflectionProperty_export_error.phpt
+      ext/reflection/tests/reflectionProperty_getDeclaringClass_variation1.phpt
+      ext/reflection/tests/reflectionProperty_getDocComment_basic.phpt
+      ext/reflection/tests/reflectionProperty_getDocComment_error.phpt
+      ext/reflection/tests/reflectionProperty_getModifiers_basic.phpt
+      ext/reflection/tests/reflectionProperty_getValue_error.phpt
+      ext/reflection/tests/reflectionProperty_isDefault_basic.phpt
+      ext/reflection/tests/reflectionProperty_setValue_error.phpt:
+      Adding PHPT tests for the ReflectionProperty class.
+
+    * ext/reflection/tests/reflectionProperty_basic1.phpt
+      ext/reflection/tests/reflectionProperty_basic1.phpt
+      ext/reflection/tests/reflectionProperty_basic1.phpt
+      ext/reflection/tests/reflectionProperty_basic2.phpt
+      ext/reflection/tests/reflectionProperty_basic2.phpt
+      ext/reflection/tests/reflectionProperty_basic2.phpt
+      ext/reflection/tests/reflectionProperty_constructor_error.phpt
+      ext/reflection/tests/reflectionProperty_constructor_error.phpt
+      ext/reflection/tests/reflectionProperty_constructor_error.phpt
+      ext/reflection/tests/reflectionProperty_error.phpt
+      ext/reflection/tests/reflectionProperty_error.phpt
+      ext/reflection/tests/reflectionProperty_error.phpt
+      ext/reflection/tests/reflectionProperty_export_basic.phpt
+      ext/reflection/tests/reflectionProperty_export_basic.phpt
+      ext/reflection/tests/reflectionProperty_export_basic.phpt
+      ext/reflection/tests/reflectionProperty_export_error.phpt
+      ext/reflection/tests/reflectionProperty_export_error.phpt
+      ext/reflection/tests/reflectionProperty_export_error.phpt
+      ext/reflection/tests/reflectionProperty_getDeclaringClass_variation1.phpt
+      ext/reflection/tests/reflectionProperty_getDeclaringClass_variation1.phpt
+      ext/reflection/tests/reflectionProperty_getDeclaringClass_variation1.phpt
+      ext/reflection/tests/reflectionProperty_getDocComment_basic.phpt
+      ext/reflection/tests/reflectionProperty_getDocComment_basic.phpt
+      ext/reflection/tests/reflectionProperty_getDocComment_basic.phpt
+      ext/reflection/tests/reflectionProperty_getDocComment_error.phpt
+      ext/reflection/tests/reflectionProperty_getDocComment_error.phpt
+      ext/reflection/tests/reflectionProperty_getDocComment_error.phpt
+      ext/reflection/tests/reflectionProperty_getModifiers_basic.phpt
+      ext/reflection/tests/reflectionProperty_getModifiers_basic.phpt
+      ext/reflection/tests/reflectionProperty_getModifiers_basic.phpt
+      ext/reflection/tests/reflectionProperty_getValue_error.phpt
+      ext/reflection/tests/reflectionProperty_getValue_error.phpt
+      ext/reflection/tests/reflectionProperty_getValue_error.phpt
+      ext/reflection/tests/reflectionProperty_isDefault_basic.phpt
+      ext/reflection/tests/reflectionProperty_isDefault_basic.phpt
+      ext/reflection/tests/reflectionProperty_isDefault_basic.phpt
+      ext/reflection/tests/reflectionProperty_setValue_error.phpt
+      ext/reflection/tests/reflectionProperty_setValue_error.phpt
+      ext/reflection/tests/reflectionProperty_setValue_error.phpt:
+        1.1.4;
+      file reflectionProperty_basic1.phpt was initially added on branch PHP_5_2.
+
+2007-12-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/interface.c
+      ext/curl/interface.c:
+      
+      MFB: Fixed bug #43620 (Workaround for a bug inside libcurl 7.16.2 that can
+      result in a crash)
+
+    * (PHP_5_3)
+      ext/curl/interface.c:
+      Fixed bug #43620 (Workaround for a bug inside libcurl 7.16.2 that can
+      result
+      in a crash)
+
+2007-12-18  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/standard/var.c
+      ext/standard/tests/array/bug26458.phpt
+      ext/standard/tests/array/var_export2.phpt
+      ext/standard/tests/strings/explode.phpt:
+      - MFH: Fixed var_export() for array keys
+      - MFH: Fixed broken explode() test
+
+    * ext/standard/var.c
+      ext/standard/tests/array/bug26458.phpt
+      ext/standard/tests/array/var_export2.phpt
+      ext/standard/tests/strings/explode.phpt:
+      - Fixed var_export() for array keys
+      - Fixed broken explode() test
+
+    * main/rfc1867.c:
+      - Fixed typo.
+
 2007-12-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
