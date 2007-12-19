@@ -3748,6 +3748,7 @@ static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
 static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC) /* {{{ */
 {
 	zend_op_array *res;
+	char *s, *name = NULL;
 	char *fname = NULL;
 	int fname_len;
 	zend_op_array *(*save)(zend_file_handle *file_handle, int type TSRMLS_DC);
@@ -3763,7 +3764,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 		}
 		fname_len = strlen(fname);
 		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
-			char *s, *name;
 
 			efree(entry);
 			entry = file_handle->filename;
@@ -3785,6 +3785,9 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 	}
 skip_phar:
 	res = zend_compile_file(file_handle, type TSRMLS_CC);
+	if (name) {
+		efree(name);
+	}
 	zend_compile_file = save;
 	return res;
 }
@@ -3902,11 +3905,11 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 		zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
 		zend_hash_init(&(PHAR_GLOBALS->phar_plain_map), sizeof(const char *),       zend_get_hash_value, NULL, 0);
 		phar_split_extract_list(TSRMLS_C);
-		if (PHAR_G(orig_fopen) && SUCCESS == zend_hash_find(EG(function_table), "fopen", 5, (void **)&orig)) {
+		if (SUCCESS == zend_hash_find(CG(function_table), "fopen", 5, (void **)&orig)) {
 			PHAR_G(orig_fopen) = orig->internal_function.handler;
 			orig->internal_function.handler = phar_fopen;
 		}
-		if (SUCCESS == zend_hash_find(EG(function_table), "getcwd", 5, (void **)&orig)) {
+		if (SUCCESS == zend_hash_find(CG(function_table), "getcwd", 5, (void **)&orig)) {
 			PHAR_G(orig_getcwd) = orig->internal_function.handler;
 			orig->internal_function.handler = phar_getcwd;
 		}
