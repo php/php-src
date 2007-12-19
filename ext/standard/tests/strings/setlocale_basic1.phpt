@@ -47,8 +47,8 @@ echo "*** Testing setlocale() : basic functionality - set to a specific locale *
 
 //set of locales to be used
 $common_locales = array(
-  "english_US"=> "en_US.utf8gfd", 
-  "english_AU" => "en_AU.utf8hgg", 
+  "english_US"=> "en_US.utf8", 
+  "english_AU" => "en_AU.utf8", 
   "korean_KR" => "ko_KR.utf8", 
   "Chinese_zh" => "zh_CN.utf8",
   "germen_DE" => "de_DE.utf8",
