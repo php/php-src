@@ -3841,7 +3841,8 @@ static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS)
 		}
 	}
 skip_phar:
-	return PHAR_G(orig_fopen)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	PHAR_G(orig_fopen)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	return;
 }
 
 static void phar_getcwd(INTERNAL_FUNCTION_PARAMETERS)
@@ -3862,7 +3863,8 @@ static void phar_getcwd(INTERNAL_FUNCTION_PARAMETERS)
 	fname[fname_len] = '\0';
 	RETURN_STRINGL(fname, fname_len, 0);
 skip_phar:
-	return PHAR_G(orig_getcwd)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	PHAR_G(orig_getcwd)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	return;
 }
 
 PHP_MINIT_FUNCTION(phar) /* {{{ */
