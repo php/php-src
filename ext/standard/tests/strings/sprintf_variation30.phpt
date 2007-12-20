@@ -39,7 +39,7 @@ foreach($resource_values as $resource_value) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 echo "Done";
 ?>
@@ -56,9 +56,9 @@ string(%d) "%d "
 string(%d) "	%d"
 string(%d) "
 %d"
-string(%d) "   %d"
-string(%d) "                             %d"
-string(4) "0-7]"
+string(%d) "%s%d"
+string(%d) "%s%d"
+string(%d) "0-7]"
 string(1) "o"
 
 -- Iteration 2 --
@@ -71,12 +71,11 @@ string(%d) "%d "
 string(%d) "	%d"
 string(%d) "
 %d"
-string(%d) "   %d"
-string(%d) "                             %d"
-string(4) "0-7]"
+string(%d) "%s%d"
+string(%d) "%s%d"
+string(%d) "0-7]"
 string(1) "o"
 Done
-
 --UEXPECTF--
 *** Testing sprintf() : octal formats with resource values ***
 
@@ -90,9 +89,9 @@ unicode(%d) "%d "
 unicode(%d) "	%d"
 unicode(%d) "
 %d"
-unicode(%d) "   %d"
-unicode(%d) "                             %d"
-unicode(4) "0-7]"
+unicode(%d) "%s%d"
+unicode(%d) "%s%d"
+unicode(%d) "0-7]"
 unicode(1) "o"
 
 -- Iteration 2 --
@@ -105,8 +104,8 @@ unicode(%d) "%d "
 unicode(%d) "	%d"
 unicode(%d) "
 %d"
-unicode(%d) "   %d"
-unicode(%d) "                             %d"
-unicode(4) "0-7]"
+unicode(%d) "%s%d"
+unicode(%d) "%s%d"
+unicode(%d) "0-7]"
 unicode(1) "o"
 Done

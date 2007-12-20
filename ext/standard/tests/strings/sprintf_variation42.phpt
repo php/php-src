@@ -40,7 +40,7 @@ foreach($resource_values as $resource_value) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 echo "Done";
 ?>
@@ -57,9 +57,9 @@ string(%d) "%d "
 string(%d) "	%d"
 string(%d) "
 %d"
-string(%d) "   %d"
-string(%d) "                             %d"
-string(4) "0-9]"
+string(%d) "%s%d"
+string(%d) "%s%d"
+string(%d) "0-9]"
 string(1) "u"
 
 -- Iteration 2 --
@@ -72,12 +72,11 @@ string(%d) "%d "
 string(%d) "	%d"
 string(%d) "
 %d"
-string(%d) "   %d"
-string(%d) "                             %d"
-string(4) "0-9]"
+string(%d) "%s%d"
+string(%d) "%s%d"
+string(%d) "0-9]"
 string(1) "u"
 Done
-
 --UEXPECTF--
 *** Testing sprintf() : unsigned formats with resource values ***
 
@@ -91,9 +90,9 @@ unicode(%d) "%d "
 unicode(%d) "	%d"
 unicode(%d) "
 %d"
-unicode(%d) "   %d"
-unicode(%d) "                             %d"
-unicode(4) "0-9]"
+unicode(%d) "%s%d"
+unicode(%d) "%s%d"
+unicode(%d) "0-9]"
 unicode(1) "u"
 
 -- Iteration 2 --
@@ -106,8 +105,8 @@ unicode(%d) "%d "
 unicode(%d) "	%d"
 unicode(%d) "
 %d"
-unicode(%d) "   %d"
-unicode(%d) "                             %d"
-unicode(4) "0-9]"
+unicode(%d) "%s%d"
+unicode(%d) "%s%d"
+unicode(%d) "0-9]"
 unicode(1) "u"
 Done
