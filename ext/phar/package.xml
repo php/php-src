@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.7.0RC1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.6.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>phar</name>
  <channel>pecl.php.net</channel>
  <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
@@ -29,8 +29,8 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-12-12</date>
- <time>11:56:58</time>
+ <date>2007-12-20</date>
+ <time>17:12:06</time>
  <version>
   <release>1.3.0</release>
   <api>1.1.0</api>
@@ -42,6 +42,10 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
 
+Major feature functionality release
+ * include/getcwd/fopen with include_path all work unmodified within a phar
+ * paths with . and .. work (phar://blah.phar/a/../b.php =&gt; phar://blah.phar/b.php)
+ * implement Phar::copy(string $from, string $to) [Greg]
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
  * add mapping of include/require from within a phar to location within phar [Greg]
    solves the include_path issue without code munging
@@ -123,7 +127,17 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
     <file name="open_for_write_newfile_b.phpt" role="test" />
     <file name="open_for_write_newfile_c.phpt" role="test" />
     <file name="phar_begin_setstub_commit.phpt" role="test" />
+    <file name="phar_buildfromiterator1.phpt" role="test" />
+    <file name="phar_buildfromiterator2.phpt" role="test" />
+    <file name="phar_buildfromiterator3.phpt" role="test" />
+    <file name="phar_buildfromiterator4.phpt" role="test" />
+    <file name="phar_buildfromiterator5.phpt" role="test" />
+    <file name="phar_buildfromiterator6.phpt" role="test" />
+    <file name="phar_buildfromiterator7.phpt" role="test" />
+    <file name="phar_buildfromiterator8.phpt" role="test" />
+    <file name="phar_buildfromiterator9.phpt" role="test" />
     <file name="phar_commitwrite.phpt" role="test" />
+    <file name="phar_copy.phpt" role="test" />
     <file name="phar_create_in_cwd.phpt" role="test" />
     <file name="phar_ctx_001.phpt" role="test" />
     <file name="phar_dir_iterate.phpt" role="test" />
@@ -133,6 +147,7 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
     <file name="phar_get_supportedcomp4.phpt" role="test" />
     <file name="phar_get_suppoted_signatures_001.phpt" role="test" />
     <file name="phar_get_suppoted_signatures_002.phpt" role="test" />
+    <file name="phar_magic.phpt" role="test" />
     <file name="phar_metadata_read.phpt" role="test" />
     <file name="phar_metadata_write.phpt" role="test" />
     <file name="phar_offset_get_error.phpt" role="test" />
@@ -235,10 +250,14 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
     <release>stable</release>
     <api>stable</api>
    </stability>
-   <date>2007-12-12</date>
+   <date>2007-12-20</date>
    <license uri="http://www.php.net/license">PHP License</license>
    <notes>
 
+Major feature functionality release
+ * include/getcwd/fopen with include_path all work unmodified within a phar
+ * paths with . and .. work (phar://blah.phar/a/../b.php =&gt; phar://blah.phar/b.php)
+ * implement Phar::copy(string $from, string $to) [Greg]
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
  * add mapping of include/require from within a phar to location within phar [Greg]
    solves the include_path issue without code munging

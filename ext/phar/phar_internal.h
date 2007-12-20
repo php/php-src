@@ -44,6 +44,7 @@
 #include "ext/standard/sha1.h"
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_smart_str.h"
+#include "TSRM/tsrm_strtok_r.h"
 #if HAVE_SPL
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
@@ -252,7 +253,7 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC);
 
 static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS);
-static void phar_cwd(INTERNAL_FUNCTION_PARAMETERS);
+static void phar_getcwd(INTERNAL_FUNCTION_PARAMETERS);
 
 #ifdef PHAR_MAIN
 static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS);

@@ -1562,6 +1562,92 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ex
 }
 /* }}} */
 
+static int php_check_dots(const char *element, int n) 
+{
+	while (n-- > 0) if (element[n] != '.') break;
+
+	return (n != -1);
+}
+
+#define IS_DIRECTORY_UP(element, len) \
+	(len >= 2 && !php_check_dots(element, len))
+
+#define IS_DIRECTORY_CURRENT(element, len) \
+	(len == 1 && element[0] == '.')
+
+#define IS_BACKSLASH(c)     ((c) == '/')
+
+/**
+ * Remove .. and . references within a phar filename
+ */
+static char *phar_fix_filepath(char *path, int *new_len) /* {{{ */
+{
+	char *ptr, *free_path, *new_phar;
+	char *tok;
+	int ptr_length, new_phar_len = 1, path_length = *new_len;
+
+	free_path = path;
+	new_phar = estrndup("/\0", 2);
+	tok = NULL;
+	ptr = tsrm_strtok_r(path, "/", &tok);
+	while (ptr) {
+		ptr_length = strlen(ptr);
+
+		if (IS_DIRECTORY_UP(ptr, ptr_length)) {
+			char save;
+
+			save = '/';
+
+#define PREVIOUS new_phar[new_phar_len - 1]
+
+			while (new_phar_len > 1 &&
+					!IS_BACKSLASH(PREVIOUS)) {
+				save = PREVIOUS;
+				PREVIOUS = '\0';
+				new_phar_len--;
+			}
+
+			if (new_phar[0] != '/') {
+				new_phar[new_phar_len++] = save;
+				new_phar[new_phar_len] = '\0';
+			} else if (new_phar_len > 1) {
+				PREVIOUS = '\0';
+				new_phar_len--;
+			}
+		} else if (!IS_DIRECTORY_CURRENT(ptr, ptr_length)) {
+			if (new_phar_len > 1) {
+				new_phar = (char *) erealloc(new_phar, new_phar_len+ptr_length+1+1);
+				new_phar[new_phar_len++] = '/';
+				memcpy(&new_phar[new_phar_len], ptr, ptr_length+1);
+			} else {
+				new_phar = (char *) erealloc(new_phar, new_phar_len+ptr_length+1);
+				memcpy(&new_phar[new_phar_len], ptr, ptr_length+1);
+			}
+
+			new_phar_len += ptr_length;
+		}
+		ptr = tsrm_strtok_r(NULL, "/", &tok);
+	}
+
+	efree(free_path);
+
+	if (path[path_length-1] == '/') {
+		new_phar = (char*)erealloc(new_phar, new_phar_len + 2);
+		new_phar[new_phar_len++] = '/';
+		new_phar[new_phar_len] = 0;
+	}
+
+	if (new_phar_len == 0) {
+		new_phar = (char *) erealloc(new_phar, new_phar_len+1+1);
+		new_phar[new_phar_len] = '/';
+		new_phar[new_phar_len+1] = '\0';
+		new_phar_len++;
+	}
+	*new_len = new_phar_len;
+	return new_phar;
+}
+/* }}} */
+
 /**
  * Process a phar stream name, ensuring we can handle any of:
  * 
@@ -1608,6 +1694,7 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 #ifdef PHP_WIN32
 		phar_unixify_path_separators(*entry, *entry_len);
 #endif
+	*entry = phar_fix_filepath(*entry, entry_len);
 	} else {
 		*entry_len = 1;
 		*entry = estrndup("/", 1);
@@ -3744,7 +3831,6 @@ static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
 	phar_globals->readonly = 1;
 }
 /* }}} */
-
 static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC) /* {{{ */
 {
 	zend_op_array *res;
