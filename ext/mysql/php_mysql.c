@@ -643,14 +643,20 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		hashed_details_length = spprintf(&hashed_details, 0, "mysql__%s_", user);
 		client_flags = CLIENT_INTERACTIVE;
 	} else {
-		host_and_port = MySG(default_host);
-		user = MySG(default_user);
-		passwd = MySG(default_password);
-		
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sssll", &host_and_port, &host_len,
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!ll", &host_and_port, &host_len,
 									&user, &user_len, &passwd, &passwd_len, 
 									&new_link, &client_flags)==FAILURE) {
 			WRONG_PARAM_COUNT;
+		}
+
+		if (!host_and_port) {
+			host_and_port = MySG(default_host);
+		}
+		if (!user) {
+			user = MySG(default_user);
+		}
+		if (!passwd) {
+			passwd = MySG(default_password);
 		}
 
 		/* mysql_pconnect does not support new_link parameter */
