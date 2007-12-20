@@ -1,3 +1,37 @@
+2007-12-19  Derick Rethans  <php@derickrethans.nl>
+
+    * README.RELEASE_PROCESS:
+      - Fixed rest warnings
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to dev.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      4.4.8RC1
+
+2007-12-19  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/setlocale_basic1.phpt
+      ext/standard/tests/strings/setlocale_basic1.phpt
+      ext/standard/tests/strings/setlocale_basic1.phpt:
+      fix test
+
+2007-12-19  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/standard/var.c
+      ext/standard/tests/array/bug26458.phpt
+      ext/standard/tests/array/var_export2.phpt
+      ext/standard/tests/strings/explode.phpt:
+      - MFH: Fixed var_export() for array keys
+      - MFH: Fixed broken explode() test
+
 2007-12-18  Steve Seear  <steve.seear@uk.ibm.com>
 
     * ext/reflection/tests/reflectionProperty_basic1.phpt
