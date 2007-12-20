@@ -64,7 +64,6 @@ Version 1.3.0
    __HALT_COMPILER();function __HALT_COMPILER(){}$a=<<<PHARDATABEGIN\n
  * ability to have Phar object return file class as offsetGet() result
  * ability to store empty directories
- * [optional] Phar->rollback() to abort a write transaction
  * implement PPG signing
  * ability to match files containing a metadata key opendir('phar://a.phar/?mime-type=image/jpeg')
    or foreach ($p->match('mime-type', 'image/jpeg') as $file)
@@ -73,4 +72,4 @@ Version 1.3.0
  X Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
  * Layout: Option to compress all content rather than single files.
    That excludes stub and manifest haeder.
- * stream context option for cleaning crap paths like phar://blah.phar/file//to\\here.php
+ X clean crap paths like phar://blah.phar/file//../to\\here.php [Greg]

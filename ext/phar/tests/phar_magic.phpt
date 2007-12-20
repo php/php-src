@@ -10,7 +10,8 @@ phar.readonly=0
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $p = new Phar($fname);
 $p['a'] = '<?php include "b/c.php";' . "\n";
-$p['b/c.php'] = '<?php echo "in b\n";$a = fopen("a", "r", true);echo stream_get_contents($a);fclose($a);echo getcwd() . "\n";';
+$p['b/c.php'] = '<?php echo "in b\n";$a = fopen("a", "r", true);echo stream_get_contents($a);fclose($a);echo getcwd() . "\n";include dirname(__FILE__) . "/../d";';
+$p['d'] = "in d\n";
 $p->setStub('<?php
 include "phar://" . __FILE__ . "/a";
 __HALT_COMPILER();');
@@ -26,4 +27,5 @@ __HALT_COMPILER();
 in b
 <?php include "b/c.php";
 phar://%s/b
+in d
 ===DONE===
