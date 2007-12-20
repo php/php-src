@@ -20,12 +20,12 @@ $float_values = array(
   0.0,
   -0.1,
   1.0,
-  1e5,
-  -1e6,
-  1E8,
-  -1E9,
+  1e3,
+  -1e2,
+  1.23456E8,
+  -1.234567E9,
   10.0000000000000000005,
-  10.5e+5
+  10.123e+5
 );
 
 // array of string formats
@@ -187,62 +187,62 @@ string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 10 --
-string(6) "100000"
+string(4) "1000"
 string(1) "s"
-string(6) "100000"
+string(4) "1000"
 string(1) "s"
-string(7) " 100000"
-string(7) "100000 "
-string(7) "	100000"
-string(7) "
-100000"
-string(6) "100000"
-string(30) "                        100000"
+string(5) " 1000"
+string(5) "1000 "
+string(5) "	1000"
+string(5) "
+1000"
+string(4) "1000"
+string(30) "                          1000"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 11 --
-string(8) "-1000000"
+string(4) "-100"
 string(1) "s"
-string(8) "-1000000"
+string(4) "-100"
 string(1) "s"
-string(9) " -1000000"
-string(9) "-1000000 "
-string(9) "	-1000000"
-string(9) "
--1000000"
-string(8) "-1000000"
-string(30) "                      -1000000"
+string(5) " -100"
+string(5) "-100 "
+string(5) "	-100"
+string(5) "
+-100"
+string(4) "-100"
+string(30) "                          -100"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 12 --
-string(9) "100000000"
+string(9) "123456000"
 string(1) "s"
-string(9) "100000000"
+string(9) "123456000"
 string(1) "s"
-string(10) " 100000000"
-string(10) "100000000 "
-string(10) "	100000000"
+string(10) " 123456000"
+string(10) "123456000 "
+string(10) "	123456000"
 string(10) "
-100000000"
-string(9) "100000000"
-string(30) "                     100000000"
+123456000"
+string(9) "123456000"
+string(30) "                     123456000"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 13 --
-string(11) "-1000000000"
+string(11) "-1234567000"
 string(1) "s"
-string(11) "-1000000000"
+string(11) "-1234567000"
 string(1) "s"
-string(12) " -1000000000"
-string(12) "-1000000000 "
-string(12) "	-1000000000"
+string(12) " -1234567000"
+string(12) "-1234567000 "
+string(12) "	-1234567000"
 string(12) "
--1000000000"
-string(11) "-1000000000"
-string(30) "                   -1000000000"
+-1234567000"
+string(11) "-1234567000"
+string(30) "                   -1234567000"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
@@ -262,17 +262,17 @@ string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 15 --
-string(7) "1050000"
+string(7) "1012300"
 string(1) "s"
-string(7) "1050000"
+string(7) "1012300"
 string(1) "s"
-string(8) " 1050000"
-string(8) "1050000 "
-string(8) "	1050000"
+string(8) " 1012300"
+string(8) "1012300 "
+string(8) "	1012300"
 string(8) "
-1050000"
-string(7) "1050000"
-string(30) "                       1050000"
+1012300"
+string(7) "1012300"
+string(30) "                       1012300"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 Done

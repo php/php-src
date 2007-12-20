@@ -7,6 +7,8 @@ Test sprintf() function : usage variations - string formats with array values
  * Source code: ext/standard/formatted_print.c
 */
 
+error_reporting(E_ALL & ~E_NOTICE);
+
 echo "*** Testing sprintf() : string formats with array values ***\n";
 
 // different arrays used to test he function

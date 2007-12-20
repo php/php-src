@@ -39,7 +39,7 @@ foreach($resource_values as $resource_value) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 echo "Done";
 ?>
@@ -56,9 +56,9 @@ string(%d) "%d "
 string(%d) "	%d"
 string(%d) "
 %d"
-string(%d) "   %d"
-string(%d) "                             %d"
-string(4) "0-7]"
+string(%d) "%s%d"
+string(%d) "%s%d"
+string(%d) "0-7]"
 string(1) "o"
 
 -- Iteration 2 --
@@ -71,8 +71,8 @@ string(%d) "%d "
 string(%d) "	%d"
 string(%d) "
 %d"
-string(%d) "   %d"
-string(%d) "                             %d"
-string(4) "0-7]"
+string(%d) "%s%d"
+string(%d) "%s%d"
+string(%d) "0-7]"
 string(1) "o"
 Done
