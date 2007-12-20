@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2008, PHP 5.2.6
 - Fixed weired behavior in CGI parameter parsing. (Dmitry, Hannes Magnusson)
 
+- Fixed bug #43635 (mysql extension ingores INI settings on NULL values
+  passed to mysql_connect()). (Ilia)
 - Fixed bug #43620 (Workaround for a bug inside libcurl 7.16.2 that can result 
   in a crash). (Ilia)
 - Fixed bug #43606 (define missing depencies of the exif extension).
