@@ -44,8 +44,8 @@ $values = array(
       // float data
       10.5,
       -10.5,
-      10.5e10,
-      10.6E-10,
+      10.1234567e10,
+      10.7654321E-10,
       .5,
 
       // array data
@@ -139,14 +139,14 @@ string(5) "-10.5"
 string(5) "-10.5"
 
 -- Iteration 7 --
-string(12) "105000000000"
-string(12) "105000000000"
-string(12) "105000000000"
+string(12) "101234567000"
+string(12) "101234567000"
+string(12) "101234567000"
 
 -- Iteration 8 --
-string(7) "1.06E-9"
-string(7) "1.06E-9"
-string(7) "1.06E-9"
+string(13) "1.07654321E-9"
+string(13) "1.07654321E-9"
+string(13) "1.07654321E-9"
 
 -- Iteration 9 --
 string(3) "0.5"
@@ -155,57 +155,57 @@ string(3) "0.5"
 
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d%d
+Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 15 --
@@ -264,13 +264,11 @@ string(0) ""
 string(0) ""
 
 -- Iteration 26 --
-string(%d) "Resource id #5"
-string(%d) "Resource id #5"
-string(%d) "Resource id #5"
+string(%d) "Resource id #%d"
+string(%d) "Resource id #%d"
+string(%d) "Resource id #%d"
 Done
-
 --UEXPECTF--
-
 *** Testing sprintf() : with unexpected values for format argument ***
 
 -- Iteration 1 --
@@ -304,14 +302,14 @@ unicode(5) "-10.5"
 unicode(5) "-10.5"
 
 -- Iteration 7 --
-unicode(12) "105000000000"
-unicode(12) "105000000000"
-unicode(12) "105000000000"
+unicode(12) "101234567000"
+unicode(12) "101234567000"
+unicode(12) "101234567000"
 
 -- Iteration 8 --
-unicode(7) "1.06E-9"
-unicode(7) "1.06E-9"
-unicode(7) "1.06E-9"
+unicode(13) "1.07654321E-9"
+unicode(13) "1.07654321E-9"
+unicode(13) "1.07654321E-9"
 
 -- Iteration 9 --
 unicode(3) "0.5"

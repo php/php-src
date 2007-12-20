@@ -7,6 +7,8 @@ Test sprintf() function : usage variations - string formats with array values
  * Source code: ext/standard/formatted_print.c
 */
 
+error_reporting(E_ALL & ~E_NOTICE);
+
 echo "*** Testing sprintf() : string formats with array values ***\n";
 
 // different arrays used to test he function
@@ -49,749 +51,364 @@ echo "Done";
 *** Testing sprintf() : string formats with array values ***
 
 -- Iteration 1 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 2 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 3 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 4 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 5 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 6 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 7 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 8 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 9 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 10 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 11 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 12 --
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 string(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 string(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 string(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 Done
-
 --UEXPECTF--
 *** Testing sprintf() : string formats with array values ***
 
 -- Iteration 1 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
 
 -- Iteration 2 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
 
 -- Iteration 3 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
 
 -- Iteration 4 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
 
 -- Iteration 5 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
 
 -- Iteration 6 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
 
 -- Iteration 7 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
 
 -- Iteration 8 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
 
 -- Iteration 9 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
 
 -- Iteration 10 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
 
 -- Iteration 11 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
 
 -- Iteration 12 --
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
 unicode(1) "s"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) " Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "Array "
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "	Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(6) "
 Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
 unicode(30) "                         Array"
 unicode(10) "a-zA-Z0-9]"
 unicode(1) "s"
