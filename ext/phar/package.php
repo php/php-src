@@ -2,7 +2,7 @@
 
 $notes = '
 Major feature functionality release
- * include/getcwd/fopen with include_path all work unmodified within a phar
+ * include/fopen with include_path all work unmodified within a phar
  * paths with . and .. work (phar://blah.phar/a/../b.php => phar://blah.phar/b.php)
  * implement Phar::copy(string $from, string $to) [Greg]
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
