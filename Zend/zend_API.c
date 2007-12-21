@@ -2329,6 +2329,10 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		mlen = Z_STRLEN_P(callable) - clen - 2;
 		lmname = colon + 2;
 	}
+	if (colon && colon == Z_STRVAL_P(callable)) {
+		return 0;
+	}
+
  	if (colon != NULL) {
 		/* This is a compound name.
 		 * Try to fetch class and then find static method. */
