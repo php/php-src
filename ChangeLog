@@ -1,3 +1,81 @@
+2007-12-20  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation1.phpt
+      ext/standard/tests/strings/sprintf_variation11.phpt
+      ext/standard/tests/strings/sprintf_variation11.phpt
+      ext/standard/tests/strings/sprintf_variation11.phpt
+      ext/standard/tests/strings/sprintf_variation16.phpt
+      ext/standard/tests/strings/sprintf_variation16.phpt
+      ext/standard/tests/strings/sprintf_variation16.phpt
+      ext/standard/tests/strings/sprintf_variation17.phpt
+      ext/standard/tests/strings/sprintf_variation17.phpt
+      ext/standard/tests/strings/sprintf_variation17.phpt
+      ext/standard/tests/strings/sprintf_variation18.phpt
+      ext/standard/tests/strings/sprintf_variation18.phpt
+      ext/standard/tests/strings/sprintf_variation18.phpt
+      ext/standard/tests/strings/sprintf_variation2.phpt
+      ext/standard/tests/strings/sprintf_variation2.phpt
+      ext/standard/tests/strings/sprintf_variation2.phpt
+      ext/standard/tests/strings/sprintf_variation30.phpt
+      ext/standard/tests/strings/sprintf_variation30.phpt
+      ext/standard/tests/strings/sprintf_variation30.phpt
+      ext/standard/tests/strings/sprintf_variation42.phpt
+      ext/standard/tests/strings/sprintf_variation42.phpt
+      ext/standard/tests/strings/sprintf_variation42.phpt:
+      fix tests
+
+2007-12-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      x86_64 assembler optimization (Brain Shire)
+
+2007-12-20  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * ZendEngine2/tests/indexing_001.phpt
+      ZendEngine2/tests/indexing_001.phpt:
+      New test - Indexing - various special cases
+
+    * ZendEngine2/tests/indexing_001.phpt
+      ZendEngine2/tests/indexing_001.phpt
+      ZendEngine2/tests/indexing_001.phpt:
+        1.1.4;
+      file indexing_001.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_map_variation1.phpt
+      ext/standard/tests/array/array_map_variation1.phpt
+      ext/standard/tests/array/array_map_variation2.phpt
+      ext/standard/tests/array/array_map_variation2.phpt:
+      new tests for array_map usage variations - string keys and references
+
+    * ext/standard/tests/array/array_map_variation1.phpt
+      ext/standard/tests/array/array_map_variation1.phpt
+      ext/standard/tests/array/array_map_variation1.phpt
+      ext/standard/tests/array/array_map_variation2.phpt
+      ext/standard/tests/array/array_map_variation2.phpt
+      ext/standard/tests/array/array_map_variation2.phpt:
+        1.1.4;
+      new tests for array_map usage variations - string keys and references
+
+2007-12-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysql/php_mysql.c:
+      
+      MFB: Fixed bug #43635 (mysql extension ingores INI settings on NULL values
+      passed to mysql_connect())
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c:
+      Fixed bug #43635 (mysql extension ingores INI settings on NULL values
+      passed
+      to mysql_connect())
+
 2007-12-19  Derick Rethans  <php@derickrethans.nl>
 
     * README.RELEASE_PROCESS:
