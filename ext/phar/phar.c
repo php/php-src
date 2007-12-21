@@ -3931,35 +3931,12 @@ skip_phar:
 	return;
 }
 
-static void phar_getcwd(INTERNAL_FUNCTION_PARAMETERS)
-{
-	char *s, *fname;
-	int fname_len;
-	if (!zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
-		/* no need to check, no active phars */
-		goto skip_phar;
-	}
-	fname = zend_get_executed_filename(TSRMLS_C);
-	if (strncasecmp(fname, "phar://", 7)) {
-		goto skip_phar;
-	}
-	s = (char *) strrchr ((void *) fname, '/');
-	fname_len = s-fname;
-	fname = estrndup(fname, fname_len + 1);
-	fname[fname_len] = '\0';
-	RETURN_STRINGL(fname, fname_len, 0);
-skip_phar:
-	PHAR_G(orig_getcwd)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	return;
-}
-
 PHP_MINIT_FUNCTION(phar) /* {{{ */
 {
 	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
 	REGISTER_INI_ENTRIES();
 
 	PHAR_G(orig_fopen) = NULL;
-	PHAR_G(orig_getcwd) = NULL;
 	phar_has_gnupg = zend_hash_exists(&module_registry, "gnupg", sizeof("gnupg"));
 	phar_has_bz2 = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
 	phar_has_zlib = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
@@ -3998,10 +3975,6 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 			PHAR_G(orig_fopen) = orig->internal_function.handler;
 			orig->internal_function.handler = phar_fopen;
 		}
-		if (SUCCESS == zend_hash_find(CG(function_table), "getcwd", 7, (void **)&orig)) {
-			PHAR_G(orig_getcwd) = orig->internal_function.handler;
-			orig->internal_function.handler = phar_getcwd;
-		}
 	}
 }
 /* }}} */
@@ -4014,9 +3987,6 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		zend_function *orig;
 		if (PHAR_G(orig_fopen) && SUCCESS == zend_hash_find(CG(function_table), "fopen", 6, (void **)&orig)) {
 			orig->internal_function.handler = PHAR_G(orig_fopen);
-		}
-		if (PHAR_G(orig_getcwd) && SUCCESS == zend_hash_find(CG(function_table), "getcwd", 7, (void **)&orig)) {
-			orig->internal_function.handler = PHAR_G(orig_getcwd);
 		}
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
