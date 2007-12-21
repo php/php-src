@@ -24,7 +24,7 @@ PHP                                                                        NEWS
 - Fixed bug #43457 (Prepared statement with incorrect parms doesn't throw 
   exception with pdo_pgsql driver). (Ilia)
 - Fixed bug #43450 (Memory leak on some functions with implicit object 
-  __toString() call). (Davic C.)
+  __toString() call). (Davidc C.)
 - Fixed bug #43386 (array_globals not reset to 0 properly on init). (Ilia)
 - Fixed bug #43377 (PHP crashes with invalid argument for DateTimeZone). (Ilia)
 - Fixed bug #43373 (pcntl_fork() should not raise E_ERROR on error). (Ilia)
