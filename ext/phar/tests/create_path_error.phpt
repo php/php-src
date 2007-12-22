@@ -54,11 +54,9 @@ foreach($checks as $check)
 --EXPECTF--
 string(5) "query"
 string(5) "query"
-Error: file_put_contents(phar://%s//): failed to open stream: phar error: invalid path "/" contains empty directory
-Error: file_put_contents(phar://%s/.): failed to open stream: phar error: invalid path "." contains current directory reference
-Error: file_put_contents(phar://%s/../): failed to open stream: phar error: invalid path "../" contains empty directory
-Error: file_put_contents(phar://%s/a/..): failed to open stream: phar error: invalid path "a/.." contains upper directory reference
-Error: file_put_contents(phar://%s/a/): failed to open stream: phar error: invalid path "a/" contains empty directory
-Error: file_put_contents(phar://%s/b//a.php): failed to open stream: phar error: invalid path "b//a.php" contains double slash
+Error: file_put_contents(phar://%s//): failed to open stream: phar error: file "" cannot be empty
+Error: file_put_contents(phar://%s/.): failed to open stream: phar error: file "" cannot be empty
+Error: file_put_contents(phar://%s/../): failed to open stream: phar error: file "" cannot be empty
+Error: file_put_contents(phar://%s/a/..): failed to open stream: phar error: file "" cannot be empty
 Exception: Entry a does not exist and cannot be created: phar error: invalid path "a" contains illegal character
 ===DONE===
