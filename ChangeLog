@@ -1,3 +1,42 @@
+2007-12-21  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      NEWS:
+      -Fix name (arg, new keyboard is coming...)
+
+    * (PHP_5_2)
+      NEWS:
+      -Fix name
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug43450.phpt
+      ZendEngine2/tests/bug43450.phpt:
+      - MFH: Fix #43450 (Memory leak on some functions with implicit object
+        __toString() call) (Davic C.)
+
+    * ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug43450.phpt
+      ZendEngine2/tests/bug43450.phpt
+      ZendEngine2/tests/bug43450.phpt:
+      - Fix #43450 (Memory leak on some functions with implicit object
+        __toString() call) (Davic C.)
+
+2007-12-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/array/array_map_variation2.phpt
+      ext/standard/tests/array/array_map_variation2.phpt
+      ext/standard/tests/array/array_map_variation2.phpt:
+      Fixed test
+
+2007-12-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      Fixed bug #43644 (is_callable(':') crashes)
+
 2007-12-20  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * ext/standard/tests/strings/sprintf_variation1.phpt

@@ -1,3 +1,26 @@
+2007-12-21  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug43450.phpt
+      tests/bug43450.phpt:
+      - MFH: Fix #43450 (Memory leak on some functions with implicit object
+        __toString() call) (Davic C.)
+
+    * zend_object_handlers.c
+      tests/bug43450.phpt
+      tests/bug43450.phpt
+      tests/bug43450.phpt:
+      - Fix #43450 (Memory leak on some functions with implicit object
+        __toString() call) (Davic C.)
+
+2007-12-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      zend_API.c:
+      Fixed bug #43644 (is_callable(':') crashes)
+
 2007-12-20  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_alloc.c
