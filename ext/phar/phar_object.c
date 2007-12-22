@@ -342,6 +342,31 @@ PHP_METHOD(Phar, getSupportedCompression)
 		return; \
 	}
 
+/* {{{ proto void Phar::useWebFrontController()
+ * This method is used in Phar creation to specify that this phar
+ * is intended to be executed as a self-contained website, and the
+ * built-in fast front controller should be used.
+ */
+PHP_METHOD(Phar, useWebFrontController)
+{
+	char *error;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot specify use of default front controller, phar is read-only");
+		return;
+	}
+
+	phar_obj->arc.archive->is_web = 1;
+	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+	if (error) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		efree(error);
+	}
+}
+/* }}} */
+
 static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 {
 	zval **value;
@@ -1982,6 +2007,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, offsetUnset,           arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, uncompressAllFiles,    NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, buildFromIterator,     arginfo_phar_build,        ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, useWebFrontController, NULL,                      ZEND_ACC_PUBLIC)
 #endif
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,            NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)

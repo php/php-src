@@ -33,6 +33,7 @@
 #include "zend_interfaces.h"
 #include "zend_operators.h"
 #include "zend_qsort.h"
+#include "zend_vm.h"
 #include "main/php_streams.h"
 #include "main/streams/php_stream_plain_wrapper.h"
 #include "ext/standard/info.h"
@@ -69,9 +70,11 @@
 #endif
 
 #define PHAR_EXT_VERSION_STR      "1.3.0"
-#define PHAR_API_VERSION_STR      "1.1.0"
+#define PHAR_API_VERSION_STR      "1.2.0"
 /* x.y.z maps to 0xyz0 */
-#define PHAR_API_VERSION          0x1100
+#define PHAR_API_VERSION          0x1200
+/* API version to use for is_web=0 in phar creation */
+#define PHAR_API_VERSION_NOWEB    0x1100
 #define PHAR_API_MIN_READ         0x1000
 #define PHAR_API_MAJORVERSION     0x1000
 #define PHAR_API_MAJORVER_MASK    0xF000
@@ -82,6 +85,7 @@
 #define PHAR_HDR_COMPRESSED_GZ    0x00001000
 #define PHAR_HDR_COMPRESSED_BZ2   0x00002000
 #define PHAR_HDR_SIGNATURE        0x00010000
+#define PHAR_HDR_WEB              0x00020000
 
 #define PHAR_SIG_MD5              0x0001
 #define PHAR_SIG_SHA1             0x0002
@@ -109,6 +113,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_fname_map;
 	HashTable   phar_alias_map;
 	HashTable   phar_plain_map;
+	/* phar archives that have is_web = 1, used for fast lookup in phar_compile_file */
+	HashTable   phar_web_map;
+	/* mapping of file extension to MIME type */
+	HashTable   phar_mimes;
 	char*       extract_list;
 	int         readonly;
 	zend_bool   readonly_orig;
@@ -202,8 +210,20 @@ struct _phar_archive_data {
 	int                      is_brandnew:1;
 	/* defer phar creation */
 	int                      donotflush:1;
+	/* this phar is intended to use a web front controller with non-CLI SAPI */
+	int                      is_web:1;
 };
 
+#define PHAR_MIME_PHP '\0'
+#define PHAR_MIME_PHPS '\1'
+#define PHAR_MIME_OTHER '\2'
+
+typedef struct _phar_mime_type {
+	char *mime;
+	int len;
+	/* one of PHAR_MIME_* */
+	char type;
+} phar_mime_type;
 
 /* stream access data for one file entry in a phar file */
 typedef struct _phar_entry_data {
@@ -251,10 +271,9 @@ int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, i
 int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC);
 
-static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS);
-static void phar_getcwd(INTERNAL_FUNCTION_PARAMETERS);
 
 #ifdef PHAR_MAIN
+static void phar_init_mime_list(TSRMLS_D);
 static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS);
 static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 
