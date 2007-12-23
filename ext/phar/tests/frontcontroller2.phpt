@@ -1,5 +1,5 @@
 --TEST--
-Phar front controller
+Phar front controller php
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --INI--
@@ -11,12 +11,12 @@ $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
 $a = new Phar($fname);
-$a['a.jpg'] = 'hio';
+$a['a.php'] = 'hio';
 $a->setStub('<?php
 Phar::webPhar();
 __HALT_COMPILER();');
 
-$_SERVER['REQUEST_URI'] = '/' . basename(__FILE__, '.php') . '.phar.php/a.jpg';
+$_SERVER['REQUEST_URI'] = '/' . basename(__FILE__, '.php') . '.phar.php/a.php';
 include $fname;
 ?>
 ===DONE===
@@ -27,7 +27,6 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phartmp.ph
 __HALT_COMPILER();
 ?>
 --EXPECTHEADERS--
-Content-type: image/jpeg
-Content-length: 3
+Content-type: text/html
 --EXPECT--
-hio===DONE===
+hio

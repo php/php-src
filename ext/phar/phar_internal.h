@@ -36,6 +36,8 @@
 #include "zend_vm.h"
 #include "main/php_streams.h"
 #include "main/streams/php_stream_plain_wrapper.h"
+#include "main/SAPI.h"
+#include "main/php_main.h"
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
@@ -70,11 +72,9 @@
 #endif
 
 #define PHAR_EXT_VERSION_STR      "1.3.0"
-#define PHAR_API_VERSION_STR      "1.2.0"
+#define PHAR_API_VERSION_STR      "1.1.0"
 /* x.y.z maps to 0xyz0 */
-#define PHAR_API_VERSION          0x1200
-/* API version to use for is_web=0 in phar creation */
-#define PHAR_API_VERSION_NOWEB    0x1100
+#define PHAR_API_VERSION          0x1100
 #define PHAR_API_MIN_READ         0x1000
 #define PHAR_API_MAJORVERSION     0x1000
 #define PHAR_API_MAJORVER_MASK    0xF000
@@ -85,7 +85,6 @@
 #define PHAR_HDR_COMPRESSED_GZ    0x00001000
 #define PHAR_HDR_COMPRESSED_BZ2   0x00002000
 #define PHAR_HDR_SIGNATURE        0x00010000
-#define PHAR_HDR_WEB              0x00020000
 
 #define PHAR_SIG_MD5              0x0001
 #define PHAR_SIG_SHA1             0x0002
@@ -113,10 +112,6 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_fname_map;
 	HashTable   phar_alias_map;
 	HashTable   phar_plain_map;
-	/* phar archives that have is_web = 1, used for fast lookup in phar_compile_file */
-	HashTable   phar_web_map;
-	/* mapping of file extension to MIME type */
-	HashTable   phar_mimes;
 	char*       extract_list;
 	int         readonly;
 	zend_bool   readonly_orig;
@@ -210,8 +205,6 @@ struct _phar_archive_data {
 	int                      is_brandnew:1;
 	/* defer phar creation */
 	int                      donotflush:1;
-	/* this phar is intended to use a web front controller with non-CLI SAPI */
-	int                      is_web:1;
 };
 
 #define PHAR_MIME_PHP '\0'
@@ -273,7 +266,6 @@ int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC);
 
 
 #ifdef PHAR_MAIN
-static void phar_init_mime_list(TSRMLS_D);
 static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS);
 static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 
@@ -309,6 +301,7 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC);
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len, char **error TSRMLS_DC);
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, int path_len, char dir, char **error TSRMLS_DC);
 phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC);
+int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC);
 int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
 int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ext_str, int *ext_len);
 int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len TSRMLS_DC);
