@@ -185,11 +185,6 @@ PHP_INI_END()
  */
 static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 {
-	if (!PHAR_G(request_ends)) {
-		if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_web_map))) {
-			zend_hash_del(&(PHAR_GLOBALS->phar_web_map), data->fname, data->fname_len);
-		}
-	}
 	if (data->alias && data->alias != data->fname) {
 		efree(data->alias);
 		data->alias = NULL;
@@ -504,7 +499,7 @@ static int phar_open_entry_file(phar_archive_data *phar, phar_entry_info *entry,
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-static int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC) /* {{{ */
+int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -1334,13 +1329,6 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	mydata->sig_len = sig_len;
 	mydata->signature = signature;
 	phar_request_initialize(TSRMLS_C);
-	if ((manifest_flags & PHAR_HDR_WEB) != 0) {
-		mydata->is_web = 1;
-		if (!zend_hash_num_elements(&(PHAR_GLOBALS->phar_mimes))) {
-			phar_init_mime_list(TSRMLS_C);
-		}
-		zend_hash_add(&(PHAR_GLOBALS->phar_web_map), mydata->fname, fname_len, (void*)&mydata, sizeof(void*),  NULL);
-	}
 	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
 	if (register_alias) {
 		mydata->is_explicit_alias = 1;
@@ -2780,13 +2768,8 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 	manifest_len = offset + archive->alias_len + sizeof(manifest) + main_metadata_str.len;
 	phar_set_32(manifest, manifest_len);
 	phar_set_32(manifest+4, new_manifest_count);
-	if (archive->is_web) {
-		*(manifest + 8) = (unsigned char) (((PHAR_API_VERSION_NOWEB) >> 8) & 0xFF);
-		*(manifest + 9) = (unsigned char) (((PHAR_API_VERSION_NOWEB) & 0xF0));
-	} else {
-		*(manifest + 8) = (unsigned char) (((PHAR_API_VERSION) >> 8) & 0xFF);
-		*(manifest + 9) = (unsigned char) (((PHAR_API_VERSION) & 0xF0));
-	}
+	*(manifest + 8) = (unsigned char) (((PHAR_API_VERSION) >> 8) & 0xFF);
+	*(manifest + 9) = (unsigned char) (((PHAR_API_VERSION) & 0xF0));
 	phar_set_32(manifest+10, global_flags);
 	phar_set_32(manifest+14, archive->alias_len);
 
@@ -3867,159 +3850,6 @@ static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
 }
 /* }}} */
 
-static void phar_init_mime_list(TSRMLS_D)
-{
-	phar_mime_type mime;
-#define PHAR_SET_MIME(mimetype, ret, ...) \
-	mime.mime = mimetype; \
-	mime.len = sizeof((mimetype))+1; \
-	mime.type = ret; \
-	{ \
-		char mimes[][5] = {__VA_ARGS__, "\0"}; \
-		int i = 0; \
-		for (; mimes[i][0]; i++) { \
-			zend_hash_add(&(PHAR_GLOBALS->phar_mimes), mimes[i], strlen(mimes[i]), (void *)&mime, sizeof(phar_mime_type), NULL); \
-		} \
-	}
-
-	PHAR_SET_MIME("text/html", PHAR_MIME_PHPS, "phps")
-	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "c", "cc", "cpp", "c++", "dtd", "h", "log", "rng", "txt", "xsd")
-	PHAR_SET_MIME("", PHAR_MIME_PHP, "php", "inc")
-	PHAR_SET_MIME("video/avi", PHAR_MIME_OTHER, "avi")
-	PHAR_SET_MIME("image/bmp", PHAR_MIME_OTHER, "bmp")
-	PHAR_SET_MIME("text/css", PHAR_MIME_OTHER, "css")
-	PHAR_SET_MIME("image/gif", PHAR_MIME_OTHER, "gif")
-	PHAR_SET_MIME("text/html", PHAR_MIME_OTHER, "htm", "html", "htmls")
-	PHAR_SET_MIME("image/x-ico", PHAR_MIME_OTHER, "ico")
-	PHAR_SET_MIME("image/jpeg", PHAR_MIME_OTHER, "jpe", "jpg", "jpeg")
-	PHAR_SET_MIME("application/x-javascript", PHAR_MIME_OTHER, "js")
-	PHAR_SET_MIME("audio/midi", PHAR_MIME_OTHER, "mid", "midi")
-	PHAR_SET_MIME("audio/mod", PHAR_MIME_OTHER, "mod")
-	PHAR_SET_MIME("movie/quicktime", PHAR_MIME_OTHER, "mov")
-	PHAR_SET_MIME("audio/mp3", PHAR_MIME_OTHER, "mp3")
-	PHAR_SET_MIME("video/mpeg", PHAR_MIME_OTHER, "mpg", "mpeg")
-	PHAR_SET_MIME("application/pdf", PHAR_MIME_OTHER, "pdf")
-	PHAR_SET_MIME("image/png", PHAR_MIME_OTHER, "png")
-	PHAR_SET_MIME("application/shockwave-flash", PHAR_MIME_OTHER, "swf")
-	PHAR_SET_MIME("image/tiff", PHAR_MIME_OTHER, "tif", "tiff")
-	PHAR_SET_MIME("audio/wav", PHAR_MIME_OTHER, "wav")
-	PHAR_SET_MIME("image/xbm", PHAR_MIME_OTHER, "xbm")
-	PHAR_SET_MIME("text/xml", PHAR_MIME_OTHER, "xml")
-}
-
-static int phar_file_type(char *file, char **mime_type TSRMLS_DC)
-{
-	char *ext;
-	phar_mime_type *mime;
-	if (!mime_type) {
-		/* assume PHP */
-		return 0;
-	}
-	ext = strrchr(file, '.');
-	if (!ext) {
-		*mime_type = "text/plain";
-		/* no file extension = assume text/plain */
-		return PHAR_MIME_OTHER;
-	}
-	ext++;
-	if (SUCCESS != zend_hash_find(&(PHAR_GLOBALS->phar_mimes), ext, strlen(ext), (void **) &mime)) {
-		*mime_type = "application/octet-stream";
-		return PHAR_MIME_OTHER;
-	}
-	*mime_type = mime->mime;
-	return mime->type;
-}
-/* }}} */
-
-static zend_op_array *phar_file_action(char *entry, int entry_len, char *arch, int arch_len, char **ourname TSRMLS_DC)
-{
-	char *mime_type, *name = NULL, buf[8192], *error;
-	zend_syntax_highlighter_ini syntax_highlighter_ini;
-	sapi_header_line ctr = {0};
-	zend_op_array *nada;
-	zend_op *opline;
-	phar_entry_data *phar;
-	size_t got;
-
-	*ourname = name;
-
-#define PHAR_NOP() \
-	nada = (zend_op_array *) emalloc(sizeof(zend_op_array)); \
-	init_op_array(nada, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC); \
-	opline = get_next_op(nada TSRMLS_CC); \
-	opline->opcode = ZEND_RETURN; \
-	opline->op1.op_type = IS_CONST; \
-	INIT_ZVAL(opline->op1.u.constant); \
-	SET_UNUSED(opline->op2); \
-	ZEND_VM_SET_OPCODE_HANDLER(opline); \
-	nada->done_pass_two = 1; \
-	return nada;
-
-	switch (phar_file_type(entry, &mime_type TSRMLS_CC)) {
-		case PHAR_MIME_PHPS:
-			/* highlight source */
-			spprintf(&name, 4096, "phar://%s/%s", arch, entry);
-			efree(arch);
-			php_get_highlight_struct(&syntax_highlighter_ini);
-
-			if (highlight_file(name, &syntax_highlighter_ini TSRMLS_CC) == FAILURE) {
-			}
-
-			PHAR_NOP();
-		case PHAR_MIME_OTHER:
-			/* send headers, output file contents */
-			if (FAILURE == phar_get_entry_data(&phar, arch, arch_len, entry, entry_len, "r", &error TSRMLS_CC)) {
-				ctr.response_code = 404;
-				ctr.line_len = sizeof("HTTP/1.0 404")+1;
-				ctr.line = "HTTP/1.0 404";
-				sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
-
-				PHAR_NOP();
-			}
-			ctr.line_len = spprintf(&(ctr.line), 0, "Content-type: %s", mime_type);
-			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
-			efree(ctr.line);
-			ctr.line_len = spprintf(&(ctr.line), 0, "Content-length: %d", phar->internal_file->uncompressed_filesize);
-			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
-			efree(ctr.line);
-			if (FAILURE == sapi_send_headers(TSRMLS_C)) {
-				phar_entry_delref(phar TSRMLS_CC);
-				zend_bailout();
-			}
-
-			/* prepare to output  */
-			if (!phar->fp) {
-				phar->internal_file->fp_refcount++;
-				phar->fp = phar->phar->fp;
-				phar->zero = phar->phar->internal_file_start + phar->internal_file->offset_within_phar;
-			}
-			php_stream_seek(phar->fp, phar->position + phar->zero, SEEK_SET);
-			do {
-				if (!phar->zero) {
-					got = php_stream_read(phar->fp, buf, 8192);
-					PHPWRITE(buf, got);
-					if (phar->fp->eof) {
-						break;
-					}
-				} else {
-					got = php_stream_read(phar->fp, buf, MIN(8192, phar->internal_file->uncompressed_filesize - phar->position));
-					PHPWRITE(buf, got);
-					phar->position = php_stream_tell(phar->fp) - phar->zero;
-					if (phar->position == (off_t) phar->internal_file->uncompressed_filesize) {
-						break;
-					}
-				}
-			} while (1);
-
-			phar_entry_delref(phar TSRMLS_CC);
-			PHAR_NOP();
-		case PHAR_MIME_PHP:
-			/* fall through */
-			break;
-	}
-	return NULL;
-}
-
 static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC) /* {{{ */
 {
 	zend_op_array *res;
@@ -4035,19 +3865,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 		int arch_len, entry_len;
 		fname = zend_get_executed_filename(TSRMLS_C);
 		fname_len = strlen(fname);
-		/* check for web front controller phars */
-		if (zend_hash_exists(&(PHAR_GLOBALS->phar_web_map), fname, fname_len)) {
-			zend_op_array *retval;
-			if (strncasecmp(file_handle->filename, "phar://", 7)) {
-				goto skip_phar;
-			}
-			fname_len = strlen(file_handle->filename);
-			if (SUCCESS == phar_split_fname(file_handle->filename, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
-				if ((retval = phar_file_action(entry, entry_len, arch, arch_len, &name TSRMLS_CC))) {
-					return retval;
-				}
-			}
-		}
 		if (strncasecmp(fname, "phar://", 7)) {
 			goto skip_phar;
 		}
@@ -4179,8 +3996,6 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 		PHAR_GLOBALS->request_done = 0;
 		zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data,  0);
 		zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
-		zend_hash_init(&(PHAR_GLOBALS->phar_web_map), sizeof(void *), zend_get_hash_value, NULL, 0);
-		zend_hash_init(&(PHAR_GLOBALS->phar_mimes), sizeof(phar_mime_type *), zend_get_hash_value, NULL, 0);
 		zend_hash_init(&(PHAR_GLOBALS->phar_plain_map), sizeof(const char *),       zend_get_hash_value, NULL, 0);
 		phar_split_extract_list(TSRMLS_C);
 		if (SUCCESS == zend_hash_find(CG(function_table), "fopen", 6, (void **)&orig)) {
@@ -4202,8 +4017,6 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		}
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
-		zend_hash_destroy(&(PHAR_GLOBALS->phar_web_map));
-		zend_hash_destroy(&(PHAR_GLOBALS->phar_mimes));
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_plain_map));
 		PHAR_GLOBALS->request_init = 0;
 	}
