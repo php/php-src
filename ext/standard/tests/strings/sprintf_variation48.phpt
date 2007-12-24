@@ -39,7 +39,7 @@ foreach($resource_values as $resource_value) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 
 echo "Done";
@@ -48,32 +48,32 @@ echo "Done";
 *** Testing sprintf() : scientific formats with resource values ***
 
 -- Iteration 1 --
-string(%d) "%d.000000e+0"
+string(%d) "%f"
 string(1) "e"
-string(%d) "%d.000000e+0"
+string(%d) "%f"
 string(1) "e"
-string(%d) " %d.000000e+0"
-string(%d) "%d.000000e+0 "
-string(%d) "	%d.000000e+0"
+string(%d) " %f"
+string(%d) "%f "
+string(%d) "	%f"
 string(%d) "
-%d.000000e+0"
-string(%d) "%d.000000e+0"
-string(%d) "                   %d.000000e+0"
-string(4) "0-1]"
+%f"
+string(%d) "%f"
+string(%d) "%s%f"
+string(%d) "0-1]"
 string(1) "e"
 
 -- Iteration 2 --
-string(%d) "%d.000000e+0"
+string(%d) "%f"
 string(1) "e"
-string(%d) "%d.000000e+0"
+string(%d) "%f"
 string(1) "e"
-string(%d) " %d.000000e+0"
-string(%d) "%d.000000e+0 "
-string(%d) "	%d.000000e+0"
+string(%d) " %f"
+string(%d) "%f "
+string(%d) "	%f"
 string(%d) "
-%d.000000e+0"
-string(%d) "%d.000000e+0"
-string(%d) "                   %d.000000e+0"
-string(4) "0-1]"
+%f"
+string(%d) "%f"
+string(%d) "%s%f"
+string(%d) "0-1]"
 string(1) "e"
 Done
