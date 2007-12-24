@@ -39,7 +39,7 @@ foreach($resource_values as $resource_value) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 
 echo "Done";
@@ -48,66 +48,65 @@ echo "Done";
 *** Testing sprintf() : scientific formats with resource values ***
 
 -- Iteration 1 --
-string(%d) "%d.000000e+0"
+string(%d) "%f"
 string(1) "e"
-string(%d) "%d.000000e+0"
+string(%d) "%f"
 string(1) "e"
-string(%d) " %d.000000e+0"
-string(%d) "%d.000000e+0 "
-string(%d) "	%d.000000e+0"
+string(%d) " %f"
+string(%d) "%f "
+string(%d) "	%f"
 string(%d) "
-%d.000000e+0"
-string(%d) "%d.000000e+0"
-string(%d) "                   %d.000000e+0"
-string(4) "0-1]"
+%f"
+string(%d) "%f"
+string(%d) "%s%f"
+string(%d) "0-1]"
 string(1) "e"
 
 -- Iteration 2 --
-string(%d) "%d.000000e+0"
+string(%d) "%f"
 string(1) "e"
-string(%d) "%d.000000e+0"
+string(%d) "%f"
 string(1) "e"
-string(%d) " %d.000000e+0"
-string(%d) "%d.000000e+0 "
-string(%d) "	%d.000000e+0"
+string(%d) " %f"
+string(%d) "%f "
+string(%d) "	%f"
 string(%d) "
-%d.000000e+0"
-string(%d) "%d.000000e+0"
-string(%d) "                   %d.000000e+0"
-string(4) "0-1]"
+%f"
+string(%d) "%f"
+string(%d) "%s%f"
+string(%d) "0-1]"
 string(1) "e"
 Done
-
 --UEXPECTF--
 *** Testing sprintf() : scientific formats with resource values ***
 
 -- Iteration 1 --
-unicode(%d) "%d.000000e+0"
+unicode(%d) "%f"
 unicode(1) "e"
-unicode(%d) "%d.000000e+0"
+unicode(%d) "%f"
 unicode(1) "e"
-unicode(%d) " %d.000000e+0"
-unicode(%d) "%d.000000e+0 "
-unicode(%d) "	%d.000000e+0"
+unicode(%d) " %f"
+unicode(%d) "%f "
+unicode(%d) "	%f"
 unicode(%d) "
-%d.000000e+0"
-unicode(%d) "%d.000000e+0"
-unicode(%d) "                   %d.000000e+0"
-unicode(4) "0-1]"
+%f"
+unicode(%d) "%f"
+unicode(%d) "%s%f"
+unicode(%d) "0-1]"
 unicode(1) "e"
 
 -- Iteration 2 --
-unicode(%d) "%d.000000e+0"
+unicode(%d) "%f"
 unicode(1) "e"
-unicode(%d) "%d.000000e+0"
+unicode(%d) "%f"
 unicode(1) "e"
-unicode(%d) " %d.000000e+0"
-unicode(%d) "%d.000000e+0 "
-unicode(%d) "	%d.000000e+0"
+unicode(%d) " %f"
+unicode(%d) "%f "
+unicode(%d) "	%f"
 unicode(%d) "
-%d.000000e+0"
-unicode(%d) "%d.000000e+0"
-unicode(%d) "                   %d.000000e+0"
-unicode(4) "0-1]"
+%f"
+unicode(%d) "%f"
+unicode(%d) "%s%f"
+unicode(%d) "0-1]"
 unicode(1) "e"
 Done
