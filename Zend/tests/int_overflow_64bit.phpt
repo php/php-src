@@ -6,11 +6,13 @@ testing integer overflow (64bit)
 <?php
 
 $doubles = array(
-        9223372036854775808,
-        9223372036854775809,
-        9223372036854775818,
-        9223372036854775908,
-        9223372036854776808,
+        PHP_INT_MAX,
+        PHP_INT_MAX + 1,
+        PHP_INT_MAX + 1000,
+        PHP_INT_MAX * 2 + 4,
+        -PHP_INT_MAX -1,
+        -PHP_INT_MAX -2,
+        -PHP_INT_MAX -1000,
         );
 
 foreach ($doubles as $d) {
@@ -21,8 +23,10 @@ foreach ($doubles as $d) {
 echo "Done\n";
 ?>
 --EXPECTF--
-int(-9223372036854775808)
-int(-9223372036854775808)
+int(9223372036854775807)
+int(9223372036854775807)
+int(9223372036854775807)
+int(9223372036854775807)
 int(-9223372036854775808)
 int(-9223372036854775808)
 int(-9223372036854775808)

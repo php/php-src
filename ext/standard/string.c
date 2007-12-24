@@ -3339,7 +3339,7 @@ PHP_FUNCTION(chunk_split)
 	zstr result;
 	char *end    = "\r\n";
 	UChar u_end[3] = { 0x0d, 0x0a, 0x0 };
-	int chunklen = 76;
+	long chunklen = 76;
 	int result_len;
 	zend_uchar str_type;
 
