@@ -209,7 +209,6 @@ PHP_METHOD(Phar, webPhar)
 	zval *mimeoverride = NULL, *redirects = NULL;
 	char *alias = NULL, *error, *plain_map, *index_php;
 	int alias_len = 0, ret;
-	long dataoffset;
 	char *fname, *basename, *path_info, *mime_type, *entry;
 	int fname_len, entry_len, code, index_php_len = 0;
 	phar_entry_data *phar;
