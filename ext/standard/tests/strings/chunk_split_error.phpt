@@ -32,9 +32,9 @@ echo "Done"
 --EXPECTF--
 *** Testing chunk_split() : error conditions ***
 -- Testing chunk_split() function with Zero arguments --
-Warning: Wrong parameter count for chunk_split() in %s on line %d
+Warning: chunk_split() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 -- Testing chunk_split() function with more than expected no. of arguments --
-Warning: Wrong parameter count for chunk_split() in %s on line %d
+Warning: chunk_split() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 Done
