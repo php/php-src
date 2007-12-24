@@ -32,9 +32,9 @@ $values = array (
   -123,  //negative integer
   0234,  //octal number
   0x1A,  //hexadecimal number
-  2147483647,  //max positive integer number
-  2147483648,  //max positive integer+1
-  -2147483648,  //min negative integer
+  PHP_INT_MAX,  //max positive integer number
+  PHP_INT_MAX * 3,  // Will overflow 32 bits on 32 bt system and 64 bits on 64 bit system
+  -PHP_INT_MAX -1,  //min negative integer
 
 );
 
@@ -78,9 +78,10 @@ string(129) "This's heredoc string with 	 and
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
-
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
-bool(false)
+string(129) "This's heredoc string with 	 and 
+ white space char.
+It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
+chunk_split():::"
 -- Iteration 8 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
