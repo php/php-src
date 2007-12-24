@@ -195,24 +195,27 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 	return -1;
 }
 
-/* {{{ proto void Phar::webPhar([string alias, [int dataoffset, [array mimetypes, [array redirects]]]])
+/* {{{ proto void Phar::webPhar([string alias, [string index, [array mimetypes, [array redirects]]]])
  * mapPhar for web-based phars. Reads the currently executed file (a phar)
- * and registers its manifest.
+ * and registers its manifest. When executed in the CLI or CGI command-line sapi,
+ * this works exactly like mapPhar().  When executed by a web-based sapi, this
+ * reads $_SERVER['REQUEST_URI'] (the actual original value) and parses out the
+ * intended internal file.
  */
 PHP_METHOD(Phar, webPhar)
 {
 	HashTable mimetypes;
 	phar_mime_type mime;
 	zval *mimeoverride = NULL, *redirects = NULL;
-	char *alias = NULL, *error, *plain_map;
+	char *alias = NULL, *error, *plain_map, *index_php;
 	int alias_len = 0, ret;
 	long dataoffset;
 	char *fname, *basename, *path_info, *mime_type, *entry;
-	int fname_len, entry_len, code;
+	int fname_len, entry_len, code, index_php_len = 0;
 	phar_entry_data *phar;
 	zval **_SERVER, **stuff;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!laa", &alias, &alias_len, &dataoffset, &mimeoverride, &redirects) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!aa", &alias, &alias_len, &index_php, &index_php_len, &mimeoverride, &redirects) == FAILURE) {
 		return;
 	}
 
@@ -243,8 +246,19 @@ PHP_METHOD(Phar, webPhar)
 	if (strstr(path_info, basename)) {
 		entry_len -= fname_len - (basename - fname) + 1;
 		entry = estrndup(path_info + (fname_len - (basename - fname) + 1), entry_len);
+		if (!entry_len) {
+			/* direct request */
+			if (index_php_len) {
+				entry = index_php;
+				entry_len = index_php_len;
+			} else {
+				/* assume "index.php" is starting point */
+				entry = estrndup("/index.php", sizeof("/index.php"));
+				entry_len = sizeof("/index.php")-1;
+			}
+		}
 	} else {
-		// error
+		/* error */
 	}
 
 	/* "tweak" $_SERVER variables */
@@ -364,6 +378,9 @@ PHP_METHOD(Phar, webPhar)
  * Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
 {
+	/* FIXME: both this and webPhar leak an entire phar entry if included from within a
+	script that accesses the phar - phar_open_compiled_file needs to check for
+	pre-existing and return gracefully if found */
 	char *fname, *alias = NULL, *error, *plain_map;
 	int fname_len, alias_len = 0;
 	long dataoffset;
@@ -2208,7 +2225,7 @@ ZEND_END_ARG_INFO();
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_webPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, alias)
-	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, mimetypes)
 	ZEND_ARG_INFO(0, redirects)
 ZEND_END_ARG_INFO();
