@@ -12,11 +12,14 @@ echo "*** Testing sprintf() : integer formats with resource values ***\n";
 // resource type variable
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
+
+$fp_copy = $fp;
+$dfp_copy = $dfp;
   
 // array of resource types
 $resource_types = array (
-  $fp,
-  $dfp
+  $fp_copy,
+  $dfp_copy
 );
 
 // various integer formats
@@ -38,7 +41,7 @@ foreach($resource_types as $res) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 
 echo "Done";
@@ -53,8 +56,8 @@ string(%d) " %d"
 string(%d) "	%d"
 string(%d) "
 %d"
-string(%d) "   %d"
-string(4) "0-9]"
+string(%d) "%s%d"
+string(%d) "0-9]"
 string(1) "d"
 
 -- Iteration 2 --
@@ -64,7 +67,7 @@ string(%d) " %d"
 string(%d) "	%d"
 string(%d) "
 %d"
-string(%d) "   %d"
-string(4) "0-9]"
+string(%d) "%s%d"
+string(%d) "0-9]"
 string(1) "d"
 Done
