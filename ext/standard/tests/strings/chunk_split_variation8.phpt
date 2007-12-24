@@ -1,5 +1,5 @@
 --TEST--
-Test chunk_split() function : usage variations - different integer values for 'chunklen' with heredoc string as 'str'
+Test chunk_split() function : usage variations - different integer values for 'chunklen' with heredoc string as 'str'(Bug#42796)
 --FILE--
 <?php
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
@@ -32,9 +32,9 @@ $values = array (
   -123,  //negative integer
   0234,  //octal number
   0x1A,  //hexadecimal number
-  2147483647,  //max positive integer number
-  2147483648,  //max positive integer+1
-  -2147483648,  //min negative integer
+  PHP_INT_MAX,  //max positive integer number
+  PHP_INT_MAX * 3,  // Will overflow 32 bits on 32 bt system and 64 bits on 64 bit system
+  -PHP_INT_MAX -1,  //min negative integer
 
 );
 
@@ -51,7 +51,7 @@ echo "Done"
 *** Testing chunk_split() : different 'chunklen' with heredoc 'str' ***
 -- Iteration 1 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d%d
+Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
 bool(false)
 -- Iteration 2 --
 string(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t:::r:::i:::n:::g::: :::w:::i:::t:::h::: :::	::: :::a:::n:::d::: :::
@@ -60,7 +60,7 @@ string(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t::
 :::c:::h:::u:::n:::k:::_:::s:::p:::l:::i:::t:::(:::):::"
 -- Iteration 3 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d%d
+Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
 bool(false)
 -- Iteration 4 --
 string(129) "This's heredoc string with 	 and 
@@ -78,15 +78,15 @@ string(129) "This's heredoc string with 	 and
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
-
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d%d
-bool(false)
+string(129) "This's heredoc string with 	 and 
+ white space char.
+It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
+chunk_split():::"
 -- Iteration 8 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d%d
+Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
 bool(false)
 Done
-
 --UEXPECTF--
 *** Testing chunk_split() : different 'chunklen' with heredoc 'str' ***
 -- Iteration 1 --
@@ -118,11 +118,13 @@ unicode(129) "This's heredoc string with 	 and
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
-
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
-bool(false)
+unicode(129) "This's heredoc string with 	 and 
+ white space char.
+It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
+chunk_split():::"
 -- Iteration 8 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
 bool(false)
 Done
+

@@ -19,7 +19,7 @@ echo "*** Testing chunk_split() : error conditions ***\n";
 echo "-- Testing chunk_split() function with Zero arguments --";
 var_dump( chunk_split() );
 
-//Test chunk_split with one more than the expected number of arguments
+// With one more than the expected number of arguments
 $str = 'Testing chunk_split';
 $chunklen = 5;
 $ending = '***';
@@ -30,15 +30,6 @@ var_dump( chunk_split($str, $chunklen, $ending, $extra_arg) );
 echo "Done"
 ?>
 --EXPECTF--
-*** Testing chunk_split() : error conditions ***
--- Testing chunk_split() function with Zero arguments --
-Warning: chunk_split() expects at least 1 parameter, 0 given in %s on line %d
-NULL
--- Testing chunk_split() function with more than expected no. of arguments --
-Warning: chunk_split() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-Done
---UEXPECTF--
 *** Testing chunk_split() : error conditions ***
 -- Testing chunk_split() function with Zero arguments --
 Warning: chunk_split() expects at least 1 parameter, 0 given in %s on line %d
