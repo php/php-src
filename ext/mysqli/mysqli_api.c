@@ -1621,6 +1621,8 @@ PHP_FUNCTION(mysqli_real_connect)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
 
+	/* set some required options */
+	flags |= CLIENT_MULTI_RESULTS; /* needed for mysql_multi_query() */
 	/* remove some insecure options */
 	flags &= ~CLIENT_MULTI_STATEMENTS;   /* don't allow multi_queries via connect parameter */
 	if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
