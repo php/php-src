@@ -825,12 +825,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				colon > fname &&
 				*(colon - 1) == ':'
 			) {
+				zend_class_entry **pce, *ce_child = NULL;
+
 				clen = colon - fname - 1;
 				fname_len -= (clen + 2);
 				fname = colon + 1;
-			}
-			if (colon != NULL) {
-				zend_class_entry **pce, *ce_child = NULL;
 		
 				lcname = zend_str_tolower_dup(cname, clen);
 				/* caution: lcname is not '\0' terminated */
