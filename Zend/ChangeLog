@@ -1,3 +1,11 @@
+2007-12-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_operators.c
+      zend_operators.c
+      tests/int_overflow_64bit.phpt
+      tests/int_overflow_64bit.phpt:
+      Additional fix for bug #42868
+
 2007-12-21  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_2)
