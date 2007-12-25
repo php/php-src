@@ -2669,9 +2669,14 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 	/* Split name into class/namespace and method/function names */
 	if (Z_TYPE_P(callable) == IS_UNICODE) {
 		if ((colon.u = u_strrstr(Z_USTRVAL_P(callable), u_doublecolon)) != NULL) {
+			if (colon.u == Z_USTRVAL_P(callable)) {
+				return 0;
+			}
 			mlen = u_strlen(colon.u+2);
 			clen = Z_USTRLEN_P(callable) - mlen - 2;
 			mname.u = colon.u + 2;
+		} else {
+			colon.u = NULL;
 		}
 	} else {
 		if ((colon.s = zend_memrchr(Z_STRVAL_P(callable), ':', Z_STRLEN_P(callable))) != NULL &&
@@ -2680,14 +2685,19 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		) {
 			colon.s--;
 			clen = colon.s - Z_STRVAL_P(callable);
+			if (clen == 0) {
+				return 0;
+			}
 			mlen = Z_STRLEN_P(callable) - clen - 2;
 			mname.s = colon.s + 2;
+		} else {
+			colon.s = NULL;
 		}
 	}
 	if (colon.v != NULL) {
 		/* This is a compound name.
 		 * Try to fetch class and then find static method. */
-		*ce_ptr = zend_u_fetch_class(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+		*ce_ptr = zend_u_fetch_class(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
 		if (!*ce_ptr) {
 			return 0;
 		}
