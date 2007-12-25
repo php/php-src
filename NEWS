@@ -77,6 +77,7 @@ PHP                                                                        NEWS
 - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
   (Jani)
 - Fixed bug #42637 (SoapFault : Only http and https are allowed). (Bill Moran)
+- Fixed bug #42548 (mysqli PROCEDURE calls can't return result sets). (hartmut)
 - Fixed bug #42509 (gmp leaks memory when gmp_init() not used). (Stas)
 - Fixed bug #42284 (duplicate of #39700). (Lars W)
 - Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
