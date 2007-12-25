@@ -902,6 +902,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					clen = colon.u - fname.u - 1;
 					fname_len -= (clen + 2);
 					fname.u = colon.u + 1;
+				} else {
+					colon.u = NULL;
 				}
 			} else {
 				if ((colon.s = zend_memrchr(fname.s, ':', fname_len)) != NULL &&
@@ -911,6 +913,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					clen = colon.s - fname.s - 1;
 					fname_len -= (clen + 2);
 					fname.s = colon.s + 1;
+				} else {
+					colon.s = NULL;
 				}
 			}
 			if (colon.v != NULL) {
