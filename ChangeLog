@@ -1,3 +1,97 @@
+2007-12-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/tests/int_overflow_64bit.phpt
+      ZendEngine2/tests/int_overflow_64bit.phpt
+      ext/standard/string.c
+      ext/standard/string.c
+      ext/standard/tests/strings/chunk_split_error.phpt
+      ext/standard/tests/strings/chunk_split_error.phpt
+      ext/standard/tests/strings/chunk_split_variation5.phpt
+      ext/standard/tests/strings/chunk_split_variation5.phpt
+      ext/standard/tests/strings/chunk_split_variation8.phpt
+      ext/standard/tests/strings/chunk_split_variation8.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation2.phpt
+      ext/standard/tests/strings/htmlspecialchars_decode_variation2.phpt:
+      Additional fix for bug #42868
+
+2007-12-24  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/dir/dir_basic.phpt
+      ext/standard/tests/dir/dir_basic.phpt
+      ext/standard/tests/dir/dir_error.phpt
+      ext/standard/tests/dir/dir_error.phpt
+      ext/standard/tests/dir/dir_variation1.phpt
+      ext/standard/tests/dir/dir_variation1.phpt
+      ext/standard/tests/dir/dir_variation2.phpt
+      ext/standard/tests/dir/dir_variation2.phpt
+      ext/standard/tests/dir/dir_variation3.phpt
+      ext/standard/tests/dir/dir_variation3.phpt
+      ext/standard/tests/dir/dir_variation4.phpt
+      ext/standard/tests/dir/dir_variation4.phpt
+      ext/standard/tests/dir/dir_variation5.phpt
+      ext/standard/tests/dir/dir_variation5.phpt
+      ext/standard/tests/dir/dir_variation6.phpt
+      ext/standard/tests/dir/dir_variation6.phpt
+      ext/standard/tests/dir/dir_variation7.phpt
+      ext/standard/tests/dir/dir_variation7.phpt
+      ext/standard/tests/dir/dir_variation8.phpt
+      ext/standard/tests/dir/dir_variation8.phpt
+      ext/standard/tests/dir/dir_variation9.phpt
+      ext/standard/tests/dir/dir_variation9.phpt:
+      new testcases for dir() function
+
+    * ext/standard/tests/dir/dir_basic.phpt
+      ext/standard/tests/dir/dir_basic.phpt
+      ext/standard/tests/dir/dir_basic.phpt
+      ext/standard/tests/dir/dir_error.phpt
+      ext/standard/tests/dir/dir_error.phpt
+      ext/standard/tests/dir/dir_error.phpt
+      ext/standard/tests/dir/dir_variation1.phpt
+      ext/standard/tests/dir/dir_variation1.phpt
+      ext/standard/tests/dir/dir_variation1.phpt
+      ext/standard/tests/dir/dir_variation2.phpt
+      ext/standard/tests/dir/dir_variation2.phpt
+      ext/standard/tests/dir/dir_variation2.phpt
+      ext/standard/tests/dir/dir_variation3.phpt
+      ext/standard/tests/dir/dir_variation3.phpt
+      ext/standard/tests/dir/dir_variation3.phpt
+      ext/standard/tests/dir/dir_variation4.phpt
+      ext/standard/tests/dir/dir_variation4.phpt
+      ext/standard/tests/dir/dir_variation4.phpt
+      ext/standard/tests/dir/dir_variation5.phpt
+      ext/standard/tests/dir/dir_variation5.phpt
+      ext/standard/tests/dir/dir_variation5.phpt
+      ext/standard/tests/dir/dir_variation6.phpt
+      ext/standard/tests/dir/dir_variation6.phpt
+      ext/standard/tests/dir/dir_variation6.phpt
+      ext/standard/tests/dir/dir_variation7.phpt
+      ext/standard/tests/dir/dir_variation7.phpt
+      ext/standard/tests/dir/dir_variation7.phpt
+      ext/standard/tests/dir/dir_variation8.phpt
+      ext/standard/tests/dir/dir_variation8.phpt
+      ext/standard/tests/dir/dir_variation8.phpt
+      ext/standard/tests/dir/dir_variation9.phpt
+      ext/standard/tests/dir/dir_variation9.phpt
+      ext/standard/tests/dir/dir_variation9.phpt:
+        1.1.4;
+      new testcases for dir() function
+
+    * ext/standard/tests/strings/sprintf_variation48.phpt
+      ext/standard/tests/strings/sprintf_variation48.phpt
+      ext/standard/tests/strings/sprintf_variation48.phpt
+      ext/standard/tests/strings/sprintf_variation5.phpt
+      ext/standard/tests/strings/sprintf_variation5.phpt
+      ext/standard/tests/strings/sprintf_variation5.phpt:
+      fix tests
+
+    * run-tests.php
+      run-tests.php
+      run-tests.php:
+      Changing the regex for %f so the it will match e-, e+ and e.
+
 2007-12-21  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_2)
