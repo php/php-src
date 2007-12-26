@@ -2323,7 +2323,7 @@ PHP_FUNCTION(mb_strimwidth)
 	convert_to_long_ex(arg2);
 	from = Z_LVAL_PP(arg2);
 	if (from < 0 || from > Z_STRLEN_PP(arg1)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Start position is out of reange");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Start position is out of range");
 		RETURN_FALSE;
 	}
 
