@@ -1,3 +1,46 @@
+2007-12-25  Hartmut Holzgraefe  <hartmut@mysql.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/bug42548.phpt:
+      MFH: Fix for bug #42548 "PROCEDURE xxx can't return a result set"
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/bug42548.phpt
+      ext/mysqli/tests/bug42548.phpt:
+      Fix for bug #42548 "PROCEDURE xxx can't return a result set"
+
+2007-12-25  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/standard/tests/dir/dir_variation3.phpt
+      ext/standard/tests/dir/dir_variation3.phpt
+      ext/standard/tests/dir/dir_variation3.phpt
+      ext/standard/tests/dir/dir_variation7.phpt
+      ext/standard/tests/dir/dir_variation7.phpt
+      ext/standard/tests/dir/dir_variation7.phpt:
+      fix test : do not run when run as root
+
+2007-12-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * run-tests.php
+      run-tests.php
+      run-tests.php:
+      Fixed %f regex
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug43651.phpt:
+      Fixed bug #43651 (is_callable() with one or more nonconsecutive colons
+      crashes)
+
+    * ZendEngine2/tests/bug43651.phpt
+      ZendEngine2/tests/bug43651.phpt:
+      
+      file bug43651.phpt was initially added on branch PHP_5_3.
+
 2007-12-24  Dmitry Stogov  <dmitry@zend.com>
 
     * ZendEngine2/zend_operators.c
