@@ -111,6 +111,9 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 
 			phar_entry_delref(phar TSRMLS_CC);
 			efree(name);
+#ifdef PHP_WIN32
+			efree(arch);
+#endif
 			zend_bailout();
 			return PHAR_MIME_PHPS;
 		case PHAR_MIME_OTHER:
@@ -173,6 +176,9 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 				new_op_array = NULL;
 				zend_file_handle_dtor(&file_handle);
 			}
+#ifdef PHP_WIN32
+			efree(arch);
+#endif
 			if (new_op_array) {
 				EG(return_value_ptr_ptr) = &result;
 				EG(active_op_array) = new_op_array;
@@ -234,7 +240,11 @@ PHP_METHOD(Phar, webPhar)
 
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
-	basename = strrchr(fname, DEFAULT_SLASH);
+#ifdef PHP_WIN32
+	fname = estrndup(fname, fname_len);
+	phar_unixify_path_separators(fname, fname_len);
+#endif
+	basename = strrchr(fname, '/');
 	if (!basename) {
 		basename = fname;
 	} else {
@@ -257,7 +267,8 @@ PHP_METHOD(Phar, webPhar)
 			}
 		}
 	} else {
-		/* error */
+		/* error? */
+		return;
 	}
 
 	/* "tweak" $_SERVER variables */
@@ -287,6 +298,9 @@ PHP_METHOD(Phar, webPhar)
 		ctr.line_len = sizeof("HTTP/1.0 404")+1;
 		ctr.line = "HTTP/1.0 404";
 		sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+#ifdef PHP_WIN32
+		efree(fname);
+#endif
 		return;
 	}
 
@@ -343,10 +357,16 @@ PHP_METHOD(Phar, webPhar)
 			ulong intkey;
 			if (HASH_KEY_IS_LONG == zend_hash_get_current_key_ex(Z_ARRVAL_P(mimeoverride), &key, &keylen, &intkey, 0, NULL)) {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Key of MIME type overrides array must be a file extension, was \"%d\"", intkey);
+#ifdef PHP_WIN32
+				efree(fname);
+#endif
 				RETURN_FALSE;
 			}
 			if (FAILURE == zend_hash_get_current_data(Z_ARRVAL_P(mimeoverride), (void **) &val)) {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Failed to retrieve Mime type for extension \"%s\"", key);
+#ifdef PHP_WIN32
+				efree(fname);
+#endif
 				RETURN_FALSE;
 			}
 			switch (Z_TYPE_P(val)) {
@@ -370,6 +390,9 @@ PHP_METHOD(Phar, webPhar)
 	code = phar_file_type(&mimetypes, entry, &mime_type TSRMLS_CC);
 	ret = phar_file_action(phar, mime_type, code, entry, entry_len, fname, fname_len TSRMLS_CC);
 	zend_hash_destroy(&mimetypes);
+#ifdef PHP_WIN32
+	efree(fname);
+#endif
 	RETURN_LONG(ret);
 }
 
