@@ -1556,6 +1556,7 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 
 	if (last_op->opcode == ZEND_FETCH_OBJ_R) {
 		last_op->opcode = ZEND_INIT_METHOD_CALL;
+		SET_UNUSED(last_op->result);
 		Z_LVAL(left_bracket->u.constant) = ZEND_INIT_FCALL_BY_NAME;
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -3392,7 +3393,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	CG(active_class_entry) = new_class_entry;
 
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->result.op_type = IS_CONST;
+	opline->result.op_type = IS_VAR;
 	CG(implementing_class) = opline->result;
 
 	if (CG(doc_comment).v) {
