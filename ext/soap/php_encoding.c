@@ -27,6 +27,10 @@
 #include <libxml/parserInternals.h>
 #include "zend_strtod.h"
 
+#ifdef HAVE_SPL
+# include "ext/spl/spl_array.h"
+#endif
+
 /* zval type decode */
 static zval *to_zval_double(encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_long(encodeTypePtr type, xmlNodePtr data);
@@ -2172,7 +2176,9 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 	int dimension = 1;
 	int* dims;
 	int soap_version;
-
+#ifdef HAVE_SPL
+	zval *array_copy = NULL;
+#endif
 	TSRMLS_FETCH();
 
 	soap_version = SOAP_GLOBAL(soap_version);
@@ -2191,6 +2197,18 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 		}
 		return xmlParam;
 	}
+
+#ifdef HAVE_SPL
+	if (Z_TYPE_P(data) == IS_OBJECT && (instanceof_function(Z_OBJCE_P(data), spl_ce_ArrayObject TSRMLS_CC) || instanceof_function(Z_OBJCE_P(data), spl_ce_ArrayIterator TSRMLS_CC))) {
+		zval getArray;
+            
+		ZVAL_STRING(&getArray, "getArrayCopy", 0);
+		call_user_function_ex(NULL, &data, &getArray, &array_copy, 0, 0, 0, NULL TSRMLS_CC);        
+		if (Z_TYPE_P(array_copy) == IS_ARRAY) {
+			data = array_copy;
+		}
+	}
+#endif
 
 	if (Z_TYPE_P(data) == IS_ARRAY) {
 		sdlAttributePtr *arrayType;
@@ -2369,6 +2387,13 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 			set_ns_and_type(xmlParam, type);
 		}
 	}
+
+#ifdef HAVE_SPL
+	if (array_copy) {
+		zval_ptr_dtor(&array_copy);
+	}
+#endif
+
 	return xmlParam;
 }
 
