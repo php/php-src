@@ -620,6 +620,7 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC)
 				 * relatively referenced file is accessible */
 				copy_len = strlen(filepath) > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : strlen(filepath);
 				real_path = estrndup(filepath, copy_len);
+				close(fdtest);
 				return real_path;
 			} else {
 				cwd[0] = '\0';
