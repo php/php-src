@@ -226,7 +226,7 @@ array(2) {
   [0]=>
   unicode(26) "string with 123,escape cha"
   [1]=>
-  unicode(4) "r  ."
+  unicode(4) "r 	."
 }
 -- Iteration 6 --
 array(1) {

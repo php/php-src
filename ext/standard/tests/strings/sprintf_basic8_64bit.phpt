@@ -1,7 +1,7 @@
 --TEST--
-Test sprintf() function : basic functionality - unsigned format
+Test sprintf() function : basic functionality - octal format
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
@@ -9,17 +9,16 @@ Test sprintf() function : basic functionality - unsigned format
  * Source code: ext/standard/formatted_print.c
  */
 
-echo "*** Testing sprintf() : basic functionality - using unsigned format ***\n";
-
+echo "*** Testing sprintf() : basic functionality - using octal format ***\n";
 
 // Initialise all required variables
 $format = "format";
-$format1 = "%u";
-$format2 = "%u %u";
-$format3 = "%u %u %u";
-$arg1 = -1111;
-$arg2 = -1234567;
-$arg3 = +2345432;
+$format1 = "%o";
+$format2 = "%o %o";
+$format3 = "%o %o %o";
+$arg1 = 021;
+$arg2 = -0347;
+$arg3 = 05678;
 
 // Calling sprintf() with default arguments
 var_dump( sprintf($format) );
@@ -36,17 +35,17 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 echo "Done";
 ?>
 --EXPECTF--
-*** Testing sprintf() : basic functionality - using unsigned format ***
+*** Testing sprintf() : basic functionality - using octal format ***
 string(6) "format"
-string(10) "4294966185"
-string(21) "4294966185 4293732729"
-string(29) "4294966185 4293732729 2345432"
+string(2) "21"
+string(25) "21 1777777777777777777431"
+string(29) "21 1777777777777777777431 567"
 Done
 
 --UEXPECTF--
-*** Testing sprintf() : basic functionality - using unsigned format ***
+*** Testing sprintf() : basic functionality - using octal format ***
 unicode(6) "format"
-unicode(10) "4294966185"
-unicode(21) "4294966185 4293732729"
-unicode(29) "4294966185 4293732729 2345432"
+unicode(2) "21"
+unicode(25) "21 1777777777777777777431"
+unicode(29) "21 1777777777777777777431 567"
 Done
