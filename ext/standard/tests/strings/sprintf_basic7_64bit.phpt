@@ -1,7 +1,7 @@
 --TEST--
 Test sprintf() function : basic functionality - unsigned format
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
@@ -38,15 +38,15 @@ echo "Done";
 --EXPECTF--
 *** Testing sprintf() : basic functionality - using unsigned format ***
 string(6) "format"
-string(10) "4294966185"
-string(21) "4294966185 4293732729"
-string(29) "4294966185 4293732729 2345432"
+string(20) "18446744073709550505"
+string(41) "18446744073709550505 18446744073708317049"
+string(49) "18446744073709550505 18446744073708317049 2345432"
 Done
 
 --UEXPECTF--
 *** Testing sprintf() : basic functionality - using unsigned format ***
 unicode(6) "format"
-unicode(10) "4294966185"
-unicode(21) "4294966185 4293732729"
-unicode(29) "4294966185 4293732729 2345432"
+unicode(20) "18446744073709550505"
+unicode(41) "18446744073709550505 18446744073708317049"
+unicode(49) "18446744073709550505 18446744073708317049 2345432"
 Done

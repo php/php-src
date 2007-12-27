@@ -1,7 +1,7 @@
 --TEST--
 Test sprintf() function : usage variations - unsigned formats with string values
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
@@ -150,17 +150,17 @@ string(4) "0-9]"
 string(1) "u"
 
 -- Iteration 7 --
-string(10) "4294967173"
+string(20) "18446744073709551493"
 string(1) "u"
-string(10) "4294967173"
+string(20) "18446744073709551493"
 string(1) "u"
-string(11) " 4294967173"
-string(11) "4294967173 "
-string(11) "	4294967173"
-string(11) "
-4294967173"
-string(10) "4294967173"
-string(30) "                    4294967173"
+string(21) " 18446744073709551493"
+string(21) "18446744073709551493 "
+string(21) "	18446744073709551493"
+string(21) "
+18446744073709551493"
+string(20) "18446744073709551493"
+string(30) "          18446744073709551493"
 string(4) "0-9]"
 string(1) "u"
 
@@ -454,17 +454,17 @@ unicode(4) "0-9]"
 unicode(1) "u"
 
 -- Iteration 7 --
-unicode(10) "4294967173"
+unicode(20) "18446744073709551493"
 unicode(1) "u"
-unicode(10) "4294967173"
+unicode(20) "18446744073709551493"
 unicode(1) "u"
-unicode(11) " 4294967173"
-unicode(11) "4294967173 "
-unicode(11) "	4294967173"
-unicode(11) "
-4294967173"
-unicode(10) "4294967173"
-unicode(30) "                    4294967173"
+unicode(21) " 18446744073709551493"
+unicode(21) "18446744073709551493 "
+unicode(21) "	18446744073709551493"
+unicode(21) "
+18446744073709551493"
+unicode(20) "18446744073709551493"
+unicode(30) "          18446744073709551493"
 unicode(4) "0-9]"
 unicode(1) "u"
 
