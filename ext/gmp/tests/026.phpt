@@ -13,7 +13,7 @@ var_dump(gmp_cmp(1231222,0));
 var_dump(gmp_cmp(0,345355));
 
 $n = gmp_init("827278512385463739");
-var_dump(gmp_cmp(0,$n));
+var_dump(gmp_cmp(0,$n) < 0);
 $n1 = gmp_init("827278512385463739");
 var_dump(gmp_cmp($n1,$n));
 
@@ -31,7 +31,7 @@ int(-1)
 int(0)
 int(1)
 int(-1)
-int(-1)
+bool(true)
 int(0)
 
 Warning: gmp_cmp() expects exactly 2 parameters, 3 given in %s on line %d
