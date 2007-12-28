@@ -731,6 +731,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
  					Z_DELREF_P(value);
  				}
  				zendi_zval_dtor(garbage);
+				return value;
  			}
  		} else {
  			if (variable_ptr != value) {
@@ -769,6 +770,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 				Z_DELREF_P(value);
 			}
 			zendi_zval_dtor(garbage);
+			return value;
 		}
 	} else {
 		if (Z_DELREF_P(variable_ptr)==0) {
