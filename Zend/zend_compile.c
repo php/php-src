@@ -1624,6 +1624,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int prefix_len TS
 			Z_STRVAL(opline->op1.u.constant) = zend_str_tolower_dup(Z_STRVAL(function_name->u.constant) + prefix_len, Z_STRLEN(opline->op1.u.constant));
 		}
 		opline->extended_value = zend_u_hash_func(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
+		SET_UNUSED(opline->op2);
 	} else {
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2 = *function_name;
