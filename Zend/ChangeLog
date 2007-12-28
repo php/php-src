@@ -1,3 +1,9 @@
+2007-12-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      Use proper result type
+
 2007-12-25  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_API.c

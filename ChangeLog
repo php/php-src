@@ -1,3 +1,92 @@
+2007-12-27  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/gmp/tests/026.phpt:
+      MFB: fix tests
+
+    * (PHP_5_3)
+      ext/gmp/tests/011.phpt
+      ext/gmp/tests/026.phpt:
+      fix tests
+
+2007-12-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Use proper result type
+
+    * (PHP_5_3)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/server030.phpt
+      ext/soap/tests/server030.phpt
+      ext/soap/tests/server030.phpt
+      ext/soap/tests/server030.wsdl
+      ext/soap/tests/server030.wsdl
+      ext/soap/tests/server030.wsdl:
+      Added ability to use SplArrays instead of plain arrays in ext/soap. (Joshua
+      Reese, Dmitry)
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/sprintf_basic7_64bit.phpt
+      ext/standard/tests/strings/sprintf_basic8_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation28_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation29_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation34_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation35_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation40_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation41_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation44_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation4_64bit.phpt:
+      Added 64-bit tests (Serg)
+
+    * ext/standard/tests/strings/sprintf_basic7.phpt
+      ext/standard/tests/strings/sprintf_basic7_64bit.phpt
+      ext/standard/tests/strings/sprintf_basic7_64bit.phpt
+      ext/standard/tests/strings/sprintf_basic8.phpt
+      ext/standard/tests/strings/sprintf_basic8_64bit.phpt
+      ext/standard/tests/strings/sprintf_basic8_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation28.phpt
+      ext/standard/tests/strings/sprintf_variation28_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation28_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation29.phpt
+      ext/standard/tests/strings/sprintf_variation29_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation29_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation34.phpt
+      ext/standard/tests/strings/sprintf_variation34_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation34_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation35.phpt
+      ext/standard/tests/strings/sprintf_variation35_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation35_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation4.phpt
+      ext/standard/tests/strings/sprintf_variation40.phpt
+      ext/standard/tests/strings/sprintf_variation40_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation40_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation41.phpt
+      ext/standard/tests/strings/sprintf_variation41_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation41_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation44.phpt
+      ext/standard/tests/strings/sprintf_variation44_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation44_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation4_64bit.phpt
+      ext/standard/tests/strings/sprintf_variation4_64bit.phpt
+      ext/standard/tests/strings/str_split_variation7_64bit.phpt:
+      Fixed 32/64-bit tests (Serg)
+
+2007-12-27  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.c:
+      MFB5.3: Fixed bug#43105 (PHP seems to fail to close open files.)
+
+    * (PHP_5_3)
+      main/fopen_wrappers.c:
+      Fixed bug#43105 (PHP seems to fail to close open files.)
+
 2007-12-26  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * ext/mbstring/mbstring.c:
