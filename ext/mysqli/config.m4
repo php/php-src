@@ -61,8 +61,6 @@ elif test "$PHP_MYSQLI" != "no"; then
   ],[
     $MYSQLI_LIBLINE
   ])
-
-  mysqli_extra_sources="$mysqli_extra_sources mysqli_repl.c"
 fi
 
 dnl Build extension

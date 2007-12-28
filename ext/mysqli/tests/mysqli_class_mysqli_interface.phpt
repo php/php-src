@@ -62,33 +62,6 @@ require_once('skipifconnectfailure.inc');
 		$expected_methods['get_connection_stats']	= true;
 	} else {
 		// libmysql only
-		if (function_exists('mysqli_disable_reads_from_master'))
-			$expected_methods['disable_reads_from_master']  = true;
-
-		if (function_exists('mysqli_disable_rpl_parse'))
-			$expected_methods['disable_rpl_parse'] = true;
-
-		if (function_exists('mysqli_enable_reads_from_master'))
-			$expected_methods['enable_reads_from_master'] = true;
-
-		if (function_exists('mysqli_enable_rpl_parse'))
-			$expected_methods['enable_rpl_parse'] = true;
-
-		if (function_exists('mysqli_master_query'))
-			$expected_methods['master_query'] = true;
-
-		if (function_exists('mysqli_rpl_parse_enabled'))
-			$expected_methods['rpl_parse_enabled'] = true;
-
-		if (function_exists('mysqli_rpl_probe'))
-			$expected_methods['rpl_probe'] = true;
-
-		if (function_exists('mysqli_rpl_query_type'))
-			$expected_methods['rpl_query_type'] = true;
-
-		if (function_exists('mysqli_slave_query'))
-			$expected_methods['slave_query'] = true;
-
 		if (function_exists('mysqli_ssl_set'))
 			$expected_methods['ssl_set'] = true;
 		$expected_methods['set_local_infile_default']	= true;

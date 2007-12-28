@@ -26,9 +26,7 @@ if (PHP_MYSQLI != "no") {
 			CHECK_HEADER_ADD_INCLUDE("mysql.h", "CFLAGS_MYSQLI", PHP_MYSQLI + 
 										"\\include;" + PHP_PHP_BUILD +
 										"\\include\\mysql;" + PHP_MYSQLI)) {
-			// No "mysqli_repl.c" when using "mysqlnd"
-			mysqli_extra_sources = "mysqli_repl.c";
-			EXTENSION("mysqli", mysqli_source + " " + mysqli_extra_sources);
+			EXTENSION("mysqli", mysqli_source);
 			AC_DEFINE('HAVE_MYSQLILIB', 1, 'Have MySQLi library');
 		} else {
 			WARNING("mysqli not enabled; libraries and headers not found");
