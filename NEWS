@@ -28,6 +28,7 @@ PHP                                                                        NEWS
 - Added DateTime::setTimestamp() to set a unix timestamp without
   invoking the date parser. (Scott)
 
+- Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 - Upgraded PCRE to version 7.4 (Nuno)
 
 - Improved php.ini handling: (Jani)
