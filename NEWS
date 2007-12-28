@@ -60,6 +60,7 @@ PHP                                                                        NEWS
 - Fixed bug #42272 (var_export() incorrectly escapes char(0)). (Derick)
 - Fixed bug #42261 (Incorrect lengths for date and boolean data types).
   (Ilia)
+- Fixed bug #38468 (Unexpected creation of cycle). (Dmitry)
 
 08 Nov 2007, PHP 5.2.5
 - Upgraded PCRE to version 7.3 (Nuno)
