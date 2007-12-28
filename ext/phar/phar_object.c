@@ -265,6 +265,37 @@ PHP_METHOD(Phar, webPhar)
 				entry = estrndup("/index.php", sizeof("/index.php"));
 				entry_len = sizeof("/index.php")-1;
 			}
+			if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
+				sapi_header_line ctr = {0};
+				ctr.response_code = 404;
+				ctr.line_len = sizeof("HTTP/1.0 404 Not Found")+1;
+				ctr.line = "HTTP/1.0 404 Not Found";
+				sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+				sapi_send_headers(TSRMLS_C);
+				phar_entry_delref(phar TSRMLS_CC);
+				zend_bailout();
+				return;
+			} else {
+				char *tmp, sa;
+				sapi_header_line ctr = {0};
+				ctr.response_code = 301;
+				ctr.line_len = sizeof("HTTP/1.1 301 Moved Permanently")+1;
+				ctr.line = "HTTP/1.1 301 Moved Permanently";
+				sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+
+				tmp = strstr(path_info, basename) + fname_len;
+				sa = *tmp;
+				*tmp = '\0';
+				ctr.response_code = 0;
+				ctr.line_len = spprintf(&(ctr.line), 4096, "Location: %s%s", path_info, entry);
+				*tmp = sa;
+				sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+				sapi_send_headers(TSRMLS_C);
+				phar_entry_delref(phar TSRMLS_CC);
+				efree(ctr.line);
+				zend_bailout();
+				return;
+			}
 		}
 	} else {
 		/* error? */
@@ -295,8 +326,8 @@ PHP_METHOD(Phar, webPhar)
 	if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
 		sapi_header_line ctr = {0};
 		ctr.response_code = 404;
-		ctr.line_len = sizeof("HTTP/1.0 404")+1;
-		ctr.line = "HTTP/1.0 404";
+		ctr.line_len = sizeof("HTTP/1.0 404 Not Found")+1;
+		ctr.line = "HTTP/1.0 404 Not Found";
 		sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 #ifdef PHP_WIN32
 		efree(fname);
