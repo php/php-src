@@ -13,15 +13,11 @@ var_dump(json_encode($a));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(1) {
   [0]=>
-  array(1) {
-    [0]=>
-    *RECURSION*
+  array(0) {
   }
 }
-
-Warning: json_encode(): recursion detected in %s on line %d
-string(8) "[[null]]"
+string(4) "[[]]"
 Done
