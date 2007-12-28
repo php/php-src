@@ -1,8 +1,8 @@
 --TEST--
 mysqli bind_param/bind_result date
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -20,12 +20,25 @@ require_once('skipifconnectfailure.inc');
 	mysqli_query($link, "SET sql_mode=''");
 
 	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_result");
-	mysqli_query($link,"CREATE TABLE test_bind_result(c1 date, c2 time,
+
+	$rc = @mysqli_query($link,"CREATE TABLE test_bind_result(
+		c1 date,
+		c2 time,
 		c3 timestamp(14),
 		c4 year,
 		c5 datetime,
 		c6 timestamp(4),
 		c7 timestamp(6))");
+
+	if (!$rc)
+		$rc = mysqli_query($link,"CREATE TABLE test_bind_result(
+		c1 date,
+		c2 time,
+		c3 timestamp,
+		c4 year,
+		c5 datetime,
+		c6 timestamp,
+		c7 timestamp)");
 
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_result VALUES (?,?,?,?,?,?,?)");
 	mysqli_bind_param($stmt, "sssssss", $d1, $d2, $d3, $d4, $d5, $d6, $d7);
@@ -41,7 +54,7 @@ require_once('skipifconnectfailure.inc');
 	mysqli_execute($stmt);
 	mysqli_stmt_close($stmt);
 
-	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_result");
+	$stmt = mysqli_prepare($link, "SELECT c1, c2, c3, c4, c5, c6, c7 FROM test_bind_result");
 
 	mysqli_bind_result($stmt,$c1, $c2, $c3, $c4, $c5, $c6, $c7);
 
