@@ -603,8 +603,39 @@ static zend_bool opline_is_fetch_this(zend_op *opline TSRMLS_DC) /* {{{ */
 
 void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {{{ */
 {
-	int last_op_number = get_next_op_number(CG(active_op_array));
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	int last_op_number;
+	zend_op *opline;
+
+	if (value->op_type == IS_CV) {
+		zend_llist *fetch_list_ptr;
+
+		zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+		if (fetch_list_ptr && fetch_list_ptr->head) {
+			opline = (zend_op *)fetch_list_ptr->head->data;
+
+			if (opline->opcode == ZEND_FETCH_DIM_W &&
+			    opline->op1.op_type == IS_CV &&
+			    opline->op1.u.var == value->u.var) {
+
+				opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+				opline->opcode = ZEND_FETCH_R;
+				opline->result.op_type = IS_VAR;
+				opline->result.u.EA.type = 0;
+				opline->result.u.var = get_temporary_variable(CG(active_op_array));
+				opline->op1.op_type = IS_CONST;
+				ZVAL_TEXTL(&opline->op1.u.constant,
+					CG(active_op_array)->vars[value->u.var].name, 
+					CG(active_op_array)->vars[value->u.var].name_len, 1);
+				SET_UNUSED(opline->op2);
+				value = &opline->result;
+			}
+		}
+	}
+
+	zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
+
+	last_op_number = get_next_op_number(CG(active_op_array));
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	if (variable->op_type == IS_VAR) {
 		int n = 0;
@@ -4202,7 +4233,6 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC) /* {{{ */
 		}
 		((list_llist_element *) le->data)->value = last_container;
 		zend_llist_destroy(&((list_llist_element *) le->data)->dimensions);
-		zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
 		zend_do_assign(result, &((list_llist_element *) le->data)->var, &((list_llist_element *) le->data)->value TSRMLS_CC);
 		zend_do_free(result TSRMLS_CC);
 		le = le->next;
@@ -4575,9 +4605,9 @@ void zend_do_foreach_cont(znode *foreach_token, znode *open_brackets_token, znod
 
 	value_node = opline->result;
 
-	zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
 	if (assign_by_ref) {
 		/* Mark FE_FETCH as IS_VAR as it holds the data directly as a value */
+		zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
 		zend_do_assign_ref(NULL, value, &value_node TSRMLS_CC);
 	} else {
 		zend_do_assign(&dummy, value, &value_node TSRMLS_CC);
@@ -4587,7 +4617,6 @@ void zend_do_foreach_cont(znode *foreach_token, znode *open_brackets_token, znod
 	if (key->op_type != IS_UNUSED) {
 		znode key_node;
 
-		zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
 		opline = &CG(active_op_array)->opcodes[as_token->u.opline_num+1];
 		opline->result.op_type = IS_TMP_VAR;
 		opline->result.u.EA.type = 0;
