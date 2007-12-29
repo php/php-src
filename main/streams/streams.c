@@ -1104,10 +1104,17 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 	if (delim_len == 0 || !delim) {
 		toread = maxlen;
 	} else {
+		size_t seek_len;
+
+		seek_len = stream->writepos - stream->readpos;
+		if (seek_len > maxlen) {
+			seek_len = maxlen;
+		}
+
 		if (delim_len == 1) {
-			e = memchr(stream->readbuf.s + stream->readpos, *delim, maxlen);
+			e = memchr(stream->readbuf.s + stream->readpos, *delim, seek_len);
 		} else {
-			e = php_memnstr(stream->readbuf.s + stream->readpos, delim, delim_len, (stream->readbuf.s + stream->readpos + maxlen));
+			e = php_memnstr(stream->readbuf.s + stream->readpos, delim, delim_len, (stream->readbuf.s + stream->readpos + seek_len));
 		}
 
 		if (!e) {
@@ -1153,10 +1160,17 @@ PHPAPI UChar *php_stream_get_record_unicode(php_stream *stream, size_t maxlen, s
 	if (delim_len == 0 || !delim) {
 		toread = maxlen;
 	} else {
+		size_t seek_len;
+
+		seek_len = stream->writepos - stream->readpos;
+		if (seek_len > maxlen) {
+			seek_len = maxlen;
+		}
+
 		if (delim_len == 1) {
-			e = u_memchr(stream->readbuf.u + stream->readpos, *delim, stream->writepos - stream->readpos);
+			e = u_memchr(stream->readbuf.u + stream->readpos, *delim, seek_len);
 		} else {
-			e = u_strFindFirst(stream->readbuf.u + stream->readpos, stream->writepos - stream->readpos, delim, delim_len);
+			e = u_strFindFirst(stream->readbuf.u + stream->readpos, stream->readbuf.u + stream->readpos + seek_len, delim, delim_len);
 		}
 
 		if (!e) {
