@@ -288,7 +288,7 @@ PHP_METHOD(Phar, webPhar)
 	if (strstr(path_info, basename)) {
 		entry_len -= fname_len - (basename - fname) + 1;
 		entry = estrndup(path_info + (fname_len - (basename - fname) + 1), entry_len);
-		if (!entry_len) {
+		if (!entry_len || (entry_len == 1 && entry[0] == '/')) {
 			efree(entry);
 			/* direct request */
 			if (index_php_len) {
