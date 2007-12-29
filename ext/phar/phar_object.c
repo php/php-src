@@ -459,9 +459,6 @@ PHP_METHOD(Phar, webPhar)
  * Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
 {
-	/* FIXME: both this and webPhar leak an entire phar entry if included from within a
-	script that accesses the phar - phar_open_compiled_file needs to check for
-	pre-existing and return gracefully if found */
 	char *fname, *alias = NULL, *error, *plain_map;
 	int fname_len, alias_len = 0;
 	long dataoffset;
