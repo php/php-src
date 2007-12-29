@@ -1,5 +1,7 @@
 --TEST--
 http-stream test
+--SKIPIF--
+<?php if (!extension_loaded("dom")) die("skip dom extension is not present"); ?>
 --FILE--
 <?php
 $d = new DomDocument;
