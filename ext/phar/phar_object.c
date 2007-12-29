@@ -226,7 +226,7 @@ nofile:
 	}
 }
 
-/* {{{ proto void Phar::webPhar([string alias, [string index, [array mimetypes, [array redirects]]]])
+/* {{{ proto void Phar::webPhar([string alias, [string index, [string f404, [array mimetypes, [array redirects]]]]])
  * mapPhar for web-based phars. Reads the currently executed file (a phar)
  * and registers its manifest. When executed in the CLI or CGI command-line sapi,
  * this works exactly like mapPhar().  When executed by a web-based sapi, this
@@ -2299,6 +2299,7 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_webPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, alias)
 	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, f404)
 	ZEND_ARG_INFO(0, mimetypes)
 	ZEND_ARG_INFO(0, redirects)
 ZEND_END_ARG_INFO();
