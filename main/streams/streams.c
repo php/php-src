@@ -855,10 +855,17 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 	if (delim_len == 0 || !delim) {
 		toread = maxlen;
 	} else {
+		size_t seek_len;
+
+		seek_len = stream->writepos - stream->readpos;
+		if (seek_len > maxlen) {
+			seek_len = maxlen;
+		}
+
 		if (delim_len == 1) {
-			e = memchr(stream->readbuf + stream->readpos, *delim, maxlen);
+			e = memchr(stream->readbuf + stream->readpos, *delim, seek_len);
 		} else {
-			e = php_memnstr(stream->readbuf + stream->readpos, delim, delim_len, (stream->readbuf + stream->readpos + maxlen));
+			e = php_memnstr(stream->readbuf + stream->readpos, delim, delim_len, (stream->readbuf + stream->readpos + seek_len));
 		}
 
 		if (!e) {
