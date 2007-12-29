@@ -201,6 +201,31 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 	return -1;
 }
 
+void phar_do_404(char *fname, int fname_len, char *f404, int f404_len TSRMLS_DC)
+{
+	int hi;
+	phar_entry_data *phar;
+	char *error;
+	if (f404_len) {
+		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, f404, f404_len, "r", &error TSRMLS_CC)) {
+			if (error) {
+				efree(error);
+			}
+			goto nofile;
+		}
+		hi = phar_file_action(phar, "text/html", PHAR_MIME_PHP, f404, f404_len, fname, fname_len TSRMLS_CC);
+	} else {
+		sapi_header_line ctr = {0};
+nofile:
+		ctr.response_code = 404;
+		ctr.line_len = sizeof("HTTP/1.0 404 Not Found")+1;
+		ctr.line = "HTTP/1.0 404 Not Found";
+		sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+		sapi_send_headers(TSRMLS_C);
+		PHPWRITE("<html><head><title>File Not Found<title></head><body><h1>404 - File Not Found</h1></body></html>", sizeof("<html><head><title>File Not Found<title></head><body><h1>404 - File Not Found</h1></body></html>") - 1);
+	}
+}
+
 /* {{{ proto void Phar::webPhar([string alias, [string index, [array mimetypes, [array redirects]]]])
  * mapPhar for web-based phars. Reads the currently executed file (a phar)
  * and registers its manifest. When executed in the CLI or CGI command-line sapi,
@@ -213,14 +238,14 @@ PHP_METHOD(Phar, webPhar)
 	HashTable mimetypes;
 	phar_mime_type mime;
 	zval *mimeoverride = NULL, *redirects = NULL;
-	char *alias = NULL, *error, *plain_map, *index_php;
-	int alias_len = 0, ret;
+	char *alias = NULL, *error, *plain_map, *index_php, *f404 = NULL;
+	int alias_len = 0, ret, f404_len = 0;
 	char *fname, *basename, *path_info, *mime_type, *entry;
 	int fname_len, entry_len, code, index_php_len = 0;
 	phar_entry_data *phar;
 	zval **_SERVER, **stuff;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!aa", &alias, &alias_len, &index_php, &index_php_len, &mimeoverride, &redirects) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!saa", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &redirects) == FAILURE) {
 		return;
 	}
 
@@ -266,12 +291,10 @@ PHP_METHOD(Phar, webPhar)
 				entry_len = sizeof("/index.php")-1;
 			}
 			if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
-				sapi_header_line ctr = {0};
-				ctr.response_code = 404;
-				ctr.line_len = sizeof("HTTP/1.0 404 Not Found")+1;
-				ctr.line = "HTTP/1.0 404 Not Found";
-				sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
-				sapi_send_headers(TSRMLS_C);
+				if (error) {
+					efree(error);
+				}
+				phar_do_404(fname, fname_len, f404, f404_len TSRMLS_CC);
 				phar_entry_delref(phar TSRMLS_CC);
 				zend_bailout();
 				return;
@@ -302,6 +325,15 @@ PHP_METHOD(Phar, webPhar)
 		return;
 	}
 
+	if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
+		phar_do_404(fname, fname_len, f404, f404_len TSRMLS_CC);
+#ifdef PHP_WIN32
+		efree(fname);
+#endif
+		zend_bailout();
+		return;
+	}
+
 	/* "tweak" $_SERVER variables */
 	if (SUCCESS == zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &_SERVER)) {
 		if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "REQUEST_URI", sizeof("REQUEST_URI"), (void **) &stuff)) {
@@ -321,18 +353,6 @@ PHP_METHOD(Phar, webPhar)
 			Z_STRLEN_PP(stuff) = spprintf(&(Z_STRVAL_PP(stuff)), 4096, "phar://%s%s", fname, entry);
 			efree(path_info);
 		}
-	}
-	
-	if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
-		sapi_header_line ctr = {0};
-		ctr.response_code = 404;
-		ctr.line_len = sizeof("HTTP/1.0 404 Not Found")+1;
-		ctr.line = "HTTP/1.0 404 Not Found";
-		sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
-#ifdef PHP_WIN32
-		efree(fname);
-#endif
-		return;
 	}
 
 	/* set up mime types */
