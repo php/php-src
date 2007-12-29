@@ -1,3 +1,33 @@
+2007-12-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c:
+      Fixed possible memory corruption
+
+    * (PHP_5_2)
+      zend_compile.c
+      zend_language_parser.y
+      tests/bug38469.phpt:
+      Fixed bug #38469 (Unexpected creation of cycle).
+
+    * zend_compile.c
+      zend_compile.c
+      zend_language_parser.y
+      zend_language_parser.y
+      tests/bug38469.phpt
+      tests/bug38469.phpt:
+      Fixed bug #38469 (unexpected creation of cycle, json tests failed, leaks
+      memory)
+
+    * tests/bug38469.phpt
+      tests/bug38469.phpt:
+      
+      file bug38469.phpt was initially added on branch PHP_5_3.
+
+    * zend_compile.c
+      zend_compile.c:
+      Initialize operand type
+
 2007-12-27  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c

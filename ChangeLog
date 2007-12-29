@@ -1,3 +1,113 @@
+2007-12-28  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysqli/tests/bug35517.phpt:
+      Merge from 5_3. Fixing 32 vs. 64bit issue.
+
+    * ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/020.phpt:
+      Merge from 5_3 - MySQL 6.0 SQL fixes
+
+2007-12-28  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Here comes the NEWS entry. The RM knows his job ;)
+
+    * ext/mysqli/config.m4
+      ext/mysqli/config.m4
+      ext/mysqli/config.w32
+      ext/mysqli/config.w32
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_repl.c
+      ext/mysqli/mysqli_repl.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/connect.inc
+      ext/mysqli/tests/mysqli_class_mysqli_interface.phpt
+      ext/mysqli/tests/mysqli_disable_rpl_parse.phpt
+      ext/mysqli/tests/mysqli_disable_rpl_parse.phpt
+      ext/mysqli/tests/mysqli_enable_rpl_parse.phpt
+      ext/mysqli/tests/mysqli_enable_rpl_parse.phpt
+      ext/mysqli/tests/mysqli_rpl_parse_enabled.phpt
+      ext/mysqli/tests/mysqli_rpl_parse_enabled.phpt
+      ext/mysqli/tests/mysqli_rpl_probe.phpt
+      ext/mysqli/tests/mysqli_rpl_probe.phpt
+      ext/mysqli/tests/mysqli_rpl_query_type.phpt
+      ext/mysqli/tests/mysqli_rpl_query_type.phpt:
+      Remove RPL functions. They were always experimental and lead to crashes.
+      The underlying functions will be removed from libmysql as of MySQL 6.0, so
+      it's right time to remove them.
+
+2007-12-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      Fixed possible memory corruption
+
+2007-12-28  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * (PHP_5_3)
+      ext/mysqli/tests/020.phpt:
+      Fixing SQL syntax in this very old test to make it pass with MySQL 6.0
+
+    * (PHP_5_3)
+      ext/mysqli/tests/bug35517.phpt:
+      Isn't it nice to get a new 64bit box? Fixing 32bit/64bit issue.
+
+    * (PHP_5_3)
+      ext/mysqli/tests/003.phpt:
+      Sooner or later these old 0*.phpt tests had to bite us - fixing SQL syntax,
+      HEAD sync will follow.
+
+    * ext/mysqli/tests/bug42548.phpt:
+      Sync from 5_3. Cutting off a few edges:
+       - use connection parameter from environment variables
+       - check if MySQL supports procedures
+       - whitespace
+
+    * (PHP_5_3)
+      ext/mysqli/tests/bug42548.phpt:
+      Cutting off a few edges:
+       - use connection parameter from environment variables
+       - check if MySQL supports procedures
+       - whitespace
+
+2007-12-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/bug38469.phpt:
+      Fixed bug #38469 (Unexpected creation of cycle).
+
+    * ext/json/tests/005.phpt
+      ext/json/tests/005.phpt
+      ext/json/tests/005.phpt:
+      Fixed test related to bug #38469
+
+    * ZendEngine2/tests/bug38469.phpt
+      ZendEngine2/tests/bug38469.phpt:
+      
+      Fixed bug #38469 (unexpected creation of cycle, json tests failed, leaks
+      memory)
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/bug38469.phpt
+      ZendEngine2/tests/bug38469.phpt:
+      Fixed bug #38469 (unexpected creation of cycle, json tests failed, leaks
+      memory)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Initialize operand type
+
 2007-12-27  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/gmp/tests/026.phpt:
