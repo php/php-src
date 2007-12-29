@@ -103,7 +103,11 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 	switch (code) {
 		case PHAR_MIME_PHPS:
 			/* highlight source */
-			spprintf(&name, 4096, "phar://%s%s", arch, entry);
+			if (entry[0] == '/') {
+				name_len = spprintf(&name, 4096, "phar://%s%s", arch, entry);
+			} else {
+				name_len = spprintf(&name, 4096, "phar://%s/%s", arch, entry);
+			}
 			php_get_highlight_struct(&syntax_highlighter_ini);
 
 			if (highlight_file(name, &syntax_highlighter_ini TSRMLS_CC) == FAILURE) {
@@ -158,7 +162,11 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			return PHAR_MIME_OTHER;
 		case PHAR_MIME_PHP:
 			phar_entry_delref(phar TSRMLS_CC);
-			name_len = spprintf(&name, 4096, "phar://%s%s", arch, entry);
+			if (entry[0] == '/') {
+				name_len = spprintf(&name, 4096, "phar://%s%s", arch, entry);
+			} else {
+				name_len = spprintf(&name, 4096, "phar://%s/%s", arch, entry);
+			}
 
 			ret = php_stream_open_for_zend_ex(name, &file_handle, ENFORCE_SAFE_MODE|USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
 			
