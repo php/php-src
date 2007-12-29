@@ -58,6 +58,7 @@
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/php_string.h"
 #include "php_variables.h"
 #include "ext/standard/credits.h"
 #ifdef PHP_WIN32
@@ -744,23 +745,24 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 
 	/* no docref given but function is known (the default) */
 	if (!docref && function.v) {
+		int doclen;
 		if (space[0] == '\0') {
 			if (function_name_is_string) {
-				spprintf(&docref_buf, 0, "function.%s", function.s);
+				doclen = spprintf(&docref_buf, 0, "function.%s", function.s);
 			} else {
-				spprintf(&docref_buf, 0, "function.%v", function);
+				doclen = spprintf(&docref_buf, 0, "function.%v", function);
 			}
 		} else {
 			if (function_name_is_string) {
-				spprintf(&docref_buf, 0, "function.%v-%s", class_name, function.s);
+				doclen = spprintf(&docref_buf, 0, "%v.%s", class_name, function.s);
 			} else {
-				spprintf(&docref_buf, 0, "function.%v-%v", class_name, function);
+				doclen = spprintf(&docref_buf, 0, "%v.%v", class_name, function);
 			}
 		}
 		while((p = strchr(docref_buf, '_')) != NULL) {
 			*p = '-';
 		}
-		docref = docref_buf;
+		docref = php_strtolower(docref_buf, doclen);
 	}
 
 	/* we have a docref for a function AND
