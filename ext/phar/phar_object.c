@@ -234,7 +234,7 @@ nofile:
 	}
 }
 
-/* {{{ proto void Phar::webPhar([string alias, [string index, [string f404, [array mimetypes, [array redirects]]]]])
+/* {{{ proto void Phar::webPhar([string alias, [string index, [string f404, [array mimetypes, [array rewrites]]]]])
  * mapPhar for web-based phars. Reads the currently executed file (a phar)
  * and registers its manifest. When executed in the CLI or CGI command-line sapi,
  * this works exactly like mapPhar().  When executed by a web-based sapi, this
@@ -245,15 +245,15 @@ PHP_METHOD(Phar, webPhar)
 {
 	HashTable mimetypes;
 	phar_mime_type mime;
-	zval *mimeoverride = NULL, *redirects = NULL;
+	zval *mimeoverride = NULL, *rewrites = NULL;
 	char *alias = NULL, *error, *plain_map, *index_php, *f404 = NULL;
 	int alias_len = 0, ret, f404_len = 0;
 	char *fname, *basename, *path_info, *mime_type, *entry;
 	int fname_len, entry_len, code, index_php_len = 0;
 	phar_entry_data *phar;
-	zval **_SERVER, **stuff;
+	zval **_SERVER, **stuff, **fd_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!saa", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &redirects) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!saa", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &rewrites) == FAILURE) {
 		return;
 	}
 
@@ -289,6 +289,7 @@ PHP_METHOD(Phar, webPhar)
 		entry_len -= fname_len - (basename - fname) + 1;
 		entry = estrndup(path_info + (fname_len - (basename - fname) + 1), entry_len);
 		if (!entry_len) {
+			efree(entry);
 			/* direct request */
 			if (index_php_len) {
 				entry = index_php;
@@ -331,6 +332,20 @@ PHP_METHOD(Phar, webPhar)
 	} else {
 		/* error? */
 		return;
+	}
+
+	if (rewrites) {
+		/* check for "rewrite" urls */
+		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(rewrites), entry, entry_len+1, (void **) &fd_ptr)) {
+			if (IS_STRING != Z_TYPE_PP(fd_ptr)) {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "phar rewrite value for \"%s\" was not a string", entry);
+			}
+			if (entry != index_php) {
+				efree(entry);
+			}
+			entry = Z_STRVAL_PP(fd_ptr);
+			entry_len = Z_STRLEN_PP(fd_ptr);
+		}
 	}
 
 	if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
@@ -409,6 +424,9 @@ PHP_METHOD(Phar, webPhar)
 		zend_hash_update(&mimetypes, key, keylen, (void *)&mime, sizeof(phar_mime_type), NULL);
 
 	if (mimeoverride) {
+		if (!zend_hash_num_elements(Z_ARRVAL_P(mimeoverride))) {
+			goto no_mimes;
+		}
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(mimeoverride)); zend_hash_has_more_elements(Z_ARRVAL_P(mimeoverride)); zend_hash_move_forward(Z_ARRVAL_P(mimeoverride))) {
 			zval *val;
 			char *key;
@@ -446,6 +464,8 @@ PHP_METHOD(Phar, webPhar)
 			}
 		}
 	}
+
+no_mimes:
 	code = phar_file_type(&mimetypes, entry, &mime_type TSRMLS_CC);
 	ret = phar_file_action(phar, mime_type, code, entry, entry_len, fname, fname_len TSRMLS_CC);
 	zend_hash_destroy(&mimetypes);
@@ -2306,7 +2326,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_webPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, f404)
 	ZEND_ARG_INFO(0, mimetypes)
-	ZEND_ARG_INFO(0, redirects)
+	ZEND_ARG_INFO(0, rewrites)
 ZEND_END_ARG_INFO();
 
 static
