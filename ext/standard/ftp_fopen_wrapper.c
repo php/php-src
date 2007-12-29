@@ -300,19 +300,21 @@ connect_errexit:
 
 /* {{{ php_fopen_do_pasv
  */
-static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, int ip_size, char **phoststart TSRMLS_DC)
+static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, size_t ip_size, char **phoststart TSRMLS_DC)
 {
 	char tmp_line[512];
 	int result, i;
 	unsigned short portno;
 	char *tpath, *ttpath, *hoststart=NULL;
 
+#ifdef HAVE_IPV6
 	/* We try EPSV first, needed for IPv6 and works on some IPv4 servers */
 	php_stream_write_string(stream, "EPSV\r\n");
 	result = GET_FTP_RESULT(stream);
 
 	/* check if we got a 229 response */
 	if (result != 229) {
+#endif
 		/* EPSV failed, let's try PASV */
 		php_stream_write_string(stream, "PASV\r\n");
 		result = GET_FTP_RESULT(stream);
@@ -357,6 +359,8 @@ static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, int ip_siz
 		tpath++;
 		/* pull out the LSB of the port */
 		portno += (unsigned short) strtoul(tpath, &ttpath, 10);
+
+#ifdef HAVE_IPV6
 	} else {
 		/* parse epsv command (|||6446|) */
 		for (i = 0, tpath = tmp_line + 4; *tpath; tpath++) {
@@ -372,7 +376,8 @@ static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, int ip_siz
 		/* pull out the port */
 		portno = (unsigned short) strtoul(tpath + 1, &ttpath, 10);
 	}
-	
+#endif
+
 	if (ttpath == NULL) {
 		/* didn't get correct response from EPSV/PASV */
 		return 0;
