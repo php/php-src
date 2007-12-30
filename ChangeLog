@@ -1,3 +1,52 @@
+2007-12-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/ftp_fopen_wrapper.c:
+      MFH:- This makes no sense with non-ipv6 builds. (and fixes lot of issues
+      with misconfigured servers)
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      - This makes no sense with non-ipv6 builds. (and fixes lot of issues with
+      misconfigured servers)
+
+2007-12-29  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/tests/general_functions/phpinfo.phpt
+      ext/standard/tests/general_functions/phpinfo.phpt:
+      MFB5.2: Fix test
+
+    * (PHP_5_2)
+      ext/standard/tests/general_functions/phpinfo.phpt:
+      Fix test when additional ini files are used (patch by <confins_de_l_univers
+      at yahoo dot fr>)
+
+2007-12-29  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/streams.c
+      main/streams/streams.c:
+      correct fix for bug #43522
+
+    * main/streams/streams.c:
+      apply correct fix for bug #43522
+      fix Unicode streams too this time
+
+    * ext/standard/tests/network/http-stream.phpt
+      ext/standard/tests/network/http-stream.phpt:
+      fix test
+
+2007-12-29  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      main/main.c
+      main/main.c:
+      MFH: Update the class method documentation links
+
+    * main/main.c:
+      Update the class method documentation links
+
 2007-12-28  Ulf Wendel  <ulf.wendel@phpdoc.de>
 
     * ext/mysqli/tests/bug35517.phpt:
