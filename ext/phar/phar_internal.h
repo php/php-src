@@ -50,6 +50,10 @@
 #ifndef PHP_WIN32
 #include "TSRM/tsrm_strtok_r.h"
 #endif
+#if HAVE_PHAR_ZIP
+#include "lib/zip.h"
+#include "lib/zipint.h"
+#endif
 #if HAVE_SPL
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
@@ -180,6 +184,12 @@ typedef struct _phar_entry_info {
 	int                      is_dir:1;
 	phar_archive_data        *phar;
 	smart_str                metadata_str;
+	/* zip-based phar file stuff */
+	int                      is_zip:1;
+#if HAVE_PHAR_ZIP
+	int                      index;
+	struct zip_file          *zip;
+#endif
 } phar_entry_info;
 
 /* information about a phar file (the archive itself) */
@@ -207,6 +217,11 @@ struct _phar_archive_data {
 	int                      is_brandnew:1;
 	/* defer phar creation */
 	int                      donotflush:1;
+	/* zip-based phar variables */
+	int                      is_zip:1;
+#if HAVE_PHAR_ZIP
+	struct zip               *zip;
+#endif
 };
 
 #define PHAR_MIME_PHP '\0'
@@ -229,6 +244,7 @@ typedef struct _phar_entry_data {
 	/* for copies of the phar fp, defines where 0 is */
 	off_t                    zero;
 	int                      for_write:1;
+	int                      is_zip:1;
 	phar_entry_info          *internal_file;
 } phar_entry_data;
 
@@ -268,7 +284,9 @@ void phar_object_init(TSRMLS_D);
 int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC);
-
+phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
+				      char **error, int for_write TSRMLS_DC);
+int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 
 #ifdef PHAR_MAIN
 static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS);

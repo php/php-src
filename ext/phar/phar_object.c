@@ -135,10 +135,15 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 
 			/* prepare to output  */
 			if (!phar->fp) {
-				phar->internal_file->fp_refcount++;
-				phar->fp = phar->phar->fp;
-				phar->zero = phar->phar->internal_file_start + phar->internal_file->offset_within_phar;
-				phar->internal_file->fp = phar->phar->fp;
+				char *error;
+				if (!phar_open_jit(phar->phar, phar->internal_file, phar->phar->fp, &error, 0 TSRMLS_CC)) {
+					if (error) {
+						zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+						efree(error);
+					}
+					return -1;
+				}
+				phar->fp = phar->internal_file->fp;
 			}
 			php_stream_seek(phar->fp, phar->position + phar->zero, SEEK_SET);
 			do {
@@ -273,6 +278,32 @@ PHP_METHOD(Phar, webPhar)
 
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
+
+	if (strstr(fname, "://")) {
+		char *arch, *entry;
+		int arch_len, entry_len;
+		phar_archive_data *phar;
+
+		/* running within a zip-based phar, acquire the actual name */
+		if (SUCCESS != phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+			efree(entry);
+			efree(arch);
+			return; /* this, incidentally, should be impossible */
+		}
+
+		efree(entry);
+		entry = fname;
+		fname = arch;
+		fname_len = arch_len;
+		if (SUCCESS == phar_open_loaded(fname, fname_len, alias, alias_len, 0, &phar, 0 TSRMLS_CC) && phar && phar->is_zip) {
+			efree(arch);
+			fname = phar->fname;
+			fname_len = phar->fname_len;
+		} else {
+			efree(arch);
+			fname = entry;
+		}
+	}
 #ifdef PHP_WIN32
 	fname = estrndup(fname, fname_len);
 	phar_unixify_path_separators(fname, fname_len);
@@ -1103,8 +1134,13 @@ PHP_METHOD(Phar, setAlias)
 		}
 
 		efree(phar_obj->arc.archive->alias);
-		phar_obj->arc.archive->alias = estrndup(alias, alias_len);
+		if (alias_len) {
+			phar_obj->arc.archive->alias = estrndup(alias, alias_len);
+		} else {
+			phar_obj->arc.archive->alias = NULL;
+		}
 		phar_obj->arc.archive->alias_len = alias_len;
+		phar_obj->arc.archive->is_explicit_alias = 0;
 		phar_flush(phar_obj->arc.archive, NULL, 0, &error TSRMLS_CC);
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
@@ -1541,6 +1577,11 @@ PHP_METHOD(Phar, copy)
 		newentry.metadata_str.c = NULL;
 		newentry.metadata_str.len = 0;
 	}
+#if HAVE_PHAR_ZIP
+	if (oldentry->is_zip) {
+		newentry.index = -1;
+	}
+#endif
 	newentry.fp = fp;
 	newentry.filename = estrndup(newfile, newfile_len);
 	newentry.filename_len = newfile_len;
@@ -1552,7 +1593,7 @@ PHP_METHOD(Phar, copy)
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
 	}
-	
+
 	RETURN_TRUE;
 }
 
@@ -1694,6 +1735,15 @@ PHP_METHOD(Phar, offsetUnset)
 			}
 			entry->is_modified = 0;
 			entry->is_deleted = 1;
+#if HAVE_PHAR_ZIP
+			if (entry->is_zip) {
+				if (entry->zip) {
+					zip_fclose(entry->zip);
+					entry->zip = 0;
+				}
+				zip_delete(phar_obj->arc.archive->zip, entry->index);
+			}
+#endif
 			/* we need to "flush" the stream to save the newly deleted file on disk */
 			phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
 			if (error) {
@@ -1718,6 +1768,36 @@ PHP_METHOD(Phar, getStub)
 	php_stream *fp;
 	PHAR_ARCHIVE_OBJECT();
 
+#if HAVE_PHAR_ZIP
+	if (phar_obj->arc.archive->is_zip) {
+		struct zip_stat zs;
+		struct zip_file *zf;
+		int index;
+
+		if (-1 == zip_stat(phar_obj->arc.archive->zip, ".phar/stub.php", 0, &zs)) {
+			zip_error_clear(phar_obj->arc.archive->zip);
+			RETURN_STRINGL("", 0, 1);
+		}
+		index = zs.index;
+		len = zs.size;
+		zf = zip_fopen_index(phar_obj->arc.archive->zip, index, 0);
+		if (!zf) {
+			zip_error_clear(phar_obj->arc.archive->zip);
+			RETURN_STRINGL("", 0, 1);
+		}
+		buf = safe_emalloc(len, 1, 1);
+		if (len != zip_fread(zf, buf, len)) {
+			zip_fclose(zf);
+			efree(buf);
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
+				"Unable to read stub");
+			return;
+		}
+		buf[len] = '\0';
+
+		RETURN_STRINGL(buf, len, 0);
+	}
+#endif
 	len = phar_obj->arc.archive->halt_offset;
 
 	if (phar_obj->arc.archive->fp && !phar_obj->arc.archive->is_brandnew) {
@@ -1747,7 +1827,7 @@ PHP_METHOD(Phar, getStub)
 		php_stream_close(fp);
 	}
 	buf[len] = '\0';
-	
+
 	RETURN_STRINGL(buf, len, 0);
 }
 /* }}}*/
@@ -1913,7 +1993,7 @@ PHP_METHOD(PharFileInfo, __destruct)
 	PHAR_ENTRY_OBJECT();
 
 	if (entry_obj->ent.entry->is_dir) {
-		if (entry_obj->ent.entry->filename) {
+		if (!entry_obj->ent.entry->is_zip && entry_obj->ent.entry->filename) {
 			efree(entry_obj->ent.entry->filename);
 			entry_obj->ent.entry->filename = NULL;
 		}
@@ -2198,6 +2278,10 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 	char *error;
 	PHAR_ENTRY_OBJECT();
 
+	if (entry_obj->ent.entry->is_zip) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot compress with Bzip2 compression, not possible with zip-based phar archives");
+	}
 	if (!phar_has_bz2) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress with Bzip2 compression, bz2 extension is not enabled");
