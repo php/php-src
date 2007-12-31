@@ -927,6 +927,7 @@ dnl "shared" can be set to "shared" or "yes" to build the extension as
 dnl a dynamically loadable library. Optional parameter "sapi_class" can
 dnl be set to "cli" to mark extension build only with CLI or CGI sapi's.
 dnl "extra-cflags" are passed to the compiler, with 
+dnl "cxx" can be used to indicate that a C++ shared module is desired.
 dnl @ext_srcdir@ and @ext_builddir@ being substituted.
 AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_builddir=[]PHP_EXT_BUILDDIR($1)
