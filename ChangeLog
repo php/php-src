@@ -1,3 +1,33 @@
+2007-12-30  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/tests/bug_43663.phpt:
+      - Fixed bug #43663 (Extending PDO class with a __call() function doesn't
+      work).
+
+    * (PHP_5_3)
+      ext/pdo/pdo_dbh.c
+      ext/pdo/tests/bug_43663.phpt:
+      - Fixed bug #43663 (Extending PDO class with a __call() function doesn't
+      work).
+      CVS
+
+    * ext/pdo/tests/bug_43663.phpt
+      ext/pdo/tests/bug_43663.phpt
+      ext/pdo/tests/bug_43663.phpt:
+        1.1.4;
+      Test for bug 43663
+
+2007-12-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      NEWS:
+      
+      Fixed typo
+
 2007-12-29  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_2)
