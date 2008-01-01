@@ -1626,7 +1626,7 @@ PHP_FUNCTION(mysqli_real_connect)
 	/* remove some insecure options */
 	flags &= ~CLIENT_MULTI_STATEMENTS;   /* don't allow multi_queries via connect parameter */
 	if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
-		flags ^= CLIENT_LOCAL_FILES;
+		flags &= ~CLIENT_LOCAL_FILES;
 	}
 
 #if !defined(HAVE_MYSQLND)
