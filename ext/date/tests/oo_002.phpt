@@ -6,7 +6,7 @@ date.timezone=Europe/Berlin
 <?php
 class _d extends DateTime {}
 class _t extends DateTimeZone {}
-$d = new _d("1pm Aug 1 GMT");
+$d = new _d("1pm Aug 1 GMT 2007");
 var_dump($d->format(DateTime::RFC822));
 $c = clone $d;
 var_dump($c->format(DateTime::RFC822));
