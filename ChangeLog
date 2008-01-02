@@ -1,3 +1,52 @@
+2008-01-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cli/php.1.in
+      sapi/cli/php.1.in:
+      
+      MFB: Update copyright
+
+    * (PHP_5_3)
+      sapi/cli/php.1.in:
+      Update copyright
+
+2008-01-01  Hartmut Holzgraefe  <hartmut@mysql.com>
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_api.c:
+      fixed binary arithmetic (MF5.2)
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/bug42548.phpt:
+      MFH: Fix for bug #42548 "PROCEDURE xxx can't return a result set"
+
+2008-01-01  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2007.11
+
+2008-01-01  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/date/tests/oo_002.phpt:
+      Fix test
+
+2008-01-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * run-tests.php
+      run-tests.php
+      server-tests.php
+      server-tests.php
+      sapi/cli/php.1.in
+      sapi/cli/php.1.in:
+      MFB: Leftover: Bump copyright year.
+
+    * (PHP_5_3)
+      run-tests.php:
+      Leftover: Bump copyright year.
+
 2007-12-31  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
