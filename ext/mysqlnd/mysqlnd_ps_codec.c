@@ -73,17 +73,17 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 	size_t tmp_len = 0;
 	zend_bool is_bit = field->type == MYSQL_TYPE_BIT;
 	if (field->flags & UNSIGNED_FLAG) {
-		my_uint64 uval = 0;
+		uint64 uval = 0;
 
 		switch (byte_count) {
-			case 8:uval = is_bit? (my_uint64) bit_uint8korr(*row):(my_uint64) uint8korr(*row);break;
+			case 8:uval = is_bit? (uint64) bit_uint8korr(*row):(uint64) uint8korr(*row);break;
 			case 7:uval = bit_uint7korr(*row);break;
 			case 6:uval = bit_uint6korr(*row);break;
 			case 5:uval = bit_uint5korr(*row);break;
-			case 4:uval = is_bit? (my_uint64) bit_uint4korr(*row):(my_uint64) uint4korr(*row);break;
-			case 3:uval = is_bit? (my_uint64) bit_uint3korr(*row):(my_uint64) uint3korr(*row);break;
-			case 2:uval = is_bit? (my_uint64) bit_uint2korr(*row):(my_uint64) uint2korr(*row);break;
-			case 1:uval = (my_uint64) uint1korr(*row);break;
+			case 4:uval = is_bit? (uint64) bit_uint4korr(*row):(uint64) uint4korr(*row);break;
+			case 3:uval = is_bit? (uint64) bit_uint3korr(*row):(uint64) uint3korr(*row);break;
+			case 2:uval = is_bit? (uint64) bit_uint2korr(*row):(uint64) uint2korr(*row);break;
+			case 1:uval = (uint64) uint1korr(*row);break;
 		}
 
 #if SIZEOF_LONG==4
@@ -100,21 +100,21 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 		}
 	} else {
 		/* SIGNED */
-		my_int64 lval = 0;
+		int64 lval = 0;
 		switch (byte_count) {
-			case 8:lval = (my_int64) sint8korr(*row);break;
+			case 8:lval = (int64) sint8korr(*row);break;
 			/*
 			  7, 6 and 5 are not possible.
 			  BIT is only unsigned, thus only uint5|6|7 macroses exist
 			*/
-			case 4:lval = (my_int64) sint4korr(*row);break;
-			case 3:lval = (my_int64) sint3korr(*row);break;
-			case 2:lval = (my_int64) sint2korr(*row);break;
-			case 1:lval = (my_int64) *(my_int8*)*row;break;
+			case 4:lval = (int64) sint4korr(*row);break;
+			case 3:lval = (int64) sint3korr(*row);break;
+			case 2:lval = (int64) sint2korr(*row);break;
+			case 1:lval = (int64) *(my_int8*)*row;break;
 		}
 
 #if SIZEOF_LONG==4
-	    if ((L64(2147483647) < (my_int64) lval) || (L64(-2147483648) > (my_int64) lval)) {
+	    if ((L64(2147483647) < (int64) lval) || (L64(-2147483648) > (int64) lval)) {
 			tmp_len = sprintf((char *)&tmp, MYSQLND_LL_SPEC, lval);
 		} else 
 #endif /* SIZEOF */
@@ -245,15 +245,15 @@ void ps_fetch_int64(zval *zv, const MYSQLND_FIELD * const field,
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 8 TSRMLS_CC);
 #if 0
 
-	my_uint64 llval = (my_uint64) sint8korr(*row);
+	uint64 llval = (uint64) sint8korr(*row);
 	zend_bool uns = field->flags & UNSIGNED_FLAG? TRUE:FALSE;
 	
 #if SIZEOF_LONG==8  
 	if (uns == TRUE && llval > 9223372036854775807L) {
 #elif SIZEOF_LONG==4
 	if ((uns == TRUE && llval > L64(2147483647)) || 
-	    (uns == FALSE && ((L64( 2147483647) < (my_int64) llval) ||
-						  (L64(-2147483648) > (my_int64) llval))))
+	    (uns == FALSE && ((L64( 2147483647) < (int64) llval) ||
+						  (L64(-2147483648) > (int64) llval))))
 	{
 #endif
 		char tmp[22];

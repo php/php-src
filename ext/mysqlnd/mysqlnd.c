@@ -1283,7 +1283,7 @@ MYSQLND_METHOD(mysqlnd_conn, field_count)(const MYSQLND * const conn)
 
 
 /* {{{ mysqlnd_conn::insert_id */
-static mynd_ulonglong
+static uint64
 MYSQLND_METHOD(mysqlnd_conn, insert_id)(const MYSQLND * const conn)
 {
 	return conn->upsert_status.last_insert_id;
@@ -1292,7 +1292,7 @@ MYSQLND_METHOD(mysqlnd_conn, insert_id)(const MYSQLND * const conn)
 
 
 /* {{{ mysqlnd_conn::affected_rows */
-static mynd_ulonglong
+static uint64
 MYSQLND_METHOD(mysqlnd_conn, affected_rows)(const MYSQLND * const conn)
 {
 	return conn->upsert_status.affected_rows;
@@ -1371,7 +1371,7 @@ MYSQLND_METHOD(mysqlnd_conn, charset_name)(const MYSQLND * const conn)
 
 
 /* {{{ mysqlnd_conn::thread_id */
-static mynd_ulonglong
+static uint64
 MYSQLND_METHOD(mysqlnd_conn, thread_id)(const MYSQLND * const conn)
 {
 	return conn->thread_id;
@@ -1425,7 +1425,7 @@ MYSQLND_METHOD(mysqlnd_conn, next_result)(MYSQLND * const conn TSRMLS_DC)
 	}
 
 	SET_EMPTY_ERROR(conn->error_info);
-	conn->upsert_status.affected_rows= ~(mynd_ulonglong) 0;
+	SET_ERROR_AFF_ROWS(conn);
 	/*
 	  We are sure that there is a result set, since conn->state is set accordingly
 	  in mysqlnd_store_result() or mysqlnd_fetch_row_unbuffered()

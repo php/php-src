@@ -126,48 +126,48 @@ unsigned long php_mysqlnd_net_field_length(zend_uchar **packet)
 
 /* {{{ php_mysqlnd_net_field_length_ll 
    Get next field's length */
-mynd_ulonglong php_mysqlnd_net_field_length_ll(zend_uchar **packet)
+uint64 php_mysqlnd_net_field_length_ll(zend_uchar **packet)
 {
 	register zend_uchar *p= (zend_uchar *)*packet;
 
 	if (*p < 251) {
 		(*packet)++;
-		return (mynd_ulonglong) *p;
+		return (uint64) *p;
 	}
 
 	switch (*p) {
 		case 251:
 			(*packet)++;
-			return (mynd_ulonglong) MYSQLND_NULL_LENGTH;
+			return (uint64) MYSQLND_NULL_LENGTH;
 		case 252:
 			(*packet) += 3;
-			return (mynd_ulonglong) uint2korr(p + 1);
+			return (uint64) uint2korr(p + 1);
 		case 253:
 			(*packet) += 4;
-			return (mynd_ulonglong) uint3korr(p + 1);
+			return (uint64) uint3korr(p + 1);
 		default:
 			(*packet) += 9;
-			return (mynd_ulonglong) uint8korr(p + 1);
+			return (uint64) uint8korr(p + 1);
 	}
 }
 /* }}} */
 
 
 /* {{{ php_mysqlnd_net_store_length */
-zend_uchar *php_mysqlnd_net_store_length(zend_uchar *packet, mynd_ulonglong length)
+zend_uchar *php_mysqlnd_net_store_length(zend_uchar *packet, uint64 length)
 {
-	if (length < (mynd_ulonglong) L64(251)) {
+	if (length < (uint64) L64(251)) {
 		*packet = (zend_uchar) length;
 		return packet + 1;
 	}
 
-	if (length < (mynd_ulonglong) L64(65536)) {
+	if (length < (uint64) L64(65536)) {
 		*packet++ = 252;
 		int2store(packet,(uint) length);
 		return packet + 2;
 	}
 
-	if (length < (mynd_ulonglong) L64(16777216)) {
+	if (length < (uint64) L64(16777216)) {
 		*packet++ = 253;
 		int3store(packet,(ulong) length);
 		return packet + 3;
@@ -1430,23 +1430,23 @@ void php_mysqlnd_rowp_read_text_protocol(php_mysql_packet_row *packet, MYSQLND *
 				if (perm_bind.pack_len < SIZEOF_LONG)
 				{
 					/* direct conversion */
-					my_int64 v = atoll((char *) p);
+					int64 v = atoll((char *) p);
 					ZVAL_LONG(*current_field, v);
 				} else {
-					my_uint64 v = (my_uint64) atoll((char *) p);
+					uint64 v = (uint64) atoll((char *) p);
 					zend_bool uns = packet->fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
 					/* We have to make it ASCIIZ temporarily */
 #if SIZEOF_LONG==8
 					if (uns == TRUE && v > 9223372036854775807L)
 #elif SIZEOF_LONG==4
 					if ((uns == TRUE && v > L64(2147483647)) || 
-						(uns == FALSE && (( L64(2147483647) < (my_int64) v) ||
-						(L64(-2147483648) > (my_int64) v))))
+						(uns == FALSE && (( L64(2147483647) < (int64) v) ||
+						(L64(-2147483648) > (int64) v))))
 #endif /* SIZEOF */
 					{
 						ZVAL_STRINGL(*current_field, (char *)p, len, 0);
 					} else {
-						ZVAL_LONG(*current_field, (my_int64)v);
+						ZVAL_LONG(*current_field, (int64)v);
 					}
 				}
 				*(p + len) = save;
@@ -1472,7 +1472,7 @@ void php_mysqlnd_rowp_read_text_protocol(php_mysql_packet_row *packet, MYSQLND *
 				p -= len;
 				if (Z_TYPE_PP(current_field) == IS_LONG) {
 					bit_area += 1 + sprintf((char *)start, MYSQLND_LLU_SPEC,
-											(my_int64) Z_LVAL_PP(current_field));
+											(int64) Z_LVAL_PP(current_field));
 #if PHP_MAJOR_VERSION >= 6
 					if (as_unicode) {
 						ZVAL_UTF8_STRINGL(*current_field, start, bit_area - start - 1, 0);
