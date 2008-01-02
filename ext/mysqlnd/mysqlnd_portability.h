@@ -69,6 +69,7 @@ typedef int8_t int8;				/* Signed integer >= 8    bits */
 #endif
 #endif
 
+
 #ifndef HAVE_UINT8
 #ifndef HAVE_UINT8_T
 typedef unsigned char uint8;		/* Unsigned integer >= 8    bits */
@@ -97,45 +98,81 @@ typedef uint16_t uint16;			/* Signed integer >= 16 bits */
 typedef unsigned char uchar;		/* Short for unsigned char */
 #endif
 
-
-#if defined(HAVE_INT32_T) && defined(HAVE_UINT32_T)
+#ifndef HAVE_INT32
+#ifdef HAVE_INT32_T
 typedef int32_t int32;
-typedef uint32_t uint32;
-
 #elif SIZEOF_INT == 4
-
-#ifndef HAVE_INT32
 typedef signed int int32;
-#endif
-#ifndef HAVE_UINT32
-typedef unsigned int uint32;
-#endif
-
 #elif SIZEOF_LONG == 4
-
-#ifndef HAVE_INT32
 typedef signed long int32;
+#else
+error "Neither int nor long is of 4 bytes width"
 #endif
+#endif /* HAVE_INT32 */
+
+
 #ifndef HAVE_UINT32
+#ifdef HAVE_UINT32_T
+typedef uint32_t uint32;
+#elif SIZEOF_INT == 4
+typedef unsigned int uint32;
+#elif SIZEOF_LONG == 4
 typedef unsigned long uint32;
+#else
+#error "Neither int nor long is of 4 bytes width"
+#endif
+#endif /* HAVE_UINT32 */
+
+
+#ifndef HAVE_INT64
+#ifdef HAVE_INT64_T
+typedef int64_t int64;
+#elif SIZEOF_INT == 8
+typedef signed int int64;
+#elif SIZEOF_LONG == 8
+typedef signed long int64;
+#elif SIZEOF_LONG_LONG == 8
+typedef signed long long int64;
+#else
+#error "Neither int nor long nor long long is of 8 bytes width"
+#endif
+#endif /* HAVE_INT64 */
+
+
+#ifndef HAVE_UINT64
+#ifdef HAVE_UINT64_T
+typedef uint64_t uint64;
+#elif SIZEOF_INT == 8
+typedef unsigned int uint64;
+#elif SIZEOF_LONG == 8
+typedef unsigned long uint64;
+#elif SIZEOF_LONG_LONG == 8
+typedef unsigned long long uint64;
+#else
+#error "Neither int nor long nor long long is of 8 bytes width"
+#endif
+#endif /* HAVE_INT64 */
+
+
+#ifdef PHP_WIN32
+#define MYSQLND_LLU_SPEC "%I64u"
+#define MYSQLND_LL_SPEC "%I64d"
+#ifndef L64
+#define L64(x) x##i64
+#endif
+typedef __int64 int64;
+typedef unsigned __int64 uint64;
+#else
+#define MYSQLND_LLU_SPEC "%llu"
+#define MYSQLND_LL_SPEC "%lld"
+#ifndef L64
+#define L64(x) x##LL
+#endif
 #endif
 
-#else
-error "Neither int or long is of 4 bytes width"
-#endif
 
-#if !defined(HAVE_ULONG) && !defined(__USE_MISC) && !defined(ulong)
-typedef unsigned long    ulong;    /* Short for unsigned long */
-#endif
-#ifndef longlong_defined
-#if defined(HAVE_LONG_LONG) && SIZEOF_LONG != 8
-typedef unsigned long long int ulonglong; /* ulong or unsigned long long */
-typedef long long int longlong;
-#else
-typedef unsigned long    ulonglong;    /* ulong or unsigned long long */
-typedef long  longlong;
-#endif
-#endif
+typedef int64 longlong;
+typedef uint64 ulonglong;
 
 
 #define int1store(T,A)	do { *((zend_uchar*) (T)) = (A); } while(0)
@@ -280,29 +317,9 @@ typedef union {
                                (((uint32) ((uchar) (A)[1])) << 8) +\
                                (((uint32) ((uchar) (A)[2])) << 16) +\
                                (((uint32) ((uchar) (A)[3])) << 24))
-#define bit_uint5korr(A)  ((ulonglong)(((uint32) ((uchar) (A)[0])) +\
-                                  (((uint32) ((uchar) (A)[1])) << 8) +\
-                                  (((uint32) ((uchar) (A)[2])) << 16) +\
-                                  (((uint32) ((uchar) (A)[3])) << 24)) +\
-                               (((ulonglong) ((uchar) (A)[4])) << 32))
-/* From Andrey Hristov, based on uint5korr */
-#define bit_uint6korr(A)	((ulonglong)(((uint32) (((uchar*) (A))[5])) +\
-									(((uint32) (((uchar*) (A))[4])) << 8) +\
-									(((uint32) (((uchar*) (A))[3])) << 16) +\
-									(((uint32) (((uchar*) (A))[2])) << 24)) +\
-									(((ulonglong) (((uint32) (((uchar*) (A))[1])) +\
-									(((uint32) (((uchar*) (A))[0]) << 8)))) << 32))
-
-#define bit_uint7korr(A)	((ulonglong)(((uint32) (((uchar*) (A))[6])) +\
-									(((uint32) (((uchar*) (A))[5])) << 8) +\
-									(((uint32) (((uchar*) (A))[4])) << 16) +\
-									(((uint32) (((uchar*) (A))[3])) << 24)) +\
-									(((ulonglong) (((uint32) (((uchar*) (A))[2])) +\
-									(((uint32) (((uchar*) (A))[1])) << 8) +\
-									(((uint32) (((uchar*) (A))[0])) << 16))) << 32))
 
 
-#define bit_uint8korr(A) ((ulonglong)(((uint32) (((uchar*) (A))[7])) +\
+#define uint8korr(A) ((ulonglong)(((uint32) (((uchar*) (A))[7])) +\
 									(((uint32) (((uchar*) (A))[6])) << 8) +\
 									(((uint32) (((uchar*) (A))[5])) << 16) +\
 									(((uint32) (((uchar*) (A))[4])) << 24)) +\
@@ -473,37 +490,6 @@ typedef union {
 #endif /* WORDS_BIGENDIAN */
 
 
-#ifdef PHP_WIN32
-#define MYSQLND_LLU_SPEC "%I64u"
-#define MYSQLND_LL_SPEC "%I64d"
-#ifndef L64
-#define L64(x) x##i64
-#endif
-typedef unsigned __int64 my_uint64;
-typedef __int64 my_int64;
-typedef unsigned __int64 mynd_ulonglong;
-typedef __int64 mynd_longlong;
-#else
-#define MYSQLND_LLU_SPEC "%llu"
-#define MYSQLND_LL_SPEC "%lld"
-#ifndef L64
-#define L64(x) x##LL
-#endif
-#ifndef HAVE_UINT64_T
-typedef unsigned long long my_uint64;
-typedef unsigned long long mynd_ulonglong;
-#else
-typedef uint64_t my_uint64;
-typedef uint64_t mynd_ulonglong;
-#endif
-#ifndef HAVE_INT64_T
-typedef long long my_int64;
-typedef long long mynd_longlong;
-#else
-typedef int64_t my_int64;
-typedef int64_t mynd_longlong;
-#endif
-#endif
 
 /*
  * Local variables:
