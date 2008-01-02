@@ -33,7 +33,7 @@ class FindFile extends FilterIterator
 	function __construct($path, $file)
 	{
 		$this->file = $file;
-		$list = split(';', $path);
+		$list = split(PATH_SEPARATOR, $path);
 		if (count($list) <= 1) {
 			parent::__construct(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)));
 		} else {
