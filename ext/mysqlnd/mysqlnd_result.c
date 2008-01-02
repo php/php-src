@@ -765,7 +765,7 @@ mysqlnd_store_result_fetch_data(MYSQLND * const conn, MYSQLND_RES *result,
 		zval **current_row;
 
 		if (!free_rows) {
-			mynd_ulonglong total_rows = free_rows = next_extend = next_extend * 5 / 3; /* extend with 33% */
+			uint64 total_rows = free_rows = next_extend = next_extend * 5 / 3; /* extend with 33% */
 			total_rows += set->row_count;
 			set->data = mnd_perealloc(set->data, total_rows * sizeof(zval **), set->persistent);
 
@@ -937,7 +937,7 @@ MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES *result, zend_bool implicit
 
 /* {{{ mysqlnd_res::data_seek */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES *result, mynd_ulonglong row TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES *result, uint64 row TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::data_seek");
 	DBG_INF_FMT("row=%lu", row);
@@ -959,7 +959,7 @@ MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES *result, mynd_ulonglong row T
 
 
 /* {{{ mysqlnd_res::num_fields */
-mynd_ulonglong
+uint64
 MYSQLND_METHOD(mysqlnd_res, num_rows)(const MYSQLND_RES * const res)
 {
 	/* Be compatible with libmysql. We count row_count, but will return 0 */
