@@ -173,8 +173,8 @@ typedef struct st_php_mysql_packet_auth {
 typedef struct st_php_mysql_packet_ok {
 	mysqlnd_packet_header		header;
 	mysqlnd_1b		field_count; /* always 0x0 */
-	mynd_ulonglong	affected_rows;
-	mynd_ulonglong	last_insert_id;
+	uint64	affected_rows;
+	uint64	last_insert_id;
 	mysqlnd_2b		server_status;
 	mysqlnd_2b		warning_count;
 	char			*message;
@@ -225,8 +225,8 @@ typedef struct st_php_mysql_packet_rset_header {
 	*/
 	mysqlnd_2b			warning_count;
 	mysqlnd_2b			server_status;
-	mynd_ulonglong		affected_rows;
-	mynd_ulonglong		last_insert_id;
+	uint64		affected_rows;
+	uint64		last_insert_id;
 	/* This is for both LOAD DATA or info, when no result set */
 	char				*info_or_local_file;
 	size_t				info_or_local_file_len;
@@ -319,7 +319,7 @@ size_t php_mysqlnd_consume_uneaten_data(MYSQLND * const conn, enum php_mysqlnd_s
 void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass);
 
 unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
-zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, mynd_ulonglong length);
+zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64 length);
 
 extern char * const mysqlnd_empty_string;
 

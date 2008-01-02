@@ -86,7 +86,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 #define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value) \
  { \
  	if (MYSQLND_G(collect_statistics)) { \
-		my_uint64 v = (my_uint64) (value); \
+		uint64 v = (uint64) (value); \
 		DBG_INF_FMT("Global&Conn stat increase w value [%s]", mysqlnd_stats_values_names[statistic]); \
 		tsrm_mutex_lock(mysqlnd_global_stats->LOCK_access); \
 		mysqlnd_global_stats->values[(statistic)] += v; \
@@ -100,9 +100,9 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 #define MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats, statistic1, value1, statistic2, value2, statistic3, value3) \
  { \
  	if (MYSQLND_G(collect_statistics)) { \
-		my_uint64 v1 = (my_uint64) (value1); \
-		my_uint64 v2 = (my_uint64) (value2); \
-		my_uint64 v3 = (my_uint64) (value3); \
+		uint64 v1 = (uint64) (value1); \
+		uint64 v2 = (uint64) (value2); \
+		uint64 v3 = (uint64) (value3); \
 								 \
 		tsrm_mutex_lock(mysqlnd_global_stats->LOCK_access); \
 		mysqlnd_global_stats->values[(statistic1)]+= v1; \
@@ -163,7 +163,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 
 #define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value) \
  { \
-	my_uint64 v = (my_uint64) (value); \
+	uint64 v = (uint64) (value); \
 	DBG_INF_FMT("Global&Conn stats increase w value [%s]", mysqlnd_stats_values_names[statistic]); \
  	if (MYSQLND_G(collect_statistics)) { \
 		mysqlnd_global_stats->values[(statistic)] += v; \
@@ -176,9 +176,9 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 #define MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats, statistic1, value1, statistic2, value2, statistic3, value3) \
  { \
  	if (MYSQLND_G(collect_statistics)) { \
-		my_uint64 v1 = (my_uint64) (value1); \
-		my_uint64 v2 = (my_uint64) (value2); \
-		my_uint64 v3 = (my_uint64) (value3); \
+		uint64 v1 = (uint64) (value1); \
+		uint64 v2 = (uint64) (value2); \
+		uint64 v3 = (uint64) (value3); \
 								\
 		mysqlnd_global_stats->values[(statistic1)]+= v1; \
 		mysqlnd_global_stats->values[(statistic2)]+= v2; \
