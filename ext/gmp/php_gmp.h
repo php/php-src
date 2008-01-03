@@ -26,12 +26,6 @@
 extern zend_module_entry gmp_module_entry;
 #define phpext_gmp_ptr &gmp_module_entry
 
-#ifdef ZEND_WIN32
-#define GMP_API __declspec(dllexport)
-#else
-#define GMP_API
-#endif
-
 ZEND_MODULE_STARTUP_D(gmp);
 ZEND_MODULE_DEACTIVATE_D(gmp);
 ZEND_MODULE_INFO_D(gmp);

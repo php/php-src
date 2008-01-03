@@ -24,12 +24,6 @@
 extern zend_module_entry xsl_module_entry;
 #define phpext_xsl_ptr &xsl_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_XSL_API __declspec(dllexport)
-#else
-#define PHP_XSL_API
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif

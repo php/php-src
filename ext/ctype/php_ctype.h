@@ -24,12 +24,6 @@
 extern zend_module_entry ctype_module_entry;
 #define phpext_ctype_ptr &ctype_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_CTYPE_API __declspec(dllexport)
-#else
-#define PHP_CTYPE_API
-#endif
-
 #else
 
 #define phpext_ctype_ptr NULL

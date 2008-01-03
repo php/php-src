@@ -24,12 +24,6 @@
 extern zend_module_entry pdo_oci_module_entry;
 #define phpext_pdo_oci_ptr &pdo_oci_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_PDO_OCI_API __declspec(dllexport)
-#else
-#define PHP_PDO_OCI_API
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif
