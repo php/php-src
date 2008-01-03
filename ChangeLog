@@ -1,3 +1,57 @@
+2008-01-02  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h:
+      - Fix problems with double definitions
+      - Clean up a bit a type mess - 4 types less. No need to have aliases
+        for the same thing (unification is the name).
+      - New macro for Johannes mysqlnd_stmt_ro_result_metadata
+      ----------------------------------------------------------------------
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h:
+      - Fix problems with double definitions
+      - Clean up a bit a type mess - 4 types less. No need to have aliases
+        for the same thing (unification is the name).
+      - New macro for Johannes mysqlnd_stmt_ro_result_metadata
+
+2008-01-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/examples/findfile.inc:
+      MFB: Fixed bug #43647 (Make FindFile use PATH_SEPARATOR instead of ";")
+
+    * ext/spl/examples/findfile.inc:
+      
+      MFB: Fixed bug #43647 (Make FindFile use PATH_SEPARATOR instead of ";")
+
+    * (PHP_5_3)
+      ext/spl/examples/findfile.inc:
+      
+      Fixed bug #43647 (Make FindFile use PATH_SEPARATOR instead of ";")
+
 2008-01-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * sapi/cli/php.1.in
