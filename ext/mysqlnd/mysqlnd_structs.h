@@ -97,7 +97,6 @@ typedef struct st_mysqlnd_charset
 	char	*collation;
 	uint	char_minlen;
 	uint	char_maxlen;
-	uint	dangerous_for_escape_backslash;
 	uint 	(*mb_charlen)(uint c);
 	uint 	(*mb_valid)(const char *start, const char *end);
 } MYSQLND_CHARSET;
