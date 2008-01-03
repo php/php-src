@@ -34,12 +34,6 @@ extern zend_module_entry xml_module_entry;
 
 #include "ext/xml/expat_compat.h"
 
-#ifdef PHP_WIN32
-#define PHP_XML_API __declspec(dllexport)
-#else
-#define PHP_XML_API
-#endif
-
 
 #ifdef XML_UNICODE
 #error "UTF-16 Unicode support not implemented!"

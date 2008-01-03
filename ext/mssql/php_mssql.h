@@ -25,11 +25,6 @@
 
 #if HAVE_MSSQL
 #define MSDBLIB
-#ifdef PHP_WIN32
-#define PHP_MSSQL_API __declspec(dllexport)
-#else
-#define PHP_MSSQL_API
-#endif
 
 #include <sqlfront.h>
 #include <sqldb.h>

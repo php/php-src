@@ -173,11 +173,6 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable *ref_map;
 ZEND_END_MODULE_GLOBALS(soap)
 
-#ifdef PHP_WIN32
-#define PHP_SOAP_API __declspec(dllexport)
-#else
-#define PHP_SOAP_API
-#endif
 #ifdef ZTS
 #include "TSRM.h"
 #endif

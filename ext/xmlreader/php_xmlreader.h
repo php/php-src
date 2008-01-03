@@ -24,12 +24,6 @@
 extern zend_module_entry xmlreader_module_entry;
 #define phpext_xmlreader_ptr &xmlreader_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_XMLREADER_API __declspec(dllexport)
-#else
-#define PHP_XMLREADER_API
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif

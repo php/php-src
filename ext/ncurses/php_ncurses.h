@@ -39,12 +39,6 @@ extern zend_module_entry ncurses_module_entry;
 extern const zend_function_entry ncurses_functions[];
 #include "php_ncurses_fe.h"
 
-#ifdef PHP_WIN32
-#define PHP_NCURSES_API __declspec(dllexport)
-#else
-#define PHP_NCURSES_API
-#endif
-
 PHP_MINIT_FUNCTION(ncurses);
 PHP_MSHUTDOWN_FUNCTION(ncurses);
 PHP_MINFO_FUNCTION(ncurses);

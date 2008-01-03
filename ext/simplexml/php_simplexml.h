@@ -24,12 +24,6 @@
 extern zend_module_entry simplexml_module_entry;
 #define phpext_simplexml_ptr &simplexml_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_SIMPLEXML_API __declspec(dllexport)
-#else
-#define PHP_SIMPLEXML_API
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif

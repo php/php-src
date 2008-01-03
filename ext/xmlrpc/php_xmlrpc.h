@@ -61,12 +61,6 @@
 extern zend_module_entry xmlrpc_module_entry;
 #define phpext_xmlrpc_ptr &xmlrpc_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_XMLRPC_API __declspec(dllexport)
-#else
-#define PHP_XMLRPC_API
-#endif
-
 PHP_MINIT_FUNCTION(xmlrpc);
 PHP_MINFO_FUNCTION(xmlrpc);
 
