@@ -1,4 +1,4 @@
-.TH PHP 1 "2007" "The PHP Group" "Scripting Language"
+.TH PHP 1 "2008" "The PHP Group" "Scripting Language"
 .SH NAME
 .TP 15
 php - PHP Command Line Interface 'CLI'
@@ -185,7 +185,7 @@ contributors all around the world.
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2007 The PHP Group
+Copyright \(co 1997\-2008 The PHP Group
 .LP
 This source file is subject to version 3.01 of the PHP license,
 that is bundled with this package in the file LICENSE, and is
