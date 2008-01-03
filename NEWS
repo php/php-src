@@ -1,8 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 03 Jan 2008, Version 4.4.8
-	
-20 Dec 2007, Version 4.4.8RC1
 - Improved fix for MOPB-02-2007. (Ilia)
 - Fixed an integer overflow inside chunk_split(). Identified by Gerhard Wagner.
   (Ilia)
