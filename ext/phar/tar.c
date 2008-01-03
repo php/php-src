@@ -276,6 +276,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	} while (read != 0);
 	myphar->fname = estrndup(fname, fname_len);
 	myphar->fname_len = fname_len;
+	myphar->fp = fp;
 	phar_request_initialize(TSRMLS_C);
 	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len, (void*)&myphar, sizeof(phar_archive_data*),  NULL);
 	if (actual_alias) {
@@ -287,7 +288,6 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	if (pphar) {
 		*pphar = myphar;
 	}
-	php_stream_close(fp);
 	return SUCCESS;
 }
 /* }}} */
@@ -305,6 +305,7 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	phar_entry_info *entry = (phar_entry_info *) pDest;
 	struct _phar_pass_tar_info *fp = (struct _phar_pass_tar_info *)argument;
 	php_stream *file;
+	char padding[512];
 
 	if (entry->is_deleted) {
 		return ZEND_HASH_APPLY_REMOVE;
@@ -377,6 +378,9 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 		return ZEND_HASH_APPLY_STOP;
 	}
 
+	memset(padding, 0, 512);
+	php_stream_write(fp->new, padding, ((entry->uncompressed_filesize +511)&~511) - entry->uncompressed_filesize);
+
 	if (entry->fp) {
 		php_stream_close(entry->fp);
 		entry->fp = NULL;
@@ -394,6 +398,7 @@ int phar_tar_flush(phar_archive_data *archive, char *user_stub, long len, char *
 	php_stream *oldfile, *newfile, *stubfile;
 	int closeoldfile, free_user_stub;
 	struct _phar_pass_tar_info pass;
+	char *buf;
 
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
 	entry.timestamp = time(NULL);
@@ -408,7 +413,7 @@ int phar_tar_flush(phar_archive_data *archive, char *user_stub, long len, char *
 		entry.crc32 = phar_tar_checksum(archive->alias, archive->alias_len);
 		php_stream_write(entry.fp, archive->alias, archive->alias_len);
 		entry.uncompressed_filesize = archive->alias_len;
-		zend_hash_add(&archive->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
+		zend_hash_update(&archive->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
 	}
 
 	/* set stub */
@@ -465,7 +470,7 @@ int phar_tar_flush(phar_archive_data *archive, char *user_stub, long len, char *
 		}
 		entry.filename = estrndup(".phar/stub.php", sizeof(".phar/stub.php")-1);
 		entry.filename_len = sizeof(".phar/stub.php")-1;
-		zend_hash_add(&archive->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
+		zend_hash_update(&archive->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
 		if (free_user_stub) {
 			efree(user_stub);
 		}
@@ -510,6 +515,11 @@ int phar_tar_flush(phar_archive_data *archive, char *user_stub, long len, char *
 	pass.error = error;
 
 	zend_hash_apply_with_argument(&archive->manifest, (apply_func_arg_t) phar_tar_writeheaders, (void *) &pass TSRMLS_CC);
+
+	/* add final zero blocks */
+	buf = (char *) ecalloc(1024, 1);
+	php_stream_write(newfile, buf, 1024);
+	efree(buf);
 
 	if (closeoldfile) {
 		php_stream_close(oldfile);
