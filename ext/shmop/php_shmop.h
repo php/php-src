@@ -24,12 +24,6 @@
 extern zend_module_entry shmop_module_entry;
 #define phpext_shmop_ptr &shmop_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_SHMOP_API __declspec(dllexport)
-#else
-#define PHP_SHMOP_API
-#endif
-
 PHP_MINIT_FUNCTION(shmop);
 PHP_MINFO_FUNCTION(shmop);
 

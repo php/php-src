@@ -26,12 +26,6 @@
 extern zend_module_entry pdo_pgsql_module_entry;
 #define phpext_pdo_pgsql_ptr &pdo_pgsql_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_PDO_PGSQL_API __declspec(dllexport)
-#else
-#define PHP_PDO_PGSQL_API
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif

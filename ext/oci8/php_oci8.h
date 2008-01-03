@@ -31,12 +31,6 @@
 # ifndef PHP_OCI8_H
 #  define PHP_OCI8_H
 
-#ifdef PHP_WIN32
-#define PHP_OCI_API __declspec(dllexport)
-#else
-#define PHP_OCI_API
-#endif                                   
-
 #ifdef ZTS
 # include "TSRM.h"
 #endif

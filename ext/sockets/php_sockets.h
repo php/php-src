@@ -30,10 +30,8 @@ extern zend_module_entry sockets_module_entry;
 #define phpext_sockets_ptr &sockets_module_entry
 
 #ifdef PHP_WIN32
-#define PHP_SOCKETS_API __declspec(dllexport)
 #include <winsock.h>
 #else
-#define PHP_SOCKETS_API
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
