@@ -298,7 +298,7 @@ static void destroy_phar_data(void *pDest) /* {{{ */
 /**
  * destructor for the manifest hash, frees each file's entry
  */
-static void destroy_phar_manifest(void *pDest) /* {{{ */
+void destroy_phar_manifest(void *pDest) /* {{{ */
 {
 	phar_entry_info *entry = (phar_entry_info *)pDest;
 	TSRMLS_FETCH();
@@ -328,6 +328,10 @@ static void destroy_phar_manifest(void *pDest) /* {{{ */
 		entry->zip = 0;
 	}
 #endif
+	if (entry->linkname) {
+		efree(entry->linkname);
+		entry->linkname = 0;
+	}
 }
 /* }}} */
 
@@ -493,7 +497,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 				entry = (phar_entry_info *) ecalloc(1, sizeof(phar_entry_info));
 				entry->is_dir = 1;
 				/* this next line tells PharFileInfo->__destruct() to efree the filename */
-				entry->is_zip = 0;
+				entry->is_zip = entry->is_tar = 0;
 				entry->filename = (char *) estrndup(path, path_len + 1);
 				entry->filename_len = path_len;
 				return entry;
@@ -624,6 +628,7 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 	(*ret)->for_write = for_write;
 	(*ret)->internal_file = entry;
 	(*ret)->is_zip = entry->is_zip;
+	(*ret)->is_tar = entry->is_tar;
 	if (entry->fp) {
 		/* make a copy */
 		if (for_trunc) {
@@ -1646,9 +1651,6 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 }
 /* }}} */
 
-/* forward declaration */
-static int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
-
 /**
  * Create or open a phar for writing
  */
@@ -1734,7 +1736,7 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 	}
 
 	if (phar_open_loaded(fname, fname_len, alias, alias_len, options, pphar, 0 TSRMLS_CC) == SUCCESS) {
-		if (!PHAR_G(readonly)) {
+		if (pphar && !PHAR_G(readonly)) {
 			(*pphar)->is_writeable = 1;
 		}
 		return SUCCESS;
@@ -1745,11 +1747,15 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 			/* assume zip-based phar */
 			return phar_open_or_create_zip(fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC);
 		}
+		if (ext_len >= sizeof(".phar.tar")-1 && !memcmp((void *) ext_str, (void *) ".phar.tar", sizeof(".phar.tar")-1)) {
+			/* assume tar-based phar */
+			return phar_open_or_create_tar(fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC);
+		}
 	}
 	return phar_create_or_parse_filename(fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC);
 }
 
-static int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *mydata;
 	char *my_realpath;
@@ -1920,6 +1926,11 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 				php_stream_close(fp);
 				return phar_open_zipfile(fname, fname_len, alias, alias_len, pphar, error TSRMLS_CC);
 			}
+			if (got > 512) {
+				if (phar_is_tar(pos)) {
+					return phar_open_tarfile(fp, fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC);
+				}
+			}
 		}
 		if ((pos = strstr(buffer, token)) != NULL) {
 			halt_offset += (pos - buffer); /* no -tokenlen+tokenlen here */
@@ -1940,6 +1951,8 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ex
 	char *pos_p = strstr(filename, ".phar.php");
 	char *pos_zi = strstr(filename, ".phar.zip");
 	char *pos_zi2 = strstr(filename, ".phar.zip.php");
+	char *pos_t = strstr(filename, ".phar.tar");
+	char *pos_t2 = strstr(filename, ".phar.tar.php");
 	char *pos_z = strstr(filename, ".phar.gz");
 	char *pos_b = strstr(filename, ".phar.bz2");
 
@@ -1960,6 +1973,12 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ex
 		*ext_len = 13;
 	} else if (pos_zi) {
 		*ext_str = pos_zi;
+		*ext_len = 9;
+	} else if (pos_t2) {
+		*ext_str = pos_t2;
+		*ext_len = 13;
+	} else if (pos_t) {
+		*ext_str = pos_t;
 		*ext_len = 9;
 	} else if ((pos_p = strstr(filename, ".phar")) != NULL) {
 		*ext_str = pos_p;
@@ -2292,7 +2311,7 @@ int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC) 
 		entry = fname;
 		fname = arch;
 		fname_len = arch_len;
-		if (SUCCESS == phar_open_loaded(fname, fname_len, alias, alias_len, 0, &phar, 0 TSRMLS_CC) && phar && phar->is_zip) {
+		if (SUCCESS == phar_open_loaded(fname, fname_len, alias, alias_len, 0, &phar, 0 TSRMLS_CC) && phar && (phar->is_zip || phar->is_tar)) {
 			efree(arch);
 			return SUCCESS;
 		}
@@ -3317,6 +3336,9 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 		return phar_zip_flush(archive, user_stub, len, error TSRMLS_CC);
 	}
 #endif
+	if (archive->is_tar) {
+		return phar_tar_flush(archive, user_stub, len, error TSRMLS_CC);
+	}
 	if (archive->fp && !archive->is_brandnew) {
 		oldfile = archive->fp;
 		closeoldfile = 0;
@@ -4688,6 +4710,17 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 		}
 		goto skip_phar;
 	}
+	if (strstr(file_handle->filename, ".phar.tar") && !strstr(file_handle->filename, ":\\")) {
+		/* zip-based phar */
+		spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
+		file_handle->type = ZEND_HANDLE_FILENAME;
+		file_handle->free_filename = 1;
+		file_handle->filename = name;
+		if (file_handle->opened_path) {
+			efree(file_handle->opened_path);
+		}
+		goto skip_phar;
+	}
 	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
 		char *arch, *entry;
 		int arch_len, entry_len;
@@ -4859,6 +4892,8 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	php_info_print_table_row(2, "Phar API version", PHAR_API_VERSION_STR);
 	php_info_print_table_row(2, "CVS revision", "$Revision$");
 	php_info_print_table_row(2, "Phar-based phar archives", 
+		"enabled");
+	php_info_print_table_row(2, "Tar-based phar archives", 
 		"enabled");
 #if HAVE_PHAR_ZIP
 	php_info_print_table_row(2, "ZIP-based phar archives", 

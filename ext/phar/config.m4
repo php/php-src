@@ -32,7 +32,7 @@ if test "$PHP_PHAR" != "no"; then
 	else
 		AC_MSG_RESULT([no])
 	fi
-  PHP_NEW_EXTENSION(phar, phar.c phar_object.c phar_path_check.c $PHP_PHAR_SOURCES, $ext_shared)
+  PHP_NEW_EXTENSION(phar, tar.c phar.c phar_object.c phar_path_check.c $PHP_PHAR_SOURCES, $ext_shared)
   PHP_ADD_BUILD_DIR($ext_builddir/lib, 1)
   PHP_SUBST(PHAR_SHARED_LIBADD)
   PHP_ADD_EXTENSION_DEP(phar, zlib, true)
