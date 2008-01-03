@@ -24,12 +24,6 @@
 extern zend_module_entry mime_magic_module_entry;
 #define phpext_mime_magic_ptr &mime_magic_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_MIME_MAGIC_API __declspec(dllexport)
-#else
-#define PHP_MIME_MAGIC_API
-#endif
-
 PHP_MINIT_FUNCTION(mime_magic);
 PHP_MSHUTDOWN_FUNCTION(mime_magic);
 PHP_RINIT_FUNCTION(mime_magic);

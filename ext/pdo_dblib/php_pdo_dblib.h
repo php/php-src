@@ -26,12 +26,6 @@
 extern zend_module_entry pdo_dblib_module_entry;
 #define phpext_pdo_dblib_ptr &pdo_dblib_module_entry
 
-#ifdef PHP_WIN32
-# define PHP_PDO_DBLIB_API __declspec(dllexport)
-#else
-# define PHP_PDO_DBLIB_API
-#endif
-
 #ifdef ZTS
 # include "TSRM.h"
 #endif

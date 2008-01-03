@@ -24,12 +24,6 @@
 extern zend_module_entry com_dotnet_module_entry;
 #define phpext_com_dotnet_ptr &com_dotnet_module_entry
 
-#ifdef PHP_WIN32
-# define PHP_COM_DOTNET_API __declspec(dllexport)
-#else
-# define PHP_COM_DOTNET_API
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif

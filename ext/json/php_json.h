@@ -26,12 +26,6 @@
 extern zend_module_entry json_module_entry;
 #define phpext_json_ptr &json_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_JSON_API __declspec(dllexport)
-#else
-#define PHP_JSON_API
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif

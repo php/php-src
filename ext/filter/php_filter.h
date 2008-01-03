@@ -33,12 +33,6 @@
 extern zend_module_entry filter_module_entry;
 #define phpext_filter_ptr &filter_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_FILTER_API __declspec(dllexport)
-#else
-#define PHP_FILTER_API
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif

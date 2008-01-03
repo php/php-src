@@ -27,12 +27,6 @@
 extern zend_module_entry pcntl_module_entry;
 #define phpext_pcntl_ptr &pcntl_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_PCNTL_API __declspec(dllexport)
-#else
-#define PHP_PCNTL_API
-#endif
-
 PHP_MINIT_FUNCTION(pcntl);
 PHP_MSHUTDOWN_FUNCTION(pcntl);
 PHP_RINIT_FUNCTION(pcntl);

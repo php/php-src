@@ -24,12 +24,6 @@
 extern zend_module_entry pdo_odbc_module_entry;
 #define phpext_pdo_odbc_ptr &pdo_odbc_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_PDO_ODBC_API __declspec(dllexport)
-#else
-#define PHP_PDO_ODBC_API
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif
