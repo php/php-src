@@ -73,6 +73,7 @@ typedef struct _tar_header {  /* {{{ */
 	                       the value of the prefix field, if non-null,
 	                       is prefixed to the name field to allow names
 	                       longer then 100 characters */
+	char padding[12];   /* unused zeroed bytes */
 } tar_header;
 /* }}} */
 

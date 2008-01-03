@@ -328,9 +328,9 @@ void destroy_phar_manifest(void *pDest) /* {{{ */
 		entry->zip = 0;
 	}
 #endif
-	if (entry->linkname) {
-		efree(entry->linkname);
-		entry->linkname = 0;
+	if (entry->link) {
+		efree(entry->link);
+		entry->link = 0;
 	}
 }
 /* }}} */
@@ -703,7 +703,7 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 	int ret = 0;
 
 	if (idata->internal_file) {
-		if (--idata->internal_file->fp_refcount <= 0) {
+		if (--idata->internal_file->fp_refcount < 0) {
 			idata->internal_file->fp_refcount = 0;
 		}
 		if (idata->fp && idata->fp != idata->internal_file->fp) {
@@ -824,6 +824,8 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 		}
 		etemp.filename = estrndup(etemp.filename, strlen(etemp.filename));
 	} else {
+		etemp.is_tar = phar->is_tar;
+		etemp.tar_type = '0';
 		etemp.filename = estrndup(path, path_len);
 	}
 #else
@@ -842,6 +844,8 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	ret->fp = entry->fp;
 	ret->position = 0;
 	ret->for_write = 1;
+	ret->is_zip = entry->is_zip;
+	ret->is_tar = entry->is_tar;
 	ret->internal_file = entry;
 	return ret;
 }
@@ -2515,7 +2519,7 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 						if (error) {
 							spprintf(error, 4096, "phar error: could not copy full zip file contents of entry \"%s\"", entry->filename);
 						}
-						fclose(fp);
+						php_stream_close(fp);
 						entry->fp = NULL;
 						zip_fclose(entry->zip);
 						entry->zip = NULL;
@@ -2527,12 +2531,12 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 
 				/* now use a decompression filter to inflate into our temp file */
 				if ((filter_name = phar_decompress_filter(entry, 0)) != NULL) {
-					filter = php_stream_filter_create(phar_decompress_filter(phar, 0), NULL, php_stream_is_persistent(fp) TSRMLS_CC);
+					filter = php_stream_filter_create(filter_name, NULL, php_stream_is_persistent(fp) TSRMLS_CC);
 				} else {
 					filter = NULL;
 				}
 				if (!filter) {
-					spprintf(error, 0, "phar error: unable to read phar \"%s\" (cannot create %s filter while decompressing file \"%s\")", phar->phar->fname, phar_decompress_filter(entry, 1), entry->filename);
+					spprintf(error, 0, "phar error: unable to read phar \"%s\" (cannot create %s filter while decompressing file \"%s\")", entry->phar->fname, phar_decompress_filter(entry, 1), entry->filename);
 					return NULL;			
 				}
 
@@ -4711,7 +4715,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 		goto skip_phar;
 	}
 	if (strstr(file_handle->filename, ".phar.tar") && !strstr(file_handle->filename, ":\\")) {
-		/* zip-based phar */
+		/* tar-based phar */
 		spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
 		file_handle->type = ZEND_HANDLE_FILENAME;
 		file_handle->free_filename = 1;
