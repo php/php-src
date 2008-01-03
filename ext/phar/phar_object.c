@@ -295,7 +295,7 @@ PHP_METHOD(Phar, webPhar)
 		entry = fname;
 		fname = arch;
 		fname_len = arch_len;
-		if (SUCCESS == phar_open_loaded(fname, fname_len, alias, alias_len, 0, &phar, 0 TSRMLS_CC) && phar && phar->is_zip) {
+		if (SUCCESS == phar_open_loaded(fname, fname_len, alias, alias_len, 0, &phar, 0 TSRMLS_CC) && phar && (phar->is_zip || phar->is_tar)) {
 			efree(arch);
 			fname = phar->fname;
 			fname_len = phar->fname_len;
@@ -1269,7 +1269,11 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 	
 	if (PHAR_G(readonly)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot change stub, phar is read-only");
+			"Cannot set signature algorithm, phar is read-only");
+	}
+	if (phar_obj->arc.archive->is_tar) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot set signature algorithm, not possible with tar-based phar archives");
 	}
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "l", &algo) != SUCCESS) {
@@ -1417,6 +1421,10 @@ PHP_METHOD(Phar, compressAllFilesGZ)
 #endif
 	PHAR_ARCHIVE_OBJECT();
 
+	if (phar_obj->arc.archive->is_tar) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot compress all files as Gzip, not possible with tar-based phar archives");
+	}
 	if (PHAR_G(readonly)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar is readonly, cannot change compression");
@@ -1454,6 +1462,15 @@ PHP_METHOD(Phar, compressAllFilesBZIP2)
 	char *error;
 #endif
 	PHAR_ARCHIVE_OBJECT();
+
+	if (phar_obj->arc.archive->is_tar) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot compress all files as Bzip2, not possible with tar-based phar archives");
+	}
+	if (phar_obj->arc.archive->is_zip) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot compress all files as Bzip2, not possible with zip-based phar archives");
+	}
 
 	if (PHAR_G(readonly)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
@@ -1585,6 +1602,9 @@ PHP_METHOD(Phar, copy)
 	newentry.fp = fp;
 	newentry.filename = estrndup(newfile, newfile_len);
 	newentry.filename_len = newfile_len;
+	if (oldentry->is_tar) {
+		newentry.tar_type = oldentry->tar_type;
+	}
 	phar_obj->arc.archive->is_modified = 1;
 	zend_hash_add(&phar_obj->arc.archive->manifest, newfile, newfile_len, (void*)&newentry, sizeof(phar_entry_info), NULL);
 
@@ -1798,6 +1818,29 @@ PHP_METHOD(Phar, getStub)
 		RETURN_STRINGL(buf, len, 0);
 	}
 #endif
+	if (phar_obj->arc.archive->is_tar) {
+		phar_entry_info *stub;
+
+		if (SUCCESS == zend_hash_find(&(phar_obj->arc.archive->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&stub)) {
+			if (phar_obj->arc.archive->fp && !phar_obj->arc.archive->is_brandnew) {
+				fp = phar_obj->arc.archive->fp;
+			} else {
+				fp = php_stream_open_wrapper(phar_obj->arc.archive->fname, "rb", 0, NULL);
+			}
+
+			if (!fp)  {
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
+					"Unable to read stub");
+				return;
+			}
+
+			php_stream_seek(fp, stub->offset_within_phar, SEEK_SET);
+			len = stub->uncompressed_filesize;
+			goto carry_on;
+		} else {
+			RETURN_STRINGL("", 0, 0);
+		}
+	}
 	len = phar_obj->arc.archive->halt_offset;
 
 	if (phar_obj->arc.archive->fp && !phar_obj->arc.archive->is_brandnew) {
@@ -1812,8 +1855,9 @@ PHP_METHOD(Phar, getStub)
 		return;
 	}
 
-	buf = safe_emalloc(len, 1, 1);
 	php_stream_rewind(fp);
+carry_on:
+	buf = safe_emalloc(len, 1, 1);
 	if (len != php_stream_read(fp, buf, len)) {
 		if (fp != phar_obj->arc.archive->fp) {
 			php_stream_close(fp);
@@ -1865,6 +1909,10 @@ PHP_METHOD(Phar, setMetadata)
 	zval *metadata;
 	PHAR_ARCHIVE_OBJECT();
 
+	if (phar_obj->arc.archive->is_tar) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot set metadata, not possible with tar-based phar archives");
+	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &metadata) == FAILURE) {
 		return;
 	}
@@ -1993,7 +2041,7 @@ PHP_METHOD(PharFileInfo, __destruct)
 	PHAR_ENTRY_OBJECT();
 
 	if (entry_obj->ent.entry->is_dir) {
-		if (!entry_obj->ent.entry->is_zip && entry_obj->ent.entry->filename) {
+		if (!entry_obj->ent.entry->is_zip && !entry_obj->ent.entry->is_tar && entry_obj->ent.entry->filename) {
 			efree(entry_obj->ent.entry->filename);
 			entry_obj->ent.entry->filename = NULL;
 		}
@@ -2167,6 +2215,10 @@ PHP_METHOD(PharFileInfo, setMetadata)
 	zval *metadata;
 	PHAR_ENTRY_OBJECT();
 
+	if (entry_obj->ent.entry->is_tar) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot set metadata, not possible with tar-based phar archives");
+	}
 	if (entry_obj->ent.entry->is_dir) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
 			"Phar entry is a directory, cannot set metadata"); \
@@ -2230,6 +2282,10 @@ PHP_METHOD(PharFileInfo, setCompressedGZ)
 	char *error;
 	PHAR_ENTRY_OBJECT();
 
+	if (entry_obj->ent.entry->is_tar) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot compress with Gzip compression, not possible with tar-based phar archives");
+	}
 	if (entry_obj->ent.entry->is_dir) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
 			"Phar entry is a directory, cannot set compression"); \
@@ -2281,6 +2337,10 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 	if (entry_obj->ent.entry->is_zip) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress with Bzip2 compression, not possible with zip-based phar archives");
+	}
+	if (entry_obj->ent.entry->is_tar) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot compress with Bzip2 compression, not possible with tar-based phar archives");
 	}
 	if (!phar_has_bz2) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,

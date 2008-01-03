@@ -25,6 +25,7 @@
 
 #include <time.h>
 #include "php.h"
+#include "tar.h"
 #include "php_ini.h"
 #include "zend_constants.h"
 #include "zend_execute.h"
@@ -184,6 +185,10 @@ typedef struct _phar_entry_info {
 	int                      is_dir:1;
 	phar_archive_data        *phar;
 	smart_str                metadata_str;
+	/* tar-based phar file stuff */
+	int                      is_tar:1;
+	char                     *link; /* symbolic link to another file */
+	char                     tar_type;
 	/* zip-based phar file stuff */
 	int                      is_zip:1;
 #if HAVE_PHAR_ZIP
@@ -219,6 +224,8 @@ struct _phar_archive_data {
 	int                      donotflush:1;
 	/* zip-based phar variables */
 	int                      is_zip:1;
+	/* tar-based phar variables */
+	int                      is_tar:1;
 #if HAVE_PHAR_ZIP
 	struct zip               *zip;
 #endif
@@ -245,6 +252,7 @@ typedef struct _phar_entry_data {
 	off_t                    zero;
 	int                      for_write:1;
 	int                      is_zip:1;
+	int                      is_tar:1;
 	phar_entry_info          *internal_file;
 } phar_entry_data;
 
@@ -283,10 +291,18 @@ void phar_object_init(TSRMLS_D);
 
 int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
+int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
 				      char **error, int for_write TSRMLS_DC);
 int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
+void destroy_phar_manifest(void *pDest);
+/* tar functions */
+int phar_is_tar(char *buf);
+int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
+int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
+int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
+int phar_tar_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
 
 #ifdef PHAR_MAIN
 static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS);
