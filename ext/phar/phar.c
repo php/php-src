@@ -206,6 +206,12 @@ PHP_INI_END()
  */
 static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 {
+#if HAVE_PHAR_ZIP
+	if (data->zip) {
+		zip_close(data->zip);
+		data->zip = 0;
+	}
+#endif
 	if (data->alias && data->alias != data->fname) {
 		efree(data->alias);
 		data->alias = NULL;
@@ -218,6 +224,7 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 	}
 	if (data->manifest.arBuckets) {
 		zend_hash_destroy(&data->manifest);
+		data->manifest.arBuckets = NULL;
 	}
 	if (data->metadata) {
 		zval_ptr_dtor(&data->metadata);
@@ -227,12 +234,6 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 		php_stream_close(data->fp);
 		data->fp = 0;
 	}
-#if HAVE_PHAR_ZIP
-	if (data->zip) {
-		zip_close(data->zip);
-		data->zip = 0;
-	}
-#endif
 	efree(data);
 }
 /* }}}*/
@@ -1123,6 +1124,7 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 						}
 						zip_close(zip);
 						zend_hash_destroy(&(mydata->manifest));
+						mdata->manifest.arBuckets = NULL;
 						efree(mydata);
 						if (error) {
 							spprintf(error, 0, "bz2 extension is required for Bzip2 compressed zip-based .phar file \"%s\"", fname);
@@ -1139,6 +1141,7 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 							}
 							zip_close(zip);
 							zend_hash_destroy(&(mydata->manifest));
+							mydata->manifest.arBuckets = NULL;
 							efree(mydata);
 							if (error) {
 								spprintf(error, 0, "bz2 extension is required for gz compressed zip-based .phar file \"%s\"", fname);
@@ -2240,7 +2243,7 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 /*			fprintf(stderr, "Fragment:  %s\n", resource->fragment);*/
 		}
 #endif
-		if (PHAR_GLOBALS->phar_plain_map.arBuckets && zend_hash_exists(&(PHAR_GLOBALS->phar_plain_map), arch, arch_len+1)) {
+		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_plain_map.arBuckets && zend_hash_exists(&(PHAR_GLOBALS->phar_plain_map), arch, arch_len+1)) {
 			return resource;
 		}
 		if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
@@ -4703,33 +4706,36 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 
 	save = zend_compile_file; /* restore current handler or we cause trouble */
 	zend_compile_file = phar_orig_compile_file;
-	if (strstr(file_handle->filename, ".phar.zip") && !strstr(file_handle->filename, ":\\")) {
-		/* zip-based phar */
-		spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
-		file_handle->type = ZEND_HANDLE_FILENAME;
-		file_handle->free_filename = 1;
-		file_handle->filename = name;
-		if (file_handle->opened_path) {
-			efree(file_handle->opened_path);
+
+	fname = zend_get_executed_filename(TSRMLS_C);
+	fname_len = strlen(fname);
+	if (fname_len == sizeof("[no active file]")-1 && !strncmp(fname, "[no active file]", fname_len)) {
+		if (strstr(file_handle->filename, ".phar.zip") && !strstr(file_handle->filename, ":\\")) {
+			/* zip-based phar */
+			spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
+			file_handle->type = ZEND_HANDLE_FILENAME;
+			file_handle->free_filename = 1;
+			file_handle->filename = name;
+			if (file_handle->opened_path) {
+				efree(file_handle->opened_path);
+			}
+			goto skip_phar;
 		}
-		goto skip_phar;
-	}
-	if (strstr(file_handle->filename, ".phar.tar") && !strstr(file_handle->filename, ":\\")) {
-		/* tar-based phar */
-		spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
-		file_handle->type = ZEND_HANDLE_FILENAME;
-		file_handle->free_filename = 1;
-		file_handle->filename = name;
-		if (file_handle->opened_path) {
-			efree(file_handle->opened_path);
+		if (strstr(file_handle->filename, ".phar.tar") && !strstr(file_handle->filename, ":\\")) {
+			/* tar-based phar */
+			spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
+			file_handle->type = ZEND_HANDLE_FILENAME;
+			file_handle->free_filename = 1;
+			file_handle->filename = name;
+			if (file_handle->opened_path) {
+				efree(file_handle->opened_path);
+			}
+			goto skip_phar;
 		}
-		goto skip_phar;
 	}
 	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
 		char *arch, *entry;
 		int arch_len, entry_len;
-		fname = zend_get_executed_filename(TSRMLS_C);
-		fname_len = strlen(fname);
 		if (strncasecmp(fname, "phar://", 7)) {
 			goto skip_phar;
 		}
@@ -4879,8 +4885,11 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 			orig->internal_function.handler = PHAR_G(orig_fopen);
 		}
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
+		PHAR_GLOBALS->phar_alias_map.arBuckets = NULL;
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
+		PHAR_GLOBALS->phar_fname_map.arBuckets = NULL;
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_plain_map));
+		PHAR_GLOBALS->phar_plain_map.arBuckets = NULL;
 		PHAR_GLOBALS->request_init = 0;
 	}
 	PHAR_GLOBALS->request_done = 1;
