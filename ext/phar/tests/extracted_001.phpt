@@ -1,7 +1,7 @@
 --TEST--
 Phar: extracted
 --SKIPIF--
-<?php if (!extension_loaded("phar")) print "skip"; ?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=0

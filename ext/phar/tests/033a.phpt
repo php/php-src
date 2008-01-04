@@ -1,7 +1,7 @@
 --TEST--
 Phar::chmod
 --SKIPIF--
-<?php if (!extension_loaded("phar")) print "skip"; ?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
 phar.readonly=1
 phar.require_hash=0
