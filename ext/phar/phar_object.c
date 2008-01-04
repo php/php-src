@@ -173,7 +173,6 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 	zend_file_handle file_handle;
 	zend_op_array *new_op_array;
 	zval *result = NULL;
-;
 
 	switch (code) {
 		case PHAR_MIME_PHPS:

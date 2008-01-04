@@ -1,5 +1,5 @@
 --TEST--
-verify signature parsing works
+Phar: verify signature parsing works
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 <?php if ( extension_loaded("hash")) print "skip extension hash conflicts"; ?>
