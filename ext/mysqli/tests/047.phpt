@@ -58,9 +58,9 @@ array(2) {
     ["max_length"]=>
     int(0)
     ["length"]=>
-    int(11)
+    int(%d)
     ["charsetnr"]=>
-    int(63)
+    int(%d)
     ["flags"]=>
     int(32768)
     ["type"]=>
@@ -83,9 +83,9 @@ array(2) {
     ["max_length"]=>
     int(0)
     ["length"]=>
-    int(10)
+    int(%d)
     ["charsetnr"]=>
-    int(8)
+    int(%d)
     ["flags"]=>
     int(0)
     ["type"]=>
@@ -110,9 +110,9 @@ object(stdClass)#6 (11) {
   ["max_length"]=>
   int(0)
   ["length"]=>
-  int(11)
+  int(%d)
   ["charsetnr"]=>
-  int(63)
+  int(%d)
   ["flags"]=>
   int(32768)
   ["type"]=>
@@ -134,9 +134,9 @@ object(stdClass)#6 (11) {
   ["max_length"]=>
   int(0)
   ["length"]=>
-  int(10)
+  int(%d)
   ["charsetnr"]=>
-  int(8)
+  int(%d)
   ["flags"]=>
   int(0)
   ["type"]=>
@@ -160,9 +160,9 @@ object(stdClass)#6 (11) {
   ["max_length"]=>
   int(0)
   ["length"]=>
-  int(11)
+  int(%d)
   ["charsetnr"]=>
-  int(63)
+  int(%d)
   ["flags"]=>
   int(32768)
   ["type"]=>
@@ -184,9 +184,9 @@ object(stdClass)#5 (11) {
   ["max_length"]=>
   int(0)
   ["length"]=>
-  int(10)
+  int(%d)
   ["charsetnr"]=>
-  int(8)
+  int(%d)
   ["flags"]=>
   int(0)
   ["type"]=>
