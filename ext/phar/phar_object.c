@@ -88,7 +88,82 @@ static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_
 }
 /* }}} */
 
-static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len TSRMLS_DC)
+static void phar_mung_server_vars(char *fname, char *entry, char *basename, int basename_len TSRMLS_DC)
+{
+	zval **_SERVER, **stuff;
+	char *path_info;
+
+	/* "tweak" $_SERVER variables requested in earlier call to Phar::mungServer() */
+	if (!zend_hash_num_elements(&(PHAR_GLOBALS->phar_SERVER_mung_list))) {
+		return;
+	}
+	if (SUCCESS != zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &_SERVER)) {
+		return;
+	}
+#define PHAR_MUNG_REPLACE(vname) \
+	if (zend_hash_exists(&(PHAR_GLOBALS->phar_SERVER_mung_list), #vname, sizeof(#vname)-1)) { \
+		if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), #vname, sizeof(#vname), (void **) &stuff)) { \
+			int code; \
+			zval *temp; \
+			char newname[sizeof("SCRIPT_FILENAME")+4]; \
+							\
+			path_info = Z_STRVAL_PP(stuff); \
+			code = Z_STRLEN_PP(stuff); \
+			Z_STRVAL_PP(stuff) = estrndup(Z_STRVAL_PP(stuff) + basename_len, Z_STRLEN_PP(stuff) - basename_len); \
+			Z_STRLEN_PP(stuff) -= basename_len; \
+							\
+			MAKE_STD_ZVAL(temp); \
+			Z_TYPE_P(temp) = IS_STRING; \
+			Z_STRVAL_P(temp) = path_info; \
+			Z_STRLEN_P(temp) = code; \
+			memset(newname, 0, sizeof("SCRIPT_FILENAME")+4); \
+			memcpy(newname, "PHAR_", 5); \
+			memcpy(newname + 5, #vname, sizeof(#vname)); \
+			zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, strlen(newname)+1, (void *) &temp, sizeof(zval **), NULL); \
+		} \
+	}
+
+	PHAR_MUNG_REPLACE(REQUEST_URI);
+	PHAR_MUNG_REPLACE(PHP_SELF);
+
+	if (zend_hash_exists(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
+		if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "SCRIPT_NAME", sizeof("SCRIPT_NAME"), (void **) &stuff)) { 
+			int code; 
+			zval *temp; 
+			char newname[] = "PHAR_SCRIPT_NAME";
+							
+			path_info = Z_STRVAL_PP(stuff); 
+			code = Z_STRLEN_PP(stuff); 
+			Z_STRLEN_PP(stuff) = spprintf(&(Z_STRVAL_PP(stuff)), 4096, "phar://%s%s", fname, entry);
+							
+			MAKE_STD_ZVAL(temp); 
+			Z_TYPE_P(temp) = IS_STRING; 
+			Z_STRVAL_P(temp) = path_info; 
+			Z_STRLEN_P(temp) = code; 
+			zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, strlen(newname)+1, (void *) &temp, sizeof(zval **), NULL); 
+		} 
+	}
+
+	if (zend_hash_exists(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
+		if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &stuff)) {
+			int code; 
+			zval *temp; 
+			char newname[] = "PHAR_SCRIPT_FILENAME";
+							
+			path_info = Z_STRVAL_PP(stuff); 
+			code = Z_STRLEN_PP(stuff); 
+			Z_STRLEN_PP(stuff) = spprintf(&(Z_STRVAL_PP(stuff)), 4096, "phar://%s%s", fname, entry);
+							
+			MAKE_STD_ZVAL(temp); 
+			Z_TYPE_P(temp) = IS_STRING; 
+			Z_STRVAL_P(temp) = path_info; 
+			Z_STRLEN_P(temp) = code; 
+			zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, strlen(newname)+1, (void *) &temp, sizeof(zval **), NULL); 
+		}
+	}
+}
+
+static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len, char *basename, int basename_len TSRMLS_DC)
 {
 	char *name = NULL, buf[8192];
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
@@ -98,9 +173,11 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 	zend_file_handle file_handle;
 	zend_op_array *new_op_array;
 	zval *result = NULL;
+;
 
 	switch (code) {
 		case PHAR_MIME_PHPS:
+			efree(basename);
 			/* highlight source */
 			if (entry[0] == '/') {
 				name_len = spprintf(&name, 4096, "phar://%s%s", arch, entry);
@@ -121,6 +198,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			return PHAR_MIME_PHPS;
 		case PHAR_MIME_OTHER:
 			/* send headers, output file contents */
+			efree(basename);
 			ctr.line_len = spprintf(&(ctr.line), 0, "Content-type: %s", mime_type);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 			efree(ctr.line);
@@ -169,6 +247,10 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			zend_bailout();
 			return PHAR_MIME_OTHER;
 		case PHAR_MIME_PHP:
+			if (basename) {
+				phar_mung_server_vars(arch, entry, basename, basename_len TSRMLS_CC);
+				efree(basename);
+			}
 			phar_entry_delref(phar TSRMLS_CC);
 			if (entry[0] == '/') {
 				name_len = spprintf(&name, 4096, "phar://%s%s", arch, entry);
@@ -229,7 +311,7 @@ void phar_do_404(char *fname, int fname_len, char *f404, int f404_len TSRMLS_DC)
 			}
 			goto nofile;
 		}
-		hi = phar_file_action(phar, "text/html", PHAR_MIME_PHP, f404, f404_len, fname, fname_len TSRMLS_CC);
+		hi = phar_file_action(phar, "text/html", PHAR_MIME_PHP, f404, f404_len, fname, fname_len, NULL, 0 TSRMLS_CC);
 	} else {
 		sapi_header_line ctr = {0};
 nofile:
@@ -256,10 +338,10 @@ PHP_METHOD(Phar, webPhar)
 	zval *mimeoverride = NULL, *rewrites = NULL;
 	char *alias = NULL, *error, *plain_map, *index_php, *f404 = NULL;
 	int alias_len = 0, ret, f404_len = 0;
-	char *fname, *basename, *path_info, *mime_type, *entry;
+	char *fname, *basename, *path_info, *mime_type, *entry, *pt;
 	int fname_len, entry_len, code, index_php_len = 0;
 	phar_entry_data *phar;
-	zval **_SERVER, **stuff, **fd_ptr;
+	zval **fd_ptr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!saa", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &rewrites) == FAILURE) {
 		return;
@@ -317,54 +399,57 @@ PHP_METHOD(Phar, webPhar)
 	} else {
 		basename++;
 	}
-	path_info = SG(request_info).request_uri;
-	entry_len = strlen(path_info);
-	if (strstr(path_info, basename)) {
-		entry_len -= fname_len - (basename - fname) + 1;
-		entry = estrndup(path_info + (fname_len - (basename - fname) + 1), entry_len);
-		if (!entry_len || (entry_len == 1 && entry[0] == '/')) {
-			efree(entry);
-			/* direct request */
-			if (index_php_len) {
-				entry = index_php;
-				entry_len = index_php_len;
-			} else {
-				/* assume "index.php" is starting point */
-				entry = estrndup("/index.php", sizeof("/index.php"));
-				entry_len = sizeof("/index.php")-1;
-			}
-			if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
-				if (error) {
-					efree(error);
-				}
-				phar_do_404(fname, fname_len, f404, f404_len TSRMLS_CC);
-				zend_bailout();
-				return;
-			} else {
-				char *tmp, sa;
-				sapi_header_line ctr = {0};
-				ctr.response_code = 301;
-				ctr.line_len = sizeof("HTTP/1.1 301 Moved Permanently")+1;
-				ctr.line = "HTTP/1.1 301 Moved Permanently";
-				sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 
-				tmp = strstr(path_info, basename) + fname_len;
-				sa = *tmp;
-				*tmp = '\0';
-				ctr.response_code = 0;
-				ctr.line_len = spprintf(&(ctr.line), 4096, "Location: %s%s", path_info, entry);
-				*tmp = sa;
-				sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
-				sapi_send_headers(TSRMLS_C);
-				phar_entry_delref(phar TSRMLS_CC);
-				efree(ctr.line);
-				zend_bailout();
-				return;
-			}
-		}
-	} else {
-		/* error? */
+	path_info = SG(request_info).request_uri;
+	if (!(pt = strstr(path_info, basename))) {
+		/* this can happen with rewrite rules - and we have no idea what to do then, so return */
 		return;
+	}
+	entry_len = strlen(path_info);
+
+	entry_len -= (pt - path_info) + (fname_len - (basename - fname));
+	entry = estrndup(pt + (fname_len - (basename - fname)), entry_len);
+
+	pt = estrndup(path_info, (pt - path_info) + (fname_len - (basename - fname)));
+	if (!entry_len || (entry_len == 1 && entry[0] == '/')) {
+		efree(entry);
+		/* direct request */
+		if (index_php_len) {
+			entry = index_php;
+			entry_len = index_php_len;
+		} else {
+			/* assume "index.php" is starting point */
+			entry = estrndup("/index.php", sizeof("/index.php"));
+			entry_len = sizeof("/index.php")-1;
+		}
+		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
+			if (error) {
+				efree(error);
+			}
+			phar_do_404(fname, fname_len, f404, f404_len TSRMLS_CC);
+			zend_bailout();
+			return;
+		} else {
+			char *tmp, sa;
+			sapi_header_line ctr = {0};
+			ctr.response_code = 301;
+			ctr.line_len = sizeof("HTTP/1.1 301 Moved Permanently")+1;
+			ctr.line = "HTTP/1.1 301 Moved Permanently";
+			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+
+			tmp = strstr(path_info, basename) + fname_len;
+			sa = *tmp;
+			*tmp = '\0';
+			ctr.response_code = 0;
+			ctr.line_len = spprintf(&(ctr.line), 4096, "Location: %s%s", path_info, entry);
+			*tmp = sa;
+			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+			sapi_send_headers(TSRMLS_C);
+			phar_entry_delref(phar TSRMLS_CC);
+			efree(ctr.line);
+			zend_bailout();
+			return;
+		}
 	}
 
 	if (rewrites) {
@@ -388,27 +473,6 @@ PHP_METHOD(Phar, webPhar)
 #endif
 		zend_bailout();
 		return;
-	}
-
-	/* "tweak" $_SERVER variables */
-	if (SUCCESS == zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &_SERVER)) {
-		if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "REQUEST_URI", sizeof("REQUEST_URI"), (void **) &stuff)) {
-			zval *temp;
-			path_info = Z_STRVAL_PP(stuff);
-			code = Z_STRLEN_PP(stuff);
-			Z_STRVAL_PP(stuff) = entry;
-			Z_STRLEN_PP(stuff) = entry_len;
-			MAKE_STD_ZVAL(temp);
-			Z_TYPE_P(temp) = IS_STRING;
-			Z_STRVAL_P(temp) = path_info;
-			Z_STRLEN_P(temp) = code;
-			zend_hash_update(Z_ARRVAL_PP(_SERVER), "PHAR_SCRIPT_FILENAME", sizeof("PHAR_SCRIPT_FILENAME"), (void *) &temp, sizeof(zval **), NULL);
-		}
-		if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &stuff)) {
-			path_info = Z_STRVAL_PP(stuff);
-			Z_STRLEN_PP(stuff) = spprintf(&(Z_STRVAL_PP(stuff)), 4096, "phar://%s%s", fname, entry);
-			efree(path_info);
-		}
 	}
 
 	/* set up mime types */
@@ -460,7 +524,7 @@ PHP_METHOD(Phar, webPhar)
 		if (!zend_hash_num_elements(Z_ARRVAL_P(mimeoverride))) {
 			goto no_mimes;
 		}
-		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(mimeoverride)); zend_hash_has_more_elements(Z_ARRVAL_P(mimeoverride)); zend_hash_move_forward(Z_ARRVAL_P(mimeoverride))) {
+		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(mimeoverride)); SUCCESS == zend_hash_has_more_elements(Z_ARRVAL_P(mimeoverride)); zend_hash_move_forward(Z_ARRVAL_P(mimeoverride))) {
 			zval *val;
 			char *key;
 			uint keylen;
@@ -500,13 +564,81 @@ PHP_METHOD(Phar, webPhar)
 
 no_mimes:
 	code = phar_file_type(&mimetypes, entry, &mime_type TSRMLS_CC);
-	ret = phar_file_action(phar, mime_type, code, entry, entry_len, fname, fname_len TSRMLS_CC);
+	ret = phar_file_action(phar, mime_type, code, entry, entry_len, fname, fname_len, pt, strlen(pt) TSRMLS_CC);
 	zend_hash_destroy(&mimetypes);
 #ifdef PHP_WIN32
 	efree(fname);
 #endif
 	RETURN_LONG(ret);
 }
+
+/* {{{ proto void Phar::mungServer(array munglist)
+ * Defines a list of up to 4 $_SERVER variables that should be modified for execution
+ * to mask the presence of the phar archive.  This should be used in conjunction with
+ * Phar::webPhar(), and has no effect otherwise
+ * SCRIPT_NAME, PHP_SELF, REQUEST_URI and SCRIPT_FILENAME
+ */
+PHP_METHOD(Phar, mungServer)
+{
+	zval *mungvalues;
+	int php_self = 0, request_uri = 0, script_name = 0, script_filename = 0;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &mungvalues) == FAILURE) {
+		return;
+	}
+
+	if (!zend_hash_num_elements(Z_ARRVAL_P(mungvalues))) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "No values passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+		return;
+	}
+	if (zend_hash_num_elements(Z_ARRVAL_P(mungvalues)) > 4) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Too many values passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+		return;
+	}
+
+	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(mungvalues)); SUCCESS == zend_hash_has_more_elements(Z_ARRVAL_P(mungvalues)); zend_hash_move_forward(Z_ARRVAL_P(mungvalues))) {
+		zval ***data;
+
+		if (SUCCESS != zend_hash_get_current_data(Z_ARRVAL_P(mungvalues), (void **) data)) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "unable to retrieve array value in Phar::mungServer()");
+			return;
+		}
+		if (Z_TYPE_PP(*data) != IS_STRING) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+			return;
+		}
+		if (!php_self && Z_STRLEN_PP(*data) == sizeof("PHP_SELF")-1 && !strncmp(Z_STRVAL_PP(*data), "PHP_SELF", sizeof("PHP_SELF")-1)) {
+			if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "PHP_SELF", sizeof("PHP_SELF")-1)) {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add PHP_SELF to Phar::mungServer() list of values to mung");
+				return;
+			}
+			php_self = 1;
+		}
+		if (Z_STRLEN_PP(*data) == sizeof("REQUEST_URI")-1) {
+			if (!request_uri && !strncmp(Z_STRVAL_PP(*data), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
+				if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add REQUEST_URI to Phar::mungServer() list of values to mung");
+					return;
+				}
+				request_uri = 1;
+			}
+			if (!script_name && !strncmp(Z_STRVAL_PP(*data), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
+				if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add SCRIPT_NAME to Phar::mungServer() list of values to mung");
+					return;
+				}
+				script_name = 1;
+			}
+		}
+		if (!script_filename && Z_STRLEN_PP(*data) == sizeof("SCRIPT_FILENAME")-1 && !strncmp(Z_STRVAL_PP(*data), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
+			if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add SCRIPT_FILENAME to Phar::mungServer() list of values to mung");
+				return;
+			}
+			script_filename = 1;
+		}
+	}
+}
+/* }}} */
 
 /* {{{ proto mixed Phar::mapPhar([string alias, [int dataoffset]])
  * Reads the currently executed file (a phar) and registers its manifest */
@@ -2476,6 +2608,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_webPhar, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mungServer, 0, 0, 1)
+	ZEND_ARG_INFO(0, munglist)
+ZEND_END_ARG_INFO();
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setStub, 0, 0, 1)
 	ZEND_ARG_INFO(0, newstub)
 	ZEND_ARG_INFO(0, maxlen)
@@ -2556,6 +2693,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, loadPhar,              arginfo_phar_loadPhar,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mapPhar,               arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, webPhar,               arginfo_phar_webPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, mungServer,            arginfo_phar_mungServer,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getExtractList,        NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getSupportedSignatures,NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getSupportedCompression,NULL,                     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
